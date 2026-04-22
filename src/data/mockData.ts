@@ -150,7 +150,7 @@ export const operationsSnapshot = {
   ],
   deploymentCards: [
     {
-      repo: "MECO-Robotics/meco-mobile",
+      repo: "MECO-Robotics/PM-mobile-app",
       title: "Mobile workflow app",
       description:
         "Expo/React Native client for in-shop updates, quick task movement, sign-ins, and portable QA status.",
@@ -161,21 +161,21 @@ export const operationsSnapshot = {
       ],
     },
     {
-      repo: "MECO-Robotics/meco-web",
+      repo: "MECO-Robotics/PM-web-app",
       title: "Browser dashboard",
       description:
         "React/Vite web app for larger-screen dashboards, review surfaces, and planning views.",
       points: [
-        "Static-site friendly deployment",
+        "Served by nginx on the shared VPS",
         "Great for mentor and admin workflows",
-        "Can share components and API contracts later",
+        "Can move to live API calls without changing origin",
       ],
     },
     {
-      repo: "MECO-Robotics/meco-platform",
-      title: "Hosted backend",
+      repo: "MECO-Robotics/PM-server",
+      title: "Shared backend",
       description:
-        "DigitalOcean App Platform API plus managed Postgres, business rules, and reporting data model.",
+        "Fastify API plus Postgres on the same Hetzner VPS, with business rules and reporting data model ownership.",
       points: [
         "Fastify + Prisma starter",
         "Owns completion-gating logic",

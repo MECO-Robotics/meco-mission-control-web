@@ -1,0 +1,123 @@
+name: Deploy Web App to VPS
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/deploy-vps.yml"
+      - "src/**"
+      - "public/**"
+      - "index.html"
+      - "package.json"
+      - "package-lock.json"
+      - "eslint.config.js"
+      - "tsconfig.json"
+      - "tsconfig.app.json"
+      - "tsconfig.node.json"
+      - "vite.config.ts"
+      - "deploy/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vps-web-production
+  cancel-in-progress: true
+
+env:
+  REMOTE_PATH: /opt/pm-web
+
+jobs:
+  validate:
+    name: Validate web build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+  deploy:
+    name: Deploy to VPS
+    needs: validate
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Configure SSH
+        shell: bash
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Ensure remote directories exist
+        shell: bash
+        run: |
+          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "mkdir -p ${REMOTE_PATH}/site ${REMOTE_PATH}/deploy"
+
+      - name: Sync static bundle to VPS
+        shell: bash
+        run: |
+          rsync -az --delete ./dist/ "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${REMOTE_PATH}/site/"
+
+      - name: Upload nginx config
+        shell: bash
+        run: |
+          scp deploy/pm-web.nginx.conf "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${REMOTE_PATH}/deploy/pm-web.nginx.conf"
+
+      - name: Configure nginx on VPS
+        shell: bash
+        run: |
+          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" <<'EOF'
+          set -euo pipefail
+          export DEBIAN_FRONTEND=noninteractive
+          if ! command -v nginx >/dev/null 2>&1; then
+            apt-get update
+            apt-get install -y nginx
+            systemctl enable nginx
+          fi
+          cp /opt/pm-web/deploy/pm-web.nginx.conf /etc/nginx/sites-available/pm-web
+          ln -sfn /etc/nginx/sites-available/pm-web /etc/nginx/sites-enabled/pm-web
+          rm -f /etc/nginx/sites-enabled/default
+          nginx -t
+          systemctl reload nginx || systemctl restart nginx
+          curl --fail --silent http://127.0.0.1/ > /dev/null
+          curl --fail --silent http://127.0.0.1/health > /dev/null
+          EOF

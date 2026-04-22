@@ -155,7 +155,7 @@ export default function App() {
                 <div>
                   <h3>{subsystem.name}</h3>
                   <p>
-                    Lead {subsystem.lead} · Mentor {subsystem.mentor}
+                    Lead {subsystem.lead} | Mentor {subsystem.mentor}
                   </p>
                 </div>
                 <div className="progress-block">
@@ -175,7 +175,7 @@ export default function App() {
         <div className="board-column">
           <article className="stack-card">
             <p className="eyebrow">Escalations</p>
-            <h3>Today’s issues that need leadership attention.</h3>
+            <h3>Today's issues that need leadership attention.</h3>
             <ul className="bullet-list">
               {operationsSnapshot.escalations.map((item) => (
                 <li key={item.title}>
@@ -208,9 +208,9 @@ export default function App() {
             <h2>Three repos, one platform story.</h2>
           </div>
           <p className="section-copy">
-            React web and mobile both talk to the DigitalOcean-hosted API. The web app
-            is a clean fit for a static front end, while the platform repo owns the
-            App Platform service and managed Postgres configuration.
+            React web and mobile both talk to the shared VPS-hosted API. The web app
+            ships as static assets behind nginx, while the server repo owns the
+            Fastify API, Prisma schema, and Postgres deployment.
           </p>
         </div>
 
