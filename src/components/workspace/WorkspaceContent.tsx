@@ -75,7 +75,7 @@ function FilterDropdown({
   return (
     <label
       className="toolbar-filter toolbar-filter-compact"
-      style={isActive ? { background: "var(--meco-soft-blue)", borderColor: "var(--meco-blue)" } : { background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
+      style={isActive ? { background: "var(--meco-soft-blue)", borderColor: "var(--meco-blue)" } : { background: "var(--bg-row-alt)", border: "1px solid var(--border-base)" }}
     >
       <span className="toolbar-filter-icon" style={isActive ? { color: "var(--meco-blue)" } : { color: "var(--text-copy)" }}>{icon}</span>
       <select
@@ -84,7 +84,7 @@ function FilterDropdown({
         style={{
           color: isActive ? "var(--text-title)" : "var(--text-copy)",
           fontWeight: isActive ? "600" : "400",
-          background: "transparent",
+          background: "inherit",
         }}
       >
         <option value="all">{allLabel}</option>
@@ -316,13 +316,13 @@ export function WorkspaceContent({
           display: "flex",
           alignItems: "center",
           padding: "0 8px",
-          background: isActive ? "var(--meco-soft-blue)" : "var(--bg-panel)",
+          background: isActive ? "var(--meco-soft-blue)" : "var(--bg-row-alt)",
           border: isActive ? "1px solid var(--meco-blue)" : "1px solid var(--border-base)",
           borderRadius: "6px"
         }}
       >
         <span style={{ color: isActive ? "var(--meco-blue)" : "var(--text-copy)", display: "flex", alignItems: "center", marginRight: "4px" }}><IconTasks /></span>
-        <input onChange={(e) => onChange(e.target.value)} placeholder={placeholder} style={{ border: "none", outline: "none", fontSize: "0.85rem", padding: "6px 0", width: "120px", background: "transparent", color: isActive ? "var(--text-title)" : "var(--text-copy)" }} type="text" value={value} />
+        <input onChange={(e) => onChange(e.target.value)} placeholder={placeholder} style={{ border: "none", outline: "none", fontSize: "0.85rem", padding: "6px 0", width: "120px", background: "inherit", color: isActive ? "var(--text-title)" : "var(--text-copy)" }} type="text" value={value} />
       </div>
     );
   };

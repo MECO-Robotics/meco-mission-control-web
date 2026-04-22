@@ -811,7 +811,7 @@ export default function App() {
         "--bg-panel": isDarkMode ? "#1e293b" : "#ffffff",
         "--border-base": isDarkMode ? "#334155" : "#e5e7eb",
         "--text-title": isDarkMode ? "#f8fafc" : "#000000",
-        "--text-copy": isDarkMode ? "#cbd5e1" : "#64748b",
+        "--text-copy": isDarkMode ? "#e2e8f0" : "#64748b",
         "--meco-blue": isDarkMode ? "#3b82f6" : "#16478e",
         "--meco-soft-blue": isDarkMode ? "#1e3a8a" : "#eff6ff",
         "--bg-row-alt": isDarkMode ? "#0f172a" : "#f8fafc",

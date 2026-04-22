@@ -140,7 +140,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                     <select
                         className="toolbar-filter-select"
                         onChange={(e) => setViewInterval(e.target.value as "all" | "week" | "month")}
-                        style={{ padding: "6px 12px", borderRadius: "6px", border: "1px solid var(--border-base)", fontSize: "0.85rem", background: "var(--bg-panel)", color: "var(--text-title)", cursor: "pointer", marginRight: "8px" }}
+                        style={{ padding: "6px 12px", borderRadius: "6px", border: "1px solid var(--border-base)", fontSize: "0.85rem", background: "var(--bg-row-alt)", color: "var(--text-title)", cursor: "pointer", marginRight: "8px" }}
                         value={viewInterval}
                     >
                         <option value="all">Full scope</option>

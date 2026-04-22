@@ -56,7 +56,7 @@ export function AppTopbar({
         <label
           aria-label="Filter person"
           className="toolbar-filter toolbar-filter-compact"
-          style={activePersonFilter !== "all" ? { background: "var(--meco-soft-blue)", borderColor: "var(--meco-blue)" } : { background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
+          style={activePersonFilter !== "all" ? { background: "var(--meco-soft-blue)", borderColor: "var(--meco-blue)" } : { background: "var(--bg-row-alt)", border: "1px solid var(--border-base)" }}
         >
           <span aria-hidden="true" className="toolbar-filter-icon" style={activePersonFilter !== "all" ? { color: "var(--meco-blue)" } : {}}>
             <IconPerson />
@@ -67,7 +67,7 @@ export function AppTopbar({
             style={{
               color: activePersonFilter !== "all" ? "var(--text-title)" : "var(--text-copy)",
               fontWeight: activePersonFilter !== "all" ? "600" : "400",
-              background: "transparent",
+              background: "inherit",
               colorScheme: isDarkMode ? "dark" : "light",
             }}
           >
