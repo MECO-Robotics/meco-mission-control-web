@@ -245,6 +245,19 @@ function renderItemMeta(
   );
 }
 
+const IconTasks = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block" }}><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+);
+const IconPurchases = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block" }}><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+);
+const IconManufacturing = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block" }}><path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path></svg>
+);
+const IconRoster = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block" }}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+);
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<ViewTab>("timeline");
   const [authConfig, setAuthConfig] = useState<AuthConfig | null>(null);
@@ -376,6 +389,30 @@ export default function App() {
     };
   }, [bootstrap.subsystems, bootstrap.tasks]);
 
+  const monthGroups = useMemo(() => {
+    const groups: { month: string; span: number }[] = [];
+    if (!timeline.days.length) return groups;
+
+    let lastMonth = "";
+    let currentSpan = 0;
+
+    timeline.days.forEach((day) => {
+      const d = new Date(`${day}T00:00:00`);
+      const monthName = d.toLocaleDateString(undefined, { month: "long" });
+      if (monthName !== lastMonth) {
+        if (lastMonth !== "") {
+          groups.push({ month: lastMonth, span: currentSpan });
+        }
+        lastMonth = monthName;
+        currentSpan = 1;
+      } else {
+        currentSpan++;
+      }
+    });
+    groups.push({ month: lastMonth, span: currentSpan });
+    return groups;
+  }, [timeline.days]);
+
   const purchaseSummary = useMemo(() => {
     const totalEstimated = bootstrap.purchaseItems.reduce(
       (sum, item) => sum + item.estimatedCost,
@@ -420,9 +457,9 @@ export default function App() {
     setMemberEditDraft(
       member
         ? {
-            name: member.name,
-            role: member.role,
-          }
+          name: member.name,
+          role: member.role,
+        }
         : null,
     );
   };
@@ -948,45 +985,36 @@ export default function App() {
   }
 
   return (
-    <main className="page-shell dense-shell">
-      <header className="topbar">
-        <div>
-          <p className="eyebrow">MECO PM</p>
-          <h1>Project workspace</h1>
+    <main className="page-shell with-sidebar" style={{ background: "#ffffff" }}>
+      <header className="topbar" style={{ padding: "0.5rem 1.5rem", minHeight: "60px", background: "#fff", borderBottom: "1px solid #e2e8f0" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "1px" }}>
+          <p className="eyebrow" style={{ fontSize: "0.65rem", margin: 0, color: "#16478e" }}>MECO PM</p>
+          <h1 style={{ fontSize: "1.1rem", margin: 0, color: "#000000" }}>Project workspace</h1>
         </div>
-        <div className="topbar-right">
-          <div className="summary-chip">
-            <span>Tasks</span>
-            <strong>{bootstrap.tasks.length}</strong>
+        <div className="topbar-right" style={{ gap: "0.5rem" }}>
+          {[
+            ["Tasks", bootstrap.tasks.length, <IconTasks />],
+            ["Purchases", bootstrap.purchaseItems.length, <IconPurchases />],
+            ["Manufacturing", bootstrap.manufacturingItems.length, <IconManufacturing />],
+            ["Roster", bootstrap.members.length, <IconRoster />],
+          ].map(([label, count, icon]) => (
+            <div className="summary-chip" key={label as string} style={{ padding: "4px 10px", fontSize: "0.85rem", height: "34px", display: "flex", alignItems: "center" }}>
+              <span style={{ display: "flex", alignItems: "center", color: "#16478e" }} title={label as string}>{icon as React.ReactNode}</span>
+              <strong style={{ marginLeft: "8px" }}>{count}</strong>
+            </div>
+          ))}
+          <div className="user-chip" style={{ padding: "4px 12px", borderLeft: "1px solid #e2e8f0", marginLeft: "8px", height: "34px" }}>
+            <strong style={{ fontSize: "0.85rem", color: "#000000" }}>{sessionUser?.name ?? "Local access"}</strong>
+            <span style={{ fontSize: "0.7rem", color: "#64748b" }}>{sessionUser?.email ?? "Auth disabled"}</span>
           </div>
-          <div className="summary-chip">
-            <span>Purchases</span>
-            <strong>{bootstrap.purchaseItems.length}</strong>
-          </div>
-          <div className="summary-chip">
-            <span>Manufacturing</span>
-            <strong>{bootstrap.manufacturingItems.length}</strong>
-          </div>
-          <div className="summary-chip">
-            <span>Roster</span>
-            <strong>{bootstrap.members.length}</strong>
-          </div>
-          <div className="user-chip">
-            <strong>{sessionUser?.name ?? "Local access"}</strong>
-            <span>{sessionUser?.email ?? "Auth disabled"}</span>
-          </div>
-          <button className="secondary-action" onClick={() => void loadWorkspace()} type="button">
-            Refresh
-          </button>
+          <button className="secondary-action" onClick={() => void loadWorkspace()} type="button" style={{ height: "34px", padding: "0 12px" }}>Refresh</button>
           {sessionUser ? (
-            <button className="secondary-action" onClick={handleSignOut} type="button">
-              Sign out
-            </button>
+            <button className="secondary-action" onClick={handleSignOut} type="button" style={{ height: "34px", padding: "0 12px" }}>Sign out</button>
           ) : null}
         </div>
       </header>
 
-      <nav className="tabbar" aria-label="Workspace views">
+      <nav className="sidebar" aria-label="Workspace views" style={{ padding: 0 }}>
         {[
           ["timeline", "Timeline"],
           ["queue", "Task queue"],
@@ -1006,1016 +1034,1092 @@ export default function App() {
         ))}
       </nav>
 
-      {dataMessage ? <p className="banner banner-error">{dataMessage}</p> : null}
-      {isLoadingData ? <p className="banner">Refreshing workspace data...</p> : null}
+      <div
+        className="dense-shell with-sidebar"
+        style={{
+          padding: 0,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-start",
+          alignItems: "stretch",
+          minHeight: "100%",
+        }}
+      >
 
-      {activeTab === "timeline" ? (
-        <section className="panel dense-panel">
-          <div className="panel-header compact-header">
-            <div>
-              <p className="eyebrow">Schedule</p>
-              <h2>Subsystem timeline</h2>
-            </div>
-            <div className="panel-actions">
-              <button className="primary-action" onClick={openCreateTaskModal} type="button">
-                New task
-              </button>
-            </div>
-          </div>
-          {timeline.days.length ? (
-            <div className="timeline-shell">
-              <div
-                className="timeline-grid header-grid"
-                style={{
-                  gridTemplateColumns: `220px repeat(${timeline.days.length}, minmax(34px, 1fr))`,
-                }}
-              >
-                <div className="sticky-label">Subsystem / Task</div>
-                {timeline.days.map((day) => (
-                  <div className="timeline-day" key={day}>
-                    {formatDate(day)}
-                  </div>
-                ))}
+        {dataMessage ? <p className="banner banner-error">{dataMessage}</p> : null}
+        {isLoadingData ? <p className="banner">Refreshing workspace data...</p> : null}
+
+        {activeTab === "timeline" ? (
+          <section className="panel dense-panel" style={{ margin: 0, borderRadius: 0, border: "none" }}>
+            <div className="panel-header compact-header">
+              <div>
+                <p className="eyebrow">Schedule</p>
+                <h2>Subsystem timeline</h2>
               </div>
-              {timeline.subsystemRows.map((subsystem) => {
-                const collapsed = collapsedSubsystems[subsystem.id] ?? false;
-                return (
-                  <div className="subsystem-block" key={subsystem.id}>
+              <div className="panel-actions">
+                <button className="primary-action" onClick={openCreateTaskModal} type="button">
+                  New task
+                </button>
+              </div>
+            </div>
+            {timeline.days.length ? (
+              <div className="timeline-shell" style={{ overflowX: "auto", padding: 0, background: "#fff", borderRadius: 0 }}>
+                <div
+                  className="timeline-grid header-grid"
+                  style={{
+                    display: "grid",
+                    width: "max-content",
+                    minWidth: "100%",
+                    gridTemplateColumns: `40px 200px repeat(${timeline.days.length}, minmax(44px, 1fr))`,
+                    background: "#f9f9f9",
+                    borderBottom: "2px solid #eee",
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 10
+                  }}
+                >
+                  <div style={{ gridRow: "1 / span 2", borderRight: "1px solid #eee", borderBottom: "1px solid #eee" }} />
+                  <div className="sticky-label" style={{ gridRow: "1 / span 2", padding: "10px 16px", fontWeight: "bold", borderRight: "1px solid #eee", borderBottom: "1px solid #eee", display: "flex", alignItems: "center" }}>Subsystem / Task</div>
+
+                  {monthGroups.map((group, idx) => (
                     <div
-                      className="subsystem-row"
+                      key={`month-${idx}`}
                       style={{
-                        gridTemplateColumns: `220px repeat(${timeline.days.length}, minmax(34px, 1fr))`,
+                        gridColumn: `span ${group.span}`,
+                        textAlign: "center",
+                        fontSize: "10px",
+                        fontWeight: "bold",
+                        padding: "6px 0",
+                        borderBottom: "1px solid #eee",
+                        borderRight: "1px solid #f0f0f0",
+                        textTransform: "uppercase",
+                        color: "var(--official-blue)",
+                        background: "#f4f4f4"
                       }}
                     >
-                      <button
-                        className="subsystem-toggle"
-                        onClick={() => toggleSubsystem(subsystem.id)}
-                        type="button"
-                      >
-                        <strong>{subsystem.name}</strong>
-                        <span>
-                          {subsystem.completeCount}/{subsystem.taskCount} complete
-                        </span>
-                      </button>
-                      {timeline.days.map((day) => (
-                        <div
-                          className="timeline-day-slot subsystem-slot"
-                          key={`${subsystem.id}-${day}`}
-                        />
-                      ))}
+                      {group.month}
                     </div>
-                    {!collapsed &&
-                      subsystem.tasks.map((task) => (
-                        <div
-                          className="timeline-grid task-timeline-row"
-                          key={task.id}
-                          style={{
-                            gridTemplateColumns: `220px repeat(${timeline.days.length}, minmax(34px, 1fr))`,
-                          }}
-                        >
-                          <div className="task-label">
-                            <strong>{task.title}</strong>
-                            <span>
-                              {membersById[task.ownerId]?.name ?? "Unassigned"} /{" "}
-                              {membersById[task.mentorId]?.name ?? "No mentor"}
+                  ))}
+
+                  {timeline.days.map((day) => {
+                    const dateObj = new Date(`${day}T00:00:00`);
+                    return (
+                      <div
+                        className="timeline-day"
+                        key={day}
+                        style={{ textAlign: "center", fontSize: "9px", padding: "4px 0", borderRight: "1px solid #f0f0f0", color: "#58667d", textTransform: "uppercase", display: "flex", flexDirection: "column", justifyContent: "center", gap: "1px", lineHeight: "1.1" }}
+                      >
+                        <span>{dateObj.toLocaleDateString(undefined, { weekday: "short" })}</span>
+                        <strong style={{ fontSize: "13px", color: "var(--official-black)" }}>{dateObj.toLocaleDateString(undefined, { day: "numeric" })}</strong>
+                      </div>
+                    );
+                  })}
+                </div>
+                {timeline.subsystemRows.map((subsystem) => {
+                  const collapsed = collapsedSubsystems[subsystem.id] ?? false;
+                  return (
+                    <div className="subsystem-block" key={subsystem.id} style={{
+                      display: "flex",
+                      width: "max-content",
+                      minWidth: "100%",
+                      margin: "12px 0",
+                      border: "1px solid #e2e8f0",
+                      borderRadius: "8px",
+                      overflow: "hidden",
+                      background: "#fff",
+                      boxShadow: "0 1px 3px rgba(0,0,0,0.02)"
+                    }}>
+                      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+                        <div style={{
+                          display: "grid",
+                          gridTemplateColumns: `40px 200px repeat(${timeline.days.length}, minmax(44px, 1fr))`,
+                          background: "#fcfcfc",
+                          borderBottom: collapsed ? "none" : "1px solid #f1f5f9"
+                        }}>
+                          <div className="subsystem-sidebar" style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            borderRight: "1px solid #f1f5f9",
+                            background: "#f8fafc"
+                          }}>
+                            <button className="subsystem-toggle" onClick={() => toggleSubsystem(subsystem.id)} type="button" style={{ background: "none", border: "none", cursor: "pointer", padding: "4px", fontSize: "12px", color: "#94a3b8" }}>
+                              {collapsed ? "▶" : "▼"}
+                            </button>
+                          </div>
+                          <div style={{ width: "200px", padding: "10px 12px", fontWeight: "bold", fontSize: "0.9rem", color: "#334155" }}>
+                            {subsystem.name}
+                            <span style={{ fontSize: "0.7rem", fontWeight: "normal", color: "#94a3b8", marginLeft: "8px" }}>
+                              {subsystem.completeCount}/{subsystem.taskCount}
                             </span>
                           </div>
-                          {timeline.days.map((day) => (
-                            <div className="timeline-day-slot" key={`${task.id}-${day}`} />
-                          ))}
-                          <button
-                            className={`timeline-bar timeline-${task.status}`}
-                            onClick={() => openEditTaskModal(task)}
-                            style={{ gridColumn: `${task.offset + 2} / span ${task.span}` }}
-                            type="button"
-                          >
-                            {task.title}
-                          </button>
+                          {timeline.days.map(day => <div key={day} style={{ borderLeft: "1px solid #f1f5f9" }} />)}
                         </div>
-                      ))}
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="section-copy">Create a task to populate the subsystem timeline.</p>
-          )}
-        </section>
-      ) : null}
 
-      {activeTab === "queue" ? (
-        <section className="panel dense-panel">
-          <div className="panel-header compact-header">
-            <div>
-              <p className="eyebrow">Execution</p>
-              <h2>Task queue</h2>
-            </div>
-            <div className="panel-actions">
-              <button className="primary-action" onClick={openCreateTaskModal} type="button">
-                New task
-              </button>
-            </div>
-          </div>
-          <div className="table-shell">
-            <div className="queue-table queue-table-header">
-              <span>Task</span>
-              <span>Subsystem</span>
-              <span>Owner</span>
-              <span>Status</span>
-              <span>Due</span>
-              <span>Priority</span>
-            </div>
-            {bootstrap.tasks.map((task) => (
-              <button
-                className="queue-table queue-row"
-                key={task.id}
-                onClick={() => openEditTaskModal(task)}
-                type="button"
-              >
-                <span className="queue-title">
-                  <strong>{task.title}</strong>
-                  <small>{task.summary}</small>
-                </span>
-                <span>{subsystemsById[task.subsystemId]?.name ?? "Unknown"}</span>
-                <span>{membersById[task.ownerId]?.name ?? "Unassigned"}</span>
-                <span className={`pill status-${task.status}`}>{task.status}</span>
-                <span>{formatDate(task.dueDate)}</span>
-                <span className={`pill priority-${task.priority}`}>{task.priority}</span>
-              </button>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      {activeTab === "purchases" ? (
-        <section className="panel dense-panel">
-          <div className="panel-header compact-header">
-            <div>
-              <p className="eyebrow">Procurement</p>
-              <h2>Purchase list</h2>
-            </div>
-            <div className="panel-actions">
-              <div className="mini-summary-row">
-                <div className="mini-chip">
-                  <span>Estimated</span>
-                  <strong>{formatCurrency(purchaseSummary.totalEstimated)}</strong>
-                </div>
-                <div className="mini-chip">
-                  <span>Delivered</span>
-                  <strong>{purchaseSummary.delivered}</strong>
-                </div>
+                        {!collapsed && subsystem.tasks.map((task) => (
+                          <div key={task.id} style={{
+                            display: "grid",
+                            gridTemplateColumns: `40px 200px repeat(${timeline.days.length}, minmax(44px, 1fr))`,
+                            borderBottom: "1px solid #f1f5f9",
+                            minHeight: "40px"
+                          }}>
+                            <div style={{ borderRight: "1px solid #f1f5f9", background: "#f8fafc" }} />
+                            <div className="task-label" style={{ width: "200px", padding: "8px 12px", fontSize: "0.8rem", borderRight: "1px solid #f1f5f9" }}>
+                              <strong style={{ display: "block", color: "#475569" }}>{task.title}</strong>
+                              <span style={{ fontSize: "0.7rem", color: "#94a3b8" }}>{membersById[task.ownerId]?.name}</span>
+                            </div>
+                            {timeline.days.map(day => <div key={day} style={{ borderLeft: "1px solid #f8fafc" }} />)}
+                            <button
+                              className={`timeline-bar timeline-${task.status}`}
+                              onClick={() => openEditTaskModal(task)}
+                              style={{
+                                gridColumn: `${task.offset + 3} / span ${task.span}`,
+                                margin: "6px 4px",
+                                zIndex: 5,
+                                borderRadius: "4px",
+                                border: "none",
+                                color: "#fff",
+                                fontSize: "0.7rem",
+                                textAlign: "left",
+                                padding: "0 8px",
+                                cursor: "pointer",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                                boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
+                                alignSelf: "center"
+                              }}
+                              type="button"
+                            >
+                              {task.title}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              <button
-                className="primary-action"
-                onClick={openCreatePurchaseModal}
-                type="button"
-              >
-                Add purchase
-              </button>
-            </div>
-          </div>
-          <div className="table-shell">
-            <div className="ops-table ops-table-header purchase-table">
-              <span>Item</span>
-              <span>Vendor</span>
-              <span>Qty</span>
-              <span>Status</span>
-              <span>Mentor</span>
-              <span>Est.</span>
-              <span>Final</span>
-            </div>
-            {bootstrap.purchaseItems.map((item) => (
-              <button
-                className="ops-table ops-row purchase-table ops-button-row"
-                key={item.id}
-                onClick={() => openEditPurchaseModal(item)}
-                type="button"
-              >
-                <span className="queue-title">
-                  {renderItemMeta(item, membersById, subsystemsById)}
-                </span>
-                <span>{item.vendor}</span>
-                <span>{item.quantity}</span>
-                <span className={`pill purchase-${item.status}`}>{item.status}</span>
-                <span>{item.approvedByMentor ? "Approved" : "Waiting"}</span>
-                <span>{formatCurrency(item.estimatedCost)}</span>
-                <span>{formatCurrency(item.finalCost)}</span>
-              </button>
-            ))}
-          </div>
-        </section>
-      ) : null}
+            ) : (
+              <p className="section-copy">Create a task to populate the subsystem timeline.</p>
+            )}
+          </section>
+        ) : null}
 
-      {activeTab === "cnc" ? (
-        <section className="panel dense-panel">
-          <div className="panel-header compact-header">
-            <div>
-              <p className="eyebrow">Manufacturing</p>
-              <h2>CNC queue</h2>
-            </div>
-            <div className="panel-actions">
-              <div className="mini-summary-row">
-                <div className="mini-chip">
-                  <span>Open jobs</span>
-                  <strong>{cncItems.length}</strong>
-                </div>
+        {activeTab === "queue" ? (
+          <section className="panel dense-panel" style={{ margin: 0, borderRadius: 0, border: "none" }}>
+            <div className="panel-header compact-header">
+              <div>
+                <p className="eyebrow">Execution</p>
+                <h2>Task queue</h2>
               </div>
-              <button
-                className="primary-action"
-                onClick={() => openCreateManufacturingModal("cnc")}
-                type="button"
-              >
-                Add CNC job
-              </button>
-            </div>
-          </div>
-          <div className="table-shell">
-            <div className="ops-table ops-table-header manufacturing-table">
-              <span>Part</span>
-              <span>Material</span>
-              <span>Qty</span>
-              <span>Batch</span>
-              <span>Due</span>
-              <span>Status</span>
-              <span>Mentor</span>
-            </div>
-            {cncItems.map((item) => (
-              <button
-                className="ops-table ops-row manufacturing-table ops-button-row"
-                key={item.id}
-                onClick={() => openEditManufacturingModal(item)}
-                type="button"
-              >
-                <span className="queue-title">
-                  {renderItemMeta(item, membersById, subsystemsById)}
-                </span>
-                <span>{item.material}</span>
-                <span>{item.quantity}</span>
-                <span>{item.batchLabel ?? "Unbatched"}</span>
-                <span>{formatDate(item.dueDate)}</span>
-                <span className={`pill manufacturing-${item.status}`}>{item.status}</span>
-                <span>{item.mentorReviewed ? "Reviewed" : "Pending"}</span>
-              </button>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      {activeTab === "prints" ? (
-        <section className="panel dense-panel">
-          <div className="panel-header compact-header">
-            <div>
-              <p className="eyebrow">Manufacturing</p>
-              <h2>3D print queue</h2>
-            </div>
-            <div className="panel-actions">
-              <div className="mini-summary-row">
-                <div className="mini-chip">
-                  <span>Open jobs</span>
-                  <strong>{printItems.length}</strong>
-                </div>
-              </div>
-              <button
-                className="primary-action"
-                onClick={() => openCreateManufacturingModal("3d-print")}
-                type="button"
-              >
-                Add print job
-              </button>
-            </div>
-          </div>
-          <div className="table-shell">
-            <div className="ops-table ops-table-header manufacturing-table">
-              <span>Part</span>
-              <span>Material</span>
-              <span>Qty</span>
-              <span>Batch</span>
-              <span>Due</span>
-              <span>Status</span>
-              <span>Mentor</span>
-            </div>
-            {printItems.map((item) => (
-              <button
-                className="ops-table ops-row manufacturing-table ops-button-row"
-                key={item.id}
-                onClick={() => openEditManufacturingModal(item)}
-                type="button"
-              >
-                <span className="queue-title">
-                  {renderItemMeta(item, membersById, subsystemsById)}
-                </span>
-                <span>{item.material}</span>
-                <span>{item.quantity}</span>
-                <span>{item.batchLabel ?? "Unbatched"}</span>
-                <span>{formatDate(item.dueDate)}</span>
-                <span className={`pill manufacturing-${item.status}`}>{item.status}</span>
-                <span>{item.mentorReviewed ? "Reviewed" : "Pending"}</span>
-              </button>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      {activeTab === "roster" ? (
-        <section className="panel dense-panel roster-layout">
-          <div className="panel-header compact-header">
-            <div>
-              <p className="eyebrow">People</p>
-              <h2>Roster editor</h2>
-            </div>
-          </div>
-          <div className="roster-columns">
-            <div className="panel-subsection">
-              <h3>Current roster</h3>
-              <div className="roster-list">
-                {bootstrap.members.map((member) => (
-                  <button
-                    className={member.id === selectedMemberId ? "member-row active" : "member-row"}
-                    key={member.id}
-                    onClick={() => selectMember(member.id, bootstrap)}
-                    type="button"
-                  >
-                    <strong>{member.name}</strong>
-                    <span>{member.role}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="panel-subsection">
-              <form className="compact-form" onSubmit={handleCreateMember}>
-                <h3>Add person</h3>
-                <label className="field">
-                  <span>Name</span>
-                  <input
-                    onChange={(event) =>
-                      setMemberForm((current) => ({ ...current, name: event.target.value }))
-                    }
-                    required
-                    value={memberForm.name}
-                  />
-                </label>
-                <label className="field">
-                  <span>Role</span>
-                  <select
-                    onChange={(event) =>
-                      setMemberForm((current) => ({
-                        ...current,
-                        role: event.target.value as MemberPayload["role"],
-                      }))
-                    }
-                    value={memberForm.role}
-                  >
-                    <option value="student">Student</option>
-                    <option value="mentor">Mentor</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </label>
-                <button className="primary-action" disabled={isSavingMember} type="submit">
-                  {isSavingMember ? "Saving..." : "Add person"}
+              <div className="panel-actions">
+                <button className="primary-action" onClick={openCreateTaskModal} type="button">
+                  New task
                 </button>
-              </form>
+              </div>
+            </div>
+            <div className="table-shell">
+              <div className="queue-table queue-table-header">
+                <span>Task</span>
+                <span>Subsystem</span>
+                <span>Owner</span>
+                <span>Status</span>
+                <span>Due</span>
+                <span>Priority</span>
+              </div>
+              {bootstrap.tasks.map((task) => (
+                <button
+                  className="queue-table queue-row"
+                  key={task.id}
+                  onClick={() => openEditTaskModal(task)}
+                  type="button"
+                >
+                  <span className="queue-title">
+                    <strong>{task.title}</strong>
+                    <small>{task.summary}</small>
+                  </span>
+                  <span>{subsystemsById[task.subsystemId]?.name ?? "Unknown"}</span>
+                  <span>{membersById[task.ownerId]?.name ?? "Unassigned"}</span>
+                  <span className={`pill status-${task.status}`}>{task.status}</span>
+                  <span>{formatDate(task.dueDate)}</span>
+                  <span className={`pill priority-${task.priority}`}>{task.priority}</span>
+                </button>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
-              {memberEditDraft ? (
-                <form className="compact-form" onSubmit={handleUpdateMember}>
-                  <h3>Edit selected person</h3>
+        {activeTab === "purchases" ? (
+          <section className="panel dense-panel" style={{ margin: 0, borderRadius: 0, border: "none" }}>
+            <div className="panel-header compact-header">
+              <div>
+                <p className="eyebrow">Procurement</p>
+                <h2>Purchase list</h2>
+              </div>
+              <div className="panel-actions">
+                <div className="mini-summary-row">
+                  <div className="mini-chip">
+                    <span>Estimated</span>
+                    <strong>{formatCurrency(purchaseSummary.totalEstimated)}</strong>
+                  </div>
+                  <div className="mini-chip">
+                    <span>Delivered</span>
+                    <strong>{purchaseSummary.delivered}</strong>
+                  </div>
+                </div>
+                <button
+                  className="primary-action"
+                  onClick={openCreatePurchaseModal}
+                  type="button"
+                >
+                  Add purchase
+                </button>
+              </div>
+            </div>
+            <div className="table-shell">
+              <div className="ops-table ops-table-header purchase-table">
+                <span>Item</span>
+                <span>Vendor</span>
+                <span>Qty</span>
+                <span>Status</span>
+                <span>Mentor</span>
+                <span>Est.</span>
+                <span>Final</span>
+              </div>
+              {bootstrap.purchaseItems.map((item) => (
+                <button
+                  className="ops-table ops-row purchase-table ops-button-row"
+                  key={item.id}
+                  onClick={() => openEditPurchaseModal(item)}
+                  type="button"
+                >
+                  <span className="queue-title">
+                    {renderItemMeta(item, membersById, subsystemsById)}
+                  </span>
+                  <span>{item.vendor}</span>
+                  <span>{item.quantity}</span>
+                  <span className={`pill purchase-${item.status}`}>{item.status}</span>
+                  <span>{item.approvedByMentor ? "Approved" : "Waiting"}</span>
+                  <span>{formatCurrency(item.estimatedCost)}</span>
+                  <span>{formatCurrency(item.finalCost)}</span>
+                </button>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {activeTab === "cnc" ? (
+          <section className="panel dense-panel" style={{ margin: 0, borderRadius: 0, border: "none" }}>
+            <div className="panel-header compact-header">
+              <div>
+                <p className="eyebrow">Manufacturing</p>
+                <h2>CNC queue</h2>
+              </div>
+              <div className="panel-actions">
+                <div className="mini-summary-row">
+                  <div className="mini-chip">
+                    <span>Open jobs</span>
+                    <strong>{cncItems.length}</strong>
+                  </div>
+                </div>
+                <button
+                  className="primary-action"
+                  onClick={() => openCreateManufacturingModal("cnc")}
+                  type="button"
+                >
+                  Add CNC job
+                </button>
+              </div>
+            </div>
+            <div className="table-shell">
+              <div className="ops-table ops-table-header manufacturing-table">
+                <span>Part</span>
+                <span>Material</span>
+                <span>Qty</span>
+                <span>Batch</span>
+                <span>Due</span>
+                <span>Status</span>
+                <span>Mentor</span>
+              </div>
+              {cncItems.map((item) => (
+                <button
+                  className="ops-table ops-row manufacturing-table ops-button-row"
+                  key={item.id}
+                  onClick={() => openEditManufacturingModal(item)}
+                  type="button"
+                >
+                  <span className="queue-title">
+                    {renderItemMeta(item, membersById, subsystemsById)}
+                  </span>
+                  <span>{item.material}</span>
+                  <span>{item.quantity}</span>
+                  <span>{item.batchLabel ?? "Unbatched"}</span>
+                  <span>{formatDate(item.dueDate)}</span>
+                  <span className={`pill manufacturing-${item.status}`}>{item.status}</span>
+                  <span>{item.mentorReviewed ? "Reviewed" : "Pending"}</span>
+                </button>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {activeTab === "prints" ? (
+          <section className="panel dense-panel" style={{ margin: 0, borderRadius: 0, border: "none" }}>
+            <div className="panel-header compact-header">
+              <div>
+                <p className="eyebrow">Manufacturing</p>
+                <h2>3D print queue</h2>
+              </div>
+              <div className="panel-actions">
+                <div className="mini-summary-row">
+                  <div className="mini-chip">
+                    <span>Open jobs</span>
+                    <strong>{printItems.length}</strong>
+                  </div>
+                </div>
+                <button
+                  className="primary-action"
+                  onClick={() => openCreateManufacturingModal("3d-print")}
+                  type="button"
+                >
+                  Add print job
+                </button>
+              </div>
+            </div>
+            <div className="table-shell">
+              <div className="ops-table ops-table-header manufacturing-table">
+                <span>Part</span>
+                <span>Material</span>
+                <span>Qty</span>
+                <span>Batch</span>
+                <span>Due</span>
+                <span>Status</span>
+                <span>Mentor</span>
+              </div>
+              {printItems.map((item) => (
+                <button
+                  className="ops-table ops-row manufacturing-table ops-button-row"
+                  key={item.id}
+                  onClick={() => openEditManufacturingModal(item)}
+                  type="button"
+                >
+                  <span className="queue-title">
+                    {renderItemMeta(item, membersById, subsystemsById)}
+                  </span>
+                  <span>{item.material}</span>
+                  <span>{item.quantity}</span>
+                  <span>{item.batchLabel ?? "Unbatched"}</span>
+                  <span>{formatDate(item.dueDate)}</span>
+                  <span className={`pill manufacturing-${item.status}`}>{item.status}</span>
+                  <span>{item.mentorReviewed ? "Reviewed" : "Pending"}</span>
+                </button>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {activeTab === "roster" ? (
+          <section className="panel dense-panel roster-layout" style={{ margin: 0, borderRadius: 0, border: "none" }}>
+            <div className="panel-header compact-header">
+              <div>
+                <p className="eyebrow">People</p>
+                <h2>Roster editor</h2>
+              </div>
+            </div>
+            <div className="roster-columns">
+              <div className="panel-subsection">
+                <h3>Current roster</h3>
+                <div className="roster-list">
+                  {bootstrap.members.map((member) => (
+                    <button
+                      className={member.id === selectedMemberId ? "member-row active" : "member-row"}
+                      key={member.id}
+                      onClick={() => selectMember(member.id, bootstrap)}
+                      type="button"
+                    >
+                      <strong>{member.name}</strong>
+                      <span>{member.role}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="panel-subsection">
+                <form className="compact-form" onSubmit={handleCreateMember}>
+                  <h3>Add person</h3>
                   <label className="field">
                     <span>Name</span>
                     <input
                       onChange={(event) =>
-                        setMemberEditDraft((current) =>
-                          current ? { ...current, name: event.target.value } : current,
-                        )
+                        setMemberForm((current) => ({ ...current, name: event.target.value }))
                       }
-                      value={memberEditDraft.name}
+                      required
+                      value={memberForm.name}
                     />
                   </label>
                   <label className="field">
                     <span>Role</span>
                     <select
                       onChange={(event) =>
-                        setMemberEditDraft((current) =>
-                          current
-                            ? {
-                                ...current,
-                                role: event.target.value as MemberPayload["role"],
-                              }
-                            : current,
-                        )
+                        setMemberForm((current) => ({
+                          ...current,
+                          role: event.target.value as MemberPayload["role"],
+                        }))
                       }
-                      value={memberEditDraft.role}
+                      value={memberForm.role}
                     >
                       <option value="student">Student</option>
                       <option value="mentor">Mentor</option>
                       <option value="admin">Admin</option>
                     </select>
                   </label>
-                  <button className="secondary-action" disabled={isSavingMember} type="submit">
-                    {isSavingMember ? "Saving..." : "Update person"}
+                  <button className="primary-action" disabled={isSavingMember} type="submit">
+                    {isSavingMember ? "Saving..." : "Add person"}
                   </button>
                 </form>
-              ) : (
-                <div className="empty-state">
-                  <p>Select someone from the roster to edit their role or name.</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-      ) : null}
 
-      {taskModalMode ? (
-        <div className="modal-scrim" role="presentation">
-          <section aria-modal="true" className="modal-card" role="dialog">
-            <div className="panel-header compact-header">
-              <div>
-                <p className="eyebrow">Task editor</p>
-                <h2>{taskModalMode === "create" ? "Create task" : activeTask?.title ?? "Edit task"}</h2>
+                {memberEditDraft ? (
+                  <form className="compact-form" onSubmit={handleUpdateMember}>
+                    <h3>Edit selected person</h3>
+                    <label className="field">
+                      <span>Name</span>
+                      <input
+                        onChange={(event) =>
+                          setMemberEditDraft((current) =>
+                            current ? { ...current, name: event.target.value } : current,
+                          )
+                        }
+                        value={memberEditDraft.name}
+                      />
+                    </label>
+                    <label className="field">
+                      <span>Role</span>
+                      <select
+                        onChange={(event) =>
+                          setMemberEditDraft((current) =>
+                            current
+                              ? {
+                                ...current,
+                                role: event.target.value as MemberPayload["role"],
+                              }
+                              : current,
+                          )
+                        }
+                        value={memberEditDraft.role}
+                      >
+                        <option value="student">Student</option>
+                        <option value="mentor">Mentor</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    </label>
+                    <button className="secondary-action" disabled={isSavingMember} type="submit">
+                      {isSavingMember ? "Saving..." : "Update person"}
+                    </button>
+                  </form>
+                ) : (
+                  <div className="empty-state">
+                    <p>Select someone from the roster to edit their role or name.</p>
+                  </div>
+                )}
               </div>
-              <button className="icon-button" onClick={closeTaskModal} type="button">
-                Close
-              </button>
             </div>
-            <form className="modal-form" onSubmit={handleTaskSubmit}>
-              <label className="field modal-wide">
-                <span>Title</span>
-                <input
-                  onChange={(event) =>
-                    setTaskDraft((current) => ({ ...current, title: event.target.value }))
-                  }
-                  required
-                  value={taskDraft.title}
-                />
-              </label>
-              <label className="field modal-wide">
-                <span>Summary</span>
-                <textarea
-                  onChange={(event) =>
-                    setTaskDraft((current) => ({ ...current, summary: event.target.value }))
-                  }
-                  required
-                  rows={3}
-                  value={taskDraft.summary}
-                />
-              </label>
-              <label className="field">
-                <span>Subsystem</span>
-                <select
-                  onChange={(event) =>
-                    setTaskDraft((current) => ({ ...current, subsystemId: event.target.value }))
-                  }
-                  value={taskDraft.subsystemId}
-                >
-                  {bootstrap.subsystems.map((subsystem) => (
-                    <option key={subsystem.id} value={subsystem.id}>
-                      {subsystem.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="field">
-                <span>Owner</span>
-                <select
-                  onChange={(event) =>
-                    setTaskDraft((current) => ({ ...current, ownerId: event.target.value }))
-                  }
-                  value={taskDraft.ownerId}
-                >
-                  {students.map((member) => (
-                    <option key={member.id} value={member.id}>
-                      {member.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="field">
-                <span>Mentor</span>
-                <select
-                  onChange={(event) =>
-                    setTaskDraft((current) => ({ ...current, mentorId: event.target.value }))
-                  }
-                  value={taskDraft.mentorId}
-                >
-                  {mentors.map((member) => (
-                    <option key={member.id} value={member.id}>
-                      {member.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="field">
-                <span>Status</span>
-                <select
-                  onChange={(event) =>
-                    setTaskDraft((current) => ({
-                      ...current,
-                      status: event.target.value as TaskPayload["status"],
-                    }))
-                  }
-                  value={taskDraft.status}
-                >
-                  <option value="not-started">Not started</option>
-                  <option value="in-progress">In progress</option>
-                  <option value="waiting-for-qa">Waiting for QA</option>
-                  <option value="complete">Complete</option>
-                </select>
-              </label>
-              <label className="field">
-                <span>Priority</span>
-                <select
-                  onChange={(event) =>
-                    setTaskDraft((current) => ({
-                      ...current,
-                      priority: event.target.value as TaskPayload["priority"],
-                    }))
-                  }
-                  value={taskDraft.priority}
-                >
-                  <option value="critical">Critical</option>
-                  <option value="high">High</option>
-                  <option value="medium">Medium</option>
-                  <option value="low">Low</option>
-                </select>
-              </label>
-              <label className="field">
-                <span>Start date</span>
-                <input
-                  onChange={(event) =>
-                    setTaskDraft((current) => ({ ...current, startDate: event.target.value }))
-                  }
-                  type="date"
-                  value={taskDraft.startDate}
-                />
-              </label>
-              <label className="field">
-                <span>Due date</span>
-                <input
-                  onChange={(event) =>
-                    setTaskDraft((current) => ({ ...current, dueDate: event.target.value }))
-                  }
-                  type="date"
-                  value={taskDraft.dueDate}
-                />
-              </label>
-              <label className="field">
-                <span>Estimated hours</span>
-                <input
-                  min="0"
-                  onChange={(event) =>
-                    setTaskDraft((current) => ({
-                      ...current,
-                      estimatedHours: Number(event.target.value),
-                    }))
-                  }
-                  type="number"
-                  value={taskDraft.estimatedHours}
-                />
-              </label>
-              <label className="field">
-                <span>Actual hours</span>
-                <input
-                  min="0"
-                  onChange={(event) =>
-                    setTaskDraft((current) => ({
-                      ...current,
-                      actualHours: Number(event.target.value),
-                    }))
-                  }
-                  step="0.5"
-                  type="number"
-                  value={taskDraft.actualHours}
-                />
-              </label>
-              <label className="field modal-wide">
-                <span>Blockers</span>
-                <input
-                  onChange={(event) => setTaskDraftBlockers(event.target.value)}
-                  placeholder="Comma-separated blockers"
-                  value={taskDraftBlockers}
-                />
-              </label>
-              <div className="checkbox-row modal-wide">
-                <label className="checkbox-field">
-                  <input
-                    checked={taskDraft.requiresDocumentation}
-                    onChange={(event) =>
-                      setTaskDraft((current) => ({
-                        ...current,
-                        requiresDocumentation: event.target.checked,
-                      }))
-                    }
-                    type="checkbox"
-                  />
-                  <span>Requires documentation</span>
-                </label>
-                <label className="checkbox-field">
-                  <input
-                    checked={taskDraft.documentationLinked}
-                    onChange={(event) =>
-                      setTaskDraft((current) => ({
-                        ...current,
-                        documentationLinked: event.target.checked,
-                      }))
-                    }
-                    type="checkbox"
-                  />
-                  <span>Documentation linked</span>
-                </label>
-              </div>
-              <div className="modal-actions modal-wide">
-                <button className="secondary-action" onClick={closeTaskModal} type="button">
-                  Cancel
-                </button>
-                <button className="primary-action" disabled={isSavingTask} type="submit">
-                  {isSavingTask
-                    ? "Saving..."
-                    : taskModalMode === "create"
-                      ? "Create task"
-                      : "Save changes"}
-                </button>
-              </div>
-            </form>
           </section>
-        </div>
-      ) : null}
+        ) : null}
 
-      {purchaseModalMode ? (
-        <div className="modal-scrim" role="presentation">
-          <section aria-modal="true" className="modal-card" role="dialog">
-            <div className="panel-header compact-header">
-              <div>
-                <p className="eyebrow">Purchase editor</p>
-                <h2>
-                  {purchaseModalMode === "create"
-                    ? "Add purchase"
-                    : "Edit purchase"}
-                </h2>
+        {taskModalMode ? (
+          <div className="modal-scrim" role="presentation">
+            <section aria-modal="true" className="modal-card" role="dialog">
+              <div className="panel-header compact-header">
+                <div>
+                  <p className="eyebrow">Task editor</p>
+                  <h2>{taskModalMode === "create" ? "Create task" : activeTask?.title ?? "Edit task"}</h2>
+                </div>
+                <button className="icon-button" onClick={closeTaskModal} type="button">
+                  Close
+                </button>
               </div>
-              <button className="icon-button" onClick={closePurchaseModal} type="button">
-                Close
-              </button>
-            </div>
-            <form className="modal-form" onSubmit={handlePurchaseSubmit}>
-              <label className="field modal-wide">
-                <span>Title</span>
-                <input
-                  onChange={(event) =>
-                    setPurchaseDraft((current) => ({
-                      ...current,
-                      title: event.target.value,
-                    }))
-                  }
-                  required
-                  value={purchaseDraft.title}
-                />
-              </label>
-              <label className="field">
-                <span>Subsystem</span>
-                <select
-                  onChange={(event) =>
-                    setPurchaseDraft((current) => ({
-                      ...current,
-                      subsystemId: event.target.value,
-                    }))
-                  }
-                  value={purchaseDraft.subsystemId}
-                >
-                  {bootstrap.subsystems.map((subsystem) => (
-                    <option key={subsystem.id} value={subsystem.id}>
-                      {subsystem.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="field">
-                <span>Requester</span>
-                <select
-                  onChange={(event) =>
-                    setPurchaseDraft((current) => ({
-                      ...current,
-                      requestedById: event.target.value,
-                    }))
-                  }
-                  value={purchaseDraft.requestedById}
-                >
-                  {bootstrap.members.map((member) => (
-                    <option key={member.id} value={member.id}>
-                      {member.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="field">
-                <span>Vendor</span>
-                <input
-                  onChange={(event) =>
-                    setPurchaseDraft((current) => ({
-                      ...current,
-                      vendor: event.target.value,
-                    }))
-                  }
-                  required
-                  value={purchaseDraft.vendor}
-                />
-              </label>
-              <label className="field">
-                <span>Link label</span>
-                <input
-                  onChange={(event) =>
-                    setPurchaseDraft((current) => ({
-                      ...current,
-                      linkLabel: event.target.value,
-                    }))
-                  }
-                  required
-                  value={purchaseDraft.linkLabel}
-                />
-              </label>
-              <label className="field">
-                <span>Quantity</span>
-                <input
-                  min="1"
-                  onChange={(event) =>
-                    setPurchaseDraft((current) => ({
-                      ...current,
-                      quantity: Number(event.target.value),
-                    }))
-                  }
-                  type="number"
-                  value={purchaseDraft.quantity}
-                />
-              </label>
-              <label className="field">
-                <span>Status</span>
-                <select
-                  onChange={(event) =>
-                    setPurchaseDraft((current) => ({
-                      ...current,
-                      status: event.target.value as PurchaseItemPayload["status"],
-                    }))
-                  }
-                  value={purchaseDraft.status}
-                >
-                  <option value="requested">Requested</option>
-                  <option value="approved">Approved</option>
-                  <option value="purchased">Purchased</option>
-                  <option value="shipped">Shipped</option>
-                  <option value="delivered">Delivered</option>
-                </select>
-              </label>
-              <label className="field">
-                <span>Estimated cost</span>
-                <input
-                  min="0"
-                  onChange={(event) =>
-                    setPurchaseDraft((current) => ({
-                      ...current,
-                      estimatedCost: Number(event.target.value),
-                    }))
-                  }
-                  type="number"
-                  value={purchaseDraft.estimatedCost}
-                />
-              </label>
-              <label className="field">
-                <span>Final cost</span>
-                <input
-                  min="0"
-                  onChange={(event) => setPurchaseFinalCost(event.target.value)}
-                  placeholder="Optional"
-                  type="number"
-                  value={purchaseFinalCost}
-                />
-              </label>
-              <div className="checkbox-row modal-wide">
-                <label className="checkbox-field">
+              <form className="modal-form" onSubmit={handleTaskSubmit}>
+                <label className="field modal-wide">
+                  <span>Title</span>
                   <input
-                    checked={purchaseDraft.approvedByMentor}
+                    onChange={(event) =>
+                      setTaskDraft((current) => ({ ...current, title: event.target.value }))
+                    }
+                    required
+                    value={taskDraft.title}
+                  />
+                </label>
+                <label className="field modal-wide">
+                  <span>Summary</span>
+                  <textarea
+                    onChange={(event) =>
+                      setTaskDraft((current) => ({ ...current, summary: event.target.value }))
+                    }
+                    required
+                    rows={3}
+                    value={taskDraft.summary}
+                  />
+                </label>
+                <label className="field">
+                  <span>Subsystem</span>
+                  <select
+                    onChange={(event) =>
+                      setTaskDraft((current) => ({ ...current, subsystemId: event.target.value }))
+                    }
+                    value={taskDraft.subsystemId}
+                  >
+                    {bootstrap.subsystems.map((subsystem) => (
+                      <option key={subsystem.id} value={subsystem.id}>
+                        {subsystem.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="field">
+                  <span>Owner</span>
+                  <select
+                    onChange={(event) =>
+                      setTaskDraft((current) => ({ ...current, ownerId: event.target.value }))
+                    }
+                    value={taskDraft.ownerId}
+                  >
+                    {students.map((member) => (
+                      <option key={member.id} value={member.id}>
+                        {member.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="field">
+                  <span>Mentor</span>
+                  <select
+                    onChange={(event) =>
+                      setTaskDraft((current) => ({ ...current, mentorId: event.target.value }))
+                    }
+                    value={taskDraft.mentorId}
+                  >
+                    {mentors.map((member) => (
+                      <option key={member.id} value={member.id}>
+                        {member.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="field">
+                  <span>Status</span>
+                  <select
+                    onChange={(event) =>
+                      setTaskDraft((current) => ({
+                        ...current,
+                        status: event.target.value as TaskPayload["status"],
+                      }))
+                    }
+                    value={taskDraft.status}
+                  >
+                    <option value="not-started">Not started</option>
+                    <option value="in-progress">In progress</option>
+                    <option value="waiting-for-qa">Waiting for QA</option>
+                    <option value="complete">Complete</option>
+                  </select>
+                </label>
+                <label className="field">
+                  <span>Priority</span>
+                  <select
+                    onChange={(event) =>
+                      setTaskDraft((current) => ({
+                        ...current,
+                        priority: event.target.value as TaskPayload["priority"],
+                      }))
+                    }
+                    value={taskDraft.priority}
+                  >
+                    <option value="critical">Critical</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                  </select>
+                </label>
+                <label className="field">
+                  <span>Start date</span>
+                  <input
+                    onChange={(event) =>
+                      setTaskDraft((current) => ({ ...current, startDate: event.target.value }))
+                    }
+                    type="date"
+                    value={taskDraft.startDate}
+                  />
+                </label>
+                <label className="field">
+                  <span>Due date</span>
+                  <input
+                    onChange={(event) =>
+                      setTaskDraft((current) => ({ ...current, dueDate: event.target.value }))
+                    }
+                    type="date"
+                    value={taskDraft.dueDate}
+                  />
+                </label>
+                <label className="field">
+                  <span>Estimated hours</span>
+                  <input
+                    min="0"
+                    onChange={(event) =>
+                      setTaskDraft((current) => ({
+                        ...current,
+                        estimatedHours: Number(event.target.value),
+                      }))
+                    }
+                    type="number"
+                    value={taskDraft.estimatedHours}
+                  />
+                </label>
+                <label className="field">
+                  <span>Actual hours</span>
+                  <input
+                    min="0"
+                    onChange={(event) =>
+                      setTaskDraft((current) => ({
+                        ...current,
+                        actualHours: Number(event.target.value),
+                      }))
+                    }
+                    step="0.5"
+                    type="number"
+                    value={taskDraft.actualHours}
+                  />
+                </label>
+                <label className="field modal-wide">
+                  <span>Blockers</span>
+                  <input
+                    onChange={(event) => setTaskDraftBlockers(event.target.value)}
+                    placeholder="Comma-separated blockers"
+                    value={taskDraftBlockers}
+                  />
+                </label>
+                <div className="checkbox-row modal-wide">
+                  <label className="checkbox-field">
+                    <input
+                      checked={taskDraft.requiresDocumentation}
+                      onChange={(event) =>
+                        setTaskDraft((current) => ({
+                          ...current,
+                          requiresDocumentation: event.target.checked,
+                        }))
+                      }
+                      type="checkbox"
+                    />
+                    <span>Requires documentation</span>
+                  </label>
+                  <label className="checkbox-field">
+                    <input
+                      checked={taskDraft.documentationLinked}
+                      onChange={(event) =>
+                        setTaskDraft((current) => ({
+                          ...current,
+                          documentationLinked: event.target.checked,
+                        }))
+                      }
+                      type="checkbox"
+                    />
+                    <span>Documentation linked</span>
+                  </label>
+                </div>
+                <div className="modal-actions modal-wide">
+                  <button className="secondary-action" onClick={closeTaskModal} type="button">
+                    Cancel
+                  </button>
+                  <button className="primary-action" disabled={isSavingTask} type="submit">
+                    {isSavingTask
+                      ? "Saving..."
+                      : taskModalMode === "create"
+                        ? "Create task"
+                        : "Save changes"}
+                  </button>
+                </div>
+              </form>
+            </section>
+          </div>
+        ) : null}
+
+        {purchaseModalMode ? (
+          <div className="modal-scrim" role="presentation">
+            <section aria-modal="true" className="modal-card" role="dialog">
+              <div className="panel-header compact-header">
+                <div>
+                  <p className="eyebrow">Purchase editor</p>
+                  <h2>
+                    {purchaseModalMode === "create"
+                      ? "Add purchase"
+                      : "Edit purchase"}
+                  </h2>
+                </div>
+                <button className="icon-button" onClick={closePurchaseModal} type="button">
+                  Close
+                </button>
+              </div>
+              <form className="modal-form" onSubmit={handlePurchaseSubmit}>
+                <label className="field modal-wide">
+                  <span>Title</span>
+                  <input
                     onChange={(event) =>
                       setPurchaseDraft((current) => ({
                         ...current,
-                        approvedByMentor: event.target.checked,
+                        title: event.target.value,
                       }))
                     }
-                    type="checkbox"
+                    required
+                    value={purchaseDraft.title}
                   />
-                  <span>Mentor approved</span>
                 </label>
-              </div>
-              <div className="modal-actions modal-wide">
-                <button className="secondary-action" onClick={closePurchaseModal} type="button">
-                  Cancel
-                </button>
-                <button className="primary-action" disabled={isSavingPurchase} type="submit">
-                  {isSavingPurchase
-                    ? "Saving..."
-                    : purchaseModalMode === "create"
-                      ? "Add purchase"
-                      : "Save changes"}
-                </button>
-              </div>
-            </form>
-          </section>
-        </div>
-      ) : null}
-
-      {manufacturingModalMode ? (
-        <div className="modal-scrim" role="presentation">
-          <section aria-modal="true" className="modal-card" role="dialog">
-            <div className="panel-header compact-header">
-              <div>
-                <p className="eyebrow">Manufacturing editor</p>
-                <h2>
-                  {manufacturingModalMode === "create"
-                    ? manufacturingDraft.process === "cnc"
-                      ? "Add CNC job"
-                      : "Add 3D print job"
-                    : "Edit manufacturing job"}
-                </h2>
-              </div>
-              <button
-                className="icon-button"
-                onClick={closeManufacturingModal}
-                type="button"
-              >
-                Close
-              </button>
-            </div>
-            <form className="modal-form" onSubmit={handleManufacturingSubmit}>
-              <label className="field modal-wide">
-                <span>Title</span>
-                <input
-                  onChange={(event) =>
-                    setManufacturingDraft((current) => ({
-                      ...current,
-                      title: event.target.value,
-                    }))
-                  }
-                  required
-                  value={manufacturingDraft.title}
-                />
-              </label>
-              <label className="field">
-                <span>Subsystem</span>
-                <select
-                  onChange={(event) =>
-                    setManufacturingDraft((current) => ({
-                      ...current,
-                      subsystemId: event.target.value,
-                    }))
-                  }
-                  value={manufacturingDraft.subsystemId}
-                >
-                  {bootstrap.subsystems.map((subsystem) => (
-                    <option key={subsystem.id} value={subsystem.id}>
-                      {subsystem.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="field">
-                <span>Requester</span>
-                <select
-                  onChange={(event) =>
-                    setManufacturingDraft((current) => ({
-                      ...current,
-                      requestedById: event.target.value,
-                    }))
-                  }
-                  value={manufacturingDraft.requestedById}
-                >
-                  {bootstrap.members.map((member) => (
-                    <option key={member.id} value={member.id}>
-                      {member.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="field">
-                <span>Process</span>
-                <select
-                  onChange={(event) =>
-                    setManufacturingDraft((current) => ({
-                      ...current,
-                      process: event.target.value as ManufacturingItemPayload["process"],
-                    }))
-                  }
-                  value={manufacturingDraft.process}
-                >
-                  <option value="cnc">CNC</option>
-                  <option value="3d-print">3D print</option>
-                  <option value="fabrication">Fabrication</option>
-                </select>
-              </label>
-              <label className="field">
-                <span>Due date</span>
-                <input
-                  onChange={(event) =>
-                    setManufacturingDraft((current) => ({
-                      ...current,
-                      dueDate: event.target.value,
-                    }))
-                  }
-                  type="date"
-                  value={manufacturingDraft.dueDate}
-                />
-              </label>
-              <label className="field">
-                <span>Material</span>
-                <input
-                  onChange={(event) =>
-                    setManufacturingDraft((current) => ({
-                      ...current,
-                      material: event.target.value,
-                    }))
-                  }
-                  required
-                  value={manufacturingDraft.material}
-                />
-              </label>
-              <label className="field">
-                <span>Quantity</span>
-                <input
-                  min="1"
-                  onChange={(event) =>
-                    setManufacturingDraft((current) => ({
-                      ...current,
-                      quantity: Number(event.target.value),
-                    }))
-                  }
-                  type="number"
-                  value={manufacturingDraft.quantity}
-                />
-              </label>
-              <label className="field">
-                <span>Status</span>
-                <select
-                  onChange={(event) =>
-                    setManufacturingDraft((current) => ({
-                      ...current,
-                      status: event.target.value as ManufacturingItemPayload["status"],
-                    }))
-                  }
-                  value={manufacturingDraft.status}
-                >
-                  <option value="requested">Requested</option>
-                  <option value="approved">Approved</option>
-                  <option value="in-progress">In progress</option>
-                  <option value="qa">QA</option>
-                  <option value="complete">Complete</option>
-                </select>
-              </label>
-              <label className="field">
-                <span>Batch label</span>
-                <input
-                  onChange={(event) =>
-                    setManufacturingDraft((current) => ({
-                      ...current,
-                      batchLabel: event.target.value,
-                    }))
-                  }
-                  placeholder="Optional"
-                  value={manufacturingDraft.batchLabel ?? ""}
-                />
-              </label>
-              <div className="checkbox-row modal-wide">
-                <label className="checkbox-field">
-                  <input
-                    checked={manufacturingDraft.mentorReviewed}
+                <label className="field">
+                  <span>Subsystem</span>
+                  <select
                     onChange={(event) =>
-                      setManufacturingDraft((current) => ({
+                      setPurchaseDraft((current) => ({
                         ...current,
-                        mentorReviewed: event.target.checked,
+                        subsystemId: event.target.value,
                       }))
                     }
-                    type="checkbox"
-                  />
-                  <span>Mentor reviewed</span>
+                    value={purchaseDraft.subsystemId}
+                  >
+                    {bootstrap.subsystems.map((subsystem) => (
+                      <option key={subsystem.id} value={subsystem.id}>
+                        {subsystem.name}
+                      </option>
+                    ))}
+                  </select>
                 </label>
-              </div>
-              <div className="modal-actions modal-wide">
+                <label className="field">
+                  <span>Requester</span>
+                  <select
+                    onChange={(event) =>
+                      setPurchaseDraft((current) => ({
+                        ...current,
+                        requestedById: event.target.value,
+                      }))
+                    }
+                    value={purchaseDraft.requestedById}
+                  >
+                    {bootstrap.members.map((member) => (
+                      <option key={member.id} value={member.id}>
+                        {member.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="field">
+                  <span>Vendor</span>
+                  <input
+                    onChange={(event) =>
+                      setPurchaseDraft((current) => ({
+                        ...current,
+                        vendor: event.target.value,
+                      }))
+                    }
+                    required
+                    value={purchaseDraft.vendor}
+                  />
+                </label>
+                <label className="field">
+                  <span>Link label</span>
+                  <input
+                    onChange={(event) =>
+                      setPurchaseDraft((current) => ({
+                        ...current,
+                        linkLabel: event.target.value,
+                      }))
+                    }
+                    required
+                    value={purchaseDraft.linkLabel}
+                  />
+                </label>
+                <label className="field">
+                  <span>Quantity</span>
+                  <input
+                    min="1"
+                    onChange={(event) =>
+                      setPurchaseDraft((current) => ({
+                        ...current,
+                        quantity: Number(event.target.value),
+                      }))
+                    }
+                    type="number"
+                    value={purchaseDraft.quantity}
+                  />
+                </label>
+                <label className="field">
+                  <span>Status</span>
+                  <select
+                    onChange={(event) =>
+                      setPurchaseDraft((current) => ({
+                        ...current,
+                        status: event.target.value as PurchaseItemPayload["status"],
+                      }))
+                    }
+                    value={purchaseDraft.status}
+                  >
+                    <option value="requested">Requested</option>
+                    <option value="approved">Approved</option>
+                    <option value="purchased">Purchased</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                  </select>
+                </label>
+                <label className="field">
+                  <span>Estimated cost</span>
+                  <input
+                    min="0"
+                    onChange={(event) =>
+                      setPurchaseDraft((current) => ({
+                        ...current,
+                        estimatedCost: Number(event.target.value),
+                      }))
+                    }
+                    type="number"
+                    value={purchaseDraft.estimatedCost}
+                  />
+                </label>
+                <label className="field">
+                  <span>Final cost</span>
+                  <input
+                    min="0"
+                    onChange={(event) => setPurchaseFinalCost(event.target.value)}
+                    placeholder="Optional"
+                    type="number"
+                    value={purchaseFinalCost}
+                  />
+                </label>
+                <div className="checkbox-row modal-wide">
+                  <label className="checkbox-field">
+                    <input
+                      checked={purchaseDraft.approvedByMentor}
+                      onChange={(event) =>
+                        setPurchaseDraft((current) => ({
+                          ...current,
+                          approvedByMentor: event.target.checked,
+                        }))
+                      }
+                      type="checkbox"
+                    />
+                    <span>Mentor approved</span>
+                  </label>
+                </div>
+                <div className="modal-actions modal-wide">
+                  <button className="secondary-action" onClick={closePurchaseModal} type="button">
+                    Cancel
+                  </button>
+                  <button className="primary-action" disabled={isSavingPurchase} type="submit">
+                    {isSavingPurchase
+                      ? "Saving..."
+                      : purchaseModalMode === "create"
+                        ? "Add purchase"
+                        : "Save changes"}
+                  </button>
+                </div>
+              </form>
+            </section>
+          </div>
+        ) : null}
+
+        {manufacturingModalMode ? (
+          <div className="modal-scrim" role="presentation">
+            <section aria-modal="true" className="modal-card" role="dialog">
+              <div className="panel-header compact-header">
+                <div>
+                  <p className="eyebrow">Manufacturing editor</p>
+                  <h2>
+                    {manufacturingModalMode === "create"
+                      ? manufacturingDraft.process === "cnc"
+                        ? "Add CNC job"
+                        : "Add 3D print job"
+                      : "Edit manufacturing job"}
+                  </h2>
+                </div>
                 <button
-                  className="secondary-action"
+                  className="icon-button"
                   onClick={closeManufacturingModal}
                   type="button"
                 >
-                  Cancel
-                </button>
-                <button
-                  className="primary-action"
-                  disabled={isSavingManufacturing}
-                  type="submit"
-                >
-                  {isSavingManufacturing
-                    ? "Saving..."
-                    : manufacturingModalMode === "create"
-                      ? "Add job"
-                      : "Save changes"}
+                  Close
                 </button>
               </div>
-            </form>
-          </section>
-        </div>
-      ) : null}
+              <form className="modal-form" onSubmit={handleManufacturingSubmit}>
+                <label className="field modal-wide">
+                  <span>Title</span>
+                  <input
+                    onChange={(event) =>
+                      setManufacturingDraft((current) => ({
+                        ...current,
+                        title: event.target.value,
+                      }))
+                    }
+                    required
+                    value={manufacturingDraft.title}
+                  />
+                </label>
+                <label className="field">
+                  <span>Subsystem</span>
+                  <select
+                    onChange={(event) =>
+                      setManufacturingDraft((current) => ({
+                        ...current,
+                        subsystemId: event.target.value,
+                      }))
+                    }
+                    value={manufacturingDraft.subsystemId}
+                  >
+                    {bootstrap.subsystems.map((subsystem) => (
+                      <option key={subsystem.id} value={subsystem.id}>
+                        {subsystem.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="field">
+                  <span>Requester</span>
+                  <select
+                    onChange={(event) =>
+                      setManufacturingDraft((current) => ({
+                        ...current,
+                        requestedById: event.target.value,
+                      }))
+                    }
+                    value={manufacturingDraft.requestedById}
+                  >
+                    {bootstrap.members.map((member) => (
+                      <option key={member.id} value={member.id}>
+                        {member.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="field">
+                  <span>Process</span>
+                  <select
+                    onChange={(event) =>
+                      setManufacturingDraft((current) => ({
+                        ...current,
+                        process: event.target.value as ManufacturingItemPayload["process"],
+                      }))
+                    }
+                    value={manufacturingDraft.process}
+                  >
+                    <option value="cnc">CNC</option>
+                    <option value="3d-print">3D print</option>
+                    <option value="fabrication">Fabrication</option>
+                  </select>
+                </label>
+                <label className="field">
+                  <span>Due date</span>
+                  <input
+                    onChange={(event) =>
+                      setManufacturingDraft((current) => ({
+                        ...current,
+                        dueDate: event.target.value,
+                      }))
+                    }
+                    type="date"
+                    value={manufacturingDraft.dueDate}
+                  />
+                </label>
+                <label className="field">
+                  <span>Material</span>
+                  <input
+                    onChange={(event) =>
+                      setManufacturingDraft((current) => ({
+                        ...current,
+                        material: event.target.value,
+                      }))
+                    }
+                    required
+                    value={manufacturingDraft.material}
+                  />
+                </label>
+                <label className="field">
+                  <span>Quantity</span>
+                  <input
+                    min="1"
+                    onChange={(event) =>
+                      setManufacturingDraft((current) => ({
+                        ...current,
+                        quantity: Number(event.target.value),
+                      }))
+                    }
+                    type="number"
+                    value={manufacturingDraft.quantity}
+                  />
+                </label>
+                <label className="field">
+                  <span>Status</span>
+                  <select
+                    onChange={(event) =>
+                      setManufacturingDraft((current) => ({
+                        ...current,
+                        status: event.target.value as ManufacturingItemPayload["status"],
+                      }))
+                    }
+                    value={manufacturingDraft.status}
+                  >
+                    <option value="requested">Requested</option>
+                    <option value="approved">Approved</option>
+                    <option value="in-progress">In progress</option>
+                    <option value="qa">QA</option>
+                    <option value="complete">Complete</option>
+                  </select>
+                </label>
+                <label className="field">
+                  <span>Batch label</span>
+                  <input
+                    onChange={(event) =>
+                      setManufacturingDraft((current) => ({
+                        ...current,
+                        batchLabel: event.target.value,
+                      }))
+                    }
+                    placeholder="Optional"
+                    value={manufacturingDraft.batchLabel ?? ""}
+                  />
+                </label>
+                <div className="checkbox-row modal-wide">
+                  <label className="checkbox-field">
+                    <input
+                      checked={manufacturingDraft.mentorReviewed}
+                      onChange={(event) =>
+                        setManufacturingDraft((current) => ({
+                          ...current,
+                          mentorReviewed: event.target.checked,
+                        }))
+                      }
+                      type="checkbox"
+                    />
+                    <span>Mentor reviewed</span>
+                  </label>
+                </div>
+                <div className="modal-actions modal-wide">
+                  <button
+                    className="secondary-action"
+                    onClick={closeManufacturingModal}
+                    type="button"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="primary-action"
+                    disabled={isSavingManufacturing}
+                    type="submit"
+                  >
+                    {isSavingManufacturing
+                      ? "Saving..."
+                      : manufacturingModalMode === "create"
+                        ? "Add job"
+                        : "Save changes"}
+                  </button>
+                </div>
+              </form>
+            </section>
+          </div>
+        ) : null}
+      </div>
     </main>
   );
 }
