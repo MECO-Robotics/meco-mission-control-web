@@ -44,7 +44,7 @@ export function TaskEditorModal({
             <p className="eyebrow" style={{ color: "var(--meco-blue)" }}>Task editor</p>
             <h2 style={{ color: "var(--text-title)" }}>{taskModalMode === "create" ? "Create task" : activeTask?.title ?? "Edit task"}</h2>
           </div>
-          <button className="icon-button" onClick={closeTaskModal} type="button" style={{ color: "var(--text-copy)" }}>
+          <button className="icon-button" onClick={closeTaskModal} type="button" style={{ color: "var(--text-copy)", background: "transparent" }}>
             Close
           </button>
         </div>
@@ -255,7 +255,7 @@ export function TaskEditorModal({
             </label>
           </div>
           <div className="modal-actions modal-wide">
-            <button className="secondary-action" onClick={closeTaskModal} type="button">
+            <button className="secondary-action" onClick={closeTaskModal} style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }} type="button">
               Cancel
             </button>
             <button className="primary-action" disabled={isSavingTask} type="submit">
@@ -307,7 +307,7 @@ export function PurchaseEditorModal({
                 : "Edit purchase"}
             </h2>
           </div>
-          <button className="icon-button" onClick={closePurchaseModal} type="button" style={{ color: "var(--text-copy)" }}>
+          <button className="icon-button" onClick={closePurchaseModal} type="button" style={{ color: "var(--text-copy)", background: "transparent" }}>
             Close
           </button>
         </div>
@@ -469,7 +469,7 @@ export function PurchaseEditorModal({
             </label>
           </div>
           <div className="modal-actions modal-wide">
-            <button className="secondary-action" onClick={closePurchaseModal} type="button">
+            <button className="secondary-action" onClick={closePurchaseModal} style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }} type="button">
               Cancel
             </button>
             <button className="primary-action" disabled={isSavingPurchase} type="submit">
@@ -525,7 +525,7 @@ export function ManufacturingEditorModal({
                 : "Edit manufacturing job"}
             </h2>
           </div>
-          <button className="icon-button" onClick={closeManufacturingModal} type="button" style={{ color: "var(--text-copy)" }}>
+          <button className="icon-button" onClick={closeManufacturingModal} type="button" style={{ color: "var(--text-copy)", background: "transparent" }}>
             Close
           </button>
         </div>
@@ -700,6 +700,7 @@ export function ManufacturingEditorModal({
             <button
               className="secondary-action"
               onClick={closeManufacturingModal}
+              style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
               type="button"
             >
               Cancel

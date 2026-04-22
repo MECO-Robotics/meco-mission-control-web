@@ -101,11 +101,22 @@ export function AppTopbar({
                 </span>
               )}
             </button>
-            <div aria-label="Profile menu" className="profile-menu-popover" role="menu">
+            <div
+              aria-label="Profile menu"
+              className="profile-menu-popover"
+              role="menu"
+              style={{
+                background: "var(--bg-panel)",
+                border: "1px solid var(--border-base)",
+                boxShadow: isDarkMode ? "0 10px 15px -3px rgba(0, 0, 0, 0.5)" : "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                padding: "4px",
+              }}
+            >
               <button
                 className="profile-menu-item"
                 onClick={handleSignOut}
                 role="menuitem"
+                style={{ color: "var(--text-title)", background: "transparent" }}
                 type="button"
               >
                 Sign out

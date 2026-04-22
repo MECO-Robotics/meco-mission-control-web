@@ -201,6 +201,34 @@ export function WorkspaceContent({
     "1fr",                  // Mentor
   ].filter(Boolean).join(" ");
 
+  const getPillStyle = (value: string) => {
+    const success = ["complete", "delivered", "approved", "low"];
+    const info = ["in-progress", "shipped", "purchased", "medium"];
+    const warning = ["waiting-for-qa", "qa", "requested", "high", "waiting"];
+    const danger = ["not-started", "critical"];
+
+    let prefix = "--status-neutral";
+    if (success.includes(value)) prefix = "--status-success";
+    else if (info.includes(value)) prefix = "--status-info";
+    else if (warning.includes(value)) prefix = "--status-warning";
+    else if (danger.includes(value)) prefix = "--status-danger";
+
+    return {
+      background: `var(${prefix}-bg)`,
+      color: `var(${prefix}-text)`,
+      border: "none",
+      fontWeight: "600",
+      fontSize: "0.7rem",
+      padding: "2px 8px",
+      borderRadius: "4px",
+      textTransform: "capitalize" as const,
+      width: "fit-content",
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+    };
+  };
+
   const toggleSort = (field: string) => {
     if (queueSortField === field) {
       setQueueSortOrder(queueSortOrder === "asc" ? "desc" : "asc");
@@ -439,9 +467,9 @@ export function WorkspaceContent({
                 </span>
                 {showSubsystemCol && <span style={{ color: "var(--text-copy)" }}>{(task.subsystemId ? subsystemsById[task.subsystemId]?.name : null) ?? "Unknown"}</span>}
                 {showOwnerCol && <span style={{ color: "var(--text-copy)" }}>{(task.ownerId ? membersById[task.ownerId]?.name : null) ?? "Unassigned"}</span>}
-                {showStatusCol && <span className={`pill status-${task.status}`}>{task.status}</span>}
+                {showStatusCol && <span style={getPillStyle(task.status)}>{task.status.replace("-", " ")}</span>}
                 <span>{formatDate(task.dueDate)}</span>
-                {showPriorityCol && <span className={`pill priority-${task.priority}`}>{task.priority}</span>}
+                {showPriorityCol && <span style={getPillStyle(task.priority)}>{task.priority}</span>}
               </button>
             ))}
           </div>
@@ -553,8 +581,8 @@ export function WorkspaceContent({
                 </span>
                 {purchaseVendor === "all" && <span style={{ color: "var(--text-copy)" }}>{item.vendor}</span>}
                 <span style={{ color: "var(--text-copy)" }}>{item.quantity}</span>
-                {purchaseStatus === "all" && <span className={`pill purchase-${item.status}`}>{item.status}</span>}
-                {purchaseApproval === "all" && <span style={{ color: "var(--text-copy)" }}>{item.approvedByMentor ? "Approved" : "Waiting"}</span>}
+                {purchaseStatus === "all" && <span style={getPillStyle(item.status)}>{item.status}</span>}
+                {purchaseApproval === "all" && <span style={getPillStyle(item.approvedByMentor ? "approved" : "waiting")}>{item.approvedByMentor ? "Approved" : "Waiting"}</span>}
                 <span>{formatCurrency(item.estimatedCost)}</span>
                 <span>{formatCurrency(item.finalCost)}</span>
               </button>
@@ -647,7 +675,7 @@ export function WorkspaceContent({
                 <span style={{ color: "var(--text-copy)" }}>{item.quantity}</span>
                 <span style={{ color: "var(--text-copy)" }}>{item.batchLabel ?? "Unbatched"}</span>
                 <span style={{ color: "var(--text-copy)" }}>{formatDate(item.dueDate)}</span>
-                {mfgStatus === "all" && <span className={`pill manufacturing-${item.status}`}>{item.status}</span>}
+                {mfgStatus === "all" && <span style={getPillStyle(item.status)}>{item.status.replace("-", " ")}</span>}
                 <span style={{ color: "var(--text-copy)" }}>{item.mentorReviewed ? "Reviewed" : "Pending"}</span>
               </button>
             ))}
@@ -739,7 +767,7 @@ export function WorkspaceContent({
                 <span style={{ color: "var(--text-copy)" }}>{item.quantity}</span>
                 <span style={{ color: "var(--text-copy)" }}>{item.batchLabel ?? "Unbatched"}</span>
                 <span style={{ color: "var(--text-copy)" }}>{formatDate(item.dueDate)}</span>
-                {mfgStatus === "all" && <span className={`pill manufacturing-${item.status}`}>{item.status}</span>}
+                {mfgStatus === "all" && <span style={getPillStyle(item.status)}>{item.status.replace("-", " ")}</span>}
                 <span style={{ color: "var(--text-copy)" }}>{item.mentorReviewed ? "Reviewed" : "Pending"}</span>
               </button>
             ))}
@@ -797,7 +825,7 @@ export function WorkspaceContent({
                 >
                   <strong style={{ color: "var(--text-title)" }}>{material}</strong>
                   <span style={{ color: "var(--text-copy)" }}>{jobCount} active jobs</span>
-                  <span className="pill status-complete" style={{ width: "fit-content" }}>
+                  <span style={getPillStyle("complete")}>
                     Available
                   </span>
                 </div>
