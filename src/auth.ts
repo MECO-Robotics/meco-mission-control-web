@@ -63,9 +63,32 @@ async function readJson<T>(response: Response): Promise<T> {
   return payload as T;
 }
 
+function isAuthConfig(payload: unknown): payload is AuthConfig {
+  if (!payload || typeof payload !== "object") {
+    return false;
+  }
+
+  const candidate = payload as Record<string, unknown>;
+  return (
+    typeof candidate.enabled === "boolean" &&
+    (typeof candidate.googleClientId === "string" ||
+      candidate.googleClientId === null) &&
+    typeof candidate.hostedDomain === "string"
+  );
+}
+
 export async function fetchAuthConfig() {
   const response = await fetch(buildApiUrl("/auth/config"));
-  return readJson<AuthConfig>(response);
+  const payload = await readJson<unknown>(response);
+
+  if (!isAuthConfig(payload)) {
+    throw new ApiError(
+      "The server returned an invalid authentication configuration.",
+      502,
+    );
+  }
+
+  return payload;
 }
 
 export async function exchangeGoogleCredential(credential: string) {
