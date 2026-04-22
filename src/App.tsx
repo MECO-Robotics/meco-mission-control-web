@@ -297,6 +297,7 @@ export default function App() {
     );
   const [isSavingManufacturing, setIsSavingManufacturing] = useState(false);
 
+  const [activePersonFilter, setActivePersonFilter] = useState<string>("all");
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [memberForm, setMemberForm] = useState<MemberPayload>({
     name: "",
@@ -442,6 +443,44 @@ export default function App() {
   const enforcedAuthConfig = authConfig?.enabled ? authConfig : null;
   const googleClientId = enforcedAuthConfig?.googleClientId ?? null;
   const hostedDomain = enforcedAuthConfig?.hostedDomain ?? "";
+  const navigationItems = [
+    {
+      value: "timeline" as ViewTab,
+      label: "Timeline",
+      icon: <IconTasks />,
+      count: bootstrap.tasks.length,
+    },
+    {
+      value: "queue" as ViewTab,
+      label: "Task queue",
+      icon: <IconTasks />,
+      count: bootstrap.tasks.length,
+    },
+    {
+      value: "purchases" as ViewTab,
+      label: "Purchases",
+      icon: <IconPurchases />,
+      count: bootstrap.purchaseItems.length,
+    },
+    {
+      value: "cnc" as ViewTab,
+      label: "CNC",
+      icon: <IconManufacturing />,
+      count: cncItems.length,
+    },
+    {
+      value: "prints" as ViewTab,
+      label: "3D print",
+      icon: <IconManufacturing />,
+      count: printItems.length,
+    },
+    {
+      value: "roster" as ViewTab,
+      label: "Roster editor",
+      icon: <IconRoster />,
+      count: bootstrap.members.length,
+    },
+  ];
 
   const handleUnauthorized = () => {
     signOutFromGoogle();
@@ -469,7 +508,10 @@ export default function App() {
     setDataMessage(null);
 
     try {
-      const payload = await fetchBootstrap(handleUnauthorized);
+      const payload = await fetchBootstrap(
+        activePersonFilter === "all" ? null : activePersonFilter,
+        handleUnauthorized,
+      );
       const nextMemberId =
         selectedMemberId && payload.members.some((member) => member.id === selectedMemberId)
           ? selectedMemberId
@@ -548,6 +590,7 @@ export default function App() {
     }
   }, [
     activeManufacturingId,
+    activePersonFilter,
     activePurchaseId,
     activeTaskId,
     manufacturingModalMode,
@@ -992,44 +1035,75 @@ export default function App() {
           <h1 style={{ fontSize: "1.1rem", margin: 0, color: "#000000" }}>Project workspace</h1>
         </div>
         <div className="topbar-right" style={{ gap: "0.5rem" }}>
-          {[
-            ["Tasks", bootstrap.tasks.length, <IconTasks />],
-            ["Purchases", bootstrap.purchaseItems.length, <IconPurchases />],
-            ["Manufacturing", bootstrap.manufacturingItems.length, <IconManufacturing />],
-            ["Roster", bootstrap.members.length, <IconRoster />],
-          ].map(([label, count, icon]) => (
-            <div className="summary-chip" key={label as string} style={{ padding: "4px 10px", fontSize: "0.85rem", height: "34px", display: "flex", alignItems: "center" }}>
-              <span style={{ display: "flex", alignItems: "center", color: "#16478e" }} title={label as string}>{icon as React.ReactNode}</span>
-              <strong style={{ marginLeft: "8px" }}>{count}</strong>
-            </div>
-          ))}
-          <div className="user-chip" style={{ padding: "4px 12px", borderLeft: "1px solid #e2e8f0", marginLeft: "8px", height: "34px" }}>
-            <strong style={{ fontSize: "0.85rem", color: "#000000" }}>{sessionUser?.name ?? "Local access"}</strong>
-            <span style={{ fontSize: "0.7rem", color: "#64748b" }}>{sessionUser?.email ?? "Auth disabled"}</span>
-          </div>
-          <button className="secondary-action" onClick={() => void loadWorkspace()} type="button" style={{ height: "34px", padding: "0 12px" }}>Refresh</button>
+          <label className="toolbar-filter">
+            <span>Filter person</span>
+            <select
+              onChange={(event) => setActivePersonFilter(event.target.value)}
+              value={activePersonFilter}
+            >
+              <option value="all">All roster</option>
+              {bootstrap.members.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.name}
+                </option>
+              ))}
+            </select>
+          </label>
           {sessionUser ? (
-            <button className="secondary-action" onClick={handleSignOut} type="button" style={{ height: "34px", padding: "0 12px" }}>Sign out</button>
-          ) : null}
+            <div className="profile-menu" style={{ marginLeft: "8px" }}>
+              <button
+                aria-haspopup="menu"
+                className="user-chip profile-trigger"
+                type="button"
+                style={{ padding: "4px 12px", height: "34px" }}
+              >
+                {sessionUser.picture ? (
+                  <img
+                    alt={`${sessionUser.name} profile`}
+                    className="profile-avatar"
+                    referrerPolicy="no-referrer"
+                    src={sessionUser.picture}
+                  />
+                ) : (
+                  <span className="profile-avatar profile-avatar-fallback" aria-hidden="true">
+                    {sessionUser.name.slice(0, 1).toUpperCase()}
+                  </span>
+                )}
+                <strong style={{ fontSize: "0.85rem", color: "#000000" }}>{sessionUser.name}</strong>
+              </button>
+              <div aria-label="Profile menu" className="profile-menu-popover" role="menu">
+                <button
+                  className="profile-menu-item"
+                  onClick={handleSignOut}
+                  role="menuitem"
+                  type="button"
+                >
+                  Sign out
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="user-chip" style={{ padding: "4px 12px", marginLeft: "8px", height: "34px" }}>
+              <strong style={{ fontSize: "0.85rem", color: "#000000" }}>Local access</strong>
+            </div>
+          )}
+          <button className="secondary-action" onClick={() => void loadWorkspace()} type="button" style={{ height: "34px", padding: "0 12px" }}>Refresh</button>
         </div>
       </header>
 
       <nav className="sidebar" aria-label="Workspace views" style={{ padding: 0 }}>
-        {[
-          ["timeline", "Timeline"],
-          ["queue", "Task queue"],
-          ["purchases", "Purchases"],
-          ["cnc", "CNC"],
-          ["prints", "3D print"],
-          ["roster", "Roster editor"],
-        ].map(([value, label]) => (
+        {navigationItems.map(({ value, label, icon, count }) => (
           <button
             className={activeTab === value ? "tab active" : "tab"}
             key={value}
-            onClick={() => setActiveTab(value as ViewTab)}
+            onClick={() => setActiveTab(value)}
             type="button"
           >
-            {label}
+            <span className="sidebar-tab-main">
+              <span className="sidebar-tab-icon" aria-hidden="true">{icon}</span>
+              <span>{label}</span>
+            </span>
+            <span className="sidebar-tab-count" aria-label={`${count} items`}>{count}</span>
           </button>
         ))}
       </nav>
@@ -1055,6 +1129,11 @@ export default function App() {
               <div>
                 <p className="eyebrow">Schedule</p>
                 <h2>Subsystem timeline</h2>
+                <p className="section-copy filter-copy">
+                  {activePersonFilter === "all"
+                    ? "Showing all roster-linked tasks."
+                    : `Filtered to ${membersById[activePersonFilter]?.name ?? "selected person"}.`}
+                </p>
               </div>
               <div className="panel-actions">
                 <button className="primary-action" onClick={openCreateTaskModal} type="button">
@@ -1212,6 +1291,11 @@ export default function App() {
               <div>
                 <p className="eyebrow">Execution</p>
                 <h2>Task queue</h2>
+                <p className="section-copy filter-copy">
+                  {activePersonFilter === "all"
+                    ? "All tasks in queue."
+                    : `Only tasks owned by or mentored by ${membersById[activePersonFilter]?.name ?? "selected person"}.`}
+                </p>
               </div>
               <div className="panel-actions">
                 <button className="primary-action" onClick={openCreateTaskModal} type="button">
@@ -1256,6 +1340,11 @@ export default function App() {
               <div>
                 <p className="eyebrow">Procurement</p>
                 <h2>Purchase list</h2>
+                <p className="section-copy filter-copy">
+                  {activePersonFilter === "all"
+                    ? "All purchase requests."
+                    : `Only requests submitted by ${membersById[activePersonFilter]?.name ?? "selected person"}.`}
+                </p>
               </div>
               <div className="panel-actions">
                 <div className="mini-summary-row">
@@ -1315,6 +1404,11 @@ export default function App() {
               <div>
                 <p className="eyebrow">Manufacturing</p>
                 <h2>CNC queue</h2>
+                <p className="section-copy filter-copy">
+                  {activePersonFilter === "all"
+                    ? "All CNC jobs."
+                    : `Only CNC jobs submitted by ${membersById[activePersonFilter]?.name ?? "selected person"}.`}
+                </p>
               </div>
               <div className="panel-actions">
                 <div className="mini-summary-row">
@@ -1370,6 +1464,11 @@ export default function App() {
               <div>
                 <p className="eyebrow">Manufacturing</p>
                 <h2>3D print queue</h2>
+                <p className="section-copy filter-copy">
+                  {activePersonFilter === "all"
+                    ? "All 3D print jobs."
+                    : `Only print jobs submitted by ${membersById[activePersonFilter]?.name ?? "selected person"}.`}
+                </p>
               </div>
               <div className="panel-actions">
                 <div className="mini-summary-row">

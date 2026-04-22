@@ -131,8 +131,12 @@ export async function fetchAuthConfig() {
   return payload;
 }
 
-export async function fetchBootstrap(onUnauthorized?: () => void) {
-  return requestApi<BootstrapPayload>("/bootstrap", {}, onUnauthorized);
+export async function fetchBootstrap(
+  personId?: string | null,
+  onUnauthorized?: () => void,
+) {
+  const query = personId ? `?personId=${encodeURIComponent(personId)}` : "";
+  return requestApi<BootstrapPayload>(`/bootstrap${query}`, {}, onUnauthorized);
 }
 
 export async function createTask(
