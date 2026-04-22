@@ -217,6 +217,21 @@ export async function updateMemberRecord(
   return response.item;
 }
 
+export async function deleteMemberRecord(
+  memberId: string,
+  onUnauthorized?: () => void,
+) {
+  const response = await requestApi<{ item: MemberRecord }>(
+    `/members/${memberId}`,
+    {
+      method: "DELETE",
+    },
+    onUnauthorized,
+  );
+
+  return response.item;
+}
+
 export async function createPurchaseItemRecord(
   payload: PurchaseItemPayload,
   onUnauthorized?: () => void,

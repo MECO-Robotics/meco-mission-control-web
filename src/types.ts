@@ -53,7 +53,7 @@ export interface MemberRecord {
 export interface SubsystemRecord {
   id: string;
   name: string;
-  responsibleEngineerId: string;
+  responsibleEngineerId: string | null;
   mentorIds: string[];
   risks: string[];
 }
@@ -63,8 +63,8 @@ export interface TaskRecord {
   title: string;
   summary: string;
   subsystemId: string;
-  ownerId: string;
-  mentorId: string;
+  ownerId: string | null;
+  mentorId: string | null;
   startDate: string;
   dueDate: string;
   priority: TaskPriority;
@@ -83,7 +83,7 @@ export interface ManufacturingItemRecord {
   id: string;
   title: string;
   subsystemId: string;
-  requestedById: string;
+  requestedById: string | null;
   process: ManufacturingProcess;
   dueDate: string;
   material: string;
@@ -97,7 +97,7 @@ export interface PurchaseItemRecord {
   id: string;
   title: string;
   subsystemId: string;
-  requestedById: string;
+  requestedById: string | null;
   quantity: number;
   vendor: string;
   linkLabel: string;
@@ -110,7 +110,7 @@ export interface PurchaseItemRecord {
 export interface PurchaseItemPayload {
   title: string;
   subsystemId: string;
-  requestedById: string;
+  requestedById: string | null;
   quantity: number;
   vendor: string;
   linkLabel: string;
@@ -123,7 +123,7 @@ export interface PurchaseItemPayload {
 export interface ManufacturingItemPayload {
   title: string;
   subsystemId: string;
-  requestedById: string;
+  requestedById: string | null;
   process: ManufacturingProcess;
   dueDate: string;
   material: string;
@@ -150,8 +150,8 @@ export interface TaskPayload {
   title: string;
   summary: string;
   subsystemId: string;
-  ownerId: string;
-  mentorId: string;
+  ownerId: string | null;
+  mentorId: string | null;
   startDate: string;
   dueDate: string;
   priority: TaskPriority;

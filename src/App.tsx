@@ -15,6 +15,7 @@ import {
   createMemberRecord,
   createPurchaseItemRecord,
   createTask,
+  deleteMemberRecord,
   exchangeGoogleCredential,
   fetchAuthConfig,
   fetchBootstrap,
@@ -107,11 +108,11 @@ function buildEmptyTaskPayload(bootstrap: BootstrapPayload): TaskPayload {
   const firstStudent =
     bootstrap.members.find((member) => member.role === "student")?.id ??
     bootstrap.members[0]?.id ??
-    "";
+    null;
   const firstMentor =
     bootstrap.members.find((member) => member.role === "mentor")?.id ??
     bootstrap.members[0]?.id ??
-    "";
+    null;
   const today = new Date().toISOString().slice(0, 10);
 
   return {
@@ -137,12 +138,12 @@ function buildEmptyTaskPayload(bootstrap: BootstrapPayload): TaskPayload {
 
 function buildEmptyPurchasePayload(bootstrap: BootstrapPayload): PurchaseItemPayload {
   const firstSubsystem = bootstrap.subsystems[0]?.id ?? "";
-  const firstRequester = bootstrap.members[0]?.id ?? "";
+  const requester = bootstrap.members[0]?.id ?? null;
 
   return {
     title: "",
     subsystemId: firstSubsystem,
-    requestedById: firstRequester,
+    requestedById: requester,
     quantity: 1,
     vendor: "",
     linkLabel: "",
@@ -158,13 +159,13 @@ function buildEmptyManufacturingPayload(
   process: ManufacturingItemPayload["process"],
 ): ManufacturingItemPayload {
   const firstSubsystem = bootstrap.subsystems[0]?.id ?? "";
-  const firstRequester = bootstrap.members[0]?.id ?? "";
+  const requester = bootstrap.members[0]?.id ?? null;
   const today = new Date().toISOString().slice(0, 10);
 
   return {
     title: "",
     subsystemId: firstSubsystem,
-    requestedById: firstRequester,
+    requestedById: requester,
     process,
     dueDate: today,
     material: "",
@@ -238,8 +239,8 @@ function renderItemMeta(
     <>
       <strong>{item.title}</strong>
       <small>
-        {subsystemsById[item.subsystemId]?.name ?? "Unknown subsystem"} /{" "}
-        {membersById[item.requestedById]?.name ?? "Unassigned"}
+        {(item.subsystemId ? subsystemsById[item.subsystemId]?.name : null) ?? "Unknown subsystem"} /{" "}
+        {(item.requestedById ? membersById[item.requestedById]?.name : null) ?? "Unassigned"}
       </small>
     </>
   );
@@ -256,6 +257,9 @@ const IconManufacturing = () => (
 );
 const IconRoster = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block" }}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+);
+const IconRefresh = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block" }}><path d="M21 2v6h-6"></path><path d="M3 22v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.13-3.36L21 8"></path><path d="M20.49 15a9 9 0 0 1-14.13 3.36L3 16"></path></svg>
 );
 
 export default function App() {
@@ -303,10 +307,13 @@ export default function App() {
     name: "",
     role: "student",
   });
+  const [isAddPersonOpen, setIsAddPersonOpen] = useState(false);
+  const [isEditPersonOpen, setIsEditPersonOpen] = useState(false);
   const [memberEditDraft, setMemberEditDraft] = useState<MemberPayload | null>(
     null,
   );
   const [isSavingMember, setIsSavingMember] = useState(false);
+  const [isDeletingMember, setIsDeletingMember] = useState(false);
   const [collapsedSubsystems, setCollapsedSubsystems] = useState<
     Record<string, boolean>
   >({});
@@ -529,6 +536,13 @@ export default function App() {
           return nextState;
         });
       });
+
+      if (
+        activePersonFilter !== "all" &&
+        !payload.members.some((member) => member.id === activePersonFilter)
+      ) {
+        setActivePersonFilter("all");
+      }
 
       selectMember(nextMemberId, payload);
 
@@ -935,6 +949,7 @@ export default function App() {
     try {
       await createMemberRecord(memberForm, handleUnauthorized);
       setMemberForm({ name: "", role: "student" });
+      setIsAddPersonOpen(false);
       await loadWorkspace();
     } catch (error) {
       setDataMessage(toErrorMessage(error));
@@ -954,11 +969,36 @@ export default function App() {
 
     try {
       await updateMemberRecord(selectedMemberId, memberEditDraft, handleUnauthorized);
+      setIsEditPersonOpen(false);
       await loadWorkspace();
     } catch (error) {
       setDataMessage(toErrorMessage(error));
     } finally {
       setIsSavingMember(false);
+    }
+  };
+
+  const handleDeleteMember = async () => {
+    if (!selectedMemberId) {
+      return;
+    }
+
+    setIsDeletingMember(true);
+    setDataMessage(null);
+
+    try {
+      await deleteMemberRecord(selectedMemberId, handleUnauthorized);
+      if (activePersonFilter === selectedMemberId) {
+        setActivePersonFilter("all");
+      }
+      setSelectedMemberId(null);
+      setMemberEditDraft(null);
+      setIsEditPersonOpen(false);
+      await loadWorkspace();
+    } catch (error) {
+      setDataMessage(toErrorMessage(error));
+    } finally {
+      setIsDeletingMember(false);
     }
   };
 
@@ -1056,6 +1096,7 @@ export default function App() {
                 className="user-chip profile-trigger"
                 type="button"
                 style={{ padding: "4px 12px", height: "34px" }}
+                title={sessionUser.name}
               >
                 {sessionUser.picture ? (
                   <img
@@ -1069,7 +1110,6 @@ export default function App() {
                     {sessionUser.name.slice(0, 1).toUpperCase()}
                   </span>
                 )}
-                <strong style={{ fontSize: "0.85rem", color: "#000000" }}>{sessionUser.name}</strong>
               </button>
               <div aria-label="Profile menu" className="profile-menu-popover" role="menu">
                 <button
@@ -1087,7 +1127,15 @@ export default function App() {
               <strong style={{ fontSize: "0.85rem", color: "#000000" }}>Local access</strong>
             </div>
           )}
-          <button className="secondary-action" onClick={() => void loadWorkspace()} type="button" style={{ height: "34px", padding: "0 12px" }}>Refresh</button>
+          <button
+            aria-label="Refresh workspace"
+            className={isLoadingData ? "icon-button refresh-button is-loading" : "icon-button refresh-button"}
+            onClick={() => void loadWorkspace()}
+            title="Refresh workspace"
+            type="button"
+          >
+            <IconRefresh />
+          </button>
         </div>
       </header>
 
@@ -1245,7 +1293,7 @@ export default function App() {
                             <div style={{ borderRight: "1px solid #f1f5f9", background: "#f8fafc" }} />
                             <div className="task-label" style={{ width: "200px", padding: "8px 12px", fontSize: "0.8rem", borderRight: "1px solid #f1f5f9" }}>
                               <strong style={{ display: "block", color: "#475569" }}>{task.title}</strong>
-                              <span style={{ fontSize: "0.7rem", color: "#94a3b8" }}>{membersById[task.ownerId]?.name}</span>
+                              <span style={{ fontSize: "0.7rem", color: "#94a3b8" }}>{(task.ownerId ? membersById[task.ownerId]?.name : null) ?? "Unassigned"}</span>
                             </div>
                             {timeline.days.map(day => <div key={day} style={{ borderLeft: "1px solid #f8fafc" }} />)}
                             <button
@@ -1323,8 +1371,8 @@ export default function App() {
                     <strong>{task.title}</strong>
                     <small>{task.summary}</small>
                   </span>
-                  <span>{subsystemsById[task.subsystemId]?.name ?? "Unknown"}</span>
-                  <span>{membersById[task.ownerId]?.name ?? "Unassigned"}</span>
+                  <span>{(task.subsystemId ? subsystemsById[task.subsystemId]?.name : null) ?? "Unknown"}</span>
+                  <span>{(task.ownerId ? membersById[task.ownerId]?.name : null) ?? "Unassigned"}</span>
                   <span className={`pill status-${task.status}`}>{task.status}</span>
                   <span>{formatDate(task.dueDate)}</span>
                   <span className={`pill priority-${task.priority}`}>{task.priority}</span>
@@ -1544,82 +1592,115 @@ export default function App() {
                 </div>
               </div>
               <div className="panel-subsection">
-                <form className="compact-form" onSubmit={handleCreateMember}>
-                  <h3>Add person</h3>
-                  <label className="field">
-                    <span>Name</span>
-                    <input
-                      onChange={(event) =>
-                        setMemberForm((current) => ({ ...current, name: event.target.value }))
-                      }
-                      required
-                      value={memberForm.name}
-                    />
-                  </label>
-                  <label className="field">
-                    <span>Role</span>
-                    <select
-                      onChange={(event) =>
-                        setMemberForm((current) => ({
-                          ...current,
-                          role: event.target.value as MemberPayload["role"],
-                        }))
-                      }
-                      value={memberForm.role}
-                    >
-                      <option value="student">Student</option>
-                      <option value="mentor">Mentor</option>
-                      <option value="admin">Admin</option>
-                    </select>
-                  </label>
-                  <button className="primary-action" disabled={isSavingMember} type="submit">
-                    {isSavingMember ? "Saving..." : "Add person"}
+                <div className="compact-form">
+                  <button
+                    aria-expanded={isAddPersonOpen}
+                    className="secondary-action roster-toggle-button"
+                    onClick={() => setIsAddPersonOpen((current) => !current)}
+                    type="button"
+                  >
+                    {isAddPersonOpen ? "Hide add person" : "Add person"}
                   </button>
-                </form>
+                  {isAddPersonOpen ? (
+                    <form className="compact-form roster-inline-form" onSubmit={handleCreateMember}>
+                      <h3>Add person</h3>
+                      <label className="field">
+                        <span>Name</span>
+                        <input
+                          onChange={(event) =>
+                            setMemberForm((current) => ({ ...current, name: event.target.value }))
+                          }
+                          required
+                          value={memberForm.name}
+                        />
+                      </label>
+                      <label className="field">
+                        <span>Role</span>
+                        <select
+                          onChange={(event) =>
+                            setMemberForm((current) => ({
+                              ...current,
+                              role: event.target.value as MemberPayload["role"],
+                            }))
+                          }
+                          value={memberForm.role}
+                        >
+                          <option value="student">Student</option>
+                          <option value="mentor">Mentor</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                      </label>
+                      <button className="primary-action" disabled={isSavingMember} type="submit">
+                        {isSavingMember ? "Saving..." : "Add person"}
+                      </button>
+                    </form>
+                  ) : null}
+                </div>
 
-                {memberEditDraft ? (
-                  <form className="compact-form" onSubmit={handleUpdateMember}>
-                    <h3>Edit selected person</h3>
-                    <label className="field">
-                      <span>Name</span>
-                      <input
-                        onChange={(event) =>
-                          setMemberEditDraft((current) =>
-                            current ? { ...current, name: event.target.value } : current,
-                          )
-                        }
-                        value={memberEditDraft.name}
-                      />
-                    </label>
-                    <label className="field">
-                      <span>Role</span>
-                      <select
-                        onChange={(event) =>
-                          setMemberEditDraft((current) =>
-                            current
-                              ? {
-                                ...current,
-                                role: event.target.value as MemberPayload["role"],
-                              }
-                              : current,
-                          )
-                        }
-                        value={memberEditDraft.role}
-                      >
-                        <option value="student">Student</option>
-                        <option value="mentor">Mentor</option>
-                        <option value="admin">Admin</option>
-                      </select>
-                    </label>
-                    <button className="secondary-action" disabled={isSavingMember} type="submit">
-                      {isSavingMember ? "Saving..." : "Update person"}
-                    </button>
-                  </form>
-                ) : (
-                  <div className="empty-state">
-                    <p>Select someone from the roster to edit their role or name.</p>
-                  </div>
-                )}
+                <div className="compact-form">
+                  <button
+                    aria-expanded={isEditPersonOpen}
+                    className="secondary-action roster-toggle-button"
+                    disabled={!memberEditDraft}
+                    onClick={() => setIsEditPersonOpen((current) => !current)}
+                    type="button"
+                  >
+                    {isEditPersonOpen ? "Hide edit person" : "Edit selected person"}
+                  </button>
+                  {memberEditDraft ? (
+                    isEditPersonOpen ? (
+                      <form className="compact-form roster-inline-form" onSubmit={handleUpdateMember}>
+                        <h3>Edit selected person</h3>
+                        <label className="field">
+                          <span>Name</span>
+                          <input
+                            onChange={(event) =>
+                              setMemberEditDraft((current) =>
+                                current ? { ...current, name: event.target.value } : current,
+                              )
+                            }
+                            value={memberEditDraft.name}
+                          />
+                        </label>
+                        <label className="field">
+                          <span>Role</span>
+                          <select
+                            onChange={(event) =>
+                              setMemberEditDraft((current) =>
+                                current
+                                  ? {
+                                    ...current,
+                                    role: event.target.value as MemberPayload["role"],
+                                  }
+                                  : current,
+                              )
+                            }
+                            value={memberEditDraft.role}
+                          >
+                            <option value="student">Student</option>
+                            <option value="mentor">Mentor</option>
+                            <option value="admin">Admin</option>
+                          </select>
+                        </label>
+                        <button className="secondary-action" disabled={isSavingMember} type="submit">
+                          {isSavingMember ? "Saving..." : "Update person"}
+                        </button>
+                        <button
+                          className="danger-action"
+                          disabled={isDeletingMember}
+                          onClick={handleDeleteMember}
+                          type="button"
+                        >
+                          {isDeletingMember ? "Removing..." : "Remove person"}
+                        </button>
+                      </form>
+                    ) : null
+                  ) : (
+                    <div className="empty-state">
+                      <p>Select someone from the roster to edit their role or name.</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </section>
@@ -1678,10 +1759,14 @@ export default function App() {
                   <span>Owner</span>
                   <select
                     onChange={(event) =>
-                      setTaskDraft((current) => ({ ...current, ownerId: event.target.value }))
+                      setTaskDraft((current) => ({
+                        ...current,
+                        ownerId: event.target.value || null,
+                      }))
                     }
-                    value={taskDraft.ownerId}
+                    value={taskDraft.ownerId ?? ""}
                   >
+                    <option value="">Unassigned</option>
                     {students.map((member) => (
                       <option key={member.id} value={member.id}>
                         {member.name}
@@ -1693,10 +1778,14 @@ export default function App() {
                   <span>Mentor</span>
                   <select
                     onChange={(event) =>
-                      setTaskDraft((current) => ({ ...current, mentorId: event.target.value }))
+                      setTaskDraft((current) => ({
+                        ...current,
+                        mentorId: event.target.value || null,
+                      }))
                     }
-                    value={taskDraft.mentorId}
+                    value={taskDraft.mentorId ?? ""}
                   >
+                    <option value="">Unassigned</option>
                     {mentors.map((member) => (
                       <option key={member.id} value={member.id}>
                         {member.name}
@@ -1894,11 +1983,12 @@ export default function App() {
                     onChange={(event) =>
                       setPurchaseDraft((current) => ({
                         ...current,
-                        requestedById: event.target.value,
+                        requestedById: event.target.value || null,
                       }))
                     }
-                    value={purchaseDraft.requestedById}
+                    value={purchaseDraft.requestedById ?? ""}
                   >
+                    <option value="">Unassigned</option>
                     {bootstrap.members.map((member) => (
                       <option key={member.id} value={member.id}>
                         {member.name}
@@ -2080,11 +2170,12 @@ export default function App() {
                     onChange={(event) =>
                       setManufacturingDraft((current) => ({
                         ...current,
-                        requestedById: event.target.value,
+                        requestedById: event.target.value || null,
                       }))
                     }
-                    value={manufacturingDraft.requestedById}
+                    value={manufacturingDraft.requestedById ?? ""}
                   >
+                    <option value="">Unassigned</option>
                     {bootstrap.members.map((member) => (
                       <option key={member.id} value={member.id}>
                         {member.name}
