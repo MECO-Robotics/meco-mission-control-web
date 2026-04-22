@@ -42,6 +42,22 @@ npm run lint
 npm run build
 ```
 
+## Local SSO testing
+
+Use the Vite proxy so the browser can stay on `http://localhost:5173` while API calls still go through `/api`.
+
+- Default local API target: `http://localhost:8080`
+- Optional live API target for frontend-only testing: set `VITE_DEV_PROXY_TARGET=http://178.104.192.162`
+
+Example local frontend env:
+
+```env
+VITE_API_BASE_URL=/api
+VITE_DEV_PROXY_TARGET=http://localhost:8080
+```
+
+To test Google sign-in from localhost, the Google OAuth web client also needs `http://localhost:5173` added as an authorized JavaScript origin.
+
 ## Production files
 
 - `.github/workflows/deploy-vps.yml`: CI and VPS deploy workflow

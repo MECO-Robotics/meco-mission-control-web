@@ -1,3 +1,11 @@
+import type {
+  BootstrapPayload,
+  MemberPayload,
+  MemberRecord,
+  TaskPayload,
+  TaskRecord,
+} from "./types";
+
 const DEFAULT_API_BASE_URL = "/api";
 const SESSION_STORAGE_KEY = "meco.session.token";
 
@@ -63,6 +71,34 @@ async function readJson<T>(response: Response): Promise<T> {
   return payload as T;
 }
 
+async function requestApi<T>(
+  path: string,
+  options: RequestInit = {},
+  onUnauthorized?: () => void,
+) {
+  const token = loadStoredSessionToken();
+  const headers = new Headers(options.headers);
+
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  const response = await fetch(buildApiUrl(path), {
+    ...options,
+    headers,
+  });
+
+  try {
+    return await readJson<T>(response);
+  } catch (error) {
+    if (error instanceof ApiError && error.statusCode === 401) {
+      clearStoredSessionToken();
+      onUnauthorized?.();
+    }
+    throw error;
+  }
+}
+
 function isAuthConfig(payload: unknown): payload is AuthConfig {
   if (!payload || typeof payload !== "object") {
     return false;
@@ -89,6 +125,88 @@ export async function fetchAuthConfig() {
   }
 
   return payload;
+}
+
+export async function fetchBootstrap(onUnauthorized?: () => void) {
+  return requestApi<BootstrapPayload>("/bootstrap", {}, onUnauthorized);
+}
+
+export async function createTask(
+  payload: TaskPayload,
+  onUnauthorized?: () => void,
+) {
+  const response = await requestApi<{ item: TaskRecord }>(
+    "/tasks",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    },
+    onUnauthorized,
+  );
+
+  return response.item;
+}
+
+export async function updateTaskRecord(
+  taskId: string,
+  payload: Partial<TaskPayload>,
+  onUnauthorized?: () => void,
+) {
+  const response = await requestApi<{ item: TaskRecord }>(
+    `/tasks/${taskId}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    },
+    onUnauthorized,
+  );
+
+  return response.item;
+}
+
+export async function createMemberRecord(
+  payload: MemberPayload,
+  onUnauthorized?: () => void,
+) {
+  const response = await requestApi<{ item: MemberRecord }>(
+    "/members",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    },
+    onUnauthorized,
+  );
+
+  return response.item;
+}
+
+export async function updateMemberRecord(
+  memberId: string,
+  payload: Partial<MemberPayload>,
+  onUnauthorized?: () => void,
+) {
+  const response = await requestApi<{ item: MemberRecord }>(
+    `/members/${memberId}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    },
+    onUnauthorized,
+  );
+
+  return response.item;
 }
 
 export async function exchangeGoogleCredential(credential: string) {
@@ -121,36 +239,6 @@ export async function fetchCurrentUser(token: string) {
   return payload.user;
 }
 
-export async function makeAuthenticatedRequest<T>(
-  url: string,
-  options: RequestInit = {},
-  onUnauthorized?: () => void,
-): Promise<T> {
-  const token = loadStoredSessionToken();
-  if (!token) {
-    throw new ApiError("No session token available.", 401);
-  }
-
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      ...options.headers,
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  try {
-    return await readJson<T>(response);
-  } catch (error) {
-    if (error instanceof ApiError && error.statusCode === 401) {
-      // Token is invalid/expired, clear it
-      clearStoredSessionToken();
-      onUnauthorized?.();
-    }
-    throw error;
-  }
-}
-
 export function loadStoredSessionToken() {
   return window.localStorage.getItem(SESSION_STORAGE_KEY);
 }
@@ -166,8 +254,6 @@ export function clearStoredSessionToken() {
 export function signOutFromGoogle() {
   if (window.google?.accounts.id) {
     window.google.accounts.id.disableAutoSelect();
-    // Note: Google Identity Services doesn't have a direct signOut method
-    // The user will remain signed in to Google, but auto-select is disabled
   }
 }
 
@@ -181,12 +267,10 @@ export async function validateSession(): Promise<boolean> {
     await fetchCurrentUser(token);
     return true;
   } catch (error) {
-    // If it's a 401, token is invalid
     if (error instanceof ApiError && error.statusCode === 401) {
       return false;
     }
-    // For other errors (network, server issues), assume session is still valid
-    // to avoid signing out users due to temporary issues
+
     return true;
   }
 }
