@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 
 import type { BootstrapPayload, MaterialRecord } from "../../types";
-import { IconEdit, IconManufacturing, IconTasks } from "../shared/Icons";
+import { IconManufacturing, IconTasks } from "../shared/Icons";
 import {
+  EditableHoverIndicator,
   FilterDropdown,
   SearchToolbarInput,
   TableCell,
@@ -117,16 +118,20 @@ export function MaterialsView({
           const isLow = material.onHandQuantity <= material.reorderPoint;
 
           return (
-            <div
+            <button
               className="ops-table ops-row materials-table editable-action-host"
               key={material.id}
+              onClick={() => openEditMaterialModal(material)}
               style={{
                 gridTemplateColumns: MATERIALS_GRID_TEMPLATE,
                 padding: "12px 16px",
                 borderBottom: "1px solid var(--border-base)",
                 color: "var(--text-copy)",
                 background: "var(--bg-row-alt)",
+                textAlign: "left",
               }}
+              title={`Edit ${material.name}`}
+              type="button"
             >
               <TableCell label="Material">
                 <strong style={{ color: "var(--text-title)" }}>{material.name}</strong>
@@ -146,21 +151,12 @@ export function MaterialsView({
                   {isLow ? "Low stock" : "Stock OK"}
                 </span>
               </TableCell>
-              <TableCell label="Actions">
+              <TableCell label="Actions" valueClassName="table-cell-actions">
                 <span className="editable-action-reveal" style={{ display: "inline-flex", gap: "0.35rem" }}>
-                  <button
-                    aria-label="Edit material"
-                    className="icon-button"
-                    onClick={() => openEditMaterialModal(material)}
-                    style={{ padding: "0.35rem 0.6rem" }}
-                    title="Edit material"
-                    type="button"
-                  >
-                    <IconEdit />
-                  </button>
+                  <EditableHoverIndicator className="editable-hover-indicator-inline" />
                 </span>
               </TableCell>
-            </div>
+            </button>
           );
         })}
 

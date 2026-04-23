@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 
-import { IconEdit, IconManufacturing, IconTasks } from "../shared/Icons";
+import { IconManufacturing, IconTasks } from "../shared/Icons";
 import type { BootstrapPayload, PartDefinitionRecord } from "../../types";
 import {
+  EditableHoverIndicator,
   FilterDropdown,
   SearchToolbarInput,
   TableCell,
@@ -131,17 +132,31 @@ export function PartsView({
             <span>Material</span>
             <span>Actions</span>
           </div>
-          {filteredPartDefinitions.map((partDefinition) => (
+        {filteredPartDefinitions.map((partDefinition) => (
             <div
-              className="ops-table ops-row editable-action-host"
+              className="ops-table ops-row editable-action-host editable-row-clickable"
               key={partDefinition.id}
+              onClick={() => openEditPartDefinitionModal(partDefinition)}
+              onKeyDown={(event) => {
+                if (event.target !== event.currentTarget) {
+                  return;
+                }
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  openEditPartDefinitionModal(partDefinition);
+                }
+              }}
+              role="button"
+              tabIndex={0}
               style={{
                 gridTemplateColumns: "minmax(180px, 2fr) 1fr 0.6fr 0.8fr 1fr 0.8fr",
                 padding: "12px 16px",
                 borderBottom: "1px solid var(--border-base)",
                 color: "var(--text-copy)",
                 background: "var(--bg-row-alt)",
+                cursor: "pointer",
               }}
+              title={`Edit ${partDefinition.name}`}
             >
               <TableCell label="Part">
                 <strong style={{ color: "var(--text-title)" }}>{partDefinition.name}</strong>
@@ -155,25 +170,19 @@ export function PartsView({
                   ? bootstrap.materials.find((material) => material.id === partDefinition.materialId)?.name
                   : null) ?? "Unassigned"}
               </TableCell>
-              <TableCell label="Actions">
+              <TableCell label="Actions" valueClassName="table-cell-actions">
                 <span
                   className="part-manager-row-actions editable-action-reveal"
-                  style={{ display: "inline-flex", gap: "0.35rem" }}
+                  style={{ display: "flex", gap: "0.35rem", justifyContent: "flex-end", width: "100%" }}
                 >
-                  <button
-                    aria-label={`Edit ${partDefinition.name}`}
-                    className="icon-button part-manager-action"
-                    onClick={() => openEditPartDefinitionModal(partDefinition)}
-                    style={{ padding: "0.35rem 0.6rem" }}
-                    title={`Edit ${partDefinition.name}`}
-                    type="button"
-                  >
-                    <IconEdit />
-                  </button>
+                  <EditableHoverIndicator className="editable-hover-indicator-inline" />
                   <button
                     className="danger-action part-manager-danger-action"
                     disabled={isDeletingPartDefinition}
-                    onClick={() => handleDeletePartDefinition(partDefinition.id)}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleDeletePartDefinition(partDefinition.id);
+                    }}
                     style={{ padding: "0.35rem 0.6rem" }}
                     type="button"
                   >

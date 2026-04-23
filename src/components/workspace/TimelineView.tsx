@@ -320,7 +320,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                                 {!collapsed && subsystem.tasks.map((task, tIdx) => (
                                     <React.Fragment key={task.id}>
                                         <button
-                                            className="task-label editable-hover-target editable-hover-target-row"
+                                            className="task-label"
                                             onClick={() => openEditTaskModal(task)}
                                             style={{
                                                 gridRow: tIdx + 1,
@@ -349,13 +349,12 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                                         >
                                             <strong style={{ display: "block", color: "var(--text-title)", lineHeight: "1.2" }}>{task.title}</strong>
                                             <span style={{ fontSize: "0.7rem", color: "var(--text-copy)" }}>{(task.ownerId ? membersById[task.ownerId]?.name : null) ?? "Unassigned"}</span>
-                                            <EditableHoverIndicator />
                                         </button>
                                         {timeline.days.map((day, dIdx) => (
                                             <div key={day} style={{ gridRow: tIdx + 1, gridColumn: dIdx + 3, borderRight: "1px solid var(--border-base)", borderTop: tIdx === 0 ? "none" : "1px solid var(--border-base)", minHeight: "44px" }} />
                                         ))}
                                         <button
-                                            className={`timeline-bar timeline-${task.status}`}
+                                            className={`timeline-bar timeline-${task.status} editable-hover-target`}
                                             onClick={() => openEditTaskModal(task)}
                                             style={{
                                                 gridRow: tIdx + 1,
@@ -376,9 +375,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                                                 alignSelf: "center",
                                                 minWidth: 0,
                                             }}
+                                            title={`Edit ${task.title}`}
                                             type="button"
                                         >
                                             {task.title}
+                                            <EditableHoverIndicator className="editable-hover-indicator-compact" />
                                         </button>
                                     </React.Fragment>
                                 ))}
@@ -392,4 +393,3 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         </section>
     );
 };
-

@@ -21,19 +21,19 @@ import type { ViewTab } from "./workspaceTypes";
 
 const TAB_INTERACTION_GUIDANCE: Record<ViewTab, string> = {
   timeline:
-    "Use the person and date-range filters above to focus the schedule, collapse or expand subsystem rows with the arrows, and hover a task to reveal the pencil affordance before editing it.",
+    "Use the person and date-range filters above to focus the schedule, collapse or expand subsystem rows with the arrows, and hover a task bar to reveal the pencil cue before clicking the task to edit it.",
   queue:
-    "Use search and filters to narrow the list, click a column header to sort, and hover any row to reveal the pencil affordance before opening its task details. Use Add to create a new task.",
+    "Use search and filters to narrow the list, click a column header to sort, and hover any row to reveal the pencil cue before clicking the row to open its task details. Use Add to create a new task.",
   purchases:
-    "Search or filter requests by subsystem, requester, status, vendor, or approval, then hover a row to reveal the pencil affordance before reviewing or updating it. Use Add to log a new request.",
+    "Search or filter requests by subsystem, requester, status, vendor, or approval, then hover a row to reveal the pencil cue before clicking the row to review or update it. Use Add to log a new request.",
   cnc:
-    "Search and filter CNC jobs by subsystem, requester, material, or status, then hover a row to reveal the pencil affordance before updating that job. Use Add to enter a new CNC request.",
+    "Search and filter CNC jobs by subsystem, requester, material, or status, then hover a row to reveal the pencil cue before clicking the row to update that job. Use Add to enter a new CNC request.",
   prints:
-    "Search and filter 3D print jobs by subsystem, requester, material, or status, then hover a row to reveal the pencil affordance before updating that job. Use Add to enter a new print request.",
+    "Search and filter 3D print jobs by subsystem, requester, material, or status, then hover a row to reveal the pencil cue before clicking the row to update that job. Use Add to enter a new print request.",
   materials:
-    "Use the search and stock filters to find inventory quickly, then hover a row to reveal the pencil affordance for updating quantities, vendors, locations, or notes. Use Add to track a new material.",
+    "Use the search and stock filters to find inventory quickly, then hover a row to reveal the pencil cue before clicking the row to update quantities, vendors, locations, or notes. Use Add to track a new material.",
   parts:
-    "Search and filter the catalog from the toolbar, hover a part definition to reveal edit and delete actions, and review matching part instances below for subsystem status.",
+    "Search and filter the catalog from the toolbar, hover a part definition to reveal the pencil cue and delete action, and click the row to edit it. Review matching part instances below for subsystem status.",
   roster:
     "Use the plus buttons to add people to each group, click a name to select them, and hover a member to reveal the pencil affordance for editing or deleting them from the popup.",
 };
