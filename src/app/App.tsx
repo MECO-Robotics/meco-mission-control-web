@@ -6,29 +6,54 @@ import {
 } from "react";
 
 import "./App.css";
-import { GoogleSignInScreen, AuthStatusScreen } from "../components/auth/AuthScreens";
+import { AuthStatusScreen, SignInScreen } from "../components/auth/AuthScreens";
 import { AppSidebar } from "../components/layout/AppSidebar";
 import { AppTopbar } from "../components/layout/AppTopbar";
 import { WorkspaceContent } from "../components/workspace/WorkspaceContent";
 import type { ViewTab } from "../components/workspace/workspaceTypes";
 import {
-  buildEmptyManufacturingPayload, buildEmptyMaterialPayload, buildEmptyPartDefinitionPayload, buildEmptyPurchasePayload, buildEmptyTaskPayload, joinList, manufacturingToPayload, materialToPayload, partDefinitionToPayload, purchaseToPayload, splitList, taskToPayload, toErrorMessage
+  buildEmptyMechanismPayload,
+  buildEmptyManufacturingPayload,
+  buildEmptyMaterialPayload,
+  buildEmptyPartDefinitionPayload,
+  buildEmptyPartInstancePayload,
+  buildEmptyPurchasePayload,
+  buildEmptySubsystemPayload,
+  buildEmptyTaskPayload,
+  joinList,
+  mechanismToPayload,
+  manufacturingToPayload,
+  materialToPayload,
+  partDefinitionToPayload,
+  partInstanceToPayload,
+  purchaseToPayload,
+  splitList,
+  subsystemToPayload,
+  taskToPayload,
+  toErrorMessage
 } from "../lib/appUtils";
 import {
   createManufacturingItemRecord,
   createMaterialRecord,
   createMemberRecord,
+  createMechanismRecord,
+  createSubsystemRecord,
   createPartDefinitionRecord,
+  createPartInstanceRecord,
   createPurchaseItemRecord,
   createTask,
   deleteMaterialRecord,
   deleteMemberRecord,
+  deleteMechanismRecord,
   deletePartDefinitionRecord,
   fetchBootstrap,
   updateManufacturingItemRecord,
   updateMaterialRecord,
   updateMemberRecord,
+  updateMechanismRecord,
+  updateSubsystemRecord,
   updatePartDefinitionRecord,
+  updatePartInstanceRecord,
   updatePurchaseItemRecord,
   updateTaskRecord,
 } from "../lib/auth";
@@ -38,11 +63,17 @@ import type {
   ManufacturingItemRecord,
   MaterialPayload,
   MaterialRecord,
+  MechanismPayload,
+  MechanismRecord,
   MemberPayload,
   PartDefinitionPayload,
   PartDefinitionRecord,
+  PartInstancePayload,
+  PartInstanceRecord,
   PurchaseItemPayload,
   PurchaseItemRecord,
+  SubsystemPayload,
+  SubsystemRecord,
   TaskPayload,
   TaskRecord,
 } from "../types";
@@ -50,8 +81,11 @@ import { EMPTY_BOOTSTRAP } from "./appConstants";
 import type {
   ManufacturingModalMode,
   MaterialModalMode,
+  MechanismModalMode,
   PartDefinitionModalMode,
+  PartInstanceModalMode,
   PurchaseModalMode,
+  SubsystemModalMode,
   TaskModalMode,
 } from "./appTypes";
 import { useAppAuth } from "./useAppAuth";
@@ -77,10 +111,15 @@ export default function App() {
     authBooting,
     authConfig,
     authMessage,
+    clearAuthMessage,
     enforcedAuthConfig,
     expireSession,
     googleButtonRef,
     handleSignOut,
+    handleRequestEmailCode,
+    handleVerifyEmailCode,
+    isEmailAuthAvailable,
+    isGoogleAuthAvailable,
     isLocalGoogleDevHost,
     isLocalGoogleOverrideActive,
     isSigningIn,
@@ -136,6 +175,32 @@ export default function App() {
     useState<PartDefinitionPayload>(buildEmptyPartDefinitionPayload(EMPTY_BOOTSTRAP));
   const [isSavingPartDefinition, setIsSavingPartDefinition] = useState(false);
   const [isDeletingPartDefinition, setIsDeletingPartDefinition] = useState(false);
+
+  const [partInstanceModalMode, setPartInstanceModalMode] =
+    useState<PartInstanceModalMode>(null);
+  const [activePartInstanceId, setActivePartInstanceId] = useState<string | null>(null);
+  const [partInstanceDraft, setPartInstanceDraft] = useState<PartInstancePayload>(
+    buildEmptyPartInstancePayload(EMPTY_BOOTSTRAP),
+  );
+  const [isSavingPartInstance, setIsSavingPartInstance] = useState(false);
+
+  const [subsystemModalMode, setSubsystemModalMode] =
+    useState<SubsystemModalMode>(null);
+  const [activeSubsystemId, setActiveSubsystemId] = useState<string | null>(null);
+  const [subsystemDraft, setSubsystemDraft] = useState<SubsystemPayload>(
+    buildEmptySubsystemPayload(EMPTY_BOOTSTRAP),
+  );
+  const [subsystemDraftRisks, setSubsystemDraftRisks] = useState("");
+  const [isSavingSubsystem, setIsSavingSubsystem] = useState(false);
+
+  const [mechanismModalMode, setMechanismModalMode] =
+    useState<MechanismModalMode>(null);
+  const [activeMechanismId, setActiveMechanismId] = useState<string | null>(null);
+  const [mechanismDraft, setMechanismDraft] = useState<MechanismPayload>(
+    buildEmptyMechanismPayload(EMPTY_BOOTSTRAP),
+  );
+  const [isSavingMechanism, setIsSavingMechanism] = useState(false);
+  const [isDeletingMechanism, setIsDeletingMechanism] = useState(false);
 
   const [activePersonFilter, setActivePersonFilter] = useState<string>("all");
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
@@ -298,6 +363,64 @@ export default function App() {
         }
       }
 
+      if (partInstanceModalMode === "create") {
+        setPartInstanceDraft((current) =>
+          buildEmptyPartInstancePayload(payload, {
+            subsystemId: current.subsystemId,
+            mechanismId: current.mechanismId ?? undefined,
+            partDefinitionId: current.partDefinitionId || undefined,
+          }),
+        );
+      }
+
+      if (partInstanceModalMode === "edit" && activePartInstanceId) {
+        const nextItem = payload.partInstances.find(
+          (item) => item.id === activePartInstanceId,
+        );
+        if (nextItem) {
+          setPartInstanceDraft(partInstanceToPayload(nextItem));
+        } else {
+          setPartInstanceModalMode(null);
+          setActivePartInstanceId(null);
+        }
+      }
+
+      if (subsystemModalMode === "create") {
+        setSubsystemDraft(buildEmptySubsystemPayload(payload));
+        setSubsystemDraftRisks("");
+      }
+
+      if (subsystemModalMode === "edit" && activeSubsystemId) {
+        const nextSubsystem = payload.subsystems.find(
+          (subsystem) => subsystem.id === activeSubsystemId,
+        );
+        if (nextSubsystem) {
+          setSubsystemDraft(subsystemToPayload(nextSubsystem));
+          setSubsystemDraftRisks(joinList(nextSubsystem.risks));
+        } else {
+          setSubsystemModalMode(null);
+          setActiveSubsystemId(null);
+        }
+      }
+
+      if (mechanismModalMode === "create") {
+        setMechanismDraft((current) =>
+          buildEmptyMechanismPayload(payload, current.subsystemId),
+        );
+      }
+
+      if (mechanismModalMode === "edit" && activeMechanismId) {
+        const nextMechanism = payload.mechanisms.find(
+          (mechanism) => mechanism.id === activeMechanismId,
+        );
+        if (nextMechanism) {
+          setMechanismDraft(mechanismToPayload(nextMechanism));
+        } else {
+          setMechanismModalMode(null);
+          setActiveMechanismId(null);
+        }
+      }
+
     } catch (error) {
       setDataMessage(toErrorMessage(error));
     } finally {
@@ -307,16 +430,22 @@ export default function App() {
     activeManufacturingId,
     activeMaterialId,
     activePartDefinitionId,
+    activePartInstanceId,
     activePersonFilter,
     activePurchaseId,
     activeTaskId,
+    activeSubsystemId,
+    activeMechanismId,
     handleUnauthorized,
+    mechanismModalMode,
     manufacturingModalMode,
     materialModalMode,
     partDefinitionModalMode,
+    partInstanceModalMode,
     purchaseModalMode,
     selectedMemberId,
     selectMember,
+    subsystemModalMode,
     taskModalMode,
   ]);
 
@@ -411,6 +540,64 @@ export default function App() {
     setActivePartDefinitionId(null);
   };
 
+  const openCreatePartInstanceModal = (mechanism: MechanismRecord) => {
+    setActivePartInstanceId(null);
+    setPartInstanceDraft(
+      buildEmptyPartInstancePayload(bootstrap, {
+        subsystemId: mechanism.subsystemId,
+        mechanismId: mechanism.id,
+      }),
+    );
+    setPartInstanceModalMode("create");
+  };
+
+  const openEditPartInstanceModal = (partInstance: PartInstanceRecord) => {
+    setActivePartInstanceId(partInstance.id);
+    setPartInstanceDraft(partInstanceToPayload(partInstance));
+    setPartInstanceModalMode("edit");
+  };
+
+  const closePartInstanceModal = () => {
+    setPartInstanceModalMode(null);
+    setActivePartInstanceId(null);
+  };
+
+  const openCreateSubsystemModal = () => {
+    setActiveSubsystemId(null);
+    setSubsystemDraft(buildEmptySubsystemPayload(bootstrap));
+    setSubsystemDraftRisks("");
+    setSubsystemModalMode("create");
+  };
+
+  const openEditSubsystemModal = (subsystem: SubsystemRecord) => {
+    setActiveSubsystemId(subsystem.id);
+    setSubsystemDraft(subsystemToPayload(subsystem));
+    setSubsystemDraftRisks(joinList(subsystem.risks));
+    setSubsystemModalMode("edit");
+  };
+
+  const closeSubsystemModal = () => {
+    setSubsystemModalMode(null);
+    setActiveSubsystemId(null);
+  };
+
+  const openCreateMechanismModal = (subsystemId?: string) => {
+    setActiveMechanismId(null);
+    setMechanismDraft(buildEmptyMechanismPayload(bootstrap, subsystemId));
+    setMechanismModalMode("create");
+  };
+
+  const openEditMechanismModal = (mechanism: MechanismRecord) => {
+    setActiveMechanismId(mechanism.id);
+    setMechanismDraft(mechanismToPayload(mechanism));
+    setMechanismModalMode("edit");
+  };
+
+  const closeMechanismModal = () => {
+    setMechanismModalMode(null);
+    setActiveMechanismId(null);
+  };
+
   useEffect(() => {
     if (authBooting) {
       return;
@@ -463,8 +650,18 @@ export default function App() {
     setDataMessage(null);
 
     try {
+      const selectedPartDefinition = bootstrap.partDefinitions.find(
+        (partDefinition) => partDefinition.id === purchaseDraft.partDefinitionId,
+      );
+
+      if (!selectedPartDefinition) {
+        setDataMessage("Please choose a real part from the Parts tab before saving the purchase.");
+        return;
+      }
+
       const payload: PurchaseItemPayload = {
         ...purchaseDraft,
+        title: selectedPartDefinition.name,
         finalCost:
           purchaseFinalCost.trim().length > 0 ? Number(purchaseFinalCost) : undefined,
       };
@@ -492,8 +689,25 @@ export default function App() {
     setDataMessage(null);
 
     try {
+      const selectedPartDefinition = manufacturingDraft.partDefinitionId
+        ? bootstrap.partDefinitions.find(
+            (partDefinition) => partDefinition.id === manufacturingDraft.partDefinitionId,
+          )
+        : null;
+
+      if (manufacturingDraft.process !== "fabrication" && !selectedPartDefinition) {
+        setDataMessage(
+          "Please choose a real part from the Parts tab before saving the CNC or 3D print job.",
+        );
+        return;
+      }
+
       const payload: ManufacturingItemPayload = {
         ...manufacturingDraft,
+        title:
+          manufacturingDraft.process === "fabrication"
+            ? manufacturingDraft.title
+            : selectedPartDefinition?.name ?? manufacturingDraft.title,
         batchLabel: manufacturingDraft.batchLabel?.trim() || undefined,
       };
 
@@ -598,6 +812,116 @@ export default function App() {
     }
   };
 
+  const handlePartInstanceSubmit = async (
+    event: React.FormEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault();
+    setIsSavingPartInstance(true);
+    setDataMessage(null);
+
+    try {
+      const selectedPartDefinition = bootstrap.partDefinitions.find(
+        (partDefinition) => partDefinition.id === partInstanceDraft.partDefinitionId,
+      );
+
+      if (!selectedPartDefinition) {
+        setDataMessage("Please choose a real part from the Parts tab before saving the part instance.");
+        return;
+      }
+
+      if (!partInstanceDraft.mechanismId) {
+        setDataMessage("Please choose a mechanism before saving the part instance.");
+        return;
+      }
+
+      const payload: PartInstancePayload = {
+        ...partInstanceDraft,
+        name: partInstanceDraft.name.trim(),
+      };
+
+      if (partInstanceModalMode === "create") {
+        await createPartInstanceRecord(payload, handleUnauthorized);
+      } else if (partInstanceModalMode === "edit" && activePartInstanceId) {
+        await updatePartInstanceRecord(
+          activePartInstanceId,
+          payload,
+          handleUnauthorized,
+        );
+      }
+
+      await loadWorkspace();
+      closePartInstanceModal();
+    } catch (error) {
+      setDataMessage(toErrorMessage(error));
+    } finally {
+      setIsSavingPartInstance(false);
+    }
+  };
+
+  const handleSubsystemSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSavingSubsystem(true);
+    setDataMessage(null);
+
+    try {
+      const payload: SubsystemPayload = {
+        ...subsystemDraft,
+        risks: splitList(subsystemDraftRisks),
+      };
+
+      if (subsystemModalMode === "create") {
+        await createSubsystemRecord(payload, handleUnauthorized);
+      } else if (subsystemModalMode === "edit" && activeSubsystemId) {
+        await updateSubsystemRecord(activeSubsystemId, payload, handleUnauthorized);
+      }
+
+      await loadWorkspace();
+      closeSubsystemModal();
+    } catch (error) {
+      setDataMessage(toErrorMessage(error));
+    } finally {
+      setIsSavingSubsystem(false);
+    }
+  };
+
+  const handleMechanismSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSavingMechanism(true);
+    setDataMessage(null);
+
+    try {
+      if (mechanismModalMode === "create") {
+        await createMechanismRecord(mechanismDraft, handleUnauthorized);
+      } else if (mechanismModalMode === "edit" && activeMechanismId) {
+        await updateMechanismRecord(activeMechanismId, mechanismDraft, handleUnauthorized);
+      }
+
+      await loadWorkspace();
+      closeMechanismModal();
+    } catch (error) {
+      setDataMessage(toErrorMessage(error));
+    } finally {
+      setIsSavingMechanism(false);
+    }
+  };
+
+  const handleDeleteMechanism = async (mechanismId: string) => {
+    setIsDeletingMechanism(true);
+    setDataMessage(null);
+
+    try {
+      await deleteMechanismRecord(mechanismId, handleUnauthorized);
+      if (activeMechanismId === mechanismId) {
+        closeMechanismModal();
+      }
+      await loadWorkspace();
+    } catch (error) {
+      setDataMessage(toErrorMessage(error));
+    } finally {
+      setIsDeletingMechanism(false);
+    }
+  };
+
   const handleCreateMember = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsSavingMember(true);
@@ -688,13 +1012,18 @@ export default function App() {
   }
 
   if (enforcedAuthConfig && !sessionUser) {
-    return (
-      <GoogleSignInScreen
+      return (
+      <SignInScreen
         authMessage={authMessage}
+        clearAuthMessage={clearAuthMessage}
+        hasEmailSignIn={isEmailAuthAvailable}
+        hasGoogleSignIn={isGoogleAuthAvailable}
         googleButtonRef={googleButtonRef}
         isLocalGoogleDevHost={isLocalGoogleDevHost}
         isLocalGoogleOverrideActive={isLocalGoogleOverrideActive}
         isSigningIn={isSigningIn}
+        onRequestEmailCode={handleRequestEmailCode}
+        onVerifyEmailCode={handleVerifyEmailCode}
         signInConfig={enforcedAuthConfig}
       />
     );
@@ -742,16 +1071,20 @@ export default function App() {
         membersById={membersById}
         openCreateManufacturingModal={openCreateManufacturingModal}
         openCreateMaterialModal={openCreateMaterialModal}
+        openCreateMechanismModal={openCreateMechanismModal}
+        openCreatePartInstanceModal={openCreatePartInstanceModal}
+        openCreateSubsystemModal={openCreateSubsystemModal}
         openCreatePartDefinitionModal={openCreatePartDefinitionModal}
         openCreatePurchaseModal={openCreatePurchaseModal}
         openCreateTaskModal={openCreateTaskModal}
         openEditManufacturingModal={openEditManufacturingModal}
         openEditMaterialModal={openEditMaterialModal}
+        openEditMechanismModal={openEditMechanismModal}
+        openEditPartInstanceModal={openEditPartInstanceModal}
+        openEditSubsystemModal={openEditSubsystemModal}
         openEditPartDefinitionModal={openEditPartDefinitionModal}
         openEditPurchaseModal={openEditPurchaseModal}
         openEditTaskModal={openEditTaskModal}
-        handleDeletePartDefinition={handleDeletePartDefinition}
-        isDeletingPartDefinition={isDeletingPartDefinition}
         printItems={printItems}
         rosterMentors={rosterMentors}
         selectMember={selectMember}
@@ -772,27 +1105,43 @@ export default function App() {
       />
 
       <WorkspaceModalHost
+        activePartDefinitionId={activePartDefinitionId}
         activeMaterialId={activeMaterialId}
+        activeMechanismId={activeMechanismId}
+        activeSubsystemId={activeSubsystemId}
         activeTask={activeTask}
         bootstrap={bootstrap}
         closeManufacturingModal={closeManufacturingModal}
         closeMaterialModal={closeMaterialModal}
+        closeMechanismModal={closeMechanismModal}
+        closePartInstanceModal={closePartInstanceModal}
         closePartDefinitionModal={closePartDefinitionModal}
         closePurchaseModal={closePurchaseModal}
+        closeSubsystemModal={closeSubsystemModal}
         closeTaskModal={closeTaskModal}
         disciplinesById={disciplinesById}
         eventsById={eventsById}
         handleDeleteMaterial={handleDeleteMaterial}
+        handleDeletePartDefinition={handleDeletePartDefinition}
+        handleDeleteMechanism={handleDeleteMechanism}
+        handlePartInstanceSubmit={handlePartInstanceSubmit}
+        handleMechanismSubmit={handleMechanismSubmit}
         handleManufacturingSubmit={handleManufacturingSubmit}
         handleMaterialSubmit={handleMaterialSubmit}
         handlePartDefinitionSubmit={handlePartDefinitionSubmit}
         handlePurchaseSubmit={handlePurchaseSubmit}
+        handleSubsystemSubmit={handleSubsystemSubmit}
         handleTaskSubmit={handleTaskSubmit}
         isDeletingMaterial={isDeletingMaterial}
+        isDeletingPartDefinition={isDeletingPartDefinition}
+        isDeletingMechanism={isDeletingMechanism}
         isSavingManufacturing={isSavingManufacturing}
         isSavingMaterial={isSavingMaterial}
         isSavingPartDefinition={isSavingPartDefinition}
+        isSavingPartInstance={isSavingPartInstance}
+        isSavingMechanism={isSavingMechanism}
         isSavingPurchase={isSavingPurchase}
+        isSavingSubsystem={isSavingSubsystem}
         isSavingTask={isSavingTask}
         manufacturingDraft={manufacturingDraft}
         manufacturingModalMode={manufacturingModalMode}
@@ -800,6 +1149,10 @@ export default function App() {
         materialModalMode={materialModalMode}
         mechanismsById={mechanismsById}
         mentors={mentors}
+        mechanismDraft={mechanismDraft}
+        mechanismModalMode={mechanismModalMode}
+        partInstanceDraft={partInstanceDraft}
+        partInstanceModalMode={partInstanceModalMode}
         partDefinitionDraft={partDefinitionDraft}
         partDefinitionModalMode={partDefinitionModalMode}
         partDefinitionsById={partDefinitionsById}
@@ -808,14 +1161,21 @@ export default function App() {
         purchaseFinalCost={purchaseFinalCost}
         purchaseModalMode={purchaseModalMode}
         requirementsById={requirementsById}
+        setMechanismDraft={setMechanismDraft}
         setManufacturingDraft={setManufacturingDraft}
         setMaterialDraft={setMaterialDraft}
+        setPartInstanceDraft={setPartInstanceDraft}
         setPartDefinitionDraft={setPartDefinitionDraft}
         setPurchaseDraft={setPurchaseDraft}
         setPurchaseFinalCost={setPurchaseFinalCost}
+        setSubsystemDraft={setSubsystemDraft}
+        setSubsystemDraftRisks={setSubsystemDraftRisks}
         setTaskDraft={setTaskDraft}
         setTaskDraftBlockers={setTaskDraftBlockers}
         students={students}
+        subsystemDraft={subsystemDraft}
+        subsystemDraftRisks={subsystemDraftRisks}
+        subsystemModalMode={subsystemModalMode}
         taskDraft={taskDraft}
         taskDraftBlockers={taskDraftBlockers}
         taskModalMode={taskModalMode}

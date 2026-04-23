@@ -15,6 +15,7 @@ import { PartsView } from "./PartsView";
 import { PrintsView } from "./PrintsView";
 import { PurchasesView } from "./PurchasesView";
 import { RosterView } from "./RosterView";
+import { SubsystemsView } from "./SubsystemsView";
 import { TaskQueueView } from "./TaskQueueView";
 import { TimelineView } from "./TimelineView";
 import type { ViewTab } from "./workspaceTypes";
@@ -25,15 +26,17 @@ const TAB_INTERACTION_GUIDANCE: Record<ViewTab, string> = {
   queue:
     "Use search and filters to narrow the list, click a column header to sort, and hover any row to reveal the pencil cue before clicking the row to open its task details. Use Add to create a new task.",
   purchases:
-    "Search or filter requests by subsystem, requester, status, vendor, or approval, then hover a row to reveal the pencil cue before clicking the row to review or update it. Use Add to log a new request.",
+    "Search or filter requests by subsystem, requester, status, vendor, or approval, then hover a row to reveal the pencil cue before clicking the row to review or update it. Use Add to log a new request against a real part from the Parts tab.",
   cnc:
-    "Search and filter CNC jobs by subsystem, requester, material, or status, then hover a row to reveal the pencil cue before clicking the row to update that job. Use Add to enter a new CNC request.",
+    "Search and filter CNC jobs by subsystem, requester, material, or status, then hover a row to reveal the pencil cue before clicking the row to update that job. Use Add to enter a new CNC request tied to a catalog part.",
   prints:
-    "Search and filter 3D print jobs by subsystem, requester, material, or status, then hover a row to reveal the pencil cue before clicking the row to update that job. Use Add to enter a new print request.",
+    "Search and filter 3D print jobs by subsystem, requester, material, or status, then hover a row to reveal the pencil cue before clicking the row to update that job. Use Add to enter a new print request tied to a catalog part.",
+  subsystems:
+    "Search and filter subsystem ownership and mechanism coverage, click a subsystem row to inspect the detail panel, and use the add buttons to create or update subsystems, mechanisms, and mechanism-owned part instances.",
   materials:
     "Use the search and stock filters to find inventory quickly, then hover a row to reveal the pencil cue before clicking the row to update quantities, vendors, locations, or notes. Use Add to track a new material.",
   parts:
-    "Search and filter the catalog from the toolbar, hover a part definition to reveal the pencil cue and delete action, and click the row to edit it. Review matching part instances below for subsystem status.",
+    "Search and filter the catalog from the toolbar, hover a part definition to reveal the pencil cue, and click the row to edit it. Use the edit modal to update or delete the part definition. Review matching part instances below for subsystem and mechanism ownership.",
   roster:
     "Use the plus buttons to add people to each group, click a name to select them, and hover a member to reveal the pencil affordance for editing or deleting them from the popup.",
 };
@@ -48,11 +51,9 @@ interface WorkspaceContentProps {
   eventsById: Record<string, BootstrapPayload["events"][number]>;
   handleCreateMember: (event: FormEvent<HTMLFormElement>) => void;
   handleDeleteMember: (id: string) => void;
-  handleDeletePartDefinition: (id: string) => void;
   handleUpdateMember: (event: FormEvent<HTMLFormElement>) => void;
   isAddPersonOpen: boolean;
   isDeletingMember: boolean;
-  isDeletingPartDefinition: boolean;
   isEditPersonOpen: boolean;
   isLoadingData: boolean;
   isSavingMember: boolean;
@@ -62,11 +63,17 @@ interface WorkspaceContentProps {
   mechanismsById: Record<string, BootstrapPayload["mechanisms"][number]>;
   openCreateManufacturingModal: (process: "cnc" | "3d-print" | "fabrication") => void;
   openCreateMaterialModal: () => void;
+  openCreateMechanismModal: (subsystemId?: string) => void;
+  openCreatePartInstanceModal: (mechanism: BootstrapPayload["mechanisms"][number]) => void;
+  openCreateSubsystemModal: () => void;
   openCreatePartDefinitionModal: () => void;
   openCreatePurchaseModal: () => void;
   openCreateTaskModal: () => void;
   openEditManufacturingModal: (item: ManufacturingItemRecord) => void;
   openEditMaterialModal: (item: MaterialRecord) => void;
+  openEditMechanismModal: (mechanism: BootstrapPayload["mechanisms"][number]) => void;
+  openEditPartInstanceModal: (partInstance: BootstrapPayload["partInstances"][number]) => void;
+  openEditSubsystemModal: (subsystem: BootstrapPayload["subsystems"][number]) => void;
   openEditPartDefinitionModal: (item: PartDefinitionRecord) => void;
   openEditPurchaseModal: (item: PurchaseItemRecord) => void;
   openEditTaskModal: (task: TaskRecord) => void;
@@ -120,11 +127,9 @@ export function WorkspaceContent({
   eventsById,
   handleCreateMember,
   handleDeleteMember,
-  handleDeletePartDefinition,
   handleUpdateMember,
   isAddPersonOpen,
   isDeletingMember,
-  isDeletingPartDefinition,
   isEditPersonOpen,
   isLoadingData,
   isSavingMember,
@@ -134,11 +139,17 @@ export function WorkspaceContent({
   mechanismsById,
   openCreateManufacturingModal,
   openCreateMaterialModal,
+  openCreateMechanismModal,
+  openCreatePartInstanceModal,
+  openCreateSubsystemModal,
   openCreatePartDefinitionModal,
   openCreatePurchaseModal,
   openCreateTaskModal,
   openEditManufacturingModal,
   openEditMaterialModal,
+  openEditMechanismModal,
+  openEditPartInstanceModal,
+  openEditSubsystemModal,
   openEditPartDefinitionModal,
   openEditPurchaseModal,
   openEditTaskModal,
@@ -254,6 +265,22 @@ export function WorkspaceContent({
       </WorkspaceTabPanel>
 
       <WorkspaceTabPanel
+        description={TAB_INTERACTION_GUIDANCE.subsystems}
+        isActive={activeTab === "subsystems"}
+      >
+      <SubsystemsView
+        bootstrap={bootstrap}
+        membersById={membersById}
+        openCreateMechanismModal={openCreateMechanismModal}
+        openCreatePartInstanceModal={openCreatePartInstanceModal}
+        openCreateSubsystemModal={openCreateSubsystemModal}
+        openEditMechanismModal={openEditMechanismModal}
+        openEditPartInstanceModal={openEditPartInstanceModal}
+        openEditSubsystemModal={openEditSubsystemModal}
+      />
+      </WorkspaceTabPanel>
+
+      <WorkspaceTabPanel
         description={TAB_INTERACTION_GUIDANCE.roster}
         isActive={activeTab === "roster"}
       >
@@ -294,15 +321,14 @@ export function WorkspaceContent({
         description={TAB_INTERACTION_GUIDANCE.parts}
         isActive={activeTab === "parts"}
       >
-        <PartsView
-          bootstrap={bootstrap}
-          handleDeletePartDefinition={handleDeletePartDefinition}
-          isDeletingPartDefinition={isDeletingPartDefinition}
-          openCreatePartDefinitionModal={openCreatePartDefinitionModal}
-          openEditPartDefinitionModal={openEditPartDefinitionModal}
-          partDefinitionsById={partDefinitionsById}
-          subsystemsById={subsystemsById}
-        />
+      <PartsView
+        bootstrap={bootstrap}
+        openCreatePartDefinitionModal={openCreatePartDefinitionModal}
+        openEditPartDefinitionModal={openEditPartDefinitionModal}
+        mechanismsById={mechanismsById}
+        partDefinitionsById={partDefinitionsById}
+        subsystemsById={subsystemsById}
+      />
       </WorkspaceTabPanel>
     </div>
   );
