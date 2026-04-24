@@ -1,6 +1,6 @@
-import type { BootstrapPayload, ManufacturingItemRecord } from "../../../types";
-import type { MembersById, SubsystemsById } from "../shared/workspaceTypes";
-import { ManufacturingQueueView } from "./ManufacturingQueueView";
+import type { BootstrapPayload, ManufacturingItemRecord } from "@/types";
+import type { MembersById, SubsystemsById } from "@/features/workspace/shared";
+import { ManufacturingQueueView } from "@/features/workspace/views";
 
 interface FabricationViewProps {
   activePersonFilter: string;
@@ -42,3 +42,7 @@ export function FabricationView({
     />
   );
 }
+
+
+
+

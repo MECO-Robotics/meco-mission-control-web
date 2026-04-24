@@ -1,20 +1,20 @@
 import { useMemo, useState, type CSSProperties } from "react";
 
-import { IconManufacturing, IconTasks } from "../../../components/shared/Icons";
+import { IconManufacturing, IconTasks } from "@/components/shared";
 import type {
   ArtifactKind,
   ArtifactRecord,
   ArtifactStatus,
   BootstrapPayload,
-} from "../../../types";
+} from "@/types";
 import {
   EditableHoverIndicator,
   FilterDropdown,
   SearchToolbarInput,
   TableCell,
-} from "../shared/WorkspaceViewShared";
-import { WORKSPACE_PANEL_CLASS } from "../shared/workspaceTypes";
-import { getStatusPillClassName } from "../shared/workspaceUtils";
+} from "@/features/workspace/shared";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
+import { getStatusPillClassName } from "@/features/workspace/shared";
 
 interface ArtifactInventoryViewProps {
   bootstrap: BootstrapPayload;
@@ -218,3 +218,7 @@ export function ArtifactInventoryView({
     </section>
   );
 }
+
+
+
+

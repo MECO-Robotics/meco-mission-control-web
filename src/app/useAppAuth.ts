@@ -27,8 +27,8 @@ import {
   type GoogleCredentialResponse,
   type SessionUser,
   validateSession,
-} from "../lib/auth";
-import { toErrorMessage } from "../lib/appUtils";
+} from "@/lib/auth";
+import { toErrorMessage } from "@/lib/appUtils";
 
 interface UseAppAuthArgs {
   resetWorkspace: () => void;
@@ -301,3 +301,4 @@ export function useAppAuth({ resetWorkspace }: UseAppAuthArgs) {
     sessionUser,
   };
 }
+

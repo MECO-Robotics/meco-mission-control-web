@@ -1,16 +1,16 @@
 import { useMemo, useState, type CSSProperties } from "react";
 
-import type { BootstrapPayload, MaterialRecord } from "../../../types";
-import { IconManufacturing, IconTasks } from "../../../components/shared/Icons";
+import type { BootstrapPayload, MaterialRecord } from "@/types";
+import { IconManufacturing, IconTasks } from "@/components/shared";
 import {
   EditableHoverIndicator,
   FilterDropdown,
   SearchToolbarInput,
   TableCell,
-} from "../shared/WorkspaceViewShared";
-import { getStatusPillClassName } from "../shared/workspaceUtils";
-import { WORKSPACE_PANEL_CLASS } from "../shared/workspaceTypes";
-import { MATERIAL_CATEGORY_OPTIONS, MATERIAL_STOCK_OPTIONS } from "../shared/workspaceOptions";
+} from "@/features/workspace/shared";
+import { getStatusPillClassName } from "@/features/workspace/shared";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
+import { MATERIAL_CATEGORY_OPTIONS, MATERIAL_STOCK_OPTIONS } from "@/features/workspace/shared";
 
 interface MaterialsViewProps {
   bootstrap: BootstrapPayload;
@@ -18,7 +18,7 @@ interface MaterialsViewProps {
   openEditMaterialModal: (item: MaterialRecord) => void;
 }
 
-const MATERIALS_GRID_TEMPLATE = "minmax(180px, 1.8fr) 0.8fr 0.8fr 0.8fr 1fr 1fr 0.8fr";
+const MATERIALS_GRID_TEMPLATE = "minmax(220px, 2.3fr) 0.75fr 0.75fr 0.75fr 1fr 1fr 0.8fr";
 
 export function MaterialsView({
   bootstrap,
@@ -111,6 +111,10 @@ export function MaterialsView({
 
         {filteredMaterials.map((material) => {
           const isLow = material.onHandQuantity <= material.reorderPoint;
+          const materialSubtitle =
+            material.notes.trim().length > 0
+              ? material.notes
+              : `Vendor: ${material.vendor || "Unknown"} | Location: ${material.location || "Unassigned"}`;
 
           return (
             <button
@@ -121,10 +125,14 @@ export function MaterialsView({
               title={`Edit ${material.name}`}
               type="button"
             >
-              <TableCell label="Material">
-                <strong>{material.name}</strong>
-                {material.notes ? <small>{material.notes}</small> : null}
-              </TableCell>
+              <span className="queue-title table-cell table-cell-primary material-primary-cell" data-label="Material">
+                <span className="requested-item-meta">
+                  <strong className="requested-item-title">{material.name}</strong>
+                  <small className="requested-item-subtitle" title={materialSubtitle}>
+                    {materialSubtitle}
+                  </small>
+                </span>
+              </span>
               <TableCell label="Category">{material.category}</TableCell>
               <TableCell label="On hand">
                 {material.onHandQuantity} {material.unit}

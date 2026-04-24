@@ -29,7 +29,7 @@ import type {
   WorkLogPayload,
   WorkLogRecord,
   WorkstreamRecord,
-} from "../types";
+} from "@/types";
 
 const DEFAULT_API_BASE_URL = "/api";
 const SESSION_STORAGE_KEY = "meco.session.token";
@@ -636,6 +636,11 @@ function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapPayload 
     workstreams: planning.workstreams,
     members: (source.members ?? []).map((member) => ({
       ...member,
+      email: typeof member.email === "string" ? member.email : "",
+      elevated:
+        typeof member.elevated === "boolean"
+          ? member.elevated
+          : member.role === "lead" || member.role === "admin",
       seasonId: member.seasonId ?? defaultSeasonId,
     })),
     subsystems: (source.subsystems ?? []).map((subsystem) => ({
@@ -776,6 +781,21 @@ export async function updateEventRecord(
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
+    },
+    onUnauthorized,
+  );
+
+  return response.item;
+}
+
+export async function deleteEventRecord(
+  eventId: string,
+  onUnauthorized?: () => void,
+) {
+  const response = await requestApi<{ item: EventRecord }>(
+    `/events/${eventId}`,
+    {
+      method: "DELETE",
     },
     onUnauthorized,
   );
@@ -1408,3 +1428,4 @@ export function loadGoogleIdentityScript() {
 
   return googleScriptPromise;
 }
+

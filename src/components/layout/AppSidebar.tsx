@@ -1,5 +1,5 @@
-import type { NavigationItem, ViewTab } from "../../features/workspace/shared/workspaceTypes";
-import type { SeasonRecord } from "../../types";
+import type { NavigationItem, ViewTab } from "@/features/workspace";
+import type { SeasonRecord } from "@/types";
 
 const CREATE_SEASON_OPTION_VALUE = "__create_new_season__";
 

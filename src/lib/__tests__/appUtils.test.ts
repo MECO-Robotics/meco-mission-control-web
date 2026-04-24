@@ -7,7 +7,7 @@ import {
   getDefaultSubsystemId,
   joinList,
   splitList,
-} from "../appUtils";
+} from "@/lib/appUtils";
 import type {
   BootstrapPayload,
   EventRecord,
@@ -15,7 +15,7 @@ import type {
   PartInstanceRecord,
   ProjectRecord,
   WorkstreamRecord,
-} from "../../types";
+} from "@/types";
 
 function createBootstrap(overrides: Partial<BootstrapPayload> = {}): BootstrapPayload {
   const projectA: ProjectRecord = {
@@ -263,3 +263,4 @@ describe("appUtils", () => {
     expect(payload.participantIds).toEqual(["lead-1"]);
   });
 });
+

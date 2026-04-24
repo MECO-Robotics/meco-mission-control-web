@@ -1,14 +1,14 @@
 import { useMemo, useState } from "react";
 
-import { IconEdit, IconPlus } from "../../../components/shared/Icons";
-import type { BootstrapPayload, MechanismRecord, SubsystemRecord } from "../../../types";
+import { IconEdit, IconPlus } from "@/components/shared";
+import type { BootstrapPayload, MechanismRecord, SubsystemRecord } from "@/types";
 import {
   SearchToolbarInput,
   TableCell,
-} from "../shared/WorkspaceViewShared";
-import { getDefaultSubsystemId } from "../../../lib/appUtils";
-import type { MembersById } from "../shared/workspaceTypes";
-import { WORKSPACE_PANEL_CLASS } from "../shared/workspaceTypes";
+} from "@/features/workspace/shared";
+import { getDefaultSubsystemId } from "@/lib/appUtils";
+import type { MembersById } from "@/features/workspace/shared";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
 
 interface SubsystemsViewProps {
   bootstrap: BootstrapPayload;
@@ -176,51 +176,6 @@ export function SubsystemsView({
   const selectedSubsystem =
     filteredSubsystems.find((subsystem) => subsystem.id === selectedSubsystemId) ?? null;
 
-  const filteredMechanisms = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
-
-    return [...bootstrap.mechanisms]
-      .filter((mechanism) => {
-        const subsystem = bootstrap.subsystems.find(
-          (candidate) => candidate.id === mechanism.subsystemId,
-        );
-        if (!subsystem) {
-          return false;
-        }
-
-        const relatedPartInstances = bootstrap.partInstances
-          .filter((partInstance) => partInstance.mechanismId === mechanism.id)
-          .map((partInstance) => {
-            const partDefinition = partDefinitionsById[partInstance.partDefinitionId];
-            return `${partInstance.name} ${partDefinition?.name ?? ""}`;
-          })
-          .join(" ");
-        const matchesSearch =
-          normalizedSearch.length === 0 ||
-          [
-            mechanism.name,
-            mechanism.description,
-            subsystem.name,
-            relatedPartInstances,
-          ]
-            .join(" ")
-            .toLowerCase()
-            .includes(normalizedSearch);
-
-        return matchesSearch;
-      })
-      .sort((left, right) => {
-        const leftSubsystem = bootstrap.subsystems.find((subsystem) => subsystem.id === left.subsystemId);
-        const rightSubsystem = bootstrap.subsystems.find((subsystem) => subsystem.id === right.subsystemId);
-        const leftName = `${leftSubsystem?.name ?? ""} ${left.name}`.toLowerCase();
-        const rightName = `${rightSubsystem?.name ?? ""} ${right.name}`.toLowerCase();
-        return leftName.localeCompare(rightName);
-      });
-  }, [bootstrap.mechanisms, bootstrap.partInstances, bootstrap.subsystems, partDefinitionsById, search]);
-
-  const visibleSubsystemCount = filteredSubsystems.length;
-  const visibleMechanismCount = filteredMechanisms.length;
-
   return (
     <section className={`panel dense-panel subsystem-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
       <div className="panel-header compact-header">
@@ -240,30 +195,12 @@ export function SubsystemsView({
 
           <button
             aria-label="Add subsystem"
-            className="primary-action subsystem-manager-toolbar-action"
+            className="primary-action queue-toolbar-action subsystem-manager-toolbar-action"
             onClick={openCreateSubsystemModal}
             type="button"
           >
             Add subsystem
           </button>
-        </div>
-      </div>
-
-      <div
-        className="summary-row"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-          gap: "0.6rem",
-        }}
-      >
-        <div className="summary-chip">
-          <span>Visible subsystems</span>
-          <strong>{visibleSubsystemCount}</strong>
-        </div>
-        <div className="summary-chip">
-          <span>Visible mechanisms</span>
-          <strong>{visibleMechanismCount}</strong>
         </div>
       </div>
 
@@ -345,13 +282,15 @@ export function SubsystemsView({
                   title={`Inspect ${subsystem.name}`}
                 >
                   <TableCell label="Subsystem">
-                    <strong style={{ color: "var(--text-title)" }}>{subsystem.name}</strong>
-                    <small style={{ color: "var(--text-copy)" }}>{subsystem.description}</small>
-                    <small style={{ color: "var(--text-copy)" }}>
-                      {subsystem.parentSubsystemId
-                        ? `Parent: ${parentSubsystem?.name ?? "Unknown"}`
-                        : "Parent: No parent (root)"}
-                    </small>
+                    <span className="subsystem-cell-meta">
+                      <strong>{subsystem.name}</strong>
+                      <small>{subsystem.description}</small>
+                      <small>
+                        {subsystem.parentSubsystemId
+                          ? `Parent: ${parentSubsystem?.name ?? "Unknown"}`
+                          : "Parent: No parent (root)"}
+                      </small>
+                    </span>
                   </TableCell>
                   <TableCell label="Lead">
                     {formatMemberName(membersById, subsystem.responsibleEngineerId)}
@@ -448,3 +387,7 @@ export function SubsystemsView({
     </section>
   );
 }
+
+
+
+

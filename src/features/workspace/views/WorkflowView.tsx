@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
 
-import type { ArtifactRecord, BootstrapPayload } from "../../../types";
+import type { ArtifactRecord, BootstrapPayload } from "@/types";
 import {
   SearchToolbarInput,
   TableCell,
-} from "../shared/WorkspaceViewShared";
-import { WORKSPACE_PANEL_CLASS } from "../shared/workspaceTypes";
+} from "@/features/workspace/shared";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
 
 interface WorkflowViewProps {
   artifacts: ArtifactRecord[];
@@ -174,3 +174,6 @@ export function WorkflowView({
     </section>
   );
 }
+
+
+

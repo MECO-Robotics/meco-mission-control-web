@@ -1,19 +1,19 @@
 import { useMemo, useState, type CSSProperties } from "react";
 
-import { formatCurrency } from "../../../lib/appUtils";
-import type { BootstrapPayload, PurchaseItemRecord } from "../../../types";
-import { IconManufacturing, IconPerson, IconTasks } from "../../../components/shared/Icons";
+import { formatCurrency } from "@/lib/appUtils";
+import type { BootstrapPayload, PurchaseItemRecord } from "@/types";
+import { IconManufacturing, IconPerson, IconTasks } from "@/components/shared";
 import {
   EditableHoverIndicator,
   FilterDropdown,
   RequestedItemMeta,
   SearchToolbarInput,
   TableCell,
-} from "../shared/WorkspaceViewShared";
-import { getStatusPillClassName } from "../shared/workspaceUtils";
-import type { MembersById, SubsystemsById } from "../shared/workspaceTypes";
-import { WORKSPACE_PANEL_CLASS } from "../shared/workspaceTypes";
-import { PURCHASE_APPROVAL_OPTIONS, PURCHASE_STATUS_OPTIONS } from "../shared/workspaceOptions";
+} from "@/features/workspace/shared";
+import { getStatusPillClassName } from "@/features/workspace/shared";
+import type { MembersById, SubsystemsById } from "@/features/workspace/shared";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
+import { PURCHASE_APPROVAL_OPTIONS, PURCHASE_STATUS_OPTIONS } from "@/features/workspace/shared";
 
 interface PurchasesViewProps {
   activePersonFilter: string;
@@ -209,3 +209,7 @@ export function PurchasesView({
     </section>
   );
 }
+
+
+
+

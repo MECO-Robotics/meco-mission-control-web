@@ -1,22 +1,22 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 
-import { formatDate } from "../../../lib/appUtils";
-import type { BootstrapPayload, TaskRecord } from "../../../types";
+import { formatDate } from "@/lib/appUtils";
+import type { BootstrapPayload, TaskRecord } from "@/types";
 import {
   IconManufacturing,
   IconParts,
   IconPerson,
   IconTasks,
-} from "../../../components/shared/Icons";
+} from "@/components/shared";
 import {
   EditableHoverIndicator,
   FilterDropdown,
   SearchToolbarInput,
   TableCell,
-} from "../shared/WorkspaceViewShared";
-import { getStatusPillClassName } from "../shared/workspaceUtils";
-import { WORKSPACE_PANEL_CLASS } from "../shared/workspaceTypes";
-import { TASK_PRIORITY_OPTIONS, TASK_STATUS_OPTIONS } from "../shared/workspaceOptions";
+} from "@/features/workspace/shared";
+import { getStatusPillClassName } from "@/features/workspace/shared";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
+import { TASK_PRIORITY_OPTIONS, TASK_STATUS_OPTIONS } from "@/features/workspace/shared";
 
 type TaskSortField =
   | "dueDate"
@@ -225,7 +225,7 @@ export function TaskQueueView({
               : `Only tasks owned by or mentored by ${membersById[activePersonFilter]?.name ?? "selected person"}.`}
           </p>
         </div>
-        <div className="panel-actions filter-toolbar queue-toolbar">
+        <div className="panel-actions filter-toolbar task-queue-toolbar">
           <SearchToolbarInput
             ariaLabel="Search tasks"
             onChange={setSearchFilter}
@@ -397,3 +397,7 @@ export function TaskQueueView({
     </section>
   );
 }
+
+
+
+

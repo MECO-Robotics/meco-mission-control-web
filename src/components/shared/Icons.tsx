@@ -64,6 +64,12 @@ export const IconRoster = () => (
 export const IconPerson = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block" }}><path d="M20 21a8 8 0 1 0-16 0"></path><circle cx="12" cy="7" r="4"></circle></svg>
 );
+export const IconEye = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block" }}>
+        <path d="M2.1 12a11.5 11.5 0 0 1 19.8 0 11.5 11.5 0 0 1-19.8 0"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+    </svg>
+);
 export const IconRefresh = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block" }}><path d="M21 2v6h-6"></path><path d="M3 22v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.13-3.36L21 8"></path><path d="M20.49 15a9 9 0 0 1-14.13 3.36L3 16"></path></svg>
 );

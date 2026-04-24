@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { buildPageShellStyle } from "./theme";
+import { buildPageShellStyle } from "@/app/theme";
 
 export function useAppShell() {
   const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
@@ -68,3 +68,4 @@ export function useAppShell() {
     toggleSidebar,
   };
 }
+

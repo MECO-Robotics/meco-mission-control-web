@@ -11,7 +11,7 @@ import {
   SubsystemEditorModal,
   TaskEditorModal,
   WorkLogEditorModal,
-} from "./WorkspaceModals";
+} from "@/features/workspace";
 import type {
   ArtifactModalMode,
   ManufacturingModalMode,
@@ -23,7 +23,7 @@ import type {
   SubsystemModalMode,
   TaskModalMode,
   WorkLogModalMode,
-} from "./shared/workspaceModalModes";
+} from "@/features/workspace/shared";
 import type {
   ArtifactPayload,
   BootstrapPayload,
@@ -37,7 +37,7 @@ import type {
   TaskPayload,
   TaskRecord,
   WorkLogPayload,
-} from "../../types";
+} from "@/types";
 
 interface WorkspaceModalHostProps {
   activeArtifactId: string | null;
@@ -121,6 +121,8 @@ interface WorkspaceModalHostProps {
   setSubsystemDraftRisks: (value: string) => void;
   setTaskDraft: Dispatch<SetStateAction<TaskPayload>>;
   setTaskDraftBlockers: (value: string) => void;
+  showTimelineCreateToggleInTaskModal: boolean;
+  onSwitchTaskCreateToMilestone: () => void;
   students: BootstrapPayload["members"];
   subsystemDraft: SubsystemPayload;
   subsystemDraftRisks: string;
@@ -212,6 +214,8 @@ export function WorkspaceModalHost({
   setSubsystemDraftRisks,
   setTaskDraft,
   setTaskDraftBlockers,
+  showTimelineCreateToggleInTaskModal,
+  onSwitchTaskCreateToMilestone,
   students,
   subsystemDraft,
   subsystemDraftRisks,
@@ -295,6 +299,8 @@ export function WorkspaceModalHost({
           partInstancesById={partInstancesById}
           setTaskDraft={setTaskDraft}
           setTaskDraftBlockers={setTaskDraftBlockers}
+          showCreateTypeToggle={showTimelineCreateToggleInTaskModal}
+          onSwitchCreateTypeToMilestone={onSwitchTaskCreateToMilestone}
           students={students}
           taskDraft={taskDraft}
           taskDraftBlockers={taskDraftBlockers}
@@ -370,3 +376,7 @@ export function WorkspaceModalHost({
     </>
   );
 }
+
+
+
+

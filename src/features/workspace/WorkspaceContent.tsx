@@ -18,26 +18,29 @@ import type {
   PartDefinitionRecord,
   PurchaseItemRecord,
   TaskRecord,
-} from "../../types";
-import { ArtifactInventoryView } from "./views/ArtifactInventoryView";
-import { CncView } from "./views/CncView";
-import { FabricationView } from "./views/FabricationView";
-import { MaterialsView } from "./views/MaterialsView";
-import { PartsView } from "./views/PartsView";
-import { PrintsView } from "./views/PrintsView";
-import { PurchasesView } from "./views/PurchasesView";
-import { RosterView } from "./views/RosterView";
-import { SubsystemsView } from "./views/SubsystemsView";
-import { WorkLogsView } from "./views/WorkLogsView";
-import { TaskQueueView } from "./views/TaskQueueView";
-import { TimelineView } from "./views/TimelineView";
-import { WorkflowView } from "./views/WorkflowView";
+} from "@/types";
+import {
+  ArtifactInventoryView,
+  CncView,
+  FabricationView,
+  MaterialsView,
+  MilestonesView,
+  PartsView,
+  PrintsView,
+  PurchasesView,
+  RosterView,
+  SubsystemsView,
+  TaskQueueView,
+  TimelineView,
+  WorkflowView,
+  WorkLogsView,
+} from "@/features/workspace/views";
 import type {
   InventoryViewTab,
   ManufacturingViewTab,
   TaskViewTab,
   ViewTab,
-} from "./shared/workspaceTypes";
+} from "@/features/workspace/shared";
 
 type WorkspaceSubviewTab =
   | TaskViewTab
@@ -50,9 +53,14 @@ type WorkspaceSubviewTab =
   | "workflow"
   | "roster";
 
+type SwipeDirection = "left" | "right" | null;
+type TabSwitchDirection = "up" | "down";
+
 const SUBVIEW_INTERACTION_GUIDANCE: Record<WorkspaceSubviewTab, string> = {
   timeline:
     "Use the person and date-range filters above to focus the schedule, click a date number to add or edit milestones for that day, collapse or expand subsystem rows with the arrows, and hover a task bar to reveal the pencil cue before clicking the task to edit it.",
+  milestones:
+    "Use search and filters to narrow milestones, click a row to edit details, and use Add to create new milestone events tied to relevant subsystems when needed.",
   queue:
     "Use search and filters to narrow the list, click a column header to sort, and hover any row to reveal the pencil cue before clicking the row to open its task details. Use Add to create a new task.",
   worklogs:
@@ -81,9 +89,37 @@ const SUBVIEW_INTERACTION_GUIDANCE: Record<WorkspaceSubviewTab, string> = {
     "Use the plus buttons to add people to each group, click a name to select them, and hover a member to reveal the pencil affordance for editing or deleting them from the popup.",
 };
 
+const TASK_VIEW_ORDER: readonly TaskViewTab[] = ["timeline", "queue", "milestones"];
+const MANUFACTURING_VIEW_ORDER: readonly ManufacturingViewTab[] = [
+  "cnc",
+  "prints",
+  "fabrication",
+];
+const INVENTORY_VIEW_ORDER: readonly InventoryViewTab[] = ["materials", "parts", "purchases"];
+
+function getSwipeDirection<T extends string>(
+  previousView: T,
+  currentView: T,
+  viewOrder: readonly T[],
+): SwipeDirection {
+  if (previousView === currentView) {
+    return null;
+  }
+
+  const previousIndex = viewOrder.indexOf(previousView);
+  const currentIndex = viewOrder.indexOf(currentView);
+
+  if (previousIndex < 0 || currentIndex < 0) {
+    return null;
+  }
+
+  return currentIndex > previousIndex ? "left" : "right";
+}
+
 interface WorkspaceContentProps {
   activePersonFilter: string;
   activeTab: ViewTab;
+  tabSwitchDirection: TabSwitchDirection;
   artifacts: ArtifactRecord[];
   bootstrap: BootstrapPayload;
   cncItems: ManufacturingItemRecord[];
@@ -93,6 +129,7 @@ interface WorkspaceContentProps {
   fabricationItems: ManufacturingItemRecord[];
   handleCreateMember: (event: FormEvent<HTMLFormElement>) => void;
   handleDeleteMember: (id: string) => void;
+  handleTimelineEventDelete: (eventId: string) => Promise<void>;
   handleTimelineEventSave: (
     mode: "create" | "edit",
     eventId: string | null,
@@ -119,6 +156,7 @@ interface WorkspaceContentProps {
   openCreatePartDefinitionModal: () => void;
   openCreatePurchaseModal: () => void;
   openCreateTaskModal: () => void;
+  openCreateTaskModalFromTimeline: () => void;
   openCreateWorkLogModal: () => void;
   openEditManufacturingModal: (item: ManufacturingItemRecord) => void;
   openEditArtifactModal: (artifact: ArtifactRecord) => void;
@@ -145,19 +183,29 @@ interface WorkspaceContentProps {
   setMemberForm: Dispatch<SetStateAction<MemberPayload>>;
   students: BootstrapPayload["members"];
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
+  timelineMilestoneCreateSignal: number;
+  disablePanelAnimations?: boolean;
   onDismissDataMessage: () => void;
 }
 
 function WorkspaceSectionPanel({
   children,
+  disableAnimations = false,
   isActive,
+  tabSwitchDirection,
 }: {
   children: ReactNode;
+  disableAnimations?: boolean;
   isActive: boolean;
+  tabSwitchDirection: TabSwitchDirection;
 }) {
+  const animationClass = isActive && !disableAnimations
+    ? ` workspace-tab-panel-enter workspace-tab-panel-enter-${tabSwitchDirection}`
+    : "";
+
   return (
     <div
-      className="workspace-tab-panel"
+      className={`workspace-tab-panel${animationClass}`}
       hidden={!isActive}
       style={isActive ? undefined : { display: "none" }}
     >
@@ -169,15 +217,23 @@ function WorkspaceSectionPanel({
 function WorkspaceSubPanel({
   children,
   description,
+  disableAnimations = false,
   isActive,
+  swipeDirection = null,
 }: {
   children: ReactNode;
   description: string;
+  disableAnimations?: boolean;
   isActive: boolean;
+  swipeDirection?: SwipeDirection;
 }) {
+  const panelAnimation =
+    isActive && !disableAnimations ? swipeDirection ?? "neutral" : undefined;
+
   return (
     <div
-      className="workspace-tab-panel"
+      className="workspace-tab-panel workspace-subtab-panel"
+      data-swipe-direction={panelAnimation}
       hidden={!isActive}
       style={isActive ? undefined : { display: "none" }}
     >
@@ -264,6 +320,7 @@ function WorkspaceErrorPopup({
 export function WorkspaceContent({
   activePersonFilter,
   activeTab,
+  tabSwitchDirection,
   artifacts,
   bootstrap,
   cncItems,
@@ -273,6 +330,7 @@ export function WorkspaceContent({
   fabricationItems,
   handleCreateMember,
   handleDeleteMember,
+  handleTimelineEventDelete,
   handleTimelineEventSave,
   handleUpdateMember,
   isAddPersonOpen,
@@ -295,6 +353,7 @@ export function WorkspaceContent({
   openCreatePartDefinitionModal,
   openCreatePurchaseModal,
   openCreateTaskModal,
+  openCreateTaskModalFromTimeline,
   openCreateWorkLogModal,
   openEditManufacturingModal,
   openEditArtifactModal,
@@ -321,8 +380,42 @@ export function WorkspaceContent({
   setMemberForm,
   students,
   subsystemsById,
+  timelineMilestoneCreateSignal,
+  disablePanelAnimations = false,
   onDismissDataMessage,
 }: WorkspaceContentProps) {
+  const previousTaskViewRef = useRef(taskView);
+  const previousManufacturingViewRef = useRef(manufacturingView);
+  const previousInventoryViewRef = useRef(inventoryView);
+
+  const taskSwipeDirection = getSwipeDirection(
+    previousTaskViewRef.current,
+    taskView,
+    TASK_VIEW_ORDER,
+  );
+  const manufacturingSwipeDirection = getSwipeDirection(
+    previousManufacturingViewRef.current,
+    manufacturingView,
+    MANUFACTURING_VIEW_ORDER,
+  );
+  const inventorySwipeDirection = getSwipeDirection(
+    previousInventoryViewRef.current,
+    inventoryView,
+    INVENTORY_VIEW_ORDER,
+  );
+
+  useEffect(() => {
+    previousTaskViewRef.current = taskView;
+  }, [taskView]);
+
+  useEffect(() => {
+    previousManufacturingViewRef.current = manufacturingView;
+  }, [manufacturingView]);
+
+  useEffect(() => {
+    previousInventoryViewRef.current = inventoryView;
+  }, [inventoryView]);
+
   return (
     <div
       className="dense-shell"
@@ -343,26 +436,36 @@ export function WorkspaceContent({
       ) : null}
       {isLoadingData ? <p className="banner">Refreshing workspace data...</p> : null}
 
-      <WorkspaceSectionPanel isActive={activeTab === "tasks"}>
+      <WorkspaceSectionPanel
+        disableAnimations={disablePanelAnimations}
+        isActive={activeTab === "tasks"}
+        tabSwitchDirection={tabSwitchDirection}
+      >
         <WorkspaceSubPanel
+          disableAnimations={disablePanelAnimations}
           description={SUBVIEW_INTERACTION_GUIDANCE.timeline}
           isActive={taskView === "timeline"}
+          swipeDirection={taskSwipeDirection}
         >
           <TimelineView
             activePersonFilter={activePersonFilter}
             bootstrap={bootstrap}
             isAllProjectsView={isAllProjectsView}
             membersById={membersById}
+            onDeleteTimelineEvent={handleTimelineEventDelete}
             onSaveTimelineEvent={handleTimelineEventSave}
-            openCreateTaskModal={openCreateTaskModal}
+            openCreateTaskModal={openCreateTaskModalFromTimeline}
             openEditTaskModal={openEditTaskModal}
             setActivePersonFilter={setActivePersonFilter}
+            triggerCreateMilestoneToken={timelineMilestoneCreateSignal}
           />
         </WorkspaceSubPanel>
 
         <WorkspaceSubPanel
+          disableAnimations={disablePanelAnimations}
           description={SUBVIEW_INTERACTION_GUIDANCE.queue}
           isActive={taskView === "queue"}
+          swipeDirection={taskSwipeDirection}
         >
           <TaskQueueView
             activePersonFilter={activePersonFilter}
@@ -379,10 +482,34 @@ export function WorkspaceContent({
             subsystemsById={subsystemsById}
           />
         </WorkspaceSubPanel>
+
+        <WorkspaceSubPanel
+          disableAnimations={disablePanelAnimations}
+          description={SUBVIEW_INTERACTION_GUIDANCE.milestones}
+          isActive={taskView === "milestones"}
+          swipeDirection={taskSwipeDirection}
+        >
+          <MilestonesView
+            bootstrap={bootstrap}
+            isAllProjectsView={isAllProjectsView}
+            onDeleteTimelineEvent={handleTimelineEventDelete}
+            onSaveTimelineEvent={handleTimelineEventSave}
+            subsystemsById={subsystemsById}
+          />
+        </WorkspaceSubPanel>
+
       </WorkspaceSectionPanel>
 
-      <WorkspaceSectionPanel isActive={activeTab === "worklogs"}>
-        <WorkspaceSubPanel description={SUBVIEW_INTERACTION_GUIDANCE.worklogs} isActive>
+      <WorkspaceSectionPanel
+        disableAnimations={disablePanelAnimations}
+        isActive={activeTab === "worklogs"}
+        tabSwitchDirection={tabSwitchDirection}
+      >
+        <WorkspaceSubPanel
+          description={SUBVIEW_INTERACTION_GUIDANCE.worklogs}
+          disableAnimations={disablePanelAnimations}
+          isActive
+        >
           <WorkLogsView
             activePersonFilter={activePersonFilter}
             bootstrap={bootstrap}
@@ -394,10 +521,16 @@ export function WorkspaceContent({
         </WorkspaceSubPanel>
       </WorkspaceSectionPanel>
 
-      <WorkspaceSectionPanel isActive={activeTab === "manufacturing"}>
+      <WorkspaceSectionPanel
+        disableAnimations={disablePanelAnimations}
+        isActive={activeTab === "manufacturing"}
+        tabSwitchDirection={tabSwitchDirection}
+      >
         <WorkspaceSubPanel
+          disableAnimations={disablePanelAnimations}
           description={SUBVIEW_INTERACTION_GUIDANCE.cnc}
           isActive={manufacturingView === "cnc"}
+          swipeDirection={manufacturingSwipeDirection}
         >
           <CncView
             activePersonFilter={activePersonFilter}
@@ -411,8 +544,10 @@ export function WorkspaceContent({
         </WorkspaceSubPanel>
 
         <WorkspaceSubPanel
+          disableAnimations={disablePanelAnimations}
           description={SUBVIEW_INTERACTION_GUIDANCE.prints}
           isActive={manufacturingView === "prints"}
+          swipeDirection={manufacturingSwipeDirection}
         >
           <PrintsView
             activePersonFilter={activePersonFilter}
@@ -426,8 +561,10 @@ export function WorkspaceContent({
         </WorkspaceSubPanel>
 
         <WorkspaceSubPanel
+          disableAnimations={disablePanelAnimations}
           description={SUBVIEW_INTERACTION_GUIDANCE.fabrication}
           isActive={manufacturingView === "fabrication"}
+          swipeDirection={manufacturingSwipeDirection}
         >
           <FabricationView
             activePersonFilter={activePersonFilter}
@@ -441,14 +578,20 @@ export function WorkspaceContent({
         </WorkspaceSubPanel>
       </WorkspaceSectionPanel>
 
-      <WorkspaceSectionPanel isActive={activeTab === "inventory"}>
+      <WorkspaceSectionPanel
+        disableAnimations={disablePanelAnimations}
+        isActive={activeTab === "inventory"}
+        tabSwitchDirection={tabSwitchDirection}
+      >
         <WorkspaceSubPanel
+          disableAnimations={disablePanelAnimations}
           description={
             isNonRobotProject
               ? SUBVIEW_INTERACTION_GUIDANCE.documents
               : SUBVIEW_INTERACTION_GUIDANCE.materials
           }
           isActive={inventoryView === "materials"}
+          swipeDirection={inventorySwipeDirection}
         >
           {isNonRobotProject ? (
             <ArtifactInventoryView
@@ -468,12 +611,14 @@ export function WorkspaceContent({
         </WorkspaceSubPanel>
 
         <WorkspaceSubPanel
+          disableAnimations={disablePanelAnimations}
           description={
             isNonRobotProject
               ? SUBVIEW_INTERACTION_GUIDANCE.nontechnical
               : SUBVIEW_INTERACTION_GUIDANCE.parts
           }
           isActive={inventoryView === "parts"}
+          swipeDirection={inventorySwipeDirection}
         >
           {isNonRobotProject ? (
             <ArtifactInventoryView
@@ -496,8 +641,10 @@ export function WorkspaceContent({
         </WorkspaceSubPanel>
 
         <WorkspaceSubPanel
+          disableAnimations={disablePanelAnimations}
           description={SUBVIEW_INTERACTION_GUIDANCE.purchases}
           isActive={inventoryView === "purchases"}
+          swipeDirection={inventorySwipeDirection}
         >
           <PurchasesView
             activePersonFilter={activePersonFilter}
@@ -510,8 +657,13 @@ export function WorkspaceContent({
         </WorkspaceSubPanel>
       </WorkspaceSectionPanel>
 
-      <WorkspaceSectionPanel isActive={activeTab === "subsystems"}>
+      <WorkspaceSectionPanel
+        disableAnimations={disablePanelAnimations}
+        isActive={activeTab === "subsystems"}
+        tabSwitchDirection={tabSwitchDirection}
+      >
         <WorkspaceSubPanel
+          disableAnimations={disablePanelAnimations}
           description={
             isNonRobotProject
               ? SUBVIEW_INTERACTION_GUIDANCE.workflow
@@ -540,8 +692,16 @@ export function WorkspaceContent({
         </WorkspaceSubPanel>
       </WorkspaceSectionPanel>
 
-      <WorkspaceSectionPanel isActive={activeTab === "roster"}>
-        <WorkspaceSubPanel description={SUBVIEW_INTERACTION_GUIDANCE.roster} isActive>
+      <WorkspaceSectionPanel
+        disableAnimations={disablePanelAnimations}
+        isActive={activeTab === "roster"}
+        tabSwitchDirection={tabSwitchDirection}
+      >
+        <WorkspaceSubPanel
+          description={SUBVIEW_INTERACTION_GUIDANCE.roster}
+          disableAnimations={disablePanelAnimations}
+          isActive
+        >
           <RosterView
             bootstrap={bootstrap}
             handleCreateMember={handleCreateMember}
@@ -567,3 +727,7 @@ export function WorkspaceContent({
     </div>
   );
 }
+
+
+
+

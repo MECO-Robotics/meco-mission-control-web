@@ -18,7 +18,7 @@ import type {
   TaskPayload,
   TaskRecord,
   WorkLogPayload,
-} from "../types";
+} from "@/types";
 
 export function toErrorMessage(error: unknown) {
     if (error instanceof Error) return error.message;
@@ -348,3 +348,4 @@ export const partInstanceToPayload = (item: PartInstanceRecord): PartInstancePay
     ...item,
     mechanismId: item.mechanismId ?? null,
 });
+

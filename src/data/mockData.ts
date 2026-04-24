@@ -1,4 +1,4 @@
-import type { PortalCard, SubsystemCard, WorkflowLane } from "../types";
+import type { PortalCard, SubsystemCard, WorkflowLane } from "@/types";
 
 const portals: PortalCard[] = [
   {
@@ -183,3 +183,4 @@ export const operationsSnapshot = {
     },
   ],
 };
+

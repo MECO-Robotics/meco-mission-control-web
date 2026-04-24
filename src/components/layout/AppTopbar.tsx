@@ -6,20 +6,21 @@ import {
   MECO_MAIN_LOGO_WHITE_SRC,
   MECO_MAIN_LOGO_WIDTH,
   MECO_PROFILE_AVATAR_SIZE,
-} from "../../lib/branding";
-import type { SessionUser } from "../../lib/auth";
-import type { ProjectRecord } from "../../types";
+} from "@/lib/branding";
+import type { SessionUser } from "@/lib/auth";
+import type { ProjectRecord } from "@/types";
 import type {
   InventoryViewTab,
   ManufacturingViewTab,
   TaskViewTab,
   ViewTab,
-} from "../../features/workspace/shared/workspaceTypes";
-import { IconRefresh } from "../shared/Icons";
+} from "@/features/workspace";
+import { IconRefresh } from "@/components/shared";
 
 const TASK_VIEW_OPTIONS: { value: TaskViewTab; label: string }[] = [
   { value: "timeline", label: "Timeline" },
   { value: "queue", label: "Queue" },
+  { value: "milestones", label: "Milestones" },
 ];
 
 const MANUFACTURING_VIEW_OPTIONS: { value: ManufacturingViewTab; label: string }[] = [
@@ -213,19 +214,17 @@ export function AppTopbar({
         >
           <span aria-hidden="true">{"\u2630"}</span>
         </button>
-        {!isSidebarCollapsed ? (
-          <div className="app-topbar-brand">
-            <img
-              alt="MECO main logo"
-              className="app-topbar-brand-icon"
-              fetchPriority="high"
-              height={MECO_MAIN_LOGO_HEIGHT}
-              loading="eager"
-              width={MECO_MAIN_LOGO_WIDTH}
-              src={isDarkMode ? MECO_MAIN_LOGO_WHITE_SRC : MECO_MAIN_LOGO_LIGHT_SRC}
-            />
-          </div>
-        ) : null}
+        <div className="app-topbar-brand" data-visible={isSidebarCollapsed ? "false" : "true"}>
+          <img
+            alt="MECO main logo"
+            className="app-topbar-brand-icon"
+            fetchPriority="high"
+            height={MECO_MAIN_LOGO_HEIGHT}
+            loading="eager"
+            width={MECO_MAIN_LOGO_WIDTH}
+            src={isDarkMode ? MECO_MAIN_LOGO_WHITE_SRC : MECO_MAIN_LOGO_LIGHT_SRC}
+          />
+        </div>
       </div>
 
       <div className="app-topbar-project-slot">
@@ -336,3 +335,5 @@ export function AppTopbar({
     </header>
   );
 }
+
+

@@ -1,4 +1,4 @@
-import type { BootstrapPayload } from "../../../types";
+import type { BootstrapPayload } from "@/types";
 
 export const EMPTY_BOOTSTRAP: BootstrapPayload = {
   seasons: [],
@@ -21,3 +21,4 @@ export const EMPTY_BOOTSTRAP: BootstrapPayload = {
   purchaseItems: [],
   manufacturingItems: [],
 };
+

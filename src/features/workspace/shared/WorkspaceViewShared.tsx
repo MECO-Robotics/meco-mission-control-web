@@ -1,11 +1,15 @@
 import type { ReactNode } from "react";
 
-import { IconEdit, IconTasks } from "../../../components/shared/Icons";
+import { IconEdit, IconTasks } from "@/components/shared";
 import type {
   ManufacturingItemRecord,
   PurchaseItemRecord,
-} from "../../../types";
-import type { DropdownOption, MembersById, SubsystemsById } from "./workspaceTypes";
+} from "@/types";
+import type {
+  DropdownOption,
+  MembersById,
+  SubsystemsById,
+} from "./workspaceTypes";
 
 export function TableCell({
   label,
@@ -134,3 +138,7 @@ export function RequestedItemMeta({
     </div>
   );
 }
+
+
+
+

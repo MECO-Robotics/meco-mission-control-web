@@ -1,16 +1,16 @@
 import { useMemo, useState, type CSSProperties } from "react";
 
-import { IconManufacturing, IconTasks } from "../../../components/shared/Icons";
-import type { BootstrapPayload, PartDefinitionRecord } from "../../../types";
+import { IconManufacturing, IconTasks } from "@/components/shared";
+import type { BootstrapPayload, PartDefinitionRecord } from "@/types";
 import {
   EditableHoverIndicator,
   FilterDropdown,
   SearchToolbarInput,
   TableCell,
-} from "../shared/WorkspaceViewShared";
-import { getStatusPillClassName } from "../shared/workspaceUtils";
-import { WORKSPACE_PANEL_CLASS } from "../shared/workspaceTypes";
-import { PART_STATUS_OPTIONS } from "../shared/workspaceOptions";
+} from "@/features/workspace/shared";
+import { getStatusPillClassName } from "@/features/workspace/shared";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
+import { PART_STATUS_OPTIONS } from "@/features/workspace/shared";
 
 interface PartsViewProps {
   bootstrap: BootstrapPayload;
@@ -220,3 +220,7 @@ export function PartsView({
     </section>
   );
 }
+
+
+
+

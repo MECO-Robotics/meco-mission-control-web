@@ -1,7 +1,7 @@
 import React from "react";
-import { IconEdit, IconPlus, IconTrash } from "../../../components/shared/Icons";
-import type { BootstrapPayload, MemberPayload, MemberRecord } from "../../../types";
-import { WORKSPACE_PANEL_CLASS } from "../shared/workspaceTypes";
+import { IconEdit, IconPlus, IconTrash } from "@/components/shared";
+import type { BootstrapPayload, MemberPayload, MemberRecord } from "@/types";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
 
 interface RosterViewProps {
     bootstrap: BootstrapPayload;
@@ -44,11 +44,29 @@ export const RosterView: React.FC<RosterViewProps> = ({
     students,
     rosterMentors,
 }) => {
-    const leadStudents = students.filter((member) => member.role === "lead");
-    const regularStudents = students.filter((member) => member.role === "student");
+    const isLeadStudent = (member: MemberRecord) => member.role === "lead" || (member.role === "student" && member.elevated);
+    const isAdminMentor = (member: MemberRecord) => member.role === "admin" || (member.role === "mentor" && member.elevated);
+    const sortedStudents = [...students].sort((a, b) => {
+        const priority = Number(isLeadStudent(b)) - Number(isLeadStudent(a));
+        return priority !== 0 ? priority : a.name.localeCompare(b.name);
+    });
+    const sortedMentors = [...rosterMentors].sort((a, b) => {
+        const priority = Number(isAdminMentor(b)) - Number(isAdminMentor(a));
+        return priority !== 0 ? priority : a.name.localeCompare(b.name);
+    });
+    const getRoleBadge = (member: MemberRecord): { label: "L" | "A"; title: string } | null => {
+        if (isLeadStudent(member)) {
+            return { label: "L", title: "Lead student" };
+        }
+        if (isAdminMentor(member)) {
+            return { label: "A", title: "Admin mentor" };
+        }
+        return null;
+    };
+    const isElevatedRole = (role: MemberPayload["role"]) => role === "lead" || role === "admin";
 
     const openAddPersonPanel = (role: MemberPayload["role"]) => {
-        setMemberForm({ name: "", role });
+        setMemberForm({ name: "", email: "", role, elevated: isElevatedRole(role) });
         setIsAddPersonOpen(true);
         setIsEditPersonOpen(false);
     };
@@ -67,24 +85,35 @@ export const RosterView: React.FC<RosterViewProps> = ({
         setIsEditPersonOpen(false);
     };
 
-    const renderMemberRow = (member: MemberRecord) => (
-        <div className={member.id === selectedMemberId ? "member-row active editable-action-host" : "member-row editable-action-host"} key={member.id}>
-            <button className="member-row-main" onClick={() => selectMember(member.id, bootstrap)} type="button">
-                <strong>{member.name}</strong>
-            </button>
-            <div className="member-row-actions editable-action-reveal">
-                <button
-                    aria-label={`Edit ${member.name}`}
-                    className="member-action-button"
-                    onClick={() => openEditPersonPopup(member.id)}
-                    title="Edit"
-                    type="button"
-                >
-                    <IconEdit />
+    const renderMemberRow = (member: MemberRecord) => {
+        const roleBadge = getRoleBadge(member);
+        return (
+            <div className={member.id === selectedMemberId ? "member-row active editable-action-host" : "member-row editable-action-host"} key={member.id}>
+                <button className="member-row-main" onClick={() => selectMember(member.id, bootstrap)} type="button">
+                    <strong>{member.name}</strong>
+                    {member.email ? <span className="member-row-email">{member.email}</span> : null}
                 </button>
+                <div className="member-row-trailing">
+                    <div className="member-row-actions editable-action-reveal">
+                        <button
+                            aria-label={`Edit ${member.name}`}
+                            className="member-action-button"
+                            onClick={() => openEditPersonPopup(member.id)}
+                            title="Edit"
+                            type="button"
+                        >
+                            <IconEdit />
+                        </button>
+                    </div>
+                    {roleBadge ? (
+                        <span className="member-role-badge" title={roleBadge.title}>
+                            {roleBadge.label}
+                        </span>
+                    ) : null}
+                </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     return (
         <section className={`panel dense-panel roster-layout ${WORKSPACE_PANEL_CLASS}`}>
@@ -99,25 +128,12 @@ export const RosterView: React.FC<RosterViewProps> = ({
                     <div className="roster-section-header">
                         <div className="roster-section-title">
                             <h3>Students</h3>
-                            <span className="sidebar-tab-count">{regularStudents.length}</span>
+                            <span className="sidebar-tab-count">{sortedStudents.length}</span>
                         </div>
                         <button className="roster-section-add" onClick={() => openAddPersonPanel("student")} type="button"><IconPlus /></button>
                     </div>
                     <div className="roster-list">
-                        {regularStudents.map(renderMemberRow)}
-                    </div>
-                </div>
-
-                <div className="panel-subsection">
-                    <div className="roster-section-header">
-                        <div className="roster-section-title">
-                            <h3>Lead Students</h3>
-                            <span className="sidebar-tab-count">{leadStudents.length}</span>
-                        </div>
-                        <button className="roster-section-add" onClick={() => openAddPersonPanel("lead")} type="button"><IconPlus /></button>
-                    </div>
-                    <div className="roster-list">
-                        {leadStudents.map(renderMemberRow)}
+                        {sortedStudents.map(renderMemberRow)}
                     </div>
                 </div>
 
@@ -125,12 +141,12 @@ export const RosterView: React.FC<RosterViewProps> = ({
                     <div className="roster-section-header">
                         <div className="roster-section-title">
                             <h3>Mentors</h3>
-                            <span className="sidebar-tab-count">{rosterMentors.length}</span>
+                            <span className="sidebar-tab-count">{sortedMentors.length}</span>
                         </div>
                         <button className="roster-section-add" onClick={() => openAddPersonPanel("mentor")} type="button"><IconPlus /></button>
                     </div>
                     <div className="roster-list">
-                        {rosterMentors.map(renderMemberRow)}
+                        {sortedMentors.map(renderMemberRow)}
                     </div>
                 </div>
             </div>
@@ -158,8 +174,15 @@ export const RosterView: React.FC<RosterViewProps> = ({
                                 <input onChange={(e) => setMemberForm((curr) => ({ ...curr, name: e.target.value }))} required value={memberForm.name} />
                             </label>
                             <label className="field">
+                                <span>Email</span>
+                                <input onChange={(e) => setMemberForm((curr) => ({ ...curr, email: e.target.value }))} placeholder="name@mecorobotics.org" type="email" value={memberForm.email} />
+                            </label>
+                            <label className="field">
                                 <span>Role</span>
-                                <select onChange={(e) => setMemberForm((curr) => ({ ...curr, role: e.target.value as MemberPayload["role"] }))} value={memberForm.role}>
+                                <select onChange={(e) => {
+                                    const nextRole = e.target.value as MemberPayload["role"];
+                                    setMemberForm((curr) => ({ ...curr, role: nextRole, elevated: isElevatedRole(nextRole) }));
+                                }} value={memberForm.role}>
                                     <option value="student">Student</option>
                                     <option value="lead">Lead</option>
                                     <option value="mentor">Mentor</option>
@@ -189,7 +212,7 @@ export const RosterView: React.FC<RosterViewProps> = ({
                         <div className="panel-header compact-header roster-modal-header">
                             <div className="queue-section-header">
                                 <h3>Edit selected person</h3>
-                                <p className="section-copy">Update the name or role for the selected team member.</p>
+                                <p className="section-copy">Update the name, email, or role for the selected team member.</p>
                             </div>
                         </div>
                         <form className="compact-form roster-inline-form" onSubmit={handleUpdateMember}>
@@ -198,8 +221,15 @@ export const RosterView: React.FC<RosterViewProps> = ({
                                 <input onChange={(e) => setMemberEditDraft(curr => curr ? { ...curr, name: e.target.value } : null)} value={memberEditDraft.name} />
                             </label>
                             <label className="field">
+                                <span>Email</span>
+                                <input onChange={(e) => setMemberEditDraft(curr => curr ? { ...curr, email: e.target.value } : null)} placeholder="name@mecorobotics.org" type="email" value={memberEditDraft.email} />
+                            </label>
+                            <label className="field">
                                 <span>Role</span>
-                                <select onChange={(e) => setMemberEditDraft(curr => curr ? { ...curr, role: e.target.value as MemberPayload["role"] } : null)} value={memberEditDraft.role}>
+                                <select onChange={(e) => {
+                                    const nextRole = e.target.value as MemberPayload["role"];
+                                    setMemberEditDraft(curr => curr ? { ...curr, role: nextRole, elevated: isElevatedRole(nextRole) } : null);
+                                }} value={memberEditDraft.role}>
                                     <option value="student">Student</option>
                                     <option value="lead">Lead</option>
                                     <option value="mentor">Mentor</option>
@@ -230,3 +260,7 @@ export const RosterView: React.FC<RosterViewProps> = ({
         </section>
     );
 };
+
+
+
+

@@ -1,19 +1,19 @@
 import { useMemo, useState, type CSSProperties } from "react";
 
-import { formatDate } from "../../../lib/appUtils";
-import type { BootstrapPayload, ManufacturingItemRecord } from "../../../types";
-import { IconManufacturing, IconPerson, IconTasks } from "../../../components/shared/Icons";
+import { formatDate } from "@/lib/appUtils";
+import type { BootstrapPayload, ManufacturingItemRecord } from "@/types";
+import { IconManufacturing, IconPerson, IconTasks } from "@/components/shared";
 import {
   EditableHoverIndicator,
   FilterDropdown,
   RequestedItemMeta,
   SearchToolbarInput,
   TableCell,
-} from "../shared/WorkspaceViewShared";
-import { getStatusPillClassName } from "../shared/workspaceUtils";
-import type { MembersById, SubsystemsById } from "../shared/workspaceTypes";
-import { WORKSPACE_PANEL_CLASS } from "../shared/workspaceTypes";
-import { MANUFACTURING_STATUS_OPTIONS } from "../shared/workspaceOptions";
+} from "@/features/workspace/shared";
+import { getStatusPillClassName } from "@/features/workspace/shared";
+import type { MembersById, SubsystemsById } from "@/features/workspace/shared";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
+import { MANUFACTURING_STATUS_OPTIONS } from "@/features/workspace/shared";
 
 interface ManufacturingQueueViewProps {
   activePersonFilter: string;
@@ -193,3 +193,7 @@ export function ManufacturingQueueView({
     </section>
   );
 }
+
+
+
+

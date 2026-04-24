@@ -5,8 +5,8 @@ import {
   MECO_MAIN_LOGO_WHITE_SRC,
   MECO_MAIN_LOGO_HEIGHT,
   MECO_MAIN_LOGO_WIDTH,
-} from "../../lib/branding";
-import type { AuthConfig, EmailCodeDeliveryResponse } from "../../lib/auth";
+} from "@/lib/branding";
+import type { AuthConfig, EmailCodeDeliveryResponse } from "@/lib/auth";
 
 interface AuthStatusScreenProps {
   body: string;
@@ -383,3 +383,4 @@ function EmailAuthPanel({
     </section>
   );
 }
+

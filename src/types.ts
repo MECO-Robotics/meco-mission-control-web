@@ -75,7 +75,9 @@ export type RiskAttachmentType = "project" | "workstream" | "mechanism" | "part-
 export interface MemberRecord {
   id: string;
   name: string;
+  email: string;
   role: MemberRole;
+  elevated: boolean;
   seasonId: string;
 }
 
@@ -362,7 +364,9 @@ export interface SeasonCreatePayload {
 
 export interface MemberPayload {
   name: string;
+  email: string;
   role: MemberRole;
+  elevated: boolean;
 }
 
 export interface MemberCreatePayload extends MemberPayload {

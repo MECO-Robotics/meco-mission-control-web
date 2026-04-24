@@ -1,16 +1,16 @@
 import { useMemo, useState, type CSSProperties } from "react";
 
-import { formatDate } from "../../../lib/appUtils";
-import type { BootstrapPayload, TaskRecord } from "../../../types";
-import { IconSubsystems, IconWorkLogs } from "../../../components/shared/Icons";
+import { formatDate } from "@/lib/appUtils";
+import type { BootstrapPayload, TaskRecord } from "@/types";
+import { IconSubsystems, IconWorkLogs } from "@/components/shared";
 import {
   EditableHoverIndicator,
   FilterDropdown,
   SearchToolbarInput,
   TableCell,
-} from "../shared/WorkspaceViewShared";
-import type { DropdownOption, MembersById, SubsystemsById } from "../shared/workspaceTypes";
-import { WORKSPACE_PANEL_CLASS } from "../shared/workspaceTypes";
+} from "@/features/workspace/shared";
+import type { DropdownOption, MembersById, SubsystemsById } from "@/features/workspace/shared";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
 
 type WorkLogSortMode = "recent" | "oldest" | "longest" | "shortest";
 
@@ -111,23 +111,6 @@ export function WorkLogsView({
     search,
   ]);
 
-  const summary = useMemo(() => {
-    const totalHours = workLogs.reduce((sum, workLog) => sum + workLog.hours, 0);
-    const participantIds = new Set<string>();
-    const taskIds = new Set<string>();
-
-    workLogs.forEach((workLog) => {
-      workLog.participantIds.forEach((participantId) => participantIds.add(participantId));
-      taskIds.add(workLog.taskId);
-    });
-
-    return {
-      totalHours,
-      participantCount: participantIds.size,
-      taskCount: taskIds.size,
-    };
-  }, [workLogs]);
-
   const activePersonFilterLabel =
     activePersonFilter === "all"
       ? "All roster"
@@ -195,25 +178,6 @@ export function WorkLogsView({
         </div>
       </div>
 
-      <div className="summary-row">
-        <div className="summary-chip">
-          <span>Entries</span>
-          <strong>{workLogs.length}</strong>
-        </div>
-        <div className="summary-chip">
-          <span>Tracked hours</span>
-          <strong>{summary.totalHours.toFixed(1)}h</strong>
-        </div>
-        <div className="summary-chip">
-          <span>People involved</span>
-          <strong>{summary.participantCount}</strong>
-        </div>
-        <div className="summary-chip">
-          <span>Tasks touched</span>
-          <strong>{summary.taskCount}</strong>
-        </div>
-      </div>
-
       <div className="table-shell">
         <div
           className="ops-table ops-table-header worklog-table"
@@ -273,3 +237,7 @@ export function WorkLogsView({
     </section>
   );
 }
+
+
+
+

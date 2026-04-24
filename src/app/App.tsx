@@ -3,20 +3,21 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
-import "./App.css";
-import { AuthStatusScreen, SignInScreen } from "../features/auth/AuthScreens";
-import { AppSidebar } from "../components/layout/AppSidebar";
-import { AppTopbar } from "../components/layout/AppTopbar";
-import { WorkspaceContent } from "../features/workspace/WorkspaceContent";
+import "@/app/App.css";
+import { AuthStatusScreen, SignInScreen } from "@/features/auth";
+import { AppSidebar } from "@/components/layout";
+import { AppTopbar } from "@/components/layout";
+import { WorkspaceContent } from "@/features/workspace";
 import type {
   InventoryViewTab,
   ManufacturingViewTab,
   TaskViewTab,
   ViewTab,
-} from "../features/workspace/shared/workspaceTypes";
+} from "@/features/workspace";
 import {
   artifactToPayload,
   buildEmptyArtifactPayload,
@@ -40,7 +41,7 @@ import {
   subsystemToPayload,
   taskToPayload,
   toErrorMessage,
-} from "../lib/appUtils";
+} from "@/lib/appUtils";
 import {
   createArtifactRecord,
   createManufacturingItemRecord,
@@ -55,6 +56,7 @@ import {
   createPartInstanceRecord,
   createPurchaseItemRecord,
   createTask,
+  deleteEventRecord,
   deleteMaterialRecord,
   deleteMemberRecord,
   deleteMechanismRecord,
@@ -72,7 +74,7 @@ import {
   updateTaskRecord,
   updateArtifactRecord,
   updateEventRecord,
-} from "../lib/auth";
+} from "@/lib/auth";
 import type {
   ArtifactKind,
   ArtifactPayload,
@@ -97,8 +99,8 @@ import type {
   TaskPayload,
   TaskRecord,
   WorkLogPayload,
-} from "../types";
-import { EMPTY_BOOTSTRAP } from "../features/workspace/shared/bootstrapDefaults";
+} from "@/types";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace";
 import type {
   ArtifactModalMode,
   ManufacturingModalMode,
@@ -110,11 +112,11 @@ import type {
   SubsystemModalMode,
   TaskModalMode,
   WorkLogModalMode,
-} from "../features/workspace/shared/workspaceModalModes";
-import { useAppAuth } from "./useAppAuth";
-import { useAppShell } from "./useAppShell";
-import { useWorkspaceDerivedData } from "../features/workspace/useWorkspaceDerivedData";
-import { WorkspaceModalHost } from "../features/workspace/WorkspaceModalHost";
+} from "@/features/workspace";
+import { useAppAuth } from "@/app/useAppAuth";
+import { useAppShell } from "@/app/useAppShell";
+import { useWorkspaceDerivedData } from "@/features/workspace";
+import { WorkspaceModalHost } from "@/features/workspace";
 
 function scopeBootstrapBySelection(
   payload: BootstrapPayload,
@@ -220,8 +222,13 @@ function scopeBootstrapBySelection(
   };
 }
 
+function isElevatedMemberRole(role: MemberPayload["role"]): boolean {
+  return role === "lead" || role === "admin";
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<ViewTab>("tasks");
+  const [tabSwitchDirection, setTabSwitchDirection] = useState<"up" | "down">("down");
   const [taskView, setTaskView] = useState<TaskViewTab>("timeline");
   const [manufacturingView, setManufacturingView] =
     useState<ManufacturingViewTab>("cnc");
@@ -270,6 +277,10 @@ export default function App() {
   );
   const [taskDraftBlockers, setTaskDraftBlockers] = useState("");
   const [isSavingTask, setIsSavingTask] = useState(false);
+  const [showTimelineCreateToggleInTaskModal, setShowTimelineCreateToggleInTaskModal] =
+    useState(false);
+  const [timelineMilestoneCreateSignal, setTimelineMilestoneCreateSignal] = useState(0);
+  const suppressNextAutoWorkspaceLoadRef = useRef(false);
 
   const [workLogModalMode, setWorkLogModalMode] = useState<WorkLogModalMode>(null);
   const [workLogDraft, setWorkLogDraft] = useState<WorkLogPayload>(
@@ -356,7 +367,9 @@ export default function App() {
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [memberForm, setMemberForm] = useState<MemberPayload>({
     name: "",
+    email: "",
     role: "student",
+    elevated: false,
   });
   const [isAddPersonOpen, setIsAddPersonOpen] = useState(false);
   const [isEditPersonOpen, setIsEditPersonOpen] = useState(false);
@@ -365,6 +378,9 @@ export default function App() {
   );
   const [isSavingMember, setIsSavingMember] = useState(false);
   const [isDeletingMember, setIsDeletingMember] = useState(false);
+  const [isAddSeasonPopupOpen, setIsAddSeasonPopupOpen] = useState(false);
+  const [seasonNameDraft, setSeasonNameDraft] = useState("");
+  const [isSavingSeason, setIsSavingSeason] = useState(false);
   const projectsInSelectedSeason = useMemo(() => {
     if (!selectedSeasonId) {
       return bootstrap.projects;
@@ -474,7 +490,9 @@ export default function App() {
       member
         ? {
           name: member.name,
+          email: member.email,
           role: member.role,
+          elevated: member.elevated,
         }
         : null,
     );
@@ -712,6 +730,17 @@ export default function App() {
   ]);
 
   const openCreateTaskModal = () => {
+    suppressNextAutoWorkspaceLoadRef.current = true;
+    setShowTimelineCreateToggleInTaskModal(false);
+    setActiveTaskId(null);
+    setTaskDraft(buildEmptyTaskPayload(scopedBootstrap));
+    setTaskDraftBlockers("");
+    setTaskModalMode("create");
+  };
+
+  const openCreateTaskModalFromTimeline = () => {
+    suppressNextAutoWorkspaceLoadRef.current = true;
+    setShowTimelineCreateToggleInTaskModal(true);
     setActiveTaskId(null);
     setTaskDraft(buildEmptyTaskPayload(scopedBootstrap));
     setTaskDraftBlockers("");
@@ -719,6 +748,8 @@ export default function App() {
   };
 
   const openEditTaskModal = (task: TaskRecord) => {
+    suppressNextAutoWorkspaceLoadRef.current = true;
+    setShowTimelineCreateToggleInTaskModal(false);
     setActiveTaskId(task.id);
     setTaskDraft(taskToPayload(task));
     setTaskDraftBlockers(joinList(task.blockers));
@@ -726,8 +757,16 @@ export default function App() {
   };
 
   const closeTaskModal = () => {
+    suppressNextAutoWorkspaceLoadRef.current = true;
+    setShowTimelineCreateToggleInTaskModal(false);
     setTaskModalMode(null);
     setActiveTaskId(null);
+  };
+
+  const switchTaskCreateToMilestone = () => {
+    suppressNextAutoWorkspaceLoadRef.current = true;
+    closeTaskModal();
+    setTimelineMilestoneCreateSignal((current) => current + 1);
   };
 
   const openCreateWorkLogModal = () => {
@@ -905,6 +944,11 @@ export default function App() {
       return;
     }
 
+    if (suppressNextAutoWorkspaceLoadRef.current) {
+      suppressNextAutoWorkspaceLoadRef.current = false;
+      return;
+    }
+
     const timeoutId = window.setTimeout(() => {
       void loadWorkspace();
     }, 0);
@@ -948,6 +992,14 @@ export default function App() {
         await updateEventRecord(eventId, payload, handleUnauthorized);
       }
 
+      await loadWorkspace();
+    },
+    [handleUnauthorized, loadWorkspace],
+  );
+
+  const handleTimelineEventDelete = useCallback(
+    async (eventId: string) => {
+      await deleteEventRecord(eventId, handleUnauthorized);
       await loadWorkspace();
     },
     [handleUnauthorized, loadWorkspace],
@@ -1330,22 +1382,31 @@ export default function App() {
     }
   };
 
-  const handleCreateSeason = async () => {
-    if (typeof window === "undefined") {
+  const handleCreateSeason = () => {
+    setDataMessage(null);
+    setSeasonNameDraft("");
+    setIsAddSeasonPopupOpen(true);
+  };
+
+  const closeCreateSeasonPopup = useCallback(() => {
+    if (isSavingSeason) {
       return;
     }
 
-    const rawSeasonName = window.prompt("Name your new season.");
-    if (rawSeasonName === null) {
-      return;
-    }
+    setIsAddSeasonPopupOpen(false);
+    setSeasonNameDraft("");
+  }, [isSavingSeason]);
 
-    const seasonName = rawSeasonName.trim();
+  const handleCreateSeasonSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const seasonName = seasonNameDraft.trim();
     if (seasonName.length < 2) {
       setDataMessage("Season names need at least 2 characters.");
       return;
     }
 
+    setIsSavingSeason(true);
     setDataMessage(null);
 
     try {
@@ -1358,8 +1419,12 @@ export default function App() {
       await loadWorkspace();
       setSelectedSeasonId(season.id);
       setSelectedProjectId(null);
+      setIsAddSeasonPopupOpen(false);
+      setSeasonNameDraft("");
     } catch (error) {
       setDataMessage(toErrorMessage(error));
+    } finally {
+      setIsSavingSeason(false);
     }
   };
 
@@ -1374,14 +1439,18 @@ export default function App() {
     setDataMessage(null);
 
     try {
+      const normalizedRole = memberForm.role;
       await createMemberRecord(
         {
-          ...memberForm,
+          name: memberForm.name.trim(),
+          email: memberForm.email.trim(),
+          role: normalizedRole,
+          elevated: isElevatedMemberRole(normalizedRole),
           seasonId: selectedSeasonId,
         },
         handleUnauthorized,
       );
-      setMemberForm({ name: "", role: "student" });
+      setMemberForm({ name: "", email: "", role: "student", elevated: false });
       setIsAddPersonOpen(false);
       await loadWorkspace();
     } catch (error) {
@@ -1401,11 +1470,14 @@ export default function App() {
     setDataMessage(null);
 
     try {
+      const normalizedRole = memberEditDraft.role;
       await updateMemberRecord(
         selectedMemberId,
         {
           name: memberEditDraft.name.trim(),
-          role: memberEditDraft.role,
+          email: memberEditDraft.email.trim(),
+          role: normalizedRole,
+          elevated: isElevatedMemberRole(normalizedRole),
         },
         handleUnauthorized,
       );
@@ -1452,10 +1524,19 @@ export default function App() {
 
   const handleSidebarTabSelect = useCallback(
     (tab: ViewTab) => {
-      setActiveTab(tab);
+      if (tab !== activeTab) {
+        const currentIndex = navigationItems.findIndex((item) => item.value === activeTab);
+        const nextIndex = navigationItems.findIndex((item) => item.value === tab);
+
+        if (currentIndex >= 0 && nextIndex >= 0) {
+          setTabSwitchDirection(nextIndex > currentIndex ? "down" : "up");
+        }
+
+        setActiveTab(tab);
+      }
       closeSidebarOverlay();
     },
-    [closeSidebarOverlay],
+    [activeTab, closeSidebarOverlay, navigationItems],
   );
 
   useEffect(() => {
@@ -1474,6 +1555,37 @@ export default function App() {
       window.removeEventListener("keydown", onKeyDown);
     };
   }, [closeSidebarOverlay, isSidebarOverlay]);
+
+  useEffect(() => {
+    if (!isAddSeasonPopupOpen) {
+      return;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeCreateSeasonPopup();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [closeCreateSeasonPopup, isAddSeasonPopupOpen]);
+
+  const disablePanelAnimations = Boolean(
+    taskModalMode ||
+      workLogModalMode ||
+      purchaseModalMode ||
+      manufacturingModalMode ||
+      materialModalMode ||
+      partDefinitionModalMode ||
+      partInstanceModalMode ||
+      subsystemModalMode ||
+      mechanismModalMode ||
+      artifactModalMode ||
+      isAddSeasonPopupOpen,
+  );
 
   if (authBooting) {
     return (
@@ -1552,18 +1664,79 @@ export default function App() {
         onCreateSeason={handleCreateSeason}
       />
 
+      {isAddSeasonPopupOpen ? (
+        <div
+          className="modal-scrim"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              closeCreateSeasonPopup();
+            }
+          }}
+          role="presentation"
+        >
+          <section aria-modal="true" className="modal-card roster-edit-modal" role="dialog">
+            <div className="panel-header compact-header">
+              <div className="queue-section-header">
+                <h3>Add season</h3>
+                <p className="section-copy">
+                  Create a new season and switch the workspace to it.
+                </p>
+              </div>
+              <button className="icon-button" onClick={closeCreateSeasonPopup} type="button">
+                Close
+              </button>
+            </div>
+            <form className="modal-form" onSubmit={handleCreateSeasonSubmit}>
+              <label className="field modal-wide">
+                <span>Name</span>
+                <input
+                  autoFocus
+                  minLength={2}
+                  onChange={(event) => setSeasonNameDraft(event.target.value)}
+                  placeholder="2027 Season"
+                  required
+                  value={seasonNameDraft}
+                />
+              </label>
+              <div className="modal-actions modal-wide">
+                <button
+                  className="secondary-action"
+                  onClick={closeCreateSeasonPopup}
+                  type="button"
+                >
+                  Cancel
+                </button>
+                <button className="primary-action" disabled={isSavingSeason} type="submit">
+                  {isSavingSeason ? "Saving..." : "Add season"}
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      ) : null}
+
       {isSidebarOverlay ? (
-        <button
-          aria-label="Close sidebar"
-          className="sidebar-overlay-scrim"
-          onClick={closeSidebarOverlay}
-          type="button"
-        />
+        <>
+          <button
+            aria-label="Close sidebar"
+            className="sidebar-overlay-scrim"
+            onClick={closeSidebarOverlay}
+            type="button"
+          />
+          <button
+            aria-hidden="true"
+            className="sidebar-overlay-topbar-scrim"
+            onClick={closeSidebarOverlay}
+            tabIndex={-1}
+            type="button"
+          />
+        </>
       ) : null}
 
       <WorkspaceContent
         activePersonFilter={activePersonFilter}
         activeTab={activeTab}
+        tabSwitchDirection={tabSwitchDirection}
         artifacts={scopedArtifacts}
         bootstrap={scopedBootstrap}
         cncItems={cncItems}
@@ -1571,6 +1744,7 @@ export default function App() {
         fabricationItems={fabricationItems}
         handleCreateMember={handleCreateMember}
         handleDeleteMember={handleDeleteMember}
+        handleTimelineEventDelete={handleTimelineEventDelete}
         handleTimelineEventSave={handleTimelineEventSave}
         handleUpdateMember={handleUpdateMember}
         isAddPersonOpen={isAddPersonOpen}
@@ -1592,6 +1766,7 @@ export default function App() {
         openCreatePartDefinitionModal={openCreatePartDefinitionModal}
         openCreatePurchaseModal={openCreatePurchaseModal}
         openCreateTaskModal={openCreateTaskModal}
+        openCreateTaskModalFromTimeline={openCreateTaskModalFromTimeline}
         openCreateWorkLogModal={openCreateWorkLogModal}
         openEditManufacturingModal={openEditManufacturingModal}
         openEditArtifactModal={openEditArtifactModal}
@@ -1621,6 +1796,8 @@ export default function App() {
         partDefinitionsById={partDefinitionsById}
         partInstancesById={partInstancesById}
         subsystemsById={subsystemsById}
+        timelineMilestoneCreateSignal={timelineMilestoneCreateSignal}
+        disablePanelAnimations={disablePanelAnimations}
         onDismissDataMessage={clearDataMessage}
       />
 
@@ -1706,6 +1883,8 @@ export default function App() {
         setSubsystemDraftRisks={setSubsystemDraftRisks}
         setTaskDraft={setTaskDraft}
         setTaskDraftBlockers={setTaskDraftBlockers}
+        showTimelineCreateToggleInTaskModal={showTimelineCreateToggleInTaskModal}
+        onSwitchTaskCreateToMilestone={switchTaskCreateToMilestone}
         students={students}
         subsystemDraft={subsystemDraft}
         subsystemDraftRisks={subsystemDraftRisks}
@@ -1717,3 +1896,7 @@ export default function App() {
     </main>
   );
 }
+
+
+
+

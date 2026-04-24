@@ -1,6 +1,6 @@
 /// <reference types="jest" />
 
-import { getStatusPillClassName } from "../workspaceUtils";
+import { getStatusPillClassName } from "@/features/workspace/shared";
 
 describe("getStatusPillClassName", () => {
   it("maps success-like statuses to the success class", () => {
@@ -27,3 +27,5 @@ describe("getStatusPillClassName", () => {
     expect(getStatusPillClassName("unknown-status")).toBe("pill status-pill status-pill-neutral");
   });
 });
+
+

@@ -13,7 +13,7 @@ import type {
   TaskPayload,
   TaskRecord,
   WorkLogPayload,
-} from "../../types";
+} from "@/types";
 
 interface TaskEditorModalProps {
   activeTask: TaskRecord | null;
@@ -31,6 +31,8 @@ interface TaskEditorModalProps {
   taskDraft: TaskPayload;
   taskDraftBlockers: string;
   taskModalMode: "create" | "edit";
+  showCreateTypeToggle?: boolean;
+  onSwitchCreateTypeToMilestone?: () => void;
   setTaskDraft: Dispatch<SetStateAction<TaskPayload>>;
   setTaskDraftBlockers: (value: string) => void;
 }
@@ -51,6 +53,8 @@ export function TaskEditorModal({
   taskDraft,
   taskDraftBlockers,
   taskModalMode,
+  showCreateTypeToggle,
+  onSwitchCreateTypeToMilestone,
   setTaskDraft,
   setTaskDraftBlockers,
 }: TaskEditorModalProps) {
@@ -76,7 +80,23 @@ export function TaskEditorModal({
         <div className="panel-header compact-header">
           <div>
             <p className="eyebrow" style={{ color: "var(--meco-blue)" }}>Task editor</p>
-            <h2 style={{ color: "var(--text-title)" }}>{taskModalMode === "create" ? "Create task" : activeTask?.title ?? "Edit task"}</h2>
+            {taskModalMode === "create" && showCreateTypeToggle ? (
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.25rem" }}>
+                <h2 style={{ color: "var(--text-title)", margin: 0 }}>Create</h2>
+                <button className="primary-action" type="button">
+                  Task
+                </button>
+                <button
+                  className="secondary-action"
+                  onClick={onSwitchCreateTypeToMilestone}
+                  type="button"
+                >
+                  Milestone
+                </button>
+              </div>
+            ) : (
+              <h2 style={{ color: "var(--text-title)" }}>{taskModalMode === "create" ? "Create" : activeTask?.title ?? "Edit task"}</h2>
+            )}
           </div>
           <button className="icon-button" onClick={closeTaskModal} type="button" style={{ color: "var(--text-copy)", background: "transparent" }}>
             Close
@@ -2211,4 +2231,5 @@ export function MechanismEditorModal({
     </div>
   );
 }
+
 
