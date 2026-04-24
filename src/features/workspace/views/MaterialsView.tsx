@@ -1,16 +1,16 @@
 import { useMemo, useState, type CSSProperties } from "react";
 
-import type { BootstrapPayload, MaterialRecord } from "../../types";
-import { IconManufacturing, IconTasks } from "../shared/Icons";
+import type { BootstrapPayload, MaterialRecord } from "../../../types";
+import { IconManufacturing, IconTasks } from "../../../components/shared/Icons";
 import {
   EditableHoverIndicator,
   FilterDropdown,
   SearchToolbarInput,
   TableCell,
-} from "./WorkspaceViewShared";
-import { getStatusPillClassName } from "./workspaceUtils";
-import { WORKSPACE_PANEL_CLASS } from "./workspaceTypes";
-import { MATERIAL_CATEGORY_OPTIONS, MATERIAL_STOCK_OPTIONS } from "./workspaceOptions";
+} from "../shared/WorkspaceViewShared";
+import { getStatusPillClassName } from "../shared/workspaceUtils";
+import { WORKSPACE_PANEL_CLASS } from "../shared/workspaceTypes";
+import { MATERIAL_CATEGORY_OPTIONS, MATERIAL_STOCK_OPTIONS } from "../shared/workspaceOptions";
 
 interface MaterialsViewProps {
   bootstrap: BootstrapPayload;
@@ -18,7 +18,7 @@ interface MaterialsViewProps {
   openEditMaterialModal: (item: MaterialRecord) => void;
 }
 
-const MATERIALS_GRID_TEMPLATE = "minmax(180px, 1.8fr) 0.8fr 0.8fr 0.8fr 1fr 1fr 0.8fr 0.6fr";
+const MATERIALS_GRID_TEMPLATE = "minmax(180px, 1.8fr) 0.8fr 0.8fr 0.8fr 1fr 1fr 0.8fr";
 
 export function MaterialsView({
   bootstrap,
@@ -107,7 +107,6 @@ export function MaterialsView({
           <span>Location</span>
           <span>Vendor</span>
           <span>Status</span>
-          <span>Actions</span>
         </div>
 
         {filteredMaterials.map((material) => {
@@ -115,7 +114,7 @@ export function MaterialsView({
 
           return (
             <button
-              className="ops-table ops-row materials-table editable-action-host"
+              className="ops-table ops-row materials-table editable-hover-target editable-hover-target-row"
               key={material.id}
               onClick={() => openEditMaterialModal(material)}
               style={{ "--workspace-grid-template": MATERIALS_GRID_TEMPLATE } as CSSProperties}
@@ -140,11 +139,7 @@ export function MaterialsView({
                   {isLow ? "Low stock" : "Stock OK"}
                 </span>
               </TableCell>
-              <TableCell label="Actions" valueClassName="table-cell-actions">
-                <span className="editable-action-reveal editable-action-reveal-inline">
-                  <EditableHoverIndicator className="editable-hover-indicator-inline" />
-                </span>
-              </TableCell>
+              <EditableHoverIndicator />
             </button>
           );
         })}

@@ -63,6 +63,8 @@ To test Google sign-in from localhost, either:
 - add `http://localhost:5173` as an authorized JavaScript origin on the same Google OAuth web client the API returns from `/api/auth/config`
 - or set `VITE_LOCAL_GOOGLE_CLIENT_ID` so the frontend uses a separate localhost-safe Google OAuth web client during local development only
 
+When the backend is configured for a non-production environment, the login page also shows a `Continue as local dev` button. It opens a dev-only session without going through Google or email, which keeps the real sign-in UI available for testing while making local development faster.
+
 ## Production files
 
 - `.github/workflows/deploy-vps.yml`: CI and VPS deploy workflow

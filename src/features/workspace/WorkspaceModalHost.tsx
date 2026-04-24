@@ -10,7 +10,7 @@ import {
   SubsystemEditorModal,
   TaskEditorModal,
   WorkLogEditorModal,
-} from "../components/workspace/WorkspaceModals";
+} from "./WorkspaceModals";
 import type {
   ManufacturingModalMode,
   MaterialModalMode,
@@ -21,7 +21,7 @@ import type {
   SubsystemModalMode,
   TaskModalMode,
   WorkLogModalMode,
-} from "./appTypes";
+} from "./shared/workspaceModalModes";
 import type {
   BootstrapPayload,
   ManufacturingItemPayload,
@@ -34,7 +34,7 @@ import type {
   TaskPayload,
   TaskRecord,
   WorkLogPayload,
-} from "../types";
+} from "../../types";
 
 interface WorkspaceModalHostProps {
   activePartDefinitionId: string | null;

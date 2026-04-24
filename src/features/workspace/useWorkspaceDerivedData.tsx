@@ -7,9 +7,9 @@ import {
   IconSubsystems,
   IconRoster,
   IconTasks,
-} from "../components/shared/Icons";
-import type { NavigationItem } from "../components/workspace/workspaceTypes";
-import type { BootstrapPayload } from "../types";
+} from "../../components/shared/Icons";
+import type { NavigationItem } from "./shared/workspaceTypes";
+import type { BootstrapPayload } from "../../types";
 
 interface UseWorkspaceDerivedDataArgs {
   activeTaskId: string | null;

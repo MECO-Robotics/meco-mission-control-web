@@ -6,16 +6,16 @@ import {
 } from "react";
 
 import "./App.css";
-import { AuthStatusScreen, SignInScreen } from "../components/auth/AuthScreens";
+import { AuthStatusScreen, SignInScreen } from "../features/auth/AuthScreens";
 import { AppSidebar } from "../components/layout/AppSidebar";
 import { AppTopbar } from "../components/layout/AppTopbar";
-import { WorkspaceContent } from "../components/workspace/WorkspaceContent";
+import { WorkspaceContent } from "../features/workspace/WorkspaceContent";
 import type {
   InventoryViewTab,
   ManufacturingViewTab,
   TaskViewTab,
   ViewTab,
-} from "../components/workspace/workspaceTypes";
+} from "../features/workspace/shared/workspaceTypes";
 import {
   buildEmptyMechanismPayload,
   buildEmptyManufacturingPayload,
@@ -85,7 +85,7 @@ import type {
   TaskRecord,
   WorkLogPayload,
 } from "../types";
-import { EMPTY_BOOTSTRAP } from "./appConstants";
+import { EMPTY_BOOTSTRAP } from "../features/workspace/shared/bootstrapDefaults";
 import type {
   ManufacturingModalMode,
   MaterialModalMode,
@@ -96,11 +96,11 @@ import type {
   SubsystemModalMode,
   TaskModalMode,
   WorkLogModalMode,
-} from "./appTypes";
+} from "../features/workspace/shared/workspaceModalModes";
 import { useAppAuth } from "./useAppAuth";
 import { useAppShell } from "./useAppShell";
-import { useWorkspaceDerivedData } from "./useWorkspaceDerivedData";
-import { WorkspaceModalHost } from "./WorkspaceModalHost";
+import { useWorkspaceDerivedData } from "../features/workspace/useWorkspaceDerivedData";
+import { WorkspaceModalHost } from "../features/workspace/WorkspaceModalHost";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<ViewTab>("tasks");
@@ -129,6 +129,7 @@ export default function App() {
     expireSession,
     googleButtonRef,
     handleSignOut,
+    handleDevBypassSignIn,
     handleRequestEmailCode,
     handleVerifyEmailCode,
     isEmailAuthAvailable,
@@ -1104,6 +1105,7 @@ export default function App() {
         isSigningIn={isSigningIn}
         onRequestEmailCode={handleRequestEmailCode}
         onVerifyEmailCode={handleVerifyEmailCode}
+        onDevBypassSignIn={handleDevBypassSignIn}
         signInConfig={enforcedAuthConfig}
       />
     );

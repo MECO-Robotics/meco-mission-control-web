@@ -1,16 +1,16 @@
 import { useMemo, useState, type CSSProperties } from "react";
 
-import { formatDate } from "../../lib/appUtils";
-import type { BootstrapPayload, TaskRecord } from "../../types";
-import { IconSubsystems, IconWorkLogs } from "../shared/Icons";
+import { formatDate } from "../../../lib/appUtils";
+import type { BootstrapPayload, TaskRecord } from "../../../types";
+import { IconSubsystems, IconWorkLogs } from "../../../components/shared/Icons";
 import {
   EditableHoverIndicator,
   FilterDropdown,
   SearchToolbarInput,
   TableCell,
-} from "./WorkspaceViewShared";
-import type { DropdownOption, MembersById, SubsystemsById } from "./workspaceTypes";
-import { WORKSPACE_PANEL_CLASS } from "./workspaceTypes";
+} from "../shared/WorkspaceViewShared";
+import type { DropdownOption, MembersById, SubsystemsById } from "../shared/workspaceTypes";
+import { WORKSPACE_PANEL_CLASS } from "../shared/workspaceTypes";
 
 type WorkLogSortMode = "recent" | "oldest" | "longest" | "shortest";
 
@@ -146,7 +146,7 @@ export function WorkLogsView({
               : `Only logs involving ${activePersonFilterLabel}.`}
           </p>
         </div>
-        <div className="panel-actions filter-toolbar queue-toolbar">
+        <div className="panel-actions filter-toolbar queue-toolbar worklog-toolbar">
           <SearchToolbarInput
             ariaLabel="Search work logs"
             onChange={setSearch}
@@ -234,7 +234,7 @@ export function WorkLogsView({
 
           return (
             <button
-              className="ops-table ops-row worklog-row editable-hover-target editable-hover-target-row"
+              className="ops-table ops-row worklog-row ops-button-row editable-hover-target editable-hover-target-row"
               key={workLog.id}
               onClick={() => {
                 if (task) {
@@ -261,7 +261,7 @@ export function WorkLogsView({
               <TableCell label="People">
                 {participantNames.length > 0 ? participantNames.join(", ") : "Unassigned"}
               </TableCell>
-              <TableCell label="Open" valueClassName="table-cell-actions">
+              <TableCell label="Open">
                 {task ? <EditableHoverIndicator /> : null}
               </TableCell>
             </button>

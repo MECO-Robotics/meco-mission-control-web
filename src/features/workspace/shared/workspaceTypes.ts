@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import type { BootstrapPayload } from "../../types";
+import type { BootstrapPayload } from "../../../types";
 
 export type ViewTab =
   | "tasks"

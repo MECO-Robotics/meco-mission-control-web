@@ -18,6 +18,7 @@ import {
   loadStoredSessionToken,
   resolveGoogleClientId,
   requestEmailSignInCode,
+  requestDevBypassSignIn,
   signOutFromGoogle,
   storeSessionToken,
   verifyEmailSignInCode,
@@ -126,6 +127,24 @@ export function useAppAuth({ resetWorkspace }: UseAppAuthArgs) {
     [],
   );
 
+  const handleDevBypassSignIn = useCallback(async () => {
+    setIsSigningIn(true);
+    setAuthMessage(null);
+
+    try {
+      const session = await requestDevBypassSignIn();
+      storeSessionToken(session.token);
+      startTransition(() => {
+        setSessionUser(session.user);
+      });
+    } catch (error) {
+      clearStoredSessionToken();
+      setAuthMessage(toErrorMessage(error));
+    } finally {
+      setIsSigningIn(false);
+    }
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -217,7 +236,7 @@ export function useAppAuth({ resetWorkspace }: UseAppAuthArgs) {
           return;
         }
 
-        activeButtonSlot.innerHTML = "";
+        activeButtonSlot.replaceChildren();
         window.google.accounts.id.initialize({
           client_id: activeGoogleClientId,
           callback: (response) => {
@@ -248,7 +267,7 @@ export function useAppAuth({ resetWorkspace }: UseAppAuthArgs) {
 
     return () => {
       cancelled = true;
-      buttonSlot.innerHTML = "";
+      buttonSlot.replaceChildren();
     };
   }, [authBooting, googleClientId, hostedDomain, sessionUser]);
 
@@ -273,6 +292,7 @@ export function useAppAuth({ resetWorkspace }: UseAppAuthArgs) {
     handleSignOut,
     handleRequestEmailCode,
     handleVerifyEmailCode,
+    handleDevBypassSignIn,
     isEmailAuthAvailable,
     isLocalGoogleDevHost,
     isLocalGoogleOverrideActive,

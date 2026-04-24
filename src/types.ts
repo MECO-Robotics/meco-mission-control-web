@@ -77,6 +77,7 @@ export interface SubsystemRecord {
   name: string;
   description: string;
   isCore: boolean;
+  parentSubsystemId: string | null;
   responsibleEngineerId: string | null;
   mentorIds: string[];
   risks: string[];
@@ -299,7 +300,7 @@ export interface PartDefinitionPayload {
 export interface SubsystemPayload {
   name: string;
   description: string;
-  isCore: boolean;
+  parentSubsystemId: string | null;
   responsibleEngineerId: string | null;
   mentorIds: string[];
   risks: string[];

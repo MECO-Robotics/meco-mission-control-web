@@ -1,4 +1,4 @@
-import type { NavigationItem, ViewTab } from "../workspace/workspaceTypes";
+import type { NavigationItem, ViewTab } from "../../features/workspace/shared/workspaceTypes";
 
 interface AppSidebarProps {
   activeTab: ViewTab;

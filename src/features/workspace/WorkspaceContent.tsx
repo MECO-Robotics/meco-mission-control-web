@@ -16,23 +16,23 @@ import type {
   PurchaseItemRecord,
   TaskRecord,
 } from "../../types";
-import { CncView } from "./CncView";
-import { FabricationView } from "./FabricationView";
-import { MaterialsView } from "./MaterialsView";
-import { PartsView } from "./PartsView";
-import { PrintsView } from "./PrintsView";
-import { PurchasesView } from "./PurchasesView";
-import { RosterView } from "./RosterView";
-import { SubsystemsView } from "./SubsystemsView";
-import { WorkLogsView } from "./WorkLogsView";
-import { TaskQueueView } from "./TaskQueueView";
-import { TimelineView } from "./TimelineView";
+import { CncView } from "./views/CncView";
+import { FabricationView } from "./views/FabricationView";
+import { MaterialsView } from "./views/MaterialsView";
+import { PartsView } from "./views/PartsView";
+import { PrintsView } from "./views/PrintsView";
+import { PurchasesView } from "./views/PurchasesView";
+import { RosterView } from "./views/RosterView";
+import { SubsystemsView } from "./views/SubsystemsView";
+import { WorkLogsView } from "./views/WorkLogsView";
+import { TaskQueueView } from "./views/TaskQueueView";
+import { TimelineView } from "./views/TimelineView";
 import type {
   InventoryViewTab,
   ManufacturingViewTab,
   TaskViewTab,
   ViewTab,
-} from "./workspaceTypes";
+} from "./shared/workspaceTypes";
 
 type WorkspaceSubviewTab =
   | TaskViewTab
@@ -62,7 +62,7 @@ const SUBVIEW_INTERACTION_GUIDANCE: Record<WorkspaceSubviewTab, string> = {
   purchases:
     "Search or filter requests by subsystem, requester, status, vendor, or approval, then hover a row to reveal the pencil cue before clicking the row to review or update it. Use Add to log a new request against a real part from the Parts tab.",
   subsystems:
-    "Search and filter subsystem ownership and mechanism coverage, click a subsystem row to inspect the detail panel, and use the add buttons to create or update subsystems, mechanisms, and mechanism-owned part instances.",
+    "Search and filter subsystem ownership and mechanism coverage, click a subsystem row to expand its mechanisms underneath, hover the pencil on the right to edit the subsystem, and use the add controls to create or update subsystems, mechanisms, and mechanism-owned part instances.",
   roster:
     "Use the plus buttons to add people to each group, click a name to select them, and hover a member to reveal the pencil affordance for editing or deleting them from the popup.",
 };

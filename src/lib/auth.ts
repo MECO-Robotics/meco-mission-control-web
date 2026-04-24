@@ -34,6 +34,7 @@ export interface AuthConfig {
   googleClientId: string | null;
   hostedDomain: string;
   emailEnabled: boolean;
+  devBypassAvailable: boolean;
 }
 
 export interface SessionUser {
@@ -74,6 +75,22 @@ class ApiError extends Error {
 
 let googleScriptPromise: Promise<void> | null = null;
 
+type GoogleTrustedTypesPolicy = {
+  createScriptURL: (value: string) => string;
+};
+
+type WindowWithGoogleTrustedTypesPolicy = Window & {
+  trustedTypes?: {
+    createPolicy: (
+      name: string,
+      rules: {
+        createScriptURL: (value: string) => string;
+      },
+    ) => GoogleTrustedTypesPolicy;
+  };
+  __mecoGoogleTrustedTypesPolicy?: GoogleTrustedTypesPolicy;
+};
+
 function isLocalHostname(hostname: string) {
   return (
     hostname === "localhost" ||
@@ -98,6 +115,28 @@ function readLocalGoogleClientIdOverride() {
 function buildApiUrl(path: string) {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   return `${apiBaseUrl}${normalizedPath}`;
+}
+
+function getGoogleTrustedTypesPolicy() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const targetWindow = window as WindowWithGoogleTrustedTypesPolicy;
+  if (!targetWindow.trustedTypes) {
+    return null;
+  }
+
+  if (!targetWindow.__mecoGoogleTrustedTypesPolicy) {
+    targetWindow.__mecoGoogleTrustedTypesPolicy = targetWindow.trustedTypes.createPolicy(
+      "meco-web-google",
+      {
+        createScriptURL: (value: string) => value,
+      },
+    );
+  }
+
+  return targetWindow.__mecoGoogleTrustedTypesPolicy;
 }
 
 async function readJson<T>(response: Response): Promise<T> {
@@ -186,7 +225,9 @@ function isAuthConfig(payload: unknown): payload is AuthConfig {
     (typeof candidate.googleClientId === "string" ||
       candidate.googleClientId === null) &&
     typeof candidate.hostedDomain === "string" &&
-    typeof candidate.emailEnabled === "boolean"
+    typeof candidate.emailEnabled === "boolean" &&
+    (candidate.devBypassAvailable === undefined ||
+      typeof candidate.devBypassAvailable === "boolean")
   );
 }
 
@@ -241,7 +282,10 @@ export async function fetchAuthConfig() {
     );
   }
 
-  return payload;
+  return {
+    ...payload,
+    devBypassAvailable: payload.devBypassAvailable ?? false,
+  };
 }
 
 export function resolveGoogleClientId(config: AuthConfig | null) {
@@ -735,6 +779,10 @@ export async function verifyEmailSignInCode(email: string, code: string) {
   });
 }
 
+export async function requestDevBypassSignIn() {
+  return postJson<SessionResponse>("/auth/dev-bypass", {});
+}
+
 export async function fetchCurrentUser(token: string) {
   const response = await fetch(buildApiUrl("/auth/me"), {
     headers: {
@@ -814,7 +862,9 @@ export function loadGoogleIdentityScript() {
     }
 
     const script = document.createElement("script");
-    script.src = "https://accounts.google.com/gsi/client";
+    const scriptUrl = "https://accounts.google.com/gsi/client";
+    const trustedScriptUrl = getGoogleTrustedTypesPolicy()?.createScriptURL(scriptUrl);
+    script.src = (trustedScriptUrl ?? scriptUrl) as string;
     script.async = true;
     script.defer = true;
     script.onload = () => resolve();

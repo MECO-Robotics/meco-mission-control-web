@@ -3,6 +3,8 @@ import { type FormEvent, type RefObject, useRef, useState } from "react";
 import {
   MECO_MAIN_LOGO_LIGHT_SRC,
   MECO_MAIN_LOGO_WHITE_SRC,
+  MECO_MAIN_LOGO_HEIGHT,
+  MECO_MAIN_LOGO_WIDTH,
 } from "../../lib/branding";
 import type { AuthConfig, EmailCodeDeliveryResponse } from "../../lib/auth";
 
@@ -25,6 +27,9 @@ export function AuthStatusScreen({
         <img
           alt="MECO main logo"
           className="auth-status-mark"
+          height={MECO_MAIN_LOGO_HEIGHT}
+          loading="eager"
+          width={MECO_MAIN_LOGO_WIDTH}
           src={MECO_MAIN_LOGO_LIGHT_SRC}
         />
         <p className="eyebrow">{eyebrow}</p>
@@ -45,6 +50,7 @@ interface SignInScreenProps {
   isLocalGoogleDevHost: boolean;
   isLocalGoogleOverrideActive: boolean;
   isSigningIn: boolean;
+  onDevBypassSignIn: () => Promise<void>;
   onRequestEmailCode: (email: string) => Promise<EmailCodeDeliveryResponse>;
   onVerifyEmailCode: (email: string, code: string) => Promise<void>;
   signInConfig: AuthConfig;
@@ -57,6 +63,9 @@ function AuthIntroPanel() {
         <img
           alt="MECO main logo"
           className="auth-intro-mark"
+          height={MECO_MAIN_LOGO_HEIGHT}
+          loading="eager"
+          width={MECO_MAIN_LOGO_WIDTH}
           src={MECO_MAIN_LOGO_WHITE_SRC}
         />
       </div>
@@ -85,6 +94,7 @@ export function SignInScreen({
   isLocalGoogleDevHost,
   isLocalGoogleOverrideActive,
   isSigningIn,
+  onDevBypassSignIn,
   onRequestEmailCode,
   onVerifyEmailCode,
   signInConfig,
@@ -128,6 +138,13 @@ export function SignInScreen({
               isLocalGoogleOverrideActive={isLocalGoogleOverrideActive}
               isSigningIn={isSigningIn}
             />
+
+            {signInConfig.devBypassAvailable ? (
+              <DevBypassPanel
+                isSigningIn={isSigningIn}
+                onDevBypassSignIn={onDevBypassSignIn}
+              />
+            ) : null}
           </div>
         </section>
       </div>
@@ -147,6 +164,8 @@ interface GoogleAuthPanelProps {
 function GoogleAuthPanel({
   googleButtonRef,
   hasGoogleSignIn,
+  isLocalGoogleDevHost,
+  isLocalGoogleOverrideActive,
 }: GoogleAuthPanelProps) {
   return (
     <section className="auth-panel" aria-label="Google SSO">
@@ -163,6 +182,50 @@ function GoogleAuthPanel({
           Google SSO is not yet configured on this server.
         </p>
       )}
+
+      {hasGoogleSignIn && isLocalGoogleDevHost && !isLocalGoogleOverrideActive ? (
+        <p className="auth-note">
+          Localhost Google sign-in needs an OAuth client that allows
+          http://localhost:5173, or a separate localhost-safe client set in
+          VITE_LOCAL_GOOGLE_CLIENT_ID.
+        </p>
+      ) : null}
+    </section>
+  );
+}
+
+interface DevBypassPanelProps {
+  isSigningIn: boolean;
+  onDevBypassSignIn: () => Promise<void>;
+}
+
+function DevBypassPanel({
+  isSigningIn,
+  onDevBypassSignIn,
+}: DevBypassPanelProps) {
+  return (
+    <section className="auth-panel" aria-label="Development sign-in bypass">
+      <div className="auth-panel-copy">
+        <p className="auth-panel-eyebrow">Development only</p>
+        <h2>Skip sign-in with a local dev session.</h2>
+        <p className="auth-body">
+          Use this button to jump into the workspace while keeping the real login page
+          available for testing.
+        </p>
+      </div>
+
+      <div className="auth-form-actions">
+        <button
+          className="secondary-action"
+          disabled={isSigningIn}
+          onClick={() => {
+            void onDevBypassSignIn();
+          }}
+          type="button"
+        >
+          {isSigningIn ? "Opening..." : "Continue as local dev"}
+        </button>
+      </div>
     </section>
   );
 }

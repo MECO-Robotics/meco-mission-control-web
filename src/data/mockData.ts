@@ -43,7 +43,7 @@ const portals: PortalCard[] = [
   {
     title: "Subsystem leadership board",
     topline: "Shared view",
-    metric: "4 subsystems",
+    metric: "3 subsystems",
     description:
       "Standup-ready browser view for responsible engineers and mentors to track risk, blockers, and next work.",
     roles: ["students", "mentors", "admins"],
@@ -87,9 +87,8 @@ const workflowLanes: WorkflowLane[] = [
 ];
 
 const subsystems: SubsystemCard[] = [
-  { name: "Drive", lead: "Ava Chen", mentor: "Jordan Lee", progress: 82 },
+  { name: "Drivetrain", lead: "Ava Chen", mentor: "Jordan Lee", progress: 82 },
   { name: "Manipulator", lead: "Lucas Brooks", mentor: "Riley Kim", progress: 58 },
-  { name: "Electrical", lead: "Priya Patel", mentor: "Jordan Lee", progress: 91 },
   { name: "Controls", lead: "Ethan Hall", mentor: "Riley Kim", progress: 43 },
 ];
 

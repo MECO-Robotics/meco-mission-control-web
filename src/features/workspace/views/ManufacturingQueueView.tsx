@@ -1,19 +1,19 @@
 import { useMemo, useState, type CSSProperties } from "react";
 
-import { formatDate } from "../../lib/appUtils";
-import type { BootstrapPayload, ManufacturingItemRecord } from "../../types";
-import { IconManufacturing, IconPerson, IconTasks } from "../shared/Icons";
+import { formatDate } from "../../../lib/appUtils";
+import type { BootstrapPayload, ManufacturingItemRecord } from "../../../types";
+import { IconManufacturing, IconPerson, IconTasks } from "../../../components/shared/Icons";
 import {
   EditableHoverIndicator,
   FilterDropdown,
   RequestedItemMeta,
   SearchToolbarInput,
   TableCell,
-} from "./WorkspaceViewShared";
-import { getStatusPillClassName } from "./workspaceUtils";
-import type { MembersById, SubsystemsById } from "./workspaceTypes";
-import { WORKSPACE_PANEL_CLASS } from "./workspaceTypes";
-import { MANUFACTURING_STATUS_OPTIONS } from "./workspaceOptions";
+} from "../shared/WorkspaceViewShared";
+import { getStatusPillClassName } from "../shared/workspaceUtils";
+import type { MembersById, SubsystemsById } from "../shared/workspaceTypes";
+import { WORKSPACE_PANEL_CLASS } from "../shared/workspaceTypes";
+import { MANUFACTURING_STATUS_OPTIONS } from "../shared/workspaceOptions";
 
 interface ManufacturingQueueViewProps {
   activePersonFilter: string;

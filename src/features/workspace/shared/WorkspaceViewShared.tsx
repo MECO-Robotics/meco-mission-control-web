@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 
-import { IconEdit, IconTasks } from "../shared/Icons";
+import { IconEdit, IconTasks } from "../../../components/shared/Icons";
 import type {
   ManufacturingItemRecord,
   PurchaseItemRecord,
-} from "../../types";
+} from "../../../types";
 import type { DropdownOption, MembersById, SubsystemsById } from "./workspaceTypes";
 
 export function TableCell({
@@ -41,12 +41,21 @@ export function FilterDropdown({
   value: string;
 }) {
   const isActive = value !== "all";
+  const selectedLabel =
+    value === "all"
+      ? allLabel
+      : options.find((option) => option.id === value)?.name ?? allLabel;
 
   return (
-    <label className={`toolbar-filter toolbar-filter-compact${isActive ? " is-active" : ""}`}>
+    <label className={`toolbar-filter toolbar-filter-dropdown${isActive ? " is-active" : ""}`}>
       <span className="toolbar-filter-icon">{icon}</span>
+      <span aria-hidden="true" className="toolbar-filter-value">
+        {selectedLabel}
+      </span>
+      <span aria-hidden="true" className="toolbar-filter-chevron" />
       <select
         aria-label={ariaLabel ?? allLabel}
+        className="toolbar-filter-select toolbar-filter-select-overlay"
         onChange={(event) => onChange(event.target.value)}
         value={value}
       >

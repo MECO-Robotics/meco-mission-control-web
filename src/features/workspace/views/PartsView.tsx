@@ -1,16 +1,16 @@
 import { useMemo, useState, type CSSProperties } from "react";
 
-import { IconManufacturing, IconTasks } from "../shared/Icons";
-import type { BootstrapPayload, PartDefinitionRecord } from "../../types";
+import { IconManufacturing, IconTasks } from "../../../components/shared/Icons";
+import type { BootstrapPayload, PartDefinitionRecord } from "../../../types";
 import {
   EditableHoverIndicator,
   FilterDropdown,
   SearchToolbarInput,
   TableCell,
-} from "./WorkspaceViewShared";
-import { getStatusPillClassName } from "./workspaceUtils";
-import { WORKSPACE_PANEL_CLASS } from "./workspaceTypes";
-import { PART_STATUS_OPTIONS } from "./workspaceOptions";
+} from "../shared/WorkspaceViewShared";
+import { getStatusPillClassName } from "../shared/workspaceUtils";
+import { WORKSPACE_PANEL_CLASS } from "../shared/workspaceTypes";
+import { PART_STATUS_OPTIONS } from "../shared/workspaceOptions";
 
 interface PartsViewProps {
   bootstrap: BootstrapPayload;
@@ -121,18 +121,17 @@ export function PartsView({
         <div className="table-shell">
           <div
             className="ops-table ops-table-header"
-            style={{ "--workspace-grid-template": "minmax(180px, 2fr) 1fr 0.6fr 0.8fr 1fr 0.8fr" } as CSSProperties}
+            style={{ "--workspace-grid-template": "minmax(180px, 2fr) 1fr 0.6fr 0.8fr 1fr" } as CSSProperties}
           >
             <span>Part</span>
             <span>Number</span>
             <span>Rev</span>
             <span>Type</span>
             <span>Material</span>
-            <span>Actions</span>
           </div>
         {filteredPartDefinitions.map((partDefinition) => (
             <div
-              className="ops-table ops-row editable-action-host editable-row-clickable"
+              className="ops-table ops-row editable-row-clickable editable-hover-target editable-hover-target-row"
               key={partDefinition.id}
               onClick={() => openEditPartDefinitionModal(partDefinition)}
               onKeyDown={(event) => {
@@ -146,7 +145,7 @@ export function PartsView({
               }}
               role="button"
               tabIndex={0}
-              style={{ "--workspace-grid-template": "minmax(180px, 2fr) 1fr 0.6fr 0.8fr 1fr 0.8fr" } as CSSProperties}
+              style={{ "--workspace-grid-template": "minmax(180px, 2fr) 1fr 0.6fr 0.8fr 1fr" } as CSSProperties}
               title={`Edit ${partDefinition.name}`}
             >
               <TableCell label="Part">
@@ -161,11 +160,7 @@ export function PartsView({
                   ? bootstrap.materials.find((material) => material.id === partDefinition.materialId)?.name
                   : null) ?? "Unassigned"}
               </TableCell>
-              <TableCell label="Actions" valueClassName="table-cell-actions">
-                <span className="part-manager-row-actions editable-action-reveal">
-                  <EditableHoverIndicator className="editable-hover-indicator-inline" />
-                </span>
-              </TableCell>
+              <EditableHoverIndicator />
             </div>
           ))}
           {filteredPartDefinitions.length === 0 ? (

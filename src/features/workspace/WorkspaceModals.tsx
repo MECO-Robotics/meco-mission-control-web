@@ -1574,6 +1574,17 @@ export function SubsystemEditorModal({
   const mentorOptions = bootstrap.members.filter(
     (member) => member.role === "mentor" || member.role === "admin",
   );
+  const currentSubsystem = activeSubsystemId
+    ? bootstrap.subsystems.find((subsystem) => subsystem.id === activeSubsystemId) ?? null
+    : null;
+  const parentSubsystemOptions = bootstrap.subsystems.filter(
+    (subsystem) => subsystem.id !== activeSubsystemId,
+  );
+  const parentSubsystemName = subsystemDraft.parentSubsystemId
+    ? bootstrap.subsystems.find(
+        (subsystem) => subsystem.id === subsystemDraft.parentSubsystemId,
+      )?.name ?? "Unknown"
+    : null;
 
   return (
     <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
@@ -1649,6 +1660,42 @@ export function SubsystemEditorModal({
             />
           </label>
 
+          {subsystemModalMode === "create" ? (
+            <label className="field">
+              <span style={{ color: "var(--text-title)" }}>Parent subsystem</span>
+              <select
+                onChange={(event) =>
+                  setSubsystemDraft((current) => ({
+                    ...current,
+                    parentSubsystemId: event.target.value || null,
+                  }))
+                }
+                required
+                style={{
+                  background: "var(--bg-row-alt)",
+                  color: "var(--text-title)",
+                  border: "1px solid var(--border-base)",
+                }}
+                value={subsystemDraft.parentSubsystemId ?? ""}
+              >
+                {parentSubsystemOptions.map((subsystem) => (
+                  <option key={subsystem.id} value={subsystem.id}>
+                    {subsystem.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <div className="field modal-wide">
+              <span style={{ color: "var(--text-title)" }}>Parent subsystem</span>
+              <p style={{ margin: 0, color: "var(--text-copy)" }}>
+                {currentSubsystem?.isCore
+                  ? "Drivetrain is the root subsystem and has no parent."
+                  : parentSubsystemName ?? "Unassigned"}
+              </p>
+            </div>
+          )}
+
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Responsible engineer</span>
             <select
@@ -1697,27 +1744,6 @@ export function SubsystemEditorModal({
                   {member.name}
                 </option>
               ))}
-            </select>
-          </label>
-
-          <label className="field">
-            <span style={{ color: "var(--text-title)" }}>Type</span>
-            <select
-              onChange={(event) =>
-                setSubsystemDraft((current) => ({
-                  ...current,
-                  isCore: event.target.value === "core",
-                }))
-              }
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
-              value={subsystemDraft.isCore ? "core" : "support"}
-            >
-              <option value="core">Core system</option>
-              <option value="support">Support system</option>
             </select>
           </label>
 

@@ -1,17 +1,17 @@
 import { useMemo, useState, type CSSProperties } from "react";
 
-import { formatDate } from "../../lib/appUtils";
-import type { BootstrapPayload, TaskRecord } from "../../types";
-import { IconManufacturing, IconPerson, IconTasks } from "../shared/Icons";
+import { formatDate } from "../../../lib/appUtils";
+import type { BootstrapPayload, TaskRecord } from "../../../types";
+import { IconManufacturing, IconPerson, IconTasks } from "../../../components/shared/Icons";
 import {
   EditableHoverIndicator,
   FilterDropdown,
   SearchToolbarInput,
   TableCell,
-} from "./WorkspaceViewShared";
-import { getStatusPillClassName } from "./workspaceUtils";
-import { WORKSPACE_PANEL_CLASS } from "./workspaceTypes";
-import { TASK_PRIORITY_OPTIONS, TASK_STATUS_OPTIONS } from "./workspaceOptions";
+} from "../shared/WorkspaceViewShared";
+import { getStatusPillClassName } from "../shared/workspaceUtils";
+import { WORKSPACE_PANEL_CLASS } from "../shared/workspaceTypes";
+import { TASK_PRIORITY_OPTIONS, TASK_STATUS_OPTIONS } from "../shared/workspaceOptions";
 
 type TaskSortField = "dueDate" | "ownerId" | "priority" | "status" | "subsystemId" | "title";
 

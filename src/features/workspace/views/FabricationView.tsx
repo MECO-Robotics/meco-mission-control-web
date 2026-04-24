@@ -1,8 +1,8 @@
-import type { BootstrapPayload, ManufacturingItemRecord } from "../../types";
-import type { MembersById, SubsystemsById } from "./workspaceTypes";
+import type { BootstrapPayload, ManufacturingItemRecord } from "../../../types";
+import type { MembersById, SubsystemsById } from "../shared/workspaceTypes";
 import { ManufacturingQueueView } from "./ManufacturingQueueView";
 
-interface CncViewProps {
+interface FabricationViewProps {
   activePersonFilter: string;
   bootstrap: BootstrapPayload;
   items: ManufacturingItemRecord[];
@@ -12,7 +12,7 @@ interface CncViewProps {
   subsystemsById: SubsystemsById;
 }
 
-export function CncView({
+export function FabricationView({
   activePersonFilter,
   bootstrap,
   items,
@@ -20,25 +20,25 @@ export function CncView({
   onCreate,
   onEdit,
   subsystemsById,
-}: CncViewProps) {
+}: FabricationViewProps) {
   const filteredDescription =
     activePersonFilter === "all"
-      ? "All CNC jobs."
-      : `Only CNC jobs submitted by ${membersById[activePersonFilter]?.name ?? "selected person"}.`;
+      ? "All fabrication jobs."
+      : `Only fabrication jobs submitted by ${membersById[activePersonFilter]?.name ?? "selected person"}.`;
 
   return (
     <ManufacturingQueueView
       activePersonFilter={activePersonFilter}
-      addButtonAriaLabel="Add CNC job"
+      addButtonAriaLabel="Add fabrication job"
       bootstrap={bootstrap}
-      emptyStateMessage="No CNC jobs match the current filters."
+      emptyStateMessage="No fabrication jobs match the current filters."
       filteredDescription={filteredDescription}
       items={items}
       membersById={membersById}
       onCreate={onCreate}
       onEdit={onEdit}
       subsystemsById={subsystemsById}
-      title="CNC queue"
+      title="Fabrication queue"
     />
   );
 }

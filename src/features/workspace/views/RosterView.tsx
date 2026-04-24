@@ -1,7 +1,7 @@
 import React from "react";
-import { IconEdit, IconPlus, IconTrash } from "../shared/Icons";
-import type { BootstrapPayload, MemberPayload, MemberRecord } from "../../types";
-import { WORKSPACE_PANEL_CLASS } from "./workspaceTypes";
+import { IconEdit, IconPlus, IconTrash } from "../../../components/shared/Icons";
+import type { BootstrapPayload, MemberPayload, MemberRecord } from "../../../types";
+import { WORKSPACE_PANEL_CLASS } from "../shared/workspaceTypes";
 
 interface RosterViewProps {
     bootstrap: BootstrapPayload;

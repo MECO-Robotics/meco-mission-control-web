@@ -1,9 +1,9 @@
-﻿import React, { useMemo, useState } from "react";
-import { IconPerson, IconTasks } from "../shared/Icons";
-import { dateDiffInDays } from "../../lib/appUtils";
-import type { BootstrapPayload, TaskRecord } from "../../types";
-import { EditableHoverIndicator } from "./WorkspaceViewShared";
-import { WORKSPACE_PANEL_CLASS } from "./workspaceTypes";
+import React, { useMemo, useState } from "react";
+import { IconPerson, IconTasks } from "../../../components/shared/Icons";
+import { dateDiffInDays } from "../../../lib/appUtils";
+import type { BootstrapPayload, TaskRecord } from "../../../types";
+import { EditableHoverIndicator } from "../shared/WorkspaceViewShared";
+import { WORKSPACE_PANEL_CLASS } from "../shared/workspaceTypes";
 
 interface TimelineViewProps {
     bootstrap: BootstrapPayload;
@@ -147,37 +147,40 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                     </p>
                 </div>
                 <div className="panel-actions filter-toolbar timeline-toolbar">
-                    <label
-                        aria-label="Filter person"
-                        className={`toolbar-filter toolbar-filter-compact timeline-roster-filter${activePersonFilter !== "all" ? " is-active" : ""}`}
-                    >
-                        <span aria-hidden="true" className="toolbar-filter-icon">
-                            <IconPerson />
-                        </span>
-                        <select
-                            onChange={(event) => setActivePersonFilter(event.target.value)}
-                            title={activePersonFilterLabel}
-                            value={activePersonFilter}
+                    <div className="timeline-toolbar-filters">
+                        <label
+                            aria-label="Filter person"
+                            className={`toolbar-filter toolbar-filter-compact timeline-roster-filter${activePersonFilter !== "all" ? " is-active" : ""}`}
                         >
-                            <option value="all">All roster</option>
-                            {bootstrap.members.map((member) => (
-                                <option key={member.id} value={member.id}>
-                                    {member.name}
-                                </option>
-                            ))}
-                        </select>
-                    </label>
-                    <label className="toolbar-filter toolbar-filter-compact">
-                        <span className="toolbar-filter-icon"><IconTasks /></span>
-                        <select
-                            onChange={(e) => setViewInterval(e.target.value as "all" | "week" | "month")}
-                            value={viewInterval}
-                        >
-                            <option value="all">Full scope</option>
-                            <option value="week">This week</option>
-                            <option value="month">This month</option>
-                        </select>
-                    </label>
+                            <span aria-hidden="true" className="toolbar-filter-icon">
+                                <IconPerson />
+                            </span>
+                            <select
+                                onChange={(event) => setActivePersonFilter(event.target.value)}
+                                title={activePersonFilterLabel}
+                                value={activePersonFilter}
+                            >
+                                <option value="all">All roster</option>
+                                {bootstrap.members.map((member) => (
+                                    <option key={member.id} value={member.id}>
+                                        {member.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                        <label className="toolbar-filter toolbar-filter-compact timeline-interval-filter">
+                            <span className="toolbar-filter-icon"><IconTasks /></span>
+                            <select
+                                aria-label="Timeline interval"
+                                onChange={(e) => setViewInterval(e.target.value as "all" | "week" | "month")}
+                                value={viewInterval}
+                            >
+                                <option value="all">All time</option>
+                                <option value="week">This week</option>
+                                <option value="month">This month</option>
+                            </select>
+                        </label>
+                    </div>
                     <button className="primary-action queue-toolbar-action" onClick={openCreateTaskModal} title="Add task" type="button">Add task</button>
                 </div>
             </div>

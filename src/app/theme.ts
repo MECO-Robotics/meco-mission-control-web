@@ -31,6 +31,7 @@ function getThemeVars(mode: ThemeMode) {
     "--meco-red": brandColors.red,
     "--meco-soft-blue": isDarkMode ? "rgba(22, 71, 142, 0.2)" : "rgba(22, 71, 142, 0.08)",
     "--meco-soft-red": isDarkMode ? "rgba(234, 28, 45, 0.2)" : "rgba(234, 28, 45, 0.08)",
+    "--row-tint": isDarkMode ? "rgba(59, 130, 246, 0.18)" : "rgba(22, 71, 142, 0.14)",
     "--bg-panel": isDarkMode ? "#1e293b" : "#ffffff",
     "--border-base": isDarkMode ? "#334155" : "#e5e7eb",
     "--text-title": isDarkMode ? "#f8fafc" : "#000000",

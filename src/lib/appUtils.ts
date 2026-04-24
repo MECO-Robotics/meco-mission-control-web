@@ -23,6 +23,10 @@ export function toErrorMessage(error: unknown) {
     return "Something went wrong while checking your session.";
 }
 
+export function getDefaultSubsystemId(bootstrap: BootstrapPayload) {
+    return bootstrap.subsystems.find((subsystem) => subsystem.isCore)?.id ?? bootstrap.subsystems[0]?.id ?? "";
+}
+
 export function formatDate(value: string) {
     return new Date(`${value}T00:00:00`).toLocaleDateString(undefined, {
         month: "short",
@@ -54,7 +58,7 @@ export function joinList(values: string[]) {
 }
 
 export function buildEmptyTaskPayload(bootstrap: BootstrapPayload): TaskPayload {
-    const firstSubsystem = bootstrap.subsystems[0]?.id ?? "";
+    const firstSubsystem = getDefaultSubsystemId(bootstrap);
     const firstDiscipline = bootstrap.disciplines[0]?.id ?? "";
     const firstRequirement =
         bootstrap.requirements.find((requirement) => requirement.subsystemId === firstSubsystem)?.id ??
@@ -108,7 +112,7 @@ export function buildEmptyPurchasePayload(bootstrap: BootstrapPayload): Purchase
 
     return {
         title: firstPartDefinition?.name ?? "",
-        subsystemId: bootstrap.subsystems[0]?.id ?? "",
+        subsystemId: getDefaultSubsystemId(bootstrap),
         requestedById: bootstrap.members[0]?.id ?? null,
         partDefinitionId: firstPartDefinition?.id ?? null,
         quantity: 1,
@@ -126,7 +130,7 @@ export function buildEmptyManufacturingPayload(bootstrap: BootstrapPayload, proc
     const firstPartDefinition = process === "fabrication" ? null : bootstrap.partDefinitions[0] ?? null;
     return {
         title: firstPartDefinition?.name ?? "",
-        subsystemId: bootstrap.subsystems[0]?.id ?? "",
+        subsystemId: getDefaultSubsystemId(bootstrap),
         requestedById: bootstrap.members[0]?.id ?? null,
         process,
         dueDate: new Date().toISOString().slice(0, 10),
@@ -186,6 +190,7 @@ export function buildEmptyPartDefinitionPayload(bootstrap: BootstrapPayload): Pa
 }
 
 export function buildEmptySubsystemPayload(bootstrap: BootstrapPayload): SubsystemPayload {
+    const defaultParentSubsystemId = getDefaultSubsystemId(bootstrap) || null;
     const firstResponsibleEngineer =
         bootstrap.members.find((member) => member.role === "lead")?.id ??
         bootstrap.members.find((member) => member.role === "student")?.id ??
@@ -196,7 +201,7 @@ export function buildEmptySubsystemPayload(bootstrap: BootstrapPayload): Subsyst
     return {
         name: "",
         description: "",
-        isCore: false,
+        parentSubsystemId: defaultParentSubsystemId,
         responsibleEngineerId: firstResponsibleEngineer,
         mentorIds: firstMentor ? [firstMentor] : [],
         risks: [],
@@ -210,7 +215,7 @@ export function buildEmptyMechanismPayload(
     const firstSubsystem =
         subsystemId && subsystemId.length > 0
             ? subsystemId
-            : bootstrap.subsystems[0]?.id ?? "";
+            : getDefaultSubsystemId(bootstrap);
 
     return {
         subsystemId: firstSubsystem,
@@ -227,7 +232,7 @@ export function buildEmptyPartInstancePayload(
         partDefinitionId?: string;
     } = {},
 ): PartInstancePayload {
-    const firstSubsystem = defaults.subsystemId ?? bootstrap.subsystems[0]?.id ?? "";
+    const firstSubsystem = defaults.subsystemId ?? getDefaultSubsystemId(bootstrap);
     const firstMechanism =
         defaults.mechanismId !== undefined
             ? defaults.mechanismId

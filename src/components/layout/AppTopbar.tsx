@@ -1,13 +1,19 @@
 import { type Dispatch, type SetStateAction } from "react";
 
-import { MECO_MAIN_LOGO_LIGHT_SRC, MECO_MAIN_LOGO_WHITE_SRC } from "../../lib/branding";
+import {
+  MECO_MAIN_LOGO_HEIGHT,
+  MECO_MAIN_LOGO_LIGHT_SRC,
+  MECO_MAIN_LOGO_WHITE_SRC,
+  MECO_MAIN_LOGO_WIDTH,
+  MECO_PROFILE_AVATAR_SIZE,
+} from "../../lib/branding";
 import type { SessionUser } from "../../lib/auth";
 import type {
   InventoryViewTab,
   ManufacturingViewTab,
   TaskViewTab,
   ViewTab,
-} from "../workspace/workspaceTypes";
+} from "../../features/workspace/shared/workspaceTypes";
 import { IconRefresh } from "../shared/Icons";
 
 const TASK_VIEW_OPTIONS: { value: TaskViewTab; label: string }[] = [
@@ -183,6 +189,10 @@ export function AppTopbar({
             <img
               alt="MECO main logo"
               className="app-topbar-brand-icon"
+              fetchPriority="high"
+              height={MECO_MAIN_LOGO_HEIGHT}
+              loading="eager"
+              width={MECO_MAIN_LOGO_WIDTH}
               src={isDarkMode ? MECO_MAIN_LOGO_WHITE_SRC : MECO_MAIN_LOGO_LIGHT_SRC}
             />
           </div>
@@ -214,8 +224,11 @@ export function AppTopbar({
                 <img
                   alt={`${sessionUser.name} profile`}
                   className="profile-avatar"
+                  height={MECO_PROFILE_AVATAR_SIZE}
+                  loading="eager"
                   referrerPolicy="no-referrer"
                   src={sessionUser.picture}
+                  width={MECO_PROFILE_AVATAR_SIZE}
                 />
               ) : (
                 <span className="profile-avatar profile-avatar-fallback" aria-hidden="true">
