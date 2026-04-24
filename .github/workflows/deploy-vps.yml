@@ -17,6 +17,7 @@ on:
       - "tsconfig.app.json"
       - "tsconfig.node.json"
       - "vite.config.ts"
+      - "jest.config.cjs"
       - "deploy/**"
 
 permissions:
@@ -49,6 +50,9 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
+
+      - name: Unit tests
+        run: npm run test
 
       - name: Lint
         run: npm run lint
