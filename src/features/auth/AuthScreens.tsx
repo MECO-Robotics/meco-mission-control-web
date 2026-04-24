@@ -56,7 +56,22 @@ interface SignInScreenProps {
   signInConfig: AuthConfig;
 }
 
-function AuthIntroPanel() {
+function AuthIntroPanel({
+  hasEmailSignIn,
+  hasGoogleSignIn,
+}: {
+  hasEmailSignIn: boolean;
+  hasGoogleSignIn: boolean;
+}) {
+  const authIntroLine =
+    hasEmailSignIn && hasGoogleSignIn
+      ? "Sign in with Google SSO or MECO email."
+      : hasGoogleSignIn
+        ? "Sign in with Google SSO."
+        : hasEmailSignIn
+          ? "Sign in with your MECO email."
+          : "No sign-in methods are currently configured.";
+
   return (
     <aside className="auth-intro" aria-label="MECO sign-in overview">
       <div className="auth-intro-mark-wrap">
@@ -77,9 +92,7 @@ function AuthIntroPanel() {
           <span>Plan. Build. Verify.</span>
           <span>One system for tasks, parts, and QA.</span>
         </p>
-        <p className="auth-body">
-          Sign in with Google SSO or MECO email.
-        </p>
+        <p className="auth-body">{authIntroLine}</p>
       </div>
     </aside>
   );
@@ -99,19 +112,37 @@ export function SignInScreen({
   onVerifyEmailCode,
   signInConfig,
 }: SignInScreenProps) {
+  const authCardTitle =
+    hasEmailSignIn && hasGoogleSignIn
+      ? "Sign in with Google or email."
+      : hasGoogleSignIn
+        ? "Sign in with Google."
+        : hasEmailSignIn
+          ? "Sign in with email."
+          : "Sign-in is currently unavailable.";
+
+  const authCardBody =
+    hasEmailSignIn && hasGoogleSignIn
+      ? "Both sign-in options are shown below. Use Google SSO or request a verified MECO email code."
+      : hasGoogleSignIn
+        ? "Google SSO is available below. Email code sign-in is not configured on this server."
+        : hasEmailSignIn
+          ? "Email code sign-in is available below. Google SSO is not configured on this server."
+          : "No sign-in methods are currently configured on this server.";
+
   return (
     <main className="page-shell auth-shell">
       <div className="auth-layout">
-        <AuthIntroPanel />
+        <AuthIntroPanel
+          hasEmailSignIn={hasEmailSignIn}
+          hasGoogleSignIn={hasGoogleSignIn}
+        />
 
         <section className="auth-card auth-card-wide">
           <div className="auth-card-header">
             <p className="eyebrow">Secure access</p>
-            <h1>Sign in with Google or email.</h1>
-            <p className="auth-body">
-              Both sign-in options are shown below. Use Google SSO or request a
-              verified MECO email code.
-            </p>
+            <h1>{authCardTitle}</h1>
+            <p className="auth-body">{authCardBody}</p>
           </div>
 
           {authMessage ? (
