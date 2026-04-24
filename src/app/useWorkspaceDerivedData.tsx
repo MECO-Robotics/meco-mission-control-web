@@ -1,11 +1,10 @@
 import { useMemo } from "react";
 
 import {
-  Icon3DPrint,
-  IconCnc,
   IconManufacturing,
   IconParts,
-  IconPurchases,
+  IconWorkLogs,
+  IconSubsystems,
   IconRoster,
   IconTasks,
 } from "../components/shared/Icons";
@@ -76,37 +75,48 @@ export function useWorkspaceDerivedData({
     [bootstrap.manufacturingItems],
   );
 
+  const fabricationItems = useMemo(
+    () => bootstrap.manufacturingItems.filter((item) => item.process === "fabrication"),
+    [bootstrap.manufacturingItems],
+  );
+
+  const inventoryCount =
+    bootstrap.materials.length +
+    bootstrap.partDefinitions.length +
+    bootstrap.partInstances.length +
+    bootstrap.purchaseItems.length;
+
   const navigationItems = useMemo<NavigationItem[]>(
     () => [
       {
-        value: "timeline",
-        label: "Timeline",
+        value: "tasks",
+        label: "Tasks",
         icon: <IconTasks />,
         count: bootstrap.tasks.length,
       },
       {
-        value: "queue",
-        label: "Task queue",
-        icon: <IconTasks />,
-        count: bootstrap.tasks.length,
+        value: "worklogs",
+        label: "Work logs",
+        icon: <IconWorkLogs />,
+        count: bootstrap.workLogs.length,
       },
       {
-        value: "purchases",
-        label: "Purchases",
-        icon: <IconPurchases />,
-        count: bootstrap.purchaseItems.length,
+        value: "manufacturing",
+        label: "Manufacturing",
+        icon: <IconManufacturing />,
+        count: bootstrap.manufacturingItems.length,
       },
       {
-        value: "cnc",
-        label: "CNC",
-        icon: <IconCnc />,
-        count: cncItems.length,
+        value: "inventory",
+        label: "Inventory",
+        icon: <IconParts />,
+        count: inventoryCount,
       },
       {
-        value: "prints",
-        label: "3D print",
-        icon: <Icon3DPrint />,
-        count: printItems.length,
+        value: "subsystems",
+        label: "Subsystems",
+        icon: <IconSubsystems />,
+        count: bootstrap.subsystems.length,
       },
       {
         value: "roster",
@@ -114,29 +124,14 @@ export function useWorkspaceDerivedData({
         icon: <IconRoster />,
         count: bootstrap.members.length,
       },
-      {
-        value: "materials",
-        label: "Materials",
-        icon: <IconManufacturing />,
-        count: bootstrap.materials.length,
-      },
-      {
-        value: "parts",
-        label: "Parts",
-        icon: <IconParts />,
-        count: bootstrap.partDefinitions.length + bootstrap.partInstances.length,
-      },
     ],
     [
       bootstrap.manufacturingItems,
-      bootstrap.materials.length,
       bootstrap.members.length,
-      bootstrap.partDefinitions.length,
-      bootstrap.partInstances.length,
-      bootstrap.purchaseItems.length,
+      bootstrap.workLogs.length,
       bootstrap.tasks.length,
-      cncItems.length,
-      printItems.length,
+      bootstrap.subsystems.length,
+      inventoryCount,
     ],
   );
 
@@ -145,6 +140,7 @@ export function useWorkspaceDerivedData({
     cncItems,
     disciplinesById,
     eventsById,
+    fabricationItems,
     mechanismsById,
     mentors,
     membersById,

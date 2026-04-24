@@ -5,8 +5,18 @@
   line-height: 1.5;
   font-weight: 400;
   color: #11213d;
+  --official-blue: #16478e;
+  --official-red: #ea1c2d;
+  --official-grey: #bbbbbb;
+  --official-black: #000000;
+  --official-white: #ffffff;
+  --meco-blue: var(--official-blue);
+  --meco-red: var(--official-red);
+  --meco-soft-blue: rgba(22, 71, 142, 0.08);
+  --meco-soft-red: rgba(234, 28, 45, 0.08);
   background:
-    radial-gradient(circle at top, rgba(22, 71, 142, 0.08), transparent 28%),
+    radial-gradient(circle at top, var(--meco-soft-blue), transparent 28%),
+    radial-gradient(circle at 88% 0%, var(--meco-soft-red), transparent 22%),
     linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -28,7 +38,7 @@ body {
   min-height: 100vh;
   background:
     radial-gradient(circle at 10% 10%, rgba(22, 71, 142, 0.05), transparent 18%),
-    radial-gradient(circle at 90% 20%, rgba(22, 71, 142, 0.05), transparent 20%),
+    radial-gradient(circle at 90% 20%, rgba(234, 28, 45, 0.05), transparent 18%),
     linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 }
 

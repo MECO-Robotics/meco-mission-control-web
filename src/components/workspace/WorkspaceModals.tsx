@@ -3,11 +3,14 @@ import type {
   BootstrapPayload,
   ManufacturingItemPayload,
   MaterialPayload,
+  MechanismPayload,
   PartDefinitionPayload,
   PartInstancePayload,
   PurchaseItemPayload,
+  SubsystemPayload,
   TaskPayload,
   TaskRecord,
+  WorkLogPayload,
 } from "../../types";
 
 interface TaskEditorModalProps {
@@ -58,7 +61,7 @@ export function TaskEditorModal({
     (mechanism) => mechanism.subsystemId === taskDraft.subsystemId,
   );
   const filteredPartInstances = bootstrap.partInstances.filter(
-    (partInstance) => partInstance.subsystemId === taskDraft.subsystemId,
+    (partInstance) => partInstance.mechanismId === taskDraft.mechanismId,
   );
 
   return (
@@ -106,12 +109,15 @@ export function TaskEditorModal({
                   const requirementId =
                     bootstrap.requirements.find((requirement) => requirement.subsystemId === subsystemId)?.id ??
                     null;
-                  const mechanismId =
-                    bootstrap.mechanisms.find((mechanism) => mechanism.subsystemId === subsystemId)?.id ??
-                    null;
-                  const partInstanceId =
-                    bootstrap.partInstances.find((partInstance) => partInstance.subsystemId === subsystemId)?.id ??
-                    null;
+                  const nextMechanisms = bootstrap.mechanisms.filter(
+                    (mechanism) => mechanism.subsystemId === subsystemId,
+                  );
+                  const mechanismId = nextMechanisms[0]?.id ?? null;
+                  const partInstanceId = mechanismId
+                    ? bootstrap.partInstances.find(
+                        (partInstance) => partInstance.mechanismId === mechanismId,
+                      )?.id ?? null
+                    : null;
 
                   return {
                     ...current,
@@ -172,10 +178,20 @@ export function TaskEditorModal({
             <span style={{ color: "var(--text-title)" }}>Mechanism</span>
             <select
               onChange={(event) =>
-                setTaskDraft((current) => ({
-                  ...current,
-                  mechanismId: event.target.value || null,
-                }))
+                setTaskDraft((current) => {
+                  const mechanismId = event.target.value || null;
+                  const partInstanceId = mechanismId
+                    ? bootstrap.partInstances.find(
+                        (partInstance) => partInstance.mechanismId === mechanismId,
+                      )?.id ?? null
+                    : null;
+
+                  return {
+                    ...current,
+                    mechanismId,
+                    partInstanceId,
+                  };
+                })
               }
               style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
               value={taskDraft.mechanismId ?? ""}
@@ -429,6 +445,227 @@ export function TaskEditorModal({
   );
 }
 
+interface WorkLogEditorModalProps {
+  bootstrap: BootstrapPayload;
+  closeWorkLogModal: () => void;
+  handleWorkLogSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  isSavingWorkLog: boolean;
+  setWorkLogDraft: Dispatch<SetStateAction<WorkLogPayload>>;
+  workLogDraft: WorkLogPayload;
+}
+
+export function WorkLogEditorModal({
+  bootstrap,
+  closeWorkLogModal,
+  handleWorkLogSubmit,
+  isSavingWorkLog,
+  setWorkLogDraft,
+  workLogDraft,
+}: WorkLogEditorModalProps) {
+  const selectedTask = bootstrap.tasks.find(
+    (task) => task.id === workLogDraft.taskId,
+  );
+  const selectedSubsystem = selectedTask
+    ? bootstrap.subsystems.find(
+        (subsystem) => subsystem.id === selectedTask.subsystemId,
+      )
+    : null;
+
+  return (
+    <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
+      <section
+        aria-modal="true"
+        className="modal-card"
+        role="dialog"
+        style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
+      >
+        <div className="panel-header compact-header">
+          <div>
+            <p className="eyebrow" style={{ color: "var(--meco-blue)" }}>
+              Work log editor
+            </p>
+            <h2 style={{ color: "var(--text-title)" }}>Add work log</h2>
+          </div>
+          <button
+            className="icon-button"
+            onClick={closeWorkLogModal}
+            type="button"
+            style={{ color: "var(--text-copy)", background: "transparent" }}
+          >
+            Close
+          </button>
+        </div>
+
+        <form
+          className="modal-form"
+          onSubmit={handleWorkLogSubmit}
+          style={{ color: "var(--text-copy)" }}
+        >
+          <label className="field modal-wide">
+            <span style={{ color: "var(--text-title)" }}>Task</span>
+            <select
+              onChange={(event) =>
+                setWorkLogDraft((current) => ({
+                  ...current,
+                  taskId: event.target.value,
+                }))
+              }
+              required
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={workLogDraft.taskId}
+            >
+              <option value="" disabled>
+                Choose a task
+              </option>
+              {bootstrap.tasks.map((task) => {
+                const subsystemName =
+                  bootstrap.subsystems.find((subsystem) => subsystem.id === task.subsystemId)
+                    ?.name ?? "Unknown subsystem";
+
+                return (
+                  <option key={task.id} value={task.id}>
+                    {task.title} - {subsystemName}
+                  </option>
+                );
+              })}
+            </select>
+            {bootstrap.tasks.length === 0 ? (
+              <small style={{ color: "var(--text-copy)" }}>
+                No tasks are available in this filtered workspace.
+              </small>
+            ) : null}
+            {selectedTask ? (
+              <small style={{ color: "var(--text-copy)" }}>
+                {selectedSubsystem?.name ?? "Unknown subsystem"} - {selectedTask.summary}
+              </small>
+            ) : null}
+          </label>
+
+          <label className="field">
+            <span style={{ color: "var(--text-title)" }}>Date</span>
+            <input
+              onChange={(event) =>
+                setWorkLogDraft((current) => ({
+                  ...current,
+                  date: event.target.value,
+                }))
+              }
+              required
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              type="date"
+              value={workLogDraft.date}
+            />
+          </label>
+
+          <label className="field">
+            <span style={{ color: "var(--text-title)" }}>Hours</span>
+            <input
+              min="0.5"
+              onChange={(event) =>
+                setWorkLogDraft((current) => ({
+                  ...current,
+                  hours: Number(event.target.value),
+                }))
+              }
+              required
+              step="0.5"
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              type="number"
+              value={workLogDraft.hours}
+            />
+          </label>
+
+          <label className="field modal-wide">
+            <span style={{ color: "var(--text-title)" }}>Participants</span>
+            <select
+              multiple
+              onChange={(event) =>
+                setWorkLogDraft((current) => ({
+                  ...current,
+                  participantIds: Array.from(
+                    event.currentTarget.selectedOptions,
+                    (option) => option.value,
+                  ),
+                }))
+              }
+              size={Math.min(bootstrap.members.length || 1, 5)}
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={workLogDraft.participantIds}
+            >
+              {bootstrap.members.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.name}
+                </option>
+              ))}
+            </select>
+            <small style={{ color: "var(--text-copy)" }}>
+              Hold Ctrl or Cmd to select multiple people.
+            </small>
+          </label>
+
+          <label className="field modal-wide">
+            <span style={{ color: "var(--text-title)" }}>Notes</span>
+            <textarea
+              onChange={(event) =>
+                setWorkLogDraft((current) => ({
+                  ...current,
+                  notes: event.target.value,
+                }))
+              }
+              placeholder="What got done?"
+              rows={3}
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={workLogDraft.notes}
+            />
+          </label>
+
+          <div className="modal-actions modal-wide">
+            <button
+              className="secondary-action"
+              onClick={closeWorkLogModal}
+              type="button"
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              className="primary-action"
+              disabled={isSavingWorkLog || bootstrap.tasks.length === 0 || bootstrap.members.length === 0}
+              type="submit"
+            >
+              {isSavingWorkLog ? "Saving..." : "Add work log"}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  );
+}
+
 interface PurchaseEditorModalProps {
   bootstrap: BootstrapPayload;
   closePurchaseModal: () => void;
@@ -452,6 +689,10 @@ export function PurchaseEditorModal({
   setPurchaseDraft,
   setPurchaseFinalCost,
 }: PurchaseEditorModalProps) {
+  const selectedPartDefinition = bootstrap.partDefinitions.find(
+    (partDefinition) => partDefinition.id === purchaseDraft.partDefinitionId,
+  );
+
   return (
     <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
       <section aria-modal="true" className="modal-card" role="dialog" style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}>
@@ -470,18 +711,36 @@ export function PurchaseEditorModal({
         </div>
         <form className="modal-form" onSubmit={handlePurchaseSubmit} style={{ color: "var(--text-copy)" }}>
           <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Title</span>
-            <input
-              onChange={(event) =>
+            <span style={{ color: "var(--text-title)" }}>Part</span>
+            <select
+              onChange={(event) => {
+                const partDefinitionId = event.target.value;
+                const partDefinition = bootstrap.partDefinitions.find(
+                  (candidate) => candidate.id === partDefinitionId,
+                );
+
                 setPurchaseDraft((current) => ({
                   ...current,
-                  title: event.target.value,
-                }))
-              }
+                  partDefinitionId,
+                  title: partDefinition?.name ?? current.title,
+                }));
+              }}
               required
               style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
-              value={purchaseDraft.title}
-            />
+              value={purchaseDraft.partDefinitionId ?? ""}
+            >
+              <option value="">Select a real part from the Parts tab...</option>
+              {bootstrap.partDefinitions.map((partDefinition) => (
+                <option key={partDefinition.id} value={partDefinition.id}>
+                  {partDefinition.partNumber} - {partDefinition.name} (Rev {partDefinition.revision})
+                </option>
+              ))}
+            </select>
+            <small style={{ color: "var(--text-copy)" }}>
+              {selectedPartDefinition
+                ? `Stored as ${selectedPartDefinition.name}.`
+                : "Purchases can only be logged against a real part from the catalog."}
+            </small>
           </label>
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Subsystem</span>
@@ -673,6 +932,12 @@ export function ManufacturingEditorModal({
   const filteredPartInstances = bootstrap.partInstances.filter(
     (partInstance) => partInstance.subsystemId === manufacturingDraft.subsystemId,
   );
+  const selectedPartDefinition = manufacturingDraft.partDefinitionId
+    ? bootstrap.partDefinitions.find(
+        (partDefinition) => partDefinition.id === manufacturingDraft.partDefinitionId,
+      )
+    : null;
+  const isPartSelectionRequired = manufacturingDraft.process !== "fabrication";
 
   return (
     <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
@@ -702,10 +967,58 @@ export function ManufacturingEditorModal({
                   title: event.target.value,
                 }))
               }
-              required
+              readOnly={isPartSelectionRequired}
+              required={!isPartSelectionRequired}
               style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
               value={manufacturingDraft.title}
             />
+            <small style={{ color: "var(--text-copy)" }}>
+              {isPartSelectionRequired
+                ? "CNC and 3D print jobs inherit their title from the selected catalog part."
+                : "Fabrication jobs can still use a freeform title."}
+            </small>
+          </label>
+          <label className="field modal-wide">
+            <span style={{ color: "var(--text-title)" }}>Part</span>
+            <select
+              onChange={(event) => {
+                const partDefinitionId = event.target.value;
+                const partDefinition = bootstrap.partDefinitions.find(
+                  (candidate) => candidate.id === partDefinitionId,
+                );
+
+                setManufacturingDraft((current) => ({
+                  ...current,
+                  partDefinitionId: partDefinitionId || null,
+                  title: isPartSelectionRequired
+                    ? partDefinition?.name ?? current.title
+                    : current.title,
+                }));
+              }}
+              required={isPartSelectionRequired}
+              style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
+              value={manufacturingDraft.partDefinitionId ?? ""}
+            >
+              <option value="">
+                {isPartSelectionRequired
+                  ? "Select a real part from the Parts tab..."
+                  : "Optional for fabrication jobs"}
+              </option>
+              {bootstrap.partDefinitions.map((partDefinition) => (
+                <option key={partDefinition.id} value={partDefinition.id}>
+                  {partDefinition.partNumber} - {partDefinition.name} (Rev {partDefinition.revision})
+                </option>
+              ))}
+            </select>
+            <small style={{ color: "var(--text-copy)" }}>
+              {isPartSelectionRequired
+                ? selectedPartDefinition
+                  ? `Stored as ${selectedPartDefinition.name}.`
+                  : "CNC and 3D print jobs must be tied to a real part."
+                : selectedPartDefinition
+                  ? "This optional catalog link will not overwrite the fabrication title."
+                  : "Fabrication jobs can stay freeform if they are not tied to a catalog part."}
+            </small>
           </label>
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Subsystem</span>
@@ -1012,18 +1325,50 @@ export function MaterialEditorModal({
 
 interface PartDefinitionEditorModalProps {
   bootstrap: BootstrapPayload;
+  activePartDefinitionId: string | null;
   closePartDefinitionModal: () => void;
+  handleDeletePartDefinition: (id: string) => void;
   handlePartDefinitionSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  isDeletingPartDefinition: boolean;
   isSavingPartDefinition: boolean;
   partDefinitionDraft: PartDefinitionPayload;
   partDefinitionModalMode: "create" | "edit";
   setPartDefinitionDraft: Dispatch<SetStateAction<PartDefinitionPayload>>;
 }
 
+interface SubsystemEditorModalProps {
+  activeSubsystemId: string | null;
+  bootstrap: BootstrapPayload;
+  closeSubsystemModal: () => void;
+  handleSubsystemSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  isSavingSubsystem: boolean;
+  subsystemDraft: SubsystemPayload;
+  subsystemDraftRisks: string;
+  subsystemModalMode: "create" | "edit";
+  setSubsystemDraft: Dispatch<SetStateAction<SubsystemPayload>>;
+  setSubsystemDraftRisks: (value: string) => void;
+}
+
+interface MechanismEditorModalProps {
+  activeMechanismId: string | null;
+  bootstrap: BootstrapPayload;
+  closeMechanismModal: () => void;
+  handleDeleteMechanism: (mechanismId: string) => void;
+  handleMechanismSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  isDeletingMechanism: boolean;
+  isSavingMechanism: boolean;
+  mechanismDraft: MechanismPayload;
+  mechanismModalMode: "create" | "edit";
+  setMechanismDraft: Dispatch<SetStateAction<MechanismPayload>>;
+}
+
 export function PartDefinitionEditorModal({
   bootstrap,
+  activePartDefinitionId,
   closePartDefinitionModal,
+  handleDeletePartDefinition,
   handlePartDefinitionSubmit,
+  isDeletingPartDefinition,
   isSavingPartDefinition,
   partDefinitionDraft,
   partDefinitionModalMode,
@@ -1072,8 +1417,18 @@ export function PartDefinitionEditorModal({
             <textarea onChange={(event) => setPartDefinitionDraft((current) => ({ ...current, description: event.target.value }))} rows={3} style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }} value={partDefinitionDraft.description} />
           </label>
           <div className="modal-actions modal-wide">
+            {partDefinitionModalMode === "edit" && activePartDefinitionId ? (
+              <button
+                className="danger-action"
+                disabled={isDeletingPartDefinition || isSavingPartDefinition}
+                onClick={() => handleDeletePartDefinition(activePartDefinitionId)}
+                type="button"
+              >
+                {isDeletingPartDefinition ? "Deleting..." : "Delete part definition"}
+              </button>
+            ) : null}
             <button className="secondary-action" onClick={closePartDefinitionModal} style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }} type="button">Cancel</button>
-            <button className="primary-action" disabled={isSavingPartDefinition} type="submit">{isSavingPartDefinition ? "Saving..." : partDefinitionModalMode === "create" ? "Add part" : "Save changes"}</button>
+            <button className="primary-action" disabled={isSavingPartDefinition || isDeletingPartDefinition} type="submit">{isSavingPartDefinition ? "Saving..." : partDefinitionModalMode === "create" ? "Add part" : "Save changes"}</button>
           </div>
         </form>
       </section>
@@ -1129,21 +1484,48 @@ export function PartInstanceEditorModal({
           </label>
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Subsystem</span>
-            <select onChange={(event) => setPartInstanceDraft((current) => {
-              const subsystemId = event.target.value;
-              return {
-                ...current,
-                subsystemId,
-                mechanismId: bootstrap.mechanisms.find((mechanism) => mechanism.subsystemId === subsystemId)?.id ?? null,
-              };
-            })} style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }} value={partInstanceDraft.subsystemId}>
+            <select
+              onChange={(event) =>
+                setPartInstanceDraft((current) => {
+                  const subsystemId = event.target.value;
+                  const nextMechanisms = bootstrap.mechanisms.filter(
+                    (mechanism) => mechanism.subsystemId === subsystemId,
+                  );
+
+                  return {
+                    ...current,
+                    subsystemId,
+                    mechanismId: nextMechanisms[0]?.id ?? null,
+                  };
+                })
+              }
+              style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
+              value={partInstanceDraft.subsystemId}
+            >
               {bootstrap.subsystems.map((subsystem) => <option key={subsystem.id} value={subsystem.id}>{subsystem.name}</option>)}
             </select>
           </label>
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Mechanism</span>
-            <select onChange={(event) => setPartInstanceDraft((current) => ({ ...current, mechanismId: event.target.value || null }))} style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }} value={partInstanceDraft.mechanismId ?? ""}>
-              <option value="">No mechanism</option>
+            <select
+              onChange={(event) =>
+                setPartInstanceDraft((current) => {
+                  const mechanismId = event.target.value || null;
+                  const selectedMechanism = mechanismId
+                    ? bootstrap.mechanisms.find((mechanism) => mechanism.id === mechanismId) ?? null
+                    : null;
+
+                  return {
+                    ...current,
+                    subsystemId: selectedMechanism?.subsystemId ?? current.subsystemId,
+                    mechanismId,
+                  };
+                })
+              }
+              required
+              style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
+              value={partInstanceDraft.mechanismId ?? ""}
+            >
               {filteredMechanisms.map((mechanism) => <option key={mechanism.id} value={mechanism.id}>{mechanism.name}</option>)}
             </select>
           </label>
@@ -1170,6 +1552,354 @@ export function PartInstanceEditorModal({
           <div className="modal-actions modal-wide">
             <button className="secondary-action" onClick={closePartInstanceModal} style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }} type="button">Cancel</button>
             <button className="primary-action" disabled={isSavingPartInstance} type="submit">{isSavingPartInstance ? "Saving..." : partInstanceModalMode === "create" ? "Add instance" : "Save changes"}</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  );
+}
+
+export function SubsystemEditorModal({
+  activeSubsystemId,
+  bootstrap,
+  closeSubsystemModal,
+  handleSubsystemSubmit,
+  isSavingSubsystem,
+  subsystemDraft,
+  subsystemDraftRisks,
+  subsystemModalMode,
+  setSubsystemDraft,
+  setSubsystemDraftRisks,
+}: SubsystemEditorModalProps) {
+  const mentorOptions = bootstrap.members.filter(
+    (member) => member.role === "mentor" || member.role === "admin",
+  );
+
+  return (
+    <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
+      <section
+        aria-modal="true"
+        className="modal-card"
+        role="dialog"
+        style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
+      >
+        <div className="panel-header compact-header">
+          <div>
+            <p className="eyebrow" style={{ color: "var(--meco-blue)" }}>
+              Subsystem editor
+            </p>
+            <h2 style={{ color: "var(--text-title)" }}>
+              {subsystemModalMode === "create"
+                ? "Add subsystem"
+                : bootstrap.subsystems.find((subsystem) => subsystem.id === activeSubsystemId)?.name ??
+                  "Edit subsystem"}
+            </h2>
+          </div>
+          <button
+            className="icon-button"
+            onClick={closeSubsystemModal}
+            type="button"
+            style={{ color: "var(--text-copy)", background: "transparent" }}
+          >
+            Close
+          </button>
+        </div>
+
+        <form
+          className="modal-form"
+          onSubmit={handleSubsystemSubmit}
+          style={{ color: "var(--text-copy)" }}
+        >
+          <label className="field modal-wide">
+            <span style={{ color: "var(--text-title)" }}>Name</span>
+            <input
+              onChange={(event) =>
+                setSubsystemDraft((current) => ({
+                  ...current,
+                  name: event.target.value,
+                }))
+              }
+              required
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={subsystemDraft.name}
+            />
+          </label>
+
+          <label className="field modal-wide">
+            <span style={{ color: "var(--text-title)" }}>Description</span>
+            <textarea
+              onChange={(event) =>
+                setSubsystemDraft((current) => ({
+                  ...current,
+                  description: event.target.value,
+                }))
+              }
+              required
+              rows={3}
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={subsystemDraft.description}
+            />
+          </label>
+
+          <label className="field">
+            <span style={{ color: "var(--text-title)" }}>Responsible engineer</span>
+            <select
+              onChange={(event) =>
+                setSubsystemDraft((current) => ({
+                  ...current,
+                  responsibleEngineerId: event.target.value || null,
+                }))
+              }
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={subsystemDraft.responsibleEngineerId ?? ""}
+            >
+              <option value="">Unassigned</option>
+              {bootstrap.members.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="field">
+            <span style={{ color: "var(--text-title)" }}>Mentors</span>
+            <select
+              multiple
+              onChange={(event) =>
+                setSubsystemDraft((current) => ({
+                  ...current,
+                  mentorIds: Array.from(event.currentTarget.selectedOptions, (option) => option.value),
+                }))
+              }
+              size={Math.min(mentorOptions.length || 1, 5)}
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={subsystemDraft.mentorIds}
+            >
+              {mentorOptions.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="field">
+            <span style={{ color: "var(--text-title)" }}>Type</span>
+            <select
+              onChange={(event) =>
+                setSubsystemDraft((current) => ({
+                  ...current,
+                  isCore: event.target.value === "core",
+                }))
+              }
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={subsystemDraft.isCore ? "core" : "support"}
+            >
+              <option value="core">Core system</option>
+              <option value="support">Support system</option>
+            </select>
+          </label>
+
+          <label className="field modal-wide">
+            <span style={{ color: "var(--text-title)" }}>Risks</span>
+            <textarea
+              onChange={(event) => setSubsystemDraftRisks(event.target.value)}
+              placeholder="Comma-separated risks"
+              rows={3}
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={subsystemDraftRisks}
+            />
+          </label>
+
+          <div className="modal-actions modal-wide">
+            <button
+              className="secondary-action"
+              onClick={closeSubsystemModal}
+              type="button"
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+            >
+              Cancel
+            </button>
+            <button className="primary-action" disabled={isSavingSubsystem} type="submit">
+              {isSavingSubsystem
+                ? "Saving..."
+                : subsystemModalMode === "create"
+                  ? "Add subsystem"
+                  : "Save changes"}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  );
+}
+
+export function MechanismEditorModal({
+  activeMechanismId,
+  bootstrap,
+  closeMechanismModal,
+  handleDeleteMechanism,
+  handleMechanismSubmit,
+  isDeletingMechanism,
+  isSavingMechanism,
+  mechanismDraft,
+  mechanismModalMode,
+  setMechanismDraft,
+}: MechanismEditorModalProps) {
+  return (
+    <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
+      <section
+        aria-modal="true"
+        className="modal-card"
+        role="dialog"
+        style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
+      >
+        <div className="panel-header compact-header">
+          <div>
+            <p className="eyebrow" style={{ color: "var(--meco-blue)" }}>
+              Mechanism editor
+            </p>
+            <h2 style={{ color: "var(--text-title)" }}>
+              {mechanismModalMode === "create" ? "Add mechanism" : "Edit mechanism"}
+            </h2>
+          </div>
+          <button
+            className="icon-button"
+            onClick={closeMechanismModal}
+            type="button"
+            style={{ color: "var(--text-copy)", background: "transparent" }}
+          >
+            Close
+          </button>
+        </div>
+
+        <form
+          className="modal-form"
+          onSubmit={handleMechanismSubmit}
+          style={{ color: "var(--text-copy)" }}
+        >
+          <label className="field">
+            <span style={{ color: "var(--text-title)" }}>Subsystem</span>
+            <select
+              onChange={(event) =>
+                setMechanismDraft((current) => ({
+                  ...current,
+                  subsystemId: event.target.value,
+                }))
+              }
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={mechanismDraft.subsystemId}
+            >
+              {bootstrap.subsystems.map((subsystem) => (
+                <option key={subsystem.id} value={subsystem.id}>
+                  {subsystem.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="field modal-wide">
+            <span style={{ color: "var(--text-title)" }}>Name</span>
+            <input
+              onChange={(event) =>
+                setMechanismDraft((current) => ({
+                  ...current,
+                  name: event.target.value,
+                }))
+              }
+              required
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={mechanismDraft.name}
+            />
+          </label>
+
+          <label className="field modal-wide">
+            <span style={{ color: "var(--text-title)" }}>Description</span>
+            <textarea
+              onChange={(event) =>
+                setMechanismDraft((current) => ({
+                  ...current,
+                  description: event.target.value,
+                }))
+              }
+              required
+              rows={3}
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={mechanismDraft.description}
+            />
+          </label>
+
+          <div className="modal-actions modal-wide">
+            {mechanismModalMode === "edit" && activeMechanismId ? (
+              <button
+                className="danger-action"
+                disabled={isDeletingMechanism || isSavingMechanism}
+                onClick={() => handleDeleteMechanism(activeMechanismId)}
+                type="button"
+              >
+                {isDeletingMechanism ? "Deleting..." : "Delete mechanism"}
+              </button>
+            ) : null}
+            <button
+              className="secondary-action"
+              onClick={closeMechanismModal}
+              type="button"
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+            >
+              Cancel
+            </button>
+            <button className="primary-action" disabled={isSavingMechanism} type="submit">
+              {isSavingMechanism
+                ? "Saving..."
+                : mechanismModalMode === "create"
+                  ? "Add mechanism"
+                  : "Save changes"}
+            </button>
           </div>
         </form>
       </section>

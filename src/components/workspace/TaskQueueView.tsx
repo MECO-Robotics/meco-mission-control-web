@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 
 import { formatDate } from "../../lib/appUtils";
 import type { BootstrapPayload, TaskRecord } from "../../types";
@@ -9,8 +9,8 @@ import {
   SearchToolbarInput,
   TableCell,
 } from "./WorkspaceViewShared";
-import { getStatusPillStyle } from "./workspaceUtils";
-import { WORKSPACE_PANEL_STYLE } from "./workspaceTypes";
+import { getStatusPillClassName } from "./workspaceUtils";
+import { WORKSPACE_PANEL_CLASS } from "./workspaceTypes";
 import { TASK_PRIORITY_OPTIONS, TASK_STATUS_OPTIONS } from "./workspaceOptions";
 
 type TaskSortField = "dueDate" | "ownerId" | "priority" | "status" | "subsystemId" | "title";
@@ -168,11 +168,11 @@ export function TaskQueueView({
   };
 
   return (
-    <section className="panel dense-panel" style={WORKSPACE_PANEL_STYLE}>
+    <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
       <div className="panel-header compact-header">
         <div className="queue-section-header">
-          <h2 style={{ color: "var(--text-title)" }}>Task queue</h2>
-          <p className="section-copy filter-copy" style={{ color: "var(--text-copy)" }}>
+          <h2>Task queue</h2>
+          <p className="section-copy filter-copy">
             {activePersonFilter === "all"
               ? "All tasks in queue."
               : `Only tasks owned by or mentored by ${membersById[activePersonFilter]?.name ?? "selected person"}.`}
@@ -237,11 +237,7 @@ export function TaskQueueView({
       <div className="table-shell">
         <div
           className="queue-table queue-table-header"
-          style={{
-            gridTemplateColumns: gridTemplate,
-            borderBottom: "1px solid var(--border-base)",
-            color: "var(--text-copy)",
-          }}
+          style={{ "--workspace-grid-template": gridTemplate } as CSSProperties}
         >
           <button className="table-sort-button" onClick={() => toggleSort("title")} type="button">
             Task{getSortIcon("title")}
@@ -279,26 +275,19 @@ export function TaskQueueView({
 
           return (
             <button
-              className="queue-table queue-row editable-hover-target editable-hover-target-row"
-              key={task.id}
-              onClick={() => openEditTaskModal(task)}
-              style={{
-                gridTemplateColumns: gridTemplate,
-                borderBottom: "1px solid var(--border-base)",
-                color: "var(--text-copy)",
-                background: "var(--bg-row-alt)",
-                marginBottom: "1px",
-              }}
-              type="button"
-            >
-              <span
-                className="queue-title table-cell table-cell-primary"
+            className="queue-table queue-row editable-hover-target editable-hover-target-row"
+            key={task.id}
+            onClick={() => openEditTaskModal(task)}
+            style={{ "--workspace-grid-template": gridTemplate } as CSSProperties}
+            type="button"
+          >
+            <span
+                className="queue-title table-cell table-cell-primary queue-title-stack"
                 data-label="Task"
-                style={{ display: "flex", flexDirection: "column", textAlign: "left" }}
               >
-                <strong style={{ color: "var(--text-title)" }}>{task.title}</strong>
-                <small style={{ color: "var(--text-copy)" }}>{task.summary}</small>
-                <small style={{ color: "var(--text-copy)" }}>
+                <strong>{task.title}</strong>
+                <small>{task.summary}</small>
+                <small>
                   {(task.disciplineId ? disciplinesById[task.disciplineId]?.name : null) ?? "No discipline"}
                   {" / "}
                   {(task.mechanismId ? mechanismsById[task.mechanismId]?.name : null) ?? "No mechanism"}
@@ -324,13 +313,13 @@ export function TaskQueueView({
               ) : null}
               {showStatusCol ? (
                 <TableCell label="Status" valueClassName="table-cell-pill">
-                  <span style={getStatusPillStyle(task.status)}>{task.status.replace("-", " ")}</span>
+                  <span className={getStatusPillClassName(task.status)}>{task.status.replace("-", " ")}</span>
                 </TableCell>
               ) : null}
               <TableCell label="Due">{formatDate(task.dueDate)}</TableCell>
               {showPriorityCol ? (
                 <TableCell label="Priority" valueClassName="table-cell-pill">
-                  <span style={getStatusPillStyle(task.priority)}>{task.priority}</span>
+                  <span className={getStatusPillClassName(task.priority)}>{task.priority}</span>
                 </TableCell>
               ) : null}
               <EditableHoverIndicator />

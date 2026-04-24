@@ -17,9 +17,12 @@ import {
   loadGoogleIdentityScript,
   loadStoredSessionToken,
   resolveGoogleClientId,
+  requestEmailSignInCode,
   signOutFromGoogle,
   storeSessionToken,
+  verifyEmailSignInCode,
   type AuthConfig,
+  type EmailCodeDeliveryResponse,
   type GoogleCredentialResponse,
   type SessionUser,
   validateSession,
@@ -41,6 +44,8 @@ export function useAppAuth({ resetWorkspace }: UseAppAuthArgs) {
   const enforcedAuthConfig = authConfig?.enabled ? authConfig : null;
   const googleClientId = resolveGoogleClientId(authConfig);
   const hostedDomain = enforcedAuthConfig?.hostedDomain ?? "";
+  const isGoogleAuthAvailable = Boolean(googleClientId);
+  const isEmailAuthAvailable = Boolean(enforcedAuthConfig?.emailEnabled);
   const isLocalGoogleOverrideActive = isUsingLocalGoogleClientIdOverride();
   const isLocalGoogleDevHost = isLocalGoogleAuthHost();
 
@@ -76,6 +81,49 @@ export function useAppAuth({ resetWorkspace }: UseAppAuthArgs) {
         setIsSigningIn(false);
       }
     },
+  );
+
+  const clearAuthMessage = useCallback(() => {
+    setAuthMessage(null);
+  }, []);
+
+  const handleRequestEmailCode = useCallback(
+    async (email: string): Promise<EmailCodeDeliveryResponse> => {
+      setIsSigningIn(true);
+      setAuthMessage(null);
+
+      try {
+        return await requestEmailSignInCode(email);
+      } catch (error) {
+        setAuthMessage(toErrorMessage(error));
+        throw error;
+      } finally {
+        setIsSigningIn(false);
+      }
+    },
+    [],
+  );
+
+  const handleVerifyEmailCode = useCallback(
+    async (email: string, code: string) => {
+      setIsSigningIn(true);
+      setAuthMessage(null);
+
+      try {
+        const session = await verifyEmailSignInCode(email, code);
+        storeSessionToken(session.token);
+        startTransition(() => {
+          setSessionUser(session.user);
+        });
+      } catch (error) {
+        clearStoredSessionToken();
+        setAuthMessage(toErrorMessage(error));
+        throw error;
+      } finally {
+        setIsSigningIn(false);
+      }
+    },
+    [],
   );
 
   useEffect(() => {
@@ -202,7 +250,7 @@ export function useAppAuth({ resetWorkspace }: UseAppAuthArgs) {
       cancelled = true;
       buttonSlot.innerHTML = "";
     };
-  }, [authBooting, googleClientId, handleGoogleCredential, hostedDomain, sessionUser]);
+  }, [authBooting, googleClientId, hostedDomain, sessionUser]);
 
   const handleSignOut = useCallback(() => {
     clearStoredSessionToken();
@@ -218,12 +266,17 @@ export function useAppAuth({ resetWorkspace }: UseAppAuthArgs) {
     authBooting,
     authConfig,
     authMessage,
+    clearAuthMessage,
     enforcedAuthConfig,
     expireSession,
     googleButtonRef,
     handleSignOut,
+    handleRequestEmailCode,
+    handleVerifyEmailCode,
+    isEmailAuthAvailable,
     isLocalGoogleDevHost,
     isLocalGoogleOverrideActive,
+    isGoogleAuthAvailable,
     isSigningIn,
     sessionUser,
   };

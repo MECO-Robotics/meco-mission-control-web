@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 
 import { IconManufacturing, IconTasks } from "../shared/Icons";
 import type { BootstrapPayload, PartDefinitionRecord } from "../../types";
@@ -8,26 +8,24 @@ import {
   SearchToolbarInput,
   TableCell,
 } from "./WorkspaceViewShared";
-import { getStatusPillStyle } from "./workspaceUtils";
-import { WORKSPACE_PANEL_STYLE } from "./workspaceTypes";
+import { getStatusPillClassName } from "./workspaceUtils";
+import { WORKSPACE_PANEL_CLASS } from "./workspaceTypes";
 import { PART_STATUS_OPTIONS } from "./workspaceOptions";
 
 interface PartsViewProps {
   bootstrap: BootstrapPayload;
-  handleDeletePartDefinition: (id: string) => void;
-  isDeletingPartDefinition: boolean;
   openCreatePartDefinitionModal: () => void;
   openEditPartDefinitionModal: (item: PartDefinitionRecord) => void;
+  mechanismsById: Record<string, BootstrapPayload["mechanisms"][number]>;
   partDefinitionsById: Record<string, BootstrapPayload["partDefinitions"][number]>;
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
 }
 
 export function PartsView({
   bootstrap,
-  handleDeletePartDefinition,
-  isDeletingPartDefinition,
   openCreatePartDefinitionModal,
   openEditPartDefinitionModal,
+  mechanismsById,
   partDefinitionsById,
   subsystemsById,
 }: PartsViewProps) {
@@ -57,23 +55,27 @@ export function PartsView({
     const search = partSearch.toLowerCase();
     return bootstrap.partInstances.filter((partInstance) => {
       const definition = partDefinitionsById[partInstance.partDefinitionId];
+      const mechanismName = partInstance.mechanismId
+        ? mechanismsById[partInstance.mechanismId]?.name ?? ""
+        : "";
       const matchesSearch =
         !search ||
         partInstance.name.toLowerCase().includes(search) ||
         definition?.name.toLowerCase().includes(search) ||
-        definition?.partNumber.toLowerCase().includes(search);
+        definition?.partNumber.toLowerCase().includes(search) ||
+        mechanismName.toLowerCase().includes(search);
       const matchesSubsystem = partSubsystem === "all" || partInstance.subsystemId === partSubsystem;
       const matchesStatus = partStatus === "all" || partInstance.status === partStatus;
       return matchesSearch && matchesSubsystem && matchesStatus;
     });
-  }, [bootstrap.partInstances, partDefinitionsById, partSearch, partStatus, partSubsystem]);
+  }, [bootstrap.partInstances, mechanismsById, partDefinitionsById, partSearch, partStatus, partSubsystem]);
 
   return (
-    <section className="panel dense-panel part-manager-shell" style={WORKSPACE_PANEL_STYLE}>
+    <section className={`panel dense-panel part-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
       <div className="panel-header compact-header">
         <div className="queue-section-header">
-          <h2 style={{ color: "var(--text-title)" }}>Part manager</h2>
-          <p className="section-copy" style={{ color: "var(--text-copy)" }}>
+          <h2>Part manager</h2>
+          <p className="section-copy">
             Reusable part definitions and subsystem-specific part instances for traceability.
           </p>
         </div>
@@ -119,13 +121,9 @@ export function PartsView({
         <div className="table-shell">
           <div
             className="ops-table ops-table-header"
-            style={{
-              gridTemplateColumns: "minmax(180px, 2fr) 1fr 0.6fr 0.8fr 1fr 0.8fr",
-              borderBottom: "1px solid var(--border-base)",
-              color: "var(--text-copy)",
-            }}
+            style={{ "--workspace-grid-template": "minmax(180px, 2fr) 1fr 0.6fr 0.8fr 1fr 0.8fr" } as CSSProperties}
           >
-            <span style={{ textAlign: "left" }}>Part</span>
+            <span>Part</span>
             <span>Number</span>
             <span>Rev</span>
             <span>Type</span>
@@ -148,18 +146,11 @@ export function PartsView({
               }}
               role="button"
               tabIndex={0}
-              style={{
-                gridTemplateColumns: "minmax(180px, 2fr) 1fr 0.6fr 0.8fr 1fr 0.8fr",
-                padding: "12px 16px",
-                borderBottom: "1px solid var(--border-base)",
-                color: "var(--text-copy)",
-                background: "var(--bg-row-alt)",
-                cursor: "pointer",
-              }}
+              style={{ "--workspace-grid-template": "minmax(180px, 2fr) 1fr 0.6fr 0.8fr 1fr 0.8fr" } as CSSProperties}
               title={`Edit ${partDefinition.name}`}
             >
               <TableCell label="Part">
-                <strong style={{ color: "var(--text-title)" }}>{partDefinition.name}</strong>
+                <strong>{partDefinition.name}</strong>
                 {partDefinition.description ? <small>{partDefinition.description}</small> : null}
               </TableCell>
               <TableCell label="Number">{partDefinition.partNumber}</TableCell>
@@ -171,23 +162,8 @@ export function PartsView({
                   : null) ?? "Unassigned"}
               </TableCell>
               <TableCell label="Actions" valueClassName="table-cell-actions">
-                <span
-                  className="part-manager-row-actions editable-action-reveal"
-                  style={{ display: "flex", gap: "0.35rem", justifyContent: "flex-end", width: "100%" }}
-                >
+                <span className="part-manager-row-actions editable-action-reveal">
                   <EditableHoverIndicator className="editable-hover-indicator-inline" />
-                  <button
-                    className="danger-action part-manager-danger-action"
-                    disabled={isDeletingPartDefinition}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      handleDeletePartDefinition(partDefinition.id);
-                    }}
-                    style={{ padding: "0.35rem 0.6rem" }}
-                    type="button"
-                  >
-                    Delete
-                  </button>
                 </span>
               </TableCell>
             </div>
@@ -200,19 +176,16 @@ export function PartsView({
 
       <div className="panel-subsection">
         <div className="roster-section-header">
-          <h3 style={{ color: "var(--text-title)" }}>Part instances</h3>
+          <h3>Part instances</h3>
         </div>
         <div className="table-shell">
           <div
             className="ops-table ops-table-header"
-            style={{
-              gridTemplateColumns: "minmax(180px, 2fr) 1fr 1fr 0.5fr 0.8fr",
-              borderBottom: "1px solid var(--border-base)",
-              color: "var(--text-copy)",
-            }}
+            style={{ "--workspace-grid-template": "minmax(180px, 2fr) 1fr 1fr 1fr 0.5fr 0.8fr" } as CSSProperties}
           >
-            <span style={{ textAlign: "left" }}>Instance</span>
+            <span>Instance</span>
             <span>Definition</span>
+            <span>Mechanism</span>
             <span>Subsystem</span>
             <span>Qty</span>
             <span>Status</span>
@@ -221,27 +194,26 @@ export function PartsView({
             <div
               className="ops-table ops-row"
               key={partInstance.id}
-              style={{
-                gridTemplateColumns: "minmax(180px, 2fr) 1fr 1fr 0.5fr 0.8fr",
-                padding: "12px 16px",
-                borderBottom: "1px solid var(--border-base)",
-                color: "var(--text-copy)",
-                background: "var(--bg-row-alt)",
-              }}
+              style={{ "--workspace-grid-template": "minmax(180px, 2fr) 1fr 1fr 1fr 0.5fr 0.8fr" } as CSSProperties}
             >
               <TableCell label="Instance">
-                <strong style={{ color: "var(--text-title)" }}>{partInstance.name}</strong>
+                <strong>{partInstance.name}</strong>
                 <small>{partInstance.trackIndividually ? "Individual tracking" : "Bulk quantity"}</small>
               </TableCell>
               <TableCell label="Definition">
                 {partDefinitionsById[partInstance.partDefinitionId]?.name ?? "Unknown part"}
+              </TableCell>
+              <TableCell label="Mechanism">
+                {partInstance.mechanismId
+                  ? mechanismsById[partInstance.mechanismId]?.name ?? "Unknown"
+                  : "Unassigned"}
               </TableCell>
               <TableCell label="Subsystem">
                 {(partInstance.subsystemId ? subsystemsById[partInstance.subsystemId]?.name : null) ?? "Unknown"}
               </TableCell>
               <TableCell label="Qty">{partInstance.quantity}</TableCell>
               <TableCell label="Status" valueClassName="table-cell-pill">
-                <span style={getStatusPillStyle(partInstance.status)}>{partInstance.status}</span>
+                <span className={getStatusPillClassName(partInstance.status)}>{partInstance.status}</span>
               </TableCell>
             </div>
           ))}

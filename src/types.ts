@@ -175,6 +175,23 @@ export interface TaskRecord {
   documentationLinked: boolean;
 }
 
+export interface WorkLogRecord {
+  id: string;
+  taskId: string;
+  date: string;
+  hours: number;
+  participantIds: string[];
+  notes: string;
+}
+
+export interface WorkLogPayload {
+  taskId: string;
+  date: string;
+  hours: number;
+  participantIds: string[];
+  notes: string;
+}
+
 export interface ManufacturingItemRecord {
   id: string;
   title: string;
@@ -184,6 +201,7 @@ export interface ManufacturingItemRecord {
   dueDate: string;
   material: string;
   materialId: string | null;
+  partDefinitionId: string | null;
   partInstanceId: string | null;
   quantity: number;
   status: ManufacturingStatus;
@@ -196,6 +214,7 @@ export interface PurchaseItemRecord {
   title: string;
   subsystemId: string;
   requestedById: string | null;
+  partDefinitionId: string | null;
   quantity: number;
   vendor: string;
   linkLabel: string;
@@ -209,6 +228,7 @@ export interface PurchaseItemPayload {
   title: string;
   subsystemId: string;
   requestedById: string | null;
+  partDefinitionId: string | null;
   quantity: number;
   vendor: string;
   linkLabel: string;
@@ -226,6 +246,7 @@ export interface ManufacturingItemPayload {
   dueDate: string;
   material: string;
   materialId: string | null;
+  partDefinitionId: string | null;
   partInstanceId: string | null;
   quantity: number;
   status: ManufacturingStatus;
@@ -244,6 +265,7 @@ export interface BootstrapPayload {
   partInstances: PartInstanceRecord[];
   events: EventRecord[];
   tasks: TaskRecord[];
+  workLogs: WorkLogRecord[];
   purchaseItems: PurchaseItemRecord[];
   manufacturingItems: ManufacturingItemRecord[];
 }
@@ -271,6 +293,21 @@ export interface PartDefinitionPayload {
   type: string;
   source: string;
   materialId: string | null;
+  description: string;
+}
+
+export interface SubsystemPayload {
+  name: string;
+  description: string;
+  isCore: boolean;
+  responsibleEngineerId: string | null;
+  mentorIds: string[];
+  risks: string[];
+}
+
+export interface MechanismPayload {
+  subsystemId: string;
+  name: string;
   description: string;
 }
 

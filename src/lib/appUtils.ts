@@ -1,17 +1,21 @@
 import type {
-    BootstrapPayload,
-    ManufacturingItemPayload,
-    ManufacturingItemRecord,
-    MaterialPayload,
-    MaterialRecord,
-    PartDefinitionPayload,
-    PartDefinitionRecord,
-    PartInstancePayload,
-    PartInstanceRecord,
-    PurchaseItemPayload,
-    PurchaseItemRecord,
-    TaskPayload,
-    TaskRecord,
+  BootstrapPayload,
+  ManufacturingItemPayload,
+  ManufacturingItemRecord,
+  MaterialPayload,
+  MaterialRecord,
+  MechanismPayload,
+  PartDefinitionPayload,
+  PartDefinitionRecord,
+  PartInstancePayload,
+  PartInstanceRecord,
+  PurchaseItemPayload,
+  PurchaseItemRecord,
+  SubsystemPayload,
+  SubsystemRecord,
+  TaskPayload,
+  TaskRecord,
+  WorkLogPayload,
 } from "../types";
 
 export function toErrorMessage(error: unknown) {
@@ -59,8 +63,11 @@ export function buildEmptyTaskPayload(bootstrap: BootstrapPayload): TaskPayload 
         bootstrap.mechanisms.find((mechanism) => mechanism.subsystemId === firstSubsystem)?.id ??
         null;
     const firstPartInstance =
-        bootstrap.partInstances.find((partInstance) => partInstance.subsystemId === firstSubsystem)?.id ??
-        null;
+        firstMechanism
+            ? bootstrap.partInstances.find(
+                (partInstance) => partInstance.mechanismId === firstMechanism,
+            )?.id ?? null
+            : null;
     const firstEvent = bootstrap.events[0]?.id ?? null;
     const firstStudent =
         bootstrap.members.find((m) => m.role === "lead")?.id ??
@@ -97,10 +104,13 @@ export function buildEmptyTaskPayload(bootstrap: BootstrapPayload): TaskPayload 
 }
 
 export function buildEmptyPurchasePayload(bootstrap: BootstrapPayload): PurchaseItemPayload {
+    const firstPartDefinition = bootstrap.partDefinitions[0] ?? null;
+
     return {
-        title: "",
+        title: firstPartDefinition?.name ?? "",
         subsystemId: bootstrap.subsystems[0]?.id ?? "",
         requestedById: bootstrap.members[0]?.id ?? null,
+        partDefinitionId: firstPartDefinition?.id ?? null,
         quantity: 1,
         vendor: "",
         linkLabel: "",
@@ -113,20 +123,41 @@ export function buildEmptyPurchasePayload(bootstrap: BootstrapPayload): Purchase
 
 export function buildEmptyManufacturingPayload(bootstrap: BootstrapPayload, process: ManufacturingItemPayload["process"]): ManufacturingItemPayload {
     const firstMaterial = bootstrap.materials[0] ?? null;
+    const firstPartDefinition = process === "fabrication" ? null : bootstrap.partDefinitions[0] ?? null;
     return {
-        title: "",
+        title: firstPartDefinition?.name ?? "",
         subsystemId: bootstrap.subsystems[0]?.id ?? "",
         requestedById: bootstrap.members[0]?.id ?? null,
         process,
         dueDate: new Date().toISOString().slice(0, 10),
         material: firstMaterial?.name ?? "",
         materialId: firstMaterial?.id ?? null,
+        partDefinitionId: firstPartDefinition?.id ?? null,
         partInstanceId: bootstrap.partInstances[0]?.id ?? null,
         quantity: 1,
         status: "requested",
         mentorReviewed: false,
         batchLabel: "",
     };
+}
+
+export function buildEmptyWorkLogPayload(
+  bootstrap: BootstrapPayload,
+  defaultParticipantId: string | null = null,
+): WorkLogPayload {
+  const participantId =
+    defaultParticipantId &&
+    bootstrap.members.some((member) => member.id === defaultParticipantId)
+      ? defaultParticipantId
+      : bootstrap.members[0]?.id ?? null;
+
+  return {
+    taskId: bootstrap.tasks[0]?.id ?? "",
+    date: new Date().toISOString().slice(0, 10),
+    hours: 1,
+    participantIds: participantId ? [participantId] : [],
+    notes: "",
+  };
 }
 
 export function buildEmptyMaterialPayload(): MaterialPayload {
@@ -154,12 +185,58 @@ export function buildEmptyPartDefinitionPayload(bootstrap: BootstrapPayload): Pa
     };
 }
 
-export function buildEmptyPartInstancePayload(bootstrap: BootstrapPayload): PartInstancePayload {
-    const firstSubsystem = bootstrap.subsystems[0]?.id ?? "";
+export function buildEmptySubsystemPayload(bootstrap: BootstrapPayload): SubsystemPayload {
+    const firstResponsibleEngineer =
+        bootstrap.members.find((member) => member.role === "lead")?.id ??
+        bootstrap.members.find((member) => member.role === "student")?.id ??
+        bootstrap.members[0]?.id ??
+        null;
+    const firstMentor = bootstrap.members.find((member) => member.role === "mentor")?.id ?? null;
+
+    return {
+        name: "",
+        description: "",
+        isCore: false,
+        responsibleEngineerId: firstResponsibleEngineer,
+        mentorIds: firstMentor ? [firstMentor] : [],
+        risks: [],
+    };
+}
+
+export function buildEmptyMechanismPayload(
+    bootstrap: BootstrapPayload,
+    subsystemId?: string,
+): MechanismPayload {
+    const firstSubsystem =
+        subsystemId && subsystemId.length > 0
+            ? subsystemId
+            : bootstrap.subsystems[0]?.id ?? "";
+
     return {
         subsystemId: firstSubsystem,
-        mechanismId: bootstrap.mechanisms.find((mechanism) => mechanism.subsystemId === firstSubsystem)?.id ?? null,
-        partDefinitionId: bootstrap.partDefinitions[0]?.id ?? "",
+        name: "",
+        description: "",
+    };
+}
+
+export function buildEmptyPartInstancePayload(
+    bootstrap: BootstrapPayload,
+    defaults: {
+        subsystemId?: string;
+        mechanismId?: string | null;
+        partDefinitionId?: string;
+    } = {},
+): PartInstancePayload {
+    const firstSubsystem = defaults.subsystemId ?? bootstrap.subsystems[0]?.id ?? "";
+    const firstMechanism =
+        defaults.mechanismId !== undefined
+            ? defaults.mechanismId
+            : bootstrap.mechanisms.find((mechanism) => mechanism.subsystemId === firstSubsystem)?.id ??
+              null;
+    return {
+        subsystemId: firstSubsystem,
+        mechanismId: firstMechanism,
+        partDefinitionId: defaults.partDefinitionId ?? bootstrap.partDefinitions[0]?.id ?? "",
         name: "",
         quantity: 1,
         trackIndividually: false,
@@ -171,12 +248,14 @@ export const taskToPayload = (task: TaskRecord): TaskPayload => ({ ...task });
 
 export const purchaseToPayload = (item: PurchaseItemRecord): PurchaseItemPayload => ({
     ...item,
+    partDefinitionId: item.partDefinitionId ?? null,
     finalCost: item.finalCost ?? undefined,
 });
 
 export const manufacturingToPayload = (item: ManufacturingItemRecord): ManufacturingItemPayload => ({
     ...item,
     materialId: item.materialId ?? null,
+    partDefinitionId: item.partDefinitionId ?? null,
     partInstanceId: item.partInstanceId ?? null,
     batchLabel: item.batchLabel ?? "",
 });
@@ -186,6 +265,18 @@ export const materialToPayload = (item: MaterialRecord): MaterialPayload => ({ .
 export const partDefinitionToPayload = (item: PartDefinitionRecord): PartDefinitionPayload => ({
     ...item,
     materialId: item.materialId ?? null,
+});
+
+export const subsystemToPayload = (item: SubsystemRecord): SubsystemPayload => ({
+    ...item,
+});
+
+export const mechanismToPayload = (item: {
+    subsystemId: string;
+    name: string;
+    description: string;
+}): MechanismPayload => ({
+    ...item,
 });
 
 export const partInstanceToPayload = (item: PartInstanceRecord): PartInstancePayload => ({

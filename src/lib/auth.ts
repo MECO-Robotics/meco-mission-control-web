@@ -4,6 +4,8 @@ import type {
   ManufacturingItemRecord,
   MaterialPayload,
   MaterialRecord,
+  MechanismPayload,
+  MechanismRecord,
   MemberPayload,
   MemberRecord,
   PartDefinitionPayload,
@@ -12,8 +14,12 @@ import type {
   PartInstanceRecord,
   PurchaseItemPayload,
   PurchaseItemRecord,
+  SubsystemPayload,
+  SubsystemRecord,
   TaskPayload,
   TaskRecord,
+  WorkLogPayload,
+  WorkLogRecord,
 } from "../types";
 
 const DEFAULT_API_BASE_URL = "/api";
@@ -27,10 +33,12 @@ export interface AuthConfig {
   enabled: boolean;
   googleClientId: string | null;
   hostedDomain: string;
+  emailEnabled: boolean;
 }
 
 export interface SessionUser {
-  googleUserId: string;
+  accountId: string;
+  authProvider: "google" | "email";
   email: string;
   name: string;
   picture: string | null;
@@ -40,6 +48,11 @@ export interface SessionUser {
 export interface SessionResponse {
   token: string;
   user: SessionUser;
+}
+
+export interface EmailCodeDeliveryResponse {
+  sentTo: string;
+  expiresInMinutes: number;
 }
 
 export interface GoogleCredentialResponse {
@@ -150,6 +163,18 @@ async function requestApi<T>(
   }
 }
 
+async function postJson<T>(path: string, body: unknown) {
+  const response = await fetch(buildApiUrl(path), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  return readJson<T>(response);
+}
+
 function isAuthConfig(payload: unknown): payload is AuthConfig {
   if (!payload || typeof payload !== "object") {
     return false;
@@ -160,7 +185,8 @@ function isAuthConfig(payload: unknown): payload is AuthConfig {
     typeof candidate.enabled === "boolean" &&
     (typeof candidate.googleClientId === "string" ||
       candidate.googleClientId === null) &&
-    typeof candidate.hostedDomain === "string"
+    typeof candidate.hostedDomain === "string" &&
+    typeof candidate.emailEnabled === "boolean"
   );
 }
 
@@ -186,10 +212,19 @@ function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapPayload 
     })),
     events: source.events ?? [],
     tasks: source.tasks ?? [],
-    purchaseItems: source.purchaseItems ?? [],
+    workLogs: (source.workLogs ?? []).map((workLog) => ({
+      ...workLog,
+      participantIds: workLog.participantIds ?? [],
+      notes: workLog.notes ?? "",
+    })),
+    purchaseItems: (source.purchaseItems ?? []).map((item) => ({
+      ...item,
+      partDefinitionId: item.partDefinitionId ?? null,
+    })),
     manufacturingItems: (source.manufacturingItems ?? []).map((item) => ({
       ...item,
       materialId: item.materialId ?? null,
+      partDefinitionId: item.partDefinitionId ?? null,
       partInstanceId: item.partInstanceId ?? null,
     })),
   };
@@ -210,7 +245,7 @@ export async function fetchAuthConfig() {
 }
 
 export function resolveGoogleClientId(config: AuthConfig | null) {
-  if (!config?.enabled) {
+  if (!config?.enabled || !config.googleClientId) {
     return null;
   }
 
@@ -250,6 +285,118 @@ export async function createTask(
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
+    },
+    onUnauthorized,
+  );
+
+  return response.item;
+}
+
+export async function createWorkLogRecord(
+  payload: WorkLogPayload,
+  onUnauthorized?: () => void,
+) {
+  const response = await requestApi<{ item: WorkLogRecord }>(
+    "/work-logs",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    },
+    onUnauthorized,
+  );
+
+  return response.item;
+}
+
+export async function createSubsystemRecord(
+  payload: SubsystemPayload,
+  onUnauthorized?: () => void,
+) {
+  const response = await requestApi<{ item: SubsystemRecord }>(
+    "/subsystems",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    },
+    onUnauthorized,
+  );
+
+  return response.item;
+}
+
+export async function updateSubsystemRecord(
+  subsystemId: string,
+  payload: Partial<SubsystemPayload>,
+  onUnauthorized?: () => void,
+) {
+  const response = await requestApi<{ item: SubsystemRecord }>(
+    `/subsystems/${subsystemId}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    },
+    onUnauthorized,
+  );
+
+  return response.item;
+}
+
+export async function createMechanismRecord(
+  payload: MechanismPayload,
+  onUnauthorized?: () => void,
+) {
+  const response = await requestApi<{ item: MechanismRecord }>(
+    "/mechanisms",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    },
+    onUnauthorized,
+  );
+
+  return response.item;
+}
+
+export async function updateMechanismRecord(
+  mechanismId: string,
+  payload: Partial<MechanismPayload>,
+  onUnauthorized?: () => void,
+) {
+  const response = await requestApi<{ item: MechanismRecord }>(
+    `/mechanisms/${mechanismId}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    },
+    onUnauthorized,
+  );
+
+  return response.item;
+}
+
+export async function deleteMechanismRecord(
+  mechanismId: string,
+  onUnauthorized?: () => void,
+) {
+  const response = await requestApi<{ item: MechanismRecord }>(
+    `/mechanisms/${mechanismId}`,
+    {
+      method: "DELETE",
     },
     onUnauthorized,
   );
@@ -572,15 +719,20 @@ export async function updateManufacturingItemRecord(
 }
 
 export async function exchangeGoogleCredential(credential: string) {
-  const response = await fetch(buildApiUrl("/auth/google"), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ credential }),
-  });
+  return postJson<SessionResponse>("/auth/google", { credential });
+}
 
-  return readJson<SessionResponse>(response);
+export async function requestEmailSignInCode(email: string) {
+  return postJson<EmailCodeDeliveryResponse>("/auth/email/start", {
+    email,
+  });
+}
+
+export async function verifyEmailSignInCode(email: string, code: string) {
+  return postJson<SessionResponse>("/auth/email/verify", {
+    email,
+    code,
+  });
 }
 
 export async function fetchCurrentUser(token: string) {
