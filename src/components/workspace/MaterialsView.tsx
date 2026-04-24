@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 
 import type { BootstrapPayload, MaterialRecord } from "../../types";
 import { IconManufacturing, IconTasks } from "../shared/Icons";
@@ -8,8 +8,8 @@ import {
   SearchToolbarInput,
   TableCell,
 } from "./WorkspaceViewShared";
-import { getStatusPillStyle } from "./workspaceUtils";
-import { WORKSPACE_PANEL_STYLE } from "./workspaceTypes";
+import { getStatusPillClassName } from "./workspaceUtils";
+import { WORKSPACE_PANEL_CLASS } from "./workspaceTypes";
 import { MATERIAL_CATEGORY_OPTIONS, MATERIAL_STOCK_OPTIONS } from "./workspaceOptions";
 
 interface MaterialsViewProps {
@@ -49,15 +49,15 @@ export function MaterialsView({
   }, [bootstrap.materials, category, search, stock]);
 
   return (
-    <section className="panel dense-panel" style={WORKSPACE_PANEL_STYLE}>
+    <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
       <div className="panel-header compact-header">
         <div className="queue-section-header">
-          <h2 style={{ color: "var(--text-title)" }}>Materials manager</h2>
-          <p className="section-copy" style={{ color: "var(--text-copy)" }}>
+          <h2>Materials manager</h2>
+          <p className="section-copy">
             Live inventory for stock, reorder thresholds, vendors, and shop locations.
           </p>
         </div>
-        <div className="panel-actions filter-toolbar materials-toolbar" style={{ justifyContent: "flex-end" }}>
+        <div className="panel-actions filter-toolbar materials-toolbar">
           <SearchToolbarInput
             ariaLabel="Search materials"
             onChange={setSearch}
@@ -98,13 +98,9 @@ export function MaterialsView({
       <div className="table-shell">
         <div
           className="ops-table ops-table-header materials-table"
-          style={{
-            gridTemplateColumns: MATERIALS_GRID_TEMPLATE,
-            borderBottom: "1px solid var(--border-base)",
-            color: "var(--text-copy)",
-          }}
+          style={{ "--workspace-grid-template": MATERIALS_GRID_TEMPLATE } as CSSProperties}
         >
-          <span style={{ textAlign: "left" }}>Material</span>
+          <span>Material</span>
           <span>Category</span>
           <span>On hand</span>
           <span>Reorder</span>
@@ -122,20 +118,13 @@ export function MaterialsView({
               className="ops-table ops-row materials-table editable-action-host"
               key={material.id}
               onClick={() => openEditMaterialModal(material)}
-              style={{
-                gridTemplateColumns: MATERIALS_GRID_TEMPLATE,
-                padding: "12px 16px",
-                borderBottom: "1px solid var(--border-base)",
-                color: "var(--text-copy)",
-                background: "var(--bg-row-alt)",
-                textAlign: "left",
-              }}
+              style={{ "--workspace-grid-template": MATERIALS_GRID_TEMPLATE } as CSSProperties}
               title={`Edit ${material.name}`}
               type="button"
             >
               <TableCell label="Material">
-                <strong style={{ color: "var(--text-title)" }}>{material.name}</strong>
-                {material.notes ? <small style={{ color: "var(--text-copy)" }}>{material.notes}</small> : null}
+                <strong>{material.name}</strong>
+                {material.notes ? <small>{material.notes}</small> : null}
               </TableCell>
               <TableCell label="Category">{material.category}</TableCell>
               <TableCell label="On hand">
@@ -147,12 +136,12 @@ export function MaterialsView({
               <TableCell label="Location">{material.location || "Unassigned"}</TableCell>
               <TableCell label="Vendor">{material.vendor || "Unknown"}</TableCell>
               <TableCell label="Status" valueClassName="table-cell-pill">
-                <span style={getStatusPillStyle(isLow ? "critical" : "complete")}>
+                <span className={getStatusPillClassName(isLow ? "critical" : "complete")}>
                   {isLow ? "Low stock" : "Stock OK"}
                 </span>
               </TableCell>
               <TableCell label="Actions" valueClassName="table-cell-actions">
-                <span className="editable-action-reveal" style={{ display: "inline-flex", gap: "0.35rem" }}>
+                <span className="editable-action-reveal editable-action-reveal-inline">
                   <EditableHoverIndicator className="editable-hover-indicator-inline" />
                 </span>
               </TableCell>

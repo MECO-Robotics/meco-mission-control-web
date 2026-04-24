@@ -1,39 +1,172 @@
-import { IconRefresh } from "../shared/Icons";
+import { type Dispatch, type SetStateAction } from "react";
+
+import { MECO_MAIN_LOGO_LIGHT_SRC, MECO_MAIN_LOGO_WHITE_SRC } from "../../lib/branding";
 import type { SessionUser } from "../../lib/auth";
+import type {
+  InventoryViewTab,
+  ManufacturingViewTab,
+  TaskViewTab,
+  ViewTab,
+} from "../workspace/workspaceTypes";
+import { IconRefresh } from "../shared/Icons";
+
+const TASK_VIEW_OPTIONS: { value: TaskViewTab; label: string }[] = [
+  { value: "timeline", label: "Timeline" },
+  { value: "queue", label: "Queue" },
+];
+
+const MANUFACTURING_VIEW_OPTIONS: { value: ManufacturingViewTab; label: string }[] = [
+  { value: "cnc", label: "CNC" },
+  { value: "prints", label: "3D print" },
+  { value: "fabrication", label: "Fabrication" },
+];
+
+const INVENTORY_VIEW_OPTIONS: { value: InventoryViewTab; label: string }[] = [
+  { value: "materials", label: "Materials" },
+  { value: "parts", label: "Parts" },
+  { value: "purchases", label: "Purchases" },
+];
+
+const SECTION_LABELS: Record<ViewTab, string> = {
+  tasks: "Tasks",
+  worklogs: "Worklogs",
+  manufacturing: "Manufacturing",
+  inventory: "Inventory",
+  subsystems: "Subsystems",
+  roster: "Roster",
+};
+
+function TopbarTabs<T extends string>({
+  activeValue,
+  ariaLabel,
+  onChange,
+  options,
+}: {
+  activeValue: T;
+  ariaLabel: string;
+  onChange: Dispatch<SetStateAction<T>>;
+  options: { label: string; value: T }[];
+}) {
+  return (
+    <div className="tabbar workspace-section-tabs app-topbar-section-tabs" aria-label={ariaLabel} role="group">
+      {options.map((option) => {
+        const isActive = activeValue === option.value;
+
+        return (
+          <button
+            key={option.value}
+            aria-pressed={isActive}
+            className="tab"
+            data-active={isActive ? "true" : "false"}
+            onClick={() => onChange(option.value)}
+            type="button"
+          >
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function TopbarNavigation({
+  activeTab,
+  inventoryView,
+  manufacturingView,
+  setInventoryView,
+  setManufacturingView,
+  setTaskView,
+  taskView,
+}: {
+  activeTab: ViewTab;
+  inventoryView: InventoryViewTab;
+  manufacturingView: ManufacturingViewTab;
+  setInventoryView: Dispatch<SetStateAction<InventoryViewTab>>;
+  setManufacturingView: Dispatch<SetStateAction<ManufacturingViewTab>>;
+  setTaskView: Dispatch<SetStateAction<TaskViewTab>>;
+  taskView: TaskViewTab;
+}) {
+  switch (activeTab) {
+    case "tasks":
+      return (
+        <>
+          <span className="app-topbar-page-label">{SECTION_LABELS.tasks}</span>
+          <TopbarTabs
+            activeValue={taskView}
+            ariaLabel="Task views"
+            onChange={setTaskView}
+            options={TASK_VIEW_OPTIONS}
+          />
+        </>
+      );
+    case "manufacturing":
+      return (
+        <>
+          <span className="app-topbar-page-label">{SECTION_LABELS.manufacturing}</span>
+          <TopbarTabs
+            activeValue={manufacturingView}
+            ariaLabel="Manufacturing views"
+            onChange={setManufacturingView}
+            options={MANUFACTURING_VIEW_OPTIONS}
+          />
+        </>
+      );
+    case "inventory":
+      return (
+        <>
+          <span className="app-topbar-page-label">{SECTION_LABELS.inventory}</span>
+          <TopbarTabs
+            activeValue={inventoryView}
+            ariaLabel="Inventory views"
+            onChange={setInventoryView}
+            options={INVENTORY_VIEW_OPTIONS}
+          />
+        </>
+      );
+    default:
+      return <span className="app-topbar-page-label">{SECTION_LABELS[activeTab]}</span>;
+  }
+}
 
 interface AppTopbarProps {
+  activeTab: ViewTab;
   handleSignOut: () => void;
+  inventoryView: InventoryViewTab;
   isLoadingData: boolean;
-  loadWorkspace: () => Promise<void>;
-  sessionUser: SessionUser | null;
   isDarkMode: boolean;
+  isSidebarCollapsed: boolean;
+  loadWorkspace: () => Promise<void>;
+  manufacturingView: ManufacturingViewTab;
+  sessionUser: SessionUser | null;
+  setInventoryView: Dispatch<SetStateAction<InventoryViewTab>>;
+  setManufacturingView: Dispatch<SetStateAction<ManufacturingViewTab>>;
+  setTaskView: Dispatch<SetStateAction<TaskViewTab>>;
+  taskView: TaskViewTab;
   toggleDarkMode: () => void;
   toggleSidebar: () => void;
-  isSidebarCollapsed: boolean;
 }
 
 export function AppTopbar({
+  activeTab,
   handleSignOut,
+  inventoryView,
   isLoadingData,
-  loadWorkspace,
-  sessionUser,
   isDarkMode,
+  isSidebarCollapsed,
+  loadWorkspace,
+  manufacturingView,
+  sessionUser,
+  setInventoryView,
+  setManufacturingView,
+  setTaskView,
+  taskView,
   toggleDarkMode,
   toggleSidebar,
-  isSidebarCollapsed,
 }: AppTopbarProps) {
   return (
     <header
       className="topbar app-topbar"
       data-collapsed={isSidebarCollapsed ? "true" : "false"}
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        zIndex: 1000,
-        background: "var(--bg-panel)",
-        borderBottom: "1px solid var(--border-base)",
-      }}
     >
       <div className="app-topbar-left">
         <button
@@ -47,15 +180,25 @@ export function AppTopbar({
         </button>
         {!isSidebarCollapsed ? (
           <div className="app-topbar-brand">
-            <div className="app-topbar-logo-badge">
-              <img
-                alt="3D printing icon"
-                className="app-topbar-brand-icon"
-                src="/meco-favicon.svg"
-              />
-            </div>
+            <img
+              alt="MECO main logo"
+              className="app-topbar-brand-icon"
+              src={isDarkMode ? MECO_MAIN_LOGO_WHITE_SRC : MECO_MAIN_LOGO_LIGHT_SRC}
+            />
           </div>
         ) : null}
+      </div>
+
+      <div className="app-topbar-nav">
+        <TopbarNavigation
+          activeTab={activeTab}
+          inventoryView={inventoryView}
+          manufacturingView={manufacturingView}
+          setInventoryView={setInventoryView}
+          setManufacturingView={setManufacturingView}
+          setTaskView={setTaskView}
+          taskView={taskView}
+        />
       </div>
 
       <div className="topbar-right app-topbar-right">

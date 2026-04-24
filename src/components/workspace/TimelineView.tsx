@@ -3,7 +3,7 @@ import { IconPerson, IconTasks } from "../shared/Icons";
 import { dateDiffInDays } from "../../lib/appUtils";
 import type { BootstrapPayload, TaskRecord } from "../../types";
 import { EditableHoverIndicator } from "./WorkspaceViewShared";
-import { WORKSPACE_PANEL_STYLE } from "./workspaceTypes";
+import { WORKSPACE_PANEL_CLASS } from "./workspaceTypes";
 
 interface TimelineViewProps {
     bootstrap: BootstrapPayload;
@@ -130,8 +130,13 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         setCollapsedSubsystems((prev) => ({ ...prev, [id]: !prev[id] }));
     };
 
+    const activePersonFilterLabel =
+        activePersonFilter === "all"
+            ? "All roster"
+            : membersById[activePersonFilter]?.name ?? "Selected person";
+
     return (
-        <section className="panel dense-panel" style={{ ...WORKSPACE_PANEL_STYLE, color: "var(--text-copy)" }}>
+        <section className={`panel dense-panel timeline-layout ${WORKSPACE_PANEL_CLASS}`}>
             <div className="panel-header compact-header">
                 <div className="queue-section-header">
                     <h2 style={{ color: "var(--text-title)" }}>Subsystem timeline</h2>
@@ -144,13 +149,14 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 <div className="panel-actions filter-toolbar timeline-toolbar">
                     <label
                         aria-label="Filter person"
-                        className={`toolbar-filter toolbar-filter-compact${activePersonFilter !== "all" ? " is-active" : ""}`}
+                        className={`toolbar-filter toolbar-filter-compact timeline-roster-filter${activePersonFilter !== "all" ? " is-active" : ""}`}
                     >
                         <span aria-hidden="true" className="toolbar-filter-icon">
                             <IconPerson />
                         </span>
                         <select
                             onChange={(event) => setActivePersonFilter(event.target.value)}
+                            title={activePersonFilterLabel}
                             value={activePersonFilter}
                         >
                             <option value="all">All roster</option>

@@ -15,6 +15,7 @@ import type {
   SubsystemRecord,
   TaskPayload,
   TaskRecord,
+  WorkLogPayload,
 } from "../types";
 
 export function toErrorMessage(error: unknown) {
@@ -138,6 +139,25 @@ export function buildEmptyManufacturingPayload(bootstrap: BootstrapPayload, proc
         mentorReviewed: false,
         batchLabel: "",
     };
+}
+
+export function buildEmptyWorkLogPayload(
+  bootstrap: BootstrapPayload,
+  defaultParticipantId: string | null = null,
+): WorkLogPayload {
+  const participantId =
+    defaultParticipantId &&
+    bootstrap.members.some((member) => member.id === defaultParticipantId)
+      ? defaultParticipantId
+      : bootstrap.members[0]?.id ?? null;
+
+  return {
+    taskId: bootstrap.tasks[0]?.id ?? "",
+    date: new Date().toISOString().slice(0, 10),
+    hours: 1,
+    participantIds: participantId ? [participantId] : [],
+    notes: "",
+  };
 }
 
 export function buildEmptyMaterialPayload(): MaterialPayload {

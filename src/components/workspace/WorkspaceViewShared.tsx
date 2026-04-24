@@ -116,9 +116,9 @@ export function RequestedItemMeta({
   subsystemsById: SubsystemsById;
 }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-      <strong style={{ color: "var(--text-title)" }}>{item.title}</strong>
-      <small style={{ color: "var(--text-copy)" }}>
+    <div className="requested-item-meta">
+      <strong className="requested-item-title">{item.title}</strong>
+      <small className="requested-item-subtitle">
         {(item.subsystemId ? subsystemsById[item.subsystemId]?.name : null) ?? "Unknown subsystem"} /{" "}
         {(item.requestedById ? membersById[item.requestedById]?.name : null) ?? "Unassigned"}
       </small>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { IconSubsystems } from "../shared/Icons";
 import type { BootstrapPayload, MechanismRecord, SubsystemRecord } from "../../types";
@@ -255,7 +255,6 @@ export function SubsystemsView({
   }, [
     bootstrap.mechanisms,
     bootstrap.partInstances,
-    bootstrap.partDefinitions,
     bootstrap.subsystems,
     bootstrap.tasks,
     membersById,
@@ -263,24 +262,10 @@ export function SubsystemsView({
     scope,
     search,
   ]);
-
-  useEffect(() => {
-    if (filteredSubsystems.length === 0) {
-      if (selectedSubsystemId !== "") {
-        setSelectedSubsystemId("");
-      }
-      return;
-    }
-
-    if (!filteredSubsystems.some((subsystem) => subsystem.id === selectedSubsystemId)) {
-      setSelectedSubsystemId(filteredSubsystems[0].id);
-    }
-  }, [filteredSubsystems, selectedSubsystemId]);
-
-  const selectedSubsystem = useMemo(
-    () => filteredSubsystems.find((subsystem) => subsystem.id === selectedSubsystemId) ?? null,
-    [filteredSubsystems, selectedSubsystemId],
-  );
+  const selectedSubsystem =
+    filteredSubsystems.find((subsystem) => subsystem.id === selectedSubsystemId) ??
+    filteredSubsystems[0] ??
+    null;
 
   const filteredMechanisms = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();

@@ -11,6 +11,7 @@ export const EMPTY_BOOTSTRAP: BootstrapPayload = {
   partInstances: [],
   events: [],
   tasks: [],
+  workLogs: [],
   purchaseItems: [],
   manufacturingItems: [],
 };

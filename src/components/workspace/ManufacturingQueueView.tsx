@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 
 import { formatDate } from "../../lib/appUtils";
 import type { BootstrapPayload, ManufacturingItemRecord } from "../../types";
@@ -10,9 +10,9 @@ import {
   SearchToolbarInput,
   TableCell,
 } from "./WorkspaceViewShared";
-import { getStatusPillStyle } from "./workspaceUtils";
+import { getStatusPillClassName } from "./workspaceUtils";
 import type { MembersById, SubsystemsById } from "./workspaceTypes";
-import { WORKSPACE_PANEL_STYLE } from "./workspaceTypes";
+import { WORKSPACE_PANEL_CLASS } from "./workspaceTypes";
 import { MANUFACTURING_STATUS_OPTIONS } from "./workspaceOptions";
 
 interface ManufacturingQueueViewProps {
@@ -85,15 +85,15 @@ export function ManufacturingQueueView({
     .join(" ");
 
   return (
-    <section className="panel dense-panel" style={WORKSPACE_PANEL_STYLE}>
+    <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
       <div className="panel-header compact-header">
         <div className="queue-section-header">
-          <h2 style={{ color: "var(--text-title)" }}>{title}</h2>
-          <p className="section-copy filter-copy" style={{ color: "var(--text-copy)" }}>
+          <h2>{title}</h2>
+          <p className="section-copy filter-copy">
             {activePersonFilter === "all" ? filteredDescription : filteredDescription}
           </p>
         </div>
-        <div className="panel-actions filter-toolbar queue-toolbar" style={{ justifyContent: "flex-start" }}>
+        <div className="panel-actions filter-toolbar queue-toolbar">
           <SearchToolbarInput
             ariaLabel={`Search ${title}`}
             onChange={setSearch}
@@ -152,13 +152,9 @@ export function ManufacturingQueueView({
       <div className="table-shell">
         <div
           className="ops-table ops-table-header manufacturing-table"
-          style={{
-            gridTemplateColumns: gridTemplate,
-            borderBottom: "1px solid var(--border-base)",
-            color: "var(--text-copy)",
-          }}
+          style={{ "--workspace-grid-template": gridTemplate } as CSSProperties}
         >
-          <span style={{ textAlign: "left" }}>Part</span>
+          <span>Part</span>
           {material === "all" ? <span>Material</span> : null}
           <span>Qty</span>
           <span>Batch</span>
@@ -172,16 +168,10 @@ export function ManufacturingQueueView({
             className="ops-table ops-row manufacturing-table ops-button-row editable-hover-target editable-hover-target-row"
             key={item.id}
             onClick={() => onEdit(item)}
-            style={{
-              gridTemplateColumns: gridTemplate,
-              borderBottom: "1px solid var(--border-base)",
-              color: "var(--text-copy)",
-              background: "var(--bg-row-alt)",
-              marginBottom: "1px",
-            }}
+            style={{ "--workspace-grid-template": gridTemplate } as CSSProperties}
             type="button"
           >
-            <span className="queue-title table-cell table-cell-primary" data-label="Part" style={{ textAlign: "left" }}>
+            <span className="queue-title table-cell table-cell-primary" data-label="Part">
               <RequestedItemMeta item={item} membersById={membersById} subsystemsById={subsystemsById} />
             </span>
             {material === "all" ? <TableCell label="Material">{item.material}</TableCell> : null}
@@ -190,7 +180,7 @@ export function ManufacturingQueueView({
             <TableCell label="Due">{formatDate(item.dueDate)}</TableCell>
             {status === "all" ? (
               <TableCell label="Status" valueClassName="table-cell-pill">
-                <span style={getStatusPillStyle(item.status)}>{item.status.replace("-", " ")}</span>
+                <span className={getStatusPillClassName(item.status)}>{item.status.replace("-", " ")}</span>
               </TableCell>
             ) : null}
             <TableCell label="Mentor">{item.mentorReviewed ? "Reviewed" : "Pending"}</TableCell>

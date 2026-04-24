@@ -1,16 +1,18 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import type { BootstrapPayload } from "../../types";
 
 export type ViewTab =
-  | "timeline"
-  | "queue"
-  | "purchases"
-  | "cnc"
-  | "prints"
-  | "materials"
-  | "parts"
+  | "tasks"
+  | "worklogs"
+  | "manufacturing"
+  | "inventory"
+  | "subsystems"
   | "roster";
+
+export type TaskViewTab = "timeline" | "queue";
+export type ManufacturingViewTab = "cnc" | "prints" | "fabrication";
+export type InventoryViewTab = "materials" | "parts" | "purchases";
 
 export interface NavigationItem {
   value: ViewTab;
@@ -27,9 +29,4 @@ export interface DropdownOption {
 export type MembersById = Record<string, BootstrapPayload["members"][number]>;
 export type SubsystemsById = Record<string, BootstrapPayload["subsystems"][number]>;
 
-export const WORKSPACE_PANEL_STYLE: CSSProperties = {
-  margin: 0,
-  borderRadius: 0,
-  border: "none",
-  background: "var(--bg-panel)",
-};
+export const WORKSPACE_PANEL_CLASS = "workspace-panel";

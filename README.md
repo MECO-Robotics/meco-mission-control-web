@@ -73,7 +73,8 @@ To test Google sign-in from localhost, either:
 
 The web app reads its sign-in requirements from `PM-server` at `/api/auth/config`.
 
-- If the server has `GOOGLE_CLIENT_ID` and `AUTH_JWT_SECRET`, the app requires Google sign-in.
+- If the server has `GOOGLE_CLIENT_ID` and `AUTH_JWT_SECRET`, the app can require Google sign-in.
+- If the server also exposes email sign-in, the login card will show a one-time code fallback for verified `@mecorobotics.org` addresses.
 - If the server is not configured yet, the dashboard stays visible with a configuration-pending banner.
 - The frontend does not need a Google client secret. Do not add one to this repo or to frontend env files.
 

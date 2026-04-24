@@ -9,6 +9,7 @@ import {
   PurchaseEditorModal,
   SubsystemEditorModal,
   TaskEditorModal,
+  WorkLogEditorModal,
 } from "../components/workspace/WorkspaceModals";
 import type {
   ManufacturingModalMode,
@@ -19,6 +20,7 @@ import type {
   PurchaseModalMode,
   SubsystemModalMode,
   TaskModalMode,
+  WorkLogModalMode,
 } from "./appTypes";
 import type {
   BootstrapPayload,
@@ -31,6 +33,7 @@ import type {
   SubsystemPayload,
   TaskPayload,
   TaskRecord,
+  WorkLogPayload,
 } from "../types";
 
 interface WorkspaceModalHostProps {
@@ -46,6 +49,7 @@ interface WorkspaceModalHostProps {
   closePartInstanceModal: () => void;
   closePartDefinitionModal: () => void;
   closePurchaseModal: () => void;
+  closeWorkLogModal: () => void;
   closeSubsystemModal: () => void;
   closeTaskModal: () => void;
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
@@ -59,6 +63,7 @@ interface WorkspaceModalHostProps {
   handleMechanismSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
   handlePartDefinitionSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
   handlePurchaseSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleWorkLogSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
   handleSubsystemSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
   handleTaskSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
   isDeletingMaterial: boolean;
@@ -70,6 +75,7 @@ interface WorkspaceModalHostProps {
   isSavingPartInstance: boolean;
   isSavingMechanism: boolean;
   isSavingPurchase: boolean;
+  isSavingWorkLog: boolean;
   isSavingSubsystem: boolean;
   isSavingTask: boolean;
   manufacturingDraft: ManufacturingItemPayload;
@@ -89,6 +95,8 @@ interface WorkspaceModalHostProps {
   purchaseDraft: PurchaseItemPayload;
   purchaseFinalCost: string;
   purchaseModalMode: PurchaseModalMode;
+  workLogDraft: WorkLogPayload;
+  workLogModalMode: WorkLogModalMode;
   requirementsById: Record<string, BootstrapPayload["requirements"][number]>;
   setManufacturingDraft: Dispatch<SetStateAction<ManufacturingItemPayload>>;
   setMaterialDraft: Dispatch<SetStateAction<MaterialPayload>>;
@@ -97,6 +105,7 @@ interface WorkspaceModalHostProps {
   setPartDefinitionDraft: Dispatch<SetStateAction<PartDefinitionPayload>>;
   setPurchaseDraft: Dispatch<SetStateAction<PurchaseItemPayload>>;
   setPurchaseFinalCost: (value: string) => void;
+  setWorkLogDraft: Dispatch<SetStateAction<WorkLogPayload>>;
   setSubsystemDraft: Dispatch<SetStateAction<SubsystemPayload>>;
   setSubsystemDraftRisks: (value: string) => void;
   setTaskDraft: Dispatch<SetStateAction<TaskPayload>>;
@@ -123,6 +132,7 @@ export function WorkspaceModalHost({
   closePartInstanceModal,
   closePartDefinitionModal,
   closePurchaseModal,
+  closeWorkLogModal,
   closeSubsystemModal,
   closeTaskModal,
   disciplinesById,
@@ -136,6 +146,7 @@ export function WorkspaceModalHost({
   handleMechanismSubmit,
   handlePartDefinitionSubmit,
   handlePurchaseSubmit,
+  handleWorkLogSubmit,
   handleSubsystemSubmit,
   handleTaskSubmit,
   isDeletingMaterial,
@@ -147,6 +158,7 @@ export function WorkspaceModalHost({
   isSavingPartInstance,
   isSavingMechanism,
   isSavingPurchase,
+  isSavingWorkLog,
   isSavingSubsystem,
   isSavingTask,
   manufacturingDraft,
@@ -166,6 +178,8 @@ export function WorkspaceModalHost({
   purchaseDraft,
   purchaseFinalCost,
   purchaseModalMode,
+  workLogDraft,
+  workLogModalMode,
   requirementsById,
   setManufacturingDraft,
   setMaterialDraft,
@@ -174,6 +188,7 @@ export function WorkspaceModalHost({
   setPartDefinitionDraft,
   setPurchaseDraft,
   setPurchaseFinalCost,
+  setWorkLogDraft,
   setSubsystemDraft,
   setSubsystemDraftRisks,
   setTaskDraft,
@@ -265,6 +280,17 @@ export function WorkspaceModalHost({
           purchaseModalMode={purchaseModalMode}
           setPurchaseDraft={setPurchaseDraft}
           setPurchaseFinalCost={setPurchaseFinalCost}
+        />
+      ) : null}
+
+      {workLogModalMode ? (
+        <WorkLogEditorModal
+          bootstrap={bootstrap}
+          closeWorkLogModal={closeWorkLogModal}
+          handleWorkLogSubmit={handleWorkLogSubmit}
+          isSavingWorkLog={isSavingWorkLog}
+          setWorkLogDraft={setWorkLogDraft}
+          workLogDraft={workLogDraft}
         />
       ) : null}
 

@@ -1,7 +1,7 @@
 import React from "react";
 import { IconEdit, IconPlus, IconTrash } from "../shared/Icons";
 import type { BootstrapPayload, MemberPayload, MemberRecord } from "../../types";
-import { WORKSPACE_PANEL_STYLE } from "./workspaceTypes";
+import { WORKSPACE_PANEL_CLASS } from "./workspaceTypes";
 
 interface RosterViewProps {
     bootstrap: BootstrapPayload;
@@ -68,9 +68,9 @@ export const RosterView: React.FC<RosterViewProps> = ({
     };
 
     const renderMemberRow = (member: MemberRecord) => (
-        <div className={member.id === selectedMemberId ? "member-row active editable-action-host" : "member-row editable-action-host"} key={member.id} style={{ background: "var(--bg-row-alt)", borderBottom: "1px solid var(--border-base)" }}>
-            <button className="member-row-main" onClick={() => selectMember(member.id, bootstrap)} style={{ background: "transparent", border: "none", textAlign: "left", color: "inherit" }} type="button">
-                <strong style={{ color: "var(--text-title)" }}>{member.name}</strong>
+        <div className={member.id === selectedMemberId ? "member-row active editable-action-host" : "member-row editable-action-host"} key={member.id}>
+            <button className="member-row-main" onClick={() => selectMember(member.id, bootstrap)} type="button">
+                <strong>{member.name}</strong>
             </button>
             <div className="member-row-actions editable-action-reveal">
                 <button
@@ -87,19 +87,19 @@ export const RosterView: React.FC<RosterViewProps> = ({
     );
 
     return (
-        <section className="panel dense-panel roster-layout" style={{ ...WORKSPACE_PANEL_STYLE, color: "var(--text-copy)" }}>
+        <section className={`panel dense-panel roster-layout ${WORKSPACE_PANEL_CLASS}`}>
             <div className="panel-header compact-header">
                 <div className="queue-section-header">
-                    <h2 style={{ color: "var(--text-title)" }}>Roster</h2>
-                    <p className="section-copy" style={{ color: "var(--text-copy)" }}>Manage team members, permissions, and roles.</p>
+                    <h2>Roster</h2>
+                    <p className="section-copy">Manage team members, permissions, and roles.</p>
                 </div>
             </div>
             <div className="roster-columns">
                 <div className="panel-subsection">
                     <div className="roster-section-header">
                         <div className="roster-section-title">
-                            <h3 style={{ color: "var(--text-title)" }}>Students</h3>
-                            <span className="sidebar-tab-count" style={{ position: "static" }}>{regularStudents.length}</span>
+                            <h3>Students</h3>
+                            <span className="sidebar-tab-count">{regularStudents.length}</span>
                         </div>
                         <button className="roster-section-add" onClick={() => openAddPersonPanel("student")} type="button"><IconPlus /></button>
                     </div>
@@ -111,8 +111,8 @@ export const RosterView: React.FC<RosterViewProps> = ({
                 <div className="panel-subsection">
                     <div className="roster-section-header">
                         <div className="roster-section-title">
-                            <h3 style={{ color: "var(--text-title)" }}>Lead Students</h3>
-                            <span className="sidebar-tab-count" style={{ position: "static" }}>{leadStudents.length}</span>
+                            <h3>Lead Students</h3>
+                            <span className="sidebar-tab-count">{leadStudents.length}</span>
                         </div>
                         <button className="roster-section-add" onClick={() => openAddPersonPanel("lead")} type="button"><IconPlus /></button>
                     </div>
@@ -124,21 +124,13 @@ export const RosterView: React.FC<RosterViewProps> = ({
                 <div className="panel-subsection">
                     <div className="roster-section-header">
                         <div className="roster-section-title">
-                            <h3 style={{ color: "var(--text-title)" }}>Mentors</h3>
-                            <span className="sidebar-tab-count" style={{ position: "static" }}>{rosterMentors.length}</span>
+                            <h3>Mentors</h3>
+                            <span className="sidebar-tab-count">{rosterMentors.length}</span>
                         </div>
                         <button className="roster-section-add" onClick={() => openAddPersonPanel("mentor")} type="button"><IconPlus /></button>
                     </div>
                     <div className="roster-list">
                         {rosterMentors.map(renderMemberRow)}
-                    </div>
-                </div>
-
-                <div className="panel-subsection roster-editor-panel">
-                    <div className="compact-form">
-                        <div className="empty-state">
-                            <p>Select a person from the roster, then use the pencil button to edit them or delete them from the edit popup. Use the plus buttons to add new people.</p>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -152,23 +144,22 @@ export const RosterView: React.FC<RosterViewProps> = ({
                         }
                     }}
                     role="presentation"
-                    style={{ zIndex: 2000 }}
                 >
-                    <section aria-modal="true" className="modal-card roster-edit-modal" role="dialog" style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}>
-                        <div className="panel-header compact-header" style={{ padding: 0, marginBottom: "1rem" }}>
+                    <section aria-modal="true" className="modal-card roster-edit-modal" role="dialog">
+                        <div className="panel-header compact-header roster-modal-header">
                             <div className="queue-section-header">
-                                <h3 style={{ color: "var(--text-title)" }}>Add person</h3>
-                                <p className="section-copy" style={{ color: "var(--text-copy)" }}>Create a new roster entry and assign its role.</p>
+                                <h3>Add person</h3>
+                                <p className="section-copy">Create a new roster entry and assign its role.</p>
                             </div>
                         </div>
                         <form className="compact-form roster-inline-form" onSubmit={handleCreateMember}>
                             <label className="field">
-                                <span style={{ color: "var(--text-title)" }}>Name</span>
-                                <input onChange={(e) => setMemberForm((curr) => ({ ...curr, name: e.target.value }))} required style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }} value={memberForm.name} />
+                                <span>Name</span>
+                                <input onChange={(e) => setMemberForm((curr) => ({ ...curr, name: e.target.value }))} required value={memberForm.name} />
                             </label>
                             <label className="field">
-                                <span style={{ color: "var(--text-title)" }}>Role</span>
-                                <select onChange={(e) => setMemberForm((curr) => ({ ...curr, role: e.target.value as MemberPayload["role"] }))} style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }} value={memberForm.role}>
+                                <span>Role</span>
+                                <select onChange={(e) => setMemberForm((curr) => ({ ...curr, role: e.target.value as MemberPayload["role"] }))} value={memberForm.role}>
                                     <option value="student">Student</option>
                                     <option value="lead">Lead</option>
                                     <option value="mentor">Mentor</option>
@@ -193,23 +184,22 @@ export const RosterView: React.FC<RosterViewProps> = ({
                         }
                     }}
                     role="presentation"
-                    style={{ zIndex: 2000 }}
                 >
-                    <section aria-modal="true" className="modal-card roster-edit-modal" role="dialog" style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}>
-                        <div className="panel-header compact-header" style={{ padding: 0, marginBottom: "1rem" }}>
+                    <section aria-modal="true" className="modal-card roster-edit-modal" role="dialog">
+                        <div className="panel-header compact-header roster-modal-header">
                             <div className="queue-section-header">
-                                <h3 style={{ color: "var(--text-title)" }}>Edit selected person</h3>
-                                <p className="section-copy" style={{ color: "var(--text-copy)" }}>Update the name or role for the selected team member.</p>
+                                <h3>Edit selected person</h3>
+                                <p className="section-copy">Update the name or role for the selected team member.</p>
                             </div>
                         </div>
                         <form className="compact-form roster-inline-form" onSubmit={handleUpdateMember}>
                             <label className="field">
-                                <span style={{ color: "var(--text-title)" }}>Name</span>
-                                <input onChange={(e) => setMemberEditDraft(curr => curr ? { ...curr, name: e.target.value } : null)} style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }} value={memberEditDraft.name} />
+                                <span>Name</span>
+                                <input onChange={(e) => setMemberEditDraft(curr => curr ? { ...curr, name: e.target.value } : null)} value={memberEditDraft.name} />
                             </label>
                             <label className="field">
-                                <span style={{ color: "var(--text-title)" }}>Role</span>
-                                <select onChange={(e) => setMemberEditDraft(curr => curr ? { ...curr, role: e.target.value as MemberPayload["role"] } : null)} style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }} value={memberEditDraft.role}>
+                                <span>Role</span>
+                                <select onChange={(e) => setMemberEditDraft(curr => curr ? { ...curr, role: e.target.value as MemberPayload["role"] } : null)} value={memberEditDraft.role}>
                                     <option value="student">Student</option>
                                     <option value="lead">Lead</option>
                                     <option value="mentor">Mentor</option>
@@ -218,14 +208,13 @@ export const RosterView: React.FC<RosterViewProps> = ({
                             </label>
                             <div className="modal-actions modal-wide">
                                 <button
-                                    className="danger-action"
+                                    className="danger-action modal-actions-leading"
                                     disabled={isDeletingMember}
                                     onClick={() => {
                                         if (selectedMemberId) {
                                             handleDeleteMember(selectedMemberId);
                                         }
                                     }}
-                                    style={{ display: "inline-flex", alignItems: "center", gap: "0.45rem", marginRight: "auto", whiteSpace: "nowrap" }}
                                     type="button"
                                 >
                                     <IconTrash />

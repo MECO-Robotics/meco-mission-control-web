@@ -10,7 +10,12 @@ import { AuthStatusScreen, SignInScreen } from "../components/auth/AuthScreens";
 import { AppSidebar } from "../components/layout/AppSidebar";
 import { AppTopbar } from "../components/layout/AppTopbar";
 import { WorkspaceContent } from "../components/workspace/WorkspaceContent";
-import type { ViewTab } from "../components/workspace/workspaceTypes";
+import type {
+  InventoryViewTab,
+  ManufacturingViewTab,
+  TaskViewTab,
+  ViewTab,
+} from "../components/workspace/workspaceTypes";
 import {
   buildEmptyMechanismPayload,
   buildEmptyManufacturingPayload,
@@ -18,6 +23,7 @@ import {
   buildEmptyPartDefinitionPayload,
   buildEmptyPartInstancePayload,
   buildEmptyPurchasePayload,
+  buildEmptyWorkLogPayload,
   buildEmptySubsystemPayload,
   buildEmptyTaskPayload,
   joinList,
@@ -30,13 +36,14 @@ import {
   splitList,
   subsystemToPayload,
   taskToPayload,
-  toErrorMessage
+  toErrorMessage,
 } from "../lib/appUtils";
 import {
   createManufacturingItemRecord,
   createMaterialRecord,
   createMemberRecord,
   createMechanismRecord,
+  createWorkLogRecord,
   createSubsystemRecord,
   createPartDefinitionRecord,
   createPartInstanceRecord,
@@ -76,6 +83,7 @@ import type {
   SubsystemRecord,
   TaskPayload,
   TaskRecord,
+  WorkLogPayload,
 } from "../types";
 import { EMPTY_BOOTSTRAP } from "./appConstants";
 import type {
@@ -87,6 +95,7 @@ import type {
   PurchaseModalMode,
   SubsystemModalMode,
   TaskModalMode,
+  WorkLogModalMode,
 } from "./appTypes";
 import { useAppAuth } from "./useAppAuth";
 import { useAppShell } from "./useAppShell";
@@ -94,7 +103,11 @@ import { useWorkspaceDerivedData } from "./useWorkspaceDerivedData";
 import { WorkspaceModalHost } from "./WorkspaceModalHost";
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<ViewTab>("timeline");
+  const [activeTab, setActiveTab] = useState<ViewTab>("tasks");
+  const [taskView, setTaskView] = useState<TaskViewTab>("timeline");
+  const [manufacturingView, setManufacturingView] =
+    useState<ManufacturingViewTab>("cnc");
+  const [inventoryView, setInventoryView] = useState<InventoryViewTab>("materials");
   const [bootstrap, setBootstrap] = useState<BootstrapPayload>(EMPTY_BOOTSTRAP);
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [dataMessage, setDataMessage] = useState<string | null>(null);
@@ -137,6 +150,12 @@ export default function App() {
   );
   const [taskDraftBlockers, setTaskDraftBlockers] = useState("");
   const [isSavingTask, setIsSavingTask] = useState(false);
+
+  const [workLogModalMode, setWorkLogModalMode] = useState<WorkLogModalMode>(null);
+  const [workLogDraft, setWorkLogDraft] = useState<WorkLogPayload>(
+    buildEmptyWorkLogPayload(EMPTY_BOOTSTRAP),
+  );
+  const [isSavingWorkLog, setIsSavingWorkLog] = useState(false);
 
   const [purchaseModalMode, setPurchaseModalMode] =
     useState<PurchaseModalMode>(null);
@@ -220,6 +239,7 @@ export default function App() {
     cncItems,
     disciplinesById,
     eventsById,
+    fabricationItems,
     mechanismsById,
     mentors,
     membersById,
@@ -240,6 +260,10 @@ export default function App() {
     expireSession("Your session expired. Please sign in again.");
     setDataMessage("Your session expired. Please sign in again.");
   }, [expireSession]);
+
+  const clearDataMessage = useCallback(() => {
+    setDataMessage(null);
+  }, []);
 
   const selectMember = useCallback((memberId: string | null, payload: BootstrapPayload) => {
     const member = payload.members.find((candidate) => candidate.id === memberId) ?? null;
@@ -468,6 +492,20 @@ export default function App() {
     setActiveTaskId(null);
   };
 
+  const openCreateWorkLogModal = () => {
+    setWorkLogDraft(
+      buildEmptyWorkLogPayload(
+        bootstrap,
+        activePersonFilter === "all" ? null : activePersonFilter,
+      ),
+    );
+    setWorkLogModalMode("create");
+  };
+
+  const closeWorkLogModal = () => {
+    setWorkLogModalMode(null);
+  };
+
   const openCreatePurchaseModal = () => {
     setActivePurchaseId(null);
     setPurchaseDraft(buildEmptyPurchasePayload(bootstrap));
@@ -639,6 +677,48 @@ export default function App() {
       setDataMessage(toErrorMessage(error));
     } finally {
       setIsSavingTask(false);
+    }
+  };
+
+  const handleWorkLogSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSavingWorkLog(true);
+    setDataMessage(null);
+
+    try {
+      const taskExists = bootstrap.tasks.some(
+        (task) => task.id === workLogDraft.taskId,
+      );
+      if (!taskExists) {
+        setDataMessage("Please choose a real task before saving the work log.");
+        return;
+      }
+
+      const participantIds = Array.from(
+        new Set(
+          workLogDraft.participantIds.filter((participantId) =>
+            bootstrap.members.some((member) => member.id === participantId),
+          ),
+        ),
+      );
+      if (participantIds.length === 0) {
+        setDataMessage("Please choose at least one participant before saving the work log.");
+        return;
+      }
+
+      const payload: WorkLogPayload = {
+        ...workLogDraft,
+        notes: workLogDraft.notes.trim(),
+        participantIds,
+      };
+
+      await createWorkLogRecord(payload, handleUnauthorized);
+      await loadWorkspace();
+      closeWorkLogModal();
+    } catch (error) {
+      setDataMessage(toErrorMessage(error));
+    } finally {
+      setIsSavingWorkLog(false);
     }
   };
 
@@ -1035,10 +1115,17 @@ export default function App() {
       style={pageShellStyle}
     >
       <AppTopbar
+        activeTab={activeTab}
         handleSignOut={handleSignOut}
+        inventoryView={inventoryView}
         isLoadingData={isLoadingData}
         loadWorkspace={loadWorkspace}
+        manufacturingView={manufacturingView}
         sessionUser={sessionUser}
+        setInventoryView={setInventoryView}
+        setManufacturingView={setManufacturingView}
+        setTaskView={setTaskView}
+        taskView={taskView}
         isDarkMode={isDarkMode}
         toggleDarkMode={toggleDarkMode}
         toggleSidebar={toggleSidebar}
@@ -1058,6 +1145,7 @@ export default function App() {
         bootstrap={bootstrap}
         cncItems={cncItems}
         dataMessage={dataMessage}
+        fabricationItems={fabricationItems}
         handleCreateMember={handleCreateMember}
         handleDeleteMember={handleDeleteMember}
         handleUpdateMember={handleUpdateMember}
@@ -1077,6 +1165,7 @@ export default function App() {
         openCreatePartDefinitionModal={openCreatePartDefinitionModal}
         openCreatePurchaseModal={openCreatePurchaseModal}
         openCreateTaskModal={openCreateTaskModal}
+        openCreateWorkLogModal={openCreateWorkLogModal}
         openEditManufacturingModal={openEditManufacturingModal}
         openEditMaterialModal={openEditMaterialModal}
         openEditMechanismModal={openEditMechanismModal}
@@ -1087,6 +1176,9 @@ export default function App() {
         openEditTaskModal={openEditTaskModal}
         printItems={printItems}
         rosterMentors={rosterMentors}
+        manufacturingView={manufacturingView}
+        inventoryView={inventoryView}
+        taskView={taskView}
         selectMember={selectMember}
         selectedMemberId={selectedMemberId}
         setIsAddPersonOpen={setIsAddPersonOpen}
@@ -1102,6 +1194,7 @@ export default function App() {
         partInstancesById={partInstancesById}
         requirementsById={requirementsById}
         subsystemsById={subsystemsById}
+        onDismissDataMessage={clearDataMessage}
       />
 
       <WorkspaceModalHost
@@ -1117,6 +1210,7 @@ export default function App() {
         closePartInstanceModal={closePartInstanceModal}
         closePartDefinitionModal={closePartDefinitionModal}
         closePurchaseModal={closePurchaseModal}
+        closeWorkLogModal={closeWorkLogModal}
         closeSubsystemModal={closeSubsystemModal}
         closeTaskModal={closeTaskModal}
         disciplinesById={disciplinesById}
@@ -1130,6 +1224,7 @@ export default function App() {
         handleMaterialSubmit={handleMaterialSubmit}
         handlePartDefinitionSubmit={handlePartDefinitionSubmit}
         handlePurchaseSubmit={handlePurchaseSubmit}
+        handleWorkLogSubmit={handleWorkLogSubmit}
         handleSubsystemSubmit={handleSubsystemSubmit}
         handleTaskSubmit={handleTaskSubmit}
         isDeletingMaterial={isDeletingMaterial}
@@ -1141,6 +1236,7 @@ export default function App() {
         isSavingPartInstance={isSavingPartInstance}
         isSavingMechanism={isSavingMechanism}
         isSavingPurchase={isSavingPurchase}
+        isSavingWorkLog={isSavingWorkLog}
         isSavingSubsystem={isSavingSubsystem}
         isSavingTask={isSavingTask}
         manufacturingDraft={manufacturingDraft}
@@ -1160,6 +1256,8 @@ export default function App() {
         purchaseDraft={purchaseDraft}
         purchaseFinalCost={purchaseFinalCost}
         purchaseModalMode={purchaseModalMode}
+        workLogDraft={workLogDraft}
+        workLogModalMode={workLogModalMode}
         requirementsById={requirementsById}
         setMechanismDraft={setMechanismDraft}
         setManufacturingDraft={setManufacturingDraft}
@@ -1168,6 +1266,7 @@ export default function App() {
         setPartDefinitionDraft={setPartDefinitionDraft}
         setPurchaseDraft={setPurchaseDraft}
         setPurchaseFinalCost={setPurchaseFinalCost}
+        setWorkLogDraft={setWorkLogDraft}
         setSubsystemDraft={setSubsystemDraft}
         setSubsystemDraftRisks={setSubsystemDraftRisks}
         setTaskDraft={setTaskDraft}

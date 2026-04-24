@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 
 import { formatCurrency } from "../../lib/appUtils";
 import type { BootstrapPayload, PurchaseItemRecord } from "../../types";
@@ -10,9 +10,9 @@ import {
   SearchToolbarInput,
   TableCell,
 } from "./WorkspaceViewShared";
-import { getStatusPillStyle } from "./workspaceUtils";
+import { getStatusPillClassName } from "./workspaceUtils";
 import type { MembersById, SubsystemsById } from "./workspaceTypes";
-import { WORKSPACE_PANEL_STYLE } from "./workspaceTypes";
+import { WORKSPACE_PANEL_CLASS } from "./workspaceTypes";
 import { PURCHASE_APPROVAL_OPTIONS, PURCHASE_STATUS_OPTIONS } from "./workspaceOptions";
 
 interface PurchasesViewProps {
@@ -82,20 +82,17 @@ export function PurchasesView({
     .join(" ");
 
   return (
-    <section className="panel dense-panel" style={WORKSPACE_PANEL_STYLE}>
+    <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
       <div className="panel-header compact-header">
         <div className="queue-section-header">
-          <h2 style={{ color: "var(--text-title)" }}>Purchase list</h2>
-          <p className="section-copy filter-copy" style={{ color: "var(--text-copy)" }}>
+          <h2>Purchase list</h2>
+          <p className="section-copy filter-copy">
             {activePersonFilter === "all"
               ? "All purchase requests."
               : `Only requests submitted by ${membersById[activePersonFilter]?.name ?? "selected person"}.`}
           </p>
         </div>
-        <div
-          className="panel-actions filter-toolbar queue-toolbar purchase-toolbar"
-          style={{ justifyContent: "flex-start" }}
-        >
+        <div className="panel-actions filter-toolbar queue-toolbar purchase-toolbar">
           <SearchToolbarInput
             ariaLabel="Search purchase items"
             onChange={setSearch}
@@ -163,13 +160,9 @@ export function PurchasesView({
       <div className="table-shell">
         <div
           className="ops-table ops-table-header purchase-table"
-          style={{
-            gridTemplateColumns: gridTemplate,
-            borderBottom: "1px solid var(--border-base)",
-            color: "var(--text-copy)",
-          }}
+          style={{ "--workspace-grid-template": gridTemplate } as CSSProperties}
         >
-          <span style={{ textAlign: "left" }}>Item</span>
+          <span>Item</span>
           {vendor === "all" ? <span>Vendor</span> : null}
           <span>Qty</span>
           {status === "all" ? <span>Status</span> : null}
@@ -183,28 +176,22 @@ export function PurchasesView({
             className="ops-table ops-row purchase-table ops-button-row editable-hover-target editable-hover-target-row"
             key={item.id}
             onClick={() => openEditPurchaseModal(item)}
-            style={{
-              gridTemplateColumns: gridTemplate,
-              borderBottom: "1px solid var(--border-base)",
-              color: "var(--text-copy)",
-              background: "var(--bg-row-alt)",
-              marginBottom: "1px",
-            }}
+            style={{ "--workspace-grid-template": gridTemplate } as CSSProperties}
             type="button"
           >
-            <span className="queue-title table-cell table-cell-primary" data-label="Item" style={{ textAlign: "left" }}>
+            <span className="queue-title table-cell table-cell-primary" data-label="Item">
               <RequestedItemMeta item={item} membersById={membersById} subsystemsById={subsystemsById} />
             </span>
             {vendor === "all" ? <TableCell label="Vendor">{item.vendor}</TableCell> : null}
             <TableCell label="Qty">{item.quantity}</TableCell>
             {status === "all" ? (
               <TableCell label="Status" valueClassName="table-cell-pill">
-                <span style={getStatusPillStyle(item.status)}>{item.status}</span>
+                <span className={getStatusPillClassName(item.status)}>{item.status}</span>
               </TableCell>
             ) : null}
             {approval === "all" ? (
               <TableCell label="Mentor" valueClassName="table-cell-pill">
-                <span style={getStatusPillStyle(item.approvedByMentor ? "approved" : "waiting")}>
+                <span className={getStatusPillClassName(item.approvedByMentor ? "approved" : "waiting")}>
                   {item.approvedByMentor ? "Approved" : "Waiting"}
                 </span>
               </TableCell>
