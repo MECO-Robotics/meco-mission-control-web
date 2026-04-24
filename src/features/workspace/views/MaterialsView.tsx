@@ -5,8 +5,10 @@ import { IconManufacturing, IconTasks } from "@/components/shared";
 import {
   EditableHoverIndicator,
   FilterDropdown,
+  PaginationControls,
   SearchToolbarInput,
   TableCell,
+  useWorkspacePagination,
 } from "@/features/workspace/shared";
 import { getStatusPillClassName } from "@/features/workspace/shared";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
@@ -47,6 +49,7 @@ export function MaterialsView({
       return matchesSearch && matchesCategory && matchesStock;
     });
   }, [bootstrap.materials, category, search, stock]);
+  const materialPagination = useWorkspacePagination(filteredMaterials);
 
   return (
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
@@ -109,7 +112,7 @@ export function MaterialsView({
           <span>Status</span>
         </div>
 
-        {filteredMaterials.map((material) => {
+        {materialPagination.pageItems.map((material) => {
           const isLow = material.onHandQuantity <= material.reorderPoint;
           const materialSubtitle =
             material.notes.trim().length > 0
@@ -155,6 +158,18 @@ export function MaterialsView({
         {filteredMaterials.length === 0 ? (
           <p className="empty-state">No materials match the current filters.</p>
         ) : null}
+        <PaginationControls
+          label="materials"
+          onPageChange={materialPagination.setPage}
+          onPageSizeChange={materialPagination.setPageSize}
+          page={materialPagination.page}
+          pageSize={materialPagination.pageSize}
+          pageSizeOptions={materialPagination.pageSizeOptions}
+          rangeEnd={materialPagination.rangeEnd}
+          rangeStart={materialPagination.rangeStart}
+          totalItems={materialPagination.totalItems}
+          totalPages={materialPagination.totalPages}
+        />
       </div>
     </section>
   );

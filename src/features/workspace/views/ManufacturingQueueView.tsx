@@ -6,9 +6,11 @@ import { IconManufacturing, IconPerson, IconTasks } from "@/components/shared";
 import {
   EditableHoverIndicator,
   FilterDropdown,
+  PaginationControls,
   RequestedItemMeta,
   SearchToolbarInput,
   TableCell,
+  useWorkspacePagination,
 } from "@/features/workspace/shared";
 import { getStatusPillClassName } from "@/features/workspace/shared";
 import type { MembersById, SubsystemsById } from "@/features/workspace/shared";
@@ -71,6 +73,7 @@ export function ManufacturingQueueView({
       return matchesSearch && matchesSubsystem && matchesRequester && matchesStatus && matchesMaterial;
     });
   }, [items, material, requester, search, status, subsystem]);
+  const manufacturingPagination = useWorkspacePagination(filteredItems);
 
   const gridTemplate = [
     "minmax(200px, 2.5fr)",
@@ -163,7 +166,7 @@ export function ManufacturingQueueView({
           <span>Mentor</span>
         </div>
 
-        {filteredItems.map((item) => (
+        {manufacturingPagination.pageItems.map((item) => (
           <button
             className="ops-table ops-row manufacturing-table ops-button-row editable-hover-target editable-hover-target-row"
             key={item.id}
@@ -189,6 +192,18 @@ export function ManufacturingQueueView({
         ))}
 
         {filteredItems.length === 0 ? <p className="empty-state">{emptyStateMessage}</p> : null}
+        <PaginationControls
+          label={title}
+          onPageChange={manufacturingPagination.setPage}
+          onPageSizeChange={manufacturingPagination.setPageSize}
+          page={manufacturingPagination.page}
+          pageSize={manufacturingPagination.pageSize}
+          pageSizeOptions={manufacturingPagination.pageSizeOptions}
+          rangeEnd={manufacturingPagination.rangeEnd}
+          rangeStart={manufacturingPagination.rangeStart}
+          totalItems={manufacturingPagination.totalItems}
+          totalPages={manufacturingPagination.totalPages}
+        />
       </div>
     </section>
   );

@@ -6,8 +6,10 @@ import { IconSubsystems, IconWorkLogs } from "@/components/shared";
 import {
   EditableHoverIndicator,
   FilterDropdown,
+  PaginationControls,
   SearchToolbarInput,
   TableCell,
+  useWorkspacePagination,
 } from "@/features/workspace/shared";
 import type { DropdownOption, MembersById, SubsystemsById } from "@/features/workspace/shared";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
@@ -110,6 +112,7 @@ export function WorkLogsView({
     taskById,
     search,
   ]);
+  const workLogPagination = useWorkspacePagination(workLogs);
 
   const activePersonFilterLabel =
     activePersonFilter === "all"
@@ -189,7 +192,7 @@ export function WorkLogsView({
           <span>Open</span>
         </div>
 
-        {workLogs.map((workLog) => {
+        {workLogPagination.pageItems.map((workLog) => {
           const task = taskById[workLog.taskId];
           const subsystemName = task ? subsystemsById[task.subsystemId]?.name ?? "Unknown subsystem" : "Unknown task";
           const participantNames = workLog.participantIds
@@ -233,6 +236,18 @@ export function WorkLogsView({
         })}
 
         {workLogs.length === 0 ? <p className="empty-state">No work logs match the current filters.</p> : null}
+        <PaginationControls
+          label="work logs"
+          onPageChange={workLogPagination.setPage}
+          onPageSizeChange={workLogPagination.setPageSize}
+          page={workLogPagination.page}
+          pageSize={workLogPagination.pageSize}
+          pageSizeOptions={workLogPagination.pageSizeOptions}
+          rangeEnd={workLogPagination.rangeEnd}
+          rangeStart={workLogPagination.rangeStart}
+          totalItems={workLogPagination.totalItems}
+          totalPages={workLogPagination.totalPages}
+        />
       </div>
     </section>
   );

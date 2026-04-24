@@ -5,8 +5,10 @@ import type { BootstrapPayload, PartDefinitionRecord } from "@/types";
 import {
   EditableHoverIndicator,
   FilterDropdown,
+  PaginationControls,
   SearchToolbarInput,
   TableCell,
+  useWorkspacePagination,
 } from "@/features/workspace/shared";
 import { getStatusPillClassName } from "@/features/workspace/shared";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
@@ -69,6 +71,8 @@ export function PartsView({
       return matchesSearch && matchesSubsystem && matchesStatus;
     });
   }, [bootstrap.partInstances, mechanismsById, partDefinitionsById, partSearch, partStatus, partSubsystem]);
+  const partDefinitionPagination = useWorkspacePagination(filteredPartDefinitions);
+  const partInstancePagination = useWorkspacePagination(filteredPartInstances);
 
   return (
     <section className={`panel dense-panel part-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
@@ -129,7 +133,7 @@ export function PartsView({
             <span>Type</span>
             <span>Material</span>
           </div>
-        {filteredPartDefinitions.map((partDefinition) => (
+          {partDefinitionPagination.pageItems.map((partDefinition) => (
             <div
               className="ops-table ops-row editable-row-clickable editable-hover-target editable-hover-target-row"
               key={partDefinition.id}
@@ -166,6 +170,18 @@ export function PartsView({
           {filteredPartDefinitions.length === 0 ? (
             <p className="empty-state">No part definitions match the current search.</p>
           ) : null}
+          <PaginationControls
+            label="part definitions"
+            onPageChange={partDefinitionPagination.setPage}
+            onPageSizeChange={partDefinitionPagination.setPageSize}
+            page={partDefinitionPagination.page}
+            pageSize={partDefinitionPagination.pageSize}
+            pageSizeOptions={partDefinitionPagination.pageSizeOptions}
+            rangeEnd={partDefinitionPagination.rangeEnd}
+            rangeStart={partDefinitionPagination.rangeStart}
+            totalItems={partDefinitionPagination.totalItems}
+            totalPages={partDefinitionPagination.totalPages}
+          />
         </div>
       </div>
 
@@ -185,7 +201,7 @@ export function PartsView({
             <span>Qty</span>
             <span>Status</span>
           </div>
-          {filteredPartInstances.map((partInstance) => (
+          {partInstancePagination.pageItems.map((partInstance) => (
             <div
               className="ops-table ops-row"
               key={partInstance.id}
@@ -215,6 +231,18 @@ export function PartsView({
           {filteredPartInstances.length === 0 ? (
             <p className="empty-state">No part instances match the current filters.</p>
           ) : null}
+          <PaginationControls
+            label="part instances"
+            onPageChange={partInstancePagination.setPage}
+            onPageSizeChange={partInstancePagination.setPageSize}
+            page={partInstancePagination.page}
+            pageSize={partInstancePagination.pageSize}
+            pageSizeOptions={partInstancePagination.pageSizeOptions}
+            rangeEnd={partInstancePagination.rangeEnd}
+            rangeStart={partInstancePagination.rangeStart}
+            totalItems={partInstancePagination.totalItems}
+            totalPages={partInstancePagination.totalPages}
+          />
         </div>
       </div>
     </section>

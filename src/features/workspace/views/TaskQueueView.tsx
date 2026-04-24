@@ -11,8 +11,10 @@ import {
 import {
   EditableHoverIndicator,
   FilterDropdown,
+  PaginationControls,
   SearchToolbarInput,
   TableCell,
+  useWorkspacePagination,
 } from "@/features/workspace/shared";
 import { getStatusPillClassName } from "@/features/workspace/shared";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
@@ -195,6 +197,7 @@ export function TaskQueueView({
     subsystemFilter,
     subsystemsById,
   ]);
+  const taskPagination = useWorkspacePagination(processedTasks);
 
   const toggleSort = (field: TaskSortField) => {
     if (sortField === field) {
@@ -330,7 +333,7 @@ export function TaskQueueView({
           ) : null}
         </div>
 
-        {processedTasks.map((task) => {
+        {taskPagination.pageItems.map((task) => {
           const linkedPart = task.partInstanceId
             ? partInstancesById[task.partInstanceId]?.name ??
             partDefinitionsById[partInstancesById[task.partInstanceId]?.partDefinitionId ?? ""]?.name
@@ -393,6 +396,18 @@ export function TaskQueueView({
         })}
 
         {processedTasks.length === 0 ? <p className="empty-state">No tasks match the current filters.</p> : null}
+        <PaginationControls
+          label="tasks"
+          onPageChange={taskPagination.setPage}
+          onPageSizeChange={taskPagination.setPageSize}
+          page={taskPagination.page}
+          pageSize={taskPagination.pageSize}
+          pageSizeOptions={taskPagination.pageSizeOptions}
+          rangeEnd={taskPagination.rangeEnd}
+          rangeStart={taskPagination.rangeStart}
+          totalItems={taskPagination.totalItems}
+          totalPages={taskPagination.totalPages}
+        />
       </div>
     </section>
   );

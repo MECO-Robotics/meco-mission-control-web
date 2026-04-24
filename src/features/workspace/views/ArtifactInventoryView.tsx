@@ -10,8 +10,10 @@ import type {
 import {
   EditableHoverIndicator,
   FilterDropdown,
+  PaginationControls,
   SearchToolbarInput,
   TableCell,
+  useWorkspacePagination,
 } from "@/features/workspace/shared";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
 import { getStatusPillClassName } from "@/features/workspace/shared";
@@ -111,6 +113,7 @@ export function ArtifactInventoryView({
       return matchesSearch && matchesWorkstream && matchesStatus;
     });
   }, [artifacts, kind, search, statusFilter, workstreamFilter]);
+  const artifactPagination = useWorkspacePagination(filteredArtifacts);
 
   const sectionTitle = kind === "document" ? "Documents" : "Non-Technical";
   const addLabel = kind === "document" ? "Add document" : "Add non-technical";
@@ -175,7 +178,7 @@ export function ArtifactInventoryView({
           <span>Updated</span>
         </div>
 
-        {filteredArtifacts.map((artifact) => {
+        {artifactPagination.pageItems.map((artifact) => {
           const workflowName = artifact.workstreamId
             ? bootstrap.workstreams.find(
                 (workstream) => workstream.id === artifact.workstreamId,
@@ -214,6 +217,18 @@ export function ArtifactInventoryView({
             No {sectionTitle.toLowerCase()} artifacts match the current filters.
           </p>
         ) : null}
+        <PaginationControls
+          label={`${sectionTitle.toLowerCase()} artifacts`}
+          onPageChange={artifactPagination.setPage}
+          onPageSizeChange={artifactPagination.setPageSize}
+          page={artifactPagination.page}
+          pageSize={artifactPagination.pageSize}
+          pageSizeOptions={artifactPagination.pageSizeOptions}
+          rangeEnd={artifactPagination.rangeEnd}
+          rangeStart={artifactPagination.rangeStart}
+          totalItems={artifactPagination.totalItems}
+          totalPages={artifactPagination.totalPages}
+        />
       </div>
     </section>
   );

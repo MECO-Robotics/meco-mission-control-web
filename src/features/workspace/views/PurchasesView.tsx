@@ -6,9 +6,11 @@ import { IconManufacturing, IconPerson, IconTasks } from "@/components/shared";
 import {
   EditableHoverIndicator,
   FilterDropdown,
+  PaginationControls,
   RequestedItemMeta,
   SearchToolbarInput,
   TableCell,
+  useWorkspacePagination,
 } from "@/features/workspace/shared";
 import { getStatusPillClassName } from "@/features/workspace/shared";
 import type { MembersById, SubsystemsById } from "@/features/workspace/shared";
@@ -68,6 +70,7 @@ export function PurchasesView({
       );
     });
   }, [approval, bootstrap.purchaseItems, requester, search, status, subsystem, vendor]);
+  const purchasePagination = useWorkspacePagination(filteredPurchases);
 
   const gridTemplate = [
     "minmax(200px, 2.5fr)",
@@ -171,7 +174,7 @@ export function PurchasesView({
           <span>Final</span>
         </div>
 
-        {filteredPurchases.map((item) => (
+        {purchasePagination.pageItems.map((item) => (
           <button
             className="ops-table ops-row purchase-table ops-button-row editable-hover-target editable-hover-target-row"
             key={item.id}
@@ -205,6 +208,18 @@ export function PurchasesView({
         {filteredPurchases.length === 0 ? (
           <p className="empty-state">No purchase requests match the current filters.</p>
         ) : null}
+        <PaginationControls
+          label="purchases"
+          onPageChange={purchasePagination.setPage}
+          onPageSizeChange={purchasePagination.setPageSize}
+          page={purchasePagination.page}
+          pageSize={purchasePagination.pageSize}
+          pageSizeOptions={purchasePagination.pageSizeOptions}
+          rangeEnd={purchasePagination.rangeEnd}
+          rangeStart={purchasePagination.rangeStart}
+          totalItems={purchasePagination.totalItems}
+          totalPages={purchasePagination.totalPages}
+        />
       </div>
     </section>
   );

@@ -8,6 +8,9 @@ module.exports = {
     "!src/vite-env.d.ts",
   ],
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json"],
+  moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/src/$1",
+  },
   roots: ["<rootDir>/src"],
   testEnvironment: "node",
   testMatch: ["**/__tests__/**/*.test.ts"],

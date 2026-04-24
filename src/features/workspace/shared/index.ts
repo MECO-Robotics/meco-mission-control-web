@@ -36,9 +36,11 @@ export { getStatusPillClassName } from "./workspaceUtils";
 export {
   EditableHoverIndicator,
   FilterDropdown,
+  PaginationControls,
   RequestedItemMeta,
   SearchToolbarInput,
   TableCell,
+  useWorkspacePagination,
 } from "./WorkspaceViewShared";
 
 
