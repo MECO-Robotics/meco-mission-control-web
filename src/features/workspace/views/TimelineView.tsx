@@ -50,6 +50,7 @@ interface HoveredMilestonePopup {
   anchorEndDay: string | null;
   rotationDeg: 45 | 90;
   lines: string[];
+  background: string;
   color: string;
 }
 
@@ -141,6 +142,19 @@ function compareDateTimes(a: string, b: string) {
   const aMs = new Date(a).getTime();
   const bMs = new Date(b).getTime();
   return aMs - bMs;
+}
+
+function withColumnOverlayTint(color: string) {
+  const rgbaMatch = color.match(
+    /^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([0-9.]+)\s*\)$/i,
+  );
+  if (!rgbaMatch) {
+    return color;
+  }
+
+  const alpha = Number.parseFloat(rgbaMatch[4] ?? "0.1");
+  const overlayAlpha = Math.min(0.62, alpha + 0.36);
+  return `rgba(${rgbaMatch[1]}, ${rgbaMatch[2]}, ${rgbaMatch[3]}, ${overlayAlpha})`;
 }
 
 function localTodayDate() {
@@ -652,6 +666,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const updateHoveredMilestonePopup = (
     target: HTMLElement,
     lines: string[],
+    background: string,
     color: string,
   ) => {
     if (typeof document === "undefined") {
@@ -674,6 +689,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       anchorEndDay: normalizedPopupEndDay,
       rotationDeg: isMultiDayEvent ? 45 : 90,
       lines,
+      background,
       color,
     });
     queueTimelineLayerUpdate();
@@ -713,12 +729,25 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     updateHoveredMilestonePopup(
       anchor,
       lines,
+      eventStyle?.columnBackground ?? "rgba(17, 33, 61, 0.16)",
       eventStyle?.chipText ?? "var(--text-title)",
     );
   };
 
   const clearHoveredMilestonePopup = () => {
     setHoveredMilestonePopup(null);
+  };
+
+  const getTimelineDayOverlayHoverProps = (day: string) => {
+    const eventsOnDay = dayEventsByDate[day] ?? [];
+    const primaryEvent = eventsOnDay[0];
+    const dayStyle = primaryEvent ? EVENT_TYPE_STYLES[primaryEvent.type] : null;
+
+    return {
+      onMouseEnter: (event: React.MouseEvent<HTMLElement>) =>
+        showDateCellMilestonePopup(event.currentTarget, eventsOnDay, dayStyle),
+      onMouseLeave: clearHoveredMilestonePopup,
+    };
   };
 
   useEffect(() => {
@@ -1129,7 +1158,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
               const dateObject = new Date(`${day}T00:00:00`);
               const eventsOnDay = dayEventsByDate[day] ?? [];
               const primaryEvent = eventsOnDay[0];
-              const eventsOnDayLabel = eventsOnDay.map((milestone) => milestone.title).join(", ");
               const dayStyle = primaryEvent ? EVENT_TYPE_STYLES[primaryEvent.type] : null;
               const primaryEventStartDay = primaryEvent ? datePortion(primaryEvent.startDateTime) : day;
               const primaryEventEndDay = primaryEvent?.endDateTime
@@ -1143,14 +1171,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   ref={(node) => {
                     timelineDayCellRefs.current[day] = node;
                   }}
-                  onMouseEnter={(event) =>
-                    showDateCellMilestonePopup(
-                      event.currentTarget,
-                      eventsOnDay,
-                      dayStyle,
-                    )
-                  }
-                  onMouseLeave={clearHoveredMilestonePopup}
+                  {...getTimelineDayOverlayHoverProps(day)}
                   key={day}
                   style={{
                     gridRow: "2",
@@ -1199,22 +1220,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                       {dateObject.toLocaleDateString(undefined, { day: "numeric" })}
                     </strong>
                   </button>
-                  {eventsOnDay.length ? (
-                    <span
-                      className={`timeline-day-event-chip${eventsOnDay.length > 1 ? " has-multiple" : ""}`}
-                      style={{
-                        background: dayStyle?.chipBackground,
-                        color: dayStyle?.chipText,
-                      }}
-                      title={eventsOnDayLabel}
-                      data-popup-start-day={primaryEventStartDay}
-                      data-popup-end-day={primaryEventEndDay}
-                    >
-                      {eventsOnDay.length === 1
-                        ? primaryEvent.title
-                        : `${eventsOnDay.length} milestones`}
-                    </span>
-                  ) : null}
                 </div>
               );
             })}
@@ -1343,9 +1348,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
 
                       {timeline.days.map((day, dayIndex) => {
                         const dayStyle = getColumnStyle(day);
+                        const dayHoverProps = getTimelineDayOverlayHoverProps(day);
                         return (
                           <div
                             key={`${project.id}-${day}`}
+                            {...dayHoverProps}
                             style={{
                               gridRow: "1",
                               gridColumn: dayIndex + firstDayGridColumn,
@@ -1364,6 +1371,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                           key={task.id}
                           className={`timeline-bar timeline-${task.status} editable-hover-target`}
                           onClick={() => openEditTaskModal(task)}
+                          onMouseEnter={clearHoveredMilestonePopup}
                           style={{
                             gridRow: "1",
                             gridColumn: `${task.offset + firstDayGridColumn} / span ${task.span}`,
@@ -1508,9 +1516,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                             {collapsed
                               ? timeline.days.map((day, dayIndex) => {
                                   const dayStyle = getColumnStyle(day);
+                                  const dayHoverProps = getTimelineDayOverlayHoverProps(day);
                                   return (
                                     <div
                                       key={`${subsystem.id}-${day}`}
+                                      {...dayHoverProps}
                                       style={{
                                         gridRow: subsystemRowStart,
                                         gridColumn: dayIndex + firstDayGridColumn,
@@ -1531,6 +1541,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                                   key={task.id}
                                   className={`timeline-bar timeline-${task.status} editable-hover-target`}
                                   onClick={() => openEditTaskModal(task)}
+                                  onMouseEnter={clearHoveredMilestonePopup}
                                   style={{
                                     gridRow: subsystemRowStart,
                                     gridColumn: `${task.offset + firstDayGridColumn} / span ${task.span}`,
@@ -1611,9 +1622,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                                     ) : null}
                                     {timeline.days.map((day, dayIndex) => {
                                       const dayStyle = getColumnStyle(day);
+                                      const dayHoverProps = getTimelineDayOverlayHoverProps(day);
                                       return (
                                     <div
                                       key={`${task.id}-${day}`}
+                                      {...dayHoverProps}
                                       style={{
                                             gridRow: subsystemRowStart + taskIndex,
                                             gridColumn: dayIndex + firstDayGridColumn,
@@ -1633,6 +1646,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                                     <button
                                       className={`timeline-bar timeline-${task.status} editable-hover-target`}
                                       onClick={() => openEditTaskModal(task)}
+                                      onMouseEnter={clearHoveredMilestonePopup}
                                       style={{
                                         gridRow: subsystemRowStart + taskIndex,
                                         gridColumn: `${task.offset + firstDayGridColumn} / span ${task.span}`,
@@ -1828,9 +1842,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 {collapsed
                   ? timeline.days.map((day, dayIndex) => {
                       const dayStyle = getColumnStyle(day);
+                      const dayHoverProps = getTimelineDayOverlayHoverProps(day);
                       return (
                         <div
                           key={day}
+                          {...dayHoverProps}
                           style={{
                             gridRow: "1",
                             gridColumn: dayIndex + firstDayGridColumn,
@@ -1851,6 +1867,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                       key={task.id}
                       className={`timeline-bar timeline-${task.status} editable-hover-target`}
                       onClick={() => openEditTaskModal(task)}
+                      onMouseEnter={clearHoveredMilestonePopup}
                       style={{
                         gridRow: "1",
                         gridColumn: `${task.offset + firstDayGridColumn} / span ${task.span}`,
@@ -1931,9 +1948,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                         ) : null}
                         {timeline.days.map((day, dayIndex) => {
                           const dayStyle = getColumnStyle(day);
+                          const dayHoverProps = getTimelineDayOverlayHoverProps(day);
                           return (
                             <div
                               key={day}
+                              {...dayHoverProps}
                               style={{
                                 gridRow: taskIndex + 1,
                                 gridColumn: dayIndex + firstDayGridColumn,
@@ -1951,6 +1970,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                         <button
                           className={`timeline-bar timeline-${task.status} editable-hover-target`}
                           onClick={() => openEditTaskModal(task)}
+                          onMouseEnter={clearHoveredMilestonePopup}
                           style={{
                             gridRow: taskIndex + 1,
                             gridColumn: `${task.offset + firstDayGridColumn} / span ${task.span}`,
@@ -2024,22 +2044,35 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
 
       {hoveredMilestonePopup && hoveredMilestonePopupGeometry && tooltipPortalTarget
         ? createPortal(
-            <div
-              className="timeline-day-event-overlay-tooltip"
-              role="presentation"
-              style={{
-                transform: `translate(-50%, -50%) rotate(${hoveredMilestonePopup.rotationDeg}deg)`,
-                left: `${hoveredMilestonePopupGeometry.centerX}px`,
-                top: `${hoveredMilestonePopupGeometry.centerY}px`,
-                color: hoveredMilestonePopup.color,
-              }}
-            >
-              {hoveredMilestonePopup.lines.map((line, index) => (
-                <span className="timeline-day-event-overlay-tooltip-item" key={`${line}-${index}`}>
-                  {line}
-                </span>
-              ))}
-            </div>,
+            <>
+              <div
+                aria-hidden="true"
+                className="timeline-day-event-overlay-column"
+                style={{
+                  background: withColumnOverlayTint(hoveredMilestonePopup.background),
+                  height: `${hoveredMilestonePopupGeometry.centerY * 2}px`,
+                  left: `${hoveredMilestonePopupGeometry.left}px`,
+                  top: "0px",
+                  width: `${hoveredMilestonePopupGeometry.width}px`,
+                }}
+              />
+              <div
+                className="timeline-day-event-overlay-tooltip"
+                role="presentation"
+                style={{
+                  transform: `translate(-50%, -50%) rotate(${hoveredMilestonePopup.rotationDeg}deg)`,
+                  left: `${hoveredMilestonePopupGeometry.centerX}px`,
+                  top: `${hoveredMilestonePopupGeometry.centerY}px`,
+                  color: "#ffffff",
+                }}
+              >
+                {hoveredMilestonePopup.lines.map((line, index) => (
+                  <span className="timeline-day-event-overlay-tooltip-item" key={`${line}-${index}`}>
+                    {line}
+                  </span>
+                ))}
+              </div>
+            </>,
             tooltipPortalTarget,
           )
         : null}
