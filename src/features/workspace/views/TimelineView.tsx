@@ -46,13 +46,34 @@ interface TimelineEventDraft {
 }
 
 interface HoveredMilestonePopup {
-  anchorElement: HTMLElement;
   anchorStartDay: string | null;
   anchorEndDay: string | null;
   rotationDeg: 45 | 90;
   lines: string[];
-  background: string;
   color: string;
+}
+
+type TimelineDayMilestoneUnderlayLayout = Record<
+  string,
+  {
+    left: number;
+    width: number;
+  }
+>;
+
+interface TimelineDayMilestoneUnderlay {
+  id: string;
+  lines: string[];
+  color: string;
+  rotationDeg: 45 | 90;
+  geometry: MilestoneGeometry;
+}
+
+interface MilestoneGeometry {
+  left: number;
+  width: number;
+  centerX: number;
+  centerY: number;
 }
 
 const PROJECT_COLUMN_WIDTH = 112;
@@ -185,10 +206,13 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const [isTaskColumnVisible, setIsTaskColumnVisible] = useState(true);
   const [hoveredMilestonePopup, setHoveredMilestonePopup] =
     useState<HoveredMilestonePopup | null>(null);
+  const [timelineDayMilestoneUnderlayLayouts, setTimelineDayMilestoneUnderlayLayouts] =
+    useState<TimelineDayMilestoneUnderlayLayout>({});
+  const [timelineGridHeight, setTimelineGridHeight] = useState(0);
   const timelineShellRef = useRef<HTMLDivElement | null>(null);
-  const milestonePopupRef = useRef<HTMLDivElement | null>(null);
-  const hoveredMilestonePopupRef = useRef<HoveredMilestonePopup | null>(null);
-  const popupPositionFrameRef = useRef<number | null>(null);
+  const timelineGridRef = useRef<HTMLDivElement | null>(null);
+  const timelineDayCellRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const timelineLayerGeometryFrameRef = useRef<number | null>(null);
 
   const projectsById = useMemo(
     () =>
@@ -533,90 +557,101 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     return EVENT_TYPE_STYLES[events[0].type];
   };
 
-  const queuePopupPositionUpdate = () => {
+  const queueTimelineLayerUpdate = () => {
     if (typeof window === "undefined") {
       return;
     }
 
-    if (popupPositionFrameRef.current !== null) {
+    if (timelineLayerGeometryFrameRef.current !== null) {
       return;
     }
 
-    popupPositionFrameRef.current = window.requestAnimationFrame(() => {
-      popupPositionFrameRef.current = null;
-      const activePopup = hoveredMilestonePopupRef.current;
-      const popupNode = milestonePopupRef.current;
-      const container = timelineShellRef.current;
-      if (!activePopup || !popupNode || !container) {
+    timelineLayerGeometryFrameRef.current = window.requestAnimationFrame(() => {
+      timelineLayerGeometryFrameRef.current = null;
+      const grid = timelineGridRef.current;
+      if (!grid) {
+        setTimelineDayMilestoneUnderlayLayouts({});
+        setTimelineGridHeight(0);
         return;
       }
 
-      if (!(activePopup.anchorElement.closest(".timeline-day") instanceof HTMLElement)) {
-        return;
-      }
+      const layouts: TimelineDayMilestoneUnderlayLayout = {};
+      timeline.days.forEach((day) => {
+        const dayCell = timelineDayCellRefs.current[day];
+        if (!dayCell) {
+          return;
+        }
 
-      const geometry = resolveMilestonePopupGeometry(
-        activePopup.anchorElement,
-        activePopup.anchorStartDay,
-        activePopup.anchorEndDay,
-      );
+        layouts[day] = {
+          left: dayCell.offsetLeft,
+          width: dayCell.offsetWidth,
+        };
+      });
 
-      if (!geometry) {
-        return;
-      }
-
-      popupNode.style.left = `${geometry.centerX}px`;
+      setTimelineDayMilestoneUnderlayLayouts(layouts);
+      setTimelineGridHeight(timelineShellRef.current?.scrollHeight ?? grid.clientHeight);
     });
   };
 
   const resolveMilestonePopupGeometry = (
-    anchor: HTMLElement,
     popupStartDay: string | null,
     popupEndDay: string | null,
-  ) => {
-    const anchorDayCell = anchor.closest(".timeline-day");
-    if (!(anchorDayCell instanceof HTMLElement)) {
+  ): MilestoneGeometry | null => {
+    if (!popupStartDay) {
       return null;
     }
 
-    const isMultiDayEvent = Boolean(popupStartDay) && Boolean(popupEndDay) && popupStartDay !== popupEndDay;
-    const container = timelineShellRef.current;
-    if (!container) {
-      return null;
-    }
-
-    const anchorRect = anchorDayCell.getBoundingClientRect();
-    const containerRect = container.getBoundingClientRect();
-    let centerX = anchorRect.left - containerRect.left + anchorRect.width / 2;
-
-    if (isMultiDayEvent) {
-      const startDayCell = popupStartDay
-        ? container.querySelector<HTMLElement>(
-            `.timeline-day[data-timeline-day="${popupStartDay}"]`,
-          )
-        : null;
-      const endDayCell = popupEndDay
-        ? container.querySelector<HTMLElement>(
-            `.timeline-day[data-timeline-day="${popupEndDay}"]`,
-          )
-        : null;
-
-      if (startDayCell instanceof HTMLElement && endDayCell instanceof HTMLElement) {
-        const startRect = startDayCell.getBoundingClientRect();
-        const endRect = endDayCell.getBoundingClientRect();
-        const spanLeft = Math.min(startRect.left, endRect.left) - containerRect.left;
-        const spanRight = Math.max(startRect.right, endRect.right) - containerRect.left;
-        centerX = spanLeft + (spanRight - spanLeft) / 2;
+    const isMultiDayEvent =
+      Boolean(popupStartDay) && Boolean(popupEndDay) && popupStartDay !== popupEndDay;
+    const fallbackLayout = (day: string | null) => {
+      if (!day) {
+        return null;
       }
+
+      const measured = timelineDayMilestoneUnderlayLayouts[day];
+      if (measured) {
+        return measured;
+      }
+
+      const dayCell = timelineDayCellRefs.current[day];
+      if (!dayCell) {
+        return null;
+      }
+
+      return {
+        left: dayCell.offsetLeft,
+        width: dayCell.offsetWidth,
+      };
+    };
+
+    const start = fallbackLayout(popupStartDay);
+    const end = isMultiDayEvent ? fallbackLayout(popupEndDay) : start;
+
+    if (!start || !end || !timelineShellRef.current) {
+      return null;
     }
 
-    return { centerX };
+    const left = Math.min(start.left, end.left);
+    const right = Math.max(start.left + start.width, end.left + end.width);
+    const gridHeight =
+      timelineShellRef.current.scrollHeight ||
+      timelineShellRef.current.clientHeight ||
+      timelineGridHeight;
+    if (gridHeight <= 0) {
+      return null;
+    }
+
+    return {
+      left,
+      width: right - left,
+      centerX: (left + right) / 2,
+      centerY: gridHeight / 2,
+    };
   };
 
   const updateHoveredMilestonePopup = (
     target: HTMLElement,
     lines: string[],
-    background: string,
     color: string,
   ) => {
     if (typeof document === "undefined") {
@@ -629,35 +664,19 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       Boolean(popupStartDay) && Boolean(popupEndDay) && popupStartDay !== popupEndDay;
     const normalizedPopupStartDay = popupStartDay ?? null;
     const normalizedPopupEndDay = popupEndDay ?? null;
-    const geometry = resolveMilestonePopupGeometry(
-      target,
-      normalizedPopupStartDay,
-      normalizedPopupEndDay,
-    );
 
-    if (!geometry) {
+    if (!normalizedPopupStartDay) {
       return;
     }
 
-    if (!timelineShellRef.current) {
-      return;
-    }
-
-    const nextPopup: HoveredMilestonePopup = {
-      anchorElement: target,
+    setHoveredMilestonePopup({
       anchorStartDay: normalizedPopupStartDay,
       anchorEndDay: normalizedPopupEndDay,
       rotationDeg: isMultiDayEvent ? 45 : 90,
       lines,
-      background,
       color,
-    };
-
-    if (milestonePopupRef.current) {
-      milestonePopupRef.current.style.left = `${geometry.centerX}px`;
-    }
-
-    setHoveredMilestonePopup(nextPopup);
+    });
+    queueTimelineLayerUpdate();
   };
 
   const showDateCellMilestonePopup = (
@@ -677,51 +696,96 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     const lines = eventsOnDay.length === 1
       ? [primaryEvent.title]
       : eventsOnDay.map((event) => event.title);
-
-    anchor.dataset.popupStartDay = datePortion(primaryEvent.startDateTime);
-    anchor.dataset.popupEndDay = primaryEvent.endDateTime
+    const timelineStart = timeline.days[0] ?? null;
+    const timelineEnd = timeline.days[timeline.days.length - 1] ?? null;
+    const eventStartDay = datePortion(primaryEvent.startDateTime);
+    const eventEndDay = primaryEvent.endDateTime
       ? datePortion(primaryEvent.endDateTime)
-      : datePortion(primaryEvent.startDateTime);
+      : eventStartDay;
+    const anchorStartDay =
+      timelineStart && eventStartDay < timelineStart ? timelineStart : eventStartDay;
+    const anchorEndDay =
+      timelineEnd && eventEndDay > timelineEnd ? timelineEnd : eventEndDay;
+
+    anchor.dataset.popupStartDay = anchorStartDay;
+    anchor.dataset.popupEndDay = anchorEndDay;
 
     updateHoveredMilestonePopup(
       anchor,
       lines,
-      eventStyle?.chipBackground ?? "var(--bg-row-alt)",
       eventStyle?.chipText ?? "var(--text-title)",
     );
   };
 
   const clearHoveredMilestonePopup = () => {
-    if (popupPositionFrameRef.current !== null) {
-      window.cancelAnimationFrame(popupPositionFrameRef.current);
-      popupPositionFrameRef.current = null;
-    }
-
     setHoveredMilestonePopup(null);
-    hoveredMilestonePopupRef.current = null;
   };
 
   useEffect(() => {
-    hoveredMilestonePopupRef.current = hoveredMilestonePopup;
-    if (!hoveredMilestonePopup) {
-      return;
-    }
-
-    const container = timelineShellRef.current;
-    if (!container) {
-      return;
-    }
-
-    queuePopupPositionUpdate();
-
-    const reposition = () => queuePopupPositionUpdate();
-    container.addEventListener("scroll", reposition, { passive: true });
-    window.addEventListener("resize", reposition);
+    queueTimelineLayerUpdate();
     return () => {
-      container.removeEventListener("scroll", reposition);
-      window.removeEventListener("resize", reposition);
+      if (timelineLayerGeometryFrameRef.current !== null) {
+        window.cancelAnimationFrame(timelineLayerGeometryFrameRef.current);
+        timelineLayerGeometryFrameRef.current = null;
+      }
     };
-  }, [hoveredMilestonePopup]);
+  }, [
+    timeline.days,
+    dayEventsByDate,
+    timelineGridTemplate,
+    showProjectCol,
+    showSubsystemCol,
+    showTaskCol,
+    isProjectColumnVisible,
+    isSubsystemColumnVisible,
+    isTaskColumnVisible,
+  ]);
+
+  useEffect(() => {
+    window.addEventListener("resize", queueTimelineLayerUpdate);
+    return () => {
+      if (timelineLayerGeometryFrameRef.current !== null) {
+        window.cancelAnimationFrame(timelineLayerGeometryFrameRef.current);
+        timelineLayerGeometryFrameRef.current = null;
+      }
+      window.removeEventListener("resize", queueTimelineLayerUpdate);
+    };
+  }, []);
+
+  const timelineDayMilestoneUnderlays = bootstrap.events
+    .map((event) => {
+      if (!timeline.days.length) {
+        return null;
+      }
+
+      const timelineStart = timeline.days[0];
+      const timelineEnd = timeline.days[timeline.days.length - 1];
+      const eventStartDay = datePortion(event.startDateTime);
+      const eventEndDay = datePortion(event.endDateTime ?? event.startDateTime);
+      const clampedStartDay = eventStartDay < timelineStart ? timelineStart : eventStartDay;
+      const clampedEndDay = eventEndDay > timelineEnd ? timelineEnd : eventEndDay;
+
+      if (clampedStartDay > timelineEnd || clampedEndDay < timelineStart) {
+        return null;
+      }
+
+      const geometry = resolveMilestonePopupGeometry(clampedStartDay, clampedEndDay);
+      if (!geometry) {
+        return null;
+      }
+
+      const style = EVENT_TYPE_STYLES[event.type];
+      const isMultiDayEvent = eventStartDay !== eventEndDay;
+
+      return {
+        id: event.id,
+        lines: [event.title],
+        color: style.chipText,
+        rotationDeg: isMultiDayEvent ? 45 : 90,
+        geometry,
+      } satisfies TimelineDayMilestoneUnderlay;
+    })
+    .filter((entry): entry is TimelineDayMilestoneUnderlay => entry !== null);
 
   const activePersonFilterLabel =
     activePersonFilter === "all"
@@ -729,7 +793,14 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       : membersById[activePersonFilter]?.name ?? "Selected person";
 
   const activeDayEvents = activeEventDay ? dayEventsByDate[activeEventDay] ?? [] : [];
-  const tooltipPortalTarget = typeof document === "undefined" ? null : timelineShellRef.current;
+  const hoveredMilestonePopupGeometry = hoveredMilestonePopup
+    ? resolveMilestonePopupGeometry(
+        hoveredMilestonePopup.anchorStartDay,
+        hoveredMilestonePopup.anchorEndDay,
+      )
+    : null;
+  const tooltipPortalTarget =
+    typeof document === "undefined" ? null : timelineShellRef.current;
   const modalPortalTarget =
     typeof document !== "undefined"
       ? ((document.querySelector(".page-shell") as HTMLElement | null) ?? document.body)
@@ -896,11 +967,13 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           }}
         >
           <div
+            ref={timelineGridRef}
             style={{
               display: "grid",
               width: "100%",
               minWidth: `${gridMinWidth}px`,
               gridTemplateColumns: timelineGridTemplate,
+              position: "relative",
               boxSizing: "border-box",
             }}
           >
@@ -1067,6 +1140,9 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 <div
                   className="timeline-day"
                   data-timeline-day={day}
+                  ref={(node) => {
+                    timelineDayCellRefs.current[day] = node;
+                  }}
                   onMouseEnter={(event) =>
                     showDateCellMilestonePopup(
                       event.currentTarget,
@@ -1536,9 +1612,9 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                                     {timeline.days.map((day, dayIndex) => {
                                       const dayStyle = getColumnStyle(day);
                                       return (
-                                        <div
-                                          key={`${task.id}-${day}`}
-                                          style={{
+                                    <div
+                                      key={`${task.id}-${day}`}
+                                      style={{
                                             gridRow: subsystemRowStart + taskIndex,
                                             gridColumn: dayIndex + firstDayGridColumn,
                                             borderRight: `1px solid ${
@@ -1914,22 +1990,54 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         </p>
       )}
 
-      {hoveredMilestonePopup && tooltipPortalTarget
+      {tooltipPortalTarget
+        ? createPortal(
+            <>
+              {timelineDayMilestoneUnderlays.map((underlay) => (
+                <div
+                  aria-hidden="true"
+                  key={`timeline-underlay-${underlay.id}`}
+                  className="timeline-day-event-underlay"
+                  title={underlay.lines.join(", ")}
+                  style={{
+                    transform: `translate(-50%, -50%) rotate(${underlay.rotationDeg}deg)`,
+                    left: `${underlay.geometry.centerX}px`,
+                    top: `${underlay.geometry.centerY}px`,
+                    color: underlay.color,
+                    zIndex: 4,
+                  }}
+                >
+                  {underlay.lines.map((line, index) => (
+                    <span
+                      className="timeline-day-event-overlay-tooltip-item"
+                      key={`${underlay.id}-${line}-${index}`}
+                    >
+                      {line}
+                    </span>
+                  ))}
+                </div>
+              ))}
+            </>,
+            tooltipPortalTarget,
+          )
+        : null}
+
+      {hoveredMilestonePopup && hoveredMilestonePopupGeometry && tooltipPortalTarget
         ? createPortal(
             <div
-              ref={milestonePopupRef}
               className="timeline-day-event-overlay-tooltip"
               role="presentation"
               style={{
                 transform: `translate(-50%, -50%) rotate(${hoveredMilestonePopup.rotationDeg}deg)`,
-                background: hoveredMilestonePopup.background,
+                left: `${hoveredMilestonePopupGeometry.centerX}px`,
+                top: `${hoveredMilestonePopupGeometry.centerY}px`,
                 color: hoveredMilestonePopup.color,
               }}
             >
               {hoveredMilestonePopup.lines.map((line, index) => (
                 <span className="timeline-day-event-overlay-tooltip-item" key={`${line}-${index}`}>
                   {line}
-              </span>
+                </span>
               ))}
             </div>,
             tooltipPortalTarget,

@@ -2281,25 +2281,54 @@
   position: absolute;
   left: 0;
   top: 50%;
+  pointer-events: none;
   display: grid;
   gap: 0.28rem;
   max-width: min(22rem, calc(100vw - 2rem));
-  padding: 0.45rem 0.55rem;
-  border-radius: 12px;
-  border: 1px solid rgba(15, 28, 52, 0.18);
-  box-shadow: 0 10px 24px rgba(15, 28, 52, 0.24);
+  background: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
   text-transform: none;
   text-align: center;
-  pointer-events: none;
-  z-index: 2990;
+  z-index: 10000;
   transform-origin: center;
+  transition: transform 120ms ease, opacity 120ms ease;
+  opacity: 1;
   will-change: transform, left, top;
+  font-weight: 800;
+}
+
+.timeline-day-event-underlay {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  pointer-events: none;
+  display: grid;
+  gap: 0.28rem;
+  max-width: min(22rem, calc(100vw - 2rem));
+  background: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  text-transform: none;
+  text-align: center;
+  z-index: 4;
+  transform-origin: center;
+  transition: transform 120ms ease, opacity 120ms ease;
+  opacity: 1;
+  will-change: transform, left, top;
+  font-weight: 800;
 }
 
 .timeline-day-event-overlay-tooltip-item {
   display: block;
   line-height: 1.3;
   white-space: nowrap;
+  font-size: 1.1rem;
+  font-weight: 700;
 }
 
 .subsystem-block {
@@ -3452,3 +3481,4 @@
     width: var(--shell-sidebar-collapsed-width);
   }
 }
+
