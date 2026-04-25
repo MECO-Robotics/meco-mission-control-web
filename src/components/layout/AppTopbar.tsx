@@ -48,6 +48,7 @@ const BASE_SECTION_LABELS: Record<ViewTab, string> = {
   inventory: "Inventory",
   subsystems: "Subsystems",
   roster: "Roster",
+  help: "Help",
 };
 
 function TopbarTabs<T extends string>({

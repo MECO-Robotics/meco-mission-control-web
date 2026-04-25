@@ -1,6 +1,7 @@
 export { ArtifactInventoryView } from "./ArtifactInventoryView";
 export { CncView } from "./CncView";
 export { FabricationView } from "./FabricationView";
+export { HelpView } from "./HelpView";
 export { ManufacturingQueueView } from "./ManufacturingQueueView";
 export { MaterialsView } from "./MaterialsView";
 export { MilestonesView } from "./MilestonesView";

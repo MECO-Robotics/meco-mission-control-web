@@ -8,7 +8,8 @@ export type ViewTab =
   | "manufacturing"
   | "inventory"
   | "subsystems"
-  | "roster";
+  | "roster"
+  | "help";
 
 export type TaskViewTab = "timeline" | "queue" | "milestones";
 export type ManufacturingViewTab = "cnc" | "prints" | "fabrication";

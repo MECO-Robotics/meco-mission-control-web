@@ -1,12 +1,13 @@
 import { useMemo } from "react";
 
 import {
+  IconHelp,
   IconManufacturing,
   IconParts,
-  IconWorkLogs,
-  IconSubsystems,
   IconRoster,
+  IconSubsystems,
   IconTasks,
+  IconWorkLogs,
 } from "@/components/shared";
 import type { NavigationItem } from "@/features/workspace";
 import type { BootstrapPayload } from "@/types";
@@ -147,6 +148,13 @@ export function useWorkspaceDerivedData({
         label: "Roster",
         icon: <IconRoster />,
         count: bootstrap.members.length,
+      });
+
+      items.push({
+        value: "help",
+        label: "Help",
+        icon: <IconHelp />,
+        count: 0,
       });
 
       return items;

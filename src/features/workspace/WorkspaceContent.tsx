@@ -23,6 +23,7 @@ import {
   ArtifactInventoryView,
   CncView,
   FabricationView,
+  HelpView,
   MaterialsView,
   MilestonesView,
   PartsView,
@@ -51,7 +52,8 @@ type WorkspaceSubviewTab =
   | "nontechnical"
   | "subsystems"
   | "workflow"
-  | "roster";
+  | "roster"
+  | "help";
 
 type SwipeDirection = "left" | "right" | null;
 type TabSwitchDirection = "up" | "down";
@@ -87,6 +89,8 @@ const SUBVIEW_INTERACTION_GUIDANCE: Record<WorkspaceSubviewTab, string> = {
     "Search and filter workflow ownership, click a row to expand details, and use add or edit controls to keep non-technical workstreams current.",
   roster:
     "Use the plus buttons to add people to each group, click a name to select them, and hover a member to reveal the pencil affordance for editing or deleting them from the popup.",
+  help:
+    "Use this page as a quick reference for how to navigate tabs, manage scoped project data, and follow the common add/edit workflows used across the workspace.",
 };
 
 const TASK_VIEW_ORDER: readonly TaskViewTab[] = ["timeline", "queue", "milestones"];
@@ -722,6 +726,20 @@ export function WorkspaceContent({
             setMemberForm={setMemberForm}
             students={students}
           />
+        </WorkspaceSubPanel>
+      </WorkspaceSectionPanel>
+
+      <WorkspaceSectionPanel
+        disableAnimations={disablePanelAnimations}
+        isActive={activeTab === "help"}
+        tabSwitchDirection={tabSwitchDirection}
+      >
+        <WorkspaceSubPanel
+          description={SUBVIEW_INTERACTION_GUIDANCE.help}
+          disableAnimations={disablePanelAnimations}
+          isActive
+        >
+          <HelpView />
         </WorkspaceSubPanel>
       </WorkspaceSectionPanel>
     </div>
