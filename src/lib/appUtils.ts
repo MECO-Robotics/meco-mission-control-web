@@ -347,6 +347,8 @@ export function buildEmptyTaskPayload(bootstrap: BootstrapPayload): TaskPayload 
         mechanismIds: [],
         partInstanceId: null,
         partInstanceIds: [],
+        artifactId: null,
+        artifactIds: [],
         targetEventId: firstEvent,
         ownerId: firstStudent,
         assigneeIds: uniqueIds([firstStudent]),
@@ -846,6 +848,8 @@ export const taskToPayload = (task: TaskRecord): TaskPayload => ({
     subsystemIds: task.subsystemIds?.length ? task.subsystemIds : uniqueIds([task.subsystemId]),
     mechanismIds: task.mechanismIds?.length ? task.mechanismIds : uniqueIds([task.mechanismId]),
     partInstanceIds: task.partInstanceIds?.length ? task.partInstanceIds : uniqueIds([task.partInstanceId]),
+    artifactId: task.artifactId ?? null,
+    artifactIds: task.artifactIds?.length ? uniqueIds(task.artifactIds) : uniqueIds([task.artifactId]),
     assigneeIds: task.assigneeIds?.length ? uniqueIds(task.assigneeIds) : uniqueIds([task.ownerId]),
 });
 

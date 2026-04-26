@@ -660,6 +660,9 @@ function normalizePlanningRecords(source: LegacyBootstrapPayload) {
     const taskPartInstanceIds = Array.isArray(task.partInstanceIds)
       ? uniqueIds(task.partInstanceIds)
       : uniqueIds([task.partInstanceId]);
+    const taskArtifactIds = Array.isArray(task.artifactIds)
+      ? uniqueIds(task.artifactIds)
+      : uniqueIds([task.artifactId]);
     const taskAssigneeIds = Array.isArray(task.assigneeIds)
       ? uniqueIds(task.assigneeIds)
       : uniqueIds([task.ownerId]);
@@ -681,6 +684,8 @@ function normalizePlanningRecords(source: LegacyBootstrapPayload) {
       mechanismIds: taskMechanismIds,
       partInstanceId: taskPartInstanceIds[0] ?? null,
       partInstanceIds: taskPartInstanceIds,
+      artifactId: taskArtifactIds[0] ?? null,
+      artifactIds: taskArtifactIds,
       targetEventId: task.targetEventId ?? null,
       ownerId: task.ownerId ?? null,
       assigneeIds: taskAssigneeIds,
@@ -823,6 +828,9 @@ function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapPayload 
     events,
     qaReports: source.qaReports ?? [],
     testResults: source.testResults ?? [],
+    qaFindings: source.qaFindings ?? [],
+    testFindings: source.testFindings ?? [],
+    designIterations: source.designIterations ?? [],
     risks: source.risks ?? [],
     tasks: planning.tasks,
     workLogs: (source.workLogs ?? []).map((workLog) => ({

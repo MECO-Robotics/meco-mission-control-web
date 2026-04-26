@@ -173,6 +173,9 @@ function createBootstrap(overrides: Partial<BootstrapPayload> = {}): BootstrapPa
     events: [event],
     qaReports: [],
     testResults: [],
+    qaFindings: [],
+    testFindings: [],
+    designIterations: [],
     risks: [],
     tasks: [
       {

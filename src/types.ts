@@ -71,6 +71,8 @@ export type ProjectStatus = "planned" | "active" | "paused" | "complete";
 export type TestResultStatus = "pass" | "fail" | "blocked";
 export type RiskSeverity = "high" | "medium" | "low";
 export type RiskAttachmentType = "project" | "workstream" | "mechanism" | "part-instance";
+export type FindingStatus = "open" | "resolved";
+export type DesignIterationSourceType = "qa-finding" | "test-finding" | "manual";
 
 export interface MemberRecord {
   id: string;
@@ -225,6 +227,36 @@ export interface TestResultRecord {
   findings: string[];
 }
 
+export interface QaFindingRecord {
+  id: string;
+  taskId: string | null;
+  qaReportId: string | null;
+  title: string;
+  detail: string;
+  severity: RiskSeverity;
+  status: FindingStatus;
+}
+
+export interface TestFindingRecord {
+  id: string;
+  taskId: string | null;
+  testResultId: string | null;
+  title: string;
+  detail: string;
+  severity: RiskSeverity;
+  status: FindingStatus;
+}
+
+export interface DesignIterationRecord {
+  id: string;
+  taskId: string | null;
+  sourceType: DesignIterationSourceType;
+  sourceId: string | null;
+  title: string;
+  summary: string;
+  createdAt: string;
+}
+
 export interface RiskRecord {
   id: string;
   title: string;
@@ -251,6 +283,8 @@ export interface TaskRecord {
   mechanismIds: string[];
   partInstanceId: string | null;
   partInstanceIds: string[];
+  artifactId?: string | null;
+  artifactIds?: string[];
   targetEventId: string | null;
   ownerId: string | null;
   assigneeIds: string[];
@@ -367,12 +401,17 @@ export interface BootstrapPayload {
   events: EventRecord[];
   qaReports: QaReportRecord[];
   testResults: TestResultRecord[];
+  qaFindings: QaFindingRecord[];
+  testFindings: TestFindingRecord[];
+  designIterations: DesignIterationRecord[];
   risks: RiskRecord[];
   tasks: TaskRecord[];
   workLogs: WorkLogRecord[];
   purchaseItems: PurchaseItemRecord[];
   manufacturingItems: ManufacturingItemRecord[];
 }
+
+export type PlatformBootstrapPayload = BootstrapPayload;
 
 export interface SeasonCreatePayload {
   name: string;
@@ -488,6 +527,8 @@ export interface TaskPayload {
   mechanismIds: string[];
   partInstanceId: string | null;
   partInstanceIds: string[];
+  artifactId?: string | null;
+  artifactIds?: string[];
   targetEventId: string | null;
   ownerId: string | null;
   assigneeIds: string[];
