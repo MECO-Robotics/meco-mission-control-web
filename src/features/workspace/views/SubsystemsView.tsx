@@ -151,6 +151,7 @@ export function SubsystemsView({
         [
           subsystem.name,
           subsystem.description,
+          `iteration ${subsystem.iteration}`,
           parentSubsystem?.name ?? "",
           responsibleEngineer,
           mentorNames,
@@ -287,6 +288,7 @@ export function SubsystemsView({
                     <span className="subsystem-cell-meta">
                       <strong>{subsystem.name}</strong>
                       <small>{subsystem.description}</small>
+                      <small>Iteration {subsystem.iteration}</small>
                       <small>
                         {subsystem.parentSubsystemId
                           ? `Parent: ${parentSubsystem?.name ?? "Unknown"}`
@@ -353,7 +355,7 @@ export function SubsystemsView({
                               <div style={{ display: "grid", gap: "0.2rem" }}>
                                 <strong style={{ color: "var(--text-title)" }}>{mechanism.name}</strong>
                                 <small style={{ color: "var(--text-copy)" }}>
-                                  {mechanism.description}
+                                  Iteration {mechanism.iteration} / {mechanism.description}
                                 </small>
                               </div>
                               <button

@@ -31,6 +31,7 @@ function createBootstrap(): BootstrapPayload {
         endDateTime: null,
         isExternal: true,
         description: "Competition readiness checkpoint",
+        projectIds: ["project-1"],
         relatedSubsystemIds: [],
       },
     ],

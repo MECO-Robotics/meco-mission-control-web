@@ -8,3 +8,4 @@ export type SubsystemModalMode = "create" | "edit" | null;
 export type MechanismModalMode = "create" | "edit" | null;
 export type WorkLogModalMode = "create" | null;
 export type ArtifactModalMode = "create" | "edit" | null;
+export type WorkstreamModalMode = "create" | null;

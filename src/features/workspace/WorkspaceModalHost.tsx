@@ -11,6 +11,7 @@ import {
   SubsystemEditorModal,
   TaskEditorModal,
   WorkLogEditorModal,
+  WorkstreamEditorModal,
 } from "@/features/workspace";
 import type {
   ArtifactModalMode,
@@ -23,6 +24,7 @@ import type {
   SubsystemModalMode,
   TaskModalMode,
   WorkLogModalMode,
+  WorkstreamModalMode,
 } from "@/features/workspace/shared";
 import type {
   ArtifactPayload,
@@ -37,6 +39,7 @@ import type {
   TaskPayload,
   TaskRecord,
   WorkLogPayload,
+  WorkstreamPayload,
 } from "@/types";
 
 interface WorkspaceModalHostProps {
@@ -57,12 +60,14 @@ interface WorkspaceModalHostProps {
   closeWorkLogModal: () => void;
   closeSubsystemModal: () => void;
   closeTaskModal: () => void;
+  closeWorkstreamModal: () => void;
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
   eventsById: Record<string, BootstrapPayload["events"][number]>;
   handleDeleteMaterial: (materialId: string) => Promise<void>;
   handleDeleteArtifact: (artifactId: string) => Promise<void>;
   handleDeletePartDefinition: (partDefinitionId: string) => Promise<void>;
   handleDeleteMechanism: (mechanismId: string) => Promise<void>;
+  handleDeleteTask: (taskId: string) => Promise<void>;
   handlePartInstanceSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
   handleManufacturingSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
   handleMaterialSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
@@ -73,10 +78,12 @@ interface WorkspaceModalHostProps {
   handleWorkLogSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
   handleSubsystemSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
   handleTaskSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleWorkstreamSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
   isDeletingMaterial: boolean;
   isDeletingArtifact: boolean;
   isDeletingPartDefinition: boolean;
   isDeletingMechanism: boolean;
+  isDeletingTask: boolean;
   isSavingManufacturing: boolean;
   isSavingArtifact: boolean;
   isSavingMaterial: boolean;
@@ -87,6 +94,7 @@ interface WorkspaceModalHostProps {
   isSavingWorkLog: boolean;
   isSavingSubsystem: boolean;
   isSavingTask: boolean;
+  isSavingWorkstream: boolean;
   artifactDraft: ArtifactPayload;
   artifactModalMode: ArtifactModalMode;
   manufacturingDraft: ManufacturingItemPayload;
@@ -108,6 +116,8 @@ interface WorkspaceModalHostProps {
   purchaseModalMode: PurchaseModalMode;
   workLogDraft: WorkLogPayload;
   workLogModalMode: WorkLogModalMode;
+  workstreamDraft: WorkstreamPayload;
+  workstreamModalMode: WorkstreamModalMode;
   setArtifactDraft: Dispatch<SetStateAction<ArtifactPayload>>;
   setManufacturingDraft: Dispatch<SetStateAction<ManufacturingItemPayload>>;
   setMaterialDraft: Dispatch<SetStateAction<MaterialPayload>>;
@@ -117,6 +127,7 @@ interface WorkspaceModalHostProps {
   setPurchaseDraft: Dispatch<SetStateAction<PurchaseItemPayload>>;
   setPurchaseFinalCost: (value: string) => void;
   setWorkLogDraft: Dispatch<SetStateAction<WorkLogPayload>>;
+  setWorkstreamDraft: Dispatch<SetStateAction<WorkstreamPayload>>;
   setSubsystemDraft: Dispatch<SetStateAction<SubsystemPayload>>;
   setSubsystemDraftRisks: (value: string) => void;
   setTaskDraft: Dispatch<SetStateAction<TaskPayload>>;
@@ -150,12 +161,14 @@ export function WorkspaceModalHost({
   closeWorkLogModal,
   closeSubsystemModal,
   closeTaskModal,
+  closeWorkstreamModal,
   disciplinesById,
   eventsById,
   handleDeleteMaterial,
   handleDeleteArtifact,
   handleDeletePartDefinition,
   handleDeleteMechanism,
+  handleDeleteTask,
   handlePartInstanceSubmit,
   handleManufacturingSubmit,
   handleMaterialSubmit,
@@ -166,10 +179,12 @@ export function WorkspaceModalHost({
   handleWorkLogSubmit,
   handleSubsystemSubmit,
   handleTaskSubmit,
+  handleWorkstreamSubmit,
   isDeletingMaterial,
   isDeletingArtifact,
   isDeletingPartDefinition,
   isDeletingMechanism,
+  isDeletingTask,
   isSavingManufacturing,
   isSavingArtifact,
   isSavingMaterial,
@@ -180,6 +195,7 @@ export function WorkspaceModalHost({
   isSavingWorkLog,
   isSavingSubsystem,
   isSavingTask,
+  isSavingWorkstream,
   artifactDraft,
   artifactModalMode,
   manufacturingDraft,
@@ -201,6 +217,8 @@ export function WorkspaceModalHost({
   purchaseModalMode,
   workLogDraft,
   workLogModalMode,
+  workstreamDraft,
+  workstreamModalMode,
   setArtifactDraft,
   setManufacturingDraft,
   setMaterialDraft,
@@ -210,6 +228,7 @@ export function WorkspaceModalHost({
   setPurchaseDraft,
   setPurchaseFinalCost,
   setWorkLogDraft,
+  setWorkstreamDraft,
   setSubsystemDraft,
   setSubsystemDraftRisks,
   setTaskDraft,
@@ -256,6 +275,17 @@ export function WorkspaceModalHost({
         />
       ) : null}
 
+      {workstreamModalMode ? (
+        <WorkstreamEditorModal
+          bootstrap={bootstrap}
+          closeWorkstreamModal={closeWorkstreamModal}
+          handleWorkstreamSubmit={handleWorkstreamSubmit}
+          isSavingWorkstream={isSavingWorkstream}
+          setWorkstreamDraft={setWorkstreamDraft}
+          workstreamDraft={workstreamDraft}
+        />
+      ) : null}
+
       {mechanismModalMode ? (
         <MechanismEditorModal
           activeMechanismId={activeMechanismId}
@@ -291,7 +321,9 @@ export function WorkspaceModalHost({
           closeTaskModal={closeTaskModal}
           disciplinesById={disciplinesById}
           eventsById={eventsById}
+          handleDeleteTask={handleDeleteTask}
           handleTaskSubmit={handleTaskSubmit}
+          isDeletingTask={isDeletingTask}
           isSavingTask={isSavingTask}
           mechanismsById={mechanismsById}
           mentors={mentors}

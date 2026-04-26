@@ -15,7 +15,9 @@ import type {
   TaskViewTab,
   ViewTab,
 } from "@/features/workspace";
-import { IconRefresh } from "@/components/shared";
+import { IconEdit, IconRefresh } from "@/components/shared";
+
+const ADD_ROBOT_PROJECT_VALUE = "__add_robot_project__";
 
 const TASK_VIEW_OPTIONS: { value: TaskViewTab; label: string }[] = [
   { value: "timeline", label: "Timeline" },
@@ -37,7 +39,6 @@ const ROBOT_INVENTORY_VIEW_OPTIONS: { value: InventoryViewTab; label: string }[]
 
 const NON_ROBOT_INVENTORY_VIEW_OPTIONS: { value: InventoryViewTab; label: string }[] = [
   { value: "materials", label: "Documents" },
-  { value: "parts", label: "Non-Technical" },
   { value: "purchases", label: "Purchases" },
 ];
 
@@ -105,6 +106,9 @@ function TopbarNavigation({
   subsystemsLabel: string;
   taskView: TaskViewTab;
 }) {
+  const effectiveInventoryView =
+    isNonRobotProject && inventoryView === "parts" ? "materials" : inventoryView;
+
   switch (activeTab) {
     case "tasks":
       return (
@@ -135,7 +139,7 @@ function TopbarNavigation({
         <>
           <span className="app-topbar-page-label">{BASE_SECTION_LABELS.inventory}</span>
           <TopbarTabs
-            activeValue={inventoryView}
+            activeValue={effectiveInventoryView}
             ariaLabel="Inventory views"
             onChange={setInventoryView}
             options={
@@ -173,6 +177,8 @@ interface AppTopbarProps {
   projects: ProjectRecord[];
   selectedProjectId: string | null;
   subsystemsLabel: string;
+  onCreateRobot: () => void;
+  onEditSelectedRobot: () => void;
   onSelectProject: (projectId: string | null) => void;
   toggleDarkMode: () => void;
   toggleSidebar: () => void;
@@ -196,10 +202,25 @@ export function AppTopbar({
   projects,
   selectedProjectId,
   subsystemsLabel,
+  onCreateRobot,
+  onEditSelectedRobot,
   onSelectProject,
   toggleDarkMode,
   toggleSidebar,
 }: AppTopbarProps) {
+  const selectedProject =
+    projects.find((project) => project.id === selectedProjectId) ?? null;
+  const canEditSelectedRobot = selectedProject?.projectType === "robot";
+
+  const handleProjectChange = (value: string) => {
+    if (value === ADD_ROBOT_PROJECT_VALUE) {
+      onCreateRobot();
+      return;
+    }
+
+    onSelectProject(value || null);
+  };
+
   return (
     <header
       className="topbar app-topbar"
@@ -233,12 +254,13 @@ export function AppTopbar({
           <span className="app-topbar-project-label">Project</span>
           <select
             className="app-topbar-project-select"
-            disabled={projects.length === 0}
-            onChange={(event) => onSelectProject(event.target.value || null)}
+            onChange={(event) => handleProjectChange(event.target.value)}
             value={selectedProjectId ?? ""}
           >
             {projects.length === 0 ? (
-              <option value="">No projects</option>
+              <option value="" disabled>
+                No projects
+              </option>
             ) : (
               <>
                 <option value="">All projects</option>
@@ -249,8 +271,20 @@ export function AppTopbar({
                 ))}
               </>
             )}
+            <option value={ADD_ROBOT_PROJECT_VALUE}>Add robot</option>
           </select>
         </label>
+        {canEditSelectedRobot ? (
+          <button
+            aria-label="Edit robot name"
+            className="app-topbar-project-action"
+            onClick={onEditSelectedRobot}
+            title="Edit robot name"
+            type="button"
+          >
+            <IconEdit />
+          </button>
+        ) : null}
       </div>
 
       <div className="app-topbar-nav">

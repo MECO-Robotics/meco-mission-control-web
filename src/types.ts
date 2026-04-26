@@ -86,6 +86,7 @@ export interface SubsystemRecord {
   projectId: string;
   name: string;
   description: string;
+  iteration: number;
   isCore: boolean;
   parentSubsystemId: string | null;
   responsibleEngineerId: string | null;
@@ -104,6 +105,7 @@ export interface MechanismRecord {
   subsystemId: string;
   name: string;
   description: string;
+  iteration: number;
 }
 
 export interface MaterialRecord {
@@ -135,6 +137,7 @@ export interface PartDefinitionRecord {
   name: string;
   partNumber: string;
   revision: string;
+  iteration: number;
   type: string;
   source: string;
   materialId: string | null;
@@ -160,6 +163,7 @@ export interface EventRecord {
   endDateTime: string | null;
   isExternal: boolean;
   description: string;
+  projectIds: string[];
   relatedSubsystemIds: string[];
 }
 
@@ -170,6 +174,7 @@ export interface EventPayload {
   endDateTime: string | null;
   isExternal: boolean;
   description: string;
+  projectIds: string[];
   relatedSubsystemIds: string[];
 }
 
@@ -243,6 +248,7 @@ export interface TaskRecord {
   partInstanceIds: string[];
   targetEventId: string | null;
   ownerId: string | null;
+  assigneeIds: string[];
   mentorId: string | null;
   startDate: string;
   dueDate: string;
@@ -366,6 +372,17 @@ export interface SeasonCreatePayload {
   endDate?: string;
 }
 
+export interface ProjectPayload {
+  name: string;
+  description?: string;
+  status?: ProjectStatus;
+}
+
+export interface ProjectCreatePayload extends ProjectPayload {
+  seasonId: string;
+  projectType: ProjectType;
+}
+
 export interface MemberPayload {
   name: string;
   email: string;
@@ -399,10 +416,17 @@ export interface ArtifactPayload {
   updatedAt: string;
 }
 
+export interface WorkstreamPayload {
+  projectId: string;
+  name: string;
+  description: string;
+}
+
 export interface PartDefinitionPayload {
   name: string;
   partNumber: string;
   revision: string;
+  iteration: number;
   type: string;
   source: string;
   materialId: string | null;
@@ -413,6 +437,7 @@ export interface SubsystemPayload {
   projectId: string;
   name: string;
   description: string;
+  iteration: number;
   parentSubsystemId: string | null;
   responsibleEngineerId: string | null;
   mentorIds: string[];
@@ -423,6 +448,7 @@ export interface MechanismPayload {
   subsystemId: string;
   name: string;
   description: string;
+  iteration: number;
 }
 
 export interface PartInstancePayload {
@@ -450,6 +476,7 @@ export interface TaskPayload {
   partInstanceIds: string[];
   targetEventId: string | null;
   ownerId: string | null;
+  assigneeIds: string[];
   mentorId: string | null;
   startDate: string;
   dueDate: string;

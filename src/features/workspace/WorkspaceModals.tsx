@@ -13,8 +13,10 @@ import type {
   TaskPayload,
   TaskRecord,
   WorkLogPayload,
+  WorkstreamPayload,
 } from "@/types";
 import {
+  buildIterationOptions,
   getProjectTaskTargetLabel,
   setTaskPrimaryTargetSelection,
   toggleTaskTargetSelection,
@@ -27,7 +29,9 @@ interface TaskEditorModalProps {
   closeTaskModal: () => void;
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
   eventsById: Record<string, BootstrapPayload["events"][number]>;
+  handleDeleteTask: (taskId: string) => Promise<void>;
   handleTaskSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  isDeletingTask: boolean;
   isSavingTask: boolean;
   mechanismsById: Record<string, BootstrapPayload["mechanisms"][number]>;
   mentors: BootstrapPayload["members"];
@@ -47,7 +51,9 @@ export function TaskEditorModal({
   activeTask,
   bootstrap,
   closeTaskModal,
+  handleDeleteTask,
   handleTaskSubmit,
+  isDeletingTask,
   isSavingTask,
   mechanismsById,
   mentors,
@@ -98,6 +104,12 @@ export function TaskEditorModal({
       ? taskDraft.partInstanceIds
       : taskDraft.partInstanceId
         ? [taskDraft.partInstanceId]
+        : [];
+  const selectedAssigneeIds =
+    taskDraft.assigneeIds.length > 0
+      ? taskDraft.assigneeIds
+      : taskDraft.ownerId
+        ? [taskDraft.ownerId]
         : [];
   const getPartInstanceLabel = (partInstance: BootstrapPayload["partInstances"][number]) => {
     const partDefinition = partDefinitionsById[partInstance.partDefinitionId];
@@ -169,7 +181,7 @@ export function TaskEditorModal({
                 </button>
               </div>
             ) : (
-              <h2 style={{ color: "var(--text-title)" }}>{taskModalMode === "create" ? "Create" : activeTask?.title ?? "Edit task"}</h2>
+              <h2 style={{ color: "var(--text-title)" }}>{taskModalMode === "create" ? "Create task" : activeTask?.title ?? "Edit task"}</h2>
             )}
           </div>
           <button className="icon-button" onClick={closeTaskModal} type="button" style={{ color: "var(--text-copy)", background: "transparent" }}>
@@ -338,16 +350,51 @@ export function TaskEditorModal({
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Owner</span>
             <select
-              onChange={(event) =>
+              onChange={(event) => {
+                const ownerId = event.target.value || null;
                 setTaskDraft((current) => ({
                   ...current,
-                  ownerId: event.target.value || null,
-                }))
-              }
+                  ownerId,
+                  assigneeIds: ownerId
+                    ? Array.from(new Set([...current.assigneeIds, ownerId]))
+                    : current.assigneeIds,
+                }));
+              }}
               style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
               value={taskDraft.ownerId ?? ""}
             >
               <option value="">Unassigned</option>
+              {students.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span style={{ color: "var(--text-title)" }}>Assigned students</span>
+            <select
+              multiple
+              onChange={(event) => {
+                const assigneeIds = Array.from(
+                  event.currentTarget.selectedOptions,
+                  (option) => option.value,
+                );
+                setTaskDraft((current) => ({
+                  ...current,
+                  assigneeIds: Array.from(
+                    new Set(
+                      [...assigneeIds, current.ownerId].filter(
+                        (memberId): memberId is string => Boolean(memberId),
+                      ),
+                    ),
+                  ),
+                }));
+              }}
+              size={Math.min(students.length || 1, 5)}
+              style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
+              value={selectedAssigneeIds}
+            >
               {students.map((member) => (
                 <option key={member.id} value={member.id}>
                   {member.name}
@@ -504,10 +551,22 @@ export function TaskEditorModal({
             </label>
           </div>
           <div className="modal-actions modal-wide">
+            {taskModalMode === "edit" && activeTask?.id ? (
+              <button
+                className="danger-action"
+                disabled={isDeletingTask || isSavingTask}
+                onClick={() => {
+                  void handleDeleteTask(activeTask.id);
+                }}
+                type="button"
+              >
+                {isDeletingTask ? "Deleting..." : "Delete task"}
+              </button>
+            ) : null}
             <button className="secondary-action" onClick={closeTaskModal} style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }} type="button">
               Cancel
             </button>
-            <button className="primary-action" disabled={isSavingTask} type="submit">
+            <button className="primary-action" disabled={isSavingTask || isDeletingTask} type="submit">
               {isSavingTask
                 ? "Saving..."
                 : taskModalMode === "create"
@@ -1652,6 +1711,146 @@ export function ArtifactEditorModal({
   );
 }
 
+interface WorkstreamEditorModalProps {
+  bootstrap: BootstrapPayload;
+  closeWorkstreamModal: () => void;
+  handleWorkstreamSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  isSavingWorkstream: boolean;
+  setWorkstreamDraft: Dispatch<SetStateAction<WorkstreamPayload>>;
+  workstreamDraft: WorkstreamPayload;
+}
+
+export function WorkstreamEditorModal({
+  bootstrap,
+  closeWorkstreamModal,
+  handleWorkstreamSubmit,
+  isSavingWorkstream,
+  setWorkstreamDraft,
+  workstreamDraft,
+}: WorkstreamEditorModalProps) {
+  return (
+    <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
+      <section
+        aria-modal="true"
+        className="modal-card"
+        role="dialog"
+        style={{
+          background: "var(--bg-panel)",
+          border: "1px solid var(--border-base)",
+        }}
+      >
+        <div className="panel-header compact-header">
+          <div>
+            <p className="eyebrow" style={{ color: "var(--meco-blue)" }}>
+              Workflow editor
+            </p>
+            <h2 style={{ color: "var(--text-title)" }}>Add workflow</h2>
+          </div>
+          <button
+            className="icon-button"
+            onClick={closeWorkstreamModal}
+            style={{ color: "var(--text-copy)", background: "transparent" }}
+            type="button"
+          >
+            Close
+          </button>
+        </div>
+
+        <form
+          className="modal-form"
+          onSubmit={handleWorkstreamSubmit}
+          style={{ color: "var(--text-copy)" }}
+        >
+          <label className="field modal-wide">
+            <span style={{ color: "var(--text-title)" }}>Name</span>
+            <input
+              onChange={(event) =>
+                setWorkstreamDraft((current) => ({
+                  ...current,
+                  name: event.target.value,
+                }))
+              }
+              required
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={workstreamDraft.name}
+            />
+          </label>
+
+          <label className="field">
+            <span style={{ color: "var(--text-title)" }}>Project</span>
+            <select
+              onChange={(event) =>
+                setWorkstreamDraft((current) => ({
+                  ...current,
+                  projectId: event.target.value,
+                }))
+              }
+              required
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={workstreamDraft.projectId}
+            >
+              <option value="" disabled>
+                Select project
+              </option>
+              {bootstrap.projects.map((project) => (
+                <option key={project.id} value={project.id}>
+                  {project.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="field modal-wide">
+            <span style={{ color: "var(--text-title)" }}>Description</span>
+            <textarea
+              onChange={(event) =>
+                setWorkstreamDraft((current) => ({
+                  ...current,
+                  description: event.target.value,
+                }))
+              }
+              required
+              rows={3}
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={workstreamDraft.description}
+            />
+          </label>
+
+          <div className="modal-actions modal-wide">
+            <button
+              className="secondary-action"
+              onClick={closeWorkstreamModal}
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              type="button"
+            >
+              Cancel
+            </button>
+            <button className="primary-action" disabled={isSavingWorkstream} type="submit">
+              {isSavingWorkstream ? "Saving..." : "Add workflow"}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  );
+}
+
 interface PartDefinitionEditorModalProps {
   bootstrap: BootstrapPayload;
   activePartDefinitionId: string | null;
@@ -1703,6 +1902,11 @@ export function PartDefinitionEditorModal({
   partDefinitionModalMode,
   setPartDefinitionDraft,
 }: PartDefinitionEditorModalProps) {
+  const partDefinitionIterationOptions = buildIterationOptions(
+    bootstrap.partDefinitions.map((partDefinition) => partDefinition.iteration),
+    partDefinitionDraft.iteration,
+  );
+
   return (
     <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
       <section aria-modal="true" className="modal-card" role="dialog" style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}>
@@ -1725,6 +1929,25 @@ export function PartDefinitionEditorModal({
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Revision</span>
             <input onChange={(event) => setPartDefinitionDraft((current) => ({ ...current, revision: event.target.value }))} required style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }} value={partDefinitionDraft.revision} />
+          </label>
+          <label className="field">
+            <span style={{ color: "var(--text-title)" }}>Part iteration</span>
+            <select
+              onChange={(event) =>
+                setPartDefinitionDraft((current) => ({
+                  ...current,
+                  iteration: Number(event.target.value),
+                }))
+              }
+              style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
+              value={partDefinitionDraft.iteration ?? 1}
+            >
+              {partDefinitionIterationOptions.map((iteration) => (
+                <option key={iteration} value={iteration}>
+                  Iteration {iteration}
+                </option>
+              ))}
+            </select>
           </label>
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Type</span>
@@ -1914,6 +2137,12 @@ export function SubsystemEditorModal({
         (subsystem) => subsystem.id === subsystemDraft.parentSubsystemId,
       )?.name ?? "Unknown"
     : null;
+  const subsystemIterationOptions = buildIterationOptions(
+    bootstrap.subsystems
+      .filter((subsystem) => subsystem.projectId === subsystemDraft.projectId)
+      .map((subsystem) => subsystem.iteration),
+    subsystemDraft.iteration,
+  );
 
   return (
     <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
@@ -1987,6 +2216,30 @@ export function SubsystemEditorModal({
               }}
               value={subsystemDraft.description}
             />
+          </label>
+
+          <label className="field">
+            <span style={{ color: "var(--text-title)" }}>Subsystem iteration</span>
+            <select
+              onChange={(event) =>
+                setSubsystemDraft((current) => ({
+                  ...current,
+                  iteration: Number(event.target.value),
+                }))
+              }
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={subsystemDraft.iteration ?? 1}
+            >
+              {subsystemIterationOptions.map((iteration) => (
+                <option key={iteration} value={iteration}>
+                  Iteration {iteration}
+                </option>
+              ))}
+            </select>
           </label>
 
           {subsystemModalMode === "create" ? (
@@ -2130,6 +2383,13 @@ export function MechanismEditorModal({
   mechanismModalMode,
   setMechanismDraft,
 }: MechanismEditorModalProps) {
+  const mechanismIterationOptions = buildIterationOptions(
+    bootstrap.mechanisms
+      .filter((mechanism) => mechanism.subsystemId === mechanismDraft.subsystemId)
+      .map((mechanism) => mechanism.iteration),
+    mechanismDraft.iteration,
+  );
+
   return (
     <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
       <section
@@ -2181,6 +2441,30 @@ export function MechanismEditorModal({
               {bootstrap.subsystems.map((subsystem) => (
                 <option key={subsystem.id} value={subsystem.id}>
                   {subsystem.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="field">
+            <span style={{ color: "var(--text-title)" }}>Mechanism iteration</span>
+            <select
+              onChange={(event) =>
+                setMechanismDraft((current) => ({
+                  ...current,
+                  iteration: Number(event.target.value),
+                }))
+              }
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={mechanismDraft.iteration ?? 1}
+            >
+              {mechanismIterationOptions.map((iteration) => (
+                <option key={iteration} value={iteration}>
+                  Iteration {iteration}
                 </option>
               ))}
             </select>

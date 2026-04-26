@@ -11,12 +11,14 @@ interface WorkflowViewProps {
   artifacts: ArtifactRecord[];
   bootstrap: BootstrapPayload;
   membersById: Record<string, BootstrapPayload["members"][number]>;
+  openCreateWorkstreamModal: () => void;
 }
 
 export function WorkflowView({
   artifacts,
   bootstrap,
   membersById,
+  openCreateWorkstreamModal,
 }: WorkflowViewProps) {
   const [search, setSearch] = useState("");
 
@@ -37,8 +39,14 @@ export function WorkflowView({
         const contributorNames = Array.from(
           new Set(
             workstreamTasks
-              .map((task) => task.ownerId)
-              .filter((ownerId): ownerId is string => Boolean(ownerId))
+              .flatMap((task) => {
+                const assigneeIds = Array.isArray(task.assigneeIds) ? task.assigneeIds : [];
+                return assigneeIds.length > 0
+                  ? assigneeIds
+                  : task.ownerId
+                    ? [task.ownerId]
+                    : [];
+              })
               .map((ownerId) => membersById[ownerId]?.name ?? "Unknown"),
           ),
         );
@@ -72,16 +80,6 @@ export function WorkflowView({
     );
   }, [search, workflowRows]);
 
-  const projectLevelArtifactCount = useMemo(
-    () => artifacts.filter((artifact) => artifact.workstreamId === null).length,
-    [artifacts],
-  );
-
-  const openTaskTotal = useMemo(
-    () => filteredRows.reduce((total, row) => total + row.openTaskCount, 0),
-    [filteredRows],
-  );
-
   return (
     <section className={`panel dense-panel subsystem-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
       <div className="panel-header compact-header">
@@ -98,28 +96,16 @@ export function WorkflowView({
             placeholder="Search workflows..."
             value={search}
           />
-        </div>
-      </div>
 
-      <div
-        className="summary-row"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-          gap: "0.6rem",
-        }}
-      >
-        <div className="summary-chip">
-          <span>Visible workflows</span>
-          <strong>{filteredRows.length}</strong>
-        </div>
-        <div className="summary-chip">
-          <span>Open tasks</span>
-          <strong>{openTaskTotal}</strong>
-        </div>
-        <div className="summary-chip">
-          <span>Project-level artifacts</span>
-          <strong>{projectLevelArtifactCount}</strong>
+          <button
+            aria-label="Add workflow"
+            className="primary-action queue-toolbar-action subsystem-manager-toolbar-action"
+            onClick={openCreateWorkstreamModal}
+            title="Add"
+            type="button"
+          >
+            Add workflow
+          </button>
         </div>
       </div>
 

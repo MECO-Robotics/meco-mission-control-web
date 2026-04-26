@@ -18,6 +18,7 @@ import type {
   TaskPayload,
   TaskRecord,
   WorkLogPayload,
+  WorkstreamPayload,
 } from "@/types";
 
 export function toErrorMessage(error: unknown) {
@@ -63,6 +64,23 @@ function uniqueIds(values: Array<string | null | undefined>) {
     return Array.from(
         new Set(values.filter((value): value is string => Boolean(value))),
     );
+}
+
+export function normalizeIteration(value: number | null | undefined) {
+    return Number.isFinite(value) && value && value >= 1 ? Math.trunc(value) : 1;
+}
+
+export function buildIterationOptions(
+    iterations: Array<number | null | undefined>,
+    selectedIteration: number | null | undefined,
+) {
+    const highestIteration = Math.max(
+        normalizeIteration(selectedIteration),
+        ...iterations.map(normalizeIteration),
+    );
+    const optionCount = Math.max(5, highestIteration + 1);
+
+    return Array.from({ length: optionCount }, (_, index) => index + 1);
 }
 
 export type TaskTargetKind = "workstream" | "subsystem" | "mechanism" | "part-instance";
@@ -306,6 +324,7 @@ export function buildEmptyTaskPayload(bootstrap: BootstrapPayload): TaskPayload 
         partInstanceIds: [],
         targetEventId: firstEvent,
         ownerId: firstStudent,
+        assigneeIds: uniqueIds([firstStudent]),
         mentorId: firstMentor,
         startDate: today,
         dueDate: today,
@@ -434,11 +453,29 @@ export function buildEmptyArtifactPayload(
     };
 }
 
+export function buildEmptyWorkstreamPayload(
+    bootstrap: BootstrapPayload,
+    defaults: { projectId?: string } = {},
+): WorkstreamPayload {
+    const resolvedProjectId =
+        defaults.projectId &&
+        bootstrap.projects.some((project) => project.id === defaults.projectId)
+            ? defaults.projectId
+            : bootstrap.projects[0]?.id ?? "";
+
+    return {
+        projectId: resolvedProjectId,
+        name: "",
+        description: "",
+    };
+}
+
 export function buildEmptyPartDefinitionPayload(bootstrap: BootstrapPayload): PartDefinitionPayload {
     return {
         name: "",
         partNumber: "",
         revision: "A",
+        iteration: 1,
         type: "custom",
         source: "",
         materialId: bootstrap.materials[0]?.id ?? null,
@@ -464,6 +501,7 @@ export function buildEmptySubsystemPayload(bootstrap: BootstrapPayload): Subsyst
         projectId: defaultProjectId,
         name: "",
         description: "",
+        iteration: 1,
         parentSubsystemId: defaultParentSubsystemId,
         responsibleEngineerId: firstResponsibleEngineer,
         mentorIds: firstMentor ? [firstMentor] : [],
@@ -484,6 +522,7 @@ export function buildEmptyMechanismPayload(
         subsystemId: firstSubsystem,
         name: "",
         description: "",
+        iteration: 1,
     };
 }
 
@@ -518,6 +557,7 @@ export const taskToPayload = (task: TaskRecord): TaskPayload => ({
     subsystemIds: task.subsystemIds?.length ? task.subsystemIds : uniqueIds([task.subsystemId]),
     mechanismIds: task.mechanismIds?.length ? task.mechanismIds : uniqueIds([task.mechanismId]),
     partInstanceIds: task.partInstanceIds?.length ? task.partInstanceIds : uniqueIds([task.partInstanceId]),
+    assigneeIds: task.assigneeIds?.length ? uniqueIds(task.assigneeIds) : uniqueIds([task.ownerId]),
 });
 
 export const purchaseToPayload = (item: PurchaseItemRecord): PurchaseItemPayload => ({
@@ -546,19 +586,23 @@ export const artifactToPayload = (item: ArtifactRecord): ArtifactPayload => ({
 
 export const partDefinitionToPayload = (item: PartDefinitionRecord): PartDefinitionPayload => ({
     ...item,
+    iteration: normalizeIteration(item.iteration),
     materialId: item.materialId ?? null,
 });
 
 export const subsystemToPayload = (item: SubsystemRecord): SubsystemPayload => ({
     ...item,
+    iteration: normalizeIteration(item.iteration),
 });
 
 export const mechanismToPayload = (item: {
     subsystemId: string;
     name: string;
     description: string;
+    iteration?: number;
 }): MechanismPayload => ({
     ...item,
+    iteration: normalizeIteration(item.iteration),
 });
 
 export const partInstanceToPayload = (item: PartInstanceRecord): PartInstancePayload => ({

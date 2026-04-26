@@ -58,6 +58,7 @@ function createBootstrap(overrides: Partial<BootstrapPayload> = {}): BootstrapPa
     name: "Bearing Block",
     partNumber: "BB-001",
     revision: "A",
+    iteration: 1,
     type: "custom",
     source: "in-house",
     materialId: null,
@@ -72,6 +73,7 @@ function createBootstrap(overrides: Partial<BootstrapPayload> = {}): BootstrapPa
     endDateTime: null,
     isExternal: true,
     description: "",
+    projectIds: [projectA.id],
     relatedSubsystemIds: [],
   };
 
@@ -130,6 +132,7 @@ function createBootstrap(overrides: Partial<BootstrapPayload> = {}): BootstrapPa
         projectId: projectA.id,
         name: "Drive",
         description: "",
+        iteration: 1,
         isCore: true,
         parentSubsystemId: null,
         responsibleEngineerId: null,
@@ -141,6 +144,7 @@ function createBootstrap(overrides: Partial<BootstrapPayload> = {}): BootstrapPa
         projectId: projectA.id,
         name: "Shooter",
         description: "",
+        iteration: 1,
         isCore: false,
         parentSubsystemId: null,
         responsibleEngineerId: null,
@@ -149,7 +153,15 @@ function createBootstrap(overrides: Partial<BootstrapPayload> = {}): BootstrapPa
       },
     ],
     disciplines: [{ id: "discipline-mech", code: "mechanical", name: "Mechanical" }],
-    mechanisms: [{ id: "mechanism-1", subsystemId: "subsystem-core", name: "Gearbox", description: "" }],
+    mechanisms: [
+      {
+        id: "mechanism-1",
+        subsystemId: "subsystem-core",
+        name: "Gearbox",
+        description: "",
+        iteration: 1,
+      },
+    ],
     materials: [],
     artifacts: [],
     partDefinitions: [partDefinition],
@@ -175,6 +187,7 @@ function createBootstrap(overrides: Partial<BootstrapPayload> = {}): BootstrapPa
         partInstanceIds: [],
         targetEventId: null,
         ownerId: null,
+        assigneeIds: [],
         mentorId: null,
         startDate: "2026-02-01",
         dueDate: "2026-02-01",
@@ -223,6 +236,7 @@ describe("appUtils", () => {
           projectId: "project-a",
           name: "Subsystem A",
           description: "",
+          iteration: 1,
           isCore: false,
           parentSubsystemId: null,
           responsibleEngineerId: null,
@@ -248,6 +262,7 @@ describe("appUtils", () => {
     expect(payload.partInstanceId).toBeNull();
     expect(payload.partInstanceIds).toEqual([]);
     expect(payload.ownerId).toBe("lead-1");
+    expect(payload.assigneeIds).toEqual(["lead-1"]);
     expect(payload.mentorId).toBe("mentor-1");
     expect(payload.targetEventId).toBe("event-1");
     expect(payload.priority).toBe("medium");
