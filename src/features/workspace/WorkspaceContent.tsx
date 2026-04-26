@@ -38,6 +38,7 @@ import {
   WorkLogsView,
 } from "@/features/workspace/views";
 import type {
+  FilterSelection,
   InventoryViewTab,
   ManufacturingViewTab,
   TaskViewTab,
@@ -50,7 +51,6 @@ type WorkspaceSubviewTab =
   | InventoryViewTab
   | "worklogs"
   | "documents"
-  | "nontechnical"
   | "subsystems"
   | "workflow"
   | "roster"
@@ -78,8 +78,6 @@ const SUBVIEW_INTERACTION_GUIDANCE: Record<WorkspaceSubviewTab, string> = {
     "Use the search and stock filters to find inventory quickly, then hover a row to reveal the pencil cue before clicking the row to update quantities, vendors, locations, or notes. Use Add to track a new material.",
   documents:
     "Use search to find project artifacts quickly, hover a row to reveal the pencil cue, and click the row to update linked document details.",
-  nontechnical:
-    "Use this view to track non-technical outputs, ownership, and progress, then click any row to update details.",
   parts:
     "Search and filter the catalog from the toolbar, hover a part definition to reveal the pencil cue, and click the row to edit it. Use the edit modal to update or delete the part definition. Review matching part instances below for subsystem and mechanism ownership.",
   purchases:
@@ -101,6 +99,7 @@ const MANUFACTURING_VIEW_ORDER: readonly ManufacturingViewTab[] = [
   "fabrication",
 ];
 const INVENTORY_VIEW_ORDER: readonly InventoryViewTab[] = ["materials", "parts", "purchases"];
+const DOCUMENT_ARTIFACT_KINDS: readonly ArtifactKind[] = ["document", "nontechnical"];
 const MemoizedTimelineView = memo(TimelineView);
 
 function getSwipeDirection<T extends string>(
@@ -123,7 +122,7 @@ function getSwipeDirection<T extends string>(
 }
 
 interface WorkspaceContentProps {
-  activePersonFilter: string;
+  activePersonFilter: FilterSelection;
   activeTab: ViewTab;
   tabSwitchDirection: TabSwitchDirection;
   artifacts: ArtifactRecord[];
@@ -164,6 +163,7 @@ interface WorkspaceContentProps {
   openCreateTaskModal: () => void;
   openCreateTaskModalFromTimeline: () => void;
   openCreateWorkLogModal: () => void;
+  openCreateWorkstreamModal: () => void;
   openEditManufacturingModal: (item: ManufacturingItemRecord) => void;
   openEditArtifactModal: (artifact: ArtifactRecord) => void;
   openEditMaterialModal: (item: MaterialRecord) => void;
@@ -182,7 +182,7 @@ interface WorkspaceContentProps {
   taskView: TaskViewTab;
   selectMember: (id: string | null, payload: BootstrapPayload) => void;
   selectedMemberId: string | null;
-  setActivePersonFilter: (value: string) => void;
+  setActivePersonFilter: (value: FilterSelection) => void;
   setIsAddPersonOpen: (open: boolean) => void;
   setIsEditPersonOpen: (open: boolean) => void;
   setMemberEditDraft: Dispatch<SetStateAction<MemberPayload | null>>;
@@ -362,6 +362,7 @@ export function WorkspaceContent({
   openCreateTaskModal,
   openCreateTaskModalFromTimeline,
   openCreateWorkLogModal,
+  openCreateWorkstreamModal,
   openEditManufacturingModal,
   openEditArtifactModal,
   openEditMaterialModal,
@@ -391,9 +392,11 @@ export function WorkspaceContent({
   disablePanelAnimations = false,
   onDismissDataMessage,
 }: WorkspaceContentProps) {
+  const effectiveInventoryView =
+    isNonRobotProject && inventoryView === "parts" ? "materials" : inventoryView;
   const previousTaskViewRef = useRef(taskView);
   const previousManufacturingViewRef = useRef(manufacturingView);
-  const previousInventoryViewRef = useRef(inventoryView);
+  const previousInventoryViewRef = useRef(effectiveInventoryView);
 
   const taskSwipeDirection = getSwipeDirection(
     previousTaskViewRef.current,
@@ -407,7 +410,7 @@ export function WorkspaceContent({
   );
   const inventorySwipeDirection = getSwipeDirection(
     previousInventoryViewRef.current,
-    inventoryView,
+    effectiveInventoryView,
     INVENTORY_VIEW_ORDER,
   );
 
@@ -420,8 +423,8 @@ export function WorkspaceContent({
   }, [manufacturingView]);
 
   useEffect(() => {
-    previousInventoryViewRef.current = inventoryView;
-  }, [inventoryView]);
+    previousInventoryViewRef.current = effectiveInventoryView;
+  }, [effectiveInventoryView]);
 
   return (
     <div
@@ -597,16 +600,18 @@ export function WorkspaceContent({
               ? SUBVIEW_INTERACTION_GUIDANCE.documents
               : SUBVIEW_INTERACTION_GUIDANCE.materials
           }
-          isActive={inventoryView === "materials"}
+          isActive={effectiveInventoryView === "materials"}
           swipeDirection={inventorySwipeDirection}
         >
           {isNonRobotProject ? (
             <ArtifactInventoryView
               artifacts={artifacts}
               bootstrap={bootstrap}
-              kind="document"
+              createKind="document"
+              kinds={DOCUMENT_ARTIFACT_KINDS}
               openCreateArtifactModal={openCreateArtifactModal}
               openEditArtifactModal={openEditArtifactModal}
+              title="Documents"
             />
           ) : (
             <MaterialsView
@@ -619,38 +624,24 @@ export function WorkspaceContent({
 
         <WorkspaceSubPanel
           disableAnimations={disablePanelAnimations}
-          description={
-            isNonRobotProject
-              ? SUBVIEW_INTERACTION_GUIDANCE.nontechnical
-              : SUBVIEW_INTERACTION_GUIDANCE.parts
-          }
-          isActive={inventoryView === "parts"}
+          description={SUBVIEW_INTERACTION_GUIDANCE.parts}
+          isActive={!isNonRobotProject && effectiveInventoryView === "parts"}
           swipeDirection={inventorySwipeDirection}
         >
-          {isNonRobotProject ? (
-            <ArtifactInventoryView
-              artifacts={artifacts}
-              bootstrap={bootstrap}
-              kind="nontechnical"
-              openCreateArtifactModal={openCreateArtifactModal}
-              openEditArtifactModal={openEditArtifactModal}
-            />
-          ) : (
-            <PartsView
-              bootstrap={bootstrap}
-              openCreatePartDefinitionModal={openCreatePartDefinitionModal}
-              openEditPartDefinitionModal={openEditPartDefinitionModal}
-              mechanismsById={mechanismsById}
-              partDefinitionsById={partDefinitionsById}
-              subsystemsById={subsystemsById}
-            />
-          )}
+          <PartsView
+            bootstrap={bootstrap}
+            openCreatePartDefinitionModal={openCreatePartDefinitionModal}
+            openEditPartDefinitionModal={openEditPartDefinitionModal}
+            mechanismsById={mechanismsById}
+            partDefinitionsById={partDefinitionsById}
+            subsystemsById={subsystemsById}
+          />
         </WorkspaceSubPanel>
 
         <WorkspaceSubPanel
           disableAnimations={disablePanelAnimations}
           description={SUBVIEW_INTERACTION_GUIDANCE.purchases}
-          isActive={inventoryView === "purchases"}
+          isActive={effectiveInventoryView === "purchases"}
           swipeDirection={inventorySwipeDirection}
         >
           <PurchasesView
@@ -683,6 +674,7 @@ export function WorkspaceContent({
               artifacts={artifacts}
               bootstrap={bootstrap}
               membersById={membersById}
+              openCreateWorkstreamModal={openCreateWorkstreamModal}
             />
           ) : (
             <SubsystemsView

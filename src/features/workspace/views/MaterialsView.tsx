@@ -3,11 +3,14 @@ import { useMemo, useState, type CSSProperties } from "react";
 import type { BootstrapPayload, MaterialRecord } from "@/types";
 import { IconManufacturing, IconTasks } from "@/components/shared";
 import {
+  ColumnFilterDropdown,
   EditableHoverIndicator,
+  type FilterSelection,
   FilterDropdown,
   PaginationControls,
   SearchToolbarInput,
   TableCell,
+  filterSelectionIncludes,
   useWorkspacePagination,
 } from "@/features/workspace/shared";
 import { getStatusPillClassName } from "@/features/workspace/shared";
@@ -28,8 +31,8 @@ export function MaterialsView({
   openEditMaterialModal,
 }: MaterialsViewProps) {
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
-  const [stock, setStock] = useState("all");
+  const [category, setCategory] = useState<FilterSelection>([]);
+  const [stock, setStock] = useState<FilterSelection>([]);
 
   const filteredMaterials = useMemo(() => {
     return bootstrap.materials.filter((material) => {
@@ -39,12 +42,9 @@ export function MaterialsView({
         material.name.toLowerCase().includes(normalizedSearch) ||
         material.vendor.toLowerCase().includes(normalizedSearch) ||
         material.location.toLowerCase().includes(normalizedSearch);
-      const matchesCategory = category === "all" || material.category === category;
-      const matchesStock =
-        stock === "all" ||
-        (stock === "low"
-          ? material.onHandQuantity <= material.reorderPoint
-          : material.onHandQuantity > material.reorderPoint);
+      const matchesCategory = filterSelectionIncludes(category, material.category);
+      const stockValue = material.onHandQuantity <= material.reorderPoint ? "low" : "ok";
+      const matchesStock = filterSelectionIncludes(stock, stockValue);
 
       return matchesSearch && matchesCategory && matchesStock;
     });
@@ -71,6 +71,7 @@ export function MaterialsView({
           <FilterDropdown
             allLabel="All categories"
             ariaLabel="Filter materials by category"
+            className="mobile-filter-control"
             icon={<IconManufacturing />}
             onChange={setCategory}
             options={MATERIAL_CATEGORY_OPTIONS}
@@ -80,6 +81,7 @@ export function MaterialsView({
           <FilterDropdown
             allLabel="All stock"
             ariaLabel="Filter materials by stock level"
+            className="mobile-filter-control"
             icon={<IconTasks />}
             onChange={setStock}
             options={MATERIAL_STOCK_OPTIONS}
@@ -104,12 +106,30 @@ export function MaterialsView({
           style={{ "--workspace-grid-template": MATERIALS_GRID_TEMPLATE } as CSSProperties}
         >
           <span>Material</span>
-          <span>Category</span>
+          <span className="table-column-header-cell">
+            <span className="table-column-title">Category</span>
+            <ColumnFilterDropdown
+              allLabel="All categories"
+              ariaLabel="Filter materials by category"
+              onChange={setCategory}
+              options={MATERIAL_CATEGORY_OPTIONS}
+              value={category}
+            />
+          </span>
           <span>On hand</span>
           <span>Reorder</span>
           <span>Location</span>
           <span>Vendor</span>
-          <span>Status</span>
+          <span className="table-column-header-cell">
+            <span className="table-column-title">Status</span>
+            <ColumnFilterDropdown
+              allLabel="All stock"
+              ariaLabel="Filter materials by stock level"
+              onChange={setStock}
+              options={MATERIAL_STOCK_OPTIONS}
+              value={stock}
+            />
+          </span>
         </div>
 
         {materialPagination.pageItems.map((material) => {

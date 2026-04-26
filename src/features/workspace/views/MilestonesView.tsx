@@ -9,12 +9,21 @@ import type {
   EventType,
 } from "@/types";
 import {
+  ColumnFilterDropdown,
   EditableHoverIndicator,
+  type FilterSelection,
   FilterDropdown,
   SearchToolbarInput,
   TableCell,
+  filterSelectionIncludes,
+  filterSelectionIntersects,
 } from "@/features/workspace/shared";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
+import {
+  getEventProjectIds,
+  getMilestoneSubsystemOptions,
+  reconcileMilestoneSubsystemIds,
+} from "@/features/workspace/shared/eventProjectUtils";
 
 type MilestoneSortField = "startDateTime" | "title" | "type";
 
@@ -45,6 +54,7 @@ interface MilestoneDraft {
   type: EventType;
   isExternal: boolean;
   description: string;
+  projectIds: string[];
   relatedSubsystemIds: string[];
 }
 
@@ -132,6 +142,7 @@ function emptyMilestoneDraft(): MilestoneDraft {
     type: DEFAULT_EVENT_TYPE,
     isExternal: false,
     description: "",
+    projectIds: [],
     relatedSubsystemIds: [],
   };
 }
@@ -142,6 +153,7 @@ function milestoneDraftFromRecord(record: EventRecord): MilestoneDraft {
     type: record.type,
     isExternal: record.isExternal,
     description: record.description,
+    projectIds: record.projectIds,
     relatedSubsystemIds: record.relatedSubsystemIds,
   };
 }
@@ -164,8 +176,8 @@ export function MilestonesView({
 }: MilestonesViewProps) {
   const [sortField, setSortField] = useState<MilestoneSortField>("startDateTime");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [projectFilter, setProjectFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
+  const [projectFilter, setProjectFilter] = useState<FilterSelection>([]);
+  const [typeFilter, setTypeFilter] = useState<FilterSelection>([]);
   const [searchFilter, setSearchFilter] = useState("");
   const [eventModalMode, setEventModalMode] = useState<"create" | "edit" | null>(null);
   const [activeEventId, setActiveEventId] = useState<string | null>(null);
@@ -179,17 +191,15 @@ export function MilestonesView({
   const [isDeletingEvent, setIsDeletingEvent] = useState(false);
 
   useEffect(() => {
-    if (!isAllProjectsView && projectFilter !== "all") {
-      setProjectFilter("all");
+    if (!isAllProjectsView && projectFilter.length > 0) {
+      setProjectFilter([]);
     }
   }, [isAllProjectsView, projectFilter]);
 
   useEffect(() => {
-    if (
-      projectFilter !== "all" &&
-      !bootstrap.projects.some((project) => project.id === projectFilter)
-    ) {
-      setProjectFilter("all");
+    const projectIds = new Set(bootstrap.projects.map((project) => project.id));
+    if (projectFilter.some((projectId) => !projectIds.has(projectId))) {
+      setProjectFilter((current) => current.filter((projectId) => projectIds.has(projectId)));
     }
   }, [bootstrap.projects, projectFilter]);
 
@@ -200,8 +210,28 @@ export function MilestonesView({
       ) as Record<string, BootstrapPayload["projects"][number]>,
     [bootstrap.projects],
   );
+  const scopedProjectIds = useMemo(
+    () => bootstrap.projects.map((project) => project.id),
+    [bootstrap.projects],
+  );
 
-  const showProjectCol = isAllProjectsView && projectFilter === "all";
+  const getDefaultEventProjectIds = () => {
+    if (
+      isAllProjectsView &&
+      projectFilter.length > 0
+    ) {
+      return projectFilter;
+    }
+
+    return scopedProjectIds;
+  };
+
+  const selectableSubsystems = useMemo(
+    () => getMilestoneSubsystemOptions(bootstrap.subsystems, milestoneDraft.projectIds),
+    [bootstrap.subsystems, milestoneDraft.projectIds],
+  );
+
+  const showProjectCol = isAllProjectsView;
   const gridTemplate = [
     showProjectCol ? "1fr" : null,
     "minmax(220px, 2.5fr)",
@@ -217,15 +247,13 @@ export function MilestonesView({
     const labels: Record<string, string> = {};
 
     bootstrap.events.forEach((event) => {
-      const relatedProjectIds = Array.from(
-        new Set(
-          event.relatedSubsystemIds
-            .map((subsystemId) => subsystemsById[subsystemId]?.projectId ?? null)
-            .filter((projectId): projectId is string => Boolean(projectId)),
-        ),
-      );
+      const relatedProjectIds = getEventProjectIds(event, subsystemsById);
 
-      if (relatedProjectIds.length === 0) {
+      if (
+        relatedProjectIds.length === 0 ||
+        (relatedProjectIds.length === scopedProjectIds.length &&
+          relatedProjectIds.every((projectId) => scopedProjectIds.includes(projectId)))
+      ) {
         labels[event.id] = "All projects";
       } else if (relatedProjectIds.length === 1) {
         labels[event.id] = projectsById[relatedProjectIds[0]]?.name ?? "Unknown project";
@@ -237,25 +265,25 @@ export function MilestonesView({
     });
 
     return labels;
-  }, [bootstrap.events, projectsById, subsystemsById]);
+  }, [bootstrap.events, projectsById, scopedProjectIds, subsystemsById]);
 
   const processedEvents = useMemo(() => {
     let result = [...bootstrap.events];
 
-    if (isAllProjectsView && projectFilter !== "all") {
+    if (isAllProjectsView && projectFilter.length > 0) {
       result = result.filter((event) => {
-        if (event.relatedSubsystemIds.length === 0) {
+        const eventProjectIds = getEventProjectIds(event, subsystemsById);
+
+        if (eventProjectIds.length === 0) {
           return true;
         }
 
-        return event.relatedSubsystemIds.some(
-          (subsystemId) => subsystemsById[subsystemId]?.projectId === projectFilter,
-        );
+        return filterSelectionIntersects(projectFilter, eventProjectIds);
       });
     }
 
-    if (typeFilter !== "all") {
-      result = result.filter((event) => event.type === typeFilter);
+    if (typeFilter.length > 0) {
+      result = result.filter((event) => filterSelectionIncludes(typeFilter, event.type));
     }
 
     if (searchFilter.trim() !== "") {
@@ -321,7 +349,10 @@ export function MilestonesView({
   const openCreateEventModal = () => {
     setEventModalMode("create");
     setActiveEventId(null);
-    setMilestoneDraft(emptyMilestoneDraft());
+    setMilestoneDraft({
+      ...emptyMilestoneDraft(),
+      projectIds: getDefaultEventProjectIds(),
+    });
     setEventStartDate(localTodayDate());
     setEventStartTime("18:00");
     setEventEndDate("");
@@ -330,9 +361,13 @@ export function MilestonesView({
   };
 
   const openEditEventModal = (event: EventRecord) => {
+    const eventProjectIds = getEventProjectIds(event, subsystemsById);
     setEventModalMode("edit");
     setActiveEventId(event.id);
-    setMilestoneDraft(milestoneDraftFromRecord(event));
+    setMilestoneDraft({
+      ...milestoneDraftFromRecord(event),
+      projectIds: eventProjectIds.length > 0 ? eventProjectIds : scopedProjectIds,
+    });
     setEventStartDate(datePortion(event.startDateTime));
     setEventStartTime(timePortion(event.startDateTime));
     setEventEndDate(event.endDateTime ? datePortion(event.endDateTime) : "");
@@ -382,6 +417,7 @@ export function MilestonesView({
         endDateTime,
         isExternal: milestoneDraft.isExternal,
         description: milestoneDraft.description.trim(),
+        projectIds: Array.from(new Set(milestoneDraft.projectIds)),
         relatedSubsystemIds: Array.from(new Set(milestoneDraft.relatedSubsystemIds)),
       };
 
@@ -438,10 +474,23 @@ export function MilestonesView({
 
   const getSortIcon = (field: MilestoneSortField) => {
     if (sortField !== field) {
-      return null;
+      return "";
     }
 
-    return sortOrder === "asc" ? " ^" : " v";
+    return sortOrder === "asc" ? "^" : "v";
+  };
+
+  const renderSortLabel = (field: MilestoneSortField, label: string) => {
+    const sortIcon = getSortIcon(field);
+
+    return (
+      <>
+        <span aria-hidden="true" className="table-sort-arrow">
+          {sortIcon}
+        </span>
+        <span>{label}</span>
+      </>
+    );
   };
 
   const modalPortalTarget =
@@ -472,6 +521,7 @@ export function MilestonesView({
             <FilterDropdown
               allLabel="All projects"
               ariaLabel="Filter milestones by project"
+              className="mobile-filter-control"
               icon={<IconParts />}
               onChange={setProjectFilter}
               options={bootstrap.projects}
@@ -482,6 +532,7 @@ export function MilestonesView({
           <FilterDropdown
             allLabel="All types"
             ariaLabel="Filter milestones by type"
+            className="mobile-filter-control"
             icon={<IconTasks />}
             onChange={setTypeFilter}
             options={EVENT_TYPE_OPTIONS}
@@ -505,19 +556,39 @@ export function MilestonesView({
           className="queue-table queue-table-header"
           style={{ "--workspace-grid-template": gridTemplate } as CSSProperties}
         >
-          {showProjectCol ? <span>Project</span> : null}
+          {showProjectCol ? (
+            <span className="table-column-header-cell">
+              <span className="table-column-title">Project</span>
+              <ColumnFilterDropdown
+                allLabel="All projects"
+                ariaLabel="Filter milestones by project"
+                onChange={setProjectFilter}
+                options={bootstrap.projects}
+                value={projectFilter}
+              />
+            </span>
+          ) : null}
           <button className="table-sort-button" onClick={() => toggleSort("title")} type="button">
-            Milestone{getSortIcon("title")}
+            {renderSortLabel("title", "Milestone")}
           </button>
-          <button className="table-sort-button" onClick={() => toggleSort("type")} type="button">
-            Type{getSortIcon("type")}
-          </button>
+          <span className="table-column-header-cell">
+            <button className="table-sort-button" onClick={() => toggleSort("type")} type="button">
+              {renderSortLabel("type", "Type")}
+            </button>
+            <ColumnFilterDropdown
+              allLabel="All types"
+              ariaLabel="Filter milestones by type"
+              onChange={setTypeFilter}
+              options={EVENT_TYPE_OPTIONS}
+              value={typeFilter}
+            />
+          </span>
           <button
             className="table-sort-button"
             onClick={() => toggleSort("startDateTime")}
             type="button"
           >
-            Start{getSortIcon("startDateTime")}
+            {renderSortLabel("startDateTime", "Start")}
           </button>
           <span>End</span>
           <span>Related subsystems</span>
@@ -737,6 +808,45 @@ export function MilestonesView({
                   </label>
 
                   <label className="field modal-wide">
+                    <span style={{ color: "var(--text-title)" }}>Related projects</span>
+                    <select
+                      multiple
+                      onChange={(event) =>
+                        setMilestoneDraft((current) => {
+                          const projectIds = Array.from(
+                            event.currentTarget.selectedOptions,
+                            (option) => option.value,
+                          );
+
+                          return {
+                            ...current,
+                            projectIds,
+                            relatedSubsystemIds: reconcileMilestoneSubsystemIds(
+                              current.relatedSubsystemIds,
+                              projectIds,
+                              subsystemsById,
+                            ),
+                          };
+                        })
+                      }
+                      size={Math.min(bootstrap.projects.length || 1, 6)}
+                      style={{
+                        background: "var(--bg-row-alt)",
+                        color: "var(--text-title)",
+                        border: "1px solid var(--border-base)",
+                        minHeight: "5rem",
+                      }}
+                      value={milestoneDraft.projectIds}
+                    >
+                      {bootstrap.projects.map((project) => (
+                        <option key={project.id} value={project.id}>
+                          {project.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="field modal-wide">
                     <span style={{ color: "var(--text-title)" }}>Related subsystems</span>
                     <select
                       multiple
@@ -757,9 +867,11 @@ export function MilestonesView({
                       }}
                       value={milestoneDraft.relatedSubsystemIds}
                     >
-                      {bootstrap.subsystems.map((subsystem) => (
+                      {selectableSubsystems.map((subsystem) => (
                         <option key={subsystem.id} value={subsystem.id}>
-                          {subsystem.name}
+                          {projectsById[subsystem.projectId]?.name
+                            ? `${projectsById[subsystem.projectId].name} - ${subsystem.name}`
+                            : subsystem.name}
                         </option>
                       ))}
                     </select>

@@ -16,7 +16,7 @@ const HELP_SECTIONS: Array<{ title: string; items: string[] }> = [
     items: [
       "Tasks always include Timeline, Queue, and Milestones for planning and execution.",
       "Manufacturing appears only when a robot project is selected.",
-      "Inventory changes by project type: robot projects show Materials, Parts, and Purchases, while non-robot projects show Documentation and Purchases.",
+      "Inventory changes by project type: robot projects show Materials, Parts, and Purchases, while non-robot projects show Documents and Purchases.",
       "Subsystems is relabeled as Workflow for non-robot projects.",
       "Roster and Help stay available in all project scopes.",
     ],
@@ -37,7 +37,7 @@ const HELP_SECTIONS: Array<{ title: string; items: string[] }> = [
       "Use search and filter controls in the toolbar to narrow results quickly.",
       "Use the refresh button in the top-right corner after external updates.",
       "Use the timeline and milestone tools to track deadlines and dependencies by subsystem.",
-      "Use person filtering to focus on one member or switch back to all contributors.",
+      "Use person filtering to focus on one or more members or switch back to all contributors.",
       "Review status chips and counts in each view to spot blocked or overdue work.",
     ],
   },

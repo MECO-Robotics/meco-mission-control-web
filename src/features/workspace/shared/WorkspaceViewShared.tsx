@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 
-import { IconEdit, IconTasks } from "@/components/shared";
+import { IconEdit, IconFilter, IconTasks } from "@/components/shared";
 import type {
   ManufacturingItemRecord,
   PurchaseItemRecord,
+  TaskRecord,
 } from "@/types";
 import type {
   DropdownOption,
@@ -14,6 +15,7 @@ import type {
 const PAGE_SIZE_OPTIONS = [15, 30, 60] as const;
 type PageSizeOption = (typeof PAGE_SIZE_OPTIONS)[number];
 const DEFAULT_PAGE_SIZE: PageSizeOption = PAGE_SIZE_OPTIONS[0];
+export type FilterSelection = string[];
 
 function normalizePageSize(value: number): PageSizeOption {
   return PAGE_SIZE_OPTIONS.includes(value as PageSizeOption)
@@ -85,9 +87,116 @@ export function TableCell({
   );
 }
 
+export function filterSelectionIncludes(selection: FilterSelection, value: string | null | undefined) {
+  return selection.length === 0 || (typeof value === "string" && selection.includes(value));
+}
+
+export function filterSelectionIntersects(selection: FilterSelection, values: string[]) {
+  return selection.length === 0 || values.some((value) => selection.includes(value));
+}
+
+export function getTaskPersonFilterIds(task: TaskRecord) {
+  const assigneeIds = Array.isArray(task.assigneeIds) ? task.assigneeIds : [];
+  const candidateIds = [
+    ...assigneeIds,
+    task.ownerId,
+    task.mentorId,
+  ].filter((value): value is string => typeof value === "string" && value.length > 0);
+
+  return Array.from(new Set(candidateIds));
+}
+
+export function filterSelectionMatchesTaskPeople(selection: FilterSelection, task: TaskRecord) {
+  return filterSelectionIntersects(selection, getTaskPersonFilterIds(task));
+}
+
+function toggleFilterSelection(selection: FilterSelection, value: string) {
+  return selection.includes(value)
+    ? selection.filter((selectedValue) => selectedValue !== value)
+    : [...selection, value];
+}
+
+export function formatFilterSelectionLabel(
+  allLabel: string,
+  options: DropdownOption[],
+  value: FilterSelection,
+) {
+  if (value.length === 0) {
+    return allLabel;
+  }
+
+  if (value.length === 1) {
+    return options.find((option) => option.id === value[0])?.name ?? "1 selected";
+  }
+
+  return `${value.length} selected`;
+}
+
+function FilterOptionMenu({
+  allLabel,
+  menuId,
+  onChange,
+  options,
+  value,
+}: {
+  allLabel: string;
+  menuId: string;
+  onChange: (value: FilterSelection) => void;
+  options: DropdownOption[];
+  value: FilterSelection;
+}) {
+  return (
+    <div
+      aria-multiselectable="true"
+      className="table-column-filter-menu"
+      id={menuId}
+      role="listbox"
+    >
+      <button
+        aria-selected={value.length === 0}
+        className={`table-column-filter-option${value.length === 0 ? " is-selected" : ""}`}
+        onClick={(event) => {
+          event.stopPropagation();
+          onChange([]);
+        }}
+        role="option"
+        type="button"
+      >
+        <span aria-hidden="true" className="table-column-filter-option-check">
+          {value.length === 0 ? "✓" : ""}
+        </span>
+        <span>{allLabel}</span>
+      </button>
+      {options.map((option) => {
+        const isSelected = value.includes(option.id);
+
+        return (
+          <button
+            aria-selected={isSelected}
+            className={`table-column-filter-option${isSelected ? " is-selected" : ""}`}
+            key={option.id}
+            onClick={(event) => {
+              event.stopPropagation();
+              onChange(toggleFilterSelection(value, option.id));
+            }}
+            role="option"
+            type="button"
+          >
+            <span aria-hidden="true" className="table-column-filter-option-check">
+              {isSelected ? "✓" : ""}
+            </span>
+            <span>{option.name}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function FilterDropdown({
   allLabel,
   ariaLabel,
+  className,
   icon,
   onChange,
   options,
@@ -95,38 +204,153 @@ export function FilterDropdown({
 }: {
   allLabel: string;
   ariaLabel?: string;
+  className?: string;
   icon: ReactNode;
-  onChange: (value: string) => void;
+  onChange: (value: FilterSelection) => void;
   options: DropdownOption[];
-  value: string;
+  value: FilterSelection;
 }) {
-  const isActive = value !== "all";
-  const selectedLabel =
-    value === "all"
-      ? allLabel
-      : options.find((option) => option.id === value)?.name ?? allLabel;
+  const [isOpen, setIsOpen] = useState(false);
+  const filterRef = useRef<HTMLSpanElement>(null);
+  const menuId = useId();
+  const isActive = value.length > 0;
+  const selectedLabel = formatFilterSelectionLabel(allLabel, options, value);
+
+  useEffect(() => {
+    if (!isOpen || typeof document === "undefined") {
+      return;
+    }
+
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target;
+      if (target instanceof Node && !filterRef.current?.contains(target)) {
+        setIsOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
 
   return (
-    <label className={`toolbar-filter toolbar-filter-dropdown${isActive ? " is-active" : ""}`}>
-      <span className="toolbar-filter-icon">{icon}</span>
-      <span aria-hidden="true" className="toolbar-filter-value">
-        {selectedLabel}
-      </span>
-      <span aria-hidden="true" className="toolbar-filter-chevron" />
-      <select
-        aria-label={ariaLabel ?? allLabel}
-        className="toolbar-filter-select toolbar-filter-select-overlay"
-        onChange={(event) => onChange(event.target.value)}
-        value={value}
+    <span
+      className={`toolbar-filter toolbar-filter-dropdown${isActive ? " is-active" : ""}${isOpen ? " is-open" : ""}${className ? ` ${className}` : ""}`}
+      ref={filterRef}
+    >
+      <button
+        aria-controls={menuId}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-label={`${ariaLabel ?? allLabel}: ${selectedLabel}`}
+        className="toolbar-filter-menu-button"
+        onClick={() => setIsOpen((current) => !current)}
+        title={`${ariaLabel ?? allLabel}: ${selectedLabel}`}
+        type="button"
       >
-        <option value="all">{allLabel}</option>
-        {options.map((option) => (
-          <option key={option.id} value={option.id}>
-            {option.name}
-          </option>
-        ))}
-      </select>
-    </label>
+        <span className="toolbar-filter-icon">{icon}</span>
+        <span aria-hidden="true" className="toolbar-filter-value">
+          {selectedLabel}
+        </span>
+        <span aria-hidden="true" className="toolbar-filter-chevron" />
+      </button>
+      {isOpen ? (
+        <FilterOptionMenu
+          allLabel={allLabel}
+          menuId={menuId}
+          onChange={onChange}
+          options={options}
+          value={value}
+        />
+      ) : null}
+    </span>
+  );
+}
+
+export function ColumnFilterDropdown({
+  allLabel,
+  ariaLabel,
+  onChange,
+  options,
+  value,
+}: {
+  allLabel: string;
+  ariaLabel: string;
+  onChange: (value: FilterSelection) => void;
+  options: DropdownOption[];
+  value: FilterSelection;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const filterRef = useRef<HTMLSpanElement>(null);
+  const menuId = useId();
+  const isActive = value.length > 0;
+  const selectedLabel = formatFilterSelectionLabel(allLabel, options, value);
+
+  useEffect(() => {
+    if (!isOpen || typeof document === "undefined") {
+      return;
+    }
+
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target;
+      if (target instanceof Node && !filterRef.current?.contains(target)) {
+        setIsOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
+
+  return (
+    <span
+      className={`table-column-filter${isActive ? " is-active" : ""}${isOpen ? " is-open" : ""}`}
+      ref={filterRef}
+    >
+      <button
+        aria-controls={menuId}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-label={`${ariaLabel}${isActive ? `: ${selectedLabel}` : ""}`}
+        className="table-column-filter-button"
+        onClick={(event) => {
+          event.stopPropagation();
+          setIsOpen((current) => !current);
+        }}
+        title={`${ariaLabel}${isActive ? `: ${selectedLabel}` : ""}`}
+        type="button"
+      >
+        <IconFilter />
+      </button>
+      {isOpen ? (
+        <FilterOptionMenu
+          allLabel={allLabel}
+          menuId={menuId}
+          onChange={onChange}
+          options={options}
+          value={value}
+        />
+      ) : null}
+    </span>
   );
 }
 

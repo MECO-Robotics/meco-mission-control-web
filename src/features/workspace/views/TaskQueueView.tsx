@@ -9,11 +9,17 @@ import {
   IconTasks,
 } from "@/components/shared";
 import {
+  ColumnFilterDropdown,
   EditableHoverIndicator,
+  type FilterSelection,
   FilterDropdown,
   PaginationControls,
   SearchToolbarInput,
   TableCell,
+  filterSelectionIncludes,
+  filterSelectionIntersects,
+  filterSelectionMatchesTaskPeople,
+  formatFilterSelectionLabel,
   useWorkspacePagination,
 } from "@/features/workspace/shared";
 import { getStatusPillClassName } from "@/features/workspace/shared";
@@ -30,7 +36,7 @@ type TaskSortField =
   | "title";
 
 interface TaskQueueViewProps {
-  activePersonFilter: string;
+  activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
   eventsById: Record<string, BootstrapPayload["events"][number]>;
@@ -44,10 +50,6 @@ interface TaskQueueViewProps {
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
 }
 
-function taskTargetsSubsystem(task: TaskRecord, subsystemId: string) {
-  return task.subsystemId === subsystemId || task.subsystemIds.includes(subsystemId);
-}
-
 function formatNames(
   ids: string[],
   lookup: Record<string, { name?: string }>,
@@ -58,6 +60,23 @@ function formatNames(
   }
 
   return ids.map((id) => lookup[id]?.name ?? "Unknown").join(", ");
+}
+
+function readTaskAssigneeIds(task: TaskRecord) {
+  const assigneeIds = Array.isArray(task.assigneeIds) ? task.assigneeIds : [];
+
+  return assigneeIds.length > 0
+    ? assigneeIds
+    : task.ownerId
+      ? [task.ownerId]
+      : [];
+}
+
+function formatTaskAssignees(
+  task: TaskRecord,
+  membersById: Record<string, BootstrapPayload["members"][number]>,
+) {
+  return formatNames(readTaskAssigneeIds(task), membersById, "Unassigned");
 }
 
 export function TaskQueueView({
@@ -76,11 +95,11 @@ export function TaskQueueView({
 }: TaskQueueViewProps) {
   const [sortField, setSortField] = useState<TaskSortField>("dueDate");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [projectFilter, setProjectFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [subsystemFilter, setSubsystemFilter] = useState("all");
-  const [ownerFilter, setOwnerFilter] = useState("all");
-  const [priorityFilter, setPriorityFilter] = useState("all");
+  const [projectFilter, setProjectFilter] = useState<FilterSelection>([]);
+  const [statusFilter, setStatusFilter] = useState<FilterSelection>([]);
+  const [subsystemFilter, setSubsystemFilter] = useState<FilterSelection>([]);
+  const [ownerFilter, setOwnerFilter] = useState<FilterSelection>([]);
+  const [priorityFilter, setPriorityFilter] = useState<FilterSelection>([]);
   const [searchFilter, setSearchFilter] = useState("");
 
   const projectsById = useMemo(
@@ -92,25 +111,28 @@ export function TaskQueueView({
   );
 
   useEffect(() => {
-    if (!isAllProjectsView && projectFilter !== "all") {
-      setProjectFilter("all");
+    if (!isAllProjectsView && projectFilter.length > 0) {
+      setProjectFilter([]);
     }
   }, [isAllProjectsView, projectFilter]);
 
   useEffect(() => {
-    if (
-      projectFilter !== "all" &&
-      !bootstrap.projects.some((project) => project.id === projectFilter)
-    ) {
-      setProjectFilter("all");
+    const projectIds = new Set(bootstrap.projects.map((project) => project.id));
+    if (projectFilter.some((projectId) => !projectIds.has(projectId))) {
+      setProjectFilter((current) => current.filter((projectId) => projectIds.has(projectId)));
     }
   }, [bootstrap.projects, projectFilter]);
 
-  const showProjectCol = isAllProjectsView && projectFilter === "all";
-  const showSubsystemCol = subsystemFilter === "all";
-  const showOwnerCol = ownerFilter === "all";
-  const showStatusCol = statusFilter === "all";
-  const showPriorityCol = priorityFilter === "all";
+  const showProjectCol = isAllProjectsView;
+  const showSubsystemCol = true;
+  const showOwnerCol = true;
+  const showStatusCol = true;
+  const showPriorityCol = true;
+  const activePersonFilterLabel = formatFilterSelectionLabel(
+    "All roster",
+    bootstrap.members,
+    activePersonFilter,
+  );
 
   const gridTemplate = [
     showProjectCol ? "1fr" : null,
@@ -127,20 +149,30 @@ export function TaskQueueView({
   const processedTasks = useMemo(() => {
     let result = [...bootstrap.tasks];
 
-    if (isAllProjectsView && projectFilter !== "all") {
-      result = result.filter((task) => task.projectId === projectFilter);
+    if (activePersonFilter.length > 0) {
+      result = result.filter((task) => filterSelectionMatchesTaskPeople(activePersonFilter, task));
     }
-    if (statusFilter !== "all") {
-      result = result.filter((task) => task.status === statusFilter);
+    if (isAllProjectsView && projectFilter.length > 0) {
+      result = result.filter((task) => filterSelectionIncludes(projectFilter, task.projectId));
     }
-    if (subsystemFilter !== "all") {
-      result = result.filter((task) => taskTargetsSubsystem(task, subsystemFilter));
+    if (statusFilter.length > 0) {
+      result = result.filter((task) => filterSelectionIncludes(statusFilter, task.status));
     }
-    if (ownerFilter !== "all") {
-      result = result.filter((task) => task.ownerId === ownerFilter);
+    if (subsystemFilter.length > 0) {
+      result = result.filter((task) =>
+        filterSelectionIntersects(
+          subsystemFilter,
+          Array.from(new Set([task.subsystemId, ...task.subsystemIds].filter(Boolean))),
+        ),
+      );
     }
-    if (priorityFilter !== "all") {
-      result = result.filter((task) => task.priority === priorityFilter);
+    if (ownerFilter.length > 0) {
+      result = result.filter((task) =>
+        readTaskAssigneeIds(task).some((assigneeId) => ownerFilter.includes(assigneeId)),
+      );
+    }
+    if (priorityFilter.length > 0) {
+      result = result.filter((task) => filterSelectionIncludes(priorityFilter, task.priority));
     }
     if (searchFilter.trim() !== "") {
       const search = searchFilter.toLowerCase();
@@ -178,7 +210,7 @@ export function TaskQueueView({
         return projectsById[task.projectId]?.name ?? "";
       }
       if (sortField === "ownerId") {
-        return membersById[task.ownerId ?? ""]?.name ?? "";
+        return formatTaskAssignees(task, membersById);
       }
       if (sortField === "title") {
         return task.title.toLowerCase();
@@ -199,6 +231,7 @@ export function TaskQueueView({
       return 0;
     });
   }, [
+    activePersonFilter,
     bootstrap.tasks,
     isAllProjectsView,
     membersById,
@@ -227,10 +260,23 @@ export function TaskQueueView({
 
   const getSortIcon = (field: TaskSortField) => {
     if (sortField !== field) {
-      return null;
+      return "";
     }
 
-    return sortOrder === "asc" ? " ^" : " v";
+    return sortOrder === "asc" ? "^" : "v";
+  };
+
+  const renderSortLabel = (field: TaskSortField, label: string) => {
+    const sortIcon = getSortIcon(field);
+
+    return (
+      <>
+        <span aria-hidden="true" className="table-sort-arrow">
+          {sortIcon}
+        </span>
+        <span>{label}</span>
+      </>
+    );
   };
 
   return (
@@ -239,9 +285,9 @@ export function TaskQueueView({
         <div className="queue-section-header">
           <h2>Task queue</h2>
           <p className="section-copy filter-copy">
-            {activePersonFilter === "all"
+            {activePersonFilter.length === 0
               ? "All tasks in queue."
-              : `Only tasks owned by or mentored by ${membersById[activePersonFilter]?.name ?? "selected person"}.`}
+              : `Only tasks assigned to or mentored by ${activePersonFilterLabel}.`}
           </p>
         </div>
         <div className="panel-actions filter-toolbar task-queue-toolbar">
@@ -256,6 +302,7 @@ export function TaskQueueView({
             <FilterDropdown
               allLabel="All projects"
               ariaLabel="Filter tasks by project"
+              className="mobile-filter-control"
               icon={<IconParts />}
               onChange={setProjectFilter}
               options={bootstrap.projects}
@@ -266,6 +313,7 @@ export function TaskQueueView({
           <FilterDropdown
             allLabel="All subsystems"
             ariaLabel="Filter tasks by subsystem"
+            className="mobile-filter-control"
             icon={<IconManufacturing />}
             onChange={setSubsystemFilter}
             options={bootstrap.subsystems}
@@ -273,8 +321,9 @@ export function TaskQueueView({
           />
 
           <FilterDropdown
-            allLabel="All owners"
-            ariaLabel="Filter tasks by owner"
+            allLabel="All assignees"
+            ariaLabel="Filter tasks by assigned student"
+            className="mobile-filter-control"
             icon={<IconPerson />}
             onChange={setOwnerFilter}
             options={bootstrap.members}
@@ -284,6 +333,7 @@ export function TaskQueueView({
           <FilterDropdown
             allLabel="All statuses"
             ariaLabel="Filter tasks by status"
+            className="mobile-filter-control"
             icon={<IconTasks />}
             onChange={setStatusFilter}
             options={TASK_STATUS_OPTIONS}
@@ -293,6 +343,7 @@ export function TaskQueueView({
           <FilterDropdown
             allLabel="All priorities"
             ariaLabel="Filter tasks by priority"
+            className="mobile-filter-control"
             icon={<IconTasks />}
             onChange={setPriorityFilter}
             options={TASK_PRIORITY_OPTIONS}
@@ -317,35 +368,80 @@ export function TaskQueueView({
           style={{ "--workspace-grid-template": gridTemplate } as CSSProperties}
         >
           {showProjectCol ? (
-            <button className="table-sort-button" onClick={() => toggleSort("projectId")} type="button">
-              Project{getSortIcon("projectId")}
-            </button>
+            <span className="table-column-header-cell">
+              <button className="table-sort-button" onClick={() => toggleSort("projectId")} type="button">
+                {renderSortLabel("projectId", "Project")}
+              </button>
+              <ColumnFilterDropdown
+                allLabel="All projects"
+                ariaLabel="Filter tasks by project"
+                onChange={setProjectFilter}
+                options={bootstrap.projects}
+                value={projectFilter}
+              />
+            </span>
           ) : null}
           <button className="table-sort-button" onClick={() => toggleSort("title")} type="button">
-            Task{getSortIcon("title")}
+            {renderSortLabel("title", "Task")}
           </button>
           {showSubsystemCol ? (
-            <button className="table-sort-button" onClick={() => toggleSort("subsystemId")} type="button">
-              Subsystem{getSortIcon("subsystemId")}
-            </button>
+            <span className="table-column-header-cell">
+              <button className="table-sort-button" onClick={() => toggleSort("subsystemId")} type="button">
+                {renderSortLabel("subsystemId", "Subsystem")}
+              </button>
+              <ColumnFilterDropdown
+                allLabel="All subsystems"
+                ariaLabel="Filter tasks by subsystem"
+                onChange={setSubsystemFilter}
+                options={bootstrap.subsystems}
+                value={subsystemFilter}
+              />
+            </span>
           ) : null}
           {showOwnerCol ? (
-            <button className="table-sort-button" onClick={() => toggleSort("ownerId")} type="button">
-              Owner{getSortIcon("ownerId")}
-            </button>
+            <span className="table-column-header-cell">
+              <button className="table-sort-button" onClick={() => toggleSort("ownerId")} type="button">
+                {renderSortLabel("ownerId", "Assigned")}
+              </button>
+              <ColumnFilterDropdown
+                allLabel="All assignees"
+                ariaLabel="Filter tasks by assigned student"
+                onChange={setOwnerFilter}
+                options={bootstrap.members}
+                value={ownerFilter}
+              />
+            </span>
           ) : null}
           {showStatusCol ? (
-            <button className="table-sort-button" onClick={() => toggleSort("status")} type="button">
-              Status{getSortIcon("status")}
-            </button>
+            <span className="table-column-header-cell">
+              <button className="table-sort-button" onClick={() => toggleSort("status")} type="button">
+                {renderSortLabel("status", "Status")}
+              </button>
+              <ColumnFilterDropdown
+                allLabel="All statuses"
+                ariaLabel="Filter tasks by status"
+                onChange={setStatusFilter}
+                options={TASK_STATUS_OPTIONS}
+                value={statusFilter}
+              />
+            </span>
           ) : null}
           <button className="table-sort-button" onClick={() => toggleSort("dueDate")} type="button">
-            Due{getSortIcon("dueDate")}
+            {renderSortLabel("dueDate", "Due")}
           </button>
           {showPriorityCol ? (
-            <button className="table-sort-button" onClick={() => toggleSort("priority")} type="button">
-              Priority{getSortIcon("priority")}
-            </button>
+            <span className="table-column-header-cell">
+              <button className="table-sort-button" onClick={() => toggleSort("priority")} type="button">
+                {renderSortLabel("priority", "Priority")}
+              </button>
+              <ColumnFilterDropdown
+                allLabel="All priorities"
+                ariaLabel="Filter tasks by priority"
+                onChange={setPriorityFilter}
+                options={TASK_PRIORITY_OPTIONS}
+                value={priorityFilter}
+              />
+            </span>
           ) : null}
         </div>
 
@@ -396,8 +492,8 @@ export function TaskQueueView({
                 </TableCell>
               ) : null}
               {showOwnerCol ? (
-                <TableCell label="Owner">
-                  {(task.ownerId ? membersById[task.ownerId]?.name : null) ?? "Unassigned"}
+                <TableCell label="Assigned">
+                  {formatTaskAssignees(task, membersById)}
                 </TableCell>
               ) : null}
               {showStatusCol ? (

@@ -8,11 +8,14 @@ import type {
   BootstrapPayload,
 } from "@/types";
 import {
+  ColumnFilterDropdown,
   EditableHoverIndicator,
+  type FilterSelection,
   FilterDropdown,
   PaginationControls,
   SearchToolbarInput,
   TableCell,
+  filterSelectionIncludes,
   useWorkspacePagination,
 } from "@/features/workspace/shared";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
@@ -21,9 +24,11 @@ import { getStatusPillClassName } from "@/features/workspace/shared";
 interface ArtifactInventoryViewProps {
   bootstrap: BootstrapPayload;
   artifacts: ArtifactRecord[];
-  kind: ArtifactKind;
+  createKind?: ArtifactKind;
+  kinds: readonly ArtifactKind[];
   openCreateArtifactModal: (kind: ArtifactKind) => void;
   openEditArtifactModal: (artifact: ArtifactRecord) => void;
+  title?: string;
 }
 
 const ARTIFACT_GRID_TEMPLATE = "minmax(240px, 2fr) 1.1fr 0.9fr 1fr 0.8fr";
@@ -72,13 +77,17 @@ function summarizeLink(link: string) {
 export function ArtifactInventoryView({
   bootstrap,
   artifacts,
-  kind,
+  createKind,
+  kinds,
   openCreateArtifactModal,
   openEditArtifactModal,
+  title,
 }: ArtifactInventoryViewProps) {
   const [search, setSearch] = useState("");
-  const [workstreamFilter, setWorkstreamFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [workstreamFilter, setWorkstreamFilter] = useState<FilterSelection>([]);
+  const [statusFilter, setStatusFilter] = useState<FilterSelection>([]);
+  const artifactKinds = kinds.length > 0 ? kinds : [createKind ?? "document"];
+  const primaryKind = createKind ?? artifactKinds[0] ?? "document";
 
   const workstreamOptions = useMemo(
     () =>
@@ -95,7 +104,7 @@ export function ArtifactInventoryView({
     const normalizedSearch = search.trim().toLowerCase();
 
     return artifacts.filter((artifact) => {
-      if (artifact.kind !== kind) {
+      if (!artifactKinds.includes(artifact.kind)) {
         return false;
       }
 
@@ -106,17 +115,17 @@ export function ArtifactInventoryView({
           .toLowerCase()
           .includes(normalizedSearch);
       const matchesWorkstream =
-        workstreamFilter === "all" || artifact.workstreamId === workstreamFilter;
-      const matchesStatus =
-        statusFilter === "all" || artifact.status === statusFilter;
+        workstreamFilter.length === 0 ||
+        (artifact.workstreamId !== null && workstreamFilter.includes(artifact.workstreamId));
+      const matchesStatus = filterSelectionIncludes(statusFilter, artifact.status);
 
       return matchesSearch && matchesWorkstream && matchesStatus;
     });
-  }, [artifacts, kind, search, statusFilter, workstreamFilter]);
+  }, [artifactKinds, artifacts, search, statusFilter, workstreamFilter]);
   const artifactPagination = useWorkspacePagination(filteredArtifacts);
 
-  const sectionTitle = kind === "document" ? "Documents" : "Non-Technical";
-  const addLabel = kind === "document" ? "Add document" : "Add non-technical";
+  const sectionTitle = title ?? "Documents";
+  const addLabel = "Add document";
 
   return (
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
@@ -139,6 +148,7 @@ export function ArtifactInventoryView({
           <FilterDropdown
             allLabel="All workflows"
             ariaLabel="Filter artifacts by workflow"
+            className="mobile-filter-control"
             icon={<IconManufacturing />}
             onChange={setWorkstreamFilter}
             options={workstreamOptions}
@@ -148,6 +158,7 @@ export function ArtifactInventoryView({
           <FilterDropdown
             allLabel="All statuses"
             ariaLabel="Filter artifacts by status"
+            className="mobile-filter-control"
             icon={<IconTasks />}
             onChange={setStatusFilter}
             options={ARTIFACT_STATUS_OPTIONS}
@@ -157,7 +168,7 @@ export function ArtifactInventoryView({
           <button
             aria-label={addLabel}
             className="primary-action queue-toolbar-action"
-            onClick={() => openCreateArtifactModal(kind)}
+            onClick={() => openCreateArtifactModal(primaryKind)}
             title={addLabel}
             type="button"
           >
@@ -172,8 +183,26 @@ export function ArtifactInventoryView({
           style={{ "--workspace-grid-template": ARTIFACT_GRID_TEMPLATE } as CSSProperties}
         >
           <span>Artifact</span>
-          <span>Workflow</span>
-          <span>Status</span>
+          <span className="table-column-header-cell">
+            <span className="table-column-title">Workflow</span>
+            <ColumnFilterDropdown
+              allLabel="All workflows"
+              ariaLabel="Filter artifacts by workflow"
+              onChange={setWorkstreamFilter}
+              options={workstreamOptions}
+              value={workstreamFilter}
+            />
+          </span>
+          <span className="table-column-header-cell">
+            <span className="table-column-title">Status</span>
+            <ColumnFilterDropdown
+              allLabel="All statuses"
+              ariaLabel="Filter artifacts by status"
+              onChange={setStatusFilter}
+              options={ARTIFACT_STATUS_OPTIONS}
+              value={statusFilter}
+            />
+          </span>
           <span>Link</span>
           <span>Updated</span>
         </div>

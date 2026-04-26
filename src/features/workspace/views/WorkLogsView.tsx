@@ -4,11 +4,16 @@ import { formatDate } from "@/lib/appUtils";
 import type { BootstrapPayload, TaskRecord } from "@/types";
 import { IconSubsystems, IconWorkLogs } from "@/components/shared";
 import {
+  ColumnFilterDropdown,
   EditableHoverIndicator,
+  type FilterSelection,
   FilterDropdown,
   PaginationControls,
   SearchToolbarInput,
   TableCell,
+  filterSelectionIncludes,
+  filterSelectionIntersects,
+  formatFilterSelectionLabel,
   useWorkspacePagination,
 } from "@/features/workspace/shared";
 import type { DropdownOption, MembersById, SubsystemsById } from "@/features/workspace/shared";
@@ -24,7 +29,7 @@ const WORKLOG_SORT_OPTIONS: DropdownOption[] = [
 ];
 
 interface WorkLogsViewProps {
-  activePersonFilter: string;
+  activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   membersById: MembersById;
   openCreateWorkLogModal: () => void;
@@ -45,7 +50,7 @@ export function WorkLogsView({
   subsystemsById,
 }: WorkLogsViewProps) {
   const [search, setSearch] = useState("");
-  const [subsystemFilter, setSubsystemFilter] = useState("all");
+  const [subsystemFilter, setSubsystemFilter] = useState<FilterSelection>([]);
   const [sortMode, setSortMode] = useState<WorkLogSortMode>("recent");
 
   const taskById = useMemo(() => buildTaskById(bootstrap.tasks), [bootstrap.tasks]);
@@ -55,17 +60,21 @@ export function WorkLogsView({
 
     const filtered = bootstrap.workLogs.filter((workLog) => {
       if (
-        activePersonFilter !== "all" &&
-        !workLog.participantIds.includes(activePersonFilter)
+        activePersonFilter.length > 0 &&
+        !workLog.participantIds.some((participantId) =>
+          filterSelectionIncludes(activePersonFilter, participantId),
+        )
       ) {
         return false;
       }
 
       const task = taskById[workLog.taskId];
       if (
-        subsystemFilter !== "all" &&
-        task?.subsystemId !== subsystemFilter &&
-        !task?.subsystemIds.includes(subsystemFilter)
+        subsystemFilter.length > 0 &&
+        !filterSelectionIntersects(
+          subsystemFilter,
+          task ? Array.from(new Set([task.subsystemId, ...task.subsystemIds].filter(Boolean))) : [],
+        )
       ) {
         return false;
       }
@@ -123,9 +132,7 @@ export function WorkLogsView({
   const workLogPagination = useWorkspacePagination(workLogs);
 
   const activePersonFilterLabel =
-    activePersonFilter === "all"
-      ? "All roster"
-      : membersById[activePersonFilter]?.name ?? "Selected person";
+    formatFilterSelectionLabel("All roster", bootstrap.members, activePersonFilter);
 
   const gridTemplate = "minmax(220px, 2.05fr) minmax(190px, 1.35fr) minmax(180px, 1fr) 0.45fr";
 
@@ -135,7 +142,7 @@ export function WorkLogsView({
         <div className="queue-section-header">
           <h2>Work logs</h2>
           <p className="section-copy filter-copy">
-            {activePersonFilter === "all"
+            {activePersonFilter.length === 0
               ? "All logged work tied back to tasks."
               : `Only logs involving ${activePersonFilterLabel}.`}
           </p>
@@ -151,6 +158,7 @@ export function WorkLogsView({
           <FilterDropdown
             allLabel="All subsystems"
             ariaLabel="Filter work logs by subsystem"
+            className="mobile-filter-control"
             icon={<IconSubsystems />}
             onChange={setSubsystemFilter}
             options={bootstrap.subsystems}
@@ -195,7 +203,16 @@ export function WorkLogsView({
           style={{ "--workspace-grid-template": gridTemplate } as CSSProperties}
         >
           <span>Log</span>
-          <span>Task</span>
+          <span className="table-column-header-cell">
+            <span className="table-column-title">Task</span>
+            <ColumnFilterDropdown
+              allLabel="All subsystems"
+              ariaLabel="Filter work logs by subsystem"
+              onChange={setSubsystemFilter}
+              options={bootstrap.subsystems}
+              value={subsystemFilter}
+            />
+          </span>
           <span>People</span>
           <span>Open</span>
         </div>

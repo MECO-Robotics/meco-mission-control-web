@@ -21,6 +21,7 @@ export {
   type SubsystemModalMode,
   type TaskModalMode,
   type WorkLogModalMode,
+  type WorkstreamModalMode,
 } from "./workspaceModalModes";
 export {
   MANUFACTURING_STATUS_OPTIONS,
@@ -34,12 +35,19 @@ export {
 } from "./workspaceOptions";
 export { getStatusPillClassName } from "./workspaceUtils";
 export {
+  ColumnFilterDropdown,
   EditableHoverIndicator,
+  type FilterSelection,
   FilterDropdown,
   PaginationControls,
   RequestedItemMeta,
   SearchToolbarInput,
   TableCell,
+  filterSelectionIncludes,
+  filterSelectionIntersects,
+  filterSelectionMatchesTaskPeople,
+  formatFilterSelectionLabel,
+  getTaskPersonFilterIds,
   useWorkspacePagination,
 } from "./WorkspaceViewShared";
 

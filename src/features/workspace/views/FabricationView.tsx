@@ -1,9 +1,14 @@
 import type { BootstrapPayload, ManufacturingItemRecord } from "@/types";
-import type { MembersById, SubsystemsById } from "@/features/workspace/shared";
+import {
+  formatFilterSelectionLabel,
+  type FilterSelection,
+  type MembersById,
+  type SubsystemsById,
+} from "@/features/workspace/shared";
 import { ManufacturingQueueView } from "@/features/workspace/views";
 
 interface FabricationViewProps {
-  activePersonFilter: string;
+  activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   items: ManufacturingItemRecord[];
   membersById: MembersById;
@@ -21,10 +26,15 @@ export function FabricationView({
   onEdit,
   subsystemsById,
 }: FabricationViewProps) {
+  const personFilterLabel = formatFilterSelectionLabel(
+    "All roster",
+    bootstrap.members,
+    activePersonFilter,
+  );
   const filteredDescription =
-    activePersonFilter === "all"
+    activePersonFilter.length === 0
       ? "All fabrication jobs."
-      : `Only fabrication jobs submitted by ${membersById[activePersonFilter]?.name ?? "selected person"}.`;
+      : `Only fabrication jobs submitted by ${personFilterLabel}.`;
 
   return (
     <ManufacturingQueueView

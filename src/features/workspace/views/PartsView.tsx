@@ -3,11 +3,14 @@ import { useMemo, useState, type CSSProperties } from "react";
 import { IconManufacturing, IconTasks } from "@/components/shared";
 import type { BootstrapPayload, PartDefinitionRecord } from "@/types";
 import {
+  ColumnFilterDropdown,
   EditableHoverIndicator,
+  type FilterSelection,
   FilterDropdown,
   PaginationControls,
   SearchToolbarInput,
   TableCell,
+  filterSelectionIncludes,
   useWorkspacePagination,
 } from "@/features/workspace/shared";
 import { getStatusPillClassName } from "@/features/workspace/shared";
@@ -32,8 +35,8 @@ export function PartsView({
   subsystemsById,
 }: PartsViewProps) {
   const [partSearch, setPartSearch] = useState("");
-  const [partSubsystem, setPartSubsystem] = useState("all");
-  const [partStatus, setPartStatus] = useState("all");
+  const [partSubsystem, setPartSubsystem] = useState<FilterSelection>([]);
+  const [partStatus, setPartStatus] = useState<FilterSelection>([]);
 
   const filteredPartDefinitions = useMemo(() => {
     const search = partSearch.toLowerCase();
@@ -46,6 +49,7 @@ export function PartsView({
         !search ||
         partDefinition.name.toLowerCase().includes(search) ||
         partDefinition.partNumber.toLowerCase().includes(search) ||
+        `iteration ${partDefinition.iteration}`.includes(search) ||
         partDefinition.type.toLowerCase().includes(search) ||
         partDefinition.source.toLowerCase().includes(search) ||
         materialName.toLowerCase().includes(search)
@@ -66,8 +70,8 @@ export function PartsView({
         definition?.name.toLowerCase().includes(search) ||
         definition?.partNumber.toLowerCase().includes(search) ||
         mechanismName.toLowerCase().includes(search);
-      const matchesSubsystem = partSubsystem === "all" || partInstance.subsystemId === partSubsystem;
-      const matchesStatus = partStatus === "all" || partInstance.status === partStatus;
+      const matchesSubsystem = filterSelectionIncludes(partSubsystem, partInstance.subsystemId);
+      const matchesStatus = filterSelectionIncludes(partStatus, partInstance.status);
       return matchesSearch && matchesSubsystem && matchesStatus;
     });
   }, [bootstrap.partInstances, mechanismsById, partDefinitionsById, partSearch, partStatus, partSubsystem]);
@@ -94,6 +98,7 @@ export function PartsView({
           <FilterDropdown
             allLabel="All subsystems"
             ariaLabel="Filter parts by subsystem"
+            className="mobile-filter-control"
             icon={<IconManufacturing />}
             onChange={setPartSubsystem}
             options={bootstrap.subsystems}
@@ -103,6 +108,7 @@ export function PartsView({
           <FilterDropdown
             allLabel="All statuses"
             ariaLabel="Filter parts by status"
+            className="mobile-filter-control"
             icon={<IconTasks />}
             onChange={setPartStatus}
             options={PART_STATUS_OPTIONS}
@@ -125,11 +131,12 @@ export function PartsView({
         <div className="table-shell">
           <div
             className="ops-table ops-table-header"
-            style={{ "--workspace-grid-template": "minmax(180px, 2fr) 1fr 0.6fr 0.8fr 1fr" } as CSSProperties}
+            style={{ "--workspace-grid-template": "minmax(180px, 2fr) 1fr 0.6fr 0.7fr 0.8fr 1fr" } as CSSProperties}
           >
             <span>Part</span>
             <span>Number</span>
             <span>Rev</span>
+            <span>Iter</span>
             <span>Type</span>
             <span>Material</span>
           </div>
@@ -149,7 +156,7 @@ export function PartsView({
               }}
               role="button"
               tabIndex={0}
-              style={{ "--workspace-grid-template": "minmax(180px, 2fr) 1fr 0.6fr 0.8fr 1fr" } as CSSProperties}
+              style={{ "--workspace-grid-template": "minmax(180px, 2fr) 1fr 0.6fr 0.7fr 0.8fr 1fr" } as CSSProperties}
               title={`Edit ${partDefinition.name}`}
             >
               <TableCell label="Part">
@@ -158,6 +165,7 @@ export function PartsView({
               </TableCell>
               <TableCell label="Number">{partDefinition.partNumber}</TableCell>
               <TableCell label="Rev">{partDefinition.revision}</TableCell>
+              <TableCell label="Iteration">Iteration {partDefinition.iteration}</TableCell>
               <TableCell label="Type">{partDefinition.type}</TableCell>
               <TableCell label="Material">
                 {(partDefinition.materialId
@@ -197,9 +205,27 @@ export function PartsView({
             <span>Instance</span>
             <span>Definition</span>
             <span>Mechanism</span>
-            <span>Subsystem</span>
+            <span className="table-column-header-cell">
+              <span className="table-column-title">Subsystem</span>
+              <ColumnFilterDropdown
+                allLabel="All subsystems"
+                ariaLabel="Filter parts by subsystem"
+                onChange={setPartSubsystem}
+                options={bootstrap.subsystems}
+                value={partSubsystem}
+              />
+            </span>
             <span>Qty</span>
-            <span>Status</span>
+            <span className="table-column-header-cell">
+              <span className="table-column-title">Status</span>
+              <ColumnFilterDropdown
+                allLabel="All statuses"
+                ariaLabel="Filter parts by status"
+                onChange={setPartStatus}
+                options={PART_STATUS_OPTIONS}
+                value={partStatus}
+              />
+            </span>
           </div>
           {partInstancePagination.pageItems.map((partInstance) => (
             <div

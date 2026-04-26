@@ -12,6 +12,7 @@ import {
 import "@/app/App.css";
 import { AuthStatusScreen, SignInScreen } from "@/features/auth";
 import type {
+  FilterSelection,
   InventoryViewTab,
   ManufacturingViewTab,
   TaskViewTab,
@@ -29,6 +30,7 @@ import {
   buildEmptyWorkLogPayload,
   buildEmptySubsystemPayload,
   buildEmptyTaskPayload,
+  buildEmptyWorkstreamPayload,
   joinList,
   mechanismToPayload,
   manufacturingToPayload,
@@ -46,9 +48,11 @@ import {
   createManufacturingItemRecord,
   createMaterialRecord,
   createMemberRecord,
+  createProjectRecord,
   createSeasonRecord,
   createMechanismRecord,
   createWorkLogRecord,
+  createWorkstreamRecord,
   createSubsystemRecord,
   createEventRecord,
   createPartDefinitionRecord,
@@ -60,12 +64,14 @@ import {
   deleteMemberRecord,
   deleteMechanismRecord,
   deletePartDefinitionRecord,
+  deleteTaskRecord,
   deleteArtifactRecord,
   fetchBootstrap,
   updateManufacturingItemRecord,
   updateMaterialRecord,
   updateMemberRecord,
   updateMechanismRecord,
+  updateProjectRecord,
   updateSubsystemRecord,
   updatePartDefinitionRecord,
   updatePartInstanceRecord,
@@ -91,6 +97,7 @@ import type {
   PartDefinitionRecord,
   PartInstancePayload,
   PartInstanceRecord,
+  ProjectPayload,
   PurchaseItemPayload,
   PurchaseItemRecord,
   SubsystemPayload,
@@ -98,6 +105,7 @@ import type {
   TaskPayload,
   TaskRecord,
   WorkLogPayload,
+  WorkstreamPayload,
 } from "@/types";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/bootstrapDefaults";
 import type {
@@ -111,6 +119,7 @@ import type {
   SubsystemModalMode,
   TaskModalMode,
   WorkLogModalMode,
+  WorkstreamModalMode,
 } from "@/features/workspace";
 import { useAppAuth } from "@/app/useAppAuth";
 import { useAppShell } from "@/app/useAppShell";
@@ -200,9 +209,17 @@ function scopeBootstrapBySelection(
     scopedSubsystemIds.has(item.subsystemId),
   );
   const scopedEvents = payload.events.filter(
-    (event) =>
-      event.relatedSubsystemIds.length === 0 ||
-      event.relatedSubsystemIds.some((subsystemId) => scopedSubsystemIds.has(subsystemId)),
+    (event) => {
+      const eventProjectIds = event.projectIds ?? [];
+      if (eventProjectIds.length > 0) {
+        return eventProjectIds.some((projectId) => activeProjectIds.has(projectId));
+      }
+
+      return (
+        event.relatedSubsystemIds.length === 0 ||
+        event.relatedSubsystemIds.some((subsystemId) => scopedSubsystemIds.has(subsystemId))
+      );
+    },
   );
   const scopedWorkstreamIds = new Set(scopedWorkstreams.map((workstream) => workstream.id));
   const scopedTasks = payload.tasks.filter(
@@ -264,6 +281,10 @@ function isElevatedMemberRole(role: MemberPayload["role"]): boolean {
   return role === "lead" || role === "admin";
 }
 
+function getSinglePersonFilterId(selection: FilterSelection) {
+  return selection.length === 1 ? selection[0] : null;
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<ViewTab>("tasks");
   const [tabSwitchDirection, setTabSwitchDirection] = useState<"up" | "down">("down");
@@ -315,6 +336,7 @@ export default function App() {
   );
   const [taskDraftBlockers, setTaskDraftBlockers] = useState("");
   const [isSavingTask, setIsSavingTask] = useState(false);
+  const [isDeletingTask, setIsDeletingTask] = useState(false);
   const [showTimelineCreateToggleInTaskModal, setShowTimelineCreateToggleInTaskModal] =
     useState(false);
   const [timelineMilestoneCreateSignal, setTimelineMilestoneCreateSignal] = useState(0);
@@ -373,6 +395,13 @@ export default function App() {
   const [isSavingArtifact, setIsSavingArtifact] = useState(false);
   const [isDeletingArtifact, setIsDeletingArtifact] = useState(false);
 
+  const [workstreamModalMode, setWorkstreamModalMode] =
+    useState<WorkstreamModalMode>(null);
+  const [workstreamDraft, setWorkstreamDraft] = useState<WorkstreamPayload>(
+    buildEmptyWorkstreamPayload(EMPTY_BOOTSTRAP),
+  );
+  const [isSavingWorkstream, setIsSavingWorkstream] = useState(false);
+
   const [partInstanceModalMode, setPartInstanceModalMode] =
     useState<PartInstanceModalMode>(null);
   const [activePartInstanceId, setActivePartInstanceId] = useState<string | null>(null);
@@ -399,7 +428,7 @@ export default function App() {
   const [isSavingMechanism, setIsSavingMechanism] = useState(false);
   const [isDeletingMechanism, setIsDeletingMechanism] = useState(false);
 
-  const [activePersonFilter, setActivePersonFilter] = useState<string>("all");
+  const [activePersonFilter, setActivePersonFilter] = useState<FilterSelection>([]);
   const [selectedSeasonId, setSelectedSeasonId] = useState<string | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
@@ -419,6 +448,10 @@ export default function App() {
   const [isAddSeasonPopupOpen, setIsAddSeasonPopupOpen] = useState(false);
   const [seasonNameDraft, setSeasonNameDraft] = useState("");
   const [isSavingSeason, setIsSavingSeason] = useState(false);
+  const [robotProjectModalMode, setRobotProjectModalMode] =
+    useState<"create" | "edit" | null>(null);
+  const [robotProjectNameDraft, setRobotProjectNameDraft] = useState("");
+  const [isSavingRobotProject, setIsSavingRobotProject] = useState(false);
   const projectsInSelectedSeason = useMemo(() => {
     if (!selectedSeasonId) {
       return bootstrap.projects;
@@ -542,7 +575,7 @@ export default function App() {
 
     try {
       const payload = await fetchBootstrap(
-        activePersonFilter === "all" ? null : activePersonFilter,
+        getSinglePersonFilterId(activePersonFilter),
         handleUnauthorized,
       );
       const scopedPayload = scopeBootstrapBySelection(
@@ -561,11 +594,14 @@ export default function App() {
         setBootstrap(payload);
       });
 
-      if (
-        activePersonFilter !== "all" &&
-        !scopedPayload.members.some((member) => member.id === activePersonFilter)
-      ) {
-        setActivePersonFilter("all");
+      if (activePersonFilter.length > 0) {
+        const scopedMemberIds = new Set(scopedPayload.members.map((member) => member.id));
+        const nextPersonFilter = activePersonFilter.filter((memberId) =>
+          scopedMemberIds.has(memberId),
+        );
+        if (nextPersonFilter.length !== activePersonFilter.length) {
+          setActivePersonFilter(nextPersonFilter);
+        }
       }
 
       selectMember(nextMemberId, scopedPayload);
@@ -676,6 +712,14 @@ export default function App() {
         }
       }
 
+      if (workstreamModalMode === "create") {
+        setWorkstreamDraft(
+          buildEmptyWorkstreamPayload(scopedPayload, {
+            projectId: selectedProjectId ?? undefined,
+          }),
+        );
+      }
+
       if (partInstanceModalMode === "create") {
         setPartInstanceDraft((current) =>
           buildEmptyPartInstancePayload(payload, {
@@ -765,6 +809,7 @@ export default function App() {
     selectMember,
     subsystemModalMode,
     taskModalMode,
+    workstreamModalMode,
   ]);
 
   const openCreateTaskModal = useCallback(() => {
@@ -811,7 +856,7 @@ export default function App() {
     setWorkLogDraft(
       buildEmptyWorkLogPayload(
         scopedBootstrap,
-        activePersonFilter === "all" ? null : activePersonFilter,
+        getSinglePersonFilterId(activePersonFilter),
       ),
     );
     setWorkLogModalMode("create");
@@ -956,6 +1001,19 @@ export default function App() {
     setActiveSubsystemId(null);
   };
 
+  const openCreateWorkstreamModal = () => {
+    setWorkstreamDraft(
+      buildEmptyWorkstreamPayload(scopedBootstrap, {
+        projectId: selectedProjectId ?? undefined,
+      }),
+    );
+    setWorkstreamModalMode("create");
+  };
+
+  const closeWorkstreamModal = () => {
+    setWorkstreamModalMode(null);
+  };
+
   const openCreateMechanismModal = (subsystemId?: string) => {
     setActiveMechanismId(null);
     setMechanismDraft(buildEmptyMechanismPayload(bootstrap, subsystemId));
@@ -1009,6 +1067,13 @@ export default function App() {
         subsystemId: taskDraft.subsystemIds[0] ?? taskDraft.subsystemId,
         mechanismId: taskDraft.mechanismIds[0] ?? null,
         partInstanceId: taskDraft.partInstanceIds[0] ?? null,
+        assigneeIds: Array.from(
+          new Set(
+            [...taskDraft.assigneeIds, taskDraft.ownerId].filter(
+              (memberId): memberId is string => Boolean(memberId),
+            ),
+          ),
+        ),
         blockers: splitList(taskDraftBlockers),
       };
 
@@ -1047,6 +1112,23 @@ export default function App() {
     },
     [handleUnauthorized, loadWorkspace],
   );
+
+  const handleDeleteTask = async (taskId: string) => {
+    setIsDeletingTask(true);
+    setDataMessage(null);
+
+    try {
+      await deleteTaskRecord(taskId, handleUnauthorized);
+      if (activeTaskId === taskId) {
+        closeTaskModal();
+      }
+      await loadWorkspace();
+    } catch (error) {
+      setDataMessage(toErrorMessage(error));
+    } finally {
+      setIsDeletingTask(false);
+    }
+  };
 
   const handleWorkLogSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -1265,6 +1347,32 @@ export default function App() {
     }
   };
 
+  const handleWorkstreamSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSavingWorkstream(true);
+    setDataMessage(null);
+
+    try {
+      const payload: WorkstreamPayload = {
+        ...workstreamDraft,
+        name: workstreamDraft.name.trim(),
+        description: workstreamDraft.description.trim(),
+      };
+      if (!payload.projectId) {
+        setDataMessage("Pick a project before adding a workflow.");
+        return;
+      }
+
+      await createWorkstreamRecord(payload, handleUnauthorized);
+      await loadWorkspace();
+      closeWorkstreamModal();
+    } catch (error) {
+      setDataMessage(toErrorMessage(error));
+    } finally {
+      setIsSavingWorkstream(false);
+    }
+  };
+
   const handlePartDefinitionSubmit = async (
     event: React.FormEvent<HTMLFormElement>,
   ) => {
@@ -1471,6 +1579,93 @@ export default function App() {
     }
   };
 
+  const handleCreateRobot = useCallback(() => {
+    if (!selectedSeasonId) {
+      setDataMessage("Pick a season before adding a robot.");
+      return;
+    }
+
+    setDataMessage(null);
+    setRobotProjectNameDraft("");
+    setRobotProjectModalMode("create");
+  }, [selectedSeasonId]);
+
+  const handleEditSelectedRobot = useCallback(() => {
+    if (selectedProject?.projectType !== "robot") {
+      return;
+    }
+
+    setDataMessage(null);
+    setRobotProjectNameDraft(selectedProject.name);
+    setRobotProjectModalMode("edit");
+  }, [selectedProject]);
+
+  const closeRobotProjectPopup = useCallback(() => {
+    if (isSavingRobotProject) {
+      return;
+    }
+
+    setRobotProjectModalMode(null);
+    setRobotProjectNameDraft("");
+  }, [isSavingRobotProject]);
+
+  const handleRobotProjectSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const robotName = robotProjectNameDraft.trim();
+    if (robotName.length < 2) {
+      setDataMessage("Robot names need at least 2 characters.");
+      return;
+    }
+
+    if (robotProjectModalMode === "create" && !selectedSeasonId) {
+      setDataMessage("Pick a season before adding a robot.");
+      return;
+    }
+
+    if (robotProjectModalMode === "edit" && selectedProject?.projectType !== "robot") {
+      setDataMessage("Select a robot before editing its name.");
+      return;
+    }
+
+    setIsSavingRobotProject(true);
+    setDataMessage(null);
+
+    try {
+      if (robotProjectModalMode === "create" && selectedSeasonId) {
+        const project = await createProjectRecord(
+          {
+            seasonId: selectedSeasonId,
+            name: robotName,
+            projectType: "robot",
+            status: "active",
+          },
+          handleUnauthorized,
+        );
+        await loadWorkspace();
+        setSelectedProjectId(project.id);
+      } else if (robotProjectModalMode === "edit" && selectedProject) {
+        const payload: ProjectPayload = {
+          name: robotName,
+        };
+        const project = await updateProjectRecord(
+          selectedProject.id,
+          payload,
+          handleUnauthorized,
+        );
+        await loadWorkspace();
+        setSelectedProjectId(project.id);
+      }
+
+      setRobotProjectModalMode(null);
+      setRobotProjectNameDraft("");
+    } catch (error) {
+      setDataMessage(toErrorMessage(error));
+    } finally {
+      setIsSavingRobotProject(false);
+    }
+  };
+
   const handleCreateMember = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selectedSeasonId) {
@@ -1543,8 +1738,8 @@ export default function App() {
 
     try {
       await deleteMemberRecord(memberId, handleUnauthorized);
-      if (activePersonFilter === memberId) {
-        setActivePersonFilter("all");
+      if (activePersonFilter.includes(memberId)) {
+        setActivePersonFilter((current) => current.filter((id) => id !== memberId));
       }
       if (selectedMemberId === memberId) {
         setSelectedMemberId(null);
@@ -1616,6 +1811,23 @@ export default function App() {
     };
   }, [closeCreateSeasonPopup, isAddSeasonPopupOpen]);
 
+  useEffect(() => {
+    if (!robotProjectModalMode) {
+      return;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeRobotProjectPopup();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [closeRobotProjectPopup, robotProjectModalMode]);
+
   const disablePanelAnimations = Boolean(
     taskModalMode ||
       workLogModalMode ||
@@ -1627,7 +1839,9 @@ export default function App() {
       subsystemModalMode ||
       mechanismModalMode ||
       artifactModalMode ||
-      isAddSeasonPopupOpen,
+      workstreamModalMode ||
+      isAddSeasonPopupOpen ||
+      robotProjectModalMode,
   );
 
   const isWorkspaceModalOpen = Boolean(
@@ -1640,7 +1854,8 @@ export default function App() {
       partInstanceModalMode ||
       subsystemModalMode ||
       mechanismModalMode ||
-      artifactModalMode,
+      artifactModalMode ||
+      workstreamModalMode,
   );
 
   if (authBooting) {
@@ -1703,6 +1918,8 @@ export default function App() {
           projects={projectsInSelectedSeason}
           selectedProjectId={selectedProjectId}
           subsystemsLabel={subsystemsLabel}
+          onCreateRobot={handleCreateRobot}
+          onEditSelectedRobot={handleEditSelectedRobot}
           onSelectProject={setSelectedProjectId}
           isDarkMode={isDarkMode}
           toggleDarkMode={toggleDarkMode}
@@ -1772,6 +1989,64 @@ export default function App() {
           </div>
         ) : null}
 
+        {robotProjectModalMode ? (
+          <div
+            className="modal-scrim"
+            onClick={(event) => {
+              if (event.target === event.currentTarget) {
+                closeRobotProjectPopup();
+              }
+            }}
+            role="presentation"
+          >
+            <section aria-modal="true" className="modal-card roster-edit-modal" role="dialog">
+              <div className="panel-header compact-header">
+                <div className="queue-section-header">
+                  <h3>
+                    {robotProjectModalMode === "create" ? "Add robot" : "Edit robot name"}
+                  </h3>
+                </div>
+                <button className="icon-button" onClick={closeRobotProjectPopup} type="button">
+                  Close
+                </button>
+              </div>
+              <form className="modal-form" onSubmit={handleRobotProjectSubmit}>
+                <label className="field modal-wide">
+                  <span>Name</span>
+                  <input
+                    autoFocus
+                    minLength={2}
+                    onChange={(event) => setRobotProjectNameDraft(event.target.value)}
+                    placeholder="Practice Bot"
+                    required
+                    value={robotProjectNameDraft}
+                  />
+                </label>
+                <div className="modal-actions modal-wide">
+                  <button
+                    className="secondary-action"
+                    onClick={closeRobotProjectPopup}
+                    type="button"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="primary-action"
+                    disabled={isSavingRobotProject}
+                    type="submit"
+                  >
+                    {isSavingRobotProject
+                      ? "Saving..."
+                      : robotProjectModalMode === "create"
+                        ? "Add robot"
+                        : "Save name"}
+                  </button>
+                </div>
+              </form>
+            </section>
+          </div>
+        ) : null}
+
         {isSidebarOverlay ? (
           <>
             <button
@@ -1825,6 +2100,7 @@ export default function App() {
           openCreateTaskModal={openCreateTaskModal}
           openCreateTaskModalFromTimeline={openCreateTaskModalFromTimeline}
           openCreateWorkLogModal={openCreateWorkLogModal}
+          openCreateWorkstreamModal={openCreateWorkstreamModal}
           openEditManufacturingModal={openEditManufacturingModal}
           openEditArtifactModal={openEditArtifactModal}
           openEditMaterialModal={openEditMaterialModal}
@@ -1879,12 +2155,14 @@ export default function App() {
             closeWorkLogModal={closeWorkLogModal}
             closeSubsystemModal={closeSubsystemModal}
             closeTaskModal={closeTaskModal}
+            closeWorkstreamModal={closeWorkstreamModal}
             disciplinesById={disciplinesById}
             eventsById={eventsById}
             handleDeleteMaterial={handleDeleteMaterial}
             handleDeleteArtifact={handleDeleteArtifact}
             handleDeletePartDefinition={handleDeletePartDefinition}
             handleDeleteMechanism={handleDeleteMechanism}
+            handleDeleteTask={handleDeleteTask}
             handlePartInstanceSubmit={handlePartInstanceSubmit}
             handleMechanismSubmit={handleMechanismSubmit}
             handleManufacturingSubmit={handleManufacturingSubmit}
@@ -1895,10 +2173,12 @@ export default function App() {
             handleWorkLogSubmit={handleWorkLogSubmit}
             handleSubsystemSubmit={handleSubsystemSubmit}
             handleTaskSubmit={handleTaskSubmit}
+            handleWorkstreamSubmit={handleWorkstreamSubmit}
             isDeletingMaterial={isDeletingMaterial}
             isDeletingArtifact={isDeletingArtifact}
             isDeletingPartDefinition={isDeletingPartDefinition}
             isDeletingMechanism={isDeletingMechanism}
+            isDeletingTask={isDeletingTask}
             isSavingManufacturing={isSavingManufacturing}
             isSavingArtifact={isSavingArtifact}
             isSavingMaterial={isSavingMaterial}
@@ -1909,6 +2189,7 @@ export default function App() {
             isSavingWorkLog={isSavingWorkLog}
             isSavingSubsystem={isSavingSubsystem}
             isSavingTask={isSavingTask}
+            isSavingWorkstream={isSavingWorkstream}
             artifactDraft={artifactDraft}
             artifactModalMode={artifactModalMode}
             manufacturingDraft={manufacturingDraft}
@@ -1930,6 +2211,8 @@ export default function App() {
             purchaseModalMode={purchaseModalMode}
             workLogDraft={workLogDraft}
             workLogModalMode={workLogModalMode}
+            workstreamDraft={workstreamDraft}
+            workstreamModalMode={workstreamModalMode}
             setArtifactDraft={setArtifactDraft}
             setMechanismDraft={setMechanismDraft}
             setManufacturingDraft={setManufacturingDraft}
@@ -1939,6 +2222,7 @@ export default function App() {
             setPurchaseDraft={setPurchaseDraft}
             setPurchaseFinalCost={setPurchaseFinalCost}
             setWorkLogDraft={setWorkLogDraft}
+            setWorkstreamDraft={setWorkstreamDraft}
             setSubsystemDraft={setSubsystemDraft}
             setSubsystemDraftRisks={setSubsystemDraftRisks}
             setTaskDraft={setTaskDraft}

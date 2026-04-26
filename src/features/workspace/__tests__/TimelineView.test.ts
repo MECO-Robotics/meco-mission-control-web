@@ -49,6 +49,7 @@ function createBootstrap(): BootstrapPayload {
         projectId: "project-1",
         name: "Drivebase",
         description: "",
+        iteration: 1,
         isCore: true,
         parentSubsystemId: null,
         responsibleEngineerId: "member-1",
@@ -80,6 +81,7 @@ function createBootstrap(): BootstrapPayload {
         partInstanceIds: [],
         targetEventId: null,
         ownerId: "member-1",
+        assigneeIds: ["member-1"],
         mentorId: null,
         startDate: "2026-04-06",
         dueDate: "2026-04-10",
@@ -110,6 +112,7 @@ function createBootstrapWithEmptySubsystem(): BootstrapPayload {
         projectId: "project-1",
         name: "Controls",
         description: "",
+        iteration: 1,
         isCore: false,
         parentSubsystemId: null,
         responsibleEngineerId: "member-1",
@@ -155,7 +158,7 @@ describe("TimelineView", () => {
         React.createElement(TimelineView, {
           bootstrap: createBootstrap(),
           isAllProjectsView,
-          activePersonFilter: "all",
+          activePersonFilter: [],
           setActivePersonFilter: jest.fn(),
           membersById,
           openEditTaskModal: jest.fn(),
@@ -178,7 +181,7 @@ describe("TimelineView", () => {
         React.createElement(TimelineView, {
           bootstrap: createBootstrap(),
           isAllProjectsView,
-          activePersonFilter: "all",
+          activePersonFilter: [],
           setActivePersonFilter: jest.fn(),
           membersById,
           openEditTaskModal: jest.fn(),
@@ -218,7 +221,7 @@ describe("TimelineView", () => {
         React.createElement(TimelineView, {
           bootstrap: createBootstrap(),
           isAllProjectsView,
-          activePersonFilter: "all",
+          activePersonFilter: [],
           setActivePersonFilter: jest.fn(),
           membersById,
           openEditTaskModal: jest.fn(),
@@ -261,7 +264,7 @@ describe("TimelineView", () => {
         React.createElement(TimelineView, {
           bootstrap: createBootstrap(),
           isAllProjectsView,
-          activePersonFilter: "all",
+          activePersonFilter: [],
           setActivePersonFilter: jest.fn(),
           membersById,
           openEditTaskModal: jest.fn(),
@@ -291,7 +294,7 @@ describe("TimelineView", () => {
         React.createElement(TimelineView, {
           bootstrap: createBootstrapWithEmptySubsystem(),
           isAllProjectsView,
-          activePersonFilter: "all",
+          activePersonFilter: [],
           setActivePersonFilter: jest.fn(),
           membersById,
           openEditTaskModal: jest.fn(),
@@ -316,7 +319,7 @@ describe("TimelineView", () => {
         React.createElement(TimelineView, {
           bootstrap: createBootstrapWithoutTasks(),
           isAllProjectsView,
-          activePersonFilter: "all",
+          activePersonFilter: [],
           setActivePersonFilter: jest.fn(),
           membersById,
           openEditTaskModal: jest.fn(),
@@ -339,7 +342,7 @@ describe("TimelineView", () => {
       React.createElement(TimelineView, {
         bootstrap: createBootstrap(),
         isAllProjectsView: false,
-        activePersonFilter: "all",
+        activePersonFilter: [],
         setActivePersonFilter: jest.fn(),
         membersById,
         openEditTaskModal: jest.fn(),

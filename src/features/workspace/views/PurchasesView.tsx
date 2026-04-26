@@ -4,12 +4,16 @@ import { formatCurrency } from "@/lib/appUtils";
 import type { BootstrapPayload, PurchaseItemRecord } from "@/types";
 import { IconManufacturing, IconPerson, IconTasks } from "@/components/shared";
 import {
+  ColumnFilterDropdown,
   EditableHoverIndicator,
+  type FilterSelection,
   FilterDropdown,
   PaginationControls,
   RequestedItemMeta,
   SearchToolbarInput,
   TableCell,
+  filterSelectionIncludes,
+  formatFilterSelectionLabel,
   useWorkspacePagination,
 } from "@/features/workspace/shared";
 import { getStatusPillClassName } from "@/features/workspace/shared";
@@ -18,7 +22,7 @@ import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
 import { PURCHASE_APPROVAL_OPTIONS, PURCHASE_STATUS_OPTIONS } from "@/features/workspace/shared";
 
 interface PurchasesViewProps {
-  activePersonFilter: string;
+  activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   membersById: MembersById;
   openCreatePurchaseModal: () => void;
@@ -35,11 +39,11 @@ export function PurchasesView({
   subsystemsById,
 }: PurchasesViewProps) {
   const [search, setSearch] = useState("");
-  const [subsystem, setSubsystem] = useState("all");
-  const [requester, setRequester] = useState("all");
-  const [status, setStatus] = useState("all");
-  const [vendor, setVendor] = useState("all");
-  const [approval, setApproval] = useState("all");
+  const [subsystem, setSubsystem] = useState<FilterSelection>([]);
+  const [requester, setRequester] = useState<FilterSelection>([]);
+  const [status, setStatus] = useState<FilterSelection>([]);
+  const [vendor, setVendor] = useState<FilterSelection>([]);
+  const [approval, setApproval] = useState<FilterSelection>([]);
 
   const uniqueVendors = useMemo(() => {
     const vendors = bootstrap.purchaseItems.map((item) => item.vendor).filter(Boolean);
@@ -52,13 +56,14 @@ export function PurchasesView({
         !search ||
         item.title.toLowerCase().includes(search.toLowerCase()) ||
         item.vendor.toLowerCase().includes(search.toLowerCase());
-      const matchesSubsystem = subsystem === "all" || item.subsystemId === subsystem;
-      const matchesRequester = requester === "all" || item.requestedById === requester;
-      const matchesStatus = status === "all" || item.status === status;
-      const matchesVendor = vendor === "all" || item.vendor === vendor;
+      const matchesSubsystem = filterSelectionIncludes(subsystem, item.subsystemId);
+      const matchesRequester = filterSelectionIncludes(requester, item.requestedById);
+      const matchesStatus = filterSelectionIncludes(status, item.status);
+      const matchesVendor = filterSelectionIncludes(vendor, item.vendor);
+      const matchesPerson = filterSelectionIncludes(activePersonFilter, item.requestedById);
       const matchesApproval =
-        approval === "all" ||
-        (approval === "approved" ? item.approvedByMentor : !item.approvedByMentor);
+        approval.length === 0 ||
+        approval.includes(item.approvedByMentor ? "approved" : "waiting");
 
       return (
         matchesSearch &&
@@ -66,23 +71,28 @@ export function PurchasesView({
         matchesRequester &&
         matchesStatus &&
         matchesVendor &&
+        matchesPerson &&
         matchesApproval
       );
     });
-  }, [approval, bootstrap.purchaseItems, requester, search, status, subsystem, vendor]);
+  }, [
+    activePersonFilter,
+    approval,
+    bootstrap.purchaseItems,
+    requester,
+    search,
+    status,
+    subsystem,
+    vendor,
+  ]);
   const purchasePagination = useWorkspacePagination(filteredPurchases);
+  const activePersonFilterLabel = formatFilterSelectionLabel(
+    "All roster",
+    bootstrap.members,
+    activePersonFilter,
+  );
 
-  const gridTemplate = [
-    "minmax(200px, 2.5fr)",
-    vendor === "all" ? "1fr" : null,
-    "0.6fr",
-    status === "all" ? "1fr" : null,
-    approval === "all" ? "1fr" : null,
-    "1fr",
-    "1fr",
-  ]
-    .filter(Boolean)
-    .join(" ");
+  const gridTemplate = "minmax(200px, 2.5fr) 1fr 0.6fr 1fr 1fr 1fr 1fr";
 
   return (
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
@@ -90,9 +100,9 @@ export function PurchasesView({
         <div className="queue-section-header">
           <h2>Purchase list</h2>
           <p className="section-copy filter-copy">
-            {activePersonFilter === "all"
+            {activePersonFilter.length === 0
               ? "All purchase requests."
-              : `Only requests submitted by ${membersById[activePersonFilter]?.name ?? "selected person"}.`}
+              : `Only requests submitted by ${activePersonFilterLabel}.`}
           </p>
         </div>
         <div className="panel-actions filter-toolbar queue-toolbar purchase-toolbar">
@@ -106,6 +116,7 @@ export function PurchasesView({
           <FilterDropdown
             allLabel="All subsystems"
             ariaLabel="Filter purchases by subsystem"
+            className="mobile-filter-control"
             icon={<IconManufacturing />}
             onChange={setSubsystem}
             options={bootstrap.subsystems}
@@ -115,6 +126,7 @@ export function PurchasesView({
           <FilterDropdown
             allLabel="All requesters"
             ariaLabel="Filter purchases by requester"
+            className="mobile-filter-control"
             icon={<IconPerson />}
             onChange={setRequester}
             options={bootstrap.members}
@@ -124,6 +136,7 @@ export function PurchasesView({
           <FilterDropdown
             allLabel="All statuses"
             ariaLabel="Filter purchases by status"
+            className="mobile-filter-control"
             icon={<IconTasks />}
             onChange={setStatus}
             options={PURCHASE_STATUS_OPTIONS}
@@ -133,6 +146,7 @@ export function PurchasesView({
           <FilterDropdown
             allLabel="All vendors"
             ariaLabel="Filter purchases by vendor"
+            className="mobile-filter-control"
             icon={<IconTasks />}
             onChange={setVendor}
             options={uniqueVendors}
@@ -142,6 +156,7 @@ export function PurchasesView({
           <FilterDropdown
             allLabel="All approvals"
             ariaLabel="Filter purchases by approval status"
+            className="mobile-filter-control"
             icon={<IconTasks />}
             onChange={setApproval}
             options={PURCHASE_APPROVAL_OPTIONS}
@@ -165,11 +180,54 @@ export function PurchasesView({
           className="ops-table ops-table-header purchase-table"
           style={{ "--workspace-grid-template": gridTemplate } as CSSProperties}
         >
-          <span>Item</span>
-          {vendor === "all" ? <span>Vendor</span> : null}
+          <span className="table-column-header-cell">
+            <span className="table-column-title">Item</span>
+            <ColumnFilterDropdown
+              allLabel="All subsystems"
+              ariaLabel="Filter purchases by subsystem"
+              onChange={setSubsystem}
+              options={bootstrap.subsystems}
+              value={subsystem}
+            />
+            <ColumnFilterDropdown
+              allLabel="All requesters"
+              ariaLabel="Filter purchases by requester"
+              onChange={setRequester}
+              options={bootstrap.members}
+              value={requester}
+            />
+          </span>
+          <span className="table-column-header-cell">
+            <span className="table-column-title">Vendor</span>
+            <ColumnFilterDropdown
+              allLabel="All vendors"
+              ariaLabel="Filter purchases by vendor"
+              onChange={setVendor}
+              options={uniqueVendors}
+              value={vendor}
+            />
+          </span>
           <span>Qty</span>
-          {status === "all" ? <span>Status</span> : null}
-          {approval === "all" ? <span>Mentor</span> : null}
+          <span className="table-column-header-cell">
+            <span className="table-column-title">Status</span>
+            <ColumnFilterDropdown
+              allLabel="All statuses"
+              ariaLabel="Filter purchases by status"
+              onChange={setStatus}
+              options={PURCHASE_STATUS_OPTIONS}
+              value={status}
+            />
+          </span>
+          <span className="table-column-header-cell">
+            <span className="table-column-title">Mentor</span>
+            <ColumnFilterDropdown
+              allLabel="All approvals"
+              ariaLabel="Filter purchases by approval status"
+              onChange={setApproval}
+              options={PURCHASE_APPROVAL_OPTIONS}
+              value={approval}
+            />
+          </span>
           <span>Est.</span>
           <span>Final</span>
         </div>
@@ -185,20 +243,16 @@ export function PurchasesView({
             <span className="queue-title table-cell table-cell-primary" data-label="Item">
               <RequestedItemMeta item={item} membersById={membersById} subsystemsById={subsystemsById} />
             </span>
-            {vendor === "all" ? <TableCell label="Vendor">{item.vendor}</TableCell> : null}
+            <TableCell label="Vendor">{item.vendor}</TableCell>
             <TableCell label="Qty">{item.quantity}</TableCell>
-            {status === "all" ? (
-              <TableCell label="Status" valueClassName="table-cell-pill">
-                <span className={getStatusPillClassName(item.status)}>{item.status}</span>
-              </TableCell>
-            ) : null}
-            {approval === "all" ? (
-              <TableCell label="Mentor" valueClassName="table-cell-pill">
-                <span className={getStatusPillClassName(item.approvedByMentor ? "approved" : "waiting")}>
-                  {item.approvedByMentor ? "Approved" : "Waiting"}
-                </span>
-              </TableCell>
-            ) : null}
+            <TableCell label="Status" valueClassName="table-cell-pill">
+              <span className={getStatusPillClassName(item.status)}>{item.status}</span>
+            </TableCell>
+            <TableCell label="Mentor" valueClassName="table-cell-pill">
+              <span className={getStatusPillClassName(item.approvedByMentor ? "approved" : "waiting")}>
+                {item.approvedByMentor ? "Approved" : "Waiting"}
+              </span>
+            </TableCell>
             <TableCell label="Est.">{formatCurrency(item.estimatedCost)}</TableCell>
             <TableCell label="Final">{formatCurrency(item.finalCost)}</TableCell>
             <EditableHoverIndicator />

@@ -4,12 +4,15 @@ import { formatDate } from "@/lib/appUtils";
 import type { BootstrapPayload, ManufacturingItemRecord } from "@/types";
 import { IconManufacturing, IconPerson, IconTasks } from "@/components/shared";
 import {
+  ColumnFilterDropdown,
   EditableHoverIndicator,
+  type FilterSelection,
   FilterDropdown,
   PaginationControls,
   RequestedItemMeta,
   SearchToolbarInput,
   TableCell,
+  filterSelectionIncludes,
   useWorkspacePagination,
 } from "@/features/workspace/shared";
 import { getStatusPillClassName } from "@/features/workspace/shared";
@@ -18,7 +21,7 @@ import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
 import { MANUFACTURING_STATUS_OPTIONS } from "@/features/workspace/shared";
 
 interface ManufacturingQueueViewProps {
-  activePersonFilter: string;
+  activePersonFilter: FilterSelection;
   addButtonAriaLabel: string;
   bootstrap: BootstrapPayload;
   emptyStateMessage: string;
@@ -45,10 +48,10 @@ export function ManufacturingQueueView({
   title,
 }: ManufacturingQueueViewProps) {
   const [search, setSearch] = useState("");
-  const [subsystem, setSubsystem] = useState("all");
-  const [requester, setRequester] = useState("all");
-  const [status, setStatus] = useState("all");
-  const [material, setMaterial] = useState("all");
+  const [subsystem, setSubsystem] = useState<FilterSelection>([]);
+  const [requester, setRequester] = useState<FilterSelection>([]);
+  const [status, setStatus] = useState<FilterSelection>([]);
+  const [material, setMaterial] = useState<FilterSelection>([]);
 
   const uniqueMaterials = useMemo(() => {
     const materials =
@@ -65,27 +68,25 @@ export function ManufacturingQueueView({
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
       const matchesSearch = !search || item.title.toLowerCase().includes(search.toLowerCase());
-      const matchesSubsystem = subsystem === "all" || item.subsystemId === subsystem;
-      const matchesRequester = requester === "all" || item.requestedById === requester;
-      const matchesStatus = status === "all" || item.status === status;
-      const matchesMaterial = material === "all" || item.material === material;
+      const matchesSubsystem = filterSelectionIncludes(subsystem, item.subsystemId);
+      const matchesRequester = filterSelectionIncludes(requester, item.requestedById);
+      const matchesStatus = filterSelectionIncludes(status, item.status);
+      const matchesMaterial = filterSelectionIncludes(material, item.material);
+      const matchesPerson = filterSelectionIncludes(activePersonFilter, item.requestedById);
 
-      return matchesSearch && matchesSubsystem && matchesRequester && matchesStatus && matchesMaterial;
+      return (
+        matchesSearch &&
+        matchesSubsystem &&
+        matchesRequester &&
+        matchesStatus &&
+        matchesMaterial &&
+        matchesPerson
+      );
     });
-  }, [items, material, requester, search, status, subsystem]);
+  }, [activePersonFilter, items, material, requester, search, status, subsystem]);
   const manufacturingPagination = useWorkspacePagination(filteredItems);
 
-  const gridTemplate = [
-    "minmax(200px, 2.5fr)",
-    material === "all" ? "1fr" : null,
-    "0.6fr",
-    "1fr",
-    "1fr",
-    status === "all" ? "1fr" : null,
-    "1fr",
-  ]
-    .filter(Boolean)
-    .join(" ");
+  const gridTemplate = "minmax(200px, 2.5fr) 1fr 0.6fr 1fr 1fr 1fr 1fr";
 
   return (
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
@@ -93,7 +94,7 @@ export function ManufacturingQueueView({
         <div className="queue-section-header">
           <h2>{title}</h2>
           <p className="section-copy filter-copy">
-            {activePersonFilter === "all" ? filteredDescription : filteredDescription}
+            {filteredDescription}
           </p>
         </div>
         <div className="panel-actions filter-toolbar queue-toolbar">
@@ -107,6 +108,7 @@ export function ManufacturingQueueView({
           <FilterDropdown
             allLabel="All subsystems"
             ariaLabel={`Filter ${title} by subsystem`}
+            className="mobile-filter-control"
             icon={<IconManufacturing />}
             onChange={setSubsystem}
             options={bootstrap.subsystems}
@@ -116,6 +118,7 @@ export function ManufacturingQueueView({
           <FilterDropdown
             allLabel="All requesters"
             ariaLabel={`Filter ${title} by requester`}
+            className="mobile-filter-control"
             icon={<IconPerson />}
             onChange={setRequester}
             options={bootstrap.members}
@@ -125,6 +128,7 @@ export function ManufacturingQueueView({
           <FilterDropdown
             allLabel="All materials"
             ariaLabel={`Filter ${title} by material`}
+            className="mobile-filter-control"
             icon={<IconManufacturing />}
             onChange={setMaterial}
             options={uniqueMaterials}
@@ -134,6 +138,7 @@ export function ManufacturingQueueView({
           <FilterDropdown
             allLabel="All statuses"
             ariaLabel={`Filter ${title} by status`}
+            className="mobile-filter-control"
             icon={<IconTasks />}
             onChange={setStatus}
             options={MANUFACTURING_STATUS_OPTIONS}
@@ -157,12 +162,46 @@ export function ManufacturingQueueView({
           className="ops-table ops-table-header manufacturing-table"
           style={{ "--workspace-grid-template": gridTemplate } as CSSProperties}
         >
-          <span>Part</span>
-          {material === "all" ? <span>Material</span> : null}
+          <span className="table-column-header-cell">
+            <span className="table-column-title">Part</span>
+            <ColumnFilterDropdown
+              allLabel="All subsystems"
+              ariaLabel={`Filter ${title} by subsystem`}
+              onChange={setSubsystem}
+              options={bootstrap.subsystems}
+              value={subsystem}
+            />
+            <ColumnFilterDropdown
+              allLabel="All requesters"
+              ariaLabel={`Filter ${title} by requester`}
+              onChange={setRequester}
+              options={bootstrap.members}
+              value={requester}
+            />
+          </span>
+          <span className="table-column-header-cell">
+            <span className="table-column-title">Material</span>
+            <ColumnFilterDropdown
+              allLabel="All materials"
+              ariaLabel={`Filter ${title} by material`}
+              onChange={setMaterial}
+              options={uniqueMaterials}
+              value={material}
+            />
+          </span>
           <span>Qty</span>
           <span>Batch</span>
           <span>Due</span>
-          {status === "all" ? <span>Status</span> : null}
+          <span className="table-column-header-cell">
+            <span className="table-column-title">Status</span>
+            <ColumnFilterDropdown
+              allLabel="All statuses"
+              ariaLabel={`Filter ${title} by status`}
+              onChange={setStatus}
+              options={MANUFACTURING_STATUS_OPTIONS}
+              value={status}
+            />
+          </span>
           <span>Mentor</span>
         </div>
 
@@ -177,15 +216,13 @@ export function ManufacturingQueueView({
             <span className="queue-title table-cell table-cell-primary" data-label="Part">
               <RequestedItemMeta item={item} membersById={membersById} subsystemsById={subsystemsById} />
             </span>
-            {material === "all" ? <TableCell label="Material">{item.material}</TableCell> : null}
+            <TableCell label="Material">{item.material}</TableCell>
             <TableCell label="Qty">{item.quantity}</TableCell>
             <TableCell label="Batch">{item.batchLabel ?? "Unbatched"}</TableCell>
             <TableCell label="Due">{formatDate(item.dueDate)}</TableCell>
-            {status === "all" ? (
-              <TableCell label="Status" valueClassName="table-cell-pill">
-                <span className={getStatusPillClassName(item.status)}>{item.status.replace("-", " ")}</span>
-              </TableCell>
-            ) : null}
+            <TableCell label="Status" valueClassName="table-cell-pill">
+              <span className={getStatusPillClassName(item.status)}>{item.status.replace("-", " ")}</span>
+            </TableCell>
             <TableCell label="Mentor">{item.mentorReviewed ? "Reviewed" : "Pending"}</TableCell>
             <EditableHoverIndicator />
           </button>

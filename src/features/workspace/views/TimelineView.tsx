@@ -15,14 +15,25 @@ import type {
   EventType,
   TaskRecord,
 } from "@/types";
-import { EditableHoverIndicator } from "@/features/workspace/shared";
+import {
+  EditableHoverIndicator,
+  type FilterSelection,
+  FilterDropdown,
+  filterSelectionMatchesTaskPeople,
+  formatFilterSelectionLabel,
+} from "@/features/workspace/shared";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
+import {
+  getEventProjectIds,
+  getMilestoneSubsystemOptions,
+  reconcileMilestoneSubsystemIds,
+} from "@/features/workspace/shared/eventProjectUtils";
 
 interface TimelineViewProps {
   bootstrap: BootstrapPayload;
   isAllProjectsView: boolean;
-  activePersonFilter: string;
-  setActivePersonFilter: (value: string) => void;
+  activePersonFilter: FilterSelection;
+  setActivePersonFilter: (value: FilterSelection) => void;
   membersById: Record<string, BootstrapPayload["members"][number]>;
   openEditTaskModal: (task: TaskRecord) => void;
   openCreateTaskModal: () => void;
@@ -48,6 +59,7 @@ interface TimelineEventDraft {
   type: EventType;
   isExternal: boolean;
   description: string;
+  projectIds: string[];
   relatedSubsystemIds: string[];
 }
 
@@ -58,6 +70,25 @@ interface HoveredMilestonePopup {
   lines: string[];
   background: string;
   color: string;
+}
+
+function formatTaskAssignees(
+  task: TaskRecord,
+  membersById: Record<string, BootstrapPayload["members"][number]>,
+) {
+  const taskAssigneeIds = Array.isArray(task.assigneeIds) ? task.assigneeIds : [];
+  const assigneeIds =
+    taskAssigneeIds.length > 0
+      ? taskAssigneeIds
+      : task.ownerId
+        ? [task.ownerId]
+        : [];
+
+  if (assigneeIds.length === 0) {
+    return "Unassigned";
+  }
+
+  return assigneeIds.map((assigneeId) => membersById[assigneeId]?.name ?? "Unknown").join(", ");
 }
 
 type TimelineDayMilestoneUnderlayLayout = Record<
@@ -259,6 +290,7 @@ function emptyEventDraft(): TimelineEventDraft {
     type: DEFAULT_EVENT_TYPE,
     isExternal: false,
     description: "",
+    projectIds: [],
     relatedSubsystemIds: [],
   };
 }
@@ -269,6 +301,7 @@ function eventDraftFromRecord(record: EventRecord): TimelineEventDraft {
     type: record.type,
     isExternal: record.isExternal,
     description: record.description,
+    projectIds: record.projectIds,
     relatedSubsystemIds: record.relatedSubsystemIds,
   };
 }
@@ -415,6 +448,21 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       ) as Record<string, BootstrapPayload["projects"][number]>,
     [bootstrap.projects],
   );
+  const scopedProjectIds = useMemo(
+    () => bootstrap.projects.map((project) => project.id),
+    [bootstrap.projects],
+  );
+  const subsystemsById = useMemo(
+    () =>
+      Object.fromEntries(
+        bootstrap.subsystems.map((subsystem) => [subsystem.id, subsystem]),
+      ) as Record<string, BootstrapPayload["subsystems"][number]>,
+    [bootstrap.subsystems],
+  );
+  const selectableSubsystems = useMemo(
+    () => getMilestoneSubsystemOptions(bootstrap.subsystems, eventDraft.projectIds),
+    [bootstrap.subsystems, eventDraft.projectIds],
+  );
 
   const hasProjectColumn = isAllProjectsView;
   const showProjectCol = hasProjectColumn && isProjectColumnVisible;
@@ -434,7 +482,13 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const firstDayGridColumn = hasProjectColumn ? 4 : 3;
   const subsystemStickyLeft = hasProjectColumn ? projectColumnWidth : 0;
   const taskLabelStickyLeft = subsystemStickyLeft + subsystemColumnWidth;
-  const scopedTasks = bootstrap.tasks;
+  const scopedTasks = useMemo(
+    () =>
+      activePersonFilter.length > 0
+        ? bootstrap.tasks.filter((task) => filterSelectionMatchesTaskPeople(activePersonFilter, task))
+        : bootstrap.tasks,
+    [activePersonFilter, bootstrap.tasks],
+  );
   const scopedSubsystems = bootstrap.subsystems;
 
   useEffect(() => {
@@ -813,7 +867,10 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     setEventModalMode("create");
     setActiveEventId(null);
     setActiveEventDay(day);
-    setEventDraft(emptyEventDraft());
+    setEventDraft({
+      ...emptyEventDraft(),
+      projectIds: scopedProjectIds,
+    });
     setEventStartDate(day);
     setEventStartTime("18:00");
     setEventEndDate("");
@@ -830,10 +887,14 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   }, [triggerCreateMilestoneToken]);
 
   const openEditEventModalForDay = (day: string, event: EventRecord) => {
+    const eventProjectIds = getEventProjectIds(event, subsystemsById);
     setEventModalMode("edit");
     setActiveEventId(event.id);
     setActiveEventDay(day);
-    setEventDraft(eventDraftFromRecord(event));
+    setEventDraft({
+      ...eventDraftFromRecord(event),
+      projectIds: eventProjectIds.length > 0 ? eventProjectIds : scopedProjectIds,
+    });
     setEventStartDate(datePortion(event.startDateTime));
     setEventStartTime(timePortion(event.startDateTime));
     setEventEndDate(event.endDateTime ? datePortion(event.endDateTime) : "");
@@ -1166,9 +1227,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   }, [bootstrap.events, resolveMilestonePopupGeometry, timeline.days]);
 
   const activePersonFilterLabel =
-    activePersonFilter === "all"
-      ? "All roster"
-      : membersById[activePersonFilter]?.name ?? "Selected person";
+    formatFilterSelectionLabel("All roster", bootstrap.members, activePersonFilter);
 
   const activeDayEvents = activeEventDay ? dayEventsByDate[activeEventDay] ?? [] : [];
   const tooltipPortalTarget =
@@ -1220,6 +1279,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         endDateTime,
         isExternal: eventDraft.isExternal,
         description: eventDraft.description.trim(),
+        projectIds: Array.from(new Set(eventDraft.projectIds)),
         relatedSubsystemIds: Array.from(new Set(eventDraft.relatedSubsystemIds)),
       };
 
@@ -1270,33 +1330,22 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         <div className="queue-section-header">
           <h2 style={{ color: "var(--text-title)" }}>Subsystem timeline</h2>
           <p className="section-copy filter-copy" style={{ color: "var(--text-copy)" }}>
-            {activePersonFilter === "all"
+            {activePersonFilter.length === 0
               ? "Showing all roster-linked tasks."
-              : `Filtered to ${membersById[activePersonFilter]?.name ?? "selected person"}.`}
+              : `Filtered to ${activePersonFilterLabel}.`}
           </p>
         </div>
         <div className="panel-actions filter-toolbar timeline-toolbar">
           <div className="timeline-toolbar-filters">
-            <label
-              aria-label="Filter person"
-              className={`toolbar-filter toolbar-filter-compact timeline-roster-filter${activePersonFilter !== "all" ? " is-active" : ""}`}
-            >
-              <span aria-hidden="true" className="toolbar-filter-icon">
-                <IconPerson />
-              </span>
-              <select
-                onChange={(event) => setActivePersonFilter(event.target.value)}
-                title={activePersonFilterLabel}
-                value={activePersonFilter}
-              >
-                <option value="all">All roster</option>
-                {bootstrap.members.map((member) => (
-                  <option key={member.id} value={member.id}>
-                    {member.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <FilterDropdown
+              allLabel="All roster"
+              ariaLabel="Filter person"
+              className="timeline-roster-filter"
+              icon={<IconPerson />}
+              onChange={setActivePersonFilter}
+              options={bootstrap.members}
+              value={activePersonFilter}
+            />
             <label className="toolbar-filter toolbar-filter-compact timeline-interval-filter">
               <span className="toolbar-filter-icon">
                 <IconTasks />
@@ -1979,14 +2028,10 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                                         </strong>
                                         <span
                                           className="timeline-task-label-owner timeline-ellipsis-reveal"
-                                          data-full-text={
-                                            (task.ownerId ? membersById[task.ownerId]?.name : null) ??
-                                            "Unassigned"
-                                          }
+                                          data-full-text={formatTaskAssignees(task, membersById)}
                                           style={{ fontSize: "0.7rem", color: "var(--text-copy)" }}
                                           >
-                                            {(task.ownerId ? membersById[task.ownerId]?.name : null) ??
-                                              "Unassigned"}
+                                            {formatTaskAssignees(task, membersById)}
                                           </span>
                                         </button>
                                       ) : null}
@@ -2276,14 +2321,10 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                             </strong>
                             <span
                               className="timeline-task-label-owner timeline-ellipsis-reveal"
-                              data-full-text={
-                                (task.ownerId ? membersById[task.ownerId]?.name : null) ??
-                                "Unassigned"
-                              }
+                              data-full-text={formatTaskAssignees(task, membersById)}
                               style={{ fontSize: "0.7rem", color: "var(--text-copy)" }}
                             >
-                              {(task.ownerId ? membersById[task.ownerId]?.name : null) ??
-                                "Unassigned"}
+                              {formatTaskAssignees(task, membersById)}
                             </span>
                           </button>
                         ) : null}
@@ -2570,6 +2611,44 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                   </label>
 
                   <label className="field modal-wide">
+                    <span style={{ color: "var(--text-title)" }}>Related projects</span>
+                    <select
+                      multiple
+                      onChange={(event) =>
+                        setEventDraft((current) => {
+                          const projectIds = Array.from(
+                            event.currentTarget.selectedOptions,
+                            (option) => option.value,
+                          );
+
+                          return {
+                            ...current,
+                            projectIds,
+                            relatedSubsystemIds: reconcileMilestoneSubsystemIds(
+                              current.relatedSubsystemIds,
+                              projectIds,
+                              subsystemsById,
+                            ),
+                          };
+                        })
+                      }
+                      size={Math.min(bootstrap.projects.length || 1, 6)}
+                      style={{
+                        background: "var(--bg-row-alt)",
+                        color: "var(--text-title)",
+                        border: "1px solid var(--border-base)",
+                      }}
+                      value={eventDraft.projectIds}
+                    >
+                      {bootstrap.projects.map((project) => (
+                        <option key={project.id} value={project.id}>
+                          {project.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="field modal-wide">
                     <span style={{ color: "var(--text-title)" }}>Related subsystems</span>
                     <select
                       multiple
@@ -2590,9 +2669,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                       }}
                       value={eventDraft.relatedSubsystemIds}
                     >
-                      {bootstrap.subsystems.map((subsystem) => (
+                      {selectableSubsystems.map((subsystem) => (
                         <option key={subsystem.id} value={subsystem.id}>
-                          {subsystem.name}
+                          {projectsById[subsystem.projectId]?.name
+                            ? `${projectsById[subsystem.projectId].name} - ${subsystem.name}`
+                            : subsystem.name}
                         </option>
                       ))}
                     </select>
