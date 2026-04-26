@@ -58,7 +58,7 @@ const bootstrap: BootstrapPayload = {
 describe("ArtifactInventoryView", () => {
   it("can merge document and non-technical artifacts into one Documents view", () => {
     const markup = renderToStaticMarkup(
-      React.createElement(ArtifactInventoryView as React.ComponentType<any>, {
+      React.createElement(ArtifactInventoryView, {
         artifacts: bootstrap.artifacts,
         bootstrap,
         createKind: "document",
