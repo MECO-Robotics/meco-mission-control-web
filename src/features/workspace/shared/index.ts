@@ -47,6 +47,7 @@ export {
   formatFilterSelectionLabel,
   getTaskPersonFilterIds,
   pruneFilterSelection,
+  useWorkspaceCompactMode,
   useFilterChangeMotionClass,
   useWorkspacePagination,
 } from "./WorkspaceViewShared";

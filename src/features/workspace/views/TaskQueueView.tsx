@@ -7,10 +7,12 @@ import {
   IconFilter,
   IconParts,
   IconPerson,
+  IconSort,
   IconTasks,
 } from "@/components/shared";
 import {
   ColumnFilterDropdown,
+  CompactFilterMenu,
   EditableHoverIndicator,
   type DropdownOption,
   type FilterSelection,
@@ -23,6 +25,7 @@ import {
   filterSelectionMatchesTaskPeople,
   formatFilterSelectionLabel,
   useFilterChangeMotionClass,
+  useWorkspaceCompactMode,
   useWorkspacePagination,
 } from "@/features/workspace/shared";
 import { getStatusPillClassName } from "@/features/workspace/shared";
@@ -33,8 +36,6 @@ import {
   getTaskPlanningState,
 } from "@/features/workspace/shared/taskPlanning";
 
-const TASK_QUEUE_MENU_BREAKPOINT = 900;
-
 type TaskSortField =
   | "dueDate"
   | "ownerId"
@@ -43,6 +44,21 @@ type TaskSortField =
   | "status"
   | "subsystemId"
   | "title";
+
+const TASK_SORT_OPTIONS: DropdownOption[] = [
+  { id: "projectId", name: "Project" },
+  { id: "title", name: "Task" },
+  { id: "subsystemId", name: "Subsystem" },
+  { id: "ownerId", name: "Assigned" },
+  { id: "status", name: "Status" },
+  { id: "dueDate", name: "Due" },
+  { id: "priority", name: "Priority" },
+];
+
+const SORT_DIRECTION_OPTIONS: DropdownOption[] = [
+  { id: "asc", name: "Ascending" },
+  { id: "desc", name: "Descending" },
+];
 
 interface TaskQueueViewProps {
   activePersonFilter: FilterSelection;
@@ -455,26 +471,8 @@ export function TaskQueueView({
       setProjectFilter((current) => current.filter((projectId) => projectIds.has(projectId)));
     }
   }, [bootstrap.projects, projectFilter]);
-  const [isTaskQueueMenuVisible, setIsTaskQueueMenuVisible] = useState(false);
+  const isTaskQueueMenuVisible = useWorkspaceCompactMode();
   const [isTaskQueueMenuOpen, setIsTaskQueueMenuOpen] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const updateMenuVisibility = () => {
-      setIsTaskQueueMenuVisible(window.innerWidth <= TASK_QUEUE_MENU_BREAKPOINT);
-    };
-
-    updateMenuVisibility();
-
-    window.addEventListener("resize", updateMenuVisibility);
-
-    return () => {
-      window.removeEventListener("resize", updateMenuVisibility);
-    };
-  }, []);
 
   useEffect(() => {
     if (!isTaskQueueMenuVisible) {
@@ -639,6 +637,7 @@ export function TaskQueueView({
     subsystemFilter,
     subsystemIterationFilter,
   ]);
+  const taskSortIsDefault = sortField === "dueDate" && sortOrder === "asc";
 
   const toggleSort = (field: TaskSortField) => {
     if (sortField === field) {
@@ -722,6 +721,52 @@ export function TaskQueueView({
               subsystemFilterOptions={subsystemFilterOptions}
               subsystemIterationFilter={subsystemIterationFilter}
               subsystemIterationOptions={subsystemIterationOptions}
+            />
+          ) : null}
+
+          {isTaskQueueMenuVisible ? (
+            <CompactFilterMenu
+              activeCount={taskSortIsDefault ? 0 : 1}
+              ariaLabel="Sort tasks"
+              buttonLabel="Sort"
+              className="task-queue-sort-menu"
+              icon={<IconSort />}
+              items={[
+                {
+                  label: "Sort by",
+                  content: (
+                    <select
+                      aria-label="Sort tasks by"
+                      className="task-queue-sort-menu-select"
+                      onChange={(event) => setSortField(event.target.value as TaskSortField)}
+                      value={sortField}
+                    >
+                      {TASK_SORT_OPTIONS.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.name}
+                        </option>
+                      ))}
+                    </select>
+                  ),
+                },
+                {
+                  label: "Direction",
+                  content: (
+                    <select
+                      aria-label="Sort direction"
+                      className="task-queue-sort-menu-select"
+                      onChange={(event) => setSortOrder(event.target.value as "asc" | "desc")}
+                      value={sortOrder}
+                    >
+                      {SORT_DIRECTION_OPTIONS.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.name}
+                        </option>
+                      ))}
+                    </select>
+                  ),
+                },
+              ]}
             />
           ) : null}
 

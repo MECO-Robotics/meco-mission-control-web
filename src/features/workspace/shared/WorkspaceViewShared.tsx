@@ -16,6 +16,7 @@ const PAGE_SIZE_OPTIONS = [15, 30, 60] as const;
 type PageSizeOption = (typeof PAGE_SIZE_OPTIONS)[number];
 const DEFAULT_PAGE_SIZE: PageSizeOption = PAGE_SIZE_OPTIONS[0];
 const FILTER_CHANGE_ANIMATION_DURATION_MS = 220;
+export const WORKSPACE_COMPACT_BREAKPOINT = 900;
 export type FilterSelection = string[];
 type FilterMotionPart = boolean | number | string | null | undefined | readonly string[];
 
@@ -190,6 +191,29 @@ export function useFilterChangeMotionClass(parts: readonly FilterMotionPart[]) {
   }, [signature]);
 
   return `filter-results-motion${isAnimating ? " is-filtering" : ""}`;
+}
+
+export function useWorkspaceCompactMode(breakpoint = WORKSPACE_COMPACT_BREAKPOINT) {
+  const [isCompact, setIsCompact] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const updateCompactState = () => {
+      setIsCompact(window.innerWidth <= breakpoint);
+    };
+
+    updateCompactState();
+    window.addEventListener("resize", updateCompactState);
+
+    return () => {
+      window.removeEventListener("resize", updateCompactState);
+    };
+  }, [breakpoint]);
+
+  return isCompact;
 }
 
 function toggleFilterSelection(selection: FilterSelection, value: string) {
@@ -370,12 +394,14 @@ export function CompactFilterMenu({
   ariaLabel = "Filters",
   buttonLabel = "Filters",
   className,
+  icon,
   items,
 }: {
   activeCount?: number;
   ariaLabel?: string;
   buttonLabel?: string;
   className?: string;
+  icon?: ReactNode;
   items: CompactFilterMenuItem[];
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -430,7 +456,7 @@ export function CompactFilterMenu({
         type="button"
       >
         <span className="toolbar-filter-icon">
-          <IconFilter />
+          {icon ?? <IconFilter />}
         </span>
         <span aria-hidden="true" className="toolbar-filter-value">
           {buttonLabel}

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 
-import { IconParts, IconTasks } from "@/components/shared";
+import { IconParts, IconSort, IconTasks } from "@/components/shared";
 import type {
   BootstrapPayload,
   EventPayload,
@@ -17,6 +17,7 @@ import {
   SearchToolbarInput,
   TableCell,
   useFilterChangeMotionClass,
+  useWorkspaceCompactMode,
 } from "@/features/workspace/shared";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
 import { getStatusPillClassName } from "@/features/workspace/shared";
@@ -78,6 +79,17 @@ const EVENT_TYPE_OPTIONS: { id: EventType; name: string }[] = (
   name: style.label,
 }));
 
+const MILESTONE_SORT_OPTIONS: { id: MilestoneSortField; name: string }[] = [
+  { id: "title", name: "Milestone" },
+  { id: "type", name: "Type" },
+  { id: "startDateTime", name: "Start" },
+];
+
+const SORT_DIRECTION_OPTIONS: { id: "asc" | "desc"; name: string }[] = [
+  { id: "asc", name: "Ascending" },
+  { id: "desc", name: "Descending" },
+];
+
 export function MilestonesView({
   bootstrap,
   isAllProjectsView,
@@ -102,6 +114,7 @@ export function MilestonesView({
   const [eventError, setEventError] = useState<string | null>(null);
   const [isSavingEvent, setIsSavingEvent] = useState(false);
   const [isDeletingEvent, setIsDeletingEvent] = useState(false);
+  const isCompactToolbar = useWorkspaceCompactMode();
 
   useEffect(() => {
     if (!isAllProjectsView && projectFilter.length > 0) {
@@ -195,6 +208,7 @@ export function MilestonesView({
     sortOrder,
     typeFilter,
   ]);
+  const milestoneSortIsDefault = sortField === "startDateTime" && sortOrder === "asc";
   const activeEvent = eventModalMode && activeEventId
     ? bootstrap.events.find((event) => event.id === activeEventId) ?? null
     : null;
@@ -443,6 +457,52 @@ export function MilestonesView({
               },
             ]}
           />
+
+          {isCompactToolbar ? (
+            <CompactFilterMenu
+              activeCount={milestoneSortIsDefault ? 0 : 1}
+              ariaLabel="Sort milestones"
+              buttonLabel="Sort"
+              className="task-queue-sort-menu"
+              icon={<IconSort />}
+              items={[
+                {
+                  label: "Sort by",
+                  content: (
+                    <select
+                      aria-label="Sort milestones by"
+                      className="task-queue-sort-menu-select"
+                      onChange={(event) => setSortField(event.target.value as MilestoneSortField)}
+                      value={sortField}
+                    >
+                      {MILESTONE_SORT_OPTIONS.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.name}
+                        </option>
+                      ))}
+                    </select>
+                  ),
+                },
+                {
+                  label: "Direction",
+                  content: (
+                    <select
+                      aria-label="Sort direction"
+                      className="task-queue-sort-menu-select"
+                      onChange={(event) => setSortOrder(event.target.value as "asc" | "desc")}
+                      value={sortOrder}
+                    >
+                      {SORT_DIRECTION_OPTIONS.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.name}
+                        </option>
+                      ))}
+                    </select>
+                  ),
+                },
+              ]}
+            />
+          ) : null}
 
           <button
             aria-label="Add milestone"
