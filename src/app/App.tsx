@@ -69,6 +69,7 @@ import {
   createPartInstanceRecord,
   createPurchaseItemRecord,
   createTask,
+  createTaskDependencyRecord,
   deleteEventRecord,
   deleteRiskRecord,
   deleteMaterialRecord,
@@ -77,6 +78,7 @@ import {
   deletePartDefinitionRecord,
   deleteTaskRecord,
   deleteArtifactRecord,
+  deleteTaskDependencyRecord,
   fetchBootstrap,
   resetInteractiveTutorialSession,
   startInteractiveTutorialSession,
@@ -90,6 +92,7 @@ import {
   updatePartDefinitionRecord,
   updatePartInstanceRecord,
   updatePurchaseItemRecord,
+  updateTaskDependencyRecord,
   updateTaskBlockerRecord,
   updateTaskRecord,
   updateArtifactRecord,
@@ -160,6 +163,16 @@ import {
 } from "@/app/workspaceStateUtils";
 
 type InteractiveTutorialChapterId = "planning" | "operations" | "outreach";
+const BROWSER_ZOOM_SHORTCUT_KEYS = new Set(["+", "=", "-", "0", "add", "subtract"]);
+
+function isBrowserZoomShortcut(event: KeyboardEvent) {
+  if (!(event.ctrlKey || event.metaKey)) {
+    return false;
+  }
+
+  const normalizedKey = event.key.toLowerCase();
+  return BROWSER_ZOOM_SHORTCUT_KEYS.has(normalizedKey);
+}
 
 type InteractiveTutorialStepId =
   | "season"
@@ -1120,7 +1133,7 @@ export default function App() {
       if (taskModalMode === "edit" && activeTaskId) {
         const nextTask = payload.tasks.find((task) => task.id === activeTaskId);
         if (nextTask) {
-          setTaskDraft(taskToPayload(nextTask));
+          setTaskDraft(taskToPayload(nextTask, scopedPayload));
         } else {
           setTaskModalMode(null);
           setActiveTaskId(null);
@@ -1358,9 +1371,9 @@ export default function App() {
     setShowTimelineCreateToggleInTaskModal(false);
     setActiveTimelineTaskDetailId(null);
     setActiveTaskId(task.id);
-    setTaskDraft(taskToPayload(task));
+    setTaskDraft(taskToPayload(task, scopedBootstrap));
     setTaskModalMode("edit");
-  }, []);
+  }, [scopedBootstrap]);
 
   const openTimelineTaskDetailsModal = useCallback((task: TaskRecord) => {
     suppressNextAutoWorkspaceLoadRef.current = true;
@@ -1630,8 +1643,10 @@ export default function App() {
     setDataMessage(null);
 
     try {
+      const { taskDependencies = [], ...taskDraftWithoutDependencies } = taskDraft;
+      const currentTaskId = taskModalMode === "edit" ? activeTaskId : null;
       const payload: TaskPayload = {
-        ...taskDraft,
+        ...taskDraftWithoutDependencies,
         workstreamId: null,
         workstreamIds: [],
         subsystemId: taskDraft.subsystemIds[0] ?? taskDraft.subsystemId,
@@ -1646,12 +1661,88 @@ export default function App() {
         ),
       };
 
+      const desiredTaskDependencies = Array.from(
+        new Map(
+          taskDependencies
+            .map((dependency) => ({
+              id: dependency.id,
+              upstreamTaskId: dependency.upstreamTaskId.trim(),
+              dependencyType: dependency.dependencyType,
+            }))
+            .filter(
+              (dependency) =>
+                dependency.upstreamTaskId.length > 0 &&
+                dependency.upstreamTaskId !== currentTaskId,
+            )
+            .map((dependency) => [
+              `${dependency.upstreamTaskId}:${dependency.dependencyType}`,
+              dependency,
+            ]),
+        ).values(),
+      );
+
+      const syncTaskDependencies = async (taskId: string) => {
+        const existingDependencies =
+          bootstrap.taskDependencies?.filter(
+            (dependency) => dependency.downstreamTaskId === taskId,
+          ) ?? [];
+        const existingDependenciesById = new Map(
+          existingDependencies.map((dependency) => [dependency.id, dependency] as const),
+        );
+        const desiredDependencyIds = new Set(
+          desiredTaskDependencies
+            .map((dependency) => dependency.id)
+            .filter((dependencyId): dependencyId is string => Boolean(dependencyId)),
+        );
+
+        for (const dependency of desiredTaskDependencies) {
+          if (dependency.id && existingDependenciesById.has(dependency.id)) {
+            const existingDependency = existingDependenciesById.get(dependency.id);
+            if (
+              existingDependency &&
+              (existingDependency.upstreamTaskId !== dependency.upstreamTaskId ||
+                existingDependency.dependencyType !== dependency.dependencyType)
+            ) {
+              await updateTaskDependencyRecord(
+                dependency.id,
+                {
+                  upstreamTaskId: dependency.upstreamTaskId,
+                  downstreamTaskId: taskId,
+                  dependencyType: dependency.dependencyType,
+                },
+                handleUnauthorized,
+              );
+            }
+            continue;
+          }
+
+          await createTaskDependencyRecord(
+            {
+              upstreamTaskId: dependency.upstreamTaskId,
+              downstreamTaskId: taskId,
+              dependencyType: dependency.dependencyType,
+            },
+            handleUnauthorized,
+          );
+        }
+
+        for (const dependency of existingDependencies) {
+          if (!desiredDependencyIds.has(dependency.id)) {
+            await deleteTaskDependencyRecord(dependency.id, handleUnauthorized);
+          }
+        }
+      };
+
+      let savedTask: TaskRecord;
       if (taskModalMode === "create") {
-        await createTask(payload, handleUnauthorized);
+        savedTask = await createTask(payload, handleUnauthorized);
       } else if (taskModalMode === "edit" && activeTaskId) {
-        await updateTaskRecord(activeTaskId, payload, handleUnauthorized);
+        savedTask = await updateTaskRecord(activeTaskId, payload, handleUnauthorized);
+      } else {
+        savedTask = await createTask(payload, handleUnauthorized);
       }
 
+      await syncTaskDependencies(savedTask.id);
       await loadWorkspace();
       closeTaskModal();
     } catch (error) {
@@ -3315,6 +3406,40 @@ export default function App() {
     isInteractiveTutorialCreationStep,
     isInteractiveTutorialStepComplete,
   ]);
+
+  useEffect(() => {
+    const handleWheel = (event: WheelEvent) => {
+      if (!event.ctrlKey && !event.metaKey) {
+        return;
+      }
+
+      event.preventDefault();
+    };
+
+    const handleGestureStart = (event: Event) => {
+      event.preventDefault();
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isBrowserZoomShortcut(event)) {
+        return;
+      }
+
+      event.preventDefault();
+    };
+
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    window.addEventListener("gesturestart", handleGestureStart, { passive: false } as AddEventListenerOptions);
+    window.addEventListener("gesturechange", handleGestureStart, { passive: false } as AddEventListenerOptions);
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("gesturestart", handleGestureStart);
+      window.removeEventListener("gesturechange", handleGestureStart);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   useEffect(() => {
     if (!isSidebarOverlay) {

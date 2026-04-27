@@ -6,6 +6,7 @@ import {
   ColumnFilterDropdown,
   CompactFilterMenu,
   EditableHoverIndicator,
+  FilterDropdown,
   type FilterSelection,
   PaginationControls,
   SearchToolbarInput,

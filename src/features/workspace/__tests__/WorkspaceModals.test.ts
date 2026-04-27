@@ -338,6 +338,14 @@ describe("TaskEditorModal", () => {
     expect(renderTaskModal("edit")).not.toContain("Task traceability");
   });
 
+  it("shows dependency controls in the task editor", () => {
+    const markup = renderTaskModal("edit");
+
+    expect(markup).toContain("Dependencies");
+    expect(markup).toContain("Depends on");
+    expect(markup).toContain("Dependency type");
+  });
+
   it("hides iteration selectors while creating definition editors", () => {
     const markup = renderIterationEditors("create");
 

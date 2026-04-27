@@ -13,6 +13,7 @@ import {
   joinList,
   setTaskPrimaryTargetSelection,
   splitList,
+  taskToPayload,
   toggleTaskTargetSelection,
 } from "@/lib/appUtils";
 import type {
@@ -276,6 +277,28 @@ describe("appUtils", () => {
     expect(payload.targetEventId).toBe("event-1");
     expect(payload.priority).toBe("medium");
     expect(payload.status).toBe("not-started");
+  });
+
+  it("taskToPayload carries dependency records from bootstrap data", () => {
+    const bootstrap = createBootstrap({
+      taskDependencies: [
+        {
+          id: "task-dependency-1",
+          upstreamTaskId: "task-upstream",
+          downstreamTaskId: "task-1",
+          dependencyType: "blocks",
+          createdAt: "2026-02-01T00:00:00.000Z",
+        },
+      ],
+    });
+
+    expect(taskToPayload(bootstrap.tasks[0], bootstrap).taskDependencies).toEqual([
+      {
+        id: "task-dependency-1",
+        upstreamTaskId: "task-upstream",
+        dependencyType: "blocks",
+      },
+    ]);
   });
 
   it("buildEmptyManufacturingPayload derives material, subsystem, instance, and quantity from the default part", () => {

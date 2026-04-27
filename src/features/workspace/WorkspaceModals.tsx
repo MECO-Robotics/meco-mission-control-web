@@ -13,6 +13,7 @@ import type {
   SubsystemPayload,
   TaskPayload,
   TaskRecord,
+  TaskDependencyType,
   TestResultPayload,
   WorkLogPayload,
   WorkstreamPayload,
@@ -159,6 +160,20 @@ export function TaskEditorModal({
       label: partInstancesById[id] ? getPartInstanceLabel(partInstancesById[id]) : undefined,
     })),
   ].filter((chip): chip is { key: string; label: string } => Boolean(chip.label));
+  const currentTaskId = activeTask?.id ?? null;
+  const dependencyTaskOptions = [...bootstrap.tasks]
+    .filter((task) => task.projectId === taskDraft.projectId && task.id !== currentTaskId)
+    .sort((left, right) => left.title.localeCompare(right.title));
+  const dependencyDrafts = taskDraft.taskDependencies ?? [];
+  const visibleDependencyDrafts =
+    dependencyDrafts.length > 0
+      ? dependencyDrafts
+      : [{ upstreamTaskId: "", dependencyType: "finish_to_start" as TaskDependencyType }];
+  const dependencyTypeLabels: Record<TaskDependencyType, string> = {
+    blocks: "Blocks",
+    soft: "Soft",
+    finish_to_start: "Finish to start",
+  };
   const updatePrimaryTarget = (subsystemId: string) => {
     setTaskDraft((current) => setTaskPrimaryTargetSelection(current, bootstrap, subsystemId));
   };
@@ -203,6 +218,49 @@ export function TaskEditorModal({
       </span>
     </label>
   );
+  const updateDependencyDraft = (
+    index: number,
+    updates: Partial<NonNullable<TaskPayload["taskDependencies"]>[number]>,
+  ) => {
+    setTaskDraft((current) => {
+      const nextDependencyDrafts = [...(current.taskDependencies ?? [])];
+      const existingDraft =
+        nextDependencyDrafts[index] ?? {
+          upstreamTaskId: "",
+          dependencyType: "finish_to_start" as TaskDependencyType,
+        };
+
+      nextDependencyDrafts[index] = {
+        ...existingDraft,
+        ...updates,
+      };
+
+      return {
+        ...current,
+        taskDependencies: nextDependencyDrafts,
+      };
+    });
+  };
+  const addDependencyDraft = () => {
+    setTaskDraft((current) => ({
+      ...current,
+      taskDependencies: [
+        ...(current.taskDependencies ?? []),
+        {
+          upstreamTaskId: "",
+          dependencyType: "finish_to_start" as TaskDependencyType,
+        },
+      ],
+    }));
+  };
+  const removeDependencyDraft = (index: number) => {
+    setTaskDraft((current) => ({
+      ...current,
+      taskDependencies: (current.taskDependencies ?? []).filter(
+        (_dependency, currentIndex) => currentIndex !== index,
+      ),
+    }));
+  };
 
   return (
     <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
@@ -265,6 +323,11 @@ export function TaskEditorModal({
                   const subsystemId =
                     bootstrap.subsystems.find((subsystem) => subsystem.projectId === projectId)
                       ?.id ?? "";
+                  const validDependencyTaskIds = new Set(
+                    bootstrap.tasks
+                      .filter((task) => task.projectId === projectId && task.id !== currentTaskId)
+                      .map((task) => task.id),
+                  );
 
                   return {
                     ...current,
@@ -277,6 +340,9 @@ export function TaskEditorModal({
                     mechanismIds: [],
                     partInstanceId: null,
                     partInstanceIds: [],
+                    taskDependencies: (current.taskDependencies ?? []).filter((dependency) =>
+                      validDependencyTaskIds.has(dependency.upstreamTaskId),
+                    ),
                   };
                 })
               }
@@ -397,6 +463,90 @@ export function TaskEditorModal({
                 )}
               </div>
             </div>
+          </div>
+          <div className="field modal-wide">
+            <span style={{ color: "var(--text-title)" }}>Dependencies</span>
+            <p style={{ margin: "0.25rem 0 0", color: "var(--text-copy)" }}>
+              Planned sequencing between tasks. Use blocking dependencies for normal order.
+            </p>
+            <div style={{ display: "grid", gap: "0.75rem", marginTop: "0.75rem" }}>
+              {visibleDependencyDrafts.map((dependency, index) => (
+                <div
+                  key={dependency.id ?? `dependency-${index}`}
+                  style={{
+                    display: "grid",
+                    gap: "0.75rem",
+                    padding: "0.75rem",
+                    border: "1px solid var(--border-base)",
+                    borderRadius: "12px",
+                    background: "var(--bg-row-alt)",
+                  }}
+                >
+                  <label className="field">
+                    <span style={{ color: "var(--text-title)" }}>Depends on</span>
+                    <select
+                      onChange={(event) =>
+                        updateDependencyDraft(index, {
+                          upstreamTaskId: event.target.value,
+                        })
+                      }
+                      style={{
+                        background: "var(--bg-panel)",
+                        color: "var(--text-title)",
+                        border: "1px solid var(--border-base)",
+                      }}
+                      value={dependency.upstreamTaskId}
+                    >
+                      <option value="">Select task</option>
+                      {dependencyTaskOptions.map((task) => (
+                        <option key={task.id} value={task.id}>
+                          {task.title}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="field">
+                    <span style={{ color: "var(--text-title)" }}>Dependency type</span>
+                    <select
+                      onChange={(event) =>
+                        updateDependencyDraft(index, {
+                          dependencyType: event.target.value as TaskDependencyType,
+                        })
+                      }
+                      style={{
+                        background: "var(--bg-panel)",
+                        color: "var(--text-title)",
+                        border: "1px solid var(--border-base)",
+                      }}
+                      value={dependency.dependencyType}
+                    >
+                      {Object.entries(dependencyTypeLabels).map(([type, label]) => (
+                        <option key={type} value={type}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  {dependencyDrafts.length > 0 ? (
+                    <button
+                      className="secondary-action"
+                      onClick={() => removeDependencyDraft(index)}
+                      type="button"
+                    >
+                      Remove dependency
+                    </button>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+            <button
+              className="secondary-action"
+              onClick={addDependencyDraft}
+              style={{ marginTop: "0.75rem" }}
+              type="button"
+            >
+              Add dependency
+            </button>
           </div>
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Target event</span>

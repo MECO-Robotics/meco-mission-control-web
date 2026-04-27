@@ -386,6 +386,12 @@ export interface TaskRecord {
   documentationLinked: boolean;
 }
 
+export interface TaskDependencyDraft {
+  id?: string;
+  upstreamTaskId: string;
+  dependencyType: TaskDependencyType;
+}
+
 export interface TaskDependencyRecord {
   id: string;
   upstreamTaskId: string;
@@ -663,6 +669,7 @@ export interface TaskPayload {
   linkedPurchaseIds: string[];
   requiresDocumentation: boolean;
   documentationLinked: boolean;
+  taskDependencies?: TaskDependencyDraft[];
 }
 
 export interface TaskDependencyPayload {

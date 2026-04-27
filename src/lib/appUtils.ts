@@ -20,6 +20,7 @@ import type {
   SubsystemRecord,
   TaskPayload,
   TaskRecord,
+  TaskDependencyDraft,
   TestResultPayload,
   WorkLogPayload,
   WorkstreamPayload,
@@ -144,7 +145,7 @@ export function getProjectTaskTargetLabel(
 }
 
 function getTaskTargetArrays(payload: TaskPayload) {
-    return {
+  return {
         subsystemIds: payload.subsystemIds.length
             ? payload.subsystemIds
             : uniqueIds([payload.subsystemId]),
@@ -701,6 +702,28 @@ export function buildEmptyWorkLogPayload(
   };
 }
 
+function getTaskDependencyDrafts(
+  task: TaskRecord,
+  bootstrap?: BootstrapPayload,
+): TaskDependencyDraft[] {
+  const explicitDependencies = bootstrap?.taskDependencies?.filter(
+    (dependency) => dependency.downstreamTaskId === task.id,
+  );
+
+  if (explicitDependencies && explicitDependencies.length > 0) {
+    return explicitDependencies.map((dependency) => ({
+      id: dependency.id,
+      upstreamTaskId: dependency.upstreamTaskId,
+      dependencyType: dependency.dependencyType,
+    }));
+  }
+
+  return uniqueIds(task.dependencyIds ?? []).map((upstreamTaskId) => ({
+    upstreamTaskId,
+    dependencyType: "finish_to_start",
+  }));
+}
+
 export function buildEmptyReportPayload(
   bootstrap: BootstrapPayload,
   reportType: ReportType,
@@ -958,15 +981,16 @@ export function buildEmptyPartInstancePayload(
     };
 }
 
-export const taskToPayload = (task: TaskRecord): TaskPayload => ({
-    ...task,
-    workstreamIds: task.workstreamIds?.length ? task.workstreamIds : uniqueIds([task.workstreamId]),
-    subsystemIds: task.subsystemIds?.length ? task.subsystemIds : uniqueIds([task.subsystemId]),
-    mechanismIds: task.mechanismIds?.length ? task.mechanismIds : uniqueIds([task.mechanismId]),
-    partInstanceIds: task.partInstanceIds?.length ? task.partInstanceIds : uniqueIds([task.partInstanceId]),
-    artifactId: task.artifactId ?? null,
-    artifactIds: task.artifactIds?.length ? uniqueIds(task.artifactIds) : uniqueIds([task.artifactId]),
-    assigneeIds: task.assigneeIds?.length ? uniqueIds(task.assigneeIds) : uniqueIds([task.ownerId]),
+export const taskToPayload = (task: TaskRecord, bootstrap?: BootstrapPayload): TaskPayload => ({
+  ...task,
+  workstreamIds: task.workstreamIds?.length ? task.workstreamIds : uniqueIds([task.workstreamId]),
+  subsystemIds: task.subsystemIds?.length ? task.subsystemIds : uniqueIds([task.subsystemId]),
+  mechanismIds: task.mechanismIds?.length ? task.mechanismIds : uniqueIds([task.mechanismId]),
+  partInstanceIds: task.partInstanceIds?.length ? task.partInstanceIds : uniqueIds([task.partInstanceId]),
+  artifactId: task.artifactId ?? null,
+  artifactIds: task.artifactIds?.length ? uniqueIds(task.artifactIds) : uniqueIds([task.artifactId]),
+  assigneeIds: task.assigneeIds?.length ? uniqueIds(task.assigneeIds) : uniqueIds([task.ownerId]),
+  taskDependencies: getTaskDependencyDrafts(task, bootstrap),
 });
 
 export const purchaseToPayload = (item: PurchaseItemRecord): PurchaseItemPayload => ({
