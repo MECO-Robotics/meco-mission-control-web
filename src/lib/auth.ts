@@ -803,15 +803,20 @@ function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapPayload 
     seasons: planning.seasons,
     projects: planning.projects,
     workstreams: planning.workstreams,
-    members: (source.members ?? []).map((member) => ({
-      ...member,
-      email: typeof member.email === "string" ? member.email : "",
-      elevated:
-        typeof member.elevated === "boolean"
-          ? member.elevated
-          : member.role === "lead" || member.role === "admin",
-      seasonId: member.seasonId ?? defaultSeasonId,
-    })),
+    members: (source.members ?? []).map((member) => {
+      const seasonId = member.seasonId ?? defaultSeasonId;
+      const activeSeasonIds = uniqueIds([...(member.activeSeasonIds ?? []), seasonId]);
+      return {
+        ...member,
+        email: typeof member.email === "string" ? member.email : "",
+        elevated:
+          typeof member.elevated === "boolean"
+            ? member.elevated
+            : member.role === "lead" || member.role === "admin",
+        seasonId,
+        activeSeasonIds: activeSeasonIds.length > 0 ? activeSeasonIds : [seasonId],
+      };
+    }),
     subsystems,
     disciplines: source.disciplines ?? [],
     mechanisms: (source.mechanisms ?? []).map((mechanism) => ({

@@ -14,6 +14,7 @@ import type { FilterSelection } from "@/features/workspace";
 import type {
   InventoryViewTab,
   ManufacturingViewTab,
+  RiskManagementViewTab,
   TaskViewTab,
   ViewTab,
   WorklogsViewTab,
@@ -34,6 +35,8 @@ import {
   buildEmptyTaskPayload,
   buildEmptyWorkstreamPayload,
   findMemberForSessionUser,
+  getMemberActiveSeasonIds,
+  isMemberActiveInSeason,
   joinList,
   mechanismToPayload,
   manufacturingToPayload,
@@ -228,6 +231,7 @@ interface InteractiveTutorialChapter {
 interface InteractiveTutorialReturnState {
   activeTab: ViewTab;
   taskView: TaskViewTab;
+  riskManagementView: RiskManagementViewTab;
   worklogsView: WorklogsViewTab;
   manufacturingView: ManufacturingViewTab;
   inventoryView: InventoryViewTab;
@@ -257,6 +261,8 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<ViewTab>("tasks");
   const [tabSwitchDirection, setTabSwitchDirection] = useState<"up" | "down">("down");
   const [taskView, setTaskView] = useState<TaskViewTab>("timeline");
+  const [riskManagementView, setRiskManagementView] =
+    useState<RiskManagementViewTab>("risks");
   const [worklogsView, setWorklogsView] = useState<WorklogsViewTab>("logs");
   const [manufacturingView, setManufacturingView] =
     useState<ManufacturingViewTab>("cnc");
@@ -1036,7 +1042,8 @@ export default function App() {
       const scopedSubsystemIds = new Set(scopedSubsystems.map((subsystem) => subsystem.id));
       const scopedStudents = tutorialSeasonId
         ? payload.members.filter(
-            (member) => member.role === "student" && member.seasonId === tutorialSeasonId,
+            (member) =>
+              member.role === "student" && isMemberActiveInSeason(member, tutorialSeasonId),
           )
         : payload.members.filter((member) => member.role === "student");
 
@@ -2963,6 +2970,7 @@ export default function App() {
           role: normalizedRole,
           elevated: isElevatedMemberRole(normalizedRole),
           seasonId: selectedSeasonId,
+          activeSeasonIds: [selectedSeasonId],
         },
         handleUnauthorized,
       );
@@ -3032,6 +3040,44 @@ export default function App() {
     }
   };
 
+  const handleReactivateMemberForSeason = async (memberId: string) => {
+    if (!selectedSeasonId) {
+      setDataMessage("Pick a season before reactivating a roster member.");
+      return;
+    }
+
+    const member = bootstrap.members.find((candidate) => candidate.id === memberId);
+    if (!member) {
+      setDataMessage("Select a valid inactive roster member to reactivate.");
+      return;
+    }
+
+    const activeSeasonIds = getMemberActiveSeasonIds(member);
+    if (activeSeasonIds.includes(selectedSeasonId)) {
+      setDataMessage("That person is already active in this season.");
+      return;
+    }
+
+    setIsSavingMember(true);
+    setDataMessage(null);
+
+    try {
+      await updateMemberRecord(
+        member.id,
+        {
+          activeSeasonIds: [...activeSeasonIds, selectedSeasonId],
+        },
+        handleUnauthorized,
+      );
+      setIsAddPersonOpen(false);
+      await loadWorkspace();
+    } catch (error) {
+      setDataMessage(toErrorMessage(error));
+    } finally {
+      setIsSavingMember(false);
+    }
+  };
+
   const closeSidebarOverlay = useCallback(() => {
     if (isSidebarOverlay) {
       toggleSidebar();
@@ -3087,6 +3133,7 @@ export default function App() {
     if (returnState) {
       setActiveTab(returnState.activeTab);
       setTaskView(returnState.taskView);
+      setRiskManagementView(returnState.riskManagementView);
       setWorklogsView(returnState.worklogsView);
       setManufacturingView(returnState.manufacturingView);
       setInventoryView(returnState.inventoryView);
@@ -3152,6 +3199,7 @@ export default function App() {
       setInteractiveTutorialReturnState({
         activeTab,
         taskView,
+        riskManagementView,
         worklogsView,
         manufacturingView,
         inventoryView,
@@ -3257,6 +3305,7 @@ export default function App() {
 
     setActiveTab("tasks");
     setTaskView("timeline");
+    setRiskManagementView("risks");
     setWorklogsView("logs");
     setManufacturingView("cnc");
     setInventoryView("materials");
@@ -3282,6 +3331,7 @@ export default function App() {
     inventoryView,
     isSidebarCollapsed,
     manufacturingView,
+    riskManagementView,
     selectedProjectId,
     selectedSeasonId,
     taskView,
@@ -3743,12 +3793,14 @@ export default function App() {
           isLoadingData={isLoadingData}
           loadWorkspace={loadWorkspace}
           manufacturingView={manufacturingView}
+          riskManagementView={riskManagementView}
           isMyViewActive={isMyViewActive}
           myViewMemberName={signedInMember?.name ?? null}
           sessionUser={sessionUser}
           isNonRobotProject={isNonRobotProject}
           setInventoryView={setInventoryView}
           setManufacturingView={setManufacturingView}
+          setRiskManagementView={setRiskManagementView}
           setTaskView={setTaskView}
           setWorklogsView={setWorklogsView}
           taskView={taskView}
@@ -3908,12 +3960,14 @@ export default function App() {
           activePersonFilter={activePersonFilter}
           activeTab={activeTab}
           tabSwitchDirection={tabSwitchDirection}
+          allMembers={bootstrap.members}
           artifacts={scopedArtifacts}
           bootstrap={scopedBootstrap}
           cncItems={cncItems}
           dataMessage={dataMessage}
           fabricationItems={fabricationItems}
           handleCreateMember={handleCreateMember}
+          handleReactivateMemberForSeason={handleReactivateMemberForSeason}
           handleDeleteMember={handleDeleteMember}
           handleTimelineEventDelete={handleTimelineEventDelete}
           handleTimelineEventSave={handleTimelineEventSave}
@@ -3965,9 +4019,11 @@ export default function App() {
           }
           manufacturingView={manufacturingView}
           inventoryView={inventoryView}
+          riskManagementView={riskManagementView}
           taskView={taskView}
           worklogsView={worklogsView}
           selectMember={selectMember}
+          selectedSeasonId={selectedSeasonId}
           selectedMemberId={selectedMemberId}
           setIsAddPersonOpen={setIsAddPersonOpen}
           setIsEditPersonOpen={setIsEditPersonOpen}

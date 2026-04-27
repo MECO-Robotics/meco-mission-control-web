@@ -28,6 +28,7 @@ import {
   WORKLOG_VIEW_ORDER,
   type InventoryViewTab,
   type ManufacturingViewTab,
+  type RiskManagementViewTab,
   type TaskViewTab,
   type ViewTab,
   type WorklogsViewTab,
@@ -97,7 +98,7 @@ const SUBVIEW_INTERACTION_GUIDANCE: Record<WorkspaceSubviewTab, string> = {
   workflow:
     "Search and filter workflow ownership, click a row to expand details, and use add or edit controls to keep non-technical workstreams current.",
   "risk-management":
-    "Use search and quick filters to triage risk records, click a row to edit details or mitigation ownership, and use Add to log a new risk linked to a real source and attachment target.",
+    "Use the top-bar subtabs to switch between Risks and Metrics. In Risks, search and filter to triage records, click a row to edit details or mitigation ownership, and use Add to log a new risk with a real source and attachment target.",
   roster:
     "Use the plus buttons to add people to each group, click a name to select them, and hover a member to reveal the pencil affordance for editing or deleting them from the popup.",
   help:
@@ -130,6 +131,7 @@ interface WorkspaceContentProps {
   activePersonFilter: FilterSelection;
   activeTab: ViewTab;
   tabSwitchDirection: TabSwitchDirection;
+  allMembers: BootstrapPayload["members"];
   artifacts: ArtifactRecord[];
   bootstrap: BootstrapPayload;
   cncItems: ManufacturingItemRecord[];
@@ -139,6 +141,7 @@ interface WorkspaceContentProps {
   externalMembers: BootstrapPayload["members"];
   fabricationItems: ManufacturingItemRecord[];
   handleCreateMember: (event: FormEvent<HTMLFormElement>) => void;
+  handleReactivateMemberForSeason: (memberId: string) => Promise<void>;
   handleDeleteMember: (id: string) => void;
   handleTimelineEventDelete: (eventId: string) => Promise<void>;
   handleTimelineEventSave: (
@@ -196,9 +199,11 @@ interface WorkspaceContentProps {
   showCncMentorQuickActions: boolean;
   manufacturingView: ManufacturingViewTab;
   inventoryView: InventoryViewTab;
+  riskManagementView: RiskManagementViewTab;
   taskView: TaskViewTab;
   worklogsView: WorklogsViewTab;
   selectMember: (id: string | null, payload: BootstrapPayload) => void;
+  selectedSeasonId: string | null;
   selectedMemberId: string | null;
   setActivePersonFilter: (value: FilterSelection) => void;
   setIsAddPersonOpen: (open: boolean) => void;
@@ -355,6 +360,7 @@ export function WorkspaceContent({
   activePersonFilter,
   activeTab,
   tabSwitchDirection,
+  allMembers,
   artifacts,
   bootstrap,
   cncItems,
@@ -364,6 +370,7 @@ export function WorkspaceContent({
   externalMembers,
   fabricationItems,
   handleCreateMember,
+  handleReactivateMemberForSeason,
   handleDeleteMember,
   handleTimelineEventDelete,
   handleTimelineEventSave,
@@ -414,9 +421,11 @@ export function WorkspaceContent({
   showCncMentorQuickActions,
   manufacturingView,
   inventoryView,
+  riskManagementView,
   taskView,
   worklogsView,
   selectMember,
+  selectedSeasonId,
   selectedMemberId,
   setActivePersonFilter,
   setIsAddPersonOpen,
@@ -575,6 +584,7 @@ export function WorkspaceContent({
             onCreateRisk={onCreateRisk}
             onDeleteRisk={onDeleteRisk}
             onUpdateRisk={onUpdateRisk}
+            view={riskManagementView}
           />
         </WorkspaceSubPanel>
       </WorkspaceSectionPanel>
@@ -797,8 +807,10 @@ export function WorkspaceContent({
           isActive
         >
           <RosterView
+            allMembers={allMembers}
             bootstrap={bootstrap}
             handleCreateMember={handleCreateMember}
+            handleReactivateMemberForSeason={handleReactivateMemberForSeason}
             handleDeleteMember={handleDeleteMember}
             handleUpdateMember={handleUpdateMember}
             isAddPersonOpen={isAddPersonOpen}
@@ -810,6 +822,7 @@ export function WorkspaceContent({
             externalMembers={externalMembers}
             rosterMentors={rosterMentors}
             selectMember={selectMember}
+            selectedSeasonId={selectedSeasonId}
             selectedMemberId={selectedMemberId}
             setIsAddPersonOpen={setIsAddPersonOpen}
             setIsEditPersonOpen={setIsEditPersonOpen}

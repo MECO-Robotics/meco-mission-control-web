@@ -1,4 +1,5 @@
 import type { BootstrapPayload, MemberPayload } from "@/types";
+import { isMemberActiveInSeason } from "@/lib/appUtils";
 
 export function scopeBootstrapBySelection(
   payload: BootstrapPayload,
@@ -90,7 +91,7 @@ export function scopeBootstrapBySelection(
     return true;
   });
   const scopedMembers = selectedSeasonId
-    ? payload.members.filter((member) => member.seasonId === selectedSeasonId)
+    ? payload.members.filter((member) => isMemberActiveInSeason(member, selectedSeasonId))
     : payload.members;
 
   return {

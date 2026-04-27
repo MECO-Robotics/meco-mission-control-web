@@ -81,6 +81,7 @@ export interface MemberRecord {
   role: MemberRole;
   elevated: boolean;
   seasonId: string;
+  activeSeasonIds?: string[];
 }
 
 export interface SubsystemRecord {
@@ -452,6 +453,7 @@ export interface MemberPayload {
   email: string;
   role: MemberRole;
   elevated: boolean;
+  activeSeasonIds?: string[];
 }
 
 export interface MemberCreatePayload extends MemberPayload {

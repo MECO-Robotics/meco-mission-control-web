@@ -2,10 +2,13 @@ import React from "react";
 import { IconEdit, IconPlus, IconTrash } from "@/components/shared";
 import type { BootstrapPayload, MemberPayload, MemberRecord } from "@/types";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
+import { isMemberActiveInSeason } from "@/lib/appUtils";
 
 interface RosterViewProps {
+    allMembers: MemberRecord[];
     bootstrap: BootstrapPayload;
     selectedMemberId: string | null;
+    selectedSeasonId: string | null;
     selectMember: (id: string | null, payload: BootstrapPayload) => void;
     isAddPersonOpen: boolean;
     setIsAddPersonOpen: (open: boolean) => void;
@@ -16,6 +19,7 @@ interface RosterViewProps {
     memberEditDraft: MemberPayload | null;
     setMemberEditDraft: React.Dispatch<React.SetStateAction<MemberPayload | null>>;
     handleCreateMember: (e: React.FormEvent<HTMLFormElement>) => void;
+    handleReactivateMemberForSeason: (memberId: string) => Promise<void>;
     handleUpdateMember: (e: React.FormEvent<HTMLFormElement>) => void;
     handleDeleteMember: (id: string) => void;
     isSavingMember: boolean;
@@ -26,8 +30,10 @@ interface RosterViewProps {
 }
 
 export const RosterView: React.FC<RosterViewProps> = ({
+    allMembers,
     bootstrap,
     selectedMemberId,
+    selectedSeasonId,
     selectMember,
     isAddPersonOpen,
     setIsAddPersonOpen,
@@ -38,6 +44,7 @@ export const RosterView: React.FC<RosterViewProps> = ({
     memberEditDraft,
     setMemberEditDraft,
     handleCreateMember,
+    handleReactivateMemberForSeason,
     handleUpdateMember,
     handleDeleteMember,
     isSavingMember,
@@ -46,6 +53,8 @@ export const RosterView: React.FC<RosterViewProps> = ({
     rosterMentors,
     externalMembers,
 }) => {
+    const [reactivateExistingMember, setReactivateExistingMember] = React.useState(false);
+    const [reactivateMemberId, setReactivateMemberId] = React.useState("");
     const isLeadStudent = (member: MemberRecord) => member.role === "lead" || (member.role === "student" && member.elevated);
     const isAdminMentor = (member: MemberRecord) => member.role === "admin" || (member.role === "mentor" && member.elevated);
     const sortedStudents = [...students].sort((a, b) => {
@@ -69,14 +78,27 @@ export const RosterView: React.FC<RosterViewProps> = ({
     const isElevatedRole = (role: MemberPayload["role"]) => role === "lead" || role === "admin";
     const getEmailPlaceholder = (role: MemberPayload["role"]) =>
         role === "external" ? "name@example.org" : "name@mecorobotics.org";
+    const inactiveMembers = React.useMemo(() => {
+        if (!selectedSeasonId) {
+            return [];
+        }
+
+        return allMembers
+            .filter((member) => !isMemberActiveInSeason(member, selectedSeasonId))
+            .sort((a, b) => a.name.localeCompare(b.name));
+    }, [allMembers, selectedSeasonId]);
 
     const openAddPersonPanel = (role: MemberPayload["role"]) => {
         setMemberForm({ name: "", email: "", role, elevated: isElevatedRole(role) });
+        setReactivateExistingMember(false);
+        setReactivateMemberId("");
         setIsAddPersonOpen(true);
         setIsEditPersonOpen(false);
     };
 
     const closeAddPersonPopup = () => {
+        setReactivateExistingMember(false);
+        setReactivateMemberId("");
         setIsAddPersonOpen(false);
     };
 
@@ -88,6 +110,19 @@ export const RosterView: React.FC<RosterViewProps> = ({
 
     const closeEditPersonPopup = () => {
         setIsEditPersonOpen(false);
+    };
+
+    const handleAddMemberSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        if (!reactivateExistingMember) {
+            handleCreateMember(event);
+            return;
+        }
+
+        event.preventDefault();
+        if (!reactivateMemberId) {
+            return;
+        }
+        void handleReactivateMemberForSeason(reactivateMemberId);
     };
 
     const renderMemberRow = (member: MemberRecord) => {
@@ -191,34 +226,83 @@ export const RosterView: React.FC<RosterViewProps> = ({
                         <div className="panel-header compact-header roster-modal-header">
                             <div className="queue-section-header">
                                 <h3>Add person</h3>
-                                <p className="section-copy">Create a new roster entry and assign its role.</p>
+                                <p className="section-copy">Create a new roster entry or reactivate one for this season.</p>
                             </div>
                         </div>
-                        <form className="compact-form roster-inline-form" onSubmit={handleCreateMember}>
-                            <label className="field">
-                                <span>Name</span>
-                                <input onChange={(e) => setMemberForm((curr) => ({ ...curr, name: e.target.value }))} required value={memberForm.name} />
-                            </label>
-                            <label className="field">
-                                <span>Email</span>
-                                <input onChange={(e) => setMemberForm((curr) => ({ ...curr, email: e.target.value }))} placeholder={getEmailPlaceholder(memberForm.role)} type="email" value={memberForm.email} />
-                            </label>
-                            <label className="field">
-                                <span>Role</span>
-                                <select onChange={(e) => {
-                                    const nextRole = e.target.value as MemberPayload["role"];
-                                    setMemberForm((curr) => ({ ...curr, role: nextRole, elevated: isElevatedRole(nextRole) }));
-                                }} value={memberForm.role}>
-                                    <option value="student">Student</option>
-                                    <option value="lead">Lead</option>
-                                    <option value="mentor">Mentor</option>
-                                    <option value="admin">Admin</option>
-                                    <option value="external">External access</option>
-                                </select>
-                            </label>
+                        <form className="compact-form roster-inline-form" onSubmit={handleAddMemberSubmit}>
+                            <div className="field modal-wide">
+                                <span>Mode</span>
+                                <label className="checkbox-field">
+                                    <input
+                                        checked={reactivateExistingMember}
+                                        onChange={(event) => {
+                                            const isChecked = event.target.checked;
+                                            setReactivateExistingMember(isChecked);
+                                            if (!isChecked) {
+                                                setReactivateMemberId("");
+                                            }
+                                        }}
+                                        type="checkbox"
+                                    />
+                                    <span>Reactivate existing inactive person for this season</span>
+                                </label>
+                            </div>
+                            {reactivateExistingMember ? (
+                                <>
+                                    <label className="field">
+                                        <span>Inactive person</span>
+                                        <select
+                                            onChange={(event) => setReactivateMemberId(event.target.value)}
+                                            required
+                                            value={reactivateMemberId}
+                                        >
+                                            <option value="">Select person</option>
+                                            {inactiveMembers.map((member) => (
+                                                <option key={member.id} value={member.id}>
+                                                    {member.name}
+                                                    {member.email ? ` (${member.email})` : ""}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </label>
+                                    {inactiveMembers.length === 0 ? (
+                                        <p className="section-copy">No inactive roster people are available for this season.</p>
+                                    ) : null}
+                                </>
+                            ) : (
+                                <>
+                                    <label className="field">
+                                        <span>Name</span>
+                                        <input onChange={(e) => setMemberForm((curr) => ({ ...curr, name: e.target.value }))} required value={memberForm.name} />
+                                    </label>
+                                    <label className="field">
+                                        <span>Email</span>
+                                        <input onChange={(e) => setMemberForm((curr) => ({ ...curr, email: e.target.value }))} placeholder={getEmailPlaceholder(memberForm.role)} type="email" value={memberForm.email} />
+                                    </label>
+                                    <label className="field">
+                                        <span>Role</span>
+                                        <select onChange={(e) => {
+                                            const nextRole = e.target.value as MemberPayload["role"];
+                                            setMemberForm((curr) => ({ ...curr, role: nextRole, elevated: isElevatedRole(nextRole) }));
+                                        }} value={memberForm.role}>
+                                            <option value="student">Student</option>
+                                            <option value="lead">Lead</option>
+                                            <option value="mentor">Mentor</option>
+                                            <option value="admin">Admin</option>
+                                            <option value="external">External access</option>
+                                        </select>
+                                    </label>
+                                </>
+                            )}
                             <div className="modal-actions modal-wide">
                                 <button className="secondary-action" onClick={closeAddPersonPopup} type="button">Cancel</button>
-                                <button className="primary-action" disabled={isSavingMember} type="submit">{isSavingMember ? "Saving..." : "Add person"}</button>
+                                <button
+                                    className="primary-action"
+                                    disabled={isSavingMember || (reactivateExistingMember && (reactivateMemberId.length === 0 || inactiveMembers.length === 0))}
+                                    type="submit"
+                                >
+                                    {isSavingMember ? "Saving..." : reactivateExistingMember ? "Reactivate person" : "Add person"}
+                                </button>
                             </div>
                         </form>
                     </section>

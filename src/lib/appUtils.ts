@@ -93,6 +93,20 @@ function uniqueIds(values: Array<string | null | undefined>) {
     );
 }
 
+export function getMemberActiveSeasonIds(
+    member: Pick<BootstrapPayload["members"][number], "seasonId" | "activeSeasonIds">,
+) {
+    const seasonIds = uniqueIds([...(member.activeSeasonIds ?? []), member.seasonId]);
+    return seasonIds.length > 0 ? seasonIds : [member.seasonId];
+}
+
+export function isMemberActiveInSeason(
+    member: Pick<BootstrapPayload["members"][number], "seasonId" | "activeSeasonIds">,
+    seasonId: string,
+) {
+    return getMemberActiveSeasonIds(member).includes(seasonId);
+}
+
 export function normalizeIteration(value: number | null | undefined) {
     return Number.isFinite(value) && value && value >= 1 ? Math.trunc(value) : 1;
 }

@@ -16,6 +16,7 @@ const student: MemberRecord = {
   role: "student",
   elevated: false,
   seasonId: "season-1",
+  activeSeasonIds: ["season-1"],
 };
 
 const mentor: MemberRecord = {
@@ -25,6 +26,7 @@ const mentor: MemberRecord = {
   role: "mentor",
   elevated: false,
   seasonId: "season-1",
+  activeSeasonIds: ["season-1"],
 };
 
 const external: MemberRecord = {
@@ -34,6 +36,7 @@ const external: MemberRecord = {
   role: "external",
   elevated: false,
   seasonId: "season-1",
+  activeSeasonIds: ["season-1"],
 };
 
 function renderRosterView() {
@@ -50,8 +53,10 @@ function renderRosterView() {
 
   return renderToStaticMarkup(
     React.createElement(RosterView, {
+      allMembers: [student, mentor, external],
       bootstrap,
       selectedMemberId: null,
+      selectedSeasonId: "season-1",
       selectMember: jest.fn(),
       isAddPersonOpen: false,
       setIsAddPersonOpen: jest.fn(),
@@ -62,6 +67,7 @@ function renderRosterView() {
       memberEditDraft: null,
       setMemberEditDraft: jest.fn(),
       handleCreateMember: jest.fn(),
+      handleReactivateMemberForSeason: jest.fn().mockResolvedValue(undefined),
       handleUpdateMember: jest.fn(),
       handleDeleteMember: jest.fn(),
       isSavingMember: false,
