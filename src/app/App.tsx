@@ -332,6 +332,7 @@ export default function App() {
     isSigningIn,
     sessionUser,
   } = useAppAuth({
+    isDarkMode,
     resetWorkspace: () => {
       setBootstrap(EMPTY_BOOTSTRAP);
     },

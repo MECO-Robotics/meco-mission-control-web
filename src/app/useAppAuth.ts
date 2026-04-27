@@ -30,12 +30,14 @@ import {
   validateSession,
 } from "@/lib/auth";
 import { toErrorMessage } from "@/lib/appUtils";
+import { getGoogleButtonTheme } from "@/app/googleButtonTheme";
 
 interface UseAppAuthArgs {
   resetWorkspace: () => void;
+  isDarkMode: boolean;
 }
 
-export function useAppAuth({ resetWorkspace }: UseAppAuthArgs) {
+export function useAppAuth({ isDarkMode, resetWorkspace }: UseAppAuthArgs) {
   const [authConfig, setAuthConfig] = useState<AuthConfig | null>(null);
   const [sessionUser, setSessionUser] = useState<SessionUser | null>(null);
   const [authBooting, setAuthBooting] = useState(true);
@@ -272,7 +274,7 @@ export function useAppAuth({ resetWorkspace }: UseAppAuthArgs) {
         });
         window.google.accounts.id.renderButton(activeButtonSlot, {
           type: "standard",
-          theme: "outline",
+          theme: getGoogleButtonTheme(isDarkMode),
           size: "large",
           text: "continue_with",
           shape: "pill",
@@ -292,7 +294,7 @@ export function useAppAuth({ resetWorkspace }: UseAppAuthArgs) {
       cancelled = true;
       buttonSlot.replaceChildren();
     };
-  }, [authBooting, googleClientId, hostedDomain, isGoogleAuthHostAllowed, sessionUser]);
+  }, [authBooting, googleClientId, hostedDomain, isDarkMode, isGoogleAuthHostAllowed, sessionUser]);
 
   const handleSignOut = useCallback(() => {
     clearStoredSessionToken();
