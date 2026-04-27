@@ -3753,12 +3753,11 @@ export default function App() {
           setWorklogsView={setWorklogsView}
           taskView={taskView}
           worklogsView={worklogsView}
-          projects={projectsInSelectedSeason}
-          selectedProjectId={selectedProjectId}
+          seasons={bootstrap.seasons}
+          selectedSeasonId={selectedSeasonId}
           subsystemsLabel={subsystemsLabel}
-          onCreateRobot={handleCreateRobot}
-          onEditSelectedRobot={handleEditSelectedRobot}
-          onSelectProject={setSelectedProjectId}
+          onCreateSeason={handleCreateSeason}
+          onSelectSeason={setSelectedSeasonId}
           onToggleMyView={toggleMyView}
           isDarkMode={isDarkMode}
           toggleDarkMode={toggleDarkMode}
@@ -3771,10 +3770,11 @@ export default function App() {
           items={navigationItems}
           onSelectTab={handleSidebarTabSelect}
           isCollapsed={isSidebarCollapsed}
-          seasons={bootstrap.seasons}
-          selectedSeasonId={selectedSeasonId}
-          onSelectSeason={setSelectedSeasonId}
-          onCreateSeason={handleCreateSeason}
+          projects={projectsInSelectedSeason}
+          selectedProjectId={selectedProjectId}
+          onSelectProject={setSelectedProjectId}
+          onCreateRobot={handleCreateRobot}
+          onEditSelectedRobot={handleEditSelectedRobot}
         />
 
         {isAddSeasonPopupOpen ? (

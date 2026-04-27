@@ -7,7 +7,7 @@ const HELP_SECTIONS: Array<{ title: string; items: string[] }> = [
   {
     title: "Start with scope",
     items: [
-      "Before editing anything, check the **season selector** in the sidebar and the **active project** in the top bar.",
+      "Before editing anything, check the **season selector** in the profile menu and the **active project** in the sidebar.",
       "Pick **All projects** only for planning sweeps; switch back to a single project before data entry.",
       "If a list looks empty, first confirm you are in the expected **season and project scope**.",
       "Timeline, Queue, and Milestones are **project-aware**, so scope mistakes show up there first.",
@@ -98,8 +98,8 @@ const HELP_TUTORIAL_STEPS: Array<{
     summary:
       "Every reliable workflow starts with correct scope. Confirm season and project before creating or editing records.",
     actions: [
-      "Confirm the active season in the left sidebar.",
-      "Set project scope in the top bar (Robot, Outreach, Operations, or All projects).",
+      "Open the profile menu and confirm the active season.",
+      "Set project scope in the sidebar (Robot, Outreach, Operations, or All projects).",
       "Switch out of All projects before entering detailed task or inventory data.",
     ],
     cue: "Wrong scope is the most common reason data looks missing.",

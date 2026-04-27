@@ -1,4 +1,4 @@
-import { type Dispatch, type SetStateAction } from "react";
+import { type ChangeEvent, type Dispatch, type SetStateAction } from "react";
 
 import {
   MECO_MAIN_LOGO_HEIGHT,
@@ -22,10 +22,10 @@ import {
   type ViewTab,
 } from "@/lib/workspaceNavigation";
 import type { SessionUser } from "@/lib/auth";
-import type { ProjectRecord } from "@/types";
-import { IconEdit, IconEye, IconRefresh } from "@/components/shared";
+import type { SeasonRecord } from "@/types";
+import { IconEye, IconRefresh } from "@/components/shared";
 
-const ADD_ROBOT_PROJECT_VALUE = "__add_robot_project__";
+const CREATE_SEASON_OPTION_VALUE = "__create_new_season__";
 
 function TopbarTabs<T extends string>({
   activeValue,
@@ -178,12 +178,11 @@ interface AppTopbarProps {
   setWorklogsView: Dispatch<SetStateAction<WorklogsViewTab>>;
   taskView: TaskViewTab;
   worklogsView: WorklogsViewTab;
-  projects: ProjectRecord[];
-  selectedProjectId: string | null;
+  seasons: SeasonRecord[];
+  selectedSeasonId: string | null;
   subsystemsLabel: string;
-  onCreateRobot: () => void;
-  onEditSelectedRobot: () => void;
-  onSelectProject: (projectId: string | null) => void;
+  onCreateSeason: () => void;
+  onSelectSeason: (seasonId: string | null) => void;
   onToggleMyView: () => void;
   toggleDarkMode: () => void;
   toggleSidebar: () => void;
@@ -208,29 +207,27 @@ export function AppTopbar({
   setWorklogsView,
   taskView,
   worklogsView,
-  projects,
-  selectedProjectId,
+  seasons,
+  selectedSeasonId,
   subsystemsLabel,
-  onCreateRobot,
-  onEditSelectedRobot,
-  onSelectProject,
+  onCreateSeason,
+  onSelectSeason,
   onToggleMyView,
   toggleDarkMode,
   toggleSidebar,
 }: AppTopbarProps) {
-  const selectedProject =
-    projects.find((project) => project.id === selectedProjectId) ?? null;
-  const canEditSelectedRobot = selectedProject?.projectType === "robot";
   const themeToggleMenuLabel = isDarkMode ? "Light mode" : "Dark mode";
   const themeToggleMenuTitle = isDarkMode ? "Switch to light mode" : "Switch to dark mode";
 
-  const handleProjectChange = (value: string) => {
-    if (value === ADD_ROBOT_PROJECT_VALUE) {
-      onCreateRobot();
+  const handleSeasonChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const nextValue = event.target.value;
+    if (nextValue === CREATE_SEASON_OPTION_VALUE) {
+      event.target.value = selectedSeasonId ?? "";
+      onCreateSeason();
       return;
     }
 
-    onSelectProject(value || null);
+    onSelectSeason(nextValue || null);
   };
 
   return (
@@ -258,55 +255,6 @@ export function AppTopbar({
             width={MECO_MAIN_LOGO_WIDTH}
             src={isDarkMode ? MECO_MAIN_LOGO_WHITE_SRC : MECO_MAIN_LOGO_LIGHT_SRC}
           />
-        </div>
-      </div>
-
-      <div className="app-topbar-project-slot">
-        <div
-          className={
-            canEditSelectedRobot
-              ? "app-topbar-project-picker has-overlay-action"
-              : "app-topbar-project-picker"
-          }
-          data-tutorial-target="project-select-outreach"
-        >
-          <label className="app-topbar-project-label" htmlFor="app-topbar-project-select">
-            Project
-          </label>
-          <select
-            className="app-topbar-project-select"
-            data-tutorial-target="project-select"
-            id="app-topbar-project-select"
-            onChange={(event) => handleProjectChange(event.target.value)}
-            value={selectedProjectId ?? ""}
-          >
-            {projects.length === 0 ? (
-              <option value="" disabled>
-                No projects
-              </option>
-            ) : (
-              <>
-                <option value="">All projects</option>
-                {projects.map((project) => (
-                  <option key={project.id} value={project.id}>
-                    {project.name}
-                  </option>
-                ))}
-              </>
-            )}
-            <option value={ADD_ROBOT_PROJECT_VALUE}>Add robot</option>
-          </select>
-          {canEditSelectedRobot ? (
-            <button
-              aria-label="Edit robot name"
-              className="app-topbar-project-action"
-              onClick={onEditSelectedRobot}
-              title="Edit robot name"
-              type="button"
-            >
-              <IconEdit />
-            </button>
-          ) : null}
         </div>
       </div>
 
@@ -374,6 +322,26 @@ export function AppTopbar({
               )}
             </button>
             <div aria-label="Profile menu" className="profile-menu-popover" role="menu">
+              <label className="profile-menu-context-picker">
+                <span className="profile-menu-context-label">Season</span>
+                <select
+                  className="profile-menu-context-select"
+                  data-tutorial-target="season-select"
+                  onChange={handleSeasonChange}
+                  value={selectedSeasonId ?? ""}
+                >
+                  {seasons.length === 0 ? (
+                    <option value="">No seasons</option>
+                  ) : (
+                    seasons.map((season) => (
+                      <option key={season.id} value={season.id}>
+                        {season.name}
+                      </option>
+                    ))
+                  )}
+                  <option value={CREATE_SEASON_OPTION_VALUE}>Create new season</option>
+                </select>
+              </label>
               <button
                 className="profile-menu-item profile-menu-item-theme-toggle"
                 onClick={toggleDarkMode}

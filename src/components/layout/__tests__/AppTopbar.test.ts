@@ -17,15 +17,6 @@ import { AppTopbar } from "@/components/layout/AppTopbar";
 
 function renderTopbar(
   isNonRobotProject: boolean,
-  selectedProject: {
-    id: string;
-    name: string;
-    projectType: "robot" | "operations";
-  } = {
-    id: "project-1",
-    name: "Operations",
-    projectType: "operations",
-  },
   myView: {
     isActive: boolean;
     memberName: string | null;
@@ -57,21 +48,19 @@ function renderTopbar(
       isSidebarCollapsed: false,
       loadWorkspace: jest.fn(),
       manufacturingView: "cnc",
-      onCreateRobot: jest.fn(),
-      onEditSelectedRobot: jest.fn(),
       onToggleMyView: jest.fn(),
-      onSelectProject: jest.fn(),
-      projects: [
+      onCreateSeason: jest.fn(),
+      onSelectSeason: jest.fn(),
+      seasons: [
         {
-          id: selectedProject.id,
-          seasonId: "season-1",
-          name: selectedProject.name,
-          projectType: selectedProject.projectType,
-          description: "",
-          status: "active",
+          id: "season-1",
+          name: "2026 Season",
+          type: "season",
+          startDate: "2026-01-01",
+          endDate: "2026-12-31",
         },
       ],
-      selectedProjectId: selectedProject.id,
+      selectedSeasonId: "season-1",
       sessionUser,
       isMyViewActive: myView.isActive,
       myViewMemberName: myView.memberName,
@@ -97,30 +86,16 @@ describe("AppTopbar", () => {
     expect(markup).not.toContain("Non-Technical");
   });
 
-  it("offers add robot from the project dropdown", () => {
-    const markup = renderTopbar(false);
+  it("renders season controls in the signed-in profile menu", () => {
+    const markup = renderTopbar(false, undefined, true);
 
-    expect(markup).toContain("Add robot");
-  });
-
-  it("shows an edit robot name button when a robot project is selected", () => {
-    const markup = renderTopbar(false, {
-      id: "project-robot",
-      name: "Robot",
-      projectType: "robot",
-    });
-
-    expect(markup).toContain("Edit robot name");
+    expect(markup).toContain('data-tutorial-target="season-select"');
+    expect(markup).toContain("Create new season");
   });
 
   it("renders My View as an active topbar filter toggle", () => {
     const markup = renderTopbar(
       false,
-      {
-        id: "project-robot",
-        name: "Robot",
-        projectType: "robot",
-      },
       {
         isActive: true,
         memberName: "Ava Chen",
@@ -140,7 +115,7 @@ describe("AppTopbar", () => {
   });
 
   it("moves dark mode toggle under profile menu for signed-in users", () => {
-    const markup = renderTopbar(false, undefined, undefined, true);
+    const markup = renderTopbar(false, undefined, true);
 
     expect(markup).toContain("profile-menu-item-theme-toggle");
     expect(markup).toContain("Dark mode");

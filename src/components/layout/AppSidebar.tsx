@@ -1,17 +1,19 @@
 import type { NavigationItem, ViewTab } from "@/lib/workspaceNavigation";
-import type { SeasonRecord } from "@/types";
+import type { ProjectRecord } from "@/types";
+import { IconEdit } from "@/components/shared";
 
-const CREATE_SEASON_OPTION_VALUE = "__create_new_season__";
+const ADD_ROBOT_PROJECT_VALUE = "__add_robot_project__";
 
 interface AppSidebarProps {
   activeTab: ViewTab;
   items: NavigationItem[];
   onSelectTab: (tab: ViewTab) => void;
   isCollapsed: boolean;
-  seasons: SeasonRecord[];
-  selectedSeasonId: string | null;
-  onSelectSeason: (seasonId: string | null) => void;
-  onCreateSeason: () => void;
+  projects: ProjectRecord[];
+  selectedProjectId: string | null;
+  onSelectProject: (projectId: string | null) => void;
+  onCreateRobot: () => void;
+  onEditSelectedRobot: () => void;
 }
 
 export function AppSidebar({
@@ -19,11 +21,25 @@ export function AppSidebar({
   items,
   onSelectTab,
   isCollapsed,
-  seasons,
-  selectedSeasonId,
-  onSelectSeason,
-  onCreateSeason,
+  projects,
+  selectedProjectId,
+  onSelectProject,
+  onCreateRobot,
+  onEditSelectedRobot,
 }: AppSidebarProps) {
+  const selectedProject =
+    projects.find((project) => project.id === selectedProjectId) ?? null;
+  const canEditSelectedRobot = selectedProject?.projectType === "robot";
+
+  const handleProjectChange = (value: string) => {
+    if (value === ADD_ROBOT_PROJECT_VALUE) {
+      onCreateRobot();
+      return;
+    }
+
+    onSelectProject(value || null);
+  };
+
   return (
     <nav
       aria-label="Workspace views"
@@ -59,33 +75,44 @@ export function AppSidebar({
 
       {!isCollapsed ? (
         <label className="sidebar-context-picker">
-          <span className="sidebar-context-label">Season</span>
-          <select
-            className="sidebar-context-select"
-            data-tutorial-target="season-select"
-            onChange={(event) => {
-              const nextValue = event.target.value;
-              if (nextValue === CREATE_SEASON_OPTION_VALUE) {
-                event.target.value = selectedSeasonId ?? "";
-                onCreateSeason();
-                return;
-              }
-
-              onSelectSeason(nextValue || null);
-            }}
-            value={selectedSeasonId ?? ""}
-          >
-            {seasons.length === 0 ? (
-              <option value="">No seasons</option>
-            ) : (
-              seasons.map((season) => (
-                <option key={season.id} value={season.id}>
-                  {season.name}
+          <span className="sidebar-context-label">Project</span>
+          <div className="sidebar-context-picker-row" data-tutorial-target="project-select-outreach">
+            <select
+              className="sidebar-context-select"
+              data-tutorial-target="project-select"
+              onChange={(event) => handleProjectChange(event.target.value)}
+              value={selectedProjectId ?? ""}
+            >
+              {projects.length === 0 ? (
+                <option value="" disabled>
+                  No projects
                 </option>
-              ))
+              ) : (
+                <>
+                  <option value="">All projects</option>
+                  {projects.map((project) => (
+                    <option key={project.id} value={project.id}>
+                      {project.name}
+                    </option>
+                  ))}
+                </>
+              )}
+              <option value={ADD_ROBOT_PROJECT_VALUE}>Add robot</option>
+            </select>
+            {canEditSelectedRobot ? (
+              <button
+                aria-label="Edit robot name"
+                className="sidebar-context-action"
+                onClick={onEditSelectedRobot}
+                title="Edit robot name"
+                type="button"
+              >
+                <IconEdit />
+              </button>
+            ) : (
+              null
             )}
-            <option value={CREATE_SEASON_OPTION_VALUE}>Create new season</option>
-          </select>
+          </div>
         </label>
       ) : null}
     </nav>
