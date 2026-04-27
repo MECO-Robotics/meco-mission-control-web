@@ -210,6 +210,36 @@ export function TaskQueueView({
       name: formatIterationVersion(iteration),
     }));
   }, [bootstrap.subsystems]);
+  const selectedSubsystemId = subsystemFilter.length === 1 ? subsystemFilter[0] : null;
+  const showSubsystemIterationFilter = useMemo(() => {
+    if (!selectedSubsystemId) {
+      return false;
+    }
+
+    const hasMechanicalTask = bootstrap.tasks.some((task) => {
+      const disciplineCode = task.disciplineId
+        ? disciplinesById[task.disciplineId]?.code
+        : null;
+
+      return (
+        disciplineCode === "mechanical" &&
+        readTaskSubsystemIds(task).includes(selectedSubsystemId)
+      );
+    });
+
+    if (hasMechanicalTask) {
+      return true;
+    }
+
+    return bootstrap.mechanisms.some(
+      (mechanism) => mechanism.subsystemId === selectedSubsystemId,
+    );
+  }, [
+    bootstrap.mechanisms,
+    bootstrap.tasks,
+    disciplinesById,
+    selectedSubsystemId,
+  ]);
 
   useEffect(() => {
     if (!isAllProjectsView && projectFilter.length > 0) {
@@ -223,6 +253,12 @@ export function TaskQueueView({
       setProjectFilter((current) => current.filter((projectId) => projectIds.has(projectId)));
     }
   }, [bootstrap.projects, projectFilter]);
+
+  useEffect(() => {
+    if (!showSubsystemIterationFilter && subsystemIterationFilter.length > 0) {
+      setSubsystemIterationFilter([]);
+    }
+  }, [showSubsystemIterationFilter, subsystemIterationFilter]);
 
   const showProjectCol = isAllProjectsView;
   const showSubsystemCol = true;
@@ -267,7 +303,7 @@ export function TaskQueueView({
         ),
       );
     }
-    if (subsystemIterationFilter.length > 0) {
+    if (showSubsystemIterationFilter && subsystemIterationFilter.length > 0) {
       result = result.filter((task) =>
         readTaskSubsystemIds(task).some((subsystemId) => {
           const subsystemIteration = subsystemsById[subsystemId]?.iteration;
@@ -358,6 +394,7 @@ export function TaskQueueView({
     statusFilter,
     subsystemFilter,
     subsystemIterationFilter,
+    showSubsystemIterationFilter,
     subsystemsById,
   ]);
   const taskPagination = useWorkspacePagination(processedTasks);
@@ -450,15 +487,17 @@ export function TaskQueueView({
               value={subsystemFilter}
             />
           </div>
-          <FilterDropdown
-            allLabel="All iterations"
-            ariaLabel="Filter tasks by subsystem iteration"
-            className="mobile-filter-control"
-            icon={<IconManufacturing />}
-            onChange={setSubsystemIterationFilter}
-            options={subsystemIterationOptions}
-            value={subsystemIterationFilter}
-          />
+          {showSubsystemIterationFilter ? (
+            <FilterDropdown
+              allLabel="All iterations"
+              ariaLabel="Filter tasks by subsystem iteration"
+              className="mobile-filter-control"
+              icon={<IconManufacturing />}
+              onChange={setSubsystemIterationFilter}
+              options={subsystemIterationOptions}
+              value={subsystemIterationFilter}
+            />
+          ) : null}
 
           <FilterDropdown
             allLabel="All assignees"
@@ -537,13 +576,15 @@ export function TaskQueueView({
                 options={subsystemFilterOptions}
                 value={subsystemFilter}
               />
-              <ColumnFilterDropdown
-                allLabel="All iterations"
-                ariaLabel="Filter tasks by subsystem iteration"
-                onChange={setSubsystemIterationFilter}
-                options={subsystemIterationOptions}
-                value={subsystemIterationFilter}
-              />
+              {showSubsystemIterationFilter ? (
+                <ColumnFilterDropdown
+                  allLabel="All iterations"
+                  ariaLabel="Filter tasks by subsystem iteration"
+                  onChange={setSubsystemIterationFilter}
+                  options={subsystemIterationOptions}
+                  value={subsystemIterationFilter}
+                />
+              ) : null}
             </span>
           ) : null}
           {showOwnerCol ? (
