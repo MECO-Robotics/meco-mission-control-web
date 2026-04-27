@@ -6,6 +6,7 @@ import type { BootstrapPayload, TaskRecord } from "@/types";
 import { IconSubsystems, IconWorkLogs } from "@/components/shared";
 import {
   ColumnFilterDropdown,
+  CompactFilterMenu,
   EditableHoverIndicator,
   type FilterSelection,
   FilterDropdown,
@@ -443,14 +444,27 @@ export function WorkLogsView({
             value={search}
           />
 
-          <FilterDropdown
-            allLabel="All subsystems"
-            ariaLabel="Filter work logs by subsystem"
-            className="mobile-filter-control"
-            icon={<IconSubsystems />}
-            onChange={setSubsystemFilter}
-            options={bootstrap.subsystems}
-            value={subsystemFilter}
+          <CompactFilterMenu
+            activeCount={subsystemFilter.length}
+            ariaLabel="Work log filters"
+            buttonLabel="Filters"
+            className="materials-filter-menu"
+            items={[
+              {
+                label: "Subsystem",
+                content: (
+                  <FilterDropdown
+                    allLabel="All subsystems"
+                    ariaLabel="Filter work logs by subsystem"
+                    className="task-queue-filter-menu-submenu"
+                    icon={<IconSubsystems />}
+                    onChange={setSubsystemFilter}
+                    options={bootstrap.subsystems}
+                    value={subsystemFilter}
+                  />
+                ),
+              },
+            ]}
           />
 
           <label

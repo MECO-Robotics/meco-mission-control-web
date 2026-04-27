@@ -10,6 +10,7 @@ import type {
 } from "@/types";
 import {
   ColumnFilterDropdown,
+  CompactFilterMenu,
   EditableHoverIndicator,
   type FilterSelection,
   FilterDropdown,
@@ -405,26 +406,42 @@ export function MilestonesView({
             />
           </div>
 
-          {isAllProjectsView ? (
-            <FilterDropdown
-              allLabel="All projects"
-              ariaLabel="Filter milestones by project"
-              className="mobile-filter-control"
-              icon={<IconParts />}
-              onChange={setProjectFilter}
-              options={bootstrap.projects}
-              value={projectFilter}
-            />
-          ) : null}
-
-          <FilterDropdown
-            allLabel="All types"
-            ariaLabel="Filter milestones by type"
-            className="mobile-filter-control"
-            icon={<IconTasks />}
-            onChange={setTypeFilter}
-            options={EVENT_TYPE_OPTIONS}
-            value={typeFilter}
+          <CompactFilterMenu
+            activeCount={Number(isAllProjectsView && projectFilter.length > 0) + Number(typeFilter.length > 0)}
+            ariaLabel="Milestone filters"
+            buttonLabel="Filters"
+            className="materials-filter-menu"
+            items={[
+              {
+                hidden: !isAllProjectsView,
+                label: "Project",
+                content: (
+                  <FilterDropdown
+                    allLabel="All projects"
+                    ariaLabel="Filter milestones by project"
+                    className="task-queue-filter-menu-submenu"
+                    icon={<IconParts />}
+                    onChange={setProjectFilter}
+                    options={bootstrap.projects}
+                    value={projectFilter}
+                  />
+                ),
+              },
+              {
+                label: "Type",
+                content: (
+                  <FilterDropdown
+                    allLabel="All types"
+                    ariaLabel="Filter milestones by type"
+                    className="task-queue-filter-menu-submenu"
+                    icon={<IconTasks />}
+                    onChange={setTypeFilter}
+                    options={EVENT_TYPE_OPTIONS}
+                    value={typeFilter}
+                  />
+                ),
+              },
+            ]}
           />
 
           <button

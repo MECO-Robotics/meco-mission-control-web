@@ -5,6 +5,7 @@ import type { BootstrapPayload, PurchaseItemRecord } from "@/types";
 import { IconManufacturing, IconPerson, IconTasks } from "@/components/shared";
 import {
   ColumnFilterDropdown,
+  CompactFilterMenu,
   EditableHoverIndicator,
   type FilterSelection,
   FilterDropdown,
@@ -125,56 +126,83 @@ export function PurchasesView({
             />
           </div>
 
-          <FilterDropdown
-            allLabel="All subsystems"
-            ariaLabel="Filter purchases by subsystem"
-            className="mobile-filter-control"
-            icon={<IconManufacturing />}
-            onChange={setSubsystem}
-            options={bootstrap.subsystems}
-            value={subsystem}
-          />
-
-          <FilterDropdown
-            allLabel="All requesters"
-            ariaLabel="Filter purchases by requester"
-            className="mobile-filter-control"
-            icon={<IconPerson />}
-            onChange={setRequester}
-            options={bootstrap.members}
-            value={requester}
-          />
-
-          <div data-tutorial-target="purchases-sort-control">
-            <FilterDropdown
-              allLabel="All statuses"
-              ariaLabel="Filter purchases by status"
-              className="mobile-filter-control"
-              icon={<IconTasks />}
-              onChange={setStatus}
-              options={PURCHASE_STATUS_OPTIONS}
-              value={status}
-            />
-          </div>
-
-          <FilterDropdown
-            allLabel="All vendors"
-            ariaLabel="Filter purchases by vendor"
-            className="mobile-filter-control"
-            icon={<IconTasks />}
-            onChange={setVendor}
-            options={uniqueVendors}
-            value={vendor}
-          />
-
-          <FilterDropdown
-            allLabel="All approvals"
-            ariaLabel="Filter purchases by approval status"
-            className="mobile-filter-control"
-            icon={<IconTasks />}
-            onChange={setApproval}
-            options={PURCHASE_APPROVAL_OPTIONS}
-            value={approval}
+          <CompactFilterMenu
+            activeCount={[subsystem, requester, status, vendor, approval].filter((value) => value.length > 0).length}
+            ariaLabel="Purchase filters"
+            buttonLabel="Filters"
+            className="materials-filter-menu"
+            items={[
+              {
+                label: "Subsystem",
+                content: (
+                  <FilterDropdown
+                    allLabel="All subsystems"
+                    ariaLabel="Filter purchases by subsystem"
+                    className="task-queue-filter-menu-submenu"
+                    icon={<IconManufacturing />}
+                    onChange={setSubsystem}
+                    options={bootstrap.subsystems}
+                    value={subsystem}
+                  />
+                ),
+              },
+              {
+                label: "Requester",
+                content: (
+                  <FilterDropdown
+                    allLabel="All requesters"
+                    ariaLabel="Filter purchases by requester"
+                    className="task-queue-filter-menu-submenu"
+                    icon={<IconPerson />}
+                    onChange={setRequester}
+                    options={bootstrap.members}
+                    value={requester}
+                  />
+                ),
+              },
+              {
+                label: "Status",
+                content: (
+                  <FilterDropdown
+                    allLabel="All statuses"
+                    ariaLabel="Filter purchases by status"
+                    className="task-queue-filter-menu-submenu"
+                    icon={<IconTasks />}
+                    onChange={setStatus}
+                    options={PURCHASE_STATUS_OPTIONS}
+                    value={status}
+                  />
+                ),
+              },
+              {
+                label: "Vendor",
+                content: (
+                  <FilterDropdown
+                    allLabel="All vendors"
+                    ariaLabel="Filter purchases by vendor"
+                    className="task-queue-filter-menu-submenu"
+                    icon={<IconTasks />}
+                    onChange={setVendor}
+                    options={uniqueVendors}
+                    value={vendor}
+                  />
+                ),
+              },
+              {
+                label: "Approval",
+                content: (
+                  <FilterDropdown
+                    allLabel="All approvals"
+                    ariaLabel="Filter purchases by approval status"
+                    className="task-queue-filter-menu-submenu"
+                    icon={<IconTasks />}
+                    onChange={setApproval}
+                    options={PURCHASE_APPROVAL_OPTIONS}
+                    value={approval}
+                  />
+                ),
+              },
+            ]}
           />
 
           <button

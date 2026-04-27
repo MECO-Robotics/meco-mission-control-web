@@ -9,6 +9,7 @@ import type {
 } from "@/types";
 import {
   ColumnFilterDropdown,
+  CompactFilterMenu,
   EditableHoverIndicator,
   getStatusPillClassName,
   type FilterSelection,
@@ -159,24 +160,41 @@ export function ArtifactInventoryView({
             value={search}
           />
 
-          <FilterDropdown
-            allLabel="All workflows"
-            ariaLabel="Filter artifacts by workflow"
-            className="mobile-filter-control"
-            icon={<IconManufacturing />}
-            onChange={setWorkstreamFilter}
-            options={workstreamOptions}
-            value={workstreamFilter}
-          />
-
-          <FilterDropdown
-            allLabel="All statuses"
-            ariaLabel="Filter artifacts by status"
-            className="mobile-filter-control"
-            icon={<IconTasks />}
-            onChange={setStatusFilter}
-            options={ARTIFACT_STATUS_OPTIONS}
-            value={statusFilter}
+          <CompactFilterMenu
+            activeCount={[workstreamFilter, statusFilter].filter((value) => value.length > 0).length}
+            ariaLabel="Artifact filters"
+            buttonLabel="Filters"
+            className="materials-filter-menu"
+            items={[
+              {
+                label: "Workflow",
+                content: (
+                  <FilterDropdown
+                    allLabel="All workflows"
+                    ariaLabel="Filter artifacts by workflow"
+                    className="task-queue-filter-menu-submenu"
+                    icon={<IconManufacturing />}
+                    onChange={setWorkstreamFilter}
+                    options={workstreamOptions}
+                    value={workstreamFilter}
+                  />
+                ),
+              },
+              {
+                label: "Status",
+                content: (
+                  <FilterDropdown
+                    allLabel="All statuses"
+                    ariaLabel="Filter artifacts by status"
+                    className="task-queue-filter-menu-submenu"
+                    icon={<IconTasks />}
+                    onChange={setStatusFilter}
+                    options={ARTIFACT_STATUS_OPTIONS}
+                    value={statusFilter}
+                  />
+                ),
+              },
+            ]}
           />
           <label
             style={{

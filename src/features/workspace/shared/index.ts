@@ -33,6 +33,7 @@ export {
 export { getStatusPillClassName } from "./workspaceUtils";
 export {
   ColumnFilterDropdown,
+  CompactFilterMenu,
   EditableHoverIndicator,
   type FilterSelection,
   FilterDropdown,

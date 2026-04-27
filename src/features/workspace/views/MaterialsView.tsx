@@ -4,9 +4,9 @@ import type { BootstrapPayload, MaterialRecord } from "@/types";
 import { IconManufacturing, IconTasks } from "@/components/shared";
 import {
   ColumnFilterDropdown,
+  CompactFilterMenu,
   EditableHoverIndicator,
   type FilterSelection,
-  FilterDropdown,
   PaginationControls,
   SearchToolbarInput,
   TableCell,
@@ -76,26 +76,41 @@ export function MaterialsView({
             />
           </div>
 
-          <div data-tutorial-target="materials-filter-control">
-            <FilterDropdown
-              allLabel="All categories"
-              ariaLabel="Filter materials by category"
-              className="mobile-filter-control"
-              icon={<IconManufacturing />}
-              onChange={setCategory}
-              options={MATERIAL_CATEGORY_OPTIONS}
-              value={category}
-            />
-          </div>
-
-          <FilterDropdown
-            allLabel="All stock"
-            ariaLabel="Filter materials by stock level"
-            className="mobile-filter-control"
-            icon={<IconTasks />}
-            onChange={setStock}
-            options={MATERIAL_STOCK_OPTIONS}
-            value={stock}
+          <CompactFilterMenu
+            activeCount={[category, stock].filter((value) => value.length > 0).length}
+            ariaLabel="Material filters"
+            buttonLabel="Filters"
+            className="materials-filter-menu"
+            items={[
+              {
+                label: "Category",
+                content: (
+                  <FilterDropdown
+                    allLabel="All categories"
+                    ariaLabel="Filter materials by category"
+                    className="task-queue-filter-menu-submenu"
+                    icon={<IconManufacturing />}
+                    onChange={setCategory}
+                    options={MATERIAL_CATEGORY_OPTIONS}
+                    value={category}
+                  />
+                ),
+              },
+              {
+                label: "Stock",
+                content: (
+                  <FilterDropdown
+                    allLabel="All stock"
+                    ariaLabel="Filter materials by stock level"
+                    className="task-queue-filter-menu-submenu"
+                    icon={<IconTasks />}
+                    onChange={setStock}
+                    options={MATERIAL_STOCK_OPTIONS}
+                    value={stock}
+                  />
+                ),
+              },
+            ]}
           />
 
           <button

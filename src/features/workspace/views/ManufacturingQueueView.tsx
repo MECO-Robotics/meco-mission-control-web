@@ -11,6 +11,7 @@ import type { BootstrapPayload, ManufacturingItemRecord } from "@/types";
 import { IconManufacturing, IconPerson, IconTasks } from "@/components/shared";
 import {
   ColumnFilterDropdown,
+  CompactFilterMenu,
   EditableHoverIndicator,
   type FilterSelection,
   FilterDropdown,
@@ -174,44 +175,69 @@ export function ManufacturingQueueView({
             />
           </div>
 
-          <FilterDropdown
-            allLabel="All subsystems"
-            ariaLabel={`Filter ${title} by subsystem`}
-            className="mobile-filter-control"
-            icon={<IconManufacturing />}
-            onChange={setSubsystem}
-            options={bootstrap.subsystems}
-            value={subsystem}
-          />
-
-          <FilterDropdown
-            allLabel="All requesters"
-            ariaLabel={`Filter ${title} by requester`}
-            className="mobile-filter-control"
-            icon={<IconPerson />}
-            onChange={setRequester}
-            options={bootstrap.members}
-            value={requester}
-          />
-
-          <FilterDropdown
-            allLabel="All materials"
-            ariaLabel={`Filter ${title} by material`}
-            className="mobile-filter-control"
-            icon={<IconManufacturing />}
-            onChange={setMaterial}
-            options={uniqueMaterials}
-            value={material}
-          />
-
-          <FilterDropdown
-            allLabel="All statuses"
-            ariaLabel={`Filter ${title} by status`}
-            className="mobile-filter-control"
-            icon={<IconTasks />}
-            onChange={setStatus}
-            options={MANUFACTURING_STATUS_OPTIONS}
-            value={status}
+          <CompactFilterMenu
+            activeCount={[subsystem, requester, material, status].filter((value) => value.length > 0).length}
+            ariaLabel={`${title} filters`}
+            buttonLabel="Filters"
+            className="materials-filter-menu"
+            items={[
+              {
+                label: "Subsystem",
+                content: (
+                  <FilterDropdown
+                    allLabel="All subsystems"
+                    ariaLabel={`Filter ${title} by subsystem`}
+                    className="task-queue-filter-menu-submenu"
+                    icon={<IconManufacturing />}
+                    onChange={setSubsystem}
+                    options={bootstrap.subsystems}
+                    value={subsystem}
+                  />
+                ),
+              },
+              {
+                label: "Requester",
+                content: (
+                  <FilterDropdown
+                    allLabel="All requesters"
+                    ariaLabel={`Filter ${title} by requester`}
+                    className="task-queue-filter-menu-submenu"
+                    icon={<IconPerson />}
+                    onChange={setRequester}
+                    options={bootstrap.members}
+                    value={requester}
+                  />
+                ),
+              },
+              {
+                label: "Material",
+                content: (
+                  <FilterDropdown
+                    allLabel="All materials"
+                    ariaLabel={`Filter ${title} by material`}
+                    className="task-queue-filter-menu-submenu"
+                    icon={<IconManufacturing />}
+                    onChange={setMaterial}
+                    options={uniqueMaterials}
+                    value={material}
+                  />
+                ),
+              },
+              {
+                label: "Status",
+                content: (
+                  <FilterDropdown
+                    allLabel="All statuses"
+                    ariaLabel={`Filter ${title} by status`}
+                    className="task-queue-filter-menu-submenu"
+                    icon={<IconTasks />}
+                    onChange={setStatus}
+                    options={MANUFACTURING_STATUS_OPTIONS}
+                    value={status}
+                  />
+                ),
+              },
+            ]}
           />
 
           <button

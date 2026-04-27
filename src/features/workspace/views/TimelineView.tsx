@@ -15,6 +15,7 @@ import type {
 } from "@/types";
 import {
   type FilterSelection,
+  CompactFilterMenu,
   FilterDropdown,
   filterSelectionMatchesTaskPeople,
   formatFilterSelectionLabel,
@@ -808,14 +809,27 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         </div>
         <div className="panel-actions filter-toolbar timeline-toolbar">
           <div className="timeline-toolbar-filters">
-            <FilterDropdown
-              allLabel="All roster"
-              ariaLabel="Filter person"
-              className="timeline-roster-filter"
-              icon={<IconPerson />}
-              onChange={setActivePersonFilter}
-              options={bootstrap.members}
-              value={activePersonFilter}
+            <CompactFilterMenu
+              activeCount={activePersonFilter.length}
+              ariaLabel="Timeline filters"
+              buttonLabel="Filters"
+              className="materials-filter-menu"
+              items={[
+                {
+                  label: "Roster",
+                  content: (
+                    <FilterDropdown
+                      allLabel="All roster"
+                      ariaLabel="Filter person"
+                      className="task-queue-filter-menu-submenu"
+                      icon={<IconPerson />}
+                      onChange={setActivePersonFilter}
+                      options={bootstrap.members}
+                      value={activePersonFilter}
+                    />
+                  ),
+                },
+              ]}
             />
             <label className="toolbar-filter toolbar-filter-compact timeline-interval-filter">
               <span className="toolbar-filter-icon">
