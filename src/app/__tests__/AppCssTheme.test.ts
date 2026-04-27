@@ -32,4 +32,14 @@ describe("App.css theme-safe badges", () => {
     expect(block).toContain("background: var(--status-info-bg);");
     expect(block).toContain("color: var(--status-info-text);");
   });
+
+  it("clips the Google auth chip container so the saved-account button keeps pill corners", () => {
+    const chipRowBlock = getCssBlock(".auth-chip-row");
+    const googleSlotBlock = getCssBlock(".google-button-slot");
+
+    expect(chipRowBlock).toContain("border-radius: 999px;");
+    expect(chipRowBlock).toContain("overflow: hidden;");
+    expect(googleSlotBlock).toContain("border-radius: 999px;");
+    expect(googleSlotBlock).toContain("overflow: hidden;");
+  });
 });

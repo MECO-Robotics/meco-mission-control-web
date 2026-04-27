@@ -4592,11 +4592,20 @@
   gap: 0.55rem;
 }
 
-.auth-chip-row,
+.auth-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
 .google-button-slot {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  border-radius: 999px;
+  overflow: hidden;
 }
 
 .auth-signin-simple {
