@@ -28,6 +28,13 @@ import {
   toggleTaskTargetSelection,
   type TaskTargetKind,
 } from "@/lib/appUtils";
+import {
+  formatTaskPlanningState,
+  getTaskBlocksDependencies,
+  getTaskOpenBlockersForTask,
+  getTaskWaitingOnDependencies,
+  getTaskPlanningState,
+} from "@/features/workspace/shared/taskPlanning";
 
 interface TaskEditorModalProps {
   activeTask: TaskRecord | null;
@@ -45,12 +52,10 @@ interface TaskEditorModalProps {
   partInstancesById: Record<string, BootstrapPayload["partInstances"][number]>;
   students: BootstrapPayload["members"];
   taskDraft: TaskPayload;
-  taskDraftBlockers: string;
   taskModalMode: "create" | "edit";
   showCreateTypeToggle?: boolean;
   onSwitchCreateTypeToMilestone?: () => void;
   setTaskDraft: Dispatch<SetStateAction<TaskPayload>>;
-  setTaskDraftBlockers: (value: string) => void;
 }
 
 export function TaskEditorModal({
@@ -67,12 +72,10 @@ export function TaskEditorModal({
   partInstancesById,
   students,
   taskDraft,
-  taskDraftBlockers,
   taskModalMode,
   showCreateTypeToggle,
   onSwitchCreateTypeToMilestone,
   setTaskDraft,
-  setTaskDraftBlockers,
 }: TaskEditorModalProps) {
   const projectsById = Object.fromEntries(
     bootstrap.projects.map((project) => [project.id, project]),
@@ -581,15 +584,6 @@ export function TaskEditorModal({
               />
             </label>
           ) : null}
-          <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Blockers</span>
-            <input
-              onChange={(event) => setTaskDraftBlockers(event.target.value)}
-              placeholder="Comma-separated blockers"
-              style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
-              value={taskDraftBlockers}
-            />
-          </label>
           <div className="checkbox-row modal-wide">
             <label className="checkbox-field">
               <input
@@ -653,6 +647,7 @@ interface TaskDetailsModalProps {
   bootstrap: BootstrapPayload;
   closeTaskDetailsModal: () => void;
   onEditTask: (task: TaskRecord) => void;
+  onResolveTaskBlocker: (blockerId: string) => Promise<void>;
 }
 
 function formatTaskDetailDate(dateValue: string): string {
@@ -673,6 +668,7 @@ export function TaskDetailsModal({
   bootstrap,
   closeTaskDetailsModal,
   onEditTask,
+  onResolveTaskBlocker,
 }: TaskDetailsModalProps) {
   const membersById = Object.fromEntries(
     bootstrap.members.map((member) => [member.id, member]),
@@ -758,6 +754,25 @@ export function TaskDetailsModal({
     activeTask.targetEventId && eventsById[activeTask.targetEventId]
       ? eventsById[activeTask.targetEventId]
       : null;
+  const planningState = getTaskPlanningState(activeTask, bootstrap);
+  const openBlockers = getTaskOpenBlockersForTask(activeTask.id, bootstrap);
+  const waitingOnDependencies = getTaskWaitingOnDependencies(activeTask.id, bootstrap);
+  const blockingDependencies = getTaskBlocksDependencies(activeTask.id, bootstrap);
+  const blockerTaskNamesById = new Map(
+    bootstrap.tasks.map((task) => [task.id, task.title] as const),
+  );
+  const openBlockerRows = openBlockers.map((blocker) => {
+    const blockerTaskName =
+      blocker.blockerType === "task" && blocker.blockerId
+        ? blockerTaskNamesById.get(blocker.blockerId) ?? "Unknown task"
+        : null;
+
+    return {
+      ...blocker,
+      blockerTaskName,
+    };
+  });
+  const dependencyTaskLabel = (taskId: string) => blockerTaskNamesById.get(taskId) ?? "Unknown task";
 
   return (
     <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
@@ -811,6 +826,12 @@ export function TaskDetailsModal({
             <span style={{ color: "var(--text-title)" }}>Status</span>
             <p style={{ margin: "0.25rem 0 0", color: "var(--text-copy)", textTransform: "capitalize" }}>
               {activeTask.status.replace("-", " ")}
+            </p>
+          </label>
+          <label className="field">
+            <span style={{ color: "var(--text-title)" }}>Planning state</span>
+            <p style={{ margin: "0.25rem 0 0", color: "var(--text-copy)", textTransform: "capitalize" }}>
+              {formatTaskPlanningState(planningState)}
             </p>
           </label>
           <label className="field">
@@ -874,12 +895,92 @@ export function TaskDetailsModal({
             </p>
           </label>
 
-          <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Blockers</span>
-            <p style={{ margin: "0.25rem 0 0", color: "var(--text-copy)" }}>
-              {activeTask.blockers.length > 0 ? activeTask.blockers.join(", ") : "None"}
-            </p>
-          </label>
+          <div className="field modal-wide">
+            <span style={{ color: "var(--text-title)" }}>Blocked by</span>
+            {openBlockers.length > 0 ? (
+              <div className="workspace-detail-list" style={{ marginTop: "0.5rem" }}>
+                {openBlockerRows.map((blocker) => (
+                  <div
+                    className="workspace-detail-list-item"
+                    key={blocker.id}
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: "0.5rem",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "0.75rem 0",
+                      borderTop: "1px solid var(--border-base)",
+                    }}
+                  >
+                    <div style={{ minWidth: 0 }}>
+                      <strong style={{ color: "var(--text-title)" }}>{blocker.description}</strong>
+                      <div style={{ color: "var(--text-copy)", fontSize: "0.8rem" }}>
+                        {blocker.blockerType.replace("_", " ")}
+                        {blocker.blockerType === "task" && blocker.blockerTaskName
+                          ? ` · ${blocker.blockerTaskName}`
+                          : ""}
+                        {blocker.severity ? ` · ${blocker.severity}` : ""}
+                      </div>
+                    </div>
+                    <button
+                      className="secondary-action"
+                      onClick={() => void onResolveTaskBlocker(blocker.id)}
+                      type="button"
+                    >
+                      Resolve
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style={{ margin: "0.25rem 0 0", color: "var(--text-copy)" }}>None</p>
+            )}
+          </div>
+
+          <div className="field modal-wide">
+            <span style={{ color: "var(--text-title)" }}>Waiting on</span>
+            {waitingOnDependencies.length > 0 ? (
+              <div style={{ marginTop: "0.5rem" }}>
+                {waitingOnDependencies.map((dependency) => (
+                  <p
+                    key={dependency.id}
+                    style={{ margin: "0.25rem 0", color: "var(--text-copy)" }}
+                  >
+                    {dependencyTaskLabel(dependency.upstreamTaskId)}
+                    {" "}
+                    <span style={{ textTransform: "lowercase" }}>
+                      ({dependency.dependencyType.replace("_", " ")})
+                    </span>
+                  </p>
+                ))}
+              </div>
+            ) : (
+              <p style={{ margin: "0.25rem 0 0", color: "var(--text-copy)" }}>None</p>
+            )}
+          </div>
+
+          <div className="field modal-wide">
+            <span style={{ color: "var(--text-title)" }}>Blocks</span>
+            {blockingDependencies.length > 0 ? (
+              <div style={{ marginTop: "0.5rem" }}>
+                {blockingDependencies.map((dependency) => (
+                  <p
+                    key={dependency.id}
+                    style={{ margin: "0.25rem 0", color: "var(--text-copy)" }}
+                  >
+                    {dependencyTaskLabel(dependency.downstreamTaskId)}
+                    {" "}
+                    <span style={{ textTransform: "lowercase" }}>
+                      ({dependency.dependencyType.replace("_", " ")})
+                    </span>
+                  </p>
+                ))}
+              </div>
+            ) : (
+              <p style={{ margin: "0.25rem 0 0", color: "var(--text-copy)" }}>None</p>
+            )}
+          </div>
 
           <div className="checkbox-row modal-wide">
             <label className="checkbox-field">
@@ -1211,7 +1312,7 @@ export function QaReportEditorModal({
                 color: "var(--text-title)",
                 border: "1px solid var(--border-base)",
               }}
-              value={qaReportDraft.taskId}
+              value={qaReportDraft.taskId ?? ""}
             >
               <option disabled value="">
                 Choose a task
@@ -1434,7 +1535,7 @@ export function EventReportEditorModal({
                 color: "var(--text-title)",
                 border: "1px solid var(--border-base)",
               }}
-              value={eventReportDraft.eventId}
+              value={eventReportDraft.eventId ?? ""}
             >
               <option disabled value="">
                 Choose an event
@@ -1465,7 +1566,7 @@ export function EventReportEditorModal({
                 color: "var(--text-title)",
                 border: "1px solid var(--border-base)",
               }}
-              value={eventReportDraft.title}
+              value={eventReportDraft.title ?? ""}
             />
           </label>
 

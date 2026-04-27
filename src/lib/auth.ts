@@ -22,8 +22,11 @@ import type {
   ProjectRecord,
   PurchaseItemPayload,
   PurchaseItemRecord,
+  ReportFindingPayload,
+  ReportFindingRecord,
+  ReportPayload,
+  ReportRecord,
   QaReportPayload,
-  QaReportRecord,
   RiskPayload,
   RiskRecord,
   SeasonCreatePayload,
@@ -31,9 +34,12 @@ import type {
   SubsystemPayload,
   SubsystemRecord,
   TaskPayload,
+  TaskBlockerPayload,
+  TaskBlockerRecord,
+  TaskDependencyPayload,
+  TaskDependencyRecord,
   TaskRecord,
   TestResultPayload,
-  TestResultRecord,
   WorkLogPayload,
   WorkLogRecord,
   WorkstreamPayload,
@@ -279,6 +285,8 @@ type LegacyBootstrapPayload = Partial<Omit<BootstrapPayload, "artifacts" | "even
   tasks?: Array<Partial<TaskRecord> & { requirementId?: string | null }>;
   artifacts?: Array<Partial<ArtifactRecord>>;
   events?: Array<Partial<EventRecord>>;
+  taskDependencies?: Array<Partial<TaskDependencyRecord>>;
+  taskBlockers?: Array<Partial<TaskBlockerRecord>>;
 };
 
 function isIsoDate(value: unknown): value is string {
@@ -710,12 +718,44 @@ function normalizePlanningRecords(source: LegacyBootstrapPayload) {
       documentationLinked: task.documentationLinked ?? false,
     };
   });
+  const dependencyIdsByTaskId = new Map<string, string[]>();
+  (source.taskDependencies ?? []).forEach((dependency) => {
+    if (dependency.dependencyType === "soft") {
+      return;
+    }
+
+    const downstreamTaskId = dependency.downstreamTaskId;
+    if (!downstreamTaskId) {
+      return;
+    }
+
+    const current = dependencyIdsByTaskId.get(downstreamTaskId) ?? [];
+    current.push(dependency.upstreamTaskId ?? "");
+    dependencyIdsByTaskId.set(downstreamTaskId, current);
+  });
+  const blockerDescriptionsByTaskId = new Map<string, string[]>();
+  (source.taskBlockers ?? []).forEach((blocker) => {
+    if (blocker.status === "resolved" || !blocker.blockedTaskId) {
+      return;
+    }
+
+    const current = blockerDescriptionsByTaskId.get(blocker.blockedTaskId) ?? [];
+    current.push(blocker.description ?? "");
+    blockerDescriptionsByTaskId.set(blocker.blockedTaskId, current);
+  });
+  const normalizedTasks = tasks.map((task) => ({
+    ...task,
+    dependencyIds:
+      task.dependencyIds.length > 0 ? uniqueIds(task.dependencyIds) : dependencyIdsByTaskId.get(task.id) ?? [],
+    blockers:
+      task.blockers.length > 0 ? uniqueIds(task.blockers) : blockerDescriptionsByTaskId.get(task.id) ?? [],
+  }));
 
   return {
     seasons,
     projects,
     workstreams,
-    tasks,
+    tasks: normalizedTasks,
     projectIdAliases,
   };
 }
@@ -798,6 +838,161 @@ function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapPayload 
       relatedSubsystemIds,
     };
   });
+  const reports: ReportRecord[] = (Array.isArray(source.reports) && source.reports.length > 0
+    ? source.reports
+    : [
+        ...(source.qaReports ?? []).map<ReportRecord>((report) => ({
+          ...report,
+          reportType: "QA",
+          projectId:
+            resolveProjectAlias(report.projectId, projectIds, planning.projectIdAliases) ??
+            defaultProjectId,
+          taskId: report.taskId ?? null,
+          eventId: null,
+          workstreamId: report.workstreamId ?? null,
+          createdByMemberId: report.createdByMemberId ?? null,
+          result: report.result ?? "pass",
+          summary: report.summary ?? report.notes ?? "",
+          notes: report.notes ?? "",
+          createdAt: report.createdAt ?? report.reviewedAt ?? new Date().toISOString().slice(0, 10),
+        })),
+        ...(source.testResults ?? []).map<ReportRecord>((result) => ({
+          ...result,
+          reportType: "EventTest",
+          projectId:
+            resolveProjectAlias(result.projectId, projectIds, planning.projectIdAliases) ??
+            defaultProjectId,
+          taskId: result.taskId ?? null,
+          eventId: result.eventId ?? null,
+          workstreamId: result.workstreamId ?? null,
+          createdByMemberId: result.createdByMemberId ?? null,
+          result: result.result ?? result.status ?? "pass",
+          summary: result.summary ?? result.title ?? "",
+          notes: result.notes ?? result.findings?.join("\n") ?? "",
+          createdAt: result.createdAt ?? new Date().toISOString().slice(0, 10),
+          title: result.title ?? "",
+          status: result.status ?? "pass",
+          findings: result.findings ?? [],
+        })),
+      ]
+  ).map((report) => ({
+    ...report,
+    reportType:
+      report.reportType === "QA" ||
+      report.reportType === "EventTest" ||
+      report.reportType === "Practice" ||
+      report.reportType === "Competition" ||
+      report.reportType === "Review"
+        ? report.reportType
+        : "QA",
+    taskId: report.taskId ?? null,
+    eventId: report.eventId ?? null,
+    workstreamId: report.workstreamId ?? null,
+    createdByMemberId: report.createdByMemberId ?? null,
+    result: report.result ?? "pass",
+    summary: report.summary ?? "",
+    notes: report.notes ?? "",
+    createdAt: report.createdAt ?? new Date().toISOString().slice(0, 10),
+  }));
+
+  const reportsById = new Map(reports.map((report) => [report.id, report] as const));
+  const reportFindings: ReportFindingRecord[] = (
+    Array.isArray(source.reportFindings) && source.reportFindings.length > 0
+      ? source.reportFindings
+      : [
+          ...((source.qaFindings ?? []) as Array<any>).map<ReportFindingRecord>((finding) => ({
+            ...finding,
+            reportId: finding.qaReportId ?? "",
+            mechanismId: finding.mechanismId ?? null,
+            partInstanceId: finding.partInstanceId ?? null,
+            artifactInstanceId: finding.artifactId ?? null,
+            issueType: finding.title ?? "",
+            severity: finding.severity ?? "low",
+            notes: finding.detail ?? "",
+            spawnedTaskId: finding.taskId ?? null,
+            spawnedIterationId: null,
+            spawnedRiskId: null,
+          })),
+          ...((source.testFindings ?? []) as Array<any>).map<ReportFindingRecord>((finding) => ({
+            ...finding,
+            reportId: finding.testResultId ?? "",
+            mechanismId: finding.mechanismId ?? null,
+            partInstanceId: finding.partInstanceId ?? null,
+            artifactInstanceId: finding.artifactId ?? null,
+            issueType: finding.title ?? "",
+            severity: finding.severity ?? "low",
+            notes: finding.detail ?? "",
+            spawnedTaskId: finding.taskId ?? null,
+            spawnedIterationId: null,
+            spawnedRiskId: null,
+          })),
+        ]
+  ).map((finding) => ({
+    ...finding,
+    mechanismId: finding.mechanismId ?? null,
+    partInstanceId: finding.partInstanceId ?? null,
+    artifactInstanceId: finding.artifactInstanceId ?? null,
+    issueType: finding.issueType ?? finding.title ?? "",
+    severity: finding.severity ?? "low",
+    notes: finding.notes ?? finding.detail ?? "",
+    spawnedTaskId: finding.spawnedTaskId ?? null,
+    spawnedIterationId: finding.spawnedIterationId ?? null,
+    spawnedRiskId: finding.spawnedRiskId ?? null,
+  }));
+
+  const qaReports = reports.filter((report) => report.reportType === "QA");
+  const testResults = reports.filter((report) => report.reportType !== "QA");
+  const qaFindings = reportFindings
+    .filter((finding) => {
+      const report = reportsById.get(finding.reportId);
+      return report?.reportType === "QA";
+    })
+    .map((finding) => {
+      const report = reportsById.get(finding.reportId);
+      return {
+        id: finding.id,
+        qaReportId: finding.reportId || null,
+        taskId: finding.taskId ?? report?.taskId ?? null,
+        projectId: finding.projectId ?? report?.projectId ?? defaultProjectId,
+        workstreamId: finding.workstreamId ?? report?.workstreamId ?? null,
+        subsystemId: finding.subsystemId ?? null,
+        mechanismId: finding.mechanismId ?? null,
+        partInstanceId: finding.partInstanceId ?? null,
+        artifactId: finding.artifactInstanceId ?? null,
+        title: finding.title ?? finding.issueType,
+        detail: finding.detail ?? finding.notes,
+        severity: finding.severity,
+        status: finding.status ?? "open",
+        createdAt: finding.createdAt ?? new Date().toISOString(),
+        updatedAt: finding.updatedAt ?? finding.createdAt ?? new Date().toISOString(),
+      };
+    });
+  const testFindings = reportFindings
+    .filter((finding) => {
+      const report = reportsById.get(finding.reportId);
+      return report?.reportType !== "QA";
+    })
+    .map((finding) => {
+      const report = reportsById.get(finding.reportId);
+      return {
+        id: finding.id,
+        testResultId: finding.reportId || null,
+        eventId: finding.eventId ?? report?.eventId ?? null,
+        taskId: finding.taskId ?? report?.taskId ?? null,
+        projectId: finding.projectId ?? report?.projectId ?? defaultProjectId,
+        workstreamId: finding.workstreamId ?? report?.workstreamId ?? null,
+        subsystemId: finding.subsystemId ?? null,
+        mechanismId: finding.mechanismId ?? null,
+        partInstanceId: finding.partInstanceId ?? null,
+        artifactId: finding.artifactInstanceId ?? null,
+        title: finding.title ?? finding.issueType,
+        detail: finding.detail ?? finding.notes,
+        severity: finding.severity,
+        status: finding.status ?? "open",
+        createdAt: finding.createdAt ?? new Date().toISOString(),
+        updatedAt: finding.updatedAt ?? finding.createdAt ?? new Date().toISOString(),
+      };
+    });
 
   return {
     seasons: planning.seasons,
@@ -837,13 +1032,36 @@ function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapPayload 
       status: partInstance.status ?? "planned",
     })),
     events,
-    qaReports: source.qaReports ?? [],
-    testResults: source.testResults ?? [],
-    qaFindings: source.qaFindings ?? [],
-    testFindings: source.testFindings ?? [],
+    reports,
+    reportFindings,
+    qaReports,
+    testResults,
+    qaFindings,
+    testFindings,
     designIterations: source.designIterations ?? [],
     risks: source.risks ?? [],
     tasks: planning.tasks,
+    taskDependencies:
+      (source.taskDependencies ?? []).map((dependency, index) => ({
+        id: dependency.id ?? `task-dependency-${index + 1}`,
+        upstreamTaskId: dependency.upstreamTaskId ?? "",
+        downstreamTaskId: dependency.downstreamTaskId ?? "",
+        dependencyType: dependency.dependencyType ?? "finish_to_start",
+        createdAt: dependency.createdAt ?? new Date().toISOString(),
+      })),
+    taskBlockers:
+      (source.taskBlockers ?? []).map((blocker, index) => ({
+        id: blocker.id ?? `task-blocker-${index + 1}`,
+        blockedTaskId: blocker.blockedTaskId ?? "",
+        blockerType: blocker.blockerType ?? "external",
+        blockerId: blocker.blockerId ?? null,
+        description: blocker.description ?? "",
+        severity: blocker.severity ?? "medium",
+        status: blocker.status ?? "open",
+        createdByMemberId: blocker.createdByMemberId ?? null,
+        createdAt: blocker.createdAt ?? new Date().toISOString(),
+        resolvedAt: blocker.resolvedAt ?? null,
+      })),
     workLogs: (source.workLogs ?? []).map((workLog) => ({
       ...workLog,
       participantIds: workLog.participantIds ?? [],
@@ -1037,12 +1255,12 @@ export async function createWorkLogRecord(
   return response.item;
 }
 
-export async function createQaReportRecord(
-  payload: QaReportPayload,
+export async function createReportRecord(
+  payload: ReportPayload,
   onUnauthorized?: () => void,
 ) {
-  const response = await requestApi<{ item: QaReportRecord }>(
-    "/qa-reports",
+  const response = await requestApi<{ item: ReportRecord }>(
+    "/reports",
     {
       method: "POST",
       headers: {
@@ -1056,12 +1274,12 @@ export async function createQaReportRecord(
   return response.item;
 }
 
-export async function createTestResultRecord(
-  payload: TestResultPayload,
+export async function createReportFindingRecord(
+  payload: ReportFindingPayload,
   onUnauthorized?: () => void,
 ) {
-  const response = await requestApi<{ item: TestResultRecord }>(
-    "/test-results",
+  const response = await requestApi<{ item: ReportFindingRecord }>(
+    "/report-findings",
     {
       method: "POST",
       headers: {
@@ -1073,6 +1291,20 @@ export async function createTestResultRecord(
   );
 
   return response.item;
+}
+
+export async function createQaReportRecord(
+  payload: QaReportPayload,
+  onUnauthorized?: () => void,
+) {
+  return createReportRecord(payload, onUnauthorized);
+}
+
+export async function createTestResultRecord(
+  payload: TestResultPayload,
+  onUnauthorized?: () => void,
+) {
+  return createReportRecord(payload, onUnauthorized);
 }
 
 export async function createRiskRecord(
@@ -1248,6 +1480,114 @@ export async function deleteTaskRecord(
 ) {
   const response = await requestApi<{ item: TaskRecord }>(
     `/tasks/${taskId}`,
+    {
+      method: "DELETE",
+    },
+    onUnauthorized,
+  );
+
+  return response.item;
+}
+
+export async function createTaskDependencyRecord(
+  payload: TaskDependencyPayload,
+  onUnauthorized?: () => void,
+) {
+  const response = await requestApi<{ item: TaskDependencyRecord }>(
+    "/task-dependencies",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    },
+    onUnauthorized,
+  );
+
+  return response.item;
+}
+
+export async function updateTaskDependencyRecord(
+  dependencyId: string,
+  payload: Partial<TaskDependencyPayload>,
+  onUnauthorized?: () => void,
+) {
+  const response = await requestApi<{ item: TaskDependencyRecord }>(
+    `/task-dependencies/${dependencyId}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    },
+    onUnauthorized,
+  );
+
+  return response.item;
+}
+
+export async function deleteTaskDependencyRecord(
+  dependencyId: string,
+  onUnauthorized?: () => void,
+) {
+  const response = await requestApi<{ item: TaskDependencyRecord }>(
+    `/task-dependencies/${dependencyId}`,
+    {
+      method: "DELETE",
+    },
+    onUnauthorized,
+  );
+
+  return response.item;
+}
+
+export async function createTaskBlockerRecord(
+  payload: TaskBlockerPayload,
+  onUnauthorized?: () => void,
+) {
+  const response = await requestApi<{ item: TaskBlockerRecord }>(
+    "/task-blockers",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    },
+    onUnauthorized,
+  );
+
+  return response.item;
+}
+
+export async function updateTaskBlockerRecord(
+  blockerId: string,
+  payload: Partial<TaskBlockerPayload>,
+  onUnauthorized?: () => void,
+) {
+  const response = await requestApi<{ item: TaskBlockerRecord }>(
+    `/task-blockers/${blockerId}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    },
+    onUnauthorized,
+  );
+
+  return response.item;
+}
+
+export async function deleteTaskBlockerRecord(
+  blockerId: string,
+  onUnauthorized?: () => void,
+) {
+  const response = await requestApi<{ item: TaskBlockerRecord }>(
+    `/task-blockers/${blockerId}`,
     {
       method: "DELETE",
     },

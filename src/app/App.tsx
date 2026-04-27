@@ -90,6 +90,7 @@ import {
   updatePartDefinitionRecord,
   updatePartInstanceRecord,
   updatePurchaseItemRecord,
+  updateTaskBlockerRecord,
   updateTaskRecord,
   updateArtifactRecord,
   updateEventRecord,
@@ -346,7 +347,6 @@ export default function App() {
   const [taskDraft, setTaskDraft] = useState<TaskPayload>(
     buildEmptyTaskPayload(EMPTY_BOOTSTRAP),
   );
-  const [taskDraftBlockers, setTaskDraftBlockers] = useState("");
   const [isSavingTask, setIsSavingTask] = useState(false);
   const [isDeletingTask, setIsDeletingTask] = useState(false);
   const [showTimelineCreateToggleInTaskModal, setShowTimelineCreateToggleInTaskModal] =
@@ -1115,14 +1115,12 @@ export default function App() {
 
       if (taskModalMode === "create") {
         setTaskDraft(buildEmptyTaskPayload(scopedPayload));
-        setTaskDraftBlockers("");
       }
 
       if (taskModalMode === "edit" && activeTaskId) {
         const nextTask = payload.tasks.find((task) => task.id === activeTaskId);
         if (nextTask) {
           setTaskDraft(taskToPayload(nextTask));
-          setTaskDraftBlockers(joinList(nextTask.blockers));
         } else {
           setTaskModalMode(null);
           setActiveTaskId(null);
@@ -1343,7 +1341,6 @@ export default function App() {
     setActiveTimelineTaskDetailId(null);
     setActiveTaskId(null);
     setTaskDraft(buildEmptyTaskPayload(scopedBootstrap));
-    setTaskDraftBlockers("");
     setTaskModalMode("create");
   }, [scopedBootstrap]);
 
@@ -1353,7 +1350,6 @@ export default function App() {
     setActiveTimelineTaskDetailId(null);
     setActiveTaskId(null);
     setTaskDraft(buildEmptyTaskPayload(scopedBootstrap));
-    setTaskDraftBlockers("");
     setTaskModalMode("create");
   }, [scopedBootstrap]);
 
@@ -1363,7 +1359,6 @@ export default function App() {
     setActiveTimelineTaskDetailId(null);
     setActiveTaskId(task.id);
     setTaskDraft(taskToPayload(task));
-    setTaskDraftBlockers(joinList(task.blockers));
     setTaskModalMode("edit");
   }, []);
 
@@ -1649,7 +1644,6 @@ export default function App() {
             ),
           ),
         ),
-        blockers: splitList(taskDraftBlockers),
       };
 
       if (taskModalMode === "create") {
@@ -1702,6 +1696,17 @@ export default function App() {
       setDataMessage(toErrorMessage(error));
     } finally {
       setIsDeletingTask(false);
+    }
+  };
+
+  const handleResolveTaskBlocker = async (blockerId: string) => {
+    setDataMessage(null);
+
+    try {
+      await updateTaskBlockerRecord(blockerId, { status: "resolved" }, handleUnauthorized);
+      await loadWorkspace();
+    } catch (error) {
+      setDataMessage(toErrorMessage(error));
     }
   };
 
@@ -1761,7 +1766,7 @@ export default function App() {
 
       const participantIds = Array.from(
         new Set(
-          qaReportDraft.participantIds.filter((participantId) =>
+          (qaReportDraft.participantIds ?? []).filter((participantId) =>
             bootstrap.members.some((member) => member.id === participantId),
           ),
         ),
@@ -1771,10 +1776,25 @@ export default function App() {
         return;
       }
 
+      const task = bootstrap.tasks.find((candidate) => candidate.id === qaReportDraft.taskId) ?? null;
+      const reportDate = qaReportDraft.createdAt ?? new Date().toISOString().slice(0, 10);
       const payload: QaReportPayload = {
-        ...qaReportDraft,
+        reportType: "QA",
+        projectId: task?.projectId ?? bootstrap.projects[0]?.id ?? "",
+        taskId: task?.id ?? "",
+        eventId: null,
+        workstreamId: task?.workstreamId ?? null,
+        createdByMemberId: qaReportDraft.createdByMemberId ?? null,
+        result: qaReportDraft.result,
+        summary: qaReportDraft.summary.trim(),
         participantIds,
+        mentorApproved: qaReportDraft.mentorApproved ?? false,
         notes: qaReportDraft.notes.trim(),
+        createdAt: reportDate,
+        reviewedAt: qaReportDraft.reviewedAt ?? reportDate,
+        title: qaReportDraft.title?.trim(),
+        status: qaReportDraft.status,
+        findings: qaReportDraft.findings ?? [],
       };
 
       await createQaReportRecord(payload, handleUnauthorized);
@@ -1799,7 +1819,7 @@ export default function App() {
         return;
       }
 
-      const normalizedTitle = eventReportDraft.title.trim();
+      const normalizedTitle = (eventReportDraft.title ?? "").trim();
       if (normalizedTitle.length < 2) {
         setDataMessage("Please provide an event report title before saving.");
         return;
@@ -1814,9 +1834,24 @@ export default function App() {
         ),
       );
 
+      const event = bootstrap.events.find((candidate) => candidate.id === eventReportDraft.eventId) ?? null;
+      const reportDate = eventReportDraft.createdAt ?? new Date().toISOString().slice(0, 10);
       const payload: TestResultPayload = {
-        ...eventReportDraft,
+        reportType: "EventTest",
+        projectId: event?.projectIds[0] ?? bootstrap.projects[0]?.id ?? "",
+        taskId: null,
+        eventId: event?.id ?? "",
+        workstreamId: null,
+        createdByMemberId: eventReportDraft.createdByMemberId ?? null,
+        result: eventReportDraft.result,
+        summary: normalizedTitle,
+        notes: findings.join("\n"),
+        createdAt: reportDate,
+        participantIds: eventReportDraft.participantIds ?? [],
+        mentorApproved: eventReportDraft.mentorApproved ?? false,
+        reviewedAt: eventReportDraft.reviewedAt ?? reportDate,
         title: normalizedTitle,
+        status: eventReportDraft.status,
         findings,
       };
 
@@ -3860,6 +3895,7 @@ export default function App() {
             handleWorkLogSubmit={handleWorkLogSubmit}
             handleSubsystemSubmit={handleSubsystemSubmit}
             handleTaskSubmit={handleTaskSubmit}
+            handleResolveTaskBlocker={handleResolveTaskBlocker}
             handleWorkstreamSubmit={handleWorkstreamSubmit}
             isDeletingMaterial={isDeletingMaterial}
             isDeletingArtifact={isDeletingArtifact}
@@ -3923,7 +3959,6 @@ export default function App() {
             setSubsystemDraft={setSubsystemDraft}
             setSubsystemDraftRisks={setSubsystemDraftRisks}
             setTaskDraft={setTaskDraft}
-            setTaskDraftBlockers={setTaskDraftBlockers}
             showTimelineCreateToggleInTaskModal={showTimelineCreateToggleInTaskModal}
             onSwitchTaskCreateToMilestone={switchTaskCreateToMilestone}
             onOpenTaskEditFromTimelineDetails={openEditTaskModal}
@@ -3932,7 +3967,6 @@ export default function App() {
             subsystemDraftRisks={subsystemDraftRisks}
             subsystemModalMode={subsystemModalMode}
             taskDraft={taskDraft}
-            taskDraftBlockers={taskDraftBlockers}
             taskModalMode={taskModalMode}
           />
         </Suspense>

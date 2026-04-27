@@ -58,6 +58,7 @@ export function scopeBootstrapBySelection(
     );
   });
   const scopedWorkstreamIds = new Set(scopedWorkstreams.map((workstream) => workstream.id));
+  const scopedEventIds = new Set(scopedEvents.map((event) => event.id));
   const scopedTasks = payload.tasks.filter(
     (task) =>
       activeProjectIds.has(task.projectId) &&
@@ -65,9 +66,83 @@ export function scopeBootstrapBySelection(
         task.subsystemIds.some((subsystemId) => scopedSubsystemIds.has(subsystemId))),
   );
   const scopedTaskIds = new Set(scopedTasks.map((task) => task.id));
+  const scopedTaskDependencies = (payload.taskDependencies ?? []).filter(
+    (dependency) =>
+      scopedTaskIds.has(dependency.upstreamTaskId) ||
+      scopedTaskIds.has(dependency.downstreamTaskId),
+  );
+  const scopedTaskBlockers = (payload.taskBlockers ?? []).filter((blocker) =>
+    scopedTaskIds.has(blocker.blockedTaskId),
+  );
   const scopedWorkLogs = payload.workLogs.filter((workLog) => scopedTaskIds.has(workLog.taskId));
-  const scopedQaReports = payload.qaReports.filter((report) => scopedTaskIds.has(report.taskId));
+  const scopedReports = payload.reports.filter((report) => {
+    if (!activeProjectIds.has(report.projectId)) {
+      return false;
+    }
+
+    if (report.taskId && !scopedTaskIds.has(report.taskId)) {
+      return false;
+    }
+
+    if (report.eventId && !scopedEventIds.has(report.eventId)) {
+      return false;
+    }
+
+    return true;
+  });
+  const scopedReportsById = new Map(scopedReports.map((report) => [report.id, report] as const));
+  const scopedReportFindings = payload.reportFindings.filter((finding) =>
+    scopedReports.some((report) => report.id === finding.reportId),
+  );
+  const scopedQaReports = scopedReports.filter((report) => report.reportType === "QA");
+  const scopedTestResults = scopedReports.filter((report) => report.reportType !== "QA");
   const scopedQaReportIds = new Set(scopedQaReports.map((report) => report.id));
+  const scopedTestResultIds = new Set(scopedTestResults.map((report) => report.id));
+  const scopedQaFindings = scopedReportFindings.filter((finding) =>
+    scopedQaReportIds.has(finding.reportId),
+  ).map((finding) => {
+    const report = scopedReportsById.get(finding.reportId);
+    return {
+      id: finding.id,
+      qaReportId: finding.reportId || null,
+      taskId: finding.taskId ?? report?.taskId ?? null,
+      projectId: finding.projectId ?? report?.projectId ?? "",
+      workstreamId: finding.workstreamId ?? report?.workstreamId ?? null,
+      subsystemId: finding.subsystemId ?? null,
+      mechanismId: finding.mechanismId ?? null,
+      partInstanceId: finding.partInstanceId ?? null,
+      artifactId: finding.artifactInstanceId ?? null,
+      title: finding.title ?? finding.issueType,
+      detail: finding.detail ?? finding.notes,
+      severity: finding.severity,
+      status: finding.status ?? "open",
+      createdAt: finding.createdAt ?? new Date().toISOString(),
+      updatedAt: finding.updatedAt ?? finding.createdAt ?? new Date().toISOString(),
+    };
+  });
+  const scopedTestFindings = scopedReportFindings.filter((finding) =>
+    scopedTestResultIds.has(finding.reportId),
+  ).map((finding) => {
+    const report = scopedReportsById.get(finding.reportId);
+    return {
+      id: finding.id,
+      testResultId: finding.reportId || null,
+      eventId: finding.eventId ?? report?.eventId ?? null,
+      taskId: finding.taskId ?? report?.taskId ?? null,
+      projectId: finding.projectId ?? report?.projectId ?? "",
+      workstreamId: finding.workstreamId ?? report?.workstreamId ?? null,
+      subsystemId: finding.subsystemId ?? null,
+      mechanismId: finding.mechanismId ?? null,
+      partInstanceId: finding.partInstanceId ?? null,
+      artifactId: finding.artifactInstanceId ?? null,
+      title: finding.title ?? finding.issueType,
+      detail: finding.detail ?? finding.notes,
+      severity: finding.severity,
+      status: finding.status ?? "open",
+      createdAt: finding.createdAt ?? new Date().toISOString(),
+      updatedAt: finding.updatedAt ?? finding.createdAt ?? new Date().toISOString(),
+    };
+  });
   const scopedRisks = payload.risks.filter((risk) => {
     if (risk.attachmentType === "project" && !activeProjectIds.has(risk.attachmentId)) {
       return false;
@@ -85,6 +160,10 @@ export function scopeBootstrapBySelection(
     }
 
     if (risk.sourceType === "qa-report" && !scopedQaReportIds.has(risk.sourceId)) {
+      return false;
+    }
+
+    if (risk.sourceType === "test-result" && !scopedTestResultIds.has(risk.sourceId)) {
       return false;
     }
 
@@ -108,8 +187,15 @@ export function scopeBootstrapBySelection(
     members: scopedMembers,
     tasks: scopedTasks,
     workLogs: scopedWorkLogs,
+    reports: scopedReports,
+    reportFindings: scopedReportFindings,
     qaReports: scopedQaReports,
+    testResults: scopedTestResults,
+    qaFindings: scopedQaFindings,
+    testFindings: scopedTestFindings,
     risks: scopedRisks,
+    taskDependencies: scopedTaskDependencies,
+    taskBlockers: scopedTaskBlockers,
   };
 }
 

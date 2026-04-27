@@ -4,6 +4,7 @@ import {
   IconHelp,
   IconManufacturing,
   IconParts,
+  IconReports,
   IconRisk,
   IconRoster,
   IconSubsystems,
@@ -126,6 +127,12 @@ export function useWorkspaceDerivedData({
           icon: <IconWorkLogs />,
           count: bootstrap.workLogs.length,
         },
+        {
+          value: "reports",
+          label: "Reports",
+          icon: <IconReports />,
+          count: bootstrap.reports.length,
+        },
       ];
 
       if (showManufacturingTab) {
@@ -175,6 +182,7 @@ export function useWorkspaceDerivedData({
       bootstrap.tasks.length,
       bootstrap.risks.length,
       bootstrap.workLogs.length,
+      bootstrap.reports.length,
       bootstrap.manufacturingItems,
       bootstrap.members.length,
       showManufacturingTab,

@@ -89,6 +89,8 @@ function renderTaskModal(taskModalMode: ComponentProps<typeof TaskEditorModal>["
   const activeTask: TaskRecord = {
     id: "task-1",
     ...taskDraft,
+    dependencyIds: [],
+    blockers: [],
     linkedManufacturingIds: [],
     linkedPurchaseIds: [],
   };
@@ -112,10 +114,8 @@ function renderTaskModal(taskModalMode: ComponentProps<typeof TaskEditorModal>["
       partInstancesById: {},
       students: bootstrap.members.filter((member) => member.role !== "mentor"),
       taskDraft,
-      taskDraftBlockers: "",
       taskModalMode,
       setTaskDraft: jest.fn(),
-      setTaskDraftBlockers: jest.fn(),
     }),
   );
 }

@@ -14,6 +14,7 @@ import type {
 type TimelineGridMotion = "left" | "right" | "neutral";
 
 interface TimelineGridBodyProps {
+  bootstrap: BootstrapPayload;
   timelineDays: string[];
   timelineFilterMotionClass: string;
   timelineGridMotion: {
@@ -57,6 +58,7 @@ interface TimelineGridBodyProps {
 }
 
 export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
+  bootstrap,
   timelineDays,
   timelineFilterMotionClass,
   timelineGridMotion,
@@ -95,6 +97,23 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
   handleTimelineDayMouseEnter,
   clearHoveredMilestonePopup,
 }) => {
+  const getDependencyCounts = (taskId: string) => {
+    const dependencies = bootstrap.taskDependencies ?? [];
+    let incoming = 0;
+    let outgoing = 0;
+
+    dependencies.forEach((dependency) => {
+      if (dependency.downstreamTaskId === taskId) {
+        incoming += 1;
+      }
+      if (dependency.upstreamTaskId === taskId) {
+        outgoing += 1;
+      }
+    });
+
+    return { incoming, outgoing };
+  };
+
   const renderTimelineDayGridCells = (
     rowKey: string,
     gridRow: string | number,
@@ -531,6 +550,26 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
                       title={`${task.title} (${task.status})`}
                       type="button"
                     >
+                      {(() => {
+                        const dependencyCounts = getDependencyCounts(task.id);
+                        if (dependencyCounts.incoming === 0 && dependencyCounts.outgoing === 0) {
+                          return null;
+                        }
+
+                        return (
+                          <span
+                            style={{
+                              position: "absolute",
+                              inset: 0,
+                              border: "1px solid rgba(255, 255, 255, 0.3)",
+                              borderRadius: "inherit",
+                              pointerEvents: "none",
+                              opacity: 0.75,
+                            }}
+                            aria-hidden="true"
+                          />
+                        );
+                      })()}
                       <EditableHoverIndicator className="editable-hover-indicator-compact" />
                     </button>
                   ))}
@@ -753,6 +792,36 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
                                     >
                                       {formatTaskAssignees(task, membersById)}
                                     </span>
+                                    {(() => {
+                                      const dependencyCounts = getDependencyCounts(task.id);
+                                      if (
+                                        dependencyCounts.incoming === 0 &&
+                                        dependencyCounts.outgoing === 0
+                                      ) {
+                                        return null;
+                                      }
+
+                                      return (
+                                        <span
+                                          style={{
+                                            fontSize: "0.65rem",
+                                            color: "var(--meco-blue)",
+                                            marginTop: "0.2rem",
+                                          }}
+                                        >
+                                          {dependencyCounts.incoming > 0
+                                            ? `Depends on ${dependencyCounts.incoming}`
+                                            : ""}
+                                          {dependencyCounts.incoming > 0 &&
+                                          dependencyCounts.outgoing > 0
+                                            ? " · "
+                                            : ""}
+                                          {dependencyCounts.outgoing > 0
+                                            ? `Blocks ${dependencyCounts.outgoing}`
+                                            : ""}
+                                        </span>
+                                      );
+                                    })()}
                                   </button>
                                 ) : null}
                                 {renderTimelineDayGridCells(
@@ -789,6 +858,34 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
                                   type="button"
                                 >
                                   {task.title}
+                                  {(() => {
+                                    const dependencyCounts = getDependencyCounts(task.id);
+                                    if (
+                                      dependencyCounts.incoming === 0 &&
+                                      dependencyCounts.outgoing === 0
+                                    ) {
+                                      return null;
+                                    }
+
+                                    return (
+                                      <span
+                                        aria-hidden="true"
+                                        style={{
+                                          marginLeft: "8px",
+                                          fontSize: "0.65rem",
+                                          opacity: 0.8,
+                                          whiteSpace: "nowrap",
+                                        }}
+                                      >
+                                        {dependencyCounts.incoming > 0 ? `↙ ${dependencyCounts.incoming}` : ""}
+                                        {dependencyCounts.incoming > 0 &&
+                                        dependencyCounts.outgoing > 0
+                                          ? " "
+                                          : ""}
+                                        {dependencyCounts.outgoing > 0 ? `↗ ${dependencyCounts.outgoing}` : ""}
+                                      </span>
+                                    );
+                                  })()}
                                   <EditableHoverIndicator className="editable-hover-indicator-compact" />
                                 </button>
                               </React.Fragment>

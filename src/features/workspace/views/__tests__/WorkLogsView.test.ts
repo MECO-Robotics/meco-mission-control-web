@@ -9,38 +9,31 @@ import type { BootstrapPayload } from "@/types";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
-function renderWorkLogsView(view: "logs" | "qa" | "event-result" | "summary") {
+function renderWorkLogsView(
+  view: "logs" | "summary",
+) {
   const bootstrap: BootstrapPayload = {
     ...EMPTY_BOOTSTRAP,
   };
 
-  return renderToStaticMarkup(
-    React.createElement(WorkLogsView, {
-      activePersonFilter: [],
-      bootstrap,
-      membersById: {},
-      openCreateWorkLogModal: jest.fn(),
-      openCreateQaReportModal: jest.fn(),
-      openCreateEventReportModal: jest.fn(),
-      openEditTaskModal: jest.fn(),
-      subsystemsById: {},
-      view,
-    }),
+    return renderToStaticMarkup(
+      React.createElement(WorkLogsView, {
+        activePersonFilter: [],
+        bootstrap,
+        membersById: {},
+        openCreateWorkLogModal: jest.fn(),
+        openEditTaskModal: jest.fn(),
+        subsystemsById: {},
+        view,
+      }),
   );
 }
 
 describe("WorkLogsView", () => {
-  it("renders a dedicated QA form tab", () => {
-    const html = renderWorkLogsView("qa");
+  it("renders the work log summary tab", () => {
+    const html = renderWorkLogsView("summary");
 
-    expect(html).toContain("QA form");
-    expect(html).toContain("Add QA report");
-  });
-
-  it("renders a dedicated Event Result form tab", () => {
-    const html = renderWorkLogsView("event-result");
-
-    expect(html).toContain("Event Result form");
-    expect(html).toContain("Add event result");
+    expect(html).toContain("Work log summary");
+    expect(html).toContain("Top contributors");
   });
 });

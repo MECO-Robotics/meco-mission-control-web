@@ -8,6 +8,7 @@ export { MilestonesView } from "./MilestonesView";
 export { PartsView } from "./PartsView";
 export { PrintsView } from "./PrintsView";
 export { PurchasesView } from "./PurchasesView";
+export { ReportsView } from "./ReportsView";
 export { RosterView } from "./RosterView";
 export { RisksView } from "./RisksView";
 export { SubsystemsView } from "./SubsystemsView";

@@ -13,6 +13,8 @@ import type {
   PartInstanceRecord,
   PurchaseItemPayload,
   PurchaseItemRecord,
+  ReportPayload,
+  ReportType,
   QaReportPayload,
   SubsystemPayload,
   SubsystemRecord,
@@ -379,8 +381,6 @@ export function buildEmptyTaskPayload(bootstrap: BootstrapPayload): TaskPayload 
         status: "not-started",
         estimatedHours: 4,
         actualHours: 0,
-        blockers: [],
-        dependencyIds: [],
         linkedManufacturingIds: [],
         linkedPurchaseIds: [],
         requiresDocumentation: false,
@@ -701,33 +701,100 @@ export function buildEmptyWorkLogPayload(
   };
 }
 
+export function buildEmptyReportPayload(
+  bootstrap: BootstrapPayload,
+  reportType: ReportType,
+  defaults: {
+    taskId?: string | null;
+    eventId?: string | null;
+    projectId?: string;
+    workstreamId?: string | null;
+    createdByMemberId?: string | null;
+    result?: string;
+    summary?: string;
+    notes?: string;
+    participantIds?: string[];
+    mentorApproved?: boolean;
+    reviewedAt?: string;
+    title?: string;
+    status?: ReportPayload["status"];
+    findings?: string[];
+  } = {},
+): ReportPayload {
+  const today = new Date().toISOString().slice(0, 10);
+  const task = defaults.taskId
+    ? bootstrap.tasks.find((candidate) => candidate.id === defaults.taskId) ?? null
+    : bootstrap.tasks[0] ?? null;
+  const event = defaults.eventId
+    ? bootstrap.events.find((candidate) => candidate.id === defaults.eventId) ?? null
+    : bootstrap.events[0] ?? null;
+  const resolvedProjectId =
+    defaults.projectId ??
+    task?.projectId ??
+    event?.projectIds?.[0] ??
+    bootstrap.projects[0]?.id ??
+    "";
+  const resolvedWorkstreamId =
+    defaults.workstreamId !== undefined
+      ? defaults.workstreamId
+      : task?.workstreamId ?? null;
+
+  return {
+    reportType,
+    projectId: resolvedProjectId,
+    taskId: defaults.taskId ?? task?.id ?? null,
+    eventId: defaults.eventId ?? event?.id ?? null,
+    workstreamId: resolvedWorkstreamId,
+    createdByMemberId: defaults.createdByMemberId ?? bootstrap.members[0]?.id ?? null,
+    result: defaults.result ?? "pass",
+    summary: defaults.summary ?? "",
+    notes: defaults.notes ?? "",
+    createdAt: today,
+    participantIds: defaults.participantIds ?? [],
+    mentorApproved: defaults.mentorApproved ?? false,
+    reviewedAt: defaults.reviewedAt ?? today,
+    title: defaults.title ?? "",
+    status: defaults.status ?? "pass",
+    findings: defaults.findings ?? [],
+  };
+}
+
 export function buildEmptyQaReportPayload(
   bootstrap: BootstrapPayload,
   defaultParticipantId: string | null = null,
 ): QaReportPayload {
+  const task = bootstrap.tasks[0] ?? null;
   const participantId =
     defaultParticipantId &&
     bootstrap.members.some((member) => member.id === defaultParticipantId)
       ? defaultParticipantId
       : bootstrap.members[0]?.id ?? null;
 
-  return {
-    taskId: bootstrap.tasks[0]?.id ?? "",
+  return buildEmptyReportPayload(bootstrap, "QA", {
+    taskId: task?.id ?? "",
+    projectId: task?.projectId ?? bootstrap.projects[0]?.id ?? "",
+    workstreamId: task?.workstreamId ?? null,
     participantIds: participantId ? [participantId] : [],
     result: "pass",
     mentorApproved: false,
     notes: "",
     reviewedAt: new Date().toISOString().slice(0, 10),
-  };
+  });
 }
 
 export function buildEmptyTestResultPayload(bootstrap: BootstrapPayload): TestResultPayload {
-  return {
-    eventId: bootstrap.events[0]?.id ?? "",
+  const event = bootstrap.events[0] ?? null;
+
+  return buildEmptyReportPayload(bootstrap, "EventTest", {
+    eventId: event?.id ?? "",
+    projectId: event?.projectIds?.[0] ?? bootstrap.projects[0]?.id ?? "",
+    result: "pass",
+    summary: "",
+    notes: "",
     title: "",
     status: "pass",
     findings: [],
-  };
+  });
 }
 
 export function buildEmptyMaterialPayload(): MaterialPayload {

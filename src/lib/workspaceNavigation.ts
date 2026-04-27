@@ -4,6 +4,7 @@ export type ViewTab =
   | "tasks"
   | "risk-management"
   | "worklogs"
+  | "reports"
   | "manufacturing"
   | "inventory"
   | "subsystems"
@@ -12,7 +13,7 @@ export type ViewTab =
 
 export type TaskViewTab = "timeline" | "queue" | "milestones";
 export type RiskManagementViewTab = "risks" | "metrics";
-export type WorklogsViewTab = "logs" | "qa" | "event-result" | "summary";
+export type WorklogsViewTab = "logs" | "summary";
 export type ManufacturingViewTab = "cnc" | "prints" | "fabrication";
 export type InventoryViewTab = "materials" | "parts" | "purchases";
 
@@ -39,8 +40,6 @@ export const RISK_MANAGEMENT_VIEW_ORDER: readonly RiskManagementViewTab[] = [
 ];
 export const WORKLOG_VIEW_ORDER: readonly WorklogsViewTab[] = [
   "logs",
-  "qa",
-  "event-result",
   "summary",
 ];
 export const MANUFACTURING_VIEW_ORDER: readonly ManufacturingViewTab[] = [
@@ -67,8 +66,6 @@ export const RISK_MANAGEMENT_VIEW_OPTIONS: readonly ViewOption<RiskManagementVie
 
 export const WORKLOG_VIEW_OPTIONS: readonly ViewOption<WorklogsViewTab>[] = [
   { value: "logs", label: "Logs" },
-  { value: "qa", label: "QA" },
-  { value: "event-result", label: "Event Result" },
   { value: "summary", label: "Summary" },
 ];
 
@@ -93,6 +90,7 @@ export const BASE_SECTION_LABELS: Record<ViewTab, string> = {
   tasks: "Tasks",
   "risk-management": "Risk Management",
   worklogs: "Worklogs",
+  reports: "Reports",
   manufacturing: "Manufacturing",
   inventory: "Inventory",
   subsystems: "Subsystems",

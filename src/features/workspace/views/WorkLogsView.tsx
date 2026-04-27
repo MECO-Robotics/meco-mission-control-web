@@ -35,8 +35,6 @@ interface WorkLogsViewProps {
   bootstrap: BootstrapPayload;
   membersById: MembersById;
   openCreateWorkLogModal: () => void;
-  openCreateQaReportModal: () => void;
-  openCreateEventReportModal: () => void;
   openEditTaskModal: (task: TaskRecord) => void;
   subsystemsById: SubsystemsById;
   view: WorklogsViewTab;
@@ -99,8 +97,6 @@ export function WorkLogsView({
   bootstrap,
   membersById,
   openCreateWorkLogModal,
-  openCreateQaReportModal,
-  openCreateEventReportModal,
   openEditTaskModal,
   subsystemsById,
   view,
@@ -312,54 +308,6 @@ export function WorkLogsView({
 
   const gridTemplate = "minmax(220px, 2.05fr) minmax(190px, 1.35fr) minmax(180px, 1fr) 0.45fr";
 
-  if (view === "qa") {
-    return (
-      <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
-        <div className="panel-header compact-header">
-          <div className="queue-section-header">
-            <h2>QA form</h2>
-            <p className="section-copy filter-copy">
-              Capture a QA report tied to a real task and the people who reviewed it.
-            </p>
-          </div>
-          <button
-            aria-label="Add QA report"
-            className="primary-action queue-toolbar-action"
-            onClick={openCreateQaReportModal}
-            title="Add QA report"
-            type="button"
-          >
-            Add QA report
-          </button>
-        </div>
-      </section>
-    );
-  }
-
-  if (view === "event-result") {
-    return (
-      <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
-        <div className="panel-header compact-header">
-          <div className="queue-section-header">
-            <h2>Event Result form</h2>
-            <p className="section-copy filter-copy">
-              Capture an event result tied to a real event and its findings.
-            </p>
-          </div>
-          <button
-            aria-label="Add event result"
-            className="primary-action queue-toolbar-action"
-            onClick={openCreateEventReportModal}
-            title="Add event result"
-            type="button"
-          >
-            Add event result
-          </button>
-        </div>
-      </section>
-    );
-  }
-
   if (view === "summary") {
     return (
       <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
@@ -524,27 +472,6 @@ export function WorkLogsView({
               ))}
             </select>
           </label>
-
-          <button
-            aria-label="Add QA report"
-            className="secondary-action queue-toolbar-action"
-            onClick={openCreateQaReportModal}
-            title="Add QA report"
-            type="button"
-          >
-            QA form
-          </button>
-
-          <button
-            aria-label="Add event result"
-            className="secondary-action queue-toolbar-action"
-            onClick={openCreateEventReportModal}
-            title="Add event result"
-            type="button"
-          >
-            Event Result form
-          </button>
-
           <button
             aria-label="Add work log"
             className="primary-action queue-toolbar-action"

@@ -871,6 +871,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       </div>
 
       <TimelineGridBody
+        bootstrap={bootstrap}
         clearHoveredMilestonePopup={clearHoveredMilestonePopup}
         collapsedProjects={collapsedProjects}
         collapsedSubsystems={collapsedSubsystems}

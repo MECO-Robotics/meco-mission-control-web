@@ -126,10 +126,12 @@ describe("AppTopbar", () => {
     expect(markup).not.toContain('aria-label="Toggle dark mode"');
   });
 
-  it("shows QA and Event Result worklog tabs in the top bar", () => {
-    const markup = renderTopbar("worklogs", false);
+  it("shows only Logs and Summary in the worklogs top bar", () => {
+    const markup = renderTopbar("worklogs", true);
 
-    expect(markup).toContain("QA");
-    expect(markup).toContain("Event Result");
+    expect(markup).toContain("Logs");
+    expect(markup).toContain("Summary");
+    expect(markup).not.toContain("QA");
+    expect(markup).not.toContain("Event Result");
   });
 });

@@ -42,6 +42,23 @@ export type TaskStatus =
   | "in-progress"
   | "waiting-for-qa"
   | "complete";
+export type TaskPlanningState =
+  | "ready"
+  | "waiting-on-dependency"
+  | "blocked"
+  | "overdue"
+  | "at-risk";
+export type TaskDependencyType = "blocks" | "soft" | "finish_to_start";
+export type TaskBlockerType =
+  | "task"
+  | "event"
+  | "workstream"
+  | "mechanism"
+  | "part_instance"
+  | "artifact_instance"
+  | "external";
+export type TaskBlockerSeverity = "low" | "medium" | "high" | "critical";
+export type TaskBlockerStatus = "open" | "resolved";
 export type ManufacturingProcess = "3d-print" | "cnc" | "fabrication";
 export type ManufacturingStatus =
   | "requested"
@@ -69,6 +86,7 @@ export type SeasonType = "season" | "offseason" | "initiative";
 export type ProjectType = "robot" | "operations" | "outreach" | "other";
 export type ProjectStatus = "planned" | "active" | "paused" | "complete";
 export type TestResultStatus = "pass" | "fail" | "blocked";
+export type ReportType = "QA" | "EventTest" | "Practice" | "Competition" | "Review";
 export type RiskSeverity = "high" | "medium" | "low";
 export type RiskAttachmentType = "project" | "workstream" | "mechanism" | "part-instance";
 export type FindingStatus = "open" | "resolved";
@@ -210,39 +228,86 @@ export interface WorkstreamRecord {
   isArchived?: boolean;
 }
 
-export interface QaReportRecord {
+export interface ReportRecord {
   id: string;
-  taskId: string;
-  participantIds: string[];
-  result: "pass" | "minor-fix" | "iteration-worthy";
-  mentorApproved: boolean;
+  reportType: ReportType;
+  projectId: string;
+  taskId: string | null;
+  eventId: string | null;
+  workstreamId: string | null;
+  createdByMemberId: string | null;
+  result: string;
+  summary: string;
   notes: string;
-  reviewedAt: string;
+  createdAt: string;
+  participantIds?: string[];
+  mentorApproved?: boolean;
+  reviewedAt?: string;
+  title?: string;
+  status?: TestResultStatus;
+  findings?: string[];
 }
 
-export interface QaReportPayload {
-  taskId: string;
-  participantIds: string[];
-  result: "pass" | "minor-fix" | "iteration-worthy";
-  mentorApproved: boolean;
+export interface ReportPayload {
+  reportType: ReportType;
+  projectId: string;
+  taskId: string | null;
+  eventId: string | null;
+  workstreamId: string | null;
+  createdByMemberId: string | null;
+  result: string;
+  summary: string;
   notes: string;
-  reviewedAt: string;
+  createdAt: string;
+  participantIds?: string[];
+  mentorApproved?: boolean;
+  reviewedAt?: string;
+  title?: string;
+  status?: TestResultStatus;
+  findings?: string[];
 }
 
-export interface TestResultRecord {
+export interface ReportFindingRecord {
   id: string;
-  eventId: string;
-  title: string;
-  status: TestResultStatus;
-  findings: string[];
+  reportId: string;
+  mechanismId: string | null;
+  partInstanceId: string | null;
+  artifactInstanceId: string | null;
+  issueType: string;
+  severity: RiskSeverity;
+  notes: string;
+  spawnedTaskId: string | null;
+  spawnedIterationId: string | null;
+  spawnedRiskId: string | null;
+  title?: string;
+  detail?: string;
+  status?: FindingStatus;
+  projectId?: string;
+  workstreamId?: string | null;
+  subsystemId?: string | null;
+  taskId?: string | null;
+  eventId?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-export interface TestResultPayload {
-  eventId: string;
-  title: string;
-  status: TestResultStatus;
-  findings: string[];
+export interface ReportFindingPayload {
+  reportId: string;
+  mechanismId: string | null;
+  partInstanceId: string | null;
+  artifactInstanceId: string | null;
+  issueType: string;
+  severity: RiskSeverity;
+  notes: string;
+  spawnedTaskId: string | null;
+  spawnedIterationId: string | null;
+  spawnedRiskId: string | null;
 }
+
+export type QaReportRecord = ReportRecord;
+export type QaReportPayload = ReportPayload;
+export type TestResultRecord = ReportRecord;
+export type TestResultPayload = ReportPayload;
 
 export interface QaFindingRecord {
   id: string;
@@ -310,6 +375,7 @@ export interface TaskRecord {
   dueDate: string;
   priority: TaskPriority;
   status: TaskStatus;
+  planningState?: TaskPlanningState;
   dependencyIds: string[];
   blockers: string[];
   linkedManufacturingIds: string[];
@@ -318,6 +384,27 @@ export interface TaskRecord {
   actualHours: number;
   requiresDocumentation: boolean;
   documentationLinked: boolean;
+}
+
+export interface TaskDependencyRecord {
+  id: string;
+  upstreamTaskId: string;
+  downstreamTaskId: string;
+  dependencyType: TaskDependencyType;
+  createdAt: string;
+}
+
+export interface TaskBlockerRecord {
+  id: string;
+  blockedTaskId: string;
+  blockerType: TaskBlockerType;
+  blockerId: string | null;
+  description: string;
+  severity: TaskBlockerSeverity;
+  status: TaskBlockerStatus;
+  createdByMemberId: string | null;
+  createdAt: string;
+  resolvedAt: string | null;
 }
 
 export interface WorkLogRecord {
@@ -416,6 +503,10 @@ export interface BootstrapPayload {
   partDefinitions: PartDefinitionRecord[];
   partInstances: PartInstanceRecord[];
   events: EventRecord[];
+  taskDependencies?: TaskDependencyRecord[];
+  taskBlockers?: TaskBlockerRecord[];
+  reports: ReportRecord[];
+  reportFindings: ReportFindingRecord[];
   qaReports: QaReportRecord[];
   testResults: TestResultRecord[];
   qaFindings: QaFindingRecord[];
@@ -568,10 +659,24 @@ export interface TaskPayload {
   status: TaskStatus;
   estimatedHours: number;
   actualHours: number;
-  blockers: string[];
-  dependencyIds: string[];
   linkedManufacturingIds: string[];
   linkedPurchaseIds: string[];
   requiresDocumentation: boolean;
   documentationLinked: boolean;
+}
+
+export interface TaskDependencyPayload {
+  upstreamTaskId: string;
+  downstreamTaskId: string;
+  dependencyType: TaskDependencyType;
+}
+
+export interface TaskBlockerPayload {
+  blockedTaskId: string;
+  blockerType: TaskBlockerType;
+  blockerId: string | null;
+  description: string;
+  severity: TaskBlockerSeverity;
+  status?: TaskBlockerStatus;
+  createdByMemberId?: string | null;
 }

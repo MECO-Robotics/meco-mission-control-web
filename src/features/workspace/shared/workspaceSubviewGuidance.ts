@@ -11,6 +11,7 @@ export type WorkspaceSubviewTab =
   | ManufacturingViewTab
   | InventoryViewTab
   | "documents"
+  | "reports"
   | "subsystems"
   | "workflow"
   | "risk-management"
@@ -26,12 +27,10 @@ export const SUBVIEW_INTERACTION_GUIDANCE: Record<WorkspaceSubviewTab, string> =
     "Use search and filters to narrow the list, click a column header to sort, and hover any row to reveal the pencil cue before clicking the row to open its task details. Use Add to create a new task.",
   logs:
     "Search the log entries, filter by subsystem, add new work logs from the toolbar, and click a row to open the linked task details. The selected roster person stays in sync with the global workspace filter.",
-  qa:
-    "Use this tab to open the QA report form for the current task scope. Choose the task, participants, result, review date, and notes before saving.",
-  "event-result":
-    "Use this tab to open the event result form for the current event scope. Choose the event, title, status, and findings before saving.",
   summary:
     "Use this dashboard to review total work-log volume, compare planned hours versus logged hours, and spot top contributors and most active tasks at a glance.",
+  reports:
+    "Use this page to launch QA and Event Result forms. Pick the report type you need, then open the matching modal to capture the task review or event findings.",
   cnc:
     "Search and filter CNC jobs by subsystem, requester, material, or status, then hover a row to reveal the pencil cue before clicking the row to update that job. Use Add to enter a new CNC request tied to a catalog part.",
   prints:

@@ -85,6 +85,7 @@ interface WorkspaceModalHostProps {
   handleToggleMechanismArchived: (mechanismId: string) => Promise<void>;
   handleToggleWorkstreamArchived: (workstreamId: string) => Promise<void>;
   handleDeleteTask: (taskId: string) => Promise<void>;
+  handleResolveTaskBlocker: (blockerId: string) => Promise<void>;
   handlePartInstanceSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
   handleManufacturingSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
   handleMaterialSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
@@ -161,7 +162,6 @@ interface WorkspaceModalHostProps {
   setSubsystemDraft: Dispatch<SetStateAction<SubsystemPayload>>;
   setSubsystemDraftRisks: (value: string) => void;
   setTaskDraft: Dispatch<SetStateAction<TaskPayload>>;
-  setTaskDraftBlockers: (value: string) => void;
   showTimelineCreateToggleInTaskModal: boolean;
   onSwitchTaskCreateToMilestone: () => void;
   students: BootstrapPayload["members"];
@@ -169,7 +169,6 @@ interface WorkspaceModalHostProps {
   subsystemDraftRisks: string;
   subsystemModalMode: SubsystemModalMode;
   taskDraft: TaskPayload;
-  taskDraftBlockers: string;
   taskModalMode: TaskModalMode;
 }
 
@@ -209,6 +208,7 @@ export function WorkspaceModalHost({
   handleToggleMechanismArchived,
   handleToggleWorkstreamArchived,
   handleDeleteTask,
+  handleResolveTaskBlocker,
   handlePartInstanceSubmit,
   handleManufacturingSubmit,
   handleMaterialSubmit,
@@ -285,7 +285,6 @@ export function WorkspaceModalHost({
   setSubsystemDraft,
   setSubsystemDraftRisks,
   setTaskDraft,
-  setTaskDraftBlockers,
   showTimelineCreateToggleInTaskModal,
   onSwitchTaskCreateToMilestone,
   students,
@@ -293,7 +292,6 @@ export function WorkspaceModalHost({
   subsystemDraftRisks,
   subsystemModalMode,
   taskDraft,
-  taskDraftBlockers,
   taskModalMode,
 }: WorkspaceModalHostProps) {
   return (
@@ -304,6 +302,7 @@ export function WorkspaceModalHost({
           bootstrap={bootstrap}
           closeTaskDetailsModal={closeTimelineTaskDetailsModal}
           onEditTask={onOpenTaskEditFromTimelineDetails}
+          onResolveTaskBlocker={handleResolveTaskBlocker}
         />
       ) : null}
 
@@ -398,12 +397,10 @@ export function WorkspaceModalHost({
           partDefinitionsById={partDefinitionsById}
           partInstancesById={partInstancesById}
           setTaskDraft={setTaskDraft}
-          setTaskDraftBlockers={setTaskDraftBlockers}
           showCreateTypeToggle={showTimelineCreateToggleInTaskModal}
           onSwitchCreateTypeToMilestone={onSwitchTaskCreateToMilestone}
           students={students}
           taskDraft={taskDraft}
-          taskDraftBlockers={taskDraftBlockers}
           taskModalMode={taskModalMode}
         />
       ) : null}

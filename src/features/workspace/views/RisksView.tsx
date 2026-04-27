@@ -238,39 +238,47 @@ export function RisksView({
   const testResultsById = useMemo(
     () =>
       Object.fromEntries(
-        bootstrap.testResults.map((testResult) => [testResult.id, testResult] as const),
+        bootstrap.reports
+          .filter((report) => report.reportType !== "QA")
+          .map((testResult) => [testResult.id, testResult] as const),
       ),
-    [bootstrap.testResults],
+    [bootstrap.reports],
   );
   const qaReportsById = useMemo(
     () =>
       Object.fromEntries(
-        bootstrap.qaReports.map((qaReport) => [qaReport.id, qaReport] as const),
+        bootstrap.reports
+          .filter((report) => report.reportType === "QA")
+          .map((qaReport) => [qaReport.id, qaReport] as const),
       ),
-    [bootstrap.qaReports],
+    [bootstrap.reports],
   );
 
   const qaSourceOptions = useMemo<SelectOption[]>(
     () =>
-      bootstrap.qaReports.map((qaReport) => {
-        const taskTitle = tasksById[qaReport.taskId]?.title ?? "Unknown task";
+        bootstrap.reports
+          .filter((report) => report.reportType === "QA")
+        .map((qaReport) => {
+        const taskTitle = tasksById[qaReport.taskId ?? ""]?.title ?? "Unknown task";
         return {
           id: qaReport.id,
           name: `${taskTitle} (${qaReport.reviewedAt})`,
         };
-      }),
-    [bootstrap.qaReports, tasksById],
+        }),
+    [bootstrap.reports, tasksById],
   );
   const testSourceOptions = useMemo<SelectOption[]>(
     () =>
-      bootstrap.testResults.map((testResult) => {
-        const eventTitle = eventsById[testResult.eventId]?.title ?? "Unknown event";
+        bootstrap.reports
+          .filter((report) => report.reportType !== "QA")
+        .map((testResult) => {
+        const eventTitle = eventsById[testResult.eventId ?? ""]?.title ?? "Unknown event";
         return {
           id: testResult.id,
           name: `${testResult.title} (${eventTitle})`,
         };
-      }),
-    [bootstrap.testResults, eventsById],
+        }),
+    [bootstrap.reports, eventsById],
   );
 
   const projectAttachmentOptions = useMemo<SelectOption[]>(
@@ -408,7 +416,7 @@ export function RisksView({
       if (!report) {
         return "Unknown QA report";
       }
-      return `${tasksById[report.taskId]?.title ?? "Unknown task"} QA report`;
+      return `${tasksById[report.taskId ?? ""]?.title ?? "Unknown task"} QA report`;
     }
 
     const testResult = testResultsById[risk.sourceId];

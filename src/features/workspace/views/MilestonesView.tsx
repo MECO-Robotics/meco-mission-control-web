@@ -18,11 +18,21 @@ import {
   useFilterChangeMotionClass,
 } from "@/features/workspace/shared";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
+import { getStatusPillClassName } from "@/features/workspace/shared";
+import {
+  formatTaskPlanningState,
+  getTaskBlocksTasks,
+  getTaskOpenBlockersForTask,
+  getTaskPlanningState,
+  getTaskWaitingOnTasks,
+  groupTasksByPlanningState,
+} from "@/features/workspace/shared/taskPlanning";
 import {
   getEventProjectIds,
   getMilestoneSubsystemOptions,
   reconcileMilestoneSubsystemIds,
 } from "@/features/workspace/shared/eventProjectUtils";
+import { formatDate } from "@/lib/appUtils";
 import {
   DEFAULT_EVENT_TYPE,
   EVENT_TYPE_STYLES,
@@ -184,6 +194,35 @@ export function MilestonesView({
     sortOrder,
     typeFilter,
   ]);
+  const activeEvent = eventModalMode && activeEventId
+    ? bootstrap.events.find((event) => event.id === activeEventId) ?? null
+    : null;
+  const activeEventTasks = useMemo(
+    () =>
+      activeEvent
+        ? bootstrap.tasks.filter((task) => task.targetEventId === activeEvent.id)
+        : [],
+    [activeEvent, bootstrap.tasks],
+  );
+  const activeEventIncompleteTasks = useMemo(
+    () => activeEventTasks.filter((task) => task.status !== "complete"),
+    [activeEventTasks],
+  );
+  const activeEventCompleteTasks = useMemo(
+    () => activeEventTasks.filter((task) => task.status === "complete"),
+    [activeEventTasks],
+  );
+  const eventTaskGroups = useMemo(
+    () => groupTasksByPlanningState(activeEventIncompleteTasks, bootstrap),
+    [activeEventIncompleteTasks, bootstrap],
+  );
+  const eventTaskOrder = [
+    "blocked",
+    "at-risk",
+    "waiting-on-dependency",
+    "ready",
+    "overdue",
+  ] as const;
 
   const closeEventModal = () => {
     setEventModalMode(null);
@@ -662,6 +701,141 @@ export function MilestonesView({
                       value={milestoneDraft.description}
                     />
                   </label>
+
+                  {eventModalMode === "edit" && activeEvent ? (
+                    <div className="field modal-wide">
+                      <span style={{ color: "var(--text-title)" }}>Readiness</span>
+                      {activeEventTasks.length > 0 ? (
+                        <div style={{ display: "grid", gap: "0.75rem", marginTop: "0.5rem" }}>
+                          {eventTaskOrder.map((state) => {
+                            const tasks = eventTaskGroups[state];
+                            if (tasks.length === 0) {
+                              return null;
+                            }
+
+                            return (
+                              <section key={state} style={{ display: "grid", gap: "0.5rem" }}>
+                                <h3
+                                  style={{
+                                    margin: 0,
+                                    color: "var(--text-title)",
+                                    fontSize: "0.9rem",
+                                    textTransform: "capitalize",
+                                  }}
+                                >
+                                  {formatTaskPlanningState(state)} ({tasks.length})
+                                </h3>
+                                <div style={{ display: "grid", gap: "0.5rem" }}>
+                                  {tasks.map((task) => {
+                                    const taskPlanningState = getTaskPlanningState(task, bootstrap);
+                                    const blockers = getTaskOpenBlockersForTask(task.id, bootstrap);
+                                    const waitingOn = getTaskWaitingOnTasks(task.id, bootstrap);
+                                    const blocks = getTaskBlocksTasks(task.id, bootstrap);
+
+                                    return (
+                                      <div
+                                        key={task.id}
+                                        style={{
+                                          display: "grid",
+                                          gap: "0.25rem",
+                                          padding: "0.75rem",
+                                          border: "1px solid var(--border-base)",
+                                          borderRadius: "12px",
+                                          background: "var(--bg-row-alt)",
+                                        }}
+                                      >
+                                        <div
+                                          style={{
+                                            display: "flex",
+                                            flexWrap: "wrap",
+                                            gap: "0.5rem",
+                                            alignItems: "center",
+                                            justifyContent: "space-between",
+                                          }}
+                                        >
+                                          <strong style={{ color: "var(--text-title)" }}>{task.title}</strong>
+                                          <span className={getStatusPillClassName(taskPlanningState)}>
+                                            {formatTaskPlanningState(taskPlanningState)}
+                                          </span>
+                                        </div>
+                                        <small style={{ color: "var(--text-copy)" }}>
+                                          Due {formatDate(task.dueDate)}
+                                          {blockers.length > 0 ? ` · blocked by ${blockers.length}` : ""}
+                                          {waitingOn.length > 0 ? ` · waiting on ${waitingOn.length}` : ""}
+                                          {blocks.length > 0 ? ` · blocks ${blocks.length}` : ""}
+                                        </small>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </section>
+                            );
+                          })}
+                          {activeEventCompleteTasks.length > 0 ? (
+                            <section style={{ display: "grid", gap: "0.5rem" }}>
+                              <h3
+                                style={{
+                                  margin: 0,
+                                  color: "var(--text-title)",
+                                  fontSize: "0.9rem",
+                                  textTransform: "capitalize",
+                                }}
+                              >
+                                Complete ({activeEventCompleteTasks.length})
+                              </h3>
+                              <div style={{ display: "grid", gap: "0.5rem" }}>
+                                {activeEventCompleteTasks.map((task) => {
+                                  const taskPlanningState = getTaskPlanningState(task, bootstrap);
+                                  const blockers = getTaskOpenBlockersForTask(task.id, bootstrap);
+                                  const waitingOn = getTaskWaitingOnTasks(task.id, bootstrap);
+                                  const blocks = getTaskBlocksTasks(task.id, bootstrap);
+
+                                  return (
+                                    <div
+                                      key={task.id}
+                                      style={{
+                                        display: "grid",
+                                        gap: "0.25rem",
+                                        padding: "0.75rem",
+                                        border: "1px solid var(--border-base)",
+                                        borderRadius: "12px",
+                                        background: "var(--bg-row-alt)",
+                                      }}
+                                    >
+                                      <div
+                                        style={{
+                                          display: "flex",
+                                          flexWrap: "wrap",
+                                          gap: "0.5rem",
+                                          alignItems: "center",
+                                          justifyContent: "space-between",
+                                        }}
+                                      >
+                                        <strong style={{ color: "var(--text-title)" }}>{task.title}</strong>
+                                        <span className={getStatusPillClassName(taskPlanningState)}>
+                                          {formatTaskPlanningState(taskPlanningState)}
+                                        </span>
+                                      </div>
+                                      <small style={{ color: "var(--text-copy)" }}>
+                                        Due {formatDate(task.dueDate)}
+                                        {blockers.length > 0 ? ` · blocked by ${blockers.length}` : ""}
+                                        {waitingOn.length > 0 ? ` · waiting on ${waitingOn.length}` : ""}
+                                        {blocks.length > 0 ? ` · blocks ${blocks.length}` : ""}
+                                      </small>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </section>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <p style={{ margin: "0.25rem 0 0", color: "var(--text-copy)" }}>
+                          No tasks currently target this milestone.
+                        </p>
+                      )}
+                    </div>
+                  ) : null}
 
                   <label className="field modal-wide">
                     <span style={{ color: "var(--text-title)" }}>Related projects</span>
