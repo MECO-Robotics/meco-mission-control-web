@@ -212,21 +212,21 @@ export function getTaskOpenBlockersForTask(taskId: string, bootstrap: BootstrapP
 }
 
 export function getTaskDependencyRecordsForTask(taskId: string, bootstrap: BootstrapPayload) {
-  return (bootstrap.taskDependencies ?? []).filter(
+  return getTaskDependencyRecords(bootstrap).filter(
     (dependency) =>
       dependency.upstreamTaskId === taskId || dependency.downstreamTaskId === taskId,
   );
 }
 
 export function getTaskWaitingOnDependencies(taskId: string, bootstrap: BootstrapPayload) {
-  return (bootstrap.taskDependencies ?? []).filter(
+  return getTaskDependencyRecords(bootstrap).filter(
     (dependency) =>
       dependency.downstreamTaskId === taskId && BLOCKING_DEPENDENCY_TYPES.has(dependency.dependencyType),
   );
 }
 
 export function getTaskBlocksDependencies(taskId: string, bootstrap: BootstrapPayload) {
-  return (bootstrap.taskDependencies ?? []).filter(
+  return getTaskDependencyRecords(bootstrap).filter(
     (dependency) =>
       dependency.upstreamTaskId === taskId && BLOCKING_DEPENDENCY_TYPES.has(dependency.dependencyType),
   );
