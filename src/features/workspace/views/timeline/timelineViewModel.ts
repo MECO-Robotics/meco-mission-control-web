@@ -23,6 +23,7 @@ export interface TimelineTaskSpan extends TaskRecord {
 export interface TimelineSubsystemRow {
   id: string;
   name: string;
+  color: string;
   projectId: string;
   projectName: string;
   index: number;
@@ -272,6 +273,7 @@ function buildTimelineSubsystemRows({
     subsystemRows.push({
       id: subsystem.id,
       name: subsystem.name,
+      color: subsystem.color ?? "#4F86C6",
       projectId: subsystem.projectId,
       projectName: projectsById[subsystem.projectId]?.name ?? "Unknown",
       index: subsystemRows.length,

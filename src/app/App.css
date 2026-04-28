@@ -2587,35 +2587,38 @@
   text-overflow: ellipsis;
 }
 
-.timeline-task-label {
-  --timeline-task-label-accent: #54627b;
+.task-label.timeline-task-label {
+  --timeline-task-discipline-accent: #7a8799;
+  --timeline-task-status-accent: #54627b;
+  --timeline-task-row-fill: var(--bg-panel);
   --timeline-task-label-title-color: color-mix(
     in srgb,
     var(--text-title) 78%,
-    var(--timeline-task-label-accent) 22%
+    var(--timeline-task-discipline-accent) 22%
   );
   --timeline-task-label-owner-color: color-mix(
     in srgb,
     var(--text-copy) 72%,
-    var(--timeline-task-label-accent) 28%
+    var(--timeline-task-discipline-accent) 28%
   );
-  box-shadow: inset 3px 0 0 var(--timeline-task-label-accent);
+  background: var(--timeline-task-row-fill);
+  box-shadow: inset 3px 0 0 var(--timeline-task-discipline-accent);
 }
 
-.timeline-task-label-not-started {
-  --timeline-task-label-accent: #54627b;
+.task-label.timeline-task-label-not-started {
+  --timeline-task-status-accent: #54627b;
 }
 
-.timeline-task-label-in-progress {
-  --timeline-task-label-accent: #16478e;
+.task-label.timeline-task-label-in-progress {
+  --timeline-task-status-accent: #16478e;
 }
 
-.timeline-task-label-waiting-for-qa {
-  --timeline-task-label-accent: #275098;
+.task-label.timeline-task-label-waiting-for-qa {
+  --timeline-task-status-accent: #275098;
 }
 
-.timeline-task-label-complete {
-  --timeline-task-label-accent: #246847;
+.task-label.timeline-task-label-complete {
+  --timeline-task-status-accent: #246847;
 }
 
 .timeline-task-label-title {
@@ -2631,17 +2634,17 @@
 .timeline-row-highlight {
   position: absolute;
   pointer-events: none;
-  background: rgba(22, 71, 142, 0.08);
+  background: var(--timeline-row-highlight-selected-fill, rgba(22, 71, 142, 0.08));
   box-shadow:
-    inset 0 1px 0 rgba(22, 71, 142, 0.2),
-    inset 0 -1px 0 rgba(22, 71, 142, 0.2);
+    inset 0 1px 0 var(--timeline-row-highlight-selected-stroke, rgba(22, 71, 142, 0.2)),
+    inset 0 -1px 0 var(--timeline-row-highlight-selected-stroke, rgba(22, 71, 142, 0.2));
 }
 
 .timeline-row-highlight.is-hovered {
-  background: rgba(22, 71, 142, 0.16);
+  background: var(--timeline-row-highlight-hover-fill, rgba(22, 71, 142, 0.16));
   box-shadow:
-    inset 0 1px 0 rgba(22, 71, 142, 0.44),
-    inset 0 -1px 0 rgba(22, 71, 142, 0.44);
+    inset 0 1px 0 var(--timeline-row-highlight-hover-stroke, rgba(22, 71, 142, 0.44)),
+    inset 0 -1px 0 var(--timeline-row-highlight-hover-stroke, rgba(22, 71, 142, 0.44));
 }
 
 .timeline-layout {
@@ -3538,32 +3541,87 @@
 }
 
 .timeline-bar {
+  --timeline-task-discipline-accent: #7a8799;
+  --timeline-task-status-accent: #54627b;
   min-height: 1.55rem;
   border: 0;
   border-radius: 999px;
-  padding: 0 0.65rem;
+  padding: 0 1.7rem 0 0.65rem;
   text-align: left;
   color: var(--official-white);
   font-weight: 700;
   cursor: pointer;
   align-self: center;
+  background: var(--timeline-task-discipline-accent);
   box-shadow: 0 8px 18px rgba(15, 28, 52, 0.18);
 }
 
 .timeline-not-started {
-  background: linear-gradient(135deg, #70809a, #54627b);
+  --timeline-task-status-accent: #54627b;
 }
 
 .timeline-in-progress {
-  background: linear-gradient(135deg, #16478e, #0d2e5c);
+  --timeline-task-status-accent: #16478e;
 }
 
 .timeline-waiting-for-qa {
-  background: linear-gradient(135deg, #4c79cf, #275098);
+  --timeline-task-status-accent: #275098;
 }
 
 .timeline-complete {
-  background: linear-gradient(135deg, #3d996c, #246847);
+  --timeline-task-status-accent: #246847;
+}
+
+.timeline-task-status-logo {
+  position: absolute;
+  top: 50%;
+  right: 0.45rem;
+  width: 0.95rem;
+  height: 0.95rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 0 0 1px rgba(15, 28, 52, 0.14);
+  color: #54627b;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.timeline-task-status-logo svg {
+  width: 0.62rem;
+  height: 0.62rem;
+  display: block;
+}
+
+.timeline-task-status-logo.is-compact {
+  right: 0.05rem;
+  width: 0.45rem;
+  height: 0.45rem;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 1px rgba(15, 28, 52, 0.12);
+}
+
+.timeline-task-status-logo.is-compact svg {
+  width: 0.3rem;
+  height: 0.3rem;
+}
+
+.timeline-task-status-logo-not-started {
+  color: #54627b;
+}
+
+.timeline-task-status-logo-in-progress {
+  color: #16478e;
+}
+
+.timeline-task-status-logo-waiting-for-qa {
+  color: #275098;
+}
+
+.timeline-task-status-logo-complete {
+  color: #246847;
 }
 
 .table-shell {

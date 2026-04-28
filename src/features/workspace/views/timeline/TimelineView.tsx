@@ -48,6 +48,10 @@ import { TimelineMilestoneModal } from "./TimelineMilestoneModal";
 import { TimelineMilestoneUnderlaysPortal } from "./TimelineMilestoneUnderlaysPortal";
 import { TimelineRowHighlightsPortal } from "./TimelineRowHighlightsPortal";
 import { TimelineToolbar } from "./TimelineToolbar";
+import {
+  buildTimelineSubsystemHighlightStyle,
+  buildTimelineTaskHighlightStyle,
+} from "./timelineTaskColors";
 import { useTimelineMilestoneOverlay } from "./useTimelineMilestoneOverlay";
 
 interface TimelineViewProps {
@@ -135,6 +139,13 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       ) as Record<string, BootstrapPayload["subsystems"][number]>,
     [bootstrap.subsystems],
   );
+  const disciplinesById = useMemo(
+    () =>
+      Object.fromEntries(
+        bootstrap.disciplines.map((discipline) => [discipline.id, discipline]),
+      ) as Record<string, BootstrapPayload["disciplines"][number]>,
+    [bootstrap.disciplines],
+  );
   const selectableSubsystems = useMemo(
     () => getMilestoneSubsystemOptions(bootstrap.subsystems, eventDraft.projectIds),
     [bootstrap.subsystems, eventDraft.projectIds],
@@ -146,6 +157,13 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         ? bootstrap.tasks.filter((task) => filterSelectionMatchesTaskPeople(activePersonFilter, task))
         : bootstrap.tasks,
     [activePersonFilter, bootstrap.tasks],
+  );
+  const tasksById = useMemo(
+    () =>
+      Object.fromEntries(
+        bootstrap.tasks.map((task) => [task.id, task]),
+      ) as Record<string, BootstrapPayload["tasks"][number]>,
+    [bootstrap.tasks],
   );
   const timelineFilterMotionClass = useFilterChangeMotionClass([activePersonFilter]);
   const scopedSubsystems = bootstrap.subsystems;
@@ -516,6 +534,23 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     [timelineShellRef],
   );
 
+  const resolveTaskRowHighlightStyle = useCallback(
+    (anchorKey: string): React.CSSProperties | null => {
+      if (anchorKey.startsWith("task:")) {
+        const task = tasksById[anchorKey.slice(5)];
+        return task ? buildTimelineTaskHighlightStyle(task.disciplineId, disciplinesById) : null;
+      }
+
+      if (anchorKey.startsWith("subsystem:")) {
+        const subsystem = subsystemsById[anchorKey.slice(10)];
+        return subsystem ? buildTimelineSubsystemHighlightStyle(subsystem.color ?? "#4F86C6") : null;
+      }
+
+      return null;
+    },
+    [disciplinesById, subsystemsById, tasksById],
+  );
+
   useEffect(() => {
     queueTimelineLayerUpdate();
   }, [
@@ -665,6 +700,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         clearHoveredMilestonePopup={clearHoveredMilestonePopup}
         collapsedProjects={collapsedProjects}
         collapsedSubsystems={collapsedSubsystems}
+        disciplinesById={disciplinesById}
         firstDayGridColumn={firstDayGridColumn}
         gridMinWidth={gridMinWidth}
         handleTimelineDayMouseEnter={handleTimelineDayMouseEnter}
@@ -719,6 +755,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         hoveredTaskId={hoveredTaskId}
         portalTarget={tooltipPortalTarget}
         resolveRowHighlightGeometry={resolveRowHighlightGeometry}
+        resolveTaskRowHighlightStyle={resolveTaskRowHighlightStyle}
         selectedSubsystemId={selectedSubsystemId}
         selectedTaskId={selectedTaskId}
       />

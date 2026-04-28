@@ -15,6 +15,7 @@ interface TimelineRowHighlightsPortalProps {
   resolveRowHighlightGeometry: (
     anchorKey: string,
   ) => TimelineRowHighlightGeometry | null;
+  resolveTaskRowHighlightStyle: (anchorKey: string) => React.CSSProperties | null;
   selectedSubsystemId: string | null;
   selectedTaskId: string | null;
 }
@@ -24,6 +25,7 @@ export const TimelineRowHighlightsPortal: React.FC<TimelineRowHighlightsPortalPr
   hoveredTaskId,
   portalTarget,
   resolveRowHighlightGeometry,
+  resolveTaskRowHighlightStyle,
   selectedSubsystemId,
   selectedTaskId,
 }) => {
@@ -48,6 +50,12 @@ export const TimelineRowHighlightsPortal: React.FC<TimelineRowHighlightsPortalPr
   const hoveredGeometry = hoveredAnchorKey
     ? resolveRowHighlightGeometry(hoveredAnchorKey)
     : null;
+  const selectedHighlightStyle = selectedAnchorKey
+    ? resolveTaskRowHighlightStyle(selectedAnchorKey)
+    : null;
+  const hoveredHighlightStyle = hoveredAnchorKey
+    ? resolveTaskRowHighlightStyle(hoveredAnchorKey)
+    : null;
 
   if (!selectedGeometry && !hoveredGeometry) {
     return null;
@@ -60,6 +68,7 @@ export const TimelineRowHighlightsPortal: React.FC<TimelineRowHighlightsPortalPr
           aria-hidden="true"
           className="timeline-row-highlight is-selected"
           style={{
+            ...selectedHighlightStyle,
             height: `${selectedGeometry.height}px`,
             left: `${selectedGeometry.left}px`,
             top: `${selectedGeometry.top}px`,
@@ -73,6 +82,7 @@ export const TimelineRowHighlightsPortal: React.FC<TimelineRowHighlightsPortalPr
           aria-hidden="true"
           className="timeline-row-highlight is-hovered"
           style={{
+            ...hoveredHighlightStyle,
             height: `${hoveredGeometry.height}px`,
             left: `${hoveredGeometry.left}px`,
             top: `${hoveredGeometry.top}px`,

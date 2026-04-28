@@ -67,8 +67,8 @@ function createBootstrap(): BootstrapPayload {
     disciplines: [
       {
         id: "discipline-1",
-        code: "mechanical",
-        name: "Mechanical",
+        code: "design",
+        name: "Design",
       },
     ],
     tasks: [
@@ -764,7 +764,7 @@ describe("TimelineView", () => {
     expect(multiRowMarkup).toContain("timeline-merged-cell-text is-rotated");
   });
 
-  it("adds status-coded styling hooks to the left timeline task labels", () => {
+  it("uses discipline-led task styling, neutral left labels, and status logos on timeline bars", () => {
     const markup = renderToStaticMarkup(
       React.createElement(TimelineView, {
         bootstrap: createBootstrap(),
@@ -781,11 +781,86 @@ describe("TimelineView", () => {
     );
     const css = readFileSync(join(process.cwd(), "src/app/App.css"), "utf8");
 
+    expect(markup).toContain("--timeline-task-discipline-accent:#c67b1f");
+    expect(markup).toContain("--timeline-task-row-fill:var(--bg-panel)");
+    expect(markup).toMatch(/class="[^"]*timeline-bar[^"]*timeline-in-progress[^"]*"/);
     expect(markup).toMatch(/class="[^"]*timeline-task-label[^"]*timeline-task-label-in-progress[^"]*"/);
-    expect(css).toMatch(/\.timeline-task-label\s*\{[\s\S]*box-shadow:\s*inset 3px 0 0 var\(--timeline-task-label-accent\)/);
-    expect(css).toMatch(/\.timeline-task-label-in-progress\s*\{[\s\S]*--timeline-task-label-accent:\s*#16478e/);
-    expect(css).toMatch(/\.timeline-task-label-complete\s*\{[\s\S]*--timeline-task-label-accent:\s*#246847/);
+    expect(markup).toMatch(/class="timeline-task-status-logo timeline-task-status-logo-in-progress"/);
+    expect(css).toMatch(/\.timeline-bar\s*\{[\s\S]*background:\s*var\(--timeline-task-discipline-accent\)/);
+    expect(css).toMatch(/\.timeline-bar\s*\{[\s\S]*box-shadow:\s*0 8px 18px rgba\(15, 28, 52, 0\.18\)/);
+    expect(css).toMatch(/\.timeline-task-status-logo\s*\{[\s\S]*position:\s*absolute/);
+    expect(css).toMatch(/\.timeline-task-status-logo-in-progress\s*\{[\s\S]*color:\s*#16478e/);
+    expect(css).toMatch(/\.task-label\.timeline-task-label\s*\{[\s\S]*background:\s*var\(--timeline-task-row-fill\)/);
+    expect(css).toMatch(/\.task-label\.timeline-task-label\s*\{[\s\S]*box-shadow:\s*inset 3px 0 0 var\(--timeline-task-discipline-accent\)/);
+    expect(css).toMatch(/\.timeline-in-progress\s*\{[\s\S]*--timeline-task-status-accent:\s*#16478e/);
+    expect(css).toMatch(/\.task-label\.timeline-task-label-in-progress\s*\{[\s\S]*--timeline-task-status-accent:\s*#16478e/);
+    expect(css).toMatch(/\.task-label\.timeline-task-label-complete\s*\{[\s\S]*--timeline-task-status-accent:\s*#246847/);
   });
+
+  it("uses task discipline and subsystem colors for timeline horizontal highlights", () => {
+    const css = readFileSync(join(process.cwd(), "src/app/App.css"), "utf8");
+    const portalSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/timeline/TimelineRowHighlightsPortal.tsx"),
+      "utf8",
+    );
+    const helperSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/timeline/timelineTaskColors.ts"),
+      "utf8",
+    );
+
+    expect(css).toMatch(/\.timeline-row-highlight\s*\{[\s\S]*background:\s*var\(--timeline-row-highlight-selected-fill,\s*rgba\(22,\s*71,\s*142,\s*0\.08\)\)/);
+    expect(css).toMatch(/\.timeline-row-highlight\.is-hovered\s*\{[\s\S]*background:\s*var\(--timeline-row-highlight-hover-fill,\s*rgba\(22,\s*71,\s*142,\s*0\.16\)\)/);
+    expect(portalSource).toContain("resolveTaskRowHighlightStyle");
+    expect(portalSource).toContain("...selectedHighlightStyle");
+    expect(portalSource).toContain("...hoveredHighlightStyle");
+    expect(helperSource).toContain('"--timeline-row-highlight-selected-fill"');
+    expect(helperSource).toContain('"--timeline-row-highlight-hover-fill"');
+    expect(helperSource).toContain("buildTimelineSubsystemHighlightStyle");
+  });
+
+  it("keeps subsystem accent strips on every sticky timeline subsystem surface", () => {
+    const subsystemGroupSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/timeline/TimelineSubsystemGroup.tsx"),
+      "utf8",
+    );
+    const projectGroupSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/timeline/TimelineProjectGroup.tsx"),
+      "utf8",
+    );
+
+    expect(subsystemGroupSource).toContain('boxShadow: `inset 3px 0 0 ${accentColor}`');
+    expect(projectGroupSource).toContain('boxShadow: `inset 3px 0 0 ${subsystem.color}`');
+  });
+
+  it.each([
+    [false, "3 / -1", "3 / -1"],
+    [true, "4 / -1", "4 / -1"],
+  ])(
+    "starts timeline row highlight anchors after sticky label columns when all-projects view is %s",
+    (isAllProjectsView, expectedTaskAnchor, expectedSubsystemAnchor) => {
+      const markup = renderToStaticMarkup(
+        React.createElement(TimelineView, {
+          bootstrap: createBootstrap(),
+          isAllProjectsView,
+          activePersonFilter: [],
+          setActivePersonFilter: jest.fn(),
+          membersById,
+          openTaskDetailModal: jest.fn(),
+          openCreateTaskModal: jest.fn(),
+          onDeleteTimelineEvent: jest.fn(),
+          onSaveTimelineEvent: jest.fn(),
+          triggerCreateMilestoneToken: 0,
+        }),
+      );
+
+      expect(markup).toMatch(
+        new RegExp(`data-timeline-row-anchor="task:task-1" style="[^"]*grid-row:1;grid-column:${expectedTaskAnchor.replace("/", "\\/")}`),
+      );
+      expect(markup).toMatch(
+        new RegExp(`data-timeline-row-anchor="subsystem:subsystem-1" style="[^"]*grid-row:1 / span 1;grid-column:${expectedSubsystemAnchor.replace("/", "\\/")}`),
+      );
+    },
+  );
 
   it("keeps left timeline task labels title-only with tighter row height", () => {
     const markup = renderToStaticMarkup(

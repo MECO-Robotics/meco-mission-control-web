@@ -17,6 +17,7 @@ interface TimelineGridBodyProps {
   collapsedProjects: Record<string, boolean>;
   collapsedSubsystems: Record<string, boolean>;
   clearHoveredMilestonePopup: () => void;
+  disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
   firstDayGridColumn: number;
   gridMinWidth: number;
   handleTimelineDayMouseEnter: (event: React.MouseEvent<HTMLElement>) => void;
@@ -69,6 +70,7 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
   collapsedProjects,
   collapsedSubsystems,
   clearHoveredMilestonePopup,
+  disciplinesById,
   firstDayGridColumn,
   gridMinWidth,
   handleTimelineDayMouseEnter,
@@ -119,6 +121,7 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
           clearHoveredMilestonePopup={clearHoveredMilestonePopup}
           collapsedProjects={collapsedProjects}
           collapsedSubsystems={collapsedSubsystems}
+          disciplinesById={disciplinesById}
           firstDayGridColumn={firstDayGridColumn}
           gridMinWidth={gridMinWidth}
           handleTimelineDayMouseEnter={handleTimelineDayMouseEnter}
@@ -153,6 +156,7 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
           bootstrap={bootstrap}
           clearHoveredMilestonePopup={clearHoveredMilestonePopup}
           collapsedSubsystems={collapsedSubsystems}
+          disciplinesById={disciplinesById}
           firstDayGridColumn={firstDayGridColumn}
           gridMinWidth={gridMinWidth}
           handleTimelineDayMouseEnter={handleTimelineDayMouseEnter}
