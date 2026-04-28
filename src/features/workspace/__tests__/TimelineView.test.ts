@@ -137,6 +137,35 @@ function createBootstrapWithoutTasks(): BootstrapPayload {
   };
 }
 
+function createBootstrapWithDependency(): BootstrapPayload {
+  const bootstrap = createBootstrap();
+
+  return {
+    ...bootstrap,
+    tasks: [
+      ...bootstrap.tasks,
+      {
+        ...bootstrap.tasks[0],
+        id: "task-2",
+        title: "Bumper mount drill pattern",
+        startDate: "2026-04-11",
+        dueDate: "2026-04-14",
+        status: "not-started",
+        dependencyIds: ["dep-1"],
+      },
+    ],
+    taskDependencies: [
+      {
+        id: "dep-1",
+        upstreamTaskId: "task-1",
+        downstreamTaskId: "task-2",
+        dependencyType: "finish_to_start",
+        createdAt: "2026-04-01T00:00:00.000Z",
+      },
+    ],
+  };
+}
+
 const membersById = {
   "member-1": {
     id: "member-1",
@@ -289,6 +318,30 @@ describe("TimelineView", () => {
     expect(css).not.toMatch(
       /\.timeline-shell\s+\.subsystem-group[\s\S]{0,180}content-visibility:\s*auto/,
     );
+  });
+
+  it("treats month-view header day clicks as week drill-ins", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(TimelineView, {
+        bootstrap: createBootstrap(),
+        isAllProjectsView: false,
+        activePersonFilter: [],
+        setActivePersonFilter: jest.fn(),
+        membersById,
+        openTaskDetailModal: jest.fn(),
+        openCreateTaskModal: jest.fn(),
+        onDeleteTimelineEvent: jest.fn(),
+        onSaveTimelineEvent: jest.fn(),
+        triggerCreateMilestoneToken: 0,
+      }),
+    );
+    const headerSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/timeline/TimelineGridHeader.tsx"),
+      "utf8",
+    );
+
+    expect(markup).toContain('title="Open week of 2026-04-06"');
+    expect(headerSource).toContain("onClick={() => handleTimelineHeaderDayClick(cell.day)}");
   });
 
   it.each([false, true])(
@@ -675,5 +728,101 @@ describe("TimelineView", () => {
     expect(
       getRule(".timeline-merged-cell-text.is-rotated .timeline-merged-cell-title"),
     ).toMatch(/max-height:\s*100%/);
+  });
+
+  it("keeps single-row subsystem and project labels horizontal while multi-row labels rotate", () => {
+    const singleRowMarkup = renderToStaticMarkup(
+      React.createElement(TimelineView, {
+        bootstrap: createBootstrap(),
+        isAllProjectsView: true,
+        activePersonFilter: [],
+        setActivePersonFilter: jest.fn(),
+        membersById,
+        openTaskDetailModal: jest.fn(),
+        openCreateTaskModal: jest.fn(),
+        onDeleteTimelineEvent: jest.fn(),
+        onSaveTimelineEvent: jest.fn(),
+        triggerCreateMilestoneToken: 0,
+      }),
+    );
+    const multiRowMarkup = renderToStaticMarkup(
+      React.createElement(TimelineView, {
+        bootstrap: createBootstrapWithDependency(),
+        isAllProjectsView: true,
+        activePersonFilter: [],
+        setActivePersonFilter: jest.fn(),
+        membersById,
+        openTaskDetailModal: jest.fn(),
+        openCreateTaskModal: jest.fn(),
+        onDeleteTimelineEvent: jest.fn(),
+        onSaveTimelineEvent: jest.fn(),
+        triggerCreateMilestoneToken: 0,
+      }),
+    );
+
+    expect(singleRowMarkup).not.toContain("timeline-merged-cell-text is-rotated");
+    expect(multiRowMarkup).toContain("timeline-merged-cell-text is-rotated");
+  });
+
+  it("adds status-coded styling hooks to the left timeline task labels", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(TimelineView, {
+        bootstrap: createBootstrap(),
+        isAllProjectsView: false,
+        activePersonFilter: [],
+        setActivePersonFilter: jest.fn(),
+        membersById,
+        openTaskDetailModal: jest.fn(),
+        openCreateTaskModal: jest.fn(),
+        onDeleteTimelineEvent: jest.fn(),
+        onSaveTimelineEvent: jest.fn(),
+        triggerCreateMilestoneToken: 0,
+      }),
+    );
+    const css = readFileSync(join(process.cwd(), "src/app/App.css"), "utf8");
+
+    expect(markup).toMatch(/class="[^"]*timeline-task-label[^"]*timeline-task-label-in-progress[^"]*"/);
+    expect(css).toMatch(/\.timeline-task-label\s*\{[\s\S]*box-shadow:\s*inset 3px 0 0 var\(--timeline-task-label-accent\)/);
+    expect(css).toMatch(/\.timeline-task-label-in-progress\s*\{[\s\S]*--timeline-task-label-accent:\s*#16478e/);
+    expect(css).toMatch(/\.timeline-task-label-complete\s*\{[\s\S]*--timeline-task-label-accent:\s*#246847/);
+  });
+
+  it("keeps left timeline task labels title-only with tighter row height", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(TimelineView, {
+        bootstrap: createBootstrapWithDependency(),
+        isAllProjectsView: false,
+        activePersonFilter: [],
+        setActivePersonFilter: jest.fn(),
+        membersById,
+        openTaskDetailModal: jest.fn(),
+        openCreateTaskModal: jest.fn(),
+        onDeleteTimelineEvent: jest.fn(),
+        onSaveTimelineEvent: jest.fn(),
+        triggerCreateMilestoneToken: 0,
+      }),
+    );
+    const css = readFileSync(join(process.cwd(), "src/app/App.css"), "utf8");
+    const daySlotsSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/timeline/TimelineGridDaySlots.tsx"),
+      "utf8",
+    );
+    const projectGroupSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/timeline/TimelineProjectGroup.tsx"),
+      "utf8",
+    );
+    const subsystemGroupSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/timeline/TimelineSubsystemGroup.tsx"),
+      "utf8",
+    );
+
+    expect(markup).not.toContain("timeline-task-label-owner");
+    expect(markup).not.toContain("Depends on");
+    expect(markup).not.toContain("Blocks");
+    expect(markup).toContain("min-height:38px");
+    expect(daySlotsSource).toContain('minHeight: "38px"');
+    expect(projectGroupSource).toContain('gridAutoRows: "38px"');
+    expect(subsystemGroupSource).toContain('gridAutoRows: "38px"');
+    expect(css).toMatch(/\.timeline-row-highlight-anchor\s*\{[\s\S]*min-height:\s*38px/);
   });
 });
