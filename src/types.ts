@@ -107,6 +107,7 @@ export interface SubsystemRecord {
   projectId: string;
   name: string;
   description: string;
+  photoUrl?: string;
   iteration: number;
   isArchived?: boolean;
   isCore: boolean;
@@ -127,6 +128,7 @@ export interface MechanismRecord {
   subsystemId: string;
   name: string;
   description: string;
+  photoUrl?: string;
   iteration: number;
   isArchived?: boolean;
 }
@@ -158,10 +160,10 @@ export interface ArtifactRecord {
 
 export interface PartDefinitionRecord {
   id: string;
-  name: string;
-  partNumber: string;
   seasonId: string;
   activeSeasonIds?: string[];
+  name: string;
+  partNumber: string;
   revision: string;
   iteration: number;
   isArchived?: boolean;
@@ -169,6 +171,7 @@ export interface PartDefinitionRecord {
   source: string;
   materialId: string | null;
   description: string;
+  photoUrl?: string;
 }
 
 export interface PartInstanceRecord {
@@ -180,6 +183,7 @@ export interface PartInstanceRecord {
   quantity: number;
   trackIndividually: boolean;
   status: "planned" | "needed" | "available" | "installed" | "retired";
+  photoUrl?: string;
 }
 
 export interface EventRecord {
@@ -192,6 +196,7 @@ export interface EventRecord {
   description: string;
   projectIds: string[];
   relatedSubsystemIds: string[];
+  photoUrl?: string;
 }
 
 export interface EventPayload {
@@ -203,6 +208,7 @@ export interface EventPayload {
   description: string;
   projectIds: string[];
   relatedSubsystemIds: string[];
+  photoUrl?: string;
 }
 
 export interface SeasonRecord {
@@ -241,6 +247,7 @@ export interface ReportRecord {
   result: string;
   summary: string;
   notes: string;
+  photoUrl?: string;
   createdAt: string;
   participantIds?: string[];
   mentorApproved?: boolean;
@@ -260,6 +267,7 @@ export interface ReportPayload {
   result: string;
   summary: string;
   notes: string;
+  photoUrl: string;
   createdAt: string;
   participantIds?: string[];
   mentorApproved?: boolean;
@@ -370,6 +378,7 @@ export interface TaskRecord {
   artifactId?: string | null;
   artifactIds?: string[];
   targetEventId: string | null;
+  photoUrl?: string;
   ownerId: string | null;
   assigneeIds: string[];
   mentorId: string | null;
@@ -422,6 +431,7 @@ export interface WorkLogRecord {
   hours: number;
   participantIds: string[];
   notes: string;
+  photoUrl?: string;
 }
 
 export interface AttendanceRecord {
@@ -437,6 +447,7 @@ export interface WorkLogPayload {
   hours: number;
   participantIds: string[];
   notes: string;
+  photoUrl: string;
 }
 
 export interface ManufacturingItemRecord {
@@ -609,6 +620,8 @@ export interface RiskPayload {
 }
 
 export interface PartDefinitionPayload {
+  seasonId?: string;
+  activeSeasonIds?: string[];
   name: string;
   partNumber: string;
   revision: string;
@@ -618,14 +631,14 @@ export interface PartDefinitionPayload {
   source: string;
   materialId: string | null;
   description: string;
+  photoUrl: string;
 }
 
-  seasonId?: string;
-  activeSeasonIds?: string[];
 export interface SubsystemPayload {
   projectId: string;
   name: string;
   description: string;
+  photoUrl: string;
   iteration: number;
   isArchived?: boolean;
   parentSubsystemId: string | null;
@@ -638,6 +651,7 @@ export interface MechanismPayload {
   subsystemId: string;
   name: string;
   description: string;
+  photoUrl: string;
   iteration: number;
   isArchived?: boolean;
 }
@@ -650,6 +664,7 @@ export interface PartInstancePayload {
   quantity: number;
   trackIndividually: boolean;
   status: PartInstanceRecord["status"];
+  photoUrl: string;
 }
 
 export interface TaskPayload {
@@ -668,6 +683,7 @@ export interface TaskPayload {
   artifactId?: string | null;
   artifactIds?: string[];
   targetEventId: string | null;
+  photoUrl: string;
   ownerId: string | null;
   assigneeIds: string[];
   mentorId: string | null;

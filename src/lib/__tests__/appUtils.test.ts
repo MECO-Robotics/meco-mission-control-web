@@ -62,6 +62,7 @@ function createBootstrap(overrides: Partial<BootstrapPayload> = {}): BootstrapPa
 
   const partDefinition: PartDefinitionRecord = {
     id: "part-def-1",
+    seasonId: "season-2026",
     name: "Bearing Block",
     partNumber: "BB-001",
     revision: "A",
@@ -331,12 +332,13 @@ describe("appUtils", () => {
   });
 
   it("buildEmptyManufacturingPayload derives material, subsystem, instance, and quantity from the default part", () => {
-    const partDefinition: PartDefinitionRecord = {
-      id: "part-def-bearing-block",
-      name: "Bearing Block",
-      partNumber: "BB-001",
-      revision: "A",
-      iteration: 1,
+  const partDefinition: PartDefinitionRecord = {
+    id: "part-def-bearing-block",
+    seasonId: "season-2026",
+    name: "Bearing Block",
+    partNumber: "BB-001",
+    revision: "A",
+    iteration: 1,
       type: "custom",
       source: "Onshape",
       materialId: "material-aluminum",
@@ -409,12 +411,13 @@ describe("appUtils", () => {
   });
 
   it("inferManufacturingDraftFromPartSelection updates an existing draft from the selected part", () => {
-    const partDefinition: PartDefinitionRecord = {
-      id: "part-def-bearing-block",
-      name: "Bearing Block",
-      partNumber: "BB-001",
-      revision: "A",
-      iteration: 1,
+  const partDefinition: PartDefinitionRecord = {
+    id: "part-def-bearing-block",
+    seasonId: "season-2026",
+    name: "Bearing Block",
+    partNumber: "BB-001",
+    revision: "A",
+    iteration: 1,
       type: "custom",
       source: "Onshape",
       materialId: "material-aluminum",

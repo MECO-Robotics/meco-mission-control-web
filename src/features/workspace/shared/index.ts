@@ -51,3 +51,4 @@ export {
   useFilterChangeMotionClass,
   useWorkspacePagination,
 } from "./WorkspaceViewShared";
+export { PhotoUploadField } from "./PhotoUploadField";

@@ -377,6 +377,7 @@ export function buildEmptyTaskPayload(bootstrap: BootstrapPayload): TaskPayload 
         workstreamIds: [],
         title: "",
         summary: "",
+        photoUrl: "",
         subsystemId: firstSubsystem,
         subsystemIds: uniqueIds([firstSubsystem]),
         disciplineId: firstDiscipline,
@@ -713,6 +714,7 @@ export function buildEmptyWorkLogPayload(
     hours: 1,
     participantIds: participantId ? [participantId] : [],
     notes: "",
+    photoUrl: "",
   };
 }
 
@@ -750,6 +752,7 @@ export function buildEmptyReportPayload(
     result?: string;
     summary?: string;
     notes?: string;
+    photoUrl?: string;
     participantIds?: string[];
     mentorApproved?: boolean;
     reviewedAt?: string;
@@ -786,6 +789,7 @@ export function buildEmptyReportPayload(
     result: defaults.result ?? "pass",
     summary: defaults.summary ?? "",
     notes: defaults.notes ?? "",
+    photoUrl: defaults.photoUrl ?? "",
     createdAt: today,
     participantIds: defaults.participantIds ?? [],
     mentorApproved: defaults.mentorApproved ?? false,
@@ -816,6 +820,7 @@ export function buildEmptyQaReportPayload(
     mentorApproved: false,
     notes: "",
     reviewedAt: new Date().toISOString().slice(0, 10),
+    photoUrl: "",
   });
 }
 
@@ -831,6 +836,7 @@ export function buildEmptyTestResultPayload(bootstrap: BootstrapPayload): TestRe
     title: "",
     status: "pass",
     findings: [],
+    photoUrl: "",
   });
 }
 
@@ -910,17 +916,18 @@ export function buildEmptyWorkstreamPayload(
 
 export function buildEmptyPartDefinitionPayload(bootstrap: BootstrapPayload): PartDefinitionPayload {
     return {
+        seasonId: bootstrap.seasons[0]?.id,
+        activeSeasonIds: bootstrap.seasons[0]?.id ? [bootstrap.seasons[0].id] : [],
         name: "",
         partNumber: "",
         revision: "A",
         iteration: 1,
         isArchived: false,
         type: "custom",
-        seasonId: bootstrap.seasons[0]?.id,
-        activeSeasonIds: bootstrap.seasons[0]?.id ? [bootstrap.seasons[0].id] : [],
         source: "",
         materialId: bootstrap.materials[0]?.id ?? null,
         description: "",
+        photoUrl: "",
     };
 }
 
@@ -945,6 +952,7 @@ export function buildEmptySubsystemPayload(bootstrap: BootstrapPayload): Subsyst
         projectId: defaultProjectId,
         name: "",
         description: "",
+        photoUrl: "",
         iteration: 1,
         isArchived: false,
         parentSubsystemId: defaultParentSubsystemId,
@@ -967,6 +975,7 @@ export function buildEmptyMechanismPayload(
         subsystemId: firstSubsystem,
         name: "",
         description: "",
+        photoUrl: "",
         iteration: 1,
         isArchived: false,
     };
@@ -994,6 +1003,7 @@ export function buildEmptyPartInstancePayload(
         quantity: 1,
         trackIndividually: false,
         status: "planned",
+        photoUrl: "",
     };
 }
 
@@ -1005,6 +1015,7 @@ export const taskToPayload = (task: TaskRecord, bootstrap?: BootstrapPayload): T
   partInstanceIds: task.partInstanceIds?.length ? task.partInstanceIds : uniqueIds([task.partInstanceId]),
   artifactId: task.artifactId ?? null,
   artifactIds: task.artifactIds?.length ? uniqueIds(task.artifactIds) : uniqueIds([task.artifactId]),
+  photoUrl: task.photoUrl ?? "",
   assigneeIds: task.assigneeIds?.length ? uniqueIds(task.assigneeIds) : uniqueIds([task.ownerId]),
   taskDependencies: getTaskDependencyDrafts(task, bootstrap),
 });
@@ -1038,29 +1049,33 @@ export const artifactToPayload = (item: ArtifactRecord): ArtifactPayload => ({
 
 export const partDefinitionToPayload = (item: PartDefinitionRecord): PartDefinitionPayload => ({
     ...item,
+    seasonId: item.seasonId,
+    activeSeasonIds: item.activeSeasonIds ?? [item.seasonId],
     iteration: normalizeIteration(item.iteration),
     isArchived: item.isArchived ?? false,
     materialId: item.materialId ?? null,
+    photoUrl: item.photoUrl ?? "",
 });
 
 export const subsystemToPayload = (item: SubsystemRecord): SubsystemPayload => ({
     ...item,
     isArchived: item.isArchived ?? false,
     iteration: normalizeIteration(item.iteration),
+    photoUrl: item.photoUrl ?? "",
 });
 
-    seasonId: item.seasonId,
-    activeSeasonIds: item.activeSeasonIds ?? [item.seasonId],
 export const mechanismToPayload = (item: {
     subsystemId: string;
     name: string;
     description: string;
     iteration?: number;
     isArchived?: boolean;
+    photoUrl?: string;
 }): MechanismPayload => ({
     ...item,
     isArchived: item.isArchived ?? false,
     iteration: normalizeIteration(item.iteration),
+    photoUrl: item.photoUrl ?? "",
 });
 
 export const workstreamToPayload = (item: WorkstreamRecord): WorkstreamPayload => ({
@@ -1071,4 +1086,5 @@ export const workstreamToPayload = (item: WorkstreamRecord): WorkstreamPayload =
 export const partInstanceToPayload = (item: PartInstanceRecord): PartInstancePayload => ({
     ...item,
     mechanismId: item.mechanismId ?? null,
+    photoUrl: item.photoUrl ?? "",
 });

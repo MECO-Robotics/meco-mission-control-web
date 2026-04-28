@@ -84,6 +84,15 @@ export interface GoogleCredentialResponse {
   credential?: string;
 }
 
+export interface MediaUploadResponse {
+  expiresInSeconds: number;
+  headers: Record<string, string>;
+  key: string;
+  method: "PUT";
+  publicUrl: string;
+  uploadUrl: string;
+}
+
 class ApiError extends Error {
   readonly statusCode: number;
 
@@ -244,6 +253,58 @@ async function postJson<T>(path: string, body: unknown) {
   });
 
   return readJson<T>(response);
+}
+
+async function requestUpload(
+  endpoint: string,
+  failureMessage: string,
+  projectId: string,
+  file: File,
+  onUnauthorized?: () => void,
+) {
+  const presignedUpload = await requestApi<MediaUploadResponse>(
+    endpoint,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        projectId,
+        fileName: file.name,
+        contentType: file.type || "application/octet-stream",
+      }),
+    },
+    onUnauthorized,
+  );
+
+  const uploadResponse = await fetch(presignedUpload.uploadUrl, {
+    method: presignedUpload.method,
+    headers: presignedUpload.headers,
+    body: file,
+  });
+
+  if (!uploadResponse.ok) {
+    throw new ApiError(failureMessage, uploadResponse.status);
+  }
+
+  return presignedUpload.publicUrl;
+}
+
+export async function requestImageUpload(
+  projectId: string,
+  file: File,
+  onUnauthorized?: () => void,
+) {
+  return requestUpload("/media/presign-upload", "Photo upload failed unexpectedly.", projectId, file, onUnauthorized);
+}
+
+export async function requestVideoUpload(
+  projectId: string,
+  file: File,
+  onUnauthorized?: () => void,
+) {
+  return requestUpload("/media/presign-video-upload", "Video upload failed unexpectedly.", projectId, file, onUnauthorized);
 }
 
 function isAuthConfig(payload: unknown): payload is AuthConfig {

@@ -48,6 +48,7 @@ const bootstrap: BootstrapPayload = {
   partDefinitions: [
     {
       id: "drive-part",
+      seasonId: "season-2026",
       name: "Drive rail",
       partNumber: "DRV-001",
       revision: "A",
@@ -59,6 +60,7 @@ const bootstrap: BootstrapPayload = {
     },
     {
       id: "arm-part",
+      seasonId: "season-2026",
       name: "Arm bracket",
       partNumber: "ARM-001",
       revision: "A",

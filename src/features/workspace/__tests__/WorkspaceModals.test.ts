@@ -82,6 +82,7 @@ function createBootstrap(): BootstrapPayload {
 
 function renderTaskModal(taskModalMode: ComponentProps<typeof TaskEditorModal>["taskModalMode"]) {
   const bootstrap = createBootstrap();
+  const requestPhotoUpload = jest.fn(async () => "https://cdn.example.test/uploaded.png");
   const taskDraft = {
     ...buildEmptyTaskPayload(bootstrap),
     actualHours: 2,
@@ -112,6 +113,7 @@ function renderTaskModal(taskModalMode: ComponentProps<typeof TaskEditorModal>["
       mentors: bootstrap.members.filter((member) => member.role === "mentor"),
       partDefinitionsById: {},
       partInstancesById: {},
+      requestPhotoUpload,
       students: bootstrap.members.filter((member) => member.role !== "mentor"),
       taskDraft,
       taskModalMode,
@@ -123,6 +125,7 @@ function renderTaskModal(taskModalMode: ComponentProps<typeof TaskEditorModal>["
 function renderIterationEditors(mode: "create" | "edit") {
   const bootstrap = createBootstrap();
   const noop = jest.fn();
+  const requestPhotoUpload = jest.fn(async () => "https://cdn.example.test/uploaded.png");
 
   return [
     renderToStaticMarkup(
@@ -135,6 +138,7 @@ function renderIterationEditors(mode: "create" | "edit") {
         handlePartDefinitionSubmit: noop,
         isDeletingPartDefinition: false,
         isSavingPartDefinition: false,
+        requestPhotoUpload,
         partDefinitionDraft: {
           name: "Bearing Block",
           partNumber: "BB-001",
@@ -144,6 +148,7 @@ function renderIterationEditors(mode: "create" | "edit") {
           source: "Onshape",
           materialId: null,
           description: "",
+          photoUrl: "",
         },
         partDefinitionModalMode: mode,
         setPartDefinitionDraft: noop,
@@ -157,10 +162,12 @@ function renderIterationEditors(mode: "create" | "edit") {
         handleToggleSubsystemArchived: noop,
         handleSubsystemSubmit: noop,
         isSavingSubsystem: false,
+        requestPhotoUpload,
         subsystemDraft: {
           projectId: "project-1",
           name: "Drive",
           description: "Drive subsystem",
+          photoUrl: "",
           iteration: 1,
           parentSubsystemId: null,
           responsibleEngineerId: null,
@@ -183,10 +190,12 @@ function renderIterationEditors(mode: "create" | "edit") {
         handleMechanismSubmit: noop,
         isDeletingMechanism: false,
         isSavingMechanism: false,
+        requestPhotoUpload,
         mechanismDraft: {
           subsystemId: "subsystem-1",
           name: "Gearbox",
           description: "Drive gearbox",
+          photoUrl: "",
           iteration: 1,
         },
         mechanismModalMode: mode,
@@ -271,6 +280,7 @@ function renderManufacturingModalWithPartInstances(process: "cnc" | "3d-print" |
     partDefinitions: [
       {
         id: "part-definition-1",
+        seasonId: "season-2026",
         name: "Bearing Block",
         partNumber: "BB-001",
         revision: "A",

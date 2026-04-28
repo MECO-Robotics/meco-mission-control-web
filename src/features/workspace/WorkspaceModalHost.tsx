@@ -73,6 +73,7 @@ interface WorkspaceModalHostProps {
   closeSubsystemModal: () => void;
   closeTaskModal: () => void;
   closeWorkstreamModal: () => void;
+  requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
   eventsById: Record<string, BootstrapPayload["events"][number]>;
   handleDeleteMaterial: (materialId: string) => Promise<void>;
@@ -196,6 +197,7 @@ export function WorkspaceModalHost({
   closeSubsystemModal,
   closeTaskModal,
   closeWorkstreamModal,
+  requestPhotoUpload,
   disciplinesById,
   eventsById,
   handleDeleteMaterial,
@@ -330,6 +332,7 @@ export function WorkspaceModalHost({
           handleToggleSubsystemArchived={handleToggleSubsystemArchived}
           handleSubsystemSubmit={handleSubsystemSubmit}
           isSavingSubsystem={isSavingSubsystem}
+          requestPhotoUpload={requestPhotoUpload}
           subsystemDraft={subsystemDraft}
           subsystemDraftRisks={subsystemDraftRisks}
           subsystemModalMode={subsystemModalMode}
@@ -362,6 +365,7 @@ export function WorkspaceModalHost({
           handleMechanismSubmit={handleMechanismSubmit}
           isDeletingMechanism={isDeletingMechanism}
           isSavingMechanism={isSavingMechanism}
+          requestPhotoUpload={requestPhotoUpload}
           mechanismDraft={mechanismDraft}
           mechanismModalMode={mechanismModalMode}
           setMechanismDraft={setMechanismDraft}
@@ -374,6 +378,7 @@ export function WorkspaceModalHost({
           closePartInstanceModal={closePartInstanceModal}
           handlePartInstanceSubmit={handlePartInstanceSubmit}
           isSavingPartInstance={isSavingPartInstance}
+          requestPhotoUpload={requestPhotoUpload}
           partDefinitionDraftsById={partDefinitionsById}
           partInstanceDraft={partInstanceDraft}
           partInstanceModalMode={partInstanceModalMode}
@@ -396,6 +401,7 @@ export function WorkspaceModalHost({
           mentors={mentors}
           partDefinitionsById={partDefinitionsById}
           partInstancesById={partInstancesById}
+          requestPhotoUpload={requestPhotoUpload}
           setTaskDraft={setTaskDraft}
           showCreateTypeToggle={showTimelineCreateToggleInTaskModal}
           onSwitchCreateTypeToMilestone={onSwitchTaskCreateToMilestone}
@@ -425,6 +431,7 @@ export function WorkspaceModalHost({
           closeWorkLogModal={closeWorkLogModal}
           handleWorkLogSubmit={handleWorkLogSubmit}
           isSavingWorkLog={isSavingWorkLog}
+          requestPhotoUpload={requestPhotoUpload}
           setWorkLogDraft={setWorkLogDraft}
           workLogDraft={workLogDraft}
         />
@@ -436,6 +443,7 @@ export function WorkspaceModalHost({
           closeQaReportModal={closeQaReportModal}
           handleQaReportSubmit={handleQaReportSubmit}
           isSavingQaReport={isSavingQaReport}
+          requestPhotoUpload={requestPhotoUpload}
           qaReportDraft={qaReportDraft}
           setQaReportDraft={setQaReportDraft}
         />
@@ -449,6 +457,7 @@ export function WorkspaceModalHost({
           eventReportFindings={eventReportFindings}
           handleEventReportSubmit={handleEventReportSubmit}
           isSavingEventReport={isSavingEventReport}
+          requestPhotoUpload={requestPhotoUpload}
           setEventReportDraft={setEventReportDraft}
           setEventReportFindings={setEventReportFindings}
         />
@@ -490,6 +499,7 @@ export function WorkspaceModalHost({
           handlePartDefinitionSubmit={handlePartDefinitionSubmit}
           isDeletingPartDefinition={isDeletingPartDefinition}
           isSavingPartDefinition={isSavingPartDefinition}
+          requestPhotoUpload={requestPhotoUpload}
           partDefinitionDraft={partDefinitionDraft}
           partDefinitionModalMode={partDefinitionModalMode}
           setPartDefinitionDraft={setPartDefinitionDraft}

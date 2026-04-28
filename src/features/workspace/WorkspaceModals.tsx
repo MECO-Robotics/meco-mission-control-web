@@ -29,6 +29,7 @@ import {
   toggleTaskTargetSelection,
   type TaskTargetKind,
 } from "@/lib/appUtils";
+import { PhotoUploadField } from "@/features/workspace/shared/PhotoUploadField";
 import {
   formatTaskPlanningState,
   getTaskBlocksDependencies,
@@ -52,6 +53,7 @@ interface TaskEditorModalProps {
   partDefinitionsById: Record<string, BootstrapPayload["partDefinitions"][number]>;
   partInstancesById: Record<string, BootstrapPayload["partInstances"][number]>;
   students: BootstrapPayload["members"];
+  requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   taskDraft: TaskPayload;
   taskModalMode: "create" | "edit";
   showCreateTypeToggle?: boolean;
@@ -72,6 +74,7 @@ export function TaskEditorModal({
   partDefinitionsById,
   partInstancesById,
   students,
+  requestPhotoUpload,
   taskDraft,
   taskModalMode,
   showCreateTypeToggle,
@@ -81,6 +84,7 @@ export function TaskEditorModal({
   const projectsById = Object.fromEntries(
     bootstrap.projects.map((project) => [project.id, project]),
   ) as Record<string, BootstrapPayload["projects"][number]>;
+  const taskPhotoProjectId = taskDraft.projectId || bootstrap.projects[0]?.id || null;
   const subsystemsById = Object.fromEntries(
     bootstrap.subsystems.map((subsystem) => [subsystem.id, subsystem]),
   ) as Record<string, BootstrapPayload["subsystems"][number]>;
@@ -314,6 +318,18 @@ export function TaskEditorModal({
               value={taskDraft.summary}
             />
           </label>
+          <PhotoUploadField
+            currentUrl={taskDraft.photoUrl}
+            label="Task photo"
+            onChange={(value) => setTaskDraft((current) => ({ ...current, photoUrl: value }))}
+            onUpload={async (file) => {
+              if (!taskPhotoProjectId) {
+                throw new Error("No project is available for photo upload.");
+              }
+
+              return requestPhotoUpload(taskPhotoProjectId, file);
+            }}
+          />
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Project</span>
             <select
@@ -1176,6 +1192,7 @@ interface WorkLogEditorModalProps {
   closeWorkLogModal: () => void;
   handleWorkLogSubmit: (event: FormEvent<HTMLFormElement>) => void;
   isSavingWorkLog: boolean;
+  requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   setWorkLogDraft: Dispatch<SetStateAction<WorkLogPayload>>;
   workLogDraft: WorkLogPayload;
 }
@@ -1185,12 +1202,14 @@ export function WorkLogEditorModal({
   closeWorkLogModal,
   handleWorkLogSubmit,
   isSavingWorkLog,
+  requestPhotoUpload,
   setWorkLogDraft,
   workLogDraft,
 }: WorkLogEditorModalProps) {
   const selectedTask = bootstrap.tasks.find(
     (task) => task.id === workLogDraft.taskId,
   );
+  const workLogPhotoProjectId = selectedTask?.projectId ?? bootstrap.projects[0]?.id ?? null;
   const selectedSubsystem = selectedTask
     ? bootstrap.subsystems.find(
         (subsystem) => subsystem.id === selectedTask.subsystemId,
@@ -1370,6 +1389,18 @@ export function WorkLogEditorModal({
               value={workLogDraft.notes}
             />
           </label>
+          <PhotoUploadField
+            currentUrl={workLogDraft.photoUrl}
+            label="Work log photo"
+            onChange={(value) => setWorkLogDraft((current) => ({ ...current, photoUrl: value }))}
+            onUpload={async (file) => {
+              if (!workLogPhotoProjectId) {
+                throw new Error("No project is available for photo upload.");
+              }
+
+              return requestPhotoUpload(workLogPhotoProjectId, file);
+            }}
+          />
 
           <div className="modal-actions modal-wide">
             <button
@@ -1403,6 +1434,7 @@ interface QaReportEditorModalProps {
   closeQaReportModal: () => void;
   handleQaReportSubmit: (event: FormEvent<HTMLFormElement>) => void;
   isSavingQaReport: boolean;
+  requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   qaReportDraft: QaReportPayload;
   setQaReportDraft: Dispatch<SetStateAction<QaReportPayload>>;
 }
@@ -1412,10 +1444,12 @@ export function QaReportEditorModal({
   closeQaReportModal,
   handleQaReportSubmit,
   isSavingQaReport,
+  requestPhotoUpload,
   qaReportDraft,
   setQaReportDraft,
 }: QaReportEditorModalProps) {
   const selectedTask = bootstrap.tasks.find((task) => task.id === qaReportDraft.taskId);
+  const qaReportPhotoProjectId = selectedTask?.projectId ?? bootstrap.projects[0]?.id ?? null;
 
   return (
     <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
@@ -1585,6 +1619,19 @@ export function QaReportEditorModal({
               value={qaReportDraft.notes}
             />
           </label>
+          <PhotoUploadField
+            accept="image/*,video/*"
+            currentUrl={qaReportDraft.photoUrl}
+            label="QA report media"
+            onChange={(value) => setQaReportDraft((current) => ({ ...current, photoUrl: value }))}
+            onUpload={async (file) => {
+              if (!qaReportPhotoProjectId) {
+                throw new Error("No project is available for photo upload.");
+              }
+
+              return requestPhotoUpload(qaReportPhotoProjectId, file);
+            }}
+          />
 
           <div className="modal-actions modal-wide">
             <button
@@ -1624,6 +1671,7 @@ interface EventReportEditorModalProps {
   eventReportFindings: string;
   handleEventReportSubmit: (event: FormEvent<HTMLFormElement>) => void;
   isSavingEventReport: boolean;
+  requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   setEventReportDraft: Dispatch<SetStateAction<TestResultPayload>>;
   setEventReportFindings: (value: string) => void;
 }
@@ -1635,10 +1683,13 @@ export function EventReportEditorModal({
   eventReportFindings,
   handleEventReportSubmit,
   isSavingEventReport,
+  requestPhotoUpload,
   setEventReportDraft,
   setEventReportFindings,
 }: EventReportEditorModalProps) {
   const selectedEvent = bootstrap.events.find((item) => item.id === eventReportDraft.eventId);
+  const eventReportPhotoProjectId =
+    selectedEvent?.projectIds[0] ?? bootstrap.projects[0]?.id ?? null;
 
   return (
     <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
@@ -1756,6 +1807,21 @@ export function EventReportEditorModal({
               value={eventReportFindings}
             />
           </label>
+          <PhotoUploadField
+            accept="image/*,video/*"
+            currentUrl={eventReportDraft.photoUrl}
+            label="Event report media"
+            onChange={(value) =>
+              setEventReportDraft((current) => ({ ...current, photoUrl: value }))
+            }
+            onUpload={async (file) => {
+              if (!eventReportPhotoProjectId) {
+                throw new Error("No project is available for photo upload.");
+              }
+
+              return requestPhotoUpload(eventReportPhotoProjectId, file);
+            }}
+          />
 
           <div className="modal-actions modal-wide">
             <button
@@ -2881,6 +2947,7 @@ interface PartDefinitionEditorModalProps {
   handlePartDefinitionSubmit: (event: FormEvent<HTMLFormElement>) => void;
   isDeletingPartDefinition: boolean;
   isSavingPartDefinition: boolean;
+  requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   partDefinitionDraft: PartDefinitionPayload;
   partDefinitionModalMode: "create" | "edit";
   setPartDefinitionDraft: Dispatch<SetStateAction<PartDefinitionPayload>>;
@@ -2893,6 +2960,7 @@ interface SubsystemEditorModalProps {
   handleToggleSubsystemArchived: (subsystemId: string) => void;
   handleSubsystemSubmit: (event: FormEvent<HTMLFormElement>) => void;
   isSavingSubsystem: boolean;
+  requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   subsystemDraft: SubsystemPayload;
   subsystemDraftRisks: string;
   subsystemModalMode: "create" | "edit";
@@ -2909,6 +2977,7 @@ interface MechanismEditorModalProps {
   handleMechanismSubmit: (event: FormEvent<HTMLFormElement>) => void;
   isDeletingMechanism: boolean;
   isSavingMechanism: boolean;
+  requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   mechanismDraft: MechanismPayload;
   mechanismModalMode: "create" | "edit";
   setMechanismDraft: Dispatch<SetStateAction<MechanismPayload>>;
@@ -2923,6 +2992,7 @@ export function PartDefinitionEditorModal({
   handlePartDefinitionSubmit,
   isDeletingPartDefinition,
   isSavingPartDefinition,
+  requestPhotoUpload,
   partDefinitionDraft,
   partDefinitionModalMode,
   setPartDefinitionDraft,
@@ -2931,6 +3001,7 @@ export function PartDefinitionEditorModal({
     bootstrap.partDefinitions.map((partDefinition) => partDefinition.iteration),
     partDefinitionDraft.iteration,
   );
+  const partDefinitionPhotoProjectId = bootstrap.projects[0]?.id ?? null;
 
   return (
     <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
@@ -2995,6 +3066,20 @@ export function PartDefinitionEditorModal({
             <span style={{ color: "var(--text-title)" }}>Description</span>
             <textarea onChange={(event) => setPartDefinitionDraft((current) => ({ ...current, description: event.target.value }))} rows={3} style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }} value={partDefinitionDraft.description} />
           </label>
+          <PhotoUploadField
+            currentUrl={partDefinitionDraft.photoUrl}
+            label="Part photo"
+            onChange={(value) =>
+              setPartDefinitionDraft((current) => ({ ...current, photoUrl: value }))
+            }
+            onUpload={async (file) => {
+              if (!partDefinitionPhotoProjectId) {
+                throw new Error("No project is available for photo upload.");
+              }
+
+              return requestPhotoUpload(partDefinitionPhotoProjectId, file);
+            }}
+          />
           <div className="modal-actions modal-wide">
             {partDefinitionModalMode === "edit" && activePartDefinitionId ? (
               <button
@@ -3032,6 +3117,7 @@ interface PartInstanceEditorModalProps {
   closePartInstanceModal: () => void;
   handlePartInstanceSubmit: (event: FormEvent<HTMLFormElement>) => void;
   isSavingPartInstance: boolean;
+  requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   partDefinitionDraftsById: Record<string, BootstrapPayload["partDefinitions"][number]>;
   partInstanceDraft: PartInstancePayload;
   partInstanceModalMode: "create" | "edit";
@@ -3043,6 +3129,7 @@ export function PartInstanceEditorModal({
   closePartInstanceModal,
   handlePartInstanceSubmit,
   isSavingPartInstance,
+  requestPhotoUpload,
   partDefinitionDraftsById,
   partInstanceDraft,
   partInstanceModalMode,
@@ -3051,6 +3138,9 @@ export function PartInstanceEditorModal({
   const filteredMechanisms = bootstrap.mechanisms.filter(
     (mechanism) => mechanism.subsystemId === partInstanceDraft.subsystemId,
   );
+  const partInstancePhotoProjectId =
+    bootstrap.subsystems.find((subsystem) => subsystem.id === partInstanceDraft.subsystemId)
+      ?.projectId ?? bootstrap.projects[0]?.id ?? null;
 
   return (
     <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
@@ -3140,6 +3230,20 @@ export function PartInstanceEditorModal({
               <span style={{ color: "var(--text-title)" }}>Track each physical part separately</span>
             </label>
           </div>
+          <PhotoUploadField
+            currentUrl={partInstanceDraft.photoUrl}
+            label="Part photo"
+            onChange={(value) =>
+              setPartInstanceDraft((current) => ({ ...current, photoUrl: value }))
+            }
+            onUpload={async (file) => {
+              if (!partInstancePhotoProjectId) {
+                throw new Error("No project is available for photo upload.");
+              }
+
+              return requestPhotoUpload(partInstancePhotoProjectId, file);
+            }}
+          />
           <div className="modal-actions modal-wide">
             <button className="secondary-action" onClick={closePartInstanceModal} style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }} type="button">Cancel</button>
             <button className="primary-action" disabled={isSavingPartInstance} type="submit">{isSavingPartInstance ? "Saving..." : partInstanceModalMode === "create" ? "Add instance" : "Save changes"}</button>
@@ -3157,6 +3261,7 @@ export function SubsystemEditorModal({
   handleToggleSubsystemArchived,
   handleSubsystemSubmit,
   isSavingSubsystem,
+  requestPhotoUpload,
   subsystemDraft,
   subsystemDraftRisks,
   subsystemModalMode,
@@ -3183,6 +3288,7 @@ export function SubsystemEditorModal({
       .map((subsystem) => subsystem.iteration),
     subsystemDraft.iteration,
   );
+  const subsystemPhotoProjectId = subsystemDraft.projectId || bootstrap.projects[0]?.id || null;
 
   return (
     <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
@@ -3385,6 +3491,18 @@ export function SubsystemEditorModal({
               value={subsystemDraftRisks}
             />
           </label>
+          <PhotoUploadField
+            currentUrl={subsystemDraft.photoUrl}
+            label="Subsystem photo"
+            onChange={(value) => setSubsystemDraft((current) => ({ ...current, photoUrl: value }))}
+            onUpload={async (file) => {
+              if (!subsystemPhotoProjectId) {
+                throw new Error("No project is available for photo upload.");
+              }
+
+              return requestPhotoUpload(subsystemPhotoProjectId, file);
+            }}
+          />
 
           <div className="modal-actions modal-wide">
             {subsystemModalMode === "edit" && activeSubsystemId ? (
@@ -3432,6 +3550,7 @@ export function MechanismEditorModal({
   handleMechanismSubmit,
   isDeletingMechanism,
   isSavingMechanism,
+  requestPhotoUpload,
   mechanismDraft,
   mechanismModalMode,
   setMechanismDraft,
@@ -3442,6 +3561,9 @@ export function MechanismEditorModal({
       .map((mechanism) => mechanism.iteration),
     mechanismDraft.iteration,
   );
+  const mechanismPhotoProjectId =
+    bootstrap.subsystems.find((subsystem) => subsystem.id === mechanismDraft.subsystemId)
+      ?.projectId ?? bootstrap.projects[0]?.id ?? null;
 
   return (
     <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
@@ -3563,6 +3685,20 @@ export function MechanismEditorModal({
               value={mechanismDraft.description}
             />
           </label>
+          <PhotoUploadField
+            currentUrl={mechanismDraft.photoUrl}
+            label="Mechanism photo"
+            onChange={(value) =>
+              setMechanismDraft((current) => ({ ...current, photoUrl: value }))
+            }
+            onUpload={async (file) => {
+              if (!mechanismPhotoProjectId) {
+                throw new Error("No project is available for photo upload.");
+              }
+
+              return requestPhotoUpload(mechanismPhotoProjectId, file);
+            }}
+          />
 
           <div className="modal-actions modal-wide">
             {mechanismModalMode === "edit" && activeMechanismId ? (

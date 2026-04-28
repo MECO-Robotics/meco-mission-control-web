@@ -98,6 +98,8 @@ import {
   updateArtifactRecord,
   updateEventRecord,
   updateWorkstreamRecord,
+  requestImageUpload,
+  requestVideoUpload,
 } from "@/lib/auth";
 import type {
   ArtifactKind,
@@ -1052,6 +1054,13 @@ export default function App() {
     expireSession("Your session expired. Please sign in again.");
     setDataMessage("Your session expired. Please sign in again.");
   }, [expireSession]);
+  const requestPhotoUpload = useCallback(
+    (projectId: string, file: File) =>
+      file.type.startsWith("video/")
+        ? requestVideoUpload(projectId, file, handleUnauthorized)
+        : requestImageUpload(projectId, file, handleUnauthorized),
+    [handleUnauthorized],
+  );
 
   const clearDataMessage = useCallback(() => {
     setDataMessage(null);
@@ -1888,6 +1897,7 @@ export default function App() {
         title: qaReportDraft.title?.trim(),
         status: qaReportDraft.status,
         findings: qaReportDraft.findings ?? [],
+        photoUrl: qaReportDraft.photoUrl ?? "",
       };
 
       await createQaReportRecord(payload, handleUnauthorized);
@@ -1946,6 +1956,7 @@ export default function App() {
         title: normalizedTitle,
         status: eventReportDraft.status,
         findings,
+        photoUrl: eventReportDraft.photoUrl ?? "",
       };
 
       await createTestResultRecord(payload, handleUnauthorized);
@@ -2346,6 +2357,11 @@ export default function App() {
     event: React.FormEvent<HTMLFormElement>,
   ) => {
     event.preventDefault();
+    if (partDefinitionModalMode === "create" && !selectedSeasonId) {
+      setDataMessage("Pick a season before adding a part definition.");
+      return;
+    }
+
     setIsSavingPartDefinition(true);
     setDataMessage(null);
 
@@ -2361,11 +2377,6 @@ export default function App() {
           },
           handleUnauthorized,
         );
-    if (partDefinitionModalMode === "create" && !selectedSeasonId) {
-      setDataMessage("Pick a season before adding a part definition.");
-      return;
-    }
-
       } else if (partDefinitionModalMode === "edit" && activePartDefinitionId) {
         await updatePartDefinitionRecord(
           activePartDefinitionId,
@@ -3625,7 +3636,6 @@ export default function App() {
           onToggleMyView={toggleMyView}
           isDarkMode={isDarkMode}
           toggleDarkMode={toggleDarkMode}
-          toggleSidebar={toggleSidebar}
           isSidebarCollapsed={isSidebarCollapsed}
         />
 
@@ -3634,6 +3644,7 @@ export default function App() {
           items={navigationItems}
           onSelectTab={handleSidebarTabSelect}
           isCollapsed={isSidebarCollapsed}
+          toggleSidebar={toggleSidebar}
           projects={projectsInSelectedSeason}
           selectedProjectId={selectedProjectId}
           onSelectProject={setSelectedProjectId}
@@ -4017,6 +4028,7 @@ export default function App() {
             closeSubsystemModal={closeSubsystemModal}
             closeTaskModal={closeTaskModal}
             closeWorkstreamModal={closeWorkstreamModal}
+            requestPhotoUpload={requestPhotoUpload}
             disciplinesById={disciplinesById}
             eventsById={eventsById}
             handleDeleteMaterial={handleDeleteMaterial}
