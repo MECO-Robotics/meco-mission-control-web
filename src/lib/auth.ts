@@ -1123,9 +1123,21 @@ export function isLocalGoogleAuthHost() {
 
 export async function fetchBootstrap(
   personId?: string | null,
+  seasonId?: string | null,
+  projectId?: string | null,
   onUnauthorized?: () => void,
 ) {
-  const query = personId ? `?personId=${encodeURIComponent(personId)}` : "";
+  const searchParams = new URLSearchParams();
+  if (personId) {
+    searchParams.set("personId", personId);
+  }
+  if (seasonId) {
+    searchParams.set("seasonId", seasonId);
+  }
+  if (projectId) {
+    searchParams.set("projectId", projectId);
+  }
+  const query = searchParams.toString() ? `?${searchParams.toString()}` : "";
   const payload = await requestApi<BootstrapPayload>(
     `/bootstrap${query}`,
     {},

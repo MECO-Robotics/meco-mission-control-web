@@ -1092,6 +1092,8 @@ export default function App() {
     try {
       const payload = await fetchBootstrap(
         getSinglePersonFilterId(activePersonFilter),
+        selectedSeasonId,
+        selectedProjectId,
         handleUnauthorized,
       );
       const scopedPayload = scopeBootstrapBySelection(
@@ -2981,7 +2983,12 @@ export default function App() {
 
     let tutorialBootstrap: BootstrapPayload;
     try {
-      tutorialBootstrap = await fetchBootstrap(undefined, handleUnauthorized);
+      tutorialBootstrap = await fetchBootstrap(
+        undefined,
+        undefined,
+        undefined,
+        handleUnauthorized,
+      );
     } catch (error) {
       setDataMessage(toErrorMessage(error));
       return;

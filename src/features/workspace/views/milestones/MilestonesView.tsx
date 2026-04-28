@@ -56,7 +56,7 @@ import {
   filterAndSortMilestones,
   formatMilestoneDateTime,
   type MilestoneSortField,
-} from "@/features/workspace/views/milestonesViewUtils";
+} from "./milestonesViewUtils";
 
 interface MilestonesViewProps {
   bootstrap: BootstrapPayload;

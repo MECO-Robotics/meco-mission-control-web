@@ -22,10 +22,15 @@ export function formatTimelineZoomLabel(zoom: number) {
 export function getTimelineDayTrackSize(
   viewInterval: TimelineViewInterval,
   zoom: number,
+  fixedColumnWidth = 0,
 ) {
   const minimumDayWidth = Math.round(TIMELINE_BASE_DAY_WIDTHS[viewInterval] * zoom);
   if (viewInterval === "month") {
     return `minmax(${minimumDayWidth}px, 1fr)`;
+  }
+
+  if (viewInterval === "week") {
+    return `minmax(calc((100vw - var(--shell-sidebar-width) - ${fixedColumnWidth}px) / 7 * ${zoom}), 1fr)`;
   }
 
   return `${minimumDayWidth}px`;
@@ -48,6 +53,14 @@ export function getTimelineGridMinWidth({
   viewInterval: TimelineViewInterval;
   zoom: number;
 }) {
+  if (viewInterval === "week") {
+    return (
+      (hasProjectColumn ? projectColumnWidth : 0) +
+      subsystemColumnWidth +
+      taskColumnWidth
+    );
+  }
+
   const minimumDayWidth = Math.round(TIMELINE_BASE_DAY_WIDTHS[viewInterval] * zoom);
   return (
     (hasProjectColumn ? projectColumnWidth : 0) +

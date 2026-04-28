@@ -13,7 +13,7 @@ import {
   getTimelineDayTrackSize,
   getTimelineGridMinWidth,
 } from "@/features/workspace/shared/timelineZoom";
-import { TimelineView } from "@/features/workspace/views/TimelineView";
+import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
 import type { BootstrapPayload } from "@/types";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
@@ -199,7 +199,7 @@ describe("TimelineView", () => {
         }),
       );
       const bodySource = readFileSync(
-        join(process.cwd(), "src/features/workspace/views/TimelineGridBody.tsx"),
+        join(process.cwd(), "src/features/workspace/views/timeline/TimelineGridBody.tsx"),
         "utf8",
       );
 
@@ -440,8 +440,12 @@ describe("TimelineView", () => {
     expect(clampTimelineZoom(0.2)).toBe(0.8);
     expect(getTimelineDayTrackSize("month", 1)).toBe("minmax(28px, 1fr)");
     expect(getTimelineDayTrackSize("month", 1.6)).toBe("minmax(45px, 1fr)");
-    expect(getTimelineDayTrackSize("week", 1)).toBe("44px");
-    expect(getTimelineDayTrackSize("week", 1.6)).toBe("70px");
+    expect(getTimelineDayTrackSize("week", 1, 388)).toBe(
+      "minmax(calc((100vw - var(--shell-sidebar-width) - 388px) / 7 * 1), 1fr)",
+    );
+    expect(getTimelineDayTrackSize("week", 1.6, 388)).toBe(
+      "minmax(calc((100vw - var(--shell-sidebar-width) - 388px) / 7 * 1.6), 1fr)",
+    );
     expect(
       getTimelineGridMinWidth({
         dayCount: 10,
@@ -452,7 +456,7 @@ describe("TimelineView", () => {
         viewInterval: "week",
         zoom: 1.2,
       }),
-    ).toBe(918);
+    ).toBe(388);
   });
 
   it("defines timeline period animations for every timeline navigation direction", () => {
@@ -506,7 +510,7 @@ describe("TimelineView", () => {
 
   it("clears timeline period motion after the interval change animation ends", () => {
     const source = readFileSync(
-      join(process.cwd(), "src/features/workspace/views/TimelineView.tsx"),
+      join(process.cwd(), "src/features/workspace/views/timeline/TimelineView.tsx"),
       "utf8",
     );
 
@@ -525,6 +529,19 @@ describe("TimelineView", () => {
     expect(css).toMatch(
       /\.timeline-grid-motion\s*\{[\s\S]*will-change:\s*min-width,\s*grid-template-columns;/,
     );
+  });
+
+  it("keeps timeline shells and rows stretched to the available page width", () => {
+    const css = readFileSync(join(process.cwd(), "src/app/App.css"), "utf8");
+
+    expect(css).toMatch(/\.workspace-tab-panel\s*\{[\s\S]*width:\s*100%;/);
+    expect(css).toMatch(/\.timeline-shell\s*\{[\s\S]*width:\s*100%;/);
+    expect(css).toMatch(/\.timeline-grid-motion\s*\{[\s\S]*width:\s*100%;/);
+    expect(css).toMatch(/\.timeline-layout\s*\{[\s\S]*width:\s*calc\(100vw - var\(--shell-sidebar-width\)\);/);
+    expect(css).toMatch(/\.timeline-layout \.timeline-shell\s*\{[\s\S]*width:\s*calc\(100vw - var\(--shell-sidebar-width\) \+ 1rem\);/);
+    expect(css).toMatch(/\.timeline-grid,\s*\.subsystem-row\s*\{[\s\S]*width:\s*100%;/);
+    expect(css).toMatch(/\.subsystem-group\s*\{[\s\S]*width:\s*100%;/);
+    expect(css).not.toMatch(/\.timeline-grid,\s*\.subsystem-group,\s*\.subsystem-row\s*\{[\s\S]*gap:/);
   });
 
   it("marks project, subsystem, and task columns as unfold-animation surfaces", () => {

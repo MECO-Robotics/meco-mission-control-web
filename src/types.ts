@@ -422,6 +422,13 @@ export interface WorkLogRecord {
   notes: string;
 }
 
+export interface AttendanceRecord {
+  id: string;
+  memberId: string;
+  date: string;
+  totalHours: number;
+}
+
 export interface WorkLogPayload {
   taskId: string;
   date: string;
@@ -521,6 +528,7 @@ export interface BootstrapPayload {
   risks: RiskRecord[];
   tasks: TaskRecord[];
   workLogs: WorkLogRecord[];
+  attendanceRecords?: AttendanceRecord[];
   purchaseItems: PurchaseItemRecord[];
   manufacturingItems: ManufacturingItemRecord[];
 }

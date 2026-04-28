@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 import type { RiskManagementViewTab } from "@/lib/workspaceNavigation";
-import type { BootstrapPayload, RiskPayload, RiskRecord } from "@/types";
+import type { BootstrapPayload, RiskPayload, RiskRecord, TaskRecord } from "@/types";
 import {
   EditableHoverIndicator,
   PaginationControls,
@@ -41,6 +41,230 @@ const ATTACHMENT_TYPE_LABELS: Record<RiskPayload["attachmentType"], string> = {
   mechanism: "Mechanism",
   "part-instance": "Part instance",
 };
+
+interface ScopeMetricRow {
+  id: string;
+  name: string;
+  subtitle: string;
+  taskCount: number;
+  activeTaskCount: number;
+  completeTaskCount: number;
+  waitingForQaCount: number;
+  blockerCount: number;
+  plannedHours: number;
+  loggedHours: number;
+  completionRate: number;
+  qaPassCount: number;
+}
+
+function formatPercent(ratio: number) {
+  return `${Math.round(Math.max(0, ratio) * 100)}%`;
+}
+
+function buildScopeMetrics<T extends { id: string; name: string }>(
+  items: T[],
+  tasks: TaskRecord[],
+  workHoursByTaskId: Map<string, number>,
+  qaPassTaskIds: Set<string>,
+  getSubtitle: (item: T) => string,
+  getLinkedSummary: (item: T) => string,
+  matchesTask: (task: TaskRecord, item: T) => boolean,
+) {
+  return items
+    .map((item) => {
+      const scopedTasks = tasks.filter((task) => matchesTask(task, item));
+      const completeTaskCount = scopedTasks.filter((task) => task.status === "complete").length;
+      const waitingForQaCount = scopedTasks.filter(
+        (task) => task.status === "waiting-for-qa",
+      ).length;
+      const blockerCount = scopedTasks.reduce((sum, task) => sum + task.blockers.length, 0);
+      const plannedHours = scopedTasks.reduce(
+        (sum, task) => sum + Math.max(0, Number(task.estimatedHours) || 0),
+        0,
+      );
+      const loggedHours = scopedTasks.reduce(
+        (sum, task) => sum + (workHoursByTaskId.get(task.id) ?? 0),
+        0,
+      );
+      const qaPassCount = scopedTasks.filter((task) => qaPassTaskIds.has(task.id)).length;
+
+      return {
+        id: item.id,
+        name: item.name,
+        subtitle: `${getSubtitle(item)} | ${getLinkedSummary(item)}`,
+        taskCount: scopedTasks.length,
+        activeTaskCount: scopedTasks.length - completeTaskCount,
+        completeTaskCount,
+        waitingForQaCount,
+        blockerCount,
+        plannedHours: Number(plannedHours.toFixed(1)),
+        loggedHours: Number(loggedHours.toFixed(1)),
+        completionRate: Number(
+          (completeTaskCount / Math.max(scopedTasks.length, 1)).toFixed(2),
+        ),
+        qaPassCount,
+      } satisfies ScopeMetricRow;
+    })
+    .sort((left, right) => {
+      const activeOrder = right.activeTaskCount - left.activeTaskCount;
+      if (activeOrder !== 0) {
+        return activeOrder;
+      }
+
+      const blockerOrder = right.blockerCount - left.blockerCount;
+      if (blockerOrder !== 0) {
+        return blockerOrder;
+      }
+
+      const completionOrder = left.completionRate - right.completionRate;
+      if (completionOrder !== 0) {
+        return completionOrder;
+      }
+
+      return left.name.localeCompare(right.name);
+    });
+}
+
+function MetricStatCard({
+  title,
+  value,
+  note,
+}: {
+  note: string;
+  title: string;
+  value: ReactNode;
+}) {
+  return (
+    <article className="worklog-summary-stat-card metrics-summary-card">
+      <h3>{title}</h3>
+      <strong>{value}</strong>
+      <small>{note}</small>
+    </article>
+  );
+}
+
+function MetricHotspotCard({
+  rows,
+  title,
+  subtitle,
+}: {
+  rows: ScopeMetricRow[];
+  title: string;
+  subtitle: string;
+}) {
+  return (
+    <article className="worklog-summary-card metrics-hotspot-card">
+      <h3>{title}</h3>
+      <p className="section-copy">{subtitle}</p>
+      {rows.length === 0 ? (
+        <p className="section-copy">No active work in scope yet.</p>
+      ) : (
+        <ol className="metrics-hotspot-list">
+          {rows.map((row) => (
+            <li className="metrics-hotspot-list-item" key={row.id}>
+              <div className="metrics-hotspot-meta">
+                <strong>{row.name}</strong>
+                <small>{row.subtitle}</small>
+              </div>
+              <span>{row.blockerCount > 0 ? `${row.blockerCount} blockers` : `${row.activeTaskCount} open`}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </article>
+  );
+}
+
+function MetricScopeTable({
+  rows,
+  subtitle,
+  title,
+  scopeLabel,
+}: {
+  rows: ScopeMetricRow[];
+  scopeLabel: string;
+  subtitle: string;
+  title: string;
+}) {
+  const gridTemplateColumns = "minmax(220px, 2fr) 0.75fr 0.75fr 0.85fr 0.8fr 1fr 1.1fr";
+
+  return (
+    <article className="metrics-scope-card">
+      <div className="panel-header compact-header">
+        <div className="queue-section-header">
+          <p className="eyebrow metrics-section-eyebrow">{scopeLabel}</p>
+          <h3>{title}</h3>
+          <p className="section-copy filter-copy">{subtitle}</p>
+        </div>
+        <p className="metrics-section-count">{rows.length} items</p>
+      </div>
+
+      <div className="table-shell metrics-scope-table-shell">
+        <div
+          className="ops-table ops-table-header metrics-scope-table-header"
+          style={{ gridTemplateColumns }}
+        >
+          <span>{scopeLabel}</span>
+          <span>Tasks</span>
+          <span>Open</span>
+          <span>QA</span>
+          <span>Blockers</span>
+          <span>Hours</span>
+          <span>Completion</span>
+        </div>
+
+        {rows.map((row) => (
+          <div
+            className="ops-table ops-row metrics-scope-row"
+            key={row.id}
+            style={{ gridTemplateColumns }}
+          >
+            <TableCell label={scopeLabel}>
+              <div className="metrics-scope-entity">
+                <strong style={{ color: "var(--text-title)" }}>{row.name}</strong>
+                <small>{row.subtitle}</small>
+              </div>
+            </TableCell>
+
+            <TableCell label="Tasks">
+              <strong style={{ color: "var(--text-title)" }}>{row.completeTaskCount}</strong>
+              <small>{row.taskCount} total</small>
+            </TableCell>
+
+            <TableCell label="Open">{row.activeTaskCount}</TableCell>
+
+            <TableCell label="QA">
+              <strong style={{ color: "var(--text-title)" }}>{row.waitingForQaCount}</strong>
+              <small>{row.qaPassCount} passes</small>
+            </TableCell>
+
+            <TableCell label="Blockers">{row.blockerCount}</TableCell>
+
+            <TableCell label="Hours">
+              <strong style={{ color: "var(--text-title)" }}>
+                {formatHours(row.plannedHours)}
+              </strong>
+              <small>{formatHours(row.loggedHours)} logged</small>
+            </TableCell>
+
+            <TableCell label="Completion">
+              <div className="metrics-completion-cell">
+                <strong style={{ color: "var(--text-title)" }}>
+                  {formatPercent(row.completionRate)}
+                </strong>
+                <div className="metrics-completion-track" aria-hidden="true">
+                  <span style={{ width: `${Math.max(0, Math.min(100, row.completionRate * 100))}%` }} />
+                </div>
+              </div>
+            </TableCell>
+          </div>
+        ))}
+
+        {rows.length === 0 ? <p className="empty-state">No items in scope yet.</p> : null}
+      </div>
+    </article>
+  );
+}
 
 function formatHours(hours: number) {
   return `${hours.toLocaleString(undefined, {
@@ -172,7 +396,7 @@ export function RisksView({
       ),
     [bootstrap.tasks],
   );
-  const doneHours = useMemo(
+  const loggedHours = useMemo(
     () =>
       bootstrap.workLogs.reduce(
         (total, workLog) => total + Math.max(0, Number(workLog.hours) || 0),
@@ -180,13 +404,9 @@ export function RisksView({
       ),
     [bootstrap.workLogs],
   );
-  const maxMetricHours = Math.max(plannedHours, doneHours, 1);
-  const completionRatio = plannedHours > 0 ? doneHours / plannedHours : 0;
-  const completionPercent = Math.round(completionRatio * 100);
+  const maxMetricHours = Math.max(plannedHours, loggedHours, 1);
+  const completionRatio = plannedHours > 0 ? loggedHours / plannedHours : 0;
   const clampedCompletionWidth = `${Math.max(0, Math.min(100, completionRatio * 100))}%`;
-  const isOverPlan = doneHours > plannedHours;
-  const overrunHours = Math.max(0, doneHours - plannedHours);
-  const remainingHours = Math.max(0, plannedHours - doneHours);
 
   const tasksById = useMemo(
     () => Object.fromEntries(bootstrap.tasks.map((task) => [task.id, task] as const)),
@@ -231,6 +451,84 @@ export function RisksView({
       ),
     [bootstrap.partInstances],
   );
+  const workHoursByTaskId = useMemo(() => {
+    const hoursByTaskId = new Map<string, number>();
+
+    bootstrap.workLogs.forEach((workLog) => {
+      hoursByTaskId.set(
+        workLog.taskId,
+        (hoursByTaskId.get(workLog.taskId) ?? 0) + Math.max(0, Number(workLog.hours) || 0),
+      );
+    });
+
+    return hoursByTaskId;
+  }, [bootstrap.workLogs]);
+  const qaPassTaskIds = useMemo(() => {
+    const taskIds = new Set<string>();
+
+    bootstrap.qaReports.forEach((report) => {
+      if (report.result === "pass" && report.mentorApproved && report.taskId) {
+        taskIds.add(report.taskId);
+      }
+    });
+
+    return taskIds;
+  }, [bootstrap.qaReports]);
+  const subsystemMetrics = useMemo(
+    () =>
+      buildScopeMetrics(
+        bootstrap.subsystems,
+        bootstrap.tasks,
+        workHoursByTaskId,
+        qaPassTaskIds,
+        (subsystem) => `Project: ${projectsById[subsystem.projectId]?.name ?? "Unknown project"}`,
+        (subsystem) => {
+          const mechanismCount = bootstrap.mechanisms.filter(
+            (mechanism) => mechanism.subsystemId === subsystem.id,
+          ).length;
+          return `${mechanismCount} mechanism${mechanismCount === 1 ? "" : "s"}`;
+        },
+        (task, subsystem) =>
+          task.subsystemId === subsystem.id ||
+          (task.subsystemIds ?? []).includes(subsystem.id),
+      ),
+    [
+      bootstrap.mechanisms,
+      bootstrap.subsystems,
+      bootstrap.tasks,
+      projectsById,
+      qaPassTaskIds,
+      workHoursByTaskId,
+    ],
+  );
+  const mechanismMetrics = useMemo(
+    () =>
+      buildScopeMetrics(
+        bootstrap.mechanisms,
+        bootstrap.tasks,
+        workHoursByTaskId,
+        qaPassTaskIds,
+        (mechanism) =>
+          `Subsystem: ${subsystemsById[mechanism.subsystemId]?.name ?? "Unknown subsystem"}`,
+        (mechanism) => {
+          const partInstanceCount = bootstrap.partInstances.filter(
+            (partInstance) => partInstance.mechanismId === mechanism.id,
+          ).length;
+          return `${partInstanceCount} part instance${partInstanceCount === 1 ? "" : "s"}`;
+        },
+        (task, mechanism) =>
+          task.mechanismId === mechanism.id ||
+          (task.mechanismIds ?? []).includes(mechanism.id),
+      ),
+    [
+      bootstrap.mechanisms,
+      bootstrap.partInstances,
+      bootstrap.tasks,
+      qaPassTaskIds,
+      subsystemsById,
+      workHoursByTaskId,
+    ],
+  );
   const eventsById = useMemo(
     () => Object.fromEntries(bootstrap.events.map((event) => [event.id, event] as const)),
     [bootstrap.events],
@@ -244,6 +542,30 @@ export function RisksView({
       ),
     [bootstrap.reports],
   );
+
+  const completedTaskCount = bootstrap.tasks.filter((task) => task.status === "complete").length;
+  const waitingForQaCount = bootstrap.tasks.filter(
+    (task) => task.status === "waiting-for-qa",
+  ).length;
+  const blockerCount = bootstrap.tasks.reduce((sum, task) => sum + task.blockers.length, 0);
+  const qaPassCount = bootstrap.qaReports.filter(
+    (report) => report.result === "pass" && report.mentorApproved,
+  ).length;
+  const deliveredPurchases = bootstrap.purchaseItems.filter(
+    (purchase) => purchase.status === "delivered",
+  ).length;
+  const lowStockMaterials = bootstrap.materials.filter(
+    (material) => material.onHandQuantity <= material.reorderPoint,
+  ).length;
+  const attendanceHours = (bootstrap.attendanceRecords ?? []).reduce(
+    (sum, record) => sum + record.totalHours,
+    0,
+  );
+  const activeSubsystemCount = subsystemMetrics.filter((metric) => metric.taskCount > 0).length;
+  const activeMechanismCount = mechanismMetrics.filter((metric) => metric.taskCount > 0).length;
+  const totalTaskCount = Math.max(bootstrap.tasks.length, 1);
+  const completionRate = completedTaskCount / totalTaskCount;
+  const supplySignals = deliveredPurchases + lowStockMaterials;
   const qaReportsById = useMemo(
     () =>
       Object.fromEntries(
@@ -571,15 +893,30 @@ export function RisksView({
     <section className={`panel dense-panel subsystem-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
       <div className="panel-header compact-header">
         <div className="queue-section-header">
-          <h2 style={{ color: "var(--text-title)" }}>Risk management</h2>
+          <h2 style={{ color: "var(--text-title)" }}>
+            {view === "metrics" ? "Operations metrics" : "Risk management"}
+          </h2>
           <p className="section-copy filter-copy" style={{ color: "var(--text-copy)" }}>
-            Track active risk exposure, evidence source, and mitigation ownership in one place.
+            {view === "metrics"
+              ? "Track planning, triage, subsystem health, and mechanism health from one view."
+              : "Track active risk exposure, evidence source, and mitigation ownership in one place."}
           </p>
         </div>
       </div>
 
       {view === "metrics" ? (
         <>
+          <div className="metrics-intro-shell">
+            <p className="eyebrow" style={{ color: "var(--meco-blue)" }}>
+              Ops overview
+            </p>
+            <h3>Planning, triage, and trend signals in one place</h3>
+            <p className="section-copy filter-copy" style={{ color: "var(--text-copy)" }}>
+              Use the summary cards for a whole-workspace pulse check, then drill into subsystem
+              and mechanism pressure to see where work is stacking up.
+            </p>
+          </div>
+
           <div className="risk-time-metrics-shell">
             <TimeMetricGraphic
               colorClassName="risk-time-ring-planned"
@@ -589,8 +926,8 @@ export function RisksView({
             />
             <TimeMetricGraphic
               colorClassName="risk-time-ring-done"
-              hours={doneHours}
-              label="Work done"
+              hours={loggedHours}
+              label="Work logged"
               maxHours={maxMetricHours}
             />
           </div>
@@ -598,18 +935,98 @@ export function RisksView({
           <div className="risk-time-progress-shell">
             <p className="risk-time-progress-label">
               {plannedHours > 0
-                ? `${completionPercent}% of planned hours logged`
+                ? `${Math.round(completionRate * 100)}% of planned hours logged`
                 : "No planned hours yet"}
             </p>
             <div className="risk-time-progress-track" aria-hidden="true">
               <span style={{ width: clampedCompletionWidth }} />
             </div>
             <p className="risk-time-progress-caption">
-              {isOverPlan
-                ? `${formatHours(overrunHours)} over plan`
-                : `${formatHours(remainingHours)} remaining to plan`}
+              {loggedHours > plannedHours
+                ? `${formatHours(loggedHours - plannedHours)} over plan`
+                : `${formatHours(plannedHours - loggedHours)} remaining to plan`}
             </p>
           </div>
+
+          <div className="metrics-summary-grid">
+            <MetricStatCard
+              note={`${completedTaskCount} of ${bootstrap.tasks.length} tasks complete`}
+              title="Completion rate"
+              value={formatPercent(completionRate)}
+            />
+            <MetricStatCard
+              note={`${formatHours(plannedHours)} planned`}
+              title="Execution hours"
+              value={formatHours(loggedHours)}
+            />
+            <MetricStatCard
+              note="Tasks that still need a next move"
+              title="Open tasks"
+              value={bootstrap.tasks.length - completedTaskCount}
+            />
+            <MetricStatCard
+              note="Review gates still waiting on a decision"
+              title="Waiting for QA"
+              value={waitingForQaCount}
+            />
+            <MetricStatCard
+              note="Unresolved blockers across all tasks"
+              title="Blockers"
+              value={blockerCount}
+            />
+            <MetricStatCard
+              note={`${activeSubsystemCount} of ${bootstrap.subsystems.length} subsystems have work`}
+              title="Subsystem coverage"
+              value={activeSubsystemCount}
+            />
+            <MetricStatCard
+              note={`${activeMechanismCount} of ${bootstrap.mechanisms.length} mechanisms have work`}
+              title="Mechanism coverage"
+              value={activeMechanismCount}
+            />
+            <MetricStatCard
+              note={`${deliveredPurchases} delivered purchases | ${lowStockMaterials} low-stock materials`}
+              title="Supply watch"
+              value={supplySignals}
+            />
+            <MetricStatCard
+              note="Attendance records and meeting sign-ins"
+              title="Attendance hours"
+              value={formatHours(attendanceHours)}
+            />
+            <MetricStatCard
+              note="Mentor-backed QA approvals"
+              title="QA passes"
+              value={qaPassCount}
+            />
+          </div>
+
+          <div className="metrics-hotspot-grid">
+            <MetricHotspotCard
+              rows={subsystemMetrics.slice(0, 3)}
+              subtitle="Subsystems sorted by open work and blocker pressure."
+              title="Subsystem pressure"
+            />
+            <MetricHotspotCard
+              rows={mechanismMetrics.slice(0, 3)}
+              subtitle="Mechanisms sorted by open work and blocker pressure."
+              title="Mechanism pressure"
+            />
+          </div>
+
+          <MetricScopeTable
+            rows={subsystemMetrics}
+            scopeLabel="Subsystem"
+            subtitle="Count tasks, active work, QA pressure, blockers, and logged time at the subsystem level."
+            title="Subsystem metrics"
+          />
+
+          <MetricScopeTable
+            rows={mechanismMetrics}
+            scopeLabel="Mechanism"
+            subtitle="Track the same signals one layer deeper so mechanism bottlenecks are visible early."
+            title="Mechanism metrics"
+          />
         </>
       ) : null}
 
