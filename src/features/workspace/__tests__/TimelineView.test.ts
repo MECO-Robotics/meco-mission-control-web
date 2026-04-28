@@ -440,6 +440,8 @@ describe("TimelineView", () => {
     expect(clampTimelineZoom(0.2)).toBe(0.8);
     expect(getTimelineDayTrackSize("month", 1)).toBe("minmax(28px, 1fr)");
     expect(getTimelineDayTrackSize("month", 1.6)).toBe("minmax(45px, 1fr)");
+    expect(getTimelineDayTrackSize("week", 1)).toBe("44px");
+    expect(getTimelineDayTrackSize("week", 1.6)).toBe("70px");
     expect(
       getTimelineGridMinWidth({
         dayCount: 10,
@@ -500,6 +502,18 @@ describe("TimelineView", () => {
         /translate3d\(\s*-?\d+px\s*,\s*0\s*,\s*0\s*\)/,
       );
     }
+  });
+
+  it("clears timeline period motion after the interval change animation ends", () => {
+    const source = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/TimelineView.tsx"),
+      "utf8",
+    );
+
+    expect(source).toMatch(
+      /const clearMotion = window\.setTimeout\(\(\) => \{[\s\S]*setTimelineGridMotion\([\s\S]*direction:\s*null,[\s\S]*\}, 180\);/,
+    );
+    expect(source).toMatch(/window\.clearTimeout\(clearMotion\);/);
   });
 
   it("only transitions timeline grid width during period motion", () => {

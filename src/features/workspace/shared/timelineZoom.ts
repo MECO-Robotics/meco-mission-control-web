@@ -24,7 +24,11 @@ export function getTimelineDayTrackSize(
   zoom: number,
 ) {
   const minimumDayWidth = Math.round(TIMELINE_BASE_DAY_WIDTHS[viewInterval] * zoom);
-  return `minmax(${minimumDayWidth}px, 1fr)`;
+  if (viewInterval === "month") {
+    return `minmax(${minimumDayWidth}px, 1fr)`;
+  }
+
+  return `${minimumDayWidth}px`;
 }
 
 export function getTimelineGridMinWidth({

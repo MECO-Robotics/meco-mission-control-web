@@ -327,6 +327,22 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     }));
   }, []);
 
+  useEffect(() => {
+    if (!timelineGridMotion.direction) {
+      return undefined;
+    }
+
+    const clearMotion = window.setTimeout(() => {
+      setTimelineGridMotion((current) =>
+        current.direction ? { direction: null, token: current.token } : current,
+      );
+    }, 180);
+
+    return () => {
+      window.clearTimeout(clearMotion);
+    };
+  }, [timelineGridMotion.direction]);
+
   const handleTimelineIntervalChange = useCallback(
     (candidate: React.ChangeEvent<HTMLSelectElement>) => {
       const nextInterval = candidate.target.value as TimelineViewInterval;
