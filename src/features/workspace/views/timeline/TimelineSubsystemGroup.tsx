@@ -421,7 +421,6 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
                 gridRow={taskIndex + 1}
                 handleTimelineDayMouseEnter={handleTimelineDayMouseEnter}
                 includeTopBorder={taskIndex > 0}
-                onRowClick={() => openTaskDetailModal(task)}
                 onRowMouseEnter={() => {
                   clearHoveredTaskRow();
                   hoverSubsystemRow(subsystem.id);

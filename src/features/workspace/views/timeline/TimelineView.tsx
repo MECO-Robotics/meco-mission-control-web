@@ -78,7 +78,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   activePersonFilter,
   setActivePersonFilter,
   membersById: _membersById,
-  openTaskDetailModal: _openTaskDetailModal,
+  openTaskDetailModal,
   openCreateTaskModal,
   onDeleteTimelineEvent,
   onSaveTimelineEvent,
@@ -286,8 +286,9 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     (task: TaskRecord) => {
       setSelectedSubsystemId(null);
       setSelectedTaskId(task.id);
+      openTaskDetailModal(task);
     },
-    [],
+    [openTaskDetailModal],
   );
 
   const adjustTimelineZoom = useCallback((direction: 1 | -1) => {
