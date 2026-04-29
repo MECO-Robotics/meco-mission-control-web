@@ -3,10 +3,10 @@ import type { BootstrapPayload, TaskRecord } from "@/types";
 import { TimelineCollapseArrow } from "./TimelineCollapseArrow";
 import { TimelineGridDaySlots } from "./TimelineGridDaySlots";
 import { TimelineTaskBar } from "./TimelineTaskBar";
+import { getTimelineTaskStatusLabel, TimelineTaskStatusLogo } from "./TimelineTaskStatusLogo";
 import {
   buildTimelineSubsystemHighlightStyle,
   buildTimelineTaskToneStyle,
-  getTimelineTaskDisciplineColor,
 } from "./timelineTaskColors";
 import {
   getTaskDependencyCountsFromLookup,
@@ -29,22 +29,20 @@ interface TimelineSubsystemGroupProps {
   gridMinWidth: number;
   handleTimelineDayMouseEnter: (event: React.MouseEvent<HTMLElement>) => void;
   hoveredSubsystemId: string | null;
-  hoveredTaskId: string | null;
+  statusIconColumnIndex: number;
+  statusIconColumnWidth: number;
+  statusIconStickyLeft: number;
   hoverTaskRow: (id: string) => void;
   hoverSubsystemRow: (id: string) => void;
   selectSubsystemRow: (id: string) => void;
   selectTaskRow: (task: TaskRecord) => void;
   selectedSubsystemId: string | null;
-  selectedTaskId: string | null;
   showProjectCol: boolean;
   showSubsystemCol: boolean;
-  showTaskCol: boolean;
   subsystem: TimelineSubsystemRow;
   subsystemColumnIndex: number;
   subsystemIndex: number;
   subsystemStickyLeft: number;
-  taskLabelColumnIndex: number;
-  taskLabelStickyLeft: number;
   taskDependencyCountsById: Record<string, TimelineTaskDependencyCounts>;
   taskStatusSignalsById: Record<string, TimelineTaskStatusSignal>;
   timelineDayHeaderCells: TimelineDayHeaderCell[];
@@ -63,22 +61,20 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
   gridMinWidth,
   handleTimelineDayMouseEnter,
   hoveredSubsystemId,
-  hoveredTaskId,
+  statusIconColumnIndex,
+  statusIconColumnWidth,
+  statusIconStickyLeft,
   hoverTaskRow,
   hoverSubsystemRow,
   selectSubsystemRow,
   selectTaskRow,
   selectedSubsystemId,
-  selectedTaskId,
   showProjectCol,
   showSubsystemCol,
-  showTaskCol,
   subsystem,
   subsystemColumnIndex,
   subsystemIndex,
   subsystemStickyLeft,
-  taskLabelColumnIndex,
-  taskLabelStickyLeft,
   taskDependencyCountsById,
   taskStatusSignalsById,
   timelineDayHeaderCells,
@@ -110,6 +106,64 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
     : "1px solid var(--border-base)";
   const shouldRotateSubsystemLabel = !collapsed && taskCount > 1;
   const subsystemLabelRotation = getTimelineMergedCellRotation(taskCount);
+  const renderStatusIconCell = (
+    task: TimelineSubsystemRow["tasks"][number],
+    gridRow: string | number,
+    compact = false,
+  ) => (
+    <div
+      className="timeline-task-status-column"
+      style={{
+        gridRow: `${gridRow}`,
+        gridColumn: `${statusIconColumnIndex}`,
+        minHeight: "38px",
+        width: `${statusIconColumnWidth}px`,
+        padding: "0 6px",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        boxSizing: "border-box",
+        position: "sticky",
+        left: `${statusIconStickyLeft}px`,
+        zIndex: 10020,
+      }}
+      key={`status-icon-${subsystem.id}-${task.id}`}
+    >
+      <button
+        aria-label={`Open task ${task.title}`}
+        className={`timeline-task-status-icon-button${compact ? " is-compact" : ""}`}
+        data-status-signal={taskStatusSignalsById[task.id] ?? task.status}
+        onClick={() => openTaskDetailModal(task)}
+        onMouseEnter={() => {
+          hoverTaskRow(task.id);
+          clearHoveredMilestonePopup();
+        }}
+        onMouseLeave={clearHoveredTaskRow}
+        type="button"
+        style={{
+          position: "relative",
+          border: "none",
+          background: "none",
+          padding: 0,
+          overflow: "visible",
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          color: "inherit",
+        }}
+      >
+        <span className="timeline-task-status-caption">
+          {getTimelineTaskStatusLabel(taskStatusSignalsById[task.id] ?? task.status)}
+        </span>
+        <TimelineTaskStatusLogo
+          compact={compact}
+          signal={taskStatusSignalsById[task.id] ?? task.status}
+          status={task.status}
+        />
+      </button>
+    </div>
+  );
 
   return (
     <div
@@ -151,24 +205,24 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
           onMouseLeave={clearHoveredSubsystemRow}
           role="button"
           tabIndex={0}
-            style={buildTimelineSubsystemHighlightStyle(accentColor, {
-              gridRow: collapsed ? "1" : `1 / span ${taskCount}`,
-              gridColumn: `${subsystemColumnIndex}`,
-              position: "sticky",
-              left: `${subsystemStickyLeft}px`,
-              zIndex: 10021,
-              background: subsystemSurfaceBackground,
-              borderRight: subsystemSurfaceBorderRight,
-              boxShadow: `inset 3px 0 0 ${accentColor}`,
-              display: "flex",
-              flexDirection: collapsed ? "row" : "column",
-              justifyContent: collapsed ? "flex-start" : "center",
-              alignItems: "center",
-              minHeight: "38px",
-              padding: collapsed ? "0 12px" : "8px 6px",
-              overflow: collapsed ? "hidden" : "visible",
-              boxSizing: "border-box",
-            })}
+          style={buildTimelineSubsystemHighlightStyle(accentColor, {
+            gridRow: collapsed ? "1" : `1 / span ${taskCount}`,
+            gridColumn: `${subsystemColumnIndex}`,
+            position: "sticky",
+            left: `${subsystemStickyLeft}px`,
+            zIndex: 10021,
+            background: subsystemSurfaceBackground,
+            borderRight: subsystemSurfaceBorderRight,
+            boxShadow: `inset 3px 0 0 ${accentColor}`,
+            display: "flex",
+            flexDirection: collapsed ? "row" : "column",
+            justifyContent: collapsed ? "flex-start" : "center",
+            alignItems: "center",
+            minHeight: "38px",
+            padding: collapsed ? "0 12px" : "8px 6px",
+            overflow: collapsed ? "hidden" : "visible",
+            boxSizing: "border-box",
+          })}
         >
           {canToggleSubsystem ? (
             <button
@@ -273,57 +327,6 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
         </div>
       ) : null}
 
-      {collapsed && showTaskCol ? (
-        <div
-          className="timeline-column-motion timeline-subsystem-summary"
-          data-timeline-column="task"
-          onMouseEnter={() => hoverSubsystemRow(subsystem.id)}
-          onMouseLeave={clearHoveredSubsystemRow}
-          style={{
-            gridRow: "1",
-            gridColumn: `${taskLabelColumnIndex}`,
-            position: "sticky",
-            left: `${taskLabelStickyLeft}px`,
-            zIndex: 10020,
-            background: subsystemSurfaceBackground,
-            borderRight: subsystemSurfaceBorderRight,
-            boxShadow: "none",
-            boxSizing: "border-box",
-            minHeight: "38px",
-            display: "flex",
-            alignItems: "center",
-            padding: "0 12px",
-            fontSize: "0.72rem",
-            color: "var(--text-copy)",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {subsystem.tasks.length} task{subsystem.tasks.length === 1 ? "" : "s"}
-        </div>
-      ) : null}
-
-      {!collapsed && showTaskCol ? (
-        <div
-          className="timeline-column-motion timeline-row-motion-item timeline-task-column-fill"
-          data-timeline-column="task"
-          onMouseEnter={() => hoverSubsystemRow(subsystem.id)}
-          onMouseLeave={clearHoveredSubsystemRow}
-          style={{
-            gridRow: `1 / span ${taskCount}`,
-            gridColumn: `${taskLabelColumnIndex}`,
-            position: "sticky",
-            left: `${taskLabelStickyLeft}px`,
-            zIndex: 10020,
-            background: subsystemSurfaceBackground,
-            borderRight: subsystemSurfaceBorderRight,
-            boxShadow: `inset 3px 0 0 ${accentColor}`,
-            boxSizing: "border-box",
-          }}
-        />
-      ) : null}
-
       {collapsed ? (
         <TimelineGridDaySlots
           clearHoveredMilestonePopup={clearHoveredMilestonePopup}
@@ -349,6 +352,7 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
                 gridColumn: `${firstDayGridColumn} / -1`,
               }}
             />
+            {renderStatusIconCell(task, "1", true)}
             <TimelineTaskBar
               compact
               dependencyCounts={getTaskDependencyCounts(task.id)}
@@ -373,12 +377,11 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
                 padding: 0,
                 opacity: 0.7,
               })}
-              spillsLeft={task.spillsLeft}
-              spillsRight={task.spillsRight}
-              statusSignal={taskStatusSignalsById[task.id] ?? task.status}
-              task={task}
-              title={`${task.title} (${task.status})`}
-            />
+                spillsLeft={task.spillsLeft}
+                spillsRight={task.spillsRight}
+                task={task}
+                title={`${task.title} (${task.status})`}
+              />
           </React.Fragment>
         ))}
 
@@ -407,61 +410,7 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
                   gridColumn: `${firstDayGridColumn} / -1`,
                 }}
               />
-              {showTaskCol ? (
-                <button
-                  className={`task-label timeline-task-label timeline-task-label-${task.status} timeline-column-motion timeline-row-motion-item`}
-                  data-tutorial-target="timeline-task-label"
-                  onClick={() => openTaskDetailModal(task)}
-                  onMouseEnter={() => hoverTaskRow(task.id)}
-                  onMouseLeave={clearHoveredTaskRow}
-                  style={(() => {
-                    const taskDisciplineColor = getTimelineTaskDisciplineColor(task.disciplineId, disciplinesById);
-                    const taskRowFill =
-                      hoveredTaskId === task.id
-                        ? buildOpaqueSurfaceFill(groupBackground, taskDisciplineColor)
-                        : selectedTaskId === task.id
-                          ? buildOpaqueSurfaceFill(groupBackground, taskDisciplineColor)
-                          : subsystemBandFill;
-                    return buildTimelineTaskToneStyle(task.disciplineId, disciplinesById, {
-                      "--timeline-task-row-fill": taskRowFill ?? groupBackground,
-                      gridRow: taskIndex + 1,
-                      gridColumn: `${taskLabelColumnIndex}`,
-                      minHeight: "38px",
-                      padding: "0 10px",
-                      fontSize: "0.8rem",
-                      border: "none",
-                      borderRight: taskRowFill
-                        ? "1px solid transparent"
-                        : "1px solid var(--border-base)",
-                      boxSizing: "border-box",
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "center",
-                      alignItems: "flex-start",
-                      position: "sticky",
-                      left: `${taskLabelStickyLeft}px`,
-                      zIndex: 10020,
-                      overflow: "visible",
-                      borderTop: taskIndex === 0 ? "none" : "1px solid var(--border-base)",
-                      borderRadius: 0,
-                      textAlign: "left",
-                      cursor: "pointer",
-                    });
-                  })()}
-                  type="button"
-                >
-                  <strong
-                    className="timeline-task-label-title timeline-ellipsis-reveal"
-                    data-full-text={task.title}
-                    style={{
-                      display: "block",
-                      lineHeight: "1.2",
-                    }}
-                  >
-                    {task.title}
-                  </strong>
-                </button>
-              ) : null}
+              {renderStatusIconCell(task, taskIndex + 1)}
               <TimelineGridDaySlots
                 clearHoveredMilestonePopup={clearHoveredMilestonePopup}
                 firstDayGridColumn={firstDayGridColumn}
@@ -507,7 +456,6 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
                 })}
                 spillsLeft={task.spillsLeft}
                 spillsRight={task.spillsRight}
-                statusSignal={taskStatusSignalsById[task.id] ?? task.status}
                 task={task}
                 title={`View details for ${task.title}`}
               />

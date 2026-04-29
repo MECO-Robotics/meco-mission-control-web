@@ -8,6 +8,15 @@ interface TimelineTaskStatusLogoProps {
   status: TaskStatus;
 }
 
+const statusSignalLabels: Record<TimelineTaskStatusSignal, string> = {
+  "not-started": "Not Started",
+  "in-progress": "In Progress",
+  "waiting-for-qa": "Waiting for QA",
+  complete: "Complete",
+  blocked: "Blocked",
+  "waiting-on-dependency": "Waiting on Dependency",
+};
+
 function renderStatusGlyph(signal: TimelineTaskStatusSignal) {
   switch (signal) {
     case "not-started":
@@ -79,6 +88,9 @@ function renderStatusGlyph(signal: TimelineTaskStatusSignal) {
       );
   }
 }
+
+export const getTimelineTaskStatusLabel = (signal: TimelineTaskStatusSignal) =>
+  statusSignalLabels[signal] ?? signal;
 
 export const TimelineTaskStatusLogo: React.FC<TimelineTaskStatusLogoProps> = ({
   compact = false,
