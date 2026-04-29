@@ -143,7 +143,7 @@ export const TimelineProjectGroup: React.FC<TimelineProjectGroupProps> = ({
             alignItems: "center",
             minHeight: "38px",
             padding: projectCollapsed ? "0 12px" : "8px 6px",
-            overflow: projectCollapsed ? "hidden" : "visible",
+            overflow: "visible",
             boxSizing: "border-box",
           }}
         >
@@ -196,6 +196,7 @@ export const TimelineProjectGroup: React.FC<TimelineProjectGroupProps> = ({
         <>
           {collapsedSummarySpan > 0 ? (
               <div
+                className="timeline-merged-cell-column timeline-column-motion"
                 style={{
                   gridRow: "1",
                   gridColumn: `${collapsedSummaryStart} / span ${collapsedSummarySpan}`,
@@ -218,26 +219,7 @@ export const TimelineProjectGroup: React.FC<TimelineProjectGroupProps> = ({
                   textOverflow: "ellipsis",
                 }}
               >
-                <span
-                  className="timeline-merged-cell-title timeline-ellipsis-reveal"
-                  data-full-text={project.name}
-                  style={{
-                    minWidth: 0,
-                    flex: "1 1 auto",
-                  }}
-                >
-                  {project.name}
-                </span>
-                <span
-                  aria-hidden="true"
-                  className="timeline-subsystem-counter-corner"
-                  style={{
-                    right: "12px",
-                    bottom: "11px",
-                  }}
-                >
-                  {project.subsystems.length} subsystems
-                </span>
+                {project.subsystems.length} subsystems
               </div>
           ) : null}
           <TimelineGridDaySlots
