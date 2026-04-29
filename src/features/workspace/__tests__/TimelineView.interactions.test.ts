@@ -119,7 +119,9 @@ describe("TimelineView interactions", () => {
     let capturedSelectTaskRow: ((task: TaskRecord) => void) | null = null;
 
     jest.isolateModules(() => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const React = require("react");
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { renderToStaticMarkup } = require("react-dom/server");
 
       (globalThis as typeof globalThis & { React: typeof React }).React = React;
@@ -138,6 +140,7 @@ describe("TimelineView interactions", () => {
         },
       }));
 
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { TimelineView } = require("@/features/workspace/views/timeline/TimelineView");
 
       renderToStaticMarkup(
