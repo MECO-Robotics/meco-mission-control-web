@@ -201,6 +201,21 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   );
   const subsystemRows = timeline.subsystemRows;
   const projectRows = useMemo(() => buildTimelineProjectRows(subsystemRows), [subsystemRows]);
+  const subsystemTaskCountsById = useMemo(() => {
+    const counts = Object.fromEntries(
+      subsystemRows.map((subsystem) => [subsystem.id, subsystem.taskCount]),
+    ) as Record<string, number>;
+
+    return counts;
+  }, [subsystemRows]);
+  const subsystemRowsById = useMemo(
+    () =>
+      Object.fromEntries(subsystemRows.map((subsystem) => [subsystem.id, subsystem])) as Record<
+        string,
+        typeof subsystemRows[number]
+      >,
+    [subsystemRows],
+  );
 
   const hasProjectColumn = isAllProjectsView;
   const showProjectCol = hasProjectColumn && isProjectColumnVisible;
@@ -540,17 +555,31 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     (anchorKey: string): React.CSSProperties | null => {
       if (anchorKey.startsWith("task:")) {
         const task = tasksById[anchorKey.slice(5)];
-        return task ? buildTimelineTaskHighlightStyle(task.disciplineId, disciplinesById) : null;
+        if (!task) {
+          return null;
+        }
+
+        return buildTimelineTaskHighlightStyle(task.disciplineId, disciplinesById);
       }
 
       if (anchorKey.startsWith("subsystem:")) {
         const subsystem = subsystemsById[anchorKey.slice(10)];
-        return subsystem ? buildTimelineSubsystemHighlightStyle(subsystem.color ?? "#4F86C6") : null;
+        if (!subsystem) {
+          return null;
+        }
+
+        const subsystemRow = subsystemRowsById[subsystem.id];
+        const isSingleTaskRow = subsystemTaskCountsById[subsystem.id] === 1;
+        if (isSingleTaskRow && subsystemRow?.tasks[0]) {
+          return buildTimelineTaskHighlightStyle(subsystemRow.tasks[0].disciplineId, disciplinesById);
+        }
+
+        return buildTimelineSubsystemHighlightStyle(subsystem.color ?? "#4F86C6");
       }
 
       return null;
     },
-    [disciplinesById, subsystemsById, tasksById],
+    [disciplinesById, subsystemsById, subsystemRowsById, subsystemTaskCountsById, tasksById],
   );
 
   useEffect(() => {
