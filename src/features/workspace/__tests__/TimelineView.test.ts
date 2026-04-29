@@ -527,6 +527,7 @@ describe("TimelineView", () => {
         statusIconColumnIndex: 2,
         statusIconColumnWidth: 36,
         statusIconStickyLeft: 128,
+        subsystem: {
           id: "subsystem-2",
           name: "Controls",
           color: "#246847",
@@ -719,9 +720,15 @@ describe("TimelineView", () => {
         }),
       );
       const css = readFileSync(join(process.cwd(), "src/app/App.css"), "utf8");
-      const eventLayerZIndexes = Array.from(
+      const eventUnderlayZIndexes = Array.from(
         css.matchAll(
-          /\.timeline-day-event-(?:overlay-tooltip|overlay-column|underlay)\s*\{[^}]*z-index:\s*(\d+)/g,
+          /\.timeline-day-event-underlay\s*\{[^}]*z-index:\s*(\d+)/g,
+        ),
+        (match) => Number(match[1]),
+      );
+      const eventOverlayZIndexes = Array.from(
+        css.matchAll(
+          /\.timeline-day-event-(?:overlay-tooltip|overlay-column)\s*\{[^}]*z-index:\s*(\d+)/g,
         ),
         (match) => Number(match[1]),
       );
@@ -730,9 +737,11 @@ describe("TimelineView", () => {
         (match) => Number(match[2]),
       );
 
-      expect(eventLayerZIndexes.length).toBeGreaterThan(0);
+      expect(eventUnderlayZIndexes.length).toBeGreaterThan(0);
+      expect(eventOverlayZIndexes.length).toBeGreaterThan(0);
       expect(stickyLeftZIndexes.length).toBeGreaterThan(0);
-      expect(Math.min(...stickyLeftZIndexes)).toBeGreaterThan(Math.max(...eventLayerZIndexes));
+      expect(Math.min(...stickyLeftZIndexes)).toBeGreaterThan(Math.max(...eventUnderlayZIndexes));
+      expect(Math.max(...eventOverlayZIndexes)).toBeGreaterThan(Math.max(...stickyLeftZIndexes));
     },
   );
 
@@ -1148,7 +1157,9 @@ describe("TimelineView", () => {
 
     const revealRule = getRule(".timeline-ellipsis-reveal[data-full-text]::after", { pseudo: true });
     expect(revealRule).toMatch(/color:\s*var\(--timeline-reveal-color/);
-    expect(revealRule).toMatch(/background:\s*var\(--bg-panel\)/);
+    expect(revealRule).toMatch(
+      /background:\s*var\(--timeline-reveal-background,\s*var\(--timeline-task-discipline-accent,\s*var\(--bg-panel\)\)\)/,
+    );
     expect(getRule(".timeline-ellipsis-reveal[data-full-text]:hover", { pseudo: false })).toMatch(
       /color:\s*transparent/,
     );
@@ -1249,9 +1260,8 @@ describe("TimelineView", () => {
     const css = readFileSync(join(process.cwd(), "src/app/App.css"), "utf8");
 
     expect(markup).toContain("--timeline-task-discipline-accent:#c67b1f");
-    expect(markup).toContain("--timeline-task-row-fill:var(--bg-panel)");
     expect(markup).toMatch(/class="[^"]*timeline-bar[^"]*timeline-in-progress[^"]*"/);
-    expect(markup).toMatch(/class="[^"]*timeline-task-label[^"]*timeline-task-label-in-progress[^"]*"/);
+    expect(markup).toMatch(/class="[^"]*timeline-merged-cell-title[^"]*"/);
     expect(markup).toMatch(
       /class="timeline-task-status-logo timeline-task-status-logo-in-progress timeline-task-status-logo-signal-in-progress"/,
     );
@@ -1261,26 +1271,26 @@ describe("TimelineView", () => {
     expect(css).toMatch(
       /\.timeline-bar\s*\{[\s\S]*--timeline-task-status-edge-padding:\s*calc\(0\.05rem \* var\(--timeline-zoom,\s*1\)\)/,
     );
-    expect(css).toMatch(/\.timeline-bar\s*\{[\s\S]*--timeline-task-status-track-height:\s*1\.55rem/);
-    expect(css).toMatch(/\.timeline-bar\s*\{[\s\S]*--timeline-task-status-size:\s*0\.95rem/);
+    expect(css).toMatch(/\.timeline-bar\s*\{[\s\S]*--timeline-task-status-track-height:\s*2\.2rem/);
+    expect(css).toMatch(/\.timeline-bar\s*\{[\s\S]*--timeline-task-status-size:\s*1\.9rem/);
     expect(css).toMatch(
       /\.timeline-bar\s*\{[\s\S]*padding:\s*0\s+var\(--timeline-task-status-edge-padding\)\s+0\s+var\(--timeline-task-bar-padding-start\)/,
     );
     expect(css).toMatch(/\.timeline-bar\s*\{[\s\S]*box-shadow:\s*0 8px 18px rgba\(15, 28, 52, 0\.18\)/);
     expect(css).toMatch(/\.timeline-bar-content\s*\{[\s\S]*width:\s*100%/);
-    expect(css).toMatch(/\.timeline-bar \.editable-hover-indicator\s*\{[\s\S]*right:\s*-\s*0\.08rem/);
+    expect(css).toMatch(/\.\s*editable-hover-indicator\.editable-hover-indicator-compact\s*\{[\s\S]*right:\s*-\s*0\.04rem/);
     expect(css).toMatch(
-      /\.timeline-task-status-logo\s*\{[\s\S]*right:\s*calc\([\s\S]*var\(--timeline-task-status-track-height\)[\s\S]*var\(--timeline-task-status-size\)[\s\S]*var\(--timeline-task-status-edge-padding\)[\s\S]*\)/,
+      /\.timeline-task-status-logo\s*\{[\s\S]*right:\s*var\(\s*--timeline-task-status-right,\s*calc\(/,
     );
     expect(css).toMatch(
-      /\.timeline-task-status-logo\s*\{[\s\S]*--timeline-task-status-logo-background:\s*rgba\(255,\s*255,\s*255,\s*0\.94\)/,
+      /\.timeline-task-status-logo\s*\{[\s\S]*--timeline-task-status-logo-background:\s*rgba\(255,\s*255,\s*255,\s*0\.5\)/,
     );
     expect(css).toMatch(
       /\.timeline-task-status-logo\s*\{[\s\S]*background:\s*var\(--timeline-task-status-logo-background\)/,
     );
     expect(css).toMatch(/\.timeline-task-status-logo\s*\{[\s\S]*width:\s*var\(--timeline-task-status-size\)/);
-    expect(css).toMatch(/\.timeline-task-status-logo\.is-compact\s*\{[\s\S]*--timeline-task-status-track-height:\s*8px/);
-    expect(css).toMatch(/\.timeline-task-status-logo\.is-compact\s*\{[\s\S]*--timeline-task-status-size:\s*0\.45rem/);
+    expect(css).toMatch(/\.timeline-task-status-logo\.is-compact\s*\{[\s\S]*--timeline-task-status-track-height:\s*1rem/);
+    expect(css).toMatch(/\.timeline-task-status-logo\.is-compact\s*\{[\s\S]*--timeline-task-status-size:\s*0\.9rem/);
     expect(css).toMatch(/\.timeline-task-status-logo-signal-in-progress\s*\{[\s\S]*color:\s*#b77900/);
     expect(css).toMatch(/\.timeline-task-status-logo-signal-waiting-for-qa\s*\{[\s\S]*color:\s*#275098/);
     expect(css).toMatch(/\.timeline-task-status-logo-signal-blocked\s*\{[\s\S]*color:\s*var\(--official-red\)/);
@@ -1482,8 +1492,8 @@ describe("TimelineView", () => {
   });
 
   it.each([
-    [false, "3 / -1", "3 / -1"],
-    [true, "4 / -1", "4 / -1"],
+    [false, "2 / -1", "2 / -1"],
+    [true, "3 / -1", "3 / -1"],
   ])(
     "starts timeline row highlight anchors after sticky label columns when all-projects view is %s",
     (isAllProjectsView, expectedTaskAnchor, expectedSubsystemAnchor) => {
@@ -1550,4 +1560,3 @@ describe("TimelineView", () => {
     expect(css).toMatch(/\.timeline-row-highlight-anchor\s*\{[\s\S]*min-height:\s*38px/);
   });
 });
-

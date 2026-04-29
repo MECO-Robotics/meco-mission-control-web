@@ -130,21 +130,26 @@ export const TimelineTaskBar: React.FC<TimelineTaskBarProps> = ({
   };
 
   return (
-    <div
-      className="timeline-bar-hover-host editable-hover-target"
-      data-tutorial-target="timeline-task-bar"
-      data-spill-left={spillsLeft ? "true" : undefined}
-      data-spill-right={spillsRight ? "true" : undefined}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
+      <div
+        className="timeline-bar-hover-host editable-hover-target"
+        data-timeline-column="task"
+        data-tutorial-target="timeline-task-bar"
+        data-spill-left={spillsLeft ? "true" : undefined}
+        data-spill-right={spillsRight ? "true" : undefined}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
       style={hostStyle}
-    >
+      >
       <button
         className={`timeline-bar timeline-${task.status} timeline-row-motion-item`}
         data-spill-left={spillsLeft ? "true" : undefined}
         data-spill-right={spillsRight ? "true" : undefined}
         onClick={() => onOpenTask(task)}
-        style={buttonStyle}
+        style={{
+          ...buttonStyle,
+          gridRow,
+          gridColumn,
+        }}
         title={title}
         type="button"
       >
