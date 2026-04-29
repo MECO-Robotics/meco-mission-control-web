@@ -1,10 +1,8 @@
 import React from "react";
 import { EditableHoverIndicator } from "@/features/workspace/shared";
 import type { TaskRecord } from "@/types";
-import { TimelineTaskStatusLogo } from "./TimelineTaskStatusLogo";
 import type {
   TimelineTaskDependencyCounts,
-  TimelineTaskStatusSignal,
 } from "./timelineGridBodyUtils";
 
 type TimelineTaskDependencyPresentation = "none" | "outline" | "text";
@@ -18,7 +16,6 @@ interface TimelineTaskBarProps {
   onMouseLeave: () => void;
   onOpenTask: (task: TaskRecord) => void;
   style: React.CSSProperties;
-  statusSignal: TimelineTaskStatusSignal;
   task: TaskRecord;
   title: string;
   spillsLeft?: boolean;
@@ -78,7 +75,6 @@ export const TimelineTaskBar: React.FC<TimelineTaskBarProps> = ({
   onMouseLeave,
   onOpenTask,
   style,
-  statusSignal,
   task,
   title,
   spillsLeft = false,
@@ -87,6 +83,7 @@ export const TimelineTaskBar: React.FC<TimelineTaskBarProps> = ({
   const { borderRadius, ...baseStyle } = style;
   const spillAwareStyle: React.CSSProperties = {
     ...baseStyle,
+    overflow: "visible",
     ...(borderRadius
       ? ({
           "--timeline-task-bar-radius": borderRadius,
@@ -114,25 +111,59 @@ export const TimelineTaskBar: React.FC<TimelineTaskBarProps> = ({
       : null),
   };
 
+  const {
+    gridRow,
+    gridColumn,
+    margin,
+    alignSelf,
+    ...buttonStyle
+  } = spillAwareStyle;
+
+  const hostStyle: React.CSSProperties = {
+    position: "relative",
+    overflow: "visible",
+    width: "100%",
+    gridRow,
+    gridColumn,
+    margin,
+    alignSelf,
+  };
+
   return (
-    <button
-      className={`timeline-bar timeline-${task.status} editable-hover-target timeline-row-motion-item`}
+    <div
+      className="timeline-bar-hover-host editable-hover-target"
+      data-tutorial-target="timeline-task-bar"
       data-spill-left={spillsLeft ? "true" : undefined}
       data-spill-right={spillsRight ? "true" : undefined}
-      data-tutorial-target="timeline-task-bar"
-      onClick={() => onOpenTask(task)}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      style={spillAwareStyle}
-      title={title}
-      type="button"
+      style={hostStyle}
     >
-      <span className="timeline-bar-content">
-        <TimelineTaskStatusLogo compact={compact} signal={statusSignal} status={task.status} />
-        {compact ? null : <span className="timeline-bar-title">{task.title}</span>}
-        {renderDependencyIndicator(dependencyCounts, dependencyPresentation)}
-        <EditableHoverIndicator className="editable-hover-indicator-compact" />
-      </span>
-    </button>
+      <button
+        className={`timeline-bar timeline-${task.status} timeline-row-motion-item`}
+        data-spill-left={spillsLeft ? "true" : undefined}
+        data-spill-right={spillsRight ? "true" : undefined}
+        onClick={() => onOpenTask(task)}
+        style={buttonStyle}
+        title={title}
+        type="button"
+      >
+        <span className="timeline-bar-content">
+          {compact ? null : (
+            <span
+              className="timeline-bar-title timeline-ellipsis-reveal"
+              data-full-text={task.title}
+              style={{
+                ["--timeline-reveal-background" as const]: "var(--timeline-task-discipline-accent)",
+              } as React.CSSProperties}
+            >
+              {task.title}
+            </span>
+          )}
+          {renderDependencyIndicator(dependencyCounts, dependencyPresentation)}
+        </span>
+      </button>
+      <EditableHoverIndicator className="timeline-bar-hover-indicator editable-hover-indicator-compact" />
+    </div>
   );
 };

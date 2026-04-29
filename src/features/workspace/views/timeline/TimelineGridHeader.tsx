@@ -18,13 +18,9 @@ interface TimelineGridHeaderProps {
   projectColumnWidth: number;
   showProjectCol: boolean;
   showSubsystemCol: boolean;
-  showTaskCol: boolean;
   subsystemColumnIndex: number;
   subsystemColumnWidth: number;
   subsystemStickyLeft: number;
-  taskLabelColumnIndex: number;
-  taskLabelStickyLeft: number;
-  taskColumnWidth: number;
   timelineDayCellRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>;
   timelineDayHeaderCells: TimelineDayHeaderCell[];
   timelineFilterMotionClass: string;
@@ -38,7 +34,6 @@ interface TimelineGridHeaderProps {
   timelineShellRef: React.MutableRefObject<HTMLDivElement | null>;
   toggleProjectColumn: () => void;
   toggleSubsystemColumn: () => void;
-  toggleTaskColumn: () => void;
   children?: React.ReactNode;
 }
 
@@ -56,13 +51,9 @@ export const TimelineGridHeader: React.FC<TimelineGridHeaderProps> = ({
   projectColumnWidth,
   showProjectCol,
   showSubsystemCol,
-  showTaskCol,
   subsystemColumnIndex,
   subsystemColumnWidth,
   subsystemStickyLeft,
-  taskLabelColumnIndex,
-  taskLabelStickyLeft,
-  taskColumnWidth,
   timelineDayCellRefs,
   timelineDayHeaderCells,
   timelineFilterMotionClass,
@@ -73,7 +64,6 @@ export const TimelineGridHeader: React.FC<TimelineGridHeaderProps> = ({
   timelineShellRef,
   toggleProjectColumn,
   toggleSubsystemColumn,
-  toggleTaskColumn,
   children,
 }) => {
   const hiddenColumnToggles = [
@@ -91,15 +81,8 @@ export const TimelineGridHeader: React.FC<TimelineGridHeaderProps> = ({
           onClick: toggleSubsystemColumn,
         }
       : null,
-    !showTaskCol
-      ? {
-          id: "task",
-          label: "Show task column",
-          onClick: toggleTaskColumn,
-        }
-      : null,
   ].filter((toggle): toggle is { id: string; label: string; onClick: () => void } => Boolean(toggle));
-  const visibleLabelWidth = projectColumnWidth + subsystemColumnWidth + taskColumnWidth;
+  const visibleLabelWidth = projectColumnWidth + subsystemColumnWidth;
   const hiddenToggleWidth = hiddenColumnToggles.length * 28 + Math.max(0, hiddenColumnToggles.length - 1) * 6;
   const hiddenToggleLeft = Math.max(6, visibleLabelWidth - hiddenToggleWidth - 6);
   const monthHeaderCells = React.useMemo(
@@ -117,7 +100,7 @@ export const TimelineGridHeader: React.FC<TimelineGridHeaderProps> = ({
   return (
     <div
       ref={timelineShellRef}
-      className={`timeline-shell ${timelineFilterMotionClass}`}
+      className={`timeline-shell ${timelineFilterMotionClass}${isWeekView ? " is-week-view" : ""}`}
       data-is-scrolling={isScrolling ? "true" : undefined}
       onWheel={handleTimelineZoomWheel}
       style={{
@@ -189,44 +172,7 @@ export const TimelineGridHeader: React.FC<TimelineGridHeaderProps> = ({
           </button>
         ) : null}
 
-      {showTaskCol ? (
-      <button
-        aria-label={`${showTaskCol ? "Hide" : "Show"} task column`}
-        aria-pressed={showTaskCol}
-        className={`sticky-label timeline-column-header timeline-column-header-button timeline-column-motion${showTaskCol ? "" : " is-hidden"}`}
-        onClick={toggleTaskColumn}
-        title={`${showTaskCol ? "Hide" : "Show"} task column`}
-        style={{
-          gridRow: showTaskCol ? "1 / span 2" : "1",
-          gridColumn: `${taskLabelColumnIndex}`,
-          width: `${taskColumnWidth}px`,
-          minWidth: `${taskColumnWidth}px`,
-          maxWidth: `${taskColumnWidth}px`,
-          padding: showTaskCol ? "10px 12px" : "4px",
-          fontWeight: "bold",
-          borderRight: "1px solid var(--border-base)",
-          borderBottom: "1px solid var(--border-base)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: showTaskCol ? "space-between" : "center",
-          gap: "0.3rem",
-          boxSizing: "border-box",
-          height: "100%",
-          position: "sticky",
-          left: `${taskLabelStickyLeft}px`,
-          zIndex: 10030,
-          background: "var(--bg-panel)",
-        }}
-        type="button"
-      >
-        {showTaskCol ? <span className="timeline-column-header-label">Task</span> : null}
-        <span aria-hidden="true" className={`timeline-column-visibility-icon${showTaskCol ? " is-active" : ""}`}>
-          <IconEye />
-        </span>
-      </button>
-      ) : null}
-
-      {hasProjectColumn && showProjectCol ? (
+        {hasProjectColumn && showProjectCol ? (
         <button
           aria-label={`${showProjectCol ? "Hide" : "Show"} project column`}
           aria-pressed={showProjectCol}
@@ -264,7 +210,7 @@ export const TimelineGridHeader: React.FC<TimelineGridHeaderProps> = ({
             <IconEye />
           </span>
         </button>
-      ) : null}
+        ) : null}
 
       {monthHeaderCells.map((group, index) => (
             <div

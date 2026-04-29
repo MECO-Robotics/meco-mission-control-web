@@ -401,11 +401,10 @@ describe("TimelineView", () => {
         disciplinesById: {
           "discipline-1": bootstrap.disciplines[0] as BootstrapPayload["disciplines"][number],
         },
-        firstDayGridColumn: 4,
+        firstDayGridColumn: 3,
         gridMinWidth: 420,
         handleTimelineDayMouseEnter: jest.fn(),
         hoveredSubsystemId: null,
-        hoveredTaskId: null,
         hoverSubsystemRow: jest.fn(),
         hoverTaskRow: jest.fn(),
         openTaskDetailModal: jest.fn(),
@@ -449,15 +448,14 @@ describe("TimelineView", () => {
         selectSubsystemRow: jest.fn(),
         selectTaskRow: jest.fn(),
         selectedSubsystemId: null,
-        selectedTaskId: null,
         showProjectCol: true,
         showSubsystemCol: true,
-        showTaskCol: true,
+        statusIconColumnIndex: 3,
+        statusIconColumnWidth: 36,
+        statusIconStickyLeft: 240,
         subsystemColumnIndex: 2,
         subsystemStickyLeft: 112,
         taskDependencyCountsById: {},
-        taskLabelColumnIndex: 3,
-        taskLabelStickyLeft: 240,
         taskStatusSignalsById: {},
         timelineDayHeaderCells: [
           {
@@ -479,7 +477,7 @@ describe("TimelineView", () => {
             primaryEventEndDay: "",
           },
         ],
-        timelineGridTemplate: "112px 128px 148px repeat(2, 24px)",
+        timelineGridTemplate: "112px 128px repeat(2, 24px)",
         toggleProject: jest.fn(),
         toggleSubsystem: jest.fn(),
       }),
@@ -493,7 +491,7 @@ describe("TimelineView", () => {
     expect(secondTaskBar?.[1]).not.toContain("grid-row:1");
   });
 
-  it("removes the task-column accent stripe from collapsed subsystem summaries", () => {
+  it("renders collapsed subsystem status icons as an overlay", () => {
     const bootstrap = createBootstrap();
     const baseTask = bootstrap.tasks[0] as BootstrapPayload["tasks"][number];
     const makeTimelineTask = (id: string, title: string) => ({
@@ -514,22 +512,21 @@ describe("TimelineView", () => {
         disciplinesById: {
           "discipline-1": bootstrap.disciplines[0] as BootstrapPayload["disciplines"][number],
         },
-        firstDayGridColumn: 4,
+        firstDayGridColumn: 2,
         gridMinWidth: 420,
         handleTimelineDayMouseEnter: jest.fn(),
         hoveredSubsystemId: null,
-        hoveredTaskId: null,
         hoverSubsystemRow: jest.fn(),
         hoverTaskRow: jest.fn(),
         openTaskDetailModal: jest.fn(),
         selectSubsystemRow: jest.fn(),
         selectTaskRow: jest.fn(),
         selectedSubsystemId: null,
-        selectedTaskId: null,
         showProjectCol: true,
         showSubsystemCol: true,
-        showTaskCol: true,
-        subsystem: {
+        statusIconColumnIndex: 2,
+        statusIconColumnWidth: 36,
+        statusIconStickyLeft: 128,
           id: "subsystem-2",
           name: "Controls",
           color: "#246847",
@@ -547,8 +544,6 @@ describe("TimelineView", () => {
         subsystemIndex: 1,
         subsystemStickyLeft: 112,
         taskDependencyCountsById: {},
-        taskLabelColumnIndex: 3,
-        taskLabelStickyLeft: 240,
         taskStatusSignalsById: {},
         timelineDayHeaderCells: [
           {
@@ -570,17 +565,17 @@ describe("TimelineView", () => {
             primaryEventEndDay: "",
           },
         ],
-        timelineGridTemplate: "112px 128px 148px repeat(2, 24px)",
+        timelineGridTemplate: "128px repeat(2, 24px)",
         toggleSubsystem: jest.fn(),
       }),
     );
 
-    const summaryIndex = markup.indexOf('class="timeline-column-motion timeline-subsystem-summary"');
-    expect(summaryIndex).toBeGreaterThanOrEqual(0);
+    const statusIndex = markup.indexOf('class="timeline-task-status-column"');
+    expect(statusIndex).toBeGreaterThanOrEqual(0);
 
-    const summarySnippet = markup.slice(summaryIndex, summaryIndex + 420);
-    expect(summarySnippet).toContain("box-shadow:none");
-    expect(summarySnippet).not.toContain("box-shadow:inset 3px 0 0 #246847");
+    const statusSnippet = markup.slice(statusIndex, statusIndex + 420);
+    expect(statusSnippet).toContain("grid-column:2");
+    expect(statusSnippet).toContain("timeline-task-status-icon-button");
   });
 
   it("lets collapsed project labels overflow past the right-side summary columns", () => {
@@ -605,11 +600,10 @@ describe("TimelineView", () => {
         disciplinesById: {
           "discipline-1": bootstrap.disciplines[0] as BootstrapPayload["disciplines"][number],
         },
-        firstDayGridColumn: 4,
+        firstDayGridColumn: 3,
         gridMinWidth: 420,
         handleTimelineDayMouseEnter: jest.fn(),
         hoveredSubsystemId: null,
-        hoveredTaskId: null,
         hoverSubsystemRow: jest.fn(),
         hoverTaskRow: jest.fn(),
         openTaskDetailModal: jest.fn(),
@@ -637,15 +631,14 @@ describe("TimelineView", () => {
         selectSubsystemRow: jest.fn(),
         selectTaskRow: jest.fn(),
         selectedSubsystemId: null,
-        selectedTaskId: null,
         showProjectCol: true,
         showSubsystemCol: true,
-        showTaskCol: true,
+        statusIconColumnIndex: 3,
+        statusIconColumnWidth: 36,
+        statusIconStickyLeft: 240,
         subsystemColumnIndex: 2,
         subsystemStickyLeft: 112,
         taskDependencyCountsById: {},
-        taskLabelColumnIndex: 3,
-        taskLabelStickyLeft: 240,
         taskStatusSignalsById: {},
         timelineDayHeaderCells: [
           {
@@ -658,7 +651,7 @@ describe("TimelineView", () => {
             primaryEventEndDay: "",
           },
         ],
-        timelineGridTemplate: "112px 128px 148px repeat(1, 24px)",
+        timelineGridTemplate: "112px 128px repeat(1, 24px)",
         toggleProject: jest.fn(),
         toggleSubsystem: jest.fn(),
       }),
@@ -1557,3 +1550,4 @@ describe("TimelineView", () => {
     expect(css).toMatch(/\.timeline-row-highlight-anchor\s*\{[\s\S]*min-height:\s*38px/);
   });
 });
+

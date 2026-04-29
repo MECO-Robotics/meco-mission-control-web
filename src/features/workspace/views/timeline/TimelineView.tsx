@@ -75,7 +75,7 @@ interface TimelineViewProps {
 type TimelineGridMotion = "left" | "right" | "neutral";
 const PROJECT_COLUMN_WIDTH = 112;
 const SUBSYSTEM_COLUMN_WIDTH = 128;
-const TASK_LABEL_COLUMN_WIDTH = 148;
+const STATUS_ICON_COLUMN_WIDTH = 36;
 
 export const TimelineView: React.FC<TimelineViewProps> = ({
   bootstrap,
@@ -115,7 +115,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const [isDeletingEvent, setIsDeletingEvent] = useState(false);
   const [isProjectColumnVisible, setIsProjectColumnVisible] = useState(true);
   const [isSubsystemColumnVisible, setIsSubsystemColumnVisible] = useState(true);
-  const [isTaskColumnVisible, setIsTaskColumnVisible] = useState(true);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [selectedSubsystemId, setSelectedSubsystemId] = useState<string | null>(null);
   const [hoveredSubsystemId, setHoveredSubsystemId] = useState<string | null>(null);
@@ -206,29 +205,26 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const hasProjectColumn = isAllProjectsView;
   const showProjectCol = hasProjectColumn && isProjectColumnVisible;
   const showSubsystemCol = isSubsystemColumnVisible;
-  const showTaskCol = isTaskColumnVisible;
   const projectColumnWidth = hasProjectColumn && showProjectCol ? PROJECT_COLUMN_WIDTH : 0;
   const subsystemColumnWidth = showSubsystemCol ? SUBSYSTEM_COLUMN_WIDTH : 0;
-  const taskColumnWidth = showTaskCol ? TASK_LABEL_COLUMN_WIDTH : 0;
   const subsystemColumnIndex = hasProjectColumn ? 2 : 1;
-  const taskLabelColumnIndex = hasProjectColumn ? 3 : 2;
-  const firstDayGridColumn = hasProjectColumn ? 4 : 3;
+  const firstDayGridColumn = hasProjectColumn ? 3 : 2;
+  const statusIconColumnIndex = firstDayGridColumn;
+  const fixedTimelineColumnWidth = projectColumnWidth + subsystemColumnWidth;
+  const statusIconStickyLeft = hasProjectColumn ? projectColumnWidth + subsystemColumnWidth : subsystemColumnWidth;
   const subsystemStickyLeft = hasProjectColumn ? projectColumnWidth : 0;
-  const taskLabelStickyLeft = subsystemStickyLeft + subsystemColumnWidth;
-  const fixedTimelineColumnWidth = projectColumnWidth + subsystemColumnWidth + taskColumnWidth;
   const dayTrackSize = useMemo(
     () => getTimelineDayTrackSize(viewInterval, timelineZoom, fixedTimelineColumnWidth),
     [fixedTimelineColumnWidth, timelineZoom, viewInterval],
   );
 
   const timelineGridTemplate = useMemo(() => {
-    return `${hasProjectColumn ? `${projectColumnWidth}px ` : ""}${subsystemColumnWidth}px ${taskColumnWidth}px repeat(${timeline.days.length}, ${dayTrackSize})`;
+    return `${hasProjectColumn ? `${projectColumnWidth}px ` : ""}${subsystemColumnWidth}px repeat(${timeline.days.length}, ${dayTrackSize})`;
   }, [
     hasProjectColumn,
     dayTrackSize,
     projectColumnWidth,
     subsystemColumnWidth,
-    taskColumnWidth,
     timeline.days.length,
   ]);
 
@@ -238,7 +234,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       hasProjectColumn,
       projectColumnWidth,
       subsystemColumnWidth,
-      taskColumnWidth,
+      taskColumnWidth: 0,
       viewInterval,
       zoom: timelineZoom,
     });
@@ -246,7 +242,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     hasProjectColumn,
     projectColumnWidth,
     subsystemColumnWidth,
-    taskColumnWidth,
     timeline.days.length,
     timelineZoom,
     viewInterval,
@@ -272,10 +267,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
 
   const toggleSubsystemColumn = useCallback(() => {
     setIsSubsystemColumnVisible((previous) => !previous);
-  }, []);
-
-  const toggleTaskColumn = useCallback(() => {
-    setIsTaskColumnVisible((previous) => !previous);
   }, []);
 
   const selectSubsystemRow = useCallback((id: string) => {
@@ -573,10 +564,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     collapsedSubsystems,
     showProjectCol,
     showSubsystemCol,
-    showTaskCol,
     isProjectColumnVisible,
     isSubsystemColumnVisible,
-    isTaskColumnVisible,
   ]);
 
   useEffect(() => {
@@ -723,20 +712,17 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         projectColumnWidth={projectColumnWidth}
         projectRows={projectRows}
         hoveredSubsystemId={hoveredSubsystemId}
-        hoveredTaskId={hoveredTaskId}
         selectedSubsystemId={selectedSubsystemId}
-        selectedTaskId={selectedTaskId}
+        statusIconColumnIndex={statusIconColumnIndex}
+        statusIconColumnWidth={STATUS_ICON_COLUMN_WIDTH}
+        statusIconStickyLeft={statusIconStickyLeft}
         showProjectCol={showProjectCol}
         showSubsystemCol={showSubsystemCol}
-        showTaskCol={showTaskCol}
         isScrolling={isTimelineShellScrolling}
         subsystemColumnIndex={subsystemColumnIndex}
         subsystemColumnWidth={subsystemColumnWidth}
         subsystemRows={subsystemRows}
         subsystemStickyLeft={subsystemStickyLeft}
-        taskColumnWidth={taskColumnWidth}
-        taskLabelColumnIndex={taskLabelColumnIndex}
-        taskLabelStickyLeft={taskLabelStickyLeft}
         timelineDayCellRefs={timelineDayCellRefs}
         timelineDayHeaderCells={timelineDayHeaderCells}
         timelineFilterMotionClass={timelineFilterMotionClass}
@@ -756,7 +742,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         toggleProjectColumn={toggleProjectColumn}
         toggleSubsystem={toggleSubsystem}
         toggleSubsystemColumn={toggleSubsystemColumn}
-        toggleTaskColumn={toggleTaskColumn}
       />
 
       <TimelineMilestoneUnderlaysPortal
