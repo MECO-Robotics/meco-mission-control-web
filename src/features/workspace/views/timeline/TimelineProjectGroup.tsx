@@ -219,7 +219,7 @@ export const TimelineProjectGroup: React.FC<TimelineProjectGroupProps> = ({
                   textOverflow: "ellipsis",
                 }}
               >
-                {project.subsystems.length} subsystems
+                {project.subsystems.length} subsystems / {project.taskCount} tasks
               </div>
           ) : null}
           <TimelineGridDaySlots

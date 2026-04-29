@@ -666,7 +666,7 @@ describe("TimelineView", () => {
 
     expect(markup).toContain('data-timeline-column="project"');
     expect(markup).toContain("overflow:visible");
-    expect(markup).toContain("5 subsystems");
+    expect(markup).toContain("5 subsystems / 5 tasks");
   });
 
   it("positions same-day milestone popup text to align with underlay lanes", () => {
