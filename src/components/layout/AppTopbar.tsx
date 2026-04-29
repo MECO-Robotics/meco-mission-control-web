@@ -256,18 +256,18 @@ export function AppTopbar({
       className="topbar app-topbar"
       data-collapsed={isSidebarCollapsed ? "true" : "false"}
     >
+      <div className="app-topbar-brand">
+        <img
+          alt="MECO main logo"
+          className="app-topbar-brand-icon"
+          fetchPriority="high"
+          height={MECO_MAIN_LOGO_HEIGHT}
+          loading="eager"
+          width={MECO_MAIN_LOGO_WIDTH}
+          src={isDarkMode ? MECO_MAIN_LOGO_WHITE_SRC : MECO_MAIN_LOGO_LIGHT_SRC}
+        />
+      </div>
       <div className="app-topbar-left">
-        <div className="app-topbar-brand" data-visible={isSidebarCollapsed ? "false" : "true"}>
-          <img
-            alt="MECO main logo"
-            className="app-topbar-brand-icon"
-            fetchPriority="high"
-            height={MECO_MAIN_LOGO_HEIGHT}
-            loading="eager"
-            width={MECO_MAIN_LOGO_WIDTH}
-            src={isDarkMode ? MECO_MAIN_LOGO_WHITE_SRC : MECO_MAIN_LOGO_LIGHT_SRC}
-          />
-        </div>
       </div>
 
       <div className="app-topbar-nav">

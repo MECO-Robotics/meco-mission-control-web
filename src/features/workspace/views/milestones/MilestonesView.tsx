@@ -414,7 +414,7 @@ export function MilestonesView({
       : null;
 
   return (
-    <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
+    <section className={`panel dense-panel milestone-view ${WORKSPACE_PANEL_CLASS}`}>
       <div className="panel-header compact-header">
         <div className="queue-section-header">
           <h2>Milestones</h2>

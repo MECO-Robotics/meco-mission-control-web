@@ -494,14 +494,10 @@ export function WorkspaceContent({
             activePersonFilter={activePersonFilter}
             bootstrap={bootstrap}
             disciplinesById={disciplinesById}
-            eventsById={eventsById}
             isAllProjectsView={isAllProjectsView}
-            mechanismsById={mechanismsById}
             membersById={membersById}
             openCreateTaskModal={openCreateTaskModal}
             openEditTaskModal={openTimelineTaskDetailsModal}
-            partDefinitionsById={partDefinitionsById}
-            partInstancesById={partInstancesById}
             subsystemsById={subsystemsById}
           />
         </WorkspaceSubPanel>

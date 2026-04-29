@@ -35,10 +35,6 @@ import {
   TASK_STATUS_OPTIONS,
   formatTaskStatusLabel,
 } from "@/features/workspace/shared";
-import {
-  formatTaskPlanningState,
-  getTaskPlanningState,
-} from "@/features/workspace/shared/taskPlanning";
 
 type TaskSortField =
   | "disciplineId"
@@ -77,14 +73,10 @@ interface TaskQueueViewProps {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
-  eventsById: Record<string, BootstrapPayload["events"][number]>;
   isAllProjectsView: boolean;
-  mechanismsById: Record<string, BootstrapPayload["mechanisms"][number]>;
   membersById: Record<string, BootstrapPayload["members"][number]>;
   openCreateTaskModal: () => void;
   openEditTaskModal: (task: TaskRecord) => void;
-  partDefinitionsById: Record<string, BootstrapPayload["partDefinitions"][number]>;
-  partInstancesById: Record<string, BootstrapPayload["partInstances"][number]>;
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
 }
 
@@ -128,25 +120,6 @@ function formatSubsystemNames(
       const subsystem = lookup[subsystemId];
       return subsystem
         ? `${subsystem.name} (${formatIterationVersion(subsystem.iteration)})`
-        : "Unknown";
-    })
-    .join(", ");
-}
-
-function formatMechanismNames(
-  mechanismIds: string[],
-  lookup: Record<string, BootstrapPayload["mechanisms"][number]>,
-  fallback: string,
-) {
-  if (mechanismIds.length === 0) {
-    return fallback;
-  }
-
-  return mechanismIds
-    .map((mechanismId) => {
-      const mechanism = lookup[mechanismId];
-      return mechanism
-        ? `${mechanism.name} (${formatIterationVersion(mechanism.iteration)})`
         : "Unknown";
     })
     .join(", ");
@@ -365,34 +338,6 @@ function isActiveClass(activeFilterCount: number) {
   return activeFilterCount > 0 ? " is-active" : "";
 }
 
-function readTaskMechanismIds(task: TaskRecord) {
-  const mechanismIds = Array.isArray(task.mechanismIds) ? task.mechanismIds : [];
-  const candidateIds = mechanismIds.length > 0 ? mechanismIds : [task.mechanismId];
-
-  return Array.from(
-    new Set(
-      candidateIds.filter(
-        (mechanismId): mechanismId is string =>
-          typeof mechanismId === "string" && mechanismId.length > 0,
-      ),
-    ),
-  );
-}
-
-function readTaskPartInstanceIds(task: TaskRecord) {
-  const partInstanceIds = Array.isArray(task.partInstanceIds) ? task.partInstanceIds : [];
-  const candidateIds = partInstanceIds.length > 0 ? partInstanceIds : [task.partInstanceId];
-
-  return Array.from(
-    new Set(
-      candidateIds.filter(
-        (partInstanceId): partInstanceId is string =>
-          typeof partInstanceId === "string" && partInstanceId.length > 0,
-      ),
-    ),
-  );
-}
-
 function readTaskAssigneeIds(task: TaskRecord) {
   const assigneeIds = Array.isArray(task.assigneeIds) ? task.assigneeIds : [];
 
@@ -414,14 +359,10 @@ export function TaskQueueView({
   activePersonFilter,
   bootstrap,
   disciplinesById,
-  eventsById,
   isAllProjectsView,
-  mechanismsById,
   membersById,
   openCreateTaskModal,
   openEditTaskModal,
-  partDefinitionsById,
-  partInstancesById,
   subsystemsById,
 }: TaskQueueViewProps) {
   const [sortField, setSortField] = useState<TaskSortField>("dueDate");
@@ -725,7 +666,7 @@ export function TaskQueueView({
   };
 
   return (
-    <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
+    <section className={`panel dense-panel task-queue-view ${WORKSPACE_PANEL_CLASS}`}>
       <div className="panel-header compact-header">
         <div className="queue-section-header">
           <h2>Task queue</h2>
@@ -948,21 +889,6 @@ export function TaskQueueView({
         </div>
 
         {taskPagination.pageItems.map((task) => {
-          const planningState = getTaskPlanningState(task, bootstrap);
-          const linkedPartNames = readTaskPartInstanceIds(task)
-            .map((partInstanceId) => {
-              const partInstance = partInstancesById[partInstanceId];
-              if (!partInstance) {
-                return null;
-              }
-
-              const partDefinition = partDefinitionsById[partInstance.partDefinitionId];
-              return partDefinition
-                ? `${partInstance.name} (${partDefinition.name} (${formatIterationVersion(partDefinition.iteration)}))`
-                : partInstance.name;
-            })
-            .filter((name): name is string => Boolean(name));
-
           return (
             <button
               className="queue-table queue-row editable-hover-target editable-hover-target-row"
@@ -983,23 +909,6 @@ export function TaskQueueView({
               >
                 <strong>{task.title}</strong>
                 <small>{task.summary}</small>
-                <small>
-                  {formatMechanismNames(
-                    readTaskMechanismIds(task),
-                    mechanismsById,
-                    "No mechanism",
-                  )}
-                  {" / "}
-                  {linkedPartNames.length > 0 ? linkedPartNames.join(", ") : "No part"}
-                  {task.targetEventId
-                    ? ` / target ${eventsById[task.targetEventId]?.title ?? "event"}`
-                    : ""}
-                </small>
-                <small style={{ display: "flex", gap: "0.4rem", alignItems: "center", flexWrap: "wrap" }}>
-                  <span className={getStatusPillClassName(planningState)}>
-                    {formatTaskPlanningState(planningState)}
-                  </span>
-                </small>
               </span>
               {showDisciplineCol ? (
                 <TableCell label="Discipline">

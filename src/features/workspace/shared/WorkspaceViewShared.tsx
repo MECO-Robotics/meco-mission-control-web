@@ -241,12 +241,16 @@ export function formatFilterSelectionLabel(
 function FilterOptionMenu({
   allLabel,
   menuId,
+  menuRef,
+  menuOffsetX,
   onChange,
   options,
   value,
 }: {
   allLabel: string;
   menuId: string;
+  menuRef: { current: HTMLDivElement | null };
+  menuOffsetX: number;
   onChange: (value: FilterSelection) => void;
   options: DropdownOption[];
   value: FilterSelection;
@@ -255,6 +259,8 @@ function FilterOptionMenu({
     <div
       aria-multiselectable="true"
       className="table-column-filter-menu"
+      style={{ transform: `translateX(${menuOffsetX}px)` }}
+      ref={menuRef}
       id={menuId}
       role="listbox"
     >
@@ -317,7 +323,10 @@ export function FilterDropdown({
   value: FilterSelection;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [menuOffsetX, setMenuOffsetX] = useState(0);
   const filterRef = useRef<HTMLSpanElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
   const isActive = value.length > 0;
   const selectedLabel = formatFilterSelectionLabel(allLabel, options, value);
@@ -349,6 +358,58 @@ export function FilterDropdown({
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen || typeof window === "undefined") {
+      return;
+    }
+
+    const updateMenuOffset = () => {
+      const buttonElement = buttonRef.current;
+      const filterElement = filterRef.current;
+      const menuElement = menuRef.current;
+      if (!buttonElement || !filterElement || !menuElement) {
+        return;
+      }
+
+      const menuWidth = menuElement.getBoundingClientRect().width;
+      const buttonRect = buttonElement.getBoundingClientRect();
+      const viewElement = filterElement.closest<HTMLElement>(".workspace-panel, .panel, .page-shell");
+      const viewRect = viewElement?.getBoundingClientRect();
+      const safeMargin = 12;
+      const viewLeft = Math.max(viewRect?.left ?? 0, 0) + safeMargin;
+      const viewRight = Math.min(viewRect?.right ?? window.innerWidth, window.innerWidth) - safeMargin;
+
+      if (menuWidth <= 0 || viewRight <= viewLeft) {
+        setMenuOffsetX(0);
+        return;
+      }
+
+      const originalLeft = buttonRect.right - menuWidth;
+      const boundedLeft = Math.max(viewLeft, Math.min(originalLeft, viewRight - menuWidth));
+      setMenuOffsetX(boundedLeft - originalLeft);
+    };
+
+    let alignmentRaf: number | undefined;
+    const onLayoutChange = () => {
+      if (alignmentRaf !== undefined) {
+        window.cancelAnimationFrame(alignmentRaf);
+      }
+      alignmentRaf = window.requestAnimationFrame(updateMenuOffset);
+    };
+
+    onLayoutChange();
+    window.addEventListener("resize", onLayoutChange);
+    window.addEventListener("scroll", onLayoutChange, true);
+
+    return () => {
+      if (alignmentRaf !== undefined) {
+        window.cancelAnimationFrame(alignmentRaf);
+      }
+      window.removeEventListener("resize", onLayoutChange);
+      window.removeEventListener("scroll", onLayoutChange, true);
+    };
+  }, [isOpen]);
+
   return (
     <span
       className={`toolbar-filter toolbar-filter-dropdown${isActive ? " is-active" : ""}${isOpen ? " is-open" : ""}${className ? ` ${className}` : ""}`}
@@ -360,6 +421,7 @@ export function FilterDropdown({
         aria-haspopup="listbox"
         aria-label={`${ariaLabel ?? allLabel}: ${selectedLabel}`}
         className="toolbar-filter-menu-button"
+        ref={buttonRef}
         onClick={() => setIsOpen((current) => !current)}
         title={`${ariaLabel ?? allLabel}: ${selectedLabel}`}
         type="button"
@@ -374,6 +436,8 @@ export function FilterDropdown({
         <FilterOptionMenu
           allLabel={allLabel}
           menuId={menuId}
+          menuRef={menuRef}
+          menuOffsetX={menuOffsetX}
           onChange={onChange}
           options={options}
           value={value}
@@ -497,7 +561,10 @@ export function ColumnFilterDropdown({
   value: FilterSelection;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [menuOffsetX, setMenuOffsetX] = useState(0);
   const filterRef = useRef<HTMLSpanElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
   const isActive = value.length > 0;
   const selectedLabel = formatFilterSelectionLabel(allLabel, options, value);
@@ -529,6 +596,58 @@ export function ColumnFilterDropdown({
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen || typeof window === "undefined") {
+      return;
+    }
+
+    const updateMenuOffset = () => {
+      const buttonElement = buttonRef.current;
+      const filterElement = filterRef.current;
+      const menuElement = menuRef.current;
+      if (!buttonElement || !filterElement || !menuElement) {
+        return;
+      }
+
+      const menuWidth = menuElement.getBoundingClientRect().width;
+      const buttonRect = buttonElement.getBoundingClientRect();
+      const viewElement = filterElement.closest<HTMLElement>(".workspace-panel, .panel, .page-shell");
+      const viewRect = viewElement?.getBoundingClientRect();
+      const safeMargin = 12;
+      const viewLeft = Math.max(viewRect?.left ?? 0, 0) + safeMargin;
+      const viewRight = Math.min(viewRect?.right ?? window.innerWidth, window.innerWidth) - safeMargin;
+
+      if (menuWidth <= 0 || viewRight <= viewLeft) {
+        setMenuOffsetX(0);
+        return;
+      }
+
+      const originalLeft = buttonRect.right - menuWidth;
+      const boundedLeft = Math.max(viewLeft, Math.min(originalLeft, viewRight - menuWidth));
+      setMenuOffsetX(boundedLeft - originalLeft);
+    };
+
+    let alignmentRaf: number | undefined;
+    const onLayoutChange = () => {
+      if (alignmentRaf !== undefined) {
+        window.cancelAnimationFrame(alignmentRaf);
+      }
+      alignmentRaf = window.requestAnimationFrame(updateMenuOffset);
+    };
+
+    onLayoutChange();
+    window.addEventListener("resize", onLayoutChange);
+    window.addEventListener("scroll", onLayoutChange, true);
+
+    return () => {
+      if (alignmentRaf !== undefined) {
+        window.cancelAnimationFrame(alignmentRaf);
+      }
+      window.removeEventListener("resize", onLayoutChange);
+      window.removeEventListener("scroll", onLayoutChange, true);
+    };
+  }, [isOpen]);
+
   return (
     <span
       className={`table-column-filter${isActive ? " is-active" : ""}${isOpen ? " is-open" : ""}`}
@@ -540,6 +659,7 @@ export function ColumnFilterDropdown({
         aria-haspopup="listbox"
         aria-label={`${ariaLabel}${isActive ? `: ${selectedLabel}` : ""}`}
         className="table-column-filter-button"
+        ref={buttonRef}
         onClick={(event) => {
           event.stopPropagation();
           setIsOpen((current) => !current);
@@ -553,6 +673,8 @@ export function ColumnFilterDropdown({
         <FilterOptionMenu
           allLabel={allLabel}
           menuId={menuId}
+          menuRef={menuRef}
+          menuOffsetX={menuOffsetX}
           onChange={onChange}
           options={options}
           value={value}
