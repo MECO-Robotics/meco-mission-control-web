@@ -1,6 +1,6 @@
 import type { NavigationItem, ViewTab } from "@/lib/workspaceNavigation";
 import type { ProjectRecord } from "@/types";
-import { IconEdit } from "@/components/shared";
+import { IconChevronLeft, IconChevronRight, IconEdit } from "@/components/shared";
 
 const ADD_ROBOT_PROJECT_VALUE = "__add_robot_project__";
 
@@ -32,6 +32,8 @@ export function AppSidebar({
   const selectedProject =
     projects.find((project) => project.id === selectedProjectId) ?? null;
   const canEditSelectedRobot = selectedProject?.projectType === "robot";
+  const toggleInsertIndex = items.findIndex((item) => item.value === "tasks");
+  const insertIndex = toggleInsertIndex >= 0 ? toggleInsertIndex : 0;
 
   const handleProjectChange = (value: string) => {
     if (value === ADD_ROBOT_PROJECT_VALUE) {
@@ -42,6 +44,28 @@ export function AppSidebar({
     onSelectProject(value || null);
   };
 
+  const toggleButton = (
+    <button
+      key="sidebar-toggle"
+      aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+      className="tab"
+      onClick={toggleSidebar}
+      title="Toggle sidebar"
+      type="button"
+    >
+      <span className="sidebar-tab-main">
+        <span aria-hidden="true" className="sidebar-tab-icon">
+          {isCollapsed ? <IconChevronRight /> : <IconChevronLeft />}
+        </span>
+        {!isCollapsed ? (
+          <span className="sidebar-tab-label">
+            {isCollapsed ? "Unfold sidebar" : "Collapse sidebar"}
+          </span>
+        ) : null}
+      </span>
+    </button>
+  );
+
   return (
     <div className="sidebar-shell" data-collapsed={isCollapsed ? "true" : "false"}>
       <nav
@@ -49,16 +73,14 @@ export function AppSidebar({
         className="sidebar"
         data-collapsed={isCollapsed ? "true" : "false"}
       >
-        {items.map(({ value, label, icon }) => {
-          const isActive = activeTab === value;
-
-          return (
+        {items.flatMap((item, index) => {
+          const itemButton = (
             <button
-              key={value}
+              key={item.value}
               className="tab"
-              data-active={isActive ? "true" : "false"}
-              data-tutorial-target={`sidebar-tab-${value}`}
-              onClick={() => onSelectTab(value)}
+              data-active={activeTab === item.value ? "true" : "false"}
+              data-tutorial-target={`sidebar-tab-${item.value}`}
+              onClick={() => onSelectTab(item.value)}
               type="button"
             >
               <span className="sidebar-tab-main">
@@ -66,15 +88,19 @@ export function AppSidebar({
                   aria-hidden="true"
                   className="sidebar-tab-icon"
                 >
-                  {icon}
+                  {item.icon}
                 </span>
                 {!isCollapsed ? (
-                  <span className="sidebar-tab-label">{label}</span>
+                  <span className="sidebar-tab-label">{item.label}</span>
                 ) : null}
               </span>
             </button>
           );
+
+          return index === insertIndex ? [toggleButton, itemButton] : [itemButton];
         })}
+
+        {items.length === 0 ? toggleButton : null}
 
         {!isCollapsed ? (
           <label className="sidebar-context-picker">
@@ -119,15 +145,6 @@ export function AppSidebar({
           </label>
         ) : null}
       </nav>
-      <button
-        aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        className={`sidebar-edge-toggle${isCollapsed ? " is-collapsed" : ""}`}
-        onClick={toggleSidebar}
-        title="Toggle sidebar"
-        type="button"
-      >
-        <span aria-hidden="true">{isCollapsed ? ">" : "<"}</span>
-      </button>
     </div>
   );
 }

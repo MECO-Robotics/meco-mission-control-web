@@ -1686,38 +1686,6 @@
   overscroll-behavior: contain;
 }
 
-.sidebar-edge-toggle {
-  position: absolute;
-  top: 50%;
-  right: 0;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.3rem;
-  height: 3rem;
-  padding: 0;
-  border: 1px solid var(--border-base);
-  border-left: 0;
-  border-radius: 0 999px 999px 0;
-  background: var(--bg-panel);
-  color: var(--text-copy);
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
-  cursor: pointer;
-  transform: translateY(-50%);
-}
-
-.sidebar-edge-toggle:hover,
-.sidebar-edge-toggle:focus-visible {
-  background: var(--bg-row-alt);
-  color: var(--text-title);
-  outline: none;
-}
-
-.sidebar-edge-toggle.is-collapsed {
-  background: color-mix(in srgb, var(--bg-panel) 84%, var(--meco-soft-blue) 16%);
-}
-
 .sidebar-context-picker {
   display: grid;
   gap: 0.28rem;

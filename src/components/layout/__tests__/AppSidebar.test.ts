@@ -38,6 +38,25 @@ describe("AppSidebar", () => {
 
     expect(markup).toContain("Reports");
     expect(markup).toContain('data-tutorial-target="sidebar-tab-reports"');
-    expect(markup).toContain('aria-label="Collapse sidebar"');
+  });
+
+  it("renders the sidebar toggle before the Tasks tab", () => {
+    const markup = renderSidebar([
+      {
+        value: "tasks",
+        label: "Tasks",
+        icon: React.createElement("span"),
+        count: 0,
+      },
+      {
+        value: "reports",
+        label: "Reports",
+        icon: React.createElement("span"),
+        count: 4,
+      },
+    ]);
+
+    expect(markup).toContain("Collapse sidebar");
+    expect(markup.indexOf("Collapse sidebar")).toBeLessThan(markup.indexOf("Tasks"));
   });
 });
