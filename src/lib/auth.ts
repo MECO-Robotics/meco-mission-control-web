@@ -46,6 +46,7 @@ import type {
   WorkstreamRecord,
 } from "@/types";
 import { resolveWorkspaceColor } from "@/features/workspace/shared/workspaceColors";
+import { localTodayDate } from "@/lib/dateUtils";
 
 const DEFAULT_API_BASE_URL = "/api";
 const SESSION_STORAGE_KEY = "meco.session.token";
@@ -506,7 +507,7 @@ function inferPlanningWindow(source: LegacyBootstrapPayload) {
 
   dates.sort((left, right) => left.localeCompare(right));
 
-  const fallbackDate = new Date().toISOString().slice(0, 10);
+  const fallbackDate = localTodayDate();
   return {
     startDate: dates[0] ?? fallbackDate,
     endDate: dates[dates.length - 1] ?? dates[0] ?? fallbackDate,
@@ -901,7 +902,7 @@ function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapPayload 
       relatedSubsystemIds.map((subsystemId) => subsystemProjectIdsById.get(subsystemId)),
     );
     const fallbackEventDate =
-      planning.seasons[0]?.startDate ?? new Date().toISOString().slice(0, 10);
+      planning.seasons[0]?.startDate ?? localTodayDate();
 
     return {
       id: event.id ?? `event-${index + 1}`,
@@ -931,7 +932,7 @@ function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapPayload 
           result: report.result ?? "pass",
           summary: report.summary ?? report.notes ?? "",
           notes: report.notes ?? "",
-          createdAt: report.createdAt ?? report.reviewedAt ?? new Date().toISOString().slice(0, 10),
+          createdAt: report.createdAt ?? report.reviewedAt ?? localTodayDate(),
         })),
         ...(source.testResults ?? []).map<ReportRecord>((result) => ({
           ...result,
@@ -946,7 +947,7 @@ function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapPayload 
           result: result.result ?? result.status ?? "pass",
           summary: result.summary ?? result.title ?? "",
           notes: result.notes ?? result.findings?.join("\n") ?? "",
-          createdAt: result.createdAt ?? new Date().toISOString().slice(0, 10),
+          createdAt: result.createdAt ?? localTodayDate(),
           title: result.title ?? "",
           status: result.status ?? "pass",
           findings: result.findings ?? [],
@@ -969,7 +970,7 @@ function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapPayload 
     result: report.result ?? "pass",
     summary: report.summary ?? "",
     notes: report.notes ?? "",
-    createdAt: report.createdAt ?? new Date().toISOString().slice(0, 10),
+    createdAt: report.createdAt ?? localTodayDate(),
   }));
 
   const reportsById = new Map(reports.map((report) => [report.id, report] as const));
@@ -2212,8 +2213,9 @@ export async function validateSession(): Promise<boolean> {
       return false;
     }
 
-    // If we can't verify the user (network error or server error), return false to be safe
-    return false;
+    // Keep the current session during transient network/server failures. The
+    // request layer still expires sessions immediately on explicit 401s.
+    return true;
   }
 }
 

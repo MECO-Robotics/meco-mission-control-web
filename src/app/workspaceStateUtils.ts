@@ -66,14 +66,41 @@ export function scopeBootstrapBySelection(
         task.subsystemIds.some((subsystemId) => scopedSubsystemIds.has(subsystemId))),
   );
   const scopedTaskIds = new Set(scopedTasks.map((task) => task.id));
+  const scopedTasksWithVisibleDependencies = scopedTasks.map((task) => ({
+    ...task,
+    dependencyIds: task.dependencyIds.filter((dependencyId) =>
+      scopedTaskIds.has(dependencyId),
+    ),
+  }));
   const scopedTaskDependencies = (payload.taskDependencies ?? []).filter(
     (dependency) =>
-      scopedTaskIds.has(dependency.upstreamTaskId) ||
+      scopedTaskIds.has(dependency.upstreamTaskId) &&
       scopedTaskIds.has(dependency.downstreamTaskId),
   );
-  const scopedTaskBlockers = (payload.taskBlockers ?? []).filter((blocker) =>
-    scopedTaskIds.has(blocker.blockedTaskId),
-  );
+  const scopedPartInstanceIds = new Set(scopedPartInstances.map((partInstance) => partInstance.id));
+  const scopedTaskBlockers = (payload.taskBlockers ?? []).filter((blocker) => {
+    if (!scopedTaskIds.has(blocker.blockedTaskId)) {
+      return false;
+    }
+
+    if (!blocker.blockerId || blocker.blockerType === "external") {
+      return true;
+    }
+
+    if (blocker.blockerType === "task") {
+      return scopedTaskIds.has(blocker.blockerId);
+    }
+
+    if (blocker.blockerType === "part_instance") {
+      return scopedPartInstanceIds.has(blocker.blockerId);
+    }
+
+    if (blocker.blockerType === "event") {
+      return scopedEventIds.has(blocker.blockerId);
+    }
+
+    return true;
+  });
   const scopedWorkLogs = payload.workLogs.filter((workLog) => scopedTaskIds.has(workLog.taskId));
   const scopedReports = payload.reports.filter((report) => {
     if (!activeProjectIds.has(report.projectId)) {
@@ -191,7 +218,7 @@ export function scopeBootstrapBySelection(
     events: scopedEvents,
     members: scopedMembers,
     partDefinitions: scopedPartDefinitions,
-    tasks: scopedTasks,
+    tasks: scopedTasksWithVisibleDependencies,
     workLogs: scopedWorkLogs,
     reports: scopedReports,
     reportFindings: scopedReportFindings,

@@ -41,6 +41,7 @@ import {
   buildTimelineDayHeaderCells,
   buildTimelineMonthGroups,
   buildTimelineProjectRows,
+  filterTimelineEventsByPersonSelection,
 } from "./timelineViewModel";
 import { TimelineGridBody } from "./TimelineGridBody";
 import { TimelineMilestoneHoverLayer } from "./TimelineMilestoneHoverLayer";
@@ -157,6 +158,15 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         : bootstrap.tasks,
     [activePersonFilter, bootstrap.tasks],
   );
+  const scopedEvents = useMemo(
+    () =>
+      filterTimelineEventsByPersonSelection({
+        activePersonFilter,
+        events: bootstrap.events,
+        tasks: bootstrap.tasks,
+      }),
+    [activePersonFilter, bootstrap.events, bootstrap.tasks],
+  );
   const tasksById = useMemo(
     () =>
       Object.fromEntries(
@@ -179,14 +189,14 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const timeline = useMemo(
     () =>
       buildTimelineData({
-        events: bootstrap.events,
+        events: scopedEvents,
         projectsById,
         scopedSubsystems,
         scopedTasks,
         viewAnchorDate,
         viewInterval,
       }),
-    [bootstrap.events, projectsById, scopedSubsystems, scopedTasks, viewAnchorDate, viewInterval],
+    [projectsById, scopedEvents, scopedSubsystems, scopedTasks, viewAnchorDate, viewInterval],
   );
 
   const timelinePeriodLabel = useMemo(
@@ -390,8 +400,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   }, [bootstrap.tasks, hoveredTaskId]);
 
   const handleTimelineIntervalChange = useCallback(
-    (candidate: React.ChangeEvent<HTMLSelectElement>) => {
-      const nextInterval = candidate.target.value as TimelineViewInterval;
+    (nextInterval: TimelineViewInterval) => {
       if (nextInterval === viewInterval) {
         return;
       }
@@ -519,7 +528,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   } = useTimelineMilestoneOverlay({
     days: timeline.days,
     dayEventsByDate,
-    events: bootstrap.events,
+    events: scopedEvents,
   });
 
   const resolveRowHighlightGeometry = useCallback(

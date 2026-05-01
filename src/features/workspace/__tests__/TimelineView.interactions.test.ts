@@ -184,12 +184,17 @@ describe("TimelineView interactions", () => {
       join(process.cwd(), "src/features/workspace/views/timeline/TimelineSubsystemGroup.tsx"),
       "utf8",
     );
+    const statusCellSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/timeline/TimelineTaskStatusCell.tsx"),
+      "utf8",
+    );
 
     expect(projectGroupSource).toContain("onRowClick={() => selectTaskRow(task)}");
     expect(subsystemGroupSource).toContain("onRowClick={() => selectTaskRow(task)}");
 
-    expect(projectGroupSource).toContain("onClick={() => openTaskDetailModal(task)}");
-    expect(subsystemGroupSource).toContain("onClick={() => openTaskDetailModal(task)}");
+    expect(projectGroupSource).toContain("onOpenTask={openTaskDetailModal}");
+    expect(subsystemGroupSource).toContain("onOpenTask={openTaskDetailModal}");
+    expect(statusCellSource).toContain("onClick={() => onOpenTask(task)}");
   });
 
   it("updates timeline hover geometry on shell scroll", () => {

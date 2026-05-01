@@ -528,6 +528,7 @@ export function WorkspaceContent({
           isActive
         >
           <RisksView
+            activePersonFilter={activePersonFilter}
             bootstrap={bootstrap}
             onCreateRisk={onCreateRisk}
             onDeleteRisk={onDeleteRisk}

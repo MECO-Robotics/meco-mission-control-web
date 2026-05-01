@@ -1,4 +1,5 @@
-import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
 import { IconEdit, IconFilter, IconTasks } from "@/components/shared";
 import type {
@@ -19,6 +20,47 @@ const FILTER_CHANGE_ANIMATION_DURATION_MS = 220;
 export const WORKSPACE_COMPACT_BREAKPOINT = 900;
 export type FilterSelection = string[];
 type FilterMotionPart = boolean | number | string | null | undefined | readonly string[];
+type PortalMenuPlacement = "auto" | "above" | "below";
+
+export function getPortalMenuPosition({
+  buttonRect,
+  menuHeight,
+  menuWidth,
+  placement,
+  viewportHeight,
+  viewportWidth,
+}: {
+  buttonRect: Pick<DOMRect, "bottom" | "right" | "top">;
+  menuHeight: number;
+  menuWidth: number;
+  placement: PortalMenuPlacement;
+  viewportHeight: number;
+  viewportWidth: number;
+}) {
+  const safeMargin = 12;
+  const menuOffset = 6;
+  const belowTop = buttonRect.bottom + menuOffset;
+  const aboveTop = buttonRect.top - menuHeight - menuOffset;
+  const spaceBelow = viewportHeight - buttonRect.bottom - menuOffset - safeMargin;
+  const spaceAbove = buttonRect.top - menuOffset - safeMargin;
+  const resolvedPlacement =
+    placement === "auto"
+      ? spaceBelow >= menuHeight || spaceBelow >= spaceAbove
+        ? "below"
+        : "above"
+      : placement;
+
+  return {
+    left: Math.max(
+      safeMargin,
+      Math.min(buttonRect.right - menuWidth, viewportWidth - menuWidth - safeMargin),
+    ),
+    top:
+      resolvedPlacement === "below"
+        ? Math.min(viewportHeight - menuHeight - safeMargin, belowTop)
+        : Math.max(safeMargin, aboveTop),
+  };
+}
 
 function normalizePageSize(value: number): PageSizeOption {
   return PAGE_SIZE_OPTIONS.includes(value as PageSizeOption)
@@ -240,26 +282,34 @@ export function formatFilterSelectionLabel(
 
 function FilterOptionMenu({
   allLabel,
+  className,
   menuId,
   menuRef,
   menuOffsetX,
+  style,
+  getOptionToneClassName,
+  singleSelect,
   onChange,
   options,
   value,
 }: {
   allLabel: string;
+  className?: string;
+  getOptionToneClassName?: (option: DropdownOption) => string | undefined;
   menuId: string;
   menuRef: { current: HTMLDivElement | null };
   menuOffsetX: number;
+  singleSelect?: boolean;
+  style?: CSSProperties;
   onChange: (value: FilterSelection) => void;
   options: DropdownOption[];
   value: FilterSelection;
 }) {
   return (
     <div
-      aria-multiselectable="true"
-      className="table-column-filter-menu"
-      style={{ transform: `translateX(${menuOffsetX}px)` }}
+      aria-multiselectable={singleSelect ? undefined : "true"}
+      className={`table-column-filter-menu${className ? ` ${className}` : ""}`}
+      style={style ?? { transform: `translateX(${menuOffsetX}px)` }}
       ref={menuRef}
       id={menuId}
       role="listbox"
@@ -285,11 +335,11 @@ function FilterOptionMenu({
         return (
           <button
             aria-selected={isSelected}
-            className={`table-column-filter-option${isSelected ? " is-selected" : ""}`}
+            className={`table-column-filter-option${isSelected ? " is-selected" : ""}${getOptionToneClassName?.(option) ? ` ${getOptionToneClassName(option)}` : ""}`}
             key={option.id}
             onClick={(event) => {
               event.stopPropagation();
-              onChange(toggleFilterSelection(value, option.id));
+              onChange(singleSelect ? [option.id] : toggleFilterSelection(value, option.id));
             }}
             role="option"
             type="button"
@@ -309,27 +359,45 @@ export function FilterDropdown({
   allLabel,
   ariaLabel,
   className,
+  buttonDataTutorialTarget,
+  buttonInlineEditField,
+  getOptionToneClassName,
+  getSelectedToneClassName,
   icon,
+  menuClassName,
+  portalMenu,
+  portalMenuPlacement = "auto",
   onChange,
   options,
+  singleSelect,
   value,
 }: {
   allLabel: string;
   ariaLabel?: string;
   className?: string;
+  buttonDataTutorialTarget?: string;
+  buttonInlineEditField?: string;
+  getOptionToneClassName?: (option: DropdownOption) => string | undefined;
+  getSelectedToneClassName?: (value: FilterSelection) => string | undefined;
   icon: ReactNode;
+  menuClassName?: string;
+  portalMenu?: boolean;
+  portalMenuPlacement?: PortalMenuPlacement;
   onChange: (value: FilterSelection) => void;
   options: DropdownOption[];
+  singleSelect?: boolean;
   value: FilterSelection;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [menuOffsetX, setMenuOffsetX] = useState(0);
+  const [menuPosition, setMenuPosition] = useState<{ left: number; top: number } | null>(null);
   const filterRef = useRef<HTMLSpanElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
   const isActive = value.length > 0;
   const selectedLabel = formatFilterSelectionLabel(allLabel, options, value);
+  const selectedToneClassName = getSelectedToneClassName?.(value);
   usePrunedFilterSelection(value, options, onChange);
 
   useEffect(() => {
@@ -339,7 +407,9 @@ export function FilterDropdown({
 
     const handlePointerDown = (event: MouseEvent) => {
       const target = event.target;
-      if (target instanceof Node && !filterRef.current?.contains(target)) {
+      const clickedInsideFilter = target instanceof Node && filterRef.current?.contains(target);
+      const clickedInsideMenu = target instanceof Node && menuRef.current?.contains(target);
+      if (!clickedInsideFilter && !clickedInsideMenu) {
         setIsOpen(false);
       }
     };
@@ -373,7 +443,7 @@ export function FilterDropdown({
 
       const menuWidth = menuElement.getBoundingClientRect().width;
       const buttonRect = buttonElement.getBoundingClientRect();
-      const viewElement = filterElement.closest<HTMLElement>(".workspace-panel, .panel, .page-shell");
+      const viewElement = filterElement.closest<HTMLElement>(".workspace-panel, .panel, .page-shell, .modal-card");
       const viewRect = viewElement?.getBoundingClientRect();
       const safeMargin = 12;
       const viewLeft = Math.max(viewRect?.left ?? 0, 0) + safeMargin;
@@ -410,9 +480,58 @@ export function FilterDropdown({
     };
   }, [isOpen]);
 
+  useLayoutEffect(() => {
+    if (!isOpen || !portalMenu || typeof window === "undefined") {
+      setMenuPosition(null);
+      return;
+    }
+
+    const updateMenuPosition = () => {
+      const buttonElement = buttonRef.current;
+      const menuElement = menuRef.current;
+      if (!buttonElement || !menuElement) {
+        return;
+      }
+
+      const menuWidth = menuElement.getBoundingClientRect().width;
+      const menuHeight = menuElement.getBoundingClientRect().height;
+      const buttonRect = buttonElement.getBoundingClientRect();
+      setMenuPosition(
+        getPortalMenuPosition({
+          buttonRect,
+          menuHeight,
+          menuWidth,
+          placement: portalMenuPlacement,
+          viewportHeight: window.innerHeight,
+          viewportWidth: window.innerWidth,
+        }),
+      );
+    };
+
+    let positionRaf: number | undefined;
+    const onLayoutChange = () => {
+      if (positionRaf !== undefined) {
+        window.cancelAnimationFrame(positionRaf);
+      }
+      positionRaf = window.requestAnimationFrame(updateMenuPosition);
+    };
+
+    onLayoutChange();
+    window.addEventListener("resize", onLayoutChange);
+    window.addEventListener("scroll", onLayoutChange, true);
+
+    return () => {
+      if (positionRaf !== undefined) {
+        window.cancelAnimationFrame(positionRaf);
+      }
+      window.removeEventListener("resize", onLayoutChange);
+      window.removeEventListener("scroll", onLayoutChange, true);
+    };
+  }, [isOpen, portalMenu, portalMenuPlacement]);
+
   return (
     <span
-      className={`toolbar-filter toolbar-filter-dropdown${isActive ? " is-active" : ""}${isOpen ? " is-open" : ""}${className ? ` ${className}` : ""}`}
+      className={`toolbar-filter toolbar-filter-dropdown${isActive ? " is-active" : ""}${isOpen ? " is-open" : ""}${selectedToneClassName ? ` ${selectedToneClassName}` : ""}${className ? ` ${className}` : ""}`}
       ref={filterRef}
     >
       <button
@@ -421,6 +540,8 @@ export function FilterDropdown({
         aria-haspopup="listbox"
         aria-label={`${ariaLabel ?? allLabel}: ${selectedLabel}`}
         className="toolbar-filter-menu-button"
+        data-tutorial-target={buttonDataTutorialTarget}
+        data-inline-edit-field={buttonInlineEditField}
         ref={buttonRef}
         onClick={() => setIsOpen((current) => !current)}
         title={`${ariaLabel ?? allLabel}: ${selectedLabel}`}
@@ -433,15 +554,46 @@ export function FilterDropdown({
         <span aria-hidden="true" className="toolbar-filter-chevron" />
       </button>
       {isOpen ? (
-        <FilterOptionMenu
-          allLabel={allLabel}
-          menuId={menuId}
-          menuRef={menuRef}
-          menuOffsetX={menuOffsetX}
-          onChange={onChange}
-          options={options}
-          value={value}
-        />
+        portalMenu && typeof document !== "undefined" ? (
+          createPortal(
+            <FilterOptionMenu
+              allLabel={allLabel}
+              className={menuClassName ?? className}
+              getOptionToneClassName={getOptionToneClassName}
+              menuId={menuId}
+              menuRef={menuRef}
+              menuOffsetX={menuOffsetX}
+              onChange={onChange}
+              options={options}
+              singleSelect={singleSelect}
+              style={{
+                position: "fixed",
+                top: `${menuPosition?.top ?? 0}px`,
+                left: `${menuPosition?.left ?? 0}px`,
+                right: "auto",
+                bottom: "auto",
+                transform: "none",
+                visibility: menuPosition ? "visible" : "hidden",
+                zIndex: 50000,
+              }}
+              value={value}
+            />,
+            document.body,
+          )
+        ) : (
+          <FilterOptionMenu
+            allLabel={allLabel}
+            className={menuClassName ?? className}
+            getOptionToneClassName={getOptionToneClassName}
+            menuId={menuId}
+            menuRef={menuRef}
+            menuOffsetX={menuOffsetX}
+            onChange={onChange}
+            options={options}
+            singleSelect={singleSelect}
+            value={value}
+          />
+        )
       ) : null}
     </span>
   );

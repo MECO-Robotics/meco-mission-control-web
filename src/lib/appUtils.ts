@@ -29,7 +29,9 @@ import type {
 import {
     resolveWorkspaceColor,
 } from "@/features/workspace/shared/workspaceColors";
+import { localTodayDate } from "@/lib/dateUtils";
 import { getDefaultTaskDisciplineIdForProject } from "@/lib/taskDisciplines";
+import { getTaskOpenBlockersForTask } from "@/features/workspace/shared/taskPlanning";
 
 export function toErrorMessage(error: unknown) {
     if (error instanceof Error) return error.message;
@@ -373,7 +375,7 @@ export function buildEmptyTaskPayload(bootstrap: BootstrapPayload): TaskPayload 
         bootstrap.members[0]?.id ??
         null;
     const firstMentor = bootstrap.members.find((m) => m.role === "mentor")?.id ?? bootstrap.members[0]?.id ?? null;
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localTodayDate();
 
     return {
         projectId: firstProject,
@@ -401,6 +403,8 @@ export function buildEmptyTaskPayload(bootstrap: BootstrapPayload): TaskPayload 
         status: "not-started",
         estimatedHours: 4,
         actualHours: 0,
+        blockers: [],
+        taskBlockers: [],
         linkedManufacturingIds: [],
         linkedPurchaseIds: [],
         requiresDocumentation: false,
@@ -562,8 +566,8 @@ export function inferManufacturingDraftFromPartSelection(
     return normalizeManufacturingPartInstanceSelection(bootstrap, {
         ...draft,
         title: partDefinition.name,
-        material: material?.name ?? draft.material,
-        materialId: material?.id ?? draft.materialId,
+        material: material?.name ?? "",
+        materialId: material?.id ?? null,
         partDefinitionId: partDefinition.id,
     }, nextPartInstanceIds);
 }
@@ -606,8 +610,8 @@ export function inferManufacturingDraftFromPartInstanceSelection(
     return normalizeManufacturingPartInstanceSelection(bootstrap, {
         ...draft,
         title: partDefinition?.name ?? draft.title,
-        material: material?.name ?? draft.material,
-        materialId: material?.id ?? draft.materialId,
+        material: material?.name ?? "",
+        materialId: material?.id ?? null,
         partDefinitionId: partDefinition?.id ?? draft.partDefinitionId,
     }, [partInstance.id]);
 }
@@ -637,8 +641,8 @@ export function toggleManufacturingDraftPartInstanceSelection(
     return normalizeManufacturingPartInstanceSelection(bootstrap, {
         ...draft,
         title: partDefinition?.name ?? draft.title,
-        material: material?.name ?? draft.material,
-        materialId: material?.id ?? draft.materialId,
+        material: material?.name ?? "",
+        materialId: material?.id ?? null,
         partDefinitionId: partDefinition?.id ?? draft.partDefinitionId,
     }, nextPartInstanceIds);
 }
@@ -685,7 +689,7 @@ export function buildEmptyManufacturingPayload(
         subsystemId: getDefaultSubsystemId(bootstrap),
         requestedById: requesterId,
         process,
-        dueDate: new Date().toISOString().slice(0, 10),
+        dueDate: localTodayDate(),
         material: firstMaterial?.name ?? "",
         materialId: firstMaterial?.id ?? null,
         partDefinitionId: firstPartDefinition?.id ?? null,
@@ -714,7 +718,7 @@ export function buildEmptyWorkLogPayload(
 
   return {
     taskId: bootstrap.tasks[0]?.id ?? "",
-    date: new Date().toISOString().slice(0, 10),
+    date: localTodayDate(),
     hours: 1,
     participantIds: participantId ? [participantId] : [],
     notes: "",
@@ -765,7 +769,7 @@ export function buildEmptyReportPayload(
     findings?: string[];
   } = {},
 ): ReportPayload {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localTodayDate();
   const task = defaults.taskId
     ? bootstrap.tasks.find((candidate) => candidate.id === defaults.taskId) ?? null
     : bootstrap.tasks[0] ?? null;
@@ -823,7 +827,7 @@ export function buildEmptyQaReportPayload(
     result: "pass",
     mentorApproved: false,
     notes: "",
-    reviewedAt: new Date().toISOString().slice(0, 10),
+    reviewedAt: localTodayDate(),
     photoUrl: "",
   });
 }
@@ -1023,6 +1027,16 @@ export const taskToPayload = (task: TaskRecord, bootstrap?: BootstrapPayload): T
   artifactIds: task.artifactIds?.length ? uniqueIds(task.artifactIds) : uniqueIds([task.artifactId]),
   photoUrl: task.photoUrl ?? "",
   assigneeIds: task.assigneeIds?.length ? uniqueIds(task.assigneeIds) : uniqueIds([task.ownerId]),
+  blockers: task.blockers?.length ? uniqueIds(task.blockers) : [],
+  taskBlockers: bootstrap
+    ? getTaskOpenBlockersForTask(task.id, bootstrap).map((blocker) => ({
+        id: blocker.id,
+        blockerType: blocker.blockerType,
+        blockerId: blocker.blockerId,
+        description: blocker.description,
+        severity: blocker.severity,
+      }))
+    : [],
   taskDependencies: getTaskDependencyDrafts(task, bootstrap),
 });
 

@@ -46,6 +46,7 @@ export {
   filterSelectionIntersects,
   filterSelectionMatchesTaskPeople,
   formatFilterSelectionLabel,
+  getPortalMenuPosition,
   getTaskPersonFilterIds,
   pruneFilterSelection,
   useWorkspaceCompactMode,

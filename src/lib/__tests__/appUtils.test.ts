@@ -18,6 +18,7 @@ import {
   taskToPayload,
   toggleTaskTargetSelection,
 } from "@/lib/appUtils";
+import { formatLocalDate, localTodayDate } from "@/lib/dateUtils";
 import type {
   BootstrapPayload,
   EventRecord,
@@ -228,6 +229,10 @@ function createBootstrap(overrides: Partial<BootstrapPayload> = {}): BootstrapPa
 }
 
 describe("appUtils", () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it("splitList trims values and removes empty entries", () => {
     expect(splitList(" alpha, , beta ,gamma ,, ")).toEqual(["alpha", "beta", "gamma"]);
   });
@@ -290,6 +295,8 @@ describe("appUtils", () => {
   });
 
   it("buildEmptyTaskPayload picks sensible defaults from bootstrap data", () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date(2026, 0, 2, 23, 30));
     const payload = buildEmptyTaskPayload(createBootstrap());
 
     expect(payload.projectId).toBe("project-a");
@@ -305,8 +312,19 @@ describe("appUtils", () => {
     expect(payload.assigneeIds).toEqual(["lead-1"]);
     expect(payload.mentorId).toBe("mentor-1");
     expect(payload.targetEventId).toBe("event-1");
+    expect(payload.startDate).toBe("2026-01-02");
+    expect(payload.dueDate).toBe("2026-01-02");
     expect(payload.priority).toBe("medium");
     expect(payload.status).toBe("not-started");
+    expect(payload.blockers).toEqual([]);
+    expect(payload.taskBlockers).toEqual([]);
+  });
+
+  it("formats local date-only values without UTC conversion", () => {
+    const localDate = new Date(2026, 0, 2, 23, 30);
+
+    expect(formatLocalDate(localDate)).toBe("2026-01-02");
+    expect(localTodayDate(localDate)).toBe("2026-01-02");
   });
 
   it("taskToPayload carries dependency records from bootstrap data", () => {
@@ -327,6 +345,48 @@ describe("appUtils", () => {
         id: "task-dependency-1",
         upstreamTaskId: "task-upstream",
         dependencyType: "blocks",
+      },
+    ]);
+  });
+
+  it("taskToPayload carries blocker strings from task data", () => {
+    const bootstrap = createBootstrap();
+    const task = {
+      ...bootstrap.tasks[0],
+      blockers: ["Waiting on mentor review", "Waiting on final assembly"],
+    };
+
+    expect(taskToPayload(task, bootstrap).blockers).toEqual([
+      "Waiting on mentor review",
+      "Waiting on final assembly",
+    ]);
+  });
+
+  it("taskToPayload carries blocker records from bootstrap data", () => {
+    const bootstrap = createBootstrap({
+      taskBlockers: [
+        {
+          id: "task-blocker-1",
+          blockedTaskId: "task-1",
+          blockerType: "task",
+          blockerId: "task-upstream",
+          description: "Waiting on upstream task",
+          severity: "high",
+          status: "open",
+          createdByMemberId: "mentor-1",
+          createdAt: "2026-02-01T00:00:00.000Z",
+          resolvedAt: null,
+        },
+      ],
+    });
+
+    expect(taskToPayload(bootstrap.tasks[0], bootstrap).taskBlockers).toEqual([
+      {
+        id: "task-blocker-1",
+        blockerType: "task",
+        blockerId: "task-upstream",
+        description: "Waiting on upstream task",
+        severity: "high",
       },
     ]);
   });
@@ -394,10 +454,14 @@ describe("appUtils", () => {
       ],
     });
 
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date(2026, 0, 2, 23, 30));
+
     (["cnc", "3d-print", "fabrication"] as const).forEach((process) => {
       const payload = buildEmptyManufacturingPayload(bootstrap, process);
 
       expect(payload.process).toBe(process);
+      expect(payload.dueDate).toBe("2026-01-02");
       expect(payload.title).toBe(partDefinition.name);
       expect(payload.materialId).toBe("material-aluminum");
       expect(payload.material).toBe("Aluminum 6061");
@@ -480,6 +544,38 @@ describe("appUtils", () => {
     expect(payload.subsystemId).toBe("subsystem-secondary");
     expect(payload.partInstanceId).toBe("part-instance-bearing-block");
     expect(payload.quantity).toBe(4);
+  });
+
+  it("inferManufacturingDraftFromPartSelection clears stale material when the selected part has no material", () => {
+    const bootstrap = createBootstrap({
+      materials: [
+        {
+          id: "material-aluminum",
+          name: "Aluminum 6061",
+          category: "metal",
+          unit: "bar",
+          onHandQuantity: 4,
+          reorderPoint: 1,
+          location: "Rack",
+          vendor: "",
+          notes: "",
+        },
+      ],
+    });
+    const partDefinition = bootstrap.partDefinitions[0];
+
+    const payload = inferManufacturingDraftFromPartSelection(
+      bootstrap,
+      {
+        ...buildEmptyManufacturingPayload(bootstrap, "cnc"),
+        material: "Aluminum 6061",
+        materialId: "material-aluminum",
+      },
+      partDefinition.id,
+    );
+
+    expect(payload.materialId).toBeNull();
+    expect(payload.material).toBe("");
   });
 
   it("lists manufacturing part instances for the selected part definition across subsystems", () => {
@@ -653,7 +749,10 @@ describe("appUtils", () => {
   });
 
   it("buildEmptyWorkLogPayload uses a valid preferred participant id", () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date(2026, 0, 2, 23, 30));
     const payload = buildEmptyWorkLogPayload(createBootstrap(), "student-1");
+    expect(payload.date).toBe("2026-01-02");
     expect(payload.participantIds).toEqual(["student-1"]);
   });
 

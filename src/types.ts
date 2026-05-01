@@ -1,28 +1,3 @@
-export type RoleFilter = "all" | "students" | "mentors" | "admins";
-
-export interface PortalCard {
-  title: string;
-  topline: string;
-  metric: string;
-  description: string;
-  roles: Exclude<RoleFilter, "all">[];
-  items: string[];
-}
-
-export interface WorkflowLane {
-  title: string;
-  metric: string;
-  summary: string;
-  tags: string[];
-}
-
-export interface SubsystemCard {
-  name: string;
-  lead: string;
-  mentor: string;
-  progress: number;
-}
-
 export type MemberRole = "student" | "lead" | "mentor" | "admin" | "external";
 export type EventType =
   | "practice"
@@ -429,6 +404,14 @@ export interface TaskDependencyDraft {
   dependencyType: TaskDependencyType;
 }
 
+export interface TaskBlockerDraft {
+  id?: string;
+  blockerType: TaskBlockerType;
+  blockerId: string | null;
+  description: string;
+  severity: TaskBlockerSeverity;
+}
+
 export interface TaskDependencyRecord {
   id: string;
   upstreamTaskId: string;
@@ -721,6 +704,8 @@ export interface TaskPayload {
   status: TaskStatus;
   estimatedHours: number;
   actualHours: number;
+  blockers: string[];
+  taskBlockers?: TaskBlockerDraft[];
   linkedManufacturingIds: string[];
   linkedPurchaseIds: string[];
   requiresDocumentation: boolean;

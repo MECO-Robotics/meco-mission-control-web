@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - ".github/workflows/ci.yml"
+      - "deploy/**"
       - "src/**"
       - "public/**"
       - "index.html"
@@ -22,6 +23,7 @@ on:
       - main
     paths:
       - ".github/workflows/ci.yml"
+      - "deploy/**"
       - "src/**"
       - "public/**"
       - "index.html"
@@ -57,14 +59,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Unit tests
-        run: npm run test:ci
-
-      - name: Build
-        run: npm run build
+      - name: Verify
+        run: npm run verify

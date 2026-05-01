@@ -579,6 +579,43 @@
   width: fit-content;
 }
 
+.task-details-blocker-add-menu-popup.table-column-filter-menu {
+  min-width: 11.5rem;
+  padding: 0.4rem;
+  border: 1px solid rgba(148, 163, 184, 0.42);
+  background-color: var(--bg-row-alt);
+  color: var(--text-title);
+  opacity: 1;
+  box-shadow:
+    0 20px 38px rgba(2, 6, 23, 0.5),
+    0 0 0 1px rgba(148, 163, 184, 0.08);
+}
+
+.page-shell.dark-mode .task-details-blocker-add-menu-popup.table-column-filter-menu {
+  border-color: rgba(148, 163, 184, 0.42);
+  background-color: var(--bg-row-alt);
+  color: var(--text-title);
+  opacity: 1;
+  box-shadow:
+    0 20px 38px rgba(2, 6, 23, 0.5),
+    0 0 0 1px rgba(148, 163, 184, 0.08);
+}
+
+.task-details-blocker-add-menu-popup.table-column-filter-menu .table-column-filter-option {
+  color: var(--text-title);
+}
+
+.task-details-blocker-add-menu-popup.table-column-filter-menu .table-column-filter-option:hover,
+.task-details-blocker-add-menu-popup.table-column-filter-menu .table-column-filter-option:focus-visible,
+.task-details-blocker-add-menu-popup.table-column-filter-menu .table-column-filter-option.is-selected {
+  color: #bfdbfe;
+  background: rgba(96, 165, 250, 0.16);
+}
+
+.task-details-blocker-add-menu-popup.table-column-filter-menu .table-column-filter-option-check {
+  color: #bfdbfe;
+}
+
 .task-details-blocker-remove-button {
   width: 2rem;
   height: 2rem;

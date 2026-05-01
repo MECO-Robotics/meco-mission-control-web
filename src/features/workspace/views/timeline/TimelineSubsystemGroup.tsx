@@ -3,7 +3,7 @@ import type { BootstrapPayload, TaskRecord } from "@/types";
 import { TimelineCollapseArrow } from "./TimelineCollapseArrow";
 import { TimelineGridDaySlots } from "./TimelineGridDaySlots";
 import { TimelineTaskBar } from "./TimelineTaskBar";
-import { getTimelineTaskStatusLabel, TimelineTaskStatusLogo } from "./TimelineTaskStatusLogo";
+import { TimelineTaskStatusCell } from "./TimelineTaskStatusCell";
 import {
   buildTimelineSubsystemHighlightStyle,
   buildTimelineTaskToneStyle,
@@ -111,58 +111,21 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
     gridRow: string | number,
     compact = false,
   ) => (
-    <div
-      className="timeline-task-status-column"
-      style={{
-        gridRow: `${gridRow}`,
-        gridColumn: `${statusIconColumnIndex}`,
-        minHeight: "38px",
-        width: `${statusIconColumnWidth}px`,
-        padding: "0 6px",
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        boxSizing: "border-box",
-        position: "sticky",
-        left: `${statusIconStickyLeft}px`,
-        zIndex: 10020,
-      }}
+    <TimelineTaskStatusCell
+      clearHoveredMilestonePopup={clearHoveredMilestonePopup}
+      clearHoveredTaskRow={clearHoveredTaskRow}
+      compact={compact}
+      gridRow={gridRow}
+      hoverTaskRow={hoverTaskRow}
       key={`status-icon-${subsystem.id}-${task.id}`}
-    >
-      <button
-        aria-label={`Open task ${task.title}`}
-        className={`timeline-task-status-icon-button${compact ? " is-compact" : ""}`}
-        data-status-signal={taskStatusSignalsById[task.id] ?? task.status}
-        onClick={() => openTaskDetailModal(task)}
-        onMouseEnter={() => {
-          hoverTaskRow(task.id);
-          clearHoveredMilestonePopup();
-        }}
-        onMouseLeave={clearHoveredTaskRow}
-        type="button"
-        style={{
-          position: "relative",
-          border: "none",
-          background: "none",
-          padding: 0,
-          overflow: "visible",
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: "pointer",
-          color: "inherit",
-        }}
-      >
-        <span className="timeline-task-status-caption">
-          {getTimelineTaskStatusLabel(taskStatusSignalsById[task.id] ?? task.status)}
-        </span>
-        <TimelineTaskStatusLogo
-          compact={compact}
-          signal={taskStatusSignalsById[task.id] ?? task.status}
-          status={task.status}
-        />
-      </button>
-    </div>
+      onOpenTask={openTaskDetailModal}
+      ownerId={subsystem.id}
+      statusIconColumnIndex={statusIconColumnIndex}
+      statusIconColumnWidth={statusIconColumnWidth}
+      statusIconStickyLeft={statusIconStickyLeft}
+      task={task}
+      taskStatusSignalsById={taskStatusSignalsById}
+    />
   );
 
   return (

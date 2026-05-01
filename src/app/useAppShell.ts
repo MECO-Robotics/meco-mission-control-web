@@ -2,19 +2,45 @@ import { useEffect, useMemo, useState } from "react";
 
 import { buildPageShellStyle } from "@/app/theme";
 
+export function readStoredThemePreference() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  try {
+    return window.localStorage.getItem("meco-theme") === "dark";
+  } catch {
+    return false;
+  }
+}
+
+export function writeStoredThemePreference(isDarkMode: boolean) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem("meco-theme", isDarkMode ? "dark" : "light");
+  } catch {
+    // Storage can be blocked by browser settings; keep in-memory theme state usable.
+  }
+}
+
 export function useAppShell() {
   const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
   const [isCompactSidebarExpanded, setIsCompactSidebarExpanded] = useState(false);
   const [isViewportNarrow, setIsViewportNarrow] = useState(() =>
-    typeof window !== "undefined"
+    typeof window !== "undefined" && typeof window.matchMedia === "function"
       ? window.matchMedia("(max-width: 960px)").matches
       : false,
   );
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    return localStorage.getItem("meco-theme") === "dark";
-  });
+  const [isDarkMode, setIsDarkMode] = useState(readStoredThemePreference);
 
   useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return;
+    }
+
     const mediaQuery = window.matchMedia("(max-width: 960px)");
 
     const updateViewportState = () => {
@@ -52,7 +78,7 @@ export function useAppShell() {
   const toggleDarkMode = () => {
     setIsDarkMode((current) => {
       const next = !current;
-      localStorage.setItem("meco-theme", next ? "dark" : "light");
+      writeStoredThemePreference(next);
       return next;
     });
   };

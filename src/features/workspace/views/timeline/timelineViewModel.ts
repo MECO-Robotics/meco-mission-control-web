@@ -1,5 +1,9 @@
 import type { BootstrapPayload, EventRecord, TaskRecord } from "@/types";
 import { dateDiffInDays } from "@/lib/appUtils";
+import {
+  filterSelectionMatchesTaskPeople,
+  type FilterSelection,
+} from "@/features/workspace/shared";
 import { getEventTypeStyle, type WorkspaceEventStyle } from "@/features/workspace/shared/eventStyles";
 import {
   datePortion,
@@ -430,8 +434,6 @@ export function buildTimelineProjectRows(subsystemRows: TimelineSubsystemRow[]) 
     const existing = grouped.get(subsystem.projectId);
     if (existing) {
       existing.subsystems.push(subsystem);
-      existing.taskCount += subsystem.taskCount;
-      existing.completeCount += subsystem.completeCount;
       existing.tasks.push(...subsystem.tasks);
       return;
     }
@@ -446,7 +448,46 @@ export function buildTimelineProjectRows(subsystemRows: TimelineSubsystemRow[]) 
     });
   });
 
-  return Array.from(grouped.values());
+  return Array.from(grouped.values()).map((project) => {
+    const tasksById = new Map<string, TimelineTaskSpan>();
+    project.tasks.forEach((task) => {
+      if (!tasksById.has(task.id)) {
+        tasksById.set(task.id, task);
+      }
+    });
+    const tasks = Array.from(tasksById.values());
+
+    return {
+      ...project,
+      taskCount: tasks.length,
+      completeCount: tasks.filter((task) => task.status === "complete").length,
+      tasks,
+    };
+  });
+}
+
+export function filterTimelineEventsByPersonSelection({
+  activePersonFilter,
+  events,
+  tasks,
+}: {
+  activePersonFilter: FilterSelection;
+  events: BootstrapPayload["events"];
+  tasks: BootstrapPayload["tasks"];
+}) {
+  if (activePersonFilter.length === 0) {
+    return events;
+  }
+
+  const matchingEventIds = new Set(
+    tasks.flatMap((task) =>
+      task.targetEventId && filterSelectionMatchesTaskPeople(activePersonFilter, task)
+        ? [task.targetEventId]
+        : [],
+    ),
+  );
+
+  return events.filter((event) => matchingEventIds.has(event.id));
 }
 
 export function buildTimelineDayMilestoneUnderlays({

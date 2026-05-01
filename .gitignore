@@ -15,6 +15,9 @@ dist-ssr
 *.out
 coverage
 *.tsbuildinfo
+docs/reports/lighthouse-*.html
+docs/reports/lighthouse-*.json
+docs/reports/lighthouse-*.txt
 
 # Environment files
 .env

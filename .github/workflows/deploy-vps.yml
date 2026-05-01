@@ -48,17 +48,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Unit tests
-        run: npm run test:ci
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Build
-        run: npm run build
+      - name: Verify
+        run: npm run verify
 
       - name: Upload validated build artifact
         uses: actions/upload-artifact@v4
@@ -126,7 +117,7 @@ jobs:
           for attempt in $(seq 1 10); do
             if curl --fail --silent http://127.0.0.1/ > /dev/null \
               && curl --fail --silent http://127.0.0.1/health > /dev/null \
-              && curl --fail --silent --insecure --resolve meco-pm.duckdns.org:443:127.0.0.1 https://meco-pm.duckdns.org/health > /dev/null; then
+              && curl --fail --silent --resolve meco-pm.duckdns.org:443:127.0.0.1 https://meco-pm.duckdns.org/health > /dev/null; then
               echo "Web checks passed."
               exit 0
             fi
@@ -138,7 +129,7 @@ jobs:
           echo "---"
           curl -i http://127.0.0.1/health || true
           echo "---"
-          curl -ki --resolve meco-pm.duckdns.org:443:127.0.0.1 https://meco-pm.duckdns.org/health || true
+          curl -i --resolve meco-pm.duckdns.org:443:127.0.0.1 https://meco-pm.duckdns.org/health || true
           echo "---"
           nginx -T || true
           echo "---"

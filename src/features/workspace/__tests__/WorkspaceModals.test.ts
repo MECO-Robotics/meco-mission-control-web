@@ -146,6 +146,7 @@ function renderTaskModal(
       ),
       eventsById: {},
       handleDeleteTask: jest.fn(),
+      handleResolveTaskBlocker: jest.fn(async () => undefined),
       handleTaskSubmit: jest.fn(),
       isDeletingTask: false,
       isSavingTask: false,
@@ -389,19 +390,68 @@ describe("TaskEditorModal", () => {
     expect(renderTaskModal("create")).not.toContain("Actual hours");
   });
 
-  it("labels the task create modal heading as Create task", () => {
-    expect(renderTaskModal("create")).toContain(
-      '<h2 style="color:var(--text-title)">Create task</h2>',
-    );
+  it("renders the task title in the detailed editor header", () => {
+    const markup = renderTaskModal("create");
+
+    expect(markup).toContain("task-details-header");
+    expect(markup).toContain('aria-label="Task title"');
   });
 
-  it("keeps actual hours visible while editing a task", () => {
+  it("shows the task editor shell in edit mode", () => {
+    expect(renderTaskModal("create")).not.toContain("Actual hours");
+    expect(renderTaskModal("create")).toContain("Task editor");
+    expect(renderTaskModal("edit")).toContain("Task editor");
+    expect(renderTaskModal("edit")).not.toContain("View Task Details");
     expect(renderTaskModal("edit")).toContain("Actual hours");
   });
 
+  it("renders the task title as an editable field in edit mode", () => {
+    const markup = renderTaskModal("edit");
+
+    expect(markup).toContain('aria-label="Task title"');
+    expect(markup).toContain("task-editor-title-input");
+  });
+
+  it("uses the task editor shell for create and edit", () => {
+    const createMarkup = renderTaskModal("create");
+    const editMarkup = renderTaskModal("edit");
+
+    expect(createMarkup).toContain("task-details-header");
+    expect(createMarkup).toContain("task-details-overview-grid");
+    expect(editMarkup).toContain("task-details-header");
+    expect(editMarkup).toContain("task-details-overview-grid");
+    expect(editMarkup).toContain(">Priority</span>");
+    expect(editMarkup).toContain(">Owner</span>");
+    expect(editMarkup).toContain(">Assigned</span>");
+    expect(editMarkup).toContain(">Mentor</span>");
+    expect(editMarkup).toContain(">Due date</span>");
+    expect(editMarkup).toContain(">Target event</span>");
+    expect(editMarkup).toContain(">Discipline</span>");
+    expect(editMarkup).toContain(">Targets</span>");
+    expect(editMarkup).toContain(">Summary</span>");
+  });
+
+  it("shows mechanism and part target groups in the task editor", () => {
+    const markup = renderTaskModal("edit");
+
+    expect(markup).toContain("Mechanisms");
+    expect(markup).toContain("Part instances");
+  });
+
+  it("keeps dependency editing controls in edit mode", () => {
+    const markup = renderTaskModal("edit");
+
+    expect(markup).toContain("Dependencies");
+    expect(markup).toContain("Depends on");
+    expect(markup).toContain("Dependency type");
+    expect(markup).toContain("Add dependency");
+  });
+
   it("renders a multi-student assignment control", () => {
-    expect(renderTaskModal("create")).toContain("Assigned students");
-    expect(renderTaskModal("create")).toContain("Taylor");
+    const markup = renderTaskModal("create");
+
+    expect(markup).toContain("Assigned");
+    expect(markup).toContain("Taylor");
   });
 
   it("limits task disciplines to media options for media projects", () => {
@@ -418,22 +468,20 @@ describe("TaskEditorModal", () => {
     expect(markup).not.toContain("Manufacturing");
   });
 
-  it("keeps task deletion inside the edit modal only", () => {
-    expect(renderTaskModal("create")).not.toContain("Delete task");
-    expect(renderTaskModal("edit")).toContain("Delete task");
+  it("shows edit-only task controls in edit mode", () => {
+    const markup = renderTaskModal("edit");
+
+    expect(markup).toContain("Actual hours");
+    expect(markup).toContain("Dependencies");
+    expect(markup).toContain("Add dependency");
+    expect(markup).toContain("Delete task");
+    expect(markup).toContain("Cancel");
+    expect(markup).toContain("Save changes");
   });
 
   it("omits task traceability text", () => {
     expect(renderTaskModal("create")).not.toContain("Task traceability");
     expect(renderTaskModal("edit")).not.toContain("Task traceability");
-  });
-
-  it("shows dependency controls in the task editor", () => {
-    const markup = renderTaskModal("edit");
-
-    expect(markup).toContain("Dependencies");
-    expect(markup).toContain("Depends on");
-    expect(markup).toContain("Dependency type");
   });
 
   it("hides iteration selectors while creating definition editors", () => {

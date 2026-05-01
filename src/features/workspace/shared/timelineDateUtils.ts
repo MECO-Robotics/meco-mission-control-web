@@ -1,3 +1,9 @@
+import {
+  addDaysToLocalDate,
+  addMonthsToLocalDate,
+  localTodayDate,
+} from "@/lib/dateUtils";
+
 export type TimelineViewInterval = "all" | "week" | "month";
 
 const MONTH_LABEL_FORMATTER = new Intl.DateTimeFormat(undefined, { month: "long" });
@@ -46,29 +52,14 @@ export function withColumnOverlayTint(color: string) {
   return `rgba(${rgbaMatch[1]}, ${rgbaMatch[2]}, ${rgbaMatch[3]}, ${overlayAlpha})`;
 }
 
-export function localTodayDate() {
-  const now = new Date();
-  const offsetAdjusted = new Date(now.getTime() - now.getTimezoneOffset() * 60_000);
-  return offsetAdjusted.toISOString().slice(0, 10);
-}
+export { localTodayDate };
 
 export function addDaysToDay(day: string, dayCount: number) {
-  const candidate = new Date(`${day}T12:00:00`);
-  candidate.setDate(candidate.getDate() + dayCount);
-  return candidate.toISOString().slice(0, 10);
+  return addDaysToLocalDate(day, dayCount);
 }
 
 export function addMonthsToDay(day: string, monthCount: number) {
-  const [year, month, date] = day.split("-").map(Number);
-  const targetMonthStart = new Date(year, month - 1 + monthCount, 1, 12);
-  const targetMonthEnd = new Date(
-    targetMonthStart.getFullYear(),
-    targetMonthStart.getMonth() + 1,
-    0,
-    12,
-  );
-  targetMonthStart.setDate(Math.min(date, targetMonthEnd.getDate()));
-  return targetMonthStart.toISOString().slice(0, 10);
+  return addMonthsToLocalDate(day, monthCount);
 }
 
 export function monthStartFromDay(day: string) {

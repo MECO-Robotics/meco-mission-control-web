@@ -53,10 +53,16 @@ export function useAppAuth({ isDarkMode, resetWorkspace }: UseAppAuthArgs) {
   const isEmailAuthAvailable = Boolean(enforcedAuthConfig?.emailEnabled);
   const isLocalGoogleOverrideActive = isUsingLocalGoogleClientIdOverride();
   const isLocalGoogleDevHost = isLocalGoogleAuthHost();
+  const resetWorkspaceRef = useRef(resetWorkspace);
+
+  useEffect(() => {
+    resetWorkspaceRef.current = resetWorkspace;
+  }, [resetWorkspace]);
 
   const expireSession = useCallback((message: string) => {
     clearStoredSessionToken();
     signOutFromGoogle();
+    resetWorkspaceRef.current();
     startTransition(() => {
       setSessionUser(null);
     });
@@ -303,8 +309,8 @@ export function useAppAuth({ isDarkMode, resetWorkspace }: UseAppAuthArgs) {
       setSessionUser(null);
     });
     setAuthMessage(null);
-    resetWorkspace();
-  }, [resetWorkspace]);
+    resetWorkspaceRef.current();
+  }, []);
 
   return {
     authBooting,

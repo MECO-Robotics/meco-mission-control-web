@@ -101,6 +101,7 @@ interface WorkspaceModalHostProps {
   handleTaskSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
   handleWorkstreamSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
   onOpenTaskEditFromTimelineDetails: (task: TaskRecord) => void;
+  openTaskDetailsModal: (task: TaskRecord) => void;
   isDeletingMaterial: boolean;
   isDeletingArtifact: boolean;
   isDeletingPartDefinition: boolean;
@@ -394,6 +395,7 @@ export function WorkspaceModalHost({
           disciplinesById={disciplinesById}
           eventsById={eventsById}
           handleDeleteTask={handleDeleteTask}
+          handleResolveTaskBlocker={handleResolveTaskBlocker}
           handleTaskSubmit={handleTaskSubmit}
           isDeletingTask={isDeletingTask}
           isSavingTask={isSavingTask}

@@ -19,6 +19,7 @@ import {
   isTaskDisciplineAllowedForProject,
 } from "@/lib/taskDisciplines";
 import { formatTaskStatusLabel } from "@/features/workspace/shared/workspaceOptions";
+import { TaskDependencyEditor } from "./TaskDependencyEditor";
 
 interface TaskEditorModalProps {
   activeTask: TaskRecord | null;
@@ -27,6 +28,7 @@ interface TaskEditorModalProps {
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
   eventsById: Record<string, BootstrapPayload["events"][number]>;
   handleDeleteTask: (taskId: string) => Promise<void>;
+  handleResolveTaskBlocker: (blockerId: string) => Promise<void>;
   handleTaskSubmit: (event: FormEvent<HTMLFormElement>) => void;
   isDeletingTask: boolean;
   isSavingTask: boolean;
@@ -248,48 +250,86 @@ export function TaskEditorModal({
       ),
     }));
   };
+  const isCreateTaskModal = taskModalMode === "create";
+  const isEditTaskModal = taskModalMode === "edit";
 
   return (
     <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
-      <section aria-modal="true" className="modal-card" role="dialog" style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}>
-        <div className="panel-header compact-header">
+      <section
+        aria-modal="true"
+        className="modal-card task-details-modal task-editor-modal"
+        role="dialog"
+        style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
+      >
+        <div className="panel-header compact-header task-details-header">
           <div>
-            <p className="eyebrow" style={{ color: "var(--meco-blue)" }}>Task editor</p>
-            {taskModalMode === "create" && showCreateTypeToggle ? (
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.25rem" }}>
-                <h2 style={{ color: "var(--text-title)", margin: 0 }}>Create</h2>
-                <button className="primary-action" type="button">
-                  Task
-                </button>
-                <button
-                  className="secondary-action"
-                  onClick={onSwitchCreateTypeToMilestone}
-                  type="button"
-                >
-                  Milestone
-                </button>
+            <p className="eyebrow" style={{ color: "var(--meco-blue)" }}>
+              Task editor
+            </p>
+            <div className="task-detail-header-title-row">
+              <div className="task-detail-header-title-stack">
+                <div className="task-detail-header-title-main">
+                  {taskModalMode === "create" && showCreateTypeToggle ? (
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                        flexWrap: "wrap",
+                        width: "100%",
+                      }}
+                    >
+                      <input
+                        className="task-editor-title-input"
+                        aria-label="Task title"
+                        onChange={(event) =>
+                          setTaskDraft((current) => ({ ...current, title: event.target.value }))
+                        }
+                        required
+                        value={taskDraft.title}
+                      />
+                      <button className="primary-action" type="button">
+                        Task
+                      </button>
+                      <button
+                        className="secondary-action"
+                        onClick={onSwitchCreateTypeToMilestone}
+                        type="button"
+                      >
+                        Milestone
+                      </button>
+                    </div>
+                  ) : (
+                    <input
+                      className="task-editor-title-input"
+                      aria-label="Task title"
+                      onChange={(event) =>
+                        setTaskDraft((current) => ({ ...current, title: event.target.value }))
+                      }
+                      required
+                      value={taskDraft.title}
+                    />
+                  )}
+                </div>
+                <p className="task-detail-copy task-detail-header-meta-line">
+                  <span className="task-detail-copy" style={{ color: "var(--text-copy)" }}>
+                    Edit the task details below.
+                  </span>
+                </p>
               </div>
-            ) : (
-              <h2 style={{ color: "var(--text-title)" }}>{taskModalMode === "create" ? "Create task" : activeTask?.title ?? "Edit task"}</h2>
-            )}
+            </div>
           </div>
-          <button className="icon-button" onClick={closeTaskModal} type="button" style={{ color: "var(--text-copy)", background: "transparent" }}>
+          <button
+            className="icon-button"
+            onClick={closeTaskModal}
+            type="button"
+            style={{ color: "var(--text-copy)", background: "transparent" }}
+          >
             Close
           </button>
         </div>
-        <form className="modal-form" onSubmit={handleTaskSubmit} style={{ color: "var(--text-copy)" }}>
-          <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Title</span>
-            <input
-              onChange={(event) =>
-                setTaskDraft((current) => ({ ...current, title: event.target.value }))
-              }
-              required
-              style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
-              value={taskDraft.title}
-            />
-          </label>
-          <label className="field modal-wide">
+        <form className="modal-form task-details-grid" onSubmit={handleTaskSubmit} style={{ color: "var(--text-copy)" }}>
+          <label className="field task-detail-row modal-wide">
             <span style={{ color: "var(--text-title)" }}>Summary</span>
             <textarea
               onChange={(event) =>
@@ -297,501 +337,836 @@ export function TaskEditorModal({
               }
               required
               rows={3}
-              style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
               value={taskDraft.summary}
             />
           </label>
-          <PhotoUploadField
-            currentUrl={taskDraft.photoUrl}
-            label="Task photo"
-            onChange={(value) => setTaskDraft((current) => ({ ...current, photoUrl: value }))}
-            onUpload={async (file) => {
-              if (!taskPhotoProjectId) {
-                throw new Error("No project is available for photo upload.");
-              }
-
-              return requestPhotoUpload(taskPhotoProjectId, file);
-            }}
-          />
-          <label className="field">
-            <span style={{ color: "var(--text-title)" }}>Project</span>
-            <select
-              onChange={(event) =>
-                setTaskDraft((current) => {
-                  const projectId = event.target.value;
-                  const nextProject = projectsById[projectId] ?? null;
-                  const subsystemId =
-                    bootstrap.subsystems.find((subsystem) => subsystem.projectId === projectId)
-                      ?.id ?? "";
-                  const validDependencyTaskIds = new Set(
-                    bootstrap.tasks
-                      .filter((task) => task.projectId === projectId && task.id !== currentTaskId)
-                      .map((task) => task.id),
-                  );
-
-                  return {
+          <div className="task-details-section-grid task-details-overview-grid modal-wide">
+            <label className="field task-detail-row task-detail-row-chip">
+              <span style={{ color: "var(--text-title)" }}>Priority</span>
+              <select
+                onChange={(event) =>
+                  setTaskDraft((current) => ({
                     ...current,
-                    projectId,
-                    disciplineId: isTaskDisciplineAllowedForProject(
-                      nextProject,
-                      current.disciplineId,
-                    )
-                      ? current.disciplineId
-                      : getDefaultTaskDisciplineIdForProject(nextProject),
-                    workstreamId: null,
-                    workstreamIds: [],
-                    subsystemId,
-                    subsystemIds: subsystemId ? [subsystemId] : [],
-                    mechanismId: null,
-                    mechanismIds: [],
-                    partInstanceId: null,
-                    partInstanceIds: [],
-                    taskDependencies: (current.taskDependencies ?? []).filter((dependency) =>
-                      validDependencyTaskIds.has(dependency.upstreamTaskId),
-                    ),
-                  };
-                })
-              }
-              style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
-              value={taskDraft.projectId}
-            >
-              {bootstrap.projects.map((project) => (
-                <option key={project.id} value={project.id}>
-                  {project.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            <span style={{ color: "var(--text-title)" }}>Discipline</span>
-            <select
-              onChange={(event) =>
-                setTaskDraft((current) => ({ ...current, disciplineId: event.target.value }))
-              }
-              style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
-              value={taskDraft.disciplineId}
-            >
-              {availableDisciplines.map((discipline) => (
-                <option key={discipline.id} value={discipline.id}>
-                  {discipline.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <div className="field modal-wide task-target-picker">
-            <span style={{ color: "var(--text-title)" }}>Targets</span>
-            <label className="task-target-primary">
-              <span>{targetGroupLabel === "Subsystems" ? "Subsystem" : "Workstream"}</span>
-              <select
-                onChange={(event) => updatePrimaryTargetName(event.target.value)}
-                required
-                style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
-                value={selectedPrimaryTargetName}
+                    priority: event.target.value as TaskPayload["priority"],
+                  }))
+                }
+                style={{
+                  background: "var(--bg-row-alt)",
+                  color: "var(--text-title)",
+                  border: "1px solid var(--border-base)",
+                }}
+                value={taskDraft.priority}
               >
-                <option value="" disabled>
-                  {targetFallback}
-                </option>
-                {primaryTargetNameOptions.map((subsystemName) => (
-                  <option key={subsystemName} value={subsystemName}>
-                    {subsystemName}
+                <option value="critical">Critical</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </label>
+            <label className="field task-detail-row">
+              <span style={{ color: "var(--text-title)" }}>Owner</span>
+              <select
+                onChange={(event) => {
+                  const ownerId = event.target.value || null;
+                  setTaskDraft((current) => ({
+                    ...current,
+                    ownerId,
+                    assigneeIds: ownerId
+                      ? Array.from(new Set([...current.assigneeIds, ownerId]))
+                      : current.assigneeIds,
+                  }));
+                }}
+                style={{
+                  background: "var(--bg-row-alt)",
+                  color: "var(--text-title)",
+                  border: "1px solid var(--border-base)",
+                }}
+                value={taskDraft.ownerId ?? ""}
+              >
+                <option value="">Unassigned</option>
+                {students.map((member) => (
+                  <option key={member.id} value={member.id}>
+                    {member.name}
                   </option>
                 ))}
               </select>
             </label>
-            <label className="task-target-primary">
-              <span>Iteration</span>
+            <div className="task-details-overview-assigned">
+              <span style={{ color: "var(--text-title)" }}>Assigned</span>
               <select
-                onChange={(event) => updatePrimaryTarget(event.target.value)}
-                required
-                style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
-                value={selectedPrimaryTargetId}
-              >
-                <option value="" disabled>
-                  Select iteration
-                </option>
-                {selectedPrimaryTargetIterations.map((subsystem) => (
-                  <option key={subsystem.id} value={subsystem.id}>
-                    {formatIterationVersion(subsystem.iteration)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <div className="task-target-selected" aria-live="polite">
-              {selectedPrimaryTarget ? (
-                <span className="task-target-chip">
-                  {getSubsystemLabel(selectedPrimaryTarget)}
-                </span>
-              ) : null}
-              {selectedScopeChips.length > 0 ? (
-                selectedScopeChips.map((chip) => (
-                  <span className="task-target-chip" key={chip.key}>
-                    {chip.label}
-                  </span>
-                ))
-              ) : (
-                <span className="task-target-empty">All mechanisms and part instances</span>
-              )}
-            </div>
-            <div className="task-target-grid">
-              <div className="task-target-group">
-                <span className="task-target-group-title">Mechanisms</span>
-                {projectMechanisms.map((mechanism) =>
-                  renderTargetOption(
-                    "mechanism",
-                    mechanism.id,
-                    getMechanismLabel(mechanism),
-                    subsystemsById[mechanism.subsystemId]
-                      ? getSubsystemLabel(subsystemsById[mechanism.subsystemId])
-                      : null,
-                    selectedMechanismIds.includes(mechanism.id),
-                  ),
-                )}
-              </div>
-              <div className="task-target-group">
-                <span className="task-target-group-title">Part instances</span>
-                {projectPartInstances.map((partInstance) =>
-                  renderTargetOption(
-                    "part-instance",
-                    partInstance.id,
-                    getPartInstanceLabel(partInstance),
-                    [
-                      partInstance.subsystemId && subsystemsById[partInstance.subsystemId]
-                        ? getSubsystemLabel(subsystemsById[partInstance.subsystemId])
-                        : null,
-                      partInstance.mechanismId && mechanismsById[partInstance.mechanismId]
-                        ? getMechanismLabel(mechanismsById[partInstance.mechanismId])
-                        : null,
-                    ]
-                      .filter(Boolean)
-                      .join(" / ") || null,
-                    selectedPartInstanceIds.includes(partInstance.id),
-                  ),
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Dependencies</span>
-            <p style={{ margin: "0.25rem 0 0", color: "var(--text-copy)" }}>
-              Planned sequencing between tasks. Use blocking dependencies for normal order.
-            </p>
-            <div style={{ display: "grid", gap: "0.75rem", marginTop: "0.75rem" }}>
-              {visibleDependencyDrafts.map((dependency, index) => (
-                <div
-                  key={dependency.id ?? `dependency-${index}`}
-                  style={{
-                    display: "grid",
-                    gap: "0.75rem",
-                    padding: "0.75rem",
-                    border: "1px solid var(--border-base)",
-                    borderRadius: "12px",
-                    background: "var(--bg-row-alt)",
-                  }}
-                >
-                  <label className="field">
-                    <span style={{ color: "var(--text-title)" }}>Depends on</span>
-                    <select
-                      onChange={(event) =>
-                        updateDependencyDraft(index, {
-                          upstreamTaskId: event.target.value,
-                        })
-                      }
-                      style={{
-                        background: "var(--bg-panel)",
-                        color: "var(--text-title)",
-                        border: "1px solid var(--border-base)",
-                      }}
-                      value={dependency.upstreamTaskId}
-                    >
-                      <option value="">Select task</option>
-                      {dependencyTaskOptions.map((task) => (
-                        <option key={task.id} value={task.id}>
-                          {task.title}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="field">
-                    <span style={{ color: "var(--text-title)" }}>Dependency type</span>
-                    <select
-                      onChange={(event) =>
-                        updateDependencyDraft(index, {
-                          dependencyType: event.target.value as TaskDependencyType,
-                        })
-                      }
-                      style={{
-                        background: "var(--bg-panel)",
-                        color: "var(--text-title)",
-                        border: "1px solid var(--border-base)",
-                      }}
-                      value={dependency.dependencyType}
-                    >
-                      {Object.entries(dependencyTypeLabels).map(([type, label]) => (
-                        <option key={type} value={type}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  {dependencyDrafts.length > 0 ? (
-                    <button
-                      className="secondary-action"
-                      onClick={() => removeDependencyDraft(index)}
-                      type="button"
-                    >
-                      Remove dependency
-                    </button>
-                  ) : null}
-                </div>
-              ))}
-            </div>
-            <button
-              className="secondary-action"
-              onClick={addDependencyDraft}
-              style={{ marginTop: "0.75rem" }}
-              type="button"
-            >
-              Add dependency
-            </button>
-          </div>
-          <label className="field">
-            <span style={{ color: "var(--text-title)" }}>Target event</span>
-            <select
-              onChange={(event) =>
-                setTaskDraft((current) => ({
-                  ...current,
-                  targetEventId: event.target.value || null,
-                }))
-              }
-              style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
-              value={taskDraft.targetEventId ?? ""}
-            >
-              <option value="">No event</option>
-              {bootstrap.events.map((event) => (
-                <option key={event.id} value={event.id}>
-                  {event.title}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            <span style={{ color: "var(--text-title)" }}>Owner</span>
-            <select
-              onChange={(event) => {
-                const ownerId = event.target.value || null;
-                setTaskDraft((current) => ({
-                  ...current,
-                  ownerId,
-                  assigneeIds: ownerId
-                    ? Array.from(new Set([...current.assigneeIds, ownerId]))
-                    : current.assigneeIds,
-                }));
-              }}
-              style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
-              value={taskDraft.ownerId ?? ""}
-            >
-              <option value="">Unassigned</option>
-              {students.map((member) => (
-                <option key={member.id} value={member.id}>
-                  {member.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            <span style={{ color: "var(--text-title)" }}>Assigned students</span>
-            <select
-              multiple
-              onChange={(event) => {
-                const assigneeIds = Array.from(
-                  event.currentTarget.selectedOptions,
-                  (option) => option.value,
-                );
-                setTaskDraft((current) => ({
-                  ...current,
-                  assigneeIds: Array.from(
-                    new Set(
-                      [...assigneeIds, current.ownerId].filter(
-                        (memberId): memberId is string => Boolean(memberId),
+                multiple
+                onChange={(event) => {
+                  const assigneeIds = Array.from(
+                    event.currentTarget.selectedOptions,
+                    (option) => option.value,
+                  );
+                  setTaskDraft((current) => ({
+                    ...current,
+                    assigneeIds: Array.from(
+                      new Set(
+                        [...assigneeIds, current.ownerId].filter(
+                          (memberId): memberId is string => Boolean(memberId),
+                        ),
                       ),
                     ),
-                  ),
-                }));
-              }}
-              size={Math.min(students.length || 1, 5)}
-              style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
-              value={selectedAssigneeIds}
-            >
-              {students.map((member) => (
-                <option key={member.id} value={member.id}>
-                  {member.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            <span style={{ color: "var(--text-title)" }}>Mentor</span>
-            <select
-              onChange={(event) =>
-                setTaskDraft((current) => ({
-                  ...current,
-                  mentorId: event.target.value || null,
-                }))
-              }
-              style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
-              value={taskDraft.mentorId ?? ""}
-            >
-              <option value="">Unassigned</option>
-              {mentors.map((member) => (
-                <option key={member.id} value={member.id}>
-                  {member.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            <span style={{ color: "var(--text-title)" }}>Status</span>
-            <select
-              onChange={(event) =>
-                setTaskDraft((current) => ({
-                  ...current,
-                  status: event.target.value as TaskPayload["status"],
-                }))
-              }
-              style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
-              value={taskDraft.status}
-            >
-              <option value="not-started">Not started</option>
-              <option value="in-progress">In progress</option>
-              <option value="waiting-for-qa">{formatTaskStatusLabel("waiting-for-qa")}</option>
-              <option value="complete">Complete</option>
-            </select>
-          </label>
-          <label className="field">
-            <span style={{ color: "var(--text-title)" }}>Priority</span>
-            <select
-              onChange={(event) =>
-                setTaskDraft((current) => ({
-                  ...current,
-                  priority: event.target.value as TaskPayload["priority"],
-                }))
-              }
-              style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
-              value={taskDraft.priority}
-            >
-              <option value="critical">Critical</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
-            </select>
-          </label>
-          <label className="field">
-            <span style={{ color: "var(--text-title)" }}>Start date</span>
-            <input
-              onChange={(event) =>
-                setTaskDraft((current) => ({ ...current, startDate: event.target.value }))
-              }
-              style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
-              type="date"
-              value={taskDraft.startDate}
-            />
-          </label>
-          <label className="field">
-            <span style={{ color: "var(--text-title)" }}>Due date</span>
-            <input
-              onChange={(event) =>
-                setTaskDraft((current) => ({ ...current, dueDate: event.target.value }))
-              }
-              style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
-              type="date"
-              value={taskDraft.dueDate}
-            />
-          </label>
-          <label className="field">
-            <span style={{ color: "var(--text-title)" }}>Estimated hours</span>
-            <input
-              min="0"
-              onChange={(event) =>
-                setTaskDraft((current) => ({
-                  ...current,
-                  estimatedHours: Number(event.target.value),
-                }))
-              }
-              style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
-              type="number"
-              value={taskDraft.estimatedHours}
-            />
-          </label>
-          {taskModalMode === "edit" ? (
-            <label className="field">
-              <span style={{ color: "var(--text-title)" }}>Actual hours</span>
-              <input
-                min="0"
-                onChange={(event) =>
-                  setTaskDraft((current) => ({
-                    ...current,
-                    actualHours: Number(event.target.value),
-                  }))
-                }
-                style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }}
-                step="0.5"
-                type="number"
-                value={taskDraft.actualHours}
-              />
-            </label>
-          ) : null}
-          <div className="checkbox-row modal-wide">
-            <label className="checkbox-field">
-              <input
-                checked={taskDraft.requiresDocumentation}
-                onChange={(event) =>
-                  setTaskDraft((current) => ({
-                    ...current,
-                    requiresDocumentation: event.target.checked,
-                  }))
-                }
-                type="checkbox"
-              />
-              <span style={{ color: "var(--text-title)" }}>Requires documentation</span>
-            </label>
-            <label className="checkbox-field">
-              <input
-                checked={taskDraft.documentationLinked}
-                onChange={(event) =>
-                  setTaskDraft((current) => ({
-                    ...current,
-                    documentationLinked: event.target.checked,
-                  }))
-                }
-                type="checkbox"
-              />
-              <span style={{ color: "var(--text-title)" }}>Documentation linked</span>
-            </label>
-          </div>
-          <div className="modal-actions modal-wide">
-            {taskModalMode === "edit" && activeTask?.id ? (
-              <button
-                className="danger-action"
-                disabled={isDeletingTask || isSavingTask}
-                onClick={() => {
-                  void handleDeleteTask(activeTask.id);
+                  }));
                 }}
-                type="button"
+                size={Math.min(students.length || 1, 5)}
+                style={{
+                  background: "var(--bg-row-alt)",
+                  color: "var(--text-title)",
+                  border: "1px solid var(--border-base)",
+                }}
+                value={selectedAssigneeIds}
               >
-                {isDeletingTask ? "Deleting..." : "Delete task"}
-              </button>
-            ) : null}
-            <button className="secondary-action" onClick={closeTaskModal} style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }} type="button">
-              Cancel
-            </button>
-            <button className="primary-action" disabled={isSavingTask || isDeletingTask} type="submit">
-              {isSavingTask
-                ? "Saving..."
-                : taskModalMode === "create"
-                  ? "Create task"
-                  : "Save changes"}
-            </button>
+                {students.map((member) => (
+                  <option key={member.id} value={member.id}>
+                    {member.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <label className="field task-detail-row">
+              <span style={{ color: "var(--text-title)" }}>Mentor</span>
+              <select
+                onChange={(event) =>
+                  setTaskDraft((current) => ({
+                    ...current,
+                    mentorId: event.target.value || null,
+                  }))
+                }
+                style={{
+                  background: "var(--bg-row-alt)",
+                  color: "var(--text-title)",
+                  border: "1px solid var(--border-base)",
+                }}
+                value={taskDraft.mentorId ?? ""}
+              >
+                <option value="">Unassigned</option>
+                {mentors.map((member) => (
+                  <option key={member.id} value={member.id}>
+                    {member.name}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
+
+          {isCreateTaskModal ? (
+            <details className="task-details-section-collapse modal-wide" open>
+              <summary className="task-details-section-title task-details-section-summary">
+                <span>Advanced</span>
+              </summary>
+              <div className="task-details-section-grid">
+                <PhotoUploadField
+                  currentUrl={taskDraft.photoUrl}
+                  label="Task photo"
+                  onChange={(value) => setTaskDraft((current) => ({ ...current, photoUrl: value }))}
+                  onUpload={async (file) => {
+                    if (!taskPhotoProjectId) {
+                      throw new Error("No project is available for photo upload.");
+                    }
+
+                    return requestPhotoUpload(taskPhotoProjectId, file);
+                  }}
+                />
+                <label className="field">
+                  <span style={{ color: "var(--text-title)" }}>Project</span>
+                  <select
+                    onChange={(event) =>
+                      setTaskDraft((current) => {
+                        const projectId = event.target.value;
+                        const nextProject = projectsById[projectId] ?? null;
+                        const subsystemId =
+                          bootstrap.subsystems.find((subsystem) => subsystem.projectId === projectId)
+                            ?.id ?? "";
+                        const validDependencyTaskIds = new Set(
+                          bootstrap.tasks
+                            .filter((task) => task.projectId === projectId && task.id !== currentTaskId)
+                            .map((task) => task.id),
+                        );
+
+                        return {
+                          ...current,
+                          projectId,
+                          disciplineId: isTaskDisciplineAllowedForProject(
+                            nextProject,
+                            current.disciplineId,
+                          )
+                            ? current.disciplineId
+                            : getDefaultTaskDisciplineIdForProject(nextProject),
+                          workstreamId: null,
+                          workstreamIds: [],
+                          subsystemId,
+                          subsystemIds: subsystemId ? [subsystemId] : [],
+                          mechanismId: null,
+                          mechanismIds: [],
+                          partInstanceId: null,
+                          partInstanceIds: [],
+                          taskDependencies: (current.taskDependencies ?? []).filter((dependency) =>
+                            validDependencyTaskIds.has(dependency.upstreamTaskId),
+                          ),
+                        };
+                      })
+                    }
+                    style={{
+                      background: "var(--bg-row-alt)",
+                      color: "var(--text-title)",
+                      border: "1px solid var(--border-base)",
+                    }}
+                    value={taskDraft.projectId}
+                  >
+                    {bootstrap.projects.map((project) => (
+                      <option key={project.id} value={project.id}>
+                        {project.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="field">
+                  <span style={{ color: "var(--text-title)" }}>Discipline</span>
+                  <select
+                    onChange={(event) =>
+                      setTaskDraft((current) => ({ ...current, disciplineId: event.target.value }))
+                    }
+                    style={{
+                      background: "var(--bg-row-alt)",
+                      color: "var(--text-title)",
+                      border: "1px solid var(--border-base)",
+                    }}
+                    value={taskDraft.disciplineId}
+                  >
+                    {availableDisciplines.map((discipline) => (
+                      <option key={discipline.id} value={discipline.id}>
+                        {discipline.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <div className="field modal-wide task-target-picker">
+                  <span style={{ color: "var(--text-title)" }}>Targets</span>
+                  <label className="task-target-primary">
+                    <span>{targetGroupLabel === "Subsystems" ? "Subsystem" : "Workstream"}</span>
+                    <select
+                      onChange={(event) => updatePrimaryTargetName(event.target.value)}
+                      required
+                      style={{
+                        background: "var(--bg-row-alt)",
+                        color: "var(--text-title)",
+                        border: "1px solid var(--border-base)",
+                      }}
+                      value={selectedPrimaryTargetName}
+                    >
+                      <option value="" disabled>
+                        {targetFallback}
+                      </option>
+                      {primaryTargetNameOptions.map((subsystemName) => (
+                        <option key={subsystemName} value={subsystemName}>
+                          {subsystemName}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="task-target-primary">
+                    <span>Iteration</span>
+                    <select
+                      onChange={(event) => updatePrimaryTarget(event.target.value)}
+                      required
+                      style={{
+                        background: "var(--bg-row-alt)",
+                        color: "var(--text-title)",
+                        border: "1px solid var(--border-base)",
+                      }}
+                      value={selectedPrimaryTargetId}
+                    >
+                      <option value="" disabled>
+                        Select iteration
+                      </option>
+                      {selectedPrimaryTargetIterations.map((subsystem) => (
+                        <option key={subsystem.id} value={subsystem.id}>
+                          {formatIterationVersion(subsystem.iteration)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <div className="task-target-selected" aria-live="polite">
+                    {selectedPrimaryTarget ? (
+                      <span className="task-target-chip">{getSubsystemLabel(selectedPrimaryTarget)}</span>
+                    ) : null}
+                    {selectedScopeChips.length > 0 ? (
+                      selectedScopeChips.map((chip) => (
+                        <span className="task-target-chip" key={chip.key}>
+                          {chip.label}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="task-target-empty">All mechanisms and part instances</span>
+                    )}
+                  </div>
+                  <div className="task-target-grid">
+                    <div className="task-target-group">
+                      <span className="task-target-group-title">Mechanisms</span>
+                      {projectMechanisms.map((mechanism) =>
+                        renderTargetOption(
+                          "mechanism",
+                          mechanism.id,
+                          getMechanismLabel(mechanism),
+                          subsystemsById[mechanism.subsystemId]
+                            ? getSubsystemLabel(subsystemsById[mechanism.subsystemId])
+                            : null,
+                          selectedMechanismIds.includes(mechanism.id),
+                        ),
+                      )}
+                    </div>
+                    <div className="task-target-group">
+                      <span className="task-target-group-title">Part instances</span>
+                      {projectPartInstances.map((partInstance) =>
+                        renderTargetOption(
+                          "part-instance",
+                          partInstance.id,
+                          getPartInstanceLabel(partInstance),
+                          [
+                            partInstance.subsystemId && subsystemsById[partInstance.subsystemId]
+                              ? getSubsystemLabel(subsystemsById[partInstance.subsystemId])
+                              : null,
+                            partInstance.mechanismId && mechanismsById[partInstance.mechanismId]
+                              ? getMechanismLabel(mechanismsById[partInstance.mechanismId])
+                              : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" / ") || null,
+                          selectedPartInstanceIds.includes(partInstance.id),
+                        ),
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <TaskDependencyEditor
+                  dependencyDrafts={dependencyDrafts}
+                  dependencyTaskOptions={dependencyTaskOptions}
+                  dependencyTypeLabels={dependencyTypeLabels}
+                  onAdd={addDependencyDraft}
+                  onRemove={removeDependencyDraft}
+                  onUpdate={updateDependencyDraft}
+                  visibleDependencyDrafts={visibleDependencyDrafts}
+                />
+                <label className="field">
+                  <span style={{ color: "var(--text-title)" }}>Target event</span>
+                  <select
+                    onChange={(event) =>
+                      setTaskDraft((current) => ({
+                        ...current,
+                        targetEventId: event.target.value || null,
+                      }))
+                    }
+                    style={{
+                      background: "var(--bg-row-alt)",
+                      color: "var(--text-title)",
+                      border: "1px solid var(--border-base)",
+                    }}
+                    value={taskDraft.targetEventId ?? ""}
+                  >
+                    <option value="">No event</option>
+                    {bootstrap.events.map((event) => (
+                      <option key={event.id} value={event.id}>
+                        {event.title}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="field">
+                  <span style={{ color: "var(--text-title)" }}>Status</span>
+                  <select
+                    onChange={(event) =>
+                      setTaskDraft((current) => ({
+                        ...current,
+                        status: event.target.value as TaskPayload["status"],
+                      }))
+                    }
+                    style={{
+                      background: "var(--bg-row-alt)",
+                      color: "var(--text-title)",
+                      border: "1px solid var(--border-base)",
+                    }}
+                    value={taskDraft.status}
+                  >
+                    <option value="not-started">Not started</option>
+                    <option value="in-progress">In progress</option>
+                    <option value="waiting-for-qa">{formatTaskStatusLabel("waiting-for-qa")}</option>
+                    <option value="complete">Complete</option>
+                  </select>
+                </label>
+                <label className="field">
+                  <span style={{ color: "var(--text-title)" }}>Start date</span>
+                  <input
+                    onChange={(event) =>
+                      setTaskDraft((current) => ({ ...current, startDate: event.target.value }))
+                    }
+                    style={{
+                      background: "var(--bg-row-alt)",
+                      color: "var(--text-title)",
+                      border: "1px solid var(--border-base)",
+                    }}
+                    type="date"
+                    value={taskDraft.startDate}
+                  />
+                </label>
+                <label className="field">
+                  <span style={{ color: "var(--text-title)" }}>Due date</span>
+                  <input
+                    onChange={(event) =>
+                      setTaskDraft((current) => ({ ...current, dueDate: event.target.value }))
+                    }
+                    style={{
+                      background: "var(--bg-row-alt)",
+                      color: "var(--text-title)",
+                      border: "1px solid var(--border-base)",
+                    }}
+                    type="date"
+                    value={taskDraft.dueDate}
+                  />
+                </label>
+                <label className="field">
+                  <span style={{ color: "var(--text-title)" }}>Estimated hours</span>
+                  <input
+                    min="0"
+                    onChange={(event) =>
+                      setTaskDraft((current) => ({
+                        ...current,
+                        estimatedHours: Number(event.target.value),
+                      }))
+                    }
+                    style={{
+                      background: "var(--bg-row-alt)",
+                      color: "var(--text-title)",
+                      border: "1px solid var(--border-base)",
+                    }}
+                    type="number"
+                    value={taskDraft.estimatedHours}
+                  />
+                </label>
+                <div className="checkbox-row modal-wide">
+                  <label className="checkbox-field">
+                    <input
+                      checked={taskDraft.requiresDocumentation}
+                      onChange={(event) =>
+                        setTaskDraft((current) => ({
+                          ...current,
+                          requiresDocumentation: event.target.checked,
+                        }))
+                      }
+                      type="checkbox"
+                    />
+                    <span style={{ color: "var(--text-title)" }}>Requires documentation</span>
+                  </label>
+                  <label className="checkbox-field">
+                    <input
+                      checked={taskDraft.documentationLinked}
+                      onChange={(event) =>
+                        setTaskDraft((current) => ({
+                          ...current,
+                          documentationLinked: event.target.checked,
+                        }))
+                      }
+                      type="checkbox"
+                    />
+                    <span style={{ color: "var(--text-title)" }}>Documentation linked</span>
+                  </label>
+                </div>
+                <div className="modal-actions modal-wide">
+                  <button
+                    className="secondary-action"
+                    onClick={closeTaskModal}
+                    style={{
+                      background: "var(--bg-row-alt)",
+                      color: "var(--text-title)",
+                      border: "1px solid var(--border-base)",
+                    }}
+                    type="button"
+                  >
+                    Cancel
+                  </button>
+                  <button className="primary-action" disabled={isSavingTask || isDeletingTask} type="submit">
+                    {isSavingTask ? "Saving..." : "Create task"}
+                  </button>
+                </div>
+              </div>
+            </details>
+          ) : (
+            <div className="task-details-section-grid modal-wide">
+              <PhotoUploadField
+                currentUrl={taskDraft.photoUrl}
+                label="Task photo"
+                onChange={(value) => setTaskDraft((current) => ({ ...current, photoUrl: value }))}
+                onUpload={async (file) => {
+                  if (!taskPhotoProjectId) {
+                    throw new Error("No project is available for photo upload.");
+                  }
+
+                  return requestPhotoUpload(taskPhotoProjectId, file);
+                }}
+              />
+              <label className="field">
+                <span style={{ color: "var(--text-title)" }}>Project</span>
+                <select
+                  onChange={(event) =>
+                    setTaskDraft((current) => {
+                      const projectId = event.target.value;
+                      const nextProject = projectsById[projectId] ?? null;
+                      const subsystemId =
+                        bootstrap.subsystems.find((subsystem) => subsystem.projectId === projectId)
+                          ?.id ?? "";
+                      const validDependencyTaskIds = new Set(
+                        bootstrap.tasks
+                          .filter((task) => task.projectId === projectId && task.id !== currentTaskId)
+                          .map((task) => task.id),
+                      );
+
+                      return {
+                        ...current,
+                        projectId,
+                        disciplineId: isTaskDisciplineAllowedForProject(
+                          nextProject,
+                          current.disciplineId,
+                        )
+                          ? current.disciplineId
+                          : getDefaultTaskDisciplineIdForProject(nextProject),
+                        workstreamId: null,
+                        workstreamIds: [],
+                        subsystemId,
+                        subsystemIds: subsystemId ? [subsystemId] : [],
+                        mechanismId: null,
+                        mechanismIds: [],
+                        partInstanceId: null,
+                        partInstanceIds: [],
+                        taskDependencies: (current.taskDependencies ?? []).filter((dependency) =>
+                          validDependencyTaskIds.has(dependency.upstreamTaskId),
+                        ),
+                      };
+                    })
+                  }
+                  style={{
+                    background: "var(--bg-row-alt)",
+                    color: "var(--text-title)",
+                    border: "1px solid var(--border-base)",
+                  }}
+                  value={taskDraft.projectId}
+                >
+                  {bootstrap.projects.map((project) => (
+                    <option key={project.id} value={project.id}>
+                      {project.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span style={{ color: "var(--text-title)" }}>Discipline</span>
+                <select
+                  onChange={(event) =>
+                    setTaskDraft((current) => ({ ...current, disciplineId: event.target.value }))
+                  }
+                  style={{
+                    background: "var(--bg-row-alt)",
+                    color: "var(--text-title)",
+                    border: "1px solid var(--border-base)",
+                  }}
+                  value={taskDraft.disciplineId}
+                >
+                  {availableDisciplines.map((discipline) => (
+                    <option key={discipline.id} value={discipline.id}>
+                      {discipline.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className="field modal-wide task-target-picker">
+                <span style={{ color: "var(--text-title)" }}>Targets</span>
+                <label className="task-target-primary">
+                  <span>{targetGroupLabel === "Subsystems" ? "Subsystem" : "Workstream"}</span>
+                  <select
+                    onChange={(event) => updatePrimaryTargetName(event.target.value)}
+                    required
+                    style={{
+                      background: "var(--bg-row-alt)",
+                      color: "var(--text-title)",
+                      border: "1px solid var(--border-base)",
+                    }}
+                    value={selectedPrimaryTargetName}
+                  >
+                    <option value="" disabled>
+                      {targetFallback}
+                    </option>
+                    {primaryTargetNameOptions.map((subsystemName) => (
+                      <option key={subsystemName} value={subsystemName}>
+                        {subsystemName}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="task-target-primary">
+                  <span>Iteration</span>
+                  <select
+                    onChange={(event) => updatePrimaryTarget(event.target.value)}
+                    required
+                    style={{
+                      background: "var(--bg-row-alt)",
+                      color: "var(--text-title)",
+                      border: "1px solid var(--border-base)",
+                    }}
+                    value={selectedPrimaryTargetId}
+                  >
+                    <option value="" disabled>
+                      Select iteration
+                    </option>
+                    {selectedPrimaryTargetIterations.map((subsystem) => (
+                      <option key={subsystem.id} value={subsystem.id}>
+                        {formatIterationVersion(subsystem.iteration)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <div className="task-target-selected" aria-live="polite">
+                  {selectedPrimaryTarget ? (
+                    <span className="task-target-chip">{getSubsystemLabel(selectedPrimaryTarget)}</span>
+                  ) : null}
+                  {selectedScopeChips.length > 0 ? (
+                    selectedScopeChips.map((chip) => (
+                      <span className="task-target-chip" key={chip.key}>
+                        {chip.label}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="task-target-empty">All mechanisms and part instances</span>
+                  )}
+                </div>
+                <div className="task-target-grid">
+                  <div className="task-target-group">
+                    <span className="task-target-group-title">Mechanisms</span>
+                    {projectMechanisms.map((mechanism) =>
+                      renderTargetOption(
+                        "mechanism",
+                        mechanism.id,
+                        getMechanismLabel(mechanism),
+                        subsystemsById[mechanism.subsystemId]
+                          ? getSubsystemLabel(subsystemsById[mechanism.subsystemId])
+                          : null,
+                        selectedMechanismIds.includes(mechanism.id),
+                      ),
+                    )}
+                  </div>
+                  <div className="task-target-group">
+                    <span className="task-target-group-title">Part instances</span>
+                    {projectPartInstances.map((partInstance) =>
+                      renderTargetOption(
+                        "part-instance",
+                        partInstance.id,
+                        getPartInstanceLabel(partInstance),
+                        [
+                          partInstance.subsystemId && subsystemsById[partInstance.subsystemId]
+                            ? getSubsystemLabel(subsystemsById[partInstance.subsystemId])
+                            : null,
+                          partInstance.mechanismId && mechanismsById[partInstance.mechanismId]
+                            ? getMechanismLabel(mechanismsById[partInstance.mechanismId])
+                            : null,
+                        ]
+                          .filter(Boolean)
+                          .join(" / ") || null,
+                        selectedPartInstanceIds.includes(partInstance.id),
+                      ),
+                    )}
+                  </div>
+                </div>
+              </div>
+              <TaskDependencyEditor
+                dependencyDrafts={dependencyDrafts}
+                dependencyTaskOptions={dependencyTaskOptions}
+                dependencyTypeLabels={dependencyTypeLabels}
+                onAdd={addDependencyDraft}
+                onRemove={removeDependencyDraft}
+                onUpdate={updateDependencyDraft}
+                visibleDependencyDrafts={visibleDependencyDrafts}
+              />
+              <label className="field">
+                <span style={{ color: "var(--text-title)" }}>Target event</span>
+                <select
+                  onChange={(event) =>
+                    setTaskDraft((current) => ({
+                      ...current,
+                      targetEventId: event.target.value || null,
+                    }))
+                  }
+                  style={{
+                    background: "var(--bg-row-alt)",
+                    color: "var(--text-title)",
+                    border: "1px solid var(--border-base)",
+                  }}
+                  value={taskDraft.targetEventId ?? ""}
+                >
+                  <option value="">No event</option>
+                  {bootstrap.events.map((event) => (
+                    <option key={event.id} value={event.id}>
+                      {event.title}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span style={{ color: "var(--text-title)" }}>Status</span>
+                <select
+                  onChange={(event) =>
+                    setTaskDraft((current) => ({
+                      ...current,
+                      status: event.target.value as TaskPayload["status"],
+                    }))
+                  }
+                  style={{
+                    background: "var(--bg-row-alt)",
+                    color: "var(--text-title)",
+                    border: "1px solid var(--border-base)",
+                  }}
+                  value={taskDraft.status}
+                >
+                  <option value="not-started">Not started</option>
+                  <option value="in-progress">In progress</option>
+                  <option value="waiting-for-qa">{formatTaskStatusLabel("waiting-for-qa")}</option>
+                  <option value="complete">Complete</option>
+                </select>
+              </label>
+              <label className="field">
+                <span style={{ color: "var(--text-title)" }}>Start date</span>
+                <input
+                  onChange={(event) =>
+                    setTaskDraft((current) => ({ ...current, startDate: event.target.value }))
+                  }
+                  style={{
+                    background: "var(--bg-row-alt)",
+                    color: "var(--text-title)",
+                    border: "1px solid var(--border-base)",
+                  }}
+                  type="date"
+                  value={taskDraft.startDate}
+                />
+              </label>
+              <label className="field">
+                <span style={{ color: "var(--text-title)" }}>Due date</span>
+                <input
+                  onChange={(event) =>
+                    setTaskDraft((current) => ({ ...current, dueDate: event.target.value }))
+                  }
+                  style={{
+                    background: "var(--bg-row-alt)",
+                    color: "var(--text-title)",
+                    border: "1px solid var(--border-base)",
+                  }}
+                  type="date"
+                  value={taskDraft.dueDate}
+                />
+              </label>
+              <label className="field">
+                <span style={{ color: "var(--text-title)" }}>Estimated hours</span>
+                <input
+                  min="0"
+                  onChange={(event) =>
+                    setTaskDraft((current) => ({
+                      ...current,
+                      estimatedHours: Number(event.target.value),
+                    }))
+                  }
+                  style={{
+                    background: "var(--bg-row-alt)",
+                    color: "var(--text-title)",
+                    border: "1px solid var(--border-base)",
+                  }}
+                  type="number"
+                  value={taskDraft.estimatedHours}
+                />
+              </label>
+              {taskModalMode === "edit" ? (
+                <label className="field">
+                  <span style={{ color: "var(--text-title)" }}>Actual hours</span>
+                  <input
+                    min="0"
+                    onChange={(event) =>
+                      setTaskDraft((current) => ({
+                        ...current,
+                        actualHours: Number(event.target.value),
+                      }))
+                    }
+                    style={{
+                      background: "var(--bg-row-alt)",
+                      color: "var(--text-title)",
+                      border: "1px solid var(--border-base)",
+                    }}
+                    step="0.5"
+                    type="number"
+                    value={taskDraft.actualHours}
+                  />
+                </label>
+              ) : null}
+              <div className="checkbox-row modal-wide">
+                <label className="checkbox-field">
+                  <input
+                    checked={taskDraft.requiresDocumentation}
+                    onChange={(event) =>
+                      setTaskDraft((current) => ({
+                        ...current,
+                        requiresDocumentation: event.target.checked,
+                      }))
+                    }
+                    type="checkbox"
+                  />
+                  <span style={{ color: "var(--text-title)" }}>Requires documentation</span>
+                </label>
+                <label className="checkbox-field">
+                  <input
+                    checked={taskDraft.documentationLinked}
+                    onChange={(event) =>
+                      setTaskDraft((current) => ({
+                        ...current,
+                        documentationLinked: event.target.checked,
+                      }))
+                    }
+                    type="checkbox"
+                  />
+                  <span style={{ color: "var(--text-title)" }}>Documentation linked</span>
+                </label>
+              </div>
+              <div className="modal-actions modal-wide">
+                {isEditTaskModal && activeTask?.id ? (
+                  <button
+                    className="danger-action"
+                    disabled={isDeletingTask || isSavingTask}
+                    onClick={() => {
+                      void handleDeleteTask(activeTask.id);
+                    }}
+                    type="button"
+                  >
+                    {isDeletingTask ? "Deleting..." : "Delete task"}
+                    </button>
+                  ) : null}
+                <button
+                  className="secondary-action"
+                  onClick={closeTaskModal}
+                  style={{
+                    background: "var(--bg-row-alt)",
+                    color: "var(--text-title)",
+                    border: "1px solid var(--border-base)",
+                  }}
+                  type="button"
+                  >
+                    Cancel
+                  </button>
+                <button className="primary-action" disabled={isSavingTask || isDeletingTask} type="submit">
+                  {isSavingTask ? "Saving..." : "Save changes"}
+                </button>
+              </div>
+            </div>
+          )}
         </form>
       </section>
     </div>

@@ -16,7 +16,10 @@ import {
 import { TimelineProjectGroup } from "@/features/workspace/views/timeline/TimelineProjectGroup";
 import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
 import {
+  buildTimelineData,
   buildTimelineDayMilestoneUnderlays,
+  buildTimelineProjectRows,
+  filterTimelineEventsByPersonSelection,
   getTimelineMilestonePopupItems,
 } from "@/features/workspace/views/timeline/timelineViewModel";
 import { TimelineSubsystemGroup } from "@/features/workspace/views/timeline/TimelineSubsystemGroup";
@@ -711,6 +714,79 @@ describe("TimelineView", () => {
       { text: "Morning review", horizontalOffset: -9 },
       { text: "Afternoon review", horizontalOffset: 9 },
     ]);
+  });
+
+  it("dedupes collapsed project-row task counts when one task belongs to multiple subsystems", () => {
+    const bootstrap = createBootstrap();
+    const multiSubsystemTask = {
+      ...bootstrap.tasks[0],
+      id: "task-shared",
+      title: "Shared drivetrain handoff",
+      status: "complete" as const,
+      subsystemId: "subsystem-1",
+      subsystemIds: ["subsystem-1", "subsystem-2"],
+    };
+    const timeline = buildTimelineData({
+      events: [],
+      projectsById: {
+        "project-1": bootstrap.projects[0] as BootstrapPayload["projects"][number],
+      },
+      scopedSubsystems: [
+        bootstrap.subsystems[0] as BootstrapPayload["subsystems"][number],
+        {
+          ...bootstrap.subsystems[0],
+          id: "subsystem-2",
+          name: "Controls",
+        } as BootstrapPayload["subsystems"][number],
+      ],
+      scopedTasks: [multiSubsystemTask],
+      viewAnchorDate: "2026-04-15",
+      viewInterval: "month",
+    });
+    const projectRows = buildTimelineProjectRows(timeline.subsystemRows);
+
+    expect(timeline.subsystemRows).toHaveLength(2);
+    expect(timeline.subsystemRows.map((row) => row.taskCount)).toEqual([1, 1]);
+    expect(projectRows[0].taskCount).toBe(1);
+    expect(projectRows[0].completeCount).toBe(1);
+    expect(projectRows[0].tasks.map((task) => task.id)).toEqual(["task-shared"]);
+  });
+
+  it("applies active person filtering to timeline events through targeted tasks", () => {
+    const bootstrap = createBootstrap();
+    const matchingEvent = createTimelineEvent({
+      id: "event-matching",
+      title: "Ada design review",
+    });
+    const hiddenEvent = createTimelineEvent({
+      id: "event-hidden",
+      title: "Unassigned review",
+      startDateTime: "2026-04-09T09:00:00.000Z",
+    });
+    const filteredEvents = filterTimelineEventsByPersonSelection({
+      activePersonFilter: ["member-1"],
+      events: [matchingEvent, hiddenEvent],
+      tasks: [
+        {
+          ...bootstrap.tasks[0],
+          id: "task-targeting-visible-event",
+          targetEventId: "event-matching",
+          ownerId: "member-1",
+          assigneeIds: [],
+          mentorId: null,
+        },
+        {
+          ...bootstrap.tasks[0],
+          id: "task-targeting-hidden-event",
+          targetEventId: "event-hidden",
+          ownerId: null,
+          assigneeIds: [],
+          mentorId: null,
+        },
+      ],
+    });
+
+    expect(filteredEvents.map((event) => event.id)).toEqual(["event-matching"]);
   });
 
   it.each([false, true])(

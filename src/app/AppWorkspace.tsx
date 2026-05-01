@@ -50,6 +50,7 @@ import {
   toErrorMessage,
   workstreamToPayload,
 } from "@/lib/appUtils";
+import { localTodayDate } from "@/lib/dateUtils";
 import {
   createArtifactRecord,
   createManufacturingItemRecord,
@@ -355,6 +356,12 @@ export default function AppWorkspace() {
     isDarkMode,
     resetWorkspace: () => {
       setBootstrap(EMPTY_BOOTSTRAP);
+      setActivePersonFilter([]);
+      setSelectedSeasonId(null);
+      setSelectedProjectId(null);
+      setSelectedMemberId(null);
+      setMemberEditDraft(null);
+      setDataMessage(null);
     },
   });
 
@@ -1370,7 +1377,14 @@ export default function AppWorkspace() {
     setActiveTaskId(null);
     setTaskDraft(buildEmptyTaskPayload(scopedBootstrap));
     setTaskModalMode("create");
-  }, [scopedBootstrap]);
+  }, [
+    scopedBootstrap,
+    setActiveTaskId,
+    setActiveTimelineTaskDetailId,
+    setShowTimelineCreateToggleInTaskModal,
+    setTaskDraft,
+    setTaskModalMode,
+  ]);
 
   const openCreateTaskModalFromTimeline = useCallback(() => {
     suppressNextAutoWorkspaceLoadRef.current = true;
@@ -1379,7 +1393,14 @@ export default function AppWorkspace() {
     setActiveTaskId(null);
     setTaskDraft(buildEmptyTaskPayload(scopedBootstrap));
     setTaskModalMode("create");
-  }, [scopedBootstrap]);
+  }, [
+    scopedBootstrap,
+    setActiveTaskId,
+    setActiveTimelineTaskDetailId,
+    setShowTimelineCreateToggleInTaskModal,
+    setTaskDraft,
+    setTaskModalMode,
+  ]);
 
   const openEditTaskModal = useCallback((task: TaskRecord) => {
     suppressNextAutoWorkspaceLoadRef.current = true;
@@ -1388,18 +1409,25 @@ export default function AppWorkspace() {
     setActiveTaskId(task.id);
     setTaskDraft(taskToPayload(task, scopedBootstrap));
     setTaskModalMode("edit");
-  }, [scopedBootstrap]);
+  }, [
+    scopedBootstrap,
+    setActiveTaskId,
+    setActiveTimelineTaskDetailId,
+    setShowTimelineCreateToggleInTaskModal,
+    setTaskDraft,
+    setTaskModalMode,
+  ]);
 
   const openTimelineTaskDetailsModal = useCallback((task: TaskRecord) => {
     suppressNextAutoWorkspaceLoadRef.current = true;
     setShowTimelineCreateToggleInTaskModal(false);
     setActiveTimelineTaskDetailId(task.id);
-  }, []);
+  }, [setActiveTimelineTaskDetailId, setShowTimelineCreateToggleInTaskModal]);
 
   const closeTimelineTaskDetailsModal = useCallback(() => {
     suppressNextAutoWorkspaceLoadRef.current = true;
     setActiveTimelineTaskDetailId(null);
-  }, []);
+  }, [setActiveTimelineTaskDetailId]);
 
   const closeTaskModal = () => {
     suppressNextAutoWorkspaceLoadRef.current = true;
@@ -1746,6 +1774,11 @@ export default function AppWorkspace() {
           bootstrap.taskDependencies?.filter(
             (dependency) => dependency.downstreamTaskId === taskId,
           ) ?? [];
+        const visibleDependencyIds = new Set(
+          (scopedBootstrap.taskDependencies ?? [])
+            .filter((dependency) => dependency.downstreamTaskId === taskId)
+            .map((dependency) => dependency.id),
+        );
         const existingDependenciesById = new Map(
           existingDependencies.map((dependency) => [dependency.id, dependency] as const),
         );
@@ -1787,7 +1820,10 @@ export default function AppWorkspace() {
         }
 
         for (const dependency of existingDependencies) {
-          if (!desiredDependencyIds.has(dependency.id)) {
+          if (
+            visibleDependencyIds.has(dependency.id) &&
+            !desiredDependencyIds.has(dependency.id)
+          ) {
             await deleteTaskDependencyRecord(dependency.id, handleUnauthorized);
           }
         }
@@ -1798,6 +1834,11 @@ export default function AppWorkspace() {
           bootstrap.taskBlockers?.filter(
             (blocker) => blocker.blockedTaskId === taskId && blocker.status === "open",
           ) ?? [];
+        const visibleBlockerIds = new Set(
+          (scopedBootstrap.taskBlockers ?? [])
+            .filter((blocker) => blocker.blockedTaskId === taskId && blocker.status === "open")
+            .map((blocker) => blocker.id),
+        );
         const existingBlockersById = new Map(
           existingBlockers.map((blocker) => [blocker.id, blocker] as const),
         );
@@ -1848,7 +1889,7 @@ export default function AppWorkspace() {
         }
 
         for (const blocker of existingBlockers) {
-          if (!desiredBlockerIds.has(blocker.id)) {
+          if (visibleBlockerIds.has(blocker.id) && !desiredBlockerIds.has(blocker.id)) {
             await deleteTaskBlockerRecord(blocker.id, handleUnauthorized);
           }
         }
@@ -1990,7 +2031,7 @@ export default function AppWorkspace() {
       }
 
       const task = bootstrap.tasks.find((candidate) => candidate.id === qaReportDraft.taskId) ?? null;
-      const reportDate = qaReportDraft.createdAt ?? new Date().toISOString().slice(0, 10);
+      const reportDate = qaReportDraft.createdAt ?? localTodayDate();
       const payload: QaReportPayload = {
         reportType: "QA",
         projectId: task?.projectId ?? bootstrap.projects[0]?.id ?? "",
@@ -2049,7 +2090,7 @@ export default function AppWorkspace() {
       );
 
       const event = bootstrap.events.find((candidate) => candidate.id === eventReportDraft.eventId) ?? null;
-      const reportDate = eventReportDraft.createdAt ?? new Date().toISOString().slice(0, 10);
+      const reportDate = eventReportDraft.createdAt ?? localTodayDate();
       const payload: TestResultPayload = {
         reportType: "EventTest",
         projectId: event?.projectIds[0] ?? bootstrap.projects[0]?.id ?? "",

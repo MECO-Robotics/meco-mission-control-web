@@ -68,33 +68,23 @@ export function getTaskDependencyCountsFromLookup(
 
 function hasActiveTaskBlocker(
   task: BootstrapPayload["tasks"][number],
-  blockers: TimelineTaskBlockerRecord[] = [],
+  activeBlockerTaskIds: Set<string>,
 ) {
-  return (
-    task.blockers.length > 0 ||
-    blockers.some((blocker) => blocker.blockedTaskId === task.id && blocker.status === "open")
-  );
+  return task.blockers.length > 0 || activeBlockerTaskIds.has(task.id);
 }
 
 function waitsOnIncompleteDependency(
   task: BootstrapPayload["tasks"][number],
   tasksById: Record<string, BootstrapPayload["tasks"][number]>,
-  dependencies: TimelineTaskDependencyRecord[] = [],
+  blockingDependencyUpstreamIdsByTaskId: Record<string, string[]>,
 ) {
   if (task.status === "complete") {
     return false;
   }
 
-  const waitsOnDependencyRecord = dependencies.some((dependency) => {
-    if (
-      dependency.downstreamTaskId !== task.id ||
-      !BLOCKING_DEPENDENCY_TYPES.has(dependency.dependencyType)
-    ) {
-      return false;
-    }
-
-    return tasksById[dependency.upstreamTaskId]?.status !== "complete";
-  });
+  const waitsOnDependencyRecord = (
+    blockingDependencyUpstreamIdsByTaskId[task.id] ?? []
+  ).some((upstreamTaskId) => tasksById[upstreamTaskId]?.status !== "complete");
 
   return (
     waitsOnDependencyRecord ||
@@ -102,16 +92,59 @@ function waitsOnIncompleteDependency(
   );
 }
 
+function buildActiveBlockerTaskIds(blockers: TimelineTaskBlockerRecord[] = []) {
+  return new Set(
+    blockers.flatMap((blocker) =>
+      blocker.status === "open" ? [blocker.blockedTaskId] : [],
+    ),
+  );
+}
+
+function buildBlockingDependencyUpstreamIdsByTaskId(
+  dependencies: TimelineTaskDependencyRecord[] = [],
+) {
+  const upstreamIdsByTaskId: Record<string, string[]> = {};
+
+  dependencies.forEach((dependency) => {
+    if (!BLOCKING_DEPENDENCY_TYPES.has(dependency.dependencyType)) {
+      return;
+    }
+
+    upstreamIdsByTaskId[dependency.downstreamTaskId] ??= [];
+    upstreamIdsByTaskId[dependency.downstreamTaskId].push(dependency.upstreamTaskId);
+  });
+
+  return upstreamIdsByTaskId;
+}
+
+function buildTimelineTaskStatusLookups(bootstrap: BootstrapPayload) {
+  return {
+    activeBlockerTaskIds: buildActiveBlockerTaskIds(bootstrap.taskBlockers),
+    blockingDependencyUpstreamIdsByTaskId: buildBlockingDependencyUpstreamIdsByTaskId(
+      bootstrap.taskDependencies,
+    ),
+    tasksById: Object.fromEntries(bootstrap.tasks.map((candidate) => [candidate.id, candidate])) as Record<
+      string,
+      BootstrapPayload["tasks"][number]
+    >,
+  };
+}
+
 export function getTimelineTaskStatusSignal(
   task: BootstrapPayload["tasks"][number],
   bootstrap: BootstrapPayload,
 ): TimelineTaskStatusSignal {
-  if (hasActiveTaskBlocker(task, bootstrap.taskBlockers)) {
+  const {
+    activeBlockerTaskIds,
+    blockingDependencyUpstreamIdsByTaskId,
+    tasksById,
+  } = buildTimelineTaskStatusLookups(bootstrap);
+
+  if (hasActiveTaskBlocker(task, activeBlockerTaskIds)) {
     return "blocked";
   }
 
-  const tasksById = Object.fromEntries(bootstrap.tasks.map((candidate) => [candidate.id, candidate]));
-  if (waitsOnIncompleteDependency(task, tasksById, bootstrap.taskDependencies)) {
+  if (waitsOnIncompleteDependency(task, tasksById, blockingDependencyUpstreamIdsByTaskId)) {
     return "waiting-on-dependency";
   }
 
@@ -121,13 +154,17 @@ export function getTimelineTaskStatusSignal(
 export function buildTimelineTaskStatusSignalByTaskId(
   bootstrap: BootstrapPayload,
 ): Record<string, TimelineTaskStatusSignal> {
-  const tasksById = Object.fromEntries(bootstrap.tasks.map((task) => [task.id, task]));
+  const {
+    activeBlockerTaskIds,
+    blockingDependencyUpstreamIdsByTaskId,
+    tasksById,
+  } = buildTimelineTaskStatusLookups(bootstrap);
 
   return Object.fromEntries(
     bootstrap.tasks.map((task) => {
-      const signal = hasActiveTaskBlocker(task, bootstrap.taskBlockers)
+      const signal = hasActiveTaskBlocker(task, activeBlockerTaskIds)
         ? "blocked"
-        : waitsOnIncompleteDependency(task, tasksById, bootstrap.taskDependencies)
+        : waitsOnIncompleteDependency(task, tasksById, blockingDependencyUpstreamIdsByTaskId)
           ? "waiting-on-dependency"
           : task.status;
 

@@ -115,9 +115,12 @@ Package scripts:
 - `npm run dev`
 - `npm run typecheck`
 - `npm run test`
+- `npm run test:ci`
 - `npm run test:watch`
 - `npm run lint`
 - `npm run build`
+- `npm run build:bundle`
+- `npm run verify`
 - `npm run preview`
 
 ## Local Setup
@@ -159,11 +162,10 @@ Run `meco-platform` locally so `/api` proxy requests succeed.
 ### 5) Validate before pushing
 
 ```bash
-npm run typecheck
-npm run test
-npm run lint
-npm run build
+npm run verify
 ```
+
+Use the individual commands (`typecheck`, `test`, `lint`, `build`) when narrowing a specific failure.
 
 ## Environment Variables
 
@@ -276,7 +278,7 @@ Recommended cycle:
 2. Start web app (`npm run dev`).
 3. Verify login flow and scoped workspace views (season/project).
 4. Implement targeted changes.
-5. Run quality checks (`typecheck`, `test`, `lint`, `build`).
+5. Run the quality gate (`npm run verify`).
 6. Push when local checks pass.
 
 ### Useful Frontend Entry Points
@@ -292,18 +294,15 @@ Recommended cycle:
 Run these before merge/deploy:
 
 ```bash
-npm run typecheck
-npm run test
-npm run lint
-npm run build
+npm run verify
 ```
 
 What each gate catches:
 
 - `typecheck`: TS type drift between views, shared types, and API payloads
-- `test`: behavior checks for utility and view logic
+- `test:ci`: behavior checks for utility and view logic
 - `lint`: code quality and consistency issues
-- `build`: production bundle correctness
+- `build:bundle`: production bundle correctness
 
 ## Deployment and Operations
 

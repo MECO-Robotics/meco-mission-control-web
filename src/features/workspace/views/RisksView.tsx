@@ -1,12 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { RiskManagementViewTab } from "@/lib/workspaceNavigation";
 import type { BootstrapPayload, RiskPayload, RiskRecord } from "@/types";
 import {
   EditableHoverIndicator,
+  type FilterSelection,
   PaginationControls,
   SearchToolbarInput,
   TableCell,
+  filterSelectionMatchesTaskPeople,
   useFilterChangeMotionClass,
   useWorkspacePagination,
 } from "@/features/workspace/shared";
@@ -26,6 +28,7 @@ type RiskSeverityFilter = "all" | RiskPayload["severity"];
 type RiskSourceFilter = "all" | RiskPayload["sourceType"];
 
 interface RisksViewProps {
+  activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   onCreateRisk: (payload: RiskPayload) => Promise<void>;
   onDeleteRisk: (riskId: string) => Promise<void>;
@@ -105,6 +108,7 @@ function buildDefaultRiskPayload(
 }
 
 export function RisksView({
+  activePersonFilter,
   bootstrap,
   onCreateRisk,
   onDeleteRisk,
@@ -119,30 +123,71 @@ export function RisksView({
   const [editorError, setEditorError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const scopedTasks = useMemo(
+    () =>
+      activePersonFilter.length > 0
+        ? bootstrap.tasks.filter((task) =>
+            filterSelectionMatchesTaskPeople(activePersonFilter, task),
+          )
+        : bootstrap.tasks,
+    [activePersonFilter, bootstrap.tasks],
+  );
+  const scopedTaskIds = useMemo(() => new Set(scopedTasks.map((task) => task.id)), [scopedTasks]);
+  const scopedWorkLogs = useMemo(
+    () =>
+      activePersonFilter.length > 0
+        ? bootstrap.workLogs.filter((workLog) => scopedTaskIds.has(workLog.taskId))
+        : bootstrap.workLogs,
+    [activePersonFilter.length, bootstrap.workLogs, scopedTaskIds],
+  );
+  const scopedReports = useMemo(
+    () =>
+      activePersonFilter.length > 0
+        ? bootstrap.reports.filter((report) => report.taskId && scopedTaskIds.has(report.taskId))
+        : bootstrap.reports,
+    [activePersonFilter.length, bootstrap.reports, scopedTaskIds],
+  );
+  const scopedReportIds = useMemo(
+    () => new Set(scopedReports.map((report) => report.id)),
+    [scopedReports],
+  );
+  const scopedRisks = useMemo(
+    () =>
+      activePersonFilter.length > 0
+        ? bootstrap.risks.filter((risk) => {
+            if (risk.mitigationTaskId && scopedTaskIds.has(risk.mitigationTaskId)) {
+              return true;
+            }
+
+            return scopedReportIds.has(risk.sourceId);
+          })
+        : bootstrap.risks,
+    [activePersonFilter.length, bootstrap.risks, scopedReportIds, scopedTaskIds],
+  );
 
   const plannedHours = useMemo(
     () =>
-      bootstrap.tasks.reduce(
+      scopedTasks.reduce(
         (total, task) => total + Math.max(0, Number(task.estimatedHours) || 0),
         0,
       ),
-    [bootstrap.tasks],
+    [scopedTasks],
   );
   const loggedHours = useMemo(
     () =>
-      bootstrap.workLogs.reduce(
+      scopedWorkLogs.reduce(
         (total, workLog) => total + Math.max(0, Number(workLog.hours) || 0),
         0,
       ),
-    [bootstrap.workLogs],
+    [scopedWorkLogs],
   );
   const maxMetricHours = Math.max(plannedHours, loggedHours, 1);
   const completionRatio = plannedHours > 0 ? loggedHours / plannedHours : 0;
   const clampedCompletionWidth = `${Math.max(0, Math.min(100, completionRatio * 100))}%`;
 
   const tasksById = useMemo(
-    () => Object.fromEntries(bootstrap.tasks.map((task) => [task.id, task] as const)),
-    [bootstrap.tasks],
+    () => Object.fromEntries(scopedTasks.map((task) => [task.id, task] as const)),
+    [scopedTasks],
   );
   const projectsById = useMemo(
     () => Object.fromEntries(bootstrap.projects.map((project) => [project.id, project] as const)),
@@ -186,7 +231,7 @@ export function RisksView({
   const workHoursByTaskId = useMemo(() => {
     const hoursByTaskId = new Map<string, number>();
 
-    bootstrap.workLogs.forEach((workLog) => {
+    scopedWorkLogs.forEach((workLog) => {
       hoursByTaskId.set(
         workLog.taskId,
         (hoursByTaskId.get(workLog.taskId) ?? 0) + Math.max(0, Number(workLog.hours) || 0),
@@ -194,23 +239,23 @@ export function RisksView({
     });
 
     return hoursByTaskId;
-  }, [bootstrap.workLogs]);
+  }, [scopedWorkLogs]);
   const qaPassTaskIds = useMemo(() => {
     const taskIds = new Set<string>();
 
-    bootstrap.qaReports.forEach((report) => {
+    scopedReports.forEach((report) => {
       if (report.result === "pass" && report.mentorApproved && report.taskId) {
         taskIds.add(report.taskId);
       }
     });
 
     return taskIds;
-  }, [bootstrap.qaReports]);
+  }, [scopedReports]);
   const subsystemMetrics = useMemo(
     () =>
       buildScopeMetrics(
         bootstrap.subsystems,
-        bootstrap.tasks,
+        scopedTasks,
         workHoursByTaskId,
         qaPassTaskIds,
         (subsystem) => `Project: ${projectsById[subsystem.projectId]?.name ?? "Unknown project"}`,
@@ -227,7 +272,7 @@ export function RisksView({
     [
       bootstrap.mechanisms,
       bootstrap.subsystems,
-      bootstrap.tasks,
+      scopedTasks,
       projectsById,
       qaPassTaskIds,
       workHoursByTaskId,
@@ -237,7 +282,7 @@ export function RisksView({
     () =>
       buildScopeMetrics(
         bootstrap.mechanisms,
-        bootstrap.tasks,
+        scopedTasks,
         workHoursByTaskId,
         qaPassTaskIds,
         (mechanism) =>
@@ -255,7 +300,7 @@ export function RisksView({
     [
       bootstrap.mechanisms,
       bootstrap.partInstances,
-      bootstrap.tasks,
+      scopedTasks,
       qaPassTaskIds,
       subsystemsById,
       workHoursByTaskId,
@@ -268,19 +313,19 @@ export function RisksView({
   const testResultsById = useMemo(
     () =>
       Object.fromEntries(
-        bootstrap.reports
+        scopedReports
           .filter((report) => report.reportType !== "QA")
           .map((testResult) => [testResult.id, testResult] as const),
       ),
-    [bootstrap.reports],
+    [scopedReports],
   );
 
-  const completedTaskCount = bootstrap.tasks.filter((task) => task.status === "complete").length;
-  const waitingForQaCount = bootstrap.tasks.filter(
+  const completedTaskCount = scopedTasks.filter((task) => task.status === "complete").length;
+  const waitingForQaCount = scopedTasks.filter(
     (task) => task.status === "waiting-for-qa",
   ).length;
-  const blockerCount = bootstrap.tasks.reduce((sum, task) => sum + task.blockers.length, 0);
-  const qaPassCount = bootstrap.qaReports.filter(
+  const blockerCount = scopedTasks.reduce((sum, task) => sum + task.blockers.length, 0);
+  const qaPassCount = scopedReports.filter(
     (report) => report.result === "pass" && report.mentorApproved,
   ).length;
   const deliveredPurchases = bootstrap.purchaseItems.filter(
@@ -295,22 +340,22 @@ export function RisksView({
   );
   const activeSubsystemCount = subsystemMetrics.filter((metric) => metric.taskCount > 0).length;
   const activeMechanismCount = mechanismMetrics.filter((metric) => metric.taskCount > 0).length;
-  const totalTaskCount = Math.max(bootstrap.tasks.length, 1);
+  const totalTaskCount = Math.max(scopedTasks.length, 1);
   const completionRate = completedTaskCount / totalTaskCount;
   const supplySignals = deliveredPurchases + lowStockMaterials;
   const qaReportsById = useMemo(
     () =>
       Object.fromEntries(
-        bootstrap.reports
+        scopedReports
           .filter((report) => report.reportType === "QA")
           .map((qaReport) => [qaReport.id, qaReport] as const),
       ),
-    [bootstrap.reports],
+    [scopedReports],
   );
 
   const qaSourceOptions = useMemo<SelectOption[]>(
     () =>
-        bootstrap.reports
+        scopedReports
           .filter((report) => report.reportType === "QA")
         .map((qaReport) => {
         const taskTitle = tasksById[qaReport.taskId ?? ""]?.title ?? "Unknown task";
@@ -319,11 +364,11 @@ export function RisksView({
           name: `${taskTitle} (${qaReport.reviewedAt})`,
         };
         }),
-    [bootstrap.reports, tasksById],
+    [scopedReports, tasksById],
   );
   const testSourceOptions = useMemo<SelectOption[]>(
     () =>
-        bootstrap.reports
+        scopedReports
           .filter((report) => report.reportType !== "QA")
         .map((testResult) => {
         const eventTitle = eventsById[testResult.eventId ?? ""]?.title ?? "Unknown event";
@@ -332,7 +377,7 @@ export function RisksView({
           name: `${testResult.title} (${eventTitle})`,
         };
         }),
-    [bootstrap.reports, eventsById],
+    [scopedReports, eventsById],
   );
 
   const projectAttachmentOptions = useMemo<SelectOption[]>(
@@ -373,11 +418,11 @@ export function RisksView({
   );
   const mitigationTaskOptions = useMemo<SelectOption[]>(
     () =>
-      bootstrap.tasks.map((task) => ({
+      scopedTasks.map((task) => ({
         id: task.id,
         name: task.title,
       })),
-    [bootstrap.tasks],
+    [scopedTasks],
   );
 
   const getSourceOptionsForType = (sourceType: RiskPayload["sourceType"]) =>
@@ -464,7 +509,7 @@ export function RisksView({
     }
   }, [attachmentOptions, draft.attachmentId, editorMode]);
 
-  const getSourceLabel = (risk: RiskRecord) => {
+  const getSourceLabel = useCallback((risk: RiskRecord) => {
     if (risk.sourceType === "qa-report") {
       const report = qaReportsById[risk.sourceId];
       if (!report) {
@@ -478,9 +523,9 @@ export function RisksView({
       return "Unknown test result";
     }
     return `${testResult.title} test result`;
-  };
+  }, [qaReportsById, tasksById, testResultsById]);
 
-  const getAttachmentLabel = (risk: RiskRecord) => {
+  const getAttachmentLabel = useCallback((risk: RiskRecord) => {
     switch (risk.attachmentType) {
       case "project":
         return projectsById[risk.attachmentId]?.name ?? "Unknown project";
@@ -507,12 +552,19 @@ export function RisksView({
       default:
         return "Unknown attachment";
     }
-  };
+  }, [
+    mechanismsById,
+    partDefinitionsById,
+    partInstancesById,
+    projectsById,
+    subsystemsById,
+    workstreamsById,
+  ]);
 
   const filteredRows = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
 
-    return bootstrap.risks
+    return scopedRisks
       .filter((risk) => {
         if (severityFilter !== "all" && risk.severity !== severityFilter) {
           return false;
@@ -549,7 +601,7 @@ export function RisksView({
         return left.title.localeCompare(right.title);
       });
   }, [
-    bootstrap.risks,
+    scopedRisks,
     getAttachmentLabel,
     getSourceLabel,
     search,
@@ -682,7 +734,7 @@ export function RisksView({
 
           <div className="metrics-summary-grid">
             <MetricStatCard
-              note={`${completedTaskCount} of ${bootstrap.tasks.length} tasks complete`}
+              note={`${completedTaskCount} of ${scopedTasks.length} tasks complete`}
               title="Completion rate"
               value={formatPercent(completionRate)}
             />
@@ -694,7 +746,7 @@ export function RisksView({
             <MetricStatCard
               note="Tasks that still need a next move"
               title="Open tasks"
-              value={bootstrap.tasks.length - completedTaskCount}
+              value={scopedTasks.length - completedTaskCount}
             />
             <MetricStatCard
               note="Review gates still waiting on a decision"
