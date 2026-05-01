@@ -336,6 +336,29 @@ export default function AppWorkspace() {
     toggleSidebar,
   } = useAppShell();
 
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    const rootStyle = document.documentElement.style;
+    const themeVariables = Object.entries(pageShellStyle).filter(
+      ([name, value]) => name.startsWith("--") && typeof value === "string",
+    );
+
+    themeVariables.forEach(([name, value]) => {
+      rootStyle.setProperty(name, value);
+    });
+    document.documentElement.classList.toggle("dark-mode", isDarkMode);
+
+    return () => {
+      themeVariables.forEach(([name]) => {
+        rootStyle.removeProperty(name);
+      });
+      document.documentElement.classList.remove("dark-mode");
+    };
+  }, [isDarkMode, pageShellStyle]);
+
   const {
     authBooting,
     authConfig,

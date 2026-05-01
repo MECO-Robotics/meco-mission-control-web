@@ -589,7 +589,7 @@
   --task-details-dropdown-option-hover-bg: rgba(22, 71, 142, 0.16);
   --task-details-dropdown-option-check: var(--official-blue);
   border: 1px solid rgba(148, 163, 184, 0.42);
-  background: var(--official-white);
+  background: var(--bg-row-alt);
   color: var(--text-title);
   opacity: 1 !important;
   box-sizing: border-box;
