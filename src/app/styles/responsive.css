@@ -579,9 +579,15 @@
   width: fit-content;
 }
 
-.task-details-blocker-add-menu-popup.table-column-filter-menu {
+.task-details-blocker-menu-popup.table-column-filter-menu {
   min-width: 11.5rem;
+  width: max-content;
+  max-width: min(18rem, calc(100vw - 1.5rem));
   padding: 0.4rem;
+  --task-details-dropdown-option-text: var(--text-title);
+  --task-details-dropdown-option-hover-text: var(--official-blue);
+  --task-details-dropdown-option-hover-bg: rgba(22, 71, 142, 0.16);
+  --task-details-dropdown-option-check: var(--official-blue);
   border: 1px solid rgba(148, 163, 184, 0.42);
   background-color: var(--bg-row-alt);
   color: var(--text-title);
@@ -591,7 +597,11 @@
     0 0 0 1px rgba(148, 163, 184, 0.08);
 }
 
-.page-shell.dark-mode .task-details-blocker-add-menu-popup.table-column-filter-menu {
+.dark-mode .task-details-blocker-menu-popup.table-column-filter-menu,
+.page-shell.dark-mode .task-details-blocker-menu-popup.table-column-filter-menu {
+  --task-details-dropdown-option-hover-text: #bfdbfe;
+  --task-details-dropdown-option-hover-bg: rgba(96, 165, 250, 0.16);
+  --task-details-dropdown-option-check: #bfdbfe;
   border-color: rgba(148, 163, 184, 0.42);
   background-color: var(--bg-row-alt);
   color: var(--text-title);
@@ -601,19 +611,22 @@
     0 0 0 1px rgba(148, 163, 184, 0.08);
 }
 
-.task-details-blocker-add-menu-popup.table-column-filter-menu .table-column-filter-option {
-  color: var(--text-title);
+.task-details-blocker-menu-popup.table-column-filter-menu .table-column-filter-option {
+  color: var(--task-details-dropdown-option-text);
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
-.task-details-blocker-add-menu-popup.table-column-filter-menu .table-column-filter-option:hover,
-.task-details-blocker-add-menu-popup.table-column-filter-menu .table-column-filter-option:focus-visible,
-.task-details-blocker-add-menu-popup.table-column-filter-menu .table-column-filter-option.is-selected {
-  color: #bfdbfe;
-  background: rgba(96, 165, 250, 0.16);
+.task-details-blocker-menu-popup.table-column-filter-menu .table-column-filter-option:hover,
+.task-details-blocker-menu-popup.table-column-filter-menu .table-column-filter-option:focus-visible,
+.task-details-blocker-menu-popup.table-column-filter-menu .table-column-filter-option.is-selected {
+  color: var(--task-details-dropdown-option-hover-text);
+  background: var(--task-details-dropdown-option-hover-bg);
 }
 
-.task-details-blocker-add-menu-popup.table-column-filter-menu .table-column-filter-option-check {
-  color: #bfdbfe;
+.task-details-blocker-menu-popup.table-column-filter-menu .table-column-filter-option-check {
+  color: var(--task-details-dropdown-option-check);
+  font-weight: 700;
 }
 
 .task-details-blocker-remove-button {

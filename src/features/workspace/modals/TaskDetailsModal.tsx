@@ -6,6 +6,7 @@ import {
   EditableHoverIndicator,
   FilterDropdown,
   getStatusPillClassName,
+  type DropdownOption,
 } from "@/features/workspace/shared";
 import {
   formatTaskStatusLabel,
@@ -18,6 +19,7 @@ import {
   IconManufacturing,
   IconParts,
   IconPerson,
+  IconWorkLogs,
   IconTasks,
 } from "@/components/shared";
 import {
@@ -320,11 +322,27 @@ export function TaskDetailsModal({
     };
   });
   const blockerDrafts = taskDraft?.taskBlockers ?? [];
-  const blockerTypeOptions: Array<{ id: TaskBlockerType; name: string }> = [
-    { id: "task", name: "Task dependency" },
-    { id: "part_instance", name: "Part" },
-    { id: "event", name: "Milestone" },
-    { id: "external", name: "Other" },
+  const blockerTypeOptions: Array<DropdownOption & { id: TaskBlockerType }> = [
+    {
+      id: "task",
+      name: "Task dependency",
+      icon: <IconTasks />,
+    },
+    {
+      id: "part_instance",
+      name: "Part",
+      icon: <IconParts />,
+    },
+    {
+      id: "event",
+      name: "Milestone",
+      icon: <IconWorkLogs />,
+    },
+    {
+      id: "external",
+      name: "Other",
+      icon: <IconPerson />,
+    },
   ];
   const filterToneClasses = [
     "filter-tone-info",
@@ -362,7 +380,14 @@ export function TaskDetailsModal({
   const getSubsystemOptionToneClassName = (option: { id: string }) =>
     getStableToneClassName(option.id);
   const blockerTaskOptions = bootstrap.tasks
-    .filter((task) => task.projectId === editableTask.projectId && task.id !== activeTask.id)
+    .filter((task) => {
+      if (task.projectId !== editableTask.projectId || task.id === activeTask.id) {
+        return false;
+      }
+
+      const taskSubsystemIds = task.subsystemIds.length > 0 ? task.subsystemIds : task.subsystemId ? [task.subsystemId] : [];
+      return taskSubsystemIds.some((subsystemId) => selectedSubsystemIds.includes(subsystemId));
+    })
     .map((task) => ({
       id: task.id,
       name: task.title,
@@ -942,130 +967,126 @@ export function TaskDetailsModal({
                   </p>
                 )}
               </label>
-              <label className="field modal-wide task-detail-row">
-                {canInlineEdit ? <span style={{ color: "var(--text-title)" }}>Mechanism</span> : null}
-                {canInlineEdit ? (
-                  editingField === "mechanism" ? (
-                    projectMechanisms.length > 0 ? (
-                      <FilterDropdown
-                        allLabel="No mechanism linked"
-                        ariaLabel="Set task mechanisms"
-                        buttonInlineEditField="mechanism"
-                        className="task-queue-filter-menu-submenu"
-                        icon={<IconManufacturing />}
-                        onChange={(selection) => {
-                          setTaskDraft?.((current) => ({
-                            ...current,
-                            mechanismIds: selection,
-                            mechanismId: selection[0] ?? null,
-                          }));
-                        }}
-                        options={mechanismOptions}
-                        value={selectedMechanismIds}
-                      />
+              <label className="field modal-wide task-detail-row task-detail-collapsible-field">
+                <details className="task-detail-collapsible" onDoubleClick={canInlineEdit ? undefined : openTaskEditModal}>
+                  <summary className="task-detail-collapsible-summary">
+                    <span className="task-detail-collapsible-icon" aria-hidden="true"></span>
+                    <span className="task-detail-copy">{canInlineEdit ? "Mechanism" : "Mechanisms"}</span>
+                  </summary>
+                  <div className="task-detail-collapsible-body">
+                    {canInlineEdit ? (
+                      editingField === "mechanism" ? (
+                        projectMechanisms.length > 0 ? (
+                          <FilterDropdown
+                            allLabel="No mechanism linked"
+                            ariaLabel="Set task mechanisms"
+                            buttonInlineEditField="mechanism"
+                            className="task-queue-filter-menu-submenu"
+                            icon={<IconManufacturing />}
+                            onChange={(selection) => {
+                              setTaskDraft?.((current) => ({
+                                ...current,
+                                mechanismIds: selection,
+                                mechanismId: selection[0] ?? null,
+                              }));
+                            }}
+                            options={mechanismOptions}
+                            value={selectedMechanismIds}
+                          />
+                        ) : (
+                          <p className="task-detail-copy task-detail-empty" style={{ margin: "0.25rem 0 0" }}>
+                            No mechanism linked
+                          </p>
+                        )
+                      ) : (
+                        <span className="task-detail-inline-edit-shell task-detail-inline-edit-shell-inline">
+                          <button
+                            className="task-detail-inline-edit-trigger task-detail-inline-edit-trigger-inline"
+                            data-inline-edit-field="mechanism"
+                            onClick={() => setEditingField("mechanism")}
+                            type="button"
+                          >
+                            <span className="task-detail-copy">
+                              {mechanismNames.length > 0 ? mechanismNames.join(", ") : "No mechanism linked"}
+                            </span>
+                          </button>
+                          <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator" />
+                        </span>
+                      )
+                    ) : mechanismNames.length > 0 ? (
+                      <div className="task-details-mechanism-list">
+                        {mechanismNames.map((mechanismName, index) => (
+                          <div className="task-details-mechanism-item" key={`${mechanismName}-${index}`}>
+                            <span
+                              className="task-detail-ellipsis-reveal"
+                              data-full-text={mechanismName}
+                            >
+                              {mechanismName}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
                     ) : (
                       <p className="task-detail-copy task-detail-empty" style={{ margin: "0.25rem 0 0" }}>
                         No mechanism linked
                       </p>
-                    )
-                  ) : (
-                    <span className="task-detail-inline-edit-shell task-detail-inline-edit-shell-inline">
-                      <button
-                        className="task-detail-inline-edit-trigger task-detail-inline-edit-trigger-inline"
-                        data-inline-edit-field="mechanism"
-                        onClick={() => setEditingField("mechanism")}
-                        type="button"
-                      >
-                        <span className="task-detail-copy">
-                          {mechanismNames.length > 0 ? mechanismNames.join(", ") : "No mechanism linked"}
-                        </span>
-                      </button>
-                      <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator" />
-                    </span>
-                  )
-                ) : (
-                  <details className="task-detail-collapsible" onDoubleClick={openTaskEditModal}>
-                    <summary className="task-detail-collapsible-summary">
-                      <span className="task-detail-collapsible-icon" aria-hidden="true"></span>
-                      <span className="task-detail-copy">Mechanisms</span>
-                    </summary>
-                    <div className="task-detail-collapsible-body">
-                      {mechanismNames.length > 0 ? (
-                        <div className="task-details-mechanism-list">
-                          {mechanismNames.map((mechanismName, index) => (
-                            <div className="task-details-mechanism-item" key={`${mechanismName}-${index}`}>
-                              <span
-                                className="task-detail-ellipsis-reveal"
-                                data-full-text={mechanismName}
-                              >
-                                {mechanismName}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <p className="task-detail-copy task-detail-empty" style={{ margin: "0.25rem 0 0" }}>
-                          No mechanism linked
-                        </p>
-                      )}
-                    </div>
-                  </details>
-                )}
+                    )}
+                  </div>
+                </details>
               </label>
-              <label className="field modal-wide task-detail-row">
-                {canInlineEdit ? <span style={{ color: "var(--text-title)" }}>Parts</span> : null}
-                {canInlineEdit ? (
-                  editingField === "parts" ? (
-                    projectPartInstances.length > 0 ? (
-                      <FilterDropdown
-                        allLabel="No part linked"
-                        ariaLabel="Set task parts"
-                        buttonInlineEditField="parts"
-                        className="task-queue-filter-menu-submenu"
-                        icon={<IconParts />}
-                        onChange={(selection) => {
-                          setTaskDraft?.((current) => ({
-                            ...current,
-                            partInstanceIds: selection,
-                            partInstanceId: selection[0] ?? null,
-                          }));
-                        }}
-                        options={partOptions}
-                        value={selectedPartInstanceIds}
-                      />
+              <label className="field modal-wide task-detail-row task-detail-collapsible-field">
+                <details className="task-detail-collapsible" onDoubleClick={canInlineEdit ? undefined : openTaskEditModal}>
+                  <summary className="task-detail-collapsible-summary">
+                    <span className="task-detail-collapsible-icon" aria-hidden="true"></span>
+                    <span className="task-detail-copy">Parts</span>
+                  </summary>
+                  <div className="task-detail-collapsible-body">
+                    {canInlineEdit ? (
+                      editingField === "parts" ? (
+                        projectPartInstances.length > 0 ? (
+                          <FilterDropdown
+                            allLabel="No part linked"
+                            ariaLabel="Set task parts"
+                            buttonInlineEditField="parts"
+                            className="task-queue-filter-menu-submenu"
+                            icon={<IconParts />}
+                            onChange={(selection) => {
+                              setTaskDraft?.((current) => ({
+                                ...current,
+                                partInstanceIds: selection,
+                                partInstanceId: selection[0] ?? null,
+                              }));
+                            }}
+                            options={partOptions}
+                            value={selectedPartInstanceIds}
+                          />
+                        ) : (
+                          <p className="task-detail-copy task-detail-empty" style={{ margin: "0.25rem 0 0" }}>
+                            No part linked
+                          </p>
+                        )
+                      ) : (
+                        <span className="task-detail-inline-edit-shell task-detail-inline-edit-shell-inline">
+                          <button
+                            className="task-detail-inline-edit-trigger task-detail-inline-edit-trigger-inline"
+                            data-inline-edit-field="parts"
+                            onClick={() => setEditingField("parts")}
+                            type="button"
+                          >
+                            <span className="task-detail-copy">{partsText}</span>
+                          </button>
+                          <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator" />
+                        </span>
+                      )
                     ) : (
-                      <p className="task-detail-copy task-detail-empty" style={{ margin: "0.25rem 0 0" }}>
-                        No part linked
-                      </p>
-                    )
-                  ) : (
-                    <span className="task-detail-inline-edit-shell task-detail-inline-edit-shell-inline">
-                      <button
-                        className="task-detail-inline-edit-trigger task-detail-inline-edit-trigger-inline"
-                        data-inline-edit-field="parts"
-                        onClick={() => setEditingField("parts")}
-                        type="button"
-                      >
-                        <span className="task-detail-copy">{partsText}</span>
-                      </button>
-                      <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator" />
-                    </span>
-                  )
-                ) : (
-                  <details className="task-detail-collapsible" onDoubleClick={openTaskEditModal}>
-                    <summary className="task-detail-collapsible-summary">
-                      <span className="task-detail-collapsible-icon" aria-hidden="true"></span>
-                      <span className="task-detail-copy">Parts</span>
-                    </summary>
-                    <div className="task-detail-collapsible-body">
                       <p className="task-detail-copy">
                         <span className="task-detail-ellipsis-reveal" data-full-text={partsText}>
                           {partsText}
                         </span>
                       </p>
-                    </div>
-                  </details>
-                )}
+                    )}
+                  </div>
+                </details>
               </label>
               <div className="field modal-wide task-detail-list-shell task-detail-collapsible-field">
                 <details className="task-detail-collapsible" open={canInlineEdit}>
@@ -1084,6 +1105,7 @@ export function TaskDetailsModal({
                                 ariaLabel="Set blocker type"
                                 buttonInlineEditField={`blocker-type-${index}`}
                                 className="task-queue-filter-menu-submenu task-details-blocker-type-menu"
+                                menuClassName="task-details-blocker-menu-popup"
                                 icon={<IconTasks />}
                                 portalMenu
                                 onChange={(selection) => {
@@ -1096,40 +1118,43 @@ export function TaskDetailsModal({
                               />
                               {blocker.blockerType === "task" ? (
                                 <FilterDropdown
-                                  allLabel="Select task"
-                                  ariaLabel="Set blocker task"
-                                  buttonInlineEditField={`blocker-target-${index}`}
-                                  className="task-queue-filter-menu-submenu task-details-blocker-target-menu"
-                                  icon={<IconTasks />}
-                                  portalMenu
-                                  onChange={(selection) => updateBlockerTarget(index, selection[0] ?? null)}
-                                  options={blockerTaskOptions}
+                                allLabel="Select task"
+                                ariaLabel="Set blocker task"
+                                buttonInlineEditField={`blocker-target-${index}`}
+                                className="task-queue-filter-menu-submenu task-details-blocker-target-menu"
+                                menuClassName="task-details-blocker-menu-popup"
+                                icon={<IconTasks />}
+                                portalMenu
+                                onChange={(selection) => updateBlockerTarget(index, selection[0] ?? null)}
+                                options={blockerTaskOptions}
                                   singleSelect
                                   value={blocker.blockerId ? [blocker.blockerId] : []}
                                 />
                               ) : blocker.blockerType === "part_instance" ? (
                                 <FilterDropdown
-                                  allLabel="Select part"
-                                  ariaLabel="Set blocker part"
-                                  buttonInlineEditField={`blocker-target-${index}`}
-                                  className="task-queue-filter-menu-submenu task-details-blocker-target-menu"
-                                  icon={<IconParts />}
-                                  portalMenu
-                                  onChange={(selection) => updateBlockerTarget(index, selection[0] ?? null)}
-                                  options={partOptions}
+                                allLabel="Select part"
+                                ariaLabel="Set blocker part"
+                                buttonInlineEditField={`blocker-target-${index}`}
+                                className="task-queue-filter-menu-submenu task-details-blocker-target-menu"
+                                menuClassName="task-details-blocker-menu-popup"
+                                icon={<IconParts />}
+                                portalMenu
+                                onChange={(selection) => updateBlockerTarget(index, selection[0] ?? null)}
+                                options={partOptions}
                                   singleSelect
                                   value={blocker.blockerId ? [blocker.blockerId] : []}
                                 />
                               ) : blocker.blockerType === "event" ? (
                                 <FilterDropdown
-                                  allLabel="Select milestone"
-                                  ariaLabel="Set blocker milestone"
-                                  buttonInlineEditField={`blocker-target-${index}`}
-                                  className="task-queue-filter-menu-submenu task-details-blocker-target-menu"
-                                  icon={<IconTasks />}
-                                  portalMenu
-                                  onChange={(selection) => updateBlockerTarget(index, selection[0] ?? null)}
-                                  options={blockerEventOptions}
+                                allLabel="Select milestone"
+                                ariaLabel="Set blocker milestone"
+                                buttonInlineEditField={`blocker-target-${index}`}
+                                className="task-queue-filter-menu-submenu task-details-blocker-target-menu"
+                                menuClassName="task-details-blocker-menu-popup"
+                                icon={<IconTasks />}
+                                portalMenu
+                                onChange={(selection) => updateBlockerTarget(index, selection[0] ?? null)}
+                                options={blockerEventOptions}
                                   singleSelect
                                   value={blocker.blockerId ? [blocker.blockerId] : []}
                                 />
@@ -1165,7 +1190,7 @@ export function TaskDetailsModal({
                             ariaLabel="Add blocker"
                             buttonInlineEditField="add-blocker"
                             className="task-queue-filter-menu-submenu task-details-blocker-add-menu"
-                            menuClassName="task-details-blocker-add-menu-popup"
+                            menuClassName="task-details-blocker-menu-popup task-details-blocker-add-menu-popup"
                             icon={<IconTasks />}
                             portalMenu
                             portalMenuPlacement="below"
@@ -1196,14 +1221,14 @@ export function TaskDetailsModal({
                               </strong>
                               <div
                                 className="task-detail-ellipsis-reveal"
-                                data-full-text={`${blocker.blockerType.replace("_", " ")}${blocker.blockerType === "task" && blocker.blockerTaskName ? ` - ${blocker.blockerTaskName}` : ""}${blocker.severity ? ` - ${blocker.severity}` : ""}`}
+                                data-full-text={`${blocker.blockerType.replace("_", " ")}${blocker.blockerType === "task" && blocker.blockerTaskName ? ` ? ${blocker.blockerTaskName}` : ""}${blocker.severity ? ` ? ${blocker.severity}` : ""}`}
                                 style={{ color: "var(--text-copy)", fontSize: "0.8rem" }}
                               >
                                 {blocker.blockerType.replace("_", " ")}
                                 {blocker.blockerType === "task" && blocker.blockerTaskName
-                                  ? ` - ${blocker.blockerTaskName}`
+                                  ? ` ? ${blocker.blockerTaskName}`
                                   : ""}
-                                {blocker.severity ? ` - ${blocker.severity}` : ""}
+                                {blocker.severity ? ` ? ${blocker.severity}` : ""}
                               </div>
                             </div>
                             <button

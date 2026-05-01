@@ -226,6 +226,7 @@ export function WorkspaceModalHost({
   handleTaskSubmit,
   handleWorkstreamSubmit,
   onOpenTaskEditFromTimelineDetails,
+  openTaskDetailsModal,
   isDeletingMaterial,
   isDeletingArtifact,
   isDeletingPartDefinition,
@@ -404,6 +405,7 @@ export function WorkspaceModalHost({
           partDefinitionsById={partDefinitionsById}
           partInstancesById={partInstancesById}
           requestPhotoUpload={requestPhotoUpload}
+          openTaskDetailsModal={openTaskDetailsModal}
           setTaskDraft={setTaskDraft}
           showCreateTypeToggle={showTimelineCreateToggleInTaskModal}
           onSwitchCreateTypeToMilestone={onSwitchTaskCreateToMilestone}

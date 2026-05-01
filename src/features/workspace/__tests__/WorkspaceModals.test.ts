@@ -155,6 +155,7 @@ function renderTaskModal(
       partDefinitionsById: {},
       partInstancesById: {},
       requestPhotoUpload,
+      openTaskDetailsModal: jest.fn(),
       students: bootstrap.members.filter((member) => member.role !== "mentor"),
       taskDraft,
       taskModalMode,
@@ -397,22 +398,22 @@ describe("TaskEditorModal", () => {
     expect(markup).toContain('aria-label="Task title"');
   });
 
-  it("shows the task editor shell in edit mode", () => {
+  it("shows the detail shell in edit mode", () => {
     expect(renderTaskModal("create")).not.toContain("Actual hours");
+    expect(renderTaskModal("edit")).toContain("Edit Task Details");
     expect(renderTaskModal("create")).toContain("Task editor");
-    expect(renderTaskModal("edit")).toContain("Task editor");
     expect(renderTaskModal("edit")).not.toContain("View Task Details");
-    expect(renderTaskModal("edit")).toContain("Actual hours");
+    expect(renderTaskModal("edit")).toContain("Logged:");
+    expect(renderTaskModal("edit")).not.toContain("Actual hours");
   });
 
   it("renders the task title as an editable field in edit mode", () => {
     const markup = renderTaskModal("edit");
 
-    expect(markup).toContain('aria-label="Task title"');
-    expect(markup).toContain("task-editor-title-input");
+    expect(markup).toContain('data-inline-edit-field="title"');
   });
 
-  it("uses the task editor shell for create and edit", () => {
+  it("uses the detailed task shell in the task editor", () => {
     const createMarkup = renderTaskModal("create");
     const editMarkup = renderTaskModal("edit");
 
@@ -420,31 +421,39 @@ describe("TaskEditorModal", () => {
     expect(createMarkup).toContain("task-details-overview-grid");
     expect(editMarkup).toContain("task-details-header");
     expect(editMarkup).toContain("task-details-overview-grid");
-    expect(editMarkup).toContain(">Priority</span>");
-    expect(editMarkup).toContain(">Owner</span>");
-    expect(editMarkup).toContain(">Assigned</span>");
-    expect(editMarkup).toContain(">Mentor</span>");
-    expect(editMarkup).toContain(">Due date</span>");
-    expect(editMarkup).toContain(">Target event</span>");
-    expect(editMarkup).toContain(">Discipline</span>");
-    expect(editMarkup).toContain(">Targets</span>");
-    expect(editMarkup).toContain(">Summary</span>");
+    expect(editMarkup).toContain('data-inline-edit-field="priority"');
+    expect(editMarkup).toContain('data-inline-edit-field="owner"');
+    expect(editMarkup).toContain('data-inline-edit-field="assigned"');
+    expect(editMarkup).toContain("task-details-assigned-list");
+    expect(editMarkup).toContain('data-inline-edit-field="mentor"');
+    expect(editMarkup).toContain('data-inline-edit-field="dueDate"');
+    expect(editMarkup).toContain('data-inline-edit-field="targetEvent"');
+    expect(editMarkup).toContain('data-inline-edit-field="discipline"');
+    expect(editMarkup).toContain('data-inline-edit-field="subsystem"');
+    expect(editMarkup).toContain('data-inline-edit-field="mechanism"');
+    expect(editMarkup).toContain('data-inline-edit-field="parts"');
+    expect(editMarkup).toContain('data-inline-edit-field="summary"');
   });
 
-  it("shows mechanism and part target groups in the task editor", () => {
+  it("shows mechanism and parts headers in the detailed task editor", () => {
     const markup = renderTaskModal("edit");
 
-    expect(markup).toContain("Mechanisms");
-    expect(markup).toContain("Part instances");
+    expect(markup).toContain('<span class="task-detail-copy">Mechanism</span>');
+    expect(markup).toContain('<span class="task-detail-copy">Parts</span>');
   });
 
-  it("keeps dependency editing controls in edit mode", () => {
+  it("keeps mechanism and parts fields collapsible in edit mode", () => {
     const markup = renderTaskModal("edit");
 
-    expect(markup).toContain("Dependencies");
-    expect(markup).toContain("Depends on");
-    expect(markup).toContain("Dependency type");
-    expect(markup).toContain("Add dependency");
+    expect(markup).toContain('<summary class="task-detail-collapsible-summary"><span class="task-detail-collapsible-icon" aria-hidden="true"></span><span class="task-detail-copy">Mechanism</span></summary>');
+    expect(markup).toContain('<summary class="task-detail-collapsible-summary"><span class="task-detail-collapsible-icon" aria-hidden="true"></span><span class="task-detail-copy">Parts</span></summary>');
+    expect(markup).toContain('<div class="task-detail-collapsible-body"><span class="task-detail-inline-edit-shell task-detail-inline-edit-shell-inline">');
+    expect(markup).toContain('data-inline-edit-field="mechanism"');
+    expect(markup).toContain('data-inline-edit-field="parts"');
+  });
+
+  it("keeps the advanced section in edit mode", () => {
+    expect(renderTaskModal("edit")).toContain(">Advanced<");
   });
 
   it("renders a multi-student assignment control", () => {
@@ -468,13 +477,11 @@ describe("TaskEditorModal", () => {
     expect(markup).not.toContain("Manufacturing");
   });
 
-  it("shows edit-only task controls in edit mode", () => {
+  it("shows save and cancel controls in edit mode", () => {
     const markup = renderTaskModal("edit");
 
-    expect(markup).toContain("Actual hours");
-    expect(markup).toContain("Dependencies");
-    expect(markup).toContain("Add dependency");
-    expect(markup).toContain("Delete task");
+    expect(markup).not.toContain("Actual hours");
+    expect(markup).not.toContain("Dependencies");
     expect(markup).toContain("Cancel");
     expect(markup).toContain("Save changes");
   });

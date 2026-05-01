@@ -19,7 +19,7 @@ import {
   isTaskDisciplineAllowedForProject,
 } from "@/lib/taskDisciplines";
 import { formatTaskStatusLabel } from "@/features/workspace/shared/workspaceOptions";
-import { TaskDependencyEditor } from "./TaskDependencyEditor";
+import { TaskDetailsModal } from "./TaskDetailsModal";
 
 interface TaskEditorModalProps {
   activeTask: TaskRecord | null;
@@ -38,6 +38,7 @@ interface TaskEditorModalProps {
   partInstancesById: Record<string, BootstrapPayload["partInstances"][number]>;
   students: BootstrapPayload["members"];
   requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
+  openTaskDetailsModal: (task: TaskRecord) => void;
   taskDraft: TaskPayload;
   taskModalMode: "create" | "edit";
   showCreateTypeToggle?: boolean;
@@ -50,6 +51,7 @@ export function TaskEditorModal({
   bootstrap,
   closeTaskModal,
   handleDeleteTask,
+  handleResolveTaskBlocker,
   handleTaskSubmit,
   isDeletingTask,
   isSavingTask,
@@ -59,6 +61,7 @@ export function TaskEditorModal({
   partInstancesById,
   students,
   requestPhotoUpload,
+  openTaskDetailsModal,
   taskDraft,
   taskModalMode,
   showCreateTypeToggle,
@@ -252,6 +255,49 @@ export function TaskEditorModal({
   };
   const isCreateTaskModal = taskModalMode === "create";
   const isEditTaskModal = taskModalMode === "edit";
+
+  if (isEditTaskModal && activeTask) {
+    return (
+      <form className="task-editor-modal" onSubmit={handleTaskSubmit}>
+        <TaskDetailsModal
+          activeTask={activeTask}
+          bootstrap={bootstrap}
+          closeTaskDetailsModal={closeTaskModal}
+          footerActions={
+            <>
+              <button
+                className="secondary-action"
+                onClick={() => {
+                  openTaskDetailsModal(activeTask);
+                  closeTaskModal();
+                }}
+                style={{
+                  background: "var(--bg-row-alt)",
+                  color: "var(--text-title)",
+                  border: "1px solid var(--border-base)",
+                }}
+                type="button"
+              >
+                Cancel
+              </button>
+              <button
+                className="primary-action"
+                disabled={isSavingTask || isDeletingTask}
+                type="submit"
+              >
+                {isSavingTask ? "Saving..." : "Save changes"}
+              </button>
+            </>
+          }
+          onEditTask={() => undefined}
+          onResolveTaskBlocker={handleResolveTaskBlocker}
+          setTaskDraft={setTaskDraft}
+          showEditButton={false}
+          taskDraft={taskDraft}
+        />
+      </form>
+    );
+  }
 
   return (
     <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
@@ -646,15 +692,90 @@ export function TaskEditorModal({
                     </div>
                   </div>
                 </div>
-                <TaskDependencyEditor
-                  dependencyDrafts={dependencyDrafts}
-                  dependencyTaskOptions={dependencyTaskOptions}
-                  dependencyTypeLabels={dependencyTypeLabels}
-                  onAdd={addDependencyDraft}
-                  onRemove={removeDependencyDraft}
-                  onUpdate={updateDependencyDraft}
-                  visibleDependencyDrafts={visibleDependencyDrafts}
-                />
+                <div className="field modal-wide">
+                  <span style={{ color: "var(--text-title)" }}>Dependencies</span>
+                  <p style={{ margin: "0.25rem 0 0", color: "var(--text-copy)" }}>
+                    Planned sequencing between tasks. Use blocking dependencies for normal order.
+                  </p>
+                  <div style={{ display: "grid", gap: "0.75rem", marginTop: "0.75rem" }}>
+                    {visibleDependencyDrafts.map((dependency, index) => (
+                      <div
+                        key={dependency.id ?? `dependency-${index}`}
+                        style={{
+                          display: "grid",
+                          gap: "0.75rem",
+                          padding: "0.75rem",
+                          border: "1px solid var(--border-base)",
+                          borderRadius: "12px",
+                          background: "var(--bg-row-alt)",
+                        }}
+                      >
+                        <label className="field">
+                          <span style={{ color: "var(--text-title)" }}>Depends on</span>
+                          <select
+                            onChange={(event) =>
+                              updateDependencyDraft(index, {
+                                upstreamTaskId: event.target.value,
+                              })
+                            }
+                            style={{
+                              background: "var(--bg-panel)",
+                              color: "var(--text-title)",
+                              border: "1px solid var(--border-base)",
+                            }}
+                            value={dependency.upstreamTaskId}
+                          >
+                            <option value="">Select task</option>
+                            {dependencyTaskOptions.map((task) => (
+                              <option key={task.id} value={task.id}>
+                                {task.title}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <label className="field">
+                          <span style={{ color: "var(--text-title)" }}>Dependency type</span>
+                          <select
+                            onChange={(event) =>
+                              updateDependencyDraft(index, {
+                                dependencyType: event.target.value as TaskDependencyType,
+                              })
+                            }
+                            style={{
+                              background: "var(--bg-panel)",
+                              color: "var(--text-title)",
+                              border: "1px solid var(--border-base)",
+                            }}
+                            value={dependency.dependencyType}
+                          >
+                            {Object.entries(dependencyTypeLabels).map(([type, label]) => (
+                              <option key={type} value={type}>
+                                {label}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        {dependencyDrafts.length > 0 ? (
+                          <button
+                            className="secondary-action"
+                            onClick={() => removeDependencyDraft(index)}
+                            type="button"
+                          >
+                            Remove dependency
+                          </button>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    className="secondary-action"
+                    onClick={addDependencyDraft}
+                    style={{ marginTop: "0.75rem" }}
+                    type="button"
+                  >
+                    Add dependency
+                  </button>
+                </div>
                 <label className="field">
                   <span style={{ color: "var(--text-title)" }}>Target event</span>
                   <select
@@ -982,15 +1103,90 @@ export function TaskEditorModal({
                   </div>
                 </div>
               </div>
-              <TaskDependencyEditor
-                dependencyDrafts={dependencyDrafts}
-                dependencyTaskOptions={dependencyTaskOptions}
-                dependencyTypeLabels={dependencyTypeLabels}
-                onAdd={addDependencyDraft}
-                onRemove={removeDependencyDraft}
-                onUpdate={updateDependencyDraft}
-                visibleDependencyDrafts={visibleDependencyDrafts}
-              />
+              <div className="field modal-wide">
+                <span style={{ color: "var(--text-title)" }}>Dependencies</span>
+                <p style={{ margin: "0.25rem 0 0", color: "var(--text-copy)" }}>
+                  Planned sequencing between tasks. Use blocking dependencies for normal order.
+                </p>
+                <div style={{ display: "grid", gap: "0.75rem", marginTop: "0.75rem" }}>
+                  {visibleDependencyDrafts.map((dependency, index) => (
+                    <div
+                      key={dependency.id ?? `dependency-${index}`}
+                      style={{
+                        display: "grid",
+                        gap: "0.75rem",
+                        padding: "0.75rem",
+                        border: "1px solid var(--border-base)",
+                        borderRadius: "12px",
+                        background: "var(--bg-row-alt)",
+                      }}
+                    >
+                      <label className="field">
+                        <span style={{ color: "var(--text-title)" }}>Depends on</span>
+                        <select
+                          onChange={(event) =>
+                            updateDependencyDraft(index, {
+                              upstreamTaskId: event.target.value,
+                            })
+                          }
+                          style={{
+                            background: "var(--bg-panel)",
+                            color: "var(--text-title)",
+                            border: "1px solid var(--border-base)",
+                          }}
+                          value={dependency.upstreamTaskId}
+                        >
+                          <option value="">Select task</option>
+                          {dependencyTaskOptions.map((task) => (
+                            <option key={task.id} value={task.id}>
+                              {task.title}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label className="field">
+                        <span style={{ color: "var(--text-title)" }}>Dependency type</span>
+                        <select
+                          onChange={(event) =>
+                            updateDependencyDraft(index, {
+                              dependencyType: event.target.value as TaskDependencyType,
+                            })
+                          }
+                          style={{
+                            background: "var(--bg-panel)",
+                            color: "var(--text-title)",
+                            border: "1px solid var(--border-base)",
+                          }}
+                          value={dependency.dependencyType}
+                        >
+                          {Object.entries(dependencyTypeLabels).map(([type, label]) => (
+                            <option key={type} value={type}>
+                              {label}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      {dependencyDrafts.length > 0 ? (
+                        <button
+                          className="secondary-action"
+                          onClick={() => removeDependencyDraft(index)}
+                          type="button"
+                        >
+                          Remove dependency
+                        </button>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+                <button
+                  className="secondary-action"
+                  onClick={addDependencyDraft}
+                  style={{ marginTop: "0.75rem" }}
+                  type="button"
+                >
+                  Add dependency
+                </button>
+              </div>
               <label className="field">
                 <span style={{ color: "var(--text-title)" }}>Target event</span>
                 <select

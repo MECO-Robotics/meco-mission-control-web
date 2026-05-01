@@ -1,8 +1,11 @@
+import type { ReactNode } from "react";
+
 import type { BootstrapPayload } from "@/types";
 
 export interface DropdownOption {
   id: string;
   name: string;
+  icon?: ReactNode;
 }
 
 export type MembersById = Record<string, BootstrapPayload["members"][number]>;
