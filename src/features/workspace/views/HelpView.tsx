@@ -10,13 +10,13 @@ const HELP_SECTIONS: Array<{ title: string; items: string[] }> = [
       "Before editing anything, check the **season selector** in the profile menu and the **active project** in the sidebar.",
       "Pick **All projects** only for planning sweeps; switch back to a single project before data entry.",
       "If a list looks empty, first confirm you are in the expected **season and project scope**.",
-      "Timeline, Queue, and Milestones are **project-aware**, so scope mistakes show up there first.",
+      "Timeline, Kanban, and Milestones are **project-aware**, so scope mistakes show up there first.",
     ],
   },
   {
     title: "Know what each tab is for",
     items: [
-      "Tasks is where scheduling and execution stay aligned: Timeline for dates, Queue for active work, and Milestones for checkpoints.",
+      "Tasks is where scheduling and execution stay aligned: Timeline for dates, Kanban for active work, and Milestones for checkpoints.",
       "Manufacturing only appears in **robot projects**, split into CNC, prints, and fabrication queues.",
       "Reports is always available and groups the **QA** and **Event Result** forms in one sidebar page.",
       "Inventory changes by project type: **robot projects use Materials and Parts, non-robot projects use Documents**.",
@@ -110,7 +110,7 @@ const HELP_TUTORIAL_STEPS: Array<{
     summary:
       "The sidebar picks the area; some areas use subtabs in the top bar, while Reports keeps its launchers on the page.",
     actions: [
-      "Open Tasks and move through Timeline, Queue, and Milestones.",
+      "Open Tasks and move through Timeline, Kanban, and Milestones.",
       "Open Reports to launch QA and Event Result forms from one place in the sidebar.",
       "Switch projects and watch Inventory move between Materials/Parts and Documents.",
       "Check footer notes at the bottom of each view for local interaction hints.",

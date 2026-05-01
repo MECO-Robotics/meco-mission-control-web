@@ -288,6 +288,7 @@ function FilterOptionMenu({
   menuOffsetX,
   style,
   getOptionToneClassName,
+  showAllOption = true,
   singleSelect,
   onChange,
   options,
@@ -300,11 +301,43 @@ function FilterOptionMenu({
   menuRef: { current: HTMLDivElement | null };
   menuOffsetX: number;
   singleSelect?: boolean;
+  showAllOption?: boolean;
   style?: CSSProperties;
   onChange: (value: FilterSelection) => void;
   options: DropdownOption[];
   value: FilterSelection;
 }) {
+  const [searchText, setSearchText] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const filteredOptions = useMemo(() => {
+    const query = searchText.trim().toLowerCase();
+    if (!query) {
+      return options;
+    }
+
+    return options.filter((option) => {
+      if (option.name.toLowerCase().includes(query)) {
+        return true;
+      }
+      return option.id.toLowerCase().includes(query);
+    });
+  }, [options, searchText]);
+
+  useLayoutEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const raf = window.requestAnimationFrame(() => {
+      searchInputRef.current?.focus();
+    });
+
+    return () => {
+      window.cancelAnimationFrame(raf);
+    };
+  }, []);
+
   return (
     <div
       aria-multiselectable={singleSelect ? undefined : "true"}
@@ -314,7 +347,19 @@ function FilterOptionMenu({
       id={menuId}
       role="listbox"
     >
-      <button
+      <div className="table-column-filter-search" role="presentation">
+        <input
+          aria-label={`Search ${allLabel} options`}
+          className="table-column-filter-search-input"
+          onChange={(event) => setSearchText(event.target.value)}
+          placeholder="Search..."
+          ref={searchInputRef}
+          type="text"
+          value={searchText}
+        />
+      </div>
+      {showAllOption ? (
+        <button
         aria-selected={value.length === 0}
         className={`table-column-filter-option${value.length === 0 ? " is-selected" : ""}`}
         onClick={(event) => {
@@ -329,7 +374,13 @@ function FilterOptionMenu({
         </span>
         <span>{allLabel}</span>
       </button>
-      {options.map((option) => {
+      ) : null}
+      {filteredOptions.length === 0 ? (
+        <div className="table-column-filter-empty" role="presentation">
+          No matches
+        </div>
+      ) : null}
+      {filteredOptions.map((option) => {
         const isSelected = value.includes(option.id);
         const hasIcon = Boolean(option.icon);
 
@@ -375,6 +426,7 @@ export function FilterDropdown({
   portalMenuPlacement = "auto",
   onChange,
   options,
+  showAllOption = true,
   singleSelect,
   value,
 }: {
@@ -391,6 +443,7 @@ export function FilterDropdown({
   portalMenuPlacement?: PortalMenuPlacement;
   onChange: (value: FilterSelection) => void;
   options: DropdownOption[];
+  showAllOption?: boolean;
   singleSelect?: boolean;
   value: FilterSelection;
 }) {
@@ -573,6 +626,7 @@ export function FilterDropdown({
               menuOffsetX={menuOffsetX}
               onChange={onChange}
               options={options}
+              showAllOption={showAllOption}
               singleSelect={singleSelect}
               style={{
                 position: "fixed",
@@ -598,6 +652,7 @@ export function FilterDropdown({
             menuOffsetX={menuOffsetX}
             onChange={onChange}
             options={options}
+            showAllOption={showAllOption}
             singleSelect={singleSelect}
             value={value}
           />

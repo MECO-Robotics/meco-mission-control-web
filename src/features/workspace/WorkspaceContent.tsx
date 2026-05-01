@@ -89,6 +89,7 @@ interface WorkspaceContentProps {
   bootstrap: BootstrapPayload;
   cncItems: ManufacturingItemRecord[];
   dataMessage: string | null;
+  taskEditNotice: string | null;
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
   eventsById: Record<string, BootstrapPayload["events"][number]>;
   externalMembers: BootstrapPayload["members"];
@@ -158,17 +159,18 @@ interface WorkspaceContentProps {
   selectMember: (id: string | null, payload: BootstrapPayload) => void;
   selectedSeasonId: string | null;
   selectedMemberId: string | null;
+  requestMemberPhotoUpload: (file: File) => Promise<string>;
   setActivePersonFilter: (value: FilterSelection) => void;
   setIsAddPersonOpen: (open: boolean) => void;
   setIsEditPersonOpen: (open: boolean) => void;
   setMemberEditDraft: Dispatch<SetStateAction<MemberPayload | null>>;
   setMemberForm: Dispatch<SetStateAction<MemberPayload>>;
-  requestMemberPhotoUpload: (file: File) => Promise<string>;
   students: BootstrapPayload["members"];
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
   timelineMilestoneCreateSignal: number;
   disablePanelAnimations?: boolean;
   onDismissDataMessage: () => void;
+  onDismissTaskEditNotice: () => void;
   onStartInteractiveTutorial?: () => void;
   onStartInteractiveTutorialChapter?: (chapterId: string) => void;
   interactiveTutorialChapters?: Array<{
@@ -310,6 +312,37 @@ function WorkspaceErrorPopup({
   );
 }
 
+function WorkspaceInfoToast({
+  message,
+  onDismiss,
+}: {
+  message: string;
+  onDismiss: () => void;
+}) {
+  return (
+    <aside className="workspace-info-toast" aria-atomic="true" aria-live="polite" role="status">
+      <section className="workspace-info-toast-card">
+        <div className="workspace-info-toast-header">
+          <div>
+            <p className="eyebrow" style={{ color: "var(--official-blue)" }}>
+              Info
+            </p>
+            <h2>Task edit canceled</h2>
+          </div>
+          <button className="icon-button" onClick={onDismiss} type="button">
+            Dismiss
+          </button>
+        </div>
+
+        <p className="workspace-info-toast-message">{message}</p>
+        <div className="workspace-info-toast-timer" aria-hidden="true">
+          <span />
+        </div>
+      </section>
+    </aside>
+  );
+}
+
 export function WorkspaceContent({
   activePersonFilter,
   activeTab,
@@ -319,6 +352,7 @@ export function WorkspaceContent({
   bootstrap,
   cncItems,
   dataMessage,
+  taskEditNotice,
   disciplinesById,
   externalMembers,
   fabricationItems,
@@ -376,6 +410,7 @@ export function WorkspaceContent({
   riskManagementView,
   taskView,
   worklogsView,
+  requestMemberPhotoUpload,
   selectMember,
   selectedSeasonId,
   selectedMemberId,
@@ -384,12 +419,12 @@ export function WorkspaceContent({
   setIsEditPersonOpen,
   setMemberEditDraft,
   setMemberForm,
-  requestMemberPhotoUpload,
   students,
   subsystemsById,
   timelineMilestoneCreateSignal,
   disablePanelAnimations = false,
   onDismissDataMessage,
+  onDismissTaskEditNotice,
   onStartInteractiveTutorial,
   onStartInteractiveTutorialChapter,
   interactiveTutorialChapters,
@@ -454,6 +489,9 @@ export function WorkspaceContent({
         minHeight: "100%",
       }}
     >
+      {taskEditNotice ? (
+        <WorkspaceInfoToast message={taskEditNotice} onDismiss={onDismissTaskEditNotice} />
+      ) : null}
       {dataMessage ? (
         <WorkspaceErrorPopup message={dataMessage} onDismiss={onDismissDataMessage} />
       ) : null}
@@ -495,6 +533,7 @@ export function WorkspaceContent({
             bootstrap={bootstrap}
             disciplinesById={disciplinesById}
             isAllProjectsView={isAllProjectsView}
+            isNonRobotProject={isNonRobotProject}
             membersById={membersById}
             openCreateTaskModal={openCreateTaskModal}
             openEditTaskModal={openTimelineTaskDetailsModal}
@@ -778,7 +817,6 @@ export function WorkspaceContent({
             handleReactivateMemberForSeason={handleReactivateMemberForSeason}
             handleDeleteMember={handleDeleteMember}
             handleUpdateMember={handleUpdateMember}
-            requestMemberPhotoUpload={requestMemberPhotoUpload}
             isAddPersonOpen={isAddPersonOpen}
             isDeletingMember={isDeletingMember}
             isEditPersonOpen={isEditPersonOpen}
@@ -787,6 +825,7 @@ export function WorkspaceContent({
             memberForm={memberForm}
             externalMembers={externalMembers}
             rosterMentors={rosterMentors}
+            requestMemberPhotoUpload={requestMemberPhotoUpload}
             selectMember={selectMember}
             selectedSeasonId={selectedSeasonId}
             selectedMemberId={selectedMemberId}

@@ -73,6 +73,7 @@ interface WorkspaceModalHostProps {
   closeSubsystemModal: () => void;
   closeTaskModal: () => void;
   closeWorkstreamModal: () => void;
+  onTaskEditCanceled: () => void;
   requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
   eventsById: Record<string, BootstrapPayload["events"][number]>;
@@ -198,6 +199,7 @@ export function WorkspaceModalHost({
   closeSubsystemModal,
   closeTaskModal,
   closeWorkstreamModal,
+  onTaskEditCanceled,
   requestPhotoUpload,
   disciplinesById,
   eventsById,
@@ -406,6 +408,7 @@ export function WorkspaceModalHost({
           partInstancesById={partInstancesById}
           requestPhotoUpload={requestPhotoUpload}
           openTaskDetailsModal={openTaskDetailsModal}
+          onTaskEditCanceled={onTaskEditCanceled}
           setTaskDraft={setTaskDraft}
           showCreateTypeToggle={showTimelineCreateToggleInTaskModal}
           onSwitchCreateTypeToMilestone={onSwitchTaskCreateToMilestone}

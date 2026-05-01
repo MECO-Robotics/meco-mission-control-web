@@ -379,6 +379,14 @@ export function TaskDetailsModal({
     getStableToneClassName(option.id);
   const getSubsystemOptionToneClassName = (option: { id: string }) =>
     getStableToneClassName(option.id);
+  const disciplineToneClassName = editableTask.disciplineId
+    ? getDisciplineOptionToneClassName({ id: editableTask.disciplineId })
+    : "filter-tone-neutral";
+  const disciplinePillClassName = `pill task-detail-discipline-pill ${disciplineToneClassName}`;
+  const subsystemToneClassName = selectedPrimaryTargetId
+    ? getSubsystemOptionToneClassName({ id: selectedPrimaryTargetId })
+    : "filter-tone-neutral";
+  const subsystemPillClassName = `pill task-detail-subsystem-pill ${subsystemToneClassName}`;
   const blockerTaskOptions = bootstrap.tasks
     .filter((task) => {
       if (task.projectId !== editableTask.projectId || task.id === activeTask.id) {
@@ -391,6 +399,13 @@ export function TaskDetailsModal({
     .map((task) => ({
       id: task.id,
       name: task.title,
+      icon: (
+        <TimelineTaskStatusLogo
+          compact
+          signal={getTimelineTaskStatusSignal(task, bootstrap)}
+          status={task.status}
+        />
+      ),
     }));
   const blockerEventOptions = bootstrap.events.map((event) => ({
     id: event.id,
@@ -904,21 +919,21 @@ export function TaskDetailsModal({
                       value={editableTask.disciplineId ? [editableTask.disciplineId] : []}
                     />
                   ) : (
-                    <span className="task-detail-inline-edit-shell task-detail-inline-edit-shell-inline">
+                    <span className="task-detail-inline-edit-shell task-detail-inline-edit-shell-inline task-detail-inline-edit-shell-inline-left">
                       <button
                         className="task-detail-inline-edit-trigger task-detail-inline-edit-trigger-inline"
                         data-inline-edit-field="discipline"
                         onClick={() => setEditingField("discipline")}
                         type="button"
                       >
-                        <span className="task-detail-copy">{disciplineText}</span>
+                        <span className={disciplinePillClassName}>{disciplineText}</span>
                       </button>
                       <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator" />
                     </span>
                   )
                 ) : (
                   <p className="task-detail-copy" onDoubleClick={openTaskEditModal}>
-                    {disciplineText}
+                    <span className={disciplinePillClassName}>{disciplineText}</span>
                   </p>
                 )}
               </label>
@@ -947,14 +962,14 @@ export function TaskDetailsModal({
                       value={selectedPrimaryTargetId ? [selectedPrimaryTargetId] : []}
                     />
                   ) : (
-                    <span className="task-detail-inline-edit-shell task-detail-inline-edit-shell-inline">
+                    <span className="task-detail-inline-edit-shell task-detail-inline-edit-shell-inline task-detail-inline-edit-shell-inline-left">
                       <button
                         className="task-detail-inline-edit-trigger task-detail-inline-edit-trigger-inline"
                         data-inline-edit-field="subsystem"
                         onClick={() => setEditingField("subsystem")}
                         type="button"
                       >
-                        <span className="task-detail-copy">
+                        <span className={subsystemPillClassName}>
                           {subsystemNames.length > 0 ? subsystemNames.join(", ") : "No subsystem linked"}
                         </span>
                       </button>
@@ -963,7 +978,9 @@ export function TaskDetailsModal({
                   )
                 ) : (
                   <p className="task-detail-copy" onDoubleClick={openTaskEditModal}>
-                    {subsystemNames.length > 0 ? subsystemNames.join(", ") : "No subsystem linked"}
+                    <span className={subsystemPillClassName}>
+                      {subsystemNames.length > 0 ? subsystemNames.join(", ") : "No subsystem linked"}
+                    </span>
                   </p>
                 )}
               </label>
@@ -982,6 +999,7 @@ export function TaskDetailsModal({
                             ariaLabel="Set task mechanisms"
                             buttonInlineEditField="mechanism"
                             className="task-queue-filter-menu-submenu"
+                            menuClassName="task-details-blocker-menu-popup"
                             icon={<IconManufacturing />}
                             onChange={(selection) => {
                               setTaskDraft?.((current) => ({
@@ -991,6 +1009,7 @@ export function TaskDetailsModal({
                               }));
                             }}
                             options={mechanismOptions}
+                            portalMenu
                             value={selectedMechanismIds}
                           />
                         ) : (
@@ -1049,6 +1068,7 @@ export function TaskDetailsModal({
                             ariaLabel="Set task parts"
                             buttonInlineEditField="parts"
                             className="task-queue-filter-menu-submenu"
+                            menuClassName="task-details-blocker-menu-popup"
                             icon={<IconParts />}
                             onChange={(selection) => {
                               setTaskDraft?.((current) => ({
@@ -1058,6 +1078,7 @@ export function TaskDetailsModal({
                               }));
                             }}
                             options={partOptions}
+                            portalMenu
                             value={selectedPartInstanceIds}
                           />
                         ) : (
@@ -1109,10 +1130,14 @@ export function TaskDetailsModal({
                                 icon={<IconTasks />}
                                 portalMenu
                                 onChange={(selection) => {
-                                  const nextType = (selection[0] as TaskBlockerType | undefined) ?? "external";
+                                  const nextType = selection[0] as TaskBlockerType | undefined;
+                                  if (!nextType) {
+                                    return;
+                                  }
                                   updateBlockerType(index, nextType);
                                 }}
                                 options={blockerTypeOptions}
+                                showAllOption={false}
                                 singleSelect
                                 value={[blocker.blockerType]}
                               />
@@ -1202,6 +1227,7 @@ export function TaskDetailsModal({
                               addBlockerDraft(nextType);
                             }}
                             options={blockerTypeOptions}
+                            showAllOption={false}
                             singleSelect
                             value={[]}
                           />

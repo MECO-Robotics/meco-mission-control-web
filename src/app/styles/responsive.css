@@ -395,17 +395,26 @@
 
 .task-detail-inline-edit-title-shell {
   position: relative;
-  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  width: fit-content;
+  max-width: 100%;
   min-width: 0;
 }
 
 .task-detail-inline-edit-title-shell > h2 {
   margin: 0;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-width: 0;
   overflow-wrap: anywhere;
   word-break: break-word;
   color: var(--text-title);
+}
+
+.task-detail-inline-edit-title-shell-editing {
+  display: block;
+  width: 100%;
 }
 
 .task-detail-inline-edit-title-shell-editing > h2 {
@@ -427,9 +436,10 @@
 }
 
 .task-detail-inline-edit-indicator-title {
-  position: absolute;
-  top: 0.12em;
-  right: 0;
+  position: static;
+  top: auto;
+  right: auto;
+  transform: none;
   pointer-events: none;
 }
 
@@ -479,6 +489,22 @@
   flex: 0 0 auto;
   align-items: center;
   padding-right: 1.85rem;
+}
+
+.task-details-modal .task-queue-filter-menu-submenu .toolbar-filter-menu-button {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.task-details-modal .task-queue-filter-menu-submenu .toolbar-filter-value {
+  flex: 0 1 auto;
+  text-align: left;
+}
+
+.task-details-modal .task-detail-inline-edit-shell-inline.task-detail-inline-edit-shell-inline-left {
+  display: flex;
+  width: 100%;
+  justify-content: flex-start;
 }
 
 .task-detail-inline-edit-select {

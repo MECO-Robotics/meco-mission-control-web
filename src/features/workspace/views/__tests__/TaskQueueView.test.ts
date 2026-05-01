@@ -5,9 +5,58 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared";
 import { TaskQueueView } from "@/features/workspace/views";
+import { getTaskQueueCardContextLabel } from "@/features/workspace/views/TaskQueueView";
+import { TASK_QUEUE_LAZY_LOAD_BATCH_SIZE } from "@/features/workspace/views/taskQueueBoard";
 import type { BootstrapPayload } from "@/types";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
+
+type Task = BootstrapPayload["tasks"][number];
+
+function createTask(index: number, overrides: Partial<Task> = {}): Task {
+  const day = String(index).padStart(2, "0");
+
+  return {
+    id: `task-${index}`,
+    projectId: "project-1",
+    workstreamId: null,
+    workstreamIds: [],
+    subsystemId: "subsystem-1",
+    subsystemIds: ["subsystem-1"],
+    disciplineId: "discipline-1",
+    mechanismId: null,
+    mechanismIds: [],
+    partInstanceId: null,
+    partInstanceIds: [],
+    title: `Task ${index}`,
+    summary: `Summary ${index}`,
+    targetEventId: null,
+    photoUrl: "",
+    ownerId: "member-1",
+    assigneeIds: [],
+    mentorId: null,
+    startDate: `2026-03-${day}`,
+    dueDate: `2026-03-${day}`,
+    priority: index % 4 === 0 ? "critical" : index % 4 === 1 ? "low" : index % 4 === 2 ? "medium" : "high",
+    status:
+      index === 1
+        ? "not-started"
+        : index === 2 || index === 3 || index === 7 || index === 11 || index === 15
+          ? "in-progress"
+          : index === 4 || index === 8 || index === 12 || index === 16
+            ? "waiting-for-qa"
+            : "complete",
+    dependencyIds: [],
+    blockers: [],
+    linkedManufacturingIds: [],
+    linkedPurchaseIds: [],
+    estimatedHours: 0,
+    actualHours: 0,
+    requiresDocumentation: false,
+    documentationLinked: false,
+    ...overrides,
+  };
+}
 
 function createBootstrap(): BootstrapPayload {
   return {
@@ -24,6 +73,16 @@ function createBootstrap(): BootstrapPayload {
         id: "member-1",
         name: "Alex Builder",
         email: "alex@example.com",
+        photoUrl: "https://example.com/alex.png",
+        role: "student",
+        elevated: false,
+        seasonId: "season-1",
+      },
+      {
+        id: "member-2",
+        name: "Quinn Maker",
+        email: "quinn@example.com",
+        photoUrl: "",
         role: "student",
         elevated: false,
         seasonId: "season-1",
@@ -55,45 +114,79 @@ function createBootstrap(): BootstrapPayload {
         risks: [],
       },
     ],
-    tasks: [
-      {
-        id: "task-1",
-        projectId: "project-1",
-        workstreamId: null,
-        workstreamIds: [],
-        subsystemId: "subsystem-1",
-        subsystemIds: ["subsystem-1"],
-        disciplineId: "discipline-1",
-        mechanismId: null,
-        mechanismIds: [],
-        partInstanceId: null,
-        partInstanceIds: [],
-        title: "Prep robot",
-        summary: "Prepare for event",
-        targetEventId: null,
-        photoUrl: "",
-        ownerId: "member-1",
-        assigneeIds: [],
-        mentorId: null,
-        startDate: "2026-03-01",
-        dueDate: "2026-03-09",
-        priority: "high",
-        status: "in-progress",
-        dependencyIds: [],
-        blockers: [],
-        linkedManufacturingIds: [],
-        linkedPurchaseIds: [],
-        estimatedHours: 0,
-        actualHours: 0,
-        requiresDocumentation: false,
-        documentationLinked: false,
-      },
-    ],
+    tasks: Array.from({ length: 16 }, (_, index) => {
+      const taskIndex = index + 1;
+
+      return createTask(taskIndex, {
+        ownerId: taskIndex === 2 ? "member-2" : "member-1",
+        dependencyIds: taskIndex === 3 ? ["task-1"] : [],
+        blockers: taskIndex === 4 ? ["Waiting on parts"] : [],
+      });
+    }),
   };
 }
 
 describe("TaskQueueView", () => {
-  it("renders a dedicated discipline column for tasks", () => {
+  it("formats the kanban card context from subsystems or workflows when a project is selected", () => {
+    const robotTask = createTask(1, {
+      projectId: "project-robot",
+      subsystemId: "subsystem-robot",
+      subsystemIds: ["subsystem-robot"],
+      workstreamId: null,
+      workstreamIds: [],
+    });
+    const workflowTask = createTask(2, {
+      projectId: "project-workflow",
+      subsystemId: "subsystem-workflow",
+      subsystemIds: [],
+      workstreamId: "workstream-workflow",
+      workstreamIds: ["workstream-workflow"],
+    });
+
+    expect(
+      getTaskQueueCardContextLabel(
+        robotTask,
+        "robot",
+        {
+          "subsystem-robot": {
+            id: "subsystem-robot",
+            projectId: "project-robot",
+            name: "Drive",
+            color: "#224466",
+            description: "",
+            photoUrl: "",
+            iteration: 1,
+            isCore: true,
+            parentSubsystemId: null,
+            responsibleEngineerId: null,
+            mentorIds: [],
+            risks: [],
+          },
+        },
+        {},
+      ),
+    ).toBe("Drive (v1)");
+
+    expect(
+      getTaskQueueCardContextLabel(
+        workflowTask,
+        "operations",
+        {},
+        {
+          "workstream-workflow": {
+            id: "workstream-workflow",
+            projectId: "project-workflow",
+            name: "Operations",
+            description: "",
+            color: "#000000",
+            isArchived: false,
+          },
+        },
+      ),
+    ).toBe("Operations");
+  });
+
+  it("renders the first lazy-load batch and groups blocked tasks into the blocked column", () => {
     const bootstrap = createBootstrap();
     const markup = renderToStaticMarkup(
       React.createElement(TaskQueueView, {
@@ -101,15 +194,47 @@ describe("TaskQueueView", () => {
         bootstrap,
         disciplinesById: { "discipline-1": bootstrap.disciplines[0] },
         isAllProjectsView: false,
-        membersById: { "member-1": bootstrap.members[0] },
+        isNonRobotProject: false,
+        membersById: {
+          "member-1": bootstrap.members[0],
+          "member-2": bootstrap.members[1],
+        },
         openCreateTaskModal: jest.fn(),
         openEditTaskModal: jest.fn(),
         subsystemsById: { "subsystem-1": bootstrap.subsystems[0] },
       }),
     );
 
-    expect(markup).toContain("data-label=\"Discipline\"");
-    expect(markup).toContain("<span>Discipline</span>");
-    expect(markup).toContain(">Design<");
+    expect(markup).toContain("task-queue-board");
+    expect(markup).toContain("task-queue-board-load-status");
+    expect(markup).toContain("task-queue-board-load-sentinel");
+    expect(markup).toContain("task-queue-board-card-due");
+    expect(markup).toContain("task-queue-board-column-header-icon");
+    expect(markup).toContain("timeline-task-status-logo-signal-not-started");
+    expect(markup).toContain("timeline-task-status-logo-signal-in-progress");
+    expect(markup).toContain("timeline-task-status-logo-signal-waiting-for-qa");
+    expect(markup).toContain("timeline-task-status-logo-signal-complete");
+    expect(markup).toContain("timeline-task-status-logo-signal-blocked");
+    expect(markup).toContain("status-pill-danger");
+    expect(markup).toContain("status-pill-info");
+    expect(markup).toContain("status-pill-warning");
+    expect(markup).toContain("status-pill-success");
+    expect(markup).not.toContain("table-pagination");
+    expect(markup).not.toContain("Unknown project");
+    expect(markup).toContain("task-queue-board-card-priority-critical");
+    expect(markup).toContain("task-queue-board-card-priority-high");
+    expect(markup).toContain("task-queue-board-card-priority-medium");
+    expect(markup).toContain("task-queue-board-card-priority-low");
+    expect(markup).toContain('aria-label="Critical priority"');
+    expect(markup).toContain('aria-label="Low priority"');
+    expect(markup.indexOf("task-queue-board-card-priority")).toBeLessThan(markup.indexOf("profile-avatar"));
+    expect(markup).toContain('alt="Alex Builder profile picture"');
+    expect(markup).toContain('src="https://example.com/alex.png"');
+    expect(markup).toContain("profile-avatar-fallback");
+    expect(markup).toContain(">Q<");
+    expect(markup).toContain("data-board-state=\"blocked\"");
+    expect(markup.match(/data-board-state=\"blocked\"/g)).toHaveLength(2);
+    expect(markup.match(/data-board-state=/g)).toHaveLength(TASK_QUEUE_LAZY_LOAD_BATCH_SIZE);
+    expect(markup).not.toContain("Task 16");
   });
 });

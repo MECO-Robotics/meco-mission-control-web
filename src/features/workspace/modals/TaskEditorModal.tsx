@@ -39,6 +39,7 @@ interface TaskEditorModalProps {
   students: BootstrapPayload["members"];
   requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   openTaskDetailsModal: (task: TaskRecord) => void;
+  onTaskEditCanceled: () => void;
   taskDraft: TaskPayload;
   taskModalMode: "create" | "edit";
   showCreateTypeToggle?: boolean;
@@ -62,6 +63,7 @@ export function TaskEditorModal({
   students,
   requestPhotoUpload,
   openTaskDetailsModal,
+  onTaskEditCanceled,
   taskDraft,
   taskModalMode,
   showCreateTypeToggle,
@@ -110,6 +112,21 @@ export function TaskEditorModal({
   const projectPartInstances = bootstrap.partInstances.filter(
     (partInstance) => partInstance.subsystemId === selectedPrimaryTargetId,
   );
+
+  const handleTaskEditClosed = () => {
+    onTaskEditCanceled();
+    closeTaskModal();
+  };
+
+  const handleTaskEditCancel = () => {
+    onTaskEditCanceled();
+
+    if (activeTask) {
+      openTaskDetailsModal(activeTask);
+    }
+
+    closeTaskModal();
+  };
   const selectedMechanismIds =
     taskDraft.mechanismIds.length > 0
       ? taskDraft.mechanismIds
@@ -262,15 +279,12 @@ export function TaskEditorModal({
         <TaskDetailsModal
           activeTask={activeTask}
           bootstrap={bootstrap}
-          closeTaskDetailsModal={closeTaskModal}
+          closeTaskDetailsModal={handleTaskEditClosed}
           footerActions={
             <>
               <button
                 className="secondary-action"
-                onClick={() => {
-                  openTaskDetailsModal(activeTask);
-                  closeTaskModal();
-                }}
+                onClick={handleTaskEditCancel}
                 style={{
                   background: "var(--bg-row-alt)",
                   color: "var(--text-title)",

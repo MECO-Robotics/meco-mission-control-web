@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useRef, useState, useId, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, useId } from "react";
+
+import * as React from "react";
 
 import { formatDate, formatIterationVersion } from "@/lib/appUtils";
-import type { BootstrapPayload, TaskRecord } from "@/types";
+import type { BootstrapPayload, TaskRecord, TaskStatus } from "@/types";
 import {
   IconManufacturing,
   IconFilter,
@@ -11,30 +13,35 @@ import {
   IconTasks,
 } from "@/components/shared";
 import {
-  ColumnFilterDropdown,
   CompactFilterMenu,
   EditableHoverIndicator,
   type DropdownOption,
   type FilterSelection,
   FilterDropdown,
-  PaginationControls,
   SearchToolbarInput,
-  TableCell,
   filterSelectionIncludes,
   filterSelectionIntersects,
   filterSelectionMatchesTaskPeople,
   formatFilterSelectionLabel,
   useFilterChangeMotionClass,
-  useWorkspaceCompactMode,
-  useWorkspacePagination,
 } from "@/features/workspace/shared";
 import { getStatusPillClassName } from "@/features/workspace/shared";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
 import {
   TASK_PRIORITY_OPTIONS,
   TASK_STATUS_OPTIONS,
-  formatTaskStatusLabel,
 } from "@/features/workspace/shared";
+import {
+  TASK_QUEUE_BOARD_COLUMNS,
+  TASK_QUEUE_LAZY_LOAD_BATCH_SIZE,
+  type TaskQueueBoardState,
+  formatTaskQueueBoardState,
+  getTaskQueueBoardState,
+  getTaskQueueBoardStateSortValue,
+  groupTasksByBoardState,
+} from "@/features/workspace/views/taskQueueBoard";
+import { TimelineTaskStatusLogo } from "@/features/workspace/views/timeline/TimelineTaskStatusLogo";
+import type { TimelineTaskStatusSignal } from "@/features/workspace/views/timeline/timelineGridBodyUtils";
 
 type TaskSortField =
   | "disciplineId"
@@ -57,10 +64,64 @@ const TASK_SORT_OPTIONS: DropdownOption[] = [
   { id: "priority", name: "Priority" },
 ];
 
+const TASK_QUEUE_STATUS_OPTIONS: DropdownOption[] = [
+  ...TASK_STATUS_OPTIONS.map((option) => ({
+    ...option,
+    icon: React.createElement(TimelineTaskStatusLogo, {
+      compact: true,
+      signal: option.id as TimelineTaskStatusSignal,
+      status: option.id as TaskStatus,
+    }),
+  })),
+  {
+    id: "blocked",
+    name: "Blocked",
+    icon: React.createElement(TimelineTaskStatusLogo, {
+      compact: true,
+      signal: "blocked",
+      status: "not-started" as TaskStatus,
+    }),
+  },
+];
+
+const TASK_QUEUE_BOARD_STATE_LOGO_SPECS: Record<
+  TaskQueueBoardState,
+  { signal: TimelineTaskStatusSignal; status: TaskStatus }
+> = {
+  "not-started": {
+    signal: "not-started",
+    status: "not-started",
+  },
+  "in-progress": {
+    signal: "in-progress",
+    status: "in-progress",
+  },
+  blocked: {
+    signal: "blocked",
+    status: "not-started",
+  },
+  "waiting-for-qa": {
+    signal: "waiting-for-qa",
+    status: "waiting-for-qa",
+  },
+  complete: {
+    signal: "complete",
+    status: "complete",
+  },
+};
+
 const SORT_DIRECTION_OPTIONS: DropdownOption[] = [
   { id: "asc", name: "Ascending" },
   { id: "desc", name: "Descending" },
 ];
+
+const FILTER_TONE_CLASSES = [
+  "filter-tone-info",
+  "filter-tone-success",
+  "filter-tone-warning",
+  "filter-tone-danger",
+  "filter-tone-neutral",
+] as const;
 
 const SUBSYSTEM_ITERATION_DISCIPLINE_CODES = new Set<string>([
   "design",
@@ -69,11 +130,39 @@ const SUBSYSTEM_ITERATION_DISCIPLINE_CODES = new Set<string>([
   "electrical",
 ]);
 
+function getStableToneClassName(value: string) {
+  let hash = 0;
+
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
+  }
+
+  return FILTER_TONE_CLASSES[hash % FILTER_TONE_CLASSES.length];
+}
+
+function getTaskQueueStatusToneClassName(value: string) {
+  switch (value) {
+    case "in-progress":
+      return "filter-tone-warning";
+    case "waiting-for-qa":
+      return "filter-tone-info";
+    case "complete":
+      return "filter-tone-success";
+    case "blocked":
+      return "filter-tone-danger";
+    case "not-started":
+      return "filter-tone-neutral";
+    default:
+      return "filter-tone-neutral";
+  }
+}
+
 interface TaskQueueViewProps {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
   isAllProjectsView: boolean;
+  isNonRobotProject: boolean;
   membersById: Record<string, BootstrapPayload["members"][number]>;
   openCreateTaskModal: () => void;
   openEditTaskModal: (task: TaskRecord) => void;
@@ -106,6 +195,20 @@ function readTaskSubsystemIds(task: TaskRecord) {
   );
 }
 
+function readTaskWorkstreamIds(task: TaskRecord) {
+  const workstreamIds = Array.isArray(task.workstreamIds) ? task.workstreamIds : [];
+  const candidateIds = workstreamIds.length > 0 ? workstreamIds : [task.workstreamId];
+
+  return Array.from(
+    new Set(
+      candidateIds.filter(
+        (workstreamId): workstreamId is string =>
+          typeof workstreamId === "string" && workstreamId.length > 0,
+      ),
+    ),
+  );
+}
+
 function formatSubsystemNames(
   subsystemIds: string[],
   lookup: Record<string, BootstrapPayload["subsystems"][number]>,
@@ -123,6 +226,14 @@ function formatSubsystemNames(
         : "Unknown";
     })
     .join(", ");
+}
+
+function formatWorkstreamNames(
+  workstreamIds: string[],
+  lookup: Record<string, BootstrapPayload["workstreams"][number]>,
+  fallback: string,
+) {
+  return formatNames(workstreamIds, lookup, fallback);
 }
 
 function TaskQueueCompactFilterMenu({
@@ -251,28 +362,36 @@ function TaskQueueCompactFilterMenu({
 
           <div className="task-queue-filter-menu-item">
             <span className="task-queue-filter-menu-label">Discipline</span>
-            <FilterDropdown
-              allLabel="All disciplines"
-              ariaLabel="Filter tasks by discipline"
-              className="task-queue-filter-menu-submenu"
-              icon={<IconTasks />}
-              onChange={setDisciplineFilter}
-              options={disciplineOptions}
-              value={disciplineFilter}
-            />
+              <FilterDropdown
+                allLabel="All disciplines"
+                ariaLabel="Filter tasks by discipline"
+                className="task-queue-filter-menu-submenu"
+                icon={<IconTasks />}
+                getOptionToneClassName={(option) => getStableToneClassName(option.id)}
+                getSelectedToneClassName={(selection) =>
+                  selection.length === 1 ? getStableToneClassName(selection[0]) : undefined
+                }
+                onChange={setDisciplineFilter}
+                options={disciplineOptions}
+                value={disciplineFilter}
+              />
           </div>
 
           <div className="task-queue-filter-menu-item">
             <span className="task-queue-filter-menu-label">Subsystem</span>
-            <FilterDropdown
-              allLabel="All subsystems"
-              ariaLabel="Filter tasks by subsystem"
-              className="task-queue-filter-menu-submenu"
-              icon={<IconManufacturing />}
-              onChange={setSubsystemFilter}
-              options={subsystemFilterOptions}
-              value={subsystemFilter}
-            />
+              <FilterDropdown
+                allLabel="All subsystems"
+                ariaLabel="Filter tasks by subsystem"
+                className="task-queue-filter-menu-submenu"
+                icon={<IconManufacturing />}
+                getOptionToneClassName={(option) => getStableToneClassName(option.id)}
+                getSelectedToneClassName={(selection) =>
+                  selection.length === 1 ? getStableToneClassName(selection[0]) : undefined
+                }
+                onChange={setSubsystemFilter}
+                options={subsystemFilterOptions}
+                value={subsystemFilter}
+              />
           </div>
 
           {showSubsystemIterationFilter ? (
@@ -305,15 +424,19 @@ function TaskQueueCompactFilterMenu({
 
           <div className="task-queue-filter-menu-item">
             <span className="task-queue-filter-menu-label">Status</span>
-            <FilterDropdown
-              allLabel="All statuses"
-              ariaLabel="Filter tasks by status"
-              className="task-queue-filter-menu-submenu"
-              icon={<IconTasks />}
-              onChange={setStatusFilter}
-              options={TASK_STATUS_OPTIONS}
-              value={statusFilter}
-            />
+              <FilterDropdown
+                allLabel="All statuses"
+                ariaLabel="Filter tasks by status"
+                className="task-queue-filter-menu-submenu"
+                icon={<IconTasks />}
+                getOptionToneClassName={(option) => getTaskQueueStatusToneClassName(option.id)}
+                getSelectedToneClassName={(selection) =>
+                  selection.length === 1 ? getTaskQueueStatusToneClassName(selection[0]) : undefined
+                }
+                onChange={setStatusFilter}
+                options={TASK_QUEUE_STATUS_OPTIONS}
+                value={statusFilter}
+              />
           </div>
 
           <div className="task-queue-filter-menu-item">
@@ -348,6 +471,102 @@ function readTaskAssigneeIds(task: TaskRecord) {
       : [];
 }
 
+function getTaskCardPerson(
+  task: TaskRecord,
+  membersById: Record<string, BootstrapPayload["members"][number]>,
+) {
+  const personId = readTaskAssigneeIds(task)[0];
+  return personId ? membersById[personId] ?? null : null;
+}
+
+function getMemberInitial(member: { name: string }) {
+  return member.name.trim().slice(0, 1).toUpperCase() || "?";
+}
+
+function getTaskPriorityLabel(priority: TaskRecord["priority"]) {
+  switch (priority) {
+    case "critical":
+      return "Critical";
+    case "high":
+      return "High";
+    case "medium":
+      return "Medium";
+    case "low":
+      return "Low";
+    default:
+      return "Priority";
+  }
+}
+
+function TaskPriorityIcon({ priority }: { priority: TaskRecord["priority"] }) {
+  switch (priority) {
+    case "critical":
+      return (
+        <>
+          <path d="m6 14 6-6 6 6" />
+          <path d="m6 9 6-6 6 6" />
+        </>
+      );
+    case "high":
+      return (
+        <>
+          <path d="m6 14 6-6 6 6" />
+        </>
+      );
+    case "medium":
+      return (
+        <>
+          <path d="M6 9h12" />
+          <path d="M6 15h12" />
+        </>
+      );
+    case "low":
+      return (
+        <>
+          <path d="m6 10 6 6 6-6" />
+        </>
+      );
+    default:
+      return null;
+  }
+}
+
+function TaskPriorityBadge({ priority }: { priority: TaskRecord["priority"] }) {
+  const label = `${getTaskPriorityLabel(priority)} priority`;
+
+  return (
+    <svg
+      aria-label={label}
+      className={`task-queue-board-card-priority task-queue-board-card-priority-${priority}`}
+      fill="none"
+      role="img"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2.5"
+      height="14"
+      viewBox="0 0 24 24"
+      width="14"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <TaskPriorityIcon priority={priority} />
+    </svg>
+  );
+}
+
+export function getTaskQueueCardContextLabel(
+  task: TaskRecord,
+  projectType: BootstrapPayload["projects"][number]["projectType"] | undefined,
+  subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>,
+  workstreamsById: Record<string, BootstrapPayload["workstreams"][number]>,
+) {
+  if (projectType === "robot") {
+    return formatSubsystemNames(readTaskSubsystemIds(task), subsystemsById, "Unassigned subsystem");
+  }
+
+  return formatWorkstreamNames(readTaskWorkstreamIds(task), workstreamsById, "Unassigned workflow");
+}
+
 function formatTaskAssignees(
   task: TaskRecord,
   membersById: Record<string, BootstrapPayload["members"][number]>,
@@ -360,6 +579,7 @@ export function TaskQueueView({
   bootstrap,
   disciplinesById,
   isAllProjectsView,
+  isNonRobotProject,
   membersById,
   openCreateTaskModal,
   openEditTaskModal,
@@ -383,6 +603,13 @@ export function TaskQueueView({
         bootstrap.projects.map((project) => [project.id, project]),
       ) as Record<string, BootstrapPayload["projects"][number]>,
     [bootstrap.projects],
+  );
+  const workstreamsById = useMemo(
+    () =>
+      Object.fromEntries(
+        bootstrap.workstreams.map((workstream) => [workstream.id, workstream]),
+      ) as Record<string, BootstrapPayload["workstreams"][number]>,
+    [bootstrap.workstreams],
   );
   const subsystemFilterOptions = useMemo(
     () =>
@@ -453,45 +680,18 @@ export function TaskQueueView({
       setProjectFilter((current) => current.filter((projectId) => projectIds.has(projectId)));
     }
   }, [bootstrap.projects, projectFilter]);
-  const isTaskQueueMenuVisible = useWorkspaceCompactMode();
   const [isTaskQueueMenuOpen, setIsTaskQueueMenuOpen] = useState(false);
-
-  useEffect(() => {
-    if (!isTaskQueueMenuVisible) {
-      setIsTaskQueueMenuOpen(false);
-    }
-  }, [isTaskQueueMenuVisible]);
 
   useEffect(() => {
     if (!showSubsystemIterationFilter && subsystemIterationFilter.length > 0) {
       setSubsystemIterationFilter([]);
     }
   }, [showSubsystemIterationFilter, subsystemIterationFilter]);
-
-  const showProjectCol = isAllProjectsView;
-  const showDisciplineCol = true;
-  const showSubsystemCol = true;
-  const showOwnerCol = true;
-  const showStatusCol = true;
-  const showPriorityCol = true;
   const activePersonFilterLabel = formatFilterSelectionLabel(
     "All roster",
     bootstrap.members,
     activePersonFilter,
   );
-
-  const gridTemplate = [
-    showProjectCol ? "1fr" : null,
-    "minmax(200px, 2.5fr)",
-    showDisciplineCol ? "1fr" : null,
-    showSubsystemCol ? "1fr" : null,
-    showOwnerCol ? "1fr" : null,
-    showStatusCol ? "1fr" : null,
-    "1fr",
-    showPriorityCol ? "1fr" : null,
-  ]
-    .filter(Boolean)
-    .join(" ");
 
   const processedTasks = useMemo(() => {
     let result = [...bootstrap.tasks];
@@ -503,7 +703,9 @@ export function TaskQueueView({
       result = result.filter((task) => filterSelectionIncludes(projectFilter, task.projectId));
     }
     if (statusFilter.length > 0) {
-      result = result.filter((task) => filterSelectionIncludes(statusFilter, task.status));
+      result = result.filter((task) =>
+        filterSelectionIncludes(statusFilter, getTaskQueueBoardState(task, bootstrap)),
+      );
     }
     if (disciplineFilter.length > 0) {
       result = result.filter((task) =>
@@ -553,19 +755,13 @@ export function TaskQueueView({
       medium: 2,
       low: 1,
     };
-    const statusValues: Record<string, number> = {
-      "not-started": 1,
-      "in-progress": 2,
-      "waiting-for-qa": 3,
-      complete: 4,
-    };
 
     const readSortValue = (task: TaskRecord): number | string => {
       if (sortField === "priority") {
         return priorityValues[task.priority] ?? 0;
       }
       if (sortField === "status") {
-        return statusValues[task.status] ?? 0;
+        return getTaskQueueBoardStateSortValue(getTaskQueueBoardState(task, bootstrap));
       }
       if (sortField === "subsystemId") {
         return formatSubsystemNames(readTaskSubsystemIds(task), subsystemsById, "");
@@ -615,9 +811,78 @@ export function TaskQueueView({
     subsystemFilter,
     subsystemIterationFilter,
     showSubsystemIterationFilter,
+    bootstrap,
+    bootstrap.taskBlockers,
+    bootstrap.taskDependencies,
     subsystemsById,
   ]);
-  const taskPagination = useWorkspacePagination(processedTasks);
+  const [visibleTaskCount, setVisibleTaskCount] = useState(TASK_QUEUE_LAZY_LOAD_BATCH_SIZE);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setVisibleTaskCount(TASK_QUEUE_LAZY_LOAD_BATCH_SIZE);
+  }, [processedTasks]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || visibleTaskCount >= processedTasks.length) {
+      return;
+    }
+
+    const loadMore = () => {
+      setVisibleTaskCount((current) =>
+        Math.min(current + TASK_QUEUE_LAZY_LOAD_BATCH_SIZE, processedTasks.length),
+      );
+    };
+
+    const maybeLoadMore = () => {
+      const sentinel = loadMoreRef.current;
+      if (!sentinel) {
+        return;
+      }
+
+      const sentinelRect = sentinel.getBoundingClientRect();
+      if (sentinelRect.top <= window.innerHeight + 240) {
+        loadMore();
+      }
+    };
+
+    let rafId: number | undefined;
+    const handleScroll = () => {
+      if (rafId !== undefined) {
+        return;
+      }
+
+      rafId = window.requestAnimationFrame(() => {
+        rafId = undefined;
+        maybeLoadMore();
+      });
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll);
+    maybeLoadMore();
+
+    return () => {
+      if (rafId !== undefined) {
+        window.cancelAnimationFrame(rafId);
+      }
+
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, [processedTasks.length, visibleTaskCount]);
+  const visibleTasks = useMemo(
+    () => processedTasks.slice(0, visibleTaskCount),
+    [processedTasks, visibleTaskCount],
+  );
+  const boardTasksByState = useMemo(
+    () => groupTasksByBoardState(visibleTasks, bootstrap),
+    [bootstrap, visibleTasks],
+  );
+  const hasMoreTasks = visibleTaskCount < processedTasks.length;
+  const loadedTaskLabel = `${Math.min(visibleTaskCount, processedTasks.length)} of ${processedTasks.length}`;
+  const showProjectOnCards = isAllProjectsView && projectFilter.length === 0;
+  const showProjectContextOnCards = !isAllProjectsView;
   const taskFilterMotionClass = useFilterChangeMotionClass([
     activePersonFilter,
     disciplineFilter,
@@ -634,45 +899,14 @@ export function TaskQueueView({
   ]);
   const taskSortIsDefault = sortField === "dueDate" && sortOrder === "asc";
 
-  const toggleSort = (field: TaskSortField) => {
-    if (sortField === field) {
-      setSortOrder((current) => (current === "asc" ? "desc" : "asc"));
-      return;
-    }
-
-    setSortField(field);
-    setSortOrder("asc");
-  };
-
-  const getSortIcon = (field: TaskSortField) => {
-    if (sortField !== field) {
-      return "";
-    }
-
-    return sortOrder === "asc" ? "^" : "v";
-  };
-
-  const renderSortLabel = (field: TaskSortField, label: string) => {
-    const sortIcon = getSortIcon(field);
-
-    return (
-      <>
-        <span aria-hidden="true" className="table-sort-arrow">
-          {sortIcon}
-        </span>
-        <span>{label}</span>
-      </>
-    );
-  };
-
   return (
     <section className={`panel dense-panel task-queue-view ${WORKSPACE_PANEL_CLASS}`}>
       <div className="panel-header compact-header">
         <div className="queue-section-header">
-          <h2>Task queue</h2>
+          <h2>Task kanban</h2>
           <p className="section-copy filter-copy">
             {activePersonFilter.length === 0
-              ? "All tasks in queue."
+              ? "All tasks in kanban."
               : `Only tasks assigned to or mentored by ${activePersonFilterLabel}.`}
           </p>
         </div>
@@ -686,88 +920,84 @@ export function TaskQueueView({
             />
           </div>
 
-          {isTaskQueueMenuVisible ? (
-            <TaskQueueCompactFilterMenu
-              activeFilterCount={[
-                isAllProjectsView ? projectFilter : [],
-                disciplineFilter,
-                subsystemFilter,
-                showSubsystemIterationFilter ? subsystemIterationFilter : [],
-                ownerFilter,
-                statusFilter,
-                priorityFilter,
-              ].filter((selection) => selection.length > 0).length}
-              bootstrap={bootstrap}
-              disciplineFilter={disciplineFilter}
-              disciplineOptions={disciplineOptions}
-              isAllProjectsView={isAllProjectsView}
-              isOpen={isTaskQueueMenuOpen}
-              onClose={() => setIsTaskQueueMenuOpen(false)}
-              onToggle={() => setIsTaskQueueMenuOpen((current) => !current)}
-              ownerFilter={ownerFilter}
-              priorityFilter={priorityFilter}
-              projectFilter={projectFilter}
-              setDisciplineFilter={setDisciplineFilter}
-              setPriorityFilter={setPriorityFilter}
-              setProjectFilter={setProjectFilter}
-              setStatusFilter={setStatusFilter}
-              setSubsystemFilter={setSubsystemFilter}
-              setSubsystemIterationFilter={setSubsystemIterationFilter}
-              setOwnerFilter={setOwnerFilter}
-              showSubsystemIterationFilter={showSubsystemIterationFilter}
-              statusFilter={statusFilter}
-              subsystemFilter={subsystemFilter}
-              subsystemFilterOptions={subsystemFilterOptions}
-              subsystemIterationFilter={subsystemIterationFilter}
-              subsystemIterationOptions={subsystemIterationOptions}
-            />
-          ) : null}
+          <TaskQueueCompactFilterMenu
+            activeFilterCount={[
+              isAllProjectsView ? projectFilter : [],
+              disciplineFilter,
+              subsystemFilter,
+              showSubsystemIterationFilter ? subsystemIterationFilter : [],
+              ownerFilter,
+              statusFilter,
+              priorityFilter,
+            ].filter((selection) => selection.length > 0).length}
+            bootstrap={bootstrap}
+            disciplineFilter={disciplineFilter}
+            disciplineOptions={disciplineOptions}
+            isAllProjectsView={isAllProjectsView}
+            isOpen={isTaskQueueMenuOpen}
+            onClose={() => setIsTaskQueueMenuOpen(false)}
+            onToggle={() => setIsTaskQueueMenuOpen((current) => !current)}
+            ownerFilter={ownerFilter}
+            priorityFilter={priorityFilter}
+            projectFilter={projectFilter}
+            setDisciplineFilter={setDisciplineFilter}
+            setPriorityFilter={setPriorityFilter}
+            setProjectFilter={setProjectFilter}
+            setStatusFilter={setStatusFilter}
+            setSubsystemFilter={setSubsystemFilter}
+            setSubsystemIterationFilter={setSubsystemIterationFilter}
+            setOwnerFilter={setOwnerFilter}
+            showSubsystemIterationFilter={showSubsystemIterationFilter}
+            statusFilter={statusFilter}
+            subsystemFilter={subsystemFilter}
+            subsystemFilterOptions={subsystemFilterOptions}
+            subsystemIterationFilter={subsystemIterationFilter}
+            subsystemIterationOptions={subsystemIterationOptions}
+          />
 
-          {isTaskQueueMenuVisible ? (
-            <CompactFilterMenu
-              activeCount={taskSortIsDefault ? 0 : 1}
-              ariaLabel="Sort tasks"
-              buttonLabel="Sort"
-              className="task-queue-sort-menu"
-              icon={<IconSort />}
-              items={[
-                {
-                  label: "Sort by",
-                  content: (
-                    <select
-                      aria-label="Sort tasks by"
-                      className="task-queue-sort-menu-select"
-                      onChange={(event) => setSortField(event.target.value as TaskSortField)}
-                      value={sortField}
-                    >
-                      {TASK_SORT_OPTIONS.map((option) => (
-                        <option key={option.id} value={option.id}>
-                          {option.name}
-                        </option>
-                      ))}
-                    </select>
-                  ),
-                },
-                {
-                  label: "Direction",
-                  content: (
-                    <select
-                      aria-label="Sort direction"
-                      className="task-queue-sort-menu-select"
-                      onChange={(event) => setSortOrder(event.target.value as "asc" | "desc")}
-                      value={sortOrder}
-                    >
-                      {SORT_DIRECTION_OPTIONS.map((option) => (
-                        <option key={option.id} value={option.id}>
-                          {option.name}
-                        </option>
-                      ))}
-                    </select>
-                  ),
-                },
-              ]}
-            />
-          ) : null}
+          <CompactFilterMenu
+            activeCount={taskSortIsDefault ? 0 : 1}
+            ariaLabel="Sort tasks"
+            buttonLabel="Sort"
+            className="task-queue-sort-menu"
+            icon={<IconSort />}
+            items={[
+              {
+                label: "Sort by",
+                content: (
+                  <select
+                    aria-label="Sort tasks by"
+                    className="task-queue-sort-menu-select"
+                    onChange={(event) => setSortField(event.target.value as TaskSortField)}
+                    value={sortField}
+                  >
+                    {TASK_SORT_OPTIONS.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.name}
+                      </option>
+                    ))}
+                  </select>
+                ),
+              },
+              {
+                label: "Direction",
+                content: (
+                  <select
+                    aria-label="Sort direction"
+                    className="task-queue-sort-menu-select"
+                    onChange={(event) => setSortOrder(event.target.value as "asc" | "desc")}
+                    value={sortOrder}
+                  >
+                    {SORT_DIRECTION_OPTIONS.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.name}
+                      </option>
+                    ))}
+                  </select>
+                ),
+              },
+            ]}
+          />
 
           <button
             aria-label="Add task"
@@ -782,178 +1012,120 @@ export function TaskQueueView({
         </div>
       </div>
 
-      <div className={`table-shell ${taskFilterMotionClass}`}>
-        <div
-          className="queue-table queue-table-header"
-          style={{ "--workspace-grid-template": gridTemplate } as CSSProperties}
-        >
-          {showProjectCol ? (
-            <span className="table-column-header-cell">
-              <button className="table-sort-button" onClick={() => toggleSort("projectId")} type="button">
-                {renderSortLabel("projectId", "Project")}
-              </button>
-              <ColumnFilterDropdown
-                allLabel="All projects"
-                ariaLabel="Filter tasks by project"
-                onChange={setProjectFilter}
-                options={bootstrap.projects}
-                value={projectFilter}
-              />
-            </span>
-          ) : null}
-          <button className="table-sort-button" onClick={() => toggleSort("title")} type="button">
-            {renderSortLabel("title", "Task")}
-          </button>
-          {showDisciplineCol ? (
-            <span className="table-column-header-cell">
-              <button className="table-sort-button" onClick={() => toggleSort("disciplineId")} type="button">
-                {renderSortLabel("disciplineId", "Discipline")}
-              </button>
-              <ColumnFilterDropdown
-                allLabel="All disciplines"
-                ariaLabel="Filter tasks by discipline"
-                onChange={setDisciplineFilter}
-                options={disciplineOptions}
-                value={disciplineFilter}
-              />
-            </span>
-          ) : null}
-          {showSubsystemCol ? (
-            <span className="table-column-header-cell">
-              <button className="table-sort-button" onClick={() => toggleSort("subsystemId")} type="button">
-                {renderSortLabel("subsystemId", "Subsystem")}
-              </button>
-              <ColumnFilterDropdown
-                allLabel="All subsystems"
-                ariaLabel="Filter tasks by subsystem"
-                onChange={setSubsystemFilter}
-                options={subsystemFilterOptions}
-                value={subsystemFilter}
-              />
-              {showSubsystemIterationFilter ? (
-                <ColumnFilterDropdown
-                  allLabel="All iterations"
-                  ariaLabel="Filter tasks by subsystem iteration"
-                  onChange={setSubsystemIterationFilter}
-                  options={subsystemIterationOptions}
-                  value={subsystemIterationFilter}
-                />
-              ) : null}
-            </span>
-          ) : null}
-          {showOwnerCol ? (
-            <span className="table-column-header-cell">
-              <button className="table-sort-button" onClick={() => toggleSort("ownerId")} type="button">
-                {renderSortLabel("ownerId", "Assigned")}
-              </button>
-              <ColumnFilterDropdown
-                allLabel="All assignees"
-                ariaLabel="Filter tasks by assigned student"
-                onChange={setOwnerFilter}
-                options={bootstrap.members}
-                value={ownerFilter}
-              />
-            </span>
-          ) : null}
-          {showStatusCol ? (
-            <span className="table-column-header-cell">
-              <button className="table-sort-button" onClick={() => toggleSort("status")} type="button">
-                {renderSortLabel("status", "Status")}
-              </button>
-              <ColumnFilterDropdown
-                allLabel="All statuses"
-                ariaLabel="Filter tasks by status"
-                onChange={setStatusFilter}
-                options={TASK_STATUS_OPTIONS}
-                value={statusFilter}
-              />
-            </span>
-          ) : null}
-          <button className="table-sort-button" onClick={() => toggleSort("dueDate")} type="button">
-            {renderSortLabel("dueDate", "Due")}
-          </button>
-          {showPriorityCol ? (
-            <span className="table-column-header-cell">
-              <button className="table-sort-button" onClick={() => toggleSort("priority")} type="button">
-                {renderSortLabel("priority", "Priority")}
-              </button>
-              <ColumnFilterDropdown
-                allLabel="All priorities"
-                ariaLabel="Filter tasks by priority"
-                onChange={setPriorityFilter}
-                options={TASK_PRIORITY_OPTIONS}
-                value={priorityFilter}
-              />
-            </span>
-          ) : null}
+      <div className={`table-shell task-queue-board-shell ${taskFilterMotionClass}`}>
+        {visibleTasks.length > 0 ? (
+          <div className="task-queue-board">
+            {TASK_QUEUE_BOARD_COLUMNS.map(({ state }) => {
+              const tasks = boardTasksByState[state];
+
+              return (
+                <section className="task-queue-board-column" key={state}>
+                  <div className="task-queue-board-column-header">
+                    <span className={getStatusPillClassName(state)}>
+                      <span
+                        aria-hidden="true"
+                        className="task-queue-board-column-header-icon"
+                      >
+                        <TimelineTaskStatusLogo
+                          compact
+                          signal={TASK_QUEUE_BOARD_STATE_LOGO_SPECS[state].signal}
+                          status={TASK_QUEUE_BOARD_STATE_LOGO_SPECS[state].status}
+                        />
+                      </span>
+                      <span className="task-queue-board-column-header-label">
+                        {formatTaskQueueBoardState(state)}
+                      </span>
+                    </span>
+                    <span className="task-queue-board-column-count">{tasks.length}</span>
+                  </div>
+                  <div className="task-queue-board-column-body">
+                    {tasks.length > 0 ? (
+                      tasks.map((task) => {
+                        const boardState = getTaskQueueBoardState(task, bootstrap);
+                        const person = getTaskCardPerson(task, membersById);
+
+                        return (
+                          <button
+                            className="task-queue-board-card editable-hover-target editable-hover-target-row"
+                            data-board-state={boardState}
+                            data-tutorial-target="edit-task-row"
+                            key={task.id}
+                            onClick={() => openEditTaskModal(task)}
+                            type="button"
+                          >
+                            <div className="task-queue-board-card-header">
+                              <strong>{task.title}</strong>
+                              <span className="task-queue-board-card-due">
+                                Due {formatDate(task.dueDate)}
+                              </span>
+                            </div>
+                            <small className="task-queue-board-card-summary">{task.summary}</small>
+                            <div
+                              className={`task-queue-board-card-meta${showProjectOnCards ? "" : " task-queue-board-card-meta-person-only"}`}
+                            >
+                              {showProjectOnCards ? (
+                                <span>{projectsById[task.projectId]?.name ?? "Unknown project"}</span>
+                              ) : showProjectContextOnCards ? (
+                                <span
+                                  className="task-queue-board-card-context-chip"
+                                  title={getTaskQueueCardContextLabel(
+                                    task,
+                                    isNonRobotProject ? "operations" : "robot",
+                                    subsystemsById,
+                                    workstreamsById,
+                                  )}
+                                >
+                                  {getTaskQueueCardContextLabel(
+                                    task,
+                                    isNonRobotProject ? "operations" : "robot",
+                                    subsystemsById,
+                                    workstreamsById,
+                                  )}
+                                </span>
+                              ) : null}
+                              <div className="task-queue-board-card-meta-person-group">
+                                <TaskPriorityBadge priority={task.priority} />
+                                {person ? (
+                                  <span className="task-queue-board-card-person" title={person.name}>
+                                    {person.photoUrl ? (
+                                      <img
+                                        alt={`${person.name} profile picture`}
+                                        className="profile-avatar"
+                                        loading="lazy"
+                                        referrerPolicy="no-referrer"
+                                        src={person.photoUrl}
+                                      />
+                                    ) : (
+                                      <span className="profile-avatar profile-avatar-fallback" aria-hidden="true">
+                                        {getMemberInitial(person)}
+                                      </span>
+                                    )}
+                                  </span>
+                                ) : null}
+                              </div>
+                            </div>
+                            <EditableHoverIndicator className="task-queue-board-card-hover" />
+                          </button>
+                        );
+                      })
+                    ) : (
+                      <p className="task-queue-board-column-empty">No tasks</p>
+                    )}
+                  </div>
+                </section>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="empty-state">No tasks match the current filters.</p>
+        )}
+        <div className="task-queue-board-footer">
+          <p className="task-queue-board-load-status">
+            Showing {loadedTaskLabel} tasks
+            {hasMoreTasks ? " - scroll to load more." : "."}
+          </p>
+          {hasMoreTasks ? <div aria-hidden="true" className="task-queue-board-load-sentinel" ref={loadMoreRef} /> : null}
         </div>
-
-        {taskPagination.pageItems.map((task) => {
-          return (
-            <button
-              className="queue-table queue-row editable-hover-target editable-hover-target-row"
-              data-tutorial-target="edit-task-row"
-              key={task.id}
-              onClick={() => openEditTaskModal(task)}
-              style={{ "--workspace-grid-template": gridTemplate } as CSSProperties}
-              type="button"
-            >
-              {showProjectCol ? (
-                <TableCell label="Project">
-                  {projectsById[task.projectId]?.name ?? "Unknown"}
-                </TableCell>
-              ) : null}
-              <span
-                className="queue-title table-cell table-cell-primary queue-title-stack"
-                data-label="Task"
-              >
-                <strong>{task.title}</strong>
-                <small>{task.summary}</small>
-              </span>
-              {showDisciplineCol ? (
-                <TableCell label="Discipline">
-                  {(task.disciplineId ? disciplinesById[task.disciplineId]?.name : null) ?? "No discipline"}
-                </TableCell>
-              ) : null}
-              {showSubsystemCol ? (
-                <TableCell label="Subsystem">
-                  {formatSubsystemNames(readTaskSubsystemIds(task), subsystemsById, "Unknown")}
-                </TableCell>
-              ) : null}
-              {showOwnerCol ? (
-                <TableCell label="Assigned">
-                  {formatTaskAssignees(task, membersById)}
-                </TableCell>
-              ) : null}
-              {showStatusCol ? (
-                <TableCell label="Status" valueClassName="table-cell-pill">
-                  <span className={getStatusPillClassName(task.status)}>{formatTaskStatusLabel(task.status)}</span>
-                </TableCell>
-              ) : null}
-              <TableCell label="Due">{formatDate(task.dueDate)}</TableCell>
-              {showPriorityCol ? (
-                <TableCell label="Priority" valueClassName="table-cell-pill">
-                  <span className={getStatusPillClassName(task.priority)}>{task.priority}</span>
-                </TableCell>
-              ) : null}
-              <EditableHoverIndicator />
-            </button>
-          );
-        })}
-
-        {processedTasks.length === 0 ? <p className="empty-state">No tasks match the current filters.</p> : null}
-        <PaginationControls
-          label="tasks"
-          onPageChange={taskPagination.setPage}
-          onPageSizeChange={taskPagination.setPageSize}
-          page={taskPagination.page}
-          pageSize={taskPagination.pageSize}
-          pageSizeOptions={taskPagination.pageSizeOptions}
-          rangeEnd={taskPagination.rangeEnd}
-          rangeStart={taskPagination.rangeStart}
-          totalItems={taskPagination.totalItems}
-          totalPages={taskPagination.totalPages}
-        />
       </div>
     </section>
   );

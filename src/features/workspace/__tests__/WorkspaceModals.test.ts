@@ -156,6 +156,7 @@ function renderTaskModal(
       partInstancesById: {},
       requestPhotoUpload,
       openTaskDetailsModal: jest.fn(),
+      onTaskEditCanceled: jest.fn(),
       students: bootstrap.members.filter((member) => member.role !== "mentor"),
       taskDraft,
       taskModalMode,

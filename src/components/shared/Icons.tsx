@@ -114,6 +114,9 @@ export const IconEye = () => (
 export const IconRefresh = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block" }}><path d="M21 2v6h-6"></path><path d="M3 22v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.13-3.36L21 8"></path><path d="M20.49 15a9 9 0 0 1-14.13 3.36L3 16"></path></svg>
 );
+export const IconCheck = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block" }}><path d="m20 6-11 11-5-5"></path></svg>
+);
 export const IconPlus = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block" }}><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
 );

@@ -284,6 +284,7 @@ export default function AppWorkspace() {
   const [bootstrap, setBootstrap] = useState<BootstrapPayload>(EMPTY_BOOTSTRAP);
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [dataMessage, setDataMessage] = useState<string | null>(null);
+  const [taskEditNotice, setTaskEditNotice] = useState<string | null>(null);
   const [interactiveTutorialChapterId, setInteractiveTutorialChapterId] =
     useState<InteractiveTutorialChapterId | null>(null);
   const [interactiveTutorialCompletedChapterId, setInteractiveTutorialCompletedChapterId] =
@@ -508,6 +509,7 @@ export default function AppWorkspace() {
   const [memberForm, setMemberForm] = useState<MemberPayload>({
     name: "",
     email: "",
+    photoUrl: "",
     role: "student",
     elevated: false,
   });
@@ -1096,9 +1098,46 @@ export default function AppWorkspace() {
     [handleUnauthorized],
   );
 
+  const requestMemberPhotoUpload = useCallback(
+    (file: File) => {
+      const projectId =
+        selectedProjectId ??
+        bootstrap.projects.find((project) => project.seasonId === selectedSeasonId)?.id ??
+        bootstrap.projects[0]?.id ??
+        null;
+
+      if (!projectId) {
+        return Promise.reject(new Error("No project is available for photo upload."));
+      }
+
+      return requestPhotoUpload(projectId, file);
+    },
+    [bootstrap.projects, requestPhotoUpload, selectedProjectId, selectedSeasonId],
+  );
+
   const clearDataMessage = useCallback(() => {
     setDataMessage(null);
   }, []);
+
+  const clearTaskEditNotice = useCallback(() => {
+    setTaskEditNotice(null);
+  }, []);
+
+  const notifyTaskEditCanceled = useCallback(() => {
+    setTaskEditNotice("Task edit canceled. Unsaved changes were discarded.");
+  }, []);
+
+  useEffect(() => {
+    if (!taskEditNotice) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setTaskEditNotice(null);
+    }, 4500);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [taskEditNotice]);
 
   const selectMember = useCallback((memberId: string | null, payload: BootstrapPayload) => {
     const member = payload.members.find((candidate) => candidate.id === memberId) ?? null;
@@ -1108,6 +1147,7 @@ export default function AppWorkspace() {
         ? {
           name: member.name,
           email: member.email,
+          photoUrl: member.photoUrl ?? "",
           role: member.role,
           elevated: member.elevated,
         }
@@ -2926,6 +2966,7 @@ export default function AppWorkspace() {
         {
           name: memberForm.name.trim(),
           email: memberForm.email.trim(),
+          photoUrl: memberForm.photoUrl.trim(),
           role: normalizedRole,
           elevated: isElevatedMemberRole(normalizedRole),
           seasonId: selectedSeasonId,
@@ -3964,6 +4005,7 @@ export default function AppWorkspace() {
           bootstrap={scopedBootstrap}
           cncItems={cncItems}
           dataMessage={dataMessage}
+          taskEditNotice={taskEditNotice}
           fabricationItems={fabricationItems}
           handleCreateMember={handleCreateMember}
           handleReactivateMemberForSeason={handleReactivateMemberForSeason}
@@ -3971,6 +4013,7 @@ export default function AppWorkspace() {
           handleTimelineEventDelete={handleTimelineEventDelete}
           handleTimelineEventSave={handleTimelineEventSave}
           handleUpdateMember={handleUpdateMember}
+          requestMemberPhotoUpload={requestMemberPhotoUpload}
           isAddPersonOpen={isAddPersonOpen}
           isDeletingMember={isDeletingMember}
           isEditPersonOpen={isEditPersonOpen}
@@ -4036,11 +4079,11 @@ export default function AppWorkspace() {
           mechanismsById={mechanismsById}
           partDefinitionsById={partDefinitionsById}
           partInstancesById={partInstancesById}
-          requestMemberPhotoUpload={requestMemberPhotoUpload}
           subsystemsById={subsystemsById}
           timelineMilestoneCreateSignal={timelineMilestoneCreateSignal}
           disablePanelAnimations={disablePanelAnimations}
           onDismissDataMessage={clearDataMessage}
+          onDismissTaskEditNotice={clearTaskEditNotice}
           onStartInteractiveTutorial={() => void startInteractiveTutorial("planning")}
           onStartInteractiveTutorialChapter={(chapterId) =>
             void startInteractiveTutorial(chapterId as InteractiveTutorialChapterId)}
@@ -4205,6 +4248,7 @@ export default function AppWorkspace() {
             closeSubsystemModal={closeSubsystemModal}
             closeTaskModal={closeTaskModal}
             closeWorkstreamModal={closeWorkstreamModal}
+            onTaskEditCanceled={notifyTaskEditCanceled}
             requestPhotoUpload={requestPhotoUpload}
             disciplinesById={disciplinesById}
             eventsById={eventsById}
@@ -4310,22 +4354,3 @@ export default function AppWorkspace() {
     </main>
   );
 }
-  const requestMemberPhotoUpload = useCallback(
-    (file: File) => {
-      const projectId =
-        selectedProjectId ??
-        bootstrap.projects.find((project) => project.seasonId === selectedSeasonId)?.id ??
-        bootstrap.projects[0]?.id ??
-        null;
-
-      if (!projectId) {
-        return Promise.reject(new Error("No project is available for photo upload."));
-      }
-
-      return requestPhotoUpload(projectId, file);
-    },
-    [bootstrap.projects, requestPhotoUpload, selectedProjectId, selectedSeasonId],
-  );
-
-          photoUrl: member.photoUrl ?? "",
-          photoUrl: memberForm.photoUrl.trim(),
