@@ -50,10 +50,7 @@ import { TimelineMilestoneUnderlaysPortal } from "./TimelineMilestoneUnderlaysPo
 import { TimelineTodayMarkerPortal } from "./TimelineTodayMarkerPortal";
 import { TimelineRowHighlightsPortal } from "./TimelineRowHighlightsPortal";
 import { TimelineToolbar } from "./TimelineToolbar";
-import {
-  buildTimelineSubsystemHighlightStyle,
-  buildTimelineTaskHighlightStyle,
-} from "./timelineTaskColors";
+import { resolveTimelineRowHighlightStyle } from "./timelineTaskColors";
 import { useTimelineMilestoneOverlay } from "./useTimelineMilestoneOverlay";
 
 interface TimelineViewProps {
@@ -211,21 +208,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   );
   const subsystemRows = timeline.subsystemRows;
   const projectRows = useMemo(() => buildTimelineProjectRows(subsystemRows), [subsystemRows]);
-  const subsystemTaskCountsById = useMemo(() => {
-    const counts = Object.fromEntries(
-      subsystemRows.map((subsystem) => [subsystem.id, subsystem.taskCount]),
-    ) as Record<string, number>;
-
-    return counts;
-  }, [subsystemRows]);
-  const subsystemRowsById = useMemo(
-    () =>
-      Object.fromEntries(subsystemRows.map((subsystem) => [subsystem.id, subsystem])) as Record<
-        string,
-        typeof subsystemRows[number]
-      >,
-    [subsystemRows],
-  );
 
   const hasProjectColumn = isAllProjectsView;
   const showProjectCol = hasProjectColumn && isProjectColumnVisible;
@@ -234,9 +216,9 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const subsystemColumnWidth = showSubsystemCol ? SUBSYSTEM_COLUMN_WIDTH : 0;
   const subsystemColumnIndex = hasProjectColumn ? 2 : 1;
   const firstDayGridColumn = hasProjectColumn ? 3 : 2;
-  const statusIconColumnIndex = firstDayGridColumn;
-  const fixedTimelineColumnWidth = projectColumnWidth + subsystemColumnWidth;
-  const statusIconStickyLeft = hasProjectColumn ? projectColumnWidth + subsystemColumnWidth : subsystemColumnWidth;
+  const statusIconColumnIndex = firstDayGridColumn + timeline.days.length;
+  const fixedTimelineColumnWidth = projectColumnWidth + subsystemColumnWidth + STATUS_ICON_COLUMN_WIDTH;
+  const statusIconStickyRight = 0;
   const subsystemStickyLeft = hasProjectColumn ? projectColumnWidth : 0;
   const dayTrackSize = useMemo(
     () => getTimelineDayTrackSize(viewInterval, timelineZoom, fixedTimelineColumnWidth),
@@ -244,7 +226,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   );
 
   const timelineGridTemplate = useMemo(() => {
-    return `${hasProjectColumn ? `${projectColumnWidth}px ` : ""}${subsystemColumnWidth}px repeat(${timeline.days.length}, ${dayTrackSize})`;
+    return `${hasProjectColumn ? `${projectColumnWidth}px ` : ""}${subsystemColumnWidth}px repeat(${timeline.days.length}, ${dayTrackSize}) ${STATUS_ICON_COLUMN_WIDTH}px`;
   }, [
     hasProjectColumn,
     dayTrackSize,
@@ -259,7 +241,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       hasProjectColumn,
       projectColumnWidth,
       subsystemColumnWidth,
-      taskColumnWidth: 0,
+      taskColumnWidth: STATUS_ICON_COLUMN_WIDTH,
       viewInterval,
       zoom: timelineZoom,
     });
@@ -561,34 +543,9 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   );
 
   const resolveTaskRowHighlightStyle = useCallback(
-    (anchorKey: string): React.CSSProperties | null => {
-      if (anchorKey.startsWith("task:")) {
-        const task = tasksById[anchorKey.slice(5)];
-        if (!task) {
-          return null;
-        }
-
-        return buildTimelineTaskHighlightStyle(task.disciplineId, disciplinesById);
-      }
-
-      if (anchorKey.startsWith("subsystem:")) {
-        const subsystem = subsystemsById[anchorKey.slice(10)];
-        if (!subsystem) {
-          return null;
-        }
-
-        const subsystemRow = subsystemRowsById[subsystem.id];
-        const isSingleTaskRow = subsystemTaskCountsById[subsystem.id] === 1;
-        if (isSingleTaskRow && subsystemRow?.tasks[0]) {
-          return buildTimelineTaskHighlightStyle(subsystemRow.tasks[0].disciplineId, disciplinesById);
-        }
-
-        return buildTimelineSubsystemHighlightStyle(subsystem.color ?? "#4F86C6");
-      }
-
-      return null;
-    },
-    [disciplinesById, subsystemsById, subsystemRowsById, subsystemTaskCountsById, tasksById],
+    (anchorKey: string) =>
+      resolveTimelineRowHighlightStyle(anchorKey, tasksById, subsystemsById, disciplinesById),
+    [disciplinesById, subsystemsById, tasksById],
   );
 
   useEffect(() => {
@@ -750,10 +707,12 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         projectColumnWidth={projectColumnWidth}
         projectRows={projectRows}
         hoveredSubsystemId={hoveredSubsystemId}
+        hoveredTaskId={hoveredTaskId}
         selectedSubsystemId={selectedSubsystemId}
+        selectedTaskId={selectedTaskId}
         statusIconColumnIndex={statusIconColumnIndex}
         statusIconColumnWidth={STATUS_ICON_COLUMN_WIDTH}
-        statusIconStickyLeft={statusIconStickyLeft}
+        statusIconStickyRight={statusIconStickyRight}
         showProjectCol={showProjectCol}
         showSubsystemCol={showSubsystemCol}
         isScrolling={isTimelineShellScrolling}

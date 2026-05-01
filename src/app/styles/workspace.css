@@ -926,16 +926,16 @@
 
 .timeline-task-status-icon-button:hover,
 .timeline-task-status-icon-button:focus-visible {
-  justify-content: flex-start;
+  justify-content: flex-end;
   z-index: 10021;
 }
 
 .timeline-task-status-caption {
   position: absolute;
-  left: calc(100% + 0.15rem);
+  right: calc(100% + 0.15rem);
   top: 50%;
   transform: translateY(-50%) scaleX(0);
-  transform-origin: left center;
+  transform-origin: right center;
   margin: 0;
   max-width: 0;
   opacity: 0;
@@ -957,10 +957,10 @@
 }
 
 .timeline-task-status-icon-button:hover .timeline-task-status-caption,
-.timeline-task-status-icon-button:focus-visible .timeline-task-status-caption {
+.timeline-task-status-icon-button:focus-visible .timeline-task-status-caption,
+.timeline-task-status-icon-button.is-row-highlighted .timeline-task-status-caption {
   transform: translateY(-50%) scaleX(1);
   max-width: 12rem;
-  margin-left: 0.35rem;
   opacity: 1;
   padding: 0.12rem 0.45rem;
 }
@@ -1035,7 +1035,136 @@
   will-change: opacity;
 }
 
+.task-queue-board-shell-frame {
+  --task-queue-edge-pad: 1rem;
+  --task-queue-panel-inline-pad: 1rem;
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  margin-inline: calc(var(--task-queue-panel-inline-pad) * -1);
+  width: calc(100% + (var(--task-queue-panel-inline-pad) * 2));
+  isolation: isolate;
+}
+
+.task-queue-board-shell-frame::before,
+.task-queue-board-shell-frame::after {
+  content: "";
+  position: absolute;
+  top: -0.25rem;
+  bottom: -0.25rem;
+  width: var(--task-queue-edge-pad);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 160ms ease;
+  z-index: 2;
+}
+
+.task-queue-board-shell-frame::before {
+  left: 0;
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--bg-panel) 100%, transparent) 0%,
+    color-mix(in srgb, var(--bg-panel) 98%, transparent) 40%,
+    color-mix(in srgb, var(--bg-panel) 92%, transparent) 70%,
+    transparent 100%
+  );
+}
+
+.task-queue-board-shell-frame::after {
+  right: 0;
+  background: linear-gradient(
+    to left,
+    color-mix(in srgb, var(--bg-panel) 100%, transparent) 0%,
+    color-mix(in srgb, var(--bg-panel) 98%, transparent) 40%,
+    color-mix(in srgb, var(--bg-panel) 92%, transparent) 70%,
+    transparent 100%
+  );
+}
+
+.task-queue-board-shell-frame.has-scroll-left::before {
+  opacity: 1;
+}
+
+.task-queue-board-shell-frame.has-scroll-right::after {
+  opacity: 1;
+}
+
+.task-queue-board-scroll-hints {
+  position: sticky;
+  top: calc(50vh - 0.9rem);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.task-queue-board-scroll-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  min-height: 1.65rem;
+  pointer-events: auto;
+  padding: 0.22rem 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--border-base) 78%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg-panel) 88%, transparent);
+  box-shadow: 0 8px 18px rgba(15, 28, 52, 0.14);
+  color: var(--text-title);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+  backdrop-filter: blur(4px);
+}
+
+.task-queue-board-scroll-hint.is-hidden {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.task-queue-board-scroll-hint-label {
+  display: inline-block;
+  overflow: hidden;
+  max-width: 0;
+  opacity: 0;
+  transform: translateX(-0.2rem);
+  transition:
+    max-width 160ms ease,
+    opacity 160ms ease,
+    transform 160ms ease;
+  white-space: nowrap;
+}
+
+.task-queue-board-scroll-hint:hover .task-queue-board-scroll-hint-label,
+.task-queue-board-scroll-hint:focus-visible .task-queue-board-scroll-hint-label {
+  max-width: 3rem;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.task-queue-board-scroll-hint-left {
+  margin-left: 0.4rem;
+}
+
+.task-queue-board-scroll-hint-left .task-queue-board-scroll-hint-label {
+  margin-left: 0.05rem;
+}
+
+.task-queue-board-scroll-hint-right {
+  margin-right: 0.4rem;
+}
+
+.task-queue-board-scroll-hint-right .task-queue-board-scroll-hint-label {
+  margin-right: 0.05rem;
+}
+
 .task-queue-board-shell {
+  position: relative;
   width: 100%;
   min-width: 0;
   gap: 0.7rem;
@@ -1043,6 +1172,25 @@
   overflow-y: hidden;
   padding-bottom: 0.25rem;
   overscroll-behavior-x: contain;
+  cursor: grab;
+  touch-action: pan-x;
+  z-index: 1;
+}
+
+.task-queue-board-shell:active {
+  cursor: grabbing;
+}
+
+.task-queue-board-scroll-hint svg {
+  width: 0.82rem;
+  height: 0.82rem;
+  flex: 0 0 auto;
+}
+
+.page-shell.dark-mode .task-queue-board-scroll-hint {
+  background: color-mix(in srgb, var(--bg-panel) 84%, transparent);
+  border-color: color-mix(in srgb, var(--border-base) 90%, transparent);
+  box-shadow: 0 10px 20px rgba(2, 6, 23, 0.24);
 }
 
 .task-queue-board {
@@ -1158,6 +1306,28 @@
   text-align: left;
   cursor: pointer;
   box-shadow: 0 8px 18px rgba(15, 28, 52, 0.05);
+}
+
+.task-queue-board-card-discipline-accented {
+  border-color: color-mix(
+    in srgb,
+    var(--task-queue-board-card-discipline-accent) 56%,
+    var(--border-base)
+  );
+  box-shadow:
+    0 8px 18px rgba(15, 28, 52, 0.05),
+    0 0 0 1.5px
+      color-mix(
+        in srgb,
+        var(--task-queue-board-card-discipline-accent) 26%,
+        transparent
+      ),
+    inset 0 0 0 1px
+      color-mix(
+        in srgb,
+        var(--task-queue-board-card-discipline-accent) 16%,
+        transparent
+      );
 }
 
 .task-queue-board-card.editable-hover-target-row {
@@ -1327,6 +1497,28 @@
   background: rgba(15, 23, 42, 0.9);
   border-color: rgba(148, 163, 184, 0.2);
   box-shadow: 0 10px 20px rgba(2, 6, 23, 0.25);
+}
+
+.page-shell.dark-mode .task-queue-board-card-discipline-accented {
+  border-color: color-mix(
+    in srgb,
+    var(--task-queue-board-card-discipline-accent) 48%,
+    rgba(148, 163, 184, 0.2)
+  );
+  box-shadow:
+    0 10px 20px rgba(2, 6, 23, 0.25),
+    0 0 0 1.5px
+      color-mix(
+        in srgb,
+        var(--task-queue-board-card-discipline-accent) 28%,
+        transparent
+      ),
+    inset 0 0 0 1px
+      color-mix(
+        in srgb,
+        var(--task-queue-board-card-discipline-accent) 20%,
+        transparent
+      );
 }
 
 .page-shell.dark-mode .task-queue-board-card-meta > span:not(.task-queue-board-card-person) {

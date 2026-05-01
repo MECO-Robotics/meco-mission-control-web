@@ -15,6 +15,8 @@ import {
 } from "@/features/workspace/shared/timelineZoom";
 import { TimelineProjectGroup } from "@/features/workspace/views/timeline/TimelineProjectGroup";
 import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
+import { TimelineTaskStatusCell } from "@/features/workspace/views/timeline/TimelineTaskStatusCell";
+import { resolveTimelineRowHighlightStyle } from "@/features/workspace/views/timeline/timelineTaskColors";
 import {
   buildTimelineData,
   buildTimelineDayMilestoneUnderlays,
@@ -464,9 +466,9 @@ describe("TimelineView", () => {
         selectedSubsystemId: null,
         showProjectCol: true,
         showSubsystemCol: true,
-        statusIconColumnIndex: 3,
+        statusIconColumnIndex: 5,
         statusIconColumnWidth: 36,
-        statusIconStickyLeft: 240,
+        statusIconStickyRight: 0,
         subsystemColumnIndex: 2,
         subsystemStickyLeft: 112,
         taskDependencyCountsById: {},
@@ -491,7 +493,7 @@ describe("TimelineView", () => {
             primaryEventEndDay: "",
           },
         ],
-        timelineGridTemplate: "112px 128px repeat(2, 24px)",
+        timelineGridTemplate: "112px 128px repeat(2, 24px) 36px",
         toggleProject: jest.fn(),
         toggleSubsystem: jest.fn(),
       }),
@@ -538,9 +540,9 @@ describe("TimelineView", () => {
         selectedSubsystemId: null,
         showProjectCol: true,
         showSubsystemCol: true,
-        statusIconColumnIndex: 2,
+        statusIconColumnIndex: 4,
         statusIconColumnWidth: 36,
-        statusIconStickyLeft: 128,
+        statusIconStickyRight: 0,
         subsystem: {
           id: "subsystem-2",
           name: "Controls",
@@ -580,7 +582,7 @@ describe("TimelineView", () => {
             primaryEventEndDay: "",
           },
         ],
-        timelineGridTemplate: "128px repeat(2, 24px)",
+        timelineGridTemplate: "128px repeat(2, 24px) 36px",
         toggleSubsystem: jest.fn(),
       }),
     );
@@ -589,8 +591,54 @@ describe("TimelineView", () => {
     expect(statusIndex).toBeGreaterThanOrEqual(0);
 
     const statusSnippet = markup.slice(statusIndex, statusIndex + 420);
-    expect(statusSnippet).toContain("grid-column:2");
+    expect(statusSnippet).toContain("grid-column:4");
+    expect(statusSnippet).toContain("right:0px");
     expect(statusSnippet).toContain("timeline-task-status-icon-button");
+  });
+
+  it("marks the timeline status caption open when the row is highlighted", () => {
+    const bootstrap = createBootstrap();
+    const task = bootstrap.tasks[0] as BootstrapPayload["tasks"][number];
+    const markup = renderToStaticMarkup(
+      React.createElement(TimelineTaskStatusCell, {
+        clearHoveredMilestonePopup: jest.fn(),
+        clearHoveredTaskRow: jest.fn(),
+        gridRow: "1",
+        hoverTaskRow: jest.fn(),
+        isHighlighted: true,
+        onOpenTask: jest.fn(),
+        ownerId: "project-1",
+        statusIconColumnIndex: 4,
+        statusIconColumnWidth: 36,
+        statusIconStickyRight: 0,
+        task,
+        taskStatusSignalsById: {},
+      }),
+    );
+
+    expect(markup).toContain("is-row-highlighted");
+    expect(markup).toContain("timeline-task-status-caption");
+  });
+
+  it("keeps single-task subsystem highlights on the subsystem color", () => {
+    const bootstrap = createBootstrap();
+    const subsystem = bootstrap.subsystems[0] as BootstrapPayload["subsystems"][number];
+    const style = resolveTimelineRowHighlightStyle(
+      `subsystem:${subsystem.id}`,
+      Object.fromEntries(bootstrap.tasks.map((task) => [task.id, task])),
+      Object.fromEntries(bootstrap.subsystems.map((row) => [row.id, row])),
+      Object.fromEntries(bootstrap.disciplines.map((discipline) => [discipline.id, discipline])),
+    );
+    const highlightStyle = style as Record<string, string | undefined> | null;
+    const selectedFill = highlightStyle?.["--timeline-row-highlight-selected-fill"];
+    const hoverFill = highlightStyle?.["--timeline-row-highlight-hover-fill"];
+    const subsystemColor = "#4F86C6";
+    const disciplineColor = "#c67b1f";
+
+    expect(selectedFill).toContain(subsystemColor);
+    expect(hoverFill).toContain(subsystemColor);
+    expect(selectedFill).not.toContain(disciplineColor);
+    expect(hoverFill).not.toContain(disciplineColor);
   });
 
   it("lets collapsed project labels overflow past the right-side summary columns", () => {
@@ -648,9 +696,9 @@ describe("TimelineView", () => {
         selectedSubsystemId: null,
         showProjectCol: true,
         showSubsystemCol: true,
-        statusIconColumnIndex: 3,
+        statusIconColumnIndex: 5,
         statusIconColumnWidth: 36,
-        statusIconStickyLeft: 240,
+        statusIconStickyRight: 0,
         subsystemColumnIndex: 2,
         subsystemStickyLeft: 112,
         taskDependencyCountsById: {},
@@ -666,7 +714,7 @@ describe("TimelineView", () => {
             primaryEventEndDay: "",
           },
         ],
-        timelineGridTemplate: "112px 128px repeat(1, 24px)",
+        timelineGridTemplate: "112px 128px repeat(1, 24px) 36px",
         toggleProject: jest.fn(),
         toggleSubsystem: jest.fn(),
       }),

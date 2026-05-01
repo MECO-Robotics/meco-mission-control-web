@@ -7,12 +7,13 @@ interface TimelineTaskStatusCellProps {
   clearHoveredMilestonePopup: () => void;
   clearHoveredTaskRow: () => void;
   compact?: boolean;
+  isHighlighted?: boolean;
   gridRow: string | number;
   hoverTaskRow: (id: string) => void;
   onOpenTask: (task: TaskRecord) => void;
   statusIconColumnIndex: number;
   statusIconColumnWidth: number;
-  statusIconStickyLeft: number;
+  statusIconStickyRight: number;
   task: TaskRecord;
   taskStatusSignalsById: Record<string, TimelineTaskStatusSignal>;
   ownerId: string;
@@ -22,13 +23,14 @@ export const TimelineTaskStatusCell: React.FC<TimelineTaskStatusCellProps> = ({
   clearHoveredMilestonePopup,
   clearHoveredTaskRow,
   compact = false,
+  isHighlighted = false,
   gridRow,
   hoverTaskRow,
   onOpenTask,
   ownerId,
   statusIconColumnIndex,
   statusIconColumnWidth,
-  statusIconStickyLeft,
+  statusIconStickyRight,
   task,
   taskStatusSignalsById,
 }) => {
@@ -49,13 +51,13 @@ export const TimelineTaskStatusCell: React.FC<TimelineTaskStatusCellProps> = ({
         justifyContent: "center",
         boxSizing: "border-box",
         position: "sticky",
-        left: `${statusIconStickyLeft}px`,
+        right: `${statusIconStickyRight}px`,
         zIndex: 10020,
       }}
     >
       <button
         aria-label={`Open task ${task.title}`}
-        className={`timeline-task-status-icon-button${compact ? " is-compact" : ""}`}
+        className={`timeline-task-status-icon-button${compact ? " is-compact" : ""}${isHighlighted ? " is-row-highlighted" : ""}`}
         data-status-signal={signal}
         onClick={() => onOpenTask(task)}
         onMouseEnter={() => {

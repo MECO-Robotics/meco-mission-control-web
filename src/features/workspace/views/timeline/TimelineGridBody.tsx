@@ -35,7 +35,9 @@ interface TimelineGridBodyProps {
   projectColumnWidth: number;
   projectRows: TimelineProjectRow[];
   hoveredSubsystemId: string | null;
+  hoveredTaskId: string | null;
   selectedSubsystemId: string | null;
+  selectedTaskId: string | null;
   showProjectCol: boolean;
   showSubsystemCol: boolean;
   subsystemColumnIndex: number;
@@ -44,7 +46,7 @@ interface TimelineGridBodyProps {
   subsystemStickyLeft: number;
   statusIconColumnIndex: number;
   statusIconColumnWidth: number;
-  statusIconStickyLeft: number;
+  statusIconStickyRight: number;
   timelineDayCellRefs: React.MutableRefObject<Record<string, HTMLDivElement | null>>;
   timelineDayHeaderCells: TimelineDayHeaderCell[];
   timelineFilterMotionClass: string;
@@ -87,7 +89,9 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
   projectColumnWidth,
   projectRows,
   hoveredSubsystemId,
+  hoveredTaskId,
   selectedSubsystemId,
+  selectedTaskId,
   showProjectCol,
   showSubsystemCol,
   subsystemColumnIndex,
@@ -96,7 +100,7 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
   subsystemStickyLeft,
   statusIconColumnIndex,
   statusIconColumnWidth,
-  statusIconStickyLeft,
+  statusIconStickyRight,
   timelineDayCellRefs,
   timelineDayHeaderCells,
   timelineFilterMotionClass,
@@ -140,10 +144,12 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
           project={project}
           projectIndex={projectIndex}
           hoveredSubsystemId={hoveredSubsystemId}
+          hoveredTaskId={hoveredTaskId}
         selectedSubsystemId={selectedSubsystemId}
+        selectedTaskId={selectedTaskId}
       statusIconColumnIndex={statusIconColumnIndex}
       statusIconColumnWidth={statusIconColumnWidth}
-      statusIconStickyLeft={statusIconStickyLeft}
+      statusIconStickyRight={statusIconStickyRight}
           clearHoveredSubsystemRow={clearHoveredSubsystemRow}
           clearHoveredTaskRow={clearHoveredTaskRow}
           hoverTaskRow={hoverTaskRow}
@@ -173,7 +179,9 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
           key={subsystem.id}
           openTaskDetailModal={openTaskDetailModal}
           hoveredSubsystemId={hoveredSubsystemId}
+          hoveredTaskId={hoveredTaskId}
           selectedSubsystemId={selectedSubsystemId}
+          selectedTaskId={selectedTaskId}
           clearHoveredSubsystemRow={clearHoveredSubsystemRow}
           clearHoveredTaskRow={clearHoveredTaskRow}
           hoverTaskRow={hoverTaskRow}
@@ -188,7 +196,7 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
           subsystemStickyLeft={subsystemStickyLeft}
           statusIconColumnIndex={statusIconColumnIndex}
           statusIconColumnWidth={statusIconColumnWidth}
-          statusIconStickyLeft={statusIconStickyLeft}
+          statusIconStickyRight={statusIconStickyRight}
           taskDependencyCountsById={taskDependencyCountsById}
           taskStatusSignalsById={taskStatusSignalsById}
           timelineDayHeaderCells={timelineDayHeaderCells}

@@ -31,6 +31,7 @@ interface TimelineProjectGroupProps {
   gridMinWidth: number;
   handleTimelineDayMouseEnter: (event: React.MouseEvent<HTMLElement>) => void;
   hoveredSubsystemId: string | null;
+  hoveredTaskId?: string | null;
   hoverTaskRow: (id: string) => void;
   hoverSubsystemRow: (id: string) => void;
   project: TimelineProjectRow;
@@ -38,13 +39,14 @@ interface TimelineProjectGroupProps {
   selectSubsystemRow: (id: string) => void;
   selectTaskRow: (task: TaskRecord) => void;
   selectedSubsystemId: string | null;
+  selectedTaskId?: string | null;
   showProjectCol: boolean;
   showSubsystemCol: boolean;
   subsystemColumnIndex: number;
   subsystemStickyLeft: number;
   statusIconColumnIndex: number;
   statusIconColumnWidth: number;
-  statusIconStickyLeft: number;
+  statusIconStickyRight: number;
   taskDependencyCountsById: Record<string, TimelineTaskDependencyCounts>;
   taskStatusSignalsById: Record<string, TimelineTaskStatusSignal>;
   timelineDayHeaderCells: TimelineDayHeaderCell[];
@@ -65,6 +67,7 @@ export const TimelineProjectGroup: React.FC<TimelineProjectGroupProps> = ({
   gridMinWidth,
   handleTimelineDayMouseEnter,
   hoveredSubsystemId,
+  hoveredTaskId,
   hoverTaskRow,
   hoverSubsystemRow,
   project,
@@ -72,13 +75,14 @@ export const TimelineProjectGroup: React.FC<TimelineProjectGroupProps> = ({
   selectSubsystemRow,
   selectTaskRow,
   selectedSubsystemId,
+  selectedTaskId,
   showProjectCol,
   showSubsystemCol,
   subsystemColumnIndex,
   subsystemStickyLeft,
   statusIconColumnIndex,
   statusIconColumnWidth,
-  statusIconStickyLeft,
+  statusIconStickyRight,
   taskDependencyCountsById,
   taskStatusSignalsById,
   timelineDayHeaderCells,
@@ -116,11 +120,12 @@ export const TimelineProjectGroup: React.FC<TimelineProjectGroupProps> = ({
       gridRow={gridRow}
       hoverTaskRow={hoverTaskRow}
       key={`status-icon-${project.id}-${task.id}`}
+      isHighlighted={hoveredTaskId === task.id || selectedTaskId === task.id}
       onOpenTask={openTaskDetailModal}
       ownerId={project.id}
       statusIconColumnIndex={statusIconColumnIndex}
       statusIconColumnWidth={statusIconColumnWidth}
-      statusIconStickyLeft={statusIconStickyLeft}
+      statusIconStickyRight={statusIconStickyRight}
       task={task}
       taskStatusSignalsById={taskStatusSignalsById}
     />

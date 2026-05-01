@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import type { BootstrapPayload, DisciplineCode } from "@/types";
+import type { BootstrapPayload, DisciplineCode, TaskRecord } from "@/types";
 
 type TimelineTaskToneExtras = CSSProperties & Record<string, string | number | undefined>;
 
@@ -90,6 +90,33 @@ export function buildTimelineSubsystemHighlightStyle(
     subsystemColor ?? FALLBACK_TIMELINE_SUBSYSTEM_HIGHLIGHT_COLOR,
     extras,
   );
+}
+
+export function resolveTimelineRowHighlightStyle(
+  anchorKey: string,
+  tasksById: Record<string, TaskRecord>,
+  subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>,
+  disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>,
+) {
+  if (anchorKey.startsWith("task:")) {
+    const task = tasksById[anchorKey.slice(5)];
+    if (!task) {
+      return null;
+    }
+
+    return buildTimelineTaskHighlightStyle(task.disciplineId, disciplinesById);
+  }
+
+  if (anchorKey.startsWith("subsystem:")) {
+    const subsystem = subsystemsById[anchorKey.slice(10)];
+    if (!subsystem) {
+      return null;
+    }
+
+    return buildTimelineSubsystemHighlightStyle(subsystem.color ?? "#4F86C6");
+  }
+
+  return null;
 }
 
 export function buildTimelineTaskToneStyle(

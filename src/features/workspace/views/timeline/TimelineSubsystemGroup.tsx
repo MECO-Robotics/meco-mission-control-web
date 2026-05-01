@@ -29,20 +29,22 @@ interface TimelineSubsystemGroupProps {
   gridMinWidth: number;
   handleTimelineDayMouseEnter: (event: React.MouseEvent<HTMLElement>) => void;
   hoveredSubsystemId: string | null;
+  hoveredTaskId?: string | null;
   statusIconColumnIndex: number;
   statusIconColumnWidth: number;
-  statusIconStickyLeft: number;
+  statusIconStickyRight: number;
   hoverTaskRow: (id: string) => void;
   hoverSubsystemRow: (id: string) => void;
   selectSubsystemRow: (id: string) => void;
   selectTaskRow: (task: TaskRecord) => void;
   selectedSubsystemId: string | null;
+  selectedTaskId?: string | null;
   showProjectCol: boolean;
   showSubsystemCol: boolean;
   subsystem: TimelineSubsystemRow;
   subsystemColumnIndex: number;
-  subsystemIndex: number;
   subsystemStickyLeft: number;
+  subsystemIndex: number;
   taskDependencyCountsById: Record<string, TimelineTaskDependencyCounts>;
   taskStatusSignalsById: Record<string, TimelineTaskStatusSignal>;
   timelineDayHeaderCells: TimelineDayHeaderCell[];
@@ -61,14 +63,16 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
   gridMinWidth,
   handleTimelineDayMouseEnter,
   hoveredSubsystemId,
+  hoveredTaskId,
   statusIconColumnIndex,
   statusIconColumnWidth,
-  statusIconStickyLeft,
+  statusIconStickyRight,
   hoverTaskRow,
   hoverSubsystemRow,
   selectSubsystemRow,
   selectTaskRow,
   selectedSubsystemId,
+  selectedTaskId,
   showProjectCol,
   showSubsystemCol,
   subsystem,
@@ -118,11 +122,12 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
       gridRow={gridRow}
       hoverTaskRow={hoverTaskRow}
       key={`status-icon-${subsystem.id}-${task.id}`}
+      isHighlighted={hoveredTaskId === task.id || selectedTaskId === task.id}
       onOpenTask={openTaskDetailModal}
       ownerId={subsystem.id}
       statusIconColumnIndex={statusIconColumnIndex}
       statusIconColumnWidth={statusIconColumnWidth}
-      statusIconStickyLeft={statusIconStickyLeft}
+      statusIconStickyRight={statusIconStickyRight}
       task={task}
       taskStatusSignalsById={taskStatusSignalsById}
     />
