@@ -1207,6 +1207,15 @@
   align-items: start;
 }
 
+.risk-board {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(15.5rem, 1fr));
+  min-width: calc((15.5rem * 3) + (0.7rem * 2));
+  width: 100%;
+  gap: 0.7rem;
+  align-items: start;
+}
+
 .task-queue-board-column {
   display: grid;
   gap: 0.55rem;

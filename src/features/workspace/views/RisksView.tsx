@@ -13,6 +13,7 @@ import {
   useWorkspacePagination,
 } from "@/features/workspace/shared";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
+import { KanbanColumns } from "@/features/workspace/views/kanban/KanbanColumns";
 import {
   buildScopeMetrics,
   formatHours,
@@ -53,6 +54,34 @@ const ATTACHMENT_TYPE_LABELS: Record<RiskPayload["attachmentType"], string> = {
   mechanism: "Mechanism",
   "part-instance": "Part instance",
 };
+
+const RISK_SEVERITY_ORDER = ["high", "medium", "low"] as const;
+
+function formatRiskSeverity(severity: RiskPayload["severity"]) {
+  switch (severity) {
+    case "high":
+      return "High";
+    case "medium":
+      return "Medium";
+    case "low":
+      return "Low";
+    default:
+      return severity;
+  }
+}
+
+function getRiskSeverityPillClassName(severity: RiskPayload["severity"]) {
+  switch (severity) {
+    case "high":
+      return "status-pill status-pill-danger";
+    case "medium":
+      return "status-pill status-pill-warning";
+    case "low":
+      return "status-pill status-pill-neutral";
+    default:
+      return "status-pill status-pill-neutral";
+  }
+}
 
 function toRiskPayload(risk: RiskRecord): RiskPayload {
   return {
@@ -610,6 +639,20 @@ export function RisksView({
     tasksById,
   ]);
 
+  const risksBySeverity = useMemo(() => {
+    const grouped: Record<(typeof RISK_SEVERITY_ORDER)[number], RiskRecord[]> = {
+      high: [],
+      medium: [],
+      low: [],
+    };
+
+    filteredRows.forEach((risk) => {
+      grouped[risk.severity].push(risk);
+    });
+
+    return grouped;
+  }, [filteredRows]);
+
   const pagination = useWorkspacePagination(filteredRows);
   const riskFilterMotionClass = useFilterChangeMotionClass([
     search,
@@ -811,6 +854,115 @@ export function RisksView({
             subtitle="Track the same signals one layer deeper so mechanism bottlenecks are visible early."
             title="Mechanism metrics"
           />
+        </>
+      ) : null}
+
+      {view === "kanban" ? (
+        <>
+          <div className="panel-header compact-header">
+            <div className="panel-actions filter-toolbar subsystem-manager-toolbar">
+              <SearchToolbarInput
+                ariaLabel="Search risks"
+                onChange={setSearch}
+                placeholder="Search risks..."
+                value={search}
+              />
+
+              <label className="risk-filter-control">
+                <span>Severity</span>
+                <select
+                  onChange={(event) => setSeverityFilter(event.target.value as RiskSeverityFilter)}
+                  value={severityFilter}
+                >
+                  <option value="all">All severities</option>
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </label>
+
+              <label className="risk-filter-control">
+                <span>Source</span>
+                <select
+                  onChange={(event) => setSourceFilter(event.target.value as RiskSourceFilter)}
+                  value={sourceFilter}
+                >
+                  <option value="all">All sources</option>
+                  <option value="qa-report">QA report</option>
+                  <option value="test-result">Test result</option>
+                </select>
+              </label>
+
+              <button
+                className="primary-action queue-toolbar-action subsystem-manager-toolbar-action"
+                onClick={openCreateEditor}
+                type="button"
+              >
+                Add risk
+              </button>
+            </div>
+          </div>
+
+          <div className={"task-queue-board-shell-frame " + riskFilterMotionClass}>
+            <div className="table-shell task-queue-board-shell">
+              {filteredRows.length > 0 ? (
+                <KanbanColumns
+                  boardClassName="risk-board"
+                  columnBodyClassName="task-queue-board-column-body"
+                  columnClassName="task-queue-board-column"
+                  columnCountClassName="task-queue-board-column-count"
+                  columnEmptyClassName="task-queue-board-column-empty"
+                  columnHeaderClassName="task-queue-board-column-header"
+                  columns={RISK_SEVERITY_ORDER.map((severity) => ({
+                    state: severity,
+                    count: risksBySeverity[severity].length,
+                    header: (
+                      <span className={getRiskSeverityPillClassName(severity)}>
+                        {formatRiskSeverity(severity)}
+                      </span>
+                    ),
+                  }))}
+                  emptyLabel="No risks"
+                  itemsByState={risksBySeverity}
+                  renderItem={(risk) => {
+                    const mitigationLabel = risk.mitigationTaskId
+                      ? tasksById[risk.mitigationTaskId]?.title ?? "Unknown task"
+                      : "No mitigation";
+                    const sourceLabel = getSourceLabel(risk);
+                    const attachmentLabel = ATTACHMENT_TYPE_LABELS[risk.attachmentType] + ": " + getAttachmentLabel(risk);
+
+                    return (
+                      <button
+                        className="task-queue-board-card editable-hover-target editable-hover-target-row"
+                        key={risk.id}
+                        onClick={() => openEditEditor(risk)}
+                        type="button"
+                      >
+                        <div className="task-queue-board-card-header">
+                          <strong>{risk.title}</strong>
+                        </div>
+                        <small className="task-queue-board-card-summary">{risk.detail}</small>
+                        <div className="task-queue-board-card-meta">
+                          <span className="task-queue-board-card-context-chip" title={attachmentLabel}>
+                            {attachmentLabel}
+                          </span>
+                          <span className="task-queue-board-card-context-chip" title={"Mitigation: " + mitigationLabel}>
+                            {mitigationLabel}
+                          </span>
+                          <span className="task-queue-board-card-context-chip" title={sourceLabel}>
+                            {sourceLabel}
+                          </span>
+                        </div>
+                        <EditableHoverIndicator className="task-queue-board-card-hover" />
+                      </button>
+                    );
+                  }}
+                />
+              ) : (
+                <p className="empty-state">No risks match the current filters.</p>
+              )}
+            </div>
+          </div>
         </>
       ) : null}
 
