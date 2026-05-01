@@ -120,8 +120,8 @@ const planningSteps: InteractiveTutorialStep[] = [
   },
   {
     id: "task-queue",
-    title: "Switch to Queue",
-    instruction: "Switch the Tasks subtab from Timeline to Queue.",
+    title: "Switch to Kanban",
+    instruction: "Switch the Tasks subtab from Timeline to Kanban.",
     selector: '[data-tutorial-target="task-view-queue"]',
   },
   {
@@ -132,14 +132,14 @@ const planningSteps: InteractiveTutorialStep[] = [
   },
   {
     id: "queue-filter",
-    title: "Use queue filters",
-    instruction: "Apply at least one Queue filter.",
+    title: "Use Kanban filters",
+    instruction: "Apply at least one Kanban filter.",
     selector: '[data-tutorial-target="task-queue-filter-control"]',
   },
   {
     id: "queue-edit-task",
-    title: "Edit a queued task",
-    instruction: "Click any task row in Queue to open edit mode.",
+    title: "Edit a Kanban task",
+    instruction: "Click any task row in Kanban to open edit mode.",
     selector: '[data-tutorial-target="edit-task-row"]',
   },
   {

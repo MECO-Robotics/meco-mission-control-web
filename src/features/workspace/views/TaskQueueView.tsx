@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useRef, useState, useId } from "react";
+import { useEffect, useMemo, useRef, useState, useId, type CSSProperties } from "react";
 
 import * as React from "react";
 
 import { formatDate, formatIterationVersion } from "@/lib/appUtils";
 import type { BootstrapPayload, TaskRecord, TaskStatus } from "@/types";
 import {
+  IconChevronLeft,
+  IconChevronRight,
   IconManufacturing,
   IconFilter,
   IconParts,
@@ -40,6 +42,7 @@ import {
   getTaskQueueBoardStateSortValue,
   groupTasksByBoardState,
 } from "@/features/workspace/views/taskQueueBoard";
+import { getTimelineTaskDisciplineColor } from "@/features/workspace/views/timeline/timelineTaskColors";
 import { TimelineTaskStatusLogo } from "@/features/workspace/views/timeline/TimelineTaskStatusLogo";
 import type { TimelineTaskStatusSignal } from "@/features/workspace/views/timeline/timelineGridBodyUtils";
 
@@ -815,10 +818,77 @@ export function TaskQueueView({
   ]);
   const [visibleTaskCount, setVisibleTaskCount] = useState(TASK_QUEUE_LAZY_LOAD_BATCH_SIZE);
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const taskQueueBoardShellRef = useRef<HTMLDivElement>(null);
+  const [taskQueueBoardScrollState, setTaskQueueBoardScrollState] = useState({
+    canScrollLeft: false,
+    canScrollRight: false,
+    hasOverflow: false,
+  });
 
   useEffect(() => {
     setVisibleTaskCount(TASK_QUEUE_LAZY_LOAD_BATCH_SIZE);
   }, [processedTasks]);
+
+  useEffect(() => {
+    const shell = taskQueueBoardShellRef.current;
+    if (!shell) {
+      setTaskQueueBoardScrollState({
+        canScrollLeft: false,
+        canScrollRight: false,
+        hasOverflow: false,
+      });
+      return;
+    }
+
+    const updateScrollState = () => {
+      const maxScrollLeft = Math.max(0, shell.scrollWidth - shell.clientWidth);
+      const nextHasOverflow = shell.scrollWidth > shell.clientWidth + 4;
+      const nextCanScrollLeft = nextHasOverflow && shell.scrollLeft > 4;
+      const nextCanScrollRight = nextHasOverflow && shell.scrollLeft < maxScrollLeft - 4;
+
+      setTaskQueueBoardScrollState((current) =>
+        current.hasOverflow === nextHasOverflow &&
+        current.canScrollLeft === nextCanScrollLeft &&
+        current.canScrollRight === nextCanScrollRight
+          ? current
+          : {
+              canScrollLeft: nextCanScrollLeft,
+              canScrollRight: nextCanScrollRight,
+              hasOverflow: nextHasOverflow,
+            },
+      );
+    };
+
+    let rafId: number | undefined;
+    const scheduleScrollStateUpdate = () => {
+      if (rafId !== undefined) {
+        return;
+      }
+
+      rafId = window.requestAnimationFrame(() => {
+        rafId = undefined;
+        updateScrollState();
+      });
+    };
+
+    const resizeObserver =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(scheduleScrollStateUpdate);
+
+    resizeObserver?.observe(shell);
+    shell.addEventListener("scroll", scheduleScrollStateUpdate, { passive: true });
+    window.addEventListener("resize", scheduleScrollStateUpdate);
+    updateScrollState();
+
+    return () => {
+      if (rafId !== undefined) {
+        window.cancelAnimationFrame(rafId);
+      }
+
+      resizeObserver?.disconnect();
+      shell.removeEventListener("scroll", scheduleScrollStateUpdate);
+      window.removeEventListener("resize", scheduleScrollStateUpdate);
+    };
+  }, [processedTasks.length, visibleTaskCount]);
 
   useEffect(() => {
     if (typeof window === "undefined" || visibleTaskCount >= processedTasks.length) {
@@ -1009,119 +1079,159 @@ export function TaskQueueView({
         </div>
       </div>
 
-      <div className={`table-shell task-queue-board-shell ${taskFilterMotionClass}`}>
-        {visibleTasks.length > 0 ? (
-          <div className="task-queue-board">
-            {TASK_QUEUE_BOARD_COLUMNS.map(({ state }) => {
-              const tasks = boardTasksByState[state];
+      <div
+        className={`task-queue-board-shell-frame${taskQueueBoardScrollState.canScrollLeft ? " has-scroll-left" : ""}${taskQueueBoardScrollState.canScrollRight ? " has-scroll-right" : ""}${taskQueueBoardScrollState.hasOverflow ? " has-task-queue-board-overflow" : ""} ${taskFilterMotionClass}`}
+      >
+        {taskQueueBoardScrollState.hasOverflow ? (
+          <div aria-hidden="true" className="task-queue-board-scroll-hints">
+            <div
+              className={`task-queue-board-scroll-hint task-queue-board-scroll-hint-left${
+                taskQueueBoardScrollState.canScrollLeft ? "" : " is-hidden"
+              }`}
+            >
+              <IconChevronLeft />
+              <span className="task-queue-board-scroll-hint-label">Scroll</span>
+            </div>
+            <div
+              className={`task-queue-board-scroll-hint task-queue-board-scroll-hint-right${
+                taskQueueBoardScrollState.canScrollRight ? "" : " is-hidden"
+              }`}
+            >
+              <span className="task-queue-board-scroll-hint-label">Scroll</span>
+              <IconChevronRight />
+            </div>
+          </div>
+        ) : null}
+        <div
+          className="table-shell task-queue-board-shell"
+          ref={taskQueueBoardShellRef}
+        >
+          {visibleTasks.length > 0 ? (
+            <div className="task-queue-board">
+              {TASK_QUEUE_BOARD_COLUMNS.map(({ state }) => {
+                const tasks = boardTasksByState[state];
 
-              return (
-                <section className="task-queue-board-column" key={state}>
-                  <div className="task-queue-board-column-header">
-                    <span className={getStatusPillClassName(state)}>
-                      <span
-                        aria-hidden="true"
-                        className="task-queue-board-column-header-icon"
-                      >
-                        <TimelineTaskStatusLogo
-                          compact
-                          signal={TASK_QUEUE_BOARD_STATE_LOGO_SPECS[state].signal}
-                          status={TASK_QUEUE_BOARD_STATE_LOGO_SPECS[state].status}
-                        />
+                return (
+                  <section className="task-queue-board-column" key={state}>
+                    <div className="task-queue-board-column-header">
+                      <span className={getStatusPillClassName(state)}>
+                        <span
+                          aria-hidden="true"
+                          className="task-queue-board-column-header-icon"
+                        >
+                          <TimelineTaskStatusLogo
+                            compact
+                            signal={TASK_QUEUE_BOARD_STATE_LOGO_SPECS[state].signal}
+                            status={TASK_QUEUE_BOARD_STATE_LOGO_SPECS[state].status}
+                          />
+                        </span>
+                        <span className="task-queue-board-column-header-label">
+                          {formatTaskQueueBoardState(state)}
+                        </span>
                       </span>
-                      <span className="task-queue-board-column-header-label">
-                        {formatTaskQueueBoardState(state)}
-                      </span>
-                    </span>
-                    <span className="task-queue-board-column-count">{tasks.length}</span>
-                  </div>
-                  <div className="task-queue-board-column-body">
-                    {tasks.length > 0 ? (
-                      tasks.map((task) => {
-                        const boardState = getTaskQueueBoardState(task, bootstrap);
-                        const person = getTaskCardPerson(task, membersById);
+                      <span className="task-queue-board-column-count">{tasks.length}</span>
+                    </div>
+                    <div className="task-queue-board-column-body">
+                      {tasks.length > 0 ? (
+                        tasks.map((task) => {
+                          const boardState = getTaskQueueBoardState(task, bootstrap);
+                          const person = getTaskCardPerson(task, membersById);
+                          const disciplineAccentColor = task.disciplineId
+                            ? getTimelineTaskDisciplineColor(task.disciplineId, disciplinesById)
+                            : null;
+                          const cardStyle = disciplineAccentColor
+                            ? ({
+                                "--task-queue-board-card-discipline-accent": disciplineAccentColor,
+                              } as CSSProperties)
+                            : undefined;
 
-                        return (
-                          <button
-                            className="task-queue-board-card editable-hover-target editable-hover-target-row"
-                            data-board-state={boardState}
-                            data-tutorial-target="edit-task-row"
-                            key={task.id}
-                            onClick={() => openEditTaskModal(task)}
-                            type="button"
-                          >
-                            <div className="task-queue-board-card-header">
-                              <strong>{task.title}</strong>
-                              <span className="task-queue-board-card-due">
-                                Due {formatDate(task.dueDate)}
-                              </span>
-                            </div>
-                            <small className="task-queue-board-card-summary">{task.summary}</small>
-                            <div
-                              className={`task-queue-board-card-meta${showProjectOnCards ? "" : " task-queue-board-card-meta-person-only"}`}
+                          return (
+                            <button
+                              className={`task-queue-board-card editable-hover-target editable-hover-target-row${
+                                disciplineAccentColor
+                                  ? " task-queue-board-card-discipline-accented"
+                                  : ""
+                              }`}
+                              data-board-state={boardState}
+                              data-tutorial-target="edit-task-row"
+                              key={task.id}
+                              onClick={() => openEditTaskModal(task)}
+                              style={cardStyle}
+                              type="button"
                             >
-                              {showProjectOnCards ? (
-                                <span>{projectsById[task.projectId]?.name ?? "Unknown project"}</span>
-                              ) : showProjectContextOnCards ? (
-                                <span
-                                  className="task-queue-board-card-context-chip"
-                                  title={getTaskQueueCardContextLabel(
-                                    task,
-                                    isNonRobotProject ? "operations" : "robot",
-                                    subsystemsById,
-                                    workstreamsById,
-                                  )}
-                                >
-                                  {getTaskQueueCardContextLabel(
-                                    task,
-                                    isNonRobotProject ? "operations" : "robot",
-                                    subsystemsById,
-                                    workstreamsById,
-                                  )}
+                              <div className="task-queue-board-card-header">
+                                <strong>{task.title}</strong>
+                                <span className="task-queue-board-card-due">
+                                  Due {formatDate(task.dueDate)}
                                 </span>
-                              ) : null}
-                              <div className="task-queue-board-card-meta-person-group">
-                                <TaskPriorityBadge priority={task.priority} />
-                                {person ? (
-                                  <span className="task-queue-board-card-person" title={person.name}>
-                                    {person.photoUrl ? (
-                                      <img
-                                        alt={`${person.name} profile picture`}
-                                        className="profile-avatar"
-                                        loading="lazy"
-                                        referrerPolicy="no-referrer"
-                                        src={person.photoUrl}
-                                      />
-                                    ) : (
-                                      <span className="profile-avatar profile-avatar-fallback" aria-hidden="true">
-                                        {getMemberInitial(person)}
-                                      </span>
+                              </div>
+                              <small className="task-queue-board-card-summary">{task.summary}</small>
+                              <div
+                                className={`task-queue-board-card-meta${showProjectOnCards ? "" : " task-queue-board-card-meta-person-only"}`}
+                              >
+                                {showProjectOnCards ? (
+                                  <span>{projectsById[task.projectId]?.name ?? "Unknown project"}</span>
+                                ) : showProjectContextOnCards ? (
+                                  <span
+                                    className="task-queue-board-card-context-chip"
+                                    title={getTaskQueueCardContextLabel(
+                                      task,
+                                      isNonRobotProject ? "operations" : "robot",
+                                      subsystemsById,
+                                      workstreamsById,
+                                    )}
+                                  >
+                                    {getTaskQueueCardContextLabel(
+                                      task,
+                                      isNonRobotProject ? "operations" : "robot",
+                                      subsystemsById,
+                                      workstreamsById,
                                     )}
                                   </span>
                                 ) : null}
+                                <div className="task-queue-board-card-meta-person-group">
+                                  <TaskPriorityBadge priority={task.priority} />
+                                  {person ? (
+                                    <span className="task-queue-board-card-person" title={person.name}>
+                                      {person.photoUrl ? (
+                                        <img
+                                          alt={`${person.name} profile picture`}
+                                          className="profile-avatar"
+                                          loading="lazy"
+                                          referrerPolicy="no-referrer"
+                                          src={person.photoUrl}
+                                        />
+                                      ) : (
+                                        <span className="profile-avatar profile-avatar-fallback" aria-hidden="true">
+                                          {getMemberInitial(person)}
+                                        </span>
+                                      )}
+                                    </span>
+                                  ) : null}
+                                </div>
                               </div>
-                            </div>
-                            <EditableHoverIndicator className="task-queue-board-card-hover" />
-                          </button>
-                        );
-                      })
-                    ) : (
-                      <p className="task-queue-board-column-empty">No tasks</p>
-                    )}
-                  </div>
-                </section>
-              );
-            })}
+                              <EditableHoverIndicator className="task-queue-board-card-hover" />
+                            </button>
+                          );
+                        })
+                      ) : (
+                        <p className="task-queue-board-column-empty">No tasks</p>
+                      )}
+                    </div>
+                  </section>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="empty-state">No tasks match the current filters.</p>
+          )}
+          <div className="task-queue-board-footer">
+            <p className="task-queue-board-load-status">
+              Showing {loadedTaskLabel} tasks
+              {hasMoreTasks ? " - scroll to load more." : "."}
+            </p>
+            {hasMoreTasks ? <div aria-hidden="true" className="task-queue-board-load-sentinel" ref={loadMoreRef} /> : null}
           </div>
-        ) : (
-          <p className="empty-state">No tasks match the current filters.</p>
-        )}
-        <div className="task-queue-board-footer">
-          <p className="task-queue-board-load-status">
-            Showing {loadedTaskLabel} tasks
-            {hasMoreTasks ? " - scroll to load more." : "."}
-          </p>
-          {hasMoreTasks ? <div aria-hidden="true" className="task-queue-board-load-sentinel" ref={loadMoreRef} /> : null}
         </div>
       </div>
     </section>

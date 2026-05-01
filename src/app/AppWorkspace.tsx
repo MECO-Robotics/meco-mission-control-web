@@ -1003,9 +1003,9 @@ export default function AppWorkspace() {
         case "create-task":
           return "Create and save one new task to continue.";
         case "queue-filter":
-          return "Apply at least one Queue filter to continue.";
+          return "Apply at least one Kanban filter to continue.";
         case "queue-edit-task":
-          return "Open any queue task row in edit mode to continue.";
+          return "Open any Kanban task row in edit mode to continue.";
         case "create-milestone":
           return "Create and save one milestone to continue.";
         case "milestone-search":

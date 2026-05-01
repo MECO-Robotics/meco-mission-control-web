@@ -65,7 +65,7 @@ Primary navigation tabs:
 
 Topbar subviews:
 
-- Tasks: `Timeline`, `Queue`, `Milestones`
+- Tasks: `Timeline`, `Kanban`, `Milestones`
 - Manufacturing: `CNC`, `3D Prints`, `Fabrication`
 - Inventory (robot projects): `Materials`, `Parts`, `Purchases`
 - Inventory (non-robot projects): `Documentation`, `Purchases`

@@ -225,6 +225,8 @@ describe("TaskQueueView", () => {
     expect(markup).toContain("task-queue-board-card-priority-high");
     expect(markup).toContain("task-queue-board-card-priority-medium");
     expect(markup).toContain("task-queue-board-card-priority-low");
+    expect(markup).toContain("task-queue-board-card-discipline-accented");
+    expect(markup).toContain("--task-queue-board-card-discipline-accent");
     expect(markup).toContain('aria-label="Critical priority"');
     expect(markup).toContain('aria-label="Low priority"');
     expect(markup.indexOf("task-queue-board-card-priority")).toBeLessThan(markup.indexOf("profile-avatar"));

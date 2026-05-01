@@ -1037,12 +1037,9 @@
 
 .task-queue-board-shell-frame {
   --task-queue-edge-pad: 1rem;
-  --task-queue-panel-inline-pad: 1rem;
   position: relative;
   width: 100%;
   min-width: 0;
-  margin-inline: calc(var(--task-queue-panel-inline-pad) * -1);
-  width: calc(100% + (var(--task-queue-panel-inline-pad) * 2));
   isolation: isolate;
 }
 
@@ -1170,6 +1167,8 @@
   gap: 0.7rem;
   overflow-x: auto;
   overflow-y: hidden;
+  padding-inline: var(--task-queue-edge-pad);
+  box-sizing: border-box;
   padding-bottom: 0.25rem;
   overscroll-behavior-x: contain;
   cursor: grab;
