@@ -331,11 +331,12 @@ function FilterOptionMenu({
       </button>
       {options.map((option) => {
         const isSelected = value.includes(option.id);
+        const hasIcon = Boolean(option.icon);
 
         return (
           <button
             aria-selected={isSelected}
-            className={`table-column-filter-option${isSelected ? " is-selected" : ""}${getOptionToneClassName?.(option) ? ` ${getOptionToneClassName(option)}` : ""}`}
+            className={`table-column-filter-option${isSelected ? " is-selected" : ""}${hasIcon ? " has-icon" : ""}${getOptionToneClassName?.(option) ? ` ${getOptionToneClassName(option)}` : ""}`}
             key={option.id}
             onClick={(event) => {
               event.stopPropagation();
@@ -347,6 +348,11 @@ function FilterOptionMenu({
             <span aria-hidden="true" className="table-column-filter-option-check">
               {isSelected ? "✓" : ""}
             </span>
+            {hasIcon ? (
+              <span aria-hidden="true" className="table-column-filter-option-icon">
+                {option.icon}
+              </span>
+            ) : null}
             <span>{option.name}</span>
           </button>
         );
@@ -397,6 +403,8 @@ export function FilterDropdown({
   const menuId = useId();
   const isActive = value.length > 0;
   const selectedLabel = formatFilterSelectionLabel(allLabel, options, value);
+  const selectedOption = options.find((option) => option.id === value[0]);
+  const selectedIcon = selectedOption?.icon ?? icon;
   const selectedToneClassName = getSelectedToneClassName?.(value);
   usePrunedFilterSelection(value, options, onChange);
 
@@ -547,7 +555,7 @@ export function FilterDropdown({
         title={`${ariaLabel ?? allLabel}: ${selectedLabel}`}
         type="button"
       >
-        <span className="toolbar-filter-icon">{icon}</span>
+        <span className="toolbar-filter-icon">{selectedIcon}</span>
         <span aria-hidden="true" className="toolbar-filter-value">
           {selectedLabel}
         </span>

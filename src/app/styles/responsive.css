@@ -589,9 +589,10 @@
   --task-details-dropdown-option-hover-bg: rgba(22, 71, 142, 0.16);
   --task-details-dropdown-option-check: var(--official-blue);
   border: 1px solid rgba(148, 163, 184, 0.42);
-  background-color: var(--bg-row-alt);
+  background: var(--official-white);
   color: var(--text-title);
-  opacity: 1;
+  opacity: 1 !important;
+  box-sizing: border-box;
   box-shadow:
     0 20px 38px rgba(2, 6, 23, 0.5),
     0 0 0 1px rgba(148, 163, 184, 0.08);
@@ -603,9 +604,9 @@
   --task-details-dropdown-option-hover-bg: rgba(96, 165, 250, 0.16);
   --task-details-dropdown-option-check: #bfdbfe;
   border-color: rgba(148, 163, 184, 0.42);
-  background-color: var(--bg-row-alt);
+  background: var(--bg-row-alt);
   color: var(--text-title);
-  opacity: 1;
+  opacity: 1 !important;
   box-shadow:
     0 20px 38px rgba(2, 6, 23, 0.5),
     0 0 0 1px rgba(148, 163, 184, 0.08);
@@ -615,6 +616,7 @@
   color: var(--task-details-dropdown-option-text);
   font-size: 0.8rem;
   font-weight: 600;
+  text-shadow: none;
 }
 
 .task-details-blocker-menu-popup.table-column-filter-menu .table-column-filter-option:hover,
