@@ -39,31 +39,30 @@ export function KanbanColumns<TState extends string, TItem>({
         const items = itemsByState[column.state];
 
         return (
-          <section className={columnClassName} key={column.state}>
+          <section
+            className={columnClassName}
+            key={column.state}
+            onClick={onColumnBodyClick ? () => onColumnBodyClick(column.state) : undefined}
+            onKeyDown={
+              onColumnBodyClick
+                ? (event) => {
+                    if (event.key !== "Enter" && event.key !== " ") {
+                      return;
+                    }
+
+                    event.preventDefault();
+                    onColumnBodyClick(column.state);
+                  }
+                : undefined
+            }
+            role={onColumnBodyClick ? "button" : undefined}
+            tabIndex={onColumnBodyClick ? 0 : undefined}
+          >
             <div className={columnHeaderClassName}>
               {column.header}
               <span className={columnCountClassName}>{column.count}</span>
             </div>
-            <div
-              className={columnBodyClassName}
-              onClick={
-                onColumnBodyClick ? () => onColumnBodyClick(column.state) : undefined
-              }
-              onKeyDown={
-                onColumnBodyClick
-                  ? (event) => {
-                      if (event.key !== "Enter" && event.key !== " ") {
-                        return;
-                      }
-
-                      event.preventDefault();
-                      onColumnBodyClick(column.state);
-                    }
-                  : undefined
-              }
-              role={onColumnBodyClick ? "button" : undefined}
-              tabIndex={onColumnBodyClick ? 0 : undefined}
-            >
+            <div className={columnBodyClassName}>
               {items.length > 0 ? (
                 items.map((item) => renderItem(item, column.state))
               ) : (
