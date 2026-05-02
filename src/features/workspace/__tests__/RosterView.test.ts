@@ -59,6 +59,7 @@ function renderRosterView(isAddPersonOpen = false) {
     React.createElement(RosterView, {
       allMembers: [student, mentor, external],
       bootstrap,
+      selectedProject: null,
       selectedMemberId: null,
       selectedSeasonId: "season-1",
       selectMember: jest.fn(),

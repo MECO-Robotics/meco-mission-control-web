@@ -162,6 +162,7 @@ interface WorkspaceContentProps {
   selectMember: (id: string | null, payload: BootstrapPayload) => void;
   selectedSeasonId: string | null;
   selectedMemberId: string | null;
+  selectedProject: BootstrapPayload["projects"][number] | null;
   requestMemberPhotoUpload: (file: File) => Promise<string>;
   setActivePersonFilter: (value: FilterSelection) => void;
   setIsAddPersonOpen: (open: boolean) => void;
@@ -417,6 +418,7 @@ export function WorkspaceContent({
   requestMemberPhotoUpload,
   selectMember,
   selectedSeasonId,
+  selectedProject,
   selectedMemberId,
   setActivePersonFilter,
   setIsAddPersonOpen,
@@ -845,6 +847,7 @@ export function WorkspaceContent({
           <RosterView
             allMembers={allMembers}
             bootstrap={bootstrap}
+            selectedProject={selectedProject}
             handleCreateMember={handleCreateMember}
             handleReactivateMemberForSeason={handleReactivateMemberForSeason}
             handleDeleteMember={handleDeleteMember}

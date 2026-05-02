@@ -4078,6 +4078,7 @@ export default function AppWorkspace() {
           worklogsView={worklogsView}
           selectMember={selectMember}
           selectedSeasonId={selectedSeasonId}
+          selectedProject={selectedProject}
           selectedMemberId={selectedMemberId}
           setIsAddPersonOpen={setIsAddPersonOpen}
           setIsEditPersonOpen={setIsEditPersonOpen}
