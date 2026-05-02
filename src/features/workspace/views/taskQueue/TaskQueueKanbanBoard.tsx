@@ -48,11 +48,6 @@ const TASK_QUEUE_BOARD_STATE_LOGO_SPECS: Record<
 
 const PRIORITY_ORDER: TaskRecord["priority"][] = ["critical", "high", "medium", "low"];
 
-function readDueDate(task: TaskRecord) {
-  const parsedDate = Date.parse(task.dueDate);
-  return Number.isNaN(parsedDate) ? Number.MAX_SAFE_INTEGER : parsedDate;
-}
-
 interface TaskQueueKanbanBoardProps {
   bootstrap: BootstrapPayload;
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
@@ -88,13 +83,10 @@ export function TaskQueueKanbanBoard({
 }: TaskQueueKanbanBoardProps) {
   const tasksByState = useMemo(() => groupTasksByBoardState(tasks, bootstrap), [bootstrap, tasks]);
 
-  const focusedTasks = useMemo(
-    () =>
-      focusedState === null ? [] : tasksByState[focusedState].slice().sort((left, right) => {
-        return readDueDate(left) - readDueDate(right);
-      }),
-    [focusedState, tasksByState],
-  );
+  const focusedTasks = useMemo(() => (focusedState === null ? [] : tasksByState[focusedState]), [
+    focusedState,
+    tasksByState,
+  ]);
 
   const groupedFocusedTasks = useMemo(() => {
     if (focusedState === null) {
@@ -111,56 +103,75 @@ export function TaskQueueKanbanBoard({
   if (focusedState !== null) {
     return (
       <section className="task-queue-board-focused" data-board-state={focusedState}>
-        <header className="task-queue-board-focused-header">
-          <div>
-            <h3 className="task-queue-board-focused-title">
-              {formatTaskQueueBoardState(focusedState)}
-            </h3>
-            <p className="task-queue-board-focused-subtitle">
-              {focusedTasks.length} task
-              {focusedTasks.length === 1 ? "" : "s"} shown
-            </p>
-          </div>
-          <button
-            aria-label="Exit focused column view"
-            className="task-queue-board-focused-exit"
-            onClick={onClearFocus}
-            type="button"
-          >
-            {"\u00d7"}
-          </button>
-        </header>
-
-        <div className="task-queue-board-focused-groups">
-          {groupedFocusedTasks.length > 0 ? (
-            groupedFocusedTasks.map((group) => (
-              <section className="task-queue-board-priority-group" key={group.priority}>
-                <header className="task-queue-board-priority-label">
-                  {group.label} ({group.tasks.length})
-                </header>
-                <div className="task-queue-board-priority-grid">
-                  {group.tasks.map((task) => (
-                    <TaskQueueCard
-                      disciplinesById={disciplinesById}
-                      bootstrap={bootstrap}
-                      isNonRobotProject={isNonRobotProject}
-                      key={task.id}
-                      membersById={membersById}
-                      openEditTaskModal={openEditTaskModal}
-                      projectsById={projectsById}
-                      showProjectContextOnCards={showProjectContextOnCards}
-                      showProjectOnCards={showProjectOnCards}
-                      subsystemsById={subsystemsById}
-                      task={task}
-                      workstreamsById={workstreamsById}
+        <div className="task-queue-board-focused-shell">
+          <header className="task-queue-board-focused-header">
+            <div className="task-queue-board-focused-title-stack">
+              <h3 className="task-queue-board-focused-title">
+                <span className={getStatusPillClassName(focusedState)}>
+                  <span aria-hidden="true" className="task-queue-board-focused-title-icon">
+                    <TimelineTaskStatusLogo
+                      compact
+                      signal={TASK_QUEUE_BOARD_STATE_LOGO_SPECS[focusedState].signal}
+                      status={TASK_QUEUE_BOARD_STATE_LOGO_SPECS[focusedState].status}
                     />
-                  ))}
-                </div>
-              </section>
-            ))
-          ) : (
-            <p className="empty-state">No tasks match the current filters.</p>
-          )}
+                  </span>
+                  <span className="task-queue-board-focused-title-label">
+                    {formatTaskQueueBoardState(focusedState)}
+                  </span>
+                </span>
+              </h3>
+              <span className="task-queue-board-focused-count">{focusedTasks.length}</span>
+            </div>
+            <button
+              aria-label="Exit focused column view"
+              className="task-queue-board-focused-exit"
+              onClick={onClearFocus}
+              type="button"
+            >
+              {"\u00d7"}
+            </button>
+          </header>
+
+          <div className="task-queue-board-focused-groups">
+            {groupedFocusedTasks.length > 0 ? (
+              groupedFocusedTasks.map((group) => (
+                <section className="task-queue-board-priority-group" key={group.priority}>
+                  <header
+                    className={`task-queue-board-priority-label task-queue-board-priority-label-${group.priority}`}
+                  >
+                    <span aria-hidden="true" className="task-queue-board-priority-label-icon">
+                      <TaskPriorityBadge priority={group.priority} />
+                    </span>
+                    <span className="task-queue-board-priority-label-text">{group.label}</span>
+                    <span className="task-queue-board-priority-label-count">
+                      {group.tasks.length}
+                    </span>
+                  </header>
+                  <div className="task-queue-board-priority-grid">
+                    {group.tasks.map((task) => (
+                      <TaskQueueCard
+                        disciplinesById={disciplinesById}
+                        bootstrap={bootstrap}
+                        isNonRobotProject={isNonRobotProject}
+                        key={task.id}
+                        membersById={membersById}
+                        openEditTaskModal={openEditTaskModal}
+                        projectsById={projectsById}
+                        showProjectContextOnCards={showProjectContextOnCards}
+                        showProjectOnCards={showProjectOnCards}
+                        subsystemsById={subsystemsById}
+                        showPriorityBadge={false}
+                        task={task}
+                        workstreamsById={workstreamsById}
+                      />
+                    ))}
+                  </div>
+                </section>
+              ))
+            ) : (
+              <p className="empty-state">No tasks match the current filters.</p>
+            )}
+          </div>
         </div>
       </section>
     );
@@ -207,6 +218,7 @@ export function TaskQueueKanbanBoard({
           showProjectContextOnCards={showProjectContextOnCards}
           showProjectOnCards={showProjectOnCards}
           subsystemsById={subsystemsById}
+          showPriorityBadge
           task={task}
           workstreamsById={workstreamsById}
         />
@@ -224,6 +236,7 @@ function TaskQueueCard({
   projectsById,
   showProjectContextOnCards,
   showProjectOnCards,
+  showPriorityBadge = true,
   subsystemsById,
   task,
   workstreamsById,
@@ -236,6 +249,7 @@ function TaskQueueCard({
   projectsById: Record<string, BootstrapPayload["projects"][number]>;
   showProjectContextOnCards: boolean;
   showProjectOnCards: boolean;
+  showPriorityBadge?: boolean;
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
   task: TaskRecord;
   workstreamsById: Record<string, BootstrapPayload["workstreams"][number]>;
@@ -286,26 +300,28 @@ function TaskQueueCard({
             {taskContextLabel}
           </span>
         ) : null}
-        <div className="task-queue-board-card-meta-person-group">
-          <TaskPriorityBadge priority={task.priority} />
-          {person ? (
-            <span className="task-queue-board-card-person" title={person.name}>
-              {person.photoUrl ? (
-                <img
-                  alt={`${person.name} profile picture`}
-                  className="profile-avatar"
-                  loading="lazy"
-                  referrerPolicy="no-referrer"
-                  src={person.photoUrl}
-                />
-              ) : (
-                <span className="profile-avatar profile-avatar-fallback" aria-hidden="true">
-                  {getMemberInitial(person)}
-                </span>
-              )}
-            </span>
-          ) : null}
-        </div>
+        {showPriorityBadge || person ? (
+          <div className="task-queue-board-card-meta-person-group">
+            {showPriorityBadge ? <TaskPriorityBadge priority={task.priority} /> : null}
+            {person ? (
+              <span className="task-queue-board-card-person" title={person.name}>
+                {person.photoUrl ? (
+                  <img
+                    alt={`${person.name} profile picture`}
+                    className="profile-avatar"
+                    loading="lazy"
+                    referrerPolicy="no-referrer"
+                    src={person.photoUrl}
+                  />
+                ) : (
+                  <span className="profile-avatar profile-avatar-fallback" aria-hidden="true">
+                    {getMemberInitial(person)}
+                  </span>
+                )}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
       </div>
       <EditableHoverIndicator className="task-queue-board-card-hover" />
     </button>

@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared";
 import { TaskQueueView } from "@/features/workspace/views";
+import { TaskQueueKanbanBoard } from "@/features/workspace/views/taskQueue/TaskQueueKanbanBoard";
 import { getTaskQueueCardContextLabel } from "@/features/workspace/views/taskQueue/taskQueueKanban";
 import { TASK_QUEUE_LAZY_LOAD_BATCH_SIZE } from "@/features/workspace/views/taskQueue/taskQueueKanban";
 import type { BootstrapPayload } from "@/types";
@@ -244,5 +245,49 @@ describe("TaskQueueView", () => {
     expect(markup.match(/data-board-state="blocked"/g)).toHaveLength(2);
     expect(markup.match(/data-board-state=/g)).toHaveLength(TASK_QUEUE_LAZY_LOAD_BATCH_SIZE);
     expect(markup).not.toContain("Task 16");
+  });
+
+  it("keeps the focused kanban view in the same order passed in by filters and sort", () => {
+    const bootstrap = createBootstrap();
+    const markup = renderToStaticMarkup(
+      React.createElement(TaskQueueKanbanBoard, {
+        bootstrap,
+        disciplinesById: { "discipline-1": bootstrap.disciplines[0] },
+        focusedState: "not-started",
+        isNonRobotProject: false,
+        membersById: {
+          "member-1": bootstrap.members[0],
+          "member-2": bootstrap.members[1],
+        },
+        onClearFocus: jest.fn(),
+        onFocusState: jest.fn(),
+        openEditTaskModal: jest.fn(),
+        projectsById: { "project-1": bootstrap.projects[0] },
+        showProjectContextOnCards: true,
+        showProjectOnCards: true,
+        subsystemsById: { "subsystem-1": bootstrap.subsystems[0] },
+        tasks: [
+          createTask(21, {
+            title: "Zulu priority task",
+            summary: "First in board order",
+            dueDate: "2026-03-20",
+            status: "not-started",
+            priority: "medium",
+          }),
+          createTask(22, {
+            title: "Alpha priority task",
+            summary: "Second in board order",
+            dueDate: "2026-03-01",
+            status: "not-started",
+            priority: "medium",
+          }),
+        ],
+        workstreamsById: {},
+      }),
+    );
+
+    expect(markup).toContain("Zulu priority task");
+    expect(markup).toContain("Alpha priority task");
+    expect(markup.indexOf("Zulu priority task")).toBeLessThan(markup.indexOf("Alpha priority task"));
   });
 });
