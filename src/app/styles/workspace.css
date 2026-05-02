@@ -1307,6 +1307,101 @@
   min-width: 0;
 }
 
+.task-queue-board-column-body[role="button"] {
+  cursor: pointer;
+}
+
+.task-queue-board-column-body[role="button"]:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--official-blue) 38%, transparent);
+  outline-offset: 2px;
+}
+
+.task-queue-board-shell-frame.is-focused-column {
+  overflow: visible;
+}
+
+.task-queue-board-shell.is-focused-column {
+  display: block;
+  width: 100%;
+  max-width: none;
+}
+
+.task-queue-board-shell-frame.is-focused-column .task-queue-board-scroll-hints {
+  display: none;
+}
+
+.task-queue-board-focused {
+  display: grid;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.task-queue-board-focused-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  width: 100%;
+}
+
+.task-queue-board-focused-title {
+  margin: 0;
+  color: var(--text-title);
+  font-size: 0.96rem;
+  letter-spacing: 0.03em;
+}
+
+.task-queue-board-focused-subtitle {
+  margin: 0.26rem 0 0;
+  color: var(--text-copy);
+  font-size: 0.72rem;
+}
+
+.task-queue-board-focused-exit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  border: 1px solid rgba(220, 38, 38, 0.35);
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+  font-size: 1.05rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.task-queue-board-focused-groups {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.task-queue-board-priority-group {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.task-queue-board-priority-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-title);
+}
+
+.task-queue-board-priority-grid {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+}
+
+.page-shell.dark-mode .task-queue-board-focused-exit {
+  border-color: rgba(248, 113, 113, 0.5);
+  background: rgba(248, 113, 113, 0.16);
+  color: #fda4af;
+}
+
 .task-queue-board-card {
   display: grid;
   gap: 0.45rem;

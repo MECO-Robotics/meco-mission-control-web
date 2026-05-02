@@ -28,6 +28,7 @@ import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
 import { TASK_PRIORITY_OPTIONS } from "@/features/workspace/shared";
 import {
   TASK_QUEUE_LAZY_LOAD_BATCH_SIZE,
+  type TaskQueueBoardState,
   getTaskQueueBoardState,
   getTaskQueueBoardStateSortValue,
   formatSubsystemNames,
@@ -365,6 +366,7 @@ export function TaskQueueView({
   const [ownerFilter, setOwnerFilter] = useState<FilterSelection>([]);
   const [priorityFilter, setPriorityFilter] = useState<FilterSelection>([]);
   const [searchFilter, setSearchFilter] = useState("");
+  const [focusedBoardState, setFocusedBoardState] = useState<TaskQueueBoardState | null>(null);
 
   const projectsById = useMemo(
     () =>
@@ -590,6 +592,37 @@ export function TaskQueueView({
     canScrollRight: false,
     hasOverflow: false,
   });
+  const isFocused = focusedBoardState !== null;
+
+  useEffect(() => {
+    if (focusedBoardState === null) {
+      return;
+    }
+
+    const hasMatchingTasks = processedTasks.some(
+      (task) => getTaskQueueBoardState(task, bootstrap) === focusedBoardState,
+    );
+    if (!hasMatchingTasks) {
+      setFocusedBoardState(null);
+    }
+  }, [bootstrap, focusedBoardState, processedTasks]);
+
+  useEffect(() => {
+    if (focusedBoardState === null || typeof document === "undefined") {
+      return;
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setFocusedBoardState(null);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [focusedBoardState]);
 
   useEffect(() => {
     setVisibleTaskCount(TASK_QUEUE_LAZY_LOAD_BATCH_SIZE);
@@ -657,7 +690,11 @@ export function TaskQueueView({
   }, [processedTasks.length, visibleTaskCount]);
 
   useEffect(() => {
-    if (typeof window === "undefined" || visibleTaskCount >= processedTasks.length) {
+    if (
+      typeof window === "undefined" ||
+      isFocused ||
+      visibleTaskCount >= processedTasks.length
+    ) {
       return;
     }
 
@@ -703,12 +740,16 @@ export function TaskQueueView({
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleScroll);
     };
-  }, [processedTasks.length, visibleTaskCount]);
+  }, [isFocused, processedTasks.length, visibleTaskCount]);
   const visibleTasks = useMemo(
     () => processedTasks.slice(0, visibleTaskCount),
     [processedTasks, visibleTaskCount],
   );
-  const hasMoreTasks = visibleTaskCount < processedTasks.length;
+  const boardTasks = useMemo(
+    () => (focusedBoardState === null ? visibleTasks : processedTasks),
+    [focusedBoardState, processedTasks, visibleTasks],
+  );
+  const hasMoreTasks = !isFocused && visibleTaskCount < processedTasks.length;
   const loadedTaskLabel = `${Math.min(visibleTaskCount, processedTasks.length)} of ${processedTasks.length}`;
   const showProjectOnCards = isAllProjectsView && projectFilter.length === 0;
   const showProjectContextOnCards = !isAllProjectsView;
@@ -842,7 +883,7 @@ export function TaskQueueView({
       </div>
 
       <div
-        className={`task-queue-board-shell-frame${taskQueueBoardScrollState.canScrollLeft ? " has-scroll-left" : ""}${taskQueueBoardScrollState.canScrollRight ? " has-scroll-right" : ""}${taskQueueBoardScrollState.hasOverflow ? " has-task-queue-board-overflow" : ""} ${taskFilterMotionClass}`}
+        className={`task-queue-board-shell-frame${taskQueueBoardScrollState.canScrollLeft ? " has-scroll-left" : ""}${taskQueueBoardScrollState.canScrollRight ? " has-scroll-right" : ""}${taskQueueBoardScrollState.hasOverflow ? " has-task-queue-board-overflow" : ""}${isFocused ? " is-focused-column" : ""} ${taskFilterMotionClass}`}
       >
         {taskQueueBoardScrollState.hasOverflow ? (
           <div aria-hidden="true" className="task-queue-board-scroll-hints">
@@ -864,34 +905,42 @@ export function TaskQueueView({
             </div>
           </div>
         ) : null}
-        <div
-          className="table-shell task-queue-board-shell"
-          ref={taskQueueBoardShellRef}
-        >
-          {visibleTasks.length > 0 ? (
+        <div className={`table-shell task-queue-board-shell${isFocused ? " is-focused-column" : ""}`} ref={taskQueueBoardShellRef}>
+          {boardTasks.length > 0 ? (
             <TaskQueueKanbanBoard
               bootstrap={bootstrap}
               disciplinesById={disciplinesById}
               isNonRobotProject={isNonRobotProject}
+              focusedState={focusedBoardState}
               membersById={membersById}
               openEditTaskModal={openEditTaskModal}
               projectsById={projectsById}
               showProjectContextOnCards={showProjectContextOnCards}
               showProjectOnCards={showProjectOnCards}
+              onClearFocus={() => setFocusedBoardState(null)}
+              onFocusState={setFocusedBoardState}
               subsystemsById={subsystemsById}
-              tasks={visibleTasks}
+              tasks={boardTasks}
               workstreamsById={workstreamsById}
             />
           ) : (
             <p className="empty-state">No tasks match the current filters.</p>
           )}
-          <div className="task-queue-board-footer">
-            <p className="task-queue-board-load-status">
-              Showing {loadedTaskLabel} tasks
-              {hasMoreTasks ? " - scroll to load more." : "."}
-            </p>
-            {hasMoreTasks ? <div aria-hidden="true" className="task-queue-board-load-sentinel" ref={loadMoreRef} /> : null}
-          </div>
+          {!isFocused ? (
+            <div className="task-queue-board-footer">
+              <p className="task-queue-board-load-status">
+                Showing {loadedTaskLabel} tasks
+                {hasMoreTasks ? " - scroll to load more." : "."}
+              </p>
+              {hasMoreTasks ? (
+                <div
+                  aria-hidden="true"
+                  className="task-queue-board-load-sentinel"
+                  ref={loadMoreRef}
+                />
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </div>
     </section>

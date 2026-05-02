@@ -17,6 +17,7 @@ interface KanbanColumnsProps<TState extends string, TItem> {
   emptyLabel: string;
   itemsByState: Record<TState, readonly TItem[]>;
   renderItem: (item: TItem, state: TState) => ReactNode;
+  onColumnBodyClick?: (state: TState) => void;
 }
 
 export function KanbanColumns<TState extends string, TItem>({
@@ -30,6 +31,7 @@ export function KanbanColumns<TState extends string, TItem>({
   emptyLabel,
   itemsByState,
   renderItem,
+  onColumnBodyClick,
 }: KanbanColumnsProps<TState, TItem>) {
   return (
     <div className={boardClassName}>
@@ -42,7 +44,26 @@ export function KanbanColumns<TState extends string, TItem>({
               {column.header}
               <span className={columnCountClassName}>{column.count}</span>
             </div>
-            <div className={columnBodyClassName}>
+            <div
+              className={columnBodyClassName}
+              onClick={
+                onColumnBodyClick ? () => onColumnBodyClick(column.state) : undefined
+              }
+              onKeyDown={
+                onColumnBodyClick
+                  ? (event) => {
+                      if (event.key !== "Enter" && event.key !== " ") {
+                        return;
+                      }
+
+                      event.preventDefault();
+                      onColumnBodyClick(column.state);
+                    }
+                  : undefined
+              }
+              role={onColumnBodyClick ? "button" : undefined}
+              tabIndex={onColumnBodyClick ? 0 : undefined}
+            >
               {items.length > 0 ? (
                 items.map((item) => renderItem(item, column.state))
               ) : (
