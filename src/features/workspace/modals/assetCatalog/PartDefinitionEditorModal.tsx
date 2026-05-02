@@ -1,0 +1,311 @@
+import type { Dispatch, FormEvent, SetStateAction } from "react";
+import type {
+  BootstrapPayload,
+  PartDefinitionPayload,
+} from "@/types";
+import { buildIterationOptions, formatIterationVersion } from "@/lib/appUtils";
+import { PhotoUploadField } from "@/features/workspace/shared/PhotoUploadField";
+
+interface PartDefinitionEditorModalProps {
+  bootstrap: BootstrapPayload;
+  activePartDefinitionId: string | null;
+  closePartDefinitionModal: () => void;
+  handleDeletePartDefinition: (id: string) => void;
+  handleTogglePartDefinitionArchived: (id: string) => void;
+  handlePartDefinitionSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  isDeletingPartDefinition: boolean;
+  isSavingPartDefinition: boolean;
+  requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
+  partDefinitionDraft: PartDefinitionPayload;
+  partDefinitionModalMode: "create" | "edit";
+  setPartDefinitionDraft: Dispatch<SetStateAction<PartDefinitionPayload>>;
+}
+
+export function PartDefinitionEditorModal({
+  bootstrap,
+  activePartDefinitionId,
+  closePartDefinitionModal,
+  handleDeletePartDefinition,
+  handleTogglePartDefinitionArchived,
+  handlePartDefinitionSubmit,
+  isDeletingPartDefinition,
+  isSavingPartDefinition,
+  requestPhotoUpload,
+  partDefinitionDraft,
+  partDefinitionModalMode,
+  setPartDefinitionDraft,
+}: PartDefinitionEditorModalProps) {
+  const partDefinitionIterationOptions = buildIterationOptions(
+    bootstrap.partDefinitions.map((partDefinition) => partDefinition.iteration),
+    partDefinitionDraft.iteration,
+  );
+  const partDefinitionPhotoProjectId = bootstrap.projects[0]?.id ?? null;
+
+  return (
+    <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
+      <section
+        aria-modal="true"
+        className="modal-card"
+        role="dialog"
+        style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
+      >
+        <div className="panel-header compact-header">
+          <div>
+            <p className="eyebrow" style={{ color: "var(--meco-blue)" }}>
+              Part definition editor
+            </p>
+            <h2 style={{ color: "var(--text-title)" }}>
+              {partDefinitionModalMode === "create"
+                ? "Add part definition"
+                : "Edit part definition"}
+            </h2>
+          </div>
+          <button
+            className="icon-button"
+            onClick={closePartDefinitionModal}
+            type="button"
+            style={{ color: "var(--text-copy)", background: "transparent" }}
+          >
+            Close
+          </button>
+        </div>
+        <form
+          className="modal-form"
+          onSubmit={handlePartDefinitionSubmit}
+          style={{ color: "var(--text-copy)" }}
+        >
+          <label className="field modal-wide">
+            <span style={{ color: "var(--text-title)" }}>Name</span>
+            <input
+              onChange={(event) =>
+                setPartDefinitionDraft((current) => ({ ...current, name: event.target.value }))
+              }
+              required
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={partDefinitionDraft.name}
+            />
+          </label>
+          <label className="field">
+            <span style={{ color: "var(--text-title)" }}>Part number</span>
+            <input
+              onChange={(event) =>
+                setPartDefinitionDraft((current) => ({
+                  ...current,
+                  partNumber: event.target.value,
+                }))
+              }
+              required
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={partDefinitionDraft.partNumber}
+            />
+          </label>
+          <label className="field">
+            <span style={{ color: "var(--text-title)" }}>Revision</span>
+            <input
+              onChange={(event) =>
+                setPartDefinitionDraft((current) => ({ ...current, revision: event.target.value }))
+              }
+              required
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={partDefinitionDraft.revision}
+            />
+          </label>
+          {partDefinitionModalMode === "edit" ? (
+            <label className="field">
+              <span style={{ color: "var(--text-title)" }}>Iteration</span>
+              <select
+                onChange={(event) =>
+                  setPartDefinitionDraft((current) => ({
+                    ...current,
+                    iteration: Number(event.target.value),
+                  }))
+                }
+                style={{
+                  background: "var(--bg-row-alt)",
+                  color: "var(--text-title)",
+                  border: "1px solid var(--border-base)",
+                }}
+                value={partDefinitionDraft.iteration ?? 1}
+              >
+                {partDefinitionIterationOptions.map((iteration) => (
+                  <option key={iteration} value={iteration}>
+                    {formatIterationVersion(iteration)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+          <label className="field">
+            <span style={{ color: "var(--text-title)" }}>Type</span>
+            <input
+              onChange={(event) =>
+                setPartDefinitionDraft((current) => ({ ...current, type: event.target.value }))
+              }
+              required
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={partDefinitionDraft.type}
+            />
+          </label>
+          <label className="field">
+            <span style={{ color: "var(--text-title)" }}>Source</span>
+            <input
+              onChange={(event) =>
+                setPartDefinitionDraft((current) => ({ ...current, source: event.target.value }))
+              }
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={partDefinitionDraft.source}
+            />
+          </label>
+          <label className="field">
+            <span style={{ color: "var(--text-title)" }}>Part type</span>
+            <div>
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  color: "var(--text-title)",
+                }}
+              >
+                <input
+                  checked={partDefinitionDraft.isHardware}
+                  onChange={(event) =>
+                    setPartDefinitionDraft((current) => ({
+                      ...current,
+                      isHardware: event.target.checked,
+                    }))
+                  }
+                  type="checkbox"
+                />
+                Hardware part
+              </span>
+            </div>
+          </label>
+          <label className="field modal-wide">
+            <span style={{ color: "var(--text-title)" }}>Default material</span>
+            <select
+              onChange={(event) =>
+                setPartDefinitionDraft((current) => ({
+                  ...current,
+                  materialId: event.target.value || null,
+                }))
+              }
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={partDefinitionDraft.materialId ?? ""}
+            >
+              <option value="">No material</option>
+              {bootstrap.materials.map((material) => (
+                <option key={material.id} value={material.id}>
+                  {material.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field modal-wide">
+            <span style={{ color: "var(--text-title)" }}>Description</span>
+            <textarea
+              onChange={(event) =>
+                setPartDefinitionDraft((current) => ({
+                  ...current,
+                  description: event.target.value,
+                }))
+              }
+              rows={3}
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={partDefinitionDraft.description}
+            />
+          </label>
+          <PhotoUploadField
+            currentUrl={partDefinitionDraft.photoUrl}
+            label="Part photo"
+            onChange={(value) =>
+              setPartDefinitionDraft((current) => ({ ...current, photoUrl: value }))
+            }
+            onUpload={async (file) => {
+              if (!partDefinitionPhotoProjectId) {
+                throw new Error("No project is available for photo upload.");
+              }
+
+              return requestPhotoUpload(partDefinitionPhotoProjectId, file);
+            }}
+          />
+          <div className="modal-actions modal-wide">
+            {partDefinitionModalMode === "edit" && activePartDefinitionId ? (
+              <button
+                className={partDefinitionDraft.isArchived ? "secondary-action" : "danger-action"}
+                disabled={isDeletingPartDefinition || isSavingPartDefinition}
+                onClick={() => handleTogglePartDefinitionArchived(activePartDefinitionId)}
+                type="button"
+              >
+                {partDefinitionDraft.isArchived
+                  ? "Restore part definition"
+                  : "Archive part definition"}
+              </button>
+            ) : null}
+            {partDefinitionModalMode === "edit" && activePartDefinitionId ? (
+              <button
+                className="danger-action"
+                disabled={isDeletingPartDefinition || isSavingPartDefinition}
+                onClick={() => handleDeletePartDefinition(activePartDefinitionId)}
+                type="button"
+              >
+                {isDeletingPartDefinition ? "Deleting..." : "Delete part definition"}
+              </button>
+            ) : null}
+            <button
+              className="secondary-action"
+              onClick={closePartDefinitionModal}
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              type="button"
+            >
+              Cancel
+            </button>
+            <button
+              className="primary-action"
+              disabled={isSavingPartDefinition || isDeletingPartDefinition}
+              type="submit"
+            >
+              {isSavingPartDefinition
+                ? "Saving..."
+                : partDefinitionModalMode === "create"
+                  ? "Add part"
+                  : "Save changes"}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  );
+}

@@ -1,0 +1,529 @@
+.app-topbar-my-view-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  width: 1.95rem;
+  height: 1.95rem;
+  padding: 0;
+  border: 1px solid var(--border-base);
+  border-radius: 7px;
+  background: var(--bg-panel);
+  color: var(--text-copy);
+  cursor: pointer;
+  flex-shrink: 0;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.app-topbar-my-view-button svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.app-topbar-my-view-button:hover,
+.app-topbar-my-view-button:focus-visible {
+  background: var(--bg-row-alt);
+  color: var(--text-title);
+}
+
+.app-topbar-my-view-button.is-active {
+  border-color: rgba(22, 71, 142, 0.34);
+  background: rgba(22, 71, 142, 0.12);
+  color: var(--meco-blue);
+}
+
+.app-topbar-my-view-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.app-topbar-my-view-button:disabled:hover,
+.app-topbar-my-view-button:disabled:focus-visible {
+  background: var(--bg-panel);
+  color: var(--text-copy);
+}
+
+.app-topbar-icon-button:hover {
+  background: var(--bg-row-alt);
+  color: var(--text-title);
+}
+
+.app-topbar-user-chip {
+  height: 1.95rem;
+  padding: 0 0.6rem;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+.app-topbar-user-chip strong {
+  font-size: 0.84rem;
+  color: var(--text-title);
+}
+
+.app-topbar-title {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.app-topbar-page-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.95rem;
+  padding: 0 0.15rem;
+  border: 0;
+  background: transparent;
+  color: var(--text-title);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.topbar h1,
+.panel-header h2,
+.auth-card h1,
+.compact-form h3,
+.task-label strong,
+.queue-title strong,
+.member-row strong,
+.subsystem-toggle strong {
+  margin: 0;
+  color: var(--official-black);
+  font-family: "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif;
+}
+
+.topbar h1 {
+  font-size: 1.08rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.topbar-right {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: end;
+  gap: 0.3rem;
+}
+
+.app-topbar-right {
+  margin-left: auto;
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  min-width: 0;
+  gap: 0.3rem;
+  padding: 0.2rem clamp(0.5rem, 1.2vw, 1rem);
+  justify-content: flex-end;
+}
+
+.app-topbar-section-tabs {
+  flex-wrap: nowrap;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.app-topbar-section-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.toolbar-filter {
+  display: grid;
+  gap: 0.18rem;
+}
+
+.toolbar-filter .toolbar-filter-value,
+.toolbar-filter-select,
+.toolbar-filter-compact select,
+.toolbar-search-input {
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.toolbar-filter-label {
+  color: var(--text-copy);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.62rem;
+}
+
+.toolbar-filter select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  min-width: 180px;
+  height: 32px;
+  border-radius: var(--control-select-radius);
+  border: 1px solid var(--border-base);
+  background-color: var(--bg-row-alt);
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - var(--control-select-arrow-right-primary)) 54%,
+    calc(100% - var(--control-select-arrow-right-secondary)) 54%;
+  background-size:
+    var(--control-select-arrow-size) var(--control-select-arrow-size),
+    var(--control-select-arrow-size) var(--control-select-arrow-size);
+  background-repeat: no-repeat;
+  color: var(--text-title);
+  cursor: pointer;
+  padding: var(--control-select-padding-block) var(--control-select-padding-inline-end) var(--control-select-padding-block) var(--control-select-padding-inline-start);
+  font: inherit;
+}
+
+.toolbar-filter-dropdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: fit-content;
+  max-width: 100%;
+  min-width: 0;
+  padding: 0.1rem 0.12rem 0.1rem 0.42rem;
+  border: 1px solid rgba(15, 28, 52, 0.12);
+  border-radius: 999px;
+  background: var(--bg-row-alt);
+  overflow: visible;
+  position: relative;
+  z-index: 2000;
+}
+
+.toolbar-filter-dropdown.is-open {
+  z-index: 3000;
+}
+
+.toolbar-filter-menu-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  position: relative;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  padding: 0 1.05rem 0 0;
+}
+
+.toolbar-filter-dropdown.is-active {
+  background: rgba(22, 71, 142, 0.08);
+  border-color: var(--official-blue);
+}
+
+.filter-tone-info {
+  --filter-tone-bg: rgba(22, 71, 142, 0.12);
+  --filter-tone-bg-active: rgba(22, 71, 142, 0.18);
+  --filter-tone-border: rgba(22, 71, 142, 0.26);
+  --filter-tone-foreground: var(--official-blue);
+  --filter-tone-check: var(--official-blue);
+}
+
+.filter-tone-success {
+  --filter-tone-bg: rgba(61, 153, 108, 0.12);
+  --filter-tone-bg-active: rgba(61, 153, 108, 0.18);
+  --filter-tone-border: rgba(61, 153, 108, 0.26);
+  --filter-tone-foreground: #246847;
+  --filter-tone-check: #246847;
+}
+
+.filter-tone-warning {
+  --filter-tone-bg: rgba(220, 120, 18, 0.14);
+  --filter-tone-bg-active: rgba(220, 120, 18, 0.2);
+  --filter-tone-border: rgba(220, 120, 18, 0.28);
+  --filter-tone-foreground: #a84712;
+  --filter-tone-check: #a84712;
+}
+
+.filter-tone-danger {
+  --filter-tone-bg: rgba(183, 28, 38, 0.12);
+  --filter-tone-bg-active: rgba(183, 28, 38, 0.18);
+  --filter-tone-border: rgba(183, 28, 38, 0.26);
+  --filter-tone-foreground: #9b1d2a;
+  --filter-tone-check: #9b1d2a;
+}
+
+.filter-tone-neutral {
+  --filter-tone-bg: rgba(112, 128, 154, 0.12);
+  --filter-tone-bg-active: rgba(112, 128, 154, 0.18);
+  --filter-tone-border: rgba(112, 128, 154, 0.22);
+  --filter-tone-foreground: #54627b;
+  --filter-tone-check: #54627b;
+}
+
+.toolbar-filter-dropdown.filter-tone-info,
+.toolbar-filter-dropdown.filter-tone-success,
+.toolbar-filter-dropdown.filter-tone-warning,
+.toolbar-filter-dropdown.filter-tone-danger,
+.toolbar-filter-dropdown.filter-tone-neutral {
+  background: var(--filter-tone-bg);
+  border-color: var(--filter-tone-border);
+  color: var(--filter-tone-foreground);
+}
+
+.toolbar-filter-dropdown.filter-tone-info.is-active,
+.toolbar-filter-dropdown.filter-tone-success.is-active,
+.toolbar-filter-dropdown.filter-tone-warning.is-active,
+.toolbar-filter-dropdown.filter-tone-danger.is-active,
+.toolbar-filter-dropdown.filter-tone-neutral.is-active {
+  background: var(--filter-tone-bg-active);
+  border-color: var(--filter-tone-border);
+}
+
+.toolbar-filter-dropdown.filter-tone-info .toolbar-filter-icon,
+.toolbar-filter-dropdown.filter-tone-info .toolbar-filter-chevron,
+.toolbar-filter-dropdown.filter-tone-info .toolbar-filter-value,
+.toolbar-filter-dropdown.filter-tone-success .toolbar-filter-icon,
+.toolbar-filter-dropdown.filter-tone-success .toolbar-filter-chevron,
+.toolbar-filter-dropdown.filter-tone-success .toolbar-filter-value,
+.toolbar-filter-dropdown.filter-tone-warning .toolbar-filter-icon,
+.toolbar-filter-dropdown.filter-tone-warning .toolbar-filter-chevron,
+.toolbar-filter-dropdown.filter-tone-warning .toolbar-filter-value,
+.toolbar-filter-dropdown.filter-tone-danger .toolbar-filter-icon,
+.toolbar-filter-dropdown.filter-tone-danger .toolbar-filter-chevron,
+.toolbar-filter-dropdown.filter-tone-danger .toolbar-filter-value,
+.toolbar-filter-dropdown.filter-tone-neutral .toolbar-filter-icon,
+.toolbar-filter-dropdown.filter-tone-neutral .toolbar-filter-chevron,
+.toolbar-filter-dropdown.filter-tone-neutral .toolbar-filter-value {
+  color: inherit;
+}
+
+.toolbar-filter-dropdown .toolbar-filter-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-copy);
+  flex-shrink: 0;
+}
+
+.toolbar-filter-dropdown.is-active .toolbar-filter-icon {
+  color: var(--official-blue);
+}
+
+.toolbar-filter-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  min-width: 148px;
+  width: clamp(148px, 16vw, 220px);
+  height: 1.85rem;
+  border: 0;
+  border-radius: var(--control-select-radius);
+  background-color: transparent;
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - var(--control-select-arrow-right-primary)) 54%,
+    calc(100% - var(--control-select-arrow-right-secondary)) 54%;
+  background-size:
+    var(--control-select-arrow-size) var(--control-select-arrow-size),
+    var(--control-select-arrow-size) var(--control-select-arrow-size);
+  background-repeat: no-repeat;
+  color: var(--text-title);
+  cursor: pointer;
+  padding: var(--control-select-padding-block) var(--control-select-padding-inline-end) var(--control-select-padding-block) var(--control-select-padding-inline-start);
+}
+
+.toolbar-filter-select-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+}
+
+.toolbar-filter-select:focus {
+  outline: none;
+}
+
+.toolbar-filter select:focus,
+.toolbar-filter select:focus-visible {
+  outline: none;
+  border-color: var(--control-select-focus-border);
+  box-shadow: var(--control-select-focus-ring);
+}
+
+.toolbar-filter-select option {
+  background: var(--bg-panel);
+  color: var(--text-title);
+}
+
+.toolbar-filter-compact {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  gap: 0.35rem;
+  padding: 0.1rem 0.12rem 0.1rem 0.42rem;
+  border: 1px solid rgba(15, 28, 52, 0.12);
+  border-radius: 999px;
+  background: var(--bg-row-alt);
+}
+
+.toolbar-filter .toolbar-filter-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--text-copy);
+  line-height: 1.1;
+  text-transform: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toolbar-filter-chevron {
+  position: absolute;
+  top: 50%;
+  right: 0.18rem;
+  display: block;
+  width: 0.56rem;
+  height: 0.44rem;
+  transform: translateY(-45%);
+  color: var(--text-copy);
+  opacity: 0.84;
+  pointer-events: none;
+}
+
+.toolbar-filter-chevron::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  border-left: 0.22rem solid transparent;
+  border-right: 0.22rem solid transparent;
+  border-top: 0.28rem solid currentColor;
+  transform: translate(-50%, -35%);
+}
+
+.toolbar-filter-compact.is-active {
+  background: rgba(22, 71, 142, 0.08);
+  border-color: var(--official-blue);
+}
+
+.toolbar-filter-compact .toolbar-filter-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-copy);
+  flex-shrink: 0;
+}
+
+.toolbar-filter-compact.is-active .toolbar-filter-icon {
+  color: var(--official-blue);
+}
+
+.toolbar-filter-dropdown.is-active .toolbar-filter-value {
+  color: var(--text-title);
+  font-weight: 600;
+}
+
+.toolbar-filter-compact select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  min-width: 104px;
+  width: clamp(104px, 13vw, 170px);
+  border-radius: var(--control-select-radius);
+  border: 0;
+  background-color: transparent;
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - var(--control-select-arrow-right-primary)) 54%,
+    calc(100% - var(--control-select-arrow-right-secondary)) 54%;
+  background-size:
+    var(--control-select-arrow-size) var(--control-select-arrow-size),
+    var(--control-select-arrow-size) var(--control-select-arrow-size);
+  background-repeat: no-repeat;
+  color: var(--text-copy);
+  padding: var(--control-select-padding-block) var(--control-select-padding-inline-end) var(--control-select-padding-block) 0.08rem;
+  color-scheme: light;
+}
+
+.toolbar-filter-compact.is-active select {
+  color: var(--text-title);
+  font-weight: 600;
+}
+
+.toolbar-filter-dropdown:focus-within,
+.toolbar-filter-compact:focus-within {
+  border-color: var(--control-select-focus-border);
+  box-shadow: var(--control-select-focus-ring);
+}
+
+.filter-toolbar .toolbar-search-input,
+.filter-toolbar .toolbar-filter .toolbar-filter-value,
+.filter-toolbar .toolbar-filter .toolbar-filter-select,
+.filter-toolbar .toolbar-filter.toolbar-filter-compact select {
+  font-family: "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif !important;
+  font-size: 0.96rem !important;
+  font-weight: 600 !important;
+  line-height: 1.2;
+  letter-spacing: 0.005em;
+}
+
+.filter-toolbar .toolbar-search-input::placeholder,
+.filter-toolbar .toolbar-filter .toolbar-filter-value,
+.filter-toolbar .toolbar-filter.toolbar-filter-compact select {
+  color: var(--text-copy);
+  opacity: 1;
+}
+
+.filter-toolbar .toolbar-filter-dropdown.is-active .toolbar-filter-value,
+.filter-toolbar .toolbar-filter.toolbar-filter-compact.is-active select {
+  color: var(--text-title);
+}
+
+.filter-toolbar .toolbar-filter-dropdown,
+.filter-toolbar .toolbar-filter-compact {
+  height: 2.05rem;
+  min-height: 2.05rem;
+  padding-top: 0;
+  padding-bottom: 0;
+  align-items: center;
+}
+
+.filter-toolbar .toolbar-search-input,
+.filter-toolbar .toolbar-filter.toolbar-filter-compact select {
+  height: 100%;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.filter-toolbar .toolbar-filter-icon {
+  font-size: 0.92rem;
+}
+
+.filter-toolbar .toolbar-filter-chevron {
+  width: 0.54rem;
+  height: 0.54rem;
+}
+
+.page-shell.dark-mode .toolbar-filter-compact {
+  background: var(--bg-panel);
+  border-color: rgba(148, 163, 184, 0.34);
+  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.24);
+}
+
+.page-shell.dark-mode .toolbar-filter-compact.is-active {
+  background: linear-gradient(135deg, rgba(22, 71, 142, 0.22), rgba(30, 41, 59, 0.98));
+}

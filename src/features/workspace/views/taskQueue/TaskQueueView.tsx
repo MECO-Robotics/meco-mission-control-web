@@ -1,113 +1,24 @@
-import { useEffect, useMemo, useRef, useState, useId } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { formatIterationVersion } from "@/lib/appUtils";
 import type { BootstrapPayload, TaskRecord } from "@/types";
 import {
   IconChevronLeft,
   IconChevronRight,
-  IconManufacturing,
-  IconFilter,
-  IconParts,
-  IconPerson,
   IconSort,
-  IconTasks,
 } from "@/components/shared";
+import { SearchToolbarInput } from "@/features/workspace/shared/WorkspaceViewShared";
+import { CompactFilterMenu } from "@/features/workspace/shared/workspaceCompactFilterMenu";
+import type { FilterSelection } from "@/features/workspace/shared/workspaceFilterUtils";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/workspaceTypes";
+import { TASK_QUEUE_LAZY_LOAD_BATCH_SIZE } from "./taskQueueKanban";
+import { TaskQueueKanbanBoard } from "./TaskQueueKanbanBoard";
+import { TaskQueueCompactFilterMenu } from "./TaskQueueCompactFilterMenu";
 import {
-  CompactFilterMenu,
-  type DropdownOption,
-  type FilterSelection,
-  FilterDropdown,
-  SearchToolbarInput,
-  filterSelectionIncludes,
-  filterSelectionIntersects,
-  filterSelectionMatchesTaskPeople,
-  formatFilterSelectionLabel,
-  useFilterChangeMotionClass,
-} from "@/features/workspace/shared";
-import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
-import { TASK_PRIORITY_OPTIONS } from "@/features/workspace/shared";
-import {
-  TASK_QUEUE_LAZY_LOAD_BATCH_SIZE,
-  type TaskQueueBoardState,
-  getTaskQueueBoardState,
-  getTaskQueueBoardStateSortValue,
-  formatSubsystemNames,
-  formatTaskQueueAssignees,
-  readTaskAssigneeIds,
-  readTaskSubsystemIds,
-  TASK_QUEUE_STATUS_OPTIONS,
-} from "@/features/workspace/views/taskQueue/taskQueueKanban";
-import { TaskQueueKanbanBoard } from "@/features/workspace/views/taskQueue/TaskQueueKanbanBoard";
-
-type TaskSortField =
-  | "disciplineId"
-  | "dueDate"
-  | "ownerId"
-  | "priority"
-  | "projectId"
-  | "status"
-  | "subsystemId"
-  | "title";
-
-const TASK_SORT_OPTIONS: DropdownOption[] = [
-  { id: "projectId", name: "Project" },
-  { id: "title", name: "Task" },
-  { id: "disciplineId", name: "Discipline" },
-  { id: "subsystemId", name: "Subsystem" },
-  { id: "ownerId", name: "Assigned" },
-  { id: "status", name: "Status" },
-  { id: "dueDate", name: "Due" },
-  { id: "priority", name: "Priority" },
-];
-
-const SORT_DIRECTION_OPTIONS: DropdownOption[] = [
-  { id: "asc", name: "Ascending" },
-  { id: "desc", name: "Descending" },
-];
-
-const FILTER_TONE_CLASSES = [
-  "filter-tone-info",
-  "filter-tone-success",
-  "filter-tone-warning",
-  "filter-tone-danger",
-  "filter-tone-neutral",
-] as const;
-
-const SUBSYSTEM_ITERATION_DISCIPLINE_CODES = new Set<string>([
-  "design",
-  "manufacturing",
-  "assembly",
-  "electrical",
-]);
-
-function getStableToneClassName(value: string) {
-  let hash = 0;
-
-  for (let index = 0; index < value.length; index += 1) {
-    hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
-  }
-
-  return FILTER_TONE_CLASSES[hash % FILTER_TONE_CLASSES.length];
-}
-
-function getTaskQueueStatusToneClassName(value: string) {
-  switch (value) {
-    case "in-progress":
-      return "filter-tone-warning";
-    case "waiting-on-dependency":
-      return "filter-tone-warning";
-    case "waiting-for-qa":
-      return "filter-tone-info";
-    case "complete":
-      return "filter-tone-success";
-    case "blocked":
-      return "filter-tone-danger";
-    case "not-started":
-      return "filter-tone-neutral";
-    default:
-      return "filter-tone-neutral";
-  }
-}
+  SORT_DIRECTION_OPTIONS,
+  TASK_SORT_OPTIONS,
+  type TaskSortField,
+  useTaskQueueViewState,
+} from "./taskQueueViewState";
 
 interface TaskQueueViewProps {
   activePersonFilter: FilterSelection;
@@ -121,231 +32,6 @@ interface TaskQueueViewProps {
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
 }
 
-function TaskQueueCompactFilterMenu({
-  activeFilterCount,
-  isAllProjectsView,
-  isOpen,
-  onClose,
-  onToggle,
-  projectFilter,
-  setPriorityFilter,
-  setProjectFilter,
-  setStatusFilter,
-  setDisciplineFilter,
-  setSubsystemFilter,
-  setSubsystemIterationFilter,
-  setOwnerFilter,
-  disciplineFilter,
-  disciplineOptions,
-  showSubsystemIterationFilter,
-  subsystemFilter,
-  subsystemFilterOptions,
-  subsystemIterationFilter,
-  subsystemIterationOptions,
-  ownerFilter,
-  priorityFilter,
-  statusFilter,
-  bootstrap,
-}: {
-  activeFilterCount: number;
-  bootstrap: BootstrapPayload;
-  disciplineFilter: FilterSelection;
-  disciplineOptions: DropdownOption[];
-  isAllProjectsView: boolean;
-  isOpen: boolean;
-  onClose: () => void;
-  onToggle: () => void;
-  ownerFilter: FilterSelection;
-  priorityFilter: FilterSelection;
-  projectFilter: FilterSelection;
-  setPriorityFilter: (value: FilterSelection) => void;
-  setProjectFilter: (value: FilterSelection) => void;
-  setStatusFilter: (value: FilterSelection) => void;
-  setDisciplineFilter: (value: FilterSelection) => void;
-  setSubsystemFilter: (value: FilterSelection) => void;
-  setSubsystemIterationFilter: (value: FilterSelection) => void;
-  setOwnerFilter: (value: FilterSelection) => void;
-  showSubsystemIterationFilter: boolean;
-  statusFilter: FilterSelection;
-  subsystemFilter: FilterSelection;
-  subsystemFilterOptions: DropdownOption[];
-  subsystemIterationFilter: FilterSelection;
-  subsystemIterationOptions: DropdownOption[];
-}) {
-  const menuRef = useRef<HTMLSpanElement>(null);
-  const menuId = useId();
-
-  useEffect(() => {
-    if (!isOpen || typeof document === "undefined") {
-      return;
-    }
-
-    const handlePointerDown = (event: MouseEvent) => {
-      const target = event.target;
-      if (target instanceof Node && !menuRef.current?.contains(target)) {
-        onClose();
-      }
-    };
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOpen, onClose]);
-
-  return (
-    <span
-      className={`toolbar-filter toolbar-filter-dropdown task-queue-filter-menu${isActiveClass(activeFilterCount)}${isOpen ? " is-open" : ""}`}
-      ref={menuRef}
-    >
-      <button
-        aria-controls={menuId}
-        aria-expanded={isOpen}
-        aria-haspopup="menu"
-        className="toolbar-filter-menu-button task-queue-filter-menu-button"
-        onClick={onToggle}
-        type="button"
-      >
-        <span className="toolbar-filter-icon">
-          <IconFilter />
-        </span>
-        <span aria-hidden="true" className="toolbar-filter-value">
-          Filters
-        </span>
-        {activeFilterCount > 0 ? (
-          <span aria-hidden="true" className="task-queue-filter-count">
-            {activeFilterCount}
-          </span>
-        ) : null}
-        <span aria-hidden="true" className="toolbar-filter-chevron" />
-      </button>
-
-      {isOpen ? (
-        <div aria-label="Task filters" className="task-queue-filter-menu-popover" id={menuId} role="menu">
-          {isAllProjectsView ? (
-            <div className="task-queue-filter-menu-item">
-              <span className="task-queue-filter-menu-label">Project</span>
-              <FilterDropdown
-                allLabel="All projects"
-                ariaLabel="Filter tasks by project"
-                className="task-queue-filter-menu-submenu"
-                icon={<IconParts />}
-                onChange={setProjectFilter}
-                options={bootstrap.projects}
-                value={projectFilter}
-              />
-            </div>
-          ) : null}
-
-          <div className="task-queue-filter-menu-item">
-            <span className="task-queue-filter-menu-label">Discipline</span>
-              <FilterDropdown
-                allLabel="All disciplines"
-                ariaLabel="Filter tasks by discipline"
-                className="task-queue-filter-menu-submenu"
-                icon={<IconTasks />}
-                getOptionToneClassName={(option) => getStableToneClassName(option.id)}
-                getSelectedToneClassName={(selection) =>
-                  selection.length === 1 ? getStableToneClassName(selection[0]) : undefined
-                }
-                onChange={setDisciplineFilter}
-                options={disciplineOptions}
-                value={disciplineFilter}
-              />
-          </div>
-
-          <div className="task-queue-filter-menu-item">
-            <span className="task-queue-filter-menu-label">Subsystem</span>
-              <FilterDropdown
-                allLabel="All subsystems"
-                ariaLabel="Filter tasks by subsystem"
-                className="task-queue-filter-menu-submenu"
-                icon={<IconManufacturing />}
-                getOptionToneClassName={(option) => getStableToneClassName(option.id)}
-                getSelectedToneClassName={(selection) =>
-                  selection.length === 1 ? getStableToneClassName(selection[0]) : undefined
-                }
-                onChange={setSubsystemFilter}
-                options={subsystemFilterOptions}
-                value={subsystemFilter}
-              />
-          </div>
-
-          {showSubsystemIterationFilter ? (
-            <div className="task-queue-filter-menu-item">
-              <span className="task-queue-filter-menu-label">Iteration</span>
-              <FilterDropdown
-                allLabel="All iterations"
-                ariaLabel="Filter tasks by subsystem iteration"
-                className="task-queue-filter-menu-submenu"
-                icon={<IconManufacturing />}
-                onChange={setSubsystemIterationFilter}
-                options={subsystemIterationOptions}
-                value={subsystemIterationFilter}
-              />
-            </div>
-          ) : null}
-
-          <div className="task-queue-filter-menu-item">
-            <span className="task-queue-filter-menu-label">Assignee</span>
-            <FilterDropdown
-              allLabel="All assignees"
-              ariaLabel="Filter tasks by assigned student"
-              className="task-queue-filter-menu-submenu"
-              icon={<IconPerson />}
-              onChange={setOwnerFilter}
-              options={bootstrap.members}
-              value={ownerFilter}
-            />
-          </div>
-
-          <div className="task-queue-filter-menu-item">
-            <span className="task-queue-filter-menu-label">Status</span>
-              <FilterDropdown
-                allLabel="All statuses"
-                ariaLabel="Filter tasks by status"
-                className="task-queue-filter-menu-submenu"
-                icon={<IconTasks />}
-                getOptionToneClassName={(option) => getTaskQueueStatusToneClassName(option.id)}
-                getSelectedToneClassName={(selection) =>
-                  selection.length === 1 ? getTaskQueueStatusToneClassName(selection[0]) : undefined
-                }
-                onChange={setStatusFilter}
-                options={TASK_QUEUE_STATUS_OPTIONS}
-                value={statusFilter}
-              />
-          </div>
-
-          <div className="task-queue-filter-menu-item">
-            <span className="task-queue-filter-menu-label">Priority</span>
-            <FilterDropdown
-              allLabel="All priorities"
-              ariaLabel="Filter tasks by priority"
-              className="task-queue-filter-menu-submenu"
-              icon={<IconTasks />}
-              onChange={setPriorityFilter}
-              options={TASK_PRIORITY_OPTIONS}
-              value={priorityFilter}
-            />
-          </div>
-        </div>
-      ) : null}
-    </span>
-  );
-}
-
-function isActiveClass(activeFilterCount: number) {
-  return activeFilterCount > 0 ? " is-active" : "";
-}
-
 export function TaskQueueView({
   activePersonFilter,
   bootstrap,
@@ -357,278 +43,64 @@ export function TaskQueueView({
   openEditTaskModal,
   subsystemsById,
 }: TaskQueueViewProps) {
-  const [sortField, setSortField] = useState<TaskSortField>("dueDate");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [projectFilter, setProjectFilter] = useState<FilterSelection>([]);
-  const [statusFilter, setStatusFilter] = useState<FilterSelection>([]);
-  const [disciplineFilter, setDisciplineFilter] = useState<FilterSelection>([]);
-  const [subsystemFilter, setSubsystemFilter] = useState<FilterSelection>([]);
-  const [subsystemIterationFilter, setSubsystemIterationFilter] =
-    useState<FilterSelection>([]);
-  const [ownerFilter, setOwnerFilter] = useState<FilterSelection>([]);
-  const [priorityFilter, setPriorityFilter] = useState<FilterSelection>([]);
-  const [searchFilter, setSearchFilter] = useState("");
-  const [focusedBoardState, setFocusedBoardState] = useState<TaskQueueBoardState | null>(null);
-
-  const projectsById = useMemo(
-    () =>
-      Object.fromEntries(
-        bootstrap.projects.map((project) => [project.id, project]),
-      ) as Record<string, BootstrapPayload["projects"][number]>,
-    [bootstrap.projects],
-  );
-  const workstreamsById = useMemo(
-    () =>
-      Object.fromEntries(
-        bootstrap.workstreams.map((workstream) => [workstream.id, workstream]),
-      ) as Record<string, BootstrapPayload["workstreams"][number]>,
-    [bootstrap.workstreams],
-  );
-  const subsystemFilterOptions = useMemo(
-    () =>
-      bootstrap.subsystems.map((subsystem) => ({
-        id: subsystem.id,
-        name: `${subsystem.name} (${formatIterationVersion(subsystem.iteration)})`,
-      })),
-    [bootstrap.subsystems],
-  );
-  const disciplineOptions = useMemo(
-    () =>
-      bootstrap.disciplines.map((discipline) => ({
-        id: discipline.id,
-        name: discipline.name,
-      })),
-    [bootstrap.disciplines],
-  );
-  const subsystemIterationOptions = useMemo(() => {
-    const uniqueIterations = Array.from(
-      new Set(bootstrap.subsystems.map((subsystem) => subsystem.iteration)),
-    ).sort((left, right) => left - right);
-
-    return uniqueIterations.map((iteration) => ({
-      id: `${iteration}`,
-      name: formatIterationVersion(iteration),
-    }));
-  }, [bootstrap.subsystems]);
-  const selectedSubsystemId = subsystemFilter.length === 1 ? subsystemFilter[0] : null;
-  const showSubsystemIterationFilter = useMemo(() => {
-    if (!selectedSubsystemId) {
-      return false;
-    }
-
-    const hasIterationSensitiveTask = bootstrap.tasks.some((task) => {
-      const disciplineCode = task.disciplineId
-        ? disciplinesById[task.disciplineId]?.code
-        : null;
-
-      return (
-        Boolean(disciplineCode && SUBSYSTEM_ITERATION_DISCIPLINE_CODES.has(disciplineCode)) &&
-        readTaskSubsystemIds(task).includes(selectedSubsystemId)
-      );
-    });
-
-    if (hasIterationSensitiveTask) {
-      return true;
-    }
-
-    return bootstrap.mechanisms.some(
-      (mechanism) => mechanism.subsystemId === selectedSubsystemId,
-    );
-  }, [
-    bootstrap.mechanisms,
-    bootstrap.tasks,
-    disciplinesById,
-    selectedSubsystemId,
-  ]);
-
-  useEffect(() => {
-    if (!isAllProjectsView && projectFilter.length > 0) {
-      setProjectFilter([]);
-    }
-  }, [isAllProjectsView, projectFilter]);
-
-  useEffect(() => {
-    const projectIds = new Set(bootstrap.projects.map((project) => project.id));
-    if (projectFilter.some((projectId) => !projectIds.has(projectId))) {
-      setProjectFilter((current) => current.filter((projectId) => projectIds.has(projectId)));
-    }
-  }, [bootstrap.projects, projectFilter]);
-  const [isTaskQueueMenuOpen, setIsTaskQueueMenuOpen] = useState(false);
-
-  useEffect(() => {
-    if (!showSubsystemIterationFilter && subsystemIterationFilter.length > 0) {
-      setSubsystemIterationFilter([]);
-    }
-  }, [showSubsystemIterationFilter, subsystemIterationFilter]);
-  const activePersonFilterLabel = formatFilterSelectionLabel(
-    "All roster",
-    bootstrap.members,
-    activePersonFilter,
-  );
-
-  const processedTasks = useMemo(() => {
-    let result = [...bootstrap.tasks];
-
-    if (activePersonFilter.length > 0) {
-      result = result.filter((task) => filterSelectionMatchesTaskPeople(activePersonFilter, task));
-    }
-    if (isAllProjectsView && projectFilter.length > 0) {
-      result = result.filter((task) => filterSelectionIncludes(projectFilter, task.projectId));
-    }
-    if (statusFilter.length > 0) {
-      result = result.filter((task) =>
-        filterSelectionIncludes(statusFilter, getTaskQueueBoardState(task, bootstrap)),
-      );
-    }
-    if (disciplineFilter.length > 0) {
-      result = result.filter((task) =>
-        filterSelectionIncludes(disciplineFilter, task.disciplineId),
-      );
-    }
-    if (subsystemFilter.length > 0) {
-      result = result.filter((task) =>
-        filterSelectionIntersects(
-          subsystemFilter,
-          readTaskSubsystemIds(task),
-        ),
-      );
-    }
-    if (showSubsystemIterationFilter && subsystemIterationFilter.length > 0) {
-      result = result.filter((task) =>
-        readTaskSubsystemIds(task).some((subsystemId) => {
-          const subsystemIteration = subsystemsById[subsystemId]?.iteration;
-
-          return (
-            typeof subsystemIteration === "number" &&
-            subsystemIterationFilter.includes(`${subsystemIteration}`)
-          );
-        }),
-      );
-    }
-    if (ownerFilter.length > 0) {
-      result = result.filter((task) =>
-        readTaskAssigneeIds(task).some((assigneeId) => ownerFilter.includes(assigneeId)),
-      );
-    }
-    if (priorityFilter.length > 0) {
-      result = result.filter((task) => filterSelectionIncludes(priorityFilter, task.priority));
-    }
-    if (searchFilter.trim() !== "") {
-      const search = searchFilter.toLowerCase();
-      result = result.filter(
-        (task) =>
-          task.title.toLowerCase().includes(search) ||
-          task.summary.toLowerCase().includes(search),
-      );
-    }
-
-    const priorityValues: Record<string, number> = {
-      critical: 4,
-      high: 3,
-      medium: 2,
-      low: 1,
-    };
-
-    const readSortValue = (task: TaskRecord): number | string => {
-      if (sortField === "priority") {
-        return priorityValues[task.priority] ?? 0;
-      }
-      if (sortField === "status") {
-        return getTaskQueueBoardStateSortValue(getTaskQueueBoardState(task, bootstrap));
-      }
-      if (sortField === "subsystemId") {
-        return formatSubsystemNames(readTaskSubsystemIds(task), subsystemsById, "");
-      }
-      if (sortField === "disciplineId") {
-        return task.disciplineId ? disciplinesById[task.disciplineId]?.name ?? "" : "";
-      }
-      if (sortField === "projectId") {
-        return projectsById[task.projectId]?.name ?? "";
-      }
-      if (sortField === "ownerId") {
-        return formatTaskQueueAssignees(task, membersById);
-      }
-      if (sortField === "title") {
-        return task.title.toLowerCase();
-      }
-      return task.dueDate;
-    };
-
-    return result.sort((left, right) => {
-      const leftValue = readSortValue(left);
-      const rightValue = readSortValue(right);
-
-      if (leftValue < rightValue) {
-        return sortOrder === "asc" ? -1 : 1;
-      }
-      if (leftValue > rightValue) {
-        return sortOrder === "asc" ? 1 : -1;
-      }
-      return 0;
-    });
-  }, [
-    activePersonFilter,
+  const {
+    activeFilterCount,
+    activePersonFilterLabel,
     disciplineFilter,
-    disciplinesById,
-    isAllProjectsView,
-    membersById,
+    disciplineOptions,
+    focusedBoardState,
     ownerFilter,
     priorityFilter,
+    processedTasks,
     projectFilter,
     projectsById,
     searchFilter,
+    setDisciplineFilter,
+    setFocusedBoardState,
+    setOwnerFilter,
+    setPriorityFilter,
+    setProjectFilter,
+    setSearchFilter,
+    setSortField,
+    setSortOrder,
+    setStatusFilter,
+    setSubsystemFilter,
+    setSubsystemIterationFilter,
+    setVisibleTaskCount,
     sortField,
     sortOrder,
     statusFilter,
     subsystemFilter,
+    subsystemFilterOptions,
     subsystemIterationFilter,
+    subsystemIterationOptions,
+    taskFilterMotionClass,
+    taskSortIsDefault,
+    visibleTaskCount,
+    workstreamsById,
+    showProjectContextOnCards,
+    showProjectOnCards,
     showSubsystemIterationFilter,
+  } = useTaskQueueViewState({
+    activePersonFilter,
     bootstrap,
+    disciplinesById,
+    isAllProjectsView,
+    membersById,
     subsystemsById,
-  ]);
-  const [visibleTaskCount, setVisibleTaskCount] = useState(TASK_QUEUE_LAZY_LOAD_BATCH_SIZE);
-  const loadMoreRef = useRef<HTMLDivElement>(null);
-  const taskQueueBoardShellRef = useRef<HTMLDivElement>(null);
+  });
+
   const [taskQueueBoardScrollState, setTaskQueueBoardScrollState] = useState({
     canScrollLeft: false,
     canScrollRight: false,
     hasOverflow: false,
   });
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const taskQueueBoardShellRef = useRef<HTMLDivElement>(null);
   const isFocused = focusedBoardState !== null;
-
-  useEffect(() => {
-    if (focusedBoardState === null) {
-      return;
-    }
-
-    const hasMatchingTasks = processedTasks.some(
-      (task) => getTaskQueueBoardState(task, bootstrap) === focusedBoardState,
-    );
-    if (!hasMatchingTasks) {
-      setFocusedBoardState(null);
-    }
-  }, [bootstrap, focusedBoardState, processedTasks]);
-
-  useEffect(() => {
-    if (focusedBoardState === null || typeof document === "undefined") {
-      return;
-    }
-
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setFocusedBoardState(null);
-      }
-    };
-
-    document.addEventListener("keydown", handleEscape);
-    return () => {
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, [focusedBoardState]);
-
-  useEffect(() => {
-    setVisibleTaskCount(TASK_QUEUE_LAZY_LOAD_BATCH_SIZE);
-  }, [processedTasks]);
+  const boardTasks = isFocused ? processedTasks : processedTasks.slice(0, visibleTaskCount);
+  const hasMoreTasks = !isFocused && visibleTaskCount < processedTasks.length;
+  const loadedTaskLabel = `${Math.min(visibleTaskCount, processedTasks.length)} of ${processedTasks.length}`;
 
   useEffect(() => {
     const shell = taskQueueBoardShellRef.current;
@@ -742,34 +214,7 @@ export function TaskQueueView({
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleScroll);
     };
-  }, [isFocused, processedTasks.length, visibleTaskCount]);
-  const visibleTasks = useMemo(
-    () => processedTasks.slice(0, visibleTaskCount),
-    [processedTasks, visibleTaskCount],
-  );
-  const boardTasks = useMemo(
-    () => (focusedBoardState === null ? visibleTasks : processedTasks),
-    [focusedBoardState, processedTasks, visibleTasks],
-  );
-  const hasMoreTasks = !isFocused && visibleTaskCount < processedTasks.length;
-  const loadedTaskLabel = `${Math.min(visibleTaskCount, processedTasks.length)} of ${processedTasks.length}`;
-  const showProjectOnCards = isAllProjectsView && projectFilter.length === 0;
-  const showProjectContextOnCards = !isAllProjectsView;
-  const taskFilterMotionClass = useFilterChangeMotionClass([
-    activePersonFilter,
-    disciplineFilter,
-    isAllProjectsView,
-    ownerFilter,
-    priorityFilter,
-    projectFilter,
-    searchFilter,
-    sortField,
-    sortOrder,
-    statusFilter,
-    subsystemFilter,
-    subsystemIterationFilter,
-  ]);
-  const taskSortIsDefault = sortField === "dueDate" && sortOrder === "asc";
+  }, [isFocused, processedTasks.length, visibleTaskCount, setVisibleTaskCount]);
 
   return (
     <section className={`panel dense-panel task-queue-view ${WORKSPACE_PANEL_CLASS}`}>
@@ -793,32 +238,21 @@ export function TaskQueueView({
           </div>
 
           <TaskQueueCompactFilterMenu
-            activeFilterCount={[
-              isAllProjectsView ? projectFilter : [],
-              disciplineFilter,
-              subsystemFilter,
-              showSubsystemIterationFilter ? subsystemIterationFilter : [],
-              ownerFilter,
-              statusFilter,
-              priorityFilter,
-            ].filter((selection) => selection.length > 0).length}
+            activeFilterCount={activeFilterCount}
             bootstrap={bootstrap}
             disciplineFilter={disciplineFilter}
             disciplineOptions={disciplineOptions}
             isAllProjectsView={isAllProjectsView}
-            isOpen={isTaskQueueMenuOpen}
-            onClose={() => setIsTaskQueueMenuOpen(false)}
-            onToggle={() => setIsTaskQueueMenuOpen((current) => !current)}
             ownerFilter={ownerFilter}
             priorityFilter={priorityFilter}
             projectFilter={projectFilter}
             setDisciplineFilter={setDisciplineFilter}
+            setOwnerFilter={setOwnerFilter}
             setPriorityFilter={setPriorityFilter}
             setProjectFilter={setProjectFilter}
             setStatusFilter={setStatusFilter}
             setSubsystemFilter={setSubsystemFilter}
             setSubsystemIterationFilter={setSubsystemIterationFilter}
-            setOwnerFilter={setOwnerFilter}
             showSubsystemIterationFilter={showSubsystemIterationFilter}
             statusFilter={statusFilter}
             subsystemFilter={subsystemFilter}
@@ -907,13 +341,16 @@ export function TaskQueueView({
             </div>
           </div>
         ) : null}
-        <div className={`table-shell task-queue-board-shell${isFocused ? " is-focused-column" : ""}`} ref={taskQueueBoardShellRef}>
+        <div
+          className={`table-shell task-queue-board-shell${isFocused ? " is-focused-column" : ""}`}
+          ref={taskQueueBoardShellRef}
+        >
           {boardTasks.length > 0 ? (
             <TaskQueueKanbanBoard
               bootstrap={bootstrap}
               disciplinesById={disciplinesById}
-              isNonRobotProject={isNonRobotProject}
               focusedState={focusedBoardState}
+              isNonRobotProject={isNonRobotProject}
               membersById={membersById}
               openEditTaskModal={openEditTaskModal}
               projectsById={projectsById}

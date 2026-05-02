@@ -1,0 +1,241 @@
+
+.auth-panel-copy {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.auth-panel-copy h2 {
+  margin: 0;
+  color: var(--official-black);
+  font-family: "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif;
+  font-size: 1.15rem;
+  line-height: 1.12;
+}
+
+.auth-mobile-platforms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.auth-mobile-platform {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.36rem 0.66rem;
+  border-radius: 999px;
+  border: 1px solid rgba(22, 71, 142, 0.14);
+  background: rgba(22, 71, 142, 0.05);
+  color: var(--text-title);
+  font-size: 0.84rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.auth-mobile-platform-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  color: var(--official-blue);
+}
+
+.auth-release-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.auth-release-link:hover,
+.auth-release-link:focus-visible {
+  text-decoration: none;
+}
+
+.auth-panel-eyebrow {
+  margin: 0;
+  color: var(--official-blue);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.auth-form {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.auth-email-verify {
+  padding: 0.95rem;
+  border: 1px solid rgba(22, 71, 142, 0.08);
+  border-radius: 16px;
+  background: rgba(22, 71, 142, 0.035);
+}
+
+.auth-form-actions {
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.auth-feedback {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0;
+  padding: 0.7rem 0.85rem;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(15, 28, 52, 0.03);
+  color: var(--text-copy);
+  line-height: 1.45;
+  font-size: 0.92rem;
+}
+
+.auth-feedback-muted {
+  color: var(--text-copy);
+}
+
+.auth-feedback-loading {
+  border-color: rgba(22, 71, 142, 0.2);
+  background: rgba(22, 71, 142, 0.06);
+  color: var(--official-blue);
+}
+
+.auth-feedback-success {
+  border-color: rgba(61, 153, 108, 0.18);
+  background: rgba(61, 153, 108, 0.08);
+  color: #246847;
+}
+
+.auth-feedback-spinner {
+  width: 0.85rem;
+  height: 0.85rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: auth-feedback-spin 0.85s linear infinite;
+}
+
+@keyframes auth-feedback-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.auth-error,
+.auth-success {
+  margin: 0;
+  border-radius: 14px;
+  padding: 0.7rem 0.9rem;
+  line-height: 1.45;
+}
+
+.auth-success {
+  border: 1px solid rgba(61, 153, 108, 0.18);
+  background: rgba(61, 153, 108, 0.08);
+  color: #246847;
+}
+
+.workspace-shell-loading {
+  grid-column: 1 / -1;
+  margin: 1rem;
+  border: 1px solid var(--border-base);
+  border-radius: 16px;
+  background: var(--bg-panel);
+  box-shadow: var(--shadow-soft);
+  padding: 1rem 1.2rem;
+}
+
+.workspace-shell-loading-copy {
+  margin: 0;
+  color: var(--text-copy);
+}
+
+@media (max-width: 900px) {
+  .app-topbar-project-label {
+    display: none;
+  }
+
+  .app-topbar-project-select {
+    min-width: 112px;
+  }
+
+  .app-topbar-right {
+    padding-inline: 0.5rem;
+  }
+
+  .queue-table.queue-table-header {
+    display: none;
+  }
+
+  .ops-table.ops-table-header {
+    display: none;
+  }
+
+  .queue-row {
+    display: grid;
+    grid-template-columns: 1fr !important;
+    gap: 0.45rem;
+    padding: 0.68rem;
+  }
+
+  .ops-row {
+    display: grid;
+    grid-template-columns: 1fr !important;
+    gap: 0.45rem;
+    padding: 0.68rem;
+  }
+
+  .queue-toolbar {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: flex-start;
+    margin-left: auto;
+  }
+
+  .worklog-toolbar {
+    flex: 1 1 420px;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: flex-start;
+    margin-left: auto;
+  }
+
+  .worklog-toolbar>* {
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .filter-toolbar {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    align-items: flex-start;
+    margin-left: auto;
+  }
+
+  .filter-toolbar>* {
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .mobile-filter-control {
+    display: inline-flex;
+  }
+}

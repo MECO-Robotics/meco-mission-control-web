@@ -35,6 +35,7 @@ export { getStatusPillClassName } from "./workspaceUtils";
 export {
   ColumnFilterDropdown,
   CompactFilterMenu,
+  type CompactFilterMenuItem,
   EditableHoverIndicator,
   type FilterSelection,
   FilterDropdown,
@@ -48,6 +49,7 @@ export {
   formatFilterSelectionLabel,
   getPortalMenuPosition,
   getTaskPersonFilterIds,
+  WORKSPACE_COMPACT_BREAKPOINT,
   pruneFilterSelection,
   useWorkspaceCompactMode,
   useFilterChangeMotionClass,

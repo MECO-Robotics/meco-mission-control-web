@@ -1,0 +1,279 @@
+
+.task-queue-board-priority-label-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.25rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: rgba(22, 71, 142, 0.1);
+  color: var(--official-blue);
+  border: 1px solid transparent;
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.task-queue-board-priority-grid {
+  display: grid;
+  gap: 0.55rem;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+}
+
+.page-shell.dark-mode .task-queue-board-focused-exit {
+  border-color: rgba(248, 113, 113, 0.5);
+  background: rgba(248, 113, 113, 0.16);
+  color: #fda4af;
+}
+
+.task-queue-board-card {
+  display: grid;
+  gap: 0.45rem;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--border-base);
+  border-radius: 14px;
+  background: var(--bg-row-alt);
+  color: var(--text-title);
+  padding: 0.72rem 0.82rem;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(15, 28, 52, 0.05);
+}
+
+.task-queue-board-card-discipline-accented {
+  border-color: color-mix(
+    in srgb,
+    var(--task-queue-board-card-discipline-accent) 56%,
+    var(--border-base)
+  );
+  box-shadow:
+    0 8px 18px rgba(15, 28, 52, 0.05),
+    0 0 0 1.5px
+      color-mix(
+        in srgb,
+        var(--task-queue-board-card-discipline-accent) 26%,
+        transparent
+      ),
+    inset 0 0 0 1px
+      color-mix(
+        in srgb,
+        var(--task-queue-board-card-discipline-accent) 16%,
+        transparent
+      );
+}
+
+.task-queue-board-card.editable-hover-target-row {
+  padding-inline-end: 0.82rem !important;
+}
+
+.task-queue-board-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.task-queue-board-card-header strong {
+  min-width: 0;
+  color: var(--text-title);
+  font-size: 0.92rem;
+  line-height: 1.25;
+}
+
+.task-queue-board-card-due {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.15rem;
+  padding: 0.1rem 0.36rem;
+  border-radius: 999px;
+  background: rgba(22, 71, 142, 0.1);
+  color: var(--official-blue);
+  font-size: 0.63rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.task-queue-board-card-summary {
+  color: var(--text-copy);
+  font-size: 0.74rem;
+  line-height: 1.35;
+  white-space: normal;
+}
+
+.task-queue-board-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.3rem;
+}
+
+.task-queue-board-card-meta.task-queue-board-card-meta-person-only {
+  justify-content: flex-end;
+}
+
+.task-queue-board-card-meta-person-group {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.22rem;
+  margin-left: auto;
+}
+
+.task-queue-board-card-meta > span:not(.task-queue-board-card-person) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.15rem;
+  padding: 0.1rem 0.36rem;
+  border-radius: 999px;
+  background: rgba(15, 28, 52, 0.05);
+  color: var(--text-copy);
+  font-size: 0.63rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.task-queue-board-card-context-chip {
+  flex-shrink: 1;
+  min-width: 0;
+  max-width: min(100%, 8.5rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: var(--task-queue-board-card-context-bg, rgba(15, 28, 52, 0.08));
+  border: 1px solid var(--task-queue-board-card-context-border, rgba(15, 28, 52, 0.16));
+  color: var(--task-queue-board-card-context-accent, var(--text-copy));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--task-queue-board-card-context-accent, var(--text-copy)) 18%, transparent);
+}
+
+.task-queue-board-card-priority {
+  display: block;
+  flex: 0 0 auto;
+  width: 0.95rem;
+  height: 0.95rem;
+  color: inherit;
+}
+
+.task-queue-board-card-priority-critical {
+  color: #dc2626;
+}
+
+.task-queue-board-card-priority-high {
+  color: #ef4444;
+}
+
+.task-queue-board-card-priority-medium {
+  color: #ca8a04;
+}
+
+.task-queue-board-card-priority-low {
+  color: #2563eb;
+}
+
+.task-queue-board-card-meta .task-queue-board-card-person {
+  flex-shrink: 0;
+}
+
+.task-queue-board-card-meta .task-queue-board-card-person .profile-avatar {
+  width: 1.85rem;
+  height: 1.85rem;
+}
+
+.task-queue-board-card-person {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.task-queue-board-card-hover {
+  right: 0.25rem;
+}
+
+.task-queue-board-column-empty {
+  margin: 0;
+  padding: 0.3rem 0.05rem 0.15rem;
+  color: var(--text-copy);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.task-queue-board-footer {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: center;
+  padding-top: 0.15rem;
+}
+
+.task-queue-board-load-status {
+  margin: 0;
+  color: var(--text-copy);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.task-queue-board-load-sentinel {
+  width: 100%;
+  height: 1px;
+}
+
+.page-shell.dark-mode .task-queue-board-column {
+  background: rgba(15, 23, 42, 0.68);
+  border-color: rgba(148, 163, 184, 0.24);
+  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.28);
+}
+
+.page-shell.dark-mode .task-queue-board-column-count {
+  background: rgba(59, 130, 246, 0.16);
+  color: #93c5fd;
+}
+
+.page-shell.dark-mode .task-queue-board-card {
+  background: rgba(15, 23, 42, 0.9);
+  border-color: rgba(148, 163, 184, 0.2);
+  box-shadow: 0 10px 20px rgba(2, 6, 23, 0.25);
+}
+
+.page-shell.dark-mode .task-queue-board-card-discipline-accented {
+  border-color: color-mix(
+    in srgb,
+    var(--task-queue-board-card-discipline-accent) 48%,
+    rgba(148, 163, 184, 0.2)
+  );
+  box-shadow:
+    0 10px 20px rgba(2, 6, 23, 0.25),
+    0 0 0 1.5px
+      color-mix(
+        in srgb,
+        var(--task-queue-board-card-discipline-accent) 28%,
+        transparent
+      ),
+    inset 0 0 0 1px
+      color-mix(
+        in srgb,
+        var(--task-queue-board-card-discipline-accent) 20%,
+        transparent
+      );
+}
+
+.page-shell.dark-mode .task-queue-board-card-meta > span:not(.task-queue-board-card-person) {
+  background: rgba(148, 163, 184, 0.14);
+  color: #cbd5e1;
+}
+
+.page-shell.dark-mode .task-queue-board-card-due:not(.pill) {
+  background: rgba(59, 130, 246, 0.16);
+  color: #93c5fd;
+}
+
+.page-shell.dark-mode .task-queue-board-column-empty {
+  color: rgba(226, 232, 240, 0.7);
+}
+
+.page-shell.dark-mode .task-queue-board-load-status {
+  color: rgba(226, 232, 240, 0.75);
+}
+

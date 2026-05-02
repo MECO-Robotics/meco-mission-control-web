@@ -1,0 +1,418 @@
+.part-instance-dropdown-chip::after {
+  content: "";
+  width: 0.34rem;
+  height: 0.34rem;
+  border-right: 1.35px solid currentColor;
+  border-bottom: 1.35px solid currentColor;
+  transform: translateY(-1px) rotate(45deg);
+  opacity: 0.65;
+  flex-shrink: 0;
+}
+
+.requested-item-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.requested-item-title {
+  color: var(--text-title);
+}
+
+.requested-item-subtitle {
+  color: var(--text-copy);
+}
+
+.pill,
+.auth-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 0.24rem 0.52rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.status-pill {
+  border: 0;
+  border-radius: 4px;
+  font-size: 0.66rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  text-transform: capitalize;
+  width: fit-content;
+}
+
+.milestone-type-pill {
+  background: var(--milestone-type-chip-bg);
+  border: 1px solid var(--milestone-type-chip-border);
+  color: var(--milestone-type-chip-text);
+}
+
+.page-shell.dark-mode .milestone-type-pill {
+  background: var(--milestone-type-chip-bg-dark);
+  border-color: var(--milestone-type-chip-border-dark);
+  color: var(--milestone-type-chip-text-dark);
+}
+
+.auth-chip {
+  background: rgba(15, 28, 52, 0.08);
+  color: #21304a;
+}
+
+.auth-chip-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  max-width: 100%;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.google-button-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.status-pill-success {
+  background: var(--status-success-bg);
+  color: var(--status-success-text);
+}
+
+.status-pill-info {
+  background: var(--status-info-bg);
+  color: var(--status-info-text);
+}
+
+.status-pill-warning {
+  background: var(--status-warning-bg);
+  color: var(--status-warning-text);
+}
+
+.status-pill-danger {
+  background: var(--status-danger-bg);
+  color: var(--status-danger-text);
+}
+
+.status-pill-neutral {
+  background: var(--status-neutral-bg);
+  color: var(--status-neutral-text);
+}
+
+.priority-critical {
+  background: rgba(234, 28, 45, 0.12);
+  color: var(--official-red);
+}
+
+.status-waiting-for-qa {
+  background: rgba(39, 80, 152, 0.14);
+  color: #275098;
+}
+
+.priority-high {
+  background: rgba(233, 131, 53, 0.14);
+  color: #a84712;
+}
+
+.status-in-progress {
+  background: rgba(183, 121, 0, 0.16);
+  color: #8a5c00;
+}
+
+.priority-medium,
+.status-not-started {
+  background: rgba(112, 128, 154, 0.16);
+  color: #54627b;
+}
+
+.priority-low,
+.status-complete {
+  background: rgba(61, 153, 108, 0.16);
+  color: #246847;
+}
+
+.purchase-requested,
+.manufacturing-requested {
+  background: rgba(112, 128, 154, 0.16);
+  color: #54627b;
+}
+
+.purchase-approved,
+.manufacturing-approved,
+.purchase-shipped,
+.manufacturing-qa {
+  background: rgba(76, 121, 207, 0.12);
+  color: #275098;
+}
+
+.purchase-purchased,
+.manufacturing-in-progress {
+  background: rgba(233, 131, 53, 0.14);
+  color: #a84712;
+}
+
+.purchase-delivered,
+.manufacturing-complete {
+  background: rgba(61, 153, 108, 0.16);
+  color: #246847;
+}
+
+.roster-layout {
+  gap: 0.8rem;
+  color: var(--text-copy);
+}
+
+.timeline-layout {
+  color: var(--text-copy);
+  width: calc(100vw - var(--shell-sidebar-width));
+  max-width: none;
+  min-width: 0;
+}
+
+.timeline-layout .timeline-shell {
+  width: calc(100vw - var(--shell-sidebar-width) + 1rem);
+  margin-left: -1rem;
+  margin-right: 0;
+}
+
+.roster-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 320px));
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 0.8rem;
+}
+
+.roster-columns>.panel-subsection {
+  min-width: 220px;
+  max-width: 320px;
+  flex: 0 0 auto;
+}
+
+.panel-subsection {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 220px;
+  min-width: 220px;
+  gap: 0.75rem;
+}
+
+.roster-editor-panel {
+  flex-basis: 100%;
+}
+
+.panel-subsection h3,
+.compact-form h3 {
+  margin: 0;
+  color: var(--text-title);
+  font-size: 1rem;
+}
+
+.help-page {
+  color: var(--text-copy);
+}
+
+.help-tutorial-launch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex: 0 0 auto;
+}
+
+.help-docs-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  align-items: start;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.help-doc-section {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--border-base);
+  border-radius: 8px;
+  background: var(--bg-row-alt);
+}
+
+.help-doc-section ul {
+  margin: 0;
+  padding-left: 1.05rem;
+  color: var(--text-copy);
+}
+
+.help-doc-section li {
+  margin-bottom: 0.35rem;
+  line-height: 1.42;
+}
+
+.help-doc-section li:last-child {
+  margin-bottom: 0;
+}
+
+.help-tutorial-modal {
+  width: min(840px, 100%);
+  display: grid;
+  gap: 0.85rem;
+}
+
+.help-tutorial-modal-header {
+  margin-bottom: 0 !important;
+}
+
+.help-tutorial-progress {
+  height: 0.42rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(88, 102, 125, 0.16);
+}
+
+.help-tutorial-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--meco-blue), var(--official-red));
+  transition: width 160ms ease;
+}
+
+.help-tutorial-layout {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.72fr) minmax(0, 1fr);
+  gap: 0.85rem;
+  align-items: stretch;
+}
+
+.help-tutorial-step-list {
+  display: grid;
+  align-content: start;
+  gap: 0.38rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.help-tutorial-step-button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.35rem;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--border-base);
+  border-radius: 8px;
+  background: var(--bg-panel);
+  color: var(--text-copy);
+  font: inherit;
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.help-tutorial-step-button[data-active="true"] {
+  border-color: var(--meco-blue);
+  background: var(--meco-soft-blue);
+  color: var(--text-title);
+  font-weight: 700;
+}
+
+.help-tutorial-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  border-radius: 999px;
+  background: rgba(88, 102, 125, 0.14);
+  color: var(--text-title);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.help-tutorial-step-button[data-active="true"] .help-tutorial-step-number {
+  background: var(--meco-blue);
+  color: var(--official-white);
+}
+
+.help-tutorial-step-card {
+  display: grid;
+  gap: 0.65rem;
+  min-width: 0;
+  padding: 0.9rem;
+  border: 1px solid var(--border-base);
+  border-radius: 8px;
+  background: var(--bg-row-alt);
+}
+
+.help-tutorial-step-card h3 {
+  margin: 0;
+  color: var(--text-title);
+  font-size: 1.15rem;
+}
+
+.help-tutorial-step-card p,
+.help-tutorial-cue p {
+  margin: 0;
+  color: var(--text-copy);
+  line-height: 1.45;
+}
+
+.help-tutorial-step-card ul {
+  margin: 0;
+  padding-left: 1.05rem;
+  color: var(--text-copy);
+}
+
+.help-tutorial-step-card li {
+  margin-bottom: 0.35rem;
+  line-height: 1.42;
+}
+
+.help-tutorial-step-card li:last-child {
+  margin-bottom: 0;
+}
+
+.help-tutorial-cue {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.62rem 0.7rem;
+  border-left: 3px solid var(--official-red);
+  border-radius: 8px;
+  background: rgba(234, 28, 45, 0.07);
+}
+
+.help-tutorial-cue span {
+  color: var(--text-title);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.help-tutorial-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.help-tutorial-actions .primary-action,
+.help-tutorial-actions .secondary-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.help-tutorial-actions .secondary-action:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+  transform: none;
+}

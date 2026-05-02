@@ -1,17 +1,9 @@
 /// <reference types="jest" />
 /// <reference types="node" />
 
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { readCssTree } from "@/testUtils/readCssTree";
 
-const appCss = [
-  "src/app/styles/shell.css",
-  "src/app/styles/workspace.css",
-  "src/app/styles/views.css",
-  "src/app/styles/responsive.css",
-]
-  .map((relativePath) => readFileSync(join(process.cwd(), relativePath), "utf8"))
-  .join("\n");
+const appCss = readCssTree("src/app/App.css");
 
 function getCssBlock(selector: string) {
   const blockStart = appCss.indexOf(`${selector} {`);
