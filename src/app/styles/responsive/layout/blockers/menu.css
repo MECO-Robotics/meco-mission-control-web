@@ -1,0 +1,62 @@
+.task-detail-inline-edit-select-list {
+  width: 100%;
+  min-height: 7.25rem;
+  max-height: 11rem;
+  overflow-y: auto;
+  align-self: stretch;
+  box-sizing: border-box;
+  font-family: "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif;
+  font-size: 0.96rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.005em;
+}
+
+.task-detail-inline-edit-trigger-assigned {
+  flex: 1 1 auto;
+  min-height: 0;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+.task-detail-inline-edit-trigger-assigned.task-details-assigned-list {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border-base);
+  border-radius: 14px;
+  background: var(--bg-row-alt);
+  box-sizing: border-box;
+}
+
+.task-detail-inline-edit-textarea {
+  min-height: 5.75rem;
+}
+
+.task-details-blocker-editor {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.task-details-blocker-editor-row {
+  display: grid;
+  grid-template-columns: minmax(12rem, 14rem) minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: start;
+}
+
+.task-details-blocker-input {
+  min-width: 0;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--border-base);
+  border-radius: 0.4rem;
+  background: var(--bg-row-alt);
+  color: var(--text-title);
+  font: inherit;
+}
+
+.task-details-blocker-input:focus,
+.task-details-blocker-input:focus-visible {
+  outline: none;
+  border-color: var(--control-select-focus-border);
+  box-shadow: var(--control-select-focus-ring);
+}

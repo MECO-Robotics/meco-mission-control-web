@@ -1,0 +1,14 @@
+.page-shell.dark-mode .task-queue-board-scroll-hint {
+  background: color-mix(in srgb, var(--bg-panel) 84%, transparent);
+  border-color: color-mix(in srgb, var(--border-base) 90%, transparent);
+  box-shadow: 0 10px 20px rgba(2, 6, 23, 0.24);
+}
+
+.task-queue-board {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(15.5rem, 1fr));
+  min-width: calc((15.5rem * 6) + (0.7rem * 5));
+  width: 100%;
+  gap: 0.7rem;
+  align-items: start;
+}

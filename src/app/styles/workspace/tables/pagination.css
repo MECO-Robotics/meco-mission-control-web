@@ -1,0 +1,107 @@
+@keyframes tablePaginationFadeIn {
+  from {
+    opacity: 0.98;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.table-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem 0.75rem;
+  justify-content: space-between;
+  border-top: 1px solid var(--border-base);
+  margin-top: 0.2rem;
+  padding: 0.5rem 0.2rem 0;
+}
+
+.table-pagination-summary {
+  margin: 0;
+  color: var(--text-copy);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.table-pagination-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-copy);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.table-pagination-size select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border: 1px solid var(--border-base);
+  border-radius: var(--control-select-radius);
+  background-color: var(--bg-row-alt);
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - var(--control-select-arrow-right-primary)) 54%,
+    calc(100% - var(--control-select-arrow-right-secondary)) 54%;
+  background-size:
+    var(--control-select-arrow-size) var(--control-select-arrow-size),
+    var(--control-select-arrow-size) var(--control-select-arrow-size);
+  background-repeat: no-repeat;
+  color: var(--text-strong);
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: normal;
+  min-height: 1.95rem;
+  padding: var(--control-select-padding-block) var(--control-select-padding-inline-end) var(--control-select-padding-block) var(--control-select-padding-inline-start);
+  text-transform: none;
+}
+
+.table-pagination-size select:focus,
+.table-pagination-size select:focus-visible {
+  outline: none;
+  border-color: var(--control-select-focus-border);
+  box-shadow: var(--control-select-focus-ring);
+}
+
+.table-pagination-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.table-pagination-controls button {
+  border: 1px solid var(--border-base);
+  border-radius: 8px;
+  background: var(--bg-base);
+  color: var(--text-strong);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+}
+
+.table-pagination-controls button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.table-pagination-page {
+  color: var(--text-copy);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.queue-table {
+  display: grid;
+  grid-template-columns: var(--workspace-grid-template, 2.2fr 1fr 1fr 0.9fr 0.8fr 0.8fr);
+  gap: 0.5rem;
+  align-items: center;
+}

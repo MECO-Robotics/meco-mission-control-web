@@ -1,0 +1,59 @@
+.auth-intro-description {
+  display: grid;
+  gap: 0.15rem;
+  max-width: 28rem;
+}
+
+.auth-intro-description span {
+  display: block;
+}
+
+.auth-intro-mark-wrap {
+  display: inline-flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  justify-self: end;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.8rem 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.auth-intro-mark {
+  display: block;
+  width: clamp(160px, 14vw, 220px);
+  max-width: 100%;
+  height: auto;
+  filter: drop-shadow(0 26px 34px rgba(2, 6, 23, 0.35));
+}
+
+.dense-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.6rem 0.85rem 1.1rem;
+  max-width: none;
+  margin: 0;
+  width: 100%;
+  min-width: 0;
+}
+
+.workspace-tab-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  min-width: 0;
+  width: 100%;
+}
+
+.workspace-tab-panel-enter {
+  animation-duration: 360ms;
+  animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+  animation-fill-mode: both;
+  will-change: transform;
+}

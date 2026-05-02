@@ -1,0 +1,127 @@
+.interactive-tutorial-highlight {
+  scroll-margin: 24px;
+}
+
+.roster-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 2rem;
+}
+
+.roster-section-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.roster-section-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--border-base);
+  border-radius: 999px;
+  background: var(--bg-panel);
+  color: var(--meco-blue);
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 160ms ease, transform 160ms ease, background 160ms ease;
+}
+
+.roster-section-add:hover,
+.roster-section-add:focus-visible {
+  background: var(--meco-soft-blue);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.roster-list,
+.compact-form {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.roster-inline-form {
+  border: 1px solid var(--border-base);
+  border-radius: 16px;
+  background: var(--bg-row-alt);
+  padding: 0.8rem;
+}
+
+.member-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  border: 1px solid var(--border-base);
+  border-radius: 10px;
+  background-color: var(--row-bg, var(--bg-row-alt));
+  padding: 0.3rem 0.35rem;
+}
+
+.roster-list>.member-row:nth-child(odd) {
+  --row-bg: var(--row-tint);
+}
+
+.member-row-main {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 0.18rem 0.24rem;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.member-row-copy {
+  display: grid;
+  gap: 0.08rem;
+  min-width: 0;
+}
+
+.member-row-main .profile-avatar {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.member-row-email {
+  font-size: 0.74rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.member-row-trailing {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.32rem;
+  min-width: 2.3rem;
+}
+
+.member-role-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.28rem;
+  height: 1.28rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-base);
+  background: var(--status-info-bg);
+  color: var(--status-info-text);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}

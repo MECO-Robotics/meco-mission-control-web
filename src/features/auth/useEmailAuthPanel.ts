@@ -1,0 +1,73 @@
+import { type ChangeEvent, type FormEvent, useRef, useState } from "react";
+
+import type { EmailCodeDeliveryResponse } from "@/lib/auth";
+
+interface UseEmailAuthPanelArgs {
+  clearAuthMessage: () => void;
+  onRequestEmailCode: (email: string) => Promise<EmailCodeDeliveryResponse>;
+  onVerifyEmailCode: (email: string, code: string) => Promise<void>;
+}
+
+export function useEmailAuthPanel({
+  clearAuthMessage,
+  onRequestEmailCode,
+  onVerifyEmailCode,
+}: UseEmailAuthPanelArgs) {
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [delivery, setDelivery] = useState<EmailCodeDeliveryResponse | null>(null);
+  const [isRequestingCode, setIsRequestingCode] = useState(false);
+  const codeInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
+    clearAuthMessage();
+    setEmail(event.target.value);
+    setCode("");
+    setDelivery(null);
+  };
+
+  const handleCodeChange = (event: ChangeEvent<HTMLInputElement>) => {
+    clearAuthMessage();
+    setCode(event.target.value);
+  };
+
+  const handleRequestCode = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsRequestingCode(true);
+
+    try {
+      const response = await onRequestEmailCode(email);
+      setDelivery(response);
+      setCode("");
+      window.setTimeout(() => {
+        codeInputRef.current?.focus();
+      }, 0);
+    } catch {
+      // The hook already surfaced the error message.
+    } finally {
+      setIsRequestingCode(false);
+    }
+  };
+
+  const handleVerifyCode = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    try {
+      await onVerifyEmailCode(email, code);
+    } catch {
+      // The hook already surfaced the error message.
+    }
+  };
+
+  return {
+    code,
+    codeInputRef,
+    delivery,
+    email,
+    handleCodeChange,
+    handleEmailChange,
+    handleRequestCode,
+    handleVerifyCode,
+    isRequestingCode,
+  };
+}

@@ -1,0 +1,93 @@
+.page-shell.is-sidebar-overlay .sidebar {
+  box-shadow: 14px 0 28px rgba(9, 18, 34, 0.24);
+}
+
+.page-shell.is-sidebar-overlay .app-topbar-left {
+  z-index: 1110;
+}
+
+.page-shell.is-sidebar-overlay .app-topbar-brand {
+  z-index: 1120;
+}
+
+.sidebar-overlay-scrim {
+  position: fixed;
+  inset: var(--shell-topbar-height) 0 0 0;
+  z-index: 1050;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  background: rgba(7, 14, 26, 0.48);
+  cursor: pointer;
+}
+
+.page-shell.auth-shell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 3vw, 2rem);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(22, 71, 142, 0.12), transparent 26%),
+    radial-gradient(circle at 88% 12%, rgba(234, 28, 45, 0.1), transparent 22%),
+    linear-gradient(160deg, #f8fbff 0%, #eef4fb 100%);
+}
+
+.page-shell.auth-shell::before,
+.page-shell.auth-shell::after {
+  content: "";
+  position: absolute;
+  inset: auto;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.page-shell.auth-shell::before {
+  top: 6%;
+  right: -8%;
+  width: 18rem;
+  height: 18rem;
+  background: radial-gradient(circle,
+      rgba(22, 71, 142, 0.14) 0%,
+      rgba(22, 71, 142, 0) 72%);
+}
+
+.page-shell.auth-shell::after {
+  left: -10%;
+  bottom: -12%;
+  width: 22rem;
+  height: 22rem;
+  background: radial-gradient(circle,
+      rgba(234, 28, 45, 0.1) 0%,
+      rgba(234, 28, 45, 0) 72%);
+}
+
+.auth-layout {
+  position: relative;
+  z-index: 1;
+  width: min(1020px, 100%);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 2.5vw, 1.5rem);
+  justify-items: center;
+  align-items: stretch;
+}
+
+.auth-layout-backdrop {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(760px, 84%);
+  max-width: none;
+  height: auto;
+  object-fit: contain;
+  object-position: center;
+  transform: translate(-50%, -50%);
+  opacity: 0.28;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.page-shell.auth-shell.dark-mode .auth-layout-backdrop {
+  opacity: 0.34;
+}

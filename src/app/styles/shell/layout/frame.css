@@ -1,0 +1,40 @@
+.page-shell {
+  --shell-topbar-height: 58px;
+  --shell-sidebar-expanded-width: 156px;
+  --shell-sidebar-collapsed-width: 64px;
+  --shell-topbar-brand-width: 156px;
+  --shell-sidebar-width: var(--shell-sidebar-expanded-width);
+  --control-select-radius: 10px;
+  --control-select-padding-block: 0.34rem;
+  --control-select-form-padding-block: 0.62rem;
+  --control-select-padding-inline-start: 0.72rem;
+  --control-select-padding-inline-end: 2rem;
+  --control-select-arrow-size: 0.36rem;
+  --control-select-arrow-right-primary: 0.9rem;
+  --control-select-arrow-right-secondary: 0.58rem;
+  --control-select-focus-border: rgba(22, 71, 142, 0.44);
+  --control-select-focus-ring: 0 0 0 2px rgba(22, 71, 142, 0.14);
+  width: 100%;
+  min-height: 100vh;
+  display: block;
+  background: var(--official-white);
+  box-sizing: border-box;
+  padding-top: var(--shell-topbar-height);
+  padding-left: var(--shell-sidebar-width);
+  transition: padding-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-x: clip;
+}
+
+.page-shell.is-sidebar-collapsed {
+  --shell-sidebar-width: var(--shell-sidebar-collapsed-width);
+}
+
+.page-shell.is-sidebar-overlay {
+  /* Keep shell layout fixed while the expanded sidebar floats over content. */
+  --shell-sidebar-width: var(--shell-sidebar-collapsed-width);
+}
+
+.page-shell.is-sidebar-overlay .sidebar-shell {
+  width: var(--shell-sidebar-expanded-width);
+  z-index: 1100;
+}

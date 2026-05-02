@@ -1,0 +1,123 @@
+@media (max-width: 900px) {
+  .queue-toolbar-action {
+    width: auto;
+  }
+
+  .toolbar-search {
+    width: min(100%, 240px);
+    min-width: 180px;
+    max-width: 100%;
+  }
+
+  .toolbar-search-input {
+    width: 100%;
+  }
+
+  .table-cell {
+    display: grid;
+    grid-template-columns: minmax(84px, 108px) minmax(0, 1fr);
+    gap: 0.55rem;
+    align-items: start;
+  }
+
+  .table-cell::before {
+    content: attr(data-label);
+    color: #58667d;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.68rem;
+    font-weight: 700;
+  }
+
+  .table-cell-primary {
+    display: block;
+  }
+
+  .table-cell-primary::before {
+    display: none;
+  }
+
+  .task-details-dependency-blocker-grid {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+
+  .table-pagination {
+    justify-content: flex-start;
+  }
+
+  .table-pagination-controls {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .modal-form {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-wide {
+    grid-column: auto;
+  }
+}
+
+.task-details-modal .modal-wide {
+  grid-column: 1 / -1;
+}
+
+.task-editor-modal .task-details-edit-button {
+  display: none !important;
+}
+
+.task-editor-modal .task-detail-header-title-main > input {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-title);
+  font-family: "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif;
+  font-size: clamp(1.45rem, 2.8vw, 2rem);
+  font-weight: 700;
+  line-height: 1.12;
+}
+
+.task-editor-modal .task-detail-header-title-main > div > input {
+  flex: 1 1 18rem;
+  min-width: 0;
+  width: auto;
+}
+
+.task-editor-modal .task-detail-header-title-main > input:focus,
+.task-editor-modal .task-detail-header-title-main > input:focus-visible {
+  outline: none;
+}
+
+.task-editor-modal .field input,
+.task-editor-modal .field select,
+.task-editor-modal .field textarea {
+  padding: 0.54rem 0.7rem;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.task-editor-modal .field textarea {
+  min-height: 5.5rem;
+}
+
+.task-editor-modal .field select[multiple] {
+  padding-top: 0.52rem;
+  padding-bottom: 0.52rem;
+}
+
+.task-editor-modal .task-details-overview-assigned > select[multiple] {
+  padding-top: 0.58rem;
+  padding-bottom: 0.58rem;
+  max-height: clamp(6.5rem, 18vh, 11rem);
+  overflow-y: auto;
+}
+
+.task-editor-modal .task-details-section-title {
+  padding-top: 0.5rem;
+  padding-bottom: 0.4rem;
+}

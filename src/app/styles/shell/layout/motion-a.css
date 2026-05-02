@@ -1,0 +1,22 @@
+.workspace-tab-panel-enter-down {
+  animation-name: workspace-tab-slide-down-in;
+}
+
+.workspace-tab-panel-enter-up {
+  animation-name: workspace-tab-slide-up-in;
+}
+
+.workspace-subtab-panel[data-swipe-direction="left"] {
+  animation: workspace-subtab-swipe-left-in 360ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  will-change: transform;
+}
+
+.workspace-subtab-panel[data-swipe-direction="right"] {
+  animation: workspace-subtab-swipe-right-in 360ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  will-change: transform;
+}
+
+.workspace-subtab-panel[data-swipe-direction="neutral"] {
+  animation: workspace-subtab-fade-in 300ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  will-change: opacity, transform;
+}

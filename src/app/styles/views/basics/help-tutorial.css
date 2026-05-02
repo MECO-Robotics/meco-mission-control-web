@@ -1,0 +1,147 @@
+.help-tutorial-progress {
+  height: 0.42rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(88, 102, 125, 0.16);
+}
+
+.help-tutorial-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--meco-blue), var(--official-red));
+  transition: width 160ms ease;
+}
+
+.help-tutorial-layout {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.72fr) minmax(0, 1fr);
+  gap: 0.85rem;
+  align-items: stretch;
+}
+
+.help-tutorial-step-list {
+  display: grid;
+  align-content: start;
+  gap: 0.38rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.help-tutorial-step-button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.35rem;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--border-base);
+  border-radius: 8px;
+  background: var(--bg-panel);
+  color: var(--text-copy);
+  font: inherit;
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.help-tutorial-step-button[data-active="true"] {
+  border-color: var(--meco-blue);
+  background: var(--meco-soft-blue);
+  color: var(--text-title);
+  font-weight: 700;
+}
+
+.help-tutorial-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  border-radius: 999px;
+  background: rgba(88, 102, 125, 0.14);
+  color: var(--text-title);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.help-tutorial-step-button[data-active="true"] .help-tutorial-step-number {
+  background: var(--meco-blue);
+  color: var(--official-white);
+}
+
+.help-tutorial-step-card {
+  display: grid;
+  gap: 0.65rem;
+  min-width: 0;
+  padding: 0.9rem;
+  border: 1px solid var(--border-base);
+  border-radius: 8px;
+  background: var(--bg-row-alt);
+}
+
+.help-tutorial-step-card h3 {
+  margin: 0;
+  color: var(--text-title);
+  font-size: 1.15rem;
+}
+
+.help-tutorial-step-card p,
+.help-tutorial-cue p {
+  margin: 0;
+  color: var(--text-copy);
+  line-height: 1.45;
+}
+
+.help-tutorial-step-card ul {
+  margin: 0;
+  padding-left: 1.05rem;
+  color: var(--text-copy);
+}
+
+.help-tutorial-step-card li {
+  margin-bottom: 0.35rem;
+  line-height: 1.42;
+}
+
+.help-tutorial-step-card li:last-child {
+  margin-bottom: 0;
+}
+
+.help-tutorial-cue {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.62rem 0.7rem;
+  border-left: 3px solid var(--official-red);
+  border-radius: 8px;
+  background: rgba(234, 28, 45, 0.07);
+}
+
+.help-tutorial-cue span {
+  color: var(--text-title);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.help-tutorial-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.help-tutorial-actions .primary-action,
+.help-tutorial-actions .secondary-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.help-tutorial-actions .secondary-action:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+  transform: none;
+}

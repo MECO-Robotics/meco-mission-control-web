@@ -1,0 +1,104 @@
+.task-details-section-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin-top: 0.65rem;
+}
+
+.task-details-dependency-blocker-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: start;
+  width: 100%;
+  margin-top: 0.55rem;
+}
+
+.task-detail-blocker-split-column {
+  min-width: 0;
+}
+
+.task-details-overview-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-areas:
+    "priority owner assigned"
+    ". mentor assigned";
+  align-items: start;
+  width: 100%;
+}
+
+.task-details-overview-priority {
+  grid-area: priority;
+}
+
+.task-details-overview-owner {
+  grid-area: owner;
+}
+
+.task-details-overview-assigned {
+  grid-area: assigned;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0.55rem;
+  margin-top: 0;
+  align-self: stretch;
+  justify-self: start;
+  text-align: left;
+  width: 100%;
+  min-height: 0;
+  justify-self: stretch;
+}
+
+.task-details-assigned-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0.2rem;
+  min-height: 0;
+  flex: 1 1 auto;
+  align-self: stretch;
+  max-height: clamp(6.5rem, 18vh, 11rem);
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  padding: 0.6rem 0.8rem 0.6rem 0.8rem;
+  border-radius: 14px;
+  border: 1px solid var(--border-base);
+  background: var(--bg-row-alt);
+  align-content: flex-start;
+  overscroll-behavior: contain;
+}
+
+.task-details-assigned-item,
+.task-details-assigned-empty {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-title);
+  line-height: 1.25;
+}
+
+.task-details-assigned-empty {
+  color: var(--text-copy);
+}
+
+.task-details-overview-mentor {
+  grid-area: mentor;
+  width: 100%;
+}
+
+@media (max-width: 800px) {
+  .task-details-overview-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas: none;
+  }
+
+  .task-details-overview-priority,
+  .task-details-overview-owner,
+  .task-details-overview-assigned,
+  .task-details-overview-mentor {
+    grid-area: auto;
+  }
+}

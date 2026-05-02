@@ -1,0 +1,62 @@
+.timeline-bar-hover-host {
+  position: relative;
+  overflow: visible;
+}
+
+.timeline-bar-hover-host .timeline-bar-hover-indicator,
+.timeline-bar .timeline-bar-hover-indicator {
+  left: var(--timeline-task-bar-edge-gap, 24px);
+  right: auto;
+  transform: translateY(-50%) translateX(calc(-100% - 0.05rem)) !important;
+  z-index: 10083;
+}
+
+.timeline-bar-hover-host[data-spill-left="true"] .timeline-bar-hover-indicator,
+.timeline-bar[data-spill-left="true"] .timeline-bar-hover-indicator {
+  left: auto;
+  right: 0.35rem;
+  transform: translateY(-50%) translateX(0) !important;
+}
+
+.timeline-shell.is-week-view .timeline-bar-hover-host .timeline-bar-hover-indicator,
+.timeline-shell.is-week-view .timeline-bar .timeline-bar-hover-indicator {
+  transform: translateY(-50%) translateX(calc(-100% - 0.05rem)) !important;
+}
+
+.timeline-shell.is-week-view .timeline-bar-hover-host[data-spill-left="true"] .timeline-bar-hover-indicator,
+.timeline-shell.is-week-view .timeline-bar[data-spill-left="true"] .timeline-bar-hover-indicator {
+  transform: translateY(-50%) translateX(0) !important;
+}
+
+.timeline-not-started {
+  --timeline-task-status-accent: #54627b;
+}
+
+.timeline-in-progress {
+  --timeline-task-status-accent: #b77900;
+}
+
+.timeline-waiting-for-qa {
+  --timeline-task-status-accent: #275098;
+}
+
+.timeline-complete {
+  --timeline-task-status-accent: #246847;
+}
+
+.table-shell {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.table-shell.filter-results-motion.is-filtering> :is(.queue-row, .ops-row, .task-queue-board-card, .subsystem-manager-item, .empty-state),
+.timeline-shell.filter-results-motion.is-filtering>* {
+  animation: filter-results-settle 160ms ease-out both;
+  will-change: opacity;
+}
+
+.task-queue-toolbar,
+.milestones-toolbar {
+  position: relative;
+  z-index: 6;
+}

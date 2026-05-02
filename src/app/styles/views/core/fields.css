@@ -1,0 +1,103 @@
+.member-action-button:hover,
+.member-action-button:focus-visible {
+  background: rgba(22, 71, 142, 0.08);
+  color: var(--official-blue);
+  outline: none;
+}
+
+.member-action-danger:hover,
+.member-action-danger:focus-visible {
+  background: rgba(234, 28, 45, 0.1);
+  color: var(--official-red);
+}
+
+.member-row.active {
+  border-color: var(--meco-blue);
+  box-shadow: 0 10px 22px rgba(22, 71, 142, 0.12);
+}
+
+.field {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--border-base);
+  background: var(--bg-row-alt);
+  color: var(--text-title);
+  padding: 0.62rem 0.72rem;
+  font: inherit;
+}
+
+.field select:not([multiple]) {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: var(--bg-row-alt);
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - var(--control-select-arrow-right-primary)) 54%,
+    calc(100% - var(--control-select-arrow-right-secondary)) 54%;
+  background-size:
+    var(--control-select-arrow-size) var(--control-select-arrow-size),
+    var(--control-select-arrow-size) var(--control-select-arrow-size);
+  background-repeat: no-repeat;
+  cursor: pointer;
+  color-scheme: light;
+  border-radius: var(--control-select-radius);
+  padding: var(--control-select-form-padding-block) var(--control-select-padding-inline-end) var(--control-select-form-padding-block) var(--control-select-padding-inline-start);
+}
+
+.field select:not([multiple]):focus,
+.field select:not([multiple]):focus-visible {
+  outline: none;
+  border-color: var(--control-select-focus-border);
+  box-shadow: var(--control-select-focus-ring);
+}
+
+.field select[multiple] {
+  background-image: none !important;
+  cursor: default;
+  padding-right: 0.72rem;
+  font-family: "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif;
+  font-size: 0.96rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.005em;
+}
+
+.field select option {
+  background: var(--bg-panel);
+  color: var(--text-title);
+}
+
+.page-shell.dark-mode .field select {
+  color-scheme: dark;
+}
+
+.field textarea {
+  resize: vertical;
+}
+
+.empty-state {
+  border: 1px dashed var(--border-base);
+  border-radius: 12px;
+  padding: 0.85rem;
+  color: var(--text-copy);
+}
+
+.modal-scrim {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(7, 14, 26, 0.72);
+  z-index: 12050 !important;
+}

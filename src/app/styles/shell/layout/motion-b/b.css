@@ -1,0 +1,11 @@
+.timeline-grid-motion[data-period-motion="left"] {
+  animation: timeline-period-swipe-left-in 180ms ease-out both;
+}
+
+.timeline-grid-motion[data-period-motion="right"] {
+  animation: timeline-period-swipe-right-in 180ms ease-out both;
+}
+
+.timeline-grid-motion[data-period-motion="neutral"] {
+  animation: timeline-period-glide-in 160ms ease-out both;
+}

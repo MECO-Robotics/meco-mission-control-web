@@ -1,0 +1,56 @@
+.page-shell.dark-mode .task-queue-board-column {
+  background: rgba(15, 23, 42, 0.68);
+  border-color: rgba(148, 163, 184, 0.24);
+  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.28);
+}
+
+.page-shell.dark-mode .task-queue-board-column-count {
+  background: rgba(59, 130, 246, 0.16);
+  color: #93c5fd;
+}
+
+.page-shell.dark-mode .task-queue-board-card {
+  background: rgba(15, 23, 42, 0.9);
+  border-color: rgba(148, 163, 184, 0.2);
+  box-shadow: 0 10px 20px rgba(2, 6, 23, 0.25);
+}
+
+.page-shell.dark-mode .task-queue-board-card-discipline-accented {
+  border-color: color-mix(
+    in srgb,
+    var(--task-queue-board-card-discipline-accent) 48%,
+    rgba(148, 163, 184, 0.2)
+  );
+  box-shadow:
+    0 10px 20px rgba(2, 6, 23, 0.25),
+    0 0 0 1.5px
+      color-mix(
+        in srgb,
+        var(--task-queue-board-card-discipline-accent) 28%,
+        transparent
+      ),
+    inset 0 0 0 1px
+      color-mix(
+        in srgb,
+        var(--task-queue-board-card-discipline-accent) 20%,
+        transparent
+      );
+}
+
+.page-shell.dark-mode .task-queue-board-card-meta > span:not(.task-queue-board-card-person) {
+  background: rgba(148, 163, 184, 0.14);
+  color: #cbd5e1;
+}
+
+.page-shell.dark-mode .task-queue-board-card-due:not(.pill) {
+  background: rgba(59, 130, 246, 0.16);
+  color: #93c5fd;
+}
+
+.page-shell.dark-mode .task-queue-board-column-empty {
+  color: rgba(226, 232, 240, 0.7);
+}
+
+.page-shell.dark-mode .task-queue-board-load-status {
+  color: rgba(226, 232, 240, 0.75);
+}

@@ -1,0 +1,120 @@
+.risk-time-metrics-shell {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 0.9rem;
+  margin: 0 0 0.75rem;
+}
+
+.risk-management-subtabs {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 0 0.75rem;
+}
+
+.risk-time-card {
+  border: 1px solid var(--border-base);
+  border-radius: 14px;
+  background: var(--bg-row-alt);
+  padding: 0.9rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.risk-time-card h3 {
+  margin: 0;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-copy);
+}
+
+.risk-time-card-graphic {
+  position: relative;
+  width: min(100%, 210px);
+  aspect-ratio: 1 / 1;
+}
+
+.risk-time-card-graphic svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.risk-time-ring-track {
+  fill: none;
+  stroke: var(--border-base);
+  stroke-width: 12;
+}
+
+.risk-time-ring-fill {
+  fill: none;
+  stroke-width: 12;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 70px 70px;
+  transition: stroke-dashoffset 220ms ease;
+}
+
+.risk-time-ring-planned {
+  stroke: var(--meco-blue);
+}
+
+.risk-time-ring-done {
+  stroke: var(--official-green);
+}
+
+.risk-time-card-value {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.risk-time-card-value strong {
+  color: var(--text-title);
+  font-size: clamp(1.45rem, 2.8vw, 2rem);
+  line-height: 1.1;
+}
+
+.risk-time-progress-shell {
+  border: 1px solid var(--border-base);
+  border-radius: 12px;
+  background: var(--bg-row-alt);
+  padding: 0.8rem 1rem;
+  margin: 0 0 0.8rem;
+}
+
+.risk-time-progress-label {
+  margin: 0 0 0.4rem;
+  color: var(--text-title);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.risk-time-progress-track {
+  width: 100%;
+  height: 14px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg-panel) 72%, var(--meco-blue) 28%);
+  overflow: hidden;
+}
+
+.risk-time-progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg,
+      color-mix(in srgb, var(--meco-blue) 68%, #ffffff 32%),
+      var(--official-green));
+  transition: width 240ms ease;
+}
+
+.risk-time-progress-caption {
+  margin: 0.45rem 0 0;
+  color: var(--text-copy);
+  font-size: 0.84rem;
+}

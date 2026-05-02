@@ -1,0 +1,66 @@
+.ops-table {
+  display: grid;
+  gap: 0.5rem;
+  align-items: center;
+  grid-template-columns: var(--workspace-grid-template, auto);
+}
+
+.purchase-table {
+  grid-template-columns: var(--workspace-grid-template, 2.4fr 1fr 0.5fr 0.8fr 0.8fr 0.8fr 0.8fr);
+}
+
+.manufacturing-table {
+  grid-template-columns: var(--workspace-grid-template, 2.5fr 1fr 0.45fr 0.7fr 0.75fr 0.8fr 0.8fr);
+}
+
+.manufacturing-table.ops-table-header {
+  padding-inline-end: 3.8rem;
+}
+
+.print-table {
+  grid-template-columns: var(--workspace-grid-template, 2.5fr 1fr 0.45fr 0.75fr 0.8fr 0.8fr);
+}
+
+.queue-table-header {
+  padding: 0 0.45rem 0.2rem;
+  border-bottom: 1px solid var(--border-base);
+  color: var(--text-copy);
+}
+
+.table-sort-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.18rem;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 0;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.table-sort-arrow {
+  display: inline-block;
+  width: 0.55rem;
+  color: var(--official-blue);
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+}
+
+.table-column-header-cell {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.22rem;
+  min-width: 0;
+  overflow: visible;
+  position: relative;
+  text-align: left;
+}

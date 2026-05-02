@@ -1,0 +1,125 @@
+.editable-row-clickable {
+  cursor: pointer;
+}
+
+.editable-row-clickable:focus-visible {
+  outline: 2px solid var(--meco-blue);
+  outline-offset: 2px;
+}
+
+.subsystem-manager-item {
+  display: grid;
+  gap: 0;
+  min-width: 0;
+}
+
+.subsystem-manager-list-shell>.subsystem-manager-item:nth-child(odd) {
+  --row-bg: var(--row-tint);
+}
+
+.subsystem-manager-item.is-active {
+  overflow: hidden;
+  border: 1px solid rgba(22, 71, 142, 0.16);
+  border-radius: 16px;
+  background: rgba(22, 71, 142, 0.03);
+  box-shadow: 0 12px 26px rgba(15, 28, 52, 0.07);
+}
+
+.subsystem-cell-meta {
+  display: grid;
+  gap: 0.28rem;
+  min-width: 0;
+  width: 100%;
+}
+
+.subsystem-cell-title {
+  display: block;
+  min-width: 0;
+  color: var(--text-title);
+  font-size: 0.95rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.subsystem-cell-description {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--text-copy);
+  font-size: 0.82rem;
+  line-height: 1.35;
+  opacity: 0.86;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.subsystem-cell-details {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.35rem;
+  min-width: 0;
+}
+
+.subsystem-cell-details small {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  width: fit-content;
+  padding: 0.12rem 0.38rem;
+  border: 1px solid var(--border-base);
+  border-radius: 999px;
+  background: rgba(88, 102, 125, 0.07);
+  color: var(--text-copy);
+  font-size: 0.72rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.subsystem-manager-row-actions {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: auto;
+  opacity: 0;
+  transform: translateY(-50%) translateX(4px);
+  pointer-events: none;
+  transition: opacity 160ms ease, transform 160ms ease;
+  z-index: 2;
+}
+
+.subsystem-manager-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  padding: 0;
+  border: 1px solid var(--border-base);
+  border-radius: 10px;
+  background: var(--bg-panel);
+  color: var(--text-title);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.subsystem-manager-action-button:hover,
+.subsystem-manager-action-button:focus-visible {
+  background: var(--meco-soft-blue);
+  color: var(--meco-blue);
+  border-color: var(--meco-blue);
+  outline: none;
+}
+
+.subsystem-manager-action-button svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}

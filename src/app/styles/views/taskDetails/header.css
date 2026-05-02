@@ -1,0 +1,143 @@
+.modal-card h2,
+.modal-card h3 {
+  margin: 0;
+  color: var(--text-title);
+  font-family: "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif;
+}
+
+.modal-card .panel-header.compact-header {
+  padding: 0;
+  margin-bottom: 1rem;
+}
+
+.modal-card .eyebrow {
+  color: var(--meco-blue);
+}
+
+.modal-card .icon-button {
+  background: transparent;
+  color: var(--text-copy);
+  border: 0;
+}
+
+.modal-card .icon-button:hover,
+.modal-card .icon-button:focus-visible {
+  background: var(--bg-row-alt);
+  color: var(--text-title);
+}
+
+.modal-card .icon-button.task-details-close-button {
+  color: #fff !important;
+  border: 1px solid color-mix(in srgb, var(--official-red) 72%, black) !important;
+  background: linear-gradient(135deg, #ea1c2d, #b81d2c) !important;
+  font-weight: 900;
+  border-radius: 999px;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 0 0 1px rgba(234, 28, 45, 0.12);
+}
+
+.modal-card .icon-button.task-details-close-button:hover,
+.modal-card .icon-button.task-details-close-button:focus-visible {
+  background: linear-gradient(135deg, #f02c3d, #8f1320) !important;
+  color: #fff !important;
+  border-color: color-mix(in srgb, var(--official-red) 85%, black) !important;
+}
+
+.task-details-header {
+  position: relative;
+  padding-right: 4.5rem;
+  padding-bottom: 0.85rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border-base);
+}
+
+.task-details-header>div:first-child {
+  flex: 1 1 100%;
+  width: 100%;
+  min-width: 0;
+}
+
+.task-details-header .task-details-close-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+}
+
+.task-detail-header-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex: 0 0 auto;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.task-detail-header-status-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  --task-detail-header-status-size: 1.2em;
+  width: var(--task-detail-header-status-size);
+  height: var(--task-detail-header-status-size);
+  flex: 0 0 auto;
+  line-height: 0;
+  vertical-align: middle;
+}
+
+.task-detail-header-status-caption {
+  color: var(--text-copy);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.task-detail-header-status-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.task-detail-header-status-icon .timeline-task-status-logo {
+  position: static;
+  top: auto;
+  right: auto;
+  left: auto;
+  transform: none;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+.task-detail-header-status-icon .timeline-task-status-logo svg {
+  width: 0.82rem;
+  height: 0.82rem;
+}
+
+.task-detail-header-status-icon-signal-not-started {
+  color: #54627b;
+}
+
+.task-detail-header-status-icon-signal-in-progress {
+  color: #b77900;
+}
+
+.task-detail-header-status-icon-signal-waiting-for-qa {
+  color: #275098;
+}
+
+.task-detail-header-status-icon-signal-complete {
+  color: #246847;
+}

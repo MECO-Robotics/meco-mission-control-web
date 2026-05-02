@@ -1,0 +1,116 @@
+.metrics-hotspot-meta {
+  display: grid;
+  gap: 0.08rem;
+  min-width: 0;
+}
+
+.metrics-hotspot-meta strong,
+.metrics-hotspot-meta small {
+  overflow-wrap: anywhere;
+}
+
+.metrics-hotspot-meta small,
+.metrics-hotspot-list-item span {
+  color: var(--text-copy);
+}
+
+.metrics-hotspot-list-item span {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.metrics-scope-card {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0 0 0.9rem;
+  padding: 1rem;
+  border: 1px solid var(--border-base);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top right, rgba(22, 71, 142, 0.05), transparent 34%),
+    linear-gradient(180deg, var(--bg-panel), var(--bg-row-alt));
+}
+
+.metrics-scope-card .panel-header.compact-header {
+  margin-bottom: 0;
+}
+
+.metrics-section-count {
+  margin: 0;
+  color: var(--text-copy);
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.metrics-section-eyebrow {
+  margin: 0;
+}
+
+.metrics-scope-table-shell {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.metrics-scope-table-header {
+  margin-bottom: 0.35rem;
+  padding: 0.25rem 0.1rem;
+  border-bottom: 1px solid var(--border-base);
+  color: var(--text-copy);
+}
+
+.metrics-scope-row {
+  padding: 0.75rem 0.1rem;
+  border-bottom: 1px solid var(--border-base);
+  background: transparent;
+}
+
+.metrics-scope-row:last-child {
+  border-bottom: 0;
+}
+
+.metrics-scope-entity {
+  display: grid;
+  gap: 0.08rem;
+}
+
+.metrics-scope-entity small {
+  color: var(--text-copy);
+  overflow-wrap: anywhere;
+}
+
+.metrics-completion-cell {
+  display: grid;
+  gap: 0.28rem;
+}
+
+.metrics-completion-track {
+  height: 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg-panel) 76%, var(--meco-blue) 24%);
+  overflow: hidden;
+}
+
+.metrics-completion-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg,
+      color-mix(in srgb, var(--meco-blue) 72%, #ffffff 28%),
+      var(--official-green));
+  transition: width 220ms ease;
+}
+
+@media (max-width: 980px) {
+  .risk-time-metrics-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics-hotspot-grid {
+    grid-template-columns: 1fr;
+  }
+}

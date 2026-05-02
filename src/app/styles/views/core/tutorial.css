@@ -1,0 +1,102 @@
+.task-details-edit-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.task-details-edit-button svg {
+  width: 0.95rem;
+  height: 0.95rem;
+  flex: 0 0 auto;
+}
+
+.interactive-tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2720;
+  pointer-events: none;
+}
+
+.interactive-tutorial-dim {
+  position: fixed;
+  pointer-events: none;
+  background: rgba(8, 14, 24, 0.7);
+}
+
+.interactive-tutorial-spotlight {
+  position: fixed;
+  pointer-events: none;
+  border-radius: 10px;
+  box-shadow:
+    0 0 0 2px var(--official-red),
+    0 0 0 5px rgba(255, 255, 255, 0.12);
+}
+
+.interactive-tutorial-card {
+  pointer-events: auto;
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  width: min(360px, calc(100vw - 1.5rem));
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--bg-panel) 90%, var(--official-black) 10%);
+  box-shadow: 0 16px 40px rgba(10, 16, 28, 0.38);
+  z-index: 1;
+}
+
+.interactive-tutorial-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.interactive-tutorial-progress {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.interactive-tutorial-card h3 {
+  margin: 0;
+  color: var(--text-title);
+  font-size: 1rem;
+}
+
+.interactive-tutorial-card p {
+  margin: 0;
+  color: var(--text-copy);
+  line-height: 1.45;
+}
+
+.interactive-tutorial-context {
+  color: var(--text-muted) !important;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.interactive-tutorial-hint {
+  color: var(--text-title) !important;
+  font-size: 0.84rem;
+}
+
+.interactive-tutorial-error {
+  color: var(--official-red) !important;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.interactive-tutorial-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+
+.interactive-tutorial-actions .secondary-action {
+  font-size: 0.82rem;
+}

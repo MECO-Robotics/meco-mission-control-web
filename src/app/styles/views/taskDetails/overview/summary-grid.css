@@ -1,0 +1,83 @@
+.task-detail-header-side-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 0.4rem;
+  min-width: 0;
+  padding-right: 0.25rem;
+  padding-top: 1rem;
+}
+
+.modal-actions-leading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-right: auto;
+  white-space: nowrap;
+}
+
+.roster-edit-modal {
+  width: min(520px, 100%);
+}
+
+.modal-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.task-details-section-title {
+  margin: 0;
+  color: var(--text-title);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 700;
+  border-top: 1px solid var(--border-base);
+  border-bottom: 1px solid var(--border-base);
+  padding: 0.55rem 0 0.45rem;
+}
+
+.task-details-section-collapse {
+  margin: 0;
+}
+
+.task-details-section-summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.task-details-section-summary::after {
+  order: 0;
+  content: "▸";
+  font-size: 0.82rem;
+  color: var(--text-copy);
+  line-height: 1;
+  opacity: 0.9;
+}
+
+.task-details-section-summary span {
+  order: 1;
+}
+
+.task-details-section-summary>span:last-child {
+  color: var(--text-title);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.task-details-section-collapse[open] .task-details-section-summary::after {
+  content: "▾";
+}
+
+.task-details-section-summary::-webkit-details-marker,
+.task-details-section-summary::marker {
+  display: none;
+}

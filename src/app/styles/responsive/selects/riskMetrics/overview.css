@@ -1,0 +1,102 @@
+.risk-filter-control {
+  min-width: 160px;
+  max-width: 220px;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.28rem;
+  color: var(--text-copy);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.risk-filter-control select {
+  border: 1px solid var(--border-base);
+  border-radius: 9px;
+  min-height: 34px;
+  padding: 0.15rem 0.55rem;
+  background: var(--bg-panel);
+  color: var(--text-title);
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.metrics-intro-shell {
+  display: grid;
+  gap: 0.2rem;
+  margin: 0 0 0.85rem;
+}
+
+.metrics-intro-shell h3 {
+  margin: 0;
+  color: var(--text-title);
+  font-family: "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif;
+  font-size: clamp(1.15rem, 2vw, 1.45rem);
+  line-height: 1.12;
+}
+
+.metrics-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(178px, 1fr));
+  gap: 0.75rem;
+  margin: 0 0 0.9rem;
+}
+
+.metrics-summary-card {
+  align-items: flex-start;
+}
+
+.metrics-summary-card strong {
+  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+}
+
+.metrics-summary-card small {
+  color: var(--text-copy);
+  line-height: 1.45;
+}
+
+.metrics-hotspot-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0 0 0.9rem;
+}
+
+.metrics-hotspot-card {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.metrics-hotspot-card h3 {
+  margin: 0;
+  color: var(--text-title);
+  font-family: "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif;
+  font-size: 1.02rem;
+  line-height: 1.15;
+}
+
+.metrics-hotspot-card .section-copy {
+  margin: 0;
+}
+
+.metrics-hotspot-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.metrics-hotspot-list-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.7rem;
+  padding: 0.58rem 0.7rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-base);
+  background: var(--bg-row-alt);
+}

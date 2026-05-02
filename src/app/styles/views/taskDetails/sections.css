@@ -1,0 +1,50 @@
+.task-detail-header-status-icon-signal-blocked {
+  color: var(--official-red);
+}
+
+.task-detail-header-status-icon-signal-waiting-on-dependency {
+  color: #c25a14;
+}
+
+.task-detail-header-meta-line {
+  margin: 0;
+}
+
+.task-detail-header-title-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  flex: 1 1 auto;
+  max-width: none;
+}
+
+.task-detail-header-title-main {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.3rem;
+  min-width: 0;
+  flex-wrap: nowrap;
+}
+
+.task-detail-header-title-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 1rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.task-detail-header-title-main>h2 {
+  margin: 0;
+  flex: 1 1 auto;
+  max-width: none;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.task-detail-header-title-main .task-detail-header-status-icon {
+  margin-top: 0.12em;
+}

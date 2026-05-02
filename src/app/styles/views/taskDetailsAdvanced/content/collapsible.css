@@ -1,0 +1,111 @@
+.task-detail-deadline-pill-warning {
+  background: rgba(183, 121, 0, 0.16);
+  color: #8d6400;
+}
+
+.task-detail-deadline-pill-danger {
+  background: rgba(234, 28, 45, 0.14);
+  color: var(--official-red);
+}
+
+.task-detail-discipline-pill,
+.task-detail-subsystem-pill {
+  border: 1px solid transparent;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.2rem 0.45rem;
+}
+
+.task-detail-discipline-pill.filter-tone-info,
+.task-detail-discipline-pill.filter-tone-success,
+.task-detail-discipline-pill.filter-tone-warning,
+.task-detail-discipline-pill.filter-tone-danger,
+.task-detail-discipline-pill.filter-tone-neutral,
+.task-detail-subsystem-pill.filter-tone-info,
+.task-detail-subsystem-pill.filter-tone-success,
+.task-detail-subsystem-pill.filter-tone-warning,
+.task-detail-subsystem-pill.filter-tone-danger,
+.task-detail-subsystem-pill.filter-tone-neutral {
+  background: var(--filter-tone-bg);
+  border-color: var(--filter-tone-border);
+  color: var(--filter-tone-foreground);
+}
+
+.task-detail-hours-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.42rem;
+  margin: 0.25rem 0 0;
+}
+
+.task-detail-pair-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.42rem;
+  margin: 0.25rem 0 0;
+}
+
+.task-detail-pair-segment {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.32rem;
+}
+
+.task-detail-pair-label {
+  color: var(--text-copy);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.task-detail-pair-separator {
+  color: var(--text-copy);
+}
+
+.task-detail-collapsible-field .task-detail-collapsible {
+  margin-top: 0.25rem;
+  width: 100%;
+}
+
+.task-detail-collapsible-summary {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  cursor: pointer;
+  list-style: none;
+  min-height: 1.2rem;
+  width: 100%;
+}
+
+.task-detail-collapsible-summary::-webkit-details-marker,
+.task-detail-collapsible-summary::marker {
+  display: none;
+}
+
+.task-detail-collapsible-summary .task-detail-copy,
+.task-detail-collapsible-summary>span:last-child {
+  margin: 0;
+  color: var(--text-title);
+  font-weight: 800;
+  min-width: 0;
+}
+
+.task-detail-collapsible-icon {
+  width: 1rem;
+  height: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-copy);
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1;
+  flex: 0 0 auto;
+  opacity: 0.8;
+  transition: transform 0.16s ease, color 0.16s ease;
+}

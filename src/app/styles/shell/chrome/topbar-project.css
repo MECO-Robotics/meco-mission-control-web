@@ -1,0 +1,98 @@
+.app-topbar-project-label {
+  color: var(--text-copy);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.62rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.app-topbar-project-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  min-width: clamp(118px, 16vw, 236px);
+  max-width: 280px;
+  height: 1.95rem;
+  border-radius: var(--control-select-radius);
+  border: 1px solid var(--border-base);
+  background-color: var(--bg-row-alt);
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - var(--control-select-arrow-right-primary)) 54%,
+    calc(100% - var(--control-select-arrow-right-secondary)) 54%;
+  background-size:
+    var(--control-select-arrow-size) var(--control-select-arrow-size),
+    var(--control-select-arrow-size) var(--control-select-arrow-size);
+  background-repeat: no-repeat;
+  color: var(--text-title);
+  cursor: pointer;
+  padding: var(--control-select-padding-block) 1.85rem var(--control-select-padding-block) var(--control-select-padding-inline-start);
+  font: inherit;
+  font-size: 0.9rem;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease;
+}
+
+.app-topbar-project-select:disabled {
+  opacity: 0.64;
+  cursor: not-allowed;
+}
+
+.app-topbar-project-select:focus,
+.app-topbar-project-select:focus-visible {
+  outline: none;
+  border-color: var(--control-select-focus-border);
+  box-shadow: var(--control-select-focus-ring);
+}
+
+.app-topbar-project-picker.has-overlay-action .app-topbar-project-select {
+  padding-right: 3rem;
+  background-position:
+    calc(100% - 2.15rem) 54%,
+    calc(100% - 1.83rem) 54%;
+}
+
+.app-topbar-project-select option,
+.sidebar-context-select option,
+.table-pagination-size select option {
+  background: var(--bg-panel);
+  color: var(--text-title);
+}
+
+.app-topbar-project-action {
+  position: absolute;
+  top: 50%;
+  right: 0.2rem;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-copy);
+}
+
+.app-topbar-project-picker.has-overlay-action .app-topbar-project-action {
+  right: 1.38rem;
+}
+
+.app-topbar-project-action:hover,
+.app-topbar-project-action:focus-visible {
+  background: var(--bg-panel);
+  color: var(--text-title);
+}
+
+.page-shell.dark-mode .app-topbar-project-select,
+.page-shell.dark-mode .sidebar-context-select,
+.page-shell.dark-mode .table-pagination-size select {
+  color-scheme: dark;
+}

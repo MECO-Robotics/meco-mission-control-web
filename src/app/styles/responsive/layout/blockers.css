@@ -1,0 +1,30 @@
+.task-details-modal .task-queue-filter-menu-submenu .toolbar-filter-menu-button {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.task-details-modal .task-queue-filter-menu-submenu .toolbar-filter-value {
+  flex: 0 1 auto;
+  text-align: left;
+}
+
+.task-details-modal .task-detail-inline-edit-shell-inline.task-detail-inline-edit-shell-inline-left {
+  display: flex;
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.task-detail-inline-edit-select {
+  min-width: 0;
+  width: 100%;
+}
+
+.task-detail-inline-edit-select-chip {
+  width: fit-content;
+  max-width: 100%;
+}
+
+.task-detail-inline-edit-select-status {
+  width: fit-content;
+  max-width: 100%;
+}

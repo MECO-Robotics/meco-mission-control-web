@@ -1,0 +1,11 @@
+.timeline-grid-motion {
+  width: 100%;
+  min-width: 0;
+  will-change: min-width, grid-template-columns;
+}
+
+.timeline-grid-motion[data-period-motion] {
+  transition:
+    min-width 180ms ease,
+    grid-template-columns 180ms ease;
+}

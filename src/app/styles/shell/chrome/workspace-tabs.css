@@ -1,0 +1,72 @@
+.workspace-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-bottom: 0.65rem;
+}
+
+.workspace-section-tabs .tab {
+  min-width: fit-content;
+  padding: 0.46rem 0.72rem;
+  font-size: 0.84rem;
+  border-radius: 8px;
+}
+
+.workspace-section-tabs .tab[data-active="true"] {
+  background: var(--meco-soft-blue);
+  color: var(--meco-blue);
+  border-color: var(--meco-blue);
+}
+
+.workspace-section-tabs .tab:hover {
+  background: var(--bg-row-alt);
+  border-color: var(--border-base);
+}
+
+.workspace-section-tabs .tab[data-active="true"]:hover {
+  background: var(--meco-soft-blue);
+}
+
+.page-shell.dark-mode .workspace-section-tabs .tab {
+  background: var(--bg-panel);
+  color: var(--text-copy);
+  border-color: var(--border-base);
+}
+
+.page-shell.dark-mode .workspace-section-tabs .tab:hover {
+  background: var(--bg-row-alt);
+}
+
+.tab-interaction-note {
+  display: grid;
+  gap: 0.12rem;
+  margin-top: auto;
+  padding: 0.55rem 0.75rem;
+  border: 1px dashed rgba(88, 102, 125, 0.22);
+  border-radius: 10px;
+  background: rgba(22, 71, 142, 0.035);
+}
+
+.tab-interaction-note-label {
+  display: block;
+  color: var(--text-copy);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.64rem;
+  font-weight: 700;
+  opacity: 0.9;
+}
+
+.tab-interaction-note p {
+  margin: 0;
+  color: var(--text-copy);
+  line-height: 1.45;
+  font-size: 0.9rem;
+}
+
+.page-shell.dark-mode .tab-interaction-note {
+  border-color: rgba(148, 163, 184, 0.14);
+  background: rgba(148, 163, 184, 0.04);
+}

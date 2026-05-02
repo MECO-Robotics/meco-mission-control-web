@@ -1,0 +1,129 @@
+.task-detail-collapsible-icon::before {
+  content: "▸";
+}
+
+.task-detail-collapsible[open] .task-detail-collapsible-icon {
+  color: var(--text-title);
+}
+
+.task-detail-collapsible[open] .task-detail-collapsible-icon::before {
+  content: "▾";
+}
+
+.task-detail-collapsible-body {
+  background: var(--bg-row-alt) !important;
+  border: 1px solid var(--border-base) !important;
+  border-radius: 0.9rem !important;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-height: 0;
+  max-height: 11rem !important;
+  overflow-y: scroll !important;
+  padding: 0.75rem 0.85rem !important;
+  scrollbar-gutter: stable;
+}
+
+.task-detail-collapsible-body .task-detail-list,
+.task-detail-collapsible-body .task-details-mechanism-list {
+  width: 100%;
+}
+
+.task-detail-collapsible-body {
+  margin-top: 0.55rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0.2rem;
+  min-height: 0;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+  padding: 0.6rem 0.8rem;
+  border-radius: 14px;
+  border: 1px solid var(--border-base);
+  background: var(--bg-row-alt);
+}
+
+.task-detail-collapsible-body .workspace-detail-list,
+.task-detail-collapsible-body .task-detail-list {
+  display: grid;
+  gap: 0.2rem;
+  margin-top: 0;
+}
+
+.task-detail-collapsible-body .workspace-detail-list-item,
+.task-detail-collapsible-body .task-detail-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.task-detail-collapsible-body .task-detail-copy {
+  margin-top: 0;
+}
+
+.task-details-mechanism-list {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0.2rem;
+  min-height: 0;
+  align-self: stretch;
+}
+
+.task-details-mechanism-item {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.task-details-mechanism-item .task-detail-ellipsis-reveal {
+  width: 100%;
+}
+
+.task-detail-hour-segment {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+}
+
+.task-detail-hour-label {
+  color: var(--text-copy);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.task-detail-hour-separator {
+  color: var(--text-copy);
+}
+
+.task-detail-list-shell .task-detail-copy {
+  margin-top: 0.5rem;
+}
+
+.task-detail-list {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+}
+
+.task-detail-list-item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--border-base);
+}
+
+.task-detail-list-item:first-child {
+  border-top: 0;
+  padding-top: 0.1rem;
+}

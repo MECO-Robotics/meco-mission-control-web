@@ -1,0 +1,87 @@
+.task-detail-copy {
+  margin: 0.25rem 0 0;
+  color: var(--text-copy);
+  line-height: 1.45;
+}
+
+.task-details-grid .task-detail-copy,
+.task-details-grid .task-detail-ellipsis-reveal {
+  color: color-mix(in srgb, var(--text-title) 88%, var(--text-copy));
+  line-height: 1.5;
+}
+
+.task-details-grid .task-detail-empty {
+  color: var(--text-copy);
+}
+
+.task-details-grid .field>span:first-child,
+.task-details-grid .task-details-overview-assigned>span:first-child,
+.task-details-grid .task-detail-collapsible-summary .task-detail-copy,
+.task-details-grid .task-detail-collapsible-summary>span:last-child {
+  color: var(--text-title);
+  font-weight: 800;
+}
+
+.task-detail-ellipsis-reveal {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
+  z-index: 1;
+}
+
+.task-detail-ellipsis-reveal[data-full-text]::after {
+  content: attr(data-full-text);
+  position: absolute;
+  left: -0.28rem;
+  top: -0.04rem;
+  z-index: 260;
+  width: max-content;
+  max-width: calc(100vw - 24px);
+  padding: 0.04rem 0.28rem;
+  border-radius: 0.35rem;
+  color: var(--text-title);
+  font: inherit;
+  line-height: inherit;
+  white-space: nowrap;
+  pointer-events: none;
+  background: var(--bg-row-alt);
+  box-shadow:
+  0 0 0 1px color-mix(in srgb, var(--border-base) 72%, transparent),
+    0 6px 18px rgba(15, 23, 42, 0.16);
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.task-details-assigned-list .task-detail-ellipsis-reveal[data-full-text]::after,
+.task-detail-collapsible-body .task-detail-ellipsis-reveal[data-full-text]::after {
+  color: var(--text-title);
+  background: var(--bg-row-alt);
+}
+
+.task-detail-ellipsis-reveal[data-full-text]:hover::after,
+.task-detail-ellipsis-reveal[data-full-text]:focus-visible::after {
+  opacity: 1;
+}
+
+.task-detail-ellipsis-reveal[data-full-text]:hover,
+.task-detail-ellipsis-reveal[data-full-text]:focus-visible {
+  z-index: 1000;
+  overflow: visible;
+  position: relative;
+  color: transparent !important;
+}
+
+.task-detail-header-hours-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}

@@ -1,0 +1,77 @@
+.editable-hover-indicator.editable-hover-indicator-compact {
+  width: 1.45rem;
+  height: 1.45rem;
+  right: 0.45rem;
+}
+
+.editable-hover-indicator-inline {
+  position: absolute;
+  top: 50%;
+  right: 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(22, 71, 142, 0.18);
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--official-blue);
+  box-shadow: 0 10px 22px rgba(15, 28, 52, 0.12);
+  opacity: 1;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.editable-hover-indicator-inline svg {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.editable-hover-target:hover .editable-hover-indicator,
+.editable-hover-target:focus-visible .editable-hover-indicator,
+.editable-hover-target:focus-within .editable-hover-indicator {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+.editable-action-host .editable-action-reveal {
+  opacity: 0;
+  transform: translateX(4px);
+  pointer-events: none;
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.editable-action-host:hover .editable-action-reveal,
+.editable-action-host:focus-within .editable-action-reveal {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.subsystem-manager-item.is-active .editable-action-reveal {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.page-shell.dark-mode .editable-hover-indicator {
+  background: rgba(15, 23, 42, 0.96);
+  border-color: rgba(96, 165, 250, 0.28);
+  color: #93c5fd;
+  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.34);
+}
+
+.page-shell.dark-mode .editable-hover-indicator-inline {
+  background: rgba(15, 23, 42, 0.96);
+  border-color: rgba(96, 165, 250, 0.28);
+  color: #93c5fd;
+  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.34);
+}
+
+.table-cell-actions {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}

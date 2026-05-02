@@ -1,0 +1,62 @@
+.page-shell.dark-mode .toolbar-filter-dropdown {
+  background: var(--bg-panel);
+  border-color: rgba(148, 163, 184, 0.34);
+  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.24);
+}
+
+.page-shell.dark-mode .toolbar-filter-dropdown.is-active {
+  background: linear-gradient(135deg, rgba(22, 71, 142, 0.22), rgba(30, 41, 59, 0.98));
+  border-color: rgba(96, 165, 250, 0.72);
+}
+
+.page-shell.dark-mode .toolbar-filter-dropdown.is-active .toolbar-filter-chevron {
+  color: var(--official-blue);
+  opacity: 1;
+}
+
+.page-shell.dark-mode .toolbar-filter select {
+  background-color: var(--bg-panel);
+  border-color: rgba(148, 163, 184, 0.34);
+  color-scheme: dark;
+}
+
+.page-shell.dark-mode .toolbar-filter-select-overlay {
+  background: transparent;
+}
+
+.page-shell.dark-mode .toolbar-filter-compact select {
+  color-scheme: dark;
+  background-color: transparent;
+}
+
+.toolbar-filter-compact select option {
+  background: var(--bg-panel);
+  color: var(--text-title);
+}
+
+.toolbar-filter-compact select:focus {
+  outline: none;
+}
+
+.mobile-filter-control {
+  display: none;
+}
+
+.toolbar-search {
+  min-width: 0;
+  padding-inline: 0.5rem;
+  border-radius: 10px;
+}
+
+.toolbar-search-input {
+  width: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text-title);
+  padding: 0.28rem 0;
+}
+
+.toolbar-search-input::placeholder {
+  color: var(--text-copy);
+}

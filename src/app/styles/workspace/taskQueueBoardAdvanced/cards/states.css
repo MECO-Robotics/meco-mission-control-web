@@ -1,0 +1,28 @@
+.task-queue-board-card-context-chip {
+  flex-shrink: 1;
+  min-width: 0;
+  max-width: min(100%, 8.5rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: var(--task-queue-board-card-context-bg, rgba(15, 28, 52, 0.08));
+  border: 1px solid var(--task-queue-board-card-context-border, rgba(15, 28, 52, 0.16));
+  color: var(--task-queue-board-card-context-accent, var(--text-copy));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--task-queue-board-card-context-accent, var(--text-copy)) 18%, transparent);
+}
+
+.task-queue-board-card-priority {
+  display: block;
+  flex: 0 0 auto;
+  width: 0.95rem;
+  height: 0.95rem;
+  color: inherit;
+}
+
+.task-queue-board-card-priority-critical {
+  color: #dc2626;
+}
+
+.task-queue-board-card-priority-high {
+  color: #ef4444;
+}

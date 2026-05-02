@@ -1,0 +1,128 @@
+.auth-card-header h1 {
+  margin: 0;
+  color: var(--official-black);
+  font-family: "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif;
+  font-size: clamp(1.9rem, 3vw, 2.6rem);
+  line-height: 1.04;
+}
+
+.topbar {
+  border-radius: 18px;
+  padding: 0.35rem 0.7rem;
+  min-height: 34px;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.app-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1200;
+  width: 100%;
+  height: var(--shell-topbar-height);
+  padding: 0;
+  box-sizing: border-box;
+  justify-content: flex-start;
+  gap: 0;
+  border-bottom: 1px solid var(--border-base);
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+  background: var(--bg-panel);
+}
+
+.app-topbar-left {
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+  width: var(--shell-topbar-brand-width);
+  min-width: 0;
+  position: relative;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border-base);
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app-topbar[data-collapsed="false"] .app-topbar-left {
+  border-right-color: transparent;
+}
+
+.app-topbar-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: var(--shell-topbar-brand-width);
+  min-width: 0;
+  padding-inline: 0.5rem 0.7rem;
+  overflow: hidden;
+  opacity: 1;
+  pointer-events: auto;
+  border-right: 1px solid var(--border-base);
+  background: var(--bg-panel);
+  box-sizing: border-box;
+  transition:
+    padding-inline 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.18s ease;
+}
+
+.app-topbar[data-collapsed="false"] .app-topbar-brand {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.app-topbar-brand-icon {
+  display: block;
+  width: min(100%, 96px);
+  height: auto;
+  max-height: 26px;
+  max-width: 100%;
+  object-fit: contain;
+  opacity: 1;
+  transform: translateX(0);
+  transition:
+    opacity 0.18s ease,
+    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app-topbar[data-collapsed="false"] .app-topbar-brand-icon {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.app-topbar-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0.2rem clamp(0.5rem, 1.2vw, 1.1rem);
+  overflow: hidden;
+}
+
+.app-topbar-project-slot {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 0 0 auto;
+  min-width: 0;
+  padding-inline: clamp(0.35rem, 0.85vw, 0.65rem) 0.25rem;
+}
+
+.app-topbar-project-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+  position: relative;
+}

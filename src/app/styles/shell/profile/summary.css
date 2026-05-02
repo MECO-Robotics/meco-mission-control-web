@@ -1,0 +1,49 @@
+.summary-chip span,
+.eyebrow,
+.timeline-day,
+.queue-table-header span {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.68rem;
+}
+
+.summary-chip strong {
+  display: block;
+  font-size: 1.15rem;
+  color: var(--official-blue);
+}
+
+.user-chip {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 180px;
+}
+
+.user-chip strong {
+  color: var(--official-black);
+  font-size: 0.92rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.35rem;
+  font-weight: 700;
+  color: var(--official-blue);
+}
+
+.auth-body,
+.auth-note {
+  margin: 0;
+  line-height: 1.55;
+  font-size: 0.95rem;
+}
+
+.auth-note {
+  font-size: 0.92rem;
+}
+
+.tabbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}

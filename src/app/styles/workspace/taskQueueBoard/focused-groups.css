@@ -1,0 +1,77 @@
+.page-shell.dark-mode .task-queue-board-focused-count,
+.page-shell.dark-mode .task-queue-board-priority-label-count {
+  background: rgba(96, 165, 250, 0.2);
+  color: #dbeafe;
+  border: 1px solid rgba(96, 165, 250, 0.34);
+}
+
+.task-queue-board-focused-exit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  border: 1px solid rgba(220, 38, 38, 0.35);
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+  font-size: 1.05rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.task-queue-board-focused-groups {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.task-queue-board-priority-group {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.task-queue-board-priority-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-title);
+}
+
+.task-queue-board-priority-label-critical {
+  color: #dc2626;
+}
+
+.task-queue-board-priority-label-high {
+  color: #ef4444;
+}
+
+.task-queue-board-priority-label-medium {
+  color: #ca8a04;
+}
+
+.task-queue-board-priority-label-low {
+  color: #2563eb;
+}
+
+.task-queue-board-priority-label-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.95rem;
+  height: 0.95rem;
+  flex: 0 0 auto;
+  line-height: 0;
+}
+
+.task-queue-board-priority-label-icon .task-queue-board-card-priority {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.task-queue-board-priority-label-text {
+  white-space: nowrap;
+}

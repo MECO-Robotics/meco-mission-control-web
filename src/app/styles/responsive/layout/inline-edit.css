@@ -1,0 +1,133 @@
+.task-detail-inline-edit-trigger {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.45rem;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: text;
+}
+
+.task-detail-inline-edit-trigger .task-detail-copy {
+  margin: 0.25rem 0 0;
+}
+
+.task-detail-inline-edit-shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  min-width: 0;
+}
+
+.task-detail-inline-edit-shell-inline {
+  display: inline-flex;
+  align-items: center;
+  width: auto;
+  min-width: 0;
+}
+
+.task-detail-inline-edit-title-shell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  width: fit-content;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.task-detail-inline-edit-title-shell > h2 {
+  margin: 0;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  color: var(--text-title);
+}
+
+.task-detail-inline-edit-title-shell-editing {
+  display: block;
+  width: 100%;
+}
+
+.task-detail-inline-edit-title-shell-editing > h2 {
+  visibility: hidden;
+}
+
+.task-detail-inline-edit-title-shell-editing .task-detail-inline-edit-indicator {
+  visibility: hidden;
+}
+
+.task-detail-inline-edit-hitarea {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: text;
+}
+
+.task-detail-inline-edit-indicator-title {
+  position: static;
+  top: auto;
+  right: auto;
+  transform: none;
+  pointer-events: none;
+}
+
+.task-detail-inline-edit-input,
+.task-detail-inline-edit-textarea {
+  width: 100%;
+}
+
+.task-detail-inline-edit-input-title {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0.08rem 0.28rem 0.12rem 0.18rem;
+  border: 0;
+  background: rgba(15, 23, 42, 0.05);
+  border-radius: 0.35rem;
+  color: var(--text-title);
+  font: 700 24px/36px "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif;
+  font-style: normal;
+  letter-spacing: 0;
+  min-width: 0;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.task-detail-inline-edit-input-title:focus,
+.task-detail-inline-edit-input-title:focus-visible {
+  outline: none;
+  background: rgba(15, 23, 42, 0.08);
+  box-shadow: 0 0 0 1px rgba(22, 71, 142, 0.18);
+}
+
+.task-detail-inline-edit-input-date {
+  width: auto;
+  min-width: 10rem;
+  padding: 0.32rem 0.55rem;
+  border-radius: 0.35rem;
+  border: 1px solid var(--border-base);
+  background: var(--bg-row-alt);
+  color: var(--text-title);
+  font: inherit;
+}
+
+.task-detail-inline-edit-trigger-inline {
+  width: auto;
+  min-width: 0;
+  flex: 0 0 auto;
+  align-items: center;
+  padding-right: 1.85rem;
+}

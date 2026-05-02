@@ -1,0 +1,62 @@
+.task-detail-header-hours-right {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.task-detail-header-hours-label {
+  color: var(--text-copy);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.task-detail-hours-estimate {
+  color: var(--text-copy);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.task-detail-hours-pill {
+  border: 0;
+  border-radius: 999px;
+  color: var(--text-title);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.2rem 0.45rem;
+}
+
+.task-detail-hours-pill-success {
+  background: rgba(36, 104, 71, 0.14);
+  color: #246847;
+}
+
+.task-detail-hours-pill-warning {
+  background: rgba(183, 121, 0, 0.16);
+  color: #8d6400;
+}
+
+.task-detail-hours-pill-danger {
+  background: rgba(234, 28, 45, 0.14);
+  color: var(--official-red);
+}
+
+.task-detail-hours-pill-neutral {
+  background: rgba(84, 98, 123, 0.12);
+  color: #54627b;
+}
+
+.task-detail-deadline-pill {
+  border: 0;
+  border-radius: 999px;
+  color: var(--text-title);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.2rem 0.45rem;
+}
+
+.task-detail-deadline-pill-success {
+  background: rgba(36, 104, 71, 0.14);
+  color: #246847;
+}

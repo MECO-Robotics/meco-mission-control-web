@@ -1,0 +1,65 @@
+.page-shell.dark-mode .profile-menu-popover {
+  background: var(--bg-panel);
+  border-color: var(--border-base);
+}
+
+.profile-menu:hover .profile-menu-popover,
+.profile-menu:focus-within .profile-menu-popover {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.profile-menu-context-picker {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.35rem 0.4rem 0.45rem;
+  margin-bottom: 0.15rem;
+}
+
+.profile-menu-context-label {
+  color: var(--text-copy);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.56rem;
+  font-weight: 700;
+}
+
+.profile-menu-context-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 100%;
+  height: 1.92rem;
+  border-radius: var(--control-select-radius);
+  border: 1px solid var(--border-base);
+  background-color: var(--bg-row-alt);
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - var(--control-select-arrow-right-primary)) 54%,
+    calc(100% - var(--control-select-arrow-right-secondary)) 54%;
+  background-size:
+    var(--control-select-arrow-size) var(--control-select-arrow-size),
+    var(--control-select-arrow-size) var(--control-select-arrow-size);
+  background-repeat: no-repeat;
+  color: var(--text-title);
+  cursor: pointer;
+  padding: var(--control-select-padding-block) var(--control-select-padding-inline-end) var(--control-select-padding-block) var(--control-select-padding-inline-start);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.profile-menu-context-select:focus,
+.profile-menu-context-select:focus-visible {
+  outline: none;
+  border-color: var(--control-select-focus-border);
+  box-shadow: var(--control-select-focus-shadow);
+}
+
+.profile-menu-context-select option {
+  background: var(--bg-panel);
+  color: var(--text-title);
+}

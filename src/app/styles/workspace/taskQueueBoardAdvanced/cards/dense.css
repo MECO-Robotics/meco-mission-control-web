@@ -1,0 +1,26 @@
+.task-queue-board-card-priority-medium {
+  color: #ca8a04;
+}
+
+.task-queue-board-card-priority-low {
+  color: #2563eb;
+}
+
+.task-queue-board-card-meta .task-queue-board-card-person {
+  flex-shrink: 0;
+}
+
+.task-queue-board-card-meta .task-queue-board-card-person .profile-avatar {
+  width: 1.85rem;
+  height: 1.85rem;
+}
+
+.task-queue-board-card-person {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.task-queue-board-card-hover {
+  right: 0.25rem;
+}

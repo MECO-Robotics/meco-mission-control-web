@@ -1,0 +1,112 @@
+.part-instance-dropdown-chip::after {
+  content: "";
+  width: 0.34rem;
+  height: 0.34rem;
+  border-right: 1.35px solid currentColor;
+  border-bottom: 1.35px solid currentColor;
+  transform: translateY(-1px) rotate(45deg);
+  opacity: 0.65;
+  flex-shrink: 0;
+}
+
+.requested-item-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.requested-item-title {
+  color: var(--text-title);
+}
+
+.requested-item-subtitle {
+  color: var(--text-copy);
+}
+
+.pill,
+.auth-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 0.24rem 0.52rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.status-pill {
+  border: 0;
+  border-radius: 4px;
+  font-size: 0.66rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  text-transform: capitalize;
+  width: fit-content;
+}
+
+.milestone-type-pill {
+  background: var(--milestone-type-chip-bg);
+  border: 1px solid var(--milestone-type-chip-border);
+  color: var(--milestone-type-chip-text);
+}
+
+.page-shell.dark-mode .milestone-type-pill {
+  background: var(--milestone-type-chip-bg-dark);
+  border-color: var(--milestone-type-chip-border-dark);
+  color: var(--milestone-type-chip-text-dark);
+}
+
+.auth-chip {
+  background: rgba(15, 28, 52, 0.08);
+  color: #21304a;
+}
+
+.auth-chip-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  max-width: 100%;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.google-button-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.status-pill-success {
+  background: var(--status-success-bg);
+  color: var(--status-success-text);
+}
+
+.status-pill-info {
+  background: var(--status-info-bg);
+  color: var(--status-info-text);
+}
+
+.status-pill-warning {
+  background: var(--status-warning-bg);
+  color: var(--status-warning-text);
+}
+
+.status-pill-danger {
+  background: var(--status-danger-bg);
+  color: var(--status-danger-text);
+}
+
+.status-pill-neutral {
+  background: var(--status-neutral-bg);
+  color: var(--status-neutral-text);
+}
+
+.priority-critical {
+  background: rgba(234, 28, 45, 0.12);
+  color: var(--official-red);
+}

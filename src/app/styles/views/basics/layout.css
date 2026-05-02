@@ -1,0 +1,70 @@
+.status-waiting-for-qa {
+  background: rgba(39, 80, 152, 0.14);
+  color: #275098;
+}
+
+.priority-high {
+  background: rgba(233, 131, 53, 0.14);
+  color: #a84712;
+}
+
+.status-in-progress {
+  background: rgba(183, 121, 0, 0.16);
+  color: #8a5c00;
+}
+
+.priority-medium,
+.status-not-started {
+  background: rgba(112, 128, 154, 0.16);
+  color: #54627b;
+}
+
+.priority-low,
+.status-complete {
+  background: rgba(61, 153, 108, 0.16);
+  color: #246847;
+}
+
+.purchase-requested,
+.manufacturing-requested {
+  background: rgba(112, 128, 154, 0.16);
+  color: #54627b;
+}
+
+.purchase-approved,
+.manufacturing-approved,
+.purchase-shipped,
+.manufacturing-qa {
+  background: rgba(76, 121, 207, 0.12);
+  color: #275098;
+}
+
+.purchase-purchased,
+.manufacturing-in-progress {
+  background: rgba(233, 131, 53, 0.14);
+  color: #a84712;
+}
+
+.purchase-delivered,
+.manufacturing-complete {
+  background: rgba(61, 153, 108, 0.16);
+  color: #246847;
+}
+
+.roster-layout {
+  gap: 0.8rem;
+  color: var(--text-copy);
+}
+
+.timeline-layout {
+  color: var(--text-copy);
+  width: calc(100vw - var(--shell-sidebar-width));
+  max-width: none;
+  min-width: 0;
+}
+
+.timeline-layout .timeline-shell {
+  width: calc(100vw - var(--shell-sidebar-width) + 1rem);
+  margin-left: -1rem;
+  margin-right: 0;
+}

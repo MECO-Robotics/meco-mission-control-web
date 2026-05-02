@@ -1,0 +1,62 @@
+.auth-layout>.auth-intro,
+.auth-layout>.auth-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 500px;
+}
+
+.auth-intro {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: 1.25rem;
+  align-content: start;
+  padding: clamp(1.25rem, 2.8vw, 2rem);
+  border-radius: 30px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background:
+    radial-gradient(circle at 18% 18%, rgba(76, 121, 207, 0.34), transparent 30%),
+    radial-gradient(circle at 84% 10%, rgba(234, 28, 45, 0.24), transparent 26%),
+    linear-gradient(160deg, #0b1731 0%, #10284d 100%);
+  color: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 28px 60px rgba(15, 23, 42, 0.18);
+}
+
+.auth-intro::before {
+  content: "";
+  position: absolute;
+  inset: auto -8% -34% auto;
+  width: 18rem;
+  height: 18rem;
+  border-radius: 999px;
+  background: radial-gradient(circle,
+      rgba(255, 255, 255, 0.16) 0%,
+      rgba(255, 255, 255, 0) 72%);
+  pointer-events: none;
+}
+
+.auth-intro-copy {
+  display: grid;
+  gap: 0.45rem;
+  align-content: start;
+}
+
+.auth-intro .eyebrow {
+  color: rgba(191, 219, 254, 0.9);
+}
+
+.auth-intro h1 {
+  margin: 0;
+  max-width: 12ch;
+  color: var(--official-white);
+  font-family: "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif;
+  font-size: clamp(2.1rem, 4vw, 3.4rem);
+  line-height: 0.98;
+}
+
+.auth-intro .auth-body {
+  max-width: 33rem;
+  color: rgba(226, 232, 240, 0.86);
+  margin: 0;
+}

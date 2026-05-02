@@ -1,0 +1,160 @@
+import type { Dispatch, FormEvent, SetStateAction } from "react";
+
+import type {
+  ArtifactModalMode,
+  EventReportModalMode,
+  ManufacturingModalMode,
+  MaterialModalMode,
+  MechanismModalMode,
+  PartDefinitionModalMode,
+  PartInstanceModalMode,
+  PurchaseModalMode,
+  QaReportModalMode,
+  SubsystemModalMode,
+  TaskModalMode,
+  WorkLogModalMode,
+  WorkstreamModalMode,
+} from "@/features/workspace/shared";
+import type {
+  ArtifactPayload,
+  BootstrapPayload,
+  ManufacturingItemPayload,
+  MaterialPayload,
+  MechanismPayload,
+  PartDefinitionPayload,
+  PartInstancePayload,
+  PurchaseItemPayload,
+  SubsystemPayload,
+  TaskPayload,
+  TaskRecord,
+  TestResultPayload,
+  QaReportPayload,
+  WorkLogPayload,
+  WorkstreamPayload,
+} from "@/types";
+
+export interface WorkspaceModalHostViewProps {
+  activeArtifactId: string | null;
+  activePartDefinitionId: string | null;
+  activeMaterialId: string | null;
+  activeMechanismId: string | null;
+  activeWorkstreamId: string | null;
+  activeSubsystemId: string | null;
+  activeTask: TaskRecord | null;
+  activeTimelineTaskDetail: TaskRecord | null;
+  bootstrap: BootstrapPayload;
+  closeManufacturingModal: () => void;
+  closeArtifactModal: () => void;
+  closeMaterialModal: () => void;
+  closeMechanismModal: () => void;
+  closePartInstanceModal: () => void;
+  closePartDefinitionModal: () => void;
+  closePurchaseModal: () => void;
+  closeQaReportModal: () => void;
+  closeEventReportModal: () => void;
+  closeTimelineTaskDetailsModal: () => void;
+  closeWorkLogModal: () => void;
+  closeSubsystemModal: () => void;
+  closeTaskModal: () => void;
+  closeWorkstreamModal: () => void;
+  onTaskEditCanceled: () => void;
+  requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
+  disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
+  eventsById: Record<string, BootstrapPayload["events"][number]>;
+  handleDeleteMaterial: (materialId: string) => Promise<void>;
+  handleDeleteArtifact: (artifactId: string) => Promise<void>;
+  handleToggleArtifactArchived: (artifactId: string) => Promise<void>;
+  handleDeletePartDefinition: (partDefinitionId: string) => Promise<void>;
+  handleDeleteMechanism: (mechanismId: string) => Promise<void>;
+  handleTogglePartDefinitionArchived: (partDefinitionId: string) => Promise<void>;
+  handleToggleSubsystemArchived: (subsystemId: string) => Promise<void>;
+  handleToggleMechanismArchived: (mechanismId: string) => Promise<void>;
+  handleToggleWorkstreamArchived: (workstreamId: string) => Promise<void>;
+  handleDeleteTask: (taskId: string) => Promise<void>;
+  handleResolveTaskBlocker: (blockerId: string) => Promise<void>;
+  handlePartInstanceSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleManufacturingSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleMaterialSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleMechanismSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+  handlePartDefinitionSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleArtifactSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+  handlePurchaseSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleQaReportSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleEventReportSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleWorkLogSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleSubsystemSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleTaskSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleWorkstreamSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+  onOpenTaskEditFromTimelineDetails: (task: TaskRecord) => void;
+  openTaskDetailsModal: (task: TaskRecord) => void;
+  isDeletingMaterial: boolean;
+  isDeletingArtifact: boolean;
+  isDeletingPartDefinition: boolean;
+  isDeletingMechanism: boolean;
+  isDeletingTask: boolean;
+  isSavingManufacturing: boolean;
+  isSavingArtifact: boolean;
+  isSavingMaterial: boolean;
+  isSavingPartDefinition: boolean;
+  isSavingPartInstance: boolean;
+  isSavingMechanism: boolean;
+  isSavingPurchase: boolean;
+  isSavingQaReport: boolean;
+  isSavingEventReport: boolean;
+  isSavingWorkLog: boolean;
+  isSavingSubsystem: boolean;
+  isSavingTask: boolean;
+  isSavingWorkstream: boolean;
+  artifactDraft: ArtifactPayload;
+  artifactModalMode: ArtifactModalMode;
+  manufacturingDraft: ManufacturingItemPayload;
+  manufacturingModalMode: ManufacturingModalMode;
+  materialDraft: MaterialPayload;
+  materialModalMode: MaterialModalMode;
+  mechanismDraft: MechanismPayload;
+  mechanismModalMode: MechanismModalMode;
+  mechanismsById: Record<string, BootstrapPayload["mechanisms"][number]>;
+  mentors: BootstrapPayload["members"];
+  partInstanceDraft: PartInstancePayload;
+  partInstanceModalMode: PartInstanceModalMode;
+  partDefinitionDraft: PartDefinitionPayload;
+  partDefinitionModalMode: PartDefinitionModalMode;
+  partDefinitionsById: Record<string, BootstrapPayload["partDefinitions"][number]>;
+  partInstancesById: Record<string, BootstrapPayload["partInstances"][number]>;
+  purchaseDraft: PurchaseItemPayload;
+  purchaseFinalCost: string;
+  purchaseModalMode: PurchaseModalMode;
+  qaReportDraft: QaReportPayload;
+  qaReportModalMode: QaReportModalMode;
+  eventReportDraft: TestResultPayload;
+  eventReportFindings: string;
+  eventReportModalMode: EventReportModalMode;
+  workLogDraft: WorkLogPayload;
+  workLogModalMode: WorkLogModalMode;
+  workstreamDraft: WorkstreamPayload;
+  workstreamModalMode: WorkstreamModalMode;
+  setArtifactDraft: Dispatch<SetStateAction<ArtifactPayload>>;
+  setManufacturingDraft: Dispatch<SetStateAction<ManufacturingItemPayload>>;
+  setMaterialDraft: Dispatch<SetStateAction<MaterialPayload>>;
+  setMechanismDraft: Dispatch<SetStateAction<MechanismPayload>>;
+  setPartInstanceDraft: Dispatch<SetStateAction<PartInstancePayload>>;
+  setPartDefinitionDraft: Dispatch<SetStateAction<PartDefinitionPayload>>;
+  setPurchaseDraft: Dispatch<SetStateAction<PurchaseItemPayload>>;
+  setPurchaseFinalCost: (value: string) => void;
+  setQaReportDraft: Dispatch<SetStateAction<QaReportPayload>>;
+  setEventReportDraft: Dispatch<SetStateAction<TestResultPayload>>;
+  setEventReportFindings: (value: string) => void;
+  setWorkLogDraft: Dispatch<SetStateAction<WorkLogPayload>>;
+  setWorkstreamDraft: Dispatch<SetStateAction<WorkstreamPayload>>;
+  setSubsystemDraft: Dispatch<SetStateAction<SubsystemPayload>>;
+  setSubsystemDraftRisks: (value: string) => void;
+  setTaskDraft: Dispatch<SetStateAction<TaskPayload>>;
+  showTimelineCreateToggleInTaskModal: boolean;
+  onSwitchTaskCreateToMilestone: () => void;
+  students: BootstrapPayload["members"];
+  subsystemDraft: SubsystemPayload;
+  subsystemDraftRisks: string;
+  subsystemModalMode: SubsystemModalMode;
+  taskDraft: TaskPayload;
+  taskModalMode: TaskModalMode;
+}
