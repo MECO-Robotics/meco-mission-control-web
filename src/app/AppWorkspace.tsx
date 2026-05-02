@@ -278,7 +278,7 @@ export default function AppWorkspace() {
   const [tabSwitchDirection, setTabSwitchDirection] = useState<"up" | "down">("down");
   const [taskView, setTaskView] = useState<TaskViewTab>("timeline");
   const [riskManagementView, setRiskManagementView] =
-    useState<RiskManagementViewTab>("risks");
+    useState<RiskManagementViewTab>("kanban");
   const [worklogsView, setWorklogsView] = useState<WorklogsViewTab>("logs");
   const [reportsView, setReportsView] = useState<ReportsViewTab>("qa");
   const [manufacturingView, setManufacturingView] =
@@ -3318,7 +3318,7 @@ export default function AppWorkspace() {
 
     setActiveTab("tasks");
     setTaskView("timeline");
-    setRiskManagementView("risks");
+    setRiskManagementView("kanban");
     setWorklogsView("logs");
     setReportsView("qa");
     setManufacturingView("cnc");

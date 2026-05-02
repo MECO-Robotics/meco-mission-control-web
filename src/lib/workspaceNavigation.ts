@@ -36,8 +36,8 @@ export const TASK_VIEW_ORDER: readonly TaskViewTab[] = [
   "milestones",
 ];
 export const RISK_MANAGEMENT_VIEW_ORDER: readonly RiskManagementViewTab[] = [
-  "risks",
   "kanban",
+  "risks",
   "metrics",
 ];
 export const WORKLOG_VIEW_ORDER: readonly WorklogsViewTab[] = [
@@ -63,8 +63,8 @@ export const TASK_VIEW_OPTIONS: readonly ViewOption<TaskViewTab>[] = [
 ];
 
 export const RISK_MANAGEMENT_VIEW_OPTIONS: readonly ViewOption<RiskManagementViewTab>[] = [
-  { value: "risks", label: "Risks" },
   { value: "kanban", label: "Kanban" },
+  { value: "risks", label: "Risks" },
   { value: "metrics", label: "Metrics" },
 ];
 
