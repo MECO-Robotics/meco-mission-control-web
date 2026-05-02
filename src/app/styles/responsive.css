@@ -277,6 +277,11 @@
     display: none;
   }
 
+  .task-details-dependency-blocker-grid {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+
   .table-pagination {
     justify-content: flex-start;
   }
