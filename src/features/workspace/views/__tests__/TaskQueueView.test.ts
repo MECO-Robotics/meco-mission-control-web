@@ -16,7 +16,7 @@ type Task = BootstrapPayload["tasks"][number];
 function createTask(index: number, overrides: Partial<Task> = {}): Task {
   const day = String(index).padStart(2, "0");
 
-  const task = {
+  const task: Task = {
     id: `task-${index}`,
     projectId: "project-1",
     workstreamId: null,
@@ -37,7 +37,8 @@ function createTask(index: number, overrides: Partial<Task> = {}): Task {
     mentorId: null,
     startDate: `2026-03-${day}`,
     dueDate: `2026-03-${day}`,
-    priority: index % 4 === 0 ? "critical" : index % 4 === 1 ? "low" : index % 4 === 2 ? "medium" : "high",
+    priority:
+      index % 4 === 0 ? "critical" : index % 4 === 1 ? "low" : index % 4 === 2 ? "medium" : "high",
     status:
       index === 1
         ? "not-started"

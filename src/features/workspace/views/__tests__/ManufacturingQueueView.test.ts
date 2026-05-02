@@ -96,13 +96,12 @@ describe("ManufacturingQueueView", () => {
       }),
     );
 
-    expect(cncMarkup).toContain("Source");
     expect(cncMarkup).toContain("Outsourced");
-    expect(cncMarkup).toContain("Approve");
-    expect(cncMarkup).toContain("Complete");
+    expect(cncMarkup).toContain("cnc-approve-job-button");
+    expect(cncMarkup).toContain("cnc-complete-job-button");
     expect(printMarkup).not.toContain("Source");
     expect(printMarkup).not.toContain("Outsourced");
-    expect(printMarkup).not.toContain("Approve");
-    expect(printMarkup).not.toContain("Complete");
+    expect(printMarkup).not.toContain("cnc-approve-job-button");
+    expect(printMarkup).not.toContain("cnc-complete-job-button");
   });
 });
