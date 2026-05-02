@@ -247,6 +247,7 @@ interface InteractiveTutorialReturnState {
   taskView: TaskViewTab;
   riskManagementView: RiskManagementViewTab;
   worklogsView: WorklogsViewTab;
+  reportsView: ReportsViewTab;
   manufacturingView: ManufacturingViewTab;
   inventoryView: InventoryViewTab;
   selectedSeasonId: string | null;
@@ -3136,6 +3137,7 @@ export default function AppWorkspace() {
       setTaskView(returnState.taskView);
       setRiskManagementView(returnState.riskManagementView);
       setWorklogsView(returnState.worklogsView);
+      setReportsView(returnState.reportsView);
       setManufacturingView(returnState.manufacturingView);
       setInventoryView(returnState.inventoryView);
       setSelectedSeasonId(returnState.selectedSeasonId);
@@ -3202,6 +3204,7 @@ export default function AppWorkspace() {
         taskView,
         riskManagementView,
         worklogsView,
+        reportsView,
         manufacturingView,
         inventoryView,
         selectedSeasonId,
@@ -3313,6 +3316,7 @@ export default function AppWorkspace() {
     setTaskView("timeline");
     setRiskManagementView("risks");
     setWorklogsView("logs");
+    setReportsView("qa");
     setManufacturingView("cnc");
     setInventoryView("materials");
     setIsInteractiveTutorialTargetReady(false);

@@ -78,6 +78,10 @@ export const RosterView: React.FC<RosterViewProps> = ({
         }
         return null;
     };
+    const sortedDisciplines = React.useMemo(
+        () => [...bootstrap.disciplines].sort((a, b) => a.name.localeCompare(b.name)),
+        [bootstrap.disciplines],
+    );
     const isElevatedRole = (role: MemberPayload["role"]) => role === "lead" || role === "admin";
     const getEmailPlaceholder = (role: MemberPayload["role"]) =>
         role === "external" ? "name@example.org" : "name@mecorobotics.org";
@@ -92,7 +96,7 @@ export const RosterView: React.FC<RosterViewProps> = ({
     }, [allMembers, selectedSeasonId]);
 
     const openAddPersonPanel = (role: MemberPayload["role"]) => {
-        setMemberForm({ name: "", email: "", photoUrl: "", role, elevated: isElevatedRole(role) });
+        setMemberForm({ name: "", email: "", photoUrl: "", role, elevated: isElevatedRole(role), disciplineId: null });
         setReactivateExistingMember(false);
         setReactivateMemberId("");
         setIsAddPersonOpen(true);
@@ -130,6 +134,10 @@ export const RosterView: React.FC<RosterViewProps> = ({
 
     const renderMemberRow = (member: MemberRecord) => {
         const roleBadge = getRoleBadge(member);
+        const disciplineName =
+            member.disciplineId
+                ? bootstrap.disciplines.find((discipline) => discipline.id === member.disciplineId)?.name ?? member.disciplineId
+                : null;
         const initials = member.name
             .split(/\s+/)
             .filter(Boolean)
@@ -149,6 +157,11 @@ export const RosterView: React.FC<RosterViewProps> = ({
                     <span className="member-row-copy">
                         <strong>{member.name}</strong>
                         {member.email ? <span className="member-row-email">{member.email}</span> : null}
+                        {disciplineName ? (
+                            <span className="member-row-email" title="Discipline">
+                                Discipline: {disciplineName}
+                            </span>
+                        ) : null}
                     </span>
                 </button>
                 <div className="member-row-trailing">
@@ -304,6 +317,23 @@ export const RosterView: React.FC<RosterViewProps> = ({
                                         <input onChange={(e) => setMemberForm((curr) => ({ ...curr, email: e.target.value }))} placeholder={getEmailPlaceholder(memberForm.role)} type="email" value={memberForm.email} />
                                     </label>
                                     <label className="field">
+                                        <span>Discipline</span>
+                                        <select
+                                            onChange={(event) => {
+                                                const nextValue = event.target.value;
+                                                setMemberForm((curr) => ({ ...curr, disciplineId: nextValue ? nextValue : null }));
+                                            }}
+                                            value={memberForm.disciplineId ?? ""}
+                                        >
+                                            <option value="">None</option>
+                                            {sortedDisciplines.map((discipline) => (
+                                                <option key={discipline.id} value={discipline.id}>
+                                                    {discipline.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </label>
+                                    <label className="field">
                                         <span>Role</span>
                                         <select onChange={(e) => {
                                             const nextRole = e.target.value as MemberPayload["role"];
@@ -366,6 +396,23 @@ export const RosterView: React.FC<RosterViewProps> = ({
                             <label className="field">
                                 <span>Email</span>
                                 <input onChange={(e) => setMemberEditDraft(curr => curr ? { ...curr, email: e.target.value } : null)} placeholder={getEmailPlaceholder(memberEditDraft.role)} type="email" value={memberEditDraft.email} />
+                            </label>
+                            <label className="field">
+                                <span>Discipline</span>
+                                <select
+                                    onChange={(event) => {
+                                        const nextValue = event.target.value;
+                                        setMemberEditDraft((curr) => (curr ? { ...curr, disciplineId: nextValue ? nextValue : null } : null));
+                                    }}
+                                    value={memberEditDraft.disciplineId ?? ""}
+                                >
+                                    <option value="">None</option>
+                                    {sortedDisciplines.map((discipline) => (
+                                        <option key={discipline.id} value={discipline.id}>
+                                            {discipline.name}
+                                        </option>
+                                    ))}
+                                </select>
                             </label>
                             <label className="field">
                                 <span>Role</span>
