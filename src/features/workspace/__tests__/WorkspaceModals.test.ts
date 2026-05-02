@@ -187,6 +187,7 @@ function renderIterationEditors(mode: "create" | "edit") {
           partNumber: "BB-001",
           revision: "A",
           iteration: 1,
+          isHardware: false,
           type: "custom",
           source: "Onshape",
           materialId: null,

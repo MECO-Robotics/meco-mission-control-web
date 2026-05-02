@@ -656,6 +656,24 @@ export function PartDefinitionEditorModal({
             <span style={{ color: "var(--text-title)" }}>Source</span>
             <input onChange={(event) => setPartDefinitionDraft((current) => ({ ...current, source: event.target.value }))} style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }} value={partDefinitionDraft.source} />
           </label>
+          <label className="field">
+            <span style={{ color: "var(--text-title)" }}>Part type</span>
+            <div>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", color: "var(--text-title)" }}>
+                <input
+                  checked={partDefinitionDraft.isHardware}
+                  onChange={(event) =>
+                    setPartDefinitionDraft((current) => ({
+                      ...current,
+                      isHardware: event.target.checked,
+                    }))
+                  }
+                  type="checkbox"
+                />
+                Hardware part
+              </span>
+            </div>
+          </label>
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Default material</span>
             <select onChange={(event) => setPartDefinitionDraft((current) => ({ ...current, materialId: event.target.value || null }))} style={{ background: "var(--bg-row-alt)", color: "var(--text-title)", border: "1px solid var(--border-base)" }} value={partDefinitionDraft.materialId ?? ""}>

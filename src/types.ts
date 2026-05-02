@@ -170,6 +170,7 @@ export interface PartDefinitionRecord {
   revision: string;
   iteration: number;
   isArchived?: boolean;
+  isHardware?: boolean;
   type: string;
   source: string;
   materialId: string | null;
@@ -643,6 +644,7 @@ export interface PartDefinitionPayload {
   revision: string;
   iteration: number;
   isArchived?: boolean;
+  isHardware: boolean;
   type: string;
   source: string;
   materialId: string | null;
