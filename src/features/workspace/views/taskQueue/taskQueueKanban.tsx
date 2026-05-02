@@ -13,12 +13,13 @@ import {
   filterSelectionIntersects,
   filterSelectionMatchesTaskPeople,
 } from "@/features/workspace/shared";
+import { resolveWorkspaceColor } from "@/features/workspace/shared/workspaceColors";
 import {
   getTaskOpenBlockersForTask,
   getTaskWaitingOnTasks,
 } from "@/features/workspace/shared/taskPlanning";
 
-export type TaskQueueBoardState = TaskStatus | "blocked";
+export type TaskQueueBoardState = TaskStatus | "blocked" | "waiting-on-dependency";
 export const TASK_QUEUE_LAZY_LOAD_BATCH_SIZE = 15;
 
 export interface TaskQueueBoardColumn {
@@ -30,6 +31,7 @@ export const TASK_QUEUE_BOARD_COLUMNS: readonly TaskQueueBoardColumn[] = [
   { state: "not-started", label: "Not started" },
   { state: "in-progress", label: "In progress" },
   { state: "blocked", label: "Blocked" },
+  { state: "waiting-on-dependency", label: "Waiting on dependency" },
   { state: "waiting-for-qa", label: "QA" },
   { state: "complete", label: "Complete" },
 ] as const;
@@ -60,14 +62,24 @@ export const TASK_QUEUE_STATUS_OPTIONS: DropdownOption[] = [
       status: "not-started" as TaskStatus,
     }),
   },
+  {
+    id: "waiting-on-dependency",
+    name: "Waiting on dependency",
+    icon: React.createElement(TimelineTaskStatusLogo, {
+      compact: true,
+      signal: "waiting-on-dependency",
+      status: "not-started" as TaskStatus,
+    }),
+  },
 ] as const;
 
 const BOARD_STATE_SORT_VALUES: Record<TaskQueueBoardState, number> = {
   "not-started": 1,
   "in-progress": 2,
   blocked: 3,
-  "waiting-for-qa": 4,
-  complete: 5,
+  "waiting-on-dependency": 4,
+  "waiting-for-qa": 5,
+  complete: 6,
 };
 
 export function getTaskQueueBoardState(
@@ -78,8 +90,8 @@ export function getTaskQueueBoardState(
     return "blocked";
   }
 
-  if (getTaskWaitingOnTasks(task.id, bootstrap).length > 0) {
-    return "blocked";
+  if (task.isWaitingOnDependency || getTaskWaitingOnTasks(task.id, bootstrap).length > 0) {
+    return "waiting-on-dependency";
   }
 
   if (task.status === "complete") {
@@ -97,6 +109,8 @@ export function formatTaskQueueBoardState(state: TaskQueueBoardState) {
       return "In progress";
     case "blocked":
       return "Blocked";
+    case "waiting-on-dependency":
+      return "Waiting on dependency";
     case "waiting-for-qa":
       return "QA";
     case "complete":
@@ -114,6 +128,7 @@ export function groupTasksByBoardState(
     "not-started": [],
     "in-progress": [],
     blocked: [],
+    "waiting-on-dependency": [],
     "waiting-for-qa": [],
     complete: [],
   };
@@ -207,6 +222,24 @@ export function formatWorkstreamNames(
   return formatNames(workstreamIds, lookup, fallback);
 }
 
+const FILTER_TONE_CLASSES = [
+  "filter-tone-info",
+  "filter-tone-success",
+  "filter-tone-warning",
+  "filter-tone-danger",
+  "filter-tone-neutral",
+] as const;
+
+function getStableToneClassName(value: string) {
+  let hash = 0;
+
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
+  }
+
+  return FILTER_TONE_CLASSES[hash % FILTER_TONE_CLASSES.length];
+}
+
 export function getTaskCardPerson(
   task: TaskRecord,
   membersById: Record<string, BootstrapPayload["members"][number]>,
@@ -217,6 +250,49 @@ export function getTaskCardPerson(
 
 export function getMemberInitial(member: { name: string }) {
   return member.name.trim().slice(0, 1).toUpperCase() || "?";
+}
+
+export function getTaskQueueCardContextToneClassName(
+  task: TaskRecord,
+  projectType: BootstrapPayload["projects"][number]["projectType"] | undefined,
+) {
+  const toneSourceId =
+    projectType === "robot" ? readTaskSubsystemIds(task)[0] : readTaskWorkstreamIds(task)[0];
+
+  return toneSourceId ? getStableToneClassName(toneSourceId) : "filter-tone-neutral";
+}
+
+function getTaskQueueCardContextSource(
+  task: TaskRecord,
+  projectType: BootstrapPayload["projects"][number]["projectType"] | undefined,
+  subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>,
+  workstreamsById: Record<string, BootstrapPayload["workstreams"][number]>,
+) {
+  if (projectType === "robot") {
+    const subsystemId = readTaskSubsystemIds(task)[0];
+    return subsystemId ? subsystemsById[subsystemId] ?? null : null;
+  }
+
+  const workstreamId = readTaskWorkstreamIds(task)[0];
+  return workstreamId ? workstreamsById[workstreamId] ?? null : null;
+}
+
+export function getTaskQueueCardContextAccentColor(
+  task: TaskRecord,
+  projectType: BootstrapPayload["projects"][number]["projectType"] | undefined,
+  subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>,
+  workstreamsById: Record<string, BootstrapPayload["workstreams"][number]>,
+) {
+  const contextSource = getTaskQueueCardContextSource(
+    task,
+    projectType,
+    subsystemsById,
+    workstreamsById,
+  );
+
+  return contextSource
+    ? resolveWorkspaceColor(contextSource.color ?? null, contextSource.id)
+    : resolveWorkspaceColor(null, task.id);
 }
 
 function getTaskPriorityLabel(priority: TaskRecord["priority"]) {

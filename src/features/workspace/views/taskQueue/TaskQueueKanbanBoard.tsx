@@ -7,6 +7,7 @@ import { EditableHoverIndicator, getStatusPillClassName } from "@/features/works
 import {
   TASK_QUEUE_BOARD_COLUMNS,
   formatTaskQueueBoardState,
+  getTaskQueueCardContextAccentColor,
   getTaskQueueBoardState,
   getMemberInitial,
   getTaskCardPerson,
@@ -34,6 +35,10 @@ const TASK_QUEUE_BOARD_STATE_LOGO_SPECS: Record<
   },
   blocked: {
     signal: "blocked",
+    status: "not-started",
+  },
+  "waiting-on-dependency": {
+    signal: "waiting-on-dependency",
     status: "not-started",
   },
   "waiting-for-qa": {
@@ -270,6 +275,17 @@ function TaskQueueCard({
     subsystemsById,
     workstreamsById,
   );
+  const taskContextAccentColor = getTaskQueueCardContextAccentColor(
+    task,
+    isNonRobotProject ? "operations" : "robot",
+    subsystemsById,
+    workstreamsById,
+  );
+  const taskContextStyle = {
+    "--task-queue-board-card-context-accent": taskContextAccentColor,
+    "--task-queue-board-card-context-bg": `color-mix(in srgb, ${taskContextAccentColor} 24%, transparent)`,
+    "--task-queue-board-card-context-border": `color-mix(in srgb, ${taskContextAccentColor} 54%, transparent)`,
+  } as CSSProperties;
 
   return (
     <button
@@ -296,7 +312,7 @@ function TaskQueueCard({
         {showProjectOnCards ? (
           <span>{projectsById[task.projectId]?.name ?? "Unknown project"}</span>
         ) : showProjectContextOnCards ? (
-          <span className="task-queue-board-card-context-chip" title={taskContextLabel}>
+          <span className="task-queue-board-card-context-chip" style={taskContextStyle} title={taskContextLabel}>
             {taskContextLabel}
           </span>
         ) : null}

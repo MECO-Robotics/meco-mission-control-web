@@ -8,12 +8,13 @@ describe("getStatusPillClassName", () => {
     expect(getStatusPillClassName("available")).toBe("pill status-pill status-pill-success");
   });
 
-  it("maps in-progress statuses to the info class", () => {
-    expect(getStatusPillClassName("in-progress")).toBe("pill status-pill status-pill-info");
+  it("maps review and progress info statuses to the info class", () => {
+    expect(getStatusPillClassName("waiting-for-qa")).toBe("pill status-pill status-pill-info");
     expect(getStatusPillClassName("purchased")).toBe("pill status-pill status-pill-info");
   });
 
   it("maps waiting and priority warning statuses to the warning class", () => {
+    expect(getStatusPillClassName("in-progress")).toBe("pill status-pill status-pill-warning");
     expect(getStatusPillClassName("requested")).toBe("pill status-pill status-pill-warning");
     expect(getStatusPillClassName("high")).toBe("pill status-pill status-pill-warning");
   });

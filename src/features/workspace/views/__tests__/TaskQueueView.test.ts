@@ -193,6 +193,36 @@ describe("TaskQueueView", () => {
     ).toBe("Operations");
   });
 
+  it("color-codes the kanban card context chip", () => {
+    const bootstrap = createBootstrap();
+    const markup = renderToStaticMarkup(
+      React.createElement(TaskQueueKanbanBoard, {
+        bootstrap,
+        disciplinesById: { "discipline-1": bootstrap.disciplines[0] },
+        focusedState: null,
+        isNonRobotProject: false,
+        membersById: {
+          "member-1": bootstrap.members[0],
+          "member-2": bootstrap.members[1],
+        },
+        onClearFocus: jest.fn(),
+        onFocusState: jest.fn(),
+        openEditTaskModal: jest.fn(),
+        projectsById: { "project-1": bootstrap.projects[0] },
+        showProjectContextOnCards: true,
+        showProjectOnCards: false,
+        subsystemsById: { "subsystem-1": bootstrap.subsystems[0] },
+        tasks: [createTask(1)],
+        workstreamsById: {},
+      }),
+    );
+
+    expect(markup).toContain("task-queue-board-card-context-chip");
+    expect(markup).toContain("--task-queue-board-card-context-accent:#224466");
+    expect(markup).toContain("color-mix(in srgb, #224466 24%, transparent)");
+    expect(markup).toContain("Drive (v1)");
+  });
+
   it("renders the first lazy-load batch and groups blocked tasks into the blocked column", () => {
     const bootstrap = createBootstrap();
     const markup = renderToStaticMarkup(
@@ -222,6 +252,7 @@ describe("TaskQueueView", () => {
     expect(markup).toContain("timeline-task-status-logo-signal-waiting-for-qa");
     expect(markup).toContain("timeline-task-status-logo-signal-complete");
     expect(markup).toContain("timeline-task-status-logo-signal-blocked");
+    expect(markup).toContain("timeline-task-status-logo-signal-waiting-on-dependency");
     expect(markup).toContain("status-pill-danger");
     expect(markup).toContain("status-pill-info");
     expect(markup).toContain("status-pill-warning");
@@ -242,7 +273,9 @@ describe("TaskQueueView", () => {
     expect(markup).toContain("profile-avatar-fallback");
     expect(markup).toContain(">Q<");
     expect(markup).toContain('data-board-state="blocked"');
-    expect(markup.match(/data-board-state="blocked"/g)).toHaveLength(2);
+    expect(markup.match(/data-board-state="blocked"/g)).toHaveLength(1);
+    expect(markup).toContain('data-board-state="waiting-on-dependency"');
+    expect(markup.match(/data-board-state="waiting-on-dependency"/g)).toHaveLength(1);
     expect(markup.match(/data-board-state=/g)).toHaveLength(TASK_QUEUE_LAZY_LOAD_BATCH_SIZE);
     expect(markup).not.toContain("Task 16");
   });
