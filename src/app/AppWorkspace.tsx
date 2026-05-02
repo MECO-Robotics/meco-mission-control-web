@@ -1753,7 +1753,6 @@ export default function AppWorkspace() {
 
     try {
       const { taskDependencies = [], taskBlockers = [], ...taskDraftWithoutDependencies } = taskDraft;
-      const currentTaskId = taskModalMode === "edit" ? activeTaskId : null;
       type NormalizedTaskBlocker = {
         id: string | undefined;
         blockedTaskId: string;
@@ -1820,16 +1819,15 @@ export default function AppWorkspace() {
           taskDependencies
             .map((dependency) => ({
               id: dependency.id,
-              upstreamTaskId: dependency.upstreamTaskId.trim(),
+              kind: dependency.kind,
+              refId: dependency.refId.trim(),
+              requiredState: dependency.requiredState?.trim() || undefined,
               dependencyType: dependency.dependencyType,
             }))
-            .filter(
-              (dependency) =>
-                dependency.upstreamTaskId.length > 0 &&
-                dependency.upstreamTaskId !== currentTaskId,
-            )
+            .filter((dependency) => dependency.refId.length > 0)
             .map((dependency) => [
-              `${dependency.upstreamTaskId}:${dependency.dependencyType}`,
+              dependency.id ??
+                `${dependency.kind}:${dependency.refId}:${dependency.dependencyType}:${dependency.requiredState ?? ""}`,
               dependency,
             ]),
         ).values(),
@@ -1837,12 +1835,10 @@ export default function AppWorkspace() {
 
       const syncTaskDependencies = async (taskId: string) => {
         const existingDependencies =
-          bootstrap.taskDependencies?.filter(
-            (dependency) => dependency.downstreamTaskId === taskId,
-          ) ?? [];
+          bootstrap.taskDependencies?.filter((dependency) => dependency.taskId === taskId) ?? [];
         const visibleDependencyIds = new Set(
           (scopedBootstrap.taskDependencies ?? [])
-            .filter((dependency) => dependency.downstreamTaskId === taskId)
+            .filter((dependency) => dependency.taskId === taskId)
             .map((dependency) => dependency.id),
         );
         const existingDependenciesById = new Map(
@@ -1859,14 +1855,18 @@ export default function AppWorkspace() {
             const existingDependency = existingDependenciesById.get(dependency.id);
             if (
               existingDependency &&
-              (existingDependency.upstreamTaskId !== dependency.upstreamTaskId ||
+              (existingDependency.kind !== dependency.kind ||
+                existingDependency.refId !== dependency.refId ||
+                existingDependency.requiredState !== dependency.requiredState ||
                 existingDependency.dependencyType !== dependency.dependencyType)
             ) {
               await updateTaskDependencyRecord(
                 dependency.id,
                 {
-                  upstreamTaskId: dependency.upstreamTaskId,
-                  downstreamTaskId: taskId,
+                  taskId,
+                  kind: dependency.kind,
+                  refId: dependency.refId,
+                  requiredState: dependency.requiredState,
                   dependencyType: dependency.dependencyType,
                 },
                 handleUnauthorized,
@@ -1877,8 +1877,10 @@ export default function AppWorkspace() {
 
           await createTaskDependencyRecord(
             {
-              upstreamTaskId: dependency.upstreamTaskId,
-              downstreamTaskId: taskId,
+              taskId,
+              kind: dependency.kind,
+              refId: dependency.refId,
+              requiredState: dependency.requiredState,
               dependencyType: dependency.dependencyType,
             },
             handleUnauthorized,

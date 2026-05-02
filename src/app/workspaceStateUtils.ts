@@ -59,6 +59,7 @@ export function scopeBootstrapBySelection(
   });
   const scopedWorkstreamIds = new Set(scopedWorkstreams.map((workstream) => workstream.id));
   const scopedEventIds = new Set(scopedEvents.map((event) => event.id));
+  const scopedPartInstanceIds = new Set(scopedPartInstances.map((partInstance) => partInstance.id));
   const scopedTasks = payload.tasks.filter(
     (task) =>
       activeProjectIds.has(task.projectId) &&
@@ -72,12 +73,25 @@ export function scopeBootstrapBySelection(
       scopedTaskIds.has(dependencyId),
     ),
   }));
-  const scopedTaskDependencies = (payload.taskDependencies ?? []).filter(
-    (dependency) =>
-      scopedTaskIds.has(dependency.upstreamTaskId) &&
-      scopedTaskIds.has(dependency.downstreamTaskId),
-  );
-  const scopedPartInstanceIds = new Set(scopedPartInstances.map((partInstance) => partInstance.id));
+  const scopedTaskDependencies = (payload.taskDependencies ?? []).filter((dependency) => {
+    if (!scopedTaskIds.has(dependency.taskId)) {
+      return false;
+    }
+
+    if (dependency.kind === "task") {
+      return scopedTaskIds.has(dependency.refId);
+    }
+
+    if (dependency.kind === "milestone" || dependency.kind === "event") {
+      return scopedEventIds.has(dependency.refId);
+    }
+
+    if (dependency.kind === "part_instance") {
+      return scopedPartInstanceIds.has(dependency.refId);
+    }
+
+    return false;
+  });
   const scopedTaskBlockers = (payload.taskBlockers ?? []).filter((blocker) => {
     if (!scopedTaskIds.has(blocker.blockedTaskId)) {
       return false;

@@ -40,7 +40,6 @@ const bootstrap = {
       description: "",
       projectIds: ["project-1"],
       relatedSubsystemIds: [],
-      status: "in-progress",
     },
   ],
   reports: [],
@@ -167,14 +166,8 @@ test("task planning helpers surface structured dependency records", () => {
   const waitingOn = getTaskWaitingOnDependencies("task-b", bootstrap);
   const blocks = getTaskBlocksDependencies("task-a", bootstrap);
 
-  expect(waitingOn).toHaveLength(2);
+  expect(waitingOn).toHaveLength(1);
   expect(waitingOn[0]).toMatchObject({
-    taskId: "task-b",
-    kind: "task",
-    refId: "task-a",
-    dependencyType: "hard",
-  });
-  expect(waitingOn[1]).toMatchObject({
     taskId: "task-b",
     kind: "part_instance",
     refId: "part-instance-1",

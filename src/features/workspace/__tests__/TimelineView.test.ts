@@ -196,9 +196,10 @@ function createBootstrapWithDependency(): BootstrapPayload {
     taskDependencies: [
       {
         id: "dep-1",
-        upstreamTaskId: "task-1",
-        downstreamTaskId: "task-2",
-        dependencyType: "finish_to_start",
+        taskId: "task-2",
+        kind: "task",
+        refId: "task-1",
+        dependencyType: "hard",
         createdAt: "2026-04-01T00:00:00.000Z",
       },
     ],

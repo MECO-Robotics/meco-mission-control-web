@@ -1,6 +1,7 @@
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 import type {
   BootstrapPayload,
+  TaskDependencyKind,
   TaskDependencyType,
   TaskPayload,
   TaskRecord,
@@ -173,15 +174,56 @@ export function TaskEditorModal({
   const dependencyTaskOptions = [...bootstrap.tasks]
     .filter((task) => task.projectId === taskDraft.projectId && task.id !== currentTaskId)
     .sort((left, right) => left.title.localeCompare(right.title));
+  const dependencyEventOptions = bootstrap.events
+    .filter((event) =>
+      event.projectIds.length === 0 ? true : event.projectIds.includes(taskDraft.projectId),
+    )
+    .sort((left, right) => left.title.localeCompare(right.title));
+  const dependencyPartInstanceOptions = projectPartInstances;
   const dependencyDrafts = taskDraft.taskDependencies ?? [];
   const visibleDependencyDrafts =
     dependencyDrafts.length > 0
       ? dependencyDrafts
-      : [{ upstreamTaskId: "", dependencyType: "finish_to_start" as TaskDependencyType }];
+      : [
+          {
+            kind: "task" as TaskDependencyKind,
+            refId: "",
+            requiredState: "complete",
+            dependencyType: "hard" as TaskDependencyType,
+          },
+        ];
+  const dependencyKindLabels: Record<TaskDependencyKind, string> = {
+    task: "Task",
+    milestone: "Milestone",
+    part_instance: "Part instance",
+    event: "Event",
+  };
   const dependencyTypeLabels: Record<TaskDependencyType, string> = {
-    blocks: "Blocks",
+    hard: "Hard",
     soft: "Soft",
-    finish_to_start: "Finish to start",
+  };
+  const getDependencyDefaultState = (kind: TaskDependencyKind) =>
+    kind === "part_instance" ? "available" : "complete";
+  const getDependencyTargetOptions = (kind: TaskDependencyKind) => {
+    if (kind === "task") {
+      return dependencyTaskOptions.map((task) => ({ id: task.id, name: task.title }));
+    }
+
+    if (kind === "milestone" || kind === "event") {
+      return dependencyEventOptions.map((event) => ({ id: event.id, name: event.title }));
+    }
+
+    return dependencyPartInstanceOptions.map((partInstance) => {
+      const partDefinition = partDefinitionsById[partInstance.partDefinitionId];
+      const label = partDefinition
+        ? `${partInstance.name} (${partDefinition.name} (${formatIterationVersion(partDefinition.iteration)}))`
+        : partInstance.name;
+
+      return {
+        id: partInstance.id,
+        name: label,
+      };
+    });
   };
   const updatePrimaryTarget = (subsystemId: string) => {
     setTaskDraft((current) => setTaskPrimaryTargetSelection(current, bootstrap, subsystemId));
@@ -235,12 +277,18 @@ export function TaskEditorModal({
       const nextDependencyDrafts = [...(current.taskDependencies ?? [])];
       const existingDraft =
         nextDependencyDrafts[index] ?? {
-          upstreamTaskId: "",
-          dependencyType: "finish_to_start" as TaskDependencyType,
+          kind: "task" as TaskDependencyKind,
+          refId: "",
+          requiredState: "complete",
+          dependencyType: "hard" as TaskDependencyType,
         };
 
       nextDependencyDrafts[index] = {
         ...existingDraft,
+        requiredState:
+          updates.kind !== undefined && updates.kind !== existingDraft.kind
+            ? getDependencyDefaultState(updates.kind)
+            : updates.requiredState ?? existingDraft.requiredState,
         ...updates,
       };
 
@@ -256,8 +304,10 @@ export function TaskEditorModal({
       taskDependencies: [
         ...(current.taskDependencies ?? []),
         {
-          upstreamTaskId: "",
-          dependencyType: "finish_to_start" as TaskDependencyType,
+          kind: "task" as TaskDependencyKind,
+          refId: "",
+          requiredState: "complete",
+          dependencyType: "hard" as TaskDependencyType,
         },
       ],
     }));
@@ -270,6 +320,136 @@ export function TaskEditorModal({
       ),
     }));
   };
+  const renderDependencyEditor = () => (
+    <div className="field modal-wide">
+      <span style={{ color: "var(--text-title)" }}>Dependencies</span>
+      <p style={{ margin: "0.25rem 0 0", color: "var(--text-copy)" }}>
+        Structured prerequisites. Hard dependencies gate waiting state; soft dependencies are advisory.
+      </p>
+      <div style={{ display: "grid", gap: "0.75rem", marginTop: "0.75rem" }}>
+        {visibleDependencyDrafts.map((dependency, index) => {
+          const targetOptions = getDependencyTargetOptions(dependency.kind);
+
+          return (
+            <div
+              key={dependency.id ?? `dependency-${index}`}
+              style={{
+                display: "grid",
+                gap: "0.75rem",
+                padding: "0.75rem",
+                border: "1px solid var(--border-base)",
+                borderRadius: "12px",
+                background: "var(--bg-row-alt)",
+              }}
+            >
+              <label className="field">
+                <span style={{ color: "var(--text-title)" }}>Dependency kind</span>
+                <select
+                  onChange={(event) =>
+                    updateDependencyDraft(index, {
+                      kind: event.target.value as TaskDependencyKind,
+                      refId: "",
+                    })
+                  }
+                  style={{
+                    background: "var(--bg-panel)",
+                    color: "var(--text-title)",
+                    border: "1px solid var(--border-base)",
+                  }}
+                  value={dependency.kind}
+                >
+                  {Object.entries(dependencyKindLabels).map(([kind, label]) => (
+                    <option key={kind} value={kind}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span style={{ color: "var(--text-title)" }}>Depends on</span>
+                <select
+                  onChange={(event) =>
+                    updateDependencyDraft(index, {
+                      refId: event.target.value,
+                    })
+                  }
+                  style={{
+                    background: "var(--bg-panel)",
+                    color: "var(--text-title)",
+                    border: "1px solid var(--border-base)",
+                  }}
+                  value={dependency.refId}
+                >
+                  <option value="">Select {dependencyKindLabels[dependency.kind].toLowerCase()}</option>
+                  {targetOptions.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span style={{ color: "var(--text-title)" }}>Required state</span>
+                <input
+                  onChange={(event) =>
+                    updateDependencyDraft(index, {
+                      requiredState: event.target.value,
+                    })
+                  }
+                  placeholder={getDependencyDefaultState(dependency.kind)}
+                  style={{
+                    background: "var(--bg-panel)",
+                    color: "var(--text-title)",
+                    border: "1px solid var(--border-base)",
+                  }}
+                  value={dependency.requiredState ?? ""}
+                />
+              </label>
+              <label className="field">
+                <span style={{ color: "var(--text-title)" }}>Dependency type</span>
+                <select
+                  onChange={(event) =>
+                    updateDependencyDraft(index, {
+                      dependencyType: event.target.value as TaskDependencyType,
+                    })
+                  }
+                  style={{
+                    background: "var(--bg-panel)",
+                    color: "var(--text-title)",
+                    border: "1px solid var(--border-base)",
+                  }}
+                  value={dependency.dependencyType}
+                >
+                  {Object.entries(dependencyTypeLabels).map(([type, label]) => (
+                    <option key={type} value={type}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {dependencyDrafts.length > 0 ? (
+                <button
+                  className="secondary-action"
+                  onClick={() => removeDependencyDraft(index)}
+                  type="button"
+                >
+                  Remove dependency
+                </button>
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
+      <button
+        className="secondary-action"
+        onClick={addDependencyDraft}
+        style={{ marginTop: "0.75rem" }}
+        type="button"
+      >
+        Add dependency
+      </button>
+    </div>
+  );
   const isCreateTaskModal = taskModalMode === "create";
   const isEditTaskModal = taskModalMode === "edit";
 
@@ -568,9 +748,30 @@ export function TaskEditorModal({
                           mechanismIds: [],
                           partInstanceId: null,
                           partInstanceIds: [],
-                          taskDependencies: (current.taskDependencies ?? []).filter((dependency) =>
-                            validDependencyTaskIds.has(dependency.upstreamTaskId),
-                          ),
+                        taskDependencies: (current.taskDependencies ?? []).filter((dependency) =>
+                          dependency.kind === "task"
+                            ? validDependencyTaskIds.has(dependency.refId)
+                            : dependency.kind === "milestone" || dependency.kind === "event"
+                              ? bootstrap.events.some(
+                                  (event) =>
+                                    (event.projectIds.length === 0 ||
+                                      event.projectIds.includes(projectId)) &&
+                                    event.id === dependency.refId,
+                                )
+                              : dependency.kind === "part_instance"
+                                ? bootstrap.partInstances.some((partInstance) => {
+                                    if (partInstance.id !== dependency.refId) {
+                                      return false;
+                                    }
+
+                                    return bootstrap.subsystems.some(
+                                      (subsystem) =>
+                                        subsystem.id === partInstance.subsystemId &&
+                                        subsystem.projectId === projectId,
+                                    );
+                                  })
+                                : false,
+                        ),
                         };
                       })
                     }
@@ -706,90 +907,7 @@ export function TaskEditorModal({
                     </div>
                   </div>
                 </div>
-                <div className="field modal-wide">
-                  <span style={{ color: "var(--text-title)" }}>Dependencies</span>
-                  <p style={{ margin: "0.25rem 0 0", color: "var(--text-copy)" }}>
-                    Planned sequencing between tasks. Use blocking dependencies for normal order.
-                  </p>
-                  <div style={{ display: "grid", gap: "0.75rem", marginTop: "0.75rem" }}>
-                    {visibleDependencyDrafts.map((dependency, index) => (
-                      <div
-                        key={dependency.id ?? `dependency-${index}`}
-                        style={{
-                          display: "grid",
-                          gap: "0.75rem",
-                          padding: "0.75rem",
-                          border: "1px solid var(--border-base)",
-                          borderRadius: "12px",
-                          background: "var(--bg-row-alt)",
-                        }}
-                      >
-                        <label className="field">
-                          <span style={{ color: "var(--text-title)" }}>Depends on</span>
-                          <select
-                            onChange={(event) =>
-                              updateDependencyDraft(index, {
-                                upstreamTaskId: event.target.value,
-                              })
-                            }
-                            style={{
-                              background: "var(--bg-panel)",
-                              color: "var(--text-title)",
-                              border: "1px solid var(--border-base)",
-                            }}
-                            value={dependency.upstreamTaskId}
-                          >
-                            <option value="">Select task</option>
-                            {dependencyTaskOptions.map((task) => (
-                              <option key={task.id} value={task.id}>
-                                {task.title}
-                              </option>
-                            ))}
-                          </select>
-                        </label>
-                        <label className="field">
-                          <span style={{ color: "var(--text-title)" }}>Dependency type</span>
-                          <select
-                            onChange={(event) =>
-                              updateDependencyDraft(index, {
-                                dependencyType: event.target.value as TaskDependencyType,
-                              })
-                            }
-                            style={{
-                              background: "var(--bg-panel)",
-                              color: "var(--text-title)",
-                              border: "1px solid var(--border-base)",
-                            }}
-                            value={dependency.dependencyType}
-                          >
-                            {Object.entries(dependencyTypeLabels).map(([type, label]) => (
-                              <option key={type} value={type}>
-                                {label}
-                              </option>
-                            ))}
-                          </select>
-                        </label>
-                        {dependencyDrafts.length > 0 ? (
-                          <button
-                            className="secondary-action"
-                            onClick={() => removeDependencyDraft(index)}
-                            type="button"
-                          >
-                            Remove dependency
-                          </button>
-                        ) : null}
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    className="secondary-action"
-                    onClick={addDependencyDraft}
-                    style={{ marginTop: "0.75rem" }}
-                    type="button"
-                  >
-                    Add dependency
-                  </button>
-                </div>
+              {renderDependencyEditor()}
                 <label className="field">
                   <span style={{ color: "var(--text-title)" }}>Target event</span>
                   <select
@@ -980,7 +1098,28 @@ export function TaskEditorModal({
                         partInstanceId: null,
                         partInstanceIds: [],
                         taskDependencies: (current.taskDependencies ?? []).filter((dependency) =>
-                          validDependencyTaskIds.has(dependency.upstreamTaskId),
+                          dependency.kind === "task"
+                            ? validDependencyTaskIds.has(dependency.refId)
+                            : dependency.kind === "milestone" || dependency.kind === "event"
+                              ? bootstrap.events.some(
+                                  (event) =>
+                                    (event.projectIds.length === 0 ||
+                                      event.projectIds.includes(projectId)) &&
+                                    event.id === dependency.refId,
+                                )
+                              : dependency.kind === "part_instance"
+                                ? bootstrap.partInstances.some((partInstance) => {
+                                    if (partInstance.id !== dependency.refId) {
+                                      return false;
+                                    }
+
+                                    return bootstrap.subsystems.some(
+                                      (subsystem) =>
+                                        subsystem.id === partInstance.subsystemId &&
+                                        subsystem.projectId === projectId,
+                                    );
+                                  })
+                                : false,
                         ),
                       };
                     })
@@ -1117,90 +1256,7 @@ export function TaskEditorModal({
                   </div>
                 </div>
               </div>
-              <div className="field modal-wide">
-                <span style={{ color: "var(--text-title)" }}>Dependencies</span>
-                <p style={{ margin: "0.25rem 0 0", color: "var(--text-copy)" }}>
-                  Planned sequencing between tasks. Use blocking dependencies for normal order.
-                </p>
-                <div style={{ display: "grid", gap: "0.75rem", marginTop: "0.75rem" }}>
-                  {visibleDependencyDrafts.map((dependency, index) => (
-                    <div
-                      key={dependency.id ?? `dependency-${index}`}
-                      style={{
-                        display: "grid",
-                        gap: "0.75rem",
-                        padding: "0.75rem",
-                        border: "1px solid var(--border-base)",
-                        borderRadius: "12px",
-                        background: "var(--bg-row-alt)",
-                      }}
-                    >
-                      <label className="field">
-                        <span style={{ color: "var(--text-title)" }}>Depends on</span>
-                        <select
-                          onChange={(event) =>
-                            updateDependencyDraft(index, {
-                              upstreamTaskId: event.target.value,
-                            })
-                          }
-                          style={{
-                            background: "var(--bg-panel)",
-                            color: "var(--text-title)",
-                            border: "1px solid var(--border-base)",
-                          }}
-                          value={dependency.upstreamTaskId}
-                        >
-                          <option value="">Select task</option>
-                          {dependencyTaskOptions.map((task) => (
-                            <option key={task.id} value={task.id}>
-                              {task.title}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                      <label className="field">
-                        <span style={{ color: "var(--text-title)" }}>Dependency type</span>
-                        <select
-                          onChange={(event) =>
-                            updateDependencyDraft(index, {
-                              dependencyType: event.target.value as TaskDependencyType,
-                            })
-                          }
-                          style={{
-                            background: "var(--bg-panel)",
-                            color: "var(--text-title)",
-                            border: "1px solid var(--border-base)",
-                          }}
-                          value={dependency.dependencyType}
-                        >
-                          {Object.entries(dependencyTypeLabels).map(([type, label]) => (
-                            <option key={type} value={type}>
-                              {label}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                      {dependencyDrafts.length > 0 ? (
-                        <button
-                          className="secondary-action"
-                          onClick={() => removeDependencyDraft(index)}
-                          type="button"
-                        >
-                          Remove dependency
-                        </button>
-                      ) : null}
-                    </div>
-                  ))}
-                </div>
-                <button
-                  className="secondary-action"
-                  onClick={addDependencyDraft}
-                  style={{ marginTop: "0.75rem" }}
-                  type="button"
-                >
-                  Add dependency
-                </button>
-              </div>
+                {renderDependencyEditor()}
               <label className="field">
                 <span style={{ color: "var(--text-title)" }}>Target event</span>
                 <select

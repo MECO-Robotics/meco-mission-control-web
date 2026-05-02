@@ -23,7 +23,7 @@ import {
   getTaskBlocksTasks,
   getTaskOpenBlockersForTask,
   getTaskPlanningState,
-  getTaskWaitingOnTasks,
+  getTaskWaitingOnDependencies,
   groupTasksByPlanningState,
 } from "@/features/workspace/shared/taskPlanning";
 import {
@@ -684,7 +684,7 @@ export function MilestonesView({
                                   {tasks.map((task) => {
                                     const taskPlanningState = getTaskPlanningState(task, bootstrap);
                                     const blockers = getTaskOpenBlockersForTask(task.id, bootstrap);
-                                    const waitingOn = getTaskWaitingOnTasks(task.id, bootstrap);
+                                    const waitingOn = getTaskWaitingOnDependencies(task.id, bootstrap);
                                     const blocks = getTaskBlocksTasks(task.id, bootstrap);
 
                                     return (
@@ -742,7 +742,7 @@ export function MilestonesView({
                                 {activeEventCompleteTasks.map((task) => {
                                   const taskPlanningState = getTaskPlanningState(task, bootstrap);
                                   const blockers = getTaskOpenBlockersForTask(task.id, bootstrap);
-                                  const waitingOn = getTaskWaitingOnTasks(task.id, bootstrap);
+                                  const waitingOn = getTaskWaitingOnDependencies(task.id, bootstrap);
                                   const blocks = getTaskBlocksTasks(task.id, bootstrap);
 
                                   return (

@@ -16,7 +16,7 @@ import {
 import { resolveWorkspaceColor } from "@/features/workspace/shared/workspaceColors";
 import {
   getTaskOpenBlockersForTask,
-  getTaskWaitingOnTasks,
+  getTaskWaitingOnDependencies,
 } from "@/features/workspace/shared/taskPlanning";
 
 export type TaskQueueBoardState = TaskStatus | "blocked" | "waiting-on-dependency";
@@ -90,7 +90,7 @@ export function getTaskQueueBoardState(
     return "blocked";
   }
 
-  if (task.isWaitingOnDependency || getTaskWaitingOnTasks(task.id, bootstrap).length > 0) {
+  if (task.isWaitingOnDependency || getTaskWaitingOnDependencies(task.id, bootstrap).length > 0) {
     return "waiting-on-dependency";
   }
 

@@ -46,30 +46,34 @@ describe("getTaskDependencyCounts", () => {
     const dependencies: Parameters<typeof getTaskDependencyCounts>[1] = [
       {
         id: "dependency-1",
-        upstreamTaskId: "task-upstream-1",
-        downstreamTaskId: "task-target",
-        dependencyType: "blocks",
+        taskId: "task-target",
+        kind: "task",
+        refId: "task-upstream-1",
+        dependencyType: "hard",
         createdAt: "2026-02-01T00:00:00.000Z",
       },
       {
         id: "dependency-2",
-        upstreamTaskId: "task-upstream-2",
-        downstreamTaskId: "task-target",
-        dependencyType: "blocks",
+        taskId: "task-target",
+        kind: "task",
+        refId: "task-upstream-2",
+        dependencyType: "hard",
         createdAt: "2026-02-01T00:00:00.000Z",
       },
       {
         id: "dependency-3",
-        upstreamTaskId: "task-target",
-        downstreamTaskId: "task-downstream",
-        dependencyType: "blocks",
+        taskId: "task-downstream",
+        kind: "task",
+        refId: "task-target",
+        dependencyType: "hard",
         createdAt: "2026-02-01T00:00:00.000Z",
       },
       {
         id: "dependency-4",
-        upstreamTaskId: "task-other",
-        downstreamTaskId: "task-unrelated",
-        dependencyType: "blocks",
+        taskId: "task-unrelated",
+        kind: "task",
+        refId: "task-other",
+        dependencyType: "hard",
         createdAt: "2026-02-01T00:00:00.000Z",
       },
     ];
@@ -85,23 +89,26 @@ describe("getTaskDependencyCounts", () => {
     const lookup = buildTaskDependencyCountsByTaskId([
       {
         id: "dependency-1",
-        upstreamTaskId: "task-a",
-        downstreamTaskId: "task-b",
-        dependencyType: "blocks",
+        taskId: "task-b",
+        kind: "task",
+        refId: "task-a",
+        dependencyType: "hard",
         createdAt: "2026-02-01T00:00:00.000Z",
       },
       {
         id: "dependency-2",
-        upstreamTaskId: "task-b",
-        downstreamTaskId: "task-c",
-        dependencyType: "blocks",
+        taskId: "task-c",
+        kind: "task",
+        refId: "task-b",
+        dependencyType: "hard",
         createdAt: "2026-02-01T00:00:00.000Z",
       },
       {
         id: "dependency-3",
-        upstreamTaskId: "task-a",
-        downstreamTaskId: "task-c",
-        dependencyType: "blocks",
+        taskId: "task-c",
+        kind: "task",
+        refId: "task-a",
+        dependencyType: "hard",
         createdAt: "2026-02-01T00:00:00.000Z",
       },
     ]);
@@ -135,9 +142,10 @@ describe("getTaskDependencyCounts", () => {
       taskDependencies: [
         {
           id: "dependency-1",
-          upstreamTaskId: "task-upstream",
-          downstreamTaskId: "task-waiting",
-          dependencyType: "finish_to_start",
+        taskId: "task-waiting",
+        kind: "task",
+        refId: "task-upstream",
+        dependencyType: "hard",
           createdAt: "2026-02-01T00:00:00.000Z",
         },
       ],
@@ -155,7 +163,7 @@ describe("getTaskDependencyCounts", () => {
           resolvedAt: null,
         },
       ],
-    } as BootstrapPayload;
+    } as unknown as BootstrapPayload;
 
     const signals = buildTimelineTaskStatusSignalByTaskId(bootstrap);
 

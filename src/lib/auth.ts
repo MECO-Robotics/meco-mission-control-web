@@ -798,21 +798,32 @@ function normalizePlanningRecords(source: LegacyBootstrapPayload) {
     };
   });
   const normalizedDependencies = (source.taskDependencies ?? []).map((dependency, index) => {
-    const kind = dependency.kind ?? "task";
-    const dependencyType = dependency.dependencyType === "soft" ? "soft" : "hard";
-    const refId = dependency.refId ?? dependency.upstreamTaskId ?? "";
-    const taskId = dependency.taskId ?? dependency.downstreamTaskId ?? "";
+    const dependencyRecord = dependency as {
+      id?: string;
+      kind?: "task" | "milestone" | "part_instance" | "event";
+      refId?: string;
+      taskId?: string;
+      upstreamTaskId?: string;
+      downstreamTaskId?: string;
+      requiredState?: string;
+      dependencyType?: "hard" | "soft" | "blocks" | "finish_to_start";
+      createdAt?: string;
+    };
+    const kind = dependencyRecord.kind ?? "task";
+    const dependencyType = dependencyRecord.dependencyType === "soft" ? "soft" : "hard";
+    const refId = dependencyRecord.refId ?? dependencyRecord.upstreamTaskId ?? "";
+    const taskId = dependencyRecord.taskId ?? dependencyRecord.downstreamTaskId ?? "";
 
     return {
-      id: dependency.id ?? `task-dependency-${index + 1}`,
+      id: dependencyRecord.id ?? `task-dependency-${index + 1}`,
       taskId,
       kind,
       refId,
       requiredState:
-        dependency.requiredState ??
+        dependencyRecord.requiredState ??
         (kind === "part_instance" ? "available" : "complete"),
       dependencyType,
-      createdAt: dependency.createdAt ?? new Date().toISOString(),
+      createdAt: dependencyRecord.createdAt ?? new Date().toISOString(),
     };
   });
   const dependencyIdsByTaskId = new Map<string, string[]>();
@@ -1152,15 +1163,29 @@ function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapPayload 
     tasks: planning.tasks,
     taskDependencies:
       (source.taskDependencies ?? []).map((dependency, index) => ({
-        id: dependency.id ?? `task-dependency-${index + 1}`,
-        taskId: dependency.taskId ?? dependency.downstreamTaskId ?? "",
-        kind: dependency.kind ?? "task",
-        refId: dependency.refId ?? dependency.upstreamTaskId ?? "",
+        id: (dependency as {
+          id?: string;
+        }).id ?? `task-dependency-${index + 1}`,
+        taskId:
+          (dependency as {
+            taskId?: string;
+            downstreamTaskId?: string;
+          }).taskId ?? (dependency as { downstreamTaskId?: string }).downstreamTaskId ?? "",
+        kind: (dependency as { kind?: "task" | "milestone" | "part_instance" | "event" }).kind ?? "task",
+        refId:
+          (dependency as {
+            refId?: string;
+            upstreamTaskId?: string;
+          }).refId ?? (dependency as { upstreamTaskId?: string }).upstreamTaskId ?? "",
         requiredState:
-          dependency.requiredState ??
-          ((dependency.kind ?? "task") === "part_instance" ? "available" : "complete"),
-        dependencyType: dependency.dependencyType === "soft" ? "soft" : "hard",
-        createdAt: dependency.createdAt ?? new Date().toISOString(),
+          (dependency as { requiredState?: string }).requiredState ??
+          ((((dependency as { kind?: string }).kind ?? "task") as string) === "part_instance"
+            ? "available"
+            : "complete"),
+        dependencyType:
+          (dependency as { dependencyType?: string }).dependencyType === "soft" ? "soft" : "hard",
+        createdAt:
+          (dependency as { createdAt?: string }).createdAt ?? new Date().toISOString(),
       })),
     taskBlockers:
       (source.taskBlockers ?? []).map((blocker, index) => ({

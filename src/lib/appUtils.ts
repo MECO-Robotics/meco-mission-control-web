@@ -735,22 +735,40 @@ function getTaskDependencyDrafts(
     (dependency) => dependency.taskId === task.id,
   );
 
+  const fallbackDependencies = uniqueIds(task.dependencyIds ?? []).map((upstreamTaskId) => ({
+    kind: "task" as const,
+    refId: upstreamTaskId,
+    requiredState: "complete",
+    dependencyType: "hard" as const,
+  }));
+
   if (explicitDependencies && explicitDependencies.length > 0) {
-    return explicitDependencies.map((dependency) => ({
+    const explicitDrafts = explicitDependencies.map((dependency) => ({
       id: dependency.id,
       kind: dependency.kind,
       refId: dependency.refId,
       requiredState: dependency.requiredState,
       dependencyType: dependency.dependencyType,
     }));
+    const explicitKeys = new Set(
+      explicitDrafts.map(
+        (dependency) =>
+          `${dependency.kind}:${dependency.refId}:${dependency.dependencyType}:${dependency.requiredState ?? ""}`,
+      ),
+    );
+
+    return [
+      ...explicitDrafts,
+      ...fallbackDependencies.filter(
+        (dependency) =>
+          !explicitKeys.has(
+            `${dependency.kind}:${dependency.refId}:${dependency.dependencyType}:${dependency.requiredState ?? ""}`,
+          ),
+      ),
+    ];
   }
 
-  return uniqueIds(task.dependencyIds ?? []).map((upstreamTaskId) => ({
-    kind: "task",
-    refId: upstreamTaskId,
-    requiredState: "complete",
-    dependencyType: "hard",
-  }));
+  return fallbackDependencies;
 }
 
 export function buildEmptyReportPayload(

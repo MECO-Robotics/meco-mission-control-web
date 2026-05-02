@@ -19,7 +19,6 @@ import {
   IconManufacturing,
   IconParts,
   IconPerson,
-  IconWorkLogs,
   IconTasks,
 } from "@/components/shared";
 import {
@@ -326,21 +325,6 @@ export function TaskDetailsModal({
   const blockerDrafts = taskDraft?.taskBlockers ?? [];
   const blockerTypeOptions: Array<DropdownOption & { id: TaskBlockerType }> = [
     {
-      id: "task",
-      name: "Task dependency",
-      icon: <IconTasks />,
-    },
-    {
-      id: "part_instance",
-      name: "Part",
-      icon: <IconParts />,
-    },
-    {
-      id: "event",
-      name: "Milestone",
-      icon: <IconWorkLogs />,
-    },
-    {
       id: "external",
       name: "Other",
       icon: <IconPerson />,
@@ -431,22 +415,15 @@ export function TaskDetailsModal({
         return blocker.description.trim();
     }
   };
-  const addBlockerDraft = (blockerType: TaskBlockerType) => {
+  const addBlockerDraft = (_blockerType: TaskBlockerType) => {
     setTaskDraft?.((current) => ({
       ...current,
       taskBlockers: [
         ...(current.taskBlockers ?? []),
         {
-          blockerType,
+          blockerType: "external",
           blockerId: null,
-          description:
-            blockerType === "task"
-              ? "Waiting on task"
-              : blockerType === "part_instance"
-                ? "Waiting on part"
-                : blockerType === "event"
-                  ? "Waiting on milestone"
-                  : "",
+          description: "",
           severity: "medium",
         },
       ],
