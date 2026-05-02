@@ -1,6 +1,5 @@
 import type { BootstrapPayload } from "@/types";
 
-import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
 import {
   reconcileActivePersonFilter,
   reconcileArtifactModal,
@@ -18,11 +17,12 @@ import {
 import {
   type AppWorkspaceLoaderModel,
   type SelectMemberHandler,
+  type WorkspaceReconciliationState,
 } from "@/app/hooks/useAppWorkspaceLoaderWorkspaceTypes";
 import { findMemberForSessionUser } from "@/lib/appUtils";
 
 export function reconcileWorkspaceState(
-  state: AppWorkspaceState,
+  state: WorkspaceReconciliationState,
   model: AppWorkspaceLoaderModel,
   payload: BootstrapPayload,
   scopedPayload: BootstrapPayload,

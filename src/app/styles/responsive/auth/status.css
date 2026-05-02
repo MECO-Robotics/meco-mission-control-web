@@ -1,0 +1,13 @@
+.auth-error,
+.auth-success {
+  margin: 0;
+  border-radius: 14px;
+  padding: 0.7rem 0.9rem;
+  line-height: 1.45;
+}
+
+.auth-success {
+  border: 1px solid rgba(61, 153, 108, 0.18);
+  background: rgba(61, 153, 108, 0.08);
+  color: #246847;
+}

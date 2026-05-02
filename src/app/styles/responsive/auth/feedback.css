@@ -1,0 +1,51 @@
+.auth-feedback {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0;
+  padding: 0.7rem 0.85rem;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(15, 28, 52, 0.03);
+  color: var(--text-copy);
+  line-height: 1.45;
+  font-size: 0.92rem;
+}
+
+.auth-feedback-muted {
+  color: var(--text-copy);
+}
+
+.auth-feedback-loading {
+  border-color: rgba(22, 71, 142, 0.2);
+  background: rgba(22, 71, 142, 0.06);
+  color: var(--official-blue);
+}
+
+.auth-feedback-success {
+  border-color: rgba(61, 153, 108, 0.18);
+  background: rgba(61, 153, 108, 0.08);
+  color: #246847;
+}
+
+.auth-feedback-spinner {
+  width: 0.85rem;
+  height: 0.85rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: auth-feedback-spin 0.85s linear infinite;
+}
+
+@keyframes auth-feedback-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}

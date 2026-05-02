@@ -1,0 +1,105 @@
+.summary-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.6rem;
+}
+
+.worklog-summary-stat-grid {
+  margin: 0 0 0.2rem;
+}
+
+.worklog-summary-stat-card {
+  border: 1px solid var(--border-base);
+  border-radius: 12px;
+  background: var(--bg-row-alt);
+  padding: 0.75rem 0.85rem;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.worklog-summary-stat-card h3 {
+  margin: 0;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-copy);
+}
+
+.worklog-summary-stat-card strong {
+  color: var(--text-title);
+  font-size: 1.22rem;
+  line-height: 1.1;
+}
+
+.worklog-summary-card {
+  border: 1px solid var(--border-base);
+  border-radius: 12px;
+  background: var(--bg-row-alt);
+  padding: 0.78rem 0.9rem;
+  display: grid;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.worklog-summary-card h3 {
+  margin: 0;
+  color: var(--text-title);
+  font-size: 0.96rem;
+}
+
+.worklog-summary-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.42rem;
+}
+
+.worklog-summary-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-top: 1px solid var(--border-base);
+  padding-top: 0.42rem;
+}
+
+.worklog-summary-list-item:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.worklog-summary-list-label {
+  color: var(--text-title);
+  font-weight: 600;
+}
+
+.worklog-summary-task-meta {
+  min-width: 0;
+  display: grid;
+  gap: 0.08rem;
+}
+
+.worklog-summary-task-meta small {
+  color: var(--text-copy);
+  font-size: 0.78rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.worklog-summary-task-link {
+  border: 0;
+  background: transparent;
+  color: var(--meco-blue);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.worklog-summary-task-link:hover {
+  text-decoration: underline;
+}

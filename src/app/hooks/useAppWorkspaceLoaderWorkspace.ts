@@ -8,6 +8,7 @@ import {
   type SelectMemberHandler,
   type UnauthorizedHandler,
 } from "@/app/hooks/useAppWorkspaceLoaderWorkspaceHelpers";
+import type { WorkspaceReconciliationState } from "@/app/hooks/useAppWorkspaceLoaderWorkspaceTypes";
 import { getSinglePersonFilterId, scopeBootstrapBySelection } from "@/app/state/workspaceStateUtils";
 
 export function useAppWorkspaceLoaderWorkspace(
@@ -37,7 +38,13 @@ export function useAppWorkspaceLoaderWorkspace(
         state.setBootstrap(payload);
       });
 
-      reconcileWorkspaceState(state, model, payload, scopedPayload, selectMember);
+      reconcileWorkspaceState(
+        state as WorkspaceReconciliationState,
+        model,
+        payload,
+        scopedPayload,
+        selectMember,
+      );
     } catch (error) {
       state.setDataMessage(error instanceof Error ? error.message : String(error));
     } finally {

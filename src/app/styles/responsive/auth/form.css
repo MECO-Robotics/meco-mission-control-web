@@ -1,0 +1,18 @@
+.auth-form {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.auth-email-verify {
+  padding: 0.95rem;
+  border: 1px solid rgba(22, 71, 142, 0.08);
+  border-radius: 16px;
+  background: rgba(22, 71, 142, 0.035);
+}
+
+.auth-form-actions {
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
