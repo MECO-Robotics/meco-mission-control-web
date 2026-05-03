@@ -1,12 +1,12 @@
-import type { BootstrapPayload, EventRecord } from "@/types";
+import type { BootstrapPayload, MilestoneRecord } from "@/types";
 import {
   filterSelectionIncludes,
   filterSelectionIntersects,
   filterSelectionMatchesTaskPeople,
   type FilterSelection,
-} from "@/features/workspace/shared";
-import { getEventProjectIds } from "@/features/workspace/shared/events";
-import { getEventTypeStyle } from "@/features/workspace/shared/events";
+} from "@/features/workspace/shared/WorkspaceViewShared";
+import { getMilestoneProjectIds } from "@/features/workspace/shared/events/eventProjectUtils";
+import { getMilestoneTypeStyle } from "@/features/workspace/shared/events/eventStyles";
 
 export type MilestoneSortField = "startDateTime" | "title" | "type";
 
@@ -20,27 +20,27 @@ export function formatMilestoneDateTime(value: string) {
 }
 
 export function buildMilestoneProjectLabels(
-  events: BootstrapPayload["events"],
+  milestones: BootstrapPayload["milestones"],
   projectsById: Record<string, BootstrapPayload["projects"][number]>,
   scopedProjectIds: string[],
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>,
 ) {
   const labels: Record<string, string> = {};
 
-  events.forEach((event) => {
-    const relatedProjectIds = getEventProjectIds(event, subsystemsById);
+  milestones.forEach((milestone) => {
+    const relatedProjectIds = getMilestoneProjectIds(milestone, subsystemsById);
 
     if (
       relatedProjectIds.length === 0 ||
       (relatedProjectIds.length === scopedProjectIds.length &&
         relatedProjectIds.every((projectId) => scopedProjectIds.includes(projectId)))
     ) {
-      labels[event.id] = "All projects";
+      labels[milestone.id] = "All projects";
     } else if (relatedProjectIds.length === 1) {
-      labels[event.id] = projectsById[relatedProjectIds[0]]?.name ?? "Unknown project";
+      labels[milestone.id] = projectsById[relatedProjectIds[0]]?.name ?? "Unknown project";
     } else {
       const firstProjectName = projectsById[relatedProjectIds[0]]?.name ?? "Multiple projects";
-      labels[event.id] = `${firstProjectName} +${relatedProjectIds.length - 1}`;
+      labels[milestone.id] = `${firstProjectName} +${relatedProjectIds.length - 1}`;
     }
   });
 
@@ -49,7 +49,7 @@ export function buildMilestoneProjectLabels(
 
 export function filterAndSortMilestones({
   activePersonFilter,
-  events,
+  milestones,
   isAllProjectsView,
   projectFilter,
   searchFilter,
@@ -60,7 +60,7 @@ export function filterAndSortMilestones({
   typeFilter,
 }: {
   activePersonFilter: FilterSelection;
-  events: BootstrapPayload["events"];
+  milestones: BootstrapPayload["milestones"];
   isAllProjectsView: boolean;
   projectFilter: string[];
   searchFilter: string;
@@ -70,62 +70,62 @@ export function filterAndSortMilestones({
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
   typeFilter: string[];
 }) {
-  let result = [...events];
+  let result = [...milestones];
 
   if (activePersonFilter.length > 0) {
-    const matchingEventIds = new Set(
+    const matchingMilestoneIds = new Set(
       tasks.flatMap((task) =>
-        task.targetEventId && filterSelectionMatchesTaskPeople(activePersonFilter, task)
-          ? [task.targetEventId]
+        task.targetMilestoneId && filterSelectionMatchesTaskPeople(activePersonFilter, task)
+          ? [task.targetMilestoneId]
           : [],
       ),
     );
-    result = result.filter((event) => matchingEventIds.has(event.id));
+    result = result.filter((milestone) => matchingMilestoneIds.has(milestone.id));
   }
 
   if (isAllProjectsView && projectFilter.length > 0) {
-    result = result.filter((event) => {
-      const eventProjectIds = getEventProjectIds(event, subsystemsById);
+    result = result.filter((milestone) => {
+      const milestoneProjectIds = getMilestoneProjectIds(milestone, subsystemsById);
 
-      if (eventProjectIds.length === 0) {
+      if (milestoneProjectIds.length === 0) {
         return true;
       }
 
-      return filterSelectionIntersects(projectFilter, eventProjectIds);
+      return filterSelectionIntersects(projectFilter, milestoneProjectIds);
     });
   }
 
   if (typeFilter.length > 0) {
-    result = result.filter((event) => filterSelectionIncludes(typeFilter, event.type));
+    result = result.filter((milestone) => filterSelectionIncludes(typeFilter, milestone.type));
   }
 
   if (searchFilter.trim() !== "") {
     const search = searchFilter.toLowerCase();
 
-    result = result.filter((event) => {
-      const relatedSubsystemNames = event.relatedSubsystemIds
+    result = result.filter((milestone) => {
+      const relatedSubsystemNames = milestone.relatedSubsystemIds
         .map((subsystemId) => subsystemsById[subsystemId]?.name ?? "")
         .join(" ")
         .toLowerCase();
 
       return (
-        event.title.toLowerCase().includes(search) ||
-        event.description.toLowerCase().includes(search) ||
+        milestone.title.toLowerCase().includes(search) ||
+        milestone.description.toLowerCase().includes(search) ||
         relatedSubsystemNames.includes(search)
       );
     });
   }
 
-  const readSortValue = (event: EventRecord): string => {
+  const readSortValue = (milestone: MilestoneRecord): string => {
     if (sortField === "title") {
-      return event.title.toLowerCase();
+      return milestone.title.toLowerCase();
     }
 
     if (sortField === "type") {
-      return getEventTypeStyle(event.type).label;
+      return getMilestoneTypeStyle(milestone.type).label;
     }
 
-    return event.startDateTime;
+    return milestone.startDateTime;
   };
 
   return result.sort((left, right) => {

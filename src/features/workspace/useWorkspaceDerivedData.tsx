@@ -69,7 +69,7 @@ export function useWorkspaceDerivedData({
     () => recordById(bootstrap.partInstances),
     [bootstrap.partInstances],
   );
-  const eventsById = useMemo(() => recordById(bootstrap.events), [bootstrap.events]);
+  const milestonesById = useMemo(() => recordById(bootstrap.milestones), [bootstrap.milestones]);
 
   const activeTask = useMemo(
     () => bootstrap.tasks.find((task) => task.id === activeTaskId) ?? null,
@@ -198,7 +198,7 @@ export function useWorkspaceDerivedData({
     activeTask,
     cncItems,
     disciplinesById,
-    eventsById,
+    milestonesById,
     externalMembers,
     fabricationItems,
     mechanismsById,

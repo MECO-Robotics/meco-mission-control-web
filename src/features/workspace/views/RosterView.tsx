@@ -142,13 +142,13 @@ export const RosterView: React.FC<RosterViewProps> = ({
     setIsAddPersonOpen(false);
   };
 
-  const handleAddMemberSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleAddMemberSubmit = (milestone: React.FormEvent<HTMLFormElement>) => {
     if (!reactivateExistingMember) {
-      handleCreateMember(event);
+      handleCreateMember(milestone);
       return;
     }
 
-    event.preventDefault();
+    milestone.preventDefault();
     if (!reactivateMemberId) {
       return;
     }
@@ -247,3 +247,4 @@ export const RosterView: React.FC<RosterViewProps> = ({
     </section>
   );
 };
+

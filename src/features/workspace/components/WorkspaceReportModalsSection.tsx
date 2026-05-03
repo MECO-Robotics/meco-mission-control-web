@@ -1,8 +1,8 @@
-import { EventReportEditorModal, QaReportEditorModal, WorkLogEditorModal } from "../WorkspaceModals";
+import { MilestoneReportEditorModal, QaReportEditorModal, WorkLogEditorModal } from "../WorkspaceModals";
 import type { WorkspaceModalHostViewProps } from "./workspaceModalHostViewTypes";
 
 export function WorkspaceReportModalsSection(props: WorkspaceModalHostViewProps) {
-  if (!props.workLogModalMode && !props.qaReportModalMode && !props.eventReportModalMode) {
+  if (!props.workLogModalMode && !props.qaReportModalMode && !props.milestoneReportModalMode) {
     return null;
   }
 
@@ -32,17 +32,17 @@ export function WorkspaceReportModalsSection(props: WorkspaceModalHostViewProps)
         />
       ) : null}
 
-      {props.eventReportModalMode ? (
-        <EventReportEditorModal
+      {props.milestoneReportModalMode ? (
+        <MilestoneReportEditorModal
           bootstrap={props.bootstrap}
-          closeEventReportModal={props.closeEventReportModal}
-          eventReportDraft={props.eventReportDraft}
-          eventReportFindings={props.eventReportFindings}
-          handleEventReportSubmit={props.handleEventReportSubmit}
-          isSavingEventReport={props.isSavingEventReport}
+          closeMilestoneReportModal={props.closeMilestoneReportModal}
+          milestoneReportDraft={props.milestoneReportDraft}
+          milestoneReportFindings={props.milestoneReportFindings}
+          handleMilestoneReportSubmit={props.handleMilestoneReportSubmit}
+          isSavingMilestoneReport={props.isSavingMilestoneReport}
           requestPhotoUpload={props.requestPhotoUpload}
-          setEventReportDraft={props.setEventReportDraft}
-          setEventReportFindings={props.setEventReportFindings}
+          setMilestoneReportDraft={props.setMilestoneReportDraft}
+          setMilestoneReportFindings={props.setMilestoneReportFindings}
         />
       ) : null}
     </>

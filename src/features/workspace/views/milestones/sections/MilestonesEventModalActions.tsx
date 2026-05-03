@@ -1,33 +1,33 @@
-interface MilestonesEventModalActionsProps {
-  eventModalMode: "create" | "edit" | null;
-  isDeletingEvent: boolean;
-  isSavingEvent: boolean;
+interface MilestonesMilestoneModalActionsProps {
+  milestoneModalMode: "create" | "edit" | null;
+  isDeletingMilestone: boolean;
+  isSavingMilestone: boolean;
   onClose: () => void;
   onDelete: () => void;
 }
 
-export function MilestonesEventModalActions({
-  eventModalMode,
-  isDeletingEvent,
-  isSavingEvent,
+export function MilestonesMilestoneModalActions({
+  milestoneModalMode,
+  isDeletingMilestone,
+  isSavingMilestone,
   onClose,
   onDelete,
-}: MilestonesEventModalActionsProps) {
+}: MilestonesMilestoneModalActionsProps) {
   return (
     <div className="modal-actions modal-wide">
-      {eventModalMode === "edit" ? (
+      {milestoneModalMode === "edit" ? (
         <button
           className="danger-action"
-          disabled={isDeletingEvent || isSavingEvent}
+          disabled={isDeletingMilestone || isSavingMilestone}
           onClick={onDelete}
           type="button"
         >
-          {isDeletingEvent ? "Deleting..." : "Delete milestone"}
+          {isDeletingMilestone ? "Deleting..." : "Delete milestone"}
         </button>
       ) : null}
       <button
         className="secondary-action"
-        disabled={isDeletingEvent || isSavingEvent}
+        disabled={isDeletingMilestone || isSavingMilestone}
         onClick={onClose}
         style={{
           background: "var(--bg-row-alt)",
@@ -38,8 +38,8 @@ export function MilestonesEventModalActions({
       >
         Cancel
       </button>
-      <button className="primary-action" disabled={isDeletingEvent || isSavingEvent} type="submit">
-        {isSavingEvent ? "Saving..." : eventModalMode === "create" ? "Add milestone" : "Save milestone"}
+      <button className="primary-action" disabled={isDeletingMilestone || isSavingMilestone} type="submit">
+        {isSavingMilestone ? "Saving..." : milestoneModalMode === "create" ? "Add milestone" : "Save milestone"}
       </button>
     </div>
   );

@@ -75,3 +75,4 @@ export const TimelineTodayMarkerPortal: React.FC<TimelineTodayMarkerPortalProps>
     portalTarget,
   );
 };
+

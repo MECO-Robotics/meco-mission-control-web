@@ -4,7 +4,7 @@ import type {
   ArtifactKind,
   ArtifactRecord,
   BootstrapPayload,
-  EventPayload,
+  MilestonePayload,
   ManufacturingItemRecord,
   MaterialRecord,
   MemberPayload,
@@ -58,16 +58,16 @@ export interface WorkspaceContentPanelsProps {
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
   externalMembers: BootstrapPayload["members"];
   fabricationItems: ManufacturingItemRecord[];
-  handleCreateMember: (event: React.FormEvent<HTMLFormElement>) => void;
+  handleCreateMember: (milestone: React.FormEvent<HTMLFormElement>) => void;
   handleReactivateMemberForSeason: (memberId: string) => Promise<void>;
   handleDeleteMember: (id: string) => void;
-  handleTimelineEventDelete: (eventId: string) => Promise<void>;
-  handleTimelineEventSave: (
+  handleTimelineMilestoneDelete: (milestoneId: string) => Promise<void>;
+  handleTimelineMilestoneSave: (
     mode: "create" | "edit",
-    eventId: string | null,
-    payload: EventPayload,
+    milestoneId: string | null,
+    payload: MilestonePayload,
   ) => Promise<void>;
-  handleUpdateMember: (event: React.FormEvent<HTMLFormElement>) => void;
+  handleUpdateMember: (milestone: React.FormEvent<HTMLFormElement>) => void;
   isAddPersonOpen: boolean;
   isDeletingMember: boolean;
   isEditPersonOpen: boolean;
@@ -91,7 +91,7 @@ export interface WorkspaceContentPanelsProps {
   openCreateTaskModalFromTimeline: () => void;
   openCreateWorkLogModal: () => void;
   openCreateQaReportModal: () => void;
-  openCreateEventReportModal: () => void;
+  openCreateMilestoneReportModal: () => void;
   openCreateWorkstreamModal: () => void;
   openEditWorkstreamModal: (workstream: BootstrapPayload["workstreams"][number]) => void;
   onCreateRisk: (payload: RiskPayload) => Promise<void>;
@@ -172,7 +172,7 @@ export function WorkspaceContentPanels({
   ]);
   const reportsSwipeDirection = getSwipeDirection(previousReportsViewRef.current, reportsView, [
     "qa",
-    "event-results",
+    "milestone-results",
   ]);
   const manufacturingSwipeDirection = getSwipeDirection(
     previousManufacturingViewRef.current,
@@ -215,3 +215,4 @@ export function WorkspaceContentPanels({
     />
   );
 }
+

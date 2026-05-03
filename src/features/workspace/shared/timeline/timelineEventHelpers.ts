@@ -1,8 +1,8 @@
-import type { BootstrapPayload, EventRecord, TaskRecord } from "@/types";
+import type { BootstrapPayload, MilestoneRecord, TaskRecord } from "@/types";
 
-export interface TimelineEventDraft {
+export interface TimelineMilestoneDraft {
   title: string;
-  type: EventRecord["type"];
+  type: MilestoneRecord["type"];
   isExternal: boolean;
   description: string;
   projectIds: string[];
@@ -38,10 +38,10 @@ export function formatTaskAssignees(
   return assigneeIds.map((assigneeId) => membersById[assigneeId]?.name ?? "Unknown").join(", ");
 }
 
-export function emptyTimelineEventDraft(defaultEventType: EventRecord["type"]): TimelineEventDraft {
+export function emptyTimelineMilestoneDraft(defaultMilestoneType: MilestoneRecord["type"]): TimelineMilestoneDraft {
   return {
     title: "",
-    type: defaultEventType,
+    type: defaultMilestoneType,
     isExternal: false,
     description: "",
     projectIds: [],
@@ -49,7 +49,7 @@ export function emptyTimelineEventDraft(defaultEventType: EventRecord["type"]): 
   };
 }
 
-export function timelineEventDraftFromRecord(record: EventRecord): TimelineEventDraft {
+export function timelineMilestoneDraftFromRecord(record: MilestoneRecord): TimelineMilestoneDraft {
   return {
     title: record.title,
     type: record.type,

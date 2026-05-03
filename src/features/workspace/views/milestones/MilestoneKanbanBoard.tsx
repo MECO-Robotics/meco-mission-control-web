@@ -1,41 +1,45 @@
 import type { CSSProperties } from "react";
 
-import type { BootstrapPayload, EventRecord } from "@/types";
-import { EditableHoverIndicator } from "@/features/workspace/shared";
-import { getEventTypeStyle, EVENT_TYPE_STYLES, DEFAULT_EVENT_TYPE } from "@/features/workspace/shared/events";
+import type { BootstrapPayload, MilestoneRecord } from "@/types";
+import { EditableHoverIndicator } from "@/features/workspace/shared/WorkspaceViewShared";
+import {
+  DEFAULT_EVENT_TYPE as DEFAULT_MILESTONE_TYPE,
+  EVENT_TYPE_STYLES as MILESTONE_TYPE_STYLES,
+  getMilestoneTypeStyle,
+} from "@/features/workspace/shared/events/eventStyles";
 import { formatMilestoneDateTime } from "./milestonesViewUtils";
 import { KanbanColumns } from "@/features/workspace/views/kanban/KanbanColumns";
 
-const MILESTONE_BOARD_TYPES = Object.keys(EVENT_TYPE_STYLES) as (keyof typeof EVENT_TYPE_STYLES)[];
+const MILESTONE_BOARD_TYPES = Object.keys(MILESTONE_TYPE_STYLES) as (keyof typeof MILESTONE_TYPE_STYLES)[];
 
-function getMilestoneBoardType(event: EventRecord) {
-  return event.type in EVENT_TYPE_STYLES ? event.type : DEFAULT_EVENT_TYPE;
+function getMilestoneBoardType(milestone: MilestoneRecord) {
+  return milestone.type in MILESTONE_TYPE_STYLES ? milestone.type : DEFAULT_MILESTONE_TYPE;
 }
 
 interface MilestoneKanbanBoardProps {
-  events: EventRecord[];
-  onOpenEvent: (event: EventRecord) => void;
-  projectLabelByEventId: Record<string, string>;
+  milestones: MilestoneRecord[];
+  onOpenMilestone: (milestone: MilestoneRecord) => void;
+  projectLabelByMilestoneId: Record<string, string>;
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
 }
 
 export function MilestoneKanbanBoard({
-  events,
-  onOpenEvent,
-  projectLabelByEventId,
+  milestones,
+  onOpenMilestone,
+  projectLabelByMilestoneId,
   subsystemsById,
 }: MilestoneKanbanBoardProps) {
-  const eventsByType = MILESTONE_BOARD_TYPES.reduce(
+  const milestonesByType = MILESTONE_BOARD_TYPES.reduce(
     (grouped, type) => {
       grouped[type] = [];
       return grouped;
     },
-    {} as Record<(typeof MILESTONE_BOARD_TYPES)[number], EventRecord[]>,
+    {} as Record<(typeof MILESTONE_BOARD_TYPES)[number], MilestoneRecord[]>,
   );
 
-  events.forEach((event) => {
-    const type = getMilestoneBoardType(event);
-    eventsByType[type].push(event);
+  milestones.forEach((milestone) => {
+    const type = getMilestoneBoardType(milestone);
+    milestonesByType[type].push(milestone);
   });
 
   return (
@@ -47,35 +51,35 @@ export function MilestoneKanbanBoard({
       columnEmptyClassName="task-queue-board-column-empty"
       columnHeaderClassName="task-queue-board-column-header"
       columns={MILESTONE_BOARD_TYPES.map((type) => {
-        const eventStyle = getEventTypeStyle(type);
+        const milestoneStyle = getMilestoneTypeStyle(type);
 
         return {
           state: type,
-          count: eventsByType[type].length,
+          count: milestonesByType[type].length,
           header: (
             <span
               className="pill status-pill milestone-type-pill"
               style={
                 {
-                  "--milestone-type-chip-bg": eventStyle.chipBackground,
-                  "--milestone-type-chip-border": eventStyle.columnBorder,
-                  "--milestone-type-chip-text": eventStyle.chipText,
-                  "--milestone-type-chip-bg-dark": eventStyle.darkChipBackground,
-                  "--milestone-type-chip-border-dark": eventStyle.darkColumnBorder,
-                  "--milestone-type-chip-text-dark": eventStyle.darkChipText,
+                  "--milestone-type-chip-bg": milestoneStyle.chipBackground,
+                  "--milestone-type-chip-border": milestoneStyle.columnBorder,
+                  "--milestone-type-chip-text": milestoneStyle.chipText,
+                  "--milestone-type-chip-bg-dark": milestoneStyle.darkChipBackground,
+                  "--milestone-type-chip-border-dark": milestoneStyle.darkColumnBorder,
+                  "--milestone-type-chip-text-dark": milestoneStyle.darkChipText,
                 } as CSSProperties
               }
             >
-              {eventStyle.label}
+              {milestoneStyle.label}
             </span>
           ),
         };
       })}
       emptyLabel="No milestones"
-      itemsByState={eventsByType}
-      renderItem={(event) => {
-        const eventStyle = getEventTypeStyle(event.type);
-        const relatedSubsystems = event.relatedSubsystemIds
+      itemsByState={milestonesByType}
+      renderItem={(milestone) => {
+        const milestoneStyle = getMilestoneTypeStyle(milestone.type);
+        const relatedSubsystems = milestone.relatedSubsystemIds
           .map((subsystemId) => subsystemsById[subsystemId]?.name ?? "Unknown subsystem")
           .join(", ");
 
@@ -83,43 +87,43 @@ export function MilestoneKanbanBoard({
           <button
             className="task-queue-board-card editable-hover-target editable-hover-target-row"
             data-tutorial-target="edit-milestone-row"
-            key={event.id}
-            onClick={() => onOpenEvent(event)}
+            key={milestone.id}
+            onClick={() => onOpenMilestone(milestone)}
             type="button"
           >
             <div className="task-queue-board-card-header">
-              <strong>{event.title}</strong>
+              <strong>{milestone.title}</strong>
               <span className="task-queue-board-card-due">
-                Start {formatMilestoneDateTime(event.startDateTime)}
+                Start {formatMilestoneDateTime(milestone.startDateTime)}
               </span>
             </div>
             <small className="task-queue-board-card-summary">
-              {event.description.trim() || "No description"}
+              {milestone.description.trim() || "No description"}
             </small>
             <div className="task-queue-board-card-meta">
-              <span className="task-queue-board-card-context-chip" title={projectLabelByEventId[event.id] ?? "All projects"}>
-                {projectLabelByEventId[event.id] ?? "All projects"}
+              <span className="task-queue-board-card-context-chip" title={projectLabelByMilestoneId[milestone.id] ?? "All projects"}>
+                {projectLabelByMilestoneId[milestone.id] ?? "All projects"}
               </span>
               <div className="task-queue-board-card-meta-person-group">
                 <span
                   className="pill status-pill milestone-type-pill"
                   style={
                     {
-                      "--milestone-type-chip-bg": eventStyle.chipBackground,
-                      "--milestone-type-chip-border": eventStyle.columnBorder,
-                      "--milestone-type-chip-text": eventStyle.chipText,
-                      "--milestone-type-chip-bg-dark": eventStyle.darkChipBackground,
-                      "--milestone-type-chip-border-dark": eventStyle.darkColumnBorder,
-                      "--milestone-type-chip-text-dark": eventStyle.darkChipText,
+                      "--milestone-type-chip-bg": milestoneStyle.chipBackground,
+                      "--milestone-type-chip-border": milestoneStyle.columnBorder,
+                      "--milestone-type-chip-text": milestoneStyle.chipText,
+                      "--milestone-type-chip-bg-dark": milestoneStyle.darkChipBackground,
+                      "--milestone-type-chip-border-dark": milestoneStyle.darkColumnBorder,
+                      "--milestone-type-chip-text-dark": milestoneStyle.darkChipText,
                     } as CSSProperties
                   }
                 >
-                  {eventStyle.label}
+                  {milestoneStyle.label}
                 </span>
               </div>
             </div>
             <small className="task-queue-board-card-summary">
-              End {event.endDateTime ? formatMilestoneDateTime(event.endDateTime) : "No end"}
+              End {milestone.endDateTime ? formatMilestoneDateTime(milestone.endDateTime) : "No end"}
               {relatedSubsystems.length > 0 ? ` · ${relatedSubsystems}` : ""}
             </small>
             <EditableHoverIndicator className="task-queue-board-card-hover" />

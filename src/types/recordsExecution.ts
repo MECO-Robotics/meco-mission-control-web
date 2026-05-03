@@ -1,5 +1,6 @@
 import type {
-  EventType,
+  MilestoneStatus,
+  MilestoneType,
   TaskBlockerSeverity,
   TaskBlockerStatus,
   TaskBlockerType,
@@ -10,10 +11,11 @@ import type {
   TaskStatus,
 } from "./common";
 
-export interface EventRecord {
+export interface MilestoneRecord {
   id: string;
   title: string;
-  type: EventType;
+  type: MilestoneType;
+  status?: MilestoneStatus;
   startDateTime: string;
   endDateTime: string | null;
   isExternal: boolean;
@@ -39,7 +41,7 @@ export interface TaskRecord {
   partInstanceIds: string[];
   artifactId?: string | null;
   artifactIds?: string[];
-  targetEventId: string | null;
+  targetMilestoneId: string | null;
   photoUrl?: string;
   ownerId: string | null;
   assigneeIds: string[];

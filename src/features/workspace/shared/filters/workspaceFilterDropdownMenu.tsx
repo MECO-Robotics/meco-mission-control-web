@@ -75,7 +75,7 @@ export function FilterOptionMenu({
         <input
           aria-label={`Search ${allLabel} options`}
           className="table-column-filter-search-input"
-          onChange={(event) => setSearchText(event.target.value)}
+          onChange={(milestone) => setSearchText(milestone.target.value)}
           placeholder="Search..."
           ref={searchInputRef}
           type="text"
@@ -86,8 +86,8 @@ export function FilterOptionMenu({
         <button
           aria-selected={value.length === 0}
           className={`table-column-filter-option${value.length === 0 ? " is-selected" : ""}`}
-          onClick={(event) => {
-            event.stopPropagation();
+          onClick={(milestone) => {
+            milestone.stopPropagation();
             onChange([]);
           }}
           role="option"
@@ -114,8 +114,8 @@ export function FilterOptionMenu({
             aria-selected={isSelected}
             className={`table-column-filter-option${isSelected ? " is-selected" : ""}${hasIcon ? " has-icon" : ""}${optionToneClassName ? ` ${optionToneClassName}` : ""}`}
             key={option.id}
-            onClick={(event) => {
-              event.stopPropagation();
+            onClick={(milestone) => {
+              milestone.stopPropagation();
               onChange(singleSelect ? [option.id] : toggleFilterSelection(value, option.id));
             }}
             role="option"

@@ -40,8 +40,8 @@ export function TaskEditorHeaderSection({
                   <input
                     className="task-editor-title-input"
                     aria-label="Task title"
-                    onChange={(event) =>
-                      setTaskDraft((current) => ({ ...current, title: event.target.value }))
+                    onChange={(milestone) =>
+                      setTaskDraft((current) => ({ ...current, title: milestone.target.value }))
                     }
                     required
                     value={taskDraft.title}
@@ -57,8 +57,8 @@ export function TaskEditorHeaderSection({
                 <input
                   className="task-editor-title-input"
                   aria-label="Task title"
-                  onChange={(event) =>
-                    setTaskDraft((current) => ({ ...current, title: event.target.value }))
+                  onChange={(milestone) =>
+                    setTaskDraft((current) => ({ ...current, title: milestone.target.value }))
                   }
                   required
                   value={taskDraft.title}

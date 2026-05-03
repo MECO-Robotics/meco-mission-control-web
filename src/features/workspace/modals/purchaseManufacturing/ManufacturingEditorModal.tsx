@@ -7,7 +7,7 @@ import { ManufacturingEditorFields } from "./ManufacturingEditorFields";
 export interface ManufacturingEditorModalProps {
   bootstrap: BootstrapPayload;
   closeManufacturingModal: () => void;
-  handleManufacturingSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  handleManufacturingSubmit: (milestone: FormEvent<HTMLFormElement>) => void;
   isSavingManufacturing: boolean;
   manufacturingDraft: ManufacturingItemPayload;
   manufacturingModalMode: "create" | "edit";
@@ -69,3 +69,4 @@ export function ManufacturingEditorModal(props: ManufacturingEditorModalProps) {
     </div>
   );
 }
+

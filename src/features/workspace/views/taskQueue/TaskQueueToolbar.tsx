@@ -132,7 +132,7 @@ export function TaskQueueToolbar({
                 <select
                   aria-label="Sort tasks by"
                   className="task-queue-sort-menu-select"
-                  onChange={(event) => setSortField(event.target.value as TaskSortField)}
+                  onChange={(milestone) => setSortField(milestone.target.value as TaskSortField)}
                   value={sortField}
                 >
                   {TASK_SORT_OPTIONS.map((option) => (
@@ -149,7 +149,7 @@ export function TaskQueueToolbar({
                 <select
                   aria-label="Sort direction"
                   className="task-queue-sort-menu-select"
-                  onChange={(event) => setSortOrder(event.target.value as "asc" | "desc")}
+                  onChange={(milestone) => setSortOrder(milestone.target.value as "asc" | "desc")}
                   value={sortOrder}
                 >
                   {SORT_DIRECTION_OPTIONS.map((option) => (

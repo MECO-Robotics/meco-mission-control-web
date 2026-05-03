@@ -63,9 +63,8 @@ export const MATERIAL_STOCK_OPTIONS: DropdownOption[] = [
 ];
 
 export const PART_STATUS_OPTIONS: DropdownOption[] = [
-  { id: "planned", name: "Planned" },
-  { id: "needed", name: "Needed" },
-  { id: "available", name: "Available" },
-  { id: "installed", name: "Installed" },
-  { id: "retired", name: "Retired" },
+  { id: "not ready", name: "Not ready" },
+  { id: "blocked", name: "Blocked" },
+  { id: "qa", name: "QA" },
+  { id: "ready", name: "Ready" },
 ];

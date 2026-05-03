@@ -30,7 +30,7 @@ export function WorkspaceColorField({
         >
           <input
             aria-label={label}
-            onChange={(event) => onChange(event.target.value)}
+            onChange={(milestone) => onChange(milestone.target.value)}
             style={{
               width: "3rem",
               height: "3rem",

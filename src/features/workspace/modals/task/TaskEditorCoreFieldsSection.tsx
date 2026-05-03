@@ -22,8 +22,8 @@ export function TaskEditorCoreFieldsSection({
       <label className="field task-detail-row modal-wide">
         <span style={{ color: "var(--text-title)" }}>Summary</span>
         <textarea
-          onChange={(event) =>
-            setTaskDraft((current) => ({ ...current, summary: event.target.value }))
+          onChange={(milestone) =>
+            setTaskDraft((current) => ({ ...current, summary: milestone.target.value }))
           }
           required
           rows={3}
@@ -38,10 +38,10 @@ export function TaskEditorCoreFieldsSection({
       <label className="field task-detail-row task-detail-row-chip">
         <span style={{ color: "var(--text-title)" }}>Priority</span>
         <select
-          onChange={(event) =>
+          onChange={(milestone) =>
             setTaskDraft((current) => ({
               ...current,
-              priority: event.target.value as TaskPayload["priority"],
+              priority: milestone.target.value as TaskPayload["priority"],
             }))
           }
           style={{
@@ -60,8 +60,8 @@ export function TaskEditorCoreFieldsSection({
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Owner</span>
         <select
-          onChange={(event) => {
-            const ownerId = event.target.value || null;
+          onChange={(milestone) => {
+            const ownerId = milestone.target.value || null;
             setTaskDraft((current) => ({
               ...current,
               ownerId,
@@ -89,8 +89,8 @@ export function TaskEditorCoreFieldsSection({
         <span style={{ color: "var(--text-title)" }}>Assigned</span>
         <select
           multiple
-          onChange={(event) => {
-            const assigneeIds = Array.from(event.currentTarget.selectedOptions, (option) => option.value);
+          onChange={(milestone) => {
+            const assigneeIds = Array.from(milestone.currentTarget.selectedOptions, (option) => option.value);
             setTaskDraft((current) => ({
               ...current,
               assigneeIds: Array.from(
@@ -120,10 +120,10 @@ export function TaskEditorCoreFieldsSection({
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Mentor</span>
         <select
-          onChange={(event) =>
+          onChange={(milestone) =>
             setTaskDraft((current) => ({
               ...current,
-              mentorId: event.target.value || null,
+              mentorId: milestone.target.value || null,
             }))
           }
           style={{

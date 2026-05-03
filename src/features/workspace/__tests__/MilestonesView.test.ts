@@ -3,7 +3,7 @@
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model";
 import { MilestonesView } from "@/features/workspace/views/milestones/MilestonesView";
 import type { BootstrapPayload } from "@/types";
 
@@ -40,9 +40,9 @@ function createBootstrap(): BootstrapPayload {
         status: "active",
       },
     ],
-    events: [
+    milestones: [
       {
-        id: "event-1",
+        id: "milestone-1",
         title: "Regional",
         type: "competition",
         startDateTime: "2026-03-10T14:00:00.000Z",
@@ -53,7 +53,7 @@ function createBootstrap(): BootstrapPayload {
         relatedSubsystemIds: [],
       },
       {
-        id: "event-2",
+        id: "milestone-2",
         title: "Design review",
         type: "deadline",
         startDateTime: "2026-03-12T14:00:00.000Z",
@@ -86,7 +86,7 @@ function createBootstrap(): BootstrapPayload {
         startDate: "2026-03-01",
         dueDate: "2026-03-09",
         priority: "high",
-        targetEventId: "event-1",
+        targetMilestoneId: "milestone-1",
         dependencyIds: [],
         blockers: [],
         isBlocked: false,
@@ -118,7 +118,7 @@ function createBootstrap(): BootstrapPayload {
         startDate: "2026-03-02",
         dueDate: "2026-03-11",
         priority: "medium",
-        targetEventId: "event-2",
+        targetMilestoneId: "milestone-2",
         dependencyIds: [],
         blockers: [],
         isBlocked: false,
@@ -154,8 +154,8 @@ describe("MilestonesView", () => {
         activePersonFilter: [],
         bootstrap: createBootstrap(),
         isAllProjectsView: false,
-        onDeleteTimelineEvent: jest.fn(),
-        onSaveTimelineEvent: jest.fn(),
+        onDeleteTimelineMilestone: jest.fn(),
+        onSaveTimelineMilestone: jest.fn(),
         subsystemsById: {},
       }),
     );
@@ -173,8 +173,8 @@ describe("MilestonesView", () => {
         activePersonFilter: [],
         bootstrap: createBootstrap(),
         isAllProjectsView: false,
-        onDeleteTimelineEvent: jest.fn(),
-        onSaveTimelineEvent: jest.fn(),
+        onDeleteTimelineMilestone: jest.fn(),
+        onSaveTimelineMilestone: jest.fn(),
         subsystemsById: {},
       }),
     );
@@ -192,8 +192,8 @@ describe("MilestonesView", () => {
         activePersonFilter: ["member-1"],
         bootstrap,
         isAllProjectsView: false,
-        onDeleteTimelineEvent: jest.fn(),
-        onSaveTimelineEvent: jest.fn(),
+        onDeleteTimelineMilestone: jest.fn(),
+        onSaveTimelineMilestone: jest.fn(),
         subsystemsById: {
           "subsystem-1": bootstrap.subsystems[0],
         },
@@ -205,12 +205,12 @@ describe("MilestonesView", () => {
     expect(markup).toContain("Only milestones linked to tasks assigned to or mentored by Alex Builder.");
   });
 
-  it("falls back to the default style label when an event type is invalid", () => {
+  it("falls back to the default style label when an milestone type is invalid", () => {
     const bootstrap = createBootstrap();
-    bootstrap.events = [
+    bootstrap.milestones = [
       {
-        ...bootstrap.events[0],
-        id: "event-legacy",
+        ...bootstrap.milestones[0],
+        id: "milestone-legacy",
         title: "Legacy milestone",
         type: "milestone" as never,
       },
@@ -222,8 +222,8 @@ describe("MilestonesView", () => {
           activePersonFilter: [],
           bootstrap,
           isAllProjectsView: false,
-          onDeleteTimelineEvent: jest.fn(),
-          onSaveTimelineEvent: jest.fn(),
+          onDeleteTimelineMilestone: jest.fn(),
+          onSaveTimelineMilestone: jest.fn(),
           subsystemsById: {
             "subsystem-1": bootstrap.subsystems[0],
           },

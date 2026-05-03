@@ -226,16 +226,16 @@ export function TimelineGridHeaderContent({
               zIndex: 12,
               background: cell.dayStyle?.columnBackground ?? "var(--bg-panel)",
             }}
-            data-popup-start-day={cell.primaryEventStartDay}
-            data-popup-end-day={cell.primaryEventEndDay}
+            data-popup-start-day={cell.primaryMilestoneStartDay}
+            data-popup-end-day={cell.primaryMilestoneEndDay}
           >
             <span style={{ whiteSpace: "nowrap", fontSize: "8px" }}>{cell.weekdayLabel}</span>
             <button
-              className={`timeline-day-number-button${cell.eventsOnDay.length ? " has-event" : ""}`}
+              className={`timeline-day-number-button${cell.milestonesOnDay.length ? " has-milestone" : ""}`}
               onClick={() => handleTimelineHeaderDayClick(cell.day)}
               title={
                 isWeekView
-                  ? cell.eventsOnDay.length
+                  ? cell.milestonesOnDay.length
                     ? `Edit milestone on ${cell.day}`
                     : `Add milestone on ${cell.day}`
                   : `Open week of ${cell.day}`

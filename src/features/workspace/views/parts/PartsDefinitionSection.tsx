@@ -64,12 +64,12 @@ export function PartsDefinitionSection({
               className="ops-table ops-row editable-row-clickable editable-hover-target editable-hover-target-row"
               key={partDefinition.id}
               onClick={() => onEditPartDefinition(partDefinition)}
-              onKeyDown={(event) => {
-                if (event.target !== event.currentTarget) {
+              onKeyDown={(milestone) => {
+                if (milestone.target !== milestone.currentTarget) {
                   return;
                 }
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
+                if (milestone.key === "Enter" || milestone.key === " ") {
+                  milestone.preventDefault();
                   onEditPartDefinition(partDefinition);
                 }
               }}
@@ -111,3 +111,4 @@ export function PartsDefinitionSection({
     </div>
   );
 }
+

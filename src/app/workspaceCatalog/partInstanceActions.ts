@@ -31,8 +31,8 @@ export function usePartInstanceActions(model: AppWorkspaceModel) {
     model.setActivePartInstanceId(null);
   }, [model]);
 
-  const handlePartInstanceSubmit = useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handlePartInstanceSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
+    milestone.preventDefault();
     model.setIsSavingPartInstance(true);
     model.setDataMessage(null);
 
@@ -82,3 +82,4 @@ export function usePartInstanceActions(model: AppWorkspaceModel) {
     openEditPartInstanceModal,
   };
 }
+

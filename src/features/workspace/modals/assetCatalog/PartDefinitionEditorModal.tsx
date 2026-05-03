@@ -12,7 +12,7 @@ interface PartDefinitionEditorModalProps {
   closePartDefinitionModal: () => void;
   handleDeletePartDefinition: (id: string) => void;
   handleTogglePartDefinitionArchived: (id: string) => void;
-  handlePartDefinitionSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  handlePartDefinitionSubmit: (milestone: FormEvent<HTMLFormElement>) => void;
   isDeletingPartDefinition: boolean;
   isSavingPartDefinition: boolean;
   requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
@@ -77,8 +77,8 @@ export function PartDefinitionEditorModal({
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Name</span>
             <input
-              onChange={(event) =>
-                setPartDefinitionDraft((current) => ({ ...current, name: event.target.value }))
+              onChange={(milestone) =>
+                setPartDefinitionDraft((current) => ({ ...current, name: milestone.target.value }))
               }
               required
               style={{
@@ -92,10 +92,10 @@ export function PartDefinitionEditorModal({
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Part number</span>
             <input
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setPartDefinitionDraft((current) => ({
                   ...current,
-                  partNumber: event.target.value,
+                  partNumber: milestone.target.value,
                 }))
               }
               required
@@ -110,8 +110,8 @@ export function PartDefinitionEditorModal({
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Revision</span>
             <input
-              onChange={(event) =>
-                setPartDefinitionDraft((current) => ({ ...current, revision: event.target.value }))
+              onChange={(milestone) =>
+                setPartDefinitionDraft((current) => ({ ...current, revision: milestone.target.value }))
               }
               required
               style={{
@@ -126,10 +126,10 @@ export function PartDefinitionEditorModal({
             <label className="field">
               <span style={{ color: "var(--text-title)" }}>Iteration</span>
               <select
-                onChange={(event) =>
+                onChange={(milestone) =>
                   setPartDefinitionDraft((current) => ({
                     ...current,
-                    iteration: Number(event.target.value),
+                    iteration: Number(milestone.target.value),
                   }))
                 }
                 style={{
@@ -150,8 +150,8 @@ export function PartDefinitionEditorModal({
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Type</span>
             <input
-              onChange={(event) =>
-                setPartDefinitionDraft((current) => ({ ...current, type: event.target.value }))
+              onChange={(milestone) =>
+                setPartDefinitionDraft((current) => ({ ...current, type: milestone.target.value }))
               }
               required
               style={{
@@ -165,8 +165,8 @@ export function PartDefinitionEditorModal({
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Source</span>
             <input
-              onChange={(event) =>
-                setPartDefinitionDraft((current) => ({ ...current, source: event.target.value }))
+              onChange={(milestone) =>
+                setPartDefinitionDraft((current) => ({ ...current, source: milestone.target.value }))
               }
               style={{
                 background: "var(--bg-row-alt)",
@@ -189,10 +189,10 @@ export function PartDefinitionEditorModal({
               >
                 <input
                   checked={partDefinitionDraft.isHardware}
-                  onChange={(event) =>
+                  onChange={(milestone) =>
                     setPartDefinitionDraft((current) => ({
                       ...current,
-                      isHardware: event.target.checked,
+                      isHardware: milestone.target.checked,
                     }))
                   }
                   type="checkbox"
@@ -204,10 +204,10 @@ export function PartDefinitionEditorModal({
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Default material</span>
             <select
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setPartDefinitionDraft((current) => ({
                   ...current,
-                  materialId: event.target.value || null,
+                  materialId: milestone.target.value || null,
                 }))
               }
               style={{
@@ -228,10 +228,10 @@ export function PartDefinitionEditorModal({
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Description</span>
             <textarea
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setPartDefinitionDraft((current) => ({
                   ...current,
-                  description: event.target.value,
+                  description: milestone.target.value,
                 }))
               }
               rows={3}
@@ -309,4 +309,5 @@ export function PartDefinitionEditorModal({
     </div>
   );
 }
+
 

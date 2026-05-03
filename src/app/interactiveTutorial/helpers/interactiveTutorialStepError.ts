@@ -19,9 +19,9 @@ export function getInteractiveTutorialStepError(
   switch (step.id) {
     case "season":
       if (!context.tutorialSeasonId) {
-        return "Tutorial season is unavailable. End tutorial and reload the page.";
+        return "Default Season is unavailable. End tutorial and reload the page.";
       }
-      return `Select ${context.tutorialSeasonName ?? "Tutorial season"} to complete this step.`;
+      return `Select ${context.tutorialSeasonName ?? "Default Season"} to complete this step.`;
     case "project-robot":
     case "project-outreach":
       if (!context.tutorialProjectId) {

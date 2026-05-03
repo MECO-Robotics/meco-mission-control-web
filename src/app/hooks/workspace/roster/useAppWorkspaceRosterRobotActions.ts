@@ -37,8 +37,8 @@ export function useAppWorkspaceRosterRobotActions(model: AppWorkspaceModel) {
   }, [model]);
 
   const handleRobotProjectSubmit = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
+    async (milestone: FormEvent<HTMLFormElement>) => {
+      milestone.preventDefault();
 
       const robotName = model.robotProjectNameDraft.trim();
       if (robotName.length < 2) {
@@ -103,3 +103,4 @@ export function useAppWorkspaceRosterRobotActions(model: AppWorkspaceModel) {
     handleRobotProjectSubmit,
   };
 }
+

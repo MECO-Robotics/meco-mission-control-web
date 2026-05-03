@@ -3,7 +3,7 @@
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model";
 import { ReportsView } from "@/features/workspace/views";
 import type { BootstrapPayload, TaskRecord } from "@/types";
 
@@ -23,7 +23,7 @@ const QA_TASK: TaskRecord = {
   mechanismIds: [],
   partInstanceId: null,
   partInstanceIds: [],
-  targetEventId: null,
+  targetMilestoneId: null,
   ownerId: null,
   assigneeIds: [],
   mentorId: null,
@@ -48,9 +48,9 @@ const ACTIVE_TASK: TaskRecord = {
   status: "in-progress",
 };
 
-const PAST_EVENT = {
-  id: "event-past",
-  title: "Past event",
+const PAST_MILESTONE = {
+  id: "milestone-past",
+  title: "Past milestone",
   type: "practice" as const,
   startDateTime: "2000-01-01T00:00:00.000Z",
   endDateTime: "2000-01-01T01:00:00.000Z",
@@ -60,9 +60,9 @@ const PAST_EVENT = {
   relatedSubsystemIds: [],
 };
 
-const FUTURE_EVENT = {
-  id: "event-future",
-  title: "Future event",
+const FUTURE_MILESTONE = {
+  id: "milestone-future",
+  title: "Future milestone",
   type: "competition" as const,
   startDateTime: "2099-12-31T00:00:00.000Z",
   endDateTime: null,
@@ -76,13 +76,13 @@ function renderReportsView() {
   const bootstrap: BootstrapPayload = {
     ...EMPTY_BOOTSTRAP,
     tasks: [QA_TASK, ACTIVE_TASK],
-    events: [PAST_EVENT, FUTURE_EVENT],
+    milestones: [PAST_MILESTONE, FUTURE_MILESTONE],
   };
 
   return renderToStaticMarkup(
     React.createElement(ReportsView, {
       bootstrap,
-      openCreateEventReportModal: jest.fn(),
+      openCreateMilestoneReportModal: jest.fn(),
       openCreateQaReportModal: jest.fn(),
       openTaskDetailsModal: jest.fn(),
       view: "qa",
@@ -100,24 +100,24 @@ describe("ReportsView", () => {
     expect(html).not.toContain("Active task");
   });
 
-  it("lists only past milestones in Event Results view", () => {
+  it("lists only past milestones in Milestone Results view", () => {
     const bootstrap: BootstrapPayload = {
       ...EMPTY_BOOTSTRAP,
-      events: [PAST_EVENT, FUTURE_EVENT],
+      milestones: [PAST_MILESTONE, FUTURE_MILESTONE],
       tasks: EMPTY_BOOTSTRAP.tasks,
     };
     const html = renderToStaticMarkup(
       React.createElement(ReportsView, {
         bootstrap,
-        openCreateEventReportModal: jest.fn(),
+        openCreateMilestoneReportModal: jest.fn(),
         openCreateQaReportModal: jest.fn(),
         openTaskDetailsModal: jest.fn(),
-        view: "event-results",
+        view: "milestone-results",
       }),
     );
 
-    expect(html).toContain("Event results");
-    expect(html).toContain(PAST_EVENT.title);
-    expect(html).not.toContain(FUTURE_EVENT.title);
+    expect(html).toContain("Milestone results");
+    expect(html).toContain(PAST_MILESTONE.title);
+    expect(html).not.toContain(FUTURE_MILESTONE.title);
   });
 });

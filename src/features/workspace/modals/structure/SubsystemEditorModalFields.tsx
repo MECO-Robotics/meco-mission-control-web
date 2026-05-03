@@ -48,10 +48,10 @@ export function SubsystemEditorModalFields({
       <label className="field modal-wide">
         <span style={labelStyle}>Name</span>
         <input
-          onChange={(event) =>
+          onChange={(milestone) =>
             setSubsystemDraft((current) => ({
               ...current,
-              name: event.target.value,
+              name: milestone.target.value,
             }))
           }
           required
@@ -63,10 +63,10 @@ export function SubsystemEditorModalFields({
       <label className="field modal-wide">
         <span style={labelStyle}>Description</span>
         <textarea
-          onChange={(event) =>
+          onChange={(milestone) =>
             setSubsystemDraft((current) => ({
               ...current,
-              description: event.target.value,
+              description: milestone.target.value,
             }))
           }
           required
@@ -92,10 +92,10 @@ export function SubsystemEditorModalFields({
         <label className="field">
           <span style={labelStyle}>Iteration</span>
           <select
-            onChange={(event) =>
+            onChange={(milestone) =>
               setSubsystemDraft((current) => ({
                 ...current,
-                iteration: Number(event.target.value),
+                iteration: Number(milestone.target.value),
               }))
             }
             style={fieldStyle}
@@ -114,10 +114,10 @@ export function SubsystemEditorModalFields({
         <label className="field">
           <span style={labelStyle}>Parent subsystem</span>
           <select
-            onChange={(event) =>
+            onChange={(milestone) =>
               setSubsystemDraft((current) => ({
                 ...current,
-                parentSubsystemId: event.target.value || null,
+                parentSubsystemId: milestone.target.value || null,
               }))
             }
             style={fieldStyle}
@@ -145,10 +145,10 @@ export function SubsystemEditorModalFields({
       <label className="field">
         <span style={labelStyle}>Responsible engineer</span>
         <select
-          onChange={(event) =>
+          onChange={(milestone) =>
             setSubsystemDraft((current) => ({
               ...current,
-              responsibleEngineerId: event.target.value || null,
+              responsibleEngineerId: milestone.target.value || null,
             }))
           }
           style={fieldStyle}
@@ -167,10 +167,10 @@ export function SubsystemEditorModalFields({
         <span style={labelStyle}>Mentors</span>
         <select
           multiple
-          onChange={(event) =>
+          onChange={(milestone) =>
             setSubsystemDraft((current) => ({
               ...current,
-              mentorIds: Array.from(event.currentTarget.selectedOptions, (option) => option.value),
+              mentorIds: Array.from(milestone.currentTarget.selectedOptions, (option) => option.value),
             }))
           }
           size={Math.min(
@@ -195,7 +195,7 @@ export function SubsystemEditorModalFields({
       <label className="field modal-wide">
         <span style={labelStyle}>Risks</span>
         <textarea
-          onChange={(event) => setSubsystemDraftRisks(event.target.value)}
+          onChange={(milestone) => setSubsystemDraftRisks(milestone.target.value)}
           placeholder="Comma-separated risks"
           rows={3}
           style={fieldStyle}

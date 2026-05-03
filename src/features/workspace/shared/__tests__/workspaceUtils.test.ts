@@ -5,7 +5,7 @@ import { getStatusPillClassName } from "@/features/workspace/shared";
 describe("getStatusPillClassName", () => {
   it("maps success-like statuses to the success class", () => {
     expect(getStatusPillClassName("complete")).toBe("pill status-pill status-pill-success");
-    expect(getStatusPillClassName("available")).toBe("pill status-pill status-pill-success");
+    expect(getStatusPillClassName("ready")).toBe("pill status-pill status-pill-success");
   });
 
   it("maps review and progress info statuses to the info class", () => {
@@ -21,7 +21,11 @@ describe("getStatusPillClassName", () => {
 
   it("maps critical statuses to the danger class", () => {
     expect(getStatusPillClassName("critical")).toBe("pill status-pill status-pill-danger");
-    expect(getStatusPillClassName("retired")).toBe("pill status-pill status-pill-danger");
+    expect(getStatusPillClassName("blocked")).toBe("pill status-pill status-pill-danger");
+  });
+
+  it("maps blocked part statuses to danger", () => {
+    expect(getStatusPillClassName("not ready")).toBe("pill status-pill status-pill-danger");
   });
 
   it("uses neutral when no explicit group is mapped", () => {

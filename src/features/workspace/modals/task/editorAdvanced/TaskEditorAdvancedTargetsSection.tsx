@@ -69,7 +69,7 @@ export function TaskEditorAdvancedTargetsSection({
       <label className="task-target-primary">
         <span>{targetGroupLabel === "Subsystems" ? "Subsystem" : "Workstream"}</span>
         <select
-          onChange={(event) => updatePrimaryTargetName(event.target.value)}
+          onChange={(milestone) => updatePrimaryTargetName(milestone.target.value)}
           required
           style={{
             background: "var(--bg-row-alt)",
@@ -91,7 +91,7 @@ export function TaskEditorAdvancedTargetsSection({
       <label className="task-target-primary">
         <span>Iteration</span>
         <select
-          onChange={(event) => updatePrimaryTarget(event.target.value)}
+          onChange={(milestone) => updatePrimaryTarget(milestone.target.value)}
           required
           style={{
             background: "var(--bg-row-alt)",

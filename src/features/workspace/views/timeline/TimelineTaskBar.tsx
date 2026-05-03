@@ -159,3 +159,4 @@ export const TimelineTaskBar: React.FC<TimelineTaskBarProps> = ({
     </div>
   );
 };
+

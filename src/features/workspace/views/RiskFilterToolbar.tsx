@@ -34,7 +34,7 @@ export function RiskFilterToolbar({
         <label className="risk-filter-control">
           <span>Severity</span>
           <select
-            onChange={(event) => onSeverityFilterChange(event.target.value as RiskSeverityFilter)}
+            onChange={(milestone) => onSeverityFilterChange(milestone.target.value as RiskSeverityFilter)}
             value={severityFilter}
           >
             <option value="all">All severities</option>
@@ -47,7 +47,7 @@ export function RiskFilterToolbar({
         <label className="risk-filter-control">
           <span>Source</span>
           <select
-            onChange={(event) => onSourceFilterChange(event.target.value as RiskSourceFilter)}
+            onChange={(milestone) => onSourceFilterChange(milestone.target.value as RiskSourceFilter)}
             value={sourceFilter}
           >
             <option value="all">All sources</option>

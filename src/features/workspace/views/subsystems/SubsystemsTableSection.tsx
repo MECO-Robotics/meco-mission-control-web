@@ -90,13 +90,13 @@ export function SubsystemsTableSection({
               <div
                 className="ops-table ops-row subsystem-manager-row editable-row-clickable editable-action-host editable-hover-target-row"
                 onClick={() => handleSubsystemSelection(subsystem.id)}
-                onKeyDown={(event) => {
-                  if (event.target !== event.currentTarget) {
+                onKeyDown={(milestone) => {
+                  if (milestone.target !== milestone.currentTarget) {
                     return;
                   }
 
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
+                  if (milestone.key === "Enter" || milestone.key === " ") {
+                    milestone.preventDefault();
                     handleSubsystemSelection(subsystem.id);
                   }
                 }}
@@ -169,8 +169,8 @@ export function SubsystemsTableSection({
                     className="subsystem-manager-action-button subsystem-manager-action-button-primary"
                     data-tutorial-target="create-mechanism-button"
                     disabled={subsystem.isArchived}
-                    onClick={(event) => {
-                      event.stopPropagation();
+                    onClick={(milestone) => {
+                      milestone.stopPropagation();
                       openCreateMechanismModal(subsystem.id);
                     }}
                     type="button"
@@ -182,8 +182,8 @@ export function SubsystemsTableSection({
                   <button
                     className="subsystem-manager-action-button"
                     data-tutorial-target="edit-subsystem-button"
-                    onClick={(event) => {
-                      event.stopPropagation();
+                    onClick={(milestone) => {
+                      milestone.stopPropagation();
                       openEditSubsystemModal(subsystem);
                     }}
                     type="button"
@@ -264,3 +264,4 @@ export function SubsystemsTableSection({
     </div>
   );
 }
+

@@ -12,10 +12,10 @@ interface TaskEditorModalProps {
   closeTaskModal: () => void;
   advancedSectionOpen: boolean;
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
-  eventsById: Record<string, BootstrapPayload["events"][number]>;
+  milestonesById: Record<string, BootstrapPayload["milestones"][number]>;
   handleDeleteTask: (taskId: string) => Promise<void>;
   handleResolveTaskBlocker: (blockerId: string) => Promise<void>;
-  handleTaskSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  handleTaskSubmit: (milestone: FormEvent<HTMLFormElement>) => void;
   isDeletingTask: boolean;
   isSavingTask: boolean;
   mechanismsById: Record<string, BootstrapPayload["mechanisms"][number]>;
@@ -158,3 +158,4 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
     </div>
   );
 }
+

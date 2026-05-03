@@ -12,7 +12,7 @@ interface MechanismEditorModalProps {
   closeMechanismModal: () => void;
   handleDeleteMechanism: (mechanismId: string) => void;
   handleToggleMechanismArchived: (mechanismId: string) => void;
-  handleMechanismSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  handleMechanismSubmit: (milestone: FormEvent<HTMLFormElement>) => void;
   isDeletingMechanism: boolean;
   isSavingMechanism: boolean;
   requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
@@ -65,10 +65,10 @@ export function MechanismEditorModal({
       <label className="field">
         <span style={labelStyle}>Subsystem</span>
         <select
-          onChange={(event) =>
+          onChange={(milestone) =>
             setMechanismDraft((current) => ({
               ...current,
-              subsystemId: event.target.value,
+              subsystemId: milestone.target.value,
             }))
           }
           style={fieldStyle}
@@ -86,10 +86,10 @@ export function MechanismEditorModal({
         <label className="field">
           <span style={labelStyle}>Iteration</span>
           <select
-            onChange={(event) =>
+            onChange={(milestone) =>
               setMechanismDraft((current) => ({
                 ...current,
-                iteration: Number(event.target.value),
+                iteration: Number(milestone.target.value),
               }))
             }
             style={fieldStyle}
@@ -107,10 +107,10 @@ export function MechanismEditorModal({
       <label className="field modal-wide">
         <span style={labelStyle}>Name</span>
         <input
-          onChange={(event) =>
+          onChange={(milestone) =>
             setMechanismDraft((current) => ({
               ...current,
-              name: event.target.value,
+              name: milestone.target.value,
             }))
           }
           required
@@ -122,10 +122,10 @@ export function MechanismEditorModal({
       <label className="field modal-wide">
         <span style={labelStyle}>Description</span>
         <textarea
-          onChange={(event) =>
+          onChange={(milestone) =>
             setMechanismDraft((current) => ({
               ...current,
-              description: event.target.value,
+              description: milestone.target.value,
             }))
           }
           required
@@ -192,3 +192,4 @@ export function MechanismEditorModal({
     </StructureModalShell>
   );
 }
+

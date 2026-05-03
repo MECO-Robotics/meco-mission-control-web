@@ -9,7 +9,7 @@ import type { UseTimelineMilestoneOverlaySyncResult } from "./useTimelineMilesto
 
 interface UseTimelineMilestoneOverlayLayoutArgs {
   days: string[];
-  events: BootstrapPayload["events"];
+  milestones: BootstrapPayload["milestones"];
   timelineDayCellLayouts: UseTimelineMilestoneOverlaySyncResult["timelineDayCellLayouts"];
   timelineDayCellRefs: UseTimelineMilestoneOverlaySyncResult["timelineDayCellRefs"];
   timelineGridHeight: UseTimelineMilestoneOverlaySyncResult["timelineGridHeight"];
@@ -20,7 +20,7 @@ interface UseTimelineMilestoneOverlayLayoutArgs {
 
 export function useTimelineMilestoneOverlayLayout({
   days,
-  events,
+  milestones,
   timelineDayCellLayouts,
   timelineDayCellRefs,
   timelineGridHeight,
@@ -58,10 +58,10 @@ export function useTimelineMilestoneOverlayLayout({
         return null;
       }
 
-      const isMultiDayEvent =
+      const isMultiDayMilestone =
         Boolean(popupStartDay) && Boolean(popupEndDay) && popupStartDay !== popupEndDay;
       const start = resolveDayLayout(popupStartDay);
-      const end = isMultiDayEvent ? resolveDayLayout(popupEndDay) : start;
+      const end = isMultiDayMilestone ? resolveDayLayout(popupEndDay) : start;
 
       if (!start || !end || !timelineShellRef.current) {
         return null;
@@ -98,11 +98,11 @@ export function useTimelineMilestoneOverlayLayout({
   const timelineDayMilestoneUnderlays = useMemo(
     () =>
       buildTimelineDayMilestoneUnderlays({
-        events,
+        milestones,
         resolveGeometry: resolveMilestonePopupGeometry,
         timelineDays: days,
       }),
-    [days, events, resolveMilestonePopupGeometry],
+    [days, milestones, resolveMilestonePopupGeometry],
   );
 
   return {

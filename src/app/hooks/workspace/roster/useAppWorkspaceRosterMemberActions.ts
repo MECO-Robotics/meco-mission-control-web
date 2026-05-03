@@ -11,8 +11,8 @@ import { isElevatedMemberRole } from "@/app/state/workspaceStateUtils";
 
 export function useAppWorkspaceRosterMemberActions(model: AppWorkspaceModel) {
   const handleCreateMember = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
+    async (milestone: FormEvent<HTMLFormElement>) => {
+      milestone.preventDefault();
       if (!model.selectedSeasonId) {
         model.setDataMessage("Pick a season before adding a roster member.");
         return;
@@ -48,8 +48,8 @@ export function useAppWorkspaceRosterMemberActions(model: AppWorkspaceModel) {
   );
 
   const handleUpdateMember = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
+    async (milestone: FormEvent<HTMLFormElement>) => {
+      milestone.preventDefault();
       if (!model.selectedMemberId || !model.memberEditDraft) {
         return;
       }
@@ -158,3 +158,4 @@ export function useAppWorkspaceRosterMemberActions(model: AppWorkspaceModel) {
     handleUpdateMember,
   };
 }
+

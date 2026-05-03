@@ -3,7 +3,7 @@ import type {
   AttendanceRecord,
   DesignIterationRecord,
   DisciplineRecord,
-  EventRecord,
+  MilestoneRecord,
   ManufacturingItemRecord,
   MaterialRecord,
   MemberRecord,
@@ -40,7 +40,7 @@ export interface BootstrapPayload {
   artifacts: ArtifactRecord[];
   partDefinitions: PartDefinitionRecord[];
   partInstances: PartInstanceRecord[];
-  events: EventRecord[];
+  milestones: MilestoneRecord[];
   taskDependencies?: TaskDependencyRecord[];
   taskBlockers?: TaskBlockerRecord[];
   reports: ReportRecord[];

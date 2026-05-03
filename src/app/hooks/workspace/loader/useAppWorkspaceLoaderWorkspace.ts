@@ -62,7 +62,7 @@ export function useAppWorkspaceLoaderWorkspace(
     model.activeTaskId,
     model.artifactDraft.kind,
     model.artifactModalMode,
-    model.eventReportModalMode,
+    model.milestoneReportModalMode,
     model.manufacturingModalMode,
     model.materialModalMode,
     model.mechanismModalMode,

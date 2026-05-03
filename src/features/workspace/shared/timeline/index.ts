@@ -14,13 +14,13 @@ export {
   withColumnOverlayTint,
 } from "./timelineDateUtils";
 export {
-  emptyTimelineEventDraft,
+  emptyTimelineMilestoneDraft,
   formatTaskAssignees,
   isSameHoveredMilestonePopup,
-  timelineEventDraftFromRecord,
+  timelineMilestoneDraftFromRecord,
   type HoveredMilestonePopup,
-  type TimelineEventDraft,
-} from "./timelineEventHelpers";
+  type TimelineMilestoneDraft,
+} from "./timelineMilestoneHelpers";
 export {
   TIMELINE_ZOOM_MAX,
   TIMELINE_ZOOM_MIN,

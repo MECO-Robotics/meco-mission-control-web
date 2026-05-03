@@ -80,7 +80,7 @@ const bootstrap: BootstrapPayload = {
       name: "Left drive rail",
       quantity: 1,
       trackIndividually: true,
-      status: "installed",
+      status: "ready",
     },
     {
       id: "arm-needed",
@@ -90,7 +90,7 @@ const bootstrap: BootstrapPayload = {
       name: "Shoulder bracket",
       quantity: 1,
       trackIndividually: true,
-      status: "needed",
+      status: "blocked",
     },
   ],
 };
@@ -100,7 +100,7 @@ describe("PartsView filters", () => {
     const filteredDefinitions = filterPartDefinitions({
       bootstrap,
       partSearch: "",
-      partStatus: ["installed"],
+      partStatus: ["ready"],
       partSubsystem: ["drive"],
     });
 
@@ -111,7 +111,7 @@ describe("PartsView filters", () => {
     const filteredDefinitions = filterPartDefinitions({
       bootstrap,
       partSearch: "",
-      partStatus: ["installed"],
+      partStatus: ["ready"],
       partSubsystem: ["arm"],
     });
 

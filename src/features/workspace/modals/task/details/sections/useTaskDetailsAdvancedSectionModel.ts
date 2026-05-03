@@ -111,8 +111,8 @@ export function useTaskDetailsAdvancedSectionModel({
     setEditingField(null);
   };
 
-  const handleStartDateChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setTaskDraft?.((current) => ({ ...current, startDate: event.target.value }));
+  const handleStartDateChange = (milestone: ChangeEvent<HTMLInputElement>) => {
+    setTaskDraft?.((current) => ({ ...current, startDate: milestone.target.value }));
     setEditingField(null);
   };
 
@@ -152,3 +152,4 @@ export function useTaskDetailsAdvancedSectionModel({
     selectedPartInstanceIds,
   };
 }
+

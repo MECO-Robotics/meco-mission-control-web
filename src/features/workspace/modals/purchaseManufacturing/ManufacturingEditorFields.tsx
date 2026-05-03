@@ -34,8 +34,8 @@ export function ManufacturingEditorFields({
       <label className="field modal-wide">
         <span style={{ color: "var(--text-title)" }}>Part definition</span>
         <select
-          onChange={(event) => {
-            const partDefinitionId = event.target.value;
+          onChange={(milestone) => {
+            const partDefinitionId = milestone.target.value;
 
             setManufacturingDraft((current) =>
               inferManufacturingDraftFromPartSelection(
@@ -73,10 +73,10 @@ export function ManufacturingEditorFields({
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Requester</span>
         <select
-          onChange={(event) =>
+          onChange={(milestone) =>
             setManufacturingDraft((current) => ({
               ...current,
-              requestedById: event.target.value || null,
+              requestedById: milestone.target.value || null,
             }))
           }
           style={{ background: "var(--bg-row-alt)", border: "1px solid var(--border-base)", color: "var(--text-title)" }}
@@ -93,10 +93,10 @@ export function ManufacturingEditorFields({
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Due date</span>
         <input
-          onChange={(event) =>
+          onChange={(milestone) =>
             setManufacturingDraft((current) => ({
               ...current,
-              dueDate: event.target.value,
+              dueDate: milestone.target.value,
             }))
           }
           style={{ background: "var(--bg-row-alt)", border: "1px solid var(--border-base)", color: "var(--text-title)" }}
@@ -107,8 +107,8 @@ export function ManufacturingEditorFields({
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Material</span>
         <select
-          onChange={(event) => {
-            const selectedId = event.target.value;
+          onChange={(milestone) => {
+            const selectedId = milestone.target.value;
             const material = bootstrap.materials.find((item) => item.id === selectedId);
             setManufacturingDraft((current) => ({
               ...current,
@@ -132,10 +132,10 @@ export function ManufacturingEditorFields({
         <span style={{ color: "var(--text-title)" }}>Quantity</span>
         <input
           min="1"
-          onChange={(event) =>
+          onChange={(milestone) =>
             setManufacturingDraft((current) => ({
               ...current,
-              quantity: Number(event.target.value),
+              quantity: Number(milestone.target.value),
             }))
           }
           style={{ background: "var(--bg-row-alt)", border: "1px solid var(--border-base)", color: "var(--text-title)" }}
@@ -146,10 +146,10 @@ export function ManufacturingEditorFields({
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Status</span>
         <select
-          onChange={(event) =>
+          onChange={(milestone) =>
             setManufacturingDraft((current) => ({
               ...current,
-              status: event.target.value as ManufacturingItemPayload["status"],
+              status: milestone.target.value as ManufacturingItemPayload["status"],
             }))
           }
           style={{ background: "var(--bg-row-alt)", border: "1px solid var(--border-base)", color: "var(--text-title)" }}
@@ -165,10 +165,10 @@ export function ManufacturingEditorFields({
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Batch label</span>
         <input
-          onChange={(event) =>
+          onChange={(milestone) =>
             setManufacturingDraft((current) => ({
               ...current,
-              batchLabel: event.target.value,
+              batchLabel: milestone.target.value,
             }))
           }
           placeholder="Optional"
@@ -181,10 +181,10 @@ export function ManufacturingEditorFields({
           <label className="checkbox-field">
             <input
               checked={manufacturingDraft.inHouse}
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setManufacturingDraft((current) => ({
                   ...current,
-                  inHouse: event.target.checked,
+                  inHouse: milestone.target.checked,
                 }))
               }
               type="checkbox"
@@ -198,10 +198,10 @@ export function ManufacturingEditorFields({
           <label className="checkbox-field">
             <input
               checked={manufacturingDraft.mentorReviewed}
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setManufacturingDraft((current) => ({
                   ...current,
-                  mentorReviewed: event.target.checked,
+                  mentorReviewed: milestone.target.checked,
                 }))
               }
               type="checkbox"

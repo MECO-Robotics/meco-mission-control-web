@@ -88,14 +88,14 @@ export function useTimelineViewState() {
     setTimelineZoom((previous) => clampTimelineZoom(previous + direction * TIMELINE_ZOOM_STEP));
   }, []);
 
-  const handleTimelineZoomWheel = useCallback((event: WheelEvent<HTMLDivElement>) => {
-    if (!(event.ctrlKey || event.metaKey) || event.deltaY === 0) {
+  const handleTimelineZoomWheel = useCallback((milestone: WheelEvent<HTMLDivElement>) => {
+    if (!(milestone.ctrlKey || milestone.metaKey) || milestone.deltaY === 0) {
       return;
     }
 
-    event.preventDefault();
+    milestone.preventDefault();
     setTimelineZoom((previous) =>
-      clampTimelineZoom(previous + (event.deltaY > 0 ? -TIMELINE_ZOOM_STEP : TIMELINE_ZOOM_STEP)),
+      clampTimelineZoom(previous + (milestone.deltaY > 0 ? -TIMELINE_ZOOM_STEP : TIMELINE_ZOOM_STEP)),
     );
   }, []);
 
@@ -186,4 +186,5 @@ export function useTimelineViewState() {
     viewInterval,
   };
 }
+
 

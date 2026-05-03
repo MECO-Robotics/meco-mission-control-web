@@ -2,7 +2,7 @@ export { EMPTY_BOOTSTRAP } from "./bootstrapDefaults";
 export { WORKSPACE_COLOR_PALETTE, resolveWorkspaceColor } from "./workspaceColors";
 export {
   type ArtifactModalMode,
-  type EventReportModalMode,
+  type MilestoneReportModalMode,
   type ManufacturingModalMode,
   type MaterialModalMode,
   type MechanismModalMode,

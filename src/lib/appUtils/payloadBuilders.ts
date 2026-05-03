@@ -60,7 +60,7 @@ export function buildEmptyReportPayload(
   reportType: ReportPayload["reportType"],
   defaults: {
     taskId?: string | null;
-    eventId?: string | null;
+    milestoneId?: string | null;
     projectId?: string;
     workstreamId?: string | null;
     createdByMemberId?: string | null;
@@ -80,13 +80,13 @@ export function buildEmptyReportPayload(
   const task = defaults.taskId
     ? bootstrap.tasks.find((candidate) => candidate.id === defaults.taskId) ?? null
     : bootstrap.tasks[0] ?? null;
-  const event = defaults.eventId
-    ? bootstrap.events.find((candidate) => candidate.id === defaults.eventId) ?? null
-    : bootstrap.events[0] ?? null;
+  const milestone = defaults.milestoneId
+    ? bootstrap.milestones.find((candidate) => candidate.id === defaults.milestoneId) ?? null
+    : bootstrap.milestones[0] ?? null;
   const resolvedProjectId =
     defaults.projectId ??
     task?.projectId ??
-    event?.projectIds?.[0] ??
+    milestone?.projectIds?.[0] ??
     bootstrap.projects[0]?.id ??
     "";
   const resolvedWorkstreamId =
@@ -96,7 +96,7 @@ export function buildEmptyReportPayload(
     reportType,
     projectId: resolvedProjectId,
     taskId: defaults.taskId ?? task?.id ?? null,
-    eventId: defaults.eventId ?? event?.id ?? null,
+    milestoneId: defaults.milestoneId ?? milestone?.id ?? null,
     workstreamId: resolvedWorkstreamId,
     createdByMemberId: defaults.createdByMemberId ?? bootstrap.members[0]?.id ?? null,
     result: defaults.result ?? "pass",
@@ -138,11 +138,11 @@ export function buildEmptyQaReportPayload(
 }
 
 export function buildEmptyTestResultPayload(bootstrap: BootstrapPayload): TestResultPayload {
-  const event = bootstrap.events[0] ?? null;
+  const milestone = bootstrap.milestones[0] ?? null;
 
-  return buildEmptyReportPayload(bootstrap, "EventTest", {
-    eventId: event?.id ?? "",
-    projectId: event?.projectIds?.[0] ?? bootstrap.projects[0]?.id ?? "",
+  return buildEmptyReportPayload(bootstrap, "MilestoneTest", {
+    milestoneId: milestone?.id ?? "",
+    projectId: milestone?.projectIds?.[0] ?? bootstrap.projects[0]?.id ?? "",
     result: "pass",
     summary: "",
     notes: "",
@@ -311,7 +311,7 @@ export function buildEmptyPartInstancePayload(
     name: "",
     quantity: 1,
     trackIndividually: false,
-    status: "planned",
+    status: "not ready",
     photoUrl: "",
   };
 }

@@ -1,8 +1,8 @@
-export { getEventProjectIds, getMilestoneSubsystemOptions, reconcileMilestoneSubsystemIds } from "./eventProjectUtils";
+export { getMilestoneProjectIds, getMilestoneSubsystemOptions, reconcileMilestoneSubsystemIds } from "./milestoneProjectUtils";
 export {
   DEFAULT_EVENT_TYPE,
   EVENT_TYPE_STYLES,
   EVENT_TYPE_OPTIONS,
-  getEventTypeStyle,
-  type WorkspaceEventStyle,
-} from "./eventStyles";
+  getMilestoneTypeStyle,
+  type WorkspaceMilestoneStyle,
+} from "./milestoneStyles";

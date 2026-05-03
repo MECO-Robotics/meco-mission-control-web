@@ -16,7 +16,7 @@ interface TimelineTaskTrackRowProps {
   clearHoveredMilestonePopup: () => void;
   clearHoveredTaskRow: () => void;
   firstDayGridColumn: number;
-  handleTimelineDayMouseEnter: (event: React.MouseEvent<HTMLElement>) => void;
+  handleTimelineDayMouseEnter: (milestone: React.MouseEvent<HTMLElement>) => void;
   hoveredTaskId?: string | null;
   hoverTaskRow: (id: string) => void;
   onOpenTask: (task: TaskRecord) => void;
@@ -134,3 +134,4 @@ export const TimelineTaskTrackRow: React.FC<TimelineTaskTrackRowProps> = ({
     </>
   );
 };
+

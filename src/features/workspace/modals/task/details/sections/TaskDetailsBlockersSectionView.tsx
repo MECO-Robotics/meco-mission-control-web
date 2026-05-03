@@ -58,8 +58,8 @@ export function TaskDetailsBlockersSectionView(props: TaskDetailsBlockersSection
                     <input
                       aria-label={`Blocker note ${index + 1}`}
                       className="task-detail-inline-edit-input task-details-blocker-input"
-                      onChange={(event) =>
-                        model.updateBlockerDraft(index, { description: event.target.value })
+                      onChange={(milestone) =>
+                        model.updateBlockerDraft(index, { description: milestone.target.value })
                       }
                       placeholder="Describe blocker"
                       value={blocker.description}

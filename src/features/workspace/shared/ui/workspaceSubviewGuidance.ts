@@ -22,7 +22,7 @@ export const SUBVIEW_INTERACTION_GUIDANCE: Record<WorkspaceSubviewTab, string> =
   timeline:
     "Use the person and date-range filters above to focus the schedule, click a date number to add or edit milestones for that day, collapse or expand subsystem rows with the arrows, click a task row to highlight it, and click the task label or bar to open details.",
   milestones:
-    "Use search and filters to narrow milestones, click a row to edit details, and use Add to create new milestone events tied to relevant subsystems when needed.",
+    "Use search and filters to narrow milestones, click a row to edit details, and use Add to create new milestone milestones tied to relevant subsystems when needed.",
   queue:
     "Use search and filters to narrow the list, click a column header to sort, and hover any row to reveal the pencil cue before clicking the row to open its task details. Use Add to create a new task.",
   logs:
@@ -30,7 +30,7 @@ export const SUBVIEW_INTERACTION_GUIDANCE: Record<WorkspaceSubviewTab, string> =
   summary:
     "Use this dashboard to review total work-log volume, compare planned hours versus logged hours, and spot top contributors and most active tasks at a glance.",
   reports:
-    "Use this page to launch QA and Event Result forms. Pick the report type you need, then open the matching modal to capture the task review or event findings.",
+    "Use this page to launch QA and Milestone Result forms. Pick the report type you need, then open the matching modal to capture the task review or milestone findings.",
   cnc:
     "Search and filter CNC jobs by subsystem, requester, material, or status, then hover a row to reveal the pencil cue before clicking the row to update that job. Use Add to enter a new CNC request tied to a catalog part.",
   prints:

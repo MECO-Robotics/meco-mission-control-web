@@ -6,7 +6,7 @@ import {
   buildEmptyTestResultPayload,
 } from "@/lib/appUtils";
 import type { QaReportPayload, TestResultPayload } from "@/types";
-import type { EventReportModalMode, QaReportModalMode } from "@/features/workspace";
+import type { MilestoneReportModalMode, QaReportModalMode } from "@/features/workspace";
 
 export function useAppWorkspaceUiStateReports() {
   const [qaReportModalMode, setQaReportModalMode] = useState<QaReportModalMode>(null);
@@ -15,26 +15,26 @@ export function useAppWorkspaceUiStateReports() {
   );
   const [isSavingQaReport, setIsSavingQaReport] = useState(false);
 
-  const [eventReportModalMode, setEventReportModalMode] =
-    useState<EventReportModalMode>(null);
-  const [eventReportDraft, setEventReportDraft] = useState<TestResultPayload>(
+  const [milestoneReportModalMode, setMilestoneReportModalMode] =
+    useState<MilestoneReportModalMode>(null);
+  const [milestoneReportDraft, setMilestoneReportDraft] = useState<TestResultPayload>(
     buildEmptyTestResultPayload(EMPTY_BOOTSTRAP),
   );
-  const [eventReportFindings, setEventReportFindings] = useState("");
-  const [isSavingEventReport, setIsSavingEventReport] = useState(false);
+  const [milestoneReportFindings, setMilestoneReportFindings] = useState("");
+  const [isSavingMilestoneReport, setIsSavingMilestoneReport] = useState(false);
 
   return {
-    eventReportDraft,
-    eventReportFindings,
-    eventReportModalMode,
-    isSavingEventReport,
+    milestoneReportDraft,
+    milestoneReportFindings,
+    milestoneReportModalMode,
+    isSavingMilestoneReport,
     isSavingQaReport,
     qaReportDraft,
     qaReportModalMode,
-    setEventReportDraft,
-    setEventReportFindings,
-    setEventReportModalMode,
-    setIsSavingEventReport,
+    setMilestoneReportDraft,
+    setMilestoneReportFindings,
+    setMilestoneReportModalMode,
+    setIsSavingMilestoneReport,
     setIsSavingQaReport,
     setQaReportDraft,
     setQaReportModalMode,

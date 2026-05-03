@@ -28,8 +28,8 @@ export function usePurchaseActions(model: AppWorkspaceModel) {
     model.setActivePurchaseId(null);
   }, [model]);
 
-  const handlePurchaseSubmit = useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handlePurchaseSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
+    milestone.preventDefault();
     model.setIsSavingPurchase(true);
     model.setDataMessage(null);
 
@@ -72,3 +72,4 @@ export function usePurchaseActions(model: AppWorkspaceModel) {
     openEditPurchaseModal,
   };
 }
+

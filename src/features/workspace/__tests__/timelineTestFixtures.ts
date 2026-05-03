@@ -74,7 +74,7 @@ export function createBootstrap(): BootstrapPayload {
         mechanismIds: [],
         partInstanceId: null,
         partInstanceIds: [],
-        targetEventId: null,
+        targetMilestoneId: null,
         ownerId: "member-1",
         assigneeIds: ["member-1"],
         mentorId: null,
@@ -125,11 +125,11 @@ export function createBootstrapWithoutTasks(): BootstrapPayload {
   };
 }
 
-export function createTimelineEvent(
-  overrides: Partial<BootstrapPayload["events"][number]>,
-): BootstrapPayload["events"][number] {
+export function createTimelineMilestone(
+  overrides: Partial<BootstrapPayload["milestones"][number]>,
+): BootstrapPayload["milestones"][number] {
   return {
-    id: "event-1",
+    id: "milestone-1",
     title: "Design review",
     type: "internal-review",
     startDateTime: "2026-04-08T09:00:00.000Z",

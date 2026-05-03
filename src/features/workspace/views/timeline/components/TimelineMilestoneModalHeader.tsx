@@ -1,12 +1,12 @@
 interface TimelineMilestoneModalHeaderProps {
-  activeEventDay: string | null;
+  activeMilestoneDay: string | null;
   mode: "create" | "edit";
   onClose: () => void;
   onSwitchToTask: () => void;
 }
 
 export function TimelineMilestoneModalHeader({
-  activeEventDay,
+  activeMilestoneDay,
   mode,
   onClose,
   onSwitchToTask,
@@ -44,9 +44,9 @@ export function TimelineMilestoneModalHeader({
         ) : (
           <h2 style={{ color: "var(--text-title)" }}>Edit milestone</h2>
         )}
-        {activeEventDay ? (
+        {activeMilestoneDay ? (
           <p className="section-copy" style={{ marginTop: "0.25rem" }}>
-            Date: {activeEventDay}
+            Date: {activeMilestoneDay}
           </p>
         ) : null}
       </div>

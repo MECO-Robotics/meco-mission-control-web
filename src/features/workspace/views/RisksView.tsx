@@ -194,13 +194,13 @@ export function RisksView({
                 className="ops-table ops-row subsystem-manager-row editable-row-clickable editable-hover-target editable-hover-target-row"
                 key={risk.id}
                 onClick={() => viewModel.openEditEditor(risk)}
-                onKeyDown={(event) => {
-                  if (event.target !== event.currentTarget) {
+                onKeyDown={(milestone) => {
+                  if (milestone.target !== milestone.currentTarget) {
                     return;
                   }
 
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
+                  if (milestone.key === "Enter" || milestone.key === " ") {
+                    milestone.preventDefault();
                     viewModel.openEditEditor(risk);
                   }
                 }}
@@ -272,3 +272,4 @@ export function RisksView({
     </section>
   );
 }
+

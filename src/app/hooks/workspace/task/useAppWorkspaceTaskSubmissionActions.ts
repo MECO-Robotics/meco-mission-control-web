@@ -18,8 +18,8 @@ export function useAppWorkspaceTaskSubmissionActions(
   closeTaskModal: () => void,
 ) {
   const handleTaskSubmit = useCallback(
-    async (event: React.FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
+    async (milestone: React.FormEvent<HTMLFormElement>) => {
+      milestone.preventDefault();
       model.setIsSavingTask(true);
       model.setDataMessage(null);
 
@@ -66,3 +66,4 @@ export function useAppWorkspaceTaskSubmissionActions(
     handleTaskSubmit,
   };
 }
+

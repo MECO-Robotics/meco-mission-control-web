@@ -106,3 +106,4 @@ export function KanbanScrollFrame({ children, motionClassName = "" }: KanbanScro
     </div>
   );
 }
+

@@ -21,7 +21,7 @@ export function SearchToolbarInput({
       <input
         aria-label={ariaLabel ?? placeholder}
         className="toolbar-search-input"
-        onChange={(event) => onChange(event.target.value)}
+        onChange={(milestone) => onChange(milestone.target.value)}
         placeholder={placeholder}
         type="text"
         value={value}

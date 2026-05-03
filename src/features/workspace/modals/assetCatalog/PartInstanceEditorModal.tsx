@@ -5,7 +5,7 @@ import { PhotoUploadField } from "@/features/workspace/shared/media";
 interface PartInstanceEditorModalProps {
   bootstrap: BootstrapPayload;
   closePartInstanceModal: () => void;
-  handlePartInstanceSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  handlePartInstanceSubmit: (milestone: FormEvent<HTMLFormElement>) => void;
   isSavingPartInstance: boolean;
   requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   partDefinitionDraftsById: Record<string, BootstrapPayload["partDefinitions"][number]>;
@@ -66,8 +66,8 @@ export function PartInstanceEditorModal({
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Name</span>
             <input
-              onChange={(event) =>
-                setPartInstanceDraft((current) => ({ ...current, name: event.target.value }))
+              onChange={(milestone) =>
+                setPartInstanceDraft((current) => ({ ...current, name: milestone.target.value }))
               }
               placeholder={
                 partDefinitionDraftsById[partInstanceDraft.partDefinitionId]?.name ??
@@ -85,10 +85,10 @@ export function PartInstanceEditorModal({
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Part definition</span>
             <select
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setPartInstanceDraft((current) => ({
                   ...current,
-                  partDefinitionId: event.target.value,
+                  partDefinitionId: milestone.target.value,
                 }))
               }
               required
@@ -109,9 +109,9 @@ export function PartInstanceEditorModal({
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Subsystem</span>
             <select
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setPartInstanceDraft((current) => {
-                  const subsystemId = event.target.value;
+                  const subsystemId = milestone.target.value;
                   const nextMechanisms = bootstrap.mechanisms.filter(
                     (mechanism) => mechanism.subsystemId === subsystemId,
                   );
@@ -140,9 +140,9 @@ export function PartInstanceEditorModal({
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Mechanism</span>
             <select
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setPartInstanceDraft((current) => {
-                  const mechanismId = event.target.value || null;
+                  const mechanismId = milestone.target.value || null;
                   const selectedMechanism = mechanismId
                     ? bootstrap.mechanisms.find((mechanism) => mechanism.id === mechanismId) ?? null
                     : null;
@@ -173,10 +173,10 @@ export function PartInstanceEditorModal({
             <span style={{ color: "var(--text-title)" }}>Quantity</span>
             <input
               min="1"
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setPartInstanceDraft((current) => ({
                   ...current,
-                  quantity: Number(event.target.value),
+                  quantity: Number(milestone.target.value),
                 }))
               }
               style={{
@@ -191,10 +191,10 @@ export function PartInstanceEditorModal({
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Status</span>
             <select
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setPartInstanceDraft((current) => ({
                   ...current,
-                  status: event.target.value as PartInstancePayload["status"],
+                  status: milestone.target.value as PartInstancePayload["status"],
                 }))
               }
               style={{
@@ -204,21 +204,20 @@ export function PartInstanceEditorModal({
               }}
               value={partInstanceDraft.status}
             >
-              <option value="planned">Planned</option>
-              <option value="needed">Needed</option>
-              <option value="available">Available</option>
-              <option value="installed">Installed</option>
-              <option value="retired">Retired</option>
+              <option value="not ready">Not ready</option>
+              <option value="blocked">Blocked</option>
+              <option value="qa">QA</option>
+              <option value="ready">Ready</option>
             </select>
           </label>
           <div className="checkbox-row modal-wide">
             <label className="checkbox-field">
               <input
                 checked={partInstanceDraft.trackIndividually}
-                onChange={(event) =>
+                onChange={(milestone) =>
                   setPartInstanceDraft((current) => ({
                     ...current,
-                    trackIndividually: event.target.checked,
+                    trackIndividually: milestone.target.checked,
                   }))
                 }
                 type="checkbox"
@@ -268,4 +267,5 @@ export function PartInstanceEditorModal({
     </div>
   );
 }
+
 

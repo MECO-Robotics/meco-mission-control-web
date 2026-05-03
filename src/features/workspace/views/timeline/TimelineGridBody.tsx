@@ -24,8 +24,8 @@ interface TimelineGridBodyProps {
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
   firstDayGridColumn: number;
   gridMinWidth: number;
-  handleTimelineDayMouseEnter: (event: React.MouseEvent<HTMLElement>) => void;
-  handleTimelineZoomWheel: (event: React.WheelEvent<HTMLDivElement>) => void;
+  handleTimelineDayMouseEnter: (milestone: React.MouseEvent<HTMLElement>) => void;
+  handleTimelineZoomWheel: (milestone: React.WheelEvent<HTMLDivElement>) => void;
   hasProjectColumn: boolean;
   isScrolling: boolean;
   isWeekView: boolean;
@@ -238,3 +238,4 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
     </TimelineGridHeader>
   );
 };
+

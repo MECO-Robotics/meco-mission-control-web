@@ -4,7 +4,7 @@ type StructureModalShellProps = {
   eyebrowLabel: string;
   title: string;
   onClose: () => void;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onSubmit: (milestone: FormEvent<HTMLFormElement>) => void;
   children: ReactNode;
 };
 
@@ -59,3 +59,4 @@ export function StructureModalShell({
     </div>
   );
 }
+

@@ -37,7 +37,7 @@ const TimelineMilestoneHoverLayerComponent: React.FC<TimelineMilestoneHoverLayer
     <>
       <div
         aria-hidden="true"
-        className="timeline-day-event-overlay-column"
+        className="timeline-day-milestone-overlay-column"
         style={{
           background: withColumnOverlayTint(popup.background),
           height: `${geometry.bodyHeight}px`,
@@ -47,7 +47,7 @@ const TimelineMilestoneHoverLayerComponent: React.FC<TimelineMilestoneHoverLayer
         }}
       />
       <div
-        className="timeline-day-event-overlay-tooltip"
+        className="timeline-day-milestone-overlay-tooltip"
         role="presentation"
         style={{
           left: `${geometry.left}px`,
@@ -66,14 +66,14 @@ const TimelineMilestoneHoverLayerComponent: React.FC<TimelineMilestoneHoverLayer
 
           return (
             <span
-              className="timeline-day-event-overlay-tooltip-lane"
+              className="timeline-day-milestone-overlay-tooltip-lane"
               key={`${line}-${index}`}
               style={{
                 left: `calc(50% + ${horizontalOffset}px)`,
               }}
             >
               <span
-                className="timeline-day-event-overlay-tooltip-item"
+                className="timeline-day-milestone-overlay-tooltip-item"
                 style={{
                   transform: `rotate(${popup.rotationDeg}deg)`,
                   transformOrigin: "center",

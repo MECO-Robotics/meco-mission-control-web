@@ -43,7 +43,7 @@ describe("TaskEditorModal", () => {
     expect(editMarkup).toContain("task-details-assigned-list");
     expect(editMarkup).toContain('data-inline-edit-field="mentor"');
     expect(editMarkup).toContain('data-inline-edit-field="dueDate"');
-    expect(editMarkup).toContain('data-inline-edit-field="targetEvent"');
+    expect(editMarkup).toContain('data-inline-edit-field="targetMilestone"');
     expect(editMarkup).toContain('data-inline-edit-field="discipline"');
     expect(editMarkup).toContain("task-details-overview-subsystem");
     expect(editMarkup).toContain('data-inline-edit-field="subsystem"');

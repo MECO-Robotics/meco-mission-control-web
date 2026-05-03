@@ -2,12 +2,12 @@ import { useEffect, type Dispatch, type SetStateAction } from "react";
 
 const BROWSER_ZOOM_SHORTCUT_KEYS = new Set(["+", "=", "-", "0", "add", "subtract"]);
 
-function isBrowserZoomShortcut(event: KeyboardEvent) {
-  if (!(event.ctrlKey || event.metaKey)) {
+function isBrowserZoomShortcut(milestone: KeyboardEvent) {
+  if (!(milestone.ctrlKey || milestone.metaKey)) {
     return false;
   }
 
-  const normalizedKey = event.key.toLowerCase();
+  const normalizedKey = milestone.key.toLowerCase();
   return BROWSER_ZOOM_SHORTCUT_KEYS.has(normalizedKey);
 }
 
@@ -60,24 +60,24 @@ export function useAppWorkspaceGlobalEffects({
   }, [isDarkMode, pageShellStyle]);
 
   useEffect(() => {
-    const handleWheel = (event: WheelEvent) => {
-      if (!event.ctrlKey && !event.metaKey) {
+    const handleWheel = (milestone: WheelEvent) => {
+      if (!milestone.ctrlKey && !milestone.metaKey) {
         return;
       }
 
-      event.preventDefault();
+      milestone.preventDefault();
     };
 
     const handleGestureStart = (event: Event) => {
       event.preventDefault();
     };
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (!isBrowserZoomShortcut(event)) {
+    const handleKeyDown = (milestone: KeyboardEvent) => {
+      if (!isBrowserZoomShortcut(milestone)) {
         return;
       }
 
-      event.preventDefault();
+      milestone.preventDefault();
     };
 
     window.addEventListener("wheel", handleWheel, { passive: false });
@@ -110,8 +110,8 @@ export function useAppWorkspaceGlobalEffects({
       return;
     }
 
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+    const onKeyDown = (milestone: KeyboardEvent) => {
+      if (milestone.key === "Escape") {
         toggleSidebar();
       }
     };
@@ -127,8 +127,8 @@ export function useAppWorkspaceGlobalEffects({
       return;
     }
 
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+    const onKeyDown = (milestone: KeyboardEvent) => {
+      if (milestone.key === "Escape") {
         setIsAddSeasonPopupOpen(false);
       }
     };
@@ -144,8 +144,8 @@ export function useAppWorkspaceGlobalEffects({
       return;
     }
 
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+    const onKeyDown = (milestone: KeyboardEvent) => {
+      if (milestone.key === "Escape") {
         setRobotProjectModalMode(null);
       }
     };
@@ -156,3 +156,4 @@ export function useAppWorkspaceGlobalEffects({
     };
   }, [robotProjectModalMode, setRobotProjectModalMode]);
 }
+

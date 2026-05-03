@@ -156,7 +156,7 @@ export function PaginationControls({
         Rows
         <select
           aria-label={`${label} rows per page`}
-          onChange={(event) => onPageSizeChange(Number(event.target.value))}
+          onChange={(milestone) => onPageSizeChange(Number(milestone.target.value))}
           value={pageSize}
         >
           {pageSizeOptions.map((option) => (

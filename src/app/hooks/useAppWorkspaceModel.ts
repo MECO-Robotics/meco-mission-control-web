@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { useEffect, useRef } from "react";
 import { useAppWorkspaceDerived } from "@/app/hooks/useAppWorkspaceDerived";
 import { useAppWorkspaceLoader } from "@/app/hooks/useAppWorkspaceLoader";
 import { useInteractiveTutorial } from "@/app/interactiveTutorial/useInteractiveTutorial";
@@ -19,6 +20,31 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     ...state,
     ...derived,
   });
+  const didAutoLoadWorkspaceRef = useRef(false);
+
+  useEffect(() => {
+    if (state.authBooting) {
+      return;
+    }
+
+    if (state.enforcedAuthConfig && !state.sessionUser) {
+      didAutoLoadWorkspaceRef.current = false;
+      return;
+    }
+
+    if (didAutoLoadWorkspaceRef.current) {
+      return;
+    }
+
+    didAutoLoadWorkspaceRef.current = true;
+    void loader.loadWorkspace();
+  }, [
+    loader.loadWorkspace,
+    state.authBooting,
+    state.enforcedAuthConfig,
+    state.sessionUser,
+  ]);
+
   const interactiveTutorial = useInteractiveTutorial({
     activeTab: state.activeTab,
     taskView: state.taskView,

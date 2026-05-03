@@ -102,10 +102,10 @@ export function TaskDetailsHeaderSection({
   canInlineEdit,
 }: TaskDetailsHeaderSectionProps) {
   const editableTask = taskDraft ?? activeTask;
-  const eventsById = Object.fromEntries(bootstrap.events.map((event) => [event.id, event]));
-  const linkedEvent =
-    editableTask.targetEventId && eventsById[editableTask.targetEventId]
-      ? eventsById[editableTask.targetEventId]
+  const milestonesById = Object.fromEntries(bootstrap.milestones.map((milestone) => [milestone.id, milestone]));
+  const linkedMilestone =
+    editableTask.targetMilestoneId && milestonesById[editableTask.targetMilestoneId]
+      ? milestonesById[editableTask.targetMilestoneId]
       : null;
   const openBlockers = getTaskOpenBlockersForTask(activeTask.id, bootstrap);
   const isBlockedByDependency = openBlockers.length > 0;
@@ -135,10 +135,10 @@ export function TaskDetailsHeaderSection({
             ? "pill task-detail-hours-pill task-detail-hours-pill-warning"
             : "pill task-detail-hours-pill task-detail-hours-pill-danger"
       : "pill task-detail-hours-pill task-detail-hours-pill-neutral";
-  const targetEventText = linkedEvent ? linkedEvent.title : "No target milestone";
-  const targetEventOptions = bootstrap.events.map((event) => ({
-    id: event.id,
-    name: event.title,
+  const targetMilestoneText = linkedMilestone ? linkedMilestone.title : "No target milestone";
+  const targetMilestoneOptions = bootstrap.milestones.map((milestone) => ({
+    id: milestone.id,
+    name: milestone.title,
   }));
 
   return (
@@ -160,8 +160,8 @@ export function TaskDetailsHeaderSection({
                       className="task-detail-inline-edit-input task-detail-inline-edit-input-title"
                       data-inline-edit-field="title"
                       onBlur={() => setEditingField(null)}
-                      onChange={(event) =>
-                        setTaskDraft?.((current) => ({ ...current, title: event.target.value }))
+                      onChange={(milestone) =>
+                        setTaskDraft?.((current) => ({ ...current, title: milestone.target.value }))
                       }
                       required
                       value={taskDraft?.title ?? activeTask.title}
@@ -195,8 +195,8 @@ export function TaskDetailsHeaderSection({
                     className="task-detail-inline-edit-input task-detail-inline-edit-input-date"
                     data-inline-edit-field="dueDate"
                     onBlur={() => setEditingField(null)}
-                    onChange={(event) => {
-                      setTaskDraft?.((current) => ({ ...current, dueDate: event.target.value }));
+                    onChange={(milestone) => {
+                      setTaskDraft?.((current) => ({ ...current, dueDate: milestone.target.value }));
                       setEditingField(null);
                     }}
                     type="date"
@@ -222,39 +222,39 @@ export function TaskDetailsHeaderSection({
               )}
               <span style={{ color: "var(--text-copy)" }}> {"->"} </span>
               {canInlineEdit ? (
-                editingField === "targetEvent" ? (
+                editingField === "targetMilestone" ? (
                   <FilterDropdown
                     allLabel="No target milestone"
                     ariaLabel="Set target milestone"
-                    buttonInlineEditField="targetEvent"
+                    buttonInlineEditField="targetMilestone"
                     className="task-queue-filter-menu-submenu"
                     icon={<IconTasks />}
                     singleSelect
                     onChange={(selection) => {
                       setTaskDraft?.((current) => ({
                         ...current,
-                        targetEventId: selection[0] ?? null,
+                        targetMilestoneId: selection[0] ?? null,
                       }));
                       setEditingField(null);
                     }}
-                    options={targetEventOptions}
-                    value={editableTask.targetEventId ? [editableTask.targetEventId] : []}
+                    options={targetMilestoneOptions}
+                    value={editableTask.targetMilestoneId ? [editableTask.targetMilestoneId] : []}
                   />
                 ) : (
                   <span className="task-detail-inline-edit-shell task-detail-inline-edit-shell-inline">
                     <button
                       className="task-detail-inline-edit-trigger task-detail-inline-edit-trigger-inline"
-                      data-inline-edit-field="targetEvent"
-                      onClick={() => setEditingField("targetEvent")}
+                      data-inline-edit-field="targetMilestone"
+                      onClick={() => setEditingField("targetMilestone")}
                       type="button"
                     >
-                      <span>{targetEventText}</span>
+                      <span>{targetMilestoneText}</span>
                     </button>
                     <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator" />
                   </span>
                 )
               ) : (
-                <span onDoubleClick={openTaskEditModal}>{targetEventText}</span>
+                <span onDoubleClick={openTaskEditModal}>{targetMilestoneText}</span>
               )}
             </div>
           </div>

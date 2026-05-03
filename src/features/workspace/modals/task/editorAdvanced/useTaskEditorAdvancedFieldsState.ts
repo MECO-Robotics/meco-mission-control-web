@@ -124,11 +124,11 @@ export function useTaskEditorAdvancedFieldsState({
       taskDependencies: (current.taskDependencies ?? []).filter((dependency) =>
         dependency.kind === "task"
           ? validDependencyTaskIds.has(dependency.refId)
-          : dependency.kind === "milestone" || dependency.kind === "event"
-            ? bootstrap.events.some(
-                (event) =>
-                  (event.projectIds.length === 0 || event.projectIds.includes(projectId)) &&
-                  event.id === dependency.refId,
+          : dependency.kind === "milestone"
+            ? bootstrap.milestones.some(
+                (milestone) =>
+                  (milestone.projectIds.length === 0 || milestone.projectIds.includes(projectId)) &&
+                  milestone.id === dependency.refId,
               )
             : dependency.kind === "part_instance"
               ? bootstrap.partInstances.some((partInstance) => {

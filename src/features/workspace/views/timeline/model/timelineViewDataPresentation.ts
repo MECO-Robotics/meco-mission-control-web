@@ -1,9 +1,9 @@
-import type { BootstrapPayload, EventRecord } from "@/types";
+import type { BootstrapPayload, MilestoneRecord } from "@/types";
 import {
   filterSelectionMatchesTaskPeople,
   type FilterSelection,
 } from "@/features/workspace/shared";
-import { getEventTypeStyle } from "@/features/workspace/shared/events";
+import { getMilestoneTypeStyle } from "@/features/workspace/shared/milestones";
 import { datePortion, monthLabelFromDay } from "@/features/workspace/shared/timeline";
 import type {
   TimelineMonthGroup,
@@ -44,26 +44,26 @@ export function buildTimelineMonthGroups(days: string[]) {
 
 export function buildTimelineDayHeaderCells(
   days: string[],
-  dayEventsByDate: Record<string, EventRecord[]>,
+  dayMilestonesByDate: Record<string, MilestoneRecord[]>,
 ) {
   return days.map((day) => {
-    const eventsOnDay = dayEventsByDate[day] ?? [];
-    const primaryEvent = eventsOnDay[0];
-    const dayStyle = primaryEvent ? getEventTypeStyle(primaryEvent.type) : null;
-    const primaryEventStartDay = primaryEvent ? datePortion(primaryEvent.startDateTime) : day;
-    const primaryEventEndDay = primaryEvent?.endDateTime
-      ? datePortion(primaryEvent.endDateTime)
-      : primaryEventStartDay;
+    const milestonesOnDay = dayMilestonesByDate[day] ?? [];
+    const primaryMilestone = milestonesOnDay[0];
+    const dayStyle = primaryMilestone ? getMilestoneTypeStyle(primaryMilestone.type) : null;
+    const primaryMilestoneStartDay = primaryMilestone ? datePortion(primaryMilestone.startDateTime) : day;
+    const primaryMilestoneEndDay = primaryMilestone?.endDateTime
+      ? datePortion(primaryMilestone.endDateTime)
+      : primaryMilestoneStartDay;
     const dayDate = new Date(`${day}T00:00:00`);
 
     return {
       day,
       weekdayLabel: WEEKDAY_SHORT_FORMATTER.format(dayDate),
       dayNumberLabel: DAY_NUMBER_FORMATTER.format(dayDate),
-      eventsOnDay,
+      milestonesOnDay,
       dayStyle,
-      primaryEventStartDay,
-      primaryEventEndDay,
+      primaryMilestoneStartDay,
+      primaryMilestoneEndDay,
     };
   });
 }
@@ -107,27 +107,27 @@ export function buildTimelineProjectRows(subsystemRows: TimelineSubsystemRow[]) 
   });
 }
 
-export function filterTimelineEventsByPersonSelection({
+export function filterTimelineMilestonesByPersonSelection({
   activePersonFilter,
-  events,
+  milestones,
   tasks,
 }: {
   activePersonFilter: FilterSelection;
-  events: BootstrapPayload["events"];
+  milestones: BootstrapPayload["milestones"];
   tasks: BootstrapPayload["tasks"];
 }) {
   if (activePersonFilter.length === 0) {
-    return events;
+    return milestones;
   }
 
-  const matchingEventIds = new Set(
+  const matchingMilestoneIds = new Set(
     tasks.flatMap((task) =>
-      task.targetEventId && filterSelectionMatchesTaskPeople(activePersonFilter, task)
-        ? [task.targetEventId]
+      task.targetMilestoneId && filterSelectionMatchesTaskPeople(activePersonFilter, task)
+        ? [task.targetMilestoneId]
         : [],
     ),
   );
 
-  return events.filter((event) => matchingEventIds.has(event.id));
+  return milestones.filter((milestone) => matchingMilestoneIds.has(milestone.id));
 }
 

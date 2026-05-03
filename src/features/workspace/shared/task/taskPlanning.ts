@@ -14,8 +14,8 @@ import {
   isTaskDependencySatisfied,
 } from "./taskPlanningInternals";
 
-function getEventById(bootstrap: BootstrapPayload, eventId: string) {
-  return bootstrap.events.find((candidate) => candidate.id === eventId) ?? null;
+function getMilestoneById(bootstrap: BootstrapPayload, milestoneId: string) {
+  return bootstrap.milestones.find((candidate) => candidate.id === milestoneId) ?? null;
 }
 
 export function getTaskWaitingOnDependencyRecords(
@@ -52,11 +52,11 @@ export function getTaskPlanningState(
     return "waiting-on-dependency";
   }
 
-  const deadlineDay = task.targetEventId && getEventById(bootstrap, task.targetEventId)
+  const deadlineDay = task.targetMilestoneId && getMilestoneById(bootstrap, task.targetMilestoneId)
     ? (() => {
-        const event = getEventById(bootstrap, task.targetEventId);
-        const eventDay = event?.startDateTime.slice(0, 10) ?? task.dueDate;
-        return eventDay < task.dueDate ? eventDay : task.dueDate;
+        const milestone = getMilestoneById(bootstrap, task.targetMilestoneId);
+        const milestoneDay = milestone?.startDateTime.slice(0, 10) ?? task.dueDate;
+        return milestoneDay < task.dueDate ? milestoneDay : task.dueDate;
       })()
     : task.dueDate;
   const hoursUntilDeadline = (() => {

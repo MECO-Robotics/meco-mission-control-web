@@ -4,7 +4,7 @@ import type { MaterialPayload } from "@/types";
 interface MaterialEditorModalProps {
   closeMaterialModal: () => void;
   handleDeleteMaterial: (id: string) => void;
-  handleMaterialSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  handleMaterialSubmit: (milestone: FormEvent<HTMLFormElement>) => void;
   isDeletingMaterial: boolean;
   isSavingMaterial: boolean;
   materialDraft: MaterialPayload;
@@ -58,8 +58,8 @@ export function MaterialEditorModal({
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Name</span>
             <input
-              onChange={(event) =>
-                setMaterialDraft((current) => ({ ...current, name: event.target.value }))
+              onChange={(milestone) =>
+                setMaterialDraft((current) => ({ ...current, name: milestone.target.value }))
               }
               required
               style={{
@@ -73,10 +73,10 @@ export function MaterialEditorModal({
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Category</span>
             <select
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setMaterialDraft((current) => ({
                   ...current,
-                  category: event.target.value as MaterialPayload["category"],
+                  category: milestone.target.value as MaterialPayload["category"],
                 }))
               }
               style={{
@@ -99,8 +99,8 @@ export function MaterialEditorModal({
             <span style={{ color: "var(--text-title)" }}>On hand</span>
             <input
               min="0"
-              onChange={(event) => {
-                const onHandQuantity = Number(event.target.value);
+              onChange={(milestone) => {
+                const onHandQuantity = Number(milestone.target.value);
                 setMaterialDraft((current) => ({
                   ...current,
                   onHandQuantity,
@@ -124,10 +124,10 @@ export function MaterialEditorModal({
             <input
               disabled={materialModalMode === "create"}
               min="0"
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setMaterialDraft((current) => ({
                   ...current,
-                  reorderPoint: Number(event.target.value),
+                  reorderPoint: Number(milestone.target.value),
                 }))
               }
               style={{
@@ -147,8 +147,8 @@ export function MaterialEditorModal({
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Location</span>
             <input
-              onChange={(event) =>
-                setMaterialDraft((current) => ({ ...current, location: event.target.value }))
+              onChange={(milestone) =>
+                setMaterialDraft((current) => ({ ...current, location: milestone.target.value }))
               }
               style={{
                 background: "var(--bg-row-alt)",
@@ -161,8 +161,8 @@ export function MaterialEditorModal({
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Vendor</span>
             <input
-              onChange={(event) =>
-                setMaterialDraft((current) => ({ ...current, vendor: event.target.value }))
+              onChange={(milestone) =>
+                setMaterialDraft((current) => ({ ...current, vendor: milestone.target.value }))
               }
               style={{
                 background: "var(--bg-row-alt)",
@@ -175,8 +175,8 @@ export function MaterialEditorModal({
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Notes</span>
             <textarea
-              onChange={(event) =>
-                setMaterialDraft((current) => ({ ...current, notes: event.target.value }))
+              onChange={(milestone) =>
+                setMaterialDraft((current) => ({ ...current, notes: milestone.target.value }))
               }
               rows={3}
               style={{
@@ -219,3 +219,4 @@ export function MaterialEditorModal({
     </div>
   );
 }
+

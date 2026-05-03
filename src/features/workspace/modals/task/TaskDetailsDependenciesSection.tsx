@@ -7,13 +7,15 @@ import type {
   TaskRecord,
 } from "@/types";
 import { formatIterationVersion } from "@/lib/appUtils";
-import { IconManufacturing, IconParts, IconPlus, IconTasks, IconTrash } from "@/components/shared/Icons";
+import { IconPlus, IconTasks, IconTrash } from "@/components/shared/Icons";
 import { FilterDropdown } from "../../shared/WorkspaceViewShared";
 import {
   getTaskDependencyRecordsForTask,
   getTaskDependencyTargetName,
   TASK_DEPENDENCY_KIND_LABELS,
+  TASK_DEPENDENCY_KIND_OPTIONS,
   TASK_DEPENDENCY_TYPE_LABELS,
+  getTaskDependencyTargetOptions,
 } from "../../shared/task/taskTargeting";
 import { TaskDetailReveal } from "./details/TaskDetailReveal";
 
@@ -26,7 +28,7 @@ interface TaskDetailsDependenciesSectionProps {
 }
 
 function getDependencyDefaultState(kind: TaskDependencyKind) {
-  return kind === "part_instance" ? "available" : "complete";
+  return kind === "part_instance" || kind === "milestone" ? "ready" : "complete";
 }
 
 function getDependencyKey(dependency: { id?: string } | undefined, index: number) {
@@ -44,7 +46,9 @@ export function TaskDetailsDependenciesSection({
   const [dependencyAddMenuKey, setDependencyAddMenuKey] = useState(0);
 
   const tasksById = Object.fromEntries(bootstrap.tasks.map((task) => [task.id, task] as const));
-  const eventsById = Object.fromEntries(bootstrap.events.map((event) => [event.id, event] as const));
+  const milestonesById = Object.fromEntries(
+    bootstrap.milestones.map((milestone) => [milestone.id, milestone] as const),
+  );
   const partInstancesById = Object.fromEntries(
     bootstrap.partInstances.map((partInstance) => [partInstance.id, partInstance] as const),
   );
@@ -58,44 +62,26 @@ export function TaskDetailsDependenciesSection({
     const key = getDependencyKey(dependency, index);
 
     return {
-      ...dependency,
-      key,
-      name: getTaskDependencyTargetName(dependency.kind, dependency.refId, {
-        tasksById,
-        eventsById,
-        partInstancesById,
-        partDefinitionsById,
-        formatIterationVersion,
-      }),
-    };
-  });
-  const dependencyKindOptions = Object.entries(TASK_DEPENDENCY_KIND_LABELS).map(([kind, label]) => ({
-    id: kind,
-    name: label,
-    icon:
-      kind === "part_instance" ? <IconParts /> : kind === "milestone" ? <IconManufacturing /> : <IconTasks />,
-  }));
-
-  const getDependencyTargetOptions = (kind: TaskDependencyKind) => {
-    if (kind === "task") {
-      return [...bootstrap.tasks]
-        .filter((task) => task.projectId === taskDraft?.projectId)
-        .sort((left, right) => left.title.localeCompare(right.title))
-        .map((task) => ({ id: task.id, name: task.title }));
-    }
-
-    if (kind === "milestone" || kind === "event") {
-      return bootstrap.events
-        .filter((event) => (event.projectIds.length === 0 ? true : event.projectIds.includes(taskDraft?.projectId ?? "")))
-        .sort((left, right) => left.title.localeCompare(right.title))
-        .map((event) => ({ id: event.id, name: event.title }));
-    }
-
-    return bootstrap.partInstances.map((partInstance) => ({
-      id: partInstance.id,
-      name: partInstance.name,
-    }));
-  };
+        ...dependency,
+        key,
+        name: getTaskDependencyTargetName(dependency.kind, dependency.refId, {
+          tasksById,
+          milestonesById,
+          partInstancesById,
+          partDefinitionsById,
+          formatIterationVersion,
+        }),
+      };
+    });
+  const dependencyKindOptions = TASK_DEPENDENCY_KIND_OPTIONS;
+  const getDependencyTargetOptions = (kind: TaskDependencyKind) =>
+    getTaskDependencyTargetOptions(kind, {
+      tasksById,
+      milestonesById,
+      partInstancesById,
+      partDefinitionsById,
+      formatIterationVersion,
+    });
 
   const updateDependencyDraft = (
     dependencyKey: string,
@@ -226,13 +212,13 @@ export function TaskDetailsDependenciesSection({
                         />
                       </label>
                       <label className="field task-details-dependency-editor-field">
-                        <span style={{ color: "var(--text-title)" }}>Depends on</span>
-                        <FilterDropdown
-                          allLabel={`Select ${TASK_DEPENDENCY_KIND_LABELS[dependency.kind].toLowerCase()}`}
-                          ariaLabel="Set dependency target"
-                          buttonInlineEditField={`dependency-target-${index}`}
-                          className="task-queue-filter-menu-submenu task-details-dependency-target-menu"
-                          icon={dependency.kind === "part_instance" ? <IconParts /> : <IconTasks />}
+                <span style={{ color: "var(--text-title)" }}>Depends on</span>
+                <FilterDropdown
+                  allLabel={`Select ${TASK_DEPENDENCY_KIND_LABELS[dependency.kind].toLowerCase()}`}
+                  ariaLabel="Set dependency target"
+                  buttonInlineEditField={`dependency-target-${index}`}
+                  className="task-queue-filter-menu-submenu task-details-dependency-target-menu"
+                  icon={<IconTasks />}
                           menuClassName="task-details-dependency-menu-popup"
                           onChange={(selection) =>
                             updateDependencyDraft(dependency.key, {

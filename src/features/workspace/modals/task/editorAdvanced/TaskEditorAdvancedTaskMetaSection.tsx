@@ -23,12 +23,12 @@ export function TaskEditorAdvancedTaskMetaSection({
   return (
     <>
       <label className="field">
-        <span style={{ color: "var(--text-title)" }}>Target event</span>
+        <span style={{ color: "var(--text-title)" }}>Target milestone</span>
         <select
-          onChange={(event) =>
+          onChange={(milestone) =>
             setTaskDraft((current) => ({
               ...current,
-              targetEventId: event.target.value || null,
+              targetMilestoneId: milestone.target.value || null,
             }))
           }
           style={{
@@ -36,12 +36,12 @@ export function TaskEditorAdvancedTaskMetaSection({
             color: "var(--text-title)",
             border: "1px solid var(--border-base)",
           }}
-          value={taskDraft.targetEventId ?? ""}
+          value={taskDraft.targetMilestoneId ?? ""}
         >
-          <option value="">No event</option>
-          {bootstrap.events.map((event) => (
-            <option key={event.id} value={event.id}>
-              {event.title}
+          <option value="">No milestone</option>
+          {bootstrap.milestones.map((milestone) => (
+            <option key={milestone.id} value={milestone.id}>
+              {milestone.title}
             </option>
           ))}
         </select>
@@ -49,10 +49,10 @@ export function TaskEditorAdvancedTaskMetaSection({
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Status</span>
         <select
-          onChange={(event) =>
+          onChange={(milestone) =>
             setTaskDraft((current) => ({
               ...current,
-              status: event.target.value as TaskPayload["status"],
+              status: milestone.target.value as TaskPayload["status"],
             }))
           }
           style={{
@@ -71,8 +71,8 @@ export function TaskEditorAdvancedTaskMetaSection({
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Start date</span>
         <input
-          onChange={(event) =>
-            setTaskDraft((current) => ({ ...current, startDate: event.target.value }))
+          onChange={(milestone) =>
+            setTaskDraft((current) => ({ ...current, startDate: milestone.target.value }))
           }
           style={{
             background: "var(--bg-row-alt)",
@@ -86,8 +86,8 @@ export function TaskEditorAdvancedTaskMetaSection({
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Due date</span>
         <input
-          onChange={(event) =>
-            setTaskDraft((current) => ({ ...current, dueDate: event.target.value }))
+          onChange={(milestone) =>
+            setTaskDraft((current) => ({ ...current, dueDate: milestone.target.value }))
           }
           style={{
             background: "var(--bg-row-alt)",
@@ -102,10 +102,10 @@ export function TaskEditorAdvancedTaskMetaSection({
         <span style={{ color: "var(--text-title)" }}>Estimated hours</span>
         <input
           min="0"
-          onChange={(event) =>
+          onChange={(milestone) =>
             setTaskDraft((current) => ({
               ...current,
-              estimatedHours: Number(event.target.value),
+              estimatedHours: Number(milestone.target.value),
             }))
           }
           style={{
@@ -121,10 +121,10 @@ export function TaskEditorAdvancedTaskMetaSection({
         <label className="checkbox-field">
           <input
             checked={taskDraft.requiresDocumentation}
-            onChange={(event) =>
+            onChange={(milestone) =>
               setTaskDraft((current) => ({
                 ...current,
-                requiresDocumentation: event.target.checked,
+                requiresDocumentation: milestone.target.checked,
               }))
             }
             type="checkbox"
@@ -134,10 +134,10 @@ export function TaskEditorAdvancedTaskMetaSection({
         <label className="checkbox-field">
           <input
             checked={taskDraft.documentationLinked}
-            onChange={(event) =>
+            onChange={(milestone) =>
               setTaskDraft((current) => ({
                 ...current,
-                documentationLinked: event.target.checked,
+                documentationLinked: milestone.target.checked,
               }))
             }
             type="checkbox"

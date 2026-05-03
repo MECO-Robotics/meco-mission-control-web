@@ -50,8 +50,8 @@ export function ColumnFilterDropdown({
         aria-label={`${ariaLabel}${isActive ? `: ${selectedLabel}` : ""}`}
         className="table-column-filter-button"
         ref={buttonRef}
-        onClick={(event) => {
-          event.stopPropagation();
+        onClick={(milestone) => {
+          milestone.stopPropagation();
           setIsOpen((current) => !current);
         }}
         title={`${ariaLabel}${isActive ? `: ${selectedLabel}` : ""}`}

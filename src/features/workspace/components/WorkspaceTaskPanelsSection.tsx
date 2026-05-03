@@ -14,8 +14,8 @@ export function WorkspaceTaskPanelsSection({
   isAllProjectsView,
   isNonRobotProject,
   membersById,
-  handleTimelineEventDelete,
-  handleTimelineEventSave,
+  handleTimelineMilestoneDelete,
+  handleTimelineMilestoneSave,
   openCreateTaskModal,
   openTimelineTaskDetailsModal,
   setActivePersonFilter,
@@ -44,8 +44,8 @@ export function WorkspaceTaskPanelsSection({
           bootstrap={bootstrap}
           isAllProjectsView={isAllProjectsView}
           membersById={membersById}
-          onDeleteTimelineEvent={handleTimelineEventDelete}
-          onSaveTimelineEvent={handleTimelineEventSave}
+          onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
+          onSaveTimelineMilestone={handleTimelineMilestoneSave}
           openCreateTaskModal={openCreateTaskModalFromTimeline}
           openTaskDetailModal={openTimelineTaskDetailsModal}
           setActivePersonFilter={setActivePersonFilter}
@@ -82,8 +82,8 @@ export function WorkspaceTaskPanelsSection({
           activePersonFilter={activePersonFilter}
           bootstrap={bootstrap}
           isAllProjectsView={isAllProjectsView}
-          onDeleteTimelineEvent={handleTimelineEventDelete}
-          onSaveTimelineEvent={handleTimelineEventSave}
+          onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
+          onSaveTimelineMilestone={handleTimelineMilestoneSave}
           subsystemsById={subsystemsById}
         />
       </WorkspaceSubPanel>

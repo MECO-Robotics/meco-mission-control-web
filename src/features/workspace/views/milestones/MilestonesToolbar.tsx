@@ -1,18 +1,18 @@
 import type { Dispatch, SetStateAction } from "react";
 
 import { IconParts, IconSort, IconTasks } from "@/components/shared";
-import type { BootstrapPayload, EventType } from "@/types";
+import type { BootstrapPayload, MilestoneType } from "@/types";
 import {
   CompactFilterMenu,
   FilterDropdown,
   SearchToolbarInput,
   type FilterSelection,
-} from "@/features/workspace/shared";
-import { EVENT_TYPE_STYLES } from "@/features/workspace/shared/events";
+} from "@/features/workspace/shared/WorkspaceViewShared";
+import { EVENT_TYPE_STYLES as MILESTONE_TYPE_STYLES } from "@/features/workspace/shared/events/eventStyles";
 import type { MilestoneSortField } from "./milestonesViewUtils";
 
-const EVENT_TYPE_OPTIONS: { id: EventType; name: string }[] = (
-  Object.entries(EVENT_TYPE_STYLES) as [EventType, (typeof EVENT_TYPE_STYLES)[EventType]][]
+const MILESTONE_TYPE_OPTIONS: { id: MilestoneType; name: string }[] = (
+  Object.entries(MILESTONE_TYPE_STYLES) as [MilestoneType, (typeof MILESTONE_TYPE_STYLES)[MilestoneType]][]
 ).map(([id, style]) => ({
   id,
   name: style.label,
@@ -105,7 +105,7 @@ export function MilestonesToolbar({
                 className="task-queue-filter-menu-submenu"
                 icon={<IconTasks />}
                 onChange={setTypeFilter}
-                options={EVENT_TYPE_OPTIONS}
+                options={MILESTONE_TYPE_OPTIONS}
                 value={typeFilter}
               />
             ),
@@ -126,7 +126,7 @@ export function MilestonesToolbar({
               <select
                 aria-label="Sort milestones by"
                 className="task-queue-sort-menu-select"
-                onChange={(event) => setSortField(event.target.value as MilestoneSortField)}
+                onChange={(milestone) => setSortField(milestone.target.value as MilestoneSortField)}
                 value={sortField}
               >
                 {MILESTONE_SORT_OPTIONS.map((option) => (
@@ -143,7 +143,7 @@ export function MilestonesToolbar({
               <select
                 aria-label="Sort direction"
                 className="task-queue-sort-menu-select"
-                onChange={(event) => setSortOrder(event.target.value as "asc" | "desc")}
+                onChange={(milestone) => setSortOrder(milestone.target.value as "asc" | "desc")}
                 value={sortOrder}
               >
                 {SORT_DIRECTION_OPTIONS.map((option) => (

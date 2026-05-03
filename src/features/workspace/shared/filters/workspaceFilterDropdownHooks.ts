@@ -53,16 +53,16 @@ export function useFilterDropdownMenuState({
       return;
     }
 
-    const handlePointerDown = (event: MouseEvent) => {
-      const target = event.target;
+    const handlePointerDown = (milestone: MouseEvent) => {
+      const target = milestone.target;
       const clickedInsideFilter = target instanceof Node && filterRef.current?.contains(target);
       const clickedInsideMenu = target instanceof Node && menuRef.current?.contains(target);
       if (!clickedInsideFilter && !clickedInsideMenu) {
         onClose();
       }
     };
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+    const handleKeyDown = (milestone: KeyboardEvent) => {
+      if (milestone.key === "Escape") {
         onClose();
       }
     };
@@ -179,3 +179,4 @@ export function useFilterDropdownMenuState({
 
   return { menuOffsetX, menuPosition };
 }
+

@@ -1,9 +1,14 @@
+import React from "react";
+
 import type {
   BootstrapPayload,
   TaskDependencyKind,
   TaskPayload,
   TaskRecord,
 } from "@/types";
+import { TimelineTaskStatusLogo } from "@/features/workspace/views/timeline/TimelineTaskStatusLogo";
+import type { TimelineTaskStatusSignal } from "@/features/workspace/views/timeline/timelineGridBodyUtils";
+import type { DropdownOption } from "../model";
 import {
   getTaskDependencyRecordsForTask as getTaskDependencyRecordsForTaskFromPlanning,
   getTaskOpenBlockersForTask as getTaskOpenBlockersForTaskFromPlanning,
@@ -29,7 +34,7 @@ type SelectionLookups = {
 
 type TaskDependencyTargetLookups = {
   tasksById: Record<string, TaskRecord>;
-  eventsById: Record<string, BootstrapPayload["events"][number]>;
+  milestonesById: Record<string, BootstrapPayload["milestones"][number]>;
   partInstancesById: Record<string, BootstrapPayload["partInstances"][number]>;
   partDefinitionsById: Record<string, BootstrapPayload["partDefinitions"][number]>;
   formatIterationVersion: (value: number | null | undefined) => string;
@@ -44,8 +49,49 @@ export const TASK_DEPENDENCY_KIND_LABELS: Record<TaskDependencyKind, string> = {
   task: "Task",
   milestone: "Milestone",
   part_instance: "Part instance",
-  event: "Event",
 };
+
+export const TASK_DEPENDENCY_KIND_OPTIONS: DropdownOption[] = (
+  Object.entries(TASK_DEPENDENCY_KIND_LABELS) as Array<[TaskDependencyKind, string]>
+)
+  .map(([kind, label]) => ({
+    id: kind,
+    name: label,
+    icon: getDependencyStatusIcon(kind === "task" ? "complete" : "ready"),
+  }));
+
+type DependencyTargetLookups = TaskDependencyTargetLookups;
+
+function getDependencyStatusIcon(status: string | undefined) {
+  const resolved = (() => {
+    switch (status) {
+      case "not ready":
+      case "not-started":
+      case "planned":
+      case "needed":
+        return { signal: "not-started" as TimelineTaskStatusSignal, status: "not-started" as const };
+      case "blocked":
+      case "retired":
+        return { signal: "blocked" as TimelineTaskStatusSignal, status: "not-started" as const };
+      case "qa":
+      case "waiting-for-qa":
+        return { signal: "waiting-for-qa" as TimelineTaskStatusSignal, status: "waiting-for-qa" as const };
+      case "ready":
+      case "complete":
+      case "available":
+      case "installed":
+        return { signal: "complete" as TimelineTaskStatusSignal, status: "complete" as const };
+      default:
+        return { signal: "not-started" as TimelineTaskStatusSignal, status: "not-started" as const };
+    }
+  })();
+
+  return React.createElement(TimelineTaskStatusLogo, {
+    compact: true,
+    signal: resolved.signal,
+    status: resolved.status,
+  });
+}
 
 export const TASK_DEPENDENCY_TYPE_LABELS = {
   hard: "Hard",
@@ -157,8 +203,8 @@ export function getTaskDependencyTargetName(
     return lookups.tasksById[refId]?.title ?? "Unknown task";
   }
 
-  if (dependencyKind === "milestone" || dependencyKind === "event") {
-    return lookups.eventsById[refId]?.title ?? "Unknown milestone";
+  if (dependencyKind === "milestone") {
+    return lookups.milestonesById[refId]?.title ?? "Unknown milestone";
   }
 
   const partInstance = lookups.partInstancesById[refId];
@@ -172,6 +218,37 @@ export function getTaskDependencyTargetName(
   }
 
   return `${partInstance.name} (${partDefinition.name} (${lookups.formatIterationVersion(partDefinition.iteration)}))`;
+}
+
+export function getTaskDependencyTargetOptions(
+  dependencyKind: TaskDependencyKind,
+  lookups: DependencyTargetLookups,
+) {
+  if (dependencyKind === "task") {
+    return Object.values(lookups.tasksById)
+      .sort((left, right) => left.title.localeCompare(right.title))
+      .map((task) => ({
+        id: task.id,
+        name: task.title,
+        icon: getDependencyStatusIcon(task.status),
+      }));
+  }
+
+  if (dependencyKind === "milestone") {
+    return Object.values(lookups.milestonesById)
+      .sort((left, right) => left.title.localeCompare(right.title))
+      .map((milestone) => ({
+        id: milestone.id,
+        name: milestone.title,
+        icon: getDependencyStatusIcon(milestone.status),
+      }));
+  }
+
+  return Object.values(lookups.partInstancesById).map((partInstance) => ({
+    id: partInstance.id,
+    name: partInstance.name,
+    icon: getDependencyStatusIcon(partInstance.status),
+  }));
 }
 
 export function getTaskDependencyRecordsForTask(taskId: string, bootstrap: BootstrapPayload) {

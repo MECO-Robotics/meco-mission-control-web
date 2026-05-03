@@ -21,7 +21,7 @@ export const TimelineMilestoneUnderlaysPortal: React.FC<TimelineMilestoneUnderla
         <div
           aria-hidden="true"
           key={`timeline-underlay-${underlay.id}`}
-          className="timeline-day-event-underlay"
+          className="timeline-day-milestone-underlay"
           title={underlay.lines.join(", ")}
           style={{
             left: `${underlay.geometry.left + underlay.horizontalOffset}px`,
@@ -47,7 +47,7 @@ export const TimelineMilestoneUnderlaysPortal: React.FC<TimelineMilestoneUnderla
           >
             {underlay.lines.map((line, index) => (
               <span
-                className="timeline-day-event-overlay-tooltip-item"
+                className="timeline-day-milestone-overlay-tooltip-item"
                 key={`${underlay.id}-${line}-${index}`}
               >
                 {line}

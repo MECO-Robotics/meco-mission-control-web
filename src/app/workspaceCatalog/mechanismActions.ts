@@ -26,8 +26,8 @@ export function useMechanismActions(model: AppWorkspaceModel) {
     model.setActiveMechanismId(null);
   }, [model]);
 
-  const handleMechanismSubmit = useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleMechanismSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
+    milestone.preventDefault();
     model.setIsSavingMechanism(true);
     model.setDataMessage(null);
 
@@ -98,3 +98,4 @@ export function useMechanismActions(model: AppWorkspaceModel) {
     openEditMechanismModal,
   };
 }
+

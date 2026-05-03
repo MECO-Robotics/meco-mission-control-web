@@ -1,15 +1,15 @@
 import { useState } from "react";
 
-import type { BootstrapPayload, EventRecord, TaskRecord } from "@/types";
+import type { BootstrapPayload, MilestoneRecord, TaskRecord } from "@/types";
 import { IconPlus, IconReports } from "@/components/shared";
 import { type ReportsViewTab } from "@/lib/workspaceNavigation";
-import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model";
 
 interface ReportsViewProps {
   bootstrap: BootstrapPayload;
   openTaskDetailsModal: (task: TaskRecord) => void;
   openCreateQaReportModal: () => void;
-  openCreateEventReportModal: () => void;
+  openCreateMilestoneReportModal: () => void;
   view: ReportsViewTab;
 }
 
@@ -33,12 +33,12 @@ function ReportLaunchCard({
   );
 }
 
-function getEventDateTimeMs(event: EventRecord) {
-  return Date.parse(event.endDateTime ?? event.startDateTime);
+function getMilestoneDateTimeMs(milestone: MilestoneRecord) {
+  return Date.parse(milestone.endDateTime ?? milestone.startDateTime);
 }
 
-function formatEventDate(event: EventRecord) {
-  const dateTimeMs = getEventDateTimeMs(event);
+function formatMilestoneDate(milestone: MilestoneRecord) {
+  const dateTimeMs = getMilestoneDateTimeMs(milestone);
   if (!Number.isFinite(dateTimeMs)) {
     return "No date";
   }
@@ -89,14 +89,14 @@ function QaReportsView({
   );
 }
 
-function EventResultsView({
-  events,
-  openCreateEventReportModal,
+function MilestoneResultsView({
+  milestones,
+  openCreateMilestoneReportModal,
 }: {
-  events: readonly EventRecord[];
-  openCreateEventReportModal: () => void;
+  milestones: readonly MilestoneRecord[];
+  openCreateMilestoneReportModal: () => void;
 }) {
-  if (events.length === 0) {
+  if (milestones.length === 0) {
     return (
       <p className="section-copy filter-copy">No past milestones are currently available to report.</p>
     );
@@ -105,21 +105,21 @@ function EventResultsView({
   return (
     <>
       <p className="section-copy filter-copy">
-        All past milestones are listed for event-result reporting.
+        All past milestones are listed for milestone-result reporting.
       </p>
       <div className="summary-row" style={{ alignItems: "stretch" }}>
-        {events.map((event) => (
-          <article className="worklog-summary-card" key={event.id}>
-            <h3>{event.title}</h3>
-            <p className="section-copy">Type: {event.type}</p>
-            <p className="section-copy">Event date: {formatEventDate(event)}</p>
+        {milestones.map((milestone) => (
+          <article className="worklog-summary-card" key={milestone.id}>
+            <h3>{milestone.title}</h3>
+            <p className="section-copy">Type: {milestone.type}</p>
+            <p className="section-copy">Milestone date: {formatMilestoneDate(milestone)}</p>
             <button
               className="primary-action queue-toolbar-action"
-              onClick={openCreateEventReportModal}
+              onClick={openCreateMilestoneReportModal}
               type="button"
             >
               <IconPlus />
-              Add event result
+              Add milestone result
             </button>
           </article>
         ))}
@@ -131,15 +131,15 @@ function EventResultsView({
 export function ReportsView({
   bootstrap,
   openTaskDetailsModal,
-  openCreateEventReportModal,
+  openCreateMilestoneReportModal,
   openCreateQaReportModal,
   view,
 }: ReportsViewProps) {
   const [nowMs] = useState(() => Date.now());
   const qaTasks = bootstrap.tasks.filter((task) => task.status === "waiting-for-qa");
-  const pastMilestones = bootstrap.events
-    .filter((event) => getEventDateTimeMs(event) < nowMs)
-    .sort((left, right) => getEventDateTimeMs(right) - getEventDateTimeMs(left));
+  const pastMilestones = bootstrap.milestones
+    .filter((milestone) => getMilestoneDateTimeMs(milestone) < nowMs)
+    .sort((left, right) => getMilestoneDateTimeMs(right) - getMilestoneDateTimeMs(left));
 
   return (
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
@@ -149,7 +149,7 @@ export function ReportsView({
             <IconReports />
             Reports
           </p>
-          <h2>{view === "qa" ? "QA reports" : "Event results"}</h2>
+          <h2>{view === "qa" ? "QA reports" : "Milestone results"}</h2>
         </div>
       </div>
 
@@ -160,9 +160,9 @@ export function ReportsView({
           tasks={qaTasks}
         />
       ) : (
-        <EventResultsView
-          events={pastMilestones}
-          openCreateEventReportModal={openCreateEventReportModal}
+        <MilestoneResultsView
+          milestones={pastMilestones}
+          openCreateMilestoneReportModal={openCreateMilestoneReportModal}
         />
       )}
     </section>

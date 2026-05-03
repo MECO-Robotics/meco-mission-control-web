@@ -29,10 +29,10 @@ function AppTopbarProfileMenu({
   const themeToggleMenuLabel = isDarkMode ? "Light mode" : "Dark mode";
   const themeToggleMenuTitle = isDarkMode ? "Switch to light mode" : "Switch to dark mode";
 
-  const handleSeasonChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    const nextValue = event.target.value;
+  const handleSeasonChange = (milestone: ChangeEvent<HTMLSelectElement>) => {
+    const nextValue = milestone.target.value;
     if (nextValue === CREATE_SEASON_OPTION_VALUE) {
-      event.target.value = selectedSeasonId ?? "";
+      milestone.target.value = selectedSeasonId ?? "";
       onCreateSeason();
       return;
     }
@@ -188,3 +188,4 @@ export function AppTopbarRightRail({
     </div>
   );
 }
+

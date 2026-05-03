@@ -6,7 +6,7 @@ type TimelineGridMotion = "left" | "right" | "neutral";
 
 interface UseTimelineViewActionsArgs {
   openTaskDetailModal: (task: TaskRecord) => void;
-  openEventModalForDay: (day: string) => void;
+  openMilestoneModalForDay: (day: string) => void;
   playTimelineGridAnimation: (direction: TimelineGridMotion) => void;
   setSelectedSubsystemId: (value: string | null) => void;
   setSelectedTaskId: (value: string | null) => void;
@@ -17,7 +17,7 @@ interface UseTimelineViewActionsArgs {
 
 export function useTimelineViewActions({
   openTaskDetailModal,
-  openEventModalForDay,
+  openMilestoneModalForDay,
   playTimelineGridAnimation,
   setSelectedSubsystemId,
   setSelectedTaskId,
@@ -34,9 +34,9 @@ export function useTimelineViewActions({
         return;
       }
 
-      openEventModalForDay(day);
+      openMilestoneModalForDay(day);
     },
-    [openEventModalForDay, playTimelineGridAnimation, setViewAnchorDate, setViewInterval, viewInterval],
+    [openMilestoneModalForDay, playTimelineGridAnimation, setViewAnchorDate, setViewInterval, viewInterval],
   );
 
   const openTaskDetailAndSelectTask = useCallback(

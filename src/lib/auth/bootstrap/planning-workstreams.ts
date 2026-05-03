@@ -146,7 +146,7 @@ export function normalizePlanningWorkstreams(
       partInstanceIds: taskPartInstanceIds,
       artifactId: taskArtifactIds[0] ?? null,
       artifactIds: taskArtifactIds,
-      targetEventId: task.targetEventId ?? null,
+      targetMilestoneId: task.targetMilestoneId ?? null,
       ownerId: task.ownerId ?? null,
       assigneeIds: taskAssigneeIds,
       mentorId: task.mentorId ?? null,
@@ -169,7 +169,7 @@ export function normalizePlanningWorkstreams(
   const normalizedDependencies = (source.taskDependencies ?? []).map((dependency, index) => {
     const dependencyRecord = dependency as {
       id?: string;
-      kind?: "task" | "milestone" | "part_instance" | "event";
+      kind?: "task" | "milestone" | "part_instance" | "milestone";
       refId?: string;
       taskId?: string;
       upstreamTaskId?: string;
@@ -190,7 +190,7 @@ export function normalizePlanningWorkstreams(
       kind,
       refId,
       requiredState:
-        dependencyRecord.requiredState ?? (kind === "part_instance" ? "available" : "complete"),
+        dependencyRecord.requiredState ?? (kind === "part_instance" ? "ready" : "complete"),
       dependencyType,
       createdAt: dependencyRecord.createdAt ?? new Date().toISOString(),
     };

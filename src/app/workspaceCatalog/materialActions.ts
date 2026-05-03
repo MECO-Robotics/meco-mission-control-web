@@ -26,8 +26,8 @@ export function useMaterialActions(model: AppWorkspaceModel) {
     model.setActiveMaterialId(null);
   }, [model]);
 
-  const handleMaterialSubmit = useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleMaterialSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
+    milestone.preventDefault();
     model.setIsSavingMaterial(true);
     model.setDataMessage(null);
 
@@ -80,3 +80,4 @@ export function useMaterialActions(model: AppWorkspaceModel) {
     openEditMaterialModal,
   };
 }
+

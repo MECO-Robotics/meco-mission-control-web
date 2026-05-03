@@ -1,24 +1,28 @@
 import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 
-import type { BootstrapPayload, EventPayload } from "@/types";
-import { formatFilterSelectionLabel, type FilterSelection, useFilterChangeMotionClass } from "@/features/workspace/shared";
-import { getMilestoneSubsystemOptions } from "@/features/workspace/shared/events";
+import type { BootstrapPayload, MilestonePayload } from "@/types";
+import {
+  formatFilterSelectionLabel,
+  type FilterSelection,
+  useFilterChangeMotionClass,
+} from "@/features/workspace/shared/WorkspaceViewShared";
+import { getMilestoneSubsystemOptions } from "@/features/workspace/shared/events/eventProjectUtils";
 import {
   buildMilestoneProjectLabels,
   filterAndSortMilestones,
   type MilestoneSortField,
 } from "../milestonesViewUtils";
 import {
-  type MilestonesEventModalState,
-  useMilestonesEventModalState,
+  type MilestonesMilestoneModalState,
+  useMilestonesMilestoneModalState,
 } from "./useMilestonesEventModalState";
 
-export type MilestonesViewState = MilestonesEventModalState & {
+export type MilestonesViewState = MilestonesMilestoneModalState & {
   activePersonFilterLabel: string;
   milestoneFilterMotionClass: string;
-  processedEvents: BootstrapPayload["events"];
+  processedMilestones: BootstrapPayload["milestones"];
   projectFilter: FilterSelection;
-  projectLabelByEventId: Record<string, string>;
+  projectLabelByMilestoneId: Record<string, string>;
   projectsById: Record<string, BootstrapPayload["projects"][number]>;
   searchFilter: string;
   selectableSubsystems: BootstrapPayload["subsystems"];
@@ -36,11 +40,11 @@ type MilestonesViewStateArgs = {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   isAllProjectsView: boolean;
-  onDeleteTimelineEvent: (eventId: string) => Promise<void>;
-  onSaveTimelineEvent: (
+  onDeleteTimelineMilestone: (milestoneId: string) => Promise<void>;
+  onSaveTimelineMilestone: (
     mode: "create" | "edit",
-    eventId: string | null,
-    payload: EventPayload,
+    milestoneId: string | null,
+    payload: MilestonePayload,
   ) => Promise<void>;
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
 };
@@ -49,8 +53,8 @@ export function useMilestonesViewState({
   activePersonFilter,
   bootstrap,
   isAllProjectsView,
-  onDeleteTimelineEvent,
-  onSaveTimelineEvent,
+  onDeleteTimelineMilestone,
+  onSaveTimelineMilestone,
   subsystemsById,
 }: MilestonesViewStateArgs): MilestonesViewState {
   const [sortField, setSortField] = useState<MilestoneSortField>("startDateTime");
@@ -80,11 +84,11 @@ export function useMilestonesViewState({
     [bootstrap.projects],
   );
   const scopedProjectIds = useMemo(() => bootstrap.projects.map((project) => project.id), [bootstrap.projects]);
-  const processedEvents = useMemo(
+  const processedMilestones = useMemo(
     () =>
       filterAndSortMilestones({
         activePersonFilter,
-        events: bootstrap.events,
+        milestones: bootstrap.milestones,
         isAllProjectsView,
         projectFilter,
         searchFilter,
@@ -96,7 +100,7 @@ export function useMilestonesViewState({
       }),
     [
       activePersonFilter,
-      bootstrap.events,
+      bootstrap.milestones,
       bootstrap.tasks,
       isAllProjectsView,
       projectFilter,
@@ -107,9 +111,9 @@ export function useMilestonesViewState({
       typeFilter,
     ],
   );
-  const projectLabelByEventId = useMemo(
-    () => buildMilestoneProjectLabels(bootstrap.events, projectsById, scopedProjectIds, subsystemsById),
-    [bootstrap.events, projectsById, scopedProjectIds, subsystemsById],
+  const projectLabelByMilestoneId = useMemo(
+    () => buildMilestoneProjectLabels(bootstrap.milestones, projectsById, scopedProjectIds, subsystemsById),
+    [bootstrap.milestones, projectsById, scopedProjectIds, subsystemsById],
   );
   const milestoneFilterMotionClass = useFilterChangeMotionClass([
     activePersonFilter,
@@ -126,11 +130,11 @@ export function useMilestonesViewState({
     activePersonFilter,
   );
 
-  const modalState = useMilestonesEventModalState({
+  const modalState = useMilestonesMilestoneModalState({
     bootstrap,
     isAllProjectsView,
-    onDeleteTimelineEvent,
-    onSaveTimelineEvent,
+    onDeleteTimelineMilestone,
+    onSaveTimelineMilestone,
     projectFilter,
     scopedProjectIds,
     subsystemsById,
@@ -144,9 +148,9 @@ export function useMilestonesViewState({
     ...modalState,
     activePersonFilterLabel,
     milestoneFilterMotionClass,
-    processedEvents,
+    processedMilestones,
     projectFilter,
-    projectLabelByEventId,
+    projectLabelByMilestoneId,
     projectsById,
     searchFilter,
     selectableSubsystems,

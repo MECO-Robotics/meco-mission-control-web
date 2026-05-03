@@ -34,22 +34,22 @@ export function useAppWorkspaceReportModalActions(model: AppWorkspaceModel) {
     model.setQaReportModalMode(null);
   }, [model]);
 
-  const openCreateEventReportModal = useCallback(() => {
-    model.setEventReportDraft(buildEmptyTestResultPayload(model.scopedBootstrap));
-    model.setEventReportFindings("");
-    model.setEventReportModalMode("create");
+  const openCreateMilestoneReportModal = useCallback(() => {
+    model.setMilestoneReportDraft(buildEmptyTestResultPayload(model.scopedBootstrap));
+    model.setMilestoneReportFindings("");
+    model.setMilestoneReportModalMode("create");
   }, [model]);
 
-  const closeEventReportModal = useCallback(() => {
-    model.setEventReportModalMode(null);
-    model.setEventReportFindings("");
+  const closeMilestoneReportModal = useCallback(() => {
+    model.setMilestoneReportModalMode(null);
+    model.setMilestoneReportFindings("");
   }, [model]);
 
   return {
-    closeEventReportModal,
+    closeMilestoneReportModal,
     closeQaReportModal,
     closeWorkLogModal,
-    openCreateEventReportModal,
+    openCreateMilestoneReportModal,
     openCreateQaReportModal,
     openCreateWorkLogModal,
   };

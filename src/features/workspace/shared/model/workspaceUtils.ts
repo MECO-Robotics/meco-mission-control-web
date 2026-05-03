@@ -1,18 +1,17 @@
 type StatusGroup = "success" | "info" | "warning" | "danger" | "neutral";
 
 const STATUS_GROUPS: Record<Exclude<StatusGroup, "neutral">, Set<string>> = {
-  success: new Set(["complete", "delivered", "available", "installed", "low"]),
+  success: new Set(["complete", "delivered", "ready", "available", "installed", "low"]),
   info: new Set(["waiting-for-qa", "qa", "shipped", "purchased", "approved"]),
   warning: new Set([
     "in-progress",
     "requested",
     "high",
     "waiting",
-    "needed",
     "waiting-on-dependency",
     "at-risk",
   ]),
-  danger: new Set(["not-started", "critical", "retired", "blocked", "overdue"]),
+  danger: new Set(["not-started", "critical", "retired", "blocked", "not ready", "overdue"]),
 };
 
 export function getStatusPillClassName(value: string): string {

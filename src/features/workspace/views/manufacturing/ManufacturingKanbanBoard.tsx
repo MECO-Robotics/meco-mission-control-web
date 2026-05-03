@@ -69,20 +69,20 @@ export function ManufacturingKanbanBoard({
     return grouped;
   }, [items]);
 
-  const handleCardKeyDown = (event: KeyboardEvent<HTMLDivElement>, item: ManufacturingItemRecord) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
+  const handleCardKeyDown = (milestone: KeyboardEvent<HTMLDivElement>, item: ManufacturingItemRecord) => {
+    if (milestone.key === "Enter" || milestone.key === " ") {
+      milestone.preventDefault();
       onEdit(item);
     }
   };
 
   const handleQuickStatusChange = async (
-    event: MouseEvent<HTMLButtonElement>,
+    milestone: MouseEvent<HTMLButtonElement>,
     item: ManufacturingItemRecord,
     nextStatus: ManufacturingItemRecord["status"],
   ) => {
-    event.preventDefault();
-    event.stopPropagation();
+    milestone.preventDefault();
+    milestone.stopPropagation();
     if (!onQuickStatusChange) {
       return;
     }
@@ -165,7 +165,7 @@ export function ManufacturingKanbanBoard({
                       className="icon-button"
                       data-tutorial-target={tutorialTarget?.("approve-job-button")}
                       disabled={isAnyActionPending || item.status !== "requested"}
-                      onClick={(event) => handleQuickStatusChange(event, item, "approved")}
+                      onClick={(milestone) => handleQuickStatusChange(milestone, item, "approved")}
                       style={{ padding: "0.15rem 0.4rem" }}
                       type="button"
                     >
@@ -175,7 +175,7 @@ export function ManufacturingKanbanBoard({
                       className="icon-button"
                       data-tutorial-target={tutorialTarget?.("complete-job-button")}
                       disabled={isAnyActionPending || item.status === "complete"}
-                      onClick={(event) => handleQuickStatusChange(event, item, "complete")}
+                      onClick={(milestone) => handleQuickStatusChange(milestone, item, "complete")}
                       style={{ padding: "0.15rem 0.4rem" }}
                       type="button"
                     >
@@ -196,7 +196,7 @@ export function ManufacturingKanbanBoard({
               data-tutorial-target={tutorialTarget?.("edit-job-row")}
               key={item.id}
               onClick={() => onEdit(item)}
-              onKeyDown={(event) => handleCardKeyDown(event, item)}
+              onKeyDown={(milestone) => handleCardKeyDown(milestone, item)}
               role="button"
               tabIndex={0}
             >
@@ -220,3 +220,4 @@ export function ManufacturingKanbanBoard({
     />
   );
 }
+

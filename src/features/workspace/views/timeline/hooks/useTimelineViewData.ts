@@ -1,21 +1,21 @@
 import { useCallback, useMemo } from "react";
-import type { BootstrapPayload, EventPayload } from "@/types";
+import type { BootstrapPayload, MilestonePayload } from "@/types";
 import {
   type FilterSelection,
   filterSelectionMatchesTaskPeople,
   formatFilterSelectionLabel,
   useFilterChangeMotionClass,
 } from "@/features/workspace/shared";
-import { getMilestoneSubsystemOptions } from "@/features/workspace/shared/events";
+import { getMilestoneSubsystemOptions } from "@/features/workspace/shared/milestones";
 import { formatTimelinePeriodLabel, type TimelineViewInterval } from "@/features/workspace/shared/timeline";
 import {
   buildTimelineData,
   buildTimelineDayHeaderCells,
   buildTimelineMonthGroups,
   buildTimelineProjectRows,
-  filterTimelineEventsByPersonSelection,
+  filterTimelineMilestonesByPersonSelection,
 } from "../model/timelineViewData";
-import { useTimelineEventModal } from "../useTimelineEventModal";
+import { useTimelineMilestoneModal } from "../useTimelineMilestoneModal";
 import { useTimelineMilestoneOverlay } from "./useTimelineMilestoneOverlay";
 import { useTimelineRowHighlightGeometry } from "./useTimelineRowHighlightGeometry";
 import { resolveTimelineRowHighlightStyle } from "../timelineTaskColors";
@@ -24,11 +24,11 @@ interface UseTimelineViewDataArgs {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   openCreateTaskModal: () => void;
-  onDeleteTimelineEvent: (eventId: string) => Promise<void>;
-  onSaveTimelineEvent: (
+  onDeleteTimelineMilestone: (milestoneId: string) => Promise<void>;
+  onSaveTimelineMilestone: (
     mode: "create" | "edit",
-    eventId: string | null,
-    payload: EventPayload,
+    milestoneId: string | null,
+    payload: MilestonePayload,
   ) => Promise<void>;
   triggerCreateMilestoneToken: number;
   viewAnchorDate: string;
@@ -39,8 +39,8 @@ export function useTimelineViewData({
   activePersonFilter,
   bootstrap,
   openCreateTaskModal,
-  onDeleteTimelineEvent,
-  onSaveTimelineEvent,
+  onDeleteTimelineMilestone,
+  onSaveTimelineMilestone,
   triggerCreateMilestoneToken,
   viewAnchorDate,
   viewInterval,
@@ -78,14 +78,14 @@ export function useTimelineViewData({
         : bootstrap.tasks,
     [activePersonFilter, bootstrap.tasks],
   );
-  const scopedEvents = useMemo(
+  const scopedMilestones = useMemo(
     () =>
-      filterTimelineEventsByPersonSelection({
+      filterTimelineMilestonesByPersonSelection({
         activePersonFilter,
-        events: bootstrap.events,
+        milestones: bootstrap.milestones,
         tasks: bootstrap.tasks,
       }),
-    [activePersonFilter, bootstrap.events, bootstrap.tasks],
+    [activePersonFilter, bootstrap.milestones, bootstrap.tasks],
   );
   const tasksById = useMemo(
     () =>
@@ -99,37 +99,37 @@ export function useTimelineViewData({
   const timeline = useMemo(
     () =>
       buildTimelineData({
-        events: scopedEvents,
+        milestones: scopedMilestones,
         projectsById,
         scopedSubsystems: bootstrap.subsystems,
         scopedTasks,
         viewAnchorDate,
         viewInterval,
       }),
-    [bootstrap.subsystems, projectsById, scopedEvents, scopedTasks, viewAnchorDate, viewInterval],
+    [bootstrap.subsystems, projectsById, scopedMilestones, scopedTasks, viewAnchorDate, viewInterval],
   );
   const timelinePeriodLabel = useMemo(
     () => formatTimelinePeriodLabel(viewInterval, timeline.days),
     [timeline.days, viewInterval],
   );
   const monthGroups = useMemo(() => buildTimelineMonthGroups(timeline.days), [timeline.days]);
-  const dayEventsByDate = timeline.dayEvents;
-  const eventModal = useTimelineEventModal({
-    dayEventsByDate,
+  const dayMilestonesByDate = timeline.dayMilestones;
+  const milestoneModal = useTimelineMilestoneModal({
+    dayMilestonesByDate,
     openCreateTaskModal,
-    onDeleteTimelineEvent,
-    onSaveTimelineEvent,
+    onDeleteTimelineMilestone,
+    onSaveTimelineMilestone,
     scopedProjectIds,
     subsystemsById,
     triggerCreateMilestoneToken,
   });
   const selectableSubsystems = useMemo(
-    () => getMilestoneSubsystemOptions(bootstrap.subsystems, eventModal.eventDraft.projectIds),
-    [bootstrap.subsystems, eventModal.eventDraft.projectIds],
+    () => getMilestoneSubsystemOptions(bootstrap.subsystems, milestoneModal.milestoneDraft.projectIds),
+    [bootstrap.subsystems, milestoneModal.milestoneDraft.projectIds],
   );
   const timelineDayHeaderCells = useMemo(
-    () => buildTimelineDayHeaderCells(timeline.days, dayEventsByDate),
-    [dayEventsByDate, timeline.days],
+    () => buildTimelineDayHeaderCells(timeline.days, dayMilestonesByDate),
+    [dayMilestonesByDate, timeline.days],
   );
   const projectRows = useMemo(
     () => buildTimelineProjectRows(timeline.subsystemRows),
@@ -153,8 +153,8 @@ export function useTimelineViewData({
     tooltipPortalTarget,
   } = useTimelineMilestoneOverlay({
     days: timeline.days,
-    dayEventsByDate,
-    events: scopedEvents,
+    dayMilestonesByDate,
+    milestones: scopedMilestones,
   });
 
   const resolveRowHighlightGeometry = useTimelineRowHighlightGeometry(timelineShellRef);
@@ -173,8 +173,8 @@ export function useTimelineViewData({
     clearHoveredMilestonePopup,
     activePersonFilterLabel,
     disciplinesById,
-    dayEventsByDate,
-    eventModal,
+    dayMilestonesByDate,
+    milestoneModal,
     handleTimelineDayMouseEnter,
     isTimelineShellScrolling,
     monthGroups,
@@ -184,7 +184,7 @@ export function useTimelineViewData({
     resolveMilestonePopupGeometry,
     resolveRowHighlightGeometry,
     resolveTaskRowHighlightStyle,
-    scopedEvents,
+    scopedMilestones,
     scopedProjectIds,
     scopedTasks,
     selectableSubsystems,

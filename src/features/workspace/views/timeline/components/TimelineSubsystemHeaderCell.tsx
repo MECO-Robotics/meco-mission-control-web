@@ -59,9 +59,9 @@ export const TimelineSubsystemHeaderCell: React.FC<TimelineSubsystemHeaderCellPr
       justifyContent={collapsed ? "flex-start" : "center"}
       left={subsystemStickyLeft}
       onClick={onSelect}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
+      onKeyDown={(milestone) => {
+        if (milestone.key === "Enter" || milestone.key === " ") {
+          milestone.preventDefault();
           onSelect();
         }
       }}
@@ -113,3 +113,4 @@ export const TimelineSubsystemHeaderCell: React.FC<TimelineSubsystemHeaderCellPr
     </TimelineMergedCellColumn>
   );
 };
+

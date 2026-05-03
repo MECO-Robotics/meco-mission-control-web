@@ -1,6 +1,6 @@
-import type { BootstrapPayload, EventRecord } from "@/types";
+import type { BootstrapPayload, MilestoneRecord } from "@/types";
 import { datePortion } from "@/features/workspace/shared/timeline";
-import { getEventTypeStyle } from "@/features/workspace/shared/events";
+import { getMilestoneTypeStyle } from "@/features/workspace/shared/milestones";
 export type {
   MilestoneGeometry,
   TimelineDayCellLayouts,
@@ -15,7 +15,7 @@ import type {
 
 const MILESTONE_UNDERLAY_HORIZONTAL_GAP = 18;
 
-function compareTimelineEventsByStart(left: EventRecord, right: EventRecord) {
+function compareTimelineMilestonesByStart(left: MilestoneRecord, right: MilestoneRecord) {
   const startComparison = left.startDateTime.localeCompare(right.startDateTime);
   if (startComparison !== 0) {
     return startComparison;
@@ -32,25 +32,25 @@ function compareTimelineEventsByStart(left: EventRecord, right: EventRecord) {
 }
 
 export function getTimelineMilestonePopupItems(
-  eventsOnDay: EventRecord[],
+  milestonesOnDay: MilestoneRecord[],
   underlays: TimelineDayMilestoneUnderlay[],
 ): TimelineMilestonePopupItem[] {
-  const underlayOffsetsByEventId = new Map(
+  const underlayOffsetsByMilestoneId = new Map(
     underlays.map((underlay) => [underlay.id, underlay.horizontalOffset]),
   );
 
-  return eventsOnDay.map((event) => ({
-    text: event.title,
-    horizontalOffset: underlayOffsetsByEventId.get(event.id) ?? 0,
+  return milestonesOnDay.map((milestone) => ({
+    text: milestone.title,
+    horizontalOffset: underlayOffsetsByMilestoneId.get(milestone.id) ?? 0,
   }));
 }
 
 export function buildTimelineDayMilestoneUnderlays({
-  events,
+  milestones,
   resolveGeometry,
   timelineDays,
 }: {
-  events: BootstrapPayload["events"];
+  milestones: BootstrapPayload["milestones"];
   resolveGeometry: (popupStartDay: string | null, popupEndDay: string | null) => MilestoneGeometry | null;
   timelineDays: string[];
 }) {
@@ -60,13 +60,13 @@ export function buildTimelineDayMilestoneUnderlays({
 
   const timelineStart = timelineDays[0];
   const timelineEnd = timelineDays[timelineDays.length - 1];
-  const underlayEntries = [...events]
-    .sort(compareTimelineEventsByStart)
-    .map((event, sourceOrder) => {
-      const eventStartDay = datePortion(event.startDateTime);
-      const eventEndDay = datePortion(event.endDateTime ?? event.startDateTime);
-      const clampedStartDay = eventStartDay < timelineStart ? timelineStart : eventStartDay;
-      const clampedEndDay = eventEndDay > timelineEnd ? timelineEnd : eventEndDay;
+  const underlayEntries = [...milestones]
+    .sort(compareTimelineMilestonesByStart)
+    .map((milestone, sourceOrder) => {
+      const milestoneStartDay = datePortion(milestone.startDateTime);
+      const milestoneEndDay = datePortion(milestone.endDateTime ?? milestone.startDateTime);
+      const clampedStartDay = milestoneStartDay < timelineStart ? timelineStart : milestoneStartDay;
+      const clampedEndDay = milestoneEndDay > timelineEnd ? timelineEnd : milestoneEndDay;
 
       if (clampedStartDay > timelineEnd || clampedEndDay < timelineStart) {
         return null;
@@ -77,14 +77,14 @@ export function buildTimelineDayMilestoneUnderlays({
         return null;
       }
 
-      const style = getEventTypeStyle(event.type);
-      const isMultiDayEvent = eventStartDay !== eventEndDay;
+      const style = getMilestoneTypeStyle(milestone.type);
+      const isMultiDayMilestone = milestoneStartDay !== milestoneEndDay;
 
       return {
-        id: event.id,
-        lines: [event.title],
+        id: milestone.id,
+        lines: [milestone.title],
         color: style.chipText,
-        rotationDeg: isMultiDayEvent ? 45 : 90,
+        rotationDeg: isMultiDayMilestone ? 45 : 90,
         geometry,
         startDay: clampedStartDay,
         endDay: clampedEndDay,

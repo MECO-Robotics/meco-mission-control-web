@@ -74,7 +74,7 @@ function createBootstrap(): BootstrapPayload {
         mechanismIds: [],
         partInstanceId: null,
         partInstanceIds: [],
-        targetEventId: null,
+        targetMilestoneId: null,
         ownerId: "member-1",
         assigneeIds: ["member-1"],
         mentorId: null,
@@ -152,8 +152,8 @@ describe("TimelineView interactions", () => {
           membersById,
           openTaskDetailModal,
           openCreateTaskModal: jest.fn(),
-          onDeleteTimelineEvent: jest.fn(),
-          onSaveTimelineEvent: jest.fn(),
+          onDeleteTimelineMilestone: jest.fn(),
+          onSaveTimelineMilestone: jest.fn(),
           triggerCreateMilestoneToken: 0,
         }),
       );
@@ -210,3 +210,4 @@ describe("TimelineView interactions", () => {
     expect(overlayHookSource).toContain("setIsTimelineShellScrolling(false)");
   });
 });
+

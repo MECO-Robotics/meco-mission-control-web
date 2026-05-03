@@ -44,8 +44,8 @@ export function RiskEditorModal({
   return (
     <div
       className="modal-scrim"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) {
+      onClick={(milestone) => {
+        if (milestone.target === milestone.currentTarget) {
           onClose();
         }
       }}
@@ -66,18 +66,18 @@ export function RiskEditorModal({
 
         <form
           className="modal-form"
-          onSubmit={(event) => {
-            event.preventDefault();
+          onSubmit={(milestone) => {
+            milestone.preventDefault();
             void onSave();
           }}
         >
           <label className="field modal-wide">
             <span>Title</span>
             <input
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setDraft((current) => ({
                   ...current,
-                  title: event.target.value,
+                  title: milestone.target.value,
                 }))
               }
               required
@@ -88,10 +88,10 @@ export function RiskEditorModal({
           <label className="field modal-wide">
             <span>Detail</span>
             <textarea
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setDraft((current) => ({
                   ...current,
-                  detail: event.target.value,
+                  detail: milestone.target.value,
                 }))
               }
               required
@@ -103,10 +103,10 @@ export function RiskEditorModal({
           <label className="field">
             <span>Severity</span>
             <select
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setDraft((current) => ({
                   ...current,
-                  severity: event.target.value as RiskPayload["severity"],
+                  severity: milestone.target.value as RiskPayload["severity"],
                 }))
               }
               value={draft.severity}
@@ -120,8 +120,8 @@ export function RiskEditorModal({
           <label className="field">
             <span>Source type</span>
             <select
-              onChange={(event) => {
-                const nextSourceType = event.target.value as RiskPayload["sourceType"];
+              onChange={(milestone) => {
+                const nextSourceType = milestone.target.value as RiskPayload["sourceType"];
                 const nextSourceOptions = getSourceOptionsForType(nextSourceType);
                 setDraft((current) => ({
                   ...current,
@@ -139,10 +139,10 @@ export function RiskEditorModal({
           <label className="field modal-wide">
             <span>Source</span>
             <select
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setDraft((current) => ({
                   ...current,
-                  sourceId: event.target.value,
+                  sourceId: milestone.target.value,
                 }))
               }
               value={draft.sourceId}
@@ -162,8 +162,8 @@ export function RiskEditorModal({
           <label className="field">
             <span>Attachment type</span>
             <select
-              onChange={(event) => {
-                const nextAttachmentType = event.target.value as RiskPayload["attachmentType"];
+              onChange={(milestone) => {
+                const nextAttachmentType = milestone.target.value as RiskPayload["attachmentType"];
                 const nextAttachmentOptions = getAttachmentOptionsForType(nextAttachmentType);
                 setDraft((current) => ({
                   ...current,
@@ -183,10 +183,10 @@ export function RiskEditorModal({
           <label className="field modal-wide">
             <span>Attachment target</span>
             <select
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setDraft((current) => ({
                   ...current,
-                  attachmentId: event.target.value,
+                  attachmentId: milestone.target.value,
                 }))
               }
               value={draft.attachmentId}
@@ -206,10 +206,10 @@ export function RiskEditorModal({
           <label className="field modal-wide">
             <span>Mitigation task</span>
             <select
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setDraft((current) => ({
                   ...current,
-                  mitigationTaskId: event.target.value || null,
+                  mitigationTaskId: milestone.target.value || null,
                 }))
               }
               value={draft.mitigationTaskId ?? ""}
@@ -265,3 +265,4 @@ export function RiskEditorModal({
     </div>
   );
 }
+

@@ -22,7 +22,7 @@ interface RosterAddPersonModalProps {
   isSavingMember: boolean;
   requestMemberPhotoUpload: (file: File) => Promise<string>;
   onClose: () => void;
-  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  onSubmit: (milestone: React.FormEvent<HTMLFormElement>) => void;
   isElevatedRole: (role: MemberPayload["role"]) => boolean;
   getEmailPlaceholder: (role: MemberPayload["role"]) => string;
 }
@@ -51,8 +51,8 @@ export const RosterAddPersonModal: React.FC<RosterAddPersonModalProps> = ({
   return (
     <div
       className="modal-scrim"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) {
+      onClick={(milestone) => {
+        if (milestone.target === milestone.currentTarget) {
           onClose();
         }
       }}
@@ -71,8 +71,8 @@ export const RosterAddPersonModal: React.FC<RosterAddPersonModalProps> = ({
             <label className="checkbox-field">
               <input
                 checked={reactivateExistingMember}
-                onChange={(event) => {
-                  const isChecked = event.target.checked;
+                onChange={(milestone) => {
+                  const isChecked = milestone.target.checked;
                   setReactivateExistingMember(isChecked);
                   if (!isChecked) {
                     setReactivateMemberId("");
@@ -87,7 +87,7 @@ export const RosterAddPersonModal: React.FC<RosterAddPersonModalProps> = ({
             <>
               <label className="field">
                 <span>Inactive person</span>
-                <select onChange={(event) => setReactivateMemberId(event.target.value)} required value={reactivateMemberId}>
+                <select onChange={(milestone) => setReactivateMemberId(milestone.target.value)} required value={reactivateMemberId}>
                   <option value="">Select person</option>
                   {inactiveMembers.map((member) => (
                     <option key={member.id} value={member.id}>
@@ -175,3 +175,4 @@ export const RosterAddPersonModal: React.FC<RosterAddPersonModalProps> = ({
     </div>
   );
 };
+

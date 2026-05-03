@@ -12,7 +12,7 @@ export interface ReportRecord {
   reportType: ReportType;
   projectId: string;
   taskId: string | null;
-  eventId: string | null;
+  milestoneId: string | null;
   workstreamId: string | null;
   createdByMemberId: string | null;
   result: string;
@@ -47,7 +47,7 @@ export interface ReportFindingRecord {
   workstreamId?: string | null;
   subsystemId?: string | null;
   taskId?: string | null;
-  eventId?: string | null;
+  milestoneId?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }

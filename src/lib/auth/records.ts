@@ -1,5 +1,5 @@
 export * from "./records/task";
-export * from "./records/event";
+export * from "./records/milestone";
 export * from "./records/taskRelations";
 export * from "./records/reporting";
 export * from "./records/structure";

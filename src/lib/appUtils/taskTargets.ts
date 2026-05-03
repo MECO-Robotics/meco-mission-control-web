@@ -250,7 +250,7 @@ export function buildEmptyTaskPayload(bootstrap: BootstrapPayload): TaskPayload 
   const firstProject = bootstrap.projects[0]?.id ?? "";
   const firstSubsystem = getDefaultSubsystemId(bootstrap);
   const firstDiscipline = getDefaultTaskDisciplineIdForProject(bootstrap.projects[0]);
-  const firstEvent = bootstrap.events[0]?.id ?? null;
+  const firstMilestone = bootstrap.milestones[0]?.id ?? null;
   const firstStudent =
     bootstrap.members.find((m) => m.role === "lead")?.id ??
     bootstrap.members.find((m) => m.role === "student")?.id ??
@@ -276,7 +276,7 @@ export function buildEmptyTaskPayload(bootstrap: BootstrapPayload): TaskPayload 
     partInstanceIds: [],
     artifactId: null,
     artifactIds: [],
-    targetEventId: firstEvent,
+    targetMilestoneId: firstMilestone,
     ownerId: firstStudent,
     assigneeIds: uniqueIds([firstStudent]),
     mentorId: firstMentor,

@@ -19,20 +19,20 @@ export function useEmailAuthPanel({
   const [isRequestingCode, setIsRequestingCode] = useState(false);
   const codeInputRef = useRef<HTMLInputElement | null>(null);
 
-  const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleEmailChange = (milestone: ChangeEvent<HTMLInputElement>) => {
     clearAuthMessage();
-    setEmail(event.target.value);
+    setEmail(milestone.target.value);
     setCode("");
     setDelivery(null);
   };
 
-  const handleCodeChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleCodeChange = (milestone: ChangeEvent<HTMLInputElement>) => {
     clearAuthMessage();
-    setCode(event.target.value);
+    setCode(milestone.target.value);
   };
 
-  const handleRequestCode = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleRequestCode = async (milestone: FormEvent<HTMLFormElement>) => {
+    milestone.preventDefault();
     setIsRequestingCode(true);
 
     try {
@@ -49,8 +49,8 @@ export function useEmailAuthPanel({
     }
   };
 
-  const handleVerifyCode = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleVerifyCode = async (milestone: FormEvent<HTMLFormElement>) => {
+    milestone.preventDefault();
 
     try {
       await onVerifyEmailCode(email, code);
@@ -71,3 +71,4 @@ export function useEmailAuthPanel({
     isRequestingCode,
   };
 }
+

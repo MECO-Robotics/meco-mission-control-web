@@ -1,1 +1,1 @@
-export { EventReportEditorModal, QaReportEditorModal, WorkLogEditorModal } from "./workReports/index";
+export { MilestoneReportEditorModal, QaReportEditorModal, WorkLogEditorModal } from "./workReports/index";

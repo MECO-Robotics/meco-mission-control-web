@@ -34,14 +34,14 @@ export function CompactFilterMenu({
       return;
     }
 
-    const handlePointerDown = (event: MouseEvent) => {
-      const target = event.target;
+    const handlePointerDown = (milestone: MouseEvent) => {
+      const target = milestone.target;
       if (target instanceof Node && !menuRef.current?.contains(target)) {
         setIsOpen(false);
       }
     };
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+    const handleKeyDown = (milestone: KeyboardEvent) => {
+      if (milestone.key === "Escape") {
         setIsOpen(false);
       }
     };
@@ -101,4 +101,5 @@ export function CompactFilterMenu({
     </span>
   );
 }
+
 

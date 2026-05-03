@@ -100,7 +100,7 @@ export function renderManufacturingModalWithPartInstances(process: "cnc" | "3d-p
         name: "Left Bearing Block",
         quantity: 2,
         trackIndividually: false,
-        status: "planned",
+        status: "not ready",
       },
     ],
   };

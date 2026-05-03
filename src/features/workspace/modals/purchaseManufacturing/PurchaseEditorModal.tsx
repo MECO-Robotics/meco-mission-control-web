@@ -7,7 +7,7 @@ import { PurchaseEditorFields } from "./PurchaseEditorFields";
 export interface PurchaseEditorModalProps {
   bootstrap: BootstrapPayload;
   closePurchaseModal: () => void;
-  handlePurchaseSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  handlePurchaseSubmit: (milestone: FormEvent<HTMLFormElement>) => void;
   isSavingPurchase: boolean;
   purchaseDraft: PurchaseItemPayload;
   purchaseFinalCost: string;
@@ -65,3 +65,4 @@ export function PurchaseEditorModal(props: PurchaseEditorModalProps) {
     </div>
   );
 }
+

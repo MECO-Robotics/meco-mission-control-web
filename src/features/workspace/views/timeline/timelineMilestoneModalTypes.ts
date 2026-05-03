@@ -1,32 +1,33 @@
 import type React from "react";
 
-import type { BootstrapPayload, EventRecord } from "@/types";
-import type { TimelineEventDraft } from "@/features/workspace/shared/timeline";
+import type { BootstrapPayload, MilestoneRecord } from "@/types";
+import type { TimelineMilestoneDraft } from "@/features/workspace/shared/timeline";
 
 export interface TimelineMilestoneModalProps {
-  activeDayEvents: EventRecord[];
-  activeEventDay: string | null;
+  activeDayMilestones: MilestoneRecord[];
+  activeMilestoneDay: string | null;
   bootstrap: BootstrapPayload;
-  eventDraft: TimelineEventDraft;
-  eventEndDate: string;
-  eventEndTime: string;
-  eventError: string | null;
-  eventStartDate: string;
-  eventStartTime: string;
-  isDeletingEvent: boolean;
-  isSavingEvent: boolean;
+  milestoneDraft: TimelineMilestoneDraft;
+  milestoneEndDate: string;
+  milestoneEndTime: string;
+  milestoneError: string | null;
+  milestoneStartDate: string;
+  milestoneStartTime: string;
+  isDeletingMilestone: boolean;
+  isSavingMilestone: boolean;
   mode: "create" | "edit" | null;
   onClose: () => void;
   onDelete: () => void;
-  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  onSubmit: (milestone: React.FormEvent<HTMLFormElement>) => void;
   onSwitchToTask: () => void;
   portalTarget: HTMLElement | null;
   projectsById: Record<string, BootstrapPayload["projects"][number]>;
   selectableSubsystems: BootstrapPayload["subsystems"];
-  setEventDraft: React.Dispatch<React.SetStateAction<TimelineEventDraft>>;
-  setEventEndDate: React.Dispatch<React.SetStateAction<string>>;
-  setEventEndTime: React.Dispatch<React.SetStateAction<string>>;
-  setEventStartDate: React.Dispatch<React.SetStateAction<string>>;
-  setEventStartTime: React.Dispatch<React.SetStateAction<string>>;
+  setMilestoneDraft: React.Dispatch<React.SetStateAction<TimelineMilestoneDraft>>;
+  setMilestoneEndDate: React.Dispatch<React.SetStateAction<string>>;
+  setMilestoneEndTime: React.Dispatch<React.SetStateAction<string>>;
+  setMilestoneStartDate: React.Dispatch<React.SetStateAction<string>>;
+  setMilestoneStartTime: React.Dispatch<React.SetStateAction<string>>;
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
 }
+

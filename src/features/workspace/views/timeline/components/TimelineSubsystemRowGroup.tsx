@@ -16,7 +16,7 @@ interface TimelineSubsystemRowGroupProps {
   collapsedSubsystems: Record<string, boolean>;
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
   firstDayGridColumn: number;
-  handleTimelineDayMouseEnter: (event: React.MouseEvent<HTMLElement>) => void;
+  handleTimelineDayMouseEnter: (milestone: React.MouseEvent<HTMLElement>) => void;
   hoveredSubsystemId: string | null;
   hoveredTaskId?: string | null;
   hoverSubsystemRow: (id: string) => void;
@@ -189,3 +189,4 @@ export const TimelineSubsystemRowGroup: React.FC<TimelineSubsystemRowGroupProps>
     </div>
   );
 };
+

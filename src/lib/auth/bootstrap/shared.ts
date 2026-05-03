@@ -1,7 +1,7 @@
 import type {
   ArtifactRecord,
   BootstrapPayload,
-  EventRecord,
+  MilestoneRecord,
   ProjectRecord,
   TaskBlockerRecord,
   TaskDependencyRecord,
@@ -29,11 +29,11 @@ export type ProjectBucket = (typeof REQUIRED_PROJECTS_PER_SEASON)[number]["key"]
 export type NonRobotProjectBucket = Exclude<ProjectBucket, "robot">;
 
 export type LegacyBootstrapPayload = Partial<
-  Omit<BootstrapPayload, "artifacts" | "events" | "tasks">
+  Omit<BootstrapPayload, "artifacts" | "milestones" | "tasks">
 > & {
   tasks?: Array<Partial<TaskRecord> & { requirementId?: string | null }>;
   artifacts?: Array<Partial<ArtifactRecord>>;
-  events?: Array<Partial<EventRecord>>;
+  milestones?: Array<Partial<MilestoneRecord>>;
   taskDependencies?: Array<
     Partial<TaskDependencyRecord> & {
       upstreamTaskId?: string;
@@ -158,10 +158,10 @@ export function classifyProjectBucket(project: Pick<ProjectRecord, "name" | "pro
   return null;
 }
 
-export function inferPlanningWindow(source: Pick<LegacyBootstrapPayload, "tasks" | "events">) {
+export function inferPlanningWindow(source: Pick<LegacyBootstrapPayload, "tasks" | "milestones">) {
   const dates: string[] = [];
   const tasks = source.tasks ?? [];
-  const events = source.events ?? [];
+  const milestones = source.milestones ?? [];
 
   tasks.forEach((task) => {
     if (isIsoDate(task.startDate)) {
@@ -173,16 +173,16 @@ export function inferPlanningWindow(source: Pick<LegacyBootstrapPayload, "tasks"
     }
   });
 
-  events.forEach((event) => {
-    const eventStart = dateOnly(event.startDateTime);
-    const eventEnd = dateOnly(event.endDateTime);
+  milestones.forEach((milestone) => {
+    const milestoneStart = dateOnly(milestone.startDateTime);
+    const milestoneEnd = dateOnly(milestone.endDateTime);
 
-    if (eventStart) {
-      dates.push(eventStart);
+    if (milestoneStart) {
+      dates.push(milestoneStart);
     }
 
-    if (eventEnd) {
-      dates.push(eventEnd);
+    if (milestoneEnd) {
+      dates.push(milestoneEnd);
     }
   });
 

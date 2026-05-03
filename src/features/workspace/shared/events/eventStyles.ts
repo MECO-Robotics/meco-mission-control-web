@@ -1,6 +1,6 @@
-import type { EventType } from "@/types";
+import type { MilestoneType } from "@/types";
 
-export interface WorkspaceEventStyle {
+export interface WorkspaceMilestoneStyle {
   label: string;
   columnBackground: string;
   columnBorder: string;
@@ -11,9 +11,9 @@ export interface WorkspaceEventStyle {
   darkChipText: string;
 }
 
-export const DEFAULT_EVENT_TYPE: EventType = "internal-review";
+export const DEFAULT_EVENT_TYPE: MilestoneType = "internal-review";
 
-export const EVENT_TYPE_STYLES: Record<EventType, WorkspaceEventStyle> = {
+export const EVENT_TYPE_STYLES: Record<MilestoneType, WorkspaceMilestoneStyle> = {
   practice: {
     label: "Practice",
     columnBackground: "rgba(22, 71, 142, 0.1)",
@@ -67,12 +67,12 @@ export const EVENT_TYPE_STYLES: Record<EventType, WorkspaceEventStyle> = {
 };
 
 export const EVENT_TYPE_OPTIONS = (
-  Object.entries(EVENT_TYPE_STYLES) as [EventType, WorkspaceEventStyle][]
+  Object.entries(EVENT_TYPE_STYLES) as [MilestoneType, WorkspaceMilestoneStyle][]
 ).map(([value, style]) => ({
   value,
   label: style.label,
 }));
 
-export function getEventTypeStyle(type: string | null | undefined) {
-  return EVENT_TYPE_STYLES[type as EventType] ?? EVENT_TYPE_STYLES[DEFAULT_EVENT_TYPE];
+export function getMilestoneTypeStyle(type: string | null | undefined) {
+  return EVENT_TYPE_STYLES[type as MilestoneType] ?? EVENT_TYPE_STYLES[DEFAULT_EVENT_TYPE];
 }

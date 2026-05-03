@@ -195,8 +195,8 @@ export function useTaskQueueViewStateLogic({
       return;
     }
 
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+    const handleEscape = (milestone: KeyboardEvent) => {
+      if (milestone.key === "Escape") {
         setFocusedBoardState(null);
       }
     };
@@ -331,3 +331,4 @@ export function useTaskQueueViewStateLogic({
     workstreamsById,
   };
 }
+

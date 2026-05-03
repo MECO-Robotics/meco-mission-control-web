@@ -34,7 +34,7 @@ export function AppWorkspaceShellModalLayer({ controller }: { controller: AppWor
             closePartDefinitionModal={c.closePartDefinitionModal}
             closePurchaseModal={c.closePurchaseModal}
             closeQaReportModal={c.closeQaReportModal}
-            closeEventReportModal={c.closeEventReportModal}
+            closeMilestoneReportModal={c.closeMilestoneReportModal}
             closeTimelineTaskDetailsModal={c.closeTimelineTaskDetailsModal}
             closeWorkLogModal={c.closeWorkLogModal}
             closeSubsystemModal={c.closeSubsystemModal}
@@ -43,7 +43,7 @@ export function AppWorkspaceShellModalLayer({ controller }: { controller: AppWor
             onTaskEditCanceled={c.notifyTaskEditCanceled}
             requestPhotoUpload={c.requestPhotoUpload}
             disciplinesById={c.disciplinesById}
-            eventsById={c.eventsById}
+            milestonesById={c.milestonesById}
             handleDeleteMaterial={c.handleDeleteMaterial}
             handleDeleteArtifact={c.handleDeleteArtifact}
             handleToggleArtifactArchived={c.handleToggleArtifactArchived}
@@ -62,7 +62,7 @@ export function AppWorkspaceShellModalLayer({ controller }: { controller: AppWor
             handleArtifactSubmit={c.handleArtifactSubmit}
             handlePurchaseSubmit={c.handlePurchaseSubmit}
             handleQaReportSubmit={c.handleQaReportSubmit}
-            handleEventReportSubmit={c.handleEventReportSubmit}
+            handleMilestoneReportSubmit={c.handleMilestoneReportSubmit}
             handleWorkLogSubmit={c.handleWorkLogSubmit}
             handleSubsystemSubmit={c.handleSubsystemSubmit}
             handleTaskSubmit={c.handleTaskSubmit}
@@ -81,7 +81,7 @@ export function AppWorkspaceShellModalLayer({ controller }: { controller: AppWor
             isSavingMechanism={c.isSavingMechanism}
             isSavingPurchase={c.isSavingPurchase}
             isSavingQaReport={c.isSavingQaReport}
-            isSavingEventReport={c.isSavingEventReport}
+            isSavingMilestoneReport={c.isSavingMilestoneReport}
             isSavingWorkLog={c.isSavingWorkLog}
             isSavingSubsystem={c.isSavingSubsystem}
             isSavingTask={c.isSavingTask}
@@ -107,9 +107,9 @@ export function AppWorkspaceShellModalLayer({ controller }: { controller: AppWor
             purchaseModalMode={c.purchaseModalMode}
             qaReportDraft={c.qaReportDraft}
             qaReportModalMode={c.qaReportModalMode}
-            eventReportDraft={c.eventReportDraft}
-            eventReportFindings={c.eventReportFindings}
-            eventReportModalMode={c.eventReportModalMode}
+            milestoneReportDraft={c.milestoneReportDraft}
+            milestoneReportFindings={c.milestoneReportFindings}
+            milestoneReportModalMode={c.milestoneReportModalMode}
             workLogDraft={c.workLogDraft}
             workLogModalMode={c.workLogModalMode}
             workstreamDraft={c.workstreamDraft}
@@ -123,8 +123,8 @@ export function AppWorkspaceShellModalLayer({ controller }: { controller: AppWor
             setPurchaseDraft={c.setPurchaseDraft}
             setPurchaseFinalCost={c.setPurchaseFinalCost}
             setQaReportDraft={c.setQaReportDraft}
-            setEventReportDraft={c.setEventReportDraft}
-            setEventReportFindings={c.setEventReportFindings}
+            setMilestoneReportDraft={c.setMilestoneReportDraft}
+            setMilestoneReportFindings={c.setMilestoneReportFindings}
             setWorkLogDraft={c.setWorkLogDraft}
             setWorkstreamDraft={c.setWorkstreamDraft}
             setSubsystemDraft={c.setSubsystemDraft}

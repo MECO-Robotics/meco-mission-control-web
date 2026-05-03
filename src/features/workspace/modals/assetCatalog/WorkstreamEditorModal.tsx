@@ -7,7 +7,7 @@ interface WorkstreamEditorModalProps {
   bootstrap: BootstrapPayload;
   closeWorkstreamModal: () => void;
   handleToggleWorkstreamArchived: (workstreamId: string) => void;
-  handleWorkstreamSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  handleWorkstreamSubmit: (milestone: FormEvent<HTMLFormElement>) => void;
   isSavingWorkstream: boolean;
   setWorkstreamDraft: Dispatch<SetStateAction<WorkstreamPayload>>;
   workstreamDraft: WorkstreamPayload;
@@ -62,10 +62,10 @@ export function WorkstreamEditorModal({
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Name</span>
             <input
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setWorkstreamDraft((current) => ({
                   ...current,
-                  name: event.target.value,
+                  name: milestone.target.value,
                 }))
               }
               required
@@ -80,10 +80,10 @@ export function WorkstreamEditorModal({
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Project</span>
             <select
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setWorkstreamDraft((current) => ({
                   ...current,
-                  projectId: event.target.value,
+                  projectId: milestone.target.value,
                 }))
               }
               required
@@ -107,10 +107,10 @@ export function WorkstreamEditorModal({
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Description</span>
             <textarea
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setWorkstreamDraft((current) => ({
                   ...current,
-                  description: event.target.value,
+                  description: milestone.target.value,
                 }))
               }
               required
@@ -170,3 +170,4 @@ export function WorkstreamEditorModal({
     </div>
   );
 }
+

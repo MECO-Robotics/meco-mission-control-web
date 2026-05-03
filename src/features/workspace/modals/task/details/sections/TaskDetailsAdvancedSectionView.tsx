@@ -45,7 +45,7 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
     <details
       className="task-details-section-collapse modal-wide"
       open={advancedSectionOpen}
-      onToggle={(event) => setAdvancedSectionOpen(event.currentTarget.open)}
+      onToggle={(milestone) => setAdvancedSectionOpen(milestone.currentTarget.open)}
     >
       <summary className="task-details-section-title task-details-section-summary">
         <span>Advanced</span>
@@ -143,9 +143,9 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
                 <button
                   aria-label={editingField === "mechanism" ? "Close mechanism editor" : "Add mechanism"}
                   className="icon-button task-detail-section-action-button"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
+                  onClick={(milestone) => {
+                    milestone.preventDefault();
+                    milestone.stopPropagation();
                     setEditingField(editingField === "mechanism" ? null : "mechanism");
                   }}
                   type="button"
@@ -220,9 +220,9 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
                 <button
                   aria-label={editingField === "parts" ? "Close parts editor" : "Add part"}
                   className="icon-button task-detail-section-action-button"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
+                  onClick={(milestone) => {
+                    milestone.preventDefault();
+                    milestone.stopPropagation();
                     setEditingField(editingField === "parts" ? null : "parts");
                   }}
                   type="button"
@@ -280,3 +280,4 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
     </details>
   );
 }
+

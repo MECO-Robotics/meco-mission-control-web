@@ -47,19 +47,19 @@ export function scopeBootstrapBySelection(
   const scopedManufacturingItems = payload.manufacturingItems.filter((item) =>
     scopedSubsystemIds.has(item.subsystemId),
   );
-  const scopedEvents = payload.events.filter((event) => {
-    const eventProjectIds = event.projectIds ?? [];
-    if (eventProjectIds.length > 0) {
-      return eventProjectIds.some((projectId) => activeProjectIds.has(projectId));
+  const scopedMilestones = payload.milestones.filter((milestone) => {
+    const milestoneProjectIds = milestone.projectIds ?? [];
+    if (milestoneProjectIds.length > 0) {
+      return milestoneProjectIds.some((projectId) => activeProjectIds.has(projectId));
     }
 
     return (
-      event.relatedSubsystemIds.length === 0 ||
-      event.relatedSubsystemIds.some((subsystemId) => scopedSubsystemIds.has(subsystemId))
+      milestone.relatedSubsystemIds.length === 0 ||
+      milestone.relatedSubsystemIds.some((subsystemId) => scopedSubsystemIds.has(subsystemId))
     );
   });
   const scopedWorkstreamIds = new Set(scopedWorkstreams.map((workstream) => workstream.id));
-  const scopedEventIds = new Set(scopedEvents.map((event) => event.id));
+  const scopedMilestoneIds = new Set(scopedMilestones.map((milestone) => milestone.id));
   const scopedPartInstanceIds = new Set(scopedPartInstances.map((partInstance) => partInstance.id));
   const scopedTasks = payload.tasks.filter(
     (task) =>
@@ -83,8 +83,8 @@ export function scopeBootstrapBySelection(
       return scopedTaskIds.has(dependency.refId);
     }
 
-    if (dependency.kind === "milestone" || dependency.kind === "event") {
-      return scopedEventIds.has(dependency.refId);
+    if (dependency.kind === "milestone") {
+      return scopedMilestoneIds.has(dependency.refId);
     }
 
     if (dependency.kind === "part_instance") {
@@ -110,8 +110,8 @@ export function scopeBootstrapBySelection(
       return scopedPartInstanceIds.has(blocker.blockerId);
     }
 
-    if (blocker.blockerType === "event") {
-      return scopedEventIds.has(blocker.blockerId);
+    if (blocker.blockerType === "milestone") {
+      return scopedMilestoneIds.has(blocker.blockerId);
     }
 
     return true;
@@ -126,7 +126,7 @@ export function scopeBootstrapBySelection(
       return false;
     }
 
-    if (report.eventId && !scopedEventIds.has(report.eventId)) {
+    if (report.milestoneId && !scopedMilestoneIds.has(report.milestoneId)) {
       return false;
     }
 
@@ -169,7 +169,7 @@ export function scopeBootstrapBySelection(
       return {
         id: finding.id,
         testResultId: finding.reportId || null,
-        eventId: finding.eventId ?? report?.eventId ?? null,
+        milestoneId: finding.milestoneId ?? report?.milestoneId ?? null,
         taskId: finding.taskId ?? report?.taskId ?? null,
         projectId: finding.projectId ?? report?.projectId ?? "",
         workstreamId: finding.workstreamId ?? report?.workstreamId ?? null,
@@ -212,7 +212,7 @@ export function scopeBootstrapBySelection(
     partInstances: scopedPartInstances,
     purchaseItems: scopedPurchaseItems,
     manufacturingItems: scopedManufacturingItems,
-    events: scopedEvents,
+    milestones: scopedMilestones,
     members: scopedMembers,
     partDefinitions: scopedPartDefinitions,
     tasks: scopedTasksWithVisibleDependencies,

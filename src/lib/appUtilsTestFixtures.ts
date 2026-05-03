@@ -1,6 +1,6 @@
 import type {
   BootstrapPayload,
-  EventRecord,
+  MilestoneRecord,
   MaterialRecord,
   PartDefinitionRecord,
   PartInstanceRecord,
@@ -87,14 +87,14 @@ export function createPartInstance(overrides: Partial<PartInstanceRecord> = {}):
     name: "Left Bearing Block",
     quantity: 1,
     trackIndividually: false,
-    status: "planned",
+    status: "not ready",
     ...overrides,
   };
 }
 
-function createEvent(overrides: Partial<EventRecord>): EventRecord {
+function createMilestone(overrides: Partial<MilestoneRecord>): MilestoneRecord {
   return {
-    id: "event-1",
+    id: "milestone-1",
     title: "Regional",
     type: "competition",
     startDateTime: "2026-03-10T14:00:00.000Z",
@@ -125,7 +125,7 @@ export function createBootstrap(overrides: Partial<BootstrapPayload> = {}): Boot
   });
 
   const partDefinition = createPartDefinition({});
-  const event = createEvent({});
+  const milestone = createMilestone({});
   const partInstance = createPartInstance({
     mechanismId: "mechanism-1",
     partDefinitionId: partDefinition.id,
@@ -194,7 +194,7 @@ export function createBootstrap(overrides: Partial<BootstrapPayload> = {}): Boot
     artifacts: [],
     partDefinitions: [partDefinition],
     partInstances: [partInstance],
-    events: [event],
+    milestones: [milestone],
     reports: [],
     reportFindings: [],
     qaReports: [],
@@ -218,7 +218,7 @@ export function createBootstrap(overrides: Partial<BootstrapPayload> = {}): Boot
         mechanismIds: [],
         partInstanceId: null,
         partInstanceIds: [],
-        targetEventId: null,
+        targetMilestoneId: null,
         ownerId: null,
         assigneeIds: [],
         mentorId: null,

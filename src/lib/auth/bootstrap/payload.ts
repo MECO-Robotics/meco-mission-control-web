@@ -24,7 +24,7 @@ export function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapP
     artifacts: catalog.artifacts,
     partDefinitions: catalog.partDefinitions,
     partInstances: catalog.partInstances,
-    events: catalog.events,
+    milestones: catalog.milestones,
     taskDependencies: normalizeBootstrapTaskDependencies(source),
     taskBlockers: normalizeBootstrapTaskBlockers(source),
     reports: reports.reports,

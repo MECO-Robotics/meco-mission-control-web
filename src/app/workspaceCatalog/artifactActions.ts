@@ -31,8 +31,8 @@ export function useArtifactActions(model: AppWorkspaceModel) {
     model.setActiveArtifactId(null);
   }, [model]);
 
-  const handleArtifactSubmit = useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleArtifactSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
+    milestone.preventDefault();
     model.setIsSavingArtifact(true);
     model.setDataMessage(null);
 
@@ -114,3 +114,4 @@ export function useArtifactActions(model: AppWorkspaceModel) {
     openEditArtifactModal,
   };
 }
+

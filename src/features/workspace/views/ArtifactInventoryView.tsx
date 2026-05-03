@@ -207,7 +207,7 @@ export function ArtifactInventoryView({
           >
             <input
               checked={showArchivedArtifacts}
-              onChange={(event) => setShowArchivedArtifacts(event.target.checked)}
+              onChange={(milestone) => setShowArchivedArtifacts(milestone.target.checked)}
               type="checkbox"
             />
             Show archived

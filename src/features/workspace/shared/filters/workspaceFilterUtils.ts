@@ -176,3 +176,4 @@ export function formatFilterSelectionLabel(
 
   return `${value.length} selected`;
 }
+

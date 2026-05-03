@@ -7,7 +7,7 @@ interface ArtifactEditorModalProps {
   artifactModalMode: "create" | "edit";
   bootstrap: BootstrapPayload;
   closeArtifactModal: () => void;
-  handleArtifactSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  handleArtifactSubmit: (milestone: FormEvent<HTMLFormElement>) => void;
   handleDeleteArtifact: (artifactId: string) => Promise<void>;
   handleToggleArtifactArchived: (artifactId: string) => Promise<void>;
   isDeletingArtifact: boolean;
@@ -69,10 +69,10 @@ export function ArtifactEditorModal({
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Title</span>
             <input
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setArtifactDraft((current) => ({
                   ...current,
-                  title: event.target.value,
+                  title: milestone.target.value,
                 }))
               }
               required
@@ -87,9 +87,9 @@ export function ArtifactEditorModal({
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Project</span>
             <select
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setArtifactDraft((current) => {
-                  const projectId = event.target.value;
+                  const projectId = milestone.target.value;
                   const defaultWorkstreamId =
                     bootstrap.workstreams.find(
                       (workstream) => workstream.projectId === projectId,
@@ -122,10 +122,10 @@ export function ArtifactEditorModal({
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Workflow</span>
             <select
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setArtifactDraft((current) => ({
                   ...current,
-                  workstreamId: event.target.value || null,
+                  workstreamId: milestone.target.value || null,
                 }))
               }
               style={{
@@ -146,10 +146,10 @@ export function ArtifactEditorModal({
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Status</span>
             <select
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setArtifactDraft((current) => ({
                   ...current,
-                  status: event.target.value as ArtifactStatus,
+                  status: milestone.target.value as ArtifactStatus,
                 }))
               }
               style={{
@@ -167,10 +167,10 @@ export function ArtifactEditorModal({
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Summary</span>
             <textarea
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setArtifactDraft((current) => ({
                   ...current,
-                  summary: event.target.value,
+                  summary: milestone.target.value,
                 }))
               }
               rows={3}
@@ -185,10 +185,10 @@ export function ArtifactEditorModal({
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Link</span>
             <input
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setArtifactDraft((current) => ({
                   ...current,
-                  link: event.target.value,
+                  link: milestone.target.value,
                 }))
               }
               placeholder="https://..."
@@ -255,3 +255,4 @@ export function ArtifactEditorModal({
     </div>
   );
 }
+

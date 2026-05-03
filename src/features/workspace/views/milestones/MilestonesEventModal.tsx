@@ -1,60 +1,60 @@
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 import { createPortal } from "react-dom";
 
-import type { BootstrapPayload, EventRecord } from "@/types";
-import type { TimelineEventDraft } from "@/features/workspace/shared/timeline";
+import type { BootstrapPayload, MilestoneRecord } from "@/types";
+import type { TimelineMilestoneDraft } from "@/features/workspace/shared/timeline";
 
-import { MilestonesEventModalActions } from "./sections/MilestonesEventModalActions";
-import { MilestonesEventModalFields } from "./sections/MilestonesEventModalFields";
-import { MilestonesEventModalReadinessSection } from "./sections/MilestonesEventModalReadinessSection";
+import { MilestonesMilestoneModalActions } from "./sections/MilestonesMilestoneModalActions";
+import { MilestonesMilestoneModalFields } from "./sections/MilestonesMilestoneModalFields";
+import { MilestonesMilestoneModalReadinessSection } from "./sections/MilestonesMilestoneModalReadinessSection";
 
 type TaskPlanningState = "blocked" | "at-risk" | "waiting-on-dependency" | "ready" | "overdue";
 
-interface MilestonesEventModalProps {
-  activeEvent: EventRecord | null;
-  activeEventCompleteTasks: BootstrapPayload["tasks"];
-  activeEventTasks: BootstrapPayload["tasks"];
+interface MilestonesMilestoneModalProps {
+  activeMilestone: MilestoneRecord | null;
+  activeMilestoneCompleteTasks: BootstrapPayload["tasks"];
+  activeMilestoneTasks: BootstrapPayload["tasks"];
   bootstrap: BootstrapPayload;
-  eventError: string | null;
-  eventModalMode: "create" | "edit" | null;
-  eventStartDate: string;
-  eventStartTime: string;
-  eventEndDate: string;
-  eventEndTime: string;
-  eventTaskGroups: Record<TaskPlanningState, BootstrapPayload["tasks"]>;
-  eventTaskOrder: readonly TaskPlanningState[];
-  isDeletingEvent: boolean;
-  isSavingEvent: boolean;
-  milestoneDraft: TimelineEventDraft;
+  milestoneError: string | null;
+  milestoneModalMode: "create" | "edit" | null;
+  milestoneStartDate: string;
+  milestoneStartTime: string;
+  milestoneEndDate: string;
+  milestoneEndTime: string;
+  milestoneTaskGroups: Record<TaskPlanningState, BootstrapPayload["tasks"]>;
+  milestoneTaskOrder: readonly TaskPlanningState[];
+  isDeletingMilestone: boolean;
+  isSavingMilestone: boolean;
+  milestoneDraft: TimelineMilestoneDraft;
   modalPortalTarget: HTMLElement | null;
   onClose: () => void;
   onDelete: () => void;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onSubmit: (milestone: FormEvent<HTMLFormElement>) => void;
   projectsById: Record<string, BootstrapPayload["projects"][number]>;
   selectableSubsystems: BootstrapPayload["subsystems"];
-  setEventEndDate: Dispatch<SetStateAction<string>>;
-  setEventEndTime: Dispatch<SetStateAction<string>>;
-  setEventStartDate: Dispatch<SetStateAction<string>>;
-  setEventStartTime: Dispatch<SetStateAction<string>>;
-  setMilestoneDraft: Dispatch<SetStateAction<TimelineEventDraft>>;
+  setMilestoneEndDate: Dispatch<SetStateAction<string>>;
+  setMilestoneEndTime: Dispatch<SetStateAction<string>>;
+  setMilestoneStartDate: Dispatch<SetStateAction<string>>;
+  setMilestoneStartTime: Dispatch<SetStateAction<string>>;
+  setMilestoneDraft: Dispatch<SetStateAction<TimelineMilestoneDraft>>;
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
 }
 
-export function MilestonesEventModal({
-  activeEvent,
-  activeEventCompleteTasks,
-  activeEventTasks,
+export function MilestonesMilestoneModal({
+  activeMilestone,
+  activeMilestoneCompleteTasks,
+  activeMilestoneTasks,
   bootstrap,
-  eventError,
-  eventModalMode,
-  eventStartDate,
-  eventStartTime,
-  eventEndDate,
-  eventEndTime,
-  eventTaskGroups,
-  eventTaskOrder,
-  isDeletingEvent,
-  isSavingEvent,
+  milestoneError,
+  milestoneModalMode,
+  milestoneStartDate,
+  milestoneStartTime,
+  milestoneEndDate,
+  milestoneEndTime,
+  milestoneTaskGroups,
+  milestoneTaskOrder,
+  isDeletingMilestone,
+  isSavingMilestone,
   milestoneDraft,
   modalPortalTarget,
   onClose,
@@ -62,14 +62,14 @@ export function MilestonesEventModal({
   onSubmit,
   projectsById,
   selectableSubsystems,
-  setEventEndDate,
-  setEventEndTime,
-  setEventStartDate,
-  setEventStartTime,
+  setMilestoneEndDate,
+  setMilestoneEndTime,
+  setMilestoneStartDate,
+  setMilestoneStartTime,
   setMilestoneDraft,
   subsystemsById,
-}: MilestonesEventModalProps) {
-  if (!eventModalMode || !modalPortalTarget) {
+}: MilestonesMilestoneModalProps) {
+  if (!milestoneModalMode || !modalPortalTarget) {
     return null;
   }
 
@@ -84,9 +84,9 @@ export function MilestonesEventModal({
         aria-modal="true"
         className="modal-card"
         data-tutorial-target={
-          eventModalMode === "create" ? "milestone-create-modal" : "milestone-edit-modal"
+          milestoneModalMode === "create" ? "milestone-create-modal" : "milestone-edit-modal"
         }
-        onClick={(event) => event.stopPropagation()}
+        onClick={(milestone) => milestone.stopPropagation()}
         role="dialog"
         style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
       >
@@ -96,7 +96,7 @@ export function MilestonesEventModal({
               Timeline milestone
             </p>
             <h2 style={{ color: "var(--text-title)" }}>
-              {eventModalMode === "create" ? "Add milestone" : "Edit milestone"}
+              {milestoneModalMode === "create" ? "Add milestone" : "Edit milestone"}
             </h2>
           </div>
           <button
@@ -110,38 +110,38 @@ export function MilestonesEventModal({
         </div>
 
         <form className="modal-form" onSubmit={onSubmit}>
-          <MilestonesEventModalFields
+          <MilestonesMilestoneModalFields
             bootstrap={bootstrap}
-            eventEndDate={eventEndDate}
-            eventEndTime={eventEndTime}
-            eventError={eventError}
-            eventStartDate={eventStartDate}
-            eventStartTime={eventStartTime}
+            milestoneEndDate={milestoneEndDate}
+            milestoneEndTime={milestoneEndTime}
+            milestoneError={milestoneError}
+            milestoneStartDate={milestoneStartDate}
+            milestoneStartTime={milestoneStartTime}
             milestoneDraft={milestoneDraft}
             projectsById={projectsById}
             selectableSubsystems={selectableSubsystems}
-            setEventEndDate={setEventEndDate}
-            setEventEndTime={setEventEndTime}
-            setEventStartDate={setEventStartDate}
-            setEventStartTime={setEventStartTime}
+            setMilestoneEndDate={setMilestoneEndDate}
+            setMilestoneEndTime={setMilestoneEndTime}
+            setMilestoneStartDate={setMilestoneStartDate}
+            setMilestoneStartTime={setMilestoneStartTime}
             setMilestoneDraft={setMilestoneDraft}
             subsystemsById={subsystemsById}
           />
 
-          <MilestonesEventModalReadinessSection
-            activeEvent={activeEvent}
-            activeEventCompleteTasks={activeEventCompleteTasks}
-            activeEventTasks={activeEventTasks}
+          <MilestonesMilestoneModalReadinessSection
+            activeMilestone={activeMilestone}
+            activeMilestoneCompleteTasks={activeMilestoneCompleteTasks}
+            activeMilestoneTasks={activeMilestoneTasks}
             bootstrap={bootstrap}
-            eventModalMode={eventModalMode}
-            eventTaskGroups={eventTaskGroups}
-            eventTaskOrder={eventTaskOrder}
+            milestoneModalMode={milestoneModalMode}
+            milestoneTaskGroups={milestoneTaskGroups}
+            milestoneTaskOrder={milestoneTaskOrder}
           />
 
-          <MilestonesEventModalActions
-            eventModalMode={eventModalMode}
-            isDeletingEvent={isDeletingEvent}
-            isSavingEvent={isSavingEvent}
+          <MilestonesMilestoneModalActions
+            milestoneModalMode={milestoneModalMode}
+            isDeletingMilestone={isDeletingMilestone}
+            isSavingMilestone={isSavingMilestone}
             onClose={onClose}
             onDelete={onDelete}
           />
@@ -151,3 +151,4 @@ export function MilestonesEventModal({
     modalPortalTarget,
   );
 }
+

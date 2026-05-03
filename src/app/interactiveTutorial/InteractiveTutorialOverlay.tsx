@@ -106,7 +106,7 @@ export function InteractiveTutorialOverlay({
             <h3>{currentStep.title}</h3>
             <p>{currentStep.instruction}</p>
             <p className="interactive-tutorial-context">
-              Fake tutorial season: {seasonName ?? "Tutorial season"}
+              Fake tutorial season: {seasonName ?? "Default Season"}
             </p>
             {projectName ? (
               <p className="interactive-tutorial-context">Tutorial project: {projectName}</p>

@@ -5,7 +5,7 @@ interface TimelineGridDaySlotsProps {
   clearHoveredMilestonePopup: () => void;
   firstDayGridColumn: number;
   gridRow: string | number;
-  handleTimelineDayMouseEnter: (event: React.MouseEvent<HTMLElement>) => void;
+  handleTimelineDayMouseEnter: (milestone: React.MouseEvent<HTMLElement>) => void;
   includeTopBorder?: boolean;
   onRowClick?: () => void;
   onRowMouseEnter?: () => void;
@@ -30,14 +30,14 @@ export const TimelineGridDaySlots: React.FC<TimelineGridDaySlotsProps> = ({
     <div
       aria-hidden="true"
       className="timeline-day-slot"
-      data-popup-end-day={cell.primaryEventEndDay}
-      data-popup-start-day={cell.primaryEventStartDay}
+      data-popup-end-day={cell.primaryMilestoneEndDay}
+      data-popup-start-day={cell.primaryMilestoneStartDay}
       data-timeline-day={cell.day}
       data-timeline-grid-cell="true"
       key={`${rowKey}-${cell.day}`}
       onClick={onRowClick}
-      onMouseEnter={(event) => {
-        handleTimelineDayMouseEnter(event);
+      onMouseEnter={(milestone) => {
+        handleTimelineDayMouseEnter(milestone);
         onRowMouseEnter?.();
       }}
       onMouseLeave={() => {
@@ -58,3 +58,4 @@ export const TimelineGridDaySlots: React.FC<TimelineGridDaySlotsProps> = ({
       }}
     />
   ));
+

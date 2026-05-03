@@ -89,7 +89,7 @@ describe("appUtils", () => {
     expect(payload.ownerId).toBe("lead-1");
     expect(payload.assigneeIds).toEqual(["lead-1"]);
     expect(payload.mentorId).toBe("mentor-1");
-    expect(payload.targetEventId).toBe("event-1");
+    expect(payload.targetMilestoneId).toBe("milestone-1");
     expect(payload.startDate).toBe("2026-01-02");
     expect(payload.dueDate).toBe("2026-01-02");
     expect(payload.priority).toBe("medium");

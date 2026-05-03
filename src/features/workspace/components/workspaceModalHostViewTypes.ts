@@ -2,7 +2,7 @@ import type { Dispatch, FormEvent, SetStateAction } from "react";
 
 import type {
   ArtifactModalMode,
-  EventReportModalMode,
+  MilestoneReportModalMode,
   ManufacturingModalMode,
   MaterialModalMode,
   MechanismModalMode,
@@ -51,7 +51,7 @@ export interface WorkspaceModalHostViewProps {
   closePartDefinitionModal: () => void;
   closePurchaseModal: () => void;
   closeQaReportModal: () => void;
-  closeEventReportModal: () => void;
+  closeMilestoneReportModal: () => void;
   closeTimelineTaskDetailsModal: () => void;
   closeWorkLogModal: () => void;
   closeSubsystemModal: () => void;
@@ -60,7 +60,7 @@ export interface WorkspaceModalHostViewProps {
   onTaskEditCanceled: () => void;
   requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
-  eventsById: Record<string, BootstrapPayload["events"][number]>;
+  milestonesById: Record<string, BootstrapPayload["milestones"][number]>;
   handleDeleteMaterial: (materialId: string) => Promise<void>;
   handleDeleteArtifact: (artifactId: string) => Promise<void>;
   handleToggleArtifactArchived: (artifactId: string) => Promise<void>;
@@ -72,19 +72,19 @@ export interface WorkspaceModalHostViewProps {
   handleToggleWorkstreamArchived: (workstreamId: string) => Promise<void>;
   handleDeleteTask: (taskId: string) => Promise<void>;
   handleResolveTaskBlocker: (blockerId: string) => Promise<void>;
-  handlePartInstanceSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
-  handleManufacturingSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
-  handleMaterialSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
-  handleMechanismSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
-  handlePartDefinitionSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
-  handleArtifactSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
-  handlePurchaseSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
-  handleQaReportSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
-  handleEventReportSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
-  handleWorkLogSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
-  handleSubsystemSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
-  handleTaskSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
-  handleWorkstreamSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+  handlePartInstanceSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleManufacturingSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleMaterialSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleMechanismSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
+  handlePartDefinitionSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleArtifactSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
+  handlePurchaseSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleQaReportSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleMilestoneReportSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleWorkLogSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleSubsystemSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleTaskSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleWorkstreamSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
   onOpenTaskEditFromTimelineDetails: (task: TaskRecord) => void;
   openTaskDetailsModal: (task: TaskRecord) => void;
   isDeletingMaterial: boolean;
@@ -100,7 +100,7 @@ export interface WorkspaceModalHostViewProps {
   isSavingMechanism: boolean;
   isSavingPurchase: boolean;
   isSavingQaReport: boolean;
-  isSavingEventReport: boolean;
+  isSavingMilestoneReport: boolean;
   isSavingWorkLog: boolean;
   isSavingSubsystem: boolean;
   isSavingTask: boolean;
@@ -126,9 +126,9 @@ export interface WorkspaceModalHostViewProps {
   purchaseModalMode: PurchaseModalMode;
   qaReportDraft: QaReportPayload;
   qaReportModalMode: QaReportModalMode;
-  eventReportDraft: TestResultPayload;
-  eventReportFindings: string;
-  eventReportModalMode: EventReportModalMode;
+  milestoneReportDraft: TestResultPayload;
+  milestoneReportFindings: string;
+  milestoneReportModalMode: MilestoneReportModalMode;
   workLogDraft: WorkLogPayload;
   workLogModalMode: WorkLogModalMode;
   workstreamDraft: WorkstreamPayload;
@@ -142,8 +142,8 @@ export interface WorkspaceModalHostViewProps {
   setPurchaseDraft: Dispatch<SetStateAction<PurchaseItemPayload>>;
   setPurchaseFinalCost: (value: string) => void;
   setQaReportDraft: Dispatch<SetStateAction<QaReportPayload>>;
-  setEventReportDraft: Dispatch<SetStateAction<TestResultPayload>>;
-  setEventReportFindings: (value: string) => void;
+  setMilestoneReportDraft: Dispatch<SetStateAction<TestResultPayload>>;
+  setMilestoneReportFindings: (value: string) => void;
   setWorkLogDraft: Dispatch<SetStateAction<WorkLogPayload>>;
   setWorkstreamDraft: Dispatch<SetStateAction<WorkstreamPayload>>;
   setSubsystemDraft: Dispatch<SetStateAction<SubsystemPayload>>;
@@ -158,3 +158,4 @@ export interface WorkspaceModalHostViewProps {
   taskDraft: TaskPayload;
   taskModalMode: TaskModalMode;
 }
+

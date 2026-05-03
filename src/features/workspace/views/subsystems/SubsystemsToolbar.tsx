@@ -40,7 +40,7 @@ export function SubsystemsToolbar({
       <label style={LABEL_STYLE}>
         <input
           checked={showArchivedSubsystems}
-          onChange={(event) => setShowArchivedSubsystems(event.target.checked)}
+          onChange={(milestone) => setShowArchivedSubsystems(milestone.target.checked)}
           type="checkbox"
         />
         Show archived subsystems
@@ -48,7 +48,7 @@ export function SubsystemsToolbar({
       <label style={LABEL_STYLE}>
         <input
           checked={showArchivedMechanisms}
-          onChange={(event) => setShowArchivedMechanisms(event.target.checked)}
+          onChange={(milestone) => setShowArchivedMechanisms(milestone.target.checked)}
           type="checkbox"
         />
         Show archived mechanisms

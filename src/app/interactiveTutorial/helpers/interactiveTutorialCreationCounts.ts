@@ -39,8 +39,8 @@ export function getInteractiveTutorialCreationCounts(
     purchaseItems: payload.purchaseItems.filter((item) =>
       scopedSubsystemIds.has(item.subsystemId),
     ).length,
-    milestones: payload.events.filter((event) =>
-      tutorialProjectId ? event.projectIds.includes(tutorialProjectId) : true,
+    milestones: payload.milestones.filter((milestone) =>
+      tutorialProjectId ? milestone.projectIds.includes(tutorialProjectId) : true,
     ).length,
     cncJobs: payload.manufacturingItems.filter(
       (item) =>

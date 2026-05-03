@@ -25,8 +25,8 @@ export function reconcileWorkLogAndReports(
     );
   }
 
-  if (model.eventReportModalMode === "create") {
-    state.setEventReportDraft(buildEmptyTestResultPayload(scopedPayload));
-    state.setEventReportFindings("");
+  if (model.milestoneReportModalMode === "create") {
+    state.setMilestoneReportDraft(buildEmptyTestResultPayload(scopedPayload));
+    state.setMilestoneReportFindings("");
   }
 }

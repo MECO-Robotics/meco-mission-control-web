@@ -1,27 +1,27 @@
-import { reconcileMilestoneSubsystemIds, EVENT_TYPE_OPTIONS } from "@/features/workspace/shared/events";
-import type { BootstrapPayload, EventRecord, EventType } from "@/types";
+import { reconcileMilestoneSubsystemIds, EVENT_TYPE_OPTIONS } from "@/features/workspace/shared/milestones";
+import type { BootstrapPayload, MilestoneRecord, MilestoneType } from "@/types";
 import type React from "react";
 
-import type { TimelineEventDraft } from "@/features/workspace/shared/timeline";
+import type { TimelineMilestoneDraft } from "@/features/workspace/shared/timeline";
 
 interface TimelineMilestoneModalFieldsProps {
-  activeDayEvents: EventRecord[];
+  activeDayMilestones: MilestoneRecord[];
   bootstrap: BootstrapPayload;
-  eventDraft: TimelineEventDraft;
-  eventError: string | null;
+  milestoneDraft: TimelineMilestoneDraft;
+  milestoneError: string | null;
   mode: "create" | "edit";
   projectsById: Record<string, BootstrapPayload["projects"][number]>;
   selectableSubsystems: BootstrapPayload["subsystems"];
-  setEventDraft: React.Dispatch<React.SetStateAction<TimelineEventDraft>>;
-  setEventEndDate: React.Dispatch<React.SetStateAction<string>>;
-  setEventEndTime: React.Dispatch<React.SetStateAction<string>>;
-  setEventStartDate: React.Dispatch<React.SetStateAction<string>>;
-  setEventStartTime: React.Dispatch<React.SetStateAction<string>>;
+  setMilestoneDraft: React.Dispatch<React.SetStateAction<TimelineMilestoneDraft>>;
+  setMilestoneEndDate: React.Dispatch<React.SetStateAction<string>>;
+  setMilestoneEndTime: React.Dispatch<React.SetStateAction<string>>;
+  setMilestoneStartDate: React.Dispatch<React.SetStateAction<string>>;
+  setMilestoneStartTime: React.Dispatch<React.SetStateAction<string>>;
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
-  eventEndDate: string;
-  eventEndTime: string;
-  eventStartDate: string;
-  eventStartTime: string;
+  milestoneEndDate: string;
+  milestoneEndTime: string;
+  milestoneStartDate: string;
+  milestoneStartTime: string;
 }
 
 const FIELD_INPUT_STYLE = {
@@ -31,54 +31,54 @@ const FIELD_INPUT_STYLE = {
 } as const;
 
 export function TimelineMilestoneModalFields({
-  activeDayEvents,
+  activeDayMilestones,
   bootstrap,
-  eventDraft,
-  eventError,
+  milestoneDraft,
+  milestoneError,
   mode,
   projectsById,
   selectableSubsystems,
-  setEventDraft,
-  setEventEndDate,
-  setEventEndTime,
-  setEventStartDate,
-  setEventStartTime,
+  setMilestoneDraft,
+  setMilestoneEndDate,
+  setMilestoneEndTime,
+  setMilestoneStartDate,
+  setMilestoneStartTime,
   subsystemsById,
-  eventEndDate,
-  eventEndTime,
-  eventStartDate,
-  eventStartTime,
+  milestoneEndDate,
+  milestoneEndTime,
+  milestoneStartDate,
+  milestoneStartTime,
 }: TimelineMilestoneModalFieldsProps) {
   return (
     <>
       <label className="field modal-wide">
         <span style={{ color: "var(--text-title)" }}>Title</span>
         <input
-          onChange={(event) =>
-            setEventDraft((current) => ({
+          onChange={(milestone) =>
+            setMilestoneDraft((current) => ({
               ...current,
-              title: event.target.value,
+              title: milestone.target.value,
             }))
           }
           required
           style={FIELD_INPUT_STYLE}
-          value={eventDraft.title}
+          value={milestoneDraft.title}
         />
       </label>
 
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Type</span>
         <select
-          onChange={(event) =>
-            setEventDraft((current) => ({
+          onChange={(milestone) =>
+            setMilestoneDraft((current) => ({
               ...current,
-              type: event.target.value as EventType,
+              type: milestone.target.value as MilestoneType,
             }))
           }
           style={FIELD_INPUT_STYLE}
-          value={eventDraft.type}
+          value={milestoneDraft.type}
         >
-          {EVENT_TYPE_OPTIONS.map((option) => (
+          {EVENT_TYPE_OPTIONS.map((option: { value: MilestoneType; label: string }) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>
@@ -89,57 +89,57 @@ export function TimelineMilestoneModalFields({
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Start date</span>
         <input
-          onChange={(event) => setEventStartDate(event.target.value)}
+          onChange={(milestone) => setMilestoneStartDate(milestone.target.value)}
           required
           style={FIELD_INPUT_STYLE}
           type="date"
-          value={eventStartDate}
+          value={milestoneStartDate}
         />
       </label>
 
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Start time</span>
         <input
-          onChange={(event) => setEventStartTime(event.target.value)}
+          onChange={(milestone) => setMilestoneStartTime(milestone.target.value)}
           required
           style={FIELD_INPUT_STYLE}
           type="time"
-          value={eventStartTime}
+          value={milestoneStartTime}
         />
       </label>
 
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>End date (optional)</span>
         <input
-          onChange={(event) => setEventEndDate(event.target.value)}
+          onChange={(milestone) => setMilestoneEndDate(milestone.target.value)}
           style={FIELD_INPUT_STYLE}
           type="date"
-          value={eventEndDate}
+          value={milestoneEndDate}
         />
       </label>
 
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>End time (optional)</span>
         <input
-          onChange={(event) => setEventEndTime(event.target.value)}
+          onChange={(milestone) => setMilestoneEndTime(milestone.target.value)}
           style={FIELD_INPUT_STYLE}
           type="time"
-          value={eventEndTime}
+          value={milestoneEndTime}
         />
       </label>
 
       <label className="field modal-wide">
         <span style={{ color: "var(--text-title)" }}>Description</span>
         <textarea
-          onChange={(event) =>
-            setEventDraft((current) => ({
+          onChange={(milestone) =>
+            setMilestoneDraft((current) => ({
               ...current,
-              description: event.target.value,
+              description: milestone.target.value,
             }))
           }
           rows={3}
           style={FIELD_INPUT_STYLE}
-          value={eventDraft.description}
+          value={milestoneDraft.description}
         />
       </label>
 
@@ -147,9 +147,9 @@ export function TimelineMilestoneModalFields({
         <span style={{ color: "var(--text-title)" }}>Related projects</span>
         <select
           multiple
-          onChange={(event) =>
-            setEventDraft((current) => {
-              const projectIds = Array.from(event.currentTarget.selectedOptions, (option) => option.value);
+          onChange={(milestone) =>
+            setMilestoneDraft((current) => {
+              const projectIds = Array.from(milestone.currentTarget.selectedOptions, (option) => option.value);
 
               return {
                 ...current,
@@ -164,7 +164,7 @@ export function TimelineMilestoneModalFields({
           }
           size={Math.min(bootstrap.projects.length || 1, 6)}
           style={FIELD_INPUT_STYLE}
-          value={eventDraft.projectIds}
+          value={milestoneDraft.projectIds}
         >
           {bootstrap.projects.map((project) => (
             <option key={project.id} value={project.id}>
@@ -178,15 +178,15 @@ export function TimelineMilestoneModalFields({
         <span style={{ color: "var(--text-title)" }}>Related subsystems</span>
         <select
           multiple
-          onChange={(event) =>
-            setEventDraft((current) => ({
+          onChange={(milestone) =>
+            setMilestoneDraft((current) => ({
               ...current,
-              relatedSubsystemIds: Array.from(event.currentTarget.selectedOptions, (option) => option.value),
+              relatedSubsystemIds: Array.from(milestone.currentTarget.selectedOptions, (option) => option.value),
             }))
           }
           size={Math.min(bootstrap.subsystems.length || 1, 6)}
           style={FIELD_INPUT_STYLE}
-          value={eventDraft.relatedSubsystemIds}
+          value={milestoneDraft.relatedSubsystemIds}
         >
           {selectableSubsystems.map((subsystem) => (
             <option key={subsystem.id} value={subsystem.id}>
@@ -201,28 +201,28 @@ export function TimelineMilestoneModalFields({
       <div className="checkbox-row modal-wide">
         <label className="checkbox-field">
           <input
-            checked={eventDraft.isExternal}
-            onChange={(event) =>
-              setEventDraft((current) => ({
+            checked={milestoneDraft.isExternal}
+            onChange={(milestone) =>
+              setMilestoneDraft((current) => ({
                 ...current,
-                isExternal: event.target.checked,
+                isExternal: milestone.target.checked,
               }))
             }
             type="checkbox"
           />
-          <span style={{ color: "var(--text-title)" }}>External milestone/event</span>
+          <span style={{ color: "var(--text-title)" }}>External milestone/milestone</span>
         </label>
       </div>
 
-      {eventError ? (
+      {milestoneError ? (
         <p className="section-copy modal-wide" style={{ color: "var(--official-red)" }}>
-          {eventError}
+          {milestoneError}
         </p>
       ) : null}
 
-      {mode === "edit" && activeDayEvents.length > 1 ? (
+      {mode === "edit" && activeDayMilestones.length > 1 ? (
         <p className="section-copy modal-wide">
-          {activeDayEvents.length} milestones are scheduled on this day. This editor opened the
+          {activeDayMilestones.length} milestones are scheduled on this day. This editor opened the
           earliest one.
         </p>
       ) : null}

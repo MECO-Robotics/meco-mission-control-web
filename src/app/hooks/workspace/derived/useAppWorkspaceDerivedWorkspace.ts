@@ -22,7 +22,7 @@ export function useAppWorkspaceDerivedWorkspace(
     taskModalMode,
     workLogModalMode,
     qaReportModalMode,
-    eventReportModalMode,
+    milestoneReportModalMode,
     purchaseModalMode,
     manufacturingModalMode,
     materialModalMode,
@@ -41,7 +41,7 @@ export function useAppWorkspaceDerivedWorkspace(
     activeTask,
     cncItems,
     disciplinesById,
-    eventsById,
+    milestonesById,
     externalMembers,
     fabricationItems,
     mechanismsById,
@@ -102,7 +102,7 @@ export function useAppWorkspaceDerivedWorkspace(
       taskModalMode ||
       workLogModalMode ||
       qaReportModalMode ||
-      eventReportModalMode ||
+      milestoneReportModalMode ||
       purchaseModalMode ||
       manufacturingModalMode ||
       materialModalMode ||
@@ -142,7 +142,7 @@ export function useAppWorkspaceDerivedWorkspace(
     activeTimelineTaskDetail,
     cncItems,
     disciplinesById,
-    eventsById,
+    milestonesById,
     externalMembers,
     fabricationItems,
     handleSidebarTabSelect,

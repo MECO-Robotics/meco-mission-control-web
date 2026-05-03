@@ -12,7 +12,7 @@ export const EMPTY_BOOTSTRAP: BootstrapPayload = {
   artifacts: [],
   partDefinitions: [],
   partInstances: [],
-  events: [],
+  milestones: [],
   taskDependencies: [],
   taskBlockers: [],
   reports: [],

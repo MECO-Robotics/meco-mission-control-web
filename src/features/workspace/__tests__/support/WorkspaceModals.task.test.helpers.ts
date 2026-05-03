@@ -35,7 +35,7 @@ export function renderTaskModal(
       disciplinesById: Object.fromEntries(
         bootstrap.disciplines.map((discipline) => [discipline.id, discipline]),
       ),
-      eventsById: {},
+      milestonesById: {},
       handleDeleteTask: jest.fn(),
       handleResolveTaskBlocker: jest.fn(async () => undefined),
       handleTaskSubmit: jest.fn(),

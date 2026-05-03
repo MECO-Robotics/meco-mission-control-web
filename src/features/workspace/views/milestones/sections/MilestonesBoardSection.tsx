@@ -1,29 +1,29 @@
 import { KanbanScrollFrame } from "@/features/workspace/views/kanban/KanbanScrollFrame";
-import type { BootstrapPayload, EventRecord } from "@/types";
+import type { BootstrapPayload, MilestoneRecord } from "@/types";
 
 import { MilestoneKanbanBoard } from "../MilestoneKanbanBoard";
 
 interface MilestonesBoardSectionProps {
-  events: EventRecord[];
+  milestones: MilestoneRecord[];
   motionClassName: string;
-  onOpenEvent: (event: EventRecord) => void;
-  projectLabelByEventId: Record<string, string>;
+  onOpenMilestone: (milestone: MilestoneRecord) => void;
+  projectLabelByMilestoneId: Record<string, string>;
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
 }
 
 export function MilestonesBoardSection({
-  events,
+  milestones,
   motionClassName,
-  onOpenEvent,
-  projectLabelByEventId,
+  onOpenMilestone,
+  projectLabelByMilestoneId,
   subsystemsById,
 }: MilestonesBoardSectionProps) {
-  return events.length > 0 ? (
+  return milestones.length > 0 ? (
     <KanbanScrollFrame motionClassName={motionClassName}>
       <MilestoneKanbanBoard
-        events={events}
-        onOpenEvent={onOpenEvent}
-        projectLabelByEventId={projectLabelByEventId}
+        milestones={milestones}
+        onOpenMilestone={onOpenMilestone}
+        projectLabelByMilestoneId={projectLabelByMilestoneId}
         subsystemsById={subsystemsById}
       />
     </KanbanScrollFrame>

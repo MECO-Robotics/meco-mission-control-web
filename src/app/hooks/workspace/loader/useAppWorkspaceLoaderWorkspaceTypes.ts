@@ -5,7 +5,7 @@ import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
 import type { BootstrapPayload } from "@/types";
 import type {
   ArtifactModalMode,
-  EventReportModalMode,
+  MilestoneReportModalMode,
   ManufacturingModalMode,
   MaterialModalMode,
   MechanismModalMode,
@@ -36,7 +36,7 @@ export type WorkspaceReconciliationState = AppWorkspaceState & {
   activeWorkstreamId: string | null;
   artifactDraft: ArtifactPayload;
   artifactModalMode: ArtifactModalMode;
-  eventReportModalMode: EventReportModalMode;
+  milestoneReportModalMode: MilestoneReportModalMode;
   manufacturingDraft: ManufacturingItemPayload;
   manufacturingModalMode: ManufacturingModalMode;
   materialDraft: MaterialPayload;
@@ -72,7 +72,7 @@ export type WorkspaceReconciliationState = AppWorkspaceState & {
   setActiveWorkstreamId: Dispatch<SetStateAction<string | null>>;
   setArtifactDraft: Dispatch<SetStateAction<ArtifactPayload>>;
   setArtifactModalMode: Dispatch<SetStateAction<ArtifactModalMode>>;
-  setEventReportModalMode: Dispatch<SetStateAction<EventReportModalMode>>;
+  setMilestoneReportModalMode: Dispatch<SetStateAction<MilestoneReportModalMode>>;
   setManufacturingDraft: Dispatch<SetStateAction<ManufacturingItemPayload>>;
   setManufacturingModalMode: Dispatch<SetStateAction<ManufacturingModalMode>>;
   setMaterialDraft: Dispatch<SetStateAction<MaterialPayload>>;

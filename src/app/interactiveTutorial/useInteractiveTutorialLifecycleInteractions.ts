@@ -54,8 +54,8 @@ export function useInteractiveTutorialLifecycleInteractions({
       stepBaselineLabel: stepBaselineLabelRef.current,
     };
 
-    const handleClickCapture = (event: MouseEvent) => {
-      const targetNode = event.target as Node | null;
+    const handleClickCapture = (milestone: MouseEvent) => {
+      const targetNode = milestone.target as Node | null;
       if (!targetNode || cardRef.current?.contains(targetNode)) {
         return;
       }
@@ -68,8 +68,8 @@ export function useInteractiveTutorialLifecycleInteractions({
           return;
         }
 
-        event.preventDefault();
-        event.stopPropagation();
+        milestone.preventDefault();
+        milestone.stopPropagation();
         return;
       }
 
@@ -184,9 +184,9 @@ export function useInteractiveTutorialLifecycleInteractions({
       }, 0);
     };
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
+    const handleKeyDown = (milestone: KeyboardEvent) => {
+      if (milestone.key === "Escape") {
+        milestone.preventDefault();
         onClose();
       }
     };
@@ -216,3 +216,4 @@ export function useInteractiveTutorialLifecycleInteractions({
 
   return { stepError };
 }
+

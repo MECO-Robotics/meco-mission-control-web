@@ -15,7 +15,7 @@ interface TimelineTaskTrackRowListProps {
   clearHoveredTaskRow: () => void;
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
   firstDayGridColumn: number;
-  handleTimelineDayMouseEnter: (event: React.MouseEvent<HTMLElement>) => void;
+  handleTimelineDayMouseEnter: (milestone: React.MouseEvent<HTMLElement>) => void;
   hoveredTaskId?: string | null;
   hoverTaskRow: (id: string) => void;
   mode: TimelineTaskTrackRowListMode;
@@ -167,3 +167,4 @@ export const TimelineTaskTrackRowList: React.FC<TimelineTaskTrackRowListProps> =
     </>
   );
 };
+

@@ -19,7 +19,7 @@ interface RosterEditPersonModalProps {
   isDeletingMember: boolean;
   requestMemberPhotoUpload: (file: File) => Promise<string>;
   onClose: () => void;
-  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  onSubmit: (milestone: React.FormEvent<HTMLFormElement>) => void;
   onDeleteMember: (id: string) => void;
   isElevatedRole: (role: MemberPayload["role"]) => boolean;
   getEmailPlaceholder: (role: MemberPayload["role"]) => string;
@@ -47,8 +47,8 @@ export const RosterEditPersonModal: React.FC<RosterEditPersonModalProps> = ({
   return (
     <div
       className="modal-scrim"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) {
+      onClick={(milestone) => {
+        if (milestone.target === milestone.currentTarget) {
           onClose();
         }
       }}
@@ -140,3 +140,4 @@ export const RosterEditPersonModal: React.FC<RosterEditPersonModalProps> = ({
     </div>
   );
 };
+

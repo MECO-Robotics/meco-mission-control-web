@@ -44,7 +44,7 @@ export function buildRiskViewLookups({
   const partInstancesById = Object.fromEntries(
     bootstrap.partInstances.map((partInstance) => [partInstance.id, partInstance] as const),
   );
-  const eventsById = Object.fromEntries(bootstrap.events.map((event) => [event.id, event] as const));
+  const milestonesById = Object.fromEntries(bootstrap.milestones.map((milestone) => [milestone.id, milestone] as const));
   const testResultsById = Object.fromEntries(
     scope.scopedReports
       .filter((report) => report.reportType !== "QA")
@@ -68,10 +68,10 @@ export function buildRiskViewLookups({
   const testSourceOptions = scope.scopedReports
     .filter((report) => report.reportType !== "QA")
     .map((testResult) => {
-      const eventTitle = eventsById[testResult.eventId ?? ""]?.title ?? "Unknown event";
+      const milestoneTitle = milestonesById[testResult.milestoneId ?? ""]?.title ?? "Unknown milestone";
       return {
         id: testResult.id,
-        name: `${testResult.title} (${eventTitle})`,
+        name: `${testResult.title} (${milestoneTitle})`,
       };
     });
   const projectAttachmentOptions = bootstrap.projects.map((project) => ({

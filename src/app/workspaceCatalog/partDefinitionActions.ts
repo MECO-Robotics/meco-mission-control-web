@@ -26,8 +26,8 @@ export function usePartDefinitionActions(model: AppWorkspaceModel) {
     model.setActivePartDefinitionId(null);
   }, [model]);
 
-  const handlePartDefinitionSubmit = useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handlePartDefinitionSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
+    milestone.preventDefault();
     if (model.partDefinitionModalMode === "create" && !model.selectedSeasonId) {
       model.setDataMessage("Pick a season before adding a part definition.");
       return;
@@ -116,3 +116,4 @@ export function usePartDefinitionActions(model: AppWorkspaceModel) {
     openEditPartDefinitionModal,
   };
 }
+

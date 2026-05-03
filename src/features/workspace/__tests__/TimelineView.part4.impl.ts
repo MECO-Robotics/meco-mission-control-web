@@ -29,8 +29,8 @@ describe("TimelineView", () => {
         membersById,
         openTaskDetailModal: jest.fn(),
         openCreateTaskModal: jest.fn(),
-        onDeleteTimelineEvent: jest.fn(),
-        onSaveTimelineEvent: jest.fn(),
+        onDeleteTimelineMilestone: jest.fn(),
+        onSaveTimelineMilestone: jest.fn(),
         triggerCreateMilestoneToken: 0,
       }),
     );
@@ -49,8 +49,8 @@ describe("TimelineView", () => {
         membersById,
         openTaskDetailModal: jest.fn(),
         openCreateTaskModal: jest.fn(),
-        onDeleteTimelineEvent: jest.fn(),
-        onSaveTimelineEvent: jest.fn(),
+        onDeleteTimelineMilestone: jest.fn(),
+        onSaveTimelineMilestone: jest.fn(),
         triggerCreateMilestoneToken: 0,
       }),
     );
@@ -109,8 +109,8 @@ describe("TimelineView", () => {
         membersById,
         openTaskDetailModal: jest.fn(),
         openCreateTaskModal: jest.fn(),
-        onDeleteTimelineEvent: jest.fn(),
-        onSaveTimelineEvent: jest.fn(),
+        onDeleteTimelineMilestone: jest.fn(),
+        onSaveTimelineMilestone: jest.fn(),
         triggerCreateMilestoneToken: 0,
       }),
     );
@@ -246,8 +246,8 @@ describe("TimelineView", () => {
         membersById,
         openTaskDetailModal: jest.fn(),
         openCreateTaskModal: jest.fn(),
-        onDeleteTimelineEvent: jest.fn(),
-        onSaveTimelineEvent: jest.fn(),
+        onDeleteTimelineMilestone: jest.fn(),
+        onSaveTimelineMilestone: jest.fn(),
         triggerCreateMilestoneToken: 0,
       }),
     );

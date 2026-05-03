@@ -109,7 +109,7 @@ export function AppSidebar({
               <select
                 className="sidebar-context-select"
                 data-tutorial-target="project-select"
-                onChange={(event) => handleProjectChange(event.target.value)}
+                onChange={(milestone) => handleProjectChange(milestone.target.value)}
                 value={selectedProjectId ?? ""}
               >
                 {projects.length === 0 ? (

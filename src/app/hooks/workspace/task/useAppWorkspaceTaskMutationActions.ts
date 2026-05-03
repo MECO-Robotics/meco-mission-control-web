@@ -3,14 +3,14 @@ import { useCallback } from "react";
 
 import { toErrorMessage } from "@/lib/appUtils";
 import {
-  createEventRecord,
-  deleteEventRecord,
+  createMilestoneRecord,
+  deleteMilestoneRecord,
   deleteTaskRecord,
-  updateEventRecord,
+  updateMilestoneRecord,
   updateTaskBlockerRecord,
 } from "@/lib/auth";
 import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
-import type { EventPayload } from "@/types";
+import type { MilestonePayload } from "@/types";
 
 export type AppWorkspaceTaskMutationActions = ReturnType<typeof useAppWorkspaceTaskMutationActions>;
 
@@ -18,12 +18,12 @@ export function useAppWorkspaceTaskMutationActions(
   model: AppWorkspaceModel,
   closeTaskModal: () => void,
 ) {
-  const handleTimelineEventSave = useCallback(
-    async (mode: "create" | "edit", eventId: string | null, payload: EventPayload) => {
+  const handleTimelineMilestoneSave = useCallback(
+    async (mode: "create" | "edit", milestoneId: string | null, payload: MilestonePayload) => {
       if (mode === "create") {
-        await createEventRecord(payload, model.handleUnauthorized);
-      } else if (eventId) {
-        await updateEventRecord(eventId, payload, model.handleUnauthorized);
+        await createMilestoneRecord(payload, model.handleUnauthorized);
+      } else if (milestoneId) {
+        await updateMilestoneRecord(milestoneId, payload, model.handleUnauthorized);
       }
 
       await model.loadWorkspace();
@@ -31,9 +31,9 @@ export function useAppWorkspaceTaskMutationActions(
     [model],
   );
 
-  const handleTimelineEventDelete = useCallback(
-    async (eventId: string) => {
-      await deleteEventRecord(eventId, model.handleUnauthorized);
+  const handleTimelineMilestoneDelete = useCallback(
+    async (milestoneId: string) => {
+      await deleteMilestoneRecord(milestoneId, model.handleUnauthorized);
       await model.loadWorkspace();
     },
     [model],
@@ -76,7 +76,7 @@ export function useAppWorkspaceTaskMutationActions(
   return {
     handleDeleteTask,
     handleResolveTaskBlocker,
-    handleTimelineEventDelete,
-    handleTimelineEventSave,
+    handleTimelineMilestoneDelete,
+    handleTimelineMilestoneSave,
   };
 }

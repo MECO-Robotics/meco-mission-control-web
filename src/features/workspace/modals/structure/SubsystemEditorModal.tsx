@@ -12,7 +12,7 @@ interface SubsystemEditorModalProps {
   bootstrap: BootstrapPayload;
   closeSubsystemModal: () => void;
   handleToggleSubsystemArchived: (subsystemId: string) => void;
-  handleSubsystemSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  handleSubsystemSubmit: (milestone: FormEvent<HTMLFormElement>) => void;
   isSavingSubsystem: boolean;
   requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   subsystemDraft: SubsystemPayload;
@@ -71,3 +71,4 @@ export function SubsystemEditorModal({
     </StructureModalShell>
   );
 }
+

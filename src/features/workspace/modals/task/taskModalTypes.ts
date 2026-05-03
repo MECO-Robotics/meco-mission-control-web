@@ -7,7 +7,7 @@ export type TaskDetailsEditableField =
   | "mentor"
   | "startDate"
   | "dueDate"
-  | "targetEvent"
+  | "targetMilestone"
   | "discipline"
   | "subsystem"
   | "mechanism"

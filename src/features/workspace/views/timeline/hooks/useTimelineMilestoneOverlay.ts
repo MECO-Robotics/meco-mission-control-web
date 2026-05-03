@@ -1,8 +1,8 @@
 import { useCallback, useRef } from "react";
 import type React from "react";
-import type { BootstrapPayload, EventRecord } from "@/types";
+import type { BootstrapPayload, MilestoneRecord } from "@/types";
 import { datePortion } from "@/features/workspace/shared/timeline";
-import { getEventTypeStyle } from "@/features/workspace/shared/events";
+import { getMilestoneTypeStyle } from "@/features/workspace/shared/milestones";
 import {
   isSameHoveredMilestonePopup,
   type HoveredMilestonePopup,
@@ -15,19 +15,19 @@ import { useTimelineMilestoneOverlaySync } from "./useTimelineMilestoneOverlaySy
 
 interface UseTimelineMilestoneOverlayArgs {
   days: string[];
-  dayEventsByDate: Record<string, EventRecord[]>;
-  events: BootstrapPayload["events"];
+  dayMilestonesByDate: Record<string, MilestoneRecord[]>;
+  milestones: BootstrapPayload["milestones"];
 }
 
 export function useTimelineMilestoneOverlay({
   days,
-  dayEventsByDate,
-  events,
+  dayMilestonesByDate,
+  milestones,
 }: UseTimelineMilestoneOverlayArgs) {
   const sync = useTimelineMilestoneOverlaySync({ days });
   const layout = useTimelineMilestoneOverlayLayout({
     days,
-    events,
+    milestones,
     timelineDayCellLayouts: sync.timelineDayCellLayouts,
     timelineDayCellRefs: sync.timelineDayCellRefs,
     timelineGridHeight: sync.timelineGridHeight,
@@ -65,7 +65,7 @@ export function useTimelineMilestoneOverlay({
 
       const popupStartDay = target.dataset.popupStartDay;
       const popupEndDay = target.dataset.popupEndDay;
-      const isMultiDayEvent =
+      const isMultiDayMilestone =
         Boolean(popupStartDay) && Boolean(popupEndDay) && popupStartDay !== popupEndDay;
       const normalizedPopupStartDay = popupStartDay ?? null;
       const normalizedPopupEndDay = popupEndDay ?? null;
@@ -77,7 +77,7 @@ export function useTimelineMilestoneOverlay({
       const nextPopup: HoveredMilestonePopup = {
         anchorStartDay: normalizedPopupStartDay,
         anchorEndDay: normalizedPopupEndDay,
-        rotationDeg: isMultiDayEvent ? 45 : 90,
+        rotationDeg: isMultiDayMilestone ? 45 : 90,
         lines,
         lineOffsets,
         background,
@@ -95,31 +95,31 @@ export function useTimelineMilestoneOverlay({
 
   const showDateCellMilestonePopup = useCallback(
     (anchor: HTMLElement, day: string) => {
-      const eventsOnDay = dayEventsByDate[day] ?? [];
-      if (!eventsOnDay.length) {
+      const milestonesOnDay = dayMilestonesByDate[day] ?? [];
+      if (!milestonesOnDay.length) {
         return;
       }
 
-      const primaryEvent = eventsOnDay[0];
-      if (!primaryEvent) {
+      const primaryMilestone = milestonesOnDay[0];
+      if (!primaryMilestone) {
         return;
       }
 
       const timelineStart = days[0] ?? null;
       const timelineEnd = days[days.length - 1] ?? null;
-      const eventStartDay = datePortion(primaryEvent.startDateTime);
-      const eventEndDay = primaryEvent.endDateTime
-        ? datePortion(primaryEvent.endDateTime)
-        : eventStartDay;
-      const popupItems = getTimelineMilestonePopupItems(eventsOnDay, timelineDayMilestoneUnderlays);
+      const milestoneStartDay = datePortion(primaryMilestone.startDateTime);
+      const milestoneEndDay = primaryMilestone.endDateTime
+        ? datePortion(primaryMilestone.endDateTime)
+        : milestoneStartDay;
+      const popupItems = getTimelineMilestonePopupItems(milestonesOnDay, timelineDayMilestoneUnderlays);
       const anchorStartDay =
-        timelineStart && eventStartDay < timelineStart ? timelineStart : eventStartDay;
-      const anchorEndDay = timelineEnd && eventEndDay > timelineEnd ? timelineEnd : eventEndDay;
+        timelineStart && milestoneStartDay < timelineStart ? timelineStart : milestoneStartDay;
+      const anchorEndDay = timelineEnd && milestoneEndDay > timelineEnd ? timelineEnd : milestoneEndDay;
 
       anchor.dataset.popupStartDay = anchorStartDay;
       anchor.dataset.popupEndDay = anchorEndDay;
 
-      const dayStyle = getEventTypeStyle(primaryEvent.type);
+      const dayStyle = getMilestoneTypeStyle(primaryMilestone.type);
       updateHoveredMilestonePopup(
         anchor,
         popupItems.map((item) => item.text),
@@ -128,7 +128,7 @@ export function useTimelineMilestoneOverlay({
         dayStyle.chipText,
       );
     },
-    [dayEventsByDate, days, timelineDayMilestoneUnderlays, updateHoveredMilestonePopup],
+    [dayMilestonesByDate, days, timelineDayMilestoneUnderlays, updateHoveredMilestonePopup],
   );
 
   const clearHoveredMilestonePopup = useCallback(() => {
@@ -140,12 +140,12 @@ export function useTimelineMilestoneOverlay({
   }, []);
 
   const handleTimelineDayMouseEnter = useCallback(
-    (event: React.MouseEvent<HTMLElement>) => {
-      const day = event.currentTarget.dataset.timelineDay;
+    (milestone: React.MouseEvent<HTMLElement>) => {
+      const day = milestone.currentTarget.dataset.timelineDay;
       if (!day) {
         return;
       }
-      showDateCellMilestonePopup(event.currentTarget, day);
+      showDateCellMilestonePopup(milestone.currentTarget, day);
     },
     [showDateCellMilestonePopup],
   );
@@ -167,4 +167,5 @@ export function useTimelineMilestoneOverlay({
     isTimelineShellScrolling,
   };
 }
+
 

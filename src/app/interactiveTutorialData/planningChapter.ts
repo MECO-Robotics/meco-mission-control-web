@@ -7,7 +7,7 @@ const planningSteps = [
   {
     id: "season",
     title: "Select the fake tutorial season",
-    instruction: "Use the season dropdown and choose Tutorial season (fake sandbox).",
+    instruction: "Use the season dropdown and choose the fake tutorial season.",
     selector: '[data-tutorial-target="season-select"]',
   },
   {

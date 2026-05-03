@@ -7,7 +7,7 @@ export {
 } from "./model";
 export {
   type ArtifactModalMode,
-  type EventReportModalMode,
+  type MilestoneReportModalMode,
   type ManufacturingModalMode,
   type MaterialModalMode,
   type MechanismModalMode,
@@ -35,12 +35,12 @@ export { getStatusPillClassName } from "./model";
 export {
   EVENT_TYPE_STYLES,
   DEFAULT_EVENT_TYPE,
-  getEventProjectIds,
-  getEventTypeStyle,
+  getMilestoneProjectIds,
+  getMilestoneTypeStyle,
   getMilestoneSubsystemOptions,
   reconcileMilestoneSubsystemIds,
-  type WorkspaceEventStyle,
-} from "./events";
+  type WorkspaceMilestoneStyle,
+} from "./milestones";
 export {
   addDaysToDay,
   addMonthsToDay,

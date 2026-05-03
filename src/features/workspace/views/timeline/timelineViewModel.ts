@@ -1,5 +1,5 @@
-import type { EventRecord, TaskRecord } from "@/types";
-import { type WorkspaceEventStyle } from "@/features/workspace/shared/events";
+import type { MilestoneRecord, TaskRecord } from "@/types";
+import { type WorkspaceMilestoneStyle } from "@/features/workspace/shared/milestones";
 
 export function getTimelineMergedCellRotation(rowCount: number) {
   return rowCount >= 4 ? "180deg" : "240deg";
@@ -42,10 +42,10 @@ export interface TimelineDayHeaderCell {
   day: string;
   weekdayLabel: string;
   dayNumberLabel: string;
-  eventsOnDay: EventRecord[];
-  dayStyle: WorkspaceEventStyle | null;
-  primaryEventStartDay: string;
-  primaryEventEndDay: string;
+  milestonesOnDay: MilestoneRecord[];
+  dayStyle: WorkspaceMilestoneStyle | null;
+  primaryMilestoneStartDay: string;
+  primaryMilestoneEndDay: string;
 }
 
 export interface TimelineDayCellLayout {

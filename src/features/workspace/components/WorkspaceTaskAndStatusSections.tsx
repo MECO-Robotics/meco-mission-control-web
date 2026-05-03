@@ -19,8 +19,8 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
     activePersonFilter,
     bootstrap,
     disablePanelAnimations = false,
-    handleTimelineEventDelete,
-    handleTimelineEventSave,
+    handleTimelineMilestoneDelete,
+    handleTimelineMilestoneSave,
     isAllProjectsView,
     membersById,
     openCreateTaskModalFromTimeline,
@@ -49,8 +49,8 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
           bootstrap={bootstrap}
           isAllProjectsView={isAllProjectsView}
           membersById={membersById}
-          onDeleteTimelineEvent={handleTimelineEventDelete}
-          onSaveTimelineEvent={handleTimelineEventSave}
+          onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
+          onSaveTimelineMilestone={handleTimelineMilestoneSave}
           openCreateTaskModal={openCreateTaskModalFromTimeline}
           openTaskDetailModal={openTimelineTaskDetailsModal}
           setActivePersonFilter={setActivePersonFilter}
@@ -87,8 +87,8 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
           activePersonFilter={activePersonFilter}
           bootstrap={bootstrap}
           isAllProjectsView={isAllProjectsView}
-          onDeleteTimelineEvent={handleTimelineEventDelete}
-          onSaveTimelineEvent={handleTimelineEventSave}
+          onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
+          onSaveTimelineMilestone={handleTimelineMilestoneSave}
           subsystemsById={props.subsystemsById}
         />
       </WorkspaceSubPanel>
@@ -152,7 +152,7 @@ export function WorkspaceWorklogsSection(props: WorkspaceContentPanelsViewProps)
 }
 
 export function WorkspaceReportsSection(props: WorkspaceContentPanelsViewProps) {
-  const { bootstrap, disablePanelAnimations = false, openCreateEventReportModal, openCreateQaReportModal, openTimelineTaskDetailsModal, reportsSwipeDirection, reportsView, tabSwitchDirection } = props;
+  const { bootstrap, disablePanelAnimations = false, openCreateMilestoneReportModal, openCreateQaReportModal, openTimelineTaskDetailsModal, reportsSwipeDirection, reportsView, tabSwitchDirection } = props;
 
   return (
     <WorkspaceSectionPanel
@@ -168,7 +168,7 @@ export function WorkspaceReportsSection(props: WorkspaceContentPanelsViewProps) 
       >
         <ReportsView
           bootstrap={bootstrap}
-          openCreateEventReportModal={openCreateEventReportModal}
+          openCreateMilestoneReportModal={openCreateMilestoneReportModal}
           openCreateQaReportModal={openCreateQaReportModal}
           openTaskDetailsModal={openTimelineTaskDetailsModal}
           view="qa"
@@ -178,15 +178,15 @@ export function WorkspaceReportsSection(props: WorkspaceContentPanelsViewProps) 
       <WorkspaceSubPanel
         description={SUBVIEW_INTERACTION_GUIDANCE.reports}
         disableAnimations={disablePanelAnimations}
-        isActive={reportsView === "event-results"}
+        isActive={reportsView === "milestone-results"}
         swipeDirection={reportsSwipeDirection}
       >
         <ReportsView
           bootstrap={bootstrap}
-          openCreateEventReportModal={openCreateEventReportModal}
+          openCreateMilestoneReportModal={openCreateMilestoneReportModal}
           openCreateQaReportModal={openCreateQaReportModal}
           openTaskDetailsModal={openTimelineTaskDetailsModal}
-          view="event-results"
+          view="milestone-results"
         />
       </WorkspaceSubPanel>
     </WorkspaceSectionPanel>

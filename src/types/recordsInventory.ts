@@ -4,6 +4,7 @@ import type {
   ManufacturingProcess,
   ManufacturingStatus,
   MaterialCategory,
+  PartInstanceStatus,
   PurchaseStatus,
 } from "./common";
 
@@ -57,7 +58,7 @@ export interface PartInstanceRecord {
   name: string;
   quantity: number;
   trackIndividually: boolean;
-  status: "planned" | "needed" | "available" | "installed" | "retired";
+  status: PartInstanceStatus;
   photoUrl?: string;
 }
 

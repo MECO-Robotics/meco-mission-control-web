@@ -8,9 +8,9 @@ export interface TimelineGridHeaderProps {
   clearHoveredMilestonePopup: () => void;
   firstDayGridColumn: number;
   gridMinWidth: number;
-  handleTimelineDayMouseEnter: (event: React.MouseEvent<HTMLElement>) => void;
+  handleTimelineDayMouseEnter: (milestone: React.MouseEvent<HTMLElement>) => void;
   handleTimelineHeaderDayClick: (day: string) => void;
-  handleTimelineZoomWheel: (event: React.WheelEvent<HTMLDivElement>) => void;
+  handleTimelineZoomWheel: (milestone: React.WheelEvent<HTMLDivElement>) => void;
   hasProjectColumn: boolean;
   isScrolling: boolean;
   isWeekView: boolean;
@@ -36,3 +36,4 @@ export interface TimelineGridHeaderProps {
   toggleSubsystemColumn: () => void;
   children?: React.ReactNode;
 }
+

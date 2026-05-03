@@ -35,7 +35,7 @@ export function WorkspaceTaskModalsSection(props: WorkspaceModalHostViewProps) {
           closeTaskModal={props.closeTaskModal}
           advancedSectionOpen={advancedSectionOpen}
           disciplinesById={props.disciplinesById}
-          eventsById={props.eventsById}
+          milestonesById={props.milestonesById}
           handleDeleteTask={props.handleDeleteTask}
           handleResolveTaskBlocker={props.handleResolveTaskBlocker}
           handleTaskSubmit={props.handleTaskSubmit}

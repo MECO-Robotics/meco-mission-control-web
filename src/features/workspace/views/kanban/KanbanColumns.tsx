@@ -45,12 +45,12 @@ export function KanbanColumns<TState extends string, TItem>({
             onClick={onColumnBodyClick ? () => onColumnBodyClick(column.state) : undefined}
             onKeyDown={
               onColumnBodyClick
-                ? (event) => {
-                    if (event.key !== "Enter" && event.key !== " ") {
+                ? (milestone) => {
+                    if (milestone.key !== "Enter" && milestone.key !== " ") {
                       return;
                     }
 
-                    event.preventDefault();
+                    milestone.preventDefault();
                     onColumnBodyClick(column.state);
                   }
                 : undefined
@@ -75,3 +75,4 @@ export function KanbanColumns<TState extends string, TItem>({
     </div>
   );
 }
+

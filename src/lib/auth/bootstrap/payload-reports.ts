@@ -37,7 +37,7 @@ export function normalizeBootstrapReports(
               resolveProjectAlias(report.projectId, projectIds, planning.projectIdAliases) ??
               defaultProjectId,
             taskId: report.taskId ?? null,
-            eventId: null,
+            milestoneId: null,
             workstreamId: report.workstreamId ?? null,
             createdByMemberId: report.createdByMemberId ?? null,
             result: report.result ?? "pass",
@@ -47,12 +47,12 @@ export function normalizeBootstrapReports(
           })),
           ...(source.testResults ?? []).map<ReportRecord>((result) => ({
             ...result,
-            reportType: "EventTest",
+            reportType: "MilestoneTest",
             projectId:
               resolveProjectAlias(result.projectId, projectIds, planning.projectIdAliases) ??
               defaultProjectId,
             taskId: result.taskId ?? null,
-            eventId: result.eventId ?? null,
+            milestoneId: result.milestoneId ?? null,
             workstreamId: result.workstreamId ?? null,
             createdByMemberId: result.createdByMemberId ?? null,
             result: result.result ?? result.status ?? "pass",
@@ -68,14 +68,14 @@ export function normalizeBootstrapReports(
     ...report,
     reportType:
       report.reportType === "QA" ||
-      report.reportType === "EventTest" ||
+      report.reportType === "MilestoneTest" ||
       report.reportType === "Practice" ||
       report.reportType === "Competition" ||
       report.reportType === "Review"
         ? report.reportType
         : "QA",
     taskId: report.taskId ?? null,
-    eventId: report.eventId ?? null,
+    milestoneId: report.milestoneId ?? null,
     workstreamId: report.workstreamId ?? null,
     createdByMemberId: report.createdByMemberId ?? null,
     result: report.result ?? "pass",
@@ -166,7 +166,7 @@ export function normalizeBootstrapReports(
       return {
         id: finding.id,
         testResultId: finding.reportId || null,
-        eventId: finding.eventId ?? report?.eventId ?? null,
+        milestoneId: finding.milestoneId ?? report?.milestoneId ?? null,
         taskId: finding.taskId ?? report?.taskId ?? null,
         projectId: finding.projectId ?? report?.projectId ?? defaultProjectId,
         workstreamId: finding.workstreamId ?? report?.workstreamId ?? null,

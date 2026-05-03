@@ -3,8 +3,8 @@ import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { BootstrapPayload } from "@/types";
 import { TimelineProjectGroup } from "@/features/workspace/views/timeline/TimelineProjectGroup";
-import { buildTimelineData, buildTimelineDayMilestoneUnderlays, buildTimelineProjectRows, filterTimelineEventsByPersonSelection, getTimelineMilestonePopupItems } from "@/features/workspace/views/timeline/timelineViewModel";
-import { createBootstrap, createTimelineEvent } from "../timelineTestFixtures";
+import { buildTimelineData, buildTimelineDayMilestoneUnderlays, buildTimelineProjectRows, filterTimelineMilestonesByPersonSelection, getTimelineMilestonePopupItems } from "@/features/workspace/views/timeline/timelineViewModel";
+import { createBootstrap, createTimelineMilestone } from "../timelineTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
@@ -76,10 +76,10 @@ describe("TimelineView", () => {
             day: "2026-04-06",
             weekdayLabel: "Mon",
             dayNumberLabel: "6",
-            eventsOnDay: [],
+            milestonesOnDay: [],
             dayStyle: null,
-            primaryEventStartDay: "",
-            primaryEventEndDay: "",
+            primaryMilestoneStartDay: "",
+            primaryMilestoneEndDay: "",
           },
         ],
         timelineGridTemplate: "112px 128px repeat(1, 24px) 36px",
@@ -94,18 +94,18 @@ describe("TimelineView", () => {
   });
 
   it("positions same-day milestone popup text to align with underlay lanes", () => {
-    const morningEvent = createTimelineEvent({
-      id: "event-b",
+    const morningMilestone = createTimelineMilestone({
+      id: "milestone-b",
       title: "Morning review",
       startDateTime: "2026-04-08T09:00:00.000Z",
     });
-    const afternoonEvent = createTimelineEvent({
-      id: "event-a",
+    const afternoonMilestone = createTimelineMilestone({
+      id: "milestone-a",
       title: "Afternoon review",
       startDateTime: "2026-04-08T14:00:00.000Z",
     });
     const underlays = buildTimelineDayMilestoneUnderlays({
-      events: [afternoonEvent, morningEvent],
+      milestones: [afternoonMilestone, morningMilestone],
       resolveGeometry: () => ({
         left: 100,
         width: 24,
@@ -126,7 +126,7 @@ describe("TimelineView", () => {
       .flatMap((underlay) => underlay.lines);
 
     expect(underlayTitlesLeftToRight).toEqual(["Morning review", "Afternoon review"]);
-    expect(getTimelineMilestonePopupItems([morningEvent, afternoonEvent], underlays)).toEqual([
+    expect(getTimelineMilestonePopupItems([morningMilestone, afternoonMilestone], underlays)).toEqual([
       { text: "Morning review", horizontalOffset: -9 },
       { text: "Afternoon review", horizontalOffset: 9 },
     ]);
@@ -143,7 +143,7 @@ describe("TimelineView", () => {
       subsystemIds: ["subsystem-1", "subsystem-2"],
     };
     const timeline = buildTimelineData({
-      events: [],
+      milestones: [],
       projectsById: {
         "project-1": bootstrap.projects[0] as BootstrapPayload["projects"][number],
       },
@@ -168,33 +168,33 @@ describe("TimelineView", () => {
     expect(projectRows[0].tasks.map((task) => task.id)).toEqual(["task-shared"]);
   });
 
-  it("applies active person filtering to timeline events through targeted tasks", () => {
+  it("applies active person filtering to timeline milestones through targeted tasks", () => {
     const bootstrap = createBootstrap();
-    const matchingEvent = createTimelineEvent({
-      id: "event-matching",
+    const matchingMilestone = createTimelineMilestone({
+      id: "milestone-matching",
       title: "Ada design review",
     });
-    const hiddenEvent = createTimelineEvent({
-      id: "event-hidden",
+    const hiddenMilestone = createTimelineMilestone({
+      id: "milestone-hidden",
       title: "Unassigned review",
       startDateTime: "2026-04-09T09:00:00.000Z",
     });
-    const filteredEvents = filterTimelineEventsByPersonSelection({
+    const filteredMilestones = filterTimelineMilestonesByPersonSelection({
       activePersonFilter: ["member-1"],
-      events: [matchingEvent, hiddenEvent],
+      milestones: [matchingMilestone, hiddenMilestone],
       tasks: [
         {
           ...bootstrap.tasks[0],
-          id: "task-targeting-visible-event",
-          targetEventId: "event-matching",
+          id: "task-targeting-visible-milestone",
+          targetMilestoneId: "milestone-matching",
           ownerId: "member-1",
           assigneeIds: [],
           mentorId: null,
         },
         {
           ...bootstrap.tasks[0],
-          id: "task-targeting-hidden-event",
-          targetEventId: "event-hidden",
+          id: "task-targeting-hidden-milestone",
+          targetMilestoneId: "milestone-hidden",
           ownerId: null,
           assigneeIds: [],
           mentorId: null,
@@ -202,7 +202,7 @@ describe("TimelineView", () => {
       ],
     });
 
-    expect(filteredEvents.map((event) => event.id)).toEqual(["event-matching"]);
+    expect(filteredMilestones.map((milestone) => milestone.id)).toEqual(["milestone-matching"]);
   });
 
 });

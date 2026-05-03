@@ -18,7 +18,7 @@ export function normalizeBootstrapTaskDependencies(
     requiredState:
       (dependency as { requiredState?: string }).requiredState ??
       ((((dependency as { kind?: string }).kind ?? "task") as string) === "part_instance"
-        ? "available"
+        ? "ready"
         : "complete"),
     dependencyType:
       (dependency as { dependencyType?: string }).dependencyType === "soft" ? "soft" : "hard",

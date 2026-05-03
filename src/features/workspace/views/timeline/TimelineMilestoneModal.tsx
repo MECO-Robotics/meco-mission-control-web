@@ -6,17 +6,17 @@ import { TimelineMilestoneModalFields } from "./components/TimelineMilestoneModa
 import { TimelineMilestoneModalHeader } from "./components/TimelineMilestoneModalHeader";
 
 export const TimelineMilestoneModal: React.FC<TimelineMilestoneModalProps> = ({
-  activeDayEvents,
-  activeEventDay,
+  activeDayMilestones,
+  activeMilestoneDay,
   bootstrap,
-  eventDraft,
-  eventEndDate,
-  eventEndTime,
-  eventError,
-  eventStartDate,
-  eventStartTime,
-  isDeletingEvent,
-  isSavingEvent,
+  milestoneDraft,
+  milestoneEndDate,
+  milestoneEndTime,
+  milestoneError,
+  milestoneStartDate,
+  milestoneStartTime,
+  isDeletingMilestone,
+  isSavingMilestone,
   mode,
   onClose,
   onDelete,
@@ -25,11 +25,11 @@ export const TimelineMilestoneModal: React.FC<TimelineMilestoneModalProps> = ({
   portalTarget,
   projectsById,
   selectableSubsystems,
-  setEventDraft,
-  setEventEndDate,
-  setEventEndTime,
-  setEventStartDate,
-  setEventStartTime,
+  setMilestoneDraft,
+  setMilestoneEndDate,
+  setMilestoneEndTime,
+  setMilestoneStartDate,
+  setMilestoneStartTime,
   subsystemsById,
 }) => {
   if (!mode || !portalTarget) {
@@ -46,7 +46,7 @@ export const TimelineMilestoneModal: React.FC<TimelineMilestoneModalProps> = ({
       <section
         aria-modal="true"
         className="modal-card"
-        onClick={(event) => event.stopPropagation()}
+        onClick={(milestone) => milestone.stopPropagation()}
         role="dialog"
         style={{
           background: "var(--bg-panel)",
@@ -55,34 +55,34 @@ export const TimelineMilestoneModal: React.FC<TimelineMilestoneModalProps> = ({
         }}
         >
         <TimelineMilestoneModalHeader
-          activeEventDay={activeEventDay}
+          activeMilestoneDay={activeMilestoneDay}
           mode={mode}
           onClose={onClose}
           onSwitchToTask={onSwitchToTask}
         />
         <form className="modal-form" onSubmit={onSubmit}>
           <TimelineMilestoneModalFields
-            activeDayEvents={activeDayEvents}
+            activeDayMilestones={activeDayMilestones}
             bootstrap={bootstrap}
-            eventDraft={eventDraft}
-            eventEndDate={eventEndDate}
-            eventEndTime={eventEndTime}
-            eventError={eventError}
-            eventStartDate={eventStartDate}
-            eventStartTime={eventStartTime}
+            milestoneDraft={milestoneDraft}
+            milestoneEndDate={milestoneEndDate}
+            milestoneEndTime={milestoneEndTime}
+            milestoneError={milestoneError}
+            milestoneStartDate={milestoneStartDate}
+            milestoneStartTime={milestoneStartTime}
             mode={mode}
             projectsById={projectsById}
             selectableSubsystems={selectableSubsystems}
-            setEventDraft={setEventDraft}
-            setEventEndDate={setEventEndDate}
-            setEventEndTime={setEventEndTime}
-            setEventStartDate={setEventStartDate}
-            setEventStartTime={setEventStartTime}
+            setMilestoneDraft={setMilestoneDraft}
+            setMilestoneEndDate={setMilestoneEndDate}
+            setMilestoneEndTime={setMilestoneEndTime}
+            setMilestoneStartDate={setMilestoneStartDate}
+            setMilestoneStartTime={setMilestoneStartTime}
             subsystemsById={subsystemsById}
           />
           <TimelineMilestoneModalActions
-            isDeletingEvent={isDeletingEvent}
-            isSavingEvent={isSavingEvent}
+            isDeletingMilestone={isDeletingMilestone}
+            isSavingMilestone={isSavingMilestone}
             mode={mode}
             onClose={onClose}
             onDelete={onDelete}

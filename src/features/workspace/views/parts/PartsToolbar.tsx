@@ -54,7 +54,7 @@ export function PartsToolbar({
       <label style={ARCHIVED_LABEL_STYLE}>
         <input
           checked={showArchivedPartDefinitions}
-          onChange={(event) => setShowArchivedPartDefinitions(event.target.checked)}
+          onChange={(milestone) => setShowArchivedPartDefinitions(milestone.target.checked)}
           type="checkbox"
         />
         Show archived definitions

@@ -21,8 +21,8 @@ export function PhotoUploadField({
 
   const isVideoUrl = (value: string) => /\.(mp4|mov|webm|m4v|ogv|avi)(\?.*)?$/i.test(value);
 
-  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.currentTarget.files?.[0];
+  const handleFileChange = async (milestone: ChangeEvent<HTMLInputElement>) => {
+    const file = milestone.currentTarget.files?.[0];
     if (!file) {
       return;
     }
@@ -38,7 +38,7 @@ export function PhotoUploadField({
       setErrorMessage(error instanceof Error ? error.message : "Photo upload failed.");
     } finally {
       setIsUploading(false);
-      event.currentTarget.value = "";
+      milestone.currentTarget.value = "";
     }
   };
 
@@ -114,3 +114,4 @@ export function PhotoUploadField({
     </label>
   );
 }
+

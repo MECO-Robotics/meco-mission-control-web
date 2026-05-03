@@ -5,7 +5,7 @@ import { PhotoUploadField } from "@/features/workspace/shared/media";
 interface QaReportEditorModalProps {
   bootstrap: BootstrapPayload;
   closeQaReportModal: () => void;
-  handleQaReportSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  handleQaReportSubmit: (milestone: FormEvent<HTMLFormElement>) => void;
   isSavingQaReport: boolean;
   requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   qaReportDraft: QaReportPayload;
@@ -56,10 +56,10 @@ export function QaReportEditorModal({
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Task</span>
             <select
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setQaReportDraft((current) => ({
                   ...current,
-                  taskId: event.target.value,
+                  taskId: milestone.target.value,
                 }))
               }
               required
@@ -86,10 +86,10 @@ export function QaReportEditorModal({
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Result</span>
             <select
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setQaReportDraft((current) => ({
                   ...current,
-                  result: event.target.value as QaReportPayload["result"],
+                  result: milestone.target.value as QaReportPayload["result"],
                 }))
               }
               style={{
@@ -107,10 +107,10 @@ export function QaReportEditorModal({
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Reviewed date</span>
             <input
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setQaReportDraft((current) => ({
                   ...current,
-                  reviewedAt: event.target.value,
+                  reviewedAt: milestone.target.value,
                 }))
               }
               required
@@ -127,11 +127,11 @@ export function QaReportEditorModal({
             <span style={{ color: "var(--text-title)" }}>Participants</span>
             <select
               multiple
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setQaReportDraft((current) => ({
                   ...current,
                   participantIds: Array.from(
-                    event.currentTarget.selectedOptions,
+                    milestone.currentTarget.selectedOptions,
                     (option) => option.value,
                   ),
                 }))
@@ -157,10 +157,10 @@ export function QaReportEditorModal({
           <label className="checkbox-field modal-wide">
             <input
               checked={qaReportDraft.mentorApproved}
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setQaReportDraft((current) => ({
                   ...current,
-                  mentorApproved: event.target.checked,
+                  mentorApproved: milestone.target.checked,
                 }))
               }
               type="checkbox"
@@ -170,10 +170,10 @@ export function QaReportEditorModal({
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Notes</span>
             <textarea
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setQaReportDraft((current) => ({
                   ...current,
-                  notes: event.target.value,
+                  notes: milestone.target.value,
                 }))
               }
               placeholder="QA observations and follow-up."
@@ -229,4 +229,5 @@ export function QaReportEditorModal({
     </div>
   );
 }
+
 

@@ -31,7 +31,7 @@ function createTask(index: number, overrides: Partial<Task> = {}): Task {
     partInstanceIds: [],
     title: `Task ${index}`,
     summary: `Summary ${index}`,
-    targetEventId: null,
+    targetMilestoneId: null,
     photoUrl: "",
     ownerId: "member-1",
     assigneeIds: [],

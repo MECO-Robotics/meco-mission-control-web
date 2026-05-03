@@ -76,7 +76,7 @@ export function WorkLogsToolbar({
         </span>
         <select
           aria-label="Sort work logs"
-          onChange={(event) => setSortMode(event.target.value as WorkLogSortMode)}
+          onChange={(milestone) => setSortMode(milestone.target.value as WorkLogSortMode)}
           value={sortMode}
         >
           {sortOptions.map((option) => (

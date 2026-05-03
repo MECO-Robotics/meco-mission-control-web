@@ -1,5 +1,5 @@
 export { TaskDetailsModal, TaskEditorModal } from "./modals/TaskModals";
-export { EventReportEditorModal, QaReportEditorModal, WorkLogEditorModal } from "./modals/workReports/index";
+export { MilestoneReportEditorModal, QaReportEditorModal, WorkLogEditorModal } from "./modals/workReports/index";
 export { ManufacturingEditorModal, PurchaseEditorModal } from "./modals/PurchaseManufacturingModals";
 export {
   ArtifactEditorModal,

@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import type { BootstrapPayload, EventPayload, TaskRecord } from "@/types";
+import type { BootstrapPayload, MilestonePayload, TaskRecord } from "@/types";
 import { type FilterSelection } from "@/features/workspace/shared";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
 import { buildTimelineGridLayout } from "./model/timelineGridLayout";
@@ -24,11 +24,11 @@ interface TimelineViewProps {
   membersById: Record<string, BootstrapPayload["members"][number]>;
   openTaskDetailModal: (task: TaskRecord) => void;
   openCreateTaskModal: () => void;
-  onDeleteTimelineEvent: (eventId: string) => Promise<void>;
-  onSaveTimelineEvent: (
+  onDeleteTimelineMilestone: (milestoneId: string) => Promise<void>;
+  onSaveTimelineMilestone: (
     mode: "create" | "edit",
-    eventId: string | null,
-    payload: EventPayload,
+    milestoneId: string | null,
+    payload: MilestonePayload,
   ) => Promise<void>;
   triggerCreateMilestoneToken: number;
 }
@@ -41,8 +41,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   membersById: _membersById,
   openTaskDetailModal,
   openCreateTaskModal,
-  onDeleteTimelineEvent,
-  onSaveTimelineEvent,
+  onDeleteTimelineMilestone,
+  onSaveTimelineMilestone,
   triggerCreateMilestoneToken,
 }) => {
   const state = useTimelineViewState();
@@ -50,15 +50,15 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     activePersonFilter,
     bootstrap,
     openCreateTaskModal,
-    onDeleteTimelineEvent,
-    onSaveTimelineEvent,
+    onDeleteTimelineMilestone,
+    onSaveTimelineMilestone,
     triggerCreateMilestoneToken,
     viewAnchorDate: state.viewAnchorDate,
     viewInterval: state.viewInterval,
   });
   const actions = useTimelineViewActions({
     openTaskDetailModal,
-    openEventModalForDay: data.eventModal.openEventModalForDay,
+    openMilestoneModalForDay: data.milestoneModal.openMilestoneModalForDay,
     playTimelineGridAnimation: state.playTimelineGridAnimation,
     setSelectedSubsystemId: state.setSelectedSubsystemId,
     setSelectedTaskId: state.setSelectedTaskId,
@@ -193,30 +193,30 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       />
 
       <TimelineMilestoneModal
-        activeDayEvents={data.eventModal.activeDayEvents}
-        activeEventDay={data.eventModal.activeEventDay}
+        activeDayMilestones={data.milestoneModal.activeDayMilestones}
+        activeMilestoneDay={data.milestoneModal.activeMilestoneDay}
         bootstrap={bootstrap}
-        eventDraft={data.eventModal.eventDraft}
-        eventEndDate={data.eventModal.eventEndDate}
-        eventEndTime={data.eventModal.eventEndTime}
-        eventError={data.eventModal.eventError}
-        eventStartDate={data.eventModal.eventStartDate}
-        eventStartTime={data.eventModal.eventStartTime}
-        isDeletingEvent={data.eventModal.isDeletingEvent}
-        isSavingEvent={data.eventModal.isSavingEvent}
-        mode={data.eventModal.eventModalMode}
-        onClose={data.eventModal.closeEventModal}
-        onDelete={data.eventModal.handleEventDelete}
-        onSubmit={data.eventModal.handleEventSubmit}
-        onSwitchToTask={data.eventModal.switchMilestoneCreateToTask}
+        milestoneDraft={data.milestoneModal.milestoneDraft}
+        milestoneEndDate={data.milestoneModal.milestoneEndDate}
+        milestoneEndTime={data.milestoneModal.milestoneEndTime}
+        milestoneError={data.milestoneModal.milestoneError}
+        milestoneStartDate={data.milestoneModal.milestoneStartDate}
+        milestoneStartTime={data.milestoneModal.milestoneStartTime}
+        isDeletingMilestone={data.milestoneModal.isDeletingMilestone}
+        isSavingMilestone={data.milestoneModal.isSavingMilestone}
+        mode={data.milestoneModal.milestoneModalMode}
+        onClose={data.milestoneModal.closeMilestoneModal}
+        onDelete={data.milestoneModal.handleMilestoneDelete}
+        onSubmit={data.milestoneModal.handleMilestoneSubmit}
+        onSwitchToTask={data.milestoneModal.switchMilestoneCreateToTask}
         portalTarget={data.modalPortalTarget}
         projectsById={data.projectsById}
         selectableSubsystems={data.selectableSubsystems}
-        setEventDraft={data.eventModal.setEventDraft}
-        setEventEndDate={data.eventModal.setEventEndDate}
-        setEventEndTime={data.eventModal.setEventEndTime}
-        setEventStartDate={data.eventModal.setEventStartDate}
-        setEventStartTime={data.eventModal.setEventStartTime}
+        setMilestoneDraft={data.milestoneModal.setMilestoneDraft}
+        setMilestoneEndDate={data.milestoneModal.setMilestoneEndDate}
+        setMilestoneEndTime={data.milestoneModal.setMilestoneEndTime}
+        setMilestoneStartDate={data.milestoneModal.setMilestoneStartDate}
+        setMilestoneStartTime={data.milestoneModal.setMilestoneStartTime}
         subsystemsById={data.subsystemsById}
       />
     </section>

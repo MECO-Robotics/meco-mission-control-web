@@ -5,7 +5,7 @@ import { PhotoUploadField } from "@/features/workspace/shared/media";
 interface WorkLogEditorModalProps {
   bootstrap: BootstrapPayload;
   closeWorkLogModal: () => void;
-  handleWorkLogSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  handleWorkLogSubmit: (milestone: FormEvent<HTMLFormElement>) => void;
   isSavingWorkLog: boolean;
   requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   setWorkLogDraft: Dispatch<SetStateAction<WorkLogPayload>>;
@@ -59,10 +59,10 @@ export function WorkLogEditorModal({
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Task</span>
             <select
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setWorkLogDraft((current) => ({
                   ...current,
-                  taskId: event.target.value,
+                  taskId: milestone.target.value,
                 }))
               }
               required
@@ -108,10 +108,10 @@ export function WorkLogEditorModal({
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Date</span>
             <input
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setWorkLogDraft((current) => ({
                   ...current,
-                  date: event.target.value,
+                  date: milestone.target.value,
                 }))
               }
               required
@@ -128,10 +128,10 @@ export function WorkLogEditorModal({
             <span style={{ color: "var(--text-title)" }}>Hours</span>
             <input
               min="0.5"
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setWorkLogDraft((current) => ({
                   ...current,
-                  hours: Number(event.target.value),
+                  hours: Number(milestone.target.value),
                 }))
               }
               required
@@ -149,11 +149,11 @@ export function WorkLogEditorModal({
             <span style={{ color: "var(--text-title)" }}>Participants</span>
             <select
               multiple
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setWorkLogDraft((current) => ({
                   ...current,
                   participantIds: Array.from(
-                    event.currentTarget.selectedOptions,
+                    milestone.currentTarget.selectedOptions,
                     (option) => option.value,
                   ),
                 }))
@@ -179,10 +179,10 @@ export function WorkLogEditorModal({
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Notes</span>
             <textarea
-              onChange={(event) =>
+              onChange={(milestone) =>
                 setWorkLogDraft((current) => ({
                   ...current,
-                  notes: event.target.value,
+                  notes: milestone.target.value,
                 }))
               }
               placeholder="What got done?"
@@ -233,4 +233,5 @@ export function WorkLogEditorModal({
     </div>
   );
 }
+
 

@@ -19,8 +19,8 @@ function getUniqueValidMemberIds(candidateIds: string[] | null | undefined, mode
 }
 
 export function useAppWorkspaceReportSubmitActions(model: AppWorkspaceModel) {
-  const handleWorkLogSubmit = useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleWorkLogSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
+    milestone.preventDefault();
     model.setIsSavingWorkLog(true);
     model.setDataMessage(null);
 
@@ -53,8 +53,8 @@ export function useAppWorkspaceReportSubmitActions(model: AppWorkspaceModel) {
     }
   }, [model]);
 
-  const handleQaReportSubmit = useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleQaReportSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
+    milestone.preventDefault();
     model.setIsSavingQaReport(true);
     model.setDataMessage(null);
 
@@ -77,7 +77,7 @@ export function useAppWorkspaceReportSubmitActions(model: AppWorkspaceModel) {
         reportType: "QA",
         projectId: task?.projectId ?? model.bootstrap.projects[0]?.id ?? "",
         taskId: task?.id ?? "",
-        eventId: null,
+        milestoneId: null,
         workstreamId: task?.workstreamId ?? null,
         createdByMemberId: model.qaReportDraft.createdByMemberId ?? null,
         result: model.qaReportDraft.result,
@@ -103,69 +103,70 @@ export function useAppWorkspaceReportSubmitActions(model: AppWorkspaceModel) {
     }
   }, [model]);
 
-  const handleEventReportSubmit = useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    model.setIsSavingEventReport(true);
+  const handleMilestoneReportSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
+    milestone.preventDefault();
+    model.setIsSavingMilestoneReport(true);
     model.setDataMessage(null);
 
     try {
-      const eventExists = model.bootstrap.events.some((item) => item.id === model.eventReportDraft.eventId);
-      if (!eventExists) {
-        model.setDataMessage("Please choose a real event before saving the event report.");
+      const milestoneExists = model.bootstrap.milestones.some((item) => item.id === model.milestoneReportDraft.milestoneId);
+      if (!milestoneExists) {
+        model.setDataMessage("Please choose a real milestone before saving the milestone report.");
         return;
       }
 
-      const normalizedTitle = (model.eventReportDraft.title ?? "").trim();
+      const normalizedTitle = (model.milestoneReportDraft.title ?? "").trim();
       if (normalizedTitle.length < 2) {
-        model.setDataMessage("Please provide an event report title before saving.");
+        model.setDataMessage("Please provide an milestone report title before saving.");
         return;
       }
 
       const findings: string[] = Array.from(
         new Set(
-          model.eventReportFindings
+          model.milestoneReportFindings
             .split(/\r?\n/)
             .map((line) => line.trim())
             .filter((line) => line.length > 0),
         ),
       );
 
-      const event = model.bootstrap.events.find((candidate) => candidate.id === model.eventReportDraft.eventId) ?? null;
-      const reportDate = model.eventReportDraft.createdAt ?? localTodayDate();
+      const milestone = model.bootstrap.milestones.find((candidate) => candidate.id === model.milestoneReportDraft.milestoneId) ?? null;
+      const reportDate = model.milestoneReportDraft.createdAt ?? localTodayDate();
       const payload: TestResultPayload = {
-        reportType: "EventTest",
-        projectId: event?.projectIds[0] ?? model.bootstrap.projects[0]?.id ?? "",
+        reportType: "MilestoneTest",
+        projectId: milestone?.projectIds[0] ?? model.bootstrap.projects[0]?.id ?? "",
         taskId: null,
-        eventId: event?.id ?? "",
+        milestoneId: milestone?.id ?? "",
         workstreamId: null,
-        createdByMemberId: model.eventReportDraft.createdByMemberId ?? null,
-        result: model.eventReportDraft.result,
+        createdByMemberId: model.milestoneReportDraft.createdByMemberId ?? null,
+        result: model.milestoneReportDraft.result,
         summary: normalizedTitle,
         notes: findings.join("\n"),
         createdAt: reportDate,
-        participantIds: model.eventReportDraft.participantIds ?? [],
-        mentorApproved: model.eventReportDraft.mentorApproved ?? false,
-        reviewedAt: model.eventReportDraft.reviewedAt ?? reportDate,
+        participantIds: model.milestoneReportDraft.participantIds ?? [],
+        mentorApproved: model.milestoneReportDraft.mentorApproved ?? false,
+        reviewedAt: model.milestoneReportDraft.reviewedAt ?? reportDate,
         title: normalizedTitle,
-        status: model.eventReportDraft.status,
+        status: model.milestoneReportDraft.status,
         findings,
-        photoUrl: model.eventReportDraft.photoUrl ?? "",
+        photoUrl: model.milestoneReportDraft.photoUrl ?? "",
       };
 
       await createTestResultRecord(payload, model.handleUnauthorized);
       await model.loadWorkspace();
-      model.setEventReportModalMode(null);
-      model.setEventReportFindings("");
+      model.setMilestoneReportModalMode(null);
+      model.setMilestoneReportFindings("");
     } catch (error) {
       model.setDataMessage(toErrorMessage(error));
     } finally {
-      model.setIsSavingEventReport(false);
+      model.setIsSavingMilestoneReport(false);
     }
   }, [model]);
 
   return {
-    handleEventReportSubmit,
+    handleMilestoneReportSubmit,
     handleQaReportSubmit,
     handleWorkLogSubmit,
   };
 }
+

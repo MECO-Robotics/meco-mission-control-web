@@ -132,8 +132,8 @@ export function TaskQueueCard({
       }`}
       data-board-state={boardState}
       data-tutorial-target="edit-task-row"
-      onClick={(event) => {
-        event.stopPropagation();
+      onClick={(milestone) => {
+        milestone.stopPropagation();
         openEditTaskModal(task);
       }}
       style={cardStyle}

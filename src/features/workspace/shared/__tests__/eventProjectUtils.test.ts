@@ -1,11 +1,11 @@
 /// <reference types="jest" />
 
 import {
-  getEventProjectIds,
+  getMilestoneProjectIds,
   getMilestoneSubsystemOptions,
   reconcileMilestoneSubsystemIds,
-} from "@/features/workspace/shared/events";
-import type { BootstrapPayload, EventRecord } from "@/types";
+} from "@/features/workspace/shared/milestones";
+import type { BootstrapPayload, MilestoneRecord } from "@/types";
 
 const subsystems: BootstrapPayload["subsystems"] = [
   {
@@ -38,9 +38,9 @@ const subsystemsById = Object.fromEntries(
   subsystems.map((subsystem) => [subsystem.id, subsystem]),
 ) as Record<string, BootstrapPayload["subsystems"][number]>;
 
-function createEvent(overrides: Partial<EventRecord>): EventRecord {
+function createMilestone(overrides: Partial<MilestoneRecord>): MilestoneRecord {
   return {
-    id: "event-1",
+    id: "milestone-1",
     title: "Milestone",
     type: "demo",
     startDateTime: "2026-05-01T12:00:00",
@@ -53,11 +53,11 @@ function createEvent(overrides: Partial<EventRecord>): EventRecord {
   };
 }
 
-describe("event project helpers", () => {
-  it("uses explicit event projects before falling back to subsystem projects", () => {
+describe("milestone project helpers", () => {
+  it("uses explicit milestone projects before falling back to subsystem projects", () => {
     expect(
-      getEventProjectIds(
-        createEvent({
+      getMilestoneProjectIds(
+        createMilestone({
           projectIds: ["project-b"],
           relatedSubsystemIds: ["subsystem-a"],
         }),
@@ -66,8 +66,8 @@ describe("event project helpers", () => {
     ).toEqual(["project-b"]);
 
     expect(
-      getEventProjectIds(
-        createEvent({
+      getMilestoneProjectIds(
+        createMilestone({
           relatedSubsystemIds: ["subsystem-a", "subsystem-b"],
         }),
         subsystemsById,

@@ -20,8 +20,8 @@ export function AppWorkspaceShellContent({ controller }: { controller: AppWorksp
       handleCreateMember={c.handleCreateMember}
       handleReactivateMemberForSeason={c.handleReactivateMemberForSeason}
       handleDeleteMember={c.handleDeleteMember}
-      handleTimelineEventDelete={c.handleTimelineEventDelete}
-      handleTimelineEventSave={c.handleTimelineEventSave}
+      handleTimelineMilestoneDelete={c.handleTimelineMilestoneDelete}
+      handleTimelineMilestoneSave={c.handleTimelineMilestoneSave}
       handleUpdateMember={c.handleUpdateMember}
       requestMemberPhotoUpload={c.requestMemberPhotoUpload}
       isAddPersonOpen={c.isAddPersonOpen}
@@ -46,7 +46,7 @@ export function AppWorkspaceShellContent({ controller }: { controller: AppWorksp
       openCreateTaskModalFromTimeline={c.openCreateTaskModalFromTimeline}
       openCreateWorkLogModal={c.openCreateWorkLogModal}
       openCreateQaReportModal={c.openCreateQaReportModal}
-      openCreateEventReportModal={c.openCreateEventReportModal}
+      openCreateMilestoneReportModal={c.openCreateMilestoneReportModal}
       openCreateWorkstreamModal={c.openCreateWorkstreamModal}
       openEditWorkstreamModal={c.openEditWorkstreamModal}
       onCreateRisk={c.handleCreateRisk}

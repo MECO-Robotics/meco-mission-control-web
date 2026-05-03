@@ -1,23 +1,23 @@
-import type { EventPayload, EventRecord } from "@/types";
+import type { MilestonePayload, MilestoneRecord } from "@/types";
 import { requestItem } from "./common";
 
-export function createEventRecord(payload: EventPayload, onUnauthorized?: () => void) {
-  return requestItem<EventRecord, EventPayload>("/events", "POST", payload, onUnauthorized);
+export function createMilestoneRecord(payload: MilestonePayload, onUnauthorized?: () => void) {
+  return requestItem<MilestoneRecord, MilestonePayload>("/milestones", "POST", payload, onUnauthorized);
 }
 
-export function updateEventRecord(
-  eventId: string,
-  payload: Partial<EventPayload>,
+export function updateMilestoneRecord(
+  milestoneId: string,
+  payload: Partial<MilestonePayload>,
   onUnauthorized?: () => void,
 ) {
-  return requestItem<EventRecord, Partial<EventPayload>>(
-    `/events/${eventId}`,
+  return requestItem<MilestoneRecord, Partial<MilestonePayload>>(
+    `/milestones/${milestoneId}`,
     "PATCH",
     payload,
     onUnauthorized,
   );
 }
 
-export function deleteEventRecord(eventId: string, onUnauthorized?: () => void) {
-  return requestItem<EventRecord, never>(`/events/${eventId}`, "DELETE", undefined, onUnauthorized);
+export function deleteMilestoneRecord(milestoneId: string, onUnauthorized?: () => void) {
+  return requestItem<MilestoneRecord, never>(`/milestones/${milestoneId}`, "DELETE", undefined, onUnauthorized);
 }

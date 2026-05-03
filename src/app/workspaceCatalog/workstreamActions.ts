@@ -30,8 +30,8 @@ export function useWorkstreamActions(model: AppWorkspaceModel) {
     model.setActiveWorkstreamId(null);
   }, [model]);
 
-  const handleWorkstreamSubmit = useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleWorkstreamSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
+    milestone.preventDefault();
     model.setIsSavingWorkstream(true);
     model.setDataMessage(null);
 
@@ -93,3 +93,4 @@ export function useWorkstreamActions(model: AppWorkspaceModel) {
     openEditWorkstreamModal,
   };
 }
+

@@ -1,7 +1,7 @@
 import type {
   ArtifactKind,
   ArtifactStatus,
-  EventType,
+  MilestoneType,
   ManufacturingProcess,
   ManufacturingStatus,
   MaterialCategory,
@@ -22,9 +22,9 @@ import type {
 } from "./common";
 import type { PartInstanceRecord as PartInstanceRecordType } from "./records";
 
-export interface EventPayload {
+export interface MilestonePayload {
   title: string;
-  type: EventType;
+  type: MilestoneType;
   startDateTime: string;
   endDateTime: string | null;
   isExternal: boolean;
@@ -35,10 +35,10 @@ export interface EventPayload {
 }
 
 export interface ReportPayload {
-  reportType: "QA" | "EventTest" | "Practice" | "Competition" | "Review";
+  reportType: "QA" | "MilestoneTest" | "Practice" | "Competition" | "Review";
   projectId: string;
   taskId: string | null;
-  eventId: string | null;
+  milestoneId: string | null;
   workstreamId: string | null;
   createdByMemberId: string | null;
   result: string;
@@ -266,7 +266,7 @@ export interface TaskPayload {
   partInstanceIds: string[];
   artifactId?: string | null;
   artifactIds?: string[];
-  targetEventId: string | null;
+  targetMilestoneId: string | null;
   photoUrl: string;
   ownerId: string | null;
   assigneeIds: string[];

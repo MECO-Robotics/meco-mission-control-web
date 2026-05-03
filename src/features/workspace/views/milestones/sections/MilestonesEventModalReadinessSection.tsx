@@ -1,36 +1,36 @@
-import type { BootstrapPayload, EventRecord } from "@/types";
+import type { BootstrapPayload, MilestoneRecord } from "@/types";
 import { formatTaskPlanningState } from "@/features/workspace/shared/task/taskPlanning";
 
 import { MilestoneTaskCard } from "./MilestoneTaskCard";
 
 type TaskPlanningState = "blocked" | "at-risk" | "waiting-on-dependency" | "ready" | "overdue";
 
-interface MilestonesEventModalReadinessSectionProps {
-  activeEvent: EventRecord | null;
-  activeEventCompleteTasks: BootstrapPayload["tasks"];
-  activeEventTasks: BootstrapPayload["tasks"];
+interface MilestonesMilestoneModalReadinessSectionProps {
+  activeMilestone: MilestoneRecord | null;
+  activeMilestoneCompleteTasks: BootstrapPayload["tasks"];
+  activeMilestoneTasks: BootstrapPayload["tasks"];
   bootstrap: BootstrapPayload;
-  eventModalMode: "create" | "edit" | null;
-  eventTaskGroups: Record<TaskPlanningState, BootstrapPayload["tasks"]>;
-  eventTaskOrder: readonly TaskPlanningState[];
+  milestoneModalMode: "create" | "edit" | null;
+  milestoneTaskGroups: Record<TaskPlanningState, BootstrapPayload["tasks"]>;
+  milestoneTaskOrder: readonly TaskPlanningState[];
 }
 
-export function MilestonesEventModalReadinessSection({
-  activeEvent,
-  activeEventCompleteTasks,
-  activeEventTasks,
+export function MilestonesMilestoneModalReadinessSection({
+  activeMilestone,
+  activeMilestoneCompleteTasks,
+  activeMilestoneTasks,
   bootstrap,
-  eventModalMode,
-  eventTaskGroups,
-  eventTaskOrder,
-}: MilestonesEventModalReadinessSectionProps) {
-  return eventModalMode === "edit" && activeEvent ? (
+  milestoneModalMode,
+  milestoneTaskGroups,
+  milestoneTaskOrder,
+}: MilestonesMilestoneModalReadinessSectionProps) {
+  return milestoneModalMode === "edit" && activeMilestone ? (
     <div className="field modal-wide">
       <span style={{ color: "var(--text-title)" }}>Readiness</span>
-      {activeEventTasks.length > 0 ? (
+      {activeMilestoneTasks.length > 0 ? (
         <div style={{ display: "grid", gap: "0.75rem", marginTop: "0.5rem" }}>
-          {eventTaskOrder.map((state) => {
-            const tasks = eventTaskGroups[state];
+          {milestoneTaskOrder.map((state) => {
+            const tasks = milestoneTaskGroups[state];
             if (tasks.length === 0) {
               return null;
             }
@@ -55,7 +55,7 @@ export function MilestonesEventModalReadinessSection({
               </section>
             );
           })}
-          {activeEventCompleteTasks.length > 0 ? (
+          {activeMilestoneCompleteTasks.length > 0 ? (
             <section style={{ display: "grid", gap: "0.5rem" }}>
               <h3
                 style={{
@@ -65,10 +65,10 @@ export function MilestonesEventModalReadinessSection({
                   textTransform: "capitalize",
                 }}
               >
-                Complete ({activeEventCompleteTasks.length})
+                Complete ({activeMilestoneCompleteTasks.length})
               </h3>
               <div style={{ display: "grid", gap: "0.5rem" }}>
-                {activeEventCompleteTasks.map((task) => (
+                {activeMilestoneCompleteTasks.map((task) => (
                   <MilestoneTaskCard key={task.id} bootstrap={bootstrap} task={task} />
                 ))}
               </div>

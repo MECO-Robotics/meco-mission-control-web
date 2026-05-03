@@ -46,7 +46,7 @@ export function normalizePlanningProjects(
 
     seasons = seasonIds.map((seasonId) => ({
       id: seasonId,
-      name: seasonIdsFromProjects.length > 0 ? toTitleFromId(seasonId) : "Tutorial season",
+      name: seasonIdsFromProjects.length > 0 ? toTitleFromId(seasonId) : "Default Season",
       type: "season",
       startDate,
       endDate,

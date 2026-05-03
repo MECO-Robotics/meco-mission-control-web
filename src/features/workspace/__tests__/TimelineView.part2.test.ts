@@ -21,7 +21,7 @@ describe("TimelineView", () => {
   });
 
   it.each([false, true])(
-    "layers sticky left columns above timeline events when all-projects view is %s",
+    "layers sticky left columns above timeline milestones when all-projects view is %s",
     (isAllProjectsView) => {
       const markup = renderToStaticMarkup(
         React.createElement(TimelineView, {
@@ -32,21 +32,21 @@ describe("TimelineView", () => {
           membersById,
           openTaskDetailModal: jest.fn(),
           openCreateTaskModal: jest.fn(),
-          onDeleteTimelineEvent: jest.fn(),
-          onSaveTimelineEvent: jest.fn(),
+          onDeleteTimelineMilestone: jest.fn(),
+          onSaveTimelineMilestone: jest.fn(),
           triggerCreateMilestoneToken: 0,
         }),
       );
       const css = readAppCss();
-      const eventUnderlayZIndexes = Array.from(
+      const milestoneUnderlayZIndexes = Array.from(
         css.matchAll(
-          /\.timeline-day-event-underlay\s*\{[^}]*z-index:\s*(\d+)/g,
+          /\.timeline-day-milestone-underlay\s*\{[^}]*z-index:\s*(\d+)/g,
         ),
         (match) => Number(match[1]),
       );
-      const eventOverlayZIndexes = Array.from(
+      const milestoneOverlayZIndexes = Array.from(
         css.matchAll(
-          /\.timeline-day-event-(?:overlay-tooltip|overlay-column)\s*\{[^}]*z-index:\s*(\d+)/g,
+          /\.timeline-day-milestone-(?:overlay-tooltip|overlay-column)\s*\{[^}]*z-index:\s*(\d+)/g,
         ),
         (match) => Number(match[1]),
       );
@@ -55,11 +55,11 @@ describe("TimelineView", () => {
         (match) => Number(match[2]),
       );
 
-      expect(eventUnderlayZIndexes.length).toBeGreaterThan(0);
-      expect(eventOverlayZIndexes.length).toBeGreaterThan(0);
+      expect(milestoneUnderlayZIndexes.length).toBeGreaterThan(0);
+      expect(milestoneOverlayZIndexes.length).toBeGreaterThan(0);
       expect(stickyLeftZIndexes.length).toBeGreaterThan(0);
-      expect(Math.min(...stickyLeftZIndexes)).toBeGreaterThan(Math.max(...eventUnderlayZIndexes));
-      expect(Math.max(...eventOverlayZIndexes)).toBeGreaterThan(Math.max(...stickyLeftZIndexes));
+      expect(Math.min(...stickyLeftZIndexes)).toBeGreaterThan(Math.max(...milestoneUnderlayZIndexes));
+      expect(Math.max(...milestoneOverlayZIndexes)).toBeGreaterThan(Math.max(...stickyLeftZIndexes));
     },
   );
 
@@ -76,9 +76,9 @@ describe("TimelineView", () => {
 
     const taskBarZIndex = getZIndex(".timeline-bar");
 
-    expect(getZIndex(".timeline-day-event-overlay-column")).toBeGreaterThan(taskBarZIndex);
-    expect(getZIndex(".timeline-day-event-overlay-tooltip")).toBeGreaterThan(taskBarZIndex);
-    expect(getZIndex(".timeline-day-event-underlay")).toBeLessThan(taskBarZIndex);
+    expect(getZIndex(".timeline-day-milestone-overlay-column")).toBeGreaterThan(taskBarZIndex);
+    expect(getZIndex(".timeline-day-milestone-overlay-tooltip")).toBeGreaterThan(taskBarZIndex);
+    expect(getZIndex(".timeline-day-milestone-underlay")).toBeLessThan(taskBarZIndex);
   });
 
   it("keeps timeline row groups out of content-visibility stacking containment", () => {
@@ -99,8 +99,8 @@ describe("TimelineView", () => {
         membersById,
         openTaskDetailModal: jest.fn(),
         openCreateTaskModal: jest.fn(),
-        onDeleteTimelineEvent: jest.fn(),
-        onSaveTimelineEvent: jest.fn(),
+        onDeleteTimelineMilestone: jest.fn(),
+        onSaveTimelineMilestone: jest.fn(),
         triggerCreateMilestoneToken: 0,
       }),
     );
@@ -125,8 +125,8 @@ describe("TimelineView", () => {
           membersById,
           openTaskDetailModal: jest.fn(),
           openCreateTaskModal: jest.fn(),
-          onDeleteTimelineEvent: jest.fn(),
-          onSaveTimelineEvent: jest.fn(),
+          onDeleteTimelineMilestone: jest.fn(),
+          onSaveTimelineMilestone: jest.fn(),
           triggerCreateMilestoneToken: 0,
         }),
       );
@@ -155,8 +155,8 @@ describe("TimelineView", () => {
           membersById,
           openTaskDetailModal: jest.fn(),
           openCreateTaskModal: jest.fn(),
-          onDeleteTimelineEvent: jest.fn(),
-          onSaveTimelineEvent: jest.fn(),
+          onDeleteTimelineMilestone: jest.fn(),
+          onSaveTimelineMilestone: jest.fn(),
           triggerCreateMilestoneToken: 0,
         }),
       );
@@ -180,8 +180,8 @@ describe("TimelineView", () => {
           membersById,
           openTaskDetailModal: jest.fn(),
           openCreateTaskModal: jest.fn(),
-          onDeleteTimelineEvent: jest.fn(),
-          onSaveTimelineEvent: jest.fn(),
+          onDeleteTimelineMilestone: jest.fn(),
+          onSaveTimelineMilestone: jest.fn(),
           triggerCreateMilestoneToken: 0,
         }),
       );
@@ -203,8 +203,8 @@ describe("TimelineView", () => {
         membersById,
         openTaskDetailModal: jest.fn(),
         openCreateTaskModal: jest.fn(),
-        onDeleteTimelineEvent: jest.fn(),
-        onSaveTimelineEvent: jest.fn(),
+        onDeleteTimelineMilestone: jest.fn(),
+        onSaveTimelineMilestone: jest.fn(),
         triggerCreateMilestoneToken: 0,
       }),
     );
@@ -230,8 +230,8 @@ describe("TimelineView", () => {
         membersById,
         openTaskDetailModal: jest.fn(),
         openCreateTaskModal: jest.fn(),
-        onDeleteTimelineEvent: jest.fn(),
-        onSaveTimelineEvent: jest.fn(),
+        onDeleteTimelineMilestone: jest.fn(),
+        onSaveTimelineMilestone: jest.fn(),
         triggerCreateMilestoneToken: 0,
       }),
     );
@@ -249,8 +249,8 @@ describe("TimelineView", () => {
         membersById,
         openTaskDetailModal: jest.fn(),
         openCreateTaskModal: jest.fn(),
-        onDeleteTimelineEvent: jest.fn(),
-        onSaveTimelineEvent: jest.fn(),
+        onDeleteTimelineMilestone: jest.fn(),
+        onSaveTimelineMilestone: jest.fn(),
         triggerCreateMilestoneToken: 0,
       }),
     );

@@ -1,9 +1,9 @@
-import type { BootstrapPayload, EventPayload } from "@/types";
-import type { FilterSelection } from "@/features/workspace/shared";
-import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
+import type { BootstrapPayload, MilestonePayload } from "@/types";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model";
+import type { FilterSelection } from "@/features/workspace/shared/WorkspaceViewShared";
 
 import { MilestonesToolbar } from "./MilestonesToolbar";
-import { MilestonesEventModal } from "./MilestonesEventModal";
+import { MilestonesMilestoneModal } from "./MilestonesEventModal";
 import { MilestonesBoardSection } from "./sections/MilestonesBoardSection";
 import { useMilestonesViewState } from "./sections/milestonesViewState";
 
@@ -11,11 +11,11 @@ interface MilestonesViewProps {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   isAllProjectsView: boolean;
-  onDeleteTimelineEvent: (eventId: string) => Promise<void>;
-  onSaveTimelineEvent: (
+  onDeleteTimelineMilestone: (milestoneId: string) => Promise<void>;
+  onSaveTimelineMilestone: (
     mode: "create" | "edit",
-    eventId: string | null,
-    payload: EventPayload,
+    milestoneId: string | null,
+    payload: MilestonePayload,
   ) => Promise<void>;
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
 }
@@ -24,16 +24,16 @@ export function MilestonesView({
   activePersonFilter,
   bootstrap,
   isAllProjectsView,
-  onDeleteTimelineEvent,
-  onSaveTimelineEvent,
+  onDeleteTimelineMilestone,
+  onSaveTimelineMilestone,
   subsystemsById,
 }: MilestonesViewProps) {
   const milestones = useMilestonesViewState({
     activePersonFilter,
     bootstrap,
     isAllProjectsView,
-    onDeleteTimelineEvent,
-    onSaveTimelineEvent,
+    onDeleteTimelineMilestone,
+    onSaveTimelineMilestone,
     subsystemsById,
   });
 
@@ -43,9 +43,9 @@ export function MilestonesView({
         <div className="queue-section-header">
           <h2>Milestones</h2>
           <p className="section-copy filter-copy">
-            {milestones.processedEvents.length === 1
+            {milestones.processedMilestones.length === 1
               ? "1 milestone matches the current filters."
-              : `${milestones.processedEvents.length} milestones match the current filters.`}
+              : `${milestones.processedMilestones.length} milestones match the current filters.`}
             {activePersonFilter.length > 0
               ? ` Only milestones linked to tasks assigned to or mentored by ${milestones.activePersonFilterLabel}.`
               : ""}
@@ -53,7 +53,7 @@ export function MilestonesView({
         </div>
         <MilestonesToolbar
           isAllProjectsView={isAllProjectsView}
-          onAddMilestone={milestones.openCreateEventModal}
+          onAddMilestone={milestones.openCreateMilestoneModal}
           projectFilter={milestones.projectFilter}
           projects={bootstrap.projects}
           searchFilter={milestones.searchFilter}
@@ -69,39 +69,39 @@ export function MilestonesView({
       </div>
 
       <MilestonesBoardSection
-        events={milestones.processedEvents}
+        milestones={milestones.processedMilestones}
         motionClassName={milestones.milestoneFilterMotionClass}
-        onOpenEvent={milestones.openEditEventModal}
-        projectLabelByEventId={milestones.projectLabelByEventId}
+        onOpenMilestone={milestones.openEditMilestoneModal}
+        projectLabelByMilestoneId={milestones.projectLabelByMilestoneId}
         subsystemsById={subsystemsById}
       />
 
-      <MilestonesEventModal
-        activeEvent={milestones.activeEvent}
-        activeEventCompleteTasks={milestones.activeEventCompleteTasks}
-        activeEventTasks={milestones.activeEventTasks}
+      <MilestonesMilestoneModal
+        activeMilestone={milestones.activeMilestone}
+        activeMilestoneCompleteTasks={milestones.activeMilestoneCompleteTasks}
+        activeMilestoneTasks={milestones.activeMilestoneTasks}
         bootstrap={bootstrap}
-        eventError={milestones.eventError}
-        eventModalMode={milestones.eventModalMode}
-        eventStartDate={milestones.eventStartDate}
-        eventStartTime={milestones.eventStartTime}
-        eventEndDate={milestones.eventEndDate}
-        eventEndTime={milestones.eventEndTime}
-        eventTaskGroups={milestones.eventTaskGroups}
-        eventTaskOrder={milestones.eventTaskOrder}
-        isDeletingEvent={milestones.isDeletingEvent}
-        isSavingEvent={milestones.isSavingEvent}
+        milestoneError={milestones.milestoneError}
+        milestoneModalMode={milestones.milestoneModalMode}
+        milestoneStartDate={milestones.milestoneStartDate}
+        milestoneStartTime={milestones.milestoneStartTime}
+        milestoneEndDate={milestones.milestoneEndDate}
+        milestoneEndTime={milestones.milestoneEndTime}
+        milestoneTaskGroups={milestones.milestoneTaskGroups}
+        milestoneTaskOrder={milestones.milestoneTaskOrder}
+        isDeletingMilestone={milestones.isDeletingMilestone}
+        isSavingMilestone={milestones.isSavingMilestone}
         milestoneDraft={milestones.milestoneDraft}
         modalPortalTarget={milestones.modalPortalTarget}
-        onClose={milestones.closeEventModal}
-        onDelete={milestones.handleEventDelete}
-        onSubmit={milestones.handleEventSubmit}
+        onClose={milestones.closeMilestoneModal}
+        onDelete={milestones.handleMilestoneDelete}
+        onSubmit={milestones.handleMilestoneSubmit}
         projectsById={milestones.projectsById}
         selectableSubsystems={milestones.selectableSubsystems}
-        setEventEndDate={milestones.setEventEndDate}
-        setEventEndTime={milestones.setEventEndTime}
-        setEventStartDate={milestones.setEventStartDate}
-        setEventStartTime={milestones.setEventStartTime}
+        setMilestoneEndDate={milestones.setMilestoneEndDate}
+        setMilestoneEndTime={milestones.setMilestoneEndTime}
+        setMilestoneStartDate={milestones.setMilestoneStartDate}
+        setMilestoneStartTime={milestones.setMilestoneStartTime}
         setMilestoneDraft={milestones.setMilestoneDraft}
         subsystemsById={subsystemsById}
       />

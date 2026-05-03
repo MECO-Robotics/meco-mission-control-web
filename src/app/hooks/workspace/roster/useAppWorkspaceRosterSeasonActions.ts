@@ -21,8 +21,8 @@ export function useAppWorkspaceRosterSeasonActions(model: AppWorkspaceModel) {
   }, [model]);
 
   const handleCreateSeasonSubmit = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
+    async (milestone: FormEvent<HTMLFormElement>) => {
+      milestone.preventDefault();
 
       const seasonName = model.seasonNameDraft.trim();
       if (seasonName.length < 2) {
@@ -55,3 +55,4 @@ export function useAppWorkspaceRosterSeasonActions(model: AppWorkspaceModel) {
     handleCreateSeasonSubmit,
   };
 }
+

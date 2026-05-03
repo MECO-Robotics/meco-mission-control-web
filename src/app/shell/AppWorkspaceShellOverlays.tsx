@@ -6,8 +6,8 @@ function ModalScrim({ children, onClose }: { children: ReactNode; onClose: () =>
   return (
     <div
       className="modal-scrim"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) {
+      onClick={(milestone) => {
+        if (milestone.target === milestone.currentTarget) {
           onClose();
         }
       }}
@@ -39,7 +39,7 @@ export function AddSeasonPopup({ controller }: { controller: AppWorkspaceControl
             <input
               autoFocus
               minLength={2}
-              onChange={(event) => c.setSeasonNameDraft(event.target.value)}
+              onChange={(milestone) => c.setSeasonNameDraft(milestone.target.value)}
               placeholder="2027 Season"
               required
               value={c.seasonNameDraft}
@@ -79,7 +79,7 @@ export function RobotProjectPopup({ controller }: { controller: AppWorkspaceCont
             <input
               autoFocus
               minLength={2}
-              onChange={(event) => c.setRobotProjectNameDraft(event.target.value)}
+              onChange={(milestone) => c.setRobotProjectNameDraft(milestone.target.value)}
               placeholder="Practice Bot"
               required
               value={c.robotProjectNameDraft}

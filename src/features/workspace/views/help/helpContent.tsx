@@ -34,7 +34,7 @@ export const HELP_SECTIONS: HelpSection[] = [
     items: [
       "Tasks is where scheduling and execution stay aligned: Timeline for dates, Kanban for active work, and Milestones for checkpoints.",
       "Manufacturing only appears in **robot projects**, split into CNC, prints, and fabrication queues.",
-      "Reports is always available and groups the **QA** and **Event Result** forms in one sidebar page.",
+      "Reports is always available and groups the **QA** and **Milestone Result** forms in one sidebar page.",
       "Inventory changes by project type: **robot projects use Materials and Parts, non-robot projects use Documents**.",
       "Workflow replaces Subsystems for non-robot projects, but the ownership flow stays the same.",
       "Roster and Help are **always available** no matter which project is selected.",
@@ -107,7 +107,7 @@ export const HELP_TUTORIAL_STEPS: HelpTutorialStep[] = [
       "The sidebar picks the area; some areas use subtabs in the top bar, while Reports keeps its launchers on the page.",
     actions: [
       "Open Tasks and move through Timeline, Kanban, and Milestones.",
-      "Open Reports to launch QA and Event Result forms from one place in the sidebar.",
+      "Open Reports to launch QA and Milestone Result forms from one place in the sidebar.",
       "Switch projects and watch Inventory move between Materials/Parts and Documents.",
       "Check footer notes at the bottom of each view for local interaction hints.",
     ],

@@ -1,6 +1,6 @@
 import type {
   ArtifactRecord,
-  EventRecord,
+  MilestoneRecord,
   ManufacturingItemRecord,
   MaterialRecord,
   MemberRecord,
@@ -36,7 +36,7 @@ export interface NormalizedBootstrapCatalogRecords {
   artifacts: ArtifactRecord[];
   partDefinitions: PartDefinitionRecord[];
   partInstances: PartInstanceRecord[];
-  events: EventRecord[];
+  milestones: MilestoneRecord[];
   workLogs: WorkLogRecord[];
   purchaseItems: PurchaseItemRecord[];
   manufacturingItems: ManufacturingItemRecord[];
@@ -96,17 +96,17 @@ export function normalizeBootstrapCatalogRecords(
   const subsystemProjectIdsById = new Map(
     subsystems.map((subsystem) => [subsystem.id, subsystem.projectId] as const),
   );
-  const events: EventRecord[] = (source.events ?? []).map((event, index) => {
-    const relatedSubsystemIds = Array.isArray(event.relatedSubsystemIds)
-      ? event.relatedSubsystemIds.filter(
+  const milestones: MilestoneRecord[] = (source.milestones ?? []).map((milestone, index) => {
+    const relatedSubsystemIds = Array.isArray(milestone.relatedSubsystemIds)
+      ? milestone.relatedSubsystemIds.filter(
           (subsystemId): subsystemId is string =>
             typeof subsystemId === "string" && subsystemId.length > 0,
         )
       : [];
-    const explicitProjectIds = Array.isArray(event.projectIds)
+    const explicitProjectIds = Array.isArray(milestone.projectIds)
       ? Array.from(
           new Set(
-            event.projectIds
+            milestone.projectIds
               .map((projectId) =>
                 resolveProjectAlias(projectId, projectIds, planning.projectIdAliases),
               )
@@ -121,16 +121,16 @@ export function normalizeBootstrapCatalogRecords(
           .filter((projectId): projectId is string => Boolean(projectId)),
       ),
     );
-    const fallbackEventDate = planning.seasons[0]?.startDate ?? localTodayDate();
+    const fallbackMilestoneDate = planning.seasons[0]?.startDate ?? localTodayDate();
 
     return {
-      id: event.id ?? `event-${index + 1}`,
-      title: event.title ?? `Event ${index + 1}`,
-      type: event.type ?? "internal-review",
-      startDateTime: event.startDateTime ?? `${fallbackEventDate}T12:00:00`,
-      endDateTime: event.endDateTime ?? null,
-      isExternal: event.isExternal ?? false,
-      description: event.description ?? "",
+      id: milestone.id ?? `milestone-${index + 1}`,
+      title: milestone.title ?? `Milestone ${index + 1}`,
+      type: milestone.type ?? "internal-review",
+      startDateTime: milestone.startDateTime ?? `${fallbackMilestoneDate}T12:00:00`,
+      endDateTime: milestone.endDateTime ?? null,
+      isExternal: milestone.isExternal ?? false,
+      description: milestone.description ?? "",
       projectIds: explicitProjectIds.length > 0 ? explicitProjectIds : inferredProjectIds,
       relatedSubsystemIds,
     };
@@ -171,9 +171,9 @@ export function normalizeBootstrapCatalogRecords(
     partInstances: (source.partInstances ?? []).map((partInstance) => ({
       ...partInstance,
       mechanismId: partInstance.mechanismId ?? null,
-      status: partInstance.status ?? "planned",
+      status: partInstance.status ?? "not ready",
     })),
-    events,
+    milestones,
     workLogs: (source.workLogs ?? []).map((workLog) => ({
       ...workLog,
       participantIds: workLog.participantIds ?? [],

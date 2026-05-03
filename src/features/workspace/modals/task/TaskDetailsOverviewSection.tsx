@@ -115,8 +115,8 @@ export function TaskDetailsOverviewSection({
               autoFocus
               className="task-detail-inline-edit-textarea"
               onBlur={() => setEditingField(null)}
-              onChange={(event) =>
-                setTaskDraft?.((current) => ({ ...current, summary: event.target.value }))
+              onChange={(milestone) =>
+                setTaskDraft?.((current) => ({ ...current, summary: milestone.target.value }))
               }
               value={taskDraft?.summary ?? activeTask.summary}
             />

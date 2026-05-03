@@ -32,8 +32,8 @@ export function useManufacturingActions(model: AppWorkspaceModel) {
     model.setActiveManufacturingId(null);
   }, [model]);
 
-  const handleManufacturingSubmit = useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleManufacturingSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
+    milestone.preventDefault();
     model.setIsSavingManufacturing(true);
     model.setDataMessage(null);
 
@@ -141,3 +141,4 @@ export function useManufacturingActions(model: AppWorkspaceModel) {
     openEditManufacturingModal,
   };
 }
+

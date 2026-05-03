@@ -18,7 +18,7 @@ const baseTask: BootstrapPayload["tasks"][number] = {
   mechanismIds: [],
   partInstanceId: null,
   partInstanceIds: [],
-  targetEventId: null,
+  targetMilestoneId: null,
   ownerId: null,
   assigneeIds: [],
   mentorId: null,

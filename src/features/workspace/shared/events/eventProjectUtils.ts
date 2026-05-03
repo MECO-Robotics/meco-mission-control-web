@@ -1,4 +1,4 @@
-import type { BootstrapPayload, EventRecord } from "@/types";
+import type { BootstrapPayload, MilestoneRecord } from "@/types";
 
 function uniqueIds(values: Array<string | null | undefined>) {
   return Array.from(
@@ -6,12 +6,12 @@ function uniqueIds(values: Array<string | null | undefined>) {
   );
 }
 
-export function getEventProjectIds(
-  event: Pick<EventRecord, "projectIds" | "relatedSubsystemIds">,
+export function getMilestoneProjectIds(
+  milestone: Pick<MilestoneRecord, "projectIds" | "relatedSubsystemIds">,
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>,
 ) {
-  const explicitProjectIds = Array.isArray(event.projectIds)
-    ? uniqueIds(event.projectIds)
+  const explicitProjectIds = Array.isArray(milestone.projectIds)
+    ? uniqueIds(milestone.projectIds)
     : [];
 
   if (explicitProjectIds.length > 0) {
@@ -19,7 +19,7 @@ export function getEventProjectIds(
   }
 
   return uniqueIds(
-    event.relatedSubsystemIds.map(
+    milestone.relatedSubsystemIds.map(
       (subsystemId) => subsystemsById[subsystemId]?.projectId,
     ),
   );

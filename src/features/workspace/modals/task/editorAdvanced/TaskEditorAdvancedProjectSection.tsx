@@ -23,7 +23,7 @@ export function TaskEditorAdvancedProjectSection({
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Project</span>
         <select
-          onChange={(event) => handleProjectChange(event.target.value)}
+          onChange={(milestone) => handleProjectChange(milestone.target.value)}
           style={{
             background: "var(--bg-row-alt)",
             color: "var(--text-title)",
@@ -41,8 +41,8 @@ export function TaskEditorAdvancedProjectSection({
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Discipline</span>
         <select
-          onChange={(event) =>
-            setTaskDraft((current) => ({ ...current, disciplineId: event.target.value }))
+          onChange={(milestone) =>
+            setTaskDraft((current) => ({ ...current, disciplineId: milestone.target.value }))
           }
           style={{
             background: "var(--bg-row-alt)",

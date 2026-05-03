@@ -28,8 +28,8 @@ export function useSubsystemActions(model: AppWorkspaceModel) {
     model.setActiveSubsystemId(null);
   }, [model]);
 
-  const handleSubsystemSubmit = useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleSubsystemSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
+    milestone.preventDefault();
     if (model.subsystemModalMode === "create" && !model.selectedProjectId) {
       model.setDataMessage("Pick a project before adding a subsystem.");
       return;
@@ -93,3 +93,4 @@ export function useSubsystemActions(model: AppWorkspaceModel) {
     openEditSubsystemModal,
   };
 }
+

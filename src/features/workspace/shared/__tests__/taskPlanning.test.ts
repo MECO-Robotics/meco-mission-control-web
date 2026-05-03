@@ -2,8 +2,8 @@ import {
   getTaskBlocksDependencies,
   getTaskOpenBlockersForTask,
   getTaskPlanningState,
-  getTaskWaitingOnDependencies,
 } from "../task/taskPlanning";
+import { getTaskDependencyTargetOptions } from "../task/taskTargeting";
 import type { BootstrapPayload } from "@/types";
 
 const bootstrap = {
@@ -26,12 +26,12 @@ const bootstrap = {
       name: "Clamp",
       quantity: 1,
       trackIndividually: false,
-      status: "available",
+      status: "ready",
     },
   ],
-  events: [
+  milestones: [
     {
-      id: "event-1",
+      id: "milestone-1",
       title: "Milestone",
       type: "demo",
       startDateTime: "2026-04-20T12:00:00.000Z",
@@ -65,7 +65,7 @@ const bootstrap = {
       mechanismIds: [],
       partInstanceId: null,
       partInstanceIds: [],
-      targetEventId: null,
+      targetMilestoneId: null,
       ownerId: null,
       assigneeIds: [],
       mentorId: null,
@@ -96,7 +96,7 @@ const bootstrap = {
       mechanismIds: [],
       partInstanceId: null,
       partInstanceIds: [],
-      targetEventId: null,
+      targetMilestoneId: null,
       ownerId: null,
       assigneeIds: [],
       mentorId: null,
@@ -129,15 +129,15 @@ const bootstrap = {
       taskId: "task-b",
       kind: "part_instance",
       refId: "part-instance-1",
-      requiredState: "installed",
+      requiredState: "ready",
       dependencyType: "hard",
       createdAt: "2026-04-20T00:00:00.000Z",
     },
     {
-      id: "task-dependency-event",
+      id: "task-dependency-milestone",
       taskId: "task-b",
-      kind: "event",
-      refId: "event-1",
+      kind: "milestone",
+      refId: "milestone-1",
       requiredState: "complete",
       dependencyType: "soft",
       createdAt: "2026-04-20T00:00:00.000Z",
@@ -163,16 +163,7 @@ const bootstrap = {
 } satisfies BootstrapPayload;
 
 test("task planning helpers surface structured dependency records", () => {
-  const waitingOn = getTaskWaitingOnDependencies("task-b", bootstrap);
   const blocks = getTaskBlocksDependencies("task-a", bootstrap);
-
-  expect(waitingOn).toHaveLength(1);
-  expect(waitingOn[0]).toMatchObject({
-    taskId: "task-b",
-    kind: "part_instance",
-    refId: "part-instance-1",
-    dependencyType: "hard",
-  });
 
   expect(blocks).toHaveLength(1);
   expect(blocks[0]).toMatchObject({
@@ -188,16 +179,210 @@ test("task planning keeps manual blockers separate from dependency waiting state
   expect(getTaskPlanningState(bootstrap.tasks[1], bootstrap, new Date("2026-04-20T12:00:00Z"))).toBe(
     "blocked",
   );
+});
 
-  const noBlockerBootstrap = {
+test("dependency targets expose standard status icons for milestone and part-instance statuses", () => {
+  const milestoneOptions = getTaskDependencyTargetOptions("milestone", {
+    tasksById: {},
+    milestonesById: {
+      milestoneBlocked: {
+        id: "milestoneBlocked",
+        title: "Blocked",
+        type: "demo",
+        status: "blocked",
+        startDateTime: "2026-04-20T12:00:00.000Z",
+        endDateTime: null,
+        isExternal: false,
+        description: "",
+        projectIds: [],
+        relatedSubsystemIds: [],
+      },
+      milestoneNotReady: {
+        id: "milestoneNotReady",
+        title: "Not Ready",
+        type: "demo",
+        status: "not ready",
+        startDateTime: "2026-04-20T12:00:00.000Z",
+        endDateTime: null,
+        isExternal: false,
+        description: "",
+        projectIds: [],
+        relatedSubsystemIds: [],
+      },
+      milestoneQa: {
+        id: "milestoneQa",
+        title: "QA",
+        type: "demo",
+        status: "qa",
+        startDateTime: "2026-04-20T12:00:00.000Z",
+        endDateTime: null,
+        isExternal: false,
+        description: "",
+        projectIds: [],
+        relatedSubsystemIds: [],
+      },
+      milestoneReady: {
+        id: "milestoneReady",
+        title: "Ready",
+        type: "demo",
+        status: "ready",
+        startDateTime: "2026-04-20T12:00:00.000Z",
+        endDateTime: null,
+        isExternal: false,
+        description: "",
+        projectIds: [],
+        relatedSubsystemIds: [],
+      },
+    },
+    partInstancesById: {},
+    partDefinitionsById: {},
+    formatIterationVersion: () => "1",
+  });
+
+  expect((milestoneOptions.find((option) => option.id === "milestoneNotReady")?.icon as any).props).toMatchObject(
+    {
+      compact: true,
+      signal: "not-started",
+      status: "not-started",
+    },
+  );
+  expect((milestoneOptions.find((option) => option.id === "milestoneBlocked")?.icon as any).props).toMatchObject({
+    compact: true,
+    signal: "blocked",
+    status: "not-started",
+  });
+  expect((milestoneOptions.find((option) => option.id === "milestoneQa")?.icon as any).props).toMatchObject({
+    compact: true,
+    signal: "waiting-for-qa",
+    status: "waiting-for-qa",
+  });
+  expect((milestoneOptions.find((option) => option.id === "milestoneReady")?.icon as any).props).toMatchObject({
+    compact: true,
+    signal: "complete",
+    status: "complete",
+  });
+
+  const partOptions = getTaskDependencyTargetOptions("part_instance", {
+    tasksById: {},
+    milestonesById: {},
+    partInstancesById: {
+      partBlocked: {
+        id: "partBlocked",
+        subsystemId: "subsystem-1",
+        mechanismId: null,
+        partDefinitionId: "part-def-1",
+        name: "Blocked part",
+        quantity: 1,
+        trackIndividually: false,
+        status: "blocked",
+      },
+      partNotReady: {
+        id: "partNotReady",
+        subsystemId: "subsystem-1",
+        mechanismId: null,
+        partDefinitionId: "part-def-1",
+        name: "Not ready part",
+        quantity: 1,
+        trackIndividually: false,
+        status: "not ready",
+      },
+      partQa: {
+        id: "partQa",
+        subsystemId: "subsystem-1",
+        mechanismId: null,
+        partDefinitionId: "part-def-1",
+        name: "QA part",
+        quantity: 1,
+        trackIndividually: false,
+        status: "qa",
+      },
+      partReady: {
+        id: "partReady",
+        subsystemId: "subsystem-1",
+        mechanismId: null,
+        partDefinitionId: "part-def-1",
+        name: "Ready part",
+        quantity: 1,
+        trackIndividually: false,
+        status: "ready",
+      },
+    },
+    partDefinitionsById: {
+      "part-def-1": {
+        id: "part-def-1",
+        seasonId: "season-1",
+        name: "Part def",
+        partNumber: "P-1",
+        revision: "A",
+        iteration: 1,
+        type: "part",
+        source: "internal",
+        materialId: null,
+        description: "",
+      },
+    },
+    formatIterationVersion: () => "1",
+  });
+
+  expect((partOptions.find((option) => option.id === "partNotReady")?.icon as any).props).toMatchObject({
+    compact: true,
+    signal: "not-started",
+    status: "not-started",
+  });
+  expect((partOptions.find((option) => option.id === "partBlocked")?.icon as any).props).toMatchObject({
+    compact: true,
+    signal: "blocked",
+    status: "not-started",
+  });
+  expect((partOptions.find((option) => option.id === "partQa")?.icon as any).props).toMatchObject({
+    compact: true,
+    signal: "waiting-for-qa",
+    status: "waiting-for-qa",
+  });
+  expect((partOptions.find((option) => option.id === "partReady")?.icon as any).props).toMatchObject({
+    compact: true,
+    signal: "complete",
+    status: "complete",
+  });
+});
+
+test("task planning accepts milestone and part-instance qa states as satisfied dependency targets", () => {
+  const qaBootstrap = {
     ...bootstrap,
+    milestones: [
+      {
+        ...bootstrap.milestones[0],
+        status: "qa" as const,
+      },
+    ],
+    partInstances: [
+      {
+        ...bootstrap.partInstances[0],
+        status: "qa" as const,
+      },
+    ],
+    taskDependencies: bootstrap.taskDependencies.map((dependency) => {
+      if (dependency.id === "task-dependency-part") {
+        return {
+          ...dependency,
+          requiredState: "qa",
+        };
+      }
+
+      if (dependency.id === "task-dependency-milestone") {
+        return {
+          ...dependency,
+          dependencyType: "hard" as const,
+          requiredState: "qa",
+        };
+      }
+
+      return dependency;
+    }),
     taskBlockers: [],
-    tasks: bootstrap.tasks.map((task) =>
-      task.id === "task-b" ? { ...task, blockers: [] } : task,
-    ),
   } satisfies BootstrapPayload;
 
-  expect(getTaskPlanningState(noBlockerBootstrap.tasks[1], noBlockerBootstrap)).toBe(
-    "waiting-on-dependency",
+  expect(getTaskPlanningState(qaBootstrap.tasks[1], qaBootstrap, new Date("2026-04-20T12:00:00Z"))).toBe(
+    "ready",
   );
 });

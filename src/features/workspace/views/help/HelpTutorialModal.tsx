@@ -37,9 +37,9 @@ export function HelpTutorialModal({
 
     closeTutorialButtonRef.current?.focus();
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
+    const handleKeyDown = (milestone: KeyboardEvent) => {
+      if (milestone.key === "Escape") {
+        milestone.preventDefault();
         onClose();
       }
     };
@@ -94,8 +94,8 @@ export function HelpTutorialModal({
   return (
     <div
       className="modal-scrim help-tutorial-scrim"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) {
+      onClick={(milestone) => {
+        if (milestone.target === milestone.currentTarget) {
           closeTutorial();
         }
       }}
@@ -107,7 +107,7 @@ export function HelpTutorialModal({
         aria-modal="true"
         className="modal-card help-tutorial-modal"
         id="help-tutorial-dialog"
-        onClick={(event) => event.stopPropagation()}
+        onClick={(milestone) => milestone.stopPropagation()}
         role="dialog"
       >
         <div className="panel-header compact-header help-tutorial-modal-header">
@@ -221,3 +221,4 @@ export function HelpTutorialModal({
     </div>
   );
 }
+

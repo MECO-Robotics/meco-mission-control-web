@@ -133,14 +133,14 @@ describe("AppTopbar", () => {
     expect(markup).toContain("Logs");
     expect(markup).toContain("Summary");
     expect(markup).not.toContain("QA");
-    expect(markup).not.toContain("Event Result");
+    expect(markup).not.toContain("Milestone Result");
   });
 
-  it("shows QA and Event Results in the reports top bar", () => {
+  it("shows QA and Milestone Results in the reports top bar", () => {
     const markup = renderTopbar("reports", true);
 
     expect(markup).toContain("QA");
-    expect(markup).toContain("Event Results");
+    expect(markup).toContain("Milestone Results");
     expect(markup).not.toContain("Timeline");
   });
 });

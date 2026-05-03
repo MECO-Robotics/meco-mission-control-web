@@ -1,14 +1,14 @@
 interface TimelineMilestoneModalActionsProps {
-  isDeletingEvent: boolean;
-  isSavingEvent: boolean;
+  isDeletingMilestone: boolean;
+  isSavingMilestone: boolean;
   mode: "create" | "edit";
   onClose: () => void;
   onDelete: () => void;
 }
 
 export function TimelineMilestoneModalActions({
-  isDeletingEvent,
-  isSavingEvent,
+  isDeletingMilestone,
+  isSavingMilestone,
   mode,
   onClose,
   onDelete,
@@ -18,16 +18,16 @@ export function TimelineMilestoneModalActions({
       {mode === "edit" ? (
         <button
           className="danger-action"
-          disabled={isDeletingEvent || isSavingEvent}
+          disabled={isDeletingMilestone || isSavingMilestone}
           onClick={onDelete}
           type="button"
         >
-          {isDeletingEvent ? "Deleting..." : "Delete milestone"}
+          {isDeletingMilestone ? "Deleting..." : "Delete milestone"}
         </button>
       ) : null}
       <button
         className="secondary-action"
-        disabled={isDeletingEvent || isSavingEvent}
+        disabled={isDeletingMilestone || isSavingMilestone}
         onClick={onClose}
         style={{
           background: "var(--bg-row-alt)",
@@ -38,8 +38,8 @@ export function TimelineMilestoneModalActions({
       >
         Cancel
       </button>
-      <button className="primary-action" disabled={isDeletingEvent || isSavingEvent} type="submit">
-        {isSavingEvent ? "Saving..." : mode === "create" ? "Add milestone" : "Save changes"}
+      <button className="primary-action" disabled={isDeletingMilestone || isSavingMilestone} type="submit">
+        {isSavingMilestone ? "Saving..." : mode === "create" ? "Add milestone" : "Save changes"}
       </button>
     </div>
   );

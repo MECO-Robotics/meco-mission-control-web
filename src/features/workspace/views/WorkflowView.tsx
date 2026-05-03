@@ -117,7 +117,7 @@ export function WorkflowView({
           >
             <input
               checked={showArchivedWorkflows}
-              onChange={(event) => setShowArchivedWorkflows(event.target.checked)}
+              onChange={(milestone) => setShowArchivedWorkflows(milestone.target.checked)}
               type="checkbox"
             />
             Show archived
@@ -162,12 +162,12 @@ export function WorkflowView({
                   data-workspace-color={row.workstream.color}
                   key={row.workstream.id}
                   onClick={() => openEditWorkstreamModal(row.workstream)}
-                  onKeyDown={(event) => {
-                    if (event.target !== event.currentTarget) {
+                  onKeyDown={(milestone) => {
+                    if (milestone.target !== milestone.currentTarget) {
                       return;
                     }
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
+                    if (milestone.key === "Enter" || milestone.key === " ") {
+                      milestone.preventDefault();
                       openEditWorkstreamModal(row.workstream);
                     }
                   }}
@@ -235,3 +235,4 @@ export function WorkflowView({
     </section>
   );
 }
+

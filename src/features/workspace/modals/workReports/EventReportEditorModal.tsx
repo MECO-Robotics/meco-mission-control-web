@@ -2,32 +2,32 @@ import type { Dispatch, FormEvent, SetStateAction } from "react";
 import type { BootstrapPayload, TestResultPayload } from "@/types";
 import { PhotoUploadField } from "@/features/workspace/shared/media";
 
-interface EventReportEditorModalProps {
+interface MilestoneReportEditorModalProps {
   bootstrap: BootstrapPayload;
-  closeEventReportModal: () => void;
-  eventReportDraft: TestResultPayload;
-  eventReportFindings: string;
-  handleEventReportSubmit: (event: FormEvent<HTMLFormElement>) => void;
-  isSavingEventReport: boolean;
+  closeMilestoneReportModal: () => void;
+  milestoneReportDraft: TestResultPayload;
+  milestoneReportFindings: string;
+  handleMilestoneReportSubmit: (milestone: FormEvent<HTMLFormElement>) => void;
+  isSavingMilestoneReport: boolean;
   requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
-  setEventReportDraft: Dispatch<SetStateAction<TestResultPayload>>;
-  setEventReportFindings: (value: string) => void;
+  setMilestoneReportDraft: Dispatch<SetStateAction<TestResultPayload>>;
+  setMilestoneReportFindings: (value: string) => void;
 }
 
-export function EventReportEditorModal({
+export function MilestoneReportEditorModal({
   bootstrap,
-  closeEventReportModal,
-  eventReportDraft,
-  eventReportFindings,
-  handleEventReportSubmit,
-  isSavingEventReport,
+  closeMilestoneReportModal,
+  milestoneReportDraft,
+  milestoneReportFindings,
+  handleMilestoneReportSubmit,
+  isSavingMilestoneReport,
   requestPhotoUpload,
-  setEventReportDraft,
-  setEventReportFindings,
-}: EventReportEditorModalProps) {
-  const selectedEvent = bootstrap.events.find((item) => item.id === eventReportDraft.eventId);
-  const eventReportPhotoProjectId =
-    selectedEvent?.projectIds[0] ?? bootstrap.projects[0]?.id ?? null;
+  setMilestoneReportDraft,
+  setMilestoneReportFindings,
+}: MilestoneReportEditorModalProps) {
+  const selectedMilestone = bootstrap.milestones.find((item) => item.id === milestoneReportDraft.milestoneId);
+  const milestoneReportPhotoProjectId =
+    selectedMilestone?.projectIds[0] ?? bootstrap.projects[0]?.id ?? null;
 
   return (
     <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
@@ -40,13 +40,13 @@ export function EventReportEditorModal({
         <div className="panel-header compact-header">
           <div>
             <p className="eyebrow" style={{ color: "var(--meco-blue)" }}>
-              Event report
+              Milestone report
             </p>
-            <h2 style={{ color: "var(--text-title)" }}>Add event report</h2>
+            <h2 style={{ color: "var(--text-title)" }}>Add milestone report</h2>
           </div>
           <button
             className="icon-button"
-            onClick={closeEventReportModal}
+            onClick={closeMilestoneReportModal}
             style={{ color: "var(--text-copy)", background: "transparent" }}
             type="button"
           >
@@ -55,16 +55,16 @@ export function EventReportEditorModal({
         </div>
         <form
           className="modal-form"
-          onSubmit={handleEventReportSubmit}
+          onSubmit={handleMilestoneReportSubmit}
           style={{ color: "var(--text-copy)" }}
         >
           <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Event</span>
+            <span style={{ color: "var(--text-title)" }}>Milestone</span>
             <select
-              onChange={(event) =>
-                setEventReportDraft((current) => ({
+              onChange={(milestone) =>
+                setMilestoneReportDraft((current) => ({
                   ...current,
-                  eventId: event.target.value,
+                  milestoneId: milestone.target.value,
                 }))
               }
               required
@@ -73,28 +73,28 @@ export function EventReportEditorModal({
                 color: "var(--text-title)",
                 border: "1px solid var(--border-base)",
               }}
-              value={eventReportDraft.eventId ?? ""}
+              value={milestoneReportDraft.milestoneId ?? ""}
             >
               <option disabled value="">
-                Choose an event
+                Choose a milestone
               </option>
-              {bootstrap.events.map((item) => (
+              {bootstrap.milestones.map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.title}
                 </option>
               ))}
             </select>
-            {selectedEvent ? (
-              <small style={{ color: "var(--text-copy)" }}>{selectedEvent.description}</small>
+            {selectedMilestone ? (
+              <small style={{ color: "var(--text-copy)" }}>{selectedMilestone.description}</small>
             ) : null}
           </label>
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Title</span>
             <input
-              onChange={(event) =>
-                setEventReportDraft((current) => ({
+              onChange={(milestone) =>
+                setMilestoneReportDraft((current) => ({
                   ...current,
-                  title: event.target.value,
+                  title: milestone.target.value,
                 }))
               }
               required
@@ -103,16 +103,16 @@ export function EventReportEditorModal({
                 color: "var(--text-title)",
                 border: "1px solid var(--border-base)",
               }}
-              value={eventReportDraft.title ?? ""}
+              value={milestoneReportDraft.title ?? ""}
             />
           </label>
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Status</span>
             <select
-              onChange={(event) =>
-                setEventReportDraft((current) => ({
+              onChange={(milestone) =>
+                setMilestoneReportDraft((current) => ({
                   ...current,
-                  status: event.target.value as TestResultPayload["status"],
+                  status: milestone.target.value as TestResultPayload["status"],
                 }))
               }
               style={{
@@ -120,7 +120,7 @@ export function EventReportEditorModal({
                 color: "var(--text-title)",
                 border: "1px solid var(--border-base)",
               }}
-              value={eventReportDraft.status}
+              value={milestoneReportDraft.status}
             >
               <option value="pass">Pass</option>
               <option value="fail">Fail</option>
@@ -130,36 +130,36 @@ export function EventReportEditorModal({
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Findings (one per line)</span>
             <textarea
-              onChange={(event) => setEventReportFindings(event.target.value)}
-              placeholder="Add findings from this event."
+              onChange={(milestone) => setMilestoneReportFindings(milestone.target.value)}
+              placeholder="Add findings from this milestone."
               rows={4}
               style={{
                 background: "var(--bg-row-alt)",
                 color: "var(--text-title)",
                 border: "1px solid var(--border-base)",
               }}
-              value={eventReportFindings}
+              value={milestoneReportFindings}
             />
           </label>
           <PhotoUploadField
             accept="image/*,video/*"
-            currentUrl={eventReportDraft.photoUrl}
-            label="Event report media"
+            currentUrl={milestoneReportDraft.photoUrl}
+            label="Milestone report media"
             onChange={(value) =>
-              setEventReportDraft((current) => ({ ...current, photoUrl: value }))
+              setMilestoneReportDraft((current) => ({ ...current, photoUrl: value }))
             }
             onUpload={async (file) => {
-              if (!eventReportPhotoProjectId) {
+              if (!milestoneReportPhotoProjectId) {
                 throw new Error("No project is available for photo upload.");
               }
 
-              return requestPhotoUpload(eventReportPhotoProjectId, file);
+              return requestPhotoUpload(milestoneReportPhotoProjectId, file);
             }}
           />
           <div className="modal-actions modal-wide">
             <button
               className="secondary-action"
-              onClick={closeEventReportModal}
+              onClick={closeMilestoneReportModal}
               style={{
                 background: "var(--bg-row-alt)",
                 color: "var(--text-title)",
@@ -171,10 +171,10 @@ export function EventReportEditorModal({
             </button>
             <button
               className="primary-action"
-              disabled={isSavingEventReport || bootstrap.events.length === 0}
+              disabled={isSavingMilestoneReport || bootstrap.milestones.length === 0}
               type="submit"
             >
-              {isSavingEventReport ? "Saving..." : "Add event report"}
+              {isSavingMilestoneReport ? "Saving..." : "Add milestone report"}
             </button>
           </div>
         </form>
@@ -182,4 +182,5 @@ export function EventReportEditorModal({
     </div>
   );
 }
+
 

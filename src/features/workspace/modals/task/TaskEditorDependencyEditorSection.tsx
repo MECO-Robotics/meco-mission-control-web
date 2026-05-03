@@ -1,8 +1,14 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { BootstrapPayload, TaskDependencyKind, TaskDependencyType, TaskPayload } from "@/types";
-import { IconManufacturing, IconParts, IconTasks, IconTrash } from "@/components/shared/Icons";
+import { IconTasks, IconTrash } from "@/components/shared/Icons";
+import { formatIterationVersion } from "@/lib/appUtils";
 import { FilterDropdown } from "../../shared/WorkspaceViewShared";
-import { TASK_DEPENDENCY_KIND_LABELS, TASK_DEPENDENCY_TYPE_LABELS } from "../../shared/task/taskTargeting";
+import {
+  TASK_DEPENDENCY_KIND_LABELS,
+  TASK_DEPENDENCY_KIND_OPTIONS,
+  TASK_DEPENDENCY_TYPE_LABELS,
+  getTaskDependencyTargetOptions,
+} from "../../shared/task/taskTargeting";
 
 interface TaskEditorDependencyEditorSectionProps {
   bootstrap: BootstrapPayload;
@@ -12,7 +18,7 @@ interface TaskEditorDependencyEditorSectionProps {
 }
 
 function getDependencyDefaultState(kind: TaskDependencyKind) {
-  return kind === "part_instance" ? "available" : "complete";
+  return kind === "part_instance" || kind === "milestone" ? "ready" : "complete";
 }
 
 export function TaskEditorDependencyEditorSection({
@@ -24,10 +30,6 @@ export function TaskEditorDependencyEditorSection({
   const dependencyTaskOptions = [...bootstrap.tasks]
     .filter((task) => task.projectId === taskDraft.projectId)
     .sort((left, right) => left.title.localeCompare(right.title));
-  const dependencyEventOptions = bootstrap.events
-    .filter((event) => (event.projectIds.length === 0 ? true : event.projectIds.includes(taskDraft.projectId)))
-    .sort((left, right) => left.title.localeCompare(right.title));
-  const dependencyPartInstanceOptions = bootstrap.partInstances;
   const dependencyDrafts = taskDraft.taskDependencies ?? [];
   const visibleDependencyDrafts =
     dependencyDrafts.length > 0
@@ -40,37 +42,31 @@ export function TaskEditorDependencyEditorSection({
             dependencyType: "hard" as TaskDependencyType,
           },
         ];
-  const dependencyKindOptions = Object.entries(TASK_DEPENDENCY_KIND_LABELS).map(([kind, label]) => ({
-    id: kind,
-    name: label,
-    icon:
-      kind === "part_instance" ? (
-        <IconParts />
-      ) : kind === "milestone" ? (
-        <IconManufacturing />
-      ) : (
-        <IconTasks />
-      ),
-  }));
+  const dependencyKindOptions = TASK_DEPENDENCY_KIND_OPTIONS;
   const dependencyTypeOptions = Object.entries(TASK_DEPENDENCY_TYPE_LABELS).map(([type, label]) => ({
     id: type,
     name: label,
     icon: <IconTasks />,
   }));
-  const getDependencyTargetOptions = (kind: TaskDependencyKind) => {
-    if (kind === "task") {
-      return dependencyTaskOptions.map((task) => ({ id: task.id, name: task.title }));
-    }
-
-    if (kind === "milestone" || kind === "event") {
-      return dependencyEventOptions.map((event) => ({ id: event.id, name: event.title }));
-    }
-
-    return dependencyPartInstanceOptions.map((partInstance) => ({
-      id: partInstance.id,
-      name: partInstance.name,
-    }));
-  };
+  const dependencyMilestoneOptions = bootstrap.milestones
+    .filter((milestone) =>
+      milestone.projectIds.length === 0 ? true : milestone.projectIds.includes(taskDraft.projectId),
+    )
+    .sort((left, right) => left.title.localeCompare(right.title));
+  const getDependencyTargetOptions = (kind: TaskDependencyKind) =>
+    getTaskDependencyTargetOptions(kind, {
+      tasksById: Object.fromEntries(dependencyTaskOptions.map((task) => [task.id, task] as const)),
+      milestonesById: Object.fromEntries(
+        dependencyMilestoneOptions.map((milestone) => [milestone.id, milestone] as const),
+      ),
+      partInstancesById: Object.fromEntries(
+        bootstrap.partInstances.map((partInstance) => [partInstance.id, partInstance] as const),
+      ),
+      partDefinitionsById: Object.fromEntries(
+        bootstrap.partDefinitions.map((partDefinition) => [partDefinition.id, partDefinition] as const),
+      ),
+      formatIterationVersion,
+    });
   const updateDependencyDraft = (
     index: number,
     updates: Partial<NonNullable<TaskPayload["taskDependencies"]>[number]>,
@@ -179,7 +175,7 @@ export function TaskEditorDependencyEditorSection({
                   ariaLabel="Set dependency target"
                   buttonInlineEditField={`dependency-target-${index}`}
                   className="task-queue-filter-menu-submenu task-details-dependency-target-menu"
-                  icon={dependency.kind === "part_instance" ? <IconParts /> : <IconTasks />}
+                  icon={<IconTasks />}
                   menuClassName="task-details-dependency-menu-popup"
                   onChange={(selection) =>
                     updateDependencyDraft(index, {
@@ -196,9 +192,9 @@ export function TaskEditorDependencyEditorSection({
               <label className="field">
                 <span style={{ color: "var(--text-title)" }}>Required state</span>
                 <input
-                  onChange={(event) =>
+                  onChange={(milestone) =>
                     updateDependencyDraft(index, {
-                      requiredState: event.target.value,
+                      requiredState: milestone.target.value,
                     })
                   }
                   placeholder={getDependencyDefaultState(dependency.kind)}

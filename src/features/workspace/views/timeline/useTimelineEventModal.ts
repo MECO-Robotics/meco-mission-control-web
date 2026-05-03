@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import type React from "react";
-import type { BootstrapPayload, EventPayload, EventRecord } from "@/types";
-import { getEventProjectIds } from "@/features/workspace/shared/events";
-import { DEFAULT_EVENT_TYPE } from "@/features/workspace/shared/events";
+import type { BootstrapPayload, MilestonePayload, MilestoneRecord } from "@/types";
+import { getMilestoneProjectIds } from "@/features/workspace/shared/milestones";
+import { DEFAULT_EVENT_TYPE } from "@/features/workspace/shared/milestones";
 import {
   buildDateTime,
   compareDateTimes,
@@ -11,71 +11,71 @@ import {
   timePortion,
 } from "@/features/workspace/shared/timeline";
 import {
-  emptyTimelineEventDraft,
-  timelineEventDraftFromRecord,
-  type TimelineEventDraft,
+  emptyTimelineMilestoneDraft,
+  timelineMilestoneDraftFromRecord,
+  type TimelineMilestoneDraft,
 } from "@/features/workspace/shared/timeline";
 
-interface UseTimelineEventModalArgs {
-  dayEventsByDate: Record<string, EventRecord[]>;
+interface UseTimelineMilestoneModalArgs {
+  dayMilestonesByDate: Record<string, MilestoneRecord[]>;
   openCreateTaskModal: () => void;
-  onDeleteTimelineEvent: (eventId: string) => Promise<void>;
-  onSaveTimelineEvent: (
+  onDeleteTimelineMilestone: (milestoneId: string) => Promise<void>;
+  onSaveTimelineMilestone: (
     mode: "create" | "edit",
-    eventId: string | null,
-    payload: EventPayload,
+    milestoneId: string | null,
+    payload: MilestonePayload,
   ) => Promise<void>;
   scopedProjectIds: string[];
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
   triggerCreateMilestoneToken: number;
 }
 
-export function useTimelineEventModal({
-  dayEventsByDate,
+export function useTimelineMilestoneModal({
+  dayMilestonesByDate,
   openCreateTaskModal,
-  onDeleteTimelineEvent,
-  onSaveTimelineEvent,
+  onDeleteTimelineMilestone,
+  onSaveTimelineMilestone,
   scopedProjectIds,
   subsystemsById,
   triggerCreateMilestoneToken,
-}: UseTimelineEventModalArgs) {
-  const [eventModalMode, setEventModalMode] = useState<"create" | "edit" | null>(null);
-  const [activeEventId, setActiveEventId] = useState<string | null>(null);
-  const [activeEventDay, setActiveEventDay] = useState<string | null>(null);
-  const [eventDraft, setEventDraft] = useState<TimelineEventDraft>(
-    emptyTimelineEventDraft(DEFAULT_EVENT_TYPE),
+}: UseTimelineMilestoneModalArgs) {
+  const [milestoneModalMode, setMilestoneModalMode] = useState<"create" | "edit" | null>(null);
+  const [activeMilestoneId, setActiveMilestoneId] = useState<string | null>(null);
+  const [activeMilestoneDay, setActiveMilestoneDay] = useState<string | null>(null);
+  const [milestoneDraft, setMilestoneDraft] = useState<TimelineMilestoneDraft>(
+    emptyTimelineMilestoneDraft(DEFAULT_EVENT_TYPE),
   );
-  const [eventStartDate, setEventStartDate] = useState("");
-  const [eventStartTime, setEventStartTime] = useState("18:00");
-  const [eventEndDate, setEventEndDate] = useState("");
-  const [eventEndTime, setEventEndTime] = useState("");
-  const [eventError, setEventError] = useState<string | null>(null);
-  const [isSavingEvent, setIsSavingEvent] = useState(false);
-  const [isDeletingEvent, setIsDeletingEvent] = useState(false);
+  const [milestoneStartDate, setMilestoneStartDate] = useState("");
+  const [milestoneStartTime, setMilestoneStartTime] = useState("18:00");
+  const [milestoneEndDate, setMilestoneEndDate] = useState("");
+  const [milestoneEndTime, setMilestoneEndTime] = useState("");
+  const [milestoneError, setMilestoneError] = useState<string | null>(null);
+  const [isSavingMilestone, setIsSavingMilestone] = useState(false);
+  const [isDeletingMilestone, setIsDeletingMilestone] = useState(false);
 
-  const closeEventModal = useCallback(() => {
-    setEventModalMode(null);
-    setActiveEventId(null);
-    setActiveEventDay(null);
-    setEventError(null);
-    setIsSavingEvent(false);
-    setIsDeletingEvent(false);
+  const closeMilestoneModal = useCallback(() => {
+    setMilestoneModalMode(null);
+    setActiveMilestoneId(null);
+    setActiveMilestoneDay(null);
+    setMilestoneError(null);
+    setIsSavingMilestone(false);
+    setIsDeletingMilestone(false);
   }, []);
 
-  const openCreateEventModalForDay = useCallback(
+  const openCreateMilestoneModalForDay = useCallback(
     (day: string) => {
-      setEventModalMode("create");
-      setActiveEventId(null);
-      setActiveEventDay(day);
-      setEventDraft({
-        ...emptyTimelineEventDraft(DEFAULT_EVENT_TYPE),
+      setMilestoneModalMode("create");
+      setActiveMilestoneId(null);
+      setActiveMilestoneDay(day);
+      setMilestoneDraft({
+        ...emptyTimelineMilestoneDraft(DEFAULT_EVENT_TYPE),
         projectIds: scopedProjectIds,
       });
-      setEventStartDate(day);
-      setEventStartTime("18:00");
-      setEventEndDate("");
-      setEventEndTime("");
-      setEventError(null);
+      setMilestoneStartDate(day);
+      setMilestoneStartTime("18:00");
+      setMilestoneEndDate("");
+      setMilestoneEndTime("");
+      setMilestoneError(null);
     },
     [scopedProjectIds],
   );
@@ -85,174 +85,175 @@ export function useTimelineEventModal({
       return;
     }
 
-    openCreateEventModalForDay(localTodayDate());
-  }, [openCreateEventModalForDay, triggerCreateMilestoneToken]);
+    openCreateMilestoneModalForDay(localTodayDate());
+  }, [openCreateMilestoneModalForDay, triggerCreateMilestoneToken]);
 
-  const openEditEventModalForDay = useCallback(
-    (day: string, event: EventRecord) => {
-      const eventProjectIds = getEventProjectIds(event, subsystemsById);
-      setEventModalMode("edit");
-      setActiveEventId(event.id);
-      setActiveEventDay(day);
-      setEventDraft({
-        ...timelineEventDraftFromRecord(event),
-        projectIds: eventProjectIds.length > 0 ? eventProjectIds : scopedProjectIds,
+  const openEditMilestoneModalForDay = useCallback(
+    (day: string, milestone: MilestoneRecord) => {
+      const milestoneProjectIds = getMilestoneProjectIds(milestone, subsystemsById);
+      setMilestoneModalMode("edit");
+      setActiveMilestoneId(milestone.id);
+      setActiveMilestoneDay(day);
+      setMilestoneDraft({
+        ...timelineMilestoneDraftFromRecord(milestone),
+        projectIds: milestoneProjectIds.length > 0 ? milestoneProjectIds : scopedProjectIds,
       });
-      setEventStartDate(datePortion(event.startDateTime));
-      setEventStartTime(timePortion(event.startDateTime));
-      setEventEndDate(event.endDateTime ? datePortion(event.endDateTime) : "");
-      setEventEndTime(event.endDateTime ? timePortion(event.endDateTime) : "");
-      setEventError(null);
+      setMilestoneStartDate(datePortion(milestone.startDateTime));
+      setMilestoneStartTime(timePortion(milestone.startDateTime));
+      setMilestoneEndDate(milestone.endDateTime ? datePortion(milestone.endDateTime) : "");
+      setMilestoneEndTime(milestone.endDateTime ? timePortion(milestone.endDateTime) : "");
+      setMilestoneError(null);
     },
     [scopedProjectIds, subsystemsById],
   );
 
-  const openEventModalForDay = useCallback(
+  const openMilestoneModalForDay = useCallback(
     (day: string) => {
-      const eventsOnDay = dayEventsByDate[day] ?? [];
-      if (eventsOnDay.length === 0) {
-        openCreateEventModalForDay(day);
+      const milestonesOnDay = dayMilestonesByDate[day] ?? [];
+      if (milestonesOnDay.length === 0) {
+        openCreateMilestoneModalForDay(day);
         return;
       }
 
-      openEditEventModalForDay(day, eventsOnDay[0]);
+      openEditMilestoneModalForDay(day, milestonesOnDay[0]);
     },
-    [dayEventsByDate, openCreateEventModalForDay, openEditEventModalForDay],
+    [dayMilestonesByDate, openCreateMilestoneModalForDay, openEditMilestoneModalForDay],
   );
 
   const switchMilestoneCreateToTask = useCallback(() => {
-    closeEventModal();
+    closeMilestoneModal();
     openCreateTaskModal();
-  }, [closeEventModal, openCreateTaskModal]);
+  }, [closeMilestoneModal, openCreateTaskModal]);
 
-  const handleEventSubmit = useCallback(
-    async (event: React.FormEvent<HTMLFormElement>) => {
-      event.preventDefault();
-      if (!eventModalMode) {
+  const handleMilestoneSubmit = useCallback(
+    async (milestone: React.FormEvent<HTMLFormElement>) => {
+      milestone.preventDefault();
+      if (!milestoneModalMode) {
         return;
       }
 
-      if (!eventStartDate) {
-        setEventError("Start date is required.");
+      if (!milestoneStartDate) {
+        setMilestoneError("Start date is required.");
         return;
       }
 
-      const normalizedTitle = eventDraft.title.trim();
+      const normalizedTitle = milestoneDraft.title.trim();
       if (!normalizedTitle) {
-        setEventError("Title is required.");
+        setMilestoneError("Title is required.");
         return;
       }
 
-      const startDateTime = buildDateTime(eventStartDate, eventStartTime || "12:00");
-      const includeEndDate = eventEndDate.trim().length > 0 || eventEndTime.trim().length > 0;
+      const startDateTime = buildDateTime(milestoneStartDate, milestoneStartTime || "12:00");
+      const includeEndDate = milestoneEndDate.trim().length > 0 || milestoneEndTime.trim().length > 0;
       const endDateTime = includeEndDate
         ? buildDateTime(
-            eventEndDate.trim().length > 0 ? eventEndDate : eventStartDate,
-            eventEndTime.trim().length > 0 ? eventEndTime : eventStartTime,
+            milestoneEndDate.trim().length > 0 ? milestoneEndDate : milestoneStartDate,
+            milestoneEndTime.trim().length > 0 ? milestoneEndTime : milestoneStartTime,
           )
         : null;
 
       if (endDateTime && compareDateTimes(endDateTime, startDateTime) < 0) {
-        setEventError("End date/time must be after the start date/time.");
+        setMilestoneError("End date/time must be after the start date/time.");
         return;
       }
 
-      setIsSavingEvent(true);
-      setEventError(null);
+      setIsSavingMilestone(true);
+      setMilestoneError(null);
 
       try {
-        const payload: EventPayload = {
+        const payload: MilestonePayload = {
           title: normalizedTitle,
-          type: eventDraft.type,
+          type: milestoneDraft.type,
           startDateTime,
           endDateTime,
-          isExternal: eventDraft.isExternal,
-          description: eventDraft.description.trim(),
-          projectIds: Array.from(new Set(eventDraft.projectIds)),
-          relatedSubsystemIds: Array.from(new Set(eventDraft.relatedSubsystemIds)),
+          isExternal: milestoneDraft.isExternal,
+          description: milestoneDraft.description.trim(),
+          projectIds: Array.from(new Set(milestoneDraft.projectIds)),
+          relatedSubsystemIds: Array.from(new Set(milestoneDraft.relatedSubsystemIds)),
         };
 
-        await onSaveTimelineEvent(eventModalMode, activeEventId, payload);
-        closeEventModal();
+        await onSaveTimelineMilestone(milestoneModalMode, activeMilestoneId, payload);
+        closeMilestoneModal();
       } catch (error) {
-        setEventError(
+        setMilestoneError(
           error instanceof Error
             ? error.message
             : "Could not save the milestone. Please try again.",
         );
       } finally {
-        setIsSavingEvent(false);
+        setIsSavingMilestone(false);
       }
     },
     [
-      activeEventId,
-      closeEventModal,
-      eventDraft.description,
-      eventDraft.isExternal,
-      eventDraft.projectIds,
-      eventDraft.relatedSubsystemIds,
-      eventDraft.title,
-      eventDraft.type,
-      eventEndDate,
-      eventEndTime,
-      eventModalMode,
-      eventStartDate,
-      eventStartTime,
-      onSaveTimelineEvent,
+      activeMilestoneId,
+      closeMilestoneModal,
+      milestoneDraft.description,
+      milestoneDraft.isExternal,
+      milestoneDraft.projectIds,
+      milestoneDraft.relatedSubsystemIds,
+      milestoneDraft.title,
+      milestoneDraft.type,
+      milestoneEndDate,
+      milestoneEndTime,
+      milestoneModalMode,
+      milestoneStartDate,
+      milestoneStartTime,
+      onSaveTimelineMilestone,
     ],
   );
 
-  const handleEventDelete = useCallback(async () => {
-    if (eventModalMode !== "edit" || !activeEventId) {
+  const handleMilestoneDelete = useCallback(async () => {
+    if (milestoneModalMode !== "edit" || !activeMilestoneId) {
       return;
     }
 
     const shouldDelete = window.confirm(
-      "Delete this milestone event? Any tasks targeting this event will be unlinked.",
+      "Delete this milestone milestone? Any tasks targeting this milestone will be unlinked.",
     );
     if (!shouldDelete) {
       return;
     }
 
-    setIsDeletingEvent(true);
-    setEventError(null);
+    setIsDeletingMilestone(true);
+    setMilestoneError(null);
 
     try {
-      await onDeleteTimelineEvent(activeEventId);
-      closeEventModal();
+      await onDeleteTimelineMilestone(activeMilestoneId);
+      closeMilestoneModal();
     } catch (error) {
-      setEventError(
+      setMilestoneError(
         error instanceof Error
           ? error.message
           : "Could not delete the milestone. Please try again.",
       );
-      setIsDeletingEvent(false);
+      setIsDeletingMilestone(false);
     }
-  }, [activeEventId, closeEventModal, eventModalMode, onDeleteTimelineEvent]);
+  }, [activeMilestoneId, closeMilestoneModal, milestoneModalMode, onDeleteTimelineMilestone]);
 
   return {
-    activeDayEvents: activeEventDay ? dayEventsByDate[activeEventDay] ?? [] : [],
-    activeEventDay,
-    activeEventId,
-    closeEventModal,
-    eventDraft,
-    eventEndDate,
-    eventEndTime,
-    eventError,
-    eventModalMode,
-    eventStartDate,
-    eventStartTime,
-    handleEventDelete,
-    handleEventSubmit,
-    isDeletingEvent,
-    isSavingEvent,
-    openEventModalForDay,
-    setEventDraft,
-    setEventEndDate,
-    setEventEndTime,
-    setEventStartDate,
-    setEventStartTime,
+    activeDayMilestones: activeMilestoneDay ? dayMilestonesByDate[activeMilestoneDay] ?? [] : [],
+    activeMilestoneDay,
+    activeMilestoneId,
+    closeMilestoneModal,
+    milestoneDraft,
+    milestoneEndDate,
+    milestoneEndTime,
+    milestoneError,
+    milestoneModalMode,
+    milestoneStartDate,
+    milestoneStartTime,
+    handleMilestoneDelete,
+    handleMilestoneSubmit,
+    isDeletingMilestone,
+    isSavingMilestone,
+    openMilestoneModalForDay,
+    setMilestoneDraft,
+    setMilestoneEndDate,
+    setMilestoneEndTime,
+    setMilestoneStartDate,
+    setMilestoneStartTime,
     switchMilestoneCreateToTask,
   };
 }
+
 

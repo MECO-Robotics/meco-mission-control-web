@@ -14,7 +14,7 @@ export type ViewTab =
 export type TaskViewTab = "timeline" | "queue" | "milestones";
 export type RiskManagementViewTab = "risks" | "kanban" | "metrics";
 export type WorklogsViewTab = "logs" | "summary";
-export type ReportsViewTab = "qa" | "event-results";
+export type ReportsViewTab = "qa" | "milestone-results";
 export type ManufacturingViewTab = "cnc" | "prints" | "fabrication";
 export type InventoryViewTab = "materials" | "parts" | "purchases";
 
@@ -44,7 +44,7 @@ export const WORKLOG_VIEW_ORDER: readonly WorklogsViewTab[] = [
   "logs",
   "summary",
 ];
-export const REPORTS_VIEW_ORDER: readonly ReportsViewTab[] = ["qa", "event-results"];
+export const REPORTS_VIEW_ORDER: readonly ReportsViewTab[] = ["qa", "milestone-results"];
 export const MANUFACTURING_VIEW_ORDER: readonly ManufacturingViewTab[] = [
   "cnc",
   "prints",
@@ -75,7 +75,7 @@ export const WORKLOG_VIEW_OPTIONS: readonly ViewOption<WorklogsViewTab>[] = [
 
 export const REPORTS_VIEW_OPTIONS: readonly ViewOption<ReportsViewTab>[] = [
   { value: "qa", label: "QA" },
-  { value: "event-results", label: "Event Results" },
+  { value: "milestone-results", label: "Milestone Results" },
 ];
 
 export const MANUFACTURING_VIEW_OPTIONS: readonly ViewOption<ManufacturingViewTab>[] = [

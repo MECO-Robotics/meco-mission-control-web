@@ -26,8 +26,8 @@ export function PurchaseEditorFields({
       <label className="field modal-wide">
         <span style={{ color: "var(--text-title)" }}>Part</span>
         <select
-          onChange={(event) => {
-            const partDefinitionId = event.target.value;
+          onChange={(milestone) => {
+            const partDefinitionId = milestone.target.value;
             const partDefinition = bootstrap.partDefinitions.find(
               (candidate) => candidate.id === partDefinitionId,
             );
@@ -58,10 +58,10 @@ export function PurchaseEditorFields({
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Subsystem</span>
         <select
-          onChange={(event) =>
+          onChange={(milestone) =>
             setPurchaseDraft((current) => ({
               ...current,
-              subsystemId: event.target.value,
+              subsystemId: milestone.target.value,
             }))
           }
           style={{ background: "var(--bg-row-alt)", border: "1px solid var(--border-base)", color: "var(--text-title)" }}
@@ -77,10 +77,10 @@ export function PurchaseEditorFields({
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Requester</span>
         <select
-          onChange={(event) =>
+          onChange={(milestone) =>
             setPurchaseDraft((current) => ({
               ...current,
-              requestedById: event.target.value || null,
+              requestedById: milestone.target.value || null,
             }))
           }
           style={{ background: "var(--bg-row-alt)", border: "1px solid var(--border-base)", color: "var(--text-title)" }}
@@ -97,10 +97,10 @@ export function PurchaseEditorFields({
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Vendor</span>
         <input
-          onChange={(event) =>
+          onChange={(milestone) =>
             setPurchaseDraft((current) => ({
               ...current,
-              vendor: event.target.value,
+              vendor: milestone.target.value,
             }))
           }
           required
@@ -111,10 +111,10 @@ export function PurchaseEditorFields({
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Link label</span>
         <input
-          onChange={(event) =>
+          onChange={(milestone) =>
             setPurchaseDraft((current) => ({
               ...current,
-              linkLabel: event.target.value,
+              linkLabel: milestone.target.value,
             }))
           }
           required
@@ -126,10 +126,10 @@ export function PurchaseEditorFields({
         <span style={{ color: "var(--text-title)" }}>Quantity</span>
         <input
           min="1"
-          onChange={(event) =>
+          onChange={(milestone) =>
             setPurchaseDraft((current) => ({
               ...current,
-              quantity: Number(event.target.value),
+              quantity: Number(milestone.target.value),
             }))
           }
           style={{ background: "var(--bg-row-alt)", border: "1px solid var(--border-base)", color: "var(--text-title)" }}
@@ -140,10 +140,10 @@ export function PurchaseEditorFields({
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Status</span>
         <select
-          onChange={(event) =>
+          onChange={(milestone) =>
             setPurchaseDraft((current) => ({
               ...current,
-              status: event.target.value as PurchaseItemPayload["status"],
+              status: milestone.target.value as PurchaseItemPayload["status"],
             }))
           }
           style={{ background: "var(--bg-row-alt)", border: "1px solid var(--border-base)", color: "var(--text-title)" }}
@@ -160,10 +160,10 @@ export function PurchaseEditorFields({
         <span style={{ color: "var(--text-title)" }}>Estimated cost</span>
         <input
           min="0"
-          onChange={(event) =>
+          onChange={(milestone) =>
             setPurchaseDraft((current) => ({
               ...current,
-              estimatedCost: Number(event.target.value),
+              estimatedCost: Number(milestone.target.value),
             }))
           }
           style={{ background: "var(--bg-row-alt)", border: "1px solid var(--border-base)", color: "var(--text-title)" }}
@@ -175,7 +175,7 @@ export function PurchaseEditorFields({
         <span style={{ color: "var(--text-title)" }}>Final cost</span>
         <input
           min="0"
-          onChange={(event) => setPurchaseFinalCost(event.target.value)}
+          onChange={(milestone) => setPurchaseFinalCost(milestone.target.value)}
           placeholder="Optional"
           style={{ background: "var(--bg-row-alt)", border: "1px solid var(--border-base)", color: "var(--text-title)" }}
           type="number"
@@ -186,10 +186,10 @@ export function PurchaseEditorFields({
         <label className="checkbox-field">
           <input
             checked={purchaseDraft.approvedByMentor}
-            onChange={(event) =>
+            onChange={(milestone) =>
               setPurchaseDraft((current) => ({
                 ...current,
-                approvedByMentor: event.target.checked,
+                approvedByMentor: milestone.target.checked,
               }))
             }
             type="checkbox"
