@@ -77,7 +77,8 @@
   line-height: 1;
 }
 
-.timeline-day-number-button.has-event {
+.timeline-day-number-button.has-event,
+.timeline-day-number-button.has-milestone {
   box-shadow: none;
 }
 

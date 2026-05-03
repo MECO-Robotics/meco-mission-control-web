@@ -1,13 +1,16 @@
-.timeline-day-event-chip:hover {
+.timeline-day-event-chip:hover,
+.timeline-day-milestone-chip:hover {
   overflow: visible;
   z-index: 330;
 }
 
-.timeline-day-event-chip:not(.has-multiple):hover::after {
+.timeline-day-event-chip:not(.has-multiple):hover::after,
+.timeline-day-milestone-chip:not(.has-multiple):hover::after {
   content: none;
 }
 
-.timeline-day-event-overlay-tooltip {
+.timeline-day-event-overlay-tooltip,
+.timeline-day-milestone-overlay-tooltip {
   position: absolute;
   left: 0;
   top: 50%;
@@ -33,7 +36,8 @@
     0 0 8px rgba(3, 12, 28, 0.74);
 }
 
-.timeline-day-event-overlay-column {
+.timeline-day-event-overlay-column,
+.timeline-day-milestone-overlay-column {
   position: absolute;
   pointer-events: none;
   border-left: 1px solid rgba(15, 28, 52, 0.12);
@@ -44,7 +48,8 @@
   z-index: 10080;
 }
 
-.timeline-day-event-underlay {
+.timeline-day-event-underlay,
+.timeline-day-milestone-underlay {
   position: absolute;
   left: 0;
   top: 50%;
@@ -67,13 +72,15 @@
   font-weight: 800;
 }
 
-.timeline-day-event-overlay-tooltip-lane {
+.timeline-day-event-overlay-tooltip-lane,
+.timeline-day-milestone-overlay-tooltip-lane {
   position: absolute;
   top: 50%;
   transform: translate(-50%, -50%);
 }
 
-.timeline-day-event-overlay-tooltip-item {
+.timeline-day-event-overlay-tooltip-item,
+.timeline-day-milestone-overlay-tooltip-item {
   display: block;
   line-height: 1.3;
   white-space: nowrap;

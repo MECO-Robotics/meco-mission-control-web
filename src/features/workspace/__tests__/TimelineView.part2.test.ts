@@ -40,13 +40,13 @@ describe("TimelineView", () => {
       const css = readAppCss();
       const milestoneUnderlayZIndexes = Array.from(
         css.matchAll(
-          /\.timeline-day-milestone-underlay\s*\{[^}]*z-index:\s*(\d+)/g,
+          /\.timeline-day-milestone-underlay[^{]*\{[^}]*z-index:\s*(\d+)/g,
         ),
         (match) => Number(match[1]),
       );
       const milestoneOverlayZIndexes = Array.from(
         css.matchAll(
-          /\.timeline-day-milestone-(?:overlay-tooltip|overlay-column)\s*\{[^}]*z-index:\s*(\d+)/g,
+          /\.timeline-day-milestone-(?:overlay-tooltip|overlay-column)[^{]*\{[^}]*z-index:\s*(\d+)/g,
         ),
         (match) => Number(match[1]),
       );
@@ -105,7 +105,7 @@ describe("TimelineView", () => {
       }),
     );
     const headerSource = readFileSync(
-      join(process.cwd(), "src/features/workspace/views/timeline/TimelineGridHeader.tsx"),
+      join(process.cwd(), "src/features/workspace/views/timeline/components/TimelineGridHeaderContent.tsx"),
       "utf8",
     );
 
