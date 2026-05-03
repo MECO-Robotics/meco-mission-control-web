@@ -48,8 +48,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify
-        run: npm run verify
+      - name: Validate deploy bundle
+        run: npm run typecheck && npm run build:bundle
 
       - name: Upload validated build artifact
         uses: actions/upload-artifact@v4
