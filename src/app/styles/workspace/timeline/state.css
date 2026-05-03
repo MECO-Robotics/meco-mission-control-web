@@ -18,6 +18,20 @@
   transform: translateY(-50%) translateX(0) !important;
 }
 
+.timeline-row-highlight {
+  position: absolute;
+  pointer-events: none;
+  border: 1px solid var(--timeline-row-highlight-selected-stroke, rgba(22, 71, 142, 0.22));
+  background: var(--timeline-row-highlight-selected-fill, rgba(22, 71, 142, 0.08));
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.timeline-row-highlight.is-hovered {
+  border-color: var(--timeline-row-highlight-hover-stroke, rgba(22, 71, 142, 0.34));
+  background: var(--timeline-row-highlight-hover-fill, rgba(22, 71, 142, 0.16));
+}
+
 .timeline-shell.is-week-view .timeline-bar-hover-host .timeline-bar-hover-indicator,
 .timeline-shell.is-week-view .timeline-bar .timeline-bar-hover-indicator {
   transform: translateY(-50%) translateX(calc(-100% - 0.05rem)) !important;

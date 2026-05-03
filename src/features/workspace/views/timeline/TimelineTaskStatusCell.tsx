@@ -45,10 +45,13 @@ export const TimelineTaskStatusCell: React.FC<TimelineTaskStatusCellProps> = ({
         gridColumn: `${statusIconColumnIndex}`,
         minHeight: "38px",
         width: `${statusIconColumnWidth}px`,
-        padding: "0 6px",
+        minWidth: `${statusIconColumnWidth}px`,
+        maxWidth: `${statusIconColumnWidth}px`,
+        padding: 0,
         display: "inline-flex",
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: "flex-start",
+        overflow: "visible",
         boxSizing: "border-box",
         position: "sticky",
         right: `${statusIconStickyRight}px`,
@@ -67,7 +70,10 @@ export const TimelineTaskStatusCell: React.FC<TimelineTaskStatusCellProps> = ({
         onMouseLeave={clearHoveredTaskRow}
         type="button"
         style={{
-          position: "relative",
+          position: "absolute",
+          right: "2px",
+          top: "50%",
+          transform: "translateY(-50%)",
           border: "none",
           background: "none",
           padding: 0,

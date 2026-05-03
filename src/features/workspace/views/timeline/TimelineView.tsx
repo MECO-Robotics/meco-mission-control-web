@@ -170,6 +170,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
 
       <TimelineTodayMarkerPortal
         portalTarget={data.timelineShellRef.current}
+        showLabelAtTop={state.viewInterval === "month"}
         todayMarkerLeft={data.timelineTodayMarkerLeft}
       />
 

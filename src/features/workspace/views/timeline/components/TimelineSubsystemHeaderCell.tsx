@@ -1,7 +1,8 @@
 import React from "react";
 import { TimelineCollapseArrow } from "../TimelineCollapseArrow";
 import { TimelineMergedCellColumn } from "./TimelineMergedCellColumn";
-import { getTimelineMergedCellRotation, type TimelineSubsystemRow } from "../timelineViewModel";
+import { buildTimelineSubsystemHighlightStyle } from "../timelineTaskColors";
+import { type TimelineSubsystemRow } from "../timelineViewModel";
 
 interface TimelineSubsystemHeaderCellProps {
   accentColor: string;
@@ -12,6 +13,7 @@ interface TimelineSubsystemHeaderCellProps {
   onHover: () => void;
   onHoverLeave: () => void;
   onSelect: () => void;
+  rowIndex: number;
   rowBackground: string;
   subsystem: TimelineSubsystemRow;
   subsystemColumnIndex: number;
@@ -29,6 +31,7 @@ export const TimelineSubsystemHeaderCell: React.FC<TimelineSubsystemHeaderCellPr
   onHover,
   onHoverLeave,
   onSelect,
+  rowIndex,
   rowBackground,
   subsystem,
   subsystemColumnIndex,
@@ -42,8 +45,6 @@ export const TimelineSubsystemHeaderCell: React.FC<TimelineSubsystemHeaderCellPr
       : null;
   const subsystemSurfaceBackground = subsystemBandFill ?? rowBackground;
   const subsystemSurfaceBorderRight = subsystemBandFill ? "1px solid transparent" : "1px solid var(--border-base)";
-  const shouldRotateSubsystemLabel = !collapsed && taskCount > 1;
-  const subsystemLabelRotation = getTimelineMergedCellRotation(taskCount);
 
   return (
     <TimelineMergedCellColumn
@@ -54,7 +55,7 @@ export const TimelineSubsystemHeaderCell: React.FC<TimelineSubsystemHeaderCellPr
       dataTimelineColumn="subsystem"
       flexDirection={collapsed ? "row" : "column"}
       gridColumn={`${subsystemColumnIndex}`}
-      gridRow={collapsed ? "1" : `1 / span ${taskCount}`}
+      gridRow={collapsed ? `${rowIndex}` : `${rowIndex} / span ${taskCount}`}
       justifyContent={collapsed ? "flex-start" : "center"}
       left={subsystemStickyLeft}
       onClick={onSelect}
@@ -76,17 +77,11 @@ export const TimelineSubsystemHeaderCell: React.FC<TimelineSubsystemHeaderCellPr
       toggleTitle={collapsed ? "Expand subsystem" : "Collapse subsystem"}
       tabIndex={0}
       zIndex={10021}
+      style={buildTimelineSubsystemHighlightStyle(accentColor, {
+        boxShadow: `inset 3px 0 0 ${accentColor}`,
+      })}
     >
-      <div
-        className={`timeline-merged-cell-text${shouldRotateSubsystemLabel ? " is-rotated" : ""}`}
-        style={
-          shouldRotateSubsystemLabel
-            ? ({
-                ["--timeline-merged-cell-rotation" as const]: subsystemLabelRotation,
-              } as React.CSSProperties)
-            : undefined
-        }
-      >
+      <div className="timeline-merged-cell-text">
         <span
           style={{
             display: "inline-flex",

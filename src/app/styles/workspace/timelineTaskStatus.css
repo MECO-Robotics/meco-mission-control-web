@@ -86,14 +86,13 @@
 }
 
 .timeline-task-status-caption {
+  display: none;
   position: absolute;
   right: calc(100% + 0.15rem);
   top: 50%;
-  transform: translateY(-50%) scaleX(0);
-  transform-origin: right center;
+  transform: translateY(-50%);
   margin: 0;
-  max-width: 0;
-  opacity: 0;
+  max-width: 12rem;
   overflow: hidden;
   white-space: nowrap;
   pointer-events: none;
@@ -103,20 +102,13 @@
   color: inherit;
   background: color-mix(in srgb, var(--status-info-bg, #eef2f8) 86%, transparent);
   box-shadow: 0 1px 3px rgba(15, 28, 52, 0.2);
-  transition:
-    max-width 170ms ease,
-    opacity 170ms ease,
-    transform 170ms ease,
-    margin-left 170ms ease,
-    padding 170ms ease;
 }
 
 .timeline-task-status-icon-button:hover .timeline-task-status-caption,
 .timeline-task-status-icon-button:focus-visible .timeline-task-status-caption,
 .timeline-task-status-icon-button.is-row-highlighted .timeline-task-status-caption {
-  transform: translateY(-50%) scaleX(1);
-  max-width: 12rem;
-  opacity: 1;
+  display: inline-flex;
+  align-items: center;
   padding: 0.12rem 0.45rem;
 }
 

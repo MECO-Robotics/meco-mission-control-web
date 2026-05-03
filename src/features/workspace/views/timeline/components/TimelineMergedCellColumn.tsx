@@ -27,6 +27,7 @@ interface TimelineMergedCellColumnProps {
   tabIndex?: number;
   zIndex: number;
   overflow?: "visible" | "hidden";
+  style?: React.CSSProperties;
 }
 
 export const TimelineMergedCellColumn: React.FC<TimelineMergedCellColumnProps> = ({
@@ -56,6 +57,7 @@ export const TimelineMergedCellColumn: React.FC<TimelineMergedCellColumnProps> =
   toggleTitle,
   zIndex,
   overflow = "visible",
+  style,
 }) => (
   <div
     aria-pressed={ariaPressed}
@@ -75,6 +77,7 @@ export const TimelineMergedCellColumn: React.FC<TimelineMergedCellColumnProps> =
       zIndex,
       background,
       borderRight,
+      ...style,
       display: "flex",
       flexDirection,
       justifyContent,

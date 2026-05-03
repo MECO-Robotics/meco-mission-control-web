@@ -6,7 +6,6 @@ import type {
 } from "./timelineGridBodyUtils";
 
 type TimelineTaskDependencyPresentation = "none" | "outline" | "text";
-const TIMELINE_TASK_BAR_EDGE_GAP = "var(--timeline-task-bar-edge-gap, 24px)";
 
 interface TimelineTaskBarProps {
   compact?: boolean;
@@ -89,21 +88,7 @@ export const TimelineTaskBar: React.FC<TimelineTaskBarProps> = ({
           "--timeline-task-bar-radius": borderRadius,
         } as React.CSSProperties)
       : null),
-    ...(!spillsLeft
-      ? {
-          marginLeft: TIMELINE_TASK_BAR_EDGE_GAP,
-        }
-      : null),
-    ...(!spillsRight
-      ? {
-          marginRight: TIMELINE_TASK_BAR_EDGE_GAP,
-        }
-      : null),
-    ...(spillsLeft
-      ? {
-          marginLeft: 0,
-        }
-      : null),
+    ...(spillsLeft ? { marginLeft: 0 } : null),
     ...(spillsRight
       ? {
           marginRight: 0,
@@ -126,6 +111,8 @@ export const TimelineTaskBar: React.FC<TimelineTaskBarProps> = ({
     gridRow,
     gridColumn,
     margin,
+    ...(spillsLeft ? { marginLeft: 0 } : null),
+    ...(spillsRight ? { marginRight: 0 } : null),
     alignSelf,
   };
 

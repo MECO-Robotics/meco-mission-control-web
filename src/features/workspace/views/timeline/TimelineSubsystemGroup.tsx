@@ -51,7 +51,7 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
   collapsedSubsystems,
   disciplinesById,
   firstDayGridColumn,
-  gridMinWidth,
+  gridMinWidth: _gridMinWidth,
   handleTimelineDayMouseEnter,
   hoveredSubsystemId,
   hoveredTaskId,
@@ -73,7 +73,7 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
   taskDependencyCountsById,
   taskStatusSignalsById,
   timelineDayHeaderCells,
-  timelineGridTemplate,
+  timelineGridTemplate: _timelineGridTemplate,
   toggleSubsystem,
   openTaskDetailModal,
 }) => {
@@ -87,7 +87,6 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
       collapsedSubsystems={collapsedSubsystems}
       disciplinesById={disciplinesById}
       firstDayGridColumn={firstDayGridColumn}
-      gridMinWidth={gridMinWidth}
       handleTimelineDayMouseEnter={handleTimelineDayMouseEnter}
       hoveredSubsystemId={hoveredSubsystemId}
       hoveredTaskId={hoveredTaskId}
@@ -110,7 +109,6 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
       taskDependencyCountsById={taskDependencyCountsById}
       taskStatusSignalsById={taskStatusSignalsById}
       timelineDayHeaderCells={timelineDayHeaderCells}
-      timelineGridTemplate={timelineGridTemplate}
       toggleSubsystem={toggleSubsystem}
     />
   );

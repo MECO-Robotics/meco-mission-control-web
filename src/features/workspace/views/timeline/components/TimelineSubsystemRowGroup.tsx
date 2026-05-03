@@ -16,7 +16,6 @@ interface TimelineSubsystemRowGroupProps {
   collapsedSubsystems: Record<string, boolean>;
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
   firstDayGridColumn: number;
-  gridMinWidth: number;
   handleTimelineDayMouseEnter: (event: React.MouseEvent<HTMLElement>) => void;
   hoveredSubsystemId: string | null;
   hoveredTaskId?: string | null;
@@ -39,7 +38,6 @@ interface TimelineSubsystemRowGroupProps {
   taskDependencyCountsById: Record<string, TimelineTaskDependencyCounts>;
   taskStatusSignalsById: Record<string, TimelineTaskStatusSignal>;
   timelineDayHeaderCells: TimelineDayHeaderCell[];
-  timelineGridTemplate: string;
   toggleSubsystem: (id: string) => void;
 }
 
@@ -50,7 +48,6 @@ export const TimelineSubsystemRowGroup: React.FC<TimelineSubsystemRowGroupProps>
   collapsedSubsystems,
   disciplinesById,
   firstDayGridColumn,
-  gridMinWidth,
   handleTimelineDayMouseEnter,
   hoveredSubsystemId,
   hoveredTaskId,
@@ -73,7 +70,6 @@ export const TimelineSubsystemRowGroup: React.FC<TimelineSubsystemRowGroupProps>
   taskDependencyCountsById,
   taskStatusSignalsById,
   timelineDayHeaderCells,
-  timelineGridTemplate,
   toggleSubsystem,
 }) => {
   const canToggleSubsystem = subsystem.tasks.length > 1;
@@ -87,14 +83,7 @@ export const TimelineSubsystemRowGroup: React.FC<TimelineSubsystemRowGroupProps>
     <div
       className="subsystem-group"
       style={{
-        display: "grid",
-        width: "100%",
-        minWidth: `${gridMinWidth}px`,
-        gridTemplateColumns: timelineGridTemplate,
-        gridAutoRows: "38px",
-        background: rowBackground,
-        borderBottom: "1px solid var(--border-base)",
-        position: "relative",
+        display: "contents",
       }}
       key={subsystem.id}
     >
@@ -103,7 +92,7 @@ export const TimelineSubsystemRowGroup: React.FC<TimelineSubsystemRowGroupProps>
         className="timeline-row-highlight-anchor"
         data-timeline-row-anchor={`subsystem:${subsystem.id}`}
         style={{
-          gridRow: collapsed ? "1" : `1 / span ${taskCount}`,
+          gridRow: collapsed ? `${rowIndex}` : `${rowIndex} / span ${taskCount}`,
           gridColumn: `${firstDayGridColumn} / -1`,
         }}
       />
@@ -117,6 +106,7 @@ export const TimelineSubsystemRowGroup: React.FC<TimelineSubsystemRowGroupProps>
           onHover={() => hoverSubsystemRow(subsystem.id)}
           onHoverLeave={clearHoveredSubsystemRow}
           onSelect={() => selectSubsystemRow(subsystem.id)}
+          rowIndex={rowIndex}
           rowBackground={rowBackground}
           subsystem={subsystem}
           subsystemColumnIndex={subsystemColumnIndex}
@@ -140,7 +130,7 @@ export const TimelineSubsystemRowGroup: React.FC<TimelineSubsystemRowGroupProps>
           onCollapsedRowMouseLeave={clearHoveredSubsystemRow}
           onOpenTask={openTaskDetailModal}
           ownerId={subsystem.id}
-          rowStart={1}
+          rowStart={rowIndex}
           selectedTaskId={selectedTaskId}
           statusIconColumnIndex={statusIconColumnIndex}
           statusIconColumnWidth={statusIconColumnWidth}

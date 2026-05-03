@@ -92,10 +92,20 @@
   gap: 0.35rem;
   min-width: 0;
   width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .timeline-bar .timeline-bar-title.timeline-ellipsis-reveal {
   --timeline-reveal-color: color-mix(in srgb, var(--timeline-task-status-accent) 34%, var(--official-white) 66%);
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .timeline-bar .editable-hover-indicator,
