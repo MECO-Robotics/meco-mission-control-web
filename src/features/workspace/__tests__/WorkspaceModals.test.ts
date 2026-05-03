@@ -45,6 +45,7 @@ describe("TaskEditorModal", () => {
     expect(editMarkup).toContain('data-inline-edit-field="dueDate"');
     expect(editMarkup).toContain('data-inline-edit-field="targetEvent"');
     expect(editMarkup).toContain('data-inline-edit-field="discipline"');
+    expect(editMarkup).toContain("task-details-overview-subsystem");
     expect(editMarkup).toContain('data-inline-edit-field="subsystem"');
     expect(editMarkup).toContain('data-inline-edit-field="mechanism"');
     expect(editMarkup).toContain('data-inline-edit-field="parts"');
@@ -61,8 +62,8 @@ describe("TaskEditorModal", () => {
   it("keeps mechanism and parts fields collapsible in edit mode", () => {
     const markup = renderTaskModal("edit");
 
-    expect(markup).toContain('<summary class="task-detail-collapsible-summary"><span class="task-detail-collapsible-icon" aria-hidden="true"></span><span class="task-detail-copy">Mechanism</span></summary>');
-    expect(markup).toContain('<summary class="task-detail-collapsible-summary"><span class="task-detail-collapsible-icon" aria-hidden="true"></span><span class="task-detail-copy">Parts</span></summary>');
+    expect(markup).toContain('<summary class="task-detail-collapsible-summary"><span class="task-detail-collapsible-summary-main"><span class="task-detail-collapsible-icon" aria-hidden="true"></span><span class="task-detail-copy">Mechanism</span></span><button aria-label="Add mechanism" class="icon-button task-detail-section-action-button" type="button">');
+    expect(markup).toContain('<summary class="task-detail-collapsible-summary"><span class="task-detail-collapsible-summary-main"><span class="task-detail-collapsible-icon" aria-hidden="true"></span><span class="task-detail-copy">Parts</span></span><button aria-label="Add part" class="icon-button task-detail-section-action-button" type="button">');
     expect(markup).toContain('<div class="task-detail-collapsible-body"><span class="task-detail-inline-edit-shell task-detail-inline-edit-shell-inline">');
     expect(markup).toContain('data-inline-edit-field="mechanism"');
     expect(markup).toContain('data-inline-edit-field="parts"');
@@ -97,7 +98,8 @@ describe("TaskEditorModal", () => {
     const markup = renderTaskModal("edit");
 
     expect(markup).not.toContain("Actual hours");
-    expect(markup).not.toContain("Dependencies");
+    expect(markup).toContain("Dependencies");
+    expect(markup).toContain("Blockers");
     expect(markup).toContain("Cancel");
     expect(markup).toContain("Save changes");
   });

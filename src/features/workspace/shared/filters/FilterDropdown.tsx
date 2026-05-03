@@ -18,6 +18,7 @@ export function FilterDropdown({
   className,
   buttonDataTutorialTarget,
   buttonInlineEditField,
+  buttonContent,
   getOptionToneClassName,
   getSelectedToneClassName,
   icon,
@@ -35,6 +36,7 @@ export function FilterDropdown({
   className?: string;
   buttonDataTutorialTarget?: string;
   buttonInlineEditField?: string;
+  buttonContent?: ReactNode;
   getOptionToneClassName?: (option: DropdownOption) => string | undefined;
   getSelectedToneClassName?: (value: FilterSelection) => string | undefined;
   icon: ReactNode;
@@ -88,11 +90,15 @@ export function FilterDropdown({
         title={`${ariaLabel ?? allLabel}: ${selectedLabel}`}
         type="button"
       >
-        <span className="toolbar-filter-icon">{selectedIcon}</span>
-        <span aria-hidden="true" className="toolbar-filter-value">
-          {selectedLabel}
-        </span>
-        <span aria-hidden="true" className="toolbar-filter-chevron" />
+        {buttonContent ?? (
+          <>
+            <span className="toolbar-filter-icon">{selectedIcon}</span>
+            <span aria-hidden="true" className="toolbar-filter-value">
+              {selectedLabel}
+            </span>
+            <span aria-hidden="true" className="toolbar-filter-chevron" />
+          </>
+        )}
       </button>
       {isOpen ? (
         portalMenu && typeof document !== "undefined" ? (

@@ -1,8 +1,9 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { BootstrapPayload, TaskPayload, TaskRecord } from "@/types";
 import { EditableHoverIndicator, FilterDropdown } from "../../../../shared/WorkspaceViewShared";
-import { IconManufacturing, IconParts } from "@/components/shared/Icons";
+import { IconManufacturing, IconParts, IconPlus } from "@/components/shared/Icons";
 import type { TaskDetailsEditableField } from "../../taskModalTypes";
+import { TaskDetailReveal } from "../TaskDetailReveal";
 import { useTaskDetailsAdvancedSectionModel } from "./useTaskDetailsAdvancedSectionModel";
 
 interface TaskDetailsAdvancedSectionViewProps {
@@ -42,7 +43,7 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
         <span>Advanced</span>
       </summary>
       <div className="task-details-section-grid">
-        <label className="field task-detail-row">
+        <label className={`field task-detail-row ${canInlineEdit ? "task-details-inline-edit-left" : ""}`}>
           <span style={{ color: "var(--text-title)" }}>Discipline</span>
           {canInlineEdit ? (
             editingField === "discipline" ? (
@@ -71,50 +72,8 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
                   onClick={() => setEditingField("discipline")}
                   type="button"
                 >
-                  <span className={model.disciplinePillClassName}>{model.disciplineText}</span>
-                </button>
-                <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator" />
-              </span>
-            )
-          ) : (
-            <p className="task-detail-copy" onDoubleClick={openTaskEditModal}>
-              <span className={model.disciplinePillClassName}>{model.disciplineText}</span>
-            </p>
-          )}
-        </label>
-        <label className="field task-detail-row">
-          <span style={{ color: "var(--text-title)" }}>{model.subsystemFieldLabel}</span>
-          {canInlineEdit ? (
-            editingField === "subsystem" ? (
-              <FilterDropdown
-                allLabel={`No ${model.subsystemFieldLabel.toLowerCase()} linked`}
-                ariaLabel={`Set ${model.subsystemFieldLabel.toLowerCase()}`}
-                buttonInlineEditField="subsystem"
-                className="task-queue-filter-menu-submenu"
-                icon={<IconManufacturing />}
-                getOptionToneClassName={model.getSubsystemOptionToneClassName}
-                getSelectedToneClassName={(selection) =>
-                  selection[0]
-                    ? model.getSubsystemOptionToneClassName({ id: selection[0] })
-                    : undefined
-                }
-                singleSelect
-                onChange={model.handleSubsystemChange}
-                options={model.primaryTargetNameOptions.map((name) => ({ id: name, name }))}
-                value={model.selectedPrimaryTargetId ? [model.selectedPrimaryTargetId] : []}
-              />
-            ) : (
-              <span className="task-detail-inline-edit-shell task-detail-inline-edit-shell-inline task-detail-inline-edit-shell-inline-left">
-                <button
-                  className="task-detail-inline-edit-trigger task-detail-inline-edit-trigger-inline"
-                  data-inline-edit-field="subsystem"
-                  onClick={() => setEditingField("subsystem")}
-                  type="button"
-                >
-                  <span className={model.subsystemPillClassName}>
-                    {model.subsystemNames.length > 0
-                      ? model.subsystemNames.join(", ")
-                      : "No subsystem linked"}
+                  <span className={model.disciplinePillClassName} style={model.disciplinePillStyle}>
+                    {model.disciplineText}
                   </span>
                 </button>
                 <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator" />
@@ -122,13 +81,13 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
             )
           ) : (
             <p className="task-detail-copy" onDoubleClick={openTaskEditModal}>
-              <span className={model.subsystemPillClassName}>
-                {model.subsystemNames.length > 0 ? model.subsystemNames.join(", ") : "No subsystem linked"}
+              <span className={model.disciplinePillClassName} style={model.disciplinePillStyle}>
+                {model.disciplineText}
               </span>
             </p>
           )}
         </label>
-        <label className="field task-detail-row">
+        <label className={`field task-detail-row ${canInlineEdit ? "task-details-inline-edit-left" : ""}`}>
           <span style={{ color: "var(--text-title)" }}>Start date</span>
           {canInlineEdit ? (
             editingField === "startDate" ? (
@@ -165,11 +124,27 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
             </p>
           )}
         </label>
-        <label className="field modal-wide task-detail-row task-detail-collapsible-field">
+        <label className="field task-detail-row task-detail-collapsible-field">
           <details className="task-detail-collapsible" onDoubleClick={canInlineEdit ? undefined : openTaskEditModal}>
             <summary className="task-detail-collapsible-summary">
-              <span className="task-detail-collapsible-icon" aria-hidden="true"></span>
-              <span className="task-detail-copy">{canInlineEdit ? "Mechanism" : "Mechanisms"}</span>
+              <span className="task-detail-collapsible-summary-main">
+                <span className="task-detail-collapsible-icon" aria-hidden="true"></span>
+                <span className="task-detail-copy">{canInlineEdit ? "Mechanism" : "Mechanisms"}</span>
+              </span>
+              {canInlineEdit ? (
+                <button
+                  aria-label={editingField === "mechanism" ? "Close mechanism editor" : "Add mechanism"}
+                  className="icon-button task-detail-section-action-button"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    setEditingField(editingField === "mechanism" ? null : "mechanism");
+                  }}
+                  type="button"
+                >
+                  <IconPlus />
+                </button>
+              ) : null}
             </summary>
             <div className="task-detail-collapsible-body">
               {canInlineEdit ? (
@@ -214,9 +189,7 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
                 <div className="task-details-mechanism-list">
                   {model.mechanismNames.map((mechanismName, index) => (
                     <div className="task-details-mechanism-item" key={`${mechanismName}-${index}`}>
-                      <span className="task-detail-ellipsis-reveal" data-full-text={mechanismName}>
-                        {mechanismName}
-                      </span>
+                      <TaskDetailReveal className="task-detail-ellipsis-reveal" text={mechanismName} />
                     </div>
                   ))}
                 </div>
@@ -228,11 +201,27 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
             </div>
           </details>
         </label>
-        <label className="field modal-wide task-detail-row task-detail-collapsible-field">
+        <label className="field task-detail-row task-detail-collapsible-field">
           <details className="task-detail-collapsible" onDoubleClick={canInlineEdit ? undefined : openTaskEditModal}>
             <summary className="task-detail-collapsible-summary">
-              <span className="task-detail-collapsible-icon" aria-hidden="true"></span>
-              <span className="task-detail-copy">Parts</span>
+              <span className="task-detail-collapsible-summary-main">
+                <span className="task-detail-collapsible-icon" aria-hidden="true"></span>
+                <span className="task-detail-copy">Parts</span>
+              </span>
+              {canInlineEdit ? (
+                <button
+                  aria-label={editingField === "parts" ? "Close parts editor" : "Add part"}
+                  className="icon-button task-detail-section-action-button"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    setEditingField(editingField === "parts" ? null : "parts");
+                  }}
+                  type="button"
+                >
+                  <IconPlus />
+                </button>
+              ) : null}
             </summary>
             <div className="task-detail-collapsible-body">
               {canInlineEdit ? (
@@ -273,9 +262,7 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
                 )
               ) : (
                 <p className="task-detail-copy">
-                  <span className="task-detail-ellipsis-reveal" data-full-text={model.partsText}>
-                    {model.partsText}
-                  </span>
+                  <TaskDetailReveal className="task-detail-ellipsis-reveal" text={model.partsText} />
                 </p>
               )}
             </div>

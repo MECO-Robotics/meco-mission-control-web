@@ -104,7 +104,7 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
           onEditTask={() => undefined}
           onResolveTaskBlocker={handleResolveTaskBlocker}
           setTaskDraft={setTaskDraft}
-          showDependencyBlockersSection={false}
+          showDependencyBlockersSection
           showEditButton={false}
           taskDraft={taskDraft}
         />

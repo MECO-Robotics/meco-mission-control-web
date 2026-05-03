@@ -9,26 +9,78 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
-  align-items: start;
+  align-items: stretch;
   width: 100%;
+  min-width: 0;
   margin-top: 0.55rem;
+  overflow-x: clip;
+}
+
+.task-details-dependency-blocker-grid > .task-detail-blocker-split-column,
+.task-details-dependency-blocker-grid > .task-detail-list-shell,
+.task-detail-collapsible-field {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  contain: inline-size;
+}
+
+.task-detail-collapsible-field {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.task-detail-collapsible-field > .task-detail-collapsible {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.task-detail-collapsible-field > .task-detail-collapsible > .task-detail-collapsible-body {
+  min-height: 0;
+  height: 100%;
+  max-height: 11rem !important;
+  overflow-y: auto !important;
+  overflow-x: clip;
 }
 
 .task-detail-blocker-split-column {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  height: 100%;
   min-width: 0;
+  max-width: 100%;
+  min-height: 0;
+  contain: inline-size;
+}
+
+.task-detail-blocker-split-column > .task-detail-collapsible {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
 }
 
 .task-details-overview-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   grid-template-areas:
     "priority owner assigned"
-    ". mentor assigned";
+    "subsystem mentor assigned";
   align-items: start;
   width: 100%;
 }
 
 .task-details-overview-priority {
   grid-area: priority;
+}
+
+.task-details-overview-subsystem {
+  grid-area: subsystem;
 }
 
 .task-details-overview-owner {
@@ -89,6 +141,20 @@
   width: 100%;
 }
 
+.task-details-inline-edit-left {
+  justify-items: start;
+  align-items: start;
+  text-align: left;
+}
+
+.task-details-inline-edit-left .task-detail-inline-edit-shell,
+.task-details-inline-edit-left .task-detail-inline-edit-shell-inline,
+.task-details-inline-edit-left .task-queue-filter-menu-submenu,
+.task-details-inline-edit-left .task-detail-inline-edit-input-date {
+  justify-self: start;
+  align-self: start;
+}
+
 @media (max-width: 800px) {
   .task-details-overview-grid {
     grid-template-columns: 1fr;
@@ -96,6 +162,7 @@
   }
 
   .task-details-overview-priority,
+  .task-details-overview-subsystem,
   .task-details-overview-owner,
   .task-details-overview-assigned,
   .task-details-overview-mentor {

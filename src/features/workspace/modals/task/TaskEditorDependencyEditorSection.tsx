@@ -1,11 +1,14 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { BootstrapPayload, TaskDependencyKind, TaskDependencyType, TaskPayload } from "@/types";
+import { IconManufacturing, IconParts, IconTasks, IconTrash } from "@/components/shared/Icons";
+import { FilterDropdown } from "../../shared/WorkspaceViewShared";
 import { TASK_DEPENDENCY_KIND_LABELS, TASK_DEPENDENCY_TYPE_LABELS } from "../../shared/task/taskTargeting";
 
 interface TaskEditorDependencyEditorSectionProps {
   bootstrap: BootstrapPayload;
   setTaskDraft: Dispatch<SetStateAction<TaskPayload>>;
   taskDraft: TaskPayload;
+  showHeader?: boolean;
 }
 
 function getDependencyDefaultState(kind: TaskDependencyKind) {
@@ -16,12 +19,13 @@ export function TaskEditorDependencyEditorSection({
   bootstrap,
   setTaskDraft,
   taskDraft,
+  showHeader = true,
 }: TaskEditorDependencyEditorSectionProps) {
   const dependencyTaskOptions = [...bootstrap.tasks]
     .filter((task) => task.projectId === taskDraft.projectId)
     .sort((left, right) => left.title.localeCompare(right.title));
   const dependencyEventOptions = bootstrap.events
-    .filter((event) => event.projectIds.length === 0 ? true : event.projectIds.includes(taskDraft.projectId))
+    .filter((event) => (event.projectIds.length === 0 ? true : event.projectIds.includes(taskDraft.projectId)))
     .sort((left, right) => left.title.localeCompare(right.title));
   const dependencyPartInstanceOptions = bootstrap.partInstances;
   const dependencyDrafts = taskDraft.taskDependencies ?? [];
@@ -36,6 +40,23 @@ export function TaskEditorDependencyEditorSection({
             dependencyType: "hard" as TaskDependencyType,
           },
         ];
+  const dependencyKindOptions = Object.entries(TASK_DEPENDENCY_KIND_LABELS).map(([kind, label]) => ({
+    id: kind,
+    name: label,
+    icon:
+      kind === "part_instance" ? (
+        <IconParts />
+      ) : kind === "milestone" ? (
+        <IconManufacturing />
+      ) : (
+        <IconTasks />
+      ),
+  }));
+  const dependencyTypeOptions = Object.entries(TASK_DEPENDENCY_TYPE_LABELS).map(([type, label]) => ({
+    id: type,
+    name: label,
+    icon: <IconTasks />,
+  }));
   const getDependencyTargetOptions = (kind: TaskDependencyKind) => {
     if (kind === "task") {
       return dependencyTaskOptions.map((task) => ({ id: task.id, name: task.title }));
@@ -96,16 +117,22 @@ export function TaskEditorDependencyEditorSection({
   const removeDependencyDraft = (index: number) => {
     setTaskDraft((current) => ({
       ...current,
-      taskDependencies: (current.taskDependencies ?? []).filter((_dependency, currentIndex) => currentIndex !== index),
+      taskDependencies: (current.taskDependencies ?? []).filter(
+        (_dependency, currentIndex) => currentIndex !== index,
+      ),
     }));
   };
 
   return (
-    <div className="field modal-wide">
-      <span style={{ color: "var(--text-title)" }}>Dependencies</span>
-      <p style={{ margin: "0.25rem 0 0", color: "var(--text-copy)" }}>
-        Structured prerequisites. Hard dependencies gate waiting state; soft dependencies are advisory.
-      </p>
+    <div className={showHeader ? "field modal-wide" : undefined}>
+      {showHeader ? (
+        <>
+          <span style={{ color: "var(--text-title)" }}>Dependencies</span>
+          <p style={{ margin: "0.25rem 0 0", color: "var(--text-copy)" }}>
+            Structured prerequisites. Hard dependencies gate waiting state; soft dependencies are advisory.
+          </p>
+        </>
+      ) : null}
       <div style={{ display: "grid", gap: "0.75rem", marginTop: "0.75rem" }}>
         {visibleDependencyDrafts.map((dependency, index) => {
           const targetOptions = getDependencyTargetOptions(dependency.kind);
@@ -114,9 +141,10 @@ export function TaskEditorDependencyEditorSection({
             <div
               key={dependency.id ?? `dependency-${index}`}
               style={{
+                position: "relative",
                 display: "grid",
                 gap: "0.75rem",
-                padding: "0.75rem",
+                padding: "0.75rem 2.75rem 0.75rem 0.75rem",
                 border: "1px solid var(--border-base)",
                 borderRadius: "12px",
                 background: "var(--bg-row-alt)",
@@ -124,49 +152,46 @@ export function TaskEditorDependencyEditorSection({
             >
               <label className="field">
                 <span style={{ color: "var(--text-title)" }}>Dependency kind</span>
-                <select
-                  onChange={(event) =>
+                <FilterDropdown
+                  allLabel="Select dependency kind"
+                  ariaLabel="Set dependency kind"
+                  buttonInlineEditField={`dependency-kind-${index}`}
+                  className="task-queue-filter-menu-submenu task-details-dependency-kind-menu"
+                  icon={<IconTasks />}
+                  menuClassName="task-details-dependency-menu-popup"
+                  onChange={(selection) =>
                     updateDependencyDraft(index, {
-                      kind: event.target.value as TaskDependencyKind,
+                      kind: selection[0] as TaskDependencyKind,
                       refId: "",
                     })
                   }
-                  style={{
-                    background: "var(--bg-panel)",
-                    color: "var(--text-title)",
-                    border: "1px solid var(--border-base)",
-                  }}
-                  value={dependency.kind}
-                >
-                  {Object.entries(TASK_DEPENDENCY_KIND_LABELS).map(([kind, label]) => (
-                    <option key={kind} value={kind}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
+                  options={dependencyKindOptions}
+                  portalMenu
+                  portalMenuPlacement="below"
+                  singleSelect
+                  value={[dependency.kind]}
+                />
               </label>
               <label className="field">
                 <span style={{ color: "var(--text-title)" }}>Depends on</span>
-                <select
-                  onChange={(event) =>
+                <FilterDropdown
+                  allLabel={`Select ${TASK_DEPENDENCY_KIND_LABELS[dependency.kind].toLowerCase()}`}
+                  ariaLabel="Set dependency target"
+                  buttonInlineEditField={`dependency-target-${index}`}
+                  className="task-queue-filter-menu-submenu task-details-dependency-target-menu"
+                  icon={dependency.kind === "part_instance" ? <IconParts /> : <IconTasks />}
+                  menuClassName="task-details-dependency-menu-popup"
+                  onChange={(selection) =>
                     updateDependencyDraft(index, {
-                      refId: event.target.value,
+                      refId: selection[0] ?? "",
                     })
                   }
-                  style={{
-                    background: "var(--bg-panel)",
-                    color: "var(--text-title)",
-                    border: "1px solid var(--border-base)",
-                  }}
-                  value={dependency.refId}
-                >
-                  <option value="">Select {TASK_DEPENDENCY_KIND_LABELS[dependency.kind].toLowerCase()}</option>
-                  {targetOptions.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.name}
-                    </option>
-                  ))}
-                </select>
+                  options={targetOptions}
+                  portalMenu
+                  portalMenuPlacement="below"
+                  singleSelect
+                  value={dependency.refId ? [dependency.refId] : []}
+                />
               </label>
               <label className="field">
                 <span style={{ color: "var(--text-title)" }}>Required state</span>
@@ -187,29 +212,33 @@ export function TaskEditorDependencyEditorSection({
               </label>
               <label className="field">
                 <span style={{ color: "var(--text-title)" }}>Dependency type</span>
-                <select
-                  onChange={(event) =>
+                <FilterDropdown
+                  allLabel="Select dependency type"
+                  ariaLabel="Set dependency type"
+                  buttonInlineEditField={`dependency-type-${index}`}
+                  className="task-queue-filter-menu-submenu task-details-dependency-type-menu"
+                  icon={<IconTasks />}
+                  menuClassName="task-details-dependency-menu-popup"
+                  onChange={(selection) =>
                     updateDependencyDraft(index, {
-                      dependencyType: event.target.value as TaskDependencyType,
+                      dependencyType: selection[0] as TaskDependencyType,
                     })
                   }
-                  style={{
-                    background: "var(--bg-panel)",
-                    color: "var(--text-title)",
-                    border: "1px solid var(--border-base)",
-                  }}
-                  value={dependency.dependencyType}
-                >
-                  {Object.entries(TASK_DEPENDENCY_TYPE_LABELS).map(([type, label]) => (
-                    <option key={type} value={type}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
+                  options={dependencyTypeOptions}
+                  portalMenu
+                  portalMenuPlacement="below"
+                  singleSelect
+                  value={[dependency.dependencyType]}
+                />
               </label>
               {dependencyDrafts.length > 0 ? (
-                <button className="secondary-action" onClick={() => removeDependencyDraft(index)} type="button">
-                  Remove dependency
+                <button
+                  aria-label="Remove dependency"
+                  className="icon-button task-details-draft-remove-button"
+                  onClick={() => removeDependencyDraft(index)}
+                  type="button"
+                >
+                  <IconTrash />
                 </button>
               ) : null}
             </div>

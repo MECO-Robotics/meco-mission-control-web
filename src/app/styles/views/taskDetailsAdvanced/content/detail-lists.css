@@ -19,15 +19,23 @@
   flex-direction: column;
   gap: 0.45rem;
   min-height: 0;
+  width: 100%;
+  max-width: 100%;
   max-height: 11rem !important;
+  min-width: 0;
+  contain: inline-size;
   overflow-y: scroll !important;
+  overflow-x: clip;
   padding: 0.75rem 0.85rem !important;
   scrollbar-gutter: stable;
 }
 
+.task-detail-collapsible-body .workspace-detail-list,
 .task-detail-collapsible-body .task-detail-list,
 .task-detail-collapsible-body .task-details-mechanism-list {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .task-detail-collapsible-body {
@@ -37,7 +45,12 @@
   justify-content: flex-start;
   gap: 0.2rem;
   min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  height: 100%;
   overflow-y: scroll;
+  overflow-x: clip;
   scrollbar-gutter: stable;
   padding: 0.6rem 0.8rem;
   border-radius: 14px;
@@ -74,16 +87,22 @@
   gap: 0.2rem;
   min-height: 0;
   align-self: stretch;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .task-details-mechanism-item {
   display: flex;
   align-items: center;
   min-width: 0;
+  max-width: 100%;
 }
 
 .task-details-mechanism-item .task-detail-ellipsis-reveal {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .task-detail-hour-segment {
@@ -126,4 +145,51 @@
 .task-detail-list-item:first-child {
   border-top: 0;
   padding-top: 0.1rem;
+}
+
+.task-detail-collapsible-body .workspace-detail-list-item,
+.task-detail-collapsible-body .task-detail-list-item {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.task-detail-collapsible-body .workspace-detail-list-item.task-details-blocker-list-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  justify-content: normal;
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.task-detail-collapsible-body .workspace-detail-list-item.task-details-blocker-list-item > .task-details-blocker-row-content {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.task-detail-collapsible-body .workspace-detail-list-item.task-details-blocker-list-item > .task-details-blocker-resolve-button {
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.task-detail-collapsible-body .workspace-detail-list-item.task-details-blocker-list-item > .task-details-blocker-resolve-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.task-details-dependency-blocker-grid .task-detail-collapsible-body {
+  height: 100%;
+  max-height: 11rem !important;
+  overflow-y: auto !important;
+  overflow-x: clip;
 }

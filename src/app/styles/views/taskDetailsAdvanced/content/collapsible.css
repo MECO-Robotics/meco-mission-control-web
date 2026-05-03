@@ -10,26 +10,15 @@
 
 .task-detail-discipline-pill,
 .task-detail-subsystem-pill {
+  --task-detail-pill-accent: var(--text-copy);
   border: 1px solid transparent;
   font-size: 0.72rem;
   font-weight: 700;
   line-height: 1;
   padding: 0.2rem 0.45rem;
-}
-
-.task-detail-discipline-pill.filter-tone-info,
-.task-detail-discipline-pill.filter-tone-success,
-.task-detail-discipline-pill.filter-tone-warning,
-.task-detail-discipline-pill.filter-tone-danger,
-.task-detail-discipline-pill.filter-tone-neutral,
-.task-detail-subsystem-pill.filter-tone-info,
-.task-detail-subsystem-pill.filter-tone-success,
-.task-detail-subsystem-pill.filter-tone-warning,
-.task-detail-subsystem-pill.filter-tone-danger,
-.task-detail-subsystem-pill.filter-tone-neutral {
-  background: var(--filter-tone-bg);
-  border-color: var(--filter-tone-border);
-  color: var(--filter-tone-foreground);
+  background: color-mix(in srgb, var(--task-detail-pill-accent) 16%, transparent);
+  border-color: color-mix(in srgb, var(--task-detail-pill-accent) 42%, transparent);
+  color: color-mix(in srgb, var(--task-detail-pill-accent) 86%, var(--text-title));
 }
 
 .task-detail-hours-row {
@@ -68,7 +57,63 @@
 
 .task-detail-collapsible-field .task-detail-collapsible {
   margin-top: 0.25rem;
+  display: flex;
+  flex-direction: column;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  contain: inline-size;
+}
+
+.task-detail-list-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.task-detail-collapsible-summary-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.task-detail-section-action-button {
+  width: 1.65rem;
+  height: 1.65rem;
+  min-width: 1.65rem;
+  min-height: 1.65rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.task-detail-section-action-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.task-details-section-add-menu .toolbar-filter-menu-button {
+  width: 1.65rem;
+  height: 1.65rem;
+  min-width: 1.65rem;
+  min-height: 1.65rem;
+  padding: 0;
+  justify-content: center;
+}
+
+.task-details-section-add-menu .toolbar-filter-value,
+.task-details-section-add-menu .toolbar-filter-chevron {
+  display: none;
+}
+
+.task-details-section-add-menu .toolbar-filter-icon {
+  margin: 0;
 }
 
 .task-detail-collapsible-summary {

@@ -21,31 +21,24 @@ export function TaskDetailsDependencyBlockersSection({
   taskDraft,
 }: TaskDetailsDependencyBlockersSectionProps) {
   return (
-    <div className="field modal-wide task-detail-list-shell task-detail-collapsible-field">
-      <details className="task-detail-collapsible" open>
-        <summary className="task-detail-collapsible-summary">
-          <span className="task-detail-collapsible-icon" aria-hidden="true"></span>
-          <span className="task-detail-copy">Dependencies & Blockers</span>
-        </summary>
-        <div className="task-detail-collapsible-body">
-          <div className="task-details-dependency-blocker-grid">
-            <TaskDetailsDependenciesSection
-              activeTask={activeTask}
-              bootstrap={bootstrap}
-              canInlineEdit={canInlineEdit}
-              taskDraft={taskDraft}
-            />
-            <TaskDetailsBlockersSection
-              activeTaskId={activeTask.id}
-              bootstrap={bootstrap}
-              canInlineEdit={canInlineEdit}
-              onResolveTaskBlocker={onResolveTaskBlocker}
-              setTaskDraft={setTaskDraft}
-              taskDraft={taskDraft}
-            />
-          </div>
-        </div>
-      </details>
+    <div className="field modal-wide task-detail-list-shell">
+      <div className="task-details-dependency-blocker-grid">
+        <TaskDetailsDependenciesSection
+          activeTask={activeTask}
+          bootstrap={bootstrap}
+          canInlineEdit={canInlineEdit}
+          taskDraft={taskDraft}
+          setTaskDraft={setTaskDraft}
+        />
+        <TaskDetailsBlockersSection
+          activeTaskId={activeTask.id}
+          bootstrap={bootstrap}
+          canInlineEdit={canInlineEdit}
+          onResolveTaskBlocker={onResolveTaskBlocker}
+          setTaskDraft={setTaskDraft}
+          taskDraft={taskDraft}
+        />
+      </div>
     </div>
   );
 }

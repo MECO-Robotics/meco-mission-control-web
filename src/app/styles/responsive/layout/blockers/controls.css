@@ -3,12 +3,18 @@
   justify-content: flex-start;
 }
 
+.task-details-dependency-kind-menu,
+.task-details-dependency-target-menu,
+.task-details-dependency-type-menu,
 .task-details-blocker-type-menu,
 .task-details-blocker-target-menu {
   width: 100%;
   min-width: 0;
 }
 
+.task-details-dependency-kind-menu .toolbar-filter-menu-button,
+.task-details-dependency-target-menu .toolbar-filter-menu-button,
+.task-details-dependency-type-menu .toolbar-filter-menu-button,
 .task-details-blocker-type-menu .toolbar-filter-menu-button,
 .task-details-blocker-target-menu .toolbar-filter-menu-button {
   width: 100%;
@@ -18,6 +24,7 @@
   width: fit-content;
 }
 
+.task-details-dependency-menu-popup.table-column-filter-menu,
 .task-details-blocker-menu-popup.table-column-filter-menu {
   min-width: 11.5rem;
   width: max-content;
@@ -37,6 +44,8 @@
     0 0 0 1px rgba(148, 163, 184, 0.08);
 }
 
+.dark-mode .task-details-dependency-menu-popup.table-column-filter-menu,
+.page-shell.dark-mode .task-details-dependency-menu-popup.table-column-filter-menu,
 .dark-mode .task-details-blocker-menu-popup.table-column-filter-menu,
 .page-shell.dark-mode .task-details-blocker-menu-popup.table-column-filter-menu {
   --task-details-dropdown-option-hover-text: #bfdbfe;
@@ -51,6 +60,7 @@
     0 0 0 1px rgba(148, 163, 184, 0.08);
 }
 
+.task-details-dependency-menu-popup.table-column-filter-menu .table-column-filter-option,
 .task-details-blocker-menu-popup.table-column-filter-menu .table-column-filter-option {
   color: var(--task-details-dropdown-option-text);
   font-size: 0.8rem;
@@ -58,6 +68,9 @@
   text-shadow: none;
 }
 
+.task-details-dependency-menu-popup.table-column-filter-menu .table-column-filter-option:hover,
+.task-details-dependency-menu-popup.table-column-filter-menu .table-column-filter-option:focus-visible,
+.task-details-dependency-menu-popup.table-column-filter-menu .table-column-filter-option.is-selected,
 .task-details-blocker-menu-popup.table-column-filter-menu .table-column-filter-option:hover,
 .task-details-blocker-menu-popup.table-column-filter-menu .table-column-filter-option:focus-visible,
 .task-details-blocker-menu-popup.table-column-filter-menu .table-column-filter-option.is-selected {
@@ -65,6 +78,7 @@
   background: var(--task-details-dropdown-option-hover-bg);
 }
 
+.task-details-dependency-menu-popup.table-column-filter-menu .table-column-filter-option-check,
 .task-details-blocker-menu-popup.table-column-filter-menu .table-column-filter-option-check {
   color: var(--task-details-dropdown-option-check);
   font-weight: 700;
@@ -79,6 +93,28 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.task-detail-collapsible-body .workspace-detail-list-item.task-details-blocker-list-item {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.task-detail-collapsible-body .workspace-detail-list-item.task-details-blocker-list-item .task-details-blocker-row-content {
+  min-width: 0;
+  max-width: 100%;
+  display: grid;
+  gap: 0.1rem;
+}
+
+.task-detail-collapsible-body .workspace-detail-list-item.task-details-blocker-list-item .task-details-blocker-resolve-button {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .task-detail-inline-edit-indicator {

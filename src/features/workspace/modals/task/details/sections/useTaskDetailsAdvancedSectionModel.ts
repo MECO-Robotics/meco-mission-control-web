@@ -1,12 +1,9 @@
-import type { ChangeEvent, Dispatch, SetStateAction } from "react";
+import type { ChangeEvent, CSSProperties, Dispatch, SetStateAction } from "react";
 import type { BootstrapPayload, TaskPayload, TaskRecord } from "@/types";
+import { getTimelineTaskDisciplineColor } from "@/features/workspace/views/timeline/timelineTaskColors";
 import {
-  getTaskPrimaryTargetNameOptions,
   getTaskSelectedMechanismIds,
   getTaskSelectedPartInstanceIds,
-  getTaskSelectedPrimaryTargetId,
-  getTaskTargetGroupLabel,
-  setTaskPrimaryTargetSelection,
 } from "../../../../shared/task/taskTargeting";
 import { formatIterationVersion } from "@/lib/appUtils";
 import { getTaskDisciplinesForProject } from "@/lib/taskDisciplines";
@@ -31,11 +28,6 @@ export function useTaskDetailsAdvancedSectionModel({
   const selectedProject =
     bootstrap.projects.find((project) => project.id === editableTask.projectId) ?? null;
   const availableDisciplines = getTaskDisciplinesForProject(selectedProject);
-  const targetGroupLabel = getTaskTargetGroupLabel(selectedProject);
-  const subsystemFieldLabel = targetGroupLabel === "Subsystems" ? "Subsystem" : "Workstream";
-  const subsystemsById = Object.fromEntries(
-    bootstrap.subsystems.map((subsystem) => [subsystem.id, subsystem] as const),
-  ) as Record<string, BootstrapPayload["subsystems"][number]>;
   const mechanismsById = Object.fromEntries(
     bootstrap.mechanisms.map((mechanism) => [mechanism.id, mechanism] as const),
   ) as Record<string, BootstrapPayload["mechanisms"][number]>;
@@ -45,14 +37,10 @@ export function useTaskDetailsAdvancedSectionModel({
   const partDefinitionsById = Object.fromEntries(
     bootstrap.partDefinitions.map((partDefinition) => [partDefinition.id, partDefinition] as const),
   ) as Record<string, BootstrapPayload["partDefinitions"][number]>;
-  const projectSubsystems = bootstrap.subsystems
-    .filter((subsystem) => subsystem.projectId === editableTask.projectId)
-    .sort((left, right) => left.name.localeCompare(right.name) || left.iteration - right.iteration);
-  const selectedPrimaryTargetId = getTaskSelectedPrimaryTargetId(editableTask);
-  const primaryTargetNameOptions = getTaskPrimaryTargetNameOptions(projectSubsystems);
-  const selectedPrimaryTarget = selectedPrimaryTargetId
-    ? subsystemsById[selectedPrimaryTargetId] ?? null
-    : null;
+  const disciplinesById = Object.fromEntries(
+    bootstrap.disciplines.map((discipline) => [discipline.id, discipline] as const),
+  ) as Record<string, BootstrapPayload["disciplines"][number]>;
+  const selectedPrimaryTargetId = editableTask.subsystemIds[0] ?? editableTask.subsystemId ?? "";
   const projectMechanisms = bootstrap.mechanisms.filter(
     (mechanism) => mechanism.subsystemId === selectedPrimaryTargetId,
   );
@@ -77,6 +65,12 @@ export function useTaskDetailsAdvancedSectionModel({
     ? availableDisciplines.find((discipline) => discipline.id === editableTask.disciplineId)?.name ??
       "Not set"
     : "Not set";
+  const disciplineAccentColor = editableTask.disciplineId
+    ? getTimelineTaskDisciplineColor(editableTask.disciplineId, disciplinesById)
+    : null;
+  const disciplinePillStyle = {
+    "--task-detail-pill-accent": disciplineAccentColor ?? undefined,
+  } as CSSProperties;
   const getStableToneClassName = (value: string) => {
     const filterToneClasses = [
       "filter-tone-info",
@@ -96,19 +90,7 @@ export function useTaskDetailsAdvancedSectionModel({
     getStableToneClassName(option.id);
   const getSubsystemOptionToneClassName = (option: { id: string }) =>
     getStableToneClassName(option.id);
-  const disciplineToneClassName = editableTask.disciplineId
-    ? getDisciplineOptionToneClassName({ id: editableTask.disciplineId })
-    : "filter-tone-neutral";
-  const disciplinePillClassName = `pill task-detail-discipline-pill ${disciplineToneClassName}`;
-  const subsystemToneClassName = selectedPrimaryTargetId
-    ? getSubsystemOptionToneClassName({ id: selectedPrimaryTargetId })
-    : "filter-tone-neutral";
-  const subsystemPillClassName = `pill task-detail-subsystem-pill ${subsystemToneClassName}`;
-  const subsystemNames = getTaskSelectedPrimaryTargetId(editableTask)
-    ? selectedPrimaryTarget
-      ? [`${selectedPrimaryTarget.name} (${formatIterationVersion(selectedPrimaryTarget.iteration)})`]
-      : []
-    : [];
+  const disciplinePillClassName = "pill task-detail-discipline-pill";
   const mechanismNames = selectedMechanismIds
     .map((mechanismId) => mechanismsById[mechanismId])
     .filter((mechanism): mechanism is BootstrapPayload["mechanisms"][number] => Boolean(mechanism))
@@ -126,13 +108,6 @@ export function useTaskDetailsAdvancedSectionModel({
       ...current,
       disciplineId: selection[0] ?? "",
     }));
-    setEditingField(null);
-  };
-
-  const handleSubsystemChange = (selection: string[]) => {
-    setTaskDraft?.((current) =>
-      setTaskPrimaryTargetSelection(current, bootstrap, selection[0] ?? ""),
-    );
     setEditingField(null);
   };
 
@@ -160,6 +135,7 @@ export function useTaskDetailsAdvancedSectionModel({
   return {
     availableDisciplines,
     disciplinePillClassName,
+    disciplinePillStyle,
     disciplineText,
     editableTask,
     getDisciplineOptionToneClassName,
@@ -168,17 +144,11 @@ export function useTaskDetailsAdvancedSectionModel({
     handleMechanismChange,
     handlePartsChange,
     handleStartDateChange,
-    handleSubsystemChange,
     mechanismNames,
     partsText,
-    primaryTargetNameOptions,
     projectMechanisms,
     projectPartInstances,
     selectedMechanismIds,
     selectedPartInstanceIds,
-    selectedPrimaryTargetId,
-    subsystemFieldLabel,
-    subsystemNames,
-    subsystemPillClassName,
   };
 }

@@ -8,6 +8,51 @@
   text-align: left;
 }
 
+.task-details-modal .task-queue-filter-menu-submenu.task-details-assigned-list.toolbar-filter-dropdown {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.2rem;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 0;
+  max-height: clamp(6.5rem, 18vh, 11rem);
+  overflow-y: auto;
+  overflow-x: clip;
+  scrollbar-gutter: stable;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border-base);
+  border-radius: 14px;
+  background: var(--bg-row-alt);
+  box-sizing: border-box;
+}
+
+.task-details-modal .task-queue-filter-menu-submenu.task-details-assigned-list .toolbar-filter-menu-button {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 0.2rem;
+  padding: 0;
+}
+
+.task-details-modal .task-queue-filter-menu-submenu.task-details-assigned-list .toolbar-filter-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.task-details-modal .task-queue-filter-menu-submenu.task-details-assigned-list .task-details-assigned-item,
+.task-details-modal .task-queue-filter-menu-submenu.task-details-assigned-list .task-details-assigned-empty {
+  min-width: 0;
+}
+
 .task-details-modal .task-detail-inline-edit-shell-inline.task-detail-inline-edit-shell-inline-left {
   display: flex;
   width: 100%;
@@ -22,6 +67,80 @@
 .task-detail-inline-edit-select-chip {
   width: fit-content;
   max-width: 100%;
+}
+
+.task-details-dependency-editor {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.task-details-dependency-row {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 0.65rem 2.65rem 0.65rem 2.65rem;
+  border: 1px solid var(--border-base);
+  border-radius: 12px;
+  background: var(--bg-row-alt);
+}
+
+.task-detail-collapsible-body .workspace-detail-list-item.task-details-dependency-row.task-details-dependency-row-with-delete {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0.1rem;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0.45rem 0.5rem;
+}
+
+.task-details-dependency-row-with-delete > .task-details-dependency-row-content {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+  width: 100%;
+}
+
+.task-detail-collapsible-body .workspace-detail-list-item.task-details-dependency-row.task-details-dependency-row-with-delete > .task-details-dependency-row-remove-button {
+  position: absolute;
+  left: -0.95rem;
+  top: 0.35rem;
+}
+
+.task-details-dependency-row-edit {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  align-items: start;
+}
+
+.task-details-dependency-editor-field {
+  min-width: 0;
+}
+
+.task-details-dependency-row-remove-button {
+  width: 1.6rem;
+  height: 1.6rem;
+  min-width: 1.6rem;
+  min-height: 1.6rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.task-details-dependency-row-remove-button svg {
+  width: 14px;
+  height: 14px;
 }
 
 .task-detail-inline-edit-select-status {

@@ -1,11 +1,19 @@
-import type { Dispatch, SetStateAction } from "react";
+import type { CSSProperties, Dispatch, SetStateAction } from "react";
 import type { BootstrapPayload, TaskPayload, TaskRecord } from "@/types";
 import { EditableHoverIndicator, FilterDropdown } from "../../shared/WorkspaceViewShared";
 import { getStatusPillClassName } from "../../shared/model";
 import { TASK_PRIORITY_OPTIONS } from "../../shared/model";
-import { getTaskSelectedAssigneeIds } from "../../shared/task/taskTargeting";
+import {
+  getTaskPrimaryTargetNameOptions,
+  getTaskSelectedAssigneeIds,
+  getTaskSelectedPrimaryTargetId,
+  getTaskTargetGroupLabel,
+  setTaskPrimaryTargetSelection,
+} from "../../shared/task/taskTargeting";
 import type { TaskDetailsEditableField } from "./taskModalTypes";
-import { IconPerson, IconTasks } from "@/components/shared/Icons";
+import { IconManufacturing, IconPerson, IconTasks } from "@/components/shared/Icons";
+import { formatIterationVersion } from "@/lib/appUtils";
+import { TaskDetailReveal } from "./details/TaskDetailReveal";
 
 interface TaskDetailsOverviewSectionProps {
   activeTask: TaskRecord;
@@ -29,24 +37,73 @@ export function TaskDetailsOverviewSection({
   taskDraft,
 }: TaskDetailsOverviewSectionProps) {
   const editableTask = taskDraft ?? activeTask;
+  const selectedProject =
+    bootstrap.projects.find((project) => project.id === editableTask.projectId) ?? null;
   const membersById = Object.fromEntries(
     bootstrap.members.map((member) => [member.id, member]),
   ) as Record<string, BootstrapPayload["members"][number]>;
+  const targetGroupLabel = getTaskTargetGroupLabel(selectedProject);
+  const subsystemFieldLabel = targetGroupLabel === "Subsystems" ? "Subsystem" : "Workstream";
+  const subsystemsById = Object.fromEntries(
+    bootstrap.subsystems.map((subsystem) => [subsystem.id, subsystem] as const),
+  ) as Record<string, BootstrapPayload["subsystems"][number]>;
   const selectedAssigneeIds = getTaskSelectedAssigneeIds(editableTask);
   const priorityText = taskDraft?.priority ?? activeTask.priority;
   const priorityPillClassName = getStatusPillClassName(priorityText);
+  const selectedPrimaryTargetId = getTaskSelectedPrimaryTargetId(editableTask);
+  const projectSubsystems = bootstrap.subsystems
+    .filter((subsystem) => subsystem.projectId === editableTask.projectId)
+    .sort((left, right) => left.name.localeCompare(right.name) || left.iteration - right.iteration);
+  const primaryTargetNameOptions = getTaskPrimaryTargetNameOptions(projectSubsystems);
+  const selectedPrimaryTarget = selectedPrimaryTargetId
+    ? subsystemsById[selectedPrimaryTargetId] ?? null
+    : null;
   const ownerIdText = taskDraft?.ownerId ?? activeTask.ownerId ?? "";
   const ownerText = ownerIdText ? membersById[ownerIdText]?.name ?? "Unknown" : "Unassigned";
   const mentorIdText = taskDraft?.mentorId ?? activeTask.mentorId ?? "";
   const mentorText = mentorIdText ? membersById[mentorIdText]?.name ?? "Unknown" : "Unassigned";
   const ownerName = editableTask.ownerId ? membersById[editableTask.ownerId]?.name ?? "Unknown" : "Unassigned";
   const mentorName = editableTask.mentorId ? membersById[editableTask.mentorId]?.name ?? "Unknown" : "Unassigned";
+  const subsystemText = selectedPrimaryTargetId
+    ? selectedPrimaryTarget
+      ? `${selectedPrimaryTarget.name} (${formatIterationVersion(selectedPrimaryTarget.iteration)})`
+      : "No subsystem linked"
+    : "No subsystem linked";
   const assigneeNames = selectedAssigneeIds
     .map((memberId) => membersById[memberId]?.name)
     .filter((name): name is string => Boolean(name));
   const editableMentorOptions = Object.values(membersById).filter((member) => member.role === "mentor");
   const editableStudentOptions = Object.values(membersById).filter((member) => member.role === "student");
   const editableMemberOptions = editableStudentOptions;
+  const getStableToneClassName = (value: string) => {
+    const filterToneClasses = [
+      "filter-tone-info",
+      "filter-tone-success",
+      "filter-tone-warning",
+      "filter-tone-danger",
+      "filter-tone-neutral",
+    ] as const;
+    let hash = 0;
+    for (let index = 0; index < value.length; index += 1) {
+      hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
+    }
+
+    return filterToneClasses[hash % filterToneClasses.length];
+  };
+  const getSubsystemOptionToneClassName = (option: { id: string }) => getStableToneClassName(option.id);
+  const subsystemToneClassName = selectedPrimaryTargetId
+    ? getSubsystemOptionToneClassName({ id: selectedPrimaryTargetId })
+    : "filter-tone-neutral";
+  const subsystemPillClassName = `pill task-detail-subsystem-pill ${subsystemToneClassName}`;
+  const subsystemPillStyle = {
+    "--task-detail-pill-accent": selectedPrimaryTarget?.color ?? undefined,
+  } as CSSProperties;
+  const handleSubsystemChange = (selection: string[]) => {
+    setTaskDraft?.((current) =>
+      setTaskPrimaryTargetSelection(current, bootstrap, selection[0] ?? ""),
+    );
+    setEditingField(null);
+  };
 
   return (
     <>
@@ -147,6 +204,54 @@ export function TaskDetailsOverviewSection({
             </span>
           )}
         </label>
+        <label
+          className={`field task-detail-row task-detail-row-chip task-details-overview-subsystem ${
+            canInlineEdit ? "task-details-inline-edit-left" : ""
+          }`}
+        >
+          <span style={{ color: "var(--text-title)" }}>{subsystemFieldLabel}</span>
+          {canInlineEdit ? (
+            editingField === "subsystem" ? (
+              <FilterDropdown
+                allLabel={`No ${subsystemFieldLabel.toLowerCase()} linked`}
+                ariaLabel={`Set ${subsystemFieldLabel.toLowerCase()}`}
+                buttonInlineEditField="subsystem"
+                className="task-queue-filter-menu-submenu"
+                icon={<IconManufacturing />}
+                getOptionToneClassName={getSubsystemOptionToneClassName}
+                getSelectedToneClassName={(selection) =>
+                  selection[0]
+                    ? getSubsystemOptionToneClassName({ id: selection[0] })
+                    : undefined
+                }
+                singleSelect
+                onChange={handleSubsystemChange}
+                options={primaryTargetNameOptions.map((name) => ({ id: name, name }))}
+                value={selectedPrimaryTargetId ? [selectedPrimaryTargetId] : []}
+              />
+            ) : (
+              <span className="task-detail-inline-edit-shell task-detail-inline-edit-shell-inline task-detail-inline-edit-shell-inline-left">
+                <button
+                  className="task-detail-inline-edit-trigger task-detail-inline-edit-trigger-inline"
+                  data-inline-edit-field="subsystem"
+                  onClick={() => setEditingField("subsystem")}
+                  type="button"
+                >
+                  <span className={subsystemPillClassName} style={subsystemPillStyle}>
+                    {subsystemText}
+                  </span>
+                </button>
+                <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator" />
+              </span>
+            )
+          ) : (
+            <p className="task-detail-copy" onDoubleClick={openTaskEditModal}>
+              <span className={subsystemPillClassName} style={subsystemPillStyle}>
+                {subsystemText}
+              </span>
+            </p>
+          )}
+        </label>
         <label className="field task-details-overview-owner">
           <span style={{ color: "var(--text-title)" }}>Owner</span>
           {canInlineEdit ? (
@@ -199,7 +304,23 @@ export function TaskDetailsOverviewSection({
                 allLabel="Unassigned"
                 ariaLabel="Set assigned members"
                 buttonInlineEditField="assigned"
-                className="task-queue-filter-menu-submenu"
+                className="task-queue-filter-menu-submenu task-details-assigned-list"
+                buttonContent={
+                  assigneeNames.length > 0 ? (
+                    <>
+                      {assigneeNames.map((assigneeName, index) => (
+                        <div className="task-details-assigned-item" key={`${assigneeName}-${index}`}>
+                          <TaskDetailReveal
+                            className="task-detail-ellipsis-reveal"
+                            text={assigneeName}
+                          />
+                        </div>
+                      ))}
+                    </>
+                  ) : (
+                    <div className="task-details-assigned-empty">Unassigned</div>
+                  )
+                }
                 icon={<IconPerson />}
                 onChange={(selection) => {
                   setTaskDraft?.((current) => ({
@@ -228,9 +349,10 @@ export function TaskDetailsOverviewSection({
                   {assigneeNames.length > 0 ? (
                     assigneeNames.map((assigneeName, index) => (
                       <div className="task-details-assigned-item" key={`${assigneeName}-${index}`}>
-                        <span className="task-detail-ellipsis-reveal" data-full-text={assigneeName}>
-                          {assigneeName}
-                        </span>
+                        <TaskDetailReveal
+                          className="task-detail-ellipsis-reveal"
+                          text={assigneeName}
+                        />
                       </div>
                     ))
                   ) : (
@@ -245,9 +367,7 @@ export function TaskDetailsOverviewSection({
               {assigneeNames.length > 0 ? (
                 assigneeNames.map((assigneeName, index) => (
                   <div className="task-details-assigned-item" key={`${assigneeName}-${index}`}>
-                    <span className="task-detail-ellipsis-reveal" data-full-text={assigneeName}>
-                      {assigneeName}
-                    </span>
+                    <TaskDetailReveal className="task-detail-ellipsis-reveal" text={assigneeName} />
                   </div>
                 ))
               ) : (
