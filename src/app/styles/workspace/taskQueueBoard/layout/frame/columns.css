@@ -12,3 +12,15 @@
   gap: 0.7rem;
   align-items: start;
 }
+
+.milestone-board {
+  display: flex;
+  width: max-content;
+  min-width: calc((15.5rem * 3) + (0.7rem * 2));
+  align-items: flex-start;
+}
+
+.milestone-board .task-queue-board-column {
+  flex: 0 0 15.5rem;
+  width: 15.5rem;
+}

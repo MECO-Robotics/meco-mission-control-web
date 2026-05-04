@@ -81,6 +81,7 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
         disableAnimations={disablePanelAnimations}
         description={SUBVIEW_INTERACTION_GUIDANCE.milestones}
         isActive={taskView === "milestones"}
+        pinInteractionNoteToBottom={false}
         swipeDirection={taskSwipeDirection}
       >
         <MilestonesView
