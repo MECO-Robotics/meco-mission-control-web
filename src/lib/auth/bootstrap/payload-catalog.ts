@@ -28,6 +28,39 @@ function isArtifactStatus(value: unknown): value is ArtifactRecord["status"] {
   return value === "draft" || value === "in-review" || value === "published";
 }
 
+function getPartInstanceMergeKey(
+  partInstance: Pick<PartInstanceRecord, "subsystemId" | "mechanismId" | "partDefinitionId">,
+) {
+  return [partInstance.subsystemId, partInstance.mechanismId ?? "", partInstance.partDefinitionId].join(
+    "::",
+  );
+}
+
+function normalizeCatalogPartInstances(partInstances: PartInstanceRecord[]) {
+  const remappedPartInstanceIds = new Map<string, string>();
+  const partInstancesByKey = new Map<string, PartInstanceRecord>();
+  const normalizedPartInstances: PartInstanceRecord[] = [];
+
+  for (const partInstance of partInstances) {
+    const mergeKey = getPartInstanceMergeKey(partInstance);
+    const existingPartInstance = partInstancesByKey.get(mergeKey);
+
+    if (existingPartInstance) {
+      existingPartInstance.quantity += partInstance.quantity;
+      remappedPartInstanceIds.set(partInstance.id, existingPartInstance.id);
+      continue;
+    }
+
+    partInstancesByKey.set(mergeKey, partInstance);
+    normalizedPartInstances.push(partInstance);
+  }
+
+  return {
+    partInstances: normalizedPartInstances,
+    remappedPartInstanceIds,
+  };
+}
+
 export interface NormalizedBootstrapCatalogRecords {
   members: MemberRecord[];
   subsystems: SubsystemRecord[];
@@ -118,6 +151,13 @@ export function normalizeBootstrapCatalogRecords(
       projectIds: explicitProjectIds,
     };
   });
+  const normalizedPartInstanceData = normalizeCatalogPartInstances(
+    (source.partInstances ?? []).map((partInstance) => ({
+      ...partInstance,
+      mechanismId: partInstance.mechanismId ?? null,
+      status: partInstance.status ?? "not ready",
+    })),
+  );
 
   return {
     members: (source.members ?? []).map((member) => {
@@ -152,11 +192,7 @@ export function normalizeBootstrapCatalogRecords(
       materialId: partDefinition.materialId ?? null,
       description: partDefinition.description ?? "",
     })),
-    partInstances: (source.partInstances ?? []).map((partInstance) => ({
-      ...partInstance,
-      mechanismId: partInstance.mechanismId ?? null,
-      status: partInstance.status ?? "not ready",
-    })),
+    partInstances: normalizedPartInstanceData.partInstances,
     milestones,
     workLogs: (source.workLogs ?? []).map((workLog) => ({
       ...workLog,
@@ -168,9 +204,12 @@ export function normalizeBootstrapCatalogRecords(
       partDefinitionId: item.partDefinitionId ?? null,
     })),
     manufacturingItems: (source.manufacturingItems ?? []).map((item) => {
-      const partInstanceIds = item.partInstanceIds?.length
-        ? uniqueIds(item.partInstanceIds)
-        : uniqueIds([item.partInstanceId]);
+      const partInstanceIds = uniqueIds(
+        (item.partInstanceIds?.length ? item.partInstanceIds : item.partInstanceId ? [item.partInstanceId] : [])
+          .map((partInstanceId) =>
+            normalizedPartInstanceData.remappedPartInstanceIds.get(partInstanceId) ?? partInstanceId,
+          ),
+      );
 
       return {
         ...item,
