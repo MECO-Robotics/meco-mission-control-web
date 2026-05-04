@@ -9,12 +9,8 @@ import { MilestonesMilestoneModalActions } from "./sections/MilestonesMilestoneM
 import { MilestonesMilestoneModalFields } from "./sections/MilestonesMilestoneModalFields";
 import { MilestonesMilestoneModalReadinessSection } from "./sections/MilestonesMilestoneModalReadinessSection";
 
-type TaskPlanningState = "blocked" | "at-risk" | "waiting-on-dependency" | "ready" | "overdue";
-
 interface MilestonesMilestoneModalProps {
   activeMilestone: MilestoneRecord | null;
-  activeMilestoneCompleteTasks: BootstrapPayload["tasks"];
-  activeMilestoneTasks: BootstrapPayload["tasks"];
   bootstrap: BootstrapPayload;
   milestoneError: string | null;
   milestoneModalMode: "create" | "detail" | "edit" | null;
@@ -22,8 +18,6 @@ interface MilestonesMilestoneModalProps {
   milestoneStartTime: string;
   milestoneEndDate: string;
   milestoneEndTime: string;
-  milestoneTaskGroups: Record<TaskPlanningState, BootstrapPayload["tasks"]>;
-  milestoneTaskOrder: readonly TaskPlanningState[];
   isDeletingMilestone: boolean;
   isSavingMilestone: boolean;
   milestoneDraft: TimelineMilestoneDraft;
@@ -42,8 +36,6 @@ interface MilestonesMilestoneModalProps {
 
 export function MilestonesMilestoneModal({
   activeMilestone,
-  activeMilestoneCompleteTasks,
-  activeMilestoneTasks,
   bootstrap,
   milestoneError,
   milestoneModalMode,
@@ -51,8 +43,6 @@ export function MilestonesMilestoneModal({
   milestoneStartTime,
   milestoneEndDate,
   milestoneEndTime,
-  milestoneTaskGroups,
-  milestoneTaskOrder,
   isDeletingMilestone,
   isSavingMilestone,
   milestoneDraft,
@@ -76,11 +66,7 @@ export function MilestonesMilestoneModal({
     return activeMilestone ? (
       <MilestonesEventDetailsModal
         activeMilestone={activeMilestone}
-        activeMilestoneCompleteTasks={activeMilestoneCompleteTasks}
-        activeMilestoneTasks={activeMilestoneTasks}
         bootstrap={bootstrap}
-        milestoneTaskGroups={milestoneTaskGroups}
-        milestoneTaskOrder={milestoneTaskOrder}
         modalPortalTarget={modalPortalTarget}
         onClose={onClose}
         onEditMilestone={onEditMilestone}
@@ -143,12 +129,8 @@ export function MilestonesMilestoneModal({
 
           <MilestonesMilestoneModalReadinessSection
             activeMilestone={activeMilestone}
-            activeMilestoneCompleteTasks={activeMilestoneCompleteTasks}
-            activeMilestoneTasks={activeMilestoneTasks}
             bootstrap={bootstrap}
             milestoneModalMode={milestoneModalMode}
-            milestoneTaskGroups={milestoneTaskGroups}
-            milestoneTaskOrder={milestoneTaskOrder}
           />
 
           <MilestonesMilestoneModalActions

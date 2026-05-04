@@ -224,7 +224,6 @@ describe("TimelineView interactions", () => {
     expect(timelineViewSource).toContain("onHideMilestonePopup={data.clearHoveredMilestonePopup}");
     expect(timelineViewSource).toContain("onShowMilestonePopup={data.showMilestoneUnderlayPopup}");
     expect(detailModalSource).toContain("MilestonesEventDetailsModal");
-    expect(detailModalSource).toContain("groupTasksByPlanningState");
     expect(timelineViewSource).toContain("<TimelineMilestoneDetailModal");
   });
 

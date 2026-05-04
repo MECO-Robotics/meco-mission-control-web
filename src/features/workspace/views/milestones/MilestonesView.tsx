@@ -75,8 +75,6 @@ export function MilestonesView({
 
       <MilestonesMilestoneModal
         activeMilestone={milestones.activeMilestone}
-        activeMilestoneCompleteTasks={milestones.activeMilestoneCompleteTasks}
-        activeMilestoneTasks={milestones.activeMilestoneTasks}
         bootstrap={bootstrap}
         milestoneError={milestones.milestoneError}
         milestoneModalMode={milestones.milestoneModalMode}
@@ -84,8 +82,6 @@ export function MilestonesView({
         milestoneStartTime={milestones.milestoneStartTime}
         milestoneEndDate={milestones.milestoneEndDate}
         milestoneEndTime={milestones.milestoneEndTime}
-        milestoneTaskGroups={milestones.milestoneTaskGroups}
-        milestoneTaskOrder={milestones.milestoneTaskOrder}
         isDeletingMilestone={milestones.isDeletingMilestone}
         isSavingMilestone={milestones.isSavingMilestone}
         milestoneDraft={milestones.milestoneDraft}

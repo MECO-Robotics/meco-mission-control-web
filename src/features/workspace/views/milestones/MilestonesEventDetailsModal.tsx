@@ -14,8 +14,6 @@ import type { TaskQueueBoardState } from "@/features/workspace/views/taskQueue/t
 import { MilestonesMilestoneModalReadinessSection } from "./sections/MilestonesMilestoneModalReadinessSection";
 import { formatMilestoneDateTime } from "./milestonesViewUtils";
 
-type TaskPlanningState = "blocked" | "at-risk" | "waiting-on-dependency" | "ready" | "overdue";
-
 function MilestoneDetailValue({
   children,
   onOpenEditMilestone,
@@ -81,11 +79,7 @@ function MilestoneDetailsStatusIcon({
 
 interface MilestonesEventDetailsModalProps {
   activeMilestone: MilestoneRecord;
-  activeMilestoneCompleteTasks: BootstrapPayload["tasks"];
-  activeMilestoneTasks: BootstrapPayload["tasks"];
   bootstrap: BootstrapPayload;
-  milestoneTaskGroups: Record<TaskPlanningState, BootstrapPayload["tasks"]>;
-  milestoneTaskOrder: readonly TaskPlanningState[];
   modalPortalTarget: HTMLElement | null;
   onClose: () => void;
   onEditMilestone: (milestone: MilestoneRecord) => void;
@@ -94,11 +88,7 @@ interface MilestonesEventDetailsModalProps {
 
 export function MilestonesEventDetailsModal({
   activeMilestone,
-  activeMilestoneCompleteTasks,
-  activeMilestoneTasks,
   bootstrap,
-  milestoneTaskGroups,
-  milestoneTaskOrder,
   modalPortalTarget,
   onClose,
   onEditMilestone,
@@ -193,15 +183,6 @@ export function MilestonesEventDetailsModal({
           </div>
         </div>
 
-        <div className="task-detail-copy modal-wide milestone-detail-type-line">
-          <span style={{ color: "var(--text-title)" }}>Type</span>
-          <MilestoneDetailValue onOpenEditMilestone={() => onEditMilestone(activeMilestone)}>
-            <span className="pill status-pill milestone-type-pill" style={milestoneTypeStyleVariables}>
-              {milestoneTypeStyle.label}
-            </span>
-          </MilestoneDetailValue>
-        </div>
-
         <div className="modal-form task-details-grid" style={{ color: "var(--text-copy)" }}>
           <div className="task-details-section-grid task-details-overview-grid modal-wide">
             <div className="field modal-wide">
@@ -211,42 +192,28 @@ export function MilestonesEventDetailsModal({
               </MilestoneDetailValue>
             </div>
             <div className="field modal-wide">
-              <span style={{ color: "var(--text-title)" }}>Related projects</span>
+              <span style={{ color: "var(--text-title)" }}>Type</span>
               <MilestoneDetailValue onOpenEditMilestone={() => onEditMilestone(activeMilestone)}>
-                <p className="task-detail-copy">{projectNames.length > 0 ? projectNames.join(", ") : "All projects"}</p>
+                <span className="pill status-pill milestone-type-pill" style={milestoneTypeStyleVariables}>
+                  {milestoneTypeStyle.label}
+                </span>
               </MilestoneDetailValue>
             </div>
             <div className="field modal-wide">
-              <span style={{ color: "var(--text-title)" }}>External milestone</span>
+              <span style={{ color: "var(--text-title)" }}>Related projects</span>
               <MilestoneDetailValue onOpenEditMilestone={() => onEditMilestone(activeMilestone)}>
-                <p className="task-detail-copy">{activeMilestone.isExternal ? "Yes" : "No"}</p>
+                <p className="task-detail-copy">{projectNames.length > 0 ? projectNames.join(", ") : "All projects"}</p>
               </MilestoneDetailValue>
             </div>
           </div>
 
           <MilestonesMilestoneModalReadinessSection
             activeMilestone={activeMilestone}
-            activeMilestoneCompleteTasks={activeMilestoneCompleteTasks}
-            activeMilestoneTasks={activeMilestoneTasks}
             bootstrap={bootstrap}
             milestoneModalMode="detail"
-            milestoneTaskGroups={milestoneTaskGroups}
-            milestoneTaskOrder={milestoneTaskOrder}
           />
 
           <div className="modal-actions modal-wide">
-            <button
-              className="secondary-action"
-              onClick={onClose}
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
-              type="button"
-            >
-              Close
-            </button>
             <button className="primary-action" onClick={() => onEditMilestone(activeMilestone)} type="button">
               Edit milestone
             </button>

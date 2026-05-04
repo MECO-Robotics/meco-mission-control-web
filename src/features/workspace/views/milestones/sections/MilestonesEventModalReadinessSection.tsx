@@ -1,83 +1,158 @@
-import type { BootstrapPayload, MilestoneRecord } from "@/types";
-import { formatTaskPlanningState } from "@/features/workspace/shared/task/taskPlanning";
+import type { BootstrapPayload, MilestoneRecord, MilestoneRequirementRecord } from "@/types";
+import {
+  getMilestoneRequirementTasks,
+  getMilestoneRequirementsForMilestone,
+  getMilestoneTaskBoardState,
+  getMilestoneTaskBoardStateLabel,
+} from "@/features/workspace/shared/milestones";
+import { getStatusPillClassName } from "@/features/workspace/shared/model";
 
-import { MilestoneTaskCard } from "./MilestoneTaskCard";
+function getMilestoneRequirementTargetLabel(
+  requirement: MilestoneRequirementRecord,
+  bootstrap: BootstrapPayload,
+) {
+  const project = bootstrap.projects.find((item) => item.id === requirement.targetId);
+  const workstream = bootstrap.workstreams.find((item) => item.id === requirement.targetId);
+  const artifact = bootstrap.artifacts.find((item) => item.id === requirement.targetId);
+  const subsystem = bootstrap.subsystems.find((item) => item.id === requirement.targetId);
+  const mechanism = bootstrap.mechanisms.find((item) => item.id === requirement.targetId);
+  const partInstance = bootstrap.partInstances.find((item) => item.id === requirement.targetId);
 
-type TaskPlanningState = "blocked" | "at-risk" | "waiting-on-dependency" | "ready" | "overdue";
+  const targetName =
+    requirement.targetType === "project"
+      ? project?.name
+      : requirement.targetType === "workflow"
+        ? workstream?.name
+        : requirement.targetType === "artifact"
+          ? artifact?.title
+          : requirement.targetType === "subsystem"
+            ? subsystem?.name
+            : requirement.targetType === "mechanism"
+              ? mechanism?.name
+              : requirement.targetType === "part-instance"
+                ? partInstance?.name
+                : null;
+
+  const targetLabel =
+    requirement.targetType === "project"
+      ? "Project"
+      : requirement.targetType === "workflow"
+        ? "Workflow"
+        : requirement.targetType === "artifact"
+          ? "Artifact"
+          : requirement.targetType === "subsystem"
+            ? "Subsystem"
+            : requirement.targetType === "mechanism"
+              ? "Mechanism"
+              : requirement.targetType === "part-instance"
+                ? "Part instance"
+                : requirement.targetType;
+
+  return targetName ? `${targetLabel}: ${targetName}` : `${targetLabel}: ${requirement.targetId}`;
+}
+
+function getMilestoneRequirementConditionLabel(requirement: MilestoneRequirementRecord) {
+  if (requirement.conditionType === "iteration") {
+    const normalized = requirement.conditionValue.trim().toLowerCase();
+    const match = normalized.match(/^iteration\s*(?:([<>]=?|==|=)\s*)?(\d+)$/);
+
+    if (match) {
+      const [, operator, value] = match;
+      return operator && operator !== "=" && operator !== "==" ? `Iteration ${operator} ${value}` : `Iteration ${value}`;
+    }
+
+    return requirement.conditionValue.trim() || "Iteration";
+  }
+
+  if (requirement.conditionType === "workflow_state") {
+    return `Workflow state ${requirement.conditionValue}`;
+  }
+
+  return requirement.conditionValue.trim() || "Custom condition";
+}
+
+function MilestoneRequirementCard({
+  bootstrap,
+  requirement,
+}: {
+  bootstrap: BootstrapPayload;
+  requirement: MilestoneRequirementRecord;
+}) {
+  const requirementTasks = getMilestoneRequirementTasks(requirement, bootstrap);
+  const requirementState = getMilestoneTaskBoardState(requirementTasks, bootstrap);
+  const requirementStateLabel = getMilestoneTaskBoardStateLabel(requirementState);
+  const requirementTargetLabel = getMilestoneRequirementTargetLabel(requirement, bootstrap);
+  const requirementConditionLabel = getMilestoneRequirementConditionLabel(requirement);
+
+  return (
+    <article
+      style={{
+        display: "grid",
+        gap: "0.35rem",
+        padding: "0.75rem",
+        border: "1px solid var(--border-base)",
+        borderRadius: "12px",
+        background: "var(--bg-row-alt)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "0.5rem",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <strong style={{ color: "var(--text-title)" }}>{requirementTargetLabel}</strong>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", justifyContent: "flex-end" }}>
+          <span
+            className={
+              requirement.required
+                ? "pill status-pill status-pill-success"
+                : "pill status-pill status-pill-neutral"
+            }
+          >
+            {requirement.required ? "Required" : "Optional"}
+          </span>
+          <span className={getStatusPillClassName(requirementState)}>{requirementStateLabel}</span>
+        </div>
+      </div>
+      <small style={{ color: "var(--text-copy)" }}>
+        {requirementConditionLabel}
+        {requirement.notes ? ` - ${requirement.notes}` : ""}
+      </small>
+    </article>
+  );
+}
 
 interface MilestonesMilestoneModalReadinessSectionProps {
   activeMilestone: MilestoneRecord | null;
-  activeMilestoneCompleteTasks: BootstrapPayload["tasks"];
-  activeMilestoneTasks: BootstrapPayload["tasks"];
   bootstrap: BootstrapPayload;
   milestoneModalMode: "create" | "detail" | "edit" | null;
-  milestoneTaskGroups: Record<TaskPlanningState, BootstrapPayload["tasks"]>;
-  milestoneTaskOrder: readonly TaskPlanningState[];
 }
 
 export function MilestonesMilestoneModalReadinessSection({
   activeMilestone,
-  activeMilestoneCompleteTasks,
-  activeMilestoneTasks,
   bootstrap,
   milestoneModalMode,
-  milestoneTaskGroups,
-  milestoneTaskOrder,
 }: MilestonesMilestoneModalReadinessSectionProps) {
+  const milestoneRequirements = activeMilestone
+    ? getMilestoneRequirementsForMilestone(activeMilestone, bootstrap)
+    : [];
+
   return milestoneModalMode !== "create" && activeMilestone ? (
     <div className="field modal-wide">
       <span style={{ color: "var(--text-title)" }}>Readiness</span>
-      {activeMilestoneTasks.length > 0 ? (
+      {milestoneRequirements.length > 0 ? (
         <div style={{ display: "grid", gap: "0.75rem", marginTop: "0.5rem" }}>
-          {milestoneTaskOrder.map((state) => {
-            const tasks = milestoneTaskGroups[state];
-            if (tasks.length === 0) {
-              return null;
-            }
-
-            return (
-              <section key={state} style={{ display: "grid", gap: "0.5rem" }}>
-                <h3
-                  style={{
-                    margin: 0,
-                    color: "var(--text-title)",
-                    fontSize: "0.9rem",
-                    textTransform: "capitalize",
-                  }}
-                >
-                  {formatTaskPlanningState(state)} ({tasks.length})
-                </h3>
-                <div style={{ display: "grid", gap: "0.5rem" }}>
-                  {tasks.map((task) => (
-                    <MilestoneTaskCard key={task.id} bootstrap={bootstrap} task={task} />
-                  ))}
-                </div>
-              </section>
-            );
-          })}
-          {activeMilestoneCompleteTasks.length > 0 ? (
-            <section style={{ display: "grid", gap: "0.5rem" }}>
-              <h3
-                style={{
-                  margin: 0,
-                  color: "var(--text-title)",
-                  fontSize: "0.9rem",
-                  textTransform: "capitalize",
-                }}
-              >
-                Complete ({activeMilestoneCompleteTasks.length})
-              </h3>
-              <div style={{ display: "grid", gap: "0.5rem" }}>
-                {activeMilestoneCompleteTasks.map((task) => (
-                  <MilestoneTaskCard key={task.id} bootstrap={bootstrap} task={task} />
-                ))}
-              </div>
-            </section>
-          ) : null}
+          {milestoneRequirements.map((requirement) => (
+            <MilestoneRequirementCard key={requirement.id} bootstrap={bootstrap} requirement={requirement} />
+          ))}
         </div>
       ) : (
         <p style={{ margin: "0.25rem 0 0", color: "var(--text-copy)" }}>
-          No tasks currently target this milestone.
+          No milestone requirements defined.
         </p>
       )}
     </div>

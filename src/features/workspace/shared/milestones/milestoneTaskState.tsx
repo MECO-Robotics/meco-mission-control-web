@@ -101,8 +101,13 @@ function matchesIterationRequirement(
 }
 
 function getTaskTargets(task: TaskRecord): MilestoneTaskTarget[] {
+  const workstreamTargetIds = new Set<string>(
+    [task.workstreamId, ...task.workstreamIds].filter((targetId): targetId is string => Boolean(targetId)),
+  );
+
   return [
     { targetType: "project", targetId: task.projectId },
+    ...Array.from(workstreamTargetIds).map((targetId) => ({ targetType: "workflow" as const, targetId })),
     ...task.subsystemIds.map((targetId) => ({ targetType: "subsystem" as const, targetId })),
     ...task.mechanismIds.map((targetId) => ({ targetType: "mechanism" as const, targetId })),
     ...task.partInstanceIds.map((targetId) => ({ targetType: "part-instance" as const, targetId })),
@@ -130,6 +135,35 @@ function matchesMilestoneRequirement(
   return false;
 }
 
+export function getMilestoneRequirementsForMilestone(
+  milestone: MilestoneRecord,
+  bootstrap: BootstrapPayload,
+) {
+  return (bootstrap.milestoneRequirements ?? [])
+    .filter((requirement) => requirement.milestoneId === milestone.id)
+    .sort((left, right) => left.sortOrder - right.sortOrder || left.id.localeCompare(right.id));
+}
+
+export function getMilestoneRequirementTasks(
+  requirement: MilestoneRequirementRecord,
+  bootstrap: BootstrapPayload,
+) {
+  const matchedTaskIds = new Set<string>();
+
+  bootstrap.tasks.forEach((task) => {
+    const targets = getTaskTargets(task);
+    if (
+      targets.some((target) =>
+        matchesMilestoneRequirement(requirement, target, bootstrap),
+      )
+    ) {
+      matchedTaskIds.add(task.id);
+    }
+  });
+
+  return bootstrap.tasks.filter((task) => matchedTaskIds.has(task.id));
+}
+
 export function getMilestoneTasksForState(
   milestone: MilestoneRecord,
   bootstrap: BootstrapPayload,
@@ -137,9 +171,7 @@ export function getMilestoneTasksForState(
   const directMilestoneTasks = bootstrap.tasks.filter(
     (task) => task.targetMilestoneId === milestone.id,
   );
-  const milestoneRequirements = (bootstrap.milestoneRequirements ?? []).filter(
-    (requirement) => requirement.milestoneId === milestone.id,
-  );
+  const milestoneRequirements = getMilestoneRequirementsForMilestone(milestone, bootstrap);
 
   if (milestoneRequirements.length === 0) {
     return directMilestoneTasks;
