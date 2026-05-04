@@ -99,6 +99,13 @@
   white-space: nowrap;
 }
 
+.task-queue-view .task-queue-board-card-due.task-detail-deadline-pill,
+.task-queue-view .task-queue-board-card-due.status-pill-neutral {
+  min-height: calc(1.15rem * var(--task-queue-zoom, 1));
+  padding: calc(0.1rem * var(--task-queue-zoom, 1)) calc(0.36rem * var(--task-queue-zoom, 1));
+  font-size: calc(0.63rem * var(--task-queue-zoom, 1));
+}
+
 .task-queue-board-card-summary {
   color: var(--text-copy);
   font-size: calc(0.74rem * var(--task-queue-zoom, 1));

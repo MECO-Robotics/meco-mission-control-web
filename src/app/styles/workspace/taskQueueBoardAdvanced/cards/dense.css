@@ -10,6 +10,16 @@
   flex-shrink: 0;
 }
 
+.task-queue-board-card-meta-person-group {
+  min-height: calc(1.85rem * var(--task-queue-zoom, 1));
+}
+
+.task-queue-board-card-priority {
+  width: calc(1.85rem * var(--task-queue-zoom, 1));
+  height: calc(1.85rem * var(--task-queue-zoom, 1));
+  align-self: center;
+}
+
 .task-queue-board-card-meta .task-queue-board-card-person .profile-avatar {
   width: calc(1.85rem * var(--task-queue-zoom, 1));
   height: calc(1.85rem * var(--task-queue-zoom, 1));
