@@ -1,8 +1,9 @@
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import type { BootstrapPayload, TaskPayload } from "@/types";
-import { IconPlus, IconTrash } from "@/components/shared/Icons";
+import { IconTrash } from "@/components/shared/Icons";
 import { TaskDetailReveal } from "../TaskDetailReveal";
 import { useTaskDetailsBlockersSectionModel } from "./useTaskDetailsBlockersSectionModel";
+import { TaskDetailsBlockerAddMenu } from "./TaskDetailsBlockerAddMenu";
 
 interface TaskDetailsBlockersSectionViewProps {
   activeTaskId: string;
@@ -44,14 +45,10 @@ export function TaskDetailsBlockersSectionView(props: TaskDetailsBlockersSection
             <span className="task-detail-copy">Blockers</span>
           </span>
           {canInlineEdit ? (
-            <button
-              aria-label="Add blocker"
-              className="icon-button task-detail-section-action-button"
-              onClick={() => setEditingBlockerKey(model.addBlockerDraft())}
-              type="button"
-            >
-              <IconPlus />
-            </button>
+            <TaskDetailsBlockerAddMenu
+              className="task-details-blocker-add-menu"
+              onAddBlocker={model.addBlockerDraft}
+            />
           ) : null}
         </summary>
         <div className="task-detail-collapsible-body">

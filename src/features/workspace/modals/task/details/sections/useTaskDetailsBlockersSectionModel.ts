@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import type { BootstrapPayload, TaskPayload } from "@/types";
+import type { BootstrapPayload, TaskBlockerType, TaskPayload } from "@/types";
 import type { TaskBlockerDraft } from "@/types";
 import { getTaskOpenBlockersForTask } from "../../../../shared/task/taskTargeting";
 
@@ -22,7 +22,7 @@ export function useTaskDetailsBlockersSectionModel({
     blocker?.id ?? `blocker-${index}`;
   const blockerDrafts = taskDraft?.taskBlockers ?? [];
   const openBlockers = getTaskOpenBlockersForTask(activeTaskId, bootstrap);
-  const addBlockerDraft = () => {
+  const addBlockerDraft = (blockerType: TaskBlockerType, description: string) => {
     const blockerId =
       typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
         ? crypto.randomUUID()
@@ -34,15 +34,13 @@ export function useTaskDetailsBlockersSectionModel({
         ...(current.taskBlockers ?? []),
         {
           id: blockerId,
-          blockerType: "external",
+          blockerType,
           blockerId: null,
-          description: "",
+          description,
           severity: "medium",
         },
       ],
     }));
-
-    return blockerId;
   };
   const updateBlockerDraft = (blockerKey: string, updates: Partial<TaskBlockerDraft>) => {
     setTaskDraft?.((current) => {

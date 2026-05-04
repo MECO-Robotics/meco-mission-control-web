@@ -1,4 +1,4 @@
-import React from "react";
+import { createElement } from "react";
 
 import type {
   BootstrapPayload,
@@ -6,8 +6,7 @@ import type {
   TaskPayload,
   TaskRecord,
 } from "@/types";
-import { TimelineTaskStatusLogo } from "@/features/workspace/views/timeline/TimelineTaskStatusLogo";
-import type { TimelineTaskStatusSignal } from "@/features/workspace/views/timeline/timelineGridBodyUtils";
+import { IconMapPin, IconParts, IconTasks } from "@/components/shared/Icons";
 import type { DropdownOption } from "../model";
 import {
   getTaskDependencyRecordsForTask as getTaskDependencyRecordsForTaskFromPlanning,
@@ -57,40 +56,20 @@ export const TASK_DEPENDENCY_KIND_OPTIONS: DropdownOption[] = (
   .map(([kind, label]) => ({
     id: kind,
     name: label,
-    icon: getDependencyStatusIcon(kind === "task" ? "complete" : "ready"),
+    icon: getDependencyKindIcon(kind),
   }));
 
 type DependencyTargetLookups = TaskDependencyTargetLookups;
 
-function getDependencyStatusIcon(status: string | undefined) {
-  const resolved = (() => {
-    switch (status) {
-      case "not ready":
-      case "not-started":
-      case "planned":
-      case "needed":
-        return { signal: "not-started" as TimelineTaskStatusSignal, status: "not-started" as const };
-      case "blocked":
-      case "retired":
-        return { signal: "blocked" as TimelineTaskStatusSignal, status: "not-started" as const };
-      case "qa":
-      case "waiting-for-qa":
-        return { signal: "waiting-for-qa" as TimelineTaskStatusSignal, status: "waiting-for-qa" as const };
-      case "ready":
-      case "complete":
-      case "available":
-      case "installed":
-        return { signal: "complete" as TimelineTaskStatusSignal, status: "complete" as const };
-      default:
-        return { signal: "not-started" as TimelineTaskStatusSignal, status: "not-started" as const };
-    }
-  })();
-
-  return React.createElement(TimelineTaskStatusLogo, {
-    compact: true,
-    signal: resolved.signal,
-    status: resolved.status,
-  });
+function getDependencyKindIcon(kind: TaskDependencyKind) {
+  switch (kind) {
+    case "task":
+      return createElement(IconTasks);
+    case "milestone":
+      return createElement(IconMapPin);
+    case "part_instance":
+      return createElement(IconParts);
+  }
 }
 
 export const TASK_DEPENDENCY_TYPE_LABELS = {
@@ -230,7 +209,7 @@ export function getTaskDependencyTargetOptions(
       .map((task) => ({
         id: task.id,
         name: task.title,
-        icon: getDependencyStatusIcon(task.status),
+        icon: createElement(IconTasks),
       }));
   }
 
@@ -240,14 +219,14 @@ export function getTaskDependencyTargetOptions(
       .map((milestone) => ({
         id: milestone.id,
         name: milestone.title,
-        icon: getDependencyStatusIcon(milestone.status),
+        icon: createElement(IconMapPin),
       }));
   }
 
   return Object.values(lookups.partInstancesById).map((partInstance) => ({
     id: partInstance.id,
     name: partInstance.name,
-    icon: getDependencyStatusIcon(partInstance.status),
+    icon: createElement(IconParts),
   }));
 }
 

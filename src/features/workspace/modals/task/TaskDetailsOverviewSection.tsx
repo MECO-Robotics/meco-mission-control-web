@@ -1,7 +1,6 @@
 import type { CSSProperties, Dispatch, SetStateAction } from "react";
 import type { BootstrapPayload, TaskPayload, TaskRecord } from "@/types";
 import { EditableHoverIndicator, FilterDropdown } from "../../shared/WorkspaceViewShared";
-import { getStatusPillClassName } from "../../shared/model";
 import { TASK_PRIORITY_OPTIONS } from "../../shared/model";
 import {
   getTaskPrimaryTargetNameOptions,
@@ -11,8 +10,9 @@ import {
   setTaskPrimaryTargetSelection,
 } from "../../shared/task/taskTargeting";
 import type { TaskDetailsEditableField } from "./taskModalTypes";
-import { IconManufacturing, IconPerson, IconTasks } from "@/components/shared/Icons";
+import { IconManufacturing, IconPerson } from "@/components/shared/Icons";
 import { formatIterationVersion } from "@/lib/appUtils";
+import { TaskPriorityBadge } from "@/features/workspace/views/taskQueue/taskQueueKanbanCard";
 import { TaskDetailReveal } from "./details/TaskDetailReveal";
 
 interface TaskDetailsOverviewSectionProps {
@@ -25,7 +25,6 @@ interface TaskDetailsOverviewSectionProps {
   setTaskDraft?: Dispatch<SetStateAction<TaskPayload>>;
   taskDraft?: TaskPayload;
 }
-
 export function TaskDetailsOverviewSection({
   activeTask,
   bootstrap,
@@ -49,7 +48,7 @@ export function TaskDetailsOverviewSection({
   ) as Record<string, BootstrapPayload["subsystems"][number]>;
   const selectedAssigneeIds = getTaskSelectedAssigneeIds(editableTask);
   const priorityText = taskDraft?.priority ?? activeTask.priority;
-  const priorityPillClassName = getStatusPillClassName(priorityText);
+  const priorityPillClassName = `pill priority-${priorityText}`;
   const selectedPrimaryTargetId = getTaskSelectedPrimaryTargetId(editableTask);
   const projectSubsystems = bootstrap.subsystems
     .filter((subsystem) => subsystem.projectId === editableTask.projectId)
@@ -144,15 +143,15 @@ export function TaskDetailsOverviewSection({
           <span style={{ color: "var(--text-title)" }}>Priority</span>
           {canInlineEdit ? (
             editingField === "priority" ? (
-              <FilterDropdown
-                allLabel="Priority"
-                ariaLabel="Set task priority"
-                buttonInlineEditField="priority"
-                className="task-queue-filter-menu-submenu"
-                icon={<IconTasks />}
-                getOptionToneClassName={(option) =>
-                  option.id === "critical"
-                    ? "filter-tone-danger"
+                <FilterDropdown
+                  allLabel="Priority"
+                  ariaLabel="Set task priority"
+                  buttonInlineEditField="priority"
+                  className="task-queue-filter-menu-submenu"
+                  icon={<TaskPriorityBadge priority={priorityText} />}
+                  getOptionToneClassName={(option) =>
+                    option.id === "critical"
+                      ? "filter-tone-danger"
                     : option.id === "high"
                       ? "filter-tone-warning"
                       : option.id === "low"
@@ -193,14 +192,22 @@ export function TaskDetailsOverviewSection({
                   onClick={() => setEditingField("priority")}
                   type="button"
                 >
-                  <span className={priorityPillClassName}>{priorityText}</span>
+                  <span className={priorityPillClassName} style={{ gap: "0.32rem" }}>
+                    <span aria-hidden="true">
+                      <TaskPriorityBadge priority={priorityText} />
+                    </span>
+                    <span>{priorityText}</span>
+                  </span>
                 </button>
                 <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator" />
               </div>
             )
           ) : (
-            <span className={priorityPillClassName} onDoubleClick={openTaskEditModal}>
-              {priorityText}
+            <span className={priorityPillClassName} onDoubleClick={openTaskEditModal} style={{ gap: "0.32rem" }}>
+              <span aria-hidden="true">
+                <TaskPriorityBadge priority={priorityText} />
+              </span>
+              <span>{priorityText}</span>
             </span>
           )}
         </label>
@@ -416,4 +423,3 @@ export function TaskDetailsOverviewSection({
     </>
   );
 }
-

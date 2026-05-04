@@ -7,7 +7,7 @@ import type {
   TaskRecord,
 } from "@/types";
 import { formatIterationVersion } from "@/lib/appUtils";
-import { IconPlus, IconTasks, IconTrash } from "@/components/shared/Icons";
+import { IconTasks, IconTrash } from "@/components/shared/Icons";
 import { FilterDropdown } from "../../shared/WorkspaceViewShared";
 import {
   getTaskDependencyRecordsForTask,
@@ -18,6 +18,7 @@ import {
   getTaskDependencyTargetOptions,
 } from "../../shared/task/taskTargeting";
 import { TaskDetailReveal } from "./details/TaskDetailReveal";
+import { TaskDetailsDependencyAddMenu } from "./details/sections/TaskDetailsDependencyAddMenu";
 
 interface TaskDetailsDependenciesSectionProps {
   activeTask: TaskRecord;
@@ -43,7 +44,6 @@ export function TaskDetailsDependenciesSection({
   taskDraft,
 }: TaskDetailsDependenciesSectionProps) {
   const [editingDependencyKey, setEditingDependencyKey] = useState<string | null>(null);
-  const [dependencyAddMenuKey, setDependencyAddMenuKey] = useState(0);
 
   const tasksById = Object.fromEntries(bootstrap.tasks.map((task) => [task.id, task] as const));
   const milestonesById = Object.fromEntries(
@@ -113,7 +113,7 @@ export function TaskDetailsDependenciesSection({
     });
   };
 
-  const addDependencyDraft = (kind: TaskDependencyKind) => {
+  const addDependencyDraft = (kind: TaskDependencyKind, refId = "") => {
     const dependencyId =
       typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
         ? crypto.randomUUID()
@@ -126,14 +126,13 @@ export function TaskDetailsDependenciesSection({
         {
           id: dependencyId,
           kind,
-          refId: "",
+          refId,
           requiredState: getDependencyDefaultState(kind),
           dependencyType: "hard" as TaskDependencyType,
         },
       ],
     }));
     setEditingDependencyKey(dependencyId);
-    setDependencyAddMenuKey((current) => current + 1);
   };
 
   const removeDependencyDraft = (dependencyKey: string) => {
@@ -155,27 +154,11 @@ export function TaskDetailsDependenciesSection({
             <span className="task-detail-copy">Dependencies</span>
           </span>
           {canInlineEdit ? (
-            <FilterDropdown
-              key={dependencyAddMenuKey}
-              allLabel="Add dependency"
-              ariaLabel="Add dependency"
-              buttonContent={<IconPlus />}
-              buttonInlineEditField="dependency-add"
+            <TaskDetailsDependencyAddMenu
               className="task-details-section-add-menu task-details-dependency-kind-menu"
-              icon={<IconTasks />}
+              getTargetOptions={getDependencyTargetOptions}
               menuClassName="task-details-dependency-menu-popup"
-              onChange={(selection) => {
-                const kind = selection[0] as TaskDependencyKind | undefined;
-                if (kind) {
-                  addDependencyDraft(kind);
-                }
-              }}
-              options={dependencyKindOptions}
-              portalMenu
-              portalMenuPlacement="below"
-              showAllOption={false}
-              singleSelect
-              value={[]}
+              onAddDependency={addDependencyDraft}
             />
           ) : null}
         </summary>

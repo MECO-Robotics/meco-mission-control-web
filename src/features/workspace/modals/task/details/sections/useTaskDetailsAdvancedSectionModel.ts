@@ -150,6 +150,26 @@ export function useTaskDetailsAdvancedSectionModel({
     }));
   };
 
+  const addMechanismSelection = (mechanismId: string) => {
+    if (!mechanismId) {
+      return;
+    }
+
+    setTaskDraft?.((current) => {
+      const nextMechanismIds = getTaskSelectedMechanismIds(current);
+      if (nextMechanismIds.includes(mechanismId)) {
+        return current;
+      }
+
+      const updatedMechanismIds = [...nextMechanismIds, mechanismId];
+      return {
+        ...current,
+        mechanismIds: updatedMechanismIds,
+        mechanismId: updatedMechanismIds[0] ?? null,
+      };
+    });
+  };
+
   const removeMechanismSelection = (mechanismId: string) => {
     setTaskDraft?.((current) => {
       const nextMechanismIds = getTaskSelectedMechanismIds(current).filter(
@@ -170,6 +190,26 @@ export function useTaskDetailsAdvancedSectionModel({
       partInstanceIds: selection,
       partInstanceId: selection[0] ?? null,
     }));
+  };
+
+  const addPartInstanceSelection = (partInstanceId: string) => {
+    if (!partInstanceId) {
+      return;
+    }
+
+    setTaskDraft?.((current) => {
+      const nextPartInstanceIds = getTaskSelectedPartInstanceIds(current);
+      if (nextPartInstanceIds.includes(partInstanceId)) {
+        return current;
+      }
+
+      const updatedPartInstanceIds = [...nextPartInstanceIds, partInstanceId];
+      return {
+        ...current,
+        partInstanceIds: updatedPartInstanceIds,
+        partInstanceId: updatedPartInstanceIds[0] ?? null,
+      };
+    });
   };
 
   const removePartInstanceSelection = (partInstanceId: string) => {
@@ -195,6 +235,8 @@ export function useTaskDetailsAdvancedSectionModel({
     getDisciplineOptionToneClassName,
     getSubsystemOptionToneClassName,
     handleDisciplineChange,
+    addMechanismSelection,
+    addPartInstanceSelection,
     handleMechanismChange,
     handlePartsChange,
     handleStartDateChange,
@@ -210,4 +252,3 @@ export function useTaskDetailsAdvancedSectionModel({
     selectedPartInstanceIds,
   };
 }
-

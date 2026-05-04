@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
 import type { DropdownOption } from "../model";
 import { type FilterSelection } from "./workspaceFilterUtils";
@@ -7,6 +7,7 @@ import { toggleFilterSelection } from "./workspaceFilterDropdownHooks";
 export function FilterOptionMenu({
   allLabel,
   className,
+  headerContent,
   getOptionToneClassName,
   menuId,
   menuRef,
@@ -20,6 +21,7 @@ export function FilterOptionMenu({
 }: {
   allLabel: string;
   className?: string;
+  headerContent?: ReactNode;
   getOptionToneClassName?: (option: DropdownOption) => string | undefined;
   menuId: string;
   menuRef: { current: HTMLDivElement | null };
@@ -71,6 +73,7 @@ export function FilterOptionMenu({
       id={menuId}
       role="listbox"
     >
+      {headerContent ? <div role="presentation">{headerContent}</div> : null}
       <div className="table-column-filter-search" role="presentation">
         <input
           aria-label={`Search ${allLabel} options`}

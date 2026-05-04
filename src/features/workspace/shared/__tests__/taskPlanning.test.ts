@@ -4,6 +4,7 @@ import {
   getTaskPlanningState,
 } from "../task/taskPlanning";
 import { getTaskDependencyTargetOptions } from "../task/taskTargeting";
+import { IconMapPin, IconParts, IconTasks } from "@/components/shared/Icons";
 import type { BootstrapPayload } from "@/types";
 
 const bootstrap = {
@@ -181,7 +182,20 @@ test("task planning keeps manual blockers separate from dependency waiting state
   );
 });
 
-test("dependency targets expose standard status icons for milestone and part-instance statuses", () => {
+test("dependency targets expose semantic icons for dependency menus", () => {
+  const taskOptions = getTaskDependencyTargetOptions("task", {
+    tasksById: {
+      taskA: {
+        ...bootstrap.tasks[0],
+        id: "taskA",
+        title: "Task A",
+      },
+    },
+    milestonesById: {},
+    partInstancesById: {},
+    partDefinitionsById: {},
+    formatIterationVersion: () => "1",
+  });
   const milestoneOptions = getTaskDependencyTargetOptions("milestone", {
     tasksById: {},
     milestonesById: {
@@ -237,29 +251,6 @@ test("dependency targets expose standard status icons for milestone and part-ins
     partInstancesById: {},
     partDefinitionsById: {},
     formatIterationVersion: () => "1",
-  });
-
-  expect((milestoneOptions.find((option) => option.id === "milestoneNotReady")?.icon as any).props).toMatchObject(
-    {
-      compact: true,
-      signal: "not-started",
-      status: "not-started",
-    },
-  );
-  expect((milestoneOptions.find((option) => option.id === "milestoneBlocked")?.icon as any).props).toMatchObject({
-    compact: true,
-    signal: "blocked",
-    status: "not-started",
-  });
-  expect((milestoneOptions.find((option) => option.id === "milestoneQa")?.icon as any).props).toMatchObject({
-    compact: true,
-    signal: "waiting-for-qa",
-    status: "waiting-for-qa",
-  });
-  expect((milestoneOptions.find((option) => option.id === "milestoneReady")?.icon as any).props).toMatchObject({
-    compact: true,
-    signal: "complete",
-    status: "complete",
   });
 
   const partOptions = getTaskDependencyTargetOptions("part_instance", {
@@ -324,26 +315,11 @@ test("dependency targets expose standard status icons for milestone and part-ins
     formatIterationVersion: () => "1",
   });
 
-  expect((partOptions.find((option) => option.id === "partNotReady")?.icon as any).props).toMatchObject({
-    compact: true,
-    signal: "not-started",
-    status: "not-started",
-  });
-  expect((partOptions.find((option) => option.id === "partBlocked")?.icon as any).props).toMatchObject({
-    compact: true,
-    signal: "blocked",
-    status: "not-started",
-  });
-  expect((partOptions.find((option) => option.id === "partQa")?.icon as any).props).toMatchObject({
-    compact: true,
-    signal: "waiting-for-qa",
-    status: "waiting-for-qa",
-  });
-  expect((partOptions.find((option) => option.id === "partReady")?.icon as any).props).toMatchObject({
-    compact: true,
-    signal: "complete",
-    status: "complete",
-  });
+  expect((taskOptions[0].icon as { type?: unknown } | null)?.type).toBe(IconTasks);
+  expect(milestoneOptions.every((option) => (option.icon as { type?: unknown } | null)?.type === IconMapPin)).toBe(
+    true,
+  );
+  expect(partOptions.every((option) => (option.icon as { type?: unknown } | null)?.type === IconParts)).toBe(true);
 });
 
 test("task planning accepts milestone and part-instance qa states as satisfied dependency targets", () => {

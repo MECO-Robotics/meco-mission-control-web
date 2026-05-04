@@ -1,7 +1,7 @@
-import type { Dispatch, SetStateAction } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import type { BootstrapPayload, TaskPayload, TaskRecord } from "@/types";
 import { EditableHoverIndicator, FilterDropdown } from "../../../../shared/WorkspaceViewShared";
-import { IconManufacturing, IconParts, IconPlus, IconTrash } from "@/components/shared/Icons";
+import { IconManufacturing, IconPlus, IconTrash } from "@/components/shared/Icons";
 import type { TaskDetailsEditableField } from "../../taskModalTypes";
 import { TaskDetailReveal } from "../TaskDetailReveal";
 import { useTaskDetailsAdvancedSectionModel } from "./useTaskDetailsAdvancedSectionModel";
@@ -40,6 +40,20 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
     taskDraft,
   });
   const editableTask = model.editableTask;
+  const [mechanismAddMenuKey, setMechanismAddMenuKey] = useState(0);
+  const [partAddMenuKey, setPartAddMenuKey] = useState(0);
+  const mechanismAddOptions = model.projectMechanisms
+    .filter((mechanism) => !model.selectedMechanismIds.includes(mechanism.id))
+    .map((mechanism) => ({
+      id: mechanism.id,
+      name: `${mechanism.name} (${mechanism.iteration})`,
+    }));
+  const partAddOptions = model.projectPartInstances
+    .filter((partInstance) => !model.selectedPartInstanceIds.includes(partInstance.id))
+    .map((partInstance) => ({
+      id: partInstance.id,
+      name: `${partInstance.name}`,
+    }));
 
   return (
     <details
@@ -140,87 +154,61 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
                 <span className="task-detail-copy">{canInlineEdit ? "Mechanism" : "Mechanisms"}</span>
               </span>
               {canInlineEdit ? (
-                <button
-                  aria-label={editingField === "mechanism" ? "Close mechanism editor" : "Add mechanism"}
-                  className="icon-button task-detail-section-action-button"
-                  onClick={(milestone) => {
-                    milestone.preventDefault();
-                    milestone.stopPropagation();
-                    setEditingField(editingField === "mechanism" ? null : "mechanism");
-                  }}
-                  type="button"
-                >
-                  <IconPlus />
-                </button>
+                mechanismAddOptions.length > 0 ? (
+                  <FilterDropdown
+                    key={mechanismAddMenuKey}
+                    allLabel="Add mechanism"
+                    ariaLabel="Add mechanism"
+                    buttonInlineEditField="mechanism-add"
+                    className="task-details-section-add-menu task-details-dependency-kind-menu"
+                    icon={<IconPlus />}
+                    menuClassName="task-details-dependency-menu-popup"
+                    onChange={(selection) => {
+                      const mechanismId = selection[0];
+                      if (mechanismId) {
+                        model.addMechanismSelection(mechanismId);
+                        setMechanismAddMenuKey((current) => current + 1);
+                      }
+                    }}
+                    options={mechanismAddOptions}
+                    portalMenu
+                    portalMenuPlacement="below"
+                    showAllOption={false}
+                    singleSelect
+                    value={[]}
+                  />
+                ) : null
               ) : null}
             </summary>
             <div className="task-detail-collapsible-body">
-              {canInlineEdit ? (
-                editingField === "mechanism" ? (
-                  model.projectMechanisms.length > 0 ? (
-                    <FilterDropdown
-                      allLabel="No mechanism linked"
-                      ariaLabel="Set task mechanisms"
-                      buttonInlineEditField="mechanism"
-                      className="task-queue-filter-menu-submenu"
-                      menuClassName="task-details-blocker-menu-popup"
-                      icon={<IconManufacturing />}
-                      onChange={model.handleMechanismChange}
-                      options={model.projectMechanisms.map((mechanism) => ({
-                        id: mechanism.id,
-                        name: `${mechanism.name} (${mechanism.iteration})`,
-                      }))}
-                      portalMenu
-                      value={model.selectedMechanismIds}
-                    />
-                  ) : (
-                    <p className="task-detail-copy task-detail-empty" style={{ margin: "0.25rem 0 0" }}>
-                      No mechanism linked
-                    </p>
-                  )
-                ) : model.mechanismRows.length > 0 ? (
-                  <div className="task-details-dependency-editor">
-                    {model.mechanismRows.map((mechanism, index) => (
-                      <div
-                        className="workspace-detail-list-item task-detail-list-item task-details-dependency-row task-details-dependency-row-with-delete"
-                        key={mechanism.id}
-                      >
-                        <button
-                          aria-label={`Remove mechanism ${index + 1}`}
-                          className="icon-button task-details-dependency-row-remove-button"
-                          onClick={() => model.removeMechanismSelection(mechanism.id)}
-                          type="button"
-                        >
-                          <IconTrash />
-                        </button>
-                        <button
-                          className="task-details-dependency-row-button task-details-mechanism-row-button"
-                          onClick={() => setEditingField("mechanism")}
-                          type="button"
-                        >
-                          <TaskDetailReveal
-                            className="task-detail-ellipsis-reveal"
-                            style={{ color: "var(--text-title)", fontWeight: 800 }}
-                            text={mechanism.label}
-                          />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <span className="task-detail-inline-edit-shell task-detail-inline-edit-shell-inline">
-                    <button
-                      className="task-detail-inline-edit-trigger task-detail-inline-edit-trigger-inline"
-                      data-inline-edit-field="mechanism"
-                      onClick={() => setEditingField("mechanism")}
-                      type="button"
+              {model.mechanismRows.length > 0 ? (
+                <div className="task-details-dependency-editor">
+                  {model.mechanismRows.map((mechanism, index) => (
+                    <div
+                      className="workspace-detail-list-item task-detail-list-item task-details-dependency-row task-details-dependency-row-with-delete"
+                      key={mechanism.id}
                     >
-                      <span className="task-detail-copy">No mechanism linked</span>
-                    </button>
-                    <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator" />
-                  </span>
-                )
-              ) : model.mechanismNames.length > 0 ? (
+                      <button
+                        aria-label={`Remove mechanism ${index + 1}`}
+                        className="icon-button task-details-dependency-row-remove-button"
+                        onClick={() => model.removeMechanismSelection(mechanism.id)}
+                        type="button"
+                      >
+                        <IconTrash />
+                      </button>
+                      <div
+                        className="task-details-dependency-row-button task-details-mechanism-row-button"
+                      >
+                        <TaskDetailReveal
+                          className="task-detail-ellipsis-reveal"
+                          style={{ color: "var(--text-title)", fontWeight: 800 }}
+                          text={mechanism.label}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : !canInlineEdit ? (
                 <div className="task-details-mechanism-list">
                   {model.mechanismNames.map((mechanismName, index) => (
                     <div className="task-details-mechanism-item" key={`${mechanismName}-${index}`}>
@@ -244,89 +232,67 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
                 <span className="task-detail-copy">Parts</span>
               </span>
               {canInlineEdit ? (
-                <button
-                  aria-label={editingField === "parts" ? "Close parts editor" : "Add part"}
-                  className="icon-button task-detail-section-action-button"
-                  onClick={(milestone) => {
-                    milestone.preventDefault();
-                    milestone.stopPropagation();
-                    setEditingField(editingField === "parts" ? null : "parts");
-                  }}
-                  type="button"
-                >
-                  <IconPlus />
-                </button>
+                partAddOptions.length > 0 ? (
+                  <FilterDropdown
+                    key={partAddMenuKey}
+                    allLabel="Add part"
+                    ariaLabel="Add part"
+                    buttonInlineEditField="parts-add"
+                    className="task-details-section-add-menu task-details-dependency-kind-menu"
+                    icon={<IconPlus />}
+                    menuClassName="task-details-dependency-menu-popup"
+                    onChange={(selection) => {
+                      const partInstanceId = selection[0];
+                      if (partInstanceId) {
+                        model.addPartInstanceSelection(partInstanceId);
+                        setPartAddMenuKey((current) => current + 1);
+                      }
+                    }}
+                    options={partAddOptions}
+                    portalMenu
+                    portalMenuPlacement="below"
+                    showAllOption={false}
+                    singleSelect
+                    value={[]}
+                  />
+                ) : null
               ) : null}
             </summary>
             <div className="task-detail-collapsible-body">
-              {canInlineEdit ? (
-                editingField === "parts" ? (
-                  model.projectPartInstances.length > 0 ? (
-                    <FilterDropdown
-                      allLabel="No part linked"
-                      ariaLabel="Set task parts"
-                      buttonInlineEditField="parts"
-                      className="task-queue-filter-menu-submenu"
-                      menuClassName="task-details-blocker-menu-popup"
-                      icon={<IconParts />}
-                      onChange={model.handlePartsChange}
-                      options={model.projectPartInstances.map((partInstance) => ({
-                        id: partInstance.id,
-                        name: `${partInstance.name}`,
-                      }))}
-                      portalMenu
-                      value={model.selectedPartInstanceIds}
-                    />
-                  ) : (
-                    <p className="task-detail-copy task-detail-empty" style={{ margin: "0.25rem 0 0" }}>
-                      No part linked
-                    </p>
-                  )
-                ) : model.partRows.length > 0 ? (
-                  <div className="task-details-dependency-editor">
-                    {model.partRows.map((partInstance, index) => (
-                      <div
-                        className="workspace-detail-list-item task-detail-list-item task-details-dependency-row task-details-dependency-row-with-delete"
-                        key={partInstance.id}
-                      >
-                        <button
-                          aria-label={`Remove part ${index + 1}`}
-                          className="icon-button task-details-dependency-row-remove-button"
-                          onClick={() => model.removePartInstanceSelection(partInstance.id)}
-                          type="button"
-                        >
-                          <IconTrash />
-                        </button>
-                        <button
-                          className="task-details-dependency-row-button task-details-parts-row-button"
-                          onClick={() => setEditingField("parts")}
-                          type="button"
-                        >
-                          <TaskDetailReveal
-                            className="task-detail-ellipsis-reveal"
-                            style={{ color: "var(--text-title)", fontWeight: 800 }}
-                            text={partInstance.label}
-                          />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <span className="task-detail-inline-edit-shell task-detail-inline-edit-shell-inline">
-                    <button
-                      className="task-detail-inline-edit-trigger task-detail-inline-edit-trigger-inline"
-                      data-inline-edit-field="parts"
-                      onClick={() => setEditingField("parts")}
-                      type="button"
+              {model.partRows.length > 0 ? (
+                <div className="task-details-dependency-editor">
+                  {model.partRows.map((partInstance, index) => (
+                    <div
+                      className="workspace-detail-list-item task-detail-list-item task-details-dependency-row task-details-dependency-row-with-delete"
+                      key={partInstance.id}
                     >
-                      <span className="task-detail-copy">No part linked</span>
-                    </button>
-                    <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator" />
-                  </span>
-                )
-              ) : (
+                      <button
+                        aria-label={`Remove part ${index + 1}`}
+                        className="icon-button task-details-dependency-row-remove-button"
+                        onClick={() => model.removePartInstanceSelection(partInstance.id)}
+                        type="button"
+                      >
+                        <IconTrash />
+                      </button>
+                      <div
+                        className="task-details-dependency-row-button task-details-parts-row-button"
+                      >
+                        <TaskDetailReveal
+                          className="task-detail-ellipsis-reveal"
+                          style={{ color: "var(--text-title)", fontWeight: 800 }}
+                          text={partInstance.label}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : !canInlineEdit ? (
                 <p className="task-detail-copy">
                   <TaskDetailReveal className="task-detail-ellipsis-reveal" text={model.partsText} />
+                </p>
+              ) : (
+                <p className="task-detail-copy task-detail-empty" style={{ margin: "0.25rem 0 0" }}>
+                  No part linked
                 </p>
               )}
             </div>
@@ -336,4 +302,3 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
     </details>
   );
 }
-

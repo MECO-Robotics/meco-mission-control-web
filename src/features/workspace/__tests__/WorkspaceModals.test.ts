@@ -38,6 +38,7 @@ describe("TaskEditorModal", () => {
     expect(editMarkup).toContain("task-details-header");
     expect(editMarkup).toContain("task-details-overview-grid");
     expect(editMarkup).toContain('data-inline-edit-field="priority"');
+    expect(editMarkup).toContain("task-queue-board-card-priority task-queue-board-card-priority-medium");
     expect(editMarkup).toContain('data-inline-edit-field="owner"');
     expect(editMarkup).toContain('data-inline-edit-field="assigned"');
     expect(editMarkup).toContain("task-details-assigned-list");

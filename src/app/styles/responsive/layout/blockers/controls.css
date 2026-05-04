@@ -24,6 +24,31 @@
   width: fit-content;
 }
 
+.task-details-blocker-add-menu.toolbar-filter-dropdown {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.task-details-blocker-add-menu .toolbar-filter-menu-button {
+  width: 1.65rem;
+  height: 1.65rem;
+  min-width: 1.65rem;
+  min-height: 1.65rem;
+  padding: 0;
+  justify-content: center;
+}
+
+.task-details-blocker-add-menu .toolbar-filter-value,
+.task-details-blocker-add-menu .toolbar-filter-chevron {
+  display: none;
+}
+
+.task-details-blocker-add-menu .toolbar-filter-icon {
+  margin: 0;
+}
+
 .task-details-dependency-menu-popup.table-column-filter-menu,
 .task-details-blocker-menu-popup.table-column-filter-menu {
   min-width: 11.5rem;
@@ -82,6 +107,11 @@
 .task-details-blocker-menu-popup.table-column-filter-menu .table-column-filter-option-check {
   color: var(--task-details-dropdown-option-check);
   font-weight: 700;
+}
+
+.task-details-blocker-menu-popup .task-details-blocker-input {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .task-details-blocker-remove-button {

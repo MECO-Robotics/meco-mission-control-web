@@ -58,7 +58,7 @@ export const INVENTORY_VIEW_ORDER: readonly InventoryViewTab[] = [
 
 export const TASK_VIEW_OPTIONS: readonly ViewOption<TaskViewTab>[] = [
   { value: "timeline", label: "Timeline" },
-  { value: "queue", label: "Kanban" },
+  { value: "queue", label: "Tasks" },
   { value: "milestones", label: "Milestones" },
 ];
 

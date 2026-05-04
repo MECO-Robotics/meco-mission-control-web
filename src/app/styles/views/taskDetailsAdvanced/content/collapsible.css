@@ -107,6 +107,13 @@
   justify-content: center;
 }
 
+.task-details-section-add-menu.toolbar-filter-dropdown {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
 .task-details-section-add-menu .toolbar-filter-value,
 .task-details-section-add-menu .toolbar-filter-chevron {
   display: none;
