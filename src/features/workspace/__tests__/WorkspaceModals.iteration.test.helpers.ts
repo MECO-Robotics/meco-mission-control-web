@@ -83,6 +83,7 @@ export function renderIterationEditors(mode: "create" | "edit") {
           subsystemId: "subsystem-1",
           name: "Gearbox",
           description: "Drive gearbox",
+          googleSheetsUrl: "",
           photoUrl: "",
           iteration: 1,
         },

@@ -285,6 +285,7 @@ export function buildEmptyMechanismPayload(
     subsystemId: firstSubsystem,
     name: "",
     description: "",
+    googleSheetsUrl: "",
     photoUrl: "",
     iteration: 1,
     isArchived: false,

@@ -135,6 +135,22 @@ export function MechanismEditorModal({
         />
       </label>
 
+      <label className="field modal-wide">
+        <span style={labelStyle}>Google Sheets link</span>
+        <input
+          onChange={(milestone) =>
+            setMechanismDraft((current) => ({
+              ...current,
+              googleSheetsUrl: milestone.target.value,
+            }))
+          }
+          placeholder="https://docs.google.com/spreadsheets/..."
+          style={fieldStyle}
+          type="url"
+          value={mechanismDraft.googleSheetsUrl}
+        />
+      </label>
+
       <PhotoUploadField
         currentUrl={mechanismDraft.photoUrl}
         label="Mechanism photo"

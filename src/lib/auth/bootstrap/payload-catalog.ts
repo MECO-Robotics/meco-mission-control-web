@@ -141,6 +141,7 @@ export function normalizeBootstrapCatalogRecords(
     subsystems,
     mechanisms: (source.mechanisms ?? []).map((mechanism) => ({
       ...mechanism,
+      googleSheetsUrl: typeof mechanism.googleSheetsUrl === "string" ? mechanism.googleSheetsUrl : "",
       isArchived: mechanism.isArchived ?? false,
     })),
     materials: source.materials ?? [],

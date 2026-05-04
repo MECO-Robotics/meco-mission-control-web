@@ -71,11 +71,13 @@ export const mechanismToPayload = (item: {
   subsystemId: string;
   name: string;
   description: string;
+  googleSheetsUrl?: string;
   iteration?: number;
   isArchived?: boolean;
   photoUrl?: string;
 }): MechanismPayload => ({
   ...item,
+  googleSheetsUrl: item.googleSheetsUrl ?? "",
   isArchived: item.isArchived ?? false,
   iteration: normalizeIteration(item.iteration),
   photoUrl: item.photoUrl ?? "",
