@@ -90,7 +90,6 @@ interface MilestonesEventDetailsModalProps {
   onClose: () => void;
   onEditMilestone: (milestone: MilestoneRecord) => void;
   projectsById: Record<string, BootstrapPayload["projects"][number]>;
-  selectableSubsystems: BootstrapPayload["subsystems"];
 }
 
 export function MilestonesEventDetailsModal({
@@ -104,7 +103,6 @@ export function MilestonesEventDetailsModal({
   onClose,
   onEditMilestone,
   projectsById,
-  selectableSubsystems,
 }: MilestonesEventDetailsModalProps) {
   if (!modalPortalTarget) {
     return null;
@@ -143,13 +141,6 @@ export function MilestonesEventDetailsModal({
   const projectNames = activeMilestone.projectIds
     .map((projectId) => projectsById[projectId]?.name)
     .filter((projectName): projectName is string => Boolean(projectName));
-  const relatedSubsystemNames = activeMilestone.relatedSubsystemIds
-    .map((subsystemId) => selectableSubsystems.find((subsystem) => subsystem.id === subsystemId))
-    .filter((subsystem): subsystem is BootstrapPayload["subsystems"][number] => Boolean(subsystem))
-    .map((subsystem) => {
-      const projectName = projectsById[subsystem.projectId]?.name;
-      return projectName ? `${projectName} - ${subsystem.name}` : subsystem.name;
-    });
 
   return createPortal(
     <div className="modal-scrim" role="presentation" style={{ zIndex: 2050 }}>
@@ -223,14 +214,6 @@ export function MilestonesEventDetailsModal({
               <span style={{ color: "var(--text-title)" }}>Related projects</span>
               <MilestoneDetailValue onOpenEditMilestone={() => onEditMilestone(activeMilestone)}>
                 <p className="task-detail-copy">{projectNames.length > 0 ? projectNames.join(", ") : "All projects"}</p>
-              </MilestoneDetailValue>
-            </div>
-            <div className="field modal-wide">
-              <span style={{ color: "var(--text-title)" }}>Related subsystems</span>
-              <MilestoneDetailValue onOpenEditMilestone={() => onEditMilestone(activeMilestone)}>
-                <p className="task-detail-copy">
-                  {relatedSubsystemNames.length > 0 ? relatedSubsystemNames.join(", ") : "No related subsystems"}
-                </p>
               </MilestoneDetailValue>
             </div>
             <div className="field modal-wide">

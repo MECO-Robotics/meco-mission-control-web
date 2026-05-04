@@ -85,7 +85,6 @@ export function WorkspaceTaskPanelsSection({
           isAllProjectsView={isAllProjectsView}
           onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
           onSaveTimelineMilestone={handleTimelineMilestoneSave}
-          subsystemsById={subsystemsById}
         />
       </WorkspaceSubPanel>
     </WorkspaceSectionPanel>

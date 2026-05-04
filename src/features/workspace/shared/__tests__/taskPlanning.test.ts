@@ -40,7 +40,6 @@ const bootstrap = {
       isExternal: false,
       description: "",
       projectIds: ["project-1"],
-      relatedSubsystemIds: [],
     },
   ],
   reports: [],
@@ -209,7 +208,6 @@ test("dependency targets expose semantic icons for dependency menus", () => {
         isExternal: false,
         description: "",
         projectIds: [],
-        relatedSubsystemIds: [],
       },
       milestoneNotReady: {
         id: "milestoneNotReady",
@@ -221,7 +219,6 @@ test("dependency targets expose semantic icons for dependency menus", () => {
         isExternal: false,
         description: "",
         projectIds: [],
-        relatedSubsystemIds: [],
       },
       milestoneQa: {
         id: "milestoneQa",
@@ -233,7 +230,6 @@ test("dependency targets expose semantic icons for dependency menus", () => {
         isExternal: false,
         description: "",
         projectIds: [],
-        relatedSubsystemIds: [],
       },
       milestoneReady: {
         id: "milestoneReady",
@@ -245,7 +241,6 @@ test("dependency targets expose semantic icons for dependency menus", () => {
         isExternal: false,
         description: "",
         projectIds: [],
-        relatedSubsystemIds: [],
       },
     },
     partInstancesById: {},

@@ -37,8 +37,6 @@ export {
   DEFAULT_EVENT_TYPE,
   getMilestoneProjectIds,
   getMilestoneTypeStyle,
-  getMilestoneSubsystemOptions,
-  reconcileMilestoneSubsystemIds,
   type WorkspaceMilestoneStyle,
 } from "./milestones";
 export {

@@ -102,7 +102,6 @@ function createMilestone(overrides: Partial<MilestoneRecord>): MilestoneRecord {
     isExternal: true,
     description: "",
     projectIds: ["project-a"],
-    relatedSubsystemIds: [],
     ...overrides,
   };
 }

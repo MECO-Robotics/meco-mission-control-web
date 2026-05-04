@@ -24,12 +24,11 @@ export function buildMilestoneProjectLabels(
   milestones: BootstrapPayload["milestones"],
   projectsById: Record<string, BootstrapPayload["projects"][number]>,
   scopedProjectIds: string[],
-  subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>,
 ) {
   const labels: Record<string, string> = {};
 
   milestones.forEach((milestone) => {
-    const relatedProjectIds = getMilestoneProjectIds(milestone, subsystemsById);
+    const relatedProjectIds = getMilestoneProjectIds(milestone);
 
     if (
       relatedProjectIds.length === 0 ||
@@ -51,24 +50,24 @@ export function buildMilestoneProjectLabels(
 export function filterAndSortMilestones({
   activePersonFilter,
   bootstrap,
+  projectsById,
   milestones,
   isAllProjectsView,
   projectFilter,
   searchFilter,
   sortField,
   sortOrder,
-  subsystemsById,
   typeFilter,
 }: {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
+  projectsById: Record<string, BootstrapPayload["projects"][number]>;
   milestones: BootstrapPayload["milestones"];
   isAllProjectsView: boolean;
   projectFilter: string[];
   searchFilter: string;
   sortField: MilestoneSortField;
   sortOrder: "asc" | "desc";
-  subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
   typeFilter: string[];
 }) {
   let result = [...milestones];
@@ -88,7 +87,7 @@ export function filterAndSortMilestones({
 
   if (isAllProjectsView && projectFilter.length > 0) {
     result = result.filter((milestone) => {
-      const milestoneProjectIds = getMilestoneProjectIds(milestone, subsystemsById);
+      const milestoneProjectIds = getMilestoneProjectIds(milestone);
 
       if (milestoneProjectIds.length === 0) {
         return true;
@@ -106,15 +105,14 @@ export function filterAndSortMilestones({
     const search = searchFilter.toLowerCase();
 
     result = result.filter((milestone) => {
-      const relatedSubsystemNames = milestone.relatedSubsystemIds
-        .map((subsystemId) => subsystemsById[subsystemId]?.name ?? "")
-        .join(" ")
-        .toLowerCase();
-
       return (
         milestone.title.toLowerCase().includes(search) ||
         milestone.description.toLowerCase().includes(search) ||
-        relatedSubsystemNames.includes(search)
+        getMilestoneProjectIds(milestone)
+          .map((projectId) => projectsById[projectId]?.name ?? "")
+          .join(" ")
+          .toLowerCase()
+          .includes(search)
       );
     });
   }

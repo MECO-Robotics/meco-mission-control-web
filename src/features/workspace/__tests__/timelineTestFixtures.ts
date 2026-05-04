@@ -137,7 +137,6 @@ export function createTimelineMilestone(
     isExternal: false,
     description: "",
     projectIds: ["project-1"],
-    relatedSubsystemIds: ["subsystem-1"],
     ...overrides,
   };
 }

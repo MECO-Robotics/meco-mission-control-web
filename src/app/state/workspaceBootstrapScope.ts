@@ -49,14 +49,9 @@ export function scopeBootstrapBySelection(
   );
   const scopedMilestones = payload.milestones.filter((milestone) => {
     const milestoneProjectIds = milestone.projectIds ?? [];
-    if (milestoneProjectIds.length > 0) {
-      return milestoneProjectIds.some((projectId) => activeProjectIds.has(projectId));
-    }
-
-    return (
-      milestone.relatedSubsystemIds.length === 0 ||
-      milestone.relatedSubsystemIds.some((subsystemId) => scopedSubsystemIds.has(subsystemId))
-    );
+    return milestoneProjectIds.length === 0
+      ? true
+      : milestoneProjectIds.some((projectId) => activeProjectIds.has(projectId));
   });
   const scopedWorkstreamIds = new Set(scopedWorkstreams.map((workstream) => workstream.id));
   const scopedMilestoneIds = new Set(scopedMilestones.map((milestone) => milestone.id));

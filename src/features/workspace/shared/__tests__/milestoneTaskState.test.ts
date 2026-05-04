@@ -69,7 +69,6 @@ function createBootstrap({
       isExternal: false,
       description: "",
       projectIds: ["project-1"],
-      relatedSubsystemIds: [],
     },
   ],
   subsystems = [],
@@ -189,7 +188,6 @@ describe("milestoneTaskState", () => {
       isExternal: false,
       description: "",
       projectIds: ["project-1"],
-      relatedSubsystemIds: [],
     };
     const milestoneRequirements: MilestoneRequirementRecord[] = [
       {

@@ -51,7 +51,6 @@ function createBootstrap(): BootstrapPayload {
         isExternal: true,
         description: "Competition readiness checkpoint",
         projectIds: ["project-1"],
-        relatedSubsystemIds: [],
       },
       {
         id: "milestone-2",
@@ -63,7 +62,6 @@ function createBootstrap(): BootstrapPayload {
         isExternal: false,
         description: "Subsystem review",
         projectIds: ["project-1"],
-        relatedSubsystemIds: [],
       },
     ],
     milestoneRequirements: [
@@ -171,7 +169,6 @@ describe("MilestonesView", () => {
         isAllProjectsView: false,
         onDeleteTimelineMilestone: jest.fn(),
         onSaveTimelineMilestone: jest.fn(),
-        subsystemsById: {},
       }),
     );
 
@@ -193,7 +190,6 @@ describe("MilestonesView", () => {
         isAllProjectsView: false,
         onDeleteTimelineMilestone: jest.fn(),
         onSaveTimelineMilestone: jest.fn(),
-        subsystemsById: {},
       }),
     );
 
@@ -210,9 +206,6 @@ describe("MilestonesView", () => {
         isAllProjectsView: false,
         onDeleteTimelineMilestone: jest.fn(),
         onSaveTimelineMilestone: jest.fn(),
-        subsystemsById: {
-          "subsystem-1": bootstrap.subsystems[0],
-        },
       }),
     );
 
@@ -235,16 +228,13 @@ describe("MilestonesView", () => {
     const render = () =>
       renderToStaticMarkup(
         React.createElement(MilestonesView, {
-          activePersonFilter: [],
-          bootstrap,
-          isAllProjectsView: false,
-          onDeleteTimelineMilestone: jest.fn(),
-          onSaveTimelineMilestone: jest.fn(),
-          subsystemsById: {
-            "subsystem-1": bootstrap.subsystems[0],
-          },
-        }),
-      );
+        activePersonFilter: [],
+        bootstrap,
+        isAllProjectsView: false,
+        onDeleteTimelineMilestone: jest.fn(),
+        onSaveTimelineMilestone: jest.fn(),
+      }),
+    );
 
     expect(render).not.toThrow();
     expect(render()).toContain("Internal review");

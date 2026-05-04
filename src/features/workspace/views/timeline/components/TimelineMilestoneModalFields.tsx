@@ -1,4 +1,4 @@
-import { reconcileMilestoneSubsystemIds, EVENT_TYPE_OPTIONS } from "@/features/workspace/shared/milestones";
+import { EVENT_TYPE_OPTIONS } from "@/features/workspace/shared/milestones";
 import type { BootstrapPayload, MilestoneRecord, MilestoneType } from "@/types";
 import type React from "react";
 
@@ -10,14 +10,11 @@ interface TimelineMilestoneModalFieldsProps {
   milestoneDraft: TimelineMilestoneDraft;
   milestoneError: string | null;
   mode: "create" | "edit";
-  projectsById: Record<string, BootstrapPayload["projects"][number]>;
-  selectableSubsystems: BootstrapPayload["subsystems"];
   setMilestoneDraft: React.Dispatch<React.SetStateAction<TimelineMilestoneDraft>>;
   setMilestoneEndDate: React.Dispatch<React.SetStateAction<string>>;
   setMilestoneEndTime: React.Dispatch<React.SetStateAction<string>>;
   setMilestoneStartDate: React.Dispatch<React.SetStateAction<string>>;
   setMilestoneStartTime: React.Dispatch<React.SetStateAction<string>>;
-  subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
   milestoneEndDate: string;
   milestoneEndTime: string;
   milestoneStartDate: string;
@@ -36,14 +33,11 @@ export function TimelineMilestoneModalFields({
   milestoneDraft,
   milestoneError,
   mode,
-  projectsById,
-  selectableSubsystems,
   setMilestoneDraft,
   setMilestoneEndDate,
   setMilestoneEndTime,
   setMilestoneStartDate,
   setMilestoneStartTime,
-  subsystemsById,
   milestoneEndDate,
   milestoneEndTime,
   milestoneStartDate,
@@ -148,19 +142,10 @@ export function TimelineMilestoneModalFields({
         <select
           multiple
           onChange={(milestone) =>
-            setMilestoneDraft((current) => {
-              const projectIds = Array.from(milestone.currentTarget.selectedOptions, (option) => option.value);
-
-              return {
-                ...current,
-                projectIds,
-                relatedSubsystemIds: reconcileMilestoneSubsystemIds(
-                  current.relatedSubsystemIds,
-                  projectIds,
-                  subsystemsById,
-                ),
-              };
-            })
+            setMilestoneDraft((current) => ({
+              ...current,
+              projectIds: Array.from(milestone.currentTarget.selectedOptions, (option) => option.value),
+            }))
           }
           size={Math.min(bootstrap.projects.length || 1, 6)}
           style={FIELD_INPUT_STYLE}
@@ -169,30 +154,6 @@ export function TimelineMilestoneModalFields({
           {bootstrap.projects.map((project) => (
             <option key={project.id} value={project.id}>
               {project.name}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      <label className="field modal-wide">
-        <span style={{ color: "var(--text-title)" }}>Related subsystems</span>
-        <select
-          multiple
-          onChange={(milestone) =>
-            setMilestoneDraft((current) => ({
-              ...current,
-              relatedSubsystemIds: Array.from(milestone.currentTarget.selectedOptions, (option) => option.value),
-            }))
-          }
-          size={Math.min(bootstrap.subsystems.length || 1, 6)}
-          style={FIELD_INPUT_STYLE}
-          value={milestoneDraft.relatedSubsystemIds}
-        >
-          {selectableSubsystems.map((subsystem) => (
-            <option key={subsystem.id} value={subsystem.id}>
-              {projectsById[subsystem.projectId]?.name
-                ? `${projectsById[subsystem.projectId].name} - ${subsystem.name}`
-                : subsystem.name}
             </option>
           ))}
         </select>

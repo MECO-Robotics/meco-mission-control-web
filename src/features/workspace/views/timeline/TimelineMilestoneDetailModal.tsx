@@ -54,7 +54,6 @@ export function TimelineMilestoneDetailModal({
       onClose={onClose}
       onEditMilestone={onEdit}
       projectsById={projectsById}
-      selectableSubsystems={bootstrap.subsystems}
     />
   );
 }

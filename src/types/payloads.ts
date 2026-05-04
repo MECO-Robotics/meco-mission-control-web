@@ -30,7 +30,6 @@ export interface MilestonePayload {
   isExternal: boolean;
   description: string;
   projectIds: string[];
-  relatedSubsystemIds: string[];
   photoUrl?: string;
 }
 

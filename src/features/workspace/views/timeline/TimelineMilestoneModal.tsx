@@ -23,14 +23,11 @@ export const TimelineMilestoneModal: React.FC<TimelineMilestoneModalProps> = ({
   onSubmit,
   onSwitchToTask,
   portalTarget,
-  projectsById,
-  selectableSubsystems,
   setMilestoneDraft,
   setMilestoneEndDate,
   setMilestoneEndTime,
   setMilestoneStartDate,
   setMilestoneStartTime,
-  subsystemsById,
 }) => {
   if (!mode || !portalTarget) {
     return null;
@@ -71,14 +68,11 @@ export const TimelineMilestoneModal: React.FC<TimelineMilestoneModalProps> = ({
             milestoneStartDate={milestoneStartDate}
             milestoneStartTime={milestoneStartTime}
             mode={mode}
-            projectsById={projectsById}
-            selectableSubsystems={selectableSubsystems}
             setMilestoneDraft={setMilestoneDraft}
             setMilestoneEndDate={setMilestoneEndDate}
             setMilestoneEndTime={setMilestoneEndTime}
             setMilestoneStartDate={setMilestoneStartDate}
             setMilestoneStartTime={setMilestoneStartTime}
-            subsystemsById={subsystemsById}
           />
           <TimelineMilestoneModalActions
             isDeletingMilestone={isDeletingMilestone}

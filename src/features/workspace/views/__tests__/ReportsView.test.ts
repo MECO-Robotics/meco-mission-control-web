@@ -57,7 +57,6 @@ const PAST_MILESTONE = {
   isExternal: false,
   description: "past milestone",
   projectIds: [],
-  relatedSubsystemIds: [],
 };
 
 const FUTURE_MILESTONE = {
@@ -69,7 +68,6 @@ const FUTURE_MILESTONE = {
   isExternal: false,
   description: "future milestone",
   projectIds: [],
-  relatedSubsystemIds: [],
 };
 
 function renderReportsView() {

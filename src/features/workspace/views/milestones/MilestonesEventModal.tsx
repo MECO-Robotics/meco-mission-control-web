@@ -33,13 +33,11 @@ interface MilestonesMilestoneModalProps {
   onEditMilestone: (milestone: MilestoneRecord) => void;
   onSubmit: (milestone: FormEvent<HTMLFormElement>) => void;
   projectsById: Record<string, BootstrapPayload["projects"][number]>;
-  selectableSubsystems: BootstrapPayload["subsystems"];
   setMilestoneEndDate: Dispatch<SetStateAction<string>>;
   setMilestoneEndTime: Dispatch<SetStateAction<string>>;
   setMilestoneStartDate: Dispatch<SetStateAction<string>>;
   setMilestoneStartTime: Dispatch<SetStateAction<string>>;
   setMilestoneDraft: Dispatch<SetStateAction<TimelineMilestoneDraft>>;
-  subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
 }
 
 export function MilestonesMilestoneModal({
@@ -64,13 +62,11 @@ export function MilestonesMilestoneModal({
   onEditMilestone,
   onSubmit,
   projectsById,
-  selectableSubsystems,
   setMilestoneEndDate,
   setMilestoneEndTime,
   setMilestoneStartDate,
   setMilestoneStartTime,
   setMilestoneDraft,
-  subsystemsById,
 }: MilestonesMilestoneModalProps) {
   if (!milestoneModalMode || !modalPortalTarget) {
     return null;
@@ -89,7 +85,6 @@ export function MilestonesMilestoneModal({
         onClose={onClose}
         onEditMilestone={onEditMilestone}
         projectsById={projectsById}
-        selectableSubsystems={selectableSubsystems}
       />
     ) : null;
   }
@@ -139,14 +134,11 @@ export function MilestonesMilestoneModal({
             milestoneStartDate={milestoneStartDate}
             milestoneStartTime={milestoneStartTime}
             milestoneDraft={milestoneDraft}
-            projectsById={projectsById}
-            selectableSubsystems={selectableSubsystems}
             setMilestoneEndDate={setMilestoneEndDate}
             setMilestoneEndTime={setMilestoneEndTime}
             setMilestoneStartDate={setMilestoneStartDate}
             setMilestoneStartTime={setMilestoneStartTime}
             setMilestoneDraft={setMilestoneDraft}
-            subsystemsById={subsystemsById}
           />
 
           <MilestonesMilestoneModalReadinessSection

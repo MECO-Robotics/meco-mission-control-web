@@ -217,7 +217,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
 
       <TimelineTodayMarkerPortal
         portalTarget={data.timelineShellRef.current}
-        showLabelAtTop={state.viewInterval === "month"}
+        showLabelAtTop={true}
         todayMarkerLabelTop={data.timelineTodayMarkerLabelTop}
         todayMarkerLineLeft={data.timelineTodayMarkerLineLeft}
         todayMarkerLeft={data.timelineTodayMarkerLeft}
@@ -257,14 +257,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         onSubmit={data.milestoneModal.handleMilestoneSubmit}
         onSwitchToTask={data.milestoneModal.switchMilestoneCreateToTask}
         portalTarget={data.modalPortalTarget}
-        projectsById={data.projectsById}
-        selectableSubsystems={data.selectableSubsystems}
         setMilestoneDraft={data.milestoneModal.setMilestoneDraft}
         setMilestoneEndDate={data.milestoneModal.setMilestoneEndDate}
         setMilestoneEndTime={data.milestoneModal.setMilestoneEndTime}
         setMilestoneStartDate={data.milestoneModal.setMilestoneStartDate}
         setMilestoneStartTime={data.milestoneModal.setMilestoneStartTime}
-        subsystemsById={data.subsystemsById}
       />
 
       <TimelineMilestoneDetailModal

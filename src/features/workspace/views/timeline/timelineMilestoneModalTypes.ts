@@ -21,13 +21,10 @@ export interface TimelineMilestoneModalProps {
   onSubmit: (milestone: React.FormEvent<HTMLFormElement>) => void;
   onSwitchToTask: () => void;
   portalTarget: HTMLElement | null;
-  projectsById: Record<string, BootstrapPayload["projects"][number]>;
-  selectableSubsystems: BootstrapPayload["subsystems"];
   setMilestoneDraft: React.Dispatch<React.SetStateAction<TimelineMilestoneDraft>>;
   setMilestoneEndDate: React.Dispatch<React.SetStateAction<string>>;
   setMilestoneEndTime: React.Dispatch<React.SetStateAction<string>>;
   setMilestoneStartDate: React.Dispatch<React.SetStateAction<string>>;
   setMilestoneStartTime: React.Dispatch<React.SetStateAction<string>>;
-  subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
 }
 

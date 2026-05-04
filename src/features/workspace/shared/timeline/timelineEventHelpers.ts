@@ -6,7 +6,6 @@ export interface TimelineMilestoneDraft {
   isExternal: boolean;
   description: string;
   projectIds: string[];
-  relatedSubsystemIds: string[];
 }
 
 export interface HoveredMilestonePopup {
@@ -45,7 +44,6 @@ export function emptyTimelineMilestoneDraft(defaultMilestoneType: MilestoneRecor
     isExternal: false,
     description: "",
     projectIds: [],
-    relatedSubsystemIds: [],
   };
 }
 
@@ -56,7 +54,6 @@ export function timelineMilestoneDraftFromRecord(record: MilestoneRecord): Timel
     isExternal: record.isExternal,
     description: record.description,
     projectIds: record.projectIds,
-    relatedSubsystemIds: record.relatedSubsystemIds,
   };
 }
 

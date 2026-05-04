@@ -6,7 +6,6 @@ import {
   type FilterSelection,
   useFilterChangeMotionClass,
 } from "@/features/workspace/shared/WorkspaceViewShared";
-import { getMilestoneSubsystemOptions } from "@/features/workspace/shared/events/eventProjectUtils";
 import {
   buildMilestoneProjectLabels,
   filterAndSortMilestones,
@@ -25,7 +24,6 @@ export type MilestonesViewState = MilestonesMilestoneModalState & {
   projectLabelByMilestoneId: Record<string, string>;
   projectsById: Record<string, BootstrapPayload["projects"][number]>;
   searchFilter: string;
-  selectableSubsystems: BootstrapPayload["subsystems"];
   setProjectFilter: Dispatch<SetStateAction<FilterSelection>>;
   setSearchFilter: Dispatch<SetStateAction<string>>;
   setSortField: Dispatch<SetStateAction<MilestoneSortField>>;
@@ -46,7 +44,6 @@ type MilestonesViewStateArgs = {
     milestoneId: string | null,
     payload: MilestonePayload,
   ) => Promise<void>;
-  subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
 };
 
 export function useMilestonesViewState({
@@ -55,7 +52,6 @@ export function useMilestonesViewState({
   isAllProjectsView,
   onDeleteTimelineMilestone,
   onSaveTimelineMilestone,
-  subsystemsById,
 }: MilestonesViewStateArgs): MilestonesViewState {
   const [sortField, setSortField] = useState<MilestoneSortField>("startDateTime");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
@@ -89,31 +85,31 @@ export function useMilestonesViewState({
       filterAndSortMilestones({
         activePersonFilter,
         bootstrap,
+        projectsById,
         milestones: bootstrap.milestones,
         isAllProjectsView,
         projectFilter,
         searchFilter,
         sortField,
         sortOrder,
-        subsystemsById,
         typeFilter,
       }),
     [
       activePersonFilter,
       bootstrap.milestones,
       bootstrap.tasks,
+      projectsById,
       isAllProjectsView,
       projectFilter,
       searchFilter,
       sortField,
       sortOrder,
-      subsystemsById,
       typeFilter,
     ],
   );
   const projectLabelByMilestoneId = useMemo(
-    () => buildMilestoneProjectLabels(bootstrap.milestones, projectsById, scopedProjectIds, subsystemsById),
-    [bootstrap.milestones, projectsById, scopedProjectIds, subsystemsById],
+    () => buildMilestoneProjectLabels(bootstrap.milestones, projectsById, scopedProjectIds),
+    [bootstrap.milestones, projectsById, scopedProjectIds],
   );
   const milestoneFilterMotionClass = useFilterChangeMotionClass([
     activePersonFilter,
@@ -137,12 +133,7 @@ export function useMilestonesViewState({
     onSaveTimelineMilestone,
     projectFilter,
     scopedProjectIds,
-    subsystemsById,
   });
-  const selectableSubsystems = useMemo(
-    () => getMilestoneSubsystemOptions(bootstrap.subsystems, modalState.milestoneDraft.projectIds),
-    [bootstrap.subsystems, modalState.milestoneDraft.projectIds],
-  );
 
   return {
     ...modalState,
@@ -153,7 +144,6 @@ export function useMilestonesViewState({
     projectLabelByMilestoneId,
     projectsById,
     searchFilter,
-    selectableSubsystems,
     setProjectFilter,
     setSearchFilter,
     setSortField,

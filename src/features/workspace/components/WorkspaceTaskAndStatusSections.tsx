@@ -90,7 +90,6 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
           isAllProjectsView={isAllProjectsView}
           onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
           onSaveTimelineMilestone={handleTimelineMilestoneSave}
-          subsystemsById={props.subsystemsById}
         />
       </WorkspaceSubPanel>
     </WorkspaceSectionPanel>

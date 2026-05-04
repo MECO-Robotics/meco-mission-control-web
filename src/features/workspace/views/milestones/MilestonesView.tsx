@@ -17,7 +17,6 @@ interface MilestonesViewProps {
     milestoneId: string | null,
     payload: MilestonePayload,
   ) => Promise<void>;
-  subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
 }
 
 export function MilestonesView({
@@ -26,7 +25,6 @@ export function MilestonesView({
   isAllProjectsView,
   onDeleteTimelineMilestone,
   onSaveTimelineMilestone,
-  subsystemsById,
 }: MilestonesViewProps) {
   const milestones = useMilestonesViewState({
     activePersonFilter,
@@ -34,7 +32,6 @@ export function MilestonesView({
     isAllProjectsView,
     onDeleteTimelineMilestone,
     onSaveTimelineMilestone,
-    subsystemsById,
   });
 
   return (
@@ -98,13 +95,11 @@ export function MilestonesView({
         onEditMilestone={milestones.openEditMilestoneModal}
         onSubmit={milestones.handleMilestoneSubmit}
         projectsById={milestones.projectsById}
-        selectableSubsystems={milestones.selectableSubsystems}
         setMilestoneEndDate={milestones.setMilestoneEndDate}
         setMilestoneEndTime={milestones.setMilestoneEndTime}
         setMilestoneStartDate={milestones.setMilestoneStartDate}
         setMilestoneStartTime={milestones.setMilestoneStartTime}
         setMilestoneDraft={milestones.setMilestoneDraft}
-        subsystemsById={subsystemsById}
       />
     </section>
   );

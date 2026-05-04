@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import type React from "react";
-import type { BootstrapPayload, MilestonePayload, MilestoneRecord } from "@/types";
-import { getMilestoneProjectIds } from "@/features/workspace/shared/milestones";
+import type { MilestonePayload, MilestoneRecord } from "@/types";
 import { DEFAULT_EVENT_TYPE } from "@/features/workspace/shared/milestones";
 import {
   buildDateTime,
@@ -26,7 +25,6 @@ interface UseTimelineMilestoneModalArgs {
     payload: MilestonePayload,
   ) => Promise<void>;
   scopedProjectIds: string[];
-  subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
   triggerCreateMilestoneToken: number;
 }
 
@@ -36,7 +34,6 @@ export function useTimelineMilestoneModal({
   onDeleteTimelineMilestone,
   onSaveTimelineMilestone,
   scopedProjectIds,
-  subsystemsById,
   triggerCreateMilestoneToken,
 }: UseTimelineMilestoneModalArgs) {
   const [milestoneModalMode, setMilestoneModalMode] = useState<"create" | "edit" | null>(null);
@@ -93,13 +90,12 @@ export function useTimelineMilestoneModal({
   const openEditMilestoneModalForDay = useCallback(
     (day: string, milestone: MilestoneRecord) => {
       setActiveMilestoneDetail(null);
-      const milestoneProjectIds = getMilestoneProjectIds(milestone, subsystemsById);
       setMilestoneModalMode("edit");
       setActiveMilestoneId(milestone.id);
       setActiveMilestoneDay(day);
       setMilestoneDraft({
         ...timelineMilestoneDraftFromRecord(milestone),
-        projectIds: milestoneProjectIds.length > 0 ? milestoneProjectIds : scopedProjectIds,
+        projectIds: milestone.projectIds.length > 0 ? milestone.projectIds : scopedProjectIds,
       });
       setMilestoneStartDate(datePortion(milestone.startDateTime));
       setMilestoneStartTime(timePortion(milestone.startDateTime));
@@ -107,7 +103,7 @@ export function useTimelineMilestoneModal({
       setMilestoneEndTime(milestone.endDateTime ? timePortion(milestone.endDateTime) : "");
       setMilestoneError(null);
     },
-    [scopedProjectIds, subsystemsById],
+    [scopedProjectIds],
   );
 
   const openEditMilestoneModalForMilestone = useCallback(
@@ -185,11 +181,10 @@ export function useTimelineMilestoneModal({
           type: milestoneDraft.type,
           startDateTime,
           endDateTime,
-          isExternal: milestoneDraft.isExternal,
-          description: milestoneDraft.description.trim(),
-          projectIds: Array.from(new Set(milestoneDraft.projectIds)),
-          relatedSubsystemIds: Array.from(new Set(milestoneDraft.relatedSubsystemIds)),
-        };
+        isExternal: milestoneDraft.isExternal,
+        description: milestoneDraft.description.trim(),
+        projectIds: Array.from(new Set(milestoneDraft.projectIds)),
+      };
 
         await onSaveTimelineMilestone(milestoneModalMode, activeMilestoneId, payload);
         closeMilestoneModal();
@@ -209,7 +204,6 @@ export function useTimelineMilestoneModal({
       milestoneDraft.description,
       milestoneDraft.isExternal,
       milestoneDraft.projectIds,
-      milestoneDraft.relatedSubsystemIds,
       milestoneDraft.title,
       milestoneDraft.type,
       milestoneEndDate,

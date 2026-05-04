@@ -6,7 +6,6 @@ import {
   formatFilterSelectionLabel,
   useFilterChangeMotionClass,
 } from "@/features/workspace/shared";
-import { getMilestoneSubsystemOptions } from "@/features/workspace/shared/milestones";
 import { formatTimelinePeriodLabel, type TimelineViewInterval } from "@/features/workspace/shared/timeline";
 import {
   buildTimelineData,
@@ -122,13 +121,8 @@ export function useTimelineViewData({
     onDeleteTimelineMilestone,
     onSaveTimelineMilestone,
     scopedProjectIds,
-    subsystemsById,
     triggerCreateMilestoneToken,
   });
-  const selectableSubsystems = useMemo(
-    () => getMilestoneSubsystemOptions(bootstrap.subsystems, milestoneModal.milestoneDraft.projectIds),
-    [bootstrap.subsystems, milestoneModal.milestoneDraft.projectIds],
-  );
   const timelineDayHeaderCells = useMemo(
     () => buildTimelineDayHeaderCells(timeline.days, dayMilestonesByDate),
     [dayMilestonesByDate, timeline.days],
@@ -191,7 +185,6 @@ export function useTimelineViewData({
     scopedMilestones,
     scopedProjectIds,
     scopedTasks,
-    selectableSubsystems,
     setHoveredMilestonePopupLayerRef,
     subsystemsById,
     tasksById,

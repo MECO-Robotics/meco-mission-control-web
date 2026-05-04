@@ -1,4 +1,4 @@
-export { getMilestoneProjectIds, getMilestoneSubsystemOptions, reconcileMilestoneSubsystemIds } from "./milestoneProjectUtils";
+export { getMilestoneProjectIds } from "./milestoneProjectUtils";
 export {
   DEFAULT_EVENT_TYPE,
   EVENT_TYPE_STYLES,

@@ -3,7 +3,7 @@ import { useMemo, useState, type Dispatch, type FormEvent, type SetStateAction }
 import type { BootstrapPayload, MilestonePayload, MilestoneRecord } from "@/types";
 import type { FilterSelection } from "@/features/workspace/shared/WorkspaceViewShared";
 import { getMilestoneTasksForState } from "@/features/workspace/shared/milestones";
-import { DEFAULT_EVENT_TYPE as DEFAULT_MILESTONE_TYPE, getMilestoneProjectIds } from "@/features/workspace/shared/milestones";
+import { DEFAULT_EVENT_TYPE as DEFAULT_MILESTONE_TYPE } from "@/features/workspace/shared/milestones";
 import {
   buildDateTime,
   compareDateTimes,
@@ -39,7 +39,6 @@ type UseMilestonesMilestoneModalStateArgs = {
   ) => Promise<void>;
   projectFilter: FilterSelection;
   scopedProjectIds: string[];
-  subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
 };
 
 export type MilestonesMilestoneModalState = {
@@ -79,7 +78,6 @@ export function useMilestonesMilestoneModalState({
   onSaveTimelineMilestone,
   projectFilter,
   scopedProjectIds,
-  subsystemsById,
 }: UseMilestonesMilestoneModalStateArgs): MilestonesMilestoneModalState {
   const [milestoneModalMode, setMilestoneModalMode] = useState<"create" | "detail" | "edit" | null>(null);
   const [activeMilestoneId, setActiveMilestoneId] = useState<string | null>(null);
@@ -148,12 +146,11 @@ export function useMilestonesMilestoneModalState({
   };
 
   const openEditMilestoneModal = (milestone: MilestoneRecord) => {
-    const milestoneProjectIds = getMilestoneProjectIds(milestone, subsystemsById);
     setMilestoneModalMode("edit");
     setActiveMilestoneId(milestone.id);
     setMilestoneDraft({
       ...timelineMilestoneDraftFromRecord(milestone),
-      projectIds: milestoneProjectIds.length > 0 ? milestoneProjectIds : scopedProjectIds,
+      projectIds: milestone.projectIds.length > 0 ? milestone.projectIds : scopedProjectIds,
     });
     setMilestoneStartDate(datePortion(milestone.startDateTime));
     setMilestoneStartTime(timePortion(milestone.startDateTime));
@@ -205,7 +202,6 @@ export function useMilestonesMilestoneModalState({
         isExternal: milestoneDraft.isExternal,
         description: milestoneDraft.description.trim(),
         projectIds: Array.from(new Set(milestoneDraft.projectIds)),
-        relatedSubsystemIds: Array.from(new Set(milestoneDraft.relatedSubsystemIds)),
       };
 
       await onSaveTimelineMilestone(milestoneModalMode, activeMilestoneId, payload);

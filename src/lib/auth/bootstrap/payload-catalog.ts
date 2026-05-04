@@ -93,16 +93,7 @@ export function normalizeBootstrapCatalogRecords(
       resolveProjectAlias(subsystem.projectId, projectIds, planning.projectIdAliases) ??
       defaultProjectId,
   }));
-  const subsystemProjectIdsById = new Map(
-    subsystems.map((subsystem) => [subsystem.id, subsystem.projectId] as const),
-  );
   const milestones: MilestoneRecord[] = (source.milestones ?? []).map((milestone, index) => {
-    const relatedSubsystemIds = Array.isArray(milestone.relatedSubsystemIds)
-      ? milestone.relatedSubsystemIds.filter(
-          (subsystemId): subsystemId is string =>
-            typeof subsystemId === "string" && subsystemId.length > 0,
-        )
-      : [];
     const explicitProjectIds = Array.isArray(milestone.projectIds)
       ? Array.from(
           new Set(
@@ -114,13 +105,6 @@ export function normalizeBootstrapCatalogRecords(
           ),
         )
       : [];
-    const inferredProjectIds = Array.from(
-      new Set(
-        relatedSubsystemIds
-          .map((subsystemId) => subsystemProjectIdsById.get(subsystemId))
-          .filter((projectId): projectId is string => Boolean(projectId)),
-      ),
-    );
     const fallbackMilestoneDate = planning.seasons[0]?.startDate ?? localTodayDate();
 
     return {
@@ -131,8 +115,7 @@ export function normalizeBootstrapCatalogRecords(
       endDateTime: milestone.endDateTime ?? null,
       isExternal: milestone.isExternal ?? false,
       description: milestone.description ?? "",
-      projectIds: explicitProjectIds.length > 0 ? explicitProjectIds : inferredProjectIds,
-      relatedSubsystemIds,
+      projectIds: explicitProjectIds,
     };
   });
 
