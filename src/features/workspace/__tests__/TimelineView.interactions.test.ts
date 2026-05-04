@@ -180,8 +180,11 @@ describe("TimelineView interactions", () => {
       join(process.cwd(), "src/features/workspace/views/timeline/TimelineProjectGroup.tsx"),
       "utf8",
     );
-    const subsystemGroupSource = readFileSync(
-      join(process.cwd(), "src/features/workspace/views/timeline/TimelineSubsystemGroup.tsx"),
+    const subsystemRowGroupSource = readFileSync(
+      join(
+        process.cwd(),
+        "src/features/workspace/views/timeline/components/TimelineSubsystemRowGroup.tsx",
+      ),
       "utf8",
     );
     const statusCellSource = readFileSync(
@@ -189,17 +192,41 @@ describe("TimelineView interactions", () => {
       "utf8",
     );
 
-    expect(projectGroupSource).toContain("onRowClick={() => selectTaskRow(task)}");
-    expect(subsystemGroupSource).toContain("onRowClick={() => selectTaskRow(task)}");
-
+    expect(projectGroupSource).toContain("selectTaskRow={selectTaskRow}");
     expect(projectGroupSource).toContain("onOpenTask={openTaskDetailModal}");
-    expect(subsystemGroupSource).toContain("onOpenTask={openTaskDetailModal}");
+    expect(subsystemRowGroupSource).toContain("onOpenTask={openTaskDetailModal}");
+    expect(subsystemRowGroupSource).toContain("onSelectTaskRow={selectTaskRow}");
     expect(statusCellSource).toContain("onClick={() => onOpenTask(task)}");
+  });
+
+  it("opens milestone details from the timeline underlay and renders the detail modal", () => {
+    const underlaySource = readFileSync(
+      join(
+        process.cwd(),
+        "src/features/workspace/views/timeline/portals/TimelineMilestoneUnderlaysPortal.tsx",
+      ),
+      "utf8",
+    );
+    const detailModalSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/timeline/TimelineMilestoneDetailModal.tsx"),
+      "utf8",
+    );
+    const timelineViewSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/timeline/TimelineView.tsx"),
+      "utf8",
+    );
+
+    expect(underlaySource).toContain('aria-label={`Open milestone ${underlay.milestone.title}`}');
+    expect(underlaySource).toContain("role=\"button\"");
+    expect(underlaySource).toContain("onClick={() => onOpenMilestoneDetails(underlay.milestone)}");
+    expect(detailModalSource).toContain("MilestonesEventDetailsModal");
+    expect(detailModalSource).toContain("groupTasksByPlanningState");
+    expect(timelineViewSource).toContain("<TimelineMilestoneDetailModal");
   });
 
   it("updates timeline hover geometry on shell scroll", () => {
     const overlayHookSource = readFileSync(
-      join(process.cwd(), "src/features/workspace/views/timeline/useTimelineMilestoneOverlay.ts"),
+      join(process.cwd(), "src/features/workspace/views/timeline/hooks/useTimelineMilestoneOverlaySync.ts"),
       "utf8",
     );
 
@@ -210,4 +237,3 @@ describe("TimelineView interactions", () => {
     expect(overlayHookSource).toContain("setIsTimelineShellScrolling(false)");
   });
 });
-

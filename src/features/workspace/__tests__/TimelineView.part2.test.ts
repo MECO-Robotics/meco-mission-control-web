@@ -268,7 +268,8 @@ describe("TimelineView", () => {
       /\.timeline-bar\s*\{[\s\S]*padding:\s*0\s+var\(--timeline-task-status-edge-padding\)\s+0\s+var\(--timeline-task-bar-padding-start\)/,
     );
     expect(formatTimelineZoomLabel(1.2)).toBe("120%");
-    expect(clampTimelineZoom(0.2)).toBe(0.8);
+    expect(clampTimelineZoom(0.2)).toBe(0.6);
+    expect(clampTimelineZoom(4)).toBe(2);
     expect(getTimelineDayTrackSize("month", 1)).toBe("minmax(28px, 1fr)");
     expect(getTimelineDayTrackSize("month", 1.6)).toBe("minmax(45px, 1fr)");
     expect(getTimelineDayTrackSize("week", 1, 388)).toBe(
@@ -289,6 +290,4 @@ describe("TimelineView", () => {
       }),
     ).toBe(388);
   });
-
 });
-

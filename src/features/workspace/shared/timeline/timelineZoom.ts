@@ -6,8 +6,8 @@ const TIMELINE_BASE_DAY_WIDTHS: Record<TimelineViewInterval, number> = {
   month: 28,
 };
 
-export const TIMELINE_ZOOM_MIN = 0.8;
-export const TIMELINE_ZOOM_MAX = 1.6;
+export const TIMELINE_ZOOM_MIN = 0.6;
+export const TIMELINE_ZOOM_MAX = 2.0;
 export const TIMELINE_ZOOM_STEP = 0.2;
 
 export function clampTimelineZoom(value: number) {

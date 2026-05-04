@@ -72,6 +72,15 @@
   font-weight: 800;
 }
 
+.timeline-day-milestone-underlay {
+  pointer-events: auto;
+}
+
+.timeline-day-milestone-underlay:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+
 .timeline-day-event-overlay-tooltip-lane,
 .timeline-day-milestone-overlay-tooltip-lane {
   position: absolute;
