@@ -33,7 +33,9 @@ export function TimelineMilestoneDetailModal({
     <MilestonesEventDetailsModal
       activeMilestone={milestone}
       bootstrap={bootstrap}
+      milestoneModalMode="detail"
       modalPortalTarget={portalTarget}
+      onCancelEdit={onClose}
       onClose={onClose}
       onEditMilestone={onEdit}
       projectsById={projectsById}

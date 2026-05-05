@@ -3,6 +3,10 @@ import { useCallback } from "react";
 import type { AppWorkspaceLoaderModel } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
 import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
 import type { BootstrapPayload } from "@/types";
+import {
+  buildEditCanceledNotice,
+  buildMilestoneEditSuccessNotice,
+} from "@/features/workspace/workspaceEditToastNotice";
 
 export function useAppWorkspaceLoaderActions(
   state: AppWorkspaceState,
@@ -13,11 +17,15 @@ export function useAppWorkspaceLoaderActions(
   }, [state]);
 
   const clearTaskEditNotice = useCallback(() => {
-    state.setTaskEditNotice(null);
+    state.clearTaskEditNotices();
   }, [state]);
 
   const notifyTaskEditCanceled = useCallback(() => {
-    state.setTaskEditNotice("Task edit canceled. Unsaved changes were discarded.");
+    state.enqueueTaskEditNotice(buildEditCanceledNotice());
+  }, [state]);
+
+  const notifyTaskEditSaved = useCallback(() => {
+    state.enqueueTaskEditNotice(buildMilestoneEditSuccessNotice());
   }, [state]);
 
   const selectMember = useCallback((memberId: string | null, payload: BootstrapPayload) => {
@@ -53,6 +61,7 @@ export function useAppWorkspaceLoaderActions(
     clearDataMessage,
     clearTaskEditNotice,
     notifyTaskEditCanceled,
+    notifyTaskEditSaved,
     selectMember,
     toggleMyView,
   };

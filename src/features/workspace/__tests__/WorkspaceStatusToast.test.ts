@@ -3,19 +3,20 @@
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import { WorkspaceErrorPopup, WorkspaceInfoToast } from "../WorkspaceStatusToast";
+import { WorkspaceErrorPopup, WorkspaceInfoToast, WorkspaceToast } from "../WorkspaceStatusToast";
 import { createPausableTimeout } from "../taskEditNoticeTimer";
 
 describe("WorkspaceInfoToast", () => {
   it("renders the updated cancel notice title", () => {
     const markup = renderToStaticMarkup(
       React.createElement(WorkspaceInfoToast, {
-        message: "Task edit canceled. Unsaved changes were discarded.",
+        message: "Unsaved changes were discarded.",
         onDismiss: () => {},
       }),
     );
 
-    expect(markup).toContain("Changes Canceled");
+    expect(markup).toContain("Edit Canceled");
+    expect(markup).toContain('data-toast-tone="info"');
   });
 });
 
@@ -28,7 +29,24 @@ describe("WorkspaceErrorPopup", () => {
       }),
     );
 
-    expect(markup).toContain("Something went wrong");
+    expect(markup).toContain("Error");
+    expect(markup).toContain('data-toast-tone="error"');
+  });
+});
+
+describe("WorkspaceToast", () => {
+  it("renders tone specific chrome", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(WorkspaceToast, {
+        message: "Queued for review.",
+        onDismiss: () => {},
+        title: "Success",
+        tone: "success",
+      }),
+    );
+
+    expect(markup).toContain('data-toast-tone="success"');
+    expect(markup).toContain("Success");
   });
 });
 

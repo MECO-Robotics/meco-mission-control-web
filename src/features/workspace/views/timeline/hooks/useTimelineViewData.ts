@@ -3,7 +3,6 @@ import type { BootstrapPayload, MilestonePayload } from "@/types";
 import {
   type FilterSelection,
   filterSelectionMatchesTaskPeople,
-  formatFilterSelectionLabel,
   useFilterChangeMotionClass,
 } from "@/features/workspace/shared";
 import { formatTimelinePeriodLabel, type TimelineViewInterval } from "@/features/workspace/shared/timeline";
@@ -23,6 +22,8 @@ interface UseTimelineViewDataArgs {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   openCreateTaskModal: () => void;
+  onTaskEditCanceled: () => void;
+  onTaskEditSaved: () => void;
   onDeleteTimelineMilestone: (milestoneId: string) => Promise<void>;
   onSaveTimelineMilestone: (
     mode: "create" | "edit",
@@ -39,6 +40,8 @@ export function useTimelineViewData({
   activePersonFilter,
   bootstrap,
   openCreateTaskModal,
+  onTaskEditCanceled,
+  onTaskEditSaved,
   onDeleteTimelineMilestone,
   onSaveTimelineMilestone,
   timelineZoom,
@@ -96,7 +99,6 @@ export function useTimelineViewData({
     [bootstrap.tasks],
   );
   const timelineFilterMotionClass = useFilterChangeMotionClass([activePersonFilter]);
-  const activePersonFilterLabel = formatFilterSelectionLabel("All roster", bootstrap.members, activePersonFilter);
   const timeline = useMemo(
     () =>
       buildTimelineData({
@@ -118,6 +120,8 @@ export function useTimelineViewData({
   const milestoneModal = useTimelineMilestoneModal({
     dayMilestonesByDate,
     openCreateTaskModal,
+    onTaskEditCanceled,
+    onTaskEditSaved,
     onDeleteTimelineMilestone,
     onSaveTimelineMilestone,
     scopedProjectIds,
@@ -169,7 +173,6 @@ export function useTimelineViewData({
 
   return {
     clearHoveredMilestonePopup,
-    activePersonFilterLabel,
     disciplinesById,
     dayMilestonesByDate,
     milestoneModal,

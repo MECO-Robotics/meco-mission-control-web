@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { BootstrapPayload, MilestonePayload, TaskRecord } from "@/types";
 import { type FilterSelection } from "@/features/workspace/shared";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
-import { getTimelineMinimumZoomForWidth } from "@/features/workspace/shared/timeline";
+import { getTimelineMinimumZoomForWidth, midpointOfTimelineDays } from "@/features/workspace/shared/timeline";
 import { buildTimelineGridLayout } from "./model/timelineGridLayout";
 import { TimelineGridBody } from "./TimelineGridBody";
 import { TimelineMilestoneDetailModal } from "./TimelineMilestoneDetailModal";
@@ -24,6 +24,8 @@ interface TimelineViewProps {
   activePersonFilter: FilterSelection;
   setActivePersonFilter: (value: FilterSelection) => void;
   membersById: Record<string, BootstrapPayload["members"][number]>;
+  onTaskEditCanceled?: () => void;
+  onTaskEditSaved?: () => void;
   openTaskDetailModal: (task: TaskRecord) => void;
   openCreateTaskModal: () => void;
   onDeleteTimelineMilestone: (milestoneId: string) => Promise<void>;
@@ -41,6 +43,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   activePersonFilter,
   setActivePersonFilter,
   membersById: _membersById,
+  onTaskEditCanceled = () => {},
+  onTaskEditSaved = () => {},
   openTaskDetailModal,
   openCreateTaskModal,
   onDeleteTimelineMilestone,
@@ -51,10 +55,13 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
 
   const state = useTimelineViewState();
   const { setTimelineZoomMin } = state;
+  const [timelineShellWidth, setTimelineShellWidth] = useState(0);
   const data = useTimelineViewData({
     activePersonFilter,
     bootstrap,
     openCreateTaskModal,
+    onTaskEditCanceled,
+    onTaskEditSaved,
     timelineZoom: state.timelineZoom,
     onDeleteTimelineMilestone,
     onSaveTimelineMilestone,
@@ -72,6 +79,13 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     setViewInterval: state.setViewInterval,
     viewInterval: state.viewInterval,
   });
+  const handleTimelineIntervalChange = useCallback(
+    (nextInterval: typeof state.viewInterval) => {
+      const nextAnchorDate = midpointOfTimelineDays(data.timeline.days) ?? state.viewAnchorDate;
+      state.handleTimelineIntervalChange(nextInterval, nextAnchorDate);
+    },
+    [data.timeline.days, state.handleTimelineIntervalChange, state.viewAnchorDate],
+  );
 
   const layout = useMemo(
     () =>
@@ -80,6 +94,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         isAllProjectsView,
         isProjectColumnVisible: state.isProjectColumnVisible,
         isSubsystemColumnVisible: state.isSubsystemColumnVisible,
+        timelineShellWidth,
         timelineZoom: state.timelineZoom,
         viewInterval: state.viewInterval,
       }),
@@ -88,6 +103,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       isAllProjectsView,
       state.isProjectColumnVisible,
       state.isSubsystemColumnVisible,
+      timelineShellWidth,
       state.timelineZoom,
       state.viewInterval,
     ],
@@ -100,11 +116,13 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     }
 
     const updateZoomFloor = () => {
+      const shellWidth = shell.getBoundingClientRect().width;
+      setTimelineShellWidth((previous) => (previous === shellWidth ? previous : shellWidth));
       setTimelineZoomMin(
         getTimelineMinimumZoomForWidth({
           dayCount: data.timeline.days.length,
           fixedColumnWidth: layout.fixedTimelineColumnWidth,
-          shellWidth: shell.clientWidth,
+          shellWidth,
           viewInterval: state.viewInterval,
         }),
       );
@@ -135,11 +153,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       <div className="panel-header compact-header">
         <div className="queue-section-header">
           <h2 style={{ color: "var(--text-title)" }}>Subsystem timeline</h2>
-          <p className="section-copy filter-copy" style={{ color: "var(--text-copy)" }}>
-            {activePersonFilter.length === 0
-              ? "Showing all roster-linked tasks."
-              : `Filtered to ${data.activePersonFilterLabel}.`}
-          </p>
         </div>
         <TimelineToolbar
           activePersonFilter={activePersonFilter}
@@ -147,7 +160,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           onAdjustZoom={state.adjustTimelineZoom}
           onChangePersonFilter={setActivePersonFilter}
           onCreateTask={openCreateTaskModal}
-          onIntervalChange={state.handleTimelineIntervalChange}
+          onIntervalChange={handleTimelineIntervalChange}
           onShiftPeriod={state.shiftTimelinePeriod}
           timelinePeriodLabel={data.timelinePeriodLabel}
           timelineZoom={state.timelineZoom}
@@ -253,6 +266,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         isSavingMilestone={data.milestoneModal.isSavingMilestone}
         mode={data.milestoneModal.milestoneModalMode}
         onClose={data.milestoneModal.closeMilestoneModal}
+        onCancelEdit={data.milestoneModal.cancelMilestoneEdit}
         onDelete={data.milestoneModal.handleMilestoneDelete}
         onSubmit={data.milestoneModal.handleMilestoneSubmit}
         onSwitchToTask={data.milestoneModal.switchMilestoneCreateToTask}

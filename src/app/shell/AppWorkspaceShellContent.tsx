@@ -15,7 +15,7 @@ export function AppWorkspaceShellContent({ controller }: { controller: AppWorksp
       bootstrap={c.scopedBootstrap}
       cncItems={c.cncItems}
       dataMessage={c.dataMessage}
-      taskEditNotice={c.taskEditNotice}
+      taskEditNotices={c.taskEditNotices}
       fabricationItems={c.fabricationItems}
       handleCreateMember={c.handleCreateMember}
       handleReactivateMemberForSeason={c.handleReactivateMemberForSeason}
@@ -93,7 +93,9 @@ export function AppWorkspaceShellContent({ controller }: { controller: AppWorksp
       timelineMilestoneCreateSignal={c.timelineMilestoneCreateSignal}
       disablePanelAnimations={c.isWorkspaceModalOpen}
       onDismissDataMessage={c.clearDataMessage}
-      onDismissTaskEditNotice={c.clearTaskEditNotice}
+      onDismissTaskEditNotice={c.dismissTaskEditNotice}
+      onTaskEditCanceled={c.notifyTaskEditCanceled}
+      onTaskEditSaved={c.notifyTaskEditSaved}
       onStartInteractiveTutorial={() => void c.startInteractiveTutorial("planning")}
       onStartInteractiveTutorialChapter={(chapterId) => void c.startInteractiveTutorial(chapterId)}
       interactiveTutorialChapters={c.interactiveTutorialChapters}

@@ -23,6 +23,7 @@ import type {
   WorklogsViewTab,
 } from "@/lib/workspaceNavigation";
 import type { FilterSelection } from "@/features/workspace/shared";
+import type { WorkspaceToastNotice } from "@/features/workspace/workspaceToastQueue";
 import { WorkspaceContentPanelsView } from "./components/WorkspaceContentPanelsView";
 
 type SwipeDirection = "left" | "right" | null;
@@ -144,9 +145,11 @@ export interface WorkspaceContentPanelsProps {
   }>;
   isInteractiveTutorialActive?: boolean;
   onDismissDataMessage: () => void;
-  onDismissTaskEditNotice: () => void;
+  onDismissTaskEditNotice: (noticeId: string) => void;
+  onTaskEditCanceled: () => void;
+  onTaskEditSaved: () => void;
   dataMessage: string | null;
-  taskEditNotice: string | null;
+  taskEditNotices: WorkspaceToastNotice[];
 }
 
 export function WorkspaceContentPanels({

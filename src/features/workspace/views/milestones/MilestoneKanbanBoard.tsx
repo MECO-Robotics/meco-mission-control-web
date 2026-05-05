@@ -1,11 +1,10 @@
 import type { CSSProperties } from "react";
 
-import type { BootstrapPayload, MilestoneRecord } from "@/types";
+import type { BootstrapPayload, MilestoneRecord, MilestoneType } from "@/types";
 import { getStatusPillClassName } from "@/features/workspace/shared";
 import {
   MilestoneTaskStateIcon,
   getMilestoneTaskBoardStateForMilestone,
-  getMilestoneTaskBoardStateLabel,
 } from "@/features/workspace/shared/milestones";
 import { EditableHoverIndicator } from "@/features/workspace/shared/WorkspaceViewShared";
 import {
@@ -14,15 +13,46 @@ import {
   getMilestoneTypeStyle,
 } from "@/features/workspace/shared/events/eventStyles";
 import { KanbanColumns } from "@/features/workspace/views/kanban/KanbanColumns";
+import {
+  TASK_QUEUE_BOARD_COLUMNS,
+  formatTaskQueueBoardState,
+  type TaskQueueBoardState,
+} from "@/features/workspace/views/taskQueue/taskQueueKanbanBoardState";
 import { formatMilestoneDateTime } from "./milestonesViewUtils";
 
-const MILESTONE_BOARD_TYPES = Object.keys(MILESTONE_TYPE_STYLES) as (keyof typeof MILESTONE_TYPE_STYLES)[];
+const MILESTONE_TYPE_BADGE_LABELS: Record<MilestoneType, string> = {
+  practice: "Practice",
+  competition: "Competition",
+  deadline: "Deadline",
+  "internal-review": "Internal review",
+  demo: "Demo",
+};
 
 function getMilestoneBoardType(milestone: MilestoneRecord) {
   return milestone.type in MILESTONE_TYPE_STYLES ? milestone.type : DEFAULT_MILESTONE_TYPE;
 }
 
+function groupMilestonesByBoardState(
+  milestones: MilestoneRecord[],
+  bootstrap: BootstrapPayload,
+) {
+  const grouped = TASK_QUEUE_BOARD_COLUMNS.reduce(
+    (accumulator, { state }) => {
+      accumulator[state] = [];
+      return accumulator;
+    },
+    {} as Record<TaskQueueBoardState, MilestoneRecord[]>,
+  );
+
+  milestones.forEach((milestone) => {
+    grouped[getMilestoneTaskBoardStateForMilestone(milestone, bootstrap)].push(milestone);
+  });
+
+  return grouped;
+}
+
 interface MilestoneKanbanBoardProps {
+  boardStyle?: CSSProperties;
   bootstrap: BootstrapPayload;
   milestones: MilestoneRecord[];
   onOpenMilestone: (milestone: MilestoneRecord) => void;
@@ -30,23 +60,13 @@ interface MilestoneKanbanBoardProps {
 }
 
 export function MilestoneKanbanBoard({
+  boardStyle,
   bootstrap,
   milestones,
   onOpenMilestone,
   projectLabelByMilestoneId,
 }: MilestoneKanbanBoardProps) {
-  const milestonesByType = MILESTONE_BOARD_TYPES.reduce(
-    (grouped, type) => {
-      grouped[type] = [];
-      return grouped;
-    },
-    {} as Record<(typeof MILESTONE_BOARD_TYPES)[number], MilestoneRecord[]>,
-  );
-
-  milestones.forEach((milestone) => {
-    const type = getMilestoneBoardType(milestone);
-    milestonesByType[type].push(milestone);
-  });
+  const milestonesByState = groupMilestonesByBoardState(milestones, bootstrap);
 
   return (
     <KanbanColumns
@@ -56,36 +76,37 @@ export function MilestoneKanbanBoard({
       columnCountClassName="task-queue-board-column-count"
       columnEmptyClassName="task-queue-board-column-empty"
       columnHeaderClassName="task-queue-board-column-header"
-      columns={MILESTONE_BOARD_TYPES.map((type) => {
-        const milestoneStyle = getMilestoneTypeStyle(type);
+      style={boardStyle}
+      columns={TASK_QUEUE_BOARD_COLUMNS.map(({ state }) => {
+        const stateLabel = formatTaskQueueBoardState(state);
 
         return {
-          state: type,
-          count: milestonesByType[type].length,
+          state,
+          count: milestonesByState[state].length,
           header: (
-            <span
-              className="pill status-pill milestone-type-pill"
-              style={
-                {
-                  "--milestone-type-chip-bg": milestoneStyle.chipBackground,
-                  "--milestone-type-chip-border": milestoneStyle.columnBorder,
-                  "--milestone-type-chip-text": milestoneStyle.chipText,
-                  "--milestone-type-chip-bg-dark": milestoneStyle.darkChipBackground,
-                  "--milestone-type-chip-border-dark": milestoneStyle.darkColumnBorder,
-                  "--milestone-type-chip-text-dark": milestoneStyle.darkChipText,
-                } as CSSProperties
-              }
-            >
-              {milestoneStyle.label}
+            <span className={getStatusPillClassName(state)}>
+              <span aria-hidden="true" className="task-queue-board-column-header-icon">
+                <MilestoneTaskStateIcon compact state={state} />
+              </span>
+              <span className="task-queue-board-column-header-label">{stateLabel}</span>
             </span>
           ),
         };
       })}
       emptyLabel="No milestones"
-      itemsByState={milestonesByType}
+      itemsByState={milestonesByState}
       renderItem={(milestone) => {
-        const milestoneStatus = getMilestoneTaskBoardStateForMilestone(milestone, bootstrap);
-        const milestoneStatusLabel = getMilestoneTaskBoardStateLabel(milestoneStatus);
+        const milestoneType = getMilestoneBoardType(milestone);
+        const milestoneTypeStyle = getMilestoneTypeStyle(milestoneType);
+        const milestoneTypeBadge = MILESTONE_TYPE_BADGE_LABELS[milestoneType];
+        const milestoneTypeBadgeStyle = {
+          "--milestone-type-chip-bg": milestoneTypeStyle.chipBackground,
+          "--milestone-type-chip-border": milestoneTypeStyle.columnBorder,
+          "--milestone-type-chip-text": milestoneTypeStyle.chipText,
+          "--milestone-type-chip-bg-dark": milestoneTypeStyle.darkChipBackground,
+          "--milestone-type-chip-border-dark": milestoneTypeStyle.darkColumnBorder,
+          "--milestone-type-chip-text-dark": milestoneTypeStyle.darkChipText,
+        } as CSSProperties;
 
         return (
           <button
@@ -119,24 +140,19 @@ export function MilestoneKanbanBoard({
             </small>
             <div className="task-queue-board-card-meta">
               <span
+                aria-label={`Milestone type: ${milestoneTypeStyle.label}`}
+                className="pill status-pill milestone-type-pill task-queue-board-card-type-badge"
+                style={milestoneTypeBadgeStyle}
+                title={`Milestone type: ${milestoneTypeStyle.label}`}
+              >
+                <span aria-hidden="true">{milestoneTypeBadge}</span>
+              </span>
+              <span
                 className="task-queue-board-card-context-chip"
                 title={projectLabelByMilestoneId[milestone.id] ?? "All projects"}
               >
                 {projectLabelByMilestoneId[milestone.id] ?? "All projects"}
               </span>
-              <div className="task-queue-board-card-meta-person-group">
-                <span
-                  aria-label={`Milestone status: ${milestoneStatusLabel}`}
-                  className={getStatusPillClassName(milestoneStatus)}
-                  title={`Milestone status: ${milestoneStatusLabel}`}
-                  style={{ display: "inline-flex", gap: "0.24rem", padding: "0.14rem 0.34rem" }}
-                >
-                  <span aria-hidden="true" className="task-queue-board-card-status-icon">
-                    <MilestoneTaskStateIcon compact state={milestoneStatus} />
-                  </span>
-                  <span className="task-queue-board-card-status-label">{milestoneStatusLabel}</span>
-                </span>
-              </div>
             </div>
             <EditableHoverIndicator className="task-queue-board-card-hover" />
           </button>

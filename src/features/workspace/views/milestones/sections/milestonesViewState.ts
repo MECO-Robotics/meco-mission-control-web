@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from
 
 import type { BootstrapPayload, MilestonePayload } from "@/types";
 import {
-  formatFilterSelectionLabel,
   type FilterSelection,
   useFilterChangeMotionClass,
 } from "@/features/workspace/shared/WorkspaceViewShared";
@@ -17,8 +16,8 @@ import {
 } from "./useMilestonesEventModalState";
 
 export type MilestonesViewState = MilestonesMilestoneModalState & {
-  activePersonFilterLabel: string;
   milestoneFilterMotionClass: string;
+  milestoneZoom: number;
   processedMilestones: BootstrapPayload["milestones"];
   projectFilter: FilterSelection;
   projectLabelByMilestoneId: Record<string, string>;
@@ -28,6 +27,7 @@ export type MilestonesViewState = MilestonesMilestoneModalState & {
   setSearchFilter: Dispatch<SetStateAction<string>>;
   setSortField: Dispatch<SetStateAction<MilestoneSortField>>;
   setSortOrder: Dispatch<SetStateAction<"asc" | "desc">>;
+  setMilestoneZoom: Dispatch<SetStateAction<number>>;
   setTypeFilter: Dispatch<SetStateAction<FilterSelection>>;
   sortField: MilestoneSortField;
   sortOrder: "asc" | "desc";
@@ -38,6 +38,8 @@ type MilestonesViewStateArgs = {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   isAllProjectsView: boolean;
+  onTaskEditCanceled: () => void;
+  onTaskEditSaved: () => void;
   onDeleteTimelineMilestone: (milestoneId: string) => Promise<void>;
   onSaveTimelineMilestone: (
     mode: "create" | "edit",
@@ -50,6 +52,8 @@ export function useMilestonesViewState({
   activePersonFilter,
   bootstrap,
   isAllProjectsView,
+  onTaskEditCanceled,
+  onTaskEditSaved,
   onDeleteTimelineMilestone,
   onSaveTimelineMilestone,
 }: MilestonesViewStateArgs): MilestonesViewState {
@@ -58,6 +62,7 @@ export function useMilestonesViewState({
   const [projectFilter, setProjectFilter] = useState<FilterSelection>([]);
   const [typeFilter, setTypeFilter] = useState<FilterSelection>([]);
   const [searchFilter, setSearchFilter] = useState("");
+  const [milestoneZoom, setMilestoneZoom] = useState(1);
 
   useEffect(() => {
     if (!isAllProjectsView && projectFilter.length > 0) {
@@ -120,15 +125,11 @@ export function useMilestonesViewState({
     sortOrder,
     typeFilter,
   ]);
-  const activePersonFilterLabel = formatFilterSelectionLabel(
-    "All roster",
-    bootstrap.members,
-    activePersonFilter,
-  );
-
   const modalState = useMilestonesMilestoneModalState({
     bootstrap,
     isAllProjectsView,
+    onTaskEditCanceled,
+    onTaskEditSaved,
     onDeleteTimelineMilestone,
     onSaveTimelineMilestone,
     projectFilter,
@@ -137,7 +138,6 @@ export function useMilestonesViewState({
 
   return {
     ...modalState,
-    activePersonFilterLabel,
     milestoneFilterMotionClass,
     processedMilestones,
     projectFilter,
@@ -148,9 +148,11 @@ export function useMilestonesViewState({
     setSearchFilter,
     setSortField,
     setSortOrder,
+    setMilestoneZoom,
     setTypeFilter,
     sortField,
     sortOrder,
+    milestoneZoom,
     typeFilter,
   };
 }

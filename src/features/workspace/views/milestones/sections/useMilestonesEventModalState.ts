@@ -31,6 +31,8 @@ type TaskPlanningState = (typeof MILESTONE_TASK_ORDER)[number];
 type UseMilestonesMilestoneModalStateArgs = {
   bootstrap: BootstrapPayload;
   isAllProjectsView: boolean;
+  onTaskEditCanceled: () => void;
+  onTaskEditSaved: () => void;
   onDeleteTimelineMilestone: (milestoneId: string) => Promise<void>;
   onSaveTimelineMilestone: (
     mode: "create" | "edit",
@@ -45,6 +47,7 @@ export type MilestonesMilestoneModalState = {
   activeMilestone: MilestoneRecord | null;
   activeMilestoneCompleteTasks: BootstrapPayload["tasks"];
   activeMilestoneTasks: BootstrapPayload["tasks"];
+  cancelMilestoneEdit: () => void;
   closeMilestoneModal: () => void;
   milestoneEndDate: string;
   milestoneEndTime: string;
@@ -74,6 +77,8 @@ export type MilestonesMilestoneModalState = {
 export function useMilestonesMilestoneModalState({
   bootstrap,
   isAllProjectsView,
+  onTaskEditCanceled,
+  onTaskEditSaved,
   onDeleteTimelineMilestone,
   onSaveTimelineMilestone,
   projectFilter,
@@ -120,6 +125,14 @@ export function useMilestonesMilestoneModalState({
     setMilestoneError(null);
     setIsSavingMilestone(false);
     setIsDeletingMilestone(false);
+  };
+
+  const cancelMilestoneEdit = () => {
+    if (milestoneModalMode === "edit") {
+      onTaskEditCanceled();
+    }
+
+    closeMilestoneModal();
   };
 
   const getDefaultMilestoneProjectIds = () =>
@@ -205,6 +218,9 @@ export function useMilestonesMilestoneModalState({
       };
 
       await onSaveTimelineMilestone(milestoneModalMode, activeMilestoneId, payload);
+      if (milestoneModalMode === "edit") {
+        onTaskEditSaved();
+      }
       closeMilestoneModal();
     } catch (error) {
       setMilestoneError(
@@ -250,6 +266,7 @@ export function useMilestonesMilestoneModalState({
     activeMilestone,
     activeMilestoneCompleteTasks,
     activeMilestoneTasks,
+    cancelMilestoneEdit,
     closeMilestoneModal,
     milestoneEndDate,
     milestoneEndTime,

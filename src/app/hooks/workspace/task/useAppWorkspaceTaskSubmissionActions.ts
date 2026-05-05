@@ -10,6 +10,7 @@ import {
   syncTaskDependencies,
 } from "@/app/hooks/workspace/task/appWorkspaceTaskActionHelpers";
 import type { TaskBlockerRecord, TaskDependencyRecord, TaskRecord } from "@/types";
+import { buildTaskEditSuccessNotice } from "@/features/workspace/workspaceEditToastNotice";
 
 export type AppWorkspaceTaskSubmissionActions = ReturnType<typeof useAppWorkspaceTaskSubmissionActions>;
 
@@ -25,6 +26,7 @@ export function useAppWorkspaceTaskSubmissionActions(
 
       try {
         const payload = normalizeTaskPayload(model.taskDraft);
+        const isEdit = model.taskModalMode === "edit";
         let savedTask: TaskRecord;
 
         if (model.taskModalMode === "create") {
@@ -52,6 +54,9 @@ export function useAppWorkspaceTaskSubmissionActions(
           handleUnauthorized: model.handleUnauthorized,
         });
         await model.loadWorkspace();
+        if (isEdit) {
+          model.enqueueTaskEditNotice(buildTaskEditSuccessNotice());
+        }
         closeTaskModal();
       } catch (error) {
         model.setDataMessage(toErrorMessage(error));

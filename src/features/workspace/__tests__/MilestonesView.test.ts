@@ -161,7 +161,7 @@ function createBootstrap(): BootstrapPayload {
 }
 
 describe("MilestonesView", () => {
-  it("renders milestones as kanban columns grouped by type", () => {
+  it("renders milestones as kanban columns grouped by status", () => {
     const markup = renderToStaticMarkup(
       React.createElement(MilestonesView, {
         activePersonFilter: [],
@@ -176,13 +176,18 @@ describe("MilestonesView", () => {
     expect(markup).toContain("milestone-board");
     expect(markup).toContain("task-queue-board-column");
     expect(markup).toContain("task-queue-board-card");
-    expect(markup).toContain("Competition");
-    expect(markup).toContain("Deadline");
+    expect(markup).toContain("Not started");
+    expect(markup).toContain("In progress");
+    expect(markup).toContain("task-queue-zoom-controls");
+    expect(markup).toContain("task-queue-zoom-label");
+    expect(markup).toContain("100%");
+    expect(markup).toContain("--task-queue-board-column-width:calc(15.5rem * 1)");
     expect((markup.match(/task-queue-board-card-due/g) ?? []).length).toBeGreaterThanOrEqual(4);
-    expect(markup).toContain("task-queue-board-card-status-icon");
+    expect(markup).toContain("task-queue-board-card-type-badge");
+    expect(markup).toContain("Milestone type: Competition");
   });
 
-  it("renders milestone status badges with the shared status palette", () => {
+  it("renders milestone type badges with the shared type palette", () => {
     const markup = renderToStaticMarkup(
       React.createElement(MilestonesView, {
         activePersonFilter: [],
@@ -193,8 +198,8 @@ describe("MilestonesView", () => {
       }),
     );
 
-    expect(markup).toContain("status-pill-warning");
-    expect(markup).toContain("Milestone status: In progress");
+    expect(markup).toContain("milestone-type-pill");
+    expect(markup).toContain("Milestone type: Competition");
   });
 
   it("filters milestones to the active person via linked tasks", () => {
@@ -211,7 +216,7 @@ describe("MilestonesView", () => {
 
     expect(markup).toContain("Regional");
     expect(markup).toContain("Design review");
-    expect(markup).toContain("Only milestones linked to tasks assigned to or mentored by Alex Builder.");
+    expect(markup).toContain("Showing 2 milestones.");
   });
 
   it("falls back to the default style label when an milestone type is invalid", () => {
@@ -228,13 +233,13 @@ describe("MilestonesView", () => {
     const render = () =>
       renderToStaticMarkup(
         React.createElement(MilestonesView, {
-        activePersonFilter: [],
-        bootstrap,
-        isAllProjectsView: false,
-        onDeleteTimelineMilestone: jest.fn(),
-        onSaveTimelineMilestone: jest.fn(),
-      }),
-    );
+          activePersonFilter: [],
+          bootstrap,
+          isAllProjectsView: false,
+          onDeleteTimelineMilestone: jest.fn(),
+          onSaveTimelineMilestone: jest.fn(),
+        }),
+      );
 
     expect(render).not.toThrow();
     expect(render()).toContain("Internal review");

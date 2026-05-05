@@ -16,6 +16,7 @@ interface UseAppWorkspaceGlobalEffectsOptions {
   pageShellStyle: Record<string, string | number | undefined>;
   isSidebarOverlay: boolean;
   toggleSidebar: () => void;
+  setDataMessage: (message: string | null) => void;
   isAddSeasonPopupOpen: boolean;
   setIsAddSeasonPopupOpen: Dispatch<SetStateAction<boolean>>;
   robotProjectModalMode: "create" | "edit" | null;
@@ -27,6 +28,7 @@ export function useAppWorkspaceGlobalEffects({
   pageShellStyle,
   isSidebarOverlay,
   toggleSidebar,
+  setDataMessage,
   isAddSeasonPopupOpen,
   setIsAddSeasonPopupOpen,
   robotProjectModalMode,
@@ -54,6 +56,28 @@ export function useAppWorkspaceGlobalEffects({
       document.documentElement.classList.remove("dark-mode");
     };
   }, [isDarkMode, pageShellStyle]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const handleGlobalError = () => {
+      setDataMessage("Something went wrong.");
+    };
+
+    const handleUnhandledRejection = () => {
+      setDataMessage("Something went wrong.");
+    };
+
+    window.addEventListener("error", handleGlobalError);
+    window.addEventListener("unhandledrejection", handleUnhandledRejection);
+
+    return () => {
+      window.removeEventListener("error", handleGlobalError);
+      window.removeEventListener("unhandledrejection", handleUnhandledRejection);
+    };
+  }, [setDataMessage]);
 
   useEffect(() => {
     const handleWheel = (milestone: WheelEvent) => {

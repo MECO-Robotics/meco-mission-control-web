@@ -133,6 +133,14 @@
   gap: calc(0.3rem * var(--task-queue-zoom, 1));
 }
 
+.milestone-board .task-queue-board-card-meta {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  justify-content: stretch;
+  gap: calc(0.35rem * var(--task-queue-zoom, 1));
+}
+
 .task-queue-board-card-meta.task-queue-board-card-meta-person-only {
   justify-content: flex-end;
 }
@@ -143,6 +151,24 @@
   justify-content: flex-end;
   gap: calc(0.22rem * var(--task-queue-zoom, 1));
   margin-left: auto;
+}
+
+.task-queue-board-card-discipline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(1.85rem * var(--task-queue-zoom, 1));
+  height: calc(1.85rem * var(--task-queue-zoom, 1));
+  border: 1px solid transparent;
+  border-radius: 999px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.task-queue-board-card-discipline svg {
+  display: block;
+  width: calc(0.88rem * var(--task-queue-zoom, 1));
+  height: calc(0.88rem * var(--task-queue-zoom, 1));
 }
 
 .task-queue-board-card-meta > span:not(.task-queue-board-card-person) {
@@ -156,4 +182,36 @@
   font-size: calc(0.63rem * var(--task-queue-zoom, 1));
   font-weight: 700;
   letter-spacing: 0.02em;
+}
+
+.task-queue-board-card-meta > span.task-queue-board-card-type-badge.milestone-type-pill {
+  flex-shrink: 0;
+  align-self: flex-end;
+  justify-content: center;
+  min-width: calc(2.1rem * var(--task-queue-zoom, 1));
+  padding: calc(0.14rem * var(--task-queue-zoom, 1)) calc(0.48rem * var(--task-queue-zoom, 1));
+  border-radius: 999px;
+  background: var(--milestone-type-chip-bg);
+  border: 1px solid var(--milestone-type-chip-border);
+  color: var(--milestone-type-chip-text);
+  font-size: calc(0.58rem * var(--task-queue-zoom, 1));
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1.15;
+  overflow: visible;
+  white-space: nowrap;
+}
+
+.milestone-board .task-queue-board-card-meta > span.task-queue-board-card-type-badge.milestone-type-pill {
+  justify-self: start;
+}
+
+.milestone-board .task-queue-board-card-context-chip {
+  justify-self: end;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.task-queue-board-card-type-badge {
+  text-transform: uppercase;
 }

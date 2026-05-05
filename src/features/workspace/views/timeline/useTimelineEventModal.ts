@@ -18,6 +18,8 @@ import {
 interface UseTimelineMilestoneModalArgs {
   dayMilestonesByDate: Record<string, MilestoneRecord[]>;
   openCreateTaskModal: () => void;
+  onTaskEditCanceled: () => void;
+  onTaskEditSaved: () => void;
   onDeleteTimelineMilestone: (milestoneId: string) => Promise<void>;
   onSaveTimelineMilestone: (
     mode: "create" | "edit",
@@ -31,6 +33,8 @@ interface UseTimelineMilestoneModalArgs {
 export function useTimelineMilestoneModal({
   dayMilestonesByDate,
   openCreateTaskModal,
+  onTaskEditCanceled,
+  onTaskEditSaved,
   onDeleteTimelineMilestone,
   onSaveTimelineMilestone,
   scopedProjectIds,
@@ -59,6 +63,14 @@ export function useTimelineMilestoneModal({
     setIsSavingMilestone(false);
     setIsDeletingMilestone(false);
   }, []);
+
+  const cancelMilestoneEdit = useCallback(() => {
+    if (milestoneModalMode === "edit") {
+      onTaskEditCanceled();
+    }
+
+    closeMilestoneModal();
+  }, [closeMilestoneModal, milestoneModalMode, onTaskEditCanceled]);
 
   const openCreateMilestoneModalForDay = useCallback(
     (day: string) => {
@@ -187,6 +199,9 @@ export function useTimelineMilestoneModal({
       };
 
         await onSaveTimelineMilestone(milestoneModalMode, activeMilestoneId, payload);
+        if (milestoneModalMode === "edit") {
+          onTaskEditSaved();
+        }
         closeMilestoneModal();
       } catch (error) {
         setMilestoneError(
@@ -212,6 +227,7 @@ export function useTimelineMilestoneModal({
       milestoneStartDate,
       milestoneStartTime,
       onSaveTimelineMilestone,
+      onTaskEditSaved,
     ],
   );
 
@@ -250,6 +266,7 @@ export function useTimelineMilestoneModal({
     activeMilestoneDetail,
     closeMilestoneDetailModal,
     closeMilestoneModal,
+    cancelMilestoneEdit,
     milestoneDraft,
     milestoneEndDate,
     milestoneEndTime,

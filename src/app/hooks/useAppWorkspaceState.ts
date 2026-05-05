@@ -7,6 +7,12 @@ import { useAppShell } from "@/app/hooks/useAppShell";
 import { useAppWorkspaceGlobalEffects } from "@/app/hooks/workspace/derived/useAppWorkspaceGlobalEffects";
 import { useAppWorkspaceUiState } from "@/app/hooks/useAppWorkspaceUiState";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model";
+import type { WorkspaceEditToastNotice } from "@/features/workspace/workspaceEditToastNotice";
+import {
+  appendWorkspaceToast,
+  removeWorkspaceToast,
+  type WorkspaceToastNotice,
+} from "@/features/workspace/workspaceToastQueue";
 import type {
   InventoryViewTab,
   ManufacturingViewTab,
@@ -34,7 +40,8 @@ export function useAppWorkspaceState() {
   const [bootstrap, setBootstrap] = useState<BootstrapPayload>(EMPTY_BOOTSTRAP);
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [dataMessage, setDataMessage] = useState<string | null>(null);
-  const [taskEditNotice, setTaskEditNotice] = useState<string | null>(null);
+  const [taskEditNotices, setTaskEditNotices] = useState<WorkspaceToastNotice[]>([]);
+  const nextTaskEditNoticeIdRef = useRef(0);
 
   const {
     isDarkMode,
@@ -47,6 +54,19 @@ export function useAppWorkspaceState() {
   const workspaceUiState = useAppWorkspaceUiState();
   const suppressNextAutoWorkspaceLoadRef = useRef(false);
 
+  const enqueueTaskEditNotice = (notice: WorkspaceEditToastNotice) => {
+    const id = `task-edit-notice-${nextTaskEditNoticeIdRef.current++}`;
+    setTaskEditNotices((current) => appendWorkspaceToast(current, { id, ...notice }));
+  };
+
+  const dismissTaskEditNotice = (noticeId: string) => {
+    setTaskEditNotices((current) => removeWorkspaceToast(current, noticeId));
+  };
+
+  const clearTaskEditNotices = () => {
+    setTaskEditNotices([]);
+  };
+
   const { authBooting, authConfig, authMessage, clearAuthMessage, enforcedAuthConfig, expireSession, googleButtonRef, handleSignOut, handleDevBypassSignIn, handleRequestEmailCode, handleVerifyEmailCode, isEmailAuthAvailable, isGoogleAuthAvailable, isSigningIn, sessionUser } =
     useAppAuth({
       isDarkMode,
@@ -58,6 +78,7 @@ export function useAppWorkspaceState() {
         workspaceUiState.setSelectedMemberId(null);
         workspaceUiState.setMemberEditDraft(null);
         setDataMessage(null);
+        clearTaskEditNotices();
       },
     });
 
@@ -66,6 +87,7 @@ export function useAppWorkspaceState() {
     pageShellStyle,
     isSidebarOverlay,
     toggleSidebar,
+    setDataMessage,
     isAddSeasonPopupOpen: workspaceUiState.isAddSeasonPopupOpen,
     setIsAddSeasonPopupOpen: workspaceUiState.setIsAddSeasonPopupOpen,
     robotProjectModalMode: workspaceUiState.robotProjectModalMode,
@@ -108,18 +130,20 @@ export function useAppWorkspaceState() {
     setReportsView,
     setRiskManagementView,
     setTabSwitchDirection,
-    setTaskEditNotice,
+    enqueueTaskEditNotice,
+    dismissTaskEditNotice,
     setTaskView,
     setWorklogsView,
     sessionUser,
     tabSwitchDirection,
-    taskEditNotice,
+    taskEditNotices,
     taskView,
     toggleDarkMode,
     toggleSidebar,
     worklogsView,
     suppressNextAutoWorkspaceLoadRef,
     enforcedAuthConfig,
+    clearTaskEditNotices,
   };
 }
 

@@ -9,9 +9,12 @@ import {
   getTimelineDayTrackSize,
   getTimelineGridMinWidth,
   getTimelineMinimumZoomForWidth,
+  midpointOfTimelineDays,
   monthEndFromDay,
+  midpointOfTimelineWeek,
 } from "@/features/workspace/shared/timeline";
 import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
+import { buildTimelineGridLayout } from "@/features/workspace/views/timeline/model/timelineGridLayout";
 import { createBootstrap, createBootstrapWithEmptySubsystem, createBootstrapWithoutTasks, readAppCss, membersById } from "./timelineTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
@@ -226,6 +229,23 @@ describe("TimelineView", () => {
     expect(monthEndFromDay("2026-02-14")).toBe("2026-02-28");
   });
 
+  it("centers the month view on the midpoint of the current week when switching from week to month", () => {
+    expect(midpointOfTimelineWeek("2026-04-06")).toBe("2026-04-08");
+    expect(midpointOfTimelineWeek("2026-04-11")).toBe("2026-04-08");
+  });
+
+  it("uses the midpoint of the visible range for interval anchor persistence", () => {
+    expect(
+      midpointOfTimelineDays([
+        "2026-04-01",
+        "2026-04-02",
+        "2026-04-03",
+        "2026-04-04",
+      ]),
+    ).toBe("2026-04-03");
+    expect(midpointOfTimelineDays([])).toBeNull();
+  });
+
   it("marks the timeline grid as motion-capable for period changes", () => {
     const markup = renderToStaticMarkup(
       React.createElement(TimelineView, {
@@ -336,12 +356,9 @@ describe("TimelineView", () => {
     expect(clampTimelineZoom(4)).toBe(2);
     expect(getTimelineDayTrackSize("month", 1)).toBe("minmax(28px, 1fr)");
     expect(getTimelineDayTrackSize("month", 1.6)).toBe("minmax(45px, 1fr)");
-    expect(getTimelineDayTrackSize("week", 1, 388)).toBe(
-      "minmax(calc((100vw - var(--shell-sidebar-width) - 388px) / 7 * 1), 1fr)",
-    );
-    expect(getTimelineDayTrackSize("week", 1.6, 388)).toBe(
-      "minmax(calc((100vw - var(--shell-sidebar-width) - 388px) / 7 * 1.6), 1fr)",
-    );
+    expect(getTimelineDayTrackSize("week", 1, 388)).toBe("minmax(44px, 1fr)");
+    expect(getTimelineDayTrackSize("week", 1.6, 388)).toBe("minmax(70px, 1fr)");
+    expect(getTimelineDayTrackSize("week", 1, 388, 0, 36)).toBe("minmax(44px, 1fr)");
     expect(css).toContain("gap: calc(0.35rem + 0.35rem * var(--timeline-zoom, 1))");
     expect(
       getTimelineGridMinWidth({
@@ -350,9 +367,37 @@ describe("TimelineView", () => {
         projectColumnWidth: 112,
         subsystemColumnWidth: 128,
         taskColumnWidth: 148,
+        statusIconColumnWidth: 36,
         viewInterval: "week",
         zoom: 1.2,
       }),
-    ).toBe(388);
+    ).toBe(918);
+  });
+
+  it("keeps the week status icon overlay anchored to the last day column", () => {
+    const fallbackLayout = buildTimelineGridLayout({
+      dayCount: 7,
+      isAllProjectsView: true,
+      isProjectColumnVisible: true,
+      isSubsystemColumnVisible: true,
+      timelineZoom: 1.4,
+      viewInterval: "week",
+    });
+    const measuredLayout = buildTimelineGridLayout({
+      dayCount: 7,
+      isAllProjectsView: true,
+      isProjectColumnVisible: true,
+      isSubsystemColumnVisible: true,
+      timelineShellWidth: 1425.59375,
+      timelineZoom: 1.4,
+      viewInterval: "week",
+    });
+
+    expect(measuredLayout.statusIconColumnIndex).toBe(9);
+    expect(measuredLayout.statusIconColumnWidth).toBe(36);
+    expect(measuredLayout.dayTrackSize).toMatch(/^minmax\(\d+px, 1fr\)$/);
+    expect(measuredLayout.timelineGridTemplate).toContain(measuredLayout.dayTrackSize);
+    expect(measuredLayout.dayTrackSize).toBe(fallbackLayout.dayTrackSize);
+    expect(measuredLayout.dayTrackSize).toBe("minmax(62px, 1fr)");
   });
 });

@@ -1,6 +1,6 @@
 import type { InventoryViewTab } from "@/lib/workspaceNavigation";
 import type { WorkspaceContentPanelsProps } from "../WorkspaceContentPanelsCoreImpl";
-import { WorkspaceErrorPopup, WorkspaceInfoToast } from "../WorkspaceStatusToast";
+import { WorkspaceToastStack, type WorkspaceToastStackItem } from "../WorkspaceStatusToast";
 import {
   WorkspaceTaskSection,
   WorkspaceRiskSection,
@@ -25,6 +25,25 @@ type WorkspaceContentPanelsViewProps = WorkspaceContentPanelsProps & {
 };
 
 export function WorkspaceContentPanelsView(props: WorkspaceContentPanelsViewProps) {
+  const toastItems: WorkspaceToastStackItem[] = [
+    ...props.taskEditNotices.map((notice) => ({
+      message: notice.message,
+      onDismiss: () => props.onDismissTaskEditNotice(notice.id),
+      title: notice.title,
+      tone: notice.tone,
+      id: notice.id,
+    })),
+    props.dataMessage
+      ? {
+          id: "workspace-data-message",
+          message: props.dataMessage,
+          onDismiss: props.onDismissDataMessage,
+          title: "Error",
+          tone: "error" as const,
+        }
+      : null,
+  ].filter((item): item is WorkspaceToastStackItem => item !== null);
+
   return (
     <div
       className="dense-shell"
@@ -40,18 +59,7 @@ export function WorkspaceContentPanelsView(props: WorkspaceContentPanelsViewProp
         minHeight: "100%",
       }}
     >
-      {props.taskEditNotice ? (
-        <WorkspaceInfoToast
-          message={props.taskEditNotice}
-          onDismiss={props.onDismissTaskEditNotice}
-        />
-      ) : null}
-      {props.dataMessage ? (
-        <WorkspaceErrorPopup
-          message={props.dataMessage}
-          onDismiss={props.onDismissDataMessage}
-        />
-      ) : null}
+      {toastItems.length > 0 ? <WorkspaceToastStack items={toastItems} /> : null}
       {props.isLoadingData ? <p className="banner">Refreshing workspace data...</p> : null}
 
       <WorkspaceTaskSection {...props} />

@@ -11,6 +11,8 @@ interface MilestonesViewProps {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   isAllProjectsView: boolean;
+  onTaskEditCanceled?: () => void;
+  onTaskEditSaved?: () => void;
   onDeleteTimelineMilestone: (milestoneId: string) => Promise<void>;
   onSaveTimelineMilestone: (
     mode: "create" | "edit",
@@ -23,6 +25,8 @@ export function MilestonesView({
   activePersonFilter,
   bootstrap,
   isAllProjectsView,
+  onTaskEditCanceled = () => {},
+  onTaskEditSaved = () => {},
   onDeleteTimelineMilestone,
   onSaveTimelineMilestone,
 }: MilestonesViewProps) {
@@ -30,30 +34,34 @@ export function MilestonesView({
     activePersonFilter,
     bootstrap,
     isAllProjectsView,
+    onTaskEditCanceled,
+    onTaskEditSaved,
     onDeleteTimelineMilestone,
     onSaveTimelineMilestone,
   });
 
   return (
-    <section className={`panel dense-panel milestone-view ${WORKSPACE_PANEL_CLASS}`}>
+    <section
+      className={`panel dense-panel milestone-view ${WORKSPACE_PANEL_CLASS}`}
+      style={{
+        display: "flex",
+        flex: "1 1 auto",
+        flexDirection: "column",
+        minHeight: 0,
+      }}
+    >
       <div className="panel-header compact-header">
         <div className="queue-section-header">
           <h2>Milestones</h2>
-          <p className="section-copy filter-copy">
-            {milestones.processedMilestones.length === 1
-              ? "1 milestone matches the current filters."
-              : `${milestones.processedMilestones.length} milestones match the current filters.`}
-            {activePersonFilter.length > 0
-              ? ` Only milestones linked to tasks assigned to or mentored by ${milestones.activePersonFilterLabel}.`
-              : ""}
-          </p>
         </div>
         <MilestonesToolbar
           isAllProjectsView={isAllProjectsView}
           onAddMilestone={milestones.openCreateMilestoneModal}
+          milestoneZoom={milestones.milestoneZoom}
           projectFilter={milestones.projectFilter}
           projects={bootstrap.projects}
           searchFilter={milestones.searchFilter}
+          setMilestoneZoom={milestones.setMilestoneZoom}
           setProjectFilter={milestones.setProjectFilter}
           setSearchFilter={milestones.setSearchFilter}
           setSortField={milestones.setSortField}
@@ -69,8 +77,10 @@ export function MilestonesView({
         bootstrap={bootstrap}
         milestones={milestones.processedMilestones}
         motionClassName={milestones.milestoneFilterMotionClass}
+        milestoneZoom={milestones.milestoneZoom}
         onOpenMilestone={milestones.openMilestoneDetailsModal}
         projectLabelByMilestoneId={milestones.projectLabelByMilestoneId}
+        setMilestoneZoom={milestones.setMilestoneZoom}
       />
 
       <MilestonesMilestoneModal
@@ -87,6 +97,7 @@ export function MilestonesView({
         milestoneDraft={milestones.milestoneDraft}
         modalPortalTarget={milestones.modalPortalTarget}
         onClose={milestones.closeMilestoneModal}
+        onCancelEdit={milestones.cancelMilestoneEdit}
         onDelete={milestones.handleMilestoneDelete}
         onEditMilestone={milestones.openEditMilestoneModal}
         onSubmit={milestones.handleMilestoneSubmit}

@@ -21,6 +21,7 @@ export function useAppWorkspaceLoader(
     clearDataMessage,
     clearTaskEditNotice,
     notifyTaskEditCanceled,
+    notifyTaskEditSaved,
     selectMember,
     toggleMyView,
   } = useAppWorkspaceLoaderActions(state, model);
@@ -32,6 +33,7 @@ export function useAppWorkspaceLoader(
     handleUnauthorized,
     loadWorkspace,
     notifyTaskEditCanceled,
+    notifyTaskEditSaved,
     requestMemberPhotoUpload,
     requestPhotoUpload,
     selectMember,

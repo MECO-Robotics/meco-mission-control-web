@@ -1,6 +1,5 @@
 import { memo } from "react";
 
-import { SUBVIEW_INTERACTION_GUIDANCE } from "@/features/workspace/shared/ui";
 import {
   MilestonesView,
   RisksView,
@@ -40,7 +39,6 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
     >
       <WorkspaceSubPanel
         disableAnimations={disablePanelAnimations}
-        description={SUBVIEW_INTERACTION_GUIDANCE.timeline}
         isActive={taskView === "timeline"}
         swipeDirection={taskSwipeDirection}
       >
@@ -49,6 +47,8 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
           bootstrap={bootstrap}
           isAllProjectsView={isAllProjectsView}
           membersById={membersById}
+          onTaskEditCanceled={props.onTaskEditCanceled}
+          onTaskEditSaved={props.onTaskEditSaved}
           onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
           onSaveTimelineMilestone={handleTimelineMilestoneSave}
           openCreateTaskModal={openCreateTaskModalFromTimeline}
@@ -60,7 +60,6 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
 
       <WorkspaceSubPanel
         disableAnimations={disablePanelAnimations}
-        description={SUBVIEW_INTERACTION_GUIDANCE.queue}
         isActive={taskView === "queue"}
         swipeDirection={taskSwipeDirection}
       >
@@ -79,15 +78,15 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
 
       <WorkspaceSubPanel
         disableAnimations={disablePanelAnimations}
-        description={SUBVIEW_INTERACTION_GUIDANCE.milestones}
         isActive={taskView === "milestones"}
-        pinInteractionNoteToBottom={false}
         swipeDirection={taskSwipeDirection}
       >
         <MilestonesView
           activePersonFilter={activePersonFilter}
           bootstrap={bootstrap}
           isAllProjectsView={isAllProjectsView}
+          onTaskEditCanceled={props.onTaskEditCanceled}
+          onTaskEditSaved={props.onTaskEditSaved}
           onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
           onSaveTimelineMilestone={handleTimelineMilestoneSave}
         />
@@ -107,7 +106,6 @@ export function WorkspaceRiskSection(props: WorkspaceContentPanelsViewProps) {
     >
       <WorkspaceSubPanel
         disableAnimations={disablePanelAnimations}
-        description={SUBVIEW_INTERACTION_GUIDANCE["risk-management"]}
         isActive
       >
         <RisksView
@@ -133,7 +131,6 @@ export function WorkspaceWorklogsSection(props: WorkspaceContentPanelsViewProps)
       tabSwitchDirection={tabSwitchDirection}
     >
       <WorkspaceSubPanel
-        description={SUBVIEW_INTERACTION_GUIDANCE.logs}
         disableAnimations={disablePanelAnimations}
         isActive
       >
@@ -161,7 +158,6 @@ export function WorkspaceReportsSection(props: WorkspaceContentPanelsViewProps) 
       tabSwitchDirection={tabSwitchDirection}
     >
       <WorkspaceSubPanel
-        description={SUBVIEW_INTERACTION_GUIDANCE.reports}
         disableAnimations={disablePanelAnimations}
         isActive={reportsView === "qa"}
         swipeDirection={reportsSwipeDirection}
@@ -176,7 +172,6 @@ export function WorkspaceReportsSection(props: WorkspaceContentPanelsViewProps) 
       </WorkspaceSubPanel>
 
       <WorkspaceSubPanel
-        description={SUBVIEW_INTERACTION_GUIDANCE.reports}
         disableAnimations={disablePanelAnimations}
         isActive={reportsView === "milestone-results"}
         swipeDirection={reportsSwipeDirection}

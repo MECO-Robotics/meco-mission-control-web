@@ -116,6 +116,7 @@ describe("MilestonesEventDetailsModal", () => {
       React.createElement(MilestonesEventDetailsModal, {
         activeMilestone: milestone,
         bootstrap,
+        milestoneModalMode: "detail",
         modalPortalTarget,
         onClose: jest.fn(),
         onEditMilestone: jest.fn(),
@@ -130,5 +131,53 @@ describe("MilestonesEventDetailsModal", () => {
     expect(markup).toContain("Required");
     expect(markup).toContain("Complete");
     expect(markup).toContain("Iteration 1");
+  });
+
+  it("renders the task-style shell for milestone editing", () => {
+    const bootstrap = createBootstrap();
+    const milestone = bootstrap.milestones[0] as MilestoneRecord;
+    const modalPortalTarget = {} as HTMLElement;
+    const markup = renderToStaticMarkup(
+      React.createElement(MilestonesEventDetailsModal, {
+        activeMilestone: milestone,
+        bootstrap,
+        isDeletingMilestone: false,
+        isSavingMilestone: false,
+        milestoneDraft: {
+          title: milestone.title,
+          type: milestone.type,
+          description: milestone.description,
+          isExternal: milestone.isExternal,
+          projectIds: milestone.projectIds,
+        },
+        milestoneEndDate: "",
+        milestoneEndTime: "",
+        milestoneError: null,
+        milestoneModalMode: "edit",
+        milestoneStartDate: "2026-05-04",
+        milestoneStartTime: "12:00",
+        modalPortalTarget,
+        onClose: jest.fn(),
+        onDelete: jest.fn(),
+        onEditMilestone: jest.fn(),
+        onSubmit: jest.fn(),
+        projectsById: {
+          "project-1": bootstrap.projects[0],
+        },
+        setMilestoneDraft: jest.fn(),
+        setMilestoneEndDate: jest.fn(),
+        setMilestoneEndTime: jest.fn(),
+        setMilestoneStartDate: jest.fn(),
+        setMilestoneStartTime: jest.fn(),
+      }),
+    );
+
+    expect(markup).toContain("milestone-edit-modal");
+    expect(markup).toContain("Edit milestone details");
+    expect(markup).toContain("task-detail-inline-edit-title-shell");
+    expect(markup).toContain("task-detail-inline-edit-trigger-summary");
+    expect(markup).toContain("task-detail-inline-edit-shell");
+    expect(markup).not.toContain("task-detail-inline-edit-input-title");
+    expect(markup).toContain("Save milestone");
   });
 });
