@@ -29,7 +29,7 @@ export function AuthIntroPanel({ title }: AuthIntroPanelProps) {
       </div>
 
       <div className="auth-intro-copy">
-        <p className="eyebrow">MECO Robotics</p>
+        <p className="eyebrow">MECO Mission Control</p>
         <h1>{title}</h1>
         <p className="auth-body auth-intro-description">
           <span>Plan. Build. Verify.</span>
@@ -61,7 +61,7 @@ export function MobileReleasePanel() {
     <section className="auth-panel" aria-label="Mobile app releases">
       <div className="auth-panel-copy">
         <p className="auth-panel-eyebrow">Mobile app</p>
-        <h2>Install from PM mobile app releases.</h2>
+        <h2>Install from Mission Control mobile releases.</h2>
         <p className="auth-body">
           Open the GitHub releases page to get the latest mobile build for your
           device.
@@ -168,7 +168,7 @@ export function DevBypassButton({
 
 export function AuthStatusCard({
   body,
-  eyebrow = "MECO workspace",
+  eyebrow = "MECO Mission Control",
   isDarkMode = false,
   message,
   shellStyle,

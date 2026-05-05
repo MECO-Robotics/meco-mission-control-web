@@ -10,7 +10,7 @@ export function getSignInScreenCopy({
   isMobileDevice,
 }: SignInScreenCopyInput) {
   const title = isMobileDevice
-    ? "Use the PM mobile app."
+    ? "Use the Mission Control mobile app."
     : hasEmailSignIn && hasGoogleSignIn
       ? "Sign in with Google or email."
       : hasGoogleSignIn
@@ -20,7 +20,7 @@ export function getSignInScreenCopy({
           : "Sign-in is currently unavailable.";
 
   const body = isMobileDevice
-    ? "Login is hidden on detected mobile devices. Install the latest iOS or Android build from PM mobile app releases."
+    ? "Login is hidden on detected mobile devices. Install the latest iOS or Android build from Mission Control mobile releases."
     : hasEmailSignIn && hasGoogleSignIn
       ? "Use Google SSO or request a verified email code."
       : hasGoogleSignIn
