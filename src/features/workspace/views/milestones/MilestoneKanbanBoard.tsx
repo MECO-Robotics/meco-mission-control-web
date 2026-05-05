@@ -32,6 +32,32 @@ function getMilestoneBoardType(milestone: MilestoneRecord) {
   return milestone.type in MILESTONE_TYPE_STYLES ? milestone.type : DEFAULT_MILESTONE_TYPE;
 }
 
+function isSameLocalCalendarDay(start: Date, end: Date) {
+  return (
+    start.getFullYear() === end.getFullYear() &&
+    start.getMonth() === end.getMonth() &&
+    start.getDate() === end.getDate()
+  );
+}
+
+function formatMilestoneEndDateTime(startDateTime: string, endDateTime: string | null) {
+  if (!endDateTime) {
+    return "No end date";
+  }
+
+  const start = new Date(startDateTime);
+  const end = new Date(endDateTime);
+
+  if (isSameLocalCalendarDay(start, end)) {
+    return end.toLocaleString(undefined, {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  }
+
+  return formatMilestoneDateTime(endDateTime);
+}
+
 function groupMilestonesByBoardState(
   milestones: MilestoneRecord[],
   bootstrap: BootstrapPayload,
@@ -99,6 +125,8 @@ export function MilestoneKanbanBoard({
         const milestoneType = getMilestoneBoardType(milestone);
         const milestoneTypeStyle = getMilestoneTypeStyle(milestoneType);
         const milestoneTypeBadge = MILESTONE_TYPE_BADGE_LABELS[milestoneType];
+        const milestoneStartLabel = formatMilestoneDateTime(milestone.startDateTime);
+        const milestoneEndLabel = formatMilestoneEndDateTime(milestone.startDateTime, milestone.endDateTime);
         const milestoneTypeBadgeStyle = {
           "--milestone-type-chip-bg": milestoneTypeStyle.chipBackground,
           "--milestone-type-chip-border": milestoneTypeStyle.columnBorder,
@@ -127,11 +155,10 @@ export function MilestoneKanbanBoard({
                   whiteSpace: "normal",
                 }}
               >
-                <span className="task-queue-board-card-due">
-                  {formatMilestoneDateTime(milestone.startDateTime)}
-                </span>
-                <span className="task-queue-board-card-due">
-                  {`to ${milestone.endDateTime ? formatMilestoneDateTime(milestone.endDateTime) : "No end date"}`}
+                <span className="task-queue-board-card-due">{milestoneStartLabel}</span>
+                <span style={{ alignItems: "center", display: "inline-flex", gap: "0.25rem" }}>
+                  <span style={{ color: "var(--text-copy)", fontSize: "0.65rem", fontWeight: 700 }}>to</span>
+                  <span className="task-queue-board-card-due">{milestoneEndLabel}</span>
                 </span>
               </span>
             </div>
