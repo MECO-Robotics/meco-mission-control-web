@@ -16,11 +16,11 @@
 .milestone-board {
   display: flex;
   width: max-content;
-  min-width: calc((15.5rem * 3) + (0.7rem * 2));
+  min-width: calc((var(--task-queue-board-column-width, 15.5rem) * 3) + (0.7rem * var(--task-queue-zoom, 1) * 2));
   align-items: flex-start;
 }
 
 .milestone-board .task-queue-board-column {
-  flex: 0 0 15.5rem;
-  width: 15.5rem;
+  flex: 0 0 var(--task-queue-board-column-width, 15.5rem);
+  width: var(--task-queue-board-column-width, 15.5rem);
 }

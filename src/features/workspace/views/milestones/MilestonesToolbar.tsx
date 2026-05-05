@@ -9,7 +9,14 @@ import {
   type FilterSelection,
 } from "@/features/workspace/shared/WorkspaceViewShared";
 import { EVENT_TYPE_STYLES as MILESTONE_TYPE_STYLES } from "@/features/workspace/shared/events/eventStyles";
-import type { MilestoneSortField } from "./milestonesViewUtils";
+import {
+  clampMilestoneZoom,
+  formatMilestoneZoomLabel,
+  MILESTONE_ZOOM_MAX,
+  MILESTONE_ZOOM_MIN,
+  MILESTONE_ZOOM_STEP,
+  type MilestoneSortField,
+} from "./milestonesViewUtils";
 
 const MILESTONE_TYPE_OPTIONS: { id: MilestoneType; name: string }[] = (
   Object.entries(MILESTONE_TYPE_STYLES) as [MilestoneType, (typeof MILESTONE_TYPE_STYLES)[MilestoneType]][]
@@ -36,9 +43,11 @@ interface MilestonesToolbarProps {
   searchFilter: string;
   setProjectFilter: Dispatch<SetStateAction<FilterSelection>>;
   setSearchFilter: Dispatch<SetStateAction<string>>;
+  setMilestoneZoom: Dispatch<SetStateAction<number>>;
   setSortField: Dispatch<SetStateAction<MilestoneSortField>>;
   setSortOrder: Dispatch<SetStateAction<"asc" | "desc">>;
   setTypeFilter: Dispatch<SetStateAction<FilterSelection>>;
+  milestoneZoom: number;
   sortField: MilestoneSortField;
   sortOrder: "asc" | "desc";
   typeFilter: FilterSelection;
@@ -53,9 +62,11 @@ export function MilestonesToolbar({
   searchFilter,
   setProjectFilter,
   setSearchFilter,
+  setMilestoneZoom,
   setSortField,
   setSortOrder,
   setTypeFilter,
+  milestoneZoom,
   sortField,
   sortOrder,
   typeFilter,
@@ -156,6 +167,30 @@ export function MilestonesToolbar({
           },
         ]}
       />
+
+      <div aria-label="Milestones zoom" className="task-queue-zoom-controls" role="group">
+        <button
+          aria-label="Zoom out milestones"
+          className="icon-button task-queue-zoom-button"
+          disabled={milestoneZoom <= MILESTONE_ZOOM_MIN}
+          onClick={() => setMilestoneZoom((current) => clampMilestoneZoom(current - MILESTONE_ZOOM_STEP))}
+          title="Zoom out milestones"
+          type="button"
+        >
+          -
+        </button>
+        <span className="task-queue-zoom-label">{formatMilestoneZoomLabel(milestoneZoom)}</span>
+        <button
+          aria-label="Zoom in milestones"
+          className="icon-button task-queue-zoom-button"
+          disabled={milestoneZoom >= MILESTONE_ZOOM_MAX}
+          onClick={() => setMilestoneZoom((current) => clampMilestoneZoom(current + MILESTONE_ZOOM_STEP))}
+          title="Zoom in milestones"
+          type="button"
+        >
+          +
+        </button>
+      </div>
 
       <button
         aria-label="Add milestone"

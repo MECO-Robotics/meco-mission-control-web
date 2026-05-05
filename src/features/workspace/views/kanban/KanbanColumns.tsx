@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 export interface KanbanColumnDefinition<TState extends string> {
   state: TState;
@@ -18,6 +18,7 @@ interface KanbanColumnsProps<TState extends string, TItem> {
   itemsByState: Record<TState, readonly TItem[]>;
   renderItem: (item: TItem, state: TState) => ReactNode;
   onColumnBodyClick?: (state: TState) => void;
+  style?: CSSProperties;
 }
 
 export function KanbanColumns<TState extends string, TItem>({
@@ -32,9 +33,10 @@ export function KanbanColumns<TState extends string, TItem>({
   itemsByState,
   renderItem,
   onColumnBodyClick,
+  style,
 }: KanbanColumnsProps<TState, TItem>) {
   return (
-    <div className={boardClassName}>
+    <div className={boardClassName} style={style}>
       {columns.map((column) => {
         const items = itemsByState[column.state];
 
