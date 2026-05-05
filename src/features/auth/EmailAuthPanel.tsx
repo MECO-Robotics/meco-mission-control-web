@@ -48,14 +48,10 @@ export function EmailAuthPanel({
           />
           <button
             className="auth-email-send-button"
-            disabled={
-              isSigningIn ||
-              isRequestingCode ||
-              email.trim().length === 0
-            }
+            disabled={isSigningIn || isRequestingCode || email.trim().length === 0}
             type="submit"
           >
-            {isRequestingCode ? "Sending..." : delivery ? "Resend code" : "Send code"}
+            Send
           </button>
         </label>
       </form>

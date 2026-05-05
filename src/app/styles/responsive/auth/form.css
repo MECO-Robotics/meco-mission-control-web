@@ -3,6 +3,36 @@
   gap: 0.8rem;
 }
 
+.auth-email-send-field {
+  position: relative;
+}
+
+.auth-email-send-field .auth-email-input {
+  padding-right: 6.25rem;
+}
+
+.auth-email-send-button {
+  position: absolute;
+  top: 0.2rem;
+  right: 0.2rem;
+  bottom: 0.2rem;
+  min-width: 4.9rem;
+  padding: 0 0.9rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: transparent;
+  box-shadow: none;
+  color: var(--official-blue);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.auth-email-send-button:hover,
+.auth-email-send-button:focus-visible {
+  background: transparent;
+  color: var(--official-blue);
+}
+
 .auth-email-verify {
   padding: 0.95rem;
   border: 1px solid rgba(22, 71, 142, 0.08);
