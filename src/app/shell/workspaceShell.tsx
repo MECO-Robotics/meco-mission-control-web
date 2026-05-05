@@ -18,6 +18,7 @@ export const WorkspaceContent = lazy(() =>
   })),
 );
 
+// Keep modal host lazily loaded from its component module to avoid re-export indirection.
 export const WorkspaceModalHost = lazy(() =>
   import("@/features/workspace/components/WorkspaceModalHostView").then((module) => ({
     default: module.WorkspaceModalHost,
