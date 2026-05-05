@@ -13,7 +13,7 @@ import {
   type TaskQueueBoardState,
 } from "./taskQueueKanbanBoardState";
 import { TaskQueueCard } from "./state/taskQueueKanbanCardView";
-import { TaskPriorityBadge } from "./taskQueueKanbanCard";
+import { TaskPriorityBadge } from "./taskQueueKanbanCardMeta";
 
 const TASK_QUEUE_BOARD_STATE_LOGO_SPECS: Record<
   TaskQueueBoardState,

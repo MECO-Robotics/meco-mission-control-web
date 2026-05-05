@@ -3,11 +3,13 @@
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
+import { IconEdit, IconManufacturing, IconParts } from "@/components/shared/Icons";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared";
-import { TaskQueueView } from "@/features/workspace/views";
+import { TaskQueueView } from "@/features/workspace/views/taskQueue/TaskQueueView";
 import { TaskQueueKanbanBoard } from "@/features/workspace/views/taskQueue/TaskQueueKanbanBoard";
 import { getTaskQueueCardContextLabel } from "@/features/workspace/views/taskQueue/taskQueueKanban";
 import { TASK_QUEUE_LAZY_LOAD_BATCH_SIZE } from "@/features/workspace/views/taskQueue/taskQueueKanban";
+import { getTaskQueueDisciplineIcon } from "@/features/workspace/views/taskQueue/taskQueueDisciplineBadge";
 import { shouldHideTaskQueueSummary } from "@/features/workspace/views/taskQueue/taskQueueViewState";
 import type { BootstrapPayload } from "@/types";
 
@@ -224,6 +226,25 @@ describe("TaskQueueView", () => {
     expect(markup).toContain("--task-queue-board-card-context-accent:#224466");
     expect(markup).toContain("color-mix(in srgb, #224466 24%, transparent)");
     expect(markup).toContain("Drive (v1)");
+    expect(markup).toContain("task-queue-board-card-discipline");
+    expect(markup).toContain('aria-label="Design discipline"');
+    expect(
+      markup.indexOf(
+        "task-queue-board-card-priority",
+        markup.indexOf("task-queue-board-card-meta-person-group"),
+      ),
+    ).toBeLessThan(markup.indexOf('aria-label="Design discipline"'));
+    expect(markup.indexOf('aria-label="Design discipline"')).toBeLessThan(
+      markup.indexOf("profile-avatar"),
+    );
+  });
+
+  it("reuses the official discipline icons for task queue discipline options", () => {
+    expect((getTaskQueueDisciplineIcon("design") as { type?: unknown } | null)?.type).toBe(IconEdit);
+    expect((getTaskQueueDisciplineIcon("manufacturing") as { type?: unknown } | null)?.type).toBe(
+      IconManufacturing,
+    );
+    expect((getTaskQueueDisciplineIcon("assembly") as { type?: unknown } | null)?.type).toBe(IconParts);
   });
 
   it("renders the first lazy-load batch and groups blocked tasks into the blocked column", () => {
@@ -336,5 +357,6 @@ describe("TaskQueueView", () => {
     expect(markup).toContain("Zulu priority task");
     expect(markup).toContain("Alpha priority task");
     expect(markup.indexOf("Zulu priority task")).toBeLessThan(markup.indexOf("Alpha priority task"));
+    expect(markup).not.toContain('aria-label="Design discipline"');
   });
 });

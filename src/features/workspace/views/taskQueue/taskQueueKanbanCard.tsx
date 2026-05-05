@@ -1,7 +1,6 @@
 import type { BootstrapPayload, TaskRecord } from "@/types";
 
 import { formatIterationVersion } from "@/lib/appUtils";
-import { resolveWorkspaceColor } from "@/features/workspace/shared/model";
 import {
   filterSelectionIncludes,
   filterSelectionIntersects,
@@ -47,7 +46,7 @@ export function readTaskSubsystemIds(task: TaskRecord) {
   );
 }
 
-function readTaskWorkstreamIds(task: TaskRecord) {
+export function readTaskWorkstreamIds(task: TaskRecord) {
   const workstreamIds = Array.isArray(task.workstreamIds) ? task.workstreamIds : [];
   const candidateIds = workstreamIds.length > 0 ? workstreamIds : [task.workstreamId];
 
@@ -86,163 +85,6 @@ export function formatWorkstreamNames(
   fallback: string,
 ) {
   return formatNames(workstreamIds, lookup, fallback);
-}
-
-const FILTER_TONE_CLASSES = [
-  "filter-tone-info",
-  "filter-tone-success",
-  "filter-tone-warning",
-  "filter-tone-danger",
-  "filter-tone-neutral",
-] as const;
-
-function getStableToneClassName(value: string) {
-  let hash = 0;
-
-  for (let index = 0; index < value.length; index += 1) {
-    hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
-  }
-
-  return FILTER_TONE_CLASSES[hash % FILTER_TONE_CLASSES.length];
-}
-
-export function getTaskCardPerson(
-  task: TaskRecord,
-  membersById: Record<string, BootstrapPayload["members"][number]>,
-) {
-  const personId = readTaskAssigneeIds(task)[0];
-  return personId ? membersById[personId] ?? null : null;
-}
-
-export function getMemberInitial(member: { name: string }) {
-  return member.name.trim().slice(0, 1).toUpperCase() || "?";
-}
-
-export function getTaskQueueCardContextToneClassName(
-  task: TaskRecord,
-  projectType: BootstrapPayload["projects"][number]["projectType"] | undefined,
-) {
-  const toneSourceId =
-    projectType === "robot" ? readTaskSubsystemIds(task)[0] : readTaskWorkstreamIds(task)[0];
-
-  return toneSourceId ? getStableToneClassName(toneSourceId) : "filter-tone-neutral";
-}
-
-function getTaskQueueCardContextSource(
-  task: TaskRecord,
-  projectType: BootstrapPayload["projects"][number]["projectType"] | undefined,
-  subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>,
-  workstreamsById: Record<string, BootstrapPayload["workstreams"][number]>,
-) {
-  if (projectType === "robot") {
-    const subsystemId = readTaskSubsystemIds(task)[0];
-    return subsystemId ? subsystemsById[subsystemId] ?? null : null;
-  }
-
-  const workstreamId = readTaskWorkstreamIds(task)[0];
-  return workstreamId ? workstreamsById[workstreamId] ?? null : null;
-}
-
-export function getTaskQueueCardContextAccentColor(
-  task: TaskRecord,
-  projectType: BootstrapPayload["projects"][number]["projectType"] | undefined,
-  subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>,
-  workstreamsById: Record<string, BootstrapPayload["workstreams"][number]>,
-) {
-  const contextSource = getTaskQueueCardContextSource(
-    task,
-    projectType,
-    subsystemsById,
-    workstreamsById,
-  );
-
-  return contextSource
-    ? resolveWorkspaceColor(contextSource.color ?? null, contextSource.id)
-    : resolveWorkspaceColor(null, task.id);
-}
-
-export function getTaskQueueCardContextLabel(
-  task: TaskRecord,
-  projectType: BootstrapPayload["projects"][number]["projectType"] | undefined,
-  subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>,
-  workstreamsById: Record<string, BootstrapPayload["workstreams"][number]>,
-) {
-  if (projectType === "robot") {
-    return formatSubsystemNames(readTaskSubsystemIds(task), subsystemsById, "Unassigned subsystem");
-  }
-
-  return formatWorkstreamNames(readTaskWorkstreamIds(task), workstreamsById, "Unassigned workflow");
-}
-
-function getTaskPriorityLabel(priority: TaskRecord["priority"]) {
-  switch (priority) {
-    case "critical":
-      return "Critical";
-    case "high":
-      return "High";
-    case "medium":
-      return "Medium";
-    case "low":
-      return "Low";
-    default:
-      return "Priority";
-  }
-}
-
-function TaskPriorityIcon({ priority }: { priority: TaskRecord["priority"] }) {
-  switch (priority) {
-    case "critical":
-      return (
-        <>
-          <path d="m6 14 6-6 6 6" />
-          <path d="m6 9 6-6 6 6" />
-        </>
-      );
-    case "high":
-      return (
-        <>
-          <path d="m6 14 6-6 6 6" />
-        </>
-      );
-    case "medium":
-      return (
-        <>
-          <path d="M6 9h12" />
-          <path d="M6 15h12" />
-        </>
-      );
-    case "low":
-      return (
-        <>
-          <path d="m6 10 6 6 6-6" />
-        </>
-      );
-    default:
-      return null;
-  }
-}
-
-export function TaskPriorityBadge({ priority }: { priority: TaskRecord["priority"] }) {
-  const label = `${getTaskPriorityLabel(priority)} priority`;
-
-  return (
-    <svg
-      aria-label={label}
-      className={`task-queue-board-card-priority task-queue-board-card-priority-${priority}`}
-      fill="none"
-      role="img"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2.5"
-      height="14"
-      viewBox="0 0 24 24"
-      width="14"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <TaskPriorityIcon priority={priority} />
-    </svg>
-  );
 }
 
 function formatTaskAssignees(

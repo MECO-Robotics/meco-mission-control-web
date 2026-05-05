@@ -12,7 +12,7 @@ import {
 import type { TaskDetailsEditableField } from "./taskModalTypes";
 import { IconManufacturing, IconPerson } from "@/components/shared/Icons";
 import { formatIterationVersion } from "@/lib/appUtils";
-import { TaskPriorityBadge } from "@/features/workspace/views/taskQueue/taskQueueKanbanCard";
+import { TaskPriorityBadge } from "@/features/workspace/views/taskQueue/taskQueueKanbanCardMeta";
 import { TaskDetailReveal } from "./details/TaskDetailReveal";
 
 interface TaskDetailsOverviewSectionProps {

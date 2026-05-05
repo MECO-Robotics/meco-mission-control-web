@@ -11,7 +11,8 @@ import {
   getTaskQueueCardContextAccentColor,
   getTaskQueueCardContextLabel,
   TaskPriorityBadge,
-} from "../taskQueueKanbanCard";
+} from "../taskQueueKanbanCardMeta";
+import { TaskDisciplineBadge } from "../taskQueueDisciplineBadge";
 import { getTaskQueueBoardState } from "../taskQueueKanbanBoardState";
 import { shouldHideTaskQueueSummary } from "../taskQueueViewState";
 
@@ -122,12 +123,14 @@ export function TaskQueueCard({
     subsystemsById,
     workstreamsById,
   );
+  const discipline = task.disciplineId ? disciplinesById[task.disciplineId] ?? null : null;
   const taskContextStyle = {
     "--task-queue-board-card-context-accent": taskContextAccentColor,
     "--task-queue-board-card-context-bg": `color-mix(in srgb, ${taskContextAccentColor} 24%, transparent)`,
     "--task-queue-board-card-context-border": `color-mix(in srgb, ${taskContextAccentColor} 54%, transparent)`,
   } as CSSProperties;
   const hideSummary = shouldHideTaskQueueSummary(taskQueueZoom);
+  const showDisciplineBadge = Boolean(!showProjectOnCards && showProjectContextOnCards && discipline);
 
   return (
     <button
@@ -169,6 +172,9 @@ export function TaskQueueCard({
         {showPriorityBadge || person ? (
           <div className="task-queue-board-card-meta-person-group">
             {showPriorityBadge ? <TaskPriorityBadge priority={task.priority} /> : null}
+            {showDisciplineBadge && discipline ? (
+              <TaskDisciplineBadge accentColor={disciplineAccentColor ?? "#7a8799"} discipline={discipline} />
+            ) : null}
             {person ? (
               <span className="task-queue-board-card-person" title={person.name}>
                 {person.photoUrl ? (
