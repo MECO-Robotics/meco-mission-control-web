@@ -25,6 +25,7 @@ export function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapP
     partDefinitions: catalog.partDefinitions,
     partInstances: catalog.partInstances,
     milestones: catalog.milestones,
+    milestoneRequirements: source.milestoneRequirements ?? [],
     taskDependencies: normalizeBootstrapTaskDependencies(source),
     taskBlockers: normalizeBootstrapTaskBlockers(source),
     reports: reports.reports,
