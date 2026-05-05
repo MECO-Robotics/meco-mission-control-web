@@ -77,7 +77,7 @@ function getGoogleTrustedTypesPolicy() {
 
   if (!targetWindow.__mecoGoogleTrustedTypesPolicy) {
     targetWindow.__mecoGoogleTrustedTypesPolicy =
-      targetWindow.trustedTypes.createPolicy("meco-web-google", {
+      targetWindow.trustedTypes.createPolicy("meco-mission-control-web-google", {
         createScriptURL: (value: string) => value,
       });
   }

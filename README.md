@@ -1,8 +1,8 @@
-# MECO Web
+# MECO Mission Control Web
 
-React + Vite browser frontend for the MECO Robotics project-management platform.
+React + Vite browser frontend for MECO Mission Control.
 
-This app is the web workspace for planning, execution, inventory, manufacturing coordination, roster management, and project-level documentation workflows. It runs against `meco-platform` (`PM-server`) and is deployed as static assets behind `nginx`.
+This app is the web workspace for planning, execution, inventory, manufacturing coordination, roster management, and project-level documentation workflows. It runs against `meco-mission-control-platform` and is deployed as static assets behind `nginx`.
 
 ## Table of Contents
 
@@ -25,15 +25,15 @@ This app is the web workspace for planning, execution, inventory, manufacturing 
 
 Current production topology:
 
-- `PM-web-app` (`meco-web`): static React build served by `nginx`
-- `PM-server` (`meco-platform`): Fastify + Prisma API, default on port `8080`
+- `meco-mission-control-web`: static React build served by `nginx`
+- `meco-mission-control-platform`: Fastify + Prisma API, default on port `8080`
 - `Postgres`: backing store for the API
 
 Traffic shape:
 
 - Browser requests static assets from `nginx`
 - Browser calls `/api/*` on the same origin
-- `nginx` proxies `/api/*` and `/health` to `PM-server`
+- `nginx` proxies `/api/*` and `/health` to the Mission Control API
 
 `deploy/pm-web.nginx.conf` currently redirects HTTP to HTTPS on `meco-pm.duckdns.org`, serves static web files from `/opt/pm-web/site`, and proxies API/health routes to `127.0.0.1:8080`.
 
@@ -49,7 +49,7 @@ The web app is designed for broader-screen, high-context workflows:
 - Roster management
 - In-app help and usage guidance
 
-The mobile app (`meco-mobile`) remains focused on fast in-shop updates, while this repo prioritizes richer dashboard-style workflows.
+The mobile app (`meco-mission-control-mobile`) remains focused on fast in-shop updates, while this repo prioritizes richer dashboard-style workflows.
 
 ### Workspace Navigation Model
 
@@ -129,7 +129,7 @@ Package scripts:
 
 - Node.js `22+` recommended (CI uses Node `22`)
 - `npm`
-- Running local `meco-platform` backend (usually `http://localhost:8080`)
+- Running local `meco-mission-control-platform` backend (usually `http://localhost:8080`)
 
 ### 1) Install dependencies
 
@@ -157,7 +157,7 @@ Default URL:
 
 ### 4) Start backend in parallel
 
-Run `meco-platform` locally so `/api` proxy requests succeed.
+Run `meco-mission-control-platform` locally so `/api` proxy requests succeed.
 
 ### 5) Validate before pushing
 
@@ -267,14 +267,14 @@ Normalization currently backfills and aligns:
 
 When changing backend contracts, validate both repos together:
 
-- `meco-platform/src/routes/registerRoutes.ts` is backend route/validation truth.
-- `meco-web/src/types.ts` and `src/lib/auth.ts` must stay in sync.
+- `meco-mission-control-platform/src/routes/registerRoutes.ts` is backend route/validation truth.
+- `meco-mission-control-web/src/types.ts` and `src/lib/auth.ts` must stay in sync.
 
 ## Development Workflow
 
 Recommended cycle:
 
-1. Start backend (`meco-platform`) locally.
+1. Start backend (`meco-mission-control-platform`) locally.
 2. Start web app (`npm run dev`).
 3. Verify login flow and scoped workspace views (season/project).
 4. Implement targeted changes.
@@ -333,7 +333,7 @@ Pipeline summary:
 
 ### Required GitHub Secrets
 
-Set in `MECO-Robotics/PM-web-app`:
+Set in `MECO-Robotics/meco-mission-control-web`:
 
 - `VPS_HOST`
 - `VPS_USER`
@@ -396,8 +396,8 @@ Check:
 
 Related repos:
 
-- `meco-platform` (`PM-server`): API routes, validation, persistence, auth config truth
-- `meco-mobile`: mobile-focused client workflows
+- `meco-mission-control-platform`: API routes, validation, persistence, auth config truth
+- `meco-mission-control-mobile`: mobile-focused client workflows
 
 For auth, payload, schema, or API behavior changes:
 
