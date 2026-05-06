@@ -1,4 +1,5 @@
 import React from "react";
+import { buildTimelineSubsystemHighlightStyle } from "./timelineTaskColors";
 import type { BootstrapPayload, TaskRecord } from "@/types";
 import type {
   TimelineDayHeaderCell,
@@ -35,7 +36,6 @@ interface TimelineSubsystemGroupProps {
   subsystem: TimelineSubsystemRow;
   subsystemColumnIndex: number;
   subsystemIndex: number;
-  subsystemRowIndex?: number;
   subsystemStickyLeft: number;
   taskDependencyCountsById: Record<string, TimelineTaskDependencyCounts>;
   taskStatusSignalsById: Record<string, TimelineTaskStatusSignal>;
@@ -52,7 +52,6 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
   collapsedSubsystems,
   disciplinesById,
   firstDayGridColumn,
-  gridMinWidth,
   handleTimelineDayMouseEnter,
   hoveredSubsystemId,
   hoveredTaskId,
@@ -69,64 +68,53 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
   subsystem,
   subsystemColumnIndex,
   subsystemIndex,
-  subsystemRowIndex = 1,
   subsystemStickyLeft,
   taskDependencyCountsById,
   taskStatusSignalsById,
   timelineDayHeaderCells,
-  timelineGridTemplate,
   toggleSubsystem,
   openTaskDetailModal,
 }) => {
   const groupBackground = subsystemIndex % 2 === 0 ? "var(--bg-panel)" : "var(--bg-row-alt)";
+  const accentColor = subsystem.color;
+  const groupStyle = buildTimelineSubsystemHighlightStyle(accentColor, {
+    boxShadow: `inset 3px 0 0 ${accentColor}`,
+    gridAutoRows: "38px",
+  });
 
   return (
-    <div
-      className="subsystem-group"
-      style={{
-        display: "grid",
-        width: "100%",
-        minWidth: `${gridMinWidth}px`,
-        gridTemplateColumns: timelineGridTemplate,
-        gridAutoRows: "38px",
-        background: groupBackground,
-        borderBottom: "1px solid var(--border-base)",
-        position: "relative",
-      }}
-      data-row-motion={undefined}
-      data-timeline-row={`subsystem:${subsystem.id}`}
-    >
-      <TimelineSubsystemRowGroup
-        clearHoveredMilestonePopup={clearHoveredMilestonePopup}
-        clearHoveredSubsystemRow={clearHoveredSubsystemRow}
-        clearHoveredTaskRow={clearHoveredTaskRow}
-        collapsedSubsystems={collapsedSubsystems}
-        disciplinesById={disciplinesById}
-        firstDayGridColumn={firstDayGridColumn}
-        handleTimelineDayMouseEnter={handleTimelineDayMouseEnter}
-        hoveredSubsystemId={hoveredSubsystemId}
-        hoveredTaskId={hoveredTaskId}
-        hoverSubsystemRow={hoverSubsystemRow}
-        hoverTaskRow={hoverTaskRow}
-        openTaskDetailModal={openTaskDetailModal}
-        rowBackground={groupBackground}
-        rowIndex={subsystemRowIndex}
-        selectSubsystemRow={selectSubsystemRow}
-        selectTaskRow={selectTaskRow}
-        selectedSubsystemId={selectedSubsystemId}
-        selectedTaskId={selectedTaskId}
-        showSubsystemCol={showSubsystemCol}
-        statusIconColumnIndex={statusIconColumnIndex}
-        statusIconColumnWidth={statusIconColumnWidth}
-        statusIconStickyRight={statusIconStickyRight}
-        subsystem={subsystem}
-        subsystemColumnIndex={subsystemColumnIndex}
-        subsystemStickyLeft={subsystemStickyLeft}
-        taskDependencyCountsById={taskDependencyCountsById}
-        taskStatusSignalsById={taskStatusSignalsById}
-        timelineDayHeaderCells={timelineDayHeaderCells}
-        toggleSubsystem={toggleSubsystem}
-      />
-    </div>
+    <TimelineSubsystemRowGroup
+      clearHoveredMilestonePopup={clearHoveredMilestonePopup}
+      clearHoveredSubsystemRow={clearHoveredSubsystemRow}
+      clearHoveredTaskRow={clearHoveredTaskRow}
+      collapsedSubsystems={collapsedSubsystems}
+      disciplinesById={disciplinesById}
+      firstDayGridColumn={firstDayGridColumn}
+      handleTimelineDayMouseEnter={handleTimelineDayMouseEnter}
+      hoveredSubsystemId={hoveredSubsystemId}
+      hoveredTaskId={hoveredTaskId}
+      hoverSubsystemRow={hoverSubsystemRow}
+      hoverTaskRow={hoverTaskRow}
+      openTaskDetailModal={openTaskDetailModal}
+      rowBackground={groupBackground}
+      rowIndex={1}
+      rowStyle={groupStyle}
+      gridAutoRows="38px"
+      selectSubsystemRow={selectSubsystemRow}
+      selectTaskRow={selectTaskRow}
+      selectedSubsystemId={selectedSubsystemId}
+      selectedTaskId={selectedTaskId}
+      showSubsystemCol={showSubsystemCol}
+      statusIconColumnIndex={statusIconColumnIndex}
+      statusIconColumnWidth={statusIconColumnWidth}
+      statusIconStickyRight={statusIconStickyRight}
+      subsystem={subsystem}
+      subsystemColumnIndex={subsystemColumnIndex}
+      subsystemStickyLeft={subsystemStickyLeft}
+      taskDependencyCountsById={taskDependencyCountsById}
+      taskStatusSignalsById={taskStatusSignalsById}
+      timelineDayHeaderCells={timelineDayHeaderCells}
+      toggleSubsystem={toggleSubsystem}
+    />
   );
 };

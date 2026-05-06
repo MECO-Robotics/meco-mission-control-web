@@ -86,6 +86,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     },
     [data.timeline.days, state.handleTimelineIntervalChange, state.viewAnchorDate],
   );
+  const { setTimelineGridMotion } = state;
 
   const layout = useMemo(
     () =>
@@ -108,6 +109,22 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       state.viewInterval,
     ],
   );
+
+  useEffect(() => {
+    if (!state.timelineGridMotion.direction) {
+      return undefined;
+    }
+
+    const clearMotion = window.setTimeout(() => {
+      setTimelineGridMotion((current) =>
+        current.direction ? { direction: null, token: current.token } : current,
+      );
+    }, 180);
+
+    return () => {
+      window.clearTimeout(clearMotion);
+    };
+  }, [state.timelineGridMotion.direction, setTimelineGridMotion]);
 
   useEffect(() => {
     const shell = data.timelineShellRef.current;

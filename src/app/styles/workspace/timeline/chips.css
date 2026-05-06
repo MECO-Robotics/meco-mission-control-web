@@ -126,3 +126,10 @@
   position: relative;
   align-items: center;
 }
+.timeline-merged-cell-text.is-rotated {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(var(--timeline-merged-cell-rotation, 240deg));
+  max-height: calc(100% - 16px);
+  max-width: none;
+}
