@@ -1,14 +1,8 @@
 import { useEffect, useState, type MutableRefObject } from "react";
 
-import {
-  getInteractiveTutorialStepError,
-  hasInteractiveTutorialAlternativeOption,
-  isInteractiveTutorialCreateStepModalInteraction,
-  isInteractiveTutorialCreationStep,
-  isInteractiveTutorialDropdownStep,
-  isInteractiveTutorialSearchStep,
-  isInteractiveTutorialStepComplete,
-} from "./interactiveTutorialHelpers";
+import { getInteractiveTutorialStepError } from "./helpers/interactiveTutorialStepError";
+import { hasInteractiveTutorialAlternativeOption, isInteractiveTutorialCreateStepModalInteraction, isInteractiveTutorialStepComplete } from "./helpers/interactiveTutorialStepCompletion";
+import { isInteractiveTutorialCreationStep, isInteractiveTutorialDropdownStep, isInteractiveTutorialSearchStep } from "./helpers/interactiveTutorialStepGroups";
 import type { InteractiveTutorialStep, InteractiveTutorialStepCompletionContext } from "./interactiveTutorialTypes";
 import { useInteractiveTutorialLifecycleCreationAdvance } from "./useInteractiveTutorialLifecycleCreationAdvance";
 

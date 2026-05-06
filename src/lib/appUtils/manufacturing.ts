@@ -1,10 +1,6 @@
-import type {
-  BootstrapPayload,
-  ManufacturingItemPayload,
-  MaterialRecord,
-  PartDefinitionRecord,
-  PartInstanceRecord,
-} from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { ManufacturingItemPayload } from "@/types/payloads";
+import type { MaterialRecord, PartDefinitionRecord, PartInstanceRecord } from "@/types/recordsInventory";
 import { getDefaultSubsystemId } from "@/lib/appUtils/common";
 import { localTodayDate } from "@/lib/dateUtils";
 import { removeId, uniqueIds } from "./internal";

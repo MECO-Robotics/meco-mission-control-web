@@ -1,21 +1,11 @@
 import React from "react";
-import {
-  IconCalendar,
-  IconChevronLeft,
-  IconChevronRight,
-  IconPerson,
-} from "@/components/shared";
-import type { BootstrapPayload } from "@/types";
-import {
-  CompactFilterMenu,
-  FilterDropdown,
-  type FilterSelection,
-} from "@/features/workspace/shared";
-import {
-  formatTimelineZoomLabel,
-  TIMELINE_ZOOM_MAX,
-} from "@/features/workspace/shared/timeline";
-import type { TimelineViewInterval } from "@/features/workspace/shared/timeline";
+import { IconCalendar, IconChevronLeft, IconChevronRight, IconPerson } from "@/components/shared/Icons";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
+import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { formatTimelineZoomLabel, TIMELINE_ZOOM_MAX } from "@/features/workspace/shared/timeline/timelineZoom";
+import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
 
 const TIMELINE_INTERVAL_OPTIONS = [
   { id: "week", name: "Week" },

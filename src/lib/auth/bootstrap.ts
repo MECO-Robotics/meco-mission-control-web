@@ -1,6 +1,6 @@
 import { requestApi } from "./core/request";
 import { normalizeBootstrapPayload } from "./bootstrap/payload";
-import type { BootstrapPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
 export function fetchBootstrap(
   personId?: string | null,

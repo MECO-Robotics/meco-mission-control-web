@@ -1,6 +1,7 @@
-import type { FilterSelection } from "@/features/workspace/shared";
-import { filterSelectionMatchesTaskPeople } from "@/features/workspace/shared";
-import type { BootstrapPayload, RiskRecord } from "@/types";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { filterSelectionMatchesTaskPeople } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { RiskRecord } from "@/types/recordsReporting";
 
 import { buildScopeMetrics, type ScopeMetricRow } from "../RiskMetrics";
 

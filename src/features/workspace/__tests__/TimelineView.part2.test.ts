@@ -3,16 +3,8 @@ import * as React from "react";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
-import {
-  clampTimelineZoom,
-  formatTimelineZoomLabel,
-  getTimelineDayTrackSize,
-  getTimelineGridMinWidth,
-  getTimelineMinimumZoomForWidth,
-  midpointOfTimelineDays,
-  monthEndFromDay,
-  midpointOfTimelineWeek,
-} from "@/features/workspace/shared/timeline";
+import { clampTimelineZoom, formatTimelineZoomLabel, getTimelineDayTrackSize, getTimelineGridMinWidth, getTimelineMinimumZoomForWidth } from "@/features/workspace/shared/timeline/timelineZoom";
+import { midpointOfTimelineDays, midpointOfTimelineWeek, monthEndFromDay } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
 import { buildTimelineGridLayout } from "@/features/workspace/views/timeline/model/timelineGridLayout";
 import { createBootstrap, createBootstrapWithEmptySubsystem, createBootstrapWithoutTasks, readAppCss, membersById } from "./timelineTestFixtures";

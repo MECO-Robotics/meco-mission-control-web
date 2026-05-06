@@ -1,6 +1,6 @@
 import { useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
-import type { DropdownOption } from "../model";
+import type { DropdownOption } from "../model/workspaceTypes";
 import { type FilterSelection } from "./workspaceFilterUtils";
 import { toggleFilterSelection } from "./workspaceFilterDropdownHooks";
 

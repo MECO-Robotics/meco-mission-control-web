@@ -1,5 +1,7 @@
 import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
-import type { BootstrapPayload, TaskPayload, TaskRecord } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskPayload } from "@/types/payloads";
+import type { TaskRecord } from "@/types/recordsExecution";
 import { TaskDetailsAdvancedSection } from "./task/TaskDetailsAdvancedSection";
 import { TaskDetailsDependencyBlockersSection } from "./task/TaskDetailsDependencyBlockersSection";
 import { TaskDetailsHeaderSection } from "./task/TaskDetailsHeaderSection";

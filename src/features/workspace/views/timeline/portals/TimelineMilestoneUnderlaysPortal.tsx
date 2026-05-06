@@ -1,6 +1,6 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import type { MilestoneRecord } from "@/types";
+import type { MilestoneRecord } from "@/types/recordsExecution";
 import type { TimelineDayMilestoneUnderlay } from "../timelineViewModel";
 
 interface TimelineMilestoneUnderlaysPortalProps {

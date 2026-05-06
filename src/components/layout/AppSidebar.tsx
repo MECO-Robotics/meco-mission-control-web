@@ -1,6 +1,6 @@
 import type { NavigationItem, ViewTab } from "@/lib/workspaceNavigation";
-import type { ProjectRecord } from "@/types";
-import { IconChevronLeft, IconChevronRight, IconEdit } from "@/components/shared";
+import type { ProjectRecord } from "@/types/recordsOrganization";
+import { IconChevronLeft, IconChevronRight, IconEdit } from "@/components/shared/Icons";
 
 const ADD_ROBOT_PROJECT_VALUE = "__add_robot_project__";
 

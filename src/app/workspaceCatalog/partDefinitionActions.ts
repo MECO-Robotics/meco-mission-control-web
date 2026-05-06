@@ -1,9 +1,11 @@
 import { useCallback } from "react";
 
-import { buildEmptyPartDefinitionPayload, partDefinitionToPayload, toErrorMessage } from "@/lib/appUtils";
-import { createPartDefinitionRecord, deletePartDefinitionRecord, updatePartDefinitionRecord } from "@/lib/auth";
+import { buildEmptyPartDefinitionPayload } from "@/lib/appUtils/payloadBuilders";
+import { partDefinitionToPayload } from "@/lib/appUtils/payloadConversions";
+import { toErrorMessage } from "@/lib/appUtils/common";
+import { createPartDefinitionRecord, deletePartDefinitionRecord, updatePartDefinitionRecord } from "@/lib/auth/records/parts";
 import type { AppWorkspaceModel } from "../hooks/useAppWorkspaceModel";
-import type { PartDefinitionRecord } from "@/types";
+import type { PartDefinitionRecord } from "@/types/recordsInventory";
 
 export type PartDefinitionActions = ReturnType<typeof usePartDefinitionActions>;
 

@@ -1,12 +1,9 @@
-import type { BootstrapPayload, TaskRecord } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskRecord } from "@/types/recordsExecution";
 
-import { formatIterationVersion } from "@/lib/appUtils";
-import {
-  filterSelectionIncludes,
-  filterSelectionIntersects,
-  filterSelectionMatchesTaskPeople,
-  type FilterSelection,
-} from "@/features/workspace/shared";
+import { formatIterationVersion } from "@/lib/appUtils/common";
+import { filterSelectionIncludes, filterSelectionIntersects, filterSelectionMatchesTaskPeople } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 
 import { getTaskQueueBoardState } from "./taskQueueKanbanBoardState";
 

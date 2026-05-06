@@ -1,4 +1,4 @@
-import type { BootstrapPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
 import { normalizePlanningRecords } from "./planning";
 import { normalizeBootstrapCatalogRecords } from "./payload-catalog";
 import { normalizeBootstrapReports } from "./payload-reports";

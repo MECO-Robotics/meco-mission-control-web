@@ -1,33 +1,9 @@
 import { useState } from "react";
 
-import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model";
-import {
-  buildEmptyArtifactPayload,
-  buildEmptyMaterialPayload,
-  buildEmptyMechanismPayload,
-  buildEmptyPartDefinitionPayload,
-  buildEmptyPartInstancePayload,
-  buildEmptySubsystemPayload,
-  buildEmptyWorkstreamPayload,
-} from "@/lib/appUtils";
-import type {
-  ArtifactPayload,
-  MaterialPayload,
-  MechanismPayload,
-  PartDefinitionPayload,
-  PartInstancePayload,
-  SubsystemPayload,
-  WorkstreamPayload,
-} from "@/types";
-import type {
-  ArtifactModalMode,
-  MaterialModalMode,
-  MechanismModalMode,
-  PartDefinitionModalMode,
-  PartInstanceModalMode,
-  SubsystemModalMode,
-  WorkstreamModalMode,
-} from "@/features/workspace";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import { buildEmptyArtifactPayload, buildEmptyMaterialPayload, buildEmptyMechanismPayload, buildEmptyPartDefinitionPayload, buildEmptyPartInstancePayload, buildEmptySubsystemPayload, buildEmptyWorkstreamPayload } from "@/lib/appUtils/payloadBuilders";
+import type { ArtifactPayload, MaterialPayload, MechanismPayload, PartDefinitionPayload, PartInstancePayload, SubsystemPayload, WorkstreamPayload } from "@/types/payloads";
+import type { ArtifactModalMode, MaterialModalMode, MechanismModalMode, PartDefinitionModalMode, PartInstanceModalMode, SubsystemModalMode, WorkstreamModalMode } from "@/features/workspace/shared/model/workspaceModalModes";
 
 export function useAppWorkspaceUiStateMaterialAndStructure() {
   const [materialModalMode, setMaterialModalMode] = useState<MaterialModalMode>(null);

@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import type { TaskPayload } from "@/types";
+import type { TaskPayload } from "@/types/payloads";
 
 interface TaskEditorHeaderSectionProps {
   closeTaskModal: () => void;

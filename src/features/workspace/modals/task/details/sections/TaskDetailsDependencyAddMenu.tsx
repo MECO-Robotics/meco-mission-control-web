@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-import type { TaskDependencyKind } from "@/types";
+import type { TaskDependencyKind } from "@/types/common";
 import { IconPlus } from "@/components/shared/Icons";
 import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
 import {

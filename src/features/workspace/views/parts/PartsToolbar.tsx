@@ -1,12 +1,10 @@
-import { IconManufacturing, IconTasks } from "@/components/shared";
-import {
-  CompactFilterMenu,
-  FilterDropdown,
-  PART_STATUS_OPTIONS,
-  SearchToolbarInput,
-  type FilterSelection,
-} from "@/features/workspace/shared";
-import type { BootstrapPayload } from "@/types";
+import { IconManufacturing, IconTasks } from "@/components/shared/Icons";
+import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
+import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
+import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import { PART_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
 interface PartsToolbarProps {
   bootstrap: BootstrapPayload;

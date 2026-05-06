@@ -1,4 +1,5 @@
-import type { BootstrapPayload, PartDefinitionRecord } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { PartDefinitionRecord } from "@/types/recordsInventory";
 
 export interface PartsViewProps {
   bootstrap: BootstrapPayload;

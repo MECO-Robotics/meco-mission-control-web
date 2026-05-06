@@ -1,7 +1,7 @@
 /// <reference types="jest" />
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import type { BootstrapPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
 import { TimelineProjectGroup } from "@/features/workspace/views/timeline/TimelineProjectGroup";
 import { buildTimelineData, buildTimelineDayMilestoneUnderlays, buildTimelineProjectRows, filterTimelineMilestonesByPersonSelection, getTimelineMilestonePopupItems } from "@/features/workspace/views/timeline/timelineViewModel";
 import { createBootstrap, createTimelineMilestone } from "../timelineTestFixtures";

@@ -1,13 +1,11 @@
 import { useMemo, useState } from "react";
 
-import type { ArtifactRecord, BootstrapPayload } from "@/types";
-import {
-  EditableHoverIndicator,
-  SearchToolbarInput,
-  TableCell,
-  useFilterChangeMotionClass,
-} from "@/features/workspace/shared";
-import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
+import type { ArtifactRecord } from "@/types/recordsInventory";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import { EditableHoverIndicator, TableCell } from "@/features/workspace/shared/table/workspaceTableChrome";
+import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 
 interface WorkflowViewProps {
   artifacts: ArtifactRecord[];

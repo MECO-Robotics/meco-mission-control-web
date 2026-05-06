@@ -1,4 +1,6 @@
-import { MilestoneReportEditorModal, QaReportEditorModal, WorkLogEditorModal } from "../WorkspaceModals";
+import { MilestoneReportEditorModal } from "../modals/workReports/EventReportEditorModal";
+import { QaReportEditorModal } from "../modals/workReports/QaReportEditorModal";
+import { WorkLogEditorModal } from "../modals/workReports/WorkLogEditorModal";
 import type { WorkspaceModalHostViewProps } from "./workspaceModalHostViewTypes";
 
 export function WorkspaceReportModalsSection(props: WorkspaceModalHostViewProps) {

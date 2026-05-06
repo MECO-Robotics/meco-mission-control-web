@@ -1,6 +1,6 @@
 import React from "react";
-import { EditableHoverIndicator } from "@/features/workspace/shared";
-import type { TaskRecord } from "@/types";
+import { EditableHoverIndicator } from "@/features/workspace/shared/table/workspaceTableChrome";
+import type { TaskRecord } from "@/types/recordsExecution";
 import type {
   TimelineTaskDependencyCounts,
 } from "./timelineGridBodyUtils";

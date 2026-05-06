@@ -1,33 +1,7 @@
-import type {
-  ArtifactRecord,
-  AttendanceRecord,
-  DesignIterationRecord,
-  DisciplineRecord,
-  MilestoneRecord,
-  ManufacturingItemRecord,
-  MaterialRecord,
-  MemberRecord,
-  MechanismRecord,
-  PartDefinitionRecord,
-  PartInstanceRecord,
-  ProjectRecord,
-  PurchaseItemRecord,
-  QaFindingRecord,
-  QaReportRecord,
-  ReportFindingRecord,
-  ReportRecord,
-  RiskRecord,
-  SeasonRecord,
-  SubsystemRecord,
-  MilestoneRequirementRecord,
-  TaskBlockerRecord,
-  TaskDependencyRecord,
-  TaskRecord,
-  TestFindingRecord,
-  TestResultRecord,
-  WorkLogRecord,
-  WorkstreamRecord,
-} from "./records";
+import type { ArtifactRecord, ManufacturingItemRecord, MaterialRecord, PartDefinitionRecord, PartInstanceRecord, PurchaseItemRecord } from "./recordsInventory";
+import type { AttendanceRecord, MilestoneRecord, MilestoneRequirementRecord, TaskBlockerRecord, TaskDependencyRecord, TaskRecord, WorkLogRecord } from "./recordsExecution";
+import type { DesignIterationRecord, QaFindingRecord, QaReportRecord, ReportFindingRecord, ReportRecord, RiskRecord, TestFindingRecord, TestResultRecord } from "./recordsReporting";
+import type { DisciplineRecord, MechanismRecord, MemberRecord, ProjectRecord, SeasonRecord, SubsystemRecord, WorkstreamRecord } from "./recordsOrganization";
 
 export interface BootstrapPayload {
   seasons: SeasonRecord[];

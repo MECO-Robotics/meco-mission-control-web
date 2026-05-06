@@ -1,8 +1,8 @@
 /// <reference types="jest" />
 
-import { scopeBootstrapBySelection } from "@/app/state/workspaceStateUtils";
-import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared";
-import type { BootstrapPayload } from "@/types";
+import { scopeBootstrapBySelection } from "@/app/state/workspaceBootstrapScope";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
 const baseTask: BootstrapPayload["tasks"][number] = {
   id: "task-visible",

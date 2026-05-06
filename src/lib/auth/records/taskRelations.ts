@@ -1,9 +1,5 @@
-import type {
-  TaskBlockerPayload,
-  TaskBlockerRecord,
-  TaskDependencyPayload,
-  TaskDependencyRecord,
-} from "@/types";
+import type { TaskBlockerPayload, TaskDependencyPayload } from "@/types/payloads";
+import type { TaskBlockerRecord, TaskDependencyRecord } from "@/types/recordsExecution";
 import { requestItem } from "./common";
 
 export function createTaskDependencyRecord(

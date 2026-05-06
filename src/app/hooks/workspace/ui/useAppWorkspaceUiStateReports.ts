@@ -1,12 +1,9 @@
 import { useState } from "react";
 
-import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model";
-import {
-  buildEmptyQaReportPayload,
-  buildEmptyTestResultPayload,
-} from "@/lib/appUtils";
-import type { QaReportPayload, TestResultPayload } from "@/types";
-import type { MilestoneReportModalMode, QaReportModalMode } from "@/features/workspace";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import { buildEmptyQaReportPayload, buildEmptyTestResultPayload } from "@/lib/appUtils/payloadBuilders";
+import type { QaReportPayload, TestResultPayload } from "@/types/payloads";
+import type { MilestoneReportModalMode, QaReportModalMode } from "@/features/workspace/shared/model/workspaceModalModes";
 
 export function useAppWorkspaceUiStateReports() {
   const [qaReportModalMode, setQaReportModalMode] = useState<QaReportModalMode>(null);

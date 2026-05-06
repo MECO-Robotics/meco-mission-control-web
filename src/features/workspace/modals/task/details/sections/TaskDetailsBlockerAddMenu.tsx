@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-import type { TaskBlockerType } from "@/types";
+import type { TaskBlockerType } from "@/types/common";
 import { IconCheck, IconPlus } from "@/components/shared/Icons";
 import { useFilterDropdownMenuState } from "../../../../shared/filters/workspaceFilterDropdownHooks";
 

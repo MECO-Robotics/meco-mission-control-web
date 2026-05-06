@@ -1,10 +1,10 @@
 import { useCallback } from "react";
 
 import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
-import { toErrorMessage } from "@/lib/appUtils";
-import { createQaReportRecord, createTestResultRecord, createWorkLogRecord } from "@/lib/auth";
+import { toErrorMessage } from "@/lib/appUtils/common";
+import { createQaReportRecord, createTestResultRecord, createWorkLogRecord } from "@/lib/auth/records/reporting";
 import { localTodayDate } from "@/lib/dateUtils";
-import type { QaReportPayload, TestResultPayload, WorkLogPayload } from "@/types";
+import type { QaReportPayload, TestResultPayload, WorkLogPayload } from "@/types/payloads";
 
 export type AppWorkspaceReportSubmitActions = ReturnType<typeof useAppWorkspaceReportSubmitActions>;
 

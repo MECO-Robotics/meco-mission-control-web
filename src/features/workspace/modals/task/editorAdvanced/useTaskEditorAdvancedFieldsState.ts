@@ -1,12 +1,13 @@
 import type { Dispatch, SetStateAction } from "react";
 
-import { formatIterationVersion } from "@/lib/appUtils";
+import { formatIterationVersion } from "@/lib/appUtils/common";
 import {
   getDefaultTaskDisciplineIdForProject,
   getTaskDisciplinesForProject,
   isTaskDisciplineAllowedForProject,
 } from "@/lib/taskDisciplines";
-import type { BootstrapPayload, TaskPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskPayload } from "@/types/payloads";
 
 import {
   getTaskPrimaryTargetName,

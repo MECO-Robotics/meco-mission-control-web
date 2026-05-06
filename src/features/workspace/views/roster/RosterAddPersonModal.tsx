@@ -1,8 +1,10 @@
 import React from "react";
 
-import { IconTasks } from "@/components/shared";
-import { FilterDropdown, PhotoUploadField } from "@/features/workspace/shared";
-import type { MemberPayload, MemberRecord } from "@/types";
+import { IconTasks } from "@/components/shared/Icons";
+import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
+import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
+import type { MemberPayload } from "@/types/payloads";
+import type { MemberRecord } from "@/types/recordsOrganization";
 
 interface DisciplineOption {
   id: string;

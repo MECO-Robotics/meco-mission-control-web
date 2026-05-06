@@ -1,11 +1,6 @@
 /// <reference types="jest" />
 
-import {
-  filterSelectionIncludes,
-  filterSelectionIntersects,
-  getPortalMenuPosition,
-  pruneFilterSelection,
-} from "@/features/workspace/shared";
+import { filterSelectionIncludes, filterSelectionIntersects, getPortalMenuPosition, pruneFilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 
 describe("WorkspaceViewShared filters", () => {
   it("treats an empty selection as the all option", () => {

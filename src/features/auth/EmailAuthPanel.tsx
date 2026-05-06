@@ -1,4 +1,4 @@
-import type { EmailCodeDeliveryResponse } from "@/lib/auth";
+import type { EmailCodeDeliveryResponse } from "@/lib/auth/types";
 
 import { useEmailAuthPanel } from "./useEmailAuthPanel";
 

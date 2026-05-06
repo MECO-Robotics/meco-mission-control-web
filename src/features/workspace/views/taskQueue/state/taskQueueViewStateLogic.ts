@@ -1,12 +1,11 @@
 import { useEffect, useMemo } from "react";
 import type { Dispatch, SetStateAction } from "react";
 
-import type { BootstrapPayload, TaskRecord } from "@/types";
-import { formatIterationVersion } from "@/lib/appUtils";
-import {
-  type FilterSelection,
-  useFilterChangeMotionClass,
-} from "@/features/workspace/shared/filters";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskRecord } from "@/types/recordsExecution";
+import { formatIterationVersion } from "@/lib/appUtils/common";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 
 import {
   filterTaskQueueTasks,

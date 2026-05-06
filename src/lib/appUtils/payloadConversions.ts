@@ -1,24 +1,8 @@
-import type {
-  ArtifactRecord,
-  ManufacturingItemRecord,
-  MaterialRecord,
-  MechanismPayload,
-  PartInstanceRecord,
-  PurchaseItemPayload,
-  PurchaseItemRecord,
-  ArtifactPayload,
-  PartDefinitionPayload,
-  PartDefinitionRecord,
-  SubsystemPayload,
-  SubsystemRecord,
-  WorkstreamPayload,
-  WorkstreamRecord,
-  PartInstancePayload,
-  MaterialPayload,
-  ManufacturingItemPayload,
-} from "@/types";
+import type { ArtifactRecord, ManufacturingItemRecord, MaterialRecord, PartDefinitionRecord, PartInstanceRecord, PurchaseItemRecord } from "@/types/recordsInventory";
+import type { ArtifactPayload, ManufacturingItemPayload, MaterialPayload, MechanismPayload, PartDefinitionPayload, PartInstancePayload, PurchaseItemPayload, SubsystemPayload, WorkstreamPayload } from "@/types/payloads";
+import type { SubsystemRecord, WorkstreamRecord } from "@/types/recordsOrganization";
 import { normalizeIteration } from "@/lib/appUtils/common";
-import { resolveWorkspaceColor } from "@/features/workspace/shared/model";
+import { resolveWorkspaceColor } from "@/features/workspace/shared/model/workspaceColors";
 import { uniqueIds } from "./internal";
 
 export const purchaseToPayload = (item: PurchaseItemRecord): PurchaseItemPayload => ({

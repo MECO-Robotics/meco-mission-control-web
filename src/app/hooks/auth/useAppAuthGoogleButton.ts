@@ -7,7 +7,7 @@ import {
   type GoogleIdentityWindow,
 } from "@/app/hooks/auth/useAppAuthGoogleIdentity";
 import { type GoogleCredentialResponse, type SessionUser } from "@/lib/auth/types";
-import { toErrorMessage } from "@/lib/appUtils";
+import { toErrorMessage } from "@/lib/appUtils/common";
 
 interface UseAppAuthGoogleButtonArgs {
   authBooting: boolean;

@@ -1,19 +1,8 @@
-import type {
-  BootstrapPayload,
-  MilestoneRecord,
-  MilestoneRequirementRecord,
-  TaskDependencyRecord,
-  TaskRecord,
-} from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneRecord, MilestoneRequirementRecord, TaskDependencyRecord, TaskRecord } from "@/types/recordsExecution";
 
-import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model";
-import {
-  getMilestoneTaskBoardState,
-  getMilestoneTaskBoardStateForMilestone,
-  getMilestoneTaskBoardStateIconStatus,
-  getMilestoneTaskBoardStateLabel,
-  getMilestoneTasksForState,
-} from "@/features/workspace/shared/milestones";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import { getMilestoneTaskBoardState, getMilestoneTaskBoardStateForMilestone, getMilestoneTaskBoardStateIconStatus, getMilestoneTaskBoardStateLabel, getMilestoneTasksForState } from "@/features/workspace/shared/milestones/milestoneTaskState";
 
 function createTask(
   id: string,

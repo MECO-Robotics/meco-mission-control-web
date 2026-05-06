@@ -1,7 +1,7 @@
 import { type Dispatch, type SetStateAction } from "react";
 
 import { MECO_MAIN_LOGO_HEIGHT, MECO_MAIN_LOGO_LIGHT_SRC, MECO_MAIN_LOGO_WHITE_SRC, MECO_MAIN_LOGO_WIDTH } from "@/lib/branding";
-import type { SessionUser } from "@/lib/auth";
+import type { SessionUser } from "@/lib/auth/types";
 import {
   type InventoryViewTab,
   type ManufacturingViewTab,
@@ -11,7 +11,7 @@ import {
   type WorklogsViewTab,
   type ViewTab,
 } from "@/lib/workspaceNavigation";
-import type { SeasonRecord } from "@/types";
+import type { SeasonRecord } from "@/types/recordsOrganization";
 
 import { AppTopbarNavigation } from "./AppTopbarNavigation";
 import { AppTopbarRightRail } from "./AppTopbarRightRail";

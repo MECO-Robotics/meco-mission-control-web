@@ -1,9 +1,12 @@
 import { useCallback } from "react";
 
-import { buildEmptySubsystemPayload, splitList, subsystemToPayload, toErrorMessage } from "@/lib/appUtils";
-import { createSubsystemRecord, updateSubsystemRecord } from "@/lib/auth";
+import { buildEmptySubsystemPayload } from "@/lib/appUtils/payloadBuilders";
+import { splitList, toErrorMessage } from "@/lib/appUtils/common";
+import { subsystemToPayload } from "@/lib/appUtils/payloadConversions";
+import { createSubsystemRecord, updateSubsystemRecord } from "@/lib/auth/records/structure";
 import type { AppWorkspaceModel } from "../hooks/useAppWorkspaceModel";
-import type { SubsystemPayload, SubsystemRecord } from "@/types";
+import type { SubsystemPayload } from "@/types/payloads";
+import type { SubsystemRecord } from "@/types/recordsOrganization";
 
 export type SubsystemActions = ReturnType<typeof useSubsystemActions>;
 

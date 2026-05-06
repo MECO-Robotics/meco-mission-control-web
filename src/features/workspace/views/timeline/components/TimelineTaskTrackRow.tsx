@@ -1,5 +1,5 @@
 import React from "react";
-import type { TaskRecord } from "@/types";
+import type { TaskRecord } from "@/types/recordsExecution";
 import { TimelineGridDaySlots } from "../TimelineGridDaySlots";
 import { TimelineTaskBar } from "../TimelineTaskBar";
 import { TimelineTaskStatusCell } from "../TimelineTaskStatusCell";

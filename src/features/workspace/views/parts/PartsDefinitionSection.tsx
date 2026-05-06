@@ -1,12 +1,9 @@
 import type { CSSProperties } from "react";
 
-import {
-  EditableHoverIndicator,
-  PaginationControls,
-  TableCell,
-} from "@/features/workspace/shared";
-import { formatIterationVersion } from "@/lib/appUtils";
-import type { BootstrapPayload, PartDefinitionRecord } from "@/types";
+import { EditableHoverIndicator, PaginationControls, TableCell } from "@/features/workspace/shared/table/workspaceTableChrome";
+import { formatIterationVersion } from "@/lib/appUtils/common";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { PartDefinitionRecord } from "@/types/recordsInventory";
 
 import { PART_DEFINITION_GRID_TEMPLATE } from "./partsViewTypes";
 

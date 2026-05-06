@@ -1,9 +1,12 @@
 import { useCallback } from "react";
 
-import { buildEmptyPurchasePayload, purchaseToPayload, toErrorMessage } from "@/lib/appUtils";
-import { createPurchaseItemRecord, updatePurchaseItemRecord } from "@/lib/auth";
+import { buildEmptyPurchasePayload } from "@/lib/appUtils/payloadBuilders";
+import { purchaseToPayload } from "@/lib/appUtils/payloadConversions";
+import { toErrorMessage } from "@/lib/appUtils/common";
+import { createPurchaseItemRecord, updatePurchaseItemRecord } from "@/lib/auth/records/production";
 import type { AppWorkspaceModel } from "../hooks/useAppWorkspaceModel";
-import type { PurchaseItemPayload, PurchaseItemRecord } from "@/types";
+import type { PurchaseItemPayload } from "@/types/payloads";
+import type { PurchaseItemRecord } from "@/types/recordsInventory";
 
 export type PurchaseActions = ReturnType<typeof usePurchaseActions>;
 

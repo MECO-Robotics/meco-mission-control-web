@@ -1,6 +1,7 @@
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 
-import type { BootstrapPayload, PurchaseItemPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { PurchaseItemPayload } from "@/types/payloads";
 
 import { PurchaseEditorFields } from "./PurchaseEditorFields";
 

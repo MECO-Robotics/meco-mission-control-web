@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
 import { useInteractiveTutorialLifecycle } from "./useInteractiveTutorialLifecycle";
-import { isInteractiveTutorialCreationStep } from "./interactiveTutorialHelpers";
+import { isInteractiveTutorialCreationStep } from "./helpers/interactiveTutorialStepGroups";
 import { useInteractiveTutorialCoreActions } from "./useInteractiveTutorialCoreActions";
 import { useInteractiveTutorialCoreState } from "./useInteractiveTutorialCoreState";
 import type { UseInteractiveTutorialOptions } from "./useInteractiveTutorialCoreTypes";

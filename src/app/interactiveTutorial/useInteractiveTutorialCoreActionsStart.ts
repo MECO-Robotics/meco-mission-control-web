@@ -1,10 +1,10 @@
 import { startTransition, useCallback } from "react";
 
-import { fetchBootstrap, resetInteractiveTutorialSession, startInteractiveTutorialSession } from "@/lib/auth";
-import { toErrorMessage } from "@/lib/appUtils";
-import type { BootstrapPayload } from "@/types";
+import { fetchBootstrap, resetInteractiveTutorialSession, startInteractiveTutorialSession } from "@/lib/auth/bootstrap";
+import { toErrorMessage } from "@/lib/appUtils/common";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
-import { getInteractiveTutorialCreationCounts } from "./interactiveTutorialHelpers";
+import { getInteractiveTutorialCreationCounts } from "./helpers/interactiveTutorialCreationCounts";
 import {
   buildInteractiveTutorialReturnState,
   getInteractiveTutorialChapter,

@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 
-import { WORKSPACE_PANEL_CLASS, useFilterChangeMotionClass, useWorkspacePagination } from "@/features/workspace/shared";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
+import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
 
 import { filterPartDefinitions } from "./parts/partsViewData";
 import { PartsDefinitionSection } from "./parts/PartsDefinitionSection";

@@ -1,4 +1,4 @@
-import type { MilestoneType } from "@/types";
+import type { MilestoneType } from "@/types/common";
 
 export interface WorkspaceMilestoneStyle {
   label: string;

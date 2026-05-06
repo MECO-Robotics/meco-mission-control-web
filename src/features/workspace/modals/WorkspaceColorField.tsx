@@ -1,7 +1,4 @@
-import {
-  WORKSPACE_COLOR_PALETTE,
-  resolveWorkspaceColor,
-} from "@/features/workspace/shared/model";
+import { resolveWorkspaceColor, WORKSPACE_COLOR_PALETTE } from "@/features/workspace/shared/model/workspaceColors";
 
 export function WorkspaceColorField({
   label,

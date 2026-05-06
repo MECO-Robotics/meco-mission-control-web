@@ -3,7 +3,7 @@
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import { PhotoUploadField } from "@/features/workspace/shared/media";
+import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 

@@ -1,27 +1,18 @@
 import { useMemo, useState, type CSSProperties } from "react";
 
-import { IconManufacturing, IconTasks } from "@/components/shared";
-import type {
-  ArtifactKind,
-  ArtifactRecord,
-  ArtifactStatus,
-  BootstrapPayload,
-} from "@/types";
-import {
-  ColumnFilterDropdown,
-  CompactFilterMenu,
-  EditableHoverIndicator,
-  getStatusPillClassName,
-  type FilterSelection,
-  FilterDropdown,
-  PaginationControls,
-  WORKSPACE_PANEL_CLASS,
-  SearchToolbarInput,
-  TableCell,
-  filterSelectionIncludes,
-  useFilterChangeMotionClass,
-  useWorkspacePagination,
-} from "@/features/workspace/shared";
+import { IconManufacturing, IconTasks } from "@/components/shared/Icons";
+import type { ArtifactKind, ArtifactStatus } from "@/types/common";
+import type { ArtifactRecord } from "@/types/recordsInventory";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import { ColumnFilterDropdown } from "@/features/workspace/shared/filters/ColumnFilterDropdown";
+import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
+import { EditableHoverIndicator, PaginationControls, TableCell, useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
+import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
+import { filterSelectionIncludes, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 
 interface ArtifactInventoryViewProps {
   bootstrap: BootstrapPayload;

@@ -1,5 +1,5 @@
 import React from "react";
-import type { TaskRecord } from "@/types";
+import type { TaskRecord } from "@/types/recordsExecution";
 import { getTimelineTaskStatusLabel, TimelineTaskStatusLogo } from "./TimelineTaskStatusLogo";
 import type { TimelineTaskStatusSignal } from "./timelineGridBodyUtils";
 

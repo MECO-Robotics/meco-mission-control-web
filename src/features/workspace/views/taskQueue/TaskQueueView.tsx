@@ -1,6 +1,7 @@
-import type { BootstrapPayload, TaskRecord } from "@/types";
-import type { FilterSelection } from "@/features/workspace/shared/filters";
-import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskRecord } from "@/types/recordsExecution";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { TaskQueueBoardSection } from "./TaskQueueBoardSection";
 import { TaskQueueToolbar } from "./TaskQueueToolbar";
 import {

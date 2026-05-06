@@ -5,7 +5,7 @@ import { useAppAuth } from "@/app/hooks/useAppAuth";
 import { useAppShell } from "@/app/hooks/useAppShell";
 import { useAppWorkspaceGlobalEffects } from "@/app/hooks/workspace/derived/useAppWorkspaceGlobalEffects";
 import { useAppWorkspaceUiState } from "@/app/hooks/useAppWorkspaceUiState";
-import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import type { WorkspaceEditToastNotice } from "@/features/workspace/workspaceEditToastNotice";
 import {
   appendWorkspaceToast,
@@ -21,7 +21,7 @@ import type {
   ViewTab,
   WorklogsViewTab,
 } from "@/lib/workspaceNavigation";
-import type { BootstrapPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
 export type AppWorkspaceState = ReturnType<typeof useAppWorkspaceState>;
 

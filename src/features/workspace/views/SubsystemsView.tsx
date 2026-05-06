@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 
-import { useFilterChangeMotionClass, WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
+import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 
 import {
   buildCountsBySubsystemId,

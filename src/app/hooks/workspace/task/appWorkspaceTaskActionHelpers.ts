@@ -1,16 +1,8 @@
 import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
-import { createTaskBlockerRecord, createTaskDependencyRecord, deleteTaskBlockerRecord, deleteTaskDependencyRecord, updateTaskBlockerRecord, updateTaskDependencyRecord } from "@/lib/auth";
-import type {
-  TaskBlockerDraft,
-  TaskBlockerPayload,
-  TaskBlockerRecord,
-  TaskBlockerSeverity,
-  TaskBlockerType,
-  TaskDependencyDraft,
-  TaskDependencyPayload,
-  TaskDependencyRecord,
-  TaskPayload,
-} from "@/types";
+import { createTaskBlockerRecord, createTaskDependencyRecord, deleteTaskBlockerRecord, deleteTaskDependencyRecord, updateTaskBlockerRecord, updateTaskDependencyRecord } from "@/lib/auth/records/taskRelations";
+import type { TaskBlockerDraft, TaskBlockerPayload, TaskDependencyDraft, TaskDependencyPayload, TaskPayload } from "@/types/payloads";
+import type { TaskBlockerRecord, TaskDependencyRecord } from "@/types/recordsExecution";
+import type { TaskBlockerSeverity, TaskBlockerType } from "@/types/common";
 
 type HandleUnauthorized = AppWorkspaceModel["handleUnauthorized"];
 

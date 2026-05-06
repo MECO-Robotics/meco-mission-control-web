@@ -1,4 +1,7 @@
-import { ManufacturingEditorModal, PurchaseEditorModal, SubsystemEditorModal, WorkstreamEditorModal } from "../WorkspaceModals";
+import { ManufacturingEditorModal } from "../modals/purchaseManufacturing/ManufacturingEditorModal";
+import { PurchaseEditorModal } from "../modals/purchaseManufacturing/PurchaseEditorModal";
+import { SubsystemEditorModal } from "../modals/structure/SubsystemEditorModal";
+import { WorkstreamEditorModal } from "../modals/assetCatalog/WorkstreamEditorModal";
 import type { WorkspaceModalHostViewProps } from "./workspaceModalHostViewTypes";
 
 export function WorkspaceStructureModalsSection(props: WorkspaceModalHostViewProps) {

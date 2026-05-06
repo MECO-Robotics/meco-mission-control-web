@@ -1,8 +1,8 @@
 import { useCallback } from "react";
 
-import { buildEmptyTaskPayload, taskToPayload } from "@/lib/appUtils";
+import { buildEmptyTaskPayload, taskToPayload } from "@/lib/appUtils/taskTargets";
 import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
-import type { TaskRecord } from "@/types";
+import type { TaskRecord } from "@/types/recordsExecution";
 
 export type AppWorkspaceTaskModalActions = ReturnType<typeof useAppWorkspaceTaskModalActions>;
 

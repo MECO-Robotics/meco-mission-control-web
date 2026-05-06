@@ -1,9 +1,5 @@
-import type {
-  MechanismPayload,
-  MechanismRecord,
-  SubsystemPayload,
-  SubsystemRecord,
-} from "@/types";
+import type { MechanismPayload, SubsystemPayload } from "@/types/payloads";
+import type { MechanismRecord, SubsystemRecord } from "@/types/recordsOrganization";
 import { requestItem } from "./common";
 
 export function createSubsystemRecord(

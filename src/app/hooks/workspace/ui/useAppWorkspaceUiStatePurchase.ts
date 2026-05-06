@@ -1,9 +1,9 @@
 import { useState } from "react";
 
-import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model";
-import { buildEmptyPurchasePayload } from "@/lib/appUtils";
-import type { PurchaseItemPayload } from "@/types";
-import type { PurchaseModalMode } from "@/features/workspace";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import { buildEmptyPurchasePayload } from "@/lib/appUtils/payloadBuilders";
+import type { PurchaseItemPayload } from "@/types/payloads";
+import type { PurchaseModalMode } from "@/features/workspace/shared/model/workspaceModalModes";
 
 export function useAppWorkspaceUiStatePurchase() {
   const [purchaseModalMode, setPurchaseModalMode] = useState<PurchaseModalMode>(null);

@@ -1,18 +1,8 @@
 import { useMemo } from "react";
 
-import {
-  IconHelp,
-  IconManufacturing,
-  IconParts,
-  IconReports,
-  IconRisk,
-  IconRoster,
-  IconSubsystems,
-  IconTasks,
-  IconWorkLogs,
-} from "@/components/shared";
+import { IconHelp, IconManufacturing, IconParts, IconReports, IconRisk, IconRoster, IconSubsystems, IconTasks, IconWorkLogs } from "@/components/shared/Icons";
 import type { NavigationItem } from "@/lib/workspaceNavigation";
-import type { BootstrapPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
 interface UseWorkspaceDerivedDataArgs {
   activeTaskId: string | null;

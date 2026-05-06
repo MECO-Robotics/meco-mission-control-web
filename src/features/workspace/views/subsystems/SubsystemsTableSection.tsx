@@ -1,8 +1,9 @@
-import { IconEdit, IconPlus } from "@/components/shared";
-import type { BootstrapPayload, MechanismRecord, SubsystemRecord } from "@/types";
-import { TableCell } from "@/features/workspace/shared";
-import { formatIterationVersion } from "@/lib/appUtils";
-import type { MembersById } from "@/features/workspace/shared";
+import { IconEdit, IconPlus } from "@/components/shared/Icons";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MechanismRecord, SubsystemRecord } from "@/types/recordsOrganization";
+import { TableCell } from "@/features/workspace/shared/table/workspaceTableChrome";
+import { formatIterationVersion } from "@/lib/appUtils/common";
+import type { MembersById } from "@/features/workspace/shared/model/workspaceTypes";
 
 import { formatMemberName, getSubsystemMechanisms, getSubsystemParentName } from "./subsystemsViewData";
 import type { SubsystemCountsById } from "./subsystemsViewTypes";

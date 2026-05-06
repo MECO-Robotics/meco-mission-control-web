@@ -1,5 +1,7 @@
 import type { Dispatch, FormEvent, SetStateAction } from "react";
-import type { ArtifactPayload, ArtifactStatus, BootstrapPayload } from "@/types";
+import type { ArtifactPayload } from "@/types/payloads";
+import type { ArtifactStatus } from "@/types/common";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
 interface ArtifactEditorModalProps {
   activeArtifactId: string | null;

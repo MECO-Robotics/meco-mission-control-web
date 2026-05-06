@@ -1,6 +1,6 @@
 /// <reference types="jest" />
 
-import { getStatusPillClassName } from "@/features/workspace/shared";
+import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
 
 describe("getStatusPillClassName", () => {
   it("maps success-like statuses to the success class", () => {

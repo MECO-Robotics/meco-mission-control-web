@@ -1,7 +1,8 @@
 import type { Dispatch, SetStateAction } from "react";
 
-import type { BootstrapPayload, SubsystemPayload } from "@/types";
-import { PhotoUploadField } from "@/features/workspace/shared/media";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { SubsystemPayload } from "@/types/payloads";
+import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
 import { WorkspaceColorField } from "../WorkspaceColorField";
 
 import type { SubsystemEditorModalState } from "./buildSubsystemEditorModalState";

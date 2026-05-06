@@ -1,21 +1,8 @@
-import type {
-  ArtifactPayload,
-  BootstrapPayload,
-  MaterialPayload,
-  MechanismPayload,
-  PartDefinitionPayload,
-  PartInstancePayload,
-  PurchaseItemPayload,
-  QaReportPayload,
-  ReportPayload,
-  SubsystemPayload,
-  TestResultPayload,
-  WorkLogPayload,
-  WorkstreamPayload,
-} from "@/types";
+import type { ArtifactPayload, MaterialPayload, MechanismPayload, PartDefinitionPayload, PartInstancePayload, PurchaseItemPayload, QaReportPayload, ReportPayload, SubsystemPayload, TestResultPayload, WorkLogPayload, WorkstreamPayload } from "@/types/payloads";
+import type { BootstrapPayload } from "@/types/bootstrap";
 import { getDefaultSubsystemId } from "@/lib/appUtils/common";
 import { localTodayDate } from "@/lib/dateUtils";
-import { resolveWorkspaceColor } from "@/features/workspace/shared/model";
+import { resolveWorkspaceColor } from "@/features/workspace/shared/model/workspaceColors";
 
 export function buildEmptyPurchasePayload(bootstrap: BootstrapPayload): PurchaseItemPayload {
   const firstPartDefinition = bootstrap.partDefinitions[0] ?? null;

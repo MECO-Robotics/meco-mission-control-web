@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 
-import type { BootstrapPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
 import {
   buildTimelineDayMilestoneUnderlays,
   type MilestoneGeometry,

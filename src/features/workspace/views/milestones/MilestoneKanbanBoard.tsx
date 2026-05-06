@@ -1,12 +1,11 @@
 import type { CSSProperties } from "react";
 
-import type { BootstrapPayload, MilestoneRecord, MilestoneType } from "@/types";
-import { getStatusPillClassName } from "@/features/workspace/shared";
-import {
-  MilestoneTaskStateIcon,
-  getMilestoneTaskBoardStateForMilestone,
-} from "@/features/workspace/shared/milestones";
-import { EditableHoverIndicator } from "@/features/workspace/shared/WorkspaceViewShared";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneRecord } from "@/types/recordsExecution";
+import type { MilestoneType } from "@/types/common";
+import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
+import { getMilestoneTaskBoardStateForMilestone, MilestoneTaskStateIcon } from "@/features/workspace/shared/milestones/milestoneTaskState";
+import { EditableHoverIndicator } from "@/features/workspace/shared/table/workspaceTableChrome";
 import {
   DEFAULT_EVENT_TYPE as DEFAULT_MILESTONE_TYPE,
   EVENT_TYPE_STYLES as MILESTONE_TYPE_STYLES,

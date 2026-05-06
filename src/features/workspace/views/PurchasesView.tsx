@@ -1,26 +1,20 @@
 import { useMemo, useState, type CSSProperties } from "react";
 
-import { formatCurrency } from "@/lib/appUtils";
-import type { BootstrapPayload, PurchaseItemRecord } from "@/types";
-import { IconManufacturing, IconPerson, IconTasks } from "@/components/shared";
-import {
-  ColumnFilterDropdown,
-  CompactFilterMenu,
-  EditableHoverIndicator,
-  type FilterSelection,
-  FilterDropdown,
-  PaginationControls,
-  RequestedItemMeta,
-  SearchToolbarInput,
-  TableCell,
-  filterSelectionIncludes,
-  useFilterChangeMotionClass,
-  useWorkspacePagination,
-} from "@/features/workspace/shared";
-import { getStatusPillClassName } from "@/features/workspace/shared";
-import type { MembersById, SubsystemsById } from "@/features/workspace/shared";
-import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
-import { PURCHASE_APPROVAL_OPTIONS, PURCHASE_STATUS_OPTIONS } from "@/features/workspace/shared";
+import { formatCurrency } from "@/lib/appUtils/common";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { PurchaseItemRecord } from "@/types/recordsInventory";
+import { IconManufacturing, IconPerson, IconTasks } from "@/components/shared/Icons";
+import { ColumnFilterDropdown } from "@/features/workspace/shared/filters/ColumnFilterDropdown";
+import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
+import { EditableHoverIndicator, PaginationControls, RequestedItemMeta, TableCell, useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
+import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
+import { filterSelectionIncludes, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
+import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
+import { PURCHASE_APPROVAL_OPTIONS, PURCHASE_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
 
 interface PurchasesViewProps {
   activePersonFilter: FilterSelection;

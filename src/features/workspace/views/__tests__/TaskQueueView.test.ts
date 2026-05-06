@@ -4,14 +4,14 @@ import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { IconEdit, IconManufacturing, IconParts } from "@/components/shared/Icons";
-import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { TaskQueueView } from "@/features/workspace/views/taskQueue/TaskQueueView";
 import { TaskQueueKanbanBoard } from "@/features/workspace/views/taskQueue/TaskQueueKanbanBoard";
-import { getTaskQueueCardContextLabel } from "@/features/workspace/views/taskQueue/taskQueueKanban";
-import { TASK_QUEUE_LAZY_LOAD_BATCH_SIZE } from "@/features/workspace/views/taskQueue/taskQueueKanban";
+import { getTaskQueueCardContextLabel } from "@/features/workspace/views/taskQueue/taskQueueKanbanCardMeta";
+import { TASK_QUEUE_LAZY_LOAD_BATCH_SIZE } from "@/features/workspace/views/taskQueue/taskQueueKanbanBoardState";
 import { getTaskQueueDisciplineIcon } from "@/features/workspace/views/taskQueue/taskQueueDisciplineBadge";
 import { shouldHideTaskQueueSummary } from "@/features/workspace/views/taskQueue/taskQueueViewState";
-import type { BootstrapPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 

@@ -1,11 +1,7 @@
 import { useEffect, useState } from "react";
-import type { BootstrapPayload, MilestoneRecord, MilestoneRequirementRecord } from "@/types";
-import {
-  getMilestoneRequirementTasks,
-  getMilestoneRequirementsForMilestone,
-  getMilestoneTaskBoardState,
-  MilestoneTaskStateIcon,
-} from "@/features/workspace/shared/milestones";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneRecord, MilestoneRequirementRecord } from "@/types/recordsExecution";
+import { getMilestoneRequirementsForMilestone, getMilestoneRequirementTasks, getMilestoneTaskBoardState, MilestoneTaskStateIcon } from "@/features/workspace/shared/milestones/milestoneTaskState";
 
 function getMilestoneRequirementTargetLabel(
   requirement: MilestoneRequirementRecord,

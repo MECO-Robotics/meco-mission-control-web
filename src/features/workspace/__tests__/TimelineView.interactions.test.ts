@@ -3,8 +3,9 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared";
-import type { BootstrapPayload, TaskRecord } from "@/types";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskRecord } from "@/types/recordsExecution";
 
 function createBootstrap(): BootstrapPayload {
   return {

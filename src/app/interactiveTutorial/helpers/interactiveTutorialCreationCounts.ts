@@ -1,6 +1,6 @@
-import type { BootstrapPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
-import { isMemberActiveInSeason } from "@/lib/appUtils";
+import { isMemberActiveInSeason } from "@/lib/appUtils/common";
 
 import type { InteractiveTutorialCreationCounts } from "../interactiveTutorialTypes";
 

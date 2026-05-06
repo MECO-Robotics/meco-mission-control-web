@@ -1,9 +1,12 @@
 import { useCallback } from "react";
 
-import { buildEmptyMaterialPayload, materialToPayload, toErrorMessage } from "@/lib/appUtils";
-import { createMaterialRecord, deleteMaterialRecord, updateMaterialRecord } from "@/lib/auth";
+import { buildEmptyMaterialPayload } from "@/lib/appUtils/payloadBuilders";
+import { materialToPayload } from "@/lib/appUtils/payloadConversions";
+import { toErrorMessage } from "@/lib/appUtils/common";
+import { createMaterialRecord, deleteMaterialRecord, updateMaterialRecord } from "@/lib/auth/records/inventory";
 import type { AppWorkspaceModel } from "../hooks/useAppWorkspaceModel";
-import type { MaterialPayload, MaterialRecord } from "@/types";
+import type { MaterialPayload } from "@/types/payloads";
+import type { MaterialRecord } from "@/types/recordsInventory";
 
 export type MaterialActions = ReturnType<typeof useMaterialActions>;
 

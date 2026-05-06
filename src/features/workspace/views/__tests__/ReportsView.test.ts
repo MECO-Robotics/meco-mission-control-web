@@ -3,9 +3,10 @@
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model";
-import { ReportsView } from "@/features/workspace/views";
-import type { BootstrapPayload, TaskRecord } from "@/types";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import { ReportsView } from "@/features/workspace/views/ReportsView";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskRecord } from "@/types/recordsExecution";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 

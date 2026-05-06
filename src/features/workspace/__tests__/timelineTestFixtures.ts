@@ -1,5 +1,5 @@
-import type { BootstrapPayload } from "@/types";
-import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { readCssTree } from "@/testUtils/readCssTree";
 
 export function readAppCss() {

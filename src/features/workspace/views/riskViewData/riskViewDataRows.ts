@@ -1,4 +1,4 @@
-import type { RiskRecord } from "@/types";
+import type { RiskRecord } from "@/types/recordsReporting";
 
 import { SEVERITY_RANK, type RiskSeverityFilter, type RiskSourceFilter } from "./riskViewDataPayload";
 import type { RiskViewLookups } from "./riskViewDataLookups";

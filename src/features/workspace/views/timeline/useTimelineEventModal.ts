@@ -1,19 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import type React from "react";
-import type { MilestonePayload, MilestoneRecord } from "@/types";
-import { DEFAULT_EVENT_TYPE } from "@/features/workspace/shared/milestones";
-import {
-  buildDateTime,
-  compareDateTimes,
-  datePortion,
-  localTodayDate,
-  timePortion,
-} from "@/features/workspace/shared/timeline";
-import {
-  emptyTimelineMilestoneDraft,
-  timelineMilestoneDraftFromRecord,
-  type TimelineMilestoneDraft,
-} from "@/features/workspace/shared/timeline";
+import type { MilestonePayload } from "@/types/payloads";
+import type { MilestoneRecord } from "@/types/recordsExecution";
+import { DEFAULT_EVENT_TYPE } from "@/features/workspace/shared/events/eventStyles";
+import { buildDateTime, compareDateTimes, datePortion, localTodayDate, timePortion } from "@/features/workspace/shared/timeline/timelineDateUtils";
+import { emptyTimelineMilestoneDraft, timelineMilestoneDraftFromRecord } from "@/features/workspace/shared/timeline/timelineEventHelpers";
+import type { TimelineMilestoneDraft } from "@/features/workspace/shared/timeline/timelineEventHelpers";
 
 interface UseTimelineMilestoneModalArgs {
   dayMilestonesByDate: Record<string, MilestoneRecord[]>;
