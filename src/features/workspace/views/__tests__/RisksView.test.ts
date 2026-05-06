@@ -168,7 +168,7 @@ describe("RisksView", () => {
         onCreateRisk: jest.fn(),
         onDeleteRisk: jest.fn(),
         onUpdateRisk: jest.fn(),
-        view: "risks",
+        view: "kanban",
       }),
     );
 

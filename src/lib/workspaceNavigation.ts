@@ -12,7 +12,7 @@ export type ViewTab =
   | "help";
 
 export type TaskViewTab = "timeline" | "queue" | "milestones";
-export type RiskManagementViewTab = "risks" | "kanban" | "metrics";
+export type RiskManagementViewTab = "kanban" | "metrics";
 export type WorklogsViewTab = "logs" | "summary";
 export type ReportsViewTab = "qa" | "milestone-results";
 export type ManufacturingViewTab = "cnc" | "prints" | "fabrication";
@@ -37,7 +37,6 @@ export const TASK_VIEW_ORDER: readonly TaskViewTab[] = [
 ];
 export const RISK_MANAGEMENT_VIEW_ORDER: readonly RiskManagementViewTab[] = [
   "kanban",
-  "risks",
   "metrics",
 ];
 export const WORKLOG_VIEW_ORDER: readonly WorklogsViewTab[] = [
@@ -63,8 +62,7 @@ export const TASK_VIEW_OPTIONS: readonly ViewOption<TaskViewTab>[] = [
 ];
 
 export const RISK_MANAGEMENT_VIEW_OPTIONS: readonly ViewOption<RiskManagementViewTab>[] = [
-  { value: "kanban", label: "Kanban" },
-  { value: "risks", label: "Risks" },
+  { value: "kanban", label: "Risks" },
   { value: "metrics", label: "Metrics" },
 ];
 
