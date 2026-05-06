@@ -6,6 +6,7 @@
 * Never ask to show the implementation when you can just implement the requested change.
 * Do not stop to recommend changes unless you were explicitly asked to recommend options; implement the requested change instead.
 * When working in a Git worktree, always audit UI changes against the worktree-hosted app instance (the version rooted at `C:\Users\Brian\.codex\worktrees\331f\meco-mission-control-web`) before finishing.
+* Keep diagnostic and snapshot artifacts out of the repository root. Create and use `/.diagnostics/` (and subfolders) for screenshots, snapshot files, and similar temporary materials.
 
 ---
 
@@ -31,6 +32,12 @@
   * Deploy production web only from `main`, `release-*` tags, or a release manifest.
   * Create a VPS backup immediately before production deploy.
 * Do not introduce or rely on a permanent live staging environment. There is one production VPS.
+
+### Diagnostic artifacts
+
+* Do not add root-level image snapshots (including PNG/JPG/WEBP) to the repo for debugging, browser captures, or visual checks.
+* Place diagnostics in `/.diagnostics/` and keep that directory in `.gitignore`.
+* Remove diagnostic root files before finishing any cleanup or screenshot workflow.
 
 ---
 
