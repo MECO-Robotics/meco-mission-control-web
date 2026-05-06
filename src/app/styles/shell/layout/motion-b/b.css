@@ -11,61 +11,28 @@
 }
 
 @keyframes timeline-period-swipe-left-in {
-  from {
-    opacity: 0.98;
+  0% {
+    opacity: 0;
   }
-
-  to {
+  100% {
     opacity: 1;
   }
 }
 
 @keyframes timeline-period-swipe-right-in {
-  from {
-    opacity: 0.98;
+  0% {
+    opacity: 0;
   }
-
-  to {
+  100% {
     opacity: 1;
   }
 }
 
 @keyframes timeline-period-glide-in {
-  from {
-    opacity: 0.98;
+  0% {
+    opacity: 0;
   }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes timeline-column-unfold-in {
-  from {
-    opacity: 0.98;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes timeline-row-unfold-in {
-  from {
-    opacity: 0.98;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes filter-results-settle {
-  from {
-    opacity: 0.98;
-  }
-
-  to {
+  100% {
     opacity: 1;
   }
 }

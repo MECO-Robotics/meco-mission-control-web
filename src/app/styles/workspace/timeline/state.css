@@ -78,3 +78,12 @@
   position: relative;
   z-index: 6;
 }
+
+@keyframes filter-results-settle {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.98;
+  }
+}

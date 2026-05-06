@@ -69,12 +69,12 @@ describe("TimelineView", () => {
 
   it("clears timeline period motion after the interval change animation ends", () => {
     const source = readFileSync(
-      join(process.cwd(), "src/features/workspace/views/timeline/hooks/useTimelineViewState.ts"),
+      join(process.cwd(), "src/features/workspace/views/timeline/TimelineView.tsx"),
       "utf8",
     );
 
     expect(source).toMatch(
-      /const clearMotion = window\.setTimeout\(\(\) => \{[\s\S]*setTimelineGridMotion\([\s\S]*direction:\s*null,[\s\S]*\}, 180\);/,
+      /const clearMotion = window\.setTimeout\(\(\) => \{[\s\S]*current\.direction \? \{ direction: null, token: current\.token \} : current,[\s\S]*\}, 180\);/,
     );
     expect(source).toMatch(/window\.clearTimeout\(clearMotion\);/);
   });
@@ -245,3 +245,5 @@ describe("TimelineView", () => {
   });
 
 });
+
+

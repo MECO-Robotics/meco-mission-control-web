@@ -101,6 +101,8 @@ export const TimelineTaskBar: React.FC<TimelineTaskBarProps> = ({
     gridColumn,
     margin,
     alignSelf,
+    marginLeft,
+    marginRight,
     ...buttonStyle
   } = spillAwareStyle;
 
@@ -134,6 +136,8 @@ export const TimelineTaskBar: React.FC<TimelineTaskBarProps> = ({
         onClick={() => onOpenTask(task)}
         style={{
           ...buttonStyle,
+          marginLeft: spillsLeft ? "0" : (marginLeft ?? "var(--timeline-task-bar-edge-gap, 24px)"),
+          marginRight: spillsRight ? "0" : (marginRight ?? "var(--timeline-task-bar-edge-gap, 24px)"),
           gridRow,
           gridColumn,
         }}

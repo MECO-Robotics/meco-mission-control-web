@@ -6,3 +6,17 @@
 @import url("./shell/sidebar.css");
 @import url("./shell/workspace.css");
 @import url("./shell/timeline.css");
+
+.timeline-merged-cell-text.is-rotated {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.28rem;
+  max-width: none;
+  max-height: calc(100% - 16px);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(var(--timeline-merged-cell-rotation, 240deg));
+  transform-origin: center;
+  white-space: nowrap;
+}

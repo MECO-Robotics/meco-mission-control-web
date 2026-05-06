@@ -125,3 +125,24 @@
   position: relative;
   z-index: 1;
 }
+
+.timeline-row-highlight-anchor {
+  min-height: 38px;
+}
+
+.timeline-merged-cell-text.is-rotated {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(var(--timeline-merged-cell-rotation, 240deg));
+  max-height: calc(100% - 16px);
+  max-width: none;
+}
+
+.timeline-ellipsis-reveal[data-full-text]:hover,
+.timeline-merged-cell-column:hover .timeline-ellipsis-reveal[data-full-text] {
+  color: transparent;
+}
+.timeline-merged-cell-column:hover,
+.timeline-merged-cell-column:focus-within {
+  z-index: 10045;
+}

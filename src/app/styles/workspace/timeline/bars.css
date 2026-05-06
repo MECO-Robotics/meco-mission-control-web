@@ -3,6 +3,19 @@
   border-radius: 10px;
 }
 
+.task-label.timeline-task-label {
+  background: var(--timeline-task-row-fill, rgba(22, 71, 142, 0.12));
+  box-shadow: inset 3px 0 0 var(--timeline-task-discipline-accent, #7a8799);
+}
+
+.task-label.timeline-task-label-in-progress {
+  --timeline-task-status-accent: #b77900;
+}
+
+.task-label.timeline-task-label-complete {
+  --timeline-task-status-accent: #246847;
+}
+
 .task-label:hover,
 .task-label:focus-visible,
 .timeline-merged-cell-text:hover,

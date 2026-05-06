@@ -39,6 +39,8 @@ interface TimelineSubsystemRowGroupProps {
   taskStatusSignalsById: Record<string, TimelineTaskStatusSignal>;
   timelineDayHeaderCells: TimelineDayHeaderCell[];
   toggleSubsystem: (id: string) => void;
+  gridAutoRows?: string;
+  rowStyle?: React.CSSProperties;
 }
 
 export const TimelineSubsystemRowGroup: React.FC<TimelineSubsystemRowGroupProps> = ({
@@ -64,6 +66,8 @@ export const TimelineSubsystemRowGroup: React.FC<TimelineSubsystemRowGroupProps>
   statusIconColumnIndex,
   statusIconColumnWidth,
   statusIconStickyRight,
+  gridAutoRows,
+  rowStyle,
   subsystem,
   subsystemColumnIndex,
   subsystemStickyLeft,
@@ -80,10 +84,12 @@ export const TimelineSubsystemRowGroup: React.FC<TimelineSubsystemRowGroupProps>
   const isSubsystemSelected = selectedSubsystemId === subsystem.id;
 
   return (
-    <div
+      <div
       className="subsystem-group"
       style={{
         display: "contents",
+        ...(gridAutoRows ? { gridAutoRows } : null),
+        ...rowStyle,
       }}
       key={subsystem.id}
     >

@@ -231,3 +231,22 @@
   transform-origin: center;
   white-space: nowrap;
 }
+
+@keyframes timeline-column-unfold-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes timeline-row-unfold-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
