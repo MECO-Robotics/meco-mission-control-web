@@ -250,3 +250,6 @@
   }
 }
 
+.timeline-merged-cell-text.is-rotated .timeline-merged-cell-title {
+  max-height: 100%;
+}

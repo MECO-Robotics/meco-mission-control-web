@@ -49,7 +49,7 @@ function renderTopbar(
       isSidebarCollapsed: false,
       loadWorkspace: jest.fn(),
       manufacturingView: "cnc",
-      riskManagementView: "risks",
+      riskManagementView: "kanban",
       reportsView: "qa",
       onToggleMyView: jest.fn(),
       onCreateSeason: jest.fn(),

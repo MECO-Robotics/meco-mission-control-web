@@ -123,7 +123,7 @@ export function buildRiskViewLookups({
         return "Unknown QA report";
       }
 
-      return `${tasksById[report.taskId ?? ""]?.title ?? "Unknown task"} QA report`;
+      return tasksById[report.taskId ?? ""]?.title ?? "Unknown task";
     }
 
     const testResult = testResultsById[risk.sourceId];
@@ -131,7 +131,7 @@ export function buildRiskViewLookups({
       return "Unknown test result";
     }
 
-    return `${testResult.title} test result`;
+    return testResult.title ?? "Unknown test result";
   };
 
   const getAttachmentLabel = (risk: RiskRecord) => {

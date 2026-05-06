@@ -84,7 +84,7 @@ export function MilestonesEventDetailsModal({
   }
 
   const isEditMode = milestoneModalMode === "edit";
-    const handleClose = isEditMode && onCancelEdit ? onCancelEdit : onClose;
+  const handleClose = isEditMode && onCancelEdit ? onCancelEdit : onClose;
   const milestoneTypeStyle = MILESTONE_TYPE_STYLES[activeMilestone.type] ?? MILESTONE_TYPE_STYLES["internal-review"];
   const milestoneTypeStyleVariables = {
     "--milestone-type-chip-bg": milestoneTypeStyle.chipBackground,

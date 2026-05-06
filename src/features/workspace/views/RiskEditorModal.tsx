@@ -8,7 +8,7 @@ interface RiskEditorModalProps {
   attachmentOptions: SelectOption[];
   draft: RiskPayload;
   editorError: string | null;
-  editorMode: RiskEditorMode;
+  editorMode: Exclude<RiskEditorMode, "detail"> | null;
   getAttachmentOptionsForType: (attachmentType: RiskPayload["attachmentType"]) => SelectOption[];
   getSourceOptionsForType: (sourceType: RiskPayload["sourceType"]) => SelectOption[];
   isDeleting: boolean;

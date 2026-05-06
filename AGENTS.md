@@ -5,6 +5,7 @@
 * Use numeric thresholds to trigger refactoring, not just hard caps.
 * Never ask to show the implementation when you can just implement the requested change.
 * Do not stop to recommend changes unless you were explicitly asked to recommend options; implement the requested change instead.
+* When working in a Git worktree, always audit UI changes against the worktree-hosted app instance (the version rooted at `C:\Users\Brian\.codex\worktrees\331f\meco-mission-control-web`) before finishing.
 
 ---
 

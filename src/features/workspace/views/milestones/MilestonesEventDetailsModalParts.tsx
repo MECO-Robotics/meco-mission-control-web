@@ -22,9 +22,11 @@ export function MilestoneDetailValue({
       onClick={onOpenEditMilestone}
       onDoubleClick={onOpenEditMilestone}
       type="button"
-      >
+    >
       {children}
-      {showEditIndicator ? <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator" /> : null}
+      {showEditIndicator ? (
+        <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator" />
+      ) : null}
     </button>
   );
 }
@@ -47,7 +49,9 @@ export function MilestoneDetailInlineValue({
         type="button"
       >
         {children}
-        {showEditIndicator ? <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator" /> : null}
+        {showEditIndicator ? (
+          <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator" />
+        ) : null}
       </button>
     </span>
   );

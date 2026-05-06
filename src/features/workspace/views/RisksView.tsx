@@ -1,28 +1,29 @@
+import { useMemo } from "react";
+
+import type { CSSProperties } from "react";
 import type { RiskManagementViewTab } from "@/lib/workspaceNavigation";
-import type { BootstrapPayload, RiskPayload } from "@/types";
-import {
-  EditableHoverIndicator,
-  type FilterSelection,
-  PaginationControls,
-  TableCell,
-} from "@/features/workspace/shared";
+import type { BootstrapPayload, RiskPayload, RiskRecord } from "@/types";
+import { EditableHoverIndicator, type FilterSelection } from "@/features/workspace/shared";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
 import { KanbanColumns } from "@/features/workspace/views/kanban/KanbanColumns";
+import { resolveWorkspaceColor } from "@/features/workspace/shared/model";
 
 import { RiskEditorModal } from "./RiskEditorModal";
+import { RiskDetailsModal } from "./RiskDetailsModal";
 import { RiskFilterToolbar } from "./RiskFilterToolbar";
 import { RiskMetricsSection } from "./RiskMetricsSection";
 import {
-  ATTACHMENT_TYPE_LABELS,
   RISK_SEVERITY_ORDER,
   formatRiskSeverity,
   getRiskSeverityPillClassName,
   useRisksViewModel,
 } from "./riskViewModel";
+import { TaskPriorityBadge } from "./taskQueue/taskQueueKanbanCardMeta";
 
 interface RisksViewProps {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
+  isAllProjectsView: boolean;
   onCreateRisk: (payload: RiskPayload) => Promise<void>;
   onDeleteRisk: (riskId: string) => Promise<void>;
   onUpdateRisk: (riskId: string, payload: RiskPayload) => Promise<void>;
@@ -32,6 +33,7 @@ interface RisksViewProps {
 export function RisksView({
   activePersonFilter,
   bootstrap,
+  isAllProjectsView,
   onCreateRisk,
   onDeleteRisk,
   onUpdateRisk,
@@ -44,6 +46,120 @@ export function RisksView({
     onDeleteRisk,
     onUpdateRisk,
   });
+  const projectsById = useMemo(
+    () => Object.fromEntries(bootstrap.projects.map((project) => [project.id, project] as const)),
+    [bootstrap.projects],
+  );
+  const workstreamsById = useMemo(
+    () =>
+      Object.fromEntries(bootstrap.workstreams.map((workstream) => [workstream.id, workstream] as const)),
+    [bootstrap.workstreams],
+  );
+  const mechanismsById = useMemo(
+    () =>
+      Object.fromEntries(bootstrap.mechanisms.map((mechanism) => [mechanism.id, mechanism] as const)),
+    [bootstrap.mechanisms],
+  );
+  const partInstancesById = useMemo(
+    () =>
+      Object.fromEntries(bootstrap.partInstances.map((partInstance) => [partInstance.id, partInstance] as const)),
+    [bootstrap.partInstances],
+  );
+  const subsystemsById = useMemo(
+    () => Object.fromEntries(bootstrap.subsystems.map((subsystem) => [subsystem.id, subsystem] as const)),
+    [bootstrap.subsystems],
+  );
+  const tasksById = useMemo(
+    () => Object.fromEntries(bootstrap.tasks.map((task) => [task.id, task] as const)),
+    [bootstrap.tasks],
+  );
+  const reportsById = useMemo(
+    () => Object.fromEntries(bootstrap.reports.map((report) => [report.id, report] as const)),
+    [bootstrap.reports],
+  );
+
+  const getRiskSourceTask = (risk: RiskRecord) => {
+    const source = reportsById[risk.sourceId];
+    return source?.taskId ? tasksById[source.taskId] : null;
+  };
+
+  const getRiskProjectLabel = (risk: RiskRecord) => {
+    if (risk.attachmentType === "project") {
+      return projectsById[risk.attachmentId]?.name ?? "Unknown project";
+    }
+
+    if (risk.attachmentType === "workstream") {
+      const workstream = workstreamsById[risk.attachmentId];
+      return workstream ? projectsById[workstream.projectId]?.name ?? "Unknown project" : "Unknown project";
+    }
+
+    if (risk.attachmentType === "mechanism") {
+      const mechanism = mechanismsById[risk.attachmentId];
+      const subsystem = mechanism ? subsystemsById[mechanism.subsystemId] : null;
+      return subsystem ? projectsById[subsystem.projectId]?.name ?? "Unknown project" : "Unknown project";
+    }
+
+    if (risk.attachmentType === "part-instance") {
+      const partInstance = partInstancesById[risk.attachmentId];
+      const subsystem = partInstance ? subsystemsById[partInstance.subsystemId] : null;
+      return subsystem ? projectsById[subsystem.projectId]?.name ?? "Unknown project" : "Unknown project";
+    }
+
+    const sourceTask = getRiskSourceTask(risk);
+    return sourceTask ? projectsById[sourceTask.projectId]?.name ?? "Unknown project" : "Unknown project";
+  };
+
+  const getRiskWorkflowLabel = (risk: RiskRecord) => {
+    if (risk.attachmentType === "workstream") {
+      return workstreamsById[risk.attachmentId]?.name ?? "Unknown workflow";
+    }
+
+    const sourceTask = getRiskSourceTask(risk);
+    const workflowId = sourceTask?.workstreamId || sourceTask?.workstreamIds?.[0];
+    return workflowId ? workstreamsById[workflowId]?.name ?? "Unknown workflow" : "Unassigned workflow";
+  };
+
+  const getRiskWorkflowColor = (risk: RiskRecord) => {
+    if (risk.attachmentType === "workstream") {
+      const workstream = workstreamsById[risk.attachmentId];
+      const workflowId = workstream ? workstream.id : risk.attachmentId;
+      return resolveWorkspaceColor(workstream?.color, workflowId);
+    }
+
+    const sourceTask = getRiskSourceTask(risk);
+    const workflowId = sourceTask?.workstreamId || sourceTask?.workstreamIds?.[0];
+    return workflowId && workstreamsById[workflowId]
+      ? resolveWorkspaceColor(workstreamsById[workflowId]?.color, workflowId)
+      : resolveWorkspaceColor(null, risk.id);
+  };
+
+  const getWorkflowChipStyle = (risk: RiskRecord): CSSProperties | undefined => {
+    const workflowColor = getRiskWorkflowColor(risk);
+
+    return {
+      "--task-queue-board-card-context-accent": workflowColor,
+      "--task-queue-board-card-context-bg": `color-mix(in srgb, ${workflowColor} 24%, transparent)`,
+      "--task-queue-board-card-context-border": `color-mix(in srgb, ${workflowColor} 54%, transparent)`,
+    } as CSSProperties;
+  };
+
+  const getRiskMechanismLabel = (risk: RiskRecord) => {
+    if (risk.attachmentType === "mechanism") {
+      const mechanism = mechanismsById[risk.attachmentId];
+      return mechanism ? mechanism.name : null;
+    }
+
+    if (risk.attachmentType === "part-instance") {
+      const partInstance = partInstancesById[risk.attachmentId];
+      if (partInstance?.mechanismId) {
+        return mechanismsById[partInstance.mechanismId]?.name ?? null;
+      }
+    }
+
+    const sourceTask = getRiskSourceTask(risk);
+    const mechanismId = sourceTask?.mechanismId || sourceTask?.mechanismIds?.[0];
+    return mechanismId ? mechanismsById[mechanismId]?.name ?? null : null;
+  };
 
   return (
     <section className={`panel dense-panel subsystem-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
@@ -94,8 +210,8 @@ export function RisksView({
 
           <div className={"task-queue-board-shell-frame " + viewModel.riskFilterMotionClass}>
             <div className="table-shell task-queue-board-shell">
-              {viewModel.filteredRows.length > 0 ? (
-                <KanbanColumns
+        {viewModel.filteredRows.length > 0 ? (
+          <KanbanColumns
                   boardClassName="risk-board"
                   columnBodyClassName="task-queue-board-column-body"
                   columnClassName="task-queue-board-column"
@@ -107,41 +223,71 @@ export function RisksView({
                     count: viewModel.risksBySeverity[severity].length,
                     header: (
                       <span className={getRiskSeverityPillClassName(severity)}>
-                        {formatRiskSeverity(severity)}
+                        <span aria-hidden="true" className="task-queue-board-column-header-icon">
+                          <TaskPriorityBadge priority={severity} />
+                        </span>
+                        <span className="task-queue-board-column-header-label">
+                          {formatRiskSeverity(severity)}
+                        </span>
                       </span>
                     ),
                   }))}
                   emptyLabel="No risks"
                   itemsByState={viewModel.risksBySeverity}
                   renderItem={(risk) => {
-                    const mitigationLabel = viewModel.getMitigationLabel(risk);
-                    const sourceLabel = viewModel.getSourceLabel(risk);
-                    const attachmentLabel = `${ATTACHMENT_TYPE_LABELS[risk.attachmentType]}: ${viewModel.getAttachmentLabel(risk)}`;
+                    const projectLabel = getRiskProjectLabel(risk);
+                    const workflowLabel = getRiskWorkflowLabel(risk);
+                    const mechanismLabel = getRiskMechanismLabel(risk);
 
                     return (
                       <button
                         className="task-queue-board-card editable-hover-target editable-hover-target-row"
                         key={risk.id}
-                        onClick={() => viewModel.openEditEditor(risk)}
+                        onClick={() => viewModel.openRiskDetails(risk)}
                         type="button"
                       >
                         <div className="task-queue-board-card-header">
                           <strong>{risk.title}</strong>
                         </div>
-                        <small className="task-queue-board-card-summary">{risk.detail}</small>
+                        <small className="task-queue-board-card-summary task-queue-board-card-summary-task">
+                          {risk.detail}
+                        </small>
                         <div className="task-queue-board-card-meta">
-                          <span className="task-queue-board-card-context-chip" title={attachmentLabel}>
-                            {attachmentLabel}
-                          </span>
-                          <span
-                            className="task-queue-board-card-context-chip"
-                            title={"Mitigation: " + mitigationLabel}
-                          >
-                            {mitigationLabel}
-                          </span>
-                          <span className="task-queue-board-card-context-chip" title={sourceLabel}>
-                            {sourceLabel}
-                          </span>
+                          {isAllProjectsView ? (
+                            <>
+                              <span
+                                className="task-queue-board-card-context-chip task-queue-board-card-context-chip-due-style"
+                                title={projectLabel}
+                              >
+                                {projectLabel}
+                              </span>
+                              <span
+                                className="task-queue-board-card-context-chip task-queue-board-card-context-chip-due-style"
+                                title={workflowLabel}
+                                style={getWorkflowChipStyle(risk)}
+                              >
+                                {workflowLabel}
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <span
+                                className="task-queue-board-card-context-chip task-queue-board-card-context-chip-due-style"
+                                title={workflowLabel}
+                                style={getWorkflowChipStyle(risk)}
+                              >
+                                {workflowLabel}
+                              </span>
+                              {mechanismLabel ? (
+                                <span
+                                  className="task-queue-board-card-context-chip"
+                                  title={`Mechanism: ${mechanismLabel}`}
+                                >
+                                  {mechanismLabel}
+                                </span>
+                              ) : null}
+                            </>
+                          )}
                         </div>
                         <EditableHoverIndicator className="task-queue-board-card-hover" />
                       </button>
@@ -156,103 +302,11 @@ export function RisksView({
         </>
       ) : null}
 
-      {view === "risks" ? (
-        <>
-          <RiskFilterToolbar
-            onAddRisk={viewModel.openCreateEditor}
-            onSearchChange={viewModel.setSearch}
-            onSeverityFilterChange={viewModel.setSeverityFilter}
-            onSourceFilterChange={viewModel.setSourceFilter}
-            search={viewModel.search}
-            severityFilter={viewModel.severityFilter}
-            sourceFilter={viewModel.sourceFilter}
-          />
-
-          <div className={`table-shell subsystem-manager-list-shell ${viewModel.riskFilterMotionClass}`}>
-            <div
-              className="ops-table ops-table-header subsystem-manager-table-header"
-              style={{
-                gridTemplateColumns: "minmax(220px, 2fr) 0.8fr 1.2fr 1.2fr 1fr",
-                borderBottom: "1px solid var(--border-base)",
-                color: "var(--text-copy)",
-              }}
-            >
-              <span style={{ textAlign: "left" }}>Risk</span>
-              <span>Severity</span>
-              <span>Source</span>
-              <span>Attachment</span>
-              <span>Mitigation</span>
-            </div>
-
-            {viewModel.pagination.pageItems.map((risk) => (
-              <div
-                className="ops-table ops-row subsystem-manager-row editable-row-clickable editable-hover-target editable-hover-target-row"
-                key={risk.id}
-                onClick={() => viewModel.openEditEditor(risk)}
-                onKeyDown={(milestone) => {
-                  if (milestone.target !== milestone.currentTarget) {
-                    return;
-                  }
-
-                  if (milestone.key === "Enter" || milestone.key === " ") {
-                    milestone.preventDefault();
-                    viewModel.openEditEditor(risk);
-                  }
-                }}
-                role="button"
-                tabIndex={0}
-                style={{
-                  gridTemplateColumns: "minmax(220px, 2fr) 0.8fr 1.2fr 1.2fr 1fr",
-                  padding: "12px 16px",
-                  borderBottom: "1px solid var(--border-base)",
-                  color: "var(--text-copy)",
-                  background: "var(--row-bg, var(--bg-row-alt))",
-                }}
-              >
-                <TableCell label="Risk">
-                  <strong style={{ color: "var(--text-title)" }}>{risk.title}</strong>
-                  <small>{risk.detail}</small>
-                </TableCell>
-                <TableCell label="Severity" valueClassName="table-cell-pill">
-                  {risk.severity}
-                </TableCell>
-                <TableCell label="Source">{viewModel.getSourceLabel(risk)}</TableCell>
-                <TableCell label="Attachment">
-                  <strong style={{ color: "var(--text-title)" }}>
-                    {ATTACHMENT_TYPE_LABELS[risk.attachmentType]}
-                  </strong>
-                  <small>{viewModel.getAttachmentLabel(risk)}</small>
-                </TableCell>
-                <TableCell label="Mitigation">{viewModel.getMitigationLabel(risk)}</TableCell>
-                <EditableHoverIndicator />
-              </div>
-            ))}
-
-            {viewModel.filteredRows.length === 0 ? (
-              <p className="empty-state">No risks match the current filters.</p>
-            ) : null}
-          </div>
-
-          <PaginationControls
-            label="Risk table"
-            onPageChange={viewModel.pagination.setPage}
-            onPageSizeChange={viewModel.pagination.setPageSize}
-            page={viewModel.pagination.page}
-            pageSize={viewModel.pagination.pageSize}
-            pageSizeOptions={viewModel.pagination.pageSizeOptions}
-            rangeEnd={viewModel.pagination.rangeEnd}
-            rangeStart={viewModel.pagination.rangeStart}
-            totalItems={viewModel.pagination.totalItems}
-            totalPages={viewModel.pagination.totalPages}
-          />
-        </>
-      ) : null}
-
       <RiskEditorModal
         attachmentOptions={viewModel.attachmentOptions}
         draft={viewModel.draft}
         editorError={viewModel.editorError}
-        editorMode={viewModel.editorMode}
+        editorMode={viewModel.editorMode === "detail" ? null : viewModel.editorMode}
         getAttachmentOptionsForType={viewModel.getAttachmentOptionsForType}
         getSourceOptionsForType={viewModel.getSourceOptionsForType}
         isDeleting={viewModel.isDeleting}
@@ -264,6 +318,16 @@ export function RisksView({
         setDraft={viewModel.setDraft}
         sourceOptions={viewModel.sourceOptions}
       />
+      {viewModel.editorMode === "detail" && viewModel.activeRisk ? (
+        <RiskDetailsModal
+          activeRisk={viewModel.activeRisk}
+          getAttachmentLabel={viewModel.getAttachmentLabel}
+          getMitigationLabel={viewModel.getMitigationLabel}
+          getSourceLabel={viewModel.getSourceLabel}
+          onClose={viewModel.closeEditor}
+          onEditRisk={() => viewModel.openEditEditor(viewModel.activeRisk!)}
+        />
+      ) : null}
     </section>
   );
 }
