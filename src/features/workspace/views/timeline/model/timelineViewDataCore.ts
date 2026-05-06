@@ -8,9 +8,6 @@ import {
   startOfTimelineWeek,
   type TimelineViewInterval,
 } from "@/features/workspace/shared/timeline";
-import type {
-  TimelineSubsystemRow,
-} from "../timelineViewModel";
 import { buildTimelineSubsystemRows } from "./timelineViewDataRows";
 
 const ALL_INTERVAL_PAST_MONTHS = 9;
@@ -70,7 +67,19 @@ function buildTimelineDateRange({
     });
 
     if (!earliestDate || !latestDate) {
-      return null;
+      const fallbackAnchor = new Date(`${viewAnchorDate}T12:00:00`);
+      const now = Number.isNaN(fallbackAnchor.getTime())
+        ? new Date()
+        : fallbackAnchor;
+
+      now.setHours(12, 0, 0, 0);
+      const fallbackStart = new Date(now.getFullYear(), now.getMonth() - ALL_INTERVAL_PAST_MONTHS, 1, 12);
+      const fallbackEnd = new Date(now.getFullYear(), now.getMonth() + ALL_INTERVAL_FUTURE_MONTHS + 1, 0, 12);
+
+      return {
+        startDate: fallbackStart.toISOString().slice(0, 10),
+        endDate: fallbackEnd.toISOString().slice(0, 10),
+      };
     }
 
     const startObj = new Date(`${monthStartFromDay(earliestDate)}T12:00:00`);
@@ -183,14 +192,6 @@ export function buildTimelineData({
     viewAnchorDate,
     viewInterval,
   });
-
-  if (!range) {
-    return {
-      days: [] as string[],
-      dayMilestones: {} as Record<string, MilestoneRecord[]>,
-      subsystemRows: [] as TimelineSubsystemRow[],
-    };
-  }
 
   const days = buildTimelineDays(range.startDate, range.endDate);
   const dayMilestones = buildTimelineDayMilestones(range.startDate, range.endDate, milestones);
