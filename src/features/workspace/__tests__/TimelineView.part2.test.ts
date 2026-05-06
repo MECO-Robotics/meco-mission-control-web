@@ -454,6 +454,9 @@ describe("TimelineView", () => {
     const css = readAppCss();
 
     expect(css).toMatch(
+      /\.timeline-bar\s+\.timeline-bar-title\.timeline-ellipsis-reveal\[data-full-text\]::after\s*\{[\s\S]*content:\s*attr\(data-full-text\)[\s\S]*opacity:\s*0[\s\S]*pointer-events:\s*none[\s\S]*padding:\s*0\.08rem 0\.28rem[\s\S]*border-radius:\s*0\.3rem[\s\S]*background:\s*color-mix\(in srgb,\s*var\(--timeline-task-discipline-accent\)\s*82%,\s*transparent\)/,
+    );
+    expect(css).toMatch(
       /\.timeline-bar-hover-host:hover,\s*\.timeline-bar-hover-host:focus-within\s*\{[\s\S]*z-index:\s*10081/,
     );
     expect(css).toMatch(
@@ -463,13 +466,10 @@ describe("TimelineView", () => {
       /\.timeline-bar-hover-host:hover\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar-hover-host:focus-within\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar:hover\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar:focus-visible\s+\.timeline-bar-title\.timeline-ellipsis-reveal\s*\{[\s\S]*max-width:\s*none[\s\S]*overflow:\s*visible[\s\S]*text-overflow:\s*clip/,
     );
     expect(css).toMatch(
-      /\.timeline-bar-hover-host:hover\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar-hover-host:focus-within\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar:hover\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar:focus-visible\s+\.timeline-bar-title\.timeline-ellipsis-reveal\s*\{[\s\S]*background:\s*color-mix\(in srgb,\s*var\(--timeline-task-discipline-accent\)\s*82%,\s*transparent\)/,
+      /\.timeline-bar-hover-host:hover\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar-hover-host:focus-within\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar:hover\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar:focus-visible\s+\.timeline-bar-title\.timeline-ellipsis-reveal\s*\{[\s\S]*color:\s*transparent\s*!important/,
     );
     expect(css).toMatch(
-      /\.timeline-bar-hover-host:hover\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar-hover-host:focus-within\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar:hover\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar:focus-visible\s+\.timeline-bar-title\.timeline-ellipsis-reveal\s*\{[\s\S]*border-radius:\s*0\.3rem/,
-    );
-    expect(css).toMatch(
-      /\.timeline-bar-hover-host:hover\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar-hover-host:focus-within\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar:hover\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar:focus-visible\s+\.timeline-bar-title\.timeline-ellipsis-reveal\s*\{[\s\S]*padding:\s*0\.08rem 0\.28rem/,
+      /\.timeline-bar-hover-host:hover\s+\.timeline-bar-title\.timeline-ellipsis-reveal\[data-full-text\]::after,\s*\.timeline-bar-hover-host:focus-within\s+\.timeline-bar-title\.timeline-ellipsis-reveal\[data-full-text\]::after,\s*\.timeline-bar:hover\s+\.timeline-bar-title\.timeline-ellipsis-reveal\[data-full-text\]::after,\s*\.timeline-bar:focus-visible\s+\.timeline-bar-title\.timeline-ellipsis-reveal\[data-full-text\]::after\s*\{[\s\S]*opacity:\s*1/,
     );
   });
 
