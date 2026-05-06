@@ -96,7 +96,17 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
 }
 
 export function WorkspaceRiskSection(props: WorkspaceContentPanelsViewProps) {
-  const { activePersonFilter, bootstrap, disablePanelAnimations = false, onCreateRisk, onDeleteRisk, onUpdateRisk, riskManagementView, tabSwitchDirection } = props;
+  const {
+    activePersonFilter,
+    bootstrap,
+    disablePanelAnimations = false,
+    isAllProjectsView,
+    onCreateRisk,
+    onDeleteRisk,
+    onUpdateRisk,
+    riskManagementView,
+    tabSwitchDirection,
+  } = props;
 
   return (
     <WorkspaceSectionPanel
@@ -111,6 +121,7 @@ export function WorkspaceRiskSection(props: WorkspaceContentPanelsViewProps) {
         <RisksView
           activePersonFilter={activePersonFilter}
           bootstrap={bootstrap}
+          isAllProjectsView={isAllProjectsView}
           onCreateRisk={onCreateRisk}
           onDeleteRisk={onDeleteRisk}
           onUpdateRisk={onUpdateRisk}

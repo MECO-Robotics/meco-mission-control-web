@@ -1,5 +1,7 @@
+import { useMemo } from "react";
+
 import type { RiskManagementViewTab } from "@/lib/workspaceNavigation";
-import type { BootstrapPayload, RiskPayload } from "@/types";
+import type { BootstrapPayload, RiskPayload, RiskRecord } from "@/types";
 import { EditableHoverIndicator, type FilterSelection } from "@/features/workspace/shared";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
 import { KanbanColumns } from "@/features/workspace/views/kanban/KanbanColumns";
@@ -9,7 +11,6 @@ import { RiskDetailsModal } from "./RiskDetailsModal";
 import { RiskFilterToolbar } from "./RiskFilterToolbar";
 import { RiskMetricsSection } from "./RiskMetricsSection";
 import {
-  ATTACHMENT_TYPE_LABELS,
   RISK_SEVERITY_ORDER,
   formatRiskSeverity,
   getRiskSeverityPillClassName,
@@ -19,6 +20,7 @@ import {
 interface RisksViewProps {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
+  isAllProjectsView: boolean;
   onCreateRisk: (payload: RiskPayload) => Promise<void>;
   onDeleteRisk: (riskId: string) => Promise<void>;
   onUpdateRisk: (riskId: string, payload: RiskPayload) => Promise<void>;
@@ -28,6 +30,7 @@ interface RisksViewProps {
 export function RisksView({
   activePersonFilter,
   bootstrap,
+  isAllProjectsView,
   onCreateRisk,
   onDeleteRisk,
   onUpdateRisk,
@@ -40,6 +43,96 @@ export function RisksView({
     onDeleteRisk,
     onUpdateRisk,
   });
+  const projectsById = useMemo(
+    () => Object.fromEntries(bootstrap.projects.map((project) => [project.id, project] as const)),
+    [bootstrap.projects],
+  );
+  const workstreamsById = useMemo(
+    () =>
+      Object.fromEntries(bootstrap.workstreams.map((workstream) => [workstream.id, workstream] as const)),
+    [bootstrap.workstreams],
+  );
+  const mechanismsById = useMemo(
+    () =>
+      Object.fromEntries(bootstrap.mechanisms.map((mechanism) => [mechanism.id, mechanism] as const)),
+    [bootstrap.mechanisms],
+  );
+  const partInstancesById = useMemo(
+    () =>
+      Object.fromEntries(bootstrap.partInstances.map((partInstance) => [partInstance.id, partInstance] as const)),
+    [bootstrap.partInstances],
+  );
+  const subsystemsById = useMemo(
+    () => Object.fromEntries(bootstrap.subsystems.map((subsystem) => [subsystem.id, subsystem] as const)),
+    [bootstrap.subsystems],
+  );
+  const tasksById = useMemo(
+    () => Object.fromEntries(bootstrap.tasks.map((task) => [task.id, task] as const)),
+    [bootstrap.tasks],
+  );
+  const reportsById = useMemo(
+    () => Object.fromEntries(bootstrap.reports.map((report) => [report.id, report] as const)),
+    [bootstrap.reports],
+  );
+
+  const getRiskSourceTask = (risk: RiskRecord) => {
+    const source = reportsById[risk.sourceId];
+    return source?.taskId ? tasksById[source.taskId] : null;
+  };
+
+  const getRiskProjectLabel = (risk: RiskRecord) => {
+    if (risk.attachmentType === "project") {
+      return projectsById[risk.attachmentId]?.name ?? "Unknown project";
+    }
+
+    if (risk.attachmentType === "workstream") {
+      const workstream = workstreamsById[risk.attachmentId];
+      return workstream ? projectsById[workstream.projectId]?.name ?? "Unknown project" : "Unknown project";
+    }
+
+    if (risk.attachmentType === "mechanism") {
+      const mechanism = mechanismsById[risk.attachmentId];
+      const subsystem = mechanism ? subsystemsById[mechanism.subsystemId] : null;
+      return subsystem ? projectsById[subsystem.projectId]?.name ?? "Unknown project" : "Unknown project";
+    }
+
+    if (risk.attachmentType === "part-instance") {
+      const partInstance = partInstancesById[risk.attachmentId];
+      const subsystem = partInstance ? subsystemsById[partInstance.subsystemId] : null;
+      return subsystem ? projectsById[subsystem.projectId]?.name ?? "Unknown project" : "Unknown project";
+    }
+
+    const sourceTask = getRiskSourceTask(risk);
+    return sourceTask ? projectsById[sourceTask.projectId]?.name ?? "Unknown project" : "Unknown project";
+  };
+
+  const getRiskWorkflowLabel = (risk: RiskRecord) => {
+    if (risk.attachmentType === "workstream") {
+      return workstreamsById[risk.attachmentId]?.name ?? "Unknown workflow";
+    }
+
+    const sourceTask = getRiskSourceTask(risk);
+    const workflowId = sourceTask?.workstreamId || sourceTask?.workstreamIds?.[0];
+    return workflowId ? workstreamsById[workflowId]?.name ?? "Unknown workflow" : "Unassigned workflow";
+  };
+
+  const getRiskMechanismLabel = (risk: RiskRecord) => {
+    if (risk.attachmentType === "mechanism") {
+      const mechanism = mechanismsById[risk.attachmentId];
+      return mechanism ? mechanism.name : null;
+    }
+
+    if (risk.attachmentType === "part-instance") {
+      const partInstance = partInstancesById[risk.attachmentId];
+      if (partInstance?.mechanismId) {
+        return mechanismsById[partInstance.mechanismId]?.name ?? null;
+      }
+    }
+
+    const sourceTask = getRiskSourceTask(risk);
+    const mechanismId = sourceTask?.mechanismId || sourceTask?.mechanismIds?.[0];
+    return mechanismId ? mechanismsById[mechanismId]?.name ?? null : null;
+  };
 
   return (
     <section className={`panel dense-panel subsystem-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
@@ -112,7 +205,9 @@ export function RisksView({
                   renderItem={(risk) => {
                     const mitigationLabel = viewModel.getMitigationLabel(risk);
                     const sourceLabel = viewModel.getSourceLabel(risk);
-                    const attachmentLabel = `${ATTACHMENT_TYPE_LABELS[risk.attachmentType]}: ${viewModel.getAttachmentLabel(risk)}`;
+                    const projectLabel = getRiskProjectLabel(risk);
+                    const workflowLabel = getRiskWorkflowLabel(risk);
+                    const mechanismLabel = getRiskMechanismLabel(risk);
 
                     return (
                       <button
@@ -126,9 +221,39 @@ export function RisksView({
                         </div>
                         <small className="task-queue-board-card-summary">{risk.detail}</small>
                         <div className="task-queue-board-card-meta">
-                          <span className="task-queue-board-card-context-chip" title={attachmentLabel}>
-                            {attachmentLabel}
-                          </span>
+                          {isAllProjectsView ? (
+                            <>
+                              <span
+                                className="task-queue-board-card-context-chip"
+                                title={`Project: ${projectLabel}`}
+                              >
+                                Project: {projectLabel}
+                              </span>
+                              <span
+                                className="task-queue-board-card-context-chip"
+                                title={`Workflow: ${workflowLabel}`}
+                              >
+                                Workflow: {workflowLabel}
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <span
+                                className="task-queue-board-card-context-chip"
+                                title={`Workflow: ${workflowLabel}`}
+                              >
+                                Workflow: {workflowLabel}
+                              </span>
+                              {mechanismLabel ? (
+                                <span
+                                  className="task-queue-board-card-context-chip"
+                                  title={`Mechanism: ${mechanismLabel}`}
+                                >
+                                  Mechanism: {mechanismLabel}
+                                </span>
+                              ) : null}
+                            </>
+                          )}
                           <span
                             className="task-queue-board-card-context-chip"
                             title={"Mitigation: " + mitigationLabel}
@@ -175,7 +300,7 @@ export function RisksView({
           getMitigationLabel={viewModel.getMitigationLabel}
           getSourceLabel={viewModel.getSourceLabel}
           onClose={viewModel.closeEditor}
-          onEditRisk={() => viewModel.openEditEditor(viewModel.activeRisk)}
+          onEditRisk={() => viewModel.openEditEditor(viewModel.activeRisk!)}
         />
       ) : null}
     </section>
