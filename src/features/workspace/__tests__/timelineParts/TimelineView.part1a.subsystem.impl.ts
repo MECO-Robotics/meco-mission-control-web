@@ -1,7 +1,7 @@
 /// <reference types="jest" />
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import type { BootstrapPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
 import { TimelineProjectGroup } from "@/features/workspace/views/timeline/TimelineProjectGroup";
 import { TimelineTaskStatusCell } from "@/features/workspace/views/timeline/TimelineTaskStatusCell";
 import { resolveTimelineRowHighlightStyle } from "@/features/workspace/views/timeline/timelineTaskColors";

@@ -1,13 +1,8 @@
-import type { BootstrapPayload, MilestoneRecord, TaskRecord } from "@/types";
-import { dateDiffInDays } from "@/lib/appUtils";
-import {
-  datePortion,
-  endOfTimelineWeek,
-  monthEndFromDay,
-  monthStartFromDay,
-  startOfTimelineWeek,
-  type TimelineViewInterval,
-} from "@/features/workspace/shared/timeline";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneRecord, TaskRecord } from "@/types/recordsExecution";
+import { dateDiffInDays } from "@/lib/appUtils/common";
+import { datePortion, endOfTimelineWeek, monthEndFromDay, monthStartFromDay, startOfTimelineWeek } from "@/features/workspace/shared/timeline/timelineDateUtils";
+import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import { buildTimelineSubsystemRows } from "./timelineViewDataRows";
 
 const ALL_INTERVAL_PAST_MONTHS = 9;

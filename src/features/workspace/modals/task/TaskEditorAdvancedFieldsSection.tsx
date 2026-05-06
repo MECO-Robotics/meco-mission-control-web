@@ -1,6 +1,8 @@
 import type { Dispatch, SetStateAction } from "react";
 
-import type { BootstrapPayload, TaskPayload, TaskRecord } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskPayload } from "@/types/payloads";
+import type { TaskRecord } from "@/types/recordsExecution";
 
 import { TaskEditorAdvancedMediaSection } from "./editorAdvanced/TaskEditorAdvancedMediaSection";
 import { TaskEditorAdvancedProjectSection } from "./editorAdvanced/TaskEditorAdvancedProjectSection";

@@ -1,7 +1,7 @@
 import { createPortal } from "react-dom";
 import { useId, useRef, useState, type ReactNode } from "react";
 
-import type { DropdownOption } from "../model";
+import type { DropdownOption } from "../model/workspaceTypes";
 import {
   type FilterSelection,
   formatFilterSelectionLabel,

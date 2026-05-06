@@ -1,8 +1,8 @@
 import type { Dispatch, FocusEvent, ReactNode, SetStateAction } from "react";
 
-import type { MilestoneRecord } from "@/types";
-import { EditableHoverIndicator } from "@/features/workspace/shared/WorkspaceViewShared";
-import { MilestoneTaskStateIcon } from "@/features/workspace/shared/milestones";
+import type { MilestoneRecord } from "@/types/recordsExecution";
+import { EditableHoverIndicator } from "@/features/workspace/shared/table/workspaceTableChrome";
+import { MilestoneTaskStateIcon } from "@/features/workspace/shared/milestones/milestoneTaskState";
 import type { TaskQueueBoardState } from "@/features/workspace/views/taskQueue/taskQueueKanbanBoardState";
 import { formatMilestoneDateTime, formatMilestoneEndDateTime } from "./milestonesViewUtils";
 import type { MilestoneDetailEditableField } from "./sections/MilestonesEventDetailEditor";

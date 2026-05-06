@@ -1,13 +1,11 @@
-import {
-  ArtifactInventoryView,
-  MaterialsView,
-  PartsView,
-  PurchasesView,
-  WorkflowView,
-  SubsystemsView,
-  RosterView,
-  HelpView,
-} from "@/features/workspace/views";
+import { ArtifactInventoryView } from "@/features/workspace/views/ArtifactInventoryView";
+import { MaterialsView } from "@/features/workspace/views/MaterialsView";
+import { PartsView } from "@/features/workspace/views/PartsView";
+import { PurchasesView } from "@/features/workspace/views/PurchasesView";
+import { WorkflowView } from "@/features/workspace/views/WorkflowView";
+import { SubsystemsView } from "@/features/workspace/views/SubsystemsView";
+import { RosterView } from "@/features/workspace/views/RosterView";
+import { HelpView } from "@/features/workspace/views/HelpView";
 import { WorkspaceSectionPanel, WorkspaceSubPanel } from "../WorkspaceContentPanelShells";
 import type { WorkspaceContentPanelsViewProps } from "./workspaceContentPanelsViewTypes";
 

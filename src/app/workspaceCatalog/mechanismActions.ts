@@ -1,9 +1,11 @@
 import { useCallback } from "react";
 
-import { buildEmptyMechanismPayload, toErrorMessage } from "@/lib/appUtils";
-import { createMechanismRecord, deleteMechanismRecord, updateMechanismRecord } from "@/lib/auth";
+import { buildEmptyMechanismPayload } from "@/lib/appUtils/payloadBuilders";
+import { toErrorMessage } from "@/lib/appUtils/common";
+import { createMechanismRecord, deleteMechanismRecord, updateMechanismRecord } from "@/lib/auth/records/structure";
 import type { AppWorkspaceModel } from "../hooks/useAppWorkspaceModel";
-import type { MechanismPayload, MechanismRecord } from "@/types";
+import type { MechanismPayload } from "@/types/payloads";
+import type { MechanismRecord } from "@/types/recordsOrganization";
 
 export type MechanismActions = ReturnType<typeof useMechanismActions>;
 

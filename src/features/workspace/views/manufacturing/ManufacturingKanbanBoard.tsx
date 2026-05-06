@@ -1,13 +1,10 @@
 import { useMemo, useState, type KeyboardEvent, type MouseEvent } from "react";
 
-import { formatDate } from "@/lib/appUtils";
-import type { ManufacturingItemRecord } from "@/types";
-import {
-  EditableHoverIndicator,
-  getStatusPillClassName,
-  RequestedItemMeta,
-} from "@/features/workspace/shared";
-import type { MembersById, SubsystemsById } from "@/features/workspace/shared";
+import { formatDate } from "@/lib/appUtils/common";
+import type { ManufacturingItemRecord } from "@/types/recordsInventory";
+import { EditableHoverIndicator, RequestedItemMeta } from "@/features/workspace/shared/table/workspaceTableChrome";
+import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
+import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
 import { KanbanColumns } from "@/features/workspace/views/kanban/KanbanColumns";
 
 const MANUFACTURING_BOARD_STATES: readonly ManufacturingItemRecord["status"][] = [

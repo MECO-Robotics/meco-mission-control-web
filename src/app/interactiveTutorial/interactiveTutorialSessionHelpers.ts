@@ -1,5 +1,5 @@
-import { isMemberActiveInSeason } from "@/lib/appUtils";
-import type { BootstrapPayload } from "@/types";
+import { isMemberActiveInSeason } from "@/lib/appUtils/common";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
 import type {
   InteractiveTutorialChapter,

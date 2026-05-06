@@ -1,9 +1,5 @@
-import type {
-  PartDefinitionPayload,
-  PartDefinitionRecord,
-  PartInstancePayload,
-  PartInstanceRecord,
-} from "@/types";
+import type { PartDefinitionPayload, PartInstancePayload } from "@/types/payloads";
+import type { PartDefinitionRecord, PartInstanceRecord } from "@/types/recordsInventory";
 import { requestItem } from "./common";
 
 export function createPartDefinitionRecord(

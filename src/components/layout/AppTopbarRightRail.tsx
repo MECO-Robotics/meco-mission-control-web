@@ -1,8 +1,8 @@
 import { type ChangeEvent } from "react";
 
 import { MECO_PROFILE_AVATAR_SIZE } from "@/lib/branding";
-import type { SessionUser } from "@/lib/auth";
-import type { SeasonRecord } from "@/types";
+import type { SessionUser } from "@/lib/auth/types";
+import type { SeasonRecord } from "@/types/recordsOrganization";
 import { AppTopbarMyViewToggle, AppTopbarRefreshButton } from "./AppTopbarRightRailControls";
 
 const CREATE_SEASON_OPTION_VALUE = "__create_new_season__";

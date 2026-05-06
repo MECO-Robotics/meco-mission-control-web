@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 
-import { IconFilter } from "@/components/shared";
+import { IconFilter } from "@/components/shared/Icons";
 
 export type CompactFilterMenuItem = {
   content: ReactNode;

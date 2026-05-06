@@ -1,5 +1,5 @@
 import React from "react";
-import { IconEye } from "@/components/shared";
+import { IconEye } from "@/components/shared/Icons";
 
 import {
   buildTimelineHiddenColumnToggles,

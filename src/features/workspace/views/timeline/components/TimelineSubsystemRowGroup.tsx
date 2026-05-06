@@ -1,5 +1,6 @@
 import React from "react";
-import type { BootstrapPayload, TaskRecord } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskRecord } from "@/types/recordsExecution";
 import { TimelineGridDaySlots } from "../TimelineGridDaySlots";
 import { TimelineSubsystemHeaderCell } from "./TimelineSubsystemHeaderCell";
 import { TimelineTaskTrackRowList } from "./TimelineTaskTrackRowList";

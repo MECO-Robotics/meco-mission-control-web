@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties, Dispatch, RefObject, SetStateAction } from "react";
 
-import type { BootstrapPayload, TaskRecord } from "@/types";
-import { IconChevronLeft, IconChevronRight } from "@/components/shared";
-import { TASK_QUEUE_LAZY_LOAD_BATCH_SIZE } from "./taskQueueKanban";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskRecord } from "@/types/recordsExecution";
+import { IconChevronLeft, IconChevronRight } from "@/components/shared/Icons";
+import { TASK_QUEUE_LAZY_LOAD_BATCH_SIZE } from "./taskQueueKanbanBoardState";
 import { TaskQueueKanbanBoard } from "./TaskQueueKanbanBoard";
 import {
   clampTaskQueueZoom,

@@ -1,12 +1,14 @@
 import type { CSSProperties, Dispatch, FormEvent, ReactNode, SetStateAction } from "react";
 
-import type { BootstrapPayload, MilestoneRecord } from "@/types";
-import type { TimelineMilestoneDraft } from "@/features/workspace/shared/timeline";
-import { EditableHoverIndicator, FilterDropdown } from "@/features/workspace/shared/WorkspaceViewShared";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneRecord } from "@/types/recordsExecution";
+import type { TimelineMilestoneDraft } from "@/features/workspace/shared/timeline/timelineEventHelpers";
+import { EditableHoverIndicator } from "@/features/workspace/shared/table/workspaceTableChrome";
+import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import { EVENT_TYPE_OPTIONS, EVENT_TYPE_STYLES as MILESTONE_TYPE_STYLES } from "@/features/workspace/shared/events/eventStyles";
-import type { DropdownOption } from "@/features/workspace/shared/model";
-import { MilestonesMilestoneModalActions } from "./MilestonesMilestoneModalActions";
-import { MilestonesMilestoneModalReadinessSection } from "./MilestonesMilestoneModalReadinessSection";
+import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
+import { MilestonesMilestoneModalActions } from "./MilestonesEventModalActions";
+import { MilestonesMilestoneModalReadinessSection } from "./MilestonesEventModalReadinessSection";
 
 export type MilestoneDetailEditableField = "title" | "schedule" | "description" | "type" | "projects" | "external";
 

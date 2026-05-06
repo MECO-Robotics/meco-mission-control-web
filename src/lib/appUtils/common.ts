@@ -1,4 +1,4 @@
-import type { BootstrapPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
 import { normalizeEmail, uniqueIds } from "./internal";
 
 export function toErrorMessage(error: unknown) {

@@ -1,6 +1,7 @@
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 
-import type { BootstrapPayload, SubsystemPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { SubsystemPayload } from "@/types/payloads";
 
 import { StructureModalShell } from "./StructureModalShell";
 import { SubsystemEditorModalActions } from "./SubsystemEditorModalActions";

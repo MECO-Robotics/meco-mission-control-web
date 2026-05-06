@@ -1,7 +1,9 @@
-import type { BootstrapPayload, TaskRecord } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskRecord } from "@/types/recordsExecution";
 import type { WorklogsViewTab } from "@/lib/workspaceNavigation";
-import type { FilterSelection, MembersById, SubsystemsById } from "@/features/workspace/shared";
-import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 
 import { useWorkLogsViewState } from "./workLogs/workLogsViewState";
 import { WorkLogsSummarySection } from "./workLogs/WorkLogsSummarySection";

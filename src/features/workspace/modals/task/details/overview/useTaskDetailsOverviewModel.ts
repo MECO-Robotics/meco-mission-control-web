@@ -1,7 +1,9 @@
 import type { CSSProperties, Dispatch, SetStateAction } from "react";
-import type { BootstrapPayload, TaskPayload, TaskRecord } from "@/types";
-import { formatIterationVersion } from "@/lib/appUtils";
-import { TASK_PRIORITY_OPTIONS } from "../../../../shared/model";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskPayload } from "@/types/payloads";
+import type { TaskRecord } from "@/types/recordsExecution";
+import { formatIterationVersion } from "@/lib/appUtils/common";
+import { TASK_PRIORITY_OPTIONS } from "../../../../shared/model/workspaceOptions";
 import {
   getTaskPrimaryTargetNameOptions,
   getTaskSelectedAssigneeIds,

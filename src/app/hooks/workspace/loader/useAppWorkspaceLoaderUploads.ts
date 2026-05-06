@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 
 import type { AppWorkspaceLoaderModel, UnauthorizedHandler } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
-import { requestImageUpload, requestVideoUpload } from "@/lib/auth";
+import { requestImageUpload, requestVideoUpload } from "@/lib/auth/core/media";
 
 export function useAppWorkspaceLoaderUploads(
   model: AppWorkspaceLoaderModel,

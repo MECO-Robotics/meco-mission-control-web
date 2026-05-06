@@ -1,6 +1,7 @@
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 
-import type { BootstrapPayload, ManufacturingItemPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { ManufacturingItemPayload } from "@/types/payloads";
 
 import { ManufacturingEditorFields } from "./ManufacturingEditorFields";
 

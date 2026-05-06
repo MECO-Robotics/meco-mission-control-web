@@ -1,15 +1,6 @@
-import type {
-  ReportFindingPayload,
-  ReportFindingRecord,
-  ReportPayload,
-  ReportRecord,
-  QaReportPayload,
-  RiskPayload,
-  RiskRecord,
-  TestResultPayload,
-  WorkLogPayload,
-  WorkLogRecord,
-} from "@/types";
+import type { QaReportPayload, ReportFindingPayload, ReportPayload, RiskPayload, TestResultPayload, WorkLogPayload } from "@/types/payloads";
+import type { ReportFindingRecord, ReportRecord, RiskRecord } from "@/types/recordsReporting";
+import type { WorkLogRecord } from "@/types/recordsExecution";
 import { requestItem } from "./common";
 
 export function createWorkLogRecord(

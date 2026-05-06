@@ -1,13 +1,11 @@
 import { createElement } from "react";
 
-import type {
-  BootstrapPayload,
-  TaskDependencyKind,
-  TaskPayload,
-  TaskRecord,
-} from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskDependencyKind } from "@/types/common";
+import type { TaskPayload } from "@/types/payloads";
+import type { TaskRecord } from "@/types/recordsExecution";
 import { IconMapPin, IconParts, IconTasks } from "@/components/shared/Icons";
-import type { DropdownOption } from "../model";
+import type { DropdownOption } from "../model/workspaceTypes";
 import {
   getTaskDependencyRecordsForTask as getTaskDependencyRecordsForTaskFromPlanning,
   getTaskOpenBlockersForTask as getTaskOpenBlockersForTaskFromPlanning,

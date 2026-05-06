@@ -1,6 +1,7 @@
-import type { BootstrapPayload } from "@/types";
-import { formatIterationVersion } from "@/lib/appUtils";
-import { filterSelectionIncludes, type FilterSelection } from "@/features/workspace/shared";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import { formatIterationVersion } from "@/lib/appUtils/common";
+import { filterSelectionIncludes } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 
 export function filterPartDefinitions({
   bootstrap,

@@ -1,16 +1,12 @@
 import type { CSSProperties, Dispatch, SetStateAction } from "react";
 
-import type { BootstrapPayload, TaskRecord } from "@/types";
-import { formatDate } from "@/lib/appUtils";
-import {
-  ColumnFilterDropdown,
-  EditableHoverIndicator,
-  PaginationControls,
-  TableCell,
-  type FilterSelection,
-  type MembersById,
-  type SubsystemsById,
-} from "@/features/workspace/shared";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskRecord } from "@/types/recordsExecution";
+import { formatDate } from "@/lib/appUtils/common";
+import { ColumnFilterDropdown } from "@/features/workspace/shared/filters/ColumnFilterDropdown";
+import { EditableHoverIndicator, PaginationControls, TableCell } from "@/features/workspace/shared/table/workspaceTableChrome";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
 
 import type {
   WorkLogPaginationState,

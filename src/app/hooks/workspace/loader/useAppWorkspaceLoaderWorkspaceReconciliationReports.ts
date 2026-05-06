@@ -1,11 +1,7 @@
-import type { BootstrapPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
-import {
-  buildEmptyQaReportPayload,
-  buildEmptyTestResultPayload,
-  buildEmptyWorkLogPayload,
-} from "@/lib/appUtils";
-import { getSinglePersonFilterId } from "@/app/state/workspaceStateUtils";
+import { buildEmptyQaReportPayload, buildEmptyTestResultPayload, buildEmptyWorkLogPayload } from "@/lib/appUtils/payloadBuilders";
+import { getSinglePersonFilterId } from "@/app/state/workspaceMemberRoleUtils";
 import type { AppWorkspaceLoaderModel, WorkspaceReconciliationState } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
 
 export function reconcileWorkLogAndReports(

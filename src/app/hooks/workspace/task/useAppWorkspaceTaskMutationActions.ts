@@ -1,15 +1,11 @@
 import { useCallback } from "react";
 
-import { toErrorMessage } from "@/lib/appUtils";
-import {
-  createMilestoneRecord,
-  deleteMilestoneRecord,
-  deleteTaskRecord,
-  updateMilestoneRecord,
-  updateTaskBlockerRecord,
-} from "@/lib/auth";
+import { toErrorMessage } from "@/lib/appUtils/common";
+import { createMilestoneRecord, deleteMilestoneRecord, updateMilestoneRecord } from "@/lib/auth/records/event";
+import { deleteTaskRecord } from "@/lib/auth/records/task";
+import { updateTaskBlockerRecord } from "@/lib/auth/records/taskRelations";
 import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
-import type { MilestonePayload } from "@/types";
+import type { MilestonePayload } from "@/types/payloads";
 
 export type AppWorkspaceTaskMutationActions = ReturnType<typeof useAppWorkspaceTaskMutationActions>;
 

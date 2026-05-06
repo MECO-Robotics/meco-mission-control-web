@@ -7,7 +7,7 @@ import {
   getTaskDependencyCountsFromLookup,
   getTimelineTaskStatusSignal,
 } from "@/features/workspace/views/timeline/timelineGridBodyUtils";
-import type { BootstrapPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
 const baseTask: BootstrapPayload["tasks"][number] = {
   id: "task-ready",

@@ -1,15 +1,9 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 
-import { IconEdit } from "@/components/shared";
-import type {
-  ManufacturingItemRecord,
-  PurchaseItemRecord,
-} from "@/types";
+import { IconEdit } from "@/components/shared/Icons";
+import type { ManufacturingItemRecord, PurchaseItemRecord } from "@/types/recordsInventory";
 
-import type {
-  MembersById,
-  SubsystemsById,
-} from "../model";
+import type { MembersById, SubsystemsById } from "../model/workspaceTypes";
 
 const PAGE_SIZE_OPTIONS = [15, 30, 60] as const;
 type PageSizeOption = (typeof PAGE_SIZE_OPTIONS)[number];

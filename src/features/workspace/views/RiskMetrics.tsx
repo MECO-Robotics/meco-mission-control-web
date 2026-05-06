@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
-import type { TaskRecord } from "@/types";
-import { TableCell } from "@/features/workspace/shared";
+import type { TaskRecord } from "@/types/recordsExecution";
+import { TableCell } from "@/features/workspace/shared/table/workspaceTableChrome";
 
 export interface ScopeMetricRow {
   id: string;

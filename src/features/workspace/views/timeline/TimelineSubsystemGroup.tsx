@@ -1,6 +1,7 @@
 import React from "react";
 import { buildTimelineSubsystemHighlightStyle } from "./timelineTaskColors";
-import type { BootstrapPayload, TaskRecord } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskRecord } from "@/types/recordsExecution";
 import type {
   TimelineDayHeaderCell,
   TimelineSubsystemRow,

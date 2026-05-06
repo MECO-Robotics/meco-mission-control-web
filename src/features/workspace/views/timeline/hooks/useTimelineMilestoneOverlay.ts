@@ -1,12 +1,11 @@
 import { useCallback, useRef } from "react";
 import type React from "react";
-import type { BootstrapPayload, MilestoneRecord } from "@/types";
-import { datePortion } from "@/features/workspace/shared/timeline";
-import { getMilestoneTypeStyle } from "@/features/workspace/shared/milestones";
-import {
-  isSameHoveredMilestonePopup,
-  type HoveredMilestonePopup,
-} from "@/features/workspace/shared/timeline";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneRecord } from "@/types/recordsExecution";
+import { datePortion } from "@/features/workspace/shared/timeline/timelineDateUtils";
+import { getMilestoneTypeStyle } from "@/features/workspace/shared/events/eventStyles";
+import { isSameHoveredMilestonePopup } from "@/features/workspace/shared/timeline/timelineEventHelpers";
+import type { HoveredMilestonePopup } from "@/features/workspace/shared/timeline/timelineEventHelpers";
 import {
   getTimelineMilestonePopupItems,
 } from "../model/timelineMilestoneData";

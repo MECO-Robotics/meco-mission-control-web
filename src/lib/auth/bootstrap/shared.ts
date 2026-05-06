@@ -1,12 +1,7 @@
-import type {
-  ArtifactRecord,
-  BootstrapPayload,
-  MilestoneRecord,
-  ProjectRecord,
-  TaskBlockerRecord,
-  TaskDependencyRecord,
-  TaskRecord,
-} from "@/types";
+import type { ArtifactRecord } from "@/types/recordsInventory";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneRecord, TaskBlockerRecord, TaskDependencyRecord, TaskRecord } from "@/types/recordsExecution";
+import type { ProjectRecord } from "@/types/recordsOrganization";
 import { localTodayDate } from "@/lib/dateUtils";
 
 export const LEGACY_SEASON_ID = "season-default";

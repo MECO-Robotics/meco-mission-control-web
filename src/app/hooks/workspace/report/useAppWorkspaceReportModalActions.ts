@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 
 import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
-import { buildEmptyQaReportPayload, buildEmptyTestResultPayload, buildEmptyWorkLogPayload } from "@/lib/appUtils";
+import { buildEmptyQaReportPayload, buildEmptyTestResultPayload, buildEmptyWorkLogPayload } from "@/lib/appUtils/payloadBuilders";
 
 export type AppWorkspaceReportModalActions = ReturnType<typeof useAppWorkspaceReportModalActions>;
 

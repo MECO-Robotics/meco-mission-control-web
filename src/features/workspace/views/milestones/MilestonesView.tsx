@@ -1,6 +1,7 @@
-import type { BootstrapPayload, MilestonePayload } from "@/types";
-import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model";
-import type { FilterSelection } from "@/features/workspace/shared/WorkspaceViewShared";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestonePayload } from "@/types/payloads";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 
 import { MilestonesToolbar } from "./MilestonesToolbar";
 import { MilestonesMilestoneModal } from "./MilestonesEventModal";

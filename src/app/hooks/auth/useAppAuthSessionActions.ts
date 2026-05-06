@@ -19,7 +19,7 @@ import {
   type SessionUser,
 } from "@/lib/auth/types";
 import { signOutFromGoogle } from "@/app/hooks/auth/useAppAuthGoogleIdentity";
-import { toErrorMessage } from "@/lib/appUtils";
+import { toErrorMessage } from "@/lib/appUtils/common";
 
 interface UseAppAuthSessionActionsArgs {
   resetWorkspaceRef: RefObject<() => void>;

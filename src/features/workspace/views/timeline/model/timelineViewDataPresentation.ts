@@ -1,10 +1,9 @@
-import type { BootstrapPayload, MilestoneRecord } from "@/types";
-import {
-  filterSelectionMatchesTaskPeople,
-  type FilterSelection,
-} from "@/features/workspace/shared";
-import { getMilestoneTypeStyle } from "@/features/workspace/shared/milestones";
-import { datePortion, monthLabelFromDay } from "@/features/workspace/shared/timeline";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneRecord } from "@/types/recordsExecution";
+import { filterSelectionMatchesTaskPeople } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { getMilestoneTypeStyle } from "@/features/workspace/shared/events/eventStyles";
+import { datePortion, monthLabelFromDay } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import type {
   TimelineMonthGroup,
   TimelineProjectRow,

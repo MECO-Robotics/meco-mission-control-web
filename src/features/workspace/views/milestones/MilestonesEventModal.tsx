@@ -1,13 +1,14 @@
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 import { createPortal } from "react-dom";
 
-import type { BootstrapPayload, MilestoneRecord } from "@/types";
-import type { TimelineMilestoneDraft } from "@/features/workspace/shared/timeline";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneRecord } from "@/types/recordsExecution";
+import type { TimelineMilestoneDraft } from "@/features/workspace/shared/timeline/timelineEventHelpers";
 
 import { MilestonesEventDetailsModal } from "./MilestonesEventDetailsModal";
-import { MilestonesMilestoneModalActions } from "./sections/MilestonesMilestoneModalActions";
-import { MilestonesMilestoneModalFields } from "./sections/MilestonesMilestoneModalFields";
-import { MilestonesMilestoneModalReadinessSection } from "./sections/MilestonesMilestoneModalReadinessSection";
+import { MilestonesMilestoneModalActions } from "./sections/MilestonesEventModalActions";
+import { MilestonesMilestoneModalFields } from "./sections/MilestonesEventModalFields";
+import { MilestonesMilestoneModalReadinessSection } from "./sections/MilestonesEventModalReadinessSection";
 
 interface MilestonesMilestoneModalProps {
   activeMilestone: MilestoneRecord | null;

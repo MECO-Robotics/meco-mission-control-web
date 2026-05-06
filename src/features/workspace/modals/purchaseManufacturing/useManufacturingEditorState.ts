@@ -1,6 +1,7 @@
-import type { BootstrapPayload, ManufacturingItemPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { ManufacturingItemPayload } from "@/types/payloads";
 
-import { getManufacturingPartInstanceOptions } from "@/lib/appUtils";
+import { getManufacturingPartInstanceOptions } from "@/lib/appUtils/manufacturing";
 
 const COMMON_MATERIALS = [
   "Aluminum 6061",

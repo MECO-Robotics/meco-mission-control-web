@@ -1,5 +1,5 @@
-import type { WorkspaceContentPanelsProps } from "./WorkspaceContentPanels";
-import { WorkspaceContentPanels } from "./WorkspaceContentPanels";
+import type { WorkspaceContentPanelsProps } from "./WorkspaceContentPanelsCoreImpl";
+import { WorkspaceContentPanels } from "./WorkspaceContentPanelsCoreImpl";
 
 export type WorkspaceContentProps = WorkspaceContentPanelsProps;
 

@@ -1,10 +1,6 @@
-import type {
-  BootstrapPayload,
-  MilestoneRecord,
-  MilestoneRequirementRecord,
-  TaskRecord,
-  TaskStatus,
-} from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneRecord, MilestoneRequirementRecord, TaskRecord } from "@/types/recordsExecution";
+import type { TaskStatus } from "@/types/common";
 import { TimelineTaskStatusLogo } from "@/features/workspace/views/timeline/TimelineTaskStatusLogo";
 import {
   getTaskQueueBoardState,

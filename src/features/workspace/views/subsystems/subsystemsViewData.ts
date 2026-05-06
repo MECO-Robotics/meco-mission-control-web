@@ -1,6 +1,6 @@
-import type { BootstrapPayload } from "@/types";
-import type { MembersById } from "@/features/workspace/shared";
-import { formatIterationVersion, getDefaultSubsystemId } from "@/lib/appUtils";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MembersById } from "@/features/workspace/shared/model/workspaceTypes";
+import { formatIterationVersion, getDefaultSubsystemId } from "@/lib/appUtils/common";
 
 import type { SubsystemCountsById } from "./subsystemsViewTypes";
 

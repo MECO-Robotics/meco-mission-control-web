@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import type { BootstrapPayload, MilestoneRecord } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneRecord } from "@/types/recordsExecution";
 import { MilestonesEventDetailsModal } from "@/features/workspace/views/milestones/MilestonesEventDetailsModal";
 
 interface TimelineMilestoneDetailModalProps {

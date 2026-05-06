@@ -9,7 +9,7 @@ import type {
   InteractiveTutorialReturnState,
   InteractiveTutorialStep,
 } from "./interactiveTutorialTypes";
-import type { BootstrapPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
 export interface InteractiveTutorialCoreState {
   chapterId: InteractiveTutorialChapter["id"] | null;

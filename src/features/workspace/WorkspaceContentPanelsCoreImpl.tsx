@@ -1,18 +1,10 @@
 import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
 
-import type {
-  ArtifactKind,
-  ArtifactRecord,
-  BootstrapPayload,
-  MilestonePayload,
-  ManufacturingItemRecord,
-  MaterialRecord,
-  MemberPayload,
-  PartDefinitionRecord,
-  PurchaseItemRecord,
-  RiskPayload,
-  TaskRecord,
-} from "@/types";
+import type { ArtifactKind } from "@/types/common";
+import type { ArtifactRecord, ManufacturingItemRecord, MaterialRecord, PartDefinitionRecord, PurchaseItemRecord } from "@/types/recordsInventory";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MemberPayload, MilestonePayload, RiskPayload } from "@/types/payloads";
+import type { TaskRecord } from "@/types/recordsExecution";
 import type {
   InventoryViewTab,
   ManufacturingViewTab,
@@ -22,7 +14,7 @@ import type {
   ViewTab,
   WorklogsViewTab,
 } from "@/lib/workspaceNavigation";
-import type { FilterSelection } from "@/features/workspace/shared";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { WorkspaceToastNotice } from "@/features/workspace/workspaceToastQueue";
 import { WorkspaceContentPanelsView } from "./components/WorkspaceContentPanelsView";
 

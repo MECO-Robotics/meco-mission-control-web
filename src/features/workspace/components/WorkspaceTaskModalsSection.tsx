@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { TaskDetailsModal, TaskEditorModal } from "../WorkspaceModals";
+import { TaskDetailsModal } from "../modals/TaskDetailsModalContent";
+import { TaskEditorModal } from "../modals/TaskEditorModalContent";
 import type { WorkspaceModalHostViewProps } from "./workspaceModalHostViewTypes";
 
 export function WorkspaceTaskModalsSection(props: WorkspaceModalHostViewProps) {

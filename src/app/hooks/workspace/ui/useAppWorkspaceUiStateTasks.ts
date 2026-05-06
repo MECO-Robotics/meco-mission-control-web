@@ -1,9 +1,9 @@
 import { useState } from "react";
 
-import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model";
-import { buildEmptyTaskPayload } from "@/lib/appUtils";
-import type { TaskPayload } from "@/types";
-import type { TaskModalMode } from "@/features/workspace";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import { buildEmptyTaskPayload } from "@/lib/appUtils/taskTargets";
+import type { TaskPayload } from "@/types/payloads";
+import type { TaskModalMode } from "@/features/workspace/shared/model/workspaceModalModes";
 
 export function useAppWorkspaceUiStateTasks() {
   const [taskModalMode, setTaskModalMode] = useState<TaskModalMode>(null);

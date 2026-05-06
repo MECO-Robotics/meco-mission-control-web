@@ -1,11 +1,13 @@
 import * as React from "react";
 
-import type { BootstrapPayload, TaskRecord, TaskStatus } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskRecord } from "@/types/recordsExecution";
+import type { TaskStatus } from "@/types/common";
 
 import { TimelineTaskStatusLogo } from "@/features/workspace/views/timeline/TimelineTaskStatusLogo";
 import type { TimelineTaskStatusSignal } from "@/features/workspace/views/timeline/timelineGridBodyUtils";
 
-import { type DropdownOption } from "@/features/workspace/shared";
+import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
 import {
   getTaskOpenBlockersForTask,
   getTaskWaitingOnDependencies,

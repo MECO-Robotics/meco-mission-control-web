@@ -1,6 +1,8 @@
 import type { Dispatch, FormEvent, SetStateAction } from "react";
-import type { BootstrapPayload, TaskPayload, TaskRecord } from "@/types";
-import { TaskDetailsModal } from "./TaskDetailsModal";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskPayload } from "@/types/payloads";
+import type { TaskRecord } from "@/types/recordsExecution";
+import { TaskDetailsModal } from "./TaskDetailsModalContent";
 import { TaskEditorAdvancedFieldsSection } from "./task/TaskEditorAdvancedFieldsSection";
 import { TaskEditorCoreFieldsSection } from "./task/TaskEditorCoreFieldsSection";
 import { TaskEditorDependencyEditorSection } from "./task/TaskEditorDependencyEditorSection";

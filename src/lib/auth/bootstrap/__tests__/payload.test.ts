@@ -1,8 +1,9 @@
 /// <reference types="jest" />
 
-import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { normalizeBootstrapPayload } from "@/lib/auth/bootstrap/payload";
-import type { BootstrapPayload, MilestoneRequirementRecord } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneRequirementRecord } from "@/types/recordsExecution";
 
 describe("normalizeBootstrapPayload", () => {
   it("preserves milestone requirements", () => {

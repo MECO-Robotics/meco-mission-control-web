@@ -1,9 +1,9 @@
 import { useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 
-import type { BootstrapPayload } from "@/types";
-import type { DropdownOption } from "@/features/workspace/shared/model";
-import type { FilterSelection } from "@/features/workspace/shared/filters";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 
 import {
   useTaskQueueViewStateLogic,

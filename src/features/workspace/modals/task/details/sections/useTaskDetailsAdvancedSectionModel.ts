@@ -1,11 +1,13 @@
 import type { ChangeEvent, CSSProperties, Dispatch, SetStateAction } from "react";
-import type { BootstrapPayload, TaskPayload, TaskRecord } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskPayload } from "@/types/payloads";
+import type { TaskRecord } from "@/types/recordsExecution";
 import { getTimelineTaskDisciplineColor } from "@/features/workspace/views/timeline/timelineTaskColors";
 import {
   getTaskSelectedMechanismIds,
   getTaskSelectedPartInstanceIds,
 } from "../../../../shared/task/taskTargeting";
-import { formatIterationVersion } from "@/lib/appUtils";
+import { formatIterationVersion } from "@/lib/appUtils/common";
 import { getTaskDisciplinesForProject } from "@/lib/taskDisciplines";
 import type { TaskDetailsEditableField } from "../../taskModalTypes";
 

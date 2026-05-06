@@ -1,5 +1,6 @@
 import type { Dispatch, FormEvent, SetStateAction } from "react";
-import type { BootstrapPayload, WorkstreamPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { WorkstreamPayload } from "@/types/payloads";
 import { WorkspaceColorField } from "../WorkspaceColorField";
 
 interface WorkstreamEditorModalProps {

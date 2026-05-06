@@ -1,11 +1,8 @@
-import type { BootstrapPayload, MilestoneRecord } from "@/types";
-import {
-  filterSelectionIncludes,
-  filterSelectionIntersects,
-  filterSelectionMatchesTaskPeople,
-  type FilterSelection,
-} from "@/features/workspace/shared/WorkspaceViewShared";
-import { getMilestoneTasksForState } from "@/features/workspace/shared/milestones";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneRecord } from "@/types/recordsExecution";
+import { filterSelectionIncludes, filterSelectionIntersects, filterSelectionMatchesTaskPeople } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { getMilestoneTasksForState } from "@/features/workspace/shared/milestones/milestoneTaskState";
 import { getMilestoneProjectIds } from "@/features/workspace/shared/events/eventProjectUtils";
 import { getMilestoneTypeStyle } from "@/features/workspace/shared/events/eventStyles";
 

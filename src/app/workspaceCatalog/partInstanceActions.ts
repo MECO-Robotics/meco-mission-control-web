@@ -1,9 +1,13 @@
 import { useCallback } from "react";
 
-import { buildEmptyPartInstancePayload, partInstanceToPayload, toErrorMessage } from "@/lib/appUtils";
-import { createPartInstanceRecord, updatePartInstanceRecord } from "@/lib/auth";
+import { buildEmptyPartInstancePayload } from "@/lib/appUtils/payloadBuilders";
+import { partInstanceToPayload } from "@/lib/appUtils/payloadConversions";
+import { toErrorMessage } from "@/lib/appUtils/common";
+import { createPartInstanceRecord, updatePartInstanceRecord } from "@/lib/auth/records/parts";
 import type { AppWorkspaceModel } from "../hooks/useAppWorkspaceModel";
-import type { MechanismRecord, PartInstancePayload, PartInstanceRecord } from "@/types";
+import type { MechanismRecord } from "@/types/recordsOrganization";
+import type { PartInstancePayload } from "@/types/payloads";
+import type { PartInstanceRecord } from "@/types/recordsInventory";
 
 export type PartInstanceActions = ReturnType<typeof usePartInstanceActions>;
 

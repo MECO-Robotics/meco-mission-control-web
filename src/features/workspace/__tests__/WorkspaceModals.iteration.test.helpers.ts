@@ -1,11 +1,9 @@
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import {
-  MechanismEditorModal,
-  PartDefinitionEditorModal,
-  SubsystemEditorModal,
-  WorkstreamEditorModal,
-} from "@/features/workspace/WorkspaceModals";
+import { MechanismEditorModal } from "@/features/workspace/modals/structure/MechanismEditorModal";
+import { PartDefinitionEditorModal } from "@/features/workspace/modals/assetCatalog/PartDefinitionEditorModal";
+import { WorkstreamEditorModal } from "@/features/workspace/modals/assetCatalog/WorkstreamEditorModal";
+import { SubsystemEditorModal } from "@/features/workspace/modals/structure/SubsystemEditorModal";
 import { createBootstrap } from "./support/WorkspaceModals.test.shared";
 
 export function renderIterationEditors(mode: "create" | "edit") {

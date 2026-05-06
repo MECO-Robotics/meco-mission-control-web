@@ -1,4 +1,4 @@
-import type { TaskDependencyRecord } from "@/types";
+import type { TaskDependencyRecord } from "@/types/recordsExecution";
 import type { LegacyBootstrapPayload } from "./shared";
 
 export function normalizeBootstrapTaskDependencies(

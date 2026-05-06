@@ -1,14 +1,12 @@
 import type { Dispatch, SetStateAction } from "react";
 
-import type { BootstrapPayload } from "@/types";
-import { IconSubsystems, IconWorkLogs } from "@/components/shared";
-import {
-  CompactFilterMenu,
-  SearchToolbarInput,
-  FilterDropdown,
-  type FilterSelection,
-  type DropdownOption,
-} from "@/features/workspace/shared";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import { IconSubsystems, IconWorkLogs } from "@/components/shared/Icons";
+import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
+import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
+import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
 
 import type { WorkLogSortMode } from "./workLogsViewState";
 

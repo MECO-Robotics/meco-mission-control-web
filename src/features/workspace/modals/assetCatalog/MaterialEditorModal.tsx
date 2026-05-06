@@ -1,5 +1,5 @@
 import type { Dispatch, FormEvent, SetStateAction } from "react";
-import type { MaterialPayload } from "@/types";
+import type { MaterialPayload } from "@/types/payloads";
 
 interface MaterialEditorModalProps {
   closeMaterialModal: () => void;

@@ -1,6 +1,8 @@
 import { memo } from "react";
 
-import { TaskQueueView, MilestonesView, TimelineView } from "@/features/workspace/views";
+import { TaskQueueView } from "@/features/workspace/views/taskQueue/TaskQueueView";
+import { MilestonesView } from "@/features/workspace/views/milestones/MilestonesView";
+import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
 import { WorkspaceSectionPanel, WorkspaceSubPanel } from "../WorkspaceContentPanelShells";
 import type { WorkspaceContentPanelsViewProps } from "./workspaceContentPanelsViewTypes";
 

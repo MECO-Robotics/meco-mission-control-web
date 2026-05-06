@@ -1,10 +1,5 @@
-import type {
-  ProjectRecord,
-  SeasonRecord,
-  TaskDependencyRecord,
-  TaskRecord,
-  WorkstreamRecord,
-} from "@/types";
+import type { ProjectRecord, SeasonRecord, WorkstreamRecord } from "@/types/recordsOrganization";
+import type { TaskDependencyRecord, TaskRecord } from "@/types/recordsExecution";
 import { inferPlanningWindow, type LegacyBootstrapPayload } from "./shared";
 import { normalizePlanningProjects } from "./planning-projects";
 import { normalizePlanningWorkstreams } from "./planning-workstreams";

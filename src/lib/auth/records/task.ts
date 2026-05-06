@@ -1,4 +1,5 @@
-import type { TaskPayload, TaskRecord } from "@/types";
+import type { TaskPayload } from "@/types/payloads";
+import type { TaskRecord } from "@/types/recordsExecution";
 import { requestItem } from "./common";
 
 export function createTask(payload: TaskPayload, onUnauthorized?: () => void) {

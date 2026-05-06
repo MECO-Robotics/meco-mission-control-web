@@ -1,9 +1,7 @@
-import type { BootstrapPayload, ManufacturingItemRecord } from "@/types";
-import {
-  type FilterSelection,
-  type MembersById,
-  type SubsystemsById,
-} from "@/features/workspace/shared";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { ManufacturingItemRecord } from "@/types/recordsInventory";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
 import { ManufacturingQueueView } from "./ManufacturingQueueView";
 
 interface FabricationViewProps {

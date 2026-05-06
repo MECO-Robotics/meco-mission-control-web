@@ -2,23 +2,9 @@ import type { Dispatch, SetStateAction } from "react";
 
 import type { AppWorkspaceDerived } from "@/app/hooks/useAppWorkspaceDerived";
 import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
-import type { BootstrapPayload } from "@/types";
-import type {
-  ArtifactModalMode,
-  MilestoneReportModalMode,
-  ManufacturingModalMode,
-  MaterialModalMode,
-  MechanismModalMode,
-  PartDefinitionModalMode,
-  PartInstanceModalMode,
-  PurchaseModalMode,
-  QaReportModalMode,
-  SubsystemModalMode,
-  TaskModalMode,
-  WorkLogModalMode,
-  WorkstreamModalMode,
-} from "@/features/workspace/shared";
-import type { ArtifactPayload, ManufacturingItemPayload, MaterialPayload, MechanismPayload, PartDefinitionPayload, PartInstancePayload, PurchaseItemPayload, SubsystemPayload, TaskPayload, QaReportPayload, WorkLogPayload, WorkstreamPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { ArtifactModalMode, ManufacturingModalMode, MaterialModalMode, MechanismModalMode, MilestoneReportModalMode, PartDefinitionModalMode, PartInstanceModalMode, PurchaseModalMode, QaReportModalMode, SubsystemModalMode, TaskModalMode, WorkLogModalMode, WorkstreamModalMode } from "@/features/workspace/shared/model/workspaceModalModes";
+import type { ArtifactPayload, ManufacturingItemPayload, MaterialPayload, MechanismPayload, PartDefinitionPayload, PartInstancePayload, PurchaseItemPayload, QaReportPayload, SubsystemPayload, TaskPayload, WorkLogPayload, WorkstreamPayload } from "@/types/payloads";
 
 export type AppWorkspaceLoaderModel = AppWorkspaceState & AppWorkspaceDerived;
 export type SelectMemberHandler = (memberId: string | null, payload: BootstrapPayload) => void;

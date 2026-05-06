@@ -1,11 +1,11 @@
-import type { BootstrapPayload } from "@/types";
-import { IconManufacturing, IconParts, IconPerson, IconTasks } from "@/components/shared";
-import { CompactFilterMenu } from "@/features/workspace/shared/filters";
-import { FilterDropdown } from "@/features/workspace/shared/filters";
-import { TASK_PRIORITY_OPTIONS } from "@/features/workspace/shared/model";
-import { TASK_QUEUE_STATUS_OPTIONS } from "./taskQueueKanban";
-import type { DropdownOption } from "@/features/workspace/shared/model";
-import type { FilterSelection } from "@/features/workspace/shared/filters";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import { IconManufacturing, IconParts, IconPerson, IconTasks } from "@/components/shared/Icons";
+import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
+import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
+import { TASK_PRIORITY_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
+import { TASK_QUEUE_STATUS_OPTIONS } from "./taskQueueKanbanBoardState";
+import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 
 import {
   getTaskQueueFilterToneClassName,

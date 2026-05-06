@@ -1,5 +1,6 @@
-import type { BootstrapPayload, TaskRecord } from "@/types";
-import { dateDiffInDays } from "@/lib/appUtils";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskRecord } from "@/types/recordsExecution";
+import { dateDiffInDays } from "@/lib/appUtils/common";
 import type { TimelineSubsystemRow, TimelineTaskSpan } from "../timelineViewModel";
 
 export function buildTimelineSubsystemRows({

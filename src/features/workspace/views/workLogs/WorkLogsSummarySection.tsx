@@ -1,4 +1,4 @@
-import type { TaskRecord } from "@/types";
+import type { TaskRecord } from "@/types/recordsExecution";
 
 import type { WorkLogsViewState } from "./workLogsViewState";
 

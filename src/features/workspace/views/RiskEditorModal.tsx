@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
 
-import type { RiskPayload } from "@/types";
+import type { RiskPayload } from "@/types/payloads";
 
 import type { RiskEditorMode, SelectOption } from "./riskViewModel";
 

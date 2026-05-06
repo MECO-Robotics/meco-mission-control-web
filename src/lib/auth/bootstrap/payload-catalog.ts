@@ -1,17 +1,7 @@
-import type {
-  ArtifactRecord,
-  MilestoneRecord,
-  ManufacturingItemRecord,
-  MaterialRecord,
-  MemberRecord,
-  MechanismRecord,
-  PartDefinitionRecord,
-  PartInstanceRecord,
-  PurchaseItemRecord,
-  SubsystemRecord,
-  WorkLogRecord,
-} from "@/types";
-import { resolveWorkspaceColor } from "@/features/workspace/shared/model";
+import type { ArtifactRecord, ManufacturingItemRecord, MaterialRecord, PartDefinitionRecord, PartInstanceRecord, PurchaseItemRecord } from "@/types/recordsInventory";
+import type { MilestoneRecord, WorkLogRecord } from "@/types/recordsExecution";
+import type { MechanismRecord, MemberRecord, SubsystemRecord } from "@/types/recordsOrganization";
+import { resolveWorkspaceColor } from "@/features/workspace/shared/model/workspaceColors";
 import { localTodayDate } from "@/lib/dateUtils";
 import type { NormalizedPlanningRecords } from "./planning";
 import {

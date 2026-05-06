@@ -1,6 +1,6 @@
 import { type ChangeEvent, type FormEvent, useRef, useState } from "react";
 
-import type { EmailCodeDeliveryResponse } from "@/lib/auth";
+import type { EmailCodeDeliveryResponse } from "@/lib/auth/types";
 
 interface UseEmailAuthPanelArgs {
   clearAuthMessage: () => void;
