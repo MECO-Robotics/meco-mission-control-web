@@ -197,3 +197,14 @@ These must still be reviewed if they exceed:
 * Max imports: 150 lines
 
 Exceeding any hard limit is not allowed.
+
+* For each new Codex worktree, install deps (`npm.cmd install`) and run the webpage (`npm.cmd run dev`) before marking the environment as ready.
+
+### Codex worktree bootstrap
+
+* Use this exact one-time bootstrap flow when creating a Codex worktree:
+  * `cd <new-worktree>`
+  * `npm.cmd install`
+  * `npm.cmd run dev -- --host 127.0.0.1 --port 5173`
+  * Confirm URL `http://127.0.0.1:5173`
+* Keep a reusable workflow via `scripts/codex-worktree-bootstrap.ps1` for dependency install + app launch.
