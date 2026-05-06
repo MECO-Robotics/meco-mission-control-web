@@ -74,7 +74,7 @@ describe("TimelineView", () => {
     );
 
     expect(source).toMatch(
-      /const clearMotion = window\.setTimeout\(\(\) => \{[\s\S]*setTimelineGridMotion\([\s\S]*direction:\s*null,[\s\S]*\}, 180\);/,
+      /const clearMotion = window\.setTimeout\(\(\) => \{[\s\S]*current\.direction \? \{ direction: null, token: current\.token \} : current,[\s\S]*\}, 180\);/,
     );
     expect(source).toMatch(/window\.clearTimeout\(clearMotion\);/);
   });
@@ -180,21 +180,8 @@ describe("TimelineView", () => {
 
   it("prevents timeline label reveal overlays from doubling visible source text", () => {
     const css = readAppCss();
-    const getRule = (selectorStart: string, options?: { pseudo?: boolean }) => {
-      let start = css.indexOf(selectorStart);
-      while (start >= 0) {
-        const blockStart = css.indexOf("{", start);
-        const selector = css.slice(start, blockStart);
-        const hasPseudo = selector.includes("::after");
-        if (options?.pseudo === undefined || options.pseudo === hasPseudo) {
-          const blockEnd = css.indexOf("}", blockStart);
-
-          return css.slice(start, blockEnd + 1);
-        }
-
-        start = css.indexOf(selectorStart, blockStart);
-      }
-
+    const getRule = (selectorStart: string) => {
+      const start = css.indexOf(selectorStart);
       expect(start).toBeGreaterThanOrEqual(0);
       const blockStart = css.indexOf("{", start);
       const blockEnd = css.indexOf("}", blockStart);
@@ -202,22 +189,12 @@ describe("TimelineView", () => {
       return css.slice(start, blockEnd + 1);
     };
 
-    const revealRule = getRule(".timeline-ellipsis-reveal[data-full-text]::after", { pseudo: true });
-    expect(revealRule).toMatch(/color:\s*var\(--timeline-reveal-color/);
-    expect(revealRule).toMatch(
-      /background:\s*var\(--timeline-reveal-background,\s*var\(--timeline-task-discipline-accent,\s*var\(--bg-panel\)\)\)/,
+    expect(css).not.toContain(".timeline-ellipsis-reveal[data-full-text]::after");
+    expect(getRule(".timeline-bar .timeline-bar-title.timeline-ellipsis-reveal")).toMatch(/overflow:\s*hidden/);
+    expect(getRule(".timeline-bar .timeline-bar-title.timeline-ellipsis-reveal")).toMatch(
+      /text-overflow:\s*ellipsis/,
     );
-    expect(getRule(".timeline-ellipsis-reveal[data-full-text]:hover", { pseudo: false })).toMatch(
-      /color:\s*transparent/,
-    );
-    expect(
-      getRule(".timeline-merged-cell-column:hover .timeline-ellipsis-reveal[data-full-text]", {
-        pseudo: false,
-      }),
-    ).toMatch(/color:\s*transparent/);
-    expect(css).toMatch(
-      /\.timeline-merged-cell-column:hover,\s*\.timeline-merged-cell-column:focus-within\s*\{[\s\S]*?z-index:\s*10045/,
-    );
+    expect(getRule(".timeline-merged-cell-title")).toMatch(/text-overflow:\s*ellipsis/);
     expect(css).toMatch(
       /\.task-label:hover,\s*\.task-label:focus-visible,\s*\.timeline-merged-cell-text:hover,\s*\.timeline-merged-cell-text:focus-within,\s*\.timeline-merged-cell-text:focus-visible\s*\{[\s\S]*?z-index:\s*10045/,
     );
@@ -243,9 +220,7 @@ describe("TimelineView", () => {
     expect(rotatedRule).toMatch(/max-height:\s*calc\(100% - 16px\)/);
     expect(rotatedRule).not.toMatch(/rotate\(-90deg\)/);
 
-    expect(
-      getRule(".timeline-merged-cell-text.is-rotated .timeline-merged-cell-title"),
-    ).toMatch(/max-height:\s*100%/);
+    expect(css).not.toContain(".timeline-merged-cell-text.is-rotated .timeline-merged-cell-title");
   });
 
   it("uses 180deg rotation for four-row labels", () => {

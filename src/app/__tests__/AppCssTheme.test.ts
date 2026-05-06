@@ -6,7 +6,9 @@ import { readCssTree } from "@/testUtils/readCssTree";
 const appCss = readCssTree("src/app/App.css");
 
 function getCssBlock(selector: string) {
-  const blockStart = appCss.indexOf(`${selector} {`);
+  const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = new RegExp(`(?:^|\\n)${escapedSelector}\\s*\\{`).exec(appCss);
+  const blockStart = match ? match.index + (match[0].startsWith("\n") ? 1 : 0) : -1;
   expect(blockStart).toBeGreaterThanOrEqual(0);
 
   const blockEnd = appCss.indexOf("}", blockStart);

@@ -1,5 +1,5 @@
 const MOBILE_RELEASES_URL =
-  "https://github.com/MECO-Robotics/PM-mobile-app/releases";
+  "https://github.com/MECO-Robotics/meco-mission-control-mobile/releases";
 const MOBILE_USER_AGENT_PATTERN =
   /android|iphone|ipod|mobile|windows phone|blackberry|opera mini/i;
 

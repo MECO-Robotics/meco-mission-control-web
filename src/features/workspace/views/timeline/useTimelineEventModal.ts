@@ -170,6 +170,13 @@ export function useTimelineMilestoneModal({
         return;
       }
 
+      const hasStartTime = milestoneStartTime.trim().length > 0;
+      const hasEndTime = milestoneEndTime.trim().length > 0;
+      if (hasStartTime !== hasEndTime) {
+        setMilestoneError("Start time and end time must both be set, or both be empty.");
+        return;
+      }
+
       const normalizedStartTime = milestoneStartTime.trim().length > 0 ? milestoneStartTime : "12:00";
       const startDateTime = buildDateTime(milestoneStartDate, normalizedStartTime);
       const includeEndDate = milestoneEndDate.trim().length > 0 || milestoneEndTime.trim().length > 0;

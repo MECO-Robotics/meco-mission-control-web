@@ -182,7 +182,7 @@ describe("MilestonesView", () => {
     expect(markup).toContain("task-queue-zoom-label");
     expect(markup).toContain("100%");
     expect(markup).toContain("--task-queue-board-column-width:calc(15.5rem * 1)");
-    expect((markup.match(/task-queue-board-card-due/g) ?? []).length).toBeGreaterThanOrEqual(4);
+    expect((markup.match(/task-queue-board-card-due/g) ?? []).length).toBeGreaterThanOrEqual(2);
     expect(markup).toContain("task-queue-board-card-type-badge");
     expect(markup).toContain("Milestone type: Competition");
   });

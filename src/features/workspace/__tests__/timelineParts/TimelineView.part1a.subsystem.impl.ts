@@ -203,6 +203,7 @@ describe("TimelineView", () => {
         },
         subsystemColumnIndex: 2,
         subsystemIndex: 1,
+        rowIndex: 1,
         subsystemStickyLeft: 112,
         taskDependencyCountsById: {},
         taskStatusSignalsById: {},

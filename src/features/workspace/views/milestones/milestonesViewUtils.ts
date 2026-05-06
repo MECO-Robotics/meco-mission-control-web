@@ -32,6 +32,32 @@ export function formatMilestoneDateTime(value: string) {
   });
 }
 
+function isSameLocalCalendarDay(start: Date, end: Date) {
+  return (
+    start.getFullYear() === end.getFullYear() &&
+    start.getMonth() === end.getMonth() &&
+    start.getDate() === end.getDate()
+  );
+}
+
+export function formatMilestoneEndDateTime(startDateTime: string, endDateTime: string | null) {
+  if (!endDateTime) {
+    return null;
+  }
+
+  const start = new Date(startDateTime);
+  const end = new Date(endDateTime);
+
+  if (isSameLocalCalendarDay(start, end)) {
+    return end.toLocaleTimeString(undefined, {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+  }
+
+  return formatMilestoneDateTime(endDateTime);
+}
+
 export function buildMilestoneProjectLabels(
   milestones: BootstrapPayload["milestones"],
   projectsById: Record<string, BootstrapPayload["projects"][number]>,

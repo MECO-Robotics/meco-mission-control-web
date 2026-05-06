@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import type { BootstrapPayload, MilestoneRecord } from "@/types";
 import type { TimelineMilestoneDraft } from "@/features/workspace/shared/timeline";
+import { TaskDetailReveal } from "@/features/workspace/modals/task/details/TaskDetailReveal";
 import {
   getMilestoneTaskBoardStateForMilestone,
   getMilestoneTaskBoardStateLabel,
@@ -19,7 +20,7 @@ import {
   MilestoneEditScheduleField,
   MilestoneEditTitleField,
 } from "./MilestonesEventDetailsModalParts";
-import { formatMilestoneDateTime } from "./milestonesViewUtils";
+import { formatMilestoneDateTime, formatMilestoneEndDateTime } from "./milestonesViewUtils";
 
 interface MilestonesEventDetailsModalProps {
   activeMilestone: MilestoneRecord;
@@ -83,7 +84,7 @@ export function MilestonesEventDetailsModal({
   }
 
   const isEditMode = milestoneModalMode === "edit";
-    const handleClose = isEditMode && onCancelEdit ? onCancelEdit : onClose;
+  const handleClose = isEditMode && onCancelEdit ? onCancelEdit : onClose;
   const milestoneTypeStyle = MILESTONE_TYPE_STYLES[activeMilestone.type] ?? MILESTONE_TYPE_STYLES["internal-review"];
   const milestoneTypeStyleVariables = {
     "--milestone-type-chip-bg": milestoneTypeStyle.chipBackground,
@@ -118,6 +119,18 @@ export function MilestonesEventDetailsModal({
   const projectNames = activeMilestone.projectIds
     .map((projectId) => projectsById[projectId]?.name)
     .filter((projectName): projectName is string => Boolean(projectName));
+  const relatedProjectItems =
+    projectNames.length > 0
+      ? projectNames.map((projectName, index) => (
+          <div className="task-details-assigned-item" key={`${projectName}-${index}`}>
+            <TaskDetailReveal className="task-detail-ellipsis-reveal" text={projectName} />
+          </div>
+        ))
+      : [
+          <div className="task-details-assigned-empty" key="all-projects">
+            All projects
+          </div>,
+        ];
   const editableMilestoneDraft =
     milestoneDraft ?? {
       title: activeMilestone.title,
@@ -130,6 +143,8 @@ export function MilestonesEventDetailsModal({
   const editableStartTime = milestoneStartTime ?? activeMilestone.startDateTime.slice(11, 16);
   const editableEndDate = milestoneEndDate ?? activeMilestone.endDateTime?.slice(0, 10) ?? "";
   const editableEndTime = milestoneEndTime ?? activeMilestone.endDateTime?.slice(11, 16) ?? "";
+  const milestoneStartLabel = formatMilestoneDateTime(activeMilestone.startDateTime);
+  const milestoneEndLabel = formatMilestoneEndDateTime(activeMilestone.startDateTime, activeMilestone.endDateTime);
 
   return createPortal(
     <div className="modal-scrim" role="presentation" style={{ zIndex: 2050 }}>
@@ -181,8 +196,16 @@ export function MilestonesEventDetailsModal({
                     />
                   ) : (
                     <MilestoneDetailInlineValue onOpenEditMilestone={() => onEditMilestone(activeMilestone)}>
-                      <span className="pill status-pill status-pill-neutral">
-                        {formatMilestoneDateTime(activeMilestone.startDateTime)}
+                      <span style={{ alignItems: "center", display: "inline-flex", gap: "0.25rem", flexWrap: "wrap" }}>
+                        <span className="pill status-pill status-pill-neutral">{milestoneStartLabel}</span>
+                        {milestoneEndLabel ? (
+                          <>
+                            <span style={{ color: "var(--text-copy)", fontSize: "0.65rem", fontWeight: 700 }}>
+                              to
+                            </span>
+                            <span className="pill status-pill status-pill-neutral">{milestoneEndLabel}</span>
+                          </>
+                        ) : null}
                       </span>
                     </MilestoneDetailInlineValue>
                   )}
@@ -248,7 +271,7 @@ export function MilestonesEventDetailsModal({
                     onOpenEditMilestone={() => onEditMilestone(activeMilestone)}
                     showEditIndicator={isEditMode}
                   >
-                    <p className="task-detail-copy">{projectNames.length > 0 ? projectNames.join(", ") : "All projects"}</p>
+                    <div className="task-details-assigned-list">{relatedProjectItems}</div>
                   </MilestoneDetailValue>
                 </div>
               </div>

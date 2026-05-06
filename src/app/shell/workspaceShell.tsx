@@ -18,8 +18,9 @@ export const WorkspaceContent = lazy(() =>
   })),
 );
 
+// Keep modal host lazily loaded from its component module to avoid re-export indirection.
 export const WorkspaceModalHost = lazy(() =>
-  import("@/features/workspace/WorkspaceModalHost").then((module) => ({
+  import("@/features/workspace/components/WorkspaceModalHostView").then((module) => ({
     default: module.WorkspaceModalHost,
   })),
 );
@@ -32,7 +33,7 @@ export function WorkspaceShellLoading() {
       className="workspace-shell-loading"
       role="status"
     >
-      <p className="eyebrow">MECO workspace</p>
+      <p className="eyebrow">MECO Mission Control</p>
       <p className="workspace-shell-loading-copy">Loading workspace modules...</p>
     </section>
   );

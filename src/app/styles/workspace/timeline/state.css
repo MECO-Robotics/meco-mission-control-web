@@ -32,6 +32,10 @@
   background: var(--timeline-row-highlight-hover-fill, rgba(22, 71, 142, 0.16));
 }
 
+.timeline-row-highlight-anchor {
+  min-height: 38px;
+}
+
 .timeline-shell.is-week-view .timeline-bar-hover-host .timeline-bar-hover-indicator,
 .timeline-shell.is-week-view .timeline-bar .timeline-bar-hover-indicator {
   transform: translateY(-50%) translateX(calc(-100% - 0.05rem)) !important;

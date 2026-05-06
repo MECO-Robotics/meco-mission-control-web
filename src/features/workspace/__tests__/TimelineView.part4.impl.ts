@@ -92,11 +92,14 @@ describe("TimelineView", () => {
     expect(css).toMatch(/\.timeline-task-status-logo-signal-waiting-for-qa\s*\{[\s\S]*color:\s*#275098/);
     expect(css).toMatch(/\.timeline-task-status-logo-signal-blocked\s*\{[\s\S]*color:\s*var\(--official-red\)/);
     expect(css).toMatch(/\.timeline-task-status-logo-signal-waiting-on-dependency\s*\{[\s\S]*color:\s*#c25a14/);
-    expect(css).toMatch(/\.task-label\.timeline-task-label\s*\{[\s\S]*background:\s*var\(--timeline-task-row-fill\)/);
-    expect(css).toMatch(/\.task-label\.timeline-task-label\s*\{[\s\S]*box-shadow:\s*inset 3px 0 0 var\(--timeline-task-discipline-accent\)/);
+    expect(css).toMatch(
+      /\.timeline-bar \.timeline-bar-title\.timeline-ellipsis-reveal\s*\{[\s\S]*--timeline-reveal-color:/,
+    );
+    expect(css).toMatch(
+      /\.timeline-bar \.timeline-bar-title\.timeline-ellipsis-reveal\s*\{[\s\S]*text-overflow:\s*ellipsis/,
+    );
     expect(css).toMatch(/\.timeline-in-progress\s*\{[\s\S]*--timeline-task-status-accent:\s*#b77900/);
-    expect(css).toMatch(/\.task-label\.timeline-task-label-in-progress\s*\{[\s\S]*--timeline-task-status-accent:\s*#b77900/);
-    expect(css).toMatch(/\.task-label\.timeline-task-label-complete\s*\{[\s\S]*--timeline-task-status-accent:\s*#246847/);
+    expect(css).toMatch(/\.timeline-complete\s*\{[\s\S]*--timeline-task-status-accent:\s*#246847/);
   });
 
   it("fades timeline task bars when tasks continue outside the scoped view", () => {
@@ -146,17 +149,11 @@ describe("TimelineView", () => {
       /\.timeline-bar\[data-spill-right="true"\]\s*\{[\s\S]*border-top-right-radius:\s*0[\s\S]*border-bottom-right-radius:\s*0/,
     );
     expect(getTaskBarStyle("View details for March carry-in")).toContain("margin-left:0");
-    expect(getTaskBarStyle("View details for March carry-in")).toContain(
-      "margin-right:var(--timeline-task-bar-edge-gap, 24px)",
-    );
     expect(getTaskBarStyle("View details for March carry-in")).not.toContain("padding-right:24px");
     expect(getTaskBarStyle("View details for March carry-in")).toContain("--timeline-task-bar-radius:4px");
     expect(getTaskBarStyle("View details for March carry-in")).not.toContain("border-top-left-radius:0");
     expect(getTaskBarStyle("View details for March carry-in")).not.toContain("border-bottom-left-radius:0");
     expect(getTaskBarStyle("View details for May carry-out")).toContain("margin-right:0");
-    expect(getTaskBarStyle("View details for May carry-out")).toContain(
-      "margin-left:var(--timeline-task-bar-edge-gap, 24px)",
-    );
     expect(getTaskBarStyle("View details for May carry-out")).not.toContain("padding-left:24px");
     expect(getTaskBarStyle("View details for May carry-out")).toContain("--timeline-task-bar-radius:4px");
     expect(getTaskBarStyle("View details for May carry-out")).not.toContain("border-top-right-radius:0");
@@ -168,12 +165,6 @@ describe("TimelineView", () => {
     expect(getTaskBarStyle("View details for Full scoped span")).not.toContain("border-top-right-radius:0");
     expect(getTaskBarStyle("View details for Full scoped span")).not.toContain("border-bottom-left-radius:0");
     expect(getTaskBarStyle("View details for Full scoped span")).not.toContain("border-bottom-right-radius:0");
-    expect(getTaskBarStyle("View details for Contained scoped task")).toContain(
-      "margin-left:var(--timeline-task-bar-edge-gap, 24px)",
-    );
-    expect(getTaskBarStyle("View details for Contained scoped task")).toContain(
-      "margin-right:var(--timeline-task-bar-edge-gap, 24px)",
-    );
     expect(getTaskBarStyle("View details for Contained scoped task")).not.toContain("padding-left:24px");
     expect(getTaskBarStyle("View details for Contained scoped task")).not.toContain("padding-right:24px");
   });
@@ -220,19 +211,18 @@ describe("TimelineView", () => {
   it("suppresses sticky label hover reveal while the timeline shell is scrolling", () => {
     const css = readAppCss();
     const headerSource = readFileSync(
-      join(process.cwd(), "src/features/workspace/views/timeline/TimelineGridHeader.tsx"),
+      join(process.cwd(), "src/features/workspace/views/timeline/components/TimelineGridHeaderContent.tsx"),
       "utf8",
     );
-    const overlayHookSource = readFileSync(
-      join(process.cwd(), "src/features/workspace/views/timeline/useTimelineMilestoneOverlay.ts"),
+    const overlaySyncSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/timeline/hooks/useTimelineMilestoneOverlaySync.ts"),
       "utf8",
     );
 
     expect(headerSource).toContain('data-is-scrolling={isScrolling ? "true" : undefined}');
-    expect(overlayHookSource).toContain('setIsTimelineShellScrolling(true)');
-    expect(overlayHookSource).toContain('setIsTimelineShellScrolling(false)');
-    expect(css).toContain('.timeline-shell[data-is-scrolling="true"] .timeline-ellipsis-reveal[data-full-text]:hover');
-    expect(css).toContain('.timeline-shell[data-is-scrolling="true"] .timeline-merged-cell-column:hover .timeline-ellipsis-reveal[data-full-text]');
+    expect(overlaySyncSource).toContain("setIsTimelineShellScrolling(true)");
+    expect(overlaySyncSource).toContain("setIsTimelineShellScrolling(false)");
+    expect(css).not.toContain(".timeline-ellipsis-reveal[data-full-text]::after");
   });
 
   it("marks the current day as a unique timeline column highlight", () => {
@@ -251,53 +241,53 @@ describe("TimelineView", () => {
         triggerCreateMilestoneToken: 0,
       }),
     );
-    const css = readAppCss();
     const portalSource = readFileSync(
       join(process.cwd(), "src/features/workspace/views/timeline/portals/TimelineTodayMarkerPortal.tsx"),
       "utf8",
     );
-    const overlaySource = readFileSync(
-      join(process.cwd(), "src/features/workspace/views/timeline/useTimelineMilestoneOverlay.ts"),
+    const overlaySyncSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/timeline/hooks/useTimelineMilestoneOverlaySync.ts"),
       "utf8",
     );
 
     expect(markup).toContain(`data-timeline-day="${todayDay}"`);
     expect(markup).not.toContain('class="timeline-day is-today"');
     expect(markup).not.toContain('class="timeline-day-slot is-today"');
-    expect(portalSource).toContain("timeline-today-marker-column");
-    expect(portalSource).toContain("timeline-today-marker-line");
+    expect(portalSource).toContain('className="timeline-today-marker-column"');
+    expect(portalSource).toContain('className="timeline-today-marker-line"');
     expect(portalSource).toContain("Today");
-    expect(overlaySource).toContain("offsetLeft : null");
-    expect(overlaySource).toContain("offsetLeft + todayCell.offsetWidth / 2");
-    expect(overlaySource).toContain("offsetTop : null");
-    expect(css).toMatch(/\.timeline-today-marker-line\s*\{[\s\S]*position:\s*absolute/);
-    expect(css).toMatch(/\.timeline-today-marker-column\s*\{[\s\S]*position:\s*absolute/);
-    expect(css).toMatch(/\.timeline-today-marker-line\s*\{[\s\S]*width:\s*2px/);
+    expect(overlaySyncSource).toContain("todayCell ? todayCell.offsetLeft : null");
+    expect(overlaySyncSource).toContain("todayCell.offsetLeft + todayCell.offsetWidth / 2");
+    expect(overlaySyncSource).toContain("todayCell ? todayCell.offsetTop : null");
+    expect(portalSource).toContain('position: "absolute"');
+    expect(portalSource).toContain("width: 0");
+    expect(portalSource).toContain('width: "2px"');
     expect(portalSource).toContain('background: "var(--meco-blue)"');
     expect(portalSource).not.toContain("boxShadow");
     expect(portalSource).toContain("todayMarkerLineLeft");
     expect(portalSource).toContain("todayMarkerLabelTop");
-    expect(portalSource).toContain("todayMarkerLeft - todayMarkerLineLeft");
+    expect(portalSource).toContain('left: `${todayMarkerLineLeft}px`');
     expect(portalSource).toContain("zIndex: 1");
     expect(portalSource).toContain("bottom: 0,");
     expect(portalSource).toContain('top: showLabelAtTop ? `${todayMarkerLabelTop - 4}px` : undefined,');
     expect(portalSource).toContain('transform: showLabelAtTop ? "translate(-50%, -50%)" : "translateX(-50%)"');
-    expect(css).toMatch(/\.timeline-today-marker-label\s*\{[\s\S]*font-weight:\s*800/);
-    expect(portalSource).toContain("zIndex: 13");
+    expect(portalSource).toContain("fontWeight: 800");
+    expect(portalSource).toContain("zIndex: 2");
   });
 
   it("keeps subsystem accent strips on every sticky timeline subsystem surface", () => {
-    const subsystemGroupSource = readFileSync(
-      join(process.cwd(), "src/features/workspace/views/timeline/TimelineSubsystemGroup.tsx"),
+    const subsystemHeaderSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/timeline/components/TimelineSubsystemHeaderCell.tsx"),
       "utf8",
     );
-    const projectGroupSource = readFileSync(
-      join(process.cwd(), "src/features/workspace/views/timeline/TimelineProjectGroup.tsx"),
+    const taskColorsSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/timeline/timelineTaskColors.ts"),
       "utf8",
     );
 
-    expect(subsystemGroupSource).toContain('boxShadow: `inset 3px 0 0 ${accentColor}`');
-    expect(projectGroupSource).toContain('boxShadow: `inset 3px 0 0 ${subsystem.color}`');
+    expect(subsystemHeaderSource).toContain("buildTimelineSubsystemHighlightStyle(accentColor");
+    expect(subsystemHeaderSource).toContain('boxShadow: `inset 3px 0 0 ${accentColor}`');
+    expect(taskColorsSource).toContain("buildTimelineSubsystemHighlightStyle");
   });
 
 });

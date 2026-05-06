@@ -13,7 +13,7 @@ export default function AppWorkspaceCoreImpl() {
         body="Checking the server-side auth configuration before the workspace opens."
         isDarkMode={c.isDarkMode}
         shellStyle={c.isDarkMode ? c.pageShellStyle : undefined}
-        title="Loading sign-in rules for MECO Robotics."
+        title="Loading sign-in rules for MECO Mission Control."
       />
     );
   }

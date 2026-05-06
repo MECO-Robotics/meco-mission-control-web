@@ -37,6 +37,7 @@ interface TimelineSubsystemGroupProps {
   subsystemColumnIndex: number;
   subsystemIndex: number;
   subsystemStickyLeft: number;
+  rowIndex: number;
   taskDependencyCountsById: Record<string, TimelineTaskDependencyCounts>;
   taskStatusSignalsById: Record<string, TimelineTaskStatusSignal>;
   timelineDayHeaderCells: TimelineDayHeaderCell[];
@@ -69,6 +70,7 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
   subsystemColumnIndex,
   subsystemIndex,
   subsystemStickyLeft,
+  rowIndex,
   taskDependencyCountsById,
   taskStatusSignalsById,
   timelineDayHeaderCells,
@@ -97,7 +99,7 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
       hoverTaskRow={hoverTaskRow}
       openTaskDetailModal={openTaskDetailModal}
       rowBackground={groupBackground}
-      rowIndex={1}
+      rowIndex={rowIndex}
       rowStyle={groupStyle}
       gridAutoRows="38px"
       selectSubsystemRow={selectSubsystemRow}

@@ -126,8 +126,9 @@ describe("MilestonesEventDetailsModal", () => {
       }),
     );
 
-    expect(markup).toContain("Readiness");
-    expect(markup).toContain("Subsystem: Drivebase");
+    expect(markup).toContain("Requirements");
+    expect(markup).toContain("Drivebase");
+    expect(markup).toContain("Subsystem");
     expect(markup).toContain("Required");
     expect(markup).toContain("Complete");
     expect(markup).toContain("Iteration 1");
