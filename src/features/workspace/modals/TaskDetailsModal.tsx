@@ -1,1 +1,0 @@
-export { TaskDetailsModal } from "./TaskDetailsModalContent";

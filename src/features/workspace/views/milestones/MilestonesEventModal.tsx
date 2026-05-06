@@ -5,9 +5,9 @@ import type { BootstrapPayload, MilestoneRecord } from "@/types";
 import type { TimelineMilestoneDraft } from "@/features/workspace/shared/timeline";
 
 import { MilestonesEventDetailsModal } from "./MilestonesEventDetailsModal";
-import { MilestonesMilestoneModalActions } from "./sections/MilestonesMilestoneModalActions";
-import { MilestonesMilestoneModalFields } from "./sections/MilestonesMilestoneModalFields";
-import { MilestonesMilestoneModalReadinessSection } from "./sections/MilestonesMilestoneModalReadinessSection";
+import { MilestonesMilestoneModalActions } from "./sections/MilestonesEventModalActions";
+import { MilestonesMilestoneModalFields } from "./sections/MilestonesEventModalFields";
+import { MilestonesMilestoneModalReadinessSection } from "./sections/MilestonesEventModalReadinessSection";
 
 interface MilestonesMilestoneModalProps {
   activeMilestone: MilestoneRecord | null;

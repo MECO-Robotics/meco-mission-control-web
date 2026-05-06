@@ -13,7 +13,7 @@ import {
   buildTimelineProjectRows,
   filterTimelineMilestonesByPersonSelection,
 } from "../model/timelineViewData";
-import { useTimelineMilestoneModal } from "../useTimelineMilestoneModal";
+import { useTimelineMilestoneModal } from "../useTimelineEventModal";
 import { useTimelineMilestoneOverlay } from "./useTimelineMilestoneOverlay";
 import { useTimelineRowHighlightGeometry } from "./useTimelineRowHighlightGeometry";
 import { resolveTimelineRowHighlightStyle } from "../timelineTaskColors";

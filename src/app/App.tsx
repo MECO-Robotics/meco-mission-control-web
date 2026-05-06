@@ -1,1 +1,1 @@
-export { default } from "./AppWorkspace";
+export { default } from "./AppWorkspaceCoreImpl";

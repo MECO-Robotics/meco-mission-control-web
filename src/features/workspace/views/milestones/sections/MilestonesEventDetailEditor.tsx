@@ -5,8 +5,8 @@ import type { TimelineMilestoneDraft } from "@/features/workspace/shared/timelin
 import { EditableHoverIndicator, FilterDropdown } from "@/features/workspace/shared/WorkspaceViewShared";
 import { EVENT_TYPE_OPTIONS, EVENT_TYPE_STYLES as MILESTONE_TYPE_STYLES } from "@/features/workspace/shared/events/eventStyles";
 import type { DropdownOption } from "@/features/workspace/shared/model";
-import { MilestonesMilestoneModalActions } from "./MilestonesMilestoneModalActions";
-import { MilestonesMilestoneModalReadinessSection } from "./MilestonesMilestoneModalReadinessSection";
+import { MilestonesMilestoneModalActions } from "./MilestonesEventModalActions";
+import { MilestonesMilestoneModalReadinessSection } from "./MilestonesEventModalReadinessSection";
 
 export type MilestoneDetailEditableField = "title" | "schedule" | "description" | "type" | "projects" | "external";
 
