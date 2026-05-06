@@ -223,26 +223,34 @@ export function MilestonesEventDetailsModal({
           />
         ) : (
           <div className="modal-form task-details-grid" style={{ color: "var(--text-copy)" }}>
-            <div className="task-details-section-grid task-details-overview-grid modal-wide">
-              <div className="field modal-wide">
+            <div className="milestone-detail-overview-grid modal-wide">
+              <div className="field modal-wide milestone-detail-description">
                 <span style={{ color: "var(--text-title)" }}>Description</span>
-                <MilestoneDetailValue onOpenEditMilestone={() => onEditMilestone(activeMilestone)}>
+                <MilestoneDetailValue onOpenEditMilestone={() => onEditMilestone(activeMilestone)} showEditIndicator={isEditMode}>
                   <p className="task-detail-copy">{activeMilestone.description || "No description provided."}</p>
                 </MilestoneDetailValue>
               </div>
-              <div className="field modal-wide">
-                <span style={{ color: "var(--text-title)" }}>Type</span>
-                <MilestoneDetailValue onOpenEditMilestone={() => onEditMilestone(activeMilestone)}>
-                  <span className="pill status-pill milestone-type-pill" style={milestoneTypeStyleVariables}>
-                    {milestoneTypeLabel}
-                  </span>
-                </MilestoneDetailValue>
-              </div>
-              <div className="field modal-wide">
-                <span style={{ color: "var(--text-title)" }}>Related projects</span>
-                <MilestoneDetailValue onOpenEditMilestone={() => onEditMilestone(activeMilestone)}>
-                  <p className="task-detail-copy">{projectNames.length > 0 ? projectNames.join(", ") : "All projects"}</p>
-                </MilestoneDetailValue>
+              <div className="milestone-detail-type-row">
+                <div className="field">
+                  <span style={{ color: "var(--text-title)" }}>Type</span>
+                  <MilestoneDetailValue
+                    onOpenEditMilestone={() => onEditMilestone(activeMilestone)}
+                    showEditIndicator={isEditMode}
+                  >
+                    <span className="pill status-pill milestone-type-pill" style={milestoneTypeStyleVariables}>
+                      {milestoneTypeLabel}
+                    </span>
+                  </MilestoneDetailValue>
+                </div>
+                <div className="field">
+                  <span style={{ color: "var(--text-title)" }}>Related projects</span>
+                  <MilestoneDetailValue
+                    onOpenEditMilestone={() => onEditMilestone(activeMilestone)}
+                    showEditIndicator={isEditMode}
+                  >
+                    <p className="task-detail-copy">{projectNames.length > 0 ? projectNames.join(", ") : "All projects"}</p>
+                  </MilestoneDetailValue>
+                </div>
               </div>
             </div>
 

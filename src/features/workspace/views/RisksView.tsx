@@ -1,10 +1,12 @@
 import { useMemo } from "react";
 
+import type { CSSProperties } from "react";
 import type { RiskManagementViewTab } from "@/lib/workspaceNavigation";
 import type { BootstrapPayload, RiskPayload, RiskRecord } from "@/types";
 import { EditableHoverIndicator, type FilterSelection } from "@/features/workspace/shared";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
 import { KanbanColumns } from "@/features/workspace/views/kanban/KanbanColumns";
+import { resolveWorkspaceColor } from "@/features/workspace/shared/model";
 
 import { RiskEditorModal } from "./RiskEditorModal";
 import { RiskDetailsModal } from "./RiskDetailsModal";
@@ -16,6 +18,7 @@ import {
   getRiskSeverityPillClassName,
   useRisksViewModel,
 } from "./riskViewModel";
+import { TaskPriorityBadge } from "./taskQueue/taskQueueKanbanCardMeta";
 
 interface RisksViewProps {
   activePersonFilter: FilterSelection;
@@ -116,6 +119,30 @@ export function RisksView({
     return workflowId ? workstreamsById[workflowId]?.name ?? "Unknown workflow" : "Unassigned workflow";
   };
 
+  const getRiskWorkflowColor = (risk: RiskRecord) => {
+    if (risk.attachmentType === "workstream") {
+      const workstream = workstreamsById[risk.attachmentId];
+      const workflowId = workstream ? workstream.id : risk.attachmentId;
+      return resolveWorkspaceColor(workstream?.color, workflowId);
+    }
+
+    const sourceTask = getRiskSourceTask(risk);
+    const workflowId = sourceTask?.workstreamId || sourceTask?.workstreamIds?.[0];
+    return workflowId && workstreamsById[workflowId]
+      ? resolveWorkspaceColor(workstreamsById[workflowId]?.color, workflowId)
+      : resolveWorkspaceColor(null, risk.id);
+  };
+
+  const getWorkflowChipStyle = (risk: RiskRecord): CSSProperties | undefined => {
+    const workflowColor = getRiskWorkflowColor(risk);
+
+    return {
+      "--task-queue-board-card-context-accent": workflowColor,
+      "--task-queue-board-card-context-bg": `color-mix(in srgb, ${workflowColor} 24%, transparent)`,
+      "--task-queue-board-card-context-border": `color-mix(in srgb, ${workflowColor} 54%, transparent)`,
+    } as CSSProperties;
+  };
+
   const getRiskMechanismLabel = (risk: RiskRecord) => {
     if (risk.attachmentType === "mechanism") {
       const mechanism = mechanismsById[risk.attachmentId];
@@ -196,15 +223,18 @@ export function RisksView({
                     count: viewModel.risksBySeverity[severity].length,
                     header: (
                       <span className={getRiskSeverityPillClassName(severity)}>
-                        {formatRiskSeverity(severity)}
+                        <span aria-hidden="true" className="task-queue-board-column-header-icon">
+                          <TaskPriorityBadge priority={severity} />
+                        </span>
+                        <span className="task-queue-board-column-header-label">
+                          {formatRiskSeverity(severity)}
+                        </span>
                       </span>
                     ),
                   }))}
                   emptyLabel="No risks"
                   itemsByState={viewModel.risksBySeverity}
                   renderItem={(risk) => {
-                    const mitigationLabel = viewModel.getMitigationLabel(risk);
-                    const sourceLabel = viewModel.getSourceLabel(risk);
                     const projectLabel = getRiskProjectLabel(risk);
                     const workflowLabel = getRiskWorkflowLabel(risk);
                     const mechanismLabel = getRiskMechanismLabel(risk);
@@ -219,50 +249,45 @@ export function RisksView({
                         <div className="task-queue-board-card-header">
                           <strong>{risk.title}</strong>
                         </div>
-                        <small className="task-queue-board-card-summary">{risk.detail}</small>
+                        <small className="task-queue-board-card-summary task-queue-board-card-summary-task">
+                          {risk.detail}
+                        </small>
                         <div className="task-queue-board-card-meta">
                           {isAllProjectsView ? (
                             <>
                               <span
-                                className="task-queue-board-card-context-chip"
-                                title={`Project: ${projectLabel}`}
+                                className="task-queue-board-card-context-chip task-queue-board-card-context-chip-due-style"
+                                title={projectLabel}
                               >
-                                Project: {projectLabel}
+                                {projectLabel}
                               </span>
                               <span
-                                className="task-queue-board-card-context-chip"
-                                title={`Workflow: ${workflowLabel}`}
+                                className="task-queue-board-card-context-chip task-queue-board-card-context-chip-due-style"
+                                title={workflowLabel}
+                                style={getWorkflowChipStyle(risk)}
                               >
-                                Workflow: {workflowLabel}
+                                {workflowLabel}
                               </span>
                             </>
                           ) : (
                             <>
                               <span
-                                className="task-queue-board-card-context-chip"
-                                title={`Workflow: ${workflowLabel}`}
+                                className="task-queue-board-card-context-chip task-queue-board-card-context-chip-due-style"
+                                title={workflowLabel}
+                                style={getWorkflowChipStyle(risk)}
                               >
-                                Workflow: {workflowLabel}
+                                {workflowLabel}
                               </span>
                               {mechanismLabel ? (
                                 <span
                                   className="task-queue-board-card-context-chip"
                                   title={`Mechanism: ${mechanismLabel}`}
                                 >
-                                  Mechanism: {mechanismLabel}
+                                  {mechanismLabel}
                                 </span>
                               ) : null}
                             </>
                           )}
-                          <span
-                            className="task-queue-board-card-context-chip"
-                            title={"Mitigation: " + mitigationLabel}
-                          >
-                            {mitigationLabel}
-                          </span>
-                          <span className="task-queue-board-card-context-chip" title={sourceLabel}>
-                            {sourceLabel}
-                          </span>
                         </div>
                         <EditableHoverIndicator className="task-queue-board-card-hover" />
                       </button>

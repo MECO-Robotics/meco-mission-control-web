@@ -52,6 +52,7 @@
 }
 
 .task-queue-board-column-header .status-pill {
+  display: inline-flex;
   align-items: center;
   justify-content: flex-start;
   gap: calc(0.32rem * var(--task-queue-zoom, 1));
@@ -65,10 +66,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  line-height: 0;
   width: calc(1rem * var(--task-queue-zoom, 1));
   height: calc(1rem * var(--task-queue-zoom, 1));
   flex: 0 0 auto;
-  line-height: 0;
 }
 
 .task-queue-board-column-header-icon .timeline-task-status-logo {

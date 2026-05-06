@@ -10,9 +10,11 @@ import type { MilestoneDetailEditableField } from "./sections/MilestonesEventDet
 export function MilestoneDetailValue({
   children,
   onOpenEditMilestone,
+  showEditIndicator = false,
 }: {
   children: ReactNode;
   onOpenEditMilestone: () => void;
+  showEditIndicator?: boolean;
 }) {
   return (
     <button
@@ -22,7 +24,9 @@ export function MilestoneDetailValue({
       type="button"
     >
       {children}
-      <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator" />
+      {showEditIndicator ? (
+        <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator" />
+      ) : null}
     </button>
   );
 }
@@ -30,9 +34,11 @@ export function MilestoneDetailValue({
 export function MilestoneDetailInlineValue({
   children,
   onOpenEditMilestone,
+  showEditIndicator = false,
 }: {
   children: ReactNode;
   onOpenEditMilestone: () => void;
+  showEditIndicator?: boolean;
 }) {
   return (
     <span className="task-detail-inline-edit-shell task-detail-inline-edit-shell-inline milestone-detail-inline-value">
@@ -43,7 +49,9 @@ export function MilestoneDetailInlineValue({
         type="button"
       >
         {children}
-        <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator" />
+        {showEditIndicator ? (
+          <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator" />
+        ) : null}
       </button>
     </span>
   );

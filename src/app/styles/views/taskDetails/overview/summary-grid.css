@@ -27,6 +27,29 @@
   width: auto;
 }
 
+.milestone-detail-type-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.milestone-detail-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin-top: 0.65rem;
+}
+
+.milestone-detail-description {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 900px) {
+  .milestone-detail-type-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 .modal-actions-leading {
   display: inline-flex;
   align-items: center;
