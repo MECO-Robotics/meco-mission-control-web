@@ -59,6 +59,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const data = useTimelineViewData({
     activePersonFilter,
     bootstrap,
+    isAllProjectsView,
     openCreateTaskModal,
     onTaskEditCanceled,
     onTaskEditSaved,

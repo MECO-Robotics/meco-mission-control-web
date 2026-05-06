@@ -21,6 +21,7 @@ import { resolveTimelineRowHighlightStyle } from "../timelineTaskColors";
 interface UseTimelineViewDataArgs {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
+  isAllProjectsView: boolean;
   openCreateTaskModal: () => void;
   onTaskEditCanceled: () => void;
   onTaskEditSaved: () => void;
@@ -39,6 +40,7 @@ interface UseTimelineViewDataArgs {
 export function useTimelineViewData({
   activePersonFilter,
   bootstrap,
+  isAllProjectsView,
   openCreateTaskModal,
   onTaskEditCanceled,
   onTaskEditSaved,
@@ -102,6 +104,7 @@ export function useTimelineViewData({
   const timeline = useMemo(
     () =>
       buildTimelineData({
+        isAllProjectsView,
         milestones: scopedMilestones,
         projectsById,
         scopedSubsystems: bootstrap.subsystems,
@@ -109,7 +112,15 @@ export function useTimelineViewData({
         viewAnchorDate,
         viewInterval,
       }),
-    [bootstrap.subsystems, projectsById, scopedMilestones, scopedTasks, viewAnchorDate, viewInterval],
+    [
+      bootstrap.subsystems,
+      isAllProjectsView,
+      projectsById,
+      scopedMilestones,
+      scopedTasks,
+      viewAnchorDate,
+      viewInterval,
+    ],
   );
   const timelinePeriodLabel = useMemo(
     () => formatTimelinePeriodLabel(viewInterval, timeline.days),

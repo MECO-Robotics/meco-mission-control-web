@@ -177,6 +177,7 @@ describe("TimelineView", () => {
       subsystemIds: ["subsystem-1", "subsystem-2"],
     };
     const timeline = buildTimelineData({
+      isAllProjectsView: true,
       milestones: [],
       projectsById: {
         "project-1": bootstrap.projects[0] as BootstrapPayload["projects"][number],

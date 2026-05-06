@@ -53,6 +53,13 @@ export function TimelineGridHeaderContent({
     () => buildTimelineMonthHeaderCells(monthGroups, firstDayGridColumn),
     [firstDayGridColumn, monthGroups],
   );
+  const visibleFixedColumnWidth =
+    (showProjectCol ? projectColumnWidth : 0) + (showSubsystemCol ? subsystemColumnWidth : 0);
+  const minimumDayWidth =
+    timelineDayHeaderCells.length > 0
+      ? Math.max(0, Math.round((gridMinWidth - visibleFixedColumnWidth) / timelineDayHeaderCells.length))
+      : 0;
+  const timelineTaskBarEdgeGap = Math.max(2, Math.round(minimumDayWidth * 0.08));
 
   return (
     <div
@@ -61,6 +68,7 @@ export function TimelineGridHeaderContent({
       data-is-scrolling={isScrolling ? "true" : undefined}
       onWheel={handleTimelineZoomWheel}
       style={{
+        "--timeline-task-bar-edge-gap": `${timelineTaskBarEdgeGap}px`,
         "--timeline-zoom": timelineZoom,
         overflowX: "auto",
         padding: 0,
@@ -81,7 +89,7 @@ export function TimelineGridHeaderContent({
         key={`timeline-grid-${timelineGridMotion.token}`}
         ref={timelineGridRef}
         style={{
-          "--timeline-task-bar-edge-gap": `${Math.round(24 * timelineZoom)}px`,
+          "--timeline-task-bar-edge-gap": `${timelineTaskBarEdgeGap}px`,
           "--timeline-zoom": timelineZoom,
           display: "grid",
           width: "100%",

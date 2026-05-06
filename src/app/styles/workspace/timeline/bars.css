@@ -121,6 +121,34 @@
   white-space: nowrap;
 }
 
+.timeline-bar-hover-host:hover,
+.timeline-bar-hover-host:focus-within {
+  z-index: 10081;
+}
+
+.timeline-bar-hover-host:hover .timeline-bar-content,
+.timeline-bar-hover-host:focus-within .timeline-bar-content,
+.timeline-bar:hover .timeline-bar-content,
+.timeline-bar:focus-visible .timeline-bar-content {
+  overflow: visible;
+}
+
+.timeline-bar-hover-host:hover .timeline-bar-title.timeline-ellipsis-reveal,
+.timeline-bar-hover-host:focus-within .timeline-bar-title.timeline-ellipsis-reveal,
+.timeline-bar:hover .timeline-bar-title.timeline-ellipsis-reveal,
+.timeline-bar:focus-visible .timeline-bar-title.timeline-ellipsis-reveal {
+  flex: 0 0 auto;
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+  position: relative;
+  z-index: 10083;
+  padding: 0.08rem 0.28rem;
+  border-radius: 0.3rem;
+  background: color-mix(in srgb, var(--timeline-task-discipline-accent) 82%, transparent);
+  box-shadow: 0 2px 10px rgba(15, 28, 52, 0.2);
+}
+
 .timeline-bar .editable-hover-indicator,
 .timeline-bar-hover-host .editable-hover-indicator {
   right: -0.08rem;
