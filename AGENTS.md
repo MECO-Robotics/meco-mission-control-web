@@ -7,7 +7,8 @@
 * Do not stop to recommend changes unless you were explicitly asked to recommend options; implement the requested change instead.
 * When working in a Git worktree, always audit UI changes against the worktree-hosted app instance (the version rooted at `C:\Users\Brian\.codex\worktrees\331f\meco-mission-control-web`) before finishing.
 * Keep diagnostic and snapshot artifacts out of the repository root. Create and use `/.diagnostics/` (and subfolders) for screenshots, snapshot files, and similar temporary materials.
-* For codex worktrees, prefer `environment.toml` + `scripts/codex-worktree-bootstrap.ps1` for startup enforcement.
+* For codex worktrees, use repository `environment.toml` as the startup source of truth (Codex UI reads this directly).
+* Keep startup commands and dev URL only in `environment.toml`; `AGENTS.md` references it and does not duplicate command details.
 
 ---
 
@@ -199,13 +200,12 @@ These must still be reviewed if they exceed:
 
 Exceeding any hard limit is not allowed.
 
-* For each new Codex worktree, install deps (`npm.cmd install`) and run the webpage (`npm.cmd run dev`) before marking the environment as ready.
+* For each new Codex worktree, bootstrap via `environment.toml`/Codex UI configuration before marking the environment as ready.
 
 ### Codex worktree bootstrap
 
-* Use this exact one-time bootstrap flow when creating a Codex worktree:
-  * `cd <new-worktree>`
-  * `npm.cmd install`
-  * `npm.cmd run dev -- --host 127.0.0.1 --port 5173`
-  * Confirm URL `http://127.0.0.1:5173`
-* Keep a reusable workflow via `scripts/codex-worktree-bootstrap.ps1` for dependency install + app launch.
+* For this repo, `environment.toml` is authoritative. Keep it as:
+  * `bootstrap_command = "powershell.exe -ExecutionPolicy Bypass -File ./scripts/codex-worktree-bootstrap.ps1"`
+  * `requirements = ["npm.cmd install", "npm.cmd run dev -- --host 127.0.0.1 --port 5173"]`
+  * `dev_url = "http://127.0.0.1:5173"`
+* Keep `scripts/codex-worktree-bootstrap.ps1` as the executable fallback when manual bootstrap is needed outside Codex UI.
