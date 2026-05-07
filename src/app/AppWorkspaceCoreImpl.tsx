@@ -41,6 +41,7 @@ export default function AppWorkspaceCoreImpl() {
         isDarkMode={c.isDarkMode}
         isSigningIn={c.isSigningIn}
         onRequestEmailCode={c.handleRequestEmailCode}
+        onToggleDarkMode={c.toggleDarkMode}
         onVerifyEmailCode={c.handleVerifyEmailCode}
         onDevBypassSignIn={c.handleDevBypassSignIn}
         shellStyle={c.isDarkMode ? c.pageShellStyle : undefined}

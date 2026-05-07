@@ -8,11 +8,18 @@
   display: block;
 }
 
+.auth-intro-brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+}
+
 .auth-intro-mark-wrap {
   display: inline-flex;
   align-items: flex-start;
   justify-content: flex-start;
-  justify-self: end;
+  margin-left: auto;
   width: fit-content;
   max-width: 100%;
   padding: 0.8rem 0.85rem;
@@ -30,6 +37,51 @@
   max-width: 100%;
   height: auto;
   filter: drop-shadow(0 26px 34px rgba(2, 6, 23, 0.35));
+}
+
+.auth-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.25rem;
+  padding: 0.35rem 0.68rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(248, 250, 252, 0.96);
+  font-family: "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.auth-theme-toggle:hover {
+  border-color: rgba(255, 255, 255, 0.42);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.auth-theme-toggle:focus-visible {
+  outline: none;
+  border-color: rgba(191, 219, 254, 0.95);
+  box-shadow: 0 0 0 2px rgba(191, 219, 254, 0.28);
+}
+
+.auth-theme-toggle:active {
+  transform: translateY(1px);
+}
+
+.auth-theme-toggle-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.auth-theme-toggle-label {
+  white-space: nowrap;
 }
 
 .dense-shell {
