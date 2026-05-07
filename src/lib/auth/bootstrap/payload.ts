@@ -38,7 +38,11 @@ export function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapP
     risks: source.risks ?? [],
     tasks: planning.tasks,
     workLogs: catalog.workLogs,
+    meetings: source.meetings ?? [],
+    attendanceRecords: source.attendanceRecords ?? [],
     purchaseItems: catalog.purchaseItems,
     manufacturingItems: catalog.manufacturingItems,
+    qaReviews: source.qaReviews ?? [],
+    escalations: source.escalations ?? [],
   };
 }

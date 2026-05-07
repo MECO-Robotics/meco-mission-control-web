@@ -1,14 +1,15 @@
-import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import { RobotMapView } from "@/features/workspace/views/robotMap/RobotMapView";
 
-export function TaskRobotMapPlaceholderView() {
-  return (
-    <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
-      <div className="empty-state">
-        <strong>Robot map placeholder</strong>
-        <p className="section-copy">
-          Robot mapping and system layout controls will be added here.
-        </p>
-      </div>
-    </section>
-  );
+interface TaskRobotMapPlaceholderViewProps {
+  bootstrap: BootstrapPayload;
+  openCreateMechanismModal: (subsystemId?: string) => void;
+  openCreatePartInstanceModal: (mechanism: BootstrapPayload["mechanisms"][number]) => void;
+  openCreateSubsystemModal: () => void;
+  openEditMechanismModal: (mechanism: BootstrapPayload["mechanisms"][number]) => void;
+  openEditSubsystemModal: (subsystem: BootstrapPayload["subsystems"][number]) => void;
+}
+
+export function TaskRobotMapPlaceholderView(props: TaskRobotMapPlaceholderViewProps) {
+  return <RobotMapView {...props} />;
 }

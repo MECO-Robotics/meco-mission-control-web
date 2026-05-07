@@ -1,14 +1,14 @@
-import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import { PartMappingsView } from "@/features/workspace/views/partMappings/PartMappingsView";
 
-export function PartMappingsPlaceholderView() {
-  return (
-    <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
-      <div className="empty-state">
-        <strong>Parts map placeholder</strong>
-        <p className="section-copy">
-          Part-to-system mapping workflows and relationship tools will be added here.
-        </p>
-      </div>
-    </section>
-  );
+interface PartMappingsPlaceholderViewProps {
+  bootstrap: BootstrapPayload;
+  openCreatePartDefinitionModal: () => void;
+  openCreatePartInstanceModal: (mechanism: BootstrapPayload["mechanisms"][number]) => void;
+  openEditMechanismModal: (mechanism: BootstrapPayload["mechanisms"][number]) => void;
+  openEditPartDefinitionModal: (item: BootstrapPayload["partDefinitions"][number]) => void;
+}
+
+export function PartMappingsPlaceholderView(props: PartMappingsPlaceholderViewProps) {
+  return <PartMappingsView {...props} />;
 }

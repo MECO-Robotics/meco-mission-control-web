@@ -25,6 +25,10 @@ export const EMPTY_BOOTSTRAP: BootstrapPayload = {
   risks: [],
   tasks: [],
   workLogs: [],
+  meetings: [],
+  attendanceRecords: [],
   purchaseItems: [],
   manufacturingItems: [],
+  qaReviews: [],
+  escalations: [],
 };

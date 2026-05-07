@@ -34,6 +34,11 @@ export interface WorkspaceTaskPanelProps {
   membersById: WorkspaceContentPanelsViewProps["membersById"];
   openCreateTaskModal: WorkspaceContentPanelsViewProps["openCreateTaskModal"];
   openCreateTaskModalFromTimeline: WorkspaceContentPanelsViewProps["openCreateTaskModalFromTimeline"];
+  openCreateMechanismModal: WorkspaceContentPanelsViewProps["openCreateMechanismModal"];
+  openCreatePartInstanceModal: WorkspaceContentPanelsViewProps["openCreatePartInstanceModal"];
+  openCreateSubsystemModal: WorkspaceContentPanelsViewProps["openCreateSubsystemModal"];
+  openEditMechanismModal: WorkspaceContentPanelsViewProps["openEditMechanismModal"];
+  openEditSubsystemModal: WorkspaceContentPanelsViewProps["openEditSubsystemModal"];
   openTimelineTaskDetailsModal: WorkspaceContentPanelsViewProps["openTimelineTaskDetailsModal"];
   setActivePersonFilter: WorkspaceContentPanelsViewProps["setActivePersonFilter"];
   subsystemsById: WorkspaceContentPanelsViewProps["subsystemsById"];
@@ -185,6 +190,11 @@ export function groupWorkspaceContentPanelProps(
       membersById: props.membersById,
       openCreateTaskModal: props.openCreateTaskModal,
       openCreateTaskModalFromTimeline: props.openCreateTaskModalFromTimeline,
+      openCreateMechanismModal: props.openCreateMechanismModal,
+      openCreatePartInstanceModal: props.openCreatePartInstanceModal,
+      openCreateSubsystemModal: props.openCreateSubsystemModal,
+      openEditMechanismModal: props.openEditMechanismModal,
+      openEditSubsystemModal: props.openEditSubsystemModal,
       openTimelineTaskDetailsModal: props.openTimelineTaskDetailsModal,
       setActivePersonFilter: props.setActivePersonFilter,
       subsystemsById: props.subsystemsById,

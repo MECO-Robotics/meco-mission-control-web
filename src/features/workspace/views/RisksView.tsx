@@ -4,6 +4,7 @@ import type { CSSProperties } from "react";
 import type { RiskManagementViewTab } from "@/lib/workspaceNavigation";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { RiskPayload } from "@/types/payloads";
+import type { TaskRecord } from "@/types/recordsExecution";
 import type { RiskRecord } from "@/types/recordsReporting";
 import { EditableHoverIndicator } from "@/features/workspace/shared/table/workspaceTableChrome";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
@@ -11,6 +12,7 @@ import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspa
 import { KanbanColumns } from "@/features/workspace/views/kanban/KanbanColumns";
 import { KanbanScrollFrame } from "@/features/workspace/views/kanban/KanbanScrollFrame";
 import { resolveWorkspaceColor } from "@/features/workspace/shared/model/workspaceColors";
+import { AttentionView } from "@/features/workspace/views/attention/AttentionView";
 
 import { RiskEditorModal } from "./RiskEditorModal";
 import { RiskDetailsModal } from "./RiskDetailsModal";
@@ -30,6 +32,7 @@ interface RisksViewProps {
   isAllProjectsView: boolean;
   onCreateRisk: (payload: RiskPayload) => Promise<void>;
   onDeleteRisk: (riskId: string) => Promise<void>;
+  openTaskDetailModal?: (task: TaskRecord) => void;
   onUpdateRisk: (riskId: string, payload: RiskPayload) => Promise<void>;
   view: RiskManagementViewTab;
 }
@@ -40,6 +43,7 @@ export function RisksView({
   isAllProjectsView,
   onCreateRisk,
   onDeleteRisk,
+  openTaskDetailModal,
   onUpdateRisk,
   view,
 }: RisksViewProps) {
@@ -168,12 +172,22 @@ export function RisksView({
   return (
     <section className={`panel dense-panel subsystem-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
       {view === "attention" ? (
-        <div className="empty-state">
-          <strong>Attention placeholder</strong>
-          <p className="section-copy">
-            Priority attention signals, blockers, and escalation summaries will be added here.
-          </p>
-        </div>
+        <AttentionView
+          activePersonFilter={activePersonFilter}
+          bootstrap={bootstrap}
+          onOpenRisk={(riskId) => {
+            const targetRisk = bootstrap.risks.find((risk) => risk.id === riskId);
+            if (targetRisk) {
+              viewModel.openRiskDetails(targetRisk);
+            }
+          }}
+          onOpenTask={(taskId) => {
+            const task = tasksById[taskId];
+            if (task && openTaskDetailModal) {
+              openTaskDetailModal(task);
+            }
+          }}
+        />
       ) : null}
 
       {view === "metrics" ? (

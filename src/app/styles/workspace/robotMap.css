@@ -1,0 +1,152 @@
+.robot-map-shell {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 0;
+}
+
+.robot-map-summary-grid {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+.robot-map-summary-card {
+  background: var(--bg-row-alt);
+  border: 1px solid var(--border-base);
+  border-radius: 0.8rem;
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.65rem 0.75rem;
+}
+
+.robot-map-summary-card strong {
+  color: var(--text-title);
+  font-size: 1.05rem;
+}
+
+.robot-map-summary-card small {
+  color: var(--text-copy);
+  font-size: 0.73rem;
+  font-weight: 700;
+}
+
+.robot-map-subsystem-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  min-height: 0;
+  overflow: auto;
+  padding-right: 0.1rem;
+}
+
+.robot-map-subsystem-card {
+  background: var(--bg-row-alt);
+  border: 1px solid var(--border-base);
+  border-radius: 0.9rem;
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.75rem;
+}
+
+.robot-map-subsystem-blocked {
+  box-shadow: inset 3px 0 0 #dc2626;
+}
+
+.robot-map-subsystem-at-risk {
+  box-shadow: inset 3px 0 0 #ca8a04;
+}
+
+.robot-map-subsystem-ready {
+  box-shadow: inset 3px 0 0 #15803d;
+}
+
+.robot-map-subsystem-header {
+  align-items: flex-start;
+  display: flex;
+  justify-content: space-between;
+}
+
+.robot-map-subsystem-title {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.robot-map-subsystem-title h3 {
+  color: var(--text-title);
+  margin: 0;
+}
+
+.robot-map-subsystem-actions {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+
+.robot-map-subsystem-metrics {
+  color: var(--text-copy);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.73rem;
+  font-weight: 700;
+  gap: 0.35rem 0.75rem;
+}
+
+.robot-map-mechanism-list {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.robot-map-mechanism-row {
+  align-items: flex-start;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-base);
+  border-radius: 0.65rem;
+  display: flex;
+  gap: 0.65rem;
+  justify-content: space-between;
+  padding: 0.52rem 0.62rem;
+}
+
+.robot-map-mechanism-main {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.robot-map-mechanism-main strong {
+  color: var(--text-title);
+}
+
+.robot-map-mechanism-metrics {
+  color: var(--text-copy);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.72rem;
+  font-weight: 700;
+  gap: 0.3rem 0.65rem;
+}
+
+.robot-map-mechanism-actions {
+  display: inline-flex;
+  gap: 0.3rem;
+}
+
+.robot-map-empty {
+  border: 1px dashed var(--border-base);
+  border-radius: 0.9rem;
+  display: grid;
+  gap: 0.6rem;
+  justify-items: start;
+  padding: 1rem;
+}
+
+@media (max-width: 880px) {
+  .robot-map-mechanism-row {
+    flex-direction: column;
+  }
+
+  .robot-map-mechanism-actions {
+    width: 100%;
+  }
+}

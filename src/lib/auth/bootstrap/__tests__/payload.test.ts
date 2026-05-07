@@ -3,7 +3,12 @@
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { normalizeBootstrapPayload } from "@/lib/auth/bootstrap/payload";
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { MilestoneRequirementRecord } from "@/types/recordsExecution";
+import type {
+  EscalationRecord,
+  MeetingRecord,
+  MilestoneRequirementRecord,
+  QaReviewRecord,
+} from "@/types/recordsExecution";
 
 describe("normalizeBootstrapPayload", () => {
   it("creates separate Operations and Business projects by default", () => {
@@ -52,5 +57,60 @@ describe("normalizeBootstrapPayload", () => {
     const normalized = normalizeBootstrapPayload(payload);
 
     expect(normalized.milestoneRequirements).toEqual(milestoneRequirements);
+  });
+
+  it("preserves calendar and triage bootstrap records", () => {
+    const meetings: MeetingRecord[] = [
+      {
+        id: "meeting-1",
+        title: "Build Standup",
+        date: "2026-03-01",
+        time: "17:30",
+        rsvpsYes: 5,
+        rsvpsMaybe: 2,
+        openSignIns: 1,
+      },
+    ];
+    const qaReviews: QaReviewRecord[] = [
+      {
+        id: "qa-review-1",
+        subjectId: "task-1",
+        subjectType: "task",
+        subjectTitle: "Wire drive train",
+        participantIds: ["member-1"],
+        result: "pass",
+        mentorApproved: true,
+        notes: "Ready for next step",
+        reviewedAt: "2026-03-01T20:00:00.000Z",
+      },
+    ];
+    const escalations: EscalationRecord[] = [
+      {
+        title: "Battery shipment delayed",
+        detail: "Critical battery order is delayed by 3 days.",
+        severity: "high",
+      },
+    ];
+    const payload: BootstrapPayload = {
+      ...EMPTY_BOOTSTRAP,
+      meetings,
+      attendanceRecords: [
+        {
+          id: "attendance-1",
+          memberId: "member-1",
+          date: "2026-03-01",
+          totalHours: 3,
+        },
+      ],
+      qaReviews,
+      escalations,
+    };
+
+    const normalized = normalizeBootstrapPayload(payload);
+
+    expect(normalized.meetings).toEqual(meetings);
+    expect(normalized.attendanceRecords).toEqual(payload.attendanceRecords);
+    expect(normalized.qaReviews).toEqual(qaReviews);
+    expect(normalized.escalations).toEqual(escalations);
   });
 });

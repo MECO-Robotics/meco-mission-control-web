@@ -30,7 +30,9 @@ export function WorkspaceInventorySection(props: WorkspaceContentPanelsViewProps
     openEditArtifactModal,
     openEditMaterialModal,
     openCreatePartDefinitionModal,
+    openCreatePartInstanceModal,
     openEditPartDefinitionModal,
+    openEditMechanismModal,
     openCreatePurchaseModal,
     openEditPurchaseModal,
     partDefinitionsById,
@@ -91,7 +93,13 @@ export function WorkspaceInventorySection(props: WorkspaceContentPanelsViewProps
         isActive={!isNonRobotProject && effectiveInventoryView === "part-mappings"}
         swipeDirection={inventorySwipeDirection}
       >
-        <PartMappingsPlaceholderView />
+        <PartMappingsPlaceholderView
+          bootstrap={bootstrap}
+          openCreatePartDefinitionModal={openCreatePartDefinitionModal}
+          openCreatePartInstanceModal={openCreatePartInstanceModal}
+          openEditMechanismModal={openEditMechanismModal}
+          openEditPartDefinitionModal={openEditPartDefinitionModal}
+        />
       </WorkspaceSubPanel>
 
       <WorkspaceSubPanel

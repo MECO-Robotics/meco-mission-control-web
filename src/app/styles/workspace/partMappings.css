@@ -1,0 +1,133 @@
+.part-mappings-shell {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 0;
+}
+
+.part-mappings-header {
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.part-mappings-summary-grid {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+.part-mappings-summary-card {
+  background: var(--bg-row-alt);
+  border: 1px solid var(--border-base);
+  border-radius: 0.8rem;
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.65rem 0.75rem;
+}
+
+.part-mappings-summary-card strong {
+  color: var(--text-title);
+  font-size: 1.05rem;
+}
+
+.part-mappings-summary-card small {
+  color: var(--text-copy);
+  font-size: 0.73rem;
+  font-weight: 700;
+}
+
+.part-mappings-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-height: 0;
+}
+
+.part-mappings-group {
+  background: var(--bg-row-alt);
+  border: 1px solid var(--border-base);
+  border-radius: 0.85rem;
+  display: grid;
+  gap: 0.55rem;
+  min-height: 0;
+  overflow: auto;
+  padding: 0.75rem;
+}
+
+.part-mappings-definition-list,
+.part-mappings-mechanism-list {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.part-mappings-definition-card,
+.part-mappings-mechanism-row {
+  align-items: flex-start;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-base);
+  border-radius: 0.7rem;
+  display: flex;
+  gap: 0.65rem;
+  justify-content: space-between;
+  padding: 0.58rem 0.64rem;
+}
+
+.part-mappings-definition-card.is-unmapped {
+  border-color: color-mix(in srgb, #ca8a04 40%, var(--border-base));
+}
+
+.part-mappings-definition-main,
+.part-mappings-mechanism-main {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.part-mappings-definition-main strong,
+.part-mappings-mechanism-main strong {
+  color: var(--text-title);
+}
+
+.part-mappings-definition-main small,
+.part-mappings-mechanism-main small {
+  color: var(--text-copy);
+}
+
+.part-mappings-definition-title-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.part-mappings-definition-metrics {
+  color: var(--text-copy);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.73rem;
+  font-weight: 700;
+  gap: 0.32rem 0.72rem;
+}
+
+.part-mappings-mechanism-actions {
+  display: inline-flex;
+  gap: 0.3rem;
+}
+
+@media (max-width: 1080px) {
+  .part-mappings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .part-mappings-header {
+    flex-direction: column;
+  }
+
+  .part-mappings-definition-card,
+  .part-mappings-mechanism-row {
+    flex-direction: column;
+  }
+}

@@ -36,6 +36,11 @@ export function WorkspaceTaskSection({
     membersById,
     openCreateTaskModal,
     openCreateTaskModalFromTimeline,
+    openCreateMechanismModal,
+    openCreatePartInstanceModal,
+    openCreateSubsystemModal,
+    openEditMechanismModal,
+    openEditSubsystemModal,
     openTimelineTaskDetailsModal,
     setActivePersonFilter,
     subsystemsById,
@@ -55,7 +60,16 @@ export function WorkspaceTaskSection({
         isActive={taskView === "calendar"}
         swipeDirection={taskSwipeDirection}
       >
-        <TaskCalendarPlaceholderView />
+        <TaskCalendarPlaceholderView
+          activePersonFilter={activePersonFilter}
+          bootstrap={bootstrap}
+          isAllProjectsView={isAllProjectsView}
+          onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
+          onSaveTimelineMilestone={handleTimelineMilestoneSave}
+          onTaskDetailOpen={openTimelineTaskDetailsModal}
+          onTaskEditCanceled={shell.onTaskEditCanceled}
+          onTaskEditSaved={shell.onTaskEditSaved}
+        />
       </WorkspaceSubPanel>
 
       <WorkspaceSubPanel
@@ -84,7 +98,14 @@ export function WorkspaceTaskSection({
         isActive={taskView === "robot-map"}
         swipeDirection={taskSwipeDirection}
       >
-        <TaskRobotMapPlaceholderView />
+        <TaskRobotMapPlaceholderView
+          bootstrap={bootstrap}
+          openCreateMechanismModal={openCreateMechanismModal}
+          openCreatePartInstanceModal={openCreatePartInstanceModal}
+          openCreateSubsystemModal={openCreateSubsystemModal}
+          openEditMechanismModal={openEditMechanismModal}
+          openEditSubsystemModal={openEditSubsystemModal}
+        />
       </WorkspaceSubPanel>
 
       <WorkspaceSubPanel
@@ -153,6 +174,7 @@ export function WorkspaceRiskSection(props: WorkspaceContentPanelsViewProps) {
           isAllProjectsView={isAllProjectsView}
           onCreateRisk={onCreateRisk}
           onDeleteRisk={onDeleteRisk}
+          openTaskDetailModal={props.openTimelineTaskDetailsModal}
           onUpdateRisk={onUpdateRisk}
           view={riskManagementView}
         />

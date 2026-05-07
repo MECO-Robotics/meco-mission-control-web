@@ -1,0 +1,137 @@
+.attention-view-shell {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.8rem;
+  min-height: 0;
+}
+
+.attention-summary-grid {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+.attention-summary-card {
+  background: var(--bg-row-alt);
+  border: 1px solid var(--border-base);
+  border-radius: 0.8rem;
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.65rem 0.75rem;
+}
+
+.attention-summary-card strong {
+  color: var(--text-title);
+  font-size: 1.05rem;
+}
+
+.attention-summary-card small {
+  color: var(--text-copy);
+  font-size: 0.73rem;
+  font-weight: 700;
+}
+
+.attention-groups {
+  display: grid;
+  gap: 0.75rem;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 0.1rem;
+}
+
+.attention-group {
+  background: var(--bg-row-alt);
+  border: 1px solid var(--border-base);
+  border-radius: 0.85rem;
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.75rem;
+}
+
+.attention-triage-list {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.attention-triage-item {
+  align-items: flex-start;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-base);
+  border-radius: 0.7rem;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  padding: 0.62rem 0.7rem;
+}
+
+.attention-triage-main {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.attention-triage-title-row {
+  align-items: center;
+  display: flex;
+  gap: 0.45rem;
+}
+
+.attention-triage-title-row strong {
+  color: var(--text-title);
+}
+
+.attention-triage-main small {
+  color: var(--text-copy);
+}
+
+.attention-triage-meta {
+  color: var(--text-copy);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.74rem;
+  font-weight: 700;
+  gap: 0.35rem 0.75rem;
+}
+
+.attention-triage-side {
+  align-items: flex-end;
+  display: grid;
+  gap: 0.4rem;
+  justify-items: end;
+}
+
+.attention-item-kind {
+  color: var(--text-copy);
+  font-size: 0.67rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.attention-triage-side .ghost-button {
+  background: transparent;
+  border: 1px solid var(--border-base);
+  border-radius: 0.45rem;
+  color: var(--text-copy);
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.22rem 0.55rem;
+}
+
+.attention-triage-side .ghost-button:hover {
+  border-color: color-mix(in srgb, var(--meco-blue) 50%, var(--border-base));
+  color: var(--text-title);
+}
+
+@media (max-width: 860px) {
+  .attention-triage-item {
+    flex-direction: column;
+  }
+
+  .attention-triage-side {
+    align-items: flex-start;
+    justify-items: start;
+  }
+}

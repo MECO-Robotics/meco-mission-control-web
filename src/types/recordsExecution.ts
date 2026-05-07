@@ -123,3 +123,33 @@ export interface AttendanceRecord {
   date: string;
   totalHours: number;
 }
+
+export interface MeetingRecord {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  rsvpsYes: number;
+  rsvpsMaybe: number;
+  openSignIns: number;
+}
+
+export type QaReviewResult = "pass" | "minor-fix" | "iteration-worthy";
+
+export interface QaReviewRecord {
+  id: string;
+  subjectId: string;
+  subjectType: "task" | "manufacturing";
+  subjectTitle: string;
+  participantIds: string[];
+  result: QaReviewResult;
+  mentorApproved: boolean;
+  notes: string;
+  reviewedAt: string;
+}
+
+export interface EscalationRecord {
+  title: string;
+  detail: string;
+  severity: "high" | "medium";
+}
