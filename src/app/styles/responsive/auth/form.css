@@ -3,6 +3,51 @@
   gap: 0.8rem;
 }
 
+.auth-method-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-block: 0.45rem;
+  margin-inline: 0;
+  color: rgba(15, 23, 42, 0.72);
+  font-size: 0.73rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.auth-method-divider::before,
+.auth-method-divider::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: rgba(15, 23, 42, 0.2);
+}
+
+.auth-method-divider span {
+  display: inline-block;
+  color: inherit;
+}
+
+.auth-google-chip {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.auth-google-chip > .auth-chip-row {
+  margin-inline: auto;
+}
+
+.page-shell.auth-shell.dark-mode .auth-method-divider {
+  color: rgba(226, 232, 240, 0.92);
+}
+
+.page-shell.auth-shell.dark-mode .auth-method-divider::before,
+.page-shell.auth-shell.dark-mode .auth-method-divider::after {
+  background: rgba(148, 163, 184, 0.5);
+}
+
 .auth-email-send-field {
   position: relative;
 }

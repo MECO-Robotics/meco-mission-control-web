@@ -26,7 +26,6 @@ function AppTopbarProfileMenu({
   sessionUser: SessionUser;
   toggleDarkMode: () => void;
 }) {
-  const themeToggleMenuLabel = isDarkMode ? "Light mode" : "Dark mode";
   const themeToggleMenuTitle = isDarkMode ? "Switch to light mode" : "Switch to dark mode";
 
   const handleSeasonChange = (milestone: ChangeEvent<HTMLSelectElement>) => {
@@ -92,10 +91,24 @@ function AppTopbarProfileMenu({
           title={themeToggleMenuTitle}
           type="button"
         >
-          <span aria-hidden="true" className="profile-menu-item-icon">
-            {isDarkMode ? "\u2600" : "\u263E"}
+          <span className="profile-menu-item-theme-copy">
+            <span className="profile-menu-item-theme-title">Theme mode</span>
+            <span className="profile-menu-item-theme-value">
+              {isDarkMode ? "Dark" : "Light"}
+            </span>
           </span>
-          <span className="profile-menu-item-theme-label">{themeToggleMenuLabel}</span>
+          <span
+            aria-hidden="true"
+            className={`profile-mode-selector ${isDarkMode ? "is-dark" : "is-light"}`}
+          >
+            <span className="profile-mode-selector-track">
+              <span className="profile-mode-selector-thumb">
+                <span className="profile-mode-selector-icon">
+                  {isDarkMode ? "\u263E" : "\u2600"}
+                </span>
+              </span>
+            </span>
+          </span>
         </button>
         <button className="profile-menu-item" onClick={handleSignOut} role="menuitem" type="button">
           Sign out

@@ -73,6 +73,13 @@
   align-items: stretch;
 }
 
+.auth-layout-dev-bypass-row {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
 .auth-layout-backdrop {
   position: absolute;
   top: 50%;
