@@ -74,6 +74,17 @@ export interface NavigationTarget {
   rosterView?: RosterViewTab;
 }
 
+export interface NavigationState {
+  activeTab: ViewTab;
+  taskView: TaskViewTab;
+  riskManagementView: RiskManagementViewTab;
+  worklogsView: WorklogsViewTab;
+  reportsView: ReportsViewTab;
+  inventoryView: InventoryViewTab;
+  manufacturingView: ManufacturingViewTab;
+  rosterView: RosterViewTab;
+}
+
 export interface NavigationSubItem {
   id: NavigationSubItemId;
   label: string;
@@ -313,98 +324,70 @@ export const NAVIGATION_SUB_ITEMS_BY_SECTION: Record<
   reports: NAVIGATION_SUB_ITEMS.filter((item) => item.section === "reports"),
 };
 
-export function getActiveNavigationSubItemId({
-  activeTab,
-  inventoryView,
-  rosterView,
-  reportsView,
-  riskManagementView,
-  taskView,
-  worklogsView,
-}: {
-  activeTab: ViewTab;
-  inventoryView: InventoryViewTab;
-  rosterView: RosterViewTab;
-  reportsView: ReportsViewTab;
-  riskManagementView: RiskManagementViewTab;
-  taskView: TaskViewTab;
-  worklogsView: WorklogsViewTab;
-}): NavigationSubItemId {
-  if (activeTab === "tasks") {
-    if (taskView === "calendar") {
-      return "dashboard-calendar";
-    }
-
-    if (taskView === "robot-map") {
-      return "config-robot-model";
-    }
-
-    if (taskView === "timeline") {
-      return "tasks-timeline";
-    }
-
-    if (taskView === "queue") {
-      return "tasks-board";
-    }
-
-    return "readiness-milestones";
+function normalizeNavigationState(state: NavigationState): NavigationState {
+  if (state.activeTab === "manufacturing") {
+    return {
+      ...state,
+      manufacturingView: "cnc",
+    };
   }
 
-  if (activeTab === "risk-management") {
-    if (riskManagementView === "attention") {
-      return "readiness-attention";
-    }
-
-    return riskManagementView === "metrics" ? "dashboard-metrics" : "readiness-risks";
+  if (state.activeTab === "worklogs" && state.worklogsView === "summary") {
+    return {
+      ...state,
+      worklogsView: "logs",
+    };
   }
 
-  if (activeTab === "manufacturing") {
-    return "tasks-manufacturing";
+  return state;
+}
+
+export function targetMatchesNavigationState(
+  target: NavigationTarget,
+  state: NavigationState,
+): boolean {
+  if (target.tab !== state.activeTab) {
+    return false;
   }
 
-  if (activeTab === "inventory") {
-    if (inventoryView === "part-mappings") {
-      return "config-part-mappings";
-    }
-
-    if (inventoryView === "parts") {
-      return "inventory-parts";
-    }
-
-    if (inventoryView === "purchases") {
-      return "inventory-purchases";
-    }
-
-    return "inventory-materials";
+  if (target.taskView && target.taskView !== state.taskView) {
+    return false;
   }
 
-  if (activeTab === "roster") {
-    if (rosterView === "workload") {
-      return "roster-workload";
-    }
-
-    if (rosterView === "attendance") {
-      return "roster-attendance";
-    }
-
-    return "config-directory";
+  if (target.riskManagementView && target.riskManagementView !== state.riskManagementView) {
+    return false;
   }
 
-  if (activeTab === "subsystems") {
-    return "readiness-subsystems";
+  if (target.worklogsView && target.worklogsView !== state.worklogsView) {
+    return false;
   }
 
-  if (activeTab === "worklogs") {
-    return worklogsView === "activity" ? "dashboard-activity" : "reports-work-logs";
+  if (target.reportsView && target.reportsView !== state.reportsView) {
+    return false;
   }
 
-  if (activeTab === "reports") {
-    return reportsView === "milestone-results"
-      ? "reports-milestone-results"
-      : "reports-qa-forms";
+  if (target.inventoryView && target.inventoryView !== state.inventoryView) {
+    return false;
   }
 
-  return "readiness-risks";
+  if (target.manufacturingView && target.manufacturingView !== state.manufacturingView) {
+    return false;
+  }
+
+  if (target.rosterView && target.rosterView !== state.rosterView) {
+    return false;
+  }
+
+  return true;
+}
+
+export function getActiveNavigationSubItemId(state: NavigationState): NavigationSubItemId {
+  const normalizedState = normalizeNavigationState(state);
+  const matchedSubItem = NAVIGATION_SUB_ITEMS.find((item) =>
+    targetMatchesNavigationState(item.target, normalizedState),
+  );
+
+  return matchedSubItem?.id ?? "readiness-risks";
 }
 
 export function getNavigationSectionFromSubItem(

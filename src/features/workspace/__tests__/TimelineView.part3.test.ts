@@ -189,7 +189,8 @@ describe("TimelineView", () => {
       return css.slice(start, blockEnd + 1);
     };
 
-    expect(css).not.toContain(".timeline-ellipsis-reveal[data-full-text]::after");
+    expect(css).toContain(".timeline-bar .timeline-bar-title.timeline-ellipsis-reveal[data-full-text]::after");
+    expect(css).not.toContain(".timeline-merged-cell-title.timeline-ellipsis-reveal[data-full-text]::after");
     expect(getRule(".timeline-bar .timeline-bar-title.timeline-ellipsis-reveal")).toMatch(/overflow:\s*hidden/);
     expect(getRule(".timeline-bar .timeline-bar-title.timeline-ellipsis-reveal")).toMatch(
       /text-overflow:\s*ellipsis/,
@@ -251,5 +252,3 @@ describe("TimelineView", () => {
   });
 
 });
-
-

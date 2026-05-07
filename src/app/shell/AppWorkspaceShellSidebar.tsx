@@ -1,8 +1,12 @@
-import type { AppWorkspaceController } from "@/app/hooks/useAppWorkspaceController";
+import type { AppWorkspaceShellSidebarController } from "@/app/hooks/useAppWorkspaceController";
 
 import { AppSidebar } from "@/app/shell/workspaceShell";
 
-export function AppWorkspaceShellSidebar({ controller }: { controller: AppWorkspaceController }) {
+export function AppWorkspaceShellSidebar({
+  controller,
+}: {
+  controller: AppWorkspaceShellSidebarController;
+}) {
   const c = controller;
   const handleSelectNavigationTarget = (target: {
     tab: typeof c.activeTab;

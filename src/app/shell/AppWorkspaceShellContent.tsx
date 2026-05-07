@@ -1,8 +1,12 @@
-import type { AppWorkspaceController } from "@/app/hooks/useAppWorkspaceController";
+import type { AppWorkspaceShellContentController } from "@/app/hooks/useAppWorkspaceController";
 
 import { WorkspaceContent } from "@/app/shell/workspaceShell";
 
-export function AppWorkspaceShellContent({ controller }: { controller: AppWorkspaceController }) {
+export function AppWorkspaceShellContent({
+  controller,
+}: {
+  controller: AppWorkspaceShellContentController;
+}) {
   const c = controller;
 
   return (

@@ -14,6 +14,7 @@ import {
   WorkspaceHelpSection,
 } from "./WorkspaceInventoryAndAdminSections";
 import { WorkspaceManufacturingSection } from "./WorkspaceManufacturingSection";
+import { groupWorkspaceContentPanelProps } from "./workspaceContentPanelsViewTypes";
 type SwipeDirection = "left" | "right" | null;
 
 type WorkspaceContentPanelsViewProps = WorkspaceContentPanelsProps & {
@@ -25,19 +26,20 @@ type WorkspaceContentPanelsViewProps = WorkspaceContentPanelsProps & {
 };
 
 export function WorkspaceContentPanelsView(props: WorkspaceContentPanelsViewProps) {
+  const groupedProps = groupWorkspaceContentPanelProps(props);
   const toastItems: WorkspaceToastStackItem[] = [
-    ...props.taskEditNotices.map((notice) => ({
+    ...groupedProps.shell.taskEditNotices.map((notice) => ({
       message: notice.message,
-      onDismiss: () => props.onDismissTaskEditNotice(notice.id),
+      onDismiss: () => groupedProps.shell.onDismissTaskEditNotice(notice.id),
       title: notice.title,
       tone: notice.tone,
       id: notice.id,
     })),
-    props.dataMessage
+    groupedProps.shell.dataMessage
       ? {
           id: "workspace-data-message",
-          message: props.dataMessage,
-          onDismiss: props.onDismissDataMessage,
+          message: groupedProps.shell.dataMessage,
+          onDismiss: groupedProps.shell.onDismissDataMessage,
           title: "Error",
           tone: "error" as const,
         }
@@ -60,16 +62,16 @@ export function WorkspaceContentPanelsView(props: WorkspaceContentPanelsViewProp
       }}
     >
       {toastItems.length > 0 ? <WorkspaceToastStack items={toastItems} /> : null}
-      {props.isLoadingData ? <p className="banner">Refreshing workspace data...</p> : null}
+      {groupedProps.shell.isLoadingData ? <p className="banner">Refreshing workspace data...</p> : null}
 
-      <WorkspaceTaskSection {...props} />
+      <WorkspaceTaskSection shell={groupedProps.shell} tasks={groupedProps.tasks} />
       <WorkspaceRiskSection {...props} />
       <WorkspaceWorklogsSection {...props} />
       <WorkspaceReportsSection {...props} />
       <WorkspaceManufacturingSection {...props} />
       <WorkspaceInventorySection {...props} />
       <WorkspaceSubsystemsSection {...props} />
-      <WorkspaceRosterSection {...props} />
+      <WorkspaceRosterSection shell={groupedProps.shell} roster={groupedProps.roster} />
       <WorkspaceHelpSection {...props} />
     </div>
   );

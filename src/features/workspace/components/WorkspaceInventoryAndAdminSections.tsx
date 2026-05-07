@@ -9,7 +9,11 @@ import { RosterView } from "@/features/workspace/views/RosterView";
 import { HelpView } from "@/features/workspace/views/HelpView";
 import { RosterPlaceholderView } from "@/features/workspace/views/roster/RosterPlaceholderView";
 import { WorkspaceSectionPanel, WorkspaceSubPanel } from "../WorkspaceContentPanelShells";
-import type { WorkspaceContentPanelsViewProps } from "./workspaceContentPanelsViewTypes";
+import type {
+  WorkspaceContentPanelsViewProps,
+  WorkspaceRosterPanelProps,
+  WorkspaceShellPanelProps,
+} from "./workspaceContentPanelsViewTypes";
 
 const DOCUMENT_ARTIFACT_KINDS: readonly ["document", "nontechnical"] = ["document", "nontechnical"];
 
@@ -146,14 +150,47 @@ export function WorkspaceSubsystemsSection(props: WorkspaceContentPanelsViewProp
   );
 }
 
-export function WorkspaceRosterSection(props: WorkspaceContentPanelsViewProps) {
-  const { allMembers, bootstrap, disablePanelAnimations = false, externalMembers, handleCreateMember, handleDeleteMember, handleReactivateMemberForSeason, handleUpdateMember, isAddPersonOpen, isDeletingMember, isEditPersonOpen, isSavingMember, memberEditDraft, memberForm, requestMemberPhotoUpload, rosterMentors, rosterView, selectMember, selectedMemberId, selectedProject, selectedSeasonId, setIsAddPersonOpen, setIsEditPersonOpen, setMemberEditDraft, setMemberForm, students, tabSwitchDirection } = props;
+export function WorkspaceRosterSection({
+  shell,
+  roster,
+}: {
+  shell: WorkspaceShellPanelProps;
+  roster: WorkspaceRosterPanelProps;
+}) {
+  const disablePanelAnimations = shell.disablePanelAnimations ?? false;
+  const {
+    allMembers,
+    bootstrap,
+    externalMembers,
+    handleCreateMember,
+    handleDeleteMember,
+    handleReactivateMemberForSeason,
+    handleUpdateMember,
+    isAddPersonOpen,
+    isDeletingMember,
+    isEditPersonOpen,
+    isSavingMember,
+    memberEditDraft,
+    memberForm,
+    requestMemberPhotoUpload,
+    rosterMentors,
+    rosterView,
+    selectMember,
+    selectedMemberId,
+    selectedProject,
+    selectedSeasonId,
+    setIsAddPersonOpen,
+    setIsEditPersonOpen,
+    setMemberEditDraft,
+    setMemberForm,
+    students,
+  } = roster;
 
   return (
     <WorkspaceSectionPanel
       disableAnimations={disablePanelAnimations}
-      isActive={props.activeTab === "roster"}
-      tabSwitchDirection={tabSwitchDirection}
+      isActive={shell.activeTab === "roster"}
+      tabSwitchDirection={shell.tabSwitchDirection}
     >
       <WorkspaceSubPanel
         disableAnimations={disablePanelAnimations}

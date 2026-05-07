@@ -1,5 +1,6 @@
 import {
   type InventoryViewTab,
+  type ManufacturingViewTab,
   type NavigationTarget,
   NAVIGATION_SECTION_LABELS,
   NAVIGATION_SUB_ITEMS_BY_SECTION,
@@ -61,6 +62,7 @@ interface AppTopbarNavigationProps {
   isAllProjectsView: boolean;
   isNonRobotProject: boolean;
   onSelectTarget: (target: NavigationTarget) => void;
+  manufacturingView: ManufacturingViewTab;
   reportsView: ReportsViewTab;
   rosterView: RosterViewTab;
   riskManagementView: RiskManagementViewTab;
@@ -74,6 +76,7 @@ export function AppTopbarNavigation({
   isAllProjectsView,
   isNonRobotProject,
   onSelectTarget,
+  manufacturingView,
   reportsView,
   rosterView,
   riskManagementView,
@@ -83,6 +86,7 @@ export function AppTopbarNavigation({
   const activeSubItemId = getActiveNavigationSubItemId({
     activeTab,
     inventoryView,
+    manufacturingView,
     rosterView,
     reportsView,
     riskManagementView,

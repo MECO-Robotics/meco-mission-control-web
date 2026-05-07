@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import type { AppWorkspaceController } from "@/app/hooks/useAppWorkspaceController";
+import type { AppWorkspaceShellOverlayLayerController } from "@/app/hooks/useAppWorkspaceController";
 
 function ModalScrim({ children, onClose }: { children: ReactNode; onClose: () => void }) {
   return (
@@ -18,7 +18,11 @@ function ModalScrim({ children, onClose }: { children: ReactNode; onClose: () =>
   );
 }
 
-export function AddSeasonPopup({ controller }: { controller: AppWorkspaceController }) {
+export function AddSeasonPopup({
+  controller,
+}: {
+  controller: AppWorkspaceShellOverlayLayerController;
+}) {
   const c = controller;
 
   return (
@@ -59,7 +63,11 @@ export function AddSeasonPopup({ controller }: { controller: AppWorkspaceControl
   );
 }
 
-export function RobotProjectPopup({ controller }: { controller: AppWorkspaceController }) {
+export function RobotProjectPopup({
+  controller,
+}: {
+  controller: AppWorkspaceShellOverlayLayerController;
+}) {
   const c = controller;
 
   return (
@@ -103,7 +111,11 @@ export function RobotProjectPopup({ controller }: { controller: AppWorkspaceCont
   );
 }
 
-export function SidebarOverlay({ controller }: { controller: AppWorkspaceController }) {
+export function SidebarOverlay({
+  controller,
+}: {
+  controller: AppWorkspaceShellOverlayLayerController;
+}) {
   const c = controller;
 
   if (!c.isSidebarOverlay) {

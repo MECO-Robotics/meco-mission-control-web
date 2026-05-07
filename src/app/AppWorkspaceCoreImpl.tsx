@@ -6,49 +6,50 @@ import { AuthStatusScreen, SignInScreen } from "@/features/auth/AuthScreens";
 
 export default function AppWorkspaceCoreImpl() {
   const c = useAppWorkspaceController();
+  const auth = c.auth;
 
-  if (c.authBooting) {
+  if (auth.authBooting) {
     return (
       <AuthStatusScreen
         body="Checking the server-side auth configuration before the workspace opens."
-        isDarkMode={c.isDarkMode}
-        shellStyle={c.isDarkMode ? c.pageShellStyle : undefined}
+        isDarkMode={auth.isDarkMode}
+        shellStyle={auth.isDarkMode ? auth.pageShellStyle : undefined}
         title="Loading sign-in rules for MECO Mission Control."
       />
     );
   }
 
-  if (!c.authConfig) {
+  if (!auth.authConfig) {
     return (
       <AuthStatusScreen
         body="The app could not confirm the server-side sign-in rules, so access is paused until the API is reachable again."
-        isDarkMode={c.isDarkMode}
-        message={c.authMessage}
-        shellStyle={c.isDarkMode ? c.pageShellStyle : undefined}
+        isDarkMode={auth.isDarkMode}
+        message={auth.authMessage}
+        shellStyle={auth.isDarkMode ? auth.pageShellStyle : undefined}
         title="Couldn&apos;t load the authentication configuration."
       />
     );
   }
 
-  if (c.enforcedAuthConfig && !c.sessionUser) {
+  if (auth.enforcedAuthConfig && !auth.sessionUser) {
     return (
       <SignInScreen
-        authMessage={c.authMessage}
-        clearAuthMessage={c.clearAuthMessage}
-        hasEmailSignIn={c.isEmailAuthAvailable}
-        hasGoogleSignIn={c.isGoogleAuthAvailable}
-        googleButtonRef={c.googleButtonRef}
-        isDarkMode={c.isDarkMode}
-        isSigningIn={c.isSigningIn}
-        onRequestEmailCode={c.handleRequestEmailCode}
-        onToggleDarkMode={c.toggleDarkMode}
-        onVerifyEmailCode={c.handleVerifyEmailCode}
-        onDevBypassSignIn={c.handleDevBypassSignIn}
-        shellStyle={c.isDarkMode ? c.pageShellStyle : undefined}
-        signInConfig={c.enforcedAuthConfig}
+        authMessage={auth.authMessage}
+        clearAuthMessage={auth.clearAuthMessage}
+        hasEmailSignIn={auth.isEmailAuthAvailable}
+        hasGoogleSignIn={auth.isGoogleAuthAvailable}
+        googleButtonRef={auth.googleButtonRef}
+        isDarkMode={auth.isDarkMode}
+        isSigningIn={auth.isSigningIn}
+        onRequestEmailCode={auth.handleRequestEmailCode}
+        onToggleDarkMode={auth.toggleDarkMode}
+        onVerifyEmailCode={auth.handleVerifyEmailCode}
+        onDevBypassSignIn={auth.handleDevBypassSignIn}
+        shellStyle={auth.isDarkMode ? auth.pageShellStyle : undefined}
+        signInConfig={auth.enforcedAuthConfig}
       />
     );
   }
 
-  return <AppWorkspaceShellView controller={c} />;
+  return <AppWorkspaceShellView controller={c.shell} />;
 }

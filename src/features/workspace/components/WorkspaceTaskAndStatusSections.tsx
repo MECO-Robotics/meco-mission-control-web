@@ -9,33 +9,46 @@ import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
 import { WorkLogsView } from "@/features/workspace/views/WorkLogsView";
 import { ReportsView } from "@/features/workspace/views/ReportsView";
 import { WorkspaceSectionPanel, WorkspaceSubPanel } from "../WorkspaceContentPanelShells";
-import type { WorkspaceContentPanelsViewProps } from "./workspaceContentPanelsViewTypes";
+import type {
+  WorkspaceContentPanelsViewProps,
+  WorkspaceShellPanelProps,
+  WorkspaceTaskPanelProps,
+} from "./workspaceContentPanelsViewTypes";
 
 const MemoizedTimelineView = memo(TimelineView);
 
-export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
+export function WorkspaceTaskSection({
+  shell,
+  tasks,
+}: {
+  shell: WorkspaceShellPanelProps;
+  tasks: WorkspaceTaskPanelProps;
+}) {
+  const disablePanelAnimations = shell.disablePanelAnimations ?? false;
   const {
     activePersonFilter,
     bootstrap,
-    disablePanelAnimations = false,
+    disciplinesById,
     handleTimelineMilestoneDelete,
     handleTimelineMilestoneSave,
     isAllProjectsView,
+    isNonRobotProject,
     membersById,
+    openCreateTaskModal,
     openCreateTaskModalFromTimeline,
     openTimelineTaskDetailsModal,
     setActivePersonFilter,
-    tabSwitchDirection,
+    subsystemsById,
     taskSwipeDirection,
     taskView,
     timelineMilestoneCreateSignal,
-  } = props;
+  } = tasks;
 
   return (
     <WorkspaceSectionPanel
       disableAnimations={disablePanelAnimations}
-      isActive={props.activeTab === "tasks"}
-      tabSwitchDirection={tabSwitchDirection}
+      isActive={shell.activeTab === "tasks"}
+      tabSwitchDirection={shell.tabSwitchDirection}
     >
       <WorkspaceSubPanel
         disableAnimations={disablePanelAnimations}
@@ -55,8 +68,8 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
           bootstrap={bootstrap}
           isAllProjectsView={isAllProjectsView}
           membersById={membersById}
-          onTaskEditCanceled={props.onTaskEditCanceled}
-          onTaskEditSaved={props.onTaskEditSaved}
+          onTaskEditCanceled={shell.onTaskEditCanceled}
+          onTaskEditSaved={shell.onTaskEditSaved}
           onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
           onSaveTimelineMilestone={handleTimelineMilestoneSave}
           openCreateTaskModal={openCreateTaskModalFromTimeline}
@@ -82,13 +95,13 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
         <TaskQueueView
           activePersonFilter={activePersonFilter}
           bootstrap={bootstrap}
-          disciplinesById={props.disciplinesById}
+          disciplinesById={disciplinesById}
           isAllProjectsView={isAllProjectsView}
-          isNonRobotProject={props.isNonRobotProject}
+          isNonRobotProject={isNonRobotProject}
           membersById={membersById}
-          openCreateTaskModal={props.openCreateTaskModal}
+          openCreateTaskModal={openCreateTaskModal}
           openEditTaskModal={openTimelineTaskDetailsModal}
-          subsystemsById={props.subsystemsById}
+          subsystemsById={subsystemsById}
         />
       </WorkspaceSubPanel>
 
@@ -101,8 +114,8 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
           activePersonFilter={activePersonFilter}
           bootstrap={bootstrap}
           isAllProjectsView={isAllProjectsView}
-          onTaskEditCanceled={props.onTaskEditCanceled}
-          onTaskEditSaved={props.onTaskEditSaved}
+          onTaskEditCanceled={shell.onTaskEditCanceled}
+          onTaskEditSaved={shell.onTaskEditSaved}
           onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
           onSaveTimelineMilestone={handleTimelineMilestoneSave}
         />

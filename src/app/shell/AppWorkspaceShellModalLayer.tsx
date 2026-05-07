@@ -1,11 +1,15 @@
 import { Suspense } from "react";
 
-import type { AppWorkspaceController } from "@/app/hooks/useAppWorkspaceController";
+import type { AppWorkspaceShellModalLayerController } from "@/app/hooks/useAppWorkspaceController";
 import { InteractiveTutorialOverlay } from "@/app/interactiveTutorial/InteractiveTutorialOverlay";
 
 import { WorkspaceModalHost } from "@/app/shell/workspaceShell";
 
-export function AppWorkspaceShellModalLayer({ controller }: { controller: AppWorkspaceController }) {
+export function AppWorkspaceShellModalLayer({
+  controller,
+}: {
+  controller: AppWorkspaceShellModalLayerController;
+}) {
   const c = controller;
 
   return (

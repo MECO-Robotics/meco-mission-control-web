@@ -262,6 +262,7 @@ export function AppSidebar({
   const activeSubItemId = getActiveNavigationSubItemId({
     activeTab,
     inventoryView,
+    manufacturingView: "cnc",
     rosterView,
     reportsView,
     riskManagementView,

@@ -1,4 +1,4 @@
-import type { AppWorkspaceController } from "@/app/hooks/useAppWorkspaceController";
+import type { AppWorkspaceShellTopbarController } from "@/app/hooks/useAppWorkspaceController";
 import {
   NAVIGATION_SECTION_LABELS,
   NAVIGATION_SUB_ITEMS,
@@ -8,11 +8,16 @@ import {
 
 import { AppTopbar } from "@/app/shell/workspaceShell";
 
-export function AppWorkspaceShellTopbar({ controller }: { controller: AppWorkspaceController }) {
+export function AppWorkspaceShellTopbar({
+  controller,
+}: {
+  controller: AppWorkspaceShellTopbarController;
+}) {
   const c = controller;
   const activeSubItemId = getActiveNavigationSubItemId({
     activeTab: c.activeTab,
     inventoryView: c.inventoryView,
+    manufacturingView: c.manufacturingView,
     rosterView: c.rosterView,
     reportsView: c.reportsView,
     riskManagementView: c.riskManagementView,

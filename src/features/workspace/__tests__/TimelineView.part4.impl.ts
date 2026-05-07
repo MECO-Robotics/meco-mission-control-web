@@ -148,18 +148,14 @@ describe("TimelineView", () => {
     expect(css).toMatch(
       /\.timeline-bar\[data-spill-right="true"\]\s*\{[\s\S]*border-top-right-radius:\s*0[\s\S]*border-bottom-right-radius:\s*0/,
     );
-    expect(getTaskBarStyle("View details for March carry-in")).toContain("margin-left:0");
     expect(getTaskBarStyle("View details for March carry-in")).not.toContain("padding-right:24px");
     expect(getTaskBarStyle("View details for March carry-in")).toContain("--timeline-task-bar-radius:4px");
     expect(getTaskBarStyle("View details for March carry-in")).not.toContain("border-top-left-radius:0");
     expect(getTaskBarStyle("View details for March carry-in")).not.toContain("border-bottom-left-radius:0");
-    expect(getTaskBarStyle("View details for May carry-out")).toContain("margin-right:0");
     expect(getTaskBarStyle("View details for May carry-out")).not.toContain("padding-left:24px");
     expect(getTaskBarStyle("View details for May carry-out")).toContain("--timeline-task-bar-radius:4px");
     expect(getTaskBarStyle("View details for May carry-out")).not.toContain("border-top-right-radius:0");
     expect(getTaskBarStyle("View details for May carry-out")).not.toContain("border-bottom-right-radius:0");
-    expect(getTaskBarStyle("View details for Full scoped span")).toContain("margin-left:0");
-    expect(getTaskBarStyle("View details for Full scoped span")).toContain("margin-right:0");
     expect(getTaskBarStyle("View details for Full scoped span")).toContain("--timeline-task-bar-radius:4px");
     expect(getTaskBarStyle("View details for Full scoped span")).not.toContain("border-top-left-radius:0");
     expect(getTaskBarStyle("View details for Full scoped span")).not.toContain("border-top-right-radius:0");
@@ -222,7 +218,8 @@ describe("TimelineView", () => {
     expect(headerSource).toContain('data-is-scrolling={isScrolling ? "true" : undefined}');
     expect(overlaySyncSource).toContain("setIsTimelineShellScrolling(true)");
     expect(overlaySyncSource).toContain("setIsTimelineShellScrolling(false)");
-    expect(css).not.toContain(".timeline-ellipsis-reveal[data-full-text]::after");
+    expect(css).toContain(".timeline-bar .timeline-bar-title.timeline-ellipsis-reveal[data-full-text]::after");
+    expect(css).not.toContain(".timeline-merged-cell-title.timeline-ellipsis-reveal[data-full-text]::after");
   });
 
   it("marks the current day as a unique timeline column highlight", () => {

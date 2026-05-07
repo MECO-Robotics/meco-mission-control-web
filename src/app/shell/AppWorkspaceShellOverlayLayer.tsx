@@ -1,8 +1,12 @@
-import type { AppWorkspaceController } from "@/app/hooks/useAppWorkspaceController";
+import type { AppWorkspaceShellOverlayLayerController } from "@/app/hooks/useAppWorkspaceController";
 
 import { AddSeasonPopup, RobotProjectPopup, SidebarOverlay } from "./AppWorkspaceShellOverlays";
 
-export function AppWorkspaceShellOverlayLayer({ controller }: { controller: AppWorkspaceController }) {
+export function AppWorkspaceShellOverlayLayer({
+  controller,
+}: {
+  controller: AppWorkspaceShellOverlayLayerController;
+}) {
   const c = controller;
 
   return (
