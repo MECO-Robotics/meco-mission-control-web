@@ -1,0 +1,4 @@
+interface:
+  display_name: "MECO Web Publish"
+  short_description: "Publish and deploy verification"
+  default_prompt: "Use $meco-web-publish-deploy to validate, publish, and verify a MECO mission-control web change."

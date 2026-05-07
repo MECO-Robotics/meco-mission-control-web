@@ -1,0 +1,4 @@
+interface:
+  display_name: "MECO Web Workflow"
+  short_description: "Repo rules and Codex startup"
+  default_prompt: "Use $meco-web-repo-workflow to work inside the MECO mission-control web repository with the correct repo rules and Codex environment."

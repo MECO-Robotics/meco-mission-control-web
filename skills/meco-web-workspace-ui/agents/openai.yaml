@@ -1,0 +1,4 @@
+interface:
+  display_name: "MECO Web UI"
+  short_description: "Workspace UI change workflow"
+  default_prompt: "Use $meco-web-workspace-ui to implement and verify a MECO mission-control web workspace UI change."
