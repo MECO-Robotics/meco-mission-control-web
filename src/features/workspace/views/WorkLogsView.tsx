@@ -6,6 +6,7 @@ import type { MembersById, SubsystemsById } from "@/features/workspace/shared/mo
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 
 import { useWorkLogsViewState } from "./workLogs/workLogsViewState";
+import { WorkLogsActivitySection } from "./workLogs/WorkLogsActivitySection";
 import { WorkLogsSummarySection } from "./workLogs/WorkLogsSummarySection";
 import { WorkLogsTableSection } from "./workLogs/WorkLogsTableSection";
 import { WorkLogsToolbar } from "./workLogs/WorkLogsToolbar";
@@ -59,12 +60,14 @@ export function WorkLogsView({
       </div>
 
       {view === "activity" ? (
-        <div className="empty-state">
-          <strong>Activity placeholder</strong>
-          <p className="section-copy">
-            Team activity feed and timeline updates will appear here.
-          </p>
-        </div>
+        <WorkLogsActivitySection
+          membersById={membersById}
+          openEditTaskModal={openEditTaskModal}
+          subsystemsById={subsystemsById}
+          taskById={workLogsView.taskById}
+          workLogPagination={workLogsView.workLogPagination}
+          workLogs={workLogsView.workLogs}
+        />
       ) : view === "summary" ? (
         <WorkLogsSummarySection
           onOpenTask={openEditTaskModal}

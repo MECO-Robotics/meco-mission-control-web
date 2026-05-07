@@ -5,27 +5,52 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { WorkLogsView } from "@/features/workspace/views/WorkLogsView";
+import type { WorklogsViewTab } from "@/lib/workspaceNavigation";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 function renderWorkLogsView(
-  view: "logs" | "summary",
+  view: WorklogsViewTab,
+  bootstrapOverrides: Partial<BootstrapPayload> = {},
 ) {
   const bootstrap: BootstrapPayload = {
     ...EMPTY_BOOTSTRAP,
+    ...bootstrapOverrides,
   };
 
-    return renderToStaticMarkup(
-      React.createElement(WorkLogsView, {
-        activePersonFilter: [],
-        bootstrap,
-        membersById: {},
-        openCreateWorkLogModal: jest.fn(),
-        openEditTaskModal: jest.fn(),
-        subsystemsById: {},
-        view,
-      }),
+  return renderToStaticMarkup(
+    React.createElement(WorkLogsView, {
+      activePersonFilter: [],
+      bootstrap,
+      membersById: {
+        "student-1": {
+          email: "student@meco.dev",
+          elevated: false,
+          id: "student-1",
+          name: "Student One",
+          role: "student",
+          seasonId: "season-1",
+        },
+      },
+      openCreateWorkLogModal: jest.fn(),
+      openEditTaskModal: jest.fn(),
+      subsystemsById: {
+        "subsystem-1": {
+          description: "",
+          id: "subsystem-1",
+          isCore: true,
+          iteration: 1,
+          mentorIds: [],
+          name: "Drive",
+          parentSubsystemId: null,
+          projectId: "project-1",
+          responsibleEngineerId: null,
+          risks: [],
+        },
+      },
+      view,
+    }),
   );
 }
 
@@ -35,5 +60,61 @@ describe("WorkLogsView", () => {
 
     expect(html).toContain("Work log summary");
     expect(html).toContain("Top contributors");
+  });
+
+  it("renders activity entries for logged work", () => {
+    const html = renderWorkLogsView("activity", {
+      tasks: [
+        {
+          actualHours: 2,
+          artifactId: null,
+          artifactIds: [],
+          assigneeIds: [],
+          blockers: [],
+          dependencyIds: [],
+          disciplineId: "discipline-1",
+          documentationLinked: false,
+          dueDate: "2026-05-01",
+          estimatedHours: 4,
+          id: "task-1",
+          linkedManufacturingIds: [],
+          linkedPurchaseIds: [],
+          mechanismId: null,
+          mechanismIds: [],
+          mentorId: null,
+          ownerId: null,
+          partInstanceId: null,
+          partInstanceIds: [],
+          priority: "medium",
+          projectId: "project-1",
+          requiresDocumentation: false,
+          startDate: "2026-05-01",
+          status: "in-progress",
+          subsystemId: "subsystem-1",
+          subsystemIds: ["subsystem-1"],
+          summary: "Updated drivetrain CAD",
+          targetMilestoneId: null,
+          title: "Drive CAD",
+          workstreamId: null,
+          workstreamIds: [],
+        },
+      ],
+      workLogs: [
+        {
+          date: "2026-05-01",
+          hours: 1.5,
+          id: "worklog-1",
+          notes: "Finished first pass",
+          participantIds: ["student-1"],
+          taskId: "task-1",
+        },
+      ],
+    });
+
+    expect(html).toContain("Activity");
+    expect(html).toContain("Recent work log activity");
+    expect(html).toContain("Drive CAD");
+    expect(html).toContain("Student One");
+    expect(html).toContain("Finished first pass");
   });
 });
