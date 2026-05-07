@@ -1,11 +1,6 @@
-import type {
-  ArtifactPayload,
-  ArtifactRecord,
-  MaterialPayload,
-  MaterialRecord,
-  WorkstreamPayload,
-  WorkstreamRecord,
-} from "@/types";
+import type { ArtifactPayload, MaterialPayload, WorkstreamPayload } from "@/types/payloads";
+import type { ArtifactRecord, MaterialRecord } from "@/types/recordsInventory";
+import type { WorkstreamRecord } from "@/types/recordsOrganization";
 import { requestItem, requestItems } from "./common";
 
 export function createMaterialRecord(

@@ -1,9 +1,13 @@
 import { useCallback } from "react";
 
-import { artifactToPayload, buildEmptyArtifactPayload, toErrorMessage } from "@/lib/appUtils";
-import { createArtifactRecord, deleteArtifactRecord, updateArtifactRecord } from "@/lib/auth";
+import { artifactToPayload } from "@/lib/appUtils/payloadConversions";
+import { buildEmptyArtifactPayload } from "@/lib/appUtils/payloadBuilders";
+import { toErrorMessage } from "@/lib/appUtils/common";
+import { createArtifactRecord, deleteArtifactRecord, updateArtifactRecord } from "@/lib/auth/records/inventory";
 import type { AppWorkspaceModel } from "../hooks/useAppWorkspaceModel";
-import type { ArtifactKind, ArtifactPayload, ArtifactRecord } from "@/types";
+import type { ArtifactKind } from "@/types/common";
+import type { ArtifactPayload } from "@/types/payloads";
+import type { ArtifactRecord } from "@/types/recordsInventory";
 
 export type ArtifactActions = ReturnType<typeof useArtifactActions>;
 

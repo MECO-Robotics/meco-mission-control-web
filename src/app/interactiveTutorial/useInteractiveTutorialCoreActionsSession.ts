@@ -1,7 +1,7 @@
 import { startTransition, useCallback } from "react";
 
-import { resetInteractiveTutorialSession } from "@/lib/auth";
-import { toErrorMessage } from "@/lib/appUtils";
+import { resetInteractiveTutorialSession } from "@/lib/auth/bootstrap";
+import { toErrorMessage } from "@/lib/appUtils/common";
 
 import type { InteractiveTutorialCoreState } from "./useInteractiveTutorialCoreState";
 import type { UseInteractiveTutorialOptions } from "./useInteractiveTutorialCoreTypes";

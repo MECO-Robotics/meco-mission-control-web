@@ -6,12 +6,12 @@
 }
 
 .timeline-roster-filter {
-  width: fit-content;
+  width: auto;
   max-width: 100%;
 }
 
 .timeline-roster-filter.toolbar-filter-dropdown {
-  max-width: 164px;
+  max-width: 100%;
 }
 
 .timeline-roster-filter .toolbar-filter-menu-button {
@@ -19,18 +19,18 @@
 }
 
 .timeline-roster-filter .toolbar-filter-value {
-  max-width: 84px;
+  max-width: min(20rem, 38vw);
 }
 
 .timeline-interval-filter {
-  width: fit-content;
+  width: auto;
   max-width: 100%;
 }
 
 .timeline-interval-filter select {
   min-width: 96px;
-  width: clamp(96px, 11vw, 132px);
-  max-width: 132px;
+  width: auto;
+  max-width: 100%;
 }
 
 @media (max-width: 1180px) {

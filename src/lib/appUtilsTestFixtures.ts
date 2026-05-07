@@ -1,13 +1,7 @@
-import type {
-  BootstrapPayload,
-  MilestoneRecord,
-  MaterialRecord,
-  PartDefinitionRecord,
-  PartInstanceRecord,
-  ProjectRecord,
-  SubsystemRecord,
-  WorkstreamRecord,
-} from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneRecord } from "@/types/recordsExecution";
+import type { MaterialRecord, PartDefinitionRecord, PartInstanceRecord } from "@/types/recordsInventory";
+import type { ProjectRecord, SubsystemRecord, WorkstreamRecord } from "@/types/recordsOrganization";
 
 function createProject(overrides: Partial<ProjectRecord>): ProjectRecord {
   return {

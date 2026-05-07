@@ -1,9 +1,9 @@
 import { useCallback, type FormEvent } from "react";
 
-import { toErrorMessage } from "@/lib/appUtils";
-import { createProjectRecord, updateProjectRecord } from "@/lib/auth";
+import { toErrorMessage } from "@/lib/appUtils/common";
+import { createProjectRecord, updateProjectRecord } from "@/lib/auth/records/planning";
 import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
-import type { ProjectPayload } from "@/types";
+import type { ProjectPayload } from "@/types/payloads";
 
 export function useAppWorkspaceRosterRobotActions(model: AppWorkspaceModel) {
   const handleCreateRobot = useCallback(() => {

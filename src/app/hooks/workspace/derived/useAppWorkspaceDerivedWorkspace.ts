@@ -121,7 +121,10 @@ export function useAppWorkspaceDerivedWorkspace(
     }
   };
 
-  const handleSidebarTabSelect = (tab: ViewTab) => {
+  const handleSidebarTabSelect = (
+    tab: ViewTab,
+    options?: { keepSidebarOpen?: boolean },
+  ) => {
     if (tab !== activeTab) {
       const currentIndex = navigationItems.findIndex((item) => item.value === activeTab);
       const nextIndex = navigationItems.findIndex((item) => item.value === tab);
@@ -133,7 +136,9 @@ export function useAppWorkspaceDerivedWorkspace(
       setActiveTab(tab);
     }
 
-    closeSidebarOverlay();
+    if (!options?.keepSidebarOpen) {
+      closeSidebarOverlay();
+    }
   };
 
   return {

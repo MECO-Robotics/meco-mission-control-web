@@ -1,22 +1,16 @@
-import { type Dispatch, type SetStateAction } from "react";
-
 import {
-  BASE_SECTION_LABELS,
-  MANUFACTURING_VIEW_OPTIONS,
-  NON_ROBOT_INVENTORY_VIEW_OPTIONS,
-  REPORTS_VIEW_OPTIONS,
-  RISK_MANAGEMENT_VIEW_OPTIONS,
-  ROBOT_INVENTORY_VIEW_OPTIONS,
-  TASK_VIEW_OPTIONS,
-  WORKLOG_VIEW_OPTIONS,
   type InventoryViewTab,
-  type ManufacturingViewTab,
+  type NavigationTarget,
+  NAVIGATION_SECTION_LABELS,
+  NAVIGATION_SUB_ITEMS_BY_SECTION,
   type ReportsViewTab,
+  type RosterViewTab,
   type RiskManagementViewTab,
   type TaskViewTab,
-  type ViewOption,
   type ViewTab,
   type WorklogsViewTab,
+  getActiveNavigationSubItemId,
+  getNavigationSectionFromSubItem,
 } from "@/lib/workspaceNavigation";
 
 function TopbarTabs<T extends string>({
@@ -28,12 +22,16 @@ function TopbarTabs<T extends string>({
 }: {
   activeValue: T;
   ariaLabel: string;
-  onChange: Dispatch<SetStateAction<T>>;
-  options: readonly ViewOption<T>[];
+  onChange: (nextValue: T) => void;
+  options: ReadonlyArray<{ value: T; label: string }>;
   tutorialPrefix?: string;
 }) {
   return (
-    <div className="tabbar workspace-section-tabs app-topbar-section-tabs" aria-label={ariaLabel} role="group">
+    <div
+      className="tabbar workspace-section-tabs app-topbar-section-tabs"
+      aria-label={ariaLabel}
+      role="group"
+    >
       {options.map((option) => {
         const isActive = activeValue === option.value;
 
@@ -60,17 +58,12 @@ function TopbarTabs<T extends string>({
 interface AppTopbarNavigationProps {
   activeTab: ViewTab;
   inventoryView: InventoryViewTab;
+  isAllProjectsView: boolean;
   isNonRobotProject: boolean;
-  manufacturingView: ManufacturingViewTab;
+  onSelectTarget: (target: NavigationTarget) => void;
   reportsView: ReportsViewTab;
+  rosterView: RosterViewTab;
   riskManagementView: RiskManagementViewTab;
-  setInventoryView: Dispatch<SetStateAction<InventoryViewTab>>;
-  setManufacturingView: Dispatch<SetStateAction<ManufacturingViewTab>>;
-  setReportsView: Dispatch<SetStateAction<ReportsViewTab>>;
-  setRiskManagementView: Dispatch<SetStateAction<RiskManagementViewTab>>;
-  setTaskView: Dispatch<SetStateAction<TaskViewTab>>;
-  setWorklogsView: Dispatch<SetStateAction<WorklogsViewTab>>;
-  subsystemsLabel: string;
   taskView: TaskViewTab;
   worklogsView: WorklogsViewTab;
 }
@@ -78,111 +71,72 @@ interface AppTopbarNavigationProps {
 export function AppTopbarNavigation({
   activeTab,
   inventoryView,
+  isAllProjectsView,
   isNonRobotProject,
-  manufacturingView,
+  onSelectTarget,
   reportsView,
+  rosterView,
   riskManagementView,
-  setInventoryView,
-  setManufacturingView,
-  setReportsView,
-  setRiskManagementView,
-  setTaskView,
-  setWorklogsView,
-  subsystemsLabel,
   taskView,
   worklogsView,
 }: AppTopbarNavigationProps) {
-  const effectiveInventoryView =
-    isNonRobotProject && inventoryView === "parts" ? "materials" : inventoryView;
+  const activeSubItemId = getActiveNavigationSubItemId({
+    activeTab,
+    inventoryView,
+    rosterView,
+    reportsView,
+    riskManagementView,
+    taskView,
+    worklogsView,
+  });
+  const activeSection = getNavigationSectionFromSubItem(activeSubItemId);
+  const showManufacturingOption = !isAllProjectsView && !isNonRobotProject;
+  const sectionOptions = NAVIGATION_SUB_ITEMS_BY_SECTION[activeSection].filter(
+    (subItem) => {
+      if (subItem.id === "readiness-subsystems") {
+        return !isAllProjectsView;
+      }
 
-  switch (activeTab) {
-    case "tasks":
-      return (
-        <>
-          <span className="app-topbar-page-label">{BASE_SECTION_LABELS.tasks}</span>
-          <TopbarTabs
-            activeValue={taskView}
-            ariaLabel="Task views"
-            onChange={setTaskView}
-            options={TASK_VIEW_OPTIONS}
-            tutorialPrefix="task-view"
-          />
-        </>
-      );
-    case "risk-management":
-      return (
-        <>
-          <span className="app-topbar-page-label">{BASE_SECTION_LABELS["risk-management"]}</span>
-          <TopbarTabs
-            activeValue={riskManagementView}
-            ariaLabel="Risk management views"
-            onChange={setRiskManagementView}
-            options={RISK_MANAGEMENT_VIEW_OPTIONS}
-            tutorialPrefix="risk-management-view"
-          />
-        </>
-      );
-    case "worklogs":
-      return (
-        <>
-          <span className="app-topbar-page-label">{BASE_SECTION_LABELS.worklogs}</span>
-          <TopbarTabs
-            activeValue={worklogsView}
-            ariaLabel="Work log views"
-            onChange={setWorklogsView}
-            options={WORKLOG_VIEW_OPTIONS}
-            tutorialPrefix="worklogs-view"
-          />
-        </>
-      );
-    case "reports":
-      return (
-        <>
-          <span className="app-topbar-page-label">{BASE_SECTION_LABELS.reports}</span>
-          <TopbarTabs
-            activeValue={reportsView}
-            ariaLabel="Report views"
-            onChange={setReportsView}
-            options={REPORTS_VIEW_OPTIONS}
-            tutorialPrefix="reports-view"
-          />
-        </>
-      );
-    case "manufacturing":
-      return (
-        <>
-          <span className="app-topbar-page-label">{BASE_SECTION_LABELS.manufacturing}</span>
-          <TopbarTabs
-            activeValue={manufacturingView}
-            ariaLabel="Manufacturing views"
-            onChange={setManufacturingView}
-            options={MANUFACTURING_VIEW_OPTIONS}
-            tutorialPrefix="manufacturing-view"
-          />
-        </>
-      );
-    case "inventory":
-      return (
-        <>
-          <span className="app-topbar-page-label">{BASE_SECTION_LABELS.inventory}</span>
-          <TopbarTabs
-            activeValue={effectiveInventoryView}
-            ariaLabel="Inventory views"
-            onChange={setInventoryView}
-            options={
-              isNonRobotProject
-                ? NON_ROBOT_INVENTORY_VIEW_OPTIONS
-                : ROBOT_INVENTORY_VIEW_OPTIONS
+      if (subItem.id === "tasks-manufacturing") {
+        return showManufacturingOption;
+      }
+
+      if (subItem.id === "inventory-parts") {
+        return !isNonRobotProject;
+      }
+
+      return true;
+    },
+  );
+  const optionById = new Map(sectionOptions.map((option) => [option.id, option]));
+  const activeOptionId = optionById.has(activeSubItemId)
+    ? activeSubItemId
+    : sectionOptions[0]?.id;
+
+  const options = sectionOptions.map((option) => ({
+    value: option.id,
+    label: option.label,
+  }));
+
+  return (
+    <>
+      <span className="app-topbar-page-label">
+        {NAVIGATION_SECTION_LABELS[activeSection]}
+      </span>
+      {activeOptionId ? (
+        <TopbarTabs
+          activeValue={activeOptionId}
+          ariaLabel={`${NAVIGATION_SECTION_LABELS[activeSection]} views`}
+          onChange={(nextValue) => {
+            const nextOption = optionById.get(nextValue);
+            if (nextOption) {
+              onSelectTarget(nextOption.target);
             }
-            tutorialPrefix="inventory-view"
-          />
-        </>
-      );
-    default:
-      return (
-        <span className="app-topbar-page-label">
-          {activeTab === "subsystems" ? subsystemsLabel : BASE_SECTION_LABELS[activeTab]}
-        </span>
-      );
-  }
+          }}
+          options={options}
+          tutorialPrefix={`${activeSection}-view`}
+        />
+      ) : null}
+    </>
+  );
 }

@@ -5,7 +5,7 @@ import { useAppAuth } from "@/app/hooks/useAppAuth";
 import { useAppShell } from "@/app/hooks/useAppShell";
 import { useAppWorkspaceGlobalEffects } from "@/app/hooks/workspace/derived/useAppWorkspaceGlobalEffects";
 import { useAppWorkspaceUiState } from "@/app/hooks/useAppWorkspaceUiState";
-import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import type { WorkspaceEditToastNotice } from "@/features/workspace/workspaceEditToastNotice";
 import {
   appendWorkspaceToast,
@@ -15,13 +15,14 @@ import {
 import type {
   InventoryViewTab,
   ManufacturingViewTab,
+  RosterViewTab,
   RiskManagementViewTab,
   ReportsViewTab,
   TaskViewTab,
   ViewTab,
   WorklogsViewTab,
 } from "@/lib/workspaceNavigation";
-import type { BootstrapPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
 export type AppWorkspaceState = ReturnType<typeof useAppWorkspaceState>;
 
@@ -36,6 +37,7 @@ export function useAppWorkspaceState() {
   const [manufacturingView, setManufacturingView] =
     useState<ManufacturingViewTab>("cnc");
   const [inventoryView, setInventoryView] = useState<InventoryViewTab>("materials");
+  const [rosterView, setRosterView] = useState<RosterViewTab>("directory");
   const [bootstrap, setBootstrap] = useState<BootstrapPayload>(EMPTY_BOOTSTRAP);
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [dataMessage, setDataMessage] = useState<string | null>(null);
@@ -122,6 +124,7 @@ export function useAppWorkspaceState() {
     manufacturingView,
     pageShellStyle,
     reportsView,
+    rosterView,
     riskManagementView,
     setActiveTab,
     setBootstrap,
@@ -129,6 +132,7 @@ export function useAppWorkspaceState() {
     setInventoryView,
     setIsLoadingData,
     setManufacturingView,
+    setRosterView,
     setReportsView,
     setRiskManagementView,
     setTabSwitchDirection,

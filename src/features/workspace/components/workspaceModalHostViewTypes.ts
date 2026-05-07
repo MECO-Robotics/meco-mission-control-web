@@ -1,37 +1,9 @@
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 
-import type {
-  ArtifactModalMode,
-  MilestoneReportModalMode,
-  ManufacturingModalMode,
-  MaterialModalMode,
-  MechanismModalMode,
-  PartDefinitionModalMode,
-  PartInstanceModalMode,
-  PurchaseModalMode,
-  QaReportModalMode,
-  SubsystemModalMode,
-  TaskModalMode,
-  WorkLogModalMode,
-  WorkstreamModalMode,
-} from "@/features/workspace/shared";
-import type {
-  ArtifactPayload,
-  BootstrapPayload,
-  ManufacturingItemPayload,
-  MaterialPayload,
-  MechanismPayload,
-  PartDefinitionPayload,
-  PartInstancePayload,
-  PurchaseItemPayload,
-  SubsystemPayload,
-  TaskPayload,
-  TaskRecord,
-  TestResultPayload,
-  QaReportPayload,
-  WorkLogPayload,
-  WorkstreamPayload,
-} from "@/types";
+import type { ArtifactModalMode, ManufacturingModalMode, MaterialModalMode, MechanismModalMode, MilestoneReportModalMode, PartDefinitionModalMode, PartInstanceModalMode, PurchaseModalMode, QaReportModalMode, SubsystemModalMode, TaskModalMode, WorkLogModalMode, WorkstreamModalMode } from "@/features/workspace/shared/model/workspaceModalModes";
+import type { ArtifactPayload, ManufacturingItemPayload, MaterialPayload, MechanismPayload, PartDefinitionPayload, PartInstancePayload, PurchaseItemPayload, QaReportPayload, SubsystemPayload, TaskPayload, TestResultPayload, WorkLogPayload, WorkstreamPayload } from "@/types/payloads";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskRecord } from "@/types/recordsExecution";
 
 export interface WorkspaceModalHostViewProps {
   activeArtifactId: string | null;

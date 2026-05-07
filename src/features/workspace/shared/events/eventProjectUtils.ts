@@ -1,4 +1,4 @@
-import type { MilestoneRecord } from "@/types";
+import type { MilestoneRecord } from "@/types/recordsExecution";
 
 function uniqueIds(values: Array<string | null | undefined>) {
   return Array.from(

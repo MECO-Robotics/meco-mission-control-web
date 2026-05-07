@@ -1,10 +1,8 @@
-import {
-  ArtifactEditorModal,
-  MaterialEditorModal,
-  MechanismEditorModal,
-  PartDefinitionEditorModal,
-  PartInstanceEditorModal,
-} from "../WorkspaceModals";
+import { ArtifactEditorModal } from "../modals/assetCatalog/ArtifactEditorModal";
+import { MaterialEditorModal } from "../modals/assetCatalog/MaterialEditorModal";
+import { PartDefinitionEditorModal } from "../modals/assetCatalog/PartDefinitionEditorModal";
+import { PartInstanceEditorModal } from "../modals/assetCatalog/PartInstanceEditorModal";
+import { MechanismEditorModal } from "../modals/structure/MechanismEditorModal";
 import type { WorkspaceModalHostViewProps } from "./workspaceModalHostViewTypes";
 
 export function WorkspaceAssetModalsSection(props: WorkspaceModalHostViewProps) {

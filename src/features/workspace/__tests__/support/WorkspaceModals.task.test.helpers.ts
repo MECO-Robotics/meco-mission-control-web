@@ -1,9 +1,9 @@
 import * as React from "react";
 import type { ComponentProps } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { TaskEditorModal } from "@/features/workspace/WorkspaceModals";
-import { buildEmptyTaskPayload } from "@/lib/appUtils";
-import type { TaskRecord } from "@/types";
+import { TaskEditorModal } from "@/features/workspace/modals/TaskEditorModalContent";
+import { buildEmptyTaskPayload } from "@/lib/appUtils/taskTargets";
+import type { TaskRecord } from "@/types/recordsExecution";
 import { createBootstrap } from "./WorkspaceModals.test.shared";
 
 export function renderTaskModal(

@@ -3,16 +3,8 @@ import * as React from "react";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
-import {
-  clampTimelineZoom,
-  formatTimelineZoomLabel,
-  getTimelineDayTrackSize,
-  getTimelineGridMinWidth,
-  getTimelineMinimumZoomForWidth,
-  midpointOfTimelineDays,
-  monthEndFromDay,
-  midpointOfTimelineWeek,
-} from "@/features/workspace/shared/timeline";
+import { clampTimelineZoom, formatTimelineZoomLabel, getTimelineDayTrackSize, getTimelineGridMinWidth, getTimelineMinimumZoomForWidth } from "@/features/workspace/shared/timeline/timelineZoom";
+import { midpointOfTimelineDays, midpointOfTimelineWeek, monthEndFromDay } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
 import { buildTimelineGridLayout } from "@/features/workspace/views/timeline/model/timelineGridLayout";
 import { createBootstrap, createBootstrapWithEmptySubsystem, createBootstrapWithoutTasks, readAppCss, membersById } from "./timelineTestFixtures";
@@ -153,7 +145,7 @@ describe("TimelineView", () => {
   );
 
   it.each([false, true])(
-    "hides subsystem rows with no tasks in the selected period when all-projects view is %s",
+    "keeps project-scoped empty subsystem rows but hides them in all-projects view when all-projects view is %s",
     (isAllProjectsView) => {
       const markup = renderToStaticMarkup(
         React.createElement(TimelineView, {
@@ -172,13 +164,19 @@ describe("TimelineView", () => {
 
       const gridCellCount = (markup.match(/data-timeline-grid-cell="true"/g) ?? []).length;
 
-      expect(markup).not.toContain("Controls");
-      expect(gridCellCount).toBe(30);
+      if (isAllProjectsView) {
+        expect(markup).not.toContain("Controls");
+        expect(gridCellCount).toBe(30);
+        return;
+      }
+
+      expect(markup).toContain("Controls");
+      expect(gridCellCount).toBe(60);
     },
   );
 
   it.each([false, true])(
-    "hides all subsystem rows when every subsystem has no tasks and all-projects view is %s",
+    "keeps project-scoped subsystem rows even when every subsystem is empty and all-projects view is %s",
     (isAllProjectsView) => {
       const markup = renderToStaticMarkup(
         React.createElement(TimelineView, {
@@ -197,8 +195,14 @@ describe("TimelineView", () => {
 
       const gridCellCount = (markup.match(/data-timeline-grid-cell="true"/g) ?? []).length;
 
-      expect(markup).not.toContain("Drivebase");
-      expect(gridCellCount).toBe(0);
+      if (isAllProjectsView) {
+        expect(markup).not.toContain("Drivebase");
+        expect(gridCellCount).toBe(0);
+        return;
+      }
+
+      expect(markup).toContain("Drivebase");
+      expect(gridCellCount).toBe(30);
     },
   );
 
@@ -344,7 +348,7 @@ describe("TimelineView", () => {
     expect(markup).toContain('aria-label="Zoom out timeline"');
     expect(markup).toContain('aria-label="Zoom in timeline"');
     expect(markup).toContain("--timeline-zoom:1");
-    expect(markup).toContain("--timeline-task-bar-edge-gap:24px");
+    expect(markup).toContain("--timeline-task-bar-edge-gap:2px");
     expect(css).toMatch(
       /\.timeline-bar\s*\{[\s\S]*--timeline-task-bar-padding-start:\s*calc\(0\.65rem \* var\(--timeline-zoom,\s*1\)\)/,
     );
@@ -372,6 +376,93 @@ describe("TimelineView", () => {
         zoom: 1.2,
       }),
     ).toBe(918);
+  });
+
+  it("keeps task fragment padding driven by zoom-aware CSS instead of fixed inline values", () => {
+    const taskTrackRowListSource = readFileSync(
+      join(
+        process.cwd(),
+        "src/features/workspace/views/timeline/components/TimelineTaskTrackRowList.tsx",
+      ),
+      "utf8",
+    );
+    const css = readAppCss();
+
+    expect(css).toMatch(
+      /\.timeline-bar\s*\{[\s\S]*--timeline-task-bar-padding-start:\s*calc\(0\.65rem \* var\(--timeline-zoom,\s*1\)\)/,
+    );
+    expect(taskTrackRowListSource).not.toContain('padding: "0 8px"');
+    expect(taskTrackRowListSource).not.toContain('padding: "0 4px"');
+  });
+
+  it("keeps task fragments inset by host padding instead of overflowing with external margins", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(TimelineView, {
+        bootstrap: createBootstrap(),
+        isAllProjectsView: false,
+        activePersonFilter: [],
+        setActivePersonFilter: jest.fn(),
+        membersById,
+        openTaskDetailModal: jest.fn(),
+        openCreateTaskModal: jest.fn(),
+        onDeleteTimelineMilestone: jest.fn(),
+        onSaveTimelineMilestone: jest.fn(),
+        triggerCreateMilestoneToken: 0,
+      }),
+    );
+
+    expect(markup).toMatch(
+      /class="timeline-bar-hover-host editable-hover-target"[^>]*style="[^"]*box-sizing:border-box;[^"]*padding-left:var\(--timeline-task-bar-edge-gap, 2px\);[^"]*padding-right:var\(--timeline-task-bar-edge-gap, 2px\)/,
+    );
+    expect(markup).not.toMatch(
+      /class="timeline-bar [^"]*"[^>]*style="[^"]*margin-left:var\(--timeline-task-bar-edge-gap, 2px\)/,
+    );
+    expect(markup).not.toMatch(
+      /class="timeline-bar [^"]*"[^>]*style="[^"]*margin-right:var\(--timeline-task-bar-edge-gap, 2px\)/,
+    );
+  });
+
+  it("publishes the zoom-scaled task fragment edge-gap on the outer timeline shell", () => {
+    const headerSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/timeline/components/TimelineGridHeaderContent.tsx"),
+      "utf8",
+    );
+    const outerShellStyleBlock =
+      headerSource.split("ref={timelineShellRef}")[1]?.split('} as React.CSSProperties & { "--timeline-zoom": number }}')[0] ??
+      "";
+
+    expect(headerSource).toContain(
+      "const minimumDayWidth =",
+    );
+    expect(headerSource).toContain(
+      "const timelineTaskBarEdgeGap = Math.max(2, Math.round(minimumDayWidth * 0.08));",
+    );
+    expect(outerShellStyleBlock).toContain(
+      '"--timeline-task-bar-edge-gap": `${timelineTaskBarEdgeGap}px`',
+    );
+  });
+
+  it("reveals task fragment text on hover and focus instead of keeping ellipsis clipping", () => {
+    const css = readAppCss();
+
+    expect(css).toMatch(
+      /\.timeline-bar\s+\.timeline-bar-title\.timeline-ellipsis-reveal\[data-full-text\]::after\s*\{[\s\S]*content:\s*attr\(data-full-text\)[\s\S]*opacity:\s*0[\s\S]*pointer-events:\s*none[\s\S]*padding:\s*0\.08rem 0\.28rem[\s\S]*border-radius:\s*0\.3rem[\s\S]*background:\s*color-mix\(in srgb,\s*var\(--timeline-task-discipline-accent\)\s*82%,\s*transparent\)/,
+    );
+    expect(css).toMatch(
+      /\.timeline-bar-hover-host:hover,\s*\.timeline-bar-hover-host:focus-within\s*\{[\s\S]*z-index:\s*10081/,
+    );
+    expect(css).toMatch(
+      /\.timeline-bar-hover-host:hover\s+\.timeline-bar-content,\s*\.timeline-bar-hover-host:focus-within\s+\.timeline-bar-content,\s*\.timeline-bar:hover\s+\.timeline-bar-content,\s*\.timeline-bar:focus-visible\s+\.timeline-bar-content\s*\{[\s\S]*overflow:\s*visible/,
+    );
+    expect(css).toMatch(
+      /\.timeline-bar-hover-host:hover\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar-hover-host:focus-within\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar:hover\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar:focus-visible\s+\.timeline-bar-title\.timeline-ellipsis-reveal\s*\{[\s\S]*max-width:\s*none[\s\S]*overflow:\s*visible[\s\S]*text-overflow:\s*clip/,
+    );
+    expect(css).toMatch(
+      /\.timeline-bar-hover-host:hover\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar-hover-host:focus-within\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar:hover\s+\.timeline-bar-title\.timeline-ellipsis-reveal,\s*\.timeline-bar:focus-visible\s+\.timeline-bar-title\.timeline-ellipsis-reveal\s*\{[\s\S]*color:\s*transparent\s*!important/,
+    );
+    expect(css).toMatch(
+      /\.timeline-bar-hover-host:hover\s+\.timeline-bar-title\.timeline-ellipsis-reveal\[data-full-text\]::after,\s*\.timeline-bar-hover-host:focus-within\s+\.timeline-bar-title\.timeline-ellipsis-reveal\[data-full-text\]::after,\s*\.timeline-bar:hover\s+\.timeline-bar-title\.timeline-ellipsis-reveal\[data-full-text\]::after,\s*\.timeline-bar:focus-visible\s+\.timeline-bar-title\.timeline-ellipsis-reveal\[data-full-text\]::after\s*\{[\s\S]*opacity:\s*1/,
+    );
   });
 
   it("keeps the week status icon overlay anchored to the last day column", () => {

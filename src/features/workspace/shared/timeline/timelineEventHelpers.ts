@@ -1,4 +1,5 @@
-import type { BootstrapPayload, MilestoneRecord, TaskRecord } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneRecord, TaskRecord } from "@/types/recordsExecution";
 
 export interface TimelineMilestoneDraft {
   title: string;

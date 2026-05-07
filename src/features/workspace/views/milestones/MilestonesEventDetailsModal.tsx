@@ -2,16 +2,13 @@ import type { CSSProperties, Dispatch, FormEvent, SetStateAction } from "react";
 import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
 
-import type { BootstrapPayload, MilestoneRecord } from "@/types";
-import type { TimelineMilestoneDraft } from "@/features/workspace/shared/timeline";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneRecord } from "@/types/recordsExecution";
+import type { TimelineMilestoneDraft } from "@/features/workspace/shared/timeline/timelineEventHelpers";
 import { TaskDetailReveal } from "@/features/workspace/modals/task/details/TaskDetailReveal";
-import {
-  getMilestoneTaskBoardStateForMilestone,
-  getMilestoneTaskBoardStateLabel,
-  getMilestoneTasksForState,
-} from "@/features/workspace/shared/milestones";
+import { getMilestoneTaskBoardStateForMilestone, getMilestoneTaskBoardStateLabel, getMilestoneTasksForState } from "@/features/workspace/shared/milestones/milestoneTaskState";
 import { EVENT_TYPE_STYLES as MILESTONE_TYPE_STYLES } from "@/features/workspace/shared/events/eventStyles";
-import { MilestonesMilestoneModalReadinessSection } from "./sections/MilestonesMilestoneModalReadinessSection";
+import { MilestonesMilestoneModalReadinessSection } from "./sections/MilestonesEventModalReadinessSection";
 import { MilestonesEventDetailEditor, type MilestoneDetailEditableField } from "./sections/MilestonesEventDetailEditor";
 import {
   MilestoneDetailInlineValue,

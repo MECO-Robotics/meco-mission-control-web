@@ -1,4 +1,6 @@
-import type { BootstrapPayload, RiskPayload, RiskRecord } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { RiskPayload } from "@/types/payloads";
+import type { RiskRecord } from "@/types/recordsReporting";
 
 export type RiskSeverityFilter = "all" | RiskPayload["severity"];
 export type RiskSourceFilter = "all" | RiskPayload["sourceType"];

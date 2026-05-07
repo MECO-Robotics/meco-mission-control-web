@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-import type { MemberPayload } from "@/types";
-import type { FilterSelection } from "@/features/workspace/shared";
+import type { MemberPayload } from "@/types/payloads";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 
 export function useAppWorkspaceUiStatePeople() {
   const [activePersonFilter, setActivePersonFilter] = useState<FilterSelection>([]);

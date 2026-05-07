@@ -1,8 +1,8 @@
 /// <reference types="jest" />
 
-import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { filterPartDefinitions } from "@/features/workspace/views/PartsView";
-import type { BootstrapPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
 const bootstrap: BootstrapPayload = {
   ...EMPTY_BOOTSTRAP,

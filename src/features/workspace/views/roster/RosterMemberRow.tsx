@@ -1,7 +1,8 @@
 import React from "react";
 
-import { IconEdit } from "@/components/shared";
-import type { BootstrapPayload, MemberRecord } from "@/types";
+import { IconEdit } from "@/components/shared/Icons";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MemberRecord } from "@/types/recordsOrganization";
 
 interface RosterMemberRowProps {
   member: MemberRecord;

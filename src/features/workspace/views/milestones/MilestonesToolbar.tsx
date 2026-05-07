@@ -1,13 +1,13 @@
 import type { Dispatch, SetStateAction } from "react";
+import { Plus } from "lucide-react";
 
-import { IconParts, IconSort, IconTasks } from "@/components/shared";
-import type { BootstrapPayload, MilestoneType } from "@/types";
-import {
-  CompactFilterMenu,
-  FilterDropdown,
-  SearchToolbarInput,
-  type FilterSelection,
-} from "@/features/workspace/shared/WorkspaceViewShared";
+import { IconParts, IconSort, IconTasks } from "@/components/shared/Icons";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneType } from "@/types/common";
+import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
+import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
+import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { EVENT_TYPE_STYLES as MILESTONE_TYPE_STYLES } from "@/features/workspace/shared/events/eventStyles";
 import {
   clampMilestoneZoom,
@@ -194,13 +194,13 @@ export function MilestonesToolbar({
 
       <button
         aria-label="Add milestone"
-        className="primary-action queue-toolbar-action"
+        className="primary-action queue-toolbar-action queue-toolbar-action-round"
         data-tutorial-target="create-milestone-button"
         onClick={onAddMilestone}
         title="Add milestone"
         type="button"
       >
-        Add
+        <Plus size={14} strokeWidth={2} />
       </button>
     </div>
   );

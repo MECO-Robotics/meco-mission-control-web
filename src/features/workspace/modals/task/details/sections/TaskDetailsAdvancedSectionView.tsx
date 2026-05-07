@@ -1,6 +1,9 @@
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
-import type { BootstrapPayload, TaskPayload, TaskRecord } from "@/types";
-import { EditableHoverIndicator, FilterDropdown } from "../../../../shared/WorkspaceViewShared";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskPayload } from "@/types/payloads";
+import type { TaskRecord } from "@/types/recordsExecution";
+import { EditableHoverIndicator } from "../../../../shared/table/workspaceTableChrome";
+import { FilterDropdown } from "../../../../shared/filters/FilterDropdown";
 import { IconManufacturing, IconPlus } from "@/components/shared/Icons";
 import type { TaskDetailsEditableField } from "../../taskModalTypes";
 import { TaskDetailReveal } from "../TaskDetailReveal";

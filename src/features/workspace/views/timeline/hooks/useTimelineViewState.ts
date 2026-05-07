@@ -1,18 +1,9 @@
 import { useCallback, useState } from "react";
 import type { WheelEvent } from "react";
-import type { TaskRecord } from "@/types";
-import {
-  addDaysToDay,
-  addMonthsToDay,
-  localTodayDate,
-  type TimelineViewInterval,
-} from "@/features/workspace/shared/timeline";
-import {
-  clampTimelineZoom,
-  TIMELINE_ZOOM_MAX,
-  TIMELINE_ZOOM_MIN,
-  TIMELINE_ZOOM_STEP,
-} from "@/features/workspace/shared/timeline";
+import type { TaskRecord } from "@/types/recordsExecution";
+import { addDaysToDay, addMonthsToDay, localTodayDate } from "@/features/workspace/shared/timeline/timelineDateUtils";
+import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
+import { clampTimelineZoom, TIMELINE_ZOOM_MAX, TIMELINE_ZOOM_MIN, TIMELINE_ZOOM_STEP } from "@/features/workspace/shared/timeline/timelineZoom";
 
 type TimelineGridMotion = "left" | "right" | "neutral";
 

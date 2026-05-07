@@ -1,8 +1,10 @@
 import React from "react";
 
-import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
-import type { BootstrapPayload, MemberPayload, MemberRecord } from "@/types";
-import { isMemberActiveInSeason } from "@/lib/appUtils";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MemberPayload } from "@/types/payloads";
+import type { MemberRecord } from "@/types/recordsOrganization";
+import { isMemberActiveInSeason } from "@/lib/appUtils/common";
 import { getTaskDisciplinesForProject } from "@/lib/taskDisciplines";
 
 import { RosterAddPersonModal } from "./roster/RosterAddPersonModal";

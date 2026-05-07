@@ -1,6 +1,7 @@
-import type { BootstrapPayload, TaskRecord } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskRecord } from "@/types/recordsExecution";
 
-import { resolveWorkspaceColor } from "@/features/workspace/shared/model";
+import { resolveWorkspaceColor } from "@/features/workspace/shared/model/workspaceColors";
 
 import { readTaskAssigneeIds, readTaskSubsystemIds, readTaskWorkstreamIds, formatSubsystemNames, formatWorkstreamNames } from "./taskQueueKanbanCard";
 

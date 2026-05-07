@@ -1,7 +1,8 @@
 import type { Dispatch, SetStateAction } from "react";
 
 import { getTaskDisciplinesForProject } from "@/lib/taskDisciplines";
-import type { BootstrapPayload, TaskPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskPayload } from "@/types/payloads";
 
 interface TaskEditorAdvancedProjectSectionProps {
   availableDisciplines: ReturnType<typeof getTaskDisciplinesForProject>;

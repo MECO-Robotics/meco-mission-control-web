@@ -1,4 +1,4 @@
-import type { MemberPayload } from "@/types";
+import type { MemberPayload } from "@/types/payloads";
 
 export function isElevatedMemberRole(role: MemberPayload["role"]): boolean {
   return role === "lead" || role === "admin";

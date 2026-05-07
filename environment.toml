@@ -1,0 +1,4 @@
+[worktree]
+bootstrap_command = "powershell.exe -ExecutionPolicy Bypass -File ./scripts/codex-worktree-bootstrap.ps1"
+dev_url = "http://127.0.0.1:5173"
+requirements = ["npm.cmd install", "npm.cmd run dev -- --host 127.0.0.1 --port 5173"]

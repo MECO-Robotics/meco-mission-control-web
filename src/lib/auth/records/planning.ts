@@ -1,13 +1,5 @@
-import type {
-  MemberCreatePayload,
-  MemberPayload,
-  MemberRecord,
-  ProjectCreatePayload,
-  ProjectPayload,
-  ProjectRecord,
-  SeasonCreatePayload,
-  SeasonRecord,
-} from "@/types";
+import type { MemberCreatePayload, MemberPayload, ProjectCreatePayload, ProjectPayload, SeasonCreatePayload } from "@/types/payloads";
+import type { MemberRecord, ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
 import { requestItem } from "./common";
 
 export function createSeasonRecord(

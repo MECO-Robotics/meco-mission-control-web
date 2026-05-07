@@ -1,7 +1,8 @@
 import type { Dispatch, SetStateAction } from "react";
 
-import { formatTaskStatusLabel } from "@/features/workspace/shared/model";
-import type { BootstrapPayload, TaskPayload } from "@/types";
+import { formatTaskStatusLabel } from "@/features/workspace/shared/model/workspaceOptions";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskPayload } from "@/types/payloads";
 
 interface TaskEditorAdvancedTaskMetaSectionProps {
   bootstrap: BootstrapPayload;

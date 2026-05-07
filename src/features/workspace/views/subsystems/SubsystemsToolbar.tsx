@@ -1,4 +1,4 @@
-import { SearchToolbarInput } from "@/features/workspace/shared";
+import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
 
 interface SubsystemsToolbarProps {
   openCreateSubsystemModal: () => void;

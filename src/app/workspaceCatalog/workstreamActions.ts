@@ -1,9 +1,12 @@
 import { useCallback } from "react";
 
-import { buildEmptyWorkstreamPayload, toErrorMessage, workstreamToPayload } from "@/lib/appUtils";
-import { createWorkstreamRecord, updateWorkstreamRecord } from "@/lib/auth";
+import { buildEmptyWorkstreamPayload } from "@/lib/appUtils/payloadBuilders";
+import { toErrorMessage } from "@/lib/appUtils/common";
+import { workstreamToPayload } from "@/lib/appUtils/payloadConversions";
+import { createWorkstreamRecord, updateWorkstreamRecord } from "@/lib/auth/records/inventory";
 import type { AppWorkspaceModel } from "../hooks/useAppWorkspaceModel";
-import type { WorkstreamPayload, WorkstreamRecord } from "@/types";
+import type { WorkstreamPayload } from "@/types/payloads";
+import type { WorkstreamRecord } from "@/types/recordsOrganization";
 
 export type WorkstreamActions = ReturnType<typeof useWorkstreamActions>;
 

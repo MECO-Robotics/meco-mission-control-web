@@ -1,11 +1,12 @@
 import type { Dispatch, SetStateAction } from "react";
+import { Plus } from "lucide-react";
 
-import type { BootstrapPayload } from "@/types";
-import { IconSort } from "@/components/shared";
-import { SearchToolbarInput } from "@/features/workspace/shared/WorkspaceViewShared";
-import { CompactFilterMenu } from "@/features/workspace/shared/filters";
-import type { FilterSelection } from "@/features/workspace/shared/filters";
-import type { DropdownOption } from "@/features/workspace/shared/model";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import { IconSort } from "@/components/shared/Icons";
+import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
 
 import { TaskQueueCompactFilterMenu } from "./TaskQueueCompactFilterMenu";
 import {
@@ -200,13 +201,13 @@ export function TaskQueueToolbar({
 
           <button
             aria-label="Add task"
-            className="primary-action queue-toolbar-action"
+            className="primary-action queue-toolbar-action queue-toolbar-action-round"
             data-tutorial-target="create-task-button"
             onClick={openCreateTaskModal}
             title="Add task"
             type="button"
           >
-            Add
+            <Plus size={14} strokeWidth={2} />
           </button>
         </div>
       </div>

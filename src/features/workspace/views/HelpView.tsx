@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 
-import { IconHelp } from "@/components/shared";
-import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
+import { IconHelp } from "@/components/shared/Icons";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import {
   HELP_SECTIONS,
   renderHelpItem,

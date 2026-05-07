@@ -1,14 +1,17 @@
-import type { BootstrapPayload, TaskRecord } from "@/types";
-import { dateDiffInDays } from "@/lib/appUtils";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskRecord } from "@/types/recordsExecution";
+import { dateDiffInDays } from "@/lib/appUtils/common";
 import type { TimelineSubsystemRow, TimelineTaskSpan } from "../timelineViewModel";
 
 export function buildTimelineSubsystemRows({
+  includeEmptySubsystems,
   projectsById,
   scopedSubsystems,
   scopedTasks,
   startDate,
   endDate,
 }: {
+  includeEmptySubsystems: boolean;
   projectsById: Record<string, BootstrapPayload["projects"][number]>;
   scopedSubsystems: BootstrapPayload["subsystems"];
   scopedTasks: TaskRecord[];
@@ -48,7 +51,7 @@ export function buildTimelineSubsystemRows({
 
   scopedSubsystems.forEach((subsystem) => {
     const subsystemTasks = tasksBySubsystem.get(subsystem.id) ?? [];
-    if (subsystemTasks.length === 0) {
+    if (!includeEmptySubsystems && subsystemTasks.length === 0) {
       return;
     }
 

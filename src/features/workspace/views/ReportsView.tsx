@@ -1,9 +1,10 @@
 import { useState } from "react";
 
-import type { BootstrapPayload, MilestoneRecord, TaskRecord } from "@/types";
-import { IconPlus, IconReports } from "@/components/shared";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneRecord, TaskRecord } from "@/types/recordsExecution";
+import { IconPlus, IconReports } from "@/components/shared/Icons";
 import { type ReportsViewTab } from "@/lib/workspaceNavigation";
-import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 
 interface ReportsViewProps {
   bootstrap: BootstrapPayload;

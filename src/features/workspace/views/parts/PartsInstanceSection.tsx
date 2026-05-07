@@ -1,14 +1,11 @@
 import type { CSSProperties } from "react";
 
-import {
-  ColumnFilterDropdown,
-  PaginationControls,
-  TableCell,
-  getStatusPillClassName,
-  PART_STATUS_OPTIONS,
-  type FilterSelection,
-} from "@/features/workspace/shared";
-import type { BootstrapPayload } from "@/types";
+import { ColumnFilterDropdown } from "@/features/workspace/shared/filters/ColumnFilterDropdown";
+import { PaginationControls, TableCell } from "@/features/workspace/shared/table/workspaceTableChrome";
+import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
+import { PART_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
 import { PART_INSTANCE_GRID_TEMPLATE } from "./partsViewTypes";
 

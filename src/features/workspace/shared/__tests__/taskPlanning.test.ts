@@ -5,7 +5,7 @@ import {
 } from "../task/taskPlanning";
 import { getTaskDependencyTargetOptions } from "../task/taskTargeting";
 import { IconMapPin, IconParts, IconTasks } from "@/components/shared/Icons";
-import type { BootstrapPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
 const bootstrap = {
   seasons: [],

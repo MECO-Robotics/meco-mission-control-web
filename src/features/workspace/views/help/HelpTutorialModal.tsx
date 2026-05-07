@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-import { IconChevronLeft, IconChevronRight } from "@/components/shared";
+import { IconChevronLeft, IconChevronRight } from "@/components/shared/Icons";
 import { HELP_TUTORIAL_STEPS } from "@/features/workspace/views/help/helpContent";
 
 interface HelpTutorialModalProps {

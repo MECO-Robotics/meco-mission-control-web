@@ -1,6 +1,7 @@
-import { EditableHoverIndicator, FilterDropdown } from "../../../../shared/WorkspaceViewShared";
+import { EditableHoverIndicator } from "../../../../shared/table/workspaceTableChrome";
+import { FilterDropdown } from "../../../../shared/filters/FilterDropdown";
 import { TaskPriorityBadge } from "@/features/workspace/views/taskQueue/taskQueueKanbanCardMeta";
-import type { TaskPayload } from "@/types";
+import type { TaskPayload } from "@/types/payloads";
 import type { TaskDetailsOverviewFieldProps } from "./TaskDetailsOverviewFieldProps";
 import { getPriorityToneClassName } from "./taskDetailsOverviewTone";
 

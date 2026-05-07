@@ -1,9 +1,9 @@
 import { useState } from "react";
 
-import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model";
-import { buildEmptyWorkLogPayload } from "@/lib/appUtils";
-import type { WorkLogPayload } from "@/types";
-import type { WorkLogModalMode } from "@/features/workspace";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import { buildEmptyWorkLogPayload } from "@/lib/appUtils/payloadBuilders";
+import type { WorkLogPayload } from "@/types/payloads";
+import type { WorkLogModalMode } from "@/features/workspace/shared/model/workspaceModalModes";
 
 export function useAppWorkspaceUiStateWorkLog() {
   const [workLogModalMode, setWorkLogModalMode] = useState<WorkLogModalMode>(null);

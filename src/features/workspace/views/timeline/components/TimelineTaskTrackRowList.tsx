@@ -1,5 +1,6 @@
 import React from "react";
-import type { BootstrapPayload, TaskRecord } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskRecord } from "@/types/recordsExecution";
 import { TimelineTaskTrackRow } from "./TimelineTaskTrackRow";
 import { buildTimelineTaskToneStyle } from "../timelineTaskColors";
 import type { TimelineDayHeaderCell, TimelineTaskSpan } from "../timelineViewModel";
@@ -76,15 +77,14 @@ export const TimelineTaskTrackRowList: React.FC<TimelineTaskTrackRowListProps> =
           position: "relative",
           zIndex: 10018,
           borderRadius: "4px",
-          border: "none",
-          color: "#fff",
-          fontSize: "0.7rem",
-          textAlign: "left",
-          padding: "0 8px",
-          cursor: "pointer",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          whiteSpace: "nowrap",
+              border: "none",
+              color: "#fff",
+              fontSize: "0.7rem",
+              textAlign: "left",
+              cursor: "pointer",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
           boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
           alignSelf: "center",
           minWidth: 0,
@@ -94,13 +94,12 @@ export const TimelineTaskTrackRowList: React.FC<TimelineTaskTrackRowListProps> =
     return buildTimelineTaskToneStyle(task.disciplineId, disciplinesById, {
       gridRow: rowStart,
       gridColumn: `${task.offset + firstDayGridColumn} / span ${task.span}`,
-      height: "8px",
-      margin: 0,
-      boxSizing: "border-box",
-      padding: "0 4px",
-      position: "relative",
-      zIndex: 10018,
-      borderRadius: "2px",
+          height: "8px",
+          margin: 0,
+          boxSizing: "border-box",
+          position: "relative",
+          zIndex: 10018,
+          borderRadius: "2px",
       border: "none",
       cursor: "pointer",
       alignSelf: "center",

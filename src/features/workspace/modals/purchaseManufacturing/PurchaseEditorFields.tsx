@@ -1,6 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 
-import type { BootstrapPayload, PurchaseItemPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { PurchaseItemPayload } from "@/types/payloads";
 
 interface PurchaseEditorFieldsProps {
   bootstrap: BootstrapPayload;

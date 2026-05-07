@@ -26,30 +26,74 @@
 }
 
 .filter-toolbar {
-  flex: 1 1 420px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, max-content));
-  justify-content: end;
+  flex: 1 1 100%;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   margin-left: auto;
-  align-items: start;
+  align-items: flex-start;
   gap: 0.4rem;
 }
 
 .filter-toolbar>* {
+  flex: 0 1 auto;
+  width: auto;
   min-width: 0;
-  width: 100%;
+  max-width: 100%;
+}
+
+.filter-toolbar .queue-toolbar-action,
+.filter-toolbar .timeline-period-controls,
+.filter-toolbar .timeline-zoom-controls,
+.filter-toolbar .task-queue-zoom-controls,
+.filter-toolbar .task-queue-toolbar-inline-actions {
+  flex: 0 1 auto;
+  width: auto;
+}
+
+.filter-toolbar .toolbar-search,
+.filter-toolbar .toolbar-filter-dropdown,
+.filter-toolbar .toolbar-filter-compact,
+.filter-toolbar .task-queue-filter-menu,
+.filter-toolbar .task-queue-sort-menu {
+  width: auto;
+  max-width: 100%;
+}
+
+.filter-toolbar .toolbar-search {
+  flex: 0 1 clamp(11.5rem, 24vw, 19rem);
+  min-width: 0;
 }
 
 .filter-toolbar .toolbar-filter-dropdown {
-  max-width: min(100%, 190px);
+  max-width: 100%;
 }
 
 .filter-toolbar .toolbar-filter-menu-button {
+  width: auto;
   max-width: 100%;
 }
 
 .filter-toolbar .toolbar-filter-value {
-  max-width: clamp(76px, 12vw, 132px);
+  max-width: min(20rem, 38vw);
+}
+
+.filter-toolbar .task-queue-sort-menu-select {
+  width: auto;
+  min-width: 0;
+}
+
+.filter-toolbar .risk-filter-control {
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.filter-toolbar .risk-filter-control select {
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .task-queue-filter-menu {
@@ -144,7 +188,7 @@
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  width: clamp(10.8rem, 14vw, 13.5rem);
+  width: 100%;
   min-width: 0;
   height: 2rem;
   border: 1px solid var(--border-base);
@@ -203,4 +247,8 @@
 .queue-section-header {
   flex: 1 1 260px;
   min-width: 0;
+}
+
+.workspace-panel > .panel-header .queue-section-header > h2 {
+  display: none;
 }

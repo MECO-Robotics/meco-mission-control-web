@@ -20,7 +20,7 @@ import type {
   TaskStatus,
   TestResultStatus,
 } from "./common";
-import type { PartInstanceRecord as PartInstanceRecordType } from "./records";
+import type { PartInstanceRecord as PartInstanceRecordType } from "./recordsInventory";
 
 export interface MilestonePayload {
   title: string;

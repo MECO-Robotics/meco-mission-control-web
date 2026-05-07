@@ -2,11 +2,14 @@ import { useMemo } from "react";
 
 import type { CSSProperties } from "react";
 import type { RiskManagementViewTab } from "@/lib/workspaceNavigation";
-import type { BootstrapPayload, RiskPayload, RiskRecord } from "@/types";
-import { EditableHoverIndicator, type FilterSelection } from "@/features/workspace/shared";
-import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { RiskPayload } from "@/types/payloads";
+import type { RiskRecord } from "@/types/recordsReporting";
+import { EditableHoverIndicator } from "@/features/workspace/shared/table/workspaceTableChrome";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { KanbanColumns } from "@/features/workspace/views/kanban/KanbanColumns";
-import { resolveWorkspaceColor } from "@/features/workspace/shared/model";
+import { resolveWorkspaceColor } from "@/features/workspace/shared/model/workspaceColors";
 
 import { RiskEditorModal } from "./RiskEditorModal";
 import { RiskDetailsModal } from "./RiskDetailsModal";
@@ -163,14 +166,6 @@ export function RisksView({
 
   return (
     <section className={`panel dense-panel subsystem-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
-      <div className="panel-header compact-header">
-        <div className="queue-section-header">
-          <h2 style={{ color: "var(--text-title)" }}>
-            {view === "metrics" ? "Operations metrics" : "Risk management"}
-          </h2>
-        </div>
-      </div>
-
       {view === "metrics" ? (
         <RiskMetricsSection
           activeMechanismCount={viewModel.activeMechanismCount}

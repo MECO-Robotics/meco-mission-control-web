@@ -1,9 +1,9 @@
 import { useCallback } from "react";
 
 import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
-import { toErrorMessage } from "@/lib/appUtils";
-import { createRiskRecord, deleteRiskRecord, updateRiskRecord } from "@/lib/auth";
-import type { RiskPayload } from "@/types";
+import { toErrorMessage } from "@/lib/appUtils/common";
+import { createRiskRecord, deleteRiskRecord, updateRiskRecord } from "@/lib/auth/records/reporting";
+import type { RiskPayload } from "@/types/payloads";
 
 export type AppWorkspaceReportRiskActions = ReturnType<typeof useAppWorkspaceReportRiskActions>;
 

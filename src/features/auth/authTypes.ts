@@ -1,6 +1,6 @@
 import { type CSSProperties, type RefObject } from "react";
 
-import type { AuthConfig, EmailCodeDeliveryResponse } from "@/lib/auth";
+import type { AuthConfig, EmailCodeDeliveryResponse } from "@/lib/auth/types";
 
 export interface AuthStatusScreenProps {
   body: string;

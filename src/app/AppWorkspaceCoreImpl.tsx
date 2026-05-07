@@ -2,7 +2,7 @@ import "@/app/App.css";
 
 import { AppWorkspaceShellView } from "@/app/shell/AppWorkspaceShellView";
 import { useAppWorkspaceController } from "@/app/hooks/useAppWorkspaceController";
-import { AuthStatusScreen, SignInScreen } from "@/features/auth";
+import { AuthStatusScreen, SignInScreen } from "@/features/auth/AuthScreens";
 
 export default function AppWorkspaceCoreImpl() {
   const c = useAppWorkspaceController();

@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import type { FilterSelection } from "@/features/workspace/shared";
-import { useFilterChangeMotionClass, useWorkspacePagination } from "@/features/workspace/shared";
-import type { BootstrapPayload, RiskPayload, RiskRecord } from "@/types";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { RiskPayload } from "@/types/payloads";
+import type { RiskRecord } from "@/types/recordsReporting";
 
 import {
   ATTACHMENT_TYPE_LABELS,

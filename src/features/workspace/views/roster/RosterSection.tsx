@@ -1,7 +1,7 @@
 import React from "react";
 
-import { IconPlus } from "@/components/shared";
-import type { MemberRecord } from "@/types";
+import { IconPlus } from "@/components/shared/Icons";
+import type { MemberRecord } from "@/types/recordsOrganization";
 
 interface RosterSectionProps {
   title: string;

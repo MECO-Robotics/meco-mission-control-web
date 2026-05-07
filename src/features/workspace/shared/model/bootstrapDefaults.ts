@@ -1,4 +1,4 @@
-import type { BootstrapPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
 export const EMPTY_BOOTSTRAP: BootstrapPayload = {
   seasons: [],

@@ -1,9 +1,12 @@
 import { useCallback } from "react";
 
-import { buildEmptyManufacturingPayload, manufacturingToPayload, toErrorMessage } from "@/lib/appUtils";
-import { createManufacturingItemRecord, updateManufacturingItemRecord } from "@/lib/auth";
+import { buildEmptyManufacturingPayload } from "@/lib/appUtils/manufacturing";
+import { manufacturingToPayload } from "@/lib/appUtils/payloadConversions";
+import { toErrorMessage } from "@/lib/appUtils/common";
+import { createManufacturingItemRecord, updateManufacturingItemRecord } from "@/lib/auth/records/production";
 import type { AppWorkspaceModel } from "../hooks/useAppWorkspaceModel";
-import type { ManufacturingItemPayload, ManufacturingItemRecord } from "@/types";
+import type { ManufacturingItemPayload } from "@/types/payloads";
+import type { ManufacturingItemRecord } from "@/types/recordsInventory";
 
 export type ManufacturingActions = ReturnType<typeof useManufacturingActions>;
 

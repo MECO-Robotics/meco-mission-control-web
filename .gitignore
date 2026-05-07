@@ -19,6 +19,10 @@ docs/reports/lighthouse-*.html
 docs/reports/lighthouse-*.json
 docs/reports/lighthouse-*.txt
 
+# Diagnostic artifacts (screenshots, snapshots, local diagnostics)
+.diagnostics/
+/.diagnostics/
+
 # Environment files
 .env
 .env.*

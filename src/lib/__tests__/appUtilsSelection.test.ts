@@ -1,14 +1,8 @@
 /// <reference types="jest" />
 
-import {
-  buildEmptyArtifactPayload,
-  buildEmptyTaskPayload,
-  buildEmptyWorkLogPayload,
-  findMemberForSessionUser,
-  getProjectTaskTargetLabel,
-  setTaskPrimaryTargetSelection,
-  toggleTaskTargetSelection,
-} from "@/lib/appUtils";
+import { buildEmptyArtifactPayload, buildEmptyWorkLogPayload } from "@/lib/appUtils/payloadBuilders";
+import { buildEmptyTaskPayload, getProjectTaskTargetLabel, setTaskPrimaryTargetSelection, toggleTaskTargetSelection } from "@/lib/appUtils/taskTargets";
+import { findMemberForSessionUser } from "@/lib/appUtils/common";
 import { createBootstrap } from "@/lib/appUtilsTestFixtures";
 
 describe("appUtils selection helpers", () => {

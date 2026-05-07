@@ -1,20 +1,18 @@
 import { useMemo, useState } from "react";
+import { Plus } from "lucide-react";
 
-import type { BootstrapPayload, ManufacturingItemRecord } from "@/types";
-import { IconManufacturing, IconPerson, IconTasks } from "@/components/shared";
-import {
-  CompactFilterMenu,
-  type FilterSelection,
-  FilterDropdown,
-  PaginationControls,
-  SearchToolbarInput,
-  filterSelectionIncludes,
-  useFilterChangeMotionClass,
-  useWorkspacePagination,
-} from "@/features/workspace/shared";
-import type { MembersById, SubsystemsById } from "@/features/workspace/shared";
-import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
-import { MANUFACTURING_STATUS_OPTIONS } from "@/features/workspace/shared";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { ManufacturingItemRecord } from "@/types/recordsInventory";
+import { IconManufacturing, IconPerson, IconTasks } from "@/components/shared/Icons";
+import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
+import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
+import { filterSelectionIncludes, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { PaginationControls, useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
+import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
+import { MANUFACTURING_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
 import { ManufacturingKanbanBoard } from "./ManufacturingKanbanBoard";
 
 interface ManufacturingQueueViewProps {
@@ -186,13 +184,13 @@ export function ManufacturingQueueView({
 
           <button
             aria-label={addButtonAriaLabel}
-            className="primary-action queue-toolbar-action"
+            className="primary-action queue-toolbar-action queue-toolbar-action-round"
             data-tutorial-target={tutorialTarget("create-job-button")}
             onClick={onCreate}
             title="Add"
             type="button"
           >
-            Add
+            <Plus size={14} strokeWidth={2} />
           </button>
         </div>
       </div>

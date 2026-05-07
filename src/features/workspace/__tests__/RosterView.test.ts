@@ -4,8 +4,10 @@ import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { RosterView } from "@/features/workspace/views/RosterView";
-import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared";
-import type { BootstrapPayload, MemberPayload, MemberRecord } from "@/types";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MemberPayload } from "@/types/payloads";
+import type { MemberRecord } from "@/types/recordsOrganization";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 

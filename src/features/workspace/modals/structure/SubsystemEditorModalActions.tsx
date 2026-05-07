@@ -1,4 +1,4 @@
-import type { SubsystemPayload } from "@/types";
+import type { SubsystemPayload } from "@/types/payloads";
 
 interface SubsystemEditorModalActionsProps {
   activeSubsystemId: string | null;

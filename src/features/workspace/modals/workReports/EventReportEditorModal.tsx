@@ -1,6 +1,7 @@
 import type { Dispatch, FormEvent, SetStateAction } from "react";
-import type { BootstrapPayload, TestResultPayload } from "@/types";
-import { PhotoUploadField } from "@/features/workspace/shared/media";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TestResultPayload } from "@/types/payloads";
+import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
 
 interface MilestoneReportEditorModalProps {
   bootstrap: BootstrapPayload;

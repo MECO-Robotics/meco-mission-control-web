@@ -1,9 +1,6 @@
-import type {
-  BootstrapPayload,
-  TaskDependencyDraft,
-  TaskPayload,
-  TaskRecord,
-} from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskDependencyDraft, TaskPayload } from "@/types/payloads";
+import type { TaskRecord } from "@/types/recordsExecution";
 import { getDefaultTaskDisciplineIdForProject } from "@/lib/taskDisciplines";
 import { localTodayDate } from "@/lib/dateUtils";
 import { getTaskOpenBlockersForTask } from "@/features/workspace/shared/task/taskPlanning";

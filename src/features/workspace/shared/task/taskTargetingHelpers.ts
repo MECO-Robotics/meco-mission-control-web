@@ -1,4 +1,5 @@
-import type { BootstrapPayload, TaskPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskPayload } from "@/types/payloads";
 
 type TaskSelectionPayload = Pick<
   TaskPayload,

@@ -1,4 +1,5 @@
-import type { BootstrapPayload, RiskRecord } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { RiskRecord } from "@/types/recordsReporting";
 
 import type { SelectOption } from "./riskViewDataPayload";
 import type { RiskViewScopeData } from "./riskViewDataScope";

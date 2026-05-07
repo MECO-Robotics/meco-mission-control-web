@@ -12,7 +12,7 @@ import {
 } from "@/components/shared/Icons";
 import { Dumbbell, HeartHandshake, Megaphone, Paintbrush, Share2 } from "lucide-react";
 
-import type { BootstrapPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
 const DISCIPLINE_ICON_BY_CODE: Record<string, ReactNode> = {
   design: <IconEdit />,

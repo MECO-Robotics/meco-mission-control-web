@@ -1,5 +1,5 @@
-import type { BootstrapPayload } from "@/types";
-import { isMemberActiveInSeason, isPartDefinitionActiveInSeason } from "@/lib/appUtils";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import { isMemberActiveInSeason, isPartDefinitionActiveInSeason } from "@/lib/appUtils/common";
 import { scopeBootstrapRisks } from "./workspaceBootstrapRiskScope";
 
 export function scopeBootstrapBySelection(

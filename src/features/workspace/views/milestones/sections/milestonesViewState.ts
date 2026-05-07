@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 
-import type { BootstrapPayload, MilestonePayload } from "@/types";
-import {
-  type FilterSelection,
-  useFilterChangeMotionClass,
-} from "@/features/workspace/shared/WorkspaceViewShared";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestonePayload } from "@/types/payloads";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import {
   buildMilestoneProjectLabels,
   filterAndSortMilestones,

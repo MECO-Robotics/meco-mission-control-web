@@ -39,30 +39,98 @@
 
 .app-topbar-left {
   display: flex;
-  align-items: stretch;
+  align-items: center;
+  justify-content: flex-start;
   height: 100%;
-  width: var(--shell-topbar-brand-width);
+  width: auto;
+  max-width: none;
   min-width: 0;
   position: relative;
-  flex-shrink: 0;
-  border-right: 1px solid var(--border-base);
-  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  flex: 1 1 auto;
+  border-right: 0;
+  padding: 0.25rem 0.75rem;
 }
 
-.app-topbar[data-collapsed="false"] .app-topbar-left {
-  border-right-color: transparent;
+.app-topbar-view-title {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.app-topbar-view-title h1 {
+  margin: 0;
+  color: var(--text-title);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+}
+
+.app-topbar-search-slot {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  flex: 0 1 clamp(12rem, 24vw, 21rem);
+  min-width: 9.5rem;
+  padding-inline: clamp(0.3rem, 0.9vw, 0.6rem);
+}
+
+.app-topbar-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.app-topbar-search-icon {
+  position: absolute;
+  left: 0.55rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-copy);
+  pointer-events: none;
+}
+
+.app-topbar-search-input {
+  width: 100%;
+  height: 2rem;
+  border-radius: 0.62rem;
+  border: 1px solid var(--border-base);
+  background: var(--bg-row-alt);
+  color: var(--text-title);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0 0.65rem 0 1.9rem;
+}
+
+.app-topbar-search-input::placeholder {
+  color: var(--text-copy);
+  opacity: 0.8;
+}
+
+.app-topbar-search-input:focus,
+.app-topbar-search-input:focus-visible {
+  outline: none;
+  border-color: var(--control-select-focus-border);
+  box-shadow: var(--control-select-focus-ring);
 }
 
 .app-topbar-brand {
   display: flex;
   align-items: center;
   justify-content: center;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
+  position: relative;
+  height: 100%;
   width: var(--shell-topbar-brand-width);
   min-width: 0;
+  flex-shrink: 0;
   padding-inline: 0.5rem 0.7rem;
   overflow: hidden;
   opacity: 1;
@@ -71,8 +139,14 @@
   background: var(--bg-panel);
   box-sizing: border-box;
   transition:
+    width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
     padding-inline 0.25s cubic-bezier(0.4, 0, 0.2, 1),
     opacity 0.18s ease;
+}
+
+.app-topbar[data-collapsed="true"] .app-topbar-brand {
+  width: var(--shell-sidebar-collapsed-width);
+  padding-inline: 0.3rem;
 }
 
 .app-topbar[data-collapsed="false"] .app-topbar-brand {
@@ -82,9 +156,9 @@
 
 .app-topbar-brand-icon {
   display: block;
-  width: min(100%, 96px);
+  width: min(100%, 118px);
   height: auto;
-  max-height: 26px;
+  max-height: 34px;
   max-width: 100%;
   object-fit: contain;
   opacity: 1;
@@ -92,6 +166,10 @@
   transition:
     opacity 0.18s ease,
     transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.app-topbar[data-collapsed="true"] .app-topbar-brand-icon {
+  width: min(100%, 42px);
 }
 
 .app-topbar[data-collapsed="false"] .app-topbar-brand-icon {

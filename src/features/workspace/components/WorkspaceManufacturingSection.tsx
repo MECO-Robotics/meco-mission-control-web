@@ -1,4 +1,6 @@
-import { CncView, FabricationView, PrintsView } from "@/features/workspace/views";
+import { CncView } from "@/features/workspace/views/manufacturing/CncView";
+import { FabricationView } from "@/features/workspace/views/manufacturing/FabricationView";
+import { PrintsView } from "@/features/workspace/views/manufacturing/PrintsView";
 import { WorkspaceSectionPanel, WorkspaceSubPanel } from "../WorkspaceContentPanelShells";
 import type { WorkspaceContentPanelsViewProps } from "./workspaceContentPanelsViewTypes";
 

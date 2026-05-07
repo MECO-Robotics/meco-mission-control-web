@@ -1,1 +1,0 @@
-export { MilestonesMilestoneModal } from "./MilestonesEventModal";

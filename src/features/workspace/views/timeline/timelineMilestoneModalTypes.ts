@@ -1,7 +1,8 @@
 import type React from "react";
 
-import type { BootstrapPayload, MilestoneRecord } from "@/types";
-import type { TimelineMilestoneDraft } from "@/features/workspace/shared/timeline";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneRecord } from "@/types/recordsExecution";
+import type { TimelineMilestoneDraft } from "@/features/workspace/shared/timeline/timelineEventHelpers";
 
 export interface TimelineMilestoneModalProps {
   activeDayMilestones: MilestoneRecord[];

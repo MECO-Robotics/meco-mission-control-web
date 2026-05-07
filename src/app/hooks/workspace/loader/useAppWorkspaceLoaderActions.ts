@@ -2,7 +2,7 @@ import { useCallback } from "react";
 
 import type { AppWorkspaceLoaderModel } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
 import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
-import type { BootstrapPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
 import {
   buildEditCanceledNotice,
   buildMilestoneEditSuccessNotice,

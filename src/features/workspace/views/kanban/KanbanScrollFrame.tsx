@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
-import { IconChevronLeft, IconChevronRight } from "@/components/shared";
+import { IconChevronLeft, IconChevronRight } from "@/components/shared/Icons";
 
 interface KanbanScrollFrameProps {
   children: ReactNode;

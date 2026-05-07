@@ -1,10 +1,6 @@
 /// <reference types="jest" />
 
-import {
-  buildEmptyManufacturingPayload,
-  getManufacturingPartInstanceOptions,
-  inferManufacturingDraftFromPartSelection,
-} from "@/lib/appUtils";
+import { buildEmptyManufacturingPayload, getManufacturingPartInstanceOptions, inferManufacturingDraftFromPartSelection } from "@/lib/appUtils/manufacturing";
 import { createBootstrap, createMaterial, createPartDefinition, createPartInstance } from "@/lib/appUtilsTestFixtures";
 
 describe("appUtils manufacturing helpers", () => {

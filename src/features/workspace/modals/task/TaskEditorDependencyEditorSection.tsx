@@ -1,8 +1,10 @@
 import type { Dispatch, SetStateAction } from "react";
-import type { BootstrapPayload, TaskDependencyKind, TaskDependencyType, TaskPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskDependencyKind, TaskDependencyType } from "@/types/common";
+import type { TaskPayload } from "@/types/payloads";
 import { IconTasks, IconTrash } from "@/components/shared/Icons";
-import { formatIterationVersion } from "@/lib/appUtils";
-import { FilterDropdown } from "../../shared/WorkspaceViewShared";
+import { formatIterationVersion } from "@/lib/appUtils/common";
+import { FilterDropdown } from "../../shared/filters/FilterDropdown";
 import {
   TASK_DEPENDENCY_KIND_LABELS,
   TASK_DEPENDENCY_KIND_OPTIONS,
