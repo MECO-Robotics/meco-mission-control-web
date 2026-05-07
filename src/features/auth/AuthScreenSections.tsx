@@ -11,26 +11,48 @@ import { MOBILE_RELEASES_URL } from "./authDevice";
 import type { AuthStatusScreenProps } from "./authTypes";
 
 interface AuthIntroPanelProps {
-  title: string;
+  isDarkMode: boolean;
+  onToggleDarkMode: () => void;
 }
 
-export function AuthIntroPanel({ title }: AuthIntroPanelProps) {
+export function AuthIntroPanel({
+  isDarkMode,
+  onToggleDarkMode,
+}: AuthIntroPanelProps) {
+  const themeToggleTitle = isDarkMode ? "Switch to light mode" : "Switch to dark mode";
+
   return (
     <aside className="auth-intro" aria-label="MECO sign-in overview">
-      <div className="auth-intro-mark-wrap">
-        <img
-          alt="MECO main logo"
-          className="auth-intro-mark"
-          height={MECO_MAIN_LOGO_HEIGHT}
-          loading="eager"
-          width={MECO_MAIN_LOGO_WIDTH}
-          src={MECO_MAIN_LOGO_WHITE_SRC}
-        />
+      <div className="auth-intro-brand-row">
+        <button
+          aria-label="Toggle dark mode"
+          className="auth-theme-toggle"
+          onClick={onToggleDarkMode}
+          title={themeToggleTitle}
+          type="button"
+        >
+          <span aria-hidden="true" className="auth-theme-toggle-icon">
+            {isDarkMode ? "\u2600" : "\u263E"}
+          </span>
+          <span className="auth-theme-toggle-label">
+            {isDarkMode ? "Light mode" : "Dark mode"}
+          </span>
+        </button>
+
+        <div className="auth-intro-mark-wrap">
+          <img
+            alt="MECO main logo"
+            className="auth-intro-mark"
+            height={MECO_MAIN_LOGO_HEIGHT}
+            loading="eager"
+            width={MECO_MAIN_LOGO_WIDTH}
+            src={MECO_MAIN_LOGO_WHITE_SRC}
+          />
+        </div>
       </div>
 
       <div className="auth-intro-copy">
-        <p className="eyebrow">MECO Mission Control</p>
-        <h1>{title}</h1>
+        <p className="eyebrow">Mission Control</p>
         <p className="auth-body auth-intro-description">
           <span>Plan. Build. Verify.</span>
           <span>One system for tasks, parts, and QA.</span>

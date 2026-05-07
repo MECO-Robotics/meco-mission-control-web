@@ -17,6 +17,7 @@ export function SignInScreen({
   isDarkMode = false,
   isSigningIn,
   onDevBypassSignIn,
+  onToggleDarkMode,
   onRequestEmailCode,
   onVerifyEmailCode,
   shellStyle,
@@ -37,7 +38,10 @@ export function SignInScreen({
       <div className="auth-layout">
         <AuthBackdrop className="auth-layout-backdrop" />
 
-        <AuthIntroPanel title="Sign in to the project workspace." />
+        <AuthIntroPanel
+          isDarkMode={isDarkMode}
+          onToggleDarkMode={onToggleDarkMode}
+        />
 
         <section className="auth-card auth-card-wide">
           <div className="auth-card-header">

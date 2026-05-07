@@ -20,6 +20,7 @@ export interface SignInScreenProps {
   isDarkMode?: boolean;
   isSigningIn: boolean;
   onDevBypassSignIn: () => Promise<void>;
+  onToggleDarkMode: () => void;
   onRequestEmailCode: (email: string) => Promise<EmailCodeDeliveryResponse>;
   onVerifyEmailCode: (email: string, code: string) => Promise<void>;
   shellStyle?: CSSProperties;
