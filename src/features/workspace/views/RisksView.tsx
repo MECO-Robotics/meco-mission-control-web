@@ -9,6 +9,7 @@ import { EditableHoverIndicator } from "@/features/workspace/shared/table/worksp
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { KanbanColumns } from "@/features/workspace/views/kanban/KanbanColumns";
+import { KanbanScrollFrame } from "@/features/workspace/views/kanban/KanbanScrollFrame";
 import { resolveWorkspaceColor } from "@/features/workspace/shared/model/workspaceColors";
 
 import { RiskEditorModal } from "./RiskEditorModal";
@@ -166,6 +167,15 @@ export function RisksView({
 
   return (
     <section className={`panel dense-panel subsystem-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
+      {view === "attention" ? (
+        <div className="empty-state">
+          <strong>Attention placeholder</strong>
+          <p className="section-copy">
+            Priority attention signals, blockers, and escalation summaries will be added here.
+          </p>
+        </div>
+      ) : null}
+
       {view === "metrics" ? (
         <RiskMetricsSection
           activeMechanismCount={viewModel.activeMechanismCount}
@@ -203,10 +213,9 @@ export function RisksView({
             sourceFilter={viewModel.sourceFilter}
           />
 
-          <div className={"task-queue-board-shell-frame " + viewModel.riskFilterMotionClass}>
-            <div className="table-shell task-queue-board-shell">
-        {viewModel.filteredRows.length > 0 ? (
-          <KanbanColumns
+          <KanbanScrollFrame motionClassName={viewModel.riskFilterMotionClass}>
+            {viewModel.filteredRows.length > 0 ? (
+              <KanbanColumns
                   boardClassName="risk-board"
                   columnBodyClassName="task-queue-board-column-body"
                   columnClassName="task-queue-board-column"
@@ -289,11 +298,10 @@ export function RisksView({
                     );
                   }}
                 />
-              ) : (
-                <p className="empty-state">No risks match the current filters.</p>
-              )}
-            </div>
-          </div>
+            ) : (
+              <p className="empty-state">No risks match the current filters.</p>
+            )}
+          </KanbanScrollFrame>
         </>
       ) : null}
 

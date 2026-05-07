@@ -165,6 +165,7 @@ export function WorkspaceContentPanels({
   const taskSwipeDirection = getSwipeDirection(previousTaskViewRef.current, taskView, [
     "calendar",
     "timeline",
+    "robot-map",
     "queue",
     "milestones",
   ]);
@@ -180,7 +181,7 @@ export function WorkspaceContentPanels({
   const inventorySwipeDirection = getSwipeDirection(
     previousInventoryViewRef.current,
     effectiveInventoryView,
-    ["materials", "parts", "purchases"],
+    ["materials", "parts", "part-mappings", "purchases"],
   );
 
   useEffect(() => {

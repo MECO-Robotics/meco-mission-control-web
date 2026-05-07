@@ -14,25 +14,31 @@ export type ViewTab =
 export type NavigationSection =
   | "dashboard"
   | "readiness"
+  | "config"
   | "tasks"
   | "inventory"
   | "roster"
   | "reports";
 
-export type TaskViewTab = "calendar" | "timeline" | "queue" | "milestones";
-export type RiskManagementViewTab = "kanban" | "metrics";
-export type WorklogsViewTab = "logs" | "summary";
+export type TaskViewTab = "calendar" | "timeline" | "robot-map" | "queue" | "milestones";
+export type RiskManagementViewTab = "attention" | "kanban" | "metrics";
+export type WorklogsViewTab = "logs" | "summary" | "activity";
 export type ReportsViewTab = "qa" | "milestone-results";
 export type ManufacturingViewTab = "cnc" | "prints" | "fabrication";
-export type InventoryViewTab = "materials" | "parts" | "purchases";
+export type InventoryViewTab = "materials" | "parts" | "part-mappings" | "purchases";
 export type RosterViewTab = "workload" | "directory" | "attendance";
 
 export type NavigationSubItemId =
   | "dashboard-calendar"
+  | "dashboard-activity"
   | "dashboard-metrics"
   | "readiness-attention"
   | "readiness-milestones"
   | "readiness-subsystems"
+  | "readiness-risks"
+  | "config-robot-model"
+  | "config-part-mappings"
+  | "config-directory"
   | "tasks-timeline"
   | "tasks-board"
   | "tasks-manufacturing"
@@ -40,7 +46,6 @@ export type NavigationSubItemId =
   | "inventory-parts"
   | "inventory-purchases"
   | "roster-workload"
-  | "roster-directory"
   | "roster-attendance"
   | "reports-work-logs"
   | "reports-qa-forms"
@@ -79,10 +84,12 @@ export interface NavigationSubItem {
 export const TASK_VIEW_ORDER: readonly TaskViewTab[] = [
   "calendar",
   "timeline",
+  "robot-map",
   "queue",
   "milestones",
 ];
 export const RISK_MANAGEMENT_VIEW_ORDER: readonly RiskManagementViewTab[] = [
+  "attention",
   "kanban",
   "metrics",
 ];
@@ -99,6 +106,7 @@ export const MANUFACTURING_VIEW_ORDER: readonly ManufacturingViewTab[] = [
 export const INVENTORY_VIEW_ORDER: readonly InventoryViewTab[] = [
   "materials",
   "parts",
+  "part-mappings",
   "purchases",
 ];
 
@@ -109,11 +117,13 @@ export const NAVIGATION_SECTION_ORDER: readonly NavigationSection[] = [
   "inventory",
   "roster",
   "reports",
+  "config",
 ];
 
 export const NAVIGATION_SECTION_LABELS: Record<NavigationSection, string> = {
   dashboard: "Dashboard",
   readiness: "Readiness",
+  config: "Config",
   tasks: "Work",
   inventory: "Inventory",
   roster: "Roster",
@@ -123,11 +133,13 @@ export const NAVIGATION_SECTION_LABELS: Record<NavigationSection, string> = {
 export const TASK_VIEW_OPTIONS: readonly ViewOption<TaskViewTab>[] = [
   { value: "calendar", label: "Calendar" },
   { value: "timeline", label: "Timeline" },
+  { value: "robot-map", label: "Robot map" },
   { value: "queue", label: "Tasks" },
   { value: "milestones", label: "Milestones" },
 ];
 
 export const RISK_MANAGEMENT_VIEW_OPTIONS: readonly ViewOption<RiskManagementViewTab>[] = [
+  { value: "attention", label: "Attention" },
   { value: "kanban", label: "Risks" },
   { value: "metrics", label: "Metrics" },
 ];
@@ -167,6 +179,12 @@ export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = [
     target: { tab: "tasks", taskView: "calendar" },
   },
   {
+    id: "dashboard-activity",
+    label: "Activity",
+    section: "dashboard",
+    target: { tab: "worklogs", worklogsView: "activity" },
+  },
+  {
     id: "dashboard-metrics",
     label: "Metrics",
     section: "dashboard",
@@ -174,9 +192,9 @@ export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = [
   },
   {
     id: "readiness-attention",
-    label: "Risks",
+    label: "Attention",
     section: "readiness",
-    target: { tab: "risk-management", riskManagementView: "kanban" },
+    target: { tab: "risk-management", riskManagementView: "attention" },
   },
   {
     id: "readiness-milestones",
@@ -189,6 +207,30 @@ export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = [
     label: "Subsystems",
     section: "readiness",
     target: { tab: "subsystems" },
+  },
+  {
+    id: "readiness-risks",
+    label: "Risks",
+    section: "readiness",
+    target: { tab: "risk-management", riskManagementView: "kanban" },
+  },
+  {
+    id: "config-robot-model",
+    label: "Robot model",
+    section: "config",
+    target: { tab: "tasks", taskView: "robot-map" },
+  },
+  {
+    id: "config-part-mappings",
+    label: "Part mappings",
+    section: "config",
+    target: { tab: "inventory", inventoryView: "part-mappings" },
+  },
+  {
+    id: "config-directory",
+    label: "Directory",
+    section: "config",
+    target: { tab: "roster", rosterView: "directory" },
   },
   {
     id: "tasks-timeline",
@@ -233,12 +275,6 @@ export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = [
     target: { tab: "roster", rosterView: "workload" },
   },
   {
-    id: "roster-directory",
-    label: "Directory",
-    section: "roster",
-    target: { tab: "roster", rosterView: "directory" },
-  },
-  {
     id: "roster-attendance",
     label: "Attendance",
     section: "roster",
@@ -270,6 +306,7 @@ export const NAVIGATION_SUB_ITEMS_BY_SECTION: Record<
 > = {
   dashboard: NAVIGATION_SUB_ITEMS.filter((item) => item.section === "dashboard"),
   readiness: NAVIGATION_SUB_ITEMS.filter((item) => item.section === "readiness"),
+  config: NAVIGATION_SUB_ITEMS.filter((item) => item.section === "config"),
   tasks: NAVIGATION_SUB_ITEMS.filter((item) => item.section === "tasks"),
   inventory: NAVIGATION_SUB_ITEMS.filter((item) => item.section === "inventory"),
   roster: NAVIGATION_SUB_ITEMS.filter((item) => item.section === "roster"),
@@ -298,6 +335,10 @@ export function getActiveNavigationSubItemId({
       return "dashboard-calendar";
     }
 
+    if (taskView === "robot-map") {
+      return "config-robot-model";
+    }
+
     if (taskView === "timeline") {
       return "tasks-timeline";
     }
@@ -310,9 +351,11 @@ export function getActiveNavigationSubItemId({
   }
 
   if (activeTab === "risk-management") {
-    return riskManagementView === "metrics"
-      ? "dashboard-metrics"
-      : "readiness-attention";
+    if (riskManagementView === "attention") {
+      return "readiness-attention";
+    }
+
+    return riskManagementView === "metrics" ? "dashboard-metrics" : "readiness-risks";
   }
 
   if (activeTab === "manufacturing") {
@@ -320,6 +363,10 @@ export function getActiveNavigationSubItemId({
   }
 
   if (activeTab === "inventory") {
+    if (inventoryView === "part-mappings") {
+      return "config-part-mappings";
+    }
+
     if (inventoryView === "parts") {
       return "inventory-parts";
     }
@@ -340,7 +387,7 @@ export function getActiveNavigationSubItemId({
       return "roster-attendance";
     }
 
-    return "roster-directory";
+    return "config-directory";
   }
 
   if (activeTab === "subsystems") {
@@ -348,9 +395,7 @@ export function getActiveNavigationSubItemId({
   }
 
   if (activeTab === "worklogs") {
-    return worklogsView === "summary"
-      ? "reports-work-logs"
-      : "reports-work-logs";
+    return worklogsView === "activity" ? "dashboard-activity" : "reports-work-logs";
   }
 
   if (activeTab === "reports") {
@@ -359,7 +404,7 @@ export function getActiveNavigationSubItemId({
       : "reports-qa-forms";
   }
 
-  return "readiness-attention";
+  return "readiness-risks";
 }
 
 export function getNavigationSectionFromSubItem(

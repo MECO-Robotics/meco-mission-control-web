@@ -40,7 +40,7 @@ export function WorkLogsView({
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
       <div className="panel-header compact-header">
         <div className="queue-section-header">
-          <h2>{view === "summary" ? "Work log summary" : "Work logs"}</h2>
+          <h2>{view === "activity" ? "Activity" : view === "summary" ? "Work log summary" : "Work logs"}</h2>
         </div>
 
         {view === "logs" ? (
@@ -58,7 +58,14 @@ export function WorkLogsView({
         ) : null}
       </div>
 
-      {view === "summary" ? (
+      {view === "activity" ? (
+        <div className="empty-state">
+          <strong>Activity placeholder</strong>
+          <p className="section-copy">
+            Team activity feed and timeline updates will appear here.
+          </p>
+        </div>
+      ) : view === "summary" ? (
         <WorkLogsSummarySection
           onOpenTask={openEditTaskModal}
           summary={workLogsView.summary}

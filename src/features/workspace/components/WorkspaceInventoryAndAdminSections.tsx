@@ -1,5 +1,6 @@
 import { ArtifactInventoryView } from "@/features/workspace/views/ArtifactInventoryView";
 import { MaterialsView } from "@/features/workspace/views/MaterialsView";
+import { PartMappingsPlaceholderView } from "@/features/workspace/views/PartMappingsPlaceholderView";
 import { PartsView } from "@/features/workspace/views/PartsView";
 import { PurchasesView } from "@/features/workspace/views/PurchasesView";
 import { WorkflowView } from "@/features/workspace/views/WorkflowView";
@@ -79,6 +80,14 @@ export function WorkspaceInventorySection(props: WorkspaceContentPanelsViewProps
           partDefinitionsById={partDefinitionsById}
           subsystemsById={subsystemsById}
         />
+      </WorkspaceSubPanel>
+
+      <WorkspaceSubPanel
+        disableAnimations={disablePanelAnimations}
+        isActive={!isNonRobotProject && effectiveInventoryView === "part-mappings"}
+        swipeDirection={inventorySwipeDirection}
+      >
+        <PartMappingsPlaceholderView />
       </WorkspaceSubPanel>
 
       <WorkspaceSubPanel
