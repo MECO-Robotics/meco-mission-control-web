@@ -50,7 +50,8 @@
 .auth-card-wide {
   display: grid;
   gap: 1rem;
-  padding: clamp(1.1rem, 2.4vw, 1.6rem);
+  padding-inline: clamp(1.1rem, 2.4vw, 1.6rem);
+  padding-block: clamp(1.3rem, 2.9vw, 1.9rem);
   width: 100%;
   max-width: 500px;
   justify-self: center;

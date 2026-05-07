@@ -97,7 +97,7 @@ describe("AppTopbar", () => {
     const markup = renderTopbar(undefined, true);
 
     expect(markup).toContain("profile-menu-item-theme-toggle");
-    expect(markup).toContain("Dark mode");
+    expect(markup).toContain("Theme mode");
     expect(markup).not.toContain('aria-label="Toggle dark mode"');
   });
 });

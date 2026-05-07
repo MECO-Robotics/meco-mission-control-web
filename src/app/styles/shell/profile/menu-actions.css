@@ -15,20 +15,89 @@
 }
 
 .profile-menu-item-theme-toggle {
-  justify-content: flex-start;
+  justify-content: space-between;
+  gap: 0.7rem;
 }
 
-.profile-menu-item-icon {
-  width: 1rem;
-  text-align: center;
+.profile-menu-item-theme-copy {
+  display: grid;
+  gap: 0.04rem;
+  min-width: 0;
+}
+
+.profile-menu-item-theme-title {
+  color: var(--text-title);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.profile-menu-item-theme-value {
+  color: var(--text-copy);
+  font-size: 0.68rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.profile-mode-selector {
+  --profile-mode-width: 2.55rem;
+  --profile-mode-height: 1.48rem;
+  --profile-mode-gap: 0.13rem;
+  --profile-mode-thumb-size: calc(var(--profile-mode-height) - (var(--profile-mode-gap) * 2));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 
-.profile-menu-item-theme-label {
-  max-width: 6.5rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.profile-mode-selector-track {
+  display: flex;
+  align-items: center;
+  width: var(--profile-mode-width);
+  height: var(--profile-mode-height);
+  padding: var(--profile-mode-gap);
+  border-radius: 999px;
+  background: rgba(22, 71, 142, 0.18);
+  border: 1px solid rgba(22, 71, 142, 0.3);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.profile-mode-selector-thumb {
+  display: grid;
+  place-items: center;
+  width: var(--profile-mode-thumb-size);
+  height: var(--profile-mode-thumb-size);
+  border-radius: 999px;
+  background: var(--official-white);
+  color: #0f172a;
+  box-shadow: 0 2px 6px rgba(2, 6, 23, 0.22);
+  transition: transform 0.22s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.profile-mode-selector-icon {
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.profile-mode-selector.is-dark .profile-mode-selector-track {
+  background: rgba(191, 219, 254, 0.36);
+  border-color: rgba(191, 219, 254, 0.58);
+}
+
+.profile-mode-selector.is-dark .profile-mode-selector-thumb {
+  transform: translateX(calc(var(--profile-mode-width) - var(--profile-mode-thumb-size) - (var(--profile-mode-gap) * 2)));
+}
+
+.page-shell.dark-mode .profile-mode-selector-track {
+  background: rgba(100, 116, 139, 0.38);
+  border-color: rgba(148, 163, 184, 0.56);
+}
+
+.page-shell.dark-mode .profile-mode-selector-thumb {
+  background: #f8fafc;
+  color: #0f172a;
 }
 
 .profile-menu-item:hover,

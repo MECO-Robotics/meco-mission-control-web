@@ -80,17 +80,19 @@ export function SignInScreen({
                 {hasGoogleSignIn ? (
                   <GoogleAuthChip googleButtonRef={googleButtonRef} />
                 ) : null}
-
-                {signInConfig.devBypassAvailable ? (
-                  <DevBypassButton
-                    isSigningIn={isSigningIn}
-                    onDevBypassSignIn={onDevBypassSignIn}
-                  />
-                ) : null}
               </>
             )}
           </div>
         </section>
+
+        {signInConfig.devBypassAvailable && !isMobileDevice ? (
+          <div className="auth-layout-dev-bypass-row">
+            <DevBypassButton
+              isSigningIn={isSigningIn}
+              onDevBypassSignIn={onDevBypassSignIn}
+            />
+          </div>
+        ) : null}
       </div>
     </main>
   );

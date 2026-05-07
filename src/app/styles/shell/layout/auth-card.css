@@ -40,6 +40,7 @@
   display: grid;
   gap: 0.45rem;
   align-content: start;
+  container-type: inline-size;
 }
 
 .auth-intro .eyebrow {
@@ -48,11 +49,13 @@
 
 .auth-intro h1 {
   margin: 0;
-  max-width: 12ch;
+  max-width: none;
   color: var(--official-white);
-  font-family: var(--font-display);
-  font-size: clamp(2.1rem, 4vw, 3.4rem);
-  line-height: 0.98;
+  font-family: var(--font-display, "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif);
+  font-size: clamp(2.75rem, 12.5cqi, 3.4rem);
+  line-height: 0.92;
+  letter-spacing: -0.012em;
+  white-space: nowrap;
 }
 
 .auth-intro .auth-body {
