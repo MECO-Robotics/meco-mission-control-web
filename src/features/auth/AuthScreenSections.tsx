@@ -26,13 +26,18 @@ export function AuthIntroPanel({
       <div className="auth-intro-brand-row">
         <button
           aria-label="Toggle dark mode"
-          className="auth-theme-toggle"
+          aria-pressed={isDarkMode}
+          className={`auth-theme-toggle ${isDarkMode ? "is-dark" : "is-light"}`}
           onClick={onToggleDarkMode}
           title={themeToggleTitle}
           type="button"
         >
-          <span aria-hidden="true" className="auth-theme-toggle-icon">
-            {isDarkMode ? "\u2600" : "\u263E"}
+          <span aria-hidden="true" className="auth-theme-toggle-track">
+            <span className="auth-theme-toggle-thumb">
+              <span className="auth-theme-toggle-icon">
+                {isDarkMode ? "\u263E" : "\u2600"}
+              </span>
+            </span>
           </span>
         </button>
 
