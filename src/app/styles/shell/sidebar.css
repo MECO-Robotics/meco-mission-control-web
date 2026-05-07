@@ -179,12 +179,29 @@
 }
 
 .sidebar-project-picker {
-  margin-top: auto;
   position: relative;
 }
 
 .sidebar-project-collapsed-slot {
+  width: 100%;
+}
+
+.sidebar-footer-stack {
+  display: grid;
+  gap: 0.35rem;
   margin-top: auto;
+}
+
+.sidebar-footer-stack-collapsed {
+  justify-items: center;
+}
+
+.sidebar-footer-help-button {
+  width: 100%;
+}
+
+.sidebar-help-collapsed-trigger {
+  width: 100%;
 }
 
 .sidebar-project-collapsed-trigger {

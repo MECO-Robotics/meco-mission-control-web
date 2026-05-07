@@ -58,6 +58,7 @@ import {
   IconChevronLeft,
   IconChevronRight,
   IconEdit,
+  IconHelp,
   IconParts,
   IconReports,
   IconRoster,
@@ -415,6 +416,12 @@ export function AppSidebar({
     onSelectProject(value || null);
   };
 
+  const handleHelpSelect = () => {
+    setCompactPopupSection(null);
+    setIsProjectPopupOpen(false);
+    onSelectTarget({ tab: "help" }, { keepSidebarOpen: true });
+  };
+
   const getSectionSubItems = (section: NavigationSection) =>
     NAVIGATION_SUB_ITEMS_BY_SECTION[section].filter((subItem) => {
       if (subItem.id === "dashboard-calendar") {
@@ -655,67 +662,99 @@ export function AppSidebar({
         )}
 
         {!isCollapsed ? (
-          <div className="sidebar-context-picker sidebar-project-picker">
-            <span className="sidebar-context-label">Project</span>
-            <div className="sidebar-project-compact-row" data-tutorial-target="project-select-outreach">
+          <div className="sidebar-footer-stack">
+            <button
+              className="tab sidebar-footer-help-button"
+              data-active={activeTab === "help" ? "true" : "false"}
+              onClick={handleHelpSelect}
+              type="button"
+            >
+              <span className="sidebar-tab-main">
+                <span aria-hidden="true" className="sidebar-tab-icon">
+                  <IconHelp />
+                </span>
+                <span className="sidebar-tab-label">Help</span>
+              </span>
+            </button>
+            <div className="sidebar-context-picker sidebar-project-picker">
+              <span className="sidebar-context-label">Project</span>
+              <div className="sidebar-project-compact-row" data-tutorial-target="project-select-outreach">
+                <button
+                  aria-expanded={isProjectPopupOpen ? "true" : "false"}
+                  aria-label="Select project"
+                  className="sidebar-project-trigger"
+                  data-tutorial-target="project-select"
+                  onClick={handleProjectTriggerClick}
+                  ref={projectTriggerRef}
+                  type="button"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="sidebar-tab-icon"
+                    style={{ color: getProjectIconColor(selectedProject) }}
+                  >
+                    {getProjectIcon(selectedProject)}
+                  </span>
+                  <span className="sidebar-project-trigger-label">{selectedProjectLabel}</span>
+                  <span
+                    aria-hidden="true"
+                    className={`sidebar-project-trigger-chevron${
+                      isProjectPopupOpen ? " is-open" : ""
+                    }`}
+                  >
+                    <IconChevronRight />
+                  </span>
+                </button>
+                {canEditSelectedRobot ? (
+                  <button
+                    aria-label="Edit robot name"
+                    className="sidebar-context-action"
+                    onClick={onEditSelectedRobot}
+                    title="Edit robot name"
+                    type="button"
+                  >
+                    <IconEdit />
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="sidebar-footer-stack sidebar-footer-stack-collapsed">
+            <button
+              aria-label="Help"
+              className="tab sidebar-help-collapsed-trigger"
+              data-active={activeTab === "help" ? "true" : "false"}
+              onClick={handleHelpSelect}
+              type="button"
+            >
+              <span className="sidebar-tab-main">
+                <span aria-hidden="true" className="sidebar-tab-icon">
+                  <IconHelp />
+                </span>
+              </span>
+            </button>
+            <div className="sidebar-project-collapsed-slot">
               <button
                 aria-expanded={isProjectPopupOpen ? "true" : "false"}
                 aria-label="Select project"
-                className="sidebar-project-trigger"
+                className="tab sidebar-project-collapsed-trigger"
                 data-tutorial-target="project-select"
                 onClick={handleProjectTriggerClick}
                 ref={projectTriggerRef}
                 type="button"
               >
-                <span
-                  aria-hidden="true"
-                  className="sidebar-tab-icon"
-                  style={{ color: getProjectIconColor(selectedProject) }}
-                >
-                  {getProjectIcon(selectedProject)}
-                </span>
-                <span className="sidebar-project-trigger-label">{selectedProjectLabel}</span>
-                <span
-                  aria-hidden="true"
-                  className={`sidebar-project-trigger-chevron${isProjectPopupOpen ? " is-open" : ""}`}
-                >
-                  <IconChevronRight />
+                <span className="sidebar-tab-main">
+                  <span
+                    aria-hidden="true"
+                    className="sidebar-tab-icon"
+                    style={{ color: getProjectIconColor(selectedProject) }}
+                  >
+                    {getProjectIcon(selectedProject)}
+                  </span>
                 </span>
               </button>
-              {canEditSelectedRobot ? (
-                <button
-                  aria-label="Edit robot name"
-                  className="sidebar-context-action"
-                  onClick={onEditSelectedRobot}
-                  title="Edit robot name"
-                  type="button"
-                >
-                  <IconEdit />
-                </button>
-              ) : null}
             </div>
-          </div>
-        ) : (
-          <div className="sidebar-project-collapsed-slot">
-            <button
-              aria-expanded={isProjectPopupOpen ? "true" : "false"}
-              aria-label="Select project"
-              className="tab sidebar-project-collapsed-trigger"
-              data-tutorial-target="project-select"
-              onClick={handleProjectTriggerClick}
-              ref={projectTriggerRef}
-              type="button"
-            >
-              <span className="sidebar-tab-main">
-                <span
-                  aria-hidden="true"
-                  className="sidebar-tab-icon"
-                  style={{ color: getProjectIconColor(selectedProject) }}
-                >
-                  {getProjectIcon(selectedProject)}
-                </span>
-              </span>
-            </button>
           </div>
         )}
       </nav>
