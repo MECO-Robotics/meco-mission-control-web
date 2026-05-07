@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Plus } from "lucide-react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { ManufacturingItemRecord } from "@/types/recordsInventory";
@@ -183,13 +184,13 @@ export function ManufacturingQueueView({
 
           <button
             aria-label={addButtonAriaLabel}
-            className="primary-action queue-toolbar-action"
+            className="primary-action queue-toolbar-action queue-toolbar-action-round"
             data-tutorial-target={tutorialTarget("create-job-button")}
             onClick={onCreate}
             title="Add"
             type="button"
           >
-            Add
+            <Plus size={14} strokeWidth={2} />
           </button>
         </div>
       </div>

@@ -34,6 +34,13 @@
   justify-self: end;
 }
 
+.queue-toolbar-action-round {
+  width: 2.2rem;
+  min-width: 2.2rem;
+  padding: 0;
+  border-radius: 999px;
+}
+
 .task-queue-toolbar-inline-actions {
   display: inline-flex;
   align-items: center;

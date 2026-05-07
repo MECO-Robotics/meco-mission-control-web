@@ -1,4 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
+import { Plus } from "lucide-react";
 
 import { IconParts, IconSort, IconTasks } from "@/components/shared/Icons";
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -193,13 +194,13 @@ export function MilestonesToolbar({
 
       <button
         aria-label="Add milestone"
-        className="primary-action queue-toolbar-action"
+        className="primary-action queue-toolbar-action queue-toolbar-action-round"
         data-tutorial-target="create-milestone-button"
         onClick={onAddMilestone}
         title="Add milestone"
         type="button"
       >
-        Add
+        <Plus size={14} strokeWidth={2} />
       </button>
     </div>
   );

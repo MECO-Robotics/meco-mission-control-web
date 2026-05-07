@@ -1,4 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
+import { Plus } from "lucide-react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { IconSubsystems, IconWorkLogs } from "@/components/shared/Icons";
@@ -87,13 +88,13 @@ export function WorkLogsToolbar({
 
       <button
         aria-label="Add work log"
-        className="primary-action queue-toolbar-action"
+        className="primary-action queue-toolbar-action queue-toolbar-action-round"
         data-tutorial-target="create-worklog-button"
         onClick={openCreateWorkLogModal}
         title="Add work log"
         type="button"
       >
-        Add
+        <Plus size={14} strokeWidth={2} />
       </button>
     </div>
   );

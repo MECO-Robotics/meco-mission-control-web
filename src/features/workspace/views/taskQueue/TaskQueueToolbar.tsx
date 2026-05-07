@@ -1,4 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
+import { Plus } from "lucide-react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { IconSort } from "@/components/shared/Icons";
@@ -200,13 +201,13 @@ export function TaskQueueToolbar({
 
           <button
             aria-label="Add task"
-            className="primary-action queue-toolbar-action"
+            className="primary-action queue-toolbar-action queue-toolbar-action-round"
             data-tutorial-target="create-task-button"
             onClick={openCreateTaskModal}
             title="Add task"
             type="button"
           >
-            Add
+            <Plus size={14} strokeWidth={2} />
           </button>
         </div>
       </div>

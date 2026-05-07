@@ -2,6 +2,7 @@ import { memo } from "react";
 
 import { MilestonesView } from "@/features/workspace/views/milestones/MilestonesView";
 import { RisksView } from "@/features/workspace/views/RisksView";
+import { TaskCalendarPlaceholderView } from "@/features/workspace/views/taskQueue/TaskCalendarPlaceholderView";
 import { TaskQueueView } from "@/features/workspace/views/taskQueue/TaskQueueView";
 import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
 import { WorkLogsView } from "@/features/workspace/views/WorkLogsView";
@@ -35,6 +36,14 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
       isActive={props.activeTab === "tasks"}
       tabSwitchDirection={tabSwitchDirection}
     >
+      <WorkspaceSubPanel
+        disableAnimations={disablePanelAnimations}
+        isActive={taskView === "calendar"}
+        swipeDirection={taskSwipeDirection}
+      >
+        <TaskCalendarPlaceholderView />
+      </WorkspaceSubPanel>
+
       <WorkspaceSubPanel
         disableAnimations={disablePanelAnimations}
         isActive={taskView === "timeline"}

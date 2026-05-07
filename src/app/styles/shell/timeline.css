@@ -4,8 +4,10 @@
 .materials-toolbar .toolbar-search,
 .part-manager-toolbar .toolbar-search,
 .subsystem-manager-toolbar .toolbar-search {
-  width: min(100%, 240px);
-  min-width: 180px;
+  width: auto;
+  flex: 0 1 clamp(11.5rem, 24vw, 19rem);
+  min-width: 0;
+  max-width: 100%;
 }
 
 .timeline-toolbar {
@@ -36,16 +38,20 @@
 
 .task-queue-toolbar .toolbar-search,
 .milestones-toolbar .toolbar-search {
-  width: min(100%, 240px);
-  min-width: 180px;
+  width: auto;
+  flex: 0 1 clamp(11.5rem, 24vw, 19rem);
+  min-width: 0;
+  max-width: 100%;
 }
 
 .timeline-toolbar-filters {
-  display: inline-flex;
+  display: flex;
   align-items: flex-start;
   flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 0.28rem;
-  width: fit-content;
+  width: auto;
+  flex: 0 1 auto;
   max-width: 100%;
 }
 

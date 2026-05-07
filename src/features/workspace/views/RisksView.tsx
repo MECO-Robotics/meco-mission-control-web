@@ -166,14 +166,6 @@ export function RisksView({
 
   return (
     <section className={`panel dense-panel subsystem-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
-      <div className="panel-header compact-header">
-        <div className="queue-section-header">
-          <h2 style={{ color: "var(--text-title)" }}>
-            {view === "metrics" ? "Operations metrics" : "Risk management"}
-          </h2>
-        </div>
-      </div>
-
       {view === "metrics" ? (
         <RiskMetricsSection
           activeMechanismCount={viewModel.activeMechanismCount}

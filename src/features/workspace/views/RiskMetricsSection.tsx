@@ -55,13 +55,6 @@ export function RiskMetricsSection({
 }: RiskMetricsSectionProps) {
   return (
     <>
-      <div className="metrics-intro-shell">
-        <p className="eyebrow" style={{ color: "var(--meco-blue)" }}>
-          Ops overview
-        </p>
-        <h3>Planning, triage, and trend signals in one place</h3>
-      </div>
-
       <div className="risk-time-metrics-shell">
         <TimeMetricGraphic
           colorClassName="risk-time-ring-planned"

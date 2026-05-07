@@ -46,6 +46,18 @@
   gap: 0.55rem;
 }
 
+.roster-placeholder-state {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.roster-placeholder-list {
+  margin: 0;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.2rem;
+}
+
 .roster-inline-form {
   border: 1px solid var(--border-base);
   border-radius: 16px;

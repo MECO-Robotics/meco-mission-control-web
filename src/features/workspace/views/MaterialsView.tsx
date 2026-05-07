@@ -1,4 +1,5 @@
 import { useMemo, useState, type CSSProperties } from "react";
+import { Plus } from "lucide-react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MaterialRecord } from "@/types/recordsInventory";
@@ -111,13 +112,13 @@ export function MaterialsView({
 
           <button
             aria-label="Add material"
-            className="primary-action queue-toolbar-action"
+            className="primary-action queue-toolbar-action queue-toolbar-action-round"
             data-tutorial-target="create-material-button"
             onClick={openCreateMaterialModal}
             title="Add material"
             type="button"
           >
-            Add
+            <Plus size={14} strokeWidth={2} />
           </button>
         </div>
       </div>

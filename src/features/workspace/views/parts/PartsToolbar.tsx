@@ -1,3 +1,4 @@
+import { Plus } from "lucide-react";
 import { IconManufacturing, IconTasks } from "@/components/shared/Icons";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
@@ -97,13 +98,13 @@ export function PartsToolbar({
 
       <button
         aria-label="Add part definition"
-        className="primary-action queue-toolbar-action part-manager-toolbar-action"
+        className="primary-action queue-toolbar-action queue-toolbar-action-round part-manager-toolbar-action"
         data-tutorial-target="create-part-button"
         onClick={openCreatePartDefinitionModal}
         title="Add part definition"
         type="button"
       >
-        Add
+        <Plus size={14} strokeWidth={2} />
       </button>
     </div>
   );

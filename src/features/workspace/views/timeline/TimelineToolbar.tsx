@@ -1,4 +1,5 @@
 import React from "react";
+import { Plus } from "lucide-react";
 import { IconCalendar, IconChevronLeft, IconChevronRight, IconPerson } from "@/components/shared/Icons";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
@@ -129,13 +130,13 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
         </div>
       </div>
       <button
-        className="primary-action queue-toolbar-action"
+        className="primary-action queue-toolbar-action queue-toolbar-action-round"
         data-tutorial-target="timeline-create-task-button"
         onClick={onCreateTask}
         title="Add to timeline"
         type="button"
       >
-        Add
+        <Plus size={14} strokeWidth={2} />
       </button>
     </div>
   );

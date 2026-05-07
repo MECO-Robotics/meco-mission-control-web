@@ -101,7 +101,7 @@ export function useWorkspaceDerivedData({
       const items: NavigationItem[] = [
         {
           value: "tasks",
-          label: "Tasks",
+          label: "Work",
           icon: <IconTasks />,
           count: bootstrap.tasks.length,
         },

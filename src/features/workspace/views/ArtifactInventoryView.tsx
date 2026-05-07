@@ -1,4 +1,5 @@
 import { useMemo, useState, type CSSProperties } from "react";
+import { Plus } from "lucide-react";
 
 import { IconManufacturing, IconTasks } from "@/components/shared/Icons";
 import type { ArtifactKind, ArtifactStatus } from "@/types/common";
@@ -206,13 +207,13 @@ export function ArtifactInventoryView({
 
           <button
             aria-label={addLabel}
-            className="primary-action queue-toolbar-action"
+            className="primary-action queue-toolbar-action queue-toolbar-action-round"
             data-tutorial-target="create-document-button"
             onClick={() => openCreateArtifactModal(primaryKind)}
             title={addLabel}
             type="button"
           >
-            Add
+            <Plus size={14} strokeWidth={2} />
           </button>
         </div>
       </div>

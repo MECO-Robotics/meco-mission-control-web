@@ -4,8 +4,9 @@
   }
 
   .toolbar-search {
-    width: min(100%, 240px);
-    min-width: 180px;
+    width: auto;
+    flex: 0 1 clamp(11.5rem, 24vw, 19rem);
+    min-width: 0;
     max-width: 100%;
   }
 

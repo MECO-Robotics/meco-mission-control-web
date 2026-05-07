@@ -1,4 +1,5 @@
 import { useMemo, useState, type CSSProperties } from "react";
+import { Plus } from "lucide-react";
 
 import { formatCurrency } from "@/lib/appUtils/common";
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -189,13 +190,13 @@ export function PurchasesView({
 
           <button
             aria-label="Add purchase"
-            className="primary-action queue-toolbar-action"
+            className="primary-action queue-toolbar-action queue-toolbar-action-round"
             data-tutorial-target="create-purchase-button"
             onClick={openCreatePurchaseModal}
             title="Add purchase"
             type="button"
           >
-            Add
+            <Plus size={14} strokeWidth={2} />
           </button>
         </div>
       </div>
