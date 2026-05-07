@@ -370,6 +370,7 @@ export function AppSidebar({
   const sectionIcons: Record<NavigationSection, ReactNode> = {
     dashboard: <LayoutDashboard size={14} strokeWidth={2} />,
     readiness: <ClipboardCheck size={14} strokeWidth={2} />,
+    config: <Cog size={14} strokeWidth={2} />,
     tasks: <ListTodo size={14} strokeWidth={2} />,
     inventory: <IconParts />,
     roster: <IconRoster />,
@@ -377,10 +378,15 @@ export function AppSidebar({
   };
   const subItemIcons: Record<NavigationSubItemId, ReactNode> = {
     "dashboard-calendar": <CalendarDays size={14} strokeWidth={2} />,
+    "dashboard-activity": <FileText size={14} strokeWidth={2} />,
     "dashboard-metrics": <BarChart3 size={14} strokeWidth={2} />,
     "readiness-attention": <AlertTriangle size={14} strokeWidth={2} />,
     "readiness-milestones": <Flag size={14} strokeWidth={2} />,
     "readiness-subsystems": <Cog size={14} strokeWidth={2} />,
+    "readiness-risks": <AlertTriangle size={14} strokeWidth={2} />,
+    "config-robot-model": <Bot size={14} strokeWidth={2} />,
+    "config-part-mappings": <Boxes size={14} strokeWidth={2} />,
+    "config-directory": <Users size={14} strokeWidth={2} />,
     "tasks-timeline": <CalendarDays size={14} strokeWidth={2} />,
     "tasks-board": <Columns3 size={14} strokeWidth={2} />,
     "tasks-manufacturing": <Wrench size={14} strokeWidth={2} />,
@@ -388,7 +394,6 @@ export function AppSidebar({
     "inventory-parts": <Boxes size={14} strokeWidth={2} />,
     "inventory-purchases": <ShoppingCart size={14} strokeWidth={2} />,
     "roster-workload": <BarChart3 size={14} strokeWidth={2} />,
-    "roster-directory": <Users size={14} strokeWidth={2} />,
     "roster-attendance": <CalendarCheck size={14} strokeWidth={2} />,
     "reports-work-logs": <FileText size={14} strokeWidth={2} />,
     "reports-qa-forms": <ClipboardCheck size={14} strokeWidth={2} />,
@@ -401,6 +406,7 @@ export function AppSidebar({
       visibleTabs.has("tasks") ||
       visibleTabs.has("risk-management") ||
       visibleTabs.has("subsystems"),
+    config: visibleTabs.has("tasks") || visibleTabs.has("roster") || visibleTabs.has("inventory"),
     tasks: visibleTabs.has("tasks"),
     inventory: visibleTabs.has("inventory"),
     roster: visibleTabs.has("roster"),
@@ -432,7 +438,15 @@ export function AppSidebar({
         return visibleTabs.has("risk-management");
       }
 
+      if (subItem.id === "dashboard-activity") {
+        return visibleTabs.has("worklogs");
+      }
+
       if (subItem.id === "readiness-attention") {
+        return visibleTabs.has("risk-management");
+      }
+
+      if (subItem.id === "readiness-risks") {
         return visibleTabs.has("risk-management");
       }
 
@@ -442,6 +456,18 @@ export function AppSidebar({
 
       if (subItem.id === "readiness-subsystems") {
         return visibleTabs.has("subsystems");
+      }
+
+      if (subItem.id === "config-robot-model") {
+        return visibleTabs.has("tasks") && isRobotProject;
+      }
+
+      if (subItem.id === "config-part-mappings") {
+        return visibleTabs.has("inventory") && isRobotProject;
+      }
+
+      if (subItem.id === "config-directory") {
+        return visibleTabs.has("roster");
       }
 
       if (subItem.id === "tasks-manufacturing") {

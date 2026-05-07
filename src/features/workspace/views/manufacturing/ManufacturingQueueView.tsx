@@ -13,6 +13,7 @@ import type { FilterSelection } from "@/features/workspace/shared/filters/worksp
 import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { MANUFACTURING_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
+import { KanbanScrollFrame } from "@/features/workspace/views/kanban/KanbanScrollFrame";
 import { ManufacturingKanbanBoard } from "./ManufacturingKanbanBoard";
 
 interface ManufacturingQueueViewProps {
@@ -195,8 +196,8 @@ export function ManufacturingQueueView({
         </div>
       </div>
 
-      <div className={`task-queue-board-shell-frame ${manufacturingFilterMotionClass}`}>
-        <div className="table-shell task-queue-board-shell">
+      <KanbanScrollFrame motionClassName={manufacturingFilterMotionClass}>
+        <>
           {filteredItems.length === 0 ? (
             <p className="empty-state">{emptyStateMessage}</p>
           ) : (
@@ -223,8 +224,8 @@ export function ManufacturingQueueView({
             totalItems={manufacturingPagination.totalItems}
             totalPages={manufacturingPagination.totalPages}
           />
-        </div>
-      </div>
+        </>
+      </KanbanScrollFrame>
     </section>
   );
 }

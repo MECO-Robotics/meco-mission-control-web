@@ -3,6 +3,7 @@ import { memo } from "react";
 import { MilestonesView } from "@/features/workspace/views/milestones/MilestonesView";
 import { RisksView } from "@/features/workspace/views/RisksView";
 import { TaskCalendarPlaceholderView } from "@/features/workspace/views/taskQueue/TaskCalendarPlaceholderView";
+import { TaskRobotMapPlaceholderView } from "@/features/workspace/views/taskQueue/TaskRobotMapPlaceholderView";
 import { TaskQueueView } from "@/features/workspace/views/taskQueue/TaskQueueView";
 import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
 import { WorkLogsView } from "@/features/workspace/views/WorkLogsView";
@@ -63,6 +64,14 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
           setActivePersonFilter={setActivePersonFilter}
           triggerCreateMilestoneToken={timelineMilestoneCreateSignal}
         />
+      </WorkspaceSubPanel>
+
+      <WorkspaceSubPanel
+        disableAnimations={disablePanelAnimations}
+        isActive={taskView === "robot-map"}
+        swipeDirection={taskSwipeDirection}
+      >
+        <TaskRobotMapPlaceholderView />
       </WorkspaceSubPanel>
 
       <WorkspaceSubPanel

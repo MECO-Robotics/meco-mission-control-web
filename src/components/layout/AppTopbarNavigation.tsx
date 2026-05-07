@@ -97,6 +97,14 @@ export function AppTopbarNavigation({
         return !isAllProjectsView;
       }
 
+      if (subItem.id === "config-robot-model") {
+        return !isAllProjectsView && !isNonRobotProject;
+      }
+
+      if (subItem.id === "config-part-mappings") {
+        return !isNonRobotProject;
+      }
+
       if (subItem.id === "tasks-manufacturing") {
         return showManufacturingOption;
       }
