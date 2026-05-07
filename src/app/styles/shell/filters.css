@@ -97,7 +97,7 @@
 .subsystem-toggle strong {
   margin: 0;
   color: var(--official-black);
-  font-family: "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif;
+  font-family: var(--font-ui);
 }
 
 .topbar h1 {
@@ -135,3 +135,4 @@
 .app-topbar-section-tabs::-webkit-scrollbar {
   display: none;
 }
+

@@ -65,7 +65,7 @@
   background-image: none !important;
   cursor: default;
   padding-right: 0.72rem;
-  font-family: "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif;
+  font-family: var(--font-ui);
   font-size: 0.96rem;
   font-weight: 600;
   line-height: 1.2;
@@ -101,3 +101,4 @@
   background: rgba(7, 14, 26, 0.72);
   z-index: 12050 !important;
 }
+

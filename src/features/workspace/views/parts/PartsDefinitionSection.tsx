@@ -89,8 +89,8 @@ export function PartsDefinitionSection({
                   </small>
                 </span>
               </span>
-              <TableCell label="Number">{partDefinition.partNumber}</TableCell>
-              <TableCell label="Rev">{partDefinition.revision}</TableCell>
+              <TableCell label="Number" valueClassName="font-mono">{partDefinition.partNumber}</TableCell>
+              <TableCell label="Rev" valueClassName="font-mono">{partDefinition.revision}</TableCell>
               <TableCell label="Iteration">
                 {formatIterationVersion(partDefinition.iteration)}
               </TableCell>

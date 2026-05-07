@@ -277,7 +277,7 @@ export function ArtifactInventoryView({
                 </span>
               </TableCell>
               <TableCell label="Link">{summarizeLink(artifact.link)}</TableCell>
-              <TableCell label="Updated">{formatUpdatedAt(artifact.updatedAt)}</TableCell>
+              <TableCell label="Updated" valueClassName="font-mono">{formatUpdatedAt(artifact.updatedAt)}</TableCell>
               <EditableHoverIndicator />
             </button>
           );

@@ -94,6 +94,8 @@
   color: var(--official-blue);
   font-size: calc(0.63rem * var(--task-queue-zoom, 1));
   font-weight: 800;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   letter-spacing: 0.02em;
   line-height: 1;
   white-space: nowrap;

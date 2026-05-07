@@ -1,7 +1,7 @@
 .auth-card-header h1 {
   margin: 0;
   color: var(--official-black);
-  font-family: "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif;
+  font-family: var(--font-ui);
   font-size: clamp(1.9rem, 3vw, 2.6rem);
   line-height: 1.04;
 }
@@ -204,3 +204,4 @@
   min-width: 0;
   position: relative;
 }
+

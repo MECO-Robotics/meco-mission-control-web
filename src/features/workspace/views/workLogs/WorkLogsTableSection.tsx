@@ -66,8 +66,8 @@ function WorkLogsRow({
     >
       <TableCell label="Log">
         <div className="requested-item-meta">
-          <strong className="requested-item-title">{formatDate(workLog.date)}</strong>
-          <small className="requested-item-subtitle">{workLog.hours.toFixed(1)}h logged</small>
+          <strong className="requested-item-title font-mono">{formatDate(workLog.date)}</strong>
+          <small className="requested-item-subtitle font-mono">{workLog.hours.toFixed(1)}h logged</small>
           <small>{workLog.notes || "No notes recorded"}</small>
         </div>
       </TableCell>

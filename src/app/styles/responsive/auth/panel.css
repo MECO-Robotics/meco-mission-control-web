@@ -6,7 +6,7 @@
 .auth-panel-copy h2 {
   margin: 0;
   color: var(--official-black);
-  font-family: "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif;
+  font-family: var(--font-ui);
   font-size: 1.15rem;
   line-height: 1.12;
 }
@@ -58,3 +58,4 @@
 .auth-release-link:focus-visible {
   text-decoration: none;
 }
+

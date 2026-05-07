@@ -14,6 +14,8 @@
   color: var(--text-copy);
   font-size: 0.8rem;
   font-weight: 700;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 .task-detail-hours-pill {
@@ -22,6 +24,8 @@
   color: var(--text-title);
   font-size: 0.72rem;
   font-weight: 700;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   line-height: 1;
   padding: 0.2rem 0.45rem;
 }
@@ -52,6 +56,8 @@
   color: var(--text-title);
   font-size: 0.72rem;
   font-weight: 700;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   line-height: 1;
   padding: 0.2rem 0.45rem;
 }

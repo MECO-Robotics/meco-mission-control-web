@@ -1,5 +1,17 @@
+/* TODO: Add the real Nasalization font file at public/fonts/nasalization.woff2. */
+@font-face {
+  font-family: "Nasalization";
+  src: url("/fonts/nasalization.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  font-family: "Spectral", Georgia, serif;
+  --font-display: "Nasalization", "Inter", system-ui, sans-serif;
+  --font-ui: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-family: var(--font-ui);
   line-height: 1.5;
   font-weight: 400;
   color: #11213d;
@@ -26,6 +38,16 @@
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  font-family: var(--font-ui);
+}
+
+#root {
+  min-height: 100vh;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -47,10 +69,27 @@ a {
 button,
 input,
 textarea,
-select {
-  font: inherit;
+select,
+dialog,
+table {
+  font-family: var(--font-ui);
 }
 
-#root {
-  min-height: 100vh;
+code,
+pre,
+kbd,
+samp {
+  font-family: var(--font-mono);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-ui {
+  font-family: var(--font-ui);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
 }

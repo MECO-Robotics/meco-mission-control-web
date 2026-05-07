@@ -65,7 +65,7 @@ function createToastIcon(tone: WorkspaceToastTone) {
               fontSize: "15.25",
               fontWeight: "700",
               fontStyle: "italic",
-              fontFamily: "Georgia, 'Times New Roman', serif",
+              fontFamily: "var(--font-ui)",
             },
             "i",
         ),

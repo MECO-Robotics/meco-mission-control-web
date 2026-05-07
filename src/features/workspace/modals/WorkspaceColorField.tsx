@@ -50,7 +50,7 @@ export function WorkspaceColorField({
               border: "1px solid var(--border-base)",
               background: "var(--bg-row-alt)",
               color: "var(--text-title)",
-              fontFamily: "monospace",
+              fontFamily: "var(--font-mono)",
               letterSpacing: "0.04em",
             }}
           >

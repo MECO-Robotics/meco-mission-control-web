@@ -97,6 +97,7 @@ export function PartInstanceEditorModal({
                 background: "var(--bg-row-alt)",
                 color: "var(--text-title)",
                 border: "1px solid var(--border-base)",
+                fontFamily: "var(--font-mono)",
               }}
               value={partInstanceDraft.partDefinitionId}
             >

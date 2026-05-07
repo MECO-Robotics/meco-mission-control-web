@@ -206,7 +206,7 @@
   background-repeat: no-repeat;
   color: var(--text-title);
   cursor: pointer;
-  font-family: "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif;
+  font-family: var(--font-ui);
   font-size: 0.96rem;
   font-weight: 600;
   line-height: 1.2;

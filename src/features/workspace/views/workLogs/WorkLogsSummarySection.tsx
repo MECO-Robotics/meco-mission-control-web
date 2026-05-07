@@ -49,7 +49,7 @@ function TimeMetricGraphic({
           />
         </svg>
         <div className="risk-time-card-value">
-          <strong>{formatHours(hours)}</strong>
+          <strong className="font-mono">{formatHours(hours)}</strong>
         </div>
       </div>
     </article>
@@ -97,19 +97,19 @@ export function WorkLogsSummarySection({
       <div className="summary-row worklog-summary-stat-grid">
         <article className="worklog-summary-stat-card">
           <h3>Logs captured</h3>
-          <strong>{summary.totalLogs}</strong>
+          <strong className="font-mono">{summary.totalLogs}</strong>
         </article>
         <article className="worklog-summary-stat-card">
           <h3>Avg hours / log</h3>
-          <strong>{formatHours(summary.averageHoursPerLog)}</strong>
+          <strong className="font-mono">{formatHours(summary.averageHoursPerLog)}</strong>
         </article>
         <article className="worklog-summary-stat-card">
           <h3>Active contributors</h3>
-          <strong>{summary.activeContributorCount}</strong>
+          <strong className="font-mono">{summary.activeContributorCount}</strong>
         </article>
         <article className="worklog-summary-stat-card">
           <h3>Tasks represented</h3>
-          <strong>{summary.tasksWithLogsCount}</strong>
+          <strong className="font-mono">{summary.tasksWithLogsCount}</strong>
         </article>
       </div>
 
@@ -123,7 +123,7 @@ export function WorkLogsSummarySection({
               {summary.topContributors.map((entry) => (
                 <li className="worklog-summary-list-item" key={entry.id}>
                   <span className="worklog-summary-list-label">{entry.name}</span>
-                  <strong>{formatHours(entry.hours)}</strong>
+                  <strong className="font-mono">{formatHours(entry.hours)}</strong>
                 </li>
               ))}
             </ol>
@@ -155,7 +155,7 @@ export function WorkLogsSummarySection({
                       )}
                       <small>{entry.subsystemName}</small>
                     </div>
-                    <strong>{formatHours(entry.hours)}</strong>
+                    <strong className="font-mono">{formatHours(entry.hours)}</strong>
                   </li>
                 );
               })}

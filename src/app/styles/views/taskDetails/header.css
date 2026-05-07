@@ -2,7 +2,7 @@
 .modal-card h3 {
   margin: 0;
   color: var(--text-title);
-  font-family: "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif;
+  font-family: var(--font-ui);
 }
 
 .modal-card .panel-header.compact-header {
@@ -141,3 +141,4 @@
 .task-detail-header-status-icon-signal-complete {
   color: #246847;
 }
+

@@ -5,7 +5,7 @@
   overflow-y: auto;
   align-self: stretch;
   box-sizing: border-box;
-  font-family: "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif;
+  font-family: var(--font-ui);
   font-size: 0.96rem;
   font-weight: 600;
   line-height: 1.2;
@@ -169,3 +169,4 @@
   width: 14px;
   height: 14px;
 }
+

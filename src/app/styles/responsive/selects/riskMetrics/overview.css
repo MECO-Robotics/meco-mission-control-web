@@ -33,7 +33,7 @@
 .metrics-intro-shell h3 {
   margin: 0;
   color: var(--text-title);
-  font-family: "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif;
+  font-family: var(--font-ui);
   font-size: clamp(1.15rem, 2vw, 1.45rem);
   line-height: 1.12;
 }
@@ -73,7 +73,7 @@
 .metrics-hotspot-card h3 {
   margin: 0;
   color: var(--text-title);
-  font-family: "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif;
+  font-family: var(--font-ui);
   font-size: 1.02rem;
   line-height: 1.15;
 }
@@ -100,3 +100,4 @@
   border: 1px solid var(--border-base);
   background: var(--bg-row-alt);
 }
+

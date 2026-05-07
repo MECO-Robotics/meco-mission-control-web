@@ -23,7 +23,7 @@ const DISCIPLINE_ICON_BY_CODE: Record<string, ReactNode> = {
   testing: <IconCheck />,
   planning: <IconCalendar />,
   communications: <Megaphone size={14} strokeWidth={2} />,
-  finance: <svg aria-hidden="true" viewBox="0 0 24 24"><text x="12" y="12" textAnchor="middle" dominantBaseline="middle" fill="currentColor" fontFamily="Arial, sans-serif" fontSize="14" fontWeight="700">$</text></svg>,
+  finance: <svg aria-hidden="true" viewBox="0 0 24 24"><text x="12" y="12" textAnchor="middle" dominantBaseline="middle" fill="currentColor" fontFamily="Inter, system-ui, sans-serif" fontSize="14" fontWeight="700">$</text></svg>,
   research: <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10" cy="10" r="4.5" fill="none" stroke="currentColor" strokeWidth="1.8" /><path d="m13.5 13.5 4.5 4.5" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2" /><path d="M8.6 10h2.8M10 8.6v2.8" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.4" /></svg>,
   documentation: <IconTasks />,
   photography: <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="11" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" /><circle cx="12" cy="12.5" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.8" /><path d="M7.5 7 9 5h6l1.5 2" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" /></svg>,

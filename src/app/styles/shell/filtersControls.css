@@ -162,7 +162,7 @@
 .filter-toolbar .toolbar-filter .toolbar-filter-value,
 .filter-toolbar .toolbar-filter .toolbar-filter-select,
 .filter-toolbar .toolbar-filter.toolbar-filter-compact select {
-  font-family: "Space Grotesk", "Avenir Next", "Trebuchet MS", sans-serif !important;
+  font-family: var(--font-ui) !important;
   font-size: 0.96rem !important;
   font-weight: 600 !important;
   line-height: 1.2;
@@ -215,3 +215,4 @@
 .page-shell.dark-mode .toolbar-filter-compact.is-active {
   background: linear-gradient(135deg, rgba(22, 71, 142, 0.22), rgba(30, 41, 59, 0.98));
 }
+
