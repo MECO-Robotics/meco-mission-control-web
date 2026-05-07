@@ -71,6 +71,7 @@ export function AppWorkspaceShellContent({ controller }: { controller: AppWorksp
       }
       manufacturingView={c.manufacturingView}
       inventoryView={c.inventoryView}
+      rosterView={c.rosterView}
       riskManagementView={c.riskManagementView}
       reportsView={c.reportsView}
       taskView={c.taskView}

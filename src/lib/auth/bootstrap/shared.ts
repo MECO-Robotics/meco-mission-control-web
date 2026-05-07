@@ -8,7 +8,7 @@ export const LEGACY_SEASON_ID = "season-default";
 export const LEGACY_PROJECT_ID = "project-default";
 
 export const REQUIRED_PROJECTS_PER_SEASON: Array<{
-  key: "robot" | "media" | "outreach" | "operations" | "strategy" | "training";
+  key: "robot" | "media" | "outreach" | "operations" | "business" | "strategy" | "training";
   name: string;
   projectType: ProjectRecord["projectType"];
 }> = [
@@ -16,6 +16,7 @@ export const REQUIRED_PROJECTS_PER_SEASON: Array<{
   { key: "media", name: "Media", projectType: "other" },
   { key: "outreach", name: "Outreach", projectType: "outreach" },
   { key: "operations", name: "Operations", projectType: "operations" },
+  { key: "business", name: "Business", projectType: "operations" },
   { key: "strategy", name: "Strategy", projectType: "other" },
   { key: "training", name: "Training", projectType: "other" },
 ];
@@ -134,10 +135,13 @@ export function classifyProjectBucket(project: Pick<ProjectRecord, "name" | "pro
     return "outreach";
   }
 
+  if (/\bbusiness\b/.test(name)) {
+    return "business";
+  }
+
   if (
     project.projectType === "operations" ||
-    /\boperations?\b/.test(name) ||
-    /\bbusiness\b/.test(name)
+    /\boperations?\b/.test(name)
   ) {
     return "operations";
   }

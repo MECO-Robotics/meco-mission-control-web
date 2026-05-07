@@ -204,3 +204,7 @@
   flex: 1 1 260px;
   min-width: 0;
 }
+
+.workspace-panel > .panel-header .queue-section-header > h2 {
+  display: none;
+}
