@@ -1,20 +1,8 @@
-import type { BootstrapPayload, MechanismPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MechanismPayload } from "@/types/payloads";
 
-import {
-  buildEmptyArtifactPayload,
-  buildEmptyMechanismPayload,
-  artifactToPayload,
-  buildEmptyMaterialPayload,
-  buildEmptyPartDefinitionPayload,
-  buildEmptyPartInstancePayload,
-  buildEmptySubsystemPayload,
-  buildEmptyWorkstreamPayload,
-  materialToPayload,
-  partDefinitionToPayload,
-  partInstanceToPayload,
-  subsystemToPayload,
-  workstreamToPayload,
-} from "@/lib/appUtils";
+import { buildEmptyArtifactPayload, buildEmptyMaterialPayload, buildEmptyMechanismPayload, buildEmptyPartDefinitionPayload, buildEmptyPartInstancePayload, buildEmptySubsystemPayload, buildEmptyWorkstreamPayload } from "@/lib/appUtils/payloadBuilders";
+import { artifactToPayload, materialToPayload, partDefinitionToPayload, partInstanceToPayload, subsystemToPayload, workstreamToPayload } from "@/lib/appUtils/payloadConversions";
 import type { AppWorkspaceLoaderModel, WorkspaceReconciliationState } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
 
 export function reconcileMaterialModal(

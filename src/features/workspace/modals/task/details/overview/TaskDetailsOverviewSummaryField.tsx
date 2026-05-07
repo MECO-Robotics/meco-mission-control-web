@@ -1,4 +1,4 @@
-import { EditableHoverIndicator } from "../../../../shared/WorkspaceViewShared";
+import { EditableHoverIndicator } from "../../../../shared/table/workspaceTableChrome";
 import type { TaskDetailsOverviewFieldProps } from "./TaskDetailsOverviewFieldProps";
 
 interface TaskDetailsOverviewSummaryFieldProps extends TaskDetailsOverviewFieldProps {

@@ -1,5 +1,6 @@
-import type { BootstrapPayload, SubsystemPayload } from "@/types";
-import { buildIterationOptions, formatIterationVersion } from "@/lib/appUtils";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { SubsystemPayload } from "@/types/payloads";
+import { buildIterationOptions, formatIterationVersion } from "@/lib/appUtils/common";
 
 type BuildSubsystemEditorModalStateArgs = {
   activeSubsystemId: string | null;

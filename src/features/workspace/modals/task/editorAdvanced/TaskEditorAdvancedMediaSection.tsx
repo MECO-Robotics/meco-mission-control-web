@@ -1,4 +1,4 @@
-import { PhotoUploadField } from "../../../shared/media";
+import { PhotoUploadField } from "../../../shared/media/PhotoUploadField";
 
 interface TaskEditorAdvancedMediaSectionProps {
   currentUrl: string;

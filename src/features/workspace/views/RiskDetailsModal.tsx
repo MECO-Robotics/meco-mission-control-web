@@ -1,6 +1,6 @@
 import { createPortal } from "react-dom";
 
-import type { RiskRecord } from "@/types";
+import type { RiskRecord } from "@/types/recordsReporting";
 
 import { ATTACHMENT_TYPE_LABELS, formatRiskSeverity, getRiskSeverityPillClassName } from "./riskViewModel";
 import { TaskPriorityBadge } from "./taskQueue/taskQueueKanbanCardMeta";

@@ -1,6 +1,7 @@
 import { useEffect, type MutableRefObject } from "react";
 
-import { isInteractiveTutorialCreationStep, isInteractiveTutorialStepComplete } from "./interactiveTutorialHelpers";
+import { isInteractiveTutorialCreationStep } from "./helpers/interactiveTutorialStepGroups";
+import { isInteractiveTutorialStepComplete } from "./helpers/interactiveTutorialStepCompletion";
 import type {
   InteractiveTutorialStep,
   InteractiveTutorialStepCompletionContext,

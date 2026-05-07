@@ -1,9 +1,7 @@
 /// <reference types="jest" />
 
-import {
-  getMilestoneProjectIds,
-} from "@/features/workspace/shared/milestones";
-import type { MilestoneRecord } from "@/types";
+import { getMilestoneProjectIds } from "@/features/workspace/shared/events/eventProjectUtils";
+import type { MilestoneRecord } from "@/types/recordsExecution";
 
 function createMilestone(overrides: Partial<MilestoneRecord>): MilestoneRecord {
   return {

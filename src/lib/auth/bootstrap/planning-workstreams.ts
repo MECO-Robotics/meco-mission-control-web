@@ -1,5 +1,6 @@
-import type { TaskDependencyRecord, TaskRecord, WorkstreamRecord } from "@/types";
-import { resolveWorkspaceColor } from "@/features/workspace/shared/model";
+import type { TaskDependencyRecord, TaskRecord } from "@/types/recordsExecution";
+import type { WorkstreamRecord } from "@/types/recordsOrganization";
+import { resolveWorkspaceColor } from "@/features/workspace/shared/model/workspaceColors";
 import {
   isIsoDate,
   resolveProjectAlias,

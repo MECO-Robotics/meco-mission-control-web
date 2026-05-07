@@ -1,5 +1,5 @@
 import type { DropdownOption } from "./workspaceTypes";
-import type { TaskStatus } from "@/types";
+import type { TaskStatus } from "@/types/common";
 
 const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   "not-started": "Not started",

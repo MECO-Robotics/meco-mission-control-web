@@ -1,14 +1,14 @@
 import { useCallback } from "react";
 
-import { toErrorMessage } from "@/lib/appUtils";
-import { createTask, updateTaskRecord } from "@/lib/auth";
+import { toErrorMessage } from "@/lib/appUtils/common";
+import { createTask, updateTaskRecord } from "@/lib/auth/records/task";
 import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
 import {
   normalizeTaskPayload,
   syncTaskBlockers,
   syncTaskDependencies,
 } from "@/app/hooks/workspace/task/appWorkspaceTaskActionHelpers";
-import type { TaskBlockerRecord, TaskDependencyRecord, TaskRecord } from "@/types";
+import type { TaskBlockerRecord, TaskDependencyRecord, TaskRecord } from "@/types/recordsExecution";
 import { buildTaskEditSuccessNotice } from "@/features/workspace/workspaceEditToastNotice";
 
 export type AppWorkspaceTaskSubmissionActions = ReturnType<typeof useAppWorkspaceTaskSubmissionActions>;

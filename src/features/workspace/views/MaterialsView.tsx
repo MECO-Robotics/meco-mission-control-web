@@ -1,23 +1,19 @@
 import { useMemo, useState, type CSSProperties } from "react";
+import { Plus } from "lucide-react";
 
-import type { BootstrapPayload, MaterialRecord } from "@/types";
-import { IconManufacturing, IconTasks } from "@/components/shared";
-import {
-  ColumnFilterDropdown,
-  CompactFilterMenu,
-  EditableHoverIndicator,
-  FilterDropdown,
-  type FilterSelection,
-  PaginationControls,
-  SearchToolbarInput,
-  TableCell,
-  filterSelectionIncludes,
-  useFilterChangeMotionClass,
-  useWorkspacePagination,
-} from "@/features/workspace/shared";
-import { getStatusPillClassName } from "@/features/workspace/shared";
-import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
-import { MATERIAL_CATEGORY_OPTIONS, MATERIAL_STOCK_OPTIONS } from "@/features/workspace/shared";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MaterialRecord } from "@/types/recordsInventory";
+import { IconManufacturing, IconTasks } from "@/components/shared/Icons";
+import { ColumnFilterDropdown } from "@/features/workspace/shared/filters/ColumnFilterDropdown";
+import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
+import { EditableHoverIndicator, PaginationControls, TableCell, useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
+import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
+import { filterSelectionIncludes, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
+import { MATERIAL_CATEGORY_OPTIONS, MATERIAL_STOCK_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
 
 interface MaterialsViewProps {
   bootstrap: BootstrapPayload;
@@ -116,13 +112,13 @@ export function MaterialsView({
 
           <button
             aria-label="Add material"
-            className="primary-action queue-toolbar-action"
+            className="primary-action queue-toolbar-action queue-toolbar-action-round"
             data-tutorial-target="create-material-button"
             onClick={openCreateMaterialModal}
             title="Add material"
             type="button"
           >
-            Add
+            <Plus size={14} strokeWidth={2} />
           </button>
         </div>
       </div>

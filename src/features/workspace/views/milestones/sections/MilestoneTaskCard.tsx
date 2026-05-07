@@ -1,5 +1,5 @@
-import type { BootstrapPayload } from "@/types";
-import { formatDate } from "@/lib/appUtils";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import { formatDate } from "@/lib/appUtils/common";
 import {
   formatTaskPlanningState,
   getTaskBlocksTasks,
@@ -7,7 +7,7 @@ import {
   getTaskPlanningState,
   getTaskWaitingOnDependencies,
 } from "@/features/workspace/shared/task/taskPlanning";
-import { getStatusPillClassName } from "@/features/workspace/shared";
+import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
 
 type MilestoneTaskCardProps = {
   bootstrap: BootstrapPayload;

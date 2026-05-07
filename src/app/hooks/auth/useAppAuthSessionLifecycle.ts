@@ -4,7 +4,7 @@ import { clearStoredSessionToken, loadStoredSessionToken } from "@/lib/auth/core
 import { fetchCurrentUser } from "@/lib/auth/core/request";
 import { validateSession } from "@/lib/auth/session";
 import { type AuthConfig, type SessionUser } from "@/lib/auth/types";
-import { toErrorMessage } from "@/lib/appUtils";
+import { toErrorMessage } from "@/lib/appUtils/common";
 import { fetchAuthConfig } from "@/app/hooks/auth/useAppAuthSessionConfig";
 
 interface UseAppAuthSessionBootstrapArgs {

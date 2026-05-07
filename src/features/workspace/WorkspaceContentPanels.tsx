@@ -1,2 +1,2 @@
-export { WorkspaceContentPanels } from "./WorkspaceContentPanelsImpl";
-export type { WorkspaceContentPanelsProps } from "./WorkspaceContentPanelsImpl";
+export { WorkspaceContentPanels } from "./WorkspaceContentPanelsCoreImpl";
+export type { WorkspaceContentPanelsProps } from "./WorkspaceContentPanelsCoreImpl";

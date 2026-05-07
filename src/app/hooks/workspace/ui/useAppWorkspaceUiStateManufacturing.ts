@@ -1,9 +1,9 @@
 import { useState } from "react";
 
-import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model";
-import { buildEmptyManufacturingPayload } from "@/lib/appUtils";
-import type { ManufacturingItemPayload } from "@/types";
-import type { ManufacturingModalMode } from "@/features/workspace";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import { buildEmptyManufacturingPayload } from "@/lib/appUtils/manufacturing";
+import type { ManufacturingItemPayload } from "@/types/payloads";
+import type { ManufacturingModalMode } from "@/features/workspace/shared/model/workspaceModalModes";
 
 export function useAppWorkspaceUiStateManufacturing() {
   const [manufacturingModalMode, setManufacturingModalMode] =

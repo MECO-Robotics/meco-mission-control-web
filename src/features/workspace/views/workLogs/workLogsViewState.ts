@@ -1,14 +1,12 @@
 import { useMemo, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 
-import type { BootstrapPayload, WorkLogRecord } from "@/types";
-import type { DropdownOption, FilterSelection, MembersById, SubsystemsById } from "@/features/workspace/shared";
-import {
-  filterSelectionIncludes,
-  filterSelectionIntersects,
-  useFilterChangeMotionClass,
-  useWorkspacePagination,
-} from "@/features/workspace/shared";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { WorkLogRecord } from "@/types/recordsExecution";
+import type { DropdownOption, MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { filterSelectionIncludes, filterSelectionIntersects, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
 
 export type WorkLogSortMode = "recent" | "oldest" | "longest" | "shortest";
 

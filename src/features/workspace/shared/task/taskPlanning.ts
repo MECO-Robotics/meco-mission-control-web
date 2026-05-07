@@ -1,8 +1,6 @@
-import type {
-  BootstrapPayload,
-  TaskPlanningState,
-  TaskRecord,
-} from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskPlanningState } from "@/types/common";
+import type { TaskRecord } from "@/types/recordsExecution";
 
 import {
   getBlockingDownstreamTaskIds,

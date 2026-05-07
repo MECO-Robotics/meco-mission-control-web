@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import type { TaskRecord } from "@/types";
-import type { TimelineViewInterval } from "@/features/workspace/shared/timeline";
+import type { TaskRecord } from "@/types/recordsExecution";
+import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
 
 type TimelineGridMotion = "left" | "right" | "neutral";
 

@@ -1,7 +1,7 @@
 import { useCallback, type FormEvent } from "react";
 
-import { toErrorMessage } from "@/lib/appUtils";
-import { createSeasonRecord } from "@/lib/auth";
+import { toErrorMessage } from "@/lib/appUtils/common";
+import { createSeasonRecord } from "@/lib/auth/records/planning";
 import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
 
 export function useAppWorkspaceRosterSeasonActions(model: AppWorkspaceModel) {

@@ -1,4 +1,4 @@
-import { IconTasks } from "@/components/shared";
+import { IconTasks } from "@/components/shared/Icons";
 
 export function SearchToolbarInput({
   ariaLabel,

@@ -1,11 +1,4 @@
-import type {
-  QaFindingRecord,
-  QaReportRecord,
-  ReportFindingRecord,
-  ReportRecord,
-  TestFindingRecord,
-  TestResultRecord,
-} from "@/types";
+import type { QaFindingRecord, QaReportRecord, ReportFindingRecord, ReportRecord, TestFindingRecord, TestResultRecord } from "@/types/recordsReporting";
 import { localTodayDate } from "@/lib/dateUtils";
 import type { NormalizedPlanningRecords } from "./planning";
 import { resolveProjectAlias, type LegacyBootstrapPayload } from "./shared";

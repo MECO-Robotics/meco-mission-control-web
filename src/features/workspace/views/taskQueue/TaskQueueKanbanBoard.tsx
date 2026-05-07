@@ -1,8 +1,9 @@
 import { useMemo } from "react";
 
-import type { BootstrapPayload, TaskRecord } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskRecord } from "@/types/recordsExecution";
 
-import { getStatusPillClassName } from "@/features/workspace/shared";
+import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
 import { KanbanColumns } from "@/features/workspace/views/kanban/KanbanColumns";
 import { TimelineTaskStatusLogo } from "@/features/workspace/views/timeline/TimelineTaskStatusLogo";
 import type { TimelineTaskStatusSignal } from "@/features/workspace/views/timeline/timelineGridBodyUtils";

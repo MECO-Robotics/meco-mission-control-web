@@ -1,5 +1,7 @@
-import type { FilterSelection } from "@/features/workspace/shared";
-import type { BootstrapPayload, RiskPayload, RiskRecord } from "@/types";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { RiskPayload } from "@/types/payloads";
+import type { RiskRecord } from "@/types/recordsReporting";
 
 import { buildRiskRows } from "./riskViewData/riskViewDataRows";
 import { buildRiskViewLookups } from "./riskViewData/riskViewDataLookups";

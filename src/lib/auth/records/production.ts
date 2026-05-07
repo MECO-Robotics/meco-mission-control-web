@@ -1,9 +1,5 @@
-import type {
-  ManufacturingItemPayload,
-  ManufacturingItemRecord,
-  PurchaseItemPayload,
-  PurchaseItemRecord,
-} from "@/types";
+import type { ManufacturingItemPayload, PurchaseItemPayload } from "@/types/payloads";
+import type { ManufacturingItemRecord, PurchaseItemRecord } from "@/types/recordsInventory";
 import { requestItem } from "./common";
 
 export function createPurchaseItemRecord(

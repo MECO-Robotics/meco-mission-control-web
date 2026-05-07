@@ -1,13 +1,9 @@
 import { useCallback, type FormEvent } from "react";
 
-import { getMemberActiveSeasonIds, toErrorMessage } from "@/lib/appUtils";
-import {
-  createMemberRecord,
-  deleteMemberRecord,
-  updateMemberRecord,
-} from "@/lib/auth";
+import { getMemberActiveSeasonIds, toErrorMessage } from "@/lib/appUtils/common";
+import { createMemberRecord, deleteMemberRecord, updateMemberRecord } from "@/lib/auth/records/planning";
 import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
-import { isElevatedMemberRole } from "@/app/state/workspaceStateUtils";
+import { isElevatedMemberRole } from "@/app/state/workspaceMemberRoleUtils";
 
 export function useAppWorkspaceRosterMemberActions(model: AppWorkspaceModel) {
   const handleCreateMember = useCallback(

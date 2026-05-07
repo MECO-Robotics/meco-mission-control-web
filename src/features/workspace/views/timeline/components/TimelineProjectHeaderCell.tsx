@@ -34,8 +34,8 @@ export const TimelineProjectHeaderCell: React.FC<TimelineProjectHeaderCellProps>
       justifyContent={projectCollapsed ? "flex-start" : "center"}
       left={0}
       onToggle={() => toggleProject(project.id)}
-      overflow="visible"
-      padding={projectCollapsed ? "0 12px" : "8px 6px"}
+      overflow="hidden"
+      padding={projectCollapsed ? "0 12px" : "8px 10px 8px 26px"}
       shouldShowToggle
       toggleIcon={<TimelineCollapseArrow isCollapsed={projectCollapsed} />}
       toggleLabel={projectCollapsed ? "Expand project" : "Collapse project"}

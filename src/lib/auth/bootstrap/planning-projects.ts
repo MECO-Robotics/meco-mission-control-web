@@ -1,4 +1,4 @@
-import type { ProjectRecord, SeasonRecord } from "@/types";
+import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
 import {
   classifyProjectBucket,
   getRequiredProjectTemplate,

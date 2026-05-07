@@ -1,10 +1,21 @@
 /// <reference types="jest" />
 
-import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { normalizeBootstrapPayload } from "@/lib/auth/bootstrap/payload";
-import type { BootstrapPayload, MilestoneRequirementRecord } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneRequirementRecord } from "@/types/recordsExecution";
 
 describe("normalizeBootstrapPayload", () => {
+  it("creates separate Operations and Business projects by default", () => {
+    const normalized = normalizeBootstrapPayload(EMPTY_BOOTSTRAP);
+    const operationsProject = normalized.projects.find((project) => project.name === "Operations");
+    const businessProject = normalized.projects.find((project) => project.name === "Business");
+
+    expect(operationsProject).toBeDefined();
+    expect(businessProject).toBeDefined();
+    expect(operationsProject?.id).not.toBe(businessProject?.id);
+  });
+
   it("preserves milestone requirements", () => {
     const milestoneId = "milestone-1";
     const milestoneRequirements: MilestoneRequirementRecord[] = [

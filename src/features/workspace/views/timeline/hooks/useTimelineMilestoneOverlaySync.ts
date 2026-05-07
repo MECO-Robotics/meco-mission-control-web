@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { MutableRefObject } from "react";
 
-import { localTodayDate } from "@/features/workspace/shared/timeline";
+import { localTodayDate } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import type { TimelineDayCellLayouts } from "../model/timelineMilestoneData";
 
 export interface UseTimelineMilestoneOverlaySyncArgs {

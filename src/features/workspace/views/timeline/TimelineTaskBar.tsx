@@ -1,6 +1,6 @@
 import React from "react";
-import { EditableHoverIndicator } from "@/features/workspace/shared";
-import type { TaskRecord } from "@/types";
+import { EditableHoverIndicator } from "@/features/workspace/shared/table/workspaceTableChrome";
+import type { TaskRecord } from "@/types/recordsExecution";
 import type {
   TimelineTaskDependencyCounts,
 } from "./timelineGridBodyUtils";
@@ -113,8 +113,9 @@ export const TimelineTaskBar: React.FC<TimelineTaskBarProps> = ({
     gridRow,
     gridColumn,
     margin,
-    ...(spillsLeft ? { marginLeft: 0 } : null),
-    ...(spillsRight ? { marginRight: 0 } : null),
+    boxSizing: "border-box",
+    paddingLeft: marginLeft ?? "var(--timeline-task-bar-edge-gap, 2px)",
+    paddingRight: marginRight ?? "var(--timeline-task-bar-edge-gap, 2px)",
     alignSelf,
   };
 
@@ -136,8 +137,6 @@ export const TimelineTaskBar: React.FC<TimelineTaskBarProps> = ({
         onClick={() => onOpenTask(task)}
         style={{
           ...buttonStyle,
-          marginLeft: spillsLeft ? "0" : (marginLeft ?? "var(--timeline-task-bar-edge-gap, 24px)"),
-          marginRight: spillsRight ? "0" : (marginRight ?? "var(--timeline-task-bar-edge-gap, 24px)"),
           gridRow,
           gridColumn,
         }}

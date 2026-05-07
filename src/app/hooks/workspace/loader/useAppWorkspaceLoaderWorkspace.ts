@@ -1,15 +1,12 @@
 import { startTransition, useCallback } from "react";
 
-import { fetchBootstrap } from "@/lib/auth";
+import { fetchBootstrap } from "@/lib/auth/bootstrap";
 import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
-import {
-  reconcileWorkspaceState,
-  type AppWorkspaceLoaderModel,
-  type SelectMemberHandler,
-  type UnauthorizedHandler,
-} from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceHelpers";
+import { reconcileWorkspaceState } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceReconciliation";
+import type { AppWorkspaceLoaderModel, SelectMemberHandler, UnauthorizedHandler } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
 import type { WorkspaceReconciliationState } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
-import { getSinglePersonFilterId, scopeBootstrapBySelection } from "@/app/state/workspaceStateUtils";
+import { getSinglePersonFilterId } from "@/app/state/workspaceMemberRoleUtils";
+import { scopeBootstrapBySelection } from "@/app/state/workspaceBootstrapScope";
 
 export function useAppWorkspaceLoaderWorkspace(
   state: AppWorkspaceState,

@@ -1,13 +1,10 @@
-import type { BootstrapPayload, ManufacturingItemPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { ManufacturingItemPayload } from "@/types/payloads";
 
-import {
-  buildEmptyManufacturingPayload,
-  buildEmptyPurchasePayload,
-  buildEmptyTaskPayload,
-  manufacturingToPayload,
-  purchaseToPayload,
-  taskToPayload,
-} from "@/lib/appUtils";
+import { buildEmptyManufacturingPayload } from "@/lib/appUtils/manufacturing";
+import { buildEmptyPurchasePayload } from "@/lib/appUtils/payloadBuilders";
+import { buildEmptyTaskPayload, taskToPayload } from "@/lib/appUtils/taskTargets";
+import { manufacturingToPayload, purchaseToPayload } from "@/lib/appUtils/payloadConversions";
 import type { AppWorkspaceLoaderModel, WorkspaceReconciliationState } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
 
 export function reconcileTaskModal(

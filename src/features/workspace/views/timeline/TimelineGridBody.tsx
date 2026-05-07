@@ -1,5 +1,6 @@
 import React from "react";
-import type { BootstrapPayload, TaskRecord } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskRecord } from "@/types/recordsExecution";
 import type {
   TimelineDayHeaderCell,
   TimelineMonthGroup,
@@ -129,7 +130,6 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
     [bootstrap],
   );
 
-  let nextSubsystemRowIndex = 1;
   const rowChildren = hasProjectColumn
     ? projectRows.map((project, projectIndex) => (
         <TimelineProjectGroup
@@ -171,11 +171,6 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
         />
       ))
     : subsystemRows.map((subsystem, subsystemIndex) => {
-        const canToggleSubsystem = subsystem.tasks.length > 1;
-        const collapsed = canToggleSubsystem ? collapsedSubsystems[subsystem.id] ?? false : false;
-        const rowIndex = nextSubsystemRowIndex;
-        nextSubsystemRowIndex += collapsed ? 1 : Math.max(1, subsystem.tasks.length);
-
         return (
           <TimelineSubsystemGroup
             clearHoveredMilestonePopup={clearHoveredMilestonePopup}
@@ -202,7 +197,6 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
             subsystemColumnIndex={subsystemColumnIndex}
             subsystemIndex={subsystemIndex}
             subsystemStickyLeft={subsystemStickyLeft}
-            rowIndex={rowIndex}
             statusIconColumnIndex={statusIconColumnIndex}
             statusIconColumnWidth={statusIconColumnWidth}
             statusIconStickyRight={statusIconStickyRight}

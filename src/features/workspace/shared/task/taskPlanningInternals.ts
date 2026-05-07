@@ -1,9 +1,5 @@
-import type {
-  BootstrapPayload,
-  TaskBlockerRecord,
-  TaskDependencyRecord,
-  TaskRecord,
-} from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskBlockerRecord, TaskDependencyRecord, TaskRecord } from "@/types/recordsExecution";
 
 type LegacyTaskDependencyRecord = {
   id: string;

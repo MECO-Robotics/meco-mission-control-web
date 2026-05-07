@@ -1,8 +1,10 @@
-import { EVENT_TYPE_OPTIONS } from "@/features/workspace/shared/milestones";
-import type { BootstrapPayload, MilestoneRecord, MilestoneType } from "@/types";
+import { EVENT_TYPE_OPTIONS } from "@/features/workspace/shared/events/eventStyles";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneRecord } from "@/types/recordsExecution";
+import type { MilestoneType } from "@/types/common";
 import type React from "react";
 
-import type { TimelineMilestoneDraft } from "@/features/workspace/shared/timeline";
+import type { TimelineMilestoneDraft } from "@/features/workspace/shared/timeline/timelineEventHelpers";
 
 interface TimelineMilestoneModalFieldsProps {
   activeDayMilestones: MilestoneRecord[];

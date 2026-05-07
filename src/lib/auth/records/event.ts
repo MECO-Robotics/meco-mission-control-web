@@ -1,4 +1,5 @@
-import type { MilestonePayload, MilestoneRecord } from "@/types";
+import type { MilestonePayload } from "@/types/payloads";
+import type { MilestoneRecord } from "@/types/recordsExecution";
 import { requestItem } from "./common";
 
 export function createMilestoneRecord(payload: MilestonePayload, onUnauthorized?: () => void) {

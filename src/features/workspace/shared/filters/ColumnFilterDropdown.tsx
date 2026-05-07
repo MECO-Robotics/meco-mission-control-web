@@ -1,8 +1,8 @@
 import { useId, useRef, useState } from "react";
 
-import { IconFilter } from "@/components/shared";
+import { IconFilter } from "@/components/shared/Icons";
 
-import type { DropdownOption } from "../model";
+import type { DropdownOption } from "../model/workspaceTypes";
 import { type FilterSelection, formatFilterSelectionLabel } from "./workspaceFilterUtils";
 import { FilterOptionMenu } from "./workspaceFilterDropdownMenu";
 import { useFilterDropdownMenuState, usePrunedFilterSelection } from "./workspaceFilterDropdownHooks";

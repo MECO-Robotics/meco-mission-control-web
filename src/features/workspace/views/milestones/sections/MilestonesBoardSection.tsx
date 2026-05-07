@@ -2,7 +2,8 @@ import { useEffect, useRef } from "react";
 import type { CSSProperties, Dispatch, SetStateAction } from "react";
 
 import { KanbanScrollFrame } from "@/features/workspace/views/kanban/KanbanScrollFrame";
-import type { BootstrapPayload, MilestoneRecord } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneRecord } from "@/types/recordsExecution";
 
 import { MilestoneKanbanBoard } from "../MilestoneKanbanBoard";
 import { clampMilestoneZoom, MILESTONE_ZOOM_STEP } from "../milestonesViewUtils";

@@ -1,13 +1,8 @@
-import type { BootstrapPayload, MilestoneRecord, TaskRecord } from "@/types";
-import { dateDiffInDays } from "@/lib/appUtils";
-import {
-  datePortion,
-  endOfTimelineWeek,
-  monthEndFromDay,
-  monthStartFromDay,
-  startOfTimelineWeek,
-  type TimelineViewInterval,
-} from "@/features/workspace/shared/timeline";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneRecord, TaskRecord } from "@/types/recordsExecution";
+import { dateDiffInDays } from "@/lib/appUtils/common";
+import { datePortion, endOfTimelineWeek, monthEndFromDay, monthStartFromDay, startOfTimelineWeek } from "@/features/workspace/shared/timeline/timelineDateUtils";
+import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import { buildTimelineSubsystemRows } from "./timelineViewDataRows";
 
 const ALL_INTERVAL_PAST_MONTHS = 9;
@@ -172,6 +167,7 @@ function buildTimelineDayMilestones(
 }
 
 export function buildTimelineData({
+  isAllProjectsView,
   milestones,
   projectsById,
   scopedSubsystems,
@@ -179,6 +175,7 @@ export function buildTimelineData({
   viewAnchorDate,
   viewInterval,
 }: {
+  isAllProjectsView: boolean;
   milestones: BootstrapPayload["milestones"];
   projectsById: Record<string, BootstrapPayload["projects"][number]>;
   scopedSubsystems: BootstrapPayload["subsystems"];
@@ -196,6 +193,7 @@ export function buildTimelineData({
   const days = buildTimelineDays(range.startDate, range.endDate);
   const dayMilestones = buildTimelineDayMilestones(range.startDate, range.endDate, milestones);
   const subsystemRows = buildTimelineSubsystemRows({
+    includeEmptySubsystems: !isAllProjectsView,
     projectsById,
     scopedSubsystems,
     scopedTasks,

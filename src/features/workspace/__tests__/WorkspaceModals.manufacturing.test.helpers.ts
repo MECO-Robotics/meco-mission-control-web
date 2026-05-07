@@ -1,8 +1,9 @@
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { MaterialEditorModal, ManufacturingEditorModal } from "@/features/workspace/WorkspaceModals";
-import { buildEmptyManufacturingPayload } from "@/lib/appUtils";
-import type { BootstrapPayload } from "@/types";
+import { MaterialEditorModal } from "@/features/workspace/modals/assetCatalog/MaterialEditorModal";
+import { ManufacturingEditorModal } from "@/features/workspace/modals/purchaseManufacturing/ManufacturingEditorModal";
+import { buildEmptyManufacturingPayload } from "@/lib/appUtils/manufacturing";
+import type { BootstrapPayload } from "@/types/bootstrap";
 import { createBootstrap } from "./support/WorkspaceModals.test.shared";
 
 export function renderManufacturingModal(

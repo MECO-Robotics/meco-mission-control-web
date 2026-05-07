@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import type { HoveredMilestonePopup } from "@/features/workspace/shared/timeline";
+import type { HoveredMilestonePopup } from "@/features/workspace/shared/timeline/timelineEventHelpers";
 import type { MilestoneGeometry } from "./timelineViewModel";
-import { withColumnOverlayTint } from "@/features/workspace/shared/timeline";
+import { withColumnOverlayTint } from "@/features/workspace/shared/timeline/timelineDateUtils";
 
 interface TimelineMilestoneHoverLayerProps {
   controllerRef: React.MutableRefObject<(popup: HoveredMilestonePopup | null) => void>;

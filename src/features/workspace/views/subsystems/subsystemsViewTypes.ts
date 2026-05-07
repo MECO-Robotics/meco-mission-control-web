@@ -1,5 +1,6 @@
-import type { BootstrapPayload, MechanismRecord, SubsystemRecord } from "@/types";
-import type { MembersById } from "@/features/workspace/shared";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MechanismRecord, SubsystemRecord } from "@/types/recordsOrganization";
+import type { MembersById } from "@/features/workspace/shared/model/workspaceTypes";
 
 export interface SubsystemsViewProps {
   bootstrap: BootstrapPayload;

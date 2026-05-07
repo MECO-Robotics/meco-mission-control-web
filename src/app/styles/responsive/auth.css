@@ -75,6 +75,7 @@
 
   .worklog-toolbar>* {
     width: auto;
+    flex: 0 1 auto;
     min-width: 0;
     max-width: 100%;
   }
@@ -90,6 +91,7 @@
 
   .filter-toolbar>* {
     width: auto;
+    flex: 0 1 auto;
     min-width: 0;
     max-width: 100%;
   }

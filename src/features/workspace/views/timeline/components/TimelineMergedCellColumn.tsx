@@ -105,7 +105,7 @@ export const TimelineMergedCellColumn: React.FC<TimelineMergedCellColumnProps> =
           marginRight: collapsed ? "6px" : 0,
           position: collapsed ? "static" : "absolute",
           top: collapsed ? undefined : "4px",
-          right: collapsed ? undefined : "4px",
+          left: collapsed ? undefined : "6px",
           zIndex: 1,
           flexShrink: 0,
         }}

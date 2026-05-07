@@ -1,5 +1,5 @@
-import { formatIterationVersion } from "@/lib/appUtils";
-import type { BootstrapPayload } from "@/types";
+import { formatIterationVersion } from "@/lib/appUtils/common";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
 interface TaskEditorAdvancedTargetsSectionProps {
   getMechanismLabel: (mechanism: BootstrapPayload["mechanisms"][number]) => string;

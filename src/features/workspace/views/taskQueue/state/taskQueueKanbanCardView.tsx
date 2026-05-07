@@ -1,8 +1,9 @@
 import type { CSSProperties } from "react";
 
-import type { BootstrapPayload, TaskRecord } from "@/types";
-import { formatDate } from "@/lib/appUtils";
-import { EditableHoverIndicator } from "@/features/workspace/shared";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskRecord } from "@/types/recordsExecution";
+import { formatDate } from "@/lib/appUtils/common";
+import { EditableHoverIndicator } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { getTimelineTaskDisciplineColor } from "@/features/workspace/views/timeline/timelineTaskColors";
 
 import {

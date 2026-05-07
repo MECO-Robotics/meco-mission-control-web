@@ -1,5 +1,7 @@
 import type { CSSProperties } from "react";
-import type { BootstrapPayload, DisciplineCode, TaskRecord } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { DisciplineCode } from "@/types/common";
+import type { TaskRecord } from "@/types/recordsExecution";
 
 type TimelineTaskToneExtras = CSSProperties & Record<string, string | number | undefined>;
 

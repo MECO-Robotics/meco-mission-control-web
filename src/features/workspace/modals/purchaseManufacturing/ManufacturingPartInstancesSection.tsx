@@ -1,7 +1,8 @@
 import type { Dispatch, SetStateAction } from "react";
 
-import type { BootstrapPayload, ManufacturingItemPayload } from "@/types";
-import { toggleManufacturingDraftPartInstanceSelection } from "@/lib/appUtils";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { ManufacturingItemPayload } from "@/types/payloads";
+import { toggleManufacturingDraftPartInstanceSelection } from "@/lib/appUtils/manufacturing";
 
 interface ManufacturingPartInstancesSectionProps {
   bootstrap: BootstrapPayload;

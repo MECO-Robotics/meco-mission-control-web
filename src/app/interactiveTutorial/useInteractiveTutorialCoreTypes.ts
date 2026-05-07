@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
 
-import type { FilterSelection } from "@/features/workspace";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type {
   InventoryViewTab,
   ManufacturingViewTab,
@@ -10,7 +10,7 @@ import type {
   ViewTab,
   WorklogsViewTab,
 } from "@/lib/workspaceNavigation";
-import type { BootstrapPayload } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
 export interface UseInteractiveTutorialOptions {
   activeTab: ViewTab;

@@ -1,4 +1,4 @@
-import type { TaskBlockerRecord } from "@/types";
+import type { TaskBlockerRecord } from "@/types/recordsExecution";
 import type { LegacyBootstrapPayload } from "./shared";
 
 export function normalizeBootstrapTaskBlockers(

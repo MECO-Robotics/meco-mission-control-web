@@ -1,4 +1,4 @@
-import type { DisciplineRecord, ProjectRecord } from "@/types";
+import type { DisciplineRecord, ProjectRecord } from "@/types/recordsOrganization";
 
 export type TaskDisciplineBucket =
   | "robot"

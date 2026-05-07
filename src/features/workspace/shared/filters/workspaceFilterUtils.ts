@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
-import type { TaskRecord } from "@/types";
+import type { TaskRecord } from "@/types/recordsExecution";
 
-import type { DropdownOption } from "../model";
+import type { DropdownOption } from "../model/workspaceTypes";
 
 const FILTER_CHANGE_ANIMATION_DURATION_MS = 220;
 

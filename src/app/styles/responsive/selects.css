@@ -46,6 +46,12 @@
     padding-inline: 0.35rem;
   }
 
+  .app-topbar-search-slot {
+    flex: 1 1 9rem;
+    min-width: 7.5rem;
+    padding-inline: 0.25rem;
+  }
+
   .app-topbar-project-slot {
     padding-inline: 0.3rem 0.2rem;
   }
@@ -60,13 +66,15 @@
 
   .filter-toolbar>* {
     width: auto;
+    flex: 0 1 auto;
     min-width: 0;
     max-width: 100%;
   }
 
   .toolbar-search {
-    width: min(100%, 220px);
-    min-width: 150px;
+    width: auto;
+    flex: 0 1 clamp(11.5rem, 24vw, 19rem);
+    min-width: 0;
     max-width: 100%;
   }
 
@@ -108,8 +116,10 @@
     justify-content: center;
   }
 
-.app-topbar-left {
-    width: var(--shell-topbar-brand-width);
+  .app-topbar-left {
+    width: auto;
+    max-width: none;
+    flex: 1 1 auto;
   }
 }
 

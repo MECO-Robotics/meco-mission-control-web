@@ -1,8 +1,9 @@
 import type { Dispatch, SetStateAction } from "react";
 
-import type { BootstrapPayload, MilestoneType } from "@/types";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneType } from "@/types/common";
 import { EVENT_TYPE_STYLES as MILESTONE_TYPE_STYLES } from "@/features/workspace/shared/events/eventStyles";
-import type { TimelineMilestoneDraft } from "@/features/workspace/shared/timeline";
+import type { TimelineMilestoneDraft } from "@/features/workspace/shared/timeline/timelineEventHelpers";
 
 const MILESTONE_TYPE_OPTIONS: { id: MilestoneType; name: string }[] = (
   Object.entries(MILESTONE_TYPE_STYLES) as [MilestoneType, (typeof MILESTONE_TYPE_STYLES)[MilestoneType]][]

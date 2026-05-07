@@ -1,13 +1,12 @@
-import {
-  ArtifactInventoryView,
-  MaterialsView,
-  PartsView,
-  PurchasesView,
-  WorkflowView,
-  SubsystemsView,
-  RosterView,
-  HelpView,
-} from "@/features/workspace/views";
+import { ArtifactInventoryView } from "@/features/workspace/views/ArtifactInventoryView";
+import { MaterialsView } from "@/features/workspace/views/MaterialsView";
+import { PartsView } from "@/features/workspace/views/PartsView";
+import { PurchasesView } from "@/features/workspace/views/PurchasesView";
+import { WorkflowView } from "@/features/workspace/views/WorkflowView";
+import { SubsystemsView } from "@/features/workspace/views/SubsystemsView";
+import { RosterView } from "@/features/workspace/views/RosterView";
+import { HelpView } from "@/features/workspace/views/HelpView";
+import { RosterPlaceholderView } from "@/features/workspace/views/roster/RosterPlaceholderView";
 import { WorkspaceSectionPanel, WorkspaceSubPanel } from "../WorkspaceContentPanelShells";
 import type { WorkspaceContentPanelsViewProps } from "./workspaceContentPanelsViewTypes";
 
@@ -139,7 +138,7 @@ export function WorkspaceSubsystemsSection(props: WorkspaceContentPanelsViewProp
 }
 
 export function WorkspaceRosterSection(props: WorkspaceContentPanelsViewProps) {
-  const { allMembers, bootstrap, disablePanelAnimations = false, externalMembers, handleCreateMember, handleDeleteMember, handleReactivateMemberForSeason, handleUpdateMember, isAddPersonOpen, isDeletingMember, isEditPersonOpen, isSavingMember, memberEditDraft, memberForm, requestMemberPhotoUpload, rosterMentors, selectMember, selectedMemberId, selectedProject, selectedSeasonId, setIsAddPersonOpen, setIsEditPersonOpen, setMemberEditDraft, setMemberForm, students, tabSwitchDirection } = props;
+  const { allMembers, bootstrap, disablePanelAnimations = false, externalMembers, handleCreateMember, handleDeleteMember, handleReactivateMemberForSeason, handleUpdateMember, isAddPersonOpen, isDeletingMember, isEditPersonOpen, isSavingMember, memberEditDraft, memberForm, requestMemberPhotoUpload, rosterMentors, rosterView, selectMember, selectedMemberId, selectedProject, selectedSeasonId, setIsAddPersonOpen, setIsEditPersonOpen, setMemberEditDraft, setMemberForm, students, tabSwitchDirection } = props;
 
   return (
     <WorkspaceSectionPanel
@@ -149,7 +148,7 @@ export function WorkspaceRosterSection(props: WorkspaceContentPanelsViewProps) {
     >
       <WorkspaceSubPanel
         disableAnimations={disablePanelAnimations}
-        isActive
+        isActive={rosterView === "directory"}
       >
         <RosterView
           allMembers={allMembers}
@@ -177,6 +176,20 @@ export function WorkspaceRosterSection(props: WorkspaceContentPanelsViewProps) {
           setMemberForm={setMemberForm}
           students={students}
         />
+      </WorkspaceSubPanel>
+
+      <WorkspaceSubPanel
+        disableAnimations={disablePanelAnimations}
+        isActive={rosterView === "workload"}
+      >
+        <RosterPlaceholderView view="workload" />
+      </WorkspaceSubPanel>
+
+      <WorkspaceSubPanel
+        disableAnimations={disablePanelAnimations}
+        isActive={rosterView === "attendance"}
+      >
+        <RosterPlaceholderView view="attendance" />
       </WorkspaceSubPanel>
     </WorkspaceSectionPanel>
   );

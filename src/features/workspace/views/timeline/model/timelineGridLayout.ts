@@ -1,4 +1,4 @@
-import { getTimelineDayTrackSize, getTimelineGridMinWidth } from "@/features/workspace/shared/timeline";
+import { getTimelineDayTrackSize, getTimelineGridMinWidth } from "@/features/workspace/shared/timeline/timelineZoom";
 
 export const PROJECT_COLUMN_WIDTH = 112;
 export const SUBSYSTEM_COLUMN_WIDTH = 128;

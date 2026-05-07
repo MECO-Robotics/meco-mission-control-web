@@ -1,14 +1,7 @@
 /// <reference types="jest" />
 
-import {
-  buildEmptyTaskPayload,
-  getDefaultSubsystemId,
-  getPartDefinitionActiveSeasonIds,
-  isPartDefinitionActiveInSeason,
-  joinList,
-  splitList,
-  taskToPayload,
-} from "@/lib/appUtils";
+import { buildEmptyTaskPayload, taskToPayload } from "@/lib/appUtils/taskTargets";
+import { getDefaultSubsystemId, getPartDefinitionActiveSeasonIds, isPartDefinitionActiveInSeason, joinList, splitList } from "@/lib/appUtils/common";
 import { formatLocalDate, localTodayDate } from "@/lib/dateUtils";
 import { createBootstrap, createSubsystem } from "@/lib/appUtilsTestFixtures";
 

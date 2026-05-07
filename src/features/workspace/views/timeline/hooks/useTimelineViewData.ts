@@ -1,19 +1,13 @@
 import { useCallback, useMemo } from "react";
-import type { BootstrapPayload, MilestonePayload } from "@/types";
-import {
-  type FilterSelection,
-  filterSelectionMatchesTaskPeople,
-  useFilterChangeMotionClass,
-} from "@/features/workspace/shared";
-import { formatTimelinePeriodLabel, type TimelineViewInterval } from "@/features/workspace/shared/timeline";
-import {
-  buildTimelineData,
-  buildTimelineDayHeaderCells,
-  buildTimelineMonthGroups,
-  buildTimelineProjectRows,
-  filterTimelineMilestonesByPersonSelection,
-} from "../model/timelineViewData";
-import { useTimelineMilestoneModal } from "../useTimelineMilestoneModal";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestonePayload } from "@/types/payloads";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { filterSelectionMatchesTaskPeople, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { formatTimelinePeriodLabel } from "@/features/workspace/shared/timeline/timelineDateUtils";
+import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
+import { buildTimelineData } from "../model/timelineViewDataCore";
+import { buildTimelineDayHeaderCells, buildTimelineMonthGroups, buildTimelineProjectRows, filterTimelineMilestonesByPersonSelection } from "../model/timelineViewDataPresentation";
+import { useTimelineMilestoneModal } from "../useTimelineEventModal";
 import { useTimelineMilestoneOverlay } from "./useTimelineMilestoneOverlay";
 import { useTimelineRowHighlightGeometry } from "./useTimelineRowHighlightGeometry";
 import { resolveTimelineRowHighlightStyle } from "../timelineTaskColors";
@@ -21,6 +15,7 @@ import { resolveTimelineRowHighlightStyle } from "../timelineTaskColors";
 interface UseTimelineViewDataArgs {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
+  isAllProjectsView: boolean;
   openCreateTaskModal: () => void;
   onTaskEditCanceled: () => void;
   onTaskEditSaved: () => void;
@@ -39,6 +34,7 @@ interface UseTimelineViewDataArgs {
 export function useTimelineViewData({
   activePersonFilter,
   bootstrap,
+  isAllProjectsView,
   openCreateTaskModal,
   onTaskEditCanceled,
   onTaskEditSaved,
@@ -102,6 +98,7 @@ export function useTimelineViewData({
   const timeline = useMemo(
     () =>
       buildTimelineData({
+        isAllProjectsView,
         milestones: scopedMilestones,
         projectsById,
         scopedSubsystems: bootstrap.subsystems,
@@ -109,7 +106,15 @@ export function useTimelineViewData({
         viewAnchorDate,
         viewInterval,
       }),
-    [bootstrap.subsystems, projectsById, scopedMilestones, scopedTasks, viewAnchorDate, viewInterval],
+    [
+      bootstrap.subsystems,
+      isAllProjectsView,
+      projectsById,
+      scopedMilestones,
+      scopedTasks,
+      viewAnchorDate,
+      viewInterval,
+    ],
   );
   const timelinePeriodLabel = useMemo(
     () => formatTimelinePeriodLabel(viewInterval, timeline.days),

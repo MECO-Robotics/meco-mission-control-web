@@ -1,5 +1,5 @@
-import type { MilestoneRecord, TaskRecord } from "@/types";
-import { type WorkspaceMilestoneStyle } from "@/features/workspace/shared/milestones";
+import type { MilestoneRecord, TaskRecord } from "@/types/recordsExecution";
+import type { WorkspaceMilestoneStyle } from "@/features/workspace/shared/events/eventStyles";
 
 export function getTimelineMergedCellRotation(rowCount: number) {
   return rowCount >= 4 ? "180deg" : "240deg";

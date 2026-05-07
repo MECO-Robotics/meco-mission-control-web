@@ -1,4 +1,4 @@
-import { IconEye, IconRefresh } from "@/components/shared";
+import { IconEye, IconRefresh } from "@/components/shared/Icons";
 
 export function AppTopbarMyViewToggle({
   isActive,

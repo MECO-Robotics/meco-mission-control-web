@@ -24,7 +24,7 @@ export {
   timelineMilestoneDraftFromRecord,
   type HoveredMilestonePopup,
   type TimelineMilestoneDraft,
-} from "./timelineMilestoneHelpers";
+} from "./timelineEventHelpers";
 export {
   TIMELINE_ZOOM_MAX,
   TIMELINE_ZOOM_MIN,

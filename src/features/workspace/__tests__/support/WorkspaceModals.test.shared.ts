@@ -1,6 +1,6 @@
 import * as React from "react";
-import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared";
-import type { BootstrapPayload } from "@/types";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 

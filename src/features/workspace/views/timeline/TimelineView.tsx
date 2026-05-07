@@ -1,18 +1,19 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import type { BootstrapPayload, MilestonePayload, TaskRecord } from "@/types";
-import { type FilterSelection } from "@/features/workspace/shared";
-import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared";
-import { getTimelineMinimumZoomForWidth, midpointOfTimelineDays } from "@/features/workspace/shared/timeline";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestonePayload } from "@/types/payloads";
+import type { TaskRecord } from "@/types/recordsExecution";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
+import { getTimelineMinimumZoomForWidth } from "@/features/workspace/shared/timeline/timelineZoom";
+import { midpointOfTimelineDays } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import { buildTimelineGridLayout } from "./model/timelineGridLayout";
 import { TimelineGridBody } from "./TimelineGridBody";
 import { TimelineMilestoneDetailModal } from "./TimelineMilestoneDetailModal";
 import { TimelineMilestoneHoverLayer } from "./TimelineMilestoneHoverLayer";
 import { TimelineMilestoneModal } from "./TimelineMilestoneModal";
-import {
-  TimelineMilestoneUnderlaysPortal,
-  TimelineRowHighlightsPortal,
-  TimelineTodayMarkerPortal,
-} from "./portals";
+import { TimelineMilestoneUnderlaysPortal } from "./portals/TimelineMilestoneUnderlaysPortal";
+import { TimelineRowHighlightsPortal } from "./portals/TimelineRowHighlightsPortal";
+import { TimelineTodayMarkerPortal } from "./portals/TimelineTodayMarkerPortal";
 import { TimelineToolbar } from "./TimelineToolbar";
 import { useTimelineViewActions } from "./hooks/useTimelineViewActions";
 import { useTimelineViewData } from "./hooks/useTimelineViewData";
@@ -59,6 +60,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const data = useTimelineViewData({
     activePersonFilter,
     bootstrap,
+    isAllProjectsView,
     openCreateTaskModal,
     onTaskEditCanceled,
     onTaskEditSaved,

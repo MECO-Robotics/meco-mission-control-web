@@ -2,9 +2,11 @@
 
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared";
-import { CncView, PrintsView } from "@/features/workspace/views";
-import type { BootstrapPayload, ManufacturingItemRecord } from "@/types";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import { CncView } from "@/features/workspace/views/manufacturing/CncView";
+import { PrintsView } from "@/features/workspace/views/manufacturing/PrintsView";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { ManufacturingItemRecord } from "@/types/recordsInventory";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 

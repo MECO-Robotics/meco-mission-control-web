@@ -68,8 +68,8 @@ export const TimelineSubsystemHeaderCell: React.FC<TimelineSubsystemHeaderCellPr
       onMouseEnter={onHover}
       onMouseLeave={onHoverLeave}
       onToggle={canToggleSubsystem ? () => toggleSubsystem(subsystem.id) : undefined}
-      overflow={collapsed ? "hidden" : "visible"}
-      padding={collapsed ? "0 12px" : "8px 6px"}
+      overflow="hidden"
+      padding={collapsed ? "0 12px" : canToggleSubsystem ? "8px 10px 8px 26px" : "8px 10px"}
       role="button"
       shouldShowToggle={canToggleSubsystem}
       toggleIcon={<TimelineCollapseArrow isCollapsed={collapsed} />}
@@ -84,9 +84,14 @@ export const TimelineSubsystemHeaderCell: React.FC<TimelineSubsystemHeaderCellPr
       <div className="timeline-merged-cell-text">
         <span
           style={{
-            display: "inline-flex",
+            display: "flex",
             alignItems: "center",
             gap: "0.45rem",
+            width: "100%",
+            minWidth: 0,
+            maxWidth: "100%",
+            paddingRight: "1.45rem",
+            paddingBottom: "0.7rem",
           }}
         >
           <span

@@ -6,6 +6,9 @@
 * Never ask to show the implementation when you can just implement the requested change.
 * Do not stop to recommend changes unless you were explicitly asked to recommend options; implement the requested change instead.
 * When working in a Git worktree, always audit UI changes against the worktree-hosted app instance (the version rooted at `C:\Users\Brian\.codex\worktrees\331f\meco-mission-control-web`) before finishing.
+* Keep diagnostic and snapshot artifacts out of the repository root. Create and use `/.diagnostics/` (and subfolders) for screenshots, snapshot files, and similar temporary materials.
+* For codex worktrees, use repository `environment.toml` as the startup source of truth (Codex UI reads this directly).
+* Keep startup commands and dev URL only in `environment.toml`; `AGENTS.md` references it and does not duplicate command details.
 
 ---
 
@@ -21,6 +24,10 @@
   * Merge `feature/*` and `fix/*` into `development` by PR only.
   * Merge `hotfix/*` into `development` or `main` by PR only.
   * Merge into `main` only from `development` or `hotfix/*` by PR only.
+* PRs into `development` must come from branches named only:
+  * `feature/*`
+  * `fix/*`
+  * `hotfix/*`
 * Protected branch requirements:
   * `development`: required checks `ci-validate` and `snapshot-validate`, at least 1 approval.
   * `main`: required checks `ci-validate`, `snapshot-validate`, and `cross-repo-production-gate`, at least 2 approvals.
@@ -31,6 +38,12 @@
   * Deploy production web only from `main`, `release-*` tags, or a release manifest.
   * Create a VPS backup immediately before production deploy.
 * Do not introduce or rely on a permanent live staging environment. There is one production VPS.
+
+### Diagnostic artifacts
+
+* Do not add root-level image snapshots (including PNG/JPG/WEBP) to the repo for debugging, browser captures, or visual checks.
+* Place diagnostics in `/.diagnostics/` and keep that directory in `.gitignore`.
+* Remove diagnostic root files before finishing any cleanup or screenshot workflow.
 
 ---
 
@@ -190,3 +203,13 @@ These must still be reviewed if they exceed:
 * Max imports: 150 lines
 
 Exceeding any hard limit is not allowed.
+
+* For each new Codex worktree, bootstrap via `environment.toml`/Codex UI configuration before marking the environment as ready.
+
+### Codex worktree bootstrap
+
+* For this repo, `environment.toml` is authoritative. Keep it as:
+  * `bootstrap_command = "powershell.exe -ExecutionPolicy Bypass -File ./scripts/codex-worktree-bootstrap.ps1"`
+  * `requirements = ["npm.cmd install", "npm.cmd run dev -- --host 127.0.0.1 --port 5173"]`
+  * `dev_url = "http://127.0.0.1:5173"`
+* Keep `scripts/codex-worktree-bootstrap.ps1` as the executable fallback when manual bootstrap is needed outside Codex UI.
