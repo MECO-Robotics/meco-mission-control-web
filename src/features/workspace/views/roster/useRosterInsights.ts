@@ -7,7 +7,6 @@ import type { RosterInsightsResponse } from "@/types/rosterInsights";
 import { buildRosterInsightsFromBootstrap } from "./rosterInsightsFallback";
 import {
   areRosterInsightsRowsInScope,
-  getScopedRosterMemberIds,
 } from "./rosterInsightsScope";
 
 export function useRosterInsights({
@@ -21,10 +20,6 @@ export function useRosterInsights({
 }) {
   const fallbackInsights = useMemo(
     () => buildRosterInsightsFromBootstrap(bootstrap, { projectId, seasonId }),
-    [bootstrap, projectId, seasonId],
-  );
-  const scopedMemberIds = useMemo(
-    () => getScopedRosterMemberIds(bootstrap, { projectId, seasonId }),
     [bootstrap, projectId, seasonId],
   );
   const [remoteInsights, setRemoteInsights] = useState<RosterInsightsResponse | null>(null);
@@ -43,7 +38,7 @@ export function useRosterInsights({
         if (!disposed) {
           if (
             (projectId || seasonId) &&
-            !areRosterInsightsRowsInScope(response, scopedMemberIds)
+            !areRosterInsightsRowsInScope(response)
           ) {
             setRemoteInsights(null);
             setErrorMessage("Scoped roster insights are unavailable right now.");
@@ -71,7 +66,7 @@ export function useRosterInsights({
     return () => {
       disposed = true;
     };
-  }, [projectId, scopedMemberIds, seasonId]);
+  }, [projectId, seasonId]);
 
   return {
     errorMessage,

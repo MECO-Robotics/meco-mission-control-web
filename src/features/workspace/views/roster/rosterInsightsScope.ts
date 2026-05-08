@@ -42,18 +42,14 @@ export function getScopedRosterMemberIds(
 
 export function areRosterInsightsRowsInScope(
   insights: RosterInsightsResponse,
-  scopedMemberIds: ReadonlySet<string>,
 ) {
   const memberIdsInResponse = new Set(insights.members.map((member) => member.memberId));
-  const membersAreScoped = insights.members.every((member) =>
-    scopedMemberIds.has(member.memberId),
-  );
-  const recentAttendanceIsScoped = insights.recentAttendance.every((record) =>
-    scopedMemberIds.has(record.memberId),
-  );
   const recentAttendanceHasKnownMembers = insights.recentAttendance.every((record) =>
     memberIdsInResponse.has(record.memberId),
   );
+  const noUnknownMemberFallbackRows = insights.recentAttendance.every(
+    (record) => record.memberName.trim().toLowerCase() !== "unknown member",
+  );
 
-  return membersAreScoped && recentAttendanceIsScoped && recentAttendanceHasKnownMembers;
+  return recentAttendanceHasKnownMembers && noUnknownMemberFallbackRows;
 }
