@@ -216,4 +216,48 @@ describe("AppSidebar", () => {
     expect(markup).toContain("Part mappings");
     expect(markup).toContain("Directory");
   });
+
+  it("renders unavailable task views as disabled instead of hiding them", () => {
+    const operationsProject: ProjectRecord = {
+      id: "ops-1",
+      name: "Operations",
+      projectType: "operations",
+      seasonId: "season-1",
+      description: "Ops workspace",
+      status: "active",
+    };
+
+    const markup = renderSidebar(
+      [
+        {
+          value: "tasks",
+          label: "Tasks",
+          icon: React.createElement("span"),
+          count: 4,
+        },
+        {
+          value: "inventory",
+          label: "Inventory",
+          icon: React.createElement("span"),
+          count: 7,
+        },
+        {
+          value: "roster",
+          label: "Roster",
+          icon: React.createElement("span"),
+          count: 5,
+        },
+      ],
+      "tasks",
+      {
+        projects: [operationsProject],
+        selectedProjectId: operationsProject.id,
+      },
+    );
+
+    expect(markup).toContain("Manufacturing");
+    expect(markup).toMatch(
+      /data-enabled="false"[^>]*disabled[^>]*>[\s\S]*?<span class="sidebar-subtab-label">Manufacturing<\/span>/,
+    );
+  });
 });

@@ -401,17 +401,60 @@ export function AppSidebar({
     "reports-milestone-results": <Flag size={14} strokeWidth={2} />,
   };
 
-  const sectionVisibility: Record<NavigationSection, boolean> = {
-    dashboard: visibleTabs.has("tasks") || visibleTabs.has("risk-management"),
-    readiness:
-      visibleTabs.has("tasks") ||
-      visibleTabs.has("risk-management") ||
-      visibleTabs.has("subsystems"),
-    config: visibleTabs.has("tasks") || visibleTabs.has("roster") || visibleTabs.has("inventory"),
-    tasks: visibleTabs.has("tasks"),
-    inventory: visibleTabs.has("inventory"),
-    roster: visibleTabs.has("roster"),
-    reports: visibleTabs.has("reports") || visibleTabs.has("worklogs"),
+  const isSubItemEnabled = (subItemId: NavigationSubItemId) => {
+    if (subItemId === "dashboard-calendar") {
+      return visibleTabs.has("tasks");
+    }
+
+    if (subItemId === "dashboard-metrics") {
+      return visibleTabs.has("risk-management");
+    }
+
+    if (subItemId === "dashboard-activity") {
+      return visibleTabs.has("worklogs");
+    }
+
+    if (subItemId === "readiness-attention") {
+      return visibleTabs.has("risk-management");
+    }
+
+    if (subItemId === "readiness-risks") {
+      return visibleTabs.has("risk-management");
+    }
+
+    if (subItemId === "readiness-milestones") {
+      return visibleTabs.has("tasks");
+    }
+
+    if (subItemId === "readiness-subsystems") {
+      return visibleTabs.has("subsystems");
+    }
+
+    if (subItemId === "config-robot-model") {
+      return visibleTabs.has("tasks") && isRobotProject;
+    }
+
+    if (subItemId === "config-part-mappings") {
+      return visibleTabs.has("inventory") && isRobotProject;
+    }
+
+    if (subItemId === "config-directory") {
+      return visibleTabs.has("roster");
+    }
+
+    if (subItemId === "tasks-manufacturing") {
+      return visibleTabs.has("manufacturing");
+    }
+
+    if (subItemId === "inventory-parts") {
+      return isRobotProject;
+    }
+
+    if (subItemId === "reports-work-logs") {
+      return visibleTabs.has("worklogs");
+    }
+
+    return true;
   };
 
   const handleProjectChange = (value: string) => {
@@ -430,70 +473,17 @@ export function AppSidebar({
   };
 
   const getSectionSubItems = (section: NavigationSection) =>
-    NAVIGATION_SUB_ITEMS_BY_SECTION[section].filter((subItem) => {
-      if (subItem.id === "dashboard-calendar") {
-        return visibleTabs.has("tasks");
-      }
-
-      if (subItem.id === "dashboard-metrics") {
-        return visibleTabs.has("risk-management");
-      }
-
-      if (subItem.id === "dashboard-activity") {
-        return visibleTabs.has("worklogs");
-      }
-
-      if (subItem.id === "readiness-attention") {
-        return visibleTabs.has("risk-management");
-      }
-
-      if (subItem.id === "readiness-risks") {
-        return visibleTabs.has("risk-management");
-      }
-
-      if (subItem.id === "readiness-milestones") {
-        return visibleTabs.has("tasks");
-      }
-
-      if (subItem.id === "readiness-subsystems") {
-        return visibleTabs.has("subsystems");
-      }
-
-      if (subItem.id === "config-robot-model") {
-        return visibleTabs.has("tasks") && isRobotProject;
-      }
-
-      if (subItem.id === "config-part-mappings") {
-        return visibleTabs.has("inventory") && isRobotProject;
-      }
-
-      if (subItem.id === "config-directory") {
-        return visibleTabs.has("roster");
-      }
-
-      if (subItem.id === "tasks-manufacturing") {
-        return visibleTabs.has("manufacturing");
-      }
-
-      if (subItem.id === "inventory-parts") {
-        return isRobotProject;
-      }
-
-      if (subItem.id === "reports-work-logs") {
-        return visibleTabs.has("worklogs");
-      }
-
-      return true;
-    });
+    NAVIGATION_SUB_ITEMS_BY_SECTION[section].map((subItem) => ({
+      ...subItem,
+      isEnabled: isSubItemEnabled(subItem.id),
+    }));
 
   const handleSectionClick = (
     section: NavigationSection,
     event: ReactMouseEvent<HTMLButtonElement>,
   ) => {
     const subItems = getSectionSubItems(section);
-    if (subItems.length === 0) {
-      return;
-    }
+    const firstEnabledSubItem = subItems.find((subItem) => subItem.isEnabled);
 
     if (isCollapsed) {
       const shellRect = sidebarShellRef.current?.getBoundingClientRect();
@@ -506,10 +496,16 @@ export function AppSidebar({
     }
 
     setExpandedSection(section);
-    onSelectTarget(subItems[0].target, { keepSidebarOpen: true });
+    if (firstEnabledSubItem) {
+      onSelectTarget(firstEnabledSubItem.target, { keepSidebarOpen: true });
+    }
   };
 
-  const handleSubItemSelect = (target: NavigationTarget) => {
+  const handleSubItemSelect = (target: NavigationTarget, isEnabled: boolean) => {
+    if (!isEnabled) {
+      return;
+    }
+
     onSelectTarget(target);
     setCompactPopupSection(null);
   };
@@ -629,8 +625,7 @@ export function AppSidebar({
       >
         {toggleButton}
 
-        {NAVIGATION_SECTION_ORDER.filter((section) => sectionVisibility[section]).map(
-          (section) => {
+        {NAVIGATION_SECTION_ORDER.map((section) => {
             const subItems = getSectionSubItems(section);
             const isExpanded = !isCollapsed && expandedSection === section;
 
@@ -671,8 +666,10 @@ export function AppSidebar({
                       <button
                         className="sidebar-subtab"
                         data-active={activeSubItemId === subItem.id ? "true" : "false"}
+                        data-enabled={subItem.isEnabled ? "true" : "false"}
+                        disabled={!subItem.isEnabled}
                         key={subItem.id}
-                        onClick={() => handleSubItemSelect(subItem.target)}
+                        onClick={() => handleSubItemSelect(subItem.target, subItem.isEnabled)}
                         type="button"
                       >
                         <span aria-hidden="true" className="sidebar-subtab-icon">
@@ -685,8 +682,7 @@ export function AppSidebar({
                 ) : null}
               </div>
             );
-          },
-        )}
+          })}
 
         {!isCollapsed ? (
           <div className="sidebar-footer-stack">
@@ -798,8 +794,10 @@ export function AppSidebar({
             <button
               className="sidebar-compact-popup-item"
               data-active={activeSubItemId === subItem.id ? "true" : "false"}
+              data-enabled={subItem.isEnabled ? "true" : "false"}
+              disabled={!subItem.isEnabled}
               key={subItem.id}
-              onClick={() => handleSubItemSelect(subItem.target)}
+              onClick={() => handleSubItemSelect(subItem.target, subItem.isEnabled)}
               type="button"
             >
               <span aria-hidden="true" className="sidebar-subtab-icon">
