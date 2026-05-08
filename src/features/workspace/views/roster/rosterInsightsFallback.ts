@@ -8,6 +8,11 @@ import type {
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
+interface RosterInsightsFallbackScope {
+  projectId?: string | null;
+  seasonId?: string | null;
+}
+
 function parseDateValue(value: string) {
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     const parsed = new Date(`${value}T00:00:00Z`);
@@ -46,6 +51,17 @@ function availabilityStatusFromMetrics(metrics: {
   return "available";
 }
 
+function isMemberInSeason(
+  member: BootstrapPayload["members"][number],
+  seasonId: string | null,
+) {
+  if (!seasonId) {
+    return true;
+  }
+
+  return member.seasonId === seasonId || Boolean(member.activeSeasonIds?.includes(seasonId));
+}
+
 function sortTaskPreviews(left: RosterInsightsTaskPreview, right: RosterInsightsTaskPreview) {
   const leftDue = parseDateValue(left.dueDate)?.getTime() ?? Number.POSITIVE_INFINITY;
   const rightDue = parseDateValue(right.dueDate)?.getTime() ?? Number.POSITIVE_INFINITY;
@@ -67,7 +83,10 @@ function sortTaskPreviews(left: RosterInsightsTaskPreview, right: RosterInsights
   return left.title.localeCompare(right.title);
 }
 
-export function buildRosterInsightsFromBootstrap(bootstrap: BootstrapPayload): RosterInsightsResponse {
+export function buildRosterInsightsFromBootstrap(
+  bootstrap: BootstrapPayload,
+  scope: RosterInsightsFallbackScope = {},
+): RosterInsightsResponse {
   const now = new Date();
   const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const day7Start = new Date(today.getTime() - 6 * MS_PER_DAY);
@@ -75,16 +94,37 @@ export function buildRosterInsightsFromBootstrap(bootstrap: BootstrapPayload): R
   const day30Start = new Date(today.getTime() - 29 * MS_PER_DAY);
   const dueSoonEnd = new Date(today.getTime() + 7 * MS_PER_DAY);
 
+  const scopedProject = scope.projectId
+    ? bootstrap.projects.find((project) => project.id === scope.projectId) ?? null
+    : null;
+  const scopedSeasonId = scope.seasonId ?? scopedProject?.seasonId ?? null;
   const attendanceRecords = bootstrap.attendanceRecords ?? [];
+  const projectsById = new Map(bootstrap.projects.map((project) => [project.id, project] as const));
+  const scopedMembers = bootstrap.members.filter((member) => isMemberInSeason(member, scopedSeasonId));
+  const scopedMemberIds = new Set(scopedMembers.map((member) => member.id));
+  const scopedAttendanceRecords = attendanceRecords.filter((record) => scopedMemberIds.has(record.memberId));
   const openTaskBlockerIds = new Set(
     (bootstrap.taskBlockers ?? [])
       .filter((blocker) => blocker.status === "open")
       .map((blocker) => blocker.blockedTaskId),
   );
-  const openTasks = bootstrap.tasks.filter((task) => task.status !== "complete");
-  const projectsById = new Map(bootstrap.projects.map((project) => [project.id, project] as const));
+  const openTasks = bootstrap.tasks.filter((task) => {
+    if (task.status === "complete") {
+      return false;
+    }
 
-  const members = bootstrap.members
+    if (scope.projectId) {
+      return task.projectId === scope.projectId;
+    }
+
+    if (scopedSeasonId) {
+      return projectsById.get(task.projectId)?.seasonId === scopedSeasonId;
+    }
+
+    return true;
+  });
+
+  const members = scopedMembers
     .map<RosterInsightsMember>((member) => {
       const assignedTasks = openTasks.filter(
         (task) => task.ownerId === member.id || task.assigneeIds.includes(member.id),
@@ -127,7 +167,7 @@ export function buildRosterInsightsFromBootstrap(bootstrap: BootstrapPayload): R
         0,
       );
 
-      const memberAttendanceRecords = attendanceRecords.filter((record) => record.memberId === member.id);
+      const memberAttendanceRecords = scopedAttendanceRecords.filter((record) => record.memberId === member.id);
       const attendanceHoursLast7Days = memberAttendanceRecords.reduce((sum, record) => {
         const attendanceDate = parseDateValue(record.date);
         return !attendanceDate || attendanceDate < day7Start ? sum : sum + record.totalHours;
@@ -186,7 +226,7 @@ export function buildRosterInsightsFromBootstrap(bootstrap: BootstrapPayload): R
     });
 
   const attendanceTimelineByDate = new Map<string, { totalHours: number; memberIds: Set<string> }>();
-  attendanceRecords.forEach((record) => {
+  scopedAttendanceRecords.forEach((record) => {
     const attendanceDate = parseDateValue(record.date);
     if (!attendanceDate || attendanceDate < day30Start) {
       return;
@@ -208,7 +248,7 @@ export function buildRosterInsightsFromBootstrap(bootstrap: BootstrapPayload): R
     .sort((left, right) => right.date.localeCompare(left.date));
 
   const membersById = new Map(members.map((member) => [member.memberId, member] as const));
-  const recentAttendance = [...attendanceRecords]
+  const recentAttendance = [...scopedAttendanceRecords]
     .sort((left, right) => right.date.localeCompare(left.date))
     .slice(0, 30)
     .map((record) => {
