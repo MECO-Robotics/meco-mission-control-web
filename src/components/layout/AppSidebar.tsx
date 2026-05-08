@@ -111,7 +111,7 @@ export function AppSidebar({
         return false;
       }
 
-      if (subItemId === "config-robot-model" || subItemId === "config-part-mappings") {
+      if (subItemId === "config-robot-model") {
         return isRobotProject;
       }
 

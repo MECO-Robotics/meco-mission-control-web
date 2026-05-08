@@ -25,7 +25,7 @@ export type RiskManagementViewTab = "attention" | "kanban" | "metrics";
 export type WorklogsViewTab = "logs" | "summary" | "activity";
 export type ReportsViewTab = "qa" | "milestone-results";
 export type ManufacturingViewTab = "cnc" | "prints" | "fabrication";
-export type InventoryViewTab = "materials" | "parts" | "part-mappings" | "purchases";
+export type InventoryViewTab = "materials" | "parts" | "purchases";
 export type RosterViewTab = "workload" | "directory" | "attendance";
 
 export type NavigationSubItemId =
@@ -37,7 +37,6 @@ export type NavigationSubItemId =
   | "readiness-subsystems"
   | "readiness-risks"
   | "config-robot-model"
-  | "config-part-mappings"
   | "config-directory"
   | "tasks-timeline"
   | "tasks-board"

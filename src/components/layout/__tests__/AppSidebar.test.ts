@@ -13,11 +13,11 @@ function renderSidebar(
   items: NavigationItem[],
   activeTab: ViewTab = "reports",
   options?: {
-    inventoryView?: "materials" | "parts" | "part-mappings" | "purchases";
+    inventoryView?: "materials" | "parts" | "purchases";
     projects?: ProjectRecord[];
     riskManagementView?: "kanban" | "metrics";
     selectedProjectId?: string | null;
-    taskView?: "calendar" | "timeline" | "queue" | "milestones";
+    taskView?: "calendar" | "timeline" | "robot-map" | "queue" | "milestones";
   },
 ) {
   return renderToStaticMarkup(
@@ -172,7 +172,7 @@ describe("AppSidebar", () => {
     expect(markup).toContain("Risks");
   });
 
-  it("renders Config with robot model, part mappings, and directory", () => {
+  it("renders Config with robot model and directory", () => {
     const robotProject: ProjectRecord = {
       id: "robot-1",
       name: "Robot 2026",
@@ -203,17 +203,16 @@ describe("AppSidebar", () => {
           count: 5,
         },
       ],
-      "inventory",
+      "tasks",
       {
-        inventoryView: "part-mappings",
         projects: [robotProject],
         selectedProjectId: robotProject.id,
+        taskView: "robot-map",
       },
     );
 
     expect(markup).toContain("Config");
     expect(markup).toContain("Robot model");
-    expect(markup).toContain("Part mappings");
     expect(markup).toContain("Directory");
   });
 
