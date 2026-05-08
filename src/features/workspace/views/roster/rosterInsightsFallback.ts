@@ -5,6 +5,10 @@ import type {
   RosterInsightsResponse,
   RosterInsightsTaskPreview,
 } from "@/types/rosterInsights";
+import {
+  getScopedRosterSeasonId,
+  isMemberInSeason,
+} from "./rosterInsightsScope";
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
@@ -51,17 +55,6 @@ function availabilityStatusFromMetrics(metrics: {
   return "available";
 }
 
-function isMemberInSeason(
-  member: BootstrapPayload["members"][number],
-  seasonId: string | null,
-) {
-  if (!seasonId) {
-    return true;
-  }
-
-  return member.seasonId === seasonId || Boolean(member.activeSeasonIds?.includes(seasonId));
-}
-
 function sortTaskPreviews(left: RosterInsightsTaskPreview, right: RosterInsightsTaskPreview) {
   const leftDue = parseDateValue(left.dueDate)?.getTime() ?? Number.POSITIVE_INFINITY;
   const rightDue = parseDateValue(right.dueDate)?.getTime() ?? Number.POSITIVE_INFINITY;
@@ -94,10 +87,10 @@ export function buildRosterInsightsFromBootstrap(
   const day30Start = new Date(today.getTime() - 29 * MS_PER_DAY);
   const dueSoonEnd = new Date(today.getTime() + 7 * MS_PER_DAY);
 
-  const scopedProject = scope.projectId
-    ? bootstrap.projects.find((project) => project.id === scope.projectId) ?? null
-    : null;
-  const scopedSeasonId = scope.seasonId ?? scopedProject?.seasonId ?? null;
+  const scopedSeasonId = getScopedRosterSeasonId(bootstrap, {
+    projectId: scope.projectId ?? null,
+    seasonId: scope.seasonId ?? null,
+  });
   const attendanceRecords = bootstrap.attendanceRecords ?? [];
   const projectsById = new Map(bootstrap.projects.map((project) => [project.id, project] as const));
   const scopedMembers = bootstrap.members.filter((member) => isMemberInSeason(member, scopedSeasonId));

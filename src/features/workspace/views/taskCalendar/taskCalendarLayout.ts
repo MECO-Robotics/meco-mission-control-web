@@ -55,8 +55,12 @@ export function toEventDateKey(start: string) {
     return calendarDateMatch[1];
   }
 
-  if (start.includes("T")) {
-    return formatDateKey(new Date(start));
+  const parsed = new Date(start);
+  if (!Number.isNaN(parsed.getTime())) {
+    const year = parsed.getUTCFullYear();
+    const month = `${parsed.getUTCMonth() + 1}`.padStart(2, "0");
+    const day = `${parsed.getUTCDate()}`.padStart(2, "0");
+    return `${year}-${month}-${day}`;
   }
 
   return start.slice(0, 10);

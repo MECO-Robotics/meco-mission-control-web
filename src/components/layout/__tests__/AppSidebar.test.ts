@@ -286,4 +286,5 @@ describe("AppSidebar", () => {
       /data-enabled="false"[^>]*disabled[^>]*>[\s\S]*?<span class="sidebar-subtab-label">Milestone results<\/span>/,
     );
   });
+
 });
