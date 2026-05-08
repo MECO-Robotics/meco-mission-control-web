@@ -96,6 +96,40 @@ function isTypeOnlyDeclaration(line) {
   return false;
 }
 
+function countToken(line, token) {
+  return line.split(token).length - 1;
+}
+
+function getCurlyBraceDelta(line) {
+  return countToken(line, "{") - countToken(line, "}");
+}
+
+function shouldTrackTypeOnlyDeclaration(line) {
+  if (line.endsWith("=")) {
+    return true;
+  }
+  if (getCurlyBraceDelta(line) > 0) {
+    return true;
+  }
+  return false;
+}
+
+function isTypeOnlyTerminatorLine(line, braceDepth) {
+  if (braceDepth > 0) {
+    return false;
+  }
+  if (line.includes(";")) {
+    return true;
+  }
+  if (line === "}" || line === "};") {
+    return true;
+  }
+  if (line.endsWith("}") && !line.endsWith("{")) {
+    return true;
+  }
+  return false;
+}
+
 function isImportStartLine(line) {
   return line.startsWith("import ");
 }
@@ -112,6 +146,9 @@ function isImportTerminatorLine(line) {
   if (/^import\s+.+\s+from\s+["'`][^"'`]+["'`]$/.test(line)) {
     return true;
   }
+  if (/^}\s+from\s+["'`][^"'`]+["'`](\s+(with|assert)\s+\{[^}]*\})?$/.test(line)) {
+    return true;
+  }
 
   return false;
 }
@@ -120,6 +157,8 @@ function countImplementationLinesTs(content) {
   const lines = content.split(/\r?\n/);
   let inBlockComment = false;
   let inImportDeclaration = false;
+  let inTypeOnlyDeclaration = false;
+  let typeOnlyBraceDepth = 0;
   let count = 0;
 
   for (const rawLine of lines) {
@@ -169,7 +208,24 @@ function countImplementationLinesTs(content) {
       continue;
     }
 
+    if (inTypeOnlyDeclaration) {
+      typeOnlyBraceDepth += getCurlyBraceDelta(line);
+      if (isTypeOnlyTerminatorLine(line, typeOnlyBraceDepth)) {
+        inTypeOnlyDeclaration = false;
+        typeOnlyBraceDepth = 0;
+      }
+      continue;
+    }
+
     if (isTypeOnlyDeclaration(line)) {
+      if (shouldTrackTypeOnlyDeclaration(line)) {
+        inTypeOnlyDeclaration = true;
+        typeOnlyBraceDepth = Math.max(0, getCurlyBraceDelta(line));
+        if (isTypeOnlyTerminatorLine(line, typeOnlyBraceDepth)) {
+          inTypeOnlyDeclaration = false;
+          typeOnlyBraceDepth = 0;
+        }
+      }
       continue;
     }
 
