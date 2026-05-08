@@ -96,8 +96,92 @@ function isTypeOnlyDeclaration(line) {
   return false;
 }
 
+function isImportStartLine(line) {
+  return line.startsWith("import ");
+}
+
+function isImportTerminatorLine(line) {
+  if (line.includes(";")) {
+    return true;
+  }
+
+  // Support semicolon-less one-line imports.
+  if (/^import\s+["'`][^"'`]+["'`]$/.test(line)) {
+    return true;
+  }
+  if (/^import\s+.+\s+from\s+["'`][^"'`]+["'`]$/.test(line)) {
+    return true;
+  }
+
+  return false;
+}
+
 function countImplementationLinesTs(content) {
   const lines = content.split(/\r?\n/);
+  let inBlockComment = false;
+  let inImportDeclaration = false;
+  let count = 0;
+
+  for (const rawLine of lines) {
+    let line = rawLine.trim();
+    if (!line) {
+      continue;
+    }
+
+    if (inBlockComment) {
+      if (line.includes("*/")) {
+        inBlockComment = false;
+        line = line.slice(line.indexOf("*/") + 2).trim();
+        if (!line) {
+          continue;
+        }
+      } else {
+        continue;
+      }
+    }
+
+    if (line.startsWith("/*")) {
+      if (!line.includes("*/")) {
+        inBlockComment = true;
+        continue;
+      }
+      line = line.slice(line.indexOf("*/") + 2).trim();
+      if (!line) {
+        continue;
+      }
+    }
+
+    if (line.startsWith("//")) {
+      continue;
+    }
+
+    if (inImportDeclaration) {
+      if (isImportTerminatorLine(line)) {
+        inImportDeclaration = false;
+      }
+      continue;
+    }
+
+    if (isImportStartLine(line)) {
+      if (!isImportTerminatorLine(line)) {
+        inImportDeclaration = true;
+      }
+      continue;
+    }
+
+    if (isTypeOnlyDeclaration(line)) {
+      continue;
+    }
+
+    count += 1;
+  }
+
+  return count;
+}
+
+function countImportLines(content) {
+  const lines = content.split(/\r?\n/);
+  let inImportDeclaration = false;
   let inBlockComment = false;
   let count = 0;
 
@@ -134,24 +218,23 @@ function countImplementationLinesTs(content) {
       continue;
     }
 
-    if (line.startsWith("import ")) {
+    if (inImportDeclaration) {
+      count += 1;
+      if (isImportTerminatorLine(line)) {
+        inImportDeclaration = false;
+      }
       continue;
     }
 
-    if (isTypeOnlyDeclaration(line)) {
-      continue;
+    if (isImportStartLine(line)) {
+      count += 1;
+      if (!isImportTerminatorLine(line)) {
+        inImportDeclaration = true;
+      }
     }
-
-    count += 1;
   }
 
   return count;
-}
-
-function countImportLines(content) {
-  return content
-    .split(/\r?\n/)
-    .filter((line) => line.trim().startsWith("import ")).length;
 }
 
 function countCssRuleLines(content) {
@@ -418,4 +501,3 @@ console.log(summary.join("\n"));
 if (enforceHard && hardViolationCount > 0) {
   process.exit(1);
 }
-
