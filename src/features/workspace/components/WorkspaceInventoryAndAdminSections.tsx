@@ -7,7 +7,8 @@ import { WorkflowView } from "@/features/workspace/views/WorkflowView";
 import { SubsystemsView } from "@/features/workspace/views/SubsystemsView";
 import { RosterView } from "@/features/workspace/views/RosterView";
 import { HelpView } from "@/features/workspace/views/HelpView";
-import { RosterPlaceholderView } from "@/features/workspace/views/roster/RosterPlaceholderView";
+import { RosterAttendanceView } from "@/features/workspace/views/roster/RosterAttendanceView";
+import { RosterWorkloadView } from "@/features/workspace/views/roster/RosterWorkloadView";
 import { WorkspaceSectionPanel, WorkspaceSubPanel } from "../WorkspaceContentPanelShells";
 import type {
   WorkspaceContentPanelsViewProps,
@@ -180,6 +181,7 @@ export function WorkspaceRosterSection({
     isSavingMember,
     memberEditDraft,
     memberForm,
+    openTimelineTaskDetailsModal,
     requestMemberPhotoUpload,
     rosterMentors,
     rosterView,
@@ -236,14 +238,28 @@ export function WorkspaceRosterSection({
         disableAnimations={disablePanelAnimations}
         isActive={rosterView === "workload"}
       >
-        <RosterPlaceholderView view="workload" />
+        <RosterWorkloadView
+          bootstrap={bootstrap}
+          onOpenTask={(taskId) => {
+            const task = bootstrap.tasks.find((candidate) => candidate.id === taskId);
+            if (task) {
+              openTimelineTaskDetailsModal(task);
+            }
+          }}
+          selectedProject={selectedProject}
+          selectedSeasonId={selectedSeasonId}
+        />
       </WorkspaceSubPanel>
 
       <WorkspaceSubPanel
         disableAnimations={disablePanelAnimations}
         isActive={rosterView === "attendance"}
       >
-        <RosterPlaceholderView view="attendance" />
+        <RosterAttendanceView
+          bootstrap={bootstrap}
+          selectedProject={selectedProject}
+          selectedSeasonId={selectedSeasonId}
+        />
       </WorkspaceSubPanel>
     </WorkspaceSectionPanel>
   );

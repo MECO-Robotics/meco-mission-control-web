@@ -135,6 +135,7 @@ export interface WorkspaceRosterPanelProps {
   requestMemberPhotoUpload: WorkspaceContentPanelsViewProps["requestMemberPhotoUpload"];
   rosterMentors: WorkspaceContentPanelsViewProps["rosterMentors"];
   rosterView: WorkspaceContentPanelsViewProps["rosterView"];
+  openTimelineTaskDetailsModal: WorkspaceContentPanelsViewProps["openTimelineTaskDetailsModal"];
   selectMember: WorkspaceContentPanelsViewProps["selectMember"];
   selectedMemberId: WorkspaceContentPanelsViewProps["selectedMemberId"];
   selectedProject: WorkspaceContentPanelsViewProps["selectedProject"];
@@ -282,6 +283,7 @@ export function groupWorkspaceContentPanelProps(
       requestMemberPhotoUpload: props.requestMemberPhotoUpload,
       rosterMentors: props.rosterMentors,
       rosterView: props.rosterView,
+      openTimelineTaskDetailsModal: props.openTimelineTaskDetailsModal,
       selectMember: props.selectMember,
       selectedMemberId: props.selectedMemberId,
       selectedProject: props.selectedProject,
