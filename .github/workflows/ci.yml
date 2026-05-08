@@ -102,7 +102,7 @@ jobs:
         run: npm ci
 
       - name: Verify
-        run: npm run typecheck && npm run build:bundle
+        run: npm run verify
 
   snapshot-validate:
     name: snapshot-validate
@@ -198,28 +198,103 @@ jobs:
             return response.json();
           }
 
-          for (const repo of repos) {
-            const branch = await gh(`/repos/${owner}/${repo}/branches/development`);
-            const sha = branch?.commit?.sha;
-            if (!sha) {
-              throw new Error(`Could not resolve development HEAD SHA for ${owner}/${repo}.`);
-            }
+          function getRunTimestamp(checkRun) {
+            return Date.parse(checkRun?.started_at ?? checkRun?.completed_at ?? 0);
+          }
 
+          async function getRequiredCheckState(owner, repo, sha, checksToRequire) {
             const checks = await gh(`/repos/${owner}/${repo}/commits/${sha}/check-runs?per_page=100`);
-            const successful = new Set(
-              (checks.check_runs ?? [])
-                .filter((check) => check.conclusion === 'success')
-                .map((check) => check.name),
-            );
+            const latestRunsByCheck = new Map();
 
-            for (const checkName of requiredChecks[repo]) {
-              if (!successful.has(checkName)) {
-                throw new Error(
-                  `${owner}/${repo}@${sha} is missing successful check: ${checkName}.`,
-                );
+            for (const checkRun of checks.check_runs ?? []) {
+              if (!checksToRequire.includes(checkRun.name)) {
+                continue;
+              }
+
+              const previousRun = latestRunsByCheck.get(checkRun.name);
+              if (!previousRun || getRunTimestamp(checkRun) >= getRunTimestamp(previousRun)) {
+                latestRunsByCheck.set(checkRun.name, checkRun);
               }
             }
 
-            console.log(`Validated ${owner}/${repo}@${sha}`);
+            const presentChecks = checksToRequire.filter((checkName) => latestRunsByCheck.has(checkName));
+            const missingChecks = checksToRequire.filter((checkName) => !latestRunsByCheck.has(checkName));
+            const nonSuccessfulChecks = checksToRequire.filter((checkName) => {
+              const checkRun = latestRunsByCheck.get(checkName);
+              return checkRun && checkRun.conclusion !== 'success';
+            });
+
+            return {
+              hasAnyRequiredCheckRun: presentChecks.length > 0,
+              hasAllRequiredCheckRuns: missingChecks.length === 0,
+              missingChecks,
+              nonSuccessfulChecks,
+              latestRunsByCheck,
+            };
+          }
+
+          async function findLatestSuccessfulCheckSha(owner, repo, branchRef, checksToRequire) {
+            const branch = await gh(`/repos/${owner}/${repo}/branches/${branchRef}`);
+            const headSha = branch?.commit?.sha;
+            if (!headSha) {
+              throw new Error(`Could not resolve ${branchRef} HEAD SHA for ${owner}/${repo}.`);
+            }
+
+            const headCheckState = await getRequiredCheckState(owner, repo, headSha, checksToRequire);
+            if (headCheckState.hasAnyRequiredCheckRun) {
+              if (!headCheckState.hasAllRequiredCheckRuns) {
+                throw new Error(
+                  `${owner}/${repo}@${headSha} has partial required checks at ${branchRef} head; missing: ${headCheckState.missingChecks.join(', ')}.`,
+                );
+              }
+
+              if (headCheckState.nonSuccessfulChecks.length > 0) {
+                const failingSummary = headCheckState.nonSuccessfulChecks
+                  .map((checkName) => {
+                    const checkRun = headCheckState.latestRunsByCheck.get(checkName);
+                    const status = checkRun?.status ?? 'unknown';
+                    const conclusion = checkRun?.conclusion ?? 'pending';
+                    return `${checkName}(${status}/${conclusion})`;
+                  })
+                  .join(', ');
+                throw new Error(
+                  `${owner}/${repo}@${headSha} has non-success required checks at ${branchRef} head: ${failingSummary}.`,
+                );
+              }
+
+              return { headSha, validatedSha: headSha };
+            }
+
+            const commits = await gh(`/repos/${owner}/${repo}/commits?sha=${branchRef}&per_page=50`);
+            for (const commit of commits) {
+              const sha = commit?.sha;
+              if (!sha || sha === headSha) {
+                continue;
+              }
+
+              const checkState = await getRequiredCheckState(owner, repo, sha, checksToRequire);
+              const hasAllSuccessfulChecks =
+                checkState.hasAllRequiredCheckRuns && checkState.nonSuccessfulChecks.length === 0;
+              if (hasAllSuccessfulChecks) {
+                return { headSha, validatedSha: sha };
+              }
+            }
+
+            throw new Error(
+              `${owner}/${repo}@${headSha} has no recent ${branchRef} commit with successful checks: ${checksToRequire.join(', ')}.`,
+            );
+          }
+
+          for (const repo of repos) {
+            const checksToRequire = requiredChecks[repo];
+            const { headSha, validatedSha } = await findLatestSuccessfulCheckSha(
+              owner,
+              repo,
+              'development',
+              checksToRequire,
+            );
+            console.log(
+              `Validated ${owner}/${repo}@${validatedSha} (development head ${headSha})`,
+            );
           }
           NODE
