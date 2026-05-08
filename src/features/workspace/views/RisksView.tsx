@@ -1,17 +1,14 @@
 import { useMemo } from "react";
 
-import type { CSSProperties } from "react";
 import type { RiskManagementViewTab } from "@/lib/workspaceNavigation";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { RiskPayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
-import type { RiskRecord } from "@/types/recordsReporting";
 import { EditableHoverIndicator } from "@/features/workspace/shared/table/workspaceTableChrome";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { KanbanColumns } from "@/features/workspace/views/kanban/KanbanColumns";
 import { KanbanScrollFrame } from "@/features/workspace/views/kanban/KanbanScrollFrame";
-import { resolveWorkspaceColor } from "@/features/workspace/shared/model/workspaceColors";
 import { AttentionView } from "@/features/workspace/views/attention/AttentionView";
 
 import { RiskEditorModal } from "./RiskEditorModal";
@@ -24,6 +21,13 @@ import {
   getRiskSeverityPillClassName,
   useRisksViewModel,
 } from "./riskViewModel";
+import {
+  buildRiskAttachmentLookups,
+  getRiskMechanismLabel,
+  getRiskProjectLabel,
+  getRiskWorkflowLabel,
+  getWorkflowChipStyle,
+} from "./riskViewData/riskAttachmentResolvers";
 import { TaskPriorityBadge } from "./taskQueue/taskQueueKanbanCardMeta";
 
 interface RisksViewProps {
@@ -54,120 +58,7 @@ export function RisksView({
     onDeleteRisk,
     onUpdateRisk,
   });
-  const projectsById = useMemo(
-    () => Object.fromEntries(bootstrap.projects.map((project) => [project.id, project] as const)),
-    [bootstrap.projects],
-  );
-  const workstreamsById = useMemo(
-    () =>
-      Object.fromEntries(bootstrap.workstreams.map((workstream) => [workstream.id, workstream] as const)),
-    [bootstrap.workstreams],
-  );
-  const mechanismsById = useMemo(
-    () =>
-      Object.fromEntries(bootstrap.mechanisms.map((mechanism) => [mechanism.id, mechanism] as const)),
-    [bootstrap.mechanisms],
-  );
-  const partInstancesById = useMemo(
-    () =>
-      Object.fromEntries(bootstrap.partInstances.map((partInstance) => [partInstance.id, partInstance] as const)),
-    [bootstrap.partInstances],
-  );
-  const subsystemsById = useMemo(
-    () => Object.fromEntries(bootstrap.subsystems.map((subsystem) => [subsystem.id, subsystem] as const)),
-    [bootstrap.subsystems],
-  );
-  const tasksById = useMemo(
-    () => Object.fromEntries(bootstrap.tasks.map((task) => [task.id, task] as const)),
-    [bootstrap.tasks],
-  );
-  const reportsById = useMemo(
-    () => Object.fromEntries(bootstrap.reports.map((report) => [report.id, report] as const)),
-    [bootstrap.reports],
-  );
-
-  const getRiskSourceTask = (risk: RiskRecord) => {
-    const source = reportsById[risk.sourceId];
-    return source?.taskId ? tasksById[source.taskId] : null;
-  };
-
-  const getRiskProjectLabel = (risk: RiskRecord) => {
-    if (risk.attachmentType === "project") {
-      return projectsById[risk.attachmentId]?.name ?? "Unknown project";
-    }
-
-    if (risk.attachmentType === "workstream") {
-      const workstream = workstreamsById[risk.attachmentId];
-      return workstream ? projectsById[workstream.projectId]?.name ?? "Unknown project" : "Unknown project";
-    }
-
-    if (risk.attachmentType === "mechanism") {
-      const mechanism = mechanismsById[risk.attachmentId];
-      const subsystem = mechanism ? subsystemsById[mechanism.subsystemId] : null;
-      return subsystem ? projectsById[subsystem.projectId]?.name ?? "Unknown project" : "Unknown project";
-    }
-
-    if (risk.attachmentType === "part-instance") {
-      const partInstance = partInstancesById[risk.attachmentId];
-      const subsystem = partInstance ? subsystemsById[partInstance.subsystemId] : null;
-      return subsystem ? projectsById[subsystem.projectId]?.name ?? "Unknown project" : "Unknown project";
-    }
-
-    const sourceTask = getRiskSourceTask(risk);
-    return sourceTask ? projectsById[sourceTask.projectId]?.name ?? "Unknown project" : "Unknown project";
-  };
-
-  const getRiskWorkflowLabel = (risk: RiskRecord) => {
-    if (risk.attachmentType === "workstream") {
-      return workstreamsById[risk.attachmentId]?.name ?? "Unknown workflow";
-    }
-
-    const sourceTask = getRiskSourceTask(risk);
-    const workflowId = sourceTask?.workstreamId || sourceTask?.workstreamIds?.[0];
-    return workflowId ? workstreamsById[workflowId]?.name ?? "Unknown workflow" : "Unassigned workflow";
-  };
-
-  const getRiskWorkflowColor = (risk: RiskRecord) => {
-    if (risk.attachmentType === "workstream") {
-      const workstream = workstreamsById[risk.attachmentId];
-      const workflowId = workstream ? workstream.id : risk.attachmentId;
-      return resolveWorkspaceColor(workstream?.color, workflowId);
-    }
-
-    const sourceTask = getRiskSourceTask(risk);
-    const workflowId = sourceTask?.workstreamId || sourceTask?.workstreamIds?.[0];
-    return workflowId && workstreamsById[workflowId]
-      ? resolveWorkspaceColor(workstreamsById[workflowId]?.color, workflowId)
-      : resolveWorkspaceColor(null, risk.id);
-  };
-
-  const getWorkflowChipStyle = (risk: RiskRecord): CSSProperties | undefined => {
-    const workflowColor = getRiskWorkflowColor(risk);
-
-    return {
-      "--task-queue-board-card-context-accent": workflowColor,
-      "--task-queue-board-card-context-bg": `color-mix(in srgb, ${workflowColor} 24%, transparent)`,
-      "--task-queue-board-card-context-border": `color-mix(in srgb, ${workflowColor} 54%, transparent)`,
-    } as CSSProperties;
-  };
-
-  const getRiskMechanismLabel = (risk: RiskRecord) => {
-    if (risk.attachmentType === "mechanism") {
-      const mechanism = mechanismsById[risk.attachmentId];
-      return mechanism ? mechanism.name : null;
-    }
-
-    if (risk.attachmentType === "part-instance") {
-      const partInstance = partInstancesById[risk.attachmentId];
-      if (partInstance?.mechanismId) {
-        return mechanismsById[partInstance.mechanismId]?.name ?? null;
-      }
-    }
-
-    const sourceTask = getRiskSourceTask(risk);
-    const mechanismId = sourceTask?.mechanismId || sourceTask?.mechanismIds?.[0];
-    return mechanismId ? mechanismsById[mechanismId]?.name ?? null : null;
-  };
+  const attachmentLookups = useMemo(() => buildRiskAttachmentLookups(bootstrap), [bootstrap]);
 
   return (
     <section className={`panel dense-panel subsystem-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
@@ -182,7 +73,7 @@ export function RisksView({
             }
           }}
           onOpenTask={(taskId) => {
-            const task = tasksById[taskId];
+            const task = attachmentLookups.tasksById[taskId];
             if (task && openTaskDetailModal) {
               openTaskDetailModal(task);
             }
@@ -253,9 +144,9 @@ export function RisksView({
                   emptyLabel="No risks"
                   itemsByState={viewModel.risksBySeverity}
                   renderItem={(risk) => {
-                    const projectLabel = getRiskProjectLabel(risk);
-                    const workflowLabel = getRiskWorkflowLabel(risk);
-                    const mechanismLabel = getRiskMechanismLabel(risk);
+                    const projectLabel = getRiskProjectLabel(risk, attachmentLookups);
+                    const workflowLabel = getRiskWorkflowLabel(risk, attachmentLookups);
+                    const mechanismLabel = getRiskMechanismLabel(risk, attachmentLookups);
 
                     return (
                       <button
@@ -282,8 +173,8 @@ export function RisksView({
                               <span
                                 className="task-queue-board-card-context-chip task-queue-board-card-context-chip-due-style"
                                 title={workflowLabel}
-                                style={getWorkflowChipStyle(risk)}
-                              >
+                          style={getWorkflowChipStyle(risk, attachmentLookups)}
+                        >
                                 {workflowLabel}
                               </span>
                             </>
@@ -292,7 +183,7 @@ export function RisksView({
                               <span
                                 className="task-queue-board-card-context-chip task-queue-board-card-context-chip-due-style"
                                 title={workflowLabel}
-                                style={getWorkflowChipStyle(risk)}
+                                style={getWorkflowChipStyle(risk, attachmentLookups)}
                               >
                                 {workflowLabel}
                               </span>

@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
-import { createBootstrap, membersById } from "../timelineTestFixtures";
+import { createBootstrap, membersById } from "../timeline/timelineTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 

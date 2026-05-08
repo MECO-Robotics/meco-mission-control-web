@@ -1,4 +1,4 @@
-/// <reference types="jest" />
+﻿/// <reference types="jest" />
 import * as React from "react";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -62,8 +62,8 @@ describe("TimelineView", () => {
     expect(markup).toMatch(
       /class="timeline-task-status-logo timeline-task-status-logo-in-progress timeline-task-status-logo-signal-in-progress"/,
     );
-    expect(markup).not.toContain("↙");
-    expect(markup).not.toContain("↗");
+    expect(markup).not.toContain("â†™");
+    expect(markup).not.toContain("â†—");
     expect(css).toMatch(/\.timeline-bar\s*\{[\s\S]*background:\s*var\(--timeline-task-discipline-accent\)/);
     expect(css).toMatch(
       /\.timeline-bar\s*\{[\s\S]*--timeline-task-status-edge-padding:\s*calc\(0\.05rem \* var\(--timeline-zoom,\s*1\)\)/,
@@ -172,7 +172,7 @@ describe("TimelineView", () => {
       "utf8",
     );
     const helperSource = readFileSync(
-      join(process.cwd(), "src/features/workspace/views/timeline/timelineTaskColors.ts"),
+      join(process.cwd(), "src/features/workspace/views/timeline/model/timelineTaskColors.ts"),
       "utf8",
     );
 
@@ -278,7 +278,7 @@ describe("TimelineView", () => {
       "utf8",
     );
     const taskColorsSource = readFileSync(
-      join(process.cwd(), "src/features/workspace/views/timeline/timelineTaskColors.ts"),
+      join(process.cwd(), "src/features/workspace/views/timeline/model/timelineTaskColors.ts"),
       "utf8",
     );
 

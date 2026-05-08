@@ -4,9 +4,9 @@ import { renderToStaticMarkup } from "react-dom/server";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { TimelineProjectGroup } from "@/features/workspace/views/timeline/TimelineProjectGroup";
 import { TimelineTaskStatusCell } from "@/features/workspace/views/timeline/TimelineTaskStatusCell";
-import { resolveTimelineRowHighlightStyle } from "@/features/workspace/views/timeline/timelineTaskColors";
+import { resolveTimelineRowHighlightStyle } from "@/features/workspace/views/timeline/model/timelineTaskColors";
 import { TimelineSubsystemGroup } from "@/features/workspace/views/timeline/TimelineSubsystemGroup";
-import { createBootstrap } from "../timelineTestFixtures";
+import { createBootstrap } from "../timeline/timelineTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
