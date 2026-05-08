@@ -134,10 +134,10 @@ describe("roster insights scope helpers", () => {
       generatedAt: "2026-04-21T00:00:00.000Z",
     };
 
-    expect(areRosterInsightsRowsInScope(response)).toBe(false);
+    expect(areRosterInsightsRowsInScope(response, new Set(["member-season-1"]))).toBe(false);
   });
 
-  it("accepts response rows when attendance member ids are represented in members", () => {
+  it("accepts scoped response rows when attendance member ids are represented in members", () => {
     const response: RosterInsightsResponse = {
       summary: {
         memberCount: 1,
@@ -189,7 +189,62 @@ describe("roster insights scope helpers", () => {
       generatedAt: "2026-04-21T00:00:00.000Z",
     };
 
-    expect(areRosterInsightsRowsInScope(response)).toBe(true);
+    expect(areRosterInsightsRowsInScope(response, new Set(["member-season-2"]))).toBe(true);
+  });
+
+  it("flags internally consistent rows that are outside the requested scope", () => {
+    const response: RosterInsightsResponse = {
+      summary: {
+        memberCount: 1,
+        activeMemberCount: 1,
+        openTaskCount: 0,
+        overdueTaskCount: 0,
+        blockedTaskCount: 0,
+        waitingForQaTaskCount: 0,
+        unassignedTaskCount: 0,
+        overloadedMemberCount: 0,
+        unavailableMemberCount: 0,
+        attendanceHoursLast14Days: 0,
+        attendanceHoursLast30Days: 0,
+        noRecentAttendanceWithTasksCount: 0,
+      },
+      members: [
+        {
+          memberId: "member-season-2",
+          memberName: "Season Two Member",
+          role: "student",
+          disciplineId: null,
+          activeTaskCount: 0,
+          blockedTaskCount: 0,
+          waitingForQaTaskCount: 0,
+          overdueTaskCount: 0,
+          dueSoonTaskCount: 0,
+          estimatedOpenHours: 0,
+          remainingOpenHours: 0,
+          attendanceHoursLast7Days: 0,
+          attendanceHoursLast14Days: 0,
+          attendanceHoursLast30Days: 0,
+          attendanceSessionsLast30Days: 0,
+          availabilityStatus: "available",
+          topTasks: [],
+        },
+      ],
+      attendanceTimeline: [],
+      recentAttendance: [
+        {
+          id: "row-1",
+          memberId: "member-season-2",
+          memberName: "Season Two Member",
+          date: "2026-04-20",
+          totalHours: 4,
+          activeTaskCount: 0,
+          availabilityStatus: "available",
+        },
+      ],
+      generatedAt: "2026-04-21T00:00:00.000Z",
+    };
+
+    expect(areRosterInsightsRowsInScope(response, new Set(["member-season-1"]))).toBe(false);
   });
 
   it("keeps fallback insights scoped to selected project season", () => {
