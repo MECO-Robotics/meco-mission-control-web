@@ -192,10 +192,25 @@ export function scopeBootstrapBySelection(
     ? payload.members.filter((member) => isMemberActiveInSeason(member, selectedSeasonId))
     : payload.members;
   const scopedPartDefinitions = selectedSeasonId
-    ? payload.partDefinitions.filter((partDefinition) =>
+      ? payload.partDefinitions.filter((partDefinition) =>
         isPartDefinitionActiveInSeason(partDefinition, selectedSeasonId),
       )
     : payload.partDefinitions;
+  const scopedActions = (payload.actions ?? []).filter((action) => {
+    if (action.projectId && !activeProjectIds.has(action.projectId)) {
+      return false;
+    }
+
+    if (action.taskId && !scopedTaskIds.has(action.taskId)) {
+      return false;
+    }
+
+    if (action.subsystemId && !scopedSubsystemIds.has(action.subsystemId)) {
+      return false;
+    }
+
+    return true;
+  });
 
   return {
     ...payload,
@@ -221,5 +236,6 @@ export function scopeBootstrapBySelection(
     risks: scopedRisks,
     taskDependencies: scopedTaskDependencies,
     taskBlockers: scopedTaskBlockers,
+    actions: scopedActions,
   };
 }

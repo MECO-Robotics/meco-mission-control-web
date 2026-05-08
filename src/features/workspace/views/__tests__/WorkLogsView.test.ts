@@ -109,12 +109,29 @@ describe("WorkLogsView", () => {
           taskId: "task-1",
         },
       ],
+      actions: [
+        {
+          actorMemberId: "student-1",
+          changedFields: [],
+          entityId: "worklog-1",
+          entityLabel: "Drive CAD",
+          entityType: "worklog",
+          id: "action-1",
+          memberIds: ["student-1"],
+          message: "Created worklog Drive CAD",
+          operation: "create",
+          projectId: "project-1",
+          subsystemId: "subsystem-1",
+          taskId: "task-1",
+          timestamp: "2026-05-01T14:30:00.000Z",
+        },
+      ],
     });
 
     expect(html).toContain("Activity");
-    expect(html).toContain("Recent work log activity");
+    expect(html).toContain("Recent workspace activity");
     expect(html).toContain("Drive CAD");
     expect(html).toContain("Student One");
-    expect(html).toContain("Finished first pass");
+    expect(html).toContain("Created worklog Drive CAD");
   });
 });
