@@ -1,4 +1,4 @@
-import type { MouseEvent as ReactMouseEvent, RefObject } from "react";
+import type { MouseEvent as ReactMouseEvent } from "react";
 import { IconChevronRight } from "@/components/shared/Icons";
 import {
   type NavigationSection,
@@ -22,9 +22,6 @@ interface SidebarSectionModel {
 interface AppSidebarSectionsProps {
   activeSection: NavigationSection;
   activeSubItemId: import("@/lib/workspaceNavigation").NavigationSubItemId;
-  compactPopupSection: NavigationSection | null;
-  compactPopupTop: number;
-  compactPopupRef: RefObject<HTMLDivElement | null>;
   expandedSection: NavigationSection;
   isCollapsed: boolean;
   onSectionClick: (section: NavigationSection, event: ReactMouseEvent<HTMLButtonElement>) => void;
@@ -33,21 +30,16 @@ interface AppSidebarSectionsProps {
     isEnabled: boolean,
   ) => void;
   sectionModels: SidebarSectionModel[];
-  getSectionSubItems: (section: NavigationSection) => SidebarSubItemModel[];
 }
 
 export function AppSidebarSections({
   activeSection,
   activeSubItemId,
-  compactPopupSection,
-  compactPopupTop,
-  compactPopupRef,
   expandedSection,
   isCollapsed,
   onSectionClick,
   onSubItemSelect,
   sectionModels,
-  getSectionSubItems,
 }: AppSidebarSectionsProps) {
   return (
     <>
@@ -106,32 +98,6 @@ export function AppSidebarSections({
           </div>
         );
       })}
-
-      {isCollapsed && compactPopupSection !== null ? (
-        <div
-          className="sidebar-compact-popup"
-          ref={compactPopupRef}
-          style={{ top: `${compactPopupTop}px` }}
-        >
-          <p className="sidebar-compact-popup-title">{NAVIGATION_SECTION_LABELS[compactPopupSection]}</p>
-          {getSectionSubItems(compactPopupSection).map((subItem) => (
-            <button
-              className="sidebar-compact-popup-item"
-              data-active={activeSubItemId === subItem.id ? "true" : "false"}
-              data-enabled={subItem.isEnabled ? "true" : "false"}
-              disabled={!subItem.isEnabled}
-              key={subItem.id}
-              onClick={() => onSubItemSelect(subItem.target, subItem.isEnabled)}
-              type="button"
-            >
-              <span aria-hidden="true" className="sidebar-subtab-icon">
-                {subItemIcons[subItem.id]}
-              </span>
-              <span className="sidebar-subtab-label">{subItem.label}</span>
-            </button>
-          ))}
-        </div>
-      ) : null}
     </>
   );
 }
