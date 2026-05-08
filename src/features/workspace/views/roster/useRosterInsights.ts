@@ -5,6 +5,9 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { RosterInsightsResponse } from "@/types/rosterInsights";
 
 import { buildRosterInsightsFromBootstrap } from "./rosterInsightsFallback";
+import {
+  areRosterInsightsRowsInScope,
+} from "./rosterInsightsScope";
 
 export function useRosterInsights({
   bootstrap,
@@ -33,6 +36,14 @@ export function useRosterInsights({
     fetchRosterInsights({ projectId, seasonId })
       .then((response) => {
         if (!disposed) {
+          if (
+            (projectId || seasonId) &&
+            !areRosterInsightsRowsInScope(response)
+          ) {
+            setRemoteInsights(null);
+            setErrorMessage("Scoped roster insights are unavailable right now.");
+            return;
+          }
           setRemoteInsights(response);
         }
       })

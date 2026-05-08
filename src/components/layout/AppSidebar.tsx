@@ -43,6 +43,7 @@ import {
   type NavigationTarget,
   NAVIGATION_SECTION_LABELS,
   NAVIGATION_SECTION_ORDER,
+  NAVIGATION_SUB_ITEMS,
   NAVIGATION_SUB_ITEMS_BY_SECTION,
   getActiveNavigationSubItemId,
   getNavigationSectionFromSubItem,
@@ -403,72 +404,21 @@ export function AppSidebar({
   };
 
   const isSubItemEnabled = useCallback((subItemId: NavigationSubItemId) => {
-    if (subItemId === "dashboard-calendar") {
-      return visibleTabs.has("tasks");
-    }
-
-    if (subItemId === "dashboard-metrics") {
-      return visibleTabs.has("risk-management");
-    }
-
-    if (subItemId === "dashboard-activity") {
-      return visibleTabs.has("worklogs");
-    }
-
-    if (subItemId === "readiness-attention") {
-      return visibleTabs.has("risk-management");
-    }
-
-    if (subItemId === "readiness-risks") {
-      return visibleTabs.has("risk-management");
-    }
-
-    if (subItemId === "readiness-milestones") {
-      return visibleTabs.has("tasks");
-    }
-
-    if (subItemId === "readiness-subsystems") {
-      return visibleTabs.has("subsystems");
+    const subItem = NAVIGATION_SUB_ITEMS.find((item) => item.id === subItemId);
+    if (subItem && !visibleTabs.has(subItem.target.tab)) {
+      return false;
     }
 
     if (subItemId === "config-robot-model") {
-      return visibleTabs.has("tasks") && isRobotProject;
+      return isRobotProject;
     }
 
     if (subItemId === "config-part-mappings") {
-      return visibleTabs.has("inventory") && isRobotProject;
-    }
-
-    if (subItemId === "config-directory") {
-      return visibleTabs.has("roster");
-    }
-
-    if (subItemId === "tasks-manufacturing") {
-      return visibleTabs.has("manufacturing");
-    }
-
-    if (subItemId === "tasks-timeline" || subItemId === "tasks-board") {
-      return visibleTabs.has("tasks");
-    }
-
-    if (subItemId === "inventory-materials" || subItemId === "inventory-purchases") {
-      return visibleTabs.has("inventory");
+      return isRobotProject;
     }
 
     if (subItemId === "inventory-parts") {
-      return visibleTabs.has("inventory") && isRobotProject;
-    }
-
-    if (subItemId === "reports-work-logs") {
-      return visibleTabs.has("worklogs");
-    }
-
-    if (subItemId === "reports-qa-forms" || subItemId === "reports-milestone-results") {
-      return visibleTabs.has("reports");
-    }
-
-    if (subItemId === "roster-workload" || subItemId === "roster-attendance") {
-      return visibleTabs.has("roster");
+      return isRobotProject;
     }
 
     return true;
