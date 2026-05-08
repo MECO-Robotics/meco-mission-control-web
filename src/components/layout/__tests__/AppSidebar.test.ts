@@ -261,7 +261,7 @@ describe("AppSidebar", () => {
     );
   });
 
-  it("renders inapplicable groups as disabled instead of hiding them", () => {
+  it("renders inapplicable groups as disabled controls that can reveal disabled subviews", () => {
     const markup = renderSidebar(
       [
         {
@@ -271,13 +271,19 @@ describe("AppSidebar", () => {
           count: 4,
         },
       ],
-      "tasks",
+      "reports",
       { taskView: "queue" },
     );
 
     expect(markup).toContain("Reports");
     expect(markup).toMatch(
-      /<button(?=[^>]*data-tutorial-target="sidebar-tab-reports")(?=[^>]*data-enabled="false")(?=[^>]*disabled)[^>]*>/,
+      /<button(?=[^>]*data-tutorial-target="sidebar-tab-reports")(?=[^>]*data-enabled="false")(?=[^>]*aria-disabled="true")(?![^>]*disabled)[^>]*>/,
+    );
+    expect(markup).toMatch(
+      /data-enabled="false"[^>]*disabled[^>]*>[\s\S]*?<span class="sidebar-subtab-label">QA forms<\/span>/,
+    );
+    expect(markup).toMatch(
+      /data-enabled="false"[^>]*disabled[^>]*>[\s\S]*?<span class="sidebar-subtab-label">Milestone results<\/span>/,
     );
   });
 });
