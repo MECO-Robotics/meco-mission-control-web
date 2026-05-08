@@ -422,6 +422,18 @@
   padding-right: 0.45rem !important;
 }
 
+.sidebar-section-toggle:disabled,
+.sidebar-section-toggle[data-enabled="false"] {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.sidebar-section-toggle:disabled:hover,
+.sidebar-section-toggle[data-enabled="false"]:hover {
+  background: transparent;
+  border-color: transparent;
+}
+
 .sidebar-section-chevron {
   display: inline-flex;
   align-items: center;

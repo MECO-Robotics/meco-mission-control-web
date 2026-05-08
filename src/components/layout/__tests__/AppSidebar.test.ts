@@ -260,4 +260,30 @@ describe("AppSidebar", () => {
       /data-enabled="false"[^>]*disabled[^>]*>[\s\S]*?<span class="sidebar-subtab-label">Manufacturing<\/span>/,
     );
   });
+
+  it("renders inapplicable groups as disabled controls that can reveal disabled subviews", () => {
+    const markup = renderSidebar(
+      [
+        {
+          value: "tasks",
+          label: "Tasks",
+          icon: React.createElement("span"),
+          count: 4,
+        },
+      ],
+      "reports",
+      { taskView: "queue" },
+    );
+
+    expect(markup).toContain("Reports");
+    expect(markup).toMatch(
+      /<button(?=[^>]*data-tutorial-target="sidebar-tab-reports")(?=[^>]*data-enabled="false")(?=[^>]*aria-disabled="true")(?![^>]*\sdisabled(?:=|\s|>))[^>]*>/,
+    );
+    expect(markup).toMatch(
+      /data-enabled="false"[^>]*disabled[^>]*>[\s\S]*?<span class="sidebar-subtab-label">QA forms<\/span>/,
+    );
+    expect(markup).toMatch(
+      /data-enabled="false"[^>]*disabled[^>]*>[\s\S]*?<span class="sidebar-subtab-label">Milestone results<\/span>/,
+    );
+  });
 });

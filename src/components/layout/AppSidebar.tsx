@@ -1,6 +1,7 @@
 import {
   type MouseEvent as ReactMouseEvent,
   type ReactNode,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -401,7 +402,7 @@ export function AppSidebar({
     "reports-milestone-results": <Flag size={14} strokeWidth={2} />,
   };
 
-  const isSubItemEnabled = (subItemId: NavigationSubItemId) => {
+  const isSubItemEnabled = useCallback((subItemId: NavigationSubItemId) => {
     if (subItemId === "dashboard-calendar") {
       return visibleTabs.has("tasks");
     }
@@ -446,16 +447,32 @@ export function AppSidebar({
       return visibleTabs.has("manufacturing");
     }
 
+    if (subItemId === "tasks-timeline" || subItemId === "tasks-board") {
+      return visibleTabs.has("tasks");
+    }
+
+    if (subItemId === "inventory-materials" || subItemId === "inventory-purchases") {
+      return visibleTabs.has("inventory");
+    }
+
     if (subItemId === "inventory-parts") {
-      return isRobotProject;
+      return visibleTabs.has("inventory") && isRobotProject;
     }
 
     if (subItemId === "reports-work-logs") {
       return visibleTabs.has("worklogs");
     }
 
+    if (subItemId === "reports-qa-forms" || subItemId === "reports-milestone-results") {
+      return visibleTabs.has("reports");
+    }
+
+    if (subItemId === "roster-workload" || subItemId === "roster-attendance") {
+      return visibleTabs.has("roster");
+    }
+
     return true;
-  };
+  }, [isRobotProject, visibleTabs]);
 
   const handleProjectChange = (value: string) => {
     if (value === ADD_ROBOT_PROJECT_VALUE) {
@@ -472,11 +489,26 @@ export function AppSidebar({
     onSelectTarget({ tab: "help" }, { keepSidebarOpen: true });
   };
 
-  const getSectionSubItems = (section: NavigationSection) =>
-    NAVIGATION_SUB_ITEMS_BY_SECTION[section].map((subItem) => ({
+  const getSectionSubItems = useCallback(
+    (section: NavigationSection) => NAVIGATION_SUB_ITEMS_BY_SECTION[section].map((subItem) => ({
       ...subItem,
       isEnabled: isSubItemEnabled(subItem.id),
-    }));
+    })),
+    [isSubItemEnabled],
+  );
+
+  const sectionModels = useMemo(
+    () =>
+      NAVIGATION_SECTION_ORDER.map((section) => {
+        const subItems = getSectionSubItems(section);
+        return {
+          section,
+          subItems,
+          isEnabled: subItems.some((subItem) => subItem.isEnabled),
+        };
+      }),
+    [getSectionSubItems],
+  );
 
   const handleSectionClick = (
     section: NavigationSection,
@@ -496,9 +528,12 @@ export function AppSidebar({
     }
 
     setExpandedSection(section);
-    if (firstEnabledSubItem) {
-      onSelectTarget(firstEnabledSubItem.target, { keepSidebarOpen: true });
+
+    if (!firstEnabledSubItem) {
+      return;
     }
+
+    onSelectTarget(firstEnabledSubItem.target, { keepSidebarOpen: true });
   };
 
   const handleSubItemSelect = (target: NavigationTarget, isEnabled: boolean) => {
@@ -625,15 +660,16 @@ export function AppSidebar({
       >
         {toggleButton}
 
-        {NAVIGATION_SECTION_ORDER.map((section) => {
-            const subItems = getSectionSubItems(section);
+        {sectionModels.map(({ section, subItems, isEnabled: isSectionEnabled }) => {
             const isExpanded = !isCollapsed && expandedSection === section;
 
             return (
               <div className="sidebar-section-group" key={section}>
                 <button
+                  aria-disabled={!isSectionEnabled}
                   className="tab sidebar-section-toggle"
                   data-active={activeSection === section ? "true" : "false"}
+                  data-enabled={isSectionEnabled ? "true" : "false"}
                   data-tutorial-target={`sidebar-tab-${section}`}
                   onClick={(event) => handleSectionClick(section, event)}
                   type="button"
