@@ -1,0 +1,46 @@
+:is(.task-calendar-legend-dot-qa-due, .task-calendar-day-event-qa-due) {
+  background: #ca8a04;
+}
+
+:is(
+    .task-calendar-legend-dot-manufacturing-due,
+    .task-calendar-day-event-manufacturing-due
+  ) {
+  background: #15803d;
+}
+
+:is(.task-calendar-legend-dot-event, .task-calendar-day-event-event) {
+  background: #475569;
+}
+
+.task-calendar-more {
+  color: var(--text-copy);
+  font-size: 0.67rem;
+  font-weight: 700;
+  padding-left: 0.04rem;
+}
+
+.task-calendar-filter-empty {
+  border-top: 1px solid var(--border-base);
+  border-radius: 0;
+  margin: 0;
+  min-height: 10rem;
+}
+
+@media (max-width: 980px) {
+  .task-calendar-toolbar {
+    align-items: flex-start;
+  }
+
+  .task-calendar-toolbar-actions {
+    flex-wrap: wrap;
+  }
+
+  .task-calendar-filter-controls {
+    width: 100%;
+  }
+
+  .task-calendar-day {
+    min-height: 5.8rem;
+  }
+}

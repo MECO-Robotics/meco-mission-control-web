@@ -1,14 +1,14 @@
 import { useCallback, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 
 import { INTERACTIVE_TUTORIAL_CHAPTERS } from "@/app/interactiveTutorialData";
-import { buildInteractiveTutorialChapterStartOptions, getInteractiveTutorialNextChapterId } from "./interactiveTutorialSessionHelpers";
+import { buildInteractiveTutorialChapterStartOptions, getInteractiveTutorialNextChapterId } from "../interactiveTutorialSessionHelpers";
 import type {
   InteractiveTutorialChapter,
   InteractiveTutorialChapterOption,
   InteractiveTutorialCreationCounts,
   InteractiveTutorialReturnState,
   InteractiveTutorialStep,
-} from "./interactiveTutorialTypes";
+} from "../interactiveTutorialTypes";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
 export interface InteractiveTutorialCoreState {

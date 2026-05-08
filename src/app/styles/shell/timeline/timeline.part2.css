@@ -1,0 +1,44 @@
+.timeline-subsystem-counter-corner {
+  position: absolute;
+  right: 0.55rem;
+  bottom: 0.42rem;
+  font-size: 0.65rem;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--text-copy);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.timeline-merged-cell-text.is-rotated {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.28rem;
+  width: auto;
+  max-width: none;
+  max-height: calc(100% - 16px);
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(var(--timeline-merged-cell-rotation, 240deg));
+  transform-origin: center;
+  white-space: nowrap;
+}
+
+@keyframes timeline-column-unfold-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes timeline-row-unfold-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}

@@ -14,7 +14,7 @@ import {
   WorkspaceHelpSection,
 } from "./WorkspaceInventoryAndAdminSections";
 import { WorkspaceManufacturingSection } from "./WorkspaceManufacturingSection";
-import { groupWorkspaceContentPanelProps } from "./workspaceContentPanelsViewTypes";
+import { groupWorkspaceContentPanelProps } from "./workspaceContentPanelsGrouping";
 type SwipeDirection = "left" | "right" | null;
 
 type WorkspaceContentPanelsViewProps = WorkspaceContentPanelsProps & {
