@@ -1,5 +1,6 @@
 import type { AppWorkspaceShellTopbarController } from "@/app/hooks/useAppWorkspaceController";
 import {
+  BASE_SECTION_LABELS,
   NAVIGATION_SECTION_LABELS,
   NAVIGATION_SUB_ITEMS,
   getActiveNavigationSubItemId,
@@ -24,11 +25,17 @@ export function AppWorkspaceShellTopbar({
     taskView: c.taskView,
     worklogsView: c.worklogsView,
   });
-  const activeSection = getNavigationSectionFromSubItem(activeSubItemId);
-  const activeSectionLabel = NAVIGATION_SECTION_LABELS[activeSection];
+  const activeSection = activeSubItemId
+    ? getNavigationSectionFromSubItem(activeSubItemId)
+    : null;
+  const activeSectionLabel = activeSection
+    ? NAVIGATION_SECTION_LABELS[activeSection]
+    : BASE_SECTION_LABELS[c.activeTab];
   const activeViewLabel =
-    NAVIGATION_SUB_ITEMS.find((subItem) => subItem.id === activeSubItemId)?.label ??
-    activeSectionLabel;
+    activeSubItemId
+      ? NAVIGATION_SUB_ITEMS.find((subItem) => subItem.id === activeSubItemId)?.label ??
+        activeSectionLabel
+      : activeSectionLabel;
 
   return (
     <AppTopbar

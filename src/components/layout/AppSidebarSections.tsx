@@ -21,7 +21,7 @@ interface SidebarSectionModel {
 
 interface AppSidebarSectionsProps {
   activeSection: NavigationSection;
-  activeSubItemId: import("@/lib/workspaceNavigation").NavigationSubItemId;
+  activeSubItemId: import("@/lib/workspaceNavigation").NavigationSubItemId | null;
   expandedSection: NavigationSection;
   isCollapsed: boolean;
   onSectionClick: (section: NavigationSection, event: ReactMouseEvent<HTMLButtonElement>) => void;

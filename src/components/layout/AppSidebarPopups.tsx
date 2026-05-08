@@ -7,7 +7,7 @@ import { getProjectIcon, getProjectIconColor, subItemIcons } from "./appSidebarI
 import type { SidebarSubItemModel } from "./AppSidebarSections";
 
 interface AppSidebarPopupsProps {
-  activeSubItemId: import("@/lib/workspaceNavigation").NavigationSubItemId;
+  activeSubItemId: import("@/lib/workspaceNavigation").NavigationSubItemId | null;
   compactPopupRef: RefObject<HTMLDivElement | null>;
   compactPopupSection: NavigationSection | null;
   compactPopupTop: number;

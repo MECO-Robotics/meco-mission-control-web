@@ -83,7 +83,9 @@ export function AppSidebar({
     taskView,
     worklogsView,
   });
-  const activeSection = getNavigationSectionFromSubItem(activeSubItemId);
+  const activeSection = activeSubItemId
+    ? getNavigationSectionFromSubItem(activeSubItemId)
+    : "dashboard";
 
   const {
     compactPopupRef,
