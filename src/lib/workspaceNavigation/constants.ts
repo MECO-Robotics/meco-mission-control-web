@@ -67,7 +67,7 @@ export const TASK_VIEW_OPTIONS: readonly ViewOption<TaskViewTab>[] = [
 ];
 
 export const RISK_MANAGEMENT_VIEW_OPTIONS: readonly ViewOption<RiskManagementViewTab>[] = [
-  { value: "attention", label: "Attention" },
+  { value: "attention", label: "Action Required" },
   { value: "kanban", label: "Risks" },
   { value: "metrics", label: "Metrics" },
 ];
@@ -120,7 +120,7 @@ export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = [
   },
   {
     id: "readiness-attention",
-    label: "Attention",
+    label: "Action Required",
     section: "readiness",
     target: { tab: "risk-management", riskManagementView: "attention" },
   },

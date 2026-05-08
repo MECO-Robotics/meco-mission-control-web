@@ -17,14 +17,20 @@ import {
   buildRiskTriageItems,
   buildTaskTriageItems,
 } from "./attentionTriageItems";
+import { buildAttentionSummaryGroups } from "./attentionSummaryGroups";
+import { buildAttentionActionNowItems } from "./attentionActionNowItems";
 import type {
-  AttentionSummaryCard,
+  AttentionSummaryGroup,
   AttentionTriageGroup,
   AttentionViewModel,
 } from "./attentionViewTypes";
 
 export type {
+  AttentionNowItem,
+  AttentionReason,
+  AttentionSummaryCategory,
   AttentionSummaryCard,
+  AttentionSummaryGroup,
   AttentionTriageGroup,
   AttentionTriageItem,
   AttentionViewModel,
@@ -212,17 +218,17 @@ export function buildAttentionViewModel({
     lookup,
   });
 
-  const summaryCards: AttentionSummaryCard[] = [
-    { id: "critical-risks", label: "Critical risks", value: criticalRisks.length },
-    { id: "high-risks", label: "High risks", value: highRisks.length },
-    { id: "blocked-tasks", label: "Blocked tasks", value: blockedTasks.length },
-    { id: "waiting-qa", label: "Waiting QA", value: waitingQaTasks.length },
-    { id: "due-soon", label: "Due soon", value: dueSoonTasks.length },
-    { id: "overdue", label: "Overdue", value: overdueTasks.length },
-    { id: "manufacturing-blockers", label: "MFG blockers", value: manufacturingItems.length },
-    { id: "purchase-delays", label: "Purchase delays", value: purchaseItems.length },
-    { id: "failed-reports", label: "Failed QA/reports", value: reportItems.length },
-  ];
+  const summaryGroups: AttentionSummaryGroup[] = buildAttentionSummaryGroups({
+    blockedTasks: blockedTasks.length,
+    criticalRisks: criticalRisks.length,
+    dueSoonTasks: dueSoonTasks.length,
+    failedReports: reportItems.length,
+    highRisks: highRisks.length,
+    manufacturingBlockers: manufacturingItems.length,
+    overdueTasks: overdueTasks.length,
+    purchaseDelays: purchaseItems.length,
+    waitingQaTasks: waitingQaTasks.length,
+  });
 
   const triageGroups: AttentionTriageGroup[] = [
     {
@@ -281,8 +287,23 @@ export function buildAttentionViewModel({
     },
   ];
 
+  const actionNowItems = buildAttentionActionNowItems({
+    blockedTasks,
+    bootstrap,
+    criticalRisks,
+    failedQaReviews,
+    failedReports,
+    highRisks,
+    lookup,
+    manufacturingBlockers,
+    overdueTasks,
+    purchaseDelays,
+    waitingQaTasks,
+  });
+
   return {
-    summaryCards,
+    actionNowItems,
+    summaryGroups,
     triageGroups,
   };
 }

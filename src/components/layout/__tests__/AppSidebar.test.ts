@@ -139,7 +139,7 @@ describe("AppSidebar", () => {
     expect(markup).toContain("Activity");
   });
 
-  it("renders Readiness with attention, milestones, subsystems, and risks", () => {
+  it("renders Readiness with action required, milestones, subsystems, and risks", () => {
     const markup = renderSidebar(
       [
         {
@@ -166,7 +166,7 @@ describe("AppSidebar", () => {
     );
 
     expect(markup).toContain("Readiness");
-    expect(markup).toContain("Attention");
+    expect(markup).toContain("Action Required");
     expect(markup).toContain("Milestones");
     expect(markup).toContain("Subsystems");
     expect(markup).toContain("Risks");
