@@ -381,13 +381,13 @@ export function targetMatchesNavigationState(
   return true;
 }
 
-export function getActiveNavigationSubItemId(state: NavigationState): NavigationSubItemId {
+export function getActiveNavigationSubItemId(state: NavigationState): NavigationSubItemId | null {
   const normalizedState = normalizeNavigationState(state);
   const matchedSubItem = NAVIGATION_SUB_ITEMS.find((item) =>
     targetMatchesNavigationState(item.target, normalizedState),
   );
 
-  return matchedSubItem?.id ?? "readiness-risks";
+  return matchedSubItem?.id ?? null;
 }
 
 export function getNavigationSectionFromSubItem(

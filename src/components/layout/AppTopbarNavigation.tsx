@@ -1,4 +1,5 @@
 import {
+  BASE_SECTION_LABELS,
   type InventoryViewTab,
   type ManufacturingViewTab,
   type NavigationTarget,
@@ -93,37 +94,42 @@ export function AppTopbarNavigation({
     taskView,
     worklogsView,
   });
-  const activeSection = getNavigationSectionFromSubItem(activeSubItemId);
+  const activeSection = activeSubItemId
+    ? getNavigationSectionFromSubItem(activeSubItemId)
+    : null;
   const showManufacturingOption = !isAllProjectsView && !isNonRobotProject;
-  const sectionOptions = NAVIGATION_SUB_ITEMS_BY_SECTION[activeSection].filter(
-    (subItem) => {
-      if (subItem.id === "readiness-subsystems") {
-        return !isAllProjectsView;
-      }
+  const sectionOptions = activeSection
+    ? NAVIGATION_SUB_ITEMS_BY_SECTION[activeSection].filter((subItem) => {
+        if (subItem.id === "readiness-subsystems") {
+          return !isAllProjectsView;
+        }
 
-      if (subItem.id === "config-robot-model") {
-        return !isAllProjectsView && !isNonRobotProject;
-      }
+        if (subItem.id === "config-robot-model") {
+          return !isAllProjectsView && !isNonRobotProject;
+        }
 
-      if (subItem.id === "config-part-mappings") {
-        return !isNonRobotProject;
-      }
+        if (subItem.id === "config-part-mappings") {
+          return !isNonRobotProject;
+        }
 
-      if (subItem.id === "tasks-manufacturing") {
-        return showManufacturingOption;
-      }
+        if (subItem.id === "tasks-manufacturing") {
+          return showManufacturingOption;
+        }
 
-      if (subItem.id === "inventory-parts") {
-        return !isNonRobotProject;
-      }
+        if (subItem.id === "inventory-parts") {
+          return !isNonRobotProject;
+        }
 
-      return true;
-    },
-  );
+        return true;
+      })
+    : [];
   const optionById = new Map(sectionOptions.map((option) => [option.id, option]));
-  const activeOptionId = optionById.has(activeSubItemId)
+  const activeOptionId = activeSubItemId && optionById.has(activeSubItemId)
     ? activeSubItemId
     : sectionOptions[0]?.id;
+  const pageLabel = activeSection
+    ? NAVIGATION_SECTION_LABELS[activeSection]
+    : BASE_SECTION_LABELS[activeTab];
 
   const options = sectionOptions.map((option) => ({
     value: option.id,
@@ -133,12 +139,12 @@ export function AppTopbarNavigation({
   return (
     <>
       <span className="app-topbar-page-label">
-        {NAVIGATION_SECTION_LABELS[activeSection]}
+        {pageLabel}
       </span>
-      {activeOptionId ? (
+      {activeOptionId && activeSection ? (
         <TopbarTabs
           activeValue={activeOptionId}
-          ariaLabel={`${NAVIGATION_SECTION_LABELS[activeSection]} views`}
+          ariaLabel={`${pageLabel} views`}
           onChange={(nextValue) => {
             const nextOption = optionById.get(nextValue);
             if (nextOption) {

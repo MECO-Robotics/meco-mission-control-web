@@ -80,6 +80,14 @@ describe("getActiveNavigationSubItemId", () => {
       ),
     ).toBe("reports-work-logs");
   });
+
+  it("returns null for help because it has no sidebar subitem", () => {
+    expect(
+      getActiveNavigationSubItemId(
+        createNavigationState({ activeTab: "help" }),
+      ),
+    ).toBeNull();
+  });
 });
 
 describe("targetMatchesNavigationState", () => {
