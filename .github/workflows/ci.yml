@@ -233,7 +233,7 @@ jobs:
             };
           }
 
-          async function findLatestSuccessfulCheckSha(owner, repo, branchRef, checksToRequire) {
+          async function validateHeadCheckSha(owner, repo, branchRef, checksToRequire) {
             const branch = await gh(`/repos/${owner}/${repo}/branches/${branchRef}`);
             const headSha = branch?.commit?.sha;
             if (!headSha) {
@@ -241,53 +241,38 @@ jobs:
             }
 
             const headCheckState = await getRequiredCheckState(owner, repo, headSha, checksToRequire);
-            if (headCheckState.hasAnyRequiredCheckRun) {
-              if (!headCheckState.hasAllRequiredCheckRuns) {
-                throw new Error(
-                  `${owner}/${repo}@${headSha} has partial required checks at ${branchRef} head; missing: ${headCheckState.missingChecks.join(', ')}.`,
-                );
-              }
-
-              if (headCheckState.nonSuccessfulChecks.length > 0) {
-                const failingSummary = headCheckState.nonSuccessfulChecks
-                  .map((checkName) => {
-                    const checkRun = headCheckState.latestRunsByCheck.get(checkName);
-                    const status = checkRun?.status ?? 'unknown';
-                    const conclusion = checkRun?.conclusion ?? 'pending';
-                    return `${checkName}(${status}/${conclusion})`;
-                  })
-                  .join(', ');
-                throw new Error(
-                  `${owner}/${repo}@${headSha} has non-success required checks at ${branchRef} head: ${failingSummary}.`,
-                );
-              }
-
-              return { headSha, validatedSha: headSha };
+            if (!headCheckState.hasAnyRequiredCheckRun) {
+              throw new Error(
+                `${owner}/${repo}@${headSha} is missing required checks at ${branchRef} head: ${checksToRequire.join(', ')}.`,
+              );
             }
 
-            const commits = await gh(`/repos/${owner}/${repo}/commits?sha=${branchRef}&per_page=50`);
-            for (const commit of commits) {
-              const sha = commit?.sha;
-              if (!sha || sha === headSha) {
-                continue;
-              }
-
-              const checkState = await getRequiredCheckState(owner, repo, sha, checksToRequire);
-              const hasAllSuccessfulChecks =
-                checkState.hasAllRequiredCheckRuns && checkState.nonSuccessfulChecks.length === 0;
-              if (hasAllSuccessfulChecks) {
-                return { headSha, validatedSha: sha };
-              }
+            if (!headCheckState.hasAllRequiredCheckRuns) {
+              throw new Error(
+                `${owner}/${repo}@${headSha} has partial required checks at ${branchRef} head; missing: ${headCheckState.missingChecks.join(', ')}.`,
+              );
             }
 
-            throw new Error(
-              `${owner}/${repo}@${headSha} has no recent ${branchRef} commit with successful checks: ${checksToRequire.join(', ')}.`,
-            );
+            if (headCheckState.nonSuccessfulChecks.length > 0) {
+              const failingSummary = headCheckState.nonSuccessfulChecks
+                .map((checkName) => {
+                  const checkRun = headCheckState.latestRunsByCheck.get(checkName);
+                  const status = checkRun?.status ?? 'unknown';
+                  const conclusion = checkRun?.conclusion ?? 'pending';
+                  return `${checkName}(${status}/${conclusion})`;
+                })
+                .join(', ');
+              throw new Error(
+                `${owner}/${repo}@${headSha} has non-success required checks at ${branchRef} head: ${failingSummary}.`,
+              );
+            }
+
+            return { headSha, validatedSha: headSha };
           }
 
           for (const repo of repos) {
             const checksToRequire = requiredChecks[repo];
-            const { headSha, validatedSha } = await findLatestSuccessfulCheckSha(
+            const { headSha, validatedSha } = await validateHeadCheckSha(
               owner,
               repo,
               'development',
