@@ -1,6 +1,7 @@
 import {
   type MouseEvent as ReactMouseEvent,
   type ReactNode,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -401,7 +402,7 @@ export function AppSidebar({
     "reports-milestone-results": <Flag size={14} strokeWidth={2} />,
   };
 
-  const isSubItemEnabled = (subItemId: NavigationSubItemId) => {
+  const isSubItemEnabled = useCallback((subItemId: NavigationSubItemId) => {
     if (subItemId === "dashboard-calendar") {
       return visibleTabs.has("tasks");
     }
@@ -471,7 +472,7 @@ export function AppSidebar({
     }
 
     return true;
-  };
+  }, [isRobotProject, visibleTabs]);
 
   const handleProjectChange = (value: string) => {
     if (value === ADD_ROBOT_PROJECT_VALUE) {
@@ -488,11 +489,13 @@ export function AppSidebar({
     onSelectTarget({ tab: "help" }, { keepSidebarOpen: true });
   };
 
-  const getSectionSubItems = (section: NavigationSection) =>
-    NAVIGATION_SUB_ITEMS_BY_SECTION[section].map((subItem) => ({
+  const getSectionSubItems = useCallback(
+    (section: NavigationSection) => NAVIGATION_SUB_ITEMS_BY_SECTION[section].map((subItem) => ({
       ...subItem,
       isEnabled: isSubItemEnabled(subItem.id),
-    }));
+    })),
+    [isSubItemEnabled],
+  );
 
   const sectionModels = useMemo(
     () =>
@@ -504,7 +507,7 @@ export function AppSidebar({
           isEnabled: subItems.some((subItem) => subItem.isEnabled),
         };
       }),
-    [isRobotProject, visibleTabs],
+    [getSectionSubItems],
   );
 
   const handleSectionClick = (
