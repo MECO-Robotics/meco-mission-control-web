@@ -7,3 +7,4 @@ export * from "./records/planning";
 export * from "./records/inventory";
 export * from "./records/parts";
 export * from "./records/production";
+export * from "./records/roster";
