@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { RisksView } from "@/features/workspace/views/RisksView";
+import { parseTimestamp } from "@/features/workspace/views/riskViewData/riskViewMetricsUtils";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
@@ -304,5 +305,15 @@ describe("RisksView", () => {
 
     expect(markup).toContain("Build Health: On Track");
     expect(markup).toContain("No tasks in scope");
+  });
+});
+
+describe("parseTimestamp", () => {
+  it("parses date-only values as local midnight", () => {
+    expect(parseTimestamp("2026-05-01")).toBe(new Date(2026, 4, 1).getTime());
+  });
+
+  it("returns null for invalid date-only values", () => {
+    expect(parseTimestamp("2026-02-31")).toBeNull();
   });
 });
