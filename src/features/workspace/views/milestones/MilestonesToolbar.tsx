@@ -85,6 +85,7 @@ export function MilestonesToolbar({
           ariaLabel="Search milestones"
           compactPlaceholder="Search"
           compactSwitchWidth={200}
+          iconReleaseWidth={260}
           iconSwitchWidth={86}
           mode="dynamic-label"
           onChange={setSearchFilter}

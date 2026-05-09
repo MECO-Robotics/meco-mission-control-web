@@ -7,6 +7,7 @@ export function TopbarResponsiveSearch({
   ariaLabel,
   compactPlaceholder,
   compactSwitchWidth,
+  iconReleaseWidth,
   iconSwitchWidth,
   mode,
   onChange,
@@ -16,6 +17,7 @@ export function TopbarResponsiveSearch({
   ariaLabel: string;
   compactPlaceholder?: string;
   compactSwitchWidth?: number;
+  iconReleaseWidth?: number;
   iconSwitchWidth?: number;
   mode?: "multi-state" | "dynamic-label";
   onChange: (value: string) => void;
@@ -34,7 +36,7 @@ export function TopbarResponsiveSearch({
   const hasCompactLabelVariant = compactLabel !== placeholder;
   const switchWidth = compactSwitchWidth ?? 132;
   const iconWidth = iconSwitchWidth ?? 86;
-  const iconExitWidth = iconWidth + 12;
+  const iconExitWidth = iconReleaseWidth ?? iconWidth + 12;
   const effectivePlaceholder =
     resolvedMode === "dynamic-label" &&
     hasCompactLabelVariant &&

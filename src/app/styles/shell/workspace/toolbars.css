@@ -102,13 +102,10 @@
 }
 
 .milestones-toolbar .milestones-search-slot {
-  flex: 1 1 0;
+  flex: 1 1 auto;
   min-width: 0;
   max-width: 100%;
   display: flex;
-  transition:
-    min-width 0.16s ease,
-    max-width 0.16s ease;
 }
 
 .milestones-toolbar .milestones-search-slot > .topbar-responsive-search {

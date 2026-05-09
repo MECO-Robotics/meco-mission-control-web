@@ -46,7 +46,7 @@
   max-width: clamp(8rem, 17vw, 15rem);
   min-width: 0;
   position: relative;
-  flex: 0 1 clamp(8rem, 17vw, 15rem);
+  flex: 0 0 clamp(8rem, 17vw, 15rem);
   border-right: 0;
   padding: 0.25rem 0.55rem;
 }
@@ -111,9 +111,9 @@
 }
 
 .app-topbar-controls-host .milestones-toolbar > .milestones-search-slot {
-  flex: 1 1 0;
-  min-width: var(--milestone-topbar-search-min, 4.35rem);
-  max-width: var(--milestone-topbar-search-max, clamp(6.3rem, 16vw, 18rem));
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: none;
   display: flex;
 }
 
@@ -198,14 +198,6 @@
   outline: none;
   border-color: var(--control-select-focus-border);
   box-shadow: var(--control-select-focus-ring);
-}
-
-@media (max-width: 1024px) {
-  .app-topbar:has(.app-topbar-controls-host:not(:empty)) .app-topbar-left {
-    flex: 0 1 auto;
-    max-width: clamp(4.5rem, 10vw, 7.5rem);
-    padding-inline: 0.2rem 0.25rem;
-  }
 }
 
 @media (max-width: 880px) {
