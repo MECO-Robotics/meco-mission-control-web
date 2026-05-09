@@ -2,6 +2,7 @@
 import type { TaskBlockerRecord } from "@/types/recordsExecution";
 
 const CALENDAR_DAY_MS = 24 * 60 * 60 * 1000;
+const DATE_ONLY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 export const DEFAULT_STALE_TASK_DAYS = 5;
 
@@ -20,7 +21,26 @@ export function parseTimestamp(value: string | null | undefined) {
     return null;
   }
 
-  const timestamp = new Date(value).getTime();
+  const trimmedValue = value.trim();
+  const dateOnlyMatch = DATE_ONLY_PATTERN.exec(trimmedValue);
+  if (dateOnlyMatch) {
+    const year = Number(dateOnlyMatch[1]);
+    const monthIndex = Number(dateOnlyMatch[2]) - 1;
+    const day = Number(dateOnlyMatch[3]);
+    const localDate = new Date(year, monthIndex, day);
+
+    if (
+      localDate.getFullYear() !== year ||
+      localDate.getMonth() !== monthIndex ||
+      localDate.getDate() !== day
+    ) {
+      return null;
+    }
+
+    return localDate.getTime();
+  }
+
+  const timestamp = Date.parse(trimmedValue);
   return Number.isFinite(timestamp) ? timestamp : null;
 }
 
