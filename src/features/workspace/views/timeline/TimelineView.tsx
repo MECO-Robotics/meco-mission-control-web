@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Plus } from "lucide-react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MilestonePayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
+import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { getTimelineMinimumZoomForWidth } from "@/features/workspace/shared/timeline/timelineZoom";
@@ -169,16 +171,12 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
 
   return (
     <section className={`panel dense-panel timeline-layout ${WORKSPACE_PANEL_CLASS}`}>
-      <div className="panel-header compact-header">
-        <div className="queue-section-header">
-          <h2 style={{ color: "var(--text-title)" }}>Subsystem timeline</h2>
-        </div>
+      <AppTopbarSlotPortal slot="search">
         <TimelineToolbar
           activePersonFilter={activePersonFilter}
           bootstrapMembers={bootstrap.members}
           onAdjustZoom={state.adjustTimelineZoom}
           onChangePersonFilter={setActivePersonFilter}
-          onCreateTask={openCreateTaskModal}
           onIntervalChange={handleTimelineIntervalChange}
           onShiftPeriod={state.shiftTimelinePeriod}
           timelinePeriodLabel={data.timelinePeriodLabel}
@@ -186,6 +184,12 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           timelineZoomMin={state.timelineZoomMin}
           viewInterval={state.viewInterval}
         />
+      </AppTopbarSlotPortal>
+
+      <div className="panel-header compact-header">
+        <div className="queue-section-header">
+          <h2 style={{ color: "var(--text-title)" }}>Subsystem timeline</h2>
+        </div>
       </div>
 
       <TimelineGridBody
@@ -238,6 +242,17 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         toggleSubsystemColumn={state.toggleSubsystemColumn}
         openTaskDetailModal={actions.openTaskDetailAndSelectTask}
       />
+
+      <button
+        aria-label="Add to timeline"
+        className="primary-action queue-toolbar-action queue-toolbar-action-round timeline-floating-create-button"
+        data-tutorial-target="timeline-create-task-button"
+        onClick={openCreateTaskModal}
+        title="Add to timeline"
+        type="button"
+      >
+        <Plus size={14} strokeWidth={2} />
+      </button>
 
       <TimelineMilestoneUnderlaysPortal
         onHideMilestonePopup={data.clearHoveredMilestonePopup}

@@ -6,11 +6,13 @@
   min-height: 0;
 }
 
-.mc-roster-insights-toolbar {
+.roster-workload-topbar-controls {
   align-items: center;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0.5rem;
+  justify-content: flex-end;
+  width: 100%;
 }
 
 .mc-roster-insights-note {

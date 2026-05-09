@@ -5,7 +5,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import { IconSubsystems, IconWorkLogs } from "@/components/shared/Icons";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
-import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
 
@@ -14,6 +14,7 @@ import type { WorkLogSortMode } from "./workLogsViewState";
 interface WorkLogsToolbarProps {
   bootstrap: BootstrapPayload;
   openCreateWorkLogModal: () => void;
+  renderMode?: "panel" | "topbar";
   search: string;
   setSearch: Dispatch<SetStateAction<string>>;
   setSortMode: Dispatch<SetStateAction<WorkLogSortMode>>;
@@ -26,6 +27,7 @@ interface WorkLogsToolbarProps {
 export function WorkLogsToolbar({
   bootstrap,
   openCreateWorkLogModal,
+  renderMode = "panel",
   search,
   setSearch,
   setSortMode,
@@ -34,9 +36,13 @@ export function WorkLogsToolbar({
   sortOptions,
   subsystemFilter,
 }: WorkLogsToolbarProps) {
+  const isTopbar = renderMode === "topbar";
+
   return (
-    <div className="panel-actions filter-toolbar queue-toolbar worklog-toolbar">
-      <SearchToolbarInput
+    <div
+      className={`panel-actions filter-toolbar queue-toolbar worklog-toolbar${isTopbar ? " worklog-toolbar-topbar" : ""}`}
+    >
+      <TopbarResponsiveSearch
         ariaLabel="Search work logs"
         onChange={setSearch}
         placeholder="Search work logs..."

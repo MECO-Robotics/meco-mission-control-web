@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { clampTimelineZoom, formatTimelineZoomLabel, getTimelineDayTrackSize, getTimelineGridMinWidth, getTimelineMinimumZoomForWidth } from "@/features/workspace/shared/timeline/timelineZoom";
-import { midpointOfTimelineDays, midpointOfTimelineWeek, monthEndFromDay } from "@/features/workspace/shared/timeline/timelineDateUtils";
+import { formatTimelinePeriodLabel, midpointOfTimelineDays, midpointOfTimelineWeek, monthEndFromDay } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
 import { buildTimelineGridLayout } from "@/features/workspace/views/timeline/model/timelineGridLayout";
 import { createBootstrap, createBootstrapWithEmptySubsystem, createBootstrapWithoutTasks, readAppCss, membersById } from "./timelineTestFixtures";
@@ -224,7 +224,21 @@ describe("TimelineView", () => {
 
     expect(markup).toContain('aria-label="Previous month"');
     expect(markup).toContain('aria-label="Next month"');
-    expect(markup).toContain("April 2026");
+    expect(markup).toContain("April &#x27;26");
+  });
+
+  it("formats week period labels with year only on the ending day", () => {
+    expect(
+      formatTimelinePeriodLabel("week", [
+        "2026-04-06",
+        "2026-04-07",
+        "2026-04-08",
+        "2026-04-09",
+        "2026-04-10",
+        "2026-04-11",
+        "2026-04-12",
+      ]),
+    ).toBe("4/6 - 4/12/26");
   });
 
   it("keeps month-end bounds in the same calendar month for month-edge dates", () => {

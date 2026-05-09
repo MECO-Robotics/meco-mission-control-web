@@ -10,6 +10,7 @@ import type { SeasonRecord } from "@/types/recordsOrganization";
 import { Search } from "lucide-react";
 
 import { AppTopbarRightRail } from "./AppTopbarRightRail";
+import { APP_TOPBAR_SLOT_IDS } from "./AppTopbarSlotPortal";
 
 interface AppTopbarProps {
   activeViewLabel: string;
@@ -71,6 +72,7 @@ export function AppTopbar({
         </div>
       </div>
       <div className="app-topbar-search-slot">
+        <div className="app-topbar-search-host" id={APP_TOPBAR_SLOT_IDS.search} />
         <label className="app-topbar-search" htmlFor="workspace-topbar-search">
           <span aria-hidden="true" className="app-topbar-search-icon">
             <Search size={14} strokeWidth={2} />

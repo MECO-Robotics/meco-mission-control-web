@@ -43,18 +43,19 @@
   justify-content: flex-start;
   height: 100%;
   width: auto;
-  max-width: none;
+  max-width: clamp(8rem, 17vw, 15rem);
   min-width: 0;
   position: relative;
-  flex: 1 1 auto;
+  flex: 0 1 clamp(8rem, 17vw, 15rem);
   border-right: 0;
-  padding: 0.25rem 0.75rem;
+  padding: 0.25rem 0.55rem;
 }
 
 .app-topbar-view-title {
   display: flex;
   align-items: center;
-  width: 100%;
+  width: auto;
+  max-width: 100%;
   min-width: 0;
 }
 
@@ -64,19 +65,49 @@
   font-size: 1rem;
   font-weight: 700;
   line-height: 1;
-  white-space: normal;
-  overflow: visible;
-  text-overflow: clip;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .app-topbar-search-slot {
   display: flex;
   align-items: center;
   height: 100%;
-  flex: 0 1 clamp(12rem, 24vw, 21rem);
-  min-width: 9.5rem;
+  flex: 1 1 auto;
   padding-inline: clamp(0.3rem, 0.9vw, 0.6rem);
+  min-width: 0;
+  overflow: visible;
+}
+
+.app-topbar-search-host {
+  display: none;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  width: 100%;
+  min-width: 0;
+  overflow: visible;
+  flex-wrap: nowrap;
+}
+
+.app-topbar-search-host:not(:empty) {
+  display: flex;
+}
+
+.app-topbar-search-host .filter-toolbar {
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.app-topbar-search-host .filter-toolbar > * {
+  flex: 0 0 auto;
+}
+
+.app-topbar-search-host:not(:empty) + .app-topbar-search {
+  display: none;
 }
 
 .app-topbar-search {

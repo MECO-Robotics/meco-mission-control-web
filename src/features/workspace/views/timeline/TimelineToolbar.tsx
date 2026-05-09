@@ -1,6 +1,5 @@
 import React from "react";
-import { Plus } from "lucide-react";
-import { IconCalendar, IconChevronLeft, IconChevronRight, IconPerson } from "@/components/shared/Icons";
+import { IconCalendar, IconChevronLeft, IconChevronRight, IconPerson, IconSearchMinus, IconSearchPlus } from "@/components/shared/Icons";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
@@ -8,9 +7,10 @@ import type { FilterSelection } from "@/features/workspace/shared/filters/worksp
 import { formatTimelineZoomLabel, TIMELINE_ZOOM_MAX } from "@/features/workspace/shared/timeline/timelineZoom";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
 
-const TIMELINE_INTERVAL_OPTIONS = [
-  { id: "week", name: "Week" },
-  { id: "month", name: "Month" },
+const TIMELINE_INTERVAL_OPTIONS: Array<{ id: TimelineViewInterval; label: string; shortLabel: string }> = [
+  { id: "all", label: "All", shortLabel: "A" },
+  { id: "month", label: "Month", shortLabel: "M" },
+  { id: "week", label: "Week", shortLabel: "W" },
 ];
 
 interface TimelineToolbarProps {
@@ -18,7 +18,6 @@ interface TimelineToolbarProps {
   bootstrapMembers: BootstrapPayload["members"];
   onAdjustZoom: (direction: 1 | -1) => void;
   onChangePersonFilter: (value: FilterSelection) => void;
-  onCreateTask: () => void;
   onIntervalChange: (value: TimelineViewInterval) => void;
   onShiftPeriod: (direction: -1 | 1) => void;
   timelinePeriodLabel: string;
@@ -32,7 +31,6 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   bootstrapMembers,
   onAdjustZoom,
   onChangePersonFilter,
-  onCreateTask,
   onIntervalChange,
   onShiftPeriod,
   timelinePeriodLabel,
@@ -40,104 +38,144 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   timelineZoomMin,
   viewInterval,
 }) => {
-  const timelineIntervalValue: FilterSelection = viewInterval === "all" ? [] : [viewInterval];
+  const [isIntervalSwitchExpanded, setIsIntervalSwitchExpanded] = React.useState(false);
+  const activeIntervalOption = TIMELINE_INTERVAL_OPTIONS.find((option) => option.id === viewInterval) ?? TIMELINE_INTERVAL_OPTIONS[0];
+  const closeIntervalSwitch = () => {
+    setIsIntervalSwitchExpanded(false);
+  };
+  const openIntervalSwitch = () => {
+    setIsIntervalSwitchExpanded(true);
+  };
+  const handleIntervalSwitchBlur = (event: React.FocusEvent<HTMLDivElement>) => {
+    const nextFocusedElement = event.relatedTarget;
+    if (nextFocusedElement instanceof Node && event.currentTarget.contains(nextFocusedElement)) {
+      return;
+    }
+
+    closeIntervalSwitch();
+  };
 
   return (
-    <div className="panel-actions filter-toolbar timeline-toolbar">
-      <div className="timeline-toolbar-filters">
-        <CompactFilterMenu
-          activeCount={activePersonFilter.length}
-          ariaLabel="Timeline filters"
-          buttonLabel="Filters"
-          className="materials-filter-menu"
-          items={[
-            {
-              label: "Roster",
-              content: (
-                <FilterDropdown
-                  allLabel="All roster"
-                  ariaLabel="Filter person"
-                  className="task-queue-filter-menu-submenu"
-                  icon={<IconPerson />}
-                  onChange={onChangePersonFilter}
-                  options={bootstrapMembers}
-                  value={activePersonFilter}
-                />
-              ),
-            },
-          ]}
-        />
-        <FilterDropdown
-          allLabel="All (recent window)"
-          ariaLabel="Timeline interval"
-          buttonDataTutorialTarget="timeline-interval-select"
-          className="timeline-interval-filter"
-          icon={<IconCalendar />}
-          onChange={(selection) => {
-            const nextInterval = selection.length === 0 ? "all" : (selection[selection.length - 1] as TimelineViewInterval);
-            onIntervalChange(nextInterval);
-          }}
-          options={TIMELINE_INTERVAL_OPTIONS}
-          value={timelineIntervalValue}
-        />
-        {viewInterval !== "all" ? (
-          <div aria-label="Timeline period controls" className="timeline-period-controls">
-            <button
-              aria-label={`Previous ${viewInterval}`}
-              className="icon-button timeline-period-button"
-              data-tutorial-target="timeline-period-prev-button"
-              onClick={() => onShiftPeriod(-1)}
-              title={`Previous ${viewInterval}`}
-              type="button"
-            >
-              <IconChevronLeft />
-            </button>
-            <span className="timeline-period-label">{timelinePeriodLabel}</span>
-            <button
-              aria-label={`Next ${viewInterval}`}
-              className="icon-button timeline-period-button"
-              data-tutorial-target="timeline-period-next-button"
-              onClick={() => onShiftPeriod(1)}
-              title={`Next ${viewInterval}`}
-              type="button"
-            >
-              <IconChevronRight />
-            </button>
+    <div className="panel-actions filter-toolbar timeline-toolbar timeline-topbar-controls">
+      <CompactFilterMenu
+        activeCount={activePersonFilter.length}
+        ariaLabel="Timeline filters"
+        buttonLabel="Filters"
+        className="materials-filter-menu timeline-roster-filter"
+        items={[
+          {
+            label: "Roster",
+            content: (
+              <FilterDropdown
+                allLabel="All roster"
+                ariaLabel="Filter person"
+                className="task-queue-filter-menu-submenu"
+                icon={<IconPerson />}
+                onChange={onChangePersonFilter}
+                options={bootstrapMembers}
+                value={activePersonFilter}
+              />
+            ),
+          },
+        ]}
+      />
+      <div
+        aria-label="Timeline interval"
+        className={`timeline-interval-switch${isIntervalSwitchExpanded ? " is-expanded" : ""}`}
+        onBlurCapture={handleIntervalSwitchBlur}
+        onMouseEnter={openIntervalSwitch}
+        onMouseLeave={closeIntervalSwitch}
+        role="group"
+      >
+        {isIntervalSwitchExpanded ? (
+          <div
+            aria-label="Timeline interval options"
+            className="timeline-interval-toggle-rail"
+            data-tutorial-target="timeline-interval-select"
+          >
+            {TIMELINE_INTERVAL_OPTIONS.map((option) => (
+              <button
+                key={option.id}
+                aria-label={`Set timeline interval to ${option.label}`}
+                aria-pressed={viewInterval === option.id}
+                className={`timeline-interval-toggle-option${viewInterval === option.id ? " is-active" : ""}`}
+                onClick={() => {
+                  onIntervalChange(option.id);
+                  closeIntervalSwitch();
+                }}
+                title={option.label}
+                type="button"
+              >
+                {option.shortLabel}
+              </button>
+            ))}
           </div>
-        ) : null}
-        <div aria-label="Timeline zoom" className="timeline-zoom-controls" role="group">
+        ) : (
           <button
-            aria-label="Zoom out timeline"
-            className="icon-button timeline-zoom-button"
-            disabled={timelineZoom <= timelineZoomMin}
-            onClick={() => onAdjustZoom(-1)}
-            title="Zoom out timeline"
+            aria-label={`Timeline interval: ${activeIntervalOption.label}`}
+            className="timeline-interval-pill"
+            data-tutorial-target="timeline-interval-select"
+            title={`Timeline interval: ${activeIntervalOption.label}`}
             type="button"
           >
-            -
+            <span className="timeline-interval-pill-icon">
+              <IconCalendar />
+            </span>
+            <span className="timeline-interval-pill-label">{activeIntervalOption.label}</span>
           </button>
-          <span className="timeline-zoom-label">{formatTimelineZoomLabel(timelineZoom)}</span>
+        )}
+      </div>
+      {viewInterval !== "all" ? (
+        <div
+          aria-label="Timeline period controls"
+          className={`timeline-period-controls${viewInterval === "week" ? " is-week" : ""}`}
+        >
           <button
-            aria-label="Zoom in timeline"
-            className="icon-button timeline-zoom-button"
-            disabled={timelineZoom >= TIMELINE_ZOOM_MAX}
-            onClick={() => onAdjustZoom(1)}
-            title="Zoom in timeline"
+            aria-label={`Previous ${viewInterval}`}
+            className="icon-button timeline-period-button"
+            data-tutorial-target="timeline-period-prev-button"
+            onClick={() => onShiftPeriod(-1)}
+            title={`Previous ${viewInterval}`}
             type="button"
           >
-            +
+            <IconChevronLeft />
+          </button>
+          <span className="timeline-period-label">{timelinePeriodLabel}</span>
+          <button
+            aria-label={`Next ${viewInterval}`}
+            className="icon-button timeline-period-button"
+            data-tutorial-target="timeline-period-next-button"
+            onClick={() => onShiftPeriod(1)}
+            title={`Next ${viewInterval}`}
+            type="button"
+          >
+            <IconChevronRight />
           </button>
         </div>
+      ) : null}
+      <div aria-label="Timeline zoom" className="timeline-zoom-controls" role="group">
+        <button
+          aria-label="Zoom out timeline"
+          className="icon-button timeline-zoom-button"
+          disabled={timelineZoom <= timelineZoomMin}
+          onClick={() => onAdjustZoom(-1)}
+          title="Zoom out timeline"
+          type="button"
+        >
+          <IconSearchMinus />
+        </button>
+        <span className="timeline-zoom-label">{formatTimelineZoomLabel(timelineZoom)}</span>
+        <button
+          aria-label="Zoom in timeline"
+          className="icon-button timeline-zoom-button"
+          disabled={timelineZoom >= TIMELINE_ZOOM_MAX}
+          onClick={() => onAdjustZoom(1)}
+          title="Zoom in timeline"
+          type="button"
+        >
+          <IconSearchPlus />
+        </button>
       </div>
-      <button
-        className="primary-action queue-toolbar-action queue-toolbar-action-round"
-        data-tutorial-target="timeline-create-task-button"
-        onClick={onCreateTask}
-        title="Add to timeline"
-        type="button"
-      >
-        <Plus size={14} strokeWidth={2} />
-      </button>
     </div>
   );
 };
