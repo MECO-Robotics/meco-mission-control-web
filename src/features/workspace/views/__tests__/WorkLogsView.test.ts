@@ -109,12 +109,83 @@ describe("WorkLogsView", () => {
           taskId: "task-1",
         },
       ],
+      actions: [
+        {
+          actorMemberId: "student-1",
+          changedFields: [],
+          entityId: "worklog-1",
+          entityLabel: "Drive CAD",
+          entityType: "worklog",
+          id: "action-1",
+          memberIds: ["student-1"],
+          message: "Created worklog Drive CAD",
+          operation: "create",
+          projectId: "project-1",
+          subsystemId: "subsystem-1",
+          taskId: "task-1",
+          timestamp: "2026-05-01T14:30:00.000Z",
+        },
+      ],
     });
 
     expect(html).toContain("Activity");
-    expect(html).toContain("Recent work log activity");
+    expect(html).toContain("Recent workspace activity");
     expect(html).toContain("Drive CAD");
     expect(html).toContain("Student One");
-    expect(html).toContain("Finished first pass");
+    expect(html).toContain("Created worklog Drive CAD");
+  });
+
+  it("falls back to work logs when audit actions are unavailable", () => {
+    const html = renderWorkLogsView("activity", {
+      tasks: [
+        {
+          actualHours: 2,
+          artifactId: null,
+          artifactIds: [],
+          assigneeIds: [],
+          blockers: [],
+          dependencyIds: [],
+          disciplineId: "discipline-1",
+          documentationLinked: false,
+          dueDate: "2026-05-01",
+          estimatedHours: 4,
+          id: "task-1",
+          linkedManufacturingIds: [],
+          linkedPurchaseIds: [],
+          mechanismId: null,
+          mechanismIds: [],
+          mentorId: null,
+          ownerId: null,
+          partInstanceId: null,
+          partInstanceIds: [],
+          priority: "medium",
+          projectId: "project-1",
+          requiresDocumentation: false,
+          startDate: "2026-05-01",
+          status: "in-progress",
+          subsystemId: "subsystem-1",
+          subsystemIds: ["subsystem-1"],
+          summary: "Updated drivetrain CAD",
+          targetMilestoneId: null,
+          title: "Drive CAD",
+          workstreamId: null,
+          workstreamIds: [],
+        },
+      ],
+      workLogs: [
+        {
+          date: "2026-05-01",
+          hours: 1.5,
+          id: "worklog-1",
+          notes: "Finished first pass",
+          participantIds: ["student-1"],
+          taskId: "task-1",
+        },
+      ],
+      actions: [],
+    });
+
+    expect(html).toContain("Drive CAD");
+    expect(html).toContain("Logged work on Drive CAD");
   });
 });

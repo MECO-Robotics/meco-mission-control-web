@@ -61,12 +61,12 @@ export function WorkLogsView({
 
       {view === "activity" ? (
         <WorkLogsActivitySection
+          actions={workLogsView.activityActions}
+          activityPagination={workLogsView.activityPagination}
           membersById={membersById}
           openEditTaskModal={openEditTaskModal}
           subsystemsById={subsystemsById}
           taskById={workLogsView.taskById}
-          workLogPagination={workLogsView.workLogPagination}
-          workLogs={workLogsView.workLogs}
         />
       ) : view === "summary" ? (
         <WorkLogsSummarySection
