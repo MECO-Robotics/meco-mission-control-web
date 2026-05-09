@@ -54,6 +54,17 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
 
     closeIntervalSwitch();
   };
+  const handleIntervalSwitchPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === "touch" || event.pointerType === "pen") {
+      openIntervalSwitch();
+    }
+  };
+  const handleIntervalPillKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === "Enter" || event.key === " " || event.key === "ArrowDown") {
+      event.preventDefault();
+      openIntervalSwitch();
+    }
+  };
 
   return (
     <div className="panel-actions filter-toolbar timeline-toolbar timeline-topbar-controls">
@@ -85,6 +96,8 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
         onBlurCapture={handleIntervalSwitchBlur}
         onMouseEnter={openIntervalSwitch}
         onMouseLeave={closeIntervalSwitch}
+        onFocusCapture={openIntervalSwitch}
+        onPointerDownCapture={handleIntervalSwitchPointerDown}
         role="group"
       >
         {isIntervalSwitchExpanded ? (
@@ -115,6 +128,8 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
             aria-label={`Timeline interval: ${activeIntervalOption.label}`}
             className="timeline-interval-pill"
             data-tutorial-target="timeline-interval-select"
+            onClick={openIntervalSwitch}
+            onKeyDown={handleIntervalPillKeyDown}
             title={`Timeline interval: ${activeIntervalOption.label}`}
             type="button"
           >

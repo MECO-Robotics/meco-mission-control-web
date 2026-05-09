@@ -240,4 +240,16 @@ describe("TimelineView interactions", () => {
     expect(overlayHookSource).toContain("setIsTimelineShellScrolling(true)");
     expect(overlayHookSource).toContain("setIsTimelineShellScrolling(false)");
   });
+
+  it("supports keyboard and touch activation for the timeline interval switch", () => {
+    const toolbarSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/timeline/TimelineToolbar.tsx"),
+      "utf8",
+    );
+
+    expect(toolbarSource).toContain("onFocusCapture={openIntervalSwitch}");
+    expect(toolbarSource).toContain("onPointerDownCapture={handleIntervalSwitchPointerDown}");
+    expect(toolbarSource).toContain("onClick={openIntervalSwitch}");
+    expect(toolbarSource).toContain("onKeyDown={handleIntervalPillKeyDown}");
+  });
 });
