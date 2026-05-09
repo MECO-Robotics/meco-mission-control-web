@@ -35,7 +35,6 @@ export const MANUFACTURING_VIEW_ORDER: readonly ManufacturingViewTab[] = [
 export const INVENTORY_VIEW_ORDER: readonly InventoryViewTab[] = [
   "materials",
   "parts",
-  "part-mappings",
   "purchases",
 ];
 
@@ -148,12 +147,6 @@ export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = [
     label: "Robot model",
     section: "config",
     target: { tab: "tasks", taskView: "robot-map" },
-  },
-  {
-    id: "config-part-mappings",
-    label: "Part mappings",
-    section: "config",
-    target: { tab: "inventory", inventoryView: "part-mappings" },
   },
   {
     id: "config-directory",

@@ -1,6 +1,5 @@
 import { ArtifactInventoryView } from "@/features/workspace/views/ArtifactInventoryView";
 import { MaterialsView } from "@/features/workspace/views/MaterialsView";
-import { PartMappingsPlaceholderView } from "@/features/workspace/views/PartMappingsPlaceholderView";
 import { PartsView } from "@/features/workspace/views/PartsView";
 import { PurchasesView } from "@/features/workspace/views/PurchasesView";
 import { WorkspaceSectionPanel, WorkspaceSubPanel } from "../../WorkspaceContentPanelShells";
@@ -19,12 +18,10 @@ export function WorkspaceInventorySection(props: WorkspaceContentPanelsViewProps
     openCreateArtifactModal,
     openCreateMaterialModal,
     openCreatePartDefinitionModal,
-    openCreatePartInstanceModal,
     openCreatePurchaseModal,
     openEditArtifactModal,
     openEditMaterialModal,
     openEditPartDefinitionModal,
-    openEditMechanismModal,
     openEditPurchaseModal,
     partDefinitionsById,
     mechanismsById,
@@ -76,20 +73,6 @@ export function WorkspaceInventorySection(props: WorkspaceContentPanelsViewProps
           mechanismsById={mechanismsById}
           partDefinitionsById={partDefinitionsById}
           subsystemsById={subsystemsById}
-        />
-      </WorkspaceSubPanel>
-
-      <WorkspaceSubPanel
-        disableAnimations={disablePanelAnimations}
-        isActive={!isNonRobotProject && effectiveInventoryView === "part-mappings"}
-        swipeDirection={inventorySwipeDirection}
-      >
-        <PartMappingsPlaceholderView
-          bootstrap={bootstrap}
-          openCreatePartDefinitionModal={openCreatePartDefinitionModal}
-          openCreatePartInstanceModal={openCreatePartInstanceModal}
-          openEditMechanismModal={openEditMechanismModal}
-          openEditPartDefinitionModal={openEditPartDefinitionModal}
         />
       </WorkspaceSubPanel>
 

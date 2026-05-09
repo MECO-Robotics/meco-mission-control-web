@@ -181,7 +181,7 @@ export function WorkspaceContentPanels({
   const inventorySwipeDirection = getSwipeDirection(
     previousInventoryViewRef.current,
     effectiveInventoryView,
-    ["materials", "parts", "part-mappings", "purchases"],
+    ["materials", "parts", "purchases"],
   );
 
   useEffect(() => {
