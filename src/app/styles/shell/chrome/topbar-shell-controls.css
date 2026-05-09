@@ -1,0 +1,114 @@
+.app-topbar-controls-host,
+.app-topbar-search-host {
+  display: none;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  width: 100%;
+  min-width: 0;
+  overflow: visible;
+  flex-wrap: nowrap;
+}
+
+.app-topbar-controls-host:not(:empty),
+.app-topbar-search-host:not(:empty) {
+  display: flex;
+}
+
+.app-topbar-controls-host .filter-toolbar,
+.app-topbar-search-host .filter-toolbar {
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.app-topbar-controls-host .filter-toolbar > *,
+.app-topbar-search-host .filter-toolbar > * {
+  flex: 0 0 auto;
+}
+
+.app-topbar-controls-host .milestones-toolbar > .milestones-search-slot {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: none;
+  display: flex;
+}
+
+.app-topbar-controls-host .milestones-toolbar > .milestones-search-slot > .topbar-responsive-search {
+  width: 100%;
+  min-width: 0;
+}
+
+.app-topbar-controls-host .milestones-toolbar .topbar-responsive-search-full,
+.app-topbar-controls-host .milestones-toolbar .topbar-responsive-search-full-compact,
+.app-topbar-controls-host .milestones-toolbar .topbar-responsive-search .toolbar-search,
+.app-topbar-controls-host .milestones-toolbar .topbar-responsive-search .toolbar-search-input {
+  width: 100%;
+  min-width: 0;
+}
+
+.app-topbar-controls-host:not(:empty) ~ .app-topbar-search,
+.app-topbar-search-host:not(:empty) + .app-topbar-search {
+  display: none;
+}
+
+.app-topbar-controls-host .task-calendar-toolbar {
+  background: transparent;
+  border: 0;
+  gap: 0.35rem;
+  padding: 0;
+}
+
+.app-topbar-controls-host .task-calendar-toolbar-actions {
+  flex-wrap: nowrap;
+}
+
+.app-topbar-controls-host .task-calendar-toolbar-center {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.45rem;
+}
+
+.app-topbar-controls-host .task-calendar-toolbar-center .task-calendar-legend {
+  flex-wrap: nowrap;
+  gap: 0.35rem;
+}
+
+@media (max-width: 880px) {
+  .app-topbar:has(.app-topbar-controls-host .topbar-responsive-search-dynamic.is-icon-mode) .app-topbar-left {
+    flex: 0 0 auto;
+    max-width: 0;
+    padding-inline: 0.2rem 0.1rem;
+  }
+
+  .app-topbar:has(.app-topbar-controls-host .topbar-responsive-search-dynamic.is-icon-mode) .app-topbar-view-title {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .app-topbar:has(.app-topbar-controls-host:empty) .app-topbar-search {
+    width: 2rem;
+    min-width: 2rem;
+    margin-left: auto;
+  }
+
+  .app-topbar:has(.app-topbar-controls-host:empty) .app-topbar-search-input {
+    width: 2rem;
+    min-width: 2rem;
+    padding: 0;
+    border-radius: 999px;
+    color: transparent;
+    caret-color: transparent;
+  }
+
+  .app-topbar:has(.app-topbar-controls-host:empty) .app-topbar-search-input::placeholder {
+    color: transparent;
+  }
+
+  .app-topbar:has(.app-topbar-controls-host:empty) .app-topbar-search-icon {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}

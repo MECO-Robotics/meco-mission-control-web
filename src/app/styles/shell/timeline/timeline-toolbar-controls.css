@@ -1,0 +1,214 @@
+.timeline-topbar-controls {
+  align-items: center;
+  gap: 0.32rem;
+}
+
+.timeline-topbar-controls > * {
+  flex: 0 0 auto;
+}
+
+.filter-toolbar.timeline-topbar-controls {
+  flex-wrap: nowrap;
+}
+
+.milestones-toolbar {
+  align-items: center;
+}
+
+.milestones-toolbar .milestones-zoom-controls {
+  gap: 0.06rem;
+  padding: 0.1rem 0.12rem;
+}
+
+.milestones-toolbar .task-queue-zoom-label {
+  min-width: 3.2rem;
+  padding: 0 0.16rem;
+}
+
+.milestones-toolbar .milestones-zoom-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.timeline-toolbar-filters {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.28rem;
+  width: auto;
+  flex: 0 1 auto;
+  max-width: 100%;
+}
+
+.timeline-interval-switch {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.05rem;
+}
+
+.timeline-interval-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.24rem;
+  min-height: 2.05rem;
+  min-width: 5.15rem;
+  padding: 0.12rem 0.42rem;
+  border: 1px solid var(--border-base);
+  border-radius: 999px;
+  background: var(--bg-row-alt);
+  color: var(--text-title);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.timeline-interval-pill:hover,
+.timeline-interval-pill:focus-visible {
+  border-color: color-mix(in srgb, var(--meco-blue) 32%, var(--border-base));
+}
+
+.timeline-interval-pill:focus-visible {
+  outline: none;
+  box-shadow: var(--control-select-focus-ring);
+}
+
+.timeline-interval-pill-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-copy);
+}
+
+.timeline-interval-pill-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.timeline-interval-toggle-rail {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.08rem;
+  min-height: 2.05rem;
+  padding: 0.08rem;
+  border: 1px solid var(--border-base);
+  border-radius: 999px;
+  background: var(--bg-row-alt);
+}
+
+.timeline-interval-toggle-option {
+  width: 1.9rem;
+  height: 1.9rem;
+  min-width: 1.9rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-copy);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.timeline-interval-toggle-option:hover,
+.timeline-interval-toggle-option:focus-visible {
+  color: var(--text-title);
+  border-color: color-mix(in srgb, var(--meco-blue) 30%, transparent);
+}
+
+.timeline-interval-toggle-option:focus-visible {
+  outline: none;
+}
+
+.timeline-interval-toggle-option.is-active {
+  color: var(--text-title);
+  border-color: color-mix(in srgb, var(--meco-blue) 40%, var(--border-base));
+  background: color-mix(in srgb, var(--meco-blue) 16%, var(--bg-panel));
+}
+
+.timeline-period-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.08rem;
+  min-height: 2.05rem;
+  max-width: 100%;
+  padding: 0.08rem 0.14rem;
+  border: 1px solid var(--border-base);
+  border-radius: 999px;
+  background: var(--bg-row-alt);
+}
+
+.timeline-period-button.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  min-width: 1.9rem;
+  padding: 0;
+  box-shadow: none;
+}
+
+.timeline-period-button svg {
+  width: 14px;
+  height: 14px;
+}
+
+.timeline-period-label {
+  min-width: 6.45rem;
+  max-width: 11rem;
+  padding: 0 0.16rem;
+  color: var(--text-title);
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.timeline-zoom-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.04rem;
+  min-height: 2.05rem;
+  max-width: 100%;
+  padding: 0.12rem 0.18rem;
+  border: 1px solid var(--border-base);
+  border-radius: 999px;
+  background: var(--bg-row-alt);
+}
+
+.timeline-zoom-button.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  min-width: 1.9rem;
+  padding: 0;
+  box-shadow: none;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.timeline-zoom-label {
+  min-width: 2.9rem;
+  padding: 0 0.04rem;
+  color: var(--text-title);
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.timeline-period-controls.is-week .timeline-period-label {
+  min-width: 4.4rem;
+  padding: 0 0.08rem;
+}

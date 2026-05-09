@@ -1,0 +1,101 @@
+.worklog-toolbar-topbar {
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0.35rem;
+  justify-content: flex-end;
+  margin-left: 0;
+  width: 100%;
+}
+
+.topbar-responsive-search {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.worklog-toolbar-topbar .topbar-responsive-search {
+  flex: 1 1 auto;
+}
+
+.worklog-toolbar-topbar .topbar-responsive-search-full {
+  flex: 1 1 15rem;
+  min-width: 0;
+}
+
+.topbar-responsive-search-full-compact {
+  display: none;
+}
+
+.topbar-responsive-search-compact {
+  display: none;
+  position: relative;
+}
+
+.topbar-responsive-search-dynamic .topbar-responsive-search-compact {
+  display: inline-flex;
+}
+
+.topbar-responsive-search-dynamic.is-icon-mode {
+  justify-content: flex-end;
+}
+
+.topbar-responsive-search-dynamic.is-icon-mode .topbar-responsive-search-compact {
+  margin-left: auto;
+}
+
+.topbar-responsive-search-toggle.is-active {
+  border-color: color-mix(in srgb, var(--meco-blue) 38%, var(--border-base));
+  color: var(--text-title);
+}
+
+.topbar-responsive-search-popover {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  right: 0;
+  z-index: 15;
+  width: min(17.5rem, 64vw);
+  padding: 0.35rem;
+  border-radius: 0.65rem;
+  border: 1px solid var(--border-base);
+  background: var(--bg-panel);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--official-black) 20%, transparent);
+}
+
+.topbar-responsive-search-popover .toolbar-search-input {
+  width: 100%;
+}
+
+@media (max-width: 1340px) {
+  .worklog-toolbar-topbar .topbar-responsive-search-full,
+  .roster-workload-topbar-controls .topbar-responsive-search-full {
+    display: none;
+  }
+
+  .worklog-toolbar-topbar .topbar-responsive-search-compact,
+  .roster-workload-topbar-controls .topbar-responsive-search-compact {
+    display: inline-flex;
+  }
+}
+
+.milestones-toolbar .topbar-responsive-search .toolbar-search {
+  padding-right: 0.3rem;
+}
+
+.milestones-toolbar .milestones-search-slot {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  display: flex;
+}
+
+.milestones-toolbar .milestones-search-slot > .topbar-responsive-search {
+  width: 100%;
+  min-width: 0;
+}
+
+.milestones-toolbar .topbar-responsive-search-dynamic .toolbar-search {
+  width: 100%;
+  min-width: 0;
+  flex: 1 1 auto;
+  padding-right: 0.08rem;
+}
