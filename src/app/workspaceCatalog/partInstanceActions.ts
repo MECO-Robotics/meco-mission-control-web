@@ -78,10 +78,57 @@ export function usePartInstanceActions(model: AppWorkspaceModel) {
     }
   }, [closePartInstanceModal, model]);
 
+  const removePartInstanceFromMechanism = useCallback(async (partInstanceId: string) => {
+    const previousPartInstance = model.bootstrap.partInstances.find(
+      (partInstance) => partInstance.id === partInstanceId,
+    );
+    if (!previousPartInstance || !previousPartInstance.mechanismId) {
+      return false;
+    }
+
+    const optimisticPartInstance: PartInstanceRecord = {
+      ...previousPartInstance,
+      mechanismId: null,
+    };
+
+    model.setBootstrap((current) => ({
+      ...current,
+      partInstances: current.partInstances.map((partInstance) =>
+        partInstance.id === partInstanceId ? optimisticPartInstance : partInstance,
+      ),
+    }));
+
+    try {
+      const updatedPartInstance = await updatePartInstanceRecord(
+        partInstanceId,
+        { mechanismId: null },
+        model.handleUnauthorized,
+      );
+
+      model.setBootstrap((current) => ({
+        ...current,
+        partInstances: current.partInstances.map((partInstance) =>
+          partInstance.id === partInstanceId ? { ...partInstance, ...updatedPartInstance } : partInstance,
+        ),
+      }));
+      return true;
+    } catch (error) {
+      model.setBootstrap((current) => ({
+        ...current,
+        partInstances: current.partInstances.map((partInstance) =>
+          partInstance.id === partInstanceId ? previousPartInstance : partInstance,
+        ),
+      }));
+      model.setDataMessage(toErrorMessage(error));
+      return false;
+    }
+  }, [model]);
+
   return {
     closePartInstanceModal,
     handlePartInstanceSubmit,
     openCreatePartInstanceModal,
     openEditPartInstanceModal,
+    removePartInstanceFromMechanism,
   };
 }

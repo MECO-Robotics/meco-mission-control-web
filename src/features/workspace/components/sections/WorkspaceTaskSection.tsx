@@ -35,8 +35,13 @@ export function WorkspaceTaskSection({
     openCreateMechanismModal,
     openCreatePartInstanceModal,
     openCreateSubsystemModal,
+    handleDeleteMechanism,
     openEditMechanismModal,
+    openEditPartInstanceModal,
     openEditSubsystemModal,
+    removePartInstanceFromMechanism,
+    saveSubsystemLayout,
+    updateSubsystemConfiguration,
     openTimelineTaskDetailsModal,
     setActivePersonFilter,
     subsystemsById,
@@ -99,8 +104,13 @@ export function WorkspaceTaskSection({
           openCreateMechanismModal={openCreateMechanismModal}
           openCreatePartInstanceModal={openCreatePartInstanceModal}
           openCreateSubsystemModal={openCreateSubsystemModal}
+          handleDeleteMechanism={handleDeleteMechanism}
           openEditMechanismModal={openEditMechanismModal}
+          openEditPartInstanceModal={openEditPartInstanceModal}
           openEditSubsystemModal={openEditSubsystemModal}
+          removePartInstanceFromMechanism={removePartInstanceFromMechanism}
+          saveSubsystemLayout={saveSubsystemLayout}
+          updateSubsystemConfiguration={updateSubsystemConfiguration}
         />
       </WorkspaceSubPanel>
 

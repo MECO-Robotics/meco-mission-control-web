@@ -152,6 +152,7 @@ export const shellContentReportActionKeys = [
   "openCreateQaReportModal",
 ] as const;
 export const shellContentCatalogActionKeys = [
+  "handleDeleteMechanism",
   "handleCncQuickStatusChange",
   "openCreateArtifactModal",
   "openCreateManufacturingModal",
@@ -171,6 +172,9 @@ export const shellContentCatalogActionKeys = [
   "openEditPurchaseModal",
   "openEditSubsystemModal",
   "openEditWorkstreamModal",
+  "removePartInstanceFromMechanism",
+  "saveSubsystemLayout",
+  "updateSubsystemConfiguration",
 ] as const;
 export const shellContentRosterActionKeys = [
   "handleCreateMember",

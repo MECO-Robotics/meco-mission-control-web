@@ -2,6 +2,7 @@ import type { ArtifactRecord, ManufacturingItemRecord, MaterialRecord, PartDefin
 import type { MilestoneRecord, WorkLogRecord } from "@/types/recordsExecution";
 import type { MechanismRecord, MemberRecord, SubsystemRecord } from "@/types/recordsOrganization";
 import { resolveWorkspaceColor } from "@/features/workspace/shared/model/workspaceColors";
+import { normalizeSubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
 import { localTodayDate } from "@/lib/dateUtils";
 import type { NormalizedPlanningRecords } from "./planning";
 import {
@@ -106,6 +107,7 @@ export function normalizeBootstrapCatalogRecords(
 
   const subsystems = (source.subsystems ?? []).map((subsystem) => ({
     ...subsystem,
+    ...normalizeSubsystemLayoutFields(subsystem),
     color: resolveWorkspaceColor(
       subsystem.color,
       `${subsystem.projectId ?? defaultProjectId}:${subsystem.id}:${subsystem.name}`,

@@ -78,6 +78,21 @@ export function WorkspaceInventorySection(props: WorkspaceContentPanelsViewProps
 
       <WorkspaceSubPanel
         disableAnimations={disablePanelAnimations}
+        isActive={!isNonRobotProject && effectiveInventoryView === "part-mappings"}
+        swipeDirection={inventorySwipeDirection}
+      >
+        <PartsView
+          bootstrap={bootstrap}
+          openCreatePartDefinitionModal={openCreatePartDefinitionModal}
+          openEditPartDefinitionModal={openEditPartDefinitionModal}
+          mechanismsById={mechanismsById}
+          partDefinitionsById={partDefinitionsById}
+          subsystemsById={subsystemsById}
+        />
+      </WorkspaceSubPanel>
+
+      <WorkspaceSubPanel
+        disableAnimations={disablePanelAnimations}
         isActive={effectiveInventoryView === "purchases"}
         swipeDirection={inventorySwipeDirection}
       >

@@ -55,6 +55,7 @@ export function AppWorkspaceShellContent({
       openEditWorkstreamModal={c.openEditWorkstreamModal}
       onCreateRisk={c.handleCreateRisk}
       onDeleteRisk={c.handleDeleteRisk}
+      handleDeleteMechanism={c.handleDeleteMechanism}
       onCncQuickStatusChange={c.handleCncQuickStatusChange}
       openEditManufacturingModal={c.openEditManufacturingModal}
       openEditArtifactModal={c.openEditArtifactModal}
@@ -62,6 +63,9 @@ export function AppWorkspaceShellContent({
       openEditMechanismModal={c.openEditMechanismModal}
       openEditPartInstanceModal={c.openEditPartInstanceModal}
       openEditSubsystemModal={c.openEditSubsystemModal}
+      removePartInstanceFromMechanism={c.removePartInstanceFromMechanism}
+      saveSubsystemLayout={c.saveSubsystemLayout}
+      updateSubsystemConfiguration={c.updateSubsystemConfiguration}
       openEditPartDefinitionModal={c.openEditPartDefinitionModal}
       openEditPurchaseModal={c.openEditPurchaseModal}
       openTimelineTaskDetailsModal={c.openTimelineTaskDetailsModal}

@@ -115,6 +115,10 @@ export function AppSidebar({
         return isRobotProject;
       }
 
+      if (subItemId === "config-part-mappings") {
+        return isRobotProject;
+      }
+
       if (subItemId === "inventory-parts") {
         return isRobotProject;
       }
