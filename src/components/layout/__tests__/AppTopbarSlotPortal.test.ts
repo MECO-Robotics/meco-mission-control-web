@@ -15,5 +15,6 @@ describe("AppTopbarSlotPortal", () => {
     expect(source).toContain("new MutationObserver(resolveHost)");
     expect(source).toContain("observer.observe(document.body, { childList: true, subtree: true })");
     expect(source).toContain("observer.disconnect()");
+    expect(source).not.toContain("if (host) {");
   });
 });

@@ -36,9 +36,6 @@ export function AppTopbarSlotPortal({
     };
 
     resolveHost();
-    if (host) {
-      return;
-    }
 
     const observer = new MutationObserver(resolveHost);
     observer.observe(document.body, { childList: true, subtree: true });
