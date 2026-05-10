@@ -2,12 +2,13 @@
 
 React + Vite browser frontend for MECO Mission Control.
 
-This app is the web workspace for planning, execution, inventory, manufacturing coordination, roster management, and project-level documentation workflows. It runs against `meco-mission-control-platform` and is deployed as static assets behind `nginx`.
+This app is the web workspace for planning, execution, inventory, manufacturing coordination, roster management, reporting, configuration, and project-level documentation workflows. It runs against `meco-mission-control-platform` and is deployed as static assets behind `nginx`.
 
 ## Table of Contents
 
 - [System Overview](#system-overview)
 - [Product Scope in This Repo](#product-scope-in-this-repo)
+- [Current Navigation Model](#current-navigation-model)
 - [Repository Layout](#repository-layout)
 - [Tech Stack](#tech-stack)
 - [Local Setup](#local-setup)
@@ -19,7 +20,7 @@ This app is the web workspace for planning, execution, inventory, manufacturing 
 - [Deployment and Operations](#deployment-and-operations)
 - [Troubleshooting](#troubleshooting)
 - [Cross-Repo Responsibilities](#cross-repo-responsibilities)
-- [Requirements Documents](#requirements-documents)
+- [Requirements and Specs](#requirements-and-specs)
 
 ## System Overview
 
@@ -39,41 +40,45 @@ Traffic shape:
 
 ## Product Scope in This Repo
 
-The web app is designed for broader-screen, high-context workflows:
+The web app is designed for broader-screen, high-context workflows that need more space and review context than the mobile app.
 
-- Planning views: timeline, queue, milestones
-- Work logs and progress review
-- Manufacturing planning (robot projects)
-- Inventory and purchasing
-- Subsystem/workflow management
-- Roster management
-- In-app help and usage guidance
+Current web responsibilities:
 
-The mobile app (`meco-mission-control-mobile`) remains focused on fast in-shop updates, while this repo prioritizes richer dashboard-style workflows.
+- Dashboard review: calendar, activity, and metrics
+- Readiness review: action triage, milestones, subsystems, and risks
+- Work planning: timeline, task board, and manufacturing execution views
+- Robot configuration: map-first subsystem layout, mechanism editing, and part-instance context
+- Inventory and purchasing: materials, parts, purchases, and robot-only part-mapping support
+- Roster operations: workload, attendance, and directory workflows
+- Reports: work logs, QA forms, and milestone results
+- In-app help and interactive guidance
 
-### Workspace Navigation Model
+The mobile app (`meco-mission-control-mobile`) remains focused on fast in-shop updates. This repo prioritizes richer dashboard, planning, configuration, and review workflows.
 
-Primary navigation tabs:
+## Current Navigation Model
 
-- `Tasks`
-- `Work logs`
-- `Manufacturing` (robot project only; hidden for all-project/non-robot scopes)
-- `Inventory` (project-scoped)
-- `Subsystems` or `Workflow` (label depends on project type)
-- `Roster`
-- `Help`
+The sidebar is organized by user-facing work area rather than raw data model entity.
 
-Topbar subviews:
+| Section | Purpose | Current subviews |
+| --- | --- | --- |
+| Dashboard | Fast review of current schedule, activity, and health | Calendar, Activity, Metrics |
+| Readiness | Items that need attention before execution or events | Action Required, Milestones, Subsystems, Risks |
+| Config | Structure and directory maintenance | Robot Configuration, Part mappings, Directory |
+| Work | Execution planning and fabrication flow | Timeline, Tasks, Manufacturing |
+| Inventory | Materials, parts, and procurement | Materials, Parts, Purchases |
+| Roster | Student/mentor availability and participation | Workload, Attendance |
+| Reports | Historical and evidence-oriented records | Work logs, QA forms, Milestone results |
 
-- Tasks: `Timeline`, `Kanban`, `Milestones`
-- Manufacturing: `CNC`, `3D Prints`, `Fabrication`
-- Inventory (robot projects): `Materials`, `Parts`, `Purchases`
-- Inventory (non-robot projects): `Documentation`, `Purchases`
+Important scope behavior:
 
-Scope controls:
+- Manufacturing is robot-project specific.
+- Robot projects expose Materials, Parts, and Purchases under Inventory.
+- Non-robot projects collapse inventory toward Documents/Materials and Purchases.
+- Robot Configuration is the preferred home for subsystem, mechanism, and part-instance structure editing.
+- Part mappings are robot-only support context and should not be treated as a general standalone planning page.
+- `All projects` can hide or redirect project-specific views when the selected scope cannot support them.
 
-- Season selector in the sidebar (with `Create new season`)
-- Project selector in the topbar (`All projects` or one project)
+For the fuller living product spec, see [`docs/CURRENT_WEB_SPEC.md`](docs/CURRENT_WEB_SPEC.md).
 
 ## Repository Layout
 
@@ -86,19 +91,23 @@ src/
   features/
     auth/              # Auth screens and sign-in UX
     workspace/
-      views/           # Task/inventory/manufacturing/roster/help views
+      views/           # Task/readiness/inventory/manufacturing/roster/report/help views
       shared/          # Shared workspace types, defaults, utility options
+      components/      # Workspace composition sections and grouped panel rendering
       Workspace*.tsx   # Workspace composition + modal hosts
   lib/
     auth.ts            # API client, auth/session calls, bootstrap normalization
-    appUtils.ts        # Form and payload utility helpers
-  types.ts             # Shared frontend type contracts
+    appUtils/          # Form, payload, layout, and domain utility helpers
+    workspaceNavigation/ # Navigation constants, helpers, and types
+  types/               # Shared frontend type contracts grouped by responsibility
 ```
 
 Operational and deployment files:
 
 - `.github/workflows/deploy-vps.yml`
 - `deploy/pm-web.nginx.conf`
+- `AGENTS.md`
+- `environment.toml`
 - `.env.example`
 - `.env.production.example`
 
@@ -120,6 +129,8 @@ Package scripts:
 - `npm run lint`
 - `npm run build`
 - `npm run build:bundle`
+- `npm run audit:organization`
+- `npm run audit:organization:strict`
 - `npm run verify`
 - `npm run preview`
 
@@ -268,11 +279,11 @@ Normalization currently backfills and aligns:
 When changing backend contracts, validate both repos together:
 
 - `meco-mission-control-platform/src/routes/registerRoutes.ts` is backend route/validation truth.
-- `meco-mission-control-web/src/types.ts` and `src/lib/auth.ts` must stay in sync.
+- `meco-mission-control-web/src/types/**` and `src/lib/auth.ts` must stay in sync.
 
 ## Development Workflow
 
-Recommended cycle:
+Recommended local cycle:
 
 1. Start backend (`meco-mission-control-platform`) locally.
 2. Start web app (`npm run dev`).
@@ -281,12 +292,28 @@ Recommended cycle:
 5. Run the quality gate (`npm run verify`).
 6. Push when local checks pass.
 
+Branch and PR workflow is governed by `AGENTS.md`:
+
+- `main` is production-ready only.
+- `development` is the integration branch for active work.
+- `feature/*`, `fix/*`, and `hotfix/*` are short-lived work branches.
+- PRs into `development` must come from `feature/*`, `fix/*`, or `hotfix/*`.
+- Merges into `main` should come only from `development` or `hotfix/*`.
+- Protected branches require CI, snapshot validation, review approval, conversation resolution, linear history, and admin enforcement as described in `AGENTS.md`.
+
+Codex/worktree notes:
+
+- `environment.toml` is the startup source of truth for Codex worktrees.
+- Keep startup commands and dev URL in `environment.toml`, not duplicated across docs.
+- Put diagnostic screenshots, generated reports, and temporary snapshots under `.diagnostics/`, not in the repository root.
+
 ### Useful Frontend Entry Points
 
 - App shell and composition: `src/app/App.tsx`
 - Auth/session orchestration: `src/app/useAppAuth.ts`
 - Workspace rendering and routing: `src/features/workspace/WorkspaceContent.tsx`
 - View-specific UI: `src/features/workspace/views/*`
+- Navigation model: `src/lib/workspaceNavigation/*`
 - API calls and payload normalization: `src/lib/auth.ts`
 
 ## Validation Commands
@@ -300,9 +327,15 @@ npm run verify
 What each gate catches:
 
 - `typecheck`: TS type drift between views, shared types, and API payloads
-- `test:ci`: behavior checks for utility and view logic
 - `lint`: code quality and consistency issues
+- `test:ci`: behavior checks for utility and view logic
 - `build:bundle`: production bundle correctness
+
+For structural refactors or file/directory cleanup, also run:
+
+```bash
+npm run audit:organization:strict
+```
 
 ## Deployment and Operations
 
@@ -383,6 +416,7 @@ Remember:
 - workspace data is intentionally scoped by selected season/project
 - `All projects` view can hide project-specific tabs
 - manufacturing tab appears only for robot project scope
+- Robot Configuration and part-mapping support are robot-project specific
 
 ### API calls fail in local dev
 
@@ -405,12 +439,15 @@ For auth, payload, schema, or API behavior changes:
 2. Align frontend types and API client.
 3. Re-test full flow end-to-end from web UI.
 
-## Requirements Documents
+## Requirements and Specs
 
-Reference docs in `docs/`:
+Current living specs and requirements references in `docs/`:
 
+- `docs/CURRENT_WEB_SPEC.md` — current repo-local web app spec aligned to recent PRs and current navigation.
 - `docs/MECO_MVP_Spec_v11.docx`
 - `docs/MECO_MVP_Spec_v10.docx`
 - `docs/MECO_Requirements_v11.docx`
 - `docs/MECO_Requirements_v10_clean.docx`
 - `docs/MECO_Requirements.docx`
+
+Use `docs/CURRENT_WEB_SPEC.md` as the first reference for current web-app behavior. Treat the Word documents as historical baseline/spec sources unless they are explicitly refreshed in a future docs PR.
