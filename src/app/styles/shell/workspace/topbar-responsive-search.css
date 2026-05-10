@@ -39,6 +39,28 @@
   flex: 0 1 clamp(15rem, 30vw, 23rem);
 }
 
+.app-topbar-controls-host .filter-toolbar > .topbar-responsive-search,
+.app-topbar-search-host .filter-toolbar > .topbar-responsive-search {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+}
+
+.app-topbar-controls-host .filter-toolbar > .topbar-responsive-search-dynamic.is-icon-mode,
+.app-topbar-search-host .filter-toolbar > .topbar-responsive-search-dynamic.is-icon-mode {
+  flex: 0 0 var(--topbar-responsive-search-icon-pill-width);
+  width: var(--topbar-responsive-search-icon-pill-width);
+  min-width: var(--topbar-responsive-search-icon-pill-width);
+}
+
+.app-topbar-controls-host .filter-toolbar .topbar-responsive-search .toolbar-search,
+.app-topbar-search-host .filter-toolbar .topbar-responsive-search .toolbar-search {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+}
+
 .topbar-responsive-search-full {
   min-width: 0;
   width: 100%;
