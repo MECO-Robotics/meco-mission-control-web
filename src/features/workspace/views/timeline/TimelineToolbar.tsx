@@ -39,14 +39,46 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   viewInterval,
 }) => {
   const [isIntervalSwitchExpanded, setIsIntervalSwitchExpanded] = React.useState(false);
+  const intervalSwitchRef = React.useRef<HTMLDivElement>(null);
+  const shouldFocusIntervalOptionRef = React.useRef(false);
+  const suppressBlurCloseRef = React.useRef(false);
   const activeIntervalOption = TIMELINE_INTERVAL_OPTIONS.find((option) => option.id === viewInterval) ?? TIMELINE_INTERVAL_OPTIONS[0];
   const closeIntervalSwitch = () => {
+    suppressBlurCloseRef.current = false;
+    shouldFocusIntervalOptionRef.current = false;
     setIsIntervalSwitchExpanded(false);
   };
-  const openIntervalSwitch = () => {
+  const openIntervalSwitch = ({ focusOptions = false }: { focusOptions?: boolean } = {}) => {
+    if (focusOptions) {
+      shouldFocusIntervalOptionRef.current = true;
+      suppressBlurCloseRef.current = true;
+    }
+
     setIsIntervalSwitchExpanded(true);
   };
+  React.useEffect(() => {
+    if (!isIntervalSwitchExpanded || !shouldFocusIntervalOptionRef.current) {
+      return;
+    }
+
+    shouldFocusIntervalOptionRef.current = false;
+    suppressBlurCloseRef.current = false;
+    const root = intervalSwitchRef.current;
+    if (!root) {
+      return;
+    }
+
+    const nextFocusTarget =
+      root.querySelector<HTMLButtonElement>(".timeline-interval-toggle-option.is-active") ??
+      root.querySelector<HTMLButtonElement>(".timeline-interval-toggle-option");
+    nextFocusTarget?.focus();
+  }, [isIntervalSwitchExpanded, viewInterval]);
+
   const handleIntervalSwitchBlur = (event: React.FocusEvent<HTMLDivElement>) => {
+    if (suppressBlurCloseRef.current) {
+      return;
+    }
+
     const nextFocusedElement = event.relatedTarget;
     if (nextFocusedElement instanceof Node && event.currentTarget.contains(nextFocusedElement)) {
       return;
@@ -59,10 +91,15 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
       openIntervalSwitch();
     }
   };
+  const handleIntervalSwitchFocusCapture = () => {
+    if (!isIntervalSwitchExpanded) {
+      openIntervalSwitch({ focusOptions: true });
+    }
+  };
   const handleIntervalPillKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
     if (event.key === "Enter" || event.key === " " || event.key === "ArrowDown") {
       event.preventDefault();
-      openIntervalSwitch();
+      openIntervalSwitch({ focusOptions: true });
     }
   };
 
@@ -93,10 +130,11 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
       <div
         aria-label="Timeline interval"
         className={`timeline-interval-switch${isIntervalSwitchExpanded ? " is-expanded" : ""}`}
+        ref={intervalSwitchRef}
         onBlurCapture={handleIntervalSwitchBlur}
-        onMouseEnter={openIntervalSwitch}
+        onMouseEnter={() => openIntervalSwitch()}
         onMouseLeave={closeIntervalSwitch}
-        onFocusCapture={openIntervalSwitch}
+        onFocusCapture={handleIntervalSwitchFocusCapture}
         onPointerDownCapture={handleIntervalSwitchPointerDown}
         role="group"
       >
@@ -128,7 +166,7 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
             aria-label={`Timeline interval: ${activeIntervalOption.label}`}
             className="timeline-interval-pill"
             data-tutorial-target="timeline-interval-select"
-            onClick={openIntervalSwitch}
+            onClick={() => openIntervalSwitch({ focusOptions: true })}
             onKeyDown={handleIntervalPillKeyDown}
             title={`Timeline interval: ${activeIntervalOption.label}`}
             type="button"

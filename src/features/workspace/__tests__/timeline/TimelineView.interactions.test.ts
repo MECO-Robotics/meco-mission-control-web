@@ -247,9 +247,23 @@ describe("TimelineView interactions", () => {
       "utf8",
     );
 
-    expect(toolbarSource).toContain("onFocusCapture={openIntervalSwitch}");
+    expect(toolbarSource).toContain("onFocusCapture={handleIntervalSwitchFocusCapture}");
     expect(toolbarSource).toContain("onPointerDownCapture={handleIntervalSwitchPointerDown}");
-    expect(toolbarSource).toContain("onClick={openIntervalSwitch}");
+    expect(toolbarSource).toContain("onClick={() => openIntervalSwitch({ focusOptions: true })}");
     expect(toolbarSource).toContain("onKeyDown={handleIntervalPillKeyDown}");
+  });
+
+  it("moves keyboard focus into interval options after expanding the switch", () => {
+    const toolbarSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/timeline/TimelineToolbar.tsx"),
+      "utf8",
+    );
+
+    expect(toolbarSource).toContain("const intervalSwitchRef = React.useRef<HTMLDivElement>(null)");
+    expect(toolbarSource).toContain("const shouldFocusIntervalOptionRef = React.useRef(false)");
+    expect(toolbarSource).toContain("const suppressBlurCloseRef = React.useRef(false)");
+    expect(toolbarSource).toContain("if (suppressBlurCloseRef.current) {");
+    expect(toolbarSource).toContain(".timeline-interval-toggle-option.is-active");
+    expect(toolbarSource).toContain("nextFocusTarget?.focus()");
   });
 });
