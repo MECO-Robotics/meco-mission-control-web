@@ -138,10 +138,6 @@
   max-width: none;
 }
 
-.timeline-ellipsis-reveal[data-full-text]:hover,
-.timeline-merged-cell-column:hover .timeline-ellipsis-reveal[data-full-text] {
-  color: transparent;
-}
 .timeline-merged-cell-column:hover,
 .timeline-merged-cell-column:focus-within {
   overflow: visible !important;
