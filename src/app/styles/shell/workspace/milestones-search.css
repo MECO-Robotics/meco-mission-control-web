@@ -18,15 +18,15 @@
 
 .milestones-search-control {
   --milestones-search-action-overlay-width: 4rem;
-  --milestones-search-icon-button-size: 1.7rem;
-  --milestones-search-icon-pill-width: calc(
-    var(--milestones-search-action-overlay-width) + var(--milestones-search-icon-button-size) + 0.45rem
-  );
-  --milestones-search-icon-pill-height: 2.05rem;
   position: relative;
   display: flex;
   flex: 1 1 auto;
   min-width: 0;
+}
+
+.milestones-search-control > .topbar-responsive-search {
+  --topbar-responsive-search-icon-pill-reserved-width: var(--milestones-search-action-overlay-width);
+  --topbar-responsive-search-icon-pill-extra-width: 1rem;
 }
 
 .milestones-toolbar .topbar-responsive-search-dynamic .toolbar-search {
@@ -38,44 +38,6 @@
 
 .milestones-search-control .toolbar-search {
   padding-right: var(--milestones-search-action-overlay-width);
-}
-
-.milestones-search-control:has(.topbar-responsive-search-dynamic.is-icon-mode) .topbar-responsive-search-compact {
-  box-sizing: border-box;
-  align-items: center;
-  width: var(--milestones-search-icon-pill-width);
-  height: var(--milestones-search-icon-pill-height);
-  min-height: var(--milestones-search-icon-pill-height);
-  padding: 0 0.18rem;
-  padding-right: var(--milestones-search-action-overlay-width);
-  border: 1px solid rgba(15, 28, 52, 0.12);
-  border-radius: 999px;
-  background: var(--bg-row-alt);
-}
-
-.milestones-search-control:has(.topbar-responsive-search-dynamic.is-icon-mode) .topbar-responsive-search-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 var(--milestones-search-icon-button-size);
-  width: var(--milestones-search-icon-button-size);
-  height: var(--milestones-search-icon-button-size);
-  min-height: var(--milestones-search-icon-button-size);
-  padding-inline: 0;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-  color: var(--text-copy);
-  line-height: 1;
-}
-
-.milestones-search-control:has(.topbar-responsive-search-dynamic.is-icon-mode)
-  .topbar-responsive-search-toggle.is-active {
-  color: var(--official-blue);
-}
-
-.milestones-search-control:has(.topbar-responsive-search-dynamic.is-icon-mode) .topbar-responsive-search-toggle svg {
-  display: block;
 }
 
 .milestones-search-filter-overlay {
@@ -212,12 +174,4 @@
   background: var(--bg-panel);
   border-color: rgba(148, 163, 184, 0.38);
   box-shadow: 0 18px 36px rgba(2, 6, 23, 0.46);
-}
-
-.page-shell.dark-mode
-  .milestones-search-control:has(.topbar-responsive-search-dynamic.is-icon-mode)
-  .topbar-responsive-search-compact {
-  background: var(--bg-panel);
-  border-color: rgba(148, 163, 184, 0.34);
-  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.24);
 }

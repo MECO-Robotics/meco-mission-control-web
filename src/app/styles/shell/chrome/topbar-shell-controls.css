@@ -90,14 +90,16 @@
 
 @media (max-width: 760px) {
   .app-topbar:has(.app-topbar-controls-host:empty) .app-topbar-search {
-    width: 2rem;
-    min-width: 2rem;
+    width: var(--app-topbar-search-icon-pill-width);
+    min-width: var(--app-topbar-search-icon-pill-width);
+    height: var(--app-topbar-search-icon-pill-height);
     margin-left: auto;
   }
 
   .app-topbar:has(.app-topbar-controls-host:empty) .app-topbar-search-input {
-    width: 2rem;
-    min-width: 2rem;
+    width: var(--app-topbar-search-icon-pill-width);
+    min-width: var(--app-topbar-search-icon-pill-width);
+    height: var(--app-topbar-search-icon-pill-height);
     padding: 0;
     border-radius: 999px;
     color: transparent;
