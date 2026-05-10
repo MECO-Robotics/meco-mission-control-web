@@ -1,7 +1,7 @@
 import { IconManufacturing, IconTasks } from "@/components/shared/Icons";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
-import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { PART_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -39,14 +39,14 @@ export function PartsToolbar({
 }: PartsToolbarProps) {
   return (
     <div className="panel-actions filter-toolbar part-manager-toolbar">
-      <div data-tutorial-target="parts-search-input">
-        <SearchToolbarInput
-          ariaLabel="Search parts"
-          onChange={setPartSearch}
-          placeholder="Search parts..."
-          value={partSearch}
-        />
-      </div>
+      <TopbarResponsiveSearch
+        ariaLabel="Search parts"
+        compactPlaceholder="Search"
+        onChange={setPartSearch}
+        placeholder="Search parts..."
+        tutorialTarget="parts-search-input"
+        value={partSearch}
+      />
       <label style={ARCHIVED_LABEL_STYLE}>
         <input
           checked={showArchivedPartDefinitions}

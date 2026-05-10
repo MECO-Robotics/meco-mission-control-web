@@ -23,13 +23,29 @@
   min-width: 0;
 }
 
+.filter-toolbar .topbar-responsive-search {
+  flex: 0 1 clamp(11.5rem, 24vw, 19rem);
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
 .worklog-toolbar-topbar .topbar-responsive-search {
   flex: 1 1 auto;
+}
+
+.topbar-responsive-search-full {
+  min-width: 0;
+  width: 100%;
 }
 
 .worklog-toolbar-topbar .topbar-responsive-search-full {
   flex: 1 1 15rem;
   min-width: 0;
+}
+
+.topbar-responsive-search-full .toolbar-search {
+  width: 100%;
 }
 
 .topbar-responsive-search-full-compact {
@@ -126,20 +142,19 @@
 }
 
 @media (max-width: 1340px) {
-  .worklog-toolbar-topbar .topbar-responsive-search-full,
-  .roster-workload-topbar-controls .topbar-responsive-search-full {
+  .filter-toolbar .topbar-responsive-search:not(.topbar-responsive-search-dynamic) .topbar-responsive-search-full {
     display: none;
   }
 
-  .worklog-toolbar-topbar .topbar-responsive-search,
-  .roster-workload-topbar-controls .topbar-responsive-search {
+  .filter-toolbar .topbar-responsive-search:not(.topbar-responsive-search-dynamic) {
     flex: 0 0 var(--topbar-responsive-search-icon-pill-width);
     width: var(--topbar-responsive-search-icon-pill-width);
     min-width: var(--topbar-responsive-search-icon-pill-width);
   }
 
-  .worklog-toolbar-topbar .topbar-responsive-search-compact,
-  .roster-workload-topbar-controls .topbar-responsive-search-compact {
+  .filter-toolbar
+    .topbar-responsive-search:not(.topbar-responsive-search-dynamic)
+    .topbar-responsive-search-compact {
     display: inline-flex;
   }
 }

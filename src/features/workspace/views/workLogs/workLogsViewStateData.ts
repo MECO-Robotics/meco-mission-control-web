@@ -44,16 +44,35 @@ export function buildTaskById(tasks: BootstrapPayload["tasks"]) {
 export function filterSummaryWorkLogs(
   workLogs: BootstrapPayload["workLogs"],
   activePersonFilter: FilterSelection,
+  search: string,
+  membersById: MembersById,
+  subsystemsById: SubsystemsById,
+  taskById: Record<string, BootstrapPayload["tasks"][number]>,
 ) {
-  if (activePersonFilter.length === 0) {
-    return workLogs;
-  }
+  const query = search.trim().toLowerCase();
 
-  return workLogs.filter((workLog) =>
-    workLog.participantIds.some((participantId) =>
-      filterSelectionIncludes(activePersonFilter, participantId),
-    ),
-  );
+  return workLogs.filter((workLog) => {
+    if (
+      activePersonFilter.length > 0 &&
+      !workLog.participantIds.some((participantId) =>
+        filterSelectionIncludes(activePersonFilter, participantId),
+      )
+    ) {
+      return false;
+    }
+
+    if (!query) {
+      return true;
+    }
+
+    return workLogMatchesSearch({
+      membersById,
+      query,
+      subsystemsById,
+      task: taskById[workLog.taskId],
+      workLog,
+    });
+  });
 }
 
 export function buildWorkLogsSummaryState({
@@ -215,23 +234,13 @@ export function filterAndSortWorkLogs({
       return true;
     }
 
-    const participantNames = workLog.participantIds
-      .map((participantId) => membersById[participantId]?.name ?? "")
-      .join(" ")
-      .toLowerCase();
-    const taskText = `${task?.title ?? ""} ${task?.summary ?? ""}`.toLowerCase();
-    const subsystemText = task
-      ? task.subsystemIds
-          .map((subsystemId) => subsystemsById[subsystemId]?.name ?? "")
-          .join(" ")
-      : "";
-
-    return (
-      workLog.notes.toLowerCase().includes(query) ||
-      taskText.includes(query) ||
-      subsystemText.toLowerCase().includes(query) ||
-      participantNames.includes(query)
-    );
+    return workLogMatchesSearch({
+      membersById,
+      query,
+      subsystemsById,
+      task,
+      workLog,
+    });
   });
 
   const compareDate = (left: string, right: string) => left.localeCompare(right);
@@ -250,4 +259,39 @@ export function filterAndSortWorkLogs({
 
     return compareDate(right.date, left.date) || compareDate(left.taskId, right.taskId);
   });
+}
+
+function workLogMatchesSearch({
+  membersById,
+  query,
+  subsystemsById,
+  task,
+  workLog,
+}: {
+  membersById: MembersById;
+  query: string;
+  subsystemsById: SubsystemsById;
+  task: BootstrapPayload["tasks"][number] | undefined;
+  workLog: WorkLogRecord;
+}) {
+  const participantNames = workLog.participantIds
+    .map((participantId) => membersById[participantId]?.name ?? "")
+    .join(" ");
+  const subsystemText = task
+    ? Array.from(new Set([task.subsystemId, ...task.subsystemIds].filter(Boolean)))
+        .map((subsystemId) => subsystemsById[subsystemId]?.name ?? "")
+        .join(" ")
+    : "";
+
+  return [
+    workLog.notes,
+    workLog.date,
+    task?.title ?? "",
+    task?.summary ?? "",
+    participantNames,
+    subsystemText,
+  ]
+    .join(" ")
+    .toLowerCase()
+    .includes(query);
 }

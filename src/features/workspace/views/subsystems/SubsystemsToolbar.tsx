@@ -1,4 +1,4 @@
-import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 
 interface SubsystemsToolbarProps {
   search: string;
@@ -27,14 +27,14 @@ export function SubsystemsToolbar({
 }: SubsystemsToolbarProps) {
   return (
     <div className="panel-actions filter-toolbar subsystem-manager-toolbar">
-      <div data-tutorial-target="subsystem-search-input">
-        <SearchToolbarInput
-          ariaLabel="Search subsystems and mechanisms"
-          onChange={setSearch}
-          placeholder="Search subsystems or mechanisms..."
-          value={search}
-        />
-      </div>
+      <TopbarResponsiveSearch
+        ariaLabel="Search subsystems and mechanisms"
+        compactPlaceholder="Search"
+        onChange={setSearch}
+        placeholder="Search subsystems or mechanisms..."
+        tutorialTarget="subsystem-search-input"
+        value={search}
+      />
       <label style={LABEL_STYLE}>
         <input
           checked={showArchivedSubsystems}

@@ -5,6 +5,7 @@ import { SearchToolbarInput } from "./workspaceSearchToolbarInput";
 
 export function TopbarResponsiveSearch({
   ariaLabel,
+  className,
   compactPlaceholder,
   compactSwitchWidth,
   iconReleaseWidth,
@@ -12,9 +13,11 @@ export function TopbarResponsiveSearch({
   mode,
   onChange,
   placeholder,
+  tutorialTarget,
   value,
 }: {
   ariaLabel: string;
+  className?: string;
   compactPlaceholder?: string;
   compactSwitchWidth?: number;
   iconReleaseWidth?: number;
@@ -22,6 +25,7 @@ export function TopbarResponsiveSearch({
   mode?: "multi-state" | "dynamic-label";
   onChange: (value: string) => void;
   placeholder: string;
+  tutorialTarget?: string;
   value: string;
 }) {
   const searchRef = useRef<HTMLDivElement>(null);
@@ -44,6 +48,7 @@ export function TopbarResponsiveSearch({
     searchWidth <= switchWidth
       ? compactLabel
       : placeholder;
+  const rootClassName = `topbar-responsive-search${className ? ` ${className}` : ""}`;
 
   useEffect(() => {
     if (!isCompactOpen || typeof document === "undefined") {
@@ -148,7 +153,8 @@ export function TopbarResponsiveSearch({
 
     return (
       <div
-        className={`topbar-responsive-search topbar-responsive-search-dynamic${isDynamicIconMode ? " is-icon-mode" : ""}`}
+        className={`${rootClassName} topbar-responsive-search-dynamic${isDynamicIconMode ? " is-icon-mode" : ""}`}
+        data-tutorial-target={tutorialTarget}
         ref={searchRef}
       >
         {isDynamicIconMode ? (
@@ -168,7 +174,7 @@ export function TopbarResponsiveSearch({
   }
 
   return (
-    <div className="topbar-responsive-search" ref={searchRef}>
+    <div className={rootClassName} data-tutorial-target={tutorialTarget} ref={searchRef}>
       <div className="topbar-responsive-search-full topbar-responsive-search-full-primary">
         <SearchToolbarInput
           ariaLabel={ariaLabel}

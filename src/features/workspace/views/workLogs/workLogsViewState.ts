@@ -100,6 +100,46 @@ function buildLegacyActivityActions(
   });
 }
 
+function actionMatchesSearch({
+  action,
+  membersById,
+  query,
+  subsystemsById,
+  taskById,
+}: {
+  action: AuditActionRecord;
+  membersById: MembersById;
+  query: string;
+  subsystemsById: SubsystemsById;
+  taskById: Record<string, BootstrapPayload["tasks"][number]>;
+}) {
+  const task = action.taskId ? taskById[action.taskId] : undefined;
+  const participantNames = action.memberIds
+    .map((memberId) => membersById[memberId]?.name ?? "")
+    .join(" ");
+  const actorName = action.actorMemberId ? membersById[action.actorMemberId]?.name ?? "" : "";
+  const subsystemText = action.subsystemId
+    ? subsystemsById[action.subsystemId]?.name ?? ""
+    : task
+      ? task.subsystemIds.map((subsystemId) => subsystemsById[subsystemId]?.name ?? "").join(" ")
+      : "";
+
+  return [
+    action.entityLabel,
+    action.message,
+    action.operation,
+    action.entityType,
+    actorName,
+    participantNames,
+    task?.title ?? "",
+    task?.summary ?? "",
+    subsystemText,
+  ]
+    .join(" ")
+    .toLowerCase()
+    .includes(query);
+}
+
 export function useWorkLogsViewState({
   activePersonFilter,
   bootstrap,
@@ -112,8 +152,16 @@ export function useWorkLogsViewState({
 
   const taskById = useMemo(() => buildTaskById(bootstrap.tasks), [bootstrap.tasks]);
   const summaryWorkLogs = useMemo(
-    () => filterSummaryWorkLogs(bootstrap.workLogs, activePersonFilter),
-    [activePersonFilter, bootstrap.workLogs],
+    () =>
+      filterSummaryWorkLogs(
+        bootstrap.workLogs,
+        activePersonFilter,
+        search,
+        membersById,
+        subsystemsById,
+        taskById,
+      ),
+    [activePersonFilter, bootstrap.workLogs, membersById, search, subsystemsById, taskById],
   );
   const summary = useMemo(
     () =>
@@ -159,8 +207,22 @@ export function useWorkLogsViewState({
             );
           });
 
-    return [...scopedActions].sort((left, right) => right.timestamp.localeCompare(left.timestamp));
-  }, [activePersonFilter, bootstrap.actions, taskById, workLogs]);
+    const query = search.trim().toLowerCase();
+    const filteredActions =
+      query.length === 0
+        ? scopedActions
+        : scopedActions.filter((action) =>
+            actionMatchesSearch({
+              action,
+              membersById,
+              query,
+              subsystemsById,
+              taskById,
+            }),
+          );
+
+    return [...filteredActions].sort((left, right) => right.timestamp.localeCompare(left.timestamp));
+  }, [activePersonFilter, bootstrap.actions, membersById, search, subsystemsById, taskById, workLogs]);
 
   const workLogPagination = useWorkspacePagination<WorkLogRecord>(workLogs);
   const activityPagination = useWorkspacePagination<AuditActionRecord>(activityActions);

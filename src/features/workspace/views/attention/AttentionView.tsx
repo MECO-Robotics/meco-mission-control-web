@@ -1,7 +1,9 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 
+import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { AttentionNeedsActionNowList } from "./AttentionNeedsActionNowList";
 import { AttentionSummaryCards } from "./AttentionSummaryCards";
@@ -21,6 +23,7 @@ export function AttentionView({
   onOpenRisk,
   onOpenTask,
 }: AttentionViewProps) {
+  const [searchFilter, setSearchFilter] = useState("");
   const viewModel = useMemo(
     () =>
       buildAttentionViewModel({
@@ -29,6 +32,53 @@ export function AttentionView({
       }),
     [activePersonFilter, bootstrap],
   );
+  const filteredActionNowItems = useMemo(() => {
+    const normalizedSearch = searchFilter.trim().toLowerCase();
+    if (normalizedSearch.length === 0) {
+      return viewModel.actionNowItems;
+    }
+
+    return viewModel.actionNowItems.filter((item) =>
+      [
+        item.title,
+        item.whyNow,
+        item.nextAction,
+        item.ownerLabel,
+        item.statusLabel,
+        item.severityLabel,
+        item.contextLabel,
+        item.sourceType,
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(normalizedSearch),
+    );
+  }, [searchFilter, viewModel.actionNowItems]);
+  const filteredTriageGroups = useMemo(() => {
+    const normalizedSearch = searchFilter.trim().toLowerCase();
+    if (normalizedSearch.length === 0) {
+      return viewModel.triageGroups;
+    }
+
+    return viewModel.triageGroups.map((group) => ({
+      ...group,
+      items: group.items.filter((item) =>
+        [
+          group.title,
+          item.title,
+          item.subtitle,
+          item.ownerLabel,
+          item.statusLabel,
+          item.severityLabel,
+          item.contextLabel,
+          item.kind,
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(normalizedSearch),
+      ),
+    }));
+  }, [searchFilter, viewModel.triageGroups]);
   const jumpToSection = useCallback((sectionId: string) => {
     if (typeof document === "undefined") {
       return;
@@ -42,6 +92,18 @@ export function AttentionView({
 
   return (
     <section className={`panel dense-panel attention-view-shell ${WORKSPACE_PANEL_CLASS}`}>
+      <AppTopbarSlotPortal slot="controls">
+        <div className="panel-actions filter-toolbar attention-toolbar">
+          <TopbarResponsiveSearch
+            ariaLabel="Search action required"
+            compactPlaceholder="Search"
+            onChange={setSearchFilter}
+            placeholder="Search action required..."
+            value={searchFilter}
+          />
+        </div>
+      </AppTopbarSlotPortal>
+
       <div className="panel-header compact-header">
         <div className="queue-section-header">
           <h2>Action Required</h2>
@@ -51,12 +113,12 @@ export function AttentionView({
 
       <AttentionSummaryCards groups={viewModel.summaryGroups} onSelectCard={jumpToSection} />
       <AttentionNeedsActionNowList
-        items={viewModel.actionNowItems}
+        items={filteredActionNowItems}
         onOpenRisk={onOpenRisk}
         onOpenTask={onOpenTask}
       />
       <AttentionTriageList
-        groups={viewModel.triageGroups}
+        groups={filteredTriageGroups}
         onOpenRisk={onOpenRisk}
         onOpenTask={onOpenTask}
       />

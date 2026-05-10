@@ -1,4 +1,4 @@
-import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 
 import type { RiskSeverityFilter, RiskSourceFilter } from "./riskViewModel";
 
@@ -21,8 +21,9 @@ export function RiskFilterToolbar({
 }: RiskFilterToolbarProps) {
   return (
     <div className="panel-actions filter-toolbar subsystem-manager-toolbar">
-      <SearchToolbarInput
+      <TopbarResponsiveSearch
         ariaLabel="Search risks"
+        compactPlaceholder="Search"
         onChange={onSearchChange}
         placeholder="Search risks..."
         value={search}

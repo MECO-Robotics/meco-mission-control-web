@@ -11,7 +11,7 @@ import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspace
 import { EditableHoverIndicator, PaginationControls, TableCell, useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import { filterSelectionIncludes, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
-import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
@@ -139,8 +139,9 @@ export function ArtifactInventoryView({
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">
         <div className="panel-actions filter-toolbar materials-toolbar">
-          <SearchToolbarInput
+          <TopbarResponsiveSearch
             ariaLabel={`Search ${sectionTitle.toLowerCase()}`}
+            compactPlaceholder="Search"
             onChange={setSearch}
             placeholder={`Search ${sectionTitle.toLowerCase()}...`}
             value={search}

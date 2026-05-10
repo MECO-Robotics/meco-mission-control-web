@@ -25,6 +25,7 @@ interface UseTimelineViewDataArgs {
     milestoneId: string | null,
     payload: MilestonePayload,
   ) => Promise<void>;
+  searchFilter: string;
   timelineZoom: number;
   triggerCreateMilestoneToken: number;
   viewAnchorDate: string;
@@ -40,6 +41,7 @@ export function useTimelineViewData({
   onTaskEditSaved,
   onDeleteTimelineMilestone,
   onSaveTimelineMilestone,
+  searchFilter,
   timelineZoom,
   triggerCreateMilestoneToken,
   viewAnchorDate,
@@ -71,21 +73,84 @@ export function useTimelineViewData({
     [bootstrap.disciplines],
   );
 
-  const scopedTasks = useMemo(
+  const normalizedSearch = searchFilter.trim().toLowerCase();
+  const scopedTasksByPerson = useMemo(
     () =>
       activePersonFilter.length > 0
         ? bootstrap.tasks.filter((task) => filterSelectionMatchesTaskPeople(activePersonFilter, task))
         : bootstrap.tasks,
     [activePersonFilter, bootstrap.tasks],
   );
+  const scopedTasks = useMemo(() => {
+    if (normalizedSearch.length === 0) {
+      return scopedTasksByPerson;
+    }
+
+    return scopedTasksByPerson.filter((task) => {
+      const subsystemIds = task.subsystemIds.length > 0 ? task.subsystemIds : [task.subsystemId];
+      const subsystemLabels = subsystemIds.map((subsystemId) => subsystemsById[subsystemId]?.name ?? "");
+      const projectLabel = projectsById[task.projectId]?.name ?? "";
+
+      return [
+        task.title,
+        task.summary,
+        task.status,
+        task.priority,
+        projectLabel,
+        ...subsystemLabels,
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(normalizedSearch);
+    });
+  }, [normalizedSearch, projectsById, scopedTasksByPerson, subsystemsById]);
+  const scopedSubsystems = useMemo(() => {
+    if (normalizedSearch.length === 0) {
+      return bootstrap.subsystems;
+    }
+
+    const taskSubsystemIds = new Set(
+      scopedTasks.flatMap((task) => (task.subsystemIds.length > 0 ? task.subsystemIds : [task.subsystemId])),
+    );
+
+    return bootstrap.subsystems.filter((subsystem) => {
+      const projectLabel = projectsById[subsystem.projectId]?.name ?? "";
+      const subsystemMatches = [subsystem.name, projectLabel]
+        .join(" ")
+        .toLowerCase()
+        .includes(normalizedSearch);
+
+      return subsystemMatches || taskSubsystemIds.has(subsystem.id);
+    });
+  }, [bootstrap.subsystems, normalizedSearch, projectsById, scopedTasks]);
   const scopedMilestones = useMemo(
-    () =>
-      filterTimelineMilestonesByPersonSelection({
+    () => {
+      const milestonesByPerson = filterTimelineMilestonesByPersonSelection({
         activePersonFilter,
         milestones: bootstrap.milestones,
         tasks: bootstrap.tasks,
-      }),
-    [activePersonFilter, bootstrap.milestones, bootstrap.tasks],
+      });
+
+      if (normalizedSearch.length === 0) {
+        return milestonesByPerson;
+      }
+
+      return milestonesByPerson.filter((milestone) => {
+        const projectLabels = milestone.projectIds.map((projectId) => projectsById[projectId]?.name ?? "");
+
+        return [
+          milestone.title,
+          milestone.description,
+          milestone.type,
+          milestone.status,
+          ...projectLabels,
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(normalizedSearch);
+      });
+    },
+    [activePersonFilter, bootstrap.milestones, bootstrap.tasks, normalizedSearch, projectsById],
   );
   const tasksById = useMemo(
     () =>
@@ -94,23 +159,23 @@ export function useTimelineViewData({
       ) as Record<string, BootstrapPayload["tasks"][number]>,
     [bootstrap.tasks],
   );
-  const timelineFilterMotionClass = useFilterChangeMotionClass([activePersonFilter]);
+  const timelineFilterMotionClass = useFilterChangeMotionClass([activePersonFilter, searchFilter]);
   const timeline = useMemo(
     () =>
       buildTimelineData({
         isAllProjectsView,
         milestones: scopedMilestones,
         projectsById,
-        scopedSubsystems: bootstrap.subsystems,
+        scopedSubsystems,
         scopedTasks,
         viewAnchorDate,
         viewInterval,
       }),
     [
-      bootstrap.subsystems,
       isAllProjectsView,
       projectsById,
       scopedMilestones,
+      scopedSubsystems,
       scopedTasks,
       viewAnchorDate,
       viewInterval,

@@ -2,7 +2,7 @@ import type { Dispatch, SetStateAction } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { IconSort } from "@/components/shared/Icons";
-import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
@@ -86,14 +86,14 @@ export function TaskQueueToolbar({
 }: TaskQueueToolbarProps) {
   return (
     <div className="panel-actions filter-toolbar task-queue-toolbar">
-      <div data-tutorial-target="task-queue-search-input">
-        <SearchToolbarInput
-          ariaLabel="Search tasks"
-          onChange={setSearchFilter}
-          placeholder="Search tasks..."
-          value={searchFilter}
-        />
-      </div>
+      <TopbarResponsiveSearch
+        ariaLabel="Search tasks"
+        compactPlaceholder="Search"
+        onChange={setSearchFilter}
+        placeholder="Search tasks..."
+        tutorialTarget="task-queue-search-input"
+        value={searchFilter}
+      />
 
       <TaskQueueCompactFilterMenu
         activeFilterCount={activeFilterCount}

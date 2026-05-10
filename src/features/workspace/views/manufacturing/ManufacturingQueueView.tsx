@@ -9,7 +9,7 @@ import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspace
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import { filterSelectionIncludes, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { PaginationControls, useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
-import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
@@ -107,14 +107,14 @@ export function ManufacturingQueueView({
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">
         <div className="panel-actions filter-toolbar queue-toolbar">
-          <div data-tutorial-target={tutorialTarget("search-input")}>
-            <SearchToolbarInput
-              ariaLabel={`Search ${title}`}
-              onChange={setSearch}
-              placeholder="Search parts..."
-              value={search}
-            />
-          </div>
+          <TopbarResponsiveSearch
+            ariaLabel={`Search ${title}`}
+            compactPlaceholder="Search"
+            onChange={setSearch}
+            placeholder="Search parts..."
+            tutorialTarget={tutorialTarget("search-input")}
+            value={search}
+          />
 
           <CompactFilterMenu
             activeCount={[subsystem, requester, material, status].filter((value) => value.length > 0).length}

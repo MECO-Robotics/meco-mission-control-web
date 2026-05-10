@@ -2,7 +2,7 @@
 
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
-import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { RosterAvailabilityStatus } from "@/types/rosterInsights";
@@ -88,8 +88,9 @@ export function RosterAttendanceView({
     <section className={`panel dense-panel roster-layout mc-roster-insights-shell ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">
         <div className="panel-actions filter-toolbar mc-roster-insights-toolbar">
-          <SearchToolbarInput
+          <TopbarResponsiveSearch
             ariaLabel="Search attendance"
+            compactPlaceholder="Search"
             onChange={setSearchText}
             placeholder="Search members..."
             value={searchText}

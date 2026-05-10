@@ -59,6 +59,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   const state = useTimelineViewState();
   const { setTimelineZoomMin } = state;
   const [timelineShellWidth, setTimelineShellWidth] = useState(0);
+  const [searchFilter, setSearchFilter] = useState("");
   const data = useTimelineViewData({
     activePersonFilter,
     bootstrap,
@@ -66,6 +67,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     openCreateTaskModal,
     onTaskEditCanceled,
     onTaskEditSaved,
+    searchFilter,
     timelineZoom: state.timelineZoom,
     onDeleteTimelineMilestone,
     onSaveTimelineMilestone,
@@ -177,8 +179,10 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           bootstrapMembers={bootstrap.members}
           onAdjustZoom={state.adjustTimelineZoom}
           onChangePersonFilter={setActivePersonFilter}
+          onSearchChange={setSearchFilter}
           onIntervalChange={handleTimelineIntervalChange}
           onShiftPeriod={state.shiftTimelinePeriod}
+          searchFilter={searchFilter}
           timelinePeriodLabel={data.timelinePeriodLabel}
           timelineZoom={state.timelineZoom}
           timelineZoomMin={state.timelineZoomMin}

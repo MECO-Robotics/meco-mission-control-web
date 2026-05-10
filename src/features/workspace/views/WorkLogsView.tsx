@@ -5,6 +5,7 @@ import type { FilterSelection } from "@/features/workspace/shared/filters/worksp
 import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
 
 import { useWorkLogsViewState } from "./workLogs/workLogsViewState";
@@ -41,8 +42,8 @@ export function WorkLogsView({
 
   return (
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
-      {view === "logs" ? (
-        <AppTopbarSlotPortal slot="controls">
+      <AppTopbarSlotPortal slot="controls">
+        {view === "logs" ? (
           <WorkLogsToolbar
             bootstrap={bootstrap}
             renderMode="topbar"
@@ -54,8 +55,18 @@ export function WorkLogsView({
             sortOptions={workLogsView.sortOptions}
             subsystemFilter={workLogsView.subsystemFilter}
           />
-        </AppTopbarSlotPortal>
-      ) : null}
+        ) : (
+          <div className="panel-actions filter-toolbar worklog-toolbar worklog-toolbar-topbar">
+            <TopbarResponsiveSearch
+              ariaLabel={view === "activity" ? "Search activity" : "Search work log summary"}
+              compactPlaceholder="Search"
+              onChange={workLogsView.setSearch}
+              placeholder={view === "activity" ? "Search activity..." : "Search summary..."}
+              value={workLogsView.search}
+            />
+          </div>
+        )}
+      </AppTopbarSlotPortal>
 
       <div className="panel-header compact-header">
         <div className="queue-section-header">
