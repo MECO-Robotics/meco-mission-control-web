@@ -1,4 +1,4 @@
-/// <reference types="jest" />
+﻿/// <reference types="jest" />
 
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -13,7 +13,7 @@ function renderSidebar(
   items: NavigationItem[],
   activeTab: ViewTab = "reports",
   options?: {
-    inventoryView?: "materials" | "parts" | "purchases";
+    inventoryView?: "materials" | "parts" | "part-mappings" | "purchases";
     projects?: ProjectRecord[];
     riskManagementView?: "kanban" | "metrics";
     selectedProjectId?: string | null;
@@ -172,7 +172,7 @@ describe("AppSidebar", () => {
     expect(markup).toContain("Risks");
   });
 
-  it("renders Config with robot model and directory", () => {
+  it("renders Config with robot configuration, part mappings, and directory", () => {
     const robotProject: ProjectRecord = {
       id: "robot-1",
       name: "Robot 2026",
@@ -212,7 +212,8 @@ describe("AppSidebar", () => {
     );
 
     expect(markup).toContain("Config");
-    expect(markup).toContain("Robot model");
+    expect(markup).toContain("Robot Configuration");
+    expect(markup).toContain("Part mappings");
     expect(markup).toContain("Directory");
   });
 

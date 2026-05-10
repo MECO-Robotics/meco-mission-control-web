@@ -1,6 +1,7 @@
-import type { InventoryViewTab } from "@/lib/workspaceNavigation";
+﻿import type { InventoryViewTab } from "@/lib/workspaceNavigation";
 import type { WorkspaceContentPanelsProps } from "../WorkspaceContentPanelsCoreImpl";
 import type { ManufacturingItemRecord } from "@/types/recordsInventory";
+import type { SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
 
 export type SwipeDirection = "left" | "right" | null;
 
@@ -37,8 +38,16 @@ export interface WorkspaceTaskPanelProps {
   openCreateMechanismModal: WorkspaceContentPanelsViewProps["openCreateMechanismModal"];
   openCreatePartInstanceModal: WorkspaceContentPanelsViewProps["openCreatePartInstanceModal"];
   openCreateSubsystemModal: WorkspaceContentPanelsViewProps["openCreateSubsystemModal"];
+  handleDeleteMechanism: WorkspaceContentPanelsViewProps["handleDeleteMechanism"];
   openEditMechanismModal: WorkspaceContentPanelsViewProps["openEditMechanismModal"];
+  openEditPartInstanceModal: WorkspaceContentPanelsViewProps["openEditPartInstanceModal"];
   openEditSubsystemModal: WorkspaceContentPanelsViewProps["openEditSubsystemModal"];
+  removePartInstanceFromMechanism: WorkspaceContentPanelsViewProps["removePartInstanceFromMechanism"];
+  saveSubsystemLayout: (
+    subsystemId: string,
+    layout: SubsystemLayoutFields,
+  ) => Promise<boolean>;
+  updateSubsystemConfiguration: WorkspaceContentPanelsViewProps["updateSubsystemConfiguration"];
   openTimelineTaskDetailsModal: WorkspaceContentPanelsViewProps["openTimelineTaskDetailsModal"];
   setActivePersonFilter: WorkspaceContentPanelsViewProps["setActivePersonFilter"];
   subsystemsById: WorkspaceContentPanelsViewProps["subsystemsById"];

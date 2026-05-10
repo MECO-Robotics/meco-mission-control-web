@@ -1,6 +1,10 @@
 import type { ArtifactPayload, MaterialPayload, MechanismPayload, PartDefinitionPayload, PartInstancePayload, PurchaseItemPayload, QaReportPayload, ReportPayload, SubsystemPayload, TestResultPayload, WorkLogPayload, WorkstreamPayload } from "@/types/payloads";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { getDefaultSubsystemId } from "@/lib/appUtils/common";
+import {
+  DEFAULT_SUBSYSTEM_LAYOUT_VIEW,
+  DEFAULT_SUBSYSTEM_LAYOUT_ZONE,
+} from "@/lib/appUtils/subsystemLayout";
 import { localTodayDate } from "@/lib/dateUtils";
 import { resolveWorkspaceColor } from "@/features/workspace/shared/model/workspaceColors";
 
@@ -258,6 +262,11 @@ export function buildEmptySubsystemPayload(bootstrap: BootstrapPayload): Subsyst
     responsibleEngineerId: firstResponsibleEngineer,
     mentorIds: firstMentor ? [firstMentor] : [],
     risks: [],
+    layoutX: null,
+    layoutY: null,
+    layoutZone: DEFAULT_SUBSYSTEM_LAYOUT_ZONE,
+    layoutView: DEFAULT_SUBSYSTEM_LAYOUT_VIEW,
+    sortOrder: null,
   };
 }
 
