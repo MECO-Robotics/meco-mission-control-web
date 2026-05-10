@@ -19,6 +19,7 @@ interface RobotMapCanvasProps {
   onSelectSubsystem: (subsystemId: string) => void;
   onToggleLayoutEdit: () => void;
   referenceImageUrl: string | null;
+  referenceImageStorageNotice: string | null;
   selectedSubsystemId: string | null;
   subsystems: RobotConfigurationSubsystemModel[];
 }
@@ -60,6 +61,7 @@ export function RobotMapCanvas({
   onSelectSubsystem,
   onToggleLayoutEdit,
   referenceImageUrl,
+  referenceImageStorageNotice,
   selectedSubsystemId,
   subsystems,
 }: RobotMapCanvasProps) {
@@ -88,21 +90,39 @@ export function RobotMapCanvas({
       return;
     }
 
-    const pointer = toLayoutCoordinates(mapSurfaceBounds, event.clientX, event.clientY);
-    if (pointer.x === null || pointer.y === null) {
+    if (mapSurfaceBounds.width <= 0 || mapSurfaceBounds.height <= 0) {
       return;
     }
 
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
-    const fallbackX = subsystem.layout.layoutX ?? 0.5;
-    const fallbackY = subsystem.layout.layoutY ?? 0.5;
+    const startedFromUnplaced = !isSubsystemPlaced(subsystem.layout);
+    let offsetX: number;
+    let offsetY: number;
+
+    if (startedFromUnplaced) {
+      const cardBounds = event.currentTarget.getBoundingClientRect();
+      offsetX =
+        (event.clientX - (cardBounds.left + cardBounds.width / 2)) / mapSurfaceBounds.width;
+      offsetY =
+        (event.clientY - (cardBounds.top + cardBounds.height / 2)) / mapSurfaceBounds.height;
+    } else {
+      const pointer = toLayoutCoordinates(mapSurfaceBounds, event.clientX, event.clientY);
+      if (pointer.x === null || pointer.y === null) {
+        return;
+      }
+
+      const fallbackX = subsystem.layout.layoutX ?? 0.5;
+      const fallbackY = subsystem.layout.layoutY ?? 0.5;
+      offsetX = pointer.x - fallbackX;
+      offsetY = pointer.y - fallbackY;
+    }
 
     setDragState({
-      offsetX: pointer.x - fallbackX,
-      offsetY: pointer.y - fallbackY,
+      offsetX,
+      offsetY,
       pointerId: event.pointerId,
-      startedFromUnplaced: !isSubsystemPlaced(subsystem.layout),
+      startedFromUnplaced,
       subsystemId: subsystem.id,
     });
     onSelectSubsystem(subsystem.id);
@@ -260,6 +280,12 @@ export function RobotMapCanvas({
             </span>
           </button>
         </div>
+
+        {referenceImageStorageNotice ? (
+          <p className="robot-config-map-storage-notice" role="status">
+            {referenceImageStorageNotice}
+          </p>
+        ) : null}
 
         {!hasUnplacedSubsystems ? (
           <div className="robot-config-map-actions-overlay">

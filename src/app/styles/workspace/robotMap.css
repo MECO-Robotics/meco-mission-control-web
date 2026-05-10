@@ -108,6 +108,22 @@
   z-index: 3;
 }
 
+.robot-config-map-storage-notice {
+  background: color-mix(in srgb, #7f1d1d 18%, var(--bg-panel) 82%);
+  border: 1px solid color-mix(in srgb, #b91c1c 35%, var(--border-base) 65%);
+  border-radius: 0.55rem;
+  bottom: 0.7rem;
+  color: var(--text-copy);
+  font-size: 0.7rem;
+  font-weight: 700;
+  left: 0.7rem;
+  margin: 0;
+  max-width: min(320px, calc(100% - 7rem));
+  padding: 0.35rem 0.5rem;
+  position: absolute;
+  z-index: 3;
+}
+
 .robot-config-reference-image {
   display: block;
   height: 100%;

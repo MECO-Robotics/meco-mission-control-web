@@ -108,6 +108,10 @@ export function AppTopbarNavigation({
           return !isAllProjectsView && !isNonRobotProject;
         }
 
+        if (subItem.id === "config-part-mappings") {
+          return !isAllProjectsView && !isNonRobotProject;
+        }
+
         if (subItem.id === "tasks-manufacturing") {
           return showManufacturingOption;
         }
