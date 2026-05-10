@@ -200,7 +200,11 @@ export function RobotMapView({
   const handleReferenceImageSelected = async (file: File) => {
     const nextImage = await readImageAsDataUrl(file);
     setReferenceImageUrl(nextImage);
-    window.localStorage.setItem(referenceImageStorageKey, nextImage);
+    try {
+      window.localStorage.setItem(referenceImageStorageKey, nextImage);
+    } catch (error) {
+      console.warn("Failed to persist robot reference image locally.", error);
+    }
   };
 
   return (
