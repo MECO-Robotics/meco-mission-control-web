@@ -2,11 +2,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
-import { normalizeSubsystemLayoutFields, type SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
+import type { SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
 
 import { RobotConfigurationToolbar } from "./RobotConfigurationToolbar";
 import { RobotMapCanvas } from "./RobotMapCanvas";
-import { buildAutoArrangedLayouts, buildUnplacedLayout } from "./robotMapLayout";
+import { buildAutoArrangedLayouts, buildUnplacedLayout, resolveSubsystemLayout } from "./robotMapLayout";
 import { buildRobotConfigurationViewModel } from "./robotMapViewModel";
 import { SubsystemDetailPanel } from "./SubsystemDetailPanel";
 import { SubsystemMapCard } from "./SubsystemMapCard";
@@ -120,7 +120,7 @@ export function RobotMapView({
   const persistedLayoutBySubsystemId = useMemo(() => {
     const nextLayouts: Record<string, SubsystemLayoutFields> = {};
     bootstrap.subsystems.forEach((subsystem) => {
-      nextLayouts[subsystem.id] = normalizeSubsystemLayoutFields(subsystem);
+      nextLayouts[subsystem.id] = resolveSubsystemLayout(subsystem);
     });
     return nextLayouts;
   }, [bootstrap.subsystems]);

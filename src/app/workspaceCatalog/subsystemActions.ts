@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import { buildEmptySubsystemPayload } from "@/lib/appUtils/payloadBuilders";
 import { splitList, toErrorMessage } from "@/lib/appUtils/common";
@@ -13,6 +13,25 @@ export type SubsystemActions = ReturnType<typeof useSubsystemActions>;
 
 export function useSubsystemActions(model: AppWorkspaceModel) {
   const updateRequestVersionBySubsystemIdRef = useRef<Record<string, number>>({});
+  const pendingUpdateCountBySubsystemIdRef = useRef<Record<string, number>>({});
+  const persistedSubsystemByIdRef = useRef<Record<string, SubsystemRecord>>({});
+
+  useEffect(() => {
+    const nextSubsystemIds = new Set(model.bootstrap.subsystems.map((subsystem) => subsystem.id));
+    Object.keys(persistedSubsystemByIdRef.current).forEach((subsystemId) => {
+      if (!nextSubsystemIds.has(subsystemId)) {
+        delete persistedSubsystemByIdRef.current[subsystemId];
+      }
+    });
+
+    model.bootstrap.subsystems.forEach((subsystem) => {
+      if ((pendingUpdateCountBySubsystemIdRef.current[subsystem.id] ?? 0) > 0) {
+        return;
+      }
+
+      persistedSubsystemByIdRef.current[subsystem.id] = subsystem;
+    });
+  }, [model.bootstrap.subsystems]);
 
   const openCreateSubsystemModal = useCallback(() => {
     model.setActiveSubsystemId(null);
@@ -103,8 +122,12 @@ export function useSubsystemActions(model: AppWorkspaceModel) {
     if (!previousSubsystem) {
       return false;
     }
+    const persistedSubsystem = persistedSubsystemByIdRef.current[subsystemId];
+    const rollbackSubsystem = persistedSubsystem ? { ...persistedSubsystem } : previousSubsystem;
     const requestVersion = (updateRequestVersionBySubsystemIdRef.current[subsystemId] ?? 0) + 1;
     updateRequestVersionBySubsystemIdRef.current[subsystemId] = requestVersion;
+    pendingUpdateCountBySubsystemIdRef.current[subsystemId] =
+      (pendingUpdateCountBySubsystemIdRef.current[subsystemId] ?? 0) + 1;
 
     const hasLayoutPatch = [
       "layoutX",
@@ -165,6 +188,7 @@ export function useSubsystemActions(model: AppWorkspaceModel) {
         payload,
         model.handleUnauthorized,
       );
+      persistedSubsystemByIdRef.current[subsystemId] = updatedSubsystem;
 
       const latestVersion = updateRequestVersionBySubsystemIdRef.current[subsystemId] ?? 0;
       if (latestVersion === requestVersion) {
@@ -182,12 +206,19 @@ export function useSubsystemActions(model: AppWorkspaceModel) {
         model.setBootstrap((current) => ({
           ...current,
           subsystems: current.subsystems.map((subsystem) =>
-            subsystem.id === subsystemId ? previousSubsystem : subsystem,
+            subsystem.id === subsystemId ? rollbackSubsystem : subsystem,
           ),
         }));
         model.setDataMessage(toErrorMessage(error));
       }
       return false;
+    } finally {
+      const pendingCount = (pendingUpdateCountBySubsystemIdRef.current[subsystemId] ?? 1) - 1;
+      if (pendingCount <= 0) {
+        delete pendingUpdateCountBySubsystemIdRef.current[subsystemId];
+      } else {
+        pendingUpdateCountBySubsystemIdRef.current[subsystemId] = pendingCount;
+      }
     }
   }, [model, updateRequestVersionBySubsystemIdRef]);
 
