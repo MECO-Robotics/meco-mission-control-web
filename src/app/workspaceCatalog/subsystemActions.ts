@@ -15,12 +15,14 @@ export function useSubsystemActions(model: AppWorkspaceModel) {
   const updateRequestVersionBySubsystemIdRef = useRef<Record<string, number>>({});
   const pendingUpdateCountBySubsystemIdRef = useRef<Record<string, number>>({});
   const persistedSubsystemByIdRef = useRef<Record<string, SubsystemRecord>>({});
+  const persistedSubsystemVersionByIdRef = useRef<Record<string, number>>({});
 
   useEffect(() => {
     const nextSubsystemIds = new Set(model.bootstrap.subsystems.map((subsystem) => subsystem.id));
     Object.keys(persistedSubsystemByIdRef.current).forEach((subsystemId) => {
       if (!nextSubsystemIds.has(subsystemId)) {
         delete persistedSubsystemByIdRef.current[subsystemId];
+        delete persistedSubsystemVersionByIdRef.current[subsystemId];
       }
     });
 
@@ -30,6 +32,8 @@ export function useSubsystemActions(model: AppWorkspaceModel) {
       }
 
       persistedSubsystemByIdRef.current[subsystem.id] = subsystem;
+      persistedSubsystemVersionByIdRef.current[subsystem.id] =
+        updateRequestVersionBySubsystemIdRef.current[subsystem.id] ?? 0;
     });
   }, [model.bootstrap.subsystems]);
 
@@ -122,8 +126,6 @@ export function useSubsystemActions(model: AppWorkspaceModel) {
     if (!previousSubsystem) {
       return false;
     }
-    const persistedSubsystem = persistedSubsystemByIdRef.current[subsystemId];
-    const rollbackSubsystem = persistedSubsystem ? { ...persistedSubsystem } : previousSubsystem;
     const requestVersion = (updateRequestVersionBySubsystemIdRef.current[subsystemId] ?? 0) + 1;
     updateRequestVersionBySubsystemIdRef.current[subsystemId] = requestVersion;
     pendingUpdateCountBySubsystemIdRef.current[subsystemId] =
@@ -188,10 +190,17 @@ export function useSubsystemActions(model: AppWorkspaceModel) {
         payload,
         model.handleUnauthorized,
       );
-      persistedSubsystemByIdRef.current[subsystemId] = updatedSubsystem;
+      const persistedVersion = persistedSubsystemVersionByIdRef.current[subsystemId] ?? 0;
+      const shouldPromotePersistedSnapshot = requestVersion >= persistedVersion;
+      if (shouldPromotePersistedSnapshot) {
+        persistedSubsystemByIdRef.current[subsystemId] = updatedSubsystem;
+        persistedSubsystemVersionByIdRef.current[subsystemId] = requestVersion;
+      }
 
       const latestVersion = updateRequestVersionBySubsystemIdRef.current[subsystemId] ?? 0;
-      if (latestVersion === requestVersion) {
+      const pendingCount = pendingUpdateCountBySubsystemIdRef.current[subsystemId] ?? 1;
+      const shouldApplyOutOfOrderSuccess = shouldPromotePersistedSnapshot && pendingCount === 1;
+      if (latestVersion === requestVersion || shouldApplyOutOfOrderSuccess) {
         model.setBootstrap((current) => ({
           ...current,
           subsystems: current.subsystems.map((subsystem) =>
@@ -203,6 +212,8 @@ export function useSubsystemActions(model: AppWorkspaceModel) {
     } catch (error) {
       const latestVersion = updateRequestVersionBySubsystemIdRef.current[subsystemId] ?? 0;
       if (latestVersion === requestVersion) {
+        const persistedSubsystem = persistedSubsystemByIdRef.current[subsystemId];
+        const rollbackSubsystem = persistedSubsystem ? { ...persistedSubsystem } : previousSubsystem;
         model.setBootstrap((current) => ({
           ...current,
           subsystems: current.subsystems.map((subsystem) =>
