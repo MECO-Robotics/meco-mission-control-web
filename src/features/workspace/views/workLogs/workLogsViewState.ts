@@ -100,7 +100,7 @@ function buildLegacyActivityActions(
   });
 }
 
-function actionMatchesSearch({
+export function actionMatchesSearch({
   action,
   membersById,
   query,
@@ -118,11 +118,17 @@ function actionMatchesSearch({
     .map((memberId) => membersById[memberId]?.name ?? "")
     .join(" ");
   const actorName = action.actorMemberId ? membersById[action.actorMemberId]?.name ?? "" : "";
-  const subsystemText = action.subsystemId
-    ? subsystemsById[action.subsystemId]?.name ?? ""
-    : task
-      ? task.subsystemIds.map((subsystemId) => subsystemsById[subsystemId]?.name ?? "").join(" ")
-      : "";
+  const subsystemIds = Array.from(
+    new Set(
+      [
+        action.subsystemId,
+        ...(task ? [task.subsystemId, ...task.subsystemIds] : []),
+      ].filter((subsystemId): subsystemId is string => Boolean(subsystemId)),
+    ),
+  );
+  const subsystemText = subsystemIds
+    .map((subsystemId) => subsystemsById[subsystemId]?.name ?? "")
+    .join(" ");
 
   return [
     action.entityLabel,
