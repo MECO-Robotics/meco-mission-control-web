@@ -15,47 +15,12 @@ import {
   stepUsesPlaceholderParser,
 } from "../model/cadStepParserStatus";
 import { CadStepImportSummaryCard } from "./CadStepImportSummaryCard";
+import { CadStepMappingReviewTable, type CadStepMappingConfirmInput } from "./CadStepMappingReviewTable";
 import { CadStepTreePanel } from "./CadStepTreePanel";
-
-type TargetKind = CadStepMappingRecord["targetKind"];
-
-const targetKinds: Array<{ value: TargetKind; label: string }> = [
-  { value: "SUBSYSTEM", label: "Existing subsystem" },
-  { value: "MECHANISM", label: "Existing mechanism" },
-  { value: "PART_DEFINITION", label: "Existing part definition" },
-  { value: "IGNORE", label: "Ignore" },
-  { value: "REFERENCE_GEOMETRY", label: "Reference geometry" },
-  { value: "UNMAPPED", label: "Unmapped" },
-];
-
-function targetOptions(
-  kind: TargetKind,
-  targets: { subsystems: SubsystemRecord[]; mechanisms: MechanismRecord[]; partDefinitions: PartDefinitionRecord[] },
-) {
-  if (kind === "SUBSYSTEM") {
-    return targets.subsystems.map((item) => ({ id: item.id, label: item.name }));
-  }
-  if (kind === "MECHANISM") {
-    return targets.mechanisms.map((item) => ({ id: item.id, label: item.name }));
-  }
-  if (kind === "PART_DEFINITION") {
-    return targets.partDefinitions.map((item) => ({ id: item.id, label: `${item.partNumber} - ${item.name}` }));
-  }
-  return [];
-}
-
-function ruleOrigin(mapping: CadStepMappingRecord) {
-  if (mapping.rule) {
-    return "existing rule";
-  }
-  if (mapping.confidence === "MANUAL") {
-    return "manual override";
-  }
-  return mapping.status === "CONFIRMED" ? "this snapshot only" : "new suggestion";
-}
 
 export function CadStepReviewPanels({
   diff,
+  groupRepeatedInstances = true,
   importRun,
   isFinalizing,
   isSavingMapping,
@@ -63,6 +28,7 @@ export function CadStepReviewPanels({
   mappings,
   onConfirmMapping,
   onFinalize,
+  onGroupRepeatedInstancesChange = () => undefined,
   snapshot,
   summary,
   targets,
@@ -70,25 +36,21 @@ export function CadStepReviewPanels({
   warnings,
 }: {
   diff: CadStepDiff | null;
+  groupRepeatedInstances?: boolean;
   importRun: CadStepImportRunRecord | null;
   isFinalizing: boolean;
   isSavingMapping: boolean;
   latestImportRunId: string | null;
   mappings: CadStepMappingRecord[];
-  onConfirmMapping: (input: {
-    mappingId: string;
-    targetKind: TargetKind;
-    targetId: string | null;
-    applyToFuture: boolean;
-  }) => void;
+  onConfirmMapping: (input: CadStepMappingConfirmInput) => void;
   onFinalize: (allowUnresolved: boolean) => void;
+  onGroupRepeatedInstancesChange?: (value: boolean) => void;
   snapshot: CadStepSnapshotRecord | null;
   summary: CadStepImportSummary | null;
   targets: { subsystems: SubsystemRecord[]; mechanisms: MechanismRecord[]; partDefinitions: PartDefinitionRecord[] };
   tree: CadStepTreeNode[];
   warnings: CadStepWarningRecord[];
 }) {
-  const [drafts, setDrafts] = useState<Record<string, { targetKind: TargetKind; targetId: string; scope: string }>>({});
   const [allowUnresolved, setAllowUnresolved] = useState(false);
   const unresolvedCount = useMemo(
     () => mappings.filter((mapping) => mapping.status === "NEEDS_REVIEW" || mapping.targetKind === "UNMAPPED").length,
@@ -96,12 +58,6 @@ export function CadStepReviewPanels({
   );
   const usesPlaceholderParser = stepUsesPlaceholderParser({ importRun, summary, warnings });
   const isViewingOlderSnapshot = Boolean(snapshot && latestImportRunId && snapshot.importRunId !== latestImportRunId);
-
-  const readDraft = (mapping: CadStepMappingRecord) => drafts[mapping.id] ?? {
-    targetKind: mapping.targetKind === "UNMAPPED" ? "SUBSYSTEM" : mapping.targetKind,
-    targetId: mapping.targetId ?? "",
-    scope: "snapshot",
-  };
 
   return (
     <div className="cad-step-review-stack">
@@ -163,109 +119,15 @@ export function CadStepReviewPanels({
         tree={tree}
       />
 
-      <section className="cad-card">
-        <div className="cad-section-heading">
-          <span className="cad-eyebrow">Mapping review</span>
-          <h3>Detected items</h3>
-        </div>
-        <div className="cad-table-wrap">
-          <table className="cad-table cad-mapping-table">
-            <thead>
-              <tr><th>Detected item</th><th>Type</th><th>Suggested target</th><th>Confidence</th><th>Status</th><th>Action</th></tr>
-            </thead>
-            <tbody>
-              {mappings.length ? mappings.map((mapping) => {
-                const draft = readDraft(mapping);
-                const options = targetOptions(draft.targetKind, targets);
-                return (
-                  <tr data-status={mapping.status} key={mapping.id}>
-                    <td><strong>{mapping.sourceName}</strong><small>{ruleOrigin(mapping)}</small></td>
-                    <td>{mapping.sourceKind.replace(/_/g, " ").toLowerCase()}</td>
-                    <td>
-                      <select
-                        value={draft.targetKind}
-                        onChange={(event) => setDrafts({
-                          ...drafts,
-                          [mapping.id]: { ...draft, targetKind: event.target.value as TargetKind, targetId: "" },
-                        })}
-                      >
-                        {targetKinds.map((kind) => <option key={kind.value} value={kind.value}>{kind.label}</option>)}
-                      </select>
-                      {options.length ? (
-                        <select
-                          value={draft.targetId}
-                          onChange={(event) => setDrafts({
-                            ...drafts,
-                            [mapping.id]: { ...draft, targetId: event.target.value },
-                          })}
-                        >
-                          <option value="">Select target</option>
-                          {options.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
-                        </select>
-                      ) : null}
-                    </td>
-                    <td>{mapping.confidence.toLowerCase()}</td>
-                    <td>{mapping.status.replace(/_/g, " ").toLowerCase()}</td>
-                    <td>
-                      <select
-                        value={draft.scope}
-                        onChange={(event) => setDrafts({
-                          ...drafts,
-                          [mapping.id]: { ...draft, scope: event.target.value },
-                        })}
-                      >
-                        <option value="snapshot">This snapshot only</option>
-                        {usesPlaceholderParser ? null : <option value="future">This snapshot and future imports</option>}
-                      </select>
-                      <div className="cad-row-actions">
-                        <button
-                          className="secondary-button compact-action"
-                          disabled={isSavingMapping || usesPlaceholderParser}
-                          onClick={() => onConfirmMapping({
-                            mappingId: mapping.id,
-                            targetKind: draft.targetKind,
-                            targetId: draft.targetId || null,
-                            applyToFuture: !usesPlaceholderParser && draft.scope === "future",
-                          })}
-                          type="button"
-                        >
-                          Confirm
-                        </button>
-                        <button
-                          className="ghost-button compact-action"
-                          disabled={isSavingMapping || usesPlaceholderParser}
-                          onClick={() => onConfirmMapping({
-                            mappingId: mapping.id,
-                            targetKind: "IGNORE",
-                            targetId: null,
-                            applyToFuture: !usesPlaceholderParser && draft.scope === "future",
-                          })}
-                          type="button"
-                        >
-                          Ignore
-                        </button>
-                        <button
-                          className="ghost-button compact-action"
-                          disabled={isSavingMapping || usesPlaceholderParser}
-                          onClick={() => onConfirmMapping({
-                            mappingId: mapping.id,
-                            targetKind: "REFERENCE_GEOMETRY",
-                            targetId: null,
-                            applyToFuture: !usesPlaceholderParser && draft.scope === "future",
-                          })}
-                          type="button"
-                        >
-                          Reference
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              }) : <tr><td colSpan={6}>No mappings yet.</td></tr>}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      <CadStepMappingReviewTable
+        groupRepeatedInstances={groupRepeatedInstances}
+        isSavingMapping={isSavingMapping}
+        mappings={mappings}
+        onConfirmMapping={onConfirmMapping}
+        onGroupRepeatedInstancesChange={onGroupRepeatedInstancesChange}
+        targets={targets}
+        usesPlaceholderParser={usesPlaceholderParser}
+      />
 
       <div className="cad-grid cad-grid-two">
         <section className="cad-card">
@@ -282,6 +144,12 @@ export function CadStepReviewPanels({
               <span>Removed parts: {diff.removedParts.length}</span>
               <span>Moved part instances: {diff.movedPartInstances.length}</span>
               <span>Mapping changes: {diff.mappingChanges.length}</span>
+              <span>Quantity changes: {diff.quantityChangedPartGroups?.length ?? 0}</span>
+              {diff.quantityChangedPartGroups?.map((change) => (
+                <span key={`${change.parentAssemblyName ?? "root"}-${change.partName}`}>
+                  {change.partName} under {change.parentAssemblyName ?? "root"} quantity changed {change.previousQuantity} {"\u2192"} {change.currentQuantity}
+                </span>
+              ))}
             </div>
           ) : <p className="cad-empty-copy">Upload another STEP iteration to compare snapshots.</p>}
         </section>

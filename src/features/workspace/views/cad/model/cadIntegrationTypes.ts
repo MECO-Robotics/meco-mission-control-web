@@ -241,28 +241,53 @@ export interface CadStepTreeNode {
   depth: number;
   mapping: CadStepMappingRecord | null;
   children: CadStepTreeNode[];
-  partInstances: Array<{
+  partInstances: CadStepTreePartInstanceRecord[];
+}
+
+export type CadStepTreePartInstanceRecord = {
     id: string;
     sourceId: string;
     instancePath: string;
     quantity: number;
     mapping: CadStepMappingRecord | null;
     partDefinition: { id: string; name: string; partNumber: string | null } | null;
-  }>;
-}
+  } | {
+    kind: "part_instance_group";
+    groupId: string;
+    parentAssemblyNodeId: string | null;
+    partDefinitionId: string | null;
+    partDefinition: { id: string; name: string; partNumber: string | null } | null;
+    displayName: string;
+    quantity: number;
+    instanceIds: string[];
+    sourceIds: string[];
+    instancePaths: string[];
+    stableSignatures: string[];
+    mapping: CadStepMappingRecord | null;
+    mappings: CadStepMappingRecord[];
+    hasMixedMappings: boolean;
+    hasMixedMetadata: boolean;
+    representativeInstanceId: string;
+  };
 
 export interface CadStepMappingRecord {
   id: string;
+  kind?: "part_instance_group";
   snapshotId: string;
   mappingRuleId: string | null;
   sourceKind: "ASSEMBLY_NODE" | "PART_DEFINITION" | "PART_INSTANCE";
   sourceId: string;
+  sourceIds?: string[];
   sourceName: string;
   targetKind: "SUBSYSTEM" | "MECHANISM" | "PART_DEFINITION" | "PART_INSTANCE" | "IGNORE" | "REFERENCE_GEOMETRY" | "UNMAPPED";
   targetId: string | null;
   confidence: "HIGH" | "MEDIUM" | "LOW" | "MANUAL";
   status: "PROPOSED" | "CONFIRMED" | "REJECTED" | "NEEDS_REVIEW";
   rule: { id: string; confidence: string } | null;
+  quantity?: number;
+  hasMixedMappings?: boolean;
+  warningCode?: string | null;
+  warning?: string | null;
   updatedAt: string;
 }
 
@@ -277,6 +302,14 @@ export interface CadStepDiff {
     sourceId: string;
     previousParentAssemblyName: string | null;
     currentParentAssemblyName: string | null;
+  }>;
+  quantityChangedPartGroups?: Array<{
+    parentAssemblyName: string | null;
+    partName: string;
+    previousQuantity: number;
+    currentQuantity: number;
+    addedInstancePaths: string[];
+    removedInstancePaths: string[];
   }>;
   mappingChanges: Array<Record<string, unknown>>;
   warnings: CadStepWarningRecord[];

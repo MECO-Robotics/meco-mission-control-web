@@ -72,17 +72,29 @@ export function fetchCadSnapshotSummary(snapshotId: string, onUnauthorized?: () 
   );
 }
 
-export function fetchCadSnapshotTree(snapshotId: string, onUnauthorized?: () => void) {
+function groupInstancesSuffix(options?: { groupInstances?: boolean }) {
+  return options?.groupInstances === undefined ? "" : `?groupInstances=${String(options.groupInstances)}`;
+}
+
+export function fetchCadSnapshotTree(
+  snapshotId: string,
+  options?: { groupInstances?: boolean },
+  onUnauthorized?: () => void,
+) {
   return requestApi<{ snapshotId: string; rootNodes: CadStepTreeNode[] }>(
-    `/cad/snapshots/${snapshotId}/tree`,
+    `/cad/snapshots/${snapshotId}/tree${groupInstancesSuffix(options)}`,
     {},
     onUnauthorized,
   );
 }
 
-export function fetchCadSnapshotMappings(snapshotId: string, onUnauthorized?: () => void) {
+export function fetchCadSnapshotMappings(
+  snapshotId: string,
+  options?: { groupInstances?: boolean },
+  onUnauthorized?: () => void,
+) {
   return requestApi<{ items: CadStepMappingRecord[] }>(
-    `/cad/snapshots/${snapshotId}/mappings`,
+    `/cad/snapshots/${snapshotId}/mappings${groupInstancesSuffix(options)}`,
     {},
     onUnauthorized,
   );
@@ -92,7 +104,9 @@ export function applyCadSnapshotMappings(
   snapshotId: string,
   payload: {
     updates: Array<{
-      mappingId: string;
+      mappingId?: string;
+      sourceKind?: CadStepMappingRecord["sourceKind"];
+      sourceIds?: string[];
       targetKind: CadStepMappingRecord["targetKind"];
       targetId?: string | null;
       confidence?: CadStepMappingRecord["confidence"];

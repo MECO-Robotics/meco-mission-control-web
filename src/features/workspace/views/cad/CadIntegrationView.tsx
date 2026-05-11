@@ -52,6 +52,7 @@ export function CadIntegrationView({
   const [stepMappings, setStepMappings] = useState<CadStepMappingRecord[]>([]);
   const [stepWarnings, setStepWarnings] = useState<CadStepWarningRecord[]>([]);
   const [stepDiff, setStepDiff] = useState<CadStepDiff | null>(null);
+  const [groupRepeatedInstances, setGroupRepeatedInstances] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
   const [isUploadingStep, setIsUploadingStep] = useState(false);
   const [isSavingMapping, setIsSavingMapping] = useState(false);
@@ -65,11 +66,12 @@ export function CadIntegrationView({
     .filter((run) => run.source === "STEP_UPLOAD" && run.status !== "FAILED" && run.status !== "CANCELED")
     .sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt))[0] ?? null;
 
-  const loadCadSnapshotDetails = useCallback(async (snapshotId: string) => {
+  const loadCadSnapshotDetails = useCallback(async (snapshotId: string, options?: { groupRepeatedInstances?: boolean }) => {
+    const shouldGroupInstances = options?.groupRepeatedInstances ?? groupRepeatedInstances;
     const [summaryResponse, treeResponse, mappingsResponse, diffResponse] = await Promise.all([
       fetchCadSnapshotSummary(snapshotId),
-      fetchCadSnapshotTree(snapshotId),
-      fetchCadSnapshotMappings(snapshotId),
+      fetchCadSnapshotTree(snapshotId, { groupInstances: shouldGroupInstances }),
+      fetchCadSnapshotMappings(snapshotId, { groupInstances: shouldGroupInstances }),
       fetchCadSnapshotDiff(snapshotId).catch(() => null),
     ]);
     setStepSummary(summaryResponse.summary);
@@ -77,7 +79,7 @@ export function CadIntegrationView({
     setStepMappings(mappingsResponse.items);
     setStepWarnings(diffResponse?.warnings ?? []);
     setStepDiff(diffResponse);
-  }, []);
+  }, [groupRepeatedInstances]);
 
   const loadCadSnapshots = useCallback(async (preferredSnapshotId?: string) => {
     const [snapshotsResponse, importRunsResponse] = await Promise.all([
@@ -134,7 +136,9 @@ export function CadIntegrationView({
   };
 
   const handleConfirmMapping = async (input: {
-    mappingId: string;
+    mappingId?: string;
+    sourceKind?: CadStepMappingRecord["sourceKind"];
+    sourceIds?: string[];
     targetKind: CadStepMappingRecord["targetKind"];
     targetId: string | null;
     applyToFuture: boolean;
@@ -148,6 +152,8 @@ export function CadIntegrationView({
       await applyCadSnapshotMappings(selectedCadSnapshotId, {
         updates: [{
           mappingId: input.mappingId,
+          sourceKind: input.sourceKind,
+          sourceIds: input.sourceIds,
           targetKind: input.targetKind,
           targetId: input.targetId,
           confidence: "MANUAL",
@@ -161,6 +167,13 @@ export function CadIntegrationView({
       setMessage(error instanceof Error ? error.message : String(error));
     } finally {
       setIsSavingMapping(false);
+    }
+  };
+
+  const handleGroupRepeatedInstancesChange = (value: boolean) => {
+    setGroupRepeatedInstances(value);
+    if (selectedCadSnapshotId) {
+      void loadCadSnapshotDetails(selectedCadSnapshotId, { groupRepeatedInstances: value });
     }
   };
 
@@ -229,11 +242,13 @@ export function CadIntegrationView({
 
       <CadStepReviewPanels
         diff={stepDiff}
+        groupRepeatedInstances={groupRepeatedInstances}
         isFinalizing={isFinalizing}
         isSavingMapping={isSavingMapping}
         mappings={stepMappings}
         onConfirmMapping={handleConfirmMapping}
         onFinalize={handleFinalize}
+        onGroupRepeatedInstancesChange={handleGroupRepeatedInstancesChange}
         importRun={selectedCadImportRun}
         latestImportRunId={latestCadImportRun?.id ?? null}
         snapshot={selectedCadSnapshot}

@@ -105,6 +105,24 @@
   padding: 6px 8px;
 }
 
+.cad-tree-part-group-row {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.cad-tree-part-group-row > span {
+  font-weight: 700;
+}
+
+.cad-tree-part-group-instances {
+  display: grid;
+  gap: 4px;
+  list-style: none;
+  margin: 8px 0 0 32px;
+  padding: 0;
+}
+
 [data-mapping="needs-review"] {
   border-color: rgba(245, 158, 11, 0.38);
 }

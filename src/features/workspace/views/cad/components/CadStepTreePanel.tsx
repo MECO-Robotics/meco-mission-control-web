@@ -3,6 +3,7 @@ import { useState } from "react";
 import { IconChevronRight } from "@/components/shared/Icons";
 import type {
   CadStepImportRunRecord,
+  CadStepTreePartInstanceRecord,
   CadStepTreeNode,
 } from "../model/cadIntegrationTypes";
 
@@ -45,6 +46,61 @@ function treeCounts(node: CadStepTreeNode): TreeCounts {
   );
 }
 
+function isGroupedPartInstance(
+  instance: CadStepTreePartInstanceRecord,
+): instance is Extract<CadStepTreePartInstanceRecord, { kind: "part_instance_group" }> {
+  return "kind" in instance && instance.kind === "part_instance_group";
+}
+
+function partInstanceKey(instance: CadStepTreePartInstanceRecord) {
+  return isGroupedPartInstance(instance) ? instance.groupId : instance.id;
+}
+
+function PartInstanceRow({ instance }: { instance: CadStepTreePartInstanceRecord }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  if (!isGroupedPartInstance(instance)) {
+    return (
+      <li data-mapping={mappingTone(instance.mapping)}>
+        <span>{instance.partDefinition?.name ?? instance.instancePath}</span>
+        <small>qty {instance.quantity}</small>
+      </li>
+    );
+  }
+
+  const toggleLabel = `${isExpanded ? "Collapse" : "Expand"} ${instance.displayName} repeated instances`;
+
+  return (
+    <li data-mapping={mappingTone(instance.mapping)} data-grouped="true">
+      <div className="cad-tree-part-group-row">
+        <button
+          aria-expanded={isExpanded}
+          aria-label={toggleLabel}
+          className="cad-tree-fold-button"
+          onClick={() => setIsExpanded(!isExpanded)}
+          title={toggleLabel}
+          type="button"
+        >
+          <span data-expanded={isExpanded}>
+            <IconChevronRight />
+          </span>
+        </button>
+        <span>{instance.displayName}</span>
+        <small>{"\u00d7"}{instance.quantity}</small>
+      </div>
+      {isExpanded ? (
+        <ul className="cad-tree-part-group-instances">
+          {instance.instancePaths.map((instancePath, index) => (
+            <li key={`${instance.groupId}-${instancePath}`}>
+              <span>{instancePath.split("/").filter(Boolean).at(-1) ?? instancePath}</span>
+              <small>{instance.instanceIds[index] ?? instancePath}</small>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </li>
+  );
+}
+
 function TreeNode({ node }: { node: CadStepTreeNode }) {
   const [isExpanded, setIsExpanded] = useState(node.depth === 0);
   const counts = treeCounts(node);
@@ -81,10 +137,7 @@ function TreeNode({ node }: { node: CadStepTreeNode }) {
       {isExpanded && node.partInstances.length ? (
         <ul className="cad-tree-parts">
           {node.partInstances.map((instance) => (
-            <li data-mapping={mappingTone(instance.mapping)} key={instance.id}>
-              <span>{instance.partDefinition?.name ?? instance.instancePath}</span>
-              <small>qty {instance.quantity}</small>
-            </li>
+            <PartInstanceRow instance={instance} key={partInstanceKey(instance)} />
           ))}
         </ul>
       ) : null}
