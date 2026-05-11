@@ -2,7 +2,10 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 import type { MechanismRecord, PartDefinitionRecord, SubsystemRecord } from "@/types/records";
 import {
+  applyCadHierarchyReview,
   applyCadSnapshotMappings,
+  fetchCadHierarchyReview,
+  fetchCadPartMatchProposals,
   fetchCadSnapshotDiff,
   fetchCadSnapshotMappings,
   fetchCadSnapshots,
@@ -15,6 +18,9 @@ import {
 import { CadStepReviewPanels } from "./components/CadStepReviewPanels";
 import { CadStepUploadPanel } from "./components/CadStepUploadPanel";
 import type {
+  CadHierarchyReview,
+  CadHierarchyReviewDecision,
+  CadPartMatchProposal,
   CadStepDiff,
   CadStepImportRunRecord,
   CadStepImportSummary,
@@ -26,6 +32,7 @@ import type {
 import "./cadIntegration.css";
 import "./cadIntegrationData.css";
 import "./cadStepDiagnostics.css";
+import "./cadStepHierarchy.css";
 import "./cadStepTree.css";
 import "./cadStepWorkflow.css";
 
@@ -50,6 +57,8 @@ export function CadIntegrationView({
   const [stepSummary, setStepSummary] = useState<CadStepImportSummary | null>(null);
   const [stepTree, setStepTree] = useState<CadStepTreeNode[]>([]);
   const [stepMappings, setStepMappings] = useState<CadStepMappingRecord[]>([]);
+  const [hierarchyReview, setHierarchyReview] = useState<CadHierarchyReview | null>(null);
+  const [partMatchProposals, setPartMatchProposals] = useState<CadPartMatchProposal[]>([]);
   const [stepWarnings, setStepWarnings] = useState<CadStepWarningRecord[]>([]);
   const [stepDiff, setStepDiff] = useState<CadStepDiff | null>(null);
   const [groupRepeatedInstances, setGroupRepeatedInstances] = useState(true);
@@ -68,15 +77,19 @@ export function CadIntegrationView({
 
   const loadCadSnapshotDetails = useCallback(async (snapshotId: string, options?: { groupRepeatedInstances?: boolean }) => {
     const shouldGroupInstances = options?.groupRepeatedInstances ?? groupRepeatedInstances;
-    const [summaryResponse, treeResponse, mappingsResponse, diffResponse] = await Promise.all([
+    const [summaryResponse, treeResponse, mappingsResponse, hierarchyResponse, proposalsResponse, diffResponse] = await Promise.all([
       fetchCadSnapshotSummary(snapshotId),
       fetchCadSnapshotTree(snapshotId, { groupInstances: shouldGroupInstances }),
       fetchCadSnapshotMappings(snapshotId, { groupInstances: shouldGroupInstances }),
+      fetchCadHierarchyReview(snapshotId),
+      fetchCadPartMatchProposals(snapshotId).catch(() => null),
       fetchCadSnapshotDiff(snapshotId).catch(() => null),
     ]);
     setStepSummary(summaryResponse.summary);
     setStepTree(treeResponse.rootNodes);
     setStepMappings(mappingsResponse.items);
+    setHierarchyReview(hierarchyResponse);
+    setPartMatchProposals(proposalsResponse?.items ?? hierarchyResponse.partMatchProposals ?? []);
     setStepWarnings(diffResponse?.warnings ?? []);
     setStepDiff(diffResponse);
   }, [groupRepeatedInstances]);
@@ -96,6 +109,8 @@ export function CadIntegrationView({
       setStepSummary(null);
       setStepTree([]);
       setStepMappings([]);
+      setHierarchyReview(null);
+      setPartMatchProposals([]);
       setStepWarnings([]);
       setStepDiff(null);
     }
@@ -163,6 +178,23 @@ export function CadIntegrationView({
       });
       await loadCadSnapshotDetails(selectedCadSnapshotId);
       setMessage(input.applyToFuture ? "Mapping confirmed and saved for future STEP imports." : "Mapping confirmed for this snapshot.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : String(error));
+    } finally {
+      setIsSavingMapping(false);
+    }
+  };
+
+  const handleConfirmHierarchyDecision = async (decision: CadHierarchyReviewDecision) => {
+    if (!selectedCadSnapshotId) {
+      return;
+    }
+    setIsSavingMapping(true);
+    setMessage(null);
+    try {
+      await applyCadHierarchyReview(selectedCadSnapshotId, { decisions: [decision] });
+      await loadCadSnapshotDetails(selectedCadSnapshotId);
+      setMessage("Hierarchy decision applied.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : String(error));
     } finally {
@@ -243,12 +275,15 @@ export function CadIntegrationView({
       <CadStepReviewPanels
         diff={stepDiff}
         groupRepeatedInstances={groupRepeatedInstances}
+        hierarchyReview={hierarchyReview}
         isFinalizing={isFinalizing}
         isSavingMapping={isSavingMapping}
         mappings={stepMappings}
+        onConfirmHierarchyDecision={handleConfirmHierarchyDecision}
         onConfirmMapping={handleConfirmMapping}
         onFinalize={handleFinalize}
         onGroupRepeatedInstancesChange={handleGroupRepeatedInstancesChange}
+        partMatchProposals={partMatchProposals}
         importRun={selectedCadImportRun}
         latestImportRunId={latestCadImportRun?.id ?? null}
         snapshot={selectedCadSnapshot}

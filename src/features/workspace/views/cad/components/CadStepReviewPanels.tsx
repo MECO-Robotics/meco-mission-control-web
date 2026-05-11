@@ -2,6 +2,9 @@ import { useMemo, useState } from "react";
 
 import type { MechanismRecord, PartDefinitionRecord, SubsystemRecord } from "@/types/records";
 import type {
+  CadHierarchyReview,
+  CadHierarchyReviewDecision,
+  CadPartMatchProposal,
   CadStepDiff,
   CadStepImportRunRecord,
   CadStepImportSummary,
@@ -14,6 +17,7 @@ import {
   PLACEHOLDER_PARSER_WARNING_TEXT,
   stepUsesPlaceholderParser,
 } from "../model/cadStepParserStatus";
+import { CadStepHierarchyReviewPanel, type CadHierarchyStage } from "./CadStepHierarchyReviewPanel";
 import { CadStepImportSummaryCard } from "./CadStepImportSummaryCard";
 import { CadStepMappingReviewTable, type CadStepMappingConfirmInput } from "./CadStepMappingReviewTable";
 import { CadStepTreePanel } from "./CadStepTreePanel";
@@ -21,14 +25,18 @@ import { CadStepTreePanel } from "./CadStepTreePanel";
 export function CadStepReviewPanels({
   diff,
   groupRepeatedInstances = true,
+  hierarchyReview,
+  initialHierarchyStage,
   importRun,
   isFinalizing,
   isSavingMapping,
   latestImportRunId,
   mappings,
+  onConfirmHierarchyDecision = () => undefined,
   onConfirmMapping,
   onFinalize,
   onGroupRepeatedInstancesChange = () => undefined,
+  partMatchProposals = [],
   snapshot,
   summary,
   targets,
@@ -37,14 +45,18 @@ export function CadStepReviewPanels({
 }: {
   diff: CadStepDiff | null;
   groupRepeatedInstances?: boolean;
+  hierarchyReview?: CadHierarchyReview | null;
+  initialHierarchyStage?: CadHierarchyStage;
   importRun: CadStepImportRunRecord | null;
   isFinalizing: boolean;
   isSavingMapping: boolean;
   latestImportRunId: string | null;
   mappings: CadStepMappingRecord[];
+  onConfirmHierarchyDecision?: (decision: CadHierarchyReviewDecision) => void;
   onConfirmMapping: (input: CadStepMappingConfirmInput) => void;
   onFinalize: (allowUnresolved: boolean) => void;
   onGroupRepeatedInstancesChange?: (value: boolean) => void;
+  partMatchProposals?: CadPartMatchProposal[];
   snapshot: CadStepSnapshotRecord | null;
   summary: CadStepImportSummary | null;
   targets: { subsystems: SubsystemRecord[]; mechanisms: MechanismRecord[]; partDefinitions: PartDefinitionRecord[] };
@@ -52,9 +64,11 @@ export function CadStepReviewPanels({
   warnings: CadStepWarningRecord[];
 }) {
   const [allowUnresolved, setAllowUnresolved] = useState(false);
+  const [showAdvancedFlatView, setShowAdvancedFlatView] = useState(false);
   const unresolvedCount = useMemo(
-    () => mappings.filter((mapping) => mapping.status === "NEEDS_REVIEW" || mapping.targetKind === "UNMAPPED").length,
-    [mappings],
+    () => hierarchyReview?.unresolved.length
+      ?? mappings.filter((mapping) => mapping.status === "NEEDS_REVIEW" || mapping.targetKind === "UNMAPPED").length,
+    [hierarchyReview?.unresolved.length, mappings],
   );
   const usesPlaceholderParser = stepUsesPlaceholderParser({ importRun, summary, warnings });
   const isViewingOlderSnapshot = Boolean(snapshot && latestImportRunId && snapshot.importRunId !== latestImportRunId);
@@ -119,15 +133,46 @@ export function CadStepReviewPanels({
         tree={tree}
       />
 
-      <CadStepMappingReviewTable
-        groupRepeatedInstances={groupRepeatedInstances}
-        isSavingMapping={isSavingMapping}
-        mappings={mappings}
-        onConfirmMapping={onConfirmMapping}
-        onGroupRepeatedInstancesChange={onGroupRepeatedInstancesChange}
-        targets={targets}
-        usesPlaceholderParser={usesPlaceholderParser}
-      />
+      {hierarchyReview ? (
+        <CadStepHierarchyReviewPanel
+          hierarchyReview={hierarchyReview}
+          initialStage={initialHierarchyStage}
+          onConfirmDecision={onConfirmHierarchyDecision}
+          partMatchProposals={partMatchProposals}
+          targets={targets}
+        />
+      ) : null}
+
+      {hierarchyReview ? (
+        <section className="cad-card cad-advanced-flat-card">
+          <div className="cad-section-heading cad-mapping-heading">
+            <div>
+              <span className="cad-eyebrow">Debug</span>
+              <h3>Advanced flat view</h3>
+            </div>
+            <button
+              className="ghost-button compact-action"
+              onClick={() => setShowAdvancedFlatView((current) => !current)}
+              type="button"
+            >
+              {showAdvancedFlatView ? "Hide flat table" : "Show flat table"}
+            </button>
+          </div>
+          <p className="cad-empty-copy">Flat mapping table is hidden during staged hierarchy review.</p>
+        </section>
+      ) : null}
+
+      {!hierarchyReview || showAdvancedFlatView ? (
+        <CadStepMappingReviewTable
+          groupRepeatedInstances={groupRepeatedInstances}
+          isSavingMapping={isSavingMapping}
+          mappings={mappings}
+          onConfirmMapping={onConfirmMapping}
+          onGroupRepeatedInstancesChange={onGroupRepeatedInstancesChange}
+          targets={targets}
+          usesPlaceholderParser={usesPlaceholderParser}
+        />
+      ) : null}
 
       <div className="cad-grid cad-grid-two">
         <section className="cad-card">

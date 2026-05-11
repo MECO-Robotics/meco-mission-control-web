@@ -1,5 +1,8 @@
 import { requestApi } from "@/lib/auth/core/request";
 import type {
+  CadHierarchyReview,
+  CadHierarchyReviewDecision,
+  CadPartMatchProposal,
   CadStepDiff,
   CadStepImportRunRecord,
   CadStepImportSummary,
@@ -95,6 +98,38 @@ export function fetchCadSnapshotMappings(
 ) {
   return requestApi<{ items: CadStepMappingRecord[] }>(
     `/cad/snapshots/${snapshotId}/mappings${groupInstancesSuffix(options)}`,
+    {},
+    onUnauthorized,
+  );
+}
+
+export function fetchCadHierarchyReview(snapshotId: string, onUnauthorized?: () => void) {
+  return requestApi<CadHierarchyReview>(
+    `/cad/snapshots/${snapshotId}/hierarchy-review`,
+    {},
+    onUnauthorized,
+  );
+}
+
+export function applyCadHierarchyReview(
+  snapshotId: string,
+  payload: { decisions: CadHierarchyReviewDecision[] },
+  onUnauthorized?: () => void,
+) {
+  return requestApi<{ applied?: CadHierarchyReviewDecision[]; decisions?: CadHierarchyReviewDecision[] }>(
+    `/cad/snapshots/${snapshotId}/hierarchy-review/apply`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    },
+    onUnauthorized,
+  );
+}
+
+export function fetchCadPartMatchProposals(snapshotId: string, onUnauthorized?: () => void) {
+  return requestApi<{ snapshotId: string; items: CadPartMatchProposal[] }>(
+    `/cad/snapshots/${snapshotId}/part-match-proposals`,
     {},
     onUnauthorized,
   );

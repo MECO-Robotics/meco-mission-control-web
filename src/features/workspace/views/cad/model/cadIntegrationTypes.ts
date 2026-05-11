@@ -298,6 +298,105 @@ export interface CadStepMappingRecord {
   updatedAt: string;
 }
 
+export type CadHierarchySourceKind = "ASSEMBLY_NODE" | "PART_DEFINITION" | "PART_INSTANCE";
+export type CadHierarchyTargetKind =
+  | "SUBSYSTEM"
+  | "MECHANISM"
+  | "COMPONENT_ASSEMBLY"
+  | "PART_DEFINITION"
+  | "IGNORE"
+  | "REFERENCE_GEOMETRY"
+  | "UNMAPPED";
+
+export interface CadHierarchyPartSummary {
+  rawInstanceCount: number;
+  groupedPartCount: number;
+  matchedExistingDefinitionCount: number;
+  proposedNewDefinitionCount: number;
+  ambiguousMatchCount: number;
+  unresolvedCount: number;
+  totalQuantity?: number;
+  groups?: Array<{
+    name: string;
+    quantity: number;
+    cadPartDefinitionId: string | null;
+    cadPartDefinitionSourceId: string | null;
+    resolvedPartDefinitionId: string | null;
+    status: string;
+  }>;
+}
+
+export interface CadHierarchyNode {
+  id: string;
+  sourceKind: CadHierarchySourceKind;
+  sourceId: string;
+  name: string;
+  instancePath: string;
+  inferredType: string;
+  proposedClassification: string | null;
+  resolvedSubsystemId: string | null;
+  resolvedMechanismId: string | null;
+  resolvedComponentAssemblyId: string | null;
+  resolvedPartDefinitionId: string | null;
+  confidence: "HIGH" | "MEDIUM" | "LOW" | "MANUAL" | string;
+  status: "PROPOSED" | "CONFIRMED" | "REJECTED" | "NEEDS_REVIEW" | string;
+  children: CadHierarchyNode[];
+  partSummary?: CadHierarchyPartSummary | null;
+}
+
+export interface CadPartMatchProposalCandidate {
+  id?: string;
+  partDefinitionId: string;
+  label: string;
+  confidence: "HIGH" | "MEDIUM" | "LOW" | "MANUAL" | string;
+  reason?: string | null;
+  strategy?: string;
+  score?: number;
+}
+
+export interface CadPartMatchProposal {
+  id: string;
+  hierarchyNodeId: string;
+  cadPartDefinitionId?: string;
+  cadPartDefinitionSourceId?: string;
+  cadPartName?: string;
+  cadPartNumber?: string | null;
+  instanceQuantity?: number;
+  recommendedPartDefinitionId?: string | null;
+  sourcePartName: string;
+  parentHierarchyName?: string | null;
+  candidates: CadPartMatchProposalCandidate[];
+  status: "EXACT" | "AMBIGUOUS" | "SUGGESTED" | "NO_MATCH" | "PROPOSED" | "CONFIRMED" | "REJECTED" | string;
+}
+
+export interface CadHierarchyIssue {
+  code: string;
+  title?: string;
+  message: string;
+  severity: "BLOCKING" | "WARNING" | "INFO" | "ERROR" | string;
+  sourceKind?: CadHierarchySourceKind;
+  sourceId?: string;
+}
+
+export interface CadHierarchyReview {
+  snapshotId: string;
+  root: CadHierarchyNode | null;
+  unresolved: CadHierarchyIssue[];
+  partMatchProposals: CadPartMatchProposal[];
+  warnings: CadHierarchyIssue[];
+}
+
+export interface CadHierarchyReviewDecision {
+  nodeId: string;
+  sourceId?: string;
+  sourceKind?: CadHierarchySourceKind;
+  targetKind: CadHierarchyTargetKind;
+  targetId?: string | null;
+  parentSubsystemId?: string | null;
+  parentMechanismId?: string | null;
+  status?: "CONFIRMED" | "REJECTED" | "NEEDS_REVIEW";
+}
+
 export interface CadStepDiff {
   previousSnapshotId: string | null;
   addedAssemblies: Array<{ id: string; name: string; instancePath: string }>;
