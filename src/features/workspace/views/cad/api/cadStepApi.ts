@@ -19,7 +19,6 @@ export function uploadCadStepFile(
   onUnauthorized?: () => void,
 ) {
   const formData = new FormData();
-  formData.set("file", payload.file);
   formData.set("label", payload.label);
   if (payload.projectId) {
     formData.set("projectId", payload.projectId);
@@ -27,6 +26,7 @@ export function uploadCadStepFile(
   if (payload.seasonId) {
     formData.set("seasonId", payload.seasonId);
   }
+  formData.set("file", payload.file);
   return requestApi<{
     importRun: CadStepImportRunRecord;
     snapshot: CadStepSnapshotRecord;
