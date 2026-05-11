@@ -1,6 +1,8 @@
 /// <reference types="jest" />
 
 import * as React from "react";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
@@ -228,6 +230,16 @@ describe("MilestonesView", () => {
     expect(markup).not.toContain('aria-label="Sort direction"');
     expect(markup).not.toContain('class="toolbar-filter-value">Filters</span>');
     expect(markup).not.toContain('class="toolbar-filter-value">Sort</span>');
+  });
+
+  it("does not toggle milestone sort direction as a side effect of opening the sort menu", () => {
+    const toolbarSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/milestones/MilestonesToolbar.tsx"),
+      "utf8",
+    );
+
+    expect(toolbarSource).not.toContain("onButtonClick={() => setSortOrder");
+    expect(toolbarSource).toContain('aria-label="Toggle milestone sort direction"');
   });
 
   it("filters milestones to the active person via linked tasks", () => {

@@ -75,6 +75,13 @@ export function MilestonesToolbar({
   const activeCount =
     Number(isAllProjectsView && projectFilter.length > 0) + Number(typeFilter.length > 0);
   const milestoneSortIsDefault = sortField === "startDateTime" && sortOrder === "asc";
+  const renderSortDirectionIcon = () =>
+    sortOrder === "asc" ? (
+      <ArrowUpWideNarrow size={14} strokeWidth={2} />
+    ) : (
+      <ArrowDownWideNarrow size={14} strokeWidth={2} />
+    );
+  const toggleSortOrder = () => setSortOrder((current) => (current === "asc" ? "desc" : "asc"));
 
   return (
     <div className="panel-actions filter-toolbar milestones-toolbar">
@@ -126,15 +133,8 @@ export function MilestonesToolbar({
                 ariaLabel="Sort milestones"
                 buttonLabel={sortOrder === "asc" ? "Sort ascending" : "Sort descending"}
                 className="task-queue-sort-menu milestones-search-sort-menu"
-                icon={
-                  sortOrder === "asc" ? (
-                    <ArrowUpWideNarrow size={14} strokeWidth={2} />
-                  ) : (
-                    <ArrowDownWideNarrow size={14} strokeWidth={2} />
-                  )
-                }
+                icon={renderSortDirectionIcon()}
                 iconOnly
-                onButtonClick={() => setSortOrder((current) => (current === "asc" ? "desc" : "asc"))}
                 items={[
                   {
                     label: "Sort by",
@@ -151,6 +151,20 @@ export function MilestonesToolbar({
                           </option>
                         ))}
                       </select>
+                    ),
+                  },
+                  {
+                    label: "Direction",
+                    content: (
+                      <button
+                        aria-label="Toggle milestone sort direction"
+                        className="icon-button milestone-sort-direction-button"
+                        onClick={toggleSortOrder}
+                        title={sortOrder === "asc" ? "Sort ascending" : "Sort descending"}
+                        type="button"
+                      >
+                        {renderSortDirectionIcon()}
+                      </button>
                     ),
                   },
                 ]}
