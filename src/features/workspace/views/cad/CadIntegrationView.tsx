@@ -16,6 +16,7 @@ import {
   uploadCadStepFile,
 } from "./api/cadStepApi";
 import { CadStepReviewPanels } from "./components/CadStepReviewPanels";
+import { CadStepImportHeader, CadStepSnapshotSelector } from "./components/CadStepSnapshotSelector";
 import { CadStepUploadPanel } from "./components/CadStepUploadPanel";
 import { isMissingCadHierarchyReviewRoute, isMissingCadOptionalRoute } from "./cadOptionalRoutes";
 import type {
@@ -165,6 +166,17 @@ export function CadIntegrationView({
     }
   }, [loadCadSnapshotDetails, projectId, seasonId, selectCadSnapshot]);
 
+  const clearCadSnapshotDetails = useCallback(() => {
+    snapshotDetailsRequestRef.current += 1;
+    setStepSummary(null);
+    setStepTree([]);
+    setStepMappings([]);
+    setHierarchyReview(null);
+    setPartMatchProposals([]);
+    setStepWarnings([]);
+    setStepDiff(null);
+  }, []);
+
   useEffect(() => {
     let isActive = true;
     void loadCadSnapshots().catch((error) => {
@@ -271,6 +283,15 @@ export function CadIntegrationView({
     }
   };
 
+  const handleSnapshotChange = (snapshotId: string) => {
+    selectCadSnapshot(snapshotId);
+    if (snapshotId) {
+      void loadCadSnapshotDetails(snapshotId);
+    } else {
+      clearCadSnapshotDetails();
+    }
+  };
+
   const handleFinalize = async (allowUnresolved: boolean) => {
     if (!selectedCadSnapshotId) {
       return;
@@ -290,49 +311,15 @@ export function CadIntegrationView({
 
   return (
     <section className="panel dense-panel cad-integration-shell">
-      <div className="panel-header compact-header cad-header">
-        <div className="queue-section-header">
-          <h2>STEP import</h2>
-          <p className="section-copy">
-            Upload STEP exports, review detected structure, and carry confirmed mappings forward across iterations.
-          </p>
-        </div>
-        <div className="cad-header-meta">
-          <span>STEP load workflow</span>
-          <span>{selectedCadSnapshot ? `Last import ${new Date(selectedCadSnapshot.createdAt).toLocaleString()}` : "No STEP snapshot yet"}</span>
-        </div>
-      </div>
+      <CadStepImportHeader selectedSnapshot={selectedCadSnapshot} />
 
       {message ? <div className="cad-message" role="status">{message}</div> : null}
 
-      <div className="cad-step-snapshot-bar">
-        <label className="cad-field">
-          <span>Snapshot</span>
-          <select
-            onChange={(event) => {
-              selectCadSnapshot(event.target.value);
-              if (event.target.value) {
-                void loadCadSnapshotDetails(event.target.value);
-              } else {
-                snapshotDetailsRequestRef.current += 1;
-                setStepSummary(null);
-                setStepTree([]);
-                setStepMappings([]);
-                setHierarchyReview(null);
-                setPartMatchProposals([]);
-                setStepWarnings([]);
-                setStepDiff(null);
-              }
-            }}
-            value={selectedCadSnapshotId}
-          >
-            <option value="">No STEP snapshot selected</option>
-            {cadSnapshots.map((snapshot) => (
-              <option key={snapshot.id} value={snapshot.id}>{snapshot.label}</option>
-            ))}
-          </select>
-        </label>
-      </div>
+      <CadStepSnapshotSelector
+        onSnapshotChange={handleSnapshotChange}
+        selectedSnapshotId={selectedCadSnapshotId}
+        snapshots={cadSnapshots}
+      />
 
       <CadStepUploadPanel
         fileName={stepFile?.name ?? ""}
