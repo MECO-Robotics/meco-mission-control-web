@@ -166,7 +166,15 @@ export function CadIntegrationView({
   }, [loadCadSnapshotDetails, projectId, seasonId, selectCadSnapshot]);
 
   useEffect(() => {
-    void loadCadSnapshots();
+    let isActive = true;
+    void loadCadSnapshots().catch((error) => {
+      if (isActive) {
+        setMessage(error instanceof Error ? error.message : String(error));
+      }
+    });
+    return () => {
+      isActive = false;
+    };
   }, [loadCadSnapshots]);
 
   const handleStepUpload = async (event: FormEvent<HTMLFormElement>) => {

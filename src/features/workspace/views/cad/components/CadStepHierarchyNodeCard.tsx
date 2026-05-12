@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type {
   CadHierarchyNode,
@@ -13,6 +13,15 @@ import {
   readHierarchyTargetId,
   type CadHierarchyTargets,
 } from "./CadStepHierarchyReviewUtils";
+
+function buildDecisionDraft(node: CadHierarchyNode, targetKind: CadHierarchyTargetKind) {
+  return {
+    parentMechanismId: node.resolvedMechanismId ?? "",
+    parentSubsystemId: node.resolvedSubsystemId ?? "",
+    targetId: readHierarchyTargetId(node, targetKind),
+    targetKind,
+  };
+}
 
 function DecisionControls({
   node,
@@ -48,13 +57,19 @@ function DecisionControls({
             { value: "IGNORE", label: "Ignore" },
             { value: "UNMAPPED", label: "Needs review" },
           ];
-  const [draft, setDraft] = useState({
-    parentMechanismId: node.resolvedMechanismId ?? "",
-    parentSubsystemId: node.resolvedSubsystemId ?? "",
-    targetId: readHierarchyTargetId(node, targetKind),
-    targetKind,
-  });
+  const [draft, setDraft] = useState(() => buildDecisionDraft(node, targetKind));
   const options = hierarchyTargetOptions(draft.targetKind, targets);
+
+  useEffect(() => {
+    setDraft(buildDecisionDraft(node, targetKind));
+  }, [
+    node.id,
+    node.resolvedComponentAssemblyId,
+    node.resolvedMechanismId,
+    node.resolvedPartDefinitionId,
+    node.resolvedSubsystemId,
+    targetKind,
+  ]);
 
   return (
     <div className="cad-hierarchy-decision">
