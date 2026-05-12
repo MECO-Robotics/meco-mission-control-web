@@ -1,9 +1,9 @@
-﻿/// <reference types="jest" />
+/// <reference types="jest" />
 
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import { CadIntegrationView } from "../CadIntegrationView";
+import { CadIntegrationView, resolveSelectedDocumentRefId } from "../CadIntegrationView";
 import {
   createOnshapeDocumentRef,
   createOnshapeOAuthAuthorizationUrl,
@@ -11,6 +11,7 @@ import {
   runOnshapeImport,
 } from "../api/onshapeCadApi";
 import { CadStatusPanels } from "../components/CadStatusPanels";
+import type { OnshapeOverview } from "../model/cadIntegrationTypes";
 import { parseOnshapeUrl } from "../model/onshapeUrlParser";
 
 jest.mock("../api/onshapeCadApi", () => ({
@@ -22,6 +23,17 @@ jest.mock("../api/onshapeCadApi", () => ({
 }));
 
 describe("CAD / Onshape integration view", () => {
+  it("keeps document selection constrained to the refreshed overview refs", () => {
+    const documentRefs = [
+      { id: "ref-a", label: "Assembly A" },
+      { id: "ref-b", label: "Assembly B" },
+    ] as OnshapeOverview["documentRefs"];
+
+    expect(resolveSelectedDocumentRefId("ref-b", documentRefs)).toBe("ref-b");
+    expect(resolveSelectedDocumentRefId("stale-ref", documentRefs)).toBe("ref-a");
+    expect(resolveSelectedDocumentRefId("stale-ref", [])).toBe("");
+  });
+
   it("parses common Onshape references for preview without network calls", () => {
     const workspace = parseOnshapeUrl(
       "https://cad.onshape.com/documents/0123456789abcdef01234567/w/abcdefabcdefabcdefabcdef/e/111111111111111111111111?renderMode=0",
