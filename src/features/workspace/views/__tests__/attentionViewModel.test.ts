@@ -1,8 +1,14 @@
 /// <reference types="jest" />
 
+import * as React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import { AttentionView } from "@/features/workspace/views/attention/AttentionView";
 import { buildAttentionViewModel } from "@/features/workspace/views/attention/attentionViewModel";
 import type { BootstrapPayload } from "@/types/bootstrap";
+
+(globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 function isoDateOffset(daysFromToday: number) {
   const target = new Date();
@@ -172,6 +178,22 @@ function createBootstrap(): BootstrapPayload {
 }
 
 describe("buildAttentionViewModel", () => {
+  it("renders action required filters inside the search overlay", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(AttentionView, {
+        activePersonFilter: [],
+        bootstrap: createBootstrap(),
+        onOpenRisk: jest.fn(),
+        onOpenTask: jest.fn(),
+      }),
+    );
+
+    expect(markup).toContain("topbar-responsive-search-actions");
+    expect(markup).toContain("--topbar-responsive-search-action-overlay-width:2rem");
+    expect(markup).toContain("attention-filter-menu");
+    expect(markup).toContain('aria-label="Action required filters"');
+  });
+
   it("builds grouped summary cards and ranked action-now items", () => {
     const viewModel = buildAttentionViewModel({
       activePersonFilter: [],
