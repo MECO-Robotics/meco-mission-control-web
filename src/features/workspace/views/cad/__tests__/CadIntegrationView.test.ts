@@ -5,9 +5,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import {
   CadIntegrationView,
-  isMissingCadHierarchyReviewRoute,
-  isMissingCadOptionalRoute,
 } from "../CadIntegrationView";
+import { isMissingCadHierarchyReviewRoute, isMissingCadOptionalRoute } from "../cadOptionalRoutes";
 import { uploadCadStepFile } from "../api/cadStepApi";
 import { CadStepReviewPanels } from "../components/CadStepReviewPanels";
 import { parseOnshapeUrl } from "../model/onshapeUrlParser";
