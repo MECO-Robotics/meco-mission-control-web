@@ -3,7 +3,11 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import { CadIntegrationView, isMissingCadHierarchyReviewRoute } from "../CadIntegrationView";
+import {
+  CadIntegrationView,
+  isMissingCadHierarchyReviewRoute,
+  isMissingCadOptionalRoute,
+} from "../CadIntegrationView";
 import { uploadCadStepFile } from "../api/cadStepApi";
 import { CadStepReviewPanels } from "../components/CadStepReviewPanels";
 import { parseOnshapeUrl } from "../model/onshapeUrlParser";
@@ -73,12 +77,24 @@ describe("CAD STEP mapper view", () => {
       new Error("Route GET:/api/cad/snapshots/cad-snapshot-0003/hierarchy-review not found"),
       { statusCode: 404 },
     );
+    const proposalsRouteError = Object.assign(
+      new Error("Route GET:/api/cad/snapshots/cad-snapshot-0003/part-match-proposals not found"),
+      { statusCode: 404 },
+    );
+    const diffRouteError = Object.assign(
+      new Error("Route GET:/api/cad/snapshots/cad-snapshot-0003/diff not found"),
+      { statusCode: 404 },
+    );
     const snapshotError = Object.assign(new Error("CAD snapshot was not found."), { statusCode: 404 });
     const serverError = Object.assign(new Error("Server Error"), { statusCode: 500 });
 
     expect(isMissingCadHierarchyReviewRoute(routeError)).toBe(true);
+    expect(isMissingCadOptionalRoute(proposalsRouteError, "/part-match-proposals")).toBe(true);
+    expect(isMissingCadOptionalRoute(diffRouteError, "/diff")).toBe(true);
     expect(isMissingCadHierarchyReviewRoute(snapshotError)).toBe(false);
+    expect(isMissingCadOptionalRoute(snapshotError, "/diff")).toBe(false);
     expect(isMissingCadHierarchyReviewRoute(serverError)).toBe(false);
+    expect(isMissingCadOptionalRoute(serverError, "/part-match-proposals")).toBe(false);
   });
 
   it("renders mapping review state with carry-forward scope and finalize guard", () => {

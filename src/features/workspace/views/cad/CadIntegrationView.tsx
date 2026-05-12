@@ -45,14 +45,18 @@ function hasApiStatus(error: unknown): error is { statusCode: number } {
   );
 }
 
-export function isMissingCadHierarchyReviewRoute(error: unknown) {
+export function isMissingCadOptionalRoute(error: unknown, routeSuffix: string) {
   return (
     hasApiStatus(error) &&
     error.statusCode === 404 &&
     error instanceof Error &&
     error.message.includes("Route GET:") &&
-    error.message.includes("/hierarchy-review")
+    error.message.includes(routeSuffix)
   );
+}
+
+export function isMissingCadHierarchyReviewRoute(error: unknown) {
+  return isMissingCadOptionalRoute(error, "/hierarchy-review");
 }
 
 export function CadIntegrationView({
@@ -115,8 +119,18 @@ export function CadIntegrationView({
         }
         throw error;
       }),
-      fetchCadPartMatchProposals(snapshotId).catch(() => null),
-      fetchCadSnapshotDiff(snapshotId).catch(() => null),
+      fetchCadPartMatchProposals(snapshotId).catch((error) => {
+        if (isMissingCadOptionalRoute(error, "/part-match-proposals")) {
+          return null;
+        }
+        throw error;
+      }),
+      fetchCadSnapshotDiff(snapshotId).catch((error) => {
+        if (isMissingCadOptionalRoute(error, "/diff")) {
+          return null;
+        }
+        throw error;
+      }),
     ]);
     if (snapshotDetailsRequestRef.current !== requestId || selectedCadSnapshotIdRef.current !== snapshotId) {
       return false;
