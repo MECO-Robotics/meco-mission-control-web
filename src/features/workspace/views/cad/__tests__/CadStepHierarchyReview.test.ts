@@ -278,6 +278,47 @@ describe("CAD STEP hierarchy review workflow", () => {
     expect(markup).toContain("Swerve Module");
   });
 
+  it("preserves nested subsystem proposals in the mechanisms stage", () => {
+    const hierarchyReview = baseHierarchyReview();
+    const driveSubsystem = hierarchyReview.root?.children.find((node) => node.id === "subsystem-drive");
+
+    if (!driveSubsystem) {
+      throw new Error("Missing drive subsystem fixture");
+    }
+
+    driveSubsystem.children = [{
+      id: "nested-subsystem-climber",
+      sourceKind: "ASSEMBLY_NODE",
+      sourceId: "asm-climber",
+      name: "SUB - Climber",
+      instancePath: "/Robot Root/SUB - Drivebase/SUB - Climber",
+      inferredType: "SUBSYSTEM_CANDIDATE",
+      proposedClassification: "SUBSYSTEM",
+      resolvedSubsystemId: "subsystem-drive",
+      resolvedMechanismId: null,
+      resolvedComponentAssemblyId: null,
+      resolvedPartDefinitionId: null,
+      confidence: "MEDIUM",
+      status: "NEEDS_REVIEW",
+      partSummary: {
+        rawInstanceCount: 42,
+        groupedPartCount: 4,
+        matchedExistingDefinitionCount: 0,
+        proposedNewDefinitionCount: 1,
+        ambiguousMatchCount: 0,
+        unresolvedCount: 0,
+      },
+      children: [],
+    }];
+
+    const markup = renderHierarchyMarkup("mechanisms", hierarchyReview);
+
+    expect(markup).toContain("SUB - Climber");
+    expect(markup).toContain("Existing subsystem");
+    expect(markup).not.toContain("Existing mechanism");
+    expect(markup).not.toContain("Parent subsystem");
+  });
+
   it("blocks target-backed hierarchy confirmations until a target is selected", () => {
     const hierarchyReview = baseHierarchyReview();
     const unresolvedSubsystem = hierarchyReview.root?.children.find((node) => node.id === "subsystem-intake");
