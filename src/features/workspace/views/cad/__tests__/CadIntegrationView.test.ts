@@ -226,6 +226,7 @@ describe("CAD / Onshape integration view", () => {
     ] as OnshapeOverview["documentRefs"];
 
     expect(getScopedDocumentRefs(documentRefs, "project-a", "season-2026").map((ref) => ref.id)).toEqual(["current"]);
+    expect(getScopedDocumentRefs(documentRefs, "project-a").map((ref) => ref.id)).toEqual(["current", "other-season"]);
     expect(getScopedDocumentRefs(documentRefs).map((ref) => ref.id)).toEqual(["global"]);
   });
 
