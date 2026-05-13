@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import type {
   CadHierarchyReview,
   CadHierarchyReviewDecision,
+  CadHierarchyTargetKind,
   CadPartMatchProposal,
 } from "../model/cadIntegrationTypes";
 import { CadStepHierarchyNodeCard } from "./CadStepHierarchyNodeCard";
@@ -83,8 +84,12 @@ export function CadStepHierarchyReviewPanel({
     (node) => node.sourceKind === "PART_INSTANCE" && (node.partSummary?.rawInstanceCount ?? 0) > 0,
   );
   const proposals = partMatchProposals.length ? partMatchProposals : hierarchyReview.partMatchProposals;
-  const mechanismTargetKind = (classification: string | null) =>
-    classification?.includes("COMPONENT") ? "COMPONENT_ASSEMBLY" : "MECHANISM";
+  const mechanismTargetKind = (classification: string | null): CadHierarchyTargetKind => {
+    if (classification === "SUBSYSTEM") {
+      return "SUBSYSTEM";
+    }
+    return classification?.includes("COMPONENT") ? "COMPONENT_ASSEMBLY" : "MECHANISM";
+  };
 
   return (
     <section className="cad-card cad-hierarchy-review">
