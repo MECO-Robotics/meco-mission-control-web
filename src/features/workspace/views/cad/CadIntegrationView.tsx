@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 import {
   createOnshapeDocumentRef,
@@ -72,7 +72,7 @@ export function getScopedDocumentRefs(
 ) {
   return documentRefs.filter((ref) => {
     const matchesProject = projectId ? ref.projectId === projectId : !ref.projectId;
-    const matchesSeason = seasonId ? ref.seasonId === seasonId : !ref.seasonId;
+    const matchesSeason = seasonId ? ref.seasonId === seasonId : true;
     return matchesProject && matchesSeason;
   });
 }
@@ -96,6 +96,7 @@ export function CadIntegrationView({
   const [isConnectingOAuth, setIsConnectingOAuth] = useState(false);
   const [isRefreshingEstimate, setIsRefreshingEstimate] = useState(false);
   const [syncEstimate, setSyncEstimate] = useState<OnshapeSyncEstimate | null>(null);
+  const overviewRequestIdRef = useRef(0);
 
   const parsedUrl = useMemo(() => (url.trim() ? parseOnshapeUrl(url.trim()) : null), [url]);
   const scopedDocumentRefs = useMemo(
@@ -106,16 +107,28 @@ export function CadIntegrationView({
   const selectedReferenceType = selectedDocumentRef?.referenceType ?? parsedUrl?.referenceType ?? "unknown";
 
   const loadOverview = useCallback(async () => {
+    const requestId = overviewRequestIdRef.current + 1;
+    overviewRequestIdRef.current = requestId;
     setIsLoading(true);
     try {
       const nextOverview = await fetchOnshapeOverview();
+      if (overviewRequestIdRef.current !== requestId) {
+        return;
+      }
+
       const nextDocumentRefs = getScopedDocumentRefs(nextOverview.documentRefs, projectId, seasonId);
       setOverview(nextOverview);
       setSelectedDocumentRefId((current) => resolveSelectedDocumentRefId(current, nextDocumentRefs));
     } catch (error) {
+      if (overviewRequestIdRef.current !== requestId) {
+        return;
+      }
+
       setMessage(error instanceof Error ? error.message : String(error));
     } finally {
-      setIsLoading(false);
+      if (overviewRequestIdRef.current === requestId) {
+        setIsLoading(false);
+      }
     }
   }, [projectId, seasonId]);
 
