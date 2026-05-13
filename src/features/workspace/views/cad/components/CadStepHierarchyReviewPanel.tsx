@@ -75,7 +75,9 @@ export function CadStepHierarchyReviewPanel({
   const mechanismNodes = allNodes.filter(
     (node) => node.sourceKind === "ASSEMBLY_NODE" && node.id !== hierarchyReview.root?.id && !subsystemNodes.some((child) => child.id === node.id),
   );
-  const partSummaryNodes = allNodes.filter((node) => (node.partSummary?.rawInstanceCount ?? 0) > 0);
+  const partSummaryNodes = allNodes.filter(
+    (node) => node.sourceKind === "PART_INSTANCE" && (node.partSummary?.rawInstanceCount ?? 0) > 0,
+  );
   const proposals = partMatchProposals.length ? partMatchProposals : hierarchyReview.partMatchProposals;
   const mechanismTargetKind = (classification: string | null) =>
     classification?.includes("COMPONENT") ? "COMPONENT_ASSEMBLY" : "MECHANISM";
