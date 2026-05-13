@@ -10,7 +10,12 @@ import {
 import { CadDataPanels } from "./components/CadDataPanels";
 import { CadLinkSyncPanel } from "./components/CadLinkSyncPanel";
 import { CadStatusPanels } from "./components/CadStatusPanels";
-import type { OnshapeOverview, OnshapeSyncEstimate, SyncLevel } from "./model/cadIntegrationTypes";
+import type {
+  OnshapeDocumentRefRecord,
+  OnshapeOverview,
+  OnshapeSyncEstimate,
+  SyncLevel,
+} from "./model/cadIntegrationTypes";
 import { parseOnshapeUrl } from "./model/onshapeUrlParser";
 import "./cadIntegration.css";
 import "./cadIntegrationData.css";
@@ -60,6 +65,18 @@ export function resolveSelectedDocumentRefId(current: string, documentRefs: Onsh
   return documentRefs[0]?.id || "";
 }
 
+export function getScopedDocumentRefs(
+  documentRefs: OnshapeDocumentRefRecord[],
+  projectId?: string | null,
+  seasonId?: string | null,
+) {
+  return documentRefs.filter((ref) => {
+    const matchesProject = projectId ? ref.projectId === projectId : !ref.projectId;
+    const matchesSeason = seasonId ? ref.seasonId === seasonId : !ref.seasonId;
+    return matchesProject && matchesSeason;
+  });
+}
+
 export function CadIntegrationView({
   projectId,
   seasonId,
@@ -77,51 +94,37 @@ export function CadIntegrationView({
   const [isSaving, setIsSaving] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isConnectingOAuth, setIsConnectingOAuth] = useState(false);
+  const [isRefreshingEstimate, setIsRefreshingEstimate] = useState(false);
   const [syncEstimate, setSyncEstimate] = useState<OnshapeSyncEstimate | null>(null);
 
   const parsedUrl = useMemo(() => (url.trim() ? parseOnshapeUrl(url.trim()) : null), [url]);
-  const selectedDocumentRef = overview.documentRefs.find((ref) => ref.id === selectedDocumentRefId) ?? null;
+  const scopedDocumentRefs = useMemo(
+    () => getScopedDocumentRefs(overview.documentRefs, projectId, seasonId),
+    [overview.documentRefs, projectId, seasonId],
+  );
+  const selectedDocumentRef = scopedDocumentRefs.find((ref) => ref.id === selectedDocumentRefId) ?? null;
   const selectedReferenceType = selectedDocumentRef?.referenceType ?? parsedUrl?.referenceType ?? "unknown";
 
   const loadOverview = useCallback(async () => {
     setIsLoading(true);
     try {
       const nextOverview = await fetchOnshapeOverview();
+      const nextDocumentRefs = getScopedDocumentRefs(nextOverview.documentRefs, projectId, seasonId);
       setOverview(nextOverview);
-      setSelectedDocumentRefId((current) => resolveSelectedDocumentRefId(current, nextOverview.documentRefs));
+      setSelectedDocumentRefId((current) => resolveSelectedDocumentRefId(current, nextDocumentRefs));
     } catch (error) {
       setMessage(error instanceof Error ? error.message : String(error));
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [projectId, seasonId]);
 
   useEffect(() => {
     void loadOverview();
   }, [loadOverview, projectId, seasonId]);
 
   useEffect(() => {
-    if (!selectedDocumentRefId) {
-      setSyncEstimate(null);
-      return;
-    }
-
-    let isCurrent = true;
-    fetchOnshapeImportEstimate({ documentRefId: selectedDocumentRefId, syncLevel })
-      .then((response) => {
-        if (isCurrent) {
-          setSyncEstimate(response.item);
-        }
-      })
-      .catch(() => {
-        if (isCurrent) {
-          setSyncEstimate(null);
-        }
-      });
-
-    return () => {
-      isCurrent = false;
-    };
+    setSyncEstimate(null);
   }, [selectedDocumentRefId, syncLevel]);
 
   const handleSave = async (event: FormEvent<HTMLFormElement>) => {
@@ -173,16 +176,43 @@ export function CadIntegrationView({
   };
 
   const handleConnectOAuth = async () => {
+    const popup = window.open("about:blank", "_blank");
+    if (!popup) {
+      setMessage("Onshape OAuth2 popup was blocked. Allow popups for this site, then try connecting again.");
+      return;
+    }
+
+    popup.opener = null;
     setIsConnectingOAuth(true);
     setMessage(null);
     try {
       const response = await createOnshapeOAuthAuthorizationUrl();
-      window.open(response.authorizationUrl, "_blank", "noopener,noreferrer");
+      popup.location.href = response.authorizationUrl;
       setMessage("Onshape OAuth2 authorization opened in a new tab. Return here after approving access.");
     } catch (error) {
+      popup.close();
       setMessage(error instanceof Error ? error.message : String(error));
     } finally {
       setIsConnectingOAuth(false);
+    }
+  };
+
+  const handleRefreshEstimate = async () => {
+    if (!selectedDocumentRefId) {
+      setMessage("Select a saved Onshape reference first.");
+      return;
+    }
+
+    setIsRefreshingEstimate(true);
+    setMessage(null);
+    try {
+      const response = await fetchOnshapeImportEstimate({ documentRefId: selectedDocumentRefId, syncLevel });
+      setSyncEstimate(response.item);
+    } catch (error) {
+      setSyncEstimate(null);
+      setMessage(error instanceof Error ? error.message : String(error));
+    } finally {
+      setIsRefreshingEstimate(false);
     }
   };
 
@@ -206,6 +236,8 @@ export function CadIntegrationView({
       <CadStatusPanels
         overview={overview}
         isConnectingOAuth={isConnectingOAuth}
+        isRefreshingEstimate={isRefreshingEstimate}
+        onRefreshEstimate={handleRefreshEstimate}
         onConnectOAuth={handleConnectOAuth}
         selectedReferenceType={selectedReferenceType}
         selectedSyncLevel={syncLevel}
@@ -213,7 +245,7 @@ export function CadIntegrationView({
       />
 
       <CadLinkSyncPanel
-        documentRefs={overview.documentRefs}
+        documentRefs={scopedDocumentRefs}
         isSaving={isSaving}
         isSyncing={isSyncing}
         label={label}
