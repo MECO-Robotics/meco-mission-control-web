@@ -97,6 +97,7 @@ export function CadIntegrationView({
   const [isRefreshingEstimate, setIsRefreshingEstimate] = useState(false);
   const [syncEstimate, setSyncEstimate] = useState<OnshapeSyncEstimate | null>(null);
   const overviewRequestIdRef = useRef(0);
+  const estimateRequestIdRef = useRef(0);
 
   const parsedUrl = useMemo(() => (url.trim() ? parseOnshapeUrl(url.trim()) : null), [url]);
   const scopedDocumentRefs = useMemo(
@@ -137,6 +138,8 @@ export function CadIntegrationView({
   }, [loadOverview, projectId, seasonId]);
 
   useEffect(() => {
+    estimateRequestIdRef.current += 1;
+    setIsRefreshingEstimate(false);
     setSyncEstimate(null);
   }, [selectedDocumentRefId, syncLevel]);
 
@@ -216,16 +219,28 @@ export function CadIntegrationView({
       return;
     }
 
+    const requestId = estimateRequestIdRef.current + 1;
+    estimateRequestIdRef.current = requestId;
     setIsRefreshingEstimate(true);
     setMessage(null);
     try {
       const response = await fetchOnshapeImportEstimate({ documentRefId: selectedDocumentRefId, syncLevel });
+      if (estimateRequestIdRef.current !== requestId) {
+        return;
+      }
+
       setSyncEstimate(response.item);
     } catch (error) {
+      if (estimateRequestIdRef.current !== requestId) {
+        return;
+      }
+
       setSyncEstimate(null);
       setMessage(error instanceof Error ? error.message : String(error));
     } finally {
-      setIsRefreshingEstimate(false);
+      if (estimateRequestIdRef.current === requestId) {
+        setIsRefreshingEstimate(false);
+      }
     }
   };
 
