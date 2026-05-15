@@ -8,7 +8,9 @@ import {
 } from "../CadIntegrationView";
 import { isMissingCadHierarchyReviewRoute, isMissingCadOptionalRoute } from "../cadOptionalRoutes";
 import { uploadCadStepFile } from "../api/cadStepApi";
+import { CadStatusPanels } from "../components/CadStatusPanels";
 import { CadStepReviewPanels } from "../components/CadStepReviewPanels";
+import type { OnshapeOverview } from "../model/cadIntegrationTypes";
 import { parseOnshapeUrl } from "../model/onshapeUrlParser";
 
 jest.mock("../api/cadStepApi", () => ({
@@ -24,6 +26,14 @@ jest.mock("../api/cadStepApi", () => ({
   applyCadHierarchyReview: jest.fn(),
   applyCadSnapshotMappings: jest.fn(),
   finalizeCadSnapshot: jest.fn(),
+}));
+
+jest.mock("../api/onshapeCadApi", () => ({
+  createOnshapeDocumentRef: jest.fn(),
+  createOnshapeOAuthAuthorizationUrl: jest.fn(),
+  fetchOnshapeImportEstimate: jest.fn(),
+  fetchOnshapeOverview: jest.fn(),
+  runOnshapeImport: jest.fn(),
 }));
 
 describe("CAD STEP mapper view", () => {
@@ -58,17 +68,71 @@ describe("CAD STEP mapper view", () => {
     expect(parseOnshapeUrl("not-a-url").ok).toBe(false);
   });
 
-  it("renders only the STEP import workflow", () => {
+  it("renders the STEP import workflow before the secondary Onshape sync section", () => {
     const markup = renderToStaticMarkup(React.createElement(CadIntegrationView, {}));
 
     expect(markup).toContain("STEP import");
     expect(markup).toContain("Export from the master assembly");
     expect(markup).toContain("MECH - Drivetrain - Swerve Module");
-    expect(markup).not.toContain("Link Onshape");
-    expect(markup).not.toContain("Manual sync");
-    expect(markup).not.toContain("Onshape status");
-    expect(markup).not.toContain("API budget");
+    expect(markup).toContain("CAD / Onshape integration");
+    expect(markup).toContain("Onshape status");
+    expect(markup).toContain("API budget");
+    expect(markup.indexOf("STEP import")).toBeLessThan(markup.indexOf("CAD / Onshape integration"));
     expect(uploadCadStepFile).not.toHaveBeenCalled();
+  });
+
+  it("renders OAuth2 connection state without exposing token values", () => {
+    const overview: OnshapeOverview = {
+      connection: {
+        authMode: "oauth",
+        baseUrl: "https://cad.onshape.com",
+        configured: true,
+        credentialReference: "onshape-oauth",
+        lastError: null,
+        oauth: {
+          clientConfigured: true,
+          connected: true,
+          authorizationUrlAvailable: true,
+          scopes: ["OAuth2Read"],
+          tokenExpiresAt: "2026-05-10T12:00:00.000Z",
+          credentialSource: "runtime",
+        },
+      },
+      documentRefs: [],
+      importRuns: [],
+      snapshots: [],
+      latestSnapshot: null,
+      assemblyNodes: [],
+      partDefinitions: [],
+      partInstances: [],
+      warnings: [],
+      budget: {
+        planType: "education",
+        dailySoftBudget: 100,
+        perSyncSoftBudget: 25,
+        callsUsedToday: 0,
+        callsUsedThisMonth: 0,
+        callsUsedThisYear: 0,
+        warningThresholdPercent: 70,
+        hardStopThresholdPercent: 90,
+        lastRateLimitRemaining: null,
+      },
+    };
+
+    const markup = renderToStaticMarkup(
+      React.createElement(CadStatusPanels, {
+        overview,
+        selectedReferenceType: "version",
+        selectedSyncLevel: "bom",
+        syncEstimate: null,
+        onConnectOAuth: jest.fn(),
+      }),
+    );
+
+    expect(markup).toContain("OAuth2 connected");
+    expect(markup).toContain("runtime token");
+    expect(markup).toContain("OAuth2Read");
+    expect(markup).not.toContain("oauth-access-token");
   });
 
   it("treats only the missing hierarchy route response as optional", () => {

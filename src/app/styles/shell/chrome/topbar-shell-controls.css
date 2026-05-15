@@ -35,7 +35,8 @@
   display: flex;
 }
 
-.app-topbar-controls-host .milestones-toolbar > .milestones-search-slot > .topbar-responsive-search {
+.app-topbar-controls-host .milestones-toolbar > .milestones-search-slot > .topbar-responsive-search,
+.app-topbar-controls-host .milestones-toolbar > .milestones-search-slot > .milestones-search-control {
   width: 100%;
   min-width: 0;
 }
@@ -53,28 +54,6 @@
   display: none;
 }
 
-.app-topbar-controls-host .task-calendar-toolbar {
-  background: transparent;
-  border: 0;
-  gap: 0.35rem;
-  padding: 0;
-}
-
-.app-topbar-controls-host .task-calendar-toolbar-actions {
-  flex-wrap: nowrap;
-}
-
-.app-topbar-controls-host .task-calendar-toolbar-center {
-  align-items: center;
-  display: inline-flex;
-  gap: 0.45rem;
-}
-
-.app-topbar-controls-host .task-calendar-toolbar-center .task-calendar-legend {
-  flex-wrap: nowrap;
-  gap: 0.35rem;
-}
-
 @media (max-width: 880px) {
   .app-topbar:has(.app-topbar-controls-host .topbar-responsive-search-dynamic.is-icon-mode) .app-topbar-left {
     flex: 0 0 auto;
@@ -89,14 +68,16 @@
 
 @media (max-width: 760px) {
   .app-topbar:has(.app-topbar-controls-host:empty) .app-topbar-search {
-    width: 2rem;
-    min-width: 2rem;
+    width: var(--app-topbar-search-icon-pill-width);
+    min-width: var(--app-topbar-search-icon-pill-width);
+    height: var(--app-topbar-search-icon-pill-height);
     margin-left: auto;
   }
 
   .app-topbar:has(.app-topbar-controls-host:empty) .app-topbar-search-input {
-    width: 2rem;
-    min-width: 2rem;
+    width: var(--app-topbar-search-icon-pill-width);
+    min-width: var(--app-topbar-search-icon-pill-width);
+    height: var(--app-topbar-search-icon-pill-height);
     padding: 0;
     border-radius: 999px;
     color: transparent;

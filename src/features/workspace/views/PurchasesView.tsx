@@ -11,7 +11,7 @@ import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspace
 import { EditableHoverIndicator, PaginationControls, RequestedItemMeta, TableCell, useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import { filterSelectionIncludes, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
-import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
 import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
@@ -98,92 +98,93 @@ export function PurchasesView({
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">
         <div className="panel-actions filter-toolbar queue-toolbar purchase-toolbar">
-          <div data-tutorial-target="purchases-search-input">
-            <SearchToolbarInput
-              ariaLabel="Search purchase items"
-              onChange={setSearch}
-              placeholder="Search items..."
-              value={search}
-            />
-          </div>
-
-          <CompactFilterMenu
-            activeCount={[subsystem, requester, status, vendor, approval].filter((value) => value.length > 0).length}
-            ariaLabel="Purchase filters"
-            buttonLabel="Filters"
-            className="materials-filter-menu"
-            items={[
-              {
-                label: "Subsystem",
-                content: (
-                  <FilterDropdown
-                    allLabel="All subsystems"
-                    ariaLabel="Filter purchases by subsystem"
-                    className="task-queue-filter-menu-submenu"
-                    icon={<IconManufacturing />}
-                    onChange={setSubsystem}
-                    options={bootstrap.subsystems}
-                    value={subsystem}
-                  />
-                ),
-              },
-              {
-                label: "Requester",
-                content: (
-                  <FilterDropdown
-                    allLabel="All requesters"
-                    ariaLabel="Filter purchases by requester"
-                    className="task-queue-filter-menu-submenu"
-                    icon={<IconPerson />}
-                    onChange={setRequester}
-                    options={bootstrap.members}
-                    value={requester}
-                  />
-                ),
-              },
-              {
-                label: "Status",
-                content: (
-                  <FilterDropdown
-                    allLabel="All statuses"
-                    ariaLabel="Filter purchases by status"
-                    className="task-queue-filter-menu-submenu"
-                    icon={<IconTasks />}
-                    onChange={setStatus}
-                    options={PURCHASE_STATUS_OPTIONS}
-                    value={status}
-                  />
-                ),
-              },
-              {
-                label: "Vendor",
-                content: (
-                  <FilterDropdown
-                    allLabel="All vendors"
-                    ariaLabel="Filter purchases by vendor"
-                    className="task-queue-filter-menu-submenu"
-                    icon={<IconTasks />}
-                    onChange={setVendor}
-                    options={uniqueVendors}
-                    value={vendor}
-                  />
-                ),
-              },
-              {
-                label: "Approval",
-                content: (
-                  <FilterDropdown
-                    allLabel="All approvals"
-                    ariaLabel="Filter purchases by approval status"
-                    className="task-queue-filter-menu-submenu"
-                    icon={<IconTasks />}
-                    onChange={setApproval}
-                    options={PURCHASE_APPROVAL_OPTIONS}
-                    value={approval}
-                  />
-                ),
-              },
-            ]}
+          <TopbarResponsiveSearch
+            actions={
+              <CompactFilterMenu
+                activeCount={[subsystem, requester, status, vendor, approval].filter((value) => value.length > 0).length}
+                ariaLabel="Purchase filters"
+                buttonLabel="Filters"
+                className="materials-filter-menu"
+                items={[
+                  {
+                    label: "Subsystem",
+                    content: (
+                      <FilterDropdown
+                        allLabel="All subsystems"
+                        ariaLabel="Filter purchases by subsystem"
+                        className="task-queue-filter-menu-submenu"
+                        icon={<IconManufacturing />}
+                        onChange={setSubsystem}
+                        options={bootstrap.subsystems}
+                        value={subsystem}
+                      />
+                    ),
+                  },
+                  {
+                    label: "Requester",
+                    content: (
+                      <FilterDropdown
+                        allLabel="All requesters"
+                        ariaLabel="Filter purchases by requester"
+                        className="task-queue-filter-menu-submenu"
+                        icon={<IconPerson />}
+                        onChange={setRequester}
+                        options={bootstrap.members}
+                        value={requester}
+                      />
+                    ),
+                  },
+                  {
+                    label: "Status",
+                    content: (
+                      <FilterDropdown
+                        allLabel="All statuses"
+                        ariaLabel="Filter purchases by status"
+                        className="task-queue-filter-menu-submenu"
+                        icon={<IconTasks />}
+                        onChange={setStatus}
+                        options={PURCHASE_STATUS_OPTIONS}
+                        value={status}
+                      />
+                    ),
+                  },
+                  {
+                    label: "Vendor",
+                    content: (
+                      <FilterDropdown
+                        allLabel="All vendors"
+                        ariaLabel="Filter purchases by vendor"
+                        className="task-queue-filter-menu-submenu"
+                        icon={<IconTasks />}
+                        onChange={setVendor}
+                        options={uniqueVendors}
+                        value={vendor}
+                      />
+                    ),
+                  },
+                  {
+                    label: "Approval",
+                    content: (
+                      <FilterDropdown
+                        allLabel="All approvals"
+                        ariaLabel="Filter purchases by approval status"
+                        className="task-queue-filter-menu-submenu"
+                        icon={<IconTasks />}
+                        onChange={setApproval}
+                        options={PURCHASE_APPROVAL_OPTIONS}
+                        value={approval}
+                      />
+                    ),
+                  },
+                ]}
+              />
+            }
+            ariaLabel="Search purchase items"
+            compactPlaceholder="Search"
+            onChange={setSearch}
+            placeholder="Search items..."
+            tutorialTarget="purchases-search-input"
+            value={search}
           />
 
         </div>

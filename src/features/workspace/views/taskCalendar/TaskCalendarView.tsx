@@ -6,6 +6,7 @@ import type { TaskRecord } from "@/types/recordsExecution";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { MilestonesMilestoneModal } from "@/features/workspace/views/milestones/MilestonesEventModal";
 import { useMilestonesMilestoneModalState } from "@/features/workspace/views/milestones/sections/useMilestonesEventModalState";
 import { TaskCalendarFilterToolbar } from "./TaskCalendarFilterToolbar";
@@ -54,6 +55,7 @@ export function TaskCalendarView({
   onTaskEditSaved = () => {},
 }: TaskCalendarViewProps) {
   const [eventFilter, setEventFilter] = useState<"all" | TaskCalendarEventType>("all");
+  const [searchFilter, setSearchFilter] = useState("");
   const [sortMode, setSortMode] = useState<TaskCalendarSortMode>("date");
   const [monthCursor, setMonthCursor] = useState(() => {
     const today = new Date();
@@ -100,13 +102,29 @@ export function TaskCalendarView({
     [activePersonFilter, bootstrap, isAllProjectsView, projectsById],
   );
   const events = useMemo(() => {
-    const scopedEvents =
+    const normalizedSearch = searchFilter.trim().toLowerCase();
+    let scopedEvents =
       eventFilter === "all"
         ? unfilteredEvents
         : unfilteredEvents.filter((event) => event.extendedProps.type === eventFilter);
 
+    if (normalizedSearch.length > 0) {
+      scopedEvents = scopedEvents.filter((event) =>
+        [
+          event.title,
+          event.extendedProps.contextLabel,
+          event.extendedProps.priority,
+          event.extendedProps.status,
+          event.extendedProps.type,
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(normalizedSearch),
+      );
+    }
+
     return sortTaskCalendarEvents(scopedEvents, sortMode);
-  }, [eventFilter, sortMode, unfilteredEvents]);
+  }, [eventFilter, searchFilter, sortMode, unfilteredEvents]);
   const monthCells = useMemo(() => createMonthCells(monthCursor), [monthCursor]);
   const eventsByDateKey = useMemo(() => {
     const grouped = new Map<string, TaskCalendarEvent[]>();
@@ -145,49 +163,22 @@ export function TaskCalendarView({
       {unfilteredEvents.length > 0 ? (
         <AppTopbarSlotPortal slot="controls">
           <div className="panel-actions filter-toolbar task-queue-toolbar task-calendar-filter-toolbar">
-            <TaskCalendarFilterToolbar
-              eventFilter={eventFilter}
-              onEventFilterChange={setEventFilter}
-              onSortModeChange={setSortMode}
-              sortMode={sortMode}
+            <TopbarResponsiveSearch
+              actionCount={2}
+              actions={
+                <TaskCalendarFilterToolbar
+                  eventFilter={eventFilter}
+                  onEventFilterChange={setEventFilter}
+                  onSortModeChange={setSortMode}
+                  sortMode={sortMode}
+                />
+              }
+              ariaLabel="Search calendar"
+              compactPlaceholder="Search"
+              onChange={setSearchFilter}
+              placeholder="Search calendar..."
+              value={searchFilter}
             />
-
-            <div className="task-calendar-toolbar">
-              <div className="task-calendar-toolbar-actions">
-                <button
-                  className="secondary-action"
-                  onClick={() =>
-                    setMonthCursor((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))
-                  }
-                  type="button"
-                >
-                  Prev
-                </button>
-                <button
-                  className="secondary-action"
-                  onClick={() =>
-                    setMonthCursor((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1))
-                  }
-                  type="button"
-                >
-                  Next
-                </button>
-                <button
-                  className="secondary-action"
-                  onClick={() => {
-                    const now = new Date();
-                    setMonthCursor(new Date(now.getFullYear(), now.getMonth(), 1));
-                  }}
-                  type="button"
-                >
-                  Today
-                </button>
-              </div>
-              <div className="task-calendar-toolbar-center">
-                <strong className="task-calendar-toolbar-title">{monthLabel}</strong>
-                <TaskCalendarLegend />
-              </div>
-            </div>
           </div>
         </AppTopbarSlotPortal>
       ) : null}
@@ -207,6 +198,43 @@ export function TaskCalendarView({
         </div>
       ) : (
         <div className="task-calendar-frame">
+          <div className="task-calendar-toolbar">
+            <div className="task-calendar-toolbar-actions">
+              <button
+                className="secondary-action"
+                onClick={() =>
+                  setMonthCursor((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))
+                }
+                type="button"
+              >
+                Prev
+              </button>
+              <button
+                className="secondary-action"
+                onClick={() =>
+                  setMonthCursor((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1))
+                }
+                type="button"
+              >
+                Next
+              </button>
+              <button
+                className="secondary-action"
+                onClick={() => {
+                  const now = new Date();
+                  setMonthCursor(new Date(now.getFullYear(), now.getMonth(), 1));
+                }}
+                type="button"
+              >
+                Today
+              </button>
+            </div>
+            <div className="task-calendar-toolbar-center">
+              <strong className="task-calendar-toolbar-title">{monthLabel}</strong>
+              <TaskCalendarLegend />
+            </div>
+          </div>
+
           {events.length === 0 ? (
             <div className="empty-state task-calendar-filter-empty">
               <strong>No events match this filter.</strong>

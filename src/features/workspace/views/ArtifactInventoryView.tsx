@@ -11,7 +11,7 @@ import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspace
 import { EditableHoverIndicator, PaginationControls, TableCell, useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import { filterSelectionIncludes, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
-import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
@@ -139,48 +139,50 @@ export function ArtifactInventoryView({
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">
         <div className="panel-actions filter-toolbar materials-toolbar">
-          <SearchToolbarInput
+          <TopbarResponsiveSearch
+            actions={
+              <CompactFilterMenu
+                activeCount={[workstreamFilter, statusFilter].filter((value) => value.length > 0).length}
+                ariaLabel="Artifact filters"
+                buttonLabel="Filters"
+                className="materials-filter-menu"
+                items={[
+                  {
+                    label: "Workflow",
+                    content: (
+                      <FilterDropdown
+                        allLabel="All workflows"
+                        ariaLabel="Filter artifacts by workflow"
+                        className="task-queue-filter-menu-submenu"
+                        icon={<IconManufacturing />}
+                        onChange={setWorkstreamFilter}
+                        options={workstreamOptions}
+                        value={workstreamFilter}
+                      />
+                    ),
+                  },
+                  {
+                    label: "Status",
+                    content: (
+                      <FilterDropdown
+                        allLabel="All statuses"
+                        ariaLabel="Filter artifacts by status"
+                        className="task-queue-filter-menu-submenu"
+                        icon={<IconTasks />}
+                        onChange={setStatusFilter}
+                        options={ARTIFACT_STATUS_OPTIONS}
+                        value={statusFilter}
+                      />
+                    ),
+                  },
+                ]}
+              />
+            }
             ariaLabel={`Search ${sectionTitle.toLowerCase()}`}
+            compactPlaceholder="Search"
             onChange={setSearch}
             placeholder={`Search ${sectionTitle.toLowerCase()}...`}
             value={search}
-          />
-
-          <CompactFilterMenu
-            activeCount={[workstreamFilter, statusFilter].filter((value) => value.length > 0).length}
-            ariaLabel="Artifact filters"
-            buttonLabel="Filters"
-            className="materials-filter-menu"
-            items={[
-              {
-                label: "Workflow",
-                content: (
-                  <FilterDropdown
-                    allLabel="All workflows"
-                    ariaLabel="Filter artifacts by workflow"
-                    className="task-queue-filter-menu-submenu"
-                    icon={<IconManufacturing />}
-                    onChange={setWorkstreamFilter}
-                    options={workstreamOptions}
-                    value={workstreamFilter}
-                  />
-                ),
-              },
-              {
-                label: "Status",
-                content: (
-                  <FilterDropdown
-                    allLabel="All statuses"
-                    ariaLabel="Filter artifacts by status"
-                    className="task-queue-filter-menu-submenu"
-                    icon={<IconTasks />}
-                    onChange={setStatusFilter}
-                    options={ARTIFACT_STATUS_OPTIONS}
-                    value={statusFilter}
-                  />
-                ),
-              },
-            ]}
           />
           <label
             style={{

@@ -29,61 +29,66 @@ export function RosterWorkloadTopbarControls({
   return (
     <div className="panel-actions filter-toolbar roster-workload-topbar-controls">
       <TopbarResponsiveSearch
+        actionCount={2}
+        actions={
+          <>
+            <CompactFilterMenu
+              activeCount={availabilityFilter === "all" ? 0 : 1}
+              ariaLabel="Filter availability"
+              buttonLabel="Status"
+              items={[
+                {
+                  label: "Availability",
+                  content: (
+                    <select
+                      aria-label="Filter members by availability"
+                      className="task-queue-sort-menu-select"
+                      onChange={(event) =>
+                        setAvailabilityFilter(event.target.value as RosterAvailabilityStatus | "all")
+                      }
+                      value={availabilityFilter}
+                    >
+                      {availabilityOptions.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.name}
+                        </option>
+                      ))}
+                    </select>
+                  ),
+                },
+              ]}
+            />
+            <CompactFilterMenu
+              activeCount={sortMode === "availability" ? 0 : 1}
+              ariaLabel="Sort workload"
+              buttonLabel="Sort"
+              icon={<IconSort />}
+              items={[
+                {
+                  label: "Sort by",
+                  content: (
+                    <select
+                      aria-label="Sort members"
+                      className="task-queue-sort-menu-select"
+                      onChange={(event) => setSortMode(event.target.value as RosterMemberSortMode)}
+                      value={sortMode}
+                    >
+                      {sortOptions.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.name}
+                        </option>
+                      ))}
+                    </select>
+                  ),
+                },
+              ]}
+            />
+          </>
+        }
         ariaLabel="Search members"
         onChange={setSearchText}
         placeholder="Search members or tasks..."
         value={searchText}
-      />
-      <CompactFilterMenu
-        activeCount={availabilityFilter === "all" ? 0 : 1}
-        ariaLabel="Filter availability"
-        buttonLabel="Status"
-        items={[
-          {
-            label: "Availability",
-            content: (
-              <select
-                aria-label="Filter members by availability"
-                className="task-queue-sort-menu-select"
-                onChange={(event) =>
-                  setAvailabilityFilter(event.target.value as RosterAvailabilityStatus | "all")
-                }
-                value={availabilityFilter}
-              >
-                {availabilityOptions.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name}
-                  </option>
-                ))}
-              </select>
-            ),
-          },
-        ]}
-      />
-      <CompactFilterMenu
-        activeCount={sortMode === "availability" ? 0 : 1}
-        ariaLabel="Sort workload"
-        buttonLabel="Sort"
-        icon={<IconSort />}
-        items={[
-          {
-            label: "Sort by",
-            content: (
-              <select
-                aria-label="Sort members"
-                className="task-queue-sort-menu-select"
-                onChange={(event) => setSortMode(event.target.value as RosterMemberSortMode)}
-                value={sortMode}
-              >
-                {sortOptions.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name}
-                  </option>
-                ))}
-              </select>
-            ),
-          },
-        ]}
       />
     </div>
   );

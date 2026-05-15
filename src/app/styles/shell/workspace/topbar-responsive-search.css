@@ -8,13 +8,69 @@
 }
 
 .topbar-responsive-search {
+  --topbar-responsive-search-action-overlay-width: 0rem;
+  --topbar-responsive-search-icon-button-size: 1.7rem;
+  --topbar-responsive-search-icon-pill-height: 2.05rem;
+  --topbar-responsive-search-icon-pill-padding: 0.18rem;
+  --topbar-responsive-search-icon-pill-reserved-width: 0rem;
+  --topbar-responsive-search-icon-pill-extra-width: 0.45rem;
+  --topbar-responsive-search-icon-pill-width: calc(
+    var(--topbar-responsive-search-icon-button-size) +
+      var(--topbar-responsive-search-icon-pill-reserved-width) +
+      var(--topbar-responsive-search-icon-pill-extra-width)
+  );
   display: flex;
   align-items: center;
   min-width: 0;
 }
 
+.filter-toolbar .topbar-responsive-search {
+  flex: 0 1 clamp(11.5rem, 24vw, 19rem);
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
 .worklog-toolbar-topbar .topbar-responsive-search {
   flex: 1 1 auto;
+}
+
+.worklog-toolbar-topbar .topbar-responsive-search.has-actions {
+  flex: 0 1 clamp(15rem, 30vw, 23rem);
+}
+
+.app-topbar-controls-host .filter-toolbar > .topbar-responsive-search,
+.app-topbar-search-host .filter-toolbar > .topbar-responsive-search {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+}
+
+.app-topbar-controls-host .filter-toolbar > .topbar-responsive-search-dynamic.is-icon-mode,
+.app-topbar-search-host .filter-toolbar > .topbar-responsive-search-dynamic.is-icon-mode {
+  flex: 0 0 var(--topbar-responsive-search-icon-pill-width);
+  width: var(--topbar-responsive-search-icon-pill-width);
+  min-width: var(--topbar-responsive-search-icon-pill-width);
+}
+
+.app-topbar-controls-host .filter-toolbar .topbar-responsive-search .toolbar-search,
+.app-topbar-search-host .filter-toolbar .topbar-responsive-search .toolbar-search {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+}
+
+.topbar-responsive-search-full {
+  min-width: 0;
+  width: 100%;
+}
+
+.topbar-responsive-search-field {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-width: 0;
 }
 
 .worklog-toolbar-topbar .topbar-responsive-search-full {
@@ -22,80 +78,13 @@
   min-width: 0;
 }
 
-.topbar-responsive-search-full-compact {
-  display: none;
-}
-
-.topbar-responsive-search-compact {
-  display: none;
-  position: relative;
-}
-
-.topbar-responsive-search-dynamic .topbar-responsive-search-compact {
-  display: inline-flex;
-}
-
-.topbar-responsive-search-dynamic.is-icon-mode {
-  justify-content: flex-end;
-}
-
-.topbar-responsive-search-dynamic.is-icon-mode .topbar-responsive-search-compact {
-  margin-left: auto;
-}
-
-.topbar-responsive-search-toggle.is-active {
-  border-color: color-mix(in srgb, var(--meco-blue) 38%, var(--border-base));
-  color: var(--text-title);
-}
-
-.topbar-responsive-search-popover {
-  position: absolute;
-  top: calc(100% + 0.45rem);
-  right: 0;
-  z-index: 15;
-  width: min(17.5rem, 64vw);
-  padding: 0.35rem;
-  border-radius: 0.65rem;
-  border: 1px solid var(--border-base);
-  background: var(--bg-panel);
-  box-shadow: 0 10px 24px color-mix(in srgb, var(--official-black) 20%, transparent);
-}
-
-.topbar-responsive-search-popover .toolbar-search-input {
+.topbar-responsive-search-field .toolbar-search,
+.topbar-responsive-search-full .toolbar-search {
   width: 100%;
 }
 
-@media (max-width: 1340px) {
-  .worklog-toolbar-topbar .topbar-responsive-search-full,
-  .roster-workload-topbar-controls .topbar-responsive-search-full {
-    display: none;
-  }
-
-  .worklog-toolbar-topbar .topbar-responsive-search-compact,
-  .roster-workload-topbar-controls .topbar-responsive-search-compact {
-    display: inline-flex;
-  }
-}
-
-.milestones-toolbar .topbar-responsive-search .toolbar-search {
-  padding-right: 0.3rem;
-}
-
-.milestones-toolbar .milestones-search-slot {
+.topbar-responsive-search.has-actions .topbar-responsive-search-field .toolbar-search {
   flex: 1 1 auto;
   min-width: 0;
-  max-width: 100%;
-  display: flex;
-}
-
-.milestones-toolbar .milestones-search-slot > .topbar-responsive-search {
-  width: 100%;
-  min-width: 0;
-}
-
-.milestones-toolbar .topbar-responsive-search-dynamic .toolbar-search {
-  width: 100%;
-  min-width: 0;
-  flex: 1 1 auto;
-  padding-right: 0.08rem;
+  padding-right: var(--topbar-responsive-search-action-overlay-width);
 }

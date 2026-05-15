@@ -1,25 +1,26 @@
 import type { Dispatch, SetStateAction } from "react";
+import { ArrowDownWideNarrow, ArrowUpWideNarrow, Filter } from "lucide-react";
 
 import {
   IconParts,
   IconSearchMinus,
   IconSearchPlus,
-  IconSort,
   IconTasks,
 } from "@/components/shared/Icons";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MilestoneType } from "@/types/common";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
-import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { EVENT_TYPE_STYLES as MILESTONE_TYPE_STYLES } from "@/features/workspace/shared/events/eventStyles";
+import { MilestonesSearchControl } from "./MilestonesSearchControl";
 import {
   clampMilestoneZoom,
   formatMilestoneZoomLabel,
   MILESTONE_ZOOM_MAX,
   MILESTONE_ZOOM_MIN,
   MILESTONE_ZOOM_STEP,
+  type MilestoneSearchSuggestion,
   type MilestoneSortField,
 } from "./milestonesViewUtils";
 
@@ -36,11 +37,6 @@ const MILESTONE_SORT_OPTIONS: { id: MilestoneSortField; name: string }[] = [
   { id: "startDateTime", name: "Start" },
 ];
 
-const SORT_DIRECTION_OPTIONS: { id: "asc" | "desc"; name: string }[] = [
-  { id: "asc", name: "Ascending" },
-  { id: "desc", name: "Descending" },
-];
-
 interface MilestonesToolbarProps {
   isAllProjectsView: boolean;
   projectFilter: FilterSelection;
@@ -51,6 +47,7 @@ interface MilestonesToolbarProps {
   setSortField: Dispatch<SetStateAction<MilestoneSortField>>;
   setSortOrder: Dispatch<SetStateAction<"asc" | "desc">>;
   setTypeFilter: Dispatch<SetStateAction<FilterSelection>>;
+  searchSuggestions: MilestoneSearchSuggestion[];
   milestoneZoom: number;
   sortField: MilestoneSortField;
   sortOrder: "asc" | "desc";
@@ -63,6 +60,7 @@ export function MilestonesToolbar({
   projectFilter,
   projects,
   searchFilter,
+  searchSuggestions,
   setProjectFilter,
   setSearchFilter,
   setMilestoneZoom,
@@ -77,104 +75,107 @@ export function MilestonesToolbar({
   const activeCount =
     Number(isAllProjectsView && projectFilter.length > 0) + Number(typeFilter.length > 0);
   const milestoneSortIsDefault = sortField === "startDateTime" && sortOrder === "asc";
+  const renderSortDirectionIcon = () =>
+    sortOrder === "asc" ? (
+      <ArrowUpWideNarrow size={14} strokeWidth={2} />
+    ) : (
+      <ArrowDownWideNarrow size={14} strokeWidth={2} />
+    );
+  const toggleSortOrder = () => setSortOrder((current) => (current === "asc" ? "desc" : "asc"));
 
   return (
     <div className="panel-actions filter-toolbar milestones-toolbar">
       <div className="milestones-search-slot" data-tutorial-target="milestone-search-input">
-        <TopbarResponsiveSearch
-          ariaLabel="Search milestones"
-          compactPlaceholder="Search"
-          compactSwitchWidth={200}
-          iconReleaseWidth={260}
-          iconSwitchWidth={86}
-          mode="dynamic-label"
-          onChange={setSearchFilter}
-          placeholder="Search milestones..."
-          value={searchFilter}
+        <MilestonesSearchControl
+          filterControl={
+            <>
+              <CompactFilterMenu
+                activeCount={activeCount}
+                ariaLabel="Milestone filters"
+                buttonLabel="Filters"
+                className="materials-filter-menu milestones-search-filter-menu"
+                icon={<Filter size={14} strokeWidth={2} />}
+                iconOnly
+                items={[
+                  {
+                    hidden: !isAllProjectsView,
+                    label: "Project",
+                    content: (
+                      <FilterDropdown
+                        allLabel="All projects"
+                        ariaLabel="Filter milestones by project"
+                        className="task-queue-filter-menu-submenu"
+                        icon={<IconParts />}
+                        onChange={setProjectFilter}
+                        options={projects}
+                        value={projectFilter}
+                      />
+                    ),
+                  },
+                  {
+                    label: "Type",
+                    content: (
+                      <FilterDropdown
+                        allLabel="All types"
+                        ariaLabel="Filter milestones by type"
+                        className="task-queue-filter-menu-submenu"
+                        icon={<IconTasks />}
+                        onChange={setTypeFilter}
+                        options={MILESTONE_TYPE_OPTIONS}
+                        value={typeFilter}
+                      />
+                    ),
+                  },
+                ]}
+              />
+              <CompactFilterMenu
+                activeCount={milestoneSortIsDefault ? 0 : 1}
+                ariaLabel="Sort milestones"
+                buttonLabel={sortOrder === "asc" ? "Sort ascending" : "Sort descending"}
+                className="task-queue-sort-menu milestones-search-sort-menu"
+                icon={renderSortDirectionIcon()}
+                iconOnly
+                items={[
+                  {
+                    label: "Sort by",
+                    content: (
+                      <select
+                        aria-label="Sort milestones by"
+                        className="task-queue-sort-menu-select"
+                        onChange={(milestone) => setSortField(milestone.target.value as MilestoneSortField)}
+                        value={sortField}
+                      >
+                        {MILESTONE_SORT_OPTIONS.map((option) => (
+                          <option key={option.id} value={option.id}>
+                            {option.name}
+                          </option>
+                        ))}
+                      </select>
+                    ),
+                  },
+                  {
+                    label: "Direction",
+                    content: (
+                      <button
+                        aria-label="Toggle milestone sort direction"
+                        className="icon-button milestone-sort-direction-button"
+                        onClick={toggleSortOrder}
+                        title={sortOrder === "asc" ? "Sort ascending" : "Sort descending"}
+                        type="button"
+                      >
+                        {renderSortDirectionIcon()}
+                      </button>
+                    ),
+                  },
+                ]}
+              />
+            </>
+          }
+          searchFilter={searchFilter}
+          searchSuggestions={searchSuggestions}
+          setSearchFilter={setSearchFilter}
         />
       </div>
-
-      <CompactFilterMenu
-        activeCount={activeCount}
-        ariaLabel="Milestone filters"
-        buttonLabel="Filters"
-        className="materials-filter-menu"
-        items={[
-          {
-            hidden: !isAllProjectsView,
-            label: "Project",
-            content: (
-              <FilterDropdown
-                allLabel="All projects"
-                ariaLabel="Filter milestones by project"
-                className="task-queue-filter-menu-submenu"
-                icon={<IconParts />}
-                onChange={setProjectFilter}
-                options={projects}
-                value={projectFilter}
-              />
-            ),
-          },
-          {
-            label: "Type",
-            content: (
-              <FilterDropdown
-                allLabel="All types"
-                ariaLabel="Filter milestones by type"
-                className="task-queue-filter-menu-submenu"
-                icon={<IconTasks />}
-                onChange={setTypeFilter}
-                options={MILESTONE_TYPE_OPTIONS}
-                value={typeFilter}
-              />
-            ),
-          },
-        ]}
-      />
-
-      <CompactFilterMenu
-        activeCount={milestoneSortIsDefault ? 0 : 1}
-        ariaLabel="Sort milestones"
-        buttonLabel="Sort"
-        className="task-queue-sort-menu"
-        icon={<IconSort />}
-        items={[
-          {
-            label: "Sort by",
-            content: (
-              <select
-                aria-label="Sort milestones by"
-                className="task-queue-sort-menu-select"
-                onChange={(milestone) => setSortField(milestone.target.value as MilestoneSortField)}
-                value={sortField}
-              >
-                {MILESTONE_SORT_OPTIONS.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name}
-                  </option>
-                ))}
-              </select>
-            ),
-          },
-          {
-            label: "Direction",
-            content: (
-              <select
-                aria-label="Sort direction"
-                className="task-queue-sort-menu-select"
-                onChange={(milestone) => setSortOrder(milestone.target.value as "asc" | "desc")}
-                value={sortOrder}
-              >
-                {SORT_DIRECTION_OPTIONS.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name}
-                  </option>
-                ))}
-              </select>
-            ),
-          },
-        ]}
-      />
 
       <div aria-label="Milestones zoom" className="task-queue-zoom-controls milestones-zoom-controls" role="group">
         <button

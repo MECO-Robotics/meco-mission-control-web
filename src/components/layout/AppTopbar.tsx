@@ -1,5 +1,6 @@
 import {
-  MECO_LOGIN_BACKDROP_SRC,
+  MECO_COMPACT_TEAM_LOGO_SIZE,
+  MECO_COMPACT_TEAM_LOGO_SRC,
   MECO_MAIN_LOGO_HEIGHT,
   MECO_MAIN_LOGO_LIGHT_SRC,
   MECO_MAIN_LOGO_WHITE_SRC,
@@ -47,23 +48,34 @@ export function AppTopbar({
   sessionUser,
   toggleDarkMode,
 }: AppTopbarProps) {
-  const topbarLogoSrc = isSidebarCollapsed
-    ? MECO_LOGIN_BACKDROP_SRC
-    : isDarkMode
-      ? MECO_MAIN_LOGO_WHITE_SRC
-      : MECO_MAIN_LOGO_LIGHT_SRC;
+  const topbarLogo = isSidebarCollapsed
+    ? {
+        alt: "MECO compact team logo",
+        height: MECO_COMPACT_TEAM_LOGO_SIZE,
+        src: MECO_COMPACT_TEAM_LOGO_SRC,
+        variant: "compact",
+        width: MECO_COMPACT_TEAM_LOGO_SIZE,
+      }
+    : {
+        alt: "MECO main logo",
+        height: MECO_MAIN_LOGO_HEIGHT,
+        src: isDarkMode ? MECO_MAIN_LOGO_WHITE_SRC : MECO_MAIN_LOGO_LIGHT_SRC,
+        variant: "full",
+        width: MECO_MAIN_LOGO_WIDTH,
+      };
 
   return (
     <header className="topbar app-topbar" data-collapsed={isSidebarCollapsed ? "true" : "false"}>
       <div className="app-topbar-brand">
         <img
-          alt="MECO main logo"
+          alt={topbarLogo.alt}
           className="app-topbar-brand-icon"
+          data-logo-variant={topbarLogo.variant}
           fetchPriority="high"
-          height={MECO_MAIN_LOGO_HEIGHT}
+          height={topbarLogo.height}
           loading="eager"
-          width={MECO_MAIN_LOGO_WIDTH}
-          src={topbarLogoSrc}
+          width={topbarLogo.width}
+          src={topbarLogo.src}
         />
       </div>
       <div className="app-topbar-left">

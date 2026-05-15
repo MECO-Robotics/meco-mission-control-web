@@ -1,4 +1,9 @@
 import type { MechanismRecord, PartDefinitionRecord, SubsystemRecord } from "@/types/records";
+import {
+  CadOnshapeIntegrationSection,
+  getScopedDocumentRefs,
+  resolveSelectedDocumentRefId,
+} from "./components/CadOnshapeIntegrationSection";
 import { CadStepImportHeader } from "./components/CadStepImportHeader";
 import { CadStepReviewPanels } from "./components/CadStepReviewPanels";
 import { CadStepSnapshotSelector } from "./components/CadStepSnapshotSelector";
@@ -10,6 +15,8 @@ import "./cadStepDiagnostics.css";
 import "./cadStepHierarchy.css";
 import "./cadStepTree.css";
 import "./cadStepWorkflow.css";
+
+export { getScopedDocumentRefs, resolveSelectedDocumentRefId };
 
 export function CadIntegrationView({
   mechanisms = [],
@@ -67,6 +74,8 @@ export function CadIntegrationView({
         tree={cadWorkflow.stepTree}
         warnings={cadWorkflow.stepWarnings}
       />
+
+      <CadOnshapeIntegrationSection projectId={projectId} seasonId={seasonId} />
     </section>
   );
 }

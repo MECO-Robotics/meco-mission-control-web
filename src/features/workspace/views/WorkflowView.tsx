@@ -5,7 +5,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
 import { EditableHoverIndicator, TableCell } from "@/features/workspace/shared/table/workspaceTableChrome";
-import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 
@@ -94,8 +94,9 @@ export function WorkflowView({
     <section className={`panel dense-panel subsystem-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">
         <div className="panel-actions filter-toolbar subsystem-manager-toolbar">
-          <SearchToolbarInput
+          <TopbarResponsiveSearch
             ariaLabel="Search workflows"
+            compactPlaceholder="Search"
             onChange={setSearch}
             placeholder="Search workflows..."
             value={search}

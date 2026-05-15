@@ -16,17 +16,26 @@ const estimatedCalls: Record<SyncLevel, string> = {
 
 export function CadStatusPanels({
   overview,
+  isConnectingOAuth = false,
+  isRefreshingEstimate = false,
+  onConnectOAuth,
+  onRefreshEstimate,
   selectedSyncLevel,
   selectedReferenceType,
   syncEstimate,
 }: {
   overview: OnshapeOverview | null;
+  isConnectingOAuth?: boolean;
+  isRefreshingEstimate?: boolean;
+  onConnectOAuth?: () => void;
+  onRefreshEstimate?: () => void;
   selectedSyncLevel: SyncLevel;
   selectedReferenceType: string;
   syncEstimate?: OnshapeSyncEstimate | null;
 }) {
   const budget = overview?.budget;
   const connection = overview?.connection;
+  const oauth = connection?.oauth;
   const isWorkspace = selectedReferenceType === "workspace";
   const estimatedCallText = syncEstimate
     ? `${syncEstimate.callsEstimated} calls`
@@ -37,18 +46,29 @@ export function CadStatusPanels({
   const budgetText = syncEstimate
     ? (syncEstimate.budgetAllowsSync ? "within budget" : "over budget")
     : "not estimated";
+  const oauthStatus = getOAuthStatusCopy(oauth);
+  const credentialSource = getCredentialSourceCopy(oauth?.credentialSource);
 
   return (
     <div className="cad-grid cad-grid-three">
       <article className="cad-card cad-status-card">
         <span className="cad-eyebrow">Connection</span>
         <h3>Onshape status</h3>
-        <p>{connection?.configured ? "Backend credentials configured" : "Credentials not configured yet"}</p>
+        <p>{oauthStatus}</p>
         <dl className="cad-key-values">
-          <div><dt>Auth mode</dt><dd>{connection?.authMode ?? "api_key"}</dd></div>
+          <div><dt>Auth mode</dt><dd>{connection?.authMode === "oauth" ? "OAuth2" : "not configured"}</dd></div>
           <div><dt>Base URL</dt><dd>{connection?.baseUrl ?? "https://cad.onshape.com"}</dd></div>
+          <div><dt>OAuth app</dt><dd>{oauth?.clientConfigured ? "configured" : "not configured"}</dd></div>
+          <div><dt>OAuth token</dt><dd>{credentialSource}</dd></div>
+          <div><dt>Scopes</dt><dd>{oauth?.scopes.length ? oauth.scopes.join(", ") : "not configured"}</dd></div>
+          <div><dt>Token expiry</dt><dd>{oauth?.tokenExpiresAt ? new Date(oauth.tokenExpiresAt).toLocaleString() : "unknown"}</dd></div>
           <div><dt>Credential ref</dt><dd>{connection?.credentialReference ?? "server env"}</dd></div>
         </dl>
+        {oauth?.authorizationUrlAvailable && onConnectOAuth ? (
+          <button className="secondary-button cad-oauth-button" disabled={isConnectingOAuth} onClick={onConnectOAuth} type="button">
+            {isConnectingOAuth ? "Opening Onshape..." : "Connect Onshape OAuth2"}
+          </button>
+        ) : null}
       </article>
 
       <article className="cad-card cad-status-card">
@@ -66,6 +86,11 @@ export function CadStatusPanels({
             This reference points to a workspace. For review/release, create an Onshape version and sync that version instead.
           </p>
         ) : null}
+        {onRefreshEstimate ? (
+          <button className="secondary-button cad-oauth-button" disabled={isRefreshingEstimate} onClick={onRefreshEstimate} type="button">
+            {isRefreshingEstimate ? "Refreshing estimate..." : "Refresh estimate"}
+          </button>
+        ) : null}
       </article>
 
       <article className="cad-card cad-status-card">
@@ -81,4 +106,24 @@ export function CadStatusPanels({
       </article>
     </div>
   );
+}
+
+function getOAuthStatusCopy(oauth: OnshapeOverview["connection"]["oauth"] | undefined) {
+  if (!oauth?.clientConfigured) {
+    return "OAuth2 app not configured on the backend.";
+  }
+  if (oauth.connected) {
+    return "OAuth2 connected.";
+  }
+  return "OAuth2 app configured. Connect Onshape before running syncs.";
+}
+
+function getCredentialSourceCopy(source?: "runtime" | "env" | "none") {
+  if (source === "runtime") {
+    return "runtime token";
+  }
+  if (source === "env") {
+    return "env token";
+  }
+  return "not connected";
 }

@@ -3,6 +3,7 @@ import { IconCalendar, IconChevronLeft, IconChevronRight, IconPerson, IconSearch
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { formatTimelineZoomLabel, TIMELINE_ZOOM_MAX } from "@/features/workspace/shared/timeline/timelineZoom";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
@@ -19,7 +20,9 @@ interface TimelineToolbarProps {
   onAdjustZoom: (direction: 1 | -1) => void;
   onChangePersonFilter: (value: FilterSelection) => void;
   onIntervalChange: (value: TimelineViewInterval) => void;
+  onSearchChange: (value: string) => void;
   onShiftPeriod: (direction: -1 | 1) => void;
+  searchFilter: string;
   timelinePeriodLabel: string;
   timelineZoom: number;
   timelineZoomMin: number;
@@ -32,7 +35,9 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   onAdjustZoom,
   onChangePersonFilter,
   onIntervalChange,
+  onSearchChange,
   onShiftPeriod,
+  searchFilter,
   timelinePeriodLabel,
   timelineZoom,
   timelineZoomMin,
@@ -105,27 +110,36 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
 
   return (
     <div className="panel-actions filter-toolbar timeline-toolbar timeline-topbar-controls">
-      <CompactFilterMenu
-        activeCount={activePersonFilter.length}
-        ariaLabel="Timeline filters"
-        buttonLabel="Filters"
-        className="materials-filter-menu timeline-roster-filter"
-        items={[
-          {
-            label: "Roster",
-            content: (
-              <FilterDropdown
-                allLabel="All roster"
-                ariaLabel="Filter person"
-                className="task-queue-filter-menu-submenu"
-                icon={<IconPerson />}
-                onChange={onChangePersonFilter}
-                options={bootstrapMembers}
-                value={activePersonFilter}
-              />
-            ),
-          },
-        ]}
+      <TopbarResponsiveSearch
+        actions={
+          <CompactFilterMenu
+            activeCount={activePersonFilter.length}
+            ariaLabel="Timeline filters"
+            buttonLabel="Filters"
+            className="materials-filter-menu timeline-roster-filter"
+            items={[
+              {
+                label: "Roster",
+                content: (
+                  <FilterDropdown
+                    allLabel="All roster"
+                    ariaLabel="Filter person"
+                    className="task-queue-filter-menu-submenu"
+                    icon={<IconPerson />}
+                    onChange={onChangePersonFilter}
+                    options={bootstrapMembers}
+                    value={activePersonFilter}
+                  />
+                ),
+              },
+            ]}
+          />
+        }
+        ariaLabel="Search timeline"
+        compactPlaceholder="Search"
+        onChange={onSearchChange}
+        placeholder="Search timeline..."
+        value={searchFilter}
       />
       <div
         aria-label="Timeline interval"

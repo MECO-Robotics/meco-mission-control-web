@@ -116,6 +116,15 @@ export interface OnshapeApiBudgetRecord {
   lastRateLimitRemaining: number | null;
 }
 
+export interface OnshapeOAuthStatus {
+  clientConfigured: boolean;
+  connected: boolean;
+  authorizationUrlAvailable: boolean;
+  scopes: string[];
+  tokenExpiresAt: string | null;
+  credentialSource: "runtime" | "env" | "none";
+}
+
 export interface OnshapeSyncEstimate {
   documentRefId: string;
   syncLevel: SyncLevel;
@@ -136,6 +145,7 @@ export interface OnshapeOverview {
     baseUrl: string;
     configured: boolean;
     credentialReference: string | null;
+    oauth?: OnshapeOAuthStatus;
     lastError: string | null;
   };
   documentRefs: OnshapeDocumentRefRecord[];

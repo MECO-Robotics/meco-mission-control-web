@@ -4,6 +4,7 @@ import type { RiskPayload } from "@/types/payloads";
 import type { RiskRecord } from "@/types/recordsReporting";
 
 import { buildRiskRows } from "./riskViewData/riskViewDataRows";
+import type { RiskSortField, RiskSortOrder } from "./riskViewData/riskViewDataRows";
 import { buildRiskViewLookups } from "./riskViewData/riskViewDataLookups";
 import { buildRiskViewScopeData } from "./riskViewData/riskViewDataScope";
 import {
@@ -20,7 +21,7 @@ import {
   type SelectOption,
 } from "./riskViewData/riskViewDataPayload";
 
-export type { RiskSourceFilter, RiskSeverityFilter, SelectOption };
+export type { RiskSortField, RiskSortOrder, RiskSourceFilter, RiskSeverityFilter, SelectOption };
 export {
   ATTACHMENT_TYPE_LABELS,
   RISK_SEVERITY_ORDER,
@@ -37,6 +38,8 @@ interface BuildRisksViewDataArgs {
   bootstrap: BootstrapPayload;
   search: string;
   severityFilter: RiskSeverityFilter;
+  sortField: RiskSortField;
+  sortOrder: RiskSortOrder;
   sourceFilter: RiskSourceFilter;
 }
 
@@ -105,6 +108,8 @@ export function buildRisksViewData({
   bootstrap,
   search,
   severityFilter,
+  sortField,
+  sortOrder,
   sourceFilter,
 }: BuildRisksViewDataArgs): RiskViewData {
   const scope = buildRiskViewScopeData({
@@ -120,6 +125,8 @@ export function buildRisksViewData({
     scopedRisks: scope.scopedRisks,
     search,
     severityFilter,
+    sortField,
+    sortOrder,
     sourceFilter,
   });
 

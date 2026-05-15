@@ -60,6 +60,7 @@ export function MilestonesView({
           projectFilter={milestones.projectFilter}
           projects={bootstrap.projects}
           searchFilter={milestones.searchFilter}
+          searchSuggestions={milestones.searchSuggestions}
           setMilestoneZoom={milestones.setMilestoneZoom}
           setProjectFilter={milestones.setProjectFilter}
           setSearchFilter={milestones.setSearchFilter}
@@ -92,6 +93,7 @@ export function MilestonesView({
         milestoneZoom={milestones.milestoneZoom}
         onOpenMilestone={milestones.openMilestoneDetailsModal}
         projectLabelByMilestoneId={milestones.projectLabelByMilestoneId}
+        searchFilter={milestones.searchFilter}
         setMilestoneZoom={milestones.setMilestoneZoom}
       />
 

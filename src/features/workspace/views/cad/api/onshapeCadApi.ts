@@ -11,6 +11,30 @@ export function fetchOnshapeOverview(onUnauthorized?: () => void) {
   return requestApi<OnshapeOverview>("/onshape/overview", {}, onUnauthorized);
 }
 
+export function createOnshapeOAuthAuthorizationUrl(onUnauthorized?: () => void) {
+  return requestApi<{
+    authorizationUrl: string;
+    state: string;
+  }>(
+    "/onshape/oauth/authorization-url",
+    { method: "POST" },
+    onUnauthorized,
+  );
+}
+
+export function refreshOnshapeOAuth(onUnauthorized?: () => void) {
+  return requestApi<{
+    item: {
+      connected: boolean;
+      tokenExpiresAt: string | null;
+    };
+  }>(
+    "/onshape/oauth/refresh",
+    { method: "POST" },
+    onUnauthorized,
+  );
+}
+
 export function createOnshapeDocumentRef(
   payload: {
     url: string;

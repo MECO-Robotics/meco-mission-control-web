@@ -146,14 +146,6 @@
   padding: 10px 12px;
 }
 
-@media (max-width: 900px) {
-  .cad-grid-two,
-  .cad-grid-three {
-    grid-template-columns: 1fr;
-  }
-
-  .cad-header-meta {
-    align-items: flex-start;
-    text-align: left;
-  }
+.cad-oauth-button {
+  margin-top: 12px;
 }

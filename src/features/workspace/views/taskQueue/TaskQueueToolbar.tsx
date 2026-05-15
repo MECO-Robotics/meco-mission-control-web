@@ -2,7 +2,7 @@ import type { Dispatch, SetStateAction } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { IconSort } from "@/components/shared/Icons";
-import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
@@ -86,84 +86,87 @@ export function TaskQueueToolbar({
 }: TaskQueueToolbarProps) {
   return (
     <div className="panel-actions filter-toolbar task-queue-toolbar">
-      <div data-tutorial-target="task-queue-search-input">
-        <SearchToolbarInput
-          ariaLabel="Search tasks"
-          onChange={setSearchFilter}
-          placeholder="Search tasks..."
-          value={searchFilter}
-        />
-      </div>
-
-      <TaskQueueCompactFilterMenu
-        activeFilterCount={activeFilterCount}
-        bootstrap={bootstrap}
-        disciplineFilter={disciplineFilter}
-        disciplineOptions={disciplineOptions}
-        isAllProjectsView={isAllProjectsView}
-        ownerFilter={ownerFilter}
-        priorityFilter={priorityFilter}
-        projectFilter={projectFilter}
-        setDisciplineFilter={setDisciplineFilter}
-        setOwnerFilter={setOwnerFilter}
-        setPriorityFilter={setPriorityFilter}
-        setProjectFilter={setProjectFilter}
-        setStatusFilter={setStatusFilter}
-        setSubsystemFilter={setSubsystemFilter}
-        setSubsystemIterationFilter={setSubsystemIterationFilter}
-        showSubsystemIterationFilter={showSubsystemIterationFilter}
-        statusFilter={statusFilter}
-        subsystemFilter={subsystemFilter}
-        subsystemFilterOptions={subsystemFilterOptions}
-        subsystemIterationFilter={subsystemIterationFilter}
-        subsystemIterationOptions={subsystemIterationOptions}
+      <TopbarResponsiveSearch
+        actionCount={2}
+        actions={
+          <>
+            <TaskQueueCompactFilterMenu
+              activeFilterCount={activeFilterCount}
+              bootstrap={bootstrap}
+              disciplineFilter={disciplineFilter}
+              disciplineOptions={disciplineOptions}
+              isAllProjectsView={isAllProjectsView}
+              ownerFilter={ownerFilter}
+              priorityFilter={priorityFilter}
+              projectFilter={projectFilter}
+              setDisciplineFilter={setDisciplineFilter}
+              setOwnerFilter={setOwnerFilter}
+              setPriorityFilter={setPriorityFilter}
+              setProjectFilter={setProjectFilter}
+              setStatusFilter={setStatusFilter}
+              setSubsystemFilter={setSubsystemFilter}
+              setSubsystemIterationFilter={setSubsystemIterationFilter}
+              showSubsystemIterationFilter={showSubsystemIterationFilter}
+              statusFilter={statusFilter}
+              subsystemFilter={subsystemFilter}
+              subsystemFilterOptions={subsystemFilterOptions}
+              subsystemIterationFilter={subsystemIterationFilter}
+              subsystemIterationOptions={subsystemIterationOptions}
+            />
+            <CompactFilterMenu
+              activeCount={taskSortIsDefault ? 0 : 1}
+              ariaLabel="Sort tasks"
+              buttonLabel="Sort"
+              className="task-queue-sort-menu"
+              icon={<IconSort />}
+              items={[
+                {
+                  label: "Sort by",
+                  content: (
+                    <select
+                      aria-label="Sort tasks by"
+                      className="task-queue-sort-menu-select"
+                      onChange={(milestone) => setSortField(milestone.target.value as TaskSortField)}
+                      value={sortField}
+                    >
+                      {TASK_SORT_OPTIONS.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.name}
+                        </option>
+                      ))}
+                    </select>
+                  ),
+                },
+                {
+                  label: "Direction",
+                  content: (
+                    <select
+                      aria-label="Sort direction"
+                      className="task-queue-sort-menu-select"
+                      onChange={(milestone) => setSortOrder(milestone.target.value as "asc" | "desc")}
+                      value={sortOrder}
+                    >
+                      {SORT_DIRECTION_OPTIONS.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.name}
+                        </option>
+                      ))}
+                    </select>
+                  ),
+                },
+              ]}
+            />
+          </>
+        }
+        ariaLabel="Search tasks"
+        compactPlaceholder="Search"
+        onChange={setSearchFilter}
+        placeholder="Search tasks..."
+        tutorialTarget="task-queue-search-input"
+        value={searchFilter}
       />
 
       <div className="task-queue-toolbar-inline-actions">
-        <CompactFilterMenu
-          activeCount={taskSortIsDefault ? 0 : 1}
-          ariaLabel="Sort tasks"
-          buttonLabel="Sort"
-          className="task-queue-sort-menu"
-          icon={<IconSort />}
-          items={[
-            {
-              label: "Sort by",
-              content: (
-                <select
-                  aria-label="Sort tasks by"
-                  className="task-queue-sort-menu-select"
-                  onChange={(milestone) => setSortField(milestone.target.value as TaskSortField)}
-                  value={sortField}
-                >
-                  {TASK_SORT_OPTIONS.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.name}
-                    </option>
-                  ))}
-                </select>
-              ),
-            },
-            {
-              label: "Direction",
-              content: (
-                <select
-                  aria-label="Sort direction"
-                  className="task-queue-sort-menu-select"
-                  onChange={(milestone) => setSortOrder(milestone.target.value as "asc" | "desc")}
-                  value={sortOrder}
-                >
-                  {SORT_DIRECTION_OPTIONS.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.name}
-                    </option>
-                  ))}
-                </select>
-              ),
-            },
-          ]}
-        />
-
         <div aria-label="Task queue zoom" className="task-queue-zoom-controls" role="group">
           <button
             aria-label="Zoom out task queue"

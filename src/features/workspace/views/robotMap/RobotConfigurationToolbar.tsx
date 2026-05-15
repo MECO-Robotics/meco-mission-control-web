@@ -1,4 +1,4 @@
-import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 
 interface RobotConfigurationToolbarProps {
   onSearchChange: (value: string) => void;
@@ -19,8 +19,9 @@ export function RobotConfigurationToolbar({
         <h2>Robot Configuration</h2>
       </div>
 
-      <SearchToolbarInput
+      <TopbarResponsiveSearch
         ariaLabel="Search subsystems, mechanisms, and parts"
+        compactPlaceholder="Search"
         onChange={onSearchChange}
         placeholder="Search subsystem or mechanism..."
         value={search}

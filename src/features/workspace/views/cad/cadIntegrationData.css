@@ -1,4 +1,4 @@
-.cad-data-stack {
+﻿.cad-data-stack {
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -89,3 +89,16 @@
   padding: 12px;
   text-align: center;
 }
+
+@media (max-width: 900px) {
+  .cad-grid-two,
+  .cad-grid-three {
+    grid-template-columns: 1fr;
+  }
+
+  .cad-header-meta {
+    align-items: flex-start;
+    text-align: left;
+  }
+}
+

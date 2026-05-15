@@ -2,3 +2,6 @@
 @import url("./workspace/worklog-summary.css");
 @import url("./workspace/toolbars.css");
 @import url("./workspace/topbar-responsive-search.css");
+@import url("./workspace/topbar-responsive-search-compact.css");
+@import url("./workspace/topbar-responsive-search-actions.css");
+@import url("./workspace/milestones-search.css");

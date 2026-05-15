@@ -2,7 +2,7 @@
 
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
-import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { RosterAvailabilityStatus } from "@/types/rosterInsights";
@@ -88,37 +88,40 @@ export function RosterAttendanceView({
     <section className={`panel dense-panel roster-layout mc-roster-insights-shell ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">
         <div className="panel-actions filter-toolbar mc-roster-insights-toolbar">
-          <SearchToolbarInput
+          <TopbarResponsiveSearch
+            actions={
+              <CompactFilterMenu
+                activeCount={availabilityFilter === "all" ? 0 : 1}
+                ariaLabel="Filter by availability"
+                buttonLabel="Status"
+                items={[
+                  {
+                    label: "Availability",
+                    content: (
+                      <select
+                        aria-label="Filter attendance by availability"
+                        className="task-queue-sort-menu-select"
+                        onChange={(event) =>
+                          setAvailabilityFilter(event.target.value as RosterAvailabilityStatus | "all")
+                        }
+                        value={availabilityFilter}
+                      >
+                        {AVAILABILITY_OPTIONS.map((option) => (
+                          <option key={option.id} value={option.id}>
+                            {option.name}
+                          </option>
+                        ))}
+                      </select>
+                    ),
+                  },
+                ]}
+              />
+            }
             ariaLabel="Search attendance"
+            compactPlaceholder="Search"
             onChange={setSearchText}
             placeholder="Search members..."
             value={searchText}
-          />
-          <CompactFilterMenu
-            activeCount={availabilityFilter === "all" ? 0 : 1}
-            ariaLabel="Filter by availability"
-            buttonLabel="Status"
-            items={[
-              {
-                label: "Availability",
-                content: (
-                  <select
-                    aria-label="Filter attendance by availability"
-                    className="task-queue-sort-menu-select"
-                    onChange={(event) =>
-                      setAvailabilityFilter(event.target.value as RosterAvailabilityStatus | "all")
-                    }
-                    value={availabilityFilter}
-                  >
-                    {AVAILABILITY_OPTIONS.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.name}
-                      </option>
-                    ))}
-                  </select>
-                ),
-              },
-            ]}
           />
         </div>
       </AppTopbarSlotPortal>
