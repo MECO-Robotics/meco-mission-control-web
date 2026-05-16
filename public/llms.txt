@@ -1,0 +1,8 @@
+# MECO Mission Control
+
+MECO Mission Control is the workspace for MECO Robotics tasks, manufacturing, inventory, work logs, roster planning, and project reporting.
+
+## Links
+
+- [Mission Control application](/)
+- [Robots policy](/robots.txt)
