@@ -1,0 +1,110 @@
+.milestones-toolbar .topbar-responsive-search:not(.has-actions) .toolbar-search {
+  padding-right: 0.3rem;
+}
+
+.milestones-toolbar .milestones-search-slot {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  display: flex;
+}
+
+.milestones-toolbar .milestones-search-slot > .topbar-responsive-search,
+.milestones-toolbar .milestones-search-slot > .milestones-search-control,
+.milestones-search-control > .topbar-responsive-search {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+}
+
+.milestones-search-control {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.milestones-toolbar .topbar-responsive-search-dynamic:not(.has-actions) .toolbar-search {
+  width: 100%;
+  min-width: 0;
+  flex: 1 1 auto;
+  padding-right: 0.08rem;
+}
+
+.milestones-search-suggestions {
+  position: absolute;
+  top: calc(100% + 0.28rem);
+  left: 0;
+  right: auto;
+  z-index: 35;
+  display: grid;
+  gap: 0.08rem;
+  width: min(27rem, calc(100vw - 1.5rem));
+  min-width: 100%;
+  max-height: min(22rem, 62vh);
+  overflow: auto;
+  padding: 0.25rem;
+  border: 1px solid var(--border-base);
+  border-radius: 8px;
+  background: var(--bg-panel);
+  box-shadow: 0 12px 24px color-mix(in srgb, var(--official-black) 18%, transparent);
+}
+
+.milestones-search-suggestion {
+  display: grid;
+  gap: 0.1rem;
+  width: 100%;
+  min-width: 0;
+  padding: 0.48rem 0.55rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-copy);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.milestones-search-suggestion:hover,
+.milestones-search-suggestion:focus-visible {
+  background: var(--official-blue);
+  color: white;
+  outline: none;
+}
+
+.milestones-search-suggestion-title {
+  color: var(--text-title);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.milestones-search-suggestion:hover .milestones-search-suggestion-title,
+.milestones-search-suggestion:hover .milestones-search-suggestion-context,
+.milestones-search-suggestion:hover .milestones-search-suggestion-description,
+.milestones-search-suggestion:focus-visible .milestones-search-suggestion-title,
+.milestones-search-suggestion:focus-visible .milestones-search-suggestion-context,
+.milestones-search-suggestion:focus-visible .milestones-search-suggestion-description {
+  color: white;
+}
+
+.milestones-search-suggestion-context,
+.milestones-search-suggestion-description {
+  overflow: hidden;
+  color: var(--text-copy);
+  font-size: 0.73rem;
+  font-weight: 650;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.milestones-search-suggestion-description {
+  font-weight: 500;
+}
+
+.page-shell.dark-mode .milestones-search-suggestions {
+  background: var(--bg-panel);
+  border-color: rgba(148, 163, 184, 0.38);
+  box-shadow: 0 18px 36px rgba(2, 6, 23, 0.46);
+}

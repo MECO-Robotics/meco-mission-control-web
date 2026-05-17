@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MilestoneRecord, TaskRecord } from "@/types/recordsExecution";
 import { IconPlus, IconReports } from "@/components/shared/Icons";
+import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { type ReportsViewTab } from "@/lib/workspaceNavigation";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 
 interface ReportsViewProps {
@@ -137,13 +139,52 @@ export function ReportsView({
   view,
 }: ReportsViewProps) {
   const [nowMs] = useState(() => Date.now());
+  const [searchFilter, setSearchFilter] = useState("");
   const qaTasks = bootstrap.tasks.filter((task) => task.status === "waiting-for-qa");
   const pastMilestones = bootstrap.milestones
     .filter((milestone) => getMilestoneDateTimeMs(milestone) < nowMs)
     .sort((left, right) => getMilestoneDateTimeMs(right) - getMilestoneDateTimeMs(left));
+  const filteredQaTasks = useMemo(() => {
+    const normalizedSearch = searchFilter.trim().toLowerCase();
+    if (normalizedSearch.length === 0) {
+      return qaTasks;
+    }
+
+    return qaTasks.filter((task) =>
+      [task.title, task.summary, task.status, task.priority]
+        .join(" ")
+        .toLowerCase()
+        .includes(normalizedSearch),
+    );
+  }, [qaTasks, searchFilter]);
+  const filteredPastMilestones = useMemo(() => {
+    const normalizedSearch = searchFilter.trim().toLowerCase();
+    if (normalizedSearch.length === 0) {
+      return pastMilestones;
+    }
+
+    return pastMilestones.filter((milestone) =>
+      [milestone.title, milestone.description, milestone.type, milestone.status]
+        .join(" ")
+        .toLowerCase()
+        .includes(normalizedSearch),
+    );
+  }, [pastMilestones, searchFilter]);
 
   return (
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
+      <AppTopbarSlotPortal slot="controls">
+        <div className="panel-actions filter-toolbar reports-toolbar">
+          <TopbarResponsiveSearch
+            ariaLabel="Search reports"
+            compactPlaceholder="Search"
+            onChange={setSearchFilter}
+            placeholder="Search reports..."
+            value={searchFilter}
+          />
+        </div>
+      </AppTopbarSlotPortal>
+
       <div className="panel-header compact-header">
         <div className="queue-section-header">
           <p className="eyebrow" style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
@@ -158,11 +199,11 @@ export function ReportsView({
         <QaReportsView
           openCreateQaReportModal={openCreateQaReportModal}
           openTaskDetailsModal={openTaskDetailsModal}
-          tasks={qaTasks}
+          tasks={filteredQaTasks}
         />
       ) : (
         <MilestoneResultsView
-          milestones={pastMilestones}
+          milestones={filteredPastMilestones}
           openCreateMilestoneReportModal={openCreateMilestoneReportModal}
         />
       )}

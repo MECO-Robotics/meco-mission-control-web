@@ -1,0 +1,104 @@
+﻿.cad-data-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cad-section-heading {
+  margin-bottom: 10px;
+}
+
+.cad-table-wrap {
+  overflow-x: auto;
+}
+
+.cad-table {
+  border-collapse: collapse;
+  font-size: 0.84rem;
+  min-width: 720px;
+  width: 100%;
+}
+
+.cad-table th,
+.cad-table td {
+  border-bottom: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.22));
+  padding: 9px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.cad-table th {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cad-tree-list,
+.cad-snapshot-list,
+.cad-warning-list {
+  display: grid;
+  gap: 8px;
+}
+
+.cad-tree-row,
+.cad-snapshot-item,
+.cad-warning-item {
+  background: rgba(15, 23, 42, 0.035);
+  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.2));
+  border-radius: 12px;
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+}
+
+.cad-tree-row span,
+.cad-snapshot-item span,
+.cad-warning-item span,
+.cad-snapshot-item small {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.cad-tree-row code,
+.cad-warning-item code,
+.cad-table code {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.76rem;
+  overflow-wrap: anywhere;
+}
+
+.cad-warning-item[data-severity="error"] {
+  border-color: rgba(220, 38, 38, 0.35);
+}
+
+.cad-warning-item[data-severity="warning"] {
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+.cad-empty-copy,
+.cad-compare-placeholder {
+  color: var(--text-muted);
+  font-size: 0.84rem;
+}
+
+.cad-compare-placeholder {
+  border: 1px dashed var(--border-subtle, rgba(148, 163, 184, 0.35));
+  border-radius: 12px;
+  margin-top: 12px;
+  padding: 12px;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .cad-grid-two,
+  .cad-grid-three {
+    grid-template-columns: 1fr;
+  }
+
+  .cad-header-meta {
+    align-items: flex-start;
+    text-align: left;
+  }
+}
+

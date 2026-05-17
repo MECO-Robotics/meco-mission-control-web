@@ -1,7 +1,9 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 
+import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
+import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
 
 import {
   buildCountsBySubsystemId,
@@ -73,13 +75,8 @@ export function SubsystemsView({
 
   return (
     <section className={`panel dense-panel subsystem-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
-      <div className="panel-header compact-header">
-        <div className="queue-section-header">
-          <h2 style={{ color: "var(--text-title)" }}>Subsystem manager</h2>
-        </div>
-
+      <AppTopbarSlotPortal slot="controls">
         <SubsystemsToolbar
-          openCreateSubsystemModal={openCreateSubsystemModal}
           search={search}
           setSearch={setSearch}
           setShowArchivedMechanisms={setShowArchivedMechanisms}
@@ -87,7 +84,20 @@ export function SubsystemsView({
           showArchivedMechanisms={showArchivedMechanisms}
           showArchivedSubsystems={showArchivedSubsystems}
         />
+      </AppTopbarSlotPortal>
+
+      <div className="panel-header compact-header">
+        <div className="queue-section-header">
+          <h2 style={{ color: "var(--text-title)" }}>Subsystem manager</h2>
+        </div>
       </div>
+
+      <WorkspaceFloatingAddButton
+        ariaLabel="Add subsystem"
+        onClick={openCreateSubsystemModal}
+        title="Add subsystem"
+        tutorialTarget="create-subsystem-button"
+      />
 
       <SubsystemsTableSection
         bootstrap={bootstrap}

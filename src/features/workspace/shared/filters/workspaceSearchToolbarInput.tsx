@@ -1,4 +1,4 @@
-import { IconTasks } from "@/components/shared/Icons";
+import { Search } from "lucide-react";
 
 export function SearchToolbarInput({
   ariaLabel,
@@ -16,7 +16,7 @@ export function SearchToolbarInput({
   return (
     <div className={`toolbar-filter toolbar-filter-compact toolbar-search${isActive ? " is-active" : ""}`}>
       <span className="toolbar-filter-icon">
-        <IconTasks />
+        <Search size={14} strokeWidth={2} />
       </span>
       <input
         aria-label={ariaLabel ?? placeholder}

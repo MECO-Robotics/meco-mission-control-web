@@ -14,6 +14,18 @@
   color: var(--text-copy);
 }
 
+.metrics-hotspot-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem;
+}
+
+.metrics-hotspot-signal {
+  color: var(--text-copy);
+  line-height: 1.35;
+}
+
 .metrics-hotspot-list-item span {
   flex-shrink: 0;
   white-space: nowrap;

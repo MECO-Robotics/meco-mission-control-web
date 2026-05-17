@@ -1,0 +1,1 @@
+export { WorkspaceFloatingAddButton } from "./WorkspaceFloatingAddButton";

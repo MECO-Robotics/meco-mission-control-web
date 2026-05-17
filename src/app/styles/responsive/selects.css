@@ -118,8 +118,8 @@
 
   .app-topbar-left {
     width: auto;
-    max-width: none;
-    flex: 1 1 auto;
+    max-width: 9.5rem;
+    flex: 0 0 9.5rem;
   }
 }
 

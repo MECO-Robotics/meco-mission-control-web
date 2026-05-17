@@ -1,0 +1,214 @@
+name: Codex Auto Merge
+
+on:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+  pull_request:
+    branches:
+      - development
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+  pull_request_review:
+    types:
+      - submitted
+      - edited
+      - dismissed
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+  statuses: read
+
+concurrency:
+  group: codex-automerge-${{ github.event.pull_request.number || github.event.workflow_run.id || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  enable-automerge:
+    name: enable-automerge
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable auto-merge when Codex review and checks are green
+        uses: actions/github-script@v7
+        env:
+          CODEX_REVIEWER_LOGINS: "chatgpt-codex-connector[bot],chatgpt-codex-connector,codex[bot]"
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const targetBaseRefs = new Set(['development', 'main']);
+            const requiredCheckRunNames = new Set(['ci-validate', 'snapshot-validate']);
+            const passingConclusions = new Set(['success', 'neutral', 'skipped']);
+            const trustedCodexReviewerLogins = new Set(
+              (process.env.CODEX_REVIEWER_LOGINS || '')
+                .split(',')
+                .map((login) => login.trim().toLowerCase())
+                .filter(Boolean)
+            );
+
+            if (context.eventName === 'workflow_run') {
+              const conclusion = context.payload?.workflow_run?.conclusion;
+              if (conclusion !== 'success') {
+                core.info(`Skipping because workflow_run conclusion is ${conclusion ?? 'unknown'}.`);
+                return;
+              }
+            }
+
+            const pullRequestNumbers = new Set();
+            if (context.payload?.pull_request?.number) {
+              pullRequestNumbers.add(context.payload.pull_request.number);
+            }
+            for (const pr of context.payload?.workflow_run?.pull_requests ?? []) {
+              if (pr?.number) {
+                pullRequestNumbers.add(pr.number);
+              }
+            }
+
+            if (pullRequestNumbers.size === 0) {
+              core.info('No pull request is associated with this event.');
+              return;
+            }
+
+            async function maybeEnableAutoMerge(pullNumber) {
+              const { data: pr } = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: pullNumber,
+              });
+
+              if (pr.state !== 'open') {
+                core.info(`PR #${pullNumber} is ${pr.state}; skipping.`);
+                return;
+              }
+
+              if (pr.draft) {
+                core.info(`PR #${pullNumber} is draft; skipping.`);
+                return;
+              }
+
+              if (!targetBaseRefs.has(pr.base.ref)) {
+                core.info(`PR #${pullNumber} targets ${pr.base.ref}; skipping.`);
+                return;
+              }
+
+              if (pr.auto_merge) {
+                core.info(`PR #${pullNumber} already has auto-merge enabled.`);
+                return;
+              }
+
+              const reviews = await github.paginate(github.rest.pulls.listReviews, {
+                owner,
+                repo,
+                pull_number: pullNumber,
+                per_page: 100,
+              });
+
+              reviews.sort((a, b) => {
+                return Date.parse(a.submitted_at ?? 0) - Date.parse(b.submitted_at ?? 0);
+              });
+
+              const latestReviewStateByUser = new Map();
+              for (const review of reviews) {
+                const login = review.user?.login;
+                if (!login) {
+                  continue;
+                }
+                latestReviewStateByUser.set(login, String(review.state ?? '').toUpperCase());
+              }
+
+              const codexReviewers = [...latestReviewStateByUser.entries()]
+                .filter(([login]) => trustedCodexReviewerLogins.has(login.toLowerCase()))
+                .map(([login, state]) => ({ login, state }));
+
+              if (codexReviewers.length === 0) {
+                core.info(`PR #${pullNumber} has no Codex review state yet.`);
+                return;
+              }
+
+              if (codexReviewers.some((review) => review.state === 'CHANGES_REQUESTED')) {
+                core.info(`PR #${pullNumber} has Codex requested changes.`);
+                return;
+              }
+
+              if (!codexReviewers.some((review) => review.state === 'APPROVED')) {
+                core.info(`PR #${pullNumber} has no Codex approval yet.`);
+                return;
+              }
+
+              const { data: checkRunsPayload } = await github.rest.checks.listForRef({
+                owner,
+                repo,
+                ref: pr.head.sha,
+                filter: 'latest',
+                per_page: 100,
+              });
+              const checkRuns = checkRunsPayload.check_runs ?? [];
+              const relevantCheckRuns = checkRuns.filter((checkRun) => {
+                const isCurrentRun = String(checkRun.details_url ?? '').includes(
+                  `/actions/runs/${context.runId}`,
+                );
+                return requiredCheckRunNames.has(checkRun.name) && !isCurrentRun;
+              });
+
+              const discoveredCheckRunNames = new Set(relevantCheckRuns.map((checkRun) => checkRun.name));
+              const missingCheckRunNames = [...requiredCheckRunNames].filter((name) => {
+                return !discoveredCheckRunNames.has(name);
+              });
+
+              if (missingCheckRunNames.length > 0) {
+                core.info(`PR #${pullNumber} is missing required checks: ${missingCheckRunNames.join(', ')}.`);
+                return;
+              }
+
+              const blockingCheckRuns = relevantCheckRuns.filter((checkRun) => {
+                if (checkRun.status !== 'completed') {
+                  return true;
+                }
+                const conclusion = String(checkRun.conclusion ?? '').toLowerCase();
+                return !passingConclusions.has(conclusion);
+              });
+
+              if (blockingCheckRuns.length > 0) {
+                const summary = blockingCheckRuns
+                  .map((checkRun) => `${checkRun.name}:${checkRun.status}/${checkRun.conclusion}`)
+                  .join(', ');
+                core.info(`PR #${pullNumber} still has non-green checks: ${summary}`);
+                return;
+              }
+
+              const enableAutoMergeMutation = `
+                mutation EnableAutoMerge($pullRequestId: ID!) {
+                  enablePullRequestAutoMerge(input: { pullRequestId: $pullRequestId, mergeMethod: SQUASH }) {
+                    pullRequest {
+                      number
+                    }
+                  }
+                }
+              `;
+
+              try {
+                await github.graphql(enableAutoMergeMutation, {
+                  pullRequestId: pr.node_id,
+                });
+                core.notice(`Enabled auto-merge (squash) for PR #${pullNumber}.`);
+              } catch (error) {
+                const message = String(error?.message ?? error);
+                if (message.includes('already enabled')) {
+                  core.info(`PR #${pullNumber} already has auto-merge enabled.`);
+                  return;
+                }
+                core.warning(`Could not enable auto-merge for PR #${pullNumber}: ${message}`);
+              }
+            }
+
+            for (const pullNumber of pullRequestNumbers) {
+              await maybeEnableAutoMerge(pullNumber);
+            }

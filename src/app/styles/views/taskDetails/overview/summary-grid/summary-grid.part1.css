@@ -1,0 +1,151 @@
+.task-detail-header-side-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 0.4rem;
+  min-width: 0;
+  padding-right: 0.25rem;
+  padding-top: 1rem;
+}
+
+.milestone-detail-type-line {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.55rem;
+  min-width: 0;
+  margin-bottom: 0.15rem;
+}
+
+.milestone-detail-inline-value {
+  width: auto;
+  min-width: 0;
+}
+
+.milestone-detail-inline-value .task-detail-inline-edit-trigger-inline {
+  width: auto;
+}
+
+.milestone-detail-type-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.milestone-detail-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin-top: 0.65rem;
+}
+
+.milestone-detail-description {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 900px) {
+  .milestone-detail-type-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.modal-actions-leading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-right: auto;
+  white-space: nowrap;
+}
+
+.roster-edit-modal {
+  width: min(520px, 100%);
+}
+
+.modal-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.task-details-section-title {
+  margin: 0;
+  color: var(--text-title);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 700;
+  border-top: 1px solid var(--border-base);
+  border-bottom: 1px solid var(--border-base);
+  padding: 0.55rem 0 0.45rem;
+}
+
+.task-details-section-collapse {
+  margin: 0;
+}
+
+.task-details-section-summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.task-details-section-summary::after {
+  order: 0;
+  content: "▸";
+  font-size: 0.82rem;
+  color: var(--text-copy);
+  line-height: 1;
+  opacity: 0.9;
+}
+
+.task-details-section-summary span {
+  order: 1;
+}
+
+.task-details-section-summary>span:last-child {
+  color: var(--text-title);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.task-details-section-collapse[open] .task-details-section-summary::after {
+  content: "▾";
+}
+
+.task-details-section-summary::-webkit-details-marker,
+.task-details-section-summary::marker {
+  display: none;
+}
+
+.task-details-section-summary-no-arrow::after {
+  display: none;
+}
+
+.milestone-requirement-item {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 0;
+  padding: 0.16rem 0.3rem;
+  border-top: 1px solid var(--border-base);
+  line-height: 1;
+}
+
+.milestone-requirement-item:first-child {
+  padding-top: 0.02rem;
+  border-top: 0;
+}
+
+.milestone-requirement-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  margin-bottom: -0.12rem;
+  order: 0;
+}

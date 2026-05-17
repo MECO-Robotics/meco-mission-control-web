@@ -1,6 +1,8 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { IconHelp } from "@/components/shared/Icons";
+import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import {
   HELP_SECTIONS,
@@ -27,6 +29,7 @@ export function HelpView({
   isInteractiveTutorialActive = false,
 }: HelpViewProps) {
   const [isTutorialOpen, setIsTutorialOpen] = useState(tutorialInitiallyOpen);
+  const [searchFilter, setSearchFilter] = useState("");
 
   const closeTutorial = useCallback(() => {
     setIsTutorialOpen(false);
@@ -38,9 +41,36 @@ export function HelpView({
 
   const hasInteractiveChapterLauncher =
     Boolean(onStartInteractiveTutorialChapter) && interactiveTutorialChapters.length > 0;
+  const filteredHelpSections = useMemo(() => {
+    const normalizedSearch = searchFilter.trim().toLowerCase();
+    if (normalizedSearch.length === 0) {
+      return HELP_SECTIONS;
+    }
+
+    return HELP_SECTIONS
+      .map((section) => ({
+        ...section,
+        items: section.items.filter((item) =>
+          [section.title, item].join(" ").toLowerCase().includes(normalizedSearch),
+        ),
+      }))
+      .filter((section) => section.items.length > 0);
+  }, [searchFilter]);
 
   return (
     <section className={`panel dense-panel help-page ${WORKSPACE_PANEL_CLASS}`}>
+      <AppTopbarSlotPortal slot="controls">
+        <div className="panel-actions filter-toolbar help-toolbar">
+          <TopbarResponsiveSearch
+            ariaLabel="Search help"
+            compactPlaceholder="Search"
+            onChange={setSearchFilter}
+            placeholder="Search help..."
+            value={searchFilter}
+          />
+        </div>
+      </AppTopbarSlotPortal>
+
       <div className="panel-header compact-header">
         <div className="queue-section-header">
           <h2>Help documentation</h2>
@@ -101,7 +131,7 @@ export function HelpView({
       ) : null}
 
       <div className="panel-subsection help-docs-list">
-        {HELP_SECTIONS.map((section) => (
+        {filteredHelpSections.map((section) => (
           <article className="help-doc-section" key={section.title}>
             <h3>{section.title}</h3>
             <ul>
@@ -111,6 +141,9 @@ export function HelpView({
             </ul>
           </article>
         ))}
+        {filteredHelpSections.length === 0 ? (
+          <p className="empty-state">No help topics match the current search.</p>
+        ) : null}
       </div>
 
       <HelpTutorialModal

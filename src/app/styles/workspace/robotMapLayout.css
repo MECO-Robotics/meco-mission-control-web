@@ -1,0 +1,205 @@
+.robot-config-unplaced {
+  background: color-mix(in srgb, var(--bg-row-alt) 70%, transparent);
+  border: 1px dashed var(--border-base);
+  border-radius: 0.85rem;
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.65rem;
+}
+
+.robot-config-unplaced h3 {
+  color: var(--text-title);
+  font-size: 0.84rem;
+  margin: 0;
+}
+
+.robot-config-unplaced-header {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  justify-content: space-between;
+}
+
+.robot-config-unplaced small {
+  color: var(--text-copy);
+  font-size: 0.72rem;
+}
+
+.robot-config-unplaced-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: flex-end;
+}
+
+.robot-config-reset-menu {
+  position: relative;
+}
+
+.robot-config-reset-trigger {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.28rem;
+}
+
+.robot-config-auto-arrange-trigger {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.28rem;
+}
+
+.robot-config-reset-menu-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-base);
+  border-radius: 0.7rem;
+  box-shadow: 0 12px 24px color-mix(in srgb, #020617 18%, transparent);
+  display: grid;
+  gap: 0.32rem;
+  min-width: 11.5rem;
+  padding: 0.5rem;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.3rem);
+  z-index: 4;
+}
+
+.robot-config-reset-menu-panel p {
+  color: var(--text-copy);
+  font-size: 0.68rem;
+  font-weight: 700;
+  margin: 0 0 0.12rem;
+}
+
+.robot-config-reset-confirm {
+  justify-content: center;
+  width: 100%;
+}
+
+.robot-config-edit-toggle {
+  --robot-edit-toggle-width: 2.2rem;
+  --robot-edit-toggle-height: 1.3rem;
+  --robot-edit-toggle-gap: 0.12rem;
+  --robot-edit-toggle-thumb-size: calc(var(--robot-edit-toggle-height) - (var(--robot-edit-toggle-gap) * 2));
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--text-copy);
+  cursor: pointer;
+  display: inline-flex;
+  gap: 0.32rem;
+  padding: 0.12rem 0.2rem;
+}
+
+.robot-config-edit-toggle-label {
+  color: var(--text-copy);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.robot-config-edit-toggle-track {
+  align-items: center;
+  background: color-mix(in srgb, var(--bg-row-alt) 84%, #0f172a 16%);
+  border: 1px solid var(--border-base);
+  border-radius: 999px;
+  display: inline-flex;
+  height: var(--robot-edit-toggle-height);
+  padding: var(--robot-edit-toggle-gap);
+  transition: background-color 160ms ease, border-color 160ms ease;
+  width: var(--robot-edit-toggle-width);
+}
+
+.robot-config-edit-toggle-thumb {
+  background: color-mix(in srgb, var(--bg-panel) 96%, #f8fafc 4%);
+  border-radius: 999px;
+  box-shadow: 0 1px 4px color-mix(in srgb, #020617 22%, transparent);
+  display: block;
+  height: var(--robot-edit-toggle-thumb-size);
+  transition: transform 170ms cubic-bezier(0.23, 1, 0.32, 1);
+  width: var(--robot-edit-toggle-thumb-size);
+}
+
+.robot-config-edit-toggle.is-active .robot-config-edit-toggle-track {
+  background: color-mix(in srgb, #1d4ed8 70%, #16478e 30%);
+  border-color: color-mix(in srgb, #1d4ed8 80%, var(--border-base) 20%);
+}
+
+.robot-config-edit-toggle.is-active .robot-config-edit-toggle-thumb {
+  transform: translateX(calc(var(--robot-edit-toggle-width) - var(--robot-edit-toggle-thumb-size) - (var(--robot-edit-toggle-gap) * 2)));
+}
+
+.robot-config-edit-toggle:hover .robot-config-edit-toggle-label {
+  color: var(--text-title);
+}
+
+.robot-config-edit-toggle:focus-visible {
+  border-radius: 999px;
+  outline: 2px solid color-mix(in srgb, #93c5fd 90%, transparent);
+  outline-offset: 1px;
+}
+
+.robot-config-unplaced-add-button {
+  align-items: center;
+  background: linear-gradient(135deg, #16478e, #0d2e5c);
+  border: 1px solid color-mix(in srgb, #16478e 70%, #0d2e5c 30%);
+  border-radius: 999px;
+  color: var(--official-white);
+  display: inline-flex;
+  height: 2.1rem;
+  justify-content: center;
+  line-height: 0;
+  padding: 0;
+  width: 2.1rem;
+}
+
+.robot-config-unplaced-add-button:hover,
+.robot-config-unplaced-add-button:focus-visible {
+  background: linear-gradient(135deg, #1f56a2, #16478e);
+}
+
+.robot-config-unplaced-grid {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.robot-config-list-view {
+  display: grid;
+  gap: 0.45rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  max-height: 72vh;
+  overflow: auto;
+  padding-right: 0.15rem;
+}
+
+.robot-config-empty {
+  border: 1px dashed var(--border-base);
+  border-radius: 1rem;
+  display: grid;
+  gap: 0.5rem;
+  justify-items: start;
+  padding: 1rem;
+}
+
+@media (max-width: 1100px) {
+  .robot-config-main-map,
+  .robot-config-main-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 780px) {
+  .robot-config-map-surface {
+    min-height: 320px;
+  }
+
+  .robot-config-card-layer {
+    max-width: min(220px, 52vw);
+  }
+
+  .robot-config-unplaced-actions {
+    justify-content: flex-start;
+    width: 100%;
+  }
+}

@@ -38,7 +38,7 @@ describe("getActiveNavigationSubItemId", () => {
     ).toBe("tasks-timeline");
   });
 
-  it("maps tasks robot map to config robot model", () => {
+  it("maps tasks robot map to config robot configuration", () => {
     expect(
       getActiveNavigationSubItemId(
         createNavigationState({ activeTab: "tasks", taskView: "robot-map" }),

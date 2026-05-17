@@ -38,6 +38,68 @@
   line-height: 1.12;
 }
 
+.metrics-dashboard-shell {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.metrics-top-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+}
+
+.metrics-health-card {
+  gap: 0.6rem;
+}
+
+.metrics-health-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.metrics-health-card h3,
+.metrics-plan-card h3 {
+  margin: 0;
+  color: var(--text-title);
+}
+
+.metrics-health-list {
+  margin: 0;
+  padding-left: 1rem;
+  display: grid;
+  gap: 0.24rem;
+  color: var(--text-copy);
+}
+
+.metrics-plan-card {
+  gap: 0.48rem;
+}
+
+.metrics-plan-line {
+  margin: 0;
+  color: var(--text-copy);
+}
+
+.metrics-plan-line strong {
+  color: var(--text-title);
+  font-size: 1.02rem;
+}
+
+.metrics-intent-section {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.metrics-intent-header h3 {
+  margin: 0;
+  color: var(--text-title);
+  font-size: 1rem;
+}
+
 .metrics-summary-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(178px, 1fr));
@@ -56,6 +118,34 @@
 .metrics-summary-card small {
   color: var(--text-copy);
   line-height: 1.45;
+}
+
+.metrics-summary-card-priority {
+  border-color: color-mix(in srgb, var(--official-red) 34%, var(--border-base));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--official-red) 6%, var(--bg-row-alt)),
+    var(--bg-row-alt)
+  );
+}
+
+.metrics-task-progress-rail {
+  width: 100%;
+  height: 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg-panel) 75%, var(--meco-blue) 25%);
+  overflow: hidden;
+}
+
+.metrics-task-progress-rail span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--meco-blue) 72%, #ffffff 28%),
+    var(--official-green)
+  );
 }
 
 .metrics-hotspot-grid {
@@ -100,4 +190,11 @@
   border: 1px solid var(--border-base);
   background: var(--bg-row-alt);
 }
+
+@media (max-width: 1080px) {
+  .metrics-top-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 

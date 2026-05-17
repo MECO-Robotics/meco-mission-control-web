@@ -1,13 +1,13 @@
 .app-topbar-my-view-button {
+  --app-topbar-my-view-thumb-x: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0;
-  width: 1.95rem;
+  width: 3.35rem;
   height: 1.95rem;
-  padding: 0;
+  padding: 0.18rem;
   border: 1px solid var(--border-base);
-  border-radius: 7px;
+  border-radius: 999px;
   background: var(--bg-panel);
   color: var(--text-copy);
   cursor: pointer;
@@ -19,9 +19,51 @@
   white-space: nowrap;
 }
 
-.app-topbar-my-view-button svg {
-  width: 1rem;
-  height: 1rem;
+.app-topbar-my-view-button[data-state="user-search"] {
+  --app-topbar-my-view-thumb-x: 1.4rem;
+}
+
+.app-topbar-my-view-track {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.app-topbar-my-view-thumb {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  left: 0;
+  width: 1.4rem;
+  height: 1.4rem;
+  border: 1px solid rgba(22, 71, 142, 0.28);
+  border-radius: 999px;
+  background: var(--official-white);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--official-black) 12%, transparent);
+  transform: translateX(var(--app-topbar-my-view-thumb-x));
+  transition: transform 160ms ease, border-color 160ms ease;
+}
+
+.app-topbar-my-view-option {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-copy);
+}
+
+.app-topbar-my-view-button[data-state="users"] .app-topbar-my-view-option-users,
+.app-topbar-my-view-button[data-state="user-search"] .app-topbar-my-view-option-search {
+  color: var(--official-blue);
+}
+
+.app-topbar-my-view-option svg {
+  width: 0.9rem;
+  height: 0.9rem;
 }
 
 .app-topbar-my-view-button:hover,
@@ -45,6 +87,11 @@
 .app-topbar-my-view-button:disabled:focus-visible {
   background: var(--bg-panel);
   color: var(--text-copy);
+}
+
+.app-topbar-my-view-button:disabled .app-topbar-my-view-thumb {
+  border-color: var(--border-base);
+  box-shadow: none;
 }
 
 .app-topbar-icon-button:hover {

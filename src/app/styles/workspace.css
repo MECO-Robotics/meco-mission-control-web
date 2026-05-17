@@ -1,4 +1,4 @@
-@import url("./workspace/base.css");
+﻿@import url("./workspace/base.css");
 @import url("./workspace/timeline.css");
 @import url("./workspace/timelineTaskStatus.css");
 @import url("./workspace/taskQueueBoard.css");
@@ -7,4 +7,6 @@
 @import url("./workspace/taskCalendar.css");
 @import url("./workspace/attention.css");
 @import url("./workspace/robotMap.css");
-@import url("./workspace/partMappings.css");
+@import url("./workspace/robotMapCard.css");
+@import url("./workspace/robotMapLayout.css");
+@import url("./workspace/robotMapDetail.css");

@@ -6,7 +6,9 @@ import type { FilterSelection } from "@/features/workspace/shared/filters/worksp
 import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import {
   buildMilestoneProjectLabels,
+  buildMilestoneSearchSuggestions,
   filterAndSortMilestones,
+  type MilestoneSearchSuggestion,
   type MilestoneSortField,
 } from "../milestonesViewUtils";
 import {
@@ -22,6 +24,7 @@ export type MilestonesViewState = MilestonesMilestoneModalState & {
   projectLabelByMilestoneId: Record<string, string>;
   projectsById: Record<string, BootstrapPayload["projects"][number]>;
   searchFilter: string;
+  searchSuggestions: MilestoneSearchSuggestion[];
   setProjectFilter: Dispatch<SetStateAction<FilterSelection>>;
   setSearchFilter: Dispatch<SetStateAction<string>>;
   setSortField: Dispatch<SetStateAction<MilestoneSortField>>;
@@ -84,6 +87,10 @@ export function useMilestonesViewState({
     [bootstrap.projects],
   );
   const scopedProjectIds = useMemo(() => bootstrap.projects.map((project) => project.id), [bootstrap.projects]);
+  const projectLabelByMilestoneId = useMemo(
+    () => buildMilestoneProjectLabels(bootstrap.milestones, projectsById, scopedProjectIds),
+    [bootstrap.milestones, projectsById, scopedProjectIds],
+  );
   const processedMilestones = useMemo(
     () =>
       filterAndSortMilestones({
@@ -100,8 +107,7 @@ export function useMilestonesViewState({
       }),
     [
       activePersonFilter,
-      bootstrap.milestones,
-      bootstrap.tasks,
+      bootstrap,
       projectsById,
       isAllProjectsView,
       projectFilter,
@@ -111,9 +117,39 @@ export function useMilestonesViewState({
       typeFilter,
     ],
   );
-  const projectLabelByMilestoneId = useMemo(
-    () => buildMilestoneProjectLabels(bootstrap.milestones, projectsById, scopedProjectIds),
-    [bootstrap.milestones, projectsById, scopedProjectIds],
+  const suggestionSourceMilestones = useMemo(
+    () =>
+      filterAndSortMilestones({
+        activePersonFilter,
+        bootstrap,
+        projectsById,
+        milestones: bootstrap.milestones,
+        isAllProjectsView,
+        projectFilter,
+        searchFilter: "",
+        sortField,
+        sortOrder,
+        typeFilter,
+      }),
+    [
+      activePersonFilter,
+      bootstrap,
+      projectsById,
+      isAllProjectsView,
+      projectFilter,
+      sortField,
+      sortOrder,
+      typeFilter,
+    ],
+  );
+  const searchSuggestions = useMemo(
+    () =>
+      buildMilestoneSearchSuggestions({
+        milestones: suggestionSourceMilestones,
+        projectLabelByMilestoneId,
+        searchFilter,
+      }),
+    [projectLabelByMilestoneId, searchFilter, suggestionSourceMilestones],
   );
   const milestoneFilterMotionClass = useFilterChangeMotionClass([
     activePersonFilter,
@@ -143,6 +179,7 @@ export function useMilestonesViewState({
     projectLabelByMilestoneId,
     projectsById,
     searchFilter,
+    searchSuggestions,
     setProjectFilter,
     setSearchFilter,
     setSortField,

@@ -1,8 +1,8 @@
-import React from "react";
+﻿import React from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { TimelineTaskTrackRow } from "./TimelineTaskTrackRow";
-import { buildTimelineTaskToneStyle } from "../timelineTaskColors";
+import { buildTimelineTaskToneStyle } from "../model/timelineTaskColors";
 import type { TimelineDayHeaderCell, TimelineTaskSpan } from "../timelineViewModel";
 import type {
   TimelineTaskDependencyCounts,

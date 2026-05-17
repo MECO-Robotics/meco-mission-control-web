@@ -1,15 +1,18 @@
 import { type ChangeEvent } from "react";
 
+import { IconRefresh } from "@/components/shared/Icons";
 import { MECO_PROFILE_AVATAR_SIZE } from "@/lib/branding";
 import type { SessionUser } from "@/lib/auth/types";
 import type { SeasonRecord } from "@/types/recordsOrganization";
-import { AppTopbarMyViewToggle, AppTopbarRefreshButton } from "./AppTopbarRightRailControls";
+import { AppTopbarMyViewToggle } from "./AppTopbarRightRailControls";
 
 const CREATE_SEASON_OPTION_VALUE = "__create_new_season__";
 
 function AppTopbarProfileMenu({
   handleSignOut,
   isDarkMode,
+  isLoadingData,
+  loadWorkspace,
   onCreateSeason,
   onSelectSeason,
   seasons,
@@ -19,6 +22,8 @@ function AppTopbarProfileMenu({
 }: {
   handleSignOut: () => void;
   isDarkMode: boolean;
+  isLoadingData: boolean;
+  loadWorkspace: () => Promise<void>;
   onCreateSeason: () => void;
   onSelectSeason: (seasonId: string | null) => void;
   seasons: SeasonRecord[];
@@ -110,6 +115,16 @@ function AppTopbarProfileMenu({
             </span>
           </span>
         </button>
+        <button
+          className={isLoadingData ? "profile-menu-item profile-menu-item-refresh is-loading" : "profile-menu-item profile-menu-item-refresh"}
+          onClick={() => void loadWorkspace()}
+          role="menuitem"
+          title="Refresh workspace"
+          type="button"
+        >
+          <IconRefresh />
+          <span>Refresh workspace</span>
+        </button>
         <button className="profile-menu-item" onClick={handleSignOut} role="menuitem" type="button">
           Sign out
         </button>
@@ -186,6 +201,8 @@ export function AppTopbarRightRail({
         <AppTopbarProfileMenu
           handleSignOut={handleSignOut}
           isDarkMode={isDarkMode}
+          isLoadingData={isLoadingData}
+          loadWorkspace={loadWorkspace}
           onCreateSeason={onCreateSeason}
           onSelectSeason={onSelectSeason}
           seasons={seasons}
@@ -196,8 +213,6 @@ export function AppTopbarRightRail({
       ) : (
         <AppTopbarGuestControls isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
       )}
-
-      <AppTopbarRefreshButton isLoadingData={isLoadingData} loadWorkspace={loadWorkspace} />
     </div>
   );
 }

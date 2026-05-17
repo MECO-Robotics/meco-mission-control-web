@@ -1,6 +1,7 @@
-import type { InventoryViewTab } from "@/lib/workspaceNavigation";
+﻿import type { InventoryViewTab } from "@/lib/workspaceNavigation";
 import type { WorkspaceContentPanelsProps } from "../WorkspaceContentPanelsCoreImpl";
 import type { ManufacturingItemRecord } from "@/types/recordsInventory";
+import type { SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
 
 export type SwipeDirection = "left" | "right" | null;
 
@@ -37,8 +38,16 @@ export interface WorkspaceTaskPanelProps {
   openCreateMechanismModal: WorkspaceContentPanelsViewProps["openCreateMechanismModal"];
   openCreatePartInstanceModal: WorkspaceContentPanelsViewProps["openCreatePartInstanceModal"];
   openCreateSubsystemModal: WorkspaceContentPanelsViewProps["openCreateSubsystemModal"];
+  handleDeleteMechanism: WorkspaceContentPanelsViewProps["handleDeleteMechanism"];
   openEditMechanismModal: WorkspaceContentPanelsViewProps["openEditMechanismModal"];
+  openEditPartInstanceModal: WorkspaceContentPanelsViewProps["openEditPartInstanceModal"];
   openEditSubsystemModal: WorkspaceContentPanelsViewProps["openEditSubsystemModal"];
+  removePartInstanceFromMechanism: WorkspaceContentPanelsViewProps["removePartInstanceFromMechanism"];
+  saveSubsystemLayout: (
+    subsystemId: string,
+    layout: SubsystemLayoutFields,
+  ) => Promise<boolean>;
+  updateSubsystemConfiguration: WorkspaceContentPanelsViewProps["updateSubsystemConfiguration"];
   openTimelineTaskDetailsModal: WorkspaceContentPanelsViewProps["openTimelineTaskDetailsModal"];
   setActivePersonFilter: WorkspaceContentPanelsViewProps["setActivePersonFilter"];
   subsystemsById: WorkspaceContentPanelsViewProps["subsystemsById"];
@@ -164,141 +173,4 @@ export interface WorkspaceContentProps {
   inventory: WorkspaceInventoryPanelProps;
   roster: WorkspaceRosterPanelProps;
   tutorial: WorkspaceTutorialPanelProps;
-}
-
-export function groupWorkspaceContentPanelProps(
-  props: WorkspaceContentPanelsViewProps,
-): WorkspaceContentProps {
-  return {
-    shell: {
-      activeTab: props.activeTab,
-      tabSwitchDirection: props.tabSwitchDirection,
-      disablePanelAnimations: props.disablePanelAnimations,
-      isLoadingData: props.isLoadingData,
-      dataMessage: props.dataMessage,
-      taskEditNotices: props.taskEditNotices,
-      onDismissDataMessage: props.onDismissDataMessage,
-      onDismissTaskEditNotice: props.onDismissTaskEditNotice,
-      onTaskEditCanceled: props.onTaskEditCanceled,
-      onTaskEditSaved: props.onTaskEditSaved,
-    },
-    tasks: {
-      activePersonFilter: props.activePersonFilter,
-      bootstrap: props.bootstrap,
-      disciplinesById: props.disciplinesById,
-      isAllProjectsView: props.isAllProjectsView,
-      isNonRobotProject: props.isNonRobotProject,
-      membersById: props.membersById,
-      openCreateTaskModal: props.openCreateTaskModal,
-      openCreateTaskModalFromTimeline: props.openCreateTaskModalFromTimeline,
-      openCreateMechanismModal: props.openCreateMechanismModal,
-      openCreatePartInstanceModal: props.openCreatePartInstanceModal,
-      openCreateSubsystemModal: props.openCreateSubsystemModal,
-      openEditMechanismModal: props.openEditMechanismModal,
-      openEditSubsystemModal: props.openEditSubsystemModal,
-      openTimelineTaskDetailsModal: props.openTimelineTaskDetailsModal,
-      setActivePersonFilter: props.setActivePersonFilter,
-      subsystemsById: props.subsystemsById,
-      taskSwipeDirection: props.taskSwipeDirection,
-      taskView: props.taskView,
-      timelineMilestoneCreateSignal: props.timelineMilestoneCreateSignal,
-      handleTimelineMilestoneDelete: props.handleTimelineMilestoneDelete,
-      handleTimelineMilestoneSave: props.handleTimelineMilestoneSave,
-    },
-    risks: {
-      activePersonFilter: props.activePersonFilter,
-      bootstrap: props.bootstrap,
-      isAllProjectsView: props.isAllProjectsView,
-      onCreateRisk: props.onCreateRisk,
-      onDeleteRisk: props.onDeleteRisk,
-      onUpdateRisk: props.onUpdateRisk,
-      riskManagementView: props.riskManagementView,
-    },
-    worklogs: {
-      activePersonFilter: props.activePersonFilter,
-      bootstrap: props.bootstrap,
-      membersById: props.membersById,
-      openCreateWorkLogModal: props.openCreateWorkLogModal,
-      openTimelineTaskDetailsModal: props.openTimelineTaskDetailsModal,
-      subsystemsById: props.subsystemsById,
-      worklogsView: props.worklogsView,
-    },
-    reports: {
-      bootstrap: props.bootstrap,
-      openCreateMilestoneReportModal: props.openCreateMilestoneReportModal,
-      openCreateQaReportModal: props.openCreateQaReportModal,
-      openTimelineTaskDetailsModal: props.openTimelineTaskDetailsModal,
-      reportsSwipeDirection: props.reportsSwipeDirection,
-      reportsView: props.reportsView,
-    },
-    manufacturing: {
-      activePersonFilter: props.activePersonFilter,
-      bootstrap: props.bootstrap,
-      cncItems: props.cncItems,
-      fabricationItems: props.fabricationItems,
-      printItems: props.printItems,
-      membersById: props.membersById,
-      subsystemsById: props.subsystemsById,
-      showCncMentorQuickActions: props.showCncMentorQuickActions,
-      manufacturingView: props.manufacturingView,
-      manufacturingSwipeDirection: props.manufacturingSwipeDirection,
-      onCncQuickStatusChange: props.onCncQuickStatusChange,
-      openCreateManufacturingModal: props.openCreateManufacturingModal,
-      openEditManufacturingModal: props.openEditManufacturingModal,
-    },
-    inventory: {
-      activePersonFilter: props.activePersonFilter,
-      artifacts: props.artifacts,
-      bootstrap: props.bootstrap,
-      effectiveInventoryView: props.effectiveInventoryView,
-      inventorySwipeDirection: props.inventorySwipeDirection,
-      isNonRobotProject: props.isNonRobotProject,
-      mechanismsById: props.mechanismsById,
-      membersById: props.membersById,
-      partDefinitionsById: props.partDefinitionsById,
-      subsystemsById: props.subsystemsById,
-      openCreateArtifactModal: props.openCreateArtifactModal,
-      openCreateMaterialModal: props.openCreateMaterialModal,
-      openCreatePartDefinitionModal: props.openCreatePartDefinitionModal,
-      openCreatePurchaseModal: props.openCreatePurchaseModal,
-      openEditArtifactModal: props.openEditArtifactModal,
-      openEditMaterialModal: props.openEditMaterialModal,
-      openEditPartDefinitionModal: props.openEditPartDefinitionModal,
-      openEditPurchaseModal: props.openEditPurchaseModal,
-    },
-    roster: {
-      allMembers: props.allMembers,
-      bootstrap: props.bootstrap,
-      externalMembers: props.externalMembers,
-      handleCreateMember: props.handleCreateMember,
-      handleDeleteMember: props.handleDeleteMember,
-      handleReactivateMemberForSeason: props.handleReactivateMemberForSeason,
-      handleUpdateMember: props.handleUpdateMember,
-      isAddPersonOpen: props.isAddPersonOpen,
-      isDeletingMember: props.isDeletingMember,
-      isEditPersonOpen: props.isEditPersonOpen,
-      isSavingMember: props.isSavingMember,
-      memberEditDraft: props.memberEditDraft,
-      memberForm: props.memberForm,
-      requestMemberPhotoUpload: props.requestMemberPhotoUpload,
-      rosterMentors: props.rosterMentors,
-      rosterView: props.rosterView,
-      openTimelineTaskDetailsModal: props.openTimelineTaskDetailsModal,
-      selectMember: props.selectMember,
-      selectedMemberId: props.selectedMemberId,
-      selectedProject: props.selectedProject,
-      selectedSeasonId: props.selectedSeasonId,
-      setIsAddPersonOpen: props.setIsAddPersonOpen,
-      setIsEditPersonOpen: props.setIsEditPersonOpen,
-      setMemberEditDraft: props.setMemberEditDraft,
-      setMemberForm: props.setMemberForm,
-      students: props.students,
-    },
-    tutorial: {
-      interactiveTutorialChapters: props.interactiveTutorialChapters,
-      isInteractiveTutorialActive: props.isInteractiveTutorialActive,
-      onStartInteractiveTutorial: props.onStartInteractiveTutorial,
-      onStartInteractiveTutorialChapter: props.onStartInteractiveTutorialChapter,
-    },
-  };
 }

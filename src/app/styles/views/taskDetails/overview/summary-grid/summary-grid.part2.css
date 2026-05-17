@@ -1,0 +1,73 @@
+.milestone-requirement-title {
+  margin: 0;
+  font-size: 1rem !important;
+  line-height: 1.45 !important;
+  color: var(--text-title);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.milestone-requirement-type-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  padding-left: 1.28rem;
+  margin-top: -0.08rem;
+  order: 1;
+}
+
+.milestone-requirement-type {
+  margin: 0;
+  font-size: 1rem !important;
+  line-height: 1.45 !important;
+  color: color-mix(in srgb, var(--text-copy) 78%, var(--bg-panel) 22%);
+}
+
+.milestone-requirement-condition {
+  margin: 0;
+  font-size: 1rem !important;
+  color: color-mix(in srgb, var(--text-copy) 78%, var(--bg-panel) 22%);
+}
+
+.task-details-milestone-requirements .milestone-requirement-typography {
+  font-size: 1rem !important;
+  line-height: 1.45 !important;
+}
+
+.task-details-milestone-requirements .task-detail-copy {
+  font-size: 1rem !important;
+}
+
+.task-details-section-collapse .task-detail-collapsible-body {
+  gap: 0.05rem !important;
+  margin-top: 0.18rem !important;
+  padding: 0.3rem 0.45rem !important;
+}
+
+.task-details-section-collapse .task-detail-collapsible-body .task-detail-copy,
+.task-details-section-collapse .task-detail-collapsible-body .milestone-requirement-item {
+  margin-top: 0 !important;
+}
+
+.task-details-section-collapse .task-detail-collapsible-body .task-detail-copy {
+  line-height: 1.18 !important;
+}
+
+.milestone-requirement-status-icon .timeline-task-status-logo {
+  position: static;
+  top: auto;
+  left: auto;
+  right: auto;
+  transform: none;
+  box-shadow: none;
+  background: transparent;
+  width: 1.15rem;
+  height: 1.15rem;
+  flex: 0 0 auto;
+}
+
+.milestone-requirement-status-icon .timeline-task-status-logo svg {
+  width: 0.8rem;
+  height: 0.8rem;
+}

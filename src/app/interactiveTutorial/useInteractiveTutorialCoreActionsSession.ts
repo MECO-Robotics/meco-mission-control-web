@@ -3,8 +3,8 @@ import { startTransition, useCallback } from "react";
 import { resetInteractiveTutorialSession } from "@/lib/auth/bootstrap";
 import { toErrorMessage } from "@/lib/appUtils/common";
 
-import type { InteractiveTutorialCoreState } from "./useInteractiveTutorialCoreState";
-import type { UseInteractiveTutorialOptions } from "./useInteractiveTutorialCoreTypes";
+import type { InteractiveTutorialCoreState } from "./core/useInteractiveTutorialCoreState";
+import type { UseInteractiveTutorialOptions } from "./core/useInteractiveTutorialCoreTypes";
 import { useInteractiveTutorialCoreActionsStart } from "./useInteractiveTutorialCoreActionsStart";
 
 export function useInteractiveTutorialCoreActionsSession(

@@ -1,135 +1,60 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
+import type { SubsystemRecord } from "@/types/recordsOrganization";
+import type { SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
 
-type ReadinessState = "blocked" | "at-risk" | "ready";
+import { resolveSubsystemLayout } from "./robotMapLayout";
 
-export interface RobotMapSummaryModel {
-  activeRiskCount: number;
-  mechanismCount: number;
-  openTaskCount: number;
-  partInstanceCount: number;
-  subsystemCount: number;
+export interface RobotConfigurationPartModel {
+  id: string;
+  name: string;
+  quantity: number;
+  record: BootstrapPayload["partInstances"][number];
 }
 
-export interface RobotMapMechanismModel {
-  activeHighRiskCount: number;
+export interface RobotConfigurationMechanismModel {
   id: string;
-  manufacturingIncompleteCount: number;
   name: string;
-  openTaskCount: number;
-  partInstanceCount: number;
+  description: string;
+  partCount: number;
+  parts: RobotConfigurationPartModel[];
   record: BootstrapPayload["mechanisms"][number];
-  waitingQaCount: number;
 }
 
-export interface RobotMapSubsystemModel {
-  blockedTaskCount: number;
+export interface RobotConfigurationSubsystemModel {
   id: string;
-  manufacturingIncompleteCount: number;
+  description: string;
+  isArchived: boolean;
+  layout: SubsystemLayoutFields;
   mechanismCount: number;
-  mechanisms: RobotMapMechanismModel[];
+  mechanisms: RobotConfigurationMechanismModel[];
   name: string;
-  openTaskCount: number;
-  partInstanceCount: number;
-  record: BootstrapPayload["subsystems"][number];
-  readinessState: ReadinessState;
-  waitingQaCount: number;
+  partCount: number;
+  record: SubsystemRecord;
 }
 
-export interface RobotMapViewModel {
-  summary: RobotMapSummaryModel;
-  subsystems: RobotMapSubsystemModel[];
+export interface RobotConfigurationViewModel {
+  subsystemCount: number;
+  mechanismCount: number;
+  partCount: number;
+  subsystems: RobotConfigurationSubsystemModel[];
 }
 
-function buildTaskMechanismIds(
-  task: BootstrapPayload["tasks"][number],
-  partInstanceToMechanismId: Record<string, string | null>,
-) {
-  const candidateIds = [
-    ...task.mechanismIds,
-    task.mechanismId,
-    ...task.partInstanceIds.map((partInstanceId) => partInstanceToMechanismId[partInstanceId] ?? null),
-    task.partInstanceId ? partInstanceToMechanismId[task.partInstanceId] ?? null : null,
-  ].filter((value): value is string => Boolean(value));
+function sortSubsystemsByLayout(left: RobotConfigurationSubsystemModel, right: RobotConfigurationSubsystemModel) {
+  const leftSortOrder = left.layout.sortOrder ?? Number.POSITIVE_INFINITY;
+  const rightSortOrder = right.layout.sortOrder ?? Number.POSITIVE_INFINITY;
 
-  return Array.from(new Set(candidateIds));
+  if (leftSortOrder !== rightSortOrder) {
+    return leftSortOrder - rightSortOrder;
+  }
+
+  return left.name.localeCompare(right.name);
 }
 
-function buildRiskMechanismIds(args: {
-  mechanismIdsByTaskId: Record<string, string[]>;
-  partInstanceToMechanismId: Record<string, string | null>;
-  reportTaskIdByReportId: Record<string, string | null>;
-  risk: BootstrapPayload["risks"][number];
-}) {
-  const { mechanismIdsByTaskId, partInstanceToMechanismId, reportTaskIdByReportId, risk } = args;
-
-  if (risk.attachmentType === "mechanism") {
-    return [risk.attachmentId];
-  }
-
-  if (risk.attachmentType === "part-instance") {
-    const mechanismId = partInstanceToMechanismId[risk.attachmentId];
-    return mechanismId ? [mechanismId] : [];
-  }
-
-  const sourceTaskId = reportTaskIdByReportId[risk.sourceId];
-  if (sourceTaskId) {
-    return mechanismIdsByTaskId[sourceTaskId] ?? [];
-  }
-
-  return [];
-}
-
-function resolveSubsystemReadiness(args: {
-  blockedTaskCount: number;
-  highRiskCount: number;
-  manufacturingIncompleteCount: number;
-  waitingQaCount: number;
-}): ReadinessState {
-  const { blockedTaskCount, highRiskCount, manufacturingIncompleteCount, waitingQaCount } = args;
-
-  if (blockedTaskCount > 0 || highRiskCount > 0) {
-    return "blocked";
-  }
-
-  if (waitingQaCount > 0 || manufacturingIncompleteCount > 0) {
-    return "at-risk";
-  }
-
-  return "ready";
-}
-
-export function buildRobotMapViewModel(bootstrap: BootstrapPayload): RobotMapViewModel {
-  const partInstanceToMechanismId = Object.fromEntries(
-    bootstrap.partInstances.map((partInstance) => [partInstance.id, partInstance.mechanismId] as const),
-  );
-  const reportTaskIdByReportId = Object.fromEntries(
-    bootstrap.reports.map((report) => [report.id, report.taskId] as const),
-  );
-  const mechanismsBySubsystemId = bootstrap.mechanisms.reduce<Record<string, BootstrapPayload["mechanisms"]>>(
-    (result, mechanism) => {
-      result[mechanism.subsystemId] = result[mechanism.subsystemId] ?? [];
-      result[mechanism.subsystemId].push(mechanism);
-      return result;
-    },
-    {},
-  );
-
-  const mechanismIdsByTaskId = bootstrap.tasks.reduce<Record<string, string[]>>((result, task) => {
-    result[task.id] = buildTaskMechanismIds(task, partInstanceToMechanismId);
-    return result;
-  }, {});
-  const mechanismTaskMap = bootstrap.tasks.reduce<Record<string, BootstrapPayload["tasks"]>>(
-    (result, task) => {
-      const mechanismIds = mechanismIdsByTaskId[task.id];
-      mechanismIds.forEach((mechanismId) => {
-        result[mechanismId] = result[mechanismId] ?? [];
-        result[mechanismId].push(task);
-      });
-      return result;
-    },
-    {},
-  );
-  const mechanismPartMap = bootstrap.partInstances.reduce<Record<string, BootstrapPayload["partInstances"]>>(
+export function buildRobotConfigurationViewModel(
+  bootstrap: BootstrapPayload,
+  search = "",
+): RobotConfigurationViewModel {
+  const partInstancesByMechanismId = bootstrap.partInstances.reduce<Record<string, BootstrapPayload["partInstances"]>>(
     (result, partInstance) => {
       if (!partInstance.mechanismId) {
         return result;
@@ -141,120 +66,78 @@ export function buildRobotMapViewModel(bootstrap: BootstrapPayload): RobotMapVie
     },
     {},
   );
-  const mechanismRiskMap = bootstrap.risks.reduce<Record<string, BootstrapPayload["risks"]>>(
-    (result, risk) => {
-      buildRiskMechanismIds({
-        mechanismIdsByTaskId,
-        partInstanceToMechanismId,
-        reportTaskIdByReportId,
-        risk,
-      }).forEach((mechanismId) => {
-        result[mechanismId] = result[mechanismId] ?? [];
-        result[mechanismId].push(risk);
-      });
+
+  const mechanismsBySubsystemId = bootstrap.mechanisms.reduce<Record<string, BootstrapPayload["mechanisms"]>>(
+    (result, mechanism) => {
+      result[mechanism.subsystemId] = result[mechanism.subsystemId] ?? [];
+      result[mechanism.subsystemId].push(mechanism);
       return result;
     },
     {},
   );
-  const mechanismManufacturingMap = bootstrap.manufacturingItems.reduce<
-    Record<string, BootstrapPayload["manufacturingItems"]>
-  >((result, item) => {
-    const linkedPartInstanceIds = [item.partInstanceId, ...item.partInstanceIds].filter(
-      (partInstanceId): partInstanceId is string => Boolean(partInstanceId),
-    );
-    const linkedMechanismIds = Array.from(
-      new Set(
-        linkedPartInstanceIds
-          .map((partInstanceId) => partInstanceToMechanismId[partInstanceId])
-          .filter((mechanismId): mechanismId is string => Boolean(mechanismId)),
-      ),
-    );
 
-    linkedMechanismIds.forEach((mechanismId) => {
-      result[mechanismId] = result[mechanismId] ?? [];
-      result[mechanismId].push(item);
-    });
-    return result;
-  }, {});
+  const normalizedSearch = search.trim().toLowerCase();
 
-  const subsystemModels = [...bootstrap.subsystems]
-    .sort((left, right) => left.name.localeCompare(right.name))
-    .map<RobotMapSubsystemModel>((subsystem) => {
-      const subsystemMechanisms = [...(mechanismsBySubsystemId[subsystem.id] ?? [])].sort((left, right) =>
-        left.name.localeCompare(right.name),
-      );
-      const subsystemTasks = bootstrap.tasks.filter(
-        (task) =>
-          task.subsystemId === subsystem.id || task.subsystemIds.includes(subsystem.id),
-      );
-      const subsystemManufacturingItems = bootstrap.manufacturingItems.filter(
-        (item) => item.subsystemId === subsystem.id && item.status !== "complete",
-      );
-
-      const mechanisms = subsystemMechanisms.map<RobotMapMechanismModel>((mechanism) => {
-        const mechanismTasks = mechanismTaskMap[mechanism.id] ?? [];
-        const mechanismRisks = mechanismRiskMap[mechanism.id] ?? [];
-        const mechanismManufacturingItems = mechanismManufacturingMap[mechanism.id] ?? [];
-        const openTaskCount = mechanismTasks.filter((task) => task.status !== "complete").length;
-        const waitingQaCount = mechanismTasks.filter((task) => task.status === "waiting-for-qa").length;
-        const activeHighRiskCount = mechanismRisks.filter((risk) => risk.severity === "high").length;
-        const manufacturingIncompleteCount = mechanismManufacturingItems.filter(
-          (item) => item.status !== "complete",
-        ).length;
+  const subsystems = bootstrap.subsystems
+    .map<RobotConfigurationSubsystemModel>((subsystem) => {
+      const subsystemMechanisms = (mechanismsBySubsystemId[subsystem.id] ?? [])
+        .filter((mechanism) => !mechanism.isArchived)
+        .sort((left, right) => left.name.localeCompare(right.name));
+      const mechanisms = subsystemMechanisms.map<RobotConfigurationMechanismModel>((mechanism) => {
+        const parts = (partInstancesByMechanismId[mechanism.id] ?? [])
+          .map<RobotConfigurationPartModel>((partInstance) => ({
+            id: partInstance.id,
+            name: partInstance.name,
+            quantity: Math.max(1, partInstance.quantity),
+            record: partInstance,
+          }))
+          .sort((left, right) => left.name.localeCompare(right.name));
 
         return {
-          activeHighRiskCount,
           id: mechanism.id,
-          manufacturingIncompleteCount,
           name: mechanism.name,
-          openTaskCount,
-          partInstanceCount: (mechanismPartMap[mechanism.id] ?? []).length,
+          description: mechanism.description,
+          partCount: parts.reduce((total, part) => total + part.quantity, 0),
+          parts,
           record: mechanism,
-          waitingQaCount,
         };
       });
 
-      const blockedTaskCount = subsystemTasks.filter(
-        (task) =>
-          task.isBlocked ||
-          task.blockers.length > 0 ||
-          task.planningState === "blocked" ||
-          task.planningState === "waiting-on-dependency",
-      ).length;
-      const waitingQaCount = subsystemTasks.filter((task) => task.status === "waiting-for-qa").length;
-      const highRiskCount = mechanisms.reduce((total, mechanism) => total + mechanism.activeHighRiskCount, 0);
-      const manufacturingIncompleteCount = subsystemManufacturingItems.length;
-
       return {
-        blockedTaskCount,
         id: subsystem.id,
-        manufacturingIncompleteCount,
+        description: subsystem.description,
+        isArchived: subsystem.isArchived ?? false,
+        layout: resolveSubsystemLayout(subsystem),
         mechanismCount: mechanisms.length,
         mechanisms,
         name: subsystem.name,
-        openTaskCount: subsystemTasks.filter((task) => task.status !== "complete").length,
-        partInstanceCount: bootstrap.partInstances.filter(
-          (partInstance) => partInstance.subsystemId === subsystem.id,
-        ).length,
+        partCount: mechanisms.reduce((total, mechanism) => total + mechanism.partCount, 0),
         record: subsystem,
-        readinessState: resolveSubsystemReadiness({
-          blockedTaskCount,
-          highRiskCount,
-          manufacturingIncompleteCount,
-          waitingQaCount,
-        }),
-        waitingQaCount,
       };
-    });
+    })
+    .filter((subsystem) => {
+      if (normalizedSearch.length === 0) {
+        return true;
+      }
+
+      const mechanismText = subsystem.mechanisms
+        .map((mechanism) => `${mechanism.name} ${mechanism.description}`)
+        .join(" ");
+      const partsText = subsystem.mechanisms
+        .flatMap((mechanism) => mechanism.parts)
+        .map((part) => part.name)
+        .join(" ");
+
+      return `${subsystem.name} ${subsystem.description} ${mechanismText} ${partsText}`
+        .toLowerCase()
+        .includes(normalizedSearch);
+    })
+    .sort(sortSubsystemsByLayout);
 
   return {
-    subsystems: subsystemModels,
-    summary: {
-      activeRiskCount: bootstrap.risks.filter((risk) => risk.severity === "high").length,
-      mechanismCount: bootstrap.mechanisms.length,
-      openTaskCount: bootstrap.tasks.filter((task) => task.status !== "complete").length,
-      partInstanceCount: bootstrap.partInstances.length,
-      subsystemCount: bootstrap.subsystems.length,
-    },
+    subsystemCount: subsystems.length,
+    mechanismCount: subsystems.reduce((total, subsystem) => total + subsystem.mechanismCount, 0),
+    partCount: subsystems.reduce((total, subsystem) => total + subsystem.partCount, 0),
+    subsystems,
   };
 }

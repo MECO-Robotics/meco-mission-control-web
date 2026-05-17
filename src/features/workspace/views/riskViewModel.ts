@@ -19,11 +19,13 @@ import {
   toRiskPayload,
   type RiskSourceFilter,
   type RiskSeverityFilter,
+  type RiskSortField,
+  type RiskSortOrder,
   type RiskViewData,
   type SelectOption,
 } from "./riskViewData";
 
-export type { RiskSourceFilter, RiskSeverityFilter, RiskViewData, SelectOption };
+export type { RiskSortField, RiskSortOrder, RiskSourceFilter, RiskSeverityFilter, RiskViewData, SelectOption };
 export {
   ATTACHMENT_TYPE_LABELS,
   RISK_SEVERITY_ORDER,
@@ -52,6 +54,8 @@ export function useRisksViewModel({
   const [search, setSearch] = useState("");
   const [severityFilter, setSeverityFilter] = useState<RiskSeverityFilter>("all");
   const [sourceFilter, setSourceFilter] = useState<RiskSourceFilter>("all");
+  const [sortField, setSortField] = useState<RiskSortField>("title");
+  const [sortOrder, setSortOrder] = useState<RiskSortOrder>("asc");
   const [editorMode, setEditorMode] = useState<RiskEditorMode>(null);
   const [activeRiskId, setActiveRiskId] = useState<string | null>(null);
   const [editorError, setEditorError] = useState<string | null>(null);
@@ -65,9 +69,11 @@ export function useRisksViewModel({
         bootstrap,
         search,
         severityFilter,
+        sortField,
+        sortOrder,
         sourceFilter,
       }),
-    [activePersonFilter, bootstrap, search, severityFilter, sourceFilter],
+    [activePersonFilter, bootstrap, search, severityFilter, sortField, sortOrder, sourceFilter],
   );
 
   const [draft, setDraft] = useState<RiskPayload>(() =>
@@ -208,6 +214,8 @@ export function useRisksViewModel({
   const riskFilterMotionClass = useFilterChangeMotionClass([
     search,
     severityFilter,
+    sortField,
+    sortOrder,
     sourceFilter,
   ]);
 
@@ -235,8 +243,12 @@ export function useRisksViewModel({
     setDraft,
     setSearch,
     setSeverityFilter,
+    setSortField,
+    setSortOrder,
     setSourceFilter,
     severityFilter,
+    sortField,
+    sortOrder,
     sourceFilter,
     sourceOptions,
     totalTaskCount: viewData.scopedTaskCount,

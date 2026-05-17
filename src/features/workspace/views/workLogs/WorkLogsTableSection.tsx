@@ -1,11 +1,8 @@
-import type { CSSProperties, Dispatch, SetStateAction } from "react";
+import type { CSSProperties } from "react";
 
-import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { formatDate } from "@/lib/appUtils/common";
-import { ColumnFilterDropdown } from "@/features/workspace/shared/filters/ColumnFilterDropdown";
 import { EditableHoverIndicator, PaginationControls, TableCell } from "@/features/workspace/shared/table/workspaceTableChrome";
-import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
 
 import type {
@@ -14,12 +11,9 @@ import type {
 } from "./workLogsViewState";
 
 interface WorkLogsTableSectionProps {
-  bootstrap: BootstrapPayload;
   membersById: MembersById;
   openEditTaskModal: (task: TaskRecord) => void;
-  setSubsystemFilter: Dispatch<SetStateAction<FilterSelection>>;
   subsystemsById: SubsystemsById;
-  subsystemFilter: FilterSelection;
   taskById: WorkLogsViewState["taskById"];
   workLogFilterMotionClass: string;
   workLogPagination: WorkLogPaginationState;
@@ -86,12 +80,9 @@ function WorkLogsRow({
 }
 
 export function WorkLogsTableSection({
-  bootstrap,
   membersById,
   openEditTaskModal,
-  setSubsystemFilter,
   subsystemsById,
-  subsystemFilter,
   taskById,
   workLogFilterMotionClass,
   workLogPagination,
@@ -104,16 +95,7 @@ export function WorkLogsTableSection({
         style={{ "--workspace-grid-template": GRID_TEMPLATE } as CSSProperties}
       >
         <span>Log</span>
-        <span className="table-column-header-cell">
-          <span className="table-column-title">Task</span>
-          <ColumnFilterDropdown
-            allLabel="All subsystems"
-            ariaLabel="Filter work logs by subsystem"
-            onChange={setSubsystemFilter}
-            options={bootstrap.subsystems}
-            value={subsystemFilter}
-          />
-        </span>
+        <span>Task</span>
         <span>People</span>
         <span>Open</span>
       </div>
