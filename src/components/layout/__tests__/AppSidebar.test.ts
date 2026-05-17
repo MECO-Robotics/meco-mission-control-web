@@ -207,6 +207,14 @@ describe("AppSidebar", () => {
     expect(activeMarkup).toContain("profile-view-group-icon");
   });
 
+  it("shrinks the inactive profile avatar inside the My View toggle", () => {
+    const css = readFileSync("src/app/styles/shell/profile/my-view-toggle.css", "utf8");
+
+    expect(css).toMatch(
+      /\.profile-view-avatar-button:not\(\.is-active\) \.profile-avatar\s*\{[^}]*width:\s*1\.22rem;[^}]*height:\s*1\.22rem;[^}]*font-size:\s*0\.72rem;/,
+    );
+  });
+
   it("uses an L avatar bubble for local dev-bypass profile state", () => {
     const markup = renderSidebar(
       [

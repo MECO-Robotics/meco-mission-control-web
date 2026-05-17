@@ -26,6 +26,16 @@
   width: 1.55rem;
   height: 1.55rem;
   font-size: 0.84rem;
+  transition:
+    width 0.16s ease,
+    height 0.16s ease,
+    font-size 0.16s ease;
+}
+
+.profile-view-avatar-button:not(.is-active) .profile-avatar {
+  width: 1.22rem;
+  height: 1.22rem;
+  font-size: 0.72rem;
 }
 
 .profile-view-toggle-option:hover,
