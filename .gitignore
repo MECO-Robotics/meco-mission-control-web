@@ -22,6 +22,7 @@ docs/reports/lighthouse-*.txt
 # Diagnostic artifacts (screenshots, snapshots, local diagnostics)
 .diagnostics/
 /.diagnostics/
+.tmp-skills-sync/
 
 # Environment files
 .env
