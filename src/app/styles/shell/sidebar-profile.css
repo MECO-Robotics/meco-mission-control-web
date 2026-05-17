@@ -31,6 +31,16 @@
   padding-inline: 0.28rem;
 }
 
+.sidebar-profile-header[data-collapsed="true"]::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 100%;
+  z-index: 1;
+  width: 2.5rem;
+}
+
 .sidebar-profile-header .profile-menu {
   display: inline-flex;
   flex: 0 0 auto;
@@ -49,6 +59,10 @@
   background: var(--bg-panel);
   color: var(--text-copy);
   cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    background-color 0.18s ease,
+    color 0.18s ease;
 }
 
 .sidebar-profile-fold-button:hover,
@@ -61,6 +75,23 @@
 
 .sidebar-profile-fold-button svg {
   display: block;
+}
+
+.sidebar-profile-header[data-collapsed="true"] .sidebar-profile-fold-button {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  top: 50%;
+  left: calc(100% + 0.2rem);
+  z-index: 1300;
+  transform: translate(-0.16rem, -50%);
+}
+
+.sidebar-shell[data-collapsed="true"]:hover .sidebar-profile-fold-button,
+.sidebar-shell[data-collapsed="true"] .sidebar-profile-fold-button:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(0, -50%);
 }
 
 .sidebar-profile-header .profile-trigger[role="img"] {

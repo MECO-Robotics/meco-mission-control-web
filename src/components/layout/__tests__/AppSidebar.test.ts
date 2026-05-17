@@ -113,6 +113,27 @@ describe("AppSidebar", () => {
     expect(markup).not.toContain("profile-menu-context-picker");
   });
 
+  it("reveals the folded sidebar expand button only on collapsed hover or keyboard focus", () => {
+    const css = readFileSync("src/app/styles/shell/sidebar-profile.css", "utf8");
+
+    expect(css).toMatch(
+      /\.sidebar-profile-header\[data-collapsed="true"\] \.sidebar-profile-fold-button\s*\{[^}]*position:\s*absolute;[^}]*opacity:\s*0;[^}]*pointer-events:\s*none;[^}]*z-index:\s*1300;/,
+    );
+    expect(css).toMatch(
+      /\.sidebar-profile-header\[data-collapsed="true"\]::after\s*\{[^}]*content:\s*"";[^}]*left:\s*100%;[^}]*width:\s*2\.5rem;/,
+    );
+    expect(css).toMatch(
+      /\.sidebar-shell\[data-collapsed="true"\]:hover \.sidebar-profile-fold-button,\s*\.sidebar-shell\[data-collapsed="true"\] \.sidebar-profile-fold-button:focus-visible\s*\{[^}]*opacity:\s*1;[^}]*pointer-events:\s*auto;/,
+    );
+  });
+
+  it("clears mouse focus after the sidebar fold button is clicked", () => {
+    const source = readFileSync("src/components/layout/AppSidebar.tsx", "utf8");
+
+    expect(source).toMatch(/const handleSidebarFoldClick = \(event: ReactMouseEvent<HTMLButtonElement>\) => \{[\s\S]*toggleSidebar\(\);[\s\S]*event\.currentTarget\.blur\(\);[\s\S]*\};/);
+    expect(source).toContain("onClick={handleSidebarFoldClick}");
+  });
+
   it("renders the season selector in the sidebar footer above project scope", () => {
     const markup = renderSidebar(
       [

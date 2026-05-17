@@ -256,6 +256,10 @@ export function AppSidebar({
     setIsProjectPopupOpen(false);
     onSelectTarget({ tab: "help" }, { keepSidebarOpen: true });
   };
+  const handleSidebarFoldClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
+    toggleSidebar();
+    event.currentTarget.blur();
+  };
 
   return (
     <div className="sidebar-shell" data-collapsed={isCollapsed ? "true" : "false"} ref={sidebarShellRef}>
@@ -272,7 +276,7 @@ export function AppSidebar({
         <button
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           className="sidebar-profile-fold-button"
-          onClick={toggleSidebar}
+          onClick={handleSidebarFoldClick}
           title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           type="button"
         >
