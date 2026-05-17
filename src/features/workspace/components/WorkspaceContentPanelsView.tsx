@@ -15,6 +15,10 @@ import {
 } from "./WorkspaceInventoryAndAdminSections";
 import { WorkspaceCadSection } from "./sections/WorkspaceCadSection";
 import { WorkspaceManufacturingSection } from "./WorkspaceManufacturingSection";
+import {
+  WorkspaceHomeSection,
+  WorkspaceTodaySection,
+} from "./overview/WorkspaceOverviewSections";
 import { groupWorkspaceContentPanelProps } from "./workspaceContentPanelsGrouping";
 type SwipeDirection = "left" | "right" | null;
 
@@ -65,6 +69,8 @@ export function WorkspaceContentPanelsView(props: WorkspaceContentPanelsViewProp
       {toastItems.length > 0 ? <WorkspaceToastStack items={toastItems} /> : null}
       {groupedProps.shell.isLoadingData ? <p className="banner">Refreshing workspace data...</p> : null}
 
+      <WorkspaceHomeSection {...props} />
+      <WorkspaceTodaySection {...props} />
       <WorkspaceTaskSection shell={groupedProps.shell} tasks={groupedProps.tasks} />
       <WorkspaceRiskSection {...props} />
       <WorkspaceWorklogsSection {...props} />

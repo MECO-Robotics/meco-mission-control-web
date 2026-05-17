@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 
+import { CalendarClock, Home } from "lucide-react";
 import { IconHelp, IconManufacturing, IconParts, IconReports, IconRisk, IconRoster, IconSubsystems, IconTasks, IconWorkLogs } from "@/components/shared/Icons";
 import type { NavigationItem } from "@/lib/workspaceNavigation";
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -95,10 +96,26 @@ export function useWorkspaceDerivedData({
   const workflowCount = isRobotProject
     ? bootstrap.subsystems.length
     : bootstrap.workstreams.length;
+  const todayCount = useMemo(
+    () => bootstrap.tasks.filter((task) => task.status !== "complete").length,
+    [bootstrap.tasks],
+  );
 
   const navigationItems = useMemo<NavigationItem[]>(
     () => {
       const items: NavigationItem[] = [
+        {
+          value: "home",
+          label: "Home",
+          icon: <Home size={16} strokeWidth={2} />,
+          count: 0,
+        },
+        {
+          value: "today",
+          label: "Today",
+          icon: <CalendarClock size={16} strokeWidth={2} />,
+          count: todayCount,
+        },
         {
           value: "tasks",
           label: "Work",
@@ -179,6 +196,7 @@ export function useWorkspaceDerivedData({
     },
     [
       bootstrap.tasks.length,
+      todayCount,
       bootstrap.risks.length,
       bootstrap.workLogs.length,
       bootstrap.reports.length,

@@ -27,7 +27,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 export type AppWorkspaceState = ReturnType<typeof useAppWorkspaceState>;
 
 export function useAppWorkspaceState() {
-  const [activeTab, setActiveTab] = useState<ViewTab>("tasks");
+  const [activeTab, setActiveTab] = useState<ViewTab>("home");
   const [tabSwitchDirection, setTabSwitchDirection] = useState<"up" | "down">("down");
   const [taskView, setTaskView] = useState<TaskViewTab>("timeline");
   const [riskManagementView, setRiskManagementView] =

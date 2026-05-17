@@ -27,6 +27,7 @@ import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
 
 import { AppSidebarPopups, ADD_ROBOT_PROJECT_VALUE } from "./AppSidebarPopups";
 import { AppSidebarProjectFooter } from "./AppSidebarProjectFooter";
+import { AppSidebarQuickActions } from "./AppSidebarQuickActions";
 import { AppSidebarSections, type SidebarSubItemModel } from "./AppSidebarSections";
 import { AppProfileAssembly } from "./AppProfileAssembly";
 import { useAppSidebarPopupState } from "./useAppSidebarPopupState";
@@ -41,7 +42,11 @@ interface AppSidebarProps {
   onSelectTarget: (target: NavigationTarget, options?: { keepSidebarOpen?: boolean }) => void;
   isCollapsed: boolean;
   myViewMemberName: string | null;
+  onCreateMilestone: () => void;
+  onCreatePart: () => void;
+  onCreateQaReport: () => void;
   onCreateSeason: () => void;
+  onCreateTask: () => void;
   onSelectSeason: (seasonId: string | null) => void;
   onToggleMyView: () => void;
   toggleSidebar: () => void;
@@ -72,7 +77,11 @@ export function AppSidebar({
   onSelectTarget,
   isCollapsed,
   myViewMemberName,
+  onCreateMilestone,
+  onCreatePart,
+  onCreateQaReport,
   onCreateSeason,
+  onCreateTask,
   onSelectSeason,
   onToggleMyView,
   toggleSidebar,
@@ -266,6 +275,16 @@ export function AppSidebar({
         />
       </div>
       <nav aria-label="Workspace views" className="sidebar" data-collapsed={isCollapsed ? "true" : "false"}>
+        <AppSidebarQuickActions
+          activeTab={activeTab}
+          isCollapsed={isCollapsed}
+          onCreateMilestone={onCreateMilestone}
+          onCreatePart={onCreatePart}
+          onCreateQaReport={onCreateQaReport}
+          onCreateTask={onCreateTask}
+          onSelectTarget={onSelectTarget}
+        />
+
         <button
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           className="tab"

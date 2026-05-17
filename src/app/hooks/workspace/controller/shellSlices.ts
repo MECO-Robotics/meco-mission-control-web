@@ -75,10 +75,19 @@ export const shellSidebarRosterActionKeys = [
   "handleCreateRobot",
   "handleEditSelectedRobot",
 ] as const;
+export const shellSidebarTaskActionKeys = [
+  "openCreateTaskModal",
+  "switchTaskCreateToMilestone",
+] as const;
+export const shellSidebarReportActionKeys = ["openCreateQaReportModal"] as const;
+export const shellSidebarCatalogActionKeys = ["openCreatePartDefinitionModal"] as const;
 export type AppWorkspaceShellSidebarController = Pick<
   AppWorkspaceModel,
   (typeof shellSidebarModelKeys)[number]
 > &
+  Pick<AppWorkspaceTaskActions, (typeof shellSidebarTaskActionKeys)[number]> &
+  Pick<AppWorkspaceReportActions, (typeof shellSidebarReportActionKeys)[number]> &
+  Pick<AppWorkspaceCatalogActions, (typeof shellSidebarCatalogActionKeys)[number]> &
   Pick<AppWorkspaceRosterActions, (typeof shellSidebarRosterActionKeys)[number]>;
 
 export const shellContentModelKeys = [

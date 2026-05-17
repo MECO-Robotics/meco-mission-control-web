@@ -51,6 +51,10 @@ export function AppWorkspaceShellSidebar({
       keepSidebarOpen: options?.keepSidebarOpen,
     });
   };
+  const handleCreateMilestone = () => {
+    handleSelectNavigationTarget({ tab: "tasks", taskView: "timeline" });
+    c.switchTaskCreateToMilestone();
+  };
 
   return (
     <AppSidebar
@@ -65,7 +69,11 @@ export function AppWorkspaceShellSidebar({
       onSelectTarget={handleSelectNavigationTarget}
       isCollapsed={c.isSidebarCollapsed}
       myViewMemberName={c.signedInMember?.name ?? null}
+      onCreateMilestone={handleCreateMilestone}
+      onCreatePart={c.openCreatePartDefinitionModal}
+      onCreateQaReport={c.openCreateQaReportModal}
       onCreateSeason={c.handleCreateSeason}
+      onCreateTask={c.openCreateTaskModal}
       onSelectSeason={c.setSelectedSeasonId}
       onToggleMyView={c.toggleMyView}
       toggleSidebar={c.toggleSidebar}

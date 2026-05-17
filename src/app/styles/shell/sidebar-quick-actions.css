@@ -1,0 +1,123 @@
+.sidebar-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.25rem;
+  padding: 0 0.55rem 0.35rem;
+  position: relative;
+}
+
+.sidebar-quick-actions[data-collapsed="true"] {
+  grid-template-columns: 1fr;
+  padding-inline: 0.4rem;
+}
+
+.sidebar-quick-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+  height: 2.55rem;
+  padding: 0.2rem 0.08rem;
+  border: 1px solid var(--border-base);
+  border-radius: 7px;
+  background: var(--bg-panel);
+  color: var(--text-copy);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.sidebar-quick-actions[data-collapsed="true"] .sidebar-quick-action {
+  flex-direction: row;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+}
+
+.sidebar-quick-action:hover,
+.sidebar-quick-action:focus-visible,
+.sidebar-add-menu[open] > .sidebar-quick-action {
+  outline: none;
+  border-color: rgba(22, 71, 142, 0.28);
+  background: var(--bg-row-alt);
+  color: var(--text-title);
+}
+
+.sidebar-quick-action[data-active="true"] {
+  border-color: rgba(22, 71, 142, 0.34);
+  background: rgba(22, 71, 142, 0.12);
+  color: var(--meco-blue);
+}
+
+.sidebar-add-menu {
+  position: relative;
+  min-width: 0;
+}
+
+.sidebar-add-menu > summary {
+  list-style: none;
+}
+
+.sidebar-add-menu > summary::-webkit-details-marker {
+  display: none;
+}
+
+.sidebar-add-menu-panel {
+  position: absolute;
+  top: calc(100% + 0.3rem);
+  left: 50%;
+  z-index: 1300;
+  display: grid;
+  min-width: 9rem;
+  padding: 0.35rem;
+  border: 1px solid var(--border-base);
+  border-radius: 8px;
+  background: var(--bg-panel);
+  box-shadow: 0 16px 38px rgba(15, 23, 42, 0.18);
+  transform: translateX(-50%);
+}
+
+.sidebar-quick-actions[data-collapsed="true"] .sidebar-add-menu-panel {
+  left: calc(100% + 0.4rem);
+  top: 0;
+  transform: none;
+}
+
+.sidebar-add-menu:not([open]) .sidebar-add-menu-panel {
+  display: none;
+}
+
+.sidebar-add-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  padding: 0.45rem 0.5rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-copy);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 650;
+  text-align: left;
+}
+
+.sidebar-add-menu-item:hover,
+.sidebar-add-menu-item:focus-visible {
+  outline: none;
+  background: var(--bg-row-alt);
+  color: var(--text-title);
+}
+
+.sidebar-add-menu-icon {
+  display: inline-flex;
+  color: var(--meco-blue);
+}

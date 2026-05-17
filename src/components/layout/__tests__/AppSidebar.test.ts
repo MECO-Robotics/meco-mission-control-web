@@ -42,7 +42,11 @@ function renderSidebar(
       isCollapsed: false,
       myViewMemberName: options?.myViewMemberName === undefined ? "Ava Chen" : options.myViewMemberName,
       onCreateSeason: jest.fn(),
+      onCreateMilestone: jest.fn(),
+      onCreatePart: jest.fn(),
+      onCreateQaReport: jest.fn(),
       onCreateRobot: jest.fn(),
+      onCreateTask: jest.fn(),
       onEditSelectedRobot: jest.fn(),
       onSelectSeason: jest.fn(),
       onSelectProject: jest.fn(),
@@ -249,6 +253,50 @@ describe("AppSidebar", () => {
     expect(markup).toMatch(
       /<div[^>]*class="[^"]*sidebar-favorites-group[^"]*"[\s\S]*?<span class="sidebar-subtab-label">Timeline<\/span>/,
     );
+  });
+
+  it("renders Home, Add, and Today controls below the profile", () => {
+    const markup = renderSidebar(
+      [
+        {
+          value: "home",
+          label: "Home",
+          icon: React.createElement("span"),
+          count: 0,
+        },
+        {
+          value: "today",
+          label: "Today",
+          icon: React.createElement("span"),
+          count: 3,
+        },
+        {
+          value: "tasks",
+          label: "Tasks",
+          icon: React.createElement("span"),
+          count: 4,
+        },
+      ],
+      "home",
+      { sessionUser: signedInUser },
+    );
+
+    expect(markup.indexOf("sidebar-profile-header")).toBeGreaterThan(-1);
+    expect(markup.indexOf("sidebar-profile-header")).toBeLessThan(markup.indexOf("sidebar-quick-actions"));
+    expect(markup.indexOf("sidebar-quick-actions")).toBeLessThan(markup.indexOf("Collapse sidebar"));
+    expect(markup).toMatch(
+      /<button(?=[^>]*class="[^"]*sidebar-quick-action[^"]*sidebar-quick-action-home)(?=[^>]*aria-label="Home")(?=[^>]*data-active="true")[^>]*>/,
+    );
+    expect(markup).toMatch(
+      /<summary(?=[^>]*class="[^"]*sidebar-quick-action[^"]*sidebar-quick-action-add)[^>]*>[\s\S]*Add[\s\S]*<\/summary>/,
+    );
+    expect(markup).toMatch(
+      /<button(?=[^>]*class="[^"]*sidebar-quick-action[^"]*sidebar-quick-action-today)(?=[^>]*aria-label="Today")(?=[^>]*data-active="false")[^>]*>/,
+    );
+    expect(markup).toContain("Add task");
+    expect(markup).toContain("Add report");
+    expect(markup).toContain("Add milestone");
+    expect(markup).toContain("Add part");
   });
 
   it("renders the Reports section with requested report subtabs", () => {

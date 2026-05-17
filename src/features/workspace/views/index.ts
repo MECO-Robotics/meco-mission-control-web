@@ -3,6 +3,7 @@ export * from "./manufacturing";
 export { HelpView } from "./HelpView";
 export { MaterialsView } from "./MaterialsView";
 export * from "./milestones";
+export * from "./overview";
 export { PartsView } from "./PartsView";
 export { PurchasesView } from "./PurchasesView";
 export { ReportsView } from "./ReportsView";
