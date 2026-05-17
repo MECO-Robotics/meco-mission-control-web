@@ -1,8 +1,9 @@
 import type { MouseEvent as ReactMouseEvent, RefObject } from "react";
 
 import { IconChevronRight, IconEdit, IconHelp } from "@/components/shared/Icons";
-import type { ProjectRecord } from "@/types/recordsOrganization";
+import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
 import { getProjectIcon, getProjectIconColor } from "./appSidebarIcons";
+import { AppSidebarSeasonPicker } from "./AppSidebarSeasonPicker";
 
 interface AppSidebarProjectFooterProps {
   activeTab: import("@/lib/workspaceNavigation").ViewTab;
@@ -10,11 +11,15 @@ interface AppSidebarProjectFooterProps {
   isCollapsed: boolean;
   isProjectPopupOpen: boolean;
   onEditSelectedRobot: () => void;
+  onCreateSeason: () => void;
   onHelpSelect: () => void;
+  onSelectSeason: (seasonId: string | null) => void;
   onProjectTriggerClick: (event: ReactMouseEvent<HTMLButtonElement>) => void;
   projectTriggerRef: RefObject<HTMLButtonElement | null>;
+  seasons: SeasonRecord[];
   selectedProject: ProjectRecord | null;
   selectedProjectLabel: string;
+  selectedSeasonId: string | null;
 }
 
 export function AppSidebarProjectFooter({
@@ -23,11 +28,15 @@ export function AppSidebarProjectFooter({
   isCollapsed,
   isProjectPopupOpen,
   onEditSelectedRobot,
+  onCreateSeason,
   onHelpSelect,
+  onSelectSeason,
   onProjectTriggerClick,
   projectTriggerRef,
+  seasons,
   selectedProject,
   selectedProjectLabel,
+  selectedSeasonId,
 }: AppSidebarProjectFooterProps) {
   return !isCollapsed ? (
     <div className="sidebar-footer-stack">
@@ -44,6 +53,12 @@ export function AppSidebarProjectFooter({
           <span className="sidebar-tab-label">Help</span>
         </span>
       </button>
+      <AppSidebarSeasonPicker
+        onCreateSeason={onCreateSeason}
+        onSelectSeason={onSelectSeason}
+        seasons={seasons}
+        selectedSeasonId={selectedSeasonId}
+      />
       <div className="sidebar-context-picker sidebar-project-picker">
         <span className="sidebar-context-label">Project</span>
         <div className="sidebar-project-compact-row" data-tutorial-target="project-select-outreach">

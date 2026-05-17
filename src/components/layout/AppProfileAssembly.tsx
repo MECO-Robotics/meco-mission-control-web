@@ -1,11 +1,8 @@
-import { type ChangeEvent } from "react";
 import { Users } from "lucide-react";
 
 import { MECO_PROFILE_AVATAR_SIZE } from "@/lib/branding";
 import type { SessionUser } from "@/lib/auth/types";
-import type { SeasonRecord } from "@/types/recordsOrganization";
 
-const CREATE_SEASON_OPTION_VALUE = "__create_new_season__";
 const LOCAL_DEV_PROFILE_INITIAL = "L";
 
 function getProfileFallbackInitial(sessionUser: SessionUser) {
@@ -81,11 +78,7 @@ function SignedInProfileAssembly({
   isDarkMode,
   isMyViewActive,
   myViewMemberName,
-  onCreateSeason,
-  onSelectSeason,
   onToggleMyView,
-  seasons,
-  selectedSeasonId,
   sessionUser,
   toggleDarkMode,
 }: AppProfileAssemblyProps & { sessionUser: SessionUser }) {
@@ -95,17 +88,6 @@ function SignedInProfileAssembly({
       : `Filter workspace to ${myViewMemberName}`
     : "No roster member matches the signed-in user";
   const isMyViewAvailable = myViewMemberName !== null;
-
-  const handleSeasonChange = (milestone: ChangeEvent<HTMLSelectElement>) => {
-    const nextValue = milestone.target.value;
-    if (nextValue === CREATE_SEASON_OPTION_VALUE) {
-      milestone.target.value = selectedSeasonId ?? "";
-      onCreateSeason();
-      return;
-    }
-
-    onSelectSeason(nextValue || null);
-  };
 
   const handleMyViewClick = () => {
     if (!isMyViewAvailable) {
@@ -156,26 +138,6 @@ function SignedInProfileAssembly({
         </button>
       </div>
       <div aria-label="Profile menu" className="profile-menu-popover" role="menu">
-        <label className="profile-menu-context-picker">
-          <span className="profile-menu-context-label">Season</span>
-          <select
-            className="profile-menu-context-select"
-            data-tutorial-target="season-select"
-            onChange={handleSeasonChange}
-            value={selectedSeasonId ?? ""}
-          >
-            {seasons.length === 0 ? (
-              <option value="">No seasons</option>
-            ) : (
-              seasons.map((season) => (
-                <option key={season.id} value={season.id}>
-                  {season.name}
-                </option>
-              ))
-            )}
-            <option value={CREATE_SEASON_OPTION_VALUE}>Create new season</option>
-          </select>
-        </label>
         <ThemeModeMenuItem isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
         <button className="profile-menu-item" onClick={handleSignOut} role="menuitem" type="button">
           Sign out
@@ -215,11 +177,7 @@ export interface AppProfileAssemblyProps {
   isDarkMode: boolean;
   isMyViewActive: boolean;
   myViewMemberName: string | null;
-  onCreateSeason: () => void;
-  onSelectSeason: (seasonId: string | null) => void;
   onToggleMyView: () => void;
-  seasons: SeasonRecord[];
-  selectedSeasonId: string | null;
   sessionUser: SessionUser | null;
   toggleDarkMode: () => void;
 }

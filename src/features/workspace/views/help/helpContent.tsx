@@ -23,7 +23,7 @@ export const HELP_SECTIONS: HelpSection[] = [
   {
     title: "Start with scope",
     items: [
-      "Before editing anything, check the **season selector** in the profile menu and the **active project** in the sidebar.",
+      "Before editing anything, check the **season selector** and **active project** at the bottom of the sidebar.",
       "Pick **All projects** only for planning sweeps; switch back to a single project before data entry.",
       "If a list looks empty, first confirm you are in the expected **season and project scope**.",
       "Timeline, Kanban, and Milestones are **project-aware**, so scope mistakes show up there first.",
@@ -95,7 +95,7 @@ export const HELP_TUTORIAL_STEPS: HelpTutorialStep[] = [
     summary:
       "Every reliable workflow starts with correct scope. Confirm season and project before creating or editing records.",
     actions: [
-      "Open the profile menu and confirm the active season.",
+      "Use the sidebar footer to confirm the active season.",
       "Set project scope in the sidebar (Robot, Outreach, Operations, or All projects).",
       "Switch out of All projects before entering detailed task or inventory data.",
     ],

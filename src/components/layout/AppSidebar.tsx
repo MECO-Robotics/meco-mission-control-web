@@ -265,11 +265,7 @@ export function AppSidebar({
           isDarkMode={isDarkMode}
           isMyViewActive={isMyViewActive}
           myViewMemberName={myViewMemberName}
-          onCreateSeason={onCreateSeason}
-          onSelectSeason={onSelectSeason}
           onToggleMyView={onToggleMyView}
-          seasons={seasons}
-          selectedSeasonId={selectedSeasonId}
           sessionUser={sessionUser}
           toggleDarkMode={toggleDarkMode}
         />
@@ -316,12 +312,16 @@ export function AppSidebar({
           canEditSelectedRobot={canEditSelectedRobot}
           isCollapsed={isCollapsed}
           isProjectPopupOpen={isProjectPopupOpen}
+          onCreateSeason={onCreateSeason}
           onEditSelectedRobot={onEditSelectedRobot}
           onHelpSelect={handleHelpSelect}
           onProjectTriggerClick={handleProjectTriggerClick}
+          onSelectSeason={onSelectSeason}
           projectTriggerRef={projectTriggerRef}
+          seasons={seasons}
           selectedProject={selectedProject}
           selectedProjectLabel={selectedProjectLabel}
+          selectedSeasonId={selectedSeasonId}
         />
       </nav>
       <AppSidebarPopups

@@ -102,10 +102,33 @@ describe("AppSidebar", () => {
 
     expect(markup.indexOf("profile-menu")).toBeGreaterThan(-1);
     expect(markup.indexOf("profile-menu")).toBeLessThan(markup.indexOf("Collapse sidebar"));
-    expect(markup).toContain('data-tutorial-target="season-select"');
     expect(markup).toContain("Theme mode");
     expect(markup).toContain("Sign out");
     expect(markup).not.toContain('aria-label="Refresh workspace"');
+    expect(markup).not.toContain("profile-menu-context-picker");
+  });
+
+  it("renders the season selector in the sidebar footer above project scope", () => {
+    const markup = renderSidebar(
+      [
+        {
+          value: "tasks",
+          label: "Tasks",
+          icon: React.createElement("span"),
+          count: 4,
+        },
+      ],
+      "tasks",
+      { sessionUser: signedInUser },
+    );
+    const footerIndex = markup.indexOf("sidebar-footer-stack");
+    const seasonIndex = markup.indexOf('data-tutorial-target="season-select"');
+    const projectIndex = markup.indexOf('data-tutorial-target="project-select"');
+
+    expect(seasonIndex).toBeGreaterThan(footerIndex);
+    expect(seasonIndex).toBeLessThan(projectIndex);
+    expect(markup).toContain('<span class="sidebar-context-label">Season</span>');
+    expect(markup).toContain("Create new season");
   });
 
   it("renders My View as a group-to-profile toggle with the avatar on the right", () => {
