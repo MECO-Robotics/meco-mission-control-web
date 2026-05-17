@@ -116,6 +116,22 @@ describe("Workspace overview views", () => {
     expect(markup).toContain("Finish bellypan CAD");
   });
 
+  it("renders Home with graph-led overview sections distinct from Today", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(HomeView, {
+        bootstrap: createOverviewBootstrap(),
+        onOpenTask: jest.fn(),
+        today: fixedToday,
+      }),
+    );
+
+    expect(markup).toContain("Schedule pressure");
+    expect(markup).toContain("Work by subsystem");
+    expect(markup).toContain("overview-graph-panel");
+    expect(markup).toContain("overview-bar-chart");
+    expect(markup).toContain("overview-donut-chart");
+  });
+
   it("renders Today with daily action items, very soon deadlines, and issues", () => {
     const markup = renderToStaticMarkup(
       React.createElement(TodayView, {

@@ -2,6 +2,7 @@ import { useMemo } from "react";
 
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import type { BootstrapPayload } from "@/types/bootstrap";
+import { OverviewHomeGraphs } from "./OverviewGraphSection";
 import { OverviewListSection } from "./OverviewListSection";
 import { OverviewMetricGrid } from "./OverviewMetricGrid";
 import { buildHomeViewModel } from "./overviewViewModel";
@@ -26,8 +27,12 @@ export function HomeView({ bootstrap, onOpenTask, today = new Date() }: HomeView
         </div>
       </div>
 
-      <OverviewMetricGrid metrics={model.metrics} />
+      <OverviewHomeGraphs
+        schedulePressure={model.schedulePressure}
+        workBySubsystem={model.workBySubsystem}
+      />
 
+      <OverviewMetricGrid metrics={model.metrics} />
       <div className="overview-section-grid">
         <OverviewListSection
           emptyLabel="No near-term task deadlines."
