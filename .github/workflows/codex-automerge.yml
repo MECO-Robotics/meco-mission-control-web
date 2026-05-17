@@ -45,6 +45,7 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const targetBaseRefs = new Set(['development', 'main']);
+            const requiredCheckRunNames = new Set(['ci-validate', 'snapshot-validate']);
             const passingConclusions = new Set(['success', 'neutral', 'skipped']);
             const trustedCodexReviewerLogins = new Set(
               (process.env.CODEX_REVIEWER_LOGINS || '')
@@ -154,11 +155,16 @@ jobs:
                 const isCurrentRun = String(checkRun.details_url ?? '').includes(
                   `/actions/runs/${context.runId}`,
                 );
-                return checkRun.name !== 'enable-automerge' && !isCurrentRun;
+                return requiredCheckRunNames.has(checkRun.name) && !isCurrentRun;
               });
 
-              if (relevantCheckRuns.length === 0) {
-                core.info(`PR #${pullNumber} has no check runs yet; waiting.`);
+              const discoveredCheckRunNames = new Set(relevantCheckRuns.map((checkRun) => checkRun.name));
+              const missingCheckRunNames = [...requiredCheckRunNames].filter((name) => {
+                return !discoveredCheckRunNames.has(name);
+              });
+
+              if (missingCheckRunNames.length > 0) {
+                core.info(`PR #${pullNumber} is missing required checks: ${missingCheckRunNames.join(', ')}.`);
                 return;
               }
 
