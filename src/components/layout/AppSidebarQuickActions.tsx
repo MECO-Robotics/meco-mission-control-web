@@ -70,7 +70,6 @@ export function AppSidebarQuickActions({
         type="button"
       >
         <Home aria-hidden="true" size={14} strokeWidth={2} />
-        {!isCollapsed ? <span>Home</span> : null}
       </button>
 
       <details className="sidebar-add-menu">
@@ -80,7 +79,6 @@ export function AppSidebarQuickActions({
           title="Add"
         >
           <Plus aria-hidden="true" size={14} strokeWidth={2} />
-          {!isCollapsed ? <span>Add</span> : null}
         </summary>
         <div className="sidebar-add-menu-panel">
           {addActions.map((action) => (
@@ -108,7 +106,6 @@ export function AppSidebarQuickActions({
         type="button"
       >
         <CalendarClock aria-hidden="true" size={14} strokeWidth={2} />
-        {!isCollapsed ? <span>Today</span> : null}
       </button>
     </div>
   );

@@ -288,7 +288,7 @@ describe("AppSidebar", () => {
       /<button(?=[^>]*class="[^"]*sidebar-quick-action[^"]*sidebar-quick-action-home)(?=[^>]*aria-label="Home")(?=[^>]*data-active="true")[^>]*>/,
     );
     expect(markup).toMatch(
-      /<summary(?=[^>]*class="[^"]*sidebar-quick-action[^"]*sidebar-quick-action-add)[^>]*>[\s\S]*Add[\s\S]*<\/summary>/,
+      /<summary(?=[^>]*class="[^"]*sidebar-quick-action[^"]*sidebar-quick-action-add)(?=[^>]*aria-label="Add new")[^>]*>[\s\S]*<\/summary>/,
     );
     expect(markup).toMatch(
       /<button(?=[^>]*class="[^"]*sidebar-quick-action[^"]*sidebar-quick-action-today)(?=[^>]*aria-label="Today")(?=[^>]*data-active="false")[^>]*>/,
