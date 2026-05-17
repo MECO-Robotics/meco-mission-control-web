@@ -1,6 +1,8 @@
 /// <reference types="jest" />
 
 import * as React from "react";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 
 jest.mock("@/lib/branding", () => ({
@@ -33,6 +35,10 @@ function renderTopbar(
       onToggleActiveViewFavorite: options.onToggleActiveViewFavorite ?? jest.fn(),
     }),
   );
+}
+
+function readTopbarShellCss() {
+  return readFileSync(join(process.cwd(), "src/app/styles/shell/chrome/topbar-shell.css"), "utf8");
 }
 
 describe("AppTopbar", () => {
@@ -69,5 +75,11 @@ describe("AppTopbar", () => {
 
     expect(markup).not.toContain("profile-menu");
     expect(markup).not.toContain('aria-label="Refresh workspace"');
+  });
+
+  it("caps the default topbar search width", () => {
+    const topbarShellCss = readTopbarShellCss();
+
+    expect(topbarShellCss).toMatch(/\.app-topbar-search\s*\{[^}]*max-width:\s*44rem;/);
   });
 });

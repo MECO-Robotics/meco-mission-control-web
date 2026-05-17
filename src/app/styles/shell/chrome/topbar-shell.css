@@ -120,6 +120,7 @@
   display: flex;
   align-items: center;
   width: 100%;
+  max-width: 44rem;
   min-width: 0;
 }
 
