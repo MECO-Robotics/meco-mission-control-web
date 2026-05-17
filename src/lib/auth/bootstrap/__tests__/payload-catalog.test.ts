@@ -121,4 +121,32 @@ describe("normalizeBootstrapCatalogRecords", () => {
     expect(normalized.manufacturingItems[0].partInstanceId).toBe("part-instance-1");
     expect(normalized.manufacturingItems[0].partInstanceIds).toEqual(["part-instance-1"]);
   });
+
+  it("normalizes missing subsystem layout fields to unplaced defaults", () => {
+    const source: LegacyBootstrapPayload = {
+      subsystems: [
+        {
+          id: "subsystem-1",
+          projectId: "project-1",
+          name: "Drive",
+          description: "",
+          iteration: 1,
+          isCore: true,
+          parentSubsystemId: null,
+          responsibleEngineerId: null,
+          mentorIds: [],
+          risks: [],
+        },
+      ],
+    };
+
+    const normalized = normalizeBootstrapCatalogRecords(source, planning);
+
+    expect(normalized.subsystems).toHaveLength(1);
+    expect(normalized.subsystems[0].layoutZone).toBe("unplaced");
+    expect(normalized.subsystems[0].layoutView).toBe("top");
+    expect(normalized.subsystems[0].layoutX).toBeNull();
+    expect(normalized.subsystems[0].layoutY).toBeNull();
+    expect(normalized.subsystems[0].sortOrder).toBeNull();
+  });
 });

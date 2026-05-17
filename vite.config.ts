@@ -19,6 +19,12 @@ export default defineConfig(({ mode }) => {
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "X-Frame-Options": "SAMEORIGIN",
   };
+  const apiProxy = {
+    "/api": {
+      target: proxyTarget,
+      changeOrigin: true,
+    },
+  };
 
   return {
     plugins: [react()],
@@ -31,15 +37,11 @@ export default defineConfig(({ mode }) => {
       headers: securityHeaders,
       host: devHost,
       port: devPort,
-      proxy: {
-        "/api": {
-          target: proxyTarget,
-          changeOrigin: true,
-        },
-      },
+      proxy: apiProxy,
     },
     preview: {
       headers: securityHeaders,
+      proxy: apiProxy,
     },
   };
 });

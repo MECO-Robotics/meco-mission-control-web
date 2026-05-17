@@ -1,4 +1,4 @@
-import { IconEye, IconRefresh } from "@/components/shared/Icons";
+import { UserSearch, Users } from "lucide-react";
 
 export function AppTopbarMyViewToggle({
   isActive,
@@ -11,45 +11,30 @@ export function AppTopbarMyViewToggle({
 }) {
   return (
     <button
-      aria-label={isActive ? "Clear My View filter" : "Show My View filter"}
+      aria-label={isActive ? "Switch to Users" : "Switch to User search"}
       aria-pressed={isActive}
       className={isActive ? "app-topbar-my-view-button is-active" : "app-topbar-my-view-button"}
+      data-state={isActive ? "user-search" : "users"}
       disabled={!memberName}
       onClick={onToggle}
       title={
         memberName
           ? isActive
-            ? `Showing ${memberName}`
-            : `Filter workspace to ${memberName}`
+            ? `Showing ${memberName}. Switch to all users.`
+            : `Showing all users. Switch to ${memberName}.`
           : "No roster member matches the signed-in user"
       }
       type="button"
     >
-      <IconEye />
-    </button>
-  );
-}
-
-export function AppTopbarRefreshButton({
-  isLoadingData,
-  loadWorkspace,
-}: {
-  isLoadingData: boolean;
-  loadWorkspace: () => Promise<void>;
-}) {
-  return (
-    <button
-      aria-label="Refresh workspace"
-      className={
-        isLoadingData
-          ? "icon-button refresh-button app-topbar-icon-button is-loading"
-          : "icon-button refresh-button app-topbar-icon-button"
-      }
-      onClick={() => void loadWorkspace()}
-      title="Refresh workspace"
-      type="button"
-    >
-      <IconRefresh />
+      <span aria-hidden="true" className="app-topbar-my-view-track">
+        <span className="app-topbar-my-view-thumb" />
+        <span className="app-topbar-my-view-option app-topbar-my-view-option-users">
+          <Users size={14} strokeWidth={2} />
+        </span>
+        <span className="app-topbar-my-view-option app-topbar-my-view-option-search">
+          <UserSearch size={14} strokeWidth={2} />
+        </span>
+      </span>
     </button>
   );
 }

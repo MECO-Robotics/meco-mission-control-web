@@ -5,6 +5,8 @@ import type { MilestonePayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
+import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { MilestonesMilestoneModal } from "@/features/workspace/views/milestones/MilestonesEventModal";
 import { useMilestonesMilestoneModalState } from "@/features/workspace/views/milestones/sections/useMilestonesEventModalState";
 import { TaskCalendarFilterToolbar } from "./TaskCalendarFilterToolbar";
@@ -53,6 +55,7 @@ export function TaskCalendarView({
   onTaskEditSaved = () => {},
 }: TaskCalendarViewProps) {
   const [eventFilter, setEventFilter] = useState<"all" | TaskCalendarEventType>("all");
+  const [searchFilter, setSearchFilter] = useState("");
   const [sortMode, setSortMode] = useState<TaskCalendarSortMode>("date");
   const [monthCursor, setMonthCursor] = useState(() => {
     const today = new Date();
@@ -99,13 +102,29 @@ export function TaskCalendarView({
     [activePersonFilter, bootstrap, isAllProjectsView, projectsById],
   );
   const events = useMemo(() => {
-    const scopedEvents =
+    const normalizedSearch = searchFilter.trim().toLowerCase();
+    let scopedEvents =
       eventFilter === "all"
         ? unfilteredEvents
         : unfilteredEvents.filter((event) => event.extendedProps.type === eventFilter);
 
+    if (normalizedSearch.length > 0) {
+      scopedEvents = scopedEvents.filter((event) =>
+        [
+          event.title,
+          event.extendedProps.contextLabel,
+          event.extendedProps.priority,
+          event.extendedProps.status,
+          event.extendedProps.type,
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(normalizedSearch),
+      );
+    }
+
     return sortTaskCalendarEvents(scopedEvents, sortMode);
-  }, [eventFilter, sortMode, unfilteredEvents]);
+  }, [eventFilter, searchFilter, sortMode, unfilteredEvents]);
   const monthCells = useMemo(() => createMonthCells(monthCursor), [monthCursor]);
   const eventsByDateKey = useMemo(() => {
     const grouped = new Map<string, TaskCalendarEvent[]>();
@@ -142,13 +161,33 @@ export function TaskCalendarView({
   return (
     <section className={`panel dense-panel task-calendar-shell ${WORKSPACE_PANEL_CLASS}`}>
       {unfilteredEvents.length > 0 ? (
-        <TaskCalendarFilterToolbar
-          eventFilter={eventFilter}
-          onEventFilterChange={setEventFilter}
-          onSortModeChange={setSortMode}
-          sortMode={sortMode}
-        />
+        <AppTopbarSlotPortal slot="controls">
+          <div className="panel-actions filter-toolbar task-queue-toolbar task-calendar-filter-toolbar">
+            <TopbarResponsiveSearch
+              actionCount={2}
+              actions={
+                <TaskCalendarFilterToolbar
+                  eventFilter={eventFilter}
+                  onEventFilterChange={setEventFilter}
+                  onSortModeChange={setSortMode}
+                  sortMode={sortMode}
+                />
+              }
+              ariaLabel="Search calendar"
+              compactPlaceholder="Search"
+              onChange={setSearchFilter}
+              placeholder="Search calendar..."
+              value={searchFilter}
+            />
+          </div>
+        </AppTopbarSlotPortal>
       ) : null}
+
+      <div className="panel-header compact-header">
+        <div className="queue-section-header">
+          <h2>Calendar</h2>
+        </div>
+      </div>
 
       {unfilteredEvents.length === 0 ? (
         <div className="empty-state">

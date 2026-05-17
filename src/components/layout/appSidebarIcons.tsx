@@ -176,7 +176,7 @@ export const subItemIcons: Record<NavigationSubItemId, ReactNode> = {
   "readiness-subsystems": createElement(Cog, { size: 14, strokeWidth: 2 }),
   "readiness-risks": createElement(AlertTriangle, { size: 14, strokeWidth: 2 }),
   "config-robot-model": createElement(Bot, { size: 14, strokeWidth: 2 }),
-  "config-part-mappings": createElement(Boxes, { size: 14, strokeWidth: 2 }),
+  "config-cad": createElement(Boxes, { size: 14, strokeWidth: 2 }),
   "config-directory": createElement(Users, { size: 14, strokeWidth: 2 }),
   "tasks-timeline": createElement(CalendarDays, { size: 14, strokeWidth: 2 }),
   "tasks-board": createElement(Columns3, { size: 14, strokeWidth: 2 }),

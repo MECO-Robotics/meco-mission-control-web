@@ -43,18 +43,19 @@
   justify-content: flex-start;
   height: 100%;
   width: auto;
-  max-width: none;
+  max-width: clamp(8rem, 17vw, 15rem);
   min-width: 0;
   position: relative;
-  flex: 1 1 auto;
+  flex: 0 0 clamp(8rem, 17vw, 15rem);
   border-right: 0;
-  padding: 0.25rem 0.75rem;
+  padding: 0.25rem 0.55rem;
 }
 
 .app-topbar-view-title {
   display: flex;
   align-items: center;
-  width: 100%;
+  width: auto;
+  max-width: 100%;
   min-width: 0;
 }
 
@@ -64,22 +65,25 @@
   font-size: 1rem;
   font-weight: 700;
   line-height: 1;
-  white-space: normal;
-  overflow: visible;
-  text-overflow: clip;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .app-topbar-search-slot {
   display: flex;
   align-items: center;
   height: 100%;
-  flex: 0 1 clamp(12rem, 24vw, 21rem);
-  min-width: 9.5rem;
+  flex: 1 1 auto;
   padding-inline: clamp(0.3rem, 0.9vw, 0.6rem);
+  min-width: 0;
+  overflow: visible;
 }
 
 .app-topbar-search {
+  --app-topbar-search-icon-button-size: 1.7rem;
+  --app-topbar-search-icon-pill-height: 2.05rem;
+  --app-topbar-search-icon-pill-width: calc(var(--app-topbar-search-icon-button-size) + 0.45rem);
   position: relative;
   display: flex;
   align-items: center;
@@ -97,10 +101,14 @@
   pointer-events: none;
 }
 
+.app-topbar-search-icon svg {
+  display: block;
+}
+
 .app-topbar-search-input {
   width: 100%;
-  height: 2rem;
-  border-radius: 0.62rem;
+  height: var(--app-topbar-search-icon-pill-height);
+  border-radius: 999px;
   border: 1px solid var(--border-base);
   background: var(--bg-row-alt);
   color: var(--text-title);
@@ -118,6 +126,18 @@
 .app-topbar-search-input:focus,
 .app-topbar-search-input:focus-visible {
   outline: none;
+  border-color: var(--control-select-focus-border);
+  box-shadow: var(--control-select-focus-ring);
+}
+
+.page-shell.dark-mode .app-topbar-search-input {
+  background: var(--bg-panel);
+  border-color: rgba(148, 163, 184, 0.34);
+  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.24);
+}
+
+.page-shell.dark-mode .app-topbar-search-input:focus,
+.page-shell.dark-mode .app-topbar-search-input:focus-visible {
   border-color: var(--control-select-focus-border);
   box-shadow: var(--control-select-focus-ring);
 }
@@ -156,9 +176,6 @@
 
 .app-topbar-brand-icon {
   display: block;
-  width: min(100%, 118px);
-  height: auto;
-  max-height: 34px;
   max-width: 100%;
   object-fit: contain;
   opacity: 1;
@@ -168,8 +185,17 @@
     transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.app-topbar[data-collapsed="true"] .app-topbar-brand-icon {
-  width: min(100%, 42px);
+.app-topbar-brand-icon[data-logo-variant="full"] {
+  width: min(100%, 118px);
+  height: auto;
+  max-height: 34px;
+}
+
+.app-topbar-brand-icon[data-logo-variant="compact"] {
+  width: 42px;
+  height: 42px;
+  max-width: 100%;
+  max-height: calc(var(--shell-topbar-height) - 0.75rem);
 }
 
 .app-topbar[data-collapsed="false"] .app-topbar-brand-icon {

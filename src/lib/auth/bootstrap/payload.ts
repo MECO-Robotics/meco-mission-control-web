@@ -44,5 +44,6 @@ export function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapP
     manufacturingItems: catalog.manufacturingItems,
     qaReviews: source.qaReviews ?? [],
     escalations: source.escalations ?? [],
+    actions: source.actions ?? [],
   };
 }

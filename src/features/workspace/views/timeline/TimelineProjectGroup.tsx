@@ -1,11 +1,11 @@
-import React from "react";
+﻿import React from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { TimelineProjectHeaderCell } from "./components/TimelineProjectHeaderCell";
 import { TimelineProjectSummaryCell } from "./components/TimelineProjectSummaryCell";
 import { TimelineSubsystemRowGroup } from "./components/TimelineSubsystemRowGroup";
 import { TimelineTaskTrackRowList } from "./components/TimelineTaskTrackRowList";
-import { buildTimelineSubsystemHighlightStyle } from "./timelineTaskColors";
+import { buildTimelineSubsystemHighlightStyle } from "./model/timelineTaskColors";
 import {
   type TimelineTaskDependencyCounts,
   type TimelineTaskStatusSignal,

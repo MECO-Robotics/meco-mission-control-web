@@ -4,7 +4,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { formatDate } from "@/lib/appUtils/common";
 import { EditableHoverIndicator } from "@/features/workspace/shared/table/workspaceTableChrome";
-import { getTimelineTaskDisciplineColor } from "@/features/workspace/views/timeline/timelineTaskColors";
+import { getTimelineTaskDisciplineColor } from "@/features/workspace/views/timeline/model/timelineTaskColors";
 
 import {
   getMemberInitial,

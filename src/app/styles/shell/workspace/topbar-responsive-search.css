@@ -1,0 +1,90 @@
+.worklog-toolbar-topbar {
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0.35rem;
+  justify-content: flex-end;
+  margin-left: 0;
+  width: 100%;
+}
+
+.topbar-responsive-search {
+  --topbar-responsive-search-action-overlay-width: 0rem;
+  --topbar-responsive-search-icon-button-size: 1.7rem;
+  --topbar-responsive-search-icon-pill-height: 2.05rem;
+  --topbar-responsive-search-icon-pill-padding: 0.18rem;
+  --topbar-responsive-search-icon-pill-reserved-width: 0rem;
+  --topbar-responsive-search-icon-pill-extra-width: 0.45rem;
+  --topbar-responsive-search-icon-pill-width: calc(
+    var(--topbar-responsive-search-icon-button-size) +
+      var(--topbar-responsive-search-icon-pill-reserved-width) +
+      var(--topbar-responsive-search-icon-pill-extra-width)
+  );
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.filter-toolbar .topbar-responsive-search {
+  flex: 0 1 clamp(11.5rem, 24vw, 19rem);
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.worklog-toolbar-topbar .topbar-responsive-search {
+  flex: 1 1 auto;
+}
+
+.worklog-toolbar-topbar .topbar-responsive-search.has-actions {
+  flex: 0 1 clamp(15rem, 30vw, 23rem);
+}
+
+.app-topbar-controls-host .filter-toolbar > .topbar-responsive-search,
+.app-topbar-search-host .filter-toolbar > .topbar-responsive-search {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+}
+
+.app-topbar-controls-host .filter-toolbar > .topbar-responsive-search-dynamic.is-icon-mode,
+.app-topbar-search-host .filter-toolbar > .topbar-responsive-search-dynamic.is-icon-mode {
+  flex: 0 0 var(--topbar-responsive-search-icon-pill-width);
+  width: var(--topbar-responsive-search-icon-pill-width);
+  min-width: var(--topbar-responsive-search-icon-pill-width);
+}
+
+.app-topbar-controls-host .filter-toolbar .topbar-responsive-search .toolbar-search,
+.app-topbar-search-host .filter-toolbar .topbar-responsive-search .toolbar-search {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+}
+
+.topbar-responsive-search-full {
+  min-width: 0;
+  width: 100%;
+}
+
+.topbar-responsive-search-field {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+}
+
+.worklog-toolbar-topbar .topbar-responsive-search-full {
+  flex: 1 1 15rem;
+  min-width: 0;
+}
+
+.topbar-responsive-search-field .toolbar-search,
+.topbar-responsive-search-full .toolbar-search {
+  width: 100%;
+}
+
+.topbar-responsive-search.has-actions .topbar-responsive-search-field .toolbar-search {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-right: var(--topbar-responsive-search-action-overlay-width);
+}

@@ -24,70 +24,61 @@ export function TaskCalendarFilterToolbar({
   const sortIsDefault = sortMode === "date";
 
   return (
-    <div className="panel-header compact-header">
-      <div className="queue-section-header">
-        <h2>Calendar</h2>
-      </div>
-      <div className="panel-actions filter-toolbar task-queue-toolbar task-calendar-filter-toolbar">
-        <div className="task-queue-toolbar-inline-actions task-calendar-filter-controls">
-          <CompactFilterMenu
-            activeCount={filterIsDefault ? 0 : 1}
-            ariaLabel="Calendar filters"
-            buttonLabel="Filters"
-            className="task-queue-filter-menu"
-            items={[
-              {
-                label: "Event type",
-                content: (
-                  <select
-                    aria-label="Filter calendar by event type"
-                    className="task-queue-sort-menu-select"
-                    onChange={(event) =>
-                      onEventFilterChange(event.currentTarget.value as "all" | TaskCalendarEventType)
-                    }
-                    value={eventFilter}
-                  >
-                    {TASK_CALENDAR_EVENT_FILTER_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                ),
-              },
-            ]}
-          />
+    <div className="task-queue-toolbar-inline-actions task-calendar-filter-controls">
+      <CompactFilterMenu
+        activeCount={filterIsDefault ? 0 : 1}
+        ariaLabel="Calendar filters"
+        buttonLabel="Filters"
+        className="task-queue-filter-menu"
+        items={[
+          {
+            label: "Event type",
+            content: (
+              <select
+                aria-label="Filter calendar by event type"
+                className="task-queue-sort-menu-select"
+                onChange={(event) =>
+                  onEventFilterChange(event.currentTarget.value as "all" | TaskCalendarEventType)
+                }
+                value={eventFilter}
+              >
+                {TASK_CALENDAR_EVENT_FILTER_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            ),
+          },
+        ]}
+      />
 
-          <CompactFilterMenu
-            activeCount={sortIsDefault ? 0 : 1}
-            ariaLabel="Calendar sorting"
-            buttonLabel="Sort"
-            className="task-queue-sort-menu"
-            icon={<IconSort />}
-            items={[
-              {
-                label: "Sort by",
-                content: (
-                  <select
-                    aria-label="Sort calendar events by"
-                    className="task-queue-sort-menu-select"
-                    onChange={(event) =>
-                      onSortModeChange(event.currentTarget.value as TaskCalendarSortMode)
-                    }
-                    value={sortMode}
-                  >
-                    {TASK_CALENDAR_SORT_OPTIONS.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                ),
-              },
-            ]}
-          />
-        </div>
-      </div>
+      <CompactFilterMenu
+        activeCount={sortIsDefault ? 0 : 1}
+        ariaLabel="Calendar sorting"
+        buttonLabel="Sort"
+        className="task-queue-sort-menu"
+        icon={<IconSort />}
+        items={[
+          {
+            label: "Sort by",
+            content: (
+              <select
+                aria-label="Sort calendar events by"
+                className="task-queue-sort-menu-select"
+                onChange={(event) => onSortModeChange(event.currentTarget.value as TaskCalendarSortMode)}
+                value={sortMode}
+              >
+                {TASK_CALENDAR_SORT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            ),
+          },
+        ]}
+      />
     </div>
   );
 }

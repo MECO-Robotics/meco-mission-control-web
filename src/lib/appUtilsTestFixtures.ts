@@ -37,6 +37,11 @@ export function createSubsystem(overrides: Partial<SubsystemRecord> = {}): Subsy
     responsibleEngineerId: null,
     mentorIds: [],
     risks: [],
+    layoutX: null,
+    layoutY: null,
+    layoutZone: "unplaced",
+    layoutView: "top",
+    sortOrder: null,
     ...overrides,
   };
 }

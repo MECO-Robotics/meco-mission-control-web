@@ -2,6 +2,7 @@
 
 import { buildEmptyTaskPayload, taskToPayload } from "@/lib/appUtils/taskTargets";
 import { getDefaultSubsystemId, getPartDefinitionActiveSeasonIds, isPartDefinitionActiveInSeason, joinList, splitList } from "@/lib/appUtils/common";
+import { buildEmptySubsystemPayload } from "@/lib/appUtils/payloadBuilders";
 import { formatLocalDate, localTodayDate } from "@/lib/dateUtils";
 import { createBootstrap, createSubsystem } from "@/lib/appUtilsTestFixtures";
 
@@ -89,6 +90,16 @@ describe("appUtils", () => {
     expect(payload.status).toBe("not-started");
     expect(payload.blockers).toEqual([]);
     expect(payload.taskBlockers).toEqual([]);
+  });
+
+  it("buildEmptySubsystemPayload defaults new subsystems to unplaced layout", () => {
+    const payload = buildEmptySubsystemPayload(createBootstrap());
+
+    expect(payload.layoutZone).toBe("unplaced");
+    expect(payload.layoutView).toBe("top");
+    expect(payload.layoutX).toBeNull();
+    expect(payload.layoutY).toBeNull();
+    expect(payload.sortOrder).toBeNull();
   });
 
   it("formats local date-only values without UTC conversion", () => {

@@ -1,0 +1,90 @@
+﻿.robot-config-card-layer {
+  max-width: min(280px, 70vw);
+  min-width: 0;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: max-content;
+}
+
+.robot-config-subsystem-card {
+  align-items: center;
+  background: color-mix(in srgb, var(--bg-row-alt) 58%, transparent);
+  border: 1px solid var(--border-base);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 14px color-mix(in srgb, #020617 8%, transparent);
+  cursor: default;
+  display: inline-flex;
+  gap: 0.45rem;
+  min-height: 0;
+  max-width: min(280px, 70vw);
+  opacity: 0.3;
+  padding: 0.4rem 0.55rem;
+  position: relative;
+  text-align: left;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    opacity 120ms ease;
+  width: max-content;
+}
+
+.robot-config-subsystem-card.is-editable {
+  cursor: grab;
+}
+
+.robot-config-subsystem-card:hover,
+.robot-config-subsystem-card:focus-visible,
+.robot-config-subsystem-card.is-selected,
+.robot-config-subsystem-card.is-dragging {
+  opacity: 0.96;
+}
+
+.robot-config-subsystem-card.is-dragging {
+  cursor: grabbing;
+  box-shadow: 0 10px 24px color-mix(in srgb, #020617 20%, transparent);
+}
+
+.robot-config-subsystem-card.is-selected {
+  border-color: color-mix(in srgb, #16478e 60%, var(--border-base) 40%);
+  box-shadow: 0 0 0 1px color-mix(in srgb, #16478e 35%, transparent), 0 10px 22px color-mix(in srgb, #020617 20%, transparent);
+}
+
+.robot-config-subsystem-card::after {
+  border-left: 0.38rem solid transparent;
+  border-right: 0.38rem solid transparent;
+  border-top: 0.5rem solid color-mix(in srgb, var(--bg-row-alt) 66%, transparent);
+  content: "";
+  height: 0;
+  left: 1.05rem;
+  pointer-events: none;
+  position: absolute;
+  top: calc(100% - 1px);
+  width: 0;
+}
+
+.robot-config-subsystem-name {
+  color: var(--text-title);
+  font-size: 0.84rem;
+  max-width: 11.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.robot-config-subsystem-meta {
+  color: var(--text-copy);
+  font-size: 0.69rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.robot-config-unplaced-add-button svg {
+  display: block;
+}
+
+@media (max-width: 780px) {
+  .robot-config-card-layer {
+    max-width: min(220px, 52vw);
+  }
+}

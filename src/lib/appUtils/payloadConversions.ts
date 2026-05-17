@@ -2,6 +2,7 @@ import type { ArtifactRecord, ManufacturingItemRecord, MaterialRecord, PartDefin
 import type { ArtifactPayload, ManufacturingItemPayload, MaterialPayload, MechanismPayload, PartDefinitionPayload, PartInstancePayload, PurchaseItemPayload, SubsystemPayload, WorkstreamPayload } from "@/types/payloads";
 import type { SubsystemRecord, WorkstreamRecord } from "@/types/recordsOrganization";
 import { normalizeIteration } from "@/lib/appUtils/common";
+import { normalizeSubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
 import { resolveWorkspaceColor } from "@/features/workspace/shared/model/workspaceColors";
 import { uniqueIds } from "./internal";
 
@@ -45,6 +46,7 @@ export const partDefinitionToPayload = (item: PartDefinitionRecord): PartDefinit
 
 export const subsystemToPayload = (item: SubsystemRecord): SubsystemPayload => ({
   ...item,
+  ...normalizeSubsystemLayoutFields(item),
   color: resolveWorkspaceColor(item.color, `${item.projectId}:${item.id}:${item.name}`, item.iteration),
   isArchived: item.isArchived ?? false,
   iteration: normalizeIteration(item.iteration),

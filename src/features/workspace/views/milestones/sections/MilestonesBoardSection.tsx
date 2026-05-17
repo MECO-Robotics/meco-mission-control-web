@@ -15,6 +15,7 @@ interface MilestonesBoardSectionProps {
   motionClassName: string;
   onOpenMilestone: (milestone: MilestoneRecord) => void;
   projectLabelByMilestoneId: Record<string, string>;
+  searchFilter: string;
   setMilestoneZoom: Dispatch<SetStateAction<number>>;
 }
 
@@ -25,6 +26,7 @@ export function MilestonesBoardSection({
   motionClassName,
   onOpenMilestone,
   projectLabelByMilestoneId,
+  searchFilter,
   setMilestoneZoom,
 }: MilestonesBoardSectionProps) {
   const zoomShellRef = useRef<HTMLDivElement>(null);
@@ -94,6 +96,7 @@ export function MilestonesBoardSection({
             milestones={milestones}
             onOpenMilestone={onOpenMilestone}
             projectLabelByMilestoneId={projectLabelByMilestoneId}
+            searchFilter={searchFilter}
           />
           <div className="task-queue-board-footer">
             <p className="task-queue-board-load-status">

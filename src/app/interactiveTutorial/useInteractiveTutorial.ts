@@ -3,8 +3,8 @@ import { useMemo } from "react";
 import { useInteractiveTutorialLifecycle } from "./useInteractiveTutorialLifecycle";
 import { isInteractiveTutorialCreationStep } from "./helpers/interactiveTutorialStepGroups";
 import { useInteractiveTutorialCoreActions } from "./useInteractiveTutorialCoreActions";
-import { useInteractiveTutorialCoreState } from "./useInteractiveTutorialCoreState";
-import type { UseInteractiveTutorialOptions } from "./useInteractiveTutorialCoreTypes";
+import { useInteractiveTutorialCoreState } from "./core/useInteractiveTutorialCoreState";
+import type { UseInteractiveTutorialOptions } from "./core/useInteractiveTutorialCoreTypes";
 import type {
   InteractiveTutorialOverlayProps,
 } from "./interactiveTutorialTypes";

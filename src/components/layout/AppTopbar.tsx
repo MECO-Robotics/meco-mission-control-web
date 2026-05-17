@@ -1,5 +1,6 @@
 import {
-  MECO_LOGIN_BACKDROP_SRC,
+  MECO_COMPACT_TEAM_LOGO_SIZE,
+  MECO_COMPACT_TEAM_LOGO_SRC,
   MECO_MAIN_LOGO_HEIGHT,
   MECO_MAIN_LOGO_LIGHT_SRC,
   MECO_MAIN_LOGO_WHITE_SRC,
@@ -10,6 +11,7 @@ import type { SeasonRecord } from "@/types/recordsOrganization";
 import { Search } from "lucide-react";
 
 import { AppTopbarRightRail } from "./AppTopbarRightRail";
+import { APP_TOPBAR_SLOT_IDS } from "./AppTopbarSlotPortal";
 
 interface AppTopbarProps {
   activeViewLabel: string;
@@ -46,23 +48,34 @@ export function AppTopbar({
   sessionUser,
   toggleDarkMode,
 }: AppTopbarProps) {
-  const topbarLogoSrc = isSidebarCollapsed
-    ? MECO_LOGIN_BACKDROP_SRC
-    : isDarkMode
-      ? MECO_MAIN_LOGO_WHITE_SRC
-      : MECO_MAIN_LOGO_LIGHT_SRC;
+  const topbarLogo = isSidebarCollapsed
+    ? {
+        alt: "MECO compact team logo",
+        height: MECO_COMPACT_TEAM_LOGO_SIZE,
+        src: MECO_COMPACT_TEAM_LOGO_SRC,
+        variant: "compact",
+        width: MECO_COMPACT_TEAM_LOGO_SIZE,
+      }
+    : {
+        alt: "MECO main logo",
+        height: MECO_MAIN_LOGO_HEIGHT,
+        src: isDarkMode ? MECO_MAIN_LOGO_WHITE_SRC : MECO_MAIN_LOGO_LIGHT_SRC,
+        variant: "full",
+        width: MECO_MAIN_LOGO_WIDTH,
+      };
 
   return (
     <header className="topbar app-topbar" data-collapsed={isSidebarCollapsed ? "true" : "false"}>
       <div className="app-topbar-brand">
         <img
-          alt="MECO main logo"
+          alt={topbarLogo.alt}
           className="app-topbar-brand-icon"
+          data-logo-variant={topbarLogo.variant}
           fetchPriority="high"
-          height={MECO_MAIN_LOGO_HEIGHT}
+          height={topbarLogo.height}
           loading="eager"
-          width={MECO_MAIN_LOGO_WIDTH}
-          src={topbarLogoSrc}
+          width={topbarLogo.width}
+          src={topbarLogo.src}
         />
       </div>
       <div className="app-topbar-left">
@@ -71,6 +84,8 @@ export function AppTopbar({
         </div>
       </div>
       <div className="app-topbar-search-slot">
+        <div className="app-topbar-controls-host" id={APP_TOPBAR_SLOT_IDS.controls} />
+        <div className="app-topbar-search-host" id={APP_TOPBAR_SLOT_IDS.search} />
         <label className="app-topbar-search" htmlFor="workspace-topbar-search">
           <span aria-hidden="true" className="app-topbar-search-icon">
             <Search size={14} strokeWidth={2} />

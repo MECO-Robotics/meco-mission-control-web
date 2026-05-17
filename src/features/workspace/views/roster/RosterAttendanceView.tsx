@@ -1,19 +1,20 @@
 ﻿import { useMemo, useState } from "react";
 
-import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { RosterAvailabilityStatus } from "@/types/rosterInsights";
 
 import { RosterInsightsSummaryCards } from "./RosterInsightsSummaryCards";
-import { fetchAvailabilityStatusTone } from "./rosterStatusTone";
 import {
   filterAndSortRosterMembers,
   filterRecentAttendance,
   formatAvailabilityLabel,
   formatHours,
 } from "./rosterInsightsViewModel";
+import { fetchAvailabilityStatusTone } from "./rosterStatusTone";
 import { useRosterInsights } from "./useRosterInsights";
 
 interface RosterAttendanceViewProps {
@@ -85,6 +86,46 @@ export function RosterAttendanceView({
 
   return (
     <section className={`panel dense-panel roster-layout mc-roster-insights-shell ${WORKSPACE_PANEL_CLASS}`}>
+      <AppTopbarSlotPortal slot="controls">
+        <div className="panel-actions filter-toolbar mc-roster-insights-toolbar">
+          <TopbarResponsiveSearch
+            actions={
+              <CompactFilterMenu
+                activeCount={availabilityFilter === "all" ? 0 : 1}
+                ariaLabel="Filter by availability"
+                buttonLabel="Status"
+                items={[
+                  {
+                    label: "Availability",
+                    content: (
+                      <select
+                        aria-label="Filter attendance by availability"
+                        className="task-queue-sort-menu-select"
+                        onChange={(event) =>
+                          setAvailabilityFilter(event.target.value as RosterAvailabilityStatus | "all")
+                        }
+                        value={availabilityFilter}
+                      >
+                        {AVAILABILITY_OPTIONS.map((option) => (
+                          <option key={option.id} value={option.id}>
+                            {option.name}
+                          </option>
+                        ))}
+                      </select>
+                    ),
+                  },
+                ]}
+              />
+            }
+            ariaLabel="Search attendance"
+            compactPlaceholder="Search"
+            onChange={setSearchText}
+            placeholder="Search members..."
+            value={searchText}
+          />
+        </div>
+      </AppTopbarSlotPortal>
+
       <div className="panel-header compact-header">
         <div className="queue-section-header">
           <h2>Attendance</h2>
@@ -95,41 +136,6 @@ export function RosterAttendanceView({
       </div>
 
       <RosterInsightsSummaryCards cards={summaryCards} />
-
-      <div className="panel-actions filter-toolbar mc-roster-insights-toolbar">
-        <SearchToolbarInput
-          ariaLabel="Search attendance"
-          onChange={setSearchText}
-          placeholder="Search members..."
-          value={searchText}
-        />
-        <CompactFilterMenu
-          activeCount={availabilityFilter === "all" ? 0 : 1}
-          ariaLabel="Filter by availability"
-          buttonLabel="Status"
-          items={[
-            {
-              label: "Availability",
-              content: (
-                <select
-                  aria-label="Filter attendance by availability"
-                  className="task-queue-sort-menu-select"
-                  onChange={(event) =>
-                    setAvailabilityFilter(event.target.value as RosterAvailabilityStatus | "all")
-                  }
-                  value={availabilityFilter}
-                >
-                  {AVAILABILITY_OPTIONS.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.name}
-                    </option>
-                  ))}
-                </select>
-              ),
-            },
-          ]}
-        />
-      </div>
 
       {insightsState.errorMessage ? (
         <p className="section-copy mc-roster-insights-note">

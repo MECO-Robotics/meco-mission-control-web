@@ -1,8 +1,8 @@
-import type { BootstrapPayload } from "@/types/bootstrap";
+﻿import type { BootstrapPayload } from "@/types/bootstrap";
 import type { RiskRecord } from "@/types/recordsReporting";
 
 import type { SelectOption } from "./riskViewDataPayload";
-import type { RiskViewScopeData } from "./riskViewDataScope";
+import type { RiskViewScopeData } from "./riskViewScopeTypes";
 
 export interface RiskViewLookups {
   attachmentOptionsForType: (attachmentType: RiskRecord["attachmentType"]) => SelectOption[];
