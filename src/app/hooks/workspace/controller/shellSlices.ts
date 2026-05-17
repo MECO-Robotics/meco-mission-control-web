@@ -140,6 +140,7 @@ export const shellContentModelKeys = [
   "selectedSeasonId",
   "selectMember",
   "setActivePersonFilter",
+  "setManufacturingView",
   "setIsAddPersonOpen",
   "setIsEditPersonOpen",
   "setMemberEditDraft",

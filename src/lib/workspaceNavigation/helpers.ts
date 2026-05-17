@@ -10,7 +10,7 @@ function normalizeNavigationState(state: NavigationState): NavigationState {
   if (state.activeTab === "manufacturing") {
     return {
       ...state,
-      manufacturingView: "cnc",
+      manufacturingView: "all",
     };
   }
 

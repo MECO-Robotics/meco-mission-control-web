@@ -87,6 +87,7 @@ export function groupWorkspaceContentPanelProps(
       showCncMentorQuickActions: props.showCncMentorQuickActions,
       manufacturingView: props.manufacturingView,
       manufacturingSwipeDirection: props.manufacturingSwipeDirection,
+      setManufacturingView: props.setManufacturingView,
       onCncQuickStatusChange: props.onCncQuickStatusChange,
       openCreateManufacturingModal: props.openCreateManufacturingModal,
       openEditManufacturingModal: props.openEditManufacturingModal,

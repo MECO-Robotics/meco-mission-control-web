@@ -128,6 +128,7 @@ export interface WorkspaceContentPanelsProps {
   rosterMentors: BootstrapPayload["members"];
   showCncMentorQuickActions: boolean;
   manufacturingView: ManufacturingViewTab;
+  setManufacturingView: Dispatch<SetStateAction<ManufacturingViewTab>>;
   inventoryView: InventoryViewTab;
   rosterView: RosterViewTab;
   riskManagementView: RiskManagementViewTab;
@@ -200,7 +201,7 @@ export function WorkspaceContentPanels({
   const manufacturingSwipeDirection = getSwipeDirection(
     previousManufacturingViewRef.current,
     manufacturingView,
-    ["cnc", "prints", "fabrication"],
+    ["all", "cnc", "prints", "fabrication"],
   );
   const inventorySwipeDirection = getSwipeDirection(
     previousInventoryViewRef.current,

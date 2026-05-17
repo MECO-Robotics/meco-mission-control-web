@@ -1,5 +1,6 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { ManufacturingItemRecord } from "@/types/recordsInventory";
+import type { ManufacturingViewTab } from "@/lib/workspaceNavigation";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
 import { ManufacturingQueueView } from "./ManufacturingQueueView";
@@ -11,10 +12,12 @@ interface CncViewProps {
   membersById: MembersById;
   onCreate: () => void;
   onEdit: (item: ManufacturingItemRecord) => void;
+  onProcessFilterChange?: (value: ManufacturingViewTab) => void;
   onQuickStatusChange?: (
     item: ManufacturingItemRecord,
     status: ManufacturingItemRecord["status"],
   ) => Promise<void>;
+  processFilterValue?: ManufacturingViewTab;
   showMentorQuickActions?: boolean;
   subsystemsById: SubsystemsById;
 }
@@ -26,7 +29,9 @@ export function CncView({
   membersById,
   onCreate,
   onEdit,
+  onProcessFilterChange,
   onQuickStatusChange,
+  processFilterValue,
   showMentorQuickActions = false,
   subsystemsById,
 }: CncViewProps) {
@@ -40,7 +45,9 @@ export function CncView({
       membersById={membersById}
       onCreate={onCreate}
       onEdit={onEdit}
+      onProcessFilterChange={onProcessFilterChange}
       onQuickStatusChange={onQuickStatusChange}
+      processFilterValue={processFilterValue}
       showMentorQuickActions={showMentorQuickActions}
       showInHouseColumn
       subsystemsById={subsystemsById}

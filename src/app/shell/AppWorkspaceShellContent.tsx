@@ -91,6 +91,7 @@ export function AppWorkspaceShellContent({
       selectedMemberId={c.selectedMemberId}
       setIsAddPersonOpen={c.setIsAddPersonOpen}
       setIsEditPersonOpen={c.setIsEditPersonOpen}
+      setManufacturingView={c.setManufacturingView}
       setMemberEditDraft={c.setMemberEditDraft}
       setMemberForm={c.setMemberForm}
       setActivePersonFilter={c.setActivePersonFilter}

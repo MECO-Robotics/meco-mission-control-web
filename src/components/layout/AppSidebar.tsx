@@ -2,6 +2,7 @@ import { type MouseEvent as ReactMouseEvent } from "react";
 
 import {
   type InventoryViewTab,
+  type ManufacturingViewTab,
   type NavigationSection,
   type NavigationSubItemId,
   type NavigationTarget,
@@ -53,6 +54,7 @@ interface AppSidebarProps {
   selectedProjectId: string | null;
   selectedSeasonId: string | null;
   inventoryView: InventoryViewTab;
+  manufacturingView?: ManufacturingViewTab;
   reportsView: ReportsViewTab;
   rosterView: RosterViewTab;
   riskManagementView: RiskManagementViewTab;
@@ -92,6 +94,7 @@ export function AppSidebar({
   selectedProjectId,
   selectedSeasonId,
   inventoryView,
+  manufacturingView = "all",
   reportsView,
   rosterView,
   riskManagementView,
@@ -119,6 +122,7 @@ export function AppSidebar({
     activeTab,
     favoriteViewIds,
     inventoryView,
+    manufacturingView,
     isRobotProject,
     items,
     reportsView,
