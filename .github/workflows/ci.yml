@@ -8,6 +8,7 @@ on:
       - main
     paths:
       - ".github/workflows/ci.yml"
+      - ".github/workflows/codex-automerge.yml"
       - ".github/workflows/deploy-vps.yml"
       - "deploy/**"
       - "docs/**"
@@ -34,6 +35,7 @@ on:
       - "hotfix/**"
     paths:
       - ".github/workflows/ci.yml"
+      - ".github/workflows/codex-automerge.yml"
       - ".github/workflows/deploy-vps.yml"
       - "deploy/**"
       - "docs/**"
