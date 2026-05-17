@@ -199,7 +199,7 @@ export function useWorkLogsViewState({
     const actions =
       (bootstrap.actions ?? []).length > 0
         ? (bootstrap.actions ?? [])
-        : buildLegacyActivityActions(workLogs, taskById);
+        : buildLegacyActivityActions(bootstrap.workLogs, taskById);
     const scopedActions =
       activePersonFilter.length === 0
         ? actions
@@ -228,7 +228,7 @@ export function useWorkLogsViewState({
           );
 
     return [...filteredActions].sort((left, right) => right.timestamp.localeCompare(left.timestamp));
-  }, [activePersonFilter, bootstrap.actions, membersById, search, subsystemsById, taskById, workLogs]);
+  }, [activePersonFilter, bootstrap.actions, bootstrap.workLogs, membersById, search, subsystemsById, taskById]);
 
   const workLogPagination = useWorkspacePagination<WorkLogRecord>(workLogs);
   const activityPagination = useWorkspacePagination<AuditActionRecord>(activityActions);
