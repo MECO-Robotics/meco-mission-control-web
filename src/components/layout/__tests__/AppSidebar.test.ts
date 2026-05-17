@@ -330,6 +330,13 @@ describe("AppSidebar", () => {
     expect(markup).toContain("Add part");
   });
 
+  it("uses one shared underline for the Home, Add, and Today quick actions", () => {
+    const css = readFileSync("src/app/styles/shell/sidebar-quick-actions.css", "utf8");
+
+    expect(css).toMatch(/\.sidebar-quick-actions::after\s*\{/);
+    expect(css).not.toMatch(/\.sidebar-quick-action::after\s*\{/);
+  });
+
   it("renders the Reports section with requested report subtabs", () => {
     const markup = renderSidebar([
       {

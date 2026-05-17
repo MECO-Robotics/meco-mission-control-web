@@ -11,6 +11,23 @@
   padding-inline: 0.4rem;
 }
 
+.sidebar-quick-actions::after {
+  position: absolute;
+  right: 0.72rem;
+  bottom: 0.23rem;
+  left: 0.72rem;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(15, 28, 52, 0.16);
+  content: "";
+  transition: background-color 0.18s ease;
+}
+
+.sidebar-quick-actions[data-collapsed="true"]::after {
+  right: 0.4rem;
+  left: 0.4rem;
+}
+
 .sidebar-quick-action {
   position: relative;
   display: inline-flex;
@@ -29,21 +46,6 @@
   text-decoration: none;
 }
 
-.sidebar-quick-action::after {
-  position: absolute;
-  left: 50%;
-  bottom: -0.23rem;
-  width: 1.25rem;
-  height: 2px;
-  border-radius: 999px;
-  background: rgba(15, 28, 52, 0.16);
-  content: "";
-  transform: translateX(-50%);
-  transition:
-    background-color 0.18s ease,
-    width 0.18s ease;
-}
-
 .sidebar-quick-action:hover,
 .sidebar-quick-action:focus-visible,
 .sidebar-add-menu[open] > .sidebar-quick-action {
@@ -52,11 +54,10 @@
   color: var(--meco-blue);
 }
 
-.sidebar-quick-action:hover::after,
-.sidebar-quick-action:focus-visible::after,
-.sidebar-quick-action[data-active="true"]::after,
-.sidebar-add-menu[open] > .sidebar-quick-action::after {
-  width: 1.55rem;
+.sidebar-quick-actions:has(.sidebar-quick-action:hover)::after,
+.sidebar-quick-actions:has(.sidebar-quick-action:focus-visible)::after,
+.sidebar-quick-actions:has(.sidebar-quick-action[data-active="true"])::after,
+.sidebar-quick-actions:has(.sidebar-add-menu[open] > .sidebar-quick-action)::after {
   background: var(--meco-blue);
 }
 
