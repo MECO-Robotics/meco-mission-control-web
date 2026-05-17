@@ -1,0 +1,61 @@
+.profile-view-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.12rem;
+  padding: 0.13rem;
+  border: 1px solid var(--border-base);
+  border-radius: 999px;
+  background: var(--bg-panel);
+}
+
+.profile-view-toggle-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-copy);
+  cursor: pointer;
+}
+
+.profile-view-toggle-option .profile-avatar {
+  width: 1.55rem;
+  height: 1.55rem;
+  font-size: 0.84rem;
+}
+
+.profile-view-toggle-option:hover,
+.profile-view-toggle-option:focus-visible {
+  background: var(--bg-row-alt);
+  color: var(--text-title);
+  outline: none;
+}
+
+.profile-view-toggle-option.is-active {
+  background: rgba(22, 71, 142, 0.1);
+  color: var(--meco-blue);
+}
+
+.profile-view-avatar-button[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.profile-view-avatar-button[aria-disabled="true"]:hover {
+  background: transparent;
+  color: var(--text-copy);
+}
+
+.page-shell.dark-mode .profile-view-toggle {
+  border-color: rgba(148, 163, 184, 0.22);
+  background: rgba(15, 23, 42, 0.82);
+}
+
+.page-shell.dark-mode .profile-view-toggle-option.is-active {
+  background: rgba(96, 165, 250, 0.18);
+  color: #dbeafe;
+}

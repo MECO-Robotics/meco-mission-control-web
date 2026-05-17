@@ -108,7 +108,7 @@ describe("AppSidebar", () => {
     expect(markup).not.toContain('aria-label="Refresh workspace"');
   });
 
-  it("uses the signed-in profile control as the My View toggle", () => {
+  it("renders My View as a group-to-profile toggle with the avatar on the right", () => {
     const inactiveMarkup = renderSidebar(
       [
         {
@@ -137,17 +137,25 @@ describe("AppSidebar", () => {
       },
     );
 
+    expect(inactiveMarkup).toContain("profile-view-toggle");
+    expect(inactiveMarkup.indexOf("profile-view-group-icon")).toBeLessThan(
+      inactiveMarkup.indexOf("profile-view-avatar-button"),
+    );
     expect(inactiveMarkup).toMatch(
-      /<button(?=[^>]*class="[^"]*profile-trigger[^"]*app-profile-my-view-button)(?=[^>]*aria-label="Show My View filter")(?=[^>]*aria-pressed="false")[^>]*>/,
+      /<button(?=[^>]*class="[^"]*profile-view-group-button[^"]*is-active)(?=[^>]*aria-label="All workspace members")(?=[^>]*aria-pressed="true")[^>]*>/,
+    );
+    expect(inactiveMarkup).toMatch(
+      /<button(?=[^>]*class="[^"]*profile-view-avatar-button)(?=[^>]*aria-label="Show My View filter")(?=[^>]*aria-pressed="false")[^>]*>/,
     );
     expect(inactiveMarkup).toContain("profile-view-group-icon");
+    expect(inactiveMarkup).toContain("profile-avatar-fallback");
 
     expect(activeMarkup).toMatch(
-      /<button(?=[^>]*class="[^"]*profile-trigger[^"]*app-profile-my-view-button)(?=[^>]*aria-label="Clear My View filter")(?=[^>]*aria-pressed="true")[^>]*>/,
+      /<button(?=[^>]*class="[^"]*profile-view-avatar-button[^"]*is-active)(?=[^>]*aria-label="Clear My View filter")(?=[^>]*aria-pressed="true")[^>]*>/,
     );
     expect(activeMarkup).toContain("Showing Ava Chen");
     expect(activeMarkup).toContain("profile-avatar-fallback");
-    expect(activeMarkup).not.toContain("profile-view-group-icon");
+    expect(activeMarkup).toContain("profile-view-group-icon");
   });
 
   it("uses an L avatar bubble for local dev-bypass profile state", () => {
@@ -221,7 +229,7 @@ describe("AppSidebar", () => {
     );
 
     expect(markup).toMatch(
-      /<button(?=[^>]*class="[^"]*profile-trigger[^"]*app-profile-my-view-button)(?=[^>]*aria-disabled="true")(?![^>]*\sdisabled(?:=|\s|>))[^>]*>/,
+      /<button(?=[^>]*class="[^"]*profile-view-avatar-button)(?=[^>]*aria-disabled="true")(?![^>]*\sdisabled(?:=|\s|>))[^>]*>/,
     );
   });
 
