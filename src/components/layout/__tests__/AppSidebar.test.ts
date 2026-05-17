@@ -86,7 +86,7 @@ describe("AppSidebar", () => {
     picture: null,
   };
 
-  it("renders the profile assembly above the sidebar collapse control", () => {
+  it("renders the icon-only fold control to the right of the profile switch", () => {
     const markup = renderSidebar(
       [
         {
@@ -101,7 +101,12 @@ describe("AppSidebar", () => {
     );
 
     expect(markup.indexOf("profile-menu")).toBeGreaterThan(-1);
-    expect(markup.indexOf("profile-menu")).toBeLessThan(markup.indexOf("Collapse sidebar"));
+    expect(markup.indexOf("profile-view-toggle")).toBeLessThan(markup.indexOf("sidebar-profile-fold-button"));
+    expect(markup.indexOf("sidebar-profile-fold-button")).toBeLessThan(markup.indexOf("sidebar-quick-actions"));
+    expect(markup).toMatch(
+      /<button(?=[^>]*class="[^"]*sidebar-profile-fold-button)(?=[^>]*aria-label="Collapse sidebar")[^>]*>[\s\S]*lucide-arrow-left-to-line[\s\S]*<\/button>/,
+    );
+    expect(markup).not.toContain('<span class="sidebar-tab-label">Collapse sidebar</span>');
     expect(markup).toContain("Theme mode");
     expect(markup).toContain("Sign out");
     expect(markup).not.toContain('aria-label="Refresh workspace"');
@@ -314,7 +319,7 @@ describe("AppSidebar", () => {
 
     expect(markup.indexOf("sidebar-profile-header")).toBeGreaterThan(-1);
     expect(markup.indexOf("sidebar-profile-header")).toBeLessThan(markup.indexOf("sidebar-quick-actions"));
-    expect(markup.indexOf("sidebar-quick-actions")).toBeLessThan(markup.indexOf("Collapse sidebar"));
+    expect(markup.indexOf("sidebar-profile-fold-button")).toBeLessThan(markup.indexOf("sidebar-quick-actions"));
     expect(markup).toMatch(
       /<button(?=[^>]*class="[^"]*sidebar-quick-action[^"]*sidebar-quick-action-home)(?=[^>]*aria-label="Home")(?=[^>]*data-active="true")[^>]*>/,
     );

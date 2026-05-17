@@ -19,18 +19,48 @@
   z-index: 1210;
   display: flex;
   align-items: center;
+  gap: 0.34rem;
   justify-content: flex-start;
   flex: 0 0 auto;
   padding: 0.45rem 0.1rem 0.18rem 0.7rem;
 }
 
 .sidebar-profile-header[data-collapsed="true"] {
-  justify-content: center;
-  padding-inline: 0.5rem;
+  gap: 0.22rem;
+  justify-content: flex-start;
+  padding-inline: 0.28rem;
 }
 
 .sidebar-profile-header .profile-menu {
   display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.sidebar-profile-fold-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  flex: 0 0 1.85rem;
+  padding: 0;
+  border: 1px solid var(--border-base);
+  border-radius: 999px;
+  background: var(--bg-panel);
+  color: var(--text-copy);
+  cursor: pointer;
+}
+
+.sidebar-profile-fold-button:hover,
+.sidebar-profile-fold-button:focus-visible {
+  outline: none;
+  border-color: rgba(22, 71, 142, 0.3);
+  background: var(--bg-row-alt);
+  color: var(--meco-blue);
+}
+
+.sidebar-profile-fold-button svg {
+  display: block;
 }
 
 .sidebar-profile-header .profile-trigger[role="img"] {

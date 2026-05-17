@@ -3,6 +3,7 @@ import {
   useMemo,
   type MouseEvent as ReactMouseEvent,
 } from "react";
+import { ArrowLeftToLine, ArrowRightToLine } from "lucide-react";
 
 import {
   type InventoryViewTab,
@@ -21,7 +22,6 @@ import {
   type ViewTab,
   type WorklogsViewTab,
 } from "@/lib/workspaceNavigation";
-import { IconChevronLeft, IconChevronRight } from "@/components/shared/Icons";
 import type { SessionUser } from "@/lib/auth/types";
 import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
 
@@ -269,6 +269,19 @@ export function AppSidebar({
           sessionUser={sessionUser}
           toggleDarkMode={toggleDarkMode}
         />
+        <button
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="sidebar-profile-fold-button"
+          onClick={toggleSidebar}
+          title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          type="button"
+        >
+          {isCollapsed ? (
+            <ArrowRightToLine aria-hidden="true" size={15} strokeWidth={2} />
+          ) : (
+            <ArrowLeftToLine aria-hidden="true" size={15} strokeWidth={2} />
+          )}
+        </button>
       </div>
       <nav aria-label="Workspace views" className="sidebar" data-collapsed={isCollapsed ? "true" : "false"}>
         <AppSidebarQuickActions
@@ -280,21 +293,6 @@ export function AppSidebar({
           onCreateTask={onCreateTask}
           onSelectTarget={onSelectTarget}
         />
-
-        <button
-          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="tab"
-          onClick={toggleSidebar}
-          title="Toggle sidebar"
-          type="button"
-        >
-          <span className="sidebar-tab-main">
-            <span aria-hidden="true" className="sidebar-tab-icon">
-              {isCollapsed ? <IconChevronRight /> : <IconChevronLeft />}
-            </span>
-            {!isCollapsed ? <span className="sidebar-tab-label">Collapse sidebar</span> : null}
-          </span>
-        </button>
 
         <AppSidebarSections
           activeSection={activeSection}
