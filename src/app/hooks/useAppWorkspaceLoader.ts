@@ -1,5 +1,7 @@
 import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
 import type { AppWorkspaceDerived } from "@/app/hooks/useAppWorkspaceDerived";
+import { updateFavoriteView } from "@/lib/auth/navigationFavorites";
+import type { NavigationSubItemId } from "@/lib/workspaceNavigation";
 import { useAppWorkspaceLoaderActions } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderActions";
 import { useAppWorkspaceLoaderUnauthorized } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderUnauthorized";
 import { useAppWorkspaceLoaderUploads } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderUploads";
@@ -25,6 +27,26 @@ export function useAppWorkspaceLoader(
     toggleMyView,
   } = useAppWorkspaceLoaderActions(state, model);
   const loadWorkspace = useAppWorkspaceLoaderWorkspace(state, model, handleUnauthorized, selectMember);
+  const toggleFavoriteView = async (
+    viewId: NavigationSubItemId,
+    isFavorite: boolean,
+  ) => {
+    state.setDataMessage(null);
+
+    try {
+      const favoriteViews = await updateFavoriteView(
+        viewId,
+        isFavorite,
+        handleUnauthorized,
+      );
+      state.setBootstrap((current) => ({
+        ...current,
+        favoriteViews,
+      }));
+    } catch (error) {
+      state.setDataMessage(error instanceof Error ? error.message : String(error));
+    }
+  };
 
   return {
     clearDataMessage,
@@ -36,6 +58,7 @@ export function useAppWorkspaceLoader(
     requestMemberPhotoUpload,
     requestPhotoUpload,
     selectMember,
+    toggleFavoriteView,
     toggleMyView,
   };
 }

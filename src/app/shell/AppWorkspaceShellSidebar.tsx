@@ -1,4 +1,5 @@
 import type { AppWorkspaceShellSidebarController } from "@/app/hooks/useAppWorkspaceController";
+import { isNavigationSubItemId } from "@/lib/workspaceNavigation";
 
 import { AppSidebar } from "@/app/shell/workspaceShell";
 
@@ -54,17 +55,31 @@ export function AppWorkspaceShellSidebar({
   return (
     <AppSidebar
       activeTab={c.activeTab}
+      favoriteViewIds={(c.bootstrap.favoriteViews ?? [])
+        .map((favorite) => favorite.viewId)
+        .filter(isNavigationSubItemId)}
+      handleSignOut={c.handleSignOut}
       items={c.navigationItems}
+      isDarkMode={c.isDarkMode}
+      isMyViewActive={c.isMyViewActive}
       onSelectTarget={handleSelectNavigationTarget}
       isCollapsed={c.isSidebarCollapsed}
+      myViewMemberName={c.signedInMember?.name ?? null}
+      onCreateSeason={c.handleCreateSeason}
+      onSelectSeason={c.setSelectedSeasonId}
+      onToggleMyView={c.toggleMyView}
       toggleSidebar={c.toggleSidebar}
       projects={c.projectsInSelectedSeason}
       selectedProjectId={c.selectedProjectId}
+      selectedSeasonId={c.selectedSeasonId}
       inventoryView={c.inventoryView}
       rosterView={c.rosterView}
       reportsView={c.reportsView}
       riskManagementView={c.riskManagementView}
+      seasons={c.bootstrap.seasons}
+      sessionUser={c.sessionUser}
       taskView={c.taskView}
+      toggleDarkMode={c.toggleDarkMode}
       worklogsView={c.worklogsView}
       onSelectProject={c.setSelectedProjectId}
       onCreateRobot={c.handleCreateRobot}

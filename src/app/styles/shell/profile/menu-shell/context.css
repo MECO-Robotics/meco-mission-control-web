@@ -3,8 +3,7 @@
   border-color: var(--border-base);
 }
 
-.profile-menu:hover .profile-menu-popover,
-.profile-menu:focus-within .profile-menu-popover {
+.profile-menu:hover .profile-menu-popover {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);

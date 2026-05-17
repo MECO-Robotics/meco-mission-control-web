@@ -21,27 +21,41 @@ import {
   type ViewTab,
   type WorklogsViewTab,
 } from "@/lib/workspaceNavigation";
-import type { ProjectRecord } from "@/types/recordsOrganization";
 import { IconChevronLeft, IconChevronRight } from "@/components/shared/Icons";
+import type { SessionUser } from "@/lib/auth/types";
+import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
 
 import { AppSidebarPopups, ADD_ROBOT_PROJECT_VALUE } from "./AppSidebarPopups";
 import { AppSidebarProjectFooter } from "./AppSidebarProjectFooter";
 import { AppSidebarSections, type SidebarSubItemModel } from "./AppSidebarSections";
+import { AppProfileAssembly } from "./AppProfileAssembly";
 import { useAppSidebarPopupState } from "./useAppSidebarPopupState";
 
 interface AppSidebarProps {
   activeTab: ViewTab;
+  favoriteViewIds: readonly NavigationSubItemId[];
+  handleSignOut: () => void;
   items: import("@/lib/workspaceNavigation").NavigationItem[];
+  isDarkMode: boolean;
+  isMyViewActive: boolean;
   onSelectTarget: (target: NavigationTarget, options?: { keepSidebarOpen?: boolean }) => void;
   isCollapsed: boolean;
+  myViewMemberName: string | null;
+  onCreateSeason: () => void;
+  onSelectSeason: (seasonId: string | null) => void;
+  onToggleMyView: () => void;
   toggleSidebar: () => void;
   projects: ProjectRecord[];
   selectedProjectId: string | null;
+  selectedSeasonId: string | null;
   inventoryView: InventoryViewTab;
   reportsView: ReportsViewTab;
   rosterView: RosterViewTab;
   riskManagementView: RiskManagementViewTab;
+  seasons: SeasonRecord[];
+  sessionUser: SessionUser | null;
   taskView: TaskViewTab;
+  toggleDarkMode: () => void;
   worklogsView: WorklogsViewTab;
   onSelectProject: (projectId: string | null) => void;
   onCreateRobot: () => void;
@@ -50,17 +64,29 @@ interface AppSidebarProps {
 
 export function AppSidebar({
   activeTab,
+  favoriteViewIds,
+  handleSignOut,
   items,
+  isDarkMode,
+  isMyViewActive,
   onSelectTarget,
   isCollapsed,
+  myViewMemberName,
+  onCreateSeason,
+  onSelectSeason,
+  onToggleMyView,
   toggleSidebar,
   projects,
   selectedProjectId,
+  selectedSeasonId,
   inventoryView,
   reportsView,
   rosterView,
   riskManagementView,
+  seasons,
+  sessionUser,
   taskView,
+  toggleDarkMode,
   worklogsView,
   onSelectProject,
   onCreateRobot,
@@ -153,6 +179,15 @@ export function AppSidebar({
       }),
     [getSectionSubItems],
   );
+  const favoriteSubItems = useMemo(() => {
+    const requestedFavoriteIds = new Set(favoriteViewIds);
+    return NAVIGATION_SUB_ITEMS
+      .filter((subItem) => requestedFavoriteIds.has(subItem.id))
+      .map((subItem) => ({
+        ...subItem,
+        isEnabled: isSubItemEnabled(subItem.id),
+      }));
+  }, [favoriteViewIds, isSubItemEnabled]);
 
   const handleSectionClick = (section: NavigationSection, event: ReactMouseEvent<HTMLButtonElement>) => {
     const subItems = getSectionSubItems(section);
@@ -215,6 +250,21 @@ export function AppSidebar({
 
   return (
     <div className="sidebar-shell" data-collapsed={isCollapsed ? "true" : "false"} ref={sidebarShellRef}>
+      <div className="sidebar-profile-header" data-collapsed={isCollapsed ? "true" : "false"}>
+        <AppProfileAssembly
+          handleSignOut={handleSignOut}
+          isDarkMode={isDarkMode}
+          isMyViewActive={isMyViewActive}
+          myViewMemberName={myViewMemberName}
+          onCreateSeason={onCreateSeason}
+          onSelectSeason={onSelectSeason}
+          onToggleMyView={onToggleMyView}
+          seasons={seasons}
+          selectedSeasonId={selectedSeasonId}
+          sessionUser={sessionUser}
+          toggleDarkMode={toggleDarkMode}
+        />
+      </div>
       <nav aria-label="Workspace views" className="sidebar" data-collapsed={isCollapsed ? "true" : "false"}>
         <button
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -238,6 +288,7 @@ export function AppSidebar({
           isCollapsed={isCollapsed}
           onSectionClick={handleSectionClick}
           onSubItemSelect={handleSubItemSelect}
+          favoriteSubItems={favoriteSubItems}
           sectionModels={sectionModels}
         />
 

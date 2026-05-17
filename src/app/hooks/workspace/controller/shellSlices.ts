@@ -18,27 +18,18 @@ export type AppWorkspaceShellFrameController = Pick<
 export const shellTopbarModelKeys = [
   "activeTab",
   "bootstrap",
-  "handleSignOut",
   "inventoryView",
   "isDarkMode",
-  "isLoadingData",
-  "isMyViewActive",
   "isSidebarCollapsed",
-  "loadWorkspace",
   "manufacturingView",
   "reportsView",
   "riskManagementView",
   "rosterView",
-  "selectedSeasonId",
-  "sessionUser",
-  "setSelectedSeasonId",
-  "signedInMember",
   "taskView",
-  "toggleDarkMode",
-  "toggleMyView",
+  "toggleFavoriteView",
   "worklogsView",
 ] as const;
-export const shellTopbarRosterActionKeys = ["handleCreateSeason"] as const;
+export const shellTopbarRosterActionKeys = [] as const;
 export type AppWorkspaceShellTopbarController = Pick<
   AppWorkspaceModel,
   (typeof shellTopbarModelKeys)[number]
@@ -47,8 +38,12 @@ export type AppWorkspaceShellTopbarController = Pick<
 
 export const shellSidebarModelKeys = [
   "activeTab",
+  "bootstrap",
+  "handleSignOut",
   "handleSidebarTabSelect",
   "inventoryView",
+  "isDarkMode",
+  "isMyViewActive",
   "isSidebarCollapsed",
   "manufacturingView",
   "navigationItems",
@@ -57,19 +52,26 @@ export const shellSidebarModelKeys = [
   "riskManagementView",
   "rosterView",
   "selectedProjectId",
+  "selectedSeasonId",
   "setInventoryView",
   "setManufacturingView",
   "setReportsView",
   "setRiskManagementView",
   "setRosterView",
   "setSelectedProjectId",
+  "setSelectedSeasonId",
   "setTaskView",
   "setWorklogsView",
+  "sessionUser",
+  "signedInMember",
   "taskView",
+  "toggleDarkMode",
+  "toggleMyView",
   "toggleSidebar",
   "worklogsView",
 ] as const;
 export const shellSidebarRosterActionKeys = [
+  "handleCreateSeason",
   "handleCreateRobot",
   "handleEditSelectedRobot",
 ] as const;

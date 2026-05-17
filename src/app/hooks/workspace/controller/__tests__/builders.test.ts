@@ -97,7 +97,7 @@ describe("workspace controller builders", () => {
 
     expect(shell.frame.isDarkMode).toBe(true);
     expect(shell.sidebar.taskView).toBe("queue");
-    expect(shell.topbar.handleCreateSeason).toBe(rosterActions.handleCreateSeason);
+    expect(shell.sidebar.handleCreateSeason).toBe(rosterActions.handleCreateSeason);
     expect(shell.overlayLayer.handleRobotProjectSubmit).toBe(
       rosterActions.handleRobotProjectSubmit,
     );

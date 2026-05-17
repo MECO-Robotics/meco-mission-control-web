@@ -1,0 +1,49 @@
+.sidebar-shell {
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+  border-right: 1px solid var(--border-base);
+  background: linear-gradient(180deg, var(--bg-row-alt), var(--bg-panel));
+}
+
+.sidebar {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  border-right: 0;
+  background: transparent;
+}
+
+.sidebar-profile-header {
+  position: relative;
+  z-index: 1210;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex: 0 0 auto;
+  padding: 0.45rem 0.1rem 0.18rem 0.7rem;
+}
+
+.sidebar-profile-header[data-collapsed="true"] {
+  justify-content: center;
+  padding-inline: 0.5rem;
+}
+
+.sidebar-profile-header .profile-menu {
+  display: inline-flex;
+}
+
+.sidebar-profile-header .profile-trigger[role="img"] {
+  cursor: default;
+}
+
+.sidebar-profile-header .profile-menu-popover {
+  top: calc(100% + 0.35rem);
+  right: auto;
+  left: 0;
+}
+
+.sidebar-profile-header[data-collapsed="true"] .profile-menu-popover {
+  top: 0;
+  left: calc(100% + 0.45rem);
+}

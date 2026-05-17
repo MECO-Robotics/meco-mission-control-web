@@ -1,4 +1,5 @@
 import type { MouseEvent as ReactMouseEvent } from "react";
+import { Star } from "lucide-react";
 import { IconChevronRight } from "@/components/shared/Icons";
 import {
   type NavigationSection,
@@ -23,6 +24,7 @@ interface AppSidebarSectionsProps {
   activeSection: NavigationSection;
   activeSubItemId: import("@/lib/workspaceNavigation").NavigationSubItemId | null;
   expandedSection: NavigationSection;
+  favoriteSubItems: SidebarSubItemModel[];
   isCollapsed: boolean;
   onSectionClick: (section: NavigationSection, event: ReactMouseEvent<HTMLButtonElement>) => void;
   onSubItemSelect: (
@@ -36,13 +38,47 @@ export function AppSidebarSections({
   activeSection,
   activeSubItemId,
   expandedSection,
+  favoriteSubItems,
   isCollapsed,
   onSectionClick,
   onSubItemSelect,
   sectionModels,
 }: AppSidebarSectionsProps) {
+  const renderSubItem = (subItem: SidebarSubItemModel) => (
+    <button
+      className="sidebar-subtab"
+      data-active={activeSubItemId === subItem.id ? "true" : "false"}
+      data-enabled={subItem.isEnabled ? "true" : "false"}
+      disabled={!subItem.isEnabled}
+      key={subItem.id}
+      onClick={() => onSubItemSelect(subItem.target, subItem.isEnabled)}
+      type="button"
+    >
+      <span aria-hidden="true" className="sidebar-subtab-icon">
+        {subItemIcons[subItem.id]}
+      </span>
+      <span className="sidebar-subtab-label">{subItem.label}</span>
+    </button>
+  );
+
   return (
     <>
+      {!isCollapsed && favoriteSubItems.length > 0 ? (
+        <div className="sidebar-section-group sidebar-favorites-group">
+          <div className="tab sidebar-section-toggle sidebar-favorites-heading">
+            <span className="sidebar-tab-main">
+              <span aria-hidden="true" className="sidebar-tab-icon">
+                <Star size={14} strokeWidth={2} />
+              </span>
+              <span className="sidebar-tab-label">Favorites</span>
+            </span>
+          </div>
+          <div className="sidebar-subtab-list sidebar-favorites-list">
+            {favoriteSubItems.map(renderSubItem)}
+          </div>
+        </div>
+      ) : null}
+
       {sectionModels.map(({ section, subItems, isEnabled: isSectionEnabled }) => {
         const isExpanded = !isCollapsed && expandedSection === section;
 
@@ -77,22 +113,7 @@ export function AppSidebarSections({
 
             {isExpanded ? (
               <div className="sidebar-subtab-list">
-                {subItems.map((subItem) => (
-                  <button
-                    className="sidebar-subtab"
-                    data-active={activeSubItemId === subItem.id ? "true" : "false"}
-                    data-enabled={subItem.isEnabled ? "true" : "false"}
-                    disabled={!subItem.isEnabled}
-                    key={subItem.id}
-                    onClick={() => onSubItemSelect(subItem.target, subItem.isEnabled)}
-                    type="button"
-                  >
-                    <span aria-hidden="true" className="sidebar-subtab-icon">
-                      {subItemIcons[subItem.id]}
-                    </span>
-                    <span className="sidebar-subtab-label">{subItem.label}</span>
-                  </button>
-                ))}
+                {subItems.map(renderSubItem)}
               </div>
             ) : null}
           </div>

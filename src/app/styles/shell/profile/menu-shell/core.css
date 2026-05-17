@@ -42,6 +42,34 @@
   cursor: default;
 }
 
+.user-chip.profile-trigger.app-profile-my-view-button {
+  border: 1px solid var(--border-base);
+  border-radius: 999px;
+  background: var(--bg-panel);
+  color: var(--text-copy);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.user-chip.profile-trigger.app-profile-my-view-button:hover,
+.user-chip.profile-trigger.app-profile-my-view-button:focus-visible {
+  border-color: rgba(22, 71, 142, 0.3);
+  background: var(--bg-row-alt);
+  color: var(--text-title);
+  outline: none;
+}
+
+.user-chip.profile-trigger.app-profile-my-view-button.is-active {
+  border-color: rgba(22, 71, 142, 0.36);
+  background: rgba(22, 71, 142, 0.08);
+  color: var(--meco-blue);
+}
+
+.user-chip.profile-trigger.app-profile-my-view-button[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .profile-avatar {
   width: 2rem;
   height: 2rem;
@@ -60,11 +88,24 @@
   font-weight: 700;
 }
 
+.profile-view-group-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 28, 52, 0.06);
+  color: var(--official-blue);
+}
+
 .page-shell.dark-mode .profile-avatar-fallback {
   background: rgba(96, 165, 250, 0.2);
   border: 1px solid rgba(96, 165, 250, 0.28);
   color: #dbeafe;
   box-shadow: 0 8px 18px rgba(2, 6, 23, 0.28);
+}
+
+.page-shell.dark-mode .profile-view-group-icon {
+  background: rgba(148, 163, 184, 0.16);
+  color: #dbeafe;
 }
 
 .profile-menu-popover {

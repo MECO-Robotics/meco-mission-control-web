@@ -15,6 +15,13 @@ import type {
 import type { DesignIterationRecord, QaFindingRecord, QaReportRecord, ReportFindingRecord, ReportRecord, RiskRecord, TestFindingRecord, TestResultRecord } from "./recordsReporting";
 import type { DisciplineRecord, MechanismRecord, MemberRecord, ProjectRecord, SeasonRecord, SubsystemRecord, WorkstreamRecord } from "./recordsOrganization";
 
+export interface FavoriteViewRecord {
+  id: string;
+  userKey: string;
+  viewId: string;
+  createdAt: string;
+}
+
 export interface BootstrapPayload {
   seasons: SeasonRecord[];
   projects: ProjectRecord[];
@@ -48,6 +55,7 @@ export interface BootstrapPayload {
   qaReviews?: QaReviewRecord[];
   escalations?: EscalationRecord[];
   actions?: AuditActionRecord[];
+  favoriteViews?: FavoriteViewRecord[];
 }
 
 export type PlatformBootstrapPayload = BootstrapPayload;

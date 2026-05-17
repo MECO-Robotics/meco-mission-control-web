@@ -28,10 +28,6 @@
     min-width: 112px;
   }
 
-  .app-topbar-right {
-    padding-inline: 0.5rem;
-  }
-
   .queue-table.queue-table-header {
     display: none;
   }
