@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 
 export type ViewTab =
   | "home"
-  | "today"
   | "tasks"
   | "risk-management"
   | "worklogs"

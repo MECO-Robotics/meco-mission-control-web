@@ -42,6 +42,7 @@ interface AppSidebarProps {
   onSelectTarget: (target: NavigationTarget, options?: { keepSidebarOpen?: boolean }) => void;
   isCollapsed: boolean;
   myViewMemberName: string | null;
+  notificationCount: number;
   onCreateMilestone: () => void;
   onCreatePart: () => void;
   onCreateQaReport: () => void;
@@ -77,6 +78,7 @@ export function AppSidebar({
   onSelectTarget,
   isCollapsed,
   myViewMemberName,
+  notificationCount,
   onCreateMilestone,
   onCreatePart,
   onCreateQaReport,
@@ -292,6 +294,7 @@ export function AppSidebar({
           onCreatePart={onCreatePart}
           onCreateQaReport={onCreateQaReport}
           onCreateTask={onCreateTask}
+          notificationCount={notificationCount}
           onSelectTarget={onSelectTarget}
         />
 

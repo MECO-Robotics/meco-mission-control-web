@@ -24,6 +24,7 @@ function renderSidebar(
     isCollapsed?: boolean;
     isMyViewActive?: boolean;
     myViewMemberName?: string | null;
+    notificationCount?: number;
     projects?: ProjectRecord[];
     riskManagementView?: "kanban" | "metrics";
     selectedProjectId?: string | null;
@@ -42,6 +43,7 @@ function renderSidebar(
       isMyViewActive: options?.isMyViewActive ?? false,
       isCollapsed: options?.isCollapsed ?? false,
       myViewMemberName: options?.myViewMemberName === undefined ? "Ava Chen" : options.myViewMemberName,
+      notificationCount: options?.notificationCount ?? 0,
       onCreateSeason: jest.fn(),
       onCreateMilestone: jest.fn(),
       onCreatePart: jest.fn(),
@@ -441,7 +443,7 @@ describe("AppSidebar", () => {
     );
   });
 
-  it("renders Home, Add, and Today controls below the profile", () => {
+  it("renders Home, Add, and Notifications controls below the profile", () => {
     const markup = renderSidebar(
       [
         {
@@ -451,12 +453,6 @@ describe("AppSidebar", () => {
           count: 0,
         },
         {
-          value: "today",
-          label: "Today",
-          icon: React.createElement("span"),
-          count: 3,
-        },
-        {
           value: "tasks",
           label: "Tasks",
           icon: React.createElement("span"),
@@ -464,7 +460,7 @@ describe("AppSidebar", () => {
         },
       ],
       "home",
-      { sessionUser: signedInUser },
+      { notificationCount: 2, sessionUser: signedInUser },
     );
 
     expect(markup.indexOf("sidebar-profile-header")).toBeGreaterThan(-1);
@@ -477,15 +473,18 @@ describe("AppSidebar", () => {
       /<summary(?=[^>]*class="[^"]*sidebar-quick-action[^"]*sidebar-quick-action-add)(?=[^>]*aria-label="Add new")[^>]*>[\s\S]*<\/summary>/,
     );
     expect(markup).toMatch(
-      /<button(?=[^>]*class="[^"]*sidebar-quick-action[^"]*sidebar-quick-action-today)(?=[^>]*aria-label="Today")(?=[^>]*data-active="false")[^>]*>/,
+      /<button(?=[^>]*class="[^"]*sidebar-quick-action[^"]*sidebar-quick-action-notifications)(?=[^>]*aria-label="Notifications \(2\)")(?=[^>]*data-active="false")[^>]*>/,
     );
+    expect(markup).toContain("lucide-bell");
+    expect(markup).toContain("sidebar-quick-action-badge");
     expect(markup).toContain("Add task");
     expect(markup).toContain("Add report");
     expect(markup).toContain("Add milestone");
     expect(markup).toContain("Add part");
+    expect(markup).not.toContain('aria-label="Today"');
   });
 
-  it("uses one shared underline for the Home, Add, and Today quick actions", () => {
+  it("uses one shared underline for the Home, Add, and Notifications quick actions", () => {
     const css = readFileSync("src/app/styles/shell/sidebar-quick-actions.css", "utf8");
 
     expect(css).toMatch(/\.sidebar-quick-actions::after\s*\{/);

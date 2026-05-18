@@ -1,6 +1,6 @@
 import {
+  Bell,
   Boxes,
-  CalendarClock,
   FileText,
   Flag,
   Home,
@@ -19,6 +19,7 @@ interface AppSidebarQuickActionsProps {
   onCreateQaReport: () => void;
   onCreateTask: () => void;
   onSelectTarget: (target: NavigationTarget) => void;
+  notificationCount: number;
 }
 
 interface AddAction {
@@ -35,7 +36,10 @@ export function AppSidebarQuickActions({
   onCreateQaReport,
   onCreateTask,
   onSelectTarget,
+  notificationCount,
 }: AppSidebarQuickActionsProps) {
+  const notificationLabel =
+    notificationCount > 0 ? `Notifications (${notificationCount})` : "Notifications";
   const addActions: AddAction[] = [
     {
       icon: <ListTodo size={14} strokeWidth={2} />,
@@ -98,14 +102,16 @@ export function AppSidebarQuickActions({
       </details>
 
       <button
-        aria-label="Today"
-        className="sidebar-quick-action sidebar-quick-action-today"
-        data-active={activeTab === "today" ? "true" : "false"}
-        onClick={() => onSelectTarget({ tab: "today" })}
-        title="Today"
+        aria-label={notificationLabel}
+        className="sidebar-quick-action sidebar-quick-action-notifications"
+        data-active="false"
+        title={notificationLabel}
         type="button"
       >
-        <CalendarClock aria-hidden="true" size={14} strokeWidth={2} />
+        <Bell aria-hidden="true" size={14} strokeWidth={2} />
+        {notificationCount > 0 ? (
+          <span className="sidebar-quick-action-badge">{notificationCount}</span>
+        ) : null}
       </button>
     </div>
   );

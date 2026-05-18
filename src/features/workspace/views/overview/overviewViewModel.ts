@@ -42,13 +42,6 @@ export interface HomeViewModel {
   issues: OverviewListItem[];
 }
 
-export interface TodayViewModel {
-  dailyActions: OverviewListItem[];
-  verySoonDeadlines: OverviewListItem[];
-  issues: OverviewListItem[];
-  summary: OverviewMetric[];
-}
-
 function dateKey(value: string) {
   return value.includes("T") ? value.slice(0, 10) : value;
 }
@@ -221,42 +214,5 @@ export function buildHomeViewModel(bootstrap: BootstrapPayload, today = new Date
       ...highRisks.map(riskToItem),
       ...blockedTasks.map((task) => taskToItem(task, lookups, today)),
     ].slice(0, 5),
-  };
-}
-
-export function buildTodayViewModel(bootstrap: BootstrapPayload, today = new Date()): TodayViewModel {
-  const lookups = buildLookups(bootstrap);
-  const openTasks = bootstrap.tasks.filter(isOpenTask);
-  const dailyTasks = sortTasksByDueDate(
-    openTasks.filter((task) => daysFromToday(task.dueDate, today) <= 0),
-  );
-  const verySoonTasks = sortTasksByDueDate(
-    openTasks.filter((task) => {
-      const days = daysFromToday(task.dueDate, today);
-      return days > 0 && days <= 3;
-    }),
-  );
-  const verySoonMilestones = bootstrap.milestones.filter((milestone) => {
-    const days = daysFromToday(milestone.startDateTime, today);
-    return days >= 0 && days <= 3;
-  });
-  const highRisks = bootstrap.risks.filter((risk) => risk.severity === "high");
-  const blockedTasks = openTasks.filter(isBlockedTask);
-
-  return {
-    dailyActions: dailyTasks.slice(0, 6).map((task) => taskToItem(task, lookups, today)),
-    verySoonDeadlines: [
-      ...verySoonTasks.map((task) => taskToItem(task, lookups, today)),
-      ...verySoonMilestones.map((milestone) => milestoneToItem(milestone, today)),
-    ].slice(0, 6),
-    issues: [
-      ...highRisks.map(riskToItem),
-      ...blockedTasks.map((task) => taskToItem(task, lookups, today)),
-    ].slice(0, 6),
-    summary: [
-      { id: "daily-actions", label: "Daily action items", value: dailyTasks.length, tone: dailyTasks.length > 0 ? "warning" : "good" },
-      { id: "very-soon", label: "Very soon deadlines", value: verySoonTasks.length + verySoonMilestones.length, tone: "warning" },
-      { id: "issues", label: "Issues", value: highRisks.length + blockedTasks.length, tone: highRisks.length > 0 ? "critical" : "warning" },
-    ],
   };
 }

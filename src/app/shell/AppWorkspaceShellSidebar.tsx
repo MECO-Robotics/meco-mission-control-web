@@ -69,6 +69,7 @@ export function AppWorkspaceShellSidebar({
       onSelectTarget={handleSelectNavigationTarget}
       isCollapsed={c.isSidebarCollapsed}
       myViewMemberName={c.signedInMember?.name ?? null}
+      notificationCount={c.taskEditNotices.length + (c.dataMessage ? 1 : 0)}
       onCreateMilestone={handleCreateMilestone}
       onCreatePart={c.openCreatePartDefinitionModal}
       onCreateQaReport={c.openCreateQaReportModal}

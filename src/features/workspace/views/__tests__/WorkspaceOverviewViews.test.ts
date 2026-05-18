@@ -4,7 +4,7 @@ import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { createBootstrap } from "@/lib/appUtilsTestFixtures";
-import { HomeView, TodayView } from "@/features/workspace/views/overview";
+import { HomeView } from "@/features/workspace/views/overview";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
@@ -116,7 +116,7 @@ describe("Workspace overview views", () => {
     expect(markup).toContain("Finish bellypan CAD");
   });
 
-  it("renders Home with graph-led overview sections distinct from Today", () => {
+  it("renders Home with graph-led overview sections", () => {
     const markup = renderToStaticMarkup(
       React.createElement(HomeView, {
         bootstrap: createOverviewBootstrap(),
@@ -132,22 +132,4 @@ describe("Workspace overview views", () => {
     expect(markup).toContain("overview-donut-chart");
   });
 
-  it("renders Today with daily action items, very soon deadlines, and issues", () => {
-    const markup = renderToStaticMarkup(
-      React.createElement(TodayView, {
-        bootstrap: createOverviewBootstrap(),
-        onOpenTask: jest.fn(),
-        today: fixedToday,
-      }),
-    );
-
-    expect(markup).toContain("<h2>Today</h2>");
-    expect(markup).toContain("Daily action items");
-    expect(markup).toContain("Very soon deadlines");
-    expect(markup).toContain("Issues");
-    expect(markup).toContain("Wire intake sensor");
-    expect(markup).toContain("Review shooter checklist");
-    expect(markup).toContain("Battery cart not inspected");
-    expect(markup).not.toContain("Later media recap");
-  });
 });

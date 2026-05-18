@@ -33,6 +33,7 @@ describe("AppSidebar inventory availability", () => {
         isMyViewActive: false,
         isCollapsed: false,
         myViewMemberName: "Ava Chen",
+        notificationCount: 0,
         onCreateMilestone: jest.fn(),
         onCreatePart: jest.fn(),
         onCreateQaReport: jest.fn(),
