@@ -66,6 +66,7 @@ export function AppSidebarQuickActions({
   return (
     <div className="sidebar-quick-actions" data-collapsed={isCollapsed ? "true" : "false"}>
       <button
+        aria-current={activeTab === "home" ? "page" : undefined}
         aria-label="Home"
         className="sidebar-quick-action sidebar-quick-action-home"
         data-active={activeTab === "home" ? "true" : "false"}

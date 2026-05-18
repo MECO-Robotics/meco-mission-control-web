@@ -122,7 +122,7 @@ export function AppSidebar({
   });
   const activeSection = activeSubItemId
     ? getNavigationSectionFromSubItem(activeSubItemId)
-    : "dashboard";
+    : null;
 
   const {
     compactPopupRef,

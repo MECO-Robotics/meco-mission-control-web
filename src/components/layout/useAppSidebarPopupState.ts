@@ -22,7 +22,7 @@ function clampPopupTop(
 }
 
 interface UseAppSidebarPopupStateArgs {
-  activeSection: NavigationSection;
+  activeSection: NavigationSection | null;
   isCollapsed: boolean;
 }
 
@@ -32,7 +32,7 @@ export function useAppSidebarPopupState({ activeSection, isCollapsed }: UseAppSi
   const projectPopupRef = useRef<HTMLDivElement | null>(null);
   const projectTriggerRef = useRef<HTMLButtonElement | null>(null);
 
-  const [expandedSection, setExpandedSection] = useState<NavigationSection>(activeSection);
+  const [expandedSection, setExpandedSection] = useState<NavigationSection | null>(activeSection);
   const [compactPopupSection, setCompactPopupSection] = useState<NavigationSection | null>(null);
   const [compactPopupTop, setCompactPopupTop] = useState(0);
   const [projectPopupTop, setProjectPopupTop] = useState(0);

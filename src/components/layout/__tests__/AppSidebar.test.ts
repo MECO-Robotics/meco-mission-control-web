@@ -469,7 +469,7 @@ describe("AppSidebar", () => {
     expect(markup.indexOf("sidebar-profile-header")).toBeLessThan(markup.indexOf("sidebar-quick-actions"));
     expect(markup.indexOf("sidebar-profile-fold-button")).toBeLessThan(markup.indexOf("sidebar-quick-actions"));
     expect(markup).toMatch(
-      /<button(?=[^>]*class="[^"]*sidebar-quick-action[^"]*sidebar-quick-action-home)(?=[^>]*aria-label="Home")(?=[^>]*data-active="true")[^>]*>/,
+      /<button(?=[^>]*class="[^"]*sidebar-quick-action[^"]*sidebar-quick-action-home)(?=[^>]*aria-current="page")(?=[^>]*aria-label="Home")(?=[^>]*data-active="true")[^>]*>/,
     );
     expect(markup).toMatch(
       /<summary(?=[^>]*class="[^"]*sidebar-quick-action[^"]*sidebar-quick-action-add)(?=[^>]*aria-label="Add new")[^>]*>[\s\S]*<\/summary>/,
@@ -484,6 +484,43 @@ describe("AppSidebar", () => {
     expect(markup).toContain("Add milestone");
     expect(markup).toContain("Add part");
     expect(markup).not.toContain('aria-label="Today"');
+  });
+
+  it("keeps workspace sections closed while Home is active", () => {
+    const markup = renderSidebar(
+      [
+        {
+          value: "home",
+          label: "Home",
+          icon: React.createElement("span"),
+          count: 0,
+        },
+        {
+          value: "tasks",
+          label: "Tasks",
+          icon: React.createElement("span"),
+          count: 4,
+        },
+        {
+          value: "worklogs",
+          label: "Work logs",
+          icon: React.createElement("span"),
+          count: 2,
+        },
+      ],
+      "home",
+      { sessionUser: signedInUser },
+    );
+
+    expect(markup).toMatch(
+      /<button(?=[^>]*class="[^"]*sidebar-quick-action[^"]*sidebar-quick-action-home)(?=[^>]*aria-current="page")(?=[^>]*data-active="true")[^>]*>/,
+    );
+    expect(markup).toMatch(
+      /<button(?=[^>]*data-active="false")(?=[^>]*data-tutorial-target="sidebar-tab-dashboard")[^>]*>/,
+    );
+    expect(markup).not.toContain('<span class="sidebar-subtab-label">Calendar</span>');
+    expect(markup).not.toContain('<span class="sidebar-subtab-label">Activity</span>');
+    expect(markup).not.toContain('<span class="sidebar-subtab-label">Metrics</span>');
   });
 
   it("uses one shared underline for the Home, Add, and Notifications quick actions", () => {
