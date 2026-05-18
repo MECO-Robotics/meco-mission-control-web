@@ -312,6 +312,7 @@ export function AppSidebar({
         <AppSidebarProjectFooter
           activeTab={activeTab}
           canEditSelectedRobot={canEditSelectedRobot}
+          isDarkMode={isDarkMode}
           isCollapsed={isCollapsed}
           isProjectPopupOpen={isProjectPopupOpen}
           onCreateSeason={onCreateSeason}
@@ -319,6 +320,7 @@ export function AppSidebar({
           onHelpSelect={handleHelpSelect}
           onProjectTriggerClick={handleProjectTriggerClick}
           onSelectSeason={onSelectSeason}
+          onToggleDarkMode={toggleDarkMode}
           projectTriggerRef={projectTriggerRef}
           seasons={seasons}
           selectedProject={selectedProject}

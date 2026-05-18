@@ -1,0 +1,80 @@
+.sidebar-settings-menu {
+  position: relative;
+  width: 100%;
+}
+
+.sidebar-settings-summary {
+  width: 100% !important;
+  list-style: none;
+}
+
+.sidebar-settings-summary::-webkit-details-marker {
+  display: none;
+}
+
+.sidebar-settings-popover {
+  display: none;
+  gap: 0.18rem;
+  margin-top: 0.35rem;
+  padding: 0.3rem;
+  border: 1px solid var(--border-base);
+  border-radius: 8px;
+  background: var(--bg-panel);
+  box-shadow: 0 10px 20px rgba(15, 28, 52, 0.14);
+}
+
+.sidebar-settings-menu[open] .sidebar-settings-popover {
+  display: grid;
+}
+
+.sidebar-settings-menu-collapsed .sidebar-settings-popover {
+  position: absolute;
+  left: calc(100% + 0.35rem);
+  bottom: 0;
+  z-index: 1205;
+  min-width: 12rem;
+  margin-top: 0;
+}
+
+.sidebar-settings-menu-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-copy);
+  padding: 0.5rem 0.55rem;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.sidebar-settings-menu-item:hover,
+.sidebar-settings-menu-item:focus-visible {
+  background: var(--bg-row-alt);
+  border-color: rgba(15, 28, 52, 0.08);
+  outline: none;
+}
+
+.sidebar-settings-menu-copy {
+  display: grid;
+  gap: 0.05rem;
+  min-width: 0;
+}
+
+.sidebar-settings-menu-title {
+  color: var(--text-title);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.sidebar-settings-menu-value {
+  color: var(--text-copy);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}

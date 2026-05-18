@@ -135,6 +135,62 @@ describe("AppSidebar", () => {
     expect(source).toContain("onClick={handleSidebarFoldClick}");
   });
 
+  it("renders the Settings menu above Help in the sidebar footer", () => {
+    const markup = renderSidebar(
+      [
+        {
+          value: "tasks",
+          label: "Tasks",
+          icon: React.createElement("span"),
+          count: 4,
+        },
+      ],
+      "tasks",
+      { sessionUser: signedInUser },
+    );
+    const footerIndex = markup.indexOf("sidebar-footer-stack");
+    const settingsIndex = markup.indexOf("sidebar-settings-menu");
+    const helpIndex = markup.indexOf("sidebar-footer-help-button");
+
+    expect(settingsIndex).toBeGreaterThan(footerIndex);
+    expect(settingsIndex).toBeLessThan(helpIndex);
+    expect(markup).toContain('aria-label="Settings menu"');
+    expect(markup).toContain("Theme mode");
+    expect(markup).toContain("sidebar-settings-menu-value");
+    expect(markup).toContain("lucide-settings");
+  });
+
+  it("keeps Settings as an icon-only menu above Help when the sidebar is folded", () => {
+    const markup = renderSidebar(
+      [
+        {
+          value: "tasks",
+          label: "Tasks",
+          icon: React.createElement("span"),
+          count: 4,
+        },
+      ],
+      "tasks",
+      {
+        isCollapsed: true,
+        sessionUser: signedInUser,
+      },
+    );
+    const css = readFileSync("src/app/styles/shell/sidebar/sidebar-settings.css", "utf8");
+    const settingsIndex = markup.indexOf("sidebar-settings-collapsed-trigger");
+    const helpIndex = markup.indexOf("sidebar-help-collapsed-trigger");
+
+    expect(settingsIndex).toBeGreaterThan(-1);
+    expect(settingsIndex).toBeLessThan(helpIndex);
+    expect(markup).toMatch(
+      /<summary(?=[^>]*class="[^"]*sidebar-settings-collapsed-trigger)(?=[^>]*aria-label="Settings")[^>]*>/,
+    );
+    expect(markup).not.toContain('<span class="sidebar-tab-label">Settings</span>');
+    expect(css).toMatch(
+      /\.sidebar-settings-menu-collapsed \.sidebar-settings-popover\s*\{[^}]*position:\s*absolute;[^}]*left:\s*calc\(100% \+ 0\.35rem\);/,
+    );
+  });
+
   it("renders the season selector in the sidebar footer above project scope", () => {
     const markup = renderSidebar(
       [
