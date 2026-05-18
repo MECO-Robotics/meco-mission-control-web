@@ -110,6 +110,7 @@ describe("AppSidebar", () => {
     expect(markup).not.toContain('<span class="sidebar-tab-label">Collapse sidebar</span>');
     expect(markup).toContain("Theme mode");
     expect(markup).toContain("Sign out");
+    expect(markup).not.toContain("profile-menu-popover");
     expect(markup).not.toContain('aria-label="Refresh workspace"');
     expect(markup).not.toContain("profile-menu-context-picker");
   });
@@ -156,8 +157,10 @@ describe("AppSidebar", () => {
     expect(settingsIndex).toBeLessThan(helpIndex);
     expect(markup).toContain('aria-label="Settings menu"');
     expect(markup).toContain("Theme mode");
+    expect(markup).toContain("Sign out");
     expect(markup).toContain("sidebar-settings-menu-value");
     expect(markup).toContain("lucide-settings");
+    expect(markup).toContain("lucide-log-out");
   });
 
   it("keeps Settings as an icon-only menu above Help when the sidebar is folded", () => {
@@ -347,7 +350,7 @@ describe("AppSidebar", () => {
     expect(markup).toContain(">L</span>");
   });
 
-  it("keeps the local profile fallback as an L bubble with theme menu access", () => {
+  it("keeps the local profile fallback as an L bubble without account actions", () => {
     const markup = renderSidebar([
       {
         value: "tasks",
@@ -361,14 +364,29 @@ describe("AppSidebar", () => {
     expect(markup).toContain("app-topbar-local-avatar");
     expect(markup).toContain(">L</span>");
     expect(markup).toContain("Theme mode");
+    expect(markup).not.toContain("Sign out");
+    expect(markup).not.toContain("profile-menu-popover");
     expect(markup).not.toContain("Local access");
   });
 
-  it("keeps the profile menu hover-only instead of opening from trigger focus", () => {
-    const css = readFileSync("src/app/styles/shell/profile/menu-shell/context.css", "utf8");
+  it("does not attach account actions to the profile view toggle", () => {
+    const markup = renderSidebar(
+      [
+        {
+          value: "tasks",
+          label: "Tasks",
+          icon: React.createElement("span"),
+          count: 4,
+        },
+      ],
+      "tasks",
+      { sessionUser: signedInUser },
+    );
 
-    expect(css).toContain(".profile-menu:hover .profile-menu-popover");
-    expect(css).not.toContain(".profile-menu:focus-within .profile-menu-popover");
+    expect(markup).toContain("profile-view-toggle");
+    expect(markup).not.toContain('aria-label="Profile menu"');
+    expect(markup).not.toContain("profile-menu-popover");
+    expect(markup.indexOf("sidebar-settings-menu")).toBeLessThan(markup.indexOf("Sign out"));
   });
 
   it("keeps the profile hover target enabled when My View has no roster match", () => {

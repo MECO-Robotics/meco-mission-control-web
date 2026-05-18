@@ -1,5 +1,5 @@
 import type { MouseEvent as ReactMouseEvent, RefObject } from "react";
-import { Settings as SettingsIcon } from "lucide-react";
+import { LogOut, Settings as SettingsIcon } from "lucide-react";
 
 import { IconChevronRight, IconEdit, IconHelp } from "@/components/shared/Icons";
 import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
@@ -9,12 +9,14 @@ import { AppSidebarSeasonPicker } from "./AppSidebarSeasonPicker";
 interface AppSidebarProjectFooterProps {
   activeTab: import("@/lib/workspaceNavigation").ViewTab;
   canEditSelectedRobot: boolean;
+  canSignOut: boolean;
   isDarkMode: boolean;
   isCollapsed: boolean;
   isProjectPopupOpen: boolean;
   onEditSelectedRobot: () => void;
   onCreateSeason: () => void;
   onHelpSelect: () => void;
+  onSignOut: () => void;
   onToggleDarkMode: () => void;
   onSelectSeason: (seasonId: string | null) => void;
   onProjectTriggerClick: (event: ReactMouseEvent<HTMLButtonElement>) => void;
@@ -28,12 +30,14 @@ interface AppSidebarProjectFooterProps {
 export function AppSidebarProjectFooter({
   activeTab,
   canEditSelectedRobot,
+  canSignOut,
   isDarkMode,
   isCollapsed,
   isProjectPopupOpen,
   onEditSelectedRobot,
   onCreateSeason,
   onHelpSelect,
+  onSignOut,
   onToggleDarkMode,
   onSelectSeason,
   onProjectTriggerClick,
@@ -47,6 +51,10 @@ export function AppSidebarProjectFooter({
   const themeTitle = isDarkMode ? "Switch to light mode" : "Switch to dark mode";
   const handleThemeClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     onToggleDarkMode();
+    event.currentTarget.closest("details")?.removeAttribute("open");
+  };
+  const handleSignOutClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
+    onSignOut();
     event.currentTarget.closest("details")?.removeAttribute("open");
   };
   const settingsMenu = (
@@ -86,6 +94,22 @@ export function AppSidebarProjectFooter({
             </span>
           </span>
         </button>
+        {canSignOut ? (
+          <button
+            className="sidebar-settings-menu-item sidebar-settings-sign-out-item"
+            onClick={handleSignOutClick}
+            role="menuitem"
+            type="button"
+          >
+            <span className="sidebar-settings-menu-copy">
+              <span className="sidebar-settings-menu-title">Sign out</span>
+              <span className="sidebar-settings-menu-value">Account</span>
+            </span>
+            <span aria-hidden="true" className="sidebar-settings-menu-icon">
+              <LogOut size={14} strokeWidth={2} />
+            </span>
+          </button>
+        ) : null}
       </div>
     </details>
   );

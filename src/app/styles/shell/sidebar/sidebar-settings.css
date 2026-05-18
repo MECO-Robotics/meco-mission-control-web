@@ -15,6 +15,7 @@
 .sidebar-settings-popover {
   display: none;
   gap: 0.18rem;
+  min-width: 8.75rem;
   margin-top: 0.35rem;
   padding: 0.3rem;
   border: 1px solid var(--border-base);
@@ -65,10 +66,17 @@
   min-width: 0;
 }
 
+.sidebar-settings-menu-icon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-copy);
+}
+
 .sidebar-settings-menu-title {
   color: var(--text-title);
   font-size: 0.72rem;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .sidebar-settings-menu-value {

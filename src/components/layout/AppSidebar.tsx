@@ -265,13 +265,10 @@ export function AppSidebar({
     <div className="sidebar-shell" data-collapsed={isCollapsed ? "true" : "false"} ref={sidebarShellRef}>
       <div className="sidebar-profile-header" data-collapsed={isCollapsed ? "true" : "false"}>
         <AppProfileAssembly
-          handleSignOut={handleSignOut}
-          isDarkMode={isDarkMode}
           isMyViewActive={isMyViewActive}
           myViewMemberName={myViewMemberName}
           onToggleMyView={onToggleMyView}
           sessionUser={sessionUser}
-          toggleDarkMode={toggleDarkMode}
         />
         <button
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -312,6 +309,7 @@ export function AppSidebar({
         <AppSidebarProjectFooter
           activeTab={activeTab}
           canEditSelectedRobot={canEditSelectedRobot}
+          canSignOut={sessionUser !== null}
           isDarkMode={isDarkMode}
           isCollapsed={isCollapsed}
           isProjectPopupOpen={isProjectPopupOpen}
@@ -319,6 +317,7 @@ export function AppSidebar({
           onEditSelectedRobot={onEditSelectedRobot}
           onHelpSelect={handleHelpSelect}
           onProjectTriggerClick={handleProjectTriggerClick}
+          onSignOut={handleSignOut}
           onSelectSeason={onSelectSeason}
           onToggleDarkMode={toggleDarkMode}
           projectTriggerRef={projectTriggerRef}

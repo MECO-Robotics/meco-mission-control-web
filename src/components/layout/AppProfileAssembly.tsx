@@ -38,49 +38,11 @@ function ProfileAvatar({ sessionUser }: { sessionUser: SessionUser }) {
   );
 }
 
-function ThemeModeMenuItem({
-  isDarkMode,
-  toggleDarkMode,
-}: {
-  isDarkMode: boolean;
-  toggleDarkMode: () => void;
-}) {
-  const themeToggleMenuTitle = isDarkMode ? "Switch to light mode" : "Switch to dark mode";
-
-  return (
-    <button
-      className="profile-menu-item profile-menu-item-theme-toggle"
-      onClick={toggleDarkMode}
-      role="menuitem"
-      title={themeToggleMenuTitle}
-      type="button"
-    >
-      <span className="profile-menu-item-theme-copy">
-        <span className="profile-menu-item-theme-title">Theme mode</span>
-        <span className="profile-menu-item-theme-value">{isDarkMode ? "Dark" : "Light"}</span>
-      </span>
-      <span
-        aria-hidden="true"
-        className={`profile-mode-selector ${isDarkMode ? "is-dark" : "is-light"}`}
-      >
-        <span className="profile-mode-selector-track">
-          <span className="profile-mode-selector-thumb">
-            <span className="profile-mode-selector-icon">{isDarkMode ? "\u263E" : "\u2600"}</span>
-          </span>
-        </span>
-      </span>
-    </button>
-  );
-}
-
 function SignedInProfileAssembly({
-  handleSignOut,
-  isDarkMode,
   isMyViewActive,
   myViewMemberName,
   onToggleMyView,
   sessionUser,
-  toggleDarkMode,
 }: AppProfileAssemblyProps & { sessionUser: SessionUser }) {
   const myViewTitle = myViewMemberName
     ? isMyViewActive
@@ -137,23 +99,11 @@ function SignedInProfileAssembly({
           <ProfileAvatar sessionUser={sessionUser} />
         </button>
       </div>
-      <div aria-label="Profile menu" className="profile-menu-popover" role="menu">
-        <ThemeModeMenuItem isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
-        <button className="profile-menu-item" onClick={handleSignOut} role="menuitem" type="button">
-          Sign out
-        </button>
-      </div>
     </div>
   );
 }
 
-function LocalProfileAssembly({
-  isDarkMode,
-  toggleDarkMode,
-}: {
-  isDarkMode: boolean;
-  toggleDarkMode: () => void;
-}) {
+function LocalProfileAssembly() {
   return (
     <div className="profile-menu">
       <span
@@ -165,21 +115,15 @@ function LocalProfileAssembly({
           {LOCAL_DEV_PROFILE_INITIAL}
         </span>
       </span>
-      <div aria-label="Local profile menu" className="profile-menu-popover" role="menu">
-        <ThemeModeMenuItem isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
-      </div>
     </div>
   );
 }
 
 export interface AppProfileAssemblyProps {
-  handleSignOut: () => void;
-  isDarkMode: boolean;
   isMyViewActive: boolean;
   myViewMemberName: string | null;
   onToggleMyView: () => void;
   sessionUser: SessionUser | null;
-  toggleDarkMode: () => void;
 }
 
 export function AppProfileAssembly(props: AppProfileAssemblyProps) {
@@ -187,5 +131,5 @@ export function AppProfileAssembly(props: AppProfileAssemblyProps) {
     return <SignedInProfileAssembly {...props} sessionUser={props.sessionUser} />;
   }
 
-  return <LocalProfileAssembly isDarkMode={props.isDarkMode} toggleDarkMode={props.toggleDarkMode} />;
+  return <LocalProfileAssembly />;
 }
