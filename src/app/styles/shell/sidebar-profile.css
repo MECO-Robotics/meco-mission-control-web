@@ -53,7 +53,7 @@
   width: 1.85rem;
   height: 1.85rem;
   flex: 0 0 1.85rem;
-  margin-left: auto;
+  margin-left: 0;
   padding: 0;
   border: 1px solid var(--border-base);
   border-radius: 999px;

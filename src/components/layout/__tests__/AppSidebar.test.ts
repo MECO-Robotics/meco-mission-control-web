@@ -89,7 +89,7 @@ describe("AppSidebar", () => {
     picture: null,
   };
 
-  it("renders the icon-only fold control at the sidebar right edge", () => {
+  it("renders the icon-only fold control just right of the profile avatar toggle", () => {
     const markup = renderSidebar(
       [
         {
@@ -107,7 +107,7 @@ describe("AppSidebar", () => {
     expect(markup.indexOf("profile-menu")).toBeGreaterThan(-1);
     expect(markup.indexOf("profile-view-toggle")).toBeLessThan(markup.indexOf("sidebar-profile-fold-button"));
     expect(markup.indexOf("sidebar-profile-fold-button")).toBeLessThan(markup.indexOf("sidebar-quick-actions"));
-    expect(css).toMatch(/\.sidebar-profile-fold-button\s*\{[^}]*margin-left:\s*auto;/);
+    expect(css).toMatch(/\.sidebar-profile-fold-button\s*\{[^}]*margin-left:\s*0;/);
     expect(markup).toMatch(
       /<button(?=[^>]*class="[^"]*sidebar-profile-fold-button)(?=[^>]*aria-label="Collapse sidebar")[^>]*>[\s\S]*lucide-arrow-left-to-line[\s\S]*<\/button>/,
     );
