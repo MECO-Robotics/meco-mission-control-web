@@ -89,7 +89,7 @@ describe("AppSidebar", () => {
     picture: null,
   };
 
-  it("renders the icon-only fold control to the right of the profile switch", () => {
+  it("renders the icon-only fold control at the sidebar right edge", () => {
     const markup = renderSidebar(
       [
         {
@@ -102,10 +102,12 @@ describe("AppSidebar", () => {
       "tasks",
       { sessionUser: signedInUser },
     );
+    const css = readFileSync("src/app/styles/shell/sidebar-profile.css", "utf8");
 
     expect(markup.indexOf("profile-menu")).toBeGreaterThan(-1);
     expect(markup.indexOf("profile-view-toggle")).toBeLessThan(markup.indexOf("sidebar-profile-fold-button"));
     expect(markup.indexOf("sidebar-profile-fold-button")).toBeLessThan(markup.indexOf("sidebar-quick-actions"));
+    expect(css).toMatch(/\.sidebar-profile-fold-button\s*\{[^}]*margin-left:\s*auto;/);
     expect(markup).toMatch(
       /<button(?=[^>]*class="[^"]*sidebar-profile-fold-button)(?=[^>]*aria-label="Collapse sidebar")[^>]*>[\s\S]*lucide-arrow-left-to-line[\s\S]*<\/button>/,
     );
@@ -121,7 +123,7 @@ describe("AppSidebar", () => {
     const css = readFileSync("src/app/styles/shell/sidebar-profile.css", "utf8");
 
     expect(css).toMatch(
-      /\.sidebar-profile-header\[data-collapsed="true"\] \.sidebar-profile-fold-button\s*\{[^}]*position:\s*absolute;[^}]*opacity:\s*0;[^}]*pointer-events:\s*none;[^}]*z-index:\s*1300;/,
+      /\.sidebar-profile-header\[data-collapsed="true"\] \.sidebar-profile-fold-button\s*\{[^}]*position:\s*absolute;[^}]*opacity:\s*0;[^}]*pointer-events:\s*none;[^}]*margin-left:\s*0;[^}]*z-index:\s*1300;/,
     );
     expect(css).toMatch(
       /\.sidebar-profile-header\[data-collapsed="true"\]::after\s*\{[^}]*content:\s*"";[^}]*left:\s*100%;[^}]*width:\s*2\.5rem;/,
