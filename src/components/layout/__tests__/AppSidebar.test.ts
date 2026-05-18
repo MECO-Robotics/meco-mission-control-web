@@ -21,6 +21,7 @@ function renderSidebar(
   options?: {
     favoriteViewIds?: NavigationSubItemId[];
     inventoryView?: "materials" | "parts" | "part-mappings" | "purchases";
+    isCollapsed?: boolean;
     isMyViewActive?: boolean;
     myViewMemberName?: string | null;
     projects?: ProjectRecord[];
@@ -39,7 +40,7 @@ function renderSidebar(
       items,
       isDarkMode: false,
       isMyViewActive: options?.isMyViewActive ?? false,
-      isCollapsed: false,
+      isCollapsed: options?.isCollapsed ?? false,
       myViewMemberName: options?.myViewMemberName === undefined ? "Ava Chen" : options.myViewMemberName,
       onCreateSeason: jest.fn(),
       onCreateMilestone: jest.fn(),
@@ -212,6 +213,52 @@ describe("AppSidebar", () => {
 
     expect(css).toMatch(
       /\.profile-view-avatar-button:not\(\.is-active\) \.profile-avatar\s*\{[^}]*width:\s*1\.22rem;[^}]*height:\s*1\.22rem;[^}]*font-size:\s*0\.72rem;/,
+    );
+  });
+
+  it("shows only the active profile toggle state when the sidebar is folded", () => {
+    const inactiveMarkup = renderSidebar(
+      [
+        {
+          value: "tasks",
+          label: "Tasks",
+          icon: React.createElement("span"),
+          count: 4,
+        },
+      ],
+      "tasks",
+      {
+        isCollapsed: true,
+        sessionUser: signedInUser,
+      },
+    );
+    const activeMarkup = renderSidebar(
+      [
+        {
+          value: "tasks",
+          label: "Tasks",
+          icon: React.createElement("span"),
+          count: 4,
+        },
+      ],
+      "tasks",
+      {
+        isCollapsed: true,
+        isMyViewActive: true,
+        sessionUser: signedInUser,
+      },
+    );
+    const css = readFileSync("src/app/styles/shell/profile/my-view-toggle.css", "utf8");
+
+    expect(inactiveMarkup).toContain('sidebar-profile-header" data-collapsed="true"');
+    expect(inactiveMarkup).toMatch(
+      /<button(?=[^>]*class="[^"]*profile-view-group-button[^"]*is-active)(?=[^>]*aria-pressed="true")[^>]*>/,
+    );
+    expect(activeMarkup).toMatch(
+      /<button(?=[^>]*class="[^"]*profile-view-avatar-button[^"]*is-active)(?=[^>]*aria-pressed="true")[^>]*>/,
+    );
+    expect(css).toMatch(
+      /\.sidebar-profile-header\[data-collapsed="true"\] \.profile-view-toggle-option:not\(\.is-active\)\s*\{[^}]*display:\s*none;/,
     );
   });
 

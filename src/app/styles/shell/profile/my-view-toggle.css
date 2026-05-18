@@ -38,6 +38,14 @@
   font-size: 0.72rem;
 }
 
+.sidebar-profile-header[data-collapsed="true"] .profile-view-toggle {
+  gap: 0;
+}
+
+.sidebar-profile-header[data-collapsed="true"] .profile-view-toggle-option:not(.is-active) {
+  display: none;
+}
+
 .profile-view-toggle-option:hover,
 .profile-view-toggle-option:focus-visible {
   background: var(--bg-row-alt);
