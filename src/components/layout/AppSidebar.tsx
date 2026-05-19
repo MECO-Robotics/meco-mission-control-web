@@ -1,19 +1,10 @@
-import {
-  useCallback,
-  useMemo,
-  type MouseEvent as ReactMouseEvent,
-} from "react";
+import { type MouseEvent as ReactMouseEvent } from "react";
 
 import {
   type InventoryViewTab,
   type NavigationSection,
   type NavigationSubItemId,
   type NavigationTarget,
-  NAVIGATION_SECTION_ORDER,
-  NAVIGATION_SUB_ITEMS,
-  NAVIGATION_SUB_ITEMS_BY_SECTION,
-  getActiveNavigationSubItemId,
-  getNavigationSectionFromSubItem,
   type ReportsViewTab,
   type RosterViewTab,
   type RiskManagementViewTab,
@@ -31,7 +22,8 @@ import {
 } from "./AppSidebarPopups";
 import { AppSidebarProjectFooter } from "./AppSidebarProjectFooter";
 import { AppSidebarQuickActions } from "./AppSidebarQuickActions";
-import { AppSidebarSections, type SidebarSubItemModel } from "./AppSidebarSections";
+import { AppSidebarSections } from "./AppSidebarSections";
+import { useAppSidebarNavigationModels } from "./sidebar/useAppSidebarNavigationModels";
 import { useAppSidebarPopupState } from "./useAppSidebarPopupState";
 
 interface AppSidebarProps {
@@ -116,21 +108,24 @@ export function AppSidebar({
   const canEditSelectedRobot = selectedProject?.projectType === "robot";
   const selectedProjectLabel = selectedProject?.name ?? "All projects";
 
-  const visibleTabs = useMemo(() => new Set(items.map((item) => item.value)), [items]);
-
-  const activeSubItemId = getActiveNavigationSubItemId({
+  const {
+    activeSection,
+    activeSubItemId,
+    favoriteSubItems,
+    getSectionSubItems,
+    sectionModels,
+  } = useAppSidebarNavigationModels({
     activeTab,
+    favoriteViewIds,
     inventoryView,
-    manufacturingView: "cnc",
-    rosterView,
+    isRobotProject,
+    items,
     reportsView,
+    rosterView,
     riskManagementView,
     taskView,
     worklogsView,
   });
-  const activeSection = activeSubItemId
-    ? getNavigationSectionFromSubItem(activeSubItemId)
-    : null;
 
   const {
     compactPopupRef,
@@ -148,65 +143,6 @@ export function AppSidebar({
     setProjectPopupTop,
     sidebarShellRef,
   } = useAppSidebarPopupState({ activeSection, isCollapsed });
-
-  const isSubItemEnabled = useCallback(
-    (subItemId: NavigationSubItemId) => {
-      const subItem = NAVIGATION_SUB_ITEMS.find((item) => item.id === subItemId);
-      if (subItem && !visibleTabs.has(subItem.target.tab)) {
-        return false;
-      }
-
-      if (subItemId === "config-robot-model") {
-        return isRobotProject;
-      }
-
-      if (subItemId === "config-cad") {
-        return isRobotProject;
-      }
-
-      if (subItemId === "config-part-mappings") {
-        return isRobotProject;
-      }
-
-      if (subItemId === "inventory-parts") {
-        return isRobotProject;
-      }
-
-      return true;
-    },
-    [isRobotProject, visibleTabs],
-  );
-
-  const getSectionSubItems = useCallback(
-    (section: NavigationSection): SidebarSubItemModel[] =>
-      NAVIGATION_SUB_ITEMS_BY_SECTION[section].map((subItem) => ({
-        ...subItem,
-        isEnabled: isSubItemEnabled(subItem.id),
-      })),
-    [isSubItemEnabled],
-  );
-
-  const sectionModels = useMemo(
-    () =>
-      NAVIGATION_SECTION_ORDER.map((section) => {
-        const subItems = getSectionSubItems(section);
-        return {
-          section,
-          subItems,
-          isEnabled: subItems.some((subItem) => subItem.isEnabled),
-        };
-      }),
-    [getSectionSubItems],
-  );
-  const favoriteSubItems = useMemo(() => {
-    const requestedFavoriteIds = new Set(favoriteViewIds);
-    return NAVIGATION_SUB_ITEMS
-      .filter((subItem) => requestedFavoriteIds.has(subItem.id))
-      .map((subItem) => ({
-        ...subItem,
-        isEnabled: isSubItemEnabled(subItem.id),
-      }));
-  }, [favoriteViewIds, isSubItemEnabled]);
 
   const handleSectionClick = (section: NavigationSection, event: ReactMouseEvent<HTMLButtonElement>) => {
     const subItems = getSectionSubItems(section);
