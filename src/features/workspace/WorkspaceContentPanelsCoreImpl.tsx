@@ -17,6 +17,7 @@ import type {
   WorklogsViewTab,
 } from "@/lib/workspaceNavigation";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import type { PartMappingChange } from "@/features/workspace/views/partMappingSync/partMappingSyncTypes";
 import type { WorkspaceToastNotice } from "@/features/workspace/workspaceToastQueue";
 import { WorkspaceContentPanelsView } from "./components/WorkspaceContentPanelsView";
 
@@ -83,6 +84,7 @@ export interface WorkspaceContentPanelsProps {
   handleDeleteMechanism: (mechanismId: string) => Promise<void>;
   openCreatePartDefinitionModal: () => void;
   openCreatePurchaseModal: () => void;
+  applyPartMappingChanges: (changes: PartMappingChange[]) => Promise<boolean>;
   openCreateTaskModal: () => void;
   openCreateTaskModalFromTimeline: () => void;
   openCreateWorkLogModal: () => void;

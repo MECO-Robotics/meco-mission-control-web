@@ -172,6 +172,7 @@ export const shellContentCatalogActionKeys = [
   "openEditPurchaseModal",
   "openEditSubsystemModal",
   "openEditWorkstreamModal",
+  "applyPartMappingChanges",
   "removePartInstanceFromMechanism",
   "saveSubsystemLayout",
   "updateSubsystemConfiguration",

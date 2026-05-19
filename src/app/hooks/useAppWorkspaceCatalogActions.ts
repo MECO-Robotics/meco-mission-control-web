@@ -4,6 +4,7 @@ import { useMaterialActions } from "@/app/workspaceCatalog/materialActions";
 import { useMechanismActions } from "@/app/workspaceCatalog/mechanismActions";
 import { usePartDefinitionActions } from "@/app/workspaceCatalog/partDefinitionActions";
 import { usePartInstanceActions } from "@/app/workspaceCatalog/partInstanceActions";
+import { usePartMappingSyncActions } from "@/app/workspaceCatalog/partMappingSyncActions";
 import { usePurchaseActions } from "@/app/workspaceCatalog/purchaseActions";
 import { useSubsystemActions } from "@/app/workspaceCatalog/subsystemActions";
 import { useWorkstreamActions } from "@/app/workspaceCatalog/workstreamActions";
@@ -20,6 +21,7 @@ export function useAppWorkspaceCatalogActions(model: AppWorkspaceModel) {
     ...useWorkstreamActions(model),
     ...usePartDefinitionActions(model),
     ...usePartInstanceActions(model),
+    ...usePartMappingSyncActions(model),
     ...useSubsystemActions(model),
     ...useMechanismActions(model),
   };

@@ -1,0 +1,82 @@
+.part-sync-review-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.part-sync-review-header h3 {
+  margin: 0.1rem 0 0;
+}
+
+.part-sync-change-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.part-sync-change-card {
+  align-items: center;
+  border: 1px solid var(--border-base, rgba(148, 163, 184, 0.28));
+  border-left: 4px solid var(--meco-blue);
+  border-radius: 8px;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 0.75rem;
+}
+
+.part-sync-change-card[data-tone="warning"] {
+  border-left-color: #f59e0b;
+}
+
+.part-sync-change-card[data-tone="danger"] {
+  border-left-color: #ef4444;
+}
+
+.part-sync-change-main {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.part-sync-change-main strong,
+.part-sync-change-main small,
+.part-sync-change-main span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.part-sync-change-main small,
+.part-sync-change-main span {
+  color: var(--text-copy);
+}
+
+.part-sync-decision-group {
+  display: inline-grid;
+  gap: 0.4rem;
+  grid-template-columns: repeat(2, minmax(92px, 1fr));
+}
+
+.part-sync-decision-button {
+  border: 1px solid var(--border-base, rgba(148, 163, 184, 0.28));
+  border-radius: 6px;
+  background: var(--bg-row-alt, #f8fafc);
+  color: var(--text-copy);
+  cursor: pointer;
+  font: inherit;
+  min-height: 36px;
+}
+
+.part-sync-decision-button[aria-pressed="true"] {
+  border-color: var(--meco-blue);
+  color: var(--text-title);
+  font-weight: 800;
+}
+
+@media (max-width: 780px) {
+  .part-sync-change-card {
+    grid-template-columns: 1fr;
+  }
+}

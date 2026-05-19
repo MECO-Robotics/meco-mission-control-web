@@ -46,6 +46,7 @@ export function AppWorkspaceShellContent({
       openCreateSubsystemModal={c.openCreateSubsystemModal}
       openCreatePartDefinitionModal={c.openCreatePartDefinitionModal}
       openCreatePurchaseModal={c.openCreatePurchaseModal}
+      applyPartMappingChanges={c.applyPartMappingChanges}
       openCreateTaskModal={c.openCreateTaskModal}
       openCreateTaskModalFromTimeline={c.openCreateTaskModalFromTimeline}
       openCreateWorkLogModal={c.openCreateWorkLogModal}

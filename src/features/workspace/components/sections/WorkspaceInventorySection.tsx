@@ -1,5 +1,6 @@
 import { ArtifactInventoryView } from "@/features/workspace/views/ArtifactInventoryView";
 import { MaterialsView } from "@/features/workspace/views/MaterialsView";
+import { PartMappingSyncView } from "@/features/workspace/views/partMappingSync/PartMappingSyncView";
 import { PartsView } from "@/features/workspace/views/PartsView";
 import { PurchasesView } from "@/features/workspace/views/PurchasesView";
 import { WorkspaceSectionPanel, WorkspaceSubPanel } from "../../WorkspaceContentPanelShells";
@@ -29,6 +30,8 @@ export function WorkspaceInventorySection(props: WorkspaceContentPanelsViewProps
     tabSwitchDirection,
     subsystemsById,
     activePersonFilter,
+    applyPartMappingChanges,
+    selectedSeasonId,
   } = props;
 
   return (
@@ -81,13 +84,10 @@ export function WorkspaceInventorySection(props: WorkspaceContentPanelsViewProps
         isActive={!isNonRobotProject && effectiveInventoryView === "part-mappings"}
         swipeDirection={inventorySwipeDirection}
       >
-        <PartsView
+        <PartMappingSyncView
+          applyPartMappingChanges={applyPartMappingChanges}
           bootstrap={bootstrap}
-          openCreatePartDefinitionModal={openCreatePartDefinitionModal}
-          openEditPartDefinitionModal={openEditPartDefinitionModal}
-          mechanismsById={mechanismsById}
-          partDefinitionsById={partDefinitionsById}
-          subsystemsById={subsystemsById}
+          selectedSeasonId={selectedSeasonId}
         />
       </WorkspaceSubPanel>
 
