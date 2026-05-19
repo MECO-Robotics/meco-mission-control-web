@@ -3,7 +3,6 @@ import {
   useMemo,
   type MouseEvent as ReactMouseEvent,
 } from "react";
-import { ArrowLeftToLine, ArrowRightToLine } from "lucide-react";
 
 import {
   type InventoryViewTab,
@@ -25,11 +24,14 @@ import {
 import type { SessionUser } from "@/lib/auth/types";
 import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
 
-import { AppSidebarPopups, ADD_ROBOT_PROJECT_VALUE } from "./AppSidebarPopups";
+import {
+  ADD_ROBOT_PROJECT_VALUE,
+  AppSidebarPopups,
+  CREATE_SEASON_OPTION_VALUE,
+} from "./AppSidebarPopups";
 import { AppSidebarProjectFooter } from "./AppSidebarProjectFooter";
 import { AppSidebarQuickActions } from "./AppSidebarQuickActions";
 import { AppSidebarSections, type SidebarSubItemModel } from "./AppSidebarSections";
-import { AppProfileAssembly } from "./AppProfileAssembly";
 import { useAppSidebarPopupState } from "./useAppSidebarPopupState";
 
 interface AppSidebarProps {
@@ -41,6 +43,7 @@ interface AppSidebarProps {
   isMyViewActive: boolean;
   onSelectTarget: (target: NavigationTarget, options?: { keepSidebarOpen?: boolean }) => void;
   isCollapsed: boolean;
+  isNotificationQueueOpen: boolean;
   myViewMemberName: string | null;
   notificationCount: number;
   onCreateMilestone: () => void;
@@ -50,6 +53,7 @@ interface AppSidebarProps {
   onCreateTask: () => void;
   onSelectSeason: (seasonId: string | null) => void;
   onToggleMyView: () => void;
+  onToggleNotificationQueue: () => void;
   toggleSidebar: () => void;
   projects: ProjectRecord[];
   selectedProjectId: string | null;
@@ -77,6 +81,7 @@ export function AppSidebar({
   isMyViewActive,
   onSelectTarget,
   isCollapsed,
+  isNotificationQueueOpen,
   myViewMemberName,
   notificationCount,
   onCreateMilestone,
@@ -86,6 +91,7 @@ export function AppSidebar({
   onCreateTask,
   onSelectSeason,
   onToggleMyView,
+  onToggleNotificationQueue,
   toggleSidebar,
   projects,
   selectedProjectId,
@@ -253,6 +259,16 @@ export function AppSidebar({
     setIsProjectPopupOpen(false);
   };
 
+  const handleSeasonOptionSelect = (value: string) => {
+    if (value === CREATE_SEASON_OPTION_VALUE) {
+      onCreateSeason();
+      setIsProjectPopupOpen(false);
+      return;
+    }
+
+    onSelectSeason(value || null);
+  };
+
   const handleHelpSelect = () => {
     setCompactPopupSection(null);
     setIsProjectPopupOpen(false);
@@ -265,27 +281,6 @@ export function AppSidebar({
 
   return (
     <div className="sidebar-shell" data-collapsed={isCollapsed ? "true" : "false"} ref={sidebarShellRef}>
-      <div className="sidebar-profile-header" data-collapsed={isCollapsed ? "true" : "false"}>
-        <AppProfileAssembly
-          isMyViewActive={isMyViewActive}
-          myViewMemberName={myViewMemberName}
-          onToggleMyView={onToggleMyView}
-          sessionUser={sessionUser}
-        />
-        <button
-          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="sidebar-profile-fold-button"
-          onClick={handleSidebarFoldClick}
-          title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          type="button"
-        >
-          {isCollapsed ? (
-            <ArrowRightToLine aria-hidden="true" size={15} strokeWidth={2} />
-          ) : (
-            <ArrowLeftToLine aria-hidden="true" size={15} strokeWidth={2} />
-          )}
-        </button>
-      </div>
       <nav aria-label="Workspace views" className="sidebar" data-collapsed={isCollapsed ? "true" : "false"}>
         <AppSidebarQuickActions
           activeTab={activeTab}
@@ -294,8 +289,8 @@ export function AppSidebar({
           onCreatePart={onCreatePart}
           onCreateQaReport={onCreateQaReport}
           onCreateTask={onCreateTask}
-          notificationCount={notificationCount}
           onSelectTarget={onSelectTarget}
+          onToggleSidebar={handleSidebarFoldClick}
         />
 
         <AppSidebarSections
@@ -311,23 +306,23 @@ export function AppSidebar({
 
         <AppSidebarProjectFooter
           activeTab={activeTab}
-          canEditSelectedRobot={canEditSelectedRobot}
           canSignOut={sessionUser !== null}
           isDarkMode={isDarkMode}
           isCollapsed={isCollapsed}
+          isMyViewActive={isMyViewActive}
+          isNotificationQueueOpen={isNotificationQueueOpen}
           isProjectPopupOpen={isProjectPopupOpen}
-          onCreateSeason={onCreateSeason}
-          onEditSelectedRobot={onEditSelectedRobot}
+          myViewMemberName={myViewMemberName}
           onHelpSelect={handleHelpSelect}
           onProjectTriggerClick={handleProjectTriggerClick}
           onSignOut={handleSignOut}
-          onSelectSeason={onSelectSeason}
+          onToggleMyView={onToggleMyView}
           onToggleDarkMode={toggleDarkMode}
+          onNotificationQueueToggle={onToggleNotificationQueue}
+          notificationCount={notificationCount}
           projectTriggerRef={projectTriggerRef}
-          seasons={seasons}
-          selectedProject={selectedProject}
           selectedProjectLabel={selectedProjectLabel}
-          selectedSeasonId={selectedSeasonId}
+          sessionUser={sessionUser}
         />
       </nav>
       <AppSidebarPopups
@@ -338,12 +333,18 @@ export function AppSidebar({
         getSectionSubItems={getSectionSubItems}
         isCollapsed={isCollapsed}
         isProjectPopupOpen={isProjectPopupOpen}
+        isScopePopupOpen={isProjectPopupOpen}
+        canEditSelectedRobot={canEditSelectedRobot}
+        onEditSelectedRobot={onEditSelectedRobot}
         onSelectProjectOption={handleProjectOptionSelect}
+        onSelectSeasonOption={handleSeasonOptionSelect}
         onSubItemSelect={handleSubItemSelect}
         projectPopupRef={projectPopupRef}
         projectPopupTop={projectPopupTop}
         projects={projects}
+        seasons={seasons}
         selectedProjectId={selectedProjectId}
+        selectedSeasonId={selectedSeasonId}
       />
     </div>
   );

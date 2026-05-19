@@ -1,14 +1,31 @@
-.sidebar-quick-actions {
+.sidebar-quick-actions,
+.sidebar-footer-actions {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.35rem;
-  padding: 0 0.72rem 0.58rem;
   position: relative;
 }
 
-.sidebar-quick-actions[data-collapsed="true"] {
+.sidebar-quick-actions {
+  padding: 0 0.72rem 0.58rem;
+}
+
+.sidebar-footer-actions {
+  width: 100%;
+  padding: 0.58rem 0 0;
+}
+
+.sidebar-quick-actions[data-collapsed="true"],
+.sidebar-footer-actions[data-collapsed="true"] {
   grid-template-columns: 1fr;
+}
+
+.sidebar-quick-actions[data-collapsed="true"] {
   padding-inline: 0.4rem;
+}
+
+.sidebar-footer-actions[data-collapsed="true"] {
+  justify-items: center;
 }
 
 .sidebar-quick-actions::after {
@@ -23,7 +40,20 @@
   transition: background-color 0.18s ease;
 }
 
-.sidebar-quick-actions[data-collapsed="true"]::after {
+.sidebar-footer-actions::before {
+  position: absolute;
+  right: 0.72rem;
+  top: 0.23rem;
+  left: 0.72rem;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(15, 28, 52, 0.16);
+  content: "";
+  transition: background-color 0.18s ease;
+}
+
+.sidebar-quick-actions[data-collapsed="true"]::after,
+.sidebar-footer-actions[data-collapsed="true"]::before {
   right: 0.4rem;
   left: 0.4rem;
 }
@@ -48,7 +78,7 @@
 
 .sidebar-quick-action:hover,
 .sidebar-quick-action:focus-visible,
-.sidebar-add-menu[open] > .sidebar-quick-action {
+.sidebar-add-menu[data-open="true"] > .sidebar-quick-action {
   outline: none;
   background: transparent;
   color: var(--meco-blue);
@@ -57,13 +87,33 @@
 .sidebar-quick-actions:has(.sidebar-quick-action:hover)::after,
 .sidebar-quick-actions:has(.sidebar-quick-action:focus-visible)::after,
 .sidebar-quick-actions:has(.sidebar-quick-action[data-active="true"])::after,
-.sidebar-quick-actions:has(.sidebar-add-menu[open] > .sidebar-quick-action)::after {
+.sidebar-quick-actions:has(.sidebar-add-menu[data-open="true"] > .sidebar-quick-action)::after {
   background: var(--meco-blue);
 }
 
-.sidebar-quick-action[data-active="true"],
-.sidebar-add-menu[open] > .sidebar-quick-action {
+.sidebar-footer-actions:has(.sidebar-quick-action:hover)::before,
+.sidebar-footer-actions:has(.sidebar-quick-action:focus-visible)::before,
+.sidebar-footer-actions:has(.sidebar-quick-action[data-active="true"])::before,
+.sidebar-footer-actions:has(.sidebar-settings-menu:hover > .sidebar-quick-action)::before,
+.sidebar-footer-actions:has(.sidebar-settings-menu[data-open="true"] > .sidebar-quick-action)::before {
+  background: var(--meco-blue);
+}
+
+.sidebar-quick-action[data-active="true"] {
+  border-radius: 8px;
+  background: var(--meco-blue);
+  color: var(--official-white);
+}
+
+.sidebar-add-menu[data-open="true"] > .sidebar-quick-action,
+.sidebar-settings-menu:hover > .sidebar-quick-action,
+.sidebar-settings-menu[data-open="true"] > .sidebar-quick-action {
   color: var(--meco-blue);
+}
+
+.page-shell.dark-mode .sidebar-quick-action[data-active="true"] {
+  background: var(--meco-blue);
+  color: var(--official-white);
 }
 
 .sidebar-quick-action svg {
@@ -90,18 +140,10 @@
   min-width: 0;
 }
 
-.sidebar-add-menu > summary {
-  list-style: none;
-}
-
-.sidebar-add-menu > summary::-webkit-details-marker {
-  display: none;
-}
-
 .sidebar-add-menu-panel {
-  position: absolute;
-  top: calc(100% + 0.3rem);
-  left: 50%;
+  position: fixed;
+  top: calc(var(--shell-topbar-height) + 2.65rem);
+  left: calc(var(--shell-sidebar-width) + 0.35rem);
   z-index: 1300;
   display: grid;
   min-width: 9rem;
@@ -110,16 +152,14 @@
   border-radius: 8px;
   background: var(--bg-panel);
   box-shadow: 0 16px 38px rgba(15, 23, 42, 0.18);
-  transform: translateX(-50%);
-}
-
-.sidebar-quick-actions[data-collapsed="true"] .sidebar-add-menu-panel {
-  left: calc(100% + 0.4rem);
-  top: 0;
   transform: none;
 }
 
-.sidebar-add-menu:not([open]) .sidebar-add-menu-panel {
+.page-shell.is-sidebar-overlay .sidebar-add-menu-panel {
+  left: calc(var(--shell-sidebar-expanded-width) + 0.35rem);
+}
+
+.sidebar-add-menu:not([data-open="true"]) .sidebar-add-menu-panel {
   display: none;
 }
 

@@ -20,25 +20,34 @@ import { AppTopbar } from "@/components/layout/AppTopbar";
 
 function renderTopbar(
   options: {
+    activeViewLabel?: string;
     isActiveViewFavorite?: boolean;
     isDarkMode?: boolean;
     isSidebarCollapsed?: boolean;
     onToggleActiveViewFavorite?: (() => void) | null;
   } = {},
 ) {
+  const favoriteToggle = Object.prototype.hasOwnProperty.call(options, "onToggleActiveViewFavorite")
+    ? (options.onToggleActiveViewFavorite ?? null)
+    : jest.fn();
+
   return renderToStaticMarkup(
     React.createElement(AppTopbar, {
-      activeViewLabel: "Timeline",
+      activeViewLabel: options.activeViewLabel ?? "Timeline",
       isActiveViewFavorite: options.isActiveViewFavorite ?? false,
       isDarkMode: options.isDarkMode ?? false,
       isSidebarCollapsed: options.isSidebarCollapsed ?? false,
-      onToggleActiveViewFavorite: options.onToggleActiveViewFavorite ?? jest.fn(),
+      onToggleActiveViewFavorite: favoriteToggle,
     }),
   );
 }
 
 function readTopbarShellCss() {
   return readFileSync(join(process.cwd(), "src/app/styles/shell/chrome/topbar-shell.css"), "utf8");
+}
+
+function readTopbarSearchCss() {
+  return readFileSync(join(process.cwd(), "src/app/styles/shell/chrome/topbar-search.css"), "utf8");
 }
 
 describe("AppTopbar", () => {
@@ -70,6 +79,34 @@ describe("AppTopbar", () => {
     );
   });
 
+  it("greys the favorite star when the active view cannot be favorited", () => {
+    const markup = renderTopbar({ onToggleActiveViewFavorite: null });
+    const topbarShellCss = readTopbarShellCss();
+
+    expect(markup).toMatch(
+      /<button(?=[^>]*class="[^"]*app-topbar-favorite-button)(?=[^>]*aria-label="Timeline cannot be favorited")(?=[^>]*data-enabled="false")(?=[^>]*disabled="")[^>]*>/,
+    );
+    expect(markup).toContain("lucide-star-off");
+    expect(topbarShellCss).toMatch(
+      /\.app-topbar-favorite-button:disabled,[\s\S]*\.app-topbar-favorite-button:disabled:focus-visible\s*\{[^}]*color:\s*rgba\(100, 116, 139, 0\.7\);[^}]*cursor:\s*default;[^}]*opacity:\s*1;/,
+    );
+    expect(topbarShellCss).toMatch(
+      /\.page-shell\.dark-mode \.app-topbar-favorite-button:disabled,[\s\S]*\.page-shell\.dark-mode \.app-topbar-favorite-button:disabled:focus-visible\s*\{[^}]*color:\s*rgba\(148, 163, 184, 0\.58\);/,
+    );
+  });
+
+  it("renders the Home favorite star as unavailable and greyed out", () => {
+    const markup = renderTopbar({
+      activeViewLabel: "Home",
+      onToggleActiveViewFavorite: null,
+    });
+
+    expect(markup).toMatch(
+      /<button(?=[^>]*class="[^"]*app-topbar-favorite-button)(?=[^>]*aria-label="Home cannot be favorited")(?=[^>]*aria-pressed="false")(?=[^>]*data-active="false")(?=[^>]*data-enabled="false")(?=[^>]*disabled="")[^>]*>[\s\S]*?<h1>Home<\/h1>/,
+    );
+    expect(markup).toContain("lucide-star-off");
+  });
+
   it("keeps profile and refresh controls out of the topbar", () => {
     const markup = renderTopbar();
 
@@ -78,8 +115,8 @@ describe("AppTopbar", () => {
   });
 
   it("caps the default topbar search width", () => {
-    const topbarShellCss = readTopbarShellCss();
+    const topbarSearchCss = readTopbarSearchCss();
 
-    expect(topbarShellCss).toMatch(/\.app-topbar-search\s*\{[^}]*max-width:\s*44rem;/);
+    expect(topbarSearchCss).toMatch(/\.app-topbar-search\s*\{[^}]*max-width:\s*44rem;/);
   });
 });

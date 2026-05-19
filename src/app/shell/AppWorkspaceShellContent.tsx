@@ -32,6 +32,7 @@ export function AppWorkspaceShellContent({
       isDeletingMember={c.isDeletingMember}
       isEditPersonOpen={c.isEditPersonOpen}
       isLoadingData={c.isLoadingData}
+      isNotificationQueueOpen={c.isNotificationQueueOpen}
       isAllProjectsView={c.isAllProjectsView}
       isNonRobotProject={c.isNonRobotProject}
       isSavingMember={c.isSavingMember}
@@ -102,6 +103,7 @@ export function AppWorkspaceShellContent({
       timelineMilestoneCreateSignal={c.timelineMilestoneCreateSignal}
       disablePanelAnimations={c.isWorkspaceModalOpen}
       onDismissDataMessage={c.clearDataMessage}
+      onDismissNotificationHistoryItem={c.dismissNotificationHistoryItem}
       onDismissTaskEditNotice={c.dismissTaskEditNotice}
       onTaskEditCanceled={c.notifyTaskEditCanceled}
       onTaskEditSaved={c.notifyTaskEditSaved}
@@ -109,6 +111,7 @@ export function AppWorkspaceShellContent({
       onStartInteractiveTutorialChapter={(chapterId) => void c.startInteractiveTutorial(chapterId)}
       interactiveTutorialChapters={c.interactiveTutorialChapters}
       isInteractiveTutorialActive={c.isInteractiveTutorialActive}
+      notificationHistory={c.notificationHistory}
     />
   );
 }

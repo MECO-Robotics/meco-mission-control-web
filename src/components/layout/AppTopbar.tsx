@@ -6,7 +6,7 @@ import {
   MECO_MAIN_LOGO_WHITE_SRC,
   MECO_MAIN_LOGO_WIDTH,
 } from "@/lib/branding";
-import { Search, Star } from "lucide-react";
+import { Search, Star, StarOff } from "lucide-react";
 
 import { APP_TOPBAR_SLOT_IDS } from "./AppTopbarSlotPortal";
 
@@ -25,6 +25,7 @@ export function AppTopbar({
   isSidebarCollapsed,
   onToggleActiveViewFavorite,
 }: AppTopbarProps) {
+  const canToggleFavorite = Boolean(onToggleActiveViewFavorite);
   const topbarLogo = isSidebarCollapsed
     ? {
         alt: "MECO compact team logo",
@@ -40,9 +41,12 @@ export function AppTopbar({
         variant: "full",
         width: MECO_MAIN_LOGO_WIDTH,
       };
-  const favoriteLabel = isActiveViewFavorite
-    ? `Remove ${activeViewLabel} from favorites`
-    : `Add ${activeViewLabel} to favorites`;
+  const favoriteLabel = canToggleFavorite
+    ? isActiveViewFavorite
+      ? `Remove ${activeViewLabel} from favorites`
+      : `Add ${activeViewLabel} to favorites`
+    : `${activeViewLabel} cannot be favorited`;
+  const FavoriteIcon = canToggleFavorite ? Star : StarOff;
 
   return (
     <header className="topbar app-topbar" data-collapsed={isSidebarCollapsed ? "true" : "false"}>
@@ -65,12 +69,13 @@ export function AppTopbar({
             aria-pressed={isActiveViewFavorite}
             className="app-topbar-favorite-button"
             data-active={isActiveViewFavorite ? "true" : "false"}
-            disabled={!onToggleActiveViewFavorite}
+            data-enabled={canToggleFavorite ? "true" : "false"}
+            disabled={!canToggleFavorite}
             onClick={onToggleActiveViewFavorite ?? undefined}
             title={favoriteLabel}
             type="button"
           >
-            <Star
+            <FavoriteIcon
               aria-hidden="true"
               fill={isActiveViewFavorite ? "currentColor" : "none"}
               size={15}

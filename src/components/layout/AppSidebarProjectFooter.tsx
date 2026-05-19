@@ -1,219 +1,136 @@
-import type { MouseEvent as ReactMouseEvent, RefObject } from "react";
-import { LogOut, Settings as SettingsIcon } from "lucide-react";
+import { type MouseEvent as ReactMouseEvent, type RefObject } from "react";
+import { ChevronRight, LayoutGrid } from "lucide-react";
 
-import { IconChevronRight, IconEdit, IconHelp } from "@/components/shared/Icons";
-import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
-import { getProjectIcon, getProjectIconColor } from "./appSidebarIcons";
-import { AppSidebarSeasonPicker } from "./AppSidebarSeasonPicker";
+import { IconHelp } from "@/components/shared/Icons";
+import type { SessionUser } from "@/lib/auth/types";
+
+import { AppProfileAssembly } from "./AppProfileAssembly";
+import { AppSidebarNotificationButton } from "./sidebar/AppSidebarNotificationButton";
+import { AppSidebarSettingsMenu } from "./sidebar/AppSidebarSettingsMenu";
 
 interface AppSidebarProjectFooterProps {
   activeTab: import("@/lib/workspaceNavigation").ViewTab;
-  canEditSelectedRobot: boolean;
   canSignOut: boolean;
   isDarkMode: boolean;
   isCollapsed: boolean;
+  isMyViewActive: boolean;
+  isNotificationQueueOpen: boolean;
   isProjectPopupOpen: boolean;
-  onEditSelectedRobot: () => void;
-  onCreateSeason: () => void;
+  myViewMemberName: string | null;
   onHelpSelect: () => void;
+  onNotificationQueueToggle: () => void;
   onSignOut: () => void;
+  onToggleMyView: () => void;
   onToggleDarkMode: () => void;
-  onSelectSeason: (seasonId: string | null) => void;
+  notificationCount: number;
   onProjectTriggerClick: (event: ReactMouseEvent<HTMLButtonElement>) => void;
   projectTriggerRef: RefObject<HTMLButtonElement | null>;
-  seasons: SeasonRecord[];
-  selectedProject: ProjectRecord | null;
   selectedProjectLabel: string;
-  selectedSeasonId: string | null;
+  sessionUser: SessionUser | null;
 }
 
 export function AppSidebarProjectFooter({
   activeTab,
-  canEditSelectedRobot,
   canSignOut,
   isDarkMode,
   isCollapsed,
+  isMyViewActive,
+  isNotificationQueueOpen,
   isProjectPopupOpen,
-  onEditSelectedRobot,
-  onCreateSeason,
+  myViewMemberName,
   onHelpSelect,
+  onNotificationQueueToggle,
   onSignOut,
+  onToggleMyView,
   onToggleDarkMode,
-  onSelectSeason,
+  notificationCount,
   onProjectTriggerClick,
   projectTriggerRef,
-  seasons,
-  selectedProject,
   selectedProjectLabel,
-  selectedSeasonId,
+  sessionUser,
 }: AppSidebarProjectFooterProps) {
-  const themeLabel = isDarkMode ? "Dark" : "Light";
-  const themeTitle = isDarkMode ? "Switch to light mode" : "Switch to dark mode";
-  const handleThemeClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
-    onToggleDarkMode();
-    event.currentTarget.closest("details")?.removeAttribute("open");
-  };
-  const handleSignOutClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
-    onSignOut();
-    event.currentTarget.closest("details")?.removeAttribute("open");
-  };
   const settingsMenu = (
-    <details className={`sidebar-settings-menu${isCollapsed ? " sidebar-settings-menu-collapsed" : ""}`}>
-      <summary
-        aria-label={isCollapsed ? "Settings" : undefined}
-        className={`tab sidebar-settings-summary${isCollapsed ? " sidebar-settings-collapsed-trigger" : ""}`}
-        data-active="false"
-      >
-        <span className="sidebar-tab-main">
-          <span aria-hidden="true" className="sidebar-tab-icon">
-            <SettingsIcon aria-hidden="true" size={14} strokeWidth={2} />
+    <AppSidebarSettingsMenu
+      canSignOut={canSignOut}
+      isCollapsed={isCollapsed}
+      isDarkMode={isDarkMode}
+      onSignOut={onSignOut}
+      onToggleDarkMode={onToggleDarkMode}
+    />
+  );
+  const scopeTrigger = (
+    <button
+      aria-expanded={isProjectPopupOpen ? "true" : "false"}
+      aria-label="Project scope"
+      className="sidebar-scope-trigger"
+      data-active={isProjectPopupOpen ? "true" : "false"}
+      onClick={onProjectTriggerClick}
+      ref={projectTriggerRef}
+      title={`Project scope: ${selectedProjectLabel}`}
+      type="button"
+    >
+      <span aria-hidden="true" className="sidebar-scope-trigger-icons">
+        <LayoutGrid size={16} strokeWidth={2} />
+      </span>
+      {!isCollapsed ? (
+        <span className="sidebar-scope-trigger-copy">
+          <span className="sidebar-scope-trigger-line" data-tutorial-target="project-select">
+            {selectedProjectLabel}
           </span>
-          {!isCollapsed ? <span className="sidebar-tab-label">Settings</span> : null}
         </span>
-      </summary>
-      <div aria-label="Settings menu" className="sidebar-settings-popover" role="menu">
-        <button
-          className="sidebar-settings-menu-item"
-          onClick={handleThemeClick}
-          role="menuitem"
-          title={themeTitle}
-          type="button"
-        >
-          <span className="sidebar-settings-menu-copy">
-            <span className="sidebar-settings-menu-title">Theme mode</span>
-            <span className="sidebar-settings-menu-value">{themeLabel}</span>
-          </span>
-          <span
-            aria-hidden="true"
-            className={`profile-mode-selector ${isDarkMode ? "is-dark" : "is-light"}`}
-          >
-            <span className="profile-mode-selector-track">
-              <span className="profile-mode-selector-thumb">
-                <span className="profile-mode-selector-icon">{isDarkMode ? "\u263E" : "\u2600"}</span>
-              </span>
-            </span>
-          </span>
-        </button>
-        {canSignOut ? (
-          <button
-            className="sidebar-settings-menu-item sidebar-settings-sign-out-item"
-            onClick={handleSignOutClick}
-            role="menuitem"
-            type="button"
-          >
-            <span className="sidebar-settings-menu-copy">
-              <span className="sidebar-settings-menu-title">Sign out</span>
-              <span className="sidebar-settings-menu-value">Account</span>
-            </span>
-            <span aria-hidden="true" className="sidebar-settings-menu-icon">
-              <LogOut size={14} strokeWidth={2} />
-            </span>
-          </button>
-        ) : null}
-      </div>
-    </details>
+      ) : null}
+      {!isCollapsed ? (
+        <span aria-hidden="true" className="sidebar-scope-trigger-caret">
+          <ChevronRight size={14} strokeWidth={2} />
+        </span>
+      ) : null}
+    </button>
+  );
+  const profileToggle = (
+    <div className="sidebar-footer-profile" data-collapsed={isCollapsed ? "true" : "false"}>
+      <AppProfileAssembly
+        isMyViewActive={isMyViewActive}
+        myViewMemberName={myViewMemberName}
+        onToggleMyView={onToggleMyView}
+        sessionUser={sessionUser}
+      />
+    </div>
+  );
+  const notificationMenu = (
+    <AppSidebarNotificationButton
+      isOpen={isNotificationQueueOpen}
+      notificationCount={notificationCount}
+      onToggle={onNotificationQueueToggle}
+    />
+  );
+  const bottomTriplet = (
+    <div className="sidebar-footer-actions" data-collapsed={isCollapsed ? "true" : "false"}>
+      {settingsMenu}
+      <button
+        aria-label="Help"
+        className={`sidebar-quick-action sidebar-footer-action-help${isCollapsed ? " sidebar-help-collapsed-trigger" : ""}`}
+        data-active={activeTab === "help" ? "true" : "false"}
+        onClick={onHelpSelect}
+        title="Help"
+        type="button"
+      >
+        <IconHelp />
+      </button>
+      {notificationMenu}
+    </div>
   );
 
   return !isCollapsed ? (
     <div className="sidebar-footer-stack">
-      {settingsMenu}
-      <button
-        className="tab sidebar-footer-help-button"
-        data-active={activeTab === "help" ? "true" : "false"}
-        onClick={onHelpSelect}
-        type="button"
-      >
-        <span className="sidebar-tab-main">
-          <span aria-hidden="true" className="sidebar-tab-icon">
-            <IconHelp />
-          </span>
-          <span className="sidebar-tab-label">Help</span>
-        </span>
-      </button>
-      <AppSidebarSeasonPicker
-        onCreateSeason={onCreateSeason}
-        onSelectSeason={onSelectSeason}
-        seasons={seasons}
-        selectedSeasonId={selectedSeasonId}
-      />
-      <div className="sidebar-context-picker sidebar-project-picker">
-        <span className="sidebar-context-label">Project</span>
-        <div className="sidebar-project-compact-row" data-tutorial-target="project-select-outreach">
-          <button
-            aria-expanded={isProjectPopupOpen ? "true" : "false"}
-            aria-label="Select project"
-            className="sidebar-project-trigger"
-            data-tutorial-target="project-select"
-            onClick={onProjectTriggerClick}
-            ref={projectTriggerRef}
-            type="button"
-          >
-            <span
-              aria-hidden="true"
-              className="sidebar-tab-icon"
-              style={{ color: getProjectIconColor(selectedProject) }}
-            >
-              {getProjectIcon(selectedProject)}
-            </span>
-            <span className="sidebar-project-trigger-label">{selectedProjectLabel}</span>
-            <span
-              aria-hidden="true"
-              className={`sidebar-project-trigger-chevron${isProjectPopupOpen ? " is-open" : ""}`}
-            >
-              <IconChevronRight />
-            </span>
-          </button>
-          {canEditSelectedRobot ? (
-            <button
-              aria-label="Edit robot name"
-              className="sidebar-context-action"
-              onClick={onEditSelectedRobot}
-              title="Edit robot name"
-              type="button"
-            >
-              <IconEdit />
-            </button>
-          ) : null}
-        </div>
-      </div>
+      {profileToggle}
+      {scopeTrigger}
+      {bottomTriplet}
     </div>
   ) : (
     <div className="sidebar-footer-stack sidebar-footer-stack-collapsed">
-      {settingsMenu}
-      <button
-        aria-label="Help"
-        className="tab sidebar-help-collapsed-trigger"
-        data-active={activeTab === "help" ? "true" : "false"}
-        onClick={onHelpSelect}
-        type="button"
-      >
-        <span className="sidebar-tab-main">
-          <span aria-hidden="true" className="sidebar-tab-icon">
-            <IconHelp />
-          </span>
-        </span>
-      </button>
-      <div className="sidebar-project-collapsed-slot">
-        <button
-          aria-expanded={isProjectPopupOpen ? "true" : "false"}
-          aria-label="Select project"
-          className="tab sidebar-project-collapsed-trigger"
-          data-tutorial-target="project-select"
-          onClick={onProjectTriggerClick}
-          ref={projectTriggerRef}
-          type="button"
-        >
-          <span className="sidebar-tab-main">
-            <span
-              aria-hidden="true"
-              className="sidebar-tab-icon"
-              style={{ color: getProjectIconColor(selectedProject) }}
-            >
-              {getProjectIcon(selectedProject)}
-            </span>
-          </span>
-        </button>
-      </div>
+      {profileToggle}
+      {scopeTrigger}
+      {bottomTriplet}
     </div>
   );
 }

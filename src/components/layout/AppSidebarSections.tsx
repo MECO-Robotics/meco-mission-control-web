@@ -1,5 +1,4 @@
 import type { MouseEvent as ReactMouseEvent } from "react";
-import { Star } from "lucide-react";
 import { IconChevronRight } from "@/components/shared/Icons";
 import {
   type NavigationSection,
@@ -44,9 +43,12 @@ export function AppSidebarSections({
   onSubItemSelect,
   sectionModels,
 }: AppSidebarSectionsProps) {
-  const renderSubItem = (subItem: SidebarSubItemModel) => (
+  const renderSubItem = (
+    subItem: SidebarSubItemModel,
+    options: { isFavorite?: boolean } = {},
+  ) => (
     <button
-      className="sidebar-subtab"
+      className={options.isFavorite ? "sidebar-subtab sidebar-favorite-subtab" : "sidebar-subtab"}
       data-active={activeSubItemId === subItem.id ? "true" : "false"}
       data-enabled={subItem.isEnabled ? "true" : "false"}
       disabled={!subItem.isEnabled}
@@ -65,16 +67,11 @@ export function AppSidebarSections({
     <>
       {!isCollapsed && favoriteSubItems.length > 0 ? (
         <div className="sidebar-section-group sidebar-favorites-group">
-          <div className="tab sidebar-section-toggle sidebar-favorites-heading">
-            <span className="sidebar-tab-main">
-              <span aria-hidden="true" className="sidebar-tab-icon">
-                <Star size={14} strokeWidth={2} />
-              </span>
-              <span className="sidebar-tab-label">Favorites</span>
-            </span>
+          <div className="sidebar-favorites-heading">
+            <span className="sidebar-favorites-heading-label">Favorites</span>
           </div>
           <div className="sidebar-subtab-list sidebar-favorites-list">
-            {favoriteSubItems.map(renderSubItem)}
+            {favoriteSubItems.map((subItem) => renderSubItem(subItem, { isFavorite: true }))}
           </div>
         </div>
       ) : null}
@@ -113,7 +110,7 @@ export function AppSidebarSections({
 
             {isExpanded ? (
               <div className="sidebar-subtab-list">
-                {subItems.map(renderSubItem)}
+                {subItems.map((subItem) => renderSubItem(subItem))}
               </div>
             ) : null}
           </div>

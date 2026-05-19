@@ -1,4 +1,4 @@
-import { Users } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, Users } from "lucide-react";
 
 import { MECO_PROFILE_AVATAR_SIZE } from "@/lib/branding";
 import type { SessionUser } from "@/lib/auth/types";
@@ -16,11 +16,17 @@ function getProfileFallbackInitial(sessionUser: SessionUser) {
   return (name || email || LOCAL_DEV_PROFILE_INITIAL).slice(0, 1).toUpperCase();
 }
 
-function ProfileAvatar({ sessionUser }: { sessionUser: SessionUser }) {
+function ProfileAvatar({
+  displayName,
+  sessionUser,
+}: {
+  displayName: string;
+  sessionUser: SessionUser;
+}) {
   if (sessionUser.picture) {
     return (
       <img
-        alt={`${sessionUser.name} profile`}
+        alt={`${displayName} profile`}
         className="profile-avatar"
         height={MECO_PROFILE_AVATAR_SIZE}
         loading="eager"
@@ -44,61 +50,45 @@ function SignedInProfileAssembly({
   onToggleMyView,
   sessionUser,
 }: AppProfileAssemblyProps & { sessionUser: SessionUser }) {
-  const myViewTitle = myViewMemberName
-    ? isMyViewActive
-      ? `Showing ${myViewMemberName}`
-      : `Filter workspace to ${myViewMemberName}`
-    : "No roster member matches the signed-in user";
-  const isMyViewAvailable = myViewMemberName !== null;
-
+  const displayName = myViewMemberName || sessionUser.name || "Local access";
+  const activeViewLabel = isMyViewActive ? "Personal view" : "All users view";
+  const inactiveViewLabel = isMyViewActive ? "all users" : "personal view";
+  const profileAvatar = <ProfileAvatar displayName={displayName} sessionUser={sessionUser} />;
+  const usersAvatar = (
+    <span className="profile-view-users-icon" aria-hidden="true">
+      <Users size={15} strokeWidth={2} />
+    </span>
+  );
+  const selectedViewAvatar = isMyViewActive ? profileAvatar : usersAvatar;
+  const alternateViewAvatar = isMyViewActive ? usersAvatar : profileAvatar;
+  const SwitchArrowIcon = isMyViewActive ? ArrowDownLeft : ArrowUpRight;
   const handleMyViewClick = () => {
-    if (!isMyViewAvailable) {
-      return;
-    }
-
     onToggleMyView();
-  };
-  const handleAllMembersClick = () => {
-    if (isMyViewActive) {
-      onToggleMyView();
-    }
   };
 
   return (
-    <div className="profile-menu">
-      <div aria-label="My View filter" className="profile-view-toggle" role="group">
-        <button
-          aria-label={isMyViewActive ? "Show all workspace members" : "All workspace members"}
-          aria-pressed={!isMyViewActive}
-          className={
-            isMyViewActive
-              ? "profile-view-toggle-option profile-view-group-button"
-              : "profile-view-toggle-option profile-view-group-button is-active"
-          }
-          onClick={handleAllMembersClick}
-          title={isMyViewActive ? "Show all workspace members" : "Showing all workspace members"}
-          type="button"
+    <div className="profile-view-switch sidebar-profile-toggle">
+      <button
+        aria-label={`${activeViewLabel}. Switch to ${inactiveViewLabel}.`}
+        aria-pressed={isMyViewActive}
+        className="user-chip profile-trigger profile-trigger-view-switch"
+        data-view={isMyViewActive ? "personal" : "all"}
+        onClick={handleMyViewClick}
+        type="button"
+      >
+        <span className="profile-view-stack" aria-hidden="true">
+          <span className="profile-view-option profile-view-option-other">{alternateViewAvatar}</span>
+          <span className="profile-view-option profile-view-option-selected">{selectedViewAvatar}</span>
+        </span>
+        <span className="profile-trigger-label">Switch view</span>
+        <span
+          aria-hidden="true"
+          className="profile-view-switch-arrow"
+          data-direction={isMyViewActive ? "down-left" : "up-right"}
         >
-          <span className="profile-avatar profile-view-group-icon" aria-hidden="true">
-            <Users size={17} strokeWidth={2} />
-          </span>
-        </button>
-        <button
-          aria-label={isMyViewActive ? "Clear My View filter" : "Show My View filter"}
-          aria-disabled={!isMyViewAvailable}
-          aria-pressed={isMyViewActive}
-          className={
-            isMyViewActive
-              ? "profile-view-toggle-option profile-view-avatar-button is-active"
-              : "profile-view-toggle-option profile-view-avatar-button"
-          }
-          onClick={handleMyViewClick}
-          title={myViewTitle}
-          type="button"
-        >
-          <ProfileAvatar sessionUser={sessionUser} />
-        </button>
-      </div>
+          <SwitchArrowIcon size={12} strokeWidth={2.2} />
+        </span>
+      </button>
     </div>
   );
 }

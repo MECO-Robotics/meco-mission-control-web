@@ -24,17 +24,34 @@
   box-shadow: 0 10px 20px rgba(15, 28, 52, 0.14);
 }
 
-.sidebar-settings-menu[open] .sidebar-settings-popover {
+.sidebar-settings-menu[data-open="true"] .sidebar-settings-popover {
   display: grid;
 }
 
+.sidebar-footer-actions .sidebar-settings-popover {
+  position: fixed;
+  bottom: 2.65rem;
+  left: calc(var(--shell-sidebar-width) + 0.35rem);
+  z-index: 1300;
+  min-width: 12rem;
+  margin-top: 0;
+}
+
+.page-shell.is-sidebar-overlay .sidebar-footer-actions .sidebar-settings-popover {
+  left: calc(var(--shell-sidebar-expanded-width) + 0.35rem);
+}
+
 .sidebar-settings-menu-collapsed .sidebar-settings-popover {
-  position: absolute;
-  left: calc(100% + 0.35rem);
-  bottom: 0;
+  position: fixed;
+  left: calc(var(--shell-sidebar-width) + 0.35rem);
+  bottom: 2.65rem;
   z-index: 1205;
   min-width: 12rem;
   margin-top: 0;
+}
+
+.page-shell.is-sidebar-overlay .sidebar-settings-menu-collapsed .sidebar-settings-popover {
+  left: calc(var(--shell-sidebar-expanded-width) + 0.35rem);
 }
 
 .sidebar-settings-menu-item {

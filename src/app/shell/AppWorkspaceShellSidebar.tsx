@@ -68,8 +68,9 @@ export function AppWorkspaceShellSidebar({
       isMyViewActive={c.isMyViewActive}
       onSelectTarget={handleSelectNavigationTarget}
       isCollapsed={c.isSidebarCollapsed}
+      isNotificationQueueOpen={c.isNotificationQueueOpen}
       myViewMemberName={c.signedInMember?.name ?? null}
-      notificationCount={c.taskEditNotices.length + (c.dataMessage ? 1 : 0)}
+      notificationCount={c.notificationHistory.length}
       onCreateMilestone={handleCreateMilestone}
       onCreatePart={c.openCreatePartDefinitionModal}
       onCreateQaReport={c.openCreateQaReportModal}
@@ -77,6 +78,7 @@ export function AppWorkspaceShellSidebar({
       onCreateTask={c.openCreateTaskModal}
       onSelectSeason={c.setSelectedSeasonId}
       onToggleMyView={c.toggleMyView}
+      onToggleNotificationQueue={c.toggleNotificationQueue}
       toggleSidebar={c.toggleSidebar}
       projects={c.projectsInSelectedSeason}
       selectedProjectId={c.selectedProjectId}
