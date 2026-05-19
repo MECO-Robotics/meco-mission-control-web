@@ -53,6 +53,7 @@ function renderSidebar(
       onCreateRobot: jest.fn(),
       onCreateTask: jest.fn(),
       onEditSelectedRobot: jest.fn(),
+      onRefreshWorkspace: jest.fn(),
       onSelectSeason: jest.fn(),
       onSelectProject: jest.fn(),
       onSelectTarget: jest.fn(),
@@ -126,9 +127,9 @@ describe("AppSidebar", () => {
     expect(markup.indexOf("profile-view-switch")).toBeGreaterThan(profileIndex);
     expect(markup).not.toContain('<span class="sidebar-tab-label">Collapse sidebar</span>');
     expect(markup).toContain("Theme mode");
+    expect(markup).toContain("Refresh workspace");
     expect(markup).toContain("Sign out");
     expect(markup).not.toContain("profile-menu-popover");
-    expect(markup).not.toContain('aria-label="Refresh workspace"');
     expect(markup).not.toContain("profile-menu-context-picker");
   });
 
@@ -196,9 +197,11 @@ describe("AppSidebar", () => {
     );
     expect(markup).toContain('aria-label="Settings menu"');
     expect(markup).toContain("Theme mode");
+    expect(markup).toContain("Refresh workspace");
     expect(markup).toContain("Sign out");
     expect(markup).toContain("sidebar-settings-menu-value");
     expect(markup).toContain("lucide-settings");
+    expect(markup).toContain("lucide-refresh-cw");
     expect(markup).toContain("lucide-log-out");
     expect(markup).toContain("lucide-bell");
     expect(css).toMatch(
@@ -242,6 +245,8 @@ describe("AppSidebar", () => {
     expect(settingsSource).toContain('data-open={isMenuOpen ? "true" : "false"}');
     expect(settingsSource).toContain("onMouseEnter={handleSettingsHover}");
     expect(settingsSource).toContain("onClick={handleSettingsClick}");
+    expect(settingsSource).toContain("handleRefreshWorkspaceClick");
+    expect(settingsSource).toContain("onRefreshWorkspace()");
     expect(settingsSource).toContain('closest(".sidebar")');
     expect(settingsSource).toContain('addEventListener("mouseleave", closeHoverMenu)');
     expect(settingsSource).toContain('document.addEventListener("pointerdown", dismissOnOutsidePointer)');
@@ -871,7 +876,8 @@ describe("AppSidebar", () => {
     expect(notificationSource).toContain("onMouseEnter={handleNotificationQueuePreviewOpen}");
     expect(notificationSource).toContain("onMouseLeave={handleNotificationQueuePreviewClose}");
     expect(notificationSource).toContain("onBlur={handleNotificationQueuePreviewClose}");
-    expect(notificationSource).toContain("onFocus={handleNotificationQueueFocus}");
+    expect(notificationSource).not.toContain("handleNotificationQueueFocus");
+    expect(notificationSource).not.toContain("onFocus=");
     expect(notificationSource).toContain("onClick={handleNotificationQueueClick}");
     expect(sidebarSource).toContain("onNotificationQueueToggle={onToggleNotificationQueue}");
     expect(source).not.toContain("notificationItems");

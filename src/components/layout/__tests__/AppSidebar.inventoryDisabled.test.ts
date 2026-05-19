@@ -42,6 +42,7 @@ describe("AppSidebar inventory availability", () => {
         onCreateTask: jest.fn(),
         onCreateRobot: jest.fn(),
         onEditSelectedRobot: jest.fn(),
+        onRefreshWorkspace: jest.fn(),
         onSelectSeason: jest.fn(),
         onSelectProject: jest.fn(),
         onSelectTarget: jest.fn(),

@@ -51,6 +51,7 @@ interface AppSidebarProps {
   onCreateQaReport: () => void;
   onCreateSeason: () => void;
   onCreateTask: () => void;
+  onRefreshWorkspace: () => void;
   onSelectSeason: (seasonId: string | null) => void;
   onToggleMyView: () => void;
   onToggleNotificationQueue: () => void;
@@ -89,6 +90,7 @@ export function AppSidebar({
   onCreateQaReport,
   onCreateSeason,
   onCreateTask,
+  onRefreshWorkspace,
   onSelectSeason,
   onToggleMyView,
   onToggleNotificationQueue,
@@ -315,6 +317,7 @@ export function AppSidebar({
           myViewMemberName={myViewMemberName}
           onHelpSelect={handleHelpSelect}
           onProjectTriggerClick={handleProjectTriggerClick}
+          onRefreshWorkspace={onRefreshWorkspace}
           onSignOut={handleSignOut}
           onToggleMyView={onToggleMyView}
           onToggleDarkMode={toggleDarkMode}

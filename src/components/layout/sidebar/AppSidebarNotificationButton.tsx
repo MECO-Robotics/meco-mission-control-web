@@ -52,13 +52,6 @@ export function AppSidebarNotificationButton({
 
     pendingHoverCloseRef.current = true;
   };
-  const handleNotificationQueueFocus = () => {
-    if (hoverOpenedNotificationQueueRef.current || isOpen) {
-      return;
-    }
-
-    onToggle();
-  };
   const handleNotificationQueueClick = () => {
     if (hoverOpenedNotificationQueueRef.current) {
       hoverOpenedNotificationQueueRef.current = false;
@@ -79,7 +72,6 @@ export function AppSidebarNotificationButton({
       data-active={isOpen ? "true" : "false"}
       onBlur={handleNotificationQueuePreviewClose}
       onClick={handleNotificationQueueClick}
-      onFocus={handleNotificationQueueFocus}
       onMouseEnter={handleNotificationQueuePreviewOpen}
       onMouseLeave={handleNotificationQueuePreviewClose}
       title={notificationLabel}

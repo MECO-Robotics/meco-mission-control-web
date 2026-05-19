@@ -5,12 +5,13 @@ import {
   useRef,
   useState,
 } from "react";
-import { LogOut, Settings as SettingsIcon } from "lucide-react";
+import { LogOut, RefreshCw, Settings as SettingsIcon } from "lucide-react";
 
 interface AppSidebarSettingsMenuProps {
   canSignOut: boolean;
   isCollapsed: boolean;
   isDarkMode: boolean;
+  onRefreshWorkspace: () => void;
   onSignOut: () => void;
   onToggleDarkMode: () => void;
 }
@@ -19,6 +20,7 @@ export function AppSidebarSettingsMenu({
   canSignOut,
   isCollapsed,
   isDarkMode,
+  onRefreshWorkspace,
   onSignOut,
   onToggleDarkMode,
 }: AppSidebarSettingsMenuProps) {
@@ -107,6 +109,11 @@ export function AppSidebarSettingsMenu({
     event.currentTarget.blur();
     closeMenu();
   };
+  const handleRefreshWorkspaceClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
+    onRefreshWorkspace();
+    event.currentTarget.blur();
+    closeMenu();
+  };
   const handleSignOutClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     onSignOut();
     event.currentTarget.blur();
@@ -154,6 +161,20 @@ export function AppSidebarSettingsMenu({
                 <span className="profile-mode-selector-icon">{isDarkMode ? "\u263E" : "\u2600"}</span>
               </span>
             </span>
+          </span>
+        </button>
+        <button
+          className="sidebar-settings-menu-item"
+          onClick={handleRefreshWorkspaceClick}
+          role="menuitem"
+          type="button"
+        >
+          <span className="sidebar-settings-menu-copy">
+            <span className="sidebar-settings-menu-title">Refresh workspace</span>
+            <span className="sidebar-settings-menu-value">Reload data</span>
+          </span>
+          <span aria-hidden="true" className="sidebar-settings-menu-icon">
+            <RefreshCw size={14} strokeWidth={2} />
           </span>
         </button>
         {canSignOut ? (

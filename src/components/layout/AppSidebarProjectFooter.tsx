@@ -19,6 +19,7 @@ interface AppSidebarProjectFooterProps {
   myViewMemberName: string | null;
   onHelpSelect: () => void;
   onNotificationQueueToggle: () => void;
+  onRefreshWorkspace: () => void;
   onSignOut: () => void;
   onToggleMyView: () => void;
   onToggleDarkMode: () => void;
@@ -40,6 +41,7 @@ export function AppSidebarProjectFooter({
   myViewMemberName,
   onHelpSelect,
   onNotificationQueueToggle,
+  onRefreshWorkspace,
   onSignOut,
   onToggleMyView,
   onToggleDarkMode,
@@ -54,6 +56,7 @@ export function AppSidebarProjectFooter({
       canSignOut={canSignOut}
       isCollapsed={isCollapsed}
       isDarkMode={isDarkMode}
+      onRefreshWorkspace={onRefreshWorkspace}
       onSignOut={onSignOut}
       onToggleDarkMode={onToggleDarkMode}
     />

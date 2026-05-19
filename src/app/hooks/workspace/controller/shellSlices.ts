@@ -46,6 +46,7 @@ export const shellSidebarModelKeys = [
   "isMyViewActive",
   "isNotificationQueueOpen",
   "isSidebarCollapsed",
+  "loadWorkspace",
   "manufacturingView",
   "navigationItems",
   "notificationHistory",

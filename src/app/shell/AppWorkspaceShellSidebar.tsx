@@ -76,6 +76,7 @@ export function AppWorkspaceShellSidebar({
       onCreateQaReport={c.openCreateQaReportModal}
       onCreateSeason={c.handleCreateSeason}
       onCreateTask={c.openCreateTaskModal}
+      onRefreshWorkspace={c.loadWorkspace}
       onSelectSeason={c.setSelectedSeasonId}
       onToggleMyView={c.toggleMyView}
       onToggleNotificationQueue={c.toggleNotificationQueue}
