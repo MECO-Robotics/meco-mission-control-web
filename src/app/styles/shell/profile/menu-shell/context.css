@@ -3,12 +3,6 @@
   border-color: var(--border-base);
 }
 
-.profile-menu:hover .profile-menu-popover {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-
 .profile-menu-context-picker {
   display: grid;
   gap: 0.3rem;
