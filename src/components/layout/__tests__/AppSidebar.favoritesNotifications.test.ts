@@ -67,6 +67,63 @@ describe("AppSidebar favorites and notifications", () => {
     );
   });
 
+  it("keeps favorite icons visible with a compact separator when folded", () => {
+    const markup = renderSidebar(
+      [
+        {
+          value: "tasks",
+          label: "Tasks",
+          icon: React.createElement("span"),
+          count: 4,
+        },
+        {
+          value: "risk-management",
+          label: "Risks",
+          icon: React.createElement("span"),
+          count: 2,
+        },
+      ],
+      "tasks",
+      {
+        favoriteViewIds: ["tasks-timeline"],
+        isCollapsed: true,
+        taskView: "timeline",
+      },
+    );
+    const css = readFileSync("src/app/styles/shell/sidebar/sidebar-favorites.css", "utf8");
+    const favoritesIndex = markup.indexOf("sidebar-favorites-group");
+    const dashboardIndex = markup.indexOf('data-tutorial-target="sidebar-tab-dashboard"');
+
+    expect(favoritesIndex).toBeGreaterThan(-1);
+    expect(favoritesIndex).toBeLessThan(dashboardIndex);
+    expect(markup).toContain('data-collapsed="true"');
+    expect(markup).toContain('aria-label="Timeline"');
+    expect(markup).toMatch(
+      /<button(?=[^>]*class="sidebar-subtab sidebar-favorite-subtab")(?=[^>]*title="Timeline")[^>]*>[\s\S]*sidebar-subtab-icon[\s\S]*<\/button>/,
+    );
+    expect(markup).toMatch(
+      /<div class="sidebar-favorites-heading"><span class="sidebar-favorites-heading-label">Fav<\/span><\/div>/,
+    );
+    expect(css).toMatch(
+      /\.sidebar-favorites-group\[data-collapsed="true"\]\s*\{[^}]*align-items:\s*center;[^}]*width:\s*100%;[^}]*box-sizing:\s*border-box;[^}]*padding:\s*0 0\.4rem 0\.58rem;/,
+    );
+    expect(css).toMatch(
+      /\.sidebar-favorites-group\[data-collapsed="true"\]::after\s*\{[^}]*right:\s*0\.4rem;[^}]*left:\s*0\.4rem;/,
+    );
+    expect(css).toMatch(
+      /\.sidebar-favorites-group\[data-collapsed="true"\] \.sidebar-favorites-heading\s*\{[^}]*font-size:\s*0\.58rem;[^}]*text-align:\s*center;/,
+    );
+    expect(css).toMatch(
+      /\.sidebar-favorites-group\[data-collapsed="true"\] \.sidebar-favorites-list\s*\{[^}]*align-items:\s*center;[^}]*justify-content:\s*center;[^}]*width:\s*100%;[^}]*padding-left:\s*0;/,
+    );
+    expect(css).toMatch(
+      /\.sidebar-favorites-group\[data-collapsed="true"\] \.sidebar-favorite-subtab\s*\{[^}]*align-self:\s*center;[^}]*justify-content:\s*center;[^}]*width:\s*1\.9rem;[^}]*flex:\s*0 0 1\.9rem;[^}]*height:\s*1\.9rem;[^}]*margin-inline:\s*auto;[^}]*border-radius:\s*8px;/,
+    );
+    expect(css).toMatch(
+      /\.sidebar-favorites-group\[data-collapsed="true"\] \.sidebar-subtab-label\s*\{[^}]*display:\s*none;/,
+    );
+  });
+
   it("renders Home, Add, and Fold controls as the top triplet", () => {
     const markup = renderSidebar(
       [

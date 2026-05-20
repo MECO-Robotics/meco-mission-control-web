@@ -23,6 +23,7 @@ import {
 import { AppSidebarProjectFooter } from "./AppSidebarProjectFooter";
 import { AppSidebarQuickActions } from "./AppSidebarQuickActions";
 import { AppSidebarSections } from "./AppSidebarSections";
+import { useSidebarScrollHints } from "./sidebar/useSidebarScrollHints";
 import { useAppSidebarNavigationModels } from "./sidebar/useAppSidebarNavigationModels";
 import { useAppSidebarPopupState } from "./useAppSidebarPopupState";
 
@@ -143,6 +144,11 @@ export function AppSidebar({
     setProjectPopupTop,
     sidebarShellRef,
   } = useAppSidebarPopupState({ activeSection, isCollapsed });
+  const {
+    hasBottomHint,
+    hasTopHint,
+    sidebarScrollRef,
+  } = useSidebarScrollHints();
 
   const handleSectionClick = (section: NavigationSection, event: ReactMouseEvent<HTMLButtonElement>) => {
     const subItems = getSectionSubItems(section);
@@ -218,8 +224,19 @@ export function AppSidebar({
   };
 
   return (
-    <div className="sidebar-shell" data-collapsed={isCollapsed ? "true" : "false"} ref={sidebarShellRef}>
-      <nav aria-label="Workspace views" className="sidebar" data-collapsed={isCollapsed ? "true" : "false"}>
+    <div
+      className="sidebar-shell"
+      data-collapsed={isCollapsed ? "true" : "false"}
+      data-scroll-bottom-hint={hasBottomHint ? "true" : "false"}
+      data-scroll-top-hint={hasTopHint ? "true" : "false"}
+      ref={sidebarShellRef}
+    >
+      <nav
+        aria-label="Workspace views"
+        className="sidebar"
+        data-collapsed={isCollapsed ? "true" : "false"}
+        ref={sidebarScrollRef}
+      >
         <AppSidebarQuickActions
           activeTab={activeTab}
           isCollapsed={isCollapsed}

@@ -46,29 +46,38 @@ export function AppSidebarSections({
   const renderSubItem = (
     subItem: SidebarSubItemModel,
     options: { isFavorite?: boolean } = {},
-  ) => (
-    <button
-      className={options.isFavorite ? "sidebar-subtab sidebar-favorite-subtab" : "sidebar-subtab"}
-      data-active={activeSubItemId === subItem.id ? "true" : "false"}
-      data-enabled={subItem.isEnabled ? "true" : "false"}
-      disabled={!subItem.isEnabled}
-      key={subItem.id}
-      onClick={() => onSubItemSelect(subItem.target, subItem.isEnabled)}
-      type="button"
-    >
-      <span aria-hidden="true" className="sidebar-subtab-icon">
-        {subItemIcons[subItem.id]}
-      </span>
-      <span className="sidebar-subtab-label">{subItem.label}</span>
-    </button>
-  );
+  ) => {
+    const isFavorite = options.isFavorite === true;
+
+    return (
+      <button
+        aria-label={isCollapsed && isFavorite ? subItem.label : undefined}
+        className={isFavorite ? "sidebar-subtab sidebar-favorite-subtab" : "sidebar-subtab"}
+        data-active={activeSubItemId === subItem.id ? "true" : "false"}
+        data-enabled={subItem.isEnabled ? "true" : "false"}
+        disabled={!subItem.isEnabled}
+        key={subItem.id}
+        onClick={() => onSubItemSelect(subItem.target, subItem.isEnabled)}
+        title={isCollapsed && isFavorite ? subItem.label : undefined}
+        type="button"
+      >
+        <span aria-hidden="true" className="sidebar-subtab-icon">
+          {subItemIcons[subItem.id]}
+        </span>
+        <span className="sidebar-subtab-label">{subItem.label}</span>
+      </button>
+    );
+  };
 
   return (
     <>
-      {!isCollapsed && favoriteSubItems.length > 0 ? (
-        <div className="sidebar-section-group sidebar-favorites-group">
+      {favoriteSubItems.length > 0 ? (
+        <div
+          className="sidebar-section-group sidebar-favorites-group"
+          data-collapsed={isCollapsed ? "true" : "false"}
+        >
           <div className="sidebar-favorites-heading">
-            <span className="sidebar-favorites-heading-label">Favorites</span>
+            <span className="sidebar-favorites-heading-label">{isCollapsed ? "Fav" : "Favorites"}</span>
           </div>
           <div className="sidebar-subtab-list sidebar-favorites-list">
             {favoriteSubItems.map((subItem) => renderSubItem(subItem, { isFavorite: true }))}

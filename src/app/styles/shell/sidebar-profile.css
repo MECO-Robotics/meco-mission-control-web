@@ -6,6 +6,47 @@
   background: linear-gradient(180deg, var(--bg-row-alt), var(--bg-panel));
 }
 
+.sidebar-shell::before,
+.sidebar-shell::after {
+  --sidebar-scroll-edge-pad: 1rem;
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 1100;
+  height: var(--sidebar-scroll-edge-pad);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.16s ease;
+}
+
+.sidebar-shell::before {
+  top: 0;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--bg-panel) 100%, transparent) 0%,
+    color-mix(in srgb, var(--bg-panel) 98%, transparent) 40%,
+    color-mix(in srgb, var(--bg-panel) 92%, transparent) 70%,
+    transparent 100%
+  );
+}
+
+.sidebar-shell::after {
+  bottom: 0;
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--bg-panel) 100%, transparent) 0%,
+    color-mix(in srgb, var(--bg-panel) 98%, transparent) 40%,
+    color-mix(in srgb, var(--bg-panel) 92%, transparent) 70%,
+    transparent 100%
+  );
+}
+
+.sidebar-shell[data-scroll-top-hint="true"]::before,
+.sidebar-shell[data-scroll-bottom-hint="true"]::after {
+  opacity: 1;
+}
+
 .sidebar {
   flex: 1 1 auto;
   min-height: 0;

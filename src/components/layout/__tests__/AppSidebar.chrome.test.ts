@@ -69,6 +69,47 @@ describe("AppSidebar chrome", () => {
     expect(markup).not.toContain("sidebar-profile-fold-button");
   });
 
+  it("adds edge gradient hints for vertical sidebar scrolling", () => {
+    const markup = renderSidebar(
+      [
+        {
+          value: "tasks",
+          label: "Tasks",
+          icon: React.createElement("span"),
+          count: 4,
+        },
+      ],
+      "tasks",
+      { sessionUser: signedInUser },
+    );
+    const sidebarSource = readFileSync("src/components/layout/AppSidebar.tsx", "utf8");
+    const hookSource = readFileSync("src/components/layout/sidebar/useSidebarScrollHints.ts", "utf8");
+    const shellCss = readFileSync("src/app/styles/shell.css", "utf8");
+    const hintCss = readFileSync("src/app/styles/shell/sidebar-profile.css", "utf8");
+
+    expect(markup).toContain('data-scroll-bottom-hint="false"');
+    expect(markup).toContain('data-scroll-top-hint="false"');
+    expect(sidebarSource).toContain("useSidebarScrollHints()");
+    expect(sidebarSource).toContain("ref={sidebarScrollRef}");
+    expect(hookSource).toContain("const SCROLL_EDGE_THRESHOLD = 4");
+    expect(hookSource).toContain('element.addEventListener("scroll", scheduleUpdate, { passive: true })');
+    expect(hookSource).toContain("new ResizeObserver(scheduleUpdate)");
+    expect(hookSource).toContain("new MutationObserver(scheduleUpdate)");
+    expect(shellCss).toContain('@import url("./shell/sidebar-profile.css");');
+    expect(hintCss).toMatch(
+      /\.sidebar-shell::before,\s*\.sidebar-shell::after\s*\{[^}]*--sidebar-scroll-edge-pad:\s*1rem;[^}]*position:\s*absolute;[^}]*height:\s*var\(--sidebar-scroll-edge-pad\);[^}]*pointer-events:\s*none;[^}]*opacity:\s*0;/,
+    );
+    expect(hintCss).toMatch(
+      /\.sidebar-shell::before\s*\{[^}]*top:\s*0;[^}]*linear-gradient\(\s*to bottom,[^}]*color-mix\(in srgb, var\(--bg-panel\) 98%, transparent\) 40%,[^}]*color-mix\(in srgb, var\(--bg-panel\) 92%, transparent\) 70%,/,
+    );
+    expect(hintCss).toMatch(
+      /\.sidebar-shell::after\s*\{[^}]*bottom:\s*0;[^}]*linear-gradient\(\s*to top,[^}]*color-mix\(in srgb, var\(--bg-panel\) 98%, transparent\) 40%,[^}]*color-mix\(in srgb, var\(--bg-panel\) 92%, transparent\) 70%,/,
+    );
+    expect(hintCss).toMatch(
+      /\.sidebar-shell\[data-scroll-top-hint="true"\]::before,\s*\.sidebar-shell\[data-scroll-bottom-hint="true"\]::after\s*\{[^}]*opacity:\s*1;/,
+    );
+  });
+
   it("clears mouse focus after the sidebar fold button is clicked", () => {
     const source = readFileSync("src/components/layout/AppSidebar.tsx", "utf8");
 
