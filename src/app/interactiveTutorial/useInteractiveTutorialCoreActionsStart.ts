@@ -10,8 +10,8 @@ import {
   getInteractiveTutorialChapter,
   resolveInteractiveTutorialSandboxSelection,
 } from "./interactiveTutorialSessionHelpers";
-import type { InteractiveTutorialCoreState } from "./useInteractiveTutorialCoreState";
-import type { UseInteractiveTutorialOptions } from "./useInteractiveTutorialCoreTypes";
+import type { InteractiveTutorialCoreState } from "./core/useInteractiveTutorialCoreState";
+import type { UseInteractiveTutorialOptions } from "./core/useInteractiveTutorialCoreTypes";
 
 interface UseInteractiveTutorialCoreActionsStartOptions {
   options: UseInteractiveTutorialOptions;

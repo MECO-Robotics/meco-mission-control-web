@@ -41,6 +41,14 @@
   border-radius: 999px;
 }
 
+.workspace-floating-create-button {
+  position: fixed;
+  right: clamp(1rem, 2vw, 1.6rem);
+  bottom: calc(clamp(1rem, 2vh, 1.3rem) + env(safe-area-inset-bottom, 0px));
+  z-index: 980;
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--official-black) 24%, transparent);
+}
+
 .task-queue-toolbar-inline-actions {
   display: inline-flex;
   align-items: center;

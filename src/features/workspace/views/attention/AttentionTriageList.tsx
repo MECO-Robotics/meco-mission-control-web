@@ -37,7 +37,7 @@ export function AttentionTriageList({
   return (
     <div className="attention-groups">
       {groups.map((group) => (
-        <section className="panel-subsection attention-group" key={group.id}>
+        <section className="panel-subsection attention-group" id={group.id} key={group.id}>
           <div className="roster-section-header">
             <div className="roster-section-title">
               <h3>{group.title}</h3>

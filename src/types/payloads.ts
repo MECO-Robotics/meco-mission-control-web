@@ -21,6 +21,7 @@ import type {
   TestResultStatus,
 } from "./common";
 import type { PartInstanceRecord as PartInstanceRecordType } from "./recordsInventory";
+import type { SubsystemLayoutView, SubsystemLayoutZone } from "./recordsOrganization";
 
 export interface MilestonePayload {
   title: string;
@@ -212,6 +213,11 @@ export interface SubsystemPayload {
   responsibleEngineerId: string | null;
   mentorIds: string[];
   risks: string[];
+  layoutX?: number | null;
+  layoutY?: number | null;
+  layoutZone?: SubsystemLayoutZone | null;
+  layoutView?: SubsystemLayoutView | null;
+  sortOrder?: number | null;
 }
 
 export interface MechanismPayload {

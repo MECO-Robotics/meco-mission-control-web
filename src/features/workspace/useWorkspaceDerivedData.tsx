@@ -143,6 +143,15 @@ export function useWorkspaceDerivedData({
         });
       }
 
+      if (showProjectInventoryTab && isRobotProject) {
+        items.push({
+          value: "cad",
+          label: "CAD",
+          icon: <IconParts />,
+          count: 0,
+        });
+      }
+
       if (showProjectWorkflowTab) {
         items.push({
           value: "subsystems",
@@ -178,6 +187,7 @@ export function useWorkspaceDerivedData({
       showManufacturingTab,
       showProjectInventoryTab,
       showProjectWorkflowTab,
+      isRobotProject,
       workflowCount,
       workflowLabel,
       inventoryCount,

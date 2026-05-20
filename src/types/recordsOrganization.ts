@@ -18,6 +18,17 @@ export interface MemberRecord {
   activeSeasonIds?: string[];
 }
 
+export type SubsystemLayoutZone =
+  | "front"
+  | "rear"
+  | "left"
+  | "right"
+  | "center"
+  | "top"
+  | "unplaced";
+
+export type SubsystemLayoutView = "top";
+
 export interface SubsystemRecord {
   id: string;
   projectId: string;
@@ -32,6 +43,11 @@ export interface SubsystemRecord {
   responsibleEngineerId: string | null;
   mentorIds: string[];
   risks: string[];
+  layoutX?: number | null;
+  layoutY?: number | null;
+  layoutZone?: SubsystemLayoutZone | null;
+  layoutView?: SubsystemLayoutView | null;
+  sortOrder?: number | null;
 }
 
 export interface DisciplineRecord {

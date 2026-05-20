@@ -4,6 +4,8 @@ import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 jest.mock("@/lib/branding", () => ({
+  MECO_COMPACT_TEAM_LOGO_SIZE: 48,
+  MECO_COMPACT_TEAM_LOGO_SRC: "/team-logo.png",
   MECO_MAIN_LOGO_HEIGHT: 40,
   MECO_MAIN_LOGO_LIGHT_SRC: "/logo-light.png",
   MECO_MAIN_LOGO_WHITE_SRC: "/logo-white.png",
@@ -24,6 +26,10 @@ function renderTopbar(
       memberName: "Ava Chen",
     },
   isSignedIn = false,
+  options: {
+    isDarkMode?: boolean;
+    isSidebarCollapsed?: boolean;
+  } = {},
 ) {
   const sessionUser = isSignedIn
     ? {
@@ -40,9 +46,9 @@ function renderTopbar(
     React.createElement(AppTopbar, {
       activeViewLabel: "Timeline",
       handleSignOut: jest.fn(),
-      isDarkMode: false,
+      isDarkMode: options.isDarkMode ?? false,
       isLoadingData: false,
-      isSidebarCollapsed: false,
+      isSidebarCollapsed: options.isSidebarCollapsed ?? false,
       loadWorkspace: jest.fn(),
       onToggleMyView: jest.fn(),
       onCreateSeason: jest.fn(),
@@ -66,6 +72,26 @@ function renderTopbar(
 }
 
 describe("AppTopbar", () => {
+  it("uses the full logo when the sidebar is unfolded", () => {
+    const markup = renderTopbar();
+
+    expect(markup).toContain('alt="MECO main logo"');
+    expect(markup).toContain('data-logo-variant="full"');
+    expect(markup).toContain('height="40"');
+    expect(markup).toContain('width="120"');
+    expect(markup).toContain('src="/logo-light.png"');
+  });
+
+  it("uses the compact team logo when the sidebar is folded", () => {
+    const markup = renderTopbar(undefined, false, { isSidebarCollapsed: true });
+
+    expect(markup).toContain('alt="MECO compact team logo"');
+    expect(markup).toContain('data-logo-variant="compact"');
+    expect(markup).toContain('height="48"');
+    expect(markup).toContain('width="48"');
+    expect(markup).toContain('src="/team-logo.png"');
+  });
+
   it("renders season controls in the signed-in profile menu", () => {
     const markup = renderTopbar(undefined, true);
 
@@ -81,10 +107,24 @@ describe("AppTopbar", () => {
       },
     );
 
-    expect(markup).toContain('aria-label="Clear My View filter"');
+    expect(markup).toContain('aria-label="Switch to Users"');
     expect(markup).toContain('aria-pressed="true"');
+    expect(markup).toContain('data-state="user-search"');
     expect(markup).toContain("Showing Ava Chen");
+    expect(markup).toContain("lucide-user-search");
+    expect(markup).toContain("lucide-users");
     expect(markup).not.toContain(">My View<");
+  });
+
+  it("renders the topbar people toggle in all-users mode by default", () => {
+    const markup = renderTopbar();
+
+    expect(markup).toContain('aria-label="Switch to User search"');
+    expect(markup).toContain('aria-pressed="false"');
+    expect(markup).toContain('data-state="users"');
+    expect(markup).toContain("Showing all users");
+    expect(markup).toContain("lucide-user-search");
+    expect(markup).toContain("lucide-users");
   });
 
   it("keeps a standalone dark mode button for local access", () => {

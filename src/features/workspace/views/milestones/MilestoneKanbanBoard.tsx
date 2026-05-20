@@ -17,6 +17,7 @@ import {
   formatTaskQueueBoardState,
   type TaskQueueBoardState,
 } from "@/features/workspace/views/taskQueue/taskQueueKanbanBoardState";
+import { MilestoneSearchHighlight } from "./MilestoneSearchHighlight";
 import { formatMilestoneDateTime } from "./milestonesViewUtils";
 
 const MILESTONE_TYPE_BADGE_LABELS: Record<MilestoneType, string> = {
@@ -112,6 +113,7 @@ interface MilestoneKanbanBoardProps {
   milestones: MilestoneRecord[];
   onOpenMilestone: (milestone: MilestoneRecord) => void;
   projectLabelByMilestoneId: Record<string, string>;
+  searchFilter: string;
 }
 
 export function MilestoneKanbanBoard({
@@ -120,6 +122,7 @@ export function MilestoneKanbanBoard({
   milestones,
   onOpenMilestone,
   projectLabelByMilestoneId,
+  searchFilter,
 }: MilestoneKanbanBoardProps) {
   const milestonesByState = groupMilestonesByBoardState(milestones, bootstrap);
 
@@ -156,6 +159,7 @@ export function MilestoneKanbanBoard({
         const milestoneTypeBadge = MILESTONE_TYPE_BADGE_LABELS[milestoneType];
         const milestoneStartLabel = formatMilestoneStartDateTime(milestone.startDateTime);
         const milestoneEndLabel = formatMilestoneEndDateTime(milestone.startDateTime, milestone.endDateTime);
+        const projectLabel = projectLabelByMilestoneId[milestone.id] ?? "All projects";
         const milestoneTypeBadgeStyle = {
           "--milestone-type-chip-bg": milestoneTypeStyle.chipBackground,
           "--milestone-type-chip-border": milestoneTypeStyle.columnBorder,
@@ -174,7 +178,9 @@ export function MilestoneKanbanBoard({
             type="button"
           >
             <div className="task-queue-board-card-header">
-              <strong>{milestone.title}</strong>
+              <strong>
+                <MilestoneSearchHighlight searchFilter={searchFilter} text={milestone.title} />
+              </strong>
               <span
                 style={{
                   alignItems: "flex-end",
@@ -194,7 +200,10 @@ export function MilestoneKanbanBoard({
               </span>
             </div>
             <small className="task-queue-board-card-summary">
-              {milestone.description.trim() || "No description"}
+              <MilestoneSearchHighlight
+                searchFilter={searchFilter}
+                text={milestone.description.trim() || "No description"}
+              />
             </small>
             <div className="task-queue-board-card-meta">
               <span
@@ -203,13 +212,15 @@ export function MilestoneKanbanBoard({
                 style={milestoneTypeBadgeStyle}
                 title={`Milestone type: ${milestoneTypeStyle.label}`}
               >
-                <span aria-hidden="true">{milestoneTypeBadge}</span>
+                <span aria-hidden="true">
+                  <MilestoneSearchHighlight searchFilter={searchFilter} text={milestoneTypeBadge} />
+                </span>
               </span>
               <span
                 className="task-queue-board-card-context-chip"
-                title={projectLabelByMilestoneId[milestone.id] ?? "All projects"}
+                title={projectLabel}
               >
-                {projectLabelByMilestoneId[milestone.id] ?? "All projects"}
+                <MilestoneSearchHighlight searchFilter={searchFilter} text={projectLabel} />
               </span>
             </div>
             <EditableHoverIndicator className="task-queue-board-card-hover" />

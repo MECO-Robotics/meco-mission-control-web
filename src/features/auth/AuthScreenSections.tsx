@@ -45,6 +45,7 @@ export function AuthIntroPanel({
           <img
             alt="MECO main logo"
             className="auth-intro-mark"
+            fetchPriority="high"
             height={MECO_MAIN_LOGO_HEIGHT}
             loading="eager"
             width={MECO_MAIN_LOGO_WIDTH}
@@ -74,6 +75,7 @@ export function AuthBackdrop({ className }: AuthBackdropProps) {
       alt=""
       aria-hidden="true"
       className={className}
+      fetchPriority="high"
       loading="eager"
       src={MECO_LOGIN_BACKDROP_SRC}
     />
@@ -207,6 +209,7 @@ export function AuthStatusCard({
         <img
           alt="MECO main logo"
           className="auth-status-mark"
+          fetchPriority="high"
           height={MECO_MAIN_LOGO_HEIGHT}
           loading="eager"
           width={MECO_MAIN_LOGO_WIDTH}

@@ -1,6 +1,8 @@
 import React from "react";
 
+import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MemberPayload } from "@/types/payloads";
 import type { MemberRecord } from "@/types/recordsOrganization";
@@ -76,6 +78,7 @@ export const RosterView: React.FC<RosterViewProps> = ({
   rosterMentors,
   externalMembers,
 }) => {
+  const [searchText, setSearchText] = React.useState("");
   const [reactivateExistingMember, setReactivateExistingMember] = React.useState(false);
   const [reactivateMemberId, setReactivateMemberId] = React.useState("");
 
@@ -113,6 +116,32 @@ export const RosterView: React.FC<RosterViewProps> = ({
     () => sortedDisciplines.map((discipline) => ({ id: discipline.id, name: discipline.name })),
     [sortedDisciplines],
   );
+  const disciplineById = React.useMemo(
+    () => Object.fromEntries(bootstrap.disciplines.map((discipline) => [discipline.id, discipline.name] as const)),
+    [bootstrap.disciplines],
+  );
+  const normalizedSearch = searchText.trim().toLowerCase();
+  const filterMembers = (members: MemberRecord[]) => {
+    if (normalizedSearch.length === 0) {
+      return members;
+    }
+
+    return members.filter((member) =>
+      [
+        member.name,
+        member.email,
+        member.role,
+        member.elevated ? "elevated" : "",
+        member.disciplineId ? disciplineById[member.disciplineId] ?? "" : "",
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(normalizedSearch),
+    );
+  };
+  const filteredSortedStudents = filterMembers(sortedStudents);
+  const filteredSortedMentors = filterMembers(sortedMentors);
+  const filteredSortedExternalMembers = filterMembers(sortedExternalMembers);
 
   const inactiveMembers = React.useMemo(() => {
     if (!selectedSeasonId) {
@@ -176,24 +205,36 @@ export const RosterView: React.FC<RosterViewProps> = ({
   }> = [
     {
       addTarget: "student",
-      members: sortedStudents,
+      members: filteredSortedStudents,
       title: "Students",
       tutorialTarget: "create-student-button",
     },
     {
       addTarget: "mentor",
-      members: sortedMentors,
+      members: filteredSortedMentors,
       title: "Mentors",
     },
     {
       addTarget: "external",
-      members: sortedExternalMembers,
+      members: filteredSortedExternalMembers,
       title: "External access",
     },
   ];
 
   return (
     <section className={`panel dense-panel roster-layout ${WORKSPACE_PANEL_CLASS}`}>
+      <AppTopbarSlotPortal slot="controls">
+        <div className="panel-actions filter-toolbar roster-directory-toolbar">
+          <TopbarResponsiveSearch
+            ariaLabel="Search roster"
+            compactPlaceholder="Search"
+            onChange={setSearchText}
+            placeholder="Search roster..."
+            value={searchText}
+          />
+        </div>
+      </AppTopbarSlotPortal>
+
       <div className="panel-header compact-header">
         <div className="queue-section-header">
           <h2>Roster</h2>

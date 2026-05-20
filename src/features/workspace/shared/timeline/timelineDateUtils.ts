@@ -8,19 +8,30 @@ import {
 export type TimelineViewInterval = "all" | "week" | "month";
 
 const MONTH_LABEL_FORMATTER = new Intl.DateTimeFormat(undefined, { month: "long" });
-const MONTH_YEAR_LABEL_FORMATTER = new Intl.DateTimeFormat(undefined, {
-  month: "long",
-  year: "numeric",
-});
-const PERIOD_DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
-  month: "short",
-  day: "numeric",
-});
-const PERIOD_DATE_WITH_YEAR_FORMATTER = new Intl.DateTimeFormat(undefined, {
-  month: "short",
-  day: "numeric",
-  year: "numeric",
-});
+
+function formatMonthShortYearFromDay(day: string) {
+  const monthLabel = monthLabelFromDay(day);
+  const yearShort = day.slice(2, 4);
+  return `${monthLabel} '${yearShort}`;
+}
+
+function formatMonthDayShortYearFromDay(day: string) {
+  const [year, month, monthDay] = day.split("-");
+  if (!year || !month || !monthDay) {
+    return day;
+  }
+
+  return `${Number.parseInt(month, 10)}/${Number.parseInt(monthDay, 10)}/${year.slice(2, 4)}`;
+}
+
+function formatMonthDayFromDay(day: string) {
+  const [, month, monthDay] = day.split("-");
+  if (!month || !monthDay) {
+    return day;
+  }
+
+  return `${Number.parseInt(month, 10)}/${Number.parseInt(monthDay, 10)}`;
+}
 
 export function datePortion(dateTime: string) {
   return dateTime.slice(0, 10);
@@ -109,13 +120,11 @@ export function formatTimelinePeriodLabel(viewInterval: TimelineViewInterval, da
   }
 
   if (viewInterval === "month") {
-    return MONTH_YEAR_LABEL_FORMATTER.format(new Date(`${startDay.slice(0, 7)}-01T00:00:00`));
+    return formatMonthShortYearFromDay(startDay);
   }
 
   if (viewInterval === "week") {
-    const startDate = new Date(`${startDay}T00:00:00`);
-    const endDate = new Date(`${endDay}T00:00:00`);
-    return `${PERIOD_DATE_FORMATTER.format(startDate)} - ${PERIOD_DATE_WITH_YEAR_FORMATTER.format(endDate)}`;
+    return `${formatMonthDayFromDay(startDay)} - ${formatMonthDayShortYearFromDay(endDay)}`;
   }
 
   return "Recent window";

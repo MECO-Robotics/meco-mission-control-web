@@ -25,6 +25,16 @@
   min-width: 0;
 }
 
+.profile-menu-item-refresh svg {
+  width: 0.95rem;
+  height: 0.95rem;
+  flex-shrink: 0;
+}
+
+.profile-menu-item-refresh.is-loading svg {
+  animation: refresh-spin 0.9s linear infinite;
+}
+
 .profile-menu-item-theme-title {
   color: var(--text-title);
   font-size: 0.72rem;

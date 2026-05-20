@@ -1,9 +1,7 @@
 ﻿import { useMemo, useState } from "react";
 
-import { IconSort } from "@/components/shared/Icons";
+import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { fetchAvailabilityStatusTone } from "@/features/workspace/views/roster/rosterStatusTone";
-import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
-import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { RosterAvailabilityStatus } from "@/types/rosterInsights";
@@ -15,6 +13,7 @@ import {
   formatHours,
   type RosterMemberSortMode,
 } from "./rosterInsightsViewModel";
+import { RosterWorkloadTopbarControls } from "./RosterWorkloadTopbarControls";
 import { useRosterInsights } from "./useRosterInsights";
 
 interface RosterWorkloadViewProps {
@@ -92,6 +91,19 @@ export function RosterWorkloadView({
 
   return (
     <section className={`panel dense-panel roster-layout mc-roster-insights-shell ${WORKSPACE_PANEL_CLASS}`}>
+      <AppTopbarSlotPortal slot="controls">
+        <RosterWorkloadTopbarControls
+          availabilityFilter={availabilityFilter}
+          availabilityOptions={AVAILABILITY_OPTIONS}
+          searchText={searchText}
+          setAvailabilityFilter={setAvailabilityFilter}
+          setSearchText={setSearchText}
+          setSortMode={setSortMode}
+          sortMode={sortMode}
+          sortOptions={SORT_OPTIONS}
+        />
+      </AppTopbarSlotPortal>
+
       <div className="panel-header compact-header">
         <div className="queue-section-header">
           <h2>Workload</h2>
@@ -102,66 +114,6 @@ export function RosterWorkloadView({
       </div>
 
       <RosterInsightsSummaryCards cards={summaryCards} />
-
-      <div className="panel-actions filter-toolbar mc-roster-insights-toolbar">
-        <SearchToolbarInput
-          ariaLabel="Search members"
-          onChange={setSearchText}
-          placeholder="Search members or tasks..."
-          value={searchText}
-        />
-        <CompactFilterMenu
-          activeCount={availabilityFilter === "all" ? 0 : 1}
-          ariaLabel="Filter availability"
-          buttonLabel="Status"
-          items={[
-            {
-              label: "Availability",
-              content: (
-                <select
-                  aria-label="Filter members by availability"
-                  className="task-queue-sort-menu-select"
-                  onChange={(event) =>
-                    setAvailabilityFilter(event.target.value as RosterAvailabilityStatus | "all")
-                  }
-                  value={availabilityFilter}
-                >
-                  {AVAILABILITY_OPTIONS.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.name}
-                    </option>
-                  ))}
-                </select>
-              ),
-            },
-          ]}
-        />
-        <CompactFilterMenu
-          activeCount={sortMode === "availability" ? 0 : 1}
-          ariaLabel="Sort workload"
-          buttonLabel="Sort"
-          icon={<IconSort />}
-          items={[
-            {
-              label: "Sort by",
-              content: (
-                <select
-                  aria-label="Sort members"
-                  className="task-queue-sort-menu-select"
-                  onChange={(event) => setSortMode(event.target.value as RosterMemberSortMode)}
-                  value={sortMode}
-                >
-                  {SORT_OPTIONS.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.name}
-                    </option>
-                  ))}
-                </select>
-              ),
-            },
-          ]}
-        />
-      </div>
 
       {insightsState.errorMessage ? (
         <p className="section-copy mc-roster-insights-note">

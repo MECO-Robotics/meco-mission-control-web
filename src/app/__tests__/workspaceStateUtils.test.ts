@@ -386,6 +386,82 @@ describe("scopeBootstrapBySelection", () => {
     expect(scoped.workLogs.map((workLog) => workLog.id)).toEqual(["worklog-visible"]);
   });
 
+  it("filters delete actions by visible task and subsystem ids", () => {
+    const actions: BootstrapPayload["actions"] = [
+      {
+        actorMemberId: null,
+        changedFields: [],
+        entityId: "task-visible",
+        entityLabel: "Visible task",
+        entityType: "task",
+        id: "delete-visible-task",
+        memberIds: [],
+        message: "Deleted visible task",
+        operation: "delete",
+        projectId: null,
+        subsystemId: null,
+        taskId: null,
+        timestamp: "2026-04-20T00:00:00.000Z",
+      },
+      {
+        actorMemberId: null,
+        changedFields: [],
+        entityId: "task-hidden",
+        entityLabel: "Hidden task",
+        entityType: "task",
+        id: "delete-hidden-task",
+        memberIds: [],
+        message: "Deleted hidden task",
+        operation: "delete",
+        projectId: null,
+        subsystemId: null,
+        taskId: null,
+        timestamp: "2026-04-20T00:00:00.000Z",
+      },
+      {
+        actorMemberId: null,
+        changedFields: [],
+        entityId: "subsystem-visible",
+        entityLabel: "Visible subsystem",
+        entityType: "subsystem",
+        id: "delete-visible-subsystem",
+        memberIds: [],
+        message: "Deleted visible subsystem",
+        operation: "delete",
+        projectId: null,
+        subsystemId: null,
+        taskId: null,
+        timestamp: "2026-04-20T00:00:00.000Z",
+      },
+      {
+        actorMemberId: null,
+        changedFields: [],
+        entityId: "subsystem-hidden",
+        entityLabel: "Hidden subsystem",
+        entityType: "subsystem",
+        id: "delete-hidden-subsystem",
+        memberIds: [],
+        message: "Deleted hidden subsystem",
+        operation: "delete",
+        projectId: null,
+        subsystemId: null,
+        taskId: null,
+        timestamp: "2026-04-20T00:00:00.000Z",
+      },
+    ];
+
+    const scoped = scopeBootstrapBySelection(
+      { ...createBootstrap(), actions },
+      "season-1",
+      "project-visible",
+    );
+
+    expect((scoped.actions ?? []).map((action) => action.id)).toEqual([
+      "delete-visible-task",
+      "delete-visible-subsystem",
+    ]);
+  });
+
   it("keeps milestones with no project ids visible", () => {
     const scoped = scopeBootstrapBySelection(createBootstrap(), "season-1", "project-visible");
 

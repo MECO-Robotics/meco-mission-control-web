@@ -1,16 +1,7 @@
-/* TODO: Add the real Nasalization font file at public/fonts/nasalization.woff2. */
-@font-face {
-  font-family: "Nasalization";
-  src: url("/fonts/nasalization.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
 :root {
-  --font-display: "Nasalization", "Inter", system-ui, sans-serif;
-  --font-ui: "Inter", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  --font-display: system-ui, sans-serif;
+  --font-ui: system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   font-family: var(--font-ui);
   line-height: 1.5;
   font-weight: 400;

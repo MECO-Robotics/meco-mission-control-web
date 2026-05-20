@@ -5,6 +5,7 @@ import type { ArtifactRecord, ManufacturingItemRecord, MaterialRecord, PartDefin
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MemberPayload, MilestonePayload, RiskPayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
+import type { SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
 import type {
   InventoryViewTab,
   ManufacturingViewTab,
@@ -79,6 +80,7 @@ export interface WorkspaceContentPanelsProps {
   openCreateMechanismModal: (subsystemId?: string) => void;
   openCreatePartInstanceModal: (mechanism: BootstrapPayload["mechanisms"][number]) => void;
   openCreateSubsystemModal: () => void;
+  handleDeleteMechanism: (mechanismId: string) => Promise<void>;
   openCreatePartDefinitionModal: () => void;
   openCreatePurchaseModal: () => void;
   openCreateTaskModal: () => void;
@@ -100,6 +102,20 @@ export interface WorkspaceContentPanelsProps {
   openEditMechanismModal: (mechanism: BootstrapPayload["mechanisms"][number]) => void;
   openEditPartInstanceModal: (partInstance: BootstrapPayload["partInstances"][number]) => void;
   openEditSubsystemModal: (subsystem: BootstrapPayload["subsystems"][number]) => void;
+  removePartInstanceFromMechanism: (partInstanceId: string) => Promise<boolean>;
+  saveSubsystemLayout: (
+    subsystemId: string,
+    layout: SubsystemLayoutFields,
+  ) => Promise<boolean>;
+  updateSubsystemConfiguration: (
+    subsystemId: string,
+    patch: Partial<
+      Pick<
+        BootstrapPayload["subsystems"][number],
+        "name" | "description" | "layoutX" | "layoutY" | "layoutZone" | "layoutView" | "sortOrder"
+      >
+    >,
+  ) => Promise<boolean>;
   openEditPartDefinitionModal: (item: PartDefinitionRecord) => void;
   openEditPurchaseModal: (item: PurchaseItemRecord) => void;
   openTimelineTaskDetailsModal: (task: TaskRecord) => void;
@@ -181,7 +197,7 @@ export function WorkspaceContentPanels({
   const inventorySwipeDirection = getSwipeDirection(
     previousInventoryViewRef.current,
     effectiveInventoryView,
-    ["materials", "parts", "part-mappings", "purchases"],
+    ["materials", "parts", "purchases"],
   );
 
   useEffect(() => {

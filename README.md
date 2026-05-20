@@ -2,142 +2,99 @@
 
 React + Vite browser frontend for MECO Mission Control.
 
-This app is the web workspace for planning, execution, inventory, manufacturing coordination, roster management, and project-level documentation workflows. It runs against `meco-mission-control-platform` and is deployed as static assets behind `nginx`.
+This repository contains the broad-screen web workspace for Mission Control: planning, readiness review, robot configuration, inventory, manufacturing coordination, roster operations, reports, and help/tutorial workflows. It runs against `meco-mission-control-platform` and is deployed as static assets behind `nginx`.
+
+Use this README as the contributor entry point. Use [`docs/CURRENT_WEB_SPEC.md`](docs/CURRENT_WEB_SPEC.md) as the current product/spec reference.
 
 ## Table of Contents
 
+- [What This Repo Owns](#what-this-repo-owns)
 - [System Overview](#system-overview)
-- [Product Scope in This Repo](#product-scope-in-this-repo)
+- [Quick Start](#quick-start)
+- [Common Development Tasks](#common-development-tasks)
+- [Current Navigation Model](#current-navigation-model)
+- [View-to-File Map](#view-to-file-map)
+- [Application Architecture](#application-architecture)
 - [Repository Layout](#repository-layout)
-- [Tech Stack](#tech-stack)
-- [Local Setup](#local-setup)
-- [Environment Variables](#environment-variables)
+- [Data Flow and API Boundary](#data-flow-and-api-boundary)
 - [Authentication Behavior](#authentication-behavior)
-- [API Integration and Contract Notes](#api-integration-and-contract-notes)
+- [Environment Variables](#environment-variables)
+- [Validation and Testing](#validation-and-testing)
 - [Development Workflow](#development-workflow)
-- [Validation Commands](#validation-commands)
 - [Deployment and Operations](#deployment-and-operations)
 - [Troubleshooting](#troubleshooting)
 - [Cross-Repo Responsibilities](#cross-repo-responsibilities)
-- [Requirements Documents](#requirements-documents)
+- [Requirements and Specs](#requirements-and-specs)
+
+## What This Repo Owns
+
+`meco-mission-control-web` owns the dense desktop/tablet experience for Mission Control.
+
+It should be the first place to implement workflows that need:
+
+- large planning surfaces
+- cross-domain review
+- configuration editing
+- timeline/board comparison
+- evidence review
+- mentor/admin context
+- richer filtering and diagnostics
+
+The mobile app (`meco-mission-control-mobile`) remains the faster in-shop update surface. Shared behavior should stay contract-compatible, but this repo is the primary home for higher-context workflows.
+
+Current web responsibilities:
+
+- Dashboard review: calendar, activity, and metrics
+- Readiness review: action triage, milestones, subsystems, and risks
+- Work planning: timeline, task board, and manufacturing execution views
+- Robot configuration: map-first subsystem layout, mechanism editing, and part-instance context
+- Inventory and purchasing: materials, parts, purchases, and robot-only part-mapping support
+- Roster operations: workload, attendance, and directory workflows
+- Reports: work logs, QA forms, and milestone results
+- In-app help and interactive guidance
 
 ## System Overview
 
 Current production topology:
 
-- `meco-mission-control-web`: static React build served by `nginx`
-- `meco-mission-control-platform`: Fastify + Prisma API, default on port `8080`
-- `Postgres`: backing store for the API
+```text
+Browser
+  |
+  | static assets, /api/*, /health
+  v
+nginx on VPS
+  |-- serves web build from /opt/pm-web/site
+  |-- proxies /api/* and /health
+  v
+meco-mission-control-platform on 127.0.0.1:8080
+  |
+  v
+Postgres
+```
 
-Traffic shape:
+Repos involved:
 
-- Browser requests static assets from `nginx`
-- Browser calls `/api/*` on the same origin
-- `nginx` proxies `/api/*` and `/health` to the Mission Control API
+- `meco-mission-control-web`: this React/Vite frontend
+- `meco-mission-control-platform`: Fastify + Prisma API and persistence
+- `meco-mission-control-mobile`: mobile client for fast in-shop updates
 
 `deploy/pm-web.nginx.conf` currently redirects HTTP to HTTPS on `meco-pm.duckdns.org`, serves static web files from `/opt/pm-web/site`, and proxies API/health routes to `127.0.0.1:8080`.
 
-## Product Scope in This Repo
-
-The web app is designed for broader-screen, high-context workflows:
-
-- Planning views: timeline, queue, milestones
-- Work logs and progress review
-- Manufacturing planning (robot projects)
-- Inventory and purchasing
-- Subsystem/workflow management
-- Roster management
-- In-app help and usage guidance
-
-The mobile app (`meco-mission-control-mobile`) remains focused on fast in-shop updates, while this repo prioritizes richer dashboard-style workflows.
-
-### Workspace Navigation Model
-
-Primary navigation tabs:
-
-- `Tasks`
-- `Work logs`
-- `Manufacturing` (robot project only; hidden for all-project/non-robot scopes)
-- `Inventory` (project-scoped)
-- `Subsystems` or `Workflow` (label depends on project type)
-- `Roster`
-- `Help`
-
-Topbar subviews:
-
-- Tasks: `Timeline`, `Kanban`, `Milestones`
-- Manufacturing: `CNC`, `3D Prints`, `Fabrication`
-- Inventory (robot projects): `Materials`, `Parts`, `Purchases`
-- Inventory (non-robot projects): `Documentation`, `Purchases`
-
-Scope controls:
-
-- Season selector in the sidebar (with `Create new season`)
-- Project selector in the topbar (`All projects` or one project)
-
-## Repository Layout
-
-The repo is organized by app shell and feature boundaries:
-
-```text
-src/
-  app/                 # App shell, auth/session orchestration, theme/shell state
-  components/          # Shared UI and layout primitives (topbar/sidebar/icons)
-  features/
-    auth/              # Auth screens and sign-in UX
-    workspace/
-      views/           # Task/inventory/manufacturing/roster/help views
-      shared/          # Shared workspace types, defaults, utility options
-      Workspace*.tsx   # Workspace composition + modal hosts
-  lib/
-    auth.ts            # API client, auth/session calls, bootstrap normalization
-    appUtils.ts        # Form and payload utility helpers
-  types.ts             # Shared frontend type contracts
-```
-
-Operational and deployment files:
-
-- `.github/workflows/deploy-vps.yml`
-- `deploy/pm-web.nginx.conf`
-- `.env.example`
-- `.env.production.example`
-
-## Tech Stack
-
-- React `19`
-- Vite `8`
-- TypeScript `6`
-- ESLint `9`
-- Jest `30` (`@swc/jest`)
-
-Package scripts:
-
-- `npm run dev`
-- `npm run typecheck`
-- `npm run test`
-- `npm run test:ci`
-- `npm run test:watch`
-- `npm run lint`
-- `npm run build`
-- `npm run build:bundle`
-- `npm run verify`
-- `npm run preview`
-
-## Local Setup
+## Quick Start
 
 ### Prerequisites
 
-- Node.js `22+` recommended (CI uses Node `22`)
+- Node.js `22+` recommended; CI uses Node `22`
 - `npm`
-- Running local `meco-mission-control-platform` backend (usually `http://localhost:8080`)
+- A running local `meco-mission-control-platform` backend, usually on `http://localhost:8080`
 
-### 1) Install dependencies
+### Install
 
 ```bash
 npm install
 ```
 
-### 2) Create local env file
+### Configure env
 
 ```bash
 cp .env.example .env
@@ -145,89 +102,258 @@ cp .env.example .env
 
 On Windows PowerShell, create `.env` manually if needed.
 
-### 3) Start the web app
+Default local frontend API behavior expects:
+
+```env
+VITE_API_BASE_URL=/api
+VITE_DEV_PROXY_TARGET=http://localhost:8080
+```
+
+### Run locally
 
 ```bash
 npm run dev
 ```
 
-Default URL:
+Default local URL:
 
-- `http://localhost:5173`
+```text
+http://localhost:5173
+```
 
-### 4) Start backend in parallel
-
-Run `meco-mission-control-platform` locally so `/api` proxy requests succeed.
-
-### 5) Validate before pushing
+### Validate before pushing
 
 ```bash
 npm run verify
 ```
 
-Use the individual commands (`typecheck`, `test`, `lint`, `build`) when narrowing a specific failure.
+`verify` runs typecheck, lint, Jest CI tests, and the production bundle build.
 
-## Environment Variables
+## Common Development Tasks
 
-Frontend env vars are read by Vite (`import.meta.env`):
+### Add or change a workspace view
 
-| Variable | Default | Purpose |
+1. Find the user-facing navigation key in `src/lib/workspaceNavigation/*`.
+2. Find the section renderer in `src/features/workspace/components/sections/*`.
+3. Implement the view under `src/features/workspace/views/*`.
+4. Add helper/model code near the view if it is view-specific.
+5. Add or update tests near existing tests for that view.
+6. Run a targeted test, then `npm run verify`.
+
+### Add a sidebar or topbar destination
+
+1. Update navigation types in `src/lib/workspaceNavigation/types.ts`.
+2. Update labels/order/targets in `src/lib/workspaceNavigation/constants.ts`.
+3. Update helper logic in `src/lib/workspaceNavigation/helpers.ts` if route matching changes.
+4. Wire the target into the relevant workspace section component.
+5. Check all-project, robot-project, and non-robot-project gating.
+
+### Add a backend-backed record mutation
+
+1. Confirm or implement the backend endpoint in `meco-mission-control-platform`.
+2. Add or update frontend request code under `src/lib/auth/*`.
+3. Update shared frontend types under `src/types/*`.
+4. Wire the action through the relevant app hook:
+   - `useAppWorkspaceTaskActions`
+   - `useAppWorkspaceCatalogActions`
+   - `useAppWorkspaceReportActions`
+   - `useAppWorkspaceRosterActions`
+5. Pass the action through the controller/shell slice only as far as needed.
+6. Add optimistic UI, rollback, unauthorized handling, and data refresh behavior where appropriate.
+
+### Add or change bootstrap data fields
+
+1. Update backend bootstrap shape first.
+2. Update frontend types in `src/types/*`.
+3. Update normalization in `src/lib/auth/bootstrap` only when compatibility with older payloads is required.
+4. Update derived selectors/hooks under `src/app/hooks` or view-local model helpers.
+5. Test empty data, legacy data, selected season/project, and `All projects` behavior.
+
+### Change robot configuration behavior
+
+Start with:
+
+- `src/features/workspace/views/taskQueue/TaskRobotMapPlaceholderView.tsx`
+- robot-map helper/model files in that view folder
+- subsystem layout utilities under `src/lib/appUtils/subsystemLayout`
+- subsystem/mechanism/part actions under app workspace catalog/task hooks
+
+Required checks:
+
+- dragging and persisted layout
+- reset/auto-arrange behavior
+- selected subsystem detail panel
+- mechanism and part-instance edit flows
+- robot-only gating
+- storage/API failure rollback behavior
+
+### Change top-level app shell behavior
+
+Start with:
+
+- `src/app/AppWorkspaceCoreImpl.tsx`
+- `src/app/hooks/useAppWorkspaceController.ts`
+- `src/app/hooks/useAppWorkspaceState.ts`
+- `src/app/hooks/useAppWorkspaceModel.ts`
+- `src/app/shell/*`
+- `src/components/layout/*`
+
+Avoid pushing view-specific business logic into the shell. The shell should compose state, routing, layout, auth gates, modals, and cross-view controls.
+
+## Current Navigation Model
+
+The sidebar is organized by user-facing work area rather than raw data model entity.
+
+| Section | Purpose | Current subviews |
 | --- | --- | --- |
-| `VITE_API_BASE_URL` | `/api` | Base path for API requests from the browser client. Keep as `/api` for same-origin proxying in dev/prod. |
-| `VITE_DEV_PROXY_TARGET` | `http://localhost:8080` | Dev-server proxy target for `/api`. Only used by Vite dev server. |
-| `VITE_LOCAL_GOOGLE_CLIENT_ID` | unset | Optional localhost-only override for Google web client ID during local development. |
+| Dashboard | Fast review of current schedule, activity, and health | Calendar, Activity, Metrics |
+| Readiness | Items that need attention before execution or events | Action Required, Milestones, Subsystems, Risks |
+| Config | Structure and directory maintenance | Robot Configuration, Part mappings, Directory |
+| Work | Execution planning and fabrication flow | Timeline, Tasks, Manufacturing |
+| Inventory | Materials, parts, and procurement | Materials, Parts, Purchases |
+| Roster | Student/mentor availability and participation | Workload, Attendance |
+| Reports | Historical and evidence-oriented records | Work logs, QA forms, Milestone results |
 
-Production example:
+Important scope behavior:
 
-```env
-VITE_API_BASE_URL=/api
+- Manufacturing is robot-project specific.
+- Robot projects expose Materials, Parts, and Purchases under Inventory.
+- Non-robot projects collapse inventory toward Documents/Materials and Purchases.
+- Robot Configuration is the preferred home for subsystem, mechanism, and part-instance structure editing.
+- Part mappings are robot-only support context and should not be treated as a general standalone planning page.
+- `All projects` can hide or redirect project-specific views when the selected scope cannot support them.
+
+## View-to-File Map
+
+Use this table to find the right implementation area before changing UI behavior.
+
+| User-facing area | Primary files |
+| --- | --- |
+| App/auth gate | `src/app/AppWorkspaceCoreImpl.tsx`, `src/app/hooks/useAppAuth.ts` |
+| Shell/controller composition | `src/app/hooks/useAppWorkspaceController.ts`, `src/app/shell/*` |
+| Workspace panel routing | `src/features/workspace/WorkspaceContent.tsx`, `src/features/workspace/components/WorkspaceContentPanelsView.tsx` |
+| Navigation constants | `src/lib/workspaceNavigation/types.ts`, `src/lib/workspaceNavigation/constants.ts`, `src/lib/workspaceNavigation/helpers.ts` |
+| Calendar | `src/features/workspace/views/taskQueue/TaskCalendarPlaceholderView.tsx` |
+| Timeline | `src/features/workspace/views/timeline/*` |
+| Robot Configuration | `src/features/workspace/views/taskQueue/TaskRobotMapPlaceholderView.tsx` and related robot-map helpers |
+| Tasks board | `src/features/workspace/views/taskQueue/TaskQueueView.tsx` |
+| Milestones | `src/features/workspace/views/milestones/*` |
+| Action Required / Risks / Metrics | `src/features/workspace/views/RisksView.tsx` and related risk/metrics helpers |
+| Work logs / Activity | `src/features/workspace/views/worklogs/*` |
+| Reports / QA / Milestone results | `src/features/workspace/views/reports/*` |
+| Manufacturing | `src/features/workspace/views/manufacturing/*` |
+| Inventory | `src/features/workspace/views/inventory/*` |
+| Subsystems | `src/features/workspace/views/subsystems/*` |
+| Roster | `src/features/workspace/views/roster/*` |
+| Help/tutorial | `src/features/workspace/views/help/*`, `src/app/interactiveTutorial/*` |
+| Shared workspace shells | `src/features/workspace/components/*` |
+| API client facade | `src/lib/auth.ts`, `src/lib/auth/*` |
+| Payload builders/utilities | `src/lib/appUtils/*` |
+| Shared frontend types | `src/types/*` |
+
+## Application Architecture
+
+The app follows a composition pattern:
+
+```text
+App.tsx
+  -> AppWorkspaceCoreImpl
+      -> auth/config gate
+      -> SignInScreen or AppWorkspaceShellView
+          -> useAppWorkspaceController
+              -> useAppWorkspaceState
+              -> useAppWorkspaceDerived
+              -> useAppWorkspaceLoader
+              -> domain action hooks
+          -> WorkspaceContent
+              -> section renderers
+              -> concrete views
 ```
 
-## Authentication Behavior
+### Main layers
 
-Authentication state is backend-driven.
+| Layer | Responsibility | Avoid putting here |
+| --- | --- | --- |
+| `src/app` | auth gate, shell state, workspace controller, app-level effects | view-specific UI details |
+| `src/components` | shared layout and reusable primitives | domain-specific business rules |
+| `src/features/workspace/components` | workspace panel composition and section routing | individual view model complexity |
+| `src/features/workspace/views` | concrete user workflows | global app/session concerns |
+| `src/lib/auth` | API requests, auth/session helpers, bootstrap normalization | visual/UI logic |
+| `src/lib/appUtils` | payload builders and reusable domain utilities | React component state |
+| `src/types` | shared frontend contract types | implementation functions |
 
-Startup flow:
+### Controller/action flow
 
-1. Frontend calls `GET /api/auth/config`.
-2. If auth is enabled, sign-in is required.
-3. If auth is not enabled, workspace remains accessible (with auth config messaging).
+The workspace controller is intentionally split:
 
-Supported sign-in paths:
+- `useAppWorkspaceState`: local UI state, selected tab/view, selected season/project/member, modal state, toast state
+- `useAppWorkspaceDerived`: derived selections, filtered records, scope helpers
+- `useAppWorkspaceLoader`: workspace bootstrap loading, unauthorized handling, uploads, refresh helpers
+- `useAppWorkspaceTaskActions`: task/event/milestone-oriented mutations
+- `useAppWorkspaceCatalogActions`: inventory, subsystem, mechanism, part, manufacturing, purchase mutations
+- `useAppWorkspaceReportActions`: QA/report mutations
+- `useAppWorkspaceRosterActions`: member/roster mutations
+- `buildShellController`: narrows the full model/actions into the props needed by the rendered shell
 
-- Google Identity Services token exchange via `POST /api/auth/google`
-- Email code flow via:
-  - `POST /api/auth/email/start`
-  - `POST /api/auth/email/verify`
-- Dev-only bypass via `POST /api/auth/dev-bypass` (when backend exposes it outside production)
+Do not pass the full app model into new components by default. Prefer narrow props or a focused controller slice.
 
-Important behavior details:
+## Repository Layout
 
-- Session token is persisted in `localStorage` (`meco.session.token`).
-- On `401` responses, the token is cleared and user is forced to re-auth.
-- Session validity is rechecked periodically.
-- Google sign-in only renders on secure hosts:
-  - localhost (`localhost`, `127.0.0.1`, `::1`) or
-  - HTTPS origins
+```text
+.github/
+  workflows/              # CI/deploy workflows
 
-### Local Google SSO Testing
+deploy/
+  pm-web.nginx.conf       # Production nginx site config
 
-Use the Vite proxy so browser origin remains `http://localhost:5173` while API traffic stays under `/api`.
+docs/
+  CURRENT_WEB_SPEC.md     # Living current web-app spec
+  *.docx                  # Historical requirements/spec baselines
 
-If Google sign-in fails locally because the backend-provided client is not authorized for localhost:
+scripts/
+  organization-audit.mjs  # File/directory/CSS guardrail audit
+  codex-worktree-bootstrap.ps1
 
-- Option A: Add `http://localhost:5173` to authorized JavaScript origins for that OAuth web client.
-- Option B: Set `VITE_LOCAL_GOOGLE_CLIENT_ID` to a localhost-authorized client ID.
+src/
+  app/
+    hooks/                # App/workspace state, derived data, loader, actions, controller builders
+    interactiveTutorial/  # Guided tutorial state and definitions
+    shell/                # App shell view composition
+    AppWorkspaceCoreImpl.tsx
 
-The frontend never needs a Google client secret.
+  components/
+    layout/               # Sidebar, topbar, icons, portal slots
+    ui/                   # Shared low-level UI components
 
-For production, Google web sign-in requires HTTPS for non-localhost origins.
+  features/
+    auth/                 # Auth/sign-in screens
+    workspace/
+      components/         # Workspace panel composition and section renderers
+      shared/             # Workspace shared defaults, filters, model helpers
+      views/              # Concrete workspace views by domain
+      Workspace*.tsx      # Workspace entrypoints and modal hosts
 
-## API Integration and Contract Notes
+  lib/
+    auth/                 # Auth, session, bootstrap, record API helpers
+    appUtils/             # Payload builders and domain utility helpers
+    workspaceNavigation/  # Navigation types, constants, helpers
 
-The frontend API layer is in `src/lib/auth.ts`.
+  types/                  # Frontend contract and record types
+```
 
-High-use endpoints from this app:
+Operational files:
+
+- `AGENTS.md`: workflow, branch, file-size, directory-size, CSS, and Codex worktree rules
+- `environment.toml`: Codex worktree startup source of truth
+- `.env.example`: local env template
+- `.env.production.example`: production env template
+- `package.json`: scripts and dependencies
+
+## Data Flow and API Boundary
+
+The frontend API facade is exposed through `src/lib/auth.ts`, which re-exports narrower modules from `src/lib/auth/*`.
+
+High-use endpoint groups:
 
 - Bootstrap and auth:
   - `GET /api/bootstrap`
@@ -236,7 +362,7 @@ High-use endpoints from this app:
   - `POST /api/auth/google`
   - `POST /api/auth/email/start`
   - `POST /api/auth/email/verify`
-  - `POST /api/auth/dev-bypass` (non-production only)
+  - `POST /api/auth/dev-bypass` in non-production only
 - Planning/workflow:
   - `POST/PATCH /api/tasks`
   - `POST/PATCH/DELETE /api/events`
@@ -254,9 +380,9 @@ High-use endpoints from this app:
   - `POST/PATCH/DELETE /api/members`
   - `POST /api/work-logs`
 
-### Bootstrap Normalization in Frontend
+### Bootstrap normalization
 
-The frontend currently includes compatibility normalization for legacy/bootstrap payload shapes. This is intentional to keep older data usable while contracts evolve.
+The frontend includes compatibility normalization for older or evolving bootstrap payloads. This is intentional, but it should not become a substitute for a clear backend contract.
 
 Normalization currently backfills and aligns:
 
@@ -265,50 +391,158 @@ Normalization currently backfills and aligns:
 - scoped references for tasks/workstreams/subsystems
 - default values for member/artifact/part/manufacturing/work-log fields
 
-When changing backend contracts, validate both repos together:
+When changing backend contracts:
 
-- `meco-mission-control-platform/src/routes/registerRoutes.ts` is backend route/validation truth.
-- `meco-mission-control-web/src/types.ts` and `src/lib/auth.ts` must stay in sync.
+1. Update `meco-mission-control-platform` route validation/schema first.
+2. Update frontend types in `src/types/*`.
+3. Update request/normalization code in `src/lib/auth/*`.
+4. Update view models/selectors that derive from the changed fields.
+5. Test with scoped season/project selection, `All projects`, robot project, and non-robot project states.
 
-## Development Workflow
+## Authentication Behavior
 
-Recommended cycle:
+Authentication state is backend-driven.
 
-1. Start backend (`meco-mission-control-platform`) locally.
-2. Start web app (`npm run dev`).
-3. Verify login flow and scoped workspace views (season/project).
-4. Implement targeted changes.
-5. Run the quality gate (`npm run verify`).
-6. Push when local checks pass.
+Startup flow:
 
-### Useful Frontend Entry Points
+1. Frontend calls `GET /api/auth/config`.
+2. If auth is enabled, sign-in is required.
+3. If auth is not enabled, workspace remains accessible with auth config messaging.
 
-- App shell and composition: `src/app/App.tsx`
-- Auth/session orchestration: `src/app/useAppAuth.ts`
-- Workspace rendering and routing: `src/features/workspace/WorkspaceContent.tsx`
-- View-specific UI: `src/features/workspace/views/*`
-- API calls and payload normalization: `src/lib/auth.ts`
+Supported sign-in paths:
 
-## Validation Commands
+- Google Identity Services token exchange via `POST /api/auth/google`
+- Email code flow via:
+  - `POST /api/auth/email/start`
+  - `POST /api/auth/email/verify`
+- Dev-only bypass via `POST /api/auth/dev-bypass` when backend exposes it outside production
 
-Run these before merge/deploy:
+Important behavior details:
+
+- Session token is persisted in `localStorage` as `meco.session.token`.
+- On `401` responses, the token is cleared and the user is forced to re-auth.
+- Session validity is rechecked periodically.
+- Google sign-in only renders on secure hosts:
+  - localhost (`localhost`, `127.0.0.1`, `::1`)
+  - HTTPS origins
+
+### Local Google SSO testing
+
+Use the Vite proxy so browser origin remains `http://localhost:5173` while API traffic stays under `/api`.
+
+If Google sign-in fails locally because the backend-provided client is not authorized for localhost:
+
+- Add `http://localhost:5173` to authorized JavaScript origins for that OAuth web client, or
+- Set `VITE_LOCAL_GOOGLE_CLIENT_ID` to a localhost-authorized client ID.
+
+The frontend never needs a Google client secret.
+
+For production, Google web sign-in requires HTTPS for non-localhost origins.
+
+## Environment Variables
+
+Frontend env vars are read by Vite through `import.meta.env`.
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `VITE_API_BASE_URL` | `/api` | Base path for API requests from the browser client. Keep as `/api` for same-origin proxying in dev/prod. |
+| `VITE_DEV_PROXY_TARGET` | `http://localhost:8080` | Dev-server proxy target for `/api`. Only used by Vite dev server. |
+| `VITE_LOCAL_GOOGLE_CLIENT_ID` | unset | Optional localhost-only override for Google web client ID during local development. |
+
+Production example:
+
+```env
+VITE_API_BASE_URL=/api
+```
+
+## Validation and Testing
+
+### Main quality gate
+
+Run before merge/deploy:
 
 ```bash
 npm run verify
 ```
 
-What each gate catches:
+`verify` runs:
 
-- `typecheck`: TS type drift between views, shared types, and API payloads
-- `test:ci`: behavior checks for utility and view logic
-- `lint`: code quality and consistency issues
-- `build:bundle`: production bundle correctness
+1. `npm run typecheck`
+2. `npm run lint`
+3. `npm run test:ci`
+4. `npm run build:bundle`
+
+### Targeted commands
+
+| Command | Use when |
+| --- | --- |
+| `npm run typecheck` | changing types, API payloads, component props, navigation keys |
+| `npm run lint` | changing React hooks, imports, or general TS/TSX code |
+| `npm run test:ci` | validating the full Jest suite in CI mode |
+| `npm run test:watch` | iterating locally on a specific unit/view test |
+| `npm run build:bundle` | checking Vite production bundle correctness |
+| `npm run audit:organization` | checking file/directory/CSS organization warnings |
+| `npm run audit:organization:strict` | enforcing hard organization limits before structural PRs |
+
+### Useful targeted test patterns
+
+```bash
+npm run test:ci -- TimelineView
+npm run test:ci -- RisksView
+npm run test:ci -- WorkLogsView
+npm run test:ci -- AppSidebar
+```
+
+Use targeted tests first when narrowing behavior, then run `npm run verify` before marking the PR ready.
+
+### Organization guardrails
+
+`AGENTS.md` defines the hard rules. Practical summary:
+
+- Prefer small cohesive files and directories.
+- Split React/TS files before they exceed the hard cap.
+- Split large CSS by component or responsibility.
+- Avoid flat mixed-responsibility directories.
+- Keep diagnostics and generated artifacts under `.diagnostics/`.
+- Use `environment.toml` as the Codex worktree startup source of truth.
+
+## Development Workflow
+
+Recommended local cycle:
+
+1. Start backend (`meco-mission-control-platform`) locally.
+2. Start web app (`npm run dev`).
+3. Verify login flow and scoped workspace views.
+4. Implement the smallest coherent change.
+5. Run targeted tests for the touched area.
+6. Run `npm run verify`.
+7. Push and open a PR into `development`.
+
+Branch and PR workflow is governed by `AGENTS.md`:
+
+- `main` is production-ready only.
+- `development` is the integration branch for active work.
+- `feature/*`, `fix/*`, and `hotfix/*` are short-lived work branches.
+- PRs into `development` must come from `feature/*`, `fix/*`, or `hotfix/*`.
+- Merges into `main` should come only from `development` or `hotfix/*`.
+- Protected branches require CI, snapshot validation, review approval, conversation resolution, linear history, and admin enforcement as described in `AGENTS.md`.
+
+Codex/worktree notes:
+
+- `environment.toml` is the startup source of truth for Codex worktrees.
+- Keep startup commands and dev URL in `environment.toml`, not duplicated across docs.
+- Put diagnostic screenshots, generated reports, and temporary snapshots under `.diagnostics/`, not in the repository root.
+- When working in a worktree, audit UI changes against the worktree-hosted app instance before finishing.
 
 ## Deployment and Operations
 
-### CI/CD Workflow
+### CI/CD workflow
 
-GitHub Actions file: `.github/workflows/deploy-vps.yml`
+GitHub Actions file:
+
+```text
+.github/workflows/deploy-vps.yml
+```
 
 Trigger conditions:
 
@@ -318,7 +552,7 @@ Trigger conditions:
 Pipeline summary:
 
 1. Validate job:
-   - install deps (`npm ci`)
+   - install deps with `npm ci`
    - typecheck
    - test
    - lint
@@ -331,7 +565,7 @@ Pipeline summary:
    - reload/restart `nginx`
    - verify `/` and `/health`
 
-### Required GitHub Secrets
+### Required GitHub secrets
 
 Set in `MECO-Robotics/meco-mission-control-web`:
 
@@ -339,7 +573,7 @@ Set in `MECO-Robotics/meco-mission-control-web`:
 - `VPS_USER`
 - `VPS_SSH_KEY`
 
-### Runtime Paths on Server
+### Runtime paths on server
 
 - Static site root: `/opt/pm-web/site`
 - Uploaded nginx config: `/opt/pm-web/deploy/pm-web.nginx.conf`
@@ -348,49 +582,69 @@ Set in `MECO-Robotics/meco-mission-control-web`:
 
 ## Troubleshooting
 
-### "Could not load authentication configuration"
+### Could not load authentication configuration
 
 Check:
 
 - backend is running
 - Vite proxy target is correct
-- `/api/auth/config` returns a valid JSON payload
-
-### Google sign-in origin mismatch
-
-Symptoms:
-
-- Google button errors on localhost or deployed host
-
-Fix:
-
-- Ensure current frontend origin is in OAuth client authorized JavaScript origins
-- On localhost, optionally set `VITE_LOCAL_GOOGLE_CLIENT_ID`
-- Ensure production host is HTTPS
-
-### Repeated session expiry / forced sign-out
-
-Check:
-
-- backend JWT settings and token validity
-- clock skew on local machine/server
-- whether `/api/auth/me` returns `401`
-
-### Missing data after switching season/project
-
-Remember:
-
-- workspace data is intentionally scoped by selected season/project
-- `All projects` view can hide project-specific tabs
-- manufacturing tab appears only for robot project scope
+- `/api/auth/config` returns valid JSON
+- `VITE_API_BASE_URL` is `/api` for local proxy behavior
 
 ### API calls fail in local dev
 
 Check:
 
-- `VITE_API_BASE_URL` is `/api`
+- `VITE_API_BASE_URL=/api`
 - backend is reachable at `VITE_DEV_PROXY_TARGET`
+- backend is running on the expected port
 - backend CORS/origin settings match local frontend when needed
+
+### Google sign-in origin mismatch
+
+Check:
+
+- current frontend origin is in OAuth client authorized JavaScript origins
+- localhost testing uses either the backend-provided localhost-authorized client or `VITE_LOCAL_GOOGLE_CLIENT_ID`
+- production host uses HTTPS
+
+### Repeated session expiry or forced sign-out
+
+Check:
+
+- backend JWT settings and token validity
+- local/server clock skew
+- whether `/api/auth/me` returns `401`
+- whether a stale `meco.session.token` exists in localStorage
+
+### Missing data after switching season/project
+
+Remember:
+
+- workspace data is scoped by selected season/project
+- `All projects` can hide project-specific tabs
+- manufacturing appears only for robot project scope
+- Robot Configuration and part-mapping support are robot-project specific
+- frontend bootstrap normalization can backfill defaults, but it does not create missing backend records permanently unless a mutation does so
+
+### View appears blank after navigation changes
+
+Check:
+
+- `src/lib/workspaceNavigation/types.ts` includes the new tab/subview key
+- `constants.ts` includes the subitem and target
+- section renderer activates the correct `WorkspaceSubPanel`
+- active tab and subview state are initialized in `useAppWorkspaceState`
+- all-project/non-robot gating is not redirecting the view
+
+### Layout or CSS regression after refactor
+
+Check:
+
+- component still imports the correct scoped CSS entrypoint
+- global CSS was not expanded for component-specific behavior
+- organization audit passes for CSS/file/directory limits
+- affected interaction tests still cover keyboard/responsive behavior where relevant
 
 ## Cross-Repo Responsibilities
 
@@ -404,13 +658,23 @@ For auth, payload, schema, or API behavior changes:
 1. Update backend contract and validation first.
 2. Align frontend types and API client.
 3. Re-test full flow end-to-end from web UI.
+4. Confirm mobile behavior if the changed contract is shared.
 
-## Requirements Documents
+For deployment changes:
 
-Reference docs in `docs/`:
+1. Update this repo's workflow/nginx/static asset behavior.
+2. Confirm platform deploy/runtime assumptions still match.
+3. Confirm `/health` and `/api/*` proxy behavior.
 
+## Requirements and Specs
+
+Current living specs and requirements references in `docs/`:
+
+- `docs/CURRENT_WEB_SPEC.md` — current repo-local web app spec aligned to recent PRs and current navigation.
 - `docs/MECO_MVP_Spec_v11.docx`
 - `docs/MECO_MVP_Spec_v10.docx`
 - `docs/MECO_Requirements_v11.docx`
 - `docs/MECO_Requirements_v10_clean.docx`
 - `docs/MECO_Requirements.docx`
+
+Use `docs/CURRENT_WEB_SPEC.md` as the first reference for current web-app behavior. Treat the Word documents as historical baseline/spec sources unless they are explicitly refreshed in a future docs PR.

@@ -8,13 +8,17 @@ on:
       - main
     paths:
       - ".github/workflows/ci.yml"
+      - ".github/workflows/codex-automerge.yml"
       - ".github/workflows/deploy-vps.yml"
       - "deploy/**"
+      - "docs/**"
+      - "README.md"
       - "src/**"
       - "public/**"
       - "index.html"
       - "package.json"
       - "package-lock.json"
+      - "scripts/organization-audit.mjs"
       - "eslint.config.js"
       - "tsconfig.json"
       - "tsconfig.app.json"
@@ -31,13 +35,17 @@ on:
       - "hotfix/**"
     paths:
       - ".github/workflows/ci.yml"
+      - ".github/workflows/codex-automerge.yml"
       - ".github/workflows/deploy-vps.yml"
       - "deploy/**"
+      - "docs/**"
+      - "README.md"
       - "src/**"
       - "public/**"
       - "index.html"
       - "package.json"
       - "package-lock.json"
+      - "scripts/organization-audit.mjs"
       - "eslint.config.js"
       - "tsconfig.json"
       - "tsconfig.app.json"
@@ -101,8 +109,41 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Enforce organization hard limits
+        run: npm run audit:organization:strict
+
       - name: Verify
         run: npm run verify
+
+  organization-audit:
+    name: organization-audit
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run organization audit
+        run: npm run audit:organization
+
+      - name: Upload organization audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: organization-audit-${{ github.sha }}
+          path: |
+            .diagnostics/organization-audit/latest.json
+            .diagnostics/organization-audit/latest.md
+          if-no-files-found: warn
 
   snapshot-validate:
     name: snapshot-validate

@@ -1,15 +1,16 @@
-import { useMemo, useState, type CSSProperties } from "react";
-import { Plus } from "lucide-react";
+﻿import { useMemo, useState, type CSSProperties } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MaterialRecord } from "@/types/recordsInventory";
 import { IconManufacturing, IconTasks } from "@/components/shared/Icons";
+import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
+import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
 import { ColumnFilterDropdown } from "@/features/workspace/shared/filters/ColumnFilterDropdown";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { EditableHoverIndicator, PaginationControls, TableCell, useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import { filterSelectionIncludes, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
-import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
@@ -56,6 +57,58 @@ export function MaterialsView({
 
   return (
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
+      <AppTopbarSlotPortal slot="controls">
+        <div className="panel-actions filter-toolbar materials-toolbar">
+          <TopbarResponsiveSearch
+            actions={
+              <CompactFilterMenu
+                activeCount={[category, stock].filter((value) => value.length > 0).length}
+                ariaLabel="Material filters"
+                buttonLabel="Filters"
+                className="materials-filter-menu"
+                items={[
+                  {
+                    label: "Category",
+                    content: (
+                      <FilterDropdown
+                        allLabel="All categories"
+                        ariaLabel="Filter materials by category"
+                        className="task-queue-filter-menu-submenu"
+                        icon={<IconManufacturing />}
+                        onChange={setCategory}
+                        options={MATERIAL_CATEGORY_OPTIONS}
+                        value={category}
+                      />
+                    ),
+                  },
+                  {
+                    label: "Stock",
+                    content: (
+                      <FilterDropdown
+                        allLabel="All stock"
+                        ariaLabel="Filter materials by stock level"
+                        className="task-queue-filter-menu-submenu"
+                        icon={<IconTasks />}
+                        onChange={setStock}
+                        options={MATERIAL_STOCK_OPTIONS}
+                        value={stock}
+                      />
+                    ),
+                  },
+                ]}
+              />
+            }
+            ariaLabel="Search materials"
+            compactPlaceholder="Search"
+            onChange={setSearch}
+            placeholder="Search materials..."
+            tutorialTarget="materials-search-input"
+            value={search}
+          />
+
+        </div>
+      </AppTopbarSlotPortal>
+
       <div className="panel-header compact-header">
         <div className="queue-section-header">
           <h2>Materials manager</h2>
@@ -63,65 +116,14 @@ export function MaterialsView({
             Live inventory for stock, reorder thresholds, vendors, and shop locations.
           </p>
         </div>
-        <div className="panel-actions filter-toolbar materials-toolbar">
-          <div data-tutorial-target="materials-search-input">
-            <SearchToolbarInput
-              ariaLabel="Search materials"
-              onChange={setSearch}
-              placeholder="Search materials..."
-              value={search}
-            />
-          </div>
-
-          <CompactFilterMenu
-            activeCount={[category, stock].filter((value) => value.length > 0).length}
-            ariaLabel="Material filters"
-            buttonLabel="Filters"
-            className="materials-filter-menu"
-            items={[
-              {
-                label: "Category",
-                content: (
-                  <FilterDropdown
-                    allLabel="All categories"
-                    ariaLabel="Filter materials by category"
-                    className="task-queue-filter-menu-submenu"
-                    icon={<IconManufacturing />}
-                    onChange={setCategory}
-                    options={MATERIAL_CATEGORY_OPTIONS}
-                    value={category}
-                  />
-                ),
-              },
-              {
-                label: "Stock",
-                content: (
-                  <FilterDropdown
-                    allLabel="All stock"
-                    ariaLabel="Filter materials by stock level"
-                    className="task-queue-filter-menu-submenu"
-                    icon={<IconTasks />}
-                    onChange={setStock}
-                    options={MATERIAL_STOCK_OPTIONS}
-                    value={stock}
-                  />
-                ),
-              },
-            ]}
-          />
-
-          <button
-            aria-label="Add material"
-            className="primary-action queue-toolbar-action queue-toolbar-action-round"
-            data-tutorial-target="create-material-button"
-            onClick={openCreateMaterialModal}
-            title="Add material"
-            type="button"
-          >
-            <Plus size={14} strokeWidth={2} />
-          </button>
-        </div>
       </div>
+
+      <WorkspaceFloatingAddButton
+        ariaLabel="Add material"
+        onClick={openCreateMaterialModal}
+        title="Add material"
+        tutorialTarget="create-material-button"
+      />
 
       <div className={`table-shell ${materialsFilterMotionClass}`}>
         <div

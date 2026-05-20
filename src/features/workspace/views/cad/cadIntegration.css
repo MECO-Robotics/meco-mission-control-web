@@ -1,0 +1,151 @@
+﻿.cad-integration-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cad-header {
+  align-items: flex-start;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.cad-header-meta {
+  align-items: flex-end;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  font-size: 0.78rem;
+  gap: 4px;
+  text-align: right;
+}
+
+.cad-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.cad-grid-two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cad-grid-three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.cad-card {
+  background:
+    linear-gradient(145deg, rgba(15, 23, 42, 0.04), rgba(14, 165, 233, 0.04)),
+    var(--surface-panel, rgba(255, 255, 255, 0.82));
+  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24));
+  border-radius: 18px;
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08);
+  padding: 16px;
+}
+
+.cad-card h3 {
+  font-size: 1rem;
+  margin: 2px 0 8px;
+}
+
+.cad-card p {
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.cad-eyebrow {
+  color: var(--official-blue);
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.cad-key-values {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+}
+
+.cad-key-values div {
+  align-items: baseline;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.cad-key-values dt {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.cad-key-values dd {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.78rem;
+  margin: 0;
+  max-width: 62%;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.cad-warning-copy {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  border-radius: 12px;
+  color: #92400e !important;
+  margin-top: 12px !important;
+  padding: 10px;
+}
+
+.cad-field {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.cad-field span {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.cad-field input,
+.cad-field select,
+.cad-field textarea {
+  background: var(--surface-input, rgba(255, 255, 255, 0.86));
+  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.3));
+  border-radius: 12px;
+  color: var(--text-primary);
+  font: inherit;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.cad-link-card,
+.cad-preview-card,
+.cad-sync-card {
+  min-height: 100%;
+}
+
+.cad-sync-card {
+  grid-column: 1 / -1;
+}
+
+.cad-message {
+  background: rgba(37, 99, 235, 0.1);
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  border-radius: 14px;
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  padding: 10px 12px;
+}
+
+.cad-oauth-button {
+  margin-top: 12px;
+}

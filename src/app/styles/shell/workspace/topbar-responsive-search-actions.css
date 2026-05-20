@@ -1,0 +1,78 @@
+.topbar-responsive-search-actions {
+  position: absolute;
+  top: 50%;
+  right: 0.2rem;
+  z-index: 45;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.08rem;
+  transform: translateY(-50%);
+}
+
+.topbar-responsive-search-actions .task-queue-toolbar-inline-actions,
+.topbar-responsive-search-actions .task-calendar-filter-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.08rem;
+  flex-wrap: nowrap;
+  width: auto;
+}
+
+.topbar-responsive-search-actions .task-queue-filter-menu.toolbar-filter-dropdown {
+  width: 1.7rem;
+  height: 1.7rem;
+  min-height: 1.7rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.topbar-responsive-search-actions .task-queue-filter-menu-button {
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0;
+  border-radius: 999px;
+  color: var(--text-copy);
+}
+
+.topbar-responsive-search-actions .toolbar-filter-value,
+.topbar-responsive-search-actions .toolbar-filter-chevron {
+  display: none;
+}
+
+.topbar-responsive-search-actions .task-queue-filter-menu-button:hover,
+.topbar-responsive-search-actions .task-queue-filter-menu.is-open .task-queue-filter-menu-button,
+.topbar-responsive-search-actions .task-queue-filter-menu.is-active .task-queue-filter-menu-button {
+  background: color-mix(in srgb, var(--meco-blue) 10%, transparent);
+  color: var(--official-blue);
+}
+
+.topbar-responsive-search-actions .task-queue-filter-count {
+  position: absolute;
+  top: -0.18rem;
+  right: -0.18rem;
+  min-width: 0.82rem;
+  width: 0.82rem;
+  height: 0.82rem;
+  padding: 0;
+  font-size: 0.52rem;
+}
+
+.topbar-responsive-search-actions .task-queue-filter-menu-popover {
+  top: calc(100% + 0.38rem);
+  right: 0;
+  width: max-content;
+  min-width: 13.5rem;
+}
+
+.topbar-responsive-search-actions .task-queue-filter-menu-item {
+  width: 100%;
+}
+
+.topbar-responsive-search-actions .task-queue-filter-menu-checkboxes {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 13.5rem;
+}

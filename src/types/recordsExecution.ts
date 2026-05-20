@@ -153,3 +153,21 @@ export interface EscalationRecord {
   detail: string;
   severity: "high" | "medium";
 }
+
+export type AuditActionOperation = "create" | "update" | "delete";
+
+export interface AuditActionRecord {
+  id: string;
+  timestamp: string;
+  operation: AuditActionOperation;
+  entityType: string;
+  entityId: string;
+  entityLabel: string;
+  message: string;
+  changedFields: string[];
+  projectId: string | null;
+  taskId: string | null;
+  subsystemId: string | null;
+  actorMemberId: string | null;
+  memberIds: string[];
+}

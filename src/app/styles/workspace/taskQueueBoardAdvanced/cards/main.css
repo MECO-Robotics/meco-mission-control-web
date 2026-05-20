@@ -115,6 +115,20 @@
   white-space: normal;
 }
 
+.milestone-search-highlight {
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  padding: 0 0.08em;
+  border-radius: 3px;
+  background: color-mix(in srgb, #facc15 48%, transparent);
+  color: inherit;
+}
+
+.milestones-search-suggestion:hover .milestone-search-highlight,
+.milestones-search-suggestion:focus-visible .milestone-search-highlight {
+  background: rgba(255, 255, 255, 0.28);
+}
+
 .risk-board .task-queue-board-card-summary-task,
 .task-queue-view .task-queue-board-card-summary-task {
   color: var(--text-title);

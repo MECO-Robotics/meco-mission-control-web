@@ -1,7 +1,7 @@
-import { SearchToolbarInput } from "@/features/workspace/shared/filters/workspaceSearchToolbarInput";
+import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 
 interface SubsystemsToolbarProps {
-  openCreateSubsystemModal: () => void;
   search: string;
   setSearch: (value: string) => void;
   setShowArchivedMechanisms: (value: boolean) => void;
@@ -19,7 +19,6 @@ const LABEL_STYLE = {
 } as const;
 
 export function SubsystemsToolbar({
-  openCreateSubsystemModal,
   search,
   setSearch,
   setShowArchivedMechanisms,
@@ -29,40 +28,48 @@ export function SubsystemsToolbar({
 }: SubsystemsToolbarProps) {
   return (
     <div className="panel-actions filter-toolbar subsystem-manager-toolbar">
-      <div data-tutorial-target="subsystem-search-input">
-        <SearchToolbarInput
-          ariaLabel="Search subsystems and mechanisms"
-          onChange={setSearch}
-          placeholder="Search subsystems or mechanisms..."
-          value={search}
-        />
-      </div>
-      <label style={LABEL_STYLE}>
-        <input
-          checked={showArchivedSubsystems}
-          onChange={(milestone) => setShowArchivedSubsystems(milestone.target.checked)}
-          type="checkbox"
-        />
-        Show archived subsystems
-      </label>
-      <label style={LABEL_STYLE}>
-        <input
-          checked={showArchivedMechanisms}
-          onChange={(milestone) => setShowArchivedMechanisms(milestone.target.checked)}
-          type="checkbox"
-        />
-        Show archived mechanisms
-      </label>
+      <TopbarResponsiveSearch
+        actions={
+          <CompactFilterMenu
+            activeCount={Number(showArchivedSubsystems) + Number(showArchivedMechanisms)}
+            ariaLabel="Subsystem filters"
+            buttonLabel="Filters"
+            className="materials-filter-menu"
+            items={[
+              {
+                label: "Archived",
+                content: (
+                  <div className="task-queue-filter-menu-checkboxes">
+                    <label style={LABEL_STYLE}>
+                      <input
+                        checked={showArchivedSubsystems}
+                        onChange={(milestone) => setShowArchivedSubsystems(milestone.target.checked)}
+                        type="checkbox"
+                      />
+                      Show archived subsystems
+                    </label>
+                    <label style={LABEL_STYLE}>
+                      <input
+                        checked={showArchivedMechanisms}
+                        onChange={(milestone) => setShowArchivedMechanisms(milestone.target.checked)}
+                        type="checkbox"
+                      />
+                      Show archived mechanisms
+                    </label>
+                  </div>
+                ),
+              },
+            ]}
+          />
+        }
+        ariaLabel="Search subsystems and mechanisms"
+        compactPlaceholder="Search"
+        onChange={setSearch}
+        placeholder="Search subsystems or mechanisms..."
+        tutorialTarget="subsystem-search-input"
+        value={search}
+      />
 
-      <button
-        aria-label="Add subsystem"
-        className="primary-action queue-toolbar-action subsystem-manager-toolbar-action"
-        data-tutorial-target="create-subsystem-button"
-        onClick={openCreateSubsystemModal}
-        type="button"
-      >
-        Add subsystem
-      </button>
     </div>
   );
 }

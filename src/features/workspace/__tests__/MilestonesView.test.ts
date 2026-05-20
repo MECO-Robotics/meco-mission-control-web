@@ -1,9 +1,16 @@
 /// <reference types="jest" />
 
 import * as React from "react";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import {
+  buildMilestoneSearchHighlightSegments,
+  MilestoneSearchHighlight,
+} from "@/features/workspace/views/milestones/MilestoneSearchHighlight";
+import { buildMilestoneSearchSuggestions } from "@/features/workspace/views/milestones/milestonesViewUtils";
 import { MilestonesView } from "@/features/workspace/views/milestones/MilestonesView";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
@@ -202,6 +209,50 @@ describe("MilestonesView", () => {
     expect(markup).toContain("Milestone type: Competition");
   });
 
+  it("renders milestone filter and sort controls as icon overlays inside search", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(MilestonesView, {
+        activePersonFilter: [],
+        bootstrap: createBootstrap(),
+        isAllProjectsView: false,
+        onDeleteTimelineMilestone: jest.fn(),
+        onSaveTimelineMilestone: jest.fn(),
+      }),
+    );
+
+    expect(markup).toContain("topbar-responsive-search-actions");
+    expect(markup).toContain("--topbar-responsive-search-action-overlay-width:4rem");
+    expect(markup).toContain("milestones-search-filter-menu");
+    expect(markup).toContain("milestones-search-sort-menu");
+    expect(markup).toContain('aria-label="Milestone filters"');
+    expect(markup).toContain('aria-label="Sort milestones"');
+    expect(markup).toContain("lucide-arrow-up-wide-narrow");
+    expect(markup).not.toContain('aria-label="Sort direction"');
+    expect(markup).not.toContain('class="toolbar-filter-value">Filters</span>');
+    expect(markup).not.toContain('class="toolbar-filter-value">Sort</span>');
+  });
+
+  it("does not toggle milestone sort direction as a side effect of opening the sort menu", () => {
+    const toolbarSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/milestones/MilestonesToolbar.tsx"),
+      "utf8",
+    );
+
+    expect(toolbarSource).not.toContain("onButtonClick={() => setSortOrder");
+    expect(toolbarSource).toContain('aria-label="Toggle milestone sort direction"');
+  });
+
+  it("closes milestone suggestions when keyboard focus moves into search actions", () => {
+    const searchControlSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/milestones/MilestonesSearchControl.tsx"),
+      "utf8",
+    );
+
+    expect(searchControlSource).toMatch(
+      /target\.closest\("\.topbar-responsive-search-actions"\)\) \{[\s\S]*setIsSuggestionsOpen\(false\);[\s\S]*return;/,
+    );
+  });
+
   it("filters milestones to the active person via linked tasks", () => {
     const bootstrap = createBootstrap();
     const markup = renderToStaticMarkup(
@@ -244,5 +295,52 @@ describe("MilestonesView", () => {
     expect(render).not.toThrow();
     expect(render()).toContain("Internal review");
     expect(render()).toContain("Legacy milestone");
+  });
+
+  it("builds contextual suggestions for milestone search matches", () => {
+    const bootstrap = createBootstrap();
+    const suggestions = buildMilestoneSearchSuggestions({
+      milestones: bootstrap.milestones,
+      projectLabelByMilestoneId: {
+        "milestone-1": "Robot",
+        "milestone-2": "Robot",
+      },
+      searchFilter: "robot",
+    });
+
+    expect(suggestions).toEqual([
+      expect.objectContaining({
+        context: expect.stringContaining("Competition"),
+        description: "Competition readiness checkpoint",
+        id: "milestone-1",
+        title: "Regional",
+      }),
+      expect.objectContaining({
+        context: expect.stringContaining("Blocked"),
+        id: "milestone-2",
+        title: "Design review",
+      }),
+    ]);
+    expect(suggestions[0]?.context).toContain("Robot");
+    expect(suggestions[0]?.context).toContain("Mar 10");
+  });
+
+  it("highlights milestone search keywords without changing the visible text", () => {
+    expect(buildMilestoneSearchHighlightSegments("Robot robot readiness", "robot")).toEqual([
+      { highlighted: true, text: "Robot" },
+      { highlighted: false, text: " " },
+      { highlighted: true, text: "robot" },
+      { highlighted: false, text: " readiness" },
+    ]);
+
+    const markup = renderToStaticMarkup(
+      React.createElement(MilestoneSearchHighlight, {
+        searchFilter: "robot",
+        text: "Robot checkpoint",
+      }),
+    );
+
+    expect(markup).toContain('<mark class="milestone-search-highlight">Robot</mark>');
+    expect(markup).toContain(" checkpoint");
   });
 });

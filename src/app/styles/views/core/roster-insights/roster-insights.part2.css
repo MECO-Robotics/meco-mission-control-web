@@ -1,0 +1,50 @@
+.mc-roster-attendance-row-main {
+  display: grid;
+  gap: 0.16rem;
+  min-width: 0;
+}
+
+.mc-roster-attendance-row-main strong {
+  color: var(--text-title);
+  font-size: 0.8rem;
+}
+
+.mc-roster-attendance-row-main small {
+  color: var(--text-copy);
+  font-size: 0.7rem;
+}
+
+.mc-roster-timeline-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.38rem;
+}
+
+.mc-roster-timeline-chip {
+  background: var(--bg-row-alt);
+  border: 1px solid var(--border-base);
+  border-radius: 0.65rem;
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.35rem 0.45rem;
+}
+
+.mc-roster-timeline-chip strong {
+  color: var(--text-title);
+  font-size: 0.7rem;
+}
+
+.mc-roster-timeline-chip small {
+  color: var(--text-copy);
+  font-size: 0.66rem;
+}
+
+@media (max-width: 860px) {
+  .mc-roster-attendance-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .mc-roster-attendance-row .mc-roster-status-badge {
+    align-self: flex-start;
+  }
+}
