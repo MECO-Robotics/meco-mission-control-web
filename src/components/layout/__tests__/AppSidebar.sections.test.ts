@@ -1,48 +1,57 @@
-﻿/// <reference types="jest" />
+/// <reference types="jest" />
 
+import { readFileSync } from "node:fs";
 import * as React from "react";
-import { renderToStaticMarkup } from "react-dom/server";
 
-import { AppSidebar } from "@/components/layout/AppSidebar";
 import type { ProjectRecord } from "@/types/recordsOrganization";
-import type { NavigationItem, ViewTab } from "@/lib/workspaceNavigation";
 
-(globalThis as typeof globalThis & { React: typeof React }).React = React;
+import { renderSidebar, signedInUser } from "./AppSidebar.testUtils";
 
-function renderSidebar(
-  items: NavigationItem[],
-  activeTab: ViewTab = "reports",
-  options?: {
-    inventoryView?: "materials" | "parts" | "part-mappings" | "purchases";
-    projects?: ProjectRecord[];
-    riskManagementView?: "kanban" | "metrics";
-    selectedProjectId?: string | null;
-    taskView?: "calendar" | "timeline" | "robot-map" | "queue" | "milestones";
-  },
-) {
-  return renderToStaticMarkup(
-    React.createElement(AppSidebar, {
-      activeTab,
-      inventoryView: options?.inventoryView ?? "materials",
-      items,
-      isCollapsed: false,
-      onCreateRobot: jest.fn(),
-      onEditSelectedRobot: jest.fn(),
-      onSelectProject: jest.fn(),
-      onSelectTarget: jest.fn(),
-      projects: options?.projects ?? [],
-      reportsView: "qa",
-      rosterView: "directory",
-      riskManagementView: options?.riskManagementView ?? "kanban",
-      selectedProjectId: options?.selectedProjectId ?? null,
-      taskView: options?.taskView ?? "queue",
-      toggleSidebar: jest.fn(),
-      worklogsView: "logs",
-    }),
-  );
-}
+describe("AppSidebar sections", () => {
+  it("keeps workspace sections closed while Home is active", () => {
+    const markup = renderSidebar(
+      [
+        {
+          value: "home",
+          label: "Home",
+          icon: React.createElement("span"),
+          count: 0,
+        },
+        {
+          value: "tasks",
+          label: "Tasks",
+          icon: React.createElement("span"),
+          count: 4,
+        },
+        {
+          value: "worklogs",
+          label: "Work logs",
+          icon: React.createElement("span"),
+          count: 2,
+        },
+      ],
+      "home",
+      { sessionUser: signedInUser },
+    );
 
-describe("AppSidebar", () => {
+    expect(markup).toMatch(
+      /<button(?=[^>]*class="[^"]*sidebar-quick-action[^"]*sidebar-quick-action-home)(?=[^>]*aria-current="page")(?=[^>]*data-active="true")[^>]*>/,
+    );
+    expect(markup).toMatch(
+      /<button(?=[^>]*data-active="false")(?=[^>]*data-tutorial-target="sidebar-tab-dashboard")[^>]*>/,
+    );
+    expect(markup).not.toContain('<span class="sidebar-subtab-label">Calendar</span>');
+    expect(markup).not.toContain('<span class="sidebar-subtab-label">Activity</span>');
+    expect(markup).not.toContain('<span class="sidebar-subtab-label">Metrics</span>');
+  });
+
+  it("uses one shared underline for the Home, Add, and Notifications quick actions", () => {
+    const css = readFileSync("src/app/styles/shell/sidebar-quick-actions.css", "utf8");
+
+    expect(css).toMatch(/\.sidebar-quick-actions::after\s*\{/);
+    expect(css).not.toMatch(/\.sidebar-quick-action::after\s*\{/);
+  });
+
   it("renders the Reports section with requested report subtabs", () => {
     const markup = renderSidebar([
       {
@@ -286,5 +295,4 @@ describe("AppSidebar", () => {
       /data-enabled="false"[^>]*disabled[^>]*>[\s\S]*?<span class="sidebar-subtab-label">Milestone results<\/span>/,
     );
   });
-
 });

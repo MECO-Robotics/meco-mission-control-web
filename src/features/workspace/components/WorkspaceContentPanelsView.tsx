@@ -1,4 +1,5 @@
 import type { InventoryViewTab } from "@/lib/workspaceNavigation";
+import type { WorkspaceToastDismissReason } from "@/features/workspace/workspaceToastQueue";
 import type { WorkspaceContentPanelsProps } from "../WorkspaceContentPanelsCoreImpl";
 import { WorkspaceToastStack, type WorkspaceToastStackItem } from "../WorkspaceStatusToast";
 import {
@@ -15,6 +16,7 @@ import {
 } from "./WorkspaceInventoryAndAdminSections";
 import { WorkspaceCadSection } from "./sections/WorkspaceCadSection";
 import { WorkspaceManufacturingSection } from "./WorkspaceManufacturingSection";
+import { WorkspaceHomeSection } from "./overview/WorkspaceOverviewSections";
 import { groupWorkspaceContentPanelProps } from "./workspaceContentPanelsGrouping";
 type SwipeDirection = "left" | "right" | null;
 
@@ -31,7 +33,8 @@ export function WorkspaceContentPanelsView(props: WorkspaceContentPanelsViewProp
   const toastItems: WorkspaceToastStackItem[] = [
     ...groupedProps.shell.taskEditNotices.map((notice) => ({
       message: notice.message,
-      onDismiss: () => groupedProps.shell.onDismissTaskEditNotice(notice.id),
+      onDismiss: (reason: WorkspaceToastDismissReason) =>
+        groupedProps.shell.onDismissTaskEditNotice(notice.id, reason),
       title: notice.title,
       tone: notice.tone,
       id: notice.id,
@@ -46,6 +49,17 @@ export function WorkspaceContentPanelsView(props: WorkspaceContentPanelsViewProp
         }
       : null,
   ].filter((item): item is WorkspaceToastStackItem => item !== null);
+  const historyItems: WorkspaceToastStackItem[] = groupedProps.shell.notificationHistory.map(
+    (notice) => ({
+      message: notice.message,
+      onDismiss: () => groupedProps.shell.onDismissNotificationHistoryItem(notice.id),
+      title: notice.title,
+      tone: notice.tone,
+      id: notice.id,
+    }),
+  );
+  const shouldRenderToastStack =
+    toastItems.length > 0 || groupedProps.shell.isNotificationQueueOpen;
 
   return (
     <div
@@ -62,9 +76,16 @@ export function WorkspaceContentPanelsView(props: WorkspaceContentPanelsViewProp
         minHeight: "100%",
       }}
     >
-      {toastItems.length > 0 ? <WorkspaceToastStack items={toastItems} /> : null}
+      {shouldRenderToastStack ? (
+        <WorkspaceToastStack
+          historyItems={historyItems}
+          isHistoryOpen={groupedProps.shell.isNotificationQueueOpen}
+          items={toastItems}
+        />
+      ) : null}
       {groupedProps.shell.isLoadingData ? <p className="banner">Refreshing workspace data...</p> : null}
 
+      <WorkspaceHomeSection {...props} />
       <WorkspaceTaskSection shell={groupedProps.shell} tasks={groupedProps.tasks} />
       <WorkspaceRiskSection {...props} />
       <WorkspaceWorklogsSection {...props} />

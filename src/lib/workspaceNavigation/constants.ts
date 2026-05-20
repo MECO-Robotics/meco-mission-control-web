@@ -249,6 +249,7 @@ export const NAVIGATION_SUB_ITEMS_BY_SECTION: Record<
 };
 
 export const BASE_SECTION_LABELS: Record<ViewTab, string> = {
+  home: "Home",
   tasks: "Work",
   "risk-management": "Risk Management",
   worklogs: "Worklogs",

@@ -19,8 +19,11 @@ export interface WorkspaceShellPanelProps {
   disablePanelAnimations?: WorkspaceContentPanelsViewProps["disablePanelAnimations"];
   isLoadingData: WorkspaceContentPanelsViewProps["isLoadingData"];
   dataMessage: WorkspaceContentPanelsViewProps["dataMessage"];
+  isNotificationQueueOpen: WorkspaceContentPanelsViewProps["isNotificationQueueOpen"];
+  notificationHistory: WorkspaceContentPanelsViewProps["notificationHistory"];
   taskEditNotices: WorkspaceContentPanelsViewProps["taskEditNotices"];
   onDismissDataMessage: WorkspaceContentPanelsViewProps["onDismissDataMessage"];
+  onDismissNotificationHistoryItem: WorkspaceContentPanelsViewProps["onDismissNotificationHistoryItem"];
   onDismissTaskEditNotice: WorkspaceContentPanelsViewProps["onDismissTaskEditNotice"];
   onTaskEditCanceled: WorkspaceContentPanelsViewProps["onTaskEditCanceled"];
   onTaskEditSaved: WorkspaceContentPanelsViewProps["onTaskEditSaved"];

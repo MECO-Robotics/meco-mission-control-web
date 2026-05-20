@@ -1,126 +1,139 @@
-import type { MouseEvent as ReactMouseEvent, RefObject } from "react";
+import { type MouseEvent as ReactMouseEvent, type RefObject } from "react";
+import { ChevronRight, LayoutGrid } from "lucide-react";
 
-import { IconChevronRight, IconEdit, IconHelp } from "@/components/shared/Icons";
-import type { ProjectRecord } from "@/types/recordsOrganization";
-import { getProjectIcon, getProjectIconColor } from "./appSidebarIcons";
+import { IconHelp } from "@/components/shared/Icons";
+import type { SessionUser } from "@/lib/auth/types";
+
+import { AppProfileAssembly } from "./AppProfileAssembly";
+import { AppSidebarNotificationButton } from "./sidebar/AppSidebarNotificationButton";
+import { AppSidebarSettingsMenu } from "./sidebar/AppSidebarSettingsMenu";
 
 interface AppSidebarProjectFooterProps {
   activeTab: import("@/lib/workspaceNavigation").ViewTab;
-  canEditSelectedRobot: boolean;
+  canSignOut: boolean;
+  isDarkMode: boolean;
   isCollapsed: boolean;
+  isMyViewActive: boolean;
+  isNotificationQueueOpen: boolean;
   isProjectPopupOpen: boolean;
-  onEditSelectedRobot: () => void;
+  myViewMemberName: string | null;
   onHelpSelect: () => void;
+  onNotificationQueueToggle: () => void;
+  onRefreshWorkspace: () => void;
+  onSignOut: () => void;
+  onToggleMyView: () => void;
+  onToggleDarkMode: () => void;
+  notificationCount: number;
   onProjectTriggerClick: (event: ReactMouseEvent<HTMLButtonElement>) => void;
   projectTriggerRef: RefObject<HTMLButtonElement | null>;
-  selectedProject: ProjectRecord | null;
   selectedProjectLabel: string;
+  sessionUser: SessionUser | null;
 }
 
 export function AppSidebarProjectFooter({
   activeTab,
-  canEditSelectedRobot,
+  canSignOut,
+  isDarkMode,
   isCollapsed,
+  isMyViewActive,
+  isNotificationQueueOpen,
   isProjectPopupOpen,
-  onEditSelectedRobot,
+  myViewMemberName,
   onHelpSelect,
+  onNotificationQueueToggle,
+  onRefreshWorkspace,
+  onSignOut,
+  onToggleMyView,
+  onToggleDarkMode,
+  notificationCount,
   onProjectTriggerClick,
   projectTriggerRef,
-  selectedProject,
   selectedProjectLabel,
+  sessionUser,
 }: AppSidebarProjectFooterProps) {
-  return !isCollapsed ? (
-    <div className="sidebar-footer-stack">
+  const settingsMenu = (
+    <AppSidebarSettingsMenu
+      canSignOut={canSignOut}
+      isCollapsed={isCollapsed}
+      isDarkMode={isDarkMode}
+      onRefreshWorkspace={onRefreshWorkspace}
+      onSignOut={onSignOut}
+      onToggleDarkMode={onToggleDarkMode}
+    />
+  );
+  const scopeTrigger = (
+    <button
+      aria-expanded={isProjectPopupOpen ? "true" : "false"}
+      aria-label="Project scope"
+      className="sidebar-scope-trigger"
+      data-active={isProjectPopupOpen ? "true" : "false"}
+      onClick={onProjectTriggerClick}
+      ref={projectTriggerRef}
+      title={`Project scope: ${selectedProjectLabel}`}
+      type="button"
+    >
+      <span aria-hidden="true" className="sidebar-scope-trigger-icons">
+        <LayoutGrid size={16} strokeWidth={2} />
+      </span>
+      {!isCollapsed ? (
+        <span className="sidebar-scope-trigger-copy">
+          <span className="sidebar-scope-trigger-line" data-tutorial-target="project-select">
+            {selectedProjectLabel}
+          </span>
+        </span>
+      ) : null}
+      {!isCollapsed ? (
+        <span aria-hidden="true" className="sidebar-scope-trigger-caret">
+          <ChevronRight size={14} strokeWidth={2} />
+        </span>
+      ) : null}
+    </button>
+  );
+  const profileToggle = (
+    <div className="sidebar-footer-profile" data-collapsed={isCollapsed ? "true" : "false"}>
+      <AppProfileAssembly
+        isMyViewActive={isMyViewActive}
+        myViewMemberName={myViewMemberName}
+        onToggleMyView={onToggleMyView}
+        sessionUser={sessionUser}
+      />
+    </div>
+  );
+  const notificationMenu = (
+    <AppSidebarNotificationButton
+      isOpen={isNotificationQueueOpen}
+      notificationCount={notificationCount}
+      onToggle={onNotificationQueueToggle}
+    />
+  );
+  const bottomTriplet = (
+    <div className="sidebar-footer-actions" data-collapsed={isCollapsed ? "true" : "false"}>
+      {settingsMenu}
       <button
-        className="tab sidebar-footer-help-button"
+        aria-label="Help"
+        className={`sidebar-quick-action sidebar-footer-action-help${isCollapsed ? " sidebar-help-collapsed-trigger" : ""}`}
         data-active={activeTab === "help" ? "true" : "false"}
         onClick={onHelpSelect}
+        title="Help"
         type="button"
       >
-        <span className="sidebar-tab-main">
-          <span aria-hidden="true" className="sidebar-tab-icon">
-            <IconHelp />
-          </span>
-          <span className="sidebar-tab-label">Help</span>
-        </span>
+        <IconHelp />
       </button>
-      <div className="sidebar-context-picker sidebar-project-picker">
-        <span className="sidebar-context-label">Project</span>
-        <div className="sidebar-project-compact-row" data-tutorial-target="project-select-outreach">
-          <button
-            aria-expanded={isProjectPopupOpen ? "true" : "false"}
-            aria-label="Select project"
-            className="sidebar-project-trigger"
-            data-tutorial-target="project-select"
-            onClick={onProjectTriggerClick}
-            ref={projectTriggerRef}
-            type="button"
-          >
-            <span
-              aria-hidden="true"
-              className="sidebar-tab-icon"
-              style={{ color: getProjectIconColor(selectedProject) }}
-            >
-              {getProjectIcon(selectedProject)}
-            </span>
-            <span className="sidebar-project-trigger-label">{selectedProjectLabel}</span>
-            <span
-              aria-hidden="true"
-              className={`sidebar-project-trigger-chevron${isProjectPopupOpen ? " is-open" : ""}`}
-            >
-              <IconChevronRight />
-            </span>
-          </button>
-          {canEditSelectedRobot ? (
-            <button
-              aria-label="Edit robot name"
-              className="sidebar-context-action"
-              onClick={onEditSelectedRobot}
-              title="Edit robot name"
-              type="button"
-            >
-              <IconEdit />
-            </button>
-          ) : null}
-        </div>
-      </div>
+      {notificationMenu}
+    </div>
+  );
+
+  return !isCollapsed ? (
+    <div className="sidebar-footer-stack">
+      {profileToggle}
+      {scopeTrigger}
+      {bottomTriplet}
     </div>
   ) : (
     <div className="sidebar-footer-stack sidebar-footer-stack-collapsed">
-      <button
-        aria-label="Help"
-        className="tab sidebar-help-collapsed-trigger"
-        data-active={activeTab === "help" ? "true" : "false"}
-        onClick={onHelpSelect}
-        type="button"
-      >
-        <span className="sidebar-tab-main">
-          <span aria-hidden="true" className="sidebar-tab-icon">
-            <IconHelp />
-          </span>
-        </span>
-      </button>
-      <div className="sidebar-project-collapsed-slot">
-        <button
-          aria-expanded={isProjectPopupOpen ? "true" : "false"}
-          aria-label="Select project"
-          className="tab sidebar-project-collapsed-trigger"
-          data-tutorial-target="project-select"
-          onClick={onProjectTriggerClick}
-          ref={projectTriggerRef}
-          type="button"
-        >
-          <span className="sidebar-tab-main">
-            <span
-              aria-hidden="true"
-              className="sidebar-tab-icon"
-              style={{ color: getProjectIconColor(selectedProject) }}
-            >
-              {getProjectIcon(selectedProject)}
-            </span>
-          </span>
-        </button>
-      </div>
+      {profileToggle}
+      {scopeTrigger}
+      {bottomTriplet}
     </div>
   );
 }

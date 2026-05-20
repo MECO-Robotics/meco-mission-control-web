@@ -18,27 +18,18 @@ export type AppWorkspaceShellFrameController = Pick<
 export const shellTopbarModelKeys = [
   "activeTab",
   "bootstrap",
-  "handleSignOut",
   "inventoryView",
   "isDarkMode",
-  "isLoadingData",
-  "isMyViewActive",
   "isSidebarCollapsed",
-  "loadWorkspace",
   "manufacturingView",
   "reportsView",
   "riskManagementView",
   "rosterView",
-  "selectedSeasonId",
-  "sessionUser",
-  "setSelectedSeasonId",
-  "signedInMember",
   "taskView",
-  "toggleDarkMode",
-  "toggleMyView",
+  "toggleFavoriteView",
   "worklogsView",
 ] as const;
-export const shellTopbarRosterActionKeys = ["handleCreateSeason"] as const;
+export const shellTopbarRosterActionKeys = [] as const;
 export type AppWorkspaceShellTopbarController = Pick<
   AppWorkspaceModel,
   (typeof shellTopbarModelKeys)[number]
@@ -47,36 +38,60 @@ export type AppWorkspaceShellTopbarController = Pick<
 
 export const shellSidebarModelKeys = [
   "activeTab",
+  "bootstrap",
+  "handleSignOut",
   "handleSidebarTabSelect",
   "inventoryView",
+  "isDarkMode",
+  "isMyViewActive",
+  "isNotificationQueueOpen",
   "isSidebarCollapsed",
+  "loadWorkspace",
   "manufacturingView",
   "navigationItems",
+  "notificationHistory",
   "projectsInSelectedSeason",
   "reportsView",
   "riskManagementView",
   "rosterView",
   "selectedProjectId",
+  "selectedSeasonId",
   "setInventoryView",
   "setManufacturingView",
   "setReportsView",
   "setRiskManagementView",
   "setRosterView",
   "setSelectedProjectId",
+  "setSelectedSeasonId",
   "setTaskView",
   "setWorklogsView",
+  "sessionUser",
+  "signedInMember",
   "taskView",
+  "toggleDarkMode",
+  "toggleNotificationQueue",
+  "toggleMyView",
   "toggleSidebar",
   "worklogsView",
 ] as const;
 export const shellSidebarRosterActionKeys = [
+  "handleCreateSeason",
   "handleCreateRobot",
   "handleEditSelectedRobot",
 ] as const;
+export const shellSidebarTaskActionKeys = [
+  "openCreateTaskModal",
+  "switchTaskCreateToMilestone",
+] as const;
+export const shellSidebarReportActionKeys = ["openCreateQaReportModal"] as const;
+export const shellSidebarCatalogActionKeys = ["openCreatePartDefinitionModal"] as const;
 export type AppWorkspaceShellSidebarController = Pick<
   AppWorkspaceModel,
   (typeof shellSidebarModelKeys)[number]
 > &
+  Pick<AppWorkspaceTaskActions, (typeof shellSidebarTaskActionKeys)[number]> &
+  Pick<AppWorkspaceReportActions, (typeof shellSidebarReportActionKeys)[number]> &
+  Pick<AppWorkspaceCatalogActions, (typeof shellSidebarCatalogActionKeys)[number]> &
   Pick<AppWorkspaceRosterActions, (typeof shellSidebarRosterActionKeys)[number]>;
 
 export const shellContentModelKeys = [
@@ -86,6 +101,7 @@ export const shellContentModelKeys = [
   "clearDataMessage",
   "cncItems",
   "dataMessage",
+  "dismissNotificationHistoryItem",
   "disciplinesById",
   "dismissTaskEditNotice",
   "externalMembers",
@@ -98,6 +114,7 @@ export const shellContentModelKeys = [
   "isEditPersonOpen",
   "isInteractiveTutorialActive",
   "isLoadingData",
+  "isNotificationQueueOpen",
   "isNonRobotProject",
   "isSavingMember",
   "isWorkspaceModalOpen",
@@ -108,6 +125,7 @@ export const shellContentModelKeys = [
   "membersById",
   "notifyTaskEditCanceled",
   "notifyTaskEditSaved",
+  "notificationHistory",
   "partDefinitionsById",
   "printItems",
   "reportsView",

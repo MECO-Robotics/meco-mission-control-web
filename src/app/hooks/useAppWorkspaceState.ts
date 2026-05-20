@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import "@/app/App.css";
 import { useAppAuth } from "@/app/hooks/useAppAuth";
@@ -8,8 +8,10 @@ import { useAppWorkspaceUiState } from "@/app/hooks/useAppWorkspaceUiState";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import type { WorkspaceEditToastNotice } from "@/features/workspace/workspaceEditToastNotice";
 import {
+  appendWorkspaceToastHistory,
   appendWorkspaceToast,
   removeWorkspaceToast,
+  type WorkspaceToastDismissReason,
   type WorkspaceToastNotice,
 } from "@/features/workspace/workspaceToastQueue";
 import type {
@@ -27,7 +29,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 export type AppWorkspaceState = ReturnType<typeof useAppWorkspaceState>;
 
 export function useAppWorkspaceState() {
-  const [activeTab, setActiveTab] = useState<ViewTab>("tasks");
+  const [activeTab, setActiveTab] = useState<ViewTab>("home");
   const [tabSwitchDirection, setTabSwitchDirection] = useState<"up" | "down">("down");
   const [taskView, setTaskView] = useState<TaskViewTab>("timeline");
   const [riskManagementView, setRiskManagementView] =
@@ -42,6 +44,10 @@ export function useAppWorkspaceState() {
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [dataMessage, setDataMessage] = useState<string | null>(null);
   const [taskEditNotices, setTaskEditNotices] = useState<WorkspaceToastNotice[]>([]);
+  const [notificationHistory, setNotificationHistory] = useState<WorkspaceToastNotice[]>([]);
+  const [isNotificationQueueOpen, setIsNotificationQueueOpen] = useState(false);
+  const lastRecordedDataMessageRef = useRef<string | null>(null);
+  const nextDataMessageNoticeIdRef = useRef(0);
   const nextTaskEditNoticeIdRef = useRef(0);
 
   const {
@@ -58,13 +64,52 @@ export function useAppWorkspaceState() {
     suppressNextAutoWorkspaceLoadRef.current = true;
   };
 
+  const enqueueNotificationHistory = useCallback((notice: WorkspaceToastNotice) => {
+    setNotificationHistory((current) => appendWorkspaceToastHistory(current, notice));
+  }, []);
+
+  useEffect(() => {
+    if (!dataMessage) {
+      lastRecordedDataMessageRef.current = null;
+      return;
+    }
+
+    if (lastRecordedDataMessageRef.current === dataMessage) {
+      return;
+    }
+
+    lastRecordedDataMessageRef.current = dataMessage;
+    enqueueNotificationHistory({
+      id: `workspace-data-message-${nextDataMessageNoticeIdRef.current++}`,
+      message: dataMessage,
+      title: "Error",
+      tone: "error",
+    });
+  }, [dataMessage, enqueueNotificationHistory]);
+
   const enqueueTaskEditNotice = (notice: WorkspaceEditToastNotice) => {
     const id = `task-edit-notice-${nextTaskEditNoticeIdRef.current++}`;
-    setTaskEditNotices((current) => appendWorkspaceToast(current, { id, ...notice }));
+    const toastNotice = { id, ...notice };
+    setTaskEditNotices((current) => appendWorkspaceToast(current, toastNotice));
+    enqueueNotificationHistory(toastNotice);
   };
 
-  const dismissTaskEditNotice = (noticeId: string) => {
+  const dismissTaskEditNotice = (
+    noticeId: string,
+    reason: WorkspaceToastDismissReason = "auto",
+  ) => {
     setTaskEditNotices((current) => removeWorkspaceToast(current, noticeId));
+    if (reason === "manual") {
+      setNotificationHistory((current) => removeWorkspaceToast(current, noticeId));
+    }
+  };
+
+  const dismissNotificationHistoryItem = (noticeId: string) => {
+    setNotificationHistory((current) => removeWorkspaceToast(current, noticeId));
+  };
+
+  const toggleNotificationQueue = () => {
+    setIsNotificationQueueOpen((current) => !current);
   };
 
   const clearTaskEditNotices = () => {
@@ -77,12 +122,15 @@ export function useAppWorkspaceState() {
       resetWorkspace: () => {
         setBootstrap(EMPTY_BOOTSTRAP);
         workspaceUiState.setActivePersonFilter([]);
+        workspaceUiState.setIsUnmatchedMyViewActive(false);
         workspaceUiState.setSelectedSeasonId(null);
         workspaceUiState.setSelectedProjectId(null);
         workspaceUiState.setSelectedMemberId(null);
         workspaceUiState.setMemberEditDraft(null);
         setDataMessage(null);
         clearTaskEditNotices();
+        setNotificationHistory([]);
+        setIsNotificationQueueOpen(false);
       },
     });
 
@@ -107,6 +155,7 @@ export function useAppWorkspaceState() {
     bootstrap,
     clearAuthMessage,
     dataMessage,
+    dismissNotificationHistoryItem,
     expireSession,
     googleButtonRef,
     handleDevBypassSignIn,
@@ -118,6 +167,7 @@ export function useAppWorkspaceState() {
     isEmailAuthAvailable,
     isGoogleAuthAvailable,
     isLoadingData,
+    isNotificationQueueOpen,
     isSigningIn,
     isSidebarCollapsed,
     isSidebarOverlay,
@@ -145,11 +195,13 @@ export function useAppWorkspaceState() {
     taskEditNotices,
     taskView,
     toggleDarkMode,
+    toggleNotificationQueue,
     toggleSidebar,
     worklogsView,
     suppressNextAutoWorkspaceLoadRef,
     suppressNextAutoWorkspaceLoad,
     enforcedAuthConfig,
     clearTaskEditNotices,
+    notificationHistory,
   };
 }

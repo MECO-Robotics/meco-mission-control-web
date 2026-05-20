@@ -1,0 +1,124 @@
+.overview-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.overview-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.overview-metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--border-base);
+  border-radius: 8px;
+  background: var(--bg-panel);
+}
+
+.overview-metric-card strong {
+  color: var(--text-title);
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.overview-metric-card small {
+  color: var(--text-copy);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.overview-metric-card[data-tone="critical"] {
+  border-color: rgba(220, 38, 38, 0.28);
+  background: rgba(220, 38, 38, 0.07);
+}
+
+.overview-metric-card[data-tone="warning"] {
+  border-color: rgba(217, 119, 6, 0.28);
+  background: rgba(217, 119, 6, 0.07);
+}
+
+.overview-metric-card[data-tone="good"] {
+  border-color: rgba(15, 118, 110, 0.24);
+  background: rgba(15, 118, 110, 0.06);
+}
+
+.overview-section-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  align-items: start;
+}
+
+.overview-list-section {
+  min-width: 0;
+}
+
+.overview-list {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.overview-list-item {
+  display: grid;
+  gap: 0.18rem;
+  width: 100%;
+  padding: 0.58rem 0.65rem;
+  border: 1px solid var(--border-base);
+  border-left: 3px solid var(--border-base);
+  border-radius: 7px;
+  background: var(--bg-panel);
+  color: var(--text-copy);
+  font: inherit;
+  text-align: left;
+}
+
+button.overview-list-item {
+  cursor: pointer;
+}
+
+button.overview-list-item:hover,
+button.overview-list-item:focus-visible {
+  outline: none;
+  border-color: rgba(22, 71, 142, 0.32);
+  background: var(--bg-row-alt);
+}
+
+.overview-list-item[data-tone="critical"] {
+  border-left-color: #dc2626;
+}
+
+.overview-list-item[data-tone="warning"] {
+  border-left-color: #d97706;
+}
+
+.overview-list-item-title {
+  color: var(--text-title);
+  font-size: 0.88rem;
+  font-weight: 750;
+}
+
+.overview-list-item small {
+  color: var(--text-copy);
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+@media (max-width: 1180px) {
+  .overview-metric-grid,
+  .overview-section-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .overview-metric-grid,
+  .overview-section-grid {
+    grid-template-columns: 1fr;
+  }
+}

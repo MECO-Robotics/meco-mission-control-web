@@ -76,3 +76,11 @@ export function getNavigationSectionFromSubItem(
 ): NavigationSection {
   return NAVIGATION_SUB_ITEMS.find((item) => item.id === subItemId)?.section ?? "dashboard";
 }
+
+const NAVIGATION_SUB_ITEM_ID_SET = new Set<string>(
+  NAVIGATION_SUB_ITEMS.map((item) => item.id),
+);
+
+export function isNavigationSubItemId(value: string): value is NavigationSubItemId {
+  return NAVIGATION_SUB_ITEM_ID_SET.has(value);
+}
