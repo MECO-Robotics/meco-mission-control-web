@@ -16,6 +16,7 @@ import {
 } from "../../shared/task/taskTargeting";
 import { TaskDetailReveal } from "./details/TaskDetailReveal";
 import { TaskDetailsDependencyAddMenu } from "./details/sections/TaskDetailsDependencyAddMenu";
+import { TaskDetailsDependencyEditActions } from "./TaskDetailsDependencyEditActions";
 import { getScopedTaskDependencyTargets } from "./taskDependencyTargetScope";
 
 interface TaskDetailsDependenciesSectionProps {
@@ -287,6 +288,11 @@ export function TaskDetailsDependenciesSection({
                           value={[dependency.dependencyType ?? "hard"]}
                         />
                       </label>
+                      <TaskDetailsDependencyEditActions
+                        index={index}
+                        onDone={() => setEditingDependencyKey(null)}
+                        onRemove={() => removeDependencyDraft(dependency.key)}
+                      />
                     </div>
                   );
                 }
