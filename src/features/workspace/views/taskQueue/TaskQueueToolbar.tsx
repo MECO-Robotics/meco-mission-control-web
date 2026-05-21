@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
-import { IconSort } from "@/components/shared/Icons";
+import { IconSearchMinus, IconSearchPlus, IconSort } from "@/components/shared/Icons";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
@@ -178,7 +178,7 @@ export function TaskQueueToolbar({
             title="Zoom out task queue"
             type="button"
           >
-            -
+            <IconSearchMinus />
           </button>
           <span className="task-queue-zoom-label">{formatTaskQueueZoomLabel(taskQueueZoom)}</span>
           <button
@@ -191,10 +191,9 @@ export function TaskQueueToolbar({
             title="Zoom in task queue"
             type="button"
           >
-            +
+            <IconSearchPlus />
           </button>
         </div>
-
       </div>
     </div>
   );
