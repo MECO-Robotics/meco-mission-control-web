@@ -3,6 +3,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskPayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { TaskDetailsModal } from "./TaskDetailsModalContent";
+import { TaskEditorAdvancedMediaSection } from "./task/editorAdvanced/TaskEditorAdvancedMediaSection";
 import { TaskEditorCreateMetadataSection } from "./task/TaskEditorCreateMetadataSection";
 import { TaskEditorCreateProjectSection } from "./task/TaskEditorCreateProjectSection";
 
@@ -83,6 +84,7 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
     isSavingTask,
     openTaskDetailsModal,
     onTaskEditCanceled,
+    requestPhotoUpload,
     setAdvancedSectionOpen,
     taskDraft,
     taskModalMode,
@@ -172,12 +174,29 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
           closeTaskDetailsModal={closeTaskModal}
           advancedSectionOpen={advancedSectionOpen}
           beforeOverviewContent={
-            <TaskEditorCreateProjectSection
-              bootstrap={bootstrap}
-              currentTaskId={activeTask?.id ?? null}
-              setTaskDraft={setTaskDraft}
-              taskDraft={taskDraft}
-            />
+            <>
+              <TaskEditorCreateProjectSection
+                bootstrap={bootstrap}
+                currentTaskId={activeTask?.id ?? null}
+                setTaskDraft={setTaskDraft}
+                taskDraft={taskDraft}
+              />
+              <TaskEditorAdvancedMediaSection
+                currentUrl={taskDraft.photoUrl}
+                onChange={(value) =>
+                  setTaskDraft((current) => ({ ...current, photoUrl: value }))
+                }
+                onUpload={async (file) => {
+                  const projectId = taskDraft.projectId || bootstrap.projects[0]?.id;
+
+                  if (!projectId) {
+                    throw new Error("No project is available for photo upload.");
+                  }
+
+                  return requestPhotoUpload(projectId, file);
+                }}
+              />
+            </>
           }
           beforeFooterContent={
             <TaskEditorCreateMetadataSection

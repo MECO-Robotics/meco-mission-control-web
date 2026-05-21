@@ -89,6 +89,7 @@ describe("workspace creation modals", () => {
     expect(markup).toContain("Create Task Details");
     expect(markup).toContain("Add task title");
     expect(markup).toContain('data-inline-edit-field="project"');
+    expect(markup).toContain("Task photo");
     expect(markup).toContain('data-inline-edit-field="summary"');
     expect(markup).toContain('data-inline-edit-field="priority"');
     expect(markup).toContain('data-inline-edit-field="owner"');
@@ -229,6 +230,7 @@ describe("workspace creation modals", () => {
     expect(markup).toContain("modal-card task-details-modal");
     expect(markup).toContain("panel-header compact-header task-details-header");
     expect(markup).toContain("task-details-close-button");
+    expect(markup).toContain('aria-label="Close milestone report modal"');
     expect(markup).toContain("modal-form task-details-grid");
   });
 });

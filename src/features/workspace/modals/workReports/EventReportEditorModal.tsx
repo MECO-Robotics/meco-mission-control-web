@@ -46,6 +46,7 @@ export function MilestoneReportEditorModal({
             <h2 style={{ color: "var(--text-title)" }}>Add milestone report</h2>
           </div>
           <button
+            aria-label="Close milestone report modal"
             className="icon-button task-details-close-button"
             onClick={closeMilestoneReportModal}
             type="button"
