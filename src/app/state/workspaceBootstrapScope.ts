@@ -210,15 +210,18 @@ export function scopeBootstrapBySelection(
     }
 
     const requiresExistingScopeEntities = action.operation !== "delete";
+    const actionTaskId = action.taskId ?? (action.entityType === "task" ? action.entityId : null);
+    const actionSubsystemId =
+      action.subsystemId ?? (action.entityType === "subsystem" ? action.entityId : null);
 
-    if (requiresExistingScopeEntities && action.taskId && !scopedTaskIds.has(action.taskId)) {
+    if (requiresExistingScopeEntities && actionTaskId && !scopedTaskIds.has(actionTaskId)) {
       return false;
     }
 
     if (
       requiresExistingScopeEntities &&
-      action.subsystemId &&
-      !scopedSubsystemIds.has(action.subsystemId)
+      actionSubsystemId &&
+      !scopedSubsystemIds.has(actionSubsystemId)
     ) {
       return false;
     }

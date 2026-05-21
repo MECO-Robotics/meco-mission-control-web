@@ -5,7 +5,10 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { WorkLogsView } from "@/features/workspace/views/WorkLogsView";
-import { actionMatchesSearch } from "@/features/workspace/views/workLogs/workLogsViewState";
+import {
+  actionMatchesSearch,
+  selectActivityActions,
+} from "@/features/workspace/views/workLogs/workLogsViewState";
 import type { WorklogsViewTab } from "@/lib/workspaceNavigation";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { AuditActionRecord } from "@/types/recordsExecution";
@@ -190,6 +193,59 @@ describe("WorkLogsView", () => {
 
     expect(html).toContain("Drive CAD");
     expect(html).toContain("Logged work on Drive CAD");
+  });
+
+  it("builds legacy activity from the unfiltered scoped work log source", () => {
+    const task: BootstrapPayload["tasks"][number] = {
+      actualHours: 2,
+      artifactId: null,
+      artifactIds: [],
+      assigneeIds: [],
+      blockers: [],
+      dependencyIds: [],
+      disciplineId: "discipline-1",
+      documentationLinked: false,
+      dueDate: "2026-05-01",
+      estimatedHours: 4,
+      id: "task-1",
+      linkedManufacturingIds: [],
+      linkedPurchaseIds: [],
+      mechanismId: null,
+      mechanismIds: [],
+      mentorId: null,
+      ownerId: null,
+      partInstanceId: null,
+      partInstanceIds: [],
+      priority: "medium",
+      projectId: "project-1",
+      requiresDocumentation: false,
+      startDate: "2026-05-01",
+      status: "in-progress",
+      subsystemId: "subsystem-1",
+      subsystemIds: ["subsystem-1"],
+      summary: "Updated drivetrain CAD",
+      targetMilestoneId: null,
+      title: "Drive CAD",
+      workstreamId: null,
+      workstreamIds: [],
+    };
+
+    const actions = selectActivityActions({
+      auditActions: [],
+      taskById: { "task-1": task },
+      workLogs: [
+        {
+          date: "2026-05-01",
+          hours: 1.5,
+          id: "worklog-1",
+          notes: "Finished first pass",
+          participantIds: ["student-1"],
+          taskId: "task-1",
+        },
+      ],
+    });
+
+    expect(actions.map((action) => action.id)).toEqual(["legacy-worklog-worklog-1"]);
   });
 
   it("matches activity search against legacy task subsystem ids", () => {
