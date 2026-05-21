@@ -26,7 +26,7 @@ export type TaskViewTab = "calendar" | "timeline" | "robot-map" | "queue" | "mil
 export type RiskManagementViewTab = "attention" | "kanban" | "metrics";
 export type WorklogsViewTab = "logs" | "summary" | "activity";
 export type ReportsViewTab = "qa" | "milestone-results";
-export type ManufacturingViewTab = "cnc" | "prints" | "fabrication";
+export type ManufacturingViewTab = "all" | "cnc" | "prints" | "fabrication";
 export type InventoryViewTab = "materials" | "parts" | "part-mappings" | "purchases";
 export type RosterViewTab = "workload" | "directory" | "attendance";
 

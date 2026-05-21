@@ -1,3 +1,4 @@
+import { AllManufacturingView } from "@/features/workspace/views/manufacturing/AllManufacturingView";
 import { CncView } from "@/features/workspace/views/manufacturing/CncView";
 import { FabricationView } from "@/features/workspace/views/manufacturing/FabricationView";
 import { PrintsView } from "@/features/workspace/views/manufacturing/PrintsView";
@@ -17,6 +18,7 @@ export function WorkspaceManufacturingSection(props: WorkspaceContentPanelsViewP
     onCncQuickStatusChange,
     openEditManufacturingModal,
     printItems,
+    setManufacturingView,
     showCncMentorQuickActions,
     tabSwitchDirection,
   } = props;
@@ -29,6 +31,24 @@ export function WorkspaceManufacturingSection(props: WorkspaceContentPanelsViewP
     >
       <WorkspaceSubPanel
         disableAnimations={disablePanelAnimations}
+        isActive={manufacturingView === "all"}
+        swipeDirection={manufacturingSwipeDirection}
+      >
+        <AllManufacturingView
+          activePersonFilter={activePersonFilter}
+          bootstrap={bootstrap}
+          items={bootstrap.manufacturingItems}
+          membersById={membersById}
+          onCreate={() => props.openCreateManufacturingModal("cnc")}
+          onEdit={openEditManufacturingModal}
+          onProcessFilterChange={setManufacturingView}
+          processFilterValue={manufacturingView}
+          subsystemsById={props.subsystemsById}
+        />
+      </WorkspaceSubPanel>
+
+      <WorkspaceSubPanel
+        disableAnimations={disablePanelAnimations}
         isActive={manufacturingView === "cnc"}
         swipeDirection={manufacturingSwipeDirection}
       >
@@ -39,7 +59,9 @@ export function WorkspaceManufacturingSection(props: WorkspaceContentPanelsViewP
           membersById={membersById}
           onCreate={() => props.openCreateManufacturingModal("cnc")}
           onEdit={openEditManufacturingModal}
+          onProcessFilterChange={setManufacturingView}
           onQuickStatusChange={onCncQuickStatusChange}
+          processFilterValue={manufacturingView}
           showMentorQuickActions={showCncMentorQuickActions}
           subsystemsById={props.subsystemsById}
         />
@@ -57,6 +79,8 @@ export function WorkspaceManufacturingSection(props: WorkspaceContentPanelsViewP
           membersById={membersById}
           onCreate={() => props.openCreateManufacturingModal("3d-print")}
           onEdit={openEditManufacturingModal}
+          onProcessFilterChange={setManufacturingView}
+          processFilterValue={manufacturingView}
           subsystemsById={props.subsystemsById}
         />
       </WorkspaceSubPanel>
@@ -73,6 +97,8 @@ export function WorkspaceManufacturingSection(props: WorkspaceContentPanelsViewP
           membersById={membersById}
           onCreate={() => props.openCreateManufacturingModal("fabrication")}
           onEdit={openEditManufacturingModal}
+          onProcessFilterChange={setManufacturingView}
+          processFilterValue={manufacturingView}
           subsystemsById={props.subsystemsById}
         />
       </WorkspaceSubPanel>

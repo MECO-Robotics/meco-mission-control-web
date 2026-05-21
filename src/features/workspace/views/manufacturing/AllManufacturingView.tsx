@@ -5,19 +5,19 @@ import type { FilterSelection } from "@/features/workspace/shared/filters/worksp
 import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
 import { ManufacturingQueueView } from "./ManufacturingQueueView";
 
-interface FabricationViewProps {
+interface AllManufacturingViewProps {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   items: ManufacturingItemRecord[];
   membersById: MembersById;
   onCreate: () => void;
   onEdit: (item: ManufacturingItemRecord) => void;
-  onProcessFilterChange?: (value: ManufacturingViewTab) => void;
-  processFilterValue?: ManufacturingViewTab;
+  onProcessFilterChange: (value: ManufacturingViewTab) => void;
+  processFilterValue: ManufacturingViewTab;
   subsystemsById: SubsystemsById;
 }
 
-export function FabricationView({
+export function AllManufacturingView({
   activePersonFilter,
   bootstrap,
   items,
@@ -27,13 +27,13 @@ export function FabricationView({
   onProcessFilterChange,
   processFilterValue,
   subsystemsById,
-}: FabricationViewProps) {
+}: AllManufacturingViewProps) {
   return (
     <ManufacturingQueueView
       activePersonFilter={activePersonFilter}
-      addButtonAriaLabel="Add fabrication job"
+      addButtonAriaLabel="Add manufacturing job"
       bootstrap={bootstrap}
-      emptyStateMessage="No fabrication jobs match the current filters."
+      emptyStateMessage="No manufacturing jobs match the current filters."
       items={items}
       membersById={membersById}
       onCreate={onCreate}
@@ -41,8 +41,8 @@ export function FabricationView({
       onProcessFilterChange={onProcessFilterChange}
       processFilterValue={processFilterValue}
       subsystemsById={subsystemsById}
-      title="Fabrication queue"
-      tutorialTargetPrefix="fabrication"
+      title="Manufacturing queue"
+      tutorialTargetPrefix="manufacturing"
     />
   );
 }

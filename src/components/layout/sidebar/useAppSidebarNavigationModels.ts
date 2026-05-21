@@ -7,6 +7,7 @@ import {
   getActiveNavigationSubItemId,
   getNavigationSectionFromSubItem,
   type InventoryViewTab,
+  type ManufacturingViewTab,
   type NavigationItem,
   type NavigationSection,
   type NavigationSubItemId,
@@ -24,6 +25,7 @@ interface UseAppSidebarNavigationModelsArgs {
   activeTab: ViewTab;
   favoriteViewIds: readonly NavigationSubItemId[];
   inventoryView: InventoryViewTab;
+  manufacturingView: ManufacturingViewTab;
   isRobotProject: boolean;
   items: NavigationItem[];
   reportsView: ReportsViewTab;
@@ -37,6 +39,7 @@ export function useAppSidebarNavigationModels({
   activeTab,
   favoriteViewIds,
   inventoryView,
+  manufacturingView,
   isRobotProject,
   items,
   reportsView,
@@ -49,7 +52,7 @@ export function useAppSidebarNavigationModels({
   const activeSubItemId = getActiveNavigationSubItemId({
     activeTab,
     inventoryView,
-    manufacturingView: "cnc",
+    manufacturingView,
     rosterView,
     reportsView,
     riskManagementView,

@@ -101,6 +101,7 @@ export interface WorkspaceManufacturingPanelProps {
   showCncMentorQuickActions: WorkspaceContentPanelsViewProps["showCncMentorQuickActions"];
   manufacturingView: WorkspaceContentPanelsViewProps["manufacturingView"];
   manufacturingSwipeDirection: WorkspaceContentPanelsViewProps["manufacturingSwipeDirection"];
+  setManufacturingView: WorkspaceContentPanelsViewProps["setManufacturingView"];
   onCncQuickStatusChange: (
     item: ManufacturingItemRecord,
     status: ManufacturingItemRecord["status"],

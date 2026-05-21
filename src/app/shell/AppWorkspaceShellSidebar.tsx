@@ -85,6 +85,7 @@ export function AppWorkspaceShellSidebar({
       selectedProjectId={c.selectedProjectId}
       selectedSeasonId={c.selectedSeasonId}
       inventoryView={c.inventoryView}
+      manufacturingView={c.manufacturingView}
       rosterView={c.rosterView}
       reportsView={c.reportsView}
       riskManagementView={c.riskManagementView}

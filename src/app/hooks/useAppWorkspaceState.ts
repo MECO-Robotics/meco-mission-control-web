@@ -37,7 +37,7 @@ export function useAppWorkspaceState() {
   const [worklogsView, setWorklogsView] = useState<WorklogsViewTab>("logs");
   const [reportsView, setReportsView] = useState<ReportsViewTab>("qa");
   const [manufacturingView, setManufacturingView] =
-    useState<ManufacturingViewTab>("cnc");
+    useState<ManufacturingViewTab>("all");
   const [inventoryView, setInventoryView] = useState<InventoryViewTab>("materials");
   const [rosterView, setRosterView] = useState<RosterViewTab>("directory");
   const [bootstrap, setBootstrap] = useState<BootstrapPayload>(EMPTY_BOOTSTRAP);
