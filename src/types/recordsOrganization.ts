@@ -1,6 +1,7 @@
 import type {
   DisciplineCode,
   MemberRole,
+  PlannedAttendanceDay,
   ProjectStatus,
   ProjectType,
   SeasonType,
@@ -16,6 +17,9 @@ export interface MemberRecord {
   disciplineId?: string | null;
   seasonId: string;
   activeSeasonIds?: string[];
+  plannedWeeklyAttendanceHours?: number;
+  plannedAttendanceDays?: PlannedAttendanceDay[];
+  plannedAttendanceNotes?: string;
 }
 
 export type SubsystemLayoutZone =

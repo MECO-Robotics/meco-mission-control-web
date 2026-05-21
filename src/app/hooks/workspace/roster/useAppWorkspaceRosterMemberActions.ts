@@ -28,10 +28,24 @@ export function useAppWorkspaceRosterMemberActions(model: AppWorkspaceModel) {
             elevated: isElevatedMemberRole(normalizedRole),
             seasonId: model.selectedSeasonId,
             activeSeasonIds: [model.selectedSeasonId],
+            disciplineId: model.memberForm.disciplineId ?? null,
+            plannedWeeklyAttendanceHours: Math.max(0, model.memberForm.plannedWeeklyAttendanceHours),
+            plannedAttendanceDays: model.memberForm.plannedAttendanceDays,
+            plannedAttendanceNotes: model.memberForm.plannedAttendanceNotes.trim(),
           },
           model.handleUnauthorized,
         );
-        model.setMemberForm({ name: "", email: "", photoUrl: "", role: "student", elevated: false });
+        model.setMemberForm({
+          name: "",
+          email: "",
+          photoUrl: "",
+          role: "student",
+          elevated: false,
+          disciplineId: null,
+          plannedWeeklyAttendanceHours: 0,
+          plannedAttendanceDays: [],
+          plannedAttendanceNotes: "",
+        });
         model.setIsAddPersonOpen(false);
         await model.loadWorkspace();
       } catch (error) {
@@ -63,6 +77,10 @@ export function useAppWorkspaceRosterMemberActions(model: AppWorkspaceModel) {
             photoUrl: model.memberEditDraft.photoUrl.trim(),
             role: normalizedRole,
             elevated: isElevatedMemberRole(normalizedRole),
+            disciplineId: model.memberEditDraft.disciplineId ?? null,
+            plannedWeeklyAttendanceHours: Math.max(0, model.memberEditDraft.plannedWeeklyAttendanceHours),
+            plannedAttendanceDays: model.memberEditDraft.plannedAttendanceDays,
+            plannedAttendanceNotes: model.memberEditDraft.plannedAttendanceNotes.trim(),
           },
           model.handleUnauthorized,
         );

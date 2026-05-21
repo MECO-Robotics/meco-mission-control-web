@@ -246,7 +246,7 @@ export function TimelineGridHeaderContent({
               {cell.weekdayNarrowLabel}
             </span>
             <button
-              className={`timeline-day-number-button${cell.milestonesOnDay.length ? " has-milestone" : ""}`}
+              className={`timeline-day-number-button${cell.milestonesOnDay.length ? " has-milestone" : ""}${cell.meetingsOnDay.length ? " has-event" : ""}`}
               onClick={() => handleTimelineHeaderDayClick(cell.day)}
               title={
                 isWeekView
@@ -267,6 +267,14 @@ export function TimelineGridHeaderContent({
                 {cell.dayNumberLabel}
               </strong>
             </button>
+            {cell.meetingsOnDay.length > 0 ? (
+              <span
+                className={`timeline-day-event-chip${cell.meetingsOnDay.length > 1 ? " has-multiple" : ""}`}
+                title={cell.meetingsOnDay.map((meeting) => meeting.title).join(", ")}
+              >
+                {cell.meetingsOnDay.length === 1 ? "Mtg" : `${cell.meetingsOnDay.length} mtgs`}
+              </span>
+            ) : null}
           </div>
         ))}
       </div>

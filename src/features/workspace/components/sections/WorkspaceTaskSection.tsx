@@ -25,6 +25,7 @@ export function WorkspaceTaskSection({
     activePersonFilter,
     bootstrap,
     disciplinesById,
+    handleMeetingSave,
     handleTimelineMilestoneDelete,
     handleTimelineMilestoneSave,
     isAllProjectsView,
@@ -65,6 +66,7 @@ export function WorkspaceTaskSection({
           activePersonFilter={activePersonFilter}
           bootstrap={bootstrap}
           isAllProjectsView={isAllProjectsView}
+          onSaveMeeting={handleMeetingSave}
           onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
           onSaveTimelineMilestone={handleTimelineMilestoneSave}
           onTaskDetailOpen={openTimelineTaskDetailsModal}

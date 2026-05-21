@@ -68,6 +68,19 @@
   padding: 0.28rem 0.55rem;
 }
 
+.task-calendar-add-meeting {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.35rem;
+}
+
+.meeting-schedule-modal .form-error {
+  color: var(--status-danger-text);
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin: 0;
+}
+
 .task-calendar-toolbar-title {
   color: var(--text-title);
   font-size: 0.9rem;
