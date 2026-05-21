@@ -106,6 +106,18 @@ function buildLegacyActivityActions(
   });
 }
 
+export function selectActivityActions({
+  auditActions,
+  taskById,
+  workLogs,
+}: {
+  auditActions: AuditActionRecord[];
+  taskById: Record<string, BootstrapPayload["tasks"][number]>;
+  workLogs: WorkLogRecord[];
+}) {
+  return auditActions.length > 0 ? auditActions : buildLegacyActivityActions(workLogs, taskById);
+}
+
 export function actionMatchesSearch({
   action,
   membersById,
@@ -205,10 +217,11 @@ export function useWorkLogsViewState({
     [activePersonFilter, bootstrap.workLogs, membersById, search, sortMode, subsystemsById, subsystemFilter, taskById],
   );
   const activityActions = useMemo(() => {
-    const actions =
-      (bootstrap.actions ?? []).length > 0
-        ? (bootstrap.actions ?? [])
-        : buildLegacyActivityActions(workLogs, taskById);
+    const actions = selectActivityActions({
+      auditActions: bootstrap.actions ?? [],
+      taskById,
+      workLogs: bootstrap.workLogs,
+    });
     const scopedActions =
       activePersonFilter.length === 0
         ? actions
@@ -237,7 +250,7 @@ export function useWorkLogsViewState({
           );
 
     return [...filteredActions].sort((left, right) => right.timestamp.localeCompare(left.timestamp));
-  }, [activePersonFilter, bootstrap.actions, membersById, search, subsystemsById, taskById, workLogs]);
+  }, [activePersonFilter, bootstrap.actions, bootstrap.workLogs, membersById, search, subsystemsById, taskById]);
 
   const workLogPagination = useWorkspacePagination<WorkLogRecord>(workLogs);
   const activityPagination = useWorkspacePagination<AuditActionRecord>(activityActions);

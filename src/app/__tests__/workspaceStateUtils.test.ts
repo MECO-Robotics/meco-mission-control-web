@@ -469,4 +469,61 @@ describe("scopeBootstrapBySelection", () => {
       "meeting-global",
     ]);
   });
+
+  it("uses legacy action entity ids when direct task and subsystem links are missing", () => {
+    const payload: BootstrapPayload = {
+      ...createBootstrap(),
+      actions: [
+        {
+          actorMemberId: null,
+          changedFields: [],
+          entityId: "task-visible",
+          entityLabel: "Visible task",
+          entityType: "task",
+          id: "action-visible-task",
+          memberIds: [],
+          message: "Updated visible task",
+          operation: "update",
+          projectId: null,
+          subsystemId: null,
+          taskId: null,
+          timestamp: "2026-04-20T12:00:00.000Z",
+        },
+        {
+          actorMemberId: null,
+          changedFields: [],
+          entityId: "task-hidden",
+          entityLabel: "Hidden task",
+          entityType: "task",
+          id: "action-hidden-task",
+          memberIds: [],
+          message: "Updated hidden task",
+          operation: "update",
+          projectId: null,
+          subsystemId: null,
+          taskId: null,
+          timestamp: "2026-04-20T12:05:00.000Z",
+        },
+        {
+          actorMemberId: null,
+          changedFields: [],
+          entityId: "subsystem-hidden",
+          entityLabel: "Hidden subsystem",
+          entityType: "subsystem",
+          id: "action-hidden-subsystem",
+          memberIds: [],
+          message: "Updated hidden subsystem",
+          operation: "update",
+          projectId: null,
+          subsystemId: null,
+          taskId: null,
+          timestamp: "2026-04-20T12:10:00.000Z",
+        },
+      ],
+    };
+
+    const scoped = scopeBootstrapBySelection(payload, "season-1", "project-visible");
+
+    expect((scoped.actions ?? []).map((action) => action.id)).toEqual(["action-visible-task"]);
+  });
 });
