@@ -1,6 +1,7 @@
 ﻿import { useCallback, useMemo } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MilestonePayload } from "@/types/payloads";
+import { isMeetingVisibleInProjectScope } from "@/features/workspace/shared/events";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { filterSelectionMatchesTaskPeople, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { formatTimelinePeriodLabel } from "@/features/workspace/shared/timeline/timelineDateUtils";
@@ -58,6 +59,7 @@ export function useTimelineViewData({
     () => bootstrap.projects.map((project) => project.id),
     [bootstrap.projects],
   );
+  const scopedProjectIdSet = useMemo(() => new Set(scopedProjectIds), [scopedProjectIds]);
   const subsystemsById = useMemo(
     () =>
       Object.fromEntries(
@@ -153,7 +155,9 @@ export function useTimelineViewData({
     [activePersonFilter, bootstrap.milestones, bootstrap.tasks, normalizedSearch, projectsById],
   );
   const scopedMeetings = useMemo(() => {
-    const meetings = bootstrap.meetings ?? [];
+    const meetings = (bootstrap.meetings ?? []).filter((meeting) =>
+      isMeetingVisibleInProjectScope(meeting, scopedProjectIdSet),
+    );
     if (normalizedSearch.length === 0) {
       return meetings;
     }
@@ -172,7 +176,7 @@ export function useTimelineViewData({
         .toLowerCase()
         .includes(normalizedSearch);
     });
-  }, [bootstrap.meetings, normalizedSearch, projectsById]);
+  }, [bootstrap.meetings, normalizedSearch, projectsById, scopedProjectIdSet]);
   const tasksById = useMemo(
     () =>
       Object.fromEntries(

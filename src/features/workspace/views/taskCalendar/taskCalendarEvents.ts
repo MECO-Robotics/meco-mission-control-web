@@ -4,6 +4,7 @@ import {
   filterSelectionIncludes,
   filterSelectionMatchesTaskPeople,
 } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { isMeetingVisibleInProjectScope } from "@/features/workspace/shared/events";
 import { getMilestoneTasksForState } from "@/features/workspace/shared/milestones/milestoneTaskState";
 
 export type TaskCalendarEventType =
@@ -153,6 +154,7 @@ export function buildTaskCalendarEvents({
   isAllProjectsView,
   projectsById,
 }: BuildTaskCalendarEventsArgs) {
+  const activeProjectIds = new Set(bootstrap.projects.map((project) => project.id));
   const subsystemProjectById = Object.fromEntries(
     bootstrap.subsystems.map((subsystem) => [subsystem.id, subsystem.projectId] as const),
   );
@@ -253,33 +255,35 @@ export function buildTaskCalendarEvents({
       };
     });
 
-  const meetingEvents: TaskCalendarEvent[] = (bootstrap.meetings ?? []).map((meeting) => {
-    const meetingStart =
-      meeting.startDateTime ??
-      (meeting.time.trim().length > 0
-        ? `${asDateOnly(meeting.date)}T${meeting.time.trim()}`
-        : asDateOnly(meeting.date));
-    const contextLabel = buildMeetingContextLabel({
-      isAllProjectsView,
-      meeting,
-      projectsById,
-    });
+  const meetingEvents: TaskCalendarEvent[] = (bootstrap.meetings ?? [])
+    .filter((meeting) => isMeetingVisibleInProjectScope(meeting, activeProjectIds))
+    .map((meeting) => {
+      const meetingStart =
+        meeting.startDateTime ??
+        (meeting.time.trim().length > 0
+          ? `${asDateOnly(meeting.date)}T${meeting.time.trim()}`
+          : asDateOnly(meeting.date));
+      const contextLabel = buildMeetingContextLabel({
+        isAllProjectsView,
+        meeting,
+        projectsById,
+      });
 
-    return {
-      allDay: !hasTime(meetingStart),
-      classNames: ["task-calendar-event", "task-calendar-event-event"],
-      extendedProps: {
-        contextLabel,
-        projectId: meeting.projectIds?.[0] ?? null,
-        recordId: meeting.id,
-        status: meeting.meetingType ?? "general",
-        type: "event",
-      },
-      id: `meeting:${meeting.id}`,
-      start: hasTime(meetingStart) ? meetingStart : asDateOnly(meetingStart),
-      title: prependContextLabel(`Meeting: ${meeting.title}`, contextLabel),
-    };
-  });
+      return {
+        allDay: !hasTime(meetingStart),
+        classNames: ["task-calendar-event", "task-calendar-event-event"],
+        extendedProps: {
+          contextLabel,
+          projectId: meeting.projectIds?.[0] ?? null,
+          recordId: meeting.id,
+          status: meeting.meetingType ?? "general",
+          type: "event",
+        },
+        id: `meeting:${meeting.id}`,
+        start: hasTime(meetingStart) ? meetingStart : asDateOnly(meetingStart),
+        title: prependContextLabel(`Meeting: ${meeting.title}`, contextLabel),
+      };
+    });
 
   return [...milestoneEvents, ...taskEvents, ...manufacturingEvents, ...meetingEvents].sort(
     compareEventStartDate,

@@ -1,4 +1,9 @@
-export { getMilestoneProjectIds } from "./eventProjectUtils";
+export {
+  getMeetingProjectIds,
+  getMilestoneProjectIds,
+  isMeetingVisibleInProjectScope,
+  isProjectScopedEventVisible,
+} from "./eventProjectUtils";
 export {
   DEFAULT_EVENT_TYPE,
   EVENT_TYPE_STYLES,
