@@ -209,20 +209,15 @@ export function scopeBootstrapBySelection(
       return false;
     }
 
-    const requiresExistingScopeEntities = action.operation !== "delete";
     const actionTaskId = action.taskId ?? (action.entityType === "task" ? action.entityId : null);
     const actionSubsystemId =
       action.subsystemId ?? (action.entityType === "subsystem" ? action.entityId : null);
 
-    if (requiresExistingScopeEntities && actionTaskId && !scopedTaskIds.has(actionTaskId)) {
+    if (actionTaskId && !scopedTaskIds.has(actionTaskId)) {
       return false;
     }
 
-    if (
-      requiresExistingScopeEntities &&
-      actionSubsystemId &&
-      !scopedSubsystemIds.has(actionSubsystemId)
-    ) {
+    if (actionSubsystemId && !scopedSubsystemIds.has(actionSubsystemId)) {
       return false;
     }
 
