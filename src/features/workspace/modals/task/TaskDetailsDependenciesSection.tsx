@@ -16,6 +16,7 @@ import {
 } from "../../shared/task/taskTargeting";
 import { TaskDetailReveal } from "./details/TaskDetailReveal";
 import { TaskDetailsDependencyAddMenu } from "./details/sections/TaskDetailsDependencyAddMenu";
+import { getScopedTaskDependencyTargets } from "./taskDependencyTargetScope";
 
 interface TaskDetailsDependenciesSectionProps {
   activeTask: TaskRecord;
@@ -63,26 +64,17 @@ export function TaskDetailsDependenciesSection({
   const partDefinitionsById = Object.fromEntries(
     bootstrap.partDefinitions.map((partDefinition) => [partDefinition.id, partDefinition] as const),
   );
-  const targetTasksById = Object.fromEntries(
-    Object.values(tasksById)
-      .filter((task) => !targetProjectId || task.projectId === targetProjectId)
-      .map((task) => [task.id, task] as const),
-  );
-  const targetMilestonesById = Object.fromEntries(
-    Object.values(milestonesById)
-      .filter((milestone) => !targetProjectId || milestone.projectIds.includes(targetProjectId))
-      .map((milestone) => [milestone.id, milestone] as const),
-  );
-  const targetPartInstancesById = Object.fromEntries(
-    Object.values(partInstancesById)
-      .filter((partInstance) => {
-        const subsystem = bootstrap.subsystems.find(
-          (candidate) => candidate.id === partInstance.subsystemId,
-        );
-        return !targetProjectId || subsystem?.projectId === targetProjectId;
-      })
-      .map((partInstance) => [partInstance.id, partInstance] as const),
-  );
+  const {
+    targetMilestonesById,
+    targetPartInstancesById,
+    targetTasksById,
+  } = getScopedTaskDependencyTargets({
+    bootstrap,
+    milestonesById,
+    partInstancesById,
+    targetProjectId,
+    tasksById,
+  });
   const dependencyRows = (
     taskDraft?.taskDependencies ??
     getTaskDependencyRecordsForTask(activeTask.id, bootstrap).filter((dependency) => dependency.taskId === activeTask.id)
