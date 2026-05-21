@@ -88,15 +88,19 @@ export function AppTopbar({
       <div className="app-topbar-search-slot">
         <div className="app-topbar-controls-host" id={APP_TOPBAR_SLOT_IDS.controls} />
         <div className="app-topbar-search-host" id={APP_TOPBAR_SLOT_IDS.search} />
-        <label className="app-topbar-search" htmlFor="workspace-topbar-search">
-          <span aria-hidden="true" className="app-topbar-search-icon">
+        <label
+          className="app-topbar-search toolbar-filter toolbar-filter-compact toolbar-search"
+          htmlFor="workspace-topbar-search"
+        >
+          <span aria-hidden="true" className="toolbar-filter-icon app-topbar-search-icon">
             <Search size={14} strokeWidth={2} />
           </span>
           <input
-            className="app-topbar-search-input"
+            aria-label="Search workspace"
+            className="toolbar-search-input app-topbar-search-input"
             id="workspace-topbar-search"
             placeholder="Search..."
-            type="search"
+            type="text"
           />
         </label>
       </div>

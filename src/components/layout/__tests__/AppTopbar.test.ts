@@ -50,6 +50,10 @@ function readTopbarSearchCss() {
   return readFileSync(join(process.cwd(), "src/app/styles/shell/chrome/topbar-search.css"), "utf8");
 }
 
+function readTopbarShellControlsCss() {
+  return readFileSync(join(process.cwd(), "src/app/styles/shell/chrome/topbar-shell-controls.css"), "utf8");
+}
+
 describe("AppTopbar", () => {
   it("uses the full logo when the sidebar is unfolded", () => {
     const markup = renderTopbar();
@@ -114,9 +118,42 @@ describe("AppTopbar", () => {
     expect(markup).not.toContain('aria-label="Refresh workspace"');
   });
 
-  it("caps the default topbar search width", () => {
+  it("uses the shared compact toolbar search styling for the default topbar search", () => {
+    const markup = renderTopbar();
+
+    expect(markup).toContain('class="app-topbar-search toolbar-filter toolbar-filter-compact toolbar-search"');
+    expect(markup).toContain('class="toolbar-filter-icon app-topbar-search-icon"');
+    expect(markup).toContain('class="toolbar-search-input app-topbar-search-input"');
+  });
+
+  it("lets the default topbar search fill the available topbar slot", () => {
     const topbarSearchCss = readTopbarSearchCss();
 
-    expect(topbarSearchCss).toMatch(/\.app-topbar-search\s*\{[^}]*max-width:\s*44rem;/);
+    expect(topbarSearchCss).toMatch(
+      /\.app-topbar-search\.toolbar-filter-compact\s*\{[^}]*width:\s*100%;[^}]*max-width:\s*none;/,
+    );
+  });
+
+  it("allows compact topbar controls to scroll sideways when controls overflow", () => {
+    const topbarSearchCss = readTopbarSearchCss();
+    const topbarShellControlsCss = readTopbarShellControlsCss();
+
+    expect(topbarSearchCss).toMatch(
+      /@media\s*\(max-width:\s*880px\)\s*\{[\s\S]*\.app-topbar-search-slot\s*\{[^}]*overflow-x:\s*auto;/,
+    );
+    expect(topbarShellControlsCss).toMatch(
+      /@media\s*\(max-width:\s*880px\)\s*\{[\s\S]*\.app-topbar-controls-host \.filter-toolbar,[\s\S]*\.app-topbar-search-host \.filter-toolbar\s*\{[^}]*min-width:\s*max-content;/,
+    );
+  });
+
+  it("adds gradient side hints to compact topbar scroll areas", () => {
+    const topbarSearchCss = readTopbarSearchCss();
+
+    expect(topbarSearchCss).toMatch(
+      /\.app-topbar-search-slot:has\(\.app-topbar-controls-host:not\(:empty\)\),[\s\S]*\.app-topbar-search-slot:has\(\.app-topbar-search-host:not\(:empty\)\)\s*\{[^}]*--app-topbar-scroll-hint-size:\s*1\.25rem;[^}]*mask-image:\s*linear-gradient\(/,
+    );
+    expect(topbarSearchCss).toMatch(
+      /\.app-topbar-search-slot:has\(\.topbar-responsive-search-compact\.is-open\),[\s\S]*\.app-topbar-search-slot:has\(\.task-queue-filter-menu\.is-open\)\s*\{[^}]*mask-image:\s*none;/,
+    );
   });
 });
