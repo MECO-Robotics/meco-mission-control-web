@@ -80,6 +80,11 @@ export function TaskDetailsDependenciesSection({
       };
     });
   const dependencyKindOptions = TASK_DEPENDENCY_KIND_OPTIONS;
+  const dependencyTypeOptions = Object.entries(TASK_DEPENDENCY_TYPE_LABELS).map(([type, label]) => ({
+    id: type,
+    name: label,
+    icon: <IconTasks />,
+  }));
   const getDependencyTargetOptions = (kind: TaskDependencyKind) =>
     getTaskDependencyTargetOptions(kind, {
       tasksById,
@@ -210,13 +215,13 @@ export function TaskDetailsDependenciesSection({
                         />
                       </label>
                       <label className="field task-details-dependency-editor-field">
-                <span style={{ color: "var(--text-title)" }}>Depends on</span>
-                <FilterDropdown
-                  allLabel={`Select ${TASK_DEPENDENCY_KIND_LABELS[dependency.kind].toLowerCase()}`}
-                  ariaLabel="Set dependency target"
-                  buttonInlineEditField={`dependency-target-${index}`}
-                  className="task-queue-filter-menu-submenu task-details-dependency-target-menu"
-                  icon={<IconTasks />}
+                        <span style={{ color: "var(--text-title)" }}>Depends on</span>
+                        <FilterDropdown
+                          allLabel={`Select ${TASK_DEPENDENCY_KIND_LABELS[dependency.kind].toLowerCase()}`}
+                          ariaLabel="Set dependency target"
+                          buttonInlineEditField={`dependency-target-${index}`}
+                          className="task-queue-filter-menu-submenu task-details-dependency-target-menu"
+                          icon={<IconTasks />}
                           menuClassName="task-details-dependency-menu-popup"
                           onChange={(selection) =>
                             updateDependencyDraft(dependency.key, {
@@ -228,6 +233,44 @@ export function TaskDetailsDependenciesSection({
                           portalMenuPlacement="below"
                           singleSelect
                           value={dependency.refId ? [dependency.refId] : []}
+                        />
+                      </label>
+                      <label className="field task-details-dependency-editor-field">
+                        <span style={{ color: "var(--text-title)" }}>Required state</span>
+                        <input
+                          onChange={(milestone) =>
+                            updateDependencyDraft(dependency.key, {
+                              requiredState: milestone.target.value,
+                            })
+                          }
+                          placeholder={getDependencyDefaultState(dependency.kind)}
+                          style={{
+                            background: "var(--bg-panel)",
+                            border: "1px solid var(--border-base)",
+                            color: "var(--text-title)",
+                          }}
+                          value={dependency.requiredState ?? ""}
+                        />
+                      </label>
+                      <label className="field task-details-dependency-editor-field">
+                        <span style={{ color: "var(--text-title)" }}>Dependency type</span>
+                        <FilterDropdown
+                          allLabel="Select dependency type"
+                          ariaLabel="Set dependency type"
+                          buttonInlineEditField={`dependency-type-${index}`}
+                          className="task-queue-filter-menu-submenu task-details-dependency-type-menu"
+                          icon={<IconTasks />}
+                          menuClassName="task-details-dependency-menu-popup"
+                          onChange={(selection) =>
+                            updateDependencyDraft(dependency.key, {
+                              dependencyType: selection[0] as TaskDependencyType,
+                            })
+                          }
+                          options={dependencyTypeOptions}
+                          portalMenu
+                          portalMenuPlacement="below"
+                          singleSelect
+                          value={[dependency.dependencyType ?? "hard"]}
                         />
                       </label>
                     </div>

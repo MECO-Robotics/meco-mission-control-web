@@ -48,6 +48,7 @@ export function TimelineMilestoneModalHeader({
         ) : null}
       </div>
       <button
+        aria-label="Close milestone modal"
         className="icon-button task-details-close-button"
         onClick={onClose}
         type="button"

@@ -118,6 +118,7 @@ export function MilestonesMilestoneModal({
             <h2 style={{ color: "var(--text-title)" }}>Add milestone</h2>
           </div>
           <button
+            aria-label="Close milestone modal"
             className="icon-button task-details-close-button"
             onClick={onClose}
             type="button"
