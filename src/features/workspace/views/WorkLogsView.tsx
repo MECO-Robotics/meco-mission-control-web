@@ -10,6 +10,7 @@ import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
 
 import { useWorkLogsViewState } from "./workLogs/workLogsViewState";
 import { WorkLogsActivitySection } from "./workLogs/WorkLogsActivitySection";
+import { WorkLogsActivityToolbar } from "./workLogs/WorkLogsActivityToolbar";
 import { WorkLogsSummarySection } from "./workLogs/WorkLogsSummarySection";
 import { WorkLogsTableSection } from "./workLogs/WorkLogsTableSection";
 import { WorkLogsToolbar } from "./workLogs/WorkLogsToolbar";
@@ -55,13 +56,20 @@ export function WorkLogsView({
             sortOptions={workLogsView.sortOptions}
             subsystemFilter={workLogsView.subsystemFilter}
           />
+        ) : view === "activity" ? (
+          <WorkLogsActivityToolbar
+            activityGroupMode={workLogsView.activityGroupMode}
+            search={workLogsView.search}
+            setActivityGroupMode={workLogsView.setActivityGroupMode}
+            setSearch={workLogsView.setSearch}
+          />
         ) : (
           <div className="panel-actions filter-toolbar worklog-toolbar worklog-toolbar-topbar">
             <TopbarResponsiveSearch
-              ariaLabel={view === "activity" ? "Search activity" : "Search work log summary"}
+              ariaLabel="Search work log summary"
               compactPlaceholder="Search"
               onChange={workLogsView.setSearch}
-              placeholder={view === "activity" ? "Search activity..." : "Search summary..."}
+              placeholder="Search summary..."
               value={workLogsView.search}
             />
           </div>
@@ -86,6 +94,7 @@ export function WorkLogsView({
       {view === "activity" ? (
         <WorkLogsActivitySection
           actions={workLogsView.activityActions}
+          activityGroupMode={workLogsView.activityGroupMode}
           activityPagination={workLogsView.activityPagination}
           membersById={membersById}
           openEditTaskModal={openEditTaskModal}
