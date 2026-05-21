@@ -13,8 +13,10 @@ interface TaskDetailsModalProps {
   bootstrap: BootstrapPayload;
   closeTaskDetailsModal: () => void;
   advancedSectionOpen: boolean;
+  eyebrowLabel?: string;
   footerActions?: ReactNode;
   headerTitle?: ReactNode;
+  modalClassName?: string;
   setTaskDraft?: Dispatch<SetStateAction<TaskPayload>>;
   setAdvancedSectionOpen: Dispatch<SetStateAction<boolean>>;
   taskDraft?: TaskPayload;
@@ -29,8 +31,10 @@ export function TaskDetailsModal({
   bootstrap,
   closeTaskDetailsModal,
   advancedSectionOpen,
+  eyebrowLabel,
   footerActions,
   headerTitle,
+  modalClassName,
   setTaskDraft,
   setAdvancedSectionOpen,
   taskDraft,
@@ -52,7 +56,7 @@ export function TaskDetailsModal({
     <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
       <section
         aria-modal="true"
-        className="modal-card task-details-modal"
+        className={`modal-card task-details-modal${modalClassName ? ` ${modalClassName}` : ""}`}
         role="dialog"
         style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
       >
@@ -61,6 +65,7 @@ export function TaskDetailsModal({
           bootstrap={bootstrap}
           canInlineEdit={canInlineEdit}
           closeTaskDetailsModal={closeTaskDetailsModal}
+          eyebrowLabel={eyebrowLabel}
           editingField={editingField}
           headerTitle={headerTitle}
           openTaskEditModal={openTaskEditModal}

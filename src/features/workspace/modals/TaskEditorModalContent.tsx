@@ -3,10 +3,6 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskPayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { TaskDetailsModal } from "./TaskDetailsModalContent";
-import { TaskEditorAdvancedFieldsSection } from "./task/TaskEditorAdvancedFieldsSection";
-import { TaskEditorCoreFieldsSection } from "./task/TaskEditorCoreFieldsSection";
-import { TaskEditorDependencyEditorSection } from "./task/TaskEditorDependencyEditorSection";
-import { TaskEditorHeaderSection } from "./task/TaskEditorHeaderSection";
 
 interface TaskEditorModalProps {
   activeTask: TaskRecord | null;
@@ -36,6 +32,43 @@ interface TaskEditorModalProps {
   setTaskDraft: Dispatch<SetStateAction<TaskPayload>>;
 }
 
+function buildDraftTaskRecord(taskDraft: TaskPayload, activeTask: TaskRecord | null): TaskRecord {
+  return {
+    id: activeTask?.id ?? "__new-task__",
+    projectId: taskDraft.projectId,
+    workstreamId: taskDraft.workstreamId,
+    workstreamIds: taskDraft.workstreamIds,
+    title: taskDraft.title,
+    summary: taskDraft.summary,
+    subsystemId: taskDraft.subsystemId,
+    subsystemIds: taskDraft.subsystemIds,
+    disciplineId: taskDraft.disciplineId,
+    mechanismId: taskDraft.mechanismId,
+    mechanismIds: taskDraft.mechanismIds,
+    partInstanceId: taskDraft.partInstanceId,
+    partInstanceIds: taskDraft.partInstanceIds,
+    artifactId: taskDraft.artifactId,
+    artifactIds: taskDraft.artifactIds,
+    targetMilestoneId: taskDraft.targetMilestoneId,
+    photoUrl: taskDraft.photoUrl,
+    ownerId: taskDraft.ownerId,
+    assigneeIds: taskDraft.assigneeIds,
+    mentorId: taskDraft.mentorId,
+    startDate: taskDraft.startDate,
+    dueDate: taskDraft.dueDate,
+    priority: taskDraft.priority,
+    status: taskDraft.status,
+    dependencyIds: [],
+    blockers: taskDraft.blockers,
+    linkedManufacturingIds: taskDraft.linkedManufacturingIds,
+    linkedPurchaseIds: taskDraft.linkedPurchaseIds,
+    estimatedHours: taskDraft.estimatedHours,
+    actualHours: taskDraft.actualHours,
+    requiresDocumentation: taskDraft.requiresDocumentation,
+    documentationLinked: taskDraft.documentationLinked,
+  };
+}
+
 export function TaskEditorModal(props: TaskEditorModalProps) {
   const {
     activeTask,
@@ -46,8 +79,6 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
     handleTaskSubmit,
     isDeletingTask,
     isSavingTask,
-    mentors,
-    requestPhotoUpload,
     openTaskDetailsModal,
     onTaskEditCanceled,
     setAdvancedSectionOpen,
@@ -56,7 +87,6 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
     showCreateTypeToggle,
     onSwitchCreateTypeToMilestone,
     setTaskDraft,
-    students,
   } = props;
 
   const handleTaskEditClosed = () => {
@@ -76,6 +106,7 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
 
   const isCreateTaskModal = taskModalMode === "create";
   const isEditTaskModal = taskModalMode === "edit";
+  const createTaskRecord = isCreateTaskModal ? buildDraftTaskRecord(taskDraft, activeTask) : null;
 
   if (isEditTaskModal && activeTask) {
     return (
@@ -120,43 +151,59 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
     );
   }
 
-  return (
-    <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
-      <section
-        aria-modal="true"
-        className="modal-card task-details-modal task-editor-modal"
-        role="dialog"
-        style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
-      >
-        <TaskEditorHeaderSection
-          closeTaskModal={closeTaskModal}
-          onSwitchCreateTypeToMilestone={onSwitchCreateTypeToMilestone}
-          setTaskDraft={setTaskDraft}
-          showCreateTypeToggle={showCreateTypeToggle}
-          taskDraft={taskDraft}
-          taskModalMode={taskModalMode}
-        />
-        <form className="modal-form task-details-grid" onSubmit={handleTaskSubmit} style={{ color: "var(--text-copy)" }}>
-          <TaskEditorCoreFieldsSection mentors={mentors} setTaskDraft={setTaskDraft} students={students} taskDraft={taskDraft} />
-
-          {isCreateTaskModal ? (
+  if (createTaskRecord) {
+    return (
+      <form className="task-editor-modal task-editor-create-modal" onSubmit={handleTaskSubmit}>
+        <TaskDetailsModal
+          activeTask={createTaskRecord}
+          bootstrap={bootstrap}
+          closeTaskDetailsModal={closeTaskModal}
+          advancedSectionOpen={advancedSectionOpen}
+          eyebrowLabel="Create Task Details"
+          footerActions={
             <>
-              <TaskEditorAdvancedFieldsSection
-                activeTask={activeTask}
-                bootstrap={bootstrap}
-                closeTaskModal={closeTaskModal}
-                currentTaskId={activeTask?.id ?? null}
-                isDeletingTask={isDeletingTask}
-                isSavingTask={isSavingTask}
-                requestPhotoUpload={requestPhotoUpload}
-                setTaskDraft={setTaskDraft}
-                taskDraft={taskDraft}
-              />
-              <TaskEditorDependencyEditorSection bootstrap={bootstrap} setTaskDraft={setTaskDraft} taskDraft={taskDraft} />
+              {showCreateTypeToggle && onSwitchCreateTypeToMilestone ? (
+                <button
+                  className="secondary-action"
+                  onClick={onSwitchCreateTypeToMilestone}
+                  type="button"
+                >
+                  Switch to milestone
+                </button>
+              ) : null}
+              <button
+                className="secondary-action"
+                onClick={closeTaskModal}
+                style={{
+                  background: "var(--bg-row-alt)",
+                  color: "var(--text-title)",
+                  border: "1px solid var(--border-base)",
+                }}
+                type="button"
+              >
+                Cancel
+              </button>
+              <button
+                className="primary-action"
+                disabled={isSavingTask || isDeletingTask}
+                type="submit"
+              >
+                {isSavingTask ? "Saving..." : "Create task"}
+              </button>
             </>
-          ) : null}
-        </form>
-      </section>
-    </div>
-  );
+          }
+          modalClassName="task-editor-modal"
+          onEditTask={() => undefined}
+          onResolveTaskBlocker={handleResolveTaskBlocker}
+          setAdvancedSectionOpen={setAdvancedSectionOpen}
+          setTaskDraft={setTaskDraft}
+          showDependencyBlockersSection
+          showEditButton={false}
+          taskDraft={taskDraft}
+        />
+      </form>
+    );
+  }
+
+  return null;
 }

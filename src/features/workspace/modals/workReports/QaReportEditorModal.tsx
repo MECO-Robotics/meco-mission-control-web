@@ -29,11 +29,11 @@ export function QaReportEditorModal({
     <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
       <section
         aria-modal="true"
-        className="modal-card"
+        className="modal-card task-details-modal"
         role="dialog"
         style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
       >
-        <div className="panel-header compact-header">
+        <div className="panel-header compact-header task-details-header">
           <div>
             <p className="eyebrow" style={{ color: "var(--meco-blue)" }}>
               QA report
@@ -41,16 +41,15 @@ export function QaReportEditorModal({
             <h2 style={{ color: "var(--text-title)" }}>Add QA report</h2>
           </div>
           <button
-            className="icon-button"
+            className="icon-button task-details-close-button"
             onClick={closeQaReportModal}
-            style={{ color: "var(--text-copy)", background: "transparent" }}
             type="button"
           >
-            Close
+            {"\u00D7"}
           </button>
         </div>
         <form
-          className="modal-form"
+          className="modal-form task-details-grid"
           onSubmit={handleQaReportSubmit}
           style={{ color: "var(--text-copy)" }}
         >

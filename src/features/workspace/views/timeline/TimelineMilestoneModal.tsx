@@ -45,13 +45,12 @@ export const TimelineMilestoneModal: React.FC<TimelineMilestoneModalProps> = ({
     >
       <section
         aria-modal="true"
-        className="modal-card"
+        className="modal-card task-details-modal"
         onClick={(milestone) => milestone.stopPropagation()}
         role="dialog"
         style={{
           background: "var(--bg-panel)",
           border: "1px solid var(--border-base)",
-          ...(mode === "create" ? { paddingTop: "0.65rem" } : null),
         }}
         >
         <TimelineMilestoneModalHeader
@@ -60,7 +59,7 @@ export const TimelineMilestoneModal: React.FC<TimelineMilestoneModalProps> = ({
           onClose={handleClose}
           onSwitchToTask={onSwitchToTask}
         />
-        <form className="modal-form" onSubmit={onSubmit}>
+        <form className="modal-form task-details-grid" onSubmit={onSubmit}>
           <TimelineMilestoneModalFields
             activeDayMilestones={activeDayMilestones}
             bootstrap={bootstrap}

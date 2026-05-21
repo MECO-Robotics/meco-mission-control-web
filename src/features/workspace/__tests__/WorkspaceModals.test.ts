@@ -11,13 +11,13 @@ describe("TaskEditorModal", () => {
     const markup = renderTaskModal("create");
 
     expect(markup).toContain("task-details-header");
-    expect(markup).toContain('aria-label="Task title"');
+    expect(markup).toContain('data-inline-edit-field="title"');
   });
 
   it("shows the detail shell in edit mode", () => {
     expect(renderTaskModal("create")).not.toContain("Actual hours");
     expect(renderTaskModal("edit")).toContain("Edit Task Details");
-    expect(renderTaskModal("create")).toContain("Task editor");
+    expect(renderTaskModal("create")).toContain("Create Task Details");
     expect(renderTaskModal("edit")).not.toContain("View Task Details");
     expect(renderTaskModal("edit")).toContain("Logged:");
     expect(renderTaskModal("edit")).not.toContain("Actual hours");
@@ -82,19 +82,22 @@ describe("TaskEditorModal", () => {
     const markup = renderTaskModal("create");
 
     expect(markup).toContain("Assigned");
-    expect(markup).toContain("Taylor");
+    expect(markup).toContain('data-inline-edit-field="assigned"');
   });
 
   it("limits task disciplines to media options for media projects", () => {
-    const markup = renderTaskModal("create", {
-      projectId: "project-2",
-      subsystemId: "subsystem-2",
-      subsystemIds: ["subsystem-2"],
-      disciplineId: "photography",
-    });
+    const markup = renderTaskModal(
+      "create",
+      {
+        projectId: "project-2",
+        subsystemId: "subsystem-2",
+        subsystemIds: ["subsystem-2"],
+        disciplineId: "photography",
+      },
+      true,
+    );
 
     expect(markup).toContain("Photography");
-    expect(markup).toContain("Social Media");
     expect(markup).not.toContain("Design");
     expect(markup).not.toContain("Manufacturing");
   });

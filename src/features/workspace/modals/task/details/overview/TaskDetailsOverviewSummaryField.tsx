@@ -13,7 +13,8 @@ export function TaskDetailsOverviewSummaryField({
   openTaskEditModal,
   setEditingField,
 }: TaskDetailsOverviewSummaryFieldProps) {
-  const summaryText = model.taskSummary || "No summary provided.";
+  const summaryText =
+    model.taskSummary || (canInlineEdit ? "Add a summary" : "No summary provided.");
 
   return (
     <label className="field task-detail-row modal-wide">
@@ -35,7 +36,9 @@ export function TaskDetailsOverviewSummaryField({
               onClick={() => setEditingField("summary")}
               type="button"
             >
-              <p className="task-detail-copy">{summaryText}</p>
+              <p className={`task-detail-copy${model.taskSummary ? "" : " task-detail-empty"}`}>
+                {summaryText}
+              </p>
             </button>
             <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator" />
           </div>
