@@ -8,6 +8,10 @@ import type { FilterSelection } from "@/features/workspace/shared/filters/worksp
 import { filterSelectionIncludes, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
 import {
+  DEFAULT_WORK_LOG_ACTIVITY_GROUP_MODE,
+  type WorkLogActivityGroupMode,
+} from "./workLogsActivityGrouping";
+import {
   buildTaskById,
   buildWorkLogsSummaryState,
   filterAndSortWorkLogs,
@@ -46,8 +50,10 @@ export type WorkLogPaginationState = {
 
 export type WorkLogsViewState = {
   activityActions: AuditActionRecord[];
+  activityGroupMode: WorkLogActivityGroupMode;
   activityPagination: ActivityPaginationState;
   search: string;
+  setActivityGroupMode: Dispatch<SetStateAction<WorkLogActivityGroupMode>>;
   setSearch: Dispatch<SetStateAction<string>>;
   setSortMode: Dispatch<SetStateAction<WorkLogSortMode>>;
   setSubsystemFilter: Dispatch<SetStateAction<FilterSelection>>;
@@ -153,6 +159,9 @@ export function useWorkLogsViewState({
   subsystemsById,
 }: WorkLogsViewStateArgs): WorkLogsViewState {
   const [search, setSearch] = useState("");
+  const [activityGroupMode, setActivityGroupMode] = useState<WorkLogActivityGroupMode>(
+    DEFAULT_WORK_LOG_ACTIVITY_GROUP_MODE,
+  );
   const [subsystemFilter, setSubsystemFilter] = useState<FilterSelection>([]);
   const [sortMode, setSortMode] = useState<WorkLogSortMode>("recent");
 
@@ -240,8 +249,10 @@ export function useWorkLogsViewState({
   ]);
   return {
     activityActions,
+    activityGroupMode,
     activityPagination,
     search,
+    setActivityGroupMode,
     setSearch,
     setSortMode,
     setSubsystemFilter,

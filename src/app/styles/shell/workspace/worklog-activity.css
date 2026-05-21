@@ -1,0 +1,70 @@
+.worklog-activity-board {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  min-width: 100%;
+  width: max-content;
+}
+
+.worklog-activity-board .task-queue-board-column {
+  flex: 0 0 var(--worklog-activity-column-width, 17rem);
+  width: var(--worklog-activity-column-width, 17rem);
+}
+
+.worklog-activity-column-title {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  color: var(--text-title);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.worklog-activity-card.task-queue-board-card {
+  cursor: default;
+  gap: 0.5rem;
+}
+
+.worklog-activity-card .worklog-summary-task-meta {
+  gap: 0.1rem;
+}
+
+.worklog-activity-card .worklog-summary-task-link {
+  color: var(--meco-blue);
+  line-height: 1.25;
+}
+
+.worklog-activity-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+  color: var(--text-title);
+}
+
+.worklog-activity-operation {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.15rem;
+  padding: 0.1rem 0.36rem;
+  border-radius: 999px;
+  background: rgba(22, 71, 142, 0.1);
+  color: var(--official-blue);
+  font-size: 0.63rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+
+.worklog-activity-meta {
+  margin: 0;
+  color: var(--text-copy);
+  font-size: 0.82rem;
+}
+
+.worklog-activity-group-menu .task-queue-filter-menu-popover {
+  min-width: 12rem;
+}
