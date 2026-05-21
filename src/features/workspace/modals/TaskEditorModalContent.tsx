@@ -204,6 +204,8 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
               taskDraft={taskDraft}
             />
           }
+          dependencyTargetProjectId={taskDraft.projectId}
+          editableMemberOptions={props.students}
           eyebrowLabel="Create Task Details"
           footerActions={
             <>

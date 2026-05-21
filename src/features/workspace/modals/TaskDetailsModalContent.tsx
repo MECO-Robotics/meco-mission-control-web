@@ -15,6 +15,8 @@ interface TaskDetailsModalProps {
   advancedSectionOpen: boolean;
   beforeOverviewContent?: ReactNode;
   beforeFooterContent?: ReactNode;
+  dependencyTargetProjectId?: string | null;
+  editableMemberOptions?: BootstrapPayload["members"];
   eyebrowLabel?: string;
   footerActions?: ReactNode;
   headerTitle?: ReactNode;
@@ -35,6 +37,8 @@ export function TaskDetailsModal({
   advancedSectionOpen,
   beforeOverviewContent,
   beforeFooterContent,
+  dependencyTargetProjectId,
+  editableMemberOptions,
   eyebrowLabel,
   footerActions,
   headerTitle,
@@ -85,6 +89,7 @@ export function TaskDetailsModal({
             activeTask={activeTask}
             bootstrap={bootstrap}
             canInlineEdit={canInlineEdit}
+            editableMemberOptions={editableMemberOptions}
             editingField={editingField}
             openTaskEditModal={openTaskEditModal}
             setEditingField={setEditingField}
@@ -97,6 +102,7 @@ export function TaskDetailsModal({
               activeTask={activeTask}
               bootstrap={bootstrap}
               canInlineEdit={canInlineEdit}
+              dependencyTargetProjectId={dependencyTargetProjectId}
               onResolveTaskBlocker={onResolveTaskBlocker}
               setTaskDraft={setTaskDraft}
               taskDraft={taskDraft}

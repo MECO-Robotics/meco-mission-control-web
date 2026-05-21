@@ -24,6 +24,7 @@ interface TaskDetailsDependenciesSectionProps {
   collapsibleOpen?: boolean;
   onCollapsibleToggle?: (open: boolean) => void;
   setTaskDraft?: Dispatch<SetStateAction<TaskPayload>>;
+  targetProjectId?: string | null;
   taskDraft?: TaskPayload;
 }
 
@@ -42,6 +43,7 @@ export function TaskDetailsDependenciesSection({
   collapsibleOpen,
   onCollapsibleToggle,
   setTaskDraft,
+  targetProjectId,
   taskDraft,
 }: TaskDetailsDependenciesSectionProps) {
   const [editingDependencyKey, setEditingDependencyKey] = useState<string | null>(null);
@@ -60,6 +62,26 @@ export function TaskDetailsDependenciesSection({
   );
   const partDefinitionsById = Object.fromEntries(
     bootstrap.partDefinitions.map((partDefinition) => [partDefinition.id, partDefinition] as const),
+  );
+  const targetTasksById = Object.fromEntries(
+    Object.values(tasksById)
+      .filter((task) => !targetProjectId || task.projectId === targetProjectId)
+      .map((task) => [task.id, task] as const),
+  );
+  const targetMilestonesById = Object.fromEntries(
+    Object.values(milestonesById)
+      .filter((milestone) => !targetProjectId || milestone.projectIds.includes(targetProjectId))
+      .map((milestone) => [milestone.id, milestone] as const),
+  );
+  const targetPartInstancesById = Object.fromEntries(
+    Object.values(partInstancesById)
+      .filter((partInstance) => {
+        const subsystem = bootstrap.subsystems.find(
+          (candidate) => candidate.id === partInstance.subsystemId,
+        );
+        return !targetProjectId || subsystem?.projectId === targetProjectId;
+      })
+      .map((partInstance) => [partInstance.id, partInstance] as const),
   );
   const dependencyRows = (
     taskDraft?.taskDependencies ??
@@ -87,9 +109,9 @@ export function TaskDetailsDependenciesSection({
   }));
   const getDependencyTargetOptions = (kind: TaskDependencyKind) =>
     getTaskDependencyTargetOptions(kind, {
-      tasksById,
-      milestonesById,
-      partInstancesById,
+      tasksById: targetTasksById,
+      milestonesById: targetMilestonesById,
+      partInstancesById: targetPartInstancesById,
       partDefinitionsById,
       formatIterationVersion,
     });

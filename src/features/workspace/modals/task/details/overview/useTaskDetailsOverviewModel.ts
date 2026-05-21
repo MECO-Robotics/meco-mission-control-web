@@ -17,6 +17,7 @@ import { getStableToneClassName } from "./taskDetailsOverviewTone";
 interface UseTaskDetailsOverviewModelArgs {
   activeTask: TaskRecord;
   bootstrap: BootstrapPayload;
+  editableMemberOptions?: BootstrapPayload["members"];
   setEditingField: Dispatch<SetStateAction<TaskDetailsEditableField | null>>;
   setTaskDraft?: Dispatch<SetStateAction<TaskPayload>>;
   taskDraft?: TaskPayload;
@@ -25,6 +26,7 @@ interface UseTaskDetailsOverviewModelArgs {
 export function useTaskDetailsOverviewModel({
   activeTask,
   bootstrap,
+  editableMemberOptions,
   setEditingField,
   setTaskDraft,
   taskDraft,
@@ -86,7 +88,7 @@ export function useTaskDetailsOverviewModel({
   const editableMentorOptions = Object.values(membersById).filter(
     (member) => member.role === "mentor",
   );
-  const editableMemberOptions = Object.values(membersById).filter(
+  const defaultEditableMemberOptions = Object.values(membersById).filter(
     (member) => member.role === "student",
   );
   const getSubsystemOptionToneClassName = (option: { id: string }) =>
@@ -151,7 +153,7 @@ export function useTaskDetailsOverviewModel({
 
   return {
     assigneeNames,
-    editableMemberOptions,
+    editableMemberOptions: editableMemberOptions ?? defaultEditableMemberOptions,
     editableMentorOptions,
     editableTask,
     handleAssignedChange,
