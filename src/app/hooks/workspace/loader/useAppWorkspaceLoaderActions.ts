@@ -39,6 +39,10 @@ export function useAppWorkspaceLoaderActions(
             photoUrl: member.photoUrl ?? "",
             role: member.role,
             elevated: member.elevated,
+            disciplineId: member.disciplineId ?? null,
+            plannedWeeklyAttendanceHours: member.plannedWeeklyAttendanceHours ?? 0,
+            plannedAttendanceDays: member.plannedAttendanceDays ?? [],
+            plannedAttendanceNotes: member.plannedAttendanceNotes ?? "",
           }
         : null,
     );

@@ -55,6 +55,9 @@ function renderRosterView(isAddPersonOpen = false) {
     role: "student",
     elevated: false,
     photoUrl: "",
+    plannedWeeklyAttendanceHours: 0,
+    plannedAttendanceDays: [],
+    plannedAttendanceNotes: "",
   };
 
   return renderToStaticMarkup(
@@ -104,5 +107,7 @@ describe("RosterView", () => {
 
     expect(html).toContain("Profile photo");
     expect(html).toContain('type="file"');
+    expect(html).toContain("Planned weekly attendance");
+    expect(html).toContain("Planned days");
   });
 });

@@ -154,7 +154,17 @@ export const RosterView: React.FC<RosterViewProps> = ({
   }, [allMembers, selectedSeasonId]);
 
   const openAddPersonPanel = (role: MemberPayload["role"]) => {
-    setMemberForm({ name: "", email: "", photoUrl: "", role, elevated: isElevatedRole(role), disciplineId: null });
+    setMemberForm({
+      name: "",
+      email: "",
+      photoUrl: "",
+      role,
+      elevated: isElevatedRole(role),
+      disciplineId: null,
+      plannedWeeklyAttendanceHours: 0,
+      plannedAttendanceDays: [],
+      plannedAttendanceNotes: "",
+    });
     setReactivateExistingMember(false);
     setReactivateMemberId("");
     setIsAddPersonOpen(true);

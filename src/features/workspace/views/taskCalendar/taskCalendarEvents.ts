@@ -106,6 +106,32 @@ function buildMilestoneContextLabel({
   return `${firstProjectName} +${milestoneProjectIds.length - 1}`;
 }
 
+function buildMeetingContextLabel({
+  isAllProjectsView,
+  meeting,
+  projectsById,
+}: {
+  isAllProjectsView: boolean;
+  meeting: NonNullable<BootstrapPayload["meetings"]>[number];
+  projectsById: Record<string, BootstrapPayload["projects"][number]>;
+}) {
+  if (!isAllProjectsView) {
+    return null;
+  }
+
+  const meetingProjectIds = meeting.projectIds ?? [];
+  if (meetingProjectIds.length === 0) {
+    return "All projects";
+  }
+
+  if (meetingProjectIds.length === 1) {
+    return projectsById[meetingProjectIds[0]]?.name ?? "Unknown project";
+  }
+
+  const firstProjectName = projectsById[meetingProjectIds[0]]?.name ?? "Multiple projects";
+  return `${firstProjectName} +${meetingProjectIds.length - 1}`;
+}
+
 function prependContextLabel(title: string, contextLabel: string | null) {
   return contextLabel ? `${contextLabel} | ${title}` : title;
 }
@@ -227,22 +253,33 @@ export function buildTaskCalendarEvents({
       };
     });
 
-  const meetingEvents: TaskCalendarEvent[] = (bootstrap.meetings ?? []).map((meeting) => ({
-    allDay: meeting.time.trim().length === 0,
-    classNames: ["task-calendar-event", "task-calendar-event-event"],
-    extendedProps: {
-      contextLabel: "All projects",
-      projectId: null,
-      recordId: meeting.id,
-      type: "event",
-    },
-    id: `meeting:${meeting.id}`,
-    start:
-      meeting.time.trim().length > 0
+  const meetingEvents: TaskCalendarEvent[] = (bootstrap.meetings ?? []).map((meeting) => {
+    const meetingStart =
+      meeting.startDateTime ??
+      (meeting.time.trim().length > 0
         ? `${asDateOnly(meeting.date)}T${meeting.time.trim()}`
-        : asDateOnly(meeting.date),
-    title: `Meeting: ${meeting.title}`,
-  }));
+        : asDateOnly(meeting.date));
+    const contextLabel = buildMeetingContextLabel({
+      isAllProjectsView,
+      meeting,
+      projectsById,
+    });
+
+    return {
+      allDay: !hasTime(meetingStart),
+      classNames: ["task-calendar-event", "task-calendar-event-event"],
+      extendedProps: {
+        contextLabel,
+        projectId: meeting.projectIds?.[0] ?? null,
+        recordId: meeting.id,
+        status: meeting.meetingType ?? "general",
+        type: "event",
+      },
+      id: `meeting:${meeting.id}`,
+      start: hasTime(meetingStart) ? meetingStart : asDateOnly(meetingStart),
+      title: prependContextLabel(`Meeting: ${meeting.title}`, contextLabel),
+    };
+  });
 
   return [...milestoneEvents, ...taskEvents, ...manufacturingEvents, ...meetingEvents].sort(
     compareEventStartDate,

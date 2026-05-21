@@ -1,0 +1,57 @@
+/// <reference types="jest" />
+
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import { buildTaskCalendarEvents } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
+import type { BootstrapPayload } from "@/types/bootstrap";
+
+describe("buildTaskCalendarEvents", () => {
+  it("uses scheduled meeting timestamps and project context", () => {
+    const bootstrap = {
+      ...EMPTY_BOOTSTRAP,
+      projects: [
+        {
+          id: "project-robot",
+          seasonId: "season-1",
+          name: "Robot 2026",
+          projectType: "robot" as const,
+          description: "",
+          status: "active" as const,
+        },
+      ],
+      meetings: [
+        {
+          id: "build-night",
+          title: "Build night",
+          meetingType: "build" as const,
+          seasonId: "season-1",
+          projectIds: ["project-robot"],
+          startDateTime: "2026-05-07T18:00:00",
+          endDateTime: "2026-05-07T20:00:00",
+          location: "Lab",
+          description: "Drivebase planning.",
+          date: "2026-05-07",
+          time: "18:00",
+          rsvpsYes: 0,
+          rsvpsMaybe: 0,
+          openSignIns: 0,
+        },
+      ],
+    } satisfies BootstrapPayload;
+
+    const events = buildTaskCalendarEvents({
+      activePersonFilter: [],
+      bootstrap,
+      isAllProjectsView: true,
+      projectsById: {
+        "project-robot": bootstrap.projects[0],
+      },
+    });
+    const meetingEvent = events.find((event) => event.id === "meeting:build-night");
+
+    expect(meetingEvent?.start).toBe("2026-05-07T18:00:00");
+    expect(meetingEvent?.extendedProps.projectId).toBe("project-robot");
+    expect(meetingEvent?.extendedProps.contextLabel).toBe("Robot 2026");
+    expect(meetingEvent?.extendedProps.status).toBe("build");
+    expect(meetingEvent?.title).toBe("Robot 2026 | Meeting: Build night");
+  });
+});

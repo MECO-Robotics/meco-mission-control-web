@@ -1,6 +1,7 @@
 import type {
   MilestoneStatus,
   MilestoneType,
+  MeetingType,
   TaskBlockerSeverity,
   TaskBlockerStatus,
   TaskBlockerType,
@@ -127,6 +128,13 @@ export interface AttendanceRecord {
 export interface MeetingRecord {
   id: string;
   title: string;
+  meetingType?: MeetingType;
+  seasonId?: string;
+  projectIds?: string[];
+  startDateTime?: string;
+  endDateTime?: string | null;
+  location?: string;
+  description?: string;
   date: string;
   time: string;
   rsvpsYes: number;

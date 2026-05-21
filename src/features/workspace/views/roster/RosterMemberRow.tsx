@@ -45,6 +45,17 @@ const getDisciplineName = (member: MemberRecord, disciplines: BootstrapPayload["
   return disciplines.find((discipline) => discipline.id === member.disciplineId)?.name ?? member.disciplineId;
 };
 
+const getPlannedAttendanceLabel = (member: MemberRecord) => {
+  const hours = member.plannedWeeklyAttendanceHours ?? 0;
+  const days = member.plannedAttendanceDays ?? [];
+  if (hours <= 0 && days.length === 0) {
+    return null;
+  }
+
+  const dayLabel = days.length > 0 ? `, ${days.length}d` : "";
+  return `Planned: ${hours.toFixed(hours % 1 === 0 ? 0 : 1)}h/wk${dayLabel}`;
+};
+
 export const RosterMemberRow: React.FC<RosterMemberRowProps> = ({
   member,
   selectedMemberId,
@@ -54,6 +65,7 @@ export const RosterMemberRow: React.FC<RosterMemberRowProps> = ({
 }) => {
   const roleBadge = getRoleBadge(member);
   const disciplineName = getDisciplineName(member, disciplines);
+  const plannedAttendanceLabel = getPlannedAttendanceLabel(member);
   const rowClassName =
     member.id === selectedMemberId ? "member-row active editable-action-host" : "member-row editable-action-host";
 
@@ -73,6 +85,11 @@ export const RosterMemberRow: React.FC<RosterMemberRowProps> = ({
           {disciplineName ? (
             <span className="member-row-email" title="Discipline">
               Discipline: {disciplineName}
+            </span>
+          ) : null}
+          {plannedAttendanceLabel ? (
+            <span className="member-row-email" title="Planned weekly attendance">
+              {plannedAttendanceLabel}
             </span>
           ) : null}
         </span>

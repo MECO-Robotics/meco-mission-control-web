@@ -51,7 +51,7 @@ export function RosterAttendanceView({
         availabilityFilter,
         members: insightsState.insights.members,
         searchText,
-        sortMode: "attendance-desc",
+        sortMode: "planned-attendance-desc",
       }),
     [availabilityFilter, insightsState.insights.members, searchText],
   );
@@ -63,19 +63,19 @@ export function RosterAttendanceView({
 
   const summaryCards = [
     {
-      id: "attendance-30",
-      label: "Attendance (30d)",
-      value: formatHours(insightsState.insights.summary.attendanceHoursLast30Days),
+      id: "planned-weekly",
+      label: "Planned / week",
+      value: formatHours(insightsState.insights.summary.plannedWeeklyAttendanceHours),
     },
     {
       id: "attendance-14",
-      label: "Attendance (14d)",
+      label: "Actual attendance (14d)",
       value: formatHours(insightsState.insights.summary.attendanceHoursLast14Days),
     },
     {
-      id: "no-recent",
-      label: "No recent attendance + active tasks",
-      value: String(insightsState.insights.summary.noRecentAttendanceWithTasksCount),
+      id: "no-planned",
+      label: "No planned attendance + active tasks",
+      value: String(insightsState.insights.summary.noPlannedAttendanceWithTasksCount ?? 0),
     },
     {
       id: "waiting-qa",
@@ -155,7 +155,7 @@ export function RosterAttendanceView({
                   <div className="mc-roster-attendance-row-main">
                     <strong>{member.memberName}</strong>
                     <small>
-                      {formatHours(member.attendanceHoursLast14Days)} attendance · {member.activeTaskCount} active tasks
+                      {formatHours(member.plannedWeeklyAttendanceHours)} planned/wk · {formatHours(member.attendanceHoursLast14Days)} actual (14d) · {member.activeTaskCount} active tasks
                     </small>
                   </div>
                   <span className={`mc-roster-status-badge ${fetchAvailabilityStatusTone(member.availabilityStatus)}`}>
