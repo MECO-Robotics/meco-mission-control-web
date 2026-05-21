@@ -3,6 +3,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskPayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { TaskDetailsModal } from "./TaskDetailsModalContent";
+import { TaskEditorCreateMetadataSection } from "./task/TaskEditorCreateMetadataSection";
 import { TaskEditorCreateProjectSection } from "./task/TaskEditorCreateProjectSection";
 
 interface TaskEditorModalProps {
@@ -174,6 +175,12 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
             <TaskEditorCreateProjectSection
               bootstrap={bootstrap}
               currentTaskId={activeTask?.id ?? null}
+              setTaskDraft={setTaskDraft}
+              taskDraft={taskDraft}
+            />
+          }
+          beforeFooterContent={
+            <TaskEditorCreateMetadataSection
               setTaskDraft={setTaskDraft}
               taskDraft={taskDraft}
             />

@@ -14,6 +14,7 @@ interface TaskDetailsModalProps {
   closeTaskDetailsModal: () => void;
   advancedSectionOpen: boolean;
   beforeOverviewContent?: ReactNode;
+  beforeFooterContent?: ReactNode;
   eyebrowLabel?: string;
   footerActions?: ReactNode;
   headerTitle?: ReactNode;
@@ -33,6 +34,7 @@ export function TaskDetailsModal({
   closeTaskDetailsModal,
   advancedSectionOpen,
   beforeOverviewContent,
+  beforeFooterContent,
   eyebrowLabel,
   footerActions,
   headerTitle,
@@ -113,6 +115,8 @@ export function TaskDetailsModal({
             setTaskDraft={setTaskDraft}
             taskDraft={taskDraft}
           />
+
+          {beforeFooterContent}
 
           <div className="modal-actions modal-wide">
             {footerActions}

@@ -98,6 +98,9 @@ describe("workspace creation modals", () => {
     expect(markup).toContain("Add a summary");
     expect(markup).toContain("Choose owner");
     expect(markup).toContain("Add teammates");
+    expect(markup).toContain("Task metadata");
+    expect(markup).toContain("Estimated hours");
+    expect(markup).toContain("Requires documentation");
     expect(markup).toContain('disabled="" type="submit">Create task');
   });
 
@@ -203,6 +206,7 @@ describe("workspace creation modals", () => {
     expect(markup).toContain("modal-card task-details-modal");
     expect(markup).toContain("panel-header compact-header task-details-header");
     expect(markup).toContain("task-details-close-button");
+    expect(markup).toContain('aria-label="Close QA report modal"');
     expect(markup).toContain("modal-form task-details-grid");
   });
 

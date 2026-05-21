@@ -41,6 +41,7 @@ export function QaReportEditorModal({
             <h2 style={{ color: "var(--text-title)" }}>Add QA report</h2>
           </div>
           <button
+            aria-label="Close QA report modal"
             className="icon-button task-details-close-button"
             onClick={closeQaReportModal}
             type="button"
