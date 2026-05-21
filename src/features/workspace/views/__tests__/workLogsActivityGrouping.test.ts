@@ -102,4 +102,23 @@ describe("workLogsActivityGrouping", () => {
 
     expect(columns.map((column) => column.label)).toEqual(expectedLabels);
   });
+
+  it("groups actorless and unknown-person activity into fallback columns", () => {
+    const columns = buildWorkLogActivityColumns({
+      actions: [
+        { ...actions[0], actorMemberId: null, id: "system-action", memberIds: ["student-1"] },
+        { ...actions[0], actorMemberId: "missing-1", id: "missing-action-1" },
+        { ...actions[0], actorMemberId: "missing-2", id: "missing-action-2" },
+      ],
+      groupMode: "person",
+      membersById,
+      subsystemsById,
+      taskById: { "task-1": task },
+    });
+
+    expect(columns.map((column) => [column.id, column.label, column.actions.length])).toEqual([
+      ["person:unknown", "Unknown member", 2],
+      ["person:system", "System", 1],
+    ]);
+  });
 });

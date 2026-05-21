@@ -61,7 +61,7 @@ function resolveActivityColumn({
   const task = action.taskId ? taskById[action.taskId] : undefined;
 
   if (groupMode === "person") {
-    const personId = action.actorMemberId ?? action.memberIds[0] ?? null;
+    const personId = action.actorMemberId;
 
     if (!personId) {
       return {
@@ -72,10 +72,21 @@ function resolveActivityColumn({
       };
     }
 
+    const person = membersById[personId];
+
+    if (!person) {
+      return {
+        id: "person:unknown",
+        isFallback: true,
+        label: "Unknown member",
+        sortRank: Number.MAX_SAFE_INTEGER - 1,
+      };
+    }
+
     return {
       id: `person:${personId}`,
       isFallback: false,
-      label: membersById[personId]?.name ?? "Unknown member",
+      label: person.name,
       sortRank: 0,
     };
   }
