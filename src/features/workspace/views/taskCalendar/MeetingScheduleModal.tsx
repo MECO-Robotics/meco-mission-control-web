@@ -26,6 +26,11 @@ function combineDateTime(date: string, time: string) {
   return time.trim().length > 0 ? `${date}T${time}` : date;
 }
 
+function resolveEndDateTime(date: string, time: string) {
+  const normalizedDate = date.trim();
+  return normalizedDate.length > 0 ? combineDateTime(normalizedDate, time) : null;
+}
+
 export function MeetingScheduleModal({
   bootstrap,
   draft,
@@ -141,7 +146,7 @@ export function MeetingScheduleModal({
               onChange={(event) =>
                 setDraft((current) => ({
                   ...current,
-                  endDateTime: endTime ? combineDateTime(event.target.value, endTime) : null,
+                  endDateTime: resolveEndDateTime(event.target.value, endTime),
                 }))
               }
               type="date"
@@ -154,7 +159,7 @@ export function MeetingScheduleModal({
               onChange={(event) =>
                 setDraft((current) => ({
                   ...current,
-                  endDateTime: event.target.value ? combineDateTime(endDate, event.target.value) : null,
+                  endDateTime: resolveEndDateTime(endDate, event.target.value),
                 }))
               }
               type="time"
