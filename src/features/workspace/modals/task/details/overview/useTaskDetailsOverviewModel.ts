@@ -17,6 +17,7 @@ import { getStableToneClassName } from "./taskDetailsOverviewTone";
 interface UseTaskDetailsOverviewModelArgs {
   activeTask: TaskRecord;
   bootstrap: BootstrapPayload;
+  editableMemberOptions?: BootstrapPayload["members"];
   setEditingField: Dispatch<SetStateAction<TaskDetailsEditableField | null>>;
   setTaskDraft?: Dispatch<SetStateAction<TaskPayload>>;
   taskDraft?: TaskPayload;
@@ -25,6 +26,7 @@ interface UseTaskDetailsOverviewModelArgs {
 export function useTaskDetailsOverviewModel({
   activeTask,
   bootstrap,
+  editableMemberOptions,
   setEditingField,
   setTaskDraft,
   taskDraft,
@@ -34,6 +36,7 @@ export function useTaskDetailsOverviewModel({
     bootstrap.projects.find((project) => project.id === editableTask.projectId) ?? null;
   const targetGroupLabel = getTaskTargetGroupLabel(selectedProject);
   const subsystemFieldLabel = targetGroupLabel === "Subsystems" ? "Subsystem" : "Workstream";
+  const isDraftEditing = Boolean(taskDraft);
   const membersById = Object.fromEntries(
     bootstrap.members.map((member) => [member.id, member] as const),
   ) as Record<string, BootstrapPayload["members"][number]>;
@@ -55,9 +58,17 @@ export function useTaskDetailsOverviewModel({
     ? subsystemsById[selectedPrimaryTargetId] ?? null
     : null;
   const ownerIdText = taskDraft?.ownerId ?? activeTask.ownerId ?? "";
-  const ownerText = ownerIdText ? membersById[ownerIdText]?.name ?? "Unknown" : "Unassigned";
+  const ownerText = ownerIdText
+    ? membersById[ownerIdText]?.name ?? "Unknown"
+    : isDraftEditing
+      ? "Choose owner"
+      : "Unassigned";
   const mentorIdText = taskDraft?.mentorId ?? activeTask.mentorId ?? "";
-  const mentorText = mentorIdText ? membersById[mentorIdText]?.name ?? "Unknown" : "Unassigned";
+  const mentorText = mentorIdText
+    ? membersById[mentorIdText]?.name ?? "Unknown"
+    : isDraftEditing
+      ? "Choose mentor"
+      : "Unassigned";
   const ownerName = editableTask.ownerId
     ? membersById[editableTask.ownerId]?.name ?? "Unknown"
     : "Unassigned";
@@ -68,14 +79,16 @@ export function useTaskDetailsOverviewModel({
     ? selectedPrimaryTarget
       ? `${selectedPrimaryTarget.name} (${formatIterationVersion(selectedPrimaryTarget.iteration)})`
       : "No subsystem linked"
-    : "No subsystem linked";
+    : isDraftEditing
+      ? `Choose ${subsystemFieldLabel.toLowerCase()}`
+      : "No subsystem linked";
   const assigneeNames = selectedAssigneeIds
     .map((memberId) => membersById[memberId]?.name)
     .filter((name): name is string => Boolean(name));
   const editableMentorOptions = Object.values(membersById).filter(
     (member) => member.role === "mentor",
   );
-  const editableMemberOptions = Object.values(membersById).filter(
+  const defaultEditableMemberOptions = Object.values(membersById).filter(
     (member) => member.role === "student",
   );
   const getSubsystemOptionToneClassName = (option: { id: string }) =>
@@ -140,7 +153,7 @@ export function useTaskDetailsOverviewModel({
 
   return {
     assigneeNames,
-    editableMemberOptions,
+    editableMemberOptions: editableMemberOptions ?? defaultEditableMemberOptions,
     editableMentorOptions,
     editableTask,
     handleAssignedChange,

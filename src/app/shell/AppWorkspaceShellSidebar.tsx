@@ -1,4 +1,5 @@
 import type { AppWorkspaceShellSidebarController } from "@/app/hooks/useAppWorkspaceController";
+import { isNavigationSubItemId } from "@/lib/workspaceNavigation";
 
 import { AppSidebar } from "@/app/shell/workspaceShell";
 
@@ -50,21 +51,48 @@ export function AppWorkspaceShellSidebar({
       keepSidebarOpen: options?.keepSidebarOpen,
     });
   };
+  const handleCreateMilestone = () => {
+    handleSelectNavigationTarget({ tab: "tasks", taskView: "timeline" });
+    c.switchTaskCreateToMilestone();
+  };
 
   return (
     <AppSidebar
       activeTab={c.activeTab}
+      favoriteViewIds={(c.bootstrap.favoriteViews ?? [])
+        .map((favorite) => favorite.viewId)
+        .filter(isNavigationSubItemId)}
+      handleSignOut={c.handleSignOut}
       items={c.navigationItems}
+      isDarkMode={c.isDarkMode}
+      isMyViewActive={c.isMyViewActive}
       onSelectTarget={handleSelectNavigationTarget}
       isCollapsed={c.isSidebarCollapsed}
+      isNotificationQueueOpen={c.isNotificationQueueOpen}
+      myViewMemberName={c.signedInMember?.name ?? null}
+      notificationCount={c.notificationHistory.length}
+      onCreateMilestone={handleCreateMilestone}
+      onCreatePart={c.openCreatePartDefinitionModal}
+      onCreateQaReport={c.openCreateQaReportModal}
+      onCreateSeason={c.handleCreateSeason}
+      onCreateTask={c.openCreateTaskModal}
+      onRefreshWorkspace={c.loadWorkspace}
+      onSelectSeason={c.setSelectedSeasonId}
+      onToggleMyView={c.toggleMyView}
+      onToggleNotificationQueue={c.toggleNotificationQueue}
       toggleSidebar={c.toggleSidebar}
       projects={c.projectsInSelectedSeason}
       selectedProjectId={c.selectedProjectId}
+      selectedSeasonId={c.selectedSeasonId}
       inventoryView={c.inventoryView}
+      manufacturingView={c.manufacturingView}
       rosterView={c.rosterView}
       reportsView={c.reportsView}
       riskManagementView={c.riskManagementView}
+      seasons={c.bootstrap.seasons}
+      sessionUser={c.sessionUser}
       taskView={c.taskView}
+      toggleDarkMode={c.toggleDarkMode}
       worklogsView={c.worklogsView}
       onSelectProject={c.setSelectedProjectId}
       onCreateRobot={c.handleCreateRobot}

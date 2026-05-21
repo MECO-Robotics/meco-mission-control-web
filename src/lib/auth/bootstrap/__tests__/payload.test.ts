@@ -108,7 +108,17 @@ describe("normalizeBootstrapPayload", () => {
 
     const normalized = normalizeBootstrapPayload(payload);
 
-    expect(normalized.meetings).toEqual(meetings);
+    expect(normalized.meetings).toEqual([
+      {
+        ...meetings[0],
+        meetingType: "general",
+        projectIds: [],
+        startDateTime: "2026-03-01T17:30",
+        endDateTime: null,
+        location: "",
+        description: "",
+      },
+    ]);
     expect(normalized.attendanceRecords).toEqual(payload.attendanceRecords);
     expect(normalized.qaReviews).toEqual(qaReviews);
     expect(normalized.escalations).toEqual(escalations);

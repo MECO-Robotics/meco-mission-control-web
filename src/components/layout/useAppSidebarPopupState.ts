@@ -22,17 +22,22 @@ function clampPopupTop(
 }
 
 interface UseAppSidebarPopupStateArgs {
-  activeSection: NavigationSection;
+  activeSection: NavigationSection | null;
   isCollapsed: boolean;
+  projectPopupLayoutKey?: unknown;
 }
 
-export function useAppSidebarPopupState({ activeSection, isCollapsed }: UseAppSidebarPopupStateArgs) {
+export function useAppSidebarPopupState({
+  activeSection,
+  isCollapsed,
+  projectPopupLayoutKey,
+}: UseAppSidebarPopupStateArgs) {
   const sidebarShellRef = useRef<HTMLDivElement | null>(null);
   const compactPopupRef = useRef<HTMLDivElement | null>(null);
   const projectPopupRef = useRef<HTMLDivElement | null>(null);
   const projectTriggerRef = useRef<HTMLButtonElement | null>(null);
 
-  const [expandedSection, setExpandedSection] = useState<NavigationSection>(activeSection);
+  const [expandedSection, setExpandedSection] = useState<NavigationSection | null>(activeSection);
   const [compactPopupSection, setCompactPopupSection] = useState<NavigationSection | null>(null);
   const [compactPopupTop, setCompactPopupTop] = useState(0);
   const [projectPopupTop, setProjectPopupTop] = useState(0);
@@ -121,7 +126,7 @@ export function useAppSidebarPopupState({ activeSection, isCollapsed }: UseAppSi
     if (Math.abs(clampedTop - projectPopupTop) > 0.5) {
       setProjectPopupTop(clampedTop);
     }
-  }, [isProjectPopupOpen, projectPopupTop]);
+  }, [isProjectPopupOpen, projectPopupLayoutKey, projectPopupTop]);
 
   return {
     compactPopupRef,

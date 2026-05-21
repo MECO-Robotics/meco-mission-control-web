@@ -28,6 +28,7 @@ export const RISK_MANAGEMENT_VIEW_ORDER: readonly RiskManagementViewTab[] = [
 export const WORKLOG_VIEW_ORDER: readonly WorklogsViewTab[] = ["logs", "summary"];
 export const REPORTS_VIEW_ORDER: readonly ReportsViewTab[] = ["qa", "milestone-results"];
 export const MANUFACTURING_VIEW_ORDER: readonly ManufacturingViewTab[] = [
+  "all",
   "cnc",
   "prints",
   "fabrication",
@@ -35,6 +36,7 @@ export const MANUFACTURING_VIEW_ORDER: readonly ManufacturingViewTab[] = [
 export const INVENTORY_VIEW_ORDER: readonly InventoryViewTab[] = [
   "materials",
   "parts",
+  "part-mappings",
   "purchases",
 ];
 
@@ -83,9 +85,10 @@ export const REPORTS_VIEW_OPTIONS: readonly ViewOption<ReportsViewTab>[] = [
 ];
 
 export const MANUFACTURING_VIEW_OPTIONS: readonly ViewOption<ManufacturingViewTab>[] = [
+  { value: "all", label: "All" },
   { value: "cnc", label: "CNC" },
-  { value: "prints", label: "3D print" },
-  { value: "fabrication", label: "Fabrication" },
+  { value: "prints", label: "3D printing" },
+  { value: "fabrication", label: "Fab" },
 ];
 
 export const ROBOT_INVENTORY_VIEW_OPTIONS: readonly ViewOption<InventoryViewTab>[] = [
@@ -155,6 +158,12 @@ export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = [
     target: { tab: "cad" },
   },
   {
+    id: "config-part-mappings",
+    label: "Part mappings",
+    section: "config",
+    target: { tab: "inventory", inventoryView: "part-mappings" },
+  },
+  {
     id: "config-directory",
     label: "Directory",
     section: "config",
@@ -176,7 +185,7 @@ export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = [
     id: "tasks-manufacturing",
     label: "Manufacturing",
     section: "tasks",
-    target: { tab: "manufacturing", manufacturingView: "cnc" },
+    target: { tab: "manufacturing", manufacturingView: "all" },
   },
   {
     id: "inventory-materials",
@@ -242,6 +251,7 @@ export const NAVIGATION_SUB_ITEMS_BY_SECTION: Record<
 };
 
 export const BASE_SECTION_LABELS: Record<ViewTab, string> = {
+  home: "Home",
   tasks: "Work",
   "risk-management": "Risk Management",
   worklogs: "Worklogs",

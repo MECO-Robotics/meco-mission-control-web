@@ -1,0 +1,108 @@
+.app-topbar-search-slot {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  flex: 1 1 auto;
+  padding-inline: clamp(0.3rem, 0.9vw, 0.6rem);
+  min-width: 0;
+  overflow: visible;
+}
+
+.app-topbar-search {
+  --app-topbar-search-icon-button-size: 1.7rem;
+  --app-topbar-search-icon-pill-height: 2.05rem;
+  --app-topbar-search-icon-pill-width: calc(var(--app-topbar-search-icon-button-size) + 0.45rem);
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 44rem;
+  min-width: 0;
+}
+
+.app-topbar-search.toolbar-filter-compact {
+  width: 100%;
+  max-width: none;
+  height: var(--app-topbar-search-icon-pill-height);
+  min-height: var(--app-topbar-search-icon-pill-height);
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.app-topbar-search-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-copy);
+  flex: 0 0 auto;
+  pointer-events: none;
+}
+
+.app-topbar-search-icon svg {
+  display: block;
+}
+
+.app-topbar-search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  height: var(--app-topbar-search-icon-pill-height);
+  color: var(--text-title);
+  font-family: var(--font-ui);
+  font-size: 0.96rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 0;
+}
+
+.app-topbar-search-input::placeholder {
+  color: var(--text-copy);
+  opacity: 0.8;
+}
+
+@media (max-width: 880px) {
+  .app-topbar-search-slot {
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+  }
+
+  .app-topbar-search-slot:has(.app-topbar-controls-host:not(:empty)),
+  .app-topbar-search-slot:has(.app-topbar-search-host:not(:empty)) {
+    --app-topbar-scroll-hint-size: 1.25rem;
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 var(--app-topbar-scroll-hint-size),
+      #000 calc(100% - var(--app-topbar-scroll-hint-size)),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 var(--app-topbar-scroll-hint-size),
+      #000 calc(100% - var(--app-topbar-scroll-hint-size)),
+      transparent 100%
+    );
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+  }
+
+  .app-topbar-search-slot:has(.topbar-responsive-search-compact.is-open),
+  .app-topbar-search-slot:has(.task-queue-filter-menu.is-open),
+  .app-topbar-search-slot:has(.milestones-search-suggestions) {
+    overflow: visible;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .app-topbar-search-slot::-webkit-scrollbar {
+    height: 0.35rem;
+  }
+
+  .app-topbar-search-slot::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(100, 116, 139, 0.4);
+  }
+}

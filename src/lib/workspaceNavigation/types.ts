@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 export type ViewTab =
+  | "home"
   | "tasks"
   | "risk-management"
   | "worklogs"
@@ -25,8 +26,8 @@ export type TaskViewTab = "calendar" | "timeline" | "robot-map" | "queue" | "mil
 export type RiskManagementViewTab = "attention" | "kanban" | "metrics";
 export type WorklogsViewTab = "logs" | "summary" | "activity";
 export type ReportsViewTab = "qa" | "milestone-results";
-export type ManufacturingViewTab = "cnc" | "prints" | "fabrication";
-export type InventoryViewTab = "materials" | "parts" | "purchases";
+export type ManufacturingViewTab = "all" | "cnc" | "prints" | "fabrication";
+export type InventoryViewTab = "materials" | "parts" | "part-mappings" | "purchases";
 export type RosterViewTab = "workload" | "directory" | "attendance";
 
 export type NavigationSubItemId =
@@ -39,6 +40,7 @@ export type NavigationSubItemId =
   | "readiness-risks"
   | "config-robot-model"
   | "config-cad"
+  | "config-part-mappings"
   | "config-directory"
   | "tasks-timeline"
   | "tasks-board"

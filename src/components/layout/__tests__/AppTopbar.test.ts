@@ -1,6 +1,8 @@
 /// <reference types="jest" />
 
 import * as React from "react";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 
 jest.mock("@/lib/branding", () => ({
@@ -10,7 +12,6 @@ jest.mock("@/lib/branding", () => ({
   MECO_MAIN_LOGO_LIGHT_SRC: "/logo-light.png",
   MECO_MAIN_LOGO_WHITE_SRC: "/logo-white.png",
   MECO_MAIN_LOGO_WIDTH: 120,
-  MECO_PROFILE_AVATAR_SIZE: 32,
 }));
 
 import { AppTopbar } from "@/components/layout/AppTopbar";
@@ -18,57 +19,39 @@ import { AppTopbar } from "@/components/layout/AppTopbar";
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 function renderTopbar(
-  myView: {
-    isActive: boolean;
-    memberName: string | null;
-  } = {
-      isActive: false,
-      memberName: "Ava Chen",
-    },
-  isSignedIn = false,
   options: {
+    activeViewLabel?: string;
+    isActiveViewFavorite?: boolean;
     isDarkMode?: boolean;
     isSidebarCollapsed?: boolean;
+    onToggleActiveViewFavorite?: (() => void) | null;
   } = {},
 ) {
-  const sessionUser = isSignedIn
-    ? {
-      accountId: "account-1",
-      authProvider: "google" as const,
-      email: "ava.chen@example.com",
-      hostedDomain: "meco-robotics.com",
-      name: "Ava Chen",
-      picture: null,
-    }
-    : null;
+  const favoriteToggle = Object.prototype.hasOwnProperty.call(options, "onToggleActiveViewFavorite")
+    ? (options.onToggleActiveViewFavorite ?? null)
+    : jest.fn();
 
   return renderToStaticMarkup(
     React.createElement(AppTopbar, {
-      activeViewLabel: "Timeline",
-      handleSignOut: jest.fn(),
+      activeViewLabel: options.activeViewLabel ?? "Timeline",
+      isActiveViewFavorite: options.isActiveViewFavorite ?? false,
       isDarkMode: options.isDarkMode ?? false,
-      isLoadingData: false,
       isSidebarCollapsed: options.isSidebarCollapsed ?? false,
-      loadWorkspace: jest.fn(),
-      onToggleMyView: jest.fn(),
-      onCreateSeason: jest.fn(),
-      onSelectSeason: jest.fn(),
-      seasons: [
-        {
-          id: "season-1",
-          name: "2026 Season",
-          type: "season",
-          startDate: "2026-01-01",
-          endDate: "2026-12-31",
-        },
-      ],
-      selectedSeasonId: "season-1",
-      sessionUser,
-      isMyViewActive: myView.isActive,
-      myViewMemberName: myView.memberName,
-      toggleDarkMode: jest.fn(),
+      onToggleActiveViewFavorite: favoriteToggle,
     }),
   );
+}
+
+function readTopbarShellCss() {
+  return readFileSync(join(process.cwd(), "src/app/styles/shell/chrome/topbar-shell.css"), "utf8");
+}
+
+function readTopbarSearchCss() {
+  return readFileSync(join(process.cwd(), "src/app/styles/shell/chrome/topbar-search.css"), "utf8");
+}
+
+function readTopbarShellControlsCss() {
+  return readFileSync(join(process.cwd(), "src/app/styles/shell/chrome/topbar-shell-controls.css"), "utf8");
 }
 
 describe("AppTopbar", () => {
@@ -83,7 +66,7 @@ describe("AppTopbar", () => {
   });
 
   it("uses the compact team logo when the sidebar is folded", () => {
-    const markup = renderTopbar(undefined, false, { isSidebarCollapsed: true });
+    const markup = renderTopbar({ isSidebarCollapsed: true });
 
     expect(markup).toContain('alt="MECO compact team logo"');
     expect(markup).toContain('data-logo-variant="compact"');
@@ -92,52 +75,85 @@ describe("AppTopbar", () => {
     expect(markup).toContain('src="/team-logo.png"');
   });
 
-  it("renders season controls in the signed-in profile menu", () => {
-    const markup = renderTopbar(undefined, true);
+  it("renders a favorite star directly before the active view title", () => {
+    const markup = renderTopbar();
 
-    expect(markup).toContain('data-tutorial-target="season-select"');
-    expect(markup).toContain("Create new season");
-  });
-
-  it("renders My View as an active topbar filter toggle", () => {
-    const markup = renderTopbar(
-      {
-        isActive: true,
-        memberName: "Ava Chen",
-      },
+    expect(markup).toMatch(
+      /<button(?=[^>]*class="[^"]*app-topbar-favorite-button)(?=[^>]*aria-label="Add Timeline to favorites")(?=[^>]*aria-pressed="false")[^>]*>[\s\S]*?<\/button><h1>Timeline<\/h1>/,
     );
-
-    expect(markup).toContain('aria-label="Switch to Users"');
-    expect(markup).toContain('aria-pressed="true"');
-    expect(markup).toContain('data-state="user-search"');
-    expect(markup).toContain("Showing Ava Chen");
-    expect(markup).toContain("lucide-user-search");
-    expect(markup).toContain("lucide-users");
-    expect(markup).not.toContain(">My View<");
   });
 
-  it("renders the topbar people toggle in all-users mode by default", () => {
+  it("greys the favorite star when the active view cannot be favorited", () => {
+    const markup = renderTopbar({ onToggleActiveViewFavorite: null });
+    const topbarShellCss = readTopbarShellCss();
+
+    expect(markup).toMatch(
+      /<button(?=[^>]*class="[^"]*app-topbar-favorite-button)(?=[^>]*aria-label="Timeline cannot be favorited")(?=[^>]*data-enabled="false")(?=[^>]*disabled="")[^>]*>/,
+    );
+    expect(markup).toContain("lucide-star-off");
+    expect(topbarShellCss).toMatch(
+      /\.app-topbar-favorite-button:disabled,[\s\S]*\.app-topbar-favorite-button:disabled:focus-visible\s*\{[^}]*color:\s*rgba\(100, 116, 139, 0\.7\);[^}]*cursor:\s*default;[^}]*opacity:\s*1;/,
+    );
+    expect(topbarShellCss).toMatch(
+      /\.page-shell\.dark-mode \.app-topbar-favorite-button:disabled,[\s\S]*\.page-shell\.dark-mode \.app-topbar-favorite-button:disabled:focus-visible\s*\{[^}]*color:\s*rgba\(148, 163, 184, 0\.58\);/,
+    );
+  });
+
+  it("renders the Home favorite star as unavailable and greyed out", () => {
+    const markup = renderTopbar({
+      activeViewLabel: "Home",
+      onToggleActiveViewFavorite: null,
+    });
+
+    expect(markup).toMatch(
+      /<button(?=[^>]*class="[^"]*app-topbar-favorite-button)(?=[^>]*aria-label="Home cannot be favorited")(?=[^>]*aria-pressed="false")(?=[^>]*data-active="false")(?=[^>]*data-enabled="false")(?=[^>]*disabled="")[^>]*>[\s\S]*?<h1>Home<\/h1>/,
+    );
+    expect(markup).toContain("lucide-star-off");
+  });
+
+  it("keeps profile and refresh controls out of the topbar", () => {
     const markup = renderTopbar();
 
-    expect(markup).toContain('aria-label="Switch to User search"');
-    expect(markup).toContain('aria-pressed="false"');
-    expect(markup).toContain('data-state="users"');
-    expect(markup).toContain("Showing all users");
-    expect(markup).toContain("lucide-user-search");
-    expect(markup).toContain("lucide-users");
+    expect(markup).not.toContain("profile-menu");
+    expect(markup).not.toContain('aria-label="Refresh workspace"');
   });
 
-  it("keeps a standalone dark mode button for local access", () => {
+  it("uses the shared compact toolbar search styling for the default topbar search", () => {
     const markup = renderTopbar();
 
-    expect(markup).toContain('aria-label="Toggle dark mode"');
+    expect(markup).toContain('class="app-topbar-search toolbar-filter toolbar-filter-compact toolbar-search"');
+    expect(markup).toContain('class="toolbar-filter-icon app-topbar-search-icon"');
+    expect(markup).toContain('class="toolbar-search-input app-topbar-search-input"');
   });
 
-  it("moves dark mode toggle under profile menu for signed-in users", () => {
-    const markup = renderTopbar(undefined, true);
+  it("lets the default topbar search fill the available topbar slot", () => {
+    const topbarSearchCss = readTopbarSearchCss();
 
-    expect(markup).toContain("profile-menu-item-theme-toggle");
-    expect(markup).toContain("Theme mode");
-    expect(markup).not.toContain('aria-label="Toggle dark mode"');
+    expect(topbarSearchCss).toMatch(
+      /\.app-topbar-search\.toolbar-filter-compact\s*\{[^}]*width:\s*100%;[^}]*max-width:\s*none;/,
+    );
+  });
+
+  it("allows compact topbar controls to scroll sideways when controls overflow", () => {
+    const topbarSearchCss = readTopbarSearchCss();
+    const topbarShellControlsCss = readTopbarShellControlsCss();
+
+    expect(topbarSearchCss).toMatch(
+      /@media\s*\(max-width:\s*880px\)\s*\{[\s\S]*\.app-topbar-search-slot\s*\{[^}]*overflow-x:\s*auto;/,
+    );
+    expect(topbarShellControlsCss).toMatch(
+      /@media\s*\(max-width:\s*880px\)\s*\{[\s\S]*\.app-topbar-controls-host \.filter-toolbar,[\s\S]*\.app-topbar-search-host \.filter-toolbar\s*\{[^}]*min-width:\s*max-content;/,
+    );
+  });
+
+  it("adds gradient side hints to compact topbar scroll areas", () => {
+    const topbarSearchCss = readTopbarSearchCss();
+
+    expect(topbarSearchCss).toMatch(
+      /\.app-topbar-search-slot:has\(\.app-topbar-controls-host:not\(:empty\)\),[\s\S]*\.app-topbar-search-slot:has\(\.app-topbar-search-host:not\(:empty\)\)\s*\{[^}]*--app-topbar-scroll-hint-size:\s*1\.25rem;[^}]*mask-image:\s*linear-gradient\(/,
+    );
+    expect(topbarSearchCss).toMatch(
+      /\.app-topbar-search-slot:has\(\.topbar-responsive-search-compact\.is-open\),[\s\S]*\.app-topbar-search-slot:has\(\.task-queue-filter-menu\.is-open\),[\s\S]*\.app-topbar-search-slot:has\(\.milestones-search-suggestions\)\s*\{[^}]*overflow:\s*visible;[^}]*mask-image:\s*none;/,
+    );
   });
 });

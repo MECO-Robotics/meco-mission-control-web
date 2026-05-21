@@ -1,4 +1,4 @@
-import type { MilestoneRecord, TaskRecord } from "@/types/recordsExecution";
+import type { MeetingRecord, MilestoneRecord, TaskRecord } from "@/types/recordsExecution";
 import type { WorkspaceMilestoneStyle } from "@/features/workspace/shared/events/eventStyles";
 
 export function getTimelineMergedCellRotation(rowCount: number) {
@@ -44,6 +44,7 @@ export interface TimelineDayHeaderCell {
   weekdayNarrowLabel: string;
   dayNumberLabel: string;
   milestonesOnDay: MilestoneRecord[];
+  meetingsOnDay: MeetingRecord[];
   dayStyle: WorkspaceMilestoneStyle | null;
   primaryMilestoneStartDay: string;
   primaryMilestoneEndDay: string;

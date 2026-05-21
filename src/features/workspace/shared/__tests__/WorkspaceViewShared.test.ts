@@ -1,6 +1,6 @@
 /// <reference types="jest" />
 
-import { filterSelectionIncludes, filterSelectionIntersects, getPortalMenuPosition, pruneFilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { filterSelectionIncludes, filterSelectionIntersects, formatFilterSelectionLabel, getPortalMenuPosition, pruneFilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 
 describe("WorkspaceViewShared filters", () => {
   it("treats an empty selection as the all option", () => {
@@ -15,6 +15,20 @@ describe("WorkspaceViewShared filters", () => {
         [{ id: "current-subsystem", name: "Current subsystem" }],
       ),
     ).toEqual(["current-subsystem"]);
+  });
+
+  it("preserves caller-provided empty-selection labels", () => {
+    const options = [
+      { id: "requested", name: "Requested" },
+      { id: "approved", name: "Approved" },
+    ];
+
+    expect(formatFilterSelectionLabel("All statuses", options, [])).toBe("All statuses");
+    expect(formatFilterSelectionLabel("Unassigned", options, [])).toBe("Unassigned");
+    expect(formatFilterSelectionLabel("All statuses", options, ["requested"])).toBe("Requested");
+    expect(formatFilterSelectionLabel("All statuses", options, ["requested", "approved"])).toBe(
+      "2 selected",
+    );
   });
 
   it("places auto portal menus below when there is room", () => {

@@ -3,7 +3,7 @@ import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
 import type { ArtifactKind } from "@/types/common";
 import type { ArtifactRecord, ManufacturingItemRecord, MaterialRecord, PartDefinitionRecord, PurchaseItemRecord } from "@/types/recordsInventory";
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { MemberPayload, MilestonePayload, RiskPayload } from "@/types/payloads";
+import type { MeetingPayload, MemberPayload, MilestonePayload, RiskPayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
 import type { SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
 import type {
@@ -17,7 +17,10 @@ import type {
   WorklogsViewTab,
 } from "@/lib/workspaceNavigation";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
-import type { WorkspaceToastNotice } from "@/features/workspace/workspaceToastQueue";
+import type {
+  WorkspaceToastDismissReason,
+  WorkspaceToastNotice,
+} from "@/features/workspace/workspaceToastQueue";
 import { WorkspaceContentPanelsView } from "./components/WorkspaceContentPanelsView";
 
 type SwipeDirection = "left" | "right" | null;
@@ -56,6 +59,7 @@ export interface WorkspaceContentPanelsProps {
   handleCreateMember: (milestone: React.FormEvent<HTMLFormElement>) => void;
   handleReactivateMemberForSeason: (memberId: string) => Promise<void>;
   handleDeleteMember: (id: string) => void;
+  handleMeetingSave: (payload: MeetingPayload) => Promise<void>;
   handleTimelineMilestoneDelete: (milestoneId: string) => Promise<void>;
   handleTimelineMilestoneSave: (
     mode: "create" | "edit",
@@ -125,6 +129,7 @@ export interface WorkspaceContentPanelsProps {
   rosterMentors: BootstrapPayload["members"];
   showCncMentorQuickActions: boolean;
   manufacturingView: ManufacturingViewTab;
+  setManufacturingView: Dispatch<SetStateAction<ManufacturingViewTab>>;
   inventoryView: InventoryViewTab;
   rosterView: RosterViewTab;
   riskManagementView: RiskManagementViewTab;
@@ -155,10 +160,13 @@ export interface WorkspaceContentPanelsProps {
   }>;
   isInteractiveTutorialActive?: boolean;
   onDismissDataMessage: () => void;
-  onDismissTaskEditNotice: (noticeId: string) => void;
+  onDismissNotificationHistoryItem: (noticeId: string) => void;
+  onDismissTaskEditNotice: (noticeId: string, reason?: WorkspaceToastDismissReason) => void;
   onTaskEditCanceled: () => void;
   onTaskEditSaved: () => void;
   dataMessage: string | null;
+  isNotificationQueueOpen: boolean;
+  notificationHistory: WorkspaceToastNotice[];
   taskEditNotices: WorkspaceToastNotice[];
 }
 
@@ -172,7 +180,9 @@ export function WorkspaceContentPanels({
   ...props
 }: WorkspaceContentPanelsProps) {
   const effectiveInventoryView =
-    isNonRobotProject && inventoryView === "parts" ? "materials" : inventoryView;
+    isNonRobotProject && (inventoryView === "parts" || inventoryView === "part-mappings")
+      ? "materials"
+      : inventoryView;
   const previousTaskViewRef = useRef(taskView);
   const previousReportsViewRef = useRef(reportsView);
   const previousManufacturingViewRef = useRef(manufacturingView);
@@ -192,12 +202,12 @@ export function WorkspaceContentPanels({
   const manufacturingSwipeDirection = getSwipeDirection(
     previousManufacturingViewRef.current,
     manufacturingView,
-    ["cnc", "prints", "fabrication"],
+    ["all", "cnc", "prints", "fabrication"],
   );
   const inventorySwipeDirection = getSwipeDirection(
     previousInventoryViewRef.current,
     effectiveInventoryView,
-    ["materials", "parts", "purchases"],
+    ["materials", "parts", "part-mappings", "purchases"],
   );
 
   useEffect(() => {

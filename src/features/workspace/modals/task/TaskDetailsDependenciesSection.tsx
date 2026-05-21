@@ -16,6 +16,8 @@ import {
 } from "../../shared/task/taskTargeting";
 import { TaskDetailReveal } from "./details/TaskDetailReveal";
 import { TaskDetailsDependencyAddMenu } from "./details/sections/TaskDetailsDependencyAddMenu";
+import { TaskDetailsDependencyEditActions } from "./TaskDetailsDependencyEditActions";
+import { getScopedTaskDependencyTargets } from "./taskDependencyTargetScope";
 
 interface TaskDetailsDependenciesSectionProps {
   activeTask: TaskRecord;
@@ -24,6 +26,7 @@ interface TaskDetailsDependenciesSectionProps {
   collapsibleOpen?: boolean;
   onCollapsibleToggle?: (open: boolean) => void;
   setTaskDraft?: Dispatch<SetStateAction<TaskPayload>>;
+  targetProjectId?: string | null;
   taskDraft?: TaskPayload;
 }
 
@@ -42,6 +45,7 @@ export function TaskDetailsDependenciesSection({
   collapsibleOpen,
   onCollapsibleToggle,
   setTaskDraft,
+  targetProjectId,
   taskDraft,
 }: TaskDetailsDependenciesSectionProps) {
   const [editingDependencyKey, setEditingDependencyKey] = useState<string | null>(null);
@@ -61,6 +65,17 @@ export function TaskDetailsDependenciesSection({
   const partDefinitionsById = Object.fromEntries(
     bootstrap.partDefinitions.map((partDefinition) => [partDefinition.id, partDefinition] as const),
   );
+  const {
+    targetMilestonesById,
+    targetPartInstancesById,
+    targetTasksById,
+  } = getScopedTaskDependencyTargets({
+    bootstrap,
+    milestonesById,
+    partInstancesById,
+    targetProjectId,
+    tasksById,
+  });
   const dependencyRows = (
     taskDraft?.taskDependencies ??
     getTaskDependencyRecordsForTask(activeTask.id, bootstrap).filter((dependency) => dependency.taskId === activeTask.id)
@@ -80,11 +95,16 @@ export function TaskDetailsDependenciesSection({
       };
     });
   const dependencyKindOptions = TASK_DEPENDENCY_KIND_OPTIONS;
+  const dependencyTypeOptions = Object.entries(TASK_DEPENDENCY_TYPE_LABELS).map(([type, label]) => ({
+    id: type,
+    name: label,
+    icon: <IconTasks />,
+  }));
   const getDependencyTargetOptions = (kind: TaskDependencyKind) =>
     getTaskDependencyTargetOptions(kind, {
-      tasksById,
-      milestonesById,
-      partInstancesById,
+      tasksById: targetTasksById,
+      milestonesById: targetMilestonesById,
+      partInstancesById: targetPartInstancesById,
       partDefinitionsById,
       formatIterationVersion,
     });
@@ -210,13 +230,13 @@ export function TaskDetailsDependenciesSection({
                         />
                       </label>
                       <label className="field task-details-dependency-editor-field">
-                <span style={{ color: "var(--text-title)" }}>Depends on</span>
-                <FilterDropdown
-                  allLabel={`Select ${TASK_DEPENDENCY_KIND_LABELS[dependency.kind].toLowerCase()}`}
-                  ariaLabel="Set dependency target"
-                  buttonInlineEditField={`dependency-target-${index}`}
-                  className="task-queue-filter-menu-submenu task-details-dependency-target-menu"
-                  icon={<IconTasks />}
+                        <span style={{ color: "var(--text-title)" }}>Depends on</span>
+                        <FilterDropdown
+                          allLabel={`Select ${TASK_DEPENDENCY_KIND_LABELS[dependency.kind].toLowerCase()}`}
+                          ariaLabel="Set dependency target"
+                          buttonInlineEditField={`dependency-target-${index}`}
+                          className="task-queue-filter-menu-submenu task-details-dependency-target-menu"
+                          icon={<IconTasks />}
                           menuClassName="task-details-dependency-menu-popup"
                           onChange={(selection) =>
                             updateDependencyDraft(dependency.key, {
@@ -230,6 +250,49 @@ export function TaskDetailsDependenciesSection({
                           value={dependency.refId ? [dependency.refId] : []}
                         />
                       </label>
+                      <label className="field task-details-dependency-editor-field">
+                        <span style={{ color: "var(--text-title)" }}>Required state</span>
+                        <input
+                          onChange={(milestone) =>
+                            updateDependencyDraft(dependency.key, {
+                              requiredState: milestone.target.value,
+                            })
+                          }
+                          placeholder={getDependencyDefaultState(dependency.kind)}
+                          style={{
+                            background: "var(--bg-panel)",
+                            border: "1px solid var(--border-base)",
+                            color: "var(--text-title)",
+                          }}
+                          value={dependency.requiredState ?? ""}
+                        />
+                      </label>
+                      <label className="field task-details-dependency-editor-field">
+                        <span style={{ color: "var(--text-title)" }}>Dependency type</span>
+                        <FilterDropdown
+                          allLabel="Select dependency type"
+                          ariaLabel="Set dependency type"
+                          buttonInlineEditField={`dependency-type-${index}`}
+                          className="task-queue-filter-menu-submenu task-details-dependency-type-menu"
+                          icon={<IconTasks />}
+                          menuClassName="task-details-dependency-menu-popup"
+                          onChange={(selection) =>
+                            updateDependencyDraft(dependency.key, {
+                              dependencyType: selection[0] as TaskDependencyType,
+                            })
+                          }
+                          options={dependencyTypeOptions}
+                          portalMenu
+                          portalMenuPlacement="below"
+                          singleSelect
+                          value={[dependency.dependencyType ?? "hard"]}
+                        />
+                      </label>
+                      <TaskDetailsDependencyEditActions
+                        index={index}
+                        onDone={() => setEditingDependencyKey(null)}
+                        onRemove={() => removeDependencyDraft(dependency.key)}
+                      />
                     </div>
                   );
                 }

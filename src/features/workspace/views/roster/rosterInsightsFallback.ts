@@ -29,12 +29,12 @@ function parseDateValue(value: string) {
 
 function availabilityStatusFromMetrics(metrics: {
   activeTaskCount: number;
-  attendanceHoursLast14Days: number;
+  plannedWeeklyAttendanceHours: number;
   overdueTaskCount: number;
   blockedTaskCount: number;
   remainingOpenHours: number;
 }): RosterAvailabilityStatus {
-  if (metrics.activeTaskCount > 0 && metrics.attendanceHoursLast14Days <= 0.25) {
+  if (metrics.activeTaskCount > 0 && metrics.plannedWeeklyAttendanceHours <= 0.25) {
     return "unavailable";
   }
   if (
@@ -47,7 +47,7 @@ function availabilityStatusFromMetrics(metrics: {
   if (
     metrics.overdueTaskCount >= 1 ||
     metrics.blockedTaskCount >= 1 ||
-    (metrics.activeTaskCount >= 3 && metrics.attendanceHoursLast14Days < 4)
+    (metrics.activeTaskCount >= 3 && metrics.plannedWeeklyAttendanceHours < 4)
   ) {
     return "at-risk";
   }
@@ -161,6 +161,9 @@ export function buildRosterInsightsFromBootstrap(
       );
 
       const memberAttendanceRecords = scopedAttendanceRecords.filter((record) => record.memberId === member.id);
+      const plannedWeeklyAttendanceHours = Number(
+        Math.max(0, member.plannedWeeklyAttendanceHours ?? 0).toFixed(1),
+      );
       const attendanceHoursLast7Days = memberAttendanceRecords.reduce((sum, record) => {
         const attendanceDate = parseDateValue(record.date);
         return !attendanceDate || attendanceDate < day7Start ? sum : sum + record.totalHours;
@@ -194,9 +197,12 @@ export function buildRosterInsightsFromBootstrap(
         attendanceHoursLast14Days: Number(attendanceHoursLast14Days.toFixed(1)),
         attendanceHoursLast30Days: Number(attendanceHoursLast30Days.toFixed(1)),
         attendanceSessionsLast30Days,
+        plannedWeeklyAttendanceHours,
+        plannedAttendanceDays: member.plannedAttendanceDays ?? [],
+        plannedAttendanceNotes: member.plannedAttendanceNotes ?? "",
         availabilityStatus: availabilityStatusFromMetrics({
           activeTaskCount: assignedTasks.length,
-          attendanceHoursLast14Days,
+          plannedWeeklyAttendanceHours,
           overdueTaskCount,
           blockedTaskCount,
           remainingOpenHours,
@@ -270,12 +276,18 @@ export function buildRosterInsightsFromBootstrap(
       ).length,
       overloadedMemberCount: members.filter((member) => member.availabilityStatus === "overloaded").length,
       unavailableMemberCount: members.filter((member) => member.availabilityStatus === "unavailable").length,
+      plannedWeeklyAttendanceHours: Number(
+        members.reduce((sum, member) => sum + member.plannedWeeklyAttendanceHours, 0).toFixed(1),
+      ),
       attendanceHoursLast14Days: Number(
         members.reduce((sum, member) => sum + member.attendanceHoursLast14Days, 0).toFixed(1),
       ),
       attendanceHoursLast30Days: Number(
         members.reduce((sum, member) => sum + member.attendanceHoursLast30Days, 0).toFixed(1),
       ),
+      noPlannedAttendanceWithTasksCount: members.filter(
+        (member) => member.activeTaskCount > 0 && member.plannedWeeklyAttendanceHours <= 0.25,
+      ).length,
       noRecentAttendanceWithTasksCount: members.filter(
         (member) => member.activeTaskCount > 0 && member.attendanceHoursLast14Days <= 0.25,
       ).length,

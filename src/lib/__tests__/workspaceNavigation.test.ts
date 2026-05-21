@@ -1,7 +1,9 @@
 /// <reference types="jest" />
 
 import {
+  BASE_SECTION_LABELS,
   getActiveNavigationSubItemId,
+  isNavigationSubItemId,
   targetMatchesNavigationState,
   type NavigationState,
   type NavigationTarget,
@@ -87,6 +89,23 @@ describe("getActiveNavigationSubItemId", () => {
         createNavigationState({ activeTab: "help" }),
       ),
     ).toBeNull();
+  });
+
+  it("returns null for home because quick actions own that page", () => {
+    expect(
+      getActiveNavigationSubItemId(
+        createNavigationState({ activeTab: "home" }),
+      ),
+    ).toBeNull();
+    expect(BASE_SECTION_LABELS.home).toBe("Home");
+  });
+});
+
+describe("isNavigationSubItemId", () => {
+  it("accepts sidebar subitems and rejects top-level quick action tabs", () => {
+    expect(isNavigationSubItemId("tasks-timeline")).toBe(true);
+    expect(isNavigationSubItemId("home")).toBe(false);
+    expect(isNavigationSubItemId("notifications")).toBe(false);
   });
 });
 

@@ -348,6 +348,72 @@ function createBootstrap(): BootstrapPayload {
         notes: "",
       },
     ],
+    meetings: [
+      {
+        id: "meeting-visible",
+        title: "Visible meeting",
+        meetingType: "build",
+        seasonId: "season-1",
+        projectIds: ["project-visible"],
+        startDateTime: "2026-04-20T18:00:00.000Z",
+        endDateTime: null,
+        location: "",
+        description: "",
+        date: "2026-04-20",
+        time: "18:00",
+        rsvpsYes: 0,
+        rsvpsMaybe: 0,
+        openSignIns: 0,
+      },
+      {
+        id: "meeting-hidden",
+        title: "Hidden meeting",
+        meetingType: "general",
+        seasonId: "season-1",
+        projectIds: ["project-hidden"],
+        startDateTime: "2026-04-20T18:00:00.000Z",
+        endDateTime: null,
+        location: "",
+        description: "",
+        date: "2026-04-20",
+        time: "18:00",
+        rsvpsYes: 0,
+        rsvpsMaybe: 0,
+        openSignIns: 0,
+      },
+      {
+        id: "meeting-global",
+        title: "Global meeting",
+        meetingType: "general",
+        seasonId: "season-1",
+        projectIds: [],
+        startDateTime: "2026-04-21T18:00:00.000Z",
+        endDateTime: null,
+        location: "",
+        description: "",
+        date: "2026-04-21",
+        time: "18:00",
+        rsvpsYes: 0,
+        rsvpsMaybe: 0,
+        openSignIns: 0,
+      },
+      {
+        id: "meeting-season-2",
+        title: "Future meeting",
+        meetingType: "general",
+        seasonId: "season-2",
+        projectIds: ["project-season-2"],
+        startDateTime: "2027-04-21T18:00:00.000Z",
+        endDateTime: null,
+        location: "",
+        description: "",
+        date: "2027-04-21",
+        time: "18:00",
+        rsvpsYes: 0,
+        rsvpsMaybe: 0,
+        openSignIns: 0,
+      },
+    ],
   };
 }
 
@@ -386,82 +452,6 @@ describe("scopeBootstrapBySelection", () => {
     expect(scoped.workLogs.map((workLog) => workLog.id)).toEqual(["worklog-visible"]);
   });
 
-  it("filters delete actions by visible task and subsystem ids", () => {
-    const actions: BootstrapPayload["actions"] = [
-      {
-        actorMemberId: null,
-        changedFields: [],
-        entityId: "task-visible",
-        entityLabel: "Visible task",
-        entityType: "task",
-        id: "delete-visible-task",
-        memberIds: [],
-        message: "Deleted visible task",
-        operation: "delete",
-        projectId: null,
-        subsystemId: null,
-        taskId: null,
-        timestamp: "2026-04-20T00:00:00.000Z",
-      },
-      {
-        actorMemberId: null,
-        changedFields: [],
-        entityId: "task-hidden",
-        entityLabel: "Hidden task",
-        entityType: "task",
-        id: "delete-hidden-task",
-        memberIds: [],
-        message: "Deleted hidden task",
-        operation: "delete",
-        projectId: null,
-        subsystemId: null,
-        taskId: null,
-        timestamp: "2026-04-20T00:00:00.000Z",
-      },
-      {
-        actorMemberId: null,
-        changedFields: [],
-        entityId: "subsystem-visible",
-        entityLabel: "Visible subsystem",
-        entityType: "subsystem",
-        id: "delete-visible-subsystem",
-        memberIds: [],
-        message: "Deleted visible subsystem",
-        operation: "delete",
-        projectId: null,
-        subsystemId: null,
-        taskId: null,
-        timestamp: "2026-04-20T00:00:00.000Z",
-      },
-      {
-        actorMemberId: null,
-        changedFields: [],
-        entityId: "subsystem-hidden",
-        entityLabel: "Hidden subsystem",
-        entityType: "subsystem",
-        id: "delete-hidden-subsystem",
-        memberIds: [],
-        message: "Deleted hidden subsystem",
-        operation: "delete",
-        projectId: null,
-        subsystemId: null,
-        taskId: null,
-        timestamp: "2026-04-20T00:00:00.000Z",
-      },
-    ];
-
-    const scoped = scopeBootstrapBySelection(
-      { ...createBootstrap(), actions },
-      "season-1",
-      "project-visible",
-    );
-
-    expect((scoped.actions ?? []).map((action) => action.id)).toEqual([
-      "delete-visible-task",
-      "delete-visible-subsystem",
-    ]);
-  });
-
   it("keeps milestones with no project ids visible", () => {
     const scoped = scopeBootstrapBySelection(createBootstrap(), "season-1", "project-visible");
 
@@ -469,5 +459,128 @@ describe("scopeBootstrapBySelection", () => {
       "milestone-visible",
       "milestone-global",
     ]);
+  });
+
+  it("keeps global meetings while filtering hidden project and season meetings", () => {
+    const scoped = scopeBootstrapBySelection(createBootstrap(), "season-1", "project-visible");
+
+    expect((scoped.meetings ?? []).map((meeting) => meeting.id)).toEqual([
+      "meeting-visible",
+      "meeting-global",
+    ]);
+  });
+
+  it("uses legacy action entity ids when direct task and subsystem links are missing", () => {
+    const payload: BootstrapPayload = {
+      ...createBootstrap(),
+      actions: [
+        {
+          actorMemberId: null,
+          changedFields: [],
+          entityId: "task-visible",
+          entityLabel: "Visible task",
+          entityType: "task",
+          id: "action-visible-task",
+          memberIds: [],
+          message: "Updated visible task",
+          operation: "update",
+          projectId: null,
+          subsystemId: null,
+          taskId: null,
+          timestamp: "2026-04-20T12:00:00.000Z",
+        },
+        {
+          actorMemberId: null,
+          changedFields: [],
+          entityId: "task-hidden",
+          entityLabel: "Hidden task",
+          entityType: "task",
+          id: "action-hidden-task",
+          memberIds: [],
+          message: "Updated hidden task",
+          operation: "update",
+          projectId: null,
+          subsystemId: null,
+          taskId: null,
+          timestamp: "2026-04-20T12:05:00.000Z",
+        },
+        {
+          actorMemberId: null,
+          changedFields: [],
+          entityId: "subsystem-hidden",
+          entityLabel: "Hidden subsystem",
+          entityType: "subsystem",
+          id: "action-hidden-subsystem",
+          memberIds: [],
+          message: "Updated hidden subsystem",
+          operation: "update",
+          projectId: null,
+          subsystemId: null,
+          taskId: null,
+          timestamp: "2026-04-20T12:10:00.000Z",
+        },
+      ],
+    };
+
+    const scoped = scopeBootstrapBySelection(payload, "season-1", "project-visible");
+
+    expect((scoped.actions ?? []).map((action) => action.id)).toEqual(["action-visible-task"]);
+  });
+
+  it("keeps delete actions scoped when task or subsystem context is present", () => {
+    const payload: BootstrapPayload = {
+      ...createBootstrap(),
+      actions: [
+        {
+          actorMemberId: null,
+          changedFields: [],
+          entityId: "task-visible",
+          entityLabel: "Visible task",
+          entityType: "task",
+          id: "delete-visible-task",
+          memberIds: [],
+          message: "Deleted visible task",
+          operation: "delete",
+          projectId: null,
+          subsystemId: null,
+          taskId: "task-visible",
+          timestamp: "2026-04-20T13:00:00.000Z",
+        },
+        {
+          actorMemberId: null,
+          changedFields: [],
+          entityId: "task-hidden",
+          entityLabel: "Hidden task",
+          entityType: "task",
+          id: "delete-hidden-task",
+          memberIds: [],
+          message: "Deleted hidden task",
+          operation: "delete",
+          projectId: null,
+          subsystemId: null,
+          taskId: "task-hidden",
+          timestamp: "2026-04-20T13:05:00.000Z",
+        },
+        {
+          actorMemberId: null,
+          changedFields: [],
+          entityId: "subsystem-hidden",
+          entityLabel: "Hidden subsystem",
+          entityType: "subsystem",
+          id: "delete-hidden-subsystem",
+          memberIds: [],
+          message: "Deleted hidden subsystem",
+          operation: "delete",
+          projectId: null,
+          subsystemId: "subsystem-hidden",
+          taskId: null,
+          timestamp: "2026-04-20T13:10:00.000Z",
+        },
+      ],
+    };
+
+    const scoped = scopeBootstrapBySelection(payload, "season-1", "project-visible");
+
+    expect((scoped.actions ?? []).map((action) => action.id)).toEqual(["delete-visible-task"]);
   });
 });

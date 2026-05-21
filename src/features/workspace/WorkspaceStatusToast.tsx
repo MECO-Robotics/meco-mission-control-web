@@ -2,21 +2,34 @@ import { createElement, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
 import { createPausableTimeout, type PausableTimeoutController } from "./taskEditNoticeTimer";
+import type { WorkspaceToastDismissReason } from "./workspaceToastQueue";
 import "./WorkspaceStatusToast.css";
 
 const TASK_EDIT_NOTICE_TIMEOUT_MS = 4500;
+const EMPTY_NOTIFICATION_HISTORY_ITEM: WorkspaceToastStackItem = {
+  id: "workspace-toast-history-empty",
+  message: "No queued notifications.",
+  onDismiss: () => {},
+  showDismiss: false,
+  title: "Notification queue",
+  tone: "neutral",
+};
 
 export type WorkspaceToastTone = "success" | "warning" | "error" | "info" | "neutral";
 
 interface WorkspaceToastProps {
+  autoDismiss?: boolean;
   id?: string;
   message: string;
-  onDismiss: () => void;
+  onDismiss: (reason: WorkspaceToastDismissReason) => void;
+  showDismiss?: boolean;
   title: string;
   tone: WorkspaceToastTone;
 }
 
 interface WorkspaceToastStackProps {
+  historyItems?: WorkspaceToastStackItem[];
+  isHistoryOpen?: boolean;
   items: WorkspaceToastStackItem[];
 }
 
@@ -91,7 +104,14 @@ function createDismissIcon() {
   );
 }
 
-function WorkspaceToastCard({ message, onDismiss, title, tone }: WorkspaceToastProps) {
+function WorkspaceToastCard({
+  autoDismiss = true,
+  message,
+  onDismiss,
+  showDismiss = true,
+  title,
+  tone,
+}: WorkspaceToastProps) {
   const dismissTimerRef = useRef<PausableTimeoutController | null>(null);
   const onDismissRef = useRef(onDismiss);
 
@@ -100,7 +120,13 @@ function WorkspaceToastCard({ message, onDismiss, title, tone }: WorkspaceToastP
   }, [onDismiss]);
 
   useEffect(() => {
-    const timer = createPausableTimeout(() => onDismissRef.current(), TASK_EDIT_NOTICE_TIMEOUT_MS);
+    if (!autoDismiss) {
+      dismissTimerRef.current?.cancel();
+      dismissTimerRef.current = null;
+      return;
+    }
+
+    const timer = createPausableTimeout(() => onDismissRef.current("auto"), TASK_EDIT_NOTICE_TIMEOUT_MS);
     dismissTimerRef.current = timer;
 
     return () => {
@@ -109,7 +135,7 @@ function WorkspaceToastCard({ message, onDismiss, title, tone }: WorkspaceToastP
         dismissTimerRef.current = null;
       }
     };
-  }, [message]);
+  }, [autoDismiss, message]);
 
   const pauseDismissTimer = () => {
     dismissTimerRef.current?.pause();
@@ -126,6 +152,7 @@ function WorkspaceToastCard({ message, onDismiss, title, tone }: WorkspaceToastP
     "section",
     {
       className: `workspace-toast-card${hasIcon ? "" : " workspace-toast-card--iconless"}`,
+      "data-toast-auto-dismiss": autoDismiss ? "true" : "false",
       "data-toast-tone": tone,
       onMouseEnter: pauseDismissTimer,
       onMouseLeave: resumeDismissTimer,
@@ -145,16 +172,18 @@ function WorkspaceToastCard({ message, onDismiss, title, tone }: WorkspaceToastP
         createElement("h2", { className: "workspace-toast-title" }, title),
         createElement("p", { className: "workspace-toast-message" }, message),
       ),
-      createElement(
-        "button",
-        {
-          className: "workspace-toast-dismiss",
-          onClick: () => onDismissRef.current(),
-          type: "button",
-          "aria-label": "Dismiss toast",
-        },
-        createDismissIcon(),
-      ),
+      showDismiss
+        ? createElement(
+            "button",
+            {
+              className: "workspace-toast-dismiss",
+              onClick: () => onDismissRef.current("manual"),
+              type: "button",
+              "aria-label": "Dismiss toast",
+            },
+            createDismissIcon(),
+          )
+        : null,
   );
 }
 
@@ -162,15 +191,35 @@ export function WorkspaceToast(props: WorkspaceToastProps) {
   return createElement(WorkspaceToastCard, props);
 }
 
-export function WorkspaceToastStack({ items }: WorkspaceToastStackProps) {
+export function WorkspaceToastStack({
+  historyItems = [],
+  isHistoryOpen = false,
+  items,
+}: WorkspaceToastStackProps) {
   const portalTarget = typeof document !== "undefined" ? document.body : null;
+  const visibleItems = isHistoryOpen
+    ? historyItems.length > 0
+      ? historyItems
+      : [EMPTY_NOTIFICATION_HISTORY_ITEM]
+    : items;
   const stack = createElement(
     "aside",
-    { className: "workspace-toast-layer", "aria-live": "polite", role: "status" },
+    {
+      className: `workspace-toast-layer${isHistoryOpen ? " workspace-toast-layer--history" : ""}`,
+      "aria-label": isHistoryOpen ? "Notification queue" : undefined,
+      "aria-live": "polite",
+      role: "status",
+    },
     createElement(
       "div",
       { className: "workspace-toast-stack" },
-      items.map((item) => createElement(WorkspaceToastCard, { ...item, key: item.id })),
+      visibleItems.map((item) =>
+        createElement(WorkspaceToastCard, {
+          ...item,
+          autoDismiss: !isHistoryOpen,
+          key: item.id,
+        }),
+      ),
     ),
   );
 

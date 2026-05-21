@@ -1,3 +1,6 @@
 @import url("./sidebar/sidebar.part1.css");
 @import url("./sidebar/sidebar.part2.css");
+@import url("./sidebar/sidebar-favorites.css");
 @import url("./sidebar/sidebar.part3.css");
+@import url("./sidebar/sidebar-settings.css");
+@import url("./sidebar/sidebar-scope.css");

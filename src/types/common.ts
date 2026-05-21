@@ -1,5 +1,14 @@
 export type MemberRole = "student" | "lead" | "mentor" | "admin" | "external";
 
+export type PlannedAttendanceDay =
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday"
+  | "sunday";
+
 export type MilestoneType =
   | "practice"
   | "competition"
@@ -42,6 +51,7 @@ export type TaskPriority = "critical" | "high" | "medium" | "low";
 export type TaskStatus = "not-started" | "in-progress" | "waiting-for-qa" | "complete";
 export type TaskPlanningState = "ready" | "waiting-on-dependency" | "blocked" | "overdue" | "at-risk";
 export type MilestoneStatus = "not ready" | "blocked" | "qa" | "ready";
+export type MeetingType = "general" | "build" | "review" | "outreach" | "competition" | "other";
 export type PartInstanceStatus = MilestoneStatus;
 export type TaskDependencyKind = "task" | "milestone" | "part_instance";
 export type TaskDependencyType = "hard" | "soft";

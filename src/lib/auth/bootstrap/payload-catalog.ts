@@ -1,6 +1,7 @@
 import type { ArtifactRecord, ManufacturingItemRecord, MaterialRecord, PartDefinitionRecord, PartInstanceRecord, PurchaseItemRecord } from "@/types/recordsInventory";
 import type { MilestoneRecord, WorkLogRecord } from "@/types/recordsExecution";
 import type { MechanismRecord, MemberRecord, SubsystemRecord } from "@/types/recordsOrganization";
+import type { PlannedAttendanceDay } from "@/types/common";
 import { resolveWorkspaceColor } from "@/features/workspace/shared/model/workspaceColors";
 import { normalizeSubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
 import { localTodayDate } from "@/lib/dateUtils";
@@ -50,6 +51,31 @@ function normalizeCatalogPartInstances(partInstances: PartInstanceRecord[]) {
     partInstances: normalizedPartInstances,
     remappedPartInstanceIds,
   };
+}
+
+const PLANNED_ATTENDANCE_DAYS = new Set<PlannedAttendanceDay>([
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "sunday",
+]);
+
+function normalizePlannedAttendanceDays(days: unknown) {
+  if (!Array.isArray(days)) {
+    return [];
+  }
+
+  return Array.from(
+    new Set(
+      days.filter(
+        (day): day is PlannedAttendanceDay =>
+          typeof day === "string" && PLANNED_ATTENDANCE_DAYS.has(day as PlannedAttendanceDay),
+      ),
+    ),
+  );
 }
 
 export interface NormalizedBootstrapCatalogRecords {
@@ -168,6 +194,10 @@ export function normalizeBootstrapCatalogRecords(
             : member.role === "lead" || member.role === "admin",
         seasonId,
         activeSeasonIds: activeSeasonIds.length > 0 ? activeSeasonIds : [seasonId],
+        plannedWeeklyAttendanceHours: Math.max(0, member.plannedWeeklyAttendanceHours ?? 0),
+        plannedAttendanceDays: normalizePlannedAttendanceDays(member.plannedAttendanceDays),
+        plannedAttendanceNotes:
+          typeof member.plannedAttendanceNotes === "string" ? member.plannedAttendanceNotes : "",
       };
     }),
     subsystems,
