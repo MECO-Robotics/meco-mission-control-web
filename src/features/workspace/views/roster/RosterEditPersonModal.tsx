@@ -4,6 +4,7 @@ import { IconTasks, IconTrash } from "@/components/shared/Icons";
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
 import type { MemberPayload } from "@/types/payloads";
+import { RosterAttendanceFields } from "./RosterAttendanceFields";
 
 interface DisciplineOption {
   id: string;
@@ -115,6 +116,10 @@ export const RosterEditPersonModal: React.FC<RosterEditPersonModalProps> = ({
               <option value="external">External access</option>
             </select>
           </label>
+          <RosterAttendanceFields
+            onChange={(patch) => setMemberEditDraft((curr) => (curr ? { ...curr, ...patch } : null))}
+            value={memberEditDraft}
+          />
           <div className="modal-actions modal-wide">
             <button
               className="danger-action modal-actions-leading"

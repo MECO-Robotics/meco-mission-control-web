@@ -8,6 +8,7 @@ export type RosterMemberSortMode =
   | "availability"
   | "load-desc"
   | "overdue-desc"
+  | "planned-attendance-desc"
   | "attendance-desc"
   | "name";
 
@@ -18,8 +19,9 @@ const availabilityOrder: Record<RosterAvailabilityStatus, number> = {
   available: 3,
 };
 
-export function formatHours(hours: number) {
-  return `${hours.toFixed(1)}h`;
+export function formatHours(hours: number | null | undefined) {
+  const safeHours = typeof hours === "number" && Number.isFinite(hours) ? hours : 0;
+  return `${safeHours.toFixed(1)}h`;
 }
 
 export function formatAvailabilityLabel(status: RosterAvailabilityStatus) {
@@ -50,6 +52,7 @@ export function filterAndSortRosterMembers(args: {
     return (
       member.memberName.toLowerCase().includes(search) ||
       member.role.toLowerCase().includes(search) ||
+      (member.plannedAttendanceNotes ?? "").toLowerCase().includes(search) ||
       member.topTasks.some((task) => task.title.toLowerCase().includes(search))
     );
   });
@@ -78,6 +81,12 @@ export function filterAndSortRosterMembers(args: {
     if (args.sortMode === "attendance-desc") {
       if (left.attendanceHoursLast14Days !== right.attendanceHoursLast14Days) {
         return right.attendanceHoursLast14Days - left.attendanceHoursLast14Days;
+      }
+    }
+
+    if (args.sortMode === "planned-attendance-desc") {
+      if ((left.plannedWeeklyAttendanceHours ?? 0) !== (right.plannedWeeklyAttendanceHours ?? 0)) {
+        return (right.plannedWeeklyAttendanceHours ?? 0) - (left.plannedWeeklyAttendanceHours ?? 0);
       }
     }
 

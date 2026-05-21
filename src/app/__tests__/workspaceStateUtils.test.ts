@@ -348,6 +348,72 @@ function createBootstrap(): BootstrapPayload {
         notes: "",
       },
     ],
+    meetings: [
+      {
+        id: "meeting-visible",
+        title: "Visible meeting",
+        meetingType: "build",
+        seasonId: "season-1",
+        projectIds: ["project-visible"],
+        startDateTime: "2026-04-20T18:00:00.000Z",
+        endDateTime: null,
+        location: "",
+        description: "",
+        date: "2026-04-20",
+        time: "18:00",
+        rsvpsYes: 0,
+        rsvpsMaybe: 0,
+        openSignIns: 0,
+      },
+      {
+        id: "meeting-hidden",
+        title: "Hidden meeting",
+        meetingType: "general",
+        seasonId: "season-1",
+        projectIds: ["project-hidden"],
+        startDateTime: "2026-04-20T18:00:00.000Z",
+        endDateTime: null,
+        location: "",
+        description: "",
+        date: "2026-04-20",
+        time: "18:00",
+        rsvpsYes: 0,
+        rsvpsMaybe: 0,
+        openSignIns: 0,
+      },
+      {
+        id: "meeting-global",
+        title: "Global meeting",
+        meetingType: "general",
+        seasonId: "season-1",
+        projectIds: [],
+        startDateTime: "2026-04-21T18:00:00.000Z",
+        endDateTime: null,
+        location: "",
+        description: "",
+        date: "2026-04-21",
+        time: "18:00",
+        rsvpsYes: 0,
+        rsvpsMaybe: 0,
+        openSignIns: 0,
+      },
+      {
+        id: "meeting-season-2",
+        title: "Future meeting",
+        meetingType: "general",
+        seasonId: "season-2",
+        projectIds: ["project-season-2"],
+        startDateTime: "2027-04-21T18:00:00.000Z",
+        endDateTime: null,
+        location: "",
+        description: "",
+        date: "2027-04-21",
+        time: "18:00",
+        rsvpsYes: 0,
+        rsvpsMaybe: 0,
+        openSignIns: 0,
+      },
+    ],
   };
 }
 
@@ -392,6 +458,15 @@ describe("scopeBootstrapBySelection", () => {
     expect(scoped.milestones.map((milestone) => milestone.id)).toEqual([
       "milestone-visible",
       "milestone-global",
+    ]);
+  });
+
+  it("keeps global meetings while filtering hidden project and season meetings", () => {
+    const scoped = scopeBootstrapBySelection(createBootstrap(), "season-1", "project-visible");
+
+    expect((scoped.meetings ?? []).map((meeting) => meeting.id)).toEqual([
+      "meeting-visible",
+      "meeting-global",
     ]);
   });
 });

@@ -5,7 +5,9 @@ import type {
   ManufacturingProcess,
   ManufacturingStatus,
   MaterialCategory,
+  MeetingType,
   MemberRole,
+  PlannedAttendanceDay,
   ProjectStatus,
   ProjectType,
   PurchaseStatus,
@@ -32,6 +34,17 @@ export interface MilestonePayload {
   description: string;
   projectIds: string[];
   photoUrl?: string;
+}
+
+export interface MeetingPayload {
+  title: string;
+  meetingType: MeetingType;
+  seasonId?: string;
+  projectIds: string[];
+  startDateTime: string;
+  endDateTime?: string | null;
+  location: string;
+  description: string;
 }
 
 export interface ReportPayload {
@@ -137,6 +150,9 @@ export interface MemberPayload {
   elevated: boolean;
   disciplineId?: string | null;
   activeSeasonIds?: string[];
+  plannedWeeklyAttendanceHours: number;
+  plannedAttendanceDays: PlannedAttendanceDay[];
+  plannedAttendanceNotes: string;
 }
 
 export interface MemberCreatePayload extends MemberPayload {

@@ -1,5 +1,5 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { MilestoneRecord } from "@/types/recordsExecution";
+import type { MeetingRecord, MilestoneRecord } from "@/types/recordsExecution";
 import { filterSelectionMatchesTaskPeople } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { getMilestoneTypeStyle } from "@/features/workspace/shared/events/eventStyles";
@@ -45,9 +45,11 @@ export function buildTimelineMonthGroups(days: string[]) {
 export function buildTimelineDayHeaderCells(
   days: string[],
   dayMilestonesByDate: Record<string, MilestoneRecord[]>,
+  dayMeetingsByDate: Record<string, MeetingRecord[]> = {},
 ) {
   return days.map((day) => {
     const milestonesOnDay = dayMilestonesByDate[day] ?? [];
+    const meetingsOnDay = dayMeetingsByDate[day] ?? [];
     const primaryMilestone = milestonesOnDay[0];
     const dayStyle = primaryMilestone ? getMilestoneTypeStyle(primaryMilestone.type) : null;
     const primaryMilestoneStartDay = primaryMilestone ? datePortion(primaryMilestone.startDateTime) : day;
@@ -62,6 +64,7 @@ export function buildTimelineDayHeaderCells(
       weekdayNarrowLabel: WEEKDAY_NARROW_FORMATTER.format(dayDate),
       dayNumberLabel: DAY_NUMBER_FORMATTER.format(dayDate),
       milestonesOnDay,
+      meetingsOnDay,
       dayStyle,
       primaryMilestoneStartDay,
       primaryMilestoneEndDay,

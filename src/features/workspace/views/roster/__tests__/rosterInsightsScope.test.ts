@@ -94,8 +94,10 @@ describe("roster insights scope helpers", () => {
         unassignedTaskCount: 0,
         overloadedMemberCount: 0,
         unavailableMemberCount: 0,
+        plannedWeeklyAttendanceHours: 0,
         attendanceHoursLast14Days: 0,
         attendanceHoursLast30Days: 0,
+        noPlannedAttendanceWithTasksCount: 0,
         noRecentAttendanceWithTasksCount: 0,
       },
       members: [
@@ -115,6 +117,9 @@ describe("roster insights scope helpers", () => {
           attendanceHoursLast14Days: 0,
           attendanceHoursLast30Days: 0,
           attendanceSessionsLast30Days: 0,
+          plannedWeeklyAttendanceHours: 0,
+          plannedAttendanceDays: [],
+          plannedAttendanceNotes: "",
           availabilityStatus: "available",
           topTasks: [],
         },
@@ -149,8 +154,10 @@ describe("roster insights scope helpers", () => {
         unassignedTaskCount: 0,
         overloadedMemberCount: 0,
         unavailableMemberCount: 0,
+        plannedWeeklyAttendanceHours: 0,
         attendanceHoursLast14Days: 0,
         attendanceHoursLast30Days: 0,
+        noPlannedAttendanceWithTasksCount: 0,
         noRecentAttendanceWithTasksCount: 0,
       },
       members: [
@@ -170,6 +177,9 @@ describe("roster insights scope helpers", () => {
           attendanceHoursLast14Days: 0,
           attendanceHoursLast30Days: 0,
           attendanceSessionsLast30Days: 0,
+          plannedWeeklyAttendanceHours: 0,
+          plannedAttendanceDays: [],
+          plannedAttendanceNotes: "",
           availabilityStatus: "available",
           topTasks: [],
         },
@@ -204,8 +214,10 @@ describe("roster insights scope helpers", () => {
         unassignedTaskCount: 0,
         overloadedMemberCount: 0,
         unavailableMemberCount: 0,
+        plannedWeeklyAttendanceHours: 0,
         attendanceHoursLast14Days: 0,
         attendanceHoursLast30Days: 0,
+        noPlannedAttendanceWithTasksCount: 0,
         noRecentAttendanceWithTasksCount: 0,
       },
       members: [
@@ -225,6 +237,9 @@ describe("roster insights scope helpers", () => {
           attendanceHoursLast14Days: 0,
           attendanceHoursLast30Days: 0,
           attendanceSessionsLast30Days: 0,
+          plannedWeeklyAttendanceHours: 0,
+          plannedAttendanceDays: [],
+          plannedAttendanceNotes: "",
           availabilityStatus: "available",
           topTasks: [],
         },
@@ -259,5 +274,88 @@ describe("roster insights scope helpers", () => {
       "member-season-1",
     ]);
     expect(scopedInsights.recentAttendance.every((row) => row.memberId === "member-season-1")).toBe(true);
+  });
+
+  it("bases fallback availability on planned weekly attendance", () => {
+    const bootstrap = {
+      ...createBootstrapFixture(),
+      members: createBootstrapFixture().members.map((member) =>
+        member.id === "member-season-1"
+          ? {
+              ...member,
+              plannedWeeklyAttendanceHours: 0,
+              plannedAttendanceDays: [],
+              plannedAttendanceNotes: "",
+            }
+          : member,
+      ),
+      tasks: [
+        {
+          id: "season-task",
+          projectId: "project-season-1",
+          workstreamId: null,
+          workstreamIds: [],
+          title: "Season task",
+          summary: "",
+          subsystemId: "subsystem-1",
+          subsystemIds: ["subsystem-1"],
+          disciplineId: "design",
+          mechanismId: null,
+          mechanismIds: [],
+          partInstanceId: null,
+          partInstanceIds: [],
+          targetMilestoneId: null,
+          ownerId: "member-season-1",
+          assigneeIds: [],
+          mentorId: null,
+          startDate: "2026-05-01",
+          dueDate: "2099-05-08",
+          priority: "medium",
+          status: "in-progress",
+          planningState: "ready",
+          dependencyIds: [],
+          blockers: [],
+          linkedManufacturingIds: [],
+          linkedPurchaseIds: [],
+          estimatedHours: 3,
+          actualHours: 0,
+          requiresDocumentation: false,
+          documentationLinked: false,
+        },
+      ],
+    } satisfies BootstrapPayload;
+
+    const unavailableInsights = buildRosterInsightsFromBootstrap(bootstrap, {
+      projectId: "project-season-1",
+      seasonId: null,
+    });
+
+    expect(unavailableInsights.members[0].availabilityStatus).toBe("unavailable");
+    expect(unavailableInsights.summary.noPlannedAttendanceWithTasksCount).toBe(1);
+
+    const scheduledInsights = buildRosterInsightsFromBootstrap(
+      {
+        ...bootstrap,
+        members: bootstrap.members.map((member) =>
+          member.id === "member-season-1"
+            ? {
+                ...member,
+                plannedWeeklyAttendanceHours: 6,
+                plannedAttendanceDays: ["monday", "wednesday"],
+                plannedAttendanceNotes: "Expected at build nights.",
+              }
+            : member,
+        ),
+      },
+      {
+        projectId: "project-season-1",
+        seasonId: null,
+      },
+    );
+
+    expect(scheduledInsights.members[0].availabilityStatus).toBe("available");
+    expect(scheduledInsights.members[0].plannedWeeklyAttendanceHours).toBe(6);
+    expect(scheduledInsights.members[0].plannedAttendanceDays).toEqual(["monday", "wednesday"]);
+    expect(scheduledInsights.summary.plannedWeeklyAttendanceHours).toBe(6);
   });
 });

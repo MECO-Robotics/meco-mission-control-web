@@ -15,6 +15,9 @@ export function useAppWorkspaceUiStatePeople() {
     photoUrl: "",
     role: "student",
     elevated: false,
+    plannedWeeklyAttendanceHours: 0,
+    plannedAttendanceDays: [],
+    plannedAttendanceNotes: "",
   });
   const [isAddPersonOpen, setIsAddPersonOpen] = useState(false);
   const [isEditPersonOpen, setIsEditPersonOpen] = useState(false);

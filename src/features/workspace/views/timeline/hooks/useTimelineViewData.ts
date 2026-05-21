@@ -1,6 +1,7 @@
 ﻿import { useCallback, useMemo } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MilestonePayload } from "@/types/payloads";
+import { isMeetingVisibleInProjectScope } from "@/features/workspace/shared/events";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { filterSelectionMatchesTaskPeople, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { formatTimelinePeriodLabel } from "@/features/workspace/shared/timeline/timelineDateUtils";
@@ -58,6 +59,7 @@ export function useTimelineViewData({
     () => bootstrap.projects.map((project) => project.id),
     [bootstrap.projects],
   );
+  const scopedProjectIdSet = useMemo(() => new Set(scopedProjectIds), [scopedProjectIds]);
   const subsystemsById = useMemo(
     () =>
       Object.fromEntries(
@@ -152,6 +154,29 @@ export function useTimelineViewData({
     },
     [activePersonFilter, bootstrap.milestones, bootstrap.tasks, normalizedSearch, projectsById],
   );
+  const scopedMeetings = useMemo(() => {
+    const meetings = (bootstrap.meetings ?? []).filter((meeting) =>
+      isMeetingVisibleInProjectScope(meeting, scopedProjectIdSet),
+    );
+    if (normalizedSearch.length === 0) {
+      return meetings;
+    }
+
+    return meetings.filter((meeting) => {
+      const projectLabels = (meeting.projectIds ?? []).map((projectId) => projectsById[projectId]?.name ?? "");
+
+      return [
+        meeting.title,
+        meeting.meetingType,
+        meeting.location,
+        meeting.description,
+        ...projectLabels,
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(normalizedSearch);
+    });
+  }, [bootstrap.meetings, normalizedSearch, projectsById, scopedProjectIdSet]);
   const tasksById = useMemo(
     () =>
       Object.fromEntries(
@@ -164,6 +189,7 @@ export function useTimelineViewData({
     () =>
       buildTimelineData({
         isAllProjectsView,
+        meetings: scopedMeetings,
         milestones: scopedMilestones,
         projectsById,
         scopedSubsystems,
@@ -174,6 +200,7 @@ export function useTimelineViewData({
     [
       isAllProjectsView,
       projectsById,
+      scopedMeetings,
       scopedMilestones,
       scopedSubsystems,
       scopedTasks,
@@ -187,6 +214,7 @@ export function useTimelineViewData({
   );
   const monthGroups = useMemo(() => buildTimelineMonthGroups(timeline.days), [timeline.days]);
   const dayMilestonesByDate = timeline.dayMilestones;
+  const dayMeetingsByDate = timeline.dayMeetings;
   const milestoneModal = useTimelineMilestoneModal({
     dayMilestonesByDate,
     openCreateTaskModal,
@@ -198,8 +226,8 @@ export function useTimelineViewData({
     triggerCreateMilestoneToken,
   });
   const timelineDayHeaderCells = useMemo(
-    () => buildTimelineDayHeaderCells(timeline.days, dayMilestonesByDate),
-    [dayMilestonesByDate, timeline.days],
+    () => buildTimelineDayHeaderCells(timeline.days, dayMilestonesByDate, dayMeetingsByDate),
+    [dayMeetingsByDate, dayMilestonesByDate, timeline.days],
   );
   const projectRows = useMemo(
     () => buildTimelineProjectRows(timeline.subsystemRows),
