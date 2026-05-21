@@ -132,6 +132,7 @@ describe("WorkLogsView", () => {
 
     expect(html).toContain("Activity");
     expect(html).toContain("Recent workspace activity");
+    expect(html).toContain("Group: Person");
     expect(html).toContain("Drive CAD");
     expect(html).toContain("Student One");
     expect(html).toContain("Created worklog Drive CAD");
