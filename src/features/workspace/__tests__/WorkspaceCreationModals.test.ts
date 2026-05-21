@@ -88,6 +88,7 @@ describe("workspace creation modals", () => {
     expect(markup).toContain("task-details-close-button");
     expect(markup).toContain("Create Task Details");
     expect(markup).toContain("Add task title");
+    expect(markup).toContain('data-inline-edit-field="project"');
     expect(markup).toContain('data-inline-edit-field="summary"');
     expect(markup).toContain('data-inline-edit-field="priority"');
     expect(markup).toContain('data-inline-edit-field="owner"');
@@ -97,6 +98,7 @@ describe("workspace creation modals", () => {
     expect(markup).toContain("Add a summary");
     expect(markup).toContain("Choose owner");
     expect(markup).toContain("Add teammates");
+    expect(markup).toContain('disabled="" type="submit">Create task');
   });
 
   it("uses the detailed task shell for timeline milestone creation", () => {

@@ -3,6 +3,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskPayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { TaskDetailsModal } from "./TaskDetailsModalContent";
+import { TaskEditorCreateProjectSection } from "./task/TaskEditorCreateProjectSection";
 
 interface TaskEditorModalProps {
   activeTask: TaskRecord | null;
@@ -107,6 +108,16 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
   const isCreateTaskModal = taskModalMode === "create";
   const isEditTaskModal = taskModalMode === "edit";
   const createTaskRecord = isCreateTaskModal ? buildDraftTaskRecord(taskDraft, activeTask) : null;
+  const canCreateTask = taskDraft.title.trim().length > 0;
+
+  const handleCreateTaskSubmit = (milestone: FormEvent<HTMLFormElement>) => {
+    if (!canCreateTask) {
+      milestone.preventDefault();
+      return;
+    }
+
+    handleTaskSubmit(milestone);
+  };
 
   if (isEditTaskModal && activeTask) {
     return (
@@ -153,12 +164,20 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
 
   if (createTaskRecord) {
     return (
-      <form className="task-editor-modal task-editor-create-modal" onSubmit={handleTaskSubmit}>
+      <form className="task-editor-modal task-editor-create-modal" onSubmit={handleCreateTaskSubmit}>
         <TaskDetailsModal
           activeTask={createTaskRecord}
           bootstrap={bootstrap}
           closeTaskDetailsModal={closeTaskModal}
           advancedSectionOpen={advancedSectionOpen}
+          beforeOverviewContent={
+            <TaskEditorCreateProjectSection
+              bootstrap={bootstrap}
+              currentTaskId={activeTask?.id ?? null}
+              setTaskDraft={setTaskDraft}
+              taskDraft={taskDraft}
+            />
+          }
           eyebrowLabel="Create Task Details"
           footerActions={
             <>
@@ -185,7 +204,7 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
               </button>
               <button
                 className="primary-action"
-                disabled={isSavingTask || isDeletingTask}
+                disabled={!canCreateTask || isSavingTask || isDeletingTask}
                 type="submit"
               >
                 {isSavingTask ? "Saving..." : "Create task"}

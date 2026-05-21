@@ -13,6 +13,7 @@ interface TaskDetailsModalProps {
   bootstrap: BootstrapPayload;
   closeTaskDetailsModal: () => void;
   advancedSectionOpen: boolean;
+  beforeOverviewContent?: ReactNode;
   eyebrowLabel?: string;
   footerActions?: ReactNode;
   headerTitle?: ReactNode;
@@ -31,6 +32,7 @@ export function TaskDetailsModal({
   bootstrap,
   closeTaskDetailsModal,
   advancedSectionOpen,
+  beforeOverviewContent,
   eyebrowLabel,
   footerActions,
   headerTitle,
@@ -75,6 +77,8 @@ export function TaskDetailsModal({
         />
 
         <div className="modal-form task-details-grid" style={{ color: "var(--text-copy)" }}>
+          {beforeOverviewContent}
+
           <TaskDetailsOverviewSection
             activeTask={activeTask}
             bootstrap={bootstrap}

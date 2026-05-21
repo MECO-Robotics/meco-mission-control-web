@@ -35,6 +35,7 @@ describe("TaskEditorModal", () => {
 
     expect(createMarkup).toContain("task-details-header");
     expect(createMarkup).toContain("task-details-overview-grid");
+    expect(createMarkup).toContain('data-inline-edit-field="project"');
     expect(editMarkup).toContain("task-details-header");
     expect(editMarkup).toContain("task-details-overview-grid");
     expect(editMarkup).toContain('data-inline-edit-field="priority"');
