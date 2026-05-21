@@ -526,4 +526,61 @@ describe("scopeBootstrapBySelection", () => {
 
     expect((scoped.actions ?? []).map((action) => action.id)).toEqual(["action-visible-task"]);
   });
+
+  it("keeps delete actions scoped when task or subsystem context is present", () => {
+    const payload: BootstrapPayload = {
+      ...createBootstrap(),
+      actions: [
+        {
+          actorMemberId: null,
+          changedFields: [],
+          entityId: "task-visible",
+          entityLabel: "Visible task",
+          entityType: "task",
+          id: "delete-visible-task",
+          memberIds: [],
+          message: "Deleted visible task",
+          operation: "delete",
+          projectId: null,
+          subsystemId: null,
+          taskId: "task-visible",
+          timestamp: "2026-04-20T13:00:00.000Z",
+        },
+        {
+          actorMemberId: null,
+          changedFields: [],
+          entityId: "task-hidden",
+          entityLabel: "Hidden task",
+          entityType: "task",
+          id: "delete-hidden-task",
+          memberIds: [],
+          message: "Deleted hidden task",
+          operation: "delete",
+          projectId: null,
+          subsystemId: null,
+          taskId: "task-hidden",
+          timestamp: "2026-04-20T13:05:00.000Z",
+        },
+        {
+          actorMemberId: null,
+          changedFields: [],
+          entityId: "subsystem-hidden",
+          entityLabel: "Hidden subsystem",
+          entityType: "subsystem",
+          id: "delete-hidden-subsystem",
+          memberIds: [],
+          message: "Deleted hidden subsystem",
+          operation: "delete",
+          projectId: null,
+          subsystemId: "subsystem-hidden",
+          taskId: null,
+          timestamp: "2026-04-20T13:10:00.000Z",
+        },
+      ],
+    };
+
+    const scoped = scopeBootstrapBySelection(payload, "season-1", "project-visible");
+
+    expect((scoped.actions ?? []).map((action) => action.id)).toEqual(["delete-visible-task"]);
+  });
 });
