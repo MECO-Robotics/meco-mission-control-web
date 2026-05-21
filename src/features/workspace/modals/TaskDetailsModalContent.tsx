@@ -13,8 +13,14 @@ interface TaskDetailsModalProps {
   bootstrap: BootstrapPayload;
   closeTaskDetailsModal: () => void;
   advancedSectionOpen: boolean;
+  beforeOverviewContent?: ReactNode;
+  beforeFooterContent?: ReactNode;
+  dependencyTargetProjectId?: string | null;
+  editableMemberOptions?: BootstrapPayload["members"];
+  eyebrowLabel?: string;
   footerActions?: ReactNode;
   headerTitle?: ReactNode;
+  modalClassName?: string;
   setTaskDraft?: Dispatch<SetStateAction<TaskPayload>>;
   setAdvancedSectionOpen: Dispatch<SetStateAction<boolean>>;
   taskDraft?: TaskPayload;
@@ -29,8 +35,14 @@ export function TaskDetailsModal({
   bootstrap,
   closeTaskDetailsModal,
   advancedSectionOpen,
+  beforeOverviewContent,
+  beforeFooterContent,
+  dependencyTargetProjectId,
+  editableMemberOptions,
+  eyebrowLabel,
   footerActions,
   headerTitle,
+  modalClassName,
   setTaskDraft,
   setAdvancedSectionOpen,
   taskDraft,
@@ -52,7 +64,7 @@ export function TaskDetailsModal({
     <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
       <section
         aria-modal="true"
-        className="modal-card task-details-modal"
+        className={`modal-card task-details-modal${modalClassName ? ` ${modalClassName}` : ""}`}
         role="dialog"
         style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
       >
@@ -61,6 +73,7 @@ export function TaskDetailsModal({
           bootstrap={bootstrap}
           canInlineEdit={canInlineEdit}
           closeTaskDetailsModal={closeTaskDetailsModal}
+          eyebrowLabel={eyebrowLabel}
           editingField={editingField}
           headerTitle={headerTitle}
           openTaskEditModal={openTaskEditModal}
@@ -70,10 +83,13 @@ export function TaskDetailsModal({
         />
 
         <div className="modal-form task-details-grid" style={{ color: "var(--text-copy)" }}>
+          {beforeOverviewContent}
+
           <TaskDetailsOverviewSection
             activeTask={activeTask}
             bootstrap={bootstrap}
             canInlineEdit={canInlineEdit}
+            editableMemberOptions={editableMemberOptions}
             editingField={editingField}
             openTaskEditModal={openTaskEditModal}
             setEditingField={setEditingField}
@@ -86,6 +102,7 @@ export function TaskDetailsModal({
               activeTask={activeTask}
               bootstrap={bootstrap}
               canInlineEdit={canInlineEdit}
+              dependencyTargetProjectId={dependencyTargetProjectId}
               onResolveTaskBlocker={onResolveTaskBlocker}
               setTaskDraft={setTaskDraft}
               taskDraft={taskDraft}
@@ -104,6 +121,8 @@ export function TaskDetailsModal({
             setTaskDraft={setTaskDraft}
             taskDraft={taskDraft}
           />
+
+          {beforeFooterContent}
 
           <div className="modal-actions modal-wide">
             {footerActions}

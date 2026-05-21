@@ -16,6 +16,7 @@ interface TaskDetailsHeaderSectionProps {
   bootstrap: BootstrapPayload;
   closeTaskDetailsModal: () => void;
   editingField: TaskDetailsEditableField | null;
+  eyebrowLabel?: string;
   headerTitle?: ReactNode;
   openTaskEditModal: () => void;
   setEditingField: Dispatch<SetStateAction<TaskDetailsEditableField | null>>;
@@ -96,6 +97,7 @@ export function TaskDetailsHeaderSection({
   activeTask,
   bootstrap,
   closeTaskDetailsModal,
+  eyebrowLabel,
   editingField,
   headerTitle,
   openTaskEditModal,
@@ -143,12 +145,15 @@ export function TaskDetailsHeaderSection({
     id: milestone.id,
     name: milestone.title,
   }));
+  const taskTitleText = (taskDraft?.title ?? activeTask.title).trim();
+  const taskTitleDisplay = taskTitleText || "Add task title";
+  const taskTitleClassName = taskTitleText ? undefined : "task-detail-title-empty";
 
   return (
     <div className="panel-header compact-header task-details-header">
       <div>
         <p className="eyebrow" style={{ color: "var(--meco-blue)" }}>
-          {canInlineEdit ? "Edit Task Details" : "View Task Details"}
+          {eyebrowLabel ?? (canInlineEdit ? "Edit Task Details" : "View Task Details")}
         </p>
         <div className="task-detail-header-title-row">
           <div className="task-detail-header-title-stack">
@@ -156,7 +161,7 @@ export function TaskDetailsHeaderSection({
               {canInlineEdit ? (
                 editingField === "title" ? (
                   <div className="task-detail-inline-edit-title-shell task-detail-inline-edit-title-shell-editing">
-                    <h2>{taskDraft?.title ?? activeTask.title}</h2>
+                    <h2 className={taskTitleClassName}>{taskTitleDisplay}</h2>
                     <input
                       aria-label="Task title"
                       autoFocus
@@ -172,7 +177,7 @@ export function TaskDetailsHeaderSection({
                   </div>
                 ) : (
                   <div className="task-detail-inline-edit-title-shell">
-                    <h2>{taskDraft?.title ?? activeTask.title}</h2>
+                    <h2 className={taskTitleClassName}>{taskTitleDisplay}</h2>
                     <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator task-detail-inline-edit-indicator-title" />
                     <button
                       aria-label="Edit task title"
