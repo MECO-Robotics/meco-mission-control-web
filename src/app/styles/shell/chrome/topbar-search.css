@@ -90,7 +90,8 @@
   }
 
   .app-topbar-search-slot:has(.topbar-responsive-search-compact.is-open),
-  .app-topbar-search-slot:has(.task-queue-filter-menu.is-open) {
+  .app-topbar-search-slot:has(.task-queue-filter-menu.is-open),
+  .app-topbar-search-slot:has(.milestones-search-suggestions) {
     overflow: visible;
     -webkit-mask-image: none;
     mask-image: none;

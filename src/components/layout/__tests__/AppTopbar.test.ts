@@ -153,7 +153,7 @@ describe("AppTopbar", () => {
       /\.app-topbar-search-slot:has\(\.app-topbar-controls-host:not\(:empty\)\),[\s\S]*\.app-topbar-search-slot:has\(\.app-topbar-search-host:not\(:empty\)\)\s*\{[^}]*--app-topbar-scroll-hint-size:\s*1\.25rem;[^}]*mask-image:\s*linear-gradient\(/,
     );
     expect(topbarSearchCss).toMatch(
-      /\.app-topbar-search-slot:has\(\.topbar-responsive-search-compact\.is-open\),[\s\S]*\.app-topbar-search-slot:has\(\.task-queue-filter-menu\.is-open\)\s*\{[^}]*mask-image:\s*none;/,
+      /\.app-topbar-search-slot:has\(\.topbar-responsive-search-compact\.is-open\),[\s\S]*\.app-topbar-search-slot:has\(\.task-queue-filter-menu\.is-open\),[\s\S]*\.app-topbar-search-slot:has\(\.milestones-search-suggestions\)\s*\{[^}]*overflow:\s*visible;[^}]*mask-image:\s*none;/,
     );
   });
 });
