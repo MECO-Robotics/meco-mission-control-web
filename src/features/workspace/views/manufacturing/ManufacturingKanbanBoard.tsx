@@ -122,9 +122,9 @@ export function ManufacturingKanbanBoard({
       getItemId={(item) => item.id}
       itemsByState={itemsByStatus}
       onItemDrop={
-        onQuickStatusChange
+        canShowMentorQuickActions
           ? (item, state) => {
-              void onQuickStatusChange(item, state);
+              void onQuickStatusChange?.(item, state);
             }
           : undefined
       }
