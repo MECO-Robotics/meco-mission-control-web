@@ -249,6 +249,8 @@ describe("TimelineView", () => {
     expect(unfoldedMarkup).toMatch(
       /class="timeline-merged-cell-column[^"]*" data-collapsed="false" data-timeline-column="project"[^>]*>[\s\S]*timeline-merged-cell-text is-rotated[\s\S]*timeline-project-title/,
     );
+    expect(collapsedMarkup).toMatch(/overflow:visible/);
+    expect(unfoldedMarkup).toMatch(/overflow:visible/);
     expect(collapsedMarkup).toMatch(
       /aria-label="Long clipped project label 0\/3"[\s\S]*class="timeline-merged-cell-text"[\s\S]*role="group"[\s\S]*tabindex="0"/,
     );
