@@ -102,12 +102,17 @@
   box-shadow: 0 12px 24px rgba(15, 28, 52, 0.2);
 }
 
-.sidebar-scope-target-panel[data-scope-panel="season"] {
-  align-self: flex-end;
-}
-
 .sidebar-scope-option.is-selected {
   color: var(--meco-blue);
+}
+
+.sidebar-scope-option-caret {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  color: currentColor;
+  opacity: 0.72;
 }
 
 .page-shell.dark-mode .sidebar-scope-trigger {

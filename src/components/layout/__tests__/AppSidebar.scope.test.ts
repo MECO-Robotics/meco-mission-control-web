@@ -10,7 +10,7 @@ import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
 import { renderSidebar, signedInUser } from "./AppSidebar.testUtils";
 
 describe("AppSidebar scope", () => {
-  it("renders the project scope pill with only the selected project label", () => {
+  it("renders the project and season scope pill below the profile switch", () => {
     const robotProject: ProjectRecord = {
       id: "robot-1",
       name: "Robot 2026",
@@ -42,16 +42,66 @@ describe("AppSidebar scope", () => {
     expect(profileIndex).toBeGreaterThan(footerIndex);
     expect(profileIndex).toBeLessThan(scopeIndex);
     expect(scopeIndex).toBeGreaterThan(footerIndex);
-    expect(markup).toContain('aria-label="Project scope"');
+    expect(markup).toContain('aria-label="Open project and season selector"');
     expect(markup).toContain('data-tutorial-target="project-select"');
+    expect(markup).toContain("2026 Season - Robot 2026");
     expect(markup).toContain("Robot 2026");
-    expect(markup).not.toContain('data-tutorial-target="season-select"');
-    expect(markup).not.toContain("2026 Season");
     expect(markup).not.toContain("sidebar-season-select");
     expect(markup).not.toContain("sidebar-project-trigger");
   });
 
-  it("renders season then project as visible two-stage scope popup panels", () => {
+  it("renders the scope kind panel before opening a target panel", () => {
+    const seasons: SeasonRecord[] = [
+      {
+        id: "season-1",
+        name: "2026 Season",
+        type: "season",
+        startDate: "2026-01-01",
+        endDate: "2026-12-31",
+      },
+    ];
+    const robotProject: ProjectRecord = {
+      id: "robot-1",
+      name: "Robot 2026",
+      projectType: "robot",
+      seasonId: "season-1",
+      description: "Test robot",
+      status: "active",
+    };
+    const scopeMarkup = renderToStaticMarkup(
+      React.createElement(AppSidebarPopups, {
+        activeScopePanel: null,
+        activeSubItemId: null,
+        compactPopupRef: React.createRef<HTMLDivElement>(),
+        compactPopupSection: null,
+        compactPopupTop: 0,
+        getSectionSubItems: () => [],
+        isCollapsed: false,
+        isProjectPopupOpen: false,
+        isScopePopupOpen: true,
+        onEditSelectedRobot: jest.fn(),
+        onSelectProjectOption: jest.fn(),
+        onSelectSeasonOption: jest.fn(),
+        onSubItemSelect: jest.fn(),
+        projectPopupRef: React.createRef<HTMLDivElement>(),
+        projectPopupTop: 0,
+        projects: [robotProject],
+        seasons,
+        selectedProjectId: robotProject.id,
+        selectedSeasonId: "season-1",
+        setActiveScopePanel: jest.fn(),
+      } as React.ComponentProps<typeof AppSidebarPopups>),
+    );
+
+    expect(scopeMarkup).toContain("sidebar-scope-popup-shell");
+    expect(scopeMarkup).toContain("sidebar-scope-kind-panel");
+    expect(scopeMarkup).toContain("Workspace scope");
+    expect(scopeMarkup).toContain(">Project</span>");
+    expect(scopeMarkup).toContain(">Season</span>");
+    expect(scopeMarkup).not.toContain("sidebar-scope-target-panel");
+  });
+
+  it("renders only the selected second-stage scope panel", () => {
     const css = readFileSync("src/app/styles/shell/sidebar/sidebar-scope.css", "utf8");
     const seasons: SeasonRecord[] = [
       {
@@ -78,6 +128,7 @@ describe("AppSidebar scope", () => {
       status: "active",
     };
     const baseProps = {
+      activeScopePanel: "season",
       activeSubItemId: null,
       compactPopupRef: React.createRef<HTMLDivElement>(),
       compactPopupSection: null,
@@ -95,34 +146,28 @@ describe("AppSidebar scope", () => {
       seasons,
       selectedProjectId: robotProject.id,
       selectedSeasonId: "season-1",
+      setActiveScopePanel: jest.fn(),
     };
     const scopeMarkup = renderToStaticMarkup(
       React.createElement(AppSidebarPopups, {
         ...baseProps,
         isScopePopupOpen: true,
-      } as unknown as React.ComponentProps<typeof AppSidebarPopups>),
+      } as React.ComponentProps<typeof AppSidebarPopups>),
     );
     const seasonPanelIndex = scopeMarkup.indexOf('data-scope-panel="season"');
     const projectPanelIndex = scopeMarkup.indexOf('data-scope-panel="project"');
 
     expect(scopeMarkup).toContain("sidebar-scope-popup-shell");
+    expect(scopeMarkup).toContain("sidebar-scope-kind-panel");
     expect(scopeMarkup).toContain("sidebar-scope-target-panel");
-    expect(scopeMarkup).not.toContain("sidebar-scope-kind-panel");
-    expect(scopeMarkup).not.toContain(">Scope<");
     expect(seasonPanelIndex).toBeGreaterThan(-1);
-    expect(projectPanelIndex).toBeGreaterThan(-1);
-    expect(seasonPanelIndex).toBeLessThan(projectPanelIndex);
+    expect(projectPanelIndex).toBe(-1);
     expect(scopeMarkup).toContain("Seasons");
     expect(scopeMarkup).toContain("2027 Season");
     expect(scopeMarkup).toContain("Create new season");
-    expect(scopeMarkup).toContain("Projects");
-    expect(scopeMarkup).toContain("All projects");
-    expect(scopeMarkup).toContain("Robot 2026");
-    expect(scopeMarkup).toContain("Edit robot name");
-    expect(scopeMarkup).toContain("Add robot");
-    expect(css).toMatch(
-      /\.sidebar-scope-target-panel\[data-scope-panel="season"\]\s*\{[^}]*align-self:\s*flex-end;/,
-    );
+    expect(scopeMarkup).not.toContain("Projects");
+    expect(scopeMarkup).not.toContain("All projects");
+    expect(css).toContain(".sidebar-scope-option-caret");
   });
 
   it("renders the project scope trigger as a larger footer control", () => {
@@ -141,7 +186,7 @@ describe("AppSidebar scope", () => {
     );
 
     expect(markup).toContain("sidebar-scope-trigger");
-    expect(markup).toContain('width="16"');
+    expect(markup).toContain('width="13"');
     expect(markup).toContain("sidebar-scope-trigger-caret");
     expect(markup).toContain("lucide-chevron-right");
     expect(css).toMatch(
