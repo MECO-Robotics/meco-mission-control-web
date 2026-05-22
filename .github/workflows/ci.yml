@@ -7,6 +7,7 @@ on:
       - development
       - main
     paths:
+      - "AGENTS.md"
       - ".github/workflows/ci.yml"
       - ".github/workflows/codex-automerge.yml"
       - ".github/workflows/deploy-vps.yml"
@@ -19,6 +20,7 @@ on:
       - "package.json"
       - "package-lock.json"
       - "scripts/organization-audit.mjs"
+      - "skills/**"
       - "eslint.config.js"
       - "tsconfig.json"
       - "tsconfig.app.json"
@@ -34,6 +36,7 @@ on:
       - "fix/**"
       - "hotfix/**"
     paths:
+      - "AGENTS.md"
       - ".github/workflows/ci.yml"
       - ".github/workflows/codex-automerge.yml"
       - ".github/workflows/deploy-vps.yml"
@@ -46,6 +49,7 @@ on:
       - "package.json"
       - "package-lock.json"
       - "scripts/organization-audit.mjs"
+      - "skills/**"
       - "eslint.config.js"
       - "tsconfig.json"
       - "tsconfig.app.json"
