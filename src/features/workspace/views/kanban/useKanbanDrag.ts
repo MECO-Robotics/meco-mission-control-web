@@ -46,11 +46,18 @@ interface UseKanbanDragOptions<TState extends string, TItem> {
 }
 
 const KANBAN_DRAG_DATA_TYPE = "application/x-meco-kanban-item";
+const KANBAN_POINTER_INTERACTIVE_SELECTOR =
+  'a[href], button, input, select, textarea, summary, [role="button"], [role="link"], [contenteditable="true"], [data-kanban-drag-ignore="true"]';
 const POINTER_DRAG_THRESHOLD_PX = 8;
 
 interface KanbanPointerFallbackStart {
   button: number;
   pointerType: string;
+}
+
+interface KanbanPointerFallbackTarget {
+  currentTarget: HTMLElement;
+  target: EventTarget | null;
 }
 
 export function canStartKanbanPointerFallbackDrag({
@@ -66,6 +73,29 @@ export function canStartKanbanPointerFallbackDrag({
   }
 
   return pointerType === "pen";
+}
+
+export function isKanbanPointerFallbackInteractiveTarget({
+  currentTarget,
+  target,
+}: KanbanPointerFallbackTarget) {
+  if (!target || target === currentTarget) {
+    return false;
+  }
+
+  const closestTarget = target as EventTarget & {
+    closest?: (selector: string) => Element | null;
+  };
+  const interactiveTarget =
+    typeof closestTarget.closest === "function"
+      ? closestTarget.closest(KANBAN_POINTER_INTERACTIVE_SELECTOR)
+      : null;
+
+  return Boolean(
+    interactiveTarget &&
+      interactiveTarget !== currentTarget &&
+      currentTarget.contains(interactiveTarget),
+  );
 }
 
 export function useKanbanDrag<TState extends string, TItem>({
@@ -301,7 +331,11 @@ export function useKanbanDrag<TState extends string, TItem>({
       setActiveDrag({ id: itemId, item, sourceState });
     };
     const handlePointerDown: PointerEventHandler<HTMLElement> = (milestone) => {
-      if (!itemDragEnabled || !canStartKanbanPointerFallbackDrag(milestone)) {
+      if (
+        !itemDragEnabled ||
+        !canStartKanbanPointerFallbackDrag(milestone) ||
+        isKanbanPointerFallbackInteractiveTarget(milestone)
+      ) {
         return;
       }
 
