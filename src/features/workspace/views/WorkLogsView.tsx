@@ -9,11 +9,13 @@ import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/Topb
 import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
 
 import { useWorkLogsViewState } from "./workLogs/workLogsViewState";
+import { WorkLogsActivityGroupingControls } from "./workLogs/WorkLogsActivityGroupingControls";
 import { WorkLogsActivitySection } from "./workLogs/WorkLogsActivitySection";
 import { WorkLogsActivityToolbar } from "./workLogs/WorkLogsActivityToolbar";
 import { WorkLogsSummarySection } from "./workLogs/WorkLogsSummarySection";
 import { WorkLogsTableSection } from "./workLogs/WorkLogsTableSection";
 import { WorkLogsToolbar } from "./workLogs/WorkLogsToolbar";
+import { WORK_LOG_KANBAN_GROUP_OPTIONS } from "./workLogs/workLogsActivityGrouping";
 
 interface WorkLogsViewProps {
   activePersonFilter: FilterSelection;
@@ -40,6 +42,26 @@ export function WorkLogsView({
     membersById,
     subsystemsById,
   });
+  const isActivityBoardView = view === "activity" || view === "kanban";
+  const activityBoardTitle = view === "kanban" ? "Work log Kanban" : "Activity";
+  const activityBoardCopy =
+    view === "kanban"
+      ? "Recent work log activity grouped across the current workspace scope."
+      : "Recent workspace activity across the current workspace scope.";
+  const activityGroupMode =
+    view === "kanban" && workLogsView.activityGroupMode === "person"
+      ? "subsystem"
+      : workLogsView.activityGroupMode;
+  const groupingControls =
+    view === "kanban" ? (
+      <WorkLogsActivityGroupingControls
+        activeGroupMode={activityGroupMode}
+        ariaLabel="Group Kanban work logs"
+        groupOptions={WORK_LOG_KANBAN_GROUP_OPTIONS}
+        onGroupModeChange={workLogsView.setActivityGroupMode}
+        tutorialPrefix="group-kanban-worklogs"
+      />
+    ) : null;
 
   return (
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
@@ -56,10 +78,14 @@ export function WorkLogsView({
             sortOptions={workLogsView.sortOptions}
             subsystemFilter={workLogsView.subsystemFilter}
           />
-        ) : view === "activity" ? (
+        ) : isActivityBoardView ? (
           <WorkLogsActivityToolbar
-            activityGroupMode={workLogsView.activityGroupMode}
+            activityGroupMode={activityGroupMode}
+            defaultGroupMode={view === "kanban" ? "subsystem" : undefined}
+            groupOptions={view === "kanban" ? WORK_LOG_KANBAN_GROUP_OPTIONS : undefined}
             search={workLogsView.search}
+            searchAriaLabel={view === "kanban" ? "Search work log kanban" : undefined}
+            searchPlaceholder={view === "kanban" ? "Search kanban..." : undefined}
             setActivityGroupMode={workLogsView.setActivityGroupMode}
             setSearch={workLogsView.setSearch}
           />
@@ -78,7 +104,7 @@ export function WorkLogsView({
 
       <div className="panel-header compact-header">
         <div className="queue-section-header">
-          <h2>{view === "activity" ? "Activity" : view === "summary" ? "Work log summary" : "Work logs"}</h2>
+          <h2>{isActivityBoardView ? activityBoardTitle : view === "summary" ? "Work log summary" : "Work logs"}</h2>
         </div>
       </div>
 
@@ -91,11 +117,13 @@ export function WorkLogsView({
         />
       ) : null}
 
-      {view === "activity" ? (
+      {isActivityBoardView ? (
         <WorkLogsActivitySection
           actions={workLogsView.activityActions}
-          activityGroupMode={workLogsView.activityGroupMode}
+          activityGroupMode={activityGroupMode}
           activityPagination={workLogsView.activityPagination}
+          description={activityBoardCopy}
+          groupingControls={groupingControls}
           membersById={membersById}
           openEditTaskModal={openEditTaskModal}
           subsystemsById={subsystemsById}
