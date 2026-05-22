@@ -100,6 +100,7 @@ export function ManufacturingKanbanBoard({
   return (
     <KanbanColumns
       boardClassName="task-queue-board"
+      canDropItem={(item, state) => item.status !== state}
       columnBodyClassName="task-queue-board-column-body"
       columnClassName="task-queue-board-column"
       columnCountClassName="task-queue-board-column-count"
@@ -117,13 +118,26 @@ export function ManufacturingKanbanBoard({
         ),
       }))}
       emptyLabel="No jobs"
+      getItemDragLabel={(item) => item.title}
+      getItemId={(item) => item.id}
       itemsByState={itemsByStatus}
-      renderItem={(item) => {
+      onItemDrop={
+        onQuickStatusChange
+          ? (item, state) => {
+              void onQuickStatusChange(item, state);
+            }
+          : undefined
+      }
+      renderItem={(item, _state, dragProps) => {
         const approveActionKey = `${item.id}:approved`;
         const completeActionKey = `${item.id}:complete`;
         const isApprovePending = pendingQuickActionKey === approveActionKey;
         const isCompletePending = pendingQuickActionKey === completeActionKey;
         const isAnyActionPending = Boolean(pendingQuickActionKey);
+        const { className: dragClassName, ...dragRootProps } = dragProps ?? {};
+        const cardClassName = `task-queue-board-card editable-hover-target editable-hover-target-row${
+          dragClassName ? ` ${dragClassName}` : ""
+        }`;
 
         const cardContent = (
           <>
@@ -189,7 +203,8 @@ export function ManufacturingKanbanBoard({
         if (canShowMentorQuickActions) {
           return (
             <div
-              className="task-queue-board-card editable-hover-target editable-hover-target-row"
+              {...dragRootProps}
+              className={cardClassName}
               data-tutorial-target={tutorialTarget?.("edit-job-row")}
               key={item.id}
               onClick={() => onEdit(item)}
@@ -204,7 +219,8 @@ export function ManufacturingKanbanBoard({
 
         return (
           <button
-            className="task-queue-board-card editable-hover-target editable-hover-target-row"
+            {...dragRootProps}
+            className={cardClassName}
             data-tutorial-target={tutorialTarget?.("edit-job-row")}
             key={item.id}
             onClick={() => onEdit(item)}

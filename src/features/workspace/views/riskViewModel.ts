@@ -32,6 +32,7 @@ export {
   SEVERITY_RANK,
   formatRiskSeverity,
   getRiskSeverityPillClassName,
+  toRiskPayload,
 };
 
 export type RiskEditorMode = "create" | "detail" | "edit" | null;

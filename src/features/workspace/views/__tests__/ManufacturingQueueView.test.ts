@@ -154,9 +154,14 @@ describe("ManufacturingQueueView", () => {
     expect(cncMarkup).toContain("Outsourced");
     expect(cncMarkup).toContain("cnc-approve-job-button");
     expect(cncMarkup).toContain("cnc-complete-job-button");
+    expect(cncMarkup).toContain('draggable="true"');
+    expect(cncMarkup).toContain('data-kanban-item-id="cnc-1"');
+    expect(cncMarkup).toContain('data-kanban-drop-state="approved"');
+    expect(cncMarkup).toContain('data-kanban-drop-enabled="true"');
     expect(printMarkup).not.toContain("Source");
     expect(printMarkup).not.toContain("Outsourced");
     expect(printMarkup).not.toContain("cnc-approve-job-button");
     expect(printMarkup).not.toContain("cnc-complete-job-button");
+    expect(printMarkup).not.toContain('draggable="true"');
   });
 });

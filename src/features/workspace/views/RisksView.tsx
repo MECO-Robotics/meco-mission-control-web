@@ -22,6 +22,7 @@ import {
   RISK_SEVERITY_ORDER,
   formatRiskSeverity,
   getRiskSeverityPillClassName,
+  toRiskPayload,
   useRisksViewModel,
 } from "./riskViewModel";
 import {
@@ -192,6 +193,7 @@ export function RisksView({
             {viewModel.filteredRows.length > 0 ? (
               <KanbanColumns
                 boardClassName="risk-board"
+                canDropItem={(risk, severity) => risk.severity !== severity}
                 columnBodyClassName="task-queue-board-column-body"
                 columnClassName="task-queue-board-column"
                 columnCountClassName="task-queue-board-column-count"
@@ -212,15 +214,27 @@ export function RisksView({
                   ),
                 }))}
                 emptyLabel="No risks"
+                getItemDragLabel={(risk) => risk.title}
+                getItemId={(risk) => risk.id}
                 itemsByState={viewModel.risksBySeverity}
-                renderItem={(risk) => {
+                onItemDrop={(risk, severity) => {
+                  void onUpdateRisk(risk.id, {
+                    ...toRiskPayload(risk),
+                    severity,
+                  }).catch(() => undefined);
+                }}
+                renderItem={(risk, _severity, dragProps) => {
                   const projectLabel = getRiskProjectLabel(risk, attachmentLookups);
                   const workflowLabel = getRiskWorkflowLabel(risk, attachmentLookups);
                   const mechanismLabel = getRiskMechanismLabel(risk, attachmentLookups);
+                  const { className: dragClassName, ...dragRootProps } = dragProps ?? {};
 
                   return (
                     <button
-                      className="task-queue-board-card editable-hover-target editable-hover-target-row"
+                      {...dragRootProps}
+                      className={`task-queue-board-card editable-hover-target editable-hover-target-row${
+                        dragClassName ? ` ${dragClassName}` : ""
+                      }`}
                       key={risk.id}
                       onClick={() => viewModel.openRiskDetails(risk)}
                       type="button"

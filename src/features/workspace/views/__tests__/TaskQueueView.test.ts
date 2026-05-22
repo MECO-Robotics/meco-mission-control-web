@@ -410,4 +410,38 @@ describe("TaskQueueView", () => {
     expect(markup.indexOf("Zulu priority task")).toBeLessThan(markup.indexOf("Alpha priority task"));
     expect(markup).not.toContain('aria-label="Design discipline"');
   });
+
+  it("enables drag-drop reassignment for task cards on direct status columns", () => {
+    const bootstrap = createBootstrap();
+    const markup = renderToStaticMarkup(
+      React.createElement(TaskQueueKanbanBoard, {
+        bootstrap,
+        disciplinesById: { "discipline-1": bootstrap.disciplines[0] },
+        focusedState: null,
+        isNonRobotProject: false,
+        membersById: {
+          "member-1": bootstrap.members[0],
+          "member-2": bootstrap.members[1],
+        },
+        onClearFocus: jest.fn(),
+        onFocusState: jest.fn(),
+        onReassignTaskStatus: jest.fn(),
+        openEditTaskModal: jest.fn(),
+        projectsById: { "project-1": bootstrap.projects[0] },
+        taskQueueZoom: 1,
+        showProjectContextOnCards: true,
+        showProjectOnCards: true,
+        subsystemsById: { "subsystem-1": bootstrap.subsystems[0] },
+        tasks: [createTask(1)],
+        workstreamsById: {},
+      }),
+    );
+
+    expect(markup).toContain('draggable="true"');
+    expect(markup).toContain('data-kanban-item-id="task-1"');
+    expect(markup).toContain('data-kanban-drop-state="in-progress"');
+    expect(markup).toContain('data-kanban-drop-enabled="true"');
+    expect(markup).toContain('data-kanban-drop-state="blocked"');
+    expect(markup).toContain('data-kanban-drop-enabled="false"');
+  });
 });
