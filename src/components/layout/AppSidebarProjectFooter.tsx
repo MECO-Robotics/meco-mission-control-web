@@ -1,5 +1,5 @@
 import { type MouseEvent as ReactMouseEvent, type RefObject } from "react";
-import { ChevronRight, LayoutGrid } from "lucide-react";
+import { CalendarDays, ChevronRight, LayoutGrid } from "lucide-react";
 
 import { IconHelp } from "@/components/shared/Icons";
 import type { SessionUser } from "@/lib/auth/types";
@@ -26,7 +26,7 @@ interface AppSidebarProjectFooterProps {
   notificationCount: number;
   onProjectTriggerClick: (event: ReactMouseEvent<HTMLButtonElement>) => void;
   projectTriggerRef: RefObject<HTMLButtonElement | null>;
-  selectedProjectLabel: string;
+  selectedScopeLabel: string;
   sessionUser: SessionUser | null;
 }
 
@@ -48,7 +48,7 @@ export function AppSidebarProjectFooter({
   notificationCount,
   onProjectTriggerClick,
   projectTriggerRef,
-  selectedProjectLabel,
+  selectedScopeLabel,
   sessionUser,
 }: AppSidebarProjectFooterProps) {
   const settingsMenu = (
@@ -64,21 +64,22 @@ export function AppSidebarProjectFooter({
   const scopeTrigger = (
     <button
       aria-expanded={isProjectPopupOpen ? "true" : "false"}
-      aria-label="Project scope"
+      aria-label="Open project and season selector"
       className="sidebar-scope-trigger"
       data-active={isProjectPopupOpen ? "true" : "false"}
       onClick={onProjectTriggerClick}
       ref={projectTriggerRef}
-      title={`Project scope: ${selectedProjectLabel}`}
+      title={`Project / Season: ${selectedScopeLabel}`}
       type="button"
     >
       <span aria-hidden="true" className="sidebar-scope-trigger-icons">
-        <LayoutGrid size={16} strokeWidth={2} />
+        <CalendarDays size={13} strokeWidth={2} />
+        <LayoutGrid size={13} strokeWidth={2} />
       </span>
       {!isCollapsed ? (
         <span className="sidebar-scope-trigger-copy">
           <span className="sidebar-scope-trigger-line" data-tutorial-target="project-select">
-            {selectedProjectLabel}
+            {selectedScopeLabel}
           </span>
         </span>
       ) : null}

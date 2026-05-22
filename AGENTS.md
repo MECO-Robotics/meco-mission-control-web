@@ -12,6 +12,16 @@
 
 ---
 
+### Multi-Agent Workflow Rules
+
+* Use multi-agent workflows for broad, parallelizable, or cross-repo work to tighten each agent's context and improve throughput.
+* Split work by repo, feature area, ownership boundary, or independent validation track so each agent has a narrow, concrete task.
+* Keep write scopes disjoint across agents. Use the main agent to integrate results, resolve conflicts, and run final verification.
+* For MECO cross-repo work, parallelize independent frontend, backend, mobile, API-contract, test, and audit passes when they can proceed without blocking each other.
+* Do not spawn agents for tiny single-file changes, urgent blocking work, or tasks where the immediate next step depends on one result.
+
+---
+
 ### Development Workflow
 
 * Branch model:
