@@ -4,12 +4,12 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import { isMeetingVisibleInProjectScope } from "@/features/workspace/shared/events";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import {
-  filterSelectionIntersects,
   filterSelectionMatchesTaskPeople,
   useFilterChangeMotionClass,
 } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 
 import {
+  filterTimelineMilestonesByProjectSelection,
   filterTimelineTasks,
   hasActiveTimelineTaskFilters,
   readTimelineTaskSubsystemIds,
@@ -122,12 +122,12 @@ export function useTimelineViewScope({
       milestones: bootstrap.milestones,
       tasks: bootstrap.tasks,
     });
-    const milestonesByProject =
-      isAllProjectsView && timelineFilters.projectFilter.length > 0
-        ? milestonesByPerson.filter((milestone) =>
-            filterSelectionIntersects(timelineFilters.projectFilter, milestone.projectIds),
-          )
-        : milestonesByPerson;
+    const milestonesByProject = filterTimelineMilestonesByProjectSelection({
+      isAllProjectsView,
+      milestones: milestonesByPerson,
+      projectFilter: timelineFilters.projectFilter,
+      scopedProjectIdSet,
+    });
 
     if (normalizedSearch.length === 0) {
       return milestonesByProject;
@@ -154,6 +154,7 @@ export function useTimelineViewScope({
     isAllProjectsView,
     normalizedSearch,
     projectsById,
+    scopedProjectIdSet,
     timelineFilters.projectFilter,
   ]);
   const scopedMeetings = useMemo(() => {

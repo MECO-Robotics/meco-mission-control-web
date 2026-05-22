@@ -8,8 +8,8 @@ import { clampTimelineZoom, formatTimelineZoomLabel, getTimelineDayTrackSize, ge
 import { formatTimelinePeriodLabel, midpointOfTimelineDays, midpointOfTimelineWeek, monthEndFromDay } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
 import { buildTimelineGridLayout } from "@/features/workspace/views/timeline/model/timelineGridLayout";
-import { countActiveTimelineFilters, filterTimelineTasks } from "@/features/workspace/views/timeline/model/timelineViewFilters";
-import { createBootstrap, createBootstrapWithEmptySubsystem, createBootstrapWithoutTasks, readAppCss, membersById } from "./timelineTestFixtures";
+import { countActiveTimelineFilters, filterTimelineMilestonesByProjectSelection, filterTimelineTasks } from "@/features/workspace/views/timeline/model/timelineViewFilters";
+import { createBootstrap, createBootstrapWithEmptySubsystem, createBootstrapWithoutTasks, createTimelineMilestone, readAppCss, membersById } from "./timelineTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
@@ -308,6 +308,37 @@ describe("TimelineView", () => {
         subsystemFilter: ["subsystem-2"],
       }),
     ).toBe(5);
+  });
+
+  it("keeps global milestones visible when filtering all-projects timeline by project", () => {
+    const projectFilter = ["project-1"];
+    const filteredMilestones = filterTimelineMilestonesByProjectSelection({
+      isAllProjectsView: true,
+      milestones: [
+        createTimelineMilestone({
+          id: "global-milestone",
+          title: "Global readiness review",
+          projectIds: [],
+        }),
+        createTimelineMilestone({
+          id: "selected-project-milestone",
+          title: "Robot readiness review",
+          projectIds: ["project-1"],
+        }),
+        createTimelineMilestone({
+          id: "other-project-milestone",
+          title: "Pit display review",
+          projectIds: ["project-2"],
+        }),
+      ],
+      projectFilter,
+      scopedProjectIdSet: new Set(projectFilter),
+    });
+
+    expect(filteredMilestones.map((milestone) => milestone.id)).toEqual([
+      "global-milestone",
+      "selected-project-milestone",
+    ]);
   });
 
   it("formats week period labels with year only on the ending day", () => {

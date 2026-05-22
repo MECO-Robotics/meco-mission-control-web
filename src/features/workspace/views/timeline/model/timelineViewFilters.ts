@@ -1,5 +1,9 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskRecord } from "@/types/recordsExecution";
+import type { MilestoneRecord, TaskRecord } from "@/types/recordsExecution";
+import {
+  getMilestoneProjectIds,
+  isProjectScopedEventVisible,
+} from "@/features/workspace/shared/events";
 import { TASK_PRIORITY_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
 import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
 import {
@@ -96,6 +100,26 @@ export function filterTimelineTasks({
   }
 
   return result;
+}
+
+export function filterTimelineMilestonesByProjectSelection({
+  isAllProjectsView,
+  milestones,
+  projectFilter,
+  scopedProjectIdSet,
+}: {
+  isAllProjectsView: boolean;
+  milestones: MilestoneRecord[];
+  projectFilter: FilterSelection;
+  scopedProjectIdSet: ReadonlySet<string>;
+}) {
+  if (!isAllProjectsView || projectFilter.length === 0) {
+    return milestones;
+  }
+
+  return milestones.filter((milestone) =>
+    isProjectScopedEventVisible(getMilestoneProjectIds(milestone), scopedProjectIdSet),
+  );
 }
 
 export function hasActiveTimelineTaskFilters({
