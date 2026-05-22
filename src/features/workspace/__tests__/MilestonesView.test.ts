@@ -194,6 +194,35 @@ describe("MilestonesView", () => {
     expect(markup).toContain("Milestone type: Competition");
   });
 
+  it("uses the shared compact zoom pill styling for milestone zoom", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(MilestonesView, {
+        activePersonFilter: [],
+        bootstrap: createBootstrap(),
+        isAllProjectsView: false,
+        onDeleteTimelineMilestone: jest.fn(),
+        onSaveTimelineMilestone: jest.fn(),
+      }),
+    );
+    const workspaceToolbarCss = readFileSync(
+      join(process.cwd(), "src/app/styles/shell/workspace/toolbars.css"),
+      "utf8",
+    );
+    const timelineToolbarCss = readFileSync(
+      join(process.cwd(), "src/app/styles/shell/timeline/timeline-toolbar-controls.css"),
+      "utf8",
+    );
+
+    expect(markup).toContain('class="task-queue-zoom-controls milestones-zoom-controls"');
+    expect(markup).toContain('class="icon-button task-queue-zoom-button milestones-zoom-button"');
+    expect(workspaceToolbarCss).toMatch(
+      /\.task-queue-zoom-controls\s*\{[\s\S]*gap:\s*0\.04rem;[\s\S]*min-height:\s*2\.05rem;[\s\S]*border-radius:\s*999px;/,
+    );
+    expect(timelineToolbarCss).not.toContain(".milestones-toolbar .milestones-zoom-controls");
+    expect(timelineToolbarCss).not.toContain(".milestones-toolbar .milestones-zoom-button");
+    expect(timelineToolbarCss).not.toContain(".milestones-toolbar .task-queue-zoom-label");
+  });
+
   it("renders milestone type badges with the shared type palette", () => {
     const markup = renderToStaticMarkup(
       React.createElement(MilestonesView, {
