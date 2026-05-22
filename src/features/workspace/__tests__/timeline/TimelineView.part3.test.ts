@@ -3,6 +3,7 @@ import * as React from "react";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
+import { TimelineProjectHeaderCell } from "@/features/workspace/views/timeline/components/TimelineProjectHeaderCell";
 import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
 import { createBootstrap, createBootstrapWithTaskRows, readAppCss, membersById } from "./timelineTestFixtures";
 
@@ -204,6 +205,61 @@ describe("TimelineView", () => {
     );
     expect(css).toMatch(
       /\.timeline-merged-cell-column:hover \.timeline-merged-cell-title,\s*\.timeline-merged-cell-column:focus-within \.timeline-merged-cell-title\s*\{[\s\S]*overflow:\s*visible;[\s\S]*text-overflow:\s*clip;/,
+    );
+  });
+
+  it("anchors project title cutoff reveal to the label hover area", () => {
+    const collapsedMarkup = renderToStaticMarkup(
+      React.createElement(TimelineProjectHeaderCell, {
+        project: {
+          id: "project-1",
+          name: "Long clipped project label",
+          completeCount: 0,
+          taskCount: 3,
+          tasks: [],
+          subsystems: [],
+        },
+        projectBackground: "var(--bg-panel)",
+        projectCollapsed: true,
+        projectRowCount: 1,
+        toggleProject: jest.fn(),
+      }),
+    );
+    const unfoldedMarkup = renderToStaticMarkup(
+      React.createElement(TimelineProjectHeaderCell, {
+        project: {
+          id: "project-1",
+          name: "Long clipped project label",
+          completeCount: 0,
+          taskCount: 4,
+          tasks: [],
+          subsystems: [],
+        },
+        projectBackground: "var(--bg-panel)",
+        projectCollapsed: false,
+        projectRowCount: 4,
+        toggleProject: jest.fn(),
+      }),
+    );
+    const css = readAppCss();
+
+    expect(collapsedMarkup).toMatch(
+      /class="timeline-merged-cell-column[^"]*" data-collapsed="true" data-timeline-column="project"[^>]*>[\s\S]*timeline-project-title/,
+    );
+    expect(unfoldedMarkup).toMatch(
+      /class="timeline-merged-cell-column[^"]*" data-collapsed="false" data-timeline-column="project"[^>]*>[\s\S]*timeline-merged-cell-text is-rotated[\s\S]*timeline-project-title/,
+    );
+    expect(css).toMatch(
+      /\.timeline-merged-cell-column\[data-timeline-column="project"\] \.timeline-project-title\.timeline-ellipsis-reveal\[data-full-text\]::after\s*\{[\s\S]*content:\s*attr\(data-full-text\)[\s\S]*opacity:\s*0[\s\S]*pointer-events:\s*none/,
+    );
+    expect(css).toMatch(
+      /\.timeline-merged-cell-column\[data-timeline-column="project"\] \.timeline-merged-cell-text:hover \.timeline-project-title\.timeline-ellipsis-reveal\s*\{[\s\S]*color:\s*transparent\s*!important/,
+    );
+    expect(css).toMatch(
+      /\.timeline-merged-cell-column\[data-timeline-column="project"\] \.timeline-merged-cell-text:hover \.timeline-project-title\.timeline-ellipsis-reveal\[data-full-text\]::after\s*\{[\s\S]*opacity:\s*1/,
+    );
+    expect(css).not.toMatch(
+      /\.timeline-merged-cell-column\[data-timeline-column="project"\][^{]+:focus-within[^{]+timeline-project-title/,
     );
   });
 
