@@ -198,7 +198,7 @@ export function TaskCalendarView({
             />
           )}
 
-          {selectedDateKey ? (
+          {selectedDateKey && calendar.events.length > 0 ? (
             <TaskCalendarDayDetails
               dateKey={selectedDateKey}
               events={selectedDayEvents}

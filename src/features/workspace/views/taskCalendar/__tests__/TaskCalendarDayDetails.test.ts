@@ -39,8 +39,17 @@ const meetingEvent: TaskCalendarEvent = {
   title: "Robot | Meeting: Build night",
 };
 
+function formatExpectedDayLabel(dateKey: string) {
+  return new Date(`${dateKey}T00:00:00`).toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
 describe("TaskCalendarDayDetails", () => {
   it("renders a selected day detail list with every due item for that date", () => {
+    const dayLabel = formatExpectedDayLabel("2026-05-07");
     const markup = renderToStaticMarkup(
       React.createElement(TaskCalendarDayDetails, {
         dateKey: "2026-05-07",
@@ -50,7 +59,7 @@ describe("TaskCalendarDayDetails", () => {
       }),
     );
 
-    expect(markup).toContain("May 7, 2026");
+    expect(markup).toContain(dayLabel);
     expect(markup).toContain("2 things due");
     expect(markup).toContain("Robot | Wire drivetrain");
     expect(markup).toContain("Task due");
@@ -59,11 +68,13 @@ describe("TaskCalendarDayDetails", () => {
     expect(markup).toContain("Robot | Meeting: Build night");
     expect(markup).toContain("Meeting / event");
     expect(markup).toContain('aria-label="Open Robot | Wire drivetrain"');
+    expect(markup).not.toContain('aria-label="Open Robot | Meeting: Build night"');
   });
 });
 
 describe("TaskCalendarMonthGrid day selection", () => {
   it("renders clickable day cells and marks the selected day", () => {
+    const dayLabel = formatExpectedDayLabel("2026-05-07");
     const markup = renderToStaticMarkup(
       React.createElement(TaskCalendarMonthGrid, {
         eventsByDateKey: new Map([["2026-05-07", [taskEvent, meetingEvent]]]),
@@ -76,7 +87,7 @@ describe("TaskCalendarMonthGrid day selection", () => {
       }),
     );
 
-    expect(markup).toContain('aria-label="View details for May 7, 2026 with 2 items"');
+    expect(markup).toContain(`aria-label="View details for ${dayLabel} with 2 items"`);
     expect(markup).toContain("task-calendar-day is-selected");
     expect(markup).toContain("task-calendar-day-open");
   });
