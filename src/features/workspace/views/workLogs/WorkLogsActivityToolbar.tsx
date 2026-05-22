@@ -3,6 +3,7 @@ import type { Dispatch, SetStateAction } from "react";
 import { IconPerson } from "@/components/shared/Icons";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
+import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
 
 import {
   DEFAULT_WORK_LOG_ACTIVITY_GROUP_MODE,
@@ -12,19 +13,27 @@ import {
 
 interface WorkLogsActivityToolbarProps {
   activityGroupMode: WorkLogActivityGroupMode;
+  defaultGroupMode?: WorkLogActivityGroupMode;
+  groupOptions?: readonly DropdownOption[];
   search: string;
+  searchAriaLabel?: string;
+  searchPlaceholder?: string;
   setActivityGroupMode: Dispatch<SetStateAction<WorkLogActivityGroupMode>>;
   setSearch: Dispatch<SetStateAction<string>>;
 }
 
 export function WorkLogsActivityToolbar({
   activityGroupMode,
+  defaultGroupMode = DEFAULT_WORK_LOG_ACTIVITY_GROUP_MODE,
+  groupOptions = WORK_LOG_ACTIVITY_GROUP_OPTIONS,
   search,
+  searchAriaLabel = "Search activity",
+  searchPlaceholder = "Search activity...",
   setActivityGroupMode,
   setSearch,
 }: WorkLogsActivityToolbarProps) {
   const selectedGroupLabel =
-    WORK_LOG_ACTIVITY_GROUP_OPTIONS.find((option) => option.id === activityGroupMode)?.name ?? "Person";
+    groupOptions.find((option) => option.id === activityGroupMode)?.name ?? "Person";
   const groupAriaLabel = `Group activity: ${selectedGroupLabel}`;
 
   return (
@@ -33,7 +42,7 @@ export function WorkLogsActivityToolbar({
         actionCount={1}
         actions={
           <CompactFilterMenu
-            activeCount={activityGroupMode !== DEFAULT_WORK_LOG_ACTIVITY_GROUP_MODE ? 1 : 0}
+            activeCount={activityGroupMode !== defaultGroupMode ? 1 : 0}
             ariaLabel={groupAriaLabel}
             buttonLabel={`Group: ${selectedGroupLabel}`}
             className="worklog-activity-group-menu"
@@ -50,7 +59,7 @@ export function WorkLogsActivityToolbar({
                     }
                     value={activityGroupMode}
                   >
-                    {WORK_LOG_ACTIVITY_GROUP_OPTIONS.map((option) => (
+                    {groupOptions.map((option) => (
                       <option key={option.id} value={option.id}>
                         {option.name}
                       </option>
@@ -61,10 +70,10 @@ export function WorkLogsActivityToolbar({
             ]}
           />
         }
-        ariaLabel="Search activity"
+        ariaLabel={searchAriaLabel}
         compactPlaceholder="Search"
         onChange={setSearch}
-        placeholder="Search activity..."
+        placeholder={searchPlaceholder}
         value={search}
       />
     </div>

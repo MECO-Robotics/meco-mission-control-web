@@ -75,6 +75,17 @@ describe("getActiveNavigationSubItemId", () => {
     ).toBe("dashboard-activity");
   });
 
+  it("maps worklogs kanban to reports worklog kanban", () => {
+    expect(
+      getActiveNavigationSubItemId(
+        createNavigationState({
+          activeTab: "worklogs",
+          worklogsView: "kanban",
+        }),
+      ),
+    ).toBe("reports-worklogs-kanban");
+  });
+
   it("maps worklogs summary to reports work logs", () => {
     expect(
       getActiveNavigationSubItemId(
