@@ -59,6 +59,12 @@
   min-width: 0;
 }
 
+.task-queue-toolbar > .task-queue-toolbar-inline-actions:has(.task-queue-zoom-controls) {
+  flex: 0 0 max-content;
+  flex-wrap: nowrap;
+  min-width: max-content;
+}
+
 .task-queue-zoom-controls {
   display: inline-flex;
   align-items: center;
