@@ -25,7 +25,7 @@ export const RISK_MANAGEMENT_VIEW_ORDER: readonly RiskManagementViewTab[] = [
   "metrics",
 ];
 
-export const WORKLOG_VIEW_ORDER: readonly WorklogsViewTab[] = ["logs", "summary"];
+export const WORKLOG_VIEW_ORDER: readonly WorklogsViewTab[] = ["logs", "kanban", "summary"];
 export const REPORTS_VIEW_ORDER: readonly ReportsViewTab[] = ["qa", "milestone-results"];
 export const MANUFACTURING_VIEW_ORDER: readonly ManufacturingViewTab[] = [
   "all",
@@ -76,6 +76,7 @@ export const RISK_MANAGEMENT_VIEW_OPTIONS: readonly ViewOption<RiskManagementVie
 
 export const WORKLOG_VIEW_OPTIONS: readonly ViewOption<WorklogsViewTab>[] = [
   { value: "logs", label: "Logs" },
+  { value: "kanban", label: "Kanban" },
   { value: "summary", label: "Summary" },
 ];
 
@@ -222,6 +223,12 @@ export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = [
     label: "Work logs",
     section: "reports",
     target: { tab: "worklogs", worklogsView: "logs" },
+  },
+  {
+    id: "reports-worklogs-kanban",
+    label: "Kanban",
+    section: "reports",
+    target: { tab: "worklogs", worklogsView: "kanban" },
   },
   {
     id: "reports-qa-forms",

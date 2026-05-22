@@ -25,6 +25,9 @@ export const WORK_LOG_ACTIVITY_GROUP_OPTIONS: DropdownOption[] = [
   { id: "action", name: "Action" },
 ];
 
+export const WORK_LOG_KANBAN_GROUP_OPTIONS: DropdownOption[] =
+  WORK_LOG_ACTIVITY_GROUP_OPTIONS.filter((option) => option.id !== "person");
+
 const ACTION_GROUP_RANK: Record<AuditActionRecord["operation"], number> = {
   create: 0,
   update: 1,
