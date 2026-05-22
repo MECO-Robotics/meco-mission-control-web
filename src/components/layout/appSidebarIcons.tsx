@@ -188,6 +188,7 @@ export const subItemIcons: Record<NavigationSubItemId, ReactNode> = {
   "roster-workload": createElement(BarChart3, { size: 14, strokeWidth: 2 }),
   "roster-attendance": createElement(CalendarCheck, { size: 14, strokeWidth: 2 }),
   "reports-work-logs": createElement(FileText, { size: 14, strokeWidth: 2 }),
+  "reports-worklogs-kanban": createElement(Columns3, { size: 14, strokeWidth: 2 }),
   "reports-qa-forms": createElement(ClipboardCheck, { size: 14, strokeWidth: 2 }),
   "reports-milestone-results": createElement(Flag, { size: 14, strokeWidth: 2 }),
 };
