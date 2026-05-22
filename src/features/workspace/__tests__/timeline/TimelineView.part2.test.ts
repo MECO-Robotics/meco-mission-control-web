@@ -3,11 +3,13 @@ import * as React from "react";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
+import type { BootstrapPayload } from "@/types/bootstrap";
 import { clampTimelineZoom, formatTimelineZoomLabel, getTimelineDayTrackSize, getTimelineGridMinWidth, getTimelineMinimumZoomForWidth } from "@/features/workspace/shared/timeline/timelineZoom";
 import { formatTimelinePeriodLabel, midpointOfTimelineDays, midpointOfTimelineWeek, monthEndFromDay } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
 import { buildTimelineGridLayout } from "@/features/workspace/views/timeline/model/timelineGridLayout";
-import { createBootstrap, createBootstrapWithEmptySubsystem, createBootstrapWithoutTasks, readAppCss, membersById } from "./timelineTestFixtures";
+import { countActiveTimelineFilters, filterTimelineMilestonesByProjectSelection, filterTimelineTasks, resolveTimelineFilteredProjectIds } from "@/features/workspace/views/timeline/model/timelineViewFilters";
+import { createBootstrap, createBootstrapWithEmptySubsystem, createBootstrapWithoutTasks, createTimelineMilestone, readAppCss, membersById } from "./timelineTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
@@ -225,6 +227,130 @@ describe("TimelineView", () => {
     expect(markup).toContain('aria-label="Previous month"');
     expect(markup).toContain('aria-label="Next month"');
     expect(markup).toContain("April &#x27;26");
+  });
+
+  it("filters timeline tasks by project, discipline, subsystem, status, and priority", () => {
+    const bootstrap = createBootstrap();
+    const scopedBootstrap: BootstrapPayload = {
+      ...bootstrap,
+      projects: [
+        ...bootstrap.projects,
+        {
+          ...bootstrap.projects[0],
+          id: "project-2",
+          name: "Pit Display",
+        },
+      ],
+      subsystems: [
+        ...bootstrap.subsystems,
+        {
+          ...bootstrap.subsystems[0],
+          id: "subsystem-2",
+          name: "Controls",
+          projectId: "project-2",
+        },
+      ],
+      disciplines: [
+        ...bootstrap.disciplines,
+        {
+          id: "discipline-2",
+          code: "programming",
+          name: "Software",
+        },
+      ],
+      tasks: [
+        bootstrap.tasks[0],
+        {
+          ...bootstrap.tasks[0],
+          id: "task-2",
+          projectId: "project-2",
+          subsystemId: "subsystem-2",
+          subsystemIds: ["subsystem-2"],
+          disciplineId: "discipline-2",
+          priority: "low",
+          status: "complete",
+          title: "Driver station status panel",
+        },
+      ],
+    };
+
+    const filteredTasks = filterTimelineTasks({
+      bootstrap: scopedBootstrap,
+      disciplineFilter: ["discipline-2"],
+      isAllProjectsView: true,
+      priorityFilter: ["low"],
+      projectFilter: ["project-2"],
+      statusFilter: ["complete"],
+      subsystemFilter: ["subsystem-2"],
+      tasks: scopedBootstrap.tasks,
+    });
+
+    expect(filteredTasks.map((task) => task.id)).toEqual(["task-2"]);
+    expect(
+      countActiveTimelineFilters({
+        activePersonFilter: ["member-1"],
+        disciplineFilter: ["discipline-2"],
+        isAllProjectsView: true,
+        priorityFilter: ["low"],
+        projectFilter: ["project-2"],
+        statusFilter: ["complete"],
+        subsystemFilter: ["subsystem-2"],
+      }),
+    ).toBe(6);
+    expect(
+      countActiveTimelineFilters({
+        activePersonFilter: ["member-1"],
+        disciplineFilter: ["discipline-2"],
+        isAllProjectsView: false,
+        priorityFilter: ["low"],
+        projectFilter: ["project-2"],
+        statusFilter: ["complete"],
+        subsystemFilter: ["subsystem-2"],
+      }),
+    ).toBe(5);
+  });
+
+  it("keeps global milestones visible when filtering all-projects timeline by project", () => {
+    const projectFilter = ["project-1"];
+    const filteredMilestones = filterTimelineMilestonesByProjectSelection({
+      isAllProjectsView: true,
+      milestones: [
+        createTimelineMilestone({
+          id: "global-milestone",
+          title: "Global readiness review",
+          projectIds: [],
+        }),
+        createTimelineMilestone({
+          id: "selected-project-milestone",
+          title: "Robot readiness review",
+          projectIds: ["project-1"],
+        }),
+        createTimelineMilestone({
+          id: "other-project-milestone",
+          title: "Pit display review",
+          projectIds: ["project-2"],
+        }),
+      ],
+      projectFilter,
+      scopedProjectIdSet: new Set(projectFilter),
+    });
+
+    expect(filteredMilestones.map((milestone) => milestone.id)).toEqual([
+      "global-milestone",
+      "selected-project-milestone",
+    ]);
+  });
+
+  it("keeps modal milestone project scope separate from the active project filter", () => {
+    const scopedProjectIds = ["project-1", "project-2"];
+    const filteredProjectIds = resolveTimelineFilteredProjectIds({
+      isAllProjectsView: true,
+      projectFilter: ["project-1"],
+      scopedProjectIds,
+    });
+
+    expect(filteredProjectIds).toEqual(["project-1"]);
+    expect(scopedProjectIds).toEqual(["project-1", "project-2"]);
   });
 
   it("formats week period labels with year only on the ending day", () => {
