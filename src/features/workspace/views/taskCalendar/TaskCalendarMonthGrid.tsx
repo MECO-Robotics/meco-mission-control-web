@@ -18,6 +18,12 @@ function eventTypeClassName(event: TaskCalendarEvent) {
   return `task-calendar-day-event-${event.extendedProps.type}`;
 }
 
+function canOpenEventDirectly(event: TaskCalendarEvent) {
+  return event.extendedProps.type === "milestone" ||
+    event.extendedProps.type === "task-due" ||
+    event.extendedProps.type === "qa-due";
+}
+
 function formatDayButtonLabel(dateKey: string, eventCount: number) {
   const dayLabel = new Date(`${dateKey}T00:00:00`).toLocaleDateString(undefined, {
     day: "numeric",
@@ -94,7 +100,11 @@ export function TaskCalendarMonthGrid({
                     key={event.id}
                     onClick={(clickEvent) => {
                       clickEvent.stopPropagation();
-                      onOpenEvent(event);
+                      if (canOpenEventDirectly(event)) {
+                        onOpenEvent(event);
+                        return;
+                      }
+                      onOpenDay(cellDateKey);
                     }}
                     title={event.title}
                     type="button"

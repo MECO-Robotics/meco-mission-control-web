@@ -47,6 +47,36 @@ function formatExpectedDayLabel(dateKey: string) {
   });
 }
 
+function findButtonByTitle(element: React.ReactNode, title: string): React.ReactElement<{
+  onClick: (event: { stopPropagation: () => void }) => void;
+  title?: string;
+}> | null {
+  if (!React.isValidElement(element)) {
+    return null;
+  }
+
+  const reactElement = element as React.ReactElement<{
+    children?: React.ReactNode;
+    title?: string;
+  }>;
+
+  if (reactElement.type === "button" && reactElement.props.title === title) {
+    return reactElement as React.ReactElement<{
+      onClick: (event: { stopPropagation: () => void }) => void;
+      title?: string;
+    }>;
+  }
+
+  for (const child of React.Children.toArray(reactElement.props.children)) {
+    const match = findButtonByTitle(child, title);
+    if (match) {
+      return match;
+    }
+  }
+
+  return null;
+}
+
 describe("TaskCalendarDayDetails", () => {
   it("renders a selected day detail list with every due item for that date", () => {
     const dayLabel = formatExpectedDayLabel("2026-05-07");
@@ -90,6 +120,29 @@ describe("TaskCalendarMonthGrid day selection", () => {
     expect(markup).toContain(`aria-label="View details for ${dayLabel} with 2 items"`);
     expect(markup).toContain("task-calendar-day is-selected");
     expect(markup).toContain("task-calendar-day-open");
+  });
+
+  it("opens day details from event chips that do not have a direct modal", () => {
+    const onOpenDay = jest.fn();
+    const onOpenEvent = jest.fn();
+    const grid = TaskCalendarMonthGrid({
+      eventsByDateKey: new Map([["2026-05-07", [taskEvent, meetingEvent]]]),
+      monthCells: [new Date(2026, 4, 7)],
+      monthCursor: new Date(2026, 4, 1),
+      onOpenDay,
+      onOpenEvent,
+      selectedDateKey: null,
+      todayDateKey: "2026-05-08",
+    });
+    const meetingButton = findButtonByTitle(grid, meetingEvent.title);
+    const taskButton = findButtonByTitle(grid, taskEvent.title);
+
+    meetingButton?.props.onClick({ stopPropagation: jest.fn() });
+    taskButton?.props.onClick({ stopPropagation: jest.fn() });
+
+    expect(onOpenDay).toHaveBeenCalledWith("2026-05-07");
+    expect(onOpenEvent).toHaveBeenCalledWith(taskEvent);
+    expect(onOpenEvent).not.toHaveBeenCalledWith(meetingEvent);
   });
 });
 
