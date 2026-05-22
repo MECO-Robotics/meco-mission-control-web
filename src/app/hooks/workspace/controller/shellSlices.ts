@@ -157,6 +157,7 @@ export const shellContentModelKeys = [
 ] as const;
 export const shellContentTaskActionKeys = [
   "handleMeetingSave",
+  "handleTaskStatusChange",
   "handleTimelineMilestoneDelete",
   "handleTimelineMilestoneSave",
   "openCreateTaskModal",
