@@ -1,10 +1,35 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MeetingRecord } from "@/types/recordsExecution";
 import { normalizePlanningRecords } from "./planning";
 import { normalizeBootstrapCatalogRecords } from "./payload-catalog";
 import { normalizeBootstrapReports } from "./payload-reports";
 import { normalizeBootstrapTaskBlockers } from "./task-blockers";
 import { normalizeBootstrapTaskDependencies } from "./task-dependencies";
 import type { LegacyBootstrapPayload } from "./shared";
+
+function normalizeMeetingRecords(source: BootstrapPayload["meetings"]): MeetingRecord[] {
+  return (source ?? []).map((meeting, index) => {
+    const date = meeting.date || meeting.startDateTime?.slice(0, 10) || new Date().toISOString().slice(0, 10);
+    const time = meeting.time || (meeting.startDateTime?.includes("T") ? meeting.startDateTime.slice(11, 16) : "");
+
+    return {
+      ...meeting,
+      id: meeting.id || `meeting-${index + 1}`,
+      title: meeting.title || `Meeting ${index + 1}`,
+      meetingType: meeting.meetingType ?? "general",
+      projectIds: meeting.projectIds ?? [],
+      date,
+      time,
+      startDateTime: meeting.startDateTime ?? (time ? `${date}T${time}` : date),
+      endDateTime: meeting.endDateTime ?? null,
+      location: meeting.location ?? "",
+      description: meeting.description ?? "",
+      rsvpsYes: meeting.rsvpsYes ?? 0,
+      rsvpsMaybe: meeting.rsvpsMaybe ?? 0,
+      openSignIns: meeting.openSignIns ?? 0,
+    };
+  });
+}
 
 export function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapPayload {
   const source = payload as LegacyBootstrapPayload;
@@ -38,12 +63,13 @@ export function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapP
     risks: source.risks ?? [],
     tasks: planning.tasks,
     workLogs: catalog.workLogs,
-    meetings: source.meetings ?? [],
+    meetings: normalizeMeetingRecords(source.meetings),
     attendanceRecords: source.attendanceRecords ?? [],
     purchaseItems: catalog.purchaseItems,
     manufacturingItems: catalog.manufacturingItems,
     qaReviews: source.qaReviews ?? [],
     escalations: source.escalations ?? [],
     actions: source.actions ?? [],
+    favoriteViews: source.favoriteViews ?? [],
   };
 }

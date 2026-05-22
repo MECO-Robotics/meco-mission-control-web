@@ -1,6 +1,8 @@
 /// <reference types="jest" />
 
 import * as React from "react";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { IconEdit, IconManufacturing, IconParts } from "@/components/shared/Icons";
@@ -16,6 +18,10 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 type Task = BootstrapPayload["tasks"][number];
+
+function readWorkspaceToolbarsCss() {
+  return readFileSync(join(process.cwd(), "src/app/styles/shell/workspace/toolbars.css"), "utf8");
+}
 
 function createTask(index: number, overrides: Partial<Task> = {}): Task {
   const day = String(index).padStart(2, "0");
@@ -321,6 +327,41 @@ describe("TaskQueueView", () => {
     expect(markup).not.toContain("Task 16");
   });
 
+  it("renders task zoom as the same compact icon pill used by timeline zoom", () => {
+    const bootstrap = createBootstrap();
+    const markup = renderToStaticMarkup(
+      React.createElement(TaskQueueView, {
+        activePersonFilter: [],
+        bootstrap,
+        disciplinesById: { "discipline-1": bootstrap.disciplines[0] },
+        isAllProjectsView: false,
+        isNonRobotProject: false,
+        membersById: {
+          "member-1": bootstrap.members[0],
+          "member-2": bootstrap.members[1],
+        },
+        openCreateTaskModal: jest.fn(),
+        openEditTaskModal: jest.fn(),
+        subsystemsById: { "subsystem-1": bootstrap.subsystems[0] },
+      }),
+    );
+    const toolbarsCss = readWorkspaceToolbarsCss();
+
+    expect(markup).toContain('aria-label="Zoom out task queue"');
+    expect(markup).toContain('aria-label="Zoom in task queue"');
+    expect(markup).toContain('d="M8 11h6"');
+    expect(markup).toContain('d="M11 8v6"');
+    expect(toolbarsCss).toMatch(
+      /\.task-queue-zoom-controls\s*\{[\s\S]*gap:\s*0\.04rem;[\s\S]*min-height:\s*2\.05rem;/,
+    );
+    expect(toolbarsCss).toMatch(
+      /\.task-queue-zoom-label\s*\{[\s\S]*min-width:\s*2\.9rem;[\s\S]*padding:\s*0 0\.04rem;/,
+    );
+    expect(toolbarsCss).toMatch(
+      /\.task-queue-toolbar\s*>\s*\.task-queue-toolbar-inline-actions:has\(\.task-queue-zoom-controls\)\s*\{[\s\S]*flex:\s*0 0 max-content;[\s\S]*flex-wrap:\s*nowrap;[\s\S]*min-width:\s*max-content;/,
+    );
+  });
+
   it("hides task summaries once zoom is compact enough", () => {
     expect(shouldHideTaskQueueSummary(1)).toBe(false);
     expect(shouldHideTaskQueueSummary(0.9)).toBe(true);
@@ -371,5 +412,39 @@ describe("TaskQueueView", () => {
     expect(markup).toContain("Alpha priority task");
     expect(markup.indexOf("Zulu priority task")).toBeLessThan(markup.indexOf("Alpha priority task"));
     expect(markup).not.toContain('aria-label="Design discipline"');
+  });
+
+  it("enables drag-drop reassignment for task cards on direct status columns", () => {
+    const bootstrap = createBootstrap();
+    const markup = renderToStaticMarkup(
+      React.createElement(TaskQueueKanbanBoard, {
+        bootstrap,
+        disciplinesById: { "discipline-1": bootstrap.disciplines[0] },
+        focusedState: null,
+        isNonRobotProject: false,
+        membersById: {
+          "member-1": bootstrap.members[0],
+          "member-2": bootstrap.members[1],
+        },
+        onClearFocus: jest.fn(),
+        onFocusState: jest.fn(),
+        onReassignTaskStatus: jest.fn(),
+        openEditTaskModal: jest.fn(),
+        projectsById: { "project-1": bootstrap.projects[0] },
+        taskQueueZoom: 1,
+        showProjectContextOnCards: true,
+        showProjectOnCards: true,
+        subsystemsById: { "subsystem-1": bootstrap.subsystems[0] },
+        tasks: [createTask(1)],
+        workstreamsById: {},
+      }),
+    );
+
+    expect(markup).toContain('draggable="true"');
+    expect(markup).toContain('data-kanban-item-id="task-1"');
+    expect(markup).toContain('data-kanban-drop-state="in-progress"');
+    expect(markup).toContain('data-kanban-drop-enabled="true"');
+    expect(markup).toContain('data-kanban-drop-state="blocked"');
+    expect(markup).toContain('data-kanban-drop-enabled="false"');
   });
 });

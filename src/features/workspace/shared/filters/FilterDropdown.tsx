@@ -27,6 +27,7 @@ export function FilterDropdown({
   portalMenuPlacement = "auto",
   onChange,
   options,
+  selectedAllLabel,
   showAllOption = true,
   singleSelect,
   value,
@@ -45,6 +46,7 @@ export function FilterDropdown({
   portalMenuPlacement?: "auto" | "above" | "below";
   onChange: (value: FilterSelection) => void;
   options: DropdownOption[];
+  selectedAllLabel?: string;
   showAllOption?: boolean;
   singleSelect?: boolean;
   value: FilterSelection;
@@ -55,7 +57,11 @@ export function FilterDropdown({
   const menuRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
   const isActive = value.length > 0;
-  const selectedLabel = formatFilterSelectionLabel(allLabel, options, value);
+  const selectedLabel = formatFilterSelectionLabel(
+    selectedAllLabel ?? allLabel,
+    options,
+    value,
+  );
   const selectedOption = options.find((option) => option.id === value[0]);
   const selectedIcon = selectedOption?.icon ?? icon;
   const selectedToneClassName = getSelectedToneClassName?.(value);

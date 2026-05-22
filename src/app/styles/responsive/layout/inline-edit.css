@@ -53,6 +53,11 @@
   color: var(--text-title);
 }
 
+.task-detail-inline-edit-title-shell > .task-detail-title-empty {
+  color: var(--text-copy);
+  font-style: italic;
+}
+
 .task-detail-inline-edit-title-shell-editing {
   display: block;
   width: 100%;

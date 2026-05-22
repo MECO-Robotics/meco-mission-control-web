@@ -42,6 +42,14 @@
   display: none;
 }
 
+.topbar-responsive-search-actions .task-queue-filter-menu-popover .toolbar-filter-value {
+  display: inline;
+}
+
+.topbar-responsive-search-actions .task-queue-filter-menu-popover .toolbar-filter-chevron {
+  display: block;
+}
+
 .topbar-responsive-search-actions .task-queue-filter-menu-button:hover,
 .topbar-responsive-search-actions .task-queue-filter-menu.is-open .task-queue-filter-menu-button,
 .topbar-responsive-search-actions .task-queue-filter-menu.is-active .task-queue-filter-menu-button {

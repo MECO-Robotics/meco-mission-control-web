@@ -25,9 +25,10 @@ export const RISK_MANAGEMENT_VIEW_ORDER: readonly RiskManagementViewTab[] = [
   "metrics",
 ];
 
-export const WORKLOG_VIEW_ORDER: readonly WorklogsViewTab[] = ["logs", "summary"];
+export const WORKLOG_VIEW_ORDER: readonly WorklogsViewTab[] = ["logs", "kanban", "summary"];
 export const REPORTS_VIEW_ORDER: readonly ReportsViewTab[] = ["qa", "milestone-results"];
 export const MANUFACTURING_VIEW_ORDER: readonly ManufacturingViewTab[] = [
+  "all",
   "cnc",
   "prints",
   "fabrication",
@@ -75,6 +76,7 @@ export const RISK_MANAGEMENT_VIEW_OPTIONS: readonly ViewOption<RiskManagementVie
 
 export const WORKLOG_VIEW_OPTIONS: readonly ViewOption<WorklogsViewTab>[] = [
   { value: "logs", label: "Logs" },
+  { value: "kanban", label: "Kanban" },
   { value: "summary", label: "Summary" },
 ];
 
@@ -84,9 +86,10 @@ export const REPORTS_VIEW_OPTIONS: readonly ViewOption<ReportsViewTab>[] = [
 ];
 
 export const MANUFACTURING_VIEW_OPTIONS: readonly ViewOption<ManufacturingViewTab>[] = [
+  { value: "all", label: "All" },
   { value: "cnc", label: "CNC" },
-  { value: "prints", label: "3D print" },
-  { value: "fabrication", label: "Fabrication" },
+  { value: "prints", label: "3D printing" },
+  { value: "fabrication", label: "Fab" },
 ];
 
 export const ROBOT_INVENTORY_VIEW_OPTIONS: readonly ViewOption<InventoryViewTab>[] = [
@@ -183,7 +186,7 @@ export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = [
     id: "tasks-manufacturing",
     label: "Manufacturing",
     section: "tasks",
-    target: { tab: "manufacturing", manufacturingView: "cnc" },
+    target: { tab: "manufacturing", manufacturingView: "all" },
   },
   {
     id: "inventory-materials",
@@ -222,6 +225,12 @@ export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = [
     target: { tab: "worklogs", worklogsView: "logs" },
   },
   {
+    id: "reports-worklogs-kanban",
+    label: "Kanban",
+    section: "reports",
+    target: { tab: "worklogs", worklogsView: "kanban" },
+  },
+  {
     id: "reports-qa-forms",
     label: "QA forms",
     section: "reports",
@@ -249,6 +258,7 @@ export const NAVIGATION_SUB_ITEMS_BY_SECTION: Record<
 };
 
 export const BASE_SECTION_LABELS: Record<ViewTab, string> = {
+  home: "Home",
   tasks: "Work",
   "risk-management": "Risk Management",
   worklogs: "Worklogs",

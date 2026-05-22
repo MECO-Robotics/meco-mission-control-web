@@ -27,7 +27,8 @@ const SORT_OPTIONS: Array<{ id: RosterMemberSortMode; name: string }> = [
   { id: "availability", name: "Availability" },
   { id: "load-desc", name: "Workload" },
   { id: "overdue-desc", name: "Overdue" },
-  { id: "attendance-desc", name: "Attendance" },
+  { id: "planned-attendance-desc", name: "Planned attendance" },
+  { id: "attendance-desc", name: "Actual attendance" },
   { id: "name", name: "Name" },
 ];
 
@@ -81,9 +82,9 @@ export function RosterWorkloadView({
         value: String(insightsState.insights.summary.unavailableMemberCount),
       },
       {
-        id: "attendance",
-        label: "Attendance (14d)",
-        value: formatHours(insightsState.insights.summary.attendanceHoursLast14Days),
+        id: "planned-attendance",
+        label: "Planned / week",
+        value: formatHours(insightsState.insights.summary.plannedWeeklyAttendanceHours),
       },
     ],
     [insightsState.insights.summary],
@@ -141,7 +142,8 @@ export function RosterWorkloadView({
                 <span>{member.overdueTaskCount} overdue</span>
                 <span>{member.blockedTaskCount} blocked</span>
                 <span>{formatHours(member.remainingOpenHours)} remaining</span>
-                <span>{formatHours(member.attendanceHoursLast14Days)} attendance (14d)</span>
+                <span>{formatHours(member.plannedWeeklyAttendanceHours)} planned/wk</span>
+                <span>{formatHours(member.attendanceHoursLast14Days)} actual (14d)</span>
               </div>
               {member.topTasks.length > 0 ? (
                 <div className="mc-roster-task-list">

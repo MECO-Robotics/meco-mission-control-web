@@ -5,7 +5,10 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { WorkLogsView } from "@/features/workspace/views/WorkLogsView";
-import { actionMatchesSearch } from "@/features/workspace/views/workLogs/workLogsViewState";
+import {
+  actionMatchesSearch,
+  selectActivityActions,
+} from "@/features/workspace/views/workLogs/workLogsViewState";
 import type { WorklogsViewTab } from "@/lib/workspaceNavigation";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { AuditActionRecord } from "@/types/recordsExecution";
@@ -132,9 +135,70 @@ describe("WorkLogsView", () => {
 
     expect(html).toContain("Activity");
     expect(html).toContain("Recent workspace activity");
+    expect(html).toContain("Group: Person");
     expect(html).toContain("Drive CAD");
     expect(html).toContain("Student One");
     expect(html).toContain("Created worklog Drive CAD");
+  });
+
+  it("renders the activity board as the worklogs kanban view", () => {
+    const html = renderWorkLogsView("kanban", {
+      tasks: [
+        {
+          actualHours: 2,
+          artifactId: null,
+          artifactIds: [],
+          assigneeIds: [],
+          blockers: [],
+          dependencyIds: [],
+          disciplineId: "discipline-1",
+          documentationLinked: false,
+          dueDate: "2026-05-01",
+          estimatedHours: 4,
+          id: "task-1",
+          linkedManufacturingIds: [],
+          linkedPurchaseIds: [],
+          mechanismId: null,
+          mechanismIds: [],
+          mentorId: null,
+          ownerId: null,
+          partInstanceId: null,
+          partInstanceIds: [],
+          priority: "medium",
+          projectId: "project-1",
+          requiresDocumentation: false,
+          startDate: "2026-05-01",
+          status: "in-progress",
+          subsystemId: "subsystem-1",
+          subsystemIds: ["subsystem-1"],
+          summary: "Updated drivetrain CAD",
+          targetMilestoneId: null,
+          title: "Drive CAD",
+          workstreamId: null,
+          workstreamIds: [],
+        },
+      ],
+      workLogs: [
+        {
+          date: "2026-05-01",
+          hours: 1.5,
+          id: "worklog-1",
+          notes: "Finished first pass",
+          participantIds: ["student-1"],
+          taskId: "task-1",
+        },
+      ],
+    });
+
+    expect(html).toContain("Work log Kanban");
+    expect(html).toContain("Recent work log activity");
+    expect(html).toContain("Group: Subsystem");
+    expect(html).toContain('aria-label="Group Kanban work logs"');
+    expect(html).toContain("group-kanban-worklogs-subsystem");
+    expect(html).toContain("group-kanban-worklogs-task");
+    expect(html).toContain("group-kanban-worklogs-action");
+    expect(html).toContain("Drive CAD");
+    expect(html).toContain("Logged work on Drive CAD");
   });
 
   it("falls back to work logs when audit actions are unavailable", () => {
@@ -189,6 +253,59 @@ describe("WorkLogsView", () => {
 
     expect(html).toContain("Drive CAD");
     expect(html).toContain("Logged work on Drive CAD");
+  });
+
+  it("builds legacy activity from the unfiltered scoped work log source", () => {
+    const task: BootstrapPayload["tasks"][number] = {
+      actualHours: 2,
+      artifactId: null,
+      artifactIds: [],
+      assigneeIds: [],
+      blockers: [],
+      dependencyIds: [],
+      disciplineId: "discipline-1",
+      documentationLinked: false,
+      dueDate: "2026-05-01",
+      estimatedHours: 4,
+      id: "task-1",
+      linkedManufacturingIds: [],
+      linkedPurchaseIds: [],
+      mechanismId: null,
+      mechanismIds: [],
+      mentorId: null,
+      ownerId: null,
+      partInstanceId: null,
+      partInstanceIds: [],
+      priority: "medium",
+      projectId: "project-1",
+      requiresDocumentation: false,
+      startDate: "2026-05-01",
+      status: "in-progress",
+      subsystemId: "subsystem-1",
+      subsystemIds: ["subsystem-1"],
+      summary: "Updated drivetrain CAD",
+      targetMilestoneId: null,
+      title: "Drive CAD",
+      workstreamId: null,
+      workstreamIds: [],
+    };
+
+    const actions = selectActivityActions({
+      auditActions: [],
+      taskById: { "task-1": task },
+      workLogs: [
+        {
+          date: "2026-05-01",
+          hours: 1.5,
+          id: "worklog-1",
+          notes: "Finished first pass",
+          participantIds: ["student-1"],
+          taskId: "task-1",
+        },
+      ],
+    });
+
+    expect(actions.map((action) => action.id)).toEqual(["legacy-worklog-worklog-1"]);
   });
 
   it("matches activity search against legacy task subsystem ids", () => {

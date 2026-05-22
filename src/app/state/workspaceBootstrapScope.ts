@@ -1,5 +1,6 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { isMemberActiveInSeason, isPartDefinitionActiveInSeason } from "@/lib/appUtils/common";
+import { isMeetingVisibleInProjectScope } from "@/features/workspace/shared/events";
 import { scopeBootstrapRisks } from "./workspaceBootstrapRiskScope";
 
 export function scopeBootstrapBySelection(
@@ -52,6 +53,13 @@ export function scopeBootstrapBySelection(
     return milestoneProjectIds.length === 0
       ? true
       : milestoneProjectIds.some((projectId) => activeProjectIds.has(projectId));
+  });
+  const scopedMeetings = (payload.meetings ?? []).filter((meeting) => {
+    if (selectedSeasonId && meeting.seasonId && meeting.seasonId !== selectedSeasonId) {
+      return false;
+    }
+
+    return isMeetingVisibleInProjectScope(meeting, activeProjectIds);
   });
   const scopedWorkstreamIds = new Set(scopedWorkstreams.map((workstream) => workstream.id));
   const scopedMilestoneIds = new Set(scopedMilestones.map((milestone) => milestone.id));
@@ -201,17 +209,15 @@ export function scopeBootstrapBySelection(
       return false;
     }
 
-    const requiresExistingScopeEntities = action.operation !== "delete";
+    const actionTaskId = action.taskId ?? (action.entityType === "task" ? action.entityId : null);
+    const actionSubsystemId =
+      action.subsystemId ?? (action.entityType === "subsystem" ? action.entityId : null);
 
-    if (requiresExistingScopeEntities && action.taskId && !scopedTaskIds.has(action.taskId)) {
+    if (actionTaskId && !scopedTaskIds.has(actionTaskId)) {
       return false;
     }
 
-    if (
-      requiresExistingScopeEntities &&
-      action.subsystemId &&
-      !scopedSubsystemIds.has(action.subsystemId)
-    ) {
+    if (actionSubsystemId && !scopedSubsystemIds.has(actionSubsystemId)) {
       return false;
     }
 
@@ -229,6 +235,7 @@ export function scopeBootstrapBySelection(
     purchaseItems: scopedPurchaseItems,
     manufacturingItems: scopedManufacturingItems,
     milestones: scopedMilestones,
+    meetings: scopedMeetings,
     members: scopedMembers,
     partDefinitions: scopedPartDefinitions,
     tasks: scopedTasksWithVisibleDependencies,

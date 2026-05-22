@@ -1,0 +1,116 @@
+.sidebar-scope-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.52rem;
+  width: 100%;
+  min-height: 2.35rem;
+  min-width: 0;
+  padding: 0.48rem 0.54rem;
+  border: 1px solid rgba(22, 71, 142, 0.16);
+  border-radius: 7px;
+  background: rgba(248, 250, 252, 0.78);
+  color: var(--text-copy);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.sidebar-scope-trigger:hover,
+.sidebar-scope-trigger:focus-visible,
+.sidebar-scope-trigger[data-active="true"] {
+  border-color: rgba(22, 71, 142, 0.28);
+  background: var(--meco-soft-blue);
+  color: var(--meco-blue);
+  outline: none;
+}
+
+.sidebar-scope-trigger-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+  flex: 0 0 auto;
+}
+
+.sidebar-scope-trigger-copy {
+  display: grid;
+  gap: 0.03rem;
+  min-width: 0;
+}
+
+.sidebar-scope-trigger-caret {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  margin-left: auto;
+  color: currentColor;
+  opacity: 0.68;
+  transition:
+    opacity 0.14s ease,
+    transform 0.14s ease;
+}
+
+.sidebar-scope-trigger:hover .sidebar-scope-trigger-caret,
+.sidebar-scope-trigger:focus-visible .sidebar-scope-trigger-caret,
+.sidebar-scope-trigger[data-active="true"] .sidebar-scope-trigger-caret {
+  opacity: 1;
+  transform: translateX(1px);
+}
+
+.sidebar-scope-trigger-line {
+  overflow: hidden;
+  color: currentColor;
+  font-size: 0.78rem;
+  font-weight: 760;
+  line-height: 1.18;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar[data-collapsed="true"] .sidebar-scope-trigger {
+  justify-content: center;
+  min-height: 2.35rem;
+  padding: 0;
+}
+
+.sidebar-scope-popup-shell {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+  max-width: min(31rem, calc(100vw - var(--shell-sidebar-width) - 1rem));
+}
+
+.sidebar-scope-kind-panel,
+.sidebar-scope-target-panel {
+  display: grid;
+  gap: 0.14rem;
+  flex: 0 0 auto;
+  width: 12.25rem;
+  max-width: min(12.25rem, calc(100vw - var(--shell-sidebar-width) - 1rem));
+  max-height: calc(100vh - var(--shell-topbar-height) - 1rem);
+  overflow-y: auto;
+  padding: 0.38rem;
+  border: 1px solid var(--border-base);
+  border-radius: 10px;
+  background: var(--bg-panel);
+  box-shadow: 0 12px 24px rgba(15, 28, 52, 0.2);
+}
+
+.sidebar-scope-target-panel[data-scope-panel="season"] {
+  align-self: flex-end;
+}
+
+.sidebar-scope-option.is-selected {
+  color: var(--meco-blue);
+}
+
+.page-shell.dark-mode .sidebar-scope-trigger {
+  background: rgba(15, 23, 42, 0.58);
+  border-color: rgba(148, 163, 184, 0.16);
+}

@@ -114,6 +114,8 @@
   justify-content: center;
   max-width: calc(100% - 0.35rem);
   border-radius: 999px;
+  background: #475569;
+  color: #fff;
   padding: 0.08rem 0.35rem;
   font-size: 0.56rem;
   font-weight: 700;

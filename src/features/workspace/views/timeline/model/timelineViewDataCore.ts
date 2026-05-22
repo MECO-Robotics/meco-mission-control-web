@@ -1,5 +1,5 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { MilestoneRecord, TaskRecord } from "@/types/recordsExecution";
+import type { MeetingRecord, MilestoneRecord, TaskRecord } from "@/types/recordsExecution";
 import { dateDiffInDays } from "@/lib/appUtils/common";
 import { datePortion, endOfTimelineWeek, monthEndFromDay, monthStartFromDay, startOfTimelineWeek } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
@@ -24,13 +24,24 @@ function compareTimelineMilestonesByStart(left: MilestoneRecord, right: Mileston
   return left.id.localeCompare(right.id);
 }
 
+function getMeetingStartDateTime(meeting: MeetingRecord) {
+  return meeting.startDateTime ?? (meeting.time ? `${meeting.date}T${meeting.time}` : meeting.date);
+}
+
+function compareTimelineMeetingsByStart(left: MeetingRecord, right: MeetingRecord) {
+  const startComparison = getMeetingStartDateTime(left).localeCompare(getMeetingStartDateTime(right));
+  return startComparison !== 0 ? startComparison : left.id.localeCompare(right.id);
+}
+
 function buildTimelineDateRange({
   milestones,
+  meetings,
   tasks,
   viewAnchorDate,
   viewInterval,
 }: {
   milestones: BootstrapPayload["milestones"];
+  meetings: NonNullable<BootstrapPayload["meetings"]>;
   tasks: TaskRecord[];
   viewAnchorDate: string;
   viewInterval: TimelineViewInterval;
@@ -59,6 +70,13 @@ function buildTimelineDateRange({
     milestones.forEach((milestone) => {
       includeCandidate(datePortion(milestone.startDateTime));
       includeCandidate(datePortion(milestone.endDateTime ?? milestone.startDateTime));
+    });
+
+    meetings.forEach((meeting) => {
+      includeCandidate(datePortion(getMeetingStartDateTime(meeting)));
+      if (meeting.endDateTime) {
+        includeCandidate(datePortion(meeting.endDateTime));
+      }
     });
 
     if (!earliestDate || !latestDate) {
@@ -166,8 +184,45 @@ function buildTimelineDayMilestones(
   return dayMilestones;
 }
 
+function buildTimelineDayMeetings(
+  startDate: string,
+  endDate: string,
+  meetings: NonNullable<BootstrapPayload["meetings"]>,
+) {
+  const dayMeetings: Record<string, MeetingRecord[]> = {};
+  const meetingsSortedByStart = [...meetings].sort(compareTimelineMeetingsByStart);
+
+  meetingsSortedByStart.forEach((meeting) => {
+    const meetingStart = datePortion(getMeetingStartDateTime(meeting));
+    const meetingEnd = datePortion(meeting.endDateTime ?? getMeetingStartDateTime(meeting));
+
+    if (meetingStart > endDate || meetingEnd < startDate) {
+      return;
+    }
+
+    const rangeStart = meetingStart < startDate ? startDate : meetingStart;
+    const rangeEnd = meetingEnd > endDate ? endDate : meetingEnd;
+    const cursor = new Date(`${rangeStart}T12:00:00`);
+    const finalDay = new Date(`${rangeEnd}T12:00:00`);
+
+    while (cursor <= finalDay) {
+      const dayKey = cursor.toISOString().slice(0, 10);
+      const existing = dayMeetings[dayKey];
+      if (existing) {
+        existing.push(meeting);
+      } else {
+        dayMeetings[dayKey] = [meeting];
+      }
+      cursor.setDate(cursor.getDate() + 1);
+    }
+  });
+
+  return dayMeetings;
+}
+
 export function buildTimelineData({
   isAllProjectsView,
+  meetings = [],
   milestones,
   projectsById,
   scopedSubsystems,
@@ -177,6 +232,7 @@ export function buildTimelineData({
 }: {
   isAllProjectsView: boolean;
   milestones: BootstrapPayload["milestones"];
+  meetings?: NonNullable<BootstrapPayload["meetings"]>;
   projectsById: Record<string, BootstrapPayload["projects"][number]>;
   scopedSubsystems: BootstrapPayload["subsystems"];
   scopedTasks: TaskRecord[];
@@ -185,6 +241,7 @@ export function buildTimelineData({
 }) {
   const range = buildTimelineDateRange({
     milestones,
+    meetings,
     tasks: scopedTasks,
     viewAnchorDate,
     viewInterval,
@@ -192,6 +249,7 @@ export function buildTimelineData({
 
   const days = buildTimelineDays(range.startDate, range.endDate);
   const dayMilestones = buildTimelineDayMilestones(range.startDate, range.endDate, milestones);
+  const dayMeetings = buildTimelineDayMeetings(range.startDate, range.endDate, meetings);
   const subsystemRows = buildTimelineSubsystemRows({
     includeEmptySubsystems: !isAllProjectsView,
     projectsById,
@@ -201,5 +259,5 @@ export function buildTimelineData({
     endDate: range.endDate,
   });
 
-  return { days, dayMilestones, subsystemRows };
+  return { days, dayMeetings, dayMilestones, subsystemRows };
 }

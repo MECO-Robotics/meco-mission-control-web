@@ -1,5 +1,5 @@
-import type { MilestonePayload } from "@/types/payloads";
-import type { MilestoneRecord } from "@/types/recordsExecution";
+import type { MeetingPayload, MilestonePayload } from "@/types/payloads";
+import type { MeetingRecord, MilestoneRecord } from "@/types/recordsExecution";
 import { requestItem } from "./common";
 
 export function createMilestoneRecord(payload: MilestonePayload, onUnauthorized?: () => void) {
@@ -21,4 +21,8 @@ export function updateMilestoneRecord(
 
 export function deleteMilestoneRecord(milestoneId: string, onUnauthorized?: () => void) {
   return requestItem<MilestoneRecord, never>(`/milestones/${milestoneId}`, "DELETE", undefined, onUnauthorized);
+}
+
+export function createMeetingRecord(payload: MeetingPayload, onUnauthorized?: () => void) {
+  return requestItem<MeetingRecord, MeetingPayload>("/meetings", "POST", payload, onUnauthorized);
 }

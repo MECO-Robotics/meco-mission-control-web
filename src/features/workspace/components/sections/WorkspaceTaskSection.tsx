@@ -25,6 +25,8 @@ export function WorkspaceTaskSection({
     activePersonFilter,
     bootstrap,
     disciplinesById,
+    handleMeetingSave,
+    handleTaskStatusChange,
     handleTimelineMilestoneDelete,
     handleTimelineMilestoneSave,
     isAllProjectsView,
@@ -65,6 +67,7 @@ export function WorkspaceTaskSection({
           activePersonFilter={activePersonFilter}
           bootstrap={bootstrap}
           isAllProjectsView={isAllProjectsView}
+          onSaveMeeting={handleMeetingSave}
           onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
           onSaveTimelineMilestone={handleTimelineMilestoneSave}
           onTaskDetailOpen={openTimelineTaskDetailsModal}
@@ -128,6 +131,7 @@ export function WorkspaceTaskSection({
           membersById={membersById}
           openCreateTaskModal={openCreateTaskModal}
           openEditTaskModal={openTimelineTaskDetailsModal}
+          onReassignTaskStatus={handleTaskStatusChange}
           subsystemsById={subsystemsById}
         />
       </WorkspaceSubPanel>

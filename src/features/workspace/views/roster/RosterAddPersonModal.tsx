@@ -5,6 +5,7 @@ import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdo
 import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
 import type { MemberPayload } from "@/types/payloads";
 import type { MemberRecord } from "@/types/recordsOrganization";
+import { RosterAttendanceFields } from "./RosterAttendanceFields";
 
 interface DisciplineOption {
   id: string;
@@ -158,6 +159,10 @@ export const RosterAddPersonModal: React.FC<RosterAddPersonModalProps> = ({
                   <option value="external">External access</option>
                 </select>
               </label>
+              <RosterAttendanceFields
+                onChange={(patch) => setMemberForm((curr) => ({ ...curr, ...patch }))}
+                value={memberForm}
+              />
             </>
           )}
           <div className="modal-actions modal-wide">

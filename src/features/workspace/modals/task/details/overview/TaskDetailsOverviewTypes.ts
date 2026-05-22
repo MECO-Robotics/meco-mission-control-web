@@ -8,6 +8,7 @@ export interface TaskDetailsOverviewSectionProps {
   activeTask: TaskRecord;
   bootstrap: BootstrapPayload;
   canInlineEdit: boolean;
+  editableMemberOptions?: BootstrapPayload["members"];
   editingField: TaskDetailsEditableField | null;
   openTaskEditModal: () => void;
   setEditingField: Dispatch<SetStateAction<TaskDetailsEditableField | null>>;

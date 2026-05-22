@@ -15,15 +15,27 @@ export function useAppWorkspaceDerived(state: AppWorkspaceState) {
     ...selection,
     ...workspace,
     isMyViewActive:
-      Boolean(selection.signedInMember) &&
-      stateSlice.activePersonFilter.length === 1 &&
-      stateSlice.activePersonFilter[0] === selection.signedInMember?.id,
+      selection.signedInMember
+        ? stateSlice.activePersonFilter.length === 1 &&
+          stateSlice.activePersonFilter[0] === selection.signedInMember.id
+        : stateSlice.isUnmatchedMyViewActive,
     toggleMyView: () => {
       const signedInMemberId = selection.signedInMember?.id;
       if (!signedInMemberId) {
+        const nextIsActive = !stateSlice.isUnmatchedMyViewActive;
+        stateSlice.setActivePersonFilter([]);
+        stateSlice.setIsUnmatchedMyViewActive(nextIsActive);
+        if (nextIsActive) {
+          stateSlice.enqueueTaskEditNotice({
+            title: "My View Notice",
+            message: "No roster member is linked to this account yet.",
+            tone: "info",
+          });
+        }
         return;
       }
 
+      stateSlice.setIsUnmatchedMyViewActive(false);
       stateSlice.setDataMessage(null);
       stateSlice.setActivePersonFilter((current) =>
         current.length === 1 && current[0] === signedInMemberId

@@ -24,6 +24,8 @@ export function AppWorkspaceShellContent({
       handleCreateMember={c.handleCreateMember}
       handleReactivateMemberForSeason={c.handleReactivateMemberForSeason}
       handleDeleteMember={c.handleDeleteMember}
+      handleMeetingSave={c.handleMeetingSave}
+      handleTaskStatusChange={c.handleTaskStatusChange}
       handleTimelineMilestoneDelete={c.handleTimelineMilestoneDelete}
       handleTimelineMilestoneSave={c.handleTimelineMilestoneSave}
       handleUpdateMember={c.handleUpdateMember}
@@ -32,6 +34,7 @@ export function AppWorkspaceShellContent({
       isDeletingMember={c.isDeletingMember}
       isEditPersonOpen={c.isEditPersonOpen}
       isLoadingData={c.isLoadingData}
+      isNotificationQueueOpen={c.isNotificationQueueOpen}
       isAllProjectsView={c.isAllProjectsView}
       isNonRobotProject={c.isNonRobotProject}
       isSavingMember={c.isSavingMember}
@@ -90,6 +93,7 @@ export function AppWorkspaceShellContent({
       selectedMemberId={c.selectedMemberId}
       setIsAddPersonOpen={c.setIsAddPersonOpen}
       setIsEditPersonOpen={c.setIsEditPersonOpen}
+      setManufacturingView={c.setManufacturingView}
       setMemberEditDraft={c.setMemberEditDraft}
       setMemberForm={c.setMemberForm}
       setActivePersonFilter={c.setActivePersonFilter}
@@ -102,6 +106,7 @@ export function AppWorkspaceShellContent({
       timelineMilestoneCreateSignal={c.timelineMilestoneCreateSignal}
       disablePanelAnimations={c.isWorkspaceModalOpen}
       onDismissDataMessage={c.clearDataMessage}
+      onDismissNotificationHistoryItem={c.dismissNotificationHistoryItem}
       onDismissTaskEditNotice={c.dismissTaskEditNotice}
       onTaskEditCanceled={c.notifyTaskEditCanceled}
       onTaskEditSaved={c.notifyTaskEditSaved}
@@ -109,6 +114,7 @@ export function AppWorkspaceShellContent({
       onStartInteractiveTutorialChapter={(chapterId) => void c.startInteractiveTutorial(chapterId)}
       interactiveTutorialChapters={c.interactiveTutorialChapters}
       isInteractiveTutorialActive={c.isInteractiveTutorialActive}
+      notificationHistory={c.notificationHistory}
     />
   );
 }

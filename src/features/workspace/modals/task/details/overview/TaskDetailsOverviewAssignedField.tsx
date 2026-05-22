@@ -11,7 +11,12 @@ export function TaskDetailsOverviewAssignedField({
   openTaskEditModal,
   setEditingField,
 }: TaskDetailsOverviewFieldProps) {
-  const assignedContent = <TaskDetailsAssignedList assigneeNames={model.assigneeNames} />;
+  const assignedContent = (
+    <TaskDetailsAssignedList
+      assigneeNames={model.assigneeNames}
+      emptyLabel={canInlineEdit ? "Add teammates" : undefined}
+    />
+  );
 
   return (
     <div className="task-details-overview-assigned">

@@ -2,6 +2,7 @@
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { ManufacturingItemRecord } from "@/types/recordsInventory";
+import type { ManufacturingViewTab } from "@/lib/workspaceNavigation";
 import { IconManufacturing, IconPerson, IconTasks } from "@/components/shared/Icons";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
@@ -16,6 +17,10 @@ import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspa
 import { MANUFACTURING_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
 import { KanbanScrollFrame } from "@/features/workspace/views/kanban/KanbanScrollFrame";
 import { ManufacturingKanbanBoard } from "./ManufacturingKanbanBoard";
+import {
+  MANUFACTURING_PROCESS_FILTER_OPTIONS,
+  filterManufacturingItemsByProcessView,
+} from "./manufacturingProcessFilter";
 
 interface ManufacturingQueueViewProps {
   activePersonFilter: FilterSelection;
@@ -26,10 +31,12 @@ interface ManufacturingQueueViewProps {
   membersById: MembersById;
   onCreate: () => void;
   onEdit: (item: ManufacturingItemRecord) => void;
+  onProcessFilterChange?: (value: ManufacturingViewTab) => void;
   onQuickStatusChange?: (
     item: ManufacturingItemRecord,
     status: ManufacturingItemRecord["status"],
   ) => Promise<void>;
+  processFilterValue?: ManufacturingViewTab;
   showMentorQuickActions?: boolean;
   showInHouseColumn?: boolean;
   subsystemsById: SubsystemsById;
@@ -46,7 +53,9 @@ export function ManufacturingQueueView({
   membersById,
   onCreate,
   onEdit,
+  onProcessFilterChange,
   onQuickStatusChange,
+  processFilterValue,
   showMentorQuickActions = false,
   showInHouseColumn = false,
   subsystemsById,
@@ -58,6 +67,8 @@ export function ManufacturingQueueView({
   const [requester, setRequester] = useState<FilterSelection>([]);
   const [status, setStatus] = useState<FilterSelection>([]);
   const [material, setMaterial] = useState<FilterSelection>([]);
+  const processFilterSelection =
+    processFilterValue && processFilterValue !== "all" ? [processFilterValue] : [];
 
   const uniqueMaterials = useMemo(() => {
     const materials =
@@ -72,7 +83,11 @@ export function ManufacturingQueueView({
   }, [bootstrap.materials, items]);
 
   const filteredItems = useMemo(() => {
-    return items.filter((item) => {
+    const processItems = processFilterValue
+      ? filterManufacturingItemsByProcessView(items, processFilterValue)
+      : items;
+
+    return processItems.filter((item) => {
       const matchesSearch = !search || item.title.toLowerCase().includes(search.toLowerCase());
       const matchesSubsystem = filterSelectionIncludes(subsystem, item.subsystemId);
       const matchesRequester = filterSelectionIncludes(requester, item.requestedById);
@@ -89,11 +104,19 @@ export function ManufacturingQueueView({
         matchesPerson
       );
     });
-  }, [activePersonFilter, items, material, requester, search, status, subsystem]);
+  }, [activePersonFilter, items, material, processFilterValue, requester, search, status, subsystem]);
   const manufacturingPagination = useWorkspacePagination(filteredItems);
+  const activeFilterCount = [
+    processFilterSelection,
+    subsystem,
+    requester,
+    material,
+    status,
+  ].filter((value) => value.length > 0).length;
   const manufacturingFilterMotionClass = useFilterChangeMotionClass([
     activePersonFilter,
     material,
+    processFilterValue,
     requester,
     search,
     status,
@@ -102,6 +125,14 @@ export function ManufacturingQueueView({
 
   const tutorialTarget = (suffix: string) =>
     tutorialTargetPrefix ? `${tutorialTargetPrefix}-${suffix}` : undefined;
+  const handleProcessFilterChange = (value: FilterSelection) => {
+    const [nextValue] = value;
+    onProcessFilterChange?.(
+      nextValue === "cnc" || nextValue === "prints" || nextValue === "fabrication"
+        ? nextValue
+        : "all",
+    );
+  };
 
   return (
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
@@ -110,11 +141,28 @@ export function ManufacturingQueueView({
           <TopbarResponsiveSearch
             actions={
               <CompactFilterMenu
-                activeCount={[subsystem, requester, material, status].filter((value) => value.length > 0).length}
+                activeCount={activeFilterCount}
                 ariaLabel={`${title} filters`}
                 buttonLabel="Filters"
                 className="materials-filter-menu"
                 items={[
+                  {
+                    hidden: !onProcessFilterChange,
+                    label: "Process",
+                    content: (
+                      <FilterDropdown
+                        allLabel="All processes"
+                        ariaLabel={`Filter ${title} by process`}
+                        className="task-queue-filter-menu-submenu manufacturing-process-filter"
+                        icon={<IconManufacturing />}
+                        onChange={handleProcessFilterChange}
+                        options={MANUFACTURING_PROCESS_FILTER_OPTIONS}
+                        selectedAllLabel="All"
+                        singleSelect
+                        value={processFilterSelection}
+                      />
+                    ),
+                  },
                   {
                     label: "Subsystem",
                     content: (
@@ -125,6 +173,7 @@ export function ManufacturingQueueView({
                         icon={<IconManufacturing />}
                         onChange={setSubsystem}
                         options={bootstrap.subsystems}
+                        selectedAllLabel="All"
                         value={subsystem}
                       />
                     ),
@@ -139,6 +188,7 @@ export function ManufacturingQueueView({
                         icon={<IconPerson />}
                         onChange={setRequester}
                         options={bootstrap.members}
+                        selectedAllLabel="All"
                         value={requester}
                       />
                     ),
@@ -153,6 +203,7 @@ export function ManufacturingQueueView({
                         icon={<IconManufacturing />}
                         onChange={setMaterial}
                         options={uniqueMaterials}
+                        selectedAllLabel="All"
                         value={material}
                       />
                     ),
@@ -167,6 +218,7 @@ export function ManufacturingQueueView({
                         icon={<IconTasks />}
                         onChange={setStatus}
                         options={MANUFACTURING_STATUS_OPTIONS}
+                        selectedAllLabel="All"
                         value={status}
                       />
                     ),
@@ -181,7 +233,6 @@ export function ManufacturingQueueView({
             tutorialTarget={tutorialTarget("search-input")}
             value={search}
           />
-
         </div>
       </AppTopbarSlotPortal>
 

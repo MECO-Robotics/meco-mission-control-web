@@ -62,6 +62,7 @@ export const TimelineMergedCellColumn: React.FC<TimelineMergedCellColumnProps> =
   <div
     aria-pressed={ariaPressed}
     className={className}
+    data-collapsed={collapsed ? "true" : "false"}
     data-timeline-column={dataTimelineColumn}
     onClick={onClick}
     onKeyDown={onKeyDown}
