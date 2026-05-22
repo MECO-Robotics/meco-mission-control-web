@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 
 import type { TaskRecord } from "@/types/recordsExecution";
 import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
@@ -20,6 +20,8 @@ interface WorkLogsActivitySectionProps {
   actions: WorkLogsViewState["activityActions"];
   activityGroupMode: WorkLogActivityGroupMode;
   activityPagination: ActivityPaginationState;
+  description: string;
+  groupingControls?: ReactNode;
   membersById: MembersById;
   openEditTaskModal: (task: TaskRecord) => void;
   subsystemsById: SubsystemsById;
@@ -64,6 +66,8 @@ export function WorkLogsActivitySection({
   actions,
   activityGroupMode,
   activityPagination,
+  description,
+  groupingControls,
   membersById,
   openEditTaskModal,
   subsystemsById,
@@ -99,7 +103,10 @@ export function WorkLogsActivitySection({
 
   return (
     <>
-      <p className="section-copy filter-copy">Recent workspace activity across the current workspace scope.</p>
+      <p className="section-copy filter-copy">{description}</p>
+      {groupingControls ? (
+        <div className="worklog-activity-board-controls">{groupingControls}</div>
+      ) : null}
       <KanbanScrollFrame>
         <KanbanColumns
           boardClassName="worklog-activity-board"
