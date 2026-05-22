@@ -7,6 +7,7 @@ import type { AppWorkspaceLoaderModel, SelectMemberHandler, UnauthorizedHandler 
 import type { WorkspaceReconciliationState } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
 import { getSinglePersonFilterId } from "@/app/state/workspaceMemberRoleUtils";
 import { scopeBootstrapBySelection } from "@/app/state/workspaceBootstrapScope";
+import type { WorkspaceLoadScope } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
 
 export function useAppWorkspaceLoaderWorkspace(
   state: AppWorkspaceState,
@@ -14,21 +15,29 @@ export function useAppWorkspaceLoaderWorkspace(
   handleUnauthorized: UnauthorizedHandler,
   selectMember: SelectMemberHandler,
 ) {
-  return useCallback(async () => {
+  return useCallback(async (scope: WorkspaceLoadScope = {}) => {
     state.setIsLoadingData(true);
     state.setDataMessage(null);
 
     try {
+      const personId =
+        scope.personId === undefined
+          ? getSinglePersonFilterId(model.activePersonFilter)
+          : scope.personId;
+      const seasonId =
+        scope.seasonId === undefined ? model.selectedSeasonId : scope.seasonId;
+      const projectId =
+        scope.projectId === undefined ? model.selectedProjectId : scope.projectId;
       const payload = await fetchBootstrap(
-        getSinglePersonFilterId(model.activePersonFilter),
-        model.selectedSeasonId,
-        model.selectedProjectId,
+        personId,
+        seasonId,
+        projectId,
         handleUnauthorized,
       );
       const scopedPayload = scopeBootstrapBySelection(
         payload,
-        model.selectedSeasonId,
-        model.selectedProjectId,
+        seasonId,
+        projectId,
       );
 
       startTransition(() => {
@@ -47,35 +56,5 @@ export function useAppWorkspaceLoaderWorkspace(
     } finally {
       state.setIsLoadingData(false);
     }
-  }, [
-    handleUnauthorized,
-    model.activeArtifactId,
-    model.activeMechanismId,
-    model.activePersonFilter,
-    model.activePartDefinitionId,
-    model.activePartInstanceId,
-    model.activePurchaseId,
-    model.activeSubsystemId,
-    model.activeTaskId,
-    model.artifactDraft.kind,
-    model.artifactModalMode,
-    model.milestoneReportModalMode,
-    model.manufacturingModalMode,
-    model.materialModalMode,
-    model.mechanismModalMode,
-    model.partDefinitionModalMode,
-    model.partInstanceModalMode,
-    model.purchaseModalMode,
-    model.qaReportModalMode,
-    model.selectedMemberId,
-    model.selectedProjectId,
-    model.selectedSeasonId,
-    model.sessionUser,
-    model.subsystemModalMode,
-    model.taskModalMode,
-    model.workLogModalMode,
-    model.workstreamModalMode,
-    selectMember,
-    state,
-  ]);
+  }, [handleUnauthorized, model, selectMember, state]);
 }
