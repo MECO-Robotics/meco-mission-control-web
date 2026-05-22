@@ -175,6 +175,7 @@ export function TaskCalendarView({
         <div className="task-calendar-frame">
           <TaskCalendarMonthToolbar
             monthLabel={calendar.monthLabel}
+            onMonthChange={() => setSelectedDateKey(null)}
             setMonthCursor={calendar.setMonthCursor}
           />
 
