@@ -122,6 +122,22 @@ export function filterTimelineMilestonesByProjectSelection({
   );
 }
 
+export function resolveTimelineFilteredProjectIds({
+  isAllProjectsView,
+  projectFilter,
+  scopedProjectIds,
+}: {
+  isAllProjectsView: boolean;
+  projectFilter: FilterSelection;
+  scopedProjectIds: string[];
+}) {
+  if (!isAllProjectsView || projectFilter.length === 0) {
+    return scopedProjectIds;
+  }
+
+  return scopedProjectIds.filter((projectId) => projectFilter.includes(projectId));
+}
+
 export function hasActiveTimelineTaskFilters({
   disciplineFilter,
   isAllProjectsView,

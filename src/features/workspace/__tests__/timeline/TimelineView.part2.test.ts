@@ -8,7 +8,7 @@ import { clampTimelineZoom, formatTimelineZoomLabel, getTimelineDayTrackSize, ge
 import { formatTimelinePeriodLabel, midpointOfTimelineDays, midpointOfTimelineWeek, monthEndFromDay } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
 import { buildTimelineGridLayout } from "@/features/workspace/views/timeline/model/timelineGridLayout";
-import { countActiveTimelineFilters, filterTimelineMilestonesByProjectSelection, filterTimelineTasks } from "@/features/workspace/views/timeline/model/timelineViewFilters";
+import { countActiveTimelineFilters, filterTimelineMilestonesByProjectSelection, filterTimelineTasks, resolveTimelineFilteredProjectIds } from "@/features/workspace/views/timeline/model/timelineViewFilters";
 import { createBootstrap, createBootstrapWithEmptySubsystem, createBootstrapWithoutTasks, createTimelineMilestone, readAppCss, membersById } from "./timelineTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
@@ -339,6 +339,18 @@ describe("TimelineView", () => {
       "global-milestone",
       "selected-project-milestone",
     ]);
+  });
+
+  it("keeps modal milestone project scope separate from the active project filter", () => {
+    const scopedProjectIds = ["project-1", "project-2"];
+    const filteredProjectIds = resolveTimelineFilteredProjectIds({
+      isAllProjectsView: true,
+      projectFilter: ["project-1"],
+      scopedProjectIds,
+    });
+
+    expect(filteredProjectIds).toEqual(["project-1"]);
+    expect(scopedProjectIds).toEqual(["project-1", "project-2"]);
   });
 
   it("formats week period labels with year only on the ending day", () => {

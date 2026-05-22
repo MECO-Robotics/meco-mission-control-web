@@ -13,6 +13,7 @@ import {
   filterTimelineTasks,
   hasActiveTimelineTaskFilters,
   readTimelineTaskSubsystemIds,
+  resolveTimelineFilteredProjectIds,
   type TimelineTaskFilters,
 } from "../model/timelineViewFilters";
 import { filterTimelineMilestonesByPersonSelection } from "../model/timelineViewDataPresentation";
@@ -40,16 +41,17 @@ export function useTimelineViewScope({
   const subsystemsById = useMemo(() => buildLookupMap(bootstrap.subsystems), [bootstrap.subsystems]);
   const disciplinesById = useMemo(() => buildLookupMap(bootstrap.disciplines), [bootstrap.disciplines]);
   const tasksById = useMemo(() => buildLookupMap(bootstrap.tasks), [bootstrap.tasks]);
-  const scopedProjectIds = useMemo(() => {
-    const projectIds = bootstrap.projects.map((project) => project.id);
-
-    if (!isAllProjectsView || timelineFilters.projectFilter.length === 0) {
-      return projectIds;
-    }
-
-    return projectIds.filter((projectId) => timelineFilters.projectFilter.includes(projectId));
-  }, [bootstrap.projects, isAllProjectsView, timelineFilters.projectFilter]);
-  const scopedProjectIdSet = useMemo(() => new Set(scopedProjectIds), [scopedProjectIds]);
+  const scopedProjectIds = useMemo(() => bootstrap.projects.map((project) => project.id), [bootstrap.projects]);
+  const filteredProjectIds = useMemo(
+    () =>
+      resolveTimelineFilteredProjectIds({
+        isAllProjectsView,
+        projectFilter: timelineFilters.projectFilter,
+        scopedProjectIds,
+      }),
+    [isAllProjectsView, scopedProjectIds, timelineFilters.projectFilter],
+  );
+  const filteredProjectIdSet = useMemo(() => new Set(filteredProjectIds), [filteredProjectIds]);
   const normalizedSearch = searchFilter.trim().toLowerCase();
   const scopedTasksByPerson = useMemo(
     () =>
@@ -126,7 +128,7 @@ export function useTimelineViewScope({
       isAllProjectsView,
       milestones: milestonesByPerson,
       projectFilter: timelineFilters.projectFilter,
-      scopedProjectIdSet,
+      scopedProjectIdSet: filteredProjectIdSet,
     });
 
     if (normalizedSearch.length === 0) {
@@ -154,12 +156,12 @@ export function useTimelineViewScope({
     isAllProjectsView,
     normalizedSearch,
     projectsById,
-    scopedProjectIdSet,
+    filteredProjectIdSet,
     timelineFilters.projectFilter,
   ]);
   const scopedMeetings = useMemo(() => {
     const meetings = (bootstrap.meetings ?? []).filter((meeting) =>
-      isMeetingVisibleInProjectScope(meeting, scopedProjectIdSet),
+      isMeetingVisibleInProjectScope(meeting, filteredProjectIdSet),
     );
     if (normalizedSearch.length === 0) {
       return meetings;
@@ -179,7 +181,7 @@ export function useTimelineViewScope({
         .toLowerCase()
         .includes(normalizedSearch);
     });
-  }, [bootstrap.meetings, normalizedSearch, projectsById, scopedProjectIdSet]);
+  }, [bootstrap.meetings, filteredProjectIdSet, normalizedSearch, projectsById]);
   const timelineFilterMotionClass = useFilterChangeMotionClass([
     activePersonFilter,
     searchFilter,
