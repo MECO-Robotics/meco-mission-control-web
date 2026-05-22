@@ -34,7 +34,7 @@ export const TimelineProjectHeaderCell: React.FC<TimelineProjectHeaderCellProps>
       justifyContent={projectCollapsed ? "flex-start" : "center"}
       left={0}
       onToggle={() => toggleProject(project.id)}
-      overflow="hidden"
+      overflow="visible"
       padding={projectCollapsed ? "0 12px" : "8px 10px 8px 26px"}
       shouldShowToggle
       toggleIcon={<TimelineCollapseArrow isCollapsed={projectCollapsed} />}
@@ -43,7 +43,9 @@ export const TimelineProjectHeaderCell: React.FC<TimelineProjectHeaderCellProps>
       zIndex={10022}
     >
       <div
+        aria-label={`${project.name} ${project.completeCount}/${project.taskCount}`}
         className={`timeline-merged-cell-text${shouldRotateProjectLabel ? " is-rotated" : ""}`}
+        role="group"
         style={
           shouldRotateProjectLabel
             ? ({
@@ -51,8 +53,12 @@ export const TimelineProjectHeaderCell: React.FC<TimelineProjectHeaderCellProps>
               } as React.CSSProperties)
             : undefined
         }
+        tabIndex={0}
       >
-        <span className="timeline-merged-cell-title timeline-ellipsis-reveal" data-full-text={project.name}>
+        <span
+          className="timeline-merged-cell-title timeline-project-title timeline-ellipsis-reveal"
+          data-full-text={project.name}
+        >
           {project.name}
         </span>
         <span className="timeline-merged-cell-meta">
