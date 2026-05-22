@@ -1,12 +1,12 @@
 import React from "react";
-import { IconCalendar, IconChevronLeft, IconChevronRight, IconPerson, IconSearchMinus, IconSearchPlus } from "@/components/shared/Icons";
+import { IconCalendar, IconChevronLeft, IconChevronRight, IconSearchMinus, IconSearchPlus } from "@/components/shared/Icons";
 import type { BootstrapPayload } from "@/types/bootstrap";
-import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
-import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
 import { formatTimelineZoomLabel, TIMELINE_ZOOM_MAX } from "@/features/workspace/shared/timeline/timelineZoom";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
+import { TimelineCompactFilterMenu } from "./components/TimelineCompactFilterMenu";
 
 const TIMELINE_INTERVAL_OPTIONS: Array<{ id: TimelineViewInterval; label: string; shortLabel: string }> = [
   { id: "all", label: "All", shortLabel: "A" },
@@ -15,14 +15,28 @@ const TIMELINE_INTERVAL_OPTIONS: Array<{ id: TimelineViewInterval; label: string
 ];
 
 interface TimelineToolbarProps {
+  activeFilterCount: number;
   activePersonFilter: FilterSelection;
-  bootstrapMembers: BootstrapPayload["members"];
+  bootstrap: BootstrapPayload;
+  disciplineFilter: FilterSelection;
+  disciplineFilterOptions: DropdownOption[];
+  isAllProjectsView: boolean;
   onAdjustZoom: (direction: 1 | -1) => void;
   onChangePersonFilter: (value: FilterSelection) => void;
   onIntervalChange: (value: TimelineViewInterval) => void;
   onSearchChange: (value: string) => void;
   onShiftPeriod: (direction: -1 | 1) => void;
+  priorityFilter: FilterSelection;
+  projectFilter: FilterSelection;
   searchFilter: string;
+  setDisciplineFilter: (value: FilterSelection) => void;
+  setPriorityFilter: (value: FilterSelection) => void;
+  setProjectFilter: (value: FilterSelection) => void;
+  setStatusFilter: (value: FilterSelection) => void;
+  setSubsystemFilter: (value: FilterSelection) => void;
+  statusFilter: FilterSelection;
+  subsystemFilter: FilterSelection;
+  subsystemFilterOptions: DropdownOption[];
   timelinePeriodLabel: string;
   timelineZoom: number;
   timelineZoomMin: number;
@@ -30,14 +44,28 @@ interface TimelineToolbarProps {
 }
 
 export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
+  activeFilterCount,
   activePersonFilter,
-  bootstrapMembers,
+  bootstrap,
+  disciplineFilter,
+  disciplineFilterOptions,
+  isAllProjectsView,
   onAdjustZoom,
   onChangePersonFilter,
   onIntervalChange,
   onSearchChange,
   onShiftPeriod,
+  priorityFilter,
+  projectFilter,
   searchFilter,
+  setDisciplineFilter,
+  setPriorityFilter,
+  setProjectFilter,
+  setStatusFilter,
+  setSubsystemFilter,
+  statusFilter,
+  subsystemFilter,
+  subsystemFilterOptions,
   timelinePeriodLabel,
   timelineZoom,
   timelineZoomMin,
@@ -112,27 +140,24 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
     <div className="panel-actions filter-toolbar timeline-toolbar timeline-topbar-controls">
       <TopbarResponsiveSearch
         actions={
-          <CompactFilterMenu
-            activeCount={activePersonFilter.length}
-            ariaLabel="Timeline filters"
-            buttonLabel="Filters"
-            className="materials-filter-menu timeline-roster-filter"
-            items={[
-              {
-                label: "Roster",
-                content: (
-                  <FilterDropdown
-                    allLabel="All roster"
-                    ariaLabel="Filter person"
-                    className="task-queue-filter-menu-submenu"
-                    icon={<IconPerson />}
-                    onChange={onChangePersonFilter}
-                    options={bootstrapMembers}
-                    value={activePersonFilter}
-                  />
-                ),
-              },
-            ]}
+          <TimelineCompactFilterMenu
+            activeFilterCount={activeFilterCount}
+            activePersonFilter={activePersonFilter}
+            bootstrap={bootstrap}
+            disciplineFilter={disciplineFilter}
+            disciplineFilterOptions={disciplineFilterOptions}
+            isAllProjectsView={isAllProjectsView}
+            onChangePersonFilter={onChangePersonFilter}
+            priorityFilter={priorityFilter}
+            projectFilter={projectFilter}
+            setDisciplineFilter={setDisciplineFilter}
+            setPriorityFilter={setPriorityFilter}
+            setProjectFilter={setProjectFilter}
+            setStatusFilter={setStatusFilter}
+            setSubsystemFilter={setSubsystemFilter}
+            statusFilter={statusFilter}
+            subsystemFilter={subsystemFilter}
+            subsystemFilterOptions={subsystemFilterOptions}
           />
         }
         ariaLabel="Search timeline"
