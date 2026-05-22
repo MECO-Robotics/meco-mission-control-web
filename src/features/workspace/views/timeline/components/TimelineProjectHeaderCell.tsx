@@ -52,7 +52,10 @@ export const TimelineProjectHeaderCell: React.FC<TimelineProjectHeaderCellProps>
             : undefined
         }
       >
-        <span className="timeline-merged-cell-title timeline-ellipsis-reveal" data-full-text={project.name}>
+        <span
+          className="timeline-merged-cell-title timeline-project-title timeline-ellipsis-reveal"
+          data-full-text={project.name}
+        >
           {project.name}
         </span>
         <span className="timeline-merged-cell-meta">
