@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -76,18 +77,20 @@ export function useKanbanDrag<TState extends string, TItem>({
 
     return lookup;
   }, [columns, getItemId, itemsByState]);
-  const isDropStateEnabled = (targetState: TState) =>
-    dragEnabled && (canDropState ? canDropState(targetState) : true);
-  const canDropDraggedItem = (
-    drag: ActiveKanbanDrag<TState, TItem> | null,
-    targetState: TState,
-  ) => {
-    if (!drag || !isDropStateEnabled(targetState) || drag.sourceState === targetState) {
-      return false;
-    }
+  const isDropStateEnabled = useCallback(
+    (targetState: TState) => dragEnabled && (canDropState ? canDropState(targetState) : true),
+    [canDropState, dragEnabled],
+  );
+  const canDropDraggedItem = useCallback(
+    (drag: ActiveKanbanDrag<TState, TItem> | null, targetState: TState) => {
+      if (!drag || !isDropStateEnabled(targetState) || drag.sourceState === targetState) {
+        return false;
+      }
 
-    return canDropItem ? canDropItem(drag.item, targetState, drag.sourceState) : true;
-  };
+      return canDropItem ? canDropItem(drag.item, targetState, drag.sourceState) : true;
+    },
+    [canDropItem, isDropStateEnabled],
+  );
   const findDragItem = (milestone: DragEvent, fallback: ActiveKanbanDrag<TState, TItem> | null) => {
     if (fallback) {
       return fallback;
@@ -96,7 +99,7 @@ export function useKanbanDrag<TState extends string, TItem>({
     const itemId = milestone.dataTransfer.getData(KANBAN_DRAG_DATA_TYPE);
     return itemId ? itemsById.get(itemId) ?? null : null;
   };
-  const getDropStateAtPoint = (clientX: number, clientY: number) => {
+  const getDropStateAtPoint = useCallback((clientX: number, clientY: number) => {
     if (typeof document === "undefined") {
       return null;
     }
@@ -106,7 +109,7 @@ export function useKanbanDrag<TState extends string, TItem>({
       ?.closest("[data-kanban-drop-state]") as HTMLElement | null;
     const state = target?.getAttribute("data-kanban-drop-state");
     return state ? (state as TState) : null;
-  };
+  }, []);
   const handleSuppressedClick: MouseEventHandler<HTMLElement> = (milestone) => {
     if (!suppressClickRef.current) {
       return;
@@ -192,7 +195,7 @@ export function useKanbanDrag<TState extends string, TItem>({
       window.removeEventListener("pointerup", handlePointerUp);
       window.removeEventListener("pointercancel", handlePointerUp);
     };
-  });
+  }, [canDropDraggedItem, dragEnabled, getDropStateAtPoint, onItemDrop]);
 
   const getColumnDropProps = (targetState: TState) => ({
     "data-kanban-drop-enabled": dragEnabled ? String(isDropStateEnabled(targetState)) : undefined,
