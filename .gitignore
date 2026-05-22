@@ -24,6 +24,9 @@ docs/reports/lighthouse-*.txt
 /.diagnostics/
 .tmp-skills-sync/
 
+# Imported shared skills
+/skills/
+
 # Environment files
 .env
 .env.*
