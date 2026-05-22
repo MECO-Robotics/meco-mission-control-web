@@ -8,7 +8,9 @@ interface TaskCalendarMonthGridProps {
   eventsByDateKey: Map<string, TaskCalendarEvent[]>;
   monthCells: Date[];
   monthCursor: Date;
+  onOpenDay: (dateKey: string) => void;
   onOpenEvent: (event: TaskCalendarEvent) => void;
+  selectedDateKey: string | null;
   todayDateKey: string;
 }
 
@@ -16,11 +18,23 @@ function eventTypeClassName(event: TaskCalendarEvent) {
   return `task-calendar-day-event-${event.extendedProps.type}`;
 }
 
+function formatDayButtonLabel(dateKey: string, eventCount: number) {
+  const dayLabel = new Date(`${dateKey}T00:00:00`).toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const itemLabel = eventCount === 1 ? "item" : "items";
+  return `View details for ${dayLabel} with ${eventCount} ${itemLabel}`;
+}
+
 export function TaskCalendarMonthGrid({
   eventsByDateKey,
   monthCells,
   monthCursor,
+  onOpenDay,
   onOpenEvent,
+  selectedDateKey,
   todayDateKey,
 }: TaskCalendarMonthGridProps) {
   return (
@@ -38,15 +52,39 @@ export function TaskCalendarMonthGrid({
           const visibleEvents = cellEvents.slice(0, 4);
           const hiddenEventCount = Math.max(0, cellEvents.length - visibleEvents.length);
           const isCurrentMonth = cellDate.getMonth() === monthCursor.getMonth();
+          const isSelected = cellDateKey === selectedDateKey;
           const isToday = cellDateKey === todayDateKey;
+          const dayClassName = [
+            "task-calendar-day",
+            isCurrentMonth ? "" : "is-outside-month",
+            isSelected ? "is-selected" : "",
+            isToday ? "is-today" : "",
+          ]
+            .filter(Boolean)
+            .join(" ");
+          const dayButtonLabel = formatDayButtonLabel(cellDateKey, cellEvents.length);
 
           return (
             <article
-              className={`task-calendar-day${isCurrentMonth ? "" : " is-outside-month"}${isToday ? " is-today" : ""}`}
+              className={dayClassName}
               key={cellDateKey}
+              onClick={() => onOpenDay(cellDateKey)}
             >
               <header className="task-calendar-day-header">
-                <span>{cellDate.getDate()}</span>
+                <button
+                  aria-label={dayButtonLabel}
+                  className="task-calendar-day-open"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onOpenDay(cellDateKey);
+                  }}
+                  type="button"
+                >
+                  <span>{cellDate.getDate()}</span>
+                  {cellEvents.length > 0 ? (
+                    <small>{cellEvents.length}</small>
+                  ) : null}
+                </button>
               </header>
 
               <div className="task-calendar-day-events">
@@ -54,7 +92,10 @@ export function TaskCalendarMonthGrid({
                   <button
                     className={`task-calendar-day-event ${eventTypeClassName(event)}`}
                     key={event.id}
-                    onClick={() => onOpenEvent(event)}
+                    onClick={(clickEvent) => {
+                      clickEvent.stopPropagation();
+                      onOpenEvent(event);
+                    }}
                     title={event.title}
                     type="button"
                   >

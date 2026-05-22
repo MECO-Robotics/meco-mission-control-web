@@ -12,6 +12,7 @@ import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/Topb
 import { MilestonesMilestoneModal } from "@/features/workspace/views/milestones/MilestonesEventModal";
 import { useMilestonesMilestoneModalState } from "@/features/workspace/views/milestones/sections/useMilestonesEventModalState";
 import { TaskCalendarFilterToolbar } from "./TaskCalendarFilterToolbar";
+import { TaskCalendarDayDetails } from "./TaskCalendarDayDetails";
 import { MeetingScheduleModal } from "./MeetingScheduleModal";
 import { TaskCalendarMonthGrid } from "./TaskCalendarMonthGrid";
 import { TaskCalendarMonthToolbar } from "./TaskCalendarMonthToolbar";
@@ -67,6 +68,7 @@ export function TaskCalendarView({
   const [isSavingMeeting, setIsSavingMeeting] = useState(false);
   const [meetingDraft, setMeetingDraft] = useState<MeetingPayload>(() => createDefaultMeetingDraft(bootstrap));
   const [meetingError, setMeetingError] = useState<string | null>(null);
+  const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
   const calendar = useTaskCalendarEventData({
     activePersonFilter,
     bootstrap,
@@ -99,6 +101,7 @@ export function TaskCalendarView({
       }
     }
   };
+  const selectedDayEvents = selectedDateKey ? calendar.eventsByDateKey.get(selectedDateKey) ?? [] : [];
 
   const openMeetingModal = () => {
     setMeetingDraft(createDefaultMeetingDraft(bootstrap));
@@ -187,10 +190,21 @@ export function TaskCalendarView({
               eventsByDateKey={calendar.eventsByDateKey}
               monthCells={calendar.monthCells}
               monthCursor={calendar.monthCursor}
+              onOpenDay={setSelectedDateKey}
               onOpenEvent={openEvent}
+              selectedDateKey={selectedDateKey}
               todayDateKey={calendar.todayDateKey}
             />
           )}
+
+          {selectedDateKey ? (
+            <TaskCalendarDayDetails
+              dateKey={selectedDateKey}
+              events={selectedDayEvents}
+              onClose={() => setSelectedDateKey(null)}
+              onOpenEvent={openEvent}
+            />
+          ) : null}
         </div>
       )}
 
