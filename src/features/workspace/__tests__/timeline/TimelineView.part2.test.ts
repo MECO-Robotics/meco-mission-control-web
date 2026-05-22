@@ -8,7 +8,8 @@ import { clampTimelineZoom, formatTimelineZoomLabel, getTimelineDayTrackSize, ge
 import { formatTimelinePeriodLabel, midpointOfTimelineDays, midpointOfTimelineWeek, monthEndFromDay } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
 import { buildTimelineGridLayout } from "@/features/workspace/views/timeline/model/timelineGridLayout";
-import { countActiveTimelineFilters, filterTimelineMilestonesByProjectSelection, filterTimelineTasks, resolveTimelineFilteredProjectIds } from "@/features/workspace/views/timeline/model/timelineViewFilters";
+import { pruneTimelineFilterSelections } from "@/features/workspace/views/timeline/hooks/useTimelineViewFilters";
+import { buildTimelineDisciplineFilterOptions, buildTimelineSubsystemFilterOptions, countActiveTimelineFilters, filterTimelineMilestonesByProjectSelection, filterTimelineTasks, resolveTimelineFilteredProjectIds, TIMELINE_TASK_PRIORITY_OPTIONS, TIMELINE_TASK_STATUS_OPTIONS } from "@/features/workspace/views/timeline/model/timelineViewFilters";
 import { createBootstrap, createBootstrapWithEmptySubsystem, createBootstrapWithoutTasks, createTimelineMilestone, readAppCss, membersById } from "./timelineTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
@@ -308,6 +309,44 @@ describe("TimelineView", () => {
         subsystemFilter: ["subsystem-2"],
       }),
     ).toBe(5);
+  });
+
+  it("prunes stale timeline filter selections when bootstrap options change", () => {
+    const bootstrap = createBootstrap();
+    const statusId = TIMELINE_TASK_STATUS_OPTIONS[0]!.id;
+    const priorityId = TIMELINE_TASK_PRIORITY_OPTIONS[0]!.id;
+    const prunedFilters = pruneTimelineFilterSelections(
+      {
+        disciplineFilter: ["discipline-1", "stale-discipline"],
+        priorityFilter: [priorityId, "stale-priority"],
+        projectFilter: ["project-1", "stale-project"],
+        statusFilter: [statusId, "stale-status"],
+        subsystemFilter: ["subsystem-1", "stale-subsystem"],
+      },
+      {
+        disciplineFilterOptions: buildTimelineDisciplineFilterOptions(bootstrap),
+        isAllProjectsView: true,
+        projectFilterOptions: bootstrap.projects,
+        subsystemFilterOptions: buildTimelineSubsystemFilterOptions(bootstrap),
+      },
+    );
+
+    expect(prunedFilters).toEqual({
+      disciplineFilter: ["discipline-1"],
+      priorityFilter: [priorityId],
+      projectFilter: ["project-1"],
+      statusFilter: [statusId],
+      subsystemFilter: ["subsystem-1"],
+    });
+
+    expect(
+      pruneTimelineFilterSelections(prunedFilters, {
+        disciplineFilterOptions: buildTimelineDisciplineFilterOptions(bootstrap),
+        isAllProjectsView: false,
+        projectFilterOptions: bootstrap.projects,
+        subsystemFilterOptions: buildTimelineSubsystemFilterOptions(bootstrap),
+      }).projectFilter,
+    ).toEqual([]);
   });
 
   it("keeps global milestones visible when filtering all-projects timeline by project", () => {
