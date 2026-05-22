@@ -115,6 +115,9 @@ export function useKanbanDrag<TState extends string, TItem>({
     milestone.preventDefault();
     milestone.stopPropagation();
   };
+  const clearPendingPointerDrag = () => {
+    pendingPointerDragRef.current = null;
+  };
 
   useEffect(() => {
     if (!dragEnabled) {
@@ -228,6 +231,7 @@ export function useKanbanDrag<TState extends string, TItem>({
     onDrop: dragEnabled
       ? (milestone: DragEvent<HTMLElement>) => {
           const drag = findDragItem(milestone, activeDrag);
+          clearPendingPointerDrag();
           setHoveredDropState(null);
           setActiveDrag(null);
           if (!drag || !canDropDraggedItem(drag, targetState) || !onItemDrop) {
@@ -252,10 +256,12 @@ export function useKanbanDrag<TState extends string, TItem>({
 
     const itemId = getItemId(item);
     const handleDragEnd = () => {
+      clearPendingPointerDrag();
       setActiveDrag(null);
       setHoveredDropState(null);
     };
     const handleDragStart: DragEventHandler<HTMLElement> = (milestone) => {
+      clearPendingPointerDrag();
       milestone.stopPropagation();
       milestone.dataTransfer.effectAllowed = "move";
       milestone.dataTransfer.setData(KANBAN_DRAG_DATA_TYPE, itemId);
