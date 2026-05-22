@@ -48,6 +48,26 @@ interface UseKanbanDragOptions<TState extends string, TItem> {
 const KANBAN_DRAG_DATA_TYPE = "application/x-meco-kanban-item";
 const POINTER_DRAG_THRESHOLD_PX = 8;
 
+interface KanbanPointerFallbackStart {
+  button: number;
+  pointerType: string;
+}
+
+export function canStartKanbanPointerFallbackDrag({
+  button,
+  pointerType,
+}: KanbanPointerFallbackStart) {
+  if (pointerType === "touch") {
+    return false;
+  }
+
+  if (pointerType === "mouse") {
+    return button === 0;
+  }
+
+  return pointerType === "pen";
+}
+
 export function useKanbanDrag<TState extends string, TItem>({
   canDropItem,
   canDropState,
@@ -272,7 +292,7 @@ export function useKanbanDrag<TState extends string, TItem>({
       setActiveDrag({ id: itemId, item, sourceState });
     };
     const handlePointerDown: PointerEventHandler<HTMLElement> = (milestone) => {
-      if (!itemDragEnabled || (milestone.pointerType === "mouse" && milestone.button !== 0)) {
+      if (!itemDragEnabled || !canStartKanbanPointerFallbackDrag(milestone)) {
         return;
       }
 
