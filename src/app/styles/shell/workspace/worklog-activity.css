@@ -11,6 +11,50 @@
   width: var(--worklog-activity-column-width, 17rem);
 }
 
+.worklog-activity-board-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: -0.15rem 0 0.85rem;
+}
+
+.worklog-activity-grouping-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  max-width: 100%;
+  padding: 0.22rem;
+  border: 1px solid var(--border-base);
+  border-radius: 8px;
+  background: var(--bg-row-alt);
+  overflow-x: auto;
+}
+
+.worklog-activity-grouping-button {
+  flex: 0 0 auto;
+  min-height: 1.9rem;
+  padding: 0 0.72rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-copy);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.worklog-activity-grouping-button[data-active="true"] {
+  background: var(--bg-panel);
+  color: var(--official-blue);
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.12);
+}
+
+.worklog-activity-grouping-button:hover {
+  color: var(--text-title);
+}
+
 .worklog-activity-column-title {
   display: inline-flex;
   align-items: center;

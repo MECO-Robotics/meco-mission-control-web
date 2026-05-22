@@ -1,6 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskStatus } from "@/types/common";
 import type { TaskRecord } from "@/types/recordsExecution";
 
 import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
@@ -29,6 +30,16 @@ const TASK_QUEUE_BOARD_STATE_LOGO_SPECS: Record<
 };
 
 const PRIORITY_ORDER: TaskRecord["priority"][] = ["critical", "high", "medium", "low"];
+const TASK_QUEUE_DIRECT_STATUS_STATES: readonly TaskStatus[] = [
+  "not-started",
+  "in-progress",
+  "waiting-for-qa",
+  "complete",
+];
+
+function isTaskQueueDirectStatusState(state: TaskQueueBoardState): state is TaskStatus {
+  return TASK_QUEUE_DIRECT_STATUS_STATES.includes(state as TaskStatus);
+}
 
 interface TaskQueueKanbanBoardProps {
   bootstrap: BootstrapPayload;
@@ -46,6 +57,7 @@ interface TaskQueueKanbanBoardProps {
   focusedState: TaskQueueBoardState | null;
   onClearFocus: () => void;
   onFocusState: (state: TaskQueueBoardState) => void;
+  onReassignTaskStatus?: (task: TaskRecord, status: TaskStatus) => void | Promise<void>;
 }
 
 export function TaskQueueKanbanBoard({
@@ -64,7 +76,12 @@ export function TaskQueueKanbanBoard({
   focusedState,
   onClearFocus,
   onFocusState,
+  onReassignTaskStatus,
 }: TaskQueueKanbanBoardProps) {
+  const pendingTaskStatusDropIdsRef = useRef<Set<string>>(new Set());
+  const [pendingTaskStatusDropIds, setPendingTaskStatusDropIds] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
   const tasksByState = useMemo(
     () => groupTasksByBoardState(tasks, bootstrap),
     [bootstrap, tasks],
@@ -86,6 +103,31 @@ export function TaskQueueKanbanBoard({
       priority,
     })).filter((group) => group.tasks.length > 0);
   }, [focusedState, focusedTasks]);
+
+  const setTaskStatusDropPending = (taskId: string, isPending: boolean) => {
+    const nextPendingIds = new Set(pendingTaskStatusDropIdsRef.current);
+    if (isPending) {
+      nextPendingIds.add(taskId);
+    } else {
+      nextPendingIds.delete(taskId);
+    }
+
+    pendingTaskStatusDropIdsRef.current = nextPendingIds;
+    setPendingTaskStatusDropIds(nextPendingIds);
+  };
+
+  const runTaskStatusDrop = async (task: TaskRecord, state: TaskStatus) => {
+    if (!onReassignTaskStatus || pendingTaskStatusDropIdsRef.current.has(task.id)) {
+      return;
+    }
+
+    setTaskStatusDropPending(task.id, true);
+    try {
+      await onReassignTaskStatus(task, state);
+    } finally {
+      setTaskStatusDropPending(task.id, false);
+    }
+  };
 
   if (focusedState !== null) {
     return (
@@ -168,6 +210,15 @@ export function TaskQueueKanbanBoard({
   return (
     <KanbanColumns
       boardClassName="task-queue-board"
+      canDragItem={(task, state) =>
+        isTaskQueueDirectStatusState(state) && !pendingTaskStatusDropIds.has(task.id)
+      }
+      canDropItem={(task, state) =>
+        isTaskQueueDirectStatusState(state) &&
+        task.status !== state &&
+        !pendingTaskStatusDropIds.has(task.id)
+      }
+      canDropState={isTaskQueueDirectStatusState}
       columnBodyClassName="task-queue-board-column-body"
       columnClassName="task-queue-board-column"
       columnEmptyClassName="task-queue-board-column-empty"
@@ -192,10 +243,24 @@ export function TaskQueueKanbanBoard({
         ),
       }))}
       emptyLabel="No tasks"
+      getItemDragLabel={(task) => task.title}
+      getItemId={(task) => task.id}
       itemsByState={tasksByState}
       onColumnBodyClick={onFocusState}
-      renderItem={(task) => (
+      onItemDrop={
+        onReassignTaskStatus
+          ? (task, state) => {
+              if (!isTaskQueueDirectStatusState(state)) {
+                return;
+              }
+
+              return runTaskStatusDrop(task, state);
+            }
+          : undefined
+      }
+      renderItem={(task, _, dragProps) => (
         <TaskQueueCard
+          {...dragProps}
           bootstrap={bootstrap}
           disciplinesById={disciplinesById}
           isNonRobotProject={isNonRobotProject}
