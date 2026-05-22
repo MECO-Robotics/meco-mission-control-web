@@ -357,6 +357,9 @@ describe("TaskQueueView", () => {
     expect(toolbarsCss).toMatch(
       /\.task-queue-zoom-label\s*\{[\s\S]*min-width:\s*2\.9rem;[\s\S]*padding:\s*0 0\.04rem;/,
     );
+    expect(toolbarsCss).toMatch(
+      /\.task-queue-toolbar\s*>\s*\.task-queue-toolbar-inline-actions:has\(\.task-queue-zoom-controls\)\s*\{[\s\S]*flex:\s*0 0 max-content;[\s\S]*flex-wrap:\s*nowrap;[\s\S]*min-width:\s*max-content;/,
+    );
   });
 
   it("hides task summaries once zoom is compact enough", () => {
