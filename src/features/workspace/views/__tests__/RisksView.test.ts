@@ -261,6 +261,10 @@ describe("RisksView", () => {
 
     expect(markup).toContain("Member one risk");
     expect(markup).not.toContain("Member two risk");
+    expect(markup).toContain('draggable="true"');
+    expect(markup).toContain('data-kanban-item-id="risk-1"');
+    expect(markup).toContain('data-kanban-drop-state="high"');
+    expect(markup).toContain('data-kanban-drop-enabled="true"');
   });
 
   it("keeps hours progress and task completion semantics separate in metrics view", () => {

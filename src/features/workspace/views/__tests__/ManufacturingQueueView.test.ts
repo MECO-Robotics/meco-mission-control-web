@@ -150,13 +150,35 @@ describe("ManufacturingQueueView", () => {
         subsystemsById: { "subsystem-1": bootstrap.subsystems[0] },
       }),
     );
+    const hiddenQuickActionsMarkup = renderToStaticMarkup(
+      React.createElement(CncView, {
+        activePersonFilter: [],
+        bootstrap,
+        items: [manufacturingItem],
+        membersById: { "member-1": bootstrap.members[0] },
+        onCreate: jest.fn(),
+        onEdit: jest.fn(),
+        onQuickStatusChange: jest.fn(),
+        showMentorQuickActions: false,
+        subsystemsById: { "subsystem-1": bootstrap.subsystems[0] },
+      }),
+    );
 
     expect(cncMarkup).toContain("Outsourced");
     expect(cncMarkup).toContain("cnc-approve-job-button");
     expect(cncMarkup).toContain("cnc-complete-job-button");
+    expect(cncMarkup).toContain('draggable="true"');
+    expect(cncMarkup).toContain('data-kanban-item-id="cnc-1"');
+    expect(cncMarkup).toContain('data-kanban-drop-state="approved"');
+    expect(cncMarkup).toContain('data-kanban-drop-enabled="true"');
     expect(printMarkup).not.toContain("Source");
     expect(printMarkup).not.toContain("Outsourced");
     expect(printMarkup).not.toContain("cnc-approve-job-button");
     expect(printMarkup).not.toContain("cnc-complete-job-button");
+    expect(printMarkup).not.toContain('draggable="true"');
+    expect(hiddenQuickActionsMarkup).not.toContain("cnc-approve-job-button");
+    expect(hiddenQuickActionsMarkup).not.toContain("cnc-complete-job-button");
+    expect(hiddenQuickActionsMarkup).not.toContain('draggable="true"');
+    expect(hiddenQuickActionsMarkup).not.toContain('data-kanban-drop-enabled="true"');
   });
 });

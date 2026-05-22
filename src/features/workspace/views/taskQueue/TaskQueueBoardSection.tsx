@@ -2,6 +2,7 @@ import { useCallback, useRef } from "react";
 import type { CSSProperties, Dispatch, SetStateAction } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskStatus } from "@/types/common";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { IconChevronLeft, IconChevronRight } from "@/components/shared/Icons";
 import { TaskQueueKanbanBoard } from "./TaskQueueKanbanBoard";
@@ -24,6 +25,7 @@ interface TaskQueueBoardSectionProps {
   isNonRobotProject: boolean;
   membersById: Record<string, BootstrapPayload["members"][number]>;
   openEditTaskModal: (task: TaskRecord) => void;
+  onReassignTaskStatus?: (task: TaskRecord, status: TaskStatus) => void | Promise<void>;
   processedTasks: TaskRecord[];
   projectsById: Record<string, BootstrapPayload["projects"][number]>;
   setFocusedBoardState: Dispatch<SetStateAction<TaskQueueBoardState | null>>;
@@ -45,6 +47,7 @@ export function TaskQueueBoardSection({
   isNonRobotProject,
   membersById,
   openEditTaskModal,
+  onReassignTaskStatus,
   processedTasks,
   projectsById,
   setFocusedBoardState,
@@ -132,6 +135,7 @@ export function TaskQueueBoardSection({
             showProjectOnCards={showProjectOnCards}
             onClearFocus={() => setFocusedBoardState(null)}
             onFocusState={setFocusedBoardState}
+            onReassignTaskStatus={onReassignTaskStatus}
             subsystemsById={subsystemsById}
             tasks={boardTasks}
             workstreamsById={workstreamsById}

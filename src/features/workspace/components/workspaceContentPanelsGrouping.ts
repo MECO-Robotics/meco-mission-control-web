@@ -48,6 +48,7 @@ export function groupWorkspaceContentPanelProps(
       taskView: props.taskView,
       timelineMilestoneCreateSignal: props.timelineMilestoneCreateSignal,
       handleMeetingSave: props.handleMeetingSave,
+      handleTaskStatusChange: props.handleTaskStatusChange,
       handleTimelineMilestoneDelete: props.handleTimelineMilestoneDelete,
       handleTimelineMilestoneSave: props.handleTimelineMilestoneSave,
     },
