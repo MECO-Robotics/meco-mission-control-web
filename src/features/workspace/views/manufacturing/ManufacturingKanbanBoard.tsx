@@ -1,4 +1,4 @@
-import { useMemo, useState, type KeyboardEvent, type MouseEvent } from "react";
+import { useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
 
 import { formatDate } from "@/lib/appUtils/common";
 import type { ManufacturingItemRecord } from "@/types/recordsInventory";
@@ -48,6 +48,7 @@ export function ManufacturingKanbanBoard({
   tutorialTarget,
 }: ManufacturingKanbanBoardProps) {
   const [pendingQuickActionKey, setPendingQuickActionKey] = useState<string | null>(null);
+  const pendingQuickActionKeyRef = useRef<string | null>(null);
   const canShowMentorQuickActions = Boolean(showMentorQuickActions && onQuickStatusChange);
 
   const itemsByStatus = useMemo(() => {
@@ -73,28 +74,39 @@ export function ManufacturingKanbanBoard({
     }
   };
 
-  const handleQuickStatusChange = async (
+  const runQuickStatusChange = async (
+    item: ManufacturingItemRecord,
+    nextStatus: ManufacturingItemRecord["status"],
+  ) => {
+    if (!onQuickStatusChange) {
+      return;
+    }
+
+    const actionKey = `${item.id}:${nextStatus}`;
+    if (pendingQuickActionKeyRef.current) {
+      return;
+    }
+
+    pendingQuickActionKeyRef.current = actionKey;
+    setPendingQuickActionKey(actionKey);
+    try {
+      await onQuickStatusChange(item, nextStatus);
+    } finally {
+      if (pendingQuickActionKeyRef.current === actionKey) {
+        pendingQuickActionKeyRef.current = null;
+        setPendingQuickActionKey(null);
+      }
+    }
+  };
+
+  const handleQuickStatusChange = (
     milestone: MouseEvent<HTMLButtonElement>,
     item: ManufacturingItemRecord,
     nextStatus: ManufacturingItemRecord["status"],
   ) => {
     milestone.preventDefault();
     milestone.stopPropagation();
-    if (!onQuickStatusChange) {
-      return;
-    }
-
-    const actionKey = `${item.id}:${nextStatus}`;
-    if (pendingQuickActionKey) {
-      return;
-    }
-
-    setPendingQuickActionKey(actionKey);
-    try {
-      await onQuickStatusChange(item, nextStatus);
-    } finally {
-      setPendingQuickActionKey(null);
-    }
+    void runQuickStatusChange(item, nextStatus);
   };
 
   return (
@@ -123,9 +135,7 @@ export function ManufacturingKanbanBoard({
       itemsByState={itemsByStatus}
       onItemDrop={
         canShowMentorQuickActions
-          ? (item, state) => {
-              void onQuickStatusChange?.(item, state);
-            }
+          ? (item, state) => runQuickStatusChange(item, state)
           : undefined
       }
       renderItem={(item, _state, dragProps) => {
