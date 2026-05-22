@@ -43,6 +43,7 @@ export const TimelineProjectHeaderCell: React.FC<TimelineProjectHeaderCellProps>
       zIndex={10022}
     >
       <div
+        aria-label={`${project.name} ${project.completeCount}/${project.taskCount}`}
         className={`timeline-merged-cell-text${shouldRotateProjectLabel ? " is-rotated" : ""}`}
         style={
           shouldRotateProjectLabel
@@ -51,6 +52,7 @@ export const TimelineProjectHeaderCell: React.FC<TimelineProjectHeaderCellProps>
               } as React.CSSProperties)
             : undefined
         }
+        tabIndex={0}
       >
         <span
           className="timeline-merged-cell-title timeline-project-title timeline-ellipsis-reveal"

@@ -208,7 +208,7 @@ describe("TimelineView", () => {
     );
   });
 
-  it("anchors project title cutoff reveal to the label hover area", () => {
+  it("anchors project title cutoff reveal to the label hover and focus area", () => {
     const collapsedMarkup = renderToStaticMarkup(
       React.createElement(TimelineProjectHeaderCell, {
         project: {
@@ -249,17 +249,20 @@ describe("TimelineView", () => {
     expect(unfoldedMarkup).toMatch(
       /class="timeline-merged-cell-column[^"]*" data-collapsed="false" data-timeline-column="project"[^>]*>[\s\S]*timeline-merged-cell-text is-rotated[\s\S]*timeline-project-title/,
     );
+    expect(collapsedMarkup).toMatch(
+      /aria-label="Long clipped project label 0\/3"[\s\S]*class="timeline-merged-cell-text"[\s\S]*tabindex="0"/,
+    );
     expect(css).toMatch(
       /\.timeline-merged-cell-column\[data-timeline-column="project"\] \.timeline-project-title\.timeline-ellipsis-reveal\[data-full-text\]::after\s*\{[\s\S]*content:\s*attr\(data-full-text\)[\s\S]*opacity:\s*0[\s\S]*pointer-events:\s*none/,
     );
     expect(css).toMatch(
-      /\.timeline-merged-cell-column\[data-timeline-column="project"\] \.timeline-merged-cell-text:hover \.timeline-project-title\.timeline-ellipsis-reveal\s*\{[\s\S]*color:\s*transparent\s*!important/,
+      /\.timeline-merged-cell-column\[data-timeline-column="project"\] \.timeline-merged-cell-text:hover \.timeline-project-title\.timeline-ellipsis-reveal,\s*\.timeline-merged-cell-column\[data-timeline-column="project"\] \.timeline-merged-cell-text:focus-visible \.timeline-project-title\.timeline-ellipsis-reveal,\s*\.timeline-merged-cell-column\[data-timeline-column="project"\] \.timeline-merged-cell-text:focus-within \.timeline-project-title\.timeline-ellipsis-reveal\s*\{[\s\S]*color:\s*transparent\s*!important/,
     );
     expect(css).toMatch(
-      /\.timeline-merged-cell-column\[data-timeline-column="project"\] \.timeline-merged-cell-text:hover \.timeline-project-title\.timeline-ellipsis-reveal\[data-full-text\]::after\s*\{[\s\S]*opacity:\s*1/,
+      /\.timeline-merged-cell-column\[data-timeline-column="project"\] \.timeline-merged-cell-text:hover \.timeline-project-title\.timeline-ellipsis-reveal\[data-full-text\]::after,\s*\.timeline-merged-cell-column\[data-timeline-column="project"\] \.timeline-merged-cell-text:focus-visible \.timeline-project-title\.timeline-ellipsis-reveal\[data-full-text\]::after,\s*\.timeline-merged-cell-column\[data-timeline-column="project"\] \.timeline-merged-cell-text:focus-within \.timeline-project-title\.timeline-ellipsis-reveal\[data-full-text\]::after\s*\{[\s\S]*opacity:\s*1/,
     );
     expect(css).not.toMatch(
-      /\.timeline-merged-cell-column\[data-timeline-column="project"\][^{]+:focus-within[^{]+timeline-project-title/,
+      /\.timeline-merged-cell-column\[data-timeline-column="project"\]:focus-within[^{]+timeline-project-title/,
     );
   });
 

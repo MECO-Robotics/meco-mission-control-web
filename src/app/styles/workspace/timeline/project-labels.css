@@ -28,13 +28,17 @@
   color: var(--timeline-reveal-color);
 }
 
-.timeline-merged-cell-column[data-timeline-column="project"] .timeline-merged-cell-text:hover .timeline-project-title.timeline-ellipsis-reveal {
+.timeline-merged-cell-column[data-timeline-column="project"] .timeline-merged-cell-text:hover .timeline-project-title.timeline-ellipsis-reveal,
+.timeline-merged-cell-column[data-timeline-column="project"] .timeline-merged-cell-text:focus-visible .timeline-project-title.timeline-ellipsis-reveal,
+.timeline-merged-cell-column[data-timeline-column="project"] .timeline-merged-cell-text:focus-within .timeline-project-title.timeline-ellipsis-reveal {
   color: transparent !important;
   max-width: none;
   overflow: visible;
   text-overflow: clip;
 }
 
-.timeline-merged-cell-column[data-timeline-column="project"] .timeline-merged-cell-text:hover .timeline-project-title.timeline-ellipsis-reveal[data-full-text]::after {
+.timeline-merged-cell-column[data-timeline-column="project"] .timeline-merged-cell-text:hover .timeline-project-title.timeline-ellipsis-reveal[data-full-text]::after,
+.timeline-merged-cell-column[data-timeline-column="project"] .timeline-merged-cell-text:focus-visible .timeline-project-title.timeline-ellipsis-reveal[data-full-text]::after,
+.timeline-merged-cell-column[data-timeline-column="project"] .timeline-merged-cell-text:focus-within .timeline-project-title.timeline-ellipsis-reveal[data-full-text]::after {
   opacity: 1;
 }
