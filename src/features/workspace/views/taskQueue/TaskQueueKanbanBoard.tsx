@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskStatus } from "@/types/common";
@@ -78,6 +78,10 @@ export function TaskQueueKanbanBoard({
   onFocusState,
   onReassignTaskStatus,
 }: TaskQueueKanbanBoardProps) {
+  const pendingTaskStatusDropIdsRef = useRef<Set<string>>(new Set());
+  const [pendingTaskStatusDropIds, setPendingTaskStatusDropIds] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
   const tasksByState = useMemo(
     () => groupTasksByBoardState(tasks, bootstrap),
     [bootstrap, tasks],
@@ -99,6 +103,31 @@ export function TaskQueueKanbanBoard({
       priority,
     })).filter((group) => group.tasks.length > 0);
   }, [focusedState, focusedTasks]);
+
+  const setTaskStatusDropPending = (taskId: string, isPending: boolean) => {
+    const nextPendingIds = new Set(pendingTaskStatusDropIdsRef.current);
+    if (isPending) {
+      nextPendingIds.add(taskId);
+    } else {
+      nextPendingIds.delete(taskId);
+    }
+
+    pendingTaskStatusDropIdsRef.current = nextPendingIds;
+    setPendingTaskStatusDropIds(nextPendingIds);
+  };
+
+  const runTaskStatusDrop = async (task: TaskRecord, state: TaskStatus) => {
+    if (!onReassignTaskStatus || pendingTaskStatusDropIdsRef.current.has(task.id)) {
+      return;
+    }
+
+    setTaskStatusDropPending(task.id, true);
+    try {
+      await onReassignTaskStatus(task, state);
+    } finally {
+      setTaskStatusDropPending(task.id, false);
+    }
+  };
 
   if (focusedState !== null) {
     return (
@@ -181,9 +210,13 @@ export function TaskQueueKanbanBoard({
   return (
     <KanbanColumns
       boardClassName="task-queue-board"
-      canDragItem={(_, state) => isTaskQueueDirectStatusState(state)}
+      canDragItem={(task, state) =>
+        isTaskQueueDirectStatusState(state) && !pendingTaskStatusDropIds.has(task.id)
+      }
       canDropItem={(task, state) =>
-        isTaskQueueDirectStatusState(state) && task.status !== state
+        isTaskQueueDirectStatusState(state) &&
+        task.status !== state &&
+        !pendingTaskStatusDropIds.has(task.id)
       }
       canDropState={isTaskQueueDirectStatusState}
       columnBodyClassName="task-queue-board-column-body"
@@ -221,7 +254,7 @@ export function TaskQueueKanbanBoard({
                 return;
               }
 
-              void onReassignTaskStatus(task, state);
+              return runTaskStatusDrop(task, state);
             }
           : undefined
       }

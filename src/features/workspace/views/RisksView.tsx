@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import type { RiskManagementViewTab } from "@/lib/workspaceNavigation";
@@ -71,6 +71,10 @@ export function RisksView({
   view,
 }: RisksViewProps) {
   const [metricsSearch, setMetricsSearch] = useState("");
+  const pendingRiskSeverityDropIdsRef = useRef<Set<string>>(new Set());
+  const [pendingRiskSeverityDropIds, setPendingRiskSeverityDropIds] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
   const viewModel = useRisksViewModel({
     activePersonFilter,
     bootstrap,
@@ -87,6 +91,37 @@ export function RisksView({
     () => filterMetricRows(viewModel.mechanismMetrics, metricsSearch),
     [metricsSearch, viewModel.mechanismMetrics],
   );
+
+  const setRiskSeverityDropPending = (riskId: string, isPending: boolean) => {
+    const nextPendingIds = new Set(pendingRiskSeverityDropIdsRef.current);
+    if (isPending) {
+      nextPendingIds.add(riskId);
+    } else {
+      nextPendingIds.delete(riskId);
+    }
+
+    pendingRiskSeverityDropIdsRef.current = nextPendingIds;
+    setPendingRiskSeverityDropIds(nextPendingIds);
+  };
+
+  const runRiskSeverityDrop = async (
+    risk: BootstrapPayload["risks"][number],
+    severity: BootstrapPayload["risks"][number]["severity"],
+  ) => {
+    if (pendingRiskSeverityDropIdsRef.current.has(risk.id)) {
+      return;
+    }
+
+    setRiskSeverityDropPending(risk.id, true);
+    try {
+      await onUpdateRisk(risk.id, {
+        ...toRiskPayload(risk),
+        severity,
+      }).catch(() => undefined);
+    } finally {
+      setRiskSeverityDropPending(risk.id, false);
+    }
+  };
 
   return (
     <section className={`panel dense-panel subsystem-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
@@ -193,7 +228,10 @@ export function RisksView({
             {viewModel.filteredRows.length > 0 ? (
               <KanbanColumns
                 boardClassName="risk-board"
-                canDropItem={(risk, severity) => risk.severity !== severity}
+                canDragItem={(risk) => !pendingRiskSeverityDropIds.has(risk.id)}
+                canDropItem={(risk, severity) =>
+                  risk.severity !== severity && !pendingRiskSeverityDropIds.has(risk.id)
+                }
                 columnBodyClassName="task-queue-board-column-body"
                 columnClassName="task-queue-board-column"
                 columnCountClassName="task-queue-board-column-count"
@@ -217,12 +255,7 @@ export function RisksView({
                 getItemDragLabel={(risk) => risk.title}
                 getItemId={(risk) => risk.id}
                 itemsByState={viewModel.risksBySeverity}
-                onItemDrop={(risk, severity) => {
-                  void onUpdateRisk(risk.id, {
-                    ...toRiskPayload(risk),
-                    severity,
-                  }).catch(() => undefined);
-                }}
+                onItemDrop={(risk, severity) => runRiskSeverityDrop(risk, severity)}
                 renderItem={(risk, _severity, dragProps) => {
                   const projectLabel = getRiskProjectLabel(risk, attachmentLookups);
                   const workflowLabel = getRiskWorkflowLabel(risk, attachmentLookups);
