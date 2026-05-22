@@ -45,6 +45,7 @@ export const TimelineProjectHeaderCell: React.FC<TimelineProjectHeaderCellProps>
       <div
         aria-label={`${project.name} ${project.completeCount}/${project.taskCount}`}
         className={`timeline-merged-cell-text${shouldRotateProjectLabel ? " is-rotated" : ""}`}
+        role="group"
         style={
           shouldRotateProjectLabel
             ? ({

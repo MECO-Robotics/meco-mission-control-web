@@ -250,7 +250,7 @@ describe("TimelineView", () => {
       /class="timeline-merged-cell-column[^"]*" data-collapsed="false" data-timeline-column="project"[^>]*>[\s\S]*timeline-merged-cell-text is-rotated[\s\S]*timeline-project-title/,
     );
     expect(collapsedMarkup).toMatch(
-      /aria-label="Long clipped project label 0\/3"[\s\S]*class="timeline-merged-cell-text"[\s\S]*tabindex="0"/,
+      /aria-label="Long clipped project label 0\/3"[\s\S]*class="timeline-merged-cell-text"[\s\S]*role="group"[\s\S]*tabindex="0"/,
     );
     expect(css).toMatch(
       /\.timeline-merged-cell-column\[data-timeline-column="project"\] \.timeline-project-title\.timeline-ellipsis-reveal\[data-full-text\]::after\s*\{[\s\S]*content:\s*attr\(data-full-text\)[\s\S]*opacity:\s*0[\s\S]*pointer-events:\s*none/,
