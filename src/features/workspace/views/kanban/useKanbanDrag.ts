@@ -206,14 +206,23 @@ export function useKanbanDrag<TState extends string, TItem>({
         void onItemDrop(pendingDrag.item, targetState, pendingDrag.sourceState);
       }
     };
+    const handlePointerCancel = (event: PointerEvent) => {
+      void event;
+      const pendingDrag = pendingPointerDragRef.current;
+      if (!pendingDrag) {
+        return;
+      }
+
+      clearPointerDrag(pendingDrag.isDragging);
+    };
 
     window.addEventListener("pointermove", handlePointerMove);
     window.addEventListener("pointerup", handlePointerUp);
-    window.addEventListener("pointercancel", handlePointerUp);
+    window.addEventListener("pointercancel", handlePointerCancel);
     return () => {
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerup", handlePointerUp);
-      window.removeEventListener("pointercancel", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerCancel);
     };
   }, [canDropDraggedItem, dragEnabled, getDropStateAtPoint, onItemDrop]);
 
