@@ -95,6 +95,8 @@ jobs:
         run: npm run audit:organization:strict
 
       - name: Verify
+        env:
+          PLATFORM_BOOTSTRAP_CONTRACT_BRANCH: development
         run: npm run verify
 
   organization-audit:
