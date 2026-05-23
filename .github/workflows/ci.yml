@@ -81,16 +81,6 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-      - name: Check out platform contract source
-        uses: actions/checkout@v4
-        with:
-          repository: MECO-Robotics/meco-mission-control-platform
-          path: platform
-          ref: development
-          sparse-checkout: |
-            contracts/platform/bootstrap/v1/contract.json
-          sparse-checkout-cone-mode: false
-          token: ${{ github.token }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -106,8 +96,8 @@ jobs:
 
       - name: Verify
         env:
-          PLATFORM_BOOTSTRAP_CONTRACT_BRANCH: development
-          PLATFORM_BOOTSTRAP_CONTRACT_SOURCE_PATH: platform/contracts/platform/bootstrap/v1/contract.json
+          GH_TOKEN: ${{ github.token }}
+          PLATFORM_BOOTSTRAP_CONTRACT_BRANCH: ${{ github.base_ref || 'development' }}
         run: npm run verify
 
   organization-audit:
@@ -368,3 +358,4 @@ jobs:
           const enforced = requiredChecks.map(([name]) => name).join(', ');
           console.log(`Required merge checks passed for ${baseRef}: ${enforced}`);
           NODE
+

@@ -10,16 +10,17 @@ async function readJson(filePath) {
 }
 
 async function readRemoteContract(url, token) {
+  const isApiUrl = url.startsWith("https://api.github.com/");
   const response = await fetch(url, {
     headers: token
       ? {
           authorization: `Bearer ${token}`,
           "user-agent": "meco-contract-verify",
-          accept: "application/vnd.github.raw+json",
+          accept: isApiUrl ? "application/vnd.github+json" : "application/vnd.github.v3.raw+json",
         }
       : {
           "user-agent": "meco-contract-verify",
-          accept: "application/vnd.github.raw+json",
+          accept: isApiUrl ? "application/vnd.github+json" : "application/vnd.github.v3.raw+json",
         },
   });
 
@@ -29,7 +30,23 @@ async function readRemoteContract(url, token) {
     );
   }
 
-  return response.json();
+  const text = await response.text();
+
+  try {
+    const data = JSON.parse(text);
+
+    if (typeof data === "object" && data !== null && data.content && data.encoding === "base64") {
+      return JSON.parse(Buffer.from(data.content.replace(/\s+/g, ""), "base64").toString("utf8"));
+    }
+
+    if (typeof data === "object" && data !== null && typeof data.message === "string") {
+      return data;
+    }
+
+    return data;
+  } catch {
+    return JSON.parse(text);
+  }
 }
 
 async function resolvePlatformSourceContract() {
@@ -59,8 +76,9 @@ async function resolvePlatformSourceContract() {
 
   const remoteBranch = process.env.PLATFORM_BOOTSTRAP_CONTRACT_BRANCH ?? "development";
   const remoteBranchRef = encodeURIComponent(remoteBranch);
-  const remoteUrl = process.env.PLATFORM_BOOTSTRAP_CONTRACT_URL ??
-    `https://raw.githubusercontent.com/MECO-Robotics/meco-mission-control-platform/${remoteBranchRef}/contracts/platform/bootstrap/v1/contract.json`;
+  const remoteUrl =
+    process.env.PLATFORM_BOOTSTRAP_CONTRACT_URL ??
+    `https://api.github.com/repos/MECO-Robotics/meco-mission-control-platform/contents/contracts/platform/bootstrap/v1/contract.json?ref=${remoteBranchRef}`;
 
   const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
   const contract = await readRemoteContract(remoteUrl, token);
