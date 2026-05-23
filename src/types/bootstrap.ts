@@ -44,7 +44,7 @@ export interface BootstrapPayload {
   testResults: TestResultRecord[];
   qaFindings: QaFindingRecord[];
   testFindings: TestFindingRecord[];
-  designIterations: DesignIterationRecord[];
+  designIterations?: DesignIterationRecord[];
   risks: RiskRecord[];
   tasks: TaskRecord[];
   workLogs: WorkLogRecord[];
