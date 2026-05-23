@@ -85,7 +85,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: MECO-Robotics/meco-mission-control-platform
-          path: ../meco-mission-control-platform
+          path: platform
           ref: development
           sparse-checkout: |
             contracts/platform/bootstrap/v1/contract.json
@@ -107,7 +107,7 @@ jobs:
       - name: Verify
         env:
           PLATFORM_BOOTSTRAP_CONTRACT_BRANCH: development
-          PLATFORM_BOOTSTRAP_CONTRACT_SOURCE_PATH: ../meco-mission-control-platform/contracts/platform/bootstrap/v1/contract.json
+          PLATFORM_BOOTSTRAP_CONTRACT_SOURCE_PATH: platform/contracts/platform/bootstrap/v1/contract.json
         run: npm run verify
 
   organization-audit:
