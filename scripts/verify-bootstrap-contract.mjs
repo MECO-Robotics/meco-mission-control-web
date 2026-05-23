@@ -58,8 +58,9 @@ async function resolvePlatformSourceContract() {
   }
 
   const remoteBranch = process.env.PLATFORM_BOOTSTRAP_CONTRACT_BRANCH ?? "development";
+  const remoteBranchRef = encodeURIComponent(remoteBranch);
   const remoteUrl = process.env.PLATFORM_BOOTSTRAP_CONTRACT_URL ??
-    `https://raw.githubusercontent.com/MECO-Robotics/meco-mission-control-platform/${remoteBranch}/contracts/platform/bootstrap/v1/contract.json`;
+    `https://raw.githubusercontent.com/MECO-Robotics/meco-mission-control-platform/${remoteBranchRef}/contracts/platform/bootstrap/v1/contract.json`;
 
   const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
   const contract = await readRemoteContract(remoteUrl, token);
