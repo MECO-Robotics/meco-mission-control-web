@@ -2,6 +2,7 @@ import type {
   ArtifactKind,
   ArtifactStatus,
   MilestoneType,
+  MilestoneStatus,
   ManufacturingProcess,
   ManufacturingStatus,
   MaterialCategory,
@@ -28,6 +29,7 @@ import type { SubsystemLayoutView, SubsystemLayoutZone } from "./recordsOrganiza
 export interface MilestonePayload {
   title: string;
   type: MilestoneType;
+  status?: MilestoneStatus;
   startDateTime: string;
   endDateTime: string | null;
   isExternal: boolean;

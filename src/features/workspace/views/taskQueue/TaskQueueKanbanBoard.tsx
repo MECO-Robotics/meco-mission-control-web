@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskStatus } from "@/types/common";
+import type { OpenEditTaskModalOptions, TaskEditIntentState } from "@/types/taskEditIntent";
 import type { TaskRecord } from "@/types/recordsExecution";
 
 import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
@@ -11,6 +12,7 @@ import type { TimelineTaskStatusSignal } from "@/features/workspace/views/timeli
 import {
   TASK_QUEUE_BOARD_COLUMNS,
   formatTaskQueueBoardState,
+  getTaskQueueBoardState,
   groupTasksByBoardState,
   type TaskQueueBoardState,
 } from "./taskQueueKanbanBoardState";
@@ -41,12 +43,16 @@ function isTaskQueueDirectStatusState(state: TaskQueueBoardState): state is Task
   return TASK_QUEUE_DIRECT_STATUS_STATES.includes(state as TaskStatus);
 }
 
+function isTaskQueueEditIntentState(state: TaskQueueBoardState): state is TaskEditIntentState {
+  return state === "blocked" || state === "waiting-on-dependency";
+}
+
 interface TaskQueueKanbanBoardProps {
   bootstrap: BootstrapPayload;
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
   isNonRobotProject: boolean;
   membersById: Record<string, BootstrapPayload["members"][number]>;
-  openEditTaskModal: (task: TaskRecord) => void;
+  openEditTaskModal: (task: TaskRecord, options?: OpenEditTaskModalOptions) => void;
   projectsById: Record<string, BootstrapPayload["projects"][number]>;
   taskQueueZoom: number;
   showProjectContextOnCards: boolean;
@@ -210,15 +216,19 @@ export function TaskQueueKanbanBoard({
   return (
     <KanbanColumns
       boardClassName="task-queue-board"
-      canDragItem={(task, state) =>
-        isTaskQueueDirectStatusState(state) && !pendingTaskStatusDropIds.has(task.id)
-      }
-      canDropItem={(task, state) =>
-        isTaskQueueDirectStatusState(state) &&
-        task.status !== state &&
-        !pendingTaskStatusDropIds.has(task.id)
-      }
-      canDropState={isTaskQueueDirectStatusState}
+      canDragItem={(task) => !pendingTaskStatusDropIds.has(task.id)}
+      canDropItem={(task, state) => {
+        if (pendingTaskStatusDropIds.has(task.id)) {
+          return false;
+        }
+
+        if (isTaskQueueDirectStatusState(state)) {
+          return Boolean(onReassignTaskStatus) && task.status !== state;
+        }
+
+        return getTaskQueueBoardState(task, bootstrap) !== state;
+      }}
+      canDropState={() => true}
       columnBodyClassName="task-queue-board-column-body"
       columnClassName="task-queue-board-column"
       columnEmptyClassName="task-queue-board-column-empty"
@@ -247,17 +257,15 @@ export function TaskQueueKanbanBoard({
       getItemId={(task) => task.id}
       itemsByState={tasksByState}
       onColumnBodyClick={onFocusState}
-      onItemDrop={
-        onReassignTaskStatus
-          ? (task, state) => {
-              if (!isTaskQueueDirectStatusState(state)) {
-                return;
-              }
+      onItemDrop={(task, state) => {
+        if (isTaskQueueDirectStatusState(state)) {
+          return runTaskStatusDrop(task, state);
+        }
 
-              return runTaskStatusDrop(task, state);
-            }
-          : undefined
-      }
+        if (isTaskQueueEditIntentState(state)) {
+          openEditTaskModal(task, { intentState: state });
+        }
+      }}
       renderItem={(task, _, dragProps) => (
         <TaskQueueCard
           {...dragProps}

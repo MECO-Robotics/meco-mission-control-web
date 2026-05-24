@@ -46,6 +46,19 @@ export function TaskDetailsBlockersSectionView(props: TaskDetailsBlockersSection
     setInternalOpen(true);
   }, [activeTaskId]);
 
+  const blockerDraftCount = taskDraft?.taskBlockers?.length ?? 0;
+
+  useEffect(() => {
+    if (!canInlineEdit) {
+      return;
+    }
+
+    const placeholderIndex = model.blockerDrafts.findIndex((blocker) => blocker.description === "Blocked");
+    if (placeholderIndex >= 0) {
+      setEditingBlockerKey(model.blockerDrafts[placeholderIndex]?.id ?? `blocker-${placeholderIndex}`);
+    }
+  }, [activeTaskId, blockerDraftCount, canInlineEdit]);
+
   const isOpen = collapsibleOpen ?? internalOpen;
 
   return (

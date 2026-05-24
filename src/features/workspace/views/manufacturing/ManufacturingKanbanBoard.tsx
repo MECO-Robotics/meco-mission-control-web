@@ -134,9 +134,7 @@ export function ManufacturingKanbanBoard({
       getItemId={(item) => item.id}
       itemsByState={itemsByStatus}
       onItemDrop={
-        canShowMentorQuickActions
-          ? (item, state) => runQuickStatusChange(item, state)
-          : undefined
+        canShowMentorQuickActions ? (item, state) => runQuickStatusChange(item, state) : undefined
       }
       renderItem={(item, _state, dragProps) => {
         const approveActionKey = `${item.id}:approved`;

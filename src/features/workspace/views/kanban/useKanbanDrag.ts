@@ -108,6 +108,9 @@ export function useKanbanDrag<TState extends string, TItem>({
   onItemDrop,
 }: UseKanbanDragOptions<TState, TItem>) {
   const [activeDrag, setActiveDrag] = useState<ActiveKanbanDrag<TState, TItem> | null>(null);
+  const [dimmedDragItemId, setDimmedDragItemId] = useState<string | null>(null);
+  const dimmedDragFrameRef = useRef<number | null>(null);
+  const nativeDragImageRef = useRef<HTMLElement | null>(null);
   const [hoveredDropState, setHoveredDropState] = useState<TState | null>(null);
   const pendingPointerDragRef = useRef<PendingKanbanPointerDrag<TState, TItem> | null>(null);
   const suppressClickRef = useRef(false);
@@ -171,6 +174,78 @@ export function useKanbanDrag<TState extends string, TItem>({
   const clearPendingPointerDrag = () => {
     pendingPointerDragRef.current = null;
   };
+  const clearDimmedDragSource = useCallback(() => {
+    if (
+      typeof window !== "undefined" &&
+      dimmedDragFrameRef.current !== null &&
+      typeof window.cancelAnimationFrame === "function"
+    ) {
+      window.cancelAnimationFrame(dimmedDragFrameRef.current);
+    }
+
+    dimmedDragFrameRef.current = null;
+    setDimmedDragItemId(null);
+  }, []);
+  const clearNativeDragImage = useCallback(() => {
+    nativeDragImageRef.current?.remove();
+    nativeDragImageRef.current = null;
+  }, []);
+  const dimSourceAfterNativeDragPreview = useCallback((itemId: string) => {
+    if (typeof window === "undefined" || typeof window.requestAnimationFrame !== "function") {
+      setDimmedDragItemId(itemId);
+      return;
+    }
+
+    if (
+      dimmedDragFrameRef.current !== null &&
+      typeof window.cancelAnimationFrame === "function"
+    ) {
+      window.cancelAnimationFrame(dimmedDragFrameRef.current);
+    }
+
+    dimmedDragFrameRef.current = window.requestAnimationFrame(() => {
+      dimmedDragFrameRef.current = null;
+      setDimmedDragItemId(itemId);
+    });
+  }, []);
+  const setOpaqueNativeDragImage = useCallback(
+    (milestone: DragEvent<HTMLElement>) => {
+      if (typeof document === "undefined") {
+        return;
+      }
+
+      clearNativeDragImage();
+
+      const source = milestone.currentTarget;
+      const sourceBounds = source.getBoundingClientRect();
+      const dragImage = source.cloneNode(true) as HTMLElement;
+      dragImage.classList.remove("is-kanban-drag-source-active");
+      dragImage.setAttribute("aria-hidden", "true");
+      Object.assign(dragImage.style, {
+        boxSizing: "border-box",
+        height: `${sourceBounds.height}px`,
+        left: "-10000px",
+        opacity: "1",
+        pointerEvents: "none",
+        position: "fixed",
+        top: "-10000px",
+        transform: "none",
+        width: `${sourceBounds.width}px`,
+        zIndex: "-1",
+      });
+
+      document.body.appendChild(dragImage);
+      nativeDragImageRef.current = dragImage;
+      milestone.dataTransfer.setDragImage(
+        dragImage,
+        Math.max(0, Math.min(sourceBounds.width, milestone.clientX - sourceBounds.left)),
+        Math.max(0, Math.min(sourceBounds.height, milestone.clientY - sourceBounds.top)),
+      );
+    },
+    [clearNativeDragImage],
+  );
+
+  useEffect(() => clearNativeDragImage, [clearNativeDragImage]);
 
   useEffect(() => {
     if (!dragEnabled) {
@@ -180,6 +255,7 @@ export function useKanbanDrag<TState extends string, TItem>({
     const clearPointerDrag = (wasDragging: boolean) => {
       pendingPointerDragRef.current = null;
       setActiveDrag(null);
+      clearDimmedDragSource();
       setHoveredDropState(null);
       if (wasDragging) {
         window.setTimeout(() => {
@@ -211,6 +287,7 @@ export function useKanbanDrag<TState extends string, TItem>({
           item: pendingDrag.item,
           sourceState: pendingDrag.sourceState,
         });
+        setDimmedDragItemId(pendingDrag.id);
       }
 
       const targetState = getDropStateAtPoint(event.clientX, event.clientY);
@@ -254,7 +331,7 @@ export function useKanbanDrag<TState extends string, TItem>({
       window.removeEventListener("pointerup", handlePointerUp);
       window.removeEventListener("pointercancel", handlePointerCancel);
     };
-  }, [canDropDraggedItem, dragEnabled, getDropStateAtPoint, onItemDrop]);
+  }, [canDropDraggedItem, clearDimmedDragSource, dragEnabled, getDropStateAtPoint, onItemDrop]);
 
   const getColumnDropProps = (targetState: TState) => ({
     "data-kanban-drop-enabled": dragEnabled ? String(isDropStateEnabled(targetState)) : undefined,
@@ -294,6 +371,8 @@ export function useKanbanDrag<TState extends string, TItem>({
       ? (milestone: DragEvent<HTMLElement>) => {
           const drag = findDragItem(milestone, activeDrag);
           clearPendingPointerDrag();
+          clearDimmedDragSource();
+          clearNativeDragImage();
           setHoveredDropState(null);
           setActiveDrag(null);
           if (!drag || !canDropDraggedItem(drag, targetState) || !onItemDrop) {
@@ -319,6 +398,8 @@ export function useKanbanDrag<TState extends string, TItem>({
     const itemId = getItemId(item);
     const handleDragEnd = () => {
       clearPendingPointerDrag();
+      clearDimmedDragSource();
+      clearNativeDragImage();
       setActiveDrag(null);
       setHoveredDropState(null);
     };
@@ -328,7 +409,9 @@ export function useKanbanDrag<TState extends string, TItem>({
       milestone.dataTransfer.effectAllowed = "move";
       milestone.dataTransfer.setData(KANBAN_DRAG_DATA_TYPE, itemId);
       milestone.dataTransfer.setData("text/plain", getItemDragLabel?.(item) ?? itemId);
+      setOpaqueNativeDragImage(milestone);
       setActiveDrag({ id: itemId, item, sourceState });
+      dimSourceAfterNativeDragPreview(itemId);
     };
     const handlePointerDown: PointerEventHandler<HTMLElement> = (milestone) => {
       if (
@@ -351,7 +434,9 @@ export function useKanbanDrag<TState extends string, TItem>({
     };
 
     return {
-      className: "kanban-draggable-card",
+      className: `kanban-draggable-card${
+        dimmedDragItemId === itemId ? " is-kanban-drag-source-active" : ""
+      }`,
       "data-kanban-drag-source": sourceState,
       "data-kanban-item-id": itemId,
       "data-kanban-item-label": getItemDragLabel?.(item),

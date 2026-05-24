@@ -1,4 +1,4 @@
-import { isValidElement, type CSSProperties, type ReactNode } from "react";
+import { cloneElement, isValidElement, type CSSProperties, type ReactNode } from "react";
 
 import {
   useKanbanDrag,
@@ -118,7 +118,7 @@ export function KanbanColumns<TState extends string, TItem>({
                     isValidElement<KanbanItemDragProps>(renderedItem) &&
                     renderedItem.props["data-kanban-item-id"] === itemId
                   ) {
-                    return renderedItem;
+                    return cloneElement(renderedItem, { key: itemId });
                   }
 
                   return (

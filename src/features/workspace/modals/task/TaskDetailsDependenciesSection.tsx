@@ -55,6 +55,20 @@ export function TaskDetailsDependenciesSection({
     setInternalOpen(true);
   }, [activeTask.id]);
 
+  const dependencyDraftCount = taskDraft?.taskDependencies?.length ?? 0;
+
+  useEffect(() => {
+    if (!canInlineEdit) {
+      return;
+    }
+
+    const dependencyDrafts = taskDraft?.taskDependencies ?? [];
+    const placeholderIndex = dependencyDrafts.findIndex((dependency) => !dependency.refId.trim());
+    if (placeholderIndex >= 0) {
+      setEditingDependencyKey(getDependencyKey(dependencyDrafts[placeholderIndex], placeholderIndex));
+    }
+  }, [activeTask.id, canInlineEdit, dependencyDraftCount]);
+
   const tasksById = Object.fromEntries(bootstrap.tasks.map((task) => [task.id, task] as const));
   const milestonesById = Object.fromEntries(
     bootstrap.milestones.map((milestone) => [milestone.id, milestone] as const),
