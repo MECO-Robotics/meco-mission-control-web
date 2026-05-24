@@ -19,7 +19,7 @@ export function normalizeTaskPayload(taskDraft: TaskPayload): TaskPayload {
       refId: dependency.refId.trim(),
       requiredState: dependency.requiredState?.trim(),
     })),
-    taskBlockers: (taskDraft.taskBlockers ?? []).map((blocker) => ({
+    taskBlockers: (taskDraft.taskBlockers ?? []).map(({ isIntentPlaceholder: _isIntentPlaceholder, ...blocker }) => ({
       ...blocker,
       description: blocker.description.trim(),
     })),

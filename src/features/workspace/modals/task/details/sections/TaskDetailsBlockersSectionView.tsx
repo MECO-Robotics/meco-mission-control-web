@@ -53,7 +53,7 @@ export function TaskDetailsBlockersSectionView(props: TaskDetailsBlockersSection
       return;
     }
 
-    const placeholderIndex = model.blockerDrafts.findIndex((blocker) => blocker.description === "Blocked");
+    const placeholderIndex = model.blockerDrafts.findIndex((blocker) => blocker.isIntentPlaceholder);
     if (placeholderIndex >= 0) {
       setEditingBlockerKey(model.blockerDrafts[placeholderIndex]?.id ?? `blocker-${placeholderIndex}`);
     }
@@ -114,7 +114,10 @@ export function TaskDetailsBlockersSectionView(props: TaskDetailsBlockersSection
                         className="task-detail-inline-edit-input task-details-blocker-input task-details-blocker-row-input"
                         onBlur={() => setEditingBlockerKey(null)}
                         onChange={(milestone) =>
-                          model.updateBlockerDraft(blockerKey, { description: milestone.target.value })
+                          model.updateBlockerDraft(blockerKey, {
+                            description: milestone.target.value,
+                            isIntentPlaceholder: false,
+                          })
                         }
                         placeholder="Describe blocker"
                         value={blocker.description}

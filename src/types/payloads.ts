@@ -272,6 +272,7 @@ export interface TaskBlockerDraft {
   blockerType: TaskBlockerType;
   blockerId: string | null;
   description: string;
+  isIntentPlaceholder?: boolean;
   severity: TaskBlockerSeverity;
 }
 

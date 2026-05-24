@@ -21,6 +21,7 @@ export function applyTaskEditIntentToDraft(
           blockerType: "external",
           blockerId: null,
           description: "Blocked",
+          isIntentPlaceholder: true,
           severity: "medium",
         },
       ],

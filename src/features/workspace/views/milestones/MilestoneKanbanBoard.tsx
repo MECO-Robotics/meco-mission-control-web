@@ -148,7 +148,10 @@ export function MilestoneKanbanBoard({
   };
 
   const handleMilestonePointerDown = (milestone: PointerEvent<HTMLButtonElement>) => {
-    if (milestone.button !== 0) {
+    if (
+      milestone.button !== 0 ||
+      (milestone.pointerType !== "mouse" && milestone.pointerType !== "pen")
+    ) {
       return;
     }
 

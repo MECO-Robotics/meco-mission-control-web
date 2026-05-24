@@ -99,17 +99,37 @@ describe("MilestoneKanbanBoard", () => {
       throw new Error("Expected milestone card to render as an element");
     }
     const renderedCard = renderedItem as React.ReactElement<{
-      onPointerDown: (event: { button: number; clientX: number; clientY: number }) => void;
+      onPointerDown: (event: { button: number; clientX: number; clientY: number; pointerType: string }) => void;
       onPointerMove: (event: { clientX: number; clientY: number; preventDefault: () => void }) => void;
     }>;
     const preventDefault = jest.fn();
 
-    renderedCard.props.onPointerDown({ button: 0, clientX: 10, clientY: 10 });
+    renderedCard.props.onPointerDown({ button: 0, clientX: 10, clientY: 10, pointerType: "mouse" });
     renderedCard.props.onPointerMove({ clientX: 40, clientY: 14, preventDefault });
 
     expect(preventDefault).toHaveBeenCalledTimes(1);
     expect(onMilestoneDragBlocked).toHaveBeenCalledWith(
       "Milestone drag reassignment is disabled. Open the milestone to change its status.",
     );
+  });
+
+  it("ignores touch movement for milestone disabled-drag detection", () => {
+    const onMilestoneDragBlocked = jest.fn();
+    const kanbanProps = renderBoard(onMilestoneDragBlocked);
+    const renderedItem = kanbanProps.renderItem(milestone, "not ready");
+    if (!React.isValidElement(renderedItem)) {
+      throw new Error("Expected milestone card to render as an element");
+    }
+    const renderedCard = renderedItem as React.ReactElement<{
+      onPointerDown: (event: { button: number; clientX: number; clientY: number; pointerType: string }) => void;
+      onPointerMove: (event: { clientX: number; clientY: number; preventDefault: () => void }) => void;
+    }>;
+    const preventDefault = jest.fn();
+
+    renderedCard.props.onPointerDown({ button: 0, clientX: 10, clientY: 10, pointerType: "touch" });
+    renderedCard.props.onPointerMove({ clientX: 40, clientY: 14, preventDefault });
+
+    expect(preventDefault).not.toHaveBeenCalled();
+    expect(onMilestoneDragBlocked).not.toHaveBeenCalled();
   });
 });
