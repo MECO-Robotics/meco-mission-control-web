@@ -1,4 +1,4 @@
-import { type MouseEvent as ReactMouseEvent } from "react";
+import { useState, type MouseEvent as ReactMouseEvent } from "react";
 
 import {
   type InventoryViewTab,
@@ -26,6 +26,7 @@ import { AppSidebarQuickActions } from "./AppSidebarQuickActions";
 import { AppSidebarSections } from "./AppSidebarSections";
 import { useSidebarScrollHints } from "./sidebar/useSidebarScrollHints";
 import { useAppSidebarNavigationModels } from "./sidebar/useAppSidebarNavigationModels";
+import type { AppSidebarScopePanel } from "./AppSidebarScopeMenuPopup";
 import { useAppSidebarPopupState } from "./useAppSidebarPopupState";
 
 interface AppSidebarProps {
@@ -108,9 +109,14 @@ export function AppSidebar({
   onEditSelectedRobot,
 }: AppSidebarProps) {
   const selectedProject = projects.find((project) => project.id === selectedProjectId) ?? null;
+  const selectedSeason = seasons.find((season) => season.id === selectedSeasonId) ?? null;
   const isRobotProject = selectedProject?.projectType === "robot";
   const canEditSelectedRobot = selectedProject?.projectType === "robot";
   const selectedProjectLabel = selectedProject?.name ?? "All projects";
+  const selectedScopeLabel = selectedSeason
+    ? `${selectedSeason.name} - ${selectedProjectLabel}`
+    : selectedProjectLabel;
+  const [activeScopePanel, setActiveScopePanel] = useState<AppSidebarScopePanel | null>(null);
 
   const {
     activeSection,
@@ -147,7 +153,11 @@ export function AppSidebar({
     setIsProjectPopupOpen,
     setProjectPopupTop,
     sidebarShellRef,
-  } = useAppSidebarPopupState({ activeSection, isCollapsed });
+  } = useAppSidebarPopupState({
+    activeSection,
+    isCollapsed,
+    projectPopupLayoutKey: activeScopePanel,
+  });
   const {
     hasBottomHint,
     hasTopHint,
@@ -194,6 +204,7 @@ export function AppSidebar({
       setCompactPopupSection(null);
     }
 
+    setActiveScopePanel(null);
     setIsProjectPopupOpen((current) => !current);
   };
 
@@ -205,24 +216,32 @@ export function AppSidebar({
     }
 
     setIsProjectPopupOpen(false);
+    setActiveScopePanel(null);
   };
 
   const handleSeasonOptionSelect = (value: string) => {
     if (value === CREATE_SEASON_OPTION_VALUE) {
       onCreateSeason();
       setIsProjectPopupOpen(false);
+      setActiveScopePanel(null);
       return;
     }
 
     onSelectSeason(value || null);
+    setIsProjectPopupOpen(false);
+    setActiveScopePanel(null);
   };
 
   const handleHelpSelect = () => {
     setCompactPopupSection(null);
     setIsProjectPopupOpen(false);
+    setActiveScopePanel(null);
     onSelectTarget({ tab: "help" }, { keepSidebarOpen: true });
   };
   const handleSidebarFoldClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
+    setCompactPopupSection(null);
+    setIsProjectPopupOpen(false);
+    setActiveScopePanel(null);
     toggleSidebar();
     event.currentTarget.blur();
   };
@@ -281,12 +300,13 @@ export function AppSidebar({
           onNotificationQueueToggle={onToggleNotificationQueue}
           notificationCount={notificationCount}
           projectTriggerRef={projectTriggerRef}
-          selectedProjectLabel={selectedProjectLabel}
+          selectedScopeLabel={selectedScopeLabel}
           sessionUser={sessionUser}
         />
       </nav>
       <AppSidebarPopups
         activeSubItemId={activeSubItemId}
+        activeScopePanel={activeScopePanel}
         compactPopupRef={compactPopupRef}
         compactPopupSection={compactPopupSection}
         compactPopupTop={compactPopupTop}
@@ -305,6 +325,7 @@ export function AppSidebar({
         seasons={seasons}
         selectedProjectId={selectedProjectId}
         selectedSeasonId={selectedSeasonId}
+        setActiveScopePanel={setActiveScopePanel}
       />
     </div>
   );

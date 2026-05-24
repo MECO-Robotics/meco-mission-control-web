@@ -58,6 +58,7 @@ export interface WorkspaceTaskPanelProps {
   taskView: WorkspaceContentPanelsViewProps["taskView"];
   timelineMilestoneCreateSignal: WorkspaceContentPanelsViewProps["timelineMilestoneCreateSignal"];
   handleMeetingSave: WorkspaceContentPanelsViewProps["handleMeetingSave"];
+  handleTaskStatusChange: WorkspaceContentPanelsViewProps["handleTaskStatusChange"];
   handleTimelineMilestoneDelete: WorkspaceContentPanelsViewProps["handleTimelineMilestoneDelete"];
   handleTimelineMilestoneSave: WorkspaceContentPanelsViewProps["handleTimelineMilestoneSave"];
 }

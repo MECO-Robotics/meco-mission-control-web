@@ -25,6 +25,7 @@ export function AppWorkspaceShellContent({
       handleReactivateMemberForSeason={c.handleReactivateMemberForSeason}
       handleDeleteMember={c.handleDeleteMember}
       handleMeetingSave={c.handleMeetingSave}
+      handleTaskStatusChange={c.handleTaskStatusChange}
       handleTimelineMilestoneDelete={c.handleTimelineMilestoneDelete}
       handleTimelineMilestoneSave={c.handleTimelineMilestoneSave}
       handleUpdateMember={c.handleUpdateMember}

@@ -1,4 +1,5 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskStatus } from "@/types/common";
 import type { TaskRecord } from "@/types/recordsExecution";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
@@ -19,6 +20,7 @@ interface TaskQueueViewProps {
   membersById: Record<string, BootstrapPayload["members"][number]>;
   openCreateTaskModal: () => void;
   openEditTaskModal: (task: TaskRecord) => void;
+  onReassignTaskStatus?: (task: TaskRecord, status: TaskStatus) => void | Promise<void>;
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
 }
 
@@ -31,6 +33,7 @@ export function TaskQueueView({
   membersById,
   openCreateTaskModal,
   openEditTaskModal,
+  onReassignTaskStatus,
   subsystemsById,
 }: TaskQueueViewProps) {
   const {
@@ -138,6 +141,7 @@ export function TaskQueueView({
         isNonRobotProject={isNonRobotProject}
         membersById={membersById}
         openEditTaskModal={openEditTaskModal}
+        onReassignTaskStatus={onReassignTaskStatus}
         processedTasks={processedTasks}
         projectsById={projectsById}
         taskQueueZoom={taskQueueZoom}

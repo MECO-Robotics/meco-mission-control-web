@@ -15,7 +15,8 @@
     "test": "jest",
     "test:ci": "jest --ci --maxWorkers=50%",
     "test:watch": "jest --watch",
-    "verify": "npm run typecheck && npm run lint && npm run test:ci && npm run build:bundle"
+    "verify-contracts": "node ./scripts/verify-bootstrap-contract.mjs",
+    "verify": "npm run verify-contracts && npm run typecheck && npm run lint && npm run test:ci && npm run build:bundle"
   },
   "dependencies": {
     "lucide-react": "^1.14.0",

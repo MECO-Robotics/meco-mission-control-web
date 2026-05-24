@@ -24,7 +24,7 @@ export type NavigationSection =
 
 export type TaskViewTab = "calendar" | "timeline" | "robot-map" | "queue" | "milestones";
 export type RiskManagementViewTab = "attention" | "kanban" | "metrics";
-export type WorklogsViewTab = "logs" | "summary" | "activity";
+export type WorklogsViewTab = "logs" | "summary" | "activity" | "kanban";
 export type ReportsViewTab = "qa" | "milestone-results";
 export type ManufacturingViewTab = "all" | "cnc" | "prints" | "fabrication";
 export type InventoryViewTab = "materials" | "parts" | "part-mappings" | "purchases";
@@ -51,6 +51,7 @@ export type NavigationSubItemId =
   | "roster-workload"
   | "roster-attendance"
   | "reports-work-logs"
+  | "reports-worklogs-kanban"
   | "reports-qa-forms"
   | "reports-milestone-results";
 

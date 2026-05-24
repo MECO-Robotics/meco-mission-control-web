@@ -35,7 +35,7 @@ export function useAppWorkspaceRosterSeasonActions(model: AppWorkspaceModel) {
 
       try {
         const season = await createSeasonRecord({ name: seasonName }, model.handleUnauthorized);
-        await model.loadWorkspace();
+        await model.loadWorkspace({ seasonId: season.id, projectId: null });
         model.setSelectedSeasonId(season.id);
         model.setSelectedProjectId(null);
         model.setIsAddSeasonPopupOpen(false);

@@ -101,6 +101,29 @@
   min-width: 0;
 }
 
+.task-queue-board-column-body.is-kanban-drop-target {
+  border-radius: 12px;
+  outline: 2px dashed color-mix(in srgb, var(--official-blue) 48%, transparent);
+  outline-offset: 4px;
+  background: color-mix(in srgb, var(--official-blue) 7%, transparent);
+}
+
+.kanban-draggable-card {
+  min-width: 0;
+}
+
+.kanban-draggable-card[draggable="true"] {
+  cursor: grab;
+}
+
+.kanban-draggable-card[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+.kanban-draggable-card[draggable="false"] {
+  cursor: default;
+}
+
 .task-queue-board-column[role="button"] {
   cursor: pointer;
 }

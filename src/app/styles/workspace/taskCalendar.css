@@ -1,2 +1,4 @@
 @import url("./taskCalendar/taskCalendar.part1.css");
 @import url("./taskCalendar/taskCalendar.part2.css");
+@import url("./taskCalendar/taskCalendar.daySelection.css");
+@import url("./taskCalendar/taskCalendar.dayDetails.css");

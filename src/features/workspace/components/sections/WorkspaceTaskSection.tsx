@@ -26,6 +26,7 @@ export function WorkspaceTaskSection({
     bootstrap,
     disciplinesById,
     handleMeetingSave,
+    handleTaskStatusChange,
     handleTimelineMilestoneDelete,
     handleTimelineMilestoneSave,
     isAllProjectsView,
@@ -130,6 +131,7 @@ export function WorkspaceTaskSection({
           membersById={membersById}
           openCreateTaskModal={openCreateTaskModal}
           openEditTaskModal={openTimelineTaskDetailsModal}
+          onReassignTaskStatus={handleTaskStatusChange}
           subsystemsById={subsystemsById}
         />
       </WorkspaceSubPanel>
