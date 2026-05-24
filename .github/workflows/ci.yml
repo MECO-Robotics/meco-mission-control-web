@@ -97,7 +97,7 @@ jobs:
       - name: Verify
         env:
           GH_TOKEN: ${{ secrets.MECO_PLATFORM_CONTRACT_READ_TOKEN }}
-          PLATFORM_BOOTSTRAP_CONTRACT_BRANCH: ${{ github.base_ref || (github.ref_name == 'main' && 'main') || (startsWith(github.ref_name, 'hotfix/') && 'main') || 'development' }}
+          PLATFORM_BOOTSTRAP_CONTRACT_BRANCH: ${{ github.base_ref || (github.ref_name == 'main' && 'main') || 'development' }}
         run: npm run verify
 
   organization-audit:
