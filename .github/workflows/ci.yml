@@ -191,7 +191,7 @@ jobs:
     steps:
       - name: Validate development integration health across all repos
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.MECO_PLATFORM_CONTRACT_READ_TOKEN }}
         run: |
           node <<'NODE'
           const owner = 'MECO-Robotics';
@@ -202,23 +202,26 @@ jobs:
             'meco-mission-control-mobile': ['ci-validate', 'snapshot-validate'],
           };
 
-          const token = process.env.GH_TOKEN;
+          const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
           if (!token) {
-            throw new Error('github.token is required for cross-repo validation.');
+            throw new Error('A GitHub token is required for cross-repo validation.');
           }
 
-          async function gh(path) {
+          async function gh(path, options = {}) {
             const response = await fetch(`https://api.github.com${path}`, {
               headers: {
                 Authorization: `Bearer ${token}`,
                 Accept: 'application/vnd.github+json',
                 'X-GitHub-Api-Version': '2022-11-28',
               },
+              ...options,
             });
 
             if (!response.ok) {
               const body = await response.text();
-              throw new Error(`GitHub API ${path} failed (${response.status}): ${body}`);
+              const error = new Error(`GitHub API ${path} failed (${response.status}): ${body}`);
+              error.status = response.status;
+              throw error;
             }
 
             return response.json();
@@ -259,9 +262,41 @@ jobs:
             };
           }
 
+          async function resolveBranchSha(owner, repo, branchRef) {
+            try {
+              const branch = await gh(`/repos/${owner}/${repo}/branches/${branchRef}`);
+              const sha = branch?.commit?.sha;
+              if (!sha) {
+                throw new Error(`Could not resolve HEAD SHA for ${branchRef} on ${owner}/${repo}.`);
+              }
+              return sha;
+            } catch (error) {
+              if (error.status !== 404 || branchRef === 'main') {
+                throw error;
+              }
+
+              const repoMetadata = await gh(`/repos/${owner}/${repo}`);
+              const fallbackBranch = repoMetadata?.default_branch;
+              if (!fallbackBranch || fallbackBranch === branchRef) {
+                throw error;
+              }
+
+              console.log(
+                `Using fallback branch ${fallbackBranch} for ${owner}/${repo} because ${branchRef} is unavailable.`,
+              );
+              const fallback = await gh(`/repos/${owner}/${repo}/branches/${fallbackBranch}`);
+              const sha = fallback?.commit?.sha;
+              if (!sha) {
+                throw new Error(`Could not resolve fallback HEAD SHA for ${owner}/${repo}@${fallbackBranch}.`);
+              }
+
+              return sha;
+            }
+          }
+
           async function findLatestSuccessfulCheckSha(owner, repo, branchRef, checksToRequire) {
-            const branch = await gh(`/repos/${owner}/${repo}/branches/${branchRef}`);
-            const headSha = branch?.commit?.sha;
+            const branchRefSha = await resolveBranchSha(owner, repo, branchRef);
+            const headSha = branchRefSha;
             if (!headSha) {
               throw new Error(`Could not resolve ${branchRef} HEAD SHA for ${owner}/${repo}.`);
             }
