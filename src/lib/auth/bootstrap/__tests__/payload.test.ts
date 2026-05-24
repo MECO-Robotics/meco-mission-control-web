@@ -44,6 +44,7 @@ describe("normalizeBootstrapPayload", () => {
           id: milestoneId,
           title: "Milestone 1",
           type: "internal-review",
+          status: "blocked",
           startDateTime: "2026-01-10T12:00:00",
           endDateTime: null,
           isExternal: false,
@@ -57,6 +58,7 @@ describe("normalizeBootstrapPayload", () => {
     const normalized = normalizeBootstrapPayload(payload);
 
     expect(normalized.milestoneRequirements).toEqual(milestoneRequirements);
+    expect(normalized.milestones[0]?.status).toBe("blocked");
   });
 
   it("preserves calendar and triage bootstrap records", () => {
