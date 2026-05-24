@@ -97,7 +97,7 @@ jobs:
       - name: Verify
         env:
           GH_TOKEN: ${{ github.token }}
-          PLATFORM_BOOTSTRAP_CONTRACT_BRANCH: ${{ github.base_ref || github.ref_name || 'development' }}
+          PLATFORM_BOOTSTRAP_CONTRACT_BRANCH: ${{ github.base_ref || (github.ref_name == 'main' && 'main') || (startsWith(github.ref_name, 'hotfix/') && 'main') || 'development' }}
         run: npm run verify
 
   organization-audit:
