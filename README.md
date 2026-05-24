@@ -22,6 +22,7 @@ Use this README as the contributor entry point. Use [`docs/CURRENT_WEB_SPEC.md`]
 - [Validation and Testing](#validation-and-testing)
 - [Development Workflow](#development-workflow)
 - [Deployment and Operations](#deployment-and-operations)
+- [Release Readiness Checklist](docs/release-readiness-checklist.md)
 - [Troubleshooting](#troubleshooting)
 - [Cross-Repo Responsibilities](#cross-repo-responsibilities)
 - [Requirements and Specs](#requirements-and-specs)
@@ -535,6 +536,8 @@ Codex/worktree notes:
 - When working in a worktree, audit UI changes against the worktree-hosted app instance before finishing.
 
 ## Deployment and Operations
+
+Use [`docs/release-readiness-checklist.md`](docs/release-readiness-checklist.md) before merging/deploying to production.
 
 ### CI/CD workflow
 
