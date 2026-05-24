@@ -73,9 +73,7 @@ export function pruneTimelineFilterSelections(
     ),
     projectFilter: isAllProjectsView
       ? pruneStableFilterSelection(filters.projectFilter, projectFilterOptions)
-      : filters.projectFilter.length > 0
-        ? []
-        : filters.projectFilter,
+      : [],
     statusFilter: pruneStableFilterSelection(
       filters.statusFilter,
       TIMELINE_TASK_STATUS_OPTIONS,
@@ -106,6 +104,7 @@ export function useTimelineViewFilters({
     () => buildTimelineSubsystemFilterOptions(bootstrap),
     [bootstrap],
   );
+  const projectFilterOptions = useMemo(() => bootstrap.projects, [bootstrap.projects]);
 
   const filters = useMemo(
     () => ({
@@ -122,7 +121,7 @@ export function useTimelineViewFilters({
     const prunedFilters = pruneTimelineFilterSelections(filters, {
       disciplineFilterOptions,
       isAllProjectsView,
-      projectFilterOptions: bootstrap.projects,
+      projectFilterOptions,
       subsystemFilterOptions,
     });
 
@@ -141,7 +140,13 @@ export function useTimelineViewFilters({
     if (prunedFilters.priorityFilter !== filters.priorityFilter) {
       setPriorityFilter(prunedFilters.priorityFilter);
     }
-  }, [bootstrap.projects, disciplineFilterOptions, filters, isAllProjectsView, subsystemFilterOptions]);
+  }, [
+    disciplineFilterOptions,
+    filters,
+    isAllProjectsView,
+    projectFilterOptions,
+    subsystemFilterOptions,
+  ]);
 
   const activeFilterCount = countActiveTimelineFilters({
     activePersonFilter,
