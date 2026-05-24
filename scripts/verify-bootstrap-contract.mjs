@@ -52,9 +52,16 @@ async function readRemoteContract(url, token) {
 async function resolvePlatformSourceContract() {
   const explicitPath = process.env.PLATFORM_BOOTSTRAP_CONTRACT_SOURCE_PATH;
   if (explicitPath) {
+    const sourcePath = path.resolve(process.cwd(), explicitPath);
+    if (sourcePath === contractPath) {
+      throw new Error(
+        "PLATFORM_BOOTSTRAP_CONTRACT_SOURCE_PATH must not point to the local mirrored contract.",
+      );
+    }
+
     return {
       source: `local ${explicitPath}`,
-      contract: await readJson(path.resolve(process.cwd(), explicitPath)),
+      contract: await readJson(sourcePath),
     };
   }
 
