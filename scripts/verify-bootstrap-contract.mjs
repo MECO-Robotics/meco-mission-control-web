@@ -49,6 +49,18 @@ async function readRemoteContract(url, token) {
   }
 }
 
+async function readRemoteContractByBranch(branch, token) {
+  const remoteBranchRef = encodeURIComponent(branch);
+  const remoteUrl =
+    process.env.PLATFORM_BOOTSTRAP_CONTRACT_URL ??
+    `https://api.github.com/repos/MECO-Robotics/meco-mission-control-platform/contents/contracts/platform/bootstrap/v1/contract.json?ref=${remoteBranchRef}`;
+
+  return {
+    source: `remote ${remoteUrl}`,
+    contract: await readRemoteContract(remoteUrl, token),
+  };
+}
+
 async function resolvePlatformSourceContract() {
   const explicitPath = process.env.PLATFORM_BOOTSTRAP_CONTRACT_SOURCE_PATH;
   if (explicitPath) {
@@ -82,17 +94,33 @@ async function resolvePlatformSourceContract() {
   }
 
   const remoteBranch = process.env.PLATFORM_BOOTSTRAP_CONTRACT_BRANCH ?? "development";
-  const remoteBranchRef = encodeURIComponent(remoteBranch);
-  const remoteUrl =
-    process.env.PLATFORM_BOOTSTRAP_CONTRACT_URL ??
-    `https://api.github.com/repos/MECO-Robotics/meco-mission-control-platform/contents/contracts/platform/bootstrap/v1/contract.json?ref=${remoteBranchRef}`;
-
   const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
-  const contract = await readRemoteContract(remoteUrl, token);
-  return {
-    source: `remote ${remoteUrl}`,
-    contract,
-  };
+  const remoteBranches = [
+    remoteBranch,
+    ...(remoteBranch === "development" ? [] : ["development"]),
+  ];
+
+  let lastError;
+
+  for (const branch of remoteBranches) {
+    try {
+      return await readRemoteContractByBranch(branch, token);
+    } catch (error) {
+      lastError = error;
+      if (
+        branch === "development" ||
+        !(error instanceof Error) ||
+        !error.message.includes("404")
+      ) {
+        throw error;
+      }
+      console.warn(
+        `Platform bootstrap contract missing at branch '${branch}', attempting fallback to development branch.`,
+      );
+    }
+  }
+
+  throw lastError;
 }
 
 async function main() {
