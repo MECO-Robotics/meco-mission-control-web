@@ -3,6 +3,7 @@ import type { CSSProperties, Dispatch, SetStateAction } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskStatus } from "@/types/common";
+import type { OpenEditTaskModalOptions } from "@/types/taskEditIntent";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { IconChevronLeft, IconChevronRight } from "@/components/shared/Icons";
 import { TaskQueueKanbanBoard } from "./TaskQueueKanbanBoard";
@@ -24,7 +25,7 @@ interface TaskQueueBoardSectionProps {
   focusedBoardState: TaskQueueBoardState | null;
   isNonRobotProject: boolean;
   membersById: Record<string, BootstrapPayload["members"][number]>;
-  openEditTaskModal: (task: TaskRecord) => void;
+  openEditTaskModal: (task: TaskRecord, options?: OpenEditTaskModalOptions) => void;
   onReassignTaskStatus?: (task: TaskRecord, status: TaskStatus) => void | Promise<void>;
   processedTasks: TaskRecord[];
   projectsById: Record<string, BootstrapPayload["projects"][number]>;

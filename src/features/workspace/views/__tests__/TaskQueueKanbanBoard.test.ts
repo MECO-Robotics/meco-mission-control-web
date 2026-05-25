@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { TaskQueueKanbanBoard } from "@/features/workspace/views/taskQueue/TaskQueueKanbanBoard";
+import type { TaskQueueBoardState } from "@/features/workspace/views/taskQueue/taskQueueKanbanBoardState";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskStatus } from "@/types/common";
 import type { TaskRecord } from "@/types/recordsExecution";
@@ -12,7 +13,14 @@ import type { TaskRecord } from "@/types/recordsExecution";
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 interface CapturedKanbanColumnsProps {
-  onItemDrop?: (task: TaskRecord, targetState: TaskStatus, sourceState: TaskStatus) => void | Promise<void>;
+  canDragItem?: (task: TaskRecord, state: TaskQueueBoardState) => boolean;
+  canDropItem?: (task: TaskRecord, state: TaskQueueBoardState) => boolean;
+  canDropState?: (state: TaskQueueBoardState) => boolean;
+  onItemDrop?: (
+    task: TaskRecord,
+    targetState: TaskQueueBoardState,
+    sourceState: TaskQueueBoardState,
+  ) => void | Promise<void>;
 }
 
 const mockKanbanColumns = jest.fn((props: CapturedKanbanColumnsProps) => {
@@ -100,7 +108,10 @@ const bootstrap: BootstrapPayload = {
   tasks: [task],
 };
 
-function renderBoard(onReassignTaskStatus: (task: TaskRecord, status: TaskStatus) => Promise<void>) {
+function renderBoard(
+  onReassignTaskStatus: (task: TaskRecord, status: TaskStatus) => Promise<void>,
+  openEditTaskModal = jest.fn(),
+) {
   mockKanbanColumns.mockClear();
   renderToStaticMarkup(
     React.createElement(TaskQueueKanbanBoard, {
@@ -112,7 +123,7 @@ function renderBoard(onReassignTaskStatus: (task: TaskRecord, status: TaskStatus
       onClearFocus: jest.fn(),
       onFocusState: jest.fn(),
       onReassignTaskStatus,
-      openEditTaskModal: jest.fn(),
+      openEditTaskModal,
       projectsById: { "project-1": bootstrap.projects[0] },
       taskQueueZoom: 1,
       showProjectContextOnCards: true,
@@ -150,5 +161,29 @@ describe("TaskQueueKanbanBoard", () => {
     await firstDrop;
     await secondDrop;
     expect(onReassignTaskStatus).toHaveBeenCalledWith(task, "in-progress");
+  });
+
+  it("opens task edit intent instead of status reassignment for pseudo-state drops", async () => {
+    const onReassignTaskStatus = jest.fn(() => Promise.resolve());
+    const openEditTaskModal = jest.fn();
+    const kanbanProps = renderBoard(onReassignTaskStatus, openEditTaskModal);
+
+    await kanbanProps.onItemDrop?.(task, "blocked", "not-started");
+    await kanbanProps.onItemDrop?.(task, "waiting-on-dependency", "not-started");
+
+    expect(onReassignTaskStatus).not.toHaveBeenCalled();
+    expect(openEditTaskModal).toHaveBeenNthCalledWith(1, task, { intentState: "blocked" });
+    expect(openEditTaskModal).toHaveBeenNthCalledWith(2, task, { intentState: "waiting-on-dependency" });
+  });
+
+  it("allows pseudo-state columns as drag and drop targets", () => {
+    const onReassignTaskStatus = jest.fn(() => Promise.resolve());
+    const kanbanProps = renderBoard(onReassignTaskStatus);
+
+    expect(kanbanProps.canDragItem?.(task, "blocked")).toBe(true);
+    expect(kanbanProps.canDropState?.("blocked")).toBe(true);
+    expect(kanbanProps.canDropState?.("waiting-on-dependency")).toBe(true);
+    expect(kanbanProps.canDropItem?.(task, "blocked")).toBe(true);
+    expect(kanbanProps.canDropItem?.(task, "waiting-on-dependency")).toBe(true);
   });
 });

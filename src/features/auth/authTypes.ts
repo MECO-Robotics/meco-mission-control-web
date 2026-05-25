@@ -19,7 +19,7 @@ export interface SignInScreenProps {
   hasGoogleSignIn: boolean;
   isDarkMode?: boolean;
   isSigningIn: boolean;
-  onDevBypassSignIn: () => Promise<void>;
+  onDevBypassSignIn: (role: "student" | "mentor") => Promise<void>;
   onToggleDarkMode: () => void;
   onRequestEmailCode: (email: string) => Promise<EmailCodeDeliveryResponse>;
   onVerifyEmailCode: (email: string, code: string) => Promise<void>;

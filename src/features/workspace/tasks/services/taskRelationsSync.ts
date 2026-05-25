@@ -59,6 +59,10 @@ export async function syncTaskDependencies(
   const desiredIds = new Set<string>();
 
   for (const dependency of desiredDependencies ?? []) {
+    if (!dependency.refId.trim()) {
+      continue;
+    }
+
     const payload = buildTaskDependencyPayload(taskId, dependency);
     const existingDependency = dependency.id ? existingById.get(dependency.id) : null;
 

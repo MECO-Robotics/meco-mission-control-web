@@ -2,6 +2,8 @@ import { useCallback } from "react";
 
 import { buildEmptyTaskPayload, taskToPayload } from "@/lib/appUtils/taskTargets";
 import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
+import { applyTaskEditIntentToDraft } from "./taskEditIntentDraft";
+import type { OpenEditTaskModalOptions } from "@/types/taskEditIntent";
 import type { TaskRecord } from "@/types/recordsExecution";
 
 export type AppWorkspaceTaskModalActions = ReturnType<typeof useAppWorkspaceTaskModalActions>;
@@ -25,12 +27,12 @@ export function useAppWorkspaceTaskModalActions(model: AppWorkspaceModel) {
     model.setTaskModalMode("create");
   }, [model]);
 
-  const openEditTaskModal = useCallback((task: TaskRecord) => {
+  const openEditTaskModal = useCallback((task: TaskRecord, options?: OpenEditTaskModalOptions) => {
     model.suppressNextAutoWorkspaceLoad();
     model.setShowTimelineCreateToggleInTaskModal(false);
     model.setActiveTimelineTaskDetailId(null);
     model.setActiveTaskId(task.id);
-    model.setTaskDraft(taskToPayload(task, model.scopedBootstrap));
+    model.setTaskDraft(applyTaskEditIntentToDraft(taskToPayload(task, model.scopedBootstrap), options));
     model.setTaskModalMode("edit");
   }, [model]);
 
