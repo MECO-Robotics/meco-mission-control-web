@@ -6,8 +6,6 @@ export interface AuthConfig {
   devBypassAvailable: boolean;
 }
 
-export type DevBypassRole = "student" | "mentor";
-
 export interface SessionUser {
   accountId: string;
   authProvider: "google" | "email";

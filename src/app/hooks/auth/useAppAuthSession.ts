@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 
 import {
   type AuthConfig,
-  type DevBypassRole,
   type EmailCodeDeliveryResponse,
   type GoogleCredentialResponse,
   type SessionUser,
@@ -33,7 +32,7 @@ export interface UseAppAuthSessionResult {
   expireSession: (message: string) => void;
   enforcedAuthConfig: AuthConfig | null;
   googleClientId: string | null;
-  handleDevBypassSignIn: (role?: DevBypassRole) => Promise<void>;
+  handleDevBypassSignIn: () => Promise<void>;
   handleGoogleCredential: (response: GoogleCredentialResponse) => Promise<void>;
   handleRequestEmailCode: (email: string) => Promise<EmailCodeDeliveryResponse>;
   handleSignOut: () => void;
