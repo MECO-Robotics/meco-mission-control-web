@@ -11,6 +11,14 @@ import {
 } from "react";
 
 import type { KanbanColumnDefinition } from "./KanbanColumns";
+import {
+  KANBAN_DRAG_DATA_TYPE,
+  POINTER_DRAG_THRESHOLD_PX,
+  canStartKanbanPointerFallbackDrag,
+  createOpaqueKanbanNativeDragImage,
+  getKanbanDropStateAtPoint,
+  isKanbanPointerFallbackInteractiveTarget,
+} from "./kanbanDragUtils";
 
 interface ActiveKanbanDrag<TState extends string, TItem> {
   id: string;
@@ -45,59 +53,6 @@ interface UseKanbanDragOptions<TState extends string, TItem> {
   onItemDrop?: (item: TItem, targetState: TState, sourceState: TState) => void | Promise<void>;
 }
 
-const KANBAN_DRAG_DATA_TYPE = "application/x-meco-kanban-item";
-const KANBAN_POINTER_INTERACTIVE_SELECTOR =
-  'a[href], button, input, select, textarea, summary, [role="button"], [role="link"], [contenteditable="true"], [data-kanban-drag-ignore="true"]';
-const POINTER_DRAG_THRESHOLD_PX = 8;
-
-interface KanbanPointerFallbackStart {
-  button: number;
-  pointerType: string;
-}
-
-interface KanbanPointerFallbackTarget {
-  currentTarget: HTMLElement;
-  target: EventTarget | null;
-}
-
-export function canStartKanbanPointerFallbackDrag({
-  button,
-  pointerType,
-}: KanbanPointerFallbackStart) {
-  if (pointerType === "touch") {
-    return false;
-  }
-
-  if (pointerType === "mouse") {
-    return button === 0;
-  }
-
-  return pointerType === "pen";
-}
-
-export function isKanbanPointerFallbackInteractiveTarget({
-  currentTarget,
-  target,
-}: KanbanPointerFallbackTarget) {
-  if (!target || target === currentTarget) {
-    return false;
-  }
-
-  const closestTarget = target as EventTarget & {
-    closest?: (selector: string) => Element | null;
-  };
-  const interactiveTarget =
-    typeof closestTarget.closest === "function"
-      ? closestTarget.closest(KANBAN_POINTER_INTERACTIVE_SELECTOR)
-      : null;
-
-  return Boolean(
-    interactiveTarget &&
-      interactiveTarget !== currentTarget &&
-      currentTarget.contains(interactiveTarget),
-  );
-}
-
 export function useKanbanDrag<TState extends string, TItem>({
   canDropItem,
   canDropState,
@@ -108,6 +63,9 @@ export function useKanbanDrag<TState extends string, TItem>({
   onItemDrop,
 }: UseKanbanDragOptions<TState, TItem>) {
   const [activeDrag, setActiveDrag] = useState<ActiveKanbanDrag<TState, TItem> | null>(null);
+  const [dimmedDragItemId, setDimmedDragItemId] = useState<string | null>(null);
+  const dimmedDragFrameRef = useRef<number | null>(null);
+  const nativeDragImageRef = useRef<HTMLElement | null>(null);
   const [hoveredDropState, setHoveredDropState] = useState<TState | null>(null);
   const pendingPointerDragRef = useRef<PendingKanbanPointerDrag<TState, TItem> | null>(null);
   const suppressClickRef = useRef(false);
@@ -149,17 +107,10 @@ export function useKanbanDrag<TState extends string, TItem>({
     const itemId = milestone.dataTransfer.getData(KANBAN_DRAG_DATA_TYPE);
     return itemId ? itemsById.get(itemId) ?? null : null;
   };
-  const getDropStateAtPoint = useCallback((clientX: number, clientY: number) => {
-    if (typeof document === "undefined") {
-      return null;
-    }
-
-    const target = document
-      .elementFromPoint(clientX, clientY)
-      ?.closest("[data-kanban-drop-state]") as HTMLElement | null;
-    const state = target?.getAttribute("data-kanban-drop-state");
-    return state ? (state as TState) : null;
-  }, []);
+  const getDropStateAtPoint = useCallback(
+    (clientX: number, clientY: number) => getKanbanDropStateAtPoint<TState>(clientX, clientY),
+    [],
+  );
   const handleSuppressedClick: MouseEventHandler<HTMLElement> = (milestone) => {
     if (!suppressClickRef.current) {
       return;
@@ -171,6 +122,49 @@ export function useKanbanDrag<TState extends string, TItem>({
   const clearPendingPointerDrag = () => {
     pendingPointerDragRef.current = null;
   };
+  const clearDimmedDragSource = useCallback(() => {
+    if (
+      typeof window !== "undefined" &&
+      dimmedDragFrameRef.current !== null &&
+      typeof window.cancelAnimationFrame === "function"
+    ) {
+      window.cancelAnimationFrame(dimmedDragFrameRef.current);
+    }
+
+    dimmedDragFrameRef.current = null;
+    setDimmedDragItemId(null);
+  }, []);
+  const clearNativeDragImage = useCallback(() => {
+    nativeDragImageRef.current?.remove();
+    nativeDragImageRef.current = null;
+  }, []);
+  const dimSourceAfterNativeDragPreview = useCallback((itemId: string) => {
+    if (typeof window === "undefined" || typeof window.requestAnimationFrame !== "function") {
+      setDimmedDragItemId(itemId);
+      return;
+    }
+
+    if (
+      dimmedDragFrameRef.current !== null &&
+      typeof window.cancelAnimationFrame === "function"
+    ) {
+      window.cancelAnimationFrame(dimmedDragFrameRef.current);
+    }
+
+    dimmedDragFrameRef.current = window.requestAnimationFrame(() => {
+      dimmedDragFrameRef.current = null;
+      setDimmedDragItemId(itemId);
+    });
+  }, []);
+  const setOpaqueNativeDragImage = useCallback(
+    (milestone: DragEvent<HTMLElement>) => {
+      clearNativeDragImage();
+      nativeDragImageRef.current = createOpaqueKanbanNativeDragImage(milestone);
+    },
+    [clearNativeDragImage],
+  );
+
+  useEffect(() => clearNativeDragImage, [clearNativeDragImage]);
 
   useEffect(() => {
     if (!dragEnabled) {
@@ -180,6 +174,7 @@ export function useKanbanDrag<TState extends string, TItem>({
     const clearPointerDrag = (wasDragging: boolean) => {
       pendingPointerDragRef.current = null;
       setActiveDrag(null);
+      clearDimmedDragSource();
       setHoveredDropState(null);
       if (wasDragging) {
         window.setTimeout(() => {
@@ -211,6 +206,7 @@ export function useKanbanDrag<TState extends string, TItem>({
           item: pendingDrag.item,
           sourceState: pendingDrag.sourceState,
         });
+        setDimmedDragItemId(pendingDrag.id);
       }
 
       const targetState = getDropStateAtPoint(event.clientX, event.clientY);
@@ -254,7 +250,7 @@ export function useKanbanDrag<TState extends string, TItem>({
       window.removeEventListener("pointerup", handlePointerUp);
       window.removeEventListener("pointercancel", handlePointerCancel);
     };
-  }, [canDropDraggedItem, dragEnabled, getDropStateAtPoint, onItemDrop]);
+  }, [canDropDraggedItem, clearDimmedDragSource, dragEnabled, getDropStateAtPoint, onItemDrop]);
 
   const getColumnDropProps = (targetState: TState) => ({
     "data-kanban-drop-enabled": dragEnabled ? String(isDropStateEnabled(targetState)) : undefined,
@@ -294,6 +290,8 @@ export function useKanbanDrag<TState extends string, TItem>({
       ? (milestone: DragEvent<HTMLElement>) => {
           const drag = findDragItem(milestone, activeDrag);
           clearPendingPointerDrag();
+          clearDimmedDragSource();
+          clearNativeDragImage();
           setHoveredDropState(null);
           setActiveDrag(null);
           if (!drag || !canDropDraggedItem(drag, targetState) || !onItemDrop) {
@@ -319,6 +317,8 @@ export function useKanbanDrag<TState extends string, TItem>({
     const itemId = getItemId(item);
     const handleDragEnd = () => {
       clearPendingPointerDrag();
+      clearDimmedDragSource();
+      clearNativeDragImage();
       setActiveDrag(null);
       setHoveredDropState(null);
     };
@@ -328,7 +328,9 @@ export function useKanbanDrag<TState extends string, TItem>({
       milestone.dataTransfer.effectAllowed = "move";
       milestone.dataTransfer.setData(KANBAN_DRAG_DATA_TYPE, itemId);
       milestone.dataTransfer.setData("text/plain", getItemDragLabel?.(item) ?? itemId);
+      setOpaqueNativeDragImage(milestone);
       setActiveDrag({ id: itemId, item, sourceState });
+      dimSourceAfterNativeDragPreview(itemId);
     };
     const handlePointerDown: PointerEventHandler<HTMLElement> = (milestone) => {
       if (
@@ -351,7 +353,9 @@ export function useKanbanDrag<TState extends string, TItem>({
     };
 
     return {
-      className: "kanban-draggable-card",
+      className: `kanban-draggable-card${
+        dimmedDragItemId === itemId ? " is-kanban-drag-source-active" : ""
+      }`,
       "data-kanban-drag-source": sourceState,
       "data-kanban-item-id": itemId,
       "data-kanban-item-label": getItemDragLabel?.(item),

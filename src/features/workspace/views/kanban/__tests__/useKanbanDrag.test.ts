@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 import {
   canStartKanbanPointerFallbackDrag,
   isKanbanPointerFallbackInteractiveTarget,
-} from "../useKanbanDrag";
+} from "../kanbanDragUtils";
 
 describe("canStartKanbanPointerFallbackDrag", () => {
   it("does not start fallback dragging for touch gestures", () => {

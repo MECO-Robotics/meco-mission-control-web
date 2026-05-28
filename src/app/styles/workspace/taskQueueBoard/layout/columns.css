@@ -103,13 +103,14 @@
 
 .task-queue-board-column-body.is-kanban-drop-target {
   border-radius: 12px;
-  outline: 2px dashed color-mix(in srgb, var(--official-blue) 48%, transparent);
+  outline: 2px solid color-mix(in srgb, var(--official-blue) 44%, transparent);
   outline-offset: 4px;
-  background: color-mix(in srgb, var(--official-blue) 7%, transparent);
+  background: color-mix(in srgb, var(--official-blue) 8%, transparent);
 }
 
 .kanban-draggable-card {
   min-width: 0;
+  transition: opacity 120ms ease;
 }
 
 .kanban-draggable-card[draggable="true"] {
@@ -118,6 +119,10 @@
 
 .kanban-draggable-card[draggable="true"]:active {
   cursor: grabbing;
+}
+
+.kanban-draggable-card.is-kanban-drag-source-active {
+  opacity: 0.46;
 }
 
 .kanban-draggable-card[draggable="false"] {

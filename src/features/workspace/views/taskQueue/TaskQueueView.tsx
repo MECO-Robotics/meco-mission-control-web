@@ -1,5 +1,6 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskStatus } from "@/types/common";
+import type { OpenEditTaskModalOptions } from "@/types/taskEditIntent";
 import type { TaskRecord } from "@/types/recordsExecution";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
@@ -19,7 +20,7 @@ interface TaskQueueViewProps {
   isNonRobotProject: boolean;
   membersById: Record<string, BootstrapPayload["members"][number]>;
   openCreateTaskModal: () => void;
-  openEditTaskModal: (task: TaskRecord) => void;
+  openEditTaskModal: (task: TaskRecord, options?: OpenEditTaskModalOptions) => void;
   onReassignTaskStatus?: (task: TaskRecord, status: TaskStatus) => void | Promise<void>;
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
 }

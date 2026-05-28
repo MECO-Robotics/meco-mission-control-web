@@ -183,7 +183,8 @@ describe("MilestonesView", () => {
     expect(markup).toContain("milestone-board");
     expect(markup).toContain("task-queue-board-column");
     expect(markup).toContain("task-queue-board-card");
-    expect(markup).toContain("Not started");
+    expect(markup).toContain("Not ready");
+    expect(markup).toContain("Ready");
     expect(markup).toContain("In progress");
     expect(markup).toContain("task-queue-zoom-controls");
     expect(markup).toContain("task-queue-zoom-label");

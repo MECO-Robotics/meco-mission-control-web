@@ -445,6 +445,6 @@ describe("TaskQueueView", () => {
     expect(markup).toContain('data-kanban-drop-state="in-progress"');
     expect(markup).toContain('data-kanban-drop-enabled="true"');
     expect(markup).toContain('data-kanban-drop-state="blocked"');
-    expect(markup).toContain('data-kanban-drop-enabled="false"');
+    expect(markup).toContain('data-kanban-drop-state="waiting-on-dependency"');
   });
 });
