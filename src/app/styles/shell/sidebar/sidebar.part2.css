@@ -1,0 +1,183 @@
+.sidebar-footer-help-button {
+  width: 100%;
+}
+
+.sidebar-help-collapsed-trigger {
+  width: 100%;
+}
+
+.sidebar-project-collapsed-trigger {
+  width: 100%;
+  justify-content: center !important;
+  padding-inline: 0.4rem !important;
+}
+
+.sidebar-project-compact-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.sidebar-project-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.36rem;
+  width: 100%;
+  height: 1.92rem;
+  border: 1px solid var(--border-base);
+  border-radius: 0.62rem;
+  background: var(--bg-row-alt);
+  color: var(--text-title);
+  padding: 0 0.35rem;
+  cursor: pointer;
+}
+
+.sidebar-project-trigger:hover,
+.sidebar-project-trigger:focus-visible {
+  border-color: rgba(22, 71, 142, 0.28);
+  background: var(--bg-row-alt);
+  outline: none;
+}
+
+.sidebar-project-trigger-label {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.sidebar-project-trigger-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(15, 28, 52, 0.52);
+  transition: transform 0.2s ease;
+}
+
+.sidebar-project-trigger-chevron.is-open {
+  transform: rotate(90deg);
+}
+
+.sidebar-project-popup {
+  display: grid;
+  gap: 0.14rem;
+  margin-top: 0.35rem;
+  padding: 0.24rem;
+  border: 1px solid var(--border-base);
+  border-radius: 8px;
+  background: var(--bg-panel);
+}
+
+.sidebar-project-option {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-copy);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: left;
+  padding: 0.36rem 0.42rem;
+  cursor: pointer;
+}
+
+.sidebar-project-option-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.sidebar-project-option-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-project-option:hover {
+  background: var(--bg-row-alt);
+  border-color: rgba(15, 28, 52, 0.08);
+}
+
+.sidebar-project-option[data-active="true"] {
+  background: var(--meco-soft-blue);
+  border-color: rgba(22, 71, 142, 0.22);
+  color: var(--meco-blue);
+}
+
+.sidebar-project-option:disabled {
+  opacity: 0.64;
+  cursor: not-allowed;
+}
+
+.sidebar-project-compact-popup {
+  min-width: 11.75rem;
+  max-width: 15.25rem;
+}
+
+.sidebar[data-collapsed="true"] {
+  padding-inline: 0.5rem;
+}
+
+.sidebar[data-collapsed="false"] {
+  padding-left: 0.7rem;
+}
+
+.sidebar[data-collapsed="true"] .tab {
+  justify-content: center;
+  padding-inline: 0.4rem;
+  width: 100%;
+}
+
+.sidebar[data-collapsed="true"] .sidebar-tab-main {
+  justify-content: center;
+  width: 100%;
+}
+
+.tab {
+  border: 1px solid var(--official-grey);
+  border-radius: 999px;
+  background: var(--official-white);
+  color: var(--official-black);
+  padding: 0.65rem 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sidebar .tab {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.45rem;
+  border-radius: 6px;
+  padding: 0.42rem 0.02rem 0.42rem 0.42rem;
+  width: fit-content;
+  max-width: 100%;
+  text-align: left;
+  font-size: 0.84rem;
+  font-weight: 600;
+  background: transparent;
+  border: 1px solid transparent;
+  min-width: 0;
+  cursor: pointer;
+  color: var(--text-copy);
+  line-height: 1.2;
+}
+
+.sidebar .tab[data-active="true"] {
+  background: var(--meco-soft-blue);
+  color: var(--meco-blue);
+  border-color: rgba(22, 71, 142, 0.22);
+}

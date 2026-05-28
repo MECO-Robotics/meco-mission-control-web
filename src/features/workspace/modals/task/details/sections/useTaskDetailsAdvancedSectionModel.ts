@@ -2,7 +2,7 @@ import type { ChangeEvent, CSSProperties, Dispatch, SetStateAction } from "react
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskPayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
-import { getTimelineTaskDisciplineColor } from "@/features/workspace/views/timeline/timelineTaskColors";
+import { getTimelineTaskDisciplineColor } from "@/features/workspace/views/timeline/model/timelineTaskColors";
 import {
   getTaskSelectedMechanismIds,
   getTaskSelectedPartInstanceIds,

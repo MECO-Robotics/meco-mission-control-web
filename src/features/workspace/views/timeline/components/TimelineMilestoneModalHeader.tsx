@@ -12,14 +12,11 @@ export function TimelineMilestoneModalHeader({
   onSwitchToTask,
 }: TimelineMilestoneModalHeaderProps) {
   return (
-    <div className="panel-header compact-header" style={mode === "create" ? { marginBottom: "0.65rem" } : undefined}>
+    <div className="panel-header compact-header task-details-header">
       <div>
         <p
           className="eyebrow"
-          style={{
-            color: "var(--meco-blue)",
-            ...(mode === "create" ? { marginBottom: "0.2rem" } : null),
-          }}
+          style={{ color: "var(--meco-blue)" }}
         >
           Timeline milestone
         </p>
@@ -51,12 +48,12 @@ export function TimelineMilestoneModalHeader({
         ) : null}
       </div>
       <button
-        className="icon-button"
+        aria-label="Close milestone modal"
+        className="icon-button task-details-close-button"
         onClick={onClose}
-        style={{ color: "var(--text-copy)", background: "transparent" }}
         type="button"
       >
-        Close
+        {"\u00D7"}
       </button>
     </div>
   );

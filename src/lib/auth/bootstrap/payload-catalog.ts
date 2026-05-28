@@ -1,7 +1,9 @@
 import type { ArtifactRecord, ManufacturingItemRecord, MaterialRecord, PartDefinitionRecord, PartInstanceRecord, PurchaseItemRecord } from "@/types/recordsInventory";
 import type { MilestoneRecord, WorkLogRecord } from "@/types/recordsExecution";
 import type { MechanismRecord, MemberRecord, SubsystemRecord } from "@/types/recordsOrganization";
+import type { MilestoneStatus, PlannedAttendanceDay } from "@/types/common";
 import { resolveWorkspaceColor } from "@/features/workspace/shared/model/workspaceColors";
+import { normalizeSubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
 import { localTodayDate } from "@/lib/dateUtils";
 import type { NormalizedPlanningRecords } from "./planning";
 import {
@@ -49,6 +51,38 @@ function normalizeCatalogPartInstances(partInstances: PartInstanceRecord[]) {
     partInstances: normalizedPartInstances,
     remappedPartInstanceIds,
   };
+}
+
+const PLANNED_ATTENDANCE_DAYS = new Set<PlannedAttendanceDay>([
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "sunday",
+]);
+const MILESTONE_STATUSES = new Set<MilestoneStatus>(["not ready", "blocked", "qa", "ready"]);
+
+function normalizeMilestoneStatus(status: unknown): MilestoneStatus {
+  return typeof status === "string" && MILESTONE_STATUSES.has(status as MilestoneStatus)
+    ? (status as MilestoneStatus)
+    : "not ready";
+}
+
+function normalizePlannedAttendanceDays(days: unknown) {
+  if (!Array.isArray(days)) {
+    return [];
+  }
+
+  return Array.from(
+    new Set(
+      days.filter(
+        (day): day is PlannedAttendanceDay =>
+          typeof day === "string" && PLANNED_ATTENDANCE_DAYS.has(day as PlannedAttendanceDay),
+      ),
+    ),
+  );
 }
 
 export interface NormalizedBootstrapCatalogRecords {
@@ -106,6 +140,7 @@ export function normalizeBootstrapCatalogRecords(
 
   const subsystems = (source.subsystems ?? []).map((subsystem) => ({
     ...subsystem,
+    ...normalizeSubsystemLayoutFields(subsystem),
     color: resolveWorkspaceColor(
       subsystem.color,
       `${subsystem.projectId ?? defaultProjectId}:${subsystem.id}:${subsystem.name}`,
@@ -134,6 +169,7 @@ export function normalizeBootstrapCatalogRecords(
       id: milestone.id ?? `milestone-${index + 1}`,
       title: milestone.title ?? `Milestone ${index + 1}`,
       type: milestone.type ?? "internal-review",
+      status: normalizeMilestoneStatus(milestone.status),
       startDateTime: milestone.startDateTime ?? `${fallbackMilestoneDate}T12:00:00`,
       endDateTime: milestone.endDateTime ?? null,
       isExternal: milestone.isExternal ?? false,
@@ -166,6 +202,10 @@ export function normalizeBootstrapCatalogRecords(
             : member.role === "lead" || member.role === "admin",
         seasonId,
         activeSeasonIds: activeSeasonIds.length > 0 ? activeSeasonIds : [seasonId],
+        plannedWeeklyAttendanceHours: Math.max(0, member.plannedWeeklyAttendanceHours ?? 0),
+        plannedAttendanceDays: normalizePlannedAttendanceDays(member.plannedAttendanceDays),
+        plannedAttendanceNotes:
+          typeof member.plannedAttendanceNotes === "string" ? member.plannedAttendanceNotes : "",
       };
     }),
     subsystems,

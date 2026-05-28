@@ -1,4 +1,5 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MilestoneStatus } from "@/types/common";
 import type { MilestoneRecord } from "@/types/recordsExecution";
 import { filterSelectionIncludes, filterSelectionIntersects, filterSelectionMatchesTaskPeople } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
@@ -7,9 +8,22 @@ import { getMilestoneProjectIds } from "@/features/workspace/shared/events/event
 import { getMilestoneTypeStyle } from "@/features/workspace/shared/events/eventStyles";
 
 export type MilestoneSortField = "startDateTime" | "title" | "type";
+export type MilestoneSearchSuggestion = {
+  context: string;
+  description: string;
+  id: string;
+  title: string;
+};
+
 export const MILESTONE_ZOOM_MIN = 0.6;
 export const MILESTONE_ZOOM_MAX = 1.6;
 export const MILESTONE_ZOOM_STEP = 0.1;
+const MILESTONE_STATUS_LABELS: Record<MilestoneStatus, string> = {
+  blocked: "Blocked",
+  "not ready": "Not ready",
+  qa: "QA",
+  ready: "Ready",
+};
 
 export function clampMilestoneZoom(value: number) {
   const normalizedValue = Math.round(value * 10) / 10;
@@ -80,6 +94,61 @@ export function buildMilestoneProjectLabels(
   });
 
   return labels;
+}
+
+function formatMilestoneStatusLabel(status: MilestoneStatus | undefined) {
+  return status ? MILESTONE_STATUS_LABELS[status] : null;
+}
+
+export function buildMilestoneSearchSuggestions({
+  maxSuggestions = 5,
+  milestones,
+  projectLabelByMilestoneId,
+  searchFilter,
+}: {
+  maxSuggestions?: number;
+  milestones: BootstrapPayload["milestones"];
+  projectLabelByMilestoneId: Record<string, string>;
+  searchFilter: string;
+}): MilestoneSearchSuggestion[] {
+  const search = searchFilter.trim().toLowerCase();
+
+  if (!search) {
+    return [];
+  }
+
+  return milestones
+    .flatMap((milestone) => {
+      const typeLabel = getMilestoneTypeStyle(milestone.type).label;
+      const statusLabel = formatMilestoneStatusLabel(milestone.status);
+      const dateLabel = formatMilestoneDateTime(milestone.startDateTime);
+      const projectLabel = projectLabelByMilestoneId[milestone.id] ?? "All projects";
+      const description = milestone.description.trim();
+      const searchableText = [
+        milestone.title,
+        description,
+        typeLabel,
+        statusLabel,
+        dateLabel,
+        projectLabel,
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      if (!searchableText.includes(search)) {
+        return [];
+      }
+
+      return [
+        {
+          context: [typeLabel, statusLabel, dateLabel, projectLabel].filter(Boolean).join(" - "),
+          description,
+          id: milestone.id,
+          title: milestone.title,
+        },
+      ];
+    })
+    .slice(0, maxSuggestions);
 }
 
 export function filterAndSortMilestones({

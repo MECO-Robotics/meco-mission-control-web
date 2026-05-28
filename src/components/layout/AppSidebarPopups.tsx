@@ -1,20 +1,30 @@
-import { LayoutGrid, Plus } from "lucide-react";
-import type { ReactNode, RefObject } from "react";
+import type { RefObject } from "react";
 
 import { NAVIGATION_SECTION_LABELS, type NavigationSection } from "@/lib/workspaceNavigation";
-import type { ProjectRecord } from "@/types/recordsOrganization";
-import { getProjectIcon, getProjectIconColor, subItemIcons } from "./appSidebarIcons";
+import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
+import { subItemIcons } from "./appSidebarIcons";
+import {
+  ADD_ROBOT_PROJECT_VALUE,
+  AppSidebarScopeMenuPopup,
+  CREATE_SEASON_OPTION_VALUE,
+  type AppSidebarScopePanel,
+} from "./AppSidebarScopeMenuPopup";
 import type { SidebarSubItemModel } from "./AppSidebarSections";
 
 interface AppSidebarPopupsProps {
   activeSubItemId: import("@/lib/workspaceNavigation").NavigationSubItemId | null;
+  activeScopePanel: AppSidebarScopePanel | null;
   compactPopupRef: RefObject<HTMLDivElement | null>;
   compactPopupSection: NavigationSection | null;
   compactPopupTop: number;
   getSectionSubItems: (section: NavigationSection) => SidebarSubItemModel[];
   isCollapsed: boolean;
   isProjectPopupOpen: boolean;
+  isScopePopupOpen?: boolean;
+  canEditSelectedRobot?: boolean;
+  onEditSelectedRobot?: () => void;
   onSelectProjectOption: (value: string) => void;
+  onSelectSeasonOption?: (value: string) => void;
   onSubItemSelect: (
     target: import("@/lib/workspaceNavigation").NavigationTarget,
     isEnabled: boolean,
@@ -22,47 +32,37 @@ interface AppSidebarPopupsProps {
   projectPopupRef: RefObject<HTMLDivElement | null>;
   projectPopupTop: number;
   projects: ProjectRecord[];
+  seasons?: SeasonRecord[];
   selectedProjectId: string | null;
+  selectedSeasonId?: string | null;
+  setActiveScopePanel: (panel: AppSidebarScopePanel) => void;
 }
-
-const ADD_ROBOT_PROJECT_VALUE = "__add_robot_project__";
 
 export function AppSidebarPopups({
   activeSubItemId,
+  activeScopePanel,
   compactPopupRef,
   compactPopupSection,
   compactPopupTop,
   getSectionSubItems,
   isCollapsed,
   isProjectPopupOpen,
+  isScopePopupOpen,
+  canEditSelectedRobot,
+  onEditSelectedRobot,
   onSelectProjectOption,
+  onSelectSeasonOption,
   onSubItemSelect,
   projectPopupRef,
   projectPopupTop,
   projects,
+  seasons = [],
   selectedProjectId,
+  selectedSeasonId = null,
+  setActiveScopePanel,
 }: AppSidebarPopupsProps) {
-  const renderProjectOption = (
-    label: string,
-    icon: ReactNode,
-    iconColor: string,
-    isActive: boolean,
-    value: string,
-    key: string,
-  ) => (
-    <button
-      className="sidebar-project-option"
-      data-active={isActive ? "true" : "false"}
-      key={key}
-      onClick={() => onSelectProjectOption(value)}
-      type="button"
-    >
-      <span aria-hidden="true" className="sidebar-project-option-icon" style={{ color: iconColor }}>
-        {icon}
-      </span>
-      <span className="sidebar-project-option-label">{label}</span>
-    </button>
-  );
+  const shouldShowScopePopup = isScopePopupOpen ?? isProjectPopupOpen;
+  const shouldShowEditRobot = canEditSelectedRobot ?? Boolean(onEditSelectedRobot);
 
   return (
     <>
@@ -88,51 +88,28 @@ export function AppSidebarPopups({
         </div>
       ) : null}
 
-      {isProjectPopupOpen ? (
+      {shouldShowScopePopup ? (
         <div
-          className="sidebar-compact-popup sidebar-project-compact-popup"
+          className="sidebar-compact-popup sidebar-scope-popup-shell"
           ref={projectPopupRef}
           style={{ top: `${projectPopupTop}px` }}
         >
-          <p className="sidebar-compact-popup-title">Project</p>
-          {projects.length === 0 ? (
-            <button className="sidebar-project-option" disabled type="button">
-              No projects
-            </button>
-          ) : (
-            <>
-              {renderProjectOption(
-                "All projects",
-                <LayoutGrid size={14} strokeWidth={2} />,
-                "var(--official-blue)",
-                selectedProjectId === null,
-                "",
-                "all-projects",
-              )}
-              {projects.map((project) =>
-                renderProjectOption(
-                  project.name,
-                  getProjectIcon(project),
-                  getProjectIconColor(project),
-                  selectedProjectId === project.id,
-                  project.id,
-                  project.id,
-                ),
-              )}
-            </>
-          )}
-          {renderProjectOption(
-            "Add robot",
-            <Plus size={14} strokeWidth={2} />,
-            "var(--meco-blue)",
-            false,
-            ADD_ROBOT_PROJECT_VALUE,
-            ADD_ROBOT_PROJECT_VALUE,
-          )}
+          <AppSidebarScopeMenuPopup
+            activePanel={activeScopePanel}
+            canEditSelectedRobot={shouldShowEditRobot}
+            onEditSelectedRobot={onEditSelectedRobot ?? (() => undefined)}
+            onPanelChange={setActiveScopePanel}
+            onSelectProjectOption={onSelectProjectOption}
+            onSelectSeasonOption={onSelectSeasonOption ?? (() => undefined)}
+            projects={projects}
+            seasons={seasons}
+            selectedProjectId={selectedProjectId}
+            selectedSeasonId={selectedSeasonId}
+          />
         </div>
       ) : null}
     </>
   );
 }
 
-export { ADD_ROBOT_PROJECT_VALUE };
+export { ADD_ROBOT_PROJECT_VALUE, CREATE_SEASON_OPTION_VALUE };

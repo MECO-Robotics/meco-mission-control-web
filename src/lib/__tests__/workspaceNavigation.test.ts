@@ -1,7 +1,9 @@
 /// <reference types="jest" />
 
 import {
+  BASE_SECTION_LABELS,
   getActiveNavigationSubItemId,
+  isNavigationSubItemId,
   targetMatchesNavigationState,
   type NavigationState,
   type NavigationTarget,
@@ -38,7 +40,7 @@ describe("getActiveNavigationSubItemId", () => {
     ).toBe("tasks-timeline");
   });
 
-  it("maps tasks robot map to config robot model", () => {
+  it("maps tasks robot map to config robot configuration", () => {
     expect(
       getActiveNavigationSubItemId(
         createNavigationState({ activeTab: "tasks", taskView: "robot-map" }),
@@ -73,6 +75,17 @@ describe("getActiveNavigationSubItemId", () => {
     ).toBe("dashboard-activity");
   });
 
+  it("maps worklogs kanban to reports worklog kanban", () => {
+    expect(
+      getActiveNavigationSubItemId(
+        createNavigationState({
+          activeTab: "worklogs",
+          worklogsView: "kanban",
+        }),
+      ),
+    ).toBe("reports-worklogs-kanban");
+  });
+
   it("maps worklogs summary to reports work logs", () => {
     expect(
       getActiveNavigationSubItemId(
@@ -87,6 +100,23 @@ describe("getActiveNavigationSubItemId", () => {
         createNavigationState({ activeTab: "help" }),
       ),
     ).toBeNull();
+  });
+
+  it("returns null for home because quick actions own that page", () => {
+    expect(
+      getActiveNavigationSubItemId(
+        createNavigationState({ activeTab: "home" }),
+      ),
+    ).toBeNull();
+    expect(BASE_SECTION_LABELS.home).toBe("Home");
+  });
+});
+
+describe("isNavigationSubItemId", () => {
+  it("accepts sidebar subitems and rejects top-level quick action tabs", () => {
+    expect(isNavigationSubItemId("tasks-timeline")).toBe(true);
+    expect(isNavigationSubItemId("home")).toBe(false);
+    expect(isNavigationSubItemId("notifications")).toBe(false);
   });
 });
 

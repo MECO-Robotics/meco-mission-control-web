@@ -25,6 +25,11 @@ module.exports = {
             tsx: true,
           },
           target: "es2022",
+          transform: {
+            react: {
+              runtime: "automatic",
+            },
+          },
         },
         module: {
           type: "commonjs",

@@ -1,19 +1,11 @@
-import {
-  useCallback,
-  useMemo,
-  type MouseEvent as ReactMouseEvent,
-} from "react";
+import { useState, type MouseEvent as ReactMouseEvent } from "react";
 
 import {
   type InventoryViewTab,
+  type ManufacturingViewTab,
   type NavigationSection,
   type NavigationSubItemId,
   type NavigationTarget,
-  NAVIGATION_SECTION_ORDER,
-  NAVIGATION_SUB_ITEMS,
-  NAVIGATION_SUB_ITEMS_BY_SECTION,
-  getActiveNavigationSubItemId,
-  getNavigationSectionFromSubItem,
   type ReportsViewTab,
   type RosterViewTab,
   type RiskManagementViewTab,
@@ -21,27 +13,56 @@ import {
   type ViewTab,
   type WorklogsViewTab,
 } from "@/lib/workspaceNavigation";
-import type { ProjectRecord } from "@/types/recordsOrganization";
-import { IconChevronLeft, IconChevronRight } from "@/components/shared/Icons";
+import type { SessionUser } from "@/lib/auth/types";
+import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
 
-import { AppSidebarPopups, ADD_ROBOT_PROJECT_VALUE } from "./AppSidebarPopups";
+import {
+  ADD_ROBOT_PROJECT_VALUE,
+  AppSidebarPopups,
+  CREATE_SEASON_OPTION_VALUE,
+} from "./AppSidebarPopups";
 import { AppSidebarProjectFooter } from "./AppSidebarProjectFooter";
-import { AppSidebarSections, type SidebarSubItemModel } from "./AppSidebarSections";
+import { AppSidebarQuickActions } from "./AppSidebarQuickActions";
+import { AppSidebarSections } from "./AppSidebarSections";
+import { useSidebarScrollHints } from "./sidebar/useSidebarScrollHints";
+import { useAppSidebarNavigationModels } from "./sidebar/useAppSidebarNavigationModels";
+import type { AppSidebarScopePanel } from "./AppSidebarScopeMenuPopup";
 import { useAppSidebarPopupState } from "./useAppSidebarPopupState";
 
 interface AppSidebarProps {
   activeTab: ViewTab;
+  favoriteViewIds: readonly NavigationSubItemId[];
+  handleSignOut: () => void;
   items: import("@/lib/workspaceNavigation").NavigationItem[];
+  isDarkMode: boolean;
+  isMyViewActive: boolean;
   onSelectTarget: (target: NavigationTarget, options?: { keepSidebarOpen?: boolean }) => void;
   isCollapsed: boolean;
+  isNotificationQueueOpen: boolean;
+  myViewMemberName: string | null;
+  notificationCount: number;
+  onCreateMilestone: () => void;
+  onCreatePart: () => void;
+  onCreateQaReport: () => void;
+  onCreateSeason: () => void;
+  onCreateTask: () => void;
+  onRefreshWorkspace: () => void;
+  onSelectSeason: (seasonId: string | null) => void;
+  onToggleMyView: () => void;
+  onToggleNotificationQueue: () => void;
   toggleSidebar: () => void;
   projects: ProjectRecord[];
   selectedProjectId: string | null;
+  selectedSeasonId: string | null;
   inventoryView: InventoryViewTab;
+  manufacturingView?: ManufacturingViewTab;
   reportsView: ReportsViewTab;
   rosterView: RosterViewTab;
   riskManagementView: RiskManagementViewTab;
+  seasons: SeasonRecord[];
+  sessionUser: SessionUser | null;
   taskView: TaskViewTab;
+  toggleDarkMode: () => void;
   worklogsView: WorklogsViewTab;
   onSelectProject: (projectId: string | null) => void;
   onCreateRobot: () => void;
@@ -50,42 +71,72 @@ interface AppSidebarProps {
 
 export function AppSidebar({
   activeTab,
+  favoriteViewIds,
+  handleSignOut,
   items,
+  isDarkMode,
+  isMyViewActive,
   onSelectTarget,
   isCollapsed,
+  isNotificationQueueOpen,
+  myViewMemberName,
+  notificationCount,
+  onCreateMilestone,
+  onCreatePart,
+  onCreateQaReport,
+  onCreateSeason,
+  onCreateTask,
+  onRefreshWorkspace,
+  onSelectSeason,
+  onToggleMyView,
+  onToggleNotificationQueue,
   toggleSidebar,
   projects,
   selectedProjectId,
+  selectedSeasonId,
   inventoryView,
+  manufacturingView = "all",
   reportsView,
   rosterView,
   riskManagementView,
+  seasons,
+  sessionUser,
   taskView,
+  toggleDarkMode,
   worklogsView,
   onSelectProject,
   onCreateRobot,
   onEditSelectedRobot,
 }: AppSidebarProps) {
   const selectedProject = projects.find((project) => project.id === selectedProjectId) ?? null;
+  const selectedSeason = seasons.find((season) => season.id === selectedSeasonId) ?? null;
   const isRobotProject = selectedProject?.projectType === "robot";
   const canEditSelectedRobot = selectedProject?.projectType === "robot";
   const selectedProjectLabel = selectedProject?.name ?? "All projects";
+  const selectedScopeLabel = selectedSeason
+    ? `${selectedSeason.name} - ${selectedProjectLabel}`
+    : selectedProjectLabel;
+  const [activeScopePanel, setActiveScopePanel] = useState<AppSidebarScopePanel | null>(null);
 
-  const visibleTabs = useMemo(() => new Set(items.map((item) => item.value)), [items]);
-
-  const activeSubItemId = getActiveNavigationSubItemId({
+  const {
+    activeSection,
+    activeSubItemId,
+    favoriteSubItems,
+    getSectionSubItems,
+    sectionModels,
+  } = useAppSidebarNavigationModels({
     activeTab,
+    favoriteViewIds,
     inventoryView,
-    manufacturingView: "cnc",
-    rosterView,
+    manufacturingView,
+    isRobotProject,
+    items,
     reportsView,
+    rosterView,
     riskManagementView,
     taskView,
     worklogsView,
   });
-  const activeSection = activeSubItemId
-    ? getNavigationSectionFromSubItem(activeSubItemId)
-    : "dashboard";
 
   const {
     compactPopupRef,
@@ -102,49 +153,16 @@ export function AppSidebar({
     setIsProjectPopupOpen,
     setProjectPopupTop,
     sidebarShellRef,
-  } = useAppSidebarPopupState({ activeSection, isCollapsed });
-
-  const isSubItemEnabled = useCallback(
-    (subItemId: NavigationSubItemId) => {
-      const subItem = NAVIGATION_SUB_ITEMS.find((item) => item.id === subItemId);
-      if (subItem && !visibleTabs.has(subItem.target.tab)) {
-        return false;
-      }
-
-      if (subItemId === "config-robot-model" || subItemId === "config-part-mappings") {
-        return isRobotProject;
-      }
-
-      if (subItemId === "inventory-parts") {
-        return isRobotProject;
-      }
-
-      return true;
-    },
-    [isRobotProject, visibleTabs],
-  );
-
-  const getSectionSubItems = useCallback(
-    (section: NavigationSection): SidebarSubItemModel[] =>
-      NAVIGATION_SUB_ITEMS_BY_SECTION[section].map((subItem) => ({
-        ...subItem,
-        isEnabled: isSubItemEnabled(subItem.id),
-      })),
-    [isSubItemEnabled],
-  );
-
-  const sectionModels = useMemo(
-    () =>
-      NAVIGATION_SECTION_ORDER.map((section) => {
-        const subItems = getSectionSubItems(section);
-        return {
-          section,
-          subItems,
-          isEnabled: subItems.some((subItem) => subItem.isEnabled),
-        };
-      }),
-    [getSectionSubItems],
-  );
+  } = useAppSidebarPopupState({
+    activeSection,
+    isCollapsed,
+    projectPopupLayoutKey: activeScopePanel,
+  });
+  const {
+    hasBottomHint,
+    hasTopHint,
+    sidebarScrollRef,
+  } = useSidebarScrollHints();
 
   const handleSectionClick = (section: NavigationSection, event: ReactMouseEvent<HTMLButtonElement>) => {
     const subItems = getSectionSubItems(section);
@@ -186,6 +204,7 @@ export function AppSidebar({
       setCompactPopupSection(null);
     }
 
+    setActiveScopePanel(null);
     setIsProjectPopupOpen((current) => !current);
   };
 
@@ -197,31 +216,60 @@ export function AppSidebar({
     }
 
     setIsProjectPopupOpen(false);
+    setActiveScopePanel(null);
+  };
+
+  const handleSeasonOptionSelect = (value: string) => {
+    if (value === CREATE_SEASON_OPTION_VALUE) {
+      onCreateSeason();
+      setIsProjectPopupOpen(false);
+      setActiveScopePanel(null);
+      return;
+    }
+
+    onSelectSeason(value || null);
+    setIsProjectPopupOpen(false);
+    setActiveScopePanel(null);
   };
 
   const handleHelpSelect = () => {
     setCompactPopupSection(null);
     setIsProjectPopupOpen(false);
+    setActiveScopePanel(null);
     onSelectTarget({ tab: "help" }, { keepSidebarOpen: true });
+  };
+  const handleSidebarFoldClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
+    setCompactPopupSection(null);
+    setIsProjectPopupOpen(false);
+    setActiveScopePanel(null);
+    toggleSidebar();
+    event.currentTarget.blur();
   };
 
   return (
-    <div className="sidebar-shell" data-collapsed={isCollapsed ? "true" : "false"} ref={sidebarShellRef}>
-      <nav aria-label="Workspace views" className="sidebar" data-collapsed={isCollapsed ? "true" : "false"}>
-        <button
-          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="tab"
-          onClick={toggleSidebar}
-          title="Toggle sidebar"
-          type="button"
-        >
-          <span className="sidebar-tab-main">
-            <span aria-hidden="true" className="sidebar-tab-icon">
-              {isCollapsed ? <IconChevronRight /> : <IconChevronLeft />}
-            </span>
-            {!isCollapsed ? <span className="sidebar-tab-label">Collapse sidebar</span> : null}
-          </span>
-        </button>
+    <div
+      className="sidebar-shell"
+      data-collapsed={isCollapsed ? "true" : "false"}
+      data-scroll-bottom-hint={hasBottomHint ? "true" : "false"}
+      data-scroll-top-hint={hasTopHint ? "true" : "false"}
+      ref={sidebarShellRef}
+    >
+      <nav
+        aria-label="Workspace views"
+        className="sidebar"
+        data-collapsed={isCollapsed ? "true" : "false"}
+        ref={sidebarScrollRef}
+      >
+        <AppSidebarQuickActions
+          activeTab={activeTab}
+          isCollapsed={isCollapsed}
+          onCreateMilestone={onCreateMilestone}
+          onCreatePart={onCreatePart}
+          onCreateQaReport={onCreateQaReport}
+          onCreateTask={onCreateTask}
+          onSelectTarget={onSelectTarget}
+          onToggleSidebar={handleSidebarFoldClick}
+        />
 
         <AppSidebarSections
           activeSection={activeSection}
@@ -230,36 +278,54 @@ export function AppSidebar({
           isCollapsed={isCollapsed}
           onSectionClick={handleSectionClick}
           onSubItemSelect={handleSubItemSelect}
+          favoriteSubItems={favoriteSubItems}
           sectionModels={sectionModels}
         />
 
         <AppSidebarProjectFooter
           activeTab={activeTab}
-          canEditSelectedRobot={canEditSelectedRobot}
+          canSignOut={sessionUser !== null}
+          isDarkMode={isDarkMode}
           isCollapsed={isCollapsed}
+          isMyViewActive={isMyViewActive}
+          isNotificationQueueOpen={isNotificationQueueOpen}
           isProjectPopupOpen={isProjectPopupOpen}
-          onEditSelectedRobot={onEditSelectedRobot}
+          myViewMemberName={myViewMemberName}
           onHelpSelect={handleHelpSelect}
           onProjectTriggerClick={handleProjectTriggerClick}
+          onRefreshWorkspace={onRefreshWorkspace}
+          onSignOut={handleSignOut}
+          onToggleMyView={onToggleMyView}
+          onToggleDarkMode={toggleDarkMode}
+          onNotificationQueueToggle={onToggleNotificationQueue}
+          notificationCount={notificationCount}
           projectTriggerRef={projectTriggerRef}
-          selectedProject={selectedProject}
-          selectedProjectLabel={selectedProjectLabel}
+          selectedScopeLabel={selectedScopeLabel}
+          sessionUser={sessionUser}
         />
       </nav>
       <AppSidebarPopups
         activeSubItemId={activeSubItemId}
+        activeScopePanel={activeScopePanel}
         compactPopupRef={compactPopupRef}
         compactPopupSection={compactPopupSection}
         compactPopupTop={compactPopupTop}
         getSectionSubItems={getSectionSubItems}
         isCollapsed={isCollapsed}
         isProjectPopupOpen={isProjectPopupOpen}
+        isScopePopupOpen={isProjectPopupOpen}
+        canEditSelectedRobot={canEditSelectedRobot}
+        onEditSelectedRobot={onEditSelectedRobot}
         onSelectProjectOption={handleProjectOptionSelect}
+        onSelectSeasonOption={handleSeasonOptionSelect}
         onSubItemSelect={handleSubItemSelect}
         projectPopupRef={projectPopupRef}
         projectPopupTop={projectPopupTop}
         projects={projects}
+        seasons={seasons}
         selectedProjectId={selectedProjectId}
+        selectedSeasonId={selectedSeasonId}
+        setActiveScopePanel={setActiveScopePanel}
       />
     </div>
   );

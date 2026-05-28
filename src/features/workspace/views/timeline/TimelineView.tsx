@@ -2,10 +2,13 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MilestonePayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
+import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
+import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
 import { getTimelineMinimumZoomForWidth } from "@/features/workspace/shared/timeline/timelineZoom";
 import { midpointOfTimelineDays } from "@/features/workspace/shared/timeline/timelineDateUtils";
+import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import { buildTimelineGridLayout } from "./model/timelineGridLayout";
 import { TimelineGridBody } from "./TimelineGridBody";
 import { TimelineMilestoneDetailModal } from "./TimelineMilestoneDetailModal";
@@ -17,6 +20,7 @@ import { TimelineTodayMarkerPortal } from "./portals/TimelineTodayMarkerPortal";
 import { TimelineToolbar } from "./TimelineToolbar";
 import { useTimelineViewActions } from "./hooks/useTimelineViewActions";
 import { useTimelineViewData } from "./hooks/useTimelineViewData";
+import { useTimelineViewFilters } from "./hooks/useTimelineViewFilters";
 import { useTimelineViewState } from "./hooks/useTimelineViewState";
 
 interface TimelineViewProps {
@@ -55,8 +59,18 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   void _membersById;
 
   const state = useTimelineViewState();
-  const { setTimelineZoomMin } = state;
+  const {
+    handleTimelineIntervalChange: applyTimelineIntervalChange,
+    setTimelineZoomMin,
+    viewAnchorDate,
+  } = state;
   const [timelineShellWidth, setTimelineShellWidth] = useState(0);
+  const [searchFilter, setSearchFilter] = useState("");
+  const filterControls = useTimelineViewFilters({
+    activePersonFilter,
+    bootstrap,
+    isAllProjectsView,
+  });
   const data = useTimelineViewData({
     activePersonFilter,
     bootstrap,
@@ -64,6 +78,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     openCreateTaskModal,
     onTaskEditCanceled,
     onTaskEditSaved,
+    searchFilter,
+    timelineFilters: filterControls.filters,
     timelineZoom: state.timelineZoom,
     onDeleteTimelineMilestone,
     onSaveTimelineMilestone,
@@ -82,11 +98,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     viewInterval: state.viewInterval,
   });
   const handleTimelineIntervalChange = useCallback(
-    (nextInterval: typeof state.viewInterval) => {
-      const nextAnchorDate = midpointOfTimelineDays(data.timeline.days) ?? state.viewAnchorDate;
-      state.handleTimelineIntervalChange(nextInterval, nextAnchorDate);
+    (nextInterval: TimelineViewInterval) => {
+      const nextAnchorDate = midpointOfTimelineDays(data.timeline.days) ?? viewAnchorDate;
+      applyTimelineIntervalChange(nextInterval, nextAnchorDate);
     },
-    [data.timeline.days, state.handleTimelineIntervalChange, state.viewAnchorDate],
+    [applyTimelineIntervalChange, data.timeline.days, viewAnchorDate],
   );
   const { setTimelineGridMotion } = state;
 
@@ -169,23 +185,41 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
 
   return (
     <section className={`panel dense-panel timeline-layout ${WORKSPACE_PANEL_CLASS}`}>
-      <div className="panel-header compact-header">
-        <div className="queue-section-header">
-          <h2 style={{ color: "var(--text-title)" }}>Subsystem timeline</h2>
-        </div>
+      <AppTopbarSlotPortal slot="controls">
         <TimelineToolbar
+          activeFilterCount={filterControls.activeFilterCount}
           activePersonFilter={activePersonFilter}
-          bootstrapMembers={bootstrap.members}
+          bootstrap={bootstrap}
+          disciplineFilter={filterControls.filters.disciplineFilter}
+          disciplineFilterOptions={filterControls.disciplineFilterOptions}
+          isAllProjectsView={isAllProjectsView}
           onAdjustZoom={state.adjustTimelineZoom}
           onChangePersonFilter={setActivePersonFilter}
-          onCreateTask={openCreateTaskModal}
+          onSearchChange={setSearchFilter}
           onIntervalChange={handleTimelineIntervalChange}
           onShiftPeriod={state.shiftTimelinePeriod}
+          priorityFilter={filterControls.filters.priorityFilter}
+          projectFilter={filterControls.filters.projectFilter}
+          searchFilter={searchFilter}
+          setDisciplineFilter={filterControls.setDisciplineFilter}
+          setPriorityFilter={filterControls.setPriorityFilter}
+          setProjectFilter={filterControls.setProjectFilter}
+          setStatusFilter={filterControls.setStatusFilter}
+          setSubsystemFilter={filterControls.setSubsystemFilter}
+          statusFilter={filterControls.filters.statusFilter}
+          subsystemFilter={filterControls.filters.subsystemFilter}
+          subsystemFilterOptions={filterControls.subsystemFilterOptions}
           timelinePeriodLabel={data.timelinePeriodLabel}
           timelineZoom={state.timelineZoom}
           timelineZoomMin={state.timelineZoomMin}
           viewInterval={state.viewInterval}
         />
+      </AppTopbarSlotPortal>
+
+      <div className="panel-header compact-header">
+        <div className="queue-section-header">
+          <h2 style={{ color: "var(--text-title)" }}>Subsystem timeline</h2>
+        </div>
       </div>
 
       <TimelineGridBody
@@ -237,6 +271,13 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         toggleSubsystem={state.toggleSubsystem}
         toggleSubsystemColumn={state.toggleSubsystemColumn}
         openTaskDetailModal={actions.openTaskDetailAndSelectTask}
+      />
+
+      <WorkspaceFloatingAddButton
+        ariaLabel="Add to timeline"
+        onClick={openCreateTaskModal}
+        title="Add to timeline"
+        tutorialTarget="timeline-create-task-button"
       />
 
       <TimelineMilestoneUnderlaysPortal

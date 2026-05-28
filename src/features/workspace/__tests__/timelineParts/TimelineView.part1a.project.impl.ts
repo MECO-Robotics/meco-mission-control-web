@@ -3,8 +3,8 @@ import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { TimelineProjectGroup } from "@/features/workspace/views/timeline/TimelineProjectGroup";
-import { buildTimelineData, buildTimelineDayMilestoneUnderlays, buildTimelineProjectRows, filterTimelineMilestonesByPersonSelection, getTimelineMilestonePopupItems } from "@/features/workspace/views/timeline/timelineViewModel";
-import { createBootstrap, createTimelineMilestone } from "../timelineTestFixtures";
+import { buildTimelineData, buildTimelineDayHeaderCells, buildTimelineDayMilestoneUnderlays, buildTimelineProjectRows, filterTimelineMilestonesByPersonSelection, getTimelineMilestonePopupItems } from "@/features/workspace/views/timeline/timelineViewModel";
+import { createBootstrap, createTimelineMilestone } from "../timeline/timelineTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
@@ -79,6 +79,7 @@ describe("TimelineView", () => {
             weekdayNarrowLabel: "M",
             dayNumberLabel: "6",
             milestonesOnDay: [],
+            meetingsOnDay: [],
             dayStyle: null,
             primaryMilestoneStartDay: "",
             primaryMilestoneEndDay: "",
@@ -201,6 +202,48 @@ describe("TimelineView", () => {
     expect(projectRows[0].taskCount).toBe(1);
     expect(projectRows[0].completeCount).toBe(1);
     expect(projectRows[0].tasks.map((task) => task.id)).toEqual(["task-shared"]);
+  });
+
+  it("maps scheduled meetings onto timeline day headers without converting them to milestones", () => {
+    const bootstrap = createBootstrap();
+    const timeline = buildTimelineData({
+      isAllProjectsView: true,
+      meetings: [
+        {
+          id: "meeting-build-night",
+          title: "Build night",
+          meetingType: "build",
+          seasonId: "season-1",
+          projectIds: ["project-1"],
+          startDateTime: "2026-04-08T18:00:00",
+          endDateTime: "2026-04-08T20:00:00",
+          location: "Lab",
+          description: "",
+          date: "2026-04-08",
+          time: "18:00",
+          rsvpsYes: 0,
+          rsvpsMaybe: 0,
+          openSignIns: 0,
+        },
+      ],
+      milestones: [],
+      projectsById: {
+        "project-1": bootstrap.projects[0] as BootstrapPayload["projects"][number],
+      },
+      scopedSubsystems: [],
+      scopedTasks: [],
+      viewAnchorDate: "2026-04-08",
+      viewInterval: "week",
+    });
+    const headerCells = buildTimelineDayHeaderCells(
+      timeline.days,
+      timeline.dayMilestones,
+      timeline.dayMeetings,
+    );
+    const meetingDay = headerCells.find((cell) => cell.day === "2026-04-08");
+
+    expect(timeline.dayMilestones["2026-04-08"]).toBeUndefined();
+    expect(meetingDay?.meetingsOnDay.map((meeting) => meeting.title)).toEqual(["Build night"]);
   });
 
   it("applies active person filtering to timeline milestones through targeted tasks", () => {

@@ -3,6 +3,7 @@
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import { AllManufacturingView } from "@/features/workspace/views/manufacturing/AllManufacturingView";
 import { CncView } from "@/features/workspace/views/manufacturing/CncView";
 import { PrintsView } from "@/features/workspace/views/manufacturing/PrintsView";
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -71,6 +72,58 @@ const manufacturingItem: ManufacturingItemRecord = {
 };
 
 describe("ManufacturingQueueView", () => {
+  it("can show all manufacturing processes or filter to one process", () => {
+    const items: ManufacturingItemRecord[] = [
+      { ...manufacturingItem, id: "cnc-1", title: "CNC drive plate", process: "cnc" },
+      {
+        ...manufacturingItem,
+        id: "print-1",
+        title: "3D printed spacer",
+        process: "3d-print",
+        batchLabel: "PRINT-1",
+      },
+      {
+        ...manufacturingItem,
+        id: "fab-1",
+        title: "Fab belly pan",
+        process: "fabrication",
+        batchLabel: "FAB-1",
+      },
+    ];
+    const baseProps = {
+      activePersonFilter: [],
+      bootstrap,
+      items,
+      membersById: { "member-1": bootstrap.members[0] },
+      onCreate: jest.fn(),
+      onEdit: jest.fn(),
+      onProcessFilterChange: jest.fn(),
+      subsystemsById: { "subsystem-1": bootstrap.subsystems[0] },
+    };
+
+    const allMarkup = renderToStaticMarkup(
+      React.createElement(AllManufacturingView, {
+        ...baseProps,
+        processFilterValue: "all",
+      }),
+    );
+    const printMarkup = renderToStaticMarkup(
+      React.createElement(AllManufacturingView, {
+        ...baseProps,
+        processFilterValue: "prints",
+      }),
+    );
+
+    expect(allMarkup).not.toContain("manufacturing-process-filter");
+    expect(allMarkup).toContain("CNC drive plate");
+    expect(allMarkup).toContain("3D printed spacer");
+    expect(allMarkup).toContain("Fab belly pan");
+    expect(printMarkup).toContain("task-queue-filter-count\">1");
+    expect(printMarkup).not.toContain("CNC drive plate");
+    expect(printMarkup).toContain("3D printed spacer");
+    expect(printMarkup).not.toContain("Fab belly pan");
+  });
+
   it("shows the in-house source column for CNC jobs only", () => {
     const cncMarkup = renderToStaticMarkup(
       React.createElement(CncView, {
@@ -97,13 +150,35 @@ describe("ManufacturingQueueView", () => {
         subsystemsById: { "subsystem-1": bootstrap.subsystems[0] },
       }),
     );
+    const hiddenQuickActionsMarkup = renderToStaticMarkup(
+      React.createElement(CncView, {
+        activePersonFilter: [],
+        bootstrap,
+        items: [manufacturingItem],
+        membersById: { "member-1": bootstrap.members[0] },
+        onCreate: jest.fn(),
+        onEdit: jest.fn(),
+        onQuickStatusChange: jest.fn(),
+        showMentorQuickActions: false,
+        subsystemsById: { "subsystem-1": bootstrap.subsystems[0] },
+      }),
+    );
 
     expect(cncMarkup).toContain("Outsourced");
     expect(cncMarkup).toContain("cnc-approve-job-button");
     expect(cncMarkup).toContain("cnc-complete-job-button");
+    expect(cncMarkup).toContain('draggable="true"');
+    expect(cncMarkup).toContain('data-kanban-item-id="cnc-1"');
+    expect(cncMarkup).toContain('data-kanban-drop-state="approved"');
+    expect(cncMarkup).toContain('data-kanban-drop-enabled="true"');
     expect(printMarkup).not.toContain("Source");
     expect(printMarkup).not.toContain("Outsourced");
     expect(printMarkup).not.toContain("cnc-approve-job-button");
     expect(printMarkup).not.toContain("cnc-complete-job-button");
+    expect(printMarkup).not.toContain('draggable="true"');
+    expect(hiddenQuickActionsMarkup).not.toContain("cnc-approve-job-button");
+    expect(hiddenQuickActionsMarkup).not.toContain("cnc-complete-job-button");
+    expect(hiddenQuickActionsMarkup).not.toContain('draggable="true"');
+    expect(hiddenQuickActionsMarkup).not.toContain('data-kanban-drop-enabled="true"');
   });
 });

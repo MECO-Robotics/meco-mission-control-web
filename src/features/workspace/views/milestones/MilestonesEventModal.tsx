@@ -104,13 +104,13 @@ export function MilestonesMilestoneModal({
     >
       <section
         aria-modal="true"
-        className="modal-card"
+        className="modal-card task-details-modal"
         data-tutorial-target="milestone-create-modal"
         onClick={(milestone) => milestone.stopPropagation()}
         role="dialog"
         style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
       >
-        <div className="panel-header compact-header">
+        <div className="panel-header compact-header task-details-header">
           <div>
             <p className="eyebrow" style={{ color: "var(--meco-blue)" }}>
               Timeline milestone
@@ -118,16 +118,16 @@ export function MilestonesMilestoneModal({
             <h2 style={{ color: "var(--text-title)" }}>Add milestone</h2>
           </div>
           <button
-            className="icon-button"
+            aria-label="Close milestone modal"
+            className="icon-button task-details-close-button"
             onClick={onClose}
-            style={{ color: "var(--text-copy)", background: "transparent" }}
             type="button"
           >
-            Close
+            {"\u00D7"}
           </button>
         </div>
 
-        <form className="modal-form" onSubmit={onSubmit}>
+        <form className="modal-form task-details-grid" onSubmit={onSubmit}>
           <MilestonesMilestoneModalFields
             bootstrap={bootstrap}
             milestoneEndDate={milestoneEndDate}

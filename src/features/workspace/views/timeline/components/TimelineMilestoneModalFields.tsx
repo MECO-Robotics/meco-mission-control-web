@@ -172,7 +172,7 @@ export function TimelineMilestoneModalFields({
             }
             type="checkbox"
           />
-          <span style={{ color: "var(--text-title)" }}>External milestone/milestone</span>
+          <span style={{ color: "var(--text-title)" }}>External milestone</span>
         </label>
       </div>
 

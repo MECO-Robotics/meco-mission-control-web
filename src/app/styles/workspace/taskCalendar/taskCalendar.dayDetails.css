@@ -1,0 +1,117 @@
+.task-calendar-day-details {
+  border-top: 1px solid var(--border-base);
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.85rem;
+}
+
+.task-calendar-day-details-header {
+  align-items: flex-start;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+
+.task-calendar-day-details-eyebrow {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.task-calendar-day-details-header h3,
+.task-calendar-day-details-header p {
+  margin: 0;
+}
+
+.task-calendar-day-details-header h3 {
+  color: var(--text-title);
+  font-size: 1rem;
+}
+
+.task-calendar-day-details-header p {
+  color: var(--text-copy);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.task-calendar-day-details-list {
+  display: grid;
+  gap: 0.45rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.task-calendar-day-details-item {
+  background: var(--bg-row-alt);
+  border: 1px solid var(--border-base);
+  border-radius: 0.55rem;
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.58rem 0.65rem;
+}
+
+.task-calendar-day-details-main {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.task-calendar-day-details-title {
+  background: transparent;
+  border: 0;
+  color: var(--text-title);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 800;
+  padding: 0;
+  text-align: left;
+}
+
+.task-calendar-day-details-type {
+  background: #475569;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1;
+  padding: 0.22rem 0.42rem;
+}
+
+.task-calendar-day-details-type.milestone {
+  background: #2563eb;
+}
+
+.task-calendar-day-details-type.task-due {
+  background: #4f46e5;
+}
+
+.task-calendar-day-details-type.qa-due {
+  background: #ca8a04;
+}
+
+.task-calendar-day-details-type.manufacturing-due {
+  background: #15803d;
+}
+
+.task-calendar-day-details-meta {
+  color: var(--text-copy);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.72rem;
+  font-weight: 700;
+  gap: 0.35rem;
+}
+
+.task-calendar-day-details-meta span {
+  background: var(--bg-panel);
+  border-radius: 999px;
+  padding: 0.18rem 0.38rem;
+}
+
+.task-calendar-day-details-empty {
+  margin: 0;
+}

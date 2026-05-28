@@ -1,10 +1,11 @@
-import type { CSSProperties } from "react";
+import type { ComponentPropsWithoutRef, CSSProperties } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
+import type { OpenEditTaskModalOptions } from "@/types/taskEditIntent";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { formatDate } from "@/lib/appUtils/common";
 import { EditableHoverIndicator } from "@/features/workspace/shared/table/workspaceTableChrome";
-import { getTimelineTaskDisciplineColor } from "@/features/workspace/views/timeline/timelineTaskColors";
+import { getTimelineTaskDisciplineColor } from "@/features/workspace/views/timeline/model/timelineTaskColors";
 
 import {
   getMemberInitial,
@@ -69,12 +70,12 @@ function getTaskCardDueDatePillClassName(task: TaskRecord): string {
   return "pill task-detail-deadline-pill task-detail-deadline-pill-success";
 }
 
-interface TaskQueueCardProps {
+interface TaskQueueCardProps extends Omit<ComponentPropsWithoutRef<"button">, "children" | "onClick" | "type"> {
   bootstrap: BootstrapPayload;
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
   isNonRobotProject: boolean;
   membersById: Record<string, BootstrapPayload["members"][number]>;
-  openEditTaskModal: (task: TaskRecord) => void;
+  openEditTaskModal: (task: TaskRecord, options?: OpenEditTaskModalOptions) => void;
   projectsById: Record<string, BootstrapPayload["projects"][number]>;
   taskQueueZoom: number;
   showProjectContextOnCards: boolean;
@@ -87,6 +88,7 @@ interface TaskQueueCardProps {
 
 export function TaskQueueCard({
   bootstrap,
+  className,
   disciplinesById,
   isNonRobotProject,
   membersById,
@@ -96,17 +98,22 @@ export function TaskQueueCard({
   showPriorityBadge = true,
   showProjectContextOnCards,
   showProjectOnCards,
+  style,
   subsystemsById,
   task,
   workstreamsById,
+  ...buttonProps
 }: TaskQueueCardProps) {
   const person = getTaskCardPerson(task, membersById);
   const disciplineAccentColor = task.disciplineId
     ? getTimelineTaskDisciplineColor(task.disciplineId, disciplinesById)
     : null;
-  const cardStyle = disciplineAccentColor
+  const cardStyle = disciplineAccentColor || style
     ? ({
-        "--task-queue-board-card-discipline-accent": disciplineAccentColor,
+        ...style,
+        ...(disciplineAccentColor
+          ? { "--task-queue-board-card-discipline-accent": disciplineAccentColor }
+          : {}),
       } as CSSProperties)
     : undefined;
   const boardState = getTaskQueueBoardState(task, bootstrap);
@@ -135,9 +142,10 @@ export function TaskQueueCard({
 
   return (
     <button
+      {...buttonProps}
       className={`task-queue-board-card editable-hover-target editable-hover-target-row${
         disciplineAccentColor ? " task-queue-board-card-discipline-accented" : ""
-      }`}
+      }${className ? ` ${className}` : ""}`}
       data-board-state={boardState}
       data-tutorial-target="edit-task-row"
       onClick={(milestone) => {

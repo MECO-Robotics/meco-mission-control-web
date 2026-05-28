@@ -5,6 +5,7 @@ import type { FilterSelection } from "@/features/workspace/shared/filters/worksp
 
 export function useAppWorkspaceUiStatePeople() {
   const [activePersonFilter, setActivePersonFilter] = useState<FilterSelection>([]);
+  const [isUnmatchedMyViewActive, setIsUnmatchedMyViewActive] = useState(false);
   const [selectedSeasonId, setSelectedSeasonId] = useState<string | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
@@ -14,6 +15,9 @@ export function useAppWorkspaceUiStatePeople() {
     photoUrl: "",
     role: "student",
     elevated: false,
+    plannedWeeklyAttendanceHours: 0,
+    plannedAttendanceDays: [],
+    plannedAttendanceNotes: "",
   });
   const [isAddPersonOpen, setIsAddPersonOpen] = useState(false);
   const [isEditPersonOpen, setIsEditPersonOpen] = useState(false);
@@ -30,6 +34,7 @@ export function useAppWorkspaceUiStatePeople() {
 
   return {
     activePersonFilter,
+    isUnmatchedMyViewActive,
     isAddPersonOpen,
     isAddSeasonPopupOpen,
     isDeletingMember,
@@ -46,6 +51,7 @@ export function useAppWorkspaceUiStatePeople() {
     selectedProjectId,
     selectedSeasonId,
     setActivePersonFilter,
+    setIsUnmatchedMyViewActive,
     setIsAddPersonOpen,
     setIsAddSeasonPopupOpen,
     setIsDeletingMember,

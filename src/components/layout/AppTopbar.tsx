@@ -1,104 +1,109 @@
 import {
-  MECO_LOGIN_BACKDROP_SRC,
+  MECO_COMPACT_TEAM_LOGO_SIZE,
+  MECO_COMPACT_TEAM_LOGO_SRC,
   MECO_MAIN_LOGO_HEIGHT,
   MECO_MAIN_LOGO_LIGHT_SRC,
   MECO_MAIN_LOGO_WHITE_SRC,
   MECO_MAIN_LOGO_WIDTH,
 } from "@/lib/branding";
-import type { SessionUser } from "@/lib/auth/types";
-import type { SeasonRecord } from "@/types/recordsOrganization";
-import { Search } from "lucide-react";
+import { Search, Star, StarOff } from "lucide-react";
 
-import { AppTopbarRightRail } from "./AppTopbarRightRail";
+import { APP_TOPBAR_SLOT_IDS } from "./AppTopbarSlotPortal";
 
 interface AppTopbarProps {
   activeViewLabel: string;
-  handleSignOut: () => void;
-  isLoadingData: boolean;
+  isActiveViewFavorite: boolean;
   isDarkMode: boolean;
-  isMyViewActive: boolean;
   isSidebarCollapsed: boolean;
-  loadWorkspace: () => Promise<void>;
-  myViewMemberName: string | null;
-  onCreateSeason: () => void;
-  onSelectSeason: (seasonId: string | null) => void;
-  onToggleMyView: () => void;
-  seasons: SeasonRecord[];
-  selectedSeasonId: string | null;
-  sessionUser: SessionUser | null;
-  toggleDarkMode: () => void;
+  onToggleActiveViewFavorite: (() => void) | null;
 }
 
 export function AppTopbar({
   activeViewLabel,
-  handleSignOut,
-  isLoadingData,
+  isActiveViewFavorite,
   isDarkMode,
-  isMyViewActive,
   isSidebarCollapsed,
-  loadWorkspace,
-  myViewMemberName,
-  onCreateSeason,
-  onSelectSeason,
-  onToggleMyView,
-  seasons,
-  selectedSeasonId,
-  sessionUser,
-  toggleDarkMode,
+  onToggleActiveViewFavorite,
 }: AppTopbarProps) {
-  const topbarLogoSrc = isSidebarCollapsed
-    ? MECO_LOGIN_BACKDROP_SRC
-    : isDarkMode
-      ? MECO_MAIN_LOGO_WHITE_SRC
-      : MECO_MAIN_LOGO_LIGHT_SRC;
+  const canToggleFavorite = Boolean(onToggleActiveViewFavorite);
+  const topbarLogo = isSidebarCollapsed
+    ? {
+        alt: "MECO compact team logo",
+        height: MECO_COMPACT_TEAM_LOGO_SIZE,
+        src: MECO_COMPACT_TEAM_LOGO_SRC,
+        variant: "compact",
+        width: MECO_COMPACT_TEAM_LOGO_SIZE,
+      }
+    : {
+        alt: "MECO main logo",
+        height: MECO_MAIN_LOGO_HEIGHT,
+        src: isDarkMode ? MECO_MAIN_LOGO_WHITE_SRC : MECO_MAIN_LOGO_LIGHT_SRC,
+        variant: "full",
+        width: MECO_MAIN_LOGO_WIDTH,
+      };
+  const favoriteLabel = canToggleFavorite
+    ? isActiveViewFavorite
+      ? `Remove ${activeViewLabel} from favorites`
+      : `Add ${activeViewLabel} to favorites`
+    : `${activeViewLabel} cannot be favorited`;
+  const FavoriteIcon = canToggleFavorite ? Star : StarOff;
 
   return (
     <header className="topbar app-topbar" data-collapsed={isSidebarCollapsed ? "true" : "false"}>
       <div className="app-topbar-brand">
         <img
-          alt="MECO main logo"
+          alt={topbarLogo.alt}
           className="app-topbar-brand-icon"
+          data-logo-variant={topbarLogo.variant}
           fetchPriority="high"
-          height={MECO_MAIN_LOGO_HEIGHT}
+          height={topbarLogo.height}
           loading="eager"
-          width={MECO_MAIN_LOGO_WIDTH}
-          src={topbarLogoSrc}
+          width={topbarLogo.width}
+          src={topbarLogo.src}
         />
       </div>
       <div className="app-topbar-left">
         <div className="app-topbar-view-title">
+          <button
+            aria-label={favoriteLabel}
+            aria-pressed={isActiveViewFavorite}
+            className="app-topbar-favorite-button"
+            data-active={isActiveViewFavorite ? "true" : "false"}
+            data-enabled={canToggleFavorite ? "true" : "false"}
+            disabled={!canToggleFavorite}
+            onClick={onToggleActiveViewFavorite ?? undefined}
+            title={favoriteLabel}
+            type="button"
+          >
+            <FavoriteIcon
+              aria-hidden="true"
+              fill={isActiveViewFavorite ? "currentColor" : "none"}
+              size={15}
+              strokeWidth={2}
+            />
+          </button>
           <h1>{activeViewLabel}</h1>
         </div>
       </div>
       <div className="app-topbar-search-slot">
-        <label className="app-topbar-search" htmlFor="workspace-topbar-search">
-          <span aria-hidden="true" className="app-topbar-search-icon">
+        <div className="app-topbar-controls-host" id={APP_TOPBAR_SLOT_IDS.controls} />
+        <div className="app-topbar-search-host" id={APP_TOPBAR_SLOT_IDS.search} />
+        <label
+          className="app-topbar-search toolbar-filter toolbar-filter-compact toolbar-search"
+          htmlFor="workspace-topbar-search"
+        >
+          <span aria-hidden="true" className="toolbar-filter-icon app-topbar-search-icon">
             <Search size={14} strokeWidth={2} />
           </span>
           <input
-            className="app-topbar-search-input"
+            aria-label="Search workspace"
+            className="toolbar-search-input app-topbar-search-input"
             id="workspace-topbar-search"
             placeholder="Search..."
-            type="search"
+            type="text"
           />
         </label>
       </div>
-
-      <AppTopbarRightRail
-        handleSignOut={handleSignOut}
-        isDarkMode={isDarkMode}
-        isLoadingData={isLoadingData}
-        isMyViewActive={isMyViewActive}
-        loadWorkspace={loadWorkspace}
-        myViewMemberName={myViewMemberName}
-        onCreateSeason={onCreateSeason}
-        onSelectSeason={onSelectSeason}
-        onToggleMyView={onToggleMyView}
-        selectedSeasonId={selectedSeasonId}
-        seasons={seasons}
-        sessionUser={sessionUser}
-        toggleDarkMode={toggleDarkMode}
-      />
     </header>
   );
 }

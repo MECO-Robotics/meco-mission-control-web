@@ -9,6 +9,11 @@ import type { ArtifactPayload, ManufacturingItemPayload, MaterialPayload, Mechan
 export type AppWorkspaceLoaderModel = AppWorkspaceState & AppWorkspaceDerived;
 export type SelectMemberHandler = (memberId: string | null, payload: BootstrapPayload) => void;
 export type UnauthorizedHandler = () => void;
+export interface WorkspaceLoadScope {
+  personId?: string | null;
+  projectId?: string | null;
+  seasonId?: string | null;
+}
 
 export type WorkspaceReconciliationState = AppWorkspaceState & {
   activeArtifactId: string | null;

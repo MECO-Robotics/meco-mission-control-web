@@ -1,0 +1,156 @@
+.cad-step-snapshot-bar {
+  display: grid;
+  grid-template-columns: minmax(260px, 420px);
+}
+
+.cad-step-upload-card {
+  border-radius: 8px;
+}
+
+.cad-step-upload-form {
+  display: grid;
+  gap: 12px;
+}
+
+.cad-step-guidance {
+  background: rgba(15, 23, 42, 0.035);
+  border: 1px dashed var(--border-subtle, rgba(148, 163, 184, 0.28));
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+}
+
+.cad-step-guidance strong,
+.cad-step-guidance span,
+.cad-inline-check {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.cad-step-review-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cad-parser-alert {
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  border-radius: 8px;
+  color: #991b1b !important;
+  font-weight: 800;
+  margin-top: 12px !important;
+  padding: 10px 12px;
+}
+
+.cad-summary-warning-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.cad-summary-warning-item {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  border-radius: 8px;
+  display: grid;
+  gap: 3px;
+  padding: 9px 10px;
+}
+
+.cad-summary-warning-item[data-severity="error"] {
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.3);
+}
+
+.cad-summary-warning-item span {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.cad-summary-warning-item code {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.74rem;
+  overflow-wrap: anywhere;
+}
+
+.cad-inline-check {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.cad-mapping-heading {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.cad-group-toggle {
+  align-items: center;
+  color: var(--text-muted);
+  display: inline-flex;
+  font-size: 0.82rem;
+  gap: 8px;
+}
+
+.cad-mapping-table small {
+  color: var(--text-muted);
+  display: block;
+  font-size: 0.76rem;
+}
+
+.cad-quantity-pill,
+.cad-warning-badge {
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 0.74rem;
+  font-weight: 800;
+  line-height: 1;
+  padding: 5px 8px;
+}
+
+.cad-quantity-pill {
+  background: rgba(14, 165, 233, 0.12);
+  color: #075985;
+}
+
+.cad-warning-badge {
+  background: rgba(245, 158, 11, 0.16);
+  color: #92400e;
+  margin-top: 5px;
+}
+
+.cad-mapping-table select {
+  background: var(--surface-input, rgba(255, 255, 255, 0.86));
+  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.3));
+  border-radius: 8px;
+  color: var(--text-primary);
+  display: block;
+  font: inherit;
+  margin-bottom: 6px;
+  max-width: 240px;
+  padding: 7px 8px;
+  width: 100%;
+}
+
+.cad-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.compact-action {
+  min-height: 30px;
+  padding: 5px 9px;
+}
+
+.cad-diff-grid {
+  color: var(--text-muted);
+  display: grid;
+  font-size: 0.84rem;
+  gap: 7px;
+}

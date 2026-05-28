@@ -1,4 +1,4 @@
-import { type RefObject } from "react";
+import { type RefObject, useState } from "react";
 
 import {
   MECO_LOGIN_BACKDROP_SRC,
@@ -45,6 +45,7 @@ export function AuthIntroPanel({
           <img
             alt="MECO main logo"
             className="auth-intro-mark"
+            fetchPriority="high"
             height={MECO_MAIN_LOGO_HEIGHT}
             loading="eager"
             width={MECO_MAIN_LOGO_WIDTH}
@@ -74,6 +75,7 @@ export function AuthBackdrop({ className }: AuthBackdropProps) {
       alt=""
       aria-hidden="true"
       className={className}
+      fetchPriority="high"
       loading="eager"
       src={MECO_LOGIN_BACKDROP_SRC}
     />
@@ -167,20 +169,46 @@ export function GoogleAuthChip({
 
 interface DevBypassButtonProps {
   isSigningIn: boolean;
-  onDevBypassSignIn: () => Promise<void>;
+  onDevBypassSignIn: (role: "student" | "mentor") => Promise<void>;
 }
 
 export function DevBypassButton({
   isSigningIn,
   onDevBypassSignIn,
 }: DevBypassButtonProps) {
+  const [devRole, setDevRole] = useState<"student" | "mentor">("student");
+
   return (
     <div className="auth-dev-bypass" aria-label="Development sign-in bypass">
+      <div aria-label="Local dev role switch" className="auth-dev-bypass-role-switch" role="group">
+        <button
+          aria-pressed={devRole === "student"}
+          className="secondary-action auth-dev-bypass-role-toggle"
+          disabled={isSigningIn}
+          onClick={() => {
+            setDevRole("student");
+          }}
+          type="button"
+        >
+          Student
+        </button>
+        <button
+          aria-pressed={devRole === "mentor"}
+          className="secondary-action auth-dev-bypass-role-toggle"
+          disabled={isSigningIn}
+          onClick={() => {
+            setDevRole("mentor");
+          }}
+          type="button"
+        >
+          Mentor
+        </button>
+      </div>
       <button
         className="secondary-action"
         disabled={isSigningIn}
         onClick={() => {
-          void onDevBypassSignIn();
+          void onDevBypassSignIn(devRole);
         }}
         type="button"
       >
@@ -207,6 +235,7 @@ export function AuthStatusCard({
         <img
           alt="MECO main logo"
           className="auth-status-mark"
+          fetchPriority="high"
           height={MECO_MAIN_LOGO_HEIGHT}
           loading="eager"
           width={MECO_MAIN_LOGO_WIDTH}

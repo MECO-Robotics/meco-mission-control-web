@@ -44,6 +44,7 @@ describe("normalizeBootstrapPayload", () => {
           id: milestoneId,
           title: "Milestone 1",
           type: "internal-review",
+          status: "blocked",
           startDateTime: "2026-01-10T12:00:00",
           endDateTime: null,
           isExternal: false,
@@ -57,6 +58,7 @@ describe("normalizeBootstrapPayload", () => {
     const normalized = normalizeBootstrapPayload(payload);
 
     expect(normalized.milestoneRequirements).toEqual(milestoneRequirements);
+    expect(normalized.milestones[0]?.status).toBe("blocked");
   });
 
   it("preserves calendar and triage bootstrap records", () => {
@@ -108,7 +110,17 @@ describe("normalizeBootstrapPayload", () => {
 
     const normalized = normalizeBootstrapPayload(payload);
 
-    expect(normalized.meetings).toEqual(meetings);
+    expect(normalized.meetings).toEqual([
+      {
+        ...meetings[0],
+        meetingType: "general",
+        projectIds: [],
+        startDateTime: "2026-03-01T17:30",
+        endDateTime: null,
+        location: "",
+        description: "",
+      },
+    ]);
     expect(normalized.attendanceRecords).toEqual(payload.attendanceRecords);
     expect(normalized.qaReviews).toEqual(qaReviews);
     expect(normalized.escalations).toEqual(escalations);

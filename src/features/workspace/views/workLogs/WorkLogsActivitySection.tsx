@@ -1,30 +1,56 @@
+import { useMemo, type ReactNode } from "react";
+
 import type { TaskRecord } from "@/types/recordsExecution";
-import { formatDate } from "@/lib/appUtils/common";
 import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
+import { KanbanColumns } from "@/features/workspace/views/kanban/KanbanColumns";
+import { KanbanScrollFrame } from "@/features/workspace/views/kanban/KanbanScrollFrame";
 import { PaginationControls } from "@/features/workspace/shared/table/workspaceTableChrome";
 
+import {
+  buildWorkLogActivityColumns,
+  formatActivityLabel,
+  type WorkLogActivityGroupMode,
+} from "./workLogsActivityGrouping";
 import type {
-  WorkLogPaginationState,
+  ActivityPaginationState,
   WorkLogsViewState,
 } from "./workLogsViewState";
 
 interface WorkLogsActivitySectionProps {
+  actions: WorkLogsViewState["activityActions"];
+  activityGroupMode: WorkLogActivityGroupMode;
+  activityPagination: ActivityPaginationState;
+  description: string;
+  groupingControls?: ReactNode;
   membersById: MembersById;
   openEditTaskModal: (task: TaskRecord) => void;
   subsystemsById: SubsystemsById;
   taskById: WorkLogsViewState["taskById"];
-  workLogPagination: WorkLogPaginationState;
-  workLogs: WorkLogsViewState["workLogs"];
 }
 
-function formatHours(hours: number) {
-  return `${hours.toFixed(1)}h`;
+function formatActionTimestamp(timestamp: string) {
+  const parsed = new Date(timestamp);
+  if (Number.isNaN(parsed.getTime())) {
+    return timestamp;
+  }
+
+  return parsed.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
-function buildSubsystemLabel(
+function resolveSubsystemLabel(
+  action: WorkLogsViewState["activityActions"][number],
   task: WorkLogsViewState["taskById"][string] | undefined,
   subsystemsById: SubsystemsById,
 ) {
+  if (action.subsystemId) {
+    return subsystemsById[action.subsystemId]?.name ?? "Unknown subsystem";
+  }
+
   if (!task) {
     return "Unknown subsystem";
   }
@@ -37,73 +63,119 @@ function buildSubsystemLabel(
 }
 
 export function WorkLogsActivitySection({
+  actions,
+  activityGroupMode,
+  activityPagination,
+  description,
+  groupingControls,
   membersById,
   openEditTaskModal,
   subsystemsById,
   taskById,
-  workLogPagination,
-  workLogs,
 }: WorkLogsActivitySectionProps) {
-  if (workLogs.length === 0) {
+  const activityColumns = useMemo(
+    () =>
+      buildWorkLogActivityColumns({
+        actions: activityPagination.pageItems,
+        groupMode: activityGroupMode,
+        membersById,
+        subsystemsById,
+        taskById,
+      }),
+    [activityGroupMode, activityPagination.pageItems, membersById, subsystemsById, taskById],
+  );
+  const actionsByColumn = useMemo(
+    () =>
+      Object.fromEntries(
+        activityColumns.map((column) => [column.id, column.actions] as const),
+      ) as Record<string, WorkLogsViewState["activityActions"]>,
+    [activityColumns],
+  );
+
+  if (actions.length === 0) {
     return (
       <div className="empty-state">
         <strong>No recent activity</strong>
-        <p className="section-copy">Create work logs to populate team activity updates.</p>
+        <p className="section-copy">Actions will appear here as workspace updates are made.</p>
       </div>
     );
   }
 
   return (
     <>
-      <p className="section-copy filter-copy">Recent work log activity across the current workspace scope.</p>
-      <div className="worklog-activity-grid">
-        {workLogPagination.pageItems.map((workLog) => {
-          const task = taskById[workLog.taskId];
-          const participantNames = workLog.participantIds
-            .map((participantId) => membersById[participantId]?.name)
-            .filter((name): name is string => Boolean(name));
+      <p className="section-copy filter-copy">{description}</p>
+      {groupingControls ? (
+        <div className="worklog-activity-board-controls">{groupingControls}</div>
+      ) : null}
+      <KanbanScrollFrame>
+        <KanbanColumns
+          boardClassName="worklog-activity-board"
+          columnBodyClassName="task-queue-board-column-body"
+          columnClassName="task-queue-board-column"
+          columnCountClassName="task-queue-board-column-count"
+          columnEmptyClassName="task-queue-board-column-empty"
+          columnHeaderClassName="task-queue-board-column-header"
+          columns={activityColumns.map((column) => ({
+            count: column.actions.length,
+            header: <span className="worklog-activity-column-title">{column.label}</span>,
+            state: column.id,
+          }))}
+          emptyLabel="No activity"
+          itemsByState={actionsByColumn}
+          renderItem={(action) => {
+            const task = action.taskId ? taskById[action.taskId] : undefined;
+            const participantNames = action.memberIds
+              .map((memberId) => membersById[memberId]?.name)
+              .filter((name): name is string => Boolean(name));
+            const actorName = action.actorMemberId
+              ? membersById[action.actorMemberId]?.name ?? null
+              : null;
 
-          return (
-            <article className="worklog-summary-card worklog-activity-card" key={workLog.id}>
-              <div className="worklog-activity-head">
-                <strong className="font-mono">{formatDate(workLog.date)}</strong>
-                <strong className="font-mono">{formatHours(workLog.hours)}</strong>
-              </div>
-              <div className="worklog-summary-task-meta">
-                {task ? (
-                  <button
-                    className="worklog-summary-task-link"
-                    onClick={() => openEditTaskModal(task)}
-                    type="button"
-                  >
-                    {task.title}
-                  </button>
-                ) : (
-                  <span className="worklog-summary-list-label">Missing task</span>
-                )}
-                <small>{buildSubsystemLabel(task, subsystemsById)}</small>
-              </div>
-              <p className="worklog-activity-meta">
-                {participantNames.length > 0
-                  ? `People: ${participantNames.join(", ")}`
-                  : "People: Unassigned"}
-              </p>
-              <p className="section-copy">{workLog.notes.trim() || "No notes recorded."}</p>
-            </article>
-          );
-        })}
-      </div>
+            return (
+              <article className="task-queue-board-card worklog-activity-card" key={action.id}>
+                <div className="worklog-activity-head">
+                  <strong className="font-mono">{formatActionTimestamp(action.timestamp)}</strong>
+                  <strong className="font-mono worklog-activity-operation">
+                    {action.operation.toUpperCase()}
+                  </strong>
+                </div>
+                <div className="worklog-summary-task-meta">
+                  {task ? (
+                    <button
+                      className="worklog-summary-task-link"
+                      onClick={() => openEditTaskModal(task)}
+                      type="button"
+                    >
+                      {task.title}
+                    </button>
+                  ) : (
+                    <span className="worklog-summary-list-label">
+                      {formatActivityLabel(action.entityType)}
+                    </span>
+                  )}
+                  <small>{resolveSubsystemLabel(action, task, subsystemsById)}</small>
+                </div>
+                <p className="worklog-activity-meta">{action.message}</p>
+                <p className="worklog-activity-meta">
+                  {actorName ? `By: ${actorName}` : "By: System"}
+                  {participantNames.length > 0 ? ` | People: ${participantNames.join(", ")}` : ""}
+                </p>
+              </article>
+            );
+          }}
+        />
+      </KanbanScrollFrame>
       <PaginationControls
-        label="work log activity"
-        onPageChange={workLogPagination.setPage}
-        onPageSizeChange={workLogPagination.setPageSize}
-        page={workLogPagination.page}
-        pageSize={workLogPagination.pageSize}
-        pageSizeOptions={workLogPagination.pageSizeOptions}
-        rangeEnd={workLogPagination.rangeEnd}
-        rangeStart={workLogPagination.rangeStart}
-        totalItems={workLogPagination.totalItems}
-        totalPages={workLogPagination.totalPages}
+        label="activity actions"
+        onPageChange={activityPagination.setPage}
+        onPageSizeChange={activityPagination.setPageSize}
+        page={activityPagination.page}
+        pageSize={activityPagination.pageSize}
+        pageSizeOptions={activityPagination.pageSizeOptions}
+        rangeEnd={activityPagination.rangeEnd}
+        rangeStart={activityPagination.rangeStart}
+        totalItems={activityPagination.totalItems}
+        totalPages={activityPagination.totalPages}
       />
     </>
   );

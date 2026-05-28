@@ -1,16 +1,17 @@
-import { useCallback, useMemo } from "react";
+﻿import { useCallback, useMemo } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MilestonePayload } from "@/types/payloads";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
-import { filterSelectionMatchesTaskPeople, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { formatTimelinePeriodLabel } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import { buildTimelineData } from "../model/timelineViewDataCore";
-import { buildTimelineDayHeaderCells, buildTimelineMonthGroups, buildTimelineProjectRows, filterTimelineMilestonesByPersonSelection } from "../model/timelineViewDataPresentation";
+import { buildTimelineDayHeaderCells, buildTimelineMonthGroups, buildTimelineProjectRows } from "../model/timelineViewDataPresentation";
+import type { TimelineTaskFilters } from "../model/timelineViewFilters";
 import { useTimelineMilestoneModal } from "../useTimelineEventModal";
 import { useTimelineMilestoneOverlay } from "./useTimelineMilestoneOverlay";
 import { useTimelineRowHighlightGeometry } from "./useTimelineRowHighlightGeometry";
-import { resolveTimelineRowHighlightStyle } from "../timelineTaskColors";
+import { useTimelineViewScope } from "./useTimelineViewScope";
+import { resolveTimelineRowHighlightStyle } from "../model/timelineTaskColors";
 
 interface UseTimelineViewDataArgs {
   activePersonFilter: FilterSelection;
@@ -25,6 +26,8 @@ interface UseTimelineViewDataArgs {
     milestoneId: string | null,
     payload: MilestonePayload,
   ) => Promise<void>;
+  searchFilter: string;
+  timelineFilters: TimelineTaskFilters;
   timelineZoom: number;
   triggerCreateMilestoneToken: number;
   viewAnchorDate: string;
@@ -40,77 +43,49 @@ export function useTimelineViewData({
   onTaskEditSaved,
   onDeleteTimelineMilestone,
   onSaveTimelineMilestone,
+  searchFilter,
+  timelineFilters,
   timelineZoom,
   triggerCreateMilestoneToken,
   viewAnchorDate,
   viewInterval,
 }: UseTimelineViewDataArgs) {
-  const projectsById = useMemo(
-    () =>
-      Object.fromEntries(
-        bootstrap.projects.map((project) => [project.id, project]),
-      ) as Record<string, BootstrapPayload["projects"][number]>,
-    [bootstrap.projects],
-  );
-  const scopedProjectIds = useMemo(
-    () => bootstrap.projects.map((project) => project.id),
-    [bootstrap.projects],
-  );
-  const subsystemsById = useMemo(
-    () =>
-      Object.fromEntries(
-        bootstrap.subsystems.map((subsystem) => [subsystem.id, subsystem]),
-      ) as Record<string, BootstrapPayload["subsystems"][number]>,
-    [bootstrap.subsystems],
-  );
-  const disciplinesById = useMemo(
-    () =>
-      Object.fromEntries(
-        bootstrap.disciplines.map((discipline) => [discipline.id, discipline]),
-      ) as Record<string, BootstrapPayload["disciplines"][number]>,
-    [bootstrap.disciplines],
-  );
-
-  const scopedTasks = useMemo(
-    () =>
-      activePersonFilter.length > 0
-        ? bootstrap.tasks.filter((task) => filterSelectionMatchesTaskPeople(activePersonFilter, task))
-        : bootstrap.tasks,
-    [activePersonFilter, bootstrap.tasks],
-  );
-  const scopedMilestones = useMemo(
-    () =>
-      filterTimelineMilestonesByPersonSelection({
-        activePersonFilter,
-        milestones: bootstrap.milestones,
-        tasks: bootstrap.tasks,
-      }),
-    [activePersonFilter, bootstrap.milestones, bootstrap.tasks],
-  );
-  const tasksById = useMemo(
-    () =>
-      Object.fromEntries(
-        bootstrap.tasks.map((task) => [task.id, task]),
-      ) as Record<string, BootstrapPayload["tasks"][number]>,
-    [bootstrap.tasks],
-  );
-  const timelineFilterMotionClass = useFilterChangeMotionClass([activePersonFilter]);
+  const {
+    disciplinesById,
+    projectsById,
+    scopedMeetings,
+    scopedMilestones,
+    scopedProjectIds,
+    scopedSubsystems,
+    scopedTasks,
+    subsystemsById,
+    tasksById,
+    timelineFilterMotionClass,
+  } = useTimelineViewScope({
+    activePersonFilter,
+    bootstrap,
+    isAllProjectsView,
+    searchFilter,
+    timelineFilters,
+  });
   const timeline = useMemo(
     () =>
       buildTimelineData({
         isAllProjectsView,
+        meetings: scopedMeetings,
         milestones: scopedMilestones,
         projectsById,
-        scopedSubsystems: bootstrap.subsystems,
+        scopedSubsystems,
         scopedTasks,
         viewAnchorDate,
         viewInterval,
       }),
     [
-      bootstrap.subsystems,
       isAllProjectsView,
       projectsById,
+      scopedMeetings,
       scopedMilestones,
+      scopedSubsystems,
       scopedTasks,
       viewAnchorDate,
       viewInterval,
@@ -122,6 +97,7 @@ export function useTimelineViewData({
   );
   const monthGroups = useMemo(() => buildTimelineMonthGroups(timeline.days), [timeline.days]);
   const dayMilestonesByDate = timeline.dayMilestones;
+  const dayMeetingsByDate = timeline.dayMeetings;
   const milestoneModal = useTimelineMilestoneModal({
     dayMilestonesByDate,
     openCreateTaskModal,
@@ -133,8 +109,8 @@ export function useTimelineViewData({
     triggerCreateMilestoneToken,
   });
   const timelineDayHeaderCells = useMemo(
-    () => buildTimelineDayHeaderCells(timeline.days, dayMilestonesByDate),
-    [dayMilestonesByDate, timeline.days],
+    () => buildTimelineDayHeaderCells(timeline.days, dayMilestonesByDate, dayMeetingsByDate),
+    [dayMeetingsByDate, dayMilestonesByDate, timeline.days],
   );
   const projectRows = useMemo(
     () => buildTimelineProjectRows(timeline.subsystemRows),

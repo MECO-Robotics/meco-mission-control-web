@@ -9,6 +9,7 @@ interface TaskDetailsDependencyBlockersSectionProps {
   activeTask: TaskRecord;
   bootstrap: BootstrapPayload;
   canInlineEdit: boolean;
+  dependencyTargetProjectId?: string | null;
   onResolveTaskBlocker: (blockerId: string) => Promise<void>;
   setTaskDraft?: Dispatch<SetStateAction<TaskPayload>>;
   taskDraft?: TaskPayload;
@@ -18,6 +19,7 @@ export function TaskDetailsDependencyBlockersSection({
   activeTask,
   bootstrap,
   canInlineEdit,
+  dependencyTargetProjectId,
   onResolveTaskBlocker,
   setTaskDraft,
   taskDraft,
@@ -36,6 +38,7 @@ export function TaskDetailsDependencyBlockersSection({
           bootstrap={bootstrap}
           canInlineEdit={canInlineEdit}
           collapsibleOpen={sharedCollapsibleOpen}
+          targetProjectId={dependencyTargetProjectId}
           onCollapsibleToggle={setSharedCollapsibleOpen}
           taskDraft={taskDraft}
           setTaskDraft={setTaskDraft}

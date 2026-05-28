@@ -4,18 +4,14 @@ import type { TaskDependencyKind, TaskDependencyType } from "@/types/common";
 import type { TaskPayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { formatIterationVersion } from "@/lib/appUtils/common";
-import { IconTasks, IconTrash } from "@/components/shared/Icons";
-import { FilterDropdown } from "../../shared/filters/FilterDropdown";
 import {
   getTaskDependencyRecordsForTask,
   getTaskDependencyTargetName,
-  TASK_DEPENDENCY_KIND_LABELS,
-  TASK_DEPENDENCY_KIND_OPTIONS,
-  TASK_DEPENDENCY_TYPE_LABELS,
   getTaskDependencyTargetOptions,
 } from "../../shared/task/taskTargeting";
-import { TaskDetailReveal } from "./details/TaskDetailReveal";
 import { TaskDetailsDependencyAddMenu } from "./details/sections/TaskDetailsDependencyAddMenu";
+import { TaskDetailsDependencyRowList } from "./TaskDetailsDependencyRowList";
+import { getScopedTaskDependencyTargets } from "./taskDependencyTargetScope";
 
 interface TaskDetailsDependenciesSectionProps {
   activeTask: TaskRecord;
@@ -24,6 +20,7 @@ interface TaskDetailsDependenciesSectionProps {
   collapsibleOpen?: boolean;
   onCollapsibleToggle?: (open: boolean) => void;
   setTaskDraft?: Dispatch<SetStateAction<TaskPayload>>;
+  targetProjectId?: string | null;
   taskDraft?: TaskPayload;
 }
 
@@ -42,6 +39,7 @@ export function TaskDetailsDependenciesSection({
   collapsibleOpen,
   onCollapsibleToggle,
   setTaskDraft,
+  targetProjectId,
   taskDraft,
 }: TaskDetailsDependenciesSectionProps) {
   const [editingDependencyKey, setEditingDependencyKey] = useState<string | null>(null);
@@ -50,6 +48,20 @@ export function TaskDetailsDependenciesSection({
   useEffect(() => {
     setInternalOpen(true);
   }, [activeTask.id]);
+
+  const dependencyDraftCount = taskDraft?.taskDependencies?.length ?? 0;
+
+  useEffect(() => {
+    if (!canInlineEdit) {
+      return;
+    }
+
+    const dependencyDrafts = taskDraft?.taskDependencies ?? [];
+    const placeholderIndex = dependencyDrafts.findIndex((dependency) => !dependency.refId.trim());
+    if (placeholderIndex >= 0) {
+      setEditingDependencyKey(getDependencyKey(dependencyDrafts[placeholderIndex], placeholderIndex));
+    }
+  }, [activeTask.id, canInlineEdit, dependencyDraftCount]);
 
   const tasksById = Object.fromEntries(bootstrap.tasks.map((task) => [task.id, task] as const));
   const milestonesById = Object.fromEntries(
@@ -61,6 +73,17 @@ export function TaskDetailsDependenciesSection({
   const partDefinitionsById = Object.fromEntries(
     bootstrap.partDefinitions.map((partDefinition) => [partDefinition.id, partDefinition] as const),
   );
+  const {
+    targetMilestonesById,
+    targetPartInstancesById,
+    targetTasksById,
+  } = getScopedTaskDependencyTargets({
+    bootstrap,
+    milestonesById,
+    partInstancesById,
+    targetProjectId,
+    tasksById,
+  });
   const dependencyRows = (
     taskDraft?.taskDependencies ??
     getTaskDependencyRecordsForTask(activeTask.id, bootstrap).filter((dependency) => dependency.taskId === activeTask.id)
@@ -79,12 +102,11 @@ export function TaskDetailsDependenciesSection({
         }),
       };
     });
-  const dependencyKindOptions = TASK_DEPENDENCY_KIND_OPTIONS;
   const getDependencyTargetOptions = (kind: TaskDependencyKind) =>
     getTaskDependencyTargetOptions(kind, {
-      tasksById,
-      milestonesById,
-      partInstancesById,
+      tasksById: targetTasksById,
+      milestonesById: targetMilestonesById,
+      partInstancesById: targetPartInstancesById,
       partDefinitionsById,
       formatIterationVersion,
     });
@@ -179,94 +201,17 @@ export function TaskDetailsDependenciesSection({
         </summary>
         <div className="task-detail-collapsible-body">
           {dependencyRows.length > 0 ? (
-            <div className="task-details-dependency-editor">
-              {dependencyRows.map((dependency, index) => {
-                const isEditing = canInlineEdit && editingDependencyKey === dependency.key;
-                const targetOptions = getDependencyTargetOptions(dependency.kind);
-
-                if (isEditing && setTaskDraft) {
-                  return (
-                    <div className="task-details-dependency-row task-details-dependency-row-edit" key={dependency.key}>
-                      <label className="field task-details-dependency-editor-field">
-                        <span style={{ color: "var(--text-title)" }}>Type</span>
-                        <FilterDropdown
-                          allLabel="Select dependency type"
-                          ariaLabel="Set dependency type"
-                          buttonInlineEditField={`dependency-kind-${index}`}
-                          className="task-queue-filter-menu-submenu task-details-dependency-kind-menu"
-                          icon={<IconTasks />}
-                          menuClassName="task-details-dependency-menu-popup"
-                          onChange={(selection) =>
-                            updateDependencyDraft(dependency.key, {
-                              kind: selection[0] as TaskDependencyKind,
-                              refId: "",
-                            })
-                          }
-                          options={dependencyKindOptions}
-                          portalMenu
-                          portalMenuPlacement="below"
-                          singleSelect
-                          value={[dependency.kind]}
-                        />
-                      </label>
-                      <label className="field task-details-dependency-editor-field">
-                <span style={{ color: "var(--text-title)" }}>Depends on</span>
-                <FilterDropdown
-                  allLabel={`Select ${TASK_DEPENDENCY_KIND_LABELS[dependency.kind].toLowerCase()}`}
-                  ariaLabel="Set dependency target"
-                  buttonInlineEditField={`dependency-target-${index}`}
-                  className="task-queue-filter-menu-submenu task-details-dependency-target-menu"
-                  icon={<IconTasks />}
-                          menuClassName="task-details-dependency-menu-popup"
-                          onChange={(selection) =>
-                            updateDependencyDraft(dependency.key, {
-                              refId: selection[0] ?? "",
-                            })
-                          }
-                          options={targetOptions}
-                          portalMenu
-                          portalMenuPlacement="below"
-                          singleSelect
-                          value={dependency.refId ? [dependency.refId] : []}
-                        />
-                      </label>
-                    </div>
-                  );
-                }
-
-                return (
-                  <div
-                    className={`workspace-detail-list-item task-detail-list-item task-details-dependency-row ${
-                      canInlineEdit ? "task-details-dependency-row-with-delete" : ""
-                    }`}
-                    key={dependency.key}
-                  >
-                    {canInlineEdit ? (
-                      <button
-                        aria-label={`Remove dependency ${index + 1}`}
-                        className="icon-button task-details-dependency-row-remove-button"
-                        onClick={() => removeDependencyDraft(dependency.key)}
-                        type="button"
-                      >
-                        <IconTrash />
-                      </button>
-                    ) : null}
-                    <div className="task-details-dependency-row-content">
-                      <TaskDetailReveal
-                        className="task-detail-ellipsis-reveal"
-                        style={{ color: "var(--text-title)", fontWeight: 800 }}
-                        text={dependency.name}
-                      />
-                      <TaskDetailReveal
-                        className="task-detail-ellipsis-reveal"
-                        style={{ color: "var(--text-copy)", fontSize: "0.8rem" }}
-                        text={`${TASK_DEPENDENCY_KIND_LABELS[dependency.kind]}${dependency.dependencyType ? ` / ${TASK_DEPENDENCY_TYPE_LABELS[dependency.dependencyType]}` : ""}${dependency.requiredState ? ` / ${dependency.requiredState}` : ""}`}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <TaskDetailsDependencyRowList
+              canInlineEdit={canInlineEdit}
+              dependencyRows={dependencyRows}
+              editingDependencyKey={editingDependencyKey}
+              getDependencyDefaultState={getDependencyDefaultState}
+              getDependencyTargetOptions={getDependencyTargetOptions}
+              removeDependencyDraft={removeDependencyDraft}
+              setEditingDependencyKey={setEditingDependencyKey}
+              setTaskDraft={setTaskDraft}
+              updateDependencyDraft={updateDependencyDraft}
+            />
           ) : (
             <p className="task-detail-copy task-detail-empty" style={{ margin: "0.25rem 0 0" }}>
               {canInlineEdit ? "No dependencies yet" : "None"}

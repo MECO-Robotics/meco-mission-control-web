@@ -1,7 +1,11 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskStatus } from "@/types/common";
+import type { OpenEditTaskModalOptions } from "@/types/taskEditIntent";
 import type { TaskRecord } from "@/types/recordsExecution";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
+import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
+import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
 import { TaskQueueBoardSection } from "./TaskQueueBoardSection";
 import { TaskQueueToolbar } from "./TaskQueueToolbar";
 import {
@@ -16,7 +20,8 @@ interface TaskQueueViewProps {
   isNonRobotProject: boolean;
   membersById: Record<string, BootstrapPayload["members"][number]>;
   openCreateTaskModal: () => void;
-  openEditTaskModal: (task: TaskRecord) => void;
+  openEditTaskModal: (task: TaskRecord, options?: OpenEditTaskModalOptions) => void;
+  onReassignTaskStatus?: (task: TaskRecord, status: TaskStatus) => void | Promise<void>;
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
 }
 
@@ -29,6 +34,7 @@ export function TaskQueueView({
   membersById,
   openCreateTaskModal,
   openEditTaskModal,
+  onReassignTaskStatus,
   subsystemsById,
 }: TaskQueueViewProps) {
   const {
@@ -81,38 +87,52 @@ export function TaskQueueView({
 
   return (
     <section className={`panel dense-panel task-queue-view ${WORKSPACE_PANEL_CLASS}`}>
-      <TaskQueueToolbar
-        activeFilterCount={activeFilterCount}
-        bootstrap={bootstrap}
-        disciplineFilter={disciplineFilter}
-        disciplineOptions={disciplineOptions}
-        isAllProjectsView={isAllProjectsView}
-        openCreateTaskModal={openCreateTaskModal}
-        ownerFilter={ownerFilter}
-        priorityFilter={priorityFilter}
-        projectFilter={projectFilter}
-        searchFilter={searchFilter}
-        setDisciplineFilter={setDisciplineFilter}
-        setOwnerFilter={setOwnerFilter}
-        setPriorityFilter={setPriorityFilter}
-        setProjectFilter={setProjectFilter}
-        setSearchFilter={setSearchFilter}
-        setSortField={setSortField}
-        setSortOrder={setSortOrder}
-        setStatusFilter={setStatusFilter}
-        setSubsystemFilter={setSubsystemFilter}
-        setSubsystemIterationFilter={setSubsystemIterationFilter}
-        setTaskQueueZoom={setTaskQueueZoom}
-        showSubsystemIterationFilter={showSubsystemIterationFilter}
-        sortField={sortField}
-        sortOrder={sortOrder}
-        statusFilter={statusFilter}
-        subsystemFilter={subsystemFilter}
-        subsystemFilterOptions={subsystemFilterOptions}
-        subsystemIterationFilter={subsystemIterationFilter}
-        subsystemIterationOptions={subsystemIterationOptions}
-        taskSortIsDefault={taskSortIsDefault}
-        taskQueueZoom={taskQueueZoom}
+      <AppTopbarSlotPortal slot="controls">
+        <TaskQueueToolbar
+          activeFilterCount={activeFilterCount}
+          bootstrap={bootstrap}
+          disciplineFilter={disciplineFilter}
+          disciplineOptions={disciplineOptions}
+          isAllProjectsView={isAllProjectsView}
+          ownerFilter={ownerFilter}
+          priorityFilter={priorityFilter}
+          projectFilter={projectFilter}
+          searchFilter={searchFilter}
+          setDisciplineFilter={setDisciplineFilter}
+          setOwnerFilter={setOwnerFilter}
+          setPriorityFilter={setPriorityFilter}
+          setProjectFilter={setProjectFilter}
+          setSearchFilter={setSearchFilter}
+          setSortField={setSortField}
+          setSortOrder={setSortOrder}
+          setStatusFilter={setStatusFilter}
+          setSubsystemFilter={setSubsystemFilter}
+          setSubsystemIterationFilter={setSubsystemIterationFilter}
+          setTaskQueueZoom={setTaskQueueZoom}
+          showSubsystemIterationFilter={showSubsystemIterationFilter}
+          sortField={sortField}
+          sortOrder={sortOrder}
+          statusFilter={statusFilter}
+          subsystemFilter={subsystemFilter}
+          subsystemFilterOptions={subsystemFilterOptions}
+          subsystemIterationFilter={subsystemIterationFilter}
+          subsystemIterationOptions={subsystemIterationOptions}
+          taskSortIsDefault={taskSortIsDefault}
+          taskQueueZoom={taskQueueZoom}
+        />
+      </AppTopbarSlotPortal>
+
+      <div className="panel-header compact-header">
+        <div className="queue-section-header">
+          <h2>Tasks</h2>
+        </div>
+      </div>
+
+      <WorkspaceFloatingAddButton
+        ariaLabel="Add task"
+        onClick={openCreateTaskModal}
+        title="Add task"
+        tutorialTarget="create-task-button"
       />
 
       <TaskQueueBoardSection
@@ -122,6 +142,7 @@ export function TaskQueueView({
         isNonRobotProject={isNonRobotProject}
         membersById={membersById}
         openEditTaskModal={openEditTaskModal}
+        onReassignTaskStatus={onReassignTaskStatus}
         processedTasks={processedTasks}
         projectsById={projectsById}
         taskQueueZoom={taskQueueZoom}

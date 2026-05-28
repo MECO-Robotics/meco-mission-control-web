@@ -1,8 +1,10 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 
+import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
+import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
 
 import { filterPartDefinitions } from "./parts/partsViewData";
 import { PartsDefinitionSection } from "./parts/PartsDefinitionSection";
@@ -108,16 +110,9 @@ export function PartsView({
 
   return (
     <section className={`panel dense-panel part-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
-      <div className="panel-header compact-header">
-        <div className="queue-section-header">
-          <h2>Part manager</h2>
-          <p className="section-copy">
-            Reusable part definitions and subsystem-specific part instances for traceability.
-          </p>
-        </div>
+      <AppTopbarSlotPortal slot="controls">
         <PartsToolbar
           bootstrap={bootstrap}
-          openCreatePartDefinitionModal={openCreatePartDefinitionModal}
           partSearch={partSearch}
           partStatus={partStatus}
           partSubsystem={partSubsystem}
@@ -127,15 +122,31 @@ export function PartsView({
           setShowArchivedPartDefinitions={setShowArchivedPartDefinitions}
           showArchivedPartDefinitions={showArchivedPartDefinitions}
         />
+      </AppTopbarSlotPortal>
+
+      <div className="panel-header compact-header">
+        <div className="queue-section-header">
+          <h2>Part manager</h2>
+          <p className="section-copy">
+            Reusable part definitions and subsystem-specific part instances for traceability.
+          </p>
+        </div>
       </div>
 
-        <PartsDefinitionSection
-          bootstrap={bootstrap}
-          filteredPartDefinitions={partDefinitionPagination.pageItems}
-          onEditPartDefinition={openEditPartDefinitionModal}
-          partDefinitionFilterMotionClass={partDefinitionFilterMotionClass}
-          pageChangeHandlers={partDefinitionPage}
-        />
+      <WorkspaceFloatingAddButton
+        ariaLabel="Add part definition"
+        onClick={openCreatePartDefinitionModal}
+        title="Add part definition"
+        tutorialTarget="create-part-button"
+      />
+
+      <PartsDefinitionSection
+        bootstrap={bootstrap}
+        filteredPartDefinitions={partDefinitionPagination.pageItems}
+        onEditPartDefinition={openEditPartDefinitionModal}
+        partDefinitionFilterMotionClass={partDefinitionFilterMotionClass}
+        pageChangeHandlers={partDefinitionPage}
+      />
 
       <PartsInstanceSection
         bootstrap={bootstrap}

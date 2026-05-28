@@ -41,6 +41,14 @@
   border-radius: 999px;
 }
 
+.workspace-floating-create-button {
+  position: fixed;
+  right: clamp(1rem, 2vw, 1.6rem);
+  bottom: calc(clamp(1rem, 2vh, 1.3rem) + env(safe-area-inset-bottom, 0px));
+  z-index: 980;
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--official-black) 24%, transparent);
+}
+
 .task-queue-toolbar-inline-actions {
   display: inline-flex;
   align-items: center;
@@ -51,11 +59,17 @@
   min-width: 0;
 }
 
+.task-queue-toolbar > .task-queue-toolbar-inline-actions:has(.task-queue-zoom-controls) {
+  flex: 0 0 max-content;
+  flex-wrap: nowrap;
+  min-width: max-content;
+}
+
 .task-queue-zoom-controls {
   display: inline-flex;
   align-items: center;
-  gap: 0.18rem;
-  min-height: 2.2rem;
+  gap: 0.04rem;
+  min-height: 2.05rem;
   padding: 0.12rem 0.18rem;
   border: 1px solid var(--border-base);
   border-radius: 999px;
@@ -77,8 +91,8 @@
 }
 
 .task-queue-zoom-label {
-  min-width: 4.9rem;
-  padding: 0 0.35rem;
+  min-width: 2.9rem;
+  padding: 0 0.04rem;
   color: var(--text-title);
   font-size: 0.78rem;
   font-weight: 800;

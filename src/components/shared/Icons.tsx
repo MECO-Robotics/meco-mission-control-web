@@ -131,6 +131,21 @@ export const IconMapPin = () => (
         <circle cx="12" cy="10" r="2.25"></circle>
     </svg>
 );
+export const IconSearchPlus = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block" }}>
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.35-4.35"></path>
+        <path d="M11 8v6"></path>
+        <path d="M8 11h6"></path>
+    </svg>
+);
+export const IconSearchMinus = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block" }}>
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.35-4.35"></path>
+        <path d="M8 11h6"></path>
+    </svg>
+);
 export const IconPlus = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ display: "block" }}><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>
 );

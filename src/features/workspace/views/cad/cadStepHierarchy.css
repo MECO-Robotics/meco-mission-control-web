@@ -1,0 +1,163 @@
+.cad-hierarchy-review {
+  display: grid;
+  gap: 12px;
+}
+
+.cad-hierarchy-tabs {
+  background: var(--surface-muted, rgba(148, 163, 184, 0.12));
+  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.22));
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 4px;
+}
+
+.cad-hierarchy-tab {
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  min-height: 34px;
+  padding: 7px 8px;
+}
+
+.cad-hierarchy-tab[aria-selected="true"] {
+  background: var(--bg-panel, #fff);
+  color: var(--text-primary);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
+.cad-hierarchy-stage {
+  display: grid;
+  gap: 10px;
+}
+
+.cad-hierarchy-stage h4 {
+  color: var(--text-title);
+  font-size: 0.94rem;
+  margin: 0;
+}
+
+.cad-hierarchy-list,
+.cad-hierarchy-warning-list,
+.cad-hierarchy-proposal-stack {
+  display: grid;
+  gap: 9px;
+}
+
+.cad-hierarchy-node,
+.cad-hierarchy-warning-list article,
+.cad-hierarchy-ambiguous {
+  background: rgba(15, 23, 42, 0.035);
+  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.22));
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+}
+
+.cad-hierarchy-node[data-status="needs-review"],
+.cad-hierarchy-warning-list article[data-severity="warning"] {
+  border-color: rgba(245, 158, 11, 0.36);
+}
+
+.cad-hierarchy-node[data-status="confirmed"] {
+  border-color: rgba(34, 197, 94, 0.32);
+}
+
+.cad-hierarchy-node strong,
+.cad-hierarchy-ambiguous strong {
+  color: var(--text-title);
+  display: block;
+}
+
+.cad-hierarchy-node span,
+.cad-hierarchy-node p,
+.cad-hierarchy-summary,
+.cad-hierarchy-ambiguous span,
+.cad-hierarchy-ambiguous small,
+.cad-hierarchy-warning-list span {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.cad-hierarchy-node p,
+.cad-hierarchy-summary {
+  margin: 0;
+}
+
+.cad-hierarchy-node code,
+.cad-hierarchy-warning-list code {
+  color: var(--text-muted);
+  display: block;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.74rem;
+  overflow-wrap: anywhere;
+}
+
+.cad-hierarchy-decision {
+  align-items: end;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) auto;
+}
+
+.cad-hierarchy-decision label {
+  display: grid;
+  gap: 4px;
+}
+
+.cad-hierarchy-help {
+  align-self: center;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+}
+
+.cad-hierarchy-decision label span {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.cad-hierarchy-decision select {
+  background: var(--surface-input, rgba(255, 255, 255, 0.86));
+  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.3));
+  border-radius: 8px;
+  color: var(--text-primary);
+  font: inherit;
+  min-height: 34px;
+  padding: 7px 8px;
+  width: 100%;
+}
+
+.cad-hierarchy-ambiguous summary {
+  color: var(--text-title);
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.cad-hierarchy-ambiguous article {
+  display: grid;
+  gap: 4px;
+  padding-top: 8px;
+}
+
+.cad-hierarchy-ambiguous ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+@media (max-width: 760px) {
+  .cad-hierarchy-tabs,
+  .cad-hierarchy-decision {
+    grid-template-columns: 1fr;
+  }
+}

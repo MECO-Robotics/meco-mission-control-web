@@ -1,6 +1,6 @@
-import type { UseInteractiveTutorialOptions } from "./useInteractiveTutorialCoreTypes";
+import type { UseInteractiveTutorialOptions } from "./core/useInteractiveTutorialCoreTypes";
 
-import type { InteractiveTutorialCoreState } from "./useInteractiveTutorialCoreState";
+import type { InteractiveTutorialCoreState } from "./core/useInteractiveTutorialCoreState";
 import { useInteractiveTutorialCoreActionsSession } from "./useInteractiveTutorialCoreActionsSession";
 
 export function useInteractiveTutorialCoreActions(

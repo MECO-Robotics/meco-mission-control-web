@@ -1,0 +1,58 @@
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { RiskRecord } from "@/types/recordsReporting";
+
+import type { ScopeMetricRow } from "../riskMetrics/riskMetricsTypes";
+import type { BlockerBreakdown, HealthStatus } from "./riskViewMetricsUtils";
+
+export interface RiskViewScopeData {
+  activeMechanismCount: number;
+  activeSubsystemCount: number;
+  attendanceHours: number;
+  blockerBreakdown: BlockerBreakdown;
+  blockerCount: number;
+  buildHealthActions: string[];
+  buildHealthReasons: string[];
+  buildHealthStatus: HealthStatus;
+  clampedCompletionWidth: string;
+  completionRate: number;
+  completedTaskCount: number;
+  deliveredPurchases: number;
+  expectedProgressRate: number | null;
+  filteredRowsBase: RiskRecord[];
+  hoursLoggedRate: number;
+  loggedHours: number;
+  logsThisWeekHours: number | null;
+  lowStockMaterials: number;
+  maxMetricHours: number;
+  mechanismMetrics: ScopeMetricRow[];
+  mentorActionRequiredCount: number | null;
+  oldestBlockerAgeDays: number | null;
+  oldestQaWaitingAgeDays: number | null;
+  openTaskCount: number;
+  ownerlessTaskCount: number;
+  pendingPurchaseCount: number;
+  planStatus: HealthStatus;
+  plannedHours: number;
+  qaPassCount: number;
+  qaWaitingCount: number;
+  remainingPlannedHours: number;
+  scopedReportIds: Set<string>;
+  scopedReports: BootstrapPayload["reports"];
+  scopedRisks: RiskRecord[];
+  scopedTaskIds: Set<string>;
+  scopedTasks: BootstrapPayload["tasks"];
+  scopedWorkLogs: BootstrapPayload["workLogs"];
+  staleSubsystemCount: number | null;
+  staleTaskCount: number | null;
+  staleTaskThresholdDays: number;
+  staleTaskUnavailableCount: number;
+  studentRevisionRequiredCount: number | null;
+  subsystemMetrics: ScopeMetricRow[];
+  supplySignals: number;
+  taskCompletionRate: number;
+  taskCompletionWidth: string;
+  totalTaskCount: number;
+  untouchedMechanismCount: number;
+  unresolvedBlockerCount: number;
+  waitingForQaCount: number;
+}

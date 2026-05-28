@@ -36,23 +36,21 @@ export function AppWorkspaceShellTopbar({
       ? NAVIGATION_SUB_ITEMS.find((subItem) => subItem.id === activeSubItemId)?.label ??
         activeSectionLabel
       : activeSectionLabel;
+  const favoriteViewIds = new Set(
+    (c.bootstrap.favoriteViews ?? []).map((favorite) => favorite.viewId),
+  );
+  const isActiveViewFavorite = activeSubItemId ? favoriteViewIds.has(activeSubItemId) : false;
 
   return (
     <AppTopbar
       activeViewLabel={activeViewLabel}
-      handleSignOut={c.handleSignOut}
-      isLoadingData={c.isLoadingData}
-      isMyViewActive={c.isMyViewActive}
-      loadWorkspace={c.loadWorkspace}
-      myViewMemberName={c.signedInMember?.name ?? null}
-      sessionUser={c.sessionUser}
-      seasons={c.bootstrap.seasons}
-      selectedSeasonId={c.selectedSeasonId}
-      onCreateSeason={c.handleCreateSeason}
-      onSelectSeason={c.setSelectedSeasonId}
-      onToggleMyView={c.toggleMyView}
+      isActiveViewFavorite={isActiveViewFavorite}
+      onToggleActiveViewFavorite={
+        activeSubItemId
+          ? () => void c.toggleFavoriteView(activeSubItemId, !isActiveViewFavorite)
+          : null
+      }
       isDarkMode={c.isDarkMode}
-      toggleDarkMode={c.toggleDarkMode}
       isSidebarCollapsed={c.isSidebarCollapsed}
     />
   );

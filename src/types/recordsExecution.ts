@@ -1,6 +1,7 @@
 import type {
   MilestoneStatus,
   MilestoneType,
+  MeetingType,
   TaskBlockerSeverity,
   TaskBlockerStatus,
   TaskBlockerType,
@@ -127,6 +128,13 @@ export interface AttendanceRecord {
 export interface MeetingRecord {
   id: string;
   title: string;
+  meetingType?: MeetingType;
+  seasonId?: string;
+  projectIds?: string[];
+  startDateTime?: string;
+  endDateTime?: string | null;
+  location?: string;
+  description?: string;
   date: string;
   time: string;
   rsvpsYes: number;
@@ -152,4 +160,22 @@ export interface EscalationRecord {
   title: string;
   detail: string;
   severity: "high" | "medium";
+}
+
+export type AuditActionOperation = "create" | "update" | "delete";
+
+export interface AuditActionRecord {
+  id: string;
+  timestamp: string;
+  operation: AuditActionOperation;
+  entityType: string;
+  entityId: string;
+  entityLabel: string;
+  message: string;
+  changedFields: string[];
+  projectId: string | null;
+  taskId: string | null;
+  subsystemId: string | null;
+  actorMemberId: string | null;
+  memberIds: string[];
 }

@@ -1,8 +1,8 @@
-import type { CSSProperties } from "react";
+import { useMemo, useRef, useState, type CSSProperties, type DragEvent, type PointerEvent } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MilestoneRecord } from "@/types/recordsExecution";
-import type { MilestoneType } from "@/types/common";
+import type { MilestoneStatus, MilestoneType } from "@/types/common";
 import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
 import { getMilestoneTaskBoardStateForMilestone, MilestoneTaskStateIcon } from "@/features/workspace/shared/milestones/milestoneTaskState";
 import { EditableHoverIndicator } from "@/features/workspace/shared/table/workspaceTableChrome";
@@ -13,10 +13,9 @@ import {
 } from "@/features/workspace/shared/events/eventStyles";
 import { KanbanColumns } from "@/features/workspace/views/kanban/KanbanColumns";
 import {
-  TASK_QUEUE_BOARD_COLUMNS,
   formatTaskQueueBoardState,
-  type TaskQueueBoardState,
 } from "@/features/workspace/views/taskQueue/taskQueueKanbanBoardState";
+import { MilestoneSearchHighlight } from "./MilestoneSearchHighlight";
 import { formatMilestoneDateTime } from "./milestonesViewUtils";
 
 const MILESTONE_TYPE_BADGE_LABELS: Record<MilestoneType, string> = {
@@ -26,6 +25,16 @@ const MILESTONE_TYPE_BADGE_LABELS: Record<MilestoneType, string> = {
   "internal-review": "Internal review",
   demo: "Demo",
 };
+
+const MILESTONE_STATUS_COLUMNS: readonly { label: string; state: MilestoneStatus }[] = [
+  { state: "not ready", label: "Not ready" },
+  { state: "blocked", label: "Blocked" },
+  { state: "qa", label: "QA" },
+  { state: "ready", label: "Ready" },
+] as const;
+const MILESTONE_DRAG_DISABLED_MESSAGE =
+  "Milestone drag reassignment is disabled. Open the milestone to change its status.";
+const MILESTONE_DRAG_ATTEMPT_THRESHOLD_PX = 8;
 
 function getMilestoneBoardType(milestone: MilestoneRecord) {
   return milestone.type in MILESTONE_TYPE_STYLES ? milestone.type : DEFAULT_MILESTONE_TYPE;
@@ -89,18 +98,17 @@ function formatMilestoneEndDateTime(startDateTime: string, endDateTime: string |
 
 function groupMilestonesByBoardState(
   milestones: MilestoneRecord[],
-  bootstrap: BootstrapPayload,
 ) {
-  const grouped = TASK_QUEUE_BOARD_COLUMNS.reduce(
+  const grouped = MILESTONE_STATUS_COLUMNS.reduce(
     (accumulator, { state }) => {
       accumulator[state] = [];
       return accumulator;
     },
-    {} as Record<TaskQueueBoardState, MilestoneRecord[]>,
+    {} as Record<MilestoneStatus, MilestoneRecord[]>,
   );
 
   milestones.forEach((milestone) => {
-    grouped[getMilestoneTaskBoardStateForMilestone(milestone, bootstrap)].push(milestone);
+    grouped[milestone.status ?? "not ready"].push(milestone);
   });
 
   return grouped;
@@ -110,52 +118,106 @@ interface MilestoneKanbanBoardProps {
   boardStyle?: CSSProperties;
   bootstrap: BootstrapPayload;
   milestones: MilestoneRecord[];
+  onMilestoneDragBlocked?: (message: string) => void;
   onOpenMilestone: (milestone: MilestoneRecord) => void;
   projectLabelByMilestoneId: Record<string, string>;
+  searchFilter: string;
 }
 
 export function MilestoneKanbanBoard({
   boardStyle,
   bootstrap,
   milestones,
+  onMilestoneDragBlocked,
   onOpenMilestone,
   projectLabelByMilestoneId,
+  searchFilter,
 }: MilestoneKanbanBoardProps) {
-  const milestonesByState = groupMilestonesByBoardState(milestones, bootstrap);
+  const [dragErrorMessage, setDragErrorMessage] = useState<string | null>(null);
+  const milestoneDragAttemptStartRef = useRef<{ x: number; y: number } | null>(null);
+  const milestonesByState = useMemo(() => groupMilestonesByBoardState(milestones), [milestones]);
+
+  const showMilestoneDragDisabledMessage = () => {
+    setDragErrorMessage(MILESTONE_DRAG_DISABLED_MESSAGE);
+    onMilestoneDragBlocked?.(MILESTONE_DRAG_DISABLED_MESSAGE);
+  };
+
+  const handleDisabledMilestoneDragStart = (milestone: DragEvent<HTMLButtonElement>) => {
+    milestone.preventDefault();
+    showMilestoneDragDisabledMessage();
+  };
+
+  const handleMilestonePointerDown = (milestone: PointerEvent<HTMLButtonElement>) => {
+    if (
+      milestone.button !== 0 ||
+      (milestone.pointerType !== "mouse" && milestone.pointerType !== "pen")
+    ) {
+      return;
+    }
+
+    milestoneDragAttemptStartRef.current = {
+      x: milestone.clientX,
+      y: milestone.clientY,
+    };
+  };
+
+  const handleMilestonePointerMove = (milestone: PointerEvent<HTMLButtonElement>) => {
+    const startPoint = milestoneDragAttemptStartRef.current;
+    if (!startPoint) {
+      return;
+    }
+
+    const deltaX = milestone.clientX - startPoint.x;
+    const deltaY = milestone.clientY - startPoint.y;
+    if (Math.hypot(deltaX, deltaY) < MILESTONE_DRAG_ATTEMPT_THRESHOLD_PX) {
+      return;
+    }
+
+    milestone.preventDefault();
+    milestoneDragAttemptStartRef.current = null;
+    showMilestoneDragDisabledMessage();
+  };
+
+  const clearMilestonePointerDragAttempt = () => {
+    milestoneDragAttemptStartRef.current = null;
+  };
 
   return (
-    <KanbanColumns
-      boardClassName="task-queue-board milestone-board"
-      columnBodyClassName="task-queue-board-column-body"
-      columnClassName="task-queue-board-column"
-      columnCountClassName="task-queue-board-column-count"
-      columnEmptyClassName="task-queue-board-column-empty"
-      columnHeaderClassName="task-queue-board-column-header"
-      style={boardStyle}
-      columns={TASK_QUEUE_BOARD_COLUMNS.map(({ state }) => {
-        const stateLabel = formatTaskQueueBoardState(state);
-
-        return {
+    <>
+      {dragErrorMessage ? (
+        <p className="form-error milestone-board-drag-error" role="alert">
+          {dragErrorMessage}
+        </p>
+      ) : null}
+      <KanbanColumns
+        boardClassName="task-queue-board milestone-board"
+        columnBodyClassName="task-queue-board-column-body"
+        columnClassName="task-queue-board-column"
+        columnCountClassName="task-queue-board-column-count"
+        columnEmptyClassName="task-queue-board-column-empty"
+        columnHeaderClassName="task-queue-board-column-header"
+        style={boardStyle}
+        columns={MILESTONE_STATUS_COLUMNS.map(({ label, state }) => ({
           state,
           count: milestonesByState[state].length,
           header: (
             <span className={getStatusPillClassName(state)}>
-              <span aria-hidden="true" className="task-queue-board-column-header-icon">
-                <MilestoneTaskStateIcon compact state={state} />
-              </span>
-              <span className="task-queue-board-column-header-label">{stateLabel}</span>
+              <span className="task-queue-board-column-header-label">{label}</span>
             </span>
           ),
-        };
-      })}
-      emptyLabel="No milestones"
-      itemsByState={milestonesByState}
-      renderItem={(milestone) => {
+        }))}
+        emptyLabel="No milestones"
+        getItemId={(milestone) => milestone.id}
+        itemsByState={milestonesByState}
+        renderItem={(milestone) => {
+        const milestoneTaskState = getMilestoneTaskBoardStateForMilestone(milestone, bootstrap);
+        const milestoneTaskStateLabel = formatTaskQueueBoardState(milestoneTaskState);
         const milestoneType = getMilestoneBoardType(milestone);
         const milestoneTypeStyle = getMilestoneTypeStyle(milestoneType);
         const milestoneTypeBadge = MILESTONE_TYPE_BADGE_LABELS[milestoneType];
         const milestoneStartLabel = formatMilestoneStartDateTime(milestone.startDateTime);
         const milestoneEndLabel = formatMilestoneEndDateTime(milestone.startDateTime, milestone.endDateTime);
+        const projectLabel = projectLabelByMilestoneId[milestone.id] ?? "All projects";
         const milestoneTypeBadgeStyle = {
           "--milestone-type-chip-bg": milestoneTypeStyle.chipBackground,
           "--milestone-type-chip-border": milestoneTypeStyle.columnBorder,
@@ -169,12 +231,21 @@ export function MilestoneKanbanBoard({
           <button
             className="task-queue-board-card editable-hover-target editable-hover-target-row"
             data-tutorial-target="edit-milestone-row"
+            draggable
             key={milestone.id}
             onClick={() => onOpenMilestone(milestone)}
+            onDragStart={handleDisabledMilestoneDragStart}
+            onPointerCancel={clearMilestonePointerDragAttempt}
+            onPointerDown={handleMilestonePointerDown}
+            onPointerLeave={clearMilestonePointerDragAttempt}
+            onPointerMove={handleMilestonePointerMove}
+            onPointerUp={clearMilestonePointerDragAttempt}
             type="button"
           >
             <div className="task-queue-board-card-header">
-              <strong>{milestone.title}</strong>
+              <strong>
+                <MilestoneSearchHighlight searchFilter={searchFilter} text={milestone.title} />
+              </strong>
               <span
                 style={{
                   alignItems: "flex-end",
@@ -194,7 +265,10 @@ export function MilestoneKanbanBoard({
               </span>
             </div>
             <small className="task-queue-board-card-summary">
-              {milestone.description.trim() || "No description"}
+              <MilestoneSearchHighlight
+                searchFilter={searchFilter}
+                text={milestone.description.trim() || "No description"}
+              />
             </small>
             <div className="task-queue-board-card-meta">
               <span
@@ -203,19 +277,28 @@ export function MilestoneKanbanBoard({
                 style={milestoneTypeBadgeStyle}
                 title={`Milestone type: ${milestoneTypeStyle.label}`}
               >
-                <span aria-hidden="true">{milestoneTypeBadge}</span>
+                <span aria-hidden="true">
+                  <MilestoneSearchHighlight searchFilter={searchFilter} text={milestoneTypeBadge} />
+                </span>
               </span>
               <span
                 className="task-queue-board-card-context-chip"
-                title={projectLabelByMilestoneId[milestone.id] ?? "All projects"}
+                title={projectLabel}
               >
-                {projectLabelByMilestoneId[milestone.id] ?? "All projects"}
+                <MilestoneSearchHighlight searchFilter={searchFilter} text={projectLabel} />
+              </span>
+              <span className={getStatusPillClassName(milestoneTaskState)}>
+                <span aria-hidden="true" className="task-queue-board-column-header-icon">
+                  <MilestoneTaskStateIcon compact state={milestoneTaskState} />
+                </span>
+                <span>{milestoneTaskStateLabel}</span>
               </span>
             </div>
             <EditableHoverIndicator className="task-queue-board-card-hover" />
           </button>
         );
       }}
-    />
+      />
+    </>
   );
 }

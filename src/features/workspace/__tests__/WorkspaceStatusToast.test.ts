@@ -3,7 +3,12 @@
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import { WorkspaceErrorPopup, WorkspaceInfoToast, WorkspaceToast } from "../WorkspaceStatusToast";
+import {
+  WorkspaceErrorPopup,
+  WorkspaceInfoToast,
+  WorkspaceToast,
+  WorkspaceToastStack,
+} from "../WorkspaceStatusToast";
 import { createPausableTimeout } from "../taskEditNoticeTimer";
 
 describe("WorkspaceInfoToast", () => {
@@ -47,6 +52,66 @@ describe("WorkspaceToast", () => {
 
     expect(markup).toContain('data-toast-tone="success"');
     expect(markup).toContain("Success");
+  });
+});
+
+describe("WorkspaceToastStack", () => {
+  it("renders notification history through the original toast stack", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(WorkspaceToastStack, {
+        items: [],
+        historyItems: [
+          {
+            id: "toast-history-1",
+            message: "Drivetrain wiring task updated",
+            onDismiss: () => {},
+            title: "Task saved",
+            tone: "success",
+          },
+        ],
+        isHistoryOpen: true,
+      }),
+    );
+
+    expect(markup).toContain("workspace-toast-layer");
+    expect(markup).toContain("workspace-toast-stack");
+    expect(markup).toContain("Drivetrain wiring task updated");
+    expect(markup).toContain('data-toast-auto-dismiss="false"');
+    expect(markup).not.toContain("sidebar-notification");
+  });
+
+  it("keeps live notification events auto-dismissed by default", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(WorkspaceToastStack, {
+        items: [
+          {
+            id: "toast-active-1",
+            message: "Milestone saved",
+            onDismiss: () => {},
+            title: "Edit Saved",
+            tone: "success",
+          },
+        ],
+      }),
+    );
+
+    expect(markup).toContain("Milestone saved");
+    expect(markup).toContain('data-toast-auto-dismiss="true"');
+  });
+
+  it("shows an empty queue card through the toast stack", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(WorkspaceToastStack, {
+        items: [],
+        historyItems: [],
+        isHistoryOpen: true,
+      }),
+    );
+
+    expect(markup).toContain("Notification queue");
+    expect(markup).toContain("No queued notifications.");
+    expect(markup).toContain('data-toast-auto-dismiss="false"');
+    expect(markup).not.toContain('aria-label="Dismiss toast"');
   });
 });
 

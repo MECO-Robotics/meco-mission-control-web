@@ -6,22 +6,6 @@ on:
     branches:
       - development
       - main
-    paths:
-      - ".github/workflows/ci.yml"
-      - ".github/workflows/deploy-vps.yml"
-      - "deploy/**"
-      - "src/**"
-      - "public/**"
-      - "index.html"
-      - "package.json"
-      - "package-lock.json"
-      - "eslint.config.js"
-      - "tsconfig.json"
-      - "tsconfig.app.json"
-      - "tsconfig.node.json"
-      - "vite.config.ts"
-      - "jest.config.cjs"
-      - ".env.production.example"
   push:
     branches:
       - development
@@ -30,14 +14,20 @@ on:
       - "fix/**"
       - "hotfix/**"
     paths:
+      - "AGENTS.md"
       - ".github/workflows/ci.yml"
+      - ".github/workflows/codex-automerge.yml"
       - ".github/workflows/deploy-vps.yml"
       - "deploy/**"
+      - "docs/**"
+      - "README.md"
       - "src/**"
       - "public/**"
       - "index.html"
       - "package.json"
       - "package-lock.json"
+      - "scripts/organization-audit.mjs"
+      - "skills/**"
       - "eslint.config.js"
       - "tsconfig.json"
       - "tsconfig.app.json"
@@ -101,8 +91,44 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Enforce organization hard limits
+        run: npm run audit:organization:strict
+
       - name: Verify
+        env:
+          GH_TOKEN: ${{ secrets.MECO_PLATFORM_CONTRACT_READ_TOKEN }}
+          PLATFORM_BOOTSTRAP_CONTRACT_BRANCH: ${{ github.base_ref || (github.ref_name == 'main' && 'main') || 'development' }}
         run: npm run verify
+
+  organization-audit:
+    name: organization-audit
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run organization audit
+        run: npm run audit:organization
+
+      - name: Upload organization audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: organization-audit-${{ github.sha }}
+          path: |
+            .diagnostics/organization-audit/latest.json
+            .diagnostics/organization-audit/latest.md
+          if-no-files-found: warn
 
   snapshot-validate:
     name: snapshot-validate
@@ -165,7 +191,7 @@ jobs:
     steps:
       - name: Validate development integration health across all repos
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.MECO_PLATFORM_CONTRACT_READ_TOKEN }}
         run: |
           node <<'NODE'
           const owner = 'MECO-Robotics';
@@ -176,23 +202,26 @@ jobs:
             'meco-mission-control-mobile': ['ci-validate', 'snapshot-validate'],
           };
 
-          const token = process.env.GH_TOKEN;
+          const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
           if (!token) {
-            throw new Error('github.token is required for cross-repo validation.');
+            throw new Error('A GitHub token is required for cross-repo validation.');
           }
 
-          async function gh(path) {
+          async function gh(path, options = {}) {
             const response = await fetch(`https://api.github.com${path}`, {
               headers: {
                 Authorization: `Bearer ${token}`,
                 Accept: 'application/vnd.github+json',
                 'X-GitHub-Api-Version': '2022-11-28',
               },
+              ...options,
             });
 
             if (!response.ok) {
               const body = await response.text();
-              throw new Error(`GitHub API ${path} failed (${response.status}): ${body}`);
+              const error = new Error(`GitHub API ${path} failed (${response.status}): ${body}`);
+              error.status = response.status;
+              throw error;
             }
 
             return response.json();
@@ -233,9 +262,41 @@ jobs:
             };
           }
 
+          async function resolveBranchSha(owner, repo, branchRef) {
+            try {
+              const branch = await gh(`/repos/${owner}/${repo}/branches/${branchRef}`);
+              const sha = branch?.commit?.sha;
+              if (!sha) {
+                throw new Error(`Could not resolve HEAD SHA for ${branchRef} on ${owner}/${repo}.`);
+              }
+              return sha;
+            } catch (error) {
+              if (error.status !== 404 || branchRef === 'main') {
+                throw error;
+              }
+
+              const repoMetadata = await gh(`/repos/${owner}/${repo}`);
+              const fallbackBranch = repoMetadata?.default_branch;
+              if (!fallbackBranch || fallbackBranch === branchRef) {
+                throw error;
+              }
+
+              console.log(
+                `Using fallback branch ${fallbackBranch} for ${owner}/${repo} because ${branchRef} is unavailable.`,
+              );
+              const fallback = await gh(`/repos/${owner}/${repo}/branches/${fallbackBranch}`);
+              const sha = fallback?.commit?.sha;
+              if (!sha) {
+                throw new Error(`Could not resolve fallback HEAD SHA for ${owner}/${repo}@${fallbackBranch}.`);
+              }
+
+              return sha;
+            }
+          }
+
           async function findLatestSuccessfulCheckSha(owner, repo, branchRef, checksToRequire) {
-            const branch = await gh(`/repos/${owner}/${repo}/branches/${branchRef}`);
-            const headSha = branch?.commit?.sha;
+            const branchRefSha = await resolveBranchSha(owner, repo, branchRef);
+            const headSha = branchRefSha;
             if (!headSha) {
               throw new Error(`Could not resolve ${branchRef} HEAD SHA for ${owner}/${repo}.`);
             }
@@ -283,3 +344,53 @@ jobs:
             );
           }
           NODE
+
+  merge-requirements:
+    name: merge-requirements
+    if: always()
+    needs:
+      - branch-model
+      - ci-validate
+      - snapshot-validate
+      - cross-repo-production-gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluate dynamic merge requirements
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+          BRANCH_MODEL_RESULT: ${{ needs.branch-model.result }}
+          CI_VALIDATE_RESULT: ${{ needs.ci-validate.result }}
+          SNAPSHOT_VALIDATE_RESULT: ${{ needs.snapshot-validate.result }}
+          CROSS_REPO_PRODUCTION_GATE_RESULT: ${{ needs.cross-repo-production-gate.result }}
+        run: |
+          node <<'NODE'
+          const eventName = process.env.EVENT_NAME;
+          const baseRef = process.env.BASE_REF;
+
+          if (eventName !== 'pull_request') {
+            console.log(`merge-requirements is enforced for pull_request events; current event is ${eventName}.`);
+            process.exit(0);
+          }
+
+          const requiredChecks = [
+            ['branch-model', process.env.BRANCH_MODEL_RESULT],
+            ['ci-validate', process.env.CI_VALIDATE_RESULT],
+            ['snapshot-validate', process.env.SNAPSHOT_VALIDATE_RESULT],
+          ];
+
+          if (baseRef === 'main') {
+            requiredChecks.push(['cross-repo-production-gate', process.env.CROSS_REPO_PRODUCTION_GATE_RESULT]);
+          }
+
+          const failures = requiredChecks.filter(([, result]) => result !== 'success');
+
+          if (failures.length > 0) {
+            const summary = failures.map(([name, result]) => `${name}=${result}`).join(', ');
+            throw new Error(`Required merge checks did not pass: ${summary}`);
+          }
+
+          const enforced = requiredChecks.map(([name]) => name).join(', ');
+          console.log(`Required merge checks passed for ${baseRef}: ${enforced}`);
+          NODE
+

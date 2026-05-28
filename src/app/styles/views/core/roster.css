@@ -65,6 +65,21 @@
   padding: 0.8rem;
 }
 
+.roster-attendance-days {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.roster-attendance-day-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.roster-attendance-day-option {
+  min-width: 4rem;
+}
+
 .member-row {
   display: grid;
   grid-template-columns: 1fr auto;

@@ -108,8 +108,12 @@ export function AppTopbarNavigation({
           return !isAllProjectsView && !isNonRobotProject;
         }
 
+        if (subItem.id === "config-cad") {
+          return !isAllProjectsView && !isNonRobotProject;
+        }
+
         if (subItem.id === "config-part-mappings") {
-          return !isNonRobotProject;
+          return !isAllProjectsView && !isNonRobotProject;
         }
 
         if (subItem.id === "tasks-manufacturing") {

@@ -15,7 +15,10 @@ import {
   shellContentTaskActionKeys,
   shellFrameKeys,
   shellSidebarModelKeys,
+  shellSidebarCatalogActionKeys,
+  shellSidebarReportActionKeys,
   shellSidebarRosterActionKeys,
+  shellSidebarTaskActionKeys,
   shellTopbarModelKeys,
   shellTopbarRosterActionKeys,
   type AppWorkspaceShellContentController,
@@ -103,6 +106,9 @@ export function buildShellController(
     },
     sidebar: {
       ...pickFields(model, shellSidebarModelKeys),
+      ...pickFields(taskActions, shellSidebarTaskActionKeys),
+      ...pickFields(reportActions, shellSidebarReportActionKeys),
+      ...pickFields(catalogActions, shellSidebarCatalogActionKeys),
       ...pickFields(rosterActions, shellSidebarRosterActionKeys),
     },
     content: {

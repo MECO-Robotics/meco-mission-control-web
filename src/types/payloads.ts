@@ -2,10 +2,13 @@ import type {
   ArtifactKind,
   ArtifactStatus,
   MilestoneType,
+  MilestoneStatus,
   ManufacturingProcess,
   ManufacturingStatus,
   MaterialCategory,
+  MeetingType,
   MemberRole,
+  PlannedAttendanceDay,
   ProjectStatus,
   ProjectType,
   PurchaseStatus,
@@ -21,16 +24,29 @@ import type {
   TestResultStatus,
 } from "./common";
 import type { PartInstanceRecord as PartInstanceRecordType } from "./recordsInventory";
+import type { SubsystemLayoutView, SubsystemLayoutZone } from "./recordsOrganization";
 
 export interface MilestonePayload {
   title: string;
   type: MilestoneType;
+  status?: MilestoneStatus;
   startDateTime: string;
   endDateTime: string | null;
   isExternal: boolean;
   description: string;
   projectIds: string[];
   photoUrl?: string;
+}
+
+export interface MeetingPayload {
+  title: string;
+  meetingType: MeetingType;
+  seasonId?: string;
+  projectIds: string[];
+  startDateTime: string;
+  endDateTime?: string | null;
+  location: string;
+  description: string;
 }
 
 export interface ReportPayload {
@@ -136,6 +152,9 @@ export interface MemberPayload {
   elevated: boolean;
   disciplineId?: string | null;
   activeSeasonIds?: string[];
+  plannedWeeklyAttendanceHours: number;
+  plannedAttendanceDays: PlannedAttendanceDay[];
+  plannedAttendanceNotes: string;
 }
 
 export interface MemberCreatePayload extends MemberPayload {
@@ -212,6 +231,11 @@ export interface SubsystemPayload {
   responsibleEngineerId: string | null;
   mentorIds: string[];
   risks: string[];
+  layoutX?: number | null;
+  layoutY?: number | null;
+  layoutZone?: SubsystemLayoutZone | null;
+  layoutView?: SubsystemLayoutView | null;
+  sortOrder?: number | null;
 }
 
 export interface MechanismPayload {
@@ -248,6 +272,7 @@ export interface TaskBlockerDraft {
   blockerType: TaskBlockerType;
   blockerId: string | null;
   description: string;
+  isIntentPlaceholder?: boolean;
   severity: TaskBlockerSeverity;
 }
 

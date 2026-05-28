@@ -1,5 +1,6 @@
 import type { ArtifactRecord, ManufacturingItemRecord, MaterialRecord, PartDefinitionRecord, PartInstanceRecord, PurchaseItemRecord } from "./recordsInventory";
 import type {
+  AuditActionRecord,
   AttendanceRecord,
   EscalationRecord,
   MeetingRecord,
@@ -13,6 +14,13 @@ import type {
 } from "./recordsExecution";
 import type { DesignIterationRecord, QaFindingRecord, QaReportRecord, ReportFindingRecord, ReportRecord, RiskRecord, TestFindingRecord, TestResultRecord } from "./recordsReporting";
 import type { DisciplineRecord, MechanismRecord, MemberRecord, ProjectRecord, SeasonRecord, SubsystemRecord, WorkstreamRecord } from "./recordsOrganization";
+
+export interface FavoriteViewRecord {
+  id: string;
+  userKey: string;
+  viewId: string;
+  createdAt: string;
+}
 
 export interface BootstrapPayload {
   seasons: SeasonRecord[];
@@ -36,7 +44,7 @@ export interface BootstrapPayload {
   testResults: TestResultRecord[];
   qaFindings: QaFindingRecord[];
   testFindings: TestFindingRecord[];
-  designIterations: DesignIterationRecord[];
+  designIterations?: DesignIterationRecord[];
   risks: RiskRecord[];
   tasks: TaskRecord[];
   workLogs: WorkLogRecord[];
@@ -46,6 +54,8 @@ export interface BootstrapPayload {
   manufacturingItems: ManufacturingItemRecord[];
   qaReviews?: QaReviewRecord[];
   escalations?: EscalationRecord[];
+  actions?: AuditActionRecord[];
+  favoriteViews?: FavoriteViewRecord[];
 }
 
 export type PlatformBootstrapPayload = BootstrapPayload;

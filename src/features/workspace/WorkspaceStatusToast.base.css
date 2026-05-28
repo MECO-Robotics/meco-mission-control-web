@@ -140,6 +140,11 @@
   animation-play-state: paused;
 }
 
+.workspace-toast-card[data-toast-auto-dismiss="false"] .workspace-toast-accent-bar {
+  animation: none;
+  transform: scaleY(1);
+}
+
 .workspace-toast-dismiss:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--toast-accent) 42%, white);
   outline-offset: 1px;

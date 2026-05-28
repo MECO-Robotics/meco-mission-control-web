@@ -197,6 +197,7 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
             subsystemColumnIndex={subsystemColumnIndex}
             subsystemIndex={subsystemIndex}
             subsystemStickyLeft={subsystemStickyLeft}
+            rowIndex={1}
             statusIconColumnIndex={statusIconColumnIndex}
             statusIconColumnWidth={statusIconColumnWidth}
             statusIconStickyRight={statusIconStickyRight}
