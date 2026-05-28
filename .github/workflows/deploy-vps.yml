@@ -10,8 +10,6 @@ on:
   push:
     branches:
       - main
-    tags:
-      - "release-*"
     paths:
       - ".github/workflows/deploy-vps.yml"
       - "src/**"
@@ -63,15 +61,13 @@ jobs:
           let deploySource = null;
           if (ref === 'refs/heads/main') {
             deploySource = 'main';
-          } else if (ref.startsWith('refs/tags/release-')) {
-            deploySource = 'release-tag';
           } else if (manifestText.length > 0) {
             deploySource = 'release-manifest';
           }
 
           if (!deploySource) {
             throw new Error(
-              `Production deploy is allowed only from main, release-* tags, or a release manifest. Got event=${eventName}, ref=${ref}.`,
+              `Production deploy is allowed only from main or a release manifest. Got event=${eventName}, ref=${ref}.`,
             );
           }
 
