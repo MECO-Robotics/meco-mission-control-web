@@ -163,13 +163,13 @@ On Windows, assume PowerShell 5.1 semantics unless proven otherwise.
   * `hotfix/*`
 * Protected branch requirements:
   * GitHub branch protection must require the stable `merge-requirements` check instead of individual workflow jobs that can be skipped or absent.
-  * `merge-requirements` dynamically enforces `branch-model`, `ci-validate`, and `snapshot-validate` for PRs into `development`.
+  * `merge-requirements` dynamically enforces `branch-model`, `ci-validate`, and `snapshot-validate` for PRs into `development`; non-PR runs must not satisfy this check.
   * For PRs into `main`, `merge-requirements` also enforces `cross-repo-production-gate`.
   * Keep configured review counts, conversation resolution, linear history, and admin enforcement enabled on protected branches.
 * Production safety requirements:
   * Validate sanitized production-like snapshots before merge.
   * Enforce stricter cross-repo validation before `main` merges.
-  * Deploy production web only from `main`, `release-*` tags, or a release manifest.
+  * Deploy production web only from reviewed/protected `main`; optional release manifests must match the protected `main` SHA.
   * Create a VPS backup immediately before production deploy.
 * Do not introduce or rely on a permanent live staging environment. There is one production VPS.
 
