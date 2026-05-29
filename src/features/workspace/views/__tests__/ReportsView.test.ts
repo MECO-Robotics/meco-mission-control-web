@@ -50,6 +50,8 @@ const ACTIVE_TASK: TaskRecord = {
   status: "in-progress",
 };
 
+const QA_TASK_HELPER_COPY = "These tasks are waiting on QA review. Open a task to launch QA details.";
+
 const PAST_MILESTONE = {
   id: "milestone-past",
   title: "Past milestone",
@@ -98,6 +100,7 @@ describe("ReportsView", () => {
     expect(html).toContain("QA task");
     expect(html).toContain("Open task details");
     expect(html).not.toContain("Active task");
+    expect(html).not.toContain(QA_TASK_HELPER_COPY);
   });
 
   it("keeps QA card copy readable in dark mode", () => {

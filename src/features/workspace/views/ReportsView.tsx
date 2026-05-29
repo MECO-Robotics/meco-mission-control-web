@@ -69,9 +69,6 @@ function QaReportsView({
 
   return (
     <>
-      <p className="section-copy filter-copy">
-        These tasks are waiting on QA review. Open a task to launch QA details.
-      </p>
       <div className="summary-row" style={{ alignItems: "stretch" }}>
         {tasks.map((task) => (
           <article className="worklog-summary-card" key={task.id}>
