@@ -52,6 +52,7 @@ const ACTIVE_TASK: TaskRecord = {
 
 const QA_TASK_HELPER_COPY = "These tasks are waiting on QA review. Open a task to launch QA details.";
 const MILESTONE_RESULTS_HELPER_COPY = "All past milestones are listed for milestone-result reporting.";
+const REPORTS_EYEBROW_PATTERN = /<p class="eyebrow"[\s\S]*?>[\s\S]*Reports[\s\S]*?<\/p>/;
 
 const PAST_MILESTONE = {
   id: "milestone-past",
@@ -132,5 +133,6 @@ describe("ReportsView", () => {
     expect(html).toContain(PAST_MILESTONE.title);
     expect(html).not.toContain(FUTURE_MILESTONE.title);
     expect(html).not.toContain(MILESTONE_RESULTS_HELPER_COPY);
+    expect(html).not.toMatch(REPORTS_EYEBROW_PATTERN);
   });
 });
