@@ -3,7 +3,6 @@
 @import url("./auth/form.css");
 @import url("./auth/feedback.css");
 @import url("./auth/status.css");
-@import url("./auth/layout.css");
 
 .workspace-shell-loading {
   grid-column: 1 / -1;

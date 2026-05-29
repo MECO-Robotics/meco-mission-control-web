@@ -79,10 +79,6 @@
   color: var(--meco-blue);
 }
 
-.page-shell.dark-mode .sidebar-subtab[data-active="true"] {
-  color: var(--official-white);
-}
-
 .sidebar-subtab:disabled,
 .sidebar-subtab[data-enabled="false"] {
   opacity: 0.48;
@@ -142,10 +138,6 @@
 .sidebar .tab[data-active="true"] .sidebar-tab-icon {
   background: rgba(22, 71, 142, 0.16);
   color: var(--meco-blue);
-}
-
-.page-shell.dark-mode .sidebar .tab[data-active="true"] .sidebar-tab-icon {
-  color: var(--official-white);
 }
 
 .sidebar-tab-count {

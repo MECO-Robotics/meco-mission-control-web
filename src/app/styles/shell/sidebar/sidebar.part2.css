@@ -181,7 +181,3 @@
   color: var(--meco-blue);
   border-color: rgba(22, 71, 142, 0.22);
 }
-
-.page-shell.dark-mode .sidebar .tab[data-active="true"] {
-  color: var(--official-white);
-}

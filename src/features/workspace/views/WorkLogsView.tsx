@@ -45,9 +45,9 @@ export function WorkLogsView({
   const isActivityBoardView = view === "activity" || view === "kanban";
   const activityBoardTitle = view === "kanban" ? "Work log Kanban" : "Activity";
   const activityBoardCopy =
-    view === "activity"
-      ? "Recent workspace activity across the current workspace scope."
-      : undefined;
+    view === "kanban"
+      ? "Recent work log activity grouped across the current workspace scope."
+      : "Recent workspace activity across the current workspace scope.";
   const activityGroupMode =
     view === "kanban" && workLogsView.activityGroupMode === "person"
       ? "subsystem"

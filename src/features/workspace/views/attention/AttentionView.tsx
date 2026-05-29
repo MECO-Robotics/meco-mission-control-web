@@ -175,6 +175,7 @@ export function AttentionView({
       <div className="panel-header compact-header">
         <div className="queue-section-header">
           <h2>Action Required</h2>
+          <small>Operational triage for immediate intervention</small>
         </div>
       </div>
 

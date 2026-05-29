@@ -1,6 +1,46 @@
 @import url("./selects/riskMetrics.css");
 
+@media (max-width: 820px) {
+  .auth-layout-backdrop {
+    width: min(620px, 92%);
+    opacity: 0.22;
+  }
+
+  .page-shell.auth-shell.dark-mode .auth-layout-backdrop {
+    opacity: 0.28;
+  }
+
+  .auth-intro {
+    display: none;
+  }
+
+  .auth-layout {
+    width: min(760px, 100%);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .auth-intro-mark {
+    width: clamp(150px, 34vw, 190px);
+  }
+
+  .auth-card-wide {
+    gap: 0.9rem;
+  }
+}
+
 @media (max-width: 720px) {
+  .page-shell.auth-shell {
+    padding: 0.75rem;
+  }
+
+  .auth-release-link {
+    width: 100%;
+  }
+
+  .auth-form-actions .primary-action {
+    width: 100%;
+  }
+
   .app-topbar-search-slot {
     flex: 1 1 9rem;
     min-width: 7.5rem;

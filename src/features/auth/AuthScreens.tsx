@@ -1,4 +1,4 @@
-import { AuthIntroPanel, AuthStatusCard, DevBypassButton, GoogleAuthChip, MobileReleasePanel } from "./AuthScreenSections";
+import { AuthBackdrop, AuthIntroPanel, AuthStatusCard, DevBypassButton, GoogleAuthChip, MobileReleasePanel } from "./AuthScreenSections";
 import { detectMobileDevice } from "./authDevice";
 import { getSignInScreenCopy } from "./authCopy";
 import { EmailAuthPanel } from "./EmailAuthPanel";
@@ -36,6 +36,8 @@ export function SignInScreen({
       style={shellStyle}
     >
       <div className="auth-layout">
+        <AuthBackdrop className="auth-layout-backdrop" />
+
         <AuthIntroPanel
           isDarkMode={isDarkMode}
           onToggleDarkMode={onToggleDarkMode}

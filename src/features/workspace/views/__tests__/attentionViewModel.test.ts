@@ -194,20 +194,6 @@ describe("buildAttentionViewModel", () => {
     expect(markup).toContain('aria-label="Action required filters"');
   });
 
-  it("renders the action required header without the compact subtitle", () => {
-    const markup = renderToStaticMarkup(
-      React.createElement(AttentionView, {
-        activePersonFilter: [],
-        bootstrap: createBootstrap(),
-        onOpenRisk: jest.fn(),
-        onOpenTask: jest.fn(),
-      }),
-    );
-
-    expect(markup).toContain("Action Required");
-    expect(markup).not.toContain("Operational triage for immediate intervention");
-  });
-
   it("builds grouped summary cards and ranked action-now items", () => {
     const viewModel = buildAttentionViewModel({
       activePersonFilter: [],
