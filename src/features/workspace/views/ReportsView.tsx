@@ -104,9 +104,6 @@ function MilestoneResultsView({
 
   return (
     <>
-      <p className="section-copy filter-copy">
-        All past milestones are listed for milestone-result reporting.
-      </p>
       <div className="summary-row" style={{ alignItems: "stretch" }}>
         {milestones.map((milestone) => (
           <article className="worklog-summary-card" key={milestone.id}>
