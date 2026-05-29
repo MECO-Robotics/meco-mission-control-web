@@ -52,6 +52,21 @@ describe("AppSidebar sections", () => {
     expect(css).not.toMatch(/\.sidebar-quick-action::after\s*\{/);
   });
 
+  it("keeps the active Action Required subtab readable in dark mode", () => {
+    const sectionCss = readFileSync("src/app/styles/shell/sidebar/sidebar.part2.css", "utf8");
+    const css = readFileSync("src/app/styles/shell/sidebar/sidebar.part3.css", "utf8");
+
+    expect(sectionCss).toMatch(
+      /\.page-shell\.dark-mode\s+\.sidebar\s+\.tab\[data-active="true"\]\s*\{[\s\S]*color:\s*var\(--official-white\);/,
+    );
+    expect(css).toMatch(
+      /\.page-shell\.dark-mode\s+\.sidebar-subtab\[data-active="true"\]\s*\{[\s\S]*color:\s*var\(--official-white\);/,
+    );
+    expect(css).toMatch(
+      /\.page-shell\.dark-mode\s+\.sidebar\s+\.tab\[data-active="true"\]\s+\.sidebar-tab-icon\s*\{[\s\S]*color:\s*var\(--official-white\);/,
+    );
+  });
+
   it("renders the Reports section with requested report subtabs", () => {
     const markup = renderSidebar([
       {

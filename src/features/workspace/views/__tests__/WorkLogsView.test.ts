@@ -191,7 +191,7 @@ describe("WorkLogsView", () => {
     });
 
     expect(html).toContain("Work log Kanban");
-    expect(html).toContain("Recent work log activity");
+    expect(html).not.toContain("Recent work log activity grouped across the current workspace scope.");
     expect(html).toContain("Group: Subsystem");
     expect(html).toContain('aria-label="Group Kanban work logs"');
     expect(html).toContain("group-kanban-worklogs-subsystem");

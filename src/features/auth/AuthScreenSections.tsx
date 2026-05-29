@@ -1,7 +1,6 @@
 import { type RefObject, useState } from "react";
 
 import {
-  MECO_LOGIN_BACKDROP_SRC,
   MECO_MAIN_LOGO_LIGHT_SRC,
   MECO_MAIN_LOGO_WHITE_SRC,
   MECO_MAIN_LOGO_HEIGHT,
@@ -62,23 +61,6 @@ export function AuthIntroPanel({
         </p>
       </div>
     </aside>
-  );
-}
-
-interface AuthBackdropProps {
-  className: string;
-}
-
-export function AuthBackdrop({ className }: AuthBackdropProps) {
-  return (
-    <img
-      alt=""
-      aria-hidden="true"
-      className={className}
-      fetchPriority="high"
-      loading="eager"
-      src={MECO_LOGIN_BACKDROP_SRC}
-    />
   );
 }
 
@@ -205,7 +187,7 @@ export function DevBypassButton({
         </button>
       </div>
       <button
-        className="secondary-action"
+        className="secondary-action auth-dev-bypass-submit"
         disabled={isSigningIn}
         onClick={() => {
           void onDevBypassSignIn(devRole);

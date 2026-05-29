@@ -64,6 +64,7 @@
 
 .auth-layout {
   position: relative;
+  isolation: isolate;
   z-index: 1;
   width: min(1020px, 100%);
   display: grid;
@@ -74,17 +75,35 @@
 }
 
 .auth-layout-dev-bypass-row {
+  position: relative;
+  z-index: 1;
   grid-column: 1 / -1;
   display: flex;
   justify-content: center;
   width: 100%;
+  margin-top: clamp(0.25rem, 1vw, 0.55rem);
+}
+
+.auth-dev-bypass {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.42rem;
+  border: 1px solid rgba(15, 28, 52, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .auth-dev-bypass-role-switch {
   display: inline-flex;
   justify-content: center;
   gap: 0.6rem;
-  margin-bottom: 0.7rem;
+  margin-bottom: 0;
 }
 
 .auth-dev-bypass-role-toggle {
@@ -97,21 +116,8 @@
   color: var(--official-white);
 }
 
-.auth-layout-backdrop {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: min(760px, 84%);
-  max-width: none;
-  height: auto;
-  object-fit: contain;
-  object-position: center;
-  transform: translate(-50%, -50%);
-  opacity: 0.28;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.page-shell.auth-shell.dark-mode .auth-layout-backdrop {
-  opacity: 0.34;
+.page-shell.auth-shell.dark-mode .auth-dev-bypass {
+  border-color: rgba(148, 163, 184, 0.24);
+  background: rgba(15, 23, 42, 0.72);
+  box-shadow: 0 14px 36px rgba(2, 6, 23, 0.36);
 }

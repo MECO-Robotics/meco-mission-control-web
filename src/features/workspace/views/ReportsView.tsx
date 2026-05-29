@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MilestoneRecord, TaskRecord } from "@/types/recordsExecution";
-import { IconPlus, IconReports } from "@/components/shared/Icons";
+import { IconPlus } from "@/components/shared/Icons";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { type ReportsViewTab } from "@/lib/workspaceNavigation";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
@@ -69,9 +69,6 @@ function QaReportsView({
 
   return (
     <>
-      <p className="section-copy filter-copy">
-        These tasks are waiting on QA review. Open a task to launch QA details.
-      </p>
       <div className="summary-row" style={{ alignItems: "stretch" }}>
         {tasks.map((task) => (
           <article className="worklog-summary-card" key={task.id}>
@@ -107,9 +104,6 @@ function MilestoneResultsView({
 
   return (
     <>
-      <p className="section-copy filter-copy">
-        All past milestones are listed for milestone-result reporting.
-      </p>
       <div className="summary-row" style={{ alignItems: "stretch" }}>
         {milestones.map((milestone) => (
           <article className="worklog-summary-card" key={milestone.id}>
@@ -187,10 +181,6 @@ export function ReportsView({
 
       <div className="panel-header compact-header">
         <div className="queue-section-header">
-          <p className="eyebrow" style={{ display: "flex", alignItems: "center", gap: "0.45rem" }}>
-            <IconReports />
-            Reports
-          </p>
           <h2>{view === "qa" ? "QA reports" : "Milestone results"}</h2>
         </div>
       </div>
