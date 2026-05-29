@@ -47,6 +47,10 @@
   font-size: 0.96rem;
 }
 
+.page-shell.dark-mode .worklog-summary-card .section-copy {
+  color: var(--text-title);
+}
+
 .worklog-summary-list {
   list-style: none;
   margin: 0;
