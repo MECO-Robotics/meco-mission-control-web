@@ -6,8 +6,9 @@ import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 
 jest.mock("@/lib/branding", () => ({
-  MECO_COMPACT_TEAM_LOGO_SIZE: 48,
+  MECO_COMPACT_TEAM_LOGO_HEIGHT: 50,
   MECO_COMPACT_TEAM_LOGO_SRC: "/team-logo.png",
+  MECO_COMPACT_TEAM_LOGO_WIDTH: 48,
   MECO_COMPACT_TEAM_LOGO_WHITE_SRC: "/team-logo-white.png",
   MECO_MAIN_LOGO_HEIGHT: 40,
   MECO_MAIN_LOGO_LIGHT_SRC: "/logo-light.png",
@@ -71,7 +72,7 @@ describe("AppTopbar", () => {
 
     expect(markup).toContain('alt="MECO compact team logo"');
     expect(markup).toContain('data-logo-variant="compact"');
-    expect(markup).toContain('height="48"');
+    expect(markup).toContain('height="50"');
     expect(markup).toContain('width="48"');
     expect(markup).toContain('src="/team-logo.png"');
   });
