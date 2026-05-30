@@ -17,7 +17,6 @@ import {
   type EmailCodeDeliveryResponse,
   type GoogleCredentialResponse,
   type SessionUser,
-  type DevBypassRole,
 } from "@/lib/auth/types";
 import { signOutFromGoogle } from "@/app/hooks/auth/useAppAuthGoogleIdentity";
 import { toErrorMessage } from "@/lib/appUtils/common";
@@ -32,7 +31,7 @@ interface UseAppAuthSessionActionsArgs {
 export interface UseAppAuthSessionActionsResult {
   clearAuthMessage: () => void;
   expireSession: (message: string) => void;
-  handleDevBypassSignIn: (role?: DevBypassRole) => Promise<void>;
+  handleDevBypassSignIn: () => Promise<void>;
   handleGoogleCredential: (response: GoogleCredentialResponse) => Promise<void>;
   handleRequestEmailCode: (email: string) => Promise<EmailCodeDeliveryResponse>;
   handleSignOut: () => void;
@@ -139,12 +138,12 @@ export function useAppAuthSessionActions({
     [setAuthMessage, setIsSigningIn, setSessionUser],
   );
 
-  const handleDevBypassSignIn = useCallback(async (role: DevBypassRole = "student") => {
+  const handleDevBypassSignIn = useCallback(async () => {
     setIsSigningIn(true);
     setAuthMessage(null);
 
     try {
-      const session = await requestDevBypassSignIn(role);
+      const session = await requestDevBypassSignIn();
       storeSignedInSession(session, setSessionUser);
     } catch (error) {
       clearStoredSessionToken();
