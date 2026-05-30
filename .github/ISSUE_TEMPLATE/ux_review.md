@@ -38,7 +38,7 @@ What is the expected user outcome?
 ## Validation
 
 - [ ] Visual QA completed at target breakpoints.
-- [ ] `npm.cmd run verify` run, or reason not applicable:
+- [ ] `npm run verify` (`npm.cmd run verify` on Windows) run, or reason not applicable:
 - [ ] Relevant contract/API state confirmed in `meco-mission-control-platform`, if applicable:
 
 ## Risk and release notes

@@ -5,7 +5,7 @@
 
 ## Validation
 
-- [ ] `npm.cmd run verify`
+- [ ] `npm run verify` (`npm.cmd run verify` on Windows)
 - [ ] Visual verification complete (screenshots/video attached)
 - [ ] `snapshot-validate` impact reviewed for any changed pages or assets
 - [ ] Release safety checks confirmed (`deploy-vps.yml` source constraints / rollback path understood)

@@ -45,6 +45,6 @@ Describe expected behavior and acceptance criteria.
 ## Validation plan
 
 - [ ] Add or update tests/verification steps:
-- [ ] Run `npm.cmd run verify` before review.
+- [ ] Run `npm run verify` (`npm.cmd run verify` on Windows) before review.
 - [ ] Include visual verification artifacts for changed screens.
 - [ ] Note any snapshot-validate / release-safety concern.

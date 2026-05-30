@@ -40,7 +40,7 @@ Shortly describe the bug and where it appears.
 
 - [ ] I reproduced on `development`.
 - [ ] I can point to the expected API/contract path (`meco-mission-control-platform` route/schema).
-- [ ] I ran `npm.cmd run verify` before submitting, or noted why not:
+- [ ] I ran `npm run verify` (`npm.cmd run verify` on Windows) before submitting, or noted why not:
 - [ ] Visual confirmation (screenshot/video) attached for UI issues.
 
 ## Risk and rollback notes
