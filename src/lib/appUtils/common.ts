@@ -1,6 +1,17 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { normalizeEmail, uniqueIds } from "./internal";
 
+const SHORT_DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
+  month: "short",
+  day: "numeric",
+});
+
+const USD_CURRENCY_FORMATTER = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 0,
+});
+
 export function toErrorMessage(error: unknown) {
   if (error instanceof Error) return error.message;
   return "Something went wrong while checking your session.";
@@ -17,19 +28,12 @@ export function getDefaultSubsystemId(bootstrap: BootstrapPayload) {
 }
 
 export function formatDate(value: string) {
-  return new Date(`${value}T00:00:00`).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-  });
+  return SHORT_DATE_FORMATTER.format(new Date(`${value}T00:00:00`));
 }
 
 export function formatCurrency(value: number | undefined) {
   if (typeof value !== "number") return "Pending";
-  return new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(value);
+  return USD_CURRENCY_FORMATTER.format(value);
 }
 
 export function dateDiffInDays(start: string, end: string) {
