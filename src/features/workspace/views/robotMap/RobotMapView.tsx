@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
@@ -39,8 +39,7 @@ interface RobotMapViewProps {
 const REFERENCE_IMAGE_STORAGE_ERROR_MESSAGE =
   "Image loaded for this session, but local browser storage is unavailable.";
 
-function buildReferenceImageStorageKey(bootstrap: BootstrapPayload) {
-  const primaryProjectId = bootstrap.projects[0]?.id ?? "default";
+function buildReferenceImageStorageKey(primaryProjectId: string) {
   return `robot-config-reference-image:${primaryProjectId}`;
 }
 
@@ -84,7 +83,11 @@ export function RobotMapView({
   const [referenceImageStorageNotice, setReferenceImageStorageNotice] = useState<string | null>(null);
   const layoutPersistVersionBySubsystemIdRef = useRef<Record<string, number>>({});
 
-  const referenceImageStorageKey = useMemo(() => buildReferenceImageStorageKey(bootstrap), [bootstrap]);
+  const primaryProjectId = bootstrap.projects[0]?.id ?? "default";
+  const referenceImageStorageKey = useMemo(
+    () => buildReferenceImageStorageKey(primaryProjectId),
+    [primaryProjectId],
+  );
   const viewModel = useMemo(() => buildRobotConfigurationViewModel(bootstrap, search), [bootstrap, search]);
 
   useEffect(() => {
@@ -136,15 +139,20 @@ export function RobotMapView({
     }
   }, [selectedSubsystemId, subsystems]);
 
-  const selectedSubsystem =
-    selectedSubsystemId ? subsystems.find((subsystem) => subsystem.id === selectedSubsystemId) ?? null : null;
+  const selectedSubsystem = useMemo(
+    () => (selectedSubsystemId ? subsystems.find((subsystem) => subsystem.id === selectedSubsystemId) ?? null : null),
+    [selectedSubsystemId, subsystems],
+  );
 
-  const applyLayoutDraft = (subsystemId: string, layout: SubsystemLayoutFields) => {
+  const applyLayoutDraft = useCallback((subsystemId: string, layout: SubsystemLayoutFields) => {
     setLayoutDraftBySubsystemId((current) => ({
       ...current,
       [subsystemId]: layout,
     }));
-  };
+  }, []);
+  const toggleLayoutEdit = useCallback(() => {
+    setIsLayoutEditEnabled((current) => !current);
+  }, []);
 
   const buildRollbackLayouts = (subsystemIds: string[]) => {
     const rollbackLayouts: Record<string, SubsystemLayoutFields> = {};
@@ -264,7 +272,7 @@ export function RobotMapView({
                 onReferenceImageSelected={(file) => void handleReferenceImageSelected(file)}
                 onResetLayout={handleResetLayout}
                 onSelectSubsystem={setSelectedSubsystemId}
-                onToggleLayoutEdit={() => setIsLayoutEditEnabled((current) => !current)}
+                onToggleLayoutEdit={toggleLayoutEdit}
                 referenceImageUrl={referenceImageUrl}
                 referenceImageStorageNotice={referenceImageStorageNotice}
                 selectedSubsystemId={selectedSubsystemId}
