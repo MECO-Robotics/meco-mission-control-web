@@ -57,7 +57,7 @@ export function AuthIntroPanel({
         <h1>FRC PM &amp; PLM</h1>
         <p className="auth-body auth-intro-description">
           <span>Plan. Build. Verify.</span>
-          <span>One system for tasks, parts, and QA.</span>
+          <span>Purpose-built for FRC teams to track parts, people, and robot readiness.</span>
         </p>
       </div>
     </aside>
