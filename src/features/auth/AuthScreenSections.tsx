@@ -54,7 +54,7 @@ export function AuthIntroPanel({
       </div>
 
       <div className="auth-intro-copy">
-        <h1>Mission Control</h1>
+        <h1>FRC PM &amp; PLM</h1>
         <p className="auth-body auth-intro-description">
           <span>Plan. Build. Verify.</span>
           <span>One system for tasks, parts, and QA.</span>
