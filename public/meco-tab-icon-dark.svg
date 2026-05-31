@@ -6,13 +6,13 @@
   role="img"
   aria-labelledby="title desc"
   xmlns="http://www.w3.org/2000/svg">
-  <title id="title">MECO Mission Control tab logo</title>
-  <desc id="desc">Compact MECO Mission Control mark on a rounded white square.</desc>
+  <title id="title">MECO Mission Control dark tab logo</title>
+  <desc id="desc">Compact MECO Mission Control mark on a rounded dark square.</desc>
   <style>
-    .tabBackground { fill:#ffffff; stroke:#d8e2f0; stroke-width:18; }
-    .boxStroke { fill:none; stroke:#061226; stroke-width:32; stroke-linecap:round; stroke-linejoin:round; }
+    .tabBackground { fill:#061226; stroke:#1c3151; stroke-width:18; }
+    .boxStroke { fill:none; stroke:#ffffff; stroke-width:32; stroke-linecap:round; stroke-linejoin:round; }
     .checkFill { fill:#ea1c2d; fill-opacity:1; fill-rule:nonzero; stroke:none; }
-    .rocketBody { fill:#061226; stroke:none; }
+    .rocketBody { fill:#ffffff; stroke:none; }
   </style>
   <rect class="tabBackground" x="16" y="16" width="480" height="480" rx="104" />
   <g transform="translate(58 48) scale(0.7645) translate(24 79.471)">
