@@ -130,7 +130,22 @@ function resolveBlockerLabel({
   return "Blocked: Waiting on dependency";
 }
 
-function cardMatchesSearch(card: WorkLogActiveBoardCard, query: string) {
+function resolveTaskSubsystemLabels(bootstrap: BootstrapPayload, task: TaskRecord | undefined) {
+  if (!task) {
+    return [];
+  }
+
+  const subsystemIds = new Set([task.subsystemId, ...task.subsystemIds].filter(Boolean));
+  return Array.from(subsystemIds)
+    .map((subsystemId) => bootstrap.subsystems.find((subsystem) => subsystem.id === subsystemId)?.name)
+    .filter(Boolean);
+}
+
+function cardMatchesSearch(
+  bootstrap: BootstrapPayload,
+  card: WorkLogActiveBoardCard,
+  query: string,
+) {
   if (!query) {
     return true;
   }
@@ -138,6 +153,8 @@ function cardMatchesSearch(card: WorkLogActiveBoardCard, query: string) {
   return [
     card.studentLabel,
     card.taskLabel,
+    card.task?.summary ?? "",
+    ...resolveTaskSubsystemLabels(bootstrap, card.task),
     card.elapsedLabel,
     card.recentActivityLabel,
     card.blockerLabel,
@@ -216,7 +233,7 @@ export function groupActiveWorklogCards({
       workLogs,
     });
 
-    if (cardMatchesSearch(card, query)) {
+    if (cardMatchesSearch(bootstrap, card, query)) {
       itemsByState[card.state].push(card);
     }
   });

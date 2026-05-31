@@ -244,4 +244,61 @@ describe("workLogsActiveBoard", () => {
 
     expect(board.itemsByState.active.map((card) => card.taskLabel)).toEqual(["Arm gearbox"]);
   });
+
+  it("includes task summary and subsystem names in board search", () => {
+    const bootstrap = buildBootstrap({
+      subsystems: [
+        {
+          description: "",
+          id: "subsystem-drive",
+          isCore: true,
+          iteration: 1,
+          mentorIds: [],
+          name: "Drive",
+          parentSubsystemId: null,
+          projectId: "project-1",
+          responsibleEngineerId: null,
+          risks: [],
+        },
+      ],
+      tasks: [
+        buildTask({
+          id: "task-hidden-context",
+          subsystemId: "subsystem-drive",
+          subsystemIds: ["subsystem-drive"],
+          summary: "Tight clearance review",
+          title: "Gearbox mount",
+        }),
+      ],
+      workLogs: [
+        buildWorkLog({
+          id: "worklog-hidden-context",
+          notes: "Measured brackets",
+          taskId: "task-hidden-context",
+        }),
+      ],
+    });
+
+    const membersById = {
+      "student-1": student,
+      "student-2": secondStudent,
+    };
+
+    expect(
+      groupActiveWorklogCards({
+        activePersonFilter: [],
+        bootstrap,
+        membersById,
+        search: "drive",
+      }).itemsByState.active.map((card) => card.taskLabel),
+    ).toEqual(["Gearbox mount"]);
+    expect(
+      groupActiveWorklogCards({
+        activePersonFilter: [],
+        bootstrap,
+        membersById,
+        search: "clearance",
+      }).itemsByState.active.map((card) => card.taskLabel),
+    ).toEqual(["Gearbox mount"]);
+  });
 });
