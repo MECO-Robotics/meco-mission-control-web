@@ -19,6 +19,7 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     ...state,
     ...derived,
   });
+  const { loadWorkspace } = loader;
   const didAutoLoadWorkspaceRef = useRef(false);
 
   useEffect(() => {
@@ -36,9 +37,9 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     }
 
     didAutoLoadWorkspaceRef.current = true;
-    void loader.loadWorkspace();
+    void loadWorkspace();
   }, [
-    loader.loadWorkspace,
+    loadWorkspace,
     state.authBooting,
     state.enforcedAuthConfig,
     state.sessionUser,
