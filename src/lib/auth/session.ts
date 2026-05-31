@@ -2,7 +2,6 @@ import type {
   EmailCodeDeliveryResponse,
   SessionResponse,
 } from "./types";
-import type { DevBypassRole } from "./types";
 import {
   fetchCurrentUser,
   isApiErrorLike,
@@ -27,8 +26,8 @@ export function verifyEmailSignInCode(email: string, code: string) {
   });
 }
 
-export function requestDevBypassSignIn(role: DevBypassRole = "student") {
-  return postJson<SessionResponse>("/auth/dev-bypass", { role });
+export function requestDevBypassSignIn() {
+  return postJson<SessionResponse>("/auth/dev-bypass", {});
 }
 
 export async function validateSession(): Promise<boolean> {

@@ -109,6 +109,28 @@ export function TaskQueueKanbanBoard({
       priority,
     })).filter((group) => group.tasks.length > 0);
   }, [focusedState, focusedTasks]);
+  const boardColumns = useMemo(
+    () =>
+      TASK_QUEUE_BOARD_COLUMNS.map(({ state }) => ({
+        state,
+        count: tasksByState[state].length,
+        header: (
+          <span className={getStatusPillClassName(state)}>
+            <span aria-hidden="true" className="task-queue-board-column-header-icon">
+              <TimelineTaskStatusLogo
+                compact
+                signal={TASK_QUEUE_BOARD_STATE_LOGO_SPECS[state].signal}
+                status={TASK_QUEUE_BOARD_STATE_LOGO_SPECS[state].status}
+              />
+            </span>
+            <span className="task-queue-board-column-header-label">
+              {formatTaskQueueBoardState(state)}
+            </span>
+          </span>
+        ),
+      })),
+    [tasksByState],
+  );
 
   const setTaskStatusDropPending = (taskId: string, isPending: boolean) => {
     const nextPendingIds = new Set(pendingTaskStatusDropIdsRef.current);
@@ -234,24 +256,7 @@ export function TaskQueueKanbanBoard({
       columnEmptyClassName="task-queue-board-column-empty"
       columnCountClassName="task-queue-board-column-count"
       columnHeaderClassName="task-queue-board-column-header"
-      columns={TASK_QUEUE_BOARD_COLUMNS.map(({ state }) => ({
-        state,
-        count: tasksByState[state].length,
-        header: (
-          <span className={getStatusPillClassName(state)}>
-            <span aria-hidden="true" className="task-queue-board-column-header-icon">
-              <TimelineTaskStatusLogo
-                compact
-                signal={TASK_QUEUE_BOARD_STATE_LOGO_SPECS[state].signal}
-                status={TASK_QUEUE_BOARD_STATE_LOGO_SPECS[state].status}
-              />
-            </span>
-            <span className="task-queue-board-column-header-label">
-              {formatTaskQueueBoardState(state)}
-            </span>
-          </span>
-        ),
-      }))}
+      columns={boardColumns}
       emptyLabel="No tasks"
       getItemDragLabel={(task) => task.title}
       getItemId={(task) => task.id}

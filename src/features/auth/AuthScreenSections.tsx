@@ -1,4 +1,4 @@
-import { type RefObject, useState } from "react";
+import { type RefObject } from "react";
 
 import {
   MECO_MAIN_LOGO_LIGHT_SRC,
@@ -54,10 +54,10 @@ export function AuthIntroPanel({
       </div>
 
       <div className="auth-intro-copy">
-        <h1>Mission Control</h1>
+        <h1>FRC PM &amp; PLM</h1>
         <p className="auth-body auth-intro-description">
           <span>Plan. Build. Verify.</span>
-          <span>One system for tasks, parts, and QA.</span>
+          <span>Purpose-built for FRC teams to track parts, people, and robot readiness.</span>
         </p>
       </div>
     </aside>
@@ -151,46 +151,20 @@ export function GoogleAuthChip({
 
 interface DevBypassButtonProps {
   isSigningIn: boolean;
-  onDevBypassSignIn: (role: "student" | "mentor") => Promise<void>;
+  onDevBypassSignIn: () => Promise<void>;
 }
 
 export function DevBypassButton({
   isSigningIn,
   onDevBypassSignIn,
 }: DevBypassButtonProps) {
-  const [devRole, setDevRole] = useState<"student" | "mentor">("student");
-
   return (
     <div className="auth-dev-bypass" aria-label="Development sign-in bypass">
-      <div aria-label="Local dev role switch" className="auth-dev-bypass-role-switch" role="group">
-        <button
-          aria-pressed={devRole === "student"}
-          className="secondary-action auth-dev-bypass-role-toggle"
-          disabled={isSigningIn}
-          onClick={() => {
-            setDevRole("student");
-          }}
-          type="button"
-        >
-          Student
-        </button>
-        <button
-          aria-pressed={devRole === "mentor"}
-          className="secondary-action auth-dev-bypass-role-toggle"
-          disabled={isSigningIn}
-          onClick={() => {
-            setDevRole("mentor");
-          }}
-          type="button"
-        >
-          Mentor
-        </button>
-      </div>
       <button
         className="secondary-action auth-dev-bypass-submit"
         disabled={isSigningIn}
         onClick={() => {
-          void onDevBypassSignIn(devRole);
+          void onDevBypassSignIn();
         }}
         type="button"
       >
