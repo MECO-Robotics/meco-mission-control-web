@@ -44,7 +44,7 @@ describe("appUtils selection helpers", () => {
     const bootstrap = createBootstrap();
 
     const member = resolveSignedInMemberForSessionUser(bootstrap.members, {
-      accountId: "local-dev-mentor",
+      accountId: "local-dev",
       email: "dev.mentor@meco.test",
       name: "Local Dev Mentor",
       picture: null,
@@ -54,7 +54,7 @@ describe("appUtils selection helpers", () => {
     expect(member).toMatchObject({
       elevated: true,
       email: "dev.mentor@meco.test",
-      id: "local-dev-mentor",
+      id: "local-dev",
       name: "Local Dev Mentor",
       role: "mentor",
       seasonId: "season-2026",

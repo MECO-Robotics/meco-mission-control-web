@@ -86,7 +86,8 @@ export function resolveSignedInMemberForSessionUser(
   }
 
   if (
-    !sessionUser?.accountId?.startsWith("local-dev-") ||
+    (sessionUser?.accountId !== "local-dev" &&
+      !sessionUser?.accountId?.startsWith("local-dev-")) ||
     !isLocalDevelopmentRole(sessionUser.role)
   ) {
     return null;
