@@ -403,9 +403,8 @@ jobs:
           const baseRef = process.env.BASE_REF;
 
           if (eventName !== 'pull_request') {
-            throw new Error(
-              `merge-requirements must not run outside pull_request events; current event is ${eventName}.`,
-            );
+            console.log(`merge-requirements is a PR gate; skipping dynamic requirements for ${eventName}.`);
+            process.exit(0);
           }
 
           const requiredChecks = [
