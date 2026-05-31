@@ -74,6 +74,7 @@ jobs:
       - name: Fetch platform bootstrap contract
         env:
           GH_TOKEN: ${{ secrets.MECO_PLATFORM_CONTRACT_READ_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
           PLATFORM_BOOTSTRAP_CONTRACT_BRANCH: ${{ github.base_ref || (github.ref_name == 'main' && 'main') || 'development' }}
           PLATFORM_BOOTSTRAP_CONTRACT_OUT: ${{ runner.temp }}/platform-bootstrap-contract.json
         run: |
@@ -81,13 +82,13 @@ jobs:
           const fs = require('node:fs/promises');
           const path = require('node:path');
 
-          const token = process.env.GH_TOKEN;
+          const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
           const branch = process.env.PLATFORM_BOOTSTRAP_CONTRACT_BRANCH;
           const outPath = process.env.PLATFORM_BOOTSTRAP_CONTRACT_OUT;
 
           async function main() {
             if (!token) {
-              throw new Error('MECO_PLATFORM_CONTRACT_READ_TOKEN is required to fetch the trusted platform contract.');
+              throw new Error('A GitHub token is required to fetch the trusted platform contract.');
             }
 
             const remoteBranchRef = encodeURIComponent(branch);
