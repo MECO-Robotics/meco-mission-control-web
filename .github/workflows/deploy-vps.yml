@@ -4,14 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       release_manifest:
-        description: Optional release-manifest JSON for coordinated cross-repo promotion
+        description: Optional release-manifest JSON; repository SHA must match protected main
         required: false
         type: string
   push:
     branches:
       - main
-    tags:
-      - "release-*"
     paths:
       - ".github/workflows/deploy-vps.yml"
       - "src/**"
@@ -45,12 +43,32 @@ jobs:
     outputs:
       deploy_source: ${{ steps.gate.outputs.deploy_source }}
     steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Validate deployment source
         id: gate
+        shell: bash
         env:
           RELEASE_MANIFEST: ${{ github.event.inputs.release_manifest || '' }}
           REPOSITORY_NAME: ${{ github.event.repository.name }}
         run: |
+          set -euo pipefail
+
+          if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
+            echo "Production deploys must run from protected main; got $GITHUB_REF." >&2
+            exit 1
+          fi
+
+          git fetch --no-tags origin main:refs/remotes/origin/main
+          main_sha="$(git rev-parse origin/main)"
+          if [[ "$GITHUB_SHA" != "$main_sha" ]]; then
+            echo "Production deploy SHA must match origin/main. Got $GITHUB_SHA, origin/main is $main_sha." >&2
+            exit 1
+          fi
+
           node <<'NODE'
           const fs = require('node:fs');
 
@@ -63,19 +81,15 @@ jobs:
           let deploySource = null;
           if (ref === 'refs/heads/main') {
             deploySource = 'main';
-          } else if (ref.startsWith('refs/tags/release-')) {
-            deploySource = 'release-tag';
-          } else if (manifestText.length > 0) {
-            deploySource = 'release-manifest';
           }
 
           if (!deploySource) {
             throw new Error(
-              `Production deploy is allowed only from main, release-* tags, or a release manifest. Got event=${eventName}, ref=${ref}.`,
+              `Production deploy is allowed only from protected main. Got event=${eventName}, ref=${ref}.`,
             );
           }
 
-          if (deploySource === 'release-manifest') {
+          if (manifestText.length > 0) {
             let manifest;
             try {
               manifest = JSON.parse(manifestText);
@@ -93,6 +107,8 @@ jobs:
                 `release manifest SHA mismatch for ${repoName}: expected ${sha} but got ${repoEntry.sha}.`,
               );
             }
+
+            deploySource = 'main-release-manifest';
           }
 
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `deploy_source=${deploySource}\n`);
