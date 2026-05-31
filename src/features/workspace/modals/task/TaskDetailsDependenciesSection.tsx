@@ -1,4 +1,4 @@
-import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskDependencyKind, TaskDependencyType } from "@/types/common";
 import type { TaskPayload } from "@/types/payloads";
@@ -49,19 +49,23 @@ export function TaskDetailsDependenciesSection({
     setInternalOpen(true);
   }, [activeTask.id]);
 
-  const dependencyDraftCount = taskDraft?.taskDependencies?.length ?? 0;
-
-  useEffect(() => {
+  const placeholderDependencyKey = useMemo(() => {
     if (!canInlineEdit) {
-      return;
+      return null;
     }
 
     const dependencyDrafts = taskDraft?.taskDependencies ?? [];
     const placeholderIndex = dependencyDrafts.findIndex((dependency) => !dependency.refId.trim());
-    if (placeholderIndex >= 0) {
-      setEditingDependencyKey(getDependencyKey(dependencyDrafts[placeholderIndex], placeholderIndex));
+    return placeholderIndex >= 0
+      ? getDependencyKey(dependencyDrafts[placeholderIndex], placeholderIndex)
+      : null;
+  }, [canInlineEdit, taskDraft?.taskDependencies]);
+
+  useEffect(() => {
+    if (placeholderDependencyKey !== null) {
+      setEditingDependencyKey(placeholderDependencyKey);
     }
-  }, [activeTask.id, canInlineEdit, dependencyDraftCount]);
+  }, [activeTask.id, placeholderDependencyKey]);
 
   const tasksById = Object.fromEntries(bootstrap.tasks.map((task) => [task.id, task] as const));
   const milestonesById = Object.fromEntries(
