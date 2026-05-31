@@ -380,7 +380,7 @@ jobs:
           NODE
 
   merge-requirements:
-    name: merge-requirements
+    name: ${{ github.event_name == 'pull_request' && 'merge-requirements' || 'merge-requirements-non-pr' }}
     if: always()
     needs:
       - branch-model
