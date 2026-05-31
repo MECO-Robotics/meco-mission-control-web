@@ -1,4 +1,4 @@
-import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskPayload } from "@/types/payloads";
 import { IconTrash } from "@/components/shared/Icons";
@@ -46,18 +46,22 @@ export function TaskDetailsBlockersSectionView(props: TaskDetailsBlockersSection
     setInternalOpen(true);
   }, [activeTaskId]);
 
-  const blockerDraftCount = taskDraft?.taskBlockers?.length ?? 0;
-
-  useEffect(() => {
+  const placeholderBlockerKey = useMemo(() => {
     if (!canInlineEdit) {
-      return;
+      return null;
     }
 
     const placeholderIndex = model.blockerDrafts.findIndex((blocker) => blocker.isIntentPlaceholder);
-    if (placeholderIndex >= 0) {
-      setEditingBlockerKey(model.blockerDrafts[placeholderIndex]?.id ?? `blocker-${placeholderIndex}`);
+    return placeholderIndex >= 0
+      ? model.blockerDrafts[placeholderIndex]?.id ?? `blocker-${placeholderIndex}`
+      : null;
+  }, [canInlineEdit, model.blockerDrafts]);
+
+  useEffect(() => {
+    if (placeholderBlockerKey !== null) {
+      setEditingBlockerKey(placeholderBlockerKey);
     }
-  }, [activeTaskId, blockerDraftCount, canInlineEdit]);
+  }, [activeTaskId, placeholderBlockerKey]);
 
   const isOpen = collapsibleOpen ?? internalOpen;
 
