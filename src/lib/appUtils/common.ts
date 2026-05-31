@@ -107,6 +107,18 @@ export function resolveSignedInMemberForSessionUser(
   };
 }
 
+export function getRosterLinkedMemberId(
+  members: BootstrapPayload["members"],
+  member: Pick<MemberRecord, "id"> | null | undefined,
+) {
+  const memberId = member?.id;
+  if (!memberId) {
+    return null;
+  }
+
+  return members.some((candidate) => candidate.id === memberId) ? memberId : null;
+}
+
 export function getMemberActiveSeasonIds(
   member: Pick<BootstrapPayload["members"][number], "seasonId" | "activeSeasonIds">,
 ) {

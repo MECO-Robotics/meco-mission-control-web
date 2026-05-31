@@ -4,6 +4,7 @@ import { buildEmptyArtifactPayload, buildEmptyWorkLogPayload } from "@/lib/appUt
 import { buildEmptyTaskPayload, getProjectTaskTargetLabel, setTaskPrimaryTargetSelection, toggleTaskTargetSelection } from "@/lib/appUtils/taskTargets";
 import {
   findMemberForSessionUser,
+  getRosterLinkedMemberId,
   resolveSignedInMemberForSessionUser,
 } from "@/lib/appUtils/common";
 import { createBootstrap } from "@/lib/appUtilsTestFixtures";
@@ -59,6 +60,13 @@ describe("appUtils selection helpers", () => {
       role: "mentor",
       seasonId: "season-2026",
     });
+  });
+
+  it("getRosterLinkedMemberId excludes synthetic local dev members from roster filters", () => {
+    const bootstrap = createBootstrap();
+
+    expect(getRosterLinkedMemberId(bootstrap.members, bootstrap.members[0])).toBe("lead-1");
+    expect(getRosterLinkedMemberId(bootstrap.members, { id: "local-dev" })).toBeNull();
   });
 
   it("toggleTaskTargetSelection treats workstream selection as a subsystem alias", () => {
