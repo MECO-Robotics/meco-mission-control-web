@@ -6,6 +6,8 @@ export interface AuthConfig {
   devBypassAvailable: boolean;
 }
 
+export type DevBypassRole = "student" | "mentor";
+
 export interface SessionUser {
   accountId: string;
   authProvider: "google" | "email";
@@ -13,6 +15,8 @@ export interface SessionUser {
   name: string;
   picture: string | null;
   hostedDomain: string;
+  role?: "student" | "lead" | "mentor" | "admin" | "external";
+  taskSubteamIds?: string[];
 }
 
 export interface SessionResponse {
