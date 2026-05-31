@@ -1,4 +1,4 @@
-import { type RefObject } from "react";
+import { type RefObject, useState } from "react";
 
 import {
   MECO_MAIN_LOGO_LIGHT_SRC,
@@ -8,6 +8,7 @@ import {
 } from "@/lib/branding";
 import { MOBILE_RELEASES_URL } from "./authDevice";
 import type { AuthStatusScreenProps } from "./authTypes";
+import type { DevBypassRole } from "@/lib/auth/types";
 
 interface AuthIntroPanelProps {
   isDarkMode: boolean;
@@ -151,20 +152,46 @@ export function GoogleAuthChip({
 
 interface DevBypassButtonProps {
   isSigningIn: boolean;
-  onDevBypassSignIn: () => Promise<void>;
+  onDevBypassSignIn: (role: DevBypassRole) => Promise<void>;
 }
 
 export function DevBypassButton({
   isSigningIn,
   onDevBypassSignIn,
 }: DevBypassButtonProps) {
+  const [devRole, setDevRole] = useState<DevBypassRole>("student");
+
   return (
     <div className="auth-dev-bypass" aria-label="Development sign-in bypass">
+      <div aria-label="Local dev role switch" className="auth-dev-bypass-role-switch" role="group">
+        <button
+          aria-pressed={devRole === "student"}
+          className="secondary-action auth-dev-bypass-role-toggle"
+          disabled={isSigningIn}
+          onClick={() => {
+            setDevRole("student");
+          }}
+          type="button"
+        >
+          Student
+        </button>
+        <button
+          aria-pressed={devRole === "mentor"}
+          className="secondary-action auth-dev-bypass-role-toggle"
+          disabled={isSigningIn}
+          onClick={() => {
+            setDevRole("mentor");
+          }}
+          type="button"
+        >
+          Mentor
+        </button>
+      </div>
       <button
         className="secondary-action auth-dev-bypass-submit"
         disabled={isSigningIn}
         onClick={() => {
-          void onDevBypassSignIn();
+          void onDevBypassSignIn(devRole);
         }}
         type="button"
       >

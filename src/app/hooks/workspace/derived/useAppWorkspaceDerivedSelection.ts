@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import { findMemberForSessionUser } from "@/lib/appUtils/common";
+import { resolveSignedInMemberForSessionUser } from "@/lib/appUtils/common";
 import { scopeBootstrapBySelection } from "@/app/state/workspaceBootstrapScope";
 import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
 
@@ -21,7 +21,7 @@ export function useAppWorkspaceDerivedSelection(state: AppWorkspaceState) {
   );
 
   const signedInMember = useMemo(
-    () => findMemberForSessionUser(scopedBootstrap.members, sessionUser),
+    () => resolveSignedInMemberForSessionUser(scopedBootstrap.members, sessionUser),
     [scopedBootstrap.members, sessionUser],
   );
 

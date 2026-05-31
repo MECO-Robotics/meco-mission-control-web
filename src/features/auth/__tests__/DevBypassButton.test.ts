@@ -14,7 +14,7 @@ jest.mock("@/lib/branding", () => ({
 import { DevBypassButton } from "../AuthScreenSections";
 
 describe("DevBypassButton", () => {
-  it("does not expose privileged role selection", () => {
+  it("exposes local dev student and mentor role choices", () => {
     const markup = renderToStaticMarkup(
       createElement(DevBypassButton, {
         isSigningIn: false,
@@ -24,7 +24,9 @@ describe("DevBypassButton", () => {
 
     expect(markup).toContain("Development sign-in bypass");
     expect(markup).toContain("Continue as local dev");
-    expect(markup).not.toContain("Local dev role switch");
-    expect(markup).not.toContain("Mentor");
+    expect(markup).toContain("Local dev role switch");
+    expect(markup).toContain("Student");
+    expect(markup).toContain("Mentor");
+    expect(markup).toContain("aria-pressed=\"true\"");
   });
 });
