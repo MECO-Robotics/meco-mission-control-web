@@ -6,35 +6,6 @@ on:
     branches:
       - development
       - main
-  push:
-    branches:
-      - development
-      - main
-      - "feature/**"
-      - "fix/**"
-      - "hotfix/**"
-    paths:
-      - "AGENTS.md"
-      - ".github/workflows/ci.yml"
-      - ".github/workflows/codex-automerge.yml"
-      - ".github/workflows/deploy-vps.yml"
-      - "deploy/**"
-      - "docs/**"
-      - "README.md"
-      - "src/**"
-      - "public/**"
-      - "index.html"
-      - "package.json"
-      - "package-lock.json"
-      - "scripts/organization-audit.mjs"
-      - "skills/**"
-      - "eslint.config.js"
-      - "tsconfig.json"
-      - "tsconfig.app.json"
-      - "tsconfig.node.json"
-      - "vite.config.ts"
-      - "jest.config.cjs"
-      - ".env.production.example"
 
 permissions:
   contents: read
