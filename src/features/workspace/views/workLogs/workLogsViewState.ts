@@ -12,6 +12,10 @@ import {
   type WorkLogActivityGroupMode,
 } from "./workLogsActivityGrouping";
 import {
+  groupActiveWorklogCards,
+  type WorkLogActiveBoard,
+} from "./workLogsActiveBoard";
+import {
   buildTaskById,
   buildWorkLogsSummaryState,
   filterAndSortWorkLogs,
@@ -49,6 +53,7 @@ export type WorkLogPaginationState = {
 };
 
 export type WorkLogsViewState = {
+  activeBoard: WorkLogActiveBoard;
   activityActions: AuditActionRecord[];
   activityGroupMode: WorkLogActivityGroupMode;
   activityPagination: ActivityPaginationState;
@@ -251,6 +256,16 @@ export function useWorkLogsViewState({
 
     return [...filteredActions].sort((left, right) => right.timestamp.localeCompare(left.timestamp));
   }, [activePersonFilter, bootstrap.actions, bootstrap.workLogs, membersById, search, subsystemsById, taskById]);
+  const activeBoard = useMemo(
+    () =>
+      groupActiveWorklogCards({
+        activePersonFilter,
+        bootstrap,
+        membersById,
+        search,
+      }),
+    [activePersonFilter, bootstrap, membersById, search],
+  );
 
   const workLogPagination = useWorkspacePagination<WorkLogRecord>(workLogs);
   const activityPagination = useWorkspacePagination<AuditActionRecord>(activityActions);
@@ -261,6 +276,7 @@ export function useWorkLogsViewState({
     subsystemFilter,
   ]);
   return {
+    activeBoard,
     activityActions,
     activityGroupMode,
     activityPagination,
