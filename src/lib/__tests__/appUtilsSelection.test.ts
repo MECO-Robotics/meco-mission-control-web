@@ -2,7 +2,10 @@
 
 import { buildEmptyArtifactPayload, buildEmptyWorkLogPayload } from "@/lib/appUtils/payloadBuilders";
 import { buildEmptyTaskPayload, getProjectTaskTargetLabel, setTaskPrimaryTargetSelection, toggleTaskTargetSelection } from "@/lib/appUtils/taskTargets";
-import { findMemberForSessionUser } from "@/lib/appUtils/common";
+import {
+  findMemberForSessionUser,
+  resolveSignedInMemberForSessionUser,
+} from "@/lib/appUtils/common";
 import { createBootstrap } from "@/lib/appUtilsTestFixtures";
 
 describe("appUtils selection helpers", () => {
@@ -35,6 +38,27 @@ describe("appUtils selection helpers", () => {
     });
 
     expect(member).toBeNull();
+  });
+
+  it("resolveSignedInMemberForSessionUser reflects local dev mentor sessions", () => {
+    const bootstrap = createBootstrap();
+
+    const member = resolveSignedInMemberForSessionUser(bootstrap.members, {
+      accountId: "local-dev-mentor",
+      email: "dev.mentor@meco.test",
+      name: "Local Dev Mentor",
+      picture: null,
+      role: "mentor",
+    });
+
+    expect(member).toMatchObject({
+      elevated: true,
+      email: "dev.mentor@meco.test",
+      id: "local-dev-mentor",
+      name: "Local Dev Mentor",
+      role: "mentor",
+      seasonId: "season-2026",
+    });
   });
 
   it("toggleTaskTargetSelection treats workstream selection as a subsystem alias", () => {

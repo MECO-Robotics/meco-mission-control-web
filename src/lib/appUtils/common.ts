@@ -1,4 +1,5 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MemberRecord } from "@/types/recordsOrganization";
 import { normalizeEmail, uniqueIds } from "./internal";
 
 const SHORT_DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
@@ -60,6 +61,49 @@ export function findMemberForSessionUser(
   }
 
   return members.find((member) => normalizeEmail(member.email) === sessionEmail) ?? null;
+}
+
+function isLocalDevelopmentRole(role: unknown): role is "student" | "mentor" {
+  return role === "student" || role === "mentor";
+}
+
+export function resolveSignedInMemberForSessionUser(
+  members: BootstrapPayload["members"],
+  sessionUser:
+    | {
+        accountId?: string;
+        email: string;
+        name?: string;
+        picture?: string | null;
+        role?: unknown;
+      }
+    | null
+    | undefined,
+): MemberRecord | null {
+  const rosterMember = findMemberForSessionUser(members, sessionUser);
+  if (rosterMember) {
+    return rosterMember;
+  }
+
+  if (
+    !sessionUser?.accountId?.startsWith("local-dev-") ||
+    !isLocalDevelopmentRole(sessionUser.role)
+  ) {
+    return null;
+  }
+
+  const activeSeasonIds = uniqueIds(members.flatMap((member) => getMemberActiveSeasonIds(member)));
+
+  return {
+    activeSeasonIds,
+    elevated: sessionUser.role === "mentor",
+    email: sessionUser.email,
+    id: sessionUser.accountId,
+    name: sessionUser.name ?? sessionUser.email,
+    photoUrl: sessionUser.picture ?? undefined,
+    role: sessionUser.role,
+    seasonId: activeSeasonIds[0] ?? members[0]?.seasonId ?? "",
+  };
 }
 
 export function getMemberActiveSeasonIds(

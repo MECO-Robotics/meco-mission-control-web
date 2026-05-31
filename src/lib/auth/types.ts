@@ -15,6 +15,8 @@ export interface SessionUser {
   name: string;
   picture: string | null;
   hostedDomain: string;
+  role?: "student" | "lead" | "mentor" | "admin" | "external";
+  taskSubteamIds?: string[];
 }
 
 export interface SessionResponse {
