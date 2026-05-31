@@ -406,7 +406,7 @@ jobs:
 
   merge-requirements:
     name: merge-requirements
-    if: ${{ github.event_name == 'pull_request' && always() }}
+    if: always()
     needs:
       - branch-model
       - ci-validate
