@@ -20,7 +20,7 @@ interface WorkLogsActivitySectionProps {
   actions: WorkLogsViewState["activityActions"];
   activityGroupMode: WorkLogActivityGroupMode;
   activityPagination: ActivityPaginationState;
-  description: string;
+  description?: string;
   groupingControls?: ReactNode;
   membersById: MembersById;
   openEditTaskModal: (task: TaskRecord) => void;
@@ -103,7 +103,7 @@ export function WorkLogsActivitySection({
 
   return (
     <>
-      <p className="section-copy filter-copy">{description}</p>
+      {description ? <p className="section-copy filter-copy">{description}</p> : null}
       {groupingControls ? (
         <div className="worklog-activity-board-controls">{groupingControls}</div>
       ) : null}

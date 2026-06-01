@@ -1,5 +1,14 @@
 ﻿import type { OnshapeOverview } from "../model/cadIntegrationTypes";
 
+import { useMemo } from "react";
+
+const EMPTY_ASSEMBLY_NODES: OnshapeOverview["assemblyNodes"] = [];
+const EMPTY_IMPORT_RUNS: OnshapeOverview["importRuns"] = [];
+const EMPTY_PART_DEFINITIONS: OnshapeOverview["partDefinitions"] = [];
+const EMPTY_PART_INSTANCES: OnshapeOverview["partInstances"] = [];
+const EMPTY_SNAPSHOTS: OnshapeOverview["snapshots"] = [];
+const EMPTY_WARNINGS: OnshapeOverview["warnings"] = [];
+
 function formatDate(value: string | null | undefined) {
   if (!value) {
     return "not yet";
@@ -7,27 +16,44 @@ function formatDate(value: string | null | undefined) {
   return new Date(value).toLocaleString();
 }
 
-function partName(overview: OnshapeOverview, partDefinitionId: string | null) {
+function partName(partDefinitionNamesById: ReadonlyMap<string, string>, partDefinitionId: string | null) {
   if (!partDefinitionId) {
     return "Unresolved part";
   }
-  return overview.partDefinitions.find((part) => part.id === partDefinitionId)?.name ?? "Unresolved part";
+  return partDefinitionNamesById.get(partDefinitionId) ?? "Unresolved part";
 }
 
-function parentAssemblyName(overview: OnshapeOverview, assemblyNodeId: string | null) {
+function parentAssemblyName(assemblyNodeNamesById: ReadonlyMap<string, string>, assemblyNodeId: string | null) {
   if (!assemblyNodeId) {
     return "No parent";
   }
-  return overview.assemblyNodes.find((node) => node.id === assemblyNodeId)?.name ?? "No parent";
+  return assemblyNodeNamesById.get(assemblyNodeId) ?? "No parent";
 }
 
 export function CadDataPanels({ overview }: { overview: OnshapeOverview | null }) {
-  const runs = overview?.importRuns ?? [];
-  const snapshots = overview?.snapshots ?? [];
-  const nodes = overview?.assemblyNodes ?? [];
-  const partDefinitions = overview?.partDefinitions ?? [];
-  const partInstances = overview?.partInstances ?? [];
-  const warnings = overview?.warnings ?? [];
+  const runs = overview?.importRuns ?? EMPTY_IMPORT_RUNS;
+  const snapshots = overview?.snapshots ?? EMPTY_SNAPSHOTS;
+  const nodes = overview?.assemblyNodes ?? EMPTY_ASSEMBLY_NODES;
+  const partDefinitions = overview?.partDefinitions ?? EMPTY_PART_DEFINITIONS;
+  const partInstances = overview?.partInstances ?? EMPTY_PART_INSTANCES;
+  const warnings = overview?.warnings ?? EMPTY_WARNINGS;
+  const partDefinitionNamesById = useMemo(
+    () => new Map(partDefinitions.map((part) => [part.id, part.name] as const)),
+    [partDefinitions],
+  );
+  const assemblyNodeNamesById = useMemo(
+    () => new Map(nodes.map((node) => [node.id, node.name] as const)),
+    [nodes],
+  );
+  const partInstanceCountsByDefinitionId = useMemo(() => {
+    const counts = new Map<string, number>();
+    partInstances.forEach((instance) => {
+      if (instance.cadPartDefinitionId) {
+        counts.set(instance.cadPartDefinitionId, (counts.get(instance.cadPartDefinitionId) ?? 0) + 1);
+      }
+    });
+    return counts;
+  }, [partInstances]);
 
   return (
     <div className="cad-data-stack">
@@ -97,7 +123,7 @@ export function CadDataPanels({ overview }: { overview: OnshapeOverview | null }
             <thead><tr><th>Part</th><th>Part number</th><th>Material</th><th>Config</th><th>Instances</th></tr></thead>
             <tbody>
               {partDefinitions.length ? partDefinitions.map((part) => {
-                const count = partInstances.filter((instance) => instance.cadPartDefinitionId === part.id).length;
+                const count = partInstanceCountsByDefinitionId.get(part.id) ?? 0;
                 return (
                   <tr key={part.id}>
                     <td>{part.name}</td><td>{part.partNumber ?? "missing"}</td>
@@ -121,8 +147,8 @@ export function CadDataPanels({ overview }: { overview: OnshapeOverview | null }
             <tbody>
               {partInstances.length ? partInstances.map((instance) => (
                 <tr key={instance.id}>
-                  <td><code>{instance.instancePath}</code></td><td>{partName(overview!, instance.cadPartDefinitionId)}</td>
-                  <td>{parentAssemblyName(overview!, instance.parentAssemblyNodeId)}</td><td>{instance.quantity}</td>
+                  <td><code>{instance.instancePath}</code></td><td>{partName(partDefinitionNamesById, instance.cadPartDefinitionId)}</td>
+                  <td>{parentAssemblyName(assemblyNodeNamesById, instance.parentAssemblyNodeId)}</td><td>{instance.quantity}</td>
                   <td>{instance.suppressed ? "yes" : "no"}</td>
                 </tr>
               )) : <tr><td colSpan={5}>No imported part instances yet.</td></tr>}

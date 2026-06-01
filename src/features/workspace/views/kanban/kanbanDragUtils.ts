@@ -16,6 +16,12 @@ interface KanbanPointerFallbackTarget {
   target: EventTarget | null;
 }
 
+export interface KanbanDragLookupEntry<TState extends string, TItem> {
+  id: string;
+  item: TItem;
+  sourceState: TState;
+}
+
 export function canStartKanbanPointerFallbackDrag({
   button,
   pointerType,
@@ -67,6 +73,34 @@ export function getKanbanDropStateAtPoint<TState extends string>(
     ?.closest("[data-kanban-drop-state]") as HTMLElement | null;
   const state = target?.getAttribute("data-kanban-drop-state");
   return state ? (state as TState) : null;
+}
+
+export function buildKanbanDragLookup<TState extends string, TItem>(
+  columns: readonly { state: TState }[],
+  getItemId: ((item: TItem) => string) | undefined,
+  itemsByState: Record<TState, readonly TItem[]>,
+) {
+  const lookup = new Map<string, KanbanDragLookupEntry<TState, TItem>>();
+  if (!getItemId) {
+    return lookup;
+  }
+
+  columns.forEach((column) => {
+    itemsByState[column.state].forEach((item) => {
+      const id = getItemId(item);
+      lookup.set(id, { id, item, sourceState: column.state });
+    });
+  });
+
+  return lookup;
+}
+
+export function getKanbanDragDataItem<TState extends string, TItem>(
+  dataTransfer: DataTransfer,
+  itemsById: ReadonlyMap<string, KanbanDragLookupEntry<TState, TItem>>,
+) {
+  const itemId = dataTransfer.getData(KANBAN_DRAG_DATA_TYPE);
+  return itemId ? itemsById.get(itemId) ?? null : null;
 }
 
 export function createOpaqueKanbanNativeDragImage(milestone: DragEvent<HTMLElement>) {

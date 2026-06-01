@@ -62,17 +62,36 @@ function DecisionControls({
             { value: "UNMAPPED", label: "Needs review" },
           ];
   const [draft, setDraft] = useState(() => buildDecisionDraft(node, targetKind));
+  const {
+    id,
+    resolvedComponentAssemblyId,
+    resolvedMechanismId,
+    resolvedPartDefinitionId,
+    resolvedSubsystemId,
+  } = node;
   const options = hierarchyTargetOptions(draft.targetKind, targets);
   const isConfirmDisabled = targetKindRequiresTarget(draft.targetKind) && !draft.targetId;
 
   useEffect(() => {
-    setDraft(buildDecisionDraft(node, targetKind));
+    setDraft({
+      parentMechanismId: resolvedMechanismId ?? "",
+      parentSubsystemId: resolvedSubsystemId ?? "",
+      targetId:
+        targetKind === "SUBSYSTEM"
+          ? resolvedSubsystemId ?? ""
+          : targetKind === "MECHANISM"
+            ? resolvedMechanismId ?? ""
+            : targetKind === "PART_DEFINITION"
+              ? resolvedPartDefinitionId ?? ""
+              : "",
+      targetKind,
+    });
   }, [
-    node.id,
-    node.resolvedComponentAssemblyId,
-    node.resolvedMechanismId,
-    node.resolvedPartDefinitionId,
-    node.resolvedSubsystemId,
+    id,
+    resolvedComponentAssemblyId,
+    resolvedMechanismId,
+    resolvedPartDefinitionId,
+    resolvedSubsystemId,
     targetKind,
   ]);
 

@@ -1,6 +1,8 @@
 import {
-  MECO_COMPACT_TEAM_LOGO_SIZE,
+  MECO_COMPACT_TEAM_LOGO_HEIGHT,
   MECO_COMPACT_TEAM_LOGO_SRC,
+  MECO_COMPACT_TEAM_LOGO_WIDTH,
+  MECO_COMPACT_TEAM_LOGO_WHITE_SRC,
   MECO_MAIN_LOGO_HEIGHT,
   MECO_MAIN_LOGO_LIGHT_SRC,
   MECO_MAIN_LOGO_WHITE_SRC,
@@ -29,10 +31,10 @@ export function AppTopbar({
   const topbarLogo = isSidebarCollapsed
     ? {
         alt: "MECO compact team logo",
-        height: MECO_COMPACT_TEAM_LOGO_SIZE,
-        src: MECO_COMPACT_TEAM_LOGO_SRC,
+        height: MECO_COMPACT_TEAM_LOGO_HEIGHT,
+        src: isDarkMode ? MECO_COMPACT_TEAM_LOGO_WHITE_SRC : MECO_COMPACT_TEAM_LOGO_SRC,
         variant: "compact",
-        width: MECO_COMPACT_TEAM_LOGO_SIZE,
+        width: MECO_COMPACT_TEAM_LOGO_WIDTH,
       }
     : {
         alt: "MECO main logo",

@@ -1,8 +1,8 @@
 import type {
+  DevBypassRole,
   EmailCodeDeliveryResponse,
   SessionResponse,
 } from "./types";
-import type { DevBypassRole } from "./types";
 import {
   fetchCurrentUser,
   isApiErrorLike,

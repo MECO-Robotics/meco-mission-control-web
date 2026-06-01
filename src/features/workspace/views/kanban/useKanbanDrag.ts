@@ -14,17 +14,16 @@ import type { KanbanColumnDefinition } from "./KanbanColumns";
 import {
   KANBAN_DRAG_DATA_TYPE,
   POINTER_DRAG_THRESHOLD_PX,
+  buildKanbanDragLookup,
   canStartKanbanPointerFallbackDrag,
   createOpaqueKanbanNativeDragImage,
+  getKanbanDragDataItem,
   getKanbanDropStateAtPoint,
   isKanbanPointerFallbackInteractiveTarget,
+  type KanbanDragLookupEntry,
 } from "./kanbanDragUtils";
 
-interface ActiveKanbanDrag<TState extends string, TItem> {
-  id: string;
-  item: TItem;
-  sourceState: TState;
-}
+type ActiveKanbanDrag<TState extends string, TItem> = KanbanDragLookupEntry<TState, TItem>;
 
 interface PendingKanbanPointerDrag<TState extends string, TItem>
   extends ActiveKanbanDrag<TState, TItem> {
@@ -70,21 +69,10 @@ export function useKanbanDrag<TState extends string, TItem>({
   const pendingPointerDragRef = useRef<PendingKanbanPointerDrag<TState, TItem> | null>(null);
   const suppressClickRef = useRef(false);
   const dragEnabled = Boolean(getItemId && onItemDrop);
-  const itemsById = useMemo(() => {
-    const lookup = new Map<string, ActiveKanbanDrag<TState, TItem>>();
-    if (!getItemId) {
-      return lookup;
-    }
-
-    columns.forEach((column) => {
-      itemsByState[column.state].forEach((item) => {
-        const id = getItemId(item);
-        lookup.set(id, { id, item, sourceState: column.state });
-      });
-    });
-
-    return lookup;
-  }, [columns, getItemId, itemsByState]);
+  const itemsById = useMemo(
+    () => buildKanbanDragLookup(columns, getItemId, itemsByState),
+    [columns, getItemId, itemsByState],
+  );
   const isDropStateEnabled = useCallback(
     (targetState: TState) => dragEnabled && (canDropState ? canDropState(targetState) : true),
     [canDropState, dragEnabled],
@@ -104,8 +92,7 @@ export function useKanbanDrag<TState extends string, TItem>({
       return fallback;
     }
 
-    const itemId = milestone.dataTransfer.getData(KANBAN_DRAG_DATA_TYPE);
-    return itemId ? itemsById.get(itemId) ?? null : null;
+    return getKanbanDragDataItem(milestone.dataTransfer, itemsById);
   };
   const getDropStateAtPoint = useCallback(
     (clientX: number, clientY: number) => getKanbanDropStateAtPoint<TState>(clientX, clientY),

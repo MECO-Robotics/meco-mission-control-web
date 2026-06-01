@@ -1,6 +1,7 @@
 import { useAppWorkspaceDerivedSelection } from "@/app/hooks/workspace/derived/useAppWorkspaceDerivedSelection";
 import { useAppWorkspaceDerivedWorkspace } from "@/app/hooks/workspace/derived/useAppWorkspaceDerivedWorkspace";
 import { buildAppWorkspaceDerivedStateSlice } from "@/app/hooks/workspace/derived/buildAppWorkspaceDerivedStateSlice";
+import { getRosterLinkedMemberId } from "@/lib/appUtils/common";
 import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
 
 export type AppWorkspaceDerived = ReturnType<typeof useAppWorkspaceDerived>;
@@ -9,19 +10,22 @@ export function useAppWorkspaceDerived(state: AppWorkspaceState) {
   const selection = useAppWorkspaceDerivedSelection(state);
   const workspace = useAppWorkspaceDerivedWorkspace(state, selection);
   const stateSlice = buildAppWorkspaceDerivedStateSlice(state);
+  const rosterLinkedSignedInMemberId = getRosterLinkedMemberId(
+    selection.scopedBootstrap.members,
+    selection.signedInMember,
+  );
 
   return {
     ...stateSlice,
     ...selection,
     ...workspace,
     isMyViewActive:
-      selection.signedInMember
+      rosterLinkedSignedInMemberId
         ? stateSlice.activePersonFilter.length === 1 &&
-          stateSlice.activePersonFilter[0] === selection.signedInMember.id
+          stateSlice.activePersonFilter[0] === rosterLinkedSignedInMemberId
         : stateSlice.isUnmatchedMyViewActive,
     toggleMyView: () => {
-      const signedInMemberId = selection.signedInMember?.id;
-      if (!signedInMemberId) {
+      if (!rosterLinkedSignedInMemberId) {
         const nextIsActive = !stateSlice.isUnmatchedMyViewActive;
         stateSlice.setActivePersonFilter([]);
         stateSlice.setIsUnmatchedMyViewActive(nextIsActive);
@@ -38,9 +42,9 @@ export function useAppWorkspaceDerived(state: AppWorkspaceState) {
       stateSlice.setIsUnmatchedMyViewActive(false);
       stateSlice.setDataMessage(null);
       stateSlice.setActivePersonFilter((current) =>
-        current.length === 1 && current[0] === signedInMemberId
+        current.length === 1 && current[0] === rosterLinkedSignedInMemberId
           ? []
-          : [signedInMemberId],
+          : [rosterLinkedSignedInMemberId],
       );
     },
   };

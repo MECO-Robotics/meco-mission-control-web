@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import type { AppWorkspaceLoaderModel } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
 import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
 import type { BootstrapPayload } from "@/types/bootstrap";
+import { getRosterLinkedMemberId } from "@/lib/appUtils/common";
 import {
   buildEditCanceledNotice,
   buildMilestoneEditSuccessNotice,
@@ -49,7 +50,12 @@ export function useAppWorkspaceLoaderActions(
   }, [state]);
 
   const toggleMyView = useCallback(() => {
-    if (!model.signedInMember) {
+    const rosterLinkedSignedInMemberId = getRosterLinkedMemberId(
+      model.scopedBootstrap.members,
+      model.signedInMember,
+    );
+
+    if (!rosterLinkedSignedInMemberId) {
       const nextIsActive = !state.isUnmatchedMyViewActive;
       state.setActivePersonFilter([]);
       state.setIsUnmatchedMyViewActive(nextIsActive);
@@ -66,11 +72,11 @@ export function useAppWorkspaceLoaderActions(
     state.setIsUnmatchedMyViewActive(false);
     state.setDataMessage(null);
     state.setActivePersonFilter((current) =>
-      current.length === 1 && current[0] === model.signedInMember?.id
+      current.length === 1 && current[0] === rosterLinkedSignedInMemberId
         ? []
-        : [model.signedInMember?.id ?? ""],
+        : [rosterLinkedSignedInMemberId],
     );
-  }, [model.signedInMember, state]);
+  }, [model.scopedBootstrap.members, model.signedInMember, state]);
 
   return {
     clearDataMessage,
