@@ -2,7 +2,11 @@
 
 import { buildEmptyArtifactPayload, buildEmptyWorkLogPayload } from "@/lib/appUtils/payloadBuilders";
 import { buildEmptyTaskPayload, getProjectTaskTargetLabel, setTaskPrimaryTargetSelection, toggleTaskTargetSelection } from "@/lib/appUtils/taskTargets";
-import { findMemberForSessionUser } from "@/lib/appUtils/common";
+import {
+  findMemberForSessionUser,
+  getRosterLinkedMemberId,
+  resolveSignedInMemberForSessionUser,
+} from "@/lib/appUtils/common";
 import { createBootstrap } from "@/lib/appUtilsTestFixtures";
 
 describe("appUtils selection helpers", () => {
@@ -35,6 +39,34 @@ describe("appUtils selection helpers", () => {
     });
 
     expect(member).toBeNull();
+  });
+
+  it("resolveSignedInMemberForSessionUser reflects local dev mentor sessions", () => {
+    const bootstrap = createBootstrap();
+
+    const member = resolveSignedInMemberForSessionUser(bootstrap.members, {
+      accountId: "local-dev",
+      email: "dev.mentor@meco.test",
+      name: "Local Dev Mentor",
+      picture: null,
+      role: "mentor",
+    });
+
+    expect(member).toMatchObject({
+      elevated: true,
+      email: "dev.mentor@meco.test",
+      id: "local-dev",
+      name: "Local Dev Mentor",
+      role: "mentor",
+      seasonId: "season-2026",
+    });
+  });
+
+  it("getRosterLinkedMemberId excludes synthetic local dev members from roster filters", () => {
+    const bootstrap = createBootstrap();
+
+    expect(getRosterLinkedMemberId(bootstrap.members, bootstrap.members[0])).toBe("lead-1");
+    expect(getRosterLinkedMemberId(bootstrap.members, { id: "local-dev" })).toBeNull();
   });
 
   it("toggleTaskTargetSelection treats workstream selection as a subsystem alias", () => {

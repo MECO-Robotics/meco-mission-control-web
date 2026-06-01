@@ -1,5 +1,6 @@
 /// <reference types="jest" />
 
+import { readFileSync } from "node:fs";
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
@@ -49,6 +50,10 @@ const ACTIVE_TASK: TaskRecord = {
   status: "in-progress",
 };
 
+const QA_TASK_HELPER_COPY = "These tasks are waiting on QA review. Open a task to launch QA details.";
+const MILESTONE_RESULTS_HELPER_COPY = "All past milestones are listed for milestone-result reporting.";
+const REPORTS_EYEBROW_PATTERN = /<p class="eyebrow"[\s\S]*?>[\s\S]*Reports[\s\S]*?<\/p>/;
+
 const PAST_MILESTONE = {
   id: "milestone-past",
   title: "Past milestone",
@@ -97,6 +102,15 @@ describe("ReportsView", () => {
     expect(html).toContain("QA task");
     expect(html).toContain("Open task details");
     expect(html).not.toContain("Active task");
+    expect(html).not.toContain(QA_TASK_HELPER_COPY);
+  });
+
+  it("keeps QA card copy readable in dark mode", () => {
+    const css = readFileSync("src/app/styles/shell/workspace/worklog-summary.css", "utf8");
+
+    expect(css).toMatch(
+      /\.page-shell\.dark-mode\s+\.worklog-summary-card\s+\.section-copy\s*\{[\s\S]*color:\s*var\(--text-title\);/,
+    );
   });
 
   it("lists only past milestones in Milestone Results view", () => {
@@ -118,5 +132,7 @@ describe("ReportsView", () => {
     expect(html).toContain("Milestone results");
     expect(html).toContain(PAST_MILESTONE.title);
     expect(html).not.toContain(FUTURE_MILESTONE.title);
+    expect(html).not.toContain(MILESTONE_RESULTS_HELPER_COPY);
+    expect(html).not.toMatch(REPORTS_EYEBROW_PATTERN);
   });
 });

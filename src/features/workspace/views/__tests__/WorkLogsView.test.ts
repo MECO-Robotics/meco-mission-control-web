@@ -141,7 +141,7 @@ describe("WorkLogsView", () => {
     expect(html).toContain("Created worklog Drive CAD");
   });
 
-  it("renders the activity board as the worklogs kanban view", () => {
+  it("renders the active worklog board as the worklogs kanban view", () => {
     const html = renderWorkLogsView("kanban", {
       tasks: [
         {
@@ -183,22 +183,41 @@ describe("WorkLogsView", () => {
           date: "2026-05-01",
           hours: 1.5,
           id: "worklog-1",
-          notes: "Finished first pass",
+          notes: "Need help with sensor bringup",
           participantIds: ["student-1"],
           taskId: "task-1",
         },
       ],
     });
 
-    expect(html).toContain("Work log Kanban");
-    expect(html).toContain("Recent work log activity");
-    expect(html).toContain("Group: Subsystem");
-    expect(html).toContain('aria-label="Group Kanban work logs"');
-    expect(html).toContain("group-kanban-worklogs-subsystem");
-    expect(html).toContain("group-kanban-worklogs-task");
-    expect(html).toContain("group-kanban-worklogs-action");
+    expect(html).toContain("Active worklog board");
+    expect(html).toContain("Active");
+    expect(html).toContain("Paused");
+    expect(html).toContain("Blocked");
+    expect(html).toContain("Waiting QA");
+    expect(html).toContain("Closed");
+    expect(html).toContain("Student One");
     expect(html).toContain("Drive CAD");
-    expect(html).toContain("Logged work on Drive CAD");
+    expect(html).toContain("1.5h elapsed");
+    expect(html).toContain("Recent: May 1 - Need help with sensor bringup");
+    expect(html).toContain("Need help");
+    expect(html).not.toContain("Group: Subsystem");
+    expect(html).not.toContain("Logged work on Drive CAD");
+  });
+
+  it("renders useful empty states on the active worklog board", () => {
+    const html = renderWorkLogsView("kanban");
+
+    expect(html).toContain("No active worklogs");
+    expect(html).toContain("In-progress task logs land here when students are actively working.");
+    expect(html).toContain("No paused worklogs");
+    expect(html).toContain("Paused project or not-started task logs land here until work resumes.");
+    expect(html).toContain("No blocked worklogs");
+    expect(html).toContain("Blocked task logs appear here when a blocker or dependency needs attention.");
+    expect(html).toContain("No QA worklogs");
+    expect(html).toContain("Logs for tasks waiting on mentor QA appear here.");
+    expect(html).toContain("No closed worklogs");
+    expect(html).toContain("Completed task logs land here after work is closed.");
   });
 
   it("falls back to work logs when audit actions are unavailable", () => {
