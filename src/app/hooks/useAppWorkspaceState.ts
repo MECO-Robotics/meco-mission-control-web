@@ -44,6 +44,7 @@ export function useAppWorkspaceState() {
   const [bootstrap, setBootstrap] = useState<BootstrapPayload>(EMPTY_BOOTSTRAP);
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [dataMessage, setDataMessage] = useState<string | null>(null);
+  const [isSignInScreenRequested, setIsSignInScreenRequested] = useState(false);
   const [taskEditNotices, setTaskEditNotices] = useState<WorkspaceToastNotice[]>([]);
   const [notificationHistory, setNotificationHistory] = useState<WorkspaceToastNotice[]>([]);
   const [isNotificationQueueOpen, setIsNotificationQueueOpen] = useState(false);
@@ -140,6 +141,22 @@ export function useAppWorkspaceState() {
     sessionUser,
   });
 
+  useEffect(() => {
+    if (sessionUser) {
+      setIsSignInScreenRequested(false);
+    }
+  }, [sessionUser]);
+
+  const requestSignIn = () => {
+    clearAuthMessage();
+    setIsSignInScreenRequested(true);
+  };
+
+  const returnToPublicDemo = () => {
+    clearAuthMessage();
+    setIsSignInScreenRequested(false);
+  };
+
   useAppWorkspaceGlobalEffects({
     isDarkMode,
     pageShellStyle,
@@ -173,6 +190,7 @@ export function useAppWorkspaceState() {
     isEmailAuthAvailable,
     isGoogleAuthAvailable,
     isLoadingData,
+    isSignInScreenRequested,
     isNotificationQueueOpen,
     isPublicDemoSession,
     isSigningIn,
@@ -180,6 +198,7 @@ export function useAppWorkspaceState() {
     isSidebarOverlay,
     manufacturingView,
     pageShellStyle,
+    requestSignIn,
     reportsView,
     rosterView,
     riskManagementView,
@@ -207,6 +226,7 @@ export function useAppWorkspaceState() {
     worklogsView,
     suppressNextAutoWorkspaceLoadRef,
     suppressNextAutoWorkspaceLoad,
+    returnToPublicDemo,
     enforcedAuthConfig,
     clearTaskEditNotices,
     notificationHistory,

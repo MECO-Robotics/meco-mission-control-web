@@ -31,6 +31,7 @@ import { useAppSidebarPopupState } from "./useAppSidebarPopupState";
 
 interface AppSidebarProps {
   activeTab: ViewTab;
+  canSignIn: boolean;
   favoriteViewIds: readonly NavigationSubItemId[];
   handleSignOut: () => void;
   items: import("@/lib/workspaceNavigation").NavigationItem[];
@@ -47,6 +48,7 @@ interface AppSidebarProps {
   onCreateSeason: () => void;
   onCreateTask: () => void;
   onRefreshWorkspace: () => void;
+  onSignIn: () => void;
   onSelectSeason: (seasonId: string | null) => void;
   onToggleMyView: () => void;
   onToggleNotificationQueue: () => void;
@@ -71,6 +73,7 @@ interface AppSidebarProps {
 
 export function AppSidebar({
   activeTab,
+  canSignIn,
   favoriteViewIds,
   handleSignOut,
   items,
@@ -87,6 +90,7 @@ export function AppSidebar({
   onCreateSeason,
   onCreateTask,
   onRefreshWorkspace,
+  onSignIn,
   onSelectSeason,
   onToggleMyView,
   onToggleNotificationQueue,
@@ -284,6 +288,7 @@ export function AppSidebar({
 
         <AppSidebarProjectFooter
           activeTab={activeTab}
+          canSignIn={canSignIn}
           canSignOut={sessionUser !== null}
           isDarkMode={isDarkMode}
           isCollapsed={isCollapsed}
@@ -294,6 +299,7 @@ export function AppSidebar({
           onHelpSelect={handleHelpSelect}
           onProjectTriggerClick={handleProjectTriggerClick}
           onRefreshWorkspace={onRefreshWorkspace}
+          onSignIn={onSignIn}
           onSignOut={handleSignOut}
           onToggleMyView={onToggleMyView}
           onToggleDarkMode={toggleDarkMode}

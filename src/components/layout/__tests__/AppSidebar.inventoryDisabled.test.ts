@@ -25,6 +25,7 @@ describe("AppSidebar inventory availability", () => {
     const markup = renderToStaticMarkup(
       React.createElement(AppSidebar, {
         activeTab: "inventory",
+        canSignIn: false,
         favoriteViewIds: [],
         handleSignOut: jest.fn(),
         inventoryView: "materials",
@@ -43,6 +44,7 @@ describe("AppSidebar inventory availability", () => {
         onCreateRobot: jest.fn(),
         onEditSelectedRobot: jest.fn(),
         onRefreshWorkspace: jest.fn(),
+        onSignIn: jest.fn(),
         onSelectSeason: jest.fn(),
         onSelectProject: jest.fn(),
         onSelectTarget: jest.fn(),

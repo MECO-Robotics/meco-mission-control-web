@@ -17,6 +17,7 @@ export function SignInScreen({
   isDarkMode = false,
   isSigningIn,
   onDevBypassSignIn,
+  onReturnToPublicDemo,
   onToggleDarkMode,
   onRequestEmailCode,
   onVerifyEmailCode,
@@ -81,6 +82,18 @@ export function SignInScreen({
               </>
             )}
           </div>
+
+          {onReturnToPublicDemo ? (
+            <div className="auth-form-actions">
+              <button
+                className="secondary-action"
+                onClick={onReturnToPublicDemo}
+                type="button"
+              >
+                Continue as demo
+              </button>
+            </div>
+          ) : null}
         </section>
 
         {signInConfig.devBypassAvailable && !isMobileDevice ? (
