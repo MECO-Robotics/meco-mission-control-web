@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import "@/app/App.css";
 import { useAppAuth } from "@/app/hooks/useAppAuth";
 import { useAppShell } from "@/app/hooks/useAppShell";
+import { isPublicDemoSeasonAccess } from "@/app/publicDemoAccess";
 import { useAppWorkspaceGlobalEffects } from "@/app/hooks/workspace/derived/useAppWorkspaceGlobalEffects";
 import { useAppWorkspaceUiState } from "@/app/hooks/useAppWorkspaceUiState";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
@@ -133,6 +134,11 @@ export function useAppWorkspaceState() {
         setIsNotificationQueueOpen(false);
       },
     });
+  const isPublicDemoSession = isPublicDemoSeasonAccess({
+    enforcedAuthConfig,
+    selectedSeasonId: workspaceUiState.selectedSeasonId,
+    sessionUser,
+  });
 
   useAppWorkspaceGlobalEffects({
     isDarkMode,
@@ -168,6 +174,7 @@ export function useAppWorkspaceState() {
     isGoogleAuthAvailable,
     isLoadingData,
     isNotificationQueueOpen,
+    isPublicDemoSession,
     isSigningIn,
     isSidebarCollapsed,
     isSidebarOverlay,

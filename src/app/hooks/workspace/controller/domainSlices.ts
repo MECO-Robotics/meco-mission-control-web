@@ -16,6 +16,7 @@ export const authControllerKeys = [
   "isDarkMode",
   "isEmailAuthAvailable",
   "isGoogleAuthAvailable",
+  "isPublicDemoSession",
   "isSigningIn",
   "pageShellStyle",
   "sessionUser",

@@ -31,7 +31,7 @@ export default function AppWorkspaceCoreImpl() {
     );
   }
 
-  if (auth.enforcedAuthConfig && !auth.sessionUser) {
+  if (auth.enforcedAuthConfig && !auth.sessionUser && !auth.isPublicDemoSession) {
     return (
       <SignInScreen
         authMessage={auth.authMessage}
