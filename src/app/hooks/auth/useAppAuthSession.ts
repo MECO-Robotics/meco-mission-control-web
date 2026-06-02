@@ -89,6 +89,7 @@ export function useAppAuthSession({
   });
 
   useAppAuthSessionBootstrap({
+    onSessionExpired,
     setAuthBooting,
     setAuthConfig,
     setAuthMessage,

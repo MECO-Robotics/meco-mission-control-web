@@ -8,9 +8,16 @@ import { toErrorMessage } from "@/lib/appUtils/common";
 import { fetchAuthConfig } from "@/app/hooks/auth/useAppAuthSessionConfig";
 
 interface UseAppAuthSessionBootstrapArgs {
+  onSessionExpired?: () => void;
   setAuthBooting: Dispatch<SetStateAction<boolean>>;
   setAuthConfig: Dispatch<SetStateAction<AuthConfig | null>>;
   setAuthMessage: Dispatch<SetStateAction<string | null>>;
+  setSessionUser: Dispatch<SetStateAction<SessionUser | null>>;
+}
+
+interface RestoreStoredSessionArgs {
+  isCancelled?: () => boolean;
+  onSessionExpired?: () => void;
   setSessionUser: Dispatch<SetStateAction<SessionUser | null>>;
 }
 
@@ -20,7 +27,33 @@ interface UseAppAuthSessionValidationArgs {
   sessionUser: SessionUser | null;
 }
 
+export async function restoreStoredSession({
+  isCancelled = () => false,
+  onSessionExpired,
+  setSessionUser,
+}: RestoreStoredSessionArgs) {
+  const storedToken = loadStoredSessionToken();
+  if (!storedToken) {
+    return;
+  }
+
+  try {
+    const user = await fetchCurrentUser(storedToken);
+    if (isCancelled()) {
+      return;
+    }
+
+    setSessionUser(user);
+  } catch {
+    clearStoredSessionToken();
+    if (!isCancelled()) {
+      onSessionExpired?.();
+    }
+  }
+}
+
 export function useAppAuthSessionBootstrap({
+  onSessionExpired,
   setAuthBooting,
   setAuthConfig,
   setAuthMessage,
@@ -42,21 +75,11 @@ export function useAppAuthSessionBootstrap({
           return;
         }
 
-        const storedToken = loadStoredSessionToken();
-        if (!storedToken) {
-          return;
-        }
-
-        try {
-          const user = await fetchCurrentUser(storedToken);
-          if (cancelled) {
-            return;
-          }
-
-          setSessionUser(user);
-        } catch {
-          clearStoredSessionToken();
-        }
+        await restoreStoredSession({
+          isCancelled: () => cancelled,
+          onSessionExpired,
+          setSessionUser,
+        });
       } catch (error) {
         if (!cancelled) {
           setAuthMessage(toErrorMessage(error));
@@ -73,7 +96,7 @@ export function useAppAuthSessionBootstrap({
     return () => {
       cancelled = true;
     };
-  }, [setAuthBooting, setAuthConfig, setAuthMessage, setSessionUser]);
+  }, [onSessionExpired, setAuthBooting, setAuthConfig, setAuthMessage, setSessionUser]);
 }
 
 export function useAppAuthSessionValidation({
