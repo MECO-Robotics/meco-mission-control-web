@@ -39,6 +39,7 @@ export type AppWorkspaceShellTopbarController = Pick<
 export const shellSidebarModelKeys = [
   "activeTab",
   "bootstrap",
+  "enforcedAuthConfig",
   "handleSignOut",
   "handleSidebarTabSelect",
   "inventoryView",
@@ -51,6 +52,7 @@ export const shellSidebarModelKeys = [
   "navigationItems",
   "notificationHistory",
   "projectsInSelectedSeason",
+  "requestSignIn",
   "reportsView",
   "riskManagementView",
   "rosterView",

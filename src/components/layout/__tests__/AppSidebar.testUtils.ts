@@ -19,6 +19,7 @@ export function renderSidebar(
   activeTab: ViewTab = "reports",
   options?: {
     favoriteViewIds?: NavigationSubItemId[];
+    canSignIn?: boolean;
     inventoryView?: "materials" | "parts" | "part-mappings" | "purchases";
     isCollapsed?: boolean;
     isMyViewActive?: boolean;
@@ -34,6 +35,7 @@ export function renderSidebar(
 ) {
   const sidebarProps: React.ComponentProps<typeof AppSidebar> = {
       activeTab,
+      canSignIn: options?.canSignIn ?? (options?.sessionUser ?? null) === null,
       favoriteViewIds: options?.favoriteViewIds ?? [],
       handleSignOut: jest.fn(),
       inventoryView: options?.inventoryView ?? "materials",
@@ -52,6 +54,7 @@ export function renderSidebar(
       onCreateTask: jest.fn(),
       onEditSelectedRobot: jest.fn(),
       onRefreshWorkspace: jest.fn(),
+      onSignIn: jest.fn(),
       onSelectSeason: jest.fn(),
       onSelectProject: jest.fn(),
       onSelectTarget: jest.fn(),

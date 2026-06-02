@@ -5,22 +5,26 @@ import {
   useRef,
   useState,
 } from "react";
-import { LogOut, RefreshCw, Settings as SettingsIcon } from "lucide-react";
+import { LogIn, LogOut, RefreshCw, Settings as SettingsIcon } from "lucide-react";
 
 interface AppSidebarSettingsMenuProps {
+  canSignIn: boolean;
   canSignOut: boolean;
   isCollapsed: boolean;
   isDarkMode: boolean;
   onRefreshWorkspace: () => void;
+  onSignIn: () => void;
   onSignOut: () => void;
   onToggleDarkMode: () => void;
 }
 
 export function AppSidebarSettingsMenu({
+  canSignIn,
   canSignOut,
   isCollapsed,
   isDarkMode,
   onRefreshWorkspace,
+  onSignIn,
   onSignOut,
   onToggleDarkMode,
 }: AppSidebarSettingsMenuProps) {
@@ -119,6 +123,11 @@ export function AppSidebarSettingsMenu({
     event.currentTarget.blur();
     closeMenu();
   };
+  const handleSignInClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
+    onSignIn();
+    event.currentTarget.blur();
+    closeMenu();
+  };
 
   return (
     <div
@@ -190,6 +199,21 @@ export function AppSidebarSettingsMenu({
             </span>
             <span aria-hidden="true" className="sidebar-settings-menu-icon">
               <LogOut size={14} strokeWidth={2} />
+            </span>
+          </button>
+        ) : canSignIn ? (
+          <button
+            className="sidebar-settings-menu-item"
+            onClick={handleSignInClick}
+            role="menuitem"
+            type="button"
+          >
+            <span className="sidebar-settings-menu-copy">
+              <span className="sidebar-settings-menu-title">Sign in</span>
+              <span className="sidebar-settings-menu-value">Account</span>
+            </span>
+            <span aria-hidden="true" className="sidebar-settings-menu-icon">
+              <LogIn size={14} strokeWidth={2} />
             </span>
           </button>
         ) : null}

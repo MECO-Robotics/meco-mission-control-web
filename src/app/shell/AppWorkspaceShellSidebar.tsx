@@ -59,6 +59,7 @@ export function AppWorkspaceShellSidebar({
   return (
     <AppSidebar
       activeTab={c.activeTab}
+      canSignIn={c.enforcedAuthConfig !== null && c.sessionUser === null}
       favoriteViewIds={(c.bootstrap.favoriteViews ?? [])
         .map((favorite) => favorite.viewId)
         .filter(isNavigationSubItemId)}
@@ -77,6 +78,7 @@ export function AppWorkspaceShellSidebar({
       onCreateSeason={c.handleCreateSeason}
       onCreateTask={c.openCreateTaskModal}
       onRefreshWorkspace={c.loadWorkspace}
+      onSignIn={c.requestSignIn}
       onSelectSeason={c.setSelectedSeasonId}
       onToggleMyView={c.toggleMyView}
       onToggleNotificationQueue={c.toggleNotificationQueue}
