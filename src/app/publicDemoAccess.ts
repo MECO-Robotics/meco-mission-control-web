@@ -19,6 +19,13 @@ export function shouldResetAuthenticatedPublicDemoSeasonScope(args: {
   return Boolean(args.sessionUser && args.selectedSeasonId === PUBLIC_DEMO_SEASON_ID);
 }
 
+export function shouldAutoLoadPublicDemoWorkspace(args: {
+  isPublicDemoSession: boolean;
+  isSignInScreenRequested: boolean;
+}) {
+  return Boolean(args.isPublicDemoSession && !args.isSignInScreenRequested);
+}
+
 export function shouldShowEnforcedSignInScreen(args: {
   enforcedAuthConfig: unknown;
   isPublicDemoSession: boolean;

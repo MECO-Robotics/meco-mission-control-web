@@ -1,5 +1,6 @@
 import {
   isPublicDemoSeasonAccess,
+  shouldAutoLoadPublicDemoWorkspace,
   shouldShowEnforcedSignInScreen,
   shouldResetAuthenticatedPublicDemoSeasonScope,
 } from "@/app/publicDemoAccess";
@@ -120,6 +121,31 @@ describe("shouldShowEnforcedSignInScreen", () => {
         isPublicDemoSession: true,
         isSignInScreenRequested: true,
         sessionUser,
+      }),
+    ).toBe(false);
+  });
+});
+
+describe("shouldAutoLoadPublicDemoWorkspace", () => {
+  it("auto-loads the public demo only while sign-in is not forced", () => {
+    expect(
+      shouldAutoLoadPublicDemoWorkspace({
+        isPublicDemoSession: true,
+        isSignInScreenRequested: false,
+      }),
+    ).toBe(true);
+
+    expect(
+      shouldAutoLoadPublicDemoWorkspace({
+        isPublicDemoSession: true,
+        isSignInScreenRequested: true,
+      }),
+    ).toBe(false);
+
+    expect(
+      shouldAutoLoadPublicDemoWorkspace({
+        isPublicDemoSession: false,
+        isSignInScreenRequested: false,
       }),
     ).toBe(false);
   });
