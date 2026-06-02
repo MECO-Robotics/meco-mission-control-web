@@ -76,9 +76,8 @@ export function useAppAuthSessionBootstrap({
           return;
         }
 
-        setAuthConfig(config);
-
         if (!config.enabled) {
+          setAuthConfig(config);
           return;
         }
 
@@ -87,6 +86,11 @@ export function useAppAuthSessionBootstrap({
           onSessionExpired,
           setSessionUser,
         });
+        if (cancelled) {
+          return;
+        }
+
+        setAuthConfig(config);
       } catch (error) {
         if (!cancelled) {
           setAuthMessage(toErrorMessage(error));
