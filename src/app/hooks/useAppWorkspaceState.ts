@@ -118,12 +118,14 @@ export function useAppWorkspaceState() {
     setTaskEditNotices([]);
   };
 
+  const handleSessionExpired = useCallback(() => {
+    setIsSignInScreenRequested(true);
+  }, []);
+
   const { authBooting, authConfig, authMessage, clearAuthMessage, enforcedAuthConfig, expireSession, googleButtonRef, handleSignOut, handleDevBypassSignIn, handleRequestEmailCode, handleVerifyEmailCode, isEmailAuthAvailable, isGoogleAuthAvailable, isSigningIn, sessionUser } =
     useAppAuth({
       isDarkMode,
-      onSessionExpired: () => {
-        setIsSignInScreenRequested(true);
-      },
+      onSessionExpired: handleSessionExpired,
       resetWorkspace: () => {
         setBootstrap(EMPTY_BOOTSTRAP);
         workspaceUiState.setActivePersonFilter([]);
