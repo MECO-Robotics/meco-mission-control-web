@@ -70,9 +70,12 @@ describe("restoreStoredSession", () => {
     const setSessionUser = jest.fn();
 
     loadStoredSessionTokenMock.mockReturnValue("stored-token");
-    fetchCurrentUserMock.mockRejectedValue({ statusCode: 500 });
+    const transientError = { statusCode: 500 };
+    fetchCurrentUserMock.mockRejectedValue(transientError);
 
-    await restoreStoredSession({ onSessionExpired, setSessionUser });
+    await expect(
+      restoreStoredSession({ onSessionExpired, setSessionUser }),
+    ).rejects.toBe(transientError);
 
     expect(clearStoredSessionTokenMock).not.toHaveBeenCalled();
     expect(onSessionExpired).not.toHaveBeenCalled();

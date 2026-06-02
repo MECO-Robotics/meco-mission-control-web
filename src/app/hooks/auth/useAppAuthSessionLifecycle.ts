@@ -46,6 +46,10 @@ export async function restoreStoredSession({
     setSessionUser(user);
   } catch (error) {
     const isUnauthorized = isApiErrorLike(error) && error.statusCode === 401;
+    if (!isUnauthorized) {
+      throw error;
+    }
+
     if (isUnauthorized) {
       clearStoredSessionToken();
     }
