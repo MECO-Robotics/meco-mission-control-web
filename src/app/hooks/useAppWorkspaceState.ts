@@ -121,6 +121,9 @@ export function useAppWorkspaceState() {
   const { authBooting, authConfig, authMessage, clearAuthMessage, enforcedAuthConfig, expireSession, googleButtonRef, handleSignOut, handleDevBypassSignIn, handleRequestEmailCode, handleVerifyEmailCode, isEmailAuthAvailable, isGoogleAuthAvailable, isSigningIn, sessionUser } =
     useAppAuth({
       isDarkMode,
+      onSessionExpired: () => {
+        setIsSignInScreenRequested(true);
+      },
       resetWorkspace: () => {
         setBootstrap(EMPTY_BOOTSTRAP);
         workspaceUiState.setActivePersonFilter([]);

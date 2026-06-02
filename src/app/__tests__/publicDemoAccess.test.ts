@@ -1,5 +1,6 @@
 import {
   isPublicDemoSeasonAccess,
+  shouldShowEnforcedSignInScreen,
   shouldResetAuthenticatedPublicDemoSeasonScope,
 } from "@/app/publicDemoAccess";
 
@@ -72,6 +73,53 @@ describe("shouldResetAuthenticatedPublicDemoSeasonScope", () => {
       shouldResetAuthenticatedPublicDemoSeasonScope({
         selectedSeasonId: "default-season",
         sessionUser: null,
+      }),
+    ).toBe(false);
+  });
+});
+
+describe("shouldShowEnforcedSignInScreen", () => {
+  const enforcedAuthConfig = { enabled: true };
+  const sessionUser = { accountId: "signed-in-user" };
+
+  it("keeps the sign-in screen hidden for unsigned public demo access by default", () => {
+    expect(
+      shouldShowEnforcedSignInScreen({
+        enforcedAuthConfig,
+        isPublicDemoSession: true,
+        isSignInScreenRequested: false,
+        sessionUser: null,
+      }),
+    ).toBe(false);
+  });
+
+  it("shows sign-in for public demo access after an expired session requests it", () => {
+    expect(
+      shouldShowEnforcedSignInScreen({
+        enforcedAuthConfig,
+        isPublicDemoSession: true,
+        isSignInScreenRequested: true,
+        sessionUser: null,
+      }),
+    ).toBe(true);
+  });
+
+  it("shows sign-in for unsigned non-demo access and hides it for signed-in users", () => {
+    expect(
+      shouldShowEnforcedSignInScreen({
+        enforcedAuthConfig,
+        isPublicDemoSession: false,
+        isSignInScreenRequested: false,
+        sessionUser: null,
+      }),
+    ).toBe(true);
+
+    expect(
+      shouldShowEnforcedSignInScreen({
+        enforcedAuthConfig,
+        isPublicDemoSession: true,
+        isSignInScreenRequested: true,
+        sessionUser,
       }),
     ).toBe(false);
   });
