@@ -1,7 +1,7 @@
 import { useEffect, type Dispatch, type SetStateAction } from "react";
 
 import { clearStoredSessionToken, loadStoredSessionToken } from "@/lib/auth/core/sessionStorage";
-import { fetchCurrentUser } from "@/lib/auth/core/request";
+import { fetchCurrentUser, isApiErrorLike } from "@/lib/auth/core/request";
 import { validateSession } from "@/lib/auth/session";
 import { type AuthConfig, type SessionUser } from "@/lib/auth/types";
 import { toErrorMessage } from "@/lib/appUtils/common";
@@ -44,9 +44,12 @@ export async function restoreStoredSession({
     }
 
     setSessionUser(user);
-  } catch {
-    clearStoredSessionToken();
-    if (!isCancelled()) {
+  } catch (error) {
+    const isUnauthorized = isApiErrorLike(error) && error.statusCode === 401;
+    if (isUnauthorized) {
+      clearStoredSessionToken();
+    }
+    if (isUnauthorized && !isCancelled()) {
       onSessionExpired?.();
     }
   }

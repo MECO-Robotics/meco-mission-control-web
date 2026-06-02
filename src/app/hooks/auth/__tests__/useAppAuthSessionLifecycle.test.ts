@@ -10,6 +10,11 @@ import type { SessionUser } from "@/lib/auth/types";
 
 jest.mock("@/lib/auth/core/request", () => ({
   fetchCurrentUser: jest.fn(),
+  isApiErrorLike: (error: unknown) =>
+    typeof error === "object" &&
+    error !== null &&
+    "statusCode" in error &&
+    typeof (error as { statusCode?: unknown }).statusCode === "number",
 }));
 
 jest.mock("@/lib/auth/core/sessionStorage", () => ({
@@ -51,7 +56,7 @@ describe("restoreStoredSession", () => {
     const setSessionUser = jest.fn();
 
     loadStoredSessionTokenMock.mockReturnValue("expired-token");
-    fetchCurrentUserMock.mockRejectedValue(new Error("expired"));
+    fetchCurrentUserMock.mockRejectedValue({ statusCode: 401 });
 
     await restoreStoredSession({ onSessionExpired, setSessionUser });
 
@@ -60,12 +65,26 @@ describe("restoreStoredSession", () => {
     expect(setSessionUser).not.toHaveBeenCalled();
   });
 
+  it("does not request sign-in for transient stored-token restore failures", async () => {
+    const onSessionExpired = jest.fn();
+    const setSessionUser = jest.fn();
+
+    loadStoredSessionTokenMock.mockReturnValue("stored-token");
+    fetchCurrentUserMock.mockRejectedValue({ statusCode: 500 });
+
+    await restoreStoredSession({ onSessionExpired, setSessionUser });
+
+    expect(clearStoredSessionTokenMock).not.toHaveBeenCalled();
+    expect(onSessionExpired).not.toHaveBeenCalled();
+    expect(setSessionUser).not.toHaveBeenCalled();
+  });
+
   it("does not request sign-in after cancellation", async () => {
     const onSessionExpired = jest.fn();
     const setSessionUser = jest.fn();
 
     loadStoredSessionTokenMock.mockReturnValue("expired-token");
-    fetchCurrentUserMock.mockRejectedValue(new Error("expired"));
+    fetchCurrentUserMock.mockRejectedValue({ statusCode: 401 });
 
     await restoreStoredSession({
       isCancelled: () => true,
