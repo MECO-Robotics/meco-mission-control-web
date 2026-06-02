@@ -49,7 +49,9 @@ export default function AppWorkspaceCoreImpl() {
         onToggleDarkMode={auth.toggleDarkMode}
         onVerifyEmailCode={auth.handleVerifyEmailCode}
         onDevBypassSignIn={auth.handleDevBypassSignIn}
-        onReturnToPublicDemo={auth.isPublicDemoSession ? auth.returnToPublicDemo : undefined}
+        onReturnToPublicDemo={
+          auth.isPublicDemoReturnAvailable ? auth.returnToPublicDemo : undefined
+        }
         shellStyle={auth.isDarkMode ? auth.pageShellStyle : undefined}
         signInConfig={auth.enforcedAuthConfig}
       />

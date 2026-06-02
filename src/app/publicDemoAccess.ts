@@ -12,6 +12,22 @@ export function isPublicDemoSeasonAccess(args: {
   );
 }
 
+export function isPublicDemoWorkspaceSession(args: {
+  enforcedAuthConfig: unknown;
+  isSignInScreenRequested: boolean;
+  selectedSeasonId: string | null;
+  sessionUser: unknown;
+}) {
+  return (
+    !args.isSignInScreenRequested &&
+    isPublicDemoSeasonAccess({
+      enforcedAuthConfig: args.enforcedAuthConfig,
+      selectedSeasonId: args.selectedSeasonId,
+      sessionUser: args.sessionUser,
+    })
+  );
+}
+
 export function shouldResetAuthenticatedPublicDemoSeasonScope(args: {
   selectedSeasonId: string | null;
   sessionUser: unknown;

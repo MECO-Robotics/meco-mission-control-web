@@ -4,10 +4,14 @@ import { useAppAuthSession } from "@/app/hooks/auth/useAppAuthSession";
 interface UseAppAuthArgs {
   resetWorkspace: () => void;
   isDarkMode: boolean;
+  onSessionExpired: () => void;
 }
 
-export function useAppAuth({ isDarkMode, resetWorkspace }: UseAppAuthArgs) {
-  const { setAuthMessage, ...auth } = useAppAuthSession({ resetWorkspace });
+export function useAppAuth({ isDarkMode, onSessionExpired, resetWorkspace }: UseAppAuthArgs) {
+  const { setAuthMessage, ...auth } = useAppAuthSession({
+    onSessionExpired,
+    resetWorkspace,
+  });
   const googleButtonRef = useAppAuthGoogleButton({
     authBooting: auth.authBooting,
     googleClientId: auth.googleClientId,

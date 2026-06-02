@@ -3,7 +3,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import "@/app/App.css";
 import { useAppAuth } from "@/app/hooks/useAppAuth";
 import { useAppShell } from "@/app/hooks/useAppShell";
-import { isPublicDemoSeasonAccess } from "@/app/publicDemoAccess";
+import {
+  isPublicDemoSeasonAccess,
+  isPublicDemoWorkspaceSession,
+} from "@/app/publicDemoAccess";
 import { useAppWorkspaceGlobalEffects } from "@/app/hooks/workspace/derived/useAppWorkspaceGlobalEffects";
 import { useAppWorkspaceUiState } from "@/app/hooks/useAppWorkspaceUiState";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
@@ -118,9 +121,14 @@ export function useAppWorkspaceState() {
     setTaskEditNotices([]);
   };
 
+  const requestSignInForExpiredSession = useCallback(() => {
+    setIsSignInScreenRequested(true);
+  }, []);
+
   const { authBooting, authConfig, authMessage, clearAuthMessage, enforcedAuthConfig, expireSession, googleButtonRef, handleSignOut, handleDevBypassSignIn, handleRequestEmailCode, handleVerifyEmailCode, isEmailAuthAvailable, isGoogleAuthAvailable, isSigningIn, sessionUser } =
     useAppAuth({
       isDarkMode,
+      onSessionExpired: requestSignInForExpiredSession,
       resetWorkspace: () => {
         setBootstrap(EMPTY_BOOTSTRAP);
         workspaceUiState.setActivePersonFilter([]);
@@ -135,8 +143,14 @@ export function useAppWorkspaceState() {
         setIsNotificationQueueOpen(false);
       },
     });
-  const isPublicDemoSession = isPublicDemoSeasonAccess({
+  const isPublicDemoReturnAvailable = isPublicDemoSeasonAccess({
     enforcedAuthConfig,
+    selectedSeasonId: workspaceUiState.selectedSeasonId,
+    sessionUser,
+  });
+  const isPublicDemoSession = isPublicDemoWorkspaceSession({
+    enforcedAuthConfig,
+    isSignInScreenRequested,
     selectedSeasonId: workspaceUiState.selectedSeasonId,
     sessionUser,
   });
@@ -192,6 +206,7 @@ export function useAppWorkspaceState() {
     isLoadingData,
     isSignInScreenRequested,
     isNotificationQueueOpen,
+    isPublicDemoReturnAvailable,
     isPublicDemoSession,
     isSigningIn,
     isSidebarCollapsed,

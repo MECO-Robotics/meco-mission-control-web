@@ -1,5 +1,6 @@
 import {
   isPublicDemoSeasonAccess,
+  isPublicDemoWorkspaceSession,
   shouldResetAuthenticatedPublicDemoSeasonScope,
 } from "@/app/publicDemoAccess";
 
@@ -46,6 +47,32 @@ describe("isPublicDemoSeasonAccess", () => {
         sessionUser,
       }),
     ).toBe(false);
+  });
+});
+
+describe("isPublicDemoWorkspaceSession", () => {
+  const enforcedAuthConfig = { enabled: true };
+
+  it("does not enter public demo while sign-in is explicitly requested", () => {
+    expect(
+      isPublicDemoWorkspaceSession({
+        enforcedAuthConfig,
+        isSignInScreenRequested: true,
+        selectedSeasonId: null,
+        sessionUser: null,
+      }),
+    ).toBe(false);
+  });
+
+  it("allows public demo when eligible and sign-in is not requested", () => {
+    expect(
+      isPublicDemoWorkspaceSession({
+        enforcedAuthConfig,
+        isSignInScreenRequested: false,
+        selectedSeasonId: null,
+        sessionUser: null,
+      }),
+    ).toBe(true);
   });
 });
 

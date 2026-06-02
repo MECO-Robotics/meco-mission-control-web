@@ -22,6 +22,7 @@ import {
 } from "@/app/hooks/auth/useAppAuthSessionLifecycle";
 
 interface UseAppAuthSessionArgs {
+  onSessionExpired: () => void;
   resetWorkspace: () => void;
 }
 
@@ -49,6 +50,7 @@ export interface UseAppAuthSessionResult {
 }
 
 export function useAppAuthSession({
+  onSessionExpired,
   resetWorkspace,
 }: UseAppAuthSessionArgs): UseAppAuthSessionResult {
   const [authConfig, setAuthConfig] = useState<AuthConfig | null>(null);
@@ -57,10 +59,15 @@ export function useAppAuthSession({
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [authMessage, setAuthMessage] = useState<string | null>(null);
   const resetWorkspaceRef = useRef(resetWorkspace);
+  const onSessionExpiredRef = useRef(onSessionExpired);
 
   useEffect(() => {
     resetWorkspaceRef.current = resetWorkspace;
   }, [resetWorkspace]);
+
+  useEffect(() => {
+    onSessionExpiredRef.current = onSessionExpired;
+  }, [onSessionExpired]);
 
   const enforcedAuthConfig = authConfig?.enabled ? authConfig : null;
   const googleClientId = resolveGoogleClientId(authConfig);
@@ -79,6 +86,7 @@ export function useAppAuthSession({
     handleVerifyEmailCode,
     setAuthMessage: setAuthMessageNow,
   }: UseAppAuthSessionActionsResult = useAppAuthSessionActions({
+    onSessionExpiredRef,
     resetWorkspaceRef,
     setAuthMessage,
     setIsSigningIn,
