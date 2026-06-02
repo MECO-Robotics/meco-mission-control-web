@@ -1,4 +1,7 @@
-import { isPublicDemoSeasonAccess } from "@/app/publicDemoAccess";
+import {
+  isPublicDemoSeasonAccess,
+  shouldResetAuthenticatedPublicDemoSeasonScope,
+} from "@/app/publicDemoAccess";
 
 describe("isPublicDemoSeasonAccess", () => {
   const enforcedAuthConfig = { enabled: true };
@@ -41,6 +44,34 @@ describe("isPublicDemoSeasonAccess", () => {
         enforcedAuthConfig,
         selectedSeasonId: "default-season",
         sessionUser,
+      }),
+    ).toBe(false);
+  });
+});
+
+describe("shouldResetAuthenticatedPublicDemoSeasonScope", () => {
+  const sessionUser = { accountId: "signed-in-user" };
+
+  it("resets the public demo season sentinel after sign-in", () => {
+    expect(
+      shouldResetAuthenticatedPublicDemoSeasonScope({
+        selectedSeasonId: "default-season",
+        sessionUser,
+      }),
+    ).toBe(true);
+  });
+
+  it("keeps non-demo and signed-out season scopes intact", () => {
+    expect(
+      shouldResetAuthenticatedPublicDemoSeasonScope({
+        selectedSeasonId: "season-2030",
+        sessionUser,
+      }),
+    ).toBe(false);
+    expect(
+      shouldResetAuthenticatedPublicDemoSeasonScope({
+        selectedSeasonId: "default-season",
+        sessionUser: null,
       }),
     ).toBe(false);
   });

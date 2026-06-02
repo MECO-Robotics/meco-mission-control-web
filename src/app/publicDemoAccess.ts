@@ -11,3 +11,10 @@ export function isPublicDemoSeasonAccess(args: {
       (args.selectedSeasonId === null || args.selectedSeasonId === PUBLIC_DEMO_SEASON_ID),
   );
 }
+
+export function shouldResetAuthenticatedPublicDemoSeasonScope(args: {
+  selectedSeasonId: string | null;
+  sessionUser: unknown;
+}) {
+  return Boolean(args.sessionUser && args.selectedSeasonId === PUBLIC_DEMO_SEASON_ID);
+}

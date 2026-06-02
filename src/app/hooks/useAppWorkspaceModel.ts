@@ -2,7 +2,10 @@ import { useEffect, useRef } from "react";
 import { useAppWorkspaceDerived } from "@/app/hooks/useAppWorkspaceDerived";
 import { useAppWorkspaceLoader } from "@/app/hooks/useAppWorkspaceLoader";
 import { useInteractiveTutorial } from "@/app/interactiveTutorial/useInteractiveTutorial";
-import { PUBLIC_DEMO_SEASON_ID } from "@/app/publicDemoAccess";
+import {
+  PUBLIC_DEMO_SEASON_ID,
+  shouldResetAuthenticatedPublicDemoSeasonScope,
+} from "@/app/publicDemoAccess";
 import type { AppWorkspaceDerived } from "@/app/hooks/useAppWorkspaceDerived";
 import type { AppWorkspaceLoader } from "@/app/hooks/useAppWorkspaceLoader";
 import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
@@ -51,12 +54,25 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
       return;
     }
 
+    if (
+      shouldResetAuthenticatedPublicDemoSeasonScope({
+        selectedSeasonId: state.selectedSeasonId,
+        sessionUser: state.sessionUser,
+      })
+    ) {
+      state.setSelectedSeasonId(null);
+      state.setSelectedProjectId(null);
+      void loadWorkspace({ seasonId: null, projectId: null, personId: null });
+      return;
+    }
+
     void loadWorkspace();
   }, [
     loadWorkspace,
     state.authBooting,
     state.enforcedAuthConfig,
     state.isPublicDemoSession,
+    state.selectedSeasonId,
     state.sessionUser,
     state.setSelectedProjectId,
     state.setSelectedSeasonId,
