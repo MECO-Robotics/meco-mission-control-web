@@ -23,6 +23,7 @@ import { signOutFromGoogle } from "@/app/hooks/auth/useAppAuthGoogleIdentity";
 import { toErrorMessage } from "@/lib/appUtils/common";
 
 interface UseAppAuthSessionActionsArgs {
+  onSessionExpired?: () => void;
   resetWorkspaceRef: RefObject<() => void>;
   setAuthMessage: Dispatch<SetStateAction<string | null>>;
   setIsSigningIn: Dispatch<SetStateAction<boolean>>;
@@ -51,6 +52,7 @@ function storeSignedInSession(
 }
 
 export function useAppAuthSessionActions({
+  onSessionExpired,
   resetWorkspaceRef,
   setAuthMessage,
   setIsSigningIn,
@@ -75,9 +77,10 @@ export function useAppAuthSessionActions({
       startTransition(() => {
         setSessionUser(null);
       });
+      onSessionExpired?.();
       setAuthMessage(message);
     },
-    [resetWorkspaceRef, setAuthMessage, setSessionUser],
+    [onSessionExpired, resetWorkspaceRef, setAuthMessage, setSessionUser],
   );
 
   const handleGoogleCredential = useCallback(

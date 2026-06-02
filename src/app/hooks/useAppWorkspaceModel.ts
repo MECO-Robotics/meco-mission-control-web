@@ -4,6 +4,7 @@ import { useAppWorkspaceLoader } from "@/app/hooks/useAppWorkspaceLoader";
 import { useInteractiveTutorial } from "@/app/interactiveTutorial/useInteractiveTutorial";
 import {
   PUBLIC_DEMO_SEASON_ID,
+  shouldAutoLoadPublicDemoWorkspace,
   shouldResetAuthenticatedPublicDemoSeasonScope,
 } from "@/app/publicDemoAccess";
 import type { AppWorkspaceDerived } from "@/app/hooks/useAppWorkspaceDerived";
@@ -25,21 +26,42 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
   });
   const { loadWorkspace } = loader;
   const autoLoadedWorkspaceKeyRef = useRef<string | null>(null);
+  const {
+    authBooting,
+    enforcedAuthConfig,
+    isPublicDemoSession,
+    isSignInScreenRequested,
+    selectedSeasonId,
+    sessionUser,
+    setSelectedProjectId,
+    setSelectedSeasonId,
+  } = state;
 
   useEffect(() => {
-    if (state.authBooting) {
+    if (authBooting) {
       return;
     }
 
-    if (state.enforcedAuthConfig && !state.sessionUser && !state.isPublicDemoSession) {
+    if (enforcedAuthConfig && !sessionUser && !isPublicDemoSession) {
       autoLoadedWorkspaceKeyRef.current = null;
       return;
     }
 
-    const autoLoadKey = state.isPublicDemoSession
+    if (
+      isPublicDemoSession &&
+      !shouldAutoLoadPublicDemoWorkspace({
+        isPublicDemoSession,
+        isSignInScreenRequested,
+      })
+    ) {
+      autoLoadedWorkspaceKeyRef.current = null;
+      return;
+    }
+
+    const autoLoadKey = isPublicDemoSession
       ? `public-demo:${PUBLIC_DEMO_SEASON_ID}`
-      : state.sessionUser
-        ? `session:${state.sessionUser.accountId}`
+      : sessionUser
+        ? `session:${sessionUser.accountId}`
         : "local";
 
     if (autoLoadedWorkspaceKeyRef.current === autoLoadKey) {
@@ -47,35 +69,36 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     }
 
     autoLoadedWorkspaceKeyRef.current = autoLoadKey;
-    if (state.isPublicDemoSession) {
-      state.setSelectedSeasonId(PUBLIC_DEMO_SEASON_ID);
-      state.setSelectedProjectId(null);
+    if (isPublicDemoSession) {
+      setSelectedSeasonId(PUBLIC_DEMO_SEASON_ID);
+      setSelectedProjectId(null);
       void loadWorkspace({ seasonId: PUBLIC_DEMO_SEASON_ID, projectId: null, personId: null });
       return;
     }
 
     if (
       shouldResetAuthenticatedPublicDemoSeasonScope({
-        selectedSeasonId: state.selectedSeasonId,
-        sessionUser: state.sessionUser,
+        selectedSeasonId,
+        sessionUser,
       })
     ) {
-      state.setSelectedSeasonId(null);
-      state.setSelectedProjectId(null);
+      setSelectedSeasonId(null);
+      setSelectedProjectId(null);
       void loadWorkspace({ seasonId: null, projectId: null, personId: null });
       return;
     }
 
     void loadWorkspace();
   }, [
+    authBooting,
+    enforcedAuthConfig,
+    isPublicDemoSession,
+    isSignInScreenRequested,
     loadWorkspace,
-    state.authBooting,
-    state.enforcedAuthConfig,
-    state.isPublicDemoSession,
-    state.selectedSeasonId,
-    state.sessionUser,
-    state.setSelectedProjectId,
-    state.setSelectedSeasonId,
+    selectedSeasonId,
+    sessionUser,
+    setSelectedProjectId,
+    setSelectedSeasonId,
   ]);
 
   const interactiveTutorial = useInteractiveTutorial({
