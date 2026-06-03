@@ -4,7 +4,7 @@ React + Vite browser frontend for MECO Mission Control.
 
 This repository contains the broad-screen web workspace for Mission Control: planning, readiness review, robot configuration, inventory, manufacturing coordination, roster operations, reports, and help/tutorial workflows. It runs against `meco-mission-control-platform` and is deployed as static assets behind `nginx`.
 
-Use this README as the contributor entry point. Use [`docs/CURRENT_WEB_SPEC.md`](docs/CURRENT_WEB_SPEC.md) as the current product/spec reference.
+Use this README as the setup entry point. Use [`docs/web-contributor-guide.md`](docs/web-contributor-guide.md) for implementation conventions and [`docs/CURRENT_WEB_SPEC.md`](docs/CURRENT_WEB_SPEC.md) as the current product/spec reference.
 
 ## Table of Contents
 
@@ -21,6 +21,7 @@ Use this README as the contributor entry point. Use [`docs/CURRENT_WEB_SPEC.md`]
 - [Environment Variables](#environment-variables)
 - [Validation and Testing](#validation-and-testing)
 - [Development Workflow](#development-workflow)
+- [Contributor Guide](docs/web-contributor-guide.md)
 - [Deployment and Operations](#deployment-and-operations)
 - [Release Readiness Checklist](docs/release-readiness-checklist.md)
 - [Troubleshooting](#troubleshooting)
