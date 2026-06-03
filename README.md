@@ -651,6 +651,8 @@ Check:
 
 ## Cross-Repo Responsibilities
 
+Use [`docs/cross-repo-architecture.md`](docs/cross-repo-architecture.md) for the current web, mobile, platform, Postgres, storage, Slack, Onshape, and deployment relationship diagram.
+
 Related repos:
 
 - `meco-mission-control-platform`: API routes, validation, persistence, auth config truth
