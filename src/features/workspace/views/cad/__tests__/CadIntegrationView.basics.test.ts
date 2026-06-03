@@ -70,6 +70,8 @@ describe("CAD STEP mapper basics", () => {
 
     expect(markup).toContain("STEP import");
     expect(markup).toContain("Export from the master assembly");
+    expect(markup).toContain("STEP export guide");
+    expect(markup).toContain("/docs/step-export-conventions.md");
     expect(markup).toContain("MECH - Drivetrain - Swerve Module");
     expect(markup).toContain("CAD / Onshape integration");
     expect(markup).toContain("Onshape status");
