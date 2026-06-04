@@ -6,6 +6,7 @@ import {
   formatContextLabel,
   mergeLatestTimestamp,
 } from "./attentionViewHelpers";
+import { DEFAULT_STALE_TASK_THRESHOLDS } from "./staleTaskDetector";
 import type { AttentionNowItem, AttentionReason } from "./attentionViewTypes";
 
 export interface AttentionLookup {
@@ -27,9 +28,9 @@ export interface ItemScoringSignals {
   waitingQaAgeDays?: number | null;
 }
 
-export const WAITING_QA_STALE_DAYS = 3;
-export const BLOCKED_STALE_DAYS = 4;
-export const STALE_UPDATE_DAYS = 5;
+export const WAITING_QA_STALE_DAYS = DEFAULT_STALE_TASK_THRESHOLDS.waitingQaDays;
+export const BLOCKED_STALE_DAYS = DEFAULT_STALE_TASK_THRESHOLDS.blockedDays;
+export const STALE_UPDATE_DAYS = DEFAULT_STALE_TASK_THRESHOLDS.noUpdateDays;
 
 const REASON_WEIGHTS: Record<AttentionReason, number> = {
   blocked: 18,
@@ -175,6 +176,16 @@ export function buildTaskLastUpdatedAtById(bootstrap: BootstrapPayload) {
       review.subjectId,
       mergeLatestTimestamp(current, review.reviewedAt) ?? review.reviewedAt,
     );
+  }
+
+  for (const action of bootstrap.actions ?? []) {
+    if (!action.taskId && action.entityType !== "task") {
+      continue;
+    }
+
+    const taskId = action.taskId ?? action.entityId;
+    const current = latestByTaskId.get(taskId);
+    latestByTaskId.set(taskId, mergeLatestTimestamp(current, action.timestamp) ?? action.timestamp);
   }
 
   return latestByTaskId;

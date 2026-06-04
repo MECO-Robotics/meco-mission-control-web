@@ -5,6 +5,7 @@ import {
   filterSelectionMatchesTaskPeople,
 } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { isTaskDueSoon } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
+import { buildTaskLastUpdatedAtById } from "./attentionActionNowShared";
 import {
   ATTENTION_DUE_SOON_DAYS,
   isDateOverdue,
@@ -19,6 +20,7 @@ import {
 } from "./attentionTriageItems";
 import { buildAttentionSummaryGroups } from "./attentionSummaryGroups";
 import { buildAttentionActionNowItems } from "./attentionActionNowItems";
+import { detectStaleTasks } from "./staleTaskDetector";
 import type {
   AttentionSummaryGroup,
   AttentionTriageGroup,
@@ -146,6 +148,13 @@ export function buildAttentionViewModel({
       isTaskDueSoon(task.dueDate, new Date()) &&
       task.status !== "waiting-for-qa",
   );
+  const taskLastUpdatedAtById = buildTaskLastUpdatedAtById(bootstrap);
+  const staleTaskResults = detectStaleTasks({
+    taskBlockers: bootstrap.taskBlockers,
+    taskLastUpdatedAtById,
+    tasks: filteredTasks,
+  });
+  const staleTasks = staleTaskResults.map((result) => result.task);
 
   const manufacturingBlockers = bootstrap.manufacturingItems
     .filter(
@@ -227,6 +236,7 @@ export function buildAttentionViewModel({
     manufacturingBlockers: manufacturingItems.length,
     overdueTasks: overdueTasks.length,
     purchaseDelays: purchaseItems.length,
+    staleTasks: staleTaskResults.length,
     waitingQaTasks: waitingQaTasks.length,
   });
 
@@ -254,6 +264,12 @@ export function buildAttentionViewModel({
       id: "waiting-qa",
       items: buildTaskTriageItems(waitingQaTasks, "Waiting QA", lookup),
       title: "Waiting for QA",
+    },
+    {
+      emptyLabel: "No stale tasks in scope.",
+      id: "stale-tasks",
+      items: buildTaskTriageItems(staleTasks, "Stale", lookup),
+      title: "Stale tasks",
     },
     {
       emptyLabel: "No tasks due soon in scope.",
@@ -298,6 +314,7 @@ export function buildAttentionViewModel({
     manufacturingBlockers,
     overdueTasks,
     purchaseDelays,
+    staleTaskResults,
     waitingQaTasks,
   });
 
