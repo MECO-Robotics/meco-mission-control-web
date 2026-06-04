@@ -1,4 +1,5 @@
 import {
+  buildPlanningConfidenceSummary,
   getTaskBlocksDependencies,
   getTaskOpenBlockersForTask,
   getTaskPlanningState,
@@ -356,4 +357,50 @@ test("task planning accepts milestone and part-instance qa states as satisfied d
   expect(getTaskPlanningState(qaBootstrap.tasks[1], qaBootstrap, new Date("2026-04-20T12:00:00Z"))).toBe(
     "ready",
   );
+});
+
+test("planning confidence counts populated planning fields and missing task ids", () => {
+  const tasks = [
+    {
+      ...bootstrap.tasks[0],
+      id: "task-complete-plan",
+      ownerId: "member-1",
+      mechanismId: "mechanism-1",
+      mechanismIds: ["mechanism-1"],
+      estimatedHours: 3,
+      acceptanceCriteria: ["Design review passed"],
+    },
+    {
+      ...bootstrap.tasks[1],
+      id: "task-missing-plan",
+      ownerId: null,
+      assigneeIds: [],
+      dueDate: "",
+      subsystemId: "",
+      subsystemIds: [],
+      mechanismId: null,
+      mechanismIds: [],
+      partInstanceId: null,
+      partInstanceIds: [],
+      estimatedHours: 0,
+      acceptanceCriteria: [],
+    },
+  ];
+
+  const summary = buildPlanningConfidenceSummary(tasks);
+
+  expect(summary.totalTasks).toBe(2);
+  expect(summary.completeFieldCount).toBe(5);
+  expect(summary.possibleFieldCount).toBe(10);
+  expect(summary.confidencePercent).toBe(50);
+  expect(Object.fromEntries(summary.fields.map((field) => [field.id, field.count]))).toEqual({
+    "acceptance-criteria": 1,
+    "due-date": 1,
+    estimate: 1,
+    owner: 1,
+    "target-link": 1,
+  });
+  expect(summary.fields.find((field) => field.id === "owner")?.missingTaskIds).toEqual([
+    "task-missing-plan",
+  ]);
 });

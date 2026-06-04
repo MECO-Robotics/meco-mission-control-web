@@ -110,6 +110,7 @@ describe("Workspace overview views", () => {
 
     expect(markup).toContain("<h2>Home</h2>");
     expect(markup).toContain("Open work");
+    expect(markup).toContain("Planning confidence %");
     expect(markup).toContain("Due soon");
     expect(markup).toContain("High risks");
     expect(markup).toContain("Drive practice deadline");
@@ -130,6 +131,37 @@ describe("Workspace overview views", () => {
     expect(markup).toContain("overview-graph-panel");
     expect(markup).toContain("overview-bar-chart");
     expect(markup).toContain("overview-donut-chart");
+  });
+
+  it("renders missing planning data as actionable overview items", () => {
+    const bootstrap = createOverviewBootstrap();
+    const markup = renderToStaticMarkup(
+      React.createElement(HomeView, {
+        bootstrap: {
+          ...bootstrap,
+          tasks: bootstrap.tasks.map((task) =>
+            task.id === "task-today"
+              ? {
+                  ...task,
+                  ownerId: null,
+                  assigneeIds: [],
+                  estimatedHours: 0,
+                }
+              : task,
+          ),
+        },
+        onOpenTask: jest.fn(),
+        today: fixedToday,
+      }),
+    );
+
+    expect(markup).toContain("Planning gaps");
+    expect(markup).toContain("Assign task owners");
+    expect(markup).toContain("Add hour estimates");
+    expect(markup).toContain("Add acceptance criteria");
+    expect(markup).toContain("tasks missing owners");
+    expect(markup).toContain("tasks missing acceptance criteria");
+    expect(markup).toContain("First: Wire intake sensor");
   });
 
 });
