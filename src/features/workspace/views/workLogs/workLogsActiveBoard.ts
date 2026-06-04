@@ -119,7 +119,7 @@ function resolveBlockerLabel({
   task: TaskRecord | undefined;
 }) {
   if (!task || state !== "blocked") {
-    return "No blocker";
+    return "No blocker reported";
   }
 
   const blocker: TaskBlockerRecord | undefined = getTaskOpenBlockersForTask(task.id, bootstrap)[0];

@@ -192,7 +192,7 @@ describe("workLogsActiveBoard", () => {
     expect(board.itemsByState.closed.map((card) => card.task?.id)).toEqual(["task-closed"]);
 
     expect(board.itemsByState.active[0]).toMatchObject({
-      blockerLabel: "No blocker",
+      blockerLabel: "No blocker reported",
       elapsedLabel: "2.5h elapsed",
       needsHelp: true,
       recentActivityLabel: "Recent: May 4 - Need help tuning PID",
@@ -202,6 +202,7 @@ describe("workLogsActiveBoard", () => {
     expect(board.itemsByState.blocked[0].blockerLabel).toBe(
       "Blocked: Waiting on motor controller",
     );
+    expect(board.totalCards).toBe(5);
   });
 
   it("filters grouped cards by student and search text", () => {
