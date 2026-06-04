@@ -76,6 +76,22 @@ bootstrap payloads, integrations, and production database behavior. The platform
 is the source of truth for permissions and data contracts even when a client
 hides or pre-validates a control.
 
+## Branch And Promotion Architecture
+
+`development` is the active integration branch for normal feature and fix work.
+When release audit or stabilization needs a frozen candidate, cut `staging` or a
+named `staging/*` branch from the current `development` head and use that branch
+as the `main` PR source. Treat staging branches like stashes: they preserve a
+candidate snapshot while regular development continues separately, and they
+should change only through an intentional refresh from `development` or through
+`fix/*` or `hotfix/*` stabilization PRs.
+
+Production `main` promotions may come from `staging`, `staging/*`,
+`development`, or `hotfix/*`. A `staging`-sourced main PR should validate the
+same staging branch across web, platform, and mobile; a direct `development`
+promotion validates the integration branch across the repo family. Staging is a
+branch/audit concept only and does not imply a second live VPS or mobile runtime.
+
 ## Client To Platform Flow
 
 The web app uses `/api` as its default API base. Local development proxies that

@@ -523,10 +523,13 @@ Recommended local cycle:
 Branch and PR workflow is governed by `AGENTS.md`:
 
 - `main` is production-ready only.
+- `staging` and `staging/*` are audited release-candidate snapshots; they are immutable except for stabilization fixes.
 - `development` is the integration branch for active work.
 - `feature/*`, `fix/*`, and `hotfix/*` are short-lived work branches.
 - PRs into `development` must come from `feature/*`, `fix/*`, or `hotfix/*`.
-- Merges into `main` should come only from `development` or `hotfix/*`.
+- Cut staging branches from `development` when a frozen promotion candidate needs to remain open against `main` while regular work continues on `development`.
+- PRs into `staging` must come from `development`, `fix/*`, or `hotfix/*`; do not merge `feature/*` into staging.
+- Merges into `main` should come only from `staging`, `staging/*`, `development`, or `hotfix/*`.
 - Protected branches require CI, snapshot validation, review approval, conversation resolution, linear history, and admin enforcement as described in `AGENTS.md`.
 
 Codex/worktree notes:
