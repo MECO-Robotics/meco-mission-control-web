@@ -212,8 +212,11 @@ export function RobotMapView({
     const autoLayouts = buildAutoArrangedLayouts(
       subsystems.map((subsystem) => ({
         id: subsystem.id,
+        layoutX: subsystem.layout.layoutX,
+        layoutY: subsystem.layout.layoutY,
         layoutView: subsystem.layout.layoutView,
         layoutZone: subsystem.layout.layoutZone,
+        sortOrder: subsystem.layout.sortOrder,
       })),
     );
     setLayoutDraftBySubsystemId((current) => ({ ...current, ...autoLayouts }));
