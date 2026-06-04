@@ -1,3 +1,4 @@
+import { TASK_BLOCKER_TYPE_LABELS } from "@/types/common";
 import type { TaskBlockerRecord } from "@/types/recordsExecution";
 import type { LegacyBootstrapPayload } from "./shared";
 
@@ -16,7 +17,10 @@ function normalizeBlockerType(blockerType: string | undefined): TaskBlockerRecor
     return "other";
   }
 
-  return LEGACY_BLOCKER_TYPE_FALLBACKS[blockerType] ?? (blockerType as TaskBlockerRecord["blockerType"]);
+  const normalizedType = LEGACY_BLOCKER_TYPE_FALLBACKS[blockerType] ?? blockerType;
+  return normalizedType in TASK_BLOCKER_TYPE_LABELS
+    ? (normalizedType as TaskBlockerRecord["blockerType"])
+    : "other";
 }
 
 export function normalizeBootstrapTaskBlockers(

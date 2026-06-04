@@ -31,7 +31,7 @@ function computeAgeDays(value: string | null | undefined, now: number) {
 }
 
 function blockerReasonLabel(blocker: TaskBlockerRecord) {
-  return TASK_BLOCKER_TYPE_LABELS[blocker.blockerType].toLowerCase();
+  return (TASK_BLOCKER_TYPE_LABELS[blocker.blockerType] ?? TASK_BLOCKER_TYPE_LABELS.other).toLowerCase();
 }
 
 function selectMostSevereBlocker(blockers: TaskBlockerRecord[]) {

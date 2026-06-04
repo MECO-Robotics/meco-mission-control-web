@@ -101,6 +101,14 @@ export function TaskDetailsBlockersSectionView(props: TaskDetailsBlockersSection
                     <div
                       className="workspace-detail-list-item task-detail-list-item task-details-dependency-row task-details-dependency-row-with-delete task-details-blocker-row-edit"
                       key={blockerKey}
+                      onBlur={(event) => {
+                        const nextFocusTarget = event.relatedTarget;
+                        if (nextFocusTarget instanceof Node && event.currentTarget.contains(nextFocusTarget)) {
+                          return;
+                        }
+
+                        setEditingBlockerKey(null);
+                      }}
                     >
                       <button
                         aria-label={`Remove blocker ${index + 1}`}
@@ -117,7 +125,6 @@ export function TaskDetailsBlockersSectionView(props: TaskDetailsBlockersSection
                         autoFocus
                         aria-label={`Blocker note ${index + 1}`}
                         className="task-detail-inline-edit-input task-details-blocker-input task-details-blocker-row-input"
-                        onBlur={() => setEditingBlockerKey(null)}
                         onChange={(milestone) =>
                           model.updateBlockerDraft(blockerKey, {
                             description: milestone.target.value,
