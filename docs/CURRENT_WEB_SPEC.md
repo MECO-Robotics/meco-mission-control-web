@@ -82,7 +82,8 @@ Context definitions:
 Dashboard is a lightweight review group, not a separate data model. It should surface already-existing workspace data through decision-focused entry points.
 
 - Calendar shows schedule/milestone context.
-- Activity shows platform audit actions and recent work context.
+- Activity shows platform audit actions and recent work context, subject to the platform audit
+  retention policy: 3 years after the related season ends, then deletion or anonymization.
 - Metrics summarizes build health, plan-vs-actual, progress, coverage, and action queues.
 
 ### Readiness
@@ -143,6 +144,10 @@ Reports are evidence and history surfaces.
 - Work logs should remain available for review and metrics support.
 - QA forms are quality evidence and can generate follow-up action.
 - Milestone results are event/deadline evidence anchors.
+- Audit activity is operational history, not a permanent student archive. It should preserve
+  minimal create/update/delete tombstones for deleted records until retention expires, avoid
+  sensitive minor data in messages, and stay limited to leads, mentors, admins, or scoped users
+  with a legitimate operational need.
 
 ## Data and API Contract Notes
 
@@ -182,7 +187,8 @@ The following recent PR themes are now part of the current spec:
 
 - Metrics is a decision-focused dashboard, not just a statistics page.
 - Attention has become Action Required and should function as cross-domain triage.
-- WorkLogs Activity now shows platform audit actions, not only work-log records.
+- WorkLogs Activity now shows platform audit actions, not only work-log records, and follows the
+  platform retention/privacy policy for archive, delete, and admin-access behavior.
 - The standalone Part Mapping page was removed from general navigation pressure.
 - Robot Configuration is map-first with draggable subsystem cards and subsystem detail editing.
 - Robot Configuration follow-up work hardened rollback behavior, reset-layout scope, storage-failure handling, and robot-only topbar gating.
