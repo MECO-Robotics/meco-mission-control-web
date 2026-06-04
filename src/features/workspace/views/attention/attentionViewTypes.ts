@@ -53,6 +53,7 @@ export interface AttentionTriageGroup {
 export interface AttentionNowItem {
   actionType: AttentionActionType;
   blockingImpact?: string;
+  blockerTypeLabel?: string;
   contextLabel?: string;
   dueDate?: string;
   id: string;

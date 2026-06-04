@@ -1,13 +1,31 @@
 import type { TaskBlockerRecord } from "@/types/recordsExecution";
 import type { LegacyBootstrapPayload } from "./shared";
 
+const LEGACY_BLOCKER_TYPE_FALLBACKS: Record<string, TaskBlockerRecord["blockerType"]> = {
+  artifact_instance: "other",
+  external: "other",
+  mechanism: "design-issue",
+  milestone: "other",
+  part_instance: "lost-part",
+  task: "other",
+  workstream: "other",
+};
+
+function normalizeBlockerType(blockerType: string | undefined): TaskBlockerRecord["blockerType"] {
+  if (!blockerType) {
+    return "other";
+  }
+
+  return LEGACY_BLOCKER_TYPE_FALLBACKS[blockerType] ?? (blockerType as TaskBlockerRecord["blockerType"]);
+}
+
 export function normalizeBootstrapTaskBlockers(
   source: LegacyBootstrapPayload,
 ): TaskBlockerRecord[] {
   return (source.taskBlockers ?? []).map((blocker, index) => ({
     id: blocker.id ?? `task-blocker-${index + 1}`,
     blockedTaskId: blocker.blockedTaskId ?? "",
-    blockerType: blocker.blockerType ?? "external",
+    blockerType: normalizeBlockerType(blocker.blockerType),
     blockerId: blocker.blockerId ?? null,
     description: blocker.description ?? "",
     severity: blocker.severity ?? "medium",

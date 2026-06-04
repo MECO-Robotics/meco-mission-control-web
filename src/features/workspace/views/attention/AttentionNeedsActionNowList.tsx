@@ -93,6 +93,11 @@ export function AttentionNeedsActionNowList({
                         <strong>Impact:</strong> {item.blockingImpact}
                       </span>
                     ) : null}
+                    {item.blockerTypeLabel ? (
+                      <span>
+                        <strong>Blocker:</strong> {item.blockerTypeLabel}
+                      </span>
+                    ) : null}
                     {item.contextLabel ? (
                       <span>
                         <strong>Scope:</strong> {item.contextLabel}

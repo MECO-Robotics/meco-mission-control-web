@@ -101,23 +101,15 @@ export function scopeBootstrapBySelection(
       return false;
     }
 
-    if (!blocker.blockerId || blocker.blockerType === "external") {
+    if (!blocker.blockerId) {
       return true;
     }
 
-    if (blocker.blockerType === "task") {
-      return scopedTaskIds.has(blocker.blockerId);
-    }
-
-    if (blocker.blockerType === "part_instance") {
-      return scopedPartInstanceIds.has(blocker.blockerId);
-    }
-
-    if (blocker.blockerType === "milestone") {
-      return scopedMilestoneIds.has(blocker.blockerId);
-    }
-
-    return true;
+    return (
+      scopedTaskIds.has(blocker.blockerId) ||
+      scopedMilestoneIds.has(blocker.blockerId) ||
+      scopedPartInstanceIds.has(blocker.blockerId)
+    );
   });
   const scopedWorkLogs = payload.workLogs.filter((workLog) => scopedTaskIds.has(workLog.taskId));
   const scopedReports = payload.reports.filter((report) => {

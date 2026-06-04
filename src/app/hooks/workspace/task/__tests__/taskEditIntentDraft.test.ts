@@ -13,7 +13,7 @@ describe("applyTaskEditIntentToDraft", () => {
     expect(updatedDraft.taskBlockers).toEqual([
       expect.objectContaining({
         blockerId: null,
-        blockerType: "external",
+        blockerType: "other",
         description: "Blocked",
         isIntentPlaceholder: true,
         severity: "medium",
@@ -47,7 +47,7 @@ describe("applyTaskEditIntentToDraft", () => {
         {
           id: "blocker-existing",
           blockerId: null,
-          blockerType: "external" as const,
+          blockerType: "shipping-delay" as const,
           description: "Waiting on vendor",
           severity: "high" as const,
         },

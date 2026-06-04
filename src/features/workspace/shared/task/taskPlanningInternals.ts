@@ -105,7 +105,7 @@ export function getTaskBlockerRecords(bootstrap: BootstrapPayload) {
     task.blockers.map((description, index) => ({
       id: `${task.id}:blocker:${index + 1}`,
       blockedTaskId: task.id,
-      blockerType: "external",
+      blockerType: "other",
       blockerId: null,
       description,
       severity: "medium",

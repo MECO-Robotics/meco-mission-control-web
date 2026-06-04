@@ -1,4 +1,5 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
+import { TASK_BLOCKER_TYPE_LABELS } from "@/types/common";
 import { daysSinceDate, formatOwnerLabel, isDateOverdue, mergeLatestTimestamp } from "./attentionViewHelpers";
 import {
   addReason,
@@ -20,6 +21,7 @@ interface BuildTaskAndRiskActionItemsArgs {
   lookup: AttentionLookup;
   overdueTasks: BootstrapPayload["tasks"];
   reportsById: Record<string, BootstrapPayload["reports"][number]>;
+  taskBlockersByTaskId: Map<string, NonNullable<BootstrapPayload["taskBlockers"]>>;
   taskLastUpdatedAtById: Map<string, string>;
   waitingQaTasks: BootstrapPayload["tasks"];
 }
@@ -32,6 +34,7 @@ export function buildTaskAndRiskActionItems({
   lookup,
   overdueTasks,
   reportsById,
+  taskBlockersByTaskId,
   taskLastUpdatedAtById,
   waitingQaTasks,
 }: BuildTaskAndRiskActionItemsArgs) {
@@ -52,6 +55,12 @@ export function buildTaskAndRiskActionItems({
     addReason(reasons, "overdue", isDateOverdue(task.dueDate));
 
     const downstreamBlockedCount = downstreamByTaskId.get(task.id) ?? 0;
+    const openBlockers = taskBlockersByTaskId.get(task.id) ?? [];
+    const blockerTypes = Array.from(new Set(openBlockers.map((blocker) => blocker.blockerType)));
+    const blockerTypeLabel =
+      blockerTypes.length > 0
+        ? blockerTypes.map((blockerType) => TASK_BLOCKER_TYPE_LABELS[blockerType]).join(", ")
+        : undefined;
     const ownerLabel = formatOwnerLabel(task.ownerId ? lookup.membersById[task.ownerId]?.name : null);
     const whyNow =
       lastUpdatedDays === null
@@ -61,6 +70,7 @@ export function buildTaskAndRiskActionItems({
     items.push({
       actionType: "open-task",
       blockingImpact: formatBlockedImpact(downstreamBlockedCount),
+      blockerTypeLabel,
       contextLabel: pickTaskContextLabel(task, lookup),
       dueDate: task.dueDate,
       id: `task-blocked-stale-${task.id}`,
@@ -76,6 +86,7 @@ export function buildTaskAndRiskActionItems({
       title: task.title,
       urgencyScore: scoreAttentionItem({
         blockedAgeDays: lastUpdatedDays,
+        blockerTypes,
         downstreamBlockedCount,
         dueDate: task.dueDate,
         isOwnerMissing: !task.ownerId,

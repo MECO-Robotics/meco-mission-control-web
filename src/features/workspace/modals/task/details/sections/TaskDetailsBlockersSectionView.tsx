@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskPayload } from "@/types/payloads";
+import { TASK_BLOCKER_TYPE_LABELS, TASK_BLOCKER_TYPE_OPTIONS, type TaskBlockerType } from "@/types/common";
 import { IconTrash } from "@/components/shared/Icons";
 import { TaskDetailReveal } from "../TaskDetailReveal";
 import { useTaskDetailsBlockersSectionModel } from "./useTaskDetailsBlockersSectionModel";
@@ -126,6 +127,22 @@ export function TaskDetailsBlockersSectionView(props: TaskDetailsBlockersSection
                         placeholder="Describe blocker"
                         value={blocker.description}
                       />
+                      <select
+                        aria-label={`Blocker type ${index + 1}`}
+                        className="task-detail-inline-edit-input task-details-blocker-input"
+                        onChange={(milestone) =>
+                          model.updateBlockerDraft(blockerKey, {
+                            blockerType: milestone.target.value as TaskBlockerType,
+                          })
+                        }
+                        value={blocker.blockerType}
+                      >
+                        {TASK_BLOCKER_TYPE_OPTIONS.map((option) => (
+                          <option key={option.id} value={option.id}>
+                            {option.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   ) : (
                     <div
@@ -145,6 +162,9 @@ export function TaskDetailsBlockersSectionView(props: TaskDetailsBlockersSection
                         onClick={() => setEditingBlockerKey(blockerKey)}
                         type="button"
                       >
+                        <span className="pill status-pill status-pill-warning">
+                          {TASK_BLOCKER_TYPE_LABELS[blocker.blockerType]}
+                        </span>
                         <TaskDetailReveal
                           className="task-detail-ellipsis-reveal"
                           style={{ color: "var(--text-title)", fontWeight: 800 }}
@@ -165,6 +185,9 @@ export function TaskDetailsBlockersSectionView(props: TaskDetailsBlockersSection
                 {model.openBlockers.map((blocker) => (
                   <div className="workspace-detail-list-item task-detail-list-item task-details-blocker-list-item" key={blocker.id}>
                     <div className="task-details-blocker-row-content">
+                      <span className="pill status-pill status-pill-warning">
+                        {TASK_BLOCKER_TYPE_LABELS[blocker.blockerType]}
+                      </span>
                       <TaskDetailReveal
                         className="task-detail-ellipsis-reveal"
                         style={{ color: "var(--text-title)", fontWeight: 800 }}

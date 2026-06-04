@@ -50,6 +50,16 @@ export function buildAttentionActionNowItems({
   const reportsById = Object.fromEntries(
     bootstrap.reports.map((report) => [report.id, report] as const),
   );
+  const taskBlockersByTaskId = new Map<string, NonNullable<BootstrapPayload["taskBlockers"]>>();
+  for (const blocker of bootstrap.taskBlockers ?? []) {
+    if (blocker.status !== "open") {
+      continue;
+    }
+
+    const taskBlockers = taskBlockersByTaskId.get(blocker.blockedTaskId) ?? [];
+    taskBlockers.push(blocker);
+    taskBlockersByTaskId.set(blocker.blockedTaskId, taskBlockers);
+  }
 
   const { items: taskAndRiskItems } = buildTaskAndRiskActionItems({
     blockedTasks,
@@ -59,6 +69,7 @@ export function buildAttentionActionNowItems({
     lookup,
     overdueTasks,
     reportsById,
+    taskBlockersByTaskId,
     taskLastUpdatedAtById,
     waitingQaTasks,
   });
