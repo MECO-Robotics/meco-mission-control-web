@@ -83,6 +83,20 @@ export function PartsView({
     partStatus,
     partSubsystem,
   ]);
+  const hasPartFilters =
+    partSearch.trim().length > 0 ||
+    partStatus.length > 0 ||
+    partSubsystem.length > 0;
+  const hasHiddenArchivedPartDefinitions =
+    !showArchivedPartDefinitions &&
+    !hasPartFilters &&
+    bootstrap.partDefinitions.length > 0 &&
+    filteredPartDefinitions.length === 0;
+  const hasPartInstanceFilters =
+    partSearch.trim().length > 0 ||
+    partMechanism.length > 0 ||
+    partStatus.length > 0 ||
+    partSubsystem.length > 0;
 
   const partDefinitionPage = {
     onPageChange: partDefinitionPagination.setPage,
@@ -143,6 +157,9 @@ export function PartsView({
       <PartsDefinitionSection
         bootstrap={bootstrap}
         filteredPartDefinitions={partDefinitionPagination.pageItems}
+        hasActiveFilters={hasPartFilters}
+        hasHiddenArchivedPartDefinitions={hasHiddenArchivedPartDefinitions}
+        onCreatePartDefinition={openCreatePartDefinitionModal}
         onEditPartDefinition={openEditPartDefinitionModal}
         partDefinitionFilterMotionClass={partDefinitionFilterMotionClass}
         pageChangeHandlers={partDefinitionPage}
@@ -151,6 +168,7 @@ export function PartsView({
       <PartsInstanceSection
         bootstrap={bootstrap}
         filteredPartInstances={partInstancePagination.pageItems}
+        hasActiveFilters={hasPartInstanceFilters}
         mechanismsById={mechanismsById}
         partDefinitionsById={partDefinitionsById}
         partInstanceFilterMotionClass={partInstanceFilterMotionClass}

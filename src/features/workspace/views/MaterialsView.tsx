@@ -4,7 +4,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MaterialRecord } from "@/types/recordsInventory";
 import { IconManufacturing, IconTasks } from "@/components/shared/Icons";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
-import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
+import { WorkspaceEmptyState, WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
 import { ColumnFilterDropdown } from "@/features/workspace/shared/filters/ColumnFilterDropdown";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { EditableHoverIndicator, PaginationControls, TableCell, useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
@@ -54,6 +54,10 @@ export function MaterialsView({
     search,
     stock,
   ]);
+  const hasMaterialFilters =
+    search.trim().length > 0 ||
+    category.length > 0 ||
+    stock.length > 0;
 
   return (
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
@@ -202,7 +206,20 @@ export function MaterialsView({
         })}
 
         {filteredMaterials.length === 0 ? (
-          <p className="empty-state">No materials match the current filters.</p>
+          <WorkspaceEmptyState
+            actionLabel={hasMaterialFilters ? undefined : "Add material"}
+            onAction={hasMaterialFilters ? undefined : openCreateMaterialModal}
+            reason={
+              hasMaterialFilters
+                ? "The current search, category, or stock filter hides every material record in this scope."
+                : "No stock, vendor, location, or reorder threshold records have been added for this workspace yet."
+            }
+            title={
+              hasMaterialFilters
+                ? "No materials match these filters"
+                : "Manage consumable and raw material inventory here"
+            }
+          />
         ) : null}
         <PaginationControls
           label="materials"
