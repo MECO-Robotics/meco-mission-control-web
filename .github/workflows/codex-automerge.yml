@@ -9,6 +9,8 @@ on:
   pull_request:
     branches:
       - development
+      - staging
+      - "staging/**"
       - main
     types:
       - opened
@@ -44,7 +46,9 @@ jobs:
           script: |
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const targetBaseRefs = new Set(['development', 'main']);
+            function isTargetBaseRef(baseRef) {
+              return baseRef === 'development' || baseRef === 'main' || baseRef === 'staging' || baseRef.startsWith('staging/');
+            }
             const requiredCheckRunNames = new Set(['merge-requirements']);
             const trustedCodexReviewerLogins = new Set(
               (process.env.CODEX_REVIEWER_LOGINS || '')
@@ -93,7 +97,7 @@ jobs:
                 return;
               }
 
-              if (!targetBaseRefs.has(pr.base.ref)) {
+              if (!isTargetBaseRef(pr.base.ref)) {
                 core.info(`PR #${pullNumber} targets ${pr.base.ref}; skipping.`);
                 return;
               }
