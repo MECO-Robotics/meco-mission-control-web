@@ -22,6 +22,7 @@ Use this README as the setup entry point. Use [`docs/web-contributor-guide.md`](
 - [Validation and Testing](#validation-and-testing)
 - [Development Workflow](#development-workflow)
 - [Contributor Guide](docs/web-contributor-guide.md)
+- [Issue Labels](#issue-labels)
 - [Deployment and Operations](#deployment-and-operations)
 - [Release Readiness Checklist](docs/release-readiness-checklist.md)
 - [Troubleshooting](#troubleshooting)
@@ -538,6 +539,25 @@ Codex/worktree notes:
 - Keep startup commands and dev URL in `environment.toml`, not duplicated across docs.
 - Put diagnostic screenshots, generated reports, and temporary snapshots under `.diagnostics/`, not in the repository root.
 - When working in a worktree, audit UI changes against the worktree-hosted app instance before finishing.
+
+## Issue Labels
+
+Use Mission Control labels so web issues sort consistently with the rest of the project.
+
+Every implementation issue should carry one label from each core group:
+
+| Group | Labels | Use |
+| --- | --- | --- |
+| Area | `area:web`, `area:docs`, `area:cad`, `area:qa`, `area:auth` | Primary product or technical surface affected by the issue. Add a second area only when the acceptance criteria genuinely cross surfaces. |
+| Type | `type:bug`, `type:feature`, `type:tech-debt`, `type:ux-review` | Kind of work expected from the issue. Use `type:ux-review` for assessment/refinement tickets, not for every UI change. |
+| Priority | `priority:p0`, `priority:p1`, `priority:p2`, `priority:p3` | Delivery urgency. `p0` is production-stopping, `p1` blocks important user workflows, `p2` is planned backlog work, and `p3` is polish or opportunistic cleanup. |
+
+Supporting labels:
+
+- `blocked`: work cannot proceed until the issue names a concrete dependency or missing decision.
+- `needs-design`: UX, copy, or workflow direction is needed before implementation should start.
+
+Issue templates default to web area labels and conservative priorities. Adjust labels during triage when an issue belongs to docs, CAD, QA, auth, or a different priority.
 
 ## Deployment and Operations
 

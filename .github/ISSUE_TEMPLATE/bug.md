@@ -3,7 +3,9 @@ name: Bug report
 about: Report a web defect, regression, or frontend/backend contract mismatch
 title: "Bug: "
 labels:
-  - bug
+  - area:web
+  - type:bug
+  - priority:p2
 ---
 
 ## Summary

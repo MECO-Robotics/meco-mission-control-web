@@ -3,7 +3,9 @@ name: Feature request
 about: Propose a new web capability
 title: "Feature: "
 labels:
-  - enhancement
+  - area:web
+  - type:feature
+  - priority:p2
 ---
 
 ## Problem / goal
