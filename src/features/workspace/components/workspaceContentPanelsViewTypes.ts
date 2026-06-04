@@ -135,6 +135,7 @@ export interface WorkspaceInventoryPanelProps {
 
 export interface WorkspaceRosterPanelProps {
   allMembers: WorkspaceContentPanelsViewProps["allMembers"];
+  availabilityBootstrap: WorkspaceContentPanelsViewProps["availabilityBootstrap"];
   bootstrap: WorkspaceContentPanelsViewProps["bootstrap"];
   externalMembers: WorkspaceContentPanelsViewProps["externalMembers"];
   handleCreateMember: WorkspaceContentPanelsViewProps["handleCreateMember"];
@@ -150,6 +151,8 @@ export interface WorkspaceRosterPanelProps {
   requestMemberPhotoUpload: WorkspaceContentPanelsViewProps["requestMemberPhotoUpload"];
   rosterMentors: WorkspaceContentPanelsViewProps["rosterMentors"];
   rosterView: WorkspaceContentPanelsViewProps["rosterView"];
+  openCreateTaskModal: WorkspaceContentPanelsViewProps["openCreateTaskModal"];
+  openCreateTaskModalForMember: WorkspaceContentPanelsViewProps["openCreateTaskModalForMember"];
   openTimelineTaskDetailsModal: WorkspaceContentPanelsViewProps["openTimelineTaskDetailsModal"];
   selectMember: WorkspaceContentPanelsViewProps["selectMember"];
   selectedMemberId: WorkspaceContentPanelsViewProps["selectedMemberId"];

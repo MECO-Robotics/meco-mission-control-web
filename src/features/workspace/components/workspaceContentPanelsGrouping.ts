@@ -116,6 +116,7 @@ export function groupWorkspaceContentPanelProps(
     },
     roster: {
       allMembers: props.allMembers,
+      availabilityBootstrap: props.availabilityBootstrap,
       bootstrap: props.bootstrap,
       externalMembers: props.externalMembers,
       handleCreateMember: props.handleCreateMember,
@@ -131,6 +132,8 @@ export function groupWorkspaceContentPanelProps(
       requestMemberPhotoUpload: props.requestMemberPhotoUpload,
       rosterMentors: props.rosterMentors,
       rosterView: props.rosterView,
+      openCreateTaskModal: props.openCreateTaskModal,
+      openCreateTaskModalForMember: props.openCreateTaskModalForMember,
       openTimelineTaskDetailsModal: props.openTimelineTaskDetailsModal,
       selectMember: props.selectMember,
       selectedMemberId: props.selectedMemberId,
