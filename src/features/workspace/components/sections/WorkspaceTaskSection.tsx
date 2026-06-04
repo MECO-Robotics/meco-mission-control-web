@@ -41,6 +41,7 @@ export function WorkspaceTaskSection({
     openEditMechanismModal,
     openEditPartInstanceModal,
     openEditSubsystemModal,
+    onOpenDrilldownTarget,
     removePartInstanceFromMechanism,
     saveSubsystemLayout,
     updateSubsystemConfiguration,
@@ -111,6 +112,7 @@ export function WorkspaceTaskSection({
           openEditMechanismModal={openEditMechanismModal}
           openEditPartInstanceModal={openEditPartInstanceModal}
           openEditSubsystemModal={openEditSubsystemModal}
+          onOpenDrilldownTarget={onOpenDrilldownTarget}
           removePartInstanceFromMechanism={removePartInstanceFromMechanism}
           saveSubsystemLayout={saveSubsystemLayout}
           updateSubsystemConfiguration={updateSubsystemConfiguration}

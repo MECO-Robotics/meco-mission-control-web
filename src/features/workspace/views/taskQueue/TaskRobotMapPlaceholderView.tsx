@@ -1,5 +1,6 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
+import type { NavigationTarget } from "@/lib/workspaceNavigation";
 import { RobotMapView } from "@/features/workspace/views/robotMap/RobotMapView";
 
 interface TaskRobotMapPlaceholderViewProps {
@@ -11,6 +12,7 @@ interface TaskRobotMapPlaceholderViewProps {
   openEditMechanismModal: (mechanism: BootstrapPayload["mechanisms"][number]) => void;
   openEditPartInstanceModal: (partInstance: BootstrapPayload["partInstances"][number]) => void;
   openEditSubsystemModal: (subsystem: BootstrapPayload["subsystems"][number]) => void;
+  onOpenDrilldownTarget?: (target: NavigationTarget) => void;
   removePartInstanceFromMechanism: (partInstanceId: string) => Promise<boolean>;
   saveSubsystemLayout: (
     subsystemId: string,

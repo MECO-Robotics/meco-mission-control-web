@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import type { SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
+import type { NavigationTarget } from "@/lib/workspaceNavigation";
 
 import { RobotConfigurationToolbar } from "./RobotConfigurationToolbar";
 import { RobotMapCanvas } from "./RobotMapCanvas";
@@ -20,6 +21,7 @@ interface RobotMapViewProps {
   openEditMechanismModal: (mechanism: BootstrapPayload["mechanisms"][number]) => void;
   openEditPartInstanceModal: (partInstance: BootstrapPayload["partInstances"][number]) => void;
   openEditSubsystemModal: (subsystem: BootstrapPayload["subsystems"][number]) => void;
+  onOpenDrilldownTarget?: (target: NavigationTarget) => void;
   removePartInstanceFromMechanism: (partInstanceId: string) => Promise<boolean>;
   saveSubsystemLayout: (
     subsystemId: string,
@@ -68,6 +70,7 @@ export function RobotMapView({
   openEditMechanismModal,
   openEditPartInstanceModal,
   openEditSubsystemModal,
+  onOpenDrilldownTarget,
   removePartInstanceFromMechanism,
   saveSubsystemLayout,
   updateSubsystemConfiguration,
@@ -140,7 +143,10 @@ export function RobotMapView({
   }, [selectedSubsystemId, subsystems]);
 
   const selectedSubsystem = useMemo(
-    () => (selectedSubsystemId ? subsystems.find((subsystem) => subsystem.id === selectedSubsystemId) ?? null : null),
+    () =>
+      selectedSubsystemId
+        ? subsystems.find((subsystem) => subsystem.id === selectedSubsystemId) ?? subsystems[0] ?? null
+        : subsystems[0] ?? null,
     [selectedSubsystemId, subsystems],
   );
 
@@ -307,6 +313,7 @@ export function RobotMapView({
             onEditMechanism={openEditMechanismModal}
             onEditPartInstance={openEditPartInstanceModal}
             onEditSubsystem={openEditSubsystemModal}
+            onOpenDrilldownTarget={onOpenDrilldownTarget}
             onRemovePartFromMechanism={removePartInstanceFromMechanism}
             onSaveSubsystemConfiguration={updateSubsystemConfiguration}
             selectedSubsystem={selectedSubsystem}

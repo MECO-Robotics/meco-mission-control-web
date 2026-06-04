@@ -38,6 +38,7 @@ export function groupWorkspaceContentPanelProps(
       openEditMechanismModal: props.openEditMechanismModal,
       openEditPartInstanceModal: props.openEditPartInstanceModal,
       openEditSubsystemModal: props.openEditSubsystemModal,
+      onOpenDrilldownTarget: props.onOpenDrilldownTarget,
       removePartInstanceFromMechanism: props.removePartInstanceFromMechanism,
       saveSubsystemLayout: props.saveSubsystemLayout,
       updateSubsystemConfiguration: props.updateSubsystemConfiguration,

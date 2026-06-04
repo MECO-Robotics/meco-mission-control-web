@@ -93,11 +93,16 @@ export function AppWorkspaceShellContent({
       selectedSeasonId={c.selectedSeasonId}
       selectedProject={c.selectedProject}
       selectedMemberId={c.selectedMemberId}
+      setActiveTab={c.setActiveTab}
+      setInventoryView={c.setInventoryView}
       setIsAddPersonOpen={c.setIsAddPersonOpen}
       setIsEditPersonOpen={c.setIsEditPersonOpen}
       setManufacturingView={c.setManufacturingView}
       setMemberEditDraft={c.setMemberEditDraft}
       setMemberForm={c.setMemberForm}
+      setRiskManagementView={c.setRiskManagementView}
+      setTaskView={c.setTaskView}
+      setWorklogsView={c.setWorklogsView}
       setActivePersonFilter={c.setActivePersonFilter}
       students={c.students}
       disciplinesById={c.disciplinesById}
