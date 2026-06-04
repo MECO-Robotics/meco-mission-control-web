@@ -1,4 +1,4 @@
-import type { InventoryViewTab } from "@/lib/workspaceNavigation";
+import type { InventoryViewTab, NavigationTarget } from "@/lib/workspaceNavigation";
 import type { WorkspaceToastDismissReason } from "@/features/workspace/workspaceToastQueue";
 import type { WorkspaceContentPanelsProps } from "../WorkspaceContentPanelsCoreImpl";
 import { WorkspaceToastStack, type WorkspaceToastStackItem } from "../WorkspaceStatusToast";
@@ -22,6 +22,7 @@ type SwipeDirection = "left" | "right" | null;
 
 type WorkspaceContentPanelsViewProps = WorkspaceContentPanelsProps & {
   effectiveInventoryView: InventoryViewTab;
+  onOpenDrilldownTarget: (target: NavigationTarget) => void;
   taskSwipeDirection: SwipeDirection;
   reportsSwipeDirection: SwipeDirection;
   manufacturingSwipeDirection: SwipeDirection;
