@@ -209,15 +209,20 @@ export function RobotMapView({
   };
 
   const handleAutoArrange = async () => {
+    const visibleSubsystemIds = new Set(subsystems.map((subsystem) => subsystem.id));
     const autoLayouts = buildAutoArrangedLayouts(
-      subsystems.map((subsystem) => ({
-        id: subsystem.id,
-        layoutX: subsystem.layout.layoutX,
-        layoutY: subsystem.layout.layoutY,
-        layoutView: subsystem.layout.layoutView,
-        layoutZone: subsystem.layout.layoutZone,
-        sortOrder: subsystem.layout.sortOrder,
-      })),
+      bootstrap.subsystems.map((subsystem) => {
+        const draftLayout = layoutDraftBySubsystemId[subsystem.id];
+        return {
+          id: subsystem.id,
+          layoutX: draftLayout?.layoutX ?? subsystem.layoutX,
+          layoutY: draftLayout?.layoutY ?? subsystem.layoutY,
+          layoutView: draftLayout?.layoutView ?? subsystem.layoutView,
+          layoutZone: draftLayout?.layoutZone ?? subsystem.layoutZone,
+          sortOrder: draftLayout?.sortOrder ?? subsystem.sortOrder,
+        };
+      }),
+      visibleSubsystemIds,
     );
     setLayoutDraftBySubsystemId((current) => ({ ...current, ...autoLayouts }));
 

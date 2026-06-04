@@ -121,8 +121,16 @@ function resolveAutoArrangeZone(
 
 export function buildAutoArrangedLayouts(
   subsystems: readonly AutoArrangeSubsystem[],
+  autoArrangeSubsystemIds?: ReadonlySet<string>,
 ): Record<string, SubsystemLayoutFields> {
   const layouts: Record<string, SubsystemLayoutFields> = {};
+  const maximumSortOrder = subsystems.reduce(
+    (maximum, subsystem) =>
+      typeof subsystem.sortOrder === "number" && Number.isFinite(subsystem.sortOrder)
+        ? Math.max(maximum, subsystem.sortOrder)
+        : maximum,
+    -1,
+  );
   const occupiedSlots = subsystems
     .map(resolveSubsystemLayout)
     .filter(isSubsystemPlaced)
@@ -131,7 +139,11 @@ export function buildAutoArrangedLayouts(
       layoutY: layout.layoutY ?? 0.5,
     }));
   const unplacedSubsystems = subsystems
-    .filter((subsystem) => !isSubsystemPlaced(resolveSubsystemLayout(subsystem)))
+    .filter(
+      (subsystem) =>
+        !isSubsystemPlaced(resolveSubsystemLayout(subsystem)) &&
+        (!autoArrangeSubsystemIds || autoArrangeSubsystemIds.has(subsystem.id)),
+    )
     .sort((left, right) => {
       const leftSortOrder = left.sortOrder ?? Number.POSITIVE_INFINITY;
       const rightSortOrder = right.sortOrder ?? Number.POSITIVE_INFINITY;
@@ -166,7 +178,7 @@ export function buildAutoArrangedLayouts(
       layoutY: nextSlot.layoutY,
       layoutZone: resolveAutoArrangeZone(nextSlot, subsystem.layoutZone),
       layoutView: subsystem.layoutView === "top" ? subsystem.layoutView : DEFAULT_SUBSYSTEM_LAYOUT_VIEW,
-      sortOrder: subsystem.sortOrder ?? index,
+      sortOrder: subsystem.sortOrder ?? maximumSortOrder + index + 1,
     };
   });
 
