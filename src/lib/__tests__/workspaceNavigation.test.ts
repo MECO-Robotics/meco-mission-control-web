@@ -2,11 +2,16 @@
 
 import {
   BASE_SECTION_LABELS,
+  NAVIGATION_SUB_ITEM_AVAILABILITY_MATRIX,
+  VIEW_AVAILABILITY_CONTEXTS,
   getActiveNavigationSubItemId,
+  isNavigationSubItemAvailable,
   isNavigationSubItemId,
+  resolveViewAvailabilityContext,
   targetMatchesNavigationState,
   type NavigationState,
   type NavigationTarget,
+  type ViewTab,
 } from "@/lib/workspaceNavigation";
 
 function createNavigationState(overrides: Partial<NavigationState> = {}): NavigationState {
@@ -160,6 +165,83 @@ describe("targetMatchesNavigationState", () => {
           inventoryView: "materials",
         }),
       ),
+    ).toBe(false);
+  });
+});
+
+describe("view availability matrix", () => {
+  it("documents every navigation subitem for every supported context", () => {
+    for (const [subItemId, row] of Object.entries(NAVIGATION_SUB_ITEM_AVAILABILITY_MATRIX)) {
+      expect(isNavigationSubItemId(subItemId)).toBe(true);
+
+      for (const context of VIEW_AVAILABILITY_CONTEXTS) {
+        expect(typeof row[context]).toBe("boolean");
+      }
+    }
+  });
+
+  it("resolves availability contexts from season and project scope", () => {
+    expect(
+      resolveViewAvailabilityContext({
+        hasProjects: true,
+        hasSeasons: false,
+        selectedProjectType: null,
+      }),
+    ).toBe("no-season");
+    expect(
+      resolveViewAvailabilityContext({
+        hasProjects: false,
+        hasSeasons: true,
+        selectedProjectType: null,
+      }),
+    ).toBe("no-project");
+    expect(
+      resolveViewAvailabilityContext({
+        hasProjects: true,
+        hasSeasons: true,
+        selectedProjectType: null,
+      }),
+    ).toBe("all-project");
+    expect(
+      resolveViewAvailabilityContext({
+        hasProjects: true,
+        hasSeasons: true,
+        selectedProjectType: "robot",
+      }),
+    ).toBe("robot-project");
+    expect(
+      resolveViewAvailabilityContext({
+        hasProjects: true,
+        hasSeasons: true,
+        selectedProjectType: "operations",
+      }),
+    ).toBe("non-robot-project");
+  });
+
+  it("enables robot-only views only for robot project context", () => {
+    expect(
+      isNavigationSubItemAvailable("config-robot-model", {
+        context: "robot-project",
+      }),
+    ).toBe(true);
+    expect(
+      isNavigationSubItemAvailable("config-robot-model", {
+        context: "all-project",
+      }),
+    ).toBe(false);
+    expect(
+      isNavigationSubItemAvailable("tasks-manufacturing", {
+        context: "non-robot-project",
+      }),
+    ).toBe(false);
+  });
+
+  it("disables otherwise valid views when the owning top-level tab is unavailable", () => {
+    expect(
+      isNavigationSubItemAvailable("inventory-materials", {
+        context: "robot-project",
+        visibleTabs: new Set<ViewTab>(["tasks"]),
+      }),
     ).toBe(false);
   });
 });

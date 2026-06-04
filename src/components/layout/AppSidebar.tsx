@@ -12,6 +12,7 @@ import {
   type TaskViewTab,
   type ViewTab,
   type WorklogsViewTab,
+  resolveViewAvailabilityContext,
 } from "@/lib/workspaceNavigation";
 import type { SessionUser } from "@/lib/auth/types";
 import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
@@ -114,7 +115,11 @@ export function AppSidebar({
 }: AppSidebarProps) {
   const selectedProject = projects.find((project) => project.id === selectedProjectId) ?? null;
   const selectedSeason = seasons.find((season) => season.id === selectedSeasonId) ?? null;
-  const isRobotProject = selectedProject?.projectType === "robot";
+  const viewAvailabilityContext = resolveViewAvailabilityContext({
+    hasProjects: projects.length > 0,
+    hasSeasons: seasons.length > 0,
+    selectedProjectType: selectedProject?.projectType ?? null,
+  });
   const canEditSelectedRobot = selectedProject?.projectType === "robot";
   const selectedProjectLabel = selectedProject?.name ?? "All projects";
   const selectedScopeLabel = selectedSeason
@@ -133,12 +138,12 @@ export function AppSidebar({
     favoriteViewIds,
     inventoryView,
     manufacturingView,
-    isRobotProject,
     items,
     reportsView,
     rosterView,
     riskManagementView,
     taskView,
+    viewAvailabilityContext,
     worklogsView,
   });
 

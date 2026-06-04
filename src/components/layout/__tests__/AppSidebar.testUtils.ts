@@ -9,7 +9,7 @@ jest.mock("@/lib/branding", () => ({
 
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import type { SessionUser } from "@/lib/auth/types";
-import type { ProjectRecord } from "@/types/recordsOrganization";
+import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
 import type { NavigationItem, NavigationSubItemId, ViewTab } from "@/lib/workspaceNavigation";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
@@ -29,6 +29,8 @@ export function renderSidebar(
     projects?: ProjectRecord[];
     riskManagementView?: "kanban" | "metrics";
     selectedProjectId?: string | null;
+    selectedSeasonId?: string | null;
+    seasons?: SeasonRecord[];
     sessionUser?: SessionUser | null;
     taskView?: "calendar" | "timeline" | "robot-map" | "queue" | "milestones";
   },
@@ -65,8 +67,8 @@ export function renderSidebar(
       rosterView: "directory",
       riskManagementView: options?.riskManagementView ?? "kanban",
       selectedProjectId: options?.selectedProjectId ?? null,
-      selectedSeasonId: "season-1",
-      seasons: [
+      selectedSeasonId: options?.selectedSeasonId ?? "season-1",
+      seasons: options?.seasons ?? [
         {
           id: "season-1",
           name: "2026 Season",

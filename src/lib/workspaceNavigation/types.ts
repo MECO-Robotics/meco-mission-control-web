@@ -22,6 +22,13 @@ export type NavigationSection =
   | "roster"
   | "reports";
 
+export type ViewAvailabilityContext =
+  | "all-project"
+  | "robot-project"
+  | "non-robot-project"
+  | "no-project"
+  | "no-season";
+
 export type TaskViewTab = "calendar" | "timeline" | "robot-map" | "queue" | "milestones";
 export type RiskManagementViewTab = "attention" | "kanban" | "metrics";
 export type WorklogsViewTab = "logs" | "summary" | "activity" | "kanban";
@@ -95,4 +102,9 @@ export interface NavigationSubItem {
   label: string;
   section: NavigationSection;
   target: NavigationTarget;
+}
+
+export interface ViewAvailabilityScope {
+  context: ViewAvailabilityContext;
+  visibleTabs?: ReadonlySet<ViewTab>;
 }
