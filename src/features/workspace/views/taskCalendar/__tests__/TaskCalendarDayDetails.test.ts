@@ -4,9 +4,11 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { TaskCalendarDayDetails } from "@/features/workspace/views/taskCalendar/TaskCalendarDayDetails";
+import { TaskCalendarFilterToolbar } from "@/features/workspace/views/taskCalendar/TaskCalendarFilterToolbar";
 import { TaskCalendarMonthGrid } from "@/features/workspace/views/taskCalendar/TaskCalendarMonthGrid";
 import { TaskCalendarMonthToolbar } from "@/features/workspace/views/taskCalendar/TaskCalendarMonthToolbar";
 import type { TaskCalendarEvent } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
+import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 
 const taskEvent: TaskCalendarEvent = {
   allDay: true,
@@ -155,16 +157,38 @@ describe("TaskCalendarMonthToolbar", () => {
       onMonthChange,
       setMonthCursor,
     }) as React.ReactElement<{ children: React.ReactNode }>;
-    const [actions] = React.Children.toArray(toolbar.props.children) as React.ReactElement<{
-      children: React.ReactNode;
-    }>[];
-    const buttons = React.Children.toArray(actions.props.children) as React.ReactElement<{
-      onClick: () => void;
-    }>[];
+    const previousButton = findButtonByTitle(toolbar, "Previous month");
+    const nextButton = findButtonByTitle(toolbar, "Next month");
+    const todayButton = findButtonByTitle(toolbar, "Jump to current month");
 
-    buttons.forEach((button) => button.props.onClick());
+    previousButton?.props.onClick({ stopPropagation: jest.fn() });
+    nextButton?.props.onClick({ stopPropagation: jest.fn() });
+    todayButton?.props.onClick({ stopPropagation: jest.fn() });
 
     expect(onMonthChange).toHaveBeenCalledTimes(3);
     expect(setMonthCursor).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe("TaskCalendarFilterToolbar", () => {
+  it("keeps event filtering and sorting in one compact view menu", () => {
+    const toolbar = TaskCalendarFilterToolbar({
+      eventFilter: "qa-due",
+      onEventFilterChange: jest.fn(),
+      onSortModeChange: jest.fn(),
+      sortMode: "priority",
+    }) as React.ReactElement<{ children: React.ReactNode }>;
+    const [viewOptionsMenu] = React.Children.toArray(toolbar.props.children) as React.ReactElement<{
+      activeCount: number;
+      ariaLabel: string;
+      buttonLabel: string;
+      items: Array<{ label: string }>;
+    }>[];
+
+    expect(viewOptionsMenu.type).toBe(CompactFilterMenu);
+    expect(viewOptionsMenu.props.ariaLabel).toBe("Calendar view options");
+    expect(viewOptionsMenu.props.buttonLabel).toBe("View");
+    expect(viewOptionsMenu.props.activeCount).toBe(2);
+    expect(viewOptionsMenu.props.items.map((item) => item.label)).toEqual(["Event type", "Sort by"]);
   });
 });
