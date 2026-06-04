@@ -147,6 +147,6 @@ describe("normalizeBootstrapPayload", () => {
 
     const normalized = normalizeBootstrapPayload(payload);
 
-    expect(normalized.taskBlockers[0]?.blockerType).toBe("other");
+    expect(normalized.taskBlockers?.[0]?.blockerType).toBe("other");
   });
 });
