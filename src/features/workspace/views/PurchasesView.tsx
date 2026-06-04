@@ -5,7 +5,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { PurchaseItemRecord } from "@/types/recordsInventory";
 import { IconManufacturing, IconPerson, IconTasks } from "@/components/shared/Icons";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
-import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
+import { WorkspaceEmptyState, WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
 import { ColumnFilterDropdown } from "@/features/workspace/shared/filters/ColumnFilterDropdown";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { EditableHoverIndicator, PaginationControls, RequestedItemMeta, TableCell, useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
@@ -93,6 +93,14 @@ export function PurchasesView({
     vendor,
   ]);
   const gridTemplate = "minmax(200px, 2.5fr) 1fr 0.6fr 1fr 1fr 1fr 1fr";
+  const hasPurchaseFilters =
+    search.trim().length > 0 ||
+    subsystem.length > 0 ||
+    requester.length > 0 ||
+    status.length > 0 ||
+    vendor.length > 0 ||
+    approval.length > 0 ||
+    activePersonFilter.length > 0;
 
   return (
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
@@ -289,7 +297,20 @@ export function PurchasesView({
         ))}
 
         {filteredPurchases.length === 0 ? (
-          <p className="empty-state">No purchase requests match the current filters.</p>
+          <WorkspaceEmptyState
+            actionLabel={hasPurchaseFilters ? undefined : "Add purchase"}
+            onAction={hasPurchaseFilters ? undefined : openCreatePurchaseModal}
+            reason={
+              hasPurchaseFilters
+                ? "The current search, person, status, vendor, or approval filters hide every purchase request in this scope."
+                : "This workspace has not captured any parts, tools, or materials that need purchasing yet."
+            }
+            title={
+              hasPurchaseFilters
+                ? "No purchase requests match these filters"
+                : "Track requested parts and materials here"
+            }
+          />
         ) : null}
         <PaginationControls
           label="purchases"
