@@ -135,7 +135,7 @@ export function TaskCalendarView({
         <AppTopbarSlotPortal slot="controls">
           <div className="panel-actions filter-toolbar task-queue-toolbar task-calendar-filter-toolbar">
             <TopbarResponsiveSearch
-              actionCount={2}
+              actionCount={1}
               actions={
                 <TaskCalendarFilterToolbar
                   eventFilter={calendar.eventFilter}
