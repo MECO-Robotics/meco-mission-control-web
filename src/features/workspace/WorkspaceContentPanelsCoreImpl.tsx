@@ -51,6 +51,7 @@ export interface WorkspaceContentPanelsProps {
   tabSwitchDirection: TabSwitchDirection;
   allMembers: BootstrapPayload["members"];
   artifacts: ArtifactRecord[];
+  availabilityBootstrap: BootstrapPayload;
   bootstrap: BootstrapPayload;
   cncItems: ManufacturingItemRecord[];
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
@@ -89,6 +90,7 @@ export interface WorkspaceContentPanelsProps {
   openCreatePartDefinitionModal: () => void;
   openCreatePurchaseModal: () => void;
   openCreateTaskModal: () => void;
+  openCreateTaskModalForMember: (memberId: string) => void;
   openCreateTaskModalFromTimeline: () => void;
   openCreateWorkLogModal: () => void;
   openCreateQaReportModal: () => void;

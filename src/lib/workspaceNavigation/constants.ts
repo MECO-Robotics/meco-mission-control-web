@@ -5,6 +5,7 @@ import type {
   NavigationSubItem,
   ReportsViewTab,
   RiskManagementViewTab,
+  RosterViewTab,
   TaskViewTab,
   ViewOption,
   ViewTab,
@@ -38,6 +39,12 @@ export const INVENTORY_VIEW_ORDER: readonly InventoryViewTab[] = [
   "parts",
   "part-mappings",
   "purchases",
+];
+export const ROSTER_VIEW_ORDER: readonly RosterViewTab[] = [
+  "available",
+  "workload",
+  "attendance",
+  "directory",
 ];
 
 export const NAVIGATION_SECTION_ORDER: readonly NavigationSection[] = [
@@ -205,6 +212,12 @@ export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = [
     label: "Purchases",
     section: "inventory",
     target: { tab: "inventory", inventoryView: "purchases" },
+  },
+  {
+    id: "roster-available",
+    label: "Available",
+    section: "roster",
+    target: { tab: "roster", rosterView: "available" },
   },
   {
     id: "roster-workload",

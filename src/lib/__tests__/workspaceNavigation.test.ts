@@ -67,6 +67,14 @@ describe("getActiveNavigationSubItemId", () => {
     ).toBe("config-directory");
   });
 
+  it("maps roster available to roster available", () => {
+    expect(
+      getActiveNavigationSubItemId(
+        createNavigationState({ activeTab: "roster", rosterView: "available" }),
+      ),
+    ).toBe("roster-available");
+  });
+
   it("maps worklogs activity to dashboard activity", () => {
     expect(
       getActiveNavigationSubItemId(

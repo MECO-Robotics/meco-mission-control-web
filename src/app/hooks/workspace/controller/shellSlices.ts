@@ -163,6 +163,7 @@ export const shellContentTaskActionKeys = [
   "handleTimelineMilestoneDelete",
   "handleTimelineMilestoneSave",
   "openCreateTaskModal",
+  "openCreateTaskModalForMember",
   "openCreateTaskModalFromTimeline",
   "openTimelineTaskDetailsModal",
 ] as const;

@@ -16,6 +16,7 @@ export function AppWorkspaceShellContent({
       tabSwitchDirection={c.tabSwitchDirection}
       allMembers={c.bootstrap.members}
       artifacts={c.scopedArtifacts}
+      availabilityBootstrap={c.bootstrap}
       bootstrap={c.scopedBootstrap}
       cncItems={c.cncItems}
       dataMessage={c.dataMessage}
@@ -50,6 +51,7 @@ export function AppWorkspaceShellContent({
       openCreatePartDefinitionModal={c.openCreatePartDefinitionModal}
       openCreatePurchaseModal={c.openCreatePurchaseModal}
       openCreateTaskModal={c.openCreateTaskModal}
+      openCreateTaskModalForMember={c.openCreateTaskModalForMember}
       openCreateTaskModalFromTimeline={c.openCreateTaskModalFromTimeline}
       openCreateWorkLogModal={c.openCreateWorkLogModal}
       openCreateQaReportModal={c.openCreateQaReportModal}

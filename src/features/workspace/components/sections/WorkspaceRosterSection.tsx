@@ -1,3 +1,4 @@
+import { RosterAvailableStudentsView } from "@/features/workspace/views/roster/RosterAvailableStudentsView";
 import { RosterAttendanceView } from "@/features/workspace/views/roster/RosterAttendanceView";
 import { RosterWorkloadView } from "@/features/workspace/views/roster/RosterWorkloadView";
 import { RosterView } from "@/features/workspace/views/RosterView";
@@ -17,6 +18,7 @@ export function WorkspaceRosterSection({
   const disablePanelAnimations = shell.disablePanelAnimations ?? false;
   const {
     allMembers,
+    availabilityBootstrap,
     bootstrap,
     externalMembers,
     handleCreateMember,
@@ -30,6 +32,8 @@ export function WorkspaceRosterSection({
     memberEditDraft,
     memberForm,
     openTimelineTaskDetailsModal,
+    openCreateTaskModal,
+    openCreateTaskModalForMember,
     requestMemberPhotoUpload,
     rosterMentors,
     rosterView,
@@ -50,6 +54,17 @@ export function WorkspaceRosterSection({
       isActive={shell.activeTab === "roster"}
       tabSwitchDirection={shell.tabSwitchDirection}
     >
+      <WorkspaceSubPanel disableAnimations={disablePanelAnimations} isActive={rosterView === "available"}>
+        <RosterAvailableStudentsView
+          availabilityBootstrap={availabilityBootstrap}
+          bootstrap={bootstrap}
+          onCreateTask={openCreateTaskModal}
+          onCreateTaskForMember={openCreateTaskModalForMember}
+          onOpenTask={openTimelineTaskDetailsModal}
+          selectedProject={selectedProject}
+        />
+      </WorkspaceSubPanel>
+
       <WorkspaceSubPanel disableAnimations={disablePanelAnimations} isActive={rosterView === "directory"}>
         <RosterView
           allMembers={allMembers}
