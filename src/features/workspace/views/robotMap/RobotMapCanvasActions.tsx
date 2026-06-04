@@ -7,6 +7,25 @@ interface RobotMapCanvasActionsProps {
   onResetLayout: () => void;
 }
 
+interface RobotMapResetConfirmationProps {
+  onConfirm: () => void;
+}
+
+export function RobotMapResetConfirmation({ onConfirm }: RobotMapResetConfirmationProps) {
+  return (
+    <div className="robot-config-reset-menu-panel" role="menu">
+      <p>Are you sure?</p>
+      <button
+        className="primary-action queue-toolbar-action robot-config-reset-confirm"
+        onClick={onConfirm}
+        type="button"
+      >
+        Confirm
+      </button>
+    </div>
+  );
+}
+
 export function RobotMapCanvasActions({
   onAddSubsystem,
   onResetLayout,
@@ -45,19 +64,12 @@ export function RobotMapCanvasActions({
           <span>Reset</span>
         </button>
         {isResetMenuOpen ? (
-          <div className="robot-config-reset-menu-panel" role="menu">
-            <p>Are you sure?</p>
-            <button
-              className="primary-action queue-toolbar-action robot-config-reset-confirm"
-              onClick={() => {
-                onResetLayout();
-                setIsResetMenuOpen(false);
-              }}
-              type="button"
-            >
-              Confirm
-            </button>
-          </div>
+          <RobotMapResetConfirmation
+            onConfirm={() => {
+              onResetLayout();
+              setIsResetMenuOpen(false);
+            }}
+          />
         ) : null}
       </div>
       <button
