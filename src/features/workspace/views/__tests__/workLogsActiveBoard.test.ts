@@ -108,7 +108,7 @@ describe("workLogsActiveBoard", () => {
         {
           blockedTaskId: "task-blocked",
           blockerId: null,
-          blockerType: "external",
+          blockerType: "other",
           createdAt: "2026-05-03T00:00:00.000Z",
           createdByMemberId: null,
           description: "Waiting on motor controller",

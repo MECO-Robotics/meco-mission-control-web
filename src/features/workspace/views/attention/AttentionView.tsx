@@ -87,6 +87,7 @@ export function AttentionView({
         item.ownerLabel,
         item.statusLabel,
         item.severityLabel,
+        item.blockerTypeLabel,
         item.contextLabel,
         item.sourceType,
       ]

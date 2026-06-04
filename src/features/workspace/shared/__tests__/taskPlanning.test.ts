@@ -148,7 +148,7 @@ const bootstrap = {
     {
       id: "blocker-1",
       blockedTaskId: "task-b",
-      blockerType: "external",
+      blockerType: "other",
       blockerId: null,
       description: "Waiting on vendor shipment",
       severity: "medium",

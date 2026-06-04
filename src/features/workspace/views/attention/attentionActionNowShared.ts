@@ -1,4 +1,5 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskBlockerType } from "@/types/common";
 import {
   ATTENTION_DUE_SOON_DAYS,
   daysUntilDate,
@@ -18,6 +19,7 @@ export interface AttentionLookup {
 
 export interface ItemScoringSignals {
   blockedAgeDays?: number | null;
+  blockerTypes?: TaskBlockerType[];
   downstreamBlockedCount?: number;
   dueDate?: string;
   isOwnerMissing?: boolean;
@@ -43,6 +45,18 @@ const REASON_WEIGHTS: Record<AttentionReason, number> = {
   "waiting-qa": 14,
 };
 
+const BLOCKER_TYPE_WEIGHTS: Record<TaskBlockerType, number> = {
+  "broken-part": 8,
+  "broken-tool": 6,
+  "design-issue": 8,
+  "lost-part": 7,
+  "lost-tool": 5,
+  "manufacturing-unavailable": 7,
+  other: 0,
+  "qa-failed": 9,
+  "shipping-delay": 6,
+};
+
 export function addReason(reasons: AttentionReason[], reason: AttentionReason, enabled = true) {
   if (enabled && !reasons.includes(reason)) {
     reasons.push(reason);
@@ -65,6 +79,10 @@ export function scoreAttentionItem(signals: ItemScoringSignals, today = new Date
 
   if ((signals.downstreamBlockedCount ?? 0) > 0) {
     score += Math.min(12, (signals.downstreamBlockedCount ?? 0) * 3);
+  }
+
+  if (signals.blockerTypes?.length) {
+    score += Math.max(...signals.blockerTypes.map((blockerType) => BLOCKER_TYPE_WEIGHTS[blockerType] ?? 0));
   }
 
   if ((signals.blockedAgeDays ?? 0) > 2) {

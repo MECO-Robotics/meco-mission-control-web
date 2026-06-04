@@ -154,7 +154,7 @@ describe("appUtils", () => {
         {
           id: "task-blocker-1",
           blockedTaskId: "task-1",
-          blockerType: "task",
+          blockerType: "design-issue",
           blockerId: "task-upstream",
           description: "Waiting on upstream task",
           severity: "high",
@@ -169,7 +169,7 @@ describe("appUtils", () => {
     expect(taskToPayload(bootstrap.tasks[0], bootstrap).taskBlockers).toEqual([
       {
         id: "task-blocker-1",
-        blockerType: "task",
+        blockerType: "design-issue",
         blockerId: "task-upstream",
         description: "Waiting on upstream task",
         severity: "high",

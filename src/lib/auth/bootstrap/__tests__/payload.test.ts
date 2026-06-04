@@ -125,4 +125,28 @@ describe("normalizeBootstrapPayload", () => {
     expect(normalized.qaReviews).toEqual(qaReviews);
     expect(normalized.escalations).toEqual(escalations);
   });
+
+  it("normalizes unknown task blocker types to other", () => {
+    const payload = {
+      ...EMPTY_BOOTSTRAP,
+      taskBlockers: [
+        {
+          id: "task-blocker-1",
+          blockedTaskId: "task-1",
+          blockerType: "vendor-shutdown",
+          blockerId: null,
+          description: "Unexpected vendor blocker",
+          severity: "medium",
+          status: "open",
+          createdByMemberId: null,
+          createdAt: "2026-01-01T00:00:00.000Z",
+          resolvedAt: null,
+        },
+      ],
+    } as unknown as BootstrapPayload;
+
+    const normalized = normalizeBootstrapPayload(payload);
+
+    expect(normalized.taskBlockers?.[0]?.blockerType).toBe("other");
+  });
 });

@@ -284,7 +284,7 @@ function createBootstrap(): BootstrapPayload {
       {
         id: "blocker-hidden-task",
         blockedTaskId: "task-visible",
-        blockerType: "task",
+        blockerType: "other",
         blockerId: "task-hidden",
         description: "Waiting on hidden task",
         severity: "medium",
@@ -296,7 +296,7 @@ function createBootstrap(): BootstrapPayload {
       {
         id: "blocker-hidden-milestone",
         blockedTaskId: "task-visible",
-        blockerType: "milestone",
+        blockerType: "design-issue",
         blockerId: "milestone-hidden",
         description: "Waiting on hidden milestone",
         severity: "medium",
@@ -308,7 +308,7 @@ function createBootstrap(): BootstrapPayload {
       {
         id: "blocker-hidden-part",
         blockedTaskId: "task-visible",
-        blockerType: "part_instance",
+        blockerType: "lost-part",
         blockerId: "part-instance-hidden-subsystem",
         description: "Waiting on hidden part instance",
         severity: "medium",
@@ -320,7 +320,7 @@ function createBootstrap(): BootstrapPayload {
       {
         id: "blocker-external",
         blockedTaskId: "task-visible",
-        blockerType: "external",
+        blockerType: "shipping-delay",
         blockerId: null,
         description: "Waiting on vendor",
         severity: "medium",

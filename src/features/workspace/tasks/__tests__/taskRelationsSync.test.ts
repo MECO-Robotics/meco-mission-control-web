@@ -49,7 +49,7 @@ function createTaskPayload(): TaskPayload {
     ],
     taskBlockers: [
       {
-        blockerType: "external",
+        blockerType: "shipping-delay",
         blockerId: null,
         description: "  Waiting on vendor reply  ",
         severity: "medium",
@@ -116,7 +116,7 @@ function createTaskRelationPersistence(): TaskRelationPersistence {
         return {
       id: blockerId,
       blockedTaskId: payload.blockedTaskId ?? "task-1",
-      blockerType: payload.blockerType ?? "external",
+      blockerType: payload.blockerType ?? "other",
       blockerId: payload.blockerId ?? null,
       description: payload.description ?? "",
       severity: payload.severity ?? "medium",
@@ -133,7 +133,7 @@ function createTaskRelationPersistence(): TaskRelationPersistence {
         return {
       id: blockerId,
       blockedTaskId: "task-1",
-      blockerType: "external",
+      blockerType: "other",
       blockerId: null,
       description: "",
       severity: "medium",
@@ -265,7 +265,7 @@ describe("task relation sync services", () => {
       {
         id: "blocker-keep",
         blockedTaskId: "task-1",
-        blockerType: "external",
+        blockerType: "shipping-delay",
         blockerId: null,
         description: "Waiting on parts",
         severity: "medium",
@@ -277,7 +277,7 @@ describe("task relation sync services", () => {
       {
         id: "blocker-update",
         blockedTaskId: "task-1",
-        blockerType: "task",
+        blockerType: "design-issue",
         blockerId: "task-2",
         description: "Old detail",
         severity: "low",
@@ -289,7 +289,7 @@ describe("task relation sync services", () => {
       {
         id: "blocker-remove",
         blockedTaskId: "task-1",
-        blockerType: "part_instance",
+        blockerType: "lost-part",
         blockerId: "part-2",
         description: "Remove this blocker",
         severity: "high",
@@ -306,20 +306,20 @@ describe("task relation sync services", () => {
         desiredBlockers: [
           {
             id: "blocker-keep",
-            blockerType: "external",
+            blockerType: "shipping-delay",
             blockerId: null,
             description: "Waiting on parts",
             severity: "medium",
           },
           {
             id: "blocker-update",
-            blockerType: "milestone",
+            blockerType: "qa-failed",
             blockerId: "milestone-1",
             description: "  Needs milestone handoff  ",
             severity: "high",
           },
           {
-            blockerType: "external",
+            blockerType: "manufacturing-unavailable",
             blockerId: null,
             description: "  Supplier ETA unknown  ",
             severity: "low",
@@ -336,7 +336,7 @@ describe("task relation sync services", () => {
       "blocker-update",
       expect.objectContaining({
         blockedTaskId: "task-1",
-        blockerType: "milestone",
+        blockerType: "qa-failed",
         blockerId: "milestone-1",
         description: "Needs milestone handoff",
         severity: "high",
@@ -348,7 +348,7 @@ describe("task relation sync services", () => {
     expect(persistence.createTaskBlockerRecord).toHaveBeenCalledWith(
       expect.objectContaining({
         blockedTaskId: "task-1",
-        blockerType: "external",
+        blockerType: "manufacturing-unavailable",
         blockerId: null,
         description: "Supplier ETA unknown",
         severity: "low",
