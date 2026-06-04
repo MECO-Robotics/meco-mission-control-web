@@ -84,6 +84,7 @@ describe("appUtils", () => {
     expect(payload.assigneeIds).toEqual(["lead-1"]);
     expect(payload.mentorId).toBe("mentor-1");
     expect(payload.targetMilestoneId).toBe("milestone-1");
+    expect(payload.targetRiskId).toBeNull();
     expect(payload.startDate).toBe("2026-01-02");
     expect(payload.dueDate).toBe("2026-01-02");
     expect(payload.priority).toBe("medium");
@@ -133,6 +134,16 @@ describe("appUtils", () => {
         dependencyType: "hard",
       },
     ]);
+  });
+
+  it("taskToPayload carries the targeted risk", () => {
+    const bootstrap = createBootstrap();
+    const task = {
+      ...bootstrap.tasks[0],
+      targetRiskId: "risk-1",
+    };
+
+    expect(taskToPayload(task, bootstrap).targetRiskId).toBe("risk-1");
   });
 
   it("taskToPayload carries blocker strings from task data", () => {

@@ -62,6 +62,10 @@ export function buildEmptyReportPayload(
     participantIds?: string[];
     mentorApproved?: boolean;
     reviewedAt?: string;
+    proposedRiskId?: string | null;
+    proposedRiskSeverity?: ReportPayload["proposedRiskSeverity"];
+    proposedRiskStatus?: ReportPayload["proposedRiskStatus"];
+    riskReassessmentNote?: string;
     title?: string;
     status?: ReportPayload["status"];
     findings?: string[];
@@ -98,6 +102,10 @@ export function buildEmptyReportPayload(
     participantIds: defaults.participantIds ?? [],
     mentorApproved: defaults.mentorApproved ?? false,
     reviewedAt: defaults.reviewedAt ?? today,
+    proposedRiskId: defaults.proposedRiskId ?? task?.targetRiskId ?? null,
+    proposedRiskSeverity: defaults.proposedRiskSeverity ?? null,
+    proposedRiskStatus: defaults.proposedRiskStatus ?? null,
+    riskReassessmentNote: defaults.riskReassessmentNote ?? "",
     title: defaults.title ?? "",
     status: defaults.status ?? "pass",
     findings: defaults.findings ?? [],

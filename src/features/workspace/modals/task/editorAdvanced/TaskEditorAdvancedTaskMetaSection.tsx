@@ -48,6 +48,33 @@ export function TaskEditorAdvancedTaskMetaSection({
         </select>
       </label>
       <label className="field">
+        <span style={{ color: "var(--text-title)" }}>Target risk</span>
+        <select
+          onChange={(milestone) =>
+            setTaskDraft((current) => ({
+              ...current,
+              targetRiskId: milestone.target.value || null,
+            }))
+          }
+          style={{
+            background: "var(--bg-row-alt)",
+            color: "var(--text-title)",
+            border: "1px solid var(--border-base)",
+          }}
+          value={taskDraft.targetRiskId ?? ""}
+        >
+          <option value="">No risk targeted</option>
+          {bootstrap.risks.map((risk) => (
+            <option key={risk.id} value={risk.id}>
+              {risk.title}
+            </option>
+          ))}
+        </select>
+        <small style={{ color: "var(--text-copy)" }}>
+          A task can target one risk for QA-driven reassessment.
+        </small>
+      </label>
+      <label className="field">
         <span style={{ color: "var(--text-title)" }}>Status</span>
         <select
           onChange={(milestone) =>

@@ -4,6 +4,7 @@ import type {
   ReportType,
   RiskAttachmentType,
   RiskSeverity,
+  RiskStatus,
   TestResultStatus,
 } from "./common";
 
@@ -23,6 +24,10 @@ export interface ReportRecord {
   participantIds?: string[];
   mentorApproved?: boolean;
   reviewedAt?: string;
+  proposedRiskId?: string | null;
+  proposedRiskSeverity?: RiskSeverity | null;
+  proposedRiskStatus?: RiskStatus | null;
+  riskReassessmentNote?: string;
   title?: string;
   status?: TestResultStatus;
   findings?: string[];
@@ -90,6 +95,7 @@ export interface RiskRecord {
   title: string;
   detail: string;
   severity: RiskSeverity;
+  status?: RiskStatus;
   sourceType: "qa-report" | "test-result";
   sourceId: string;
   attachmentType: RiskAttachmentType;

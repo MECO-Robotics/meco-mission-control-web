@@ -1,6 +1,7 @@
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { QaReportPayload } from "@/types/payloads";
+import { formatRiskSeverity, formatRiskStatus } from "@/features/workspace/views/riskViewModel";
 import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
 
 interface QaReportEditorModalProps {
@@ -23,6 +24,9 @@ export function QaReportEditorModal({
   setQaReportDraft,
 }: QaReportEditorModalProps) {
   const selectedTask = bootstrap.tasks.find((task) => task.id === qaReportDraft.taskId);
+  const selectedTaskRisk = selectedTask?.targetRiskId
+    ? bootstrap.risks.find((risk) => risk.id === selectedTask.targetRiskId) ?? null
+    : null;
   const qaReportPhotoProjectId = selectedTask?.projectId ?? bootstrap.projects[0]?.id ?? null;
 
   return (
@@ -61,6 +65,10 @@ export function QaReportEditorModal({
                 setQaReportDraft((current) => ({
                   ...current,
                   taskId: milestone.target.value,
+                  proposedRiskId:
+                    bootstrap.tasks.find((task) => task.id === milestone.target.value)?.targetRiskId ?? null,
+                  proposedRiskSeverity: null,
+                  proposedRiskStatus: null,
                 }))
               }
               required
@@ -83,6 +91,82 @@ export function QaReportEditorModal({
             {selectedTask ? (
               <small style={{ color: "var(--text-copy)" }}>{selectedTask.summary}</small>
             ) : null}
+          </label>
+          <label className="field">
+            <span style={{ color: "var(--text-title)" }}>Targeted risk</span>
+            <select
+              onChange={(milestone) =>
+                setQaReportDraft((current) => ({
+                  ...current,
+                  proposedRiskId: milestone.target.value || null,
+                }))
+              }
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={qaReportDraft.proposedRiskId ?? ""}
+            >
+              <option value="">No risk reassessment</option>
+              {selectedTaskRisk ? (
+                <option value={selectedTaskRisk.id}>{selectedTaskRisk.title}</option>
+              ) : null}
+            </select>
+            <small style={{ color: "var(--text-copy)" }}>
+              QA can reassess only the risk targeted by this task.
+            </small>
+          </label>
+          <label className="field">
+            <span style={{ color: "var(--text-title)" }}>Proposed severity</span>
+            <select
+              disabled={!qaReportDraft.proposedRiskId}
+              onChange={(milestone) =>
+                setQaReportDraft((current) => ({
+                  ...current,
+                  proposedRiskSeverity:
+                    (milestone.target.value as QaReportPayload["proposedRiskSeverity"]) || null,
+                }))
+              }
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={qaReportDraft.proposedRiskSeverity ?? ""}
+            >
+              <option value="">No severity change</option>
+              <option value="high">{formatRiskSeverity("high")}</option>
+              <option value="medium">{formatRiskSeverity("medium")}</option>
+              <option value="low">{formatRiskSeverity("low")}</option>
+            </select>
+          </label>
+          <label className="field">
+            <span style={{ color: "var(--text-title)" }}>Proposed status</span>
+            <select
+              disabled={!qaReportDraft.proposedRiskId}
+              onChange={(milestone) =>
+                setQaReportDraft((current) => ({
+                  ...current,
+                  proposedRiskStatus:
+                    (milestone.target.value as QaReportPayload["proposedRiskStatus"]) || null,
+                }))
+              }
+              style={{
+                background: "var(--bg-row-alt)",
+                color: "var(--text-title)",
+                border: "1px solid var(--border-base)",
+              }}
+              value={qaReportDraft.proposedRiskStatus ?? ""}
+            >
+              <option value="">No status change</option>
+              <option value="open">{formatRiskStatus("open")}</option>
+              <option value="partially-mitigated">{formatRiskStatus("partially-mitigated")}</option>
+              <option value="mitigated">{formatRiskStatus("mitigated")}</option>
+            </select>
+            <small style={{ color: "var(--text-copy)" }}>
+              Partial mitigation lowers or contains the risk. Full mitigation marks it controlled.
+            </small>
           </label>
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Result</span>
@@ -168,6 +252,10 @@ export function QaReportEditorModal({
             />
             <span style={{ color: "var(--text-title)" }}>Mentor approved</span>
           </label>
+          <p className="section-copy modal-wide" style={{ color: "var(--text-copy)" }}>
+            Proposed risk updates are saved with the QA report. The linked risk changes only when
+            mentor approval is checked, so audit records come from the approved risk update.
+          </p>
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Notes</span>
             <textarea

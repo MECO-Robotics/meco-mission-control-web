@@ -60,7 +60,10 @@ export function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapP
     qaFindings: reports.qaFindings,
     testFindings: reports.testFindings,
     designIterations: source.designIterations ?? [],
-    risks: source.risks ?? [],
+    risks: (source.risks ?? []).map((risk) => ({
+      ...risk,
+      status: risk.status ?? "open",
+    })),
     tasks: planning.tasks,
     workLogs: catalog.workLogs,
     meetings: normalizeMeetingRecords(source.meetings),

@@ -2,7 +2,13 @@ import { createPortal } from "react-dom";
 
 import type { RiskRecord } from "@/types/recordsReporting";
 
-import { ATTACHMENT_TYPE_LABELS, formatRiskSeverity, getRiskSeverityPillClassName } from "./riskViewModel";
+import {
+  ATTACHMENT_TYPE_LABELS,
+  formatRiskSeverity,
+  formatRiskStatus,
+  getRiskSeverityPillClassName,
+  getRiskStatusPillClassName,
+} from "./riskViewModel";
 import { TaskPriorityBadge } from "./taskQueue/taskQueueKanbanCardMeta";
 
 interface RiskDetailsModalProps {
@@ -64,6 +70,12 @@ export function RiskDetailsModal({
                 <span className="task-queue-board-column-header-label">{formatRiskSeverity(activeRisk.severity)}</span>
               </span>
               <span style={{ color: "var(--text-copy)" }}>from</span>
+              <span
+                aria-label="Risk status"
+                className={getRiskStatusPillClassName(activeRisk.status ?? "open")}
+              >
+                {formatRiskStatus(activeRisk.status ?? "open")}
+              </span>
               <span style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", color: "var(--text-copy)" }}>
                 <span className="pill status-pill status-pill-neutral">{sourceTypeLabel}</span>
                 <span>{getSourceLabel(activeRisk)}</span>
@@ -91,6 +103,10 @@ export function RiskDetailsModal({
           <div className="field">
             <span style={{ color: "var(--text-title)" }}>Mitigation task</span>
             <p className="task-detail-copy">{getMitigationLabel(activeRisk)}</p>
+            <small style={{ color: "var(--text-copy)" }}>
+              Partial mitigation reduces severity or marks progress while work remains. Full
+              mitigation means a mentor-approved review moved this risk to fully mitigated.
+            </small>
           </div>
 
           <div className="modal-actions modal-wide">

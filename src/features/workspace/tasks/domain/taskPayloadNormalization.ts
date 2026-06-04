@@ -13,6 +13,7 @@ export function normalizeTaskPayload(taskDraft: TaskPayload): TaskPayload {
     ...taskDraft,
     title: taskDraft.title.trim(),
     summary: taskDraft.summary.trim(),
+    targetRiskId: taskDraft.targetRiskId?.trim() || null,
     assigneeIds: Array.from(new Set(taskDraft.assigneeIds)),
     taskDependencies: (taskDraft.taskDependencies ?? []).map((dependency) => ({
       ...dependency,

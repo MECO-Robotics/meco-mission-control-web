@@ -10,11 +10,14 @@ import type { RiskRecord } from "@/types/recordsReporting";
 import {
   ATTACHMENT_TYPE_LABELS,
   RISK_SEVERITY_ORDER,
+  RISK_STATUS_ORDER,
   SEVERITY_RANK,
   buildDefaultRiskPayload,
   buildRisksViewData,
   formatRiskSeverity,
+  formatRiskStatus,
   getRiskSeverityPillClassName,
+  getRiskStatusPillClassName,
   sanitizeRiskPayload,
   toRiskPayload,
   type RiskSourceFilter,
@@ -29,9 +32,12 @@ export type { RiskSortField, RiskSortOrder, RiskSourceFilter, RiskSeverityFilter
 export {
   ATTACHMENT_TYPE_LABELS,
   RISK_SEVERITY_ORDER,
+  RISK_STATUS_ORDER,
   SEVERITY_RANK,
   formatRiskSeverity,
+  formatRiskStatus,
   getRiskSeverityPillClassName,
+  getRiskStatusPillClassName,
   toRiskPayload,
 };
 

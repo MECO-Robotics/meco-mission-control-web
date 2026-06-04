@@ -77,6 +77,7 @@ export type ProjectStatus = "planned" | "active" | "paused" | "complete";
 export type TestResultStatus = "pass" | "fail" | "blocked";
 export type ReportType = "QA" | "MilestoneTest" | "Practice" | "Competition" | "Review";
 export type RiskSeverity = "high" | "medium" | "low";
+export type RiskStatus = "open" | "partially-mitigated" | "mitigated";
 export type RiskAttachmentType = "project" | "workstream" | "mechanism" | "part-instance";
 export type FindingStatus = "open" | "resolved";
 export type DesignIterationSourceType = "qa-finding" | "test-finding" | "manual";

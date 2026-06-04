@@ -2,9 +2,15 @@ import { useCallback } from "react";
 
 import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
 import { toErrorMessage } from "@/lib/appUtils/common";
-import { createQaReportRecord, createTestResultRecord, createWorkLogRecord } from "@/lib/auth/records/reporting";
+import {
+  createQaReportRecord,
+  createTestResultRecord,
+  createWorkLogRecord,
+  updateRiskRecord,
+} from "@/lib/auth/records/reporting";
 import { localTodayDate } from "@/lib/dateUtils";
 import type { QaReportPayload, TestResultPayload, WorkLogPayload } from "@/types/payloads";
+import { buildMentorApprovedQaRiskReassessmentPatch } from "./qaRiskReassessment";
 
 export type AppWorkspaceReportSubmitActions = ReturnType<typeof useAppWorkspaceReportSubmitActions>;
 
@@ -72,6 +78,20 @@ export function useAppWorkspaceReportSubmitActions(model: AppWorkspaceModel) {
       }
 
       const task = model.bootstrap.tasks.find((candidate) => candidate.id === model.qaReportDraft.taskId) ?? null;
+      const proposedRiskId = model.qaReportDraft.proposedRiskId ?? null;
+      const proposedRisk = proposedRiskId
+        ? model.bootstrap.risks.find((risk) => risk.id === proposedRiskId) ?? null
+        : null;
+      if (proposedRiskId && task?.targetRiskId !== proposedRiskId) {
+        model.setDataMessage("QA reports can reassess only the risk targeted by the selected task.");
+        return;
+      }
+
+      if (proposedRiskId && !proposedRisk) {
+        model.setDataMessage("Please choose a real targeted risk before saving the QA report.");
+        return;
+      }
+
       const reportDate = model.qaReportDraft.createdAt ?? localTodayDate();
       const payload: QaReportPayload = {
         reportType: "QA",
@@ -84,6 +104,10 @@ export function useAppWorkspaceReportSubmitActions(model: AppWorkspaceModel) {
         summary: model.qaReportDraft.summary.trim(),
         participantIds,
         mentorApproved: model.qaReportDraft.mentorApproved ?? false,
+        proposedRiskId,
+        proposedRiskSeverity: model.qaReportDraft.proposedRiskSeverity ?? null,
+        proposedRiskStatus: model.qaReportDraft.proposedRiskStatus ?? null,
+        riskReassessmentNote: model.qaReportDraft.riskReassessmentNote?.trim() ?? "",
         notes: model.qaReportDraft.notes.trim(),
         createdAt: reportDate,
         reviewedAt: model.qaReportDraft.reviewedAt ?? reportDate,
@@ -94,6 +118,12 @@ export function useAppWorkspaceReportSubmitActions(model: AppWorkspaceModel) {
       };
 
       await createQaReportRecord(payload, model.handleUnauthorized);
+      if (proposedRisk) {
+        const riskPatch = buildMentorApprovedQaRiskReassessmentPatch(payload, proposedRisk);
+        if (riskPatch.severity || riskPatch.status) {
+          await updateRiskRecord(proposedRisk.id, riskPatch, model.handleUnauthorized);
+        }
+      }
       await model.loadWorkspace();
       model.setQaReportModalMode(null);
     } catch (error) {

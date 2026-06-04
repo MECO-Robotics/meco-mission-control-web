@@ -14,6 +14,7 @@ import type {
   PurchaseStatus,
   RiskAttachmentType,
   RiskSeverity,
+  RiskStatus,
   SeasonType,
   TaskBlockerSeverity,
   TaskBlockerType,
@@ -64,6 +65,10 @@ export interface ReportPayload {
   participantIds?: string[];
   mentorApproved?: boolean;
   reviewedAt?: string;
+  proposedRiskId?: string | null;
+  proposedRiskSeverity?: RiskSeverity | null;
+  proposedRiskStatus?: RiskStatus | null;
+  riskReassessmentNote?: string;
   title?: string;
   status?: TestResultStatus;
   findings?: string[];
@@ -196,6 +201,7 @@ export interface RiskPayload {
   title: string;
   detail: string;
   severity: RiskSeverity;
+  status: RiskStatus;
   sourceType: "qa-report" | "test-result";
   sourceId: string;
   attachmentType: RiskAttachmentType;
@@ -292,6 +298,7 @@ export interface TaskPayload {
   artifactId?: string | null;
   artifactIds?: string[];
   targetMilestoneId: string | null;
+  targetRiskId?: string | null;
   photoUrl: string;
   ownerId: string | null;
   assigneeIds: string[];

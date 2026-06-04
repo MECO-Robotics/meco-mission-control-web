@@ -10,10 +10,13 @@ import { buildRiskViewScopeData } from "./riskViewData/riskViewDataScope";
 import {
   ATTACHMENT_TYPE_LABELS,
   RISK_SEVERITY_ORDER,
+  RISK_STATUS_ORDER,
   SEVERITY_RANK,
   buildDefaultRiskPayload,
   formatRiskSeverity,
+  formatRiskStatus,
   getRiskSeverityPillClassName,
+  getRiskStatusPillClassName,
   sanitizeRiskPayload,
   toRiskPayload,
   type RiskSeverityFilter,
@@ -25,10 +28,13 @@ export type { RiskSortField, RiskSortOrder, RiskSourceFilter, RiskSeverityFilter
 export {
   ATTACHMENT_TYPE_LABELS,
   RISK_SEVERITY_ORDER,
+  RISK_STATUS_ORDER,
   SEVERITY_RANK,
   buildDefaultRiskPayload,
   formatRiskSeverity,
+  formatRiskStatus,
   getRiskSeverityPillClassName,
+  getRiskStatusPillClassName,
   sanitizeRiskPayload,
   toRiskPayload,
 };

@@ -148,6 +148,7 @@ export function normalizePlanningWorkstreams(
       artifactId: taskArtifactIds[0] ?? null,
       artifactIds: taskArtifactIds,
       targetMilestoneId: task.targetMilestoneId ?? null,
+      targetRiskId: task.targetRiskId ?? null,
       ownerId: task.ownerId ?? null,
       assigneeIds: taskAssigneeIds,
       mentorId: task.mentorId ?? null,

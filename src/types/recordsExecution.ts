@@ -64,6 +64,7 @@ export interface TaskRecord {
   artifactId?: string | null;
   artifactIds?: string[];
   targetMilestoneId: string | null;
+  targetRiskId?: string | null;
   photoUrl?: string;
   ownerId: string | null;
   assigneeIds: string[];

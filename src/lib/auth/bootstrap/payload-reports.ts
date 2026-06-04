@@ -75,6 +75,10 @@ export function normalizeBootstrapReports(
     summary: report.summary ?? "",
     notes: report.notes ?? "",
     createdAt: report.createdAt ?? localTodayDate(),
+    proposedRiskId: report.proposedRiskId ?? null,
+    proposedRiskSeverity: report.proposedRiskSeverity ?? null,
+    proposedRiskStatus: report.proposedRiskStatus ?? null,
+    riskReassessmentNote: report.riskReassessmentNote ?? "",
   }));
 
   const reportsById = new Map(reports.map((report) => [report.id, report] as const));

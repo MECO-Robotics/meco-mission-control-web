@@ -3,6 +3,7 @@ import type { Dispatch, SetStateAction } from "react";
 import type { RiskPayload } from "@/types/payloads";
 
 import type { RiskEditorMode, SelectOption } from "./riskViewModel";
+import { formatRiskStatus } from "./riskViewModel";
 
 interface RiskEditorModalProps {
   attachmentOptions: SelectOption[];
@@ -115,6 +116,27 @@ export function RiskEditorModal({
               <option value="medium">Medium</option>
               <option value="low">Low</option>
             </select>
+          </label>
+
+          <label className="field">
+            <span>Status</span>
+            <select
+              onChange={(milestone) =>
+                setDraft((current) => ({
+                  ...current,
+                  status: milestone.target.value as RiskPayload["status"],
+                }))
+              }
+              value={draft.status}
+            >
+              <option value="open">{formatRiskStatus("open")}</option>
+              <option value="partially-mitigated">{formatRiskStatus("partially-mitigated")}</option>
+              <option value="mitigated">{formatRiskStatus("mitigated")}</option>
+            </select>
+            <small>
+              Partial mitigation means the risk is reduced but still tracked. Full mitigation marks
+              the risk controlled after mentor review.
+            </small>
           </label>
 
           <label className="field">

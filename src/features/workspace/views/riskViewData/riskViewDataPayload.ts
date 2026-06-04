@@ -24,6 +24,7 @@ export const ATTACHMENT_TYPE_LABELS: Record<RiskPayload["attachmentType"], strin
 };
 
 export const RISK_SEVERITY_ORDER = ["high", "medium", "low"] as const;
+export const RISK_STATUS_ORDER = ["open", "partially-mitigated", "mitigated"] as const;
 
 export function formatRiskSeverity(severity: RiskPayload["severity"]) {
   switch (severity) {
@@ -51,11 +52,38 @@ export function getRiskSeverityPillClassName(severity: RiskPayload["severity"]) 
   }
 }
 
+export function formatRiskStatus(status: RiskPayload["status"]) {
+  switch (status) {
+    case "open":
+      return "Open";
+    case "partially-mitigated":
+      return "Partially mitigated";
+    case "mitigated":
+      return "Fully mitigated";
+    default:
+      return status;
+  }
+}
+
+export function getRiskStatusPillClassName(status: RiskPayload["status"]) {
+  switch (status) {
+    case "mitigated":
+      return "status-pill status-pill-success";
+    case "partially-mitigated":
+      return "status-pill status-pill-warning";
+    case "open":
+      return "status-pill status-pill-neutral";
+    default:
+      return "status-pill status-pill-neutral";
+  }
+}
+
 export function toRiskPayload(risk: RiskRecord): RiskPayload {
   return {
     title: risk.title,
     detail: risk.detail,
     severity: risk.severity,
+    status: risk.status ?? "open",
     sourceType: risk.sourceType,
     sourceId: risk.sourceId,
     attachmentType: risk.attachmentType,
@@ -94,6 +122,7 @@ export function buildDefaultRiskPayload(
     title: "",
     detail: "",
     severity: "medium",
+    status: "open",
     sourceType,
     sourceId,
     attachmentType: "project",
