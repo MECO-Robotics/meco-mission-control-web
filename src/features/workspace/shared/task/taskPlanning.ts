@@ -16,8 +16,7 @@ export type PlanningConfidenceField =
   | "due-date"
   | "owner"
   | "target-link"
-  | "estimate"
-  | "acceptance-criteria";
+  | "estimate";
 
 export interface PlanningConfidenceFieldSummary {
   id: PlanningConfidenceField;
@@ -50,32 +49,6 @@ function hasIdListValue(value: unknown) {
 
 function hasPositiveNumberValue(value: unknown) {
   return typeof value === "number" && Number.isFinite(value) && value > 0;
-}
-
-function hasTaskAcceptanceCriteria(task: TaskRecord) {
-  const candidate = task as TaskRecord & {
-    acceptanceCriteria?: unknown;
-    acceptanceCriteriaItems?: unknown;
-    acceptanceCriteriaText?: unknown;
-  };
-
-  if (hasTextValue(candidate.acceptanceCriteria) || hasTextValue(candidate.acceptanceCriteriaText)) {
-    return true;
-  }
-
-  if (hasIdListValue(candidate.acceptanceCriteriaItems)) {
-    return true;
-  }
-
-  if (Array.isArray(candidate.acceptanceCriteria)) {
-    return candidate.acceptanceCriteria.some((item) =>
-      typeof item === "string"
-        ? hasTextValue(item)
-        : Boolean(item && typeof item === "object" && hasTextValue((item as { text?: unknown }).text)),
-    );
-  }
-
-  return false;
 }
 
 function hasTaskTargetLink(task: TaskRecord) {
@@ -119,12 +92,6 @@ export function buildPlanningConfidenceSummary(tasks: TaskRecord[]): PlanningCon
       label: "Estimates",
       actionLabel: "Add hour estimates",
       hasValue: (task) => hasPositiveNumberValue(task.estimatedHours),
-    },
-    {
-      id: "acceptance-criteria",
-      label: "Acceptance criteria",
-      actionLabel: "Add acceptance criteria",
-      hasValue: hasTaskAcceptanceCriteria,
     },
   ];
 

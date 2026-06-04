@@ -158,9 +158,7 @@ describe("Workspace overview views", () => {
     expect(markup).toContain("Planning gaps");
     expect(markup).toContain("Assign task owners");
     expect(markup).toContain("Add hour estimates");
-    expect(markup).toContain("Add acceptance criteria");
     expect(markup).toContain("tasks missing owners");
-    expect(markup).toContain("tasks missing acceptance criteria");
     expect(markup).toContain("First: Wire intake sensor");
   });
 

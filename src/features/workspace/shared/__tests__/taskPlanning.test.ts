@@ -368,7 +368,6 @@ test("planning confidence counts populated planning fields and missing task ids"
       mechanismId: "mechanism-1",
       mechanismIds: ["mechanism-1"],
       estimatedHours: 3,
-      acceptanceCriteria: ["Design review passed"],
     },
     {
       ...bootstrap.tasks[1],
@@ -383,18 +382,16 @@ test("planning confidence counts populated planning fields and missing task ids"
       partInstanceId: null,
       partInstanceIds: [],
       estimatedHours: 0,
-      acceptanceCriteria: [],
     },
   ];
 
   const summary = buildPlanningConfidenceSummary(tasks);
 
   expect(summary.totalTasks).toBe(2);
-  expect(summary.completeFieldCount).toBe(5);
-  expect(summary.possibleFieldCount).toBe(10);
+  expect(summary.completeFieldCount).toBe(4);
+  expect(summary.possibleFieldCount).toBe(8);
   expect(summary.confidencePercent).toBe(50);
   expect(Object.fromEntries(summary.fields.map((field) => [field.id, field.count]))).toEqual({
-    "acceptance-criteria": 1,
     "due-date": 1,
     estimate: 1,
     owner: 1,
