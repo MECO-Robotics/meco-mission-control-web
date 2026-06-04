@@ -28,21 +28,52 @@ The sidebar is organized around these sections:
 | --- | --- | --- |
 | Dashboard | Fast review of what is happening now | Calendar, Activity, Metrics |
 | Readiness | What needs attention before execution or events | Action Required, Milestones, Subsystems, Risks |
-| Config | Configuration and directory maintenance | Robot Configuration, Part mappings, Directory |
+| Config | Configuration and directory maintenance | Robot Configuration, STEP import, Part mappings, Directory |
 | Work | Execution planning and manufacturing work | Timeline, Tasks, Manufacturing |
 | Inventory | Materials, parts, and purchasing | Materials, Parts, Purchases |
-| Roster | Student/mentor availability and participation | Workload, Attendance |
+| Roster | Student/mentor availability and participation | Available, Workload, Attendance |
 | Reports | Historical or evidence-oriented records | Work logs, QA forms, Milestone results |
 
 The route/tab keys remain implementation details. User-facing docs and UI copy should use the section and subview labels above unless a code-level reference is required.
 
-### View Availability Rules
+### View Availability Matrix
 
-- Manufacturing is robot-project specific.
-- Robot projects expose Materials, Parts, and Purchases under Inventory.
-- Non-robot projects collapse inventory toward Documents/Materials and Purchases.
-- Part mappings are a robot configuration/inventory support surface, not a general standalone planning view.
-- `All projects` can hide or redirect project-specific views when the selected scope cannot support them.
+The sidebar and topbar must use the same availability rules. Sidebar entries remain visible but disabled when their section is open or when they are favorited; topbar view switchers include only views available in the current context. The implementation source of truth is `NAVIGATION_SUB_ITEM_AVAILABILITY_MATRIX` in `src/lib/workspaceNavigation/availability.ts`.
+
+| Section | View | All-project | Robot project | Non-robot project | No project | No season |
+| --- | --- | --- | --- | --- | --- | --- |
+| Dashboard | Calendar | Yes | Yes | Yes | Yes | No |
+| Dashboard | Activity | Yes | Yes | Yes | Yes | No |
+| Dashboard | Metrics | Yes | Yes | Yes | Yes | No |
+| Readiness | Action Required | Yes | Yes | Yes | Yes | No |
+| Readiness | Milestones | Yes | Yes | Yes | Yes | No |
+| Readiness | Subsystems | No | Yes | Yes | No | No |
+| Readiness | Risks | Yes | Yes | Yes | Yes | No |
+| Config | Robot Configuration | No | Yes | No | No | No |
+| Config | STEP import | No | Yes | No | No | No |
+| Config | Part mappings | No | Yes | No | No | No |
+| Config | Directory | Yes | Yes | Yes | Yes | No |
+| Work | Timeline | Yes | Yes | Yes | Yes | No |
+| Work | Tasks | Yes | Yes | Yes | Yes | No |
+| Work | Manufacturing | No | Yes | No | No | No |
+| Inventory | Materials/Documents | Yes | Yes | Yes | No | No |
+| Inventory | Parts | No | Yes | No | No | No |
+| Inventory | Purchases | Yes | Yes | Yes | No | No |
+| Roster | Available | Yes | Yes | Yes | Yes | No |
+| Roster | Workload | Yes | Yes | Yes | Yes | No |
+| Roster | Attendance | Yes | Yes | Yes | Yes | No |
+| Reports | Work logs | Yes | Yes | Yes | Yes | No |
+| Reports | Kanban | Yes | Yes | Yes | Yes | No |
+| Reports | QA forms | Yes | Yes | Yes | Yes | No |
+| Reports | Milestone results | Yes | Yes | Yes | Yes | No |
+
+Context definitions:
+
+- `All-project` means at least one project exists in the current season scope and the selected project is `All projects`.
+- `Robot project` means the selected project has `projectType: "robot"`.
+- `Non-robot project` means the selected project exists and is not a robot project.
+- `No project` means a season context exists but no projects are available in that scope.
+- `No season` means there are no season records available. This is distinct from the all-seasons selection, where `selectedSeasonId` is intentionally `null` while seasons still exist.
 
 ## Current View Specifications
 

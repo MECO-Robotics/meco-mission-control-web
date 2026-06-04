@@ -6,6 +6,7 @@ import {
   NAVIGATION_SUB_ITEMS_BY_SECTION,
   getActiveNavigationSubItemId,
   getNavigationSectionFromSubItem,
+  isNavigationSubItemAvailable,
   type InventoryViewTab,
   type ManufacturingViewTab,
   type NavigationItem,
@@ -15,6 +16,7 @@ import {
   type RosterViewTab,
   type RiskManagementViewTab,
   type TaskViewTab,
+  type ViewAvailabilityContext,
   type ViewTab,
   type WorklogsViewTab,
 } from "@/lib/workspaceNavigation";
@@ -26,12 +28,12 @@ interface UseAppSidebarNavigationModelsArgs {
   favoriteViewIds: readonly NavigationSubItemId[];
   inventoryView: InventoryViewTab;
   manufacturingView: ManufacturingViewTab;
-  isRobotProject: boolean;
   items: NavigationItem[];
   reportsView: ReportsViewTab;
   rosterView: RosterViewTab;
   riskManagementView: RiskManagementViewTab;
   taskView: TaskViewTab;
+  viewAvailabilityContext: ViewAvailabilityContext;
   worklogsView: WorklogsViewTab;
 }
 
@@ -40,12 +42,12 @@ export function useAppSidebarNavigationModels({
   favoriteViewIds,
   inventoryView,
   manufacturingView,
-  isRobotProject,
   items,
   reportsView,
   rosterView,
   riskManagementView,
   taskView,
+  viewAvailabilityContext,
   worklogsView,
 }: UseAppSidebarNavigationModelsArgs) {
   const visibleTabs = useMemo(() => new Set(items.map((item) => item.value)), [items]);
@@ -63,20 +65,12 @@ export function useAppSidebarNavigationModels({
     ? getNavigationSectionFromSubItem(activeSubItemId)
     : null;
   const isSubItemEnabled = useCallback(
-    (subItemId: NavigationSubItemId) => {
-      const subItem = NAVIGATION_SUB_ITEMS.find((item) => item.id === subItemId);
-      if (subItem && !visibleTabs.has(subItem.target.tab)) {
-        return false;
-      }
-
-      return subItemId === "config-robot-model" ||
-        subItemId === "config-cad" ||
-        subItemId === "config-part-mappings" ||
-        subItemId === "inventory-parts"
-        ? isRobotProject
-        : true;
-    },
-    [isRobotProject, visibleTabs],
+    (subItemId: NavigationSubItemId) =>
+      isNavigationSubItemAvailable(subItemId, {
+        context: viewAvailabilityContext,
+        visibleTabs,
+      }),
+    [viewAvailabilityContext, visibleTabs],
   );
   const getSectionSubItems = useCallback(
     (section: NavigationSection): SidebarSubItemModel[] =>

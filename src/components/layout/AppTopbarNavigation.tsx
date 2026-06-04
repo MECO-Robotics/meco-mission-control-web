@@ -9,10 +9,12 @@ import {
   type RosterViewTab,
   type RiskManagementViewTab,
   type TaskViewTab,
+  type ViewAvailabilityContext,
   type ViewTab,
   type WorklogsViewTab,
   getActiveNavigationSubItemId,
   getNavigationSectionFromSubItem,
+  isNavigationSubItemAvailable,
 } from "@/lib/workspaceNavigation";
 
 function TopbarTabs<T extends string>({
@@ -68,6 +70,7 @@ interface AppTopbarNavigationProps {
   rosterView: RosterViewTab;
   riskManagementView: RiskManagementViewTab;
   taskView: TaskViewTab;
+  viewAvailabilityContext?: ViewAvailabilityContext;
   worklogsView: WorklogsViewTab;
 }
 
@@ -82,6 +85,7 @@ export function AppTopbarNavigation({
   rosterView,
   riskManagementView,
   taskView,
+  viewAvailabilityContext,
   worklogsView,
 }: AppTopbarNavigationProps) {
   const activeSubItemId = getActiveNavigationSubItemId({
@@ -97,35 +101,19 @@ export function AppTopbarNavigation({
   const activeSection = activeSubItemId
     ? getNavigationSectionFromSubItem(activeSubItemId)
     : null;
-  const showManufacturingOption = !isAllProjectsView && !isNonRobotProject;
+  const resolvedAvailabilityContext =
+    viewAvailabilityContext ??
+    (isAllProjectsView
+      ? "all-project"
+      : isNonRobotProject
+        ? "non-robot-project"
+        : "robot-project");
   const sectionOptions = activeSection
-    ? NAVIGATION_SUB_ITEMS_BY_SECTION[activeSection].filter((subItem) => {
-        if (subItem.id === "readiness-subsystems") {
-          return !isAllProjectsView;
-        }
-
-        if (subItem.id === "config-robot-model") {
-          return !isAllProjectsView && !isNonRobotProject;
-        }
-
-        if (subItem.id === "config-cad") {
-          return !isAllProjectsView && !isNonRobotProject;
-        }
-
-        if (subItem.id === "config-part-mappings") {
-          return !isAllProjectsView && !isNonRobotProject;
-        }
-
-        if (subItem.id === "tasks-manufacturing") {
-          return showManufacturingOption;
-        }
-
-        if (subItem.id === "inventory-parts") {
-          return !isNonRobotProject;
-        }
-
-        return true;
-      })
+    ? NAVIGATION_SUB_ITEMS_BY_SECTION[activeSection].filter((subItem) =>
+        isNavigationSubItemAvailable(subItem.id, {
+          context: resolvedAvailabilityContext,
+        }),
+      )
     : [];
   const optionById = new Map(sectionOptions.map((option) => [option.id, option]));
   const activeOptionId = activeSubItemId && optionById.has(activeSubItemId)

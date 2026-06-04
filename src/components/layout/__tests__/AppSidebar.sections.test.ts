@@ -286,6 +286,65 @@ describe("AppSidebar sections", () => {
     );
   });
 
+  it("disables project inventory views when a selected season has no projects", () => {
+    const markup = renderSidebar(
+      [
+        {
+          value: "inventory",
+          label: "Inventory",
+          icon: React.createElement("span"),
+          count: 0,
+        },
+      ],
+      "inventory",
+      {
+        inventoryView: "materials",
+        projects: [],
+      },
+    );
+
+    expect(markup).toContain("Inventory");
+    expect(markup).toMatch(
+      /data-enabled="false"[^>]*disabled[^>]*>[\s\S]*?<span class="sidebar-subtab-label">Materials<\/span>/,
+    );
+    expect(markup).toMatch(
+      /data-enabled="false"[^>]*disabled[^>]*>[\s\S]*?<span class="sidebar-subtab-label">Purchases<\/span>/,
+    );
+  });
+
+  it("disables season-scoped views when no seasons exist", () => {
+    const markup = renderSidebar(
+      [
+        {
+          value: "tasks",
+          label: "Tasks",
+          icon: React.createElement("span"),
+          count: 0,
+        },
+        {
+          value: "risk-management",
+          label: "Risks",
+          icon: React.createElement("span"),
+          count: 0,
+        },
+      ],
+      "tasks",
+      {
+        seasons: [],
+        selectedSeasonId: null,
+        taskView: "queue",
+      },
+    );
+
+    expect(markup).toContain("Work");
+    expect(markup).toMatch(
+      /data-enabled="false"[^>]*disabled[^>]*>[\s\S]*?<span class="sidebar-subtab-label">Timeline<\/span>/,
+    );
+    expect(markup).toMatch(
+      /data-enabled="false"[^>]*disabled[^>]*>[\s\S]*?<span class="sidebar-subtab-label">Tasks<\/span>/,
+    );
+  });
+
   it("renders inapplicable groups as disabled controls that can reveal disabled subviews", () => {
     const markup = renderSidebar(
       [
