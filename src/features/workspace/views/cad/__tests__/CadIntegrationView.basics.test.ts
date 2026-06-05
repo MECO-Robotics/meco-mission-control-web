@@ -54,7 +54,7 @@ describe("CAD STEP mapper basics", () => {
           connected: true,
           authorizationUrlAvailable: true,
           scopes: ["OAuth2Read"],
-          tokenExpiresAt: "2026-07-10T12:00:00.000Z",
+          tokenExpiresAt: "2099-07-10T12:00:00.000Z",
           credentialSource: "runtime",
         },
         ...overrides,
