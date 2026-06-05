@@ -84,7 +84,7 @@ describe("CAD STEP review panel mapping state", () => {
     expect(markup).toContain("Current: Exact name match; confidence high");
     expect(markup).toContain("Current: Ignore this item; confidence manual");
     expect(markup).toContain("Current: This snapshot only; confidence manual");
-    expect(markup).toContain("Review choice: Exact name match for future imports.");
+    expect(markup).toContain("Review choice: This snapshot only before finalize.");
     expect(markup).toContain("Review choice: ignore item.");
   });
 
