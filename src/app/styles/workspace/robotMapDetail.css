@@ -32,52 +32,8 @@
 }
 
 .robot-config-detail-header small,
-.robot-config-mechanism-item p {
+.robot-config-detail-readonly p {
   color: var(--text-copy);
-}
-
-.robot-config-detail-meta-row,
-.robot-config-mechanism-summary-meta,
-.robot-config-part-title {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  min-width: 0;
-}
-
-.robot-config-cad-source {
-  border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
-  border-radius: 999px;
-  color: #334155;
-  display: inline-flex;
-  flex: 0 0 auto;
-  font-size: 0.72rem;
-  font-weight: 700;
-  line-height: 1;
-  max-width: 100%;
-  padding: 0.22rem 0.45rem;
-  white-space: nowrap;
-}
-
-.robot-config-cad-source[data-source="manual"] {
-  background: #f8fafc;
-  color: #475569;
-}
-
-.robot-config-cad-source[data-source="step-import"] {
-  background: #ecfdf5;
-  color: #047857;
-}
-
-.robot-config-cad-source[data-source="onshape-sync"] {
-  background: #eff6ff;
-  color: #1d4ed8;
-}
-
-.robot-config-cad-source[data-source="edited-after-import"] {
-  background: #fff7ed;
-  color: #c2410c;
 }
 
 .robot-config-detail-title-edit {
@@ -113,8 +69,7 @@
   gap: 0.35rem;
 }
 
-.robot-config-detail-readonly,
-.robot-config-detail-mechanisms {
+.robot-config-detail-readonly {
   display: grid;
   gap: 0.55rem;
 }
@@ -126,108 +81,6 @@
 
 .robot-config-detail-readonly .section-copy {
   margin: 0;
-}
-
-.robot-config-detail-mechanisms h4 {
-  color: var(--text-title);
-  margin: 0;
-}
-
-.robot-config-mechanism-header {
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
-}
-
-.robot-config-mechanism-add-button {
-  align-items: center;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-  color: #2563eb;
-  display: inline-flex;
-  height: 1.85rem;
-  justify-content: center;
-  line-height: 0;
-  padding: 0;
-  width: 1.85rem;
-}
-
-.robot-config-mechanism-add-button:hover,
-.robot-config-mechanism-add-button:focus-visible {
-  background: transparent;
-  border: 0;
-  color: #1d4ed8;
-  outline: none;
-  transform: none;
-}
-
-.robot-config-mechanism-scroll {
-  background: var(--bg-row-alt);
-  border: 1px solid var(--border-base);
-  border-radius: 0.9rem;
-  max-height: 11rem;
-  min-height: 0;
-  overflow-x: clip;
-  overflow-y: auto;
-  padding: 0.65rem 0.8rem;
-  scrollbar-gutter: stable;
-}
-
-.robot-config-mechanism-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.robot-config-mechanism-item {
-  border: 0;
-  border-top: 1px solid var(--border-base);
-  padding: 0.65rem 0 0.4rem;
-}
-
-.robot-config-mechanism-item:first-child {
-  border-top: 0;
-  padding-top: 0.2rem;
-}
-
-.robot-config-mechanism-item summary {
-  align-items: baseline;
-  color: var(--text-title);
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-}
-
-.robot-config-mechanism-summary-meta {
-  justify-content: flex-end;
-}
-
-.robot-config-mechanism-item p {
-  margin: 0.45rem 0;
-}
-
-.robot-config-part-list {
-  display: grid;
-  gap: 0.35rem;
-  list-style: none;
-  margin: 0.45rem 0 0;
-  padding: 0;
-}
-
-.robot-config-part-list li {
-  align-items: center;
-  border-top: 1px solid color-mix(in srgb, var(--border-base) 75%, transparent);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  justify-content: space-between;
-  padding-top: 0.35rem;
-}
-
-.robot-config-part-title {
-  flex: 1 1 12rem;
 }
 
 @media (max-width: 1100px) {
