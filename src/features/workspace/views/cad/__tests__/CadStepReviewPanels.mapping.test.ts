@@ -4,8 +4,78 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { CadStepReviewPanels } from "../components/CadStepReviewPanels";
+import { CadStepMappingReviewTable } from "../components/CadStepMappingReviewTable";
 
 describe("CAD STEP review panel mapping state", () => {
+  it("renders carry-forward rule selections and current review choices", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(CadStepMappingReviewTable, {
+        groupRepeatedInstances: true,
+        isSavingMapping: false,
+        mappings: [{
+          id: "mapping-rule-exact",
+          snapshotId: "cad-snapshot-2",
+          mappingRuleId: "rule-shooter",
+          sourceKind: "ASSEMBLY_NODE",
+          sourceId: "cad-assembly-shooter",
+          sourceName: "MECH - Shooter",
+          targetKind: "MECHANISM",
+          targetId: "mechanism-shooter",
+          confidence: "HIGH",
+          status: "CONFIRMED",
+          rule: { id: "rule-shooter", confidence: "HIGH" },
+          updatedAt: "2026-05-10T00:00:00.000Z",
+        }, {
+          id: "mapping-manual",
+          snapshotId: "cad-snapshot-2",
+          mappingRuleId: null,
+          sourceKind: "PART_DEFINITION",
+          sourceId: "cad-part-roller",
+          sourceName: "Roller tube",
+          targetKind: "PART_DEFINITION",
+          targetId: "part-roller",
+          confidence: "MANUAL",
+          status: "CONFIRMED",
+          rule: null,
+          updatedAt: "2026-05-10T00:00:00.000Z",
+        }, {
+          id: "mapping-ignore",
+          snapshotId: "cad-snapshot-2",
+          mappingRuleId: "rule-ignore-fasteners",
+          sourceKind: "PART_INSTANCE",
+          sourceId: "cad-fastener-1",
+          sourceName: "Washer <1>",
+          targetKind: "IGNORE",
+          targetId: null,
+          confidence: "MANUAL",
+          status: "CONFIRMED",
+          rule: { id: "rule-ignore-fasteners", confidence: "MANUAL" },
+          updatedAt: "2026-05-10T00:00:00.000Z",
+        }],
+        onConfirmMapping: jest.fn(),
+        onGroupRepeatedInstancesChange: jest.fn(),
+        targets: {
+          subsystems: [],
+          mechanisms: [{ id: "mechanism-shooter", subsystemId: "subsystem-shooter", name: "Shooter", description: "", iteration: 1 }],
+          partDefinitions: [{ id: "part-roller", seasonId: "season-2026", name: "Roller tube", partNumber: "SHR-010", revision: "A", iteration: 1, type: "custom", source: "cad", materialId: null, description: "" }],
+        },
+        usesPlaceholderParser: false,
+      }),
+    );
+
+    expect(markup).toContain("Exact name match");
+    expect(markup).toContain("Normalized name match");
+    expect(markup).toContain("Manual override");
+    expect(markup).toContain("Ignore this item");
+    expect(markup).toContain("Split/merge deferred");
+    expect(markup).toContain("Current: Exact name match; confidence high");
+    expect(markup).toContain("Current: Manual override; confidence manual");
+    expect(markup).toContain("Current: Ignore this item; confidence manual");
+    expect(markup).toContain("Review choice: Exact name match for future imports.");
+    expect(markup).toContain("Review choice: Manual override for future imports.");
+    expect(markup).toContain("Review choice: ignore item.");
+  });
+
   it("renders mapping review state with carry-forward scope and finalize guard", () => {
     const markup = renderToStaticMarkup(
       React.createElement(CadStepReviewPanels, {
@@ -87,7 +157,13 @@ describe("CAD STEP review panel mapping state", () => {
     );
 
     expect(markup).toContain("MECH - Shooter - Flywheel");
-    expect(markup).toContain("This snapshot and future imports");
+    expect(markup).toContain("Exact name match");
+    expect(markup).toContain("Normalized name match");
+    expect(markup).toContain("Manual override");
+    expect(markup).toContain("Ignore this item");
+    expect(markup).toContain("Split/merge deferred");
+    expect(markup).toContain("Review choice: This snapshot only before finalize.");
+    expect(markup).toContain("multi-source carry-forward rules");
     expect(markup).toContain("Select a target before confirming.");
     expect(markup).toContain("<button class=\"secondary-button compact-action\" disabled=\"\" type=\"button\">Confirm</button>");
     expect(markup).toContain("Finalize with unresolved warnings");
