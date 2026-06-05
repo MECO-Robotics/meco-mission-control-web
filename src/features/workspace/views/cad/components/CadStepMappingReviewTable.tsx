@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import type { MechanismRecord, PartDefinitionRecord, SubsystemRecord } from "@/types/records";
-import type { CadStepMappingRecord } from "../model/cadIntegrationTypes";
+import type { CadStepMappingRecord, CadStepMappingRuleMatchStrategy } from "../model/cadIntegrationTypes";
 import {
   carryForwardRuleModeDescription,
   carryForwardRuleModeLabel,
@@ -10,6 +10,7 @@ import {
   defaultTargetKind,
   persistedCarryForwardRuleMode,
   repeatedInstanceQuantity,
+  ruleMatchStrategyForMode,
   ruleModeAppliesToFuture,
   ruleOrigin,
   targetKindForRuleMode,
@@ -28,6 +29,14 @@ export interface CadStepMappingConfirmInput {
   targetKind: TargetKind;
   targetId: string | null;
   applyToFuture: boolean;
+  ruleMatchStrategy?: CadStepMappingRuleMatchStrategy;
+}
+
+function futureRuleStrategy(ruleMode: CarryForwardRuleMode, usesPlaceholderParser: boolean) {
+  if (usesPlaceholderParser || !ruleModeAppliesToFuture(ruleMode)) {
+    return undefined;
+  }
+  return ruleMatchStrategyForMode(ruleMode);
 }
 
 function targetOptions(
@@ -103,6 +112,8 @@ export function CadStepMappingReviewTable({
               const isSplitMergeDeferred = draft.ruleMode === "split_merge_deferred";
               const isConfirmBlocked = isSplitMergeDeferred || (targetKindRequiresTarget(effectiveTargetKind) && !draft.targetId);
               const ruleDescription = carryForwardRuleModeDescription(draft.ruleMode);
+              const applyToFuture = !usesPlaceholderParser && ruleModeAppliesToFuture(draft.ruleMode);
+              const ruleMatchStrategy = futureRuleStrategy(draft.ruleMode, usesPlaceholderParser);
               return (
                 <tr data-status={mapping.status} key={mapping.id}>
                   <td>
@@ -189,7 +200,8 @@ export function CadStepMappingReviewTable({
                           sourceIds,
                           targetKind: effectiveTargetKind,
                           targetId: effectiveTargetKind === "IGNORE" ? null : draft.targetId || null,
-                          applyToFuture: !usesPlaceholderParser && ruleModeAppliesToFuture(draft.ruleMode),
+                          applyToFuture,
+                          ruleMatchStrategy,
                         })}
                         type="button"
                       >
@@ -204,7 +216,8 @@ export function CadStepMappingReviewTable({
                           sourceIds,
                           targetKind: "IGNORE",
                           targetId: null,
-                          applyToFuture: !usesPlaceholderParser && ruleModeAppliesToFuture(draft.ruleMode),
+                          applyToFuture,
+                          ruleMatchStrategy,
                         })}
                         type="button"
                       >
@@ -219,7 +232,8 @@ export function CadStepMappingReviewTable({
                           sourceIds,
                           targetKind: "REFERENCE_GEOMETRY",
                           targetId: null,
-                          applyToFuture: !usesPlaceholderParser && ruleModeAppliesToFuture(draft.ruleMode),
+                          applyToFuture,
+                          ruleMatchStrategy,
                         })}
                         type="button"
                       >

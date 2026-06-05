@@ -1,4 +1,4 @@
-import type { CadStepMappingRecord } from "./cadIntegrationTypes";
+import type { CadStepMappingRecord, CadStepMappingRuleMatchStrategy } from "./cadIntegrationTypes";
 
 type TargetKind = CadStepMappingRecord["targetKind"];
 
@@ -53,6 +53,12 @@ export function persistedCarryForwardRuleMode(mapping: CadStepMappingRecord): Ca
   if (!mapping.rule) {
     return "snapshot";
   }
+  if (mapping.rule.matchStrategy === "NORMALIZED_NAME" || mapping.rule.matchStrategy === "NORMALIZED_NAME_WITH_PARENT") {
+    return "normalized";
+  }
+  if (mapping.rule.matchStrategy === "MANUAL_ONLY") {
+    return "manual";
+  }
   return mapping.targetKind === "IGNORE" ? "ignore" : "exact";
 }
 
@@ -89,4 +95,17 @@ export function targetKindForRuleMode(ruleMode: CarryForwardRuleMode, targetKind
 
 export function ruleModeAppliesToFuture(ruleMode: CarryForwardRuleMode) {
   return ruleMode !== "snapshot" && ruleMode !== "split_merge_deferred";
+}
+
+export function ruleMatchStrategyForMode(ruleMode: CarryForwardRuleMode): CadStepMappingRuleMatchStrategy | undefined {
+  if (ruleMode === "normalized") {
+    return "NORMALIZED_NAME";
+  }
+  if (ruleMode === "manual") {
+    return "MANUAL_ONLY";
+  }
+  if (ruleMode === "exact" || ruleMode === "ignore") {
+    return "STABLE_SIGNATURE";
+  }
+  return undefined;
 }
