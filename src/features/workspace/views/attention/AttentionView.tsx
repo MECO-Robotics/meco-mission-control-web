@@ -14,6 +14,7 @@ import {
   buildAttentionViewModel,
   type AttentionNowItem,
   type AttentionTriageItem,
+  type MentorActionQueueItem,
 } from "./attentionViewModel";
 
 type AttentionSourceFilter = "all" | "risk" | "task" | "manufacturing" | "purchase" | "quality";
@@ -52,6 +53,40 @@ function triageItemMatchesSourceFilter(item: AttentionTriageItem, sourceFilter: 
     return item.kind === "report";
   }
   return item.kind === sourceFilter;
+}
+
+export function mentorQueueItemMatchesFilters(
+  item: MentorActionQueueItem,
+  sourceFilter: AttentionSourceFilter,
+  searchFilter: string,
+) {
+  if (sourceFilter === "manufacturing") {
+    return false;
+  }
+  if (sourceFilter === "quality" && item.sourceType !== "qa") {
+    return false;
+  }
+  if (sourceFilter !== "all" && sourceFilter !== "quality" && item.sourceType !== sourceFilter) {
+    return false;
+  }
+
+  const normalizedSearch = searchFilter.trim().toLowerCase();
+  if (normalizedSearch.length === 0) {
+    return true;
+  }
+
+  return [
+    item.title,
+    item.contextLabel,
+    item.ownerLabel,
+    item.priorityLabel,
+    item.sourceLabel,
+    item.sourceType,
+    item.statusLabel,
+  ]
+    .join(" ")
+    .toLowerCase()
+    .includes(normalizedSearch);
 }
 
 export function AttentionView({
@@ -121,6 +156,13 @@ export function AttentionView({
       ),
     }));
   }, [searchFilter, sourceFilter, viewModel.triageGroups]);
+  const filteredMentorQueueItems = useMemo(
+    () =>
+      viewModel.mentorQueueItems.filter((item) =>
+        mentorQueueItemMatchesFilters(item, sourceFilter, searchFilter),
+      ),
+    [searchFilter, sourceFilter, viewModel.mentorQueueItems],
+  );
   const jumpToSection = useCallback((sectionId: string) => {
     if (typeof document === "undefined") {
       return;
@@ -182,7 +224,7 @@ export function AttentionView({
 
       <AttentionSummaryCards groups={viewModel.summaryGroups} onSelectCard={jumpToSection} />
       <AttentionMentorActionQueue
-        items={viewModel.mentorQueueItems}
+        items={filteredMentorQueueItems}
         onOpenRisk={onOpenRisk}
         onOpenTask={onOpenTask}
       />

@@ -4,7 +4,10 @@ import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
-import { AttentionView } from "@/features/workspace/views/attention/AttentionView";
+import {
+  AttentionView,
+  mentorQueueItemMatchesFilters,
+} from "@/features/workspace/views/attention/AttentionView";
 import { buildAttentionViewModel } from "@/features/workspace/views/attention/attentionViewModel";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
@@ -414,6 +417,26 @@ describe("buildAttentionViewModel", () => {
       recordId: "risk-mentor-review",
       sourceType: "risk",
     });
+  });
+
+  it("applies action required filters to mentor queue items", () => {
+    const viewModel = buildAttentionViewModel({
+      activePersonFilter: [],
+      bootstrap: createMentorQueueBootstrap(),
+    });
+    const purchaseItem = viewModel.mentorQueueItems.find(
+      (item) => item.id === "mentor-purchase-approval-purchase-1",
+    );
+    const qaItem = viewModel.mentorQueueItems.find(
+      (item) => item.id === "mentor-qa-review-approval-qa-review-1",
+    );
+
+    expect(purchaseItem).toBeDefined();
+    expect(qaItem).toBeDefined();
+    expect(mentorQueueItemMatchesFilters(purchaseItem!, "purchase", "")).toBe(true);
+    expect(mentorQueueItemMatchesFilters(purchaseItem!, "quality", "")).toBe(false);
+    expect(mentorQueueItemMatchesFilters(qaItem!, "quality", "drivetrain")).toBe(true);
+    expect(mentorQueueItemMatchesFilters(qaItem!, "quality", "swerve")).toBe(false);
   });
 
   it("renders mentor queue source links in the attention view", () => {
