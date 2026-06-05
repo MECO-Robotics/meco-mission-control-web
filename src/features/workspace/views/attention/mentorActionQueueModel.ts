@@ -47,7 +47,7 @@ function buildTaskQueueItem({
 }
 
 function getQaReportOutcome(report: BootstrapPayload["reports"][number]) {
-  return report.reportType === "QA" && report.result ? report.result : report.status;
+  return report.reportType === "QA" && report.result ? report.result : report.status ?? "pending";
 }
 
 function getQaReportPriority(report: BootstrapPayload["reports"][number]) {
