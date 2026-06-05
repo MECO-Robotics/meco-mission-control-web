@@ -494,6 +494,55 @@ describe("buildAttentionViewModel", () => {
     });
   });
 
+  it("keeps mentor QA review approvals scoped to visible subjects", () => {
+    const bootstrap = createMentorQueueBootstrap();
+    const viewModel = buildAttentionViewModel({
+      activePersonFilter: [],
+      bootstrap: {
+        ...bootstrap,
+        qaReviews: [
+          ...(bootstrap.qaReviews ?? []),
+          {
+            id: "qa-review-hidden-task",
+            mentorApproved: false,
+            notes: "Hidden task review",
+            participantIds: ["member-1"],
+            result: "minor-fix",
+            reviewedAt: `${isoDateOffset(-1)}T14:00:00.000Z`,
+            subjectId: "task-hidden",
+            subjectTitle: "Hidden task QA",
+            subjectType: "task",
+          },
+          {
+            id: "qa-review-hidden-manufacturing",
+            mentorApproved: false,
+            notes: "Hidden manufacturing review",
+            participantIds: ["member-1"],
+            result: "iteration-worthy",
+            reviewedAt: `${isoDateOffset(-1)}T15:00:00.000Z`,
+            subjectId: "manufacturing-hidden",
+            subjectTitle: "Hidden manufacturing QA",
+            subjectType: "manufacturing",
+          },
+        ],
+      },
+    });
+
+    expect(
+      viewModel.mentorQueueItems.find((item) => item.id === "mentor-qa-review-approval-qa-review-1"),
+    ).toBeDefined();
+    expect(
+      viewModel.mentorQueueItems.find(
+        (item) => item.id === "mentor-qa-review-approval-qa-review-hidden-task",
+      ),
+    ).toBeUndefined();
+    expect(
+      viewModel.mentorQueueItems.find(
+        (item) => item.id === "mentor-qa-review-approval-qa-review-hidden-manufacturing",
+      ),
+    ).toBeUndefined();
+  });
+
   it("applies action required filters to mentor queue items", () => {
     const viewModel = buildAttentionViewModel({
       activePersonFilter: [],

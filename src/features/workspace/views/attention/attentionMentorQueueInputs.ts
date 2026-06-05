@@ -67,11 +67,20 @@ export function buildAttentionMentorQueueInputs({
       return false;
     }
 
+    const sourceTask = review.subjectType === "task" ? tasksById[review.subjectId] : null;
+    const sourceManufacturing =
+      review.subjectType === "manufacturing"
+        ? bootstrap.manufacturingItems.find((item) => item.id === review.subjectId)
+        : null;
+
+    if (!sourceTask && !sourceManufacturing) {
+      return false;
+    }
+
     if (activePersonFilter.length === 0) {
       return true;
     }
 
-    const sourceTask = review.subjectType === "task" ? tasksById[review.subjectId] : null;
     return (
       review.participantIds.some((memberId) => activePersonFilter.includes(memberId)) ||
       (sourceTask ? filterSelectionMatchesTaskPeople(activePersonFilter, sourceTask) : false)
