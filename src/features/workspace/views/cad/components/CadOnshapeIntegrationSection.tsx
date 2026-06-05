@@ -10,6 +10,7 @@ import {
 import { CadDataPanels } from "./CadDataPanels";
 import { CadLinkSyncPanel } from "./CadLinkSyncPanel";
 import { CadStatusPanels } from "./CadStatusPanels";
+import { CadSyncHistoryPanel } from "./CadSyncHistoryPanel";
 import type {
   OnshapeDocumentRefRecord,
   OnshapeOverview,
@@ -36,6 +37,7 @@ const defaultOverview: OnshapeOverview = {
   },
   documentRefs: [],
   importRuns: [],
+  syncJobs: [],
   snapshots: [],
   latestSnapshot: null,
   assemblyNodes: [],
@@ -286,6 +288,8 @@ export function CadOnshapeIntegrationSection({
         syncLevel={syncLevel}
         url={url}
       />
+
+      <CadSyncHistoryPanel overview={overview} />
 
       <CadDataPanels overview={overview} />
     </section>
