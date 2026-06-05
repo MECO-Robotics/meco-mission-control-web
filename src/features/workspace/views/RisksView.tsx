@@ -18,6 +18,7 @@ import { RiskEditorModal } from "./RiskEditorModal";
 import { RiskDetailsModal } from "./RiskDetailsModal";
 import { RiskFilterToolbar } from "./RiskFilterToolbar";
 import { RiskMetricsSection } from "./RiskMetricsSection";
+import { riskAuditActions } from "./riskViewData/riskAuditActions";
 import {
   RISK_SEVERITY_ORDER,
   formatRiskSeverity,
@@ -346,6 +347,7 @@ export function RisksView({
       {viewModel.editorMode === "detail" && viewModel.activeRisk ? (
         <RiskDetailsModal
           activeRisk={viewModel.activeRisk}
+          auditActions={riskAuditActions(bootstrap.actions, viewModel.activeRisk)}
           getAttachmentLabel={viewModel.getAttachmentLabel}
           getMitigationLabel={viewModel.getMitigationLabel}
           getSourceLabel={viewModel.getSourceLabel}

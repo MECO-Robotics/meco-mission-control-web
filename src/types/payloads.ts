@@ -13,6 +13,7 @@ import type {
   ProjectType,
   PurchaseStatus,
   RiskAttachmentType,
+  RiskReassessmentStatus,
   RiskSeverity,
   SeasonType,
   TaskBlockerSeverity,
@@ -67,6 +68,9 @@ export interface ReportPayload {
   title?: string;
   status?: TestResultStatus;
   findings?: string[];
+  targetRiskId?: string | null;
+  proposedRiskSeverity?: RiskSeverity | null;
+  proposedRiskStatus?: RiskReassessmentStatus | null;
 }
 
 export interface ReportFindingPayload {
@@ -291,6 +295,7 @@ export interface TaskPayload {
   partInstanceIds: string[];
   artifactId?: string | null;
   artifactIds?: string[];
+  targetRiskId?: string | null;
   targetMilestoneId: string | null;
   photoUrl: string;
   ownerId: string | null;
