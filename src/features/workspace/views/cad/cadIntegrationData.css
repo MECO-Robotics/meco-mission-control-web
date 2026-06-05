@@ -124,18 +124,9 @@
   border-color: rgba(245, 158, 11, 0.35);
 }
 
-.cad-empty-copy,
-.cad-compare-placeholder {
+.cad-empty-copy {
   color: var(--text-muted);
   font-size: 0.84rem;
-}
-
-.cad-compare-placeholder {
-  border: 1px dashed var(--border-subtle, rgba(148, 163, 184, 0.35));
-  border-radius: 12px;
-  margin-top: 12px;
-  padding: 12px;
-  text-align: center;
 }
 
 @media (max-width: 900px) {
@@ -148,5 +139,6 @@
     align-items: flex-start;
     text-align: left;
   }
+
 }
 

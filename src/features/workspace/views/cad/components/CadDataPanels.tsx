@@ -1,6 +1,7 @@
 ﻿import type { OnshapeOverview } from "../model/cadIntegrationTypes";
 
 import { useMemo } from "react";
+import { CadSnapshotDiffPanel } from "./CadSnapshotDiffPanel";
 
 const EMPTY_ASSEMBLY_NODES: OnshapeOverview["assemblyNodes"] = [];
 const EMPTY_PART_DEFINITIONS: OnshapeOverview["partDefinitions"] = [];
@@ -86,9 +87,10 @@ export function CadDataPanels({ overview }: { overview: OnshapeOverview | null }
               </article>
             )) : <p className="cad-empty-copy">No snapshots yet.</p>}
           </div>
-          <div className="cad-compare-placeholder">Snapshot comparison placeholder</div>
         </section>
       </div>
+
+      <CadSnapshotDiffPanel overview={overview} />
 
       <section className="cad-card">
         <div className="cad-section-heading">
