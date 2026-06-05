@@ -5,7 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { AttentionView } from "@/features/workspace/views/attention/AttentionView";
 import { buildAttentionViewModel } from "@/features/workspace/views/attention/attentionViewModel";
-import { createBootstrap } from "./attentionViewModel.fixture";
+import { createBootstrap } from "./support/attentionViewModel.fixture";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 

@@ -8,8 +8,8 @@ import {
   mentorQueueItemMatchesFilters,
 } from "@/features/workspace/views/attention/AttentionView";
 import { buildAttentionViewModel } from "@/features/workspace/views/attention/attentionViewModel";
-import { createMentorQueueBootstrap } from "./attentionMentorQueue.fixture";
-import { isoDateOffset } from "./attentionViewModel.fixture";
+import { createMentorQueueBootstrap } from "./support/attentionMentorQueue.fixture";
+import { isoDateOffset } from "./support/attentionViewModel.fixture";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
