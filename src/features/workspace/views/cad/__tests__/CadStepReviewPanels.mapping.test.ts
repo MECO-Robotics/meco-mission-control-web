@@ -12,12 +12,12 @@ describe("CAD STEP review panel mapping state", () => {
         diff: {
           previousSnapshotId: "cad-snapshot-1",
           addedAssemblies: [{ id: "asm-intake", name: "MECH - Intake", instancePath: "/Robot/MECH - Intake" }],
-          removedAssemblies: [],
+          removedAssemblies: [{ id: "asm-old", name: "MECH - Old Shooter", instancePath: "/Robot/MECH - Old Shooter" }],
           movedAssemblies: [],
-          addedParts: [],
+          addedParts: [{ id: "part-roller", name: "Roller tube", partNumber: "INT-002" }],
           removedParts: [],
           movedPartInstances: [],
-          mappingChanges: [],
+          mappingChanges: [{ previousName: "Wheel spacer v1", currentName: "Wheel spacer v2" }],
           warnings: [],
         },
         importRun: null,
@@ -91,7 +91,16 @@ describe("CAD STEP review panel mapping state", () => {
     expect(markup).toContain("Select a target before confirming.");
     expect(markup).toContain("<button class=\"secondary-button compact-action\" disabled=\"\" type=\"button\">Confirm</button>");
     expect(markup).toContain("Finalize with unresolved warnings");
-    expect(markup).toContain("Added assemblies: 1");
+    expect(markup).toContain("STEP preview diff");
+    expect(markup).toContain("Review mapping decisions");
+    expect(markup).toContain("New subsystems, mechanisms, and parts");
+    expect(markup).toContain("MECH - Intake");
+    expect(markup).toContain("INT-002 - Roller tube");
+    expect(markup).toContain("Renamed or unmatched parts");
+    expect(markup).toContain("Wheel spacer v2");
+    expect(markup).toContain("Removed or unmapped items");
+    expect(markup).toContain("MECH - Old Shooter");
+    expect(markup).toContain("Confidence warnings");
     expect(markup).toContain("step_unmapped_assembly");
   });
 
