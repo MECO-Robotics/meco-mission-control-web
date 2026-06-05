@@ -63,6 +63,8 @@ export function QaReportEditorModal({
                   ...current,
                   taskId: milestone.target.value,
                   targetRiskId: bootstrap.tasks.find((task) => task.id === milestone.target.value)?.targetRiskId ?? null,
+                  proposedRiskSeverity: null,
+                  proposedRiskStatus: null,
                 }))
               }
               required
