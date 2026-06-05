@@ -27,7 +27,6 @@ on:
       - "package.json"
       - "package-lock.json"
       - "scripts/organization-audit.mjs"
-      - "skills/**"
       - "eslint.config.js"
       - "tsconfig.json"
       - "tsconfig.app.json"
@@ -393,4 +392,3 @@ jobs:
           const enforced = requiredChecks.map(([name]) => name).join(', ');
           console.log(`Required merge checks passed for ${baseRef}: ${enforced}`);
           NODE
-
