@@ -11,6 +11,8 @@ import { CadStepUploadPanel } from "./components/CadStepUploadPanel";
 import { useCadStepWorkflow } from "./hooks/useCadStepWorkflow";
 import "./cadIntegration.css";
 import "./cadIntegrationData.css";
+import "./cadSnapshotDiff.css";
+import "./cadSnapshotDiffTree.css";
 import "./cadStepDiagnostics.css";
 import "./cadStepHierarchy.css";
 import "./cadStepTree.css";
