@@ -126,9 +126,13 @@ export function buildSyncHistoryRows(overview: OnshapeOverview | null): SyncHist
 
   const importRuns = overview.importRuns ?? EMPTY_IMPORT_RUNS;
   const syncJobs = overview.syncJobs ?? EMPTY_SYNC_JOBS;
-  const rows = syncJobs.length
-    ? syncJobs.map((job) => rowFromSyncJob(overview, job, importRuns))
-    : importRuns.map((run) => rowFromImportRun(overview, run));
+  const syncJobImportRunIds = new Set(syncJobs.map((job) => job.importRunId));
+  const rows = [
+    ...syncJobs.map((job) => rowFromSyncJob(overview, job, importRuns)),
+    ...importRuns
+      .filter((run) => !syncJobImportRunIds.has(run.id))
+      .map((run) => rowFromImportRun(overview, run)),
+  ];
 
   return rows.sort((left, right) => {
     const leftTime = left.timestamp ? new Date(left.timestamp).getTime() : 0;

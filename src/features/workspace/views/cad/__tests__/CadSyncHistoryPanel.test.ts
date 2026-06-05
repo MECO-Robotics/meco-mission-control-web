@@ -148,6 +148,63 @@ describe("CadSyncHistoryPanel", () => {
     expect(markup).toContain("not reported");
   });
 
+  it("keeps legacy import runs that do not have matching sync jobs", () => {
+    const overview = createOverview({
+      importRuns: [
+        {
+          id: "cad-import-with-job",
+          onshapeDocumentRefId: "ref-1",
+          syncLevel: "full",
+          status: "completed",
+          startedAt: "2026-06-03T12:00:00.000Z",
+          completedAt: "2026-06-03T12:03:00.000Z",
+          requestedBy: "cad.lead@mecorobotics.org",
+          callsEstimated: 2,
+          callsUsed: 2,
+          stoppedReason: null,
+          errorMessage: null,
+        },
+        {
+          id: "legacy-import-only",
+          onshapeDocumentRefId: "ref-1",
+          syncLevel: "bom",
+          status: "completed",
+          startedAt: "2026-06-02T12:00:00.000Z",
+          completedAt: "2026-06-02T12:02:00.000Z",
+          requestedBy: "legacy.cad@mecorobotics.org",
+          callsEstimated: 1,
+          callsUsed: 1,
+          stoppedReason: null,
+          errorMessage: null,
+        },
+      ],
+      syncJobs: [
+        {
+          id: "sync-job-current",
+          importRunId: "cad-import-with-job",
+          onshapeDocumentRefId: "ref-1",
+          status: "completed",
+          startedAt: "2026-06-03T12:00:00.000Z",
+          completedAt: "2026-06-03T12:03:00.000Z",
+          actor: "cad.lead@mecorobotics.org",
+          sourceReferenceJson: {},
+          summaryJson: { warningCount: 0, changedObjectCount: 4 },
+          errorMessage: null,
+          createdAt: "2026-06-03T12:00:00.000Z",
+        },
+      ],
+    });
+
+    const rows = buildSyncHistoryRows(overview);
+
+    expect(rows.map((row) => row.id)).toEqual(["sync-job-current", "legacy-import-only"]);
+    expect(rows[1]).toMatchObject({
+      actor: "legacy.cad@mecorobotics.org",
+      label: "legacy-import-only",
+      syncLevel: "bom",
+    });
+  });
+
   it("renders an empty state explaining how to create sync history", () => {
     const markup = renderToStaticMarkup(React.createElement(CadSyncHistoryPanel, { overview: createOverview() }));
 
