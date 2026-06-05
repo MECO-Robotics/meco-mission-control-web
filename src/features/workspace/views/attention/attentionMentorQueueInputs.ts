@@ -92,5 +92,6 @@ export function buildAttentionMentorQueueInputs({
     pendingQaReports,
     pendingQaReviews,
     purchaseLinkedTasksById,
+    scopedPurchaseLinkedTasksById,
   };
 }

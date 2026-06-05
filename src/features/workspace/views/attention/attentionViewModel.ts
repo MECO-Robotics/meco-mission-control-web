@@ -216,6 +216,7 @@ export function buildAttentionViewModel({
     pendingQaReports,
     pendingQaReviews,
     purchaseLinkedTasksById,
+    scopedPurchaseLinkedTasksById,
   } = buildAttentionMentorQueueInputs({
     activePersonFilter,
     bootstrap,
@@ -339,6 +340,7 @@ export function buildAttentionViewModel({
     pendingPurchaseApprovals,
     purchaseLinkedTasksById,
     riskReviewItems: [...criticalRisks, ...highRisks],
+    scopedPurchaseLinkedTasksById,
     staleTaskResults,
     waitingQaTasks,
   });

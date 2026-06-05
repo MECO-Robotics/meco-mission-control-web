@@ -564,9 +564,29 @@ describe("buildAttentionViewModel", () => {
   });
 
   it("keeps purchase approvals linked to selected mentor tasks", () => {
+    const bootstrap = createMentorQueueBootstrap();
+    const scopedPurchaseTask = bootstrap.tasks.find((task) => task.id === "task-purchase");
+    if (!scopedPurchaseTask) {
+      throw new Error("Expected mentor purchase task fixture");
+    }
+
     const viewModel = buildAttentionViewModel({
       activePersonFilter: ["mentor-1"],
-      bootstrap: createMentorQueueBootstrap(),
+      bootstrap: {
+        ...bootstrap,
+        tasks: [
+          ...bootstrap.tasks,
+          {
+            ...scopedPurchaseTask,
+            assigneeIds: [],
+            dueDate: isoDateOffset(-3),
+            id: "task-purchase-out-of-scope",
+            mentorId: null,
+            ownerId: null,
+            title: "Earlier out-of-scope purchase task",
+          },
+        ],
+      },
     });
 
     expect(

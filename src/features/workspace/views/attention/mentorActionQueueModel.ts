@@ -11,6 +11,7 @@ interface BuildMentorActionQueueItemsArgs {
   pendingQaReviews: NonNullable<BootstrapPayload["qaReviews"]>;
   purchaseLinkedTasksById: Map<string, BootstrapPayload["tasks"]>;
   riskReviewItems: BootstrapPayload["risks"];
+  scopedPurchaseLinkedTasksById: Map<string, BootstrapPayload["tasks"]>;
   staleTaskResults: StaleTaskResult[];
   pendingPurchaseApprovals: BootstrapPayload["purchaseItems"];
   waitingQaTasks: BootstrapPayload["tasks"];
@@ -63,6 +64,7 @@ export function buildMentorActionQueueItems({
   pendingPurchaseApprovals,
   purchaseLinkedTasksById,
   riskReviewItems,
+  scopedPurchaseLinkedTasksById,
   staleTaskResults,
   waitingQaTasks,
 }: BuildMentorActionQueueItemsArgs): MentorActionQueueItem[] {
@@ -159,7 +161,11 @@ export function buildMentorActionQueueItems({
   }
 
   for (const purchase of pendingPurchaseApprovals) {
-    const linkedTask = pickPrimaryTask(purchaseLinkedTasksById.get(purchase.id) ?? []);
+    const linkedTask = pickPrimaryTask(
+      scopedPurchaseLinkedTasksById.get(purchase.id) ??
+        purchaseLinkedTasksById.get(purchase.id) ??
+        [],
+    );
 
     items.push({
       actionType: linkedTask ? "open-task" : null,
