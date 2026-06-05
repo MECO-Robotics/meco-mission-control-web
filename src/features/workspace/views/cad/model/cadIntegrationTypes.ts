@@ -38,10 +38,26 @@ export interface CadImportRunRecord {
   status: "pending" | "running" | "completed" | "partial" | "failed" | "canceled";
   startedAt: string;
   completedAt: string | null;
+  requestedBy?: string | null;
   callsEstimated: number | null;
   callsUsed: number;
   stoppedReason: string | null;
   errorMessage: string | null;
+  rawSummaryJson?: Record<string, unknown>;
+}
+
+export interface OnshapeSyncJobRecord {
+  id: string;
+  importRunId: string;
+  onshapeDocumentRefId: string;
+  status: "pending" | "running" | "completed" | "partial" | "failed" | "canceled";
+  startedAt: string;
+  completedAt: string | null;
+  actor: string | null;
+  sourceReferenceJson: Record<string, unknown>;
+  summaryJson: Record<string, unknown>;
+  errorMessage: string | null;
+  createdAt: string;
 }
 
 export interface CadSnapshotRecord {
@@ -150,6 +166,7 @@ export interface OnshapeOverview {
   };
   documentRefs: OnshapeDocumentRefRecord[];
   importRuns: CadImportRunRecord[];
+  syncJobs?: OnshapeSyncJobRecord[];
   snapshots: CadSnapshotRecord[];
   latestSnapshot: CadSnapshotRecord | null;
   assemblyNodes: CadAssemblyNodeRecord[];
