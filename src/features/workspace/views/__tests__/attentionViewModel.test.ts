@@ -439,6 +439,21 @@ describe("buildAttentionViewModel", () => {
     expect(mentorQueueItemMatchesFilters(qaItem!, "quality", "swerve")).toBe(false);
   });
 
+  it("keeps purchase approvals linked to selected mentor tasks", () => {
+    const viewModel = buildAttentionViewModel({
+      activePersonFilter: ["mentor-1"],
+      bootstrap: createMentorQueueBootstrap(),
+    });
+
+    expect(
+      viewModel.mentorQueueItems.find((item) => item.id === "mentor-purchase-approval-purchase-1"),
+    ).toMatchObject({
+      actionType: "open-task",
+      recordId: "task-purchase",
+      sourceType: "purchase",
+    });
+  });
+
   it("renders mentor queue source links in the attention view", () => {
     const markup = renderToStaticMarkup(
       React.createElement(AttentionView, {

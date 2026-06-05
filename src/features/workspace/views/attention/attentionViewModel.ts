@@ -177,12 +177,21 @@ export function buildAttentionViewModel({
         filterSelectionIncludes(activePersonFilter, item.requestedById),
     )
     .sort((left, right) => left.status.localeCompare(right.status));
+  const purchaseLinkedTasksById = new Map<string, BootstrapPayload["tasks"]>();
+  for (const task of filteredTasks) {
+    for (const purchaseId of task.linkedPurchaseIds) {
+      const linkedTasks = purchaseLinkedTasksById.get(purchaseId) ?? [];
+      linkedTasks.push(task);
+      purchaseLinkedTasksById.set(purchaseId, linkedTasks);
+    }
+  }
   const pendingPurchaseApprovals = bootstrap.purchaseItems
     .filter(
       (item) =>
         !item.approvedByMentor &&
         item.status === "requested" &&
-        filterSelectionIncludes(activePersonFilter, item.requestedById),
+        (filterSelectionIncludes(activePersonFilter, item.requestedById) ||
+          (purchaseLinkedTasksById.get(item.id)?.length ?? 0) > 0),
     )
     .sort((left, right) => left.title.localeCompare(right.title));
 
@@ -357,14 +366,6 @@ export function buildAttentionViewModel({
     staleTaskResults,
     waitingQaTasks,
   });
-  const purchaseLinkedTasksById = new Map<string, BootstrapPayload["tasks"]>();
-  for (const task of filteredTasks) {
-    for (const purchaseId of task.linkedPurchaseIds) {
-      const linkedTasks = purchaseLinkedTasksById.get(purchaseId) ?? [];
-      linkedTasks.push(task);
-      purchaseLinkedTasksById.set(purchaseId, linkedTasks);
-    }
-  }
   const mentorQueueItems = buildMentorActionQueueItems({
     blockedTasks,
     lookup,
