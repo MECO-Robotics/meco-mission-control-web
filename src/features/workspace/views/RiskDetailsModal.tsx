@@ -1,12 +1,15 @@
 import { createPortal } from "react-dom";
 
+import type { AuditActionRecord } from "@/types/recordsExecution";
 import type { RiskRecord } from "@/types/recordsReporting";
+import { WorkspaceAuditActionList } from "@/features/workspace/shared/WorkspaceAuditActionList";
 
 import { ATTACHMENT_TYPE_LABELS, formatRiskSeverity, getRiskSeverityPillClassName } from "./riskViewModel";
 import { TaskPriorityBadge } from "./taskQueue/taskQueueKanbanCardMeta";
 
 interface RiskDetailsModalProps {
   activeRisk: RiskRecord;
+  auditActions?: AuditActionRecord[];
   getAttachmentLabel: (risk: RiskRecord) => string;
   getMitigationLabel: (risk: RiskRecord) => string;
   getSourceLabel: (risk: RiskRecord) => string;
@@ -16,6 +19,7 @@ interface RiskDetailsModalProps {
 
 export function RiskDetailsModal({
   activeRisk,
+  auditActions = [],
   getAttachmentLabel,
   getMitigationLabel,
   getSourceLabel,
@@ -92,6 +96,17 @@ export function RiskDetailsModal({
             <span style={{ color: "var(--text-title)" }}>Mitigation task</span>
             <p className="task-detail-copy">{getMitigationLabel(activeRisk)}</p>
           </div>
+          <div className="field modal-wide">
+            <span style={{ color: "var(--text-title)" }}>Mitigation meaning</span>
+            <p className="task-detail-copy">
+              Partial mitigation lowers severity while keeping the risk tracked. Full mitigation is
+              a mentor-approved QA reassessment that reduces the tracked risk to low.
+            </p>
+          </div>
+          <WorkspaceAuditActionList
+            actions={auditActions}
+            emptyText="No risk reassessment audit actions are recorded yet."
+          />
 
           <div className="modal-actions modal-wide">
             <button className="primary-action" onClick={onEditRisk} type="button">

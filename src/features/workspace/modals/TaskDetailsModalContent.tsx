@@ -7,6 +7,7 @@ import { TaskDetailsDependencyBlockersSection } from "./task/TaskDetailsDependen
 import { TaskDetailsHeaderSection } from "./task/TaskDetailsHeaderSection";
 import { TaskDetailsOverviewSection } from "./task/TaskDetailsOverviewSection";
 import type { TaskDetailsEditableField } from "./task/taskModalTypes";
+import { WorkspaceAuditActionList } from "../shared/WorkspaceAuditActionList";
 
 interface TaskDetailsModalProps {
   activeTask: TaskRecord;
@@ -53,6 +54,14 @@ export function TaskDetailsModal({
 }: TaskDetailsModalProps) {
   const [editingField, setEditingField] = useState<TaskDetailsEditableField | null>(null);
   const canInlineEdit = Boolean(taskDraft && setTaskDraft);
+  const taskAuditActions = (bootstrap.actions ?? []).filter(
+    (action) =>
+      action.taskId === activeTask.id ||
+      (action.entityType === "task" && action.entityId === activeTask.id) ||
+      (Boolean(activeTask.targetRiskId) &&
+        action.entityType === "risk" &&
+        action.entityId === activeTask.targetRiskId),
+  );
 
   useEffect(() => {
     setEditingField(null);
@@ -120,6 +129,11 @@ export function TaskDetailsModal({
             setEditingField={setEditingField}
             setTaskDraft={setTaskDraft}
             taskDraft={taskDraft}
+          />
+
+          <WorkspaceAuditActionList
+            actions={taskAuditActions}
+            emptyText="No task or risk reassessment audit actions are recorded yet."
           />
 
           {beforeFooterContent}
