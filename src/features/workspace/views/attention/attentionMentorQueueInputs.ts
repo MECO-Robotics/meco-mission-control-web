@@ -1,0 +1,78 @@
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import {
+  filterSelectionIncludes,
+  filterSelectionMatchesTaskPeople,
+} from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import type { BootstrapPayload } from "@/types/bootstrap";
+
+interface BuildAttentionMentorQueueInputsArgs {
+  activePersonFilter: FilterSelection;
+  bootstrap: BootstrapPayload;
+  filteredTasks: BootstrapPayload["tasks"];
+  tasksById: Record<string, BootstrapPayload["tasks"][number]>;
+}
+
+export function buildAttentionMentorQueueInputs({
+  activePersonFilter,
+  bootstrap,
+  filteredTasks,
+  tasksById,
+}: BuildAttentionMentorQueueInputsArgs) {
+  const purchaseLinkedTasksById = new Map<string, BootstrapPayload["tasks"]>();
+  for (const task of filteredTasks) {
+    for (const purchaseId of task.linkedPurchaseIds) {
+      const linkedTasks = purchaseLinkedTasksById.get(purchaseId) ?? [];
+      linkedTasks.push(task);
+      purchaseLinkedTasksById.set(purchaseId, linkedTasks);
+    }
+  }
+
+  const pendingPurchaseApprovals = bootstrap.purchaseItems
+    .filter(
+      (item) =>
+        !item.approvedByMentor &&
+        item.status === "requested" &&
+        (filterSelectionIncludes(activePersonFilter, item.requestedById) ||
+          (purchaseLinkedTasksById.get(item.id)?.length ?? 0) > 0),
+    )
+    .sort((left, right) => left.title.localeCompare(right.title));
+
+  const pendingQaReports = bootstrap.reports.filter((report) => {
+    if (report.reportType !== "QA" || report.mentorApproved === true) {
+      return false;
+    }
+
+    if (activePersonFilter.length === 0) {
+      return true;
+    }
+
+    const sourceTask = report.taskId ? tasksById[report.taskId] : null;
+    return (
+      filterSelectionIncludes(activePersonFilter, report.createdByMemberId) ||
+      (sourceTask ? filterSelectionMatchesTaskPeople(activePersonFilter, sourceTask) : false)
+    );
+  });
+
+  const pendingQaReviews = (bootstrap.qaReviews ?? []).filter((review) => {
+    if (review.mentorApproved === true) {
+      return false;
+    }
+
+    if (activePersonFilter.length === 0) {
+      return true;
+    }
+
+    const sourceTask = review.subjectType === "task" ? tasksById[review.subjectId] : null;
+    return (
+      review.participantIds.some((memberId) => activePersonFilter.includes(memberId)) ||
+      (sourceTask ? filterSelectionMatchesTaskPeople(activePersonFilter, sourceTask) : false)
+    );
+  });
+
+  return {
+    pendingPurchaseApprovals,
+    pendingQaReports,
+    pendingQaReviews,
+    purchaseLinkedTasksById,
+  };
+}
