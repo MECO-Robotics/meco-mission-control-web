@@ -111,7 +111,7 @@ export function CadStepReviewPanels({
           <p>
             {usesPlaceholderParser
               ? "Finalize is blocked for placeholder STEP output."
-              : "Finalize is blocked while required mappings are unresolved unless you explicitly allow unresolved warnings."}
+              : "Preview-only STEP data becomes a finalized Robot Configuration source after required mappings are resolved."}
           </p>
           <label className="cad-inline-check">
             <input

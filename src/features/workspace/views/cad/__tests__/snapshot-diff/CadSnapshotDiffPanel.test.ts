@@ -5,11 +5,24 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { CadSnapshotDiffPanel } from "../../components/CadSnapshotDiffPanel";
 import { buildCadSnapshotDiffViewModel } from "../../model/cadSnapshotDiffViewModel";
-import { createOverview } from "./cadSnapshotDiffTestUtils";
+import { createOverview, createSnapshotPair } from "./cadSnapshotDiffTestUtils";
 
 describe("CadSnapshotDiffPanel", () => {
+  it("does not show Onshape source metadata before a snapshot exists", () => {
+    const markup = renderToStaticMarkup(React.createElement(CadSnapshotDiffPanel, { overview: createOverview({ snapshots: [] }) }));
+
+    expect(markup).toContain("Run BOM Sync to create a CAD snapshot before previewing changes.");
+    expect(markup).toContain("Not started");
+    expect(markup).not.toContain("Source: Onshape sync.");
+    expect(markup).not.toContain("Preview only");
+    expect(markup).not.toContain("Review-only data that has not been finalized into Robot Configuration.");
+  });
+
   it("uses future platform diff records to group statuses and warning badges by subsystem, mechanism, and part", () => {
+    const { currentSnapshot, previousSnapshot } = createSnapshotPair();
     const overview = createOverview({
+      latestSnapshot: currentSnapshot,
+      snapshots: [previousSnapshot, currentSnapshot],
       snapshotDiffRecords: [
         {
           id: "diff-new-wheel",
@@ -80,6 +93,8 @@ describe("CadSnapshotDiffPanel", () => {
     const markup = renderToStaticMarkup(React.createElement(CadSnapshotDiffPanel, { overview }));
     expect(markup).toContain("Onshape change preview");
     expect(markup).toContain("Preview only");
+    expect(markup).toContain("Source: Onshape sync.");
+    expect(markup).toContain("Review-only data that has not been finalized into Robot Configuration.");
     expect(markup).toContain("Drive");
     expect(markup).toContain("Swerve module");
     expect(markup).toContain("Wheel tread");

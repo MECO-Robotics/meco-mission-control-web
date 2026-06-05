@@ -1,6 +1,10 @@
 ﻿import type { OnshapeOverview } from "../model/cadIntegrationTypes";
 
 import { useMemo } from "react";
+import {
+  getCadConfigurationLifecycleCopy,
+  getCadConfigurationSourceCopy,
+} from "@/features/workspace/shared/model/cadSourceModel";
 import { CadSnapshotDiffPanel } from "./CadSnapshotDiffPanel";
 
 const EMPTY_ASSEMBLY_NODES: OnshapeOverview["assemblyNodes"] = [];
@@ -82,7 +86,9 @@ export function CadDataPanels({ overview }: { overview: OnshapeOverview | null }
             {snapshots.length ? snapshots.map((snapshot) => (
               <article className="cad-snapshot-item" key={snapshot.id}>
                 <strong>{snapshot.label}</strong>
-                <span>{snapshot.immutable ? "immutable" : "workspace draft"} - {snapshot.source}</span>
+                <span>
+                  {getCadConfigurationSourceCopy(snapshot.source).label} - {getCadConfigurationLifecycleCopy(snapshot).label}
+                </span>
                 <small>{formatDate(snapshot.createdAt)}</small>
               </article>
             )) : <p className="cad-empty-copy">No snapshots yet.</p>}
