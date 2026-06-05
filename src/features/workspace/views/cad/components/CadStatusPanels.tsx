@@ -1,5 +1,7 @@
 import type { OnshapeOverview, OnshapeSyncEstimate, SyncLevel } from "../model/cadIntegrationTypes";
 
+export type OnshapeConnectionHealth = "connected" | "expired" | "disconnected" | "unavailable";
+
 const syncCopy: Record<SyncLevel, string> = {
   link_only: "Link Only: stores the Onshape URL without spending API calls.",
   shallow: "Shallow Sync: verifies the link and caches document or assembly info.",
@@ -16,6 +18,7 @@ const estimatedCalls: Record<SyncLevel, string> = {
 
 export function CadStatusPanels({
   overview,
+  overviewError,
   isConnectingOAuth = false,
   isRefreshingEstimate = false,
   onConnectOAuth,
@@ -25,6 +28,7 @@ export function CadStatusPanels({
   syncEstimate,
 }: {
   overview: OnshapeOverview | null;
+  overviewError?: string | null;
   isConnectingOAuth?: boolean;
   isRefreshingEstimate?: boolean;
   onConnectOAuth?: () => void;
@@ -36,6 +40,7 @@ export function CadStatusPanels({
   const budget = overview?.budget;
   const connection = overview?.connection;
   const oauth = connection?.oauth;
+  const health = getOnshapeConnectionHealth(overview, overviewError);
   const isWorkspace = selectedReferenceType === "workspace";
   const estimatedCallText = syncEstimate
     ? `${syncEstimate.callsEstimated} calls`
@@ -46,27 +51,32 @@ export function CadStatusPanels({
   const budgetText = syncEstimate
     ? (syncEstimate.budgetAllowsSync ? "within budget" : "over budget")
     : "not estimated";
-  const oauthStatus = getOAuthStatusCopy(oauth);
+  const healthCopy = getOnshapeHealthCopy(health);
   const credentialSource = getCredentialSourceCopy(oauth?.credentialSource);
+  const connectActionLabel = getConnectActionLabel(health);
 
   return (
     <div className="cad-grid cad-grid-three">
-      <article className="cad-card cad-status-card">
+      <article className="cad-card cad-status-card" data-onshape-health={health}>
         <span className="cad-eyebrow">Connection</span>
-        <h3>Onshape status</h3>
-        <p>{oauthStatus}</p>
+        <div className="cad-status-title-row">
+          <h3>Onshape status</h3>
+          <span className={`cad-health-badge cad-health-${health}`}>{healthCopy.label}</span>
+        </div>
+        <p>{healthCopy.description}</p>
         <dl className="cad-key-values">
           <div><dt>Auth mode</dt><dd>{connection?.authMode === "oauth" ? "OAuth2" : "not configured"}</dd></div>
           <div><dt>Base URL</dt><dd>{connection?.baseUrl ?? "https://cad.onshape.com"}</dd></div>
           <div><dt>OAuth app</dt><dd>{oauth?.clientConfigured ? "configured" : "not configured"}</dd></div>
-          <div><dt>OAuth token</dt><dd>{credentialSource}</dd></div>
+          <div><dt>Credential source</dt><dd>{credentialSource}</dd></div>
           <div><dt>Scopes</dt><dd>{oauth?.scopes.length ? oauth.scopes.join(", ") : "not configured"}</dd></div>
           <div><dt>Token expiry</dt><dd>{oauth?.tokenExpiresAt ? new Date(oauth.tokenExpiresAt).toLocaleString() : "unknown"}</dd></div>
-          <div><dt>Credential ref</dt><dd>{connection?.credentialReference ?? "server env"}</dd></div>
+          <div><dt>Backend</dt><dd>{health === "unavailable" ? "unavailable" : "reachable"}</dd></div>
+          {connection?.lastError ? <div><dt>Last error</dt><dd>{connection.lastError}</dd></div> : null}
         </dl>
-        {oauth?.authorizationUrlAvailable && onConnectOAuth ? (
+        {connectActionLabel && oauth?.authorizationUrlAvailable && onConnectOAuth ? (
           <button className="secondary-button cad-oauth-button" disabled={isConnectingOAuth} onClick={onConnectOAuth} type="button">
-            {isConnectingOAuth ? "Opening Onshape..." : "Connect Onshape OAuth2"}
+            {isConnectingOAuth ? "Opening Onshape..." : connectActionLabel}
           </button>
         ) : null}
       </article>
@@ -108,22 +118,75 @@ export function CadStatusPanels({
   );
 }
 
-function getOAuthStatusCopy(oauth: OnshapeOverview["connection"]["oauth"] | undefined) {
-  if (!oauth?.clientConfigured) {
-    return "OAuth2 app not configured on the backend.";
+export function getOnshapeConnectionHealth(
+  overview: OnshapeOverview | null | undefined,
+  overviewError?: string | null,
+  now: Date = new Date(),
+): OnshapeConnectionHealth {
+  if (overviewError) {
+    return "unavailable";
   }
+
+  const connection = overview?.connection;
+  const oauth = connection?.oauth;
+  if (!connection?.configured || !oauth?.clientConfigured) {
+    return "disconnected";
+  }
+
+  const expiresAt = oauth.tokenExpiresAt ? Date.parse(oauth.tokenExpiresAt) : Number.NaN;
+  if (Number.isFinite(expiresAt) && expiresAt <= now.getTime()) {
+    return "expired";
+  }
+
   if (oauth.connected) {
-    return "OAuth2 connected.";
+    return "connected";
   }
-  return "OAuth2 app configured. Connect Onshape before running syncs.";
+
+  return "disconnected";
+}
+
+function getOnshapeHealthCopy(health: OnshapeConnectionHealth) {
+  if (health === "connected") {
+    return {
+      label: "Connected",
+      description: "Onshape is connected. Explicit sync actions can use the server-held OAuth grant.",
+    };
+  }
+  if (health === "expired") {
+    return {
+      label: "Expired",
+      description: "Onshape authorization has expired. Reconnect before running syncs.",
+    };
+  }
+  if (health === "unavailable") {
+    return {
+      label: "Unavailable",
+      description: "Connection health is unavailable because the Onshape overview service could not be reached.",
+    };
+  }
+
+  return {
+    label: "Disconnected",
+    description: "Onshape is disconnected. Connect before running syncs.",
+  };
 }
 
 function getCredentialSourceCopy(source?: "runtime" | "env" | "none") {
   if (source === "runtime") {
-    return "runtime token";
+    return "runtime session";
   }
   if (source === "env") {
-    return "env token";
+    return "server environment";
   }
   return "not connected";
+}
+
+function getConnectActionLabel(health: OnshapeConnectionHealth) {
+  if (health === "unavailable") {
+    return null;
+  }
+  if (health === "connected" || health === "expired") {
+    return "Reconnect Onshape OAuth2";
+  }
+  return "Connect Onshape OAuth2";
 }

@@ -90,6 +90,7 @@ export function CadOnshapeIntegrationSection({
   const [selectedDocumentRefId, setSelectedDocumentRefId] = useState("");
   const [syncLevel, setSyncLevel] = useState<SyncLevel>("bom");
   const [message, setMessage] = useState<string | null>(null);
+  const [overviewError, setOverviewError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -119,13 +120,16 @@ export function CadOnshapeIntegrationSection({
 
       const nextDocumentRefs = getScopedDocumentRefs(nextOverview.documentRefs, projectId, seasonId);
       setOverview(nextOverview);
+      setOverviewError(null);
       setSelectedDocumentRefId((current) => resolveSelectedDocumentRefId(current, nextDocumentRefs));
     } catch (error) {
       if (overviewRequestIdRef.current !== requestId) {
         return;
       }
 
-      setMessage(error instanceof Error ? error.message : String(error));
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setOverviewError(errorMessage);
+      setMessage(errorMessage);
     } finally {
       if (overviewRequestIdRef.current === requestId) {
         setIsLoading(false);
@@ -263,6 +267,7 @@ export function CadOnshapeIntegrationSection({
 
       <CadStatusPanels
         overview={overview}
+        overviewError={overviewError}
         isConnectingOAuth={isConnectingOAuth}
         isRefreshingEstimate={isRefreshingEstimate}
         onRefreshEstimate={handleRefreshEstimate}
