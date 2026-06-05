@@ -49,9 +49,6 @@ export function defaultCarryForwardRuleMode(mapping: CadStepMappingRecord): Carr
   if (mapping.rule) {
     return "exact";
   }
-  if (mapping.confidence === "MANUAL") {
-    return "manual";
-  }
   return "snapshot";
 }
 

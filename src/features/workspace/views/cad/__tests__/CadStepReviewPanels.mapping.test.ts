@@ -82,7 +82,6 @@ describe("CAD STEP review panel mapping state", () => {
     expect(markup).toContain("Ignore this item");
     expect(markup).toContain("Split/merge deferred");
     expect(markup).toContain("Current: Exact name match; confidence high");
-    expect(markup).toContain("Current: Manual override; confidence manual");
     expect(markup).toContain("Current: Ignore this item; confidence manual");
     expect(markup).toContain("Current: This snapshot only; confidence manual");
     expect(markup).toContain("Review choice: Exact name match for future imports.");
