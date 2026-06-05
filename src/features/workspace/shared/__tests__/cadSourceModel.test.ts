@@ -24,6 +24,10 @@ describe("cadSourceModel", () => {
       kind: "onshape_sync",
       label: "Onshape sync",
     });
+    expect(getCadConfigurationSourceCopy("onshape")).toMatchObject({
+      kind: "onshape_sync",
+      label: "Onshape sync",
+    });
   });
 
   it("labels preview-only and finalized lifecycle states", () => {

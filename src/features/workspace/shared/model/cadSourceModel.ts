@@ -29,6 +29,7 @@ export function getCadConfigurationSourceCopy(source?: string | null): CadConfig
       };
     case "ONSHAPE_API":
     case "ONSHAPE_BOM_CSV":
+    case "ONSHAPE":
       return {
         detail: "Onshape sync data cached from a saved document reference.",
         kind: "onshape_sync",
