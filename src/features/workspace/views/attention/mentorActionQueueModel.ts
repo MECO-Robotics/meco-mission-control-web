@@ -46,6 +46,15 @@ function buildTaskQueueItem({
   };
 }
 
+function getQaReportOutcome(report: BootstrapPayload["reports"][number]) {
+  return report.reportType === "QA" && report.result ? report.result : report.status;
+}
+
+function getQaReportPriority(report: BootstrapPayload["reports"][number]) {
+  const outcome = getQaReportOutcome(report);
+  return outcome === "pass" ? "medium" : "high";
+}
+
 export function buildMentorActionQueueItems({
   blockedTasks,
   lookup,
@@ -75,11 +84,11 @@ export function buildMentorActionQueueItems({
       ownerLabel: formatOwnerLabel(
         report.createdByMemberId ? lookup.membersById[report.createdByMemberId]?.name : null,
       ),
-      priorityLabel: report.status === "fail" || report.status === "blocked" ? "high" : "medium",
+      priorityLabel: getQaReportPriority(report),
       recordId: task?.id ?? report.id,
       sourceLabel: "Pending QA approval",
       sourceType: "qa",
-      statusLabel: report.status ?? report.result,
+      statusLabel: getQaReportOutcome(report),
       title: report.title || task?.title || "QA report",
     });
 

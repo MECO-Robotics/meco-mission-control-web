@@ -211,6 +211,25 @@ function createMentorQueueBootstrap(): BootstrapPayload {
         vendor: "Bearing Co",
       },
     ],
+    reports: [
+      ...bootstrap.reports,
+      {
+        createdAt: `${isoDateOffset(-1)}T13:00:00.000Z`,
+        createdByMemberId: "member-1",
+        id: "report-mentor-result",
+        mentorApproved: false,
+        milestoneId: null,
+        notes: "Iteration should be reviewed.",
+        projectId: "project-1",
+        reportType: "QA",
+        result: "iteration-worthy",
+        status: "pass",
+        summary: "Iteration-worthy result",
+        taskId: "task-2",
+        title: "Drivetrain QA result",
+        workstreamId: null,
+      },
+    ],
     qaReviews: [
       {
         id: "qa-review-1",
@@ -409,6 +428,14 @@ describe("buildAttentionViewModel", () => {
       recordId: "task-2",
       sourceType: "qa",
       statusLabel: "minor-fix",
+    });
+    expect(
+      viewModel.mentorQueueItems.find((item) => item.id === "mentor-qa-report-approval-report-mentor-result"),
+    ).toMatchObject({
+      priorityLabel: "high",
+      recordId: "task-2",
+      sourceType: "qa",
+      statusLabel: "iteration-worthy",
     });
     expect(
       viewModel.mentorQueueItems.find((item) => item.id === "mentor-risk-review-risk-mentor-review"),
