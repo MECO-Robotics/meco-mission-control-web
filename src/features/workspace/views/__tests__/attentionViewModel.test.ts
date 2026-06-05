@@ -494,12 +494,32 @@ describe("buildAttentionViewModel", () => {
     });
   });
 
-  it("keeps mentor QA review approvals scoped to visible subjects", () => {
+  it("keeps mentor QA review approvals scoped to actionable task subjects", () => {
     const bootstrap = createMentorQueueBootstrap();
     const viewModel = buildAttentionViewModel({
       activePersonFilter: [],
       bootstrap: {
         ...bootstrap,
+        manufacturingItems: [
+          {
+            batchLabel: "CNC-1",
+            dueDate: isoDateOffset(4),
+            id: "manufacturing-visible",
+            inHouse: false,
+            material: "Aluminum 6061",
+            materialId: null,
+            mentorReviewed: false,
+            partDefinitionId: null,
+            partInstanceId: null,
+            partInstanceIds: [],
+            process: "cnc",
+            quantity: 1,
+            requestedById: "member-1",
+            status: "requested",
+            subsystemId: "subsystem-1",
+            title: "Visible manufacturing job",
+          },
+        ],
         qaReviews: [
           ...(bootstrap.qaReviews ?? []),
           {
@@ -524,6 +544,17 @@ describe("buildAttentionViewModel", () => {
             subjectTitle: "Hidden manufacturing QA",
             subjectType: "manufacturing",
           },
+          {
+            id: "qa-review-visible-manufacturing",
+            mentorApproved: false,
+            notes: "Visible manufacturing review",
+            participantIds: ["member-1"],
+            result: "minor-fix",
+            reviewedAt: `${isoDateOffset(-1)}T16:00:00.000Z`,
+            subjectId: "manufacturing-visible",
+            subjectTitle: "Visible manufacturing QA",
+            subjectType: "manufacturing",
+          },
         ],
       },
     });
@@ -539,6 +570,11 @@ describe("buildAttentionViewModel", () => {
     expect(
       viewModel.mentorQueueItems.find(
         (item) => item.id === "mentor-qa-review-approval-qa-review-hidden-manufacturing",
+      ),
+    ).toBeUndefined();
+    expect(
+      viewModel.mentorQueueItems.find(
+        (item) => item.id === "mentor-qa-review-approval-qa-review-visible-manufacturing",
       ),
     ).toBeUndefined();
   });

@@ -67,13 +67,12 @@ export function buildAttentionMentorQueueInputs({
       return false;
     }
 
-    const sourceTask = review.subjectType === "task" ? tasksById[review.subjectId] : null;
-    const sourceManufacturing =
-      review.subjectType === "manufacturing"
-        ? bootstrap.manufacturingItems.find((item) => item.id === review.subjectId)
-        : null;
+    if (review.subjectType !== "task") {
+      return false;
+    }
 
-    if (!sourceTask && !sourceManufacturing) {
+    const sourceTask = tasksById[review.subjectId];
+    if (!sourceTask) {
       return false;
     }
 
