@@ -106,6 +106,7 @@ export function CadStepImportSummaryCard({
   const usesPlaceholderParser = stepUsesPlaceholderParser({ importRun, summary, warnings });
   const diagnostics = readDiagnostics(summary, importRun);
   const summaryWarnings = warnings.filter((warning) => SUMMARY_WARNING_CODES.has(warning.code));
+  const hasSourceModel = snapshot !== null || importRun !== null;
   const sourceCopy = getCadConfigurationSourceCopy(snapshot?.source ?? importRun?.source);
   const lifecycleCopy = getCadConfigurationLifecycleCopy(snapshot);
 
@@ -114,8 +115,12 @@ export function CadStepImportSummaryCard({
       <span className="cad-eyebrow">Import summary</span>
       <h3>{snapshot?.label ?? "No STEP snapshot selected"}</h3>
       <dl className="cad-key-values">
-        <div><dt>Source</dt><dd>{sourceCopy.label}</dd></div>
-        <div><dt>Snapshot state</dt><dd>{lifecycleCopy.label}</dd></div>
+        {hasSourceModel ? (
+          <>
+            <div><dt>Source</dt><dd>{sourceCopy.label}</dd></div>
+            <div><dt>Snapshot state</dt><dd>{lifecycleCopy.label}</dd></div>
+          </>
+        ) : null}
         <div><dt>Status</dt><dd>{snapshot?.status ?? "none"}</dd></div>
         <div><dt>Parser mode</dt><dd>{diagnostics.parserMode}</dd></div>
         <div><dt>Parser version</dt><dd>{diagnostics.parserVersion}</dd></div>
@@ -132,12 +137,14 @@ export function CadStepImportSummaryCard({
         <div><dt>Warnings</dt><dd>{warnings.length}</dd></div>
         <div><dt>Created</dt><dd>{formatDate(snapshot?.createdAt)}</dd></div>
       </dl>
-      <p className="cad-source-model-copy">
-        {sourceCopy.detail} {lifecycleCopy.detail}{" "}
-        <a href={CAD_SOURCE_MODEL_DOCS.stepExportGuide} rel="noreferrer" target="_blank">
-          STEP export guide
-        </a>
-      </p>
+      {hasSourceModel ? (
+        <p className="cad-source-model-copy">
+          {sourceCopy.detail} {lifecycleCopy.detail}{" "}
+          <a href={CAD_SOURCE_MODEL_DOCS.stepExportGuide} rel="noreferrer" target="_blank">
+            STEP export guide
+          </a>
+        </p>
+      ) : null}
       {usesPlaceholderParser ? (
         <p className="cad-parser-alert">{PLACEHOLDER_PARSER_WARNING_TEXT}</p>
       ) : null}
