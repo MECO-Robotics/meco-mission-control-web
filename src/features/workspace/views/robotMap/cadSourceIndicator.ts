@@ -19,7 +19,12 @@ function normalizeSourceValue(value: unknown): CadSourceIndicatorTone | null {
     return "step-import";
   }
 
-  if (normalized === "onshape" || normalized === "onshape-api" || normalized === "onshape-sync") {
+  if (
+    normalized === "onshape" ||
+    normalized === "onshape-api" ||
+    normalized === "onshape-bom-csv" ||
+    normalized === "onshape-sync"
+  ) {
     return "onshape-sync";
   }
 

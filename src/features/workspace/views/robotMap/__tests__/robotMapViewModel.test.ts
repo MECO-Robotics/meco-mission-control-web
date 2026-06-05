@@ -131,7 +131,7 @@ describe("buildRobotConfigurationViewModel", () => {
           name: "Swerve Modules",
           description: "",
           iteration: 1,
-          cadSource: "ONSHAPE_API",
+          cadSource: "ONSHAPE_BOM_CSV",
         },
       ],
       partDefinitions: [
