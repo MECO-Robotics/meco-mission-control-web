@@ -1,4 +1,6 @@
-﻿.cad-integration-shell {
+@import "./cadIntegrationHealth.css";
+
+.cad-integration-shell {
   display: flex;
   flex-direction: column;
   gap: 16px;

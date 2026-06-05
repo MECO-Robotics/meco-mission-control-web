@@ -20,6 +20,8 @@ import {
 } from "./attentionTriageItems";
 import { buildAttentionSummaryGroups } from "./attentionSummaryGroups";
 import { buildAttentionActionNowItems } from "./attentionActionNowItems";
+import { buildAttentionMentorQueueInputs } from "./attentionMentorQueueInputs";
+import { buildMentorActionQueueItems } from "./mentorActionQueueModel";
 import { detectStaleTasks } from "./staleTaskDetector";
 import type {
   AttentionSummaryGroup,
@@ -36,6 +38,7 @@ export type {
   AttentionTriageGroup,
   AttentionTriageItem,
   AttentionViewModel,
+  MentorActionQueueItem,
 } from "./attentionViewTypes";
 
 interface BuildAttentionViewModelArgs {
@@ -208,6 +211,18 @@ export function buildAttentionViewModel({
 
     return isWithinRecentWindow(review.reviewedAt);
   });
+  const {
+    pendingPurchaseApprovals,
+    pendingQaReports,
+    pendingQaReviews,
+    purchaseLinkedTasksById,
+    scopedPurchaseLinkedTasksById,
+  } = buildAttentionMentorQueueInputs({
+    activePersonFilter,
+    bootstrap,
+    filteredTasks,
+    tasksById,
+  });
 
   const lookup = {
     membersById,
@@ -317,9 +332,22 @@ export function buildAttentionViewModel({
     staleTaskResults,
     waitingQaTasks,
   });
+  const mentorQueueItems = buildMentorActionQueueItems({
+    blockedTasks,
+    lookup,
+    pendingQaReports,
+    pendingQaReviews,
+    pendingPurchaseApprovals,
+    purchaseLinkedTasksById,
+    riskReviewItems: [...criticalRisks, ...highRisks],
+    scopedPurchaseLinkedTasksById,
+    staleTaskResults,
+    waitingQaTasks,
+  });
 
   return {
     actionNowItems,
+    mentorQueueItems,
     summaryGroups,
     triageGroups,
   };
