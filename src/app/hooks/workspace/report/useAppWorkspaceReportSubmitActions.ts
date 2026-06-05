@@ -82,6 +82,8 @@ export function useAppWorkspaceReportSubmitActions(model: AppWorkspaceModel) {
         : null;
       const proposedRiskSeverity = model.qaReportDraft.proposedRiskSeverity || null;
       const proposedRiskStatus = model.qaReportDraft.proposedRiskStatus || null;
+      const effectiveProposedRiskSeverity =
+        proposedRiskStatus === "full-mitigation" ? "low" : proposedRiskSeverity;
       const reportDate = model.qaReportDraft.createdAt ?? localTodayDate();
       const payload: QaReportPayload = {
         reportType: "QA",
@@ -101,7 +103,7 @@ export function useAppWorkspaceReportSubmitActions(model: AppWorkspaceModel) {
         status: model.qaReportDraft.status,
         findings: model.qaReportDraft.findings ?? [],
         targetRiskId,
-        proposedRiskSeverity: targetRisk ? proposedRiskSeverity : null,
+        proposedRiskSeverity: targetRisk ? effectiveProposedRiskSeverity : null,
         proposedRiskStatus: targetRisk ? proposedRiskStatus : null,
         photoUrl: model.qaReportDraft.photoUrl ?? "",
       };
