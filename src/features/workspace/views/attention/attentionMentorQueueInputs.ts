@@ -12,14 +12,9 @@ interface BuildAttentionMentorQueueInputsArgs {
   tasksById: Record<string, BootstrapPayload["tasks"][number]>;
 }
 
-export function buildAttentionMentorQueueInputs({
-  activePersonFilter,
-  bootstrap,
-  filteredTasks,
-  tasksById,
-}: BuildAttentionMentorQueueInputsArgs) {
+function indexPurchaseLinkedTasks(tasks: BootstrapPayload["tasks"]) {
   const purchaseLinkedTasksById = new Map<string, BootstrapPayload["tasks"]>();
-  for (const task of filteredTasks) {
+  for (const task of tasks) {
     for (const purchaseId of task.linkedPurchaseIds) {
       const linkedTasks = purchaseLinkedTasksById.get(purchaseId) ?? [];
       linkedTasks.push(task);
@@ -27,13 +22,27 @@ export function buildAttentionMentorQueueInputs({
     }
   }
 
+  return purchaseLinkedTasksById;
+}
+
+export function buildAttentionMentorQueueInputs({
+  activePersonFilter,
+  bootstrap,
+  filteredTasks,
+  tasksById,
+}: BuildAttentionMentorQueueInputsArgs) {
+  const scopedPurchaseLinkedTasksById = indexPurchaseLinkedTasks(filteredTasks);
+  const purchaseLinkedTasksById = indexPurchaseLinkedTasks(
+    bootstrap.tasks.filter((task) => task.status !== "complete"),
+  );
+
   const pendingPurchaseApprovals = bootstrap.purchaseItems
     .filter(
       (item) =>
         !item.approvedByMentor &&
         item.status === "requested" &&
         (filterSelectionIncludes(activePersonFilter, item.requestedById) ||
-          (purchaseLinkedTasksById.get(item.id)?.length ?? 0) > 0),
+          (scopedPurchaseLinkedTasksById.get(item.id)?.length ?? 0) > 0),
     )
     .sort((left, right) => left.title.localeCompare(right.title));
 

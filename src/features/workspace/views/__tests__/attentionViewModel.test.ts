@@ -210,6 +210,19 @@ function createMentorQueueBootstrap(): BootstrapPayload {
         title: "Order swerve bearings",
         vendor: "Bearing Co",
       },
+      {
+        approvedByMentor: false,
+        estimatedCost: 75,
+        id: "purchase-2",
+        linkLabel: "Vendor quote",
+        partDefinitionId: null,
+        quantity: 1,
+        requestedById: "member-1",
+        status: "requested",
+        subsystemId: "subsystem-1",
+        title: "Order encoder cable",
+        vendor: "Cable Co",
+      },
     ],
     reports: [
       ...bootstrap.reports,
@@ -295,6 +308,41 @@ function createMentorQueueBootstrap(): BootstrapPayload {
         summary: "Blocked on mentor purchase approval",
         targetMilestoneId: null,
         title: "Install swerve bearings",
+        workstreamId: null,
+        workstreamIds: [],
+      },
+      {
+        actualHours: 0,
+        artifactId: null,
+        artifactIds: [],
+        assigneeIds: [],
+        blockers: [],
+        dependencyIds: [],
+        disciplineId: "",
+        documentationLinked: false,
+        dueDate: isoDateOffset(4),
+        estimatedHours: 1,
+        id: "task-purchase-requester-only",
+        isBlocked: false,
+        linkedManufacturingIds: [],
+        linkedPurchaseIds: ["purchase-2"],
+        mechanismId: null,
+        mechanismIds: [],
+        mentorId: "mentor-1",
+        ownerId: "mentor-1",
+        partInstanceId: null,
+        partInstanceIds: [],
+        planningState: "ready",
+        priority: "medium",
+        projectId: "project-1",
+        requiresDocumentation: false,
+        startDate: isoDateOffset(-1),
+        status: "not-started",
+        subsystemId: "subsystem-1",
+        subsystemIds: ["subsystem-1"],
+        summary: "Requester needs mentor purchase approval.",
+        targetMilestoneId: null,
+        title: "Install encoder cable",
         workstreamId: null,
         workstreamIds: [],
       },
@@ -477,6 +525,22 @@ describe("buildAttentionViewModel", () => {
     ).toMatchObject({
       actionType: "open-task",
       recordId: "task-purchase",
+      sourceType: "purchase",
+    });
+  });
+
+  it("keeps linked task targets for purchases requested by the selected person", () => {
+    const viewModel = buildAttentionViewModel({
+      activePersonFilter: ["member-1"],
+      bootstrap: createMentorQueueBootstrap(),
+    });
+
+    expect(
+      viewModel.mentorQueueItems.find((item) => item.id === "mentor-purchase-approval-purchase-2"),
+    ).toMatchObject({
+      actionType: "open-task",
+      openLabel: "Open linked task",
+      recordId: "task-purchase-requester-only",
       sourceType: "purchase",
     });
   });
