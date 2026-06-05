@@ -2,9 +2,23 @@ import { useState } from "react";
 
 import type { MechanismRecord, PartDefinitionRecord, SubsystemRecord } from "@/types/records";
 import type { CadStepMappingRecord } from "../model/cadIntegrationTypes";
+import {
+  carryForwardRuleModeDescription,
+  carryForwardRuleModeLabel,
+  carryForwardRuleModes,
+  defaultCarryForwardRuleMode,
+  defaultTargetKind,
+  repeatedInstanceQuantity,
+  ruleModeAppliesToFuture,
+  ruleOrigin,
+  targetKindForRuleMode,
+  targetKindForSource,
+  targetKindRequiresTarget,
+  targetKinds,
+  type CarryForwardRuleMode,
+} from "../model/cadStepMappingRules";
 
 type TargetKind = CadStepMappingRecord["targetKind"];
-type CarryForwardRuleMode = "snapshot" | "exact" | "normalized" | "manual" | "ignore" | "split_merge_deferred";
 
 export interface CadStepMappingConfirmInput {
   mappingId?: string;
@@ -14,24 +28,6 @@ export interface CadStepMappingConfirmInput {
   targetId: string | null;
   applyToFuture: boolean;
 }
-
-const carryForwardRuleModes: Array<{ value: CarryForwardRuleMode; label: string; description: string }> = [
-  { value: "snapshot", label: "This snapshot only", description: "Do not save a carry-forward rule." },
-  { value: "exact", label: "Exact name match", description: "Reuse this target when the next STEP item name is identical." },
-  { value: "normalized", label: "Normalized name match", description: "Reuse this target after trimming case, spaces, and common separators." },
-  { value: "manual", label: "Manual override", description: "Save this reviewer-selected target for future imports." },
-  { value: "ignore", label: "Ignore this item", description: "Carry forward an ignore decision for this STEP item." },
-  { value: "split_merge_deferred", label: "Split/merge deferred", description: "Unsupported for automatic rules; leave a review note for now." },
-];
-
-const targetKinds: Array<{ value: TargetKind; label: string }> = [
-  { value: "SUBSYSTEM", label: "Existing subsystem" },
-  { value: "MECHANISM", label: "Existing mechanism" },
-  { value: "PART_DEFINITION", label: "Existing part definition" },
-  { value: "IGNORE", label: "Ignore" },
-  { value: "REFERENCE_GEOMETRY", label: "Reference geometry" },
-  { value: "UNMAPPED", label: "Unmapped" },
-];
 
 function targetOptions(
   kind: TargetKind,
@@ -47,66 +43,6 @@ function targetOptions(
     return targets.partDefinitions.map((item) => ({ id: item.id, label: `${item.partNumber} - ${item.name}` }));
   }
   return [];
-}
-
-function ruleOrigin(mapping: CadStepMappingRecord) {
-  if (mapping.rule) {
-    return "existing rule";
-  }
-  if (mapping.confidence === "MANUAL") {
-    return "manual override";
-  }
-  return mapping.status === "CONFIRMED" ? "this snapshot only" : "new suggestion";
-}
-
-function defaultCarryForwardRuleMode(mapping: CadStepMappingRecord): CarryForwardRuleMode {
-  if (mapping.targetKind === "IGNORE") {
-    return mapping.rule || mapping.status === "CONFIRMED" ? "ignore" : "snapshot";
-  }
-  if (mapping.rule) {
-    return "exact";
-  }
-  if (mapping.confidence === "MANUAL") {
-    return "manual";
-  }
-  return "snapshot";
-}
-
-function carryForwardRuleModeDescription(mode: CarryForwardRuleMode) {
-  return carryForwardRuleModes.find((ruleMode) => ruleMode.value === mode)?.description ?? "";
-}
-
-function carryForwardRuleModeLabel(mode: CarryForwardRuleMode) {
-  return carryForwardRuleModes.find((ruleMode) => ruleMode.value === mode)?.label ?? mode;
-}
-
-function defaultTargetKind(mapping: CadStepMappingRecord): TargetKind {
-  if (mapping.targetKind !== "UNMAPPED") {
-    return mapping.targetKind;
-  }
-  if (mapping.sourceKind === "PART_DEFINITION" || mapping.sourceKind === "PART_INSTANCE") {
-    return "PART_DEFINITION";
-  }
-  return "SUBSYSTEM";
-}
-
-function targetKindRequiresTarget(kind: TargetKind) {
-  return kind === "SUBSYSTEM" || kind === "MECHANISM" || kind === "PART_DEFINITION";
-}
-
-function repeatedInstanceQuantity(mapping: CadStepMappingRecord) {
-  return mapping.quantity ?? mapping.sourceIds?.length ?? 1;
-}
-
-function targetKindForRuleMode(ruleMode: CarryForwardRuleMode, targetKind: TargetKind): TargetKind {
-  if (ruleMode === "ignore") {
-    return "IGNORE";
-  }
-  return targetKind;
-}
-
-function ruleModeAppliesToFuture(ruleMode: CarryForwardRuleMode) {
-  return ruleMode !== "snapshot" && ruleMode !== "split_merge_deferred";
 }
 
 export function CadStepMappingReviewTable({
@@ -211,7 +147,12 @@ export function CadStepMappingReviewTable({
                           [mapping.id]: {
                             ...draft,
                             ruleMode,
-                            targetKind: ruleMode === "ignore" ? "IGNORE" : draft.targetKind,
+                            targetKind:
+                              ruleMode === "ignore"
+                                ? "IGNORE"
+                                : draft.targetKind === "IGNORE"
+                                  ? targetKindForSource(mapping)
+                                  : draft.targetKind,
                             targetId: ruleMode === "ignore" || ruleMode === "split_merge_deferred" ? "" : draft.targetId,
                           },
                         });
