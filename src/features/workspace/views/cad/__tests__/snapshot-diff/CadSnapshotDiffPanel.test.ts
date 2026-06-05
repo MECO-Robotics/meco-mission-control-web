@@ -80,6 +80,8 @@ describe("CadSnapshotDiffPanel", () => {
     const markup = renderToStaticMarkup(React.createElement(CadSnapshotDiffPanel, { overview }));
     expect(markup).toContain("Onshape change preview");
     expect(markup).toContain("Preview only");
+    expect(markup).toContain("Source: Onshape sync.");
+    expect(markup).toContain("Review-only data that has not been finalized into Robot Configuration.");
     expect(markup).toContain("Drive");
     expect(markup).toContain("Swerve module");
     expect(markup).toContain("Wheel tread");

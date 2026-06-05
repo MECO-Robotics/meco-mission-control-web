@@ -49,6 +49,9 @@ describe("RobotMapView", () => {
     );
 
     expect(markup).toContain("Robot Configuration");
+    expect(markup).toContain("Manual configuration with finalized STEP import and Onshape sync sources.");
+    expect(markup).toContain("Source model docs");
+    expect(markup).toContain("/docs/CURRENT_WEB_SPEC.md#robot-configuration");
     expect(markup).not.toContain("Unplaced Subsystems");
     expect(markup).not.toContain("All subsystems are currently placed.");
     expect(markup).not.toContain("Enable Edit Layout to drag subsystems.");
