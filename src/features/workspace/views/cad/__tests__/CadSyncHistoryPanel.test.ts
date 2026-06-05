@@ -154,7 +154,7 @@ describe("CadSyncHistoryPanel", () => {
         {
           id: "cad-import-with-job",
           onshapeDocumentRefId: "ref-1",
-          syncLevel: "full",
+          syncLevel: "deep_release",
           status: "completed",
           startedAt: "2026-06-03T12:00:00.000Z",
           completedAt: "2026-06-03T12:03:00.000Z",
