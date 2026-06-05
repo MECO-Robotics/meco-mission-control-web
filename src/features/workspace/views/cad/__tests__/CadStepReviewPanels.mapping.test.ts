@@ -51,6 +51,19 @@ describe("CAD STEP review panel mapping state", () => {
           status: "CONFIRMED",
           rule: { id: "rule-ignore-fasteners", confidence: "MANUAL" },
           updatedAt: "2026-05-10T00:00:00.000Z",
+        }, {
+          id: "mapping-ignore-snapshot",
+          snapshotId: "cad-snapshot-2",
+          mappingRuleId: null,
+          sourceKind: "PART_INSTANCE",
+          sourceId: "cad-fastener-2",
+          sourceName: "Washer <2>",
+          targetKind: "IGNORE",
+          targetId: null,
+          confidence: "MANUAL",
+          status: "CONFIRMED",
+          rule: null,
+          updatedAt: "2026-05-10T00:00:00.000Z",
         }],
         onConfirmMapping: jest.fn(),
         onGroupRepeatedInstancesChange: jest.fn(),
@@ -71,6 +84,7 @@ describe("CAD STEP review panel mapping state", () => {
     expect(markup).toContain("Current: Exact name match; confidence high");
     expect(markup).toContain("Current: Manual override; confidence manual");
     expect(markup).toContain("Current: Ignore this item; confidence manual");
+    expect(markup).toContain("Current: This snapshot only; confidence manual");
     expect(markup).toContain("Review choice: Exact name match for future imports.");
     expect(markup).toContain("Review choice: Manual override for future imports.");
     expect(markup).toContain("Review choice: ignore item.");

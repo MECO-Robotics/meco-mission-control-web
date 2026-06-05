@@ -44,7 +44,7 @@ export function ruleOrigin(mapping: CadStepMappingRecord) {
 
 export function defaultCarryForwardRuleMode(mapping: CadStepMappingRecord): CarryForwardRuleMode {
   if (mapping.targetKind === "IGNORE") {
-    return mapping.rule || mapping.status === "CONFIRMED" ? "ignore" : "snapshot";
+    return mapping.rule ? "ignore" : "snapshot";
   }
   if (mapping.rule) {
     return "exact";
