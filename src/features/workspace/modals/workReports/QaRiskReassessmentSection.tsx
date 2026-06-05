@@ -45,18 +45,16 @@ export function QaRiskReassessmentSection({
           <span style={{ color: "var(--text-title)" }}>Target risk</span>
           <select
             onChange={(milestone) =>
-              setQaReportDraft((current) => ({
-                ...current,
-                targetRiskId: milestone.target.value || null,
-                proposedRiskSeverity: milestone.target.value
-                  ? (current.proposedRiskSeverity ??
-                    bootstrap.risks.find((risk) => risk.id === milestone.target.value)?.severity ??
-                    null)
-                  : null,
-                proposedRiskStatus: milestone.target.value
-                  ? (current.proposedRiskStatus ?? "partial-mitigation")
-                  : null,
-              }))
+              setQaReportDraft((current) => {
+                const nextRisk = bootstrap.risks.find((risk) => risk.id === milestone.target.value) ?? null;
+
+                return {
+                  ...current,
+                  targetRiskId: nextRisk?.id ?? null,
+                  proposedRiskSeverity: nextRisk?.severity ?? null,
+                  proposedRiskStatus: nextRisk ? "partial-mitigation" : null,
+                };
+              })
             }
             style={selectStyle}
             value={qaReportDraft.targetRiskId ?? ""}

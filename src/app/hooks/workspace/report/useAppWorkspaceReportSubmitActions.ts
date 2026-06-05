@@ -5,7 +5,6 @@ import { toErrorMessage } from "@/lib/appUtils/common";
 import { createQaReportRecord, createTestResultRecord, createWorkLogRecord, updateRiskRecord } from "@/lib/auth/records/reporting";
 import { localTodayDate } from "@/lib/dateUtils";
 import type { QaReportPayload, TestResultPayload, WorkLogPayload } from "@/types/payloads";
-import { toRiskPayload } from "@/features/workspace/views/riskViewModel";
 
 export type AppWorkspaceReportSubmitActions = ReturnType<typeof useAppWorkspaceReportSubmitActions>;
 
@@ -112,13 +111,14 @@ export function useAppWorkspaceReportSubmitActions(model: AppWorkspaceModel) {
       let riskUpdateError: string | null = null;
       if (targetRisk && payload.mentorApproved && payload.proposedRiskSeverity) {
         try {
+          const riskUpdatePayload = {
+            severity: payload.proposedRiskSeverity,
+            ...(targetRisk.mitigationTaskId ? {} : { mitigationTaskId: task?.id ?? null }),
+          };
+
           await updateRiskRecord(
             targetRisk.id,
-            {
-              ...toRiskPayload(targetRisk),
-              severity: payload.proposedRiskSeverity,
-              mitigationTaskId: targetRisk.mitigationTaskId ?? task?.id ?? null,
-            },
+            riskUpdatePayload,
             model.handleUnauthorized,
           );
         } catch (error) {
