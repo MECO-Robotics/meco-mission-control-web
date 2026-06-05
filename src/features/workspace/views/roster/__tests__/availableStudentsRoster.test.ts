@@ -5,14 +5,18 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { RosterAvailableStudentsView } from "@/features/workspace/views/roster/RosterAvailableStudentsView";
-import { buildAvailableStudentRoster } from "@/features/workspace/views/roster/availableStudentsRoster";
+import {
+  buildAvailableStudentRoster,
+  formatRosterDateKey,
+} from "@/features/workspace/views/roster/availableStudentsRoster";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 import type { MemberRecord } from "@/types/recordsOrganization";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
-const today = new Date(2026, 5, 4);
+const today = new Date();
+const todayIso = formatRosterDateKey(today);
 
 const baseStudent = (id: string, name: string, extras: Partial<MemberRecord> = {}): MemberRecord => ({
   activeSeasonIds: ["season-1"],
@@ -78,7 +82,7 @@ function createBootstrap(overrides: Partial<BootstrapPayload> = {}): BootstrapPa
     attendanceRecords: members
       .filter((member) => member.id !== "absent")
       .map((member) => ({
-        date: "2026-06-04",
+        date: todayIso,
         id: `attendance-${member.id}`,
         memberId: member.id,
         totalHours: 1,
@@ -122,7 +126,7 @@ function createBootstrap(overrides: Partial<BootstrapPayload> = {}): BootstrapPa
     ],
     workLogs: [
       {
-        date: "2026-06-04",
+        date: todayIso,
         hours: 1,
         id: "worklog-1",
         notes: "Already cutting stock",
@@ -189,7 +193,7 @@ describe("RosterAvailableStudentsView", () => {
       attendanceRecords: [
         ...(baseBootstrap.attendanceRecords ?? []),
         {
-          date: "2026-06-04",
+          date: todayIso,
           id: "attendance-other-season",
           memberId: "other-season",
           totalHours: 1,
