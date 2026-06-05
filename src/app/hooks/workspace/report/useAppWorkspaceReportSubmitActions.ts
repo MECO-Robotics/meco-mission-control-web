@@ -109,19 +109,27 @@ export function useAppWorkspaceReportSubmitActions(model: AppWorkspaceModel) {
       };
 
       await createQaReportRecord(payload, model.handleUnauthorized);
+      let riskUpdateError: string | null = null;
       if (targetRisk && payload.mentorApproved && payload.proposedRiskSeverity) {
-        await updateRiskRecord(
-          targetRisk.id,
-          {
-            ...toRiskPayload(targetRisk),
-            severity: payload.proposedRiskSeverity,
-            mitigationTaskId: targetRisk.mitigationTaskId ?? task?.id ?? null,
-          },
-          model.handleUnauthorized,
-        );
+        try {
+          await updateRiskRecord(
+            targetRisk.id,
+            {
+              ...toRiskPayload(targetRisk),
+              severity: payload.proposedRiskSeverity,
+              mitigationTaskId: targetRisk.mitigationTaskId ?? task?.id ?? null,
+            },
+            model.handleUnauthorized,
+          );
+        } catch (error) {
+          riskUpdateError = toErrorMessage(error);
+        }
       }
       await model.loadWorkspace();
       model.setQaReportModalMode(null);
+      if (riskUpdateError) {
+        model.setDataMessage(`QA report saved, but the linked risk update failed: ${riskUpdateError}`);
+      }
     } catch (error) {
       model.setDataMessage(toErrorMessage(error));
     } finally {
