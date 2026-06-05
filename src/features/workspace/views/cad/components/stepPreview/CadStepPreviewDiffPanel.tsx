@@ -9,8 +9,8 @@ import type {
 } from "../../model/cadIntegrationTypes";
 import {
   buildCadStepPreviewDiffViewModel,
-  type CadStepPreviewDiffGroup,
 } from "../../model/cadStepPreviewDiffViewModel";
+import type { CadStepPreviewDiffGroup } from "../../model/cadStepPreviewDiffTypes";
 
 function CadStepPreviewDiffGroupView({ group }: { group: CadStepPreviewDiffGroup }) {
   return (

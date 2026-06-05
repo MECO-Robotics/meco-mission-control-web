@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { CadStepReviewPanels } from "../components/CadStepReviewPanels";
 import { baseHierarchyReview } from "./cadStepHierarchyReviewTestHelpers";
+import { buildCadStepPreviewDiffViewModel } from "../model/cadStepPreviewDiffViewModel";
 
 describe("CAD STEP review preview diff", () => {
   it("shows preview states and mapping return before finalize", () => {
@@ -103,5 +104,66 @@ describe("CAD STEP review preview diff", () => {
     expect(markup).toContain("Low confidence match");
     expect(markup).toContain("Review mapping decisions");
     expect(markup).toContain("Finalize with unresolved warnings");
+  });
+
+  it("preserves distinct duplicate-named STEP parts in preview counts", () => {
+    const groups = buildCadStepPreviewDiffViewModel({
+      diff: {
+        previousSnapshotId: null,
+        addedAssemblies: [],
+        removedAssemblies: [],
+        movedAssemblies: [],
+        addedParts: [
+          { id: "part-left-plate", name: "Side plate", partNumber: null },
+          { id: "part-right-plate", name: "Side plate", partNumber: null },
+        ],
+        removedParts: [],
+        movedPartInstances: [],
+        mappingChanges: [],
+        warnings: [],
+      },
+      hierarchyReview: null,
+      mappings: [],
+      partMatchProposals: [],
+      warnings: [],
+    });
+
+    expect(groups[0].items.map((item) => item.id)).toEqual(["added-part-part-left-plate", "added-part-part-right-plate"]);
+  });
+
+  it("counts unmapped STEP mappings only in the removed or unmapped group", () => {
+    const groups = buildCadStepPreviewDiffViewModel({
+      diff: {
+        previousSnapshotId: null,
+        addedAssemblies: [],
+        removedAssemblies: [],
+        movedAssemblies: [],
+        addedParts: [],
+        removedParts: [],
+        movedPartInstances: [],
+        mappingChanges: [],
+        warnings: [],
+      },
+      hierarchyReview: null,
+      mappings: [{
+        id: "mapping-unmapped-arm",
+        snapshotId: "snapshot-current",
+        mappingRuleId: null,
+        sourceKind: "PART_DEFINITION",
+        sourceId: "part-arm",
+        sourceName: "Arm spacer",
+        targetKind: "UNMAPPED",
+        targetId: null,
+        confidence: "LOW",
+        status: "NEEDS_REVIEW",
+        rule: null,
+        updatedAt: "2026-05-15T00:00:00.000Z",
+      }],
+      partMatchProposals: [],
+      warnings: [],
+    });
+
+    expect(groups.find((group) => group.id === "renamed")?.items).toEqual([]);
+    expect(groups.find((group) => group.id === "removed")?.items.map((item) => item.id)).toEqual(["unmapped-mapping-unmapped-arm"]);
   });
 });
