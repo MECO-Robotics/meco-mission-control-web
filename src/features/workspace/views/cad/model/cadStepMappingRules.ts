@@ -49,6 +49,13 @@ export function defaultCarryForwardRuleMode(mapping: CadStepMappingRecord): Carr
   return "snapshot";
 }
 
+export function persistedCarryForwardRuleMode(mapping: CadStepMappingRecord): CarryForwardRuleMode {
+  if (!mapping.rule) {
+    return "snapshot";
+  }
+  return mapping.targetKind === "IGNORE" ? "ignore" : "exact";
+}
+
 export function carryForwardRuleModeDescription(mode: CarryForwardRuleMode) {
   return carryForwardRuleModes.find((ruleMode) => ruleMode.value === mode)?.description ?? "";
 }

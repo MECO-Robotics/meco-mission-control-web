@@ -8,6 +8,7 @@ import {
   carryForwardRuleModes,
   defaultCarryForwardRuleMode,
   defaultTargetKind,
+  persistedCarryForwardRuleMode,
   repeatedInstanceQuantity,
   ruleModeAppliesToFuture,
   ruleOrigin,
@@ -169,7 +170,7 @@ export function CadStepMappingReviewTable({
                       ))}
                     </select>
                     <small>{ruleDescription}</small>
-                    <small>Current: {carryForwardRuleModeLabel(defaultCarryForwardRuleMode(mapping))}; confidence {mapping.confidence.toLowerCase()}</small>
+                    <small>Current: {carryForwardRuleModeLabel(persistedCarryForwardRuleMode(mapping))}; confidence {mapping.confidence.toLowerCase()}</small>
                   </td>
                   <td>{mapping.status.replace(/_/g, " ").toLowerCase()}</td>
                   <td>
