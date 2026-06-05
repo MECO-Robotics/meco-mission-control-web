@@ -177,6 +177,144 @@ function createBootstrap(): BootstrapPayload {
   };
 }
 
+function createMentorQueueBootstrap(): BootstrapPayload {
+  const bootstrap = createBootstrap();
+
+  return {
+    ...bootstrap,
+    members: [
+      ...bootstrap.members,
+      {
+        email: "mentor@example.com",
+        elevated: true,
+        id: "mentor-1",
+        name: "Morgan Mentor",
+        role: "mentor",
+        seasonId: "season-1",
+      },
+    ],
+    purchaseItems: [
+      {
+        approvedByMentor: false,
+        estimatedCost: 325,
+        id: "purchase-1",
+        linkLabel: "Vendor quote",
+        partDefinitionId: null,
+        quantity: 2,
+        requestedById: "member-1",
+        status: "requested",
+        subsystemId: "subsystem-1",
+        title: "Order swerve bearings",
+        vendor: "Bearing Co",
+      },
+    ],
+    qaReviews: [
+      {
+        id: "qa-review-1",
+        mentorApproved: false,
+        notes: "Needs mentor signoff",
+        participantIds: ["member-1"],
+        result: "minor-fix",
+        reviewedAt: `${isoDateOffset(-1)}T12:00:00.000Z`,
+        subjectId: "task-2",
+        subjectTitle: "Approve drivetrain QA",
+        subjectType: "task",
+      },
+    ],
+    risks: [
+      ...bootstrap.risks,
+      {
+        attachmentId: "project-1",
+        attachmentType: "project",
+        detail: "Battery mount may fail inspection",
+        id: "risk-mentor-review",
+        mitigationTaskId: "task-stale-mentor",
+        severity: "high",
+        sourceId: "report-1",
+        sourceType: "qa-report",
+        title: "Battery retention risk",
+      },
+    ],
+    tasks: [
+      ...bootstrap.tasks.map((task) =>
+        task.id === "task-2"
+          ? { ...task, mentorId: "mentor-1", title: "Approve drivetrain QA" }
+          : task,
+      ),
+      {
+        actualHours: 0,
+        artifactId: null,
+        artifactIds: [],
+        assigneeIds: ["member-1"],
+        blockers: [],
+        dependencyIds: [],
+        disciplineId: "",
+        documentationLinked: false,
+        dueDate: isoDateOffset(7),
+        estimatedHours: 1,
+        id: "task-purchase",
+        isBlocked: false,
+        linkedManufacturingIds: [],
+        linkedPurchaseIds: ["purchase-1"],
+        mechanismId: null,
+        mechanismIds: [],
+        mentorId: "mentor-1",
+        ownerId: "member-1",
+        partInstanceId: null,
+        partInstanceIds: [],
+        planningState: "ready",
+        priority: "medium",
+        projectId: "project-1",
+        requiresDocumentation: false,
+        startDate: isoDateOffset(-2),
+        status: "not-started",
+        subsystemId: "subsystem-1",
+        subsystemIds: ["subsystem-1"],
+        summary: "Blocked on mentor purchase approval",
+        targetMilestoneId: null,
+        title: "Install swerve bearings",
+        workstreamId: null,
+        workstreamIds: [],
+      },
+      {
+        actualHours: 0,
+        artifactId: null,
+        artifactIds: [],
+        assigneeIds: ["member-1"],
+        blockers: [],
+        dependencyIds: [],
+        disciplineId: "",
+        documentationLinked: false,
+        dueDate: isoDateOffset(5),
+        estimatedHours: 3,
+        id: "task-stale-mentor",
+        isBlocked: false,
+        linkedManufacturingIds: [],
+        linkedPurchaseIds: [],
+        mechanismId: null,
+        mechanismIds: [],
+        mentorId: "mentor-1",
+        ownerId: "member-1",
+        partInstanceId: null,
+        partInstanceIds: [],
+        planningState: "ready",
+        priority: "low",
+        projectId: "project-1",
+        requiresDocumentation: false,
+        startDate: isoDateOffset(-20),
+        status: "in-progress",
+        subsystemId: "subsystem-1",
+        subsystemIds: ["subsystem-1"],
+        summary: "Needs mentor follow-up",
+        targetMilestoneId: null,
+        title: "Document climb iteration",
+        workstreamId: null,
+        workstreamIds: [],
+      },
+    ],
+  };
+}
+
 describe("buildAttentionViewModel", () => {
   it("renders action required filters inside the search overlay", () => {
     const markup = renderToStaticMarkup(
@@ -235,5 +373,63 @@ describe("buildAttentionViewModel", () => {
         viewModel.actionNowItems[i].urgencyScore,
       );
     }
+  });
+
+  it("builds a mentor action queue across approvals, help requests, risk reviews, and stale mentor tasks", () => {
+    const viewModel = buildAttentionViewModel({
+      activePersonFilter: [],
+      bootstrap: createMentorQueueBootstrap(),
+    });
+
+    expect(viewModel.mentorQueueItems.map((item) => item.sourceLabel)).toEqual(
+      expect.arrayContaining([
+        "Pending QA approval",
+        "Blocked student help",
+        "Purchase approval",
+        "Risk review",
+        "Stale mentor task",
+      ]),
+    );
+    expect(
+      viewModel.mentorQueueItems.find((item) => item.id === "mentor-purchase-approval-purchase-1"),
+    ).toMatchObject({
+      actionType: "open-task",
+      openLabel: "Open linked task",
+      recordId: "task-purchase",
+      sourceType: "purchase",
+      title: "Order swerve bearings",
+    });
+    expect(
+      viewModel.mentorQueueItems.find((item) => item.id === "mentor-qa-review-approval-qa-review-1"),
+    ).toMatchObject({
+      actionType: "open-task",
+      recordId: "task-2",
+      sourceType: "qa",
+      statusLabel: "minor-fix",
+    });
+    expect(
+      viewModel.mentorQueueItems.find((item) => item.id === "mentor-risk-review-risk-mentor-review"),
+    ).toMatchObject({
+      actionType: "open-risk",
+      recordId: "risk-mentor-review",
+      sourceType: "risk",
+    });
+  });
+
+  it("renders mentor queue source links in the attention view", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(AttentionView, {
+        activePersonFilter: [],
+        bootstrap: createMentorQueueBootstrap(),
+        onOpenRisk: jest.fn(),
+        onOpenTask: jest.fn(),
+      }),
+    );
+
+    expect(markup).toContain("Mentor action queue");
+    expect(markup).toContain("Pending QA approval");
+    expect(markup).toContain("Purchase approval");
+    expect(markup).toContain("Open linked task");
+    expect(markup).toContain("Open risk");
   });
 });

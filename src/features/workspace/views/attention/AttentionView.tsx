@@ -7,6 +7,7 @@ import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspace
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { AttentionNeedsActionNowList } from "./AttentionNeedsActionNowList";
+import { AttentionMentorActionQueue } from "./AttentionMentorActionQueue";
 import { AttentionSummaryCards } from "./AttentionSummaryCards";
 import { AttentionTriageList } from "./AttentionTriageList";
 import {
@@ -180,6 +181,11 @@ export function AttentionView({
       </div>
 
       <AttentionSummaryCards groups={viewModel.summaryGroups} onSelectCard={jumpToSection} />
+      <AttentionMentorActionQueue
+        items={viewModel.mentorQueueItems}
+        onOpenRisk={onOpenRisk}
+        onOpenTask={onOpenTask}
+      />
       <AttentionNeedsActionNowList
         items={filteredActionNowItems}
         onOpenRisk={onOpenRisk}
