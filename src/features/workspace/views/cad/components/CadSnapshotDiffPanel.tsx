@@ -28,11 +28,14 @@ function WarningBadges({ warnings }: { warnings: CadImportWarningRecord[] }) {
 
 export function CadSnapshotDiffPanel({ overview }: { overview: OnshapeOverview | null }) {
   const viewModel = useMemo(() => buildCadSnapshotDiffViewModel(overview), [overview]);
-  const sourceCopy = getCadConfigurationSourceCopy(viewModel.currentSnapshot?.source ?? "ONSHAPE_API");
-  const lifecycleCopy = getCadConfigurationLifecycleCopy({
-    immutable: viewModel.currentSnapshot?.immutable ?? null,
-    status: viewModel.currentSnapshot ? "preview" : null,
-  });
+  const hasSnapshot = viewModel.currentSnapshot !== null;
+  const sourceCopy = hasSnapshot ? getCadConfigurationSourceCopy(viewModel.currentSnapshot?.source ?? "ONSHAPE_API") : null;
+  const lifecycleCopy = hasSnapshot
+    ? getCadConfigurationLifecycleCopy({
+        immutable: viewModel.currentSnapshot?.immutable ?? null,
+        status: "preview",
+      })
+    : null;
 
   return (
     <section className="cad-card cad-snapshot-diff-card" aria-labelledby="cad-snapshot-diff-title">
@@ -41,16 +44,18 @@ export function CadSnapshotDiffPanel({ overview }: { overview: OnshapeOverview |
           <span className="cad-eyebrow">Snapshot diff</span>
           <h3 id="cad-snapshot-diff-title">Onshape change preview</h3>
         </div>
-        <span className="cad-preview-pill">{lifecycleCopy.label}</span>
+        <span className="cad-preview-pill">{lifecycleCopy?.label ?? "Not started"}</span>
       </div>
       <p className="cad-diff-context">
         {viewModel.currentSnapshot
           ? `Comparing ${viewModel.currentSnapshot.label} against ${viewModel.previousSnapshot?.label ?? "an empty baseline"}.`
           : "Run BOM Sync to create a CAD snapshot before previewing changes."}
       </p>
-      <p className="cad-source-model-copy">
-        Source: {sourceCopy.label}. {lifecycleCopy.detail}
-      </p>
+      {sourceCopy && lifecycleCopy ? (
+        <p className="cad-source-model-copy">
+          Source: {sourceCopy.label}. {lifecycleCopy.detail}
+        </p>
+      ) : null}
       <div className="cad-diff-counts" aria-label="CAD snapshot diff counts">
         {(Object.keys(cadSnapshotDiffStatusLabels) as CadSnapshotDiffStatus[]).map((status) => (
           <span className="cad-diff-count" data-status={status} key={status}>
