@@ -58,7 +58,6 @@ export type NavigationSubItemId =
   | "roster-available"
   | "roster-workload"
   | "roster-attendance"
-  | "reports-work-logs"
   | "reports-worklogs-kanban"
   | "reports-qa-forms"
   | "reports-milestone-results";
