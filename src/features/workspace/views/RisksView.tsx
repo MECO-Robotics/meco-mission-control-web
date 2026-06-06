@@ -13,6 +13,7 @@ import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspa
 import { KanbanColumns } from "@/features/workspace/views/kanban/KanbanColumns";
 import { KanbanScrollFrame } from "@/features/workspace/views/kanban/KanbanScrollFrame";
 import { AttentionView } from "@/features/workspace/views/attention/AttentionView";
+import type { KanbanItemDragProps } from "@/features/workspace/views/kanban/useKanbanDrag";
 
 import { RiskEditorModal } from "./RiskEditorModal";
 import { RiskDetailsModal } from "./RiskDetailsModal";
@@ -76,6 +77,7 @@ export function RisksView({
   const [pendingRiskSeverityDropIds, setPendingRiskSeverityDropIds] = useState<ReadonlySet<string>>(
     () => new Set(),
   );
+  const [focusedSeverity, setFocusedSeverity] = useState<RiskPayload["severity"] | null>(null);
   const viewModel = useRisksViewModel({
     activePersonFilter,
     bootstrap,
@@ -91,6 +93,11 @@ export function RisksView({
   const filteredMechanismMetrics = useMemo(
     () => filterMetricRows(viewModel.mechanismMetrics, metricsSearch),
     [metricsSearch, viewModel.mechanismMetrics],
+  );
+  const focusedRisks = useMemo(
+    () =>
+      focusedSeverity === null ? [] : viewModel.risksBySeverity[focusedSeverity],
+    [focusedSeverity, viewModel.risksBySeverity],
   );
 
   const setRiskSeverityDropPending = (riskId: string, isPending: boolean) => {
@@ -122,6 +129,72 @@ export function RisksView({
     } finally {
       setRiskSeverityDropPending(risk.id, false);
     }
+  };
+
+  const renderRiskCard = (
+    risk: BootstrapPayload["risks"][number],
+    _severity: RiskPayload["severity"],
+    dragProps?: KanbanItemDragProps,
+  ) => {
+    const projectLabel = getRiskProjectLabel(risk, attachmentLookups);
+    const workflowLabel = getRiskWorkflowLabel(risk, attachmentLookups);
+    const mechanismLabel = getRiskMechanismLabel(risk, attachmentLookups);
+    const { className: dragClassName, ...dragRootProps } =
+      dragProps ? (dragProps as { className?: string }) : {};
+
+    return (
+      <button
+        {...dragRootProps}
+        className={`task-queue-board-card editable-hover-target editable-hover-target-row${
+          dragClassName ? ` ${dragClassName}` : ""
+        }`}
+        key={risk.id}
+        onClick={() => viewModel.openRiskDetails(risk)}
+        type="button"
+      >
+        <div className="task-queue-board-card-header">
+          <strong>{risk.title}</strong>
+        </div>
+        <small className="task-queue-board-card-summary task-queue-board-card-summary-task">
+          {risk.detail}
+        </small>
+        <div className="task-queue-board-card-meta">
+          {isAllProjectsView ? (
+            <>
+              <span
+                className="task-queue-board-card-context-chip task-queue-board-card-context-chip-due-style"
+                title={projectLabel}
+              >
+                {projectLabel}
+              </span>
+              <span
+                className="task-queue-board-card-context-chip task-queue-board-card-context-chip-due-style"
+                title={workflowLabel}
+                style={getWorkflowChipStyle(risk, attachmentLookups)}
+              >
+                {workflowLabel}
+              </span>
+            </>
+          ) : (
+            <>
+              <span
+                className="task-queue-board-card-context-chip task-queue-board-card-context-chip-due-style"
+                title={workflowLabel}
+                style={getWorkflowChipStyle(risk, attachmentLookups)}
+              >
+                {workflowLabel}
+              </span>
+              {mechanismLabel ? (
+                <span className="task-queue-board-card-context-chip" title={`Mechanism: ${mechanismLabel}`}>
+                  {mechanismLabel}
+                </span>
+              ) : null}
+            </>
+          )}
+        </div>
+        <EditableHoverIndicator className="task-queue-board-card-hover" />
+      </button>
+    );
   };
 
   return (
@@ -226,103 +299,83 @@ export function RisksView({
           />
 
           <KanbanScrollFrame motionClassName={viewModel.riskFilterMotionClass}>
-            {viewModel.filteredRows.length > 0 ? (
-              <KanbanColumns
-                boardClassName="risk-board"
-                canDragItem={(risk) => !pendingRiskSeverityDropIds.has(risk.id)}
-                canDropItem={(risk, severity) =>
-                  risk.severity !== severity && !pendingRiskSeverityDropIds.has(risk.id)
-                }
-                columnBodyClassName="task-queue-board-column-body"
-                columnClassName="task-queue-board-column"
-                columnCountClassName="task-queue-board-column-count"
-                columnEmptyClassName="task-queue-board-column-empty"
-                columnHeaderClassName="task-queue-board-column-header"
-                columns={RISK_SEVERITY_ORDER.map((severity) => ({
-                  state: severity,
-                  count: viewModel.risksBySeverity[severity].length,
-                  header: (
-                    <span className={getRiskSeverityPillClassName(severity)}>
-                      <span aria-hidden="true" className="task-queue-board-column-header-icon">
-                        <TaskPriorityBadge priority={severity} />
+            {focusedSeverity === null ? (
+              viewModel.filteredRows.length > 0 ? (
+                <KanbanColumns
+                  boardClassName="risk-board"
+                  canDragItem={(risk) => !pendingRiskSeverityDropIds.has(risk.id)}
+                  canDropItem={(risk, severity) =>
+                    risk.severity !== severity && !pendingRiskSeverityDropIds.has(risk.id)
+                  }
+                  columnBodyClassName="task-queue-board-column-body"
+                  columnClassName="task-queue-board-column"
+                  columnCountClassName="task-queue-board-column-count"
+                  columnEmptyClassName="task-queue-board-column-empty"
+                  columnHeaderClassName="task-queue-board-column-header"
+                  columns={RISK_SEVERITY_ORDER.map((severity) => ({
+                    state: severity,
+                    count: viewModel.risksBySeverity[severity].length,
+                    header: (
+                      <span className={getRiskSeverityPillClassName(severity)}>
+                        <span aria-hidden="true" className="task-queue-board-column-header-icon">
+                          <TaskPriorityBadge priority={severity} />
+                        </span>
+                        <span className="task-queue-board-column-header-label">
+                          {formatRiskSeverity(severity)}
+                        </span>
                       </span>
-                      <span className="task-queue-board-column-header-label">
-                        {formatRiskSeverity(severity)}
-                      </span>
-                    </span>
-                  ),
-                }))}
-                emptyLabel="No risks"
-                getItemDragLabel={(risk) => risk.title}
-                getItemId={(risk) => risk.id}
-                itemsByState={viewModel.risksBySeverity}
-                onItemDrop={(risk, severity) => runRiskSeverityDrop(risk, severity)}
-                renderItem={(risk, _severity, dragProps) => {
-                  const projectLabel = getRiskProjectLabel(risk, attachmentLookups);
-                  const workflowLabel = getRiskWorkflowLabel(risk, attachmentLookups);
-                  const mechanismLabel = getRiskMechanismLabel(risk, attachmentLookups);
-                  const { className: dragClassName, ...dragRootProps } = dragProps ?? {};
-
-                  return (
+                    ),
+                  }))}
+                  emptyLabel="No risks"
+                  getItemDragLabel={(risk) => risk.title}
+                  getItemId={(risk) => risk.id}
+                  itemsByState={viewModel.risksBySeverity}
+                  onColumnBodyClick={(severity) => setFocusedSeverity(severity)}
+                  onItemDrop={(risk, severity) => runRiskSeverityDrop(risk, severity)}
+                  renderItem={(risk, _severity, dragProps) =>
+                    renderRiskCard(risk, _severity, dragProps)
+                  }
+                />
+              ) : (
+                <p className="empty-state">No risks match the current filters.</p>
+              )
+            ) : (
+              <section className="task-queue-board-focused" data-board-state={focusedSeverity}>
+                <div className="task-queue-board-focused-shell">
+                  <header className="task-queue-board-focused-header">
+                    <div className="task-queue-board-focused-title-stack">
+                      <h3 className="task-queue-board-focused-title">
+                        <span className={getRiskSeverityPillClassName(focusedSeverity)}>
+                          <span aria-hidden="true" className="task-queue-board-focused-title-icon">
+                            <TaskPriorityBadge priority={focusedSeverity} />
+                          </span>
+                          <span className="task-queue-board-focused-title-label">
+                            {formatRiskSeverity(focusedSeverity)}
+                          </span>
+                        </span>
+                      </h3>
+                      <span className="task-queue-board-focused-count">{focusedRisks.length}</span>
+                    </div>
                     <button
-                      {...dragRootProps}
-                      className={`task-queue-board-card editable-hover-target editable-hover-target-row${
-                        dragClassName ? ` ${dragClassName}` : ""
-                      }`}
-                      key={risk.id}
-                      onClick={() => viewModel.openRiskDetails(risk)}
+                      aria-label="Exit focused column view"
+                      className="task-queue-board-focused-exit"
+                      onClick={() => setFocusedSeverity(null)}
                       type="button"
                     >
-                      <div className="task-queue-board-card-header">
-                        <strong>{risk.title}</strong>
-                      </div>
-                      <small className="task-queue-board-card-summary task-queue-board-card-summary-task">
-                        {risk.detail}
-                      </small>
-                      <div className="task-queue-board-card-meta">
-                        {isAllProjectsView ? (
-                          <>
-                            <span
-                              className="task-queue-board-card-context-chip task-queue-board-card-context-chip-due-style"
-                              title={projectLabel}
-                            >
-                              {projectLabel}
-                            </span>
-                            <span
-                              className="task-queue-board-card-context-chip task-queue-board-card-context-chip-due-style"
-                              title={workflowLabel}
-                              style={getWorkflowChipStyle(risk, attachmentLookups)}
-                            >
-                              {workflowLabel}
-                            </span>
-                          </>
-                        ) : (
-                          <>
-                            <span
-                              className="task-queue-board-card-context-chip task-queue-board-card-context-chip-due-style"
-                              title={workflowLabel}
-                              style={getWorkflowChipStyle(risk, attachmentLookups)}
-                            >
-                              {workflowLabel}
-                            </span>
-                            {mechanismLabel ? (
-                              <span
-                                className="task-queue-board-card-context-chip"
-                                title={`Mechanism: ${mechanismLabel}`}
-                              >
-                                {mechanismLabel}
-                              </span>
-                            ) : null}
-                          </>
-                        )}
-                      </div>
-                      <EditableHoverIndicator className="task-queue-board-card-hover" />
+                      {"\u00d7"}
                     </button>
-                  );
-                }}
-              />
-            ) : (
-              <p className="empty-state">No risks match the current filters.</p>
+                  </header>
+                  <div className="task-queue-board-priority-grid">
+                    {focusedRisks.length > 0 ? (
+                      focusedRisks.map((risk) => (
+                        <div key={risk.id}>{renderRiskCard(risk, focusedSeverity)}</div>
+                      ))
+                    ) : (
+                      <p className="empty-state">No risks in this column.</p>
+                    )}
+                  </div>
+                </div>
+              </section>
             )}
           </KanbanScrollFrame>
         </>

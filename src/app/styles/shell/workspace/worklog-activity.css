@@ -1,14 +1,18 @@
 .worklog-activity-board {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(var(--worklog-activity-column-width, 17rem), 1fr)
+  );
   align-items: flex-start;
   gap: 0.7rem;
-  min-width: 100%;
-  width: max-content;
+  min-width: 0;
+  width: 100%;
 }
 
 .worklog-activity-board .task-queue-board-column {
-  flex: 0 0 var(--worklog-activity-column-width, 17rem);
-  width: var(--worklog-activity-column-width, 17rem);
+  width: 100%;
+  min-width: 0;
 }
 
 .worklog-activity-board-controls {
@@ -70,6 +74,40 @@
 .worklog-activity-card.task-queue-board-card {
   cursor: default;
   gap: 0.5rem;
+}
+
+.worklog-activity-column-body {
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(100%, var(--task-queue-board-focused-card-width, 16rem)), var(--task-queue-board-focused-card-width, 16rem))
+  );
+  align-items: start;
+  justify-content: start;
+}
+
+.worklog-activity-column-body .task-queue-board-card {
+  width: 100%;
+  max-width: var(--task-queue-board-focused-card-width, 16rem);
+}
+
+.worklog-activity-focused-grid {
+  display: grid;
+  justify-content: start;
+  justify-items: start;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(100%, var(--task-queue-board-focused-card-width, 16rem)), var(--task-queue-board-focused-card-width, 16rem))
+  );
+}
+
+.worklog-activity-focused-grid > div {
+  width: auto;
+}
+
+.worklog-activity-focused-grid .task-queue-board-card {
+  width: min(100%, var(--task-queue-board-focused-card-width, 16rem)) !important;
+  max-width: min(100%, var(--task-queue-board-focused-card-width, 16rem));
+  justify-self: start;
 }
 
 .worklog-activity-card .worklog-summary-task-meta {
