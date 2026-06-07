@@ -1,4 +1,4 @@
-﻿import { useMemo, useState, type CSSProperties } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { ManufacturingItemRecord } from "@/types/recordsInventory";
@@ -11,13 +11,18 @@ import {
   IconTasks,
 } from "@/components/shared/Icons";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
-import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { filterSelectionIncludes, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { PaginationControls, useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
-import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import {
+  WorkspaceTopbarControls,
+  buildSingleAddMenuAction,
+  buildTopbarSearchProps,
+} from "@/features/workspace/shared/topbar";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { MANUFACTURING_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
@@ -155,102 +160,118 @@ export function ManufacturingQueueView({
   return (
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`} style={manufacturingBoardStyle}>
       <AppTopbarSlotPortal slot="controls">
-        <div className="panel-actions filter-toolbar queue-toolbar">
-          <TopbarResponsiveSearch
-            actions={
-              <CompactFilterMenu
-                activeCount={activeFilterCount}
-                ariaLabel={`${title} filters`}
-                buttonLabel="Filters"
-                className="materials-filter-menu"
-                items={[
-                  {
-                    hidden: !onProcessFilterChange,
-                    label: "Process",
-                    content: (
-                      <FilterDropdown
-                        allLabel="All processes"
-                        ariaLabel={`Filter ${title} by process`}
-                        className="task-queue-filter-menu-submenu manufacturing-process-filter"
-                        icon={<IconManufacturing />}
-                        onChange={handleProcessFilterChange}
-                        options={MANUFACTURING_PROCESS_FILTER_OPTIONS}
-                        selectedAllLabel="All"
-                        singleSelect
-                        value={processFilterSelection}
-                      />
-                    ),
-                  },
-                  {
-                    label: "Subsystem",
-                    content: (
-                      <FilterDropdown
-                        allLabel="All subsystems"
-                        ariaLabel={`Filter ${title} by subsystem`}
-                        className="task-queue-filter-menu-submenu"
-                        icon={<IconManufacturing />}
-                        onChange={setSubsystem}
-                        options={bootstrap.subsystems}
-                        selectedAllLabel="All"
-                        value={subsystem}
-                      />
-                    ),
-                  },
-                  {
-                    label: "Requester",
-                    content: (
-                      <FilterDropdown
-                        allLabel="All requesters"
-                        ariaLabel={`Filter ${title} by requester`}
-                        className="task-queue-filter-menu-submenu"
-                        icon={<IconPerson />}
-                        onChange={setRequester}
-                        options={bootstrap.members}
-                        selectedAllLabel="All"
-                        value={requester}
-                      />
-                    ),
-                  },
-                  {
-                    label: "Material",
-                    content: (
-                      <FilterDropdown
-                        allLabel="All materials"
-                        ariaLabel={`Filter ${title} by material`}
-                        className="task-queue-filter-menu-submenu"
-                        icon={<IconManufacturing />}
-                        onChange={setMaterial}
-                        options={uniqueMaterials}
-                        selectedAllLabel="All"
-                        value={material}
-                      />
-                    ),
-                  },
-                  {
-                    label: "Status",
-                    content: (
-                      <FilterDropdown
-                        allLabel="All statuses"
-                        ariaLabel={`Filter ${title} by status`}
-                        className="task-queue-filter-menu-submenu"
-                        icon={<IconTasks />}
-                        onChange={setStatus}
-                        options={MANUFACTURING_STATUS_OPTIONS}
-                        selectedAllLabel="All"
-                        value={status}
-                      />
-                    ),
-                  },
-                ]}
-              />
-            }
-            ariaLabel={`Search ${title}`}
-            compactPlaceholder="Search"
-            onChange={setSearch}
-            placeholder="Search parts..."
-            tutorialTarget={tutorialTarget("search-input")}
-            value={search}
-          />
+        <WorkspaceTopbarControls
+          className="queue-toolbar"
+          search={
+            <TopbarResponsiveSearch
+              {...buildTopbarSearchProps("manufacturing", {
+                actions: (
+                  <CompactFilterMenu
+                    activeCount={activeFilterCount}
+                    ariaLabel={`${title} filters`}
+                    buttonLabel="Filters"
+                    className="materials-filter-menu"
+                    items={[
+                      {
+                        hidden: !onProcessFilterChange,
+                        label: "Process",
+                        content: (
+                          <FilterDropdown
+                            allLabel="All processes"
+                            ariaLabel={`Filter ${title} by process`}
+                            className="task-queue-filter-menu-submenu"
+                            icon={<IconManufacturing />}
+                            onChange={handleProcessFilterChange}
+                            options={MANUFACTURING_PROCESS_FILTER_OPTIONS}
+                            selectedAllLabel="All"
+                            singleSelect
+                            value={processFilterSelection}
+                          />
+                        ),
+                      },
+                      {
+                        label: "Subsystem",
+                        content: (
+                          <FilterDropdown
+                            allLabel="All subsystems"
+                            ariaLabel={`Filter ${title} by subsystem`}
+                            className="task-queue-filter-menu-submenu"
+                            icon={<IconManufacturing />}
+                            onChange={setSubsystem}
+                            options={bootstrap.subsystems}
+                            selectedAllLabel="All"
+                            value={subsystem}
+                          />
+                        ),
+                      },
+                      {
+                        label: "Requester",
+                        content: (
+                          <FilterDropdown
+                            allLabel="All requesters"
+                            ariaLabel={`Filter ${title} by requester`}
+                            className="task-queue-filter-menu-submenu"
+                            icon={<IconPerson />}
+                            onChange={setRequester}
+                            options={bootstrap.members}
+                            selectedAllLabel="All"
+                            value={requester}
+                          />
+                        ),
+                      },
+                      {
+                        label: "Material",
+                        content: (
+                          <FilterDropdown
+                            allLabel="All materials"
+                            ariaLabel={`Filter ${title} by material`}
+                            className="task-queue-filter-menu-submenu"
+                            icon={<IconManufacturing />}
+                            onChange={setMaterial}
+                            options={uniqueMaterials}
+                            selectedAllLabel="All"
+                            value={material}
+                          />
+                        ),
+                      },
+                      {
+                        label: "Status",
+                        content: (
+                          <FilterDropdown
+                            allLabel="All statuses"
+                            ariaLabel={`Filter ${title} by status`}
+                            className="task-queue-filter-menu-submenu"
+                            icon={<IconTasks />}
+                            onChange={setStatus}
+                            options={MANUFACTURING_STATUS_OPTIONS}
+                            selectedAllLabel="All"
+                            value={status}
+                          />
+                        ),
+                      },
+                    ]}
+                  />
+                ),
+                ariaLabel: `Search ${title}`,
+                onChange: setSearch,
+                placeholder: "Search parts...",
+                tutorialTarget: tutorialTarget("search-input"),
+                value: search,
+              })}
+            />
+          }
+          addMenu={
+            <WorkspaceTopbarAddMenu
+              actions={buildSingleAddMenuAction({
+                label: addButtonAriaLabel,
+                onSelect: onCreate,
+              })}
+              ariaLabel={addButtonAriaLabel}
+              title={addButtonAriaLabel}
+              tutorialTarget={tutorialTarget("create-job-button")}
+            />
+          }
+        >
           <div className="task-queue-toolbar-inline-actions">
             <div aria-label="Manufacturing zoom" className="task-queue-zoom-controls" role="group">
               <button
@@ -280,13 +301,7 @@ export function ManufacturingQueueView({
               </button>
             </div>
           </div>
-          <WorkspaceTopbarAddMenu
-            actions={[{ label: addButtonAriaLabel, onSelect: onCreate }]}
-            ariaLabel={addButtonAriaLabel}
-            title={addButtonAriaLabel}
-            tutorialTarget={tutorialTarget("create-job-button")}
-          />
-        </div>
+        </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
 
       <div className="panel-header compact-header">

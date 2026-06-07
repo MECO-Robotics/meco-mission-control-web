@@ -10,6 +10,12 @@ import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspa
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
+import {
+  buildTopbarSearchProps,
+  buildTopbarAddMenuActions,
+  makeAddMenuAction,
+} from "@/features/workspace/shared/topbar";
+import { WorkspaceTopbarControls } from "@/features/workspace/shared/topbar";
 import { MilestonesMilestoneModal } from "@/features/workspace/views/milestones/MilestonesEventModal";
 import { useMilestonesMilestoneModalState } from "@/features/workspace/views/milestones/sections/useMilestonesEventModalState";
 import { TaskCalendarFilterToolbar } from "./TaskCalendarFilterToolbar";
@@ -133,32 +139,40 @@ export function TaskCalendarView({
   return (
     <section className={`panel dense-panel task-calendar-shell ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">
-        <div className="panel-actions filter-toolbar task-queue-toolbar task-calendar-filter-toolbar">
-          <TopbarResponsiveSearch
-            actionCount={2}
-            actions={
-              <TaskCalendarFilterToolbar
-                eventFilter={calendar.eventFilter}
-                onEventFilterChange={calendar.setEventFilter}
-                onSortModeChange={calendar.setSortMode}
-                sortMode={calendar.sortMode}
-              />
-            }
-            ariaLabel="Search calendar"
-            compactPlaceholder="Search"
-            onChange={calendar.setSearchFilter}
-            placeholder="Search calendar..."
-            value={calendar.searchFilter}
-          />
-          <WorkspaceTopbarAddMenu
-            actions={[
-              { icon: <IconCalendar />, label: "Add meeting", onSelect: openMeetingModal },
-              { icon: <IconTasks />, label: "Add milestone", onSelect: milestoneModalState.openCreateMilestoneModal },
-            ]}
-            ariaLabel="Add calendar item"
-            title="Add calendar item"
-          />
-        </div>
+        <WorkspaceTopbarControls
+          className="task-queue-toolbar task-calendar-filter-toolbar"
+          search={
+            <TopbarResponsiveSearch
+              {...buildTopbarSearchProps("calendar", {
+                actions: (
+                  <TaskCalendarFilterToolbar
+                    eventFilter={calendar.eventFilter}
+                    onEventFilterChange={calendar.setEventFilter}
+                    onSortModeChange={calendar.setSortMode}
+                    sortMode={calendar.sortMode}
+                  />
+                ),
+                onChange: calendar.setSearchFilter,
+                placeholder: "Search calendar...",
+                value: calendar.searchFilter,
+              })}
+            />
+          }
+          addMenu={
+            <WorkspaceTopbarAddMenu
+              actions={buildTopbarAddMenuActions(
+                makeAddMenuAction("Add meeting", openMeetingModal, <IconCalendar />),
+                makeAddMenuAction(
+                  "Add milestone",
+                  milestoneModalState.openCreateMilestoneModal,
+                  <IconTasks />,
+                ),
+              )}
+              ariaLabel="Add calendar item"
+              title="Add calendar item"
+            />
+          }
+        />
       </AppTopbarSlotPortal>
 
       <div className="panel-header compact-header">

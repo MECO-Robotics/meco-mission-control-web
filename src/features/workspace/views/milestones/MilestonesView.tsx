@@ -3,6 +3,7 @@ import type { MilestonePayload } from "@/types/payloads";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
+import { WorkspaceTopbarControls, buildSingleAddMenuAction } from "@/features/workspace/shared/topbar";
 import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 
 import { MilestonesToolbar } from "./MilestonesToolbar";
@@ -54,29 +55,34 @@ export function MilestonesView({
       }}
     >
       <AppTopbarSlotPortal slot="controls">
-        <MilestonesToolbar
-          isAllProjectsView={isAllProjectsView}
-          milestoneZoom={milestones.milestoneZoom}
-          projectFilter={milestones.projectFilter}
-          projects={bootstrap.projects}
-          searchFilter={milestones.searchFilter}
-          searchSuggestions={milestones.searchSuggestions}
-          setMilestoneZoom={milestones.setMilestoneZoom}
-          setProjectFilter={milestones.setProjectFilter}
-          setSearchFilter={milestones.setSearchFilter}
-          setSortField={milestones.setSortField}
-          setSortOrder={milestones.setSortOrder}
-          setTypeFilter={milestones.setTypeFilter}
-          sortField={milestones.sortField}
-          sortOrder={milestones.sortOrder}
-          typeFilter={milestones.typeFilter}
-        />
-        <WorkspaceTopbarAddMenu
-          actions={[{ label: "Add milestone", onSelect: milestones.openCreateMilestoneModal }]}
-          ariaLabel="Add milestone"
-          title="Add milestone"
-          tutorialTarget="create-milestone-button"
-        />
+        <WorkspaceTopbarControls className="milestones-toolbar">
+          <MilestonesToolbar
+            isAllProjectsView={isAllProjectsView}
+            milestoneZoom={milestones.milestoneZoom}
+            projectFilter={milestones.projectFilter}
+            projects={bootstrap.projects}
+            searchFilter={milestones.searchFilter}
+            searchSuggestions={milestones.searchSuggestions}
+            setMilestoneZoom={milestones.setMilestoneZoom}
+            setProjectFilter={milestones.setProjectFilter}
+            setSearchFilter={milestones.setSearchFilter}
+            setSortField={milestones.setSortField}
+            setSortOrder={milestones.setSortOrder}
+            setTypeFilter={milestones.setTypeFilter}
+            sortField={milestones.sortField}
+            sortOrder={milestones.sortOrder}
+            typeFilter={milestones.typeFilter}
+          />
+          <WorkspaceTopbarAddMenu
+            actions={buildSingleAddMenuAction({
+              label: "Add milestone",
+              onSelect: milestones.openCreateMilestoneModal,
+            })}
+            ariaLabel="Add milestone"
+            title="Add milestone"
+            tutorialTarget="create-milestone-button"
+          />
+        </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
 
       <div className="panel-header compact-header">

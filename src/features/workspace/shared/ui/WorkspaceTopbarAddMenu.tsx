@@ -8,7 +8,7 @@ import {
 } from "react";
 import { Plus } from "lucide-react";
 
-interface TopbarAddMenuAction {
+export interface TopbarAddMenuAction {
   icon?: ReactNode;
   label: string;
   onSelect: () => void;

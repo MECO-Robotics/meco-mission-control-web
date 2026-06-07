@@ -5,6 +5,7 @@ import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspa
 import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
+import { WorkspaceTopbarControls, buildSingleAddMenuAction } from "@/features/workspace/shared/topbar";
 
 import { filterPartDefinitions } from "./parts/partsViewData";
 import { PartsDefinitionSection } from "./parts/PartsDefinitionSection";
@@ -125,23 +126,28 @@ export function PartsView({
   return (
     <section className={`panel dense-panel part-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">
-        <PartsToolbar
-          bootstrap={bootstrap}
-          partSearch={partSearch}
-          partStatus={partStatus}
-          partSubsystem={partSubsystem}
-          setPartSearch={setPartSearch}
-          setPartStatus={setPartStatus}
-          setPartSubsystem={setPartSubsystem}
-          setShowArchivedPartDefinitions={setShowArchivedPartDefinitions}
-          showArchivedPartDefinitions={showArchivedPartDefinitions}
-        />
-        <WorkspaceTopbarAddMenu
-          actions={[{ label: "Add part definition", onSelect: openCreatePartDefinitionModal }]}
-          ariaLabel="Add part definition"
-          title="Add part definition"
-          tutorialTarget="create-part-button"
-        />
+        <WorkspaceTopbarControls className="part-manager-toolbar">
+          <PartsToolbar
+            bootstrap={bootstrap}
+            partSearch={partSearch}
+            partStatus={partStatus}
+            partSubsystem={partSubsystem}
+            setPartSearch={setPartSearch}
+            setPartStatus={setPartStatus}
+            setPartSubsystem={setPartSubsystem}
+            setShowArchivedPartDefinitions={setShowArchivedPartDefinitions}
+            showArchivedPartDefinitions={showArchivedPartDefinitions}
+          />
+          <WorkspaceTopbarAddMenu
+            actions={buildSingleAddMenuAction({
+              label: "Add part definition",
+              onSelect: openCreatePartDefinitionModal,
+            })}
+            ariaLabel="Add part definition"
+            title="Add part definition"
+            tutorialTarget="create-part-button"
+          />
+        </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
 
       <div className="panel-header compact-header">

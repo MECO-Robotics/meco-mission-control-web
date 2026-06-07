@@ -174,8 +174,9 @@ describe("AppTopbar", () => {
 
     expect(source).toContain("const container = element.parentElement;");
     expect(source).toContain("observer.observe(container);");
-    expect(source).toContain("setSearchWidth(container.clientWidth);");
+    expect(source).toContain("const widthToTest = nextSearchWidth?.availableWidthPx ?? container.clientWidth;");
     expect(source).not.toContain("observer.observe(element);");
+    expect(source).toContain("getCollisionMeasurement(searchRef, effectivePadding, collisionRoots)");
     expect(source).not.toContain("setSearchWidth(element.clientWidth);");
   });
 

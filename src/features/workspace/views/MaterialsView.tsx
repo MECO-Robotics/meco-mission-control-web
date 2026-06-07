@@ -1,4 +1,4 @@
-﻿import { useMemo, useState, type CSSProperties } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MaterialRecord } from "@/types/recordsInventory";
@@ -11,6 +11,11 @@ import { EditableHoverIndicator, PaginationControls, TableCell, useWorkspacePagi
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import { filterSelectionIncludes, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
+import {
+  WorkspaceTopbarControls,
+  buildSingleAddMenuAction,
+  buildTopbarSearchProps,
+} from "@/features/workspace/shared/topbar";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
@@ -62,60 +67,61 @@ export function MaterialsView({
   return (
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">
-        <div className="panel-actions filter-toolbar materials-toolbar">
+        <WorkspaceTopbarControls className="materials-toolbar">
           <TopbarResponsiveSearch
-            actions={
-              <CompactFilterMenu
-                activeCount={[category, stock].filter((value) => value.length > 0).length}
-                ariaLabel="Material filters"
-                buttonLabel="Filters"
-                className="materials-filter-menu"
-                items={[
-                  {
-                    label: "Category",
-                    content: (
-                      <FilterDropdown
-                        allLabel="All categories"
-                        ariaLabel="Filter materials by category"
-                        className="task-queue-filter-menu-submenu"
-                        icon={<IconManufacturing />}
-                        onChange={setCategory}
-                        options={MATERIAL_CATEGORY_OPTIONS}
-                        value={category}
-                      />
-                    ),
-                  },
-                  {
-                    label: "Stock",
-                    content: (
-                      <FilterDropdown
-                        allLabel="All stock"
-                        ariaLabel="Filter materials by stock level"
-                        className="task-queue-filter-menu-submenu"
-                        icon={<IconTasks />}
-                        onChange={setStock}
-                        options={MATERIAL_STOCK_OPTIONS}
-                        value={stock}
-                      />
-                    ),
-                  },
-                ]}
-              />
-            }
-            ariaLabel="Search materials"
-            compactPlaceholder="Search"
-            onChange={setSearch}
-            placeholder="Search materials..."
-            tutorialTarget="materials-search-input"
-            value={search}
+            {...buildTopbarSearchProps("materials", {
+              actions: (
+                <CompactFilterMenu
+                  activeCount={[category, stock].filter((value) => value.length > 0).length}
+                  ariaLabel="Material filters"
+                  buttonLabel="Filters"
+                  className="materials-filter-menu"
+                  items={[
+                    {
+                      label: "Category",
+                      content: (
+                        <FilterDropdown
+                          allLabel="All categories"
+                          ariaLabel="Filter materials by category"
+                          className="task-queue-filter-menu-submenu"
+                          icon={<IconManufacturing />}
+                          onChange={setCategory}
+                          options={MATERIAL_CATEGORY_OPTIONS}
+                          value={category}
+                        />
+                      ),
+                    },
+                    {
+                      label: "Stock",
+                      content: (
+                        <FilterDropdown
+                          allLabel="All stock"
+                          ariaLabel="Filter materials by stock level"
+                          className="task-queue-filter-menu-submenu"
+                          icon={<IconTasks />}
+                          onChange={setStock}
+                          options={MATERIAL_STOCK_OPTIONS}
+                          value={stock}
+                        />
+                      ),
+                    },
+                   ]}
+                  />
+                ),
+               ariaLabel: "Search materials",
+              onChange: setSearch,
+              placeholder: "Search materials...",
+              tutorialTarget: "materials-search-input",
+              value: search,
+            })}
           />
           <WorkspaceTopbarAddMenu
-            actions={[{ label: "Add material", onSelect: openCreateMaterialModal }]}
+            actions={buildSingleAddMenuAction({ label: "Add material", onSelect: openCreateMaterialModal })}
             ariaLabel="Add material"
             title="Add material"
             tutorialTarget="create-material-button"
           />
-        </div>
+        </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
 
       <div className="panel-header compact-header">
