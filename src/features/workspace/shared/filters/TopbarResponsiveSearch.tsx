@@ -115,6 +115,14 @@ export function TopbarResponsiveSearch({
       </div>
     </div>
   );
+  const renderIconOnlySearch = () => (
+    <div className="topbar-responsive-search-full topbar-responsive-search-full-primary topbar-responsive-search-full-icon-only">
+      <div className="topbar-responsive-search-field">
+        <SearchToolbarInput ariaLabel={ariaLabel} onChange={onChange} placeholder="" value={value} />
+        {renderActions(" topbar-responsive-search-actions-compact")}
+      </div>
+    </div>
+  );
 
   useEffect(() => {
     if (!isCompactOpen || typeof document === "undefined") {
@@ -151,6 +159,10 @@ export function TopbarResponsiveSearch({
     if (!element) {
       return;
     }
+    const container = element.parentElement;
+    if (!container) {
+      return;
+    }
 
     const observer = new ResizeObserver((entries) => {
       const [entry] = entries;
@@ -160,8 +172,8 @@ export function TopbarResponsiveSearch({
       setSearchWidth(entry.contentRect.width);
     });
 
-    observer.observe(element);
-    setSearchWidth(element.clientWidth);
+    observer.observe(container);
+    setSearchWidth(container.clientWidth);
 
     return () => {
       observer.disconnect();
@@ -189,35 +201,6 @@ export function TopbarResponsiveSearch({
   }, [isDynamicIconMode]);
 
   if (resolvedMode === "dynamic-label") {
-    const compactSearch = (
-      <div className={`topbar-responsive-search-compact${isCompactOpen ? " is-open" : ""}`} ref={compactRef}>
-        <button
-          aria-expanded={isCompactOpen}
-          aria-haspopup="dialog"
-          aria-label={ariaLabel}
-          className={`icon-button app-topbar-icon-button topbar-responsive-search-toggle${isActive ? " is-active" : ""}`}
-          onClick={() => setIsCompactOpen((current) => !current)}
-          title={ariaLabel}
-          type="button"
-        >
-          <Search size={14} strokeWidth={2} />
-        </button>
-        {renderActions(" topbar-responsive-search-actions-compact")}
-        {isCompactOpen ? (
-          <div className="topbar-responsive-search-popover">
-            <input
-              aria-label={ariaLabel}
-              className="toolbar-search-input"
-              onChange={(event) => onChange(event.target.value)}
-              placeholder={placeholder}
-              type="search"
-              value={value}
-            />
-          </div>
-        ) : null}
-      </div>
-    );
-
     return (
       <div
         className={`${rootClassName} topbar-responsive-search-dynamic${isDynamicIconMode ? " is-icon-mode" : ""}`}
@@ -226,7 +209,7 @@ export function TopbarResponsiveSearch({
         style={rootStyle}
       >
         {isDynamicIconMode ? (
-          compactSearch
+          renderIconOnlySearch()
         ) : (
           renderFullSearch(effectivePlaceholder, "topbar-responsive-search-full-primary")
         )}

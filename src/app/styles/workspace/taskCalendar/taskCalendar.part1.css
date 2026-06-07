@@ -81,12 +81,6 @@
   box-shadow: none;
 }
 
-.task-calendar-add-meeting {
-  align-items: center;
-  display: inline-flex;
-  gap: 0.35rem;
-}
-
 .meeting-schedule-modal .form-error {
   color: var(--status-danger-text);
   font-size: 0.78rem;

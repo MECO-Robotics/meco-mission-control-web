@@ -4,7 +4,7 @@ import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
-import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 
 import { filterPartDefinitions } from "./parts/partsViewData";
 import { PartsDefinitionSection } from "./parts/PartsDefinitionSection";
@@ -136,6 +136,12 @@ export function PartsView({
           setShowArchivedPartDefinitions={setShowArchivedPartDefinitions}
           showArchivedPartDefinitions={showArchivedPartDefinitions}
         />
+        <WorkspaceTopbarAddMenu
+          actions={[{ label: "Add part definition", onSelect: openCreatePartDefinitionModal }]}
+          ariaLabel="Add part definition"
+          title="Add part definition"
+          tutorialTarget="create-part-button"
+        />
       </AppTopbarSlotPortal>
 
       <div className="panel-header compact-header">
@@ -146,13 +152,6 @@ export function PartsView({
           </p>
         </div>
       </div>
-
-      <WorkspaceFloatingAddButton
-        ariaLabel="Add part definition"
-        onClick={openCreatePartDefinitionModal}
-        title="Add part definition"
-        tutorialTarget="create-part-button"
-      />
 
       <PartsDefinitionSection
         bootstrap={bootstrap}

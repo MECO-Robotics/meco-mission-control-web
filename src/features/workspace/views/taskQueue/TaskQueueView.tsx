@@ -5,7 +5,7 @@ import type { TaskRecord } from "@/types/recordsExecution";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
-import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { TaskQueueBoardSection } from "./TaskQueueBoardSection";
 import { TaskQueueToolbar } from "./TaskQueueToolbar";
 import {
@@ -120,6 +120,12 @@ export function TaskQueueView({
           taskSortIsDefault={taskSortIsDefault}
           taskQueueZoom={taskQueueZoom}
         />
+        <WorkspaceTopbarAddMenu
+          actions={[{ label: "Add task", onSelect: openCreateTaskModal }]}
+          ariaLabel="Add task"
+          title="Add task"
+          tutorialTarget="create-task-button"
+        />
       </AppTopbarSlotPortal>
 
       <div className="panel-header compact-header">
@@ -127,13 +133,6 @@ export function TaskQueueView({
           <h2>Tasks</h2>
         </div>
       </div>
-
-      <WorkspaceFloatingAddButton
-        ariaLabel="Add task"
-        onClick={openCreateTaskModal}
-        title="Add task"
-        tutorialTarget="create-task-button"
-      />
 
       <TaskQueueBoardSection
         bootstrap={bootstrap}

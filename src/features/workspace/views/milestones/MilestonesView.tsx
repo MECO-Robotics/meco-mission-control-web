@@ -3,7 +3,7 @@ import type { MilestonePayload } from "@/types/payloads";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
-import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 
 import { MilestonesToolbar } from "./MilestonesToolbar";
 import { MilestonesMilestoneModal } from "./MilestonesEventModal";
@@ -71,6 +71,12 @@ export function MilestonesView({
           sortOrder={milestones.sortOrder}
           typeFilter={milestones.typeFilter}
         />
+        <WorkspaceTopbarAddMenu
+          actions={[{ label: "Add milestone", onSelect: milestones.openCreateMilestoneModal }]}
+          ariaLabel="Add milestone"
+          title="Add milestone"
+          tutorialTarget="create-milestone-button"
+        />
       </AppTopbarSlotPortal>
 
       <div className="panel-header compact-header">
@@ -78,13 +84,6 @@ export function MilestonesView({
           <h2>Milestones</h2>
         </div>
       </div>
-
-      <WorkspaceFloatingAddButton
-        ariaLabel="Add milestone"
-        onClick={milestones.openCreateMilestoneModal}
-        title="Add milestone"
-        tutorialTarget="create-milestone-button"
-      />
 
       <MilestonesBoardSection
         bootstrap={bootstrap}

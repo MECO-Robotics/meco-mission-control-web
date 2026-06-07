@@ -3,11 +3,12 @@ import { useState, type FormEvent } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MeetingPayload, MilestonePayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
-import { IconPlus } from "@/components/shared/Icons";
+import { IconCalendar, IconTasks } from "@/components/shared/Icons";
 import { toErrorMessage } from "@/lib/appUtils/common";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { MilestonesMilestoneModal } from "@/features/workspace/views/milestones/MilestonesEventModal";
 import { useMilestonesMilestoneModalState } from "@/features/workspace/views/milestones/sections/useMilestonesEventModalState";
@@ -131,37 +132,39 @@ export function TaskCalendarView({
 
   return (
     <section className={`panel dense-panel task-calendar-shell ${WORKSPACE_PANEL_CLASS}`}>
-      {calendar.unfilteredEvents.length > 0 ? (
-        <AppTopbarSlotPortal slot="controls">
-          <div className="panel-actions filter-toolbar task-queue-toolbar task-calendar-filter-toolbar">
-            <TopbarResponsiveSearch
-              actionCount={1}
-              actions={
-                <TaskCalendarFilterToolbar
-                  eventFilter={calendar.eventFilter}
-                  onEventFilterChange={calendar.setEventFilter}
-                  onSortModeChange={calendar.setSortMode}
-                  sortMode={calendar.sortMode}
-                />
-              }
-              ariaLabel="Search calendar"
-              compactPlaceholder="Search"
-              onChange={calendar.setSearchFilter}
-              placeholder="Search calendar..."
-              value={calendar.searchFilter}
-            />
-          </div>
-        </AppTopbarSlotPortal>
-      ) : null}
+      <AppTopbarSlotPortal slot="controls">
+        <div className="panel-actions filter-toolbar task-queue-toolbar task-calendar-filter-toolbar">
+          <TopbarResponsiveSearch
+            actionCount={2}
+            actions={
+              <TaskCalendarFilterToolbar
+                eventFilter={calendar.eventFilter}
+                onEventFilterChange={calendar.setEventFilter}
+                onSortModeChange={calendar.setSortMode}
+                sortMode={calendar.sortMode}
+              />
+            }
+            ariaLabel="Search calendar"
+            compactPlaceholder="Search"
+            onChange={calendar.setSearchFilter}
+            placeholder="Search calendar..."
+            value={calendar.searchFilter}
+          />
+          <WorkspaceTopbarAddMenu
+            actions={[
+              { icon: <IconCalendar />, label: "Add meeting", onSelect: openMeetingModal },
+              { icon: <IconTasks />, label: "Add milestone", onSelect: milestoneModalState.openCreateMilestoneModal },
+            ]}
+            ariaLabel="Add calendar item"
+            title="Add calendar item"
+          />
+        </div>
+      </AppTopbarSlotPortal>
 
       <div className="panel-header compact-header">
         <div className="queue-section-header">
           <h2>Calendar</h2>
         </div>
-        <button className="secondary-action task-calendar-add-meeting" onClick={openMeetingModal} type="button">
-          <IconPlus />
-          Add meeting
-        </button>
       </div>
 
       {calendar.unfilteredEvents.length === 0 ? (

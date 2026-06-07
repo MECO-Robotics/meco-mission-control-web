@@ -4,7 +4,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MaterialRecord } from "@/types/recordsInventory";
 import { IconManufacturing, IconTasks } from "@/components/shared/Icons";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
-import { WorkspaceEmptyState, WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
+import { WorkspaceEmptyState, WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { ColumnFilterDropdown } from "@/features/workspace/shared/filters/ColumnFilterDropdown";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { EditableHoverIndicator, PaginationControls, TableCell, useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
@@ -109,7 +109,12 @@ export function MaterialsView({
             tutorialTarget="materials-search-input"
             value={search}
           />
-
+          <WorkspaceTopbarAddMenu
+            actions={[{ label: "Add material", onSelect: openCreateMaterialModal }]}
+            ariaLabel="Add material"
+            title="Add material"
+            tutorialTarget="create-material-button"
+          />
         </div>
       </AppTopbarSlotPortal>
 
@@ -121,13 +126,6 @@ export function MaterialsView({
           </p>
         </div>
       </div>
-
-      <WorkspaceFloatingAddButton
-        ariaLabel="Add material"
-        onClick={openCreateMaterialModal}
-        title="Add material"
-        tutorialTarget="create-material-button"
-      />
 
       <div className={`table-shell ${materialsFilterMotionClass}`}>
         <div

@@ -262,6 +262,17 @@ describe("MilestonesView", () => {
     expect(markup).not.toContain('class="toolbar-filter-value">Sort</span>');
   });
 
+  it("uses wider icon-mode thresholds for milestone search on cramped topbars", () => {
+    const searchControlSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/milestones/MilestonesSearchControl.tsx"),
+      "utf8",
+    );
+
+    expect(searchControlSource).toContain("MILESTONE_SEARCH_COMPACT_SWITCH_WIDTH = 360 + MILESTONE_SEARCH_ACTION_OVERLAY_WIDTH");
+    expect(searchControlSource).toContain("MILESTONE_SEARCH_ICON_SWITCH_WIDTH = 260 + MILESTONE_SEARCH_ACTION_OVERLAY_WIDTH");
+    expect(searchControlSource).toContain("MILESTONE_SEARCH_ICON_RELEASE_WIDTH = 420 + MILESTONE_SEARCH_ACTION_OVERLAY_WIDTH");
+  });
+
   it("does not toggle milestone sort direction as a side effect of opening the sort menu", () => {
     const toolbarSource = readFileSync(
       join(process.cwd(), "src/features/workspace/views/milestones/MilestonesToolbar.tsx"),

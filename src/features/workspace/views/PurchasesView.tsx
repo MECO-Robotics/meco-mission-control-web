@@ -5,7 +5,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { PurchaseItemRecord } from "@/types/recordsInventory";
 import { IconManufacturing, IconPerson, IconTasks } from "@/components/shared/Icons";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
-import { WorkspaceEmptyState, WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
+import { WorkspaceEmptyState, WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { ColumnFilterDropdown } from "@/features/workspace/shared/filters/ColumnFilterDropdown";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { EditableHoverIndicator, PaginationControls, RequestedItemMeta, TableCell, useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
@@ -194,7 +194,12 @@ export function PurchasesView({
             tutorialTarget="purchases-search-input"
             value={search}
           />
-
+          <WorkspaceTopbarAddMenu
+            actions={[{ label: "Add purchase", onSelect: openCreatePurchaseModal }]}
+            ariaLabel="Add purchase"
+            title="Add purchase"
+            tutorialTarget="create-purchase-button"
+          />
         </div>
       </AppTopbarSlotPortal>
 
@@ -203,13 +208,6 @@ export function PurchasesView({
           <h2>Purchase list</h2>
         </div>
       </div>
-
-      <WorkspaceFloatingAddButton
-        ariaLabel="Add purchase"
-        onClick={openCreatePurchaseModal}
-        title="Add purchase"
-        tutorialTarget="create-purchase-button"
-      />
 
       <div className={`table-shell ${purchaseFilterMotionClass}`}>
         <div

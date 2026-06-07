@@ -6,7 +6,7 @@ import type { MembersById, SubsystemsById } from "@/features/workspace/shared/mo
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
-import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 
 import { useWorkLogsViewState } from "./workLogs/workLogsViewState";
 import { WorkLogsActiveBoardSection } from "./workLogs/WorkLogsActiveBoardSection";
@@ -64,6 +64,14 @@ export function WorkLogsView({
             sortOptions={workLogsView.sortOptions}
             subsystemFilter={workLogsView.subsystemFilter}
           />
+        ) : null}
+        {view === "logs" ? (
+          <WorkspaceTopbarAddMenu
+            actions={[{ label: "Add work log", onSelect: openCreateWorkLogModal }]}
+            ariaLabel="Add work log"
+            title="Add work log"
+            tutorialTarget="create-worklog-button"
+          />
         ) : isActivityView ? (
           <WorkLogsActivityToolbar
             activityGroupMode={workLogsView.activityGroupMode}
@@ -97,15 +105,6 @@ export function WorkLogsView({
           </h2>
         </div>
       </div>
-
-      {view === "logs" ? (
-        <WorkspaceFloatingAddButton
-          ariaLabel="Add work log"
-          onClick={openCreateWorkLogModal}
-          title="Add work log"
-          tutorialTarget="create-worklog-button"
-        />
-      ) : null}
 
       {isActivityView ? (
         <WorkLogsActivitySection

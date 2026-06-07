@@ -5,7 +5,7 @@ import type { TaskRecord } from "@/types/recordsExecution";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
-import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { getTimelineMinimumZoomForWidth } from "@/features/workspace/shared/timeline/timelineZoom";
 import { midpointOfTimelineDays } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
@@ -214,6 +214,12 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
           timelineZoomMin={state.timelineZoomMin}
           viewInterval={state.viewInterval}
         />
+        <WorkspaceTopbarAddMenu
+          actions={[{ label: "Add task", onSelect: openCreateTaskModal }]}
+          ariaLabel="Add to timeline"
+          title="Add to timeline"
+          tutorialTarget="timeline-create-task-button"
+        />
       </AppTopbarSlotPortal>
 
       <div className="panel-header compact-header">
@@ -271,13 +277,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         toggleSubsystem={state.toggleSubsystem}
         toggleSubsystemColumn={state.toggleSubsystemColumn}
         openTaskDetailModal={actions.openTaskDetailAndSelectTask}
-      />
-
-      <WorkspaceFloatingAddButton
-        ariaLabel="Add to timeline"
-        onClick={openCreateTaskModal}
-        title="Add to timeline"
-        tutorialTarget="timeline-create-task-button"
       />
 
       <TimelineMilestoneUnderlaysPortal

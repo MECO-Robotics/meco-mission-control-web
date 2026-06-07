@@ -1,11 +1,17 @@
-﻿import { useMemo, useState } from "react";
+﻿import { useMemo, useState, type CSSProperties } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { ManufacturingItemRecord } from "@/types/recordsInventory";
 import type { ManufacturingViewTab } from "@/lib/workspaceNavigation";
-import { IconManufacturing, IconPerson, IconTasks } from "@/components/shared/Icons";
+import {
+  IconManufacturing,
+  IconPerson,
+  IconSearchMinus,
+  IconSearchPlus,
+  IconTasks,
+} from "@/components/shared/Icons";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
-import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import { filterSelectionIncludes, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
@@ -21,6 +27,13 @@ import {
   MANUFACTURING_PROCESS_FILTER_OPTIONS,
   filterManufacturingItemsByProcessView,
 } from "./manufacturingProcessFilter";
+import {
+  clampTaskQueueZoom,
+  formatTaskQueueZoomLabel,
+  TASK_QUEUE_ZOOM_MAX,
+  TASK_QUEUE_ZOOM_MIN,
+  TASK_QUEUE_ZOOM_STEP,
+} from "../taskQueue/taskQueueViewState";
 
 interface ManufacturingQueueViewProps {
   activePersonFilter: FilterSelection;
@@ -67,6 +80,7 @@ export function ManufacturingQueueView({
   const [requester, setRequester] = useState<FilterSelection>([]);
   const [status, setStatus] = useState<FilterSelection>([]);
   const [material, setMaterial] = useState<FilterSelection>([]);
+  const [manufacturingZoom, setManufacturingZoom] = useState(1);
   const processFilterSelection =
     processFilterValue && processFilterValue !== "all" ? [processFilterValue] : [];
 
@@ -125,6 +139,10 @@ export function ManufacturingQueueView({
 
   const tutorialTarget = (suffix: string) =>
     tutorialTargetPrefix ? `${tutorialTargetPrefix}-${suffix}` : undefined;
+  const manufacturingBoardStyle = {
+    "--task-queue-zoom": manufacturingZoom,
+    "--task-queue-board-column-width": `calc(15.5rem * ${manufacturingZoom})`,
+  } as CSSProperties;
   const handleProcessFilterChange = (value: FilterSelection) => {
     const [nextValue] = value;
     onProcessFilterChange?.(
@@ -135,7 +153,7 @@ export function ManufacturingQueueView({
   };
 
   return (
-    <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
+    <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`} style={manufacturingBoardStyle}>
       <AppTopbarSlotPortal slot="controls">
         <div className="panel-actions filter-toolbar queue-toolbar">
           <TopbarResponsiveSearch
@@ -233,6 +251,41 @@ export function ManufacturingQueueView({
             tutorialTarget={tutorialTarget("search-input")}
             value={search}
           />
+          <div className="task-queue-toolbar-inline-actions">
+            <div aria-label="Manufacturing zoom" className="task-queue-zoom-controls" role="group">
+              <button
+                aria-label="Zoom out manufacturing"
+                className="icon-button task-queue-zoom-button"
+                disabled={manufacturingZoom <= TASK_QUEUE_ZOOM_MIN}
+                onClick={() =>
+                  setManufacturingZoom((current) => clampTaskQueueZoom(current - TASK_QUEUE_ZOOM_STEP))
+                }
+                title="Zoom out manufacturing"
+                type="button"
+              >
+                <IconSearchMinus />
+              </button>
+              <span className="task-queue-zoom-label">{formatTaskQueueZoomLabel(manufacturingZoom)}</span>
+              <button
+                aria-label="Zoom in manufacturing"
+                className="icon-button task-queue-zoom-button"
+                disabled={manufacturingZoom >= TASK_QUEUE_ZOOM_MAX}
+                onClick={() =>
+                  setManufacturingZoom((current) => clampTaskQueueZoom(current + TASK_QUEUE_ZOOM_STEP))
+                }
+                title="Zoom in manufacturing"
+                type="button"
+              >
+                <IconSearchPlus />
+              </button>
+            </div>
+          </div>
+          <WorkspaceTopbarAddMenu
+            actions={[{ label: addButtonAriaLabel, onSelect: onCreate }]}
+            ariaLabel={addButtonAriaLabel}
+            title={addButtonAriaLabel}
+            tutorialTarget={tutorialTarget("create-job-button")}
+          />
         </div>
       </AppTopbarSlotPortal>
 
@@ -241,13 +294,6 @@ export function ManufacturingQueueView({
           <h2>{title}</h2>
         </div>
       </div>
-
-      <WorkspaceFloatingAddButton
-        ariaLabel={addButtonAriaLabel}
-        onClick={onCreate}
-        title={addButtonAriaLabel}
-        tutorialTarget={tutorialTarget("create-job-button")}
-      />
 
       <KanbanScrollFrame motionClassName={manufacturingFilterMotionClass}>
         <>
