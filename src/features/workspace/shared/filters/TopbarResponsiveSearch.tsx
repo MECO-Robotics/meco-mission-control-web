@@ -63,6 +63,7 @@ export function TopbarResponsiveSearch({
   value: string;
 }) {
   const searchRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [isCompactOpen, setIsCompactOpen] = useState(false);
   const [isDynamicIconMode, setIsDynamicIconMode] = useState(false);
   const [searchWidth, setSearchWidth] = useState<number | null>(null);
@@ -118,7 +119,16 @@ export function TopbarResponsiveSearch({
   const renderIconOnlySearch = () => (
     <div className="topbar-responsive-search-full topbar-responsive-search-full-primary topbar-responsive-search-full-icon-only">
       <div className="topbar-responsive-search-field">
-        <SearchToolbarInput ariaLabel={ariaLabel} onChange={onChange} placeholder="" value={value} />
+        <SearchToolbarInput
+          ariaLabel={ariaLabel}
+          inputRef={searchInputRef}
+          onChange={onChange}
+          onSearchIconActivate={() => {
+            searchInputRef.current?.focus();
+          }}
+          placeholder=""
+          value={value}
+        />
         {renderActions(" topbar-responsive-search-actions-compact")}
       </div>
     </div>
