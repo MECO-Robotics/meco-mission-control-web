@@ -46,6 +46,12 @@ export function HomeView({ bootstrap, onOpenTask, today = new Date() }: HomeView
           title="Upcoming milestones"
         />
         <OverviewListSection
+          emptyLabel="No planning gaps."
+          items={model.planningActions}
+          onOpenTask={onOpenTask}
+          title="Planning gaps"
+        />
+        <OverviewListSection
           emptyLabel="No high-risk issues."
           items={model.issues}
           onOpenTask={onOpenTask}

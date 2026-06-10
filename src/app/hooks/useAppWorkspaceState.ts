@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import "@/app/App.css";
 import { useAppAuth } from "@/app/hooks/useAppAuth";
 import { useAppShell } from "@/app/hooks/useAppShell";
+import { isPublicDemoSeasonAccess } from "@/app/publicDemoAccess";
 import { useAppWorkspaceGlobalEffects } from "@/app/hooks/workspace/derived/useAppWorkspaceGlobalEffects";
 import { useAppWorkspaceUiState } from "@/app/hooks/useAppWorkspaceUiState";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
@@ -39,10 +40,11 @@ export function useAppWorkspaceState() {
   const [manufacturingView, setManufacturingView] =
     useState<ManufacturingViewTab>("all");
   const [inventoryView, setInventoryView] = useState<InventoryViewTab>("materials");
-  const [rosterView, setRosterView] = useState<RosterViewTab>("directory");
+  const [rosterView, setRosterView] = useState<RosterViewTab>("available");
   const [bootstrap, setBootstrap] = useState<BootstrapPayload>(EMPTY_BOOTSTRAP);
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [dataMessage, setDataMessage] = useState<string | null>(null);
+  const [isSignInScreenRequested, setIsSignInScreenRequested] = useState(false);
   const [taskEditNotices, setTaskEditNotices] = useState<WorkspaceToastNotice[]>([]);
   const [notificationHistory, setNotificationHistory] = useState<WorkspaceToastNotice[]>([]);
   const [isNotificationQueueOpen, setIsNotificationQueueOpen] = useState(false);
@@ -116,9 +118,14 @@ export function useAppWorkspaceState() {
     setTaskEditNotices([]);
   };
 
+  const handleSessionExpired = useCallback(() => {
+    setIsSignInScreenRequested(true);
+  }, []);
+
   const { authBooting, authConfig, authMessage, clearAuthMessage, enforcedAuthConfig, expireSession, googleButtonRef, handleSignOut, handleDevBypassSignIn, handleRequestEmailCode, handleVerifyEmailCode, isEmailAuthAvailable, isGoogleAuthAvailable, isSigningIn, sessionUser } =
     useAppAuth({
       isDarkMode,
+      onSessionExpired: handleSessionExpired,
       resetWorkspace: () => {
         setBootstrap(EMPTY_BOOTSTRAP);
         workspaceUiState.setActivePersonFilter([]);
@@ -133,6 +140,27 @@ export function useAppWorkspaceState() {
         setIsNotificationQueueOpen(false);
       },
     });
+  const isPublicDemoSession = isPublicDemoSeasonAccess({
+    enforcedAuthConfig,
+    selectedSeasonId: workspaceUiState.selectedSeasonId,
+    sessionUser,
+  });
+
+  useEffect(() => {
+    if (sessionUser) {
+      setIsSignInScreenRequested(false);
+    }
+  }, [sessionUser]);
+
+  const requestSignIn = () => {
+    clearAuthMessage();
+    setIsSignInScreenRequested(true);
+  };
+
+  const returnToPublicDemo = () => {
+    clearAuthMessage();
+    setIsSignInScreenRequested(false);
+  };
 
   useAppWorkspaceGlobalEffects({
     isDarkMode,
@@ -167,12 +195,15 @@ export function useAppWorkspaceState() {
     isEmailAuthAvailable,
     isGoogleAuthAvailable,
     isLoadingData,
+    isSignInScreenRequested,
     isNotificationQueueOpen,
+    isPublicDemoSession,
     isSigningIn,
     isSidebarCollapsed,
     isSidebarOverlay,
     manufacturingView,
     pageShellStyle,
+    requestSignIn,
     reportsView,
     rosterView,
     riskManagementView,
@@ -200,6 +231,7 @@ export function useAppWorkspaceState() {
     worklogsView,
     suppressNextAutoWorkspaceLoadRef,
     suppressNextAutoWorkspaceLoad,
+    returnToPublicDemo,
     enforcedAuthConfig,
     clearTaskEditNotices,
     notificationHistory,

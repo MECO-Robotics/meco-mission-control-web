@@ -2,11 +2,17 @@
 
 import {
   BASE_SECTION_LABELS,
+  NAVIGATION_SUB_ITEM_AVAILABILITY_MATRIX,
+  VIEW_AVAILABILITY_CONTEXTS,
   getActiveNavigationSubItemId,
+  isNavigationSubItemAvailable,
   isNavigationSubItemId,
+  normalizeNavigationSubItemId,
+  resolveViewAvailabilityContext,
   targetMatchesNavigationState,
   type NavigationState,
   type NavigationTarget,
+  type ViewTab,
 } from "@/lib/workspaceNavigation";
 
 function createNavigationState(overrides: Partial<NavigationState> = {}): NavigationState {
@@ -67,6 +73,14 @@ describe("getActiveNavigationSubItemId", () => {
     ).toBe("config-directory");
   });
 
+  it("maps roster available to roster available", () => {
+    expect(
+      getActiveNavigationSubItemId(
+        createNavigationState({ activeTab: "roster", rosterView: "available" }),
+      ),
+    ).toBe("roster-available");
+  });
+
   it("maps worklogs activity to dashboard activity", () => {
     expect(
       getActiveNavigationSubItemId(
@@ -75,7 +89,7 @@ describe("getActiveNavigationSubItemId", () => {
     ).toBe("dashboard-activity");
   });
 
-  it("maps worklogs kanban to reports worklog kanban", () => {
+  it("maps worklogs kanban to reports worklog", () => {
     expect(
       getActiveNavigationSubItemId(
         createNavigationState({
@@ -86,12 +100,20 @@ describe("getActiveNavigationSubItemId", () => {
     ).toBe("reports-worklogs-kanban");
   });
 
-  it("maps worklogs summary to reports work logs", () => {
+  it("maps worklogs summary to reports worklog", () => {
     expect(
       getActiveNavigationSubItemId(
         createNavigationState({ activeTab: "worklogs", worklogsView: "summary" }),
       ),
-    ).toBe("reports-work-logs");
+    ).toBe("reports-worklogs-kanban");
+  });
+
+  it("maps worklogs logs to reports worklog", () => {
+    expect(
+      getActiveNavigationSubItemId(
+        createNavigationState({ activeTab: "worklogs", worklogsView: "logs" }),
+      ),
+    ).toBe("reports-worklogs-kanban");
   });
 
   it("returns null for help because it has no sidebar subitem", () => {
@@ -117,6 +139,12 @@ describe("isNavigationSubItemId", () => {
     expect(isNavigationSubItemId("tasks-timeline")).toBe(true);
     expect(isNavigationSubItemId("home")).toBe(false);
     expect(isNavigationSubItemId("notifications")).toBe(false);
+  });
+
+  it("normalizes legacy favorite IDs", () => {
+    expect(normalizeNavigationSubItemId("reports-work-logs")).toBe("reports-worklogs-kanban");
+    expect(normalizeNavigationSubItemId("reports-worklogs-kanban")).toBe("reports-worklogs-kanban");
+    expect(normalizeNavigationSubItemId("invalid-workview")).toBeNull();
   });
 });
 
@@ -152,6 +180,83 @@ describe("targetMatchesNavigationState", () => {
           inventoryView: "materials",
         }),
       ),
+    ).toBe(false);
+  });
+});
+
+describe("view availability matrix", () => {
+  it("documents every navigation subitem for every supported context", () => {
+    for (const [subItemId, row] of Object.entries(NAVIGATION_SUB_ITEM_AVAILABILITY_MATRIX)) {
+      expect(isNavigationSubItemId(subItemId)).toBe(true);
+
+      for (const context of VIEW_AVAILABILITY_CONTEXTS) {
+        expect(typeof row[context]).toBe("boolean");
+      }
+    }
+  });
+
+  it("resolves availability contexts from season and project scope", () => {
+    expect(
+      resolveViewAvailabilityContext({
+        hasProjects: true,
+        hasSeasons: false,
+        selectedProjectType: null,
+      }),
+    ).toBe("no-season");
+    expect(
+      resolveViewAvailabilityContext({
+        hasProjects: false,
+        hasSeasons: true,
+        selectedProjectType: null,
+      }),
+    ).toBe("no-project");
+    expect(
+      resolveViewAvailabilityContext({
+        hasProjects: true,
+        hasSeasons: true,
+        selectedProjectType: null,
+      }),
+    ).toBe("all-project");
+    expect(
+      resolveViewAvailabilityContext({
+        hasProjects: true,
+        hasSeasons: true,
+        selectedProjectType: "robot",
+      }),
+    ).toBe("robot-project");
+    expect(
+      resolveViewAvailabilityContext({
+        hasProjects: true,
+        hasSeasons: true,
+        selectedProjectType: "operations",
+      }),
+    ).toBe("non-robot-project");
+  });
+
+  it("enables robot-only views only for robot project context", () => {
+    expect(
+      isNavigationSubItemAvailable("config-robot-model", {
+        context: "robot-project",
+      }),
+    ).toBe(true);
+    expect(
+      isNavigationSubItemAvailable("config-robot-model", {
+        context: "all-project",
+      }),
+    ).toBe(false);
+    expect(
+      isNavigationSubItemAvailable("tasks-manufacturing", {
+        context: "non-robot-project",
+      }),
+    ).toBe(false);
+  });
+
+  it("disables otherwise valid views when the owning top-level tab is unavailable", () => {
+    expect(
+      isNavigationSubItemAvailable("inventory-materials", {
+        context: "robot-project",
+        visibleTabs: new Set<ViewTab>(["tasks"]),
+      }),
     ).toBe(false);
   });
 });

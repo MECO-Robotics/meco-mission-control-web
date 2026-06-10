@@ -8,6 +8,7 @@ import {
 } from "@/lib/branding";
 import { MOBILE_RELEASES_URL } from "./authDevice";
 import type { AuthStatusScreenProps } from "./authTypes";
+import type { DevBypassRole } from "@/lib/auth/types";
 
 interface AuthIntroPanelProps {
   isDarkMode: boolean;
@@ -54,10 +55,10 @@ export function AuthIntroPanel({
       </div>
 
       <div className="auth-intro-copy">
-        <h1>Mission Control</h1>
+        <h1>FRC PM &amp; PLM</h1>
         <p className="auth-body auth-intro-description">
           <span>Plan. Build. Verify.</span>
-          <span>One system for tasks, parts, and QA.</span>
+          <span>Purpose-built for FRC teams to track parts, people, and robot readiness.</span>
         </p>
       </div>
     </aside>
@@ -151,14 +152,14 @@ export function GoogleAuthChip({
 
 interface DevBypassButtonProps {
   isSigningIn: boolean;
-  onDevBypassSignIn: (role: "student" | "mentor") => Promise<void>;
+  onDevBypassSignIn: (role: DevBypassRole) => Promise<void>;
 }
 
 export function DevBypassButton({
   isSigningIn,
   onDevBypassSignIn,
 }: DevBypassButtonProps) {
-  const [devRole, setDevRole] = useState<"student" | "mentor">("student");
+  const [devRole, setDevRole] = useState<DevBypassRole>("student");
 
   return (
     <div className="auth-dev-bypass" aria-label="Development sign-in bypass">

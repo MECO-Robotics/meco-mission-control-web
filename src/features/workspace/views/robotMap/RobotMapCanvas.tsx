@@ -74,7 +74,6 @@ export function RobotMapCanvas({
   );
   const placedSubsystems = subsystems.filter((subsystem) => isSubsystemPlaced(subsystem.layout));
   const unplacedSubsystems = subsystems.filter((subsystem) => !isSubsystemPlaced(subsystem.layout));
-  const hasPlacedSubsystems = placedSubsystems.length > 0;
   const hasUnplacedSubsystems = unplacedSubsystems.length > 0;
 
   const startDraggingSubsystem = (
@@ -306,16 +305,14 @@ export function RobotMapCanvas({
               </small>
             </div>
             <div className="robot-config-unplaced-actions">
-              {!hasPlacedSubsystems ? (
-                <button
-                  className="secondary-action queue-toolbar-action robot-config-auto-arrange-trigger"
-                  onClick={onAutoArrange}
-                  type="button"
-                >
-                  <LayoutGrid aria-hidden="true" size={14} />
-                  <span>Auto-arrange</span>
-                </button>
-              ) : null}
+              <button
+                className="secondary-action queue-toolbar-action robot-config-auto-arrange-trigger"
+                onClick={onAutoArrange}
+                type="button"
+              >
+                <LayoutGrid aria-hidden="true" size={14} />
+                <span>Auto-arrange</span>
+              </button>
               <RobotMapCanvasActions onAddSubsystem={onAddSubsystem} onResetLayout={onResetLayout} />
             </div>
           </header>

@@ -9,7 +9,9 @@ export function useAppWorkspaceRosterMemberActions(model: AppWorkspaceModel) {
   const handleCreateMember = useCallback(
     async (milestone: FormEvent<HTMLFormElement>) => {
       milestone.preventDefault();
-      if (!model.selectedSeasonId) {
+      const selectedSeasonId = model.selectedSeasonId;
+      const selectedProjectId = model.selectedProjectId;
+      if (!selectedSeasonId) {
         model.setDataMessage("Pick a season before adding a roster member.");
         return;
       }
@@ -26,8 +28,8 @@ export function useAppWorkspaceRosterMemberActions(model: AppWorkspaceModel) {
             photoUrl: model.memberForm.photoUrl.trim(),
             role: normalizedRole,
             elevated: isElevatedMemberRole(normalizedRole),
-            seasonId: model.selectedSeasonId,
-            activeSeasonIds: [model.selectedSeasonId],
+            seasonId: selectedSeasonId,
+            activeSeasonIds: [selectedSeasonId],
             disciplineId: model.memberForm.disciplineId ?? null,
             plannedWeeklyAttendanceHours: Math.max(0, model.memberForm.plannedWeeklyAttendanceHours),
             plannedAttendanceDays: model.memberForm.plannedAttendanceDays,
@@ -47,7 +49,10 @@ export function useAppWorkspaceRosterMemberActions(model: AppWorkspaceModel) {
           plannedAttendanceNotes: "",
         });
         model.setIsAddPersonOpen(false);
-        await model.loadWorkspace();
+        await model.loadWorkspace({
+          projectId: selectedProjectId,
+          seasonId: selectedSeasonId,
+        });
       } catch (error) {
         model.setDataMessage(toErrorMessage(error));
       } finally {
@@ -85,7 +90,10 @@ export function useAppWorkspaceRosterMemberActions(model: AppWorkspaceModel) {
           model.handleUnauthorized,
         );
         model.setIsEditPersonOpen(false);
-        await model.loadWorkspace();
+        await model.loadWorkspace({
+          projectId: model.selectedProjectId,
+          seasonId: model.selectedSeasonId,
+        });
       } catch (error) {
         model.setDataMessage(toErrorMessage(error));
       } finally {
@@ -114,7 +122,10 @@ export function useAppWorkspaceRosterMemberActions(model: AppWorkspaceModel) {
           model.setMemberEditDraft(null);
           model.setIsEditPersonOpen(false);
         }
-        await model.loadWorkspace();
+        await model.loadWorkspace({
+          projectId: model.selectedProjectId,
+          seasonId: model.selectedSeasonId,
+        });
       } catch (error) {
         model.setDataMessage(toErrorMessage(error));
       } finally {
@@ -155,7 +166,10 @@ export function useAppWorkspaceRosterMemberActions(model: AppWorkspaceModel) {
           model.handleUnauthorized,
         );
         model.setIsAddPersonOpen(false);
-        await model.loadWorkspace();
+        await model.loadWorkspace({
+          projectId: model.selectedProjectId,
+          seasonId: model.selectedSeasonId,
+        });
       } catch (error) {
         model.setDataMessage(toErrorMessage(error));
       } finally {

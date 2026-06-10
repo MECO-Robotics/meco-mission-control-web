@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 
 import { ColumnFilterDropdown } from "@/features/workspace/shared/filters/ColumnFilterDropdown";
+import { WorkspaceEmptyState } from "@/features/workspace/shared/ui";
 import { PaginationControls, TableCell } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
 import { PART_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
@@ -12,6 +13,7 @@ import { PART_INSTANCE_GRID_TEMPLATE } from "./partsViewTypes";
 interface PartsInstanceSectionProps {
   bootstrap: BootstrapPayload;
   filteredPartInstances: BootstrapPayload["partInstances"];
+  hasActiveFilters: boolean;
   mechanismsById: Record<string, BootstrapPayload["mechanisms"][number]>;
   partDefinitionsById: Record<string, BootstrapPayload["partDefinitions"][number]>;
   partInstanceFilterMotionClass: string;
@@ -38,6 +40,7 @@ interface PartsInstanceSectionProps {
 export function PartsInstanceSection({
   bootstrap,
   filteredPartInstances,
+  hasActiveFilters,
   mechanismsById,
   partDefinitionsById,
   partInstanceFilterMotionClass,
@@ -138,7 +141,18 @@ export function PartsInstanceSection({
           );
         })}
         {filteredPartInstances.length === 0 ? (
-          <p className="empty-state">No part instances match the current filters.</p>
+          <WorkspaceEmptyState
+            reason={
+              hasActiveFilters
+                ? "The current search, subsystem, mechanism, or status filters hide every subsystem-specific part instance."
+                : "Part instances appear after reusable definitions are tied to a subsystem or mechanism for tracking on the robot."
+            }
+            title={
+              hasActiveFilters
+                ? "No part instances match these filters"
+                : "Track subsystem-specific part instances here"
+            }
+          />
         ) : null}
         <PaginationControls {...pageChangeHandlers} label="part instances" />
       </div>

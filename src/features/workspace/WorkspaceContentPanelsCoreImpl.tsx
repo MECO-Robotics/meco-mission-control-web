@@ -9,6 +9,7 @@ import type { SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
 import type {
   InventoryViewTab,
   ManufacturingViewTab,
+  NavigationTarget,
   RosterViewTab,
   ReportsViewTab,
   RiskManagementViewTab,
@@ -51,6 +52,7 @@ export interface WorkspaceContentPanelsProps {
   tabSwitchDirection: TabSwitchDirection;
   allMembers: BootstrapPayload["members"];
   artifacts: ArtifactRecord[];
+  availabilityBootstrap: BootstrapPayload;
   bootstrap: BootstrapPayload;
   cncItems: ManufacturingItemRecord[];
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
@@ -89,6 +91,7 @@ export interface WorkspaceContentPanelsProps {
   openCreatePartDefinitionModal: () => void;
   openCreatePurchaseModal: () => void;
   openCreateTaskModal: () => void;
+  openCreateTaskModalForMember: (memberId: string) => void;
   openCreateTaskModalFromTimeline: () => void;
   openCreateWorkLogModal: () => void;
   openCreateQaReportModal: () => void;
@@ -130,7 +133,12 @@ export interface WorkspaceContentPanelsProps {
   rosterMentors: BootstrapPayload["members"];
   showCncMentorQuickActions: boolean;
   manufacturingView: ManufacturingViewTab;
+  setActiveTab: Dispatch<SetStateAction<ViewTab>>;
+  setInventoryView: Dispatch<SetStateAction<InventoryViewTab>>;
   setManufacturingView: Dispatch<SetStateAction<ManufacturingViewTab>>;
+  setRiskManagementView: Dispatch<SetStateAction<RiskManagementViewTab>>;
+  setTaskView: Dispatch<SetStateAction<TaskViewTab>>;
+  setWorklogsView: Dispatch<SetStateAction<WorklogsViewTab>>;
   inventoryView: InventoryViewTab;
   rosterView: RosterViewTab;
   riskManagementView: RiskManagementViewTab;
@@ -177,6 +185,12 @@ export function WorkspaceContentPanels({
   isNonRobotProject,
   manufacturingView,
   reportsView,
+  setActiveTab,
+  setInventoryView,
+  setManufacturingView,
+  setRiskManagementView,
+  setTaskView,
+  setWorklogsView,
   taskView,
   ...props
 }: WorkspaceContentPanelsProps) {
@@ -224,6 +238,30 @@ export function WorkspaceContentPanels({
     previousInventoryViewRef.current = effectiveInventoryView;
   }, [effectiveInventoryView]);
 
+  const handleOpenDrilldownTarget = (target: NavigationTarget) => {
+    if (target.taskView) {
+      setTaskView(target.taskView);
+    }
+
+    if (target.riskManagementView) {
+      setRiskManagementView(target.riskManagementView);
+    }
+
+    if (target.worklogsView) {
+      setWorklogsView(target.worklogsView);
+    }
+
+    if (target.inventoryView) {
+      setInventoryView(target.inventoryView);
+    }
+
+    if (target.manufacturingView) {
+      setManufacturingView(target.manufacturingView);
+    }
+
+    setActiveTab(target.tab);
+  };
+
   return (
     <WorkspaceContentPanelsView
       {...props}
@@ -238,6 +276,13 @@ export function WorkspaceContentPanels({
       reportsView={reportsView}
       inventoryView={inventoryView}
       isNonRobotProject={isNonRobotProject}
+      onOpenDrilldownTarget={handleOpenDrilldownTarget}
+      setActiveTab={setActiveTab}
+      setInventoryView={setInventoryView}
+      setManufacturingView={setManufacturingView}
+      setRiskManagementView={setRiskManagementView}
+      setTaskView={setTaskView}
+      setWorklogsView={setWorklogsView}
     />
   );
 }

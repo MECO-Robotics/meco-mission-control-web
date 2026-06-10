@@ -12,8 +12,122 @@ import {
   isTaskDependencySatisfied,
 } from "./taskPlanningInternals";
 
+export type PlanningConfidenceField =
+  | "due-date"
+  | "owner"
+  | "target-link"
+  | "estimate";
+
+export interface PlanningConfidenceFieldSummary {
+  id: PlanningConfidenceField;
+  label: string;
+  actionLabel: string;
+  count: number;
+  missingCount: number;
+  missingTaskIds: string[];
+}
+
+export interface PlanningConfidenceSummary {
+  totalTasks: number;
+  confidencePercent: number;
+  fields: PlanningConfidenceFieldSummary[];
+  completeFieldCount: number;
+  possibleFieldCount: number;
+}
+
 function getMilestoneById(bootstrap: BootstrapPayload, milestoneId: string) {
   return bootstrap.milestones.find((candidate) => candidate.id === milestoneId) ?? null;
+}
+
+function hasTextValue(value: unknown) {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function hasIdListValue(value: unknown) {
+  return Array.isArray(value) && value.some((item) => hasTextValue(item));
+}
+
+function hasPositiveNumberValue(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value) && value > 0;
+}
+
+function hasTaskTargetLink(task: TaskRecord) {
+  return (
+    hasTextValue(task.subsystemId) ||
+    hasIdListValue(task.subsystemIds) ||
+    hasTextValue(task.mechanismId) ||
+    hasIdListValue(task.mechanismIds) ||
+    hasTextValue(task.partInstanceId) ||
+    hasIdListValue(task.partInstanceIds)
+  );
+}
+
+export function buildPlanningConfidenceSummary(tasks: TaskRecord[]): PlanningConfidenceSummary {
+  const checks: Array<{
+    id: PlanningConfidenceField;
+    label: string;
+    actionLabel: string;
+    hasValue: (task: TaskRecord) => boolean;
+  }> = [
+    {
+      id: "due-date",
+      label: "Due dates",
+      actionLabel: "Set due dates",
+      hasValue: (task) => hasTextValue(task.dueDate),
+    },
+    {
+      id: "owner",
+      label: "Owners",
+      actionLabel: "Assign task owners",
+      hasValue: (task) => hasTextValue(task.ownerId) || hasIdListValue(task.assigneeIds),
+    },
+    {
+      id: "target-link",
+      label: "Subsystem/mechanism links",
+      actionLabel: "Link subsystem/mechanism scope",
+      hasValue: hasTaskTargetLink,
+    },
+    {
+      id: "estimate",
+      label: "Estimates",
+      actionLabel: "Add hour estimates",
+      hasValue: (task) => hasPositiveNumberValue(task.estimatedHours),
+    },
+  ];
+
+  const fields = checks.map((check) => {
+    const missingTaskIds: string[] = [];
+    let count = 0;
+
+    tasks.forEach((task) => {
+      if (check.hasValue(task)) {
+        count += 1;
+      } else {
+        missingTaskIds.push(task.id);
+      }
+    });
+
+    return {
+      id: check.id,
+      label: check.label,
+      actionLabel: check.actionLabel,
+      count,
+      missingCount: missingTaskIds.length,
+      missingTaskIds,
+    };
+  });
+
+  const possibleFieldCount = tasks.length * checks.length;
+  const completeFieldCount = fields.reduce((sum, field) => sum + field.count, 0);
+
+  return {
+    totalTasks: tasks.length,
+    confidencePercent:
+      possibleFieldCount === 0 ? 100 : Math.round((completeFieldCount / possibleFieldCount) * 100),
+    fields,
+    completeFieldCount,
+    possibleFieldCount,
+  };
 }
 
 export function getTaskWaitingOnDependencyRecords(

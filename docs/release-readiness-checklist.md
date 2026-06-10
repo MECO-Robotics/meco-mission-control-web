@@ -1,13 +1,13 @@
 ---
 title: Mission Control Web Release Readiness Checklist
-description: Release safety checklist for development-to-main promotion and production deploy
+description: Release safety checklist for staging or development promotion to main and production deploy
 ---
 
 # Mission Control Web Release Readiness Checklist
 
 Reference for **Issue #76**.
 
-- Goal: make promotion from `development` → `main` and production deploys repeatable and safe.
+- Goal: make promotion from `development` to `staging`, from `staging` or `development` to `main`, and production deploys repeatable and safe.
 - Scope: repository `meco-mission-control-web` only.
 - Related checks are defined in `.github/workflows/ci.yml` and `.github/workflows/deploy-vps.yml`.
 
@@ -42,8 +42,12 @@ Before a PR is mergeable in this repo, the `ci.yml` checks enforce:
 
 - PR target `development` must come from:
   - `feature/*`, `fix/*`, or `hotfix/*`
+- PR target `staging` or `staging/*` must come from:
+  - `development`, `fix/*`, or `hotfix/*`
+  - Treat staging branches as immutable release-candidate snapshots; use `fix/*` or `hotfix/*` only for stabilization fixes.
 - PR target `main` must come from:
-  - `development` or `hotfix/*`
+  - `staging`, `staging/*`, `development`, or `hotfix/*`
+- For a staging-sourced `main` PR, cut the staging branch from the current `development` head and leave new unrelated work on `development` until the candidate is intentionally refreshed.
 
 ### Snapshot validation check
 
@@ -65,6 +69,7 @@ Before a PR is mergeable in this repo, the `ci.yml` checks enforce:
   - `meco-mission-control-platform`
   - `meco-mission-control-mobile`
 - Required checks per repo are `ci-validate` + `snapshot-validate`.
+- If the PR source is `staging` or `staging/*`, the gate validates that staging snapshot across repos. Otherwise it validates `development`.
 
 ## 3) Unresolved review-thread check
 
@@ -72,7 +77,7 @@ Before merging a PR, verify there are no unresolved review threads / open unreso
 
 - Resolve all threads in the GitHub PR discussion before merge.
 - Confirm mergeability state in PR view after final review activity.
-- This repo’s branch-protection expectations assume conversation resolution is part of the merge policy.
+- This repo's branch-protection expectations assume conversation resolution is part of the merge policy.
 
 ## 4) Production env and proxy assumptions
 
@@ -118,18 +123,21 @@ Use this block in issue/PR comments before merging to `main`.
 
 | PR / Change | Target | Check type | Status | Owner | Blocker details | ETA |
 | --- | --- | --- | --- | --- | --- | --- |
-| #1234 | development | `npm run verify` | ☐ Pending |  |  |  |
-| #1234 | main | `ci-validate` | ☐ Pending |  |  |  |
-| #1234 | main | `snapshot-validate` | ☐ Pending |  |  |  |
-| #1234 | main | cross-repo gate (`platform`, `mobile`) | ☐ Pending |  |  |  |
-| #1234 | main | Unresolved review threads | ☐ Pending |  |  |  |
-| #1234 | production | Deploy source validation (main/tag/manifest) | ☐ Pending |  |  |  |
-| #1234 | production | VPS backup present | ☐ Pending |  |  |  |
-| #1234 | production | Smoke check (`/health`) after deploy | ☐ Pending |  |  |  |
+| #1234 | development | `npm run verify` | [ ] Pending |  |  |  |
+| #1234 | staging | `ci-validate` | [ ] Pending |  |  |  |
+| #1234 | staging | `snapshot-validate` | [ ] Pending |  |  |  |
+| #1234 | staging | stabilization fixes only | [ ] Pending |  |  |  |
+| #1234 | main | `ci-validate` | [ ] Pending |  |  |  |
+| #1234 | main | `snapshot-validate` | [ ] Pending |  |  |  |
+| #1234 | main | cross-repo gate (`platform`, `mobile`) | [ ] Pending |  |  |  |
+| #1234 | main | Unresolved review threads | [ ] Pending |  |  |  |
+| #1234 | production | Deploy source validation (main/tag/manifest) | [ ] Pending |  |  |  |
+| #1234 | production | VPS backup present | [ ] Pending |  |  |  |
+| #1234 | production | Smoke check (`/health`) after deploy | [ ] Pending |  |  |  |
 
 ## 7) Completion criteria (promotion complete)
 
-- All items in sections 1–5 are marked complete for the target branch.
+- All items in sections 1-5 are marked complete for the target branch.
 - No unresolved review thread or conversation item.
 - Snapshot produced and validated in CI.
 - For main merge, cross-repo production gate passes.

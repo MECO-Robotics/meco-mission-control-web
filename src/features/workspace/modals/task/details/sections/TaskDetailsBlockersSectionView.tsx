@@ -1,6 +1,7 @@
-import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskPayload } from "@/types/payloads";
+import { TASK_BLOCKER_TYPE_LABELS, TASK_BLOCKER_TYPE_OPTIONS, type TaskBlockerType } from "@/types/common";
 import { IconTrash } from "@/components/shared/Icons";
 import { TaskDetailReveal } from "../TaskDetailReveal";
 import { useTaskDetailsBlockersSectionModel } from "./useTaskDetailsBlockersSectionModel";
@@ -46,18 +47,22 @@ export function TaskDetailsBlockersSectionView(props: TaskDetailsBlockersSection
     setInternalOpen(true);
   }, [activeTaskId]);
 
-  const blockerDraftCount = taskDraft?.taskBlockers?.length ?? 0;
-
-  useEffect(() => {
+  const placeholderBlockerKey = useMemo(() => {
     if (!canInlineEdit) {
-      return;
+      return null;
     }
 
     const placeholderIndex = model.blockerDrafts.findIndex((blocker) => blocker.isIntentPlaceholder);
-    if (placeholderIndex >= 0) {
-      setEditingBlockerKey(model.blockerDrafts[placeholderIndex]?.id ?? `blocker-${placeholderIndex}`);
+    return placeholderIndex >= 0
+      ? model.blockerDrafts[placeholderIndex]?.id ?? `blocker-${placeholderIndex}`
+      : null;
+  }, [canInlineEdit, model.blockerDrafts]);
+
+  useEffect(() => {
+    if (placeholderBlockerKey !== null) {
+      setEditingBlockerKey(placeholderBlockerKey);
     }
-  }, [activeTaskId, blockerDraftCount, canInlineEdit]);
+  }, [activeTaskId, placeholderBlockerKey]);
 
   const isOpen = collapsibleOpen ?? internalOpen;
 
@@ -96,6 +101,14 @@ export function TaskDetailsBlockersSectionView(props: TaskDetailsBlockersSection
                     <div
                       className="workspace-detail-list-item task-detail-list-item task-details-dependency-row task-details-dependency-row-with-delete task-details-blocker-row-edit"
                       key={blockerKey}
+                      onBlur={(event) => {
+                        const nextFocusTarget = event.relatedTarget;
+                        if (nextFocusTarget instanceof Node && event.currentTarget.contains(nextFocusTarget)) {
+                          return;
+                        }
+
+                        setEditingBlockerKey(null);
+                      }}
                     >
                       <button
                         aria-label={`Remove blocker ${index + 1}`}
@@ -112,7 +125,6 @@ export function TaskDetailsBlockersSectionView(props: TaskDetailsBlockersSection
                         autoFocus
                         aria-label={`Blocker note ${index + 1}`}
                         className="task-detail-inline-edit-input task-details-blocker-input task-details-blocker-row-input"
-                        onBlur={() => setEditingBlockerKey(null)}
                         onChange={(milestone) =>
                           model.updateBlockerDraft(blockerKey, {
                             description: milestone.target.value,
@@ -122,6 +134,22 @@ export function TaskDetailsBlockersSectionView(props: TaskDetailsBlockersSection
                         placeholder="Describe blocker"
                         value={blocker.description}
                       />
+                      <select
+                        aria-label={`Blocker type ${index + 1}`}
+                        className="task-detail-inline-edit-input task-details-blocker-input"
+                        onChange={(milestone) =>
+                          model.updateBlockerDraft(blockerKey, {
+                            blockerType: milestone.target.value as TaskBlockerType,
+                          })
+                        }
+                        value={blocker.blockerType}
+                      >
+                        {TASK_BLOCKER_TYPE_OPTIONS.map((option) => (
+                          <option key={option.id} value={option.id}>
+                            {option.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   ) : (
                     <div
@@ -141,6 +169,9 @@ export function TaskDetailsBlockersSectionView(props: TaskDetailsBlockersSection
                         onClick={() => setEditingBlockerKey(blockerKey)}
                         type="button"
                       >
+                        <span className="pill status-pill status-pill-warning">
+                          {TASK_BLOCKER_TYPE_LABELS[blocker.blockerType]}
+                        </span>
                         <TaskDetailReveal
                           className="task-detail-ellipsis-reveal"
                           style={{ color: "var(--text-title)", fontWeight: 800 }}
@@ -161,6 +192,9 @@ export function TaskDetailsBlockersSectionView(props: TaskDetailsBlockersSection
                 {model.openBlockers.map((blocker) => (
                   <div className="workspace-detail-list-item task-detail-list-item task-details-blocker-list-item" key={blocker.id}>
                     <div className="task-details-blocker-row-content">
+                      <span className="pill status-pill status-pill-warning">
+                        {TASK_BLOCKER_TYPE_LABELS[blocker.blockerType]}
+                      </span>
                       <TaskDetailReveal
                         className="task-detail-ellipsis-reveal"
                         style={{ color: "var(--text-title)", fontWeight: 800 }}

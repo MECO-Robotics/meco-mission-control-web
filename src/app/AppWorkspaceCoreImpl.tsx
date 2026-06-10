@@ -3,6 +3,7 @@ import "@/app/App.css";
 import { AppWorkspaceShellView } from "@/app/shell/AppWorkspaceShellView";
 import { useAppWorkspaceController } from "@/app/hooks/useAppWorkspaceController";
 import { AuthStatusScreen, SignInScreen } from "@/features/auth/AuthScreens";
+import { shouldShowEnforcedSignInScreen } from "@/app/publicDemoAccess";
 
 export default function AppWorkspaceCoreImpl() {
   const c = useAppWorkspaceController();
@@ -31,7 +32,15 @@ export default function AppWorkspaceCoreImpl() {
     );
   }
 
-  if (auth.enforcedAuthConfig && !auth.sessionUser) {
+  if (
+    auth.enforcedAuthConfig &&
+    shouldShowEnforcedSignInScreen({
+      enforcedAuthConfig: auth.enforcedAuthConfig,
+      isPublicDemoSession: auth.isPublicDemoSession,
+      isSignInScreenRequested: auth.isSignInScreenRequested,
+      sessionUser: auth.sessionUser,
+    })
+  ) {
     return (
       <SignInScreen
         authMessage={auth.authMessage}
@@ -45,6 +54,7 @@ export default function AppWorkspaceCoreImpl() {
         onToggleDarkMode={auth.toggleDarkMode}
         onVerifyEmailCode={auth.handleVerifyEmailCode}
         onDevBypassSignIn={auth.handleDevBypassSignIn}
+        onReturnToPublicDemo={auth.isPublicDemoSession ? auth.returnToPublicDemo : undefined}
         shellStyle={auth.isDarkMode ? auth.pageShellStyle : undefined}
         signInConfig={auth.enforcedAuthConfig}
       />

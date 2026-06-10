@@ -2,6 +2,7 @@ export type AttentionItemKind = "risk" | "task" | "manufacturing" | "purchase" |
 export type AttentionActionType = "open-risk" | "open-task" | null;
 export type AttentionSummaryCategory = "risk" | "flow" | "supply" | "quality";
 export type AttentionNowSourceType = "risk" | "task" | "qa" | "purchase" | "manufacturing";
+export type MentorActionQueueSourceType = "qa" | "task" | "purchase" | "risk";
 export type AttentionReason =
   | "critical-risk"
   | "high-risk"
@@ -53,6 +54,7 @@ export interface AttentionTriageGroup {
 export interface AttentionNowItem {
   actionType: AttentionActionType;
   blockingImpact?: string;
+  blockerTypeLabel?: string;
   contextLabel?: string;
   dueDate?: string;
   id: string;
@@ -70,8 +72,23 @@ export interface AttentionNowItem {
   whyNow: string;
 }
 
+export interface MentorActionQueueItem {
+  actionType: AttentionActionType;
+  contextLabel: string;
+  id: string;
+  openLabel: string;
+  ownerLabel: string;
+  priorityLabel: string;
+  recordId: string;
+  sourceLabel: string;
+  sourceType: MentorActionQueueSourceType;
+  statusLabel: string;
+  title: string;
+}
+
 export interface AttentionViewModel {
   actionNowItems: AttentionNowItem[];
+  mentorQueueItems: MentorActionQueueItem[];
   summaryGroups: AttentionSummaryGroup[];
   triageGroups: AttentionTriageGroup[];
 }

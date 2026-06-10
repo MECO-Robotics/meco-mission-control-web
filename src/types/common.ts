@@ -56,13 +56,29 @@ export type PartInstanceStatus = MilestoneStatus;
 export type TaskDependencyKind = "task" | "milestone" | "part_instance";
 export type TaskDependencyType = "hard" | "soft";
 export type TaskBlockerType =
-  | "task"
-  | "milestone"
-  | "workstream"
-  | "mechanism"
-  | "part_instance"
-  | "artifact_instance"
-  | "external";
+  | "lost-part"
+  | "broken-part"
+  | "lost-tool"
+  | "broken-tool"
+  | "design-issue"
+  | "manufacturing-unavailable"
+  | "shipping-delay"
+  | "qa-failed"
+  | "other";
+export const TASK_BLOCKER_TYPE_LABELS: Record<TaskBlockerType, string> = {
+  "lost-part": "Lost part",
+  "broken-part": "Broken part",
+  "lost-tool": "Lost tool",
+  "broken-tool": "Broken tool",
+  "design-issue": "Design issue",
+  "manufacturing-unavailable": "Manufacturing unavailable",
+  "shipping-delay": "Shipping delay",
+  "qa-failed": "QA failed",
+  other: "Other",
+};
+export const TASK_BLOCKER_TYPE_OPTIONS = Object.entries(TASK_BLOCKER_TYPE_LABELS).map(
+  ([id, name]) => ({ id: id as TaskBlockerType, name }),
+);
 export type TaskBlockerSeverity = "low" | "medium" | "high" | "critical";
 export type TaskBlockerStatus = "open" | "resolved";
 export type ManufacturingProcess = "3d-print" | "cnc" | "fabrication";
@@ -77,6 +93,7 @@ export type ProjectStatus = "planned" | "active" | "paused" | "complete";
 export type TestResultStatus = "pass" | "fail" | "blocked";
 export type ReportType = "QA" | "MilestoneTest" | "Practice" | "Competition" | "Review";
 export type RiskSeverity = "high" | "medium" | "low";
+export type RiskReassessmentStatus = "partial-mitigation" | "full-mitigation";
 export type RiskAttachmentType = "project" | "workstream" | "mechanism" | "part-instance";
 export type FindingStatus = "open" | "resolved";
 export type DesignIterationSourceType = "qa-finding" | "test-finding" | "manual";

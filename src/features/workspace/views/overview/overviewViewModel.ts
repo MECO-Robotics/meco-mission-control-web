@@ -1,6 +1,7 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 import type { RiskRecord } from "@/types/recordsReporting";
+import { buildPlanningConfidenceSummary } from "@/features/workspace/shared/task/taskPlanning";
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
@@ -39,6 +40,7 @@ export interface HomeViewModel {
   workBySubsystem: OverviewBarDatum[];
   upcomingMilestones: OverviewListItem[];
   priorityTasks: OverviewListItem[];
+  planningActions: OverviewListItem[];
   issues: OverviewListItem[];
 }
 
@@ -140,6 +142,37 @@ function sortTasksByDueDate(tasks: TaskRecord[]) {
   return [...tasks].sort((left, right) => left.dueDate.localeCompare(right.dueDate));
 }
 
+function buildPlanningActionItems(tasks: TaskRecord[], today: Date): OverviewListItem[] {
+  const tasksById = new Map(tasks.map((task) => [task.id, task]));
+  const planningConfidence = buildPlanningConfidenceSummary(tasks);
+
+  return planningConfidence.fields
+    .filter((field) => field.missingCount > 0)
+    .map((field) => {
+      const firstMissingTask = field.missingTaskIds
+        .map((taskId) => tasksById.get(taskId) ?? null)
+        .filter((task): task is TaskRecord => task !== null)
+        .sort((left, right) => left.dueDate.localeCompare(right.dueDate))[0];
+      const firstTaskLabel = firstMissingTask ? ` | First: ${firstMissingTask.title}` : "";
+      const days = firstMissingTask?.dueDate ? daysFromToday(firstMissingTask.dueDate, today) : null;
+
+      return {
+        id: `planning-gap-${field.id}`,
+        title: field.actionLabel,
+        meta: `${field.missingCount} task${field.missingCount === 1 ? "" : "s"} missing ${field.label.toLowerCase()}${firstTaskLabel}`,
+        taskId: firstMissingTask?.id,
+        tone: days !== null && days <= 1 ? "critical" : "warning",
+      } satisfies OverviewListItem;
+    })
+    .sort((left, right) => {
+      const leftTask = left.taskId ? tasksById.get(left.taskId) : null;
+      const rightTask = right.taskId ? tasksById.get(right.taskId) : null;
+      const leftDue = leftTask?.dueDate ?? "9999-12-31";
+      const rightDue = rightTask?.dueDate ?? "9999-12-31";
+      return leftDue.localeCompare(rightDue) || left.title.localeCompare(right.title);
+    });
+}
+
 function buildSchedulePressure(openTasks: TaskRecord[], today: Date): OverviewGraphSegment[] {
   const overdue = openTasks.filter((task) => daysFromToday(task.dueDate, today) < 0).length;
   const dueSoon = openTasks.filter((task) => {
@@ -187,6 +220,7 @@ export function buildHomeViewModel(bootstrap: BootstrapPayload, today = new Date
   const overdueTasks = openTasks.filter((task) => daysFromToday(task.dueDate, today) < 0);
   const highRisks = bootstrap.risks.filter((risk) => risk.severity === "high");
   const blockedTasks = openTasks.filter(isBlockedTask);
+  const planningConfidence = buildPlanningConfidenceSummary(openTasks);
 
   const upcomingMilestones = bootstrap.milestones
     .filter((milestone) => {
@@ -200,6 +234,17 @@ export function buildHomeViewModel(bootstrap: BootstrapPayload, today = new Date
   return {
     metrics: [
       { id: "open-work", label: "Open work", value: openTasks.length },
+      {
+        id: "planning-confidence",
+        label: "Planning confidence %",
+        value: planningConfidence.confidencePercent,
+        tone:
+          planningConfidence.confidencePercent >= 85
+            ? "good"
+            : planningConfidence.confidencePercent >= 65
+              ? "warning"
+              : "critical",
+      },
       { id: "due-soon", label: "Due soon", value: dueSoonTasks.length, tone: "warning" },
       { id: "overdue", label: "Overdue", value: overdueTasks.length, tone: overdueTasks.length > 0 ? "critical" : "good" },
       { id: "high-risks", label: "High risks", value: highRisks.length, tone: highRisks.length > 0 ? "critical" : "good" },
@@ -210,6 +255,7 @@ export function buildHomeViewModel(bootstrap: BootstrapPayload, today = new Date
       .slice(0, 5)
       .map((task) => taskToItem(task, lookups, today)),
     upcomingMilestones,
+    planningActions: buildPlanningActionItems(openTasks, today).slice(0, 5),
     issues: [
       ...highRisks.map(riskToItem),
       ...blockedTasks.map((task) => taskToItem(task, lookups, today)),

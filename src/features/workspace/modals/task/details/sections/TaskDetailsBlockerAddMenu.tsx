@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-import type { TaskBlockerType } from "@/types/common";
+import { TASK_BLOCKER_TYPE_OPTIONS, type TaskBlockerType } from "@/types/common";
 import { IconCheck, IconPlus } from "@/components/shared/Icons";
 import { useFilterDropdownMenuState } from "../../../../shared/filters/workspaceFilterDropdownHooks";
 
-const DEFAULT_BLOCKER_TYPE: TaskBlockerType = "task";
+const DEFAULT_BLOCKER_TYPE: TaskBlockerType = "other";
 
 interface TaskDetailsBlockerAddMenuProps {
   className?: string;
@@ -20,6 +20,7 @@ export function TaskDetailsBlockerAddMenu({
 }: TaskDetailsBlockerAddMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [description, setDescription] = useState("");
+  const [selectedType, setSelectedType] = useState<TaskBlockerType>(DEFAULT_BLOCKER_TYPE);
   const filterRef = useRef<HTMLSpanElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -29,6 +30,7 @@ export function TaskDetailsBlockerAddMenu({
   const closeMenu = useCallback(() => {
     setIsOpen(false);
     setDescription("");
+    setSelectedType(DEFAULT_BLOCKER_TYPE);
   }, []);
 
   const submitBlocker = useCallback(() => {
@@ -37,9 +39,9 @@ export function TaskDetailsBlockerAddMenu({
       return;
     }
 
-    onAddBlocker(DEFAULT_BLOCKER_TYPE, trimmedDescription);
+    onAddBlocker(selectedType, trimmedDescription);
     closeMenu();
-  }, [closeMenu, description, onAddBlocker]);
+  }, [closeMenu, description, onAddBlocker, selectedType]);
 
   const { menuPosition } = useFilterDropdownMenuState({
     buttonRef,
@@ -129,8 +131,33 @@ export function TaskDetailsBlockerAddMenu({
                 gap: "0.35rem",
                 fontSize: "0.78rem",
                 fontWeight: 700,
+                paddingBottom: "0.4rem",
               }}
             >
+              Type
+              <select
+                aria-label="Blocker type"
+                className="task-detail-inline-edit-input task-details-blocker-input"
+                onChange={(milestone) => setSelectedType(milestone.target.value as TaskBlockerType)}
+                value={selectedType}
+              >
+                {TASK_BLOCKER_TYPE_OPTIONS.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label
+              style={{
+                color: "var(--text-title)",
+                display: "grid",
+                gap: "0.35rem",
+                fontSize: "0.78rem",
+                fontWeight: 700,
+              }}
+            >
+              Description
               <div style={{ alignItems: "center", display: "flex", gap: "0.35rem" }}>
                 <input
                   aria-label="Blocker description"

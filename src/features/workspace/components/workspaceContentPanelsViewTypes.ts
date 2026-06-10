@@ -1,5 +1,6 @@
 ﻿import type { InventoryViewTab } from "@/lib/workspaceNavigation";
 import type { WorkspaceContentPanelsProps } from "../WorkspaceContentPanelsCoreImpl";
+import type { NavigationTarget } from "@/lib/workspaceNavigation";
 import type { ManufacturingItemRecord } from "@/types/recordsInventory";
 import type { SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
 
@@ -7,6 +8,7 @@ export type SwipeDirection = "left" | "right" | null;
 
 export type WorkspaceContentPanelsViewProps = WorkspaceContentPanelsProps & {
   effectiveInventoryView: InventoryViewTab;
+  onOpenDrilldownTarget: (target: NavigationTarget) => void;
   taskSwipeDirection: SwipeDirection;
   reportsSwipeDirection: SwipeDirection;
   manufacturingSwipeDirection: SwipeDirection;
@@ -45,6 +47,7 @@ export interface WorkspaceTaskPanelProps {
   openEditMechanismModal: WorkspaceContentPanelsViewProps["openEditMechanismModal"];
   openEditPartInstanceModal: WorkspaceContentPanelsViewProps["openEditPartInstanceModal"];
   openEditSubsystemModal: WorkspaceContentPanelsViewProps["openEditSubsystemModal"];
+  onOpenDrilldownTarget: WorkspaceContentPanelsViewProps["onOpenDrilldownTarget"];
   removePartInstanceFromMechanism: WorkspaceContentPanelsViewProps["removePartInstanceFromMechanism"];
   saveSubsystemLayout: (
     subsystemId: string,
@@ -135,6 +138,7 @@ export interface WorkspaceInventoryPanelProps {
 
 export interface WorkspaceRosterPanelProps {
   allMembers: WorkspaceContentPanelsViewProps["allMembers"];
+  availabilityBootstrap: WorkspaceContentPanelsViewProps["availabilityBootstrap"];
   bootstrap: WorkspaceContentPanelsViewProps["bootstrap"];
   externalMembers: WorkspaceContentPanelsViewProps["externalMembers"];
   handleCreateMember: WorkspaceContentPanelsViewProps["handleCreateMember"];
@@ -150,6 +154,8 @@ export interface WorkspaceRosterPanelProps {
   requestMemberPhotoUpload: WorkspaceContentPanelsViewProps["requestMemberPhotoUpload"];
   rosterMentors: WorkspaceContentPanelsViewProps["rosterMentors"];
   rosterView: WorkspaceContentPanelsViewProps["rosterView"];
+  openCreateTaskModal: WorkspaceContentPanelsViewProps["openCreateTaskModal"];
+  openCreateTaskModalForMember: WorkspaceContentPanelsViewProps["openCreateTaskModalForMember"];
   openTimelineTaskDetailsModal: WorkspaceContentPanelsViewProps["openTimelineTaskDetailsModal"];
   selectMember: WorkspaceContentPanelsViewProps["selectMember"];
   selectedMemberId: WorkspaceContentPanelsViewProps["selectedMemberId"];

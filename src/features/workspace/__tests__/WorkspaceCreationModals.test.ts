@@ -37,6 +37,7 @@ function createModalBootstrap() {
     mechanismIds: [],
     partInstanceId: null,
     partInstanceIds: [],
+    targetRiskId: "risk-1",
     targetMilestoneId: null,
     ownerId: null,
     assigneeIds: [],
@@ -54,6 +55,17 @@ function createModalBootstrap() {
     requiresDocumentation: false,
     documentationLinked: false,
   };
+  const risk: BootstrapPayload["risks"][number] = {
+    id: "risk-1",
+    title: "Intake binding",
+    detail: "Intake can bind under load.",
+    severity: "high",
+    sourceType: "qa-report",
+    sourceId: "report-1",
+    attachmentType: "project",
+    attachmentId: "project-1",
+    mitigationTaskId: "task-1",
+  };
   const milestone: BootstrapPayload["milestones"][number] = {
     id: "milestone-1",
     title: "Intake signoff",
@@ -70,6 +82,7 @@ function createModalBootstrap() {
     ...bootstrap,
     tasks: [task],
     milestones: [milestone],
+    risks: [risk],
   };
 }
 
@@ -209,6 +222,20 @@ describe("workspace creation modals", () => {
     expect(markup).toContain("task-details-close-button");
     expect(markup).toContain('aria-label="Close QA report modal"');
     expect(markup).toContain("modal-form task-details-grid");
+    expect(markup).toContain("Risk reassessment");
+    expect(markup).toContain("Intake binding (High)");
+    expect(markup).toContain("Partial mitigation");
+    expect(markup).toContain("Full mitigation");
+    expect(markup).toContain("risk severity changes only");
+  });
+
+  it("defaults QA risk reassessment to the selected task target risk", () => {
+    const bootstrap = createModalBootstrap();
+    const payload = buildEmptyQaReportPayload(bootstrap);
+
+    expect(payload.targetRiskId).toBe("risk-1");
+    expect(payload.proposedRiskSeverity).toBeNull();
+    expect(payload.proposedRiskStatus).toBeNull();
   });
 
   it("keeps milestone report creation aligned with report modal chrome", () => {

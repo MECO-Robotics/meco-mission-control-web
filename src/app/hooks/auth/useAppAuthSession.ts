@@ -22,6 +22,7 @@ import {
 } from "@/app/hooks/auth/useAppAuthSessionLifecycle";
 
 interface UseAppAuthSessionArgs {
+  onSessionExpired?: () => void;
   resetWorkspace: () => void;
 }
 
@@ -49,6 +50,7 @@ export interface UseAppAuthSessionResult {
 }
 
 export function useAppAuthSession({
+  onSessionExpired,
   resetWorkspace,
 }: UseAppAuthSessionArgs): UseAppAuthSessionResult {
   const [authConfig, setAuthConfig] = useState<AuthConfig | null>(null);
@@ -79,6 +81,7 @@ export function useAppAuthSession({
     handleVerifyEmailCode,
     setAuthMessage: setAuthMessageNow,
   }: UseAppAuthSessionActionsResult = useAppAuthSessionActions({
+    onSessionExpired,
     resetWorkspaceRef,
     setAuthMessage,
     setIsSigningIn,
@@ -86,6 +89,7 @@ export function useAppAuthSession({
   });
 
   useAppAuthSessionBootstrap({
+    onSessionExpired,
     setAuthBooting,
     setAuthConfig,
     setAuthMessage,

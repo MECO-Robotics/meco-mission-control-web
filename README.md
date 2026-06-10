@@ -4,7 +4,7 @@ React + Vite browser frontend for MECO Mission Control.
 
 This repository contains the broad-screen web workspace for Mission Control: planning, readiness review, robot configuration, inventory, manufacturing coordination, roster operations, reports, and help/tutorial workflows. It runs against `meco-mission-control-platform` and is deployed as static assets behind `nginx`.
 
-Use this README as the contributor entry point. Use [`docs/CURRENT_WEB_SPEC.md`](docs/CURRENT_WEB_SPEC.md) as the current product/spec reference.
+Use this README as the setup entry point. Use [`docs/web-contributor-guide.md`](docs/web-contributor-guide.md) for implementation conventions and [`docs/CURRENT_WEB_SPEC.md`](docs/CURRENT_WEB_SPEC.md) as the current product/spec reference.
 
 ## Table of Contents
 
@@ -21,6 +21,8 @@ Use this README as the contributor entry point. Use [`docs/CURRENT_WEB_SPEC.md`]
 - [Environment Variables](#environment-variables)
 - [Validation and Testing](#validation-and-testing)
 - [Development Workflow](#development-workflow)
+- [Contributor Guide](docs/web-contributor-guide.md)
+- [Issue Labels](#issue-labels)
 - [Deployment and Operations](#deployment-and-operations)
 - [Release Readiness Checklist](docs/release-readiness-checklist.md)
 - [Troubleshooting](#troubleshooting)
@@ -522,10 +524,13 @@ Recommended local cycle:
 Branch and PR workflow is governed by `AGENTS.md`:
 
 - `main` is production-ready only.
+- `staging` and `staging/*` are audited release-candidate snapshots; they are immutable except for stabilization fixes.
 - `development` is the integration branch for active work.
 - `feature/*`, `fix/*`, and `hotfix/*` are short-lived work branches.
 - PRs into `development` must come from `feature/*`, `fix/*`, or `hotfix/*`.
-- Merges into `main` should come only from `development` or `hotfix/*`.
+- Cut staging branches from `development` when a frozen promotion candidate needs to remain open against `main` while regular work continues on `development`.
+- PRs into `staging` must come from `development`, `fix/*`, or `hotfix/*`; do not merge `feature/*` into staging.
+- Merges into `main` should come only from `staging`, `staging/*`, `development`, or `hotfix/*`.
 - Protected branches require CI, snapshot validation, review approval, conversation resolution, linear history, and admin enforcement as described in `AGENTS.md`.
 
 Codex/worktree notes:
@@ -534,6 +539,25 @@ Codex/worktree notes:
 - Keep startup commands and dev URL in `environment.toml`, not duplicated across docs.
 - Put diagnostic screenshots, generated reports, and temporary snapshots under `.diagnostics/`, not in the repository root.
 - When working in a worktree, audit UI changes against the worktree-hosted app instance before finishing.
+
+## Issue Labels
+
+Use Mission Control labels so web issues sort consistently with the rest of the project.
+
+Every implementation issue should carry one label from each core group:
+
+| Group | Labels | Use |
+| --- | --- | --- |
+| Area | `area:web`, `area:docs`, `area:cad`, `area:qa`, `area:auth` | Primary product or technical surface affected by the issue. Add a second area only when the acceptance criteria genuinely cross surfaces. |
+| Type | `type:bug`, `type:feature`, `type:tech-debt`, `type:ux-review` | Kind of work expected from the issue. Use `type:ux-review` for assessment/refinement tickets, not for every UI change. |
+| Priority | `priority:p0`, `priority:p1`, `priority:p2`, `priority:p3` | Delivery urgency. `p0` is production-stopping, `p1` blocks important user workflows, `p2` is planned backlog work, and `p3` is polish or opportunistic cleanup. |
+
+Supporting labels:
+
+- `blocked`: work cannot proceed until the issue names a concrete dependency or missing decision.
+- `needs-design`: UX, copy, or workflow direction is needed before implementation should start.
+
+Issue templates default to web area labels and conservative priorities. Adjust labels during triage when an issue belongs to docs, CAD, QA, auth, or a different priority.
 
 ## Deployment and Operations
 
@@ -650,6 +674,8 @@ Check:
 - affected interaction tests still cover keyboard/responsive behavior where relevant
 
 ## Cross-Repo Responsibilities
+
+Use [`docs/cross-repo-architecture.md`](docs/cross-repo-architecture.md) for the current web, mobile, platform, Postgres, storage, Slack, Onshape, and deployment relationship diagram.
 
 Related repos:
 

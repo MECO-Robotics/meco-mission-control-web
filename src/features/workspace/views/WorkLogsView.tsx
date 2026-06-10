@@ -9,13 +9,12 @@ import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/Topb
 import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
 
 import { useWorkLogsViewState } from "./workLogs/workLogsViewState";
-import { WorkLogsActivityGroupingControls } from "./workLogs/WorkLogsActivityGroupingControls";
+import { WorkLogsActiveBoardSection } from "./workLogs/WorkLogsActiveBoardSection";
 import { WorkLogsActivitySection } from "./workLogs/WorkLogsActivitySection";
 import { WorkLogsActivityToolbar } from "./workLogs/WorkLogsActivityToolbar";
 import { WorkLogsSummarySection } from "./workLogs/WorkLogsSummarySection";
 import { WorkLogsTableSection } from "./workLogs/WorkLogsTableSection";
 import { WorkLogsToolbar } from "./workLogs/WorkLogsToolbar";
-import { WORK_LOG_KANBAN_GROUP_OPTIONS } from "./workLogs/workLogsActivityGrouping";
 
 interface WorkLogsViewProps {
   activePersonFilter: FilterSelection;
@@ -42,26 +41,13 @@ export function WorkLogsView({
     membersById,
     subsystemsById,
   });
-  const isActivityBoardView = view === "activity" || view === "kanban";
-  const activityBoardTitle = view === "kanban" ? "Work log Kanban" : "Activity";
-  const activityBoardCopy =
-    view === "activity"
-      ? "Recent workspace activity across the current workspace scope."
-      : undefined;
-  const activityGroupMode =
-    view === "kanban" && workLogsView.activityGroupMode === "person"
-      ? "subsystem"
-      : workLogsView.activityGroupMode;
-  const groupingControls =
-    view === "kanban" ? (
-      <WorkLogsActivityGroupingControls
-        activeGroupMode={activityGroupMode}
-        ariaLabel="Group Kanban work logs"
-        groupOptions={WORK_LOG_KANBAN_GROUP_OPTIONS}
-        onGroupModeChange={workLogsView.setActivityGroupMode}
-        tutorialPrefix="group-kanban-worklogs"
-      />
-    ) : null;
+  const isActivityView = view === "activity";
+  const isActiveBoardView = view === "kanban";
+  const activityBoardCopy = "Recent workspace activity across the current workspace scope.";
+  const topbarSearchLabel = isActiveBoardView
+    ? "Search active worklog board"
+    : "Search work log summary";
+  const topbarSearchPlaceholder = isActiveBoardView ? "Search board..." : "Search summary...";
 
   return (
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
@@ -78,24 +64,20 @@ export function WorkLogsView({
             sortOptions={workLogsView.sortOptions}
             subsystemFilter={workLogsView.subsystemFilter}
           />
-        ) : isActivityBoardView ? (
+        ) : isActivityView ? (
           <WorkLogsActivityToolbar
-            activityGroupMode={activityGroupMode}
-            defaultGroupMode={view === "kanban" ? "subsystem" : undefined}
-            groupOptions={view === "kanban" ? WORK_LOG_KANBAN_GROUP_OPTIONS : undefined}
+            activityGroupMode={workLogsView.activityGroupMode}
             search={workLogsView.search}
-            searchAriaLabel={view === "kanban" ? "Search work log kanban" : undefined}
-            searchPlaceholder={view === "kanban" ? "Search kanban..." : undefined}
             setActivityGroupMode={workLogsView.setActivityGroupMode}
             setSearch={workLogsView.setSearch}
           />
         ) : (
           <div className="panel-actions filter-toolbar worklog-toolbar worklog-toolbar-topbar">
             <TopbarResponsiveSearch
-              ariaLabel="Search work log summary"
+              ariaLabel={topbarSearchLabel}
               compactPlaceholder="Search"
               onChange={workLogsView.setSearch}
-              placeholder="Search summary..."
+              placeholder={topbarSearchPlaceholder}
               value={workLogsView.search}
             />
           </div>
@@ -104,7 +86,15 @@ export function WorkLogsView({
 
       <div className="panel-header compact-header">
         <div className="queue-section-header">
-          <h2>{isActivityBoardView ? activityBoardTitle : view === "summary" ? "Work log summary" : "Work logs"}</h2>
+          <h2>
+            {isActiveBoardView
+              ? "Active worklog board"
+              : isActivityView
+                ? "Activity"
+                : view === "summary"
+                  ? "Work log summary"
+                  : "Work logs"}
+          </h2>
         </div>
       </div>
 
@@ -117,17 +107,21 @@ export function WorkLogsView({
         />
       ) : null}
 
-      {isActivityBoardView ? (
+      {isActivityView ? (
         <WorkLogsActivitySection
           actions={workLogsView.activityActions}
-          activityGroupMode={activityGroupMode}
+          activityGroupMode={workLogsView.activityGroupMode}
           activityPagination={workLogsView.activityPagination}
           description={activityBoardCopy}
-          groupingControls={groupingControls}
           membersById={membersById}
           openEditTaskModal={openEditTaskModal}
           subsystemsById={subsystemsById}
           taskById={workLogsView.taskById}
+        />
+      ) : isActiveBoardView ? (
+        <WorkLogsActiveBoardSection
+          board={workLogsView.activeBoard}
+          openEditTaskModal={openEditTaskModal}
         />
       ) : view === "summary" ? (
         <WorkLogsSummarySection

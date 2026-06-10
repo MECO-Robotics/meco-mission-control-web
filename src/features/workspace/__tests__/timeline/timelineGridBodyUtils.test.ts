@@ -153,7 +153,7 @@ describe("getTaskDependencyCounts", () => {
         {
           id: "blocker-1",
           blockedTaskId: "task-blocked",
-          blockerType: "external",
+          blockerType: "other",
           blockerId: null,
           description: "Waiting on material",
           severity: "medium",

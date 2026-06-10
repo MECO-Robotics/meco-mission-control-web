@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 import {
   applyCadHierarchyReview,
@@ -15,6 +15,11 @@ import {
   uploadCadStepFile,
 } from "../api/cadStepApi";
 import { isMissingCadHierarchyReviewRoute, isMissingCadOptionalRoute } from "../cadOptionalRoutes";
+import {
+  findCadImportRun,
+  findCadSnapshot,
+  findLatestSuccessfulStepImportRun,
+} from "./cadStepWorkflowDerivations";
 import type {
   CadHierarchyReview,
   CadHierarchyReviewDecision,
@@ -69,13 +74,18 @@ export function useCadStepWorkflow({
     groupRepeatedInstancesRef.current = groupRepeatedInstances;
   }, [groupRepeatedInstances]);
 
-  const selectedCadSnapshot = cadSnapshots.find((snapshot) => snapshot.id === selectedCadSnapshotId) ?? null;
-  const selectedCadImportRun = selectedCadSnapshot
-    ? cadImportRuns.find((run) => run.id === selectedCadSnapshot.importRunId) ?? null
-    : null;
-  const latestCadImportRun = cadImportRuns
-    .filter((run) => run.source === "STEP_UPLOAD" && run.status !== "FAILED" && run.status !== "CANCELED")
-    .sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt))[0] ?? null;
+  const selectedCadSnapshot = useMemo(
+    () => findCadSnapshot(cadSnapshots, selectedCadSnapshotId),
+    [cadSnapshots, selectedCadSnapshotId],
+  );
+  const selectedCadImportRun = useMemo(
+    () => findCadImportRun(cadImportRuns, selectedCadSnapshot),
+    [cadImportRuns, selectedCadSnapshot],
+  );
+  const latestCadImportRun = useMemo(
+    () => findLatestSuccessfulStepImportRun(cadImportRuns),
+    [cadImportRuns],
+  );
 
   const isCurrentScope = useCallback((requestedProjectId?: string | null, requestedSeasonId?: string | null) => (
     latestCadSnapshotScopeRef.current.projectId === requestedProjectId

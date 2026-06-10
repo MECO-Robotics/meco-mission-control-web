@@ -8,6 +8,7 @@ import {
   type AttentionLookup,
 } from "./attentionActionNowShared";
 import { buildTaskAndRiskActionItems } from "./attentionActionNowTaskRisk";
+import type { StaleTaskResult } from "./staleTaskDetector";
 import type { AttentionNowItem } from "./attentionViewTypes";
 
 interface BuildAttentionActionNowItemsArgs {
@@ -21,6 +22,7 @@ interface BuildAttentionActionNowItemsArgs {
   manufacturingBlockers: BootstrapPayload["manufacturingItems"];
   overdueTasks: BootstrapPayload["tasks"];
   purchaseDelays: BootstrapPayload["purchaseItems"];
+  staleTaskResults: StaleTaskResult[];
   waitingQaTasks: BootstrapPayload["tasks"];
 }
 
@@ -35,6 +37,7 @@ export function buildAttentionActionNowItems({
   manufacturingBlockers,
   overdueTasks,
   purchaseDelays,
+  staleTaskResults,
   waitingQaTasks,
 }: BuildAttentionActionNowItemsArgs): AttentionNowItem[] {
   const taskLastUpdatedAtById = buildTaskLastUpdatedAtById(bootstrap);
@@ -50,6 +53,16 @@ export function buildAttentionActionNowItems({
   const reportsById = Object.fromEntries(
     bootstrap.reports.map((report) => [report.id, report] as const),
   );
+  const taskBlockersByTaskId = new Map<string, NonNullable<BootstrapPayload["taskBlockers"]>>();
+  for (const blocker of bootstrap.taskBlockers ?? []) {
+    if (blocker.status !== "open") {
+      continue;
+    }
+
+    const taskBlockers = taskBlockersByTaskId.get(blocker.blockedTaskId) ?? [];
+    taskBlockers.push(blocker);
+    taskBlockersByTaskId.set(blocker.blockedTaskId, taskBlockers);
+  }
 
   const { items: taskAndRiskItems } = buildTaskAndRiskActionItems({
     blockedTasks,
@@ -59,6 +72,8 @@ export function buildAttentionActionNowItems({
     lookup,
     overdueTasks,
     reportsById,
+    staleTaskResults,
+    taskBlockersByTaskId,
     taskLastUpdatedAtById,
     waitingQaTasks,
   });

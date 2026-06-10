@@ -9,7 +9,7 @@
 .task-calendar-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.55rem 0.85rem;
+  gap: 0.35rem 0.7rem;
   justify-content: flex-end;
 }
 
@@ -17,16 +17,16 @@
   align-items: center;
   color: var(--text-copy);
   display: inline-flex;
-  font-size: 0.74rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  gap: 0.35rem;
+  gap: 0.28rem;
 }
 
 .task-calendar-legend-dot {
   border-radius: 999px;
   display: inline-block;
-  height: 0.58rem;
-  width: 0.58rem;
+  height: 0.5rem;
+  width: 0.5rem;
 }
 
 .task-calendar-frame {
@@ -42,30 +42,43 @@
   border-bottom: 1px solid var(--border-base);
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem 0.65rem;
+  gap: 0.35rem 0.65rem;
   justify-content: space-between;
-  padding: 0.6rem 0.7rem;
+  padding: 0.46rem 0.58rem;
 }
 
-.task-calendar-toolbar-actions {
+.task-calendar-month-controls {
+  align-items: center;
   display: inline-flex;
-  gap: 0.4rem;
+  gap: 0.08rem;
+  min-height: 2rem;
+  max-width: 100%;
+  padding: 0.08rem 0.14rem;
+  border: 1px solid var(--border-base);
+  border-radius: 999px;
+  background: var(--bg-panel);
 }
 
-.task-calendar-toolbar-center {
-  display: grid;
-  gap: 0.25rem;
-  min-width: 0;
+.task-calendar-month-button.icon-button {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  min-width: 1.75rem;
+  padding: 0;
+  box-shadow: none;
 }
 
-.task-calendar-toolbar-center .task-calendar-legend {
-  justify-content: flex-start;
-}
-
-.task-calendar-toolbar .secondary-action {
+.task-calendar-today-button.secondary-action {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.26rem;
   font-size: 0.72rem;
-  min-width: 3.2rem;
-  padding: 0.28rem 0.55rem;
+  min-height: 1.75rem;
+  margin-left: 0.16rem;
+  padding: 0.24rem 0.52rem;
+  box-shadow: none;
 }
 
 .task-calendar-add-meeting {
@@ -83,7 +96,13 @@
 
 .task-calendar-toolbar-title {
   color: var(--text-title);
-  font-size: 0.9rem;
+  font-size: 0.84rem;
+  font-weight: 800;
+  line-height: 1.1;
+  min-width: 6.2rem;
+  padding: 0 0.12rem;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .task-calendar-filter-toolbar {

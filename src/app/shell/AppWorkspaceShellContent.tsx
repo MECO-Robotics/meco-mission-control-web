@@ -16,6 +16,7 @@ export function AppWorkspaceShellContent({
       tabSwitchDirection={c.tabSwitchDirection}
       allMembers={c.bootstrap.members}
       artifacts={c.scopedArtifacts}
+      availabilityBootstrap={c.bootstrap}
       bootstrap={c.scopedBootstrap}
       cncItems={c.cncItems}
       dataMessage={c.dataMessage}
@@ -50,6 +51,7 @@ export function AppWorkspaceShellContent({
       openCreatePartDefinitionModal={c.openCreatePartDefinitionModal}
       openCreatePurchaseModal={c.openCreatePurchaseModal}
       openCreateTaskModal={c.openCreateTaskModal}
+      openCreateTaskModalForMember={c.openCreateTaskModalForMember}
       openCreateTaskModalFromTimeline={c.openCreateTaskModalFromTimeline}
       openCreateWorkLogModal={c.openCreateWorkLogModal}
       openCreateQaReportModal={c.openCreateQaReportModal}
@@ -91,11 +93,16 @@ export function AppWorkspaceShellContent({
       selectedSeasonId={c.selectedSeasonId}
       selectedProject={c.selectedProject}
       selectedMemberId={c.selectedMemberId}
+      setActiveTab={c.setActiveTab}
+      setInventoryView={c.setInventoryView}
       setIsAddPersonOpen={c.setIsAddPersonOpen}
       setIsEditPersonOpen={c.setIsEditPersonOpen}
       setManufacturingView={c.setManufacturingView}
       setMemberEditDraft={c.setMemberEditDraft}
       setMemberForm={c.setMemberForm}
+      setRiskManagementView={c.setRiskManagementView}
+      setTaskView={c.setTaskView}
+      setWorklogsView={c.setWorklogsView}
       setActivePersonFilter={c.setActivePersonFilter}
       students={c.students}
       disciplinesById={c.disciplinesById}

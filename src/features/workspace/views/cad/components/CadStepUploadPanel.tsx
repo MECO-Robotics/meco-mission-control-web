@@ -26,7 +26,10 @@ export function CadStepUploadPanel({
         <h3>Detect CAD structure</h3>
         <p>
           Export from the master assembly, preserve assembly hierarchy, avoid flattened STEP, and use meaningful
-          assembly and part names.
+          assembly and part names.{" "}
+          <a href="/docs/step-export-conventions.md" rel="noreferrer" target="_blank">
+            STEP export guide
+          </a>
         </p>
       </div>
       <form className="cad-step-upload-form" onSubmit={onSubmit}>

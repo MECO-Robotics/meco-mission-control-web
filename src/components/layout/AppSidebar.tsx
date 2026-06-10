@@ -12,6 +12,7 @@ import {
   type TaskViewTab,
   type ViewTab,
   type WorklogsViewTab,
+  resolveViewAvailabilityContext,
 } from "@/lib/workspaceNavigation";
 import type { SessionUser } from "@/lib/auth/types";
 import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
@@ -31,6 +32,7 @@ import { useAppSidebarPopupState } from "./useAppSidebarPopupState";
 
 interface AppSidebarProps {
   activeTab: ViewTab;
+  canSignIn: boolean;
   favoriteViewIds: readonly NavigationSubItemId[];
   handleSignOut: () => void;
   items: import("@/lib/workspaceNavigation").NavigationItem[];
@@ -47,6 +49,7 @@ interface AppSidebarProps {
   onCreateSeason: () => void;
   onCreateTask: () => void;
   onRefreshWorkspace: () => void;
+  onSignIn: () => void;
   onSelectSeason: (seasonId: string | null) => void;
   onToggleMyView: () => void;
   onToggleNotificationQueue: () => void;
@@ -71,6 +74,7 @@ interface AppSidebarProps {
 
 export function AppSidebar({
   activeTab,
+  canSignIn,
   favoriteViewIds,
   handleSignOut,
   items,
@@ -87,6 +91,7 @@ export function AppSidebar({
   onCreateSeason,
   onCreateTask,
   onRefreshWorkspace,
+  onSignIn,
   onSelectSeason,
   onToggleMyView,
   onToggleNotificationQueue,
@@ -110,7 +115,11 @@ export function AppSidebar({
 }: AppSidebarProps) {
   const selectedProject = projects.find((project) => project.id === selectedProjectId) ?? null;
   const selectedSeason = seasons.find((season) => season.id === selectedSeasonId) ?? null;
-  const isRobotProject = selectedProject?.projectType === "robot";
+  const viewAvailabilityContext = resolveViewAvailabilityContext({
+    hasProjects: projects.length > 0,
+    hasSeasons: seasons.length > 0,
+    selectedProjectType: selectedProject?.projectType ?? null,
+  });
   const canEditSelectedRobot = selectedProject?.projectType === "robot";
   const selectedProjectLabel = selectedProject?.name ?? "All projects";
   const selectedScopeLabel = selectedSeason
@@ -129,12 +138,12 @@ export function AppSidebar({
     favoriteViewIds,
     inventoryView,
     manufacturingView,
-    isRobotProject,
     items,
     reportsView,
     rosterView,
     riskManagementView,
     taskView,
+    viewAvailabilityContext,
     worklogsView,
   });
 
@@ -284,6 +293,7 @@ export function AppSidebar({
 
         <AppSidebarProjectFooter
           activeTab={activeTab}
+          canSignIn={canSignIn}
           canSignOut={sessionUser !== null}
           isDarkMode={isDarkMode}
           isCollapsed={isCollapsed}
@@ -294,6 +304,7 @@ export function AppSidebar({
           onHelpSelect={handleHelpSelect}
           onProjectTriggerClick={handleProjectTriggerClick}
           onRefreshWorkspace={onRefreshWorkspace}
+          onSignIn={onSignIn}
           onSignOut={handleSignOut}
           onToggleMyView={onToggleMyView}
           onToggleDarkMode={toggleDarkMode}

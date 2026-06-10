@@ -1,5 +1,17 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MemberRecord } from "@/types/recordsOrganization";
 import { normalizeEmail, uniqueIds } from "./internal";
+
+const SHORT_DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
+  month: "short",
+  day: "numeric",
+});
+
+const USD_CURRENCY_FORMATTER = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 0,
+});
 
 export function toErrorMessage(error: unknown) {
   if (error instanceof Error) return error.message;
@@ -17,19 +29,12 @@ export function getDefaultSubsystemId(bootstrap: BootstrapPayload) {
 }
 
 export function formatDate(value: string) {
-  return new Date(`${value}T00:00:00`).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-  });
+  return SHORT_DATE_FORMATTER.format(new Date(`${value}T00:00:00`));
 }
 
 export function formatCurrency(value: number | undefined) {
   if (typeof value !== "number") return "Pending";
-  return new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(value);
+  return USD_CURRENCY_FORMATTER.format(value);
 }
 
 export function dateDiffInDays(start: string, end: string) {
@@ -56,6 +61,62 @@ export function findMemberForSessionUser(
   }
 
   return members.find((member) => normalizeEmail(member.email) === sessionEmail) ?? null;
+}
+
+function isLocalDevelopmentRole(role: unknown): role is "student" | "mentor" {
+  return role === "student" || role === "mentor";
+}
+
+export function resolveSignedInMemberForSessionUser(
+  members: BootstrapPayload["members"],
+  sessionUser:
+    | {
+        accountId?: string;
+        email: string;
+        name?: string;
+        picture?: string | null;
+        role?: unknown;
+      }
+    | null
+    | undefined,
+): MemberRecord | null {
+  const rosterMember = findMemberForSessionUser(members, sessionUser);
+  if (rosterMember) {
+    return rosterMember;
+  }
+
+  if (
+    (sessionUser?.accountId !== "local-dev" &&
+      !sessionUser?.accountId?.startsWith("local-dev-")) ||
+    !isLocalDevelopmentRole(sessionUser.role)
+  ) {
+    return null;
+  }
+
+  const activeSeasonIds = uniqueIds(members.flatMap((member) => getMemberActiveSeasonIds(member)));
+
+  return {
+    activeSeasonIds,
+    elevated: sessionUser.role === "mentor",
+    email: sessionUser.email,
+    id: sessionUser.accountId,
+    name: sessionUser.name ?? sessionUser.email,
+    photoUrl: sessionUser.picture ?? undefined,
+    role: sessionUser.role,
+    seasonId: activeSeasonIds[0] ?? members[0]?.seasonId ?? "",
+  };
+}
+
+export function getRosterLinkedMemberId(
+  members: BootstrapPayload["members"],
+  member: Pick<MemberRecord, "id"> | null | undefined,
+) {
+  const memberId = member?.id;
+  if (!memberId) {
+    return null;
+  }
+
+  return members.some((candidate) => candidate.id === memberId) ? memberId : null;
 }
 
 export function getMemberActiveSeasonIds(

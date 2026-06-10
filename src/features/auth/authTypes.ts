@@ -1,6 +1,6 @@
 import { type CSSProperties, type RefObject } from "react";
 
-import type { AuthConfig, EmailCodeDeliveryResponse } from "@/lib/auth/types";
+import type { AuthConfig, DevBypassRole, EmailCodeDeliveryResponse } from "@/lib/auth/types";
 
 export interface AuthStatusScreenProps {
   body: string;
@@ -19,7 +19,8 @@ export interface SignInScreenProps {
   hasGoogleSignIn: boolean;
   isDarkMode?: boolean;
   isSigningIn: boolean;
-  onDevBypassSignIn: (role: "student" | "mentor") => Promise<void>;
+  onDevBypassSignIn: (role?: DevBypassRole) => Promise<void>;
+  onReturnToPublicDemo?: () => void;
   onToggleDarkMode: () => void;
   onRequestEmailCode: (email: string) => Promise<EmailCodeDeliveryResponse>;
   onVerifyEmailCode: (email: string, code: string) => Promise<void>;

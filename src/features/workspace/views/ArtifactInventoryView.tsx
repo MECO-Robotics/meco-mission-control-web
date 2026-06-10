@@ -2,7 +2,7 @@ import { useMemo, useState, type CSSProperties } from "react";
 
 import { IconManufacturing, IconTasks } from "@/components/shared/Icons";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
-import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
+import { WorkspaceEmptyState, WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
 import type { ArtifactKind, ArtifactStatus } from "@/types/common";
 import type { ArtifactRecord } from "@/types/recordsInventory";
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -134,6 +134,16 @@ export function ArtifactInventoryView({
 
   const sectionTitle = title ?? "Documents";
   const addLabel = "Add document";
+  const artifactNoun = sectionTitle.toLowerCase();
+  const hasArtifactFilters =
+    search.trim().length > 0 ||
+    workstreamFilter.length > 0 ||
+    statusFilter.length > 0;
+  const hasHiddenArchivedArtifacts =
+    !showArchivedArtifacts &&
+    !hasArtifactFilters &&
+    artifacts.some((artifact) => artifactKinds.includes(artifact.kind)) &&
+    filteredArtifacts.length === 0;
 
   return (
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
@@ -178,10 +188,10 @@ export function ArtifactInventoryView({
                 ]}
               />
             }
-            ariaLabel={`Search ${sectionTitle.toLowerCase()}`}
+            ariaLabel={`Search ${artifactNoun}`}
             compactPlaceholder="Search"
             onChange={setSearch}
-            placeholder={`Search ${sectionTitle.toLowerCase()}...`}
+            placeholder={`Search ${artifactNoun}...`}
             value={search}
           />
           <label
@@ -286,12 +296,31 @@ export function ArtifactInventoryView({
         })}
 
         {filteredArtifacts.length === 0 ? (
-          <p className="empty-state">
-            No {sectionTitle.toLowerCase()} artifacts match the current filters.
-          </p>
+          <WorkspaceEmptyState
+            actionLabel={hasArtifactFilters || hasHiddenArchivedArtifacts ? undefined : addLabel}
+            onAction={
+              hasArtifactFilters || hasHiddenArchivedArtifacts
+                ? undefined
+                : () => openCreateArtifactModal(primaryKind)
+            }
+            reason={
+              hasHiddenArchivedArtifacts
+                ? `Archived ${artifactNoun} are hidden. Turn on Show archived to review existing records.`
+                : hasArtifactFilters
+                  ? "The current search, workflow, or status filters hide every artifact in this project scope."
+                  : `This project has not linked any ${artifactNoun} for planning notes, files, or handoffs yet.`
+            }
+            title={
+              hasHiddenArchivedArtifacts
+                ? `Archived ${artifactNoun} are hidden`
+                : hasArtifactFilters
+                  ? `No ${artifactNoun} match these filters`
+                  : `${sectionTitle} collect project files and handoffs here`
+            }
+          />
         ) : null}
         <PaginationControls
-          label={`${sectionTitle.toLowerCase()} artifacts`}
+          label={`${artifactNoun} artifacts`}
           onPageChange={artifactPagination.setPage}
           onPageSizeChange={artifactPagination.setPageSize}
           page={artifactPagination.page}

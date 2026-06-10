@@ -1,9 +1,12 @@
 import { NAVIGATION_SUB_ITEMS } from "./constants";
+import { NAVIGATION_SUB_ITEM_AVAILABILITY_MATRIX } from "./availability";
 import type {
   NavigationSection,
   NavigationState,
   NavigationSubItemId,
   NavigationTarget,
+  ViewAvailabilityContext,
+  ViewAvailabilityScope,
 } from "./types";
 
 function normalizeNavigationState(state: NavigationState): NavigationState {
@@ -14,10 +17,10 @@ function normalizeNavigationState(state: NavigationState): NavigationState {
     };
   }
 
-  if (state.activeTab === "worklogs" && state.worklogsView === "summary") {
+  if (state.activeTab === "worklogs" && ["summary", "logs"].includes(state.worklogsView)) {
     return {
       ...state,
-      worklogsView: "logs",
+      worklogsView: "kanban",
     };
   }
 
@@ -83,4 +86,59 @@ const NAVIGATION_SUB_ITEM_ID_SET = new Set<string>(
 
 export function isNavigationSubItemId(value: string): value is NavigationSubItemId {
   return NAVIGATION_SUB_ITEM_ID_SET.has(value);
+}
+
+export function normalizeNavigationSubItemId(value: string): NavigationSubItemId | null {
+  if (value === "reports-work-logs") {
+    return "reports-worklogs-kanban";
+  }
+
+  return isNavigationSubItemId(value) ? value : null;
+}
+
+export function resolveViewAvailabilityContext({
+  hasProjects,
+  hasSeasons,
+  selectedProjectType,
+}: {
+  hasProjects: boolean;
+  hasSeasons: boolean;
+  selectedProjectType: "robot" | string | null;
+}): ViewAvailabilityContext {
+  if (!hasSeasons) {
+    return "no-season";
+  }
+
+  if (selectedProjectType === "robot") {
+    return "robot-project";
+  }
+
+  if (selectedProjectType !== null) {
+    return "non-robot-project";
+  }
+
+  return hasProjects ? "all-project" : "no-project";
+}
+
+export function isNavigationSubItemAvailable(
+  subItemId: NavigationSubItemId,
+  scope: ViewAvailabilityScope,
+): boolean {
+  const subItem = NAVIGATION_SUB_ITEMS.find((item) => item.id === subItemId);
+  if (!subItem) {
+    return false;
+  }
+
+  if (scope.visibleTabs && !scope.visibleTabs.has(subItem.target.tab)) {
+    return false;
+  }
+
+  return NAVIGATION_SUB_ITEM_AVAILABILITY_MATRIX[subItemId][scope.context];
+}
+
+export function getAvailableNavigationSubItems(
+  subItems: readonly { id: NavigationSubItemId }[],
+  scope: ViewAvailabilityScope,
+) {
+  return subItems.filter((subItem) => isNavigationSubItemAvailable(subItem.id, scope));
 }
