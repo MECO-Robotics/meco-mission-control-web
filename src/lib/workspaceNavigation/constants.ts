@@ -232,14 +232,8 @@ export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = [
     target: { tab: "roster", rosterView: "attendance" },
   },
   {
-    id: "reports-work-logs",
-    label: "Work logs",
-    section: "reports",
-    target: { tab: "worklogs", worklogsView: "logs" },
-  },
-  {
     id: "reports-worklogs-kanban",
-    label: "Kanban",
+    label: "Worklog",
     section: "reports",
     target: { tab: "worklogs", worklogsView: "kanban" },
   },

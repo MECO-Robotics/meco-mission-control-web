@@ -2,8 +2,10 @@ import { requestApi } from "./core/request";
 import type { FavoriteViewRecord } from "@/types/bootstrap";
 import type { NavigationSubItemId } from "@/lib/workspaceNavigation";
 
+type NavigationFavoriteUpdateViewId = NavigationSubItemId | "reports-work-logs";
+
 export function updateFavoriteView(
-  viewId: NavigationSubItemId,
+  viewId: NavigationFavoriteUpdateViewId,
   isFavorite: boolean,
   onUnauthorized?: () => void,
 ) {
