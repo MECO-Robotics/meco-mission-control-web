@@ -1,0 +1,51 @@
+.robot-config-detail-meta-row,
+.robot-config-mechanism-summary-meta,
+.robot-config-part-title {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.robot-config-mechanism-summary-meta {
+  justify-content: flex-end;
+}
+
+.robot-config-part-title {
+  flex: 1 1 12rem;
+}
+
+.robot-config-cad-source {
+  border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
+  border-radius: 999px;
+  color: #334155;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  max-width: 100%;
+  padding: 0.22rem 0.45rem;
+  white-space: nowrap;
+}
+
+.robot-config-cad-source[data-source="manual"] {
+  background: #f8fafc;
+  color: #475569;
+}
+
+.robot-config-cad-source[data-source="step-import"] {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.robot-config-cad-source[data-source="onshape-sync"] {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.robot-config-cad-source[data-source="edited-after-import"] {
+  background: #fff7ed;
+  color: #c2410c;
+}

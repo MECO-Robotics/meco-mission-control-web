@@ -33,7 +33,21 @@ export type SubsystemLayoutZone =
 
 export type SubsystemLayoutView = "top";
 
-export interface SubsystemRecord {
+export type CadSourceKind = "manual" | "step-import" | "onshape-sync";
+
+export interface CadSourceMetadata {
+  cadSource?: CadSourceKind | "STEP_UPLOAD" | "ONSHAPE_API" | "ONSHAPE_BOM_CSV" | "MANUAL_BOM_CSV" | string | null;
+  cadSourceKind?: CadSourceKind | string | null;
+  cadImportSource?: "STEP_UPLOAD" | "ONSHAPE_API" | "ONSHAPE_BOM_CSV" | "MANUAL_BOM_CSV" | string | null;
+  cadSourceLabel?: string | null;
+  cadSourceDetail?: string | null;
+  cadSourceUpdatedAt?: string | null;
+  cadImportedAt?: string | null;
+  cadEditedAfterImport?: boolean | null;
+  editedAfterImport?: boolean | null;
+}
+
+export interface SubsystemRecord extends CadSourceMetadata {
   id: string;
   projectId: string;
   name: string;
@@ -60,7 +74,7 @@ export interface DisciplineRecord {
   name: string;
 }
 
-export interface MechanismRecord {
+export interface MechanismRecord extends CadSourceMetadata {
   id: string;
   subsystemId: string;
   name: string;
