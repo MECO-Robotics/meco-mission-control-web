@@ -1,10 +1,12 @@
 import type { AppWorkspaceShellTopbarController } from "@/app/hooks/useAppWorkspaceController";
 import {
+  type NavigationSubItemId,
   BASE_SECTION_LABELS,
   NAVIGATION_SECTION_LABELS,
   NAVIGATION_SUB_ITEMS,
   getActiveNavigationSubItemId,
   getNavigationSectionFromSubItem,
+  normalizeNavigationSubItemId,
 } from "@/lib/workspaceNavigation";
 
 import { AppTopbar } from "@/app/shell/workspaceShell";
@@ -37,7 +39,9 @@ export function AppWorkspaceShellTopbar({
         activeSectionLabel
       : activeSectionLabel;
   const favoriteViewIds = new Set(
-    (c.bootstrap.favoriteViews ?? []).map((favorite) => favorite.viewId),
+    (c.bootstrap.favoriteViews ?? [])
+      .map((favorite) => normalizeNavigationSubItemId(favorite.viewId))
+      .filter((favoriteViewId): favoriteViewId is NavigationSubItemId => favoriteViewId !== null),
   );
   const isActiveViewFavorite = activeSubItemId ? favoriteViewIds.has(activeSubItemId) : false;
 

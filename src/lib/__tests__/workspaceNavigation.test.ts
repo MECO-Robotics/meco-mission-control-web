@@ -7,6 +7,7 @@ import {
   getActiveNavigationSubItemId,
   isNavigationSubItemAvailable,
   isNavigationSubItemId,
+  normalizeNavigationSubItemId,
   resolveViewAvailabilityContext,
   targetMatchesNavigationState,
   type NavigationState,
@@ -88,7 +89,7 @@ describe("getActiveNavigationSubItemId", () => {
     ).toBe("dashboard-activity");
   });
 
-  it("maps worklogs kanban to reports worklog kanban", () => {
+  it("maps worklogs kanban to reports worklog", () => {
     expect(
       getActiveNavigationSubItemId(
         createNavigationState({
@@ -99,12 +100,20 @@ describe("getActiveNavigationSubItemId", () => {
     ).toBe("reports-worklogs-kanban");
   });
 
-  it("maps worklogs summary to reports work logs", () => {
+  it("maps worklogs summary to reports worklog", () => {
     expect(
       getActiveNavigationSubItemId(
         createNavigationState({ activeTab: "worklogs", worklogsView: "summary" }),
       ),
-    ).toBe("reports-work-logs");
+    ).toBe("reports-worklogs-kanban");
+  });
+
+  it("maps worklogs logs to reports worklog", () => {
+    expect(
+      getActiveNavigationSubItemId(
+        createNavigationState({ activeTab: "worklogs", worklogsView: "logs" }),
+      ),
+    ).toBe("reports-worklogs-kanban");
   });
 
   it("returns null for help because it has no sidebar subitem", () => {
@@ -130,6 +139,12 @@ describe("isNavigationSubItemId", () => {
     expect(isNavigationSubItemId("tasks-timeline")).toBe(true);
     expect(isNavigationSubItemId("home")).toBe(false);
     expect(isNavigationSubItemId("notifications")).toBe(false);
+  });
+
+  it("normalizes legacy favorite IDs", () => {
+    expect(normalizeNavigationSubItemId("reports-work-logs")).toBe("reports-worklogs-kanban");
+    expect(normalizeNavigationSubItemId("reports-worklogs-kanban")).toBe("reports-worklogs-kanban");
+    expect(normalizeNavigationSubItemId("invalid-workview")).toBeNull();
   });
 });
 

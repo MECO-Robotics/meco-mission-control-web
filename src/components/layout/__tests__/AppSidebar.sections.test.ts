@@ -103,7 +103,7 @@ describe("AppSidebar sections", () => {
 
     expect(markup).toContain("Reports");
     expect(markup).toContain('data-tutorial-target="sidebar-tab-reports"');
-    expect(markup).toContain("Kanban");
+    expect(markup).toContain("Worklog");
     expect(markup).toContain("QA forms");
     expect(markup).toContain("Milestone results");
   });

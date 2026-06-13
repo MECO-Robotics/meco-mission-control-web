@@ -17,10 +17,10 @@ function normalizeNavigationState(state: NavigationState): NavigationState {
     };
   }
 
-  if (state.activeTab === "worklogs" && state.worklogsView === "summary") {
+  if (state.activeTab === "worklogs" && ["summary", "logs"].includes(state.worklogsView)) {
     return {
       ...state,
-      worklogsView: "logs",
+      worklogsView: "kanban",
     };
   }
 
@@ -86,6 +86,14 @@ const NAVIGATION_SUB_ITEM_ID_SET = new Set<string>(
 
 export function isNavigationSubItemId(value: string): value is NavigationSubItemId {
   return NAVIGATION_SUB_ITEM_ID_SET.has(value);
+}
+
+export function normalizeNavigationSubItemId(value: string): NavigationSubItemId | null {
+  if (value === "reports-work-logs") {
+    return "reports-worklogs-kanban";
+  }
+
+  return isNavigationSubItemId(value) ? value : null;
 }
 
 export function resolveViewAvailabilityContext({

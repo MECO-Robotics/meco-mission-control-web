@@ -65,6 +65,9 @@ export function buildEmptyReportPayload(
     title?: string;
     status?: ReportPayload["status"];
     findings?: string[];
+    targetRiskId?: string | null;
+    proposedRiskSeverity?: ReportPayload["proposedRiskSeverity"];
+    proposedRiskStatus?: ReportPayload["proposedRiskStatus"];
   } = {},
 ): ReportPayload {
   const today = localTodayDate();
@@ -101,6 +104,9 @@ export function buildEmptyReportPayload(
     title: defaults.title ?? "",
     status: defaults.status ?? "pass",
     findings: defaults.findings ?? [],
+    targetRiskId: defaults.targetRiskId ?? null,
+    proposedRiskSeverity: defaults.proposedRiskSeverity ?? null,
+    proposedRiskStatus: defaults.proposedRiskStatus ?? null,
   };
 }
 
@@ -125,6 +131,9 @@ export function buildEmptyQaReportPayload(
     notes: "",
     reviewedAt: localTodayDate(),
     photoUrl: "",
+    targetRiskId: task?.targetRiskId ?? null,
+    proposedRiskSeverity: null,
+    proposedRiskStatus: null,
   });
 }
 

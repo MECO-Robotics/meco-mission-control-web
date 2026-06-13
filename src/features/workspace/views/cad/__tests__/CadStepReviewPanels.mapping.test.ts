@@ -87,6 +87,12 @@ describe("CAD STEP review panel mapping state", () => {
     );
 
     expect(markup).toContain("MECH - Shooter - Flywheel");
+    expect(markup).toContain("Source");
+    expect(markup).toContain("STEP import");
+    expect(markup).toContain("Snapshot state");
+    expect(markup).toContain("Preview only");
+    expect(markup).toContain("Preview-only STEP data becomes a finalized Robot Configuration source");
+    expect(markup).toContain("STEP export guide");
     expect(markup).toContain("This snapshot and future imports");
     expect(markup).toContain("Select a target before confirming.");
     expect(markup).toContain("<button class=\"secondary-button compact-action\" disabled=\"\" type=\"button\">Confirm</button>");
@@ -201,6 +207,9 @@ describe("CAD STEP review panel mapping state", () => {
 
     const carryForwardIndex = markup.indexOf("Carry-forward");
 
+    expect(markup).toContain("Source");
+    expect(markup).toContain("STEP import");
+    expect(markup).toContain("Preview only");
     expect(markup).toContain("step-text-assembly-parser-1");
     expect(markup.indexOf("Placeholder parser output. This is not from your uploaded STEP file.")).toBeGreaterThan(-1);
     expect(markup.indexOf("Placeholder parser output. This is not from your uploaded STEP file.")).toBeLessThan(carryForwardIndex);

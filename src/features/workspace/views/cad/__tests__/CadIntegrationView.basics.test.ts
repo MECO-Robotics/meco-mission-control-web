@@ -13,6 +13,7 @@ import {
 } from "../api/onshapeCadApi";
 import { CadIntegrationView } from "../CadIntegrationView";
 import { isMissingCadHierarchyReviewRoute, isMissingCadOptionalRoute } from "../cadOptionalRoutes";
+import { CadStepImportSummaryCard } from "../components/CadStepImportSummaryCard";
 import { CadStatusPanels, getOnshapeConnectionHealth } from "../components/CadStatusPanels";
 import type { OnshapeOverview } from "../model/cadIntegrationTypes";
 import { parseOnshapeUrl } from "../model/onshapeUrlParser";
@@ -121,10 +122,30 @@ describe("CAD STEP mapper basics", () => {
     expect(markup).toContain("/docs/step-export-conventions.md");
     expect(markup).toContain("MECH - Drivetrain - Swerve Module");
     expect(markup).toContain("CAD / Onshape integration");
+    expect(markup).toContain("CAD source model docs");
+    expect(markup).toContain("/docs/cross-repo-architecture.md");
     expect(markup).toContain("Onshape status");
     expect(markup).toContain("API budget");
     expect(markup.indexOf("STEP import")).toBeLessThan(markup.indexOf("CAD / Onshape integration"));
     expect(uploadCadStepFile).not.toHaveBeenCalled();
+  });
+
+  it("keeps an empty STEP summary from looking like a manual configuration source", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(CadStepImportSummaryCard, {
+        importRun: null,
+        snapshot: null,
+        summary: null,
+        warnings: [],
+      }),
+    );
+
+    expect(markup).toContain("No STEP snapshot selected");
+    expect(markup).toContain("<dt>Status</dt><dd>none</dd>");
+    expect(markup).not.toContain("Manual configuration");
+    expect(markup).not.toContain("Manual editable");
+    expect(markup).not.toContain("Source</dt>");
+    expect(markup).not.toContain("Snapshot state</dt>");
   });
 
   it("does not run Onshape sync or OAuth actions while rendering", () => {
