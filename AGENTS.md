@@ -354,10 +354,11 @@ Exceeding any hard limit is not allowed.
 * Keep `scripts/codex-worktree-bootstrap.ps1` as the executable fallback when manual bootstrap is needed outside Codex UI.
 
 # Cross-repo active PR notes
-- Shared context optimization stack now includes all implemented Mission Control adapters through commit `41f76cf` in `mission-control-skills` (Repomix, Repository-Intelligence, Graphify, Static Analysis, Evaluation, Observability, and Semantic Retrieval).
+- Shared context architecture changes live in `mission-control-skills` and are consumed by all repo PRs. Main change: repository-intelligence + repomix task-context bridge (commit: 46bab41).
 - Open cross-repo PR onboarding:
   - Primary context PR: `pr-286` (`mission-control-skills`).
   - Keep `AGENTS.md` cross-repo notes synchronized with `pr-286` before review.
+  - Current implementation changes include optional graph neighborhoods for task and PR planning used by repomix and repository-intelligence.
+  - Mission Control Static Analysis adapter (`mission-control-skills`) is now active in this onboarding cycle; align review contexts with findings/merge-readiness artifacts.
+  - Mission Control Evaluation adapter (`mission-control-skills`, Promptfoo) is now on board for agent/retrieval/review scoring; include evaluation artifacts in context handoff.
   - Ensure optional backends remain graceful fallbacks (Graphify, Sourcebot/Qdrant/Repo-Intelligence vector paths, Semgrep, Promptfoo, Langfuse, etc.).
-  - Downstream repos should align with generated context/retrieval artifacts from mission-control-skills when handling task planning, implementation, and review workflows.
-
