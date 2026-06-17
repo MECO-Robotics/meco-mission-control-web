@@ -422,7 +422,9 @@ Supported sign-in paths:
 
 Important behavior details:
 
-- Session token is persisted in `localStorage` as `meco.session.token`.
+- Session token is scoped to the current browser tab in `sessionStorage` as
+  `meco.session.token`; legacy `localStorage` tokens are migrated into
+  session storage and removed.
 - On `401` responses, the token is cleared and the user is forced to re-auth.
 - Session validity is rechecked periodically.
 - Google sign-in only renders on secure hosts:
@@ -642,7 +644,8 @@ Check:
 - backend JWT settings and token validity
 - local/server clock skew
 - whether `/api/auth/me` returns `401`
-- whether a stale `meco.session.token` exists in localStorage
+- whether a stale `meco.session.token` remains in legacy localStorage or the
+  active tab's sessionStorage
 
 ### Missing data after switching season/project
 
