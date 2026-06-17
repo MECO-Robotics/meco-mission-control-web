@@ -114,6 +114,14 @@
   flex-shrink: 0;
 }
 
+.toolbar-filter-compact .toolbar-filter-icon-button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
 .toolbar-filter-compact.is-active .toolbar-filter-icon {
   color: var(--official-blue);
 }

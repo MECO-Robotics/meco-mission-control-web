@@ -251,6 +251,7 @@ describe("TimelineView interactions", () => {
     expect(toolbarSource).toContain("onPointerDownCapture={handleIntervalSwitchPointerDown}");
     expect(toolbarSource).toContain("onClick={() => openIntervalSwitch({ focusOptions: true })}");
     expect(toolbarSource).toContain("onKeyDown={handleIntervalPillKeyDown}");
+    expect(toolbarSource).toContain('compactSwitchWidth={220}');
   });
 
   it("moves keyboard focus into interval options after expanding the switch", () => {
