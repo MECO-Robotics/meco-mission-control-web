@@ -109,7 +109,7 @@ describe("TimelineView", () => {
       }),
     );
     const headerSource = readFileSync(
-      join(process.cwd(), "src/features/workspace/views/timeline/components/TimelineGridHeaderContent.tsx"),
+      join(process.cwd(), "src/features/workspace/views/timeline/components/TimelineDayHeaderRow.tsx"),
       "utf8",
     );
 
@@ -494,7 +494,7 @@ describe("TimelineView", () => {
     const headerSource = readFileSync(
       join(
         process.cwd(),
-        "src/features/workspace/views/timeline/components/TimelineGridHeaderContent.tsx",
+        "src/features/workspace/views/timeline/components/TimelineDayHeaderRow.tsx",
       ),
       "utf8",
     );

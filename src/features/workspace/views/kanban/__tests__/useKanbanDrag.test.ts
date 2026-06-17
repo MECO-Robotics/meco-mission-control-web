@@ -21,7 +21,7 @@ describe("canStartKanbanPointerFallbackDrag", () => {
 
   it("clears pointer fallback drags on cancel without committing a drop", () => {
     const source = readFileSync(
-      "src/features/workspace/views/kanban/useKanbanDrag.ts",
+      "src/features/workspace/views/kanban/useKanbanPointerFallbackDrag.ts",
       "utf8",
     );
 
