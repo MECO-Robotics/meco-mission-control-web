@@ -3,6 +3,7 @@ import type { NavigationTarget } from "@/lib/workspaceNavigation";
 import type { PartInstanceRecord } from "@/types/recordsInventory";
 import type { MechanismRecord, SubsystemRecord } from "@/types/recordsOrganization";
 
+import { CadSourceBadge } from "./CadSourceBadge";
 import { SubsystemMechanismSection } from "./SubsystemMechanismSection";
 import type {
   RobotConfigurationDrilldownLinkModel,
@@ -151,7 +152,10 @@ export function SubsystemDetailPanel({
             <IconEdit />
           </button>
         </div>
-        <small>{`${selectedSubsystem.mechanismCount} mechanisms | ${selectedSubsystem.partCount} parts`}</small>
+        <div className="robot-config-detail-meta-row">
+          <small>{`${selectedSubsystem.mechanismCount} mechanisms | ${selectedSubsystem.partCount} parts`}</small>
+          <CadSourceBadge source={selectedSubsystem.cadSource} />
+        </div>
       </header>
 
       <section className="robot-config-detail-readonly">

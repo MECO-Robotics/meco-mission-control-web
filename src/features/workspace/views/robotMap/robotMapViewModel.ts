@@ -2,9 +2,11 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { SubsystemRecord } from "@/types/recordsOrganization";
 import type { SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
 
+import { resolveCadSourceIndicator, type CadSourceIndicatorModel } from "./cadSourceIndicator";
 import { resolveSubsystemLayout } from "./robotMapLayout";
 
 export interface RobotConfigurationPartModel {
+  cadSource: CadSourceIndicatorModel;
   id: string;
   name: string;
   quantity: number;
@@ -18,6 +20,7 @@ export interface RobotConfigurationDrilldownLinkModel {
 }
 
 export interface RobotConfigurationMechanismModel {
+  cadSource: CadSourceIndicatorModel;
   id: string;
   name: string;
   description: string;
@@ -27,6 +30,7 @@ export interface RobotConfigurationMechanismModel {
 }
 
 export interface RobotConfigurationSubsystemModel {
+  cadSource: CadSourceIndicatorModel;
   id: string;
   description: string;
   isArchived: boolean;
@@ -114,8 +118,12 @@ function sortLinks(left: RobotConfigurationDrilldownLinkModel, right: RobotConfi
   return left.label.localeCompare(right.label);
 }
 
-function buildPartModel(partInstance: BootstrapPayload["partInstances"][number]): RobotConfigurationPartModel {
+function buildPartModel(
+  partInstance: BootstrapPayload["partInstances"][number],
+  partDefinitionsById: ReadonlyMap<string, BootstrapPayload["partDefinitions"][number]>,
+): RobotConfigurationPartModel {
   return {
+    cadSource: resolveCadSourceIndicator(partInstance, partDefinitionsById.get(partInstance.partDefinitionId)),
     id: partInstance.id,
     name: partInstance.name,
     quantity: Math.max(1, partInstance.quantity),
@@ -148,6 +156,7 @@ export function buildRobotConfigurationViewModel(
     },
     {},
   );
+  const partDefinitionsById = new Map(bootstrap.partDefinitions.map((partDefinition) => [partDefinition.id, partDefinition]));
 
   const normalizedSearch = search.trim().toLowerCase();
 
@@ -158,10 +167,11 @@ export function buildRobotConfigurationViewModel(
         .sort((left, right) => left.name.localeCompare(right.name));
       const mechanisms = subsystemMechanisms.map<RobotConfigurationMechanismModel>((mechanism) => {
         const parts = (partInstancesByMechanismId[mechanism.id] ?? [])
-          .map(buildPartModel)
+          .map((partInstance) => buildPartModel(partInstance, partDefinitionsById))
           .sort((left, right) => left.name.localeCompare(right.name));
 
         return {
+          cadSource: resolveCadSourceIndicator(mechanism),
           id: mechanism.id,
           name: mechanism.name,
           description: mechanism.description,
@@ -180,7 +190,7 @@ export function buildRobotConfigurationViewModel(
             partInstance.subsystemId === subsystem.id &&
             (!partInstance.mechanismId || mechanismIds.has(partInstance.mechanismId)),
         )
-        .map(buildPartModel)
+        .map((partInstance) => buildPartModel(partInstance, partDefinitionsById))
         .forEach((part) => linkedPartsById.set(part.id, part));
       const linkedParts = [...linkedPartsById.values()].sort((left, right) => left.name.localeCompare(right.name));
       const partInstanceIds = new Set(linkedParts.map((part) => part.id));
@@ -200,6 +210,7 @@ export function buildRobotConfigurationViewModel(
       );
 
       return {
+        cadSource: resolveCadSourceIndicator(subsystem),
         id: subsystem.id,
         description: subsystem.description,
         isArchived: subsystem.isArchived ?? false,

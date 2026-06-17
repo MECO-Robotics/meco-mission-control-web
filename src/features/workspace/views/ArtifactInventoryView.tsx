@@ -1,20 +1,16 @@
-import { useMemo, useState, type CSSProperties } from "react";
+import { useMemo, useState } from "react";
 
-import { IconManufacturing, IconTasks } from "@/components/shared/Icons";
-import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
-import { WorkspaceEmptyState, WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
-import type { ArtifactKind, ArtifactStatus } from "@/types/common";
+import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
+import type { ArtifactKind } from "@/types/common";
 import type { ArtifactRecord } from "@/types/recordsInventory";
 import type { BootstrapPayload } from "@/types/bootstrap";
-import { ColumnFilterDropdown } from "@/features/workspace/shared/filters/ColumnFilterDropdown";
-import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
-import { EditableHoverIndicator, PaginationControls, TableCell, useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
-import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
+import { useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { filterSelectionIncludes, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
-import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
-import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+
+import { ArtifactFiltersToolbar } from "./artifacts/ArtifactFiltersToolbar";
+import { ArtifactTable } from "./artifacts/ArtifactTable";
 
 interface ArtifactInventoryViewProps {
   bootstrap: BootstrapPayload;
@@ -24,49 +20,6 @@ interface ArtifactInventoryViewProps {
   openCreateArtifactModal: (kind: ArtifactKind) => void;
   openEditArtifactModal: (artifact: ArtifactRecord) => void;
   title?: string;
-}
-
-const ARTIFACT_GRID_TEMPLATE = "minmax(240px, 2fr) 1.1fr 0.9fr 1fr 0.8fr";
-
-const ARTIFACT_STATUS_OPTIONS: Array<{ id: ArtifactStatus; name: string }> = [
-  { id: "draft", name: "Draft" },
-  { id: "in-review", name: "In review" },
-  { id: "published", name: "Published" },
-];
-
-const ARTIFACT_STATUS_DISPLAY: Record<
-  ArtifactStatus,
-  { label: string; statusValue: string }
-> = {
-  draft: { label: "Draft", statusValue: "not-started" },
-  "in-review": { label: "In review", statusValue: "waiting-for-qa" },
-  published: { label: "Published", statusValue: "complete" },
-};
-
-function formatUpdatedAt(value: string) {
-  if (!value) {
-    return "Unknown";
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "Unknown";
-  }
-
-  return date.toLocaleDateString();
-}
-
-function summarizeLink(link: string) {
-  if (!link.trim()) {
-    return "No link";
-  }
-
-  try {
-    const url = new URL(link);
-    return `${url.hostname}${url.pathname}`;
-  } catch {
-    return link;
-  }
 }
 
 export function ArtifactInventoryView({
@@ -96,6 +49,13 @@ export function ArtifactInventoryView({
           name: workstream.name,
         }))
         .sort((left, right) => left.name.localeCompare(right.name)),
+    [bootstrap.workstreams],
+  );
+  const workstreamsById = useMemo(
+    () =>
+      Object.fromEntries(
+        bootstrap.workstreams.map((workstream) => [workstream.id, workstream.name]),
+      ),
     [bootstrap.workstreams],
   );
 
@@ -147,72 +107,18 @@ export function ArtifactInventoryView({
 
   return (
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
-      <AppTopbarSlotPortal slot="controls">
-        <div className="panel-actions filter-toolbar materials-toolbar">
-          <TopbarResponsiveSearch
-            actions={
-              <CompactFilterMenu
-                activeCount={[workstreamFilter, statusFilter].filter((value) => value.length > 0).length}
-                ariaLabel="Artifact filters"
-                buttonLabel="Filters"
-                className="materials-filter-menu"
-                items={[
-                  {
-                    label: "Workflow",
-                    content: (
-                      <FilterDropdown
-                        allLabel="All workflows"
-                        ariaLabel="Filter artifacts by workflow"
-                        className="task-queue-filter-menu-submenu"
-                        icon={<IconManufacturing />}
-                        onChange={setWorkstreamFilter}
-                        options={workstreamOptions}
-                        value={workstreamFilter}
-                      />
-                    ),
-                  },
-                  {
-                    label: "Status",
-                    content: (
-                      <FilterDropdown
-                        allLabel="All statuses"
-                        ariaLabel="Filter artifacts by status"
-                        className="task-queue-filter-menu-submenu"
-                        icon={<IconTasks />}
-                        onChange={setStatusFilter}
-                        options={ARTIFACT_STATUS_OPTIONS}
-                        value={statusFilter}
-                      />
-                    ),
-                  },
-                ]}
-              />
-            }
-            ariaLabel={`Search ${artifactNoun}`}
-            compactPlaceholder="Search"
-            onChange={setSearch}
-            placeholder={`Search ${artifactNoun}...`}
-            value={search}
-          />
-          <label
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.35rem",
-              color: "var(--text-copy)",
-              fontSize: "0.85rem",
-            }}
-          >
-            <input
-              checked={showArchivedArtifacts}
-              onChange={(milestone) => setShowArchivedArtifacts(milestone.target.checked)}
-              type="checkbox"
-            />
-            Show archived
-          </label>
-
-        </div>
-      </AppTopbarSlotPortal>
+      <ArtifactFiltersToolbar
+        artifactNoun={artifactNoun}
+        search={search}
+        setSearch={setSearch}
+        setShowArchivedArtifacts={setShowArchivedArtifacts}
+        setStatusFilter={setStatusFilter}
+        setWorkstreamFilter={setWorkstreamFilter}
+        showArchivedArtifacts={showArchivedArtifacts}
+        statusFilter={statusFilter}
+        workstreamFilter={workstreamFilter}
+        workstreamOptions={workstreamOptions}
+      />
 
       <div className="panel-header compact-header">
         <div className="queue-section-header">
@@ -230,108 +136,24 @@ export function ArtifactInventoryView({
         tutorialTarget="create-document-button"
       />
 
-      <div className={`table-shell ${artifactFilterMotionClass}`}>
-        <div
-          className="ops-table ops-table-header materials-table"
-          style={{ "--workspace-grid-template": ARTIFACT_GRID_TEMPLATE } as CSSProperties}
-        >
-          <span>Artifact</span>
-          <span className="table-column-header-cell">
-            <span className="table-column-title">Workflow</span>
-            <ColumnFilterDropdown
-              allLabel="All workflows"
-              ariaLabel="Filter artifacts by workflow"
-              onChange={setWorkstreamFilter}
-              options={workstreamOptions}
-              value={workstreamFilter}
-            />
-          </span>
-          <span className="table-column-header-cell">
-            <span className="table-column-title">Status</span>
-            <ColumnFilterDropdown
-              allLabel="All statuses"
-              ariaLabel="Filter artifacts by status"
-              onChange={setStatusFilter}
-              options={ARTIFACT_STATUS_OPTIONS}
-              value={statusFilter}
-            />
-          </span>
-          <span>Link</span>
-          <span>Updated</span>
-        </div>
-
-        {artifactPagination.pageItems.map((artifact) => {
-          const workflowName = artifact.workstreamId
-            ? bootstrap.workstreams.find(
-                (workstream) => workstream.id === artifact.workstreamId,
-              )?.name ?? "Unknown workflow"
-            : "Project-level";
-          const statusMeta = ARTIFACT_STATUS_DISPLAY[artifact.status];
-
-          return (
-            <button
-              className="ops-table ops-row materials-table editable-hover-target editable-hover-target-row"
-              key={artifact.id}
-              onClick={() => openEditArtifactModal(artifact)}
-              style={{ "--workspace-grid-template": ARTIFACT_GRID_TEMPLATE } as CSSProperties}
-              title={`Edit ${artifact.title}`}
-              type="button"
-            >
-              <TableCell label="Artifact">
-                <strong>{artifact.title}</strong>
-                {artifact.isArchived ? <small>Archived</small> : null}
-                <small>{artifact.summary || "No summary yet."}</small>
-              </TableCell>
-              <TableCell label="Workflow">{workflowName}</TableCell>
-              <TableCell label="Status" valueClassName="table-cell-pill">
-                <span className={getStatusPillClassName(statusMeta.statusValue)}>
-                  {statusMeta.label}
-                </span>
-              </TableCell>
-              <TableCell label="Link">{summarizeLink(artifact.link)}</TableCell>
-              <TableCell label="Updated" valueClassName="font-mono">{formatUpdatedAt(artifact.updatedAt)}</TableCell>
-              <EditableHoverIndicator />
-            </button>
-          );
-        })}
-
-        {filteredArtifacts.length === 0 ? (
-          <WorkspaceEmptyState
-            actionLabel={hasArtifactFilters || hasHiddenArchivedArtifacts ? undefined : addLabel}
-            onAction={
-              hasArtifactFilters || hasHiddenArchivedArtifacts
-                ? undefined
-                : () => openCreateArtifactModal(primaryKind)
-            }
-            reason={
-              hasHiddenArchivedArtifacts
-                ? `Archived ${artifactNoun} are hidden. Turn on Show archived to review existing records.`
-                : hasArtifactFilters
-                  ? "The current search, workflow, or status filters hide every artifact in this project scope."
-                  : `This project has not linked any ${artifactNoun} for planning notes, files, or handoffs yet.`
-            }
-            title={
-              hasHiddenArchivedArtifacts
-                ? `Archived ${artifactNoun} are hidden`
-                : hasArtifactFilters
-                  ? `No ${artifactNoun} match these filters`
-                  : `${sectionTitle} collect project files and handoffs here`
-            }
-          />
-        ) : null}
-        <PaginationControls
-          label={`${artifactNoun} artifacts`}
-          onPageChange={artifactPagination.setPage}
-          onPageSizeChange={artifactPagination.setPageSize}
-          page={artifactPagination.page}
-          pageSize={artifactPagination.pageSize}
-          pageSizeOptions={artifactPagination.pageSizeOptions}
-          rangeEnd={artifactPagination.rangeEnd}
-          rangeStart={artifactPagination.rangeStart}
-          totalItems={artifactPagination.totalItems}
-          totalPages={artifactPagination.totalPages}
-        />
-      </div>
+      <ArtifactTable
+        artifactNoun={artifactNoun}
+        filteredArtifacts={filteredArtifacts}
+        filterMotionClass={artifactFilterMotionClass}
+        hasArtifactFilters={hasArtifactFilters}
+        hasHiddenArchivedArtifacts={hasHiddenArchivedArtifacts}
+        openCreateArtifactModal={openCreateArtifactModal}
+        openEditArtifactModal={openEditArtifactModal}
+        pagination={artifactPagination}
+        primaryKind={primaryKind}
+        sectionTitle={sectionTitle}
+        setStatusFilter={setStatusFilter}
+        setWorkstreamFilter={setWorkstreamFilter}
+        statusFilter={statusFilter}
+        workstreamFilter={workstreamFilter}
+        workstreamOptions={workstreamOptions}
+        workstreamsById={workstreamsById}
+      />
     </section>
   );
 }
