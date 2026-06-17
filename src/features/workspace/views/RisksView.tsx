@@ -7,7 +7,6 @@ import type { TaskRecord } from "@/types/recordsExecution";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { AttentionView } from "@/features/workspace/views/attention/AttentionView";
-import type { KanbanItemDragProps } from "@/features/workspace/views/kanban/useKanbanDrag";
 
 import { RiskEditorModal } from "./RiskEditorModal";
 import { RiskDetailsModal } from "./RiskDetailsModal";
@@ -44,7 +43,6 @@ export function RisksView({
   const [pendingRiskSeverityDropIds, setPendingRiskSeverityDropIds] = useState<ReadonlySet<string>>(
     () => new Set(),
   );
-  const [focusedSeverity, setFocusedSeverity] = useState<RiskPayload["severity"] | null>(null);
   const viewModel = useRisksViewModel({
     activePersonFilter,
     bootstrap,
@@ -60,11 +58,6 @@ export function RisksView({
   const filteredMechanismMetrics = useMemo(
     () => filterMetricRows(viewModel.mechanismMetrics, metricsSearch),
     [metricsSearch, viewModel.mechanismMetrics],
-  );
-  const focusedRisks = useMemo(
-    () =>
-      focusedSeverity === null ? [] : viewModel.risksBySeverity[focusedSeverity],
-    [focusedSeverity, viewModel.risksBySeverity],
   );
 
   const setRiskSeverityDropPending = (riskId: string, isPending: boolean) => {
@@ -96,72 +89,6 @@ export function RisksView({
     } finally {
       setRiskSeverityDropPending(risk.id, false);
     }
-  };
-
-  const renderRiskCard = (
-    risk: BootstrapPayload["risks"][number],
-    _severity: RiskPayload["severity"],
-    dragProps?: KanbanItemDragProps,
-  ) => {
-    const projectLabel = getRiskProjectLabel(risk, attachmentLookups);
-    const workflowLabel = getRiskWorkflowLabel(risk, attachmentLookups);
-    const mechanismLabel = getRiskMechanismLabel(risk, attachmentLookups);
-    const { className: dragClassName, ...dragRootProps } =
-      dragProps ? (dragProps as { className?: string }) : {};
-
-    return (
-      <button
-        {...dragRootProps}
-        className={`task-queue-board-card editable-hover-target editable-hover-target-row${
-          dragClassName ? ` ${dragClassName}` : ""
-        }`}
-        key={risk.id}
-        onClick={() => viewModel.openRiskDetails(risk)}
-        type="button"
-      >
-        <div className="task-queue-board-card-header">
-          <strong>{risk.title}</strong>
-        </div>
-        <small className="task-queue-board-card-summary task-queue-board-card-summary-task">
-          {risk.detail}
-        </small>
-        <div className="task-queue-board-card-meta">
-          {isAllProjectsView ? (
-            <>
-              <span
-                className="task-queue-board-card-context-chip task-queue-board-card-context-chip-due-style"
-                title={projectLabel}
-              >
-                {projectLabel}
-              </span>
-              <span
-                className="task-queue-board-card-context-chip task-queue-board-card-context-chip-due-style"
-                title={workflowLabel}
-                style={getWorkflowChipStyle(risk, attachmentLookups)}
-              >
-                {workflowLabel}
-              </span>
-            </>
-          ) : (
-            <>
-              <span
-                className="task-queue-board-card-context-chip task-queue-board-card-context-chip-due-style"
-                title={workflowLabel}
-                style={getWorkflowChipStyle(risk, attachmentLookups)}
-              >
-                {workflowLabel}
-              </span>
-              {mechanismLabel ? (
-                <span className="task-queue-board-card-context-chip" title={`Mechanism: ${mechanismLabel}`}>
-                  {mechanismLabel}
-                </span>
-              ) : null}
-            </>
-          )}
-        </div>
-        <EditableHoverIndicator className="task-queue-board-card-hover" />
-      </button>
-    );
   };
 
   return (
