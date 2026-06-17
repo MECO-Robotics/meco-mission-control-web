@@ -168,7 +168,10 @@ describe("AppTopbar", () => {
 
   it("measures the responsive search against its parent container so icon mode can recover", () => {
     const source = readFileSync(
-      join(process.cwd(), "src/features/workspace/shared/filters/TopbarResponsiveSearch.tsx"),
+      join(
+        process.cwd(),
+        "src/features/workspace/shared/filters/topbarResponsiveSearch/useTopbarResponsiveSearchMode.ts",
+      ),
       "utf8",
     );
 

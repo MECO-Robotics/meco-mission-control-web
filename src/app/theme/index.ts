@@ -57,4 +57,3 @@ export function buildPageShellStyle(mode: ThemeMode): CSSProperties {
     colorScheme: mode,
   } as CSSProperties;
 }
-11
