@@ -15,6 +15,7 @@
     "test": "jest",
     "test:ci": "jest --ci --maxWorkers=50%",
     "test:watch": "jest --watch",
+    "test:app-utils": "jest src/lib/__tests__/appUtils.test.ts src/lib/__tests__/appUtilsSelection.test.ts src/lib/__tests__/appUtilsManufacturing.test.ts src/lib/__tests__/workspaceNavigation.test.ts",
     "verify-contracts": "node ./scripts/verify-bootstrap-contract.mjs",
     "verify": "npm run verify-contracts && npm run typecheck && npm run lint && npm run test:ci && npm run build:bundle"
   },
