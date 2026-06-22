@@ -22,6 +22,7 @@ on:
       - ".github/workflows/ci.yml"
       - ".github/workflows/codex-automerge.yml"
       - ".github/workflows/deploy-vps.yml"
+      - ".nvmrc"
       - "deploy/**"
       - "docs/**"
       - "README.md"
