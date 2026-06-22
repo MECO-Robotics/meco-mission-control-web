@@ -1,73 +1,16 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { ManufacturingItemPayload } from "@/types/payloads";
-import type { MaterialRecord, PartDefinitionRecord, PartInstanceRecord } from "@/types/recordsInventory";
 import { getDefaultSubsystemId } from "@/lib/appUtils/common";
 import { localTodayDate } from "@/lib/dateUtils";
 import { removeId, uniqueIds } from "./internal";
-
-function getManufacturingMaterialFromPart(
-  bootstrap: BootstrapPayload,
-  partDefinition: PartDefinitionRecord | null,
-): MaterialRecord | null {
-  if (!partDefinition?.materialId) return null;
-  return bootstrap.materials.find((material) => material.id === partDefinition.materialId) ?? null;
-}
-
-function getPreferredManufacturingPartInstance(
-  bootstrap: BootstrapPayload,
-  partDefinitionId: string,
-  subsystemId: string,
-): PartInstanceRecord | null {
-  return (
-    bootstrap.partInstances.find(
-      (partInstance) =>
-        partInstance.partDefinitionId === partDefinitionId &&
-        partInstance.subsystemId === subsystemId,
-    ) ??
-    bootstrap.partInstances.find((partInstance) => partInstance.partDefinitionId === partDefinitionId) ??
-    null
-  );
-}
-
-function getSubsystemManufacturingPartInstance(
-  bootstrap: BootstrapPayload,
-  partDefinitionId: string | null,
-  subsystemId: string,
-): PartInstanceRecord | null {
-  return (
-    bootstrap.partInstances.find(
-      (partInstance) =>
-        partInstance.subsystemId === subsystemId &&
-        (!partDefinitionId || partInstance.partDefinitionId === partDefinitionId),
-    ) ?? null
-  );
-}
-
-function getManufacturingDraftPartInstanceIds(draft: ManufacturingItemPayload) {
-  return draft.partInstanceIds.length ? uniqueIds(draft.partInstanceIds) : uniqueIds([draft.partInstanceId]);
-}
-
-function getManufacturingPartInstancesByIds(
-  bootstrap: BootstrapPayload,
-  partInstanceIds: string[],
-) {
-  const partInstancesById = Object.fromEntries(
-    bootstrap.partInstances.map((partInstance) => [partInstance.id, partInstance]),
-  ) as Record<string, PartInstanceRecord>;
-
-  return partInstanceIds
-    .map((partInstanceId) => partInstancesById[partInstanceId])
-    .filter((partInstance): partInstance is PartInstanceRecord => Boolean(partInstance));
-}
-
-function getManufacturingQuantityFromInstances(
-  draft: ManufacturingItemPayload,
-  partInstances: PartInstanceRecord[],
-) {
-  return partInstances.length > 0
-    ? partInstances.reduce((total, partInstance) => total + Math.max(1, partInstance.quantity), 0)
-    : draft.quantity;
-}
+import {
+  getManufacturingDraftPartInstanceIds,
+  getManufacturingMaterialFromPart,
+  getManufacturingPartInstancesByIds,
+  getManufacturingQuantityFromInstances,
+  getPreferredManufacturingPartInstance,
+  getSubsystemManufacturingPartInstance,
+} from "./manufacturing/partSelection";
 
 function normalizeManufacturingPartInstanceSelection(
   bootstrap: BootstrapPayload,
