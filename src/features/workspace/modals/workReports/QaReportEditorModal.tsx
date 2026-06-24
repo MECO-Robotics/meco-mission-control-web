@@ -2,6 +2,7 @@ import type { Dispatch, FormEvent, SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { QaReportPayload } from "@/types/payloads";
 import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
+import { QaRiskReassessmentSection } from "./QaRiskReassessmentSection";
 
 interface QaReportEditorModalProps {
   bootstrap: BootstrapPayload;
@@ -61,6 +62,9 @@ export function QaReportEditorModal({
                 setQaReportDraft((current) => ({
                   ...current,
                   taskId: milestone.target.value,
+                  targetRiskId: bootstrap.tasks.find((task) => task.id === milestone.target.value)?.targetRiskId ?? null,
+                  proposedRiskSeverity: null,
+                  proposedRiskStatus: null,
                 }))
               }
               required
@@ -168,6 +172,12 @@ export function QaReportEditorModal({
             />
             <span style={{ color: "var(--text-title)" }}>Mentor approved</span>
           </label>
+          <QaRiskReassessmentSection
+            bootstrap={bootstrap}
+            qaReportDraft={qaReportDraft}
+            selectedTask={selectedTask}
+            setQaReportDraft={setQaReportDraft}
+          />
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Notes</span>
             <textarea

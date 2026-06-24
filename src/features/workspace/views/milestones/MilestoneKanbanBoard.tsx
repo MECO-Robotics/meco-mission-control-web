@@ -35,6 +35,13 @@ const MILESTONE_STATUS_COLUMNS: readonly { label: string; state: MilestoneStatus
 const MILESTONE_DRAG_DISABLED_MESSAGE =
   "Milestone drag reassignment is disabled. Open the milestone to change its status.";
 const MILESTONE_DRAG_ATTEMPT_THRESHOLD_PX = 8;
+const MILESTONE_STATUS_BY_VALUE = MILESTONE_STATUS_COLUMNS.reduce(
+  (acc, { state, label }) => {
+    acc[state] = label;
+    return acc;
+  },
+  {} as Record<MilestoneStatus, string>,
+);
 
 function getMilestoneBoardType(milestone: MilestoneRecord) {
   return milestone.type in MILESTONE_TYPE_STYLES ? milestone.type : DEFAULT_MILESTONE_TYPE;
@@ -134,8 +141,13 @@ export function MilestoneKanbanBoard({
   searchFilter,
 }: MilestoneKanbanBoardProps) {
   const [dragErrorMessage, setDragErrorMessage] = useState<string | null>(null);
+  const [focusedState, setFocusedState] = useState<MilestoneStatus | null>(null);
   const milestoneDragAttemptStartRef = useRef<{ x: number; y: number } | null>(null);
   const milestonesByState = useMemo(() => groupMilestonesByBoardState(milestones), [milestones]);
+  const focusedMilestones = useMemo(
+    () => (focusedState === null ? [] : milestonesByState[focusedState]),
+    [focusedState, milestonesByState],
+  );
 
   const showMilestoneDragDisabledMessage = () => {
     setDragErrorMessage(MILESTONE_DRAG_DISABLED_MESSAGE);
@@ -182,6 +194,131 @@ export function MilestoneKanbanBoard({
     milestoneDragAttemptStartRef.current = null;
   };
 
+  const renderMilestoneCard = (milestone: MilestoneRecord) => {
+    const milestoneTaskState = getMilestoneTaskBoardStateForMilestone(milestone, bootstrap);
+    const milestoneTaskStateLabel = formatTaskQueueBoardState(milestoneTaskState);
+    const milestoneType = getMilestoneBoardType(milestone);
+    const milestoneTypeStyle = getMilestoneTypeStyle(milestoneType);
+    const milestoneTypeBadge = MILESTONE_TYPE_BADGE_LABELS[milestoneType];
+    const milestoneStartLabel = formatMilestoneStartDateTime(milestone.startDateTime);
+    const milestoneEndLabel = formatMilestoneEndDateTime(milestone.startDateTime, milestone.endDateTime);
+    const projectLabel = projectLabelByMilestoneId[milestone.id] ?? "All projects";
+    const milestoneTypeBadgeStyle = {
+      "--milestone-type-chip-bg": milestoneTypeStyle.chipBackground,
+      "--milestone-type-chip-border": milestoneTypeStyle.columnBorder,
+      "--milestone-type-chip-text": milestoneTypeStyle.chipText,
+      "--milestone-type-chip-bg-dark": milestoneTypeStyle.darkChipBackground,
+      "--milestone-type-chip-border-dark": milestoneTypeStyle.darkColumnBorder,
+      "--milestone-type-chip-text-dark": milestoneTypeStyle.darkChipText,
+    } as CSSProperties;
+
+    return (
+      <button
+        className="task-queue-board-card editable-hover-target editable-hover-target-row"
+        data-tutorial-target="edit-milestone-row"
+        draggable
+        key={milestone.id}
+        onClick={() => onOpenMilestone(milestone)}
+        onDragStart={handleDisabledMilestoneDragStart}
+        onPointerCancel={clearMilestonePointerDragAttempt}
+        onPointerDown={handleMilestonePointerDown}
+        onPointerLeave={clearMilestonePointerDragAttempt}
+        onPointerMove={handleMilestonePointerMove}
+        onPointerUp={clearMilestonePointerDragAttempt}
+        type="button"
+      >
+        <div className="task-queue-board-card-header">
+          <strong>
+            <MilestoneSearchHighlight searchFilter={searchFilter} text={milestone.title} />
+          </strong>
+          <span
+            style={{
+              alignItems: "flex-end",
+              display: "inline-flex",
+              flexDirection: "column",
+              gap: "0.15rem",
+              whiteSpace: "normal",
+            }}
+          >
+            <span className="task-queue-board-card-due">{milestoneStartLabel}</span>
+            {milestoneEndLabel ? (
+              <span style={{ alignItems: "center", display: "inline-flex", gap: "0.25rem" }}>
+                <span style={{ color: "var(--text-copy)", fontSize: "0.65rem", fontWeight: 700 }}>to</span>
+                <span className="task-queue-board-card-due">{milestoneEndLabel}</span>
+              </span>
+            ) : null}
+          </span>
+        </div>
+        <small className="task-queue-board-card-summary">
+          <MilestoneSearchHighlight
+            searchFilter={searchFilter}
+            text={milestone.description.trim() || "No description"}
+          />
+        </small>
+        <div className="task-queue-board-card-meta">
+          <span
+            aria-label={`Milestone type: ${milestoneTypeStyle.label}`}
+            className="pill status-pill milestone-type-pill task-queue-board-card-type-badge"
+            style={milestoneTypeBadgeStyle}
+            title={`Milestone type: ${milestoneTypeStyle.label}`}
+          >
+            <span aria-hidden="true">
+              <MilestoneSearchHighlight searchFilter={searchFilter} text={milestoneTypeBadge} />
+            </span>
+          </span>
+          <span className="task-queue-board-card-context-chip" title={projectLabel}>
+            <MilestoneSearchHighlight searchFilter={searchFilter} text={projectLabel} />
+          </span>
+          <span className={getStatusPillClassName(milestoneTaskState)}>
+            <span aria-hidden="true" className="task-queue-board-column-header-icon">
+              <MilestoneTaskStateIcon compact state={milestoneTaskState} />
+            </span>
+            <span>{milestoneTaskStateLabel}</span>
+          </span>
+        </div>
+        <EditableHoverIndicator className="task-queue-board-card-hover" />
+      </button>
+    );
+  };
+
+  if (focusedState !== null) {
+    return (
+      <section className="task-queue-board-focused" data-board-state={focusedState}>
+        <div className="task-queue-board-focused-shell">
+          <header className="task-queue-board-focused-header">
+            <div className="task-queue-board-focused-title-stack">
+              <h3 className="task-queue-board-focused-title">
+                <span className={getStatusPillClassName(focusedState)}>
+                  <span className="task-queue-board-focused-title-label">
+                    {MILESTONE_STATUS_BY_VALUE[focusedState]}
+                  </span>
+                </span>
+              </h3>
+              <span className="task-queue-board-focused-count">{focusedMilestones.length}</span>
+            </div>
+            <button
+              aria-label="Exit focused column view"
+              className="task-queue-board-focused-exit"
+              onClick={() => setFocusedState(null)}
+              type="button"
+            >
+              {"\u00d7"}
+            </button>
+          </header>
+          {focusedMilestones.length > 0 ? (
+            <div className="task-queue-board-priority-grid">
+              {focusedMilestones.map((milestone) => (
+                <div key={milestone.id}>{renderMilestoneCard(milestone)}</div>
+              ))}
+            </div>
+          ) : (
+            <p className="empty-state">No milestones in this column.</p>
+          )}
+        </div>
+      </section>
+    );
+  }
+
   return (
     <>
       {dragErrorMessage ? (
@@ -209,95 +346,8 @@ export function MilestoneKanbanBoard({
         emptyLabel="No milestones"
         getItemId={(milestone) => milestone.id}
         itemsByState={milestonesByState}
-        renderItem={(milestone) => {
-        const milestoneTaskState = getMilestoneTaskBoardStateForMilestone(milestone, bootstrap);
-        const milestoneTaskStateLabel = formatTaskQueueBoardState(milestoneTaskState);
-        const milestoneType = getMilestoneBoardType(milestone);
-        const milestoneTypeStyle = getMilestoneTypeStyle(milestoneType);
-        const milestoneTypeBadge = MILESTONE_TYPE_BADGE_LABELS[milestoneType];
-        const milestoneStartLabel = formatMilestoneStartDateTime(milestone.startDateTime);
-        const milestoneEndLabel = formatMilestoneEndDateTime(milestone.startDateTime, milestone.endDateTime);
-        const projectLabel = projectLabelByMilestoneId[milestone.id] ?? "All projects";
-        const milestoneTypeBadgeStyle = {
-          "--milestone-type-chip-bg": milestoneTypeStyle.chipBackground,
-          "--milestone-type-chip-border": milestoneTypeStyle.columnBorder,
-          "--milestone-type-chip-text": milestoneTypeStyle.chipText,
-          "--milestone-type-chip-bg-dark": milestoneTypeStyle.darkChipBackground,
-          "--milestone-type-chip-border-dark": milestoneTypeStyle.darkColumnBorder,
-          "--milestone-type-chip-text-dark": milestoneTypeStyle.darkChipText,
-        } as CSSProperties;
-
-        return (
-          <button
-            className="task-queue-board-card editable-hover-target editable-hover-target-row"
-            data-tutorial-target="edit-milestone-row"
-            draggable
-            key={milestone.id}
-            onClick={() => onOpenMilestone(milestone)}
-            onDragStart={handleDisabledMilestoneDragStart}
-            onPointerCancel={clearMilestonePointerDragAttempt}
-            onPointerDown={handleMilestonePointerDown}
-            onPointerLeave={clearMilestonePointerDragAttempt}
-            onPointerMove={handleMilestonePointerMove}
-            onPointerUp={clearMilestonePointerDragAttempt}
-            type="button"
-          >
-            <div className="task-queue-board-card-header">
-              <strong>
-                <MilestoneSearchHighlight searchFilter={searchFilter} text={milestone.title} />
-              </strong>
-              <span
-                style={{
-                  alignItems: "flex-end",
-                  display: "inline-flex",
-                  flexDirection: "column",
-                  gap: "0.15rem",
-                  whiteSpace: "normal",
-                }}
-              >
-                <span className="task-queue-board-card-due">{milestoneStartLabel}</span>
-                {milestoneEndLabel ? (
-                  <span style={{ alignItems: "center", display: "inline-flex", gap: "0.25rem" }}>
-                    <span style={{ color: "var(--text-copy)", fontSize: "0.65rem", fontWeight: 700 }}>to</span>
-                    <span className="task-queue-board-card-due">{milestoneEndLabel}</span>
-                  </span>
-                ) : null}
-              </span>
-            </div>
-            <small className="task-queue-board-card-summary">
-              <MilestoneSearchHighlight
-                searchFilter={searchFilter}
-                text={milestone.description.trim() || "No description"}
-              />
-            </small>
-            <div className="task-queue-board-card-meta">
-              <span
-                aria-label={`Milestone type: ${milestoneTypeStyle.label}`}
-                className="pill status-pill milestone-type-pill task-queue-board-card-type-badge"
-                style={milestoneTypeBadgeStyle}
-                title={`Milestone type: ${milestoneTypeStyle.label}`}
-              >
-                <span aria-hidden="true">
-                  <MilestoneSearchHighlight searchFilter={searchFilter} text={milestoneTypeBadge} />
-                </span>
-              </span>
-              <span
-                className="task-queue-board-card-context-chip"
-                title={projectLabel}
-              >
-                <MilestoneSearchHighlight searchFilter={searchFilter} text={projectLabel} />
-              </span>
-              <span className={getStatusPillClassName(milestoneTaskState)}>
-                <span aria-hidden="true" className="task-queue-board-column-header-icon">
-                  <MilestoneTaskStateIcon compact state={milestoneTaskState} />
-                </span>
-                <span>{milestoneTaskStateLabel}</span>
-              </span>
-            </div>
-            <EditableHoverIndicator className="task-queue-board-card-hover" />
-          </button>
-        );
-      }}
+        onColumnBodyClick={(state) => setFocusedState(state)}
+        renderItem={renderMilestoneCard}
       />
     </>
   );

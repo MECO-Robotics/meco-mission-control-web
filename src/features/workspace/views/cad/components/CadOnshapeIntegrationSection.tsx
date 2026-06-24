@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
+import { CAD_SOURCE_MODEL_DOCS } from "@/features/workspace/shared/model/cadSourceModel";
 import {
   createOnshapeDocumentRef,
   createOnshapeOAuthAuthorizationUrl,
@@ -254,7 +255,10 @@ export function CadOnshapeIntegrationSection({
         <div className="queue-section-header">
           <h2>CAD / Onshape integration</h2>
           <p className="section-copy">
-            Snapshot-first CAD traceability for assemblies, subassemblies, part definitions, and part instances.
+            Snapshot-first CAD traceability for assemblies, subassemblies, part definitions, and part instances.{" "}
+            <a href={CAD_SOURCE_MODEL_DOCS.systemArchitecture} rel="noreferrer" target="_blank">
+              CAD source model docs
+            </a>
           </p>
         </div>
         <div className="cad-header-meta">

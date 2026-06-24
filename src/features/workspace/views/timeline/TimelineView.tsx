@@ -5,7 +5,8 @@ import type { TaskRecord } from "@/types/recordsExecution";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
-import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
+import { WorkspaceTopbarControls, buildSingleAddMenuAction } from "@/features/workspace/shared/topbar";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { getTimelineMinimumZoomForWidth } from "@/features/workspace/shared/timeline/timelineZoom";
 import { midpointOfTimelineDays } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
@@ -186,34 +187,45 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   return (
     <section className={`panel dense-panel timeline-layout ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">
-        <TimelineToolbar
-          activeFilterCount={filterControls.activeFilterCount}
-          activePersonFilter={activePersonFilter}
-          bootstrap={bootstrap}
-          disciplineFilter={filterControls.filters.disciplineFilter}
-          disciplineFilterOptions={filterControls.disciplineFilterOptions}
-          isAllProjectsView={isAllProjectsView}
-          onAdjustZoom={state.adjustTimelineZoom}
-          onChangePersonFilter={setActivePersonFilter}
-          onSearchChange={setSearchFilter}
-          onIntervalChange={handleTimelineIntervalChange}
-          onShiftPeriod={state.shiftTimelinePeriod}
-          priorityFilter={filterControls.filters.priorityFilter}
-          projectFilter={filterControls.filters.projectFilter}
-          searchFilter={searchFilter}
-          setDisciplineFilter={filterControls.setDisciplineFilter}
-          setPriorityFilter={filterControls.setPriorityFilter}
-          setProjectFilter={filterControls.setProjectFilter}
-          setStatusFilter={filterControls.setStatusFilter}
-          setSubsystemFilter={filterControls.setSubsystemFilter}
-          statusFilter={filterControls.filters.statusFilter}
-          subsystemFilter={filterControls.filters.subsystemFilter}
-          subsystemFilterOptions={filterControls.subsystemFilterOptions}
-          timelinePeriodLabel={data.timelinePeriodLabel}
-          timelineZoom={state.timelineZoom}
-          timelineZoomMin={state.timelineZoomMin}
-          viewInterval={state.viewInterval}
-        />
+        <WorkspaceTopbarControls className="timeline-toolbar timeline-topbar-controls">
+          <TimelineToolbar
+            activeFilterCount={filterControls.activeFilterCount}
+            activePersonFilter={activePersonFilter}
+            bootstrap={bootstrap}
+            disciplineFilter={filterControls.filters.disciplineFilter}
+            disciplineFilterOptions={filterControls.disciplineFilterOptions}
+            isAllProjectsView={isAllProjectsView}
+            onAdjustZoom={state.adjustTimelineZoom}
+            onChangePersonFilter={setActivePersonFilter}
+            onSearchChange={setSearchFilter}
+            onIntervalChange={handleTimelineIntervalChange}
+            onShiftPeriod={state.shiftTimelinePeriod}
+            priorityFilter={filterControls.filters.priorityFilter}
+            projectFilter={filterControls.filters.projectFilter}
+            searchFilter={searchFilter}
+            setDisciplineFilter={filterControls.setDisciplineFilter}
+            setPriorityFilter={filterControls.setPriorityFilter}
+            setProjectFilter={filterControls.setProjectFilter}
+            setStatusFilter={filterControls.setStatusFilter}
+            setSubsystemFilter={filterControls.setSubsystemFilter}
+            statusFilter={filterControls.filters.statusFilter}
+            subsystemFilter={filterControls.filters.subsystemFilter}
+            subsystemFilterOptions={filterControls.subsystemFilterOptions}
+            timelinePeriodLabel={data.timelinePeriodLabel}
+            timelineZoom={state.timelineZoom}
+            timelineZoomMin={state.timelineZoomMin}
+            viewInterval={state.viewInterval}
+          />
+          <WorkspaceTopbarAddMenu
+            actions={buildSingleAddMenuAction({
+              label: "Add task",
+              onSelect: openCreateTaskModal,
+            })}
+            ariaLabel="Add to timeline"
+            title="Add to timeline"
+            tutorialTarget="timeline-create-task-button"
+          />
+        </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
 
       <div className="panel-header compact-header">
@@ -271,13 +283,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         toggleSubsystem={state.toggleSubsystem}
         toggleSubsystemColumn={state.toggleSubsystemColumn}
         openTaskDetailModal={actions.openTaskDetailAndSelectTask}
-      />
-
-      <WorkspaceFloatingAddButton
-        ariaLabel="Add to timeline"
-        onClick={openCreateTaskModal}
-        title="Add to timeline"
-        tutorialTarget="timeline-create-task-button"
       />
 
       <TimelineMilestoneUnderlaysPortal

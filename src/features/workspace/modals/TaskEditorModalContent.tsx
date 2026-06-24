@@ -52,6 +52,7 @@ function buildDraftTaskRecord(taskDraft: TaskPayload, activeTask: TaskRecord | n
     partInstanceIds: taskDraft.partInstanceIds,
     artifactId: taskDraft.artifactId,
     artifactIds: taskDraft.artifactIds,
+    targetRiskId: taskDraft.targetRiskId,
     targetMilestoneId: taskDraft.targetMilestoneId,
     photoUrl: taskDraft.photoUrl,
     ownerId: taskDraft.ownerId,

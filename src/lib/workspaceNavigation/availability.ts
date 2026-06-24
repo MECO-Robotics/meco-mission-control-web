@@ -152,13 +152,6 @@ export const NAVIGATION_SUB_ITEM_AVAILABILITY_MATRIX: Record<
     "no-project": true,
     "no-season": false,
   },
-  "reports-work-logs": {
-    "all-project": true,
-    "robot-project": true,
-    "non-robot-project": true,
-    "no-project": true,
-    "no-season": false,
-  },
   "reports-worklogs-kanban": {
     "all-project": true,
     "robot-project": true,

@@ -2,6 +2,7 @@ import { IconEdit, IconPlus, IconTrash } from "@/components/shared/Icons";
 import type { MechanismRecord } from "@/types/recordsOrganization";
 import type { PartInstanceRecord } from "@/types/recordsInventory";
 
+import { CadSourceBadge } from "./CadSourceBadge";
 import type { RobotConfigurationSubsystemModel } from "./robotMapViewModel";
 
 interface SubsystemMechanismSectionProps {
@@ -44,7 +45,10 @@ export function SubsystemMechanismSection({
               <details className="robot-config-mechanism-item" key={mechanism.id}>
                 <summary>
                   <span>{mechanism.name}</span>
-                  <small>{`${mechanism.partCount} parts`}</small>
+                  <span className="robot-config-mechanism-summary-meta">
+                    <small>{`${mechanism.partCount} parts`}</small>
+                    <CadSourceBadge source={mechanism.cadSource} />
+                  </span>
                 </summary>
                 <p>{mechanism.description || "No description yet."}</p>
                 <div className="robot-config-row-actions">
@@ -80,7 +84,10 @@ export function SubsystemMechanismSection({
                   <ul className="robot-config-part-list">
                     {mechanism.parts.map((part) => (
                       <li key={part.id}>
-                        <span>{`${part.name} (${part.quantity})`}</span>
+                        <span className="robot-config-part-title">
+                          <span>{`${part.name} (${part.quantity})`}</span>
+                          <CadSourceBadge source={part.cadSource} />
+                        </span>
                         <div className="robot-config-row-actions">
                           <button
                             className="subsystem-manager-action-button"

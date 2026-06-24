@@ -84,8 +84,8 @@ When adding a backend-backed feature:
 - Implement or confirm the platform route and response shape first.
 - Update frontend types in `src/types/`.
 - Normalize only for backward compatibility with older payloads.
-- Keep bearer-token handling, auth expiry handling, and no-store assumptions in
-  shared request helpers.
+- Keep bearer-token handling, tab-scoped session storage, auth expiry handling,
+  and no-store assumptions in shared request helpers.
 - Treat `401` as a session/auth state transition, not as a generic empty-data
   response.
 - Add tests for empty payloads, scoped season/project payloads, unauthorized

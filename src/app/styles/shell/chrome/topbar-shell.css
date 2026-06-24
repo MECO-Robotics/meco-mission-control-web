@@ -43,10 +43,10 @@
   justify-content: flex-start;
   height: 100%;
   width: auto;
-  max-width: clamp(8rem, 17vw, 15rem);
+  max-width: none;
   min-width: 0;
   position: relative;
-  flex: 0 0 clamp(8rem, 17vw, 15rem);
+  flex: 0 0 auto;
   border-right: 0;
   padding: 0.25rem 0.55rem;
 }

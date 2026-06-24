@@ -2,6 +2,7 @@ import type {
   DesignIterationSourceType,
   FindingStatus,
   ReportType,
+  RiskReassessmentStatus,
   RiskAttachmentType,
   RiskSeverity,
   TestResultStatus,
@@ -26,6 +27,9 @@ export interface ReportRecord {
   title?: string;
   status?: TestResultStatus;
   findings?: string[];
+  targetRiskId?: string | null;
+  proposedRiskSeverity?: RiskSeverity | null;
+  proposedRiskStatus?: RiskReassessmentStatus | null;
 }
 
 export interface ReportFindingRecord {

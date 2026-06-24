@@ -40,6 +40,7 @@ It should be the first place to implement workflows that need:
 - configuration editing
 - timeline/board comparison
 - evidence review
+- audit activity review with retention-aware visibility
 - mentor/admin context
 - richer filtering and diagnostics
 
@@ -54,6 +55,7 @@ Current web responsibilities:
 - Inventory and purchasing: materials, parts, purchases, and robot-only part-mapping support
 - Roster operations: workload, attendance, and directory workflows
 - Reports: work logs, QA forms, and milestone results
+- Saved navigation favorites, theme preference sync, and profile/session controls
 - In-app help and interactive guidance
 
 ## System Overview
@@ -110,6 +112,8 @@ Default local frontend API behavior expects:
 ```env
 VITE_API_BASE_URL=/api
 VITE_DEV_PROXY_TARGET=http://localhost:8080
+VITE_DEV_SERVER_HOST=127.0.0.1
+VITE_DEV_SERVER_PORT=5177
 ```
 
 ### Run locally
@@ -118,10 +122,16 @@ VITE_DEV_PROXY_TARGET=http://localhost:8080
 npm run dev
 ```
 
-Default local URL:
+Default Vite URL without an explicit port is:
 
 ```text
 http://localhost:5173
+```
+
+With the committed `.env.example` values, use:
+
+```text
+http://127.0.0.1:5177
 ```
 
 ### Validate before pushing
@@ -130,7 +140,7 @@ http://localhost:5173
 npm run verify
 ```
 
-`verify` runs typecheck, lint, Jest CI tests, and the production bundle build.
+`verify` runs bootstrap contract verification, typecheck, lint, Jest CI tests, and the production bundle build.
 
 ## Common Development Tasks
 
@@ -142,6 +152,7 @@ npm run verify
 4. Add helper/model code near the view if it is view-specific.
 5. Add or update tests near existing tests for that view.
 6. Run a targeted test, then `npm run verify`.
+7. For structural changes, run `npm run audit:organization:strict`.
 
 ### Add a sidebar or topbar destination
 
@@ -291,7 +302,7 @@ The workspace controller is intentionally split:
 
 - `useAppWorkspaceState`: local UI state, selected tab/view, selected season/project/member, modal state, toast state
 - `useAppWorkspaceDerived`: derived selections, filtered records, scope helpers
-- `useAppWorkspaceLoader`: workspace bootstrap loading, unauthorized handling, uploads, refresh helpers
+- `useAppWorkspaceLoader`: workspace bootstrap loading, unauthorized handling, uploads, navigation favorites, refresh helpers
 - `useAppWorkspaceTaskActions`: task/event/milestone-oriented mutations
 - `useAppWorkspaceCatalogActions`: inventory, subsystem, mechanism, part, manufacturing, purchase mutations
 - `useAppWorkspaceReportActions`: QA/report mutations
@@ -337,7 +348,7 @@ src/
       Workspace*.tsx      # Workspace entrypoints and modal hosts
 
   lib/
-    auth/                 # Auth, session, bootstrap, record API helpers
+    auth/                 # Auth, session, bootstrap, record API, preferences, and navigation favorite helpers
     appUtils/             # Payload builders and domain utility helpers
     workspaceNavigation/  # Navigation types, constants, helpers
 
@@ -382,6 +393,9 @@ High-use endpoint groups:
 - People/work logs:
   - `POST/PATCH/DELETE /api/members`
   - `POST /api/work-logs`
+- User preferences:
+  - `GET/PATCH /api/users/me/preferences`
+  - `POST /api/users/me/navigation-favorites`
 
 ### Bootstrap normalization
 
@@ -422,7 +436,9 @@ Supported sign-in paths:
 
 Important behavior details:
 
-- Session token is persisted in `localStorage` as `meco.session.token`.
+- Session token is scoped to the current browser tab in `sessionStorage` as
+  `meco.session.token`; legacy `localStorage` tokens are migrated into
+  session storage and removed.
 - On `401` responses, the token is cleared and the user is forced to re-auth.
 - Session validity is rechecked periodically.
 - Google sign-in only renders on secure hosts:
@@ -451,6 +467,8 @@ Frontend env vars are read by Vite through `import.meta.env`.
 | `VITE_API_BASE_URL` | `/api` | Base path for API requests from the browser client. Keep as `/api` for same-origin proxying in dev/prod. |
 | `VITE_DEV_PROXY_TARGET` | `http://localhost:8080` | Dev-server proxy target for `/api`. Only used by Vite dev server. |
 | `VITE_LOCAL_GOOGLE_CLIENT_ID` | unset | Optional localhost-only override for Google web client ID during local development. |
+| `VITE_DEV_SERVER_HOST` | `127.0.0.1` | Optional local Vite dev-server host override. |
+| `VITE_DEV_SERVER_PORT` | unset | Optional local Vite dev-server port override. `.env.example` uses `5177`. |
 
 Production example:
 
@@ -470,10 +488,13 @@ npm run verify
 
 `verify` runs:
 
-1. `npm run typecheck`
-2. `npm run lint`
-3. `npm run test:ci`
-4. `npm run build:bundle`
+1. `npm run verify-contracts`
+2. `npm run typecheck`
+3. `npm run lint`
+4. `npm run test:ci`
+5. `npm run build:bundle`
+
+CI also runs `npm run audit:organization:strict` before `npm run verify`.
 
 ### Targeted commands
 
@@ -484,6 +505,7 @@ npm run verify
 | `npm run test:ci` | validating the full Jest suite in CI mode |
 | `npm run test:watch` | iterating locally on a specific unit/view test |
 | `npm run build:bundle` | checking Vite production bundle correctness |
+| `npm run verify-contracts` | validating the local bootstrap contract and, when configured, the platform bootstrap contract |
 | `npm run audit:organization` | checking file/directory/CSS organization warnings |
 | `npm run audit:organization:strict` | enforcing hard organization limits before structural PRs |
 
@@ -574,18 +596,20 @@ GitHub Actions file:
 Trigger conditions:
 
 - Pushes to `main` affecting app/workflow/deploy files
+- `release-*` tag pushes
 - Manual `workflow_dispatch`
 
 Pipeline summary:
 
-1. Validate job:
+1. Deploy source gate:
+   - allow only `main`, `release-*` tags, or a matching release manifest
+2. Validate job:
    - install deps with `npm ci`
    - typecheck
-   - test
-   - lint
-   - build
-2. Deploy job:
-   - rebuild app
+   - build production bundle
+3. Deploy job:
+   - create a timestamped backup under `/opt/pm-backups/web`
+   - download the validated `dist` artifact
    - rsync `dist/` to `/opt/pm-web/site`
    - upload `deploy/pm-web.nginx.conf` to `/opt/pm-web/deploy/`
    - ensure `nginx` installed/configured
@@ -642,7 +666,8 @@ Check:
 - backend JWT settings and token validity
 - local/server clock skew
 - whether `/api/auth/me` returns `401`
-- whether a stale `meco.session.token` exists in localStorage
+- whether a stale `meco.session.token` remains in legacy localStorage or the
+  active tab's sessionStorage
 
 ### Missing data after switching season/project
 

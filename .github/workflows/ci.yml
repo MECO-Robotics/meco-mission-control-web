@@ -14,6 +14,31 @@ on:
       - staging
       - "staging/**"
       - main
+      - "feature/**"
+      - "fix/**"
+      - "hotfix/**"
+    paths:
+      - "AGENTS.md"
+      - ".github/workflows/ci.yml"
+      - ".github/workflows/codex-automerge.yml"
+      - ".github/workflows/deploy-vps.yml"
+      - ".nvmrc"
+      - "deploy/**"
+      - "docs/**"
+      - "README.md"
+      - "src/**"
+      - "public/**"
+      - "index.html"
+      - "package.json"
+      - "package-lock.json"
+      - "scripts/organization-audit.mjs"
+      - "eslint.config.js"
+      - "tsconfig.json"
+      - "tsconfig.app.json"
+      - "tsconfig.node.json"
+      - "vite.config.ts"
+      - "jest.config.cjs"
+      - ".env.production.example"
 
 permissions:
   contents: read
@@ -450,4 +475,3 @@ jobs:
           const enforced = requiredChecks.map(([name]) => name).join(', ');
           console.log(`Required merge checks passed for ${baseRef}: ${enforced}`);
           NODE
-

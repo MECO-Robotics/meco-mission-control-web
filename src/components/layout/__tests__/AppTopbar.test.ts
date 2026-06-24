@@ -52,6 +52,10 @@ function readTopbarSearchCss() {
   return readFileSync(join(process.cwd(), "src/app/styles/shell/chrome/topbar-search.css"), "utf8");
 }
 
+function readTopbarResponsiveSearchCss() {
+  return readFileSync(join(process.cwd(), "src/app/styles/shell/workspace/topbar-responsive-search.css"), "utf8");
+}
+
 function readTopbarShellControlsCss() {
   return readFileSync(join(process.cwd(), "src/app/styles/shell/chrome/topbar-shell-controls.css"), "utf8");
 }
@@ -130,10 +134,19 @@ describe("AppTopbar", () => {
 
   it("uses the shared compact toolbar search styling for the default topbar search", () => {
     const markup = renderTopbar();
+    const topbarSearchCss = readTopbarSearchCss();
 
     expect(markup).toContain('class="app-topbar-search toolbar-filter toolbar-filter-compact toolbar-search"');
     expect(markup).toContain('class="toolbar-filter-icon app-topbar-search-icon"');
     expect(markup).toContain('class="toolbar-search-input app-topbar-search-input"');
+    expect(topbarSearchCss).toMatch(/\.app-topbar-search-slot\s*\{[^}]*justify-content:\s*flex-end;/);
+  });
+
+  it("lets the topbar title area grow instead of hard-clamping its width", () => {
+    const topbarShellCss = readTopbarShellCss();
+
+    expect(topbarShellCss).toMatch(/\.app-topbar-left\s*\{[^}]*max-width:\s*none;[^}]*flex:\s*0 0 auto;/);
+    expect(topbarShellCss).not.toMatch(/max-width:\s*clamp\(8rem,\s*17vw,\s*15rem\)/);
   });
 
   it("lets the default topbar search fill the available topbar slot", () => {
@@ -142,6 +155,32 @@ describe("AppTopbar", () => {
     expect(topbarSearchCss).toMatch(
       /\.app-topbar-search\.toolbar-filter-compact\s*\{[^}]*width:\s*100%;[^}]*max-width:\s*none;/,
     );
+  });
+
+  it("keeps the responsive search visible as a bar when it switches to icon mode", () => {
+    const topbarSearchCss = readTopbarResponsiveSearchCss();
+
+    expect(topbarSearchCss).toMatch(/\.topbar-responsive-search-full-icon-only\s*\{[^}]*width:\s*100%;[^}]*min-width:\s*0;/);
+    expect(topbarSearchCss).toMatch(
+      /\.topbar-responsive-search-dynamic\.is-icon-mode \.topbar-responsive-search-full-icon-only \.toolbar-search-input\s*\{[^}]*opacity:\s*0;/,
+    );
+  });
+
+  it("measures the responsive search against its parent container so icon mode can recover", () => {
+    const source = readFileSync(
+      join(
+        process.cwd(),
+        "src/features/workspace/shared/filters/topbarResponsiveSearch/useTopbarResponsiveSearchMode.ts",
+      ),
+      "utf8",
+    );
+
+    expect(source).toContain("const container = element.parentElement;");
+    expect(source).toContain("observer.observe(container);");
+    expect(source).toContain("const widthToTest = nextSearchWidth?.availableWidthPx ?? container.clientWidth;");
+    expect(source).not.toContain("observer.observe(element);");
+    expect(source).toContain("getCollisionMeasurement(searchRef, effectivePadding, collisionRoots)");
+    expect(source).not.toContain("setSearchWidth(element.clientWidth);");
   });
 
   it("allows compact topbar controls to scroll sideways when controls overflow", () => {
@@ -154,6 +193,13 @@ describe("AppTopbar", () => {
     expect(topbarShellControlsCss).toMatch(
       /@media\s*\(max-width:\s*880px\)\s*\{[\s\S]*\.app-topbar-controls-host \.filter-toolbar,[\s\S]*\.app-topbar-search-host \.filter-toolbar\s*\{[^}]*min-width:\s*max-content;/,
     );
+  });
+
+  it("keeps the favorite icon visible when the topbar compacts the title", () => {
+    const topbarShellControlsCss = readTopbarShellControlsCss();
+
+    expect(topbarShellControlsCss).toContain(".app-topbar-view-title h1");
+    expect(topbarShellControlsCss).not.toContain(".app-topbar-view-title {\n    display: none;");
   });
 
   it("adds gradient side hints to compact topbar scroll areas", () => {

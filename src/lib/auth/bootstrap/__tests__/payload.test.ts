@@ -149,4 +149,21 @@ describe("normalizeBootstrapPayload", () => {
 
     expect(normalized.taskBlockers?.[0]?.blockerType).toBe("other");
   });
+
+  it("preserves task target risk through bootstrap normalization", () => {
+    const payload = {
+      ...EMPTY_BOOTSTRAP,
+      tasks: [
+        {
+          id: "task-1",
+          title: "Mitigate drivetrain risk",
+          targetRiskId: "risk-1",
+        },
+      ],
+    } as unknown as BootstrapPayload;
+
+    const normalized = normalizeBootstrapPayload(payload);
+
+    expect(normalized.tasks[0]?.targetRiskId).toBe("risk-1");
+  });
 });

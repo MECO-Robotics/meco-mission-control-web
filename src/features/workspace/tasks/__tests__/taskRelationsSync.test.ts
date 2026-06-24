@@ -23,6 +23,7 @@ function createTaskPayload(): TaskPayload {
     mechanismIds: [],
     partInstanceId: null,
     partInstanceIds: [],
+    targetRiskId: "  risk-1  ",
     targetMilestoneId: null,
     photoUrl: "",
     ownerId: null,
@@ -153,6 +154,7 @@ describe("normalizeTaskPayload", () => {
 
     expect(normalized.title).toBe("Build intake");
     expect(normalized.summary).toBe("Trim this summary");
+    expect(normalized.targetRiskId).toBe("risk-1");
     expect(normalized.assigneeIds).toEqual(["member-1", "member-2"]);
     expect(normalized.taskDependencies?.[0]).toMatchObject({
       refId: "task-upstream",

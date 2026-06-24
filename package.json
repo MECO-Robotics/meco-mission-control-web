@@ -15,6 +15,7 @@
     "test": "jest",
     "test:ci": "jest --ci --maxWorkers=50%",
     "test:watch": "jest --watch",
+    "test:app-utils": "jest src/lib/__tests__/appUtils.test.ts src/lib/__tests__/appUtilsSelection.test.ts src/lib/__tests__/appUtilsManufacturing.test.ts src/lib/__tests__/workspaceNavigation.test.ts",
     "verify-contracts": "node ./scripts/verify-bootstrap-contract.mjs",
     "verify": "npm run verify-contracts && npm run typecheck && npm run lint && npm run test:ci && npm run build:bundle"
   },
@@ -39,6 +40,9 @@
     "jest": "^30.3.0",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.59.2",
-    "vite": "^8.0.10"
+    "vite": "^8.0.16"
+  },
+  "overrides": {
+    "js-yaml": "^4.2.0"
   }
 }

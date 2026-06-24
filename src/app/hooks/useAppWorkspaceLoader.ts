@@ -34,11 +34,13 @@ export function useAppWorkspaceLoader(
     state.setDataMessage(null);
 
     try {
-      const favoriteViews = await updateFavoriteView(
-        viewId,
-        isFavorite,
-        handleUnauthorized,
-      );
+      let favoriteViews = await updateFavoriteView(viewId, isFavorite, handleUnauthorized);
+
+      if (viewId === "reports-worklogs-kanban" && !isFavorite) {
+        await updateFavoriteView("reports-work-logs", isFavorite, handleUnauthorized);
+        favoriteViews = favoriteViews.filter((favorite) => favorite.viewId !== "reports-work-logs");
+      }
+
       state.setBootstrap((current) => ({
         ...current,
         favoriteViews,
