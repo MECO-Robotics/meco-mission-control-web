@@ -143,6 +143,14 @@
   gap: 6px;
 }
 
+.cad-mapping-choice {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.35;
+  margin: 0 0 8px;
+}
+
 .compact-action {
   min-height: 30px;
   padding: 5px 9px;

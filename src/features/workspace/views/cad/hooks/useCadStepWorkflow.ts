@@ -18,6 +18,7 @@ import type {
   CadHierarchyReviewDecision,
   CadStepImportRunRecord,
   CadStepMappingRecord,
+  CadStepMappingRuleMatchStrategy,
   CadStepSnapshotRecord,
 } from "../model/cadIntegrationTypes";
 
@@ -189,6 +190,7 @@ export function useCadStepWorkflow({
     targetKind: CadStepMappingRecord["targetKind"];
     targetId: string | null;
     applyToFuture: boolean;
+    ruleMatchStrategy?: CadStepMappingRuleMatchStrategy;
   }) => {
     if (!selectedCadSnapshotId) {
       return;
@@ -206,6 +208,7 @@ export function useCadStepWorkflow({
           confidence: "MANUAL",
           status: "CONFIRMED",
           applyToFuture: input.applyToFuture,
+          ruleMatchStrategy: input.ruleMatchStrategy,
         }],
       });
       const didLoadSelectedSnapshot = await loadCadSnapshotDetails(selectedCadSnapshotId);

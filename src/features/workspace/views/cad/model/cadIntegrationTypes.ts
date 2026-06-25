@@ -332,6 +332,13 @@ export type CadStepTreePartInstanceRecord = {
     representativeInstanceId: string;
   };
 
+export type CadStepMappingRuleMatchStrategy =
+  | "STABLE_SIGNATURE"
+  | "INSTANCE_PATH"
+  | "NORMALIZED_NAME"
+  | "NORMALIZED_NAME_WITH_PARENT"
+  | "MANUAL_ONLY";
+
 export interface CadStepMappingRecord {
   id: string;
   kind?: "part_instance_group";
@@ -346,7 +353,7 @@ export interface CadStepMappingRecord {
   targetId: string | null;
   confidence: "HIGH" | "MEDIUM" | "LOW" | "MANUAL";
   status: "PROPOSED" | "CONFIRMED" | "REJECTED" | "NEEDS_REVIEW";
-  rule: { id: string; confidence: string } | null;
+  rule: { id: string; confidence: string; matchStrategy?: CadStepMappingRuleMatchStrategy } | null;
   quantity?: number;
   hasMixedMappings?: boolean;
   warningCode?: string | null;
