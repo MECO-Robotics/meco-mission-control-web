@@ -5,6 +5,8 @@ import { TableCell } from "@/features/workspace/shared/table/workspaceTableChrom
 import { formatIterationVersion } from "@/lib/appUtils/common";
 import type { MembersById } from "@/features/workspace/shared/model/workspaceTypes";
 
+import { CadSourceBadge } from "@/features/workspace/views/robotMap/CadSourceBadge";
+import { resolveCadSourceIndicator } from "@/features/workspace/views/robotMap/cadSourceIndicator";
 import { formatMemberName, getSubsystemMechanisms, getSubsystemParentName } from "./subsystemsViewData";
 import type { SubsystemCountsById } from "./subsystemsViewTypes";
 
@@ -151,6 +153,7 @@ export function SubsystemsTableSection({
                       <span className="subsystem-cell-details" aria-label="Subsystem metadata">
                         <small>{formatIterationVersion(subsystem.iteration)}</small>
                         <small>{`Parent: ${parentSubsystemName}`}</small>
+                        <CadSourceBadge source={resolveCadSourceIndicator(subsystem)} />
                       </span>
                     </span>
                   </span>
@@ -216,6 +219,7 @@ export function SubsystemsTableSection({
                           >
                             <div style={{ display: "grid", gap: "0.2rem" }}>
                               <strong style={{ color: "var(--text-title)" }}>{mechanism.name}</strong>
+                              <CadSourceBadge source={resolveCadSourceIndicator(mechanism)} />
                               {mechanism.isArchived ? (
                                 <small style={{ color: "var(--text-copy)" }}>Archived</small>
                               ) : null}
