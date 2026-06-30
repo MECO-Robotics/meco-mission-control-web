@@ -294,4 +294,81 @@ describe("RobotMapView", () => {
     expect(markup).toContain("No linked worklogs yet.");
     expect(markup).toContain("No linked manufacturing items yet.");
   });
+  it("renders CAD source indicators in PM object detail views", () => {
+    const bootstrap = createBootstrap({
+      subsystems: [
+        {
+          id: "subsystem-drive",
+          projectId: "project-a",
+          name: "Drivetrain",
+          description: "",
+          iteration: 1,
+          isCore: true,
+          parentSubsystemId: null,
+          responsibleEngineerId: null,
+          mentorIds: [],
+          risks: [],
+          cadImportSource: "STEP_UPLOAD",
+        },
+      ],
+      mechanisms: [
+        {
+          id: "mechanism-1",
+          subsystemId: "subsystem-drive",
+          name: "Swerve Modules",
+          description: "",
+          iteration: 1,
+          cadSource: "ONSHAPE_API",
+        },
+      ],
+      partDefinitions: [
+        {
+          id: "part-def-1",
+          seasonId: "season-2026",
+          name: "Wheel Module",
+          partNumber: "WM-001",
+          revision: "A",
+          iteration: 1,
+          isHardware: false,
+          type: "assembly",
+          source: "Onshape",
+          materialId: null,
+          description: "",
+        },
+      ],
+      partInstances: [
+        {
+          id: "part-instance-1",
+          subsystemId: "subsystem-drive",
+          mechanismId: "mechanism-1",
+          partDefinitionId: "part-def-1",
+          name: "Wheel Module",
+          quantity: 4,
+          trackIndividually: false,
+          status: "not ready",
+          cadEditedAfterImport: true,
+        },
+      ],
+    });
+
+    const markup = renderToStaticMarkup(
+      React.createElement(RobotMapView, {
+        bootstrap,
+        handleDeleteMechanism: jest.fn(async () => {}),
+        openCreateMechanismModal: jest.fn(),
+        openCreatePartInstanceModal: jest.fn(),
+        openCreateSubsystemModal: jest.fn(),
+        openEditMechanismModal: jest.fn(),
+        openEditPartInstanceModal: jest.fn(),
+        openEditSubsystemModal: jest.fn(),
+        removePartInstanceFromMechanism: jest.fn(async () => true),
+        saveSubsystemLayout: jest.fn(async () => true),
+        updateSubsystemConfiguration: jest.fn(async () => true),
+      }),
+    );
+
+    expect(markup).toContain("STEP import");
+    expect(markup).toContain("Onshape sync");
+    expect(markup).toContain("Edited after import");
+  });
 });
