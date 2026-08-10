@@ -1,0 +1,239 @@
+name: Trusted Merge Requirements
+
+on:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+  workflow_dispatch:
+    inputs:
+      workflow_run_id:
+        description: Completed CI workflow run ID to re-evaluate
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  attestations: read
+  checks: read
+  contents: read
+  packages: read
+  pull-requests: read
+  statuses: write
+
+concurrency:
+  group: trusted-merge-requirements-${{ github.event.workflow_run.id || inputs.workflow_run_id || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  trusted-gate:
+    name: trusted-merge-requirements
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve the exact pull request revision
+        id: resolve
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        env:
+          REQUESTED_WORKFLOW_RUN_ID: ${{ inputs.workflow_run_id || '' }}
+        with:
+          script: |
+            const runId = context.eventName === 'workflow_run'
+              ? context.payload.workflow_run.id
+              : Number(process.env.REQUESTED_WORKFLOW_RUN_ID);
+            if (!Number.isSafeInteger(runId) || runId <= 0) {
+              throw new Error('A valid completed CI workflow run ID is required.');
+            }
+
+            const { data: workflowRun } = await github.rest.actions.getWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: runId,
+            });
+            if (
+              workflowRun.name !== 'CI' ||
+              workflowRun.path !== '.github/workflows/ci.yml' ||
+              workflowRun.event !== 'pull_request' ||
+              workflowRun.status !== 'completed'
+            ) {
+              throw new Error(`Run ${runId} is not a completed pull-request CI workflow at .github/workflows/ci.yml.`);
+            }
+
+            let pullRequests = workflowRun.pull_requests ?? [];
+            if (pullRequests.length === 0 && workflowRun.event === 'pull_request') {
+              const candidates = await github.paginate(github.rest.pulls.list, {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'all',
+                per_page: 100,
+              });
+              pullRequests = candidates.filter((pullRequest) => {
+                return pullRequest.head.sha === workflowRun.head_sha;
+              });
+            }
+            if (pullRequests.length === 0) {
+              core.info(`CI run ${runId} is not associated with a pull request; no merge status will be published.`);
+              core.setOutput('has_pr', 'false');
+              return;
+            }
+            if (pullRequests.length !== 1) {
+              throw new Error(`CI run ${runId} is associated with ${pullRequests.length} pull requests.`);
+            }
+
+            const pullNumber = pullRequests[0].number;
+            const { data: pullRequest } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pullNumber,
+            });
+            const headSha = workflowRun.head_sha;
+            core.setOutput('has_pr', 'true');
+            core.setOutput('head_sha', headSha);
+            core.setOutput('head_ref', pullRequest.head.ref);
+            core.setOutput('base_ref', pullRequest.base.ref);
+            core.setOutput('check_suite_id', workflowRun.check_suite_id);
+            core.setOutput('workflow_event', workflowRun.event);
+            core.setOutput('workflow_path', workflowRun.path);
+
+            try {
+              if (pullRequest.state !== 'open') {
+                throw new Error(`Pull request #${pullNumber} is ${pullRequest.state}.`);
+              }
+              if (pullRequest.head.sha !== headSha) {
+                throw new Error(
+                  `CI run ${runId} tested ${headSha}, but pull request #${pullNumber} is now ${pullRequest.head.sha}.`,
+                );
+              }
+              const baseRef = pullRequest.base.ref;
+              if (
+                baseRef !== 'development' &&
+                baseRef !== 'main' &&
+                baseRef !== 'staging' &&
+                !baseRef.startsWith('staging/')
+              ) {
+                throw new Error(`Pull request #${pullNumber} targets unsupported branch ${baseRef}.`);
+              }
+              await github.rest.repos.createCommitStatus({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                sha: headSha,
+                state: 'pending',
+                context: 'merge-requirements',
+                description: 'Trusted merge requirements are being evaluated',
+                target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              });
+            } catch (error) {
+              await github.rest.repos.createCommitStatus({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                sha: headSha,
+                state: 'failure',
+                context: 'merge-requirements',
+                description: String(error.message ?? error).slice(0, 140),
+                target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              });
+              throw error;
+            }
+
+      - name: Check out trusted default-branch gate code
+        if: steps.resolve.outputs.has_pr == 'true'
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: Validate CI jobs from the triggering check suite
+        id: ci
+        if: steps.resolve.outputs.has_pr == 'true'
+        env:
+          CHECK_SUITE_ID: ${{ steps.resolve.outputs.check_suite_id }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_HEAD_SHA: ${{ steps.resolve.outputs.head_sha }}
+          WORKFLOW_RUN_EVENT: ${{ steps.resolve.outputs.workflow_event }}
+          WORKFLOW_RUN_PATH: ${{ steps.resolve.outputs.workflow_path }}
+        run: node scripts/merge-requirements-gate.mjs validate-ci
+
+      - name: Pull and attest the public platform contract
+        id: artifact
+        if: steps.resolve.outputs.has_pr == 'true'
+        shell: bash
+        env:
+          CONTRACT_CHANNEL: ${{ steps.resolve.outputs.base_ref == 'main' && 'main' || 'development' }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          image=ghcr.io/meco-robotics/meco-bootstrap-contract
+          channel_tag="v1-${CONTRACT_CHANNEL}"
+          artifact_dir="$RUNNER_TEMP/platform-contract"
+          mkdir -p "$artifact_dir"
+
+          printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+          docker pull "${image}:${channel_tag}"
+          channel_digest="$(docker image inspect --format '{{range .RepoDigests}}{{println .}}{{end}}' "${image}:${channel_tag}" | grep -E "^${image}@sha256:[0-9a-f]{64}$" | sed -n '1p')"
+          if [[ -z "$channel_digest" ]]; then
+            echo "Could not resolve an immutable digest for ${image}:${channel_tag}." >&2
+            exit 1
+          fi
+          container_id="$(docker create "$channel_digest" /bin/true)"
+          trap 'docker rm -f "$container_id" >/dev/null 2>&1 || true' EXIT
+          docker cp "${container_id}:/contract/." "$artifact_dir/"
+
+          source_revision="$(node -p "JSON.parse(require('node:fs').readFileSync('${artifact_dir}/manifest.json', 'utf8')).sourceRevision")"
+          if [[ ! "$source_revision" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Contract manifest sourceRevision is invalid." >&2
+            exit 1
+          fi
+          gh attestation verify "oci://${channel_digest}" \
+            --repo MECO-Robotics/meco-mission-control-platform \
+            --signer-workflow github.com/MECO-Robotics/meco-mission-control-platform/.github/workflows/publish-bootstrap-contract.yml \
+            --source-ref "refs/heads/${CONTRACT_CHANNEL}" \
+            --source-digest "$source_revision"
+          immutable_tag="v1-${CONTRACT_CHANNEL}-sha-${source_revision}"
+          docker pull "${image}:${immutable_tag}"
+          immutable_digest="$(docker image inspect --format '{{range .RepoDigests}}{{println .}}{{end}}' "${image}:${immutable_tag}" | grep -E "^${image}@sha256:[0-9a-f]{64}$" | sed -n '1p')"
+          if [[ "$immutable_digest" != "$channel_digest" ]]; then
+            echo "Channel tag and immutable source tag do not resolve to the same artifact." >&2
+            exit 1
+          fi
+          echo "directory=$artifact_dir" >> "$GITHUB_OUTPUT"
+
+      - name: Compare contracts and apply production requirements
+        id: contract
+        if: steps.resolve.outputs.has_pr == 'true'
+        env:
+          CONTRACT_ARTIFACT_DIR: ${{ steps.artifact.outputs.directory }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_BASE_REF: ${{ steps.resolve.outputs.base_ref }}
+          PR_HEAD_REF: ${{ steps.resolve.outputs.head_ref }}
+          PR_HEAD_SHA: ${{ steps.resolve.outputs.head_sha }}
+        run: node scripts/merge-requirements-gate.mjs validate-contract
+
+      - name: Publish stable merge requirement status
+        if: always() && steps.resolve.outputs.has_pr == 'true'
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        env:
+          CI_OUTCOME: ${{ steps.ci.outcome }}
+          ARTIFACT_OUTCOME: ${{ steps.artifact.outcome }}
+          CONTRACT_OUTCOME: ${{ steps.contract.outcome }}
+          HEAD_SHA: ${{ steps.resolve.outputs.head_sha }}
+        with:
+          script: |
+            const outcomes = [
+              process.env.CI_OUTCOME,
+              process.env.ARTIFACT_OUTCOME,
+              process.env.CONTRACT_OUTCOME,
+            ];
+            const passed = outcomes.every((outcome) => outcome === 'success');
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: process.env.HEAD_SHA,
+              state: passed ? 'success' : 'failure',
+              context: 'merge-requirements',
+              description: passed
+                ? 'Trusted merge requirements passed'
+                : 'One or more trusted merge requirements failed',
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });

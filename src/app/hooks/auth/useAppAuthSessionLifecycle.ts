@@ -1,14 +1,15 @@
 import { useEffect, type Dispatch, type SetStateAction } from "react";
 
-import { clearStoredSessionToken, loadStoredSessionToken } from "@/lib/auth/core/sessionStorage";
-import { fetchCurrentUser, isApiErrorLike } from "@/lib/auth/core/request";
-import { validateSession } from "@/lib/auth/session";
+import { clearWebSessionState } from "@/lib/auth/core/sessionStorage";
+import {
+  restoreWebSession,
+  validateSession,
+} from "@/lib/auth/session";
 import { type AuthConfig, type SessionUser } from "@/lib/auth/types";
 import { toErrorMessage } from "@/lib/appUtils/common";
 import { fetchAuthConfig } from "@/app/hooks/auth/useAppAuthSessionConfig";
 
 interface UseAppAuthSessionBootstrapArgs {
-  onSessionExpired?: () => void;
   setAuthBooting: Dispatch<SetStateAction<boolean>>;
   setAuthConfig: Dispatch<SetStateAction<AuthConfig | null>>;
   setAuthMessage: Dispatch<SetStateAction<string | null>>;
@@ -17,7 +18,6 @@ interface UseAppAuthSessionBootstrapArgs {
 
 interface RestoreStoredSessionArgs {
   isCancelled?: () => boolean;
-  onSessionExpired?: () => void;
   setSessionUser: Dispatch<SetStateAction<SessionUser | null>>;
 }
 
@@ -29,38 +29,32 @@ interface UseAppAuthSessionValidationArgs {
 
 export async function restoreStoredSession({
   isCancelled = () => false,
-  onSessionExpired,
   setSessionUser,
 }: RestoreStoredSessionArgs) {
-  const storedToken = loadStoredSessionToken();
-  if (!storedToken) {
-    return;
-  }
-
   try {
-    const user = await fetchCurrentUser(storedToken);
+    const { user } = await restoreWebSession();
     if (isCancelled()) {
       return;
     }
 
     setSessionUser(user);
   } catch (error) {
-    const isUnauthorized = isApiErrorLike(error) && error.statusCode === 401;
+    const isUnauthorized =
+      typeof error === "object" &&
+      error !== null &&
+      "statusCode" in error &&
+      (error as { statusCode?: unknown }).statusCode === 401;
     if (!isUnauthorized) {
       throw error;
     }
 
     if (isUnauthorized) {
-      clearStoredSessionToken();
-    }
-    if (isUnauthorized && !isCancelled()) {
-      onSessionExpired?.();
+      clearWebSessionState();
     }
   }
 }
 
 export function useAppAuthSessionBootstrap({
-  onSessionExpired,
   setAuthBooting,
   setAuthConfig,
   setAuthMessage,
@@ -83,7 +77,6 @@ export function useAppAuthSessionBootstrap({
 
         await restoreStoredSession({
           isCancelled: () => cancelled,
-          onSessionExpired,
           setSessionUser,
         });
         if (cancelled) {
@@ -107,7 +100,7 @@ export function useAppAuthSessionBootstrap({
     return () => {
       cancelled = true;
     };
-  }, [onSessionExpired, setAuthBooting, setAuthConfig, setAuthMessage, setSessionUser]);
+  }, [setAuthBooting, setAuthConfig, setAuthMessage, setSessionUser]);
 }
 
 export function useAppAuthSessionValidation({

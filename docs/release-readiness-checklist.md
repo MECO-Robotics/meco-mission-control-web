@@ -9,7 +9,7 @@ Reference for **Issue #76**.
 
 - Goal: make promotion from `development` to `staging`, from `staging` or `development` to `main`, and production deploys repeatable and safe.
 - Scope: repository `meco-mission-control-web` only.
-- Related checks are defined in `.github/workflows/ci.yml` and `.github/workflows/deploy-vps.yml`.
+- Related checks are defined in `.github/workflows/ci.yml`, `.github/workflows/merge-requirements.yml`, and `.github/workflows/deploy-vps.yml`.
 
 ## 1) Required local quality gates before PR merge
 
@@ -20,6 +20,8 @@ Reference for **Issue #76**.
 
 2. This command is currently defined as:
 
+   - `npm run verify-contracts`
+   - `npm run test:security-workflows`
    - `npm run typecheck`
    - `npm run lint`
    - `npm run test:ci`
@@ -31,12 +33,28 @@ Reference for **Issue #76**.
 
 ## 2) CI and merge-gate checks (repo-side)
 
-Before a PR is mergeable in this repo, the `ci.yml` checks enforce:
+Before a PR is mergeable, the secretless `ci.yml` workflow runs PR code and the
+default-branch `merge-requirements.yml` workflow publishes the protected
+`merge-requirements` status after enforcing:
 
 - `branch-model`
-- `ci-validate` (`npm run verify`)
+- `ci-validate` (`npm audit --audit-level=low` and `npm run verify`)
 - `snapshot-validate`
-- `cross-repo-production-gate` (only when base branch is `main`)
+- public, attested platform-contract parity
+- cross-repository production health (only when base branch is `main`)
+
+The trusted workflow never checks out or executes the PR revision. It reads the PR
+contract as JSON data and compares it with the versioned public platform contract
+artifact from `ghcr.io/meco-robotics/meco-bootstrap-contract`.
+It accepts only `pull_request` runs from `.github/workflows/ci.yml`, requires the PR
+copy of that workflow to match the trusted SHA-256 embedded in the gate script, and
+requires the platform artifact revision to equal the selected channel branch head.
+
+Because `workflow_run` executes the workflow and gate script from the default branch,
+changes to this trust boundary must land on `main` before a development PR relies on
+them. The bootstrap subset is `.github/workflows/merge-requirements.yml` and
+`scripts/merge-requirements-gate.mjs`; do not remove the previous required context
+until that subset and the public platform artifact are available.
 
 ### Branch model check
 
@@ -99,11 +117,13 @@ Deployment source control in `deploy-vps.yml`:
 
 - Allowed production deploy sources:
   - `main` branch push
-  - `release-*` tag push
   - `workflow_dispatch` with matching `release_manifest` SHA
 - Deployment validation before sync:
   - `npm run typecheck`
   - `npm run build:bundle`
+- Deployment SSH trust:
+  - `VPS_SSH_KNOWN_HOSTS` contains the exact host-key entry confirmed through an out-of-band trusted channel.
+  - A missing or mismatched host key fails before backup or file transfer.
 
 Rollback path (implemented by workflow):
 
