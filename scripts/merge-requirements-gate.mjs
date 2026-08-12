@@ -90,6 +90,18 @@ export function assertTrustedCiWorkflow(workflowBytes) {
   }
 }
 
+export function assertTrustedCiIdentity(workflowEvent, workflowPath) {
+  if (workflowEvent !== "pull_request" || workflowPath !== ".github/workflows/ci.yml") {
+    throw new Error("Trusted merge requirements accept only pull-request runs from .github/workflows/ci.yml.");
+  }
+}
+
+export function assertCheckSuiteHead(suiteHeadSha, expectedHeadSha) {
+  if (suiteHeadSha !== expectedHeadSha) {
+    throw new Error(`CI check suite belongs to ${suiteHeadSha}, not PR head ${expectedHeadSha}.`);
+  }
+}
+
 async function validateCi() {
   const repository = requireValue(process.env.GITHUB_REPOSITORY, "GITHUB_REPOSITORY");
   const token = requireValue(process.env.GITHUB_TOKEN, "GITHUB_TOKEN");
@@ -97,16 +109,12 @@ async function validateCi() {
   const headSha = requireValue(process.env.PR_HEAD_SHA, "PR_HEAD_SHA");
   const workflowEvent = requireValue(process.env.WORKFLOW_RUN_EVENT, "WORKFLOW_RUN_EVENT");
   const workflowPath = requireValue(process.env.WORKFLOW_RUN_PATH, "WORKFLOW_RUN_PATH");
-  if (workflowEvent !== "pull_request" || workflowPath !== ".github/workflows/ci.yml") {
-    throw new Error("Trusted merge requirements accept only pull-request runs from .github/workflows/ci.yml.");
-  }
+  assertTrustedCiIdentity(workflowEvent, workflowPath);
   const suite = await fetchJson(
     `https://api.github.com/repos/${repository}/check-suites/${suiteId}`,
     token,
   );
-  if (suite.head_sha !== headSha) {
-    throw new Error(`CI check suite belongs to ${suite.head_sha}, not PR head ${headSha}.`);
-  }
+  assertCheckSuiteHead(suite.head_sha, headSha);
   const workflowBytes = await readRepositoryFile(
     repository,
     ".github/workflows/ci.yml",
