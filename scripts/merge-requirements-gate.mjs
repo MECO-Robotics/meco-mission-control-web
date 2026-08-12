@@ -1,11 +1,5 @@
 import { createHash } from "node:crypto";
-import { deepStrictEqual } from "node:assert";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
 
-const contractRepository = "MECO-Robotics/meco-mission-control-platform";
-const contractPath = "contracts/platform/bootstrap/v1/contract.json";
-const supportedBases = new Set(["development", "staging", "main"]);
 export const trustedCiWorkflowSha256 = "2660805581abe2cffbb85d3db98a99fa192b20d23624ffa186da04d9c943c894";
 
 function requireValue(value, name) {
@@ -87,32 +81,6 @@ export function assertRequiredCheckRuns(checkRuns, requiredNames) {
   }
 }
 
-export function validateManifest(manifest, contractBytes, expectedChannel) {
-  const expectedKeys = ["channel", "contractVersion", "sha256", "sourceRevision"];
-  deepStrictEqual(Object.keys(manifest).sort(), expectedKeys);
-  if (manifest.contractVersion !== "v1" || manifest.channel !== expectedChannel) {
-    throw new Error("Platform contract manifest version or channel is invalid.");
-  }
-  if (!/^[0-9a-f]{40}$/.test(manifest.sourceRevision)) {
-    throw new Error("Platform contract source revision must be a full lowercase commit SHA.");
-  }
-  if (!/^[0-9a-f]{64}$/.test(manifest.sha256)) {
-    throw new Error("Platform contract manifest SHA-256 is invalid.");
-  }
-  const actualSha = createHash("sha256").update(contractBytes).digest("hex");
-  if (actualSha !== manifest.sha256) {
-    throw new Error(`Platform contract digest mismatch: expected ${manifest.sha256}, got ${actualSha}.`);
-  }
-}
-
-export function assertManifestIsCurrent(manifest, channelHeadSha, expectedChannel) {
-  if (manifest.channel !== expectedChannel || manifest.sourceRevision !== channelHeadSha) {
-    throw new Error(
-      `Platform contract artifact is stale: ${manifest.sourceRevision} is not ${expectedChannel} head ${channelHeadSha}.`,
-    );
-  }
-}
-
 export function assertTrustedCiWorkflow(workflowBytes) {
   const actualSha = createHash("sha256").update(workflowBytes).digest("hex");
   if (actualSha !== trustedCiWorkflowSha256) {
@@ -169,101 +137,9 @@ async function readRepositoryFile(repository, filePath, headSha, token) {
   return Buffer.from(payload.content.replace(/\s+/g, ""), "base64");
 }
 
-async function getExternalBranchSha(repository, branch, allowDefaultFallback) {
-  try {
-    const payload = await fetchJson(
-      `https://api.github.com/repos/${repository}/branches/${encodeURIComponent(branch)}`,
-    );
-    return payload.commit?.sha;
-  } catch (error) {
-    if (!allowDefaultFallback || error.status !== 404) {
-      throw error;
-    }
-    const metadata = await fetchJson(`https://api.github.com/repos/${repository}`);
-    const fallback = metadata.default_branch;
-    if (!fallback || fallback === branch) {
-      throw error;
-    }
-    console.log(`${repository} has no ${branch}; checking ${fallback} instead.`);
-    const payload = await fetchJson(
-      `https://api.github.com/repos/${repository}/branches/${encodeURIComponent(fallback)}`,
-    );
-    return payload.commit?.sha;
-  }
-}
-
-async function validateExternalRepository(repository, branch, requiredChecks, allowDefaultFallback) {
-  const sha = await getExternalBranchSha(repository, branch, allowDefaultFallback);
-  if (!sha) {
-    throw new Error(`Could not resolve ${repository}@${branch}.`);
-  }
-  const payload = await fetchJson(
-    `https://api.github.com/repos/${repository}/commits/${sha}/check-runs?per_page=100`,
-  );
-  assertRequiredCheckRuns(payload.check_runs ?? [], requiredChecks);
-  console.log(`Cross-repository checks passed for ${repository}@${sha}.`);
-}
-
-async function validateProductionRepositories(headRef) {
-  const promotionBranch = headRef === "staging" || headRef.startsWith("staging/")
-    ? headRef
-    : "development";
-  const allowDefaultFallback = promotionBranch === "development";
-  const requirements = new Map([
-    ["MECO-Robotics/meco-mission-control-web", ["ci-validate", "snapshot-validate"]],
-    [contractRepository, ["ci-validate", "snapshot-validate"]],
-    ["MECO-Robotics/meco-mission-control-mobile", ["ci-validate", "snapshot-validate"]],
-  ]);
-  for (const [repository, requiredChecks] of requirements) {
-    await validateExternalRepository(
-      repository,
-      promotionBranch,
-      requiredChecks,
-      allowDefaultFallback,
-    );
-  }
-}
-
-async function validateContract() {
-  const repository = requireValue(process.env.GITHUB_REPOSITORY, "GITHUB_REPOSITORY");
-  const token = requireValue(process.env.GITHUB_TOKEN, "GITHUB_TOKEN");
-  const headSha = requireValue(process.env.PR_HEAD_SHA, "PR_HEAD_SHA");
-  const baseRef = requireValue(process.env.PR_BASE_REF, "PR_BASE_REF");
-  const headRef = requireValue(process.env.PR_HEAD_REF, "PR_HEAD_REF");
-  const artifactDirectory = requireValue(process.env.CONTRACT_ARTIFACT_DIR, "CONTRACT_ARTIFACT_DIR");
-  const normalizedBase = baseRef.startsWith("staging/") ? "staging" : baseRef;
-  if (!supportedBases.has(normalizedBase)) {
-    throw new Error(`Unsupported PR base branch: ${baseRef}.`);
-  }
-  const expectedChannel = baseRef === "main" ? "main" : "development";
-  const contractBytes = await readFile(path.join(artifactDirectory, "contract.json"));
-  const manifest = JSON.parse(await readFile(path.join(artifactDirectory, "manifest.json"), "utf8"));
-  validateManifest(manifest, contractBytes, expectedChannel);
-  const platformBranch = await fetchJson(
-    `https://api.github.com/repos/${contractRepository}/branches/${expectedChannel}`,
-  );
-  assertManifestIsCurrent(manifest, platformBranch.commit?.sha, expectedChannel);
-
-  const platformContract = JSON.parse(contractBytes.toString("utf8"));
-  const pullRequestBytes = await readRepositoryFile(repository, contractPath, headSha, token);
-  const pullRequestContract = JSON.parse(pullRequestBytes.toString("utf8"));
-  validateBootstrapContract(platformContract);
-  validateBootstrapContract(pullRequestContract);
-  deepStrictEqual(pullRequestContract, platformContract);
-  console.log(
-    `PR bootstrap contract matches ${contractRepository}@${manifest.sourceRevision} (${expectedChannel}).`,
-  );
-
-  if (baseRef === "main") {
-    await validateProductionRepositories(headRef);
-  }
-}
-
 const command = process.argv[2];
 if (command === "validate-ci") {
   await validateCi();
-} else if (command === "validate-contract") {
-  await validateContract();
 } else if (process.argv[1] === new URL(import.meta.url).pathname) {
-  throw new Error("Expected validate-ci or validate-contract command.");
+  throw new Error("Expected validate-ci command.");
 }

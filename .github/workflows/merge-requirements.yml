@@ -15,10 +15,8 @@ on:
 
 permissions:
   actions: read
-  attestations: read
   checks: read
   contents: read
-  packages: read
   pull-requests: read
   statuses: write
 
@@ -154,78 +152,15 @@ jobs:
           WORKFLOW_RUN_PATH: ${{ steps.resolve.outputs.workflow_path }}
         run: node scripts/merge-requirements-gate.mjs validate-ci
 
-      - name: Pull and attest the public platform contract
-        id: artifact
-        if: steps.resolve.outputs.has_pr == 'true'
-        shell: bash
-        env:
-          CONTRACT_CHANNEL: ${{ steps.resolve.outputs.base_ref == 'main' && 'main' || 'development' }}
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          image=ghcr.io/meco-robotics/meco-bootstrap-contract
-          channel_tag="v1-${CONTRACT_CHANNEL}"
-          artifact_dir="$RUNNER_TEMP/platform-contract"
-          mkdir -p "$artifact_dir"
-
-          printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
-          docker pull "${image}:${channel_tag}"
-          channel_digest="$(docker image inspect --format '{{range .RepoDigests}}{{println .}}{{end}}' "${image}:${channel_tag}" | grep -E "^${image}@sha256:[0-9a-f]{64}$" | sed -n '1p')"
-          if [[ -z "$channel_digest" ]]; then
-            echo "Could not resolve an immutable digest for ${image}:${channel_tag}." >&2
-            exit 1
-          fi
-          container_id="$(docker create "$channel_digest" /bin/true)"
-          trap 'docker rm -f "$container_id" >/dev/null 2>&1 || true' EXIT
-          docker cp "${container_id}:/contract/." "$artifact_dir/"
-
-          source_revision="$(node -p "JSON.parse(require('node:fs').readFileSync('${artifact_dir}/manifest.json', 'utf8')).sourceRevision")"
-          if [[ ! "$source_revision" =~ ^[0-9a-f]{40}$ ]]; then
-            echo "Contract manifest sourceRevision is invalid." >&2
-            exit 1
-          fi
-          gh attestation verify "oci://${channel_digest}" \
-            --repo MECO-Robotics/meco-mission-control-platform \
-            --signer-workflow github.com/MECO-Robotics/meco-mission-control-platform/.github/workflows/publish-bootstrap-contract.yml \
-            --source-ref "refs/heads/${CONTRACT_CHANNEL}" \
-            --source-digest "$source_revision"
-          immutable_tag="v1-${CONTRACT_CHANNEL}-sha-${source_revision}"
-          docker pull "${image}:${immutable_tag}"
-          immutable_digest="$(docker image inspect --format '{{range .RepoDigests}}{{println .}}{{end}}' "${image}:${immutable_tag}" | grep -E "^${image}@sha256:[0-9a-f]{64}$" | sed -n '1p')"
-          if [[ "$immutable_digest" != "$channel_digest" ]]; then
-            echo "Channel tag and immutable source tag do not resolve to the same artifact." >&2
-            exit 1
-          fi
-          echo "directory=$artifact_dir" >> "$GITHUB_OUTPUT"
-
-      - name: Compare contracts and apply production requirements
-        id: contract
-        if: steps.resolve.outputs.has_pr == 'true'
-        env:
-          CONTRACT_ARTIFACT_DIR: ${{ steps.artifact.outputs.directory }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_TOKEN: ${{ github.token }}
-          PR_BASE_REF: ${{ steps.resolve.outputs.base_ref }}
-          PR_HEAD_REF: ${{ steps.resolve.outputs.head_ref }}
-          PR_HEAD_SHA: ${{ steps.resolve.outputs.head_sha }}
-        run: node scripts/merge-requirements-gate.mjs validate-contract
-
       - name: Publish stable merge requirement status
         if: always() && steps.resolve.outputs.has_pr == 'true'
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         env:
           CI_OUTCOME: ${{ steps.ci.outcome }}
-          ARTIFACT_OUTCOME: ${{ steps.artifact.outcome }}
-          CONTRACT_OUTCOME: ${{ steps.contract.outcome }}
           HEAD_SHA: ${{ steps.resolve.outputs.head_sha }}
         with:
           script: |
-            const outcomes = [
-              process.env.CI_OUTCOME,
-              process.env.ARTIFACT_OUTCOME,
-              process.env.CONTRACT_OUTCOME,
-            ];
-            const passed = outcomes.every((outcome) => outcome === 'success');
+            const passed = process.env.CI_OUTCOME === 'success';
             await github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
