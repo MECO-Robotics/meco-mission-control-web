@@ -40,21 +40,16 @@ default-branch `merge-requirements.yml` workflow publishes the protected
 - `branch-model`
 - `ci-validate` (`npm audit --audit-level=low` and `npm run verify`)
 - `snapshot-validate`
-- public, attested platform-contract parity
-- cross-repository production health (only when base branch is `main`)
 
-The trusted workflow never checks out or executes the PR revision. It reads the PR
-contract as JSON data and compares it with the versioned public platform contract
-artifact from `ghcr.io/meco-robotics/meco-bootstrap-contract`.
-It accepts only `pull_request` runs from `.github/workflows/ci.yml`, requires the PR
-copy of that workflow to match the trusted SHA-256 embedded in the gate script, and
-requires the platform artifact revision to equal the selected channel branch head.
+The trusted workflow never checks out or executes the PR revision. It accepts only
+`pull_request` runs from `.github/workflows/ci.yml`, requires the PR copy of that
+workflow to match the trusted SHA-256 embedded in the gate script, and verifies that
+the exact PR head passed all three required web checks.
 
 Because `workflow_run` executes the workflow and gate script from the default branch,
 changes to this trust boundary must land on `main` before a development PR relies on
 them. The bootstrap subset is `.github/workflows/merge-requirements.yml` and
-`scripts/merge-requirements-gate.mjs`; do not remove the previous required context
-until that subset and the public platform artifact are available.
+`scripts/merge-requirements-gate.mjs`.
 
 ### Branch model check
 
@@ -80,14 +75,13 @@ until that subset and the public platform artifact are available.
   - `package-lock.json`
   - `snapshot/manifest.json`
 
-### Cross-repo gate on main
+### Cross-repository coordination
 
-- For `main` merges, CI checks required states for:
-  - `meco-mission-control-web`
-  - `meco-mission-control-platform`
-  - `meco-mission-control-mobile`
-- Required checks per repo are `ci-validate` + `snapshot-validate`.
-- If the PR source is `staging` or `staging/*`, the gate validates that staging snapshot across repos. Otherwise it validates `development`.
+- Web merge checks do not query platform or mobile repositories and do not require
+  access to cross-repository packages.
+- API compatibility remains a release-review responsibility: deploy compatible
+  platform changes before a web bundle that depends on them, and confirm shared
+  mobile behavior when changing a shared contract.
 
 ## 3) Unresolved review-thread check
 
@@ -149,7 +143,6 @@ Use this block in issue/PR comments before merging to `main`.
 | #1234 | staging | stabilization fixes only | [ ] Pending |  |  |  |
 | #1234 | main | `ci-validate` | [ ] Pending |  |  |  |
 | #1234 | main | `snapshot-validate` | [ ] Pending |  |  |  |
-| #1234 | main | cross-repo gate (`platform`, `mobile`) | [ ] Pending |  |  |  |
 | #1234 | main | Unresolved review threads | [ ] Pending |  |  |  |
 | #1234 | production | Deploy source validation (main/tag/manifest) | [ ] Pending |  |  |  |
 | #1234 | production | VPS backup present | [ ] Pending |  |  |  |
@@ -160,6 +153,5 @@ Use this block in issue/PR comments before merging to `main`.
 - All items in sections 1-5 are marked complete for the target branch.
 - No unresolved review thread or conversation item.
 - Snapshot produced and validated in CI.
-- For main merge, cross-repo production gate passes.
 - Post-merge production deploy source allowed by `deploy-vps.yml`.
 - VPS backup retained and rollback check validated from backup inventory.

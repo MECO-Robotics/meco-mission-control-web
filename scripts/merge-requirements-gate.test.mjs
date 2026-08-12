@@ -3,12 +3,12 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 import {
-  assertManifestIsCurrent,
+  assertCheckSuiteHead,
   assertRequiredCheckRuns,
+  assertTrustedCiIdentity,
   assertTrustedCiWorkflow,
   trustedCiWorkflowSha256,
   validateBootstrapContract,
-  validateManifest,
 } from "./merge-requirements-gate.mjs";
 
 const validContract = {
@@ -63,32 +63,20 @@ test("required check validation rejects missing and unsuccessful jobs", () => {
   );
 });
 
-test("manifest validation binds channel, revision, and exact contract bytes", () => {
-  const contractBytes = Buffer.from(`${JSON.stringify(validContract)}\n`);
-  const manifest = {
-    contractVersion: "v1",
-    channel: "development",
-    sourceRevision: "a".repeat(40),
-    sha256: "7c7eeed5a869a4c7acd3e6767f4f574eb089a44e57f6fb09a5eb2235e3eea123",
-  };
-  manifest.sha256 = createHash("sha256")
-    .update(contractBytes)
-    .digest("hex");
-  assert.doesNotThrow(() => validateManifest(manifest, contractBytes, "development"));
+test("trusted CI identity and revision checks reject unrelated or stale runs", () => {
+  assert.doesNotThrow(() => assertTrustedCiIdentity("pull_request", ".github/workflows/ci.yml"));
   assert.throws(
-    () => validateManifest({ ...manifest, channel: "main" }, contractBytes, "development"),
-    /version or channel/,
+    () => assertTrustedCiIdentity("push", ".github/workflows/ci.yml"),
+    /only pull-request runs/,
   );
   assert.throws(
-    () => validateManifest(manifest, Buffer.from("tampered"), "development"),
-    /digest mismatch/,
+    () => assertTrustedCiIdentity("pull_request", ".github/workflows/other.yml"),
+    /only pull-request runs/,
   );
-  assert.doesNotThrow(() => {
-    assertManifestIsCurrent(manifest, manifest.sourceRevision, "development");
-  });
+  assert.doesNotThrow(() => assertCheckSuiteHead("a".repeat(40), "a".repeat(40)));
   assert.throws(
-    () => assertManifestIsCurrent(manifest, "b".repeat(40), "development"),
-    /artifact is stale/,
+    () => assertCheckSuiteHead("a".repeat(40), "b".repeat(40)),
+    /not PR head/,
   );
 });
 
@@ -133,8 +121,9 @@ test("all GitHub Actions are pinned and production SSH trust is pre-provisioned"
   assert.doesNotMatch(deploy, /ssh-keyscan/);
   assert.match(deploy, /VPS_SSH_KNOWN_HOSTS/);
   const mergeGate = await readFile(".github/workflows/merge-requirements.yml", "utf8");
-  assert.match(mergeGate, /--signer-workflow github\.com\/MECO-Robotics\/meco-mission-control-platform\/\.github\/workflows\/publish-bootstrap-contract\.yml/);
-  assert.match(mergeGate, /--source-digest "\$source_revision"/);
+  assert.doesNotMatch(mergeGate, /ghcr|packages:|attestations:|meco-mission-control-platform|meco-mission-control-mobile/i);
+  assert.match(mergeGate, /pullRequest\.head\.sha !== headSha/);
+  assert.match(mergeGate, /process\.env\.CI_OUTCOME === 'success'/);
 });
 
 test("script CSP contains no inline or eval execution allowances", async () => {

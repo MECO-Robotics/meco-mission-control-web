@@ -18,7 +18,6 @@ async function main() {
   }
 
   console.log("Web bootstrap contract is valid canonical JSON.");
-  console.log("Cross-repository drift is enforced by the trusted merge-requirements workflow.");
 }
 
 main().catch((error) => {
