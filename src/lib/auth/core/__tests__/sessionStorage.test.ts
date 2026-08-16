@@ -1,9 +1,10 @@
 /// <reference types="jest" />
 
 import {
-  clearStoredSessionToken,
-  loadStoredSessionToken,
-  storeSessionToken,
+  clearWebSessionState,
+  getSessionCsrfToken,
+  purgeLegacySessionTokens,
+  setSessionCsrfToken,
 } from "../sessionStorage";
 
 function createMemoryStorage(throwOnAccess = false): Storage {
@@ -14,33 +15,23 @@ function createMemoryStorage(throwOnAccess = false): Storage {
       return values.size;
     },
     clear() {
-      if (throwOnAccess) {
-        throw new Error("blocked");
-      }
+      if (throwOnAccess) throw new Error("blocked");
       values.clear();
     },
     getItem(key: string) {
-      if (throwOnAccess) {
-        throw new Error("blocked");
-      }
+      if (throwOnAccess) throw new Error("blocked");
       return values.get(key) ?? null;
     },
     key(index: number) {
-      if (throwOnAccess) {
-        throw new Error("blocked");
-      }
+      if (throwOnAccess) throw new Error("blocked");
       return Array.from(values.keys())[index] ?? null;
     },
     removeItem(key: string) {
-      if (throwOnAccess) {
-        throw new Error("blocked");
-      }
+      if (throwOnAccess) throw new Error("blocked");
       values.delete(key);
     },
     setItem(key: string, value: string) {
-      if (throwOnAccess) {
-        throw new Error("blocked");
-      }
+      if (throwOnAccess) throw new Error("blocked");
       values.set(key, value);
     },
   };
@@ -55,60 +46,48 @@ function installWindowStorage({
 } = {}) {
   Object.defineProperty(globalThis, "window", {
     configurable: true,
-    value: {
-      localStorage,
-      sessionStorage,
-    },
+    value: { localStorage, sessionStorage },
   });
 
   return { localStorage, sessionStorage };
 }
 
-describe("auth session storage", () => {
+describe("web session state", () => {
   afterEach(() => {
-    clearStoredSessionToken();
+    clearWebSessionState();
     Reflect.deleteProperty(globalThis, "window");
   });
 
-  it("stores bearer tokens in sessionStorage, not localStorage", () => {
-    const { localStorage, sessionStorage } = installWindowStorage();
-
-    storeSessionToken("session-token");
-
-    expect(sessionStorage.getItem("meco.session.token")).toBe("session-token");
-    expect(localStorage.getItem("meco.session.token")).toBeNull();
-    expect(loadStoredSessionToken()).toBe("session-token");
-  });
-
-  it("migrates and removes the legacy localStorage token", () => {
+  it("purges bearer credentials from both browser storage mechanisms", () => {
     const { localStorage, sessionStorage } = installWindowStorage();
     localStorage.setItem("meco.session.token", "legacy-token");
+    sessionStorage.setItem("meco.session.token", "session-token");
 
-    expect(loadStoredSessionToken()).toBe("legacy-token");
-    expect(sessionStorage.getItem("meco.session.token")).toBe("legacy-token");
+    purgeLegacySessionTokens();
+
     expect(localStorage.getItem("meco.session.token")).toBeNull();
+    expect(sessionStorage.getItem("meco.session.token")).toBeNull();
   });
 
-  it("falls back to memory when sessionStorage is blocked", () => {
-    const { localStorage } = installWindowStorage({
+  it("keeps only the CSRF token in module memory", () => {
+    const { localStorage, sessionStorage } = installWindowStorage();
+
+    setSessionCsrfToken("csrf-token");
+
+    expect(getSessionCsrfToken()).toBe("csrf-token");
+    expect(localStorage.length).toBe(0);
+    expect(sessionStorage.length).toBe(0);
+  });
+
+  it("clears memory even when browser storage access is blocked", () => {
+    installWindowStorage({
+      localStorage: createMemoryStorage(true),
       sessionStorage: createMemoryStorage(true),
     });
+    setSessionCsrfToken("csrf-token");
 
-    storeSessionToken("memory-token");
+    clearWebSessionState();
 
-    expect(loadStoredSessionToken()).toBe("memory-token");
-    expect(localStorage.getItem("meco.session.token")).toBeNull();
-  });
-
-  it("clears session, legacy, and memory tokens", () => {
-    const { localStorage, sessionStorage } = installWindowStorage();
-
-    storeSessionToken("session-token");
-    localStorage.setItem("meco.session.token", "legacy-token");
-    clearStoredSessionToken();
-
-    expect(loadStoredSessionToken()).toBeNull();
-    expect(sessionStorage.getItem("meco.session.token")).toBeNull();
-    expect(localStorage.getItem("meco.session.token")).toBeNull();
+    expect(getSessionCsrfToken()).toBeNull();
   });
 });

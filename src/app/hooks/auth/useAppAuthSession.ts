@@ -37,7 +37,7 @@ export interface UseAppAuthSessionResult {
   handleDevBypassSignIn: (role?: DevBypassRole) => Promise<void>;
   handleGoogleCredential: (response: GoogleCredentialResponse) => Promise<void>;
   handleRequestEmailCode: (email: string) => Promise<EmailCodeDeliveryResponse>;
-  handleSignOut: () => void;
+  handleSignOut: () => Promise<void>;
   handleVerifyEmailCode: (email: string, code: string) => Promise<void>;
   hostedDomain: string;
   isEmailAuthAvailable: boolean;
@@ -89,7 +89,6 @@ export function useAppAuthSession({
   });
 
   useAppAuthSessionBootstrap({
-    onSessionExpired,
     setAuthBooting,
     setAuthConfig,
     setAuthMessage,

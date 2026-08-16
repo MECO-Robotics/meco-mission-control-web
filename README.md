@@ -134,6 +134,10 @@ With the committed `.env.example` values, use:
 http://127.0.0.1:5177
 ```
 
+Hot-module replacement is intentionally disabled because React Fast Refresh injects
+an inline bootstrap script that violates the app's script CSP. Refresh the browser
+after local source changes.
+
 ### Validate before pushing
 
 ```bash
@@ -372,11 +376,12 @@ High-use endpoint groups:
 - Bootstrap and auth:
   - `GET /api/bootstrap`
   - `GET /api/auth/config`
-  - `GET /api/auth/me`
-  - `POST /api/auth/google`
+  - `GET /api/auth/web/session`
+  - `POST /api/auth/web/google`
   - `POST /api/auth/email/start`
-  - `POST /api/auth/email/verify`
-  - `POST /api/auth/dev-bypass` in non-production only
+  - `POST /api/auth/web/email/verify`
+  - `POST /api/auth/web/dev-bypass` in non-production only
+  - `POST /api/auth/web/logout`
 - Planning/workflow:
   - `POST/PATCH /api/tasks`
   - `POST/PATCH/DELETE /api/events`
@@ -428,18 +433,22 @@ Startup flow:
 
 Supported sign-in paths:
 
-- Google Identity Services token exchange via `POST /api/auth/google`
+- Google Identity Services token exchange via `POST /api/auth/web/google`
 - Email code flow via:
   - `POST /api/auth/email/start`
-  - `POST /api/auth/email/verify`
-- Dev-only bypass via `POST /api/auth/dev-bypass` when backend exposes it outside production
+  - `POST /api/auth/web/email/verify`
+- Dev-only bypass via `POST /api/auth/web/dev-bypass` when backend exposes it outside production
 
 Important behavior details:
 
-- Session token is scoped to the current browser tab in `sessionStorage` as
-  `meco.session.token`; legacy `localStorage` tokens are migrated into
-  session storage and removed.
-- On `401` responses, the token is cleared and the user is forced to re-auth.
+- The reusable session identifier is held only in a 12-hour, revocable,
+  `HttpOnly`, `SameSite=Lax` cookie. Frontend JavaScript cannot read it.
+- A session-bound CSRF token is held only in memory and sent as
+  `X-CSRF-Token` on unsafe authenticated requests.
+- Legacy `meco.session.token` values are removed from both `localStorage` and
+  `sessionStorage`; they are never migrated or replayed.
+- On `401` responses, in-memory session state is cleared and the user is forced
+  to re-authenticate. Logout revokes the server record before clearing the UI.
 - Session validity is rechecked periodically.
 - Google sign-in only renders on secure hosts:
   - localhost (`localhost`, `127.0.0.1`, `::1`)
@@ -489,10 +498,11 @@ npm run verify
 `verify` runs:
 
 1. `npm run verify-contracts`
-2. `npm run typecheck`
-3. `npm run lint`
-4. `npm run test:ci`
-5. `npm run build:bundle`
+2. `npm run test:security-workflows`
+3. `npm run typecheck`
+4. `npm run lint`
+5. `npm run test:ci`
+6. `npm run build:bundle`
 
 CI also runs `npm run audit:organization:strict` before `npm run verify`.
 
@@ -505,7 +515,8 @@ CI also runs `npm run audit:organization:strict` before `npm run verify`.
 | `npm run test:ci` | validating the full Jest suite in CI mode |
 | `npm run test:watch` | iterating locally on a specific unit/view test |
 | `npm run build:bundle` | checking Vite production bundle correctness |
-| `npm run verify-contracts` | validating the local bootstrap contract and, when configured, the platform bootstrap contract |
+| `npm run verify-contracts` | validating that the checked-in bootstrap contract is canonical, well-formed JSON Schema |
+| `npm run test:security-workflows` | testing the trusted merge-gate validation helpers |
 | `npm run audit:organization` | checking file/directory/CSS organization warnings |
 | `npm run audit:organization:strict` | enforcing hard organization limits before structural PRs |
 
@@ -596,18 +607,18 @@ GitHub Actions file:
 Trigger conditions:
 
 - Pushes to `main` affecting app/workflow/deploy files
-- `release-*` tag pushes
 - Manual `workflow_dispatch`
 
 Pipeline summary:
 
 1. Deploy source gate:
-   - allow only `main`, `release-*` tags, or a matching release manifest
+   - allow only protected `main`, optionally with a matching release manifest
 2. Validate job:
    - install deps with `npm ci`
    - typecheck
    - build production bundle
 3. Deploy job:
+   - verify the VPS against the pre-provisioned SSH host key
    - create a timestamped backup under `/opt/pm-backups/web`
    - download the validated `dist` artifact
    - rsync `dist/` to `/opt/pm-web/site`
@@ -623,6 +634,12 @@ Set in `MECO-Robotics/meco-mission-control-web`:
 - `VPS_HOST`
 - `VPS_USER`
 - `VPS_SSH_KEY`
+- `VPS_SSH_KNOWN_HOSTS` (the exact trusted `known_hosts` entry obtained out-of-band)
+
+Do not generate `VPS_SSH_KNOWN_HOSTS` during deployment. When the VPS host key is
+intentionally rotated, confirm the new fingerprint through the VPS provider console,
+replace the production-environment secret, and run a manual deployment. A mismatch
+fails before the backup or file transfer starts.
 
 ### Runtime paths on server
 
@@ -663,11 +680,11 @@ Check:
 
 Check:
 
-- backend JWT settings and token validity
+- whether the platform's `WebSession` schema has been deployed
 - local/server clock skew
-- whether `/api/auth/me` returns `401`
-- whether a stale `meco.session.token` remains in legacy localStorage or the
-  active tab's sessionStorage
+- whether `/api/auth/web/session` returns `401`
+- whether the browser accepts the first-party `meco_web_session` cookie
+- whether `CORS_ORIGIN` contains the exact web origin for direct API calls
 
 ### Missing data after switching season/project
 

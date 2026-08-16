@@ -1,5 +1,6 @@
 import type { MediaUploadResponse, SessionUser } from "../types";
-import { clearStoredSessionToken, loadStoredSessionToken } from "./sessionStorage";
+import { clearWebSessionState } from "./sessionStorage";
+import { buildCookieRequestOptions } from "./requestOptions";
 
 const DEFAULT_API_BASE_URL = "/api";
 
@@ -70,21 +71,11 @@ export function requestApi<T>(
   options: RequestInit = {},
   onUnauthorized?: () => void,
 ) {
-  const token = loadStoredSessionToken();
-  const headers = new Headers(options.headers);
-
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
-
-  return fetch(buildApiUrl(path), {
-    ...options,
-    headers,
-  })
+  return fetch(buildApiUrl(path), buildCookieRequestOptions(options))
     .then((response) => readJson<T>(response))
     .catch((error) => {
       if (error instanceof ApiError && error.statusCode === 401) {
-        clearStoredSessionToken();
+        clearWebSessionState();
         onUnauthorized?.();
       }
       throw error;
@@ -92,13 +83,19 @@ export function requestApi<T>(
 }
 
 export function postJson<T>(path: string, body: unknown) {
-  return fetch(buildApiUrl(path), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  }).then((response) => readJson<T>(response));
+  return fetch(
+    buildApiUrl(path),
+    buildCookieRequestOptions(
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      },
+      false,
+    ),
+  ).then((response) => readJson<T>(response));
 }
 
 export async function requestUpload(
@@ -137,20 +134,21 @@ export async function requestUpload(
   return presignedUpload.publicUrl;
 }
 
-export async function fetchCurrentUser(token: string) {
-  const response = await fetch(buildApiUrl("/auth/me"), {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  const payload = await readJson<{
-    enabled: boolean;
+export async function fetchWebSession() {
+  const payload = await requestApi<{
+    csrfToken: string;
+    expiresAt: string;
     user: SessionUser | null;
-  }>(response);
+  }>("/auth/web/session");
 
   if (!payload.user) {
     throw new ApiError("No signed-in session is available.", 401);
   }
 
-  return payload.user;
+  return payload;
+}
+
+export async function fetchCurrentUser(_unusedLegacyToken?: string) {
+  void _unusedLegacyToken;
+  return (await fetchWebSession()).user;
 }

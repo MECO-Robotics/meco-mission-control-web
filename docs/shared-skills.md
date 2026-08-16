@@ -111,9 +111,12 @@ The check uses the configured `SKILLS_REPO` and `SKILLS_REF`, imports or compare
 
 CI runs the same import check on pull requests and pushes. Configure:
 
-- `SKILLS_REPO` as an optional repository variable or secret when the default repo is not correct.
+- `SKILLS_REPO` as an optional repository variable when the default repo is not correct.
 - `SKILLS_REF` as a repository variable pinned to the approved release tag.
-- `SKILLS_REPO_DEPLOY_KEY` or `SKILLS_REPO_TOKEN` as a secret if the shared repo is private.
+
+The CI check intentionally supports only a public HTTPS source so pull-request code
+never receives repository credentials. Run private-source imports only from a trusted
+local environment, outside PR workflows.
 
 Do not hardcode credentials in scripts or workflow files.
 

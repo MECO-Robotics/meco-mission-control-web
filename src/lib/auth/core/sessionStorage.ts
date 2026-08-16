@@ -1,30 +1,13 @@
-const SESSION_STORAGE_KEY = "meco.session.token";
-const LEGACY_LOCAL_STORAGE_KEY = SESSION_STORAGE_KEY;
+const LEGACY_SESSION_STORAGE_KEY = "meco.session.token";
 
-let memorySessionToken: string | null = null;
-
-function readStorage(storage: Storage | undefined, key: string) {
-  try {
-    return storage?.getItem(key) ?? null;
-  } catch {
-    return null;
-  }
-}
-
-function writeStorage(storage: Storage | undefined, key: string, value: string) {
-  try {
-    storage?.setItem(key, value);
-    return true;
-  } catch {
-    return false;
-  }
-}
+let memoryCsrfToken: string | null = null;
 
 function removeStorage(storage: Storage | undefined, key: string) {
   try {
     storage?.removeItem(key);
   } catch {
-    // Storage access can be blocked by privacy settings; in-memory state still clears.
+    // Storage access can be blocked by privacy settings. The cookie session is
+    // unaffected, and no credential is kept in browser-readable storage.
   }
 }
 
@@ -32,52 +15,40 @@ function getBrowserWindow() {
   return typeof window === "undefined" ? null : window;
 }
 
+export function purgeLegacySessionTokens() {
+  const browserWindow = getBrowserWindow();
+  if (!browserWindow) {
+    return;
+  }
+
+  removeStorage(browserWindow.sessionStorage, LEGACY_SESSION_STORAGE_KEY);
+  removeStorage(browserWindow.localStorage, LEGACY_SESSION_STORAGE_KEY);
+}
+
+export function getSessionCsrfToken() {
+  return memoryCsrfToken;
+}
+
+export function setSessionCsrfToken(csrfToken: string) {
+  purgeLegacySessionTokens();
+  memoryCsrfToken = csrfToken;
+}
+
+export function clearWebSessionState() {
+  memoryCsrfToken = null;
+  purgeLegacySessionTokens();
+}
+
+// Compatibility exports for the public auth barrel. They intentionally never
+// load or persist bearer credentials and can be removed with the next API cleanup.
 export function loadStoredSessionToken() {
-  const browserWindow = getBrowserWindow();
-  if (!browserWindow) {
-    return memorySessionToken;
-  }
-
-  const sessionToken = readStorage(browserWindow.sessionStorage, SESSION_STORAGE_KEY);
-  if (sessionToken) {
-    memorySessionToken = sessionToken;
-    removeStorage(browserWindow.localStorage, LEGACY_LOCAL_STORAGE_KEY);
-    return sessionToken;
-  }
-
-  const legacyToken = readStorage(browserWindow.localStorage, LEGACY_LOCAL_STORAGE_KEY);
-  if (!legacyToken) {
-    return memorySessionToken;
-  }
-
-  const storedInSession = writeStorage(
-    browserWindow.sessionStorage,
-    SESSION_STORAGE_KEY,
-    legacyToken,
-  );
-  removeStorage(browserWindow.localStorage, LEGACY_LOCAL_STORAGE_KEY);
-  memorySessionToken = storedInSession ? legacyToken : null;
-  return memorySessionToken;
+  purgeLegacySessionTokens();
+  return null;
 }
 
-export function storeSessionToken(token: string) {
-  memorySessionToken = token;
-  const browserWindow = getBrowserWindow();
-  if (!browserWindow) {
-    return;
-  }
-
-  writeStorage(browserWindow.sessionStorage, SESSION_STORAGE_KEY, token);
-  removeStorage(browserWindow.localStorage, LEGACY_LOCAL_STORAGE_KEY);
+export function storeSessionToken(unusedToken: string) {
+  void unusedToken;
+  purgeLegacySessionTokens();
 }
 
-export function clearStoredSessionToken() {
-  memorySessionToken = null;
-  const browserWindow = getBrowserWindow();
-  if (!browserWindow) {
-    return;
-  }
-
-  removeStorage(browserWindow.sessionStorage, SESSION_STORAGE_KEY);
-  removeStorage(browserWindow.localStorage, LEGACY_LOCAL_STORAGE_KEY);
-}
+export const clearStoredSessionToken = clearWebSessionState;

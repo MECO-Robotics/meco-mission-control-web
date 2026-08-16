@@ -6,11 +6,12 @@ import {
   type SetStateAction,
 } from "react";
 
-import { clearStoredSessionToken, storeSessionToken } from "@/lib/auth/core/sessionStorage";
+import { clearWebSessionState } from "@/lib/auth/core/sessionStorage";
 import {
   exchangeGoogleCredential,
   requestDevBypassSignIn,
   requestEmailSignInCode,
+  revokeWebSession,
   verifyEmailSignInCode,
 } from "@/lib/auth/session";
 import {
@@ -30,25 +31,54 @@ interface UseAppAuthSessionActionsArgs {
   setSessionUser: Dispatch<SetStateAction<SessionUser | null>>;
 }
 
+export const UNCONFIRMED_SIGN_OUT_MESSAGE =
+  "Your local session was cleared, but server sign-out could not be confirmed. Please retry when connected.";
+
 export interface UseAppAuthSessionActionsResult {
   clearAuthMessage: () => void;
   expireSession: (message: string) => void;
   handleDevBypassSignIn: (role?: DevBypassRole) => Promise<void>;
   handleGoogleCredential: (response: GoogleCredentialResponse) => Promise<void>;
   handleRequestEmailCode: (email: string) => Promise<EmailCodeDeliveryResponse>;
-  handleSignOut: () => void;
+  handleSignOut: () => Promise<void>;
   handleVerifyEmailCode: (email: string, code: string) => Promise<void>;
   setAuthMessage: (message: string) => void;
 }
 
 function storeSignedInSession(
-  session: { token: string; user: SessionUser },
+  session: { user: SessionUser },
   setSessionUser: Dispatch<SetStateAction<SessionUser | null>>,
 ) {
-  storeSessionToken(session.token);
   startTransition(() => {
     setSessionUser(session.user);
   });
+}
+
+export async function revokeThenClearWebSession(
+  clearLocalSession: () => void,
+  onUnconfirmed: (message: string) => void = () => undefined,
+) {
+  let confirmed = false;
+
+  try {
+    await revokeWebSession();
+    confirmed = true;
+  } catch {
+    try {
+      await revokeWebSession();
+      confirmed = true;
+    } catch {
+      // Local state still clears below, but the server session may remain live.
+    }
+  } finally {
+    clearLocalSession();
+  }
+
+  if (!confirmed) {
+    onUnconfirmed(UNCONFIRMED_SIGN_OUT_MESSAGE);
+  }
+
+  return confirmed;
 }
 
 export function useAppAuthSessionActions({
@@ -71,7 +101,7 @@ export function useAppAuthSessionActions({
 
   const expireSession = useCallback(
     (message: string) => {
-      clearStoredSessionToken();
+      clearWebSessionState();
       signOutFromGoogle();
       resetWorkspaceRef.current?.();
       startTransition(() => {
@@ -97,7 +127,7 @@ export function useAppAuthSessionActions({
         const session = await exchangeGoogleCredential(response.credential);
         storeSignedInSession(session, setSessionUser);
       } catch (error) {
-        clearStoredSessionToken();
+        clearWebSessionState();
         setAuthMessage(toErrorMessage(error));
       } finally {
         setIsSigningIn(false);
@@ -132,7 +162,7 @@ export function useAppAuthSessionActions({
         const session = await verifyEmailSignInCode(email, code);
         storeSignedInSession(session, setSessionUser);
       } catch (error) {
-        clearStoredSessionToken();
+        clearWebSessionState();
         setAuthMessage(toErrorMessage(error));
         throw error;
       } finally {
@@ -142,29 +172,37 @@ export function useAppAuthSessionActions({
     [setAuthMessage, setIsSigningIn, setSessionUser],
   );
 
-  const handleDevBypassSignIn = useCallback(async (role: DevBypassRole = "student") => {
-    setIsSigningIn(true);
-    setAuthMessage(null);
+  const handleDevBypassSignIn = useCallback(
+    async (role: DevBypassRole = "student") => {
+      setIsSigningIn(true);
+      setAuthMessage(null);
 
-    try {
-      const session = await requestDevBypassSignIn(role);
-      storeSignedInSession(session, setSessionUser);
-    } catch (error) {
-      clearStoredSessionToken();
-      setAuthMessage(toErrorMessage(error));
-    } finally {
-      setIsSigningIn(false);
-    }
-  }, [setAuthMessage, setIsSigningIn, setSessionUser]);
+      try {
+        const session = await requestDevBypassSignIn(role);
+        storeSignedInSession(session, setSessionUser);
+      } catch (error) {
+        clearWebSessionState();
+        setAuthMessage(toErrorMessage(error));
+      } finally {
+        setIsSigningIn(false);
+      }
+    },
+    [setAuthMessage, setIsSigningIn, setSessionUser],
+  );
 
-  const handleSignOut = useCallback(() => {
-    clearStoredSessionToken();
-    signOutFromGoogle();
-    startTransition(() => {
-      setSessionUser(null);
-    });
-    setAuthMessage(null);
-    resetWorkspaceRef.current?.();
+  const handleSignOut = useCallback(async () => {
+    await revokeThenClearWebSession(
+      () => {
+        clearWebSessionState();
+        signOutFromGoogle();
+        startTransition(() => {
+          setSessionUser(null);
+        });
+        setAuthMessage(null);
+        resetWorkspaceRef.current?.();
+      },
+      setAuthMessage,
+    );
   }, [resetWorkspaceRef, setAuthMessage, setSessionUser]);
 
   return {

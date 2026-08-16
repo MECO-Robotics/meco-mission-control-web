@@ -3,10 +3,11 @@ name: Codex Auto Merge
 on:
   workflow_run:
     workflows:
-      - CI
+      - Trusted Merge Requirements
     types:
       - completed
-  pull_request:
+  # Metadata-only trusted event: this workflow never checks out or executes PR code.
+  pull_request_target:
     branches:
       - development
       - staging
@@ -39,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Enable auto-merge when Codex review and checks are green
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         env:
           CODEX_REVIEWER_LOGINS: "chatgpt-codex-connector[bot],chatgpt-codex-connector,codex[bot]"
         with:
@@ -49,7 +50,7 @@ jobs:
             function isTargetBaseRef(baseRef) {
               return baseRef === 'development' || baseRef === 'main' || baseRef === 'staging' || baseRef.startsWith('staging/');
             }
-            const requiredCheckRunNames = new Set(['merge-requirements']);
+            const requiredStatusContexts = new Set(['merge-requirements']);
             const trustedCodexReviewerLogins = new Set(
               (process.env.CODEX_REVIEWER_LOGINS || '')
                 .split(',')
@@ -182,32 +183,53 @@ jobs:
                 const isCurrentRun = String(checkRun.details_url ?? '').includes(
                   `/actions/runs/${context.runId}`,
                 );
-                return requiredCheckRunNames.has(checkRun.name) && !isCurrentRun;
+                return requiredStatusContexts.has(checkRun.name) && !isCurrentRun;
               });
-
-              const discoveredCheckRunNames = new Set(relevantCheckRuns.map((checkRun) => checkRun.name));
-              const missingCheckRunNames = [...requiredCheckRunNames].filter((name) => {
-                return !discoveredCheckRunNames.has(name);
+              const { data: statuses } = await github.rest.repos.listCommitStatusesForRef({
+                owner,
+                repo,
+                ref: pr.head.sha,
+                per_page: 100,
               });
-
-              if (missingCheckRunNames.length > 0) {
-                core.info(`PR #${pullNumber} is missing required checks: ${missingCheckRunNames.join(', ')}.`);
-                return;
+              const latestStatusByContext = new Map();
+              for (const status of statuses) {
+                if (requiredStatusContexts.has(status.context) && !latestStatusByContext.has(status.context)) {
+                  latestStatusByContext.set(status.context, status);
+                }
+              }
+              const latestCheckByName = new Map();
+              for (const checkRun of relevantCheckRuns) {
+                const previous = latestCheckByName.get(checkRun.name);
+                const currentTime = Date.parse(checkRun.started_at ?? checkRun.completed_at ?? 0);
+                const previousTime = Date.parse(previous?.started_at ?? previous?.completed_at ?? 0);
+                if (!previous || currentTime >= previousTime) {
+                  latestCheckByName.set(checkRun.name, checkRun);
+                }
               }
 
-              const blockingCheckRuns = relevantCheckRuns.filter((checkRun) => {
-                if (checkRun.status !== 'completed') {
-                  return true;
+              const blockingContexts = [];
+              for (const requiredContext of requiredStatusContexts) {
+                const status = latestStatusByContext.get(requiredContext);
+                const checkRun = latestCheckByName.get(requiredContext);
+                if (status) {
+                  if (status.state !== 'success') {
+                    blockingContexts.push(`${requiredContext}:status/${status.state}`);
+                  }
+                  continue;
                 }
-                const conclusion = String(checkRun.conclusion ?? '').toLowerCase();
-                return conclusion !== 'success';
-              });
+                if (!checkRun) {
+                  blockingContexts.push(`${requiredContext}:missing`);
+                  continue;
+                }
+                if (checkRun.status !== 'completed' || checkRun.conclusion !== 'success') {
+                  blockingContexts.push(
+                    `${requiredContext}:check/${checkRun.status}/${checkRun.conclusion ?? 'pending'}`,
+                  );
+                }
+              }
 
-              if (blockingCheckRuns.length > 0) {
-                const summary = blockingCheckRuns
-                  .map((checkRun) => `${checkRun.name}:${checkRun.status}/${checkRun.conclusion}`)
-                  .join(', ');
-                core.info(`PR #${pullNumber} still has non-green checks: ${summary}`);
+              if (blockingContexts.length > 0) {
+                core.info(`PR #${pullNumber} still has non-green requirements: ${blockingContexts.join(', ')}.`);
                 return;
               }
 
