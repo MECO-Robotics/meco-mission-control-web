@@ -157,6 +157,16 @@ export interface QaReviewRecord {
   reviewedAt: string;
 }
 
+export interface QaRequestRecord {
+  id: string;
+  taskId: string | null;
+  subject: string;
+  mentorId: string;
+  requestedById: string | null;
+  createdAt: string;
+  status: "requested";
+}
+
 export interface EscalationRecord {
   title: string;
   detail: string;

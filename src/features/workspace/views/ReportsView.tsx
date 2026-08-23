@@ -7,6 +7,7 @@ import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { type ReportsViewTab } from "@/lib/workspaceNavigation";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
+import { parseLocalDate } from "@/lib/dateUtils";
 
 interface ReportsViewProps {
   bootstrap: BootstrapPayload;
@@ -49,6 +50,10 @@ function formatMilestoneDate(milestone: MilestoneRecord) {
   return new Date(dateTimeMs).toLocaleDateString();
 }
 
+function formatTaskDueDate(dueDate: string) {
+  return parseLocalDate(dueDate)?.toLocaleDateString() ?? "No date";
+}
+
 function QaReportsView({
   tasks,
   openCreateQaReportModal,
@@ -74,7 +79,7 @@ function QaReportsView({
           <article className="worklog-summary-card" key={task.id}>
             <h3>{task.title}</h3>
             <p className="section-copy">{task.summary || "No summary"}</p>
-            <p className="section-copy">Due {new Date(task.dueDate).toLocaleDateString()}</p>
+            <p className="section-copy">Due {formatTaskDueDate(task.dueDate)}</p>
             <button
               className="primary-action queue-toolbar-action"
               onClick={() => openTaskDetailsModal(task)}

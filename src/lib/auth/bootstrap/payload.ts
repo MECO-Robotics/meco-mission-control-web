@@ -56,6 +56,7 @@ export function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapP
     reports: reports.reports,
     reportFindings: reports.reportFindings,
     qaReports: reports.qaReports,
+    qaRequests: source.qaRequests ?? [],
     testResults: reports.testResults,
     qaFindings: reports.qaFindings,
     testFindings: reports.testFindings,

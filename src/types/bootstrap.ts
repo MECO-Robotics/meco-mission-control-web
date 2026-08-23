@@ -7,6 +7,7 @@ import type {
   MilestoneRecord,
   MilestoneRequirementRecord,
   QaReviewRecord,
+  QaRequestRecord,
   TaskBlockerRecord,
   TaskDependencyRecord,
   TaskRecord,
@@ -41,6 +42,7 @@ export interface BootstrapPayload {
   reports: ReportRecord[];
   reportFindings: ReportFindingRecord[];
   qaReports: QaReportRecord[];
+  qaRequests: QaRequestRecord[];
   testResults: TestResultRecord[];
   qaFindings: QaFindingRecord[];
   testFindings: TestFindingRecord[];

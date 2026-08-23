@@ -15,6 +15,21 @@ function parseDateParts(day: string) {
   return { year, month, date };
 }
 
+export function parseLocalDate(day: string) {
+  const { year, month, date } = parseDateParts(day.slice(0, 10));
+  const candidate = new Date(year, month - 1, date);
+
+  if (
+    candidate.getFullYear() !== year ||
+    candidate.getMonth() !== month - 1 ||
+    candidate.getDate() !== date
+  ) {
+    return null;
+  }
+
+  return candidate;
+}
+
 export function addDaysToLocalDate(day: string, dayCount: number) {
   const { year, month, date } = parseDateParts(day);
   const candidate = new Date(year, month - 1, date, 12);
