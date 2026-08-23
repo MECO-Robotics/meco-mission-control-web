@@ -21,10 +21,16 @@ async function main() {
     throw new Error("Bootstrap contract must use canonical two-space JSON formatting.");
   }
 
+  const pushedRef = process.env.GITHUB_REF_NAME;
+  const pushedChannel = pushedRef === "main" ||
+    pushedRef === "development" ||
+    pushedRef?.startsWith("staging")
+    ? pushedRef
+    : undefined;
   const platformBranch = [
     process.env.MECO_PLATFORM_CONTRACT_BRANCH,
     process.env.GITHUB_BASE_REF,
-    process.env.GITHUB_REF_NAME,
+    pushedChannel,
   ].find((value) => value?.trim()) ?? "development";
   const platformContent = await readPublicRepositoryFile(
     "MECO-Robotics/meco-mission-control-platform",
