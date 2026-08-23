@@ -201,7 +201,9 @@ async function validateIntegration() {
   if (baseRef !== "main") {
     return;
   }
-  const promotionBranch = headRef === "development" ? "development" : headRef;
+  const promotionBranch = headRef === "development" || headRef.startsWith("staging")
+    ? headRef
+    : "main";
   await validateExternalRepository(contractRepository, promotionBranch);
   await validateExternalRepository(
     "MECO-Robotics/meco-mission-control-mobile",

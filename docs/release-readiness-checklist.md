@@ -87,6 +87,8 @@ them. The bootstrap subset is `.github/workflows/merge-requirements.yml` and
   platform contract changes before the dependent web promotion.
 - PRs into `main` require successful platform and mobile `ci-validate` and
   `snapshot-validate` checks before the web `merge-requirements` status passes.
+  Development and staging promotions use the matching external branch; a web-only
+  direct hotfix uses the production `main` channel.
 
 ## 3) Unresolved review-thread check
 

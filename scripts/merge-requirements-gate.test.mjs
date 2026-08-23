@@ -137,6 +137,8 @@ test("trusted integration validation checks independent repositories", async () 
   assert.match(gate, /\["ci-validate", "snapshot-validate"\]/);
   assert.doesNotMatch(gate, /default_branch/);
   assert.match(gate, /const contractBranch = baseRef/);
+  assert.match(gate, /headRef\.startsWith\("staging"\)/);
+  assert.match(verifier, /GITHUB_REF_NAME/);
   assert.match(verifier, /readPublicRepositoryFile/);
   assert.match(verifier, /deepStrictEqual\(contract, platformContract\)/);
 });
