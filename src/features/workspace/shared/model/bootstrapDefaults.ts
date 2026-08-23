@@ -18,6 +18,7 @@ export const EMPTY_BOOTSTRAP: BootstrapPayload = {
   reports: [],
   reportFindings: [],
   qaReports: [],
+  qaRequests: [],
   testResults: [],
   qaFindings: [],
   testFindings: [],

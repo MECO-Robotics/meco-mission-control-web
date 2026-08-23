@@ -46,6 +46,7 @@ const bootstrap = {
   reports: [],
   reportFindings: [],
   qaReports: [],
+  qaRequests: [],
   testResults: [],
   qaFindings: [],
   testFindings: [],

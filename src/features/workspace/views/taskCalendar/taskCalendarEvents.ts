@@ -292,8 +292,17 @@ export function buildTaskCalendarEvents({
 }
 
 export function isTaskDueSoon(dueDate: string, today = new Date()) {
-  const normalizedToday = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
-  const parsedDue = parseLocalDate(asDateOnly(dueDate))?.getTime() ?? Number.NaN;
-  const diffDays = (parsedDue - normalizedToday) / CALENDAR_MS_PER_DAY;
+  const parsedDue = parseLocalDate(asDateOnly(dueDate));
+  if (!parsedDue) {
+    return false;
+  }
+
+  const normalizedToday = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+  const normalizedDue = Date.UTC(
+    parsedDue.getFullYear(),
+    parsedDue.getMonth(),
+    parsedDue.getDate(),
+  );
+  const diffDays = (normalizedDue - normalizedToday) / CALENDAR_MS_PER_DAY;
   return diffDays >= 0 && diffDays <= 7;
 }

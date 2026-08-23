@@ -12,6 +12,18 @@ describe("buildTaskCalendarEvents", () => {
     expect(isTaskDueSoon("2026-05-07", new Date(2026, 4, 7, 8))).toBe(true);
   });
 
+  it("uses calendar days across the fall daylight-saving transition", () => {
+    const previousTimezone = process.env.TZ;
+    process.env.TZ = "America/New_York";
+
+    try {
+      expect(isTaskDueSoon("2026-11-07", new Date(2026, 9, 31, 8))).toBe(true);
+      expect(isTaskDueSoon("2026-11-08", new Date(2026, 9, 31, 8))).toBe(false);
+    } finally {
+      process.env.TZ = previousTimezone;
+    }
+  });
+
   it("uses scheduled meeting timestamps and project context", () => {
     const bootstrap = {
       ...EMPTY_BOOTSTRAP,

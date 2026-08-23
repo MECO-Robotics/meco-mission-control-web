@@ -8,6 +8,7 @@ import type {
   MeetingRecord,
   MilestoneRequirementRecord,
   QaReviewRecord,
+  QaRequestRecord,
 } from "@/types/recordsExecution";
 
 describe("normalizeBootstrapPayload", () => {
@@ -124,6 +125,26 @@ describe("normalizeBootstrapPayload", () => {
     expect(normalized.attendanceRecords).toEqual(payload.attendanceRecords);
     expect(normalized.qaReviews).toEqual(qaReviews);
     expect(normalized.escalations).toEqual(escalations);
+  });
+
+  it("preserves QA requests required by the platform bootstrap contract", () => {
+    const qaRequests: QaRequestRecord[] = [
+      {
+        id: "qa-request-1",
+        taskId: "task-1",
+        subject: "Review drivetrain wiring",
+        mentorId: "mentor-1",
+        requestedById: "student-1",
+        createdAt: "2026-03-01T20:00:00.000Z",
+        status: "requested",
+      },
+    ];
+    const payload: BootstrapPayload = {
+      ...EMPTY_BOOTSTRAP,
+      qaRequests,
+    };
+
+    expect(normalizeBootstrapPayload(payload).qaRequests).toEqual(qaRequests);
   });
 
   it("normalizes unknown task blocker types to other", () => {
