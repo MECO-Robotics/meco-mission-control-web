@@ -121,9 +121,22 @@ test("all GitHub Actions are pinned and production SSH trust is pre-provisioned"
   assert.doesNotMatch(deploy, /ssh-keyscan/);
   assert.match(deploy, /VPS_SSH_KNOWN_HOSTS/);
   const mergeGate = await readFile(".github/workflows/merge-requirements.yml", "utf8");
-  assert.doesNotMatch(mergeGate, /ghcr|packages:|attestations:|meco-mission-control-platform|meco-mission-control-mobile/i);
+  assert.doesNotMatch(mergeGate, /ghcr|packages:|attestations:/i);
+  assert.match(mergeGate, /validate-integration/);
+  assert.match(mergeGate, /INTEGRATION_OUTCOME/);
   assert.match(mergeGate, /pullRequest\.head\.sha !== headSha/);
   assert.match(mergeGate, /process\.env\.CI_OUTCOME === 'success'/);
+});
+
+test("trusted integration validation checks independent repositories", async () => {
+  const gate = await readFile("scripts/merge-requirements-gate.mjs", "utf8");
+  const verifier = await readFile("scripts/verify-bootstrap-contract.mjs", "utf8");
+
+  assert.match(gate, /meco-mission-control-platform/);
+  assert.match(gate, /meco-mission-control-mobile/);
+  assert.match(gate, /\["ci-validate", "snapshot-validate"\]/);
+  assert.match(verifier, /readPublicRepositoryFile/);
+  assert.match(verifier, /deepStrictEqual\(contract, platformContract\)/);
 });
 
 test("script CSP contains no inline or eval execution allowances", async () => {

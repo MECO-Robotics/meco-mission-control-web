@@ -1,4 +1,8 @@
+import { deepStrictEqual } from "node:assert";
 import { createHash } from "node:crypto";
+
+const contractRepository = "MECO-Robotics/meco-mission-control-platform";
+const contractPath = "contracts/platform/bootstrap/v1/contract.json";
 
 export const trustedCiWorkflowSha256 = "2660805581abe2cffbb85d3db98a99fa192b20d23624ffa186da04d9c943c894";
 
@@ -25,6 +29,16 @@ async function fetchJson(url, token) {
     throw error;
   }
   return response.json();
+}
+
+export async function readPublicRepositoryFile(repository, filePath, ref) {
+  const payload = await fetchJson(
+    `https://api.github.com/repos/${repository}/contents/${filePath}?ref=${encodeURIComponent(ref)}`,
+  );
+  if (payload.type !== "file" || payload.encoding !== "base64" || !payload.content) {
+    throw new Error(`${repository}/${filePath}@${ref} was not returned as a base64 file.`);
+  }
+  return Buffer.from(payload.content.replace(/\s+/g, ""), "base64");
 }
 
 export function validateBootstrapContract(contract) {
@@ -145,9 +159,78 @@ async function readRepositoryFile(repository, filePath, headSha, token) {
   return Buffer.from(payload.content.replace(/\s+/g, ""), "base64");
 }
 
+async function getExternalBranchSha(repository, branch, allowDefaultFallback) {
+  try {
+    const payload = await fetchJson(
+      `https://api.github.com/repos/${repository}/branches/${encodeURIComponent(branch)}`,
+    );
+    return payload.commit?.sha;
+  } catch (error) {
+    if (!allowDefaultFallback || error.status !== 404) {
+      throw error;
+    }
+    const metadata = await fetchJson(`https://api.github.com/repos/${repository}`);
+    const fallback = metadata.default_branch;
+    if (!fallback || fallback === branch) {
+      throw error;
+    }
+    const payload = await fetchJson(
+      `https://api.github.com/repos/${repository}/branches/${encodeURIComponent(fallback)}`,
+    );
+    return payload.commit?.sha;
+  }
+}
+
+async function validateExternalRepository(repository, branch, allowDefaultFallback) {
+  const sha = await getExternalBranchSha(repository, branch, allowDefaultFallback);
+  if (!sha) {
+    throw new Error(`Could not resolve ${repository}@${branch}.`);
+  }
+  const payload = await fetchJson(
+    `https://api.github.com/repos/${repository}/commits/${sha}/check-runs?per_page=100`,
+  );
+  assertRequiredCheckRuns(payload.check_runs ?? [], ["ci-validate", "snapshot-validate"]);
+  console.log(`Cross-repository checks passed for ${repository}@${sha}.`);
+}
+
+async function validateIntegration() {
+  const repository = requireValue(process.env.GITHUB_REPOSITORY, "GITHUB_REPOSITORY");
+  const token = requireValue(process.env.GITHUB_TOKEN, "GITHUB_TOKEN");
+  const headSha = requireValue(process.env.PR_HEAD_SHA, "PR_HEAD_SHA");
+  const baseRef = requireValue(process.env.PR_BASE_REF, "PR_BASE_REF");
+  const headRef = requireValue(process.env.PR_HEAD_REF, "PR_HEAD_REF");
+  const contractBranch = baseRef === "main" ? "main" : "development";
+  const platformContractBytes = await readPublicRepositoryFile(
+    contractRepository,
+    contractPath,
+    contractBranch,
+  );
+  const webContractBytes = await readRepositoryFile(repository, contractPath, headSha, token);
+  const platformContract = JSON.parse(platformContractBytes.toString("utf8"));
+  const webContract = JSON.parse(webContractBytes.toString("utf8"));
+  validateBootstrapContract(platformContract);
+  validateBootstrapContract(webContract);
+  deepStrictEqual(webContract, platformContract);
+  console.log(`Web bootstrap contract matches ${contractRepository}@${contractBranch}.`);
+
+  if (baseRef !== "main") {
+    return;
+  }
+  const promotionBranch = headRef === "development" ? "development" : headRef;
+  const allowDefaultFallback = promotionBranch === "development";
+  await validateExternalRepository(contractRepository, promotionBranch, allowDefaultFallback);
+  await validateExternalRepository(
+    "MECO-Robotics/meco-mission-control-mobile",
+    promotionBranch,
+    allowDefaultFallback,
+  );
+}
+
 const command = process.argv[2];
 if (command === "validate-ci") {
   await validateCi();
+} else if (command === "validate-integration") {
+  await validateIntegration();
 } else if (process.argv[1] === new URL(import.meta.url).pathname) {
-  throw new Error("Expected validate-ci command.");
+  throw new Error("Expected validate-ci or validate-integration command.");
 }

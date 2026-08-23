@@ -44,7 +44,10 @@ default-branch `merge-requirements.yml` workflow publishes the protected
 The trusted workflow never checks out or executes the PR revision. It accepts only
 `pull_request` runs from `.github/workflows/ci.yml`, requires the PR copy of that
 workflow to match the trusted SHA-256 embedded in the gate script, and verifies that
-the exact PR head passed all three required web checks.
+the exact PR head passed all three required web checks. It also compares the web
+bootstrap contract with the platform repository. For PRs into `main`, it requires
+successful `ci-validate` and `snapshot-validate` checks on the corresponding platform
+and mobile promotion branches.
 
 Because `workflow_run` executes the workflow and gate script from the default branch,
 changes to this trust boundary must land on `main` before a development PR relies on
@@ -77,11 +80,13 @@ them. The bootstrap subset is `.github/workflows/merge-requirements.yml` and
 
 ### Cross-repository coordination
 
-- Web merge checks do not query platform or mobile repositories and do not require
-  access to cross-repository packages.
-- API compatibility remains a release-review responsibility: deploy compatible
-  platform changes before a web bundle that depends on them, and confirm shared
-  mobile behavior when changing a shared contract.
+- The trusted merge gate queries public platform and mobile repository state without
+  requiring cross-repository package credentials.
+- The vendored web bootstrap contract must match the platform contract for the target
+  channel. Promote compatible platform contract changes before the dependent web
+  promotion.
+- PRs into `main` require successful platform and mobile `ci-validate` and
+  `snapshot-validate` checks before the web `merge-requirements` status passes.
 
 ## 3) Unresolved review-thread check
 

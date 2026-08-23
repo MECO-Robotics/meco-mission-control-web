@@ -1,6 +1,10 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { validateBootstrapContract } from "./merge-requirements-gate.mjs";
+import { deepStrictEqual } from "node:assert";
+import {
+  readPublicRepositoryFile,
+  validateBootstrapContract,
+} from "./merge-requirements-gate.mjs";
 
 const contractPath = path.resolve(
   process.cwd(),
@@ -17,7 +21,18 @@ async function main() {
     throw new Error("Bootstrap contract must use canonical two-space JSON formatting.");
   }
 
-  console.log("Web bootstrap contract is valid canonical JSON.");
+  const platformBranch = process.env.MECO_PLATFORM_CONTRACT_BRANCH ??
+    (process.env.GITHUB_BASE_REF === "main" ? "main" : "development");
+  const platformContent = await readPublicRepositoryFile(
+    "MECO-Robotics/meco-mission-control-platform",
+    "contracts/platform/bootstrap/v1/contract.json",
+    platformBranch,
+  );
+  const platformContract = JSON.parse(platformContent.toString("utf8"));
+  validateBootstrapContract(platformContract);
+  deepStrictEqual(contract, platformContract);
+
+  console.log(`Web bootstrap contract matches platform ${platformBranch}.`);
 }
 
 main().catch((error) => {
