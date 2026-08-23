@@ -159,30 +159,15 @@ async function readRepositoryFile(repository, filePath, headSha, token) {
   return Buffer.from(payload.content.replace(/\s+/g, ""), "base64");
 }
 
-async function getExternalBranchSha(repository, branch, allowDefaultFallback) {
-  try {
-    const payload = await fetchJson(
-      `https://api.github.com/repos/${repository}/branches/${encodeURIComponent(branch)}`,
-    );
-    return payload.commit?.sha;
-  } catch (error) {
-    if (!allowDefaultFallback || error.status !== 404) {
-      throw error;
-    }
-    const metadata = await fetchJson(`https://api.github.com/repos/${repository}`);
-    const fallback = metadata.default_branch;
-    if (!fallback || fallback === branch) {
-      throw error;
-    }
-    const payload = await fetchJson(
-      `https://api.github.com/repos/${repository}/branches/${encodeURIComponent(fallback)}`,
-    );
-    return payload.commit?.sha;
-  }
+async function getExternalBranchSha(repository, branch) {
+  const payload = await fetchJson(
+    `https://api.github.com/repos/${repository}/branches/${encodeURIComponent(branch)}`,
+  );
+  return payload.commit?.sha;
 }
 
-async function validateExternalRepository(repository, branch, allowDefaultFallback) {
-  const sha = await getExternalBranchSha(repository, branch, allowDefaultFallback);
+async function validateExternalRepository(repository, branch) {
+  const sha = await getExternalBranchSha(repository, branch);
   if (!sha) {
     throw new Error(`Could not resolve ${repository}@${branch}.`);
   }
@@ -199,7 +184,7 @@ async function validateIntegration() {
   const headSha = requireValue(process.env.PR_HEAD_SHA, "PR_HEAD_SHA");
   const baseRef = requireValue(process.env.PR_BASE_REF, "PR_BASE_REF");
   const headRef = requireValue(process.env.PR_HEAD_REF, "PR_HEAD_REF");
-  const contractBranch = baseRef === "main" ? "main" : "development";
+  const contractBranch = baseRef;
   const platformContractBytes = await readPublicRepositoryFile(
     contractRepository,
     contractPath,
@@ -217,12 +202,10 @@ async function validateIntegration() {
     return;
   }
   const promotionBranch = headRef === "development" ? "development" : headRef;
-  const allowDefaultFallback = promotionBranch === "development";
-  await validateExternalRepository(contractRepository, promotionBranch, allowDefaultFallback);
+  await validateExternalRepository(contractRepository, promotionBranch);
   await validateExternalRepository(
     "MECO-Robotics/meco-mission-control-mobile",
     promotionBranch,
-    allowDefaultFallback,
   );
 }
 

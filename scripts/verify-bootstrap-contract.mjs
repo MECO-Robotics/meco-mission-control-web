@@ -22,7 +22,8 @@ async function main() {
   }
 
   const platformBranch = process.env.MECO_PLATFORM_CONTRACT_BRANCH ??
-    (process.env.GITHUB_BASE_REF === "main" ? "main" : "development");
+    process.env.GITHUB_BASE_REF ??
+    "development";
   const platformContent = await readPublicRepositoryFile(
     "MECO-Robotics/meco-mission-control-platform",
     "contracts/platform/bootstrap/v1/contract.json",

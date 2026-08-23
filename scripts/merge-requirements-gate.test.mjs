@@ -135,6 +135,8 @@ test("trusted integration validation checks independent repositories", async () 
   assert.match(gate, /meco-mission-control-platform/);
   assert.match(gate, /meco-mission-control-mobile/);
   assert.match(gate, /\["ci-validate", "snapshot-validate"\]/);
+  assert.doesNotMatch(gate, /default_branch/);
+  assert.match(gate, /const contractBranch = baseRef/);
   assert.match(verifier, /readPublicRepositoryFile/);
   assert.match(verifier, /deepStrictEqual\(contract, platformContract\)/);
 });
