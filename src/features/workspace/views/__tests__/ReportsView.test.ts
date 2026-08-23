@@ -103,6 +103,7 @@ describe("ReportsView", () => {
     expect(html).toContain("Open task details");
     expect(html).not.toContain("Active task");
     expect(html).not.toContain(QA_TASK_HELPER_COPY);
+    expect(html).toContain(`Due ${new Date(2026, 0, 2).toLocaleDateString()}`);
   });
 
   it("keeps QA card copy readable in dark mode", () => {

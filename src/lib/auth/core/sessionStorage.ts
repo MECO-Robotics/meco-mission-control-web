@@ -2,9 +2,9 @@ const LEGACY_SESSION_STORAGE_KEY = "meco.session.token";
 
 let memoryCsrfToken: string | null = null;
 
-function removeStorage(storage: Storage | undefined, key: string) {
+function removeStorage(storageName: "localStorage" | "sessionStorage", key: string) {
   try {
-    storage?.removeItem(key);
+    getBrowserWindow()?.[storageName]?.removeItem(key);
   } catch {
     // Storage access can be blocked by privacy settings. The cookie session is
     // unaffected, and no credential is kept in browser-readable storage.
@@ -21,8 +21,8 @@ export function purgeLegacySessionTokens() {
     return;
   }
 
-  removeStorage(browserWindow.sessionStorage, LEGACY_SESSION_STORAGE_KEY);
-  removeStorage(browserWindow.localStorage, LEGACY_SESSION_STORAGE_KEY);
+  removeStorage("sessionStorage", LEGACY_SESSION_STORAGE_KEY);
+  removeStorage("localStorage", LEGACY_SESSION_STORAGE_KEY);
 }
 
 export function getSessionCsrfToken() {

@@ -90,4 +90,17 @@ describe("web session state", () => {
 
     expect(getSessionCsrfToken()).toBeNull();
   });
+
+  it("does not throw when browser storage property access is blocked", () => {
+    const blockedWindow = {} as Window;
+    Object.defineProperties(blockedWindow, {
+      localStorage: { get: () => { throw new DOMException("blocked", "SecurityError"); } },
+      sessionStorage: { get: () => { throw new DOMException("blocked", "SecurityError"); } },
+    });
+    Object.defineProperty(globalThis, "window", { configurable: true, value: blockedWindow });
+
+    expect(() => purgeLegacySessionTokens()).not.toThrow();
+    expect(() => setSessionCsrfToken("csrf-token")).not.toThrow();
+    expect(getSessionCsrfToken()).toBe("csrf-token");
+  });
 });

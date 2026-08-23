@@ -1,10 +1,17 @@
 /// <reference types="jest" />
 
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
-import { buildTaskCalendarEvents } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
+import {
+  buildTaskCalendarEvents,
+  isTaskDueSoon,
+} from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
 describe("buildTaskCalendarEvents", () => {
+  it("treats a local date-only deadline as due today", () => {
+    expect(isTaskDueSoon("2026-05-07", new Date(2026, 4, 7, 8))).toBe(true);
+  });
+
   it("uses scheduled meeting timestamps and project context", () => {
     const bootstrap = {
       ...EMPTY_BOOTSTRAP,

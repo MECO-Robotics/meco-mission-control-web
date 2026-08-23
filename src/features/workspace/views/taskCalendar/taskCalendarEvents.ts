@@ -6,6 +6,7 @@ import {
 } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { isMeetingVisibleInProjectScope } from "@/features/workspace/shared/events";
 import { getMilestoneTasksForState } from "@/features/workspace/shared/milestones/milestoneTaskState";
+import { parseLocalDate } from "@/lib/dateUtils";
 
 export type TaskCalendarEventType =
   | "milestone"
@@ -292,7 +293,7 @@ export function buildTaskCalendarEvents({
 
 export function isTaskDueSoon(dueDate: string, today = new Date()) {
   const normalizedToday = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
-  const parsedDue = new Date(asDateOnly(dueDate)).getTime();
+  const parsedDue = parseLocalDate(asDateOnly(dueDate))?.getTime() ?? Number.NaN;
   const diffDays = (parsedDue - normalizedToday) / CALENDAR_MS_PER_DAY;
   return diffDays >= 0 && diffDays <= 7;
 }
