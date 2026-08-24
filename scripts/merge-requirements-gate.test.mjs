@@ -160,6 +160,8 @@ test("trusted integration validation checks independent repositories", async () 
   assert.match(gate, /production-integration\.json/);
   assert.match(gate, /productionIntegration\.platform/);
   assert.match(gate, /productionIntegration\.mobile/);
+  assert.match(gate, /productionIntegration\.platform\.branch !== baseRef/);
+  assert.doesNotMatch(gate, /let contractRevision = baseRef/);
   assert.doesNotMatch(gate, /getExternalBranchSha/);
   assert.match(gate, /candidate\.path === "\.github\/workflows\/ci\.yml"/);
   assert.match(gate, /candidate\.event === "pull_request"/);

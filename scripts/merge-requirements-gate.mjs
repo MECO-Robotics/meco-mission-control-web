@@ -225,19 +225,20 @@ async function validateIntegration() {
   const token = requireValue(process.env.GITHUB_TOKEN, "GITHUB_TOKEN");
   const headSha = requireValue(process.env.PR_HEAD_SHA, "PR_HEAD_SHA");
   const baseRef = requireValue(process.env.PR_BASE_REF, "PR_BASE_REF");
-  let contractRevision = baseRef;
-  let productionIntegration;
-  if (baseRef === "main") {
-    const manifestBytes = await readRepositoryFile(
-      repository,
-      productionIntegrationPath,
-      headSha,
-      token,
+  const manifestBytes = await readRepositoryFile(
+    repository,
+    productionIntegrationPath,
+    headSha,
+    token,
+  );
+  const productionIntegration = JSON.parse(manifestBytes.toString("utf8"));
+  validateProductionIntegrationManifest(productionIntegration);
+  if (baseRef !== "main" && productionIntegration.platform.branch !== baseRef) {
+    throw new Error(
+      `Pinned platform branch ${productionIntegration.platform.branch} does not match PR base ${baseRef}.`,
     );
-    productionIntegration = JSON.parse(manifestBytes.toString("utf8"));
-    validateProductionIntegrationManifest(productionIntegration);
-    contractRevision = productionIntegration.platform.revision;
   }
+  const contractRevision = productionIntegration.platform.revision;
   const platformContractBytes = await readPublicRepositoryFile(
     contractRepository,
     contractPath,

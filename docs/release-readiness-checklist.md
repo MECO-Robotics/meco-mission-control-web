@@ -82,9 +82,10 @@ them. The bootstrap subset is `.github/workflows/merge-requirements.yml` and
 
 - The trusted merge gate queries public platform and mobile repository state without
   requiring cross-repository package credentials.
-- The vendored web bootstrap contract must match the platform contract from the exact
-  target branch (`development`, `main`, or the named staging branch). Promote compatible
-  platform contract changes before the dependent web promotion.
+- The vendored web bootstrap contract must match the platform contract at the immutable
+  revision in `contracts/production-integration.json`. For development and staging PRs,
+  the manifest's platform branch must exactly match the PR target. Promote compatible
+  platform contract changes and update the manifest before the dependent web change.
 - PRs into `main` require successful platform and mobile `ci-validate` and
   `snapshot-validate` checks before the web `merge-requirements` status passes. Update
   `contracts/production-integration.json` to the full, reviewed platform and mobile
