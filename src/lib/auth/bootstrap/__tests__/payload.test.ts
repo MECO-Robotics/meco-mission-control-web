@@ -184,7 +184,7 @@ describe("normalizeBootstrapPayload", () => {
     } as unknown as BootstrapPayload;
 
     const blocker = normalizeBootstrapPayload(payload).taskBlockers?.[0];
-    expect(blocker?.blockerType).toBe("other");
+    expect(blocker?.blockerType).toBe("external");
     expect(blocker?.blockerId).toBe("vendor-order-42");
     expect(blocker?.sourceKind).toBe("external");
   });

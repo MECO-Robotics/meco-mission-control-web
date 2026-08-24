@@ -1,4 +1,4 @@
-import type { TaskBlockerSeverity, TaskBlockerType } from "@/types/common";
+import type { TaskBlockerSeverity } from "@/types/common";
 import type {
   TaskBlockerDraft,
   TaskBlockerPayload,
@@ -65,7 +65,7 @@ export function buildTaskBlockerPayload(
 ): TaskBlockerPayload {
   return {
     blockedTaskId: taskId,
-    blockerType: blocker.blockerType as TaskBlockerType,
+    blockerType: blocker.sourceKind === "external" ? "external" : blocker.blockerType,
     blockerId: blocker.blockerId ?? null,
     description: blocker.description.trim(),
     severity: blocker.severity as TaskBlockerSeverity,

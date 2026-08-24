@@ -105,7 +105,7 @@ export function scopeBootstrapBySelection(
       return true;
     }
 
-    if (blocker.sourceKind === "external") {
+    if (blocker.blockerType === "external" || blocker.sourceKind === "external") {
       return true;
     }
 

@@ -4,7 +4,6 @@ import type { LegacyBootstrapPayload } from "./shared";
 
 const LEGACY_BLOCKER_TYPE_FALLBACKS: Record<string, TaskBlockerRecord["blockerType"]> = {
   artifact_instance: "other",
-  external: "other",
   mechanism: "design-issue",
   milestone: "other",
   part_instance: "lost-part",
