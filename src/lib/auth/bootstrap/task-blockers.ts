@@ -31,6 +31,7 @@ export function normalizeBootstrapTaskBlockers(
     blockedTaskId: blocker.blockedTaskId ?? "",
     blockerType: normalizeBlockerType(blocker.blockerType),
     blockerId: blocker.blockerId ?? null,
+    sourceKind: blocker.blockerType ?? null,
     description: blocker.description ?? "",
     severity: blocker.severity ?? "medium",
     status: blocker.status ?? "open",

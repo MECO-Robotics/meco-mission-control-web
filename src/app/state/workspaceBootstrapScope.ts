@@ -105,6 +105,10 @@ export function scopeBootstrapBySelection(
       return true;
     }
 
+    if (blocker.sourceKind === "external") {
+      return true;
+    }
+
     return (
       scopedTaskIds.has(blocker.blockerId) ||
       scopedMilestoneIds.has(blocker.blockerId) ||

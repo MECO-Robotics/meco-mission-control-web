@@ -169,6 +169,24 @@ describe("normalizeBootstrapPayload", () => {
     const normalized = normalizeBootstrapPayload(payload);
 
     expect(normalized.taskBlockers?.[0]?.blockerType).toBe("other");
+    expect(normalized.taskBlockers?.[0]?.sourceKind).toBe("vendor-shutdown");
+  });
+
+  it("retains the legacy external relationship kind and source id", () => {
+    const payload = {
+      ...EMPTY_BOOTSTRAP,
+      taskBlockers: [{
+        id: "external-blocker",
+        blockedTaskId: "task-1",
+        blockerType: "external",
+        blockerId: "vendor-order-42",
+      }],
+    } as unknown as BootstrapPayload;
+
+    const blocker = normalizeBootstrapPayload(payload).taskBlockers?.[0];
+    expect(blocker?.blockerType).toBe("other");
+    expect(blocker?.blockerId).toBe("vendor-order-42");
+    expect(blocker?.sourceKind).toBe("external");
   });
 
   it("preserves task target risk through bootstrap normalization", () => {
