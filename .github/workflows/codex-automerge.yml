@@ -77,18 +77,27 @@ jobs:
             }
 
             if (context.eventName === 'workflow_run' && pullRequestNumbers.size === 0) {
-              const headSha = context.payload?.workflow_run?.head_sha;
-              if (headSha) {
-                const openPulls = await github.paginate(github.rest.pulls.list, {
+              const trustedRunId = context.payload?.workflow_run?.id;
+              const openPulls = await github.paginate(github.rest.pulls.list, {
+                owner,
+                repo,
+                state: 'open',
+                per_page: 100,
+              });
+              for (const pr of openPulls) {
+                const { data: combinedStatus } = await github.rest.repos.getCombinedStatusForRef({
                   owner,
                   repo,
-                  state: 'open',
+                  ref: pr.head.sha,
                   per_page: 100,
                 });
-                for (const pr of openPulls) {
-                  if (pr.head?.sha === headSha) {
-                    pullRequestNumbers.add(pr.number);
-                  }
+                const statusMatchesRun = (combinedStatus.statuses ?? []).some((status) => (
+                  status.context === 'merge-requirements'
+                    && status.state === 'success'
+                    && String(status.target_url ?? '').includes(`/actions/runs/${trustedRunId}`)
+                ));
+                if (statusMatchesRun) {
+                  pullRequestNumbers.add(pr.number);
                 }
               }
             }

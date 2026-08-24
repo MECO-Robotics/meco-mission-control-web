@@ -121,7 +121,9 @@ test("pull-request workflows expose neither repository secrets nor write tokens"
   assert.doesNotMatch(skills, /^\s+[a-z-]+:\s*write\s*$/m);
   assert.doesNotMatch(autoMerge, /^  pull_request:/m);
   assert.match(autoMerge, /^  pull_request_target:/m);
-  assert.match(autoMerge, /pr\.head\?\.sha === headSha/);
+  assert.match(autoMerge, /getCombinedStatusForRef/);
+  assert.match(autoMerge, /status\.context === 'merge-requirements'/);
+  assert.match(autoMerge, /actions\/runs\/\$\{trustedRunId\}/);
 });
 
 test("all GitHub Actions are pinned and production SSH trust is pre-provisioned", async () => {
