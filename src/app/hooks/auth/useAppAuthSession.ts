@@ -45,6 +45,7 @@ export interface UseAppAuthSessionResult {
   isLocalGoogleDevHost: boolean;
   isLocalGoogleOverrideActive: boolean;
   isSigningIn: boolean;
+  isSignInForced: boolean;
   sessionUser: SessionUser | null;
   setAuthMessage: (message: string) => void;
 }
@@ -57,6 +58,7 @@ export function useAppAuthSession({
   const [sessionUser, setSessionUser] = useState<SessionUser | null>(null);
   const [authBooting, setAuthBooting] = useState(true);
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [isSignInForced, setIsSignInForced] = useState(false);
   const [authMessage, setAuthMessage] = useState<string | null>(null);
   const resetWorkspaceRef = useRef(resetWorkspace);
 
@@ -85,6 +87,7 @@ export function useAppAuthSession({
     resetWorkspaceRef,
     setAuthMessage,
     setIsSigningIn,
+    setIsSignInForced,
     setSessionUser,
   });
 
@@ -120,6 +123,7 @@ export function useAppAuthSession({
     isLocalGoogleDevHost,
     isLocalGoogleOverrideActive,
     isSigningIn,
+    isSignInForced,
     sessionUser,
     setAuthMessage: setAuthMessageNow,
   };

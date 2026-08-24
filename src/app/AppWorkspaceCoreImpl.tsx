@@ -4,7 +4,6 @@ import { AppWorkspaceShellView } from "@/app/shell/AppWorkspaceShellView";
 import { useAppWorkspaceController } from "@/app/hooks/useAppWorkspaceController";
 import { AuthStatusScreen, SignInScreen } from "@/features/auth/AuthScreens";
 import { shouldShowEnforcedSignInScreen } from "@/app/publicDemoAccess";
-import { UNCONFIRMED_SIGN_OUT_MESSAGE } from "@/app/hooks/auth/useAppAuthSessionActions";
 
 export default function AppWorkspaceCoreImpl() {
   const c = useAppWorkspaceController();
@@ -40,7 +39,7 @@ export default function AppWorkspaceCoreImpl() {
       isPublicDemoSession: auth.isPublicDemoSession,
       isSignInScreenRequested: auth.isSignInScreenRequested,
       sessionUser: auth.sessionUser,
-      forceSignIn: auth.authMessage === UNCONFIRMED_SIGN_OUT_MESSAGE,
+      forceSignIn: auth.isSignInForced,
     })
   ) {
     return (
