@@ -32,9 +32,19 @@ async function fetchJson(url, token) {
   return response.json();
 }
 
-export async function readPublicRepositoryFile(repository, filePath, ref) {
+export async function readPublicRepositoryFile(repository, filePath, ref, token) {
+  if (!token) {
+    const response = await fetch(
+      `https://raw.githubusercontent.com/${repository}/${encodeURIComponent(ref)}/${filePath}`,
+    );
+    if (!response.ok) {
+      throw new Error(`Public repository file request failed (${response.status}).`);
+    }
+    return Buffer.from(await response.arrayBuffer());
+  }
   const payload = await fetchJson(
     `https://api.github.com/repos/${repository}/contents/${filePath}?ref=${encodeURIComponent(ref)}`,
+    token,
   );
   if (payload.type !== "file" || payload.encoding !== "base64" || !payload.content) {
     throw new Error(`${repository}/${filePath}@${ref} was not returned as a base64 file.`);
@@ -75,13 +85,17 @@ export function validateProductionIntegrationManifest(manifest) {
   if (!manifest || typeof manifest !== "object" || Array.isArray(manifest)) {
     throw new Error("Production integration manifest must be a JSON object.");
   }
-  deepStrictEqual(Object.keys(manifest).sort(), ["mobileRevision", "platformRevision", "version"]);
+  deepStrictEqual(Object.keys(manifest).sort(), ["mobile", "platform", "version"]);
   if (manifest.version !== 1) {
     throw new Error("Production integration manifest version must be 1.");
   }
-  for (const key of ["platformRevision", "mobileRevision"]) {
-    if (typeof manifest[key] !== "string" || !/^[0-9a-f]{40}$/.test(manifest[key])) {
-      throw new Error(`Production integration manifest ${key} must be a full commit SHA.`);
+  for (const key of ["platform", "mobile"]) {
+    deepStrictEqual(Object.keys(manifest[key] ?? {}).sort(), ["branch", "revision"]);
+    if (!/^(development|main|staging(?:\/.*)?)$/.test(manifest[key].branch)) {
+      throw new Error(`Production integration manifest ${key} branch is not a release branch.`);
+    }
+    if (typeof manifest[key].revision !== "string" || !/^[0-9a-f]{40}$/.test(manifest[key].revision)) {
+      throw new Error(`Production integration manifest ${key} revision must be a full commit SHA.`);
     }
   }
 }
@@ -175,12 +189,35 @@ async function readRepositoryFile(repository, filePath, headSha, token) {
   return Buffer.from(payload.content.replace(/\s+/g, ""), "base64");
 }
 
-async function validateExternalRepository(repository, sha) {
-  const payload = await fetchJson(
-    `https://api.github.com/repos/${repository}/commits/${sha}/check-runs?per_page=100`,
+async function validateExternalRepository(repository, release, token) {
+  const comparison = await fetchJson(
+    `https://api.github.com/repos/${repository}/compare/${release.revision}...${encodeURIComponent(release.branch)}`,
+    token,
   );
-  assertRequiredCheckRuns(payload.check_runs ?? [], ["ci-validate", "snapshot-validate"]);
-  console.log(`Cross-repository checks passed for ${repository}@${sha}.`);
+  if (comparison.status !== "identical" && comparison.status !== "ahead") {
+    throw new Error(`${repository}@${release.revision} is not in release branch ${release.branch}.`);
+  }
+  const runs = await fetchJson(
+    `https://api.github.com/repos/${repository}/actions/runs?head_sha=${release.revision}&per_page=100`,
+    token,
+  );
+  const run = (runs.workflow_runs ?? []).find((candidate) => (
+    candidate.path === ".github/workflows/ci.yml"
+      && (candidate.event === "pull_request" || (
+        candidate.event === "push" && candidate.head_branch === release.branch
+      ))
+      && candidate.head_sha === release.revision
+      && candidate.conclusion === "success"
+  ));
+  if (!run) {
+    throw new Error(`No successful trusted CI run for ${repository}@${release.revision}.`);
+  }
+  const jobs = await fetchJson(
+    `https://api.github.com/repos/${repository}/actions/runs/${run.id}/jobs?per_page=100`,
+    token,
+  );
+  assertRequiredCheckRuns(jobs.jobs ?? [], ["ci-validate", "snapshot-validate"]);
+  console.log(`Trusted cross-repository CI passed for ${repository}@${release.revision}.`);
 }
 
 async function validateIntegration() {
@@ -199,12 +236,13 @@ async function validateIntegration() {
     );
     productionIntegration = JSON.parse(manifestBytes.toString("utf8"));
     validateProductionIntegrationManifest(productionIntegration);
-    contractRevision = productionIntegration.platformRevision;
+    contractRevision = productionIntegration.platform.revision;
   }
   const platformContractBytes = await readPublicRepositoryFile(
     contractRepository,
     contractPath,
     contractRevision,
+    token,
   );
   const webContractBytes = await readRepositoryFile(repository, contractPath, headSha, token);
   const platformContract = JSON.parse(platformContractBytes.toString("utf8"));
@@ -217,10 +255,11 @@ async function validateIntegration() {
   if (baseRef !== "main") {
     return;
   }
-  await validateExternalRepository(contractRepository, productionIntegration.platformRevision);
+  await validateExternalRepository(contractRepository, productionIntegration.platform, token);
   await validateExternalRepository(
     "MECO-Robotics/meco-mission-control-mobile",
-    productionIntegration.mobileRevision,
+    productionIntegration.mobile,
+    token,
   );
 }
 

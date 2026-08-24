@@ -35,12 +35,15 @@ test("bootstrap validation rejects required keys without schemas", () => {
 test("production integration manifest pins exact external revisions", () => {
   const manifest = {
     version: 1,
-    platformRevision: "a".repeat(40),
-    mobileRevision: "b".repeat(40),
+    platform: { branch: "development", revision: "a".repeat(40) },
+    mobile: { branch: "development", revision: "b".repeat(40) },
   };
   assert.doesNotThrow(() => validateProductionIntegrationManifest(manifest));
   assert.throws(
-    () => validateProductionIntegrationManifest({ ...manifest, platformRevision: "development" }),
+    () => validateProductionIntegrationManifest({
+      ...manifest,
+      platform: { ...manifest.platform, revision: "development" },
+    }),
     /full commit SHA/,
   );
   assert.throws(
@@ -155,9 +158,15 @@ test("trusted integration validation checks independent repositories", async () 
   assert.match(gate, /\["ci-validate", "snapshot-validate"\]/);
   assert.doesNotMatch(gate, /default_branch/);
   assert.match(gate, /production-integration\.json/);
-  assert.match(gate, /productionIntegration\.platformRevision/);
-  assert.match(gate, /productionIntegration\.mobileRevision/);
+  assert.match(gate, /productionIntegration\.platform/);
+  assert.match(gate, /productionIntegration\.mobile/);
   assert.doesNotMatch(gate, /getExternalBranchSha/);
+  assert.match(gate, /candidate\.path === "\.github\/workflows\/ci\.yml"/);
+  assert.match(gate, /candidate\.event === "pull_request"/);
+  assert.match(gate, /candidate\.event === "push"/);
+  assert.match(gate, /compare\/\$\{release\.revision\}/);
+  assert.match(gate, /raw\.githubusercontent\.com/);
+  assert.match(verifier, /process\.env\.GITHUB_TOKEN/);
   assert.match(verifier, /GITHUB_REF_NAME/);
   assert.match(verifier, /pushedRef\?\.startsWith\("staging"\)/);
   assert.match(verifier, /readPublicRepositoryFile/);

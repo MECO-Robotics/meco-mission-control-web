@@ -88,8 +88,10 @@ them. The bootstrap subset is `.github/workflows/merge-requirements.yml` and
 - PRs into `main` require successful platform and mobile `ci-validate` and
   `snapshot-validate` checks before the web `merge-requirements` status passes. Update
   `contracts/production-integration.json` to the full, reviewed platform and mobile
-  commit SHAs being released. The gate validates the contract and checks at those
-  immutable revisions, so later external branch movement cannot stale an approval.
+  release branches and commit SHAs being released. The gate authenticates its GitHub
+  API reads, proves each immutable revision belongs to its declared release branch,
+  and validates required jobs from that revision's successful canonical CI workflow,
+  so later external branch movement cannot stale an approval.
 
 ## 3) Unresolved review-thread check
 

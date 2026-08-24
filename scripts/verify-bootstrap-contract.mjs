@@ -36,6 +36,7 @@ async function main() {
     "MECO-Robotics/meco-mission-control-platform",
     "contracts/platform/bootstrap/v1/contract.json",
     platformBranch,
+    process.env.GITHUB_TOKEN,
   );
   const platformContract = JSON.parse(platformContent.toString("utf8"));
   validateBootstrapContract(platformContract);
