@@ -94,8 +94,8 @@ them. The bootstrap subset is `.github/workflows/merge-requirements.yml` and
   and validates required jobs from that revision's successful canonical CI workflow,
   so later external branch movement cannot stale an approval.
 - Pull-request `npm run verify-contracts` uses the same pinned platform revision as
-  the trusted gate. Local and post-merge push verification use the selected branch
-  channel.
+  the trusted gate and confirms that revision belongs to its declared release branch.
+  Local and post-merge push verification use the selected branch channel.
 
 ## 3) Unresolved review-thread check
 

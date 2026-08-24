@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { deepStrictEqual } from "node:assert";
 import {
+  assertExternalRevisionInBranch,
   readPublicRepositoryFile,
   validateBootstrapContract,
   validateProductionIntegrationManifest,
@@ -43,6 +44,14 @@ async function main() {
         `Pinned platform branch ${manifest.platform.branch} does not match PR base ${process.env.GITHUB_BASE_REF}.`,
       );
     }
+    if (!process.env.GITHUB_TOKEN) {
+      throw new Error("GITHUB_TOKEN is required to validate a pull-request contract pin.");
+    }
+    await assertExternalRevisionInBranch(
+      "MECO-Robotics/meco-mission-control-platform",
+      manifest.platform,
+      process.env.GITHUB_TOKEN,
+    );
     platformBranch = manifest.platform.revision;
   }
   const platformContent = await readPublicRepositoryFile(
