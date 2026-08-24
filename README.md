@@ -515,7 +515,7 @@ CI also runs `npm run audit:organization:strict` before `npm run verify`.
 | `npm run test:ci` | validating the full Jest suite in CI mode |
 | `npm run test:watch` | iterating locally on a specific unit/view test |
 | `npm run build:bundle` | checking Vite production bundle correctness |
-| `npm run verify-contracts` | validating that the checked-in bootstrap contract is canonical, well-formed JSON Schema |
+| `npm run verify-contracts` | validating canonical JSON Schema and matching it to the platform contract (`development` by default, `main` for main-targeting CI) |
 | `npm run test:security-workflows` | testing the trusted merge-gate validation helpers |
 | `npm run audit:organization` | checking file/directory/CSS organization warnings |
 | `npm run audit:organization:strict` | enforcing hard organization limits before structural PRs |

@@ -44,7 +44,10 @@ default-branch `merge-requirements.yml` workflow publishes the protected
 The trusted workflow never checks out or executes the PR revision. It accepts only
 `pull_request` runs from `.github/workflows/ci.yml`, requires the PR copy of that
 workflow to match the trusted SHA-256 embedded in the gate script, and verifies that
-the exact PR head passed all three required web checks.
+the exact PR head passed all three required web checks. It also compares the web
+bootstrap contract with the platform repository. For PRs into `main`, it requires
+successful `ci-validate` and `snapshot-validate` checks on the exact platform and
+mobile commits pinned in `contracts/production-integration.json`.
 
 Because `workflow_run` executes the workflow and gate script from the default branch,
 changes to this trust boundary must land on `main` before a development PR relies on
@@ -77,11 +80,19 @@ them. The bootstrap subset is `.github/workflows/merge-requirements.yml` and
 
 ### Cross-repository coordination
 
-- Web merge checks do not query platform or mobile repositories and do not require
-  access to cross-repository packages.
-- API compatibility remains a release-review responsibility: deploy compatible
-  platform changes before a web bundle that depends on them, and confirm shared
-  mobile behavior when changing a shared contract.
+- The trusted merge gate queries public platform and mobile repository state without
+  requiring cross-repository package credentials.
+- The vendored web bootstrap contract must match the platform contract at the immutable
+  revision in `contracts/production-integration.json`. For development and staging PRs,
+  the manifest's platform branch must exactly match the PR target. Promote compatible
+  platform contract changes and update the manifest before the dependent web change.
+- PRs into `main` require successful platform and mobile `ci-validate` and
+  `snapshot-validate` checks before the web `merge-requirements` status passes. Update
+  `contracts/production-integration.json` to the full, reviewed platform and mobile
+  release branches and commit SHAs being released. The gate authenticates its GitHub
+  API reads, proves each immutable revision belongs to its declared release branch,
+  and validates required jobs from that revision's successful canonical CI workflow,
+  so later external branch movement cannot stale an approval.
 
 ## 3) Unresolved review-thread check
 

@@ -9,6 +9,7 @@ import {
   assertTrustedCiWorkflow,
   trustedCiWorkflowSha256,
   validateBootstrapContract,
+  validateProductionIntegrationManifest,
 } from "./merge-requirements-gate.mjs";
 
 const validContract = {
@@ -28,6 +29,26 @@ test("bootstrap validation rejects required keys without schemas", () => {
   assert.throws(
     () => validateBootstrapContract({ ...validContract, required: ["members"] }),
     /required key is invalid/,
+  );
+});
+
+test("production integration manifest pins exact external revisions", () => {
+  const manifest = {
+    version: 1,
+    platform: { branch: "development", revision: "a".repeat(40) },
+    mobile: { branch: "development", revision: "b".repeat(40) },
+  };
+  assert.doesNotThrow(() => validateProductionIntegrationManifest(manifest));
+  assert.throws(
+    () => validateProductionIntegrationManifest({
+      ...manifest,
+      platform: { ...manifest.platform, revision: "development" },
+    }),
+    /full commit SHA/,
+  );
+  assert.throws(
+    () => validateProductionIntegrationManifest({ ...manifest, untrustedRevision: "c".repeat(40) }),
+    /Expected values to be strictly deep-equal/,
   );
 });
 
@@ -121,9 +142,37 @@ test("all GitHub Actions are pinned and production SSH trust is pre-provisioned"
   assert.doesNotMatch(deploy, /ssh-keyscan/);
   assert.match(deploy, /VPS_SSH_KNOWN_HOSTS/);
   const mergeGate = await readFile(".github/workflows/merge-requirements.yml", "utf8");
-  assert.doesNotMatch(mergeGate, /ghcr|packages:|attestations:|meco-mission-control-platform|meco-mission-control-mobile/i);
+  assert.doesNotMatch(mergeGate, /ghcr|packages:|attestations:/i);
+  assert.match(mergeGate, /validate-integration/);
+  assert.match(mergeGate, /INTEGRATION_OUTCOME/);
   assert.match(mergeGate, /pullRequest\.head\.sha !== headSha/);
   assert.match(mergeGate, /process\.env\.CI_OUTCOME === 'success'/);
+});
+
+test("trusted integration validation checks independent repositories", async () => {
+  const gate = await readFile("scripts/merge-requirements-gate.mjs", "utf8");
+  const verifier = await readFile("scripts/verify-bootstrap-contract.mjs", "utf8");
+
+  assert.match(gate, /meco-mission-control-platform/);
+  assert.match(gate, /meco-mission-control-mobile/);
+  assert.match(gate, /\["ci-validate", "snapshot-validate"\]/);
+  assert.doesNotMatch(gate, /default_branch/);
+  assert.match(gate, /production-integration\.json/);
+  assert.match(gate, /productionIntegration\.platform/);
+  assert.match(gate, /productionIntegration\.mobile/);
+  assert.match(gate, /productionIntegration\.platform\.branch !== baseRef/);
+  assert.doesNotMatch(gate, /let contractRevision = baseRef/);
+  assert.doesNotMatch(gate, /getExternalBranchSha/);
+  assert.match(gate, /candidate\.path === "\.github\/workflows\/ci\.yml"/);
+  assert.match(gate, /candidate\.event === "pull_request"/);
+  assert.match(gate, /candidate\.event === "push"/);
+  assert.match(gate, /compare\/\$\{release\.revision\}/);
+  assert.match(gate, /raw\.githubusercontent\.com/);
+  assert.match(verifier, /process\.env\.GITHUB_TOKEN/);
+  assert.match(verifier, /GITHUB_REF_NAME/);
+  assert.match(verifier, /pushedRef\?\.startsWith\("staging"\)/);
+  assert.match(verifier, /readPublicRepositoryFile/);
+  assert.match(verifier, /deepStrictEqual\(contract, platformContract\)/);
 });
 
 test("script CSP contains no inline or eval execution allowances", async () => {
