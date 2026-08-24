@@ -189,7 +189,7 @@ async function readRepositoryFile(repository, filePath, headSha, token) {
   return Buffer.from(payload.content.replace(/\s+/g, ""), "base64");
 }
 
-async function validateExternalRepository(repository, release, token) {
+export async function assertExternalRevisionInBranch(repository, release, token) {
   const comparison = await fetchJson(
     `https://api.github.com/repos/${repository}/compare/${release.revision}...${encodeURIComponent(release.branch)}`,
     token,
@@ -197,6 +197,10 @@ async function validateExternalRepository(repository, release, token) {
   if (comparison.status !== "identical" && comparison.status !== "ahead") {
     throw new Error(`${repository}@${release.revision} is not in release branch ${release.branch}.`);
   }
+}
+
+async function validateExternalRepository(repository, release, token) {
+  await assertExternalRevisionInBranch(repository, release, token);
   const runs = await fetchJson(
     `https://api.github.com/repos/${repository}/actions/runs?head_sha=${release.revision}&per_page=100`,
     token,
@@ -238,6 +242,7 @@ async function validateIntegration() {
       `Pinned platform branch ${productionIntegration.platform.branch} does not match PR base ${baseRef}.`,
     );
   }
+  await assertExternalRevisionInBranch(contractRepository, productionIntegration.platform, token);
   const contractRevision = productionIntegration.platform.revision;
   const platformContractBytes = await readPublicRepositoryFile(
     contractRepository,
