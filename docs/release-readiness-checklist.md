@@ -46,8 +46,8 @@ The trusted workflow never checks out or executes the PR revision. It accepts on
 workflow to match the trusted SHA-256 embedded in the gate script, and verifies that
 the exact PR head passed all three required web checks. It also compares the web
 bootstrap contract with the platform repository. For PRs into `main`, it requires
-successful `ci-validate` and `snapshot-validate` checks on the corresponding platform
-and mobile promotion branches.
+successful `ci-validate` and `snapshot-validate` checks on the exact platform and
+mobile commits pinned in `contracts/production-integration.json`.
 
 Because `workflow_run` executes the workflow and gate script from the default branch,
 changes to this trust boundary must land on `main` before a development PR relies on
@@ -86,9 +86,10 @@ them. The bootstrap subset is `.github/workflows/merge-requirements.yml` and
   target branch (`development`, `main`, or the named staging branch). Promote compatible
   platform contract changes before the dependent web promotion.
 - PRs into `main` require successful platform and mobile `ci-validate` and
-  `snapshot-validate` checks before the web `merge-requirements` status passes.
-  Development and staging promotions use the matching external branch; a web-only
-  direct hotfix uses the production `main` channel.
+  `snapshot-validate` checks before the web `merge-requirements` status passes. Update
+  `contracts/production-integration.json` to the full, reviewed platform and mobile
+  commit SHAs being released. The gate validates the contract and checks at those
+  immutable revisions, so later external branch movement cannot stale an approval.
 
 ## 3) Unresolved review-thread check
 

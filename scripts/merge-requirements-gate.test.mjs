@@ -9,6 +9,7 @@ import {
   assertTrustedCiWorkflow,
   trustedCiWorkflowSha256,
   validateBootstrapContract,
+  validateProductionIntegrationManifest,
 } from "./merge-requirements-gate.mjs";
 
 const validContract = {
@@ -28,6 +29,23 @@ test("bootstrap validation rejects required keys without schemas", () => {
   assert.throws(
     () => validateBootstrapContract({ ...validContract, required: ["members"] }),
     /required key is invalid/,
+  );
+});
+
+test("production integration manifest pins exact external revisions", () => {
+  const manifest = {
+    version: 1,
+    platformRevision: "a".repeat(40),
+    mobileRevision: "b".repeat(40),
+  };
+  assert.doesNotThrow(() => validateProductionIntegrationManifest(manifest));
+  assert.throws(
+    () => validateProductionIntegrationManifest({ ...manifest, platformRevision: "development" }),
+    /full commit SHA/,
+  );
+  assert.throws(
+    () => validateProductionIntegrationManifest({ ...manifest, untrustedRevision: "c".repeat(40) }),
+    /Expected values to be strictly deep-equal/,
   );
 });
 
@@ -136,8 +154,10 @@ test("trusted integration validation checks independent repositories", async () 
   assert.match(gate, /meco-mission-control-mobile/);
   assert.match(gate, /\["ci-validate", "snapshot-validate"\]/);
   assert.doesNotMatch(gate, /default_branch/);
-  assert.match(gate, /const contractBranch = baseRef/);
-  assert.match(gate, /headRef\.startsWith\("staging"\)/);
+  assert.match(gate, /production-integration\.json/);
+  assert.match(gate, /productionIntegration\.platformRevision/);
+  assert.match(gate, /productionIntegration\.mobileRevision/);
+  assert.doesNotMatch(gate, /getExternalBranchSha/);
   assert.match(verifier, /GITHUB_REF_NAME/);
   assert.match(verifier, /pushedRef\?\.startsWith\("staging"\)/);
   assert.match(verifier, /readPublicRepositoryFile/);

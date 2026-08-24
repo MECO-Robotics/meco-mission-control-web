@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 
 const contractRepository = "MECO-Robotics/meco-mission-control-platform";
 const contractPath = "contracts/platform/bootstrap/v1/contract.json";
+const productionIntegrationPath = "contracts/production-integration.json";
 
 export const trustedCiWorkflowSha256 = "2660805581abe2cffbb85d3db98a99fa192b20d23624ffa186da04d9c943c894";
 
@@ -66,6 +67,21 @@ export function validateBootstrapContract(contract) {
   for (const key of contract.required) {
     if (typeof key !== "string" || !(key in contract.properties)) {
       throw new Error(`Bootstrap contract required key is invalid: ${String(key)}.`);
+    }
+  }
+}
+
+export function validateProductionIntegrationManifest(manifest) {
+  if (!manifest || typeof manifest !== "object" || Array.isArray(manifest)) {
+    throw new Error("Production integration manifest must be a JSON object.");
+  }
+  deepStrictEqual(Object.keys(manifest).sort(), ["mobileRevision", "platformRevision", "version"]);
+  if (manifest.version !== 1) {
+    throw new Error("Production integration manifest version must be 1.");
+  }
+  for (const key of ["platformRevision", "mobileRevision"]) {
+    if (typeof manifest[key] !== "string" || !/^[0-9a-f]{40}$/.test(manifest[key])) {
+      throw new Error(`Production integration manifest ${key} must be a full commit SHA.`);
     }
   }
 }
@@ -159,18 +175,7 @@ async function readRepositoryFile(repository, filePath, headSha, token) {
   return Buffer.from(payload.content.replace(/\s+/g, ""), "base64");
 }
 
-async function getExternalBranchSha(repository, branch) {
-  const payload = await fetchJson(
-    `https://api.github.com/repos/${repository}/branches/${encodeURIComponent(branch)}`,
-  );
-  return payload.commit?.sha;
-}
-
-async function validateExternalRepository(repository, branch) {
-  const sha = await getExternalBranchSha(repository, branch);
-  if (!sha) {
-    throw new Error(`Could not resolve ${repository}@${branch}.`);
-  }
+async function validateExternalRepository(repository, sha) {
   const payload = await fetchJson(
     `https://api.github.com/repos/${repository}/commits/${sha}/check-runs?per_page=100`,
   );
@@ -183,12 +188,23 @@ async function validateIntegration() {
   const token = requireValue(process.env.GITHUB_TOKEN, "GITHUB_TOKEN");
   const headSha = requireValue(process.env.PR_HEAD_SHA, "PR_HEAD_SHA");
   const baseRef = requireValue(process.env.PR_BASE_REF, "PR_BASE_REF");
-  const headRef = requireValue(process.env.PR_HEAD_REF, "PR_HEAD_REF");
-  const contractBranch = baseRef;
+  let contractRevision = baseRef;
+  let productionIntegration;
+  if (baseRef === "main") {
+    const manifestBytes = await readRepositoryFile(
+      repository,
+      productionIntegrationPath,
+      headSha,
+      token,
+    );
+    productionIntegration = JSON.parse(manifestBytes.toString("utf8"));
+    validateProductionIntegrationManifest(productionIntegration);
+    contractRevision = productionIntegration.platformRevision;
+  }
   const platformContractBytes = await readPublicRepositoryFile(
     contractRepository,
     contractPath,
-    contractBranch,
+    contractRevision,
   );
   const webContractBytes = await readRepositoryFile(repository, contractPath, headSha, token);
   const platformContract = JSON.parse(platformContractBytes.toString("utf8"));
@@ -196,18 +212,15 @@ async function validateIntegration() {
   validateBootstrapContract(platformContract);
   validateBootstrapContract(webContract);
   deepStrictEqual(webContract, platformContract);
-  console.log(`Web bootstrap contract matches ${contractRepository}@${contractBranch}.`);
+  console.log(`Web bootstrap contract matches ${contractRepository}@${contractRevision}.`);
 
   if (baseRef !== "main") {
     return;
   }
-  const promotionBranch = headRef === "development" || headRef.startsWith("staging")
-    ? headRef
-    : "main";
-  await validateExternalRepository(contractRepository, promotionBranch);
+  await validateExternalRepository(contractRepository, productionIntegration.platformRevision);
   await validateExternalRepository(
     "MECO-Robotics/meco-mission-control-mobile",
-    promotionBranch,
+    productionIntegration.mobileRevision,
   );
 }
 
