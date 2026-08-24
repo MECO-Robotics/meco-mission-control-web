@@ -169,6 +169,8 @@ test("trusted integration validation checks independent repositories", async () 
   assert.match(gate, /compare\/\$\{release\.revision\}/);
   assert.match(gate, /raw\.githubusercontent\.com/);
   assert.match(verifier, /process\.env\.GITHUB_TOKEN/);
+  assert.match(verifier, /contracts\/production-integration\.json/);
+  assert.match(verifier, /manifest\.platform\.revision/);
   assert.match(verifier, /GITHUB_REF_NAME/);
   assert.match(verifier, /pushedRef\?\.startsWith\("staging"\)/);
   assert.match(verifier, /readPublicRepositoryFile/);

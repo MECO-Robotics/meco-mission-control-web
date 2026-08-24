@@ -4,6 +4,7 @@ import { deepStrictEqual } from "node:assert";
 import {
   readPublicRepositoryFile,
   validateBootstrapContract,
+  validateProductionIntegrationManifest,
 } from "./merge-requirements-gate.mjs";
 
 const contractPath = path.resolve(
@@ -27,11 +28,23 @@ async function main() {
     pushedRef?.startsWith("staging")
     ? pushedRef
     : undefined;
-  const platformBranch = [
+  let platformBranch = [
     process.env.MECO_PLATFORM_CONTRACT_BRANCH,
-    process.env.GITHUB_BASE_REF,
     pushedChannel,
   ].find((value) => value?.trim()) ?? "development";
+  if (process.env.GITHUB_BASE_REF) {
+    const manifest = JSON.parse(await readFile(
+      path.resolve(process.cwd(), "contracts/production-integration.json"),
+      "utf8",
+    ));
+    validateProductionIntegrationManifest(manifest);
+    if (process.env.GITHUB_BASE_REF !== "main" && manifest.platform.branch !== process.env.GITHUB_BASE_REF) {
+      throw new Error(
+        `Pinned platform branch ${manifest.platform.branch} does not match PR base ${process.env.GITHUB_BASE_REF}.`,
+      );
+    }
+    platformBranch = manifest.platform.revision;
+  }
   const platformContent = await readPublicRepositoryFile(
     "MECO-Robotics/meco-mission-control-platform",
     "contracts/platform/bootstrap/v1/contract.json",
