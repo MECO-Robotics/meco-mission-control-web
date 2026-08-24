@@ -31,10 +31,11 @@ export function shouldShowEnforcedSignInScreen(args: {
   isPublicDemoSession: boolean;
   isSignInScreenRequested: boolean;
   sessionUser: unknown;
+  forceSignIn?: boolean;
 }) {
   return Boolean(
     args.enforcedAuthConfig &&
       !args.sessionUser &&
-      (!args.isPublicDemoSession || args.isSignInScreenRequested),
+      (!args.isPublicDemoSession || args.isSignInScreenRequested || args.forceSignIn),
   );
 }
