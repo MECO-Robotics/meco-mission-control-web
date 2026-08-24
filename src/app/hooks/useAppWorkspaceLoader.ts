@@ -36,7 +36,7 @@ export function useAppWorkspaceLoader(
     try {
       let favoriteViews = await updateFavoriteView(viewId, isFavorite, handleUnauthorized);
 
-      if (viewId === "reports-worklogs-kanban" && !isFavorite) {
+      if (viewId === "reports-worklogs" && !isFavorite) {
         await updateFavoriteView("reports-work-logs", isFavorite, handleUnauthorized);
         favoriteViews = favoriteViews.filter((favorite) => favorite.viewId !== "reports-work-logs");
       }
