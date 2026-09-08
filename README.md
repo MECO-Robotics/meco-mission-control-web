@@ -115,7 +115,7 @@ Default local frontend API behavior expects:
 VITE_API_BASE_URL=/api
 VITE_DEV_PROXY_TARGET=http://localhost:8080
 VITE_DEV_SERVER_HOST=127.0.0.1
-VITE_DEV_SERVER_PORT=5177
+VITE_DEV_SERVER_PORT=5173
 ```
 
 ### Run locally
@@ -127,13 +127,13 @@ npm run dev
 Default Vite URL without an explicit port is:
 
 ```text
-http://localhost:5173
+http://127.0.0.1:5173
 ```
 
 With the committed `.env.example` values, use:
 
 ```text
-http://127.0.0.1:5177
+http://127.0.0.1:5173
 ```
 
 Hot-module replacement is intentionally disabled because React Fast Refresh injects
@@ -174,10 +174,10 @@ npm run verify
 3. Update shared frontend types under `src/types/*`.
 4. Wire the action through the relevant app hook:
    - `useAppWorkspaceTaskActions`
-   - `useAppWorkspaceCatalogActions`
+   - the relevant hook in `src/app/workspaceCatalog` (material editing owns its draft and commands)
    - `useAppWorkspaceReportActions`
    - `useAppWorkspaceRosterActions`
-5. Pass the action through the controller/shell slice only as far as needed.
+5. Compose the actual component props once in `AppWorkspaceShellView`; do not add key catalogs or controller projections.
 6. Add optimistic UI, rollback, unauthorized handling, and data refresh behavior where appropriate.
 
 ### Add or change bootstrap data fields
@@ -309,12 +309,12 @@ The workspace controller is intentionally split:
 - `useAppWorkspaceDerived`: derived selections, filtered records, scope helpers
 - `useAppWorkspaceLoader`: workspace bootstrap loading, unauthorized handling, uploads, navigation favorites, refresh helpers
 - `useAppWorkspaceTaskActions`: task/event/milestone-oriented mutations
-- `useAppWorkspaceCatalogActions`: inventory, subsystem, mechanism, part, manufacturing, purchase mutations
+- `src/app/workspaceCatalog`: catalog hooks receive explicit dependencies at controller composition; `useMaterialEditor` owns material draft/open/save state and commands
 - `useAppWorkspaceReportActions`: QA/report mutations
 - `useAppWorkspaceRosterActions`: member/roster mutations
-- `buildShellController`: narrows the full model/actions into the props needed by the rendered shell
+- `AppWorkspaceShellView`: derives navigation and composes actual shell/content/modal props once, without intermediate key catalogs
 
-Do not pass the full app model into new components by default. Prefer narrow props or a focused controller slice.
+Do not pass the full app model into new components by default. Prefer the concrete inputs the component uses.
 
 ## Repository Layout
 
@@ -456,11 +456,11 @@ Important behavior details:
 
 ### Local Google SSO testing
 
-Use the Vite proxy so browser origin remains `http://localhost:5173` while API traffic stays under `/api`.
+Use the Vite proxy so browser origin remains `http://127.0.0.1:5173` while API traffic stays under `/api`.
 
 If Google sign-in fails locally because the backend-provided client is not authorized for localhost:
 
-- Add `http://localhost:5173` to authorized JavaScript origins for that OAuth web client, or
+- Add `http://127.0.0.1:5173` to authorized JavaScript origins for that OAuth web client, or
 - Set `VITE_LOCAL_GOOGLE_CLIENT_ID` to a localhost-authorized client ID.
 
 The frontend never needs a Google client secret.
@@ -477,7 +477,7 @@ Frontend env vars are read by Vite through `import.meta.env`.
 | `VITE_DEV_PROXY_TARGET` | `http://localhost:8080` | Dev-server proxy target for `/api`. Only used by Vite dev server. |
 | `VITE_LOCAL_GOOGLE_CLIENT_ID` | unset | Optional localhost-only override for Google web client ID during local development. |
 | `VITE_DEV_SERVER_HOST` | `127.0.0.1` | Optional local Vite dev-server host override. |
-| `VITE_DEV_SERVER_PORT` | unset | Optional local Vite dev-server port override. `.env.example` uses `5177`. |
+| `VITE_DEV_SERVER_PORT` | unset | Optional local Vite dev-server port override. `.env.example` uses `5173`. |
 
 Production example:
 

@@ -62,5 +62,5 @@ export default function AppWorkspaceCoreImpl() {
     );
   }
 
-  return <AppWorkspaceShellView controller={c.shell} />;
+  return <AppWorkspaceShellView controller={c} />;
 }

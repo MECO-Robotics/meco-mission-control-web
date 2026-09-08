@@ -24,7 +24,6 @@ export function useAppWorkspaceDerivedWorkspace(
     milestoneReportModalMode,
     purchaseModalMode,
     manufacturingModalMode,
-    materialModalMode,
     partDefinitionModalMode,
     partInstanceModalMode,
     subsystemModalMode,
@@ -104,7 +103,6 @@ export function useAppWorkspaceDerivedWorkspace(
       milestoneReportModalMode ||
       purchaseModalMode ||
       manufacturingModalMode ||
-      materialModalMode ||
       partDefinitionModalMode ||
       partInstanceModalMode ||
       subsystemModalMode ||

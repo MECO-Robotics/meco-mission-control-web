@@ -9,104 +9,132 @@ import type { PartDefinitionRecord } from "@/types/recordsInventory";
 
 export type PartDefinitionActions = ReturnType<typeof usePartDefinitionActions>;
 
-export function usePartDefinitionActions(model: AppWorkspaceModel) {
+export function usePartDefinitionActions({
+  activePartDefinitionId,
+  bootstrap,
+  handleUnauthorized,
+  loadWorkspace,
+  partDefinitionDraft,
+  partDefinitionModalMode,
+  selectedSeasonId,
+  setActivePartDefinitionId,
+  setDataMessage,
+  setIsDeletingPartDefinition,
+  setIsSavingPartDefinition,
+  setPartDefinitionDraft,
+  setPartDefinitionModalMode,
+}: {
+  activePartDefinitionId: AppWorkspaceModel["activePartDefinitionId"];
+  bootstrap: AppWorkspaceModel["bootstrap"];
+  handleUnauthorized: AppWorkspaceModel["handleUnauthorized"];
+  loadWorkspace: AppWorkspaceModel["loadWorkspace"];
+  partDefinitionDraft: AppWorkspaceModel["partDefinitionDraft"];
+  partDefinitionModalMode: AppWorkspaceModel["partDefinitionModalMode"];
+  selectedSeasonId: AppWorkspaceModel["selectedSeasonId"];
+  setActivePartDefinitionId: AppWorkspaceModel["setActivePartDefinitionId"];
+  setDataMessage: AppWorkspaceModel["setDataMessage"];
+  setIsDeletingPartDefinition: AppWorkspaceModel["setIsDeletingPartDefinition"];
+  setIsSavingPartDefinition: AppWorkspaceModel["setIsSavingPartDefinition"];
+  setPartDefinitionDraft: AppWorkspaceModel["setPartDefinitionDraft"];
+  setPartDefinitionModalMode: AppWorkspaceModel["setPartDefinitionModalMode"];
+}) {
   const openCreatePartDefinitionModal = useCallback(() => {
-    model.setActivePartDefinitionId(null);
-    model.setPartDefinitionDraft(buildEmptyPartDefinitionPayload(model.bootstrap));
-    model.setPartDefinitionModalMode("create");
-  }, [model]);
+    setActivePartDefinitionId(null);
+    setPartDefinitionDraft(buildEmptyPartDefinitionPayload(bootstrap));
+    setPartDefinitionModalMode("create");
+  }, [bootstrap, setActivePartDefinitionId, setPartDefinitionDraft, setPartDefinitionModalMode]);
 
   const openEditPartDefinitionModal = useCallback((item: PartDefinitionRecord) => {
-    model.setActivePartDefinitionId(item.id);
-    model.setPartDefinitionDraft(partDefinitionToPayload(item));
-    model.setPartDefinitionModalMode("edit");
-  }, [model]);
+    setActivePartDefinitionId(item.id);
+    setPartDefinitionDraft(partDefinitionToPayload(item));
+    setPartDefinitionModalMode("edit");
+  }, [setActivePartDefinitionId, setPartDefinitionDraft, setPartDefinitionModalMode]);
 
   const closePartDefinitionModal = useCallback(() => {
-    model.setPartDefinitionModalMode(null);
-    model.setActivePartDefinitionId(null);
-  }, [model]);
+    setPartDefinitionModalMode(null);
+    setActivePartDefinitionId(null);
+  }, [setActivePartDefinitionId, setPartDefinitionModalMode]);
 
   const handlePartDefinitionSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
-    if (model.partDefinitionModalMode === "create" && !model.selectedSeasonId) {
-      model.setDataMessage("Pick a season before adding a part definition.");
+    if (partDefinitionModalMode === "create" && !selectedSeasonId) {
+      setDataMessage("Pick a season before adding a part definition.");
       return;
     }
 
-    model.setIsSavingPartDefinition(true);
-    model.setDataMessage(null);
+    setIsSavingPartDefinition(true);
+    setDataMessage(null);
 
     try {
-      if (model.partDefinitionModalMode === "create") {
+      if (partDefinitionModalMode === "create") {
         await createPartDefinitionRecord(
           {
-            ...model.partDefinitionDraft,
-            seasonId: model.selectedSeasonId ?? model.partDefinitionDraft.seasonId,
-            activeSeasonIds: model.selectedSeasonId
-              ? [model.selectedSeasonId]
-              : model.partDefinitionDraft.activeSeasonIds,
+            ...partDefinitionDraft,
+            seasonId: selectedSeasonId ?? partDefinitionDraft.seasonId,
+            activeSeasonIds: selectedSeasonId
+              ? [selectedSeasonId]
+              : partDefinitionDraft.activeSeasonIds,
           },
-          model.handleUnauthorized,
+          handleUnauthorized,
         );
-      } else if (model.partDefinitionModalMode === "edit" && model.activePartDefinitionId) {
+      } else if (partDefinitionModalMode === "edit" && activePartDefinitionId) {
         await updatePartDefinitionRecord(
-          model.activePartDefinitionId,
-          model.partDefinitionDraft,
-          model.handleUnauthorized,
+          activePartDefinitionId,
+          partDefinitionDraft,
+          handleUnauthorized,
         );
       }
 
-      await model.loadWorkspace();
+      await loadWorkspace();
       closePartDefinitionModal();
     } catch (error) {
-      model.setDataMessage(toErrorMessage(error));
+      setDataMessage(toErrorMessage(error));
     } finally {
-      model.setIsSavingPartDefinition(false);
+      setIsSavingPartDefinition(false);
     }
-  }, [closePartDefinitionModal, model]);
+  }, [activePartDefinitionId, closePartDefinitionModal, handleUnauthorized, loadWorkspace, partDefinitionDraft, partDefinitionModalMode, selectedSeasonId, setDataMessage, setIsSavingPartDefinition]);
 
   const handleDeletePartDefinition = useCallback(async (partDefinitionId: string) => {
-    model.setIsDeletingPartDefinition(true);
-    model.setDataMessage(null);
+    setIsDeletingPartDefinition(true);
+    setDataMessage(null);
 
     try {
-      await deletePartDefinitionRecord(partDefinitionId, model.handleUnauthorized);
-      if (model.activePartDefinitionId === partDefinitionId) {
+      await deletePartDefinitionRecord(partDefinitionId, handleUnauthorized);
+      if (activePartDefinitionId === partDefinitionId) {
         closePartDefinitionModal();
       }
-      await model.loadWorkspace();
+      await loadWorkspace();
     } catch (error) {
-      model.setDataMessage(toErrorMessage(error));
+      setDataMessage(toErrorMessage(error));
     } finally {
-      model.setIsDeletingPartDefinition(false);
+      setIsDeletingPartDefinition(false);
     }
-  }, [closePartDefinitionModal, model]);
+  }, [activePartDefinitionId, closePartDefinitionModal, handleUnauthorized, loadWorkspace, setDataMessage, setIsDeletingPartDefinition]);
 
   const handleTogglePartDefinitionArchived = useCallback(async (partDefinitionId: string) => {
-    const currentPartDefinition = model.bootstrap.partDefinitions.find(
+    const currentPartDefinition = bootstrap.partDefinitions.find(
       (partDefinition) => partDefinition.id === partDefinitionId,
     );
     if (!currentPartDefinition) {
       return;
     }
 
-    model.setIsSavingPartDefinition(true);
-    model.setDataMessage(null);
+    setIsSavingPartDefinition(true);
+    setDataMessage(null);
 
     try {
       await updatePartDefinitionRecord(
         partDefinitionId,
         { isArchived: !currentPartDefinition.isArchived },
-        model.handleUnauthorized,
+        handleUnauthorized,
       );
-      await model.loadWorkspace();
+      await loadWorkspace();
     } catch (error) {
-      model.setDataMessage(toErrorMessage(error));
+      setDataMessage(toErrorMessage(error));
     } finally {
-      model.setIsSavingPartDefinition(false);
+      setIsSavingPartDefinition(false);
     }
-  }, [model]);
+  }, [bootstrap, handleUnauthorized, loadWorkspace, setDataMessage, setIsSavingPartDefinition]);
 
   return {
     closePartDefinitionModal,

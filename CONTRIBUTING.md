@@ -16,6 +16,8 @@ PRs should explain the problem, resulting behavior and validation. Include scree
 
 Use focused tests while developing. Before marking a code or CI change ready, run `npm run verify`: it owns contract validation, workflow security checks, TypeScript, lint, Jest and the production bundle build. Do not repeat these commands separately after that same revision passes. Documentation-only changes require link/command review and `git diff --check`.
 
+For coordinated local contract work, run `PLATFORM_BOOTSTRAP_CONTRACT_SOURCE_PATH=/absolute/path/to/platform/contracts/platform/bootstrap/v1/contract.json npm run verify`. The explicit source must match the checked-in artifact; local sources are rejected in CI, which retains the pinned manifest checks.
+
 For UI changes, exercise affected behavior in the local application. Changes to transport or bootstrap data must update platform and relevant mobile consumers. Keep tests focused on outcomes; do not preserve obsolete wiring with source-layout assertions.
 
 CI validates PRs and protected-branch pushes; release jobs reuse the verified bundle. The trusted merge gate accepts exact reviewed CI digests. To change CI, first promote the new digest allowlist under the existing trusted workflow, then integrate the matching workflow bytes. Preserve required check names and review protections. Use GitHub's normal protected PR merge flow; automated comments do not satisfy an approving-review requirement.

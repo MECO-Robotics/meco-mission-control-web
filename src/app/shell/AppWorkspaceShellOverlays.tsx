@@ -1,6 +1,20 @@
-import type { ReactNode } from "react";
+import type { ReactNode, FormEvent } from "react";
 
-import type { AppWorkspaceShellOverlayLayerController } from "@/app/hooks/useAppWorkspaceController";
+interface OverlayProps {
+  closeCreateSeasonPopup: () => void;
+  closeRobotProjectPopup: () => void;
+  closeSidebarOverlay: () => void;
+  handleCreateSeasonSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  handleRobotProjectSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  isSavingSeason: boolean;
+  isSavingRobotProject: boolean;
+  isSidebarOverlay: boolean;
+  robotProjectModalMode: "create" | "edit" | null;
+  robotProjectNameDraft: string;
+  seasonNameDraft: string;
+  setRobotProjectNameDraft: (name: string) => void;
+  setSeasonNameDraft: (name: string) => void;
+}
 
 function ModalScrim({ children, onClose }: { children: ReactNode; onClose: () => void }) {
   return (
@@ -21,7 +35,7 @@ function ModalScrim({ children, onClose }: { children: ReactNode; onClose: () =>
 export function AddSeasonPopup({
   controller,
 }: {
-  controller: AppWorkspaceShellOverlayLayerController;
+  controller: OverlayProps;
 }) {
   const c = controller;
 
@@ -66,7 +80,7 @@ export function AddSeasonPopup({
 export function RobotProjectPopup({
   controller,
 }: {
-  controller: AppWorkspaceShellOverlayLayerController;
+  controller: OverlayProps;
 }) {
   const c = controller;
 
@@ -114,7 +128,7 @@ export function RobotProjectPopup({
 export function SidebarOverlay({
   controller,
 }: {
-  controller: AppWorkspaceShellOverlayLayerController;
+  controller: OverlayProps;
 }) {
   const c = controller;
 

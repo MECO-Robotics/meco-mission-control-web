@@ -47,8 +47,6 @@ export function buildAppWorkspaceDerivedStateSlice(state: AppWorkspaceState) {
     setIsAddSeasonPopupOpen: state.setIsAddSeasonPopupOpen,
     setManufacturingDraft: state.setManufacturingDraft,
     setManufacturingModalMode: state.setManufacturingModalMode,
-    setMaterialDraft: state.setMaterialDraft,
-    setMaterialModalMode: state.setMaterialModalMode,
     setMechanismDraft: state.setMechanismDraft,
     setMechanismModalMode: state.setMechanismModalMode,
     setMemberEditDraft: state.setMemberEditDraft,
