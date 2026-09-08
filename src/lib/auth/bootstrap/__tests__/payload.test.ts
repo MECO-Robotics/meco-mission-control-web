@@ -169,7 +169,18 @@ describe("normalizeBootstrapPayload", () => {
     const normalized = normalizeBootstrapPayload(payload);
 
     expect(normalized.taskBlockers?.[0]?.blockerType).toBe("other");
-    expect(normalized.taskBlockers?.[0]?.sourceKind).toBe("vendor-shutdown");
+    expect(normalized.taskBlockers?.[0]?.sourceKind).toBe("external");
+  });
+
+  it("decodes issue category separately from the source relationship", () => {
+    const payload = { ...EMPTY_BOOTSTRAP, taskBlockers: [{
+      id: "blocker-1", blockedTaskId: "task-1", blockerType: "external",
+      issueType: "shipping-delay", blockerId: "vendor-order-42",
+    }] } as unknown as BootstrapPayload;
+    const blocker = normalizeBootstrapPayload(payload).taskBlockers?.[0];
+    expect(blocker?.blockerType).toBe("shipping-delay");
+    expect(blocker?.sourceKind).toBe("external");
+    expect(blocker?.blockerId).toBe("vendor-order-42");
   });
 
   it("retains the legacy external relationship kind and source id", () => {

@@ -1,3 +1,4 @@
+import { normalizeBlockerSourceKind } from "@/lib/auth/bootstrap/task-blockers";
 import type { TaskBlockerSeverity } from "@/types/common";
 import type {
   TaskBlockerDraft,
@@ -65,7 +66,8 @@ export function buildTaskBlockerPayload(
 ): TaskBlockerPayload {
   return {
     blockedTaskId: taskId,
-    blockerType: blocker.blockerType,
+    blockerType: normalizeBlockerSourceKind(blocker.sourceKind),
+    issueType: blocker.blockerType,
     blockerId: blocker.blockerId ?? null,
     description: blocker.description.trim(),
     severity: blocker.severity as TaskBlockerSeverity,
@@ -78,7 +80,7 @@ export function isTaskBlockerPayloadChanged(
   payload: TaskBlockerPayload,
 ) {
   return (
-    existingBlocker.blockerType !== payload.blockerType ||
+    existingBlocker.blockerType !== payload.issueType ||
     existingBlocker.blockerId !== payload.blockerId ||
     existingBlocker.description !== payload.description ||
     existingBlocker.severity !== payload.severity ||

@@ -1,5 +1,6 @@
+import { normalizeTaskBlockerRecord } from "../bootstrap/task-blockers";
 import type { TaskBlockerPayload, TaskDependencyPayload } from "@/types/payloads";
-import type { TaskBlockerRecord, TaskDependencyRecord } from "@/types/recordsExecution";
+import type { TaskBlockerResponse, TaskDependencyRecord } from "@/types/recordsExecution";
 import { requestItem } from "./common";
 
 export function createTaskDependencyRecord(
@@ -43,12 +44,12 @@ export function createTaskBlockerRecord(
   payload: TaskBlockerPayload,
   onUnauthorized?: () => void,
 ) {
-  return requestItem<TaskBlockerRecord, TaskBlockerPayload>(
+  return requestItem<TaskBlockerResponse, TaskBlockerPayload>(
     "/task-blockers",
     "POST",
     payload,
     onUnauthorized,
-  );
+  ).then((record) => normalizeTaskBlockerRecord(record));
 }
 
 export function updateTaskBlockerRecord(
@@ -56,22 +57,22 @@ export function updateTaskBlockerRecord(
   payload: Partial<TaskBlockerPayload>,
   onUnauthorized?: () => void,
 ) {
-  return requestItem<TaskBlockerRecord, Partial<TaskBlockerPayload>>(
+  return requestItem<TaskBlockerResponse, Partial<TaskBlockerPayload>>(
     `/task-blockers/${blockerId}`,
     "PATCH",
     payload,
     onUnauthorized,
-  );
+  ).then((record) => normalizeTaskBlockerRecord(record));
 }
 
 export function deleteTaskBlockerRecord(
   blockerId: string,
   onUnauthorized?: () => void,
 ) {
-  return requestItem<TaskBlockerRecord, never>(
+  return requestItem<TaskBlockerResponse, never>(
     `/task-blockers/${blockerId}`,
     "DELETE",
     undefined,
     onUnauthorized,
-  );
+  ).then((record) => normalizeTaskBlockerRecord(record));
 }

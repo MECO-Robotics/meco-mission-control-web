@@ -17,6 +17,7 @@ import type {
   RiskSeverity,
   SeasonType,
   TaskBlockerSeverity,
+  TaskBlockerSourceKind,
   TaskBlockerType,
   TaskDependencyKind,
   TaskDependencyType,
@@ -327,7 +328,8 @@ export interface TaskDependencyPayload {
 
 export interface TaskBlockerPayload {
   blockedTaskId: string;
-  blockerType: TaskBlockerType;
+  blockerType: TaskBlockerSourceKind;
+  issueType: TaskBlockerType;
   blockerId: string | null;
   description: string;
   severity: TaskBlockerSeverity;
