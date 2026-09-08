@@ -6,7 +6,7 @@ import {
   type SetStateAction,
 } from "react";
 
-import { clearWebSessionState } from "@/lib/auth/core/sessionStorage";
+import { clearWebSessionState, setPendingSignOut } from "@/lib/auth/core/sessionStorage";
 import {
   exchangeGoogleCredential,
   requestDevBypassSignIn,
@@ -59,6 +59,7 @@ export async function revokeThenClearWebSession(
   clearLocalSession: () => void,
   onUnconfirmed: (message: string) => void = () => undefined,
 ) {
+  setPendingSignOut(true);
   let confirmed = false;
 
   try {
@@ -74,6 +75,8 @@ export async function revokeThenClearWebSession(
   } finally {
     clearLocalSession();
   }
+
+  if (confirmed) setPendingSignOut(false);
 
   if (!confirmed) {
     onUnconfirmed(UNCONFIRMED_SIGN_OUT_MESSAGE);

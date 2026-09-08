@@ -1,3 +1,4 @@
+import { hasPendingSignOut } from "@/lib/auth/core/sessionStorage";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -14,6 +15,7 @@ import {
 } from "@/app/hooks/auth/useAppAuthGoogleIdentity";
 import {
   useAppAuthSessionActions,
+  UNCONFIRMED_SIGN_OUT_MESSAGE,
   type UseAppAuthSessionActionsResult,
 } from "@/app/hooks/auth/useAppAuthSessionActions";
 import {
@@ -58,8 +60,8 @@ export function useAppAuthSession({
   const [sessionUser, setSessionUser] = useState<SessionUser | null>(null);
   const [authBooting, setAuthBooting] = useState(true);
   const [isSigningIn, setIsSigningIn] = useState(false);
-  const [isSignInForced, setIsSignInForced] = useState(false);
-  const [authMessage, setAuthMessage] = useState<string | null>(null);
+  const [isSignInForced, setIsSignInForced] = useState(hasPendingSignOut);
+  const [authMessage, setAuthMessage] = useState<string | null>(() => hasPendingSignOut() ? UNCONFIRMED_SIGN_OUT_MESSAGE : null);
   const resetWorkspaceRef = useRef(resetWorkspace);
 
   useEffect(() => {

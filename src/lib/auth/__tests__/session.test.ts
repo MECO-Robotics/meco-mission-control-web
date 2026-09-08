@@ -8,6 +8,8 @@ import {
 import { fetchWebSession, postJson, requestApi } from "../core/request";
 import {
   purgeLegacySessionTokens,
+  hasPendingSignOut,
+  setPendingSignOut,
   setSessionCsrfToken,
 } from "../core/sessionStorage";
 
@@ -20,6 +22,8 @@ jest.mock("../core/request", () => ({
 
 jest.mock("../core/sessionStorage", () => ({
   clearWebSessionState: jest.fn(),
+  hasPendingSignOut: jest.fn(() => false),
+  setPendingSignOut: jest.fn(),
   getSessionCsrfToken: jest.fn(),
   purgeLegacySessionTokens: jest.fn(),
   setSessionCsrfToken: jest.fn(),
@@ -32,6 +36,18 @@ const purgeLegacySessionTokensMock = purgeLegacySessionTokens as jest.Mock;
 const setSessionCsrfTokenMock = setSessionCsrfToken as jest.Mock;
 
 describe("web sessions", () => {
+  afterEach(() => jest.mocked(hasPendingSignOut).mockReturnValue(false));
+  it("does not fetch a residual cookie session while sign-out is pending", async () => {
+    jest.mocked(hasPendingSignOut).mockReturnValue(true);
+    await expect(restoreWebSession()).rejects.toMatchObject({ statusCode: 401 });
+    expect(fetchWebSession).not.toHaveBeenCalled();
+  });
+  it("discards a restore response if sign-out began while it was in flight", async () => {
+    jest.mocked(hasPendingSignOut).mockReturnValueOnce(false).mockReturnValueOnce(true);
+    fetchWebSessionMock.mockResolvedValue({ csrfToken: "residual", user: {} });
+    await expect(restoreWebSession()).rejects.toMatchObject({ statusCode: 401 });
+    expect(setSessionCsrfToken).not.toHaveBeenCalled();
+  });
   it("submits the selected role to the web-only development endpoint", async () => {
     const response = {
       csrfToken: "csrf-token",
@@ -46,6 +62,7 @@ describe("web sessions", () => {
       role: "mentor",
     });
     expect(setSessionCsrfTokenMock).toHaveBeenCalledWith("csrf-token");
+    expect(setPendingSignOut).toHaveBeenCalledWith(false);
   });
 
   it("restores a cookie session and keeps its CSRF token in memory", async () => {

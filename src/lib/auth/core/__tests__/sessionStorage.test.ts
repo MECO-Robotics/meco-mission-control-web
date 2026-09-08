@@ -2,6 +2,8 @@
 
 import {
   clearWebSessionState,
+  hasPendingSignOut,
+  setPendingSignOut,
   getSessionCsrfToken,
   purgeLegacySessionTokens,
   setSessionCsrfToken,
@@ -53,8 +55,23 @@ function installWindowStorage({
 }
 
 describe("web session state", () => {
+  it("retains only logout intent across a fresh module load until explicitly cleared", () => {
+    installWindowStorage();
+    setPendingSignOut(true);
+    clearWebSessionState();
+    jest.isolateModules(() => {
+      const reloaded = jest.requireActual<typeof import("../sessionStorage")>("../sessionStorage");
+      expect(reloaded.hasPendingSignOut()).toBe(true);
+      expect(reloaded.getSessionCsrfToken()).toBeNull();
+      reloaded.setPendingSignOut(false);
+      expect(reloaded.hasPendingSignOut()).toBe(false);
+    });
+    setPendingSignOut(false);
+    expect(hasPendingSignOut()).toBe(false);
+  });
   afterEach(() => {
     clearWebSessionState();
+    setPendingSignOut(false);
     Reflect.deleteProperty(globalThis, "window");
   });
 
