@@ -93,12 +93,17 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
     setTaskDraft,
   } = props;
 
+  const isBusy = isSavingTask || isDeletingTask;
+  const closeWhenIdle = () => { if (!isBusy) closeTaskModal(); };
+
   const handleTaskEditClosed = () => {
+    if (isBusy) return;
     onTaskEditCanceled();
     closeTaskModal();
   };
 
   const handleTaskEditCancel = () => {
+    if (isBusy) return;
     onTaskEditCanceled();
 
     if (activeTask) {
@@ -114,7 +119,7 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
   const canCreateTask = taskDraft.title.trim().length > 0;
 
   const handleCreateTaskSubmit = (milestone: FormEvent<HTMLFormElement>) => {
-    if (!canCreateTask) {
+    if (isBusy || !canCreateTask) {
       milestone.preventDefault();
       return;
     }
@@ -125,6 +130,7 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
   if (isEditTaskModal && activeTask) {
     return (
       <form className="task-editor-modal" onSubmit={handleTaskSubmit}>
+        <fieldset disabled={isBusy} inert={isBusy} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
         <TaskDetailsModal
           activeTask={activeTask}
           bootstrap={bootstrap}
@@ -161,6 +167,7 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
           showEditButton={false}
           taskDraft={taskDraft}
         />
+        </fieldset>
       </form>
     );
   }
@@ -168,10 +175,11 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
   if (createTaskRecord) {
     return (
       <form className="task-editor-modal task-editor-create-modal" onSubmit={handleCreateTaskSubmit}>
+        <fieldset disabled={isBusy} inert={isBusy} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
         <TaskDetailsModal
           activeTask={createTaskRecord}
           bootstrap={bootstrap}
-          closeTaskDetailsModal={closeTaskModal}
+          closeTaskDetailsModal={closeWhenIdle}
           advancedSectionOpen={advancedSectionOpen}
           beforeOverviewContent={
             <>
@@ -220,7 +228,7 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
               ) : null}
               <button
                 className="secondary-action"
-                onClick={closeTaskModal}
+                onClick={closeWhenIdle}
                 style={{
                   background: "var(--bg-row-alt)",
                   color: "var(--text-title)",
@@ -248,6 +256,7 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
           showEditButton={false}
           taskDraft={taskDraft}
         />
+        </fieldset>
       </form>
     );
   }

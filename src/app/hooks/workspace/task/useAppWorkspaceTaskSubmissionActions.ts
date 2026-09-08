@@ -1,5 +1,5 @@
 import { updateRiskRecord } from "@/lib/auth/records/reporting";
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 
 import { toErrorMessage } from "@/lib/appUtils/common";
 import { createTask, updateTaskRecord } from "@/lib/auth/records/task";
@@ -38,9 +38,12 @@ export function useAppWorkspaceTaskSubmissionActions(
   model: AppWorkspaceModel,
   closeTaskModal: () => void,
 ) {
+  const saveInFlight = useRef(false);
   const handleTaskSubmit = useCallback(
     async (milestone: React.FormEvent<HTMLFormElement>) => {
       milestone.preventDefault();
+      if (saveInFlight.current) return;
+      saveInFlight.current = true;
       model.setIsSavingTask(true);
       model.setDataMessage(null);
 
@@ -101,6 +104,7 @@ export function useAppWorkspaceTaskSubmissionActions(
       } catch (error) {
         model.setDataMessage(toErrorMessage(error));
       } finally {
+        saveInFlight.current = false;
         model.setIsSavingTask(false);
       }
     },
