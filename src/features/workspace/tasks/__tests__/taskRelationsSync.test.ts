@@ -182,23 +182,23 @@ describe("buildTaskBlockerPayload", () => {
   it("respects an explicitly changed type on an external blocker", () => {
     expect(buildTaskBlockerPayload("task-1", {
       blockerType: "broken-part",
-      blockerId: "part-1",
+      blockerId: null,
       description: "Broken replacement",
       severity: "high",
       sourceKind: "external",
     }).issueType).toBe("broken-part");
   });
-  it("preserves a legacy external kind during unrelated blocker edits", () => {
+  it("preserves an external kind during unrelated blocker edits", () => {
     expect(buildTaskBlockerPayload("task-1", {
       id: "blocker-1",
       blockerType: "external",
-      blockerId: "vendor-order-42",
+      blockerId: null,
       description: "  Updated vendor ETA  ",
       severity: "high",
       sourceKind: "external",
     })).toEqual(expect.objectContaining({
       blockerType: "external",
-      blockerId: "vendor-order-42",
+      blockerId: null,
       description: "Updated vendor ETA",
     }));
   });
@@ -355,6 +355,7 @@ describe("task relation sync services", () => {
             id: "blocker-update",
             blockerType: "qa-failed",
             blockerId: "milestone-1",
+            sourceKind: "milestone",
             description: "  Needs milestone handoff  ",
             severity: "high",
           },
@@ -376,7 +377,7 @@ describe("task relation sync services", () => {
       "blocker-update",
       expect.objectContaining({
         blockedTaskId: "task-1",
-        blockerType: "external",
+        blockerType: "milestone",
         issueType: "qa-failed",
         blockerId: "milestone-1",
         description: "Needs milestone handoff",
