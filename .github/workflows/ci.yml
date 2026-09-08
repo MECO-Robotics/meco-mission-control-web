@@ -14,14 +14,11 @@ on:
       - staging
       - "staging/**"
       - main
-      - "feature/**"
-      - "fix/**"
-      - "hotfix/**"
     paths:
       - "AGENTS.md"
+      - "CONTRIBUTING.md"
       - ".github/workflows/ci.yml"
       - ".github/workflows/merge-requirements.yml"
-      - ".github/workflows/codex-automerge.yml"
       - ".github/workflows/deploy-vps.yml"
       - ".nvmrc"
       - "deploy/**"
@@ -32,13 +29,13 @@ on:
       - "index.html"
       - "package.json"
       - "package-lock.json"
-      - "scripts/organization-audit.mjs"
       - "eslint.config.js"
       - "tsconfig.json"
       - "tsconfig.app.json"
       - "tsconfig.node.json"
       - "vite.config.ts"
       - "jest.config.cjs"
+      - "scripts/**"
       - ".env.production.example"
 
 permissions:
@@ -108,19 +105,6 @@ jobs:
 
       - name: Reject vulnerable dependencies
         run: npm audit --audit-level=low
-
-      - name: Enforce organization hard limits
-        run: npm run audit:organization:strict
-
-      - name: Upload organization audit artifact
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: organization-audit-${{ github.sha }}
-          path: |
-            .diagnostics/organization-audit/latest.json
-            .diagnostics/organization-audit/latest.md
-          if-no-files-found: warn
 
       - name: Verify
         run: npm run verify

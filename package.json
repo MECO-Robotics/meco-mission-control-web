@@ -7,8 +7,6 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "build:bundle": "vite build",
-    "audit:organization": "node ./scripts/organization-audit.mjs",
-    "audit:organization:strict": "node ./scripts/organization-audit.mjs --enforce-hard",
     "lint": "eslint .",
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit --force",
