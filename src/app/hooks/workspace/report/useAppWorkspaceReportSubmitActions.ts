@@ -98,7 +98,7 @@ export function useAppWorkspaceReportSubmitActions(model: AppWorkspaceModel) {
         notes: model.qaReportDraft.notes.trim(),
         createdAt: reportDate,
         reviewedAt: model.qaReportDraft.reviewedAt ?? reportDate,
-        title: model.qaReportDraft.title?.trim(),
+        title: model.qaReportDraft.title?.trim() || undefined,
         status: model.qaReportDraft.status,
         findings: model.qaReportDraft.findings ?? [],
         targetRiskId,

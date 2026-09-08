@@ -46,6 +46,7 @@ export function useSubsystemActions({
   subsystemDraftRisks: AppWorkspaceModel["subsystemDraftRisks"];
   subsystemModalMode: AppWorkspaceModel["subsystemModalMode"];
 }) {
+  const writeTailBySubsystemIdRef = useRef<Record<string, Promise<unknown>>>({});
   const updateRequestVersionBySubsystemIdRef = useRef<Record<string, number>>({});
   const pendingUpdateCountBySubsystemIdRef = useRef<Record<string, number>>({});
   const persistedSubsystemByIdRef = useRef<Record<string, SubsystemRecord>>({});
@@ -219,11 +220,10 @@ export function useSubsystemActions({
     }));
 
     try {
-      const updatedSubsystem = await updateSubsystemRecord(
-        subsystemId,
-        payload,
-        handleUnauthorized,
-      );
+      const previousWrite = writeTailBySubsystemIdRef.current[subsystemId] ?? Promise.resolve();
+      const write = previousWrite.catch(() => undefined).then(() => updateSubsystemRecord(subsystemId, payload, handleUnauthorized));
+      writeTailBySubsystemIdRef.current[subsystemId] = write;
+      const updatedSubsystem = await write;
       const persistedVersion = persistedSubsystemVersionByIdRef.current[subsystemId] ?? 0;
       const shouldPromotePersistedSnapshot = requestVersion >= persistedVersion;
       if (shouldPromotePersistedSnapshot) {
