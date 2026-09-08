@@ -171,11 +171,11 @@ When changing data contracts:
 
 ## Implementation Guardrails
 
-Follow `AGENTS.md` for repository structure rules.
+Follow [CONTRIBUTING.md](../CONTRIBUTING.md) for contributor and ownership criteria.
 
 Key implications for web-app changes:
 
-- Split React files before they exceed the hard file-size cap.
+- Give behavior one clear owner; remove redundant wiring rather than splitting files to satisfy quotas.
 - Keep feature-specific CSS scoped and split by component or responsibility.
 - Avoid flat directories with mixed responsibilities.
 - Keep generated diagnostics under `.diagnostics/`, not in the repository root.
@@ -212,11 +212,6 @@ npm run test:ci -- RisksView
 npm run test:ci -- WorkLogsView
 ```
 
-For structural refactors, run:
-
-```bash
-npm run audit:organization:strict
-```
 
 ## Known Documentation Drift to Avoid
 
