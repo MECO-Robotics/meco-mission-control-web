@@ -34,7 +34,7 @@ const baseTask = (id: string, assigneeId: string, extras: Partial<TaskRecord> = 
   actualHours: 0,
   assigneeIds: [assigneeId],
   blockers: [],
-  dependencyIds: [],
+
   disciplineId: "mechanical",
   documentationLinked: false,
   dueDate: "2026-06-10",

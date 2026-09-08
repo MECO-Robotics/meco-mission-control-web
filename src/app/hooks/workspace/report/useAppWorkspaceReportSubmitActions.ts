@@ -2,7 +2,7 @@ import { useCallback } from "react";
 
 import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
 import { toErrorMessage } from "@/lib/appUtils/common";
-import { createQaReportRecord, createTestResultRecord, createWorkLogRecord, updateRiskRecord } from "@/lib/auth/records/reporting";
+import { createQaReportRecord, createTestResultRecord, createWorkLogRecord } from "@/lib/auth/records/reporting";
 import { localTodayDate } from "@/lib/dateUtils";
 import type { QaReportPayload, TestResultPayload, WorkLogPayload } from "@/types/payloads";
 
@@ -108,28 +108,9 @@ export function useAppWorkspaceReportSubmitActions(model: AppWorkspaceModel) {
       };
 
       await createQaReportRecord(payload, model.handleUnauthorized);
-      let riskUpdateError: string | null = null;
-      if (targetRisk && payload.mentorApproved && payload.proposedRiskSeverity) {
-        try {
-          const riskUpdatePayload = {
-            severity: payload.proposedRiskSeverity,
-            ...(targetRisk.mitigationTaskId ? {} : { mitigationTaskId: task?.id ?? null }),
-          };
-
-          await updateRiskRecord(
-            targetRisk.id,
-            riskUpdatePayload,
-            model.handleUnauthorized,
-          );
-        } catch (error) {
-          riskUpdateError = toErrorMessage(error);
-        }
-      }
       await model.loadWorkspace();
       model.setQaReportModalMode(null);
-      if (riskUpdateError) {
-        model.setDataMessage(`QA report saved, but the linked risk update failed: ${riskUpdateError}`);
-      }
+
     } catch (error) {
       model.setDataMessage(toErrorMessage(error));
     } finally {

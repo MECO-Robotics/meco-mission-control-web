@@ -71,12 +71,6 @@ export function scopeBootstrapBySelection(
         task.subsystemIds.some((subsystemId) => scopedSubsystemIds.has(subsystemId))),
   );
   const scopedTaskIds = new Set(scopedTasks.map((task) => task.id));
-  const scopedTasksWithVisibleDependencies = scopedTasks.map((task) => ({
-    ...task,
-    dependencyIds: task.dependencyIds.filter((dependencyId) =>
-      scopedTaskIds.has(dependencyId),
-    ),
-  }));
   const scopedTaskDependencies = (payload.taskDependencies ?? []).filter((dependency) => {
     if (!scopedTaskIds.has(dependency.taskId)) {
       return false;
@@ -234,7 +228,7 @@ export function scopeBootstrapBySelection(
     meetings: scopedMeetings,
     members: scopedMembers,
     partDefinitions: scopedPartDefinitions,
-    tasks: scopedTasksWithVisibleDependencies,
+    tasks: scopedTasks,
     workLogs: scopedWorkLogs,
     reports: scopedReports,
     reportFindings: scopedReportFindings,

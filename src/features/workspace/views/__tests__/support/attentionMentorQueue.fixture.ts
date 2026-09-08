@@ -103,7 +103,7 @@ export function createMentorQueueBootstrap(): BootstrapPayload {
         artifactIds: [],
         assigneeIds: ["member-1"],
         blockers: [],
-        dependencyIds: [],
+
         disciplineId: "",
         documentationLinked: false,
         dueDate: isoDateOffset(7),
@@ -138,7 +138,7 @@ export function createMentorQueueBootstrap(): BootstrapPayload {
         artifactIds: [],
         assigneeIds: [],
         blockers: [],
-        dependencyIds: [],
+
         disciplineId: "",
         documentationLinked: false,
         dueDate: isoDateOffset(4),
@@ -173,7 +173,7 @@ export function createMentorQueueBootstrap(): BootstrapPayload {
         artifactIds: [],
         assigneeIds: ["member-1"],
         blockers: [],
-        dependencyIds: [],
+
         disciplineId: "",
         documentationLinked: false,
         dueDate: isoDateOffset(5),

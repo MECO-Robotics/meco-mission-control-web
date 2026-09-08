@@ -26,6 +26,7 @@ module.exports = {
           },
           target: "es2022",
           transform: {
+            optimizer: { globals: { vars: { "import.meta.env": "{}" } } },
             react: {
               runtime: "automatic",
             },

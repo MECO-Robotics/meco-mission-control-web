@@ -22,6 +22,7 @@ jest.mock("../core/request", () => ({
 
 jest.mock("../core/sessionStorage", () => ({
   clearWebSessionState: jest.fn(),
+  getSessionGeneration: jest.fn(() => 0),
   hasPendingSignOut: jest.fn(() => false),
   setPendingSignOut: jest.fn(),
   getSessionCsrfToken: jest.fn(),

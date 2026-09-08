@@ -6,7 +6,7 @@ import {
   type SetStateAction,
 } from "react";
 
-import { clearWebSessionState, setPendingSignOut } from "@/lib/auth/core/sessionStorage";
+import { beginSessionChange, clearWebSessionState, getSessionGeneration, setPendingSignOut } from "@/lib/auth/core/sessionStorage";
 import {
   exchangeGoogleCredential,
   requestDevBypassSignIn,
@@ -60,12 +60,15 @@ export async function revokeThenClearWebSession(
   onUnconfirmed: (message: string) => void = () => undefined,
 ) {
   setPendingSignOut(true);
+  const generation = beginSessionChange();
   let confirmed = false;
+  let ownsCompletion: boolean;
 
   try {
     await revokeWebSession();
     confirmed = true;
   } catch {
+    if (generation !== getSessionGeneration()) return false;
     try {
       await revokeWebSession();
       confirmed = true;
@@ -73,9 +76,11 @@ export async function revokeThenClearWebSession(
       // Local state still clears below, but the server session may remain live.
     }
   } finally {
-    clearLocalSession();
+    ownsCompletion = generation === getSessionGeneration();
+    if (ownsCompletion) clearLocalSession();
   }
 
+  if (!ownsCompletion) return false;
   if (confirmed) setPendingSignOut(false);
 
   if (!confirmed) {
@@ -133,6 +138,7 @@ export function useAppAuthSessionActions({
         setIsSignInForced(false);
         storeSignedInSession(session, setSessionUser);
       } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") return;
         clearWebSessionState();
         setAuthMessage(toErrorMessage(error));
       } finally {
@@ -169,6 +175,7 @@ export function useAppAuthSessionActions({
         setIsSignInForced(false);
         storeSignedInSession(session, setSessionUser);
       } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") return;
         clearWebSessionState();
         setAuthMessage(toErrorMessage(error));
         throw error;
@@ -189,6 +196,7 @@ export function useAppAuthSessionActions({
         setIsSignInForced(false);
         storeSignedInSession(session, setSessionUser);
       } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") return;
         clearWebSessionState();
         setAuthMessage(toErrorMessage(error));
       } finally {

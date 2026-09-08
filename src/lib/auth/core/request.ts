@@ -1,5 +1,5 @@
 import type { MediaUploadResponse, SessionUser } from "../types";
-import { clearWebSessionState } from "./sessionStorage";
+import { getSessionGeneration } from "./sessionStorage";
 import { buildCookieRequestOptions } from "./requestOptions";
 
 const DEFAULT_API_BASE_URL = "/api";
@@ -71,11 +71,11 @@ export function requestApi<T>(
   options: RequestInit = {},
   onUnauthorized?: () => void,
 ) {
+  const generation = getSessionGeneration();
   return fetch(buildApiUrl(path), buildCookieRequestOptions(options))
     .then((response) => readJson<T>(response))
     .catch((error) => {
-      if (error instanceof ApiError && error.statusCode === 401) {
-        clearWebSessionState();
+      if (error instanceof ApiError && error.statusCode === 401 && generation === getSessionGeneration()) {
         onUnauthorized?.();
       }
       throw error;
@@ -146,9 +146,4 @@ export async function fetchWebSession() {
   }
 
   return payload;
-}
-
-export async function fetchCurrentUser(_unusedLegacyToken?: string) {
-  void _unusedLegacyToken;
-  return (await fetchWebSession()).user;
 }

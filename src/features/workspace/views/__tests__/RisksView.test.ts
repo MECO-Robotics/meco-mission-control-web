@@ -49,7 +49,7 @@ const baseTask: BootstrapPayload["tasks"][number] = {
   dueDate: "2026-04-22",
   priority: "medium",
   status: "not-started",
-  dependencyIds: [],
+
   blockers: [],
   linkedManufacturingIds: [],
   linkedPurchaseIds: [],

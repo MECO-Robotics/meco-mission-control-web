@@ -51,16 +51,3 @@ export function normalizeSubsystemLayoutFields(layout: {
       : null,
   };
 }
-
-export function withDefaultSubsystemLayout<T extends {
-  layoutX?: number | null;
-  layoutY?: number | null;
-  layoutZone?: SubsystemLayoutZone | null;
-  layoutView?: SubsystemLayoutView | null;
-  sortOrder?: number | null;
-}>(record: T): T & SubsystemLayoutFields {
-  return {
-    ...record,
-    ...normalizeSubsystemLayoutFields(record),
-  };
-}

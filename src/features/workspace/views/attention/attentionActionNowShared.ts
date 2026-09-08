@@ -102,19 +102,17 @@ export function scoreAttentionItem(signals: ItemScoringSignals, today = new Date
   return score;
 }
 
-export function buildTaskDownstreamCount(tasks: BootstrapPayload["tasks"]) {
+export function buildTaskDownstreamCount(bootstrap: BootstrapPayload) {
   const counts = new Map<string, number>();
-
-  for (const task of tasks) {
-    if (task.status === "complete") {
-      continue;
-    }
-
-    for (const dependencyId of task.dependencyIds) {
-      counts.set(dependencyId, (counts.get(dependencyId) ?? 0) + 1);
-    }
+  const activeTaskIds = new Set(bootstrap.tasks.filter((task) => task.status !== "complete").map((task) => task.id));
+  const edges = new Set<string>();
+  for (const dependency of bootstrap.taskDependencies ?? []) {
+    if (dependency.kind !== "task" || dependency.dependencyType !== "hard" || !activeTaskIds.has(dependency.taskId)) continue;
+    const key = `${dependency.taskId}:${dependency.refId}`;
+    if (edges.has(key)) continue;
+    edges.add(key);
+    counts.set(dependency.refId, (counts.get(dependency.refId) ?? 0) + 1);
   }
-
   return counts;
 }
 

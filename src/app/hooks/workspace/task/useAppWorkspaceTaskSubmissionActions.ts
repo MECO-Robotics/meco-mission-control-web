@@ -1,3 +1,4 @@
+import { updateRiskRecord } from "@/lib/auth/records/reporting";
 import { useCallback } from "react";
 
 import { toErrorMessage } from "@/lib/appUtils/common";
@@ -72,6 +73,12 @@ export function useAppWorkspaceTaskSubmissionActions(
           ),
           handleUnauthorized: model.handleUnauthorized,
         }, TASK_RELATION_PERSISTENCE);
+        const previousRisk = model.scopedBootstrap.risks.find((risk) => risk.mitigationTaskId === savedTask.id);
+        const nextRiskId = model.taskDraft.targetRiskId ?? null;
+        if (previousRisk?.id !== nextRiskId) {
+          if (previousRisk) await updateRiskRecord(previousRisk.id, { mitigationTaskId: null }, model.handleUnauthorized);
+          if (nextRiskId) await updateRiskRecord(nextRiskId, { mitigationTaskId: savedTask.id }, model.handleUnauthorized);
+        }
         await model.loadWorkspace();
         if (isEdit) {
           model.enqueueTaskEditNotice(buildTaskEditSuccessNotice());

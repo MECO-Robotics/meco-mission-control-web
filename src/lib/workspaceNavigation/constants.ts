@@ -1,51 +1,8 @@
 import type {
-  InventoryViewTab,
-  ManufacturingViewTab,
   NavigationSection,
   NavigationSubItem,
-  ReportsViewTab,
-  RiskManagementViewTab,
-  RosterViewTab,
-  TaskViewTab,
-  ViewOption,
   ViewTab,
-  WorklogsViewTab,
-} from "./types";
-
-export const TASK_VIEW_ORDER: readonly TaskViewTab[] = [
-  "calendar",
-  "timeline",
-  "robot-map",
-  "queue",
-  "milestones",
-];
-
-export const RISK_MANAGEMENT_VIEW_ORDER: readonly RiskManagementViewTab[] = [
-  "attention",
-  "kanban",
-  "metrics",
-];
-
-export const WORKLOG_VIEW_ORDER: readonly WorklogsViewTab[] = ["logs", "kanban", "summary"];
-export const REPORTS_VIEW_ORDER: readonly ReportsViewTab[] = ["qa", "milestone-results"];
-export const MANUFACTURING_VIEW_ORDER: readonly ManufacturingViewTab[] = [
-  "all",
-  "cnc",
-  "prints",
-  "fabrication",
-];
-export const INVENTORY_VIEW_ORDER: readonly InventoryViewTab[] = [
-  "materials",
-  "parts",
-  "part-mappings",
-  "purchases",
-];
-export const ROSTER_VIEW_ORDER: readonly RosterViewTab[] = [
-  "available",
-  "workload",
-  "attendance",
-  "directory",
-];
+  } from "./types";
 
 export const NAVIGATION_SECTION_ORDER: readonly NavigationSection[] = [
   "dashboard",
@@ -66,49 +23,6 @@ export const NAVIGATION_SECTION_LABELS: Record<NavigationSection, string> = {
   roster: "Roster",
   reports: "Reports",
 };
-
-export const TASK_VIEW_OPTIONS: readonly ViewOption<TaskViewTab>[] = [
-  { value: "calendar", label: "Calendar" },
-  { value: "timeline", label: "Timeline" },
-  { value: "robot-map", label: "Robot Configuration" },
-  { value: "queue", label: "Tasks" },
-  { value: "milestones", label: "Milestones" },
-];
-
-export const RISK_MANAGEMENT_VIEW_OPTIONS: readonly ViewOption<RiskManagementViewTab>[] = [
-  { value: "attention", label: "Action Required" },
-  { value: "kanban", label: "Risks" },
-  { value: "metrics", label: "Metrics" },
-];
-
-export const WORKLOG_VIEW_OPTIONS: readonly ViewOption<WorklogsViewTab>[] = [
-  { value: "logs", label: "Logs" },
-  { value: "kanban", label: "Kanban" },
-  { value: "summary", label: "Summary" },
-];
-
-export const REPORTS_VIEW_OPTIONS: readonly ViewOption<ReportsViewTab>[] = [
-  { value: "qa", label: "QA" },
-  { value: "milestone-results", label: "Milestone Results" },
-];
-
-export const MANUFACTURING_VIEW_OPTIONS: readonly ViewOption<ManufacturingViewTab>[] = [
-  { value: "all", label: "All" },
-  { value: "cnc", label: "CNC" },
-  { value: "prints", label: "3D printing" },
-  { value: "fabrication", label: "Fab" },
-];
-
-export const ROBOT_INVENTORY_VIEW_OPTIONS: readonly ViewOption<InventoryViewTab>[] = [
-  { value: "materials", label: "Materials" },
-  { value: "parts", label: "Parts" },
-  { value: "purchases", label: "Purchases" },
-];
-
-export const NON_ROBOT_INVENTORY_VIEW_OPTIONS: readonly ViewOption<InventoryViewTab>[] = [
-  { value: "materials", label: "Documents" },
-  { value: "purchases", label: "Purchases" },
-];
 
 export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = [
   {

@@ -70,11 +70,6 @@ export interface NavigationItem {
   count: number;
 }
 
-export interface ViewOption<T extends string> {
-  value: T;
-  label: string;
-}
-
 export interface NavigationTarget {
   tab: ViewTab;
   taskView?: TaskViewTab;

@@ -31,7 +31,7 @@ const baseTask: BootstrapPayload["tasks"][number] = {
   dueDate: "2026-04-03",
   priority: "medium",
   status: "not-started",
-  dependencyIds: [],
+
   blockers: [],
   linkedManufacturingIds: [],
   linkedPurchaseIds: [],
@@ -51,6 +51,7 @@ describe("getTaskDependencyCounts", () => {
         refId: "task-upstream-1",
         dependencyType: "hard",
         createdAt: "2026-02-01T00:00:00.000Z",
+        requiredState: "complete",
       },
       {
         id: "dependency-2",
@@ -59,6 +60,7 @@ describe("getTaskDependencyCounts", () => {
         refId: "task-upstream-2",
         dependencyType: "hard",
         createdAt: "2026-02-01T00:00:00.000Z",
+        requiredState: "complete",
       },
       {
         id: "dependency-3",
@@ -67,6 +69,7 @@ describe("getTaskDependencyCounts", () => {
         refId: "task-target",
         dependencyType: "hard",
         createdAt: "2026-02-01T00:00:00.000Z",
+        requiredState: "complete",
       },
       {
         id: "dependency-4",
@@ -75,6 +78,7 @@ describe("getTaskDependencyCounts", () => {
         refId: "task-other",
         dependencyType: "hard",
         createdAt: "2026-02-01T00:00:00.000Z",
+        requiredState: "complete",
       },
     ];
     const counts = getTaskDependencyCounts("task-target", dependencies);
@@ -94,6 +98,7 @@ describe("getTaskDependencyCounts", () => {
         refId: "task-a",
         dependencyType: "hard",
         createdAt: "2026-02-01T00:00:00.000Z",
+        requiredState: "complete",
       },
       {
         id: "dependency-2",
@@ -102,6 +107,7 @@ describe("getTaskDependencyCounts", () => {
         refId: "task-b",
         dependencyType: "hard",
         createdAt: "2026-02-01T00:00:00.000Z",
+        requiredState: "complete",
       },
       {
         id: "dependency-3",
@@ -110,6 +116,7 @@ describe("getTaskDependencyCounts", () => {
         refId: "task-a",
         dependencyType: "hard",
         createdAt: "2026-02-01T00:00:00.000Z",
+        requiredState: "complete",
       },
     ]);
 
@@ -136,7 +143,7 @@ describe("getTaskDependencyCounts", () => {
       tasks: [
         { ...baseTask, id: "task-upstream", status: "in-progress" },
         { ...baseTask, id: "task-blocked", blockers: ["Waiting on material"] },
-        { ...baseTask, id: "task-waiting", dependencyIds: ["task-upstream"] },
+        { ...baseTask, id: "task-waiting" },
         { ...baseTask, id: "task-qa", status: "waiting-for-qa" },
       ],
       taskDependencies: [
@@ -147,6 +154,7 @@ describe("getTaskDependencyCounts", () => {
         refId: "task-upstream",
         dependencyType: "hard",
           createdAt: "2026-02-01T00:00:00.000Z",
+          requiredState: "complete",
         },
       ],
       taskBlockers: [

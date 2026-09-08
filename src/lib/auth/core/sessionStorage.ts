@@ -1,6 +1,16 @@
 const LEGACY_SESSION_STORAGE_KEY = "meco.session.token";
 
 let memoryCsrfToken: string | null = null;
+let sessionGeneration = 0;
+
+export function beginSessionChange() {
+  sessionGeneration += 1;
+  return sessionGeneration;
+}
+
+export function getSessionGeneration() {
+  return sessionGeneration;
+}
 const PENDING_SIGN_OUT_KEY = "meco.session.pending-sign-out";
 let memoryPendingSignOut = false;
 
@@ -56,20 +66,7 @@ export function setSessionCsrfToken(csrfToken: string) {
 }
 
 export function clearWebSessionState() {
+  beginSessionChange();
   memoryCsrfToken = null;
   purgeLegacySessionTokens();
 }
-
-// Compatibility exports for the public auth barrel. They intentionally never
-// load or persist bearer credentials and can be removed with the next API cleanup.
-export function loadStoredSessionToken() {
-  purgeLegacySessionTokens();
-  return null;
-}
-
-export function storeSessionToken(unusedToken: string) {
-  void unusedToken;
-  purgeLegacySessionTokens();
-}
-
-export const clearStoredSessionToken = clearWebSessionState;

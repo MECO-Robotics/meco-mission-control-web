@@ -33,7 +33,7 @@ function buildTask(overrides: Partial<TaskRecord> = {}): TaskRecord {
     artifactIds: [],
     assigneeIds: [],
     blockers: [],
-    dependencyIds: [],
+
     disciplineId: "discipline-1",
     documentationLinked: false,
     dueDate: "2026-05-10",

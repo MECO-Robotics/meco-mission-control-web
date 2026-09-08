@@ -76,7 +76,7 @@ describe("WorkLogsView", () => {
           artifactIds: [],
           assigneeIds: [],
           blockers: [],
-          dependencyIds: [],
+
           disciplineId: "discipline-1",
           documentationLinked: false,
           dueDate: "2026-05-01",
@@ -150,7 +150,7 @@ describe("WorkLogsView", () => {
           artifactIds: [],
           assigneeIds: [],
           blockers: [],
-          dependencyIds: [],
+
           disciplineId: "discipline-1",
           documentationLinked: false,
           dueDate: "2026-05-01",
@@ -229,7 +229,7 @@ describe("WorkLogsView", () => {
           artifactIds: [],
           assigneeIds: [],
           blockers: [],
-          dependencyIds: [],
+
           disciplineId: "discipline-1",
           documentationLinked: false,
           dueDate: "2026-05-01",
@@ -281,7 +281,7 @@ describe("WorkLogsView", () => {
       artifactIds: [],
       assigneeIds: [],
       blockers: [],
-      dependencyIds: [],
+
       disciplineId: "discipline-1",
       documentationLinked: false,
       dueDate: "2026-05-01",
@@ -334,7 +334,7 @@ describe("WorkLogsView", () => {
       artifactIds: [],
       assigneeIds: [],
       blockers: [],
-      dependencyIds: [],
+
       disciplineId: "discipline-1",
       documentationLinked: false,
       dueDate: "2026-05-01",

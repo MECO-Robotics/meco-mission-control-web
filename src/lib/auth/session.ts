@@ -11,22 +11,34 @@ import {
 } from "./core/request";
 import {
   clearWebSessionState,
+  getSessionGeneration,
   hasPendingSignOut,
   setPendingSignOut,
   purgeLegacySessionTokens,
   setSessionCsrfToken,
 } from "./core/sessionStorage";
 
-function rememberWebSession(session: SessionResponse) {
-  setPendingSignOut(false);
-  setSessionCsrfToken(session.csrfToken);
-  return session;
+function staleSessionResponse() {
+  return Object.assign(new Error("Session changed while the request was pending."), { name: "AbortError" });
+}
+
+async function signIn(path: string, body: unknown) {
+  clearWebSessionState();
+  const generation = getSessionGeneration();
+  try {
+    const session = await postJson<SessionResponse>(path, body);
+    if (generation !== getSessionGeneration()) throw staleSessionResponse();
+    setPendingSignOut(false);
+    setSessionCsrfToken(session.csrfToken);
+    return session;
+  } catch (error) {
+    if (generation !== getSessionGeneration()) throw staleSessionResponse();
+    throw error;
+  }
 }
 
 export function exchangeGoogleCredential(credential: string) {
-  return postJson<SessionResponse>("/auth/web/google", { credential }).then(
-    rememberWebSession,
-  );
+  return signIn("/auth/web/google", { credential });
 }
 
 export function requestEmailSignInCode(email: string) {
@@ -36,19 +48,15 @@ export function requestEmailSignInCode(email: string) {
 }
 
 export function verifyEmailSignInCode(email: string, code: string) {
-  return postJson<SessionResponse>("/auth/web/email/verify", {
-    email,
-    code,
-  }).then(rememberWebSession);
+  return signIn("/auth/web/email/verify", { email, code });
 }
 
 export function requestDevBypassSignIn(role: DevBypassRole = "student") {
-  return postJson<SessionResponse>("/auth/web/dev-bypass", { role }).then(
-    rememberWebSession,
-  );
+  return signIn("/auth/web/dev-bypass", { role });
 }
 
 export async function restoreWebSession() {
+  const generation = getSessionGeneration();
   purgeLegacySessionTokens();
   const assertRestorable = () => {
     if (hasPendingSignOut()) {
@@ -57,6 +65,7 @@ export async function restoreWebSession() {
   };
   assertRestorable();
   const session = await fetchWebSession();
+  if (generation !== getSessionGeneration()) throw staleSessionResponse();
   assertRestorable();
   setSessionCsrfToken(session.csrfToken);
   return session;
@@ -77,16 +86,15 @@ export function revokeWebSession() {
 
 export async function validateSession(): Promise<boolean> {
   try {
-    await restoreWebSession();
+    await fetchWebSession();
     return true;
   } catch (error) {
     if (isApiErrorLike(error) && error.statusCode === 401) {
-      clearWebSessionState();
       return false;
     }
 
     // Keep the current session during transient network/server failures. The
-    // request layer still expires sessions immediately on explicit 401s.
+    // current session owner handles explicit 401s.
     return true;
   }
 }

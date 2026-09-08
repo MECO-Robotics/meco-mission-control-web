@@ -22,7 +22,7 @@ function createTask(
     artifactIds: [],
     assigneeIds: ["member-1"],
     blockers: [],
-    dependencyIds: [],
+
     disciplineId: "discipline-1",
     documentationLinked: false,
     dueDate: "2026-06-30",

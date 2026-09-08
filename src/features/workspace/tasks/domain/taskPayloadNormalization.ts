@@ -22,7 +22,7 @@ export function normalizeTaskPayload(taskDraft: TaskPayload): TaskPayload {
     taskDependencies: (taskDraft.taskDependencies ?? []).map((dependency) => ({
       ...dependency,
       refId: dependency.refId.trim(),
-      requiredState: dependency.requiredState?.trim(),
+      requiredState: dependency.requiredState.trim(),
     })),
     taskBlockers: (taskDraft.taskBlockers ?? []).map((blocker) => {
       const persistedBlocker = { ...blocker };
@@ -43,7 +43,7 @@ export function buildTaskDependencyPayload(
     taskId,
     kind: dependency.kind,
     refId: dependency.refId.trim(),
-    requiredState: dependency.requiredState?.trim(),
+    requiredState: dependency.requiredState.trim(),
     dependencyType: dependency.dependencyType,
   };
 }

@@ -1,22 +1,7 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskBlockerRecord, TaskDependencyRecord, TaskRecord } from "@/types/recordsExecution";
+import type { TaskDependencyRecord, TaskRecord } from "@/types/recordsExecution";
 
-type LegacyTaskDependencyRecord = {
-  id: string;
-  upstreamTaskId: string;
-  downstreamTaskId: string;
-  dependencyType: "blocks" | "soft" | "finish_to_start";
-  createdAt: string;
-};
-
-type DependencyLike =
-  | TaskDependencyRecord
-  | LegacyTaskDependencyRecord
-  | Partial<TaskDependencyRecord & LegacyTaskDependencyRecord>;
-
-export const HARD_DEPENDENCY_TYPES = new Set<
-  TaskDependencyRecord["dependencyType"] | "blocks" | "finish_to_start"
->(["hard", "blocks", "finish_to_start"]);
+export const HARD_DEPENDENCY_TYPES = new Set<TaskDependencyRecord["dependencyType"]>(["hard"]);
 
 const PART_INSTANCE_STATUS_ORDER: Record<string, number> = {
   "not ready": 0,
@@ -32,97 +17,16 @@ const MILESTONE_STATUS_ORDER: Record<string, number> = {
   ready: 3,
 };
 
-function normalizeTaskDependencyKind(kind: TaskDependencyRecord["kind"] | undefined) {
-  return kind ?? "task";
-}
-
 function uniqueIds(values: Array<string | null | undefined>) {
   return Array.from(new Set(values.filter((value): value is string => Boolean(value))));
 }
 
-function normalizeTaskDependencyRecord(
-  dependency: DependencyLike,
-  index: number,
-): TaskDependencyRecord {
-  const dependencyRecord = dependency as {
-    id?: string;
-    kind?: TaskDependencyRecord["kind"];
-    taskId?: string;
-    downstreamTaskId?: string;
-    refId?: string;
-    upstreamTaskId?: string;
-    requiredState?: string;
-    dependencyType?: TaskDependencyRecord["dependencyType"] | "blocks" | "finish_to_start";
-    createdAt?: string;
-  };
-  const kind = normalizeTaskDependencyKind(dependencyRecord.kind);
-  const taskId = dependencyRecord.taskId ?? dependencyRecord.downstreamTaskId ?? "";
-  const refId = dependencyRecord.refId ?? dependencyRecord.upstreamTaskId ?? "";
-
-  return {
-    id: dependencyRecord.id ?? `${taskId || "task"}:dependency:${index + 1}`,
-    taskId,
-    kind,
-    refId,
-    requiredState:
-      dependencyRecord.requiredState ??
-      (kind === "part_instance" || kind === "milestone" ? "ready" : "complete"),
-    dependencyType: dependencyRecord.dependencyType === "soft" ? "soft" : "hard",
-    createdAt: dependencyRecord.createdAt ?? new Date().toISOString(),
-  };
-}
-
 export function getTaskDependencyRecords(bootstrap: BootstrapPayload) {
-  const explicitDependencies = (bootstrap.taskDependencies ?? []).map((dependency, index) =>
-    normalizeTaskDependencyRecord(dependency as DependencyLike, index),
-  );
-
-  const fallbackDependencies = bootstrap.tasks.flatMap((task, taskIndex) =>
-    uniqueIds(task.dependencyIds ?? []).map<TaskDependencyRecord>((refId, dependencyIndex) => ({
-      id: `${task.id}:dependency:${taskIndex + dependencyIndex + 1}`,
-      taskId: task.id,
-      kind: "task",
-      refId,
-      requiredState: "complete",
-      dependencyType: "hard",
-      createdAt: task.startDate ? `${task.startDate}T00:00:00.000Z` : new Date().toISOString(),
-    })),
-  );
-
-  const dependencyKey = (dependency: TaskDependencyRecord) =>
-    `${dependency.taskId}:${dependency.kind}:${dependency.refId}:${dependency.dependencyType}:${dependency.requiredState ?? ""}`;
-  const explicitKeys = new Set(explicitDependencies.map(dependencyKey));
-
-  return [
-    ...explicitDependencies,
-    ...fallbackDependencies.filter((dependency) => !explicitKeys.has(dependencyKey(dependency))),
-  ];
+  return bootstrap.taskDependencies ?? [];
 }
 
 export function getTaskBlockerRecords(bootstrap: BootstrapPayload) {
-  const explicitBlockers = bootstrap.taskBlockers ?? [];
-  const fallbackBlockers = bootstrap.tasks.flatMap<TaskBlockerRecord>((task) =>
-    task.blockers.map((description, index) => ({
-      id: `${task.id}:blocker:${index + 1}`,
-      blockedTaskId: task.id,
-      blockerType: "other",
-      blockerId: null,
-      description,
-      severity: "medium",
-      status: "open",
-      createdByMemberId: null,
-      createdAt: task.startDate ? `${task.startDate}T00:00:00.000Z` : new Date().toISOString(),
-      resolvedAt: null,
-    })),
-  );
-  const blockerKey = (blocker: { blockedTaskId: string; description: string; status: string }) =>
-    `${blocker.blockedTaskId}:${blocker.description}:${blocker.status}`;
-  const explicitKeys = new Set(explicitBlockers.map(blockerKey));
-
-  return [
-    ...explicitBlockers,
-    ...fallbackBlockers.filter((blocker) => !explicitKeys.has(blockerKey(blocker))),
-  ];
+  return bootstrap.taskBlockers ?? [];
 }
 
 export function getTaskById(bootstrap: BootstrapPayload, taskId: string) {

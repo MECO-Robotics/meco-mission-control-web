@@ -59,7 +59,7 @@ const task: TaskRecord = {
   dueDate: "2026-03-02",
   priority: "medium",
   status: "not-started",
-  dependencyIds: [],
+
   blockers: [],
   linkedManufacturingIds: [],
   linkedPurchaseIds: [],

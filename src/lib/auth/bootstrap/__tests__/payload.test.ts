@@ -200,14 +200,14 @@ describe("normalizeBootstrapPayload", () => {
     expect(blocker?.sourceKind).toBe("external");
   });
 
-  it("preserves task target risk through bootstrap normalization", () => {
+  it("derives task target risk from the authoritative risk relation", () => {
     const payload = {
       ...EMPTY_BOOTSTRAP,
+      risks: [{ id: "risk-1", mitigationTaskId: "task-1" }],
       tasks: [
         {
           id: "task-1",
           title: "Mitigate drivetrain risk",
-          targetRiskId: "risk-1",
         },
       ],
     } as unknown as BootstrapPayload;

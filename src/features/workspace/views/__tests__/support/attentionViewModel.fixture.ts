@@ -98,7 +98,7 @@ export function createBootstrap(): BootstrapPayload {
         artifactIds: [],
         assigneeIds: [],
         blockers: ["external-delay"],
-        dependencyIds: [],
+
         disciplineId: "",
         documentationLinked: false,
         dueDate: isoDateOffset(-1),
@@ -134,7 +134,7 @@ export function createBootstrap(): BootstrapPayload {
         artifactIds: [],
         assigneeIds: [],
         blockers: [],
-        dependencyIds: [],
+
         disciplineId: "",
         documentationLinked: false,
         dueDate: isoDateOffset(1),

@@ -27,15 +27,10 @@ export type NonRobotProjectBucket = Exclude<ProjectBucket, "robot">;
 export type LegacyBootstrapPayload = Partial<
   Omit<BootstrapPayload, "artifacts" | "milestones" | "tasks">
 > & {
-  tasks?: Array<Partial<TaskRecord> & { requirementId?: string | null }>;
+  tasks?: Array<Partial<TaskRecord>>;
   artifacts?: Array<Partial<ArtifactRecord>>;
   milestones?: Array<Partial<MilestoneRecord>>;
-  taskDependencies?: Array<
-    Partial<TaskDependencyRecord> & {
-      upstreamTaskId?: string;
-      downstreamTaskId?: string;
-    }
-  >;
+  taskDependencies?: TaskDependencyRecord[];
   taskBlockers?: Array<Partial<TaskBlockerRecord>>;
 };
 
