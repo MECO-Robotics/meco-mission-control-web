@@ -999,20 +999,13 @@
         "summary",
         "disciplineId",
         "targetMilestoneId",
-        "photoUrl",
         "ownerId",
-        "assigneeIds",
         "mentorId",
         "dueDate",
         "priority",
         "status",
         "estimatedHours",
-        "actualHours",
-        "checklistItems",
-        "linkedManufacturingIds",
-        "linkedPurchaseIds",
-        "requiresDocumentation",
-        "documentationLinked"
+        "actualHours"
       ],
       "additionalProperties": false
     },
@@ -1418,12 +1411,7 @@
       "required": [
         "name",
         "description",
-        "photoUrl",
-        "iteration",
-        "isArchived",
-        "responsibleEngineerId",
-        "mentorIds",
-        "risks"
+        "responsibleEngineerId"
       ],
       "additionalProperties": false
     },
@@ -1771,9 +1759,6 @@
         "workstreamId",
         "createdByMemberId",
         "result",
-        "summary",
-        "notes",
-        "photoUrl",
         "createdAt"
       ],
       "additionalProperties": false
@@ -1864,9 +1849,6 @@
         "taskId",
         "participantIds",
         "result",
-        "mentorApproved",
-        "notes",
-        "photoUrl",
         "reviewedAt"
       ],
       "additionalProperties": false
@@ -1996,8 +1978,7 @@
         "blockerType",
         "blockerId",
         "description",
-        "severity",
-        "status"
+        "severity"
       ],
       "additionalProperties": false
     }
