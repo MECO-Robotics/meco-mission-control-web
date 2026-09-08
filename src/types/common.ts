@@ -55,6 +55,7 @@ export type MeetingType = "general" | "build" | "review" | "outreach" | "competi
 export type PartInstanceStatus = MilestoneStatus;
 export type TaskDependencyKind = "task" | "milestone" | "part_instance";
 export type TaskDependencyType = "hard" | "soft";
+export type TaskBlockerSourceKind = "task" | "milestone" | "workstream" | "mechanism" | "part_instance" | "artifact_instance" | "external";
 export type TaskBlockerType =
   | "external"
   | "lost-part"

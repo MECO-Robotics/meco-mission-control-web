@@ -111,6 +111,7 @@ function createTaskRelationPersistence(): TaskRelationPersistence {
       createdAt: "2026-05-01T00:00:00.000Z",
       resolvedAt: null,
       ...payload,
+      blockerType: payload.issueType,
         };
       },
     ),
@@ -120,7 +121,7 @@ function createTaskRelationPersistence(): TaskRelationPersistence {
         return {
       id: blockerId,
       blockedTaskId: payload.blockedTaskId ?? "task-1",
-      blockerType: payload.blockerType ?? "other",
+      blockerType: payload.issueType ?? "other",
       blockerId: payload.blockerId ?? null,
       description: payload.description ?? "",
       severity: payload.severity ?? "medium",
@@ -170,6 +171,14 @@ describe("normalizeTaskPayload", () => {
 });
 
 describe("buildTaskBlockerPayload", () => {
+  it("keeps a part relationship while changing its issue category", () => {
+    expect(buildTaskBlockerPayload("task-1", {
+      blockerType: "broken-part", blockerId: "part-1", sourceKind: "part_instance",
+      description: "Replacement needed", severity: "high",
+    })).toEqual(expect.objectContaining({
+      blockerType: "part_instance", issueType: "broken-part", blockerId: "part-1",
+    }));
+  });
   it("respects an explicitly changed type on an external blocker", () => {
     expect(buildTaskBlockerPayload("task-1", {
       blockerType: "broken-part",
@@ -177,7 +186,7 @@ describe("buildTaskBlockerPayload", () => {
       description: "Broken replacement",
       severity: "high",
       sourceKind: "external",
-    }).blockerType).toBe("broken-part");
+    }).issueType).toBe("broken-part");
   });
   it("preserves a legacy external kind during unrelated blocker edits", () => {
     expect(buildTaskBlockerPayload("task-1", {
@@ -367,7 +376,8 @@ describe("task relation sync services", () => {
       "blocker-update",
       expect.objectContaining({
         blockedTaskId: "task-1",
-        blockerType: "qa-failed",
+        blockerType: "external",
+        issueType: "qa-failed",
         blockerId: "milestone-1",
         description: "Needs milestone handoff",
         severity: "high",
@@ -379,7 +389,8 @@ describe("task relation sync services", () => {
     expect(persistence.createTaskBlockerRecord).toHaveBeenCalledWith(
       expect.objectContaining({
         blockedTaskId: "task-1",
-        blockerType: "manufacturing-unavailable",
+        blockerType: "external",
+        issueType: "manufacturing-unavailable",
         blockerId: null,
         description: "Supplier ETA unknown",
         severity: "low",
