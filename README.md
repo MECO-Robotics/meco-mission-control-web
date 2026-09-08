@@ -504,7 +504,7 @@ npm run verify
 5. `npm run test:ci`
 6. `npm run build:bundle`
 
-CI also runs `npm run audit:organization:strict` before `npm run verify`.
+CI runs `npm run audit:organization:strict` once before `npm run verify` and uploads that report. The snapshot job packages the verified bundle artifact from the same run; it does not install dependencies or build a second copy.
 
 ### Targeted commands
 
@@ -529,7 +529,7 @@ npm run test:ci -- WorkLogsView
 npm run test:ci -- AppSidebar
 ```
 
-Use targeted tests first when narrowing behavior, then run `npm run verify` before marking the PR ready.
+Timeline cases live in directly discovered, behavior-named `TimelineView.*.test.ts` suites; no side-effect test-registration imports are needed. Use targeted tests first when narrowing behavior, then run `npm run verify` before marking the PR ready.
 
 ### Organization guardrails
 

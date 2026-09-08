@@ -6,7 +6,7 @@ import { TimelineProjectGroup } from "@/features/workspace/views/timeline/Timeli
 import { TimelineTaskStatusCell } from "@/features/workspace/views/timeline/TimelineTaskStatusCell";
 import { resolveTimelineRowHighlightStyle } from "@/features/workspace/views/timeline/model/timelineTaskColors";
 import { TimelineSubsystemGroup } from "@/features/workspace/views/timeline/TimelineSubsystemGroup";
-import { createBootstrap } from "../timeline/timelineTestFixtures";
+import { createBootstrap } from "./timelineTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 

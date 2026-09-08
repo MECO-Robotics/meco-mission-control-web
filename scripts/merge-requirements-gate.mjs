@@ -5,7 +5,7 @@ const contractRepository = "MECO-Robotics/meco-mission-control-platform";
 const contractPath = "contracts/platform/bootstrap/v1/contract.json";
 const productionIntegrationPath = "contracts/production-integration.json";
 
-export const trustedCiWorkflowSha256 = "2660805581abe2cffbb85d3db98a99fa192b20d23624ffa186da04d9c943c894";
+export const trustedCiWorkflowSha256 = "5686aa7904ff3e24ff56cb1941572511d19dca8e4286c0a14502b7f0ec762fd5";
 
 function requireValue(value, name) {
   if (!value) {
