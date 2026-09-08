@@ -3,6 +3,7 @@ import type {
   MilestoneType,
   MeetingType,
   TaskBlockerSeverity,
+  TaskBlockerSourceKind,
   TaskBlockerStatus,
   TaskBlockerType,
   TaskDependencyKind,
@@ -101,6 +102,8 @@ export interface TaskBlockerRecord {
   blockedTaskId: string;
   blockerType: TaskBlockerType;
   blockerId: string | null;
+  sourceKind?: string | null;
+  issueType?: TaskBlockerType;
   description: string;
   severity: TaskBlockerSeverity;
   status: TaskBlockerStatus;
@@ -190,3 +193,7 @@ export interface AuditActionRecord {
   actorMemberId: string | null;
   memberIds: string[];
 }
+
+export type TaskBlockerResponse = Omit<TaskBlockerRecord, "blockerType" | "sourceKind"> & {
+  blockerType: TaskBlockerSourceKind;
+};

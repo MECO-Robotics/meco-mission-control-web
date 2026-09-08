@@ -105,6 +105,18 @@ describe("shouldShowEnforcedSignInScreen", () => {
     ).toBe(true);
   });
 
+  it("shows sign-in so a forced warning remains visible in public demo mode", () => {
+    expect(
+      shouldShowEnforcedSignInScreen({
+        enforcedAuthConfig,
+        isPublicDemoSession: true,
+        isSignInScreenRequested: false,
+        sessionUser: null,
+        forceSignIn: true,
+      }),
+    ).toBe(true);
+  });
+
   it("shows sign-in for unsigned non-demo access and hides it for signed-in users", () => {
     expect(
       shouldShowEnforcedSignInScreen({

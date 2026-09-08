@@ -6,7 +6,7 @@ import {
   type SetStateAction,
 } from "react";
 
-import { clearWebSessionState } from "@/lib/auth/core/sessionStorage";
+import { clearWebSessionState, setPendingSignOut } from "@/lib/auth/core/sessionStorage";
 import {
   exchangeGoogleCredential,
   requestDevBypassSignIn,
@@ -28,6 +28,7 @@ interface UseAppAuthSessionActionsArgs {
   resetWorkspaceRef: RefObject<() => void>;
   setAuthMessage: Dispatch<SetStateAction<string | null>>;
   setIsSigningIn: Dispatch<SetStateAction<boolean>>;
+  setIsSignInForced: Dispatch<SetStateAction<boolean>>;
   setSessionUser: Dispatch<SetStateAction<SessionUser | null>>;
 }
 
@@ -58,6 +59,7 @@ export async function revokeThenClearWebSession(
   clearLocalSession: () => void,
   onUnconfirmed: (message: string) => void = () => undefined,
 ) {
+  setPendingSignOut(true);
   let confirmed = false;
 
   try {
@@ -74,6 +76,8 @@ export async function revokeThenClearWebSession(
     clearLocalSession();
   }
 
+  if (confirmed) setPendingSignOut(false);
+
   if (!confirmed) {
     onUnconfirmed(UNCONFIRMED_SIGN_OUT_MESSAGE);
   }
@@ -86,6 +90,7 @@ export function useAppAuthSessionActions({
   resetWorkspaceRef,
   setAuthMessage,
   setIsSigningIn,
+  setIsSignInForced,
   setSessionUser,
 }: UseAppAuthSessionActionsArgs): UseAppAuthSessionActionsResult {
   const clearAuthMessage = useCallback(() => {
@@ -125,6 +130,7 @@ export function useAppAuthSessionActions({
 
       try {
         const session = await exchangeGoogleCredential(response.credential);
+        setIsSignInForced(false);
         storeSignedInSession(session, setSessionUser);
       } catch (error) {
         clearWebSessionState();
@@ -133,7 +139,7 @@ export function useAppAuthSessionActions({
         setIsSigningIn(false);
       }
     },
-    [setAuthMessage, setIsSigningIn, setSessionUser],
+    [setAuthMessage, setIsSignInForced, setIsSigningIn, setSessionUser],
   );
 
   const handleRequestEmailCode = useCallback(
@@ -160,6 +166,7 @@ export function useAppAuthSessionActions({
 
       try {
         const session = await verifyEmailSignInCode(email, code);
+        setIsSignInForced(false);
         storeSignedInSession(session, setSessionUser);
       } catch (error) {
         clearWebSessionState();
@@ -169,7 +176,7 @@ export function useAppAuthSessionActions({
         setIsSigningIn(false);
       }
     },
-    [setAuthMessage, setIsSigningIn, setSessionUser],
+    [setAuthMessage, setIsSignInForced, setIsSigningIn, setSessionUser],
   );
 
   const handleDevBypassSignIn = useCallback(
@@ -179,6 +186,7 @@ export function useAppAuthSessionActions({
 
       try {
         const session = await requestDevBypassSignIn(role);
+        setIsSignInForced(false);
         storeSignedInSession(session, setSessionUser);
       } catch (error) {
         clearWebSessionState();
@@ -187,7 +195,7 @@ export function useAppAuthSessionActions({
         setIsSigningIn(false);
       }
     },
-    [setAuthMessage, setIsSigningIn, setSessionUser],
+    [setAuthMessage, setIsSignInForced, setIsSigningIn, setSessionUser],
   );
 
   const handleSignOut = useCallback(async () => {
@@ -201,9 +209,12 @@ export function useAppAuthSessionActions({
         setAuthMessage(null);
         resetWorkspaceRef.current?.();
       },
-      setAuthMessage,
+      (message) => {
+        setAuthMessage(message);
+        setIsSignInForced(true);
+      },
     );
-  }, [resetWorkspaceRef, setAuthMessage, setSessionUser]);
+  }, [resetWorkspaceRef, setAuthMessage, setIsSignInForced, setSessionUser]);
 
   return {
     clearAuthMessage,
