@@ -170,6 +170,15 @@ describe("normalizeTaskPayload", () => {
 });
 
 describe("buildTaskBlockerPayload", () => {
+  it("respects an explicitly changed type on an external blocker", () => {
+    expect(buildTaskBlockerPayload("task-1", {
+      blockerType: "broken-part",
+      blockerId: "part-1",
+      description: "Broken replacement",
+      severity: "high",
+      sourceKind: "external",
+    }).blockerType).toBe("broken-part");
+  });
   it("preserves a legacy external kind during unrelated blocker edits", () => {
     expect(buildTaskBlockerPayload("task-1", {
       id: "blocker-1",

@@ -65,7 +65,7 @@ export function buildTaskBlockerPayload(
 ): TaskBlockerPayload {
   return {
     blockedTaskId: taskId,
-    blockerType: blocker.sourceKind === "external" ? "external" : blocker.blockerType,
+    blockerType: blocker.blockerType,
     blockerId: blocker.blockerId ?? null,
     description: blocker.description.trim(),
     severity: blocker.severity as TaskBlockerSeverity,

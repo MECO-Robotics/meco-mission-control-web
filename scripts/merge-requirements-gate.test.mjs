@@ -7,6 +7,7 @@ import {
   assertRequiredCheckRuns,
   assertTrustedCiIdentity,
   assertTrustedCiWorkflow,
+  assertTrustedCiWorkflowSha256,
   trustedCiWorkflowSha256,
   validateBootstrapContract,
   validateProductionIntegrationManifest,
@@ -190,4 +191,10 @@ test("script CSP contains no inline or eval execution allowances", async () => {
     assert.match(config, /script-src-attr 'none'/);
     assert.match(config, /trusted-types meco-mission-control-web-google goog#html/);
   }
+});
+
+ test("accepts only the reviewed CI transition digests", () => {
+  assert.doesNotThrow(() => assertTrustedCiWorkflowSha256("2660805581abe2cffbb85d3db98a99fa192b20d23624ffa186da04d9c943c894"));
+  assert.doesNotThrow(() => assertTrustedCiWorkflowSha256("5686aa7904ff3e24ff56cb1941572511d19dca8e4286c0a14502b7f0ec762fd5"));
+  assert.throws(() => assertTrustedCiWorkflowSha256("5686aa7904ff3e24ff56cb1941572511d19dca8e4286c0a14502b7f0ec762fd6"), /digest mismatch/);
 });
