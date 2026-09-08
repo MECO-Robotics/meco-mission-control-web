@@ -122,7 +122,7 @@ export function useAppWorkspaceState() {
     setIsSignInScreenRequested(true);
   }, []);
 
-  const { authBooting, authConfig, authMessage, clearAuthMessage, enforcedAuthConfig, expireSession, googleButtonRef, handleSignOut, handleDevBypassSignIn, handleRequestEmailCode, handleVerifyEmailCode, isEmailAuthAvailable, isGoogleAuthAvailable, isSigningIn, sessionUser } =
+  const { authBooting, authConfig, authMessage, clearAuthMessage, enforcedAuthConfig, expireSession, googleButtonRef, handleSignOut, handleDevBypassSignIn, handleRequestEmailCode, handleVerifyEmailCode, isEmailAuthAvailable, isGoogleAuthAvailable, isSignInForced, isSigningIn, sessionUser } =
     useAppAuth({
       isDarkMode,
       onSessionExpired: handleSessionExpired,
@@ -198,6 +198,7 @@ export function useAppWorkspaceState() {
     isSignInScreenRequested,
     isNotificationQueueOpen,
     isPublicDemoSession,
+    isSignInForced,
     isSigningIn,
     isSidebarCollapsed,
     isSidebarOverlay,

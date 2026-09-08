@@ -76,6 +76,36 @@ jobs:
               }
             }
 
+            if (context.eventName === 'workflow_run' && pullRequestNumbers.size === 0) {
+              const trustedRunId = context.payload?.workflow_run?.id;
+              const openPulls = await github.paginate(github.rest.pulls.list, {
+                owner,
+                repo,
+                state: 'open',
+                per_page: 100,
+              });
+              for (const pr of openPulls) {
+                const { data: combinedStatus } = await github.rest.repos.getCombinedStatusForRef({
+                  owner,
+                  repo,
+                  ref: pr.head.sha,
+                  per_page: 100,
+                });
+                const statusMatchesRun = (combinedStatus.statuses ?? []).some((status) => (
+                  status.context === 'merge-requirements'
+                    && status.state === 'success'
+                    && status.target_url === `${context.serverUrl}/${owner}/${repo}/actions/runs/${trustedRunId}`
+                ));
+                if (statusMatchesRun) {
+                  pullRequestNumbers.add(pr.number);
+                }
+              }
+            }
+
+            if (pullRequestNumbers.size > 1) {
+              throw new Error('Ambiguous pull request association; refusing to reuse a SHA-scoped gate status.');
+            }
+
             if (pullRequestNumbers.size === 0) {
               core.info('No pull request is associated with this event.');
               return;

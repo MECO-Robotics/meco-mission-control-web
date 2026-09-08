@@ -1,6 +1,27 @@
 const LEGACY_SESSION_STORAGE_KEY = "meco.session.token";
 
 let memoryCsrfToken: string | null = null;
+const PENDING_SIGN_OUT_KEY = "meco.session.pending-sign-out";
+let memoryPendingSignOut = false;
+
+export function hasPendingSignOut() {
+  try {
+    return memoryPendingSignOut || getBrowserWindow()?.localStorage?.getItem(PENDING_SIGN_OUT_KEY) === "1";
+  } catch {
+    return memoryPendingSignOut;
+  }
+}
+
+export function setPendingSignOut(pending: boolean) {
+  memoryPendingSignOut = pending;
+  try {
+    const storage = getBrowserWindow()?.localStorage;
+    if (pending) storage?.setItem(PENDING_SIGN_OUT_KEY, "1");
+    else storage?.removeItem(PENDING_SIGN_OUT_KEY);
+  } catch {
+    // Retain the guard in memory when browser storage is unavailable.
+  }
+}
 
 function removeStorage(storageName: "localStorage" | "sessionStorage", key: string) {
   try {

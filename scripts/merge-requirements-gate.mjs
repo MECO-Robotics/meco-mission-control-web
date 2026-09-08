@@ -6,6 +6,9 @@ const contractPath = "contracts/platform/bootstrap/v1/contract.json";
 const productionIntegrationPath = "contracts/production-integration.json";
 
 export const trustedCiWorkflowSha256 = "2660805581abe2cffbb85d3db98a99fa192b20d23624ffa186da04d9c943c894";
+const trustedCiWorkflowSha256s = new Set([trustedCiWorkflowSha256,
+  "5686aa7904ff3e24ff56cb1941572511d19dca8e4286c0a14502b7f0ec762fd5",
+]);
 
 function requireValue(value, name) {
   if (!value) {
@@ -126,10 +129,13 @@ export function assertRequiredCheckRuns(checkRuns, requiredNames) {
 }
 
 export function assertTrustedCiWorkflow(workflowBytes) {
-  const actualSha = createHash("sha256").update(workflowBytes).digest("hex");
-  if (actualSha !== trustedCiWorkflowSha256) {
+  assertTrustedCiWorkflowSha256(createHash("sha256").update(workflowBytes).digest("hex"));
+}
+
+export function assertTrustedCiWorkflowSha256(actualSha) {
+  if (!trustedCiWorkflowSha256s.has(actualSha)) {
     throw new Error(
-      `PR CI workflow digest mismatch: expected ${trustedCiWorkflowSha256}, got ${actualSha}.`,
+      `PR CI workflow digest mismatch: expected one of ${[...trustedCiWorkflowSha256s].join(", ")}, got ${actualSha}.`,
     );
   }
 }

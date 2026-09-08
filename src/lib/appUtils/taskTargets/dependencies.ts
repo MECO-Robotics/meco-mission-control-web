@@ -56,6 +56,7 @@ export function getTaskBlockerDrafts(task: TaskRecord, bootstrap?: BootstrapPayl
         blockerId: blocker.blockerId,
         description: blocker.description,
         severity: blocker.severity,
+        sourceKind: blocker.sourceKind,
       }))
     : [];
 }
