@@ -278,6 +278,7 @@ export interface TaskBlockerDraft {
   description: string;
   isIntentPlaceholder?: boolean;
   severity: TaskBlockerSeverity;
+  sourceKind?: string | null;
 }
 
 export interface TaskPayload {

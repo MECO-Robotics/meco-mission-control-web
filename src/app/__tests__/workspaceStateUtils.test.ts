@@ -321,7 +321,8 @@ function createBootstrap(): BootstrapPayload {
         id: "blocker-external",
         blockedTaskId: "task-visible",
         blockerType: "shipping-delay",
-        blockerId: null,
+        blockerId: "vendor-order-42",
+        sourceKind: "external",
         description: "Waiting on vendor",
         severity: "medium",
         status: "open",
@@ -444,6 +445,7 @@ describe("scopeBootstrapBySelection", () => {
     const scoped = scopeBootstrapBySelection(createBootstrap(), "season-1", "project-visible");
 
     expect((scoped.taskBlockers ?? []).map((blocker) => blocker.id)).toEqual(["blocker-external"]);
+    expect(scoped.taskBlockers?.[0]?.blockerId).toBe("vendor-order-42");
   });
 
   it("filters work logs to scoped task ids", () => {

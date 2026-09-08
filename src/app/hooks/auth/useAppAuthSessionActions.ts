@@ -28,6 +28,7 @@ interface UseAppAuthSessionActionsArgs {
   resetWorkspaceRef: RefObject<() => void>;
   setAuthMessage: Dispatch<SetStateAction<string | null>>;
   setIsSigningIn: Dispatch<SetStateAction<boolean>>;
+  setIsSignInForced: Dispatch<SetStateAction<boolean>>;
   setSessionUser: Dispatch<SetStateAction<SessionUser | null>>;
 }
 
@@ -86,6 +87,7 @@ export function useAppAuthSessionActions({
   resetWorkspaceRef,
   setAuthMessage,
   setIsSigningIn,
+  setIsSignInForced,
   setSessionUser,
 }: UseAppAuthSessionActionsArgs): UseAppAuthSessionActionsResult {
   const clearAuthMessage = useCallback(() => {
@@ -125,6 +127,7 @@ export function useAppAuthSessionActions({
 
       try {
         const session = await exchangeGoogleCredential(response.credential);
+        setIsSignInForced(false);
         storeSignedInSession(session, setSessionUser);
       } catch (error) {
         clearWebSessionState();
@@ -133,7 +136,7 @@ export function useAppAuthSessionActions({
         setIsSigningIn(false);
       }
     },
-    [setAuthMessage, setIsSigningIn, setSessionUser],
+    [setAuthMessage, setIsSignInForced, setIsSigningIn, setSessionUser],
   );
 
   const handleRequestEmailCode = useCallback(
@@ -160,6 +163,7 @@ export function useAppAuthSessionActions({
 
       try {
         const session = await verifyEmailSignInCode(email, code);
+        setIsSignInForced(false);
         storeSignedInSession(session, setSessionUser);
       } catch (error) {
         clearWebSessionState();
@@ -169,7 +173,7 @@ export function useAppAuthSessionActions({
         setIsSigningIn(false);
       }
     },
-    [setAuthMessage, setIsSigningIn, setSessionUser],
+    [setAuthMessage, setIsSignInForced, setIsSigningIn, setSessionUser],
   );
 
   const handleDevBypassSignIn = useCallback(
@@ -179,6 +183,7 @@ export function useAppAuthSessionActions({
 
       try {
         const session = await requestDevBypassSignIn(role);
+        setIsSignInForced(false);
         storeSignedInSession(session, setSessionUser);
       } catch (error) {
         clearWebSessionState();
@@ -187,7 +192,7 @@ export function useAppAuthSessionActions({
         setIsSigningIn(false);
       }
     },
-    [setAuthMessage, setIsSigningIn, setSessionUser],
+    [setAuthMessage, setIsSignInForced, setIsSigningIn, setSessionUser],
   );
 
   const handleSignOut = useCallback(async () => {
@@ -201,9 +206,12 @@ export function useAppAuthSessionActions({
         setAuthMessage(null);
         resetWorkspaceRef.current?.();
       },
-      setAuthMessage,
+      (message) => {
+        setAuthMessage(message);
+        setIsSignInForced(true);
+      },
     );
-  }, [resetWorkspaceRef, setAuthMessage, setSessionUser]);
+  }, [resetWorkspaceRef, setAuthMessage, setIsSignInForced, setSessionUser]);
 
   return {
     clearAuthMessage,

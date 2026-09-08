@@ -113,7 +113,7 @@ describe("getActiveNavigationSubItemId", () => {
       getActiveNavigationSubItemId(
         createNavigationState({ activeTab: "worklogs", worklogsView: "logs" }),
       ),
-    ).toBe("reports-worklogs-kanban");
+    ).toBe("reports-worklogs");
   });
 
   it("returns null for help because it has no sidebar subitem", () => {
@@ -142,7 +142,8 @@ describe("isNavigationSubItemId", () => {
   });
 
   it("normalizes legacy favorite IDs", () => {
-    expect(normalizeNavigationSubItemId("reports-work-logs")).toBe("reports-worklogs-kanban");
+    expect(normalizeNavigationSubItemId("reports-work-logs")).toBe("reports-worklogs");
+    expect(normalizeNavigationSubItemId("reports-worklogs")).toBe("reports-worklogs");
     expect(normalizeNavigationSubItemId("reports-worklogs-kanban")).toBe("reports-worklogs-kanban");
     expect(normalizeNavigationSubItemId("invalid-workview")).toBeNull();
   });

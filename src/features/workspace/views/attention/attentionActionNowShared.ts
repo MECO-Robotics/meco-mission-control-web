@@ -47,6 +47,7 @@ const REASON_WEIGHTS: Record<AttentionReason, number> = {
 };
 
 const BLOCKER_TYPE_WEIGHTS: Record<TaskBlockerType, number> = {
+  external: 6,
   "broken-part": 8,
   "broken-tool": 6,
   "design-issue": 8,

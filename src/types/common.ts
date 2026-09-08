@@ -56,6 +56,7 @@ export type PartInstanceStatus = MilestoneStatus;
 export type TaskDependencyKind = "task" | "milestone" | "part_instance";
 export type TaskDependencyType = "hard" | "soft";
 export type TaskBlockerType =
+  | "external"
   | "lost-part"
   | "broken-part"
   | "lost-tool"
@@ -66,6 +67,7 @@ export type TaskBlockerType =
   | "qa-failed"
   | "other";
 export const TASK_BLOCKER_TYPE_LABELS: Record<TaskBlockerType, string> = {
+  external: "External",
   "lost-part": "Lost part",
   "broken-part": "Broken part",
   "lost-tool": "Lost tool",

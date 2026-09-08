@@ -17,7 +17,7 @@ function normalizeNavigationState(state: NavigationState): NavigationState {
     };
   }
 
-  if (state.activeTab === "worklogs" && ["summary", "logs"].includes(state.worklogsView)) {
+  if (state.activeTab === "worklogs" && state.worklogsView === "summary") {
     return {
       ...state,
       worklogsView: "kanban",
@@ -90,7 +90,7 @@ export function isNavigationSubItemId(value: string): value is NavigationSubItem
 
 export function normalizeNavigationSubItemId(value: string): NavigationSubItemId | null {
   if (value === "reports-work-logs") {
-    return "reports-worklogs-kanban";
+    return "reports-worklogs";
   }
 
   return isNavigationSubItemId(value) ? value : null;

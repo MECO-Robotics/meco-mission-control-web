@@ -101,6 +101,7 @@ export interface TaskBlockerRecord {
   blockedTaskId: string;
   blockerType: TaskBlockerType;
   blockerId: string | null;
+  sourceKind?: string | null;
   description: string;
   severity: TaskBlockerSeverity;
   status: TaskBlockerStatus;

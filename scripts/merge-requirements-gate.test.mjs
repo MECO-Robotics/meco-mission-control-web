@@ -7,6 +7,7 @@ import {
   assertRequiredCheckRuns,
   assertTrustedCiIdentity,
   assertTrustedCiWorkflow,
+  assertTrustedCiWorkflowSha256,
   trustedCiWorkflowSha256,
   validateBootstrapContract,
   validateProductionIntegrationManifest,
@@ -103,7 +104,7 @@ test("trusted CI identity and revision checks reject unrelated or stale runs", (
 
 test("trusted CI digest accepts the finalized workflow and rejects PR edits", async () => {
   const workflow = await readFile(".github/workflows/ci.yml");
-  assert.equal(createHash("sha256").update(workflow).digest("hex"), trustedCiWorkflowSha256);
+  assert.equal(createHash("sha256").update(workflow).digest("hex"), "5686aa7904ff3e24ff56cb1941572511d19dca8e4286c0a14502b7f0ec762fd5");
   assert.doesNotThrow(() => assertTrustedCiWorkflow(workflow));
   assert.throws(
     () => assertTrustedCiWorkflow(Buffer.concat([workflow, Buffer.from("# attacker edit\n")])),
@@ -121,6 +122,9 @@ test("pull-request workflows expose neither repository secrets nor write tokens"
   assert.doesNotMatch(skills, /^\s+[a-z-]+:\s*write\s*$/m);
   assert.doesNotMatch(autoMerge, /^  pull_request:/m);
   assert.match(autoMerge, /^  pull_request_target:/m);
+  assert.match(autoMerge, /getCombinedStatusForRef/);
+  assert.match(autoMerge, /status\.context === 'merge-requirements'/);
+  assert.match(autoMerge, /actions\/runs\/\$\{trustedRunId\}/);
 });
 
 test("all GitHub Actions are pinned and production SSH trust is pre-provisioned", async () => {
@@ -187,4 +191,10 @@ test("script CSP contains no inline or eval execution allowances", async () => {
     assert.match(config, /script-src-attr 'none'/);
     assert.match(config, /trusted-types meco-mission-control-web-google goog#html/);
   }
+});
+
+ test("accepts only the reviewed CI transition digests", () => {
+  assert.doesNotThrow(() => assertTrustedCiWorkflowSha256("2660805581abe2cffbb85d3db98a99fa192b20d23624ffa186da04d9c943c894"));
+  assert.doesNotThrow(() => assertTrustedCiWorkflowSha256("5686aa7904ff3e24ff56cb1941572511d19dca8e4286c0a14502b7f0ec762fd5"));
+  assert.throws(() => assertTrustedCiWorkflowSha256("5686aa7904ff3e24ff56cb1941572511d19dca8e4286c0a14502b7f0ec762fd6"), /digest mismatch/);
 });

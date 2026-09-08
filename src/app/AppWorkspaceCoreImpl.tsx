@@ -39,6 +39,7 @@ export default function AppWorkspaceCoreImpl() {
       isPublicDemoSession: auth.isPublicDemoSession,
       isSignInScreenRequested: auth.isSignInScreenRequested,
       sessionUser: auth.sessionUser,
+      forceSignIn: auth.isSignInForced,
     })
   ) {
     return (

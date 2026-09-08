@@ -45,6 +45,7 @@ const authControllerKeys = [
   "isPublicDemoSession",
   "isSignInScreenRequested",
   "isSigningIn",
+  "isSignInForced",
   "pageShellStyle",
   "returnToPublicDemo",
   "sessionUser",

@@ -1,6 +1,9 @@
 /// <reference types="jest" />
 
-import { normalizeTaskPayload } from "@/features/workspace/tasks/domain/taskPayloadNormalization";
+import {
+  buildTaskBlockerPayload,
+  normalizeTaskPayload,
+} from "@/features/workspace/tasks/domain/taskPayloadNormalization";
 import {
   syncTaskBlockers,
   syncTaskDependencies,
@@ -163,6 +166,32 @@ describe("normalizeTaskPayload", () => {
     expect(normalized.taskBlockers?.[0]).toMatchObject({
       description: "Waiting on vendor reply",
     });
+  });
+});
+
+describe("buildTaskBlockerPayload", () => {
+  it("respects an explicitly changed type on an external blocker", () => {
+    expect(buildTaskBlockerPayload("task-1", {
+      blockerType: "broken-part",
+      blockerId: "part-1",
+      description: "Broken replacement",
+      severity: "high",
+      sourceKind: "external",
+    }).blockerType).toBe("broken-part");
+  });
+  it("preserves a legacy external kind during unrelated blocker edits", () => {
+    expect(buildTaskBlockerPayload("task-1", {
+      id: "blocker-1",
+      blockerType: "external",
+      blockerId: "vendor-order-42",
+      description: "  Updated vendor ETA  ",
+      severity: "high",
+      sourceKind: "external",
+    })).toEqual(expect.objectContaining({
+      blockerType: "external",
+      blockerId: "vendor-order-42",
+      description: "Updated vendor ETA",
+    }));
   });
 });
 

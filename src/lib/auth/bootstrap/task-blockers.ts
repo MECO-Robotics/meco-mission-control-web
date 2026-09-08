@@ -4,7 +4,6 @@ import type { LegacyBootstrapPayload } from "./shared";
 
 const LEGACY_BLOCKER_TYPE_FALLBACKS: Record<string, TaskBlockerRecord["blockerType"]> = {
   artifact_instance: "other",
-  external: "other",
   mechanism: "design-issue",
   milestone: "other",
   part_instance: "lost-part",
@@ -31,6 +30,7 @@ export function normalizeBootstrapTaskBlockers(
     blockedTaskId: blocker.blockedTaskId ?? "",
     blockerType: normalizeBlockerType(blocker.blockerType),
     blockerId: blocker.blockerId ?? null,
+    sourceKind: blocker.blockerType ?? null,
     description: blocker.description ?? "",
     severity: blocker.severity ?? "medium",
     status: blocker.status ?? "open",
