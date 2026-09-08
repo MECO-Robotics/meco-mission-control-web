@@ -198,3 +198,24 @@ test("script CSP contains no inline or eval execution allowances", async () => {
   assert.doesNotThrow(() => assertTrustedCiWorkflowSha256("5686aa7904ff3e24ff56cb1941572511d19dca8e4286c0a14502b7f0ec762fd5"));
   assert.throws(() => assertTrustedCiWorkflowSha256("5686aa7904ff3e24ff56cb1941572511d19dca8e4286c0a14502b7f0ec762fd6"), /digest mismatch/);
 });
+
+ test("automerge resolver rejects SHA-scoped statuses shared by multiple PRs", async () => {
+  const workflow = await readFile(".github/workflows/codex-automerge.yml", "utf8");
+  const prefix = workflow.split("          script: |\n")[1]
+    .split("            async function maybeEnableAutoMerge")[0];
+  const resolve = new (Object.getPrototypeOf(async function () {}).constructor)(
+    "github", "context", "core", `${prefix} return [...pullRequestNumbers];`,
+  );
+  const context = { serverUrl: "https://github.com", repo: { owner: "org", repo: "web" }, eventName: "workflow_run",
+    payload: { workflow_run: { id: 42, conclusion: "success", pull_requests: [] } } };
+  const github = {
+    rest: { pulls: { list: {} }, repos: { getCombinedStatusForRef: async () => ({ data: {
+      statuses: [{ context: "merge-requirements", state: "success", target_url: "https://github.com/org/web/actions/runs/42" }],
+    } }) } },
+    paginate: async () => [{ number: 1, head: { sha: "same-sha" }, base: { ref: "development" } },
+      { number: 2, head: { sha: "same-sha" }, base: { ref: "main" } }],
+  };
+  await assert.rejects(resolve(github, context, { info() {} }), /Ambiguous pull request/);
+  github.paginate = async () => [{ number: 1, head: { sha: "same-sha" } }];
+  assert.deepEqual(await resolve(github, context, { info() {} }), [1]);
+});

@@ -94,12 +94,16 @@ jobs:
                 const statusMatchesRun = (combinedStatus.statuses ?? []).some((status) => (
                   status.context === 'merge-requirements'
                     && status.state === 'success'
-                    && String(status.target_url ?? '').includes(`/actions/runs/${trustedRunId}`)
+                    && status.target_url === `${context.serverUrl}/${owner}/${repo}/actions/runs/${trustedRunId}`
                 ));
                 if (statusMatchesRun) {
                   pullRequestNumbers.add(pr.number);
                 }
               }
+            }
+
+            if (pullRequestNumbers.size > 1) {
+              throw new Error('Ambiguous pull request association; refusing to reuse a SHA-scoped gate status.');
             }
 
             if (pullRequestNumbers.size === 0) {
