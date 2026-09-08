@@ -11,11 +11,14 @@ import {
 } from "./core/request";
 import {
   clearWebSessionState,
+  hasPendingSignOut,
+  setPendingSignOut,
   purgeLegacySessionTokens,
   setSessionCsrfToken,
 } from "./core/sessionStorage";
 
 function rememberWebSession(session: SessionResponse) {
+  setPendingSignOut(false);
   setSessionCsrfToken(session.csrfToken);
   return session;
 }
@@ -47,7 +50,14 @@ export function requestDevBypassSignIn(role: DevBypassRole = "student") {
 
 export async function restoreWebSession() {
   purgeLegacySessionTokens();
+  const assertRestorable = () => {
+    if (hasPendingSignOut()) {
+      throw Object.assign(new Error("Explicit sign-in is required after an unconfirmed sign-out."), { statusCode: 401 });
+    }
+  };
+  assertRestorable();
   const session = await fetchWebSession();
+  assertRestorable();
   setSessionCsrfToken(session.csrfToken);
   return session;
 }
