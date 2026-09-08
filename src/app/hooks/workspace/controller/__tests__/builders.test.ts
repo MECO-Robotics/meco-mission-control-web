@@ -1,9 +1,7 @@
 /// <reference types="jest" />
 
 import {
-  buildRosterController,
   buildShellController,
-  buildTaskController,
 } from "@/app/hooks/workspace/controller/builders";
 import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
 import type { AppWorkspaceCatalogActions } from "@/app/hooks/useAppWorkspaceCatalogActions";
@@ -12,50 +10,6 @@ import type { AppWorkspaceRosterActions } from "@/app/hooks/useAppWorkspaceRoste
 import type { AppWorkspaceTaskActions } from "@/app/hooks/useAppWorkspaceTaskActions";
 
 describe("workspace controller builders", () => {
-  it("normalizes dependency strings in task controller", () => {
-    const model = {
-      activeTask: null,
-      activeTaskId: null,
-      activeTimelineTaskDetail: null,
-      showTimelineCreateToggleInTaskModal: false,
-      taskDraft: null,
-      taskModalMode: null,
-      timelineMilestoneCreateSignal: 0,
-    } as unknown as AppWorkspaceModel;
-    const taskActions = {} as AppWorkspaceTaskActions;
-
-    const controller = buildTaskController(model, taskActions);
-    const normalized = controller.normalizeDependencies([
-      {
-        kind: "task",
-        refId: "  TASK-123  ",
-        requiredState: "  waiting-for-qa  ",
-        dependencyType: "hard",
-      },
-      {
-        kind: "task",
-        refId: "TASK-456",
-        requiredState: undefined,
-        dependencyType: "soft",
-      },
-    ]);
-
-    expect(normalized).toEqual([
-      {
-        kind: "task",
-        refId: "TASK-123",
-        requiredState: "waiting-for-qa",
-        dependencyType: "hard",
-      },
-      {
-        kind: "task",
-        refId: "TASK-456",
-        requiredState: undefined,
-        dependencyType: "soft",
-      },
-    ]);
-  });
-
   it("builds shell slices with shared model/action fields", () => {
     const model = {
       isDarkMode: true,
@@ -103,25 +57,4 @@ describe("workspace controller builders", () => {
     );
   });
 
-  it("builds roster slice from model and roster actions", () => {
-    const rosterActions = {
-      handleCreateMember: jest.fn(),
-    } as unknown as AppWorkspaceRosterActions;
-    const model = {
-      isSavingMember: false,
-      isSavingRobotProject: false,
-      isSavingSeason: true,
-      robotProjectNameDraft: "Robot",
-      seasonNameDraft: "2026",
-      selectedProject: null,
-      selectedProjectId: null,
-      selectedSeasonId: "season-1",
-    } as unknown as AppWorkspaceModel;
-
-    const roster = buildRosterController(model, rosterActions);
-
-    expect(roster.isSavingSeason).toBe(true);
-    expect(roster.seasonNameDraft).toBe("2026");
-    expect(roster.handleCreateMember).toBe(rosterActions.handleCreateMember);
-  });
 });

@@ -29,12 +29,10 @@ export const shellTopbarModelKeys = [
   "toggleFavoriteView",
   "worklogsView",
 ] as const;
-export const shellTopbarRosterActionKeys = [] as const;
 export type AppWorkspaceShellTopbarController = Pick<
   AppWorkspaceModel,
   (typeof shellTopbarModelKeys)[number]
-> &
-  Pick<AppWorkspaceRosterActions, (typeof shellTopbarRosterActionKeys)[number]>;
+>;
 
 export const shellSidebarModelKeys = [
   "activeTab",
