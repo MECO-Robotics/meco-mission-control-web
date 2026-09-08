@@ -7,7 +7,6 @@ import {
 } from "../session";
 import { fetchWebSession, postJson, requestApi } from "../core/request";
 import {
-  purgeLegacySessionTokens,
   hasPendingSignOut,
   setPendingSignOut,
   setSessionCsrfToken,
@@ -21,19 +20,17 @@ jest.mock("../core/request", () => ({
 }));
 
 jest.mock("../core/sessionStorage", () => ({
-  clearWebSessionState: jest.fn(),
+  beginSessionChange: jest.fn(() => 0),
   getSessionGeneration: jest.fn(() => 0),
   hasPendingSignOut: jest.fn(() => false),
   setPendingSignOut: jest.fn(),
   getSessionCsrfToken: jest.fn(),
-  purgeLegacySessionTokens: jest.fn(),
   setSessionCsrfToken: jest.fn(),
 }));
 
 const fetchWebSessionMock = fetchWebSession as jest.Mock;
 const postJsonMock = postJson as jest.Mock;
 const requestApiMock = requestApi as jest.Mock;
-const purgeLegacySessionTokensMock = purgeLegacySessionTokens as jest.Mock;
 const setSessionCsrfTokenMock = setSessionCsrfToken as jest.Mock;
 
 describe("web sessions", () => {
@@ -76,7 +73,6 @@ describe("web sessions", () => {
 
     await expect(restoreWebSession()).resolves.toBe(response);
 
-    expect(purgeLegacySessionTokensMock).toHaveBeenCalledTimes(1);
     expect(setSessionCsrfTokenMock).toHaveBeenCalledWith(
       "restored-csrf-token",
     );

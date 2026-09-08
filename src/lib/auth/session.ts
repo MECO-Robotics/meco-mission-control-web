@@ -10,11 +10,10 @@ import {
   requestApi,
 } from "./core/request";
 import {
-  clearWebSessionState,
+  beginSessionChange,
   getSessionGeneration,
   hasPendingSignOut,
   setPendingSignOut,
-  purgeLegacySessionTokens,
   setSessionCsrfToken,
 } from "./core/sessionStorage";
 
@@ -22,11 +21,24 @@ function staleSessionResponse() {
   return Object.assign(new Error("Session changed while the request was pending."), { name: "AbortError" });
 }
 
+let cookieMutationTail: Promise<unknown> = Promise.resolve();
+
+function mutateSessionCookie<T>(operation: () => Promise<T>): Promise<T> {
+  const result = cookieMutationTail.then(operation, operation);
+  cookieMutationTail = result.catch(() => undefined);
+  return result;
+}
+
 async function signIn(path: string, body: unknown) {
-  clearWebSessionState();
-  const generation = getSessionGeneration();
+  const generation = beginSessionChange();
   try {
-    const session = await postJson<SessionResponse>(path, body);
+    const session = await mutateSessionCookie(async () => {
+      const result = await postJson<SessionResponse>(path, body);
+      // The browser has already installed this response cookie. The next queued
+      // logout must use its matching CSRF token even if its UI owner is stale.
+      setSessionCsrfToken(result.csrfToken);
+      return result;
+    });
     if (generation !== getSessionGeneration()) throw staleSessionResponse();
     setPendingSignOut(false);
     setSessionCsrfToken(session.csrfToken);
@@ -57,7 +69,6 @@ export function requestDevBypassSignIn(role: DevBypassRole = "student") {
 
 export async function restoreWebSession() {
   const generation = getSessionGeneration();
-  purgeLegacySessionTokens();
   const assertRestorable = () => {
     if (hasPendingSignOut()) {
       throw Object.assign(new Error("Explicit sign-in is required after an unconfirmed sign-out."), { statusCode: 401 });
@@ -72,7 +83,7 @@ export async function restoreWebSession() {
 }
 
 export function revokeWebSession() {
-  return requestApi<{ ok: boolean }>("/auth/web/logout", {
+  return mutateSessionCookie(() => requestApi<{ ok: boolean }>("/auth/web/logout", {
     keepalive: true,
     method: "POST",
   }).catch((error) => {
@@ -81,7 +92,7 @@ export function revokeWebSession() {
     }
 
     throw error;
-  });
+  }));
 }
 
 export async function validateSession(): Promise<boolean> {

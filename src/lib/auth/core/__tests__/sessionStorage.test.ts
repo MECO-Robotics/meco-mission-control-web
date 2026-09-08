@@ -5,7 +5,6 @@ import {
   hasPendingSignOut,
   setPendingSignOut,
   getSessionCsrfToken,
-  purgeLegacySessionTokens,
   setSessionCsrfToken,
 } from "../sessionStorage";
 
@@ -75,17 +74,6 @@ describe("web session state", () => {
     Reflect.deleteProperty(globalThis, "window");
   });
 
-  it("purges bearer credentials from both browser storage mechanisms", () => {
-    const { localStorage, sessionStorage } = installWindowStorage();
-    localStorage.setItem("meco.session.token", "legacy-token");
-    sessionStorage.setItem("meco.session.token", "session-token");
-
-    purgeLegacySessionTokens();
-
-    expect(localStorage.getItem("meco.session.token")).toBeNull();
-    expect(sessionStorage.getItem("meco.session.token")).toBeNull();
-  });
-
   it("keeps only the CSRF token in module memory", () => {
     const { localStorage, sessionStorage } = installWindowStorage();
 
@@ -116,7 +104,6 @@ describe("web session state", () => {
     });
     Object.defineProperty(globalThis, "window", { configurable: true, value: blockedWindow });
 
-    expect(() => purgeLegacySessionTokens()).not.toThrow();
     expect(() => setSessionCsrfToken("csrf-token")).not.toThrow();
     expect(getSessionCsrfToken()).toBe("csrf-token");
   });

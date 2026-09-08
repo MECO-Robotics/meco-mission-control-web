@@ -133,16 +133,20 @@ export function useAppAuthSessionActions({
       setIsSigningIn(true);
       setAuthMessage(null);
 
+      let generation = getSessionGeneration();
       try {
-        const session = await exchangeGoogleCredential(response.credential);
+        const pendingSession = exchangeGoogleCredential(response.credential);
+        generation = getSessionGeneration();
+        const session = await pendingSession;
         setIsSignInForced(false);
         storeSignedInSession(session, setSessionUser);
       } catch (error) {
         if (error instanceof Error && error.name === "AbortError") return;
         clearWebSessionState();
+        generation = getSessionGeneration();
         setAuthMessage(toErrorMessage(error));
       } finally {
-        setIsSigningIn(false);
+        if (generation === getSessionGeneration()) setIsSigningIn(false);
       }
     },
     [setAuthMessage, setIsSignInForced, setIsSigningIn, setSessionUser],
@@ -170,17 +174,21 @@ export function useAppAuthSessionActions({
       setIsSigningIn(true);
       setAuthMessage(null);
 
+      let generation = getSessionGeneration();
       try {
-        const session = await verifyEmailSignInCode(email, code);
+        const pendingSession = verifyEmailSignInCode(email, code);
+        generation = getSessionGeneration();
+        const session = await pendingSession;
         setIsSignInForced(false);
         storeSignedInSession(session, setSessionUser);
       } catch (error) {
         if (error instanceof Error && error.name === "AbortError") return;
         clearWebSessionState();
+        generation = getSessionGeneration();
         setAuthMessage(toErrorMessage(error));
         throw error;
       } finally {
-        setIsSigningIn(false);
+        if (generation === getSessionGeneration()) setIsSigningIn(false);
       }
     },
     [setAuthMessage, setIsSignInForced, setIsSigningIn, setSessionUser],
@@ -191,16 +199,20 @@ export function useAppAuthSessionActions({
       setIsSigningIn(true);
       setAuthMessage(null);
 
+      let generation = getSessionGeneration();
       try {
-        const session = await requestDevBypassSignIn(role);
+        const pendingSession = requestDevBypassSignIn(role);
+        generation = getSessionGeneration();
+        const session = await pendingSession;
         setIsSignInForced(false);
         storeSignedInSession(session, setSessionUser);
       } catch (error) {
         if (error instanceof Error && error.name === "AbortError") return;
         clearWebSessionState();
+        generation = getSessionGeneration();
         setAuthMessage(toErrorMessage(error));
       } finally {
-        setIsSigningIn(false);
+        if (generation === getSessionGeneration()) setIsSigningIn(false);
       }
     },
     [setAuthMessage, setIsSignInForced, setIsSigningIn, setSessionUser],
@@ -210,6 +222,7 @@ export function useAppAuthSessionActions({
     await revokeThenClearWebSession(
       () => {
         clearWebSessionState();
+        setIsSigningIn(false);
         signOutFromGoogle();
         startTransition(() => {
           setSessionUser(null);
@@ -222,7 +235,7 @@ export function useAppAuthSessionActions({
         setIsSignInForced(true);
       },
     );
-  }, [resetWorkspaceRef, setAuthMessage, setIsSignInForced, setSessionUser]);
+  }, [resetWorkspaceRef, setAuthMessage, setIsSignInForced, setIsSigningIn, setSessionUser]);
 
   return {
     clearAuthMessage,

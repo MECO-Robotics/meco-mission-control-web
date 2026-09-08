@@ -1,5 +1,3 @@
-const LEGACY_SESSION_STORAGE_KEY = "meco.session.token";
-
 let memoryCsrfToken: string | null = null;
 let sessionGeneration = 0;
 
@@ -33,27 +31,8 @@ export function setPendingSignOut(pending: boolean) {
   }
 }
 
-function removeStorage(storageName: "localStorage" | "sessionStorage", key: string) {
-  try {
-    getBrowserWindow()?.[storageName]?.removeItem(key);
-  } catch {
-    // Storage access can be blocked by privacy settings. The cookie session is
-    // unaffected, and no credential is kept in browser-readable storage.
-  }
-}
-
 function getBrowserWindow() {
   return typeof window === "undefined" ? null : window;
-}
-
-export function purgeLegacySessionTokens() {
-  const browserWindow = getBrowserWindow();
-  if (!browserWindow) {
-    return;
-  }
-
-  removeStorage("sessionStorage", LEGACY_SESSION_STORAGE_KEY);
-  removeStorage("localStorage", LEGACY_SESSION_STORAGE_KEY);
 }
 
 export function getSessionCsrfToken() {
@@ -61,12 +40,10 @@ export function getSessionCsrfToken() {
 }
 
 export function setSessionCsrfToken(csrfToken: string) {
-  purgeLegacySessionTokens();
   memoryCsrfToken = csrfToken;
 }
 
 export function clearWebSessionState() {
   beginSessionChange();
   memoryCsrfToken = null;
-  purgeLegacySessionTokens();
 }
