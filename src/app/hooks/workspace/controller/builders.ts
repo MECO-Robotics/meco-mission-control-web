@@ -3,10 +3,6 @@ import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
 import type { AppWorkspaceReportActions } from "@/app/hooks/useAppWorkspaceReportActions";
 import type { AppWorkspaceRosterActions } from "@/app/hooks/useAppWorkspaceRosterActions";
 import type { AppWorkspaceTaskActions } from "@/app/hooks/useAppWorkspaceTaskActions";
-import type {
-  AppWorkspaceRosterController,
-  AppWorkspaceTaskController,
-} from "@/app/hooks/workspace/controller/domainSlices";
 import {
   shellContentCatalogActionKeys,
   shellContentModelKeys,
@@ -20,7 +16,6 @@ import {
   shellSidebarRosterActionKeys,
   shellSidebarTaskActionKeys,
   shellTopbarModelKeys,
-  shellTopbarRosterActionKeys,
   type AppWorkspaceShellContentController,
   type AppWorkspaceShellFrameController,
   type AppWorkspaceShellSidebarController,
@@ -37,7 +32,6 @@ import {
   type AppWorkspaceShellOverlayLayerController,
 } from "@/app/hooks/workspace/controller/shellLayerSlices";
 import { pickFields } from "@/app/hooks/workspace/controller/pickFields";
-import type { TaskDependencyDraft } from "@/types/payloads";
 
 export interface AppWorkspaceShellController {
   frame: AppWorkspaceShellFrameController;
@@ -46,49 +40,6 @@ export interface AppWorkspaceShellController {
   content: AppWorkspaceShellContentController;
   modalLayer: AppWorkspaceShellModalLayerController;
   overlayLayer: AppWorkspaceShellOverlayLayerController;
-}
-
-export function buildTaskController(
-  model: AppWorkspaceModel,
-  taskActions: AppWorkspaceTaskActions,
-): AppWorkspaceTaskController {
-  return {
-    ...taskActions,
-    ...pickFields(model, [
-      "activeTask",
-      "activeTaskId",
-      "activeTimelineTaskDetail",
-      "showTimelineCreateToggleInTaskModal",
-      "taskDraft",
-      "taskModalMode",
-      "timelineMilestoneCreateSignal",
-    ] as const),
-    normalizeDependencies: (dependencies: TaskDependencyDraft[]) =>
-      dependencies.map((dependency) => ({
-        ...dependency,
-        refId: dependency.refId.trim(),
-        requiredState: dependency.requiredState?.trim(),
-      })),
-  };
-}
-
-export function buildRosterController(
-  model: AppWorkspaceModel,
-  rosterActions: AppWorkspaceRosterActions,
-): AppWorkspaceRosterController {
-  return {
-    ...rosterActions,
-    ...pickFields(model, [
-      "isSavingMember",
-      "isSavingRobotProject",
-      "isSavingSeason",
-      "robotProjectNameDraft",
-      "seasonNameDraft",
-      "selectedProject",
-      "selectedProjectId",
-      "selectedSeasonId",
-    ] as const),
-  };
 }
 
 export function buildShellController(
@@ -100,10 +51,7 @@ export function buildShellController(
 ): AppWorkspaceShellController {
   return {
     frame: pickFields(model, shellFrameKeys),
-    topbar: {
-      ...pickFields(model, shellTopbarModelKeys),
-      ...pickFields(rosterActions, shellTopbarRosterActionKeys),
-    },
+    topbar: pickFields(model, shellTopbarModelKeys),
     sidebar: {
       ...pickFields(model, shellSidebarModelKeys),
       ...pickFields(taskActions, shellSidebarTaskActionKeys),

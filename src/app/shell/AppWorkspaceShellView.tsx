@@ -2,7 +2,7 @@ import { Suspense } from "react";
 
 import type { AppWorkspaceShellController } from "@/app/hooks/useAppWorkspaceController";
 import { AppWorkspaceShellModalLayer } from "./AppWorkspaceShellModalLayer";
-import { AppWorkspaceShellOverlayLayer } from "./AppWorkspaceShellOverlayLayer";
+import { AddSeasonPopup, RobotProjectPopup, SidebarOverlay } from "./AppWorkspaceShellOverlays";
 import { AppWorkspaceShellSidebar } from "./AppWorkspaceShellSidebar";
 import { AppWorkspaceShellTopbar } from "./AppWorkspaceShellTopbar";
 import { WorkspaceContent, WorkspaceShellLoading } from "./workspaceShell";
@@ -19,7 +19,9 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       <Suspense fallback={<WorkspaceShellLoading />}>
         <AppWorkspaceShellTopbar controller={c.topbar} />
         <AppWorkspaceShellSidebar controller={c.sidebar} />
-        <AppWorkspaceShellOverlayLayer controller={c.overlayLayer} />
+        {c.overlayLayer.isAddSeasonPopupOpen ? <AddSeasonPopup controller={c.overlayLayer} /> : null}
+        {c.overlayLayer.robotProjectModalMode ? <RobotProjectPopup controller={c.overlayLayer} /> : null}
+        <SidebarOverlay controller={c.overlayLayer} />
         <WorkspaceContent
           activePersonFilter={content.activePersonFilter}
           activeTab={content.activeTab}

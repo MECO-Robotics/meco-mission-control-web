@@ -4,24 +4,7 @@ import { useAppWorkspaceReportActions } from "@/app/hooks/useAppWorkspaceReportA
 import { useAppWorkspaceRosterActions } from "@/app/hooks/useAppWorkspaceRosterActions";
 import { useAppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
 import { useAppWorkspaceTaskActions } from "@/app/hooks/useAppWorkspaceTaskActions";
-import {
-  authControllerKeys,
-  navigationControllerKeys,
-  tutorialControllerKeys,
-  workspaceControllerKeys,
-  type AppWorkspaceAuthController,
-  type AppWorkspaceNavigationController,
-  type AppWorkspaceRosterController,
-  type AppWorkspaceTaskController,
-  type AppWorkspaceTutorialController,
-  type AppWorkspaceWorkspaceController,
-} from "@/app/hooks/workspace/controller/domainSlices";
-import {
-  buildRosterController,
-  buildShellController,
-  buildTaskController,
-  type AppWorkspaceShellController,
-} from "@/app/hooks/workspace/controller/builders";
+import { buildShellController, type AppWorkspaceShellController } from "@/app/hooks/workspace/controller/builders";
 import { pickFields } from "@/app/hooks/workspace/controller/pickFields";
 import type {
   AppWorkspaceShellContentController,
@@ -33,17 +16,8 @@ import type {
   AppWorkspaceShellModalLayerController,
   AppWorkspaceShellOverlayLayerController,
 } from "@/app/hooks/workspace/controller/shellLayerSlices";
-import type { WorkspaceToastNotice } from "@/features/workspace/workspaceToastQueue";
 
 export type { AppWorkspaceShellController };
-export type {
-  AppWorkspaceAuthController,
-  AppWorkspaceNavigationController,
-  AppWorkspaceRosterController,
-  AppWorkspaceTaskController,
-  AppWorkspaceTutorialController,
-  AppWorkspaceWorkspaceController,
-};
 export type {
   AppWorkspaceShellContentController,
   AppWorkspaceShellFrameController,
@@ -54,7 +28,28 @@ export type {
   AppWorkspaceShellModalLayerController,
   AppWorkspaceShellOverlayLayerController,
 };
-export { buildRosterController, buildShellController, buildTaskController };
+
+const authControllerKeys = [
+  "authBooting",
+  "authConfig",
+  "authMessage",
+  "clearAuthMessage",
+  "enforcedAuthConfig",
+  "googleButtonRef",
+  "handleDevBypassSignIn",
+  "handleRequestEmailCode",
+  "handleVerifyEmailCode",
+  "isDarkMode",
+  "isEmailAuthAvailable",
+  "isGoogleAuthAvailable",
+  "isPublicDemoSession",
+  "isSignInScreenRequested",
+  "isSigningIn",
+  "pageShellStyle",
+  "returnToPublicDemo",
+  "sessionUser",
+  "toggleDarkMode",
+] as const;
 
 export function useAppWorkspaceController() {
   const state = useAppWorkspaceState();
@@ -74,26 +69,5 @@ export function useAppWorkspaceController() {
   return {
     auth: pickFields(model, authControllerKeys),
     shell,
-    navigation: pickFields(model, navigationControllerKeys),
-    workspace: pickFields(model, workspaceControllerKeys),
-    tasks: buildTaskController(model, taskActions),
-    reports: reportActions,
-    catalog: catalogActions,
-    roster: buildRosterController(model, rosterActions),
-    modals: {
-      ...shell.modalLayer,
-      ...shell.overlayLayer,
-    },
-    tutorial: pickFields(model, tutorialControllerKeys),
-    notifications: {
-      dataMessage: model.dataMessage,
-      taskEditNotices: model.taskEditNotices as WorkspaceToastNotice[],
-      clearDataMessage: model.clearDataMessage,
-      dismissTaskEditNotice: model.dismissTaskEditNotice,
-      notifyTaskEditCanceled: model.notifyTaskEditCanceled,
-      notifyTaskEditSaved: model.notifyTaskEditSaved,
-    },
   };
 }
-
-export type AppWorkspaceController = ReturnType<typeof useAppWorkspaceController>;
