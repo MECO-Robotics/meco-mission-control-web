@@ -36,8 +36,11 @@ function newLocalId() {
   return `local-${Array.from(crypto.getRandomValues(new Uint32Array(4)), (part) => part.toString(16).padStart(8, "0")).join("")}`;
 }
 
-function refreshTasks(snapshot: BootstrapPayload) {
+export function refreshLocalTaskState(snapshot: BootstrapPayload) {
+  const loggedHours = new Map<string, number>();
+  for (const log of snapshot.workLogs) loggedHours.set(log.taskId, (loggedHours.get(log.taskId) ?? 0) + log.hours);
   for (const task of snapshot.tasks) {
+    task.actualHours = loggedHours.get(task.id) ?? 0;
     task.blockers = [...new Set((snapshot.taskBlockers ?? [])
       .filter((blocker) => blocker.blockedTaskId === task.id && blocker.status === "open")
       .map((blocker) => blocker.description))];
@@ -162,12 +165,17 @@ export function applyLocalCommand(snapshot: BootstrapPayload, path: string, opti
       delete item.taskDependencies;
       delete item.taskBlockers;
       delete item.blockers;
+      delete item.actualHours;
       const task = item as unknown as TaskRecord;
       if (task.status === "complete") {
         const existing = snapshot.tasks.find((candidate) => candidate.id === id);
-        refreshTasks(snapshot);
+        refreshLocalTaskState(snapshot);
         if (existing?.isBlocked || existing?.isWaitingOnDependency) throw new Error("Resolve blockers and required dependencies before completing this task.");
       }
+    }
+    if (resource === "work-logs") {
+      if (!snapshot.tasks.some((task) => task.id === item.taskId)) throw new Error("The work log task no longer exists.");
+      if (typeof item.hours !== "number" || !Number.isFinite(item.hours) || item.hours <= 0) throw new Error("Work log hours must be a positive number.");
     }
     if (resource === "task-dependencies" && !snapshot.tasks.some((task) => task.id === item.taskId)) throw new Error("Dependency task does not exist.");
     if (resource === "task-blockers") {
@@ -203,7 +211,7 @@ export function applyLocalCommand(snapshot: BootstrapPayload, path: string, opti
   }
   snapshot.qaReports = snapshot.reports.filter((report) => report.reportType === "QA");
   snapshot.testResults = snapshot.reports.filter((report) => report.reportType === "MilestoneTest");
-  refreshTasks(snapshot);
+  refreshLocalTaskState(snapshot);
   if (resource === "task-blockers") return { item: { ...item, blockerType: item.sourceKind ?? "external", issueType: item.blockerType } };
   return { item };
 }

@@ -24,6 +24,7 @@ it.each(["task", "subsystem"])("%s editor emits only fields accepted by the cano
   expect(Object.keys(serialized).filter((key) => !(key in contract.x_commands[kind].properties))).toEqual([]);
   expect(contract.x_commands[kind].required.filter((key: string) => !(key in serialized))).toEqual([]);
   expect(serialized).not.toHaveProperty("id");
+  expect(serialized).not.toHaveProperty("actualHours");
   expect(serialized).not.toHaveProperty("blockers");
   expect(serialized).not.toHaveProperty("dependencyIds");
   expect(serialized).not.toHaveProperty("taskDependencies");

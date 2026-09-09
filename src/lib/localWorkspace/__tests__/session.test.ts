@@ -1,3 +1,4 @@
+import { createBootstrap } from "@/lib/appUtilsTestFixtures";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { requestApi } from "@/lib/auth/core/request";
 import { enterLocalDemo, getLocalWorkspaceMode, leaveLocalWorkspace, resetLocalDemo } from "../session";
@@ -103,4 +104,18 @@ it("Reset demo reloads the current roster baseline instead of retaining the cach
   expect((await read()).materials[0].name).toBe("Updated seed");
   expect(fetch).toHaveBeenCalledTimes(1);
   expect(jest.mocked(fetch).mock.calls[0][1]).toMatchObject({ credentials: "omit" });
+});
+
+it("derives cached task hours from logs across reload and tutorial entry", async () => {
+  const snapshot = createBootstrap();
+  snapshot.tasks[0].actualHours = 999;
+  const taskId = snapshot.tasks[0].id;
+  const expected = snapshot.workLogs.filter((log) => log.taskId === taskId).reduce((sum, log) => sum + log.hours, 0);
+  data.set("meco.local-demo.v1", JSON.stringify({ baseline: snapshot, snapshot }));
+  expect((await read()).tasks[0].actualHours).toBe(expected);
+  leaveLocalWorkspace(); enterLocalDemo();
+  expect((await read()).tasks[0].actualHours).toBe(expected);
+  await requestApi("/tutorial/session/start", { method: "POST" });
+  expect((await read()).tasks[0].actualHours).toBe(expected);
+  expect(fetch).not.toHaveBeenCalled();
 });

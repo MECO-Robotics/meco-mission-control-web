@@ -10,6 +10,8 @@ Contributor setup, review expectations and validation are in [CONTRIBUTING.md](C
 
 ## Local demo and tutorials
 
+Task logged hours are derived from work logs in both demo and tutorial workspaces, including after reload. Reset existing demos to receive corrected example dates and QA records.
+
 Unsigned demo users edit an isolated workspace in browser `sessionStorage`. The initial anonymized examples are downloaded with a read-only bootstrap request; subsequent workspace reads, edits, photos, favorites, and refreshes stay in that tab. Nothing is queued or uploaded when signing in. Reload keeps demo changes; **Reset demo** downloads the current anonymized examples with a read-only request, and closing the tab ends its storage lifetime.
 
 Interactive tutorials use a separate in-memory copy of the examples, even for signed-in users. Starting a chapter restores that tutorial baseline. Ending the tutorial restores the previous workspace; tutorial changes are discarded on exit or reload. The header identifies both modes as **no sync**. Real signed-in workspaces continue using the authenticated API.
