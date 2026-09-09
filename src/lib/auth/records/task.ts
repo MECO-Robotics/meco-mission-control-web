@@ -7,6 +7,7 @@ function taskCommand(payload: Partial<TaskPayload>) {
   delete command.taskDependencies;
   delete command.taskBlockers;
   delete command.targetRiskId;
+  delete command.actualHours;
   return command;
 }
 

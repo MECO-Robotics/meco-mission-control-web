@@ -1,7 +1,7 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { normalizeBootstrapPayload } from "@/lib/auth/bootstrap/payload";
 import { localRosterInsights } from "./roster";
-import { applyLocalCommand } from "./commands";
+import { applyLocalCommand, refreshLocalTaskState } from "./commands";
 
 const STORAGE_KEY = "meco.local-demo.v1";
 export type LocalWorkspaceMode = "demo" | "tutorial" | null;
@@ -107,6 +107,7 @@ export async function requestLocalWorkspace<T>(
   }
   if (workspace !== active) throw new Error("The workspace changed. This local operation was cancelled.");
   const current = workspace.snapshot!;
+  refreshLocalTaskState(current);
   if (pathname === "/tutorial/session/start") return { ok: true } as T;
   if (pathname === "/tutorial/session/reset") {
     if (workspace.mode !== "tutorial") throw new Error("No local tutorial is active.");

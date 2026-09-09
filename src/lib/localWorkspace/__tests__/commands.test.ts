@@ -125,3 +125,20 @@ test("stale person selections cannot recreate dangling assignments after roster 
   expect(() => command(snapshot, "/reports", { reportType: "QA", taskId: subject.id, createdByMemberId: member.id })).toThrow("local roster");
   expect(subject.assigneeIds).toEqual([]);
 });
+
+test("logged hours follow work-log creation, edits, moves and deletion rather than task writes", () => {
+  const snapshot = createBootstrap();
+  const first = task(snapshot, "First");
+  const second = task(snapshot, "Second");
+  const log = command(snapshot, "/work-logs", { taskId: first.id, hours: 1.25, participantIds: [], date: "2026-09-09", notes: "Example" }).item;
+  expect(first.actualHours).toBe(1.25);
+  command(snapshot, `/work-logs/${log.id}`, { hours: 2.5 }, "PATCH");
+  expect(first.actualHours).toBe(2.5);
+  command(snapshot, `/work-logs/${log.id}`, { taskId: second.id }, "PATCH");
+  expect(first.actualHours).toBe(0);
+  expect(second.actualHours).toBe(2.5);
+  command(snapshot, `/tasks/${second.id}`, { actualHours: 999 }, "PATCH");
+  expect(snapshot.tasks.find((row) => row.id === second.id)?.actualHours).toBe(2.5);
+  command(snapshot, `/work-logs/${log.id}`, {}, "DELETE");
+  expect(snapshot.tasks.find((row) => row.id === second.id)?.actualHours).toBe(0);
+});
