@@ -6,7 +6,7 @@ Use Node22 (see `.nvmrc`), run `npm ci`, and follow the [README quick start](REA
 
 ## Change and review
 
-Follow the [shared contribution workflow](https://github.com/MECO-Robotics/mission-control-skills/blob/main/CONTRIBUTING.md). Start normal feature/fix work from development in a dedicated worktree; open its PR into development, then promote development to main through a separate PR. Stabilization may target an existing staging branch; main accepts development, staging or an explicitly intended hotfix, subject to live branch rules. Never bypass required checks or approvals.
+Follow the [shared contribution workflow](https://github.com/MECO-Robotics/mission-control-skills/blob/main/CONTRIBUTING.md). Start normal feature/fix work from development in a dedicated worktree; open its PR into development, then promote development to main through a separate PR. Stabilization may target an existing staging branch; main accepts development, staging or an explicitly intended hotfix, subject to live branch rules. Web merge protections are currently disabled by explicit user direction; see [prototype merge policy](docs/prototype-merge-policy.md).
 
 Prefer cohesive ownership, explicit dependencies and one authoritative representation. Remove redundant projections and forwarding layers instead of creating smaller fragments to satisfy file-size limits. This prototype is not deployed or serving real operational data; breaking replacements are permitted when all affected clients, tests and documentation change together. Describe any reset commands and discarded state.
 
@@ -20,4 +20,4 @@ For coordinated local contract work, run `PLATFORM_BOOTSTRAP_CONTRACT_SOURCE_PAT
 
 For UI changes, exercise affected behavior in the local application. Changes to transport or bootstrap data must update platform and relevant mobile consumers. Keep tests focused on outcomes; do not preserve obsolete wiring with source-layout assertions.
 
-CI validates PRs and protected-branch pushes; release jobs reuse the verified bundle. The trusted merge gate accepts exact reviewed CI digests. To change CI, first promote the new digest allowlist under the existing trusted workflow, then integrate the matching workflow bytes. Preserve required check names and review protections. Use GitHub's normal protected PR merge flow; automated comments do not satisfy an approving-review requirement.
+CI continues to validate PRs and main/development pushes. Its results remain visible, but merge approval, required-status and workflow-digest gates are disabled during prototype development. Keep changes reviewable through PRs. Deployment approvals are unchanged. Reinstatement instructions and saved rules are in the [prototype merge policy](docs/prototype-merge-policy.md).

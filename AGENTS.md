@@ -9,4 +9,4 @@
 - Keep agent write scopes disjoint when delegating; integrate and review centrally.
 - Use `environment.toml` for worktree startup. Check UI changes against that worktree's running application.
 - Keep generated diagnostics outside tracked source. Run checks relevant to the change and report actual outcomes and limitations; never claim unrun checks passed.
-- Preserve protected-branch reviews and trusted workflow checks. Agent comments are not GitHub approving reviews.
+- Web merge protections are intentionally disabled during prototype development (user direction, 2026-09-09). Keep CI validation and dedicated-worktree PRs; do not reinstate approval/digest gates without user direction. Deployment approvals remain separate. See docs/prototype-merge-policy.md.
