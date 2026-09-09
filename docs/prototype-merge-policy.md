@@ -7,6 +7,7 @@ User direction on 2026-09-09: remove web integration blocks until the product is
 - Classic branch protection removed from main and development.
 - Repository rulesets 16137219 (development), 16137229 (main), and 17247679 (staging) disabled.
 - Trusted Merge Requirements workflow (`merge-requirements.yml`) disabled through GitHub Actions settings. Its source remains available for later reuse.
+- The obsolete Codex Auto Merge workflow (already deleted from development source) is also disabled in Actions settings.
 - CI and shared-skill validation remain enabled. Dedicated worktrees and reviewable PRs remain the development convention.
 - Deployment workflow/environment approvals are unchanged. Merging development is not a deployment request.
 
