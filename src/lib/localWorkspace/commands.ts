@@ -12,6 +12,25 @@ const collections = {
 } as const satisfies Record<string, keyof BootstrapPayload>;
 type Row = Record<string, unknown> & { id: string };
 
+// These are roster foreign keys across planning, reports, work logs and inventory.
+const memberFields = new Set([
+  "ownerId", "mentorId", "responsibleEngineerId", "createdByMemberId", "createdById",
+  "requestedById", "requestedByMemberId", "reviewedById", "approvedById", "actorMemberId", "memberId",
+]);
+const memberListFields = new Set(["assigneeIds", "mentorIds", "participantIds", "memberIds"]);
+
+function validateRosterReferences(snapshot: BootstrapPayload, item: Row) {
+  const memberIds = new Set(snapshot.members.map((member) => member.id));
+  for (const [field, value] of Object.entries(item)) {
+    if (memberFields.has(field) && value != null && value !== "" && !memberIds.has(String(value))) {
+      throw new Error("The selected person is no longer in the local roster. Choose a current roster member.");
+    }
+    if (memberListFields.has(field) && (!Array.isArray(value) || value.some((id) => typeof id !== "string" || !memberIds.has(id)))) {
+      throw new Error("An assigned person is no longer in the local roster. Choose current roster members.");
+    }
+  }
+}
+
 // getRandomValues also works on HTTP Meshnet hosts, unlike randomUUID.
 function newLocalId() {
   return `local-${Array.from(crypto.getRandomValues(new Uint32Array(4)), (part) => part.toString(16).padStart(8, "0")).join("")}`;
@@ -93,12 +112,17 @@ function removeReferences(snapshot: BootstrapPayload, resource: string, id: stri
     for (const risk of snapshot.risks) if (risk.mitigationTaskId === id) risk.mitigationTaskId = null;
   }
   if (resource === "members") {
-    for (const task of snapshot.tasks) {
-      task.assigneeIds = task.assigneeIds.filter((memberId) => memberId !== id);
-      if (task.ownerId === id) task.ownerId = null;
-      if (task.mentorId === id) task.mentorId = null;
-    }
     snapshot.attendanceRecords = (snapshot.attendanceRecords ?? []).filter((record) => record.memberId !== id);
+    snapshot.qaRequests = snapshot.qaRequests.filter((request) => request.mentorId !== id);
+    for (const collection of Object.values(snapshot)) {
+      if (!Array.isArray(collection)) continue;
+      for (const record of collection as unknown as Record<string, unknown>[]) {
+        for (const field of memberFields) if (record[field] === id) record[field] = null;
+        for (const field of memberListFields) {
+          if (Array.isArray(record[field])) record[field] = record[field].filter((memberId: unknown) => memberId !== id);
+        }
+      }
+    }
   }
 }
 
@@ -133,6 +157,7 @@ export function applyLocalCommand(snapshot: BootstrapPayload, path: string, opti
     removeReferences(snapshot, resource, item.id);
   } else {
     item = { ...(method === "POST" ? defaults(resource, snapshot) : rows[index]), ...body, id: id ?? newLocalId() };
+    validateRosterReferences(snapshot, item);
     if (resource === "tasks") {
       delete item.taskDependencies;
       delete item.taskBlockers;

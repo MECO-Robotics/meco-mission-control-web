@@ -93,3 +93,14 @@ it("rolls back failed tutorial entry and cancels a seed load after the owner cha
     expect(data.size).toBe(0);
   });
 });
+
+it("Reset demo reloads the current roster baseline instead of retaining the cached examples", async () => {
+  await read();
+  const updated = structuredClone(seed);
+  updated.materials[0].name = "Updated seed";
+  globalThis.fetch = jest.fn(async () => new Response(JSON.stringify(updated)));
+  resetLocalDemo();
+  expect((await read()).materials[0].name).toBe("Updated seed");
+  expect(fetch).toHaveBeenCalledTimes(1);
+  expect(jest.mocked(fetch).mock.calls[0][1]).toMatchObject({ credentials: "omit" });
+});

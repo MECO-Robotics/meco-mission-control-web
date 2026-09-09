@@ -91,3 +91,37 @@ test("part-definition deletion removes instances and detaches task and productio
   expect(assigned).toMatchObject({ partInstanceId: null, partInstanceIds: [] });
   expect(purchase).toMatchObject({ partDefinitionId: null });
 });
+
+test("deleting a roster member clears work, report, subsystem and procurement references together", () => {
+  const snapshot = createBootstrap();
+  const member = snapshot.members[0];
+  const subject = task(snapshot, "Roster cleanup");
+  command(snapshot, `/tasks/${subject.id}`, { ownerId: member.id, assigneeIds: [member.id], mentorId: member.id }, "PATCH");
+  command(snapshot, `/subsystems/${snapshot.subsystems[0].id}`, { responsibleEngineerId: member.id, mentorIds: [member.id] }, "PATCH");
+  command(snapshot, "/work-logs", { taskId: subject.id, participantIds: [member.id], hours: 1, date: "2026-09-09", notes: "Example" });
+  command(snapshot, "/reports", { reportType: "QA", taskId: subject.id, createdByMemberId: member.id, participantIds: [member.id], notes: "Example" });
+  command(snapshot, "/manufacturing", { requestedById: member.id, title: "Example" });
+  snapshot.qaReviews = [{ id: "review", subjectId: subject.id, subjectType: "task", subjectTitle: subject.title, participantIds: [member.id], result: "pass", mentorApproved: true, notes: "Example", reviewedAt: "2026-09-09" }];
+  snapshot.qaRequests = [{ id: "request", taskId: subject.id, subject: subject.title, mentorId: member.id, requestedById: null, createdAt: "2026-09-09", status: "requested" }];
+  snapshot.attendanceRecords = [{ id: "attendance", memberId: member.id, date: "2026-09-09", totalHours: 1 }];
+  command(snapshot, `/members/${member.id}`, {}, "DELETE");
+  expect(snapshot.tasks.find((row) => row.id === subject.id)).toMatchObject({ ownerId: null, mentorId: null, assigneeIds: [] });
+  expect(snapshot.subsystems[0]).toMatchObject({ responsibleEngineerId: null, mentorIds: [] });
+  expect(snapshot.workLogs.at(-1)?.participantIds).toEqual([]);
+  expect(snapshot.reports.at(-1)).toMatchObject({ createdByMemberId: null, participantIds: [] });
+  expect(snapshot.qaReports.at(-1)?.participantIds).toEqual([]);
+  expect(snapshot.qaReviews[0].participantIds).toEqual([]);
+  expect(snapshot.manufacturingItems.at(-1)?.requestedById).toBeNull();
+  expect(snapshot.qaRequests).toEqual([]);
+  expect(snapshot.attendanceRecords).toEqual([]);
+});
+
+test("stale person selections cannot recreate dangling assignments after roster deletion", () => {
+  const snapshot = createBootstrap();
+  const member = snapshot.members[0];
+  const subject = task(snapshot, "Assignment");
+  command(snapshot, `/members/${member.id}`, {}, "DELETE");
+  expect(() => command(snapshot, `/tasks/${subject.id}`, { assigneeIds: [member.id] }, "PATCH")).toThrow("local roster");
+  expect(() => command(snapshot, "/reports", { reportType: "QA", taskId: subject.id, createdByMemberId: member.id })).toThrow("local roster");
+  expect(subject.assigneeIds).toEqual([]);
+});

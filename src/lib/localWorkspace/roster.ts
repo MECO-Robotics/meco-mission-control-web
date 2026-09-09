@@ -1,3 +1,4 @@
+import { isMemberActiveInSeason } from "@/lib/appUtils/common";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { RosterInsightsMember, RosterInsightsResponse } from "@/types/rosterInsights";
 
@@ -6,10 +7,12 @@ export function localRosterInsights(snapshot: BootstrapPayload, query: URLSearch
   const today = now.toISOString().slice(0, 10);
   const age = (date: string) => (Date.parse(today) - Date.parse(date)) / 86_400_000;
   const projectId = query.get("projectId");
-  const seasonId = query.get("seasonId");
+  const seasonId = query.get("seasonId") ?? snapshot.projects.find((project) => project.id === projectId)?.seasonId ?? null;
   const projectIds = new Set(snapshot.projects.filter((project) => (!projectId || project.id === projectId) && (!seasonId || project.seasonId === seasonId)).map((project) => project.id));
   const openTasks = snapshot.tasks.filter((task) => projectIds.has(task.projectId) && task.status !== "complete");
-  const members: RosterInsightsMember[] = snapshot.members.map((member) => {
+  const scopedMembers = snapshot.members.filter((member) => !seasonId || isMemberActiveInSeason(member, seasonId));
+  const memberIds = new Set(scopedMembers.map((member) => member.id));
+  const members: RosterInsightsMember[] = scopedMembers.map((member) => {
     const tasks = openTasks.filter((task) => task.ownerId === member.id || task.assigneeIds.includes(member.id));
     const attendance = (snapshot.attendanceRecords ?? []).filter((record) => record.memberId === member.id && age(record.date) >= 0);
     const hours = (days: number) => attendance.filter((record) => age(record.date) < days).reduce((sum, record) => sum + record.totalHours, 0);
@@ -31,7 +34,7 @@ export function localRosterInsights(snapshot: BootstrapPayload, query: URLSearch
   });
   const sum = (field: "plannedWeeklyAttendanceHours" | "attendanceHoursLast14Days" | "attendanceHoursLast30Days") => members.reduce((total, member) => total + member[field], 0);
   const byDate = new Map<string, { date: string; totalHours: number; members: Set<string> }>();
-  const recentAttendance = (snapshot.attendanceRecords ?? []).filter((record) => age(record.date) >= 0 && age(record.date) < 30).map((record) => {
+  const recentAttendance = (snapshot.attendanceRecords ?? []).filter((record) => memberIds.has(record.memberId) && age(record.date) >= 0 && age(record.date) < 30).map((record) => {
     const bucket = byDate.get(record.date) ?? { date: record.date, totalHours: 0, members: new Set<string>() };
     bucket.totalHours += record.totalHours; bucket.members.add(record.memberId); byDate.set(record.date, bucket);
     const member = members.find((candidate) => candidate.memberId === record.memberId);
