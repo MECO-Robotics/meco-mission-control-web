@@ -8,6 +8,14 @@ Use this README as the setup entry point. Use [`docs/web-contributor-guide.md`](
 
 Contributor setup, review expectations and validation are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Local demo and tutorials
+
+Unsigned demo users edit an isolated workspace in browser `sessionStorage`. The initial anonymized examples are downloaded with a read-only bootstrap request; subsequent workspace reads, edits, photos, favorites, and refreshes stay in that tab. Nothing is queued or uploaded when signing in. Reload keeps demo changes; **Reset demo** restores the examples, and closing the tab ends its storage lifetime.
+
+Interactive tutorials use a separate in-memory copy of the examples, even for signed-in users. Starting a chapter restores that tutorial baseline. Ending the tutorial restores the previous workspace; tutorial changes are discarded on exit or reload. The header identifies both modes as **no sync**. Real signed-in workspaces continue using the authenticated API.
+
+STEP processing and Onshape connections require server services and are unavailable in local modes; robot maps, parts, materials, planning, roster, and reports can be edited locally. Browser storage errors are surfaced without publishing failed writes. No schema reset or reseed is required. For manual demo recovery, run `sessionStorage.removeItem("meco.local-demo.v1")` in the browser console, then reload.
+
 ## Table of Contents
 
 - [What This Repo Owns](#what-this-repo-owns)

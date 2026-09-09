@@ -208,3 +208,12 @@
   position: relative;
 }
 
+
+.local-workspace-status { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; font-size: 0.75rem; }
+.local-workspace-status button { min-height: 32px; padding: 0.25rem 0.5rem; font-size: inherit; }
+@media (max-width: 700px) {
+  .page-shell:has(.local-workspace-status) { --shell-topbar-height: 104px; }
+  .local-workspace-status button { min-height: 44px; }
+  .app-topbar-view-title:has(.local-workspace-status) { flex-wrap: wrap; }
+  .local-workspace-status { flex-basis: 100%; }
+}

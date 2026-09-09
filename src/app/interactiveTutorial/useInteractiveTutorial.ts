@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import { getLocalWorkspaceMode, subscribeLocalWorkspace } from "@/lib/localWorkspace/session";
+import { useEffect, useMemo, useSyncExternalStore } from "react";
 
 import { useInteractiveTutorialLifecycle } from "./useInteractiveTutorialLifecycle";
 import { isInteractiveTutorialCreationStep } from "./helpers/interactiveTutorialStepGroups";
@@ -11,6 +12,14 @@ import type {
 
 export function useInteractiveTutorial(options: UseInteractiveTutorialOptions) {
   const state = useInteractiveTutorialCoreState();
+  const localMode = useSyncExternalStore(subscribeLocalWorkspace, getLocalWorkspaceMode, () => null);
+  const { resetLocalTutorialState, setReturnState, isInteractiveTutorialActive } = state;
+  useEffect(() => {
+    if (localMode !== "tutorial" && isInteractiveTutorialActive) {
+      resetLocalTutorialState();
+      setReturnState(null);
+    }
+  }, [localMode, isInteractiveTutorialActive, resetLocalTutorialState, setReturnState]);
   const actions = useInteractiveTutorialCoreActions(options, state);
   const {
     advanceInteractiveTutorial,
@@ -22,6 +31,8 @@ export function useInteractiveTutorial(options: UseInteractiveTutorialOptions) {
   const stepCompletionContext = useMemo(
     () => ({
       bootstrap: options.bootstrap,
+      selectedSeasonId: options.selectedSeasonId,
+      selectedProjectId: options.selectedProjectId,
       tutorialProjectId: state.tutorialProjectId,
       tutorialSeasonId: state.tutorialSeasonId,
       baselineCounts: state.baselineCounts,
@@ -48,6 +59,8 @@ export function useInteractiveTutorial(options: UseInteractiveTutorialOptions) {
       options.activeWorkstreamId,
       options.activeMechanismId,
       options.bootstrap,
+      options.selectedSeasonId,
+      options.selectedProjectId,
       options.manufacturingModalMode,
       options.materialModalMode,
       options.mechanismModalMode,

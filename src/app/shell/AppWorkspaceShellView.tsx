@@ -9,13 +9,15 @@ import {
   normalizeNavigationSubItemId,
 } from "@/lib/workspaceNavigation";
 
-import { Suspense } from "react";
+import { getLocalWorkspaceMode, resetLocalDemo, subscribeLocalWorkspace } from "@/lib/localWorkspace/session";
+import { Suspense, useSyncExternalStore } from "react";
 
 import type { AppWorkspaceController } from "@/app/hooks/useAppWorkspaceController";
 import { AddSeasonPopup, RobotProjectPopup, SidebarOverlay } from "./AppWorkspaceShellOverlays";
 import { AppTopbar, AppSidebar, WorkspaceModalHost, WorkspaceContent, WorkspaceShellLoading } from "./workspaceShell";
 
 export function AppWorkspaceShellView({ controller }: { controller: AppWorkspaceController }) {
+  const localMode = useSyncExternalStore(subscribeLocalWorkspace, getLocalWorkspaceMode, () => null);
   const c = { ...controller.model, ...controller.taskActions, ...controller.reportActions,
     ...controller.catalogActions, ...controller.rosterActions, ...controller.model.materialEditor };
   const content = c;
@@ -101,6 +103,17 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
     >
       <Suspense fallback={<WorkspaceShellLoading />}>
         <AppTopbar
+      localMode={localMode}
+      onResetDemo={() => {
+        try {
+          resetLocalDemo();
+          c.setSelectedSeasonId("default-season");
+          c.setSelectedProjectId(null);
+          void c.loadWorkspace({ seasonId: "default-season", projectId: null, personId: null });
+        } catch (error) {
+          c.setDataMessage(error instanceof Error ? error.message : "The local demo could not be reset.");
+        }
+      }}
       activeViewLabel={activeViewLabel}
       isActiveViewFavorite={isActiveViewFavorite}
       onToggleActiveViewFavorite={

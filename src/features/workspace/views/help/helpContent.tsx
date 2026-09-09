@@ -21,6 +21,15 @@ export interface InteractiveTutorialChapter {
 
 export const HELP_SECTIONS: HelpSection[] = [
   {
+    title: "Local demo and tutorials",
+    items: [
+      "Demo edits stay in this browser tab and are **never synced**, including after sign-in.",
+      "Reload keeps demo edits. **Reset demo** restores the examples; closing the tab ends its local storage lifetime.",
+      "Tutorials use a separate local copy. Ending or reloading a tutorial discards its edits and restores your previous workspace.",
+      "STEP processing and Onshape connections need a signed-in workspace. Robot maps, parts, and materials can be edited locally.",
+    ],
+  },
+  {
     title: "Start with scope",
     items: [
       "Before editing anything, check the **season selector** and **active project** at the bottom of the sidebar.",

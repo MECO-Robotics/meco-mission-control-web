@@ -13,6 +13,8 @@ import { Search, Star, StarOff } from "lucide-react";
 import { APP_TOPBAR_SLOT_IDS } from "./AppTopbarSlotPortal";
 
 interface AppTopbarProps {
+  localMode?: "demo" | "tutorial" | null;
+  onResetDemo?: () => void;
   activeViewLabel: string;
   isActiveViewFavorite: boolean;
   isDarkMode: boolean;
@@ -21,6 +23,8 @@ interface AppTopbarProps {
 }
 
 export function AppTopbar({
+  localMode,
+  onResetDemo,
   activeViewLabel,
   isActiveViewFavorite,
   isDarkMode,
@@ -85,6 +89,12 @@ export function AppTopbar({
             />
           </button>
           <h1>{activeViewLabel}</h1>
+          {localMode ? (
+            <div className="local-workspace-status">
+              <span title="Changes stay in this browser tab and are never synced.">{localMode === "tutorial" ? "Local tutorial" : "Local demo"} · no sync</span>
+              {localMode === "demo" ? <button type="button" className="secondary-action" onClick={onResetDemo}>Reset demo</button> : null}
+            </div>
+          ) : null}
         </div>
       </div>
       <div className="app-topbar-search-slot">

@@ -12,6 +12,11 @@ import type {
 export type InteractiveTutorialChapterId = "planning" | "operations" | "outreach";
 
 export type InteractiveTutorialStepId =
+  | "readiness-tab"
+  | "reports-worklogs"
+  | "directory-view"
+  | "subsystems-view"
+  | "outreach-workflow-view"
   | "season"
   | "project-robot"
   | "project-outreach"
@@ -142,6 +147,8 @@ export interface InteractiveTutorialOverlayProps {
 }
 
 export interface InteractiveTutorialStepCompletionContext {
+  selectedSeasonId: string | null;
+  selectedProjectId: string | null;
   bootstrap: BootstrapPayload;
   tutorialProjectId: string | null;
   tutorialSeasonId: string | null;

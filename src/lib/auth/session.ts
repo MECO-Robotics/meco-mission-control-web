@@ -1,3 +1,4 @@
+import { leaveLocalWorkspace } from "@/lib/localWorkspace/session";
 import type {
   DevBypassRole,
   EmailCodeDeliveryResponse,
@@ -40,6 +41,7 @@ async function signIn(path: string, body: unknown) {
       return result;
     });
     if (generation !== getSessionGeneration()) throw staleSessionResponse();
+    leaveLocalWorkspace();
     setPendingSignOut(false);
     setSessionCsrfToken(session.csrfToken);
     return session;

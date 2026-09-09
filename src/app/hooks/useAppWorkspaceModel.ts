@@ -1,3 +1,4 @@
+import { enterLocalDemo } from "@/lib/localWorkspace/session";
 import { useMaterialEditor } from "@/app/workspaceCatalog/materialActions";
 import { useEffect, useRef } from "react";
 import { useAppWorkspaceDerived } from "@/app/hooks/useAppWorkspaceDerived";
@@ -73,6 +74,7 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
 
     autoLoadedWorkspaceKeyRef.current = autoLoadKey;
     if (isPublicDemoSession) {
+      enterLocalDemo();
       setSelectedSeasonId(PUBLIC_DEMO_SEASON_ID);
       setSelectedProjectId(null);
       void loadWorkspace({ seasonId: PUBLIC_DEMO_SEASON_ID, projectId: null, personId: null });

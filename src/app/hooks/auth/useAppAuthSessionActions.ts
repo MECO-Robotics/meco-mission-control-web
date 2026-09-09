@@ -1,3 +1,4 @@
+import { leaveLocalWorkspace } from "@/lib/localWorkspace/session";
 import {
   startTransition,
   useCallback,
@@ -111,6 +112,7 @@ export function useAppAuthSessionActions({
 
   const expireSession = useCallback(
     (message: string) => {
+      leaveLocalWorkspace();
       clearWebSessionState();
       signOutFromGoogle();
       resetWorkspaceRef.current?.();
@@ -221,6 +223,7 @@ export function useAppAuthSessionActions({
   const handleSignOut = useCallback(async () => {
     await revokeThenClearWebSession(
       () => {
+        leaveLocalWorkspace();
         clearWebSessionState();
         setIsSigningIn(false);
         signOutFromGoogle();
