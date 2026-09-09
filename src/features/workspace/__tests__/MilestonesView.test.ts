@@ -107,7 +107,7 @@ function createBootstrap(): BootstrapPayload {
         dueDate: "2026-03-09",
         priority: "high",
         targetMilestoneId: "milestone-1",
-        dependencyIds: [],
+
         blockers: [],
         isBlocked: false,
         linkedManufacturingIds: [],
@@ -139,7 +139,7 @@ function createBootstrap(): BootstrapPayload {
         dueDate: "2026-03-11",
         priority: "medium",
         targetMilestoneId: null,
-        dependencyIds: [],
+
         blockers: [],
         isBlocked: false,
         linkedManufacturingIds: [],

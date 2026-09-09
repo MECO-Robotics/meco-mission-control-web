@@ -33,7 +33,7 @@ const QA_TASK: TaskRecord = {
   dueDate: "2026-01-02",
   priority: "high",
   status: "waiting-for-qa",
-  dependencyIds: [],
+
   blockers: [],
   linkedManufacturingIds: [],
   linkedPurchaseIds: [],

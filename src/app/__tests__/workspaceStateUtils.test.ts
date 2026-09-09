@@ -26,7 +26,7 @@ const baseTask: BootstrapPayload["tasks"][number] = {
   dueDate: "2026-04-22",
   priority: "medium",
   status: "not-started",
-  dependencyIds: [],
+
   blockers: [],
   linkedManufacturingIds: [],
   linkedPurchaseIds: [],
@@ -212,7 +212,6 @@ function createBootstrap(): BootstrapPayload {
       {
         ...baseTask,
         id: "task-visible",
-        dependencyIds: ["task-hidden"],
       },
       {
         ...baseTask,
@@ -434,7 +433,6 @@ describe("scopeBootstrapBySelection", () => {
   it("filters task dependencies to only visible task, milestone, and part-instance targets", () => {
     const scoped = scopeBootstrapBySelection(createBootstrap(), "season-1", "project-visible");
 
-    expect(scoped.tasks[0].dependencyIds).toEqual([]);
     expect((scoped.taskDependencies ?? []).map((dependency) => dependency.id)).toEqual([
       "dependency-global-milestone",
       "dependency-visible-part",

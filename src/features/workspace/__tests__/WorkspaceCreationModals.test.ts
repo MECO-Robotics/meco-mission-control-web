@@ -46,7 +46,7 @@ function createModalBootstrap() {
     dueDate: "2026-05-03",
     priority: "medium",
     status: "waiting-for-qa",
-    dependencyIds: [],
+
     blockers: [],
     linkedManufacturingIds: [],
     linkedPurchaseIds: [],

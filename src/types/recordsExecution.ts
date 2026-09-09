@@ -75,8 +75,8 @@ export interface TaskRecord {
   priority: TaskPriority;
   status: TaskStatus;
   planningState?: TaskPlanningState;
-  dependencyIds: string[];
   blockers: string[];
+  checklistItems?: string[];
   isBlocked?: boolean;
   isWaitingOnDependency?: boolean;
   linkedManufacturingIds: string[];
@@ -92,7 +92,7 @@ export interface TaskDependencyRecord {
   taskId: string;
   kind: TaskDependencyKind;
   refId: string;
-  requiredState?: string;
+  requiredState: string;
   dependencyType: TaskDependencyType;
   createdAt: string;
 }

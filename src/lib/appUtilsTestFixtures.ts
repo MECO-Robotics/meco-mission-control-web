@@ -225,7 +225,7 @@ export function createBootstrap(overrides: Partial<BootstrapPayload> = {}): Boot
         dueDate: "2026-02-01",
         priority: "medium",
         status: "not-started",
-        dependencyIds: [],
+
         blockers: [],
         linkedManufacturingIds: [],
         linkedPurchaseIds: [],

@@ -45,7 +45,11 @@ async function main() {
     }
     platformBranch = manifest.platform.revision;
   }
-  const platformContent = await readPublicRepositoryFile(
+  const localSource = process.env.PLATFORM_BOOTSTRAP_CONTRACT_SOURCE_PATH;
+  if (localSource && (process.env.CI || process.env.GITHUB_ACTIONS)) {
+    throw new Error("Local platform contract sources are not allowed in CI.");
+  }
+  const platformContent = localSource ? await readFile(path.resolve(localSource), "utf8") : await readPublicRepositoryFile(
     "MECO-Robotics/meco-mission-control-platform",
     "contracts/platform/bootstrap/v1/contract.json",
     platformBranch,
@@ -55,7 +59,7 @@ async function main() {
   validateBootstrapContract(platformContract);
   deepStrictEqual(contract, platformContract);
 
-  console.log(`Web bootstrap contract matches platform ${platformBranch}.`);
+  console.log(`Web bootstrap contract matches platform ${localSource ?? platformBranch}.`);
 }
 
 main().catch((error) => {

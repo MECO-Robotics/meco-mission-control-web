@@ -75,7 +75,7 @@ const bootstrap = {
       dueDate: "2026-04-21",
       priority: "medium",
       status: "complete",
-      dependencyIds: [],
+
       blockers: [],
       linkedManufacturingIds: [],
       linkedPurchaseIds: [],
@@ -106,7 +106,7 @@ const bootstrap = {
       dueDate: "2026-04-22",
       priority: "medium",
       status: "not-started",
-      dependencyIds: [],
+
       blockers: [],
       linkedManufacturingIds: [],
       linkedPurchaseIds: [],
@@ -173,6 +173,7 @@ test("task planning helpers surface structured dependency records", () => {
     kind: "task",
     refId: "task-a",
     dependencyType: "hard",
+    requiredState: "complete",
   });
 });
 

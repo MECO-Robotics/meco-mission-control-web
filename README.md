@@ -6,6 +6,8 @@ This repository contains the broad-screen web workspace for Mission Control: pla
 
 Use this README as the setup entry point. Use [`docs/web-contributor-guide.md`](docs/web-contributor-guide.md) for implementation conventions and [`docs/CURRENT_WEB_SPEC.md`](docs/CURRENT_WEB_SPEC.md) as the current product/spec reference.
 
+Contributor setup, review expectations and validation are in [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Table of Contents
 
 - [What This Repo Owns](#what-this-repo-owns)
@@ -113,7 +115,7 @@ Default local frontend API behavior expects:
 VITE_API_BASE_URL=/api
 VITE_DEV_PROXY_TARGET=http://localhost:8080
 VITE_DEV_SERVER_HOST=127.0.0.1
-VITE_DEV_SERVER_PORT=5177
+VITE_DEV_SERVER_PORT=5173
 ```
 
 ### Run locally
@@ -125,13 +127,13 @@ npm run dev
 Default Vite URL without an explicit port is:
 
 ```text
-http://localhost:5173
+http://127.0.0.1:5173
 ```
 
 With the committed `.env.example` values, use:
 
 ```text
-http://127.0.0.1:5177
+http://127.0.0.1:5173
 ```
 
 Hot-module replacement is intentionally disabled because React Fast Refresh injects
@@ -144,7 +146,7 @@ after local source changes.
 npm run verify
 ```
 
-`verify` runs bootstrap contract verification, typecheck, lint, Jest CI tests, and the production bundle build.
+`verify` runs bootstrap contract verification, workflow security checks, typecheck, lint, Jest CI tests, and the production bundle build.
 
 ## Common Development Tasks
 
@@ -156,7 +158,6 @@ npm run verify
 4. Add helper/model code near the view if it is view-specific.
 5. Add or update tests near existing tests for that view.
 6. Run a targeted test, then `npm run verify`.
-7. For structural changes, run `npm run audit:organization:strict`.
 
 ### Add a sidebar or topbar destination
 
@@ -173,10 +174,10 @@ npm run verify
 3. Update shared frontend types under `src/types/*`.
 4. Wire the action through the relevant app hook:
    - `useAppWorkspaceTaskActions`
-   - `useAppWorkspaceCatalogActions`
+   - the relevant hook in `src/app/workspaceCatalog` (material editing owns its draft and commands)
    - `useAppWorkspaceReportActions`
    - `useAppWorkspaceRosterActions`
-5. Pass the action through the controller/shell slice only as far as needed.
+5. Compose the actual component props once in `AppWorkspaceShellView`; do not add key catalogs or controller projections.
 6. Add optimistic UI, rollback, unauthorized handling, and data refresh behavior where appropriate.
 
 ### Add or change bootstrap data fields
@@ -308,12 +309,12 @@ The workspace controller is intentionally split:
 - `useAppWorkspaceDerived`: derived selections, filtered records, scope helpers
 - `useAppWorkspaceLoader`: workspace bootstrap loading, unauthorized handling, uploads, navigation favorites, refresh helpers
 - `useAppWorkspaceTaskActions`: task/event/milestone-oriented mutations
-- `useAppWorkspaceCatalogActions`: inventory, subsystem, mechanism, part, manufacturing, purchase mutations
+- `src/app/workspaceCatalog`: catalog hooks receive explicit dependencies at controller composition; `useMaterialEditor` owns material draft/open/save state and commands
 - `useAppWorkspaceReportActions`: QA/report mutations
 - `useAppWorkspaceRosterActions`: member/roster mutations
-- `buildShellController`: narrows the full model/actions into the props needed by the rendered shell
+- `AppWorkspaceShellView`: derives navigation and composes actual shell/content/modal props once, without intermediate key catalogs
 
-Do not pass the full app model into new components by default. Prefer narrow props or a focused controller slice.
+Do not pass the full app model into new components by default. Prefer the concrete inputs the component uses.
 
 ## Repository Layout
 
@@ -329,7 +330,6 @@ docs/
   *.docx                  # Historical requirements/spec baselines
 
 scripts/
-  organization-audit.mjs  # File/directory/CSS guardrail audit
   codex-worktree-bootstrap.ps1
 
 src/
@@ -361,7 +361,7 @@ src/
 
 Operational files:
 
-- `AGENTS.md`: workflow, branch, file-size, directory-size, CSS, and Codex worktree rules
+- `CONTRIBUTING.md`: contributor setup, ownership criteria, validation and protected PR workflow
 - `environment.toml`: Codex worktree startup source of truth
 - `.env.example`: local env template
 - `.env.production.example`: production env template
@@ -456,11 +456,11 @@ Important behavior details:
 
 ### Local Google SSO testing
 
-Use the Vite proxy so browser origin remains `http://localhost:5173` while API traffic stays under `/api`.
+Use the Vite proxy so browser origin remains `http://127.0.0.1:5173` while API traffic stays under `/api`.
 
 If Google sign-in fails locally because the backend-provided client is not authorized for localhost:
 
-- Add `http://localhost:5173` to authorized JavaScript origins for that OAuth web client, or
+- Add `http://127.0.0.1:5173` to authorized JavaScript origins for that OAuth web client, or
 - Set `VITE_LOCAL_GOOGLE_CLIENT_ID` to a localhost-authorized client ID.
 
 The frontend never needs a Google client secret.
@@ -477,7 +477,7 @@ Frontend env vars are read by Vite through `import.meta.env`.
 | `VITE_DEV_PROXY_TARGET` | `http://localhost:8080` | Dev-server proxy target for `/api`. Only used by Vite dev server. |
 | `VITE_LOCAL_GOOGLE_CLIENT_ID` | unset | Optional localhost-only override for Google web client ID during local development. |
 | `VITE_DEV_SERVER_HOST` | `127.0.0.1` | Optional local Vite dev-server host override. |
-| `VITE_DEV_SERVER_PORT` | unset | Optional local Vite dev-server port override. `.env.example` uses `5177`. |
+| `VITE_DEV_SERVER_PORT` | unset | Optional local Vite dev-server port override. `.env.example` uses `5173`. |
 
 Production example:
 
@@ -504,7 +504,6 @@ npm run verify
 5. `npm run test:ci`
 6. `npm run build:bundle`
 
-CI also runs `npm run audit:organization:strict` before `npm run verify`.
 
 ### Targeted commands
 
@@ -517,8 +516,6 @@ CI also runs `npm run audit:organization:strict` before `npm run verify`.
 | `npm run build:bundle` | checking Vite production bundle correctness |
 | `npm run verify-contracts` | validating canonical JSON Schema and matching it to the platform contract (`development` by default, `main` for main-targeting CI) |
 | `npm run test:security-workflows` | testing the trusted merge-gate validation helpers |
-| `npm run audit:organization` | checking file/directory/CSS organization warnings |
-| `npm run audit:organization:strict` | enforcing hard organization limits before structural PRs |
 
 ### Useful targeted test patterns
 
@@ -529,49 +526,13 @@ npm run test:ci -- WorkLogsView
 npm run test:ci -- AppSidebar
 ```
 
-Use targeted tests first when narrowing behavior, then run `npm run verify` before marking the PR ready.
-
-### Organization guardrails
-
-`AGENTS.md` defines the hard rules. Practical summary:
-
-- Prefer small cohesive files and directories.
-- Split React/TS files before they exceed the hard cap.
-- Split large CSS by component or responsibility.
-- Avoid flat mixed-responsibility directories.
-- Keep diagnostics and generated artifacts under `.diagnostics/`.
-- Use `environment.toml` as the Codex worktree startup source of truth.
+Timeline cases live in directly discovered, behavior-named `TimelineView.*.test.ts` suites; no side-effect test-registration imports are needed. Use targeted tests first when narrowing behavior, then run `npm run verify` before marking the PR ready.
 
 ## Development Workflow
 
-Recommended local cycle:
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, ownership criteria, validation and protected PR flow. Keep diagnostics outside tracked source. Shared skills are optional ignored local imports; synchronize explicitly rather than treating them as application dependencies.
 
-1. Start backend (`meco-mission-control-platform`) locally.
-2. Start web app (`npm run dev`).
-3. Verify login flow and scoped workspace views.
-4. Implement the smallest coherent change.
-5. Run targeted tests for the touched area.
-6. Run `npm run verify`.
-7. Push and open a PR into `development`.
-
-Branch and PR workflow is governed by `AGENTS.md`:
-
-- `main` is production-ready only.
-- `staging` and `staging/*` are audited release-candidate snapshots; they are immutable except for stabilization fixes.
-- `development` is the integration branch for active work.
-- `feature/*`, `fix/*`, and `hotfix/*` are short-lived work branches.
-- PRs into `development` must come from `feature/*`, `fix/*`, or `hotfix/*`.
-- Cut staging branches from `development` when a frozen promotion candidate needs to remain open against `main` while regular work continues on `development`.
-- PRs into `staging` must come from `development`, `fix/*`, or `hotfix/*`; do not merge `feature/*` into staging.
-- Merges into `main` should come only from `staging`, `staging/*`, `development`, or `hotfix/*`.
-- Protected branches require CI, snapshot validation, review approval, conversation resolution, linear history, and admin enforcement as described in `AGENTS.md`.
-
-Codex/worktree notes:
-
-- `environment.toml` is the startup source of truth for Codex worktrees.
-- Keep startup commands and dev URL in `environment.toml`, not duplicated across docs.
-- Put diagnostic screenshots, generated reports, and temporary snapshots under `.diagnostics/`, not in the repository root.
-- When working in a worktree, audit UI changes against the worktree-hosted app instance before finishing.
+The snapshot job packages the verified bundle from the same CI run; it does not reinstall dependencies or rebuild.
 
 ## Issue Labels
 
@@ -712,7 +673,6 @@ Check:
 
 - component still imports the correct scoped CSS entrypoint
 - global CSS was not expanded for component-specific behavior
-- organization audit passes for CSS/file/directory limits
 - affected interaction tests still cover keyboard/responsive behavior where relevant
 
 ## Cross-Repo Responsibilities

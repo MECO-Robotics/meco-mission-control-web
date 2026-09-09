@@ -1,29 +1,9 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MechanismPayload } from "@/types/payloads";
 
-import { buildEmptyArtifactPayload, buildEmptyMaterialPayload, buildEmptyMechanismPayload, buildEmptyPartDefinitionPayload, buildEmptyPartInstancePayload, buildEmptySubsystemPayload, buildEmptyWorkstreamPayload } from "@/lib/appUtils/payloadBuilders";
-import { artifactToPayload, materialToPayload, partDefinitionToPayload, partInstanceToPayload, subsystemToPayload, workstreamToPayload } from "@/lib/appUtils/payloadConversions";
+import { buildEmptyArtifactPayload, buildEmptyMechanismPayload, buildEmptyPartDefinitionPayload, buildEmptyPartInstancePayload, buildEmptySubsystemPayload, buildEmptyWorkstreamPayload } from "@/lib/appUtils/payloadBuilders";
+import { artifactToPayload, partDefinitionToPayload, partInstanceToPayload, subsystemToPayload, workstreamToPayload } from "@/lib/appUtils/payloadConversions";
 import type { AppWorkspaceLoaderModel, WorkspaceReconciliationState } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
-
-export function reconcileMaterialModal(
-  state: WorkspaceReconciliationState,
-  model: AppWorkspaceLoaderModel,
-  payload: BootstrapPayload,
-) {
-  if (model.materialModalMode === "create") {
-    state.setMaterialDraft(buildEmptyMaterialPayload());
-  }
-
-  if (model.materialModalMode === "edit" && model.activeMaterialId) {
-    const nextItem = payload.materials.find((item) => item.id === model.activeMaterialId);
-    if (nextItem) {
-      state.setMaterialDraft(materialToPayload(nextItem));
-    } else {
-      state.setMaterialModalMode(null);
-      state.setActiveMaterialId(null);
-    }
-  }
-}
 
 export function reconcilePartDefinitionModal(
   state: WorkspaceReconciliationState,

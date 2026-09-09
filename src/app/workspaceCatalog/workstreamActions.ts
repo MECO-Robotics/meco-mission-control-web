@@ -10,82 +10,110 @@ import type { WorkstreamRecord } from "@/types/recordsOrganization";
 
 export type WorkstreamActions = ReturnType<typeof useWorkstreamActions>;
 
-export function useWorkstreamActions(model: AppWorkspaceModel) {
+export function useWorkstreamActions({
+  activeWorkstreamId,
+  bootstrap,
+  handleUnauthorized,
+  loadWorkspace,
+  scopedBootstrap,
+  selectedProjectId,
+  setActiveWorkstreamId,
+  setDataMessage,
+  setIsSavingWorkstream,
+  setWorkstreamDraft,
+  setWorkstreamModalMode,
+  workstreamDraft,
+  workstreamModalMode,
+}: {
+  activeWorkstreamId: AppWorkspaceModel["activeWorkstreamId"];
+  bootstrap: AppWorkspaceModel["bootstrap"];
+  handleUnauthorized: AppWorkspaceModel["handleUnauthorized"];
+  loadWorkspace: AppWorkspaceModel["loadWorkspace"];
+  scopedBootstrap: AppWorkspaceModel["scopedBootstrap"];
+  selectedProjectId: AppWorkspaceModel["selectedProjectId"];
+  setActiveWorkstreamId: AppWorkspaceModel["setActiveWorkstreamId"];
+  setDataMessage: AppWorkspaceModel["setDataMessage"];
+  setIsSavingWorkstream: AppWorkspaceModel["setIsSavingWorkstream"];
+  setWorkstreamDraft: AppWorkspaceModel["setWorkstreamDraft"];
+  setWorkstreamModalMode: AppWorkspaceModel["setWorkstreamModalMode"];
+  workstreamDraft: AppWorkspaceModel["workstreamDraft"];
+  workstreamModalMode: AppWorkspaceModel["workstreamModalMode"];
+}) {
   const openCreateWorkstreamModal = useCallback(() => {
-    model.setActiveWorkstreamId(null);
-    model.setWorkstreamDraft(
-      buildEmptyWorkstreamPayload(model.scopedBootstrap, {
-        projectId: model.selectedProjectId ?? undefined,
+    setActiveWorkstreamId(null);
+    setWorkstreamDraft(
+      buildEmptyWorkstreamPayload(scopedBootstrap, {
+        projectId: selectedProjectId ?? undefined,
       }),
     );
-    model.setWorkstreamModalMode("create");
-  }, [model]);
+    setWorkstreamModalMode("create");
+  }, [scopedBootstrap, selectedProjectId, setActiveWorkstreamId, setWorkstreamDraft, setWorkstreamModalMode]);
 
   const openEditWorkstreamModal = useCallback((item: WorkstreamRecord) => {
-    model.setActiveWorkstreamId(item.id);
-    model.setWorkstreamDraft(workstreamToPayload(item));
-    model.setWorkstreamModalMode("edit");
-  }, [model]);
+    setActiveWorkstreamId(item.id);
+    setWorkstreamDraft(workstreamToPayload(item));
+    setWorkstreamModalMode("edit");
+  }, [setActiveWorkstreamId, setWorkstreamDraft, setWorkstreamModalMode]);
 
   const closeWorkstreamModal = useCallback(() => {
-    model.setWorkstreamModalMode(null);
-    model.setActiveWorkstreamId(null);
-  }, [model]);
+    setWorkstreamModalMode(null);
+    setActiveWorkstreamId(null);
+  }, [setActiveWorkstreamId, setWorkstreamModalMode]);
 
   const handleWorkstreamSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
-    model.setIsSavingWorkstream(true);
-    model.setDataMessage(null);
+    setIsSavingWorkstream(true);
+    setDataMessage(null);
 
     try {
       const payload: WorkstreamPayload = {
-        ...model.workstreamDraft,
-        name: model.workstreamDraft.name.trim(),
-        description: model.workstreamDraft.description.trim(),
+        ...workstreamDraft,
+        name: workstreamDraft.name.trim(),
+        description: workstreamDraft.description.trim(),
       };
       if (!payload.projectId) {
-        model.setDataMessage("Pick a project before adding a workflow.");
+        setDataMessage("Pick a project before adding a workflow.");
         return;
       }
 
-      if (model.workstreamModalMode === "create") {
-        await createWorkstreamRecord(payload, model.handleUnauthorized);
-      } else if (model.workstreamModalMode === "edit" && model.activeWorkstreamId) {
-        await updateWorkstreamRecord(model.activeWorkstreamId, payload, model.handleUnauthorized);
+      if (workstreamModalMode === "create") {
+        await createWorkstreamRecord(payload, handleUnauthorized);
+      } else if (workstreamModalMode === "edit" && activeWorkstreamId) {
+        await updateWorkstreamRecord(activeWorkstreamId, payload, handleUnauthorized);
       }
-      await model.loadWorkspace();
+      await loadWorkspace();
       closeWorkstreamModal();
     } catch (error) {
-      model.setDataMessage(toErrorMessage(error));
+      setDataMessage(toErrorMessage(error));
     } finally {
-      model.setIsSavingWorkstream(false);
+      setIsSavingWorkstream(false);
     }
-  }, [closeWorkstreamModal, model]);
+  }, [activeWorkstreamId, closeWorkstreamModal, handleUnauthorized, loadWorkspace, setDataMessage, setIsSavingWorkstream, workstreamDraft, workstreamModalMode]);
 
   const handleToggleWorkstreamArchived = useCallback(async (workstreamId: string) => {
-    const currentWorkstream = model.bootstrap.workstreams.find(
+    const currentWorkstream = bootstrap.workstreams.find(
       (workstream) => workstream.id === workstreamId,
     );
     if (!currentWorkstream) {
       return;
     }
 
-    model.setIsSavingWorkstream(true);
-    model.setDataMessage(null);
+    setIsSavingWorkstream(true);
+    setDataMessage(null);
 
     try {
       await updateWorkstreamRecord(
         workstreamId,
         { isArchived: !currentWorkstream.isArchived },
-        model.handleUnauthorized,
+        handleUnauthorized,
       );
-      await model.loadWorkspace();
+      await loadWorkspace();
     } catch (error) {
-      model.setDataMessage(toErrorMessage(error));
+      setDataMessage(toErrorMessage(error));
     } finally {
-      model.setIsSavingWorkstream(false);
+      setIsSavingWorkstream(false);
     }
-  }, [model]);
+  }, [bootstrap, handleUnauthorized, loadWorkspace, setDataMessage, setIsSavingWorkstream]);
 
   return {
     closeWorkstreamModal,

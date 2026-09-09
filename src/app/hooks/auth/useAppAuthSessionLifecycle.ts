@@ -1,6 +1,6 @@
 import { useEffect, type Dispatch, type SetStateAction } from "react";
 
-import { clearWebSessionState } from "@/lib/auth/core/sessionStorage";
+import { clearWebSessionState, getSessionGeneration } from "@/lib/auth/core/sessionStorage";
 import {
   restoreWebSession,
   validateSession,
@@ -31,14 +31,16 @@ export async function restoreStoredSession({
   isCancelled = () => false,
   setSessionUser,
 }: RestoreStoredSessionArgs) {
+  const generation = getSessionGeneration();
   try {
     const { user } = await restoreWebSession();
-    if (isCancelled()) {
+    if (isCancelled() || generation !== getSessionGeneration()) {
       return;
     }
 
     setSessionUser(user);
   } catch (error) {
+    if (isCancelled() || generation !== getSessionGeneration()) return;
     const isUnauthorized =
       typeof error === "object" &&
       error !== null &&
@@ -113,16 +115,19 @@ export function useAppAuthSessionValidation({
       return;
     }
 
+    let cancelled = false;
     const intervalId = window.setInterval(() => {
       void (async () => {
+        const generation = getSessionGeneration();
         const isValid = await validateSession();
-        if (!isValid) {
+        if (!cancelled && generation === getSessionGeneration() && !isValid) {
           expireSession("Your session expired. Please sign in again.");
         }
       })();
     }, 5 * 60 * 1000);
 
     return () => {
+      cancelled = true;
       window.clearInterval(intervalId);
     };
   }, [enforcedAuthConfig, expireSession, sessionUser]);

@@ -12,7 +12,7 @@ $SkillsRef = if ([string]::IsNullOrWhiteSpace($env:SKILLS_REF)) {
     $env:SKILLS_REF
 }
 
-$TmpDir = ".tmp-skills-sync"
+$TmpDir = Join-Path ([System.IO.Path]::GetTempPath()) ([System.Guid]::NewGuid().ToString())
 
 function Fail {
     param([string] $Message)
@@ -44,8 +44,6 @@ try {
     if (-not [string]::IsNullOrWhiteSpace($SkillsRef)) {
         Write-Host "Using skills ref: $SkillsRef"
     }
-
-    Remove-Tmp
 
     & git clone $SkillsRepo $TmpDir
     if ($LASTEXITCODE -ne 0) {

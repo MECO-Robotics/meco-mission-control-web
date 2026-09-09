@@ -57,7 +57,7 @@ function createTask(index: number, overrides: Partial<Task> = {}): Task {
           : index === 4 || index === 8 || index === 12 || index === 16
             ? "waiting-for-qa"
             : "complete",
-    dependencyIds: [],
+
     blockers: [],
     linkedManufacturingIds: [],
     linkedPurchaseIds: [],
@@ -130,12 +130,13 @@ function createBootstrap(): BootstrapPayload {
         risks: [],
       },
     ],
+    taskDependencies: [{ id: "dependency-1", taskId: "task-3", kind: "task", refId: "task-1", requiredState: "complete", dependencyType: "hard", createdAt: "2026-01-01" }],
+    taskBlockers: [{ id: "blocker-1", blockedTaskId: "task-4", blockerType: "other", blockerId: null, description: "Waiting on parts", severity: "medium", status: "open", createdByMemberId: null, createdAt: "2026-01-01", resolvedAt: null }],
     tasks: Array.from({ length: 16 }, (_, index) => {
       const taskIndex = index + 1;
 
       return createTask(taskIndex, {
         ownerId: taskIndex === 2 ? "member-2" : "member-1",
-        dependencyIds: taskIndex === 3 ? ["task-1"] : [],
         blockers: taskIndex === 4 ? ["Waiting on parts"] : [],
       });
     }),

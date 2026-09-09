@@ -41,7 +41,7 @@ export function buildAttentionActionNowItems({
   waitingQaTasks,
 }: BuildAttentionActionNowItemsArgs): AttentionNowItem[] {
   const taskLastUpdatedAtById = buildTaskLastUpdatedAtById(bootstrap);
-  const downstreamByTaskId = buildTaskDownstreamCount(bootstrap.tasks);
+  const downstreamByTaskId = buildTaskDownstreamCount(bootstrap);
   const purchaseLinkedTasksById = indexLinkedTasksBySupplyId({
     key: "linkedPurchaseIds",
     tasks: bootstrap.tasks,

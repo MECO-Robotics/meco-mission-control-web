@@ -281,7 +281,7 @@ describe("buildRobotConfigurationViewModel", () => {
           dueDate: "2026-02-10",
           priority: "high",
           status: "in-progress",
-          dependencyIds: [],
+
           blockers: [],
           linkedManufacturingIds: ["manufacturing-1"],
           linkedPurchaseIds: [],
@@ -312,7 +312,7 @@ describe("buildRobotConfigurationViewModel", () => {
           dueDate: "2026-02-10",
           priority: "medium",
           status: "not-started",
-          dependencyIds: [],
+
           blockers: [],
           linkedManufacturingIds: [],
           linkedPurchaseIds: [],
@@ -343,7 +343,7 @@ describe("buildRobotConfigurationViewModel", () => {
           dueDate: "2026-02-10",
           priority: "low",
           status: "not-started",
-          dependencyIds: [],
+
           blockers: [],
           linkedManufacturingIds: [],
           linkedPurchaseIds: [],

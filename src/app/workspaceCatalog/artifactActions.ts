@@ -11,102 +11,132 @@ import type { ArtifactRecord } from "@/types/recordsInventory";
 
 export type ArtifactActions = ReturnType<typeof useArtifactActions>;
 
-export function useArtifactActions(model: AppWorkspaceModel) {
+export function useArtifactActions({
+  activeArtifactId,
+  artifactDraft,
+  artifactModalMode,
+  bootstrap,
+  handleUnauthorized,
+  loadWorkspace,
+  scopedBootstrap,
+  selectedProjectId,
+  setActiveArtifactId,
+  setArtifactDraft,
+  setArtifactModalMode,
+  setDataMessage,
+  setIsDeletingArtifact,
+  setIsSavingArtifact,
+}: {
+  activeArtifactId: AppWorkspaceModel["activeArtifactId"];
+  artifactDraft: AppWorkspaceModel["artifactDraft"];
+  artifactModalMode: AppWorkspaceModel["artifactModalMode"];
+  bootstrap: AppWorkspaceModel["bootstrap"];
+  handleUnauthorized: AppWorkspaceModel["handleUnauthorized"];
+  loadWorkspace: AppWorkspaceModel["loadWorkspace"];
+  scopedBootstrap: AppWorkspaceModel["scopedBootstrap"];
+  selectedProjectId: AppWorkspaceModel["selectedProjectId"];
+  setActiveArtifactId: AppWorkspaceModel["setActiveArtifactId"];
+  setArtifactDraft: AppWorkspaceModel["setArtifactDraft"];
+  setArtifactModalMode: AppWorkspaceModel["setArtifactModalMode"];
+  setDataMessage: AppWorkspaceModel["setDataMessage"];
+  setIsDeletingArtifact: AppWorkspaceModel["setIsDeletingArtifact"];
+  setIsSavingArtifact: AppWorkspaceModel["setIsSavingArtifact"];
+}) {
   const openCreateArtifactModal = useCallback((kind: ArtifactKind) => {
-    model.setActiveArtifactId(null);
-    model.setArtifactDraft(
-      buildEmptyArtifactPayload(model.scopedBootstrap, {
-        projectId: model.selectedProjectId ?? undefined,
+    setActiveArtifactId(null);
+    setArtifactDraft(
+      buildEmptyArtifactPayload(scopedBootstrap, {
+        projectId: selectedProjectId ?? undefined,
         kind,
       }),
     );
-    model.setArtifactModalMode("create");
-  }, [model]);
+    setArtifactModalMode("create");
+  }, [scopedBootstrap, selectedProjectId, setActiveArtifactId, setArtifactDraft, setArtifactModalMode]);
 
   const openEditArtifactModal = useCallback((artifact: ArtifactRecord) => {
-    model.setActiveArtifactId(artifact.id);
-    model.setArtifactDraft(artifactToPayload(artifact));
-    model.setArtifactModalMode("edit");
-  }, [model]);
+    setActiveArtifactId(artifact.id);
+    setArtifactDraft(artifactToPayload(artifact));
+    setArtifactModalMode("edit");
+  }, [setActiveArtifactId, setArtifactDraft, setArtifactModalMode]);
 
   const closeArtifactModal = useCallback(() => {
-    model.setArtifactModalMode(null);
-    model.setActiveArtifactId(null);
-  }, [model]);
+    setArtifactModalMode(null);
+    setActiveArtifactId(null);
+  }, [setActiveArtifactId, setArtifactModalMode]);
 
   const handleArtifactSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
-    model.setIsSavingArtifact(true);
-    model.setDataMessage(null);
+    setIsSavingArtifact(true);
+    setDataMessage(null);
 
     try {
       const payload: ArtifactPayload = {
-        ...model.artifactDraft,
-        title: model.artifactDraft.title.trim(),
-        summary: model.artifactDraft.summary.trim(),
-        link: model.artifactDraft.link.trim(),
+        ...artifactDraft,
+        title: artifactDraft.title.trim(),
+        summary: artifactDraft.summary.trim(),
+        link: artifactDraft.link.trim(),
       };
       if (!payload.projectId) {
-        model.setDataMessage("Pick a project before saving an artifact.");
+        setDataMessage("Pick a project before saving an artifact.");
         return;
       }
 
-      if (model.artifactModalMode === "create") {
-        await createArtifactRecord(payload, model.handleUnauthorized);
-      } else if (model.artifactModalMode === "edit" && model.activeArtifactId) {
-        await updateArtifactRecord(model.activeArtifactId, payload, model.handleUnauthorized);
+      if (artifactModalMode === "create") {
+        await createArtifactRecord(payload, handleUnauthorized);
+      } else if (artifactModalMode === "edit" && activeArtifactId) {
+        await updateArtifactRecord(activeArtifactId, payload, handleUnauthorized);
       }
 
-      await model.loadWorkspace();
+      await loadWorkspace();
       closeArtifactModal();
     } catch (error) {
-      model.setDataMessage(toErrorMessage(error));
+      setDataMessage(toErrorMessage(error));
     } finally {
-      model.setIsSavingArtifact(false);
+      setIsSavingArtifact(false);
     }
-  }, [closeArtifactModal, model]);
+  }, [activeArtifactId, artifactDraft, artifactModalMode, closeArtifactModal, handleUnauthorized, loadWorkspace, setDataMessage, setIsSavingArtifact]);
 
   const handleDeleteArtifact = useCallback(async (artifactId: string) => {
-    model.setIsDeletingArtifact(true);
-    model.setDataMessage(null);
+    setIsDeletingArtifact(true);
+    setDataMessage(null);
 
     try {
-      await deleteArtifactRecord(artifactId, model.handleUnauthorized);
-      if (model.activeArtifactId === artifactId) {
+      await deleteArtifactRecord(artifactId, handleUnauthorized);
+      if (activeArtifactId === artifactId) {
         closeArtifactModal();
       }
-      await model.loadWorkspace();
+      await loadWorkspace();
     } catch (error) {
-      model.setDataMessage(toErrorMessage(error));
+      setDataMessage(toErrorMessage(error));
     } finally {
-      model.setIsDeletingArtifact(false);
+      setIsDeletingArtifact(false);
     }
-  }, [closeArtifactModal, model]);
+  }, [activeArtifactId, closeArtifactModal, handleUnauthorized, loadWorkspace, setDataMessage, setIsDeletingArtifact]);
 
   const handleToggleArtifactArchived = useCallback(async (artifactId: string) => {
-    const currentArtifact = model.bootstrap.artifacts.find(
+    const currentArtifact = bootstrap.artifacts.find(
       (artifact) => artifact.id === artifactId,
     );
     if (!currentArtifact) {
       return;
     }
 
-    model.setIsSavingArtifact(true);
-    model.setDataMessage(null);
+    setIsSavingArtifact(true);
+    setDataMessage(null);
 
     try {
       await updateArtifactRecord(
         artifactId,
         { isArchived: !(currentArtifact.isArchived ?? false) },
-        model.handleUnauthorized,
+        handleUnauthorized,
       );
-      await model.loadWorkspace();
+      await loadWorkspace();
     } catch (error) {
-      model.setDataMessage(toErrorMessage(error));
+      setDataMessage(toErrorMessage(error));
     } finally {
-      model.setIsSavingArtifact(false);
+      setIsSavingArtifact(false);
     }
-  }, [model]);
+  }, [bootstrap, handleUnauthorized, loadWorkspace, setDataMessage, setIsSavingArtifact]);
 
   return {
     closeArtifactModal,

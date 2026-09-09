@@ -1,6 +1,8 @@
 /// <reference types="jest" />
 
-import { readFileSync } from "node:fs";
+import { useEffect } from "react";
+import { useKanbanPointerFallbackDrag, type PendingKanbanPointerDrag } from "../useKanbanPointerFallbackDrag";
+jest.mock("react", () => ({ ...jest.requireActual("react"), useEffect: jest.fn() }));
 
 import {
   canStartKanbanPointerFallbackDrag,
@@ -20,15 +22,40 @@ describe("canStartKanbanPointerFallbackDrag", () => {
   });
 
   it("clears pointer fallback drags on cancel without committing a drop", () => {
-    const source = readFileSync(
-      "src/features/workspace/views/kanban/useKanbanPointerFallbackDrag.ts",
-      "utf8",
-    );
-
-    expect(source).toContain("const handlePointerCancel = (event: PointerEvent) => {");
-    expect(source).toContain('window.addEventListener("pointercancel", handlePointerCancel);');
-    expect(source).toContain('window.removeEventListener("pointercancel", handlePointerCancel);');
-    expect(source).not.toContain('window.addEventListener("pointercancel", handlePointerUp);');
+    const previousWindow = globalThis.window;
+    const handlers = new Map<string, (event: PointerEvent) => void>();
+    Object.defineProperty(globalThis, "window", { configurable: true, value: {
+      addEventListener: (name: string, handler: (event: PointerEvent) => void) => handlers.set(name, handler),
+      removeEventListener: (name: string) => handlers.delete(name),
+      setTimeout: (callback: () => void) => callback(),
+    } });
+    let unmount: (() => void) | undefined;
+    jest.mocked(useEffect).mockImplementation((effect) => { unmount = effect() as (() => void); });
+    const pending = { current: { id: "a", item: "task", sourceState: "ready", isDragging: false, startX: 0, startY: 0 } as PendingKanbanPointerDrag<string, string> | null };
+    const onDrop = jest.fn();
+    const setActive = jest.fn();
+    const setHovered = jest.fn();
+    const clearDimmed = jest.fn();
+    const suppress = { current: false };
+    try {
+      useKanbanPointerFallbackDrag({ canDropDraggedItem: () => true, clearDimmedDragSource: clearDimmed,
+        dragEnabled: true, getDropStateAtPoint: () => "done", onItemDrop: onDrop,
+        pendingPointerDragRef: pending, setActiveDrag: setActive, setDimmedDragItemId: jest.fn(),
+        setHoveredDropState: setHovered, suppressClickRef: suppress });
+      handlers.get("pointermove")!({ clientX: 50, clientY: 50 } as PointerEvent);
+      expect(pending.current?.isDragging).toBe(true);
+      handlers.get("pointercancel")!({} as PointerEvent);
+      expect(onDrop).not.toHaveBeenCalled();
+      expect(pending.current).toBeNull();
+      expect(setActive).toHaveBeenLastCalledWith(null);
+      expect(setHovered).toHaveBeenLastCalledWith(null);
+      expect(clearDimmed).toHaveBeenCalledTimes(1);
+      expect(suppress.current).toBe(false);
+      unmount?.();
+      expect(handlers.size).toBe(0);
+    } finally {
+      Object.defineProperty(globalThis, "window", { configurable: true, value: previousWindow });
+    }
   });
 
   it("does not arm fallback dragging from nested interactive controls", () => {

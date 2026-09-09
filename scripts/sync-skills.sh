@@ -3,7 +3,7 @@ set -euo pipefail
 
 SKILLS_REPO="${SKILLS_REPO:-https://github.com/MECO-Robotics/mission-control-skills.git}"
 SKILLS_REF="${SKILLS_REF:-}"
-TMP_DIR=".tmp-skills-sync"
+TMP_DIR=""
 
 fail() {
   echo "Error: $*" >&2
@@ -28,14 +28,13 @@ require_repo_root() {
 }
 
 require_repo_root
+TMP_DIR="$(mktemp -d)"
 trap cleanup EXIT
 
 echo "Syncing skills from: $SKILLS_REPO"
 if [ -n "$SKILLS_REF" ]; then
   echo "Using skills ref: $SKILLS_REF"
 fi
-
-cleanup
 
 if ! git clone "$SKILLS_REPO" "$TMP_DIR"; then
   fail "failed to clone shared skills repo: $SKILLS_REPO"

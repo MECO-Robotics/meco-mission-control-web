@@ -2,8 +2,16 @@ import type { TaskPayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { requestItem } from "./common";
 
+function taskCommand(payload: Partial<TaskPayload>) {
+  const command = { ...payload };
+  delete command.taskDependencies;
+  delete command.taskBlockers;
+  delete command.targetRiskId;
+  return command;
+}
+
 export function createTask(payload: TaskPayload, onUnauthorized?: () => void) {
-  return requestItem<TaskRecord, TaskPayload>("/tasks", "POST", payload, onUnauthorized);
+  return requestItem<TaskRecord, Partial<TaskPayload>>("/tasks", "POST", taskCommand(payload), onUnauthorized);
 }
 
 export function updateTaskRecord(
@@ -14,7 +22,7 @@ export function updateTaskRecord(
   return requestItem<TaskRecord, Partial<TaskPayload>>(
     `/tasks/${taskId}`,
     "PATCH",
-    payload,
+    taskCommand(payload),
     onUnauthorized,
   );
 }

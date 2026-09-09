@@ -32,7 +32,7 @@ function createTask(id: string, title: string): TaskRecord {
     priority: "medium",
     status: "in-progress",
     planningState: "blocked",
-    dependencyIds: [],
+
     blockers: [],
     isBlocked: true,
     linkedManufacturingIds: [],

@@ -96,15 +96,9 @@ Do not duplicate platform validation rules in UI code except where immediate
 client-side feedback improves the workflow. The platform remains the source of
 truth for permissions, persistence, and schema validation.
 
-## CSS And File-Size Rules
+## Ownership and styles
 
-Follow the repository structure rules in `AGENTS.md` when editing source files:
-
-- Keep React and TypeScript implementation files below the repo size limits.
-- Treat large files as refactor candidates before adding more logic.
-- Prefer one primary component, hook, or helper module per file.
-- Split feature folders before they become difficult to scan.
-- Keep style blocks and CSS modules focused on the component or view they serve.
+Follow [CONTRIBUTING.md](../CONTRIBUTING.md). Keep one clear owner and explicit dependencies; delete redundant representations and forwarding layers. Split or merge modules according to responsibility and reuse, without file-size quotas. Keep styles with the view or component whose cascade they control.
 
 For UI work, match existing dense Mission Control patterns. Use restrained
 controls, stable dimensions, and predictable responsive behavior. Avoid adding

@@ -1,19 +1,11 @@
 import { useState } from "react";
 
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
-import { buildEmptyArtifactPayload, buildEmptyMaterialPayload, buildEmptyMechanismPayload, buildEmptyPartDefinitionPayload, buildEmptyPartInstancePayload, buildEmptySubsystemPayload, buildEmptyWorkstreamPayload } from "@/lib/appUtils/payloadBuilders";
-import type { ArtifactPayload, MaterialPayload, MechanismPayload, PartDefinitionPayload, PartInstancePayload, SubsystemPayload, WorkstreamPayload } from "@/types/payloads";
-import type { ArtifactModalMode, MaterialModalMode, MechanismModalMode, PartDefinitionModalMode, PartInstanceModalMode, SubsystemModalMode, WorkstreamModalMode } from "@/features/workspace/shared/model/workspaceModalModes";
+import { buildEmptyArtifactPayload, buildEmptyMechanismPayload, buildEmptyPartDefinitionPayload, buildEmptyPartInstancePayload, buildEmptySubsystemPayload, buildEmptyWorkstreamPayload } from "@/lib/appUtils/payloadBuilders";
+import type { ArtifactPayload, MechanismPayload, PartDefinitionPayload, PartInstancePayload, SubsystemPayload, WorkstreamPayload } from "@/types/payloads";
+import type { ArtifactModalMode, MechanismModalMode, PartDefinitionModalMode, PartInstanceModalMode, SubsystemModalMode, WorkstreamModalMode } from "@/features/workspace/shared/model/workspaceModalModes";
 
-export function useAppWorkspaceUiStateMaterialAndStructure() {
-  const [materialModalMode, setMaterialModalMode] = useState<MaterialModalMode>(null);
-  const [activeMaterialId, setActiveMaterialId] = useState<string | null>(null);
-  const [materialDraft, setMaterialDraft] = useState<MaterialPayload>(
-    buildEmptyMaterialPayload(),
-  );
-  const [isSavingMaterial, setIsSavingMaterial] = useState(false);
-  const [isDeletingMaterial, setIsDeletingMaterial] = useState(false);
-
+export function useAppWorkspaceUiStateStructure() {
   const [partDefinitionModalMode, setPartDefinitionModalMode] =
     useState<PartDefinitionModalMode>(null);
   const [activePartDefinitionId, setActivePartDefinitionId] = useState<string | null>(
@@ -69,7 +61,6 @@ export function useAppWorkspaceUiStateMaterialAndStructure() {
   return {
     activeArtifactId,
     activeMechanismId,
-    activeMaterialId,
     activePartDefinitionId,
     activePartInstanceId,
     activeSubsystemId,
@@ -77,18 +68,14 @@ export function useAppWorkspaceUiStateMaterialAndStructure() {
     artifactDraft,
     artifactModalMode,
     isDeletingArtifact,
-    isDeletingMaterial,
     isDeletingMechanism,
     isDeletingPartDefinition,
     isSavingArtifact,
-    isSavingMaterial,
     isSavingMechanism,
     isSavingPartDefinition,
     isSavingPartInstance,
     isSavingSubsystem,
     isSavingWorkstream,
-    materialDraft,
-    materialModalMode,
     mechanismDraft,
     mechanismModalMode,
     partDefinitionDraft,
@@ -97,7 +84,6 @@ export function useAppWorkspaceUiStateMaterialAndStructure() {
     partInstanceModalMode,
     setActiveArtifactId,
     setActiveMechanismId,
-    setActiveMaterialId,
     setActivePartDefinitionId,
     setActivePartInstanceId,
     setActiveSubsystemId,
@@ -105,18 +91,14 @@ export function useAppWorkspaceUiStateMaterialAndStructure() {
     setArtifactDraft,
     setArtifactModalMode,
     setIsDeletingArtifact,
-    setIsDeletingMaterial,
     setIsDeletingMechanism,
     setIsDeletingPartDefinition,
     setIsSavingArtifact,
-    setIsSavingMaterial,
     setIsSavingMechanism,
     setIsSavingPartDefinition,
     setIsSavingPartInstance,
     setIsSavingSubsystem,
     setIsSavingWorkstream,
-    setMaterialDraft,
-    setMaterialModalMode,
     setMechanismDraft,
     setMechanismModalMode,
     setPartDefinitionDraft,

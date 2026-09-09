@@ -10,23 +10,47 @@ import {
   requestApi,
 } from "./core/request";
 import {
-  clearWebSessionState,
+  beginSessionChange,
+  getSessionGeneration,
   hasPendingSignOut,
   setPendingSignOut,
-  purgeLegacySessionTokens,
   setSessionCsrfToken,
 } from "./core/sessionStorage";
 
-function rememberWebSession(session: SessionResponse) {
-  setPendingSignOut(false);
-  setSessionCsrfToken(session.csrfToken);
-  return session;
+function staleSessionResponse() {
+  return Object.assign(new Error("Session changed while the request was pending."), { name: "AbortError" });
+}
+
+let cookieMutationTail: Promise<unknown> = Promise.resolve();
+
+function mutateSessionCookie<T>(operation: () => Promise<T>): Promise<T> {
+  const result = cookieMutationTail.then(operation, operation);
+  cookieMutationTail = result.catch(() => undefined);
+  return result;
+}
+
+async function signIn(path: string, body: unknown) {
+  const generation = beginSessionChange();
+  try {
+    const session = await mutateSessionCookie(async () => {
+      const result = await postJson<SessionResponse>(path, body);
+      // The browser has already installed this response cookie. The next queued
+      // logout must use its matching CSRF token even if its UI owner is stale.
+      setSessionCsrfToken(result.csrfToken);
+      return result;
+    });
+    if (generation !== getSessionGeneration()) throw staleSessionResponse();
+    setPendingSignOut(false);
+    setSessionCsrfToken(session.csrfToken);
+    return session;
+  } catch (error) {
+    if (generation !== getSessionGeneration()) throw staleSessionResponse();
+    throw error;
+  }
 }
 
 export function exchangeGoogleCredential(credential: string) {
-  return postJson<SessionResponse>("/auth/web/google", { credential }).then(
-    rememberWebSession,
-  );
+  return signIn("/auth/web/google", { credential });
 }
 
 export function requestEmailSignInCode(email: string) {
@@ -36,20 +60,15 @@ export function requestEmailSignInCode(email: string) {
 }
 
 export function verifyEmailSignInCode(email: string, code: string) {
-  return postJson<SessionResponse>("/auth/web/email/verify", {
-    email,
-    code,
-  }).then(rememberWebSession);
+  return signIn("/auth/web/email/verify", { email, code });
 }
 
 export function requestDevBypassSignIn(role: DevBypassRole = "student") {
-  return postJson<SessionResponse>("/auth/web/dev-bypass", { role }).then(
-    rememberWebSession,
-  );
+  return signIn("/auth/web/dev-bypass", { role });
 }
 
 export async function restoreWebSession() {
-  purgeLegacySessionTokens();
+  const generation = getSessionGeneration();
   const assertRestorable = () => {
     if (hasPendingSignOut()) {
       throw Object.assign(new Error("Explicit sign-in is required after an unconfirmed sign-out."), { statusCode: 401 });
@@ -57,13 +76,14 @@ export async function restoreWebSession() {
   };
   assertRestorable();
   const session = await fetchWebSession();
+  if (generation !== getSessionGeneration()) throw staleSessionResponse();
   assertRestorable();
   setSessionCsrfToken(session.csrfToken);
   return session;
 }
 
 export function revokeWebSession() {
-  return requestApi<{ ok: boolean }>("/auth/web/logout", {
+  return mutateSessionCookie(() => requestApi<{ ok: boolean }>("/auth/web/logout", {
     keepalive: true,
     method: "POST",
   }).catch((error) => {
@@ -72,21 +92,20 @@ export function revokeWebSession() {
     }
 
     throw error;
-  });
+  }));
 }
 
 export async function validateSession(): Promise<boolean> {
   try {
-    await restoreWebSession();
+    await fetchWebSession();
     return true;
   } catch (error) {
     if (isApiErrorLike(error) && error.statusCode === 401) {
-      clearWebSessionState();
       return false;
     }
 
     // Keep the current session during transient network/server failures. The
-    // request layer still expires sessions immediately on explicit 401s.
+    // current session owner handles explicit 401s.
     return true;
   }
 }

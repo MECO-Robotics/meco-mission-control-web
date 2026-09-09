@@ -11,75 +11,101 @@ import type { PartInstanceRecord } from "@/types/recordsInventory";
 
 export type PartInstanceActions = ReturnType<typeof usePartInstanceActions>;
 
-export function usePartInstanceActions(model: AppWorkspaceModel) {
+export function usePartInstanceActions({
+  activePartInstanceId,
+  bootstrap,
+  handleUnauthorized,
+  loadWorkspace,
+  partInstanceDraft,
+  partInstanceModalMode,
+  setActivePartInstanceId,
+  setBootstrap,
+  setDataMessage,
+  setIsSavingPartInstance,
+  setPartInstanceDraft,
+  setPartInstanceModalMode,
+}: {
+  activePartInstanceId: AppWorkspaceModel["activePartInstanceId"];
+  bootstrap: AppWorkspaceModel["bootstrap"];
+  handleUnauthorized: AppWorkspaceModel["handleUnauthorized"];
+  loadWorkspace: AppWorkspaceModel["loadWorkspace"];
+  partInstanceDraft: AppWorkspaceModel["partInstanceDraft"];
+  partInstanceModalMode: AppWorkspaceModel["partInstanceModalMode"];
+  setActivePartInstanceId: AppWorkspaceModel["setActivePartInstanceId"];
+  setBootstrap: AppWorkspaceModel["setBootstrap"];
+  setDataMessage: AppWorkspaceModel["setDataMessage"];
+  setIsSavingPartInstance: AppWorkspaceModel["setIsSavingPartInstance"];
+  setPartInstanceDraft: AppWorkspaceModel["setPartInstanceDraft"];
+  setPartInstanceModalMode: AppWorkspaceModel["setPartInstanceModalMode"];
+}) {
   const openCreatePartInstanceModal = useCallback((mechanism: MechanismRecord) => {
-    model.setActivePartInstanceId(null);
-    model.setPartInstanceDraft(
-      buildEmptyPartInstancePayload(model.bootstrap, {
+    setActivePartInstanceId(null);
+    setPartInstanceDraft(
+      buildEmptyPartInstancePayload(bootstrap, {
         subsystemId: mechanism.subsystemId,
         mechanismId: mechanism.id,
       }),
     );
-    model.setPartInstanceModalMode("create");
-  }, [model]);
+    setPartInstanceModalMode("create");
+  }, [bootstrap, setActivePartInstanceId, setPartInstanceDraft, setPartInstanceModalMode]);
 
   const openEditPartInstanceModal = useCallback((partInstance: PartInstanceRecord) => {
-    model.setActivePartInstanceId(partInstance.id);
-    model.setPartInstanceDraft(partInstanceToPayload(partInstance));
-    model.setPartInstanceModalMode("edit");
-  }, [model]);
+    setActivePartInstanceId(partInstance.id);
+    setPartInstanceDraft(partInstanceToPayload(partInstance));
+    setPartInstanceModalMode("edit");
+  }, [setActivePartInstanceId, setPartInstanceDraft, setPartInstanceModalMode]);
 
   const closePartInstanceModal = useCallback(() => {
-    model.setPartInstanceModalMode(null);
-    model.setActivePartInstanceId(null);
-  }, [model]);
+    setPartInstanceModalMode(null);
+    setActivePartInstanceId(null);
+  }, [setActivePartInstanceId, setPartInstanceModalMode]);
 
   const handlePartInstanceSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
-    model.setIsSavingPartInstance(true);
-    model.setDataMessage(null);
+    setIsSavingPartInstance(true);
+    setDataMessage(null);
 
     try {
-      const selectedPartDefinition = model.bootstrap.partDefinitions.find(
-        (partDefinition) => partDefinition.id === model.partInstanceDraft.partDefinitionId,
+      const selectedPartDefinition = bootstrap.partDefinitions.find(
+        (partDefinition) => partDefinition.id === partInstanceDraft.partDefinitionId,
       );
 
       if (!selectedPartDefinition) {
-        model.setDataMessage("Please choose a real part from the Parts tab before saving the part instance.");
+        setDataMessage("Please choose a real part from the Parts tab before saving the part instance.");
         return;
       }
 
-      if (!model.partInstanceDraft.mechanismId) {
-        model.setDataMessage("Please choose a mechanism before saving the part instance.");
+      if (!partInstanceDraft.mechanismId) {
+        setDataMessage("Please choose a mechanism before saving the part instance.");
         return;
       }
 
       const payload: PartInstancePayload = {
-        ...model.partInstanceDraft,
-        name: model.partInstanceDraft.name.trim(),
+        ...partInstanceDraft,
+        name: partInstanceDraft.name.trim(),
       };
 
-      if (model.partInstanceModalMode === "create") {
-        await createPartInstanceRecord(payload, model.handleUnauthorized);
-      } else if (model.partInstanceModalMode === "edit" && model.activePartInstanceId) {
+      if (partInstanceModalMode === "create") {
+        await createPartInstanceRecord(payload, handleUnauthorized);
+      } else if (partInstanceModalMode === "edit" && activePartInstanceId) {
         await updatePartInstanceRecord(
-          model.activePartInstanceId,
+          activePartInstanceId,
           payload,
-          model.handleUnauthorized,
+          handleUnauthorized,
         );
       }
 
-      await model.loadWorkspace();
+      await loadWorkspace();
       closePartInstanceModal();
     } catch (error) {
-      model.setDataMessage(toErrorMessage(error));
+      setDataMessage(toErrorMessage(error));
     } finally {
-      model.setIsSavingPartInstance(false);
+      setIsSavingPartInstance(false);
     }
-  }, [closePartInstanceModal, model]);
+  }, [activePartInstanceId, bootstrap, closePartInstanceModal, handleUnauthorized, loadWorkspace, partInstanceDraft, partInstanceModalMode, setDataMessage, setIsSavingPartInstance]);
 
   const removePartInstanceFromMechanism = useCallback(async (partInstanceId: string) => {
-    const previousPartInstance = model.bootstrap.partInstances.find(
+    const previousPartInstance = bootstrap.partInstances.find(
       (partInstance) => partInstance.id === partInstanceId,
     );
     if (!previousPartInstance || !previousPartInstance.mechanismId) {
@@ -91,7 +117,7 @@ export function usePartInstanceActions(model: AppWorkspaceModel) {
       mechanismId: null,
     };
 
-    model.setBootstrap((current) => ({
+    setBootstrap((current) => ({
       ...current,
       partInstances: current.partInstances.map((partInstance) =>
         partInstance.id === partInstanceId ? optimisticPartInstance : partInstance,
@@ -102,10 +128,10 @@ export function usePartInstanceActions(model: AppWorkspaceModel) {
       const updatedPartInstance = await updatePartInstanceRecord(
         partInstanceId,
         { mechanismId: null },
-        model.handleUnauthorized,
+        handleUnauthorized,
       );
 
-      model.setBootstrap((current) => ({
+      setBootstrap((current) => ({
         ...current,
         partInstances: current.partInstances.map((partInstance) =>
           partInstance.id === partInstanceId ? { ...partInstance, ...updatedPartInstance } : partInstance,
@@ -113,16 +139,16 @@ export function usePartInstanceActions(model: AppWorkspaceModel) {
       }));
       return true;
     } catch (error) {
-      model.setBootstrap((current) => ({
+      setBootstrap((current) => ({
         ...current,
         partInstances: current.partInstances.map((partInstance) =>
           partInstance.id === partInstanceId ? previousPartInstance : partInstance,
         ),
       }));
-      model.setDataMessage(toErrorMessage(error));
+      setDataMessage(toErrorMessage(error));
       return false;
     }
-  }, [model]);
+  }, [bootstrap, handleUnauthorized, setBootstrap, setDataMessage]);
 
   return {
     closePartInstanceModal,

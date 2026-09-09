@@ -1,4 +1,4 @@
-import { hasPendingSignOut, setPendingSignOut } from "@/lib/auth/core/sessionStorage";
+import { clearWebSessionState, getSessionCsrfToken, setSessionCsrfToken, hasPendingSignOut, setPendingSignOut } from "@/lib/auth/core/sessionStorage";
 /// <reference types="jest" />
 
 import {
@@ -79,4 +79,25 @@ describe("web sign out", () => {
     expect(onUnconfirmed).toHaveBeenCalledWith(UNCONFIRMED_SIGN_OUT_MESSAGE);
     expect(hasPendingSignOut()).toBe(true);
   });
+});
+
+it("retains CSRF for logout and does not clear a newer login after delayed logout", async () => {
+  let finish!: () => void;
+  setSessionCsrfToken("logout-csrf");
+  revokeWebSessionMock.mockImplementation(() => {
+    expect(getSessionCsrfToken()).toBe("logout-csrf");
+    return new Promise<void>((resolve) => { finish = resolve; });
+  });
+  const clearLocal = jest.fn();
+  const warn = jest.fn();
+  const signingOut = revokeThenClearWebSession(clearLocal, warn);
+  clearWebSessionState();
+  setSessionCsrfToken("new-login");
+  setPendingSignOut(false);
+  finish();
+  await expect(signingOut).resolves.toBe(false);
+  expect(clearLocal).not.toHaveBeenCalled();
+  expect(warn).not.toHaveBeenCalled();
+  expect(getSessionCsrfToken()).toBe("new-login");
+  clearWebSessionState();
 });

@@ -104,7 +104,7 @@ test("trusted CI identity and revision checks reject unrelated or stale runs", (
 
 test("trusted CI digest accepts the finalized workflow and rejects PR edits", async () => {
   const workflow = await readFile(".github/workflows/ci.yml");
-  assert.equal(createHash("sha256").update(workflow).digest("hex"), trustedCiWorkflowSha256);
+  assert.equal(createHash("sha256").update(workflow).digest("hex"), "b976f372bb4b5cfc0e8165c1ed99c6de2c85ecfdea497bfbf0e8c48d714f7af7");
   assert.doesNotThrow(() => assertTrustedCiWorkflow(workflow));
   assert.throws(
     () => assertTrustedCiWorkflow(Buffer.concat([workflow, Buffer.from("# attacker edit\n")])),
@@ -115,23 +115,16 @@ test("trusted CI digest accepts the finalized workflow and rejects PR edits", as
 test("pull-request workflows expose neither repository secrets nor write tokens", async () => {
   const ci = await readFile(".github/workflows/ci.yml", "utf8");
   const skills = await readFile(".github/workflows/check-skills.yml", "utf8");
-  const autoMerge = await readFile(".github/workflows/codex-automerge.yml", "utf8");
   assert.doesNotMatch(ci, /secrets\.|MECO_PLATFORM_CONTRACT_READ_TOKEN/);
   assert.doesNotMatch(skills, /secrets\.|SKILLS_REPO_(TOKEN|DEPLOY_KEY)/);
   assert.doesNotMatch(ci, /^\s+[a-z-]+:\s*write\s*$/m);
   assert.doesNotMatch(skills, /^\s+[a-z-]+:\s*write\s*$/m);
-  assert.doesNotMatch(autoMerge, /^  pull_request:/m);
-  assert.match(autoMerge, /^  pull_request_target:/m);
-  assert.match(autoMerge, /getCombinedStatusForRef/);
-  assert.match(autoMerge, /status\.context === 'merge-requirements'/);
-  assert.match(autoMerge, /actions\/runs\/\$\{trustedRunId\}/);
 });
 
 test("all GitHub Actions are pinned and production SSH trust is pre-provisioned", async () => {
   const workflowFiles = [
     ".github/workflows/check-skills.yml",
     ".github/workflows/ci.yml",
-    ".github/workflows/codex-automerge.yml",
     ".github/workflows/deploy-vps.yml",
     ".github/workflows/merge-requirements.yml",
   ];
@@ -198,25 +191,4 @@ test("script CSP contains no inline or eval execution allowances", async () => {
   assert.doesNotThrow(() => assertTrustedCiWorkflowSha256("2660805581abe2cffbb85d3db98a99fa192b20d23624ffa186da04d9c943c894"));
   assert.doesNotThrow(() => assertTrustedCiWorkflowSha256("5686aa7904ff3e24ff56cb1941572511d19dca8e4286c0a14502b7f0ec762fd5"));
   assert.throws(() => assertTrustedCiWorkflowSha256("5686aa7904ff3e24ff56cb1941572511d19dca8e4286c0a14502b7f0ec762fd6"), /digest mismatch/);
-});
-
- test("automerge resolver rejects SHA-scoped statuses shared by multiple PRs", async () => {
-  const workflow = await readFile(".github/workflows/codex-automerge.yml", "utf8");
-  const prefix = workflow.split("          script: |\n")[1]
-    .split("            async function maybeEnableAutoMerge")[0];
-  const resolve = new (Object.getPrototypeOf(async function () {}).constructor)(
-    "github", "context", "core", `${prefix} return [...pullRequestNumbers];`,
-  );
-  const context = { serverUrl: "https://github.com", repo: { owner: "org", repo: "web" }, eventName: "workflow_run",
-    payload: { workflow_run: { id: 42, conclusion: "success", pull_requests: [] } } };
-  const github = {
-    rest: { pulls: { list: {} }, repos: { getCombinedStatusForRef: async () => ({ data: {
-      statuses: [{ context: "merge-requirements", state: "success", target_url: "https://github.com/org/web/actions/runs/42" }],
-    } }) } },
-    paginate: async () => [{ number: 1, head: { sha: "same-sha" }, base: { ref: "development" } },
-      { number: 2, head: { sha: "same-sha" }, base: { ref: "main" } }],
-  };
-  await assert.rejects(resolve(github, context, { info() {} }), /Ambiguous pull request/);
-  github.paginate = async () => [{ number: 1, head: { sha: "same-sha" } }];
-  assert.deepEqual(await resolve(github, context, { info() {} }), [1]);
 });

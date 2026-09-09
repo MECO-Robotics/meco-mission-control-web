@@ -95,7 +95,7 @@ function createBootstrap(): BootstrapPayload {
         dueDate: "2026-05-03",
         priority: "medium",
         status: "complete",
-        dependencyIds: [],
+
         blockers: [],
         linkedManufacturingIds: [],
         linkedPurchaseIds: [],

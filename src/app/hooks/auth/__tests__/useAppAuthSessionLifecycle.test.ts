@@ -1,9 +1,12 @@
 /// <reference types="jest" />
 
-import { restoreStoredSession } from "../useAppAuthSessionLifecycle";
-import { restoreWebSession } from "@/lib/auth/session";
-import { clearWebSessionState } from "@/lib/auth/core/sessionStorage";
+import { useEffect } from "react";
+import { restoreStoredSession, useAppAuthSessionValidation } from "../useAppAuthSessionLifecycle";
+import { restoreWebSession, validateSession } from "@/lib/auth/session";
+import { clearWebSessionState, getSessionGeneration } from "@/lib/auth/core/sessionStorage";
 import type { SessionUser } from "@/lib/auth/types";
+
+jest.mock("react", () => ({ ...jest.requireActual("react"), useEffect: jest.fn() }));
 
 jest.mock("@/lib/auth/session", () => ({
   restoreWebSession: jest.fn(),
@@ -12,6 +15,7 @@ jest.mock("@/lib/auth/session", () => ({
 
 jest.mock("@/lib/auth/core/sessionStorage", () => ({
   clearWebSessionState: jest.fn(),
+  getSessionGeneration: jest.fn(() => 0),
 }));
 
 jest.mock("@/app/hooks/auth/useAppAuthSessionConfig", () => ({
@@ -87,4 +91,30 @@ describe("restoreStoredSession", () => {
 
     expect(setSessionUser).not.toHaveBeenCalled();
   });
+});
+
+it("does not expire a new login when an old validation poll returns unauthorized", async () => {
+  const previousWindow = globalThis.window;
+  let tick!: () => void;
+  let cleanup!: () => void;
+  let finish!: (valid: boolean) => void;
+  const expireSession = jest.fn();
+  jest.mocked(getSessionGeneration).mockReturnValue(1);
+  jest.mocked(validateSession).mockImplementation(() => new Promise<boolean>((resolve) => { finish = resolve; }));
+  jest.mocked(useEffect).mockImplementation((effect) => { cleanup = effect() as () => void; });
+  Object.defineProperty(globalThis, "window", { configurable: true, value: {
+    setInterval: (callback: () => void) => { tick = callback; return 1; }, clearInterval: jest.fn(),
+  } });
+  try {
+    useAppAuthSessionValidation({ enforcedAuthConfig: {} as never, expireSession, sessionUser: {} as SessionUser });
+    tick();
+    jest.mocked(getSessionGeneration).mockReturnValue(2);
+    finish(false);
+    await Promise.resolve();
+    expect(expireSession).not.toHaveBeenCalled();
+    cleanup();
+  } finally {
+    Object.defineProperty(globalThis, "window", { configurable: true, value: previousWindow });
+    jest.mocked(getSessionGeneration).mockReturnValue(0);
+  }
 });

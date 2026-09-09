@@ -1,3 +1,4 @@
+import { useMaterialEditor } from "@/app/workspaceCatalog/materialActions";
 import { useEffect, useRef } from "react";
 import { useAppWorkspaceDerived } from "@/app/hooks/useAppWorkspaceDerived";
 import { useAppWorkspaceLoader } from "@/app/hooks/useAppWorkspaceLoader";
@@ -15,6 +16,7 @@ export type AppWorkspaceModel = AppWorkspaceState &
   AppWorkspaceDerived &
   AppWorkspaceLoader &
   ReturnType<typeof useInteractiveTutorial> & {
+    materialEditor: ReturnType<typeof useMaterialEditor>;
     interactiveTutorialChapters: ReturnType<typeof useInteractiveTutorial>["chapterStartOptions"];
   };
 
@@ -25,6 +27,7 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     ...derived,
   });
   const { loadWorkspace } = loader;
+  const materialEditor = useMaterialEditor({ handleUnauthorized: loader.handleUnauthorized, loadWorkspace, setDataMessage: state.setDataMessage });
   const autoLoadedWorkspaceKeyRef = useRef<string | null>(null);
   const {
     authBooting,
@@ -131,8 +134,8 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     activeTimelineTaskDetailId: state.activeTimelineTaskDetailId,
     taskModalMode: state.taskModalMode,
     activeTaskId: state.activeTaskId,
-    materialModalMode: state.materialModalMode,
-    activeMaterialId: state.activeMaterialId,
+    materialModalMode: materialEditor.materialModalMode,
+    activeMaterialId: materialEditor.activeMaterialId,
     subsystemModalMode: state.subsystemModalMode,
     activeSubsystemId: state.activeSubsystemId,
     mechanismModalMode: state.mechanismModalMode,
@@ -147,8 +150,9 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     ...state,
     ...derived,
     ...loader,
+    materialEditor,
     ...interactiveTutorial,
     interactiveTutorialChapters: interactiveTutorial.chapterStartOptions,
-    isWorkspaceModalOpen: derived.isWorkspaceModalOpen || interactiveTutorial.isInteractiveTutorialActive,
+    isWorkspaceModalOpen: derived.isWorkspaceModalOpen || materialEditor.materialModalMode !== null || interactiveTutorial.isInteractiveTutorialActive,
   };
 }
