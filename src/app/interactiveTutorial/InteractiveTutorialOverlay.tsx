@@ -1,3 +1,5 @@
+import { createPortal } from "react-dom";
+import { useModalPortalTarget } from "@/components/useModalPortalTarget";
 import type { CSSProperties } from "react";
 
 import type { InteractiveTutorialOverlayProps } from "./interactiveTutorialTypes";
@@ -29,6 +31,7 @@ export function InteractiveTutorialOverlay({
   stepError,
   stepNumber,
 }: InteractiveTutorialOverlayProps) {
+  const portalTarget = useModalPortalTarget();
   const spotlightBounds = spotlightRect
     ? {
         top: Math.max(0, spotlightRect.top),
@@ -40,7 +43,7 @@ export function InteractiveTutorialOverlay({
 
   const dimFallback = toDimStyle(spotlightBounds, spotlightRect);
 
-  return (
+  const overlay = (
     <aside aria-label="Interactive tutorial" className="interactive-tutorial-overlay" role="dialog">
       {spotlightRect && spotlightBounds ? (
         <>
@@ -155,4 +158,5 @@ export function InteractiveTutorialOverlay({
       </section>
     </aside>
   );
+  return portalTarget ? createPortal(overlay, portalTarget) : overlay;
 }

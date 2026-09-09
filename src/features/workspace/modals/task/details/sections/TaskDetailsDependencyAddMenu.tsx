@@ -217,7 +217,7 @@ export function TaskDetailsDependencyAddMenu({
               </div>
             ) : null}
           </div>,
-          document.body,
+          buttonRef.current?.closest("dialog") ?? document.body,
         )
       ) : null}
     </span>

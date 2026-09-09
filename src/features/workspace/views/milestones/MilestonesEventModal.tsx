@@ -1,3 +1,4 @@
+import { ModalDialog } from "@/components/ModalDialog";
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 import { createPortal } from "react-dom";
 
@@ -96,18 +97,11 @@ export function MilestonesMilestoneModal({
   }
 
   return createPortal(
-    <div
-      className="modal-scrim"
-      onClick={onClose}
-      role="presentation"
-      style={{ zIndex: 2050 }}
-    >
+    <ModalDialog label="Add milestone" onClose={onClose} dismissOnBackdrop>
       <section
-        aria-modal="true"
         className="modal-card task-details-modal"
         data-tutorial-target="milestone-create-modal"
         onClick={(milestone) => milestone.stopPropagation()}
-        role="dialog"
         style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
       >
         <div className="panel-header compact-header task-details-header">
@@ -158,7 +152,7 @@ export function MilestonesMilestoneModal({
           />
         </form>
       </section>
-    </div>,
+    </ModalDialog>,
     modalPortalTarget,
   );
 }

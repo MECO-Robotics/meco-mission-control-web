@@ -1,3 +1,4 @@
+import { ModalDialog } from "@/components/ModalDialog";
 import type { FormEvent, ReactNode } from "react";
 
 type StructureModalShellProps = {
@@ -38,8 +39,8 @@ export function StructureModalShell({
   title,
 }: StructureModalShellProps) {
   return (
-    <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
-      <section aria-modal="true" className="modal-card" role="dialog" style={modalCardStyle}>
+    <ModalDialog label={title} onClose={onClose}>
+      <section  className="modal-card"  style={modalCardStyle}>
         <div className="panel-header compact-header">
           <div>
             <p className="eyebrow" style={eyebrowStyle}>
@@ -56,6 +57,6 @@ export function StructureModalShell({
           {children}
         </form>
       </section>
-    </div>
+    </ModalDialog>
   );
 }

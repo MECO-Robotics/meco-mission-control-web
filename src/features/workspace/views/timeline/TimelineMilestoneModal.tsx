@@ -1,3 +1,4 @@
+import { ModalDialog } from "@/components/ModalDialog";
 import React from "react";
 import { createPortal } from "react-dom";
 import type { TimelineMilestoneModalProps } from "./timelineMilestoneModalTypes";
@@ -37,17 +38,10 @@ export const TimelineMilestoneModal: React.FC<TimelineMilestoneModalProps> = ({
   const handleClose = mode === "edit" ? onCancelEdit : onClose;
 
   return createPortal(
-    <div
-      className="modal-scrim"
-      onClick={handleClose}
-      role="presentation"
-      style={{ zIndex: 2050 }}
-    >
+    <ModalDialog label="Milestone editor" onClose={handleClose} dismissOnBackdrop>
       <section
-        aria-modal="true"
         className="modal-card task-details-modal"
         onClick={(milestone) => milestone.stopPropagation()}
-        role="dialog"
         style={{
           background: "var(--bg-panel)",
           border: "1px solid var(--border-base)",
@@ -85,7 +79,7 @@ export const TimelineMilestoneModal: React.FC<TimelineMilestoneModalProps> = ({
           />
         </form>
       </section>
-    </div>,
+    </ModalDialog>,
     portalTarget,
   );
 };

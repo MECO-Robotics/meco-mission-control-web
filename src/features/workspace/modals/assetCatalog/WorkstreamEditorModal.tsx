@@ -1,3 +1,4 @@
+import { ModalDialog } from "@/components/ModalDialog";
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { WorkstreamPayload } from "@/types/payloads";
@@ -27,11 +28,9 @@ export function WorkstreamEditorModal({
   workstreamModalMode,
 }: WorkstreamEditorModalProps) {
   return (
-    <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
+    <ModalDialog label="Workstream editor" onClose={closeWorkstreamModal}>
       <section
-        aria-modal="true"
         className="modal-card"
-        role="dialog"
         style={{
           background: "var(--bg-panel)",
           border: "1px solid var(--border-base)",
@@ -168,6 +167,6 @@ export function WorkstreamEditorModal({
           </div>
         </form>
       </section>
-    </div>
+    </ModalDialog>
   );
 }

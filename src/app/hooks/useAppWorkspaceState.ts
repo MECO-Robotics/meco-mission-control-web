@@ -168,10 +168,6 @@ export function useAppWorkspaceState() {
     isSidebarOverlay,
     toggleSidebar,
     setDataMessage,
-    isAddSeasonPopupOpen: workspaceUiState.isAddSeasonPopupOpen,
-    setIsAddSeasonPopupOpen: workspaceUiState.setIsAddSeasonPopupOpen,
-    robotProjectModalMode: workspaceUiState.robotProjectModalMode,
-    setRobotProjectModalMode: workspaceUiState.setRobotProjectModalMode,
   });
 
   return {

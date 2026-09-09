@@ -1,3 +1,4 @@
+import { ModalDialog } from "@/components/ModalDialog";
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TestResultPayload } from "@/types/payloads";
@@ -31,11 +32,9 @@ export function MilestoneReportEditorModal({
     selectedMilestone?.projectIds[0] ?? bootstrap.projects[0]?.id ?? null;
 
   return (
-    <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
+    <ModalDialog label="Add milestone report" onClose={closeMilestoneReportModal}>
       <section
-        aria-modal="true"
         className="modal-card task-details-modal"
-        role="dialog"
         style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
       >
         <div className="panel-header compact-header task-details-header">
@@ -180,6 +179,6 @@ export function MilestoneReportEditorModal({
           </div>
         </form>
       </section>
-    </div>
+    </ModalDialog>
   );
 }
