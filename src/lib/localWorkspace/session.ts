@@ -66,7 +66,8 @@ async function initialize(workspace: Workspace, loadSeed: () => Promise<Bootstra
 export function resetLocalDemo() {
   // Remove first: storage failure must not report a successful reset.
   window.sessionStorage.removeItem(STORAGE_KEY);
-  active = { mode: "demo", snapshot: seed ? structuredClone(seed) : null, ready: null };
+  seed = null;
+  active = { mode: "demo", snapshot: null, ready: null };
   beforeTutorial = null;
   changed();
 }
