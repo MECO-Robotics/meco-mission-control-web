@@ -1,3 +1,5 @@
+import { getLocalWorkspaceGeneration, getLocalWorkspaceMode, localMediaUrl, requestLocalWorkspace, shouldHandleLocally } from "@/lib/localWorkspace/session";
+import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MediaUploadResponse, SessionUser } from "../types";
 import { getSessionGeneration } from "./sessionStorage";
 import { buildCookieRequestOptions } from "./requestOptions";
@@ -71,10 +73,24 @@ export function requestApi<T>(
   options: RequestInit = {},
   onUnauthorized?: () => void,
 ) {
+  if (shouldHandleLocally(path)) {
+    return requestLocalWorkspace<T>(path, options, () =>
+      fetch(buildApiUrl("/bootstrap?seasonId=default-season"), { credentials: "omit" })
+        .then((response) => readJson<BootstrapPayload>(response)),
+    );
+  }
   const generation = getSessionGeneration();
+  const workspaceGeneration = getLocalWorkspaceGeneration();
+  const assertCurrentWorkspace = () => {
+    if (!path.startsWith("/auth/") && workspaceGeneration !== getLocalWorkspaceGeneration()) {
+      throw Object.assign(new Error("The workspace changed while this request was pending."), { name: "AbortError" });
+    }
+  };
   return fetch(buildApiUrl(path), buildCookieRequestOptions(options))
     .then((response) => readJson<T>(response))
+    .then((payload) => { assertCurrentWorkspace(); return payload; })
     .catch((error) => {
+      assertCurrentWorkspace();
       if (error instanceof ApiError && error.statusCode === 401 && generation === getSessionGeneration()) {
         onUnauthorized?.();
       }
@@ -83,6 +99,7 @@ export function requestApi<T>(
 }
 
 export function postJson<T>(path: string, body: unknown) {
+  if (shouldHandleLocally(path)) return requestApi<T>(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
   return fetch(
     buildApiUrl(path),
     buildCookieRequestOptions(
@@ -105,6 +122,7 @@ export async function requestUpload(
   file: File,
   onUnauthorized?: () => void,
 ) {
+  if (getLocalWorkspaceMode()) return localMediaUrl(file);
   const presignedUpload = await requestApi<MediaUploadResponse>(
     endpoint,
     {

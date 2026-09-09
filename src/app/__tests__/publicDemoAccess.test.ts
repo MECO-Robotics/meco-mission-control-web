@@ -26,14 +26,14 @@ describe("isPublicDemoSeasonAccess", () => {
     ).toBe(true);
   });
 
-  it("keeps auth enforced outside the public demo scope", () => {
+  it("allows local demo seasons without treating them as authenticated workspaces", () => {
     expect(
       isPublicDemoSeasonAccess({
         enforcedAuthConfig,
         selectedSeasonId: "season-2030",
         sessionUser: null,
       }),
-    ).toBe(false);
+    ).toBe(true);
     expect(
       isPublicDemoSeasonAccess({
         enforcedAuthConfig: null,

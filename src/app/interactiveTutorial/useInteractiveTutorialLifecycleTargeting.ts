@@ -20,7 +20,6 @@ export function useInteractiveTutorialLifecycleTargeting({
 }: UseInteractiveTutorialLifecycleTargetingOptions) {
   const [isTargetReady, setIsTargetReady] = useState(false);
   const [spotlightRect, setSpotlightRect] = useState<SpotlightRect>(null);
-  const cardRef = useRef<HTMLElement | null>(null);
   const targetRef = useRef<HTMLElement | null>(null);
   const stepBaselineLabelRef = useRef<string | null>(null);
 
@@ -82,6 +81,8 @@ export function useInteractiveTutorialLifecycleTargeting({
         return;
       }
 
+      if (target === targetRef.current) return;
+      resizeObserver?.disconnect();
       target.scrollIntoView({
         behavior: attempts > 0 ? "smooth" : "auto",
         block: "center",
@@ -99,11 +100,15 @@ export function useInteractiveTutorialLifecycleTargeting({
     };
 
     setHighlightTarget();
+    // Editors, scope popups, and interval switches replace their DOM targets.
+    const mutationObserver = new MutationObserver(setHighlightTarget);
+    mutationObserver.observe(document.body, { childList: true, subtree: true });
 
     return () => {
       if (frameId !== null) {
         window.cancelAnimationFrame(frameId);
       }
+      mutationObserver.disconnect();
       resizeObserver?.disconnect();
       window.removeEventListener("resize", updateSpotlightRect);
       window.removeEventListener("scroll", updateSpotlightRect, true);
@@ -114,7 +119,6 @@ export function useInteractiveTutorialLifecycleTargeting({
   }, [currentStep]);
 
   return {
-    cardRef,
     isTargetReady,
     spotlightRect,
     stepBaselineLabelRef,

@@ -39,25 +39,6 @@ export function useInteractiveTutorialCoreActionsStart({
         return;
       }
 
-      if (!returnState) {
-        onActivateTutorial(
-          buildInteractiveTutorialReturnState({
-            activeTab,
-            taskView,
-            riskManagementView,
-            worklogsView,
-            reportsView,
-            manufacturingView,
-            inventoryView,
-            selectedSeasonId,
-            selectedProjectId,
-          }),
-        );
-      }
-      if (!bootstrapSnapshot) {
-        setBootstrapSnapshot(structuredClone(bootstrap));
-      }
-
       setDataMessage(null);
       try {
         if (!returnState) {
@@ -75,6 +56,25 @@ export function useInteractiveTutorialCoreActionsStart({
       } catch (error) {
         setDataMessage(toErrorMessage(error));
         return;
+      }
+
+      if (!returnState) {
+        onActivateTutorial(
+          buildInteractiveTutorialReturnState({
+            activeTab,
+            taskView,
+            riskManagementView,
+            worklogsView,
+            reportsView,
+            manufacturingView,
+            inventoryView,
+            selectedSeasonId,
+            selectedProjectId,
+          }),
+        );
+      }
+      if (!bootstrapSnapshot) {
+        setBootstrapSnapshot(structuredClone(bootstrap));
       }
 
       startTransition(() => {

@@ -7,8 +7,7 @@ export function isPublicDemoSeasonAccess(args: {
 }) {
   return Boolean(
     args.enforcedAuthConfig &&
-      !args.sessionUser &&
-      (args.selectedSeasonId === null || args.selectedSeasonId === PUBLIC_DEMO_SEASON_ID),
+      !args.sessionUser,
   );
 }
 
