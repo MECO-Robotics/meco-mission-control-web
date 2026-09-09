@@ -1,3 +1,4 @@
+import { ModalDialog } from "@/components/ModalDialog";
 import { createPortal } from "react-dom";
 
 import type { AuditActionRecord } from "@/types/recordsExecution";
@@ -34,20 +35,9 @@ export function RiskDetailsModal({
   }
 
   const modal = (
-    <div
-      className="modal-scrim"
-      role="presentation"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) {
-          onClose();
-        }
-      }}
-      style={{ zIndex: 2050 }}
-    >
+    <ModalDialog label={activeRisk.title} onClose={onClose} dismissOnBackdrop>
       <section
-        aria-modal="true"
         className="modal-card task-details-modal"
-        role="dialog"
         style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
       >
         <div className="panel-header compact-header task-details-header">
@@ -115,7 +105,7 @@ export function RiskDetailsModal({
           </div>
         </div>
       </section>
-    </div>
+    </ModalDialog>
   );
 
   return createPortal(modal, document.body);

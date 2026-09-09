@@ -1,3 +1,4 @@
+import { ModalDialog } from "@/components/ModalDialog";
 import type { CSSProperties, Dispatch, FormEvent, SetStateAction } from "react";
 import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
@@ -144,12 +145,10 @@ export function MilestonesEventDetailsModal({
   const milestoneEndLabel = formatMilestoneEndDateTime(activeMilestone.startDateTime, activeMilestone.endDateTime);
 
   return createPortal(
-    <div className="modal-scrim" role="presentation" style={{ zIndex: 2050 }}>
+    <ModalDialog label={activeMilestone.title} onClose={handleClose}>
       <section
-        aria-modal="true"
         className="modal-card task-details-modal"
         data-tutorial-target={isEditMode ? "milestone-edit-modal" : "milestone-detail-modal"}
-        role="dialog"
         style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
       >
         <div className="panel-header compact-header task-details-header">
@@ -288,7 +287,7 @@ export function MilestonesEventDetailsModal({
           </div>
         )}
       </section>
-    </div>,
+    </ModalDialog>,
     modalPortalTarget,
   );
 }

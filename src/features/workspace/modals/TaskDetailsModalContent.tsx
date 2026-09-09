@@ -1,3 +1,4 @@
+import { ModalDialog } from "@/components/ModalDialog";
 import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskPayload } from "@/types/payloads";
@@ -70,11 +71,9 @@ export function TaskDetailsModal({
   const openTaskEditModal = () => onEditTask(activeTask);
 
   return (
-    <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
+    <ModalDialog label={typeof headerTitle === "string" ? headerTitle : activeTask.title} onClose={closeTaskDetailsModal}>
       <section
-        aria-modal="true"
         className={`modal-card task-details-modal${modalClassName ? ` ${modalClassName}` : ""}`}
-        role="dialog"
         style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
       >
         <TaskDetailsHeaderSection
@@ -159,6 +158,6 @@ export function TaskDetailsModal({
           </div>
         </div>
       </section>
-    </div>
+    </ModalDialog>
   );
 }

@@ -1,3 +1,4 @@
+import { ModalDialog } from "@/components/ModalDialog";
 import type { Dispatch, SetStateAction } from "react";
 
 import type { RiskPayload } from "@/types/payloads";
@@ -42,16 +43,8 @@ export function RiskEditorModal({
   }
 
   return (
-    <div
-      className="modal-scrim"
-      onClick={(milestone) => {
-        if (milestone.target === milestone.currentTarget) {
-          onClose();
-        }
-      }}
-      role="presentation"
-    >
-      <section aria-modal="true" className="modal-card" role="dialog">
+    <ModalDialog label="Risk editor" onClose={onClose} dismissOnBackdrop>
+      <section  className="modal-card" >
         <div className="panel-header compact-header">
           <div>
             <p className="eyebrow" style={{ color: "var(--official-red)" }}>
@@ -262,6 +255,6 @@ export function RiskEditorModal({
           </div>
         </form>
       </section>
-    </div>
+    </ModalDialog>
   );
 }

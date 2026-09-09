@@ -1,3 +1,4 @@
+import { ModalDialog } from "@/components/ModalDialog";
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -21,11 +22,9 @@ export function PurchaseEditorModal(props: PurchaseEditorModalProps) {
   const { closePurchaseModal, handlePurchaseSubmit, isSavingPurchase, purchaseModalMode } = props;
 
   return (
-    <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
+    <ModalDialog label="Purchase editor" onClose={closePurchaseModal}>
       <section
-        aria-modal="true"
         className="modal-card"
-        role="dialog"
         style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
       >
         <div className="panel-header compact-header">
@@ -63,6 +62,6 @@ export function PurchaseEditorModal(props: PurchaseEditorModalProps) {
           </div>
         </form>
       </section>
-    </div>
+    </ModalDialog>
   );
 }

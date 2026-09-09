@@ -1,4 +1,5 @@
-import type { ReactNode, FormEvent } from "react";
+import { ModalDialog } from "@/components/ModalDialog";
+import type { FormEvent } from "react";
 
 interface OverlayProps {
   closeCreateSeasonPopup: () => void;
@@ -16,22 +17,6 @@ interface OverlayProps {
   setSeasonNameDraft: (name: string) => void;
 }
 
-function ModalScrim({ children, onClose }: { children: ReactNode; onClose: () => void }) {
-  return (
-    <div
-      className="modal-scrim"
-      onClick={(milestone) => {
-        if (milestone.target === milestone.currentTarget) {
-          onClose();
-        }
-      }}
-      role="presentation"
-    >
-      {children}
-    </div>
-  );
-}
-
 export function AddSeasonPopup({
   controller,
 }: {
@@ -40,8 +25,8 @@ export function AddSeasonPopup({
   const c = controller;
 
   return (
-    <ModalScrim onClose={c.closeCreateSeasonPopup}>
-      <section aria-modal="true" className="modal-card roster-edit-modal" role="dialog">
+    <ModalDialog label="Add season" onClose={c.closeCreateSeasonPopup} dismissOnBackdrop>
+      <section className="modal-card roster-edit-modal">
         <div className="panel-header compact-header">
           <div className="queue-section-header">
             <h3>Add season</h3>
@@ -73,7 +58,7 @@ export function AddSeasonPopup({
           </div>
         </form>
       </section>
-    </ModalScrim>
+    </ModalDialog>
   );
 }
 
@@ -85,8 +70,8 @@ export function RobotProjectPopup({
   const c = controller;
 
   return (
-    <ModalScrim onClose={c.closeRobotProjectPopup}>
-      <section aria-modal="true" className="modal-card roster-edit-modal" role="dialog">
+    <ModalDialog label="Robot project editor" onClose={c.closeRobotProjectPopup} dismissOnBackdrop>
+      <section className="modal-card roster-edit-modal">
         <div className="panel-header compact-header">
           <div className="queue-section-header">
             <h3>{c.robotProjectModalMode === "create" ? "Add robot" : "Edit robot name"}</h3>
@@ -121,7 +106,7 @@ export function RobotProjectPopup({
           </div>
         </form>
       </section>
-    </ModalScrim>
+    </ModalDialog>
   );
 }
 

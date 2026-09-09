@@ -1,3 +1,4 @@
+import { useModalPortalTarget } from "@/components/useModalPortalTarget";
 import { createElement, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
@@ -196,7 +197,7 @@ export function WorkspaceToastStack({
   isHistoryOpen = false,
   items,
 }: WorkspaceToastStackProps) {
-  const portalTarget = typeof document !== "undefined" ? document.body : null;
+  const portalTarget = useModalPortalTarget();
   const visibleItems = isHistoryOpen
     ? historyItems.length > 0
       ? historyItems

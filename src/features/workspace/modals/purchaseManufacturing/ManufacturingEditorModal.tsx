@@ -1,3 +1,4 @@
+import { ModalDialog } from "@/components/ModalDialog";
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -19,11 +20,9 @@ export function ManufacturingEditorModal(props: ManufacturingEditorModalProps) {
   const { closeManufacturingModal, handleManufacturingSubmit, isSavingManufacturing, manufacturingDraft, manufacturingModalMode } = props;
 
   return (
-    <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
+    <ModalDialog label="Manufacturing editor" onClose={closeManufacturingModal}>
       <section
-        aria-modal="true"
         className="modal-card"
-        role="dialog"
         style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
       >
         <div className="panel-header compact-header">
@@ -67,6 +66,6 @@ export function ManufacturingEditorModal(props: ManufacturingEditorModalProps) {
           </div>
         </form>
       </section>
-    </div>
+    </ModalDialog>
   );
 }

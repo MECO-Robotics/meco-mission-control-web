@@ -188,7 +188,7 @@ export function TaskDetailsBlockerAddMenu({
               </div>
             </label>
           </div>,
-          document.body,
+          buttonRef.current?.closest("dialog") ?? document.body,
         )
       ) : null}
     </span>

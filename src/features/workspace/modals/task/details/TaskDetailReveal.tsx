@@ -71,7 +71,7 @@ export function TaskDetailReveal({ className, style, text }: TaskDetailRevealPro
             <span aria-hidden="true" className="task-detail-ellipsis-reveal-popout" style={overlayStyle}>
               {text}
             </span>,
-            document.body,
+            anchorRef.current?.closest("dialog") ?? document.body,
           )
         : null}
     </>

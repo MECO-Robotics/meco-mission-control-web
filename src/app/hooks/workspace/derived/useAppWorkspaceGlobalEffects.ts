@@ -1,15 +1,4 @@
-import { useEffect, type CSSProperties, type Dispatch, type SetStateAction } from "react";
-
-const BROWSER_ZOOM_SHORTCUT_KEYS = new Set(["+", "=", "-", "0", "add", "subtract"]);
-
-function isBrowserZoomShortcut(milestone: KeyboardEvent) {
-  if (!(milestone.ctrlKey || milestone.metaKey)) {
-    return false;
-  }
-
-  const normalizedKey = milestone.key.toLowerCase();
-  return BROWSER_ZOOM_SHORTCUT_KEYS.has(normalizedKey);
-}
+import { useEffect, type CSSProperties } from "react";
 
 interface UseAppWorkspaceGlobalEffectsOptions {
   isDarkMode: boolean;
@@ -17,10 +6,6 @@ interface UseAppWorkspaceGlobalEffectsOptions {
   isSidebarOverlay: boolean;
   toggleSidebar: () => void;
   setDataMessage: (message: string | null) => void;
-  isAddSeasonPopupOpen: boolean;
-  setIsAddSeasonPopupOpen: Dispatch<SetStateAction<boolean>>;
-  robotProjectModalMode: "create" | "edit" | null;
-  setRobotProjectModalMode: Dispatch<SetStateAction<"create" | "edit" | null>>;
 }
 
 export function useAppWorkspaceGlobalEffects({
@@ -29,10 +14,6 @@ export function useAppWorkspaceGlobalEffects({
   isSidebarOverlay,
   toggleSidebar,
   setDataMessage,
-  isAddSeasonPopupOpen,
-  setIsAddSeasonPopupOpen,
-  robotProjectModalMode,
-  setRobotProjectModalMode,
 }: UseAppWorkspaceGlobalEffectsOptions) {
   useEffect(() => {
     if (typeof document === "undefined") {
@@ -80,40 +61,6 @@ export function useAppWorkspaceGlobalEffects({
   }, [setDataMessage]);
 
   useEffect(() => {
-    const handleWheel = (milestone: WheelEvent) => {
-      if (!milestone.ctrlKey && !milestone.metaKey) {
-        return;
-      }
-
-      milestone.preventDefault();
-    };
-
-    const handleGestureStart = (event: Event) => {
-      event.preventDefault();
-    };
-
-    const handleKeyDown = (milestone: KeyboardEvent) => {
-      if (!isBrowserZoomShortcut(milestone)) {
-        return;
-      }
-
-      milestone.preventDefault();
-    };
-
-    window.addEventListener("wheel", handleWheel, { passive: false });
-    window.addEventListener("gesturestart", handleGestureStart, { passive: false } as AddEventListenerOptions);
-    window.addEventListener("gesturechange", handleGestureStart, { passive: false } as AddEventListenerOptions);
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("wheel", handleWheel);
-      window.removeEventListener("gesturestart", handleGestureStart);
-      window.removeEventListener("gesturechange", handleGestureStart);
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
-
-  useEffect(() => {
     if (!isSidebarOverlay) {
       return;
     }
@@ -130,37 +77,4 @@ export function useAppWorkspaceGlobalEffects({
     };
   }, [isSidebarOverlay, toggleSidebar]);
 
-  useEffect(() => {
-    if (!isAddSeasonPopupOpen) {
-      return;
-    }
-
-    const onKeyDown = (milestone: KeyboardEvent) => {
-      if (milestone.key === "Escape") {
-        setIsAddSeasonPopupOpen(false);
-      }
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [isAddSeasonPopupOpen, setIsAddSeasonPopupOpen]);
-
-  useEffect(() => {
-    if (!robotProjectModalMode) {
-      return;
-    }
-
-    const onKeyDown = (milestone: KeyboardEvent) => {
-      if (milestone.key === "Escape") {
-        setRobotProjectModalMode(null);
-      }
-    };
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [robotProjectModalMode, setRobotProjectModalMode]);
 }

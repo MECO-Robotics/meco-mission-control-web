@@ -19,6 +19,10 @@ export interface ReportRecord {
   result: string;
   summary: string;
   notes: string;
+  evidenceNotes?: string;
+  qaRequestId?: string | null;
+  mentorId?: string | null;
+  requestedById?: string | null;
   photoUrl?: string;
   createdAt: string;
   participantIds?: string[];
