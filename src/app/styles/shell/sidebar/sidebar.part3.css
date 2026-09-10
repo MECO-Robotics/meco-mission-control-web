@@ -143,6 +143,13 @@
   transform: translateY(-50%) translateX(0);
 }
 
+.sidebar[data-collapsed="true"] .sidebar-nav-item[data-enabled="false"]:hover .sidebar-nav-item-rollout {
+  display: inline-flex;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(0);
+}
+
 .sidebar-tab-label {
   min-width: 0;
   overflow: hidden;
