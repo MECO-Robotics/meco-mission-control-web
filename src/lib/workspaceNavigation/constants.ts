@@ -13,7 +13,7 @@ export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = [
   { id: "resources-parts", label: "Parts", section: "resources", target: { tab: "inventory", inventoryView: "parts" } },
   { id: "resources-purchases", label: "Purchases", section: "resources", target: { tab: "inventory", inventoryView: "purchases" } },
   { id: "work-manufacturing", label: "Manufacturing", section: "work", target: { tab: "manufacturing", manufacturingView: "all" } },
-  { id: "resources-structure", label: "Structure", section: "resources", target: { tab: "tasks", taskView: "robot-map" } },
+  { id: "resources-structure", label: "Robot", section: "work", target: { tab: "tasks", taskView: "robot-map" } },
   { id: "team-people", label: "People", section: "resources", target: { tab: "roster", rosterView: "directory" } },
 ];
 export const NAVIGATION_SUB_ITEMS_BY_SECTION: Record<NavigationSection, readonly NavigationSubItem[]> = {
