@@ -1,26 +1,17 @@
 import { memo } from "react";
 
 import { MilestonesView } from "@/features/workspace/views/milestones/MilestonesView";
-import { TaskCalendarPlaceholderView } from "@/features/workspace/views/taskQueue/TaskCalendarPlaceholderView";
+import { TaskCalendarView } from "@/features/workspace/views/taskCalendar/TaskCalendarView";
 import { TaskRobotMapPlaceholderView } from "@/features/workspace/views/taskQueue/TaskRobotMapPlaceholderView";
 import { TaskQueueView } from "@/features/workspace/views/taskQueue/TaskQueueView";
 import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
 import { WorkspaceSectionPanel, WorkspaceSubPanel } from "../../WorkspaceContentPanelShells";
-import type {
-  WorkspaceShellPanelProps,
-  WorkspaceTaskPanelProps,
-} from "../workspaceContentPanelsViewTypes";
+import type { WorkspaceContentPanelsViewProps } from "../workspaceContentPanelsViewTypes";
 
 const MemoizedTimelineView = memo(TimelineView);
 
-export function WorkspaceTaskSection({
-  shell,
-  tasks,
-}: {
-  shell: WorkspaceShellPanelProps;
-  tasks: WorkspaceTaskPanelProps;
-}) {
-  const disablePanelAnimations = shell.disablePanelAnimations ?? false;
+export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
+  const disablePanelAnimations = props.disablePanelAnimations ?? false;
   const {
     activePersonFilter,
     bootstrap,
@@ -41,6 +32,7 @@ export function WorkspaceTaskSection({
     openEditMechanismModal,
     openEditPartInstanceModal,
     openEditSubsystemModal,
+    onOpenDrilldownTarget,
     removePartInstanceFromMechanism,
     saveSubsystemLayout,
     updateSubsystemConfiguration,
@@ -50,29 +42,42 @@ export function WorkspaceTaskSection({
     taskSwipeDirection,
     taskView,
     timelineMilestoneCreateSignal,
-  } = tasks;
+  } = props;
 
   return (
     <WorkspaceSectionPanel
       disableAnimations={disablePanelAnimations}
-      isActive={shell.activeTab === "tasks"}
-      tabSwitchDirection={shell.tabSwitchDirection}
+      isActive={props.activeTab === "tasks"}
+      tabSwitchDirection={props.tabSwitchDirection}
     >
+      {["calendar", "timeline", "milestones"].includes(taskView) ? (
+        <div className="workspace-presentation-controls" role="group" aria-label="Schedule presentation" data-tutorial-target="schedule-view">
+          {([ ["calendar", "Calendar"], ["timeline", "Timeline"], ["milestones", "Agenda"] ] as const).map(([value, label]) => (
+            <button key={value} className="ghost-button" aria-pressed={taskView === value} onClick={() => props.onOpenDrilldownTarget({ tab: "tasks", taskView: value })} type="button">{label}</button>
+          ))}
+        </div>
+      ) : null}
+      {taskView === "robot-map" ? (
+        <div className="workspace-presentation-controls">
+          <button className="ghost-button" onClick={() => props.onOpenDrilldownTarget({ tab: "cad" })} type="button">Import CAD</button>
+        </div>
+      ) : null}
       <WorkspaceSubPanel
         disableAnimations={disablePanelAnimations}
         isActive={taskView === "calendar"}
         swipeDirection={taskSwipeDirection}
       >
-        <TaskCalendarPlaceholderView
+        <TaskCalendarView
           activePersonFilter={activePersonFilter}
           bootstrap={bootstrap}
           isAllProjectsView={isAllProjectsView}
           onSaveMeeting={handleMeetingSave}
+          onCreateMilestoneReport={props.openCreateMilestoneReportModal}
           onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
           onSaveTimelineMilestone={handleTimelineMilestoneSave}
           onTaskDetailOpen={openTimelineTaskDetailsModal}
-          onTaskEditCanceled={shell.onTaskEditCanceled}
-          onTaskEditSaved={shell.onTaskEditSaved}
+          onTaskEditCanceled={props.onTaskEditCanceled}
+          onTaskEditSaved={props.onTaskEditSaved}
         />
       </WorkspaceSubPanel>
 
@@ -86,8 +91,9 @@ export function WorkspaceTaskSection({
           bootstrap={bootstrap}
           isAllProjectsView={isAllProjectsView}
           membersById={membersById}
-          onTaskEditCanceled={shell.onTaskEditCanceled}
-          onTaskEditSaved={shell.onTaskEditSaved}
+          onTaskEditCanceled={props.onTaskEditCanceled}
+          onTaskEditSaved={props.onTaskEditSaved}
+          onCreateMilestoneReport={props.openCreateMilestoneReportModal}
           onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
           onSaveTimelineMilestone={handleTimelineMilestoneSave}
           openCreateTaskModal={openCreateTaskModalFromTimeline}
@@ -111,6 +117,7 @@ export function WorkspaceTaskSection({
           openEditMechanismModal={openEditMechanismModal}
           openEditPartInstanceModal={openEditPartInstanceModal}
           openEditSubsystemModal={openEditSubsystemModal}
+          onOpenDrilldownTarget={onOpenDrilldownTarget}
           removePartInstanceFromMechanism={removePartInstanceFromMechanism}
           saveSubsystemLayout={saveSubsystemLayout}
           updateSubsystemConfiguration={updateSubsystemConfiguration}
@@ -123,6 +130,7 @@ export function WorkspaceTaskSection({
         swipeDirection={taskSwipeDirection}
       >
         <TaskQueueView
+          currentMemberId={props.currentMemberId}
           activePersonFilter={activePersonFilter}
           bootstrap={bootstrap}
           disciplinesById={disciplinesById}
@@ -145,8 +153,9 @@ export function WorkspaceTaskSection({
           activePersonFilter={activePersonFilter}
           bootstrap={bootstrap}
           isAllProjectsView={isAllProjectsView}
-          onTaskEditCanceled={shell.onTaskEditCanceled}
-          onTaskEditSaved={shell.onTaskEditSaved}
+          onTaskEditCanceled={props.onTaskEditCanceled}
+          onTaskEditSaved={props.onTaskEditSaved}
+          onCreateMilestoneReport={props.openCreateMilestoneReportModal}
           onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
           onSaveTimelineMilestone={handleTimelineMilestoneSave}
         />

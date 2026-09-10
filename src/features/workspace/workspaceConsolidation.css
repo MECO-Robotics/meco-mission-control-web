@@ -1,0 +1,39 @@
+.workspace-presentation-controls { display: flex; flex-wrap: wrap; align-items: center; gap: .65rem; padding: .8rem 1rem; }
+.workspace-presentation-controls label { display: flex; align-items: center; gap: .5rem; }
+.workspace-presentation-controls input, .workspace-presentation-controls select { min-height: 2.5rem; max-width: 100%; color: var(--text-title); background: var(--bg-panel); border: 1px solid var(--border-base); border-radius: 6px; padding: .45rem .7rem; }
+.workspace-presentation-controls [aria-pressed="true"] { background: var(--bg-row-alt); color: var(--text-title); font-weight: 700; outline: 1px solid var(--border-base); }
+.workspace-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.workspace-record-list { margin: 0; padding: 0; list-style: none; }
+.workspace-record-list > li { display: flex; align-items: start; justify-content: space-between; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--border-base); }
+.workspace-record-list small { display: block; margin-top: .3rem; color: var(--text-copy); }
+.workspace-record-list p { margin: .4rem 0 0; max-width: 75ch; color: var(--text-copy); }
+.home-attention { padding: 1rem; }
+.home-attention .workspace-presentation-controls { padding-inline: 0; }
+.workspace-disclosure { margin: 1rem; }
+.workspace-disclosure > summary { cursor: pointer; font-size: 1.1rem; font-weight: 600; padding: 1rem 0; }
+.workspace-inline-summary { padding: 0 1rem; color: var(--text-copy); }
+.people-member { padding-bottom: 1rem; border-bottom: 1px solid var(--border-base); }
+.people-member-context { display: flex; flex-direction: column; align-items: flex-start; gap: .4rem; padding: .5rem; }
+.people-member-context small { color: var(--text-copy); }
+.people-member .member-row-actions { opacity: 1; visibility: visible; }
+.workspace-detail-dialog { justify-content: flex-end; align-items: stretch; }
+.workspace-detail-card { width: min(46rem, 100vw); max-height: 100dvh; margin: 0; overflow-y: auto; padding: 1.5rem; border-radius: 0; }
+.modal-scrim:has(.task-details-modal), .modal-scrim:has(.risk-details-modal) { justify-content: flex-end; align-items: stretch; }
+.modal-scrim .task-details-modal, .modal-scrim .risk-details-modal { margin: 0; max-height: 100dvh; border-radius: 0; }
+@media (max-width: 700px) {
+  .workspace-record-list > li { flex-direction: column; gap: .6rem; }
+  .workspace-detail-card, .modal-scrim .task-details-modal, .modal-scrim .risk-details-modal { width: 100%; max-width: none; min-height: 100dvh; }
+  .workspace-presentation-controls { padding: .65rem; }
+  .home-attention { padding: .75rem; }
+}
+
+.workspace-presentation-controls button, .workspace-record-list .ghost-button, .people-member-context .ghost-button, .home-attention > .ghost-button { font: inherit; min-height: 40px; padding: .45rem .8rem; border: 1px solid var(--border-base); border-radius: 7px; background: var(--bg-panel); color: var(--text-title); cursor: pointer; }
+.workspace-presentation-controls button:hover, .workspace-record-list .ghost-button:hover, .people-member-context .ghost-button:hover { background: var(--bg-row-alt); }
+.workspace-presentation-controls button:disabled { opacity: .55; cursor: default; }
+.workspace-presentation-controls button:focus-visible, .workspace-record-list button:focus-visible, .workspace-disclosure summary:focus-visible { outline: 2px solid var(--official-blue); outline-offset: 2px; }
+@media (max-width: 700px) { .task-queue-view .task-queue-board-column { min-width: min(18rem, calc(100vw - 3rem)); max-width: min(18rem, calc(100vw - 3rem)); } .task-queue-view .task-queue-board-card { white-space: normal; } }
+
+.attention-reasons, .people-workload-details { margin-top: .5rem; color: var(--text-copy); }
+.attention-reasons summary, .people-workload-details summary { cursor: pointer; font-size: .875rem; }
+.attention-reasons li { margin-block: .4rem; max-width: 75ch; }
+.people-workload-details[open] { display: flex; flex-direction: column; gap: .4rem; }

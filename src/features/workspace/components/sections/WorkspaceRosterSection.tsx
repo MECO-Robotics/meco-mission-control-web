@@ -1,22 +1,13 @@
 import { RosterAttendanceView } from "@/features/workspace/views/roster/RosterAttendanceView";
-import { RosterWorkloadView } from "@/features/workspace/views/roster/RosterWorkloadView";
 import { RosterView } from "@/features/workspace/views/RosterView";
 import { WorkspaceSectionPanel, WorkspaceSubPanel } from "../../WorkspaceContentPanelShells";
-import type {
-  WorkspaceRosterPanelProps,
-  WorkspaceShellPanelProps,
-} from "../workspaceContentPanelsViewTypes";
+import type { WorkspaceContentPanelsViewProps } from "../workspaceContentPanelsViewTypes";
 
-export function WorkspaceRosterSection({
-  shell,
-  roster,
-}: {
-  shell: WorkspaceShellPanelProps;
-  roster: WorkspaceRosterPanelProps;
-}) {
-  const disablePanelAnimations = shell.disablePanelAnimations ?? false;
+export function WorkspaceRosterSection(props: WorkspaceContentPanelsViewProps) {
+  const disablePanelAnimations = props.disablePanelAnimations ?? false;
   const {
     allMembers,
+    availabilityBootstrap,
     bootstrap,
     externalMembers,
     handleCreateMember,
@@ -30,6 +21,7 @@ export function WorkspaceRosterSection({
     memberEditDraft,
     memberForm,
     openTimelineTaskDetailsModal,
+    openCreateTaskModalForMember,
     requestMemberPhotoUpload,
     rosterMentors,
     rosterView,
@@ -42,16 +34,19 @@ export function WorkspaceRosterSection({
     setMemberEditDraft,
     setMemberForm,
     students,
-  } = roster;
+  } = props;
 
   return (
     <WorkspaceSectionPanel
       disableAnimations={disablePanelAnimations}
-      isActive={shell.activeTab === "roster"}
-      tabSwitchDirection={shell.tabSwitchDirection}
+      isActive={props.activeTab === "roster"}
+      tabSwitchDirection={props.tabSwitchDirection}
     >
-      <WorkspaceSubPanel disableAnimations={disablePanelAnimations} isActive={rosterView === "directory"}>
+      <WorkspaceSubPanel disableAnimations={disablePanelAnimations} isActive={rosterView !== "attendance"}>
         <RosterView
+          availabilityBootstrap={availabilityBootstrap}
+          onCreateTaskForMember={openCreateTaskModalForMember}
+          onOpenTask={openTimelineTaskDetailsModal}
           allMembers={allMembers}
           bootstrap={bootstrap}
           selectedProject={selectedProject}
@@ -76,20 +71,6 @@ export function WorkspaceRosterSection({
           setMemberEditDraft={setMemberEditDraft}
           setMemberForm={setMemberForm}
           students={students}
-        />
-      </WorkspaceSubPanel>
-
-      <WorkspaceSubPanel disableAnimations={disablePanelAnimations} isActive={rosterView === "workload"}>
-        <RosterWorkloadView
-          bootstrap={bootstrap}
-          onOpenTask={(taskId) => {
-            const task = bootstrap.tasks.find((candidate) => candidate.id === taskId);
-            if (task) {
-              openTimelineTaskDetailsModal(task);
-            }
-          }}
-          selectedProject={selectedProject}
-          selectedSeasonId={selectedSeasonId}
         />
       </WorkspaceSubPanel>
 

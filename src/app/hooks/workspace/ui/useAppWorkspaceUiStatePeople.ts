@@ -6,8 +6,8 @@ import type { FilterSelection } from "@/features/workspace/shared/filters/worksp
 export function useAppWorkspaceUiStatePeople() {
   const [activePersonFilter, setActivePersonFilter] = useState<FilterSelection>([]);
   const [isUnmatchedMyViewActive, setIsUnmatchedMyViewActive] = useState(false);
-  const [selectedSeasonId, setSelectedSeasonId] = useState<string | null>(null);
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [selectedSeasonId, setSelectedSeasonId] = useState<string | null>(() => typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("season"));
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(() => typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("project"));
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [memberForm, setMemberForm] = useState<MemberPayload>({
     name: "",

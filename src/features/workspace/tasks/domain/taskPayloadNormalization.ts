@@ -1,4 +1,5 @@
-import type { TaskBlockerSeverity, TaskBlockerType } from "@/types/common";
+import { normalizeBlockerSourceKind } from "@/lib/auth/bootstrap/task-blockers";
+import type { TaskBlockerSeverity } from "@/types/common";
 import type {
   TaskBlockerDraft,
   TaskBlockerPayload,
@@ -13,11 +14,15 @@ export function normalizeTaskPayload(taskDraft: TaskPayload): TaskPayload {
     ...taskDraft,
     title: taskDraft.title.trim(),
     summary: taskDraft.summary.trim(),
+    targetRiskId:
+      typeof taskDraft.targetRiskId === "string" && taskDraft.targetRiskId.trim().length > 0
+        ? taskDraft.targetRiskId.trim()
+        : null,
     assigneeIds: Array.from(new Set(taskDraft.assigneeIds)),
     taskDependencies: (taskDraft.taskDependencies ?? []).map((dependency) => ({
       ...dependency,
       refId: dependency.refId.trim(),
-      requiredState: dependency.requiredState?.trim(),
+      requiredState: dependency.requiredState.trim(),
     })),
     taskBlockers: (taskDraft.taskBlockers ?? []).map((blocker) => {
       const persistedBlocker = { ...blocker };
@@ -38,7 +43,7 @@ export function buildTaskDependencyPayload(
     taskId,
     kind: dependency.kind,
     refId: dependency.refId.trim(),
-    requiredState: dependency.requiredState?.trim(),
+    requiredState: dependency.requiredState.trim(),
     dependencyType: dependency.dependencyType,
   };
 }
@@ -61,7 +66,8 @@ export function buildTaskBlockerPayload(
 ): TaskBlockerPayload {
   return {
     blockedTaskId: taskId,
-    blockerType: blocker.blockerType as TaskBlockerType,
+    blockerType: normalizeBlockerSourceKind(blocker.sourceKind),
+    issueType: blocker.blockerType,
     blockerId: blocker.blockerId ?? null,
     description: blocker.description.trim(),
     severity: blocker.severity as TaskBlockerSeverity,
@@ -74,7 +80,7 @@ export function isTaskBlockerPayloadChanged(
   payload: TaskBlockerPayload,
 ) {
   return (
-    existingBlocker.blockerType !== payload.blockerType ||
+    existingBlocker.blockerType !== payload.issueType ||
     existingBlocker.blockerId !== payload.blockerId ||
     existingBlocker.description !== payload.description ||
     existingBlocker.severity !== payload.severity ||

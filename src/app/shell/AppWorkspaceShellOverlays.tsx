@@ -1,33 +1,32 @@
-import type { ReactNode } from "react";
+import { ModalDialog } from "@/components/ModalDialog";
+import type { FormEvent } from "react";
 
-import type { AppWorkspaceShellOverlayLayerController } from "@/app/hooks/useAppWorkspaceController";
-
-function ModalScrim({ children, onClose }: { children: ReactNode; onClose: () => void }) {
-  return (
-    <div
-      className="modal-scrim"
-      onClick={(milestone) => {
-        if (milestone.target === milestone.currentTarget) {
-          onClose();
-        }
-      }}
-      role="presentation"
-    >
-      {children}
-    </div>
-  );
+interface OverlayProps {
+  closeCreateSeasonPopup: () => void;
+  closeRobotProjectPopup: () => void;
+  closeSidebarOverlay: () => void;
+  handleCreateSeasonSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  handleRobotProjectSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  isSavingSeason: boolean;
+  isSavingRobotProject: boolean;
+  isSidebarOverlay: boolean;
+  robotProjectModalMode: "create" | "edit" | null;
+  robotProjectNameDraft: string;
+  seasonNameDraft: string;
+  setRobotProjectNameDraft: (name: string) => void;
+  setSeasonNameDraft: (name: string) => void;
 }
 
 export function AddSeasonPopup({
   controller,
 }: {
-  controller: AppWorkspaceShellOverlayLayerController;
+  controller: OverlayProps;
 }) {
   const c = controller;
 
   return (
-    <ModalScrim onClose={c.closeCreateSeasonPopup}>
-      <section aria-modal="true" className="modal-card roster-edit-modal" role="dialog">
+    <ModalDialog label="Add season" onClose={c.closeCreateSeasonPopup} dismissOnBackdrop>
+      <section className="modal-card roster-edit-modal">
         <div className="panel-header compact-header">
           <div className="queue-section-header">
             <h3>Add season</h3>
@@ -59,20 +58,20 @@ export function AddSeasonPopup({
           </div>
         </form>
       </section>
-    </ModalScrim>
+    </ModalDialog>
   );
 }
 
 export function RobotProjectPopup({
   controller,
 }: {
-  controller: AppWorkspaceShellOverlayLayerController;
+  controller: OverlayProps;
 }) {
   const c = controller;
 
   return (
-    <ModalScrim onClose={c.closeRobotProjectPopup}>
-      <section aria-modal="true" className="modal-card roster-edit-modal" role="dialog">
+    <ModalDialog label="Robot project editor" onClose={c.closeRobotProjectPopup} dismissOnBackdrop>
+      <section className="modal-card roster-edit-modal">
         <div className="panel-header compact-header">
           <div className="queue-section-header">
             <h3>{c.robotProjectModalMode === "create" ? "Add robot" : "Edit robot name"}</h3>
@@ -107,14 +106,14 @@ export function RobotProjectPopup({
           </div>
         </form>
       </section>
-    </ModalScrim>
+    </ModalDialog>
   );
 }
 
 export function SidebarOverlay({
   controller,
 }: {
-  controller: AppWorkspaceShellOverlayLayerController;
+  controller: OverlayProps;
 }) {
   const c = controller;
 

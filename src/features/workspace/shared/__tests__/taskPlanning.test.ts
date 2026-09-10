@@ -1,4 +1,5 @@
 import {
+  buildPlanningConfidenceSummary,
   getTaskBlocksDependencies,
   getTaskOpenBlockersForTask,
   getTaskPlanningState,
@@ -45,6 +46,7 @@ const bootstrap = {
   reports: [],
   reportFindings: [],
   qaReports: [],
+  qaRequests: [],
   testResults: [],
   qaFindings: [],
   testFindings: [],
@@ -73,7 +75,7 @@ const bootstrap = {
       dueDate: "2026-04-21",
       priority: "medium",
       status: "complete",
-      dependencyIds: [],
+
       blockers: [],
       linkedManufacturingIds: [],
       linkedPurchaseIds: [],
@@ -104,7 +106,7 @@ const bootstrap = {
       dueDate: "2026-04-22",
       priority: "medium",
       status: "not-started",
-      dependencyIds: [],
+
       blockers: [],
       linkedManufacturingIds: [],
       linkedPurchaseIds: [],
@@ -147,7 +149,7 @@ const bootstrap = {
     {
       id: "blocker-1",
       blockedTaskId: "task-b",
-      blockerType: "external",
+      blockerType: "other",
       blockerId: null,
       description: "Waiting on vendor shipment",
       severity: "medium",
@@ -171,6 +173,7 @@ test("task planning helpers surface structured dependency records", () => {
     kind: "task",
     refId: "task-a",
     dependencyType: "hard",
+    requiredState: "complete",
   });
 });
 
@@ -356,4 +359,47 @@ test("task planning accepts milestone and part-instance qa states as satisfied d
   expect(getTaskPlanningState(qaBootstrap.tasks[1], qaBootstrap, new Date("2026-04-20T12:00:00Z"))).toBe(
     "ready",
   );
+});
+
+test("planning confidence counts populated planning fields and missing task ids", () => {
+  const tasks = [
+    {
+      ...bootstrap.tasks[0],
+      id: "task-complete-plan",
+      ownerId: "member-1",
+      mechanismId: "mechanism-1",
+      mechanismIds: ["mechanism-1"],
+      estimatedHours: 3,
+    },
+    {
+      ...bootstrap.tasks[1],
+      id: "task-missing-plan",
+      ownerId: null,
+      assigneeIds: [],
+      dueDate: "",
+      subsystemId: "",
+      subsystemIds: [],
+      mechanismId: null,
+      mechanismIds: [],
+      partInstanceId: null,
+      partInstanceIds: [],
+      estimatedHours: 0,
+    },
+  ];
+
+  const summary = buildPlanningConfidenceSummary(tasks);
+
+  expect(summary.totalTasks).toBe(2);
+  expect(summary.completeFieldCount).toBe(4);
+  expect(summary.possibleFieldCount).toBe(8);
+  expect(summary.confidencePercent).toBe(50);
+  expect(Object.fromEntries(summary.fields.map((field) => [field.id, field.count]))).toEqual({
+    "due-date": 1,
+    estimate: 1,
+    owner: 1,
+    "target-link": 1,
+  });
+  expect(summary.fields.find((field) => field.id === "owner")?.missingTaskIds).toEqual([
+    "task-missing-plan",
+  ]);
 });

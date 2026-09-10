@@ -94,14 +94,6 @@
   outline: none;
 }
 
-.task-editor-modal .field input,
-.task-editor-modal .field select,
-.task-editor-modal .field textarea {
-  padding: 0.54rem 0.7rem;
-  font-size: 0.95rem;
-  line-height: 1.45;
-}
-
 .task-editor-modal .field textarea {
   min-height: 5.5rem;
 }
@@ -116,10 +108,5 @@
   padding-bottom: 0.58rem;
   max-height: clamp(6.5rem, 18vh, 11rem);
   overflow-y: auto;
-}
-
-.task-editor-modal .task-details-section-title {
-  padding-top: 0.5rem;
-  padding-bottom: 0.4rem;
 }
 

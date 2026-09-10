@@ -5,15 +5,15 @@ import type { TaskRecord } from "@/types/recordsExecution";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
-import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
+import { WorkspaceTopbarControls, buildSingleAddMenuAction } from "@/features/workspace/shared/topbar";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { getTimelineMinimumZoomForWidth } from "@/features/workspace/shared/timeline/timelineZoom";
 import { midpointOfTimelineDays } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import { buildTimelineGridLayout } from "./model/timelineGridLayout";
 import { TimelineGridBody } from "./TimelineGridBody";
-import { TimelineMilestoneDetailModal } from "./TimelineMilestoneDetailModal";
 import { TimelineMilestoneHoverLayer } from "./TimelineMilestoneHoverLayer";
-import { TimelineMilestoneModal } from "./TimelineMilestoneModal";
+import { MilestonesMilestoneModal } from "../milestones/MilestonesEventModal";
 import { TimelineMilestoneUnderlaysPortal } from "./portals/TimelineMilestoneUnderlaysPortal";
 import { TimelineRowHighlightsPortal } from "./portals/TimelineRowHighlightsPortal";
 import { TimelineTodayMarkerPortal } from "./portals/TimelineTodayMarkerPortal";
@@ -24,6 +24,7 @@ import { useTimelineViewFilters } from "./hooks/useTimelineViewFilters";
 import { useTimelineViewState } from "./hooks/useTimelineViewState";
 
 interface TimelineViewProps {
+  onCreateMilestoneReport?: (milestoneId: string, onReturn?: () => void) => void;
   bootstrap: BootstrapPayload;
   isAllProjectsView: boolean;
   activePersonFilter: FilterSelection;
@@ -43,6 +44,7 @@ interface TimelineViewProps {
 }
 
 export const TimelineView: React.FC<TimelineViewProps> = ({
+  onCreateMilestoneReport,
   bootstrap,
   isAllProjectsView,
   activePersonFilter,
@@ -186,34 +188,45 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   return (
     <section className={`panel dense-panel timeline-layout ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">
-        <TimelineToolbar
-          activeFilterCount={filterControls.activeFilterCount}
-          activePersonFilter={activePersonFilter}
-          bootstrap={bootstrap}
-          disciplineFilter={filterControls.filters.disciplineFilter}
-          disciplineFilterOptions={filterControls.disciplineFilterOptions}
-          isAllProjectsView={isAllProjectsView}
-          onAdjustZoom={state.adjustTimelineZoom}
-          onChangePersonFilter={setActivePersonFilter}
-          onSearchChange={setSearchFilter}
-          onIntervalChange={handleTimelineIntervalChange}
-          onShiftPeriod={state.shiftTimelinePeriod}
-          priorityFilter={filterControls.filters.priorityFilter}
-          projectFilter={filterControls.filters.projectFilter}
-          searchFilter={searchFilter}
-          setDisciplineFilter={filterControls.setDisciplineFilter}
-          setPriorityFilter={filterControls.setPriorityFilter}
-          setProjectFilter={filterControls.setProjectFilter}
-          setStatusFilter={filterControls.setStatusFilter}
-          setSubsystemFilter={filterControls.setSubsystemFilter}
-          statusFilter={filterControls.filters.statusFilter}
-          subsystemFilter={filterControls.filters.subsystemFilter}
-          subsystemFilterOptions={filterControls.subsystemFilterOptions}
-          timelinePeriodLabel={data.timelinePeriodLabel}
-          timelineZoom={state.timelineZoom}
-          timelineZoomMin={state.timelineZoomMin}
-          viewInterval={state.viewInterval}
-        />
+        <WorkspaceTopbarControls className="timeline-toolbar timeline-topbar-controls">
+          <TimelineToolbar
+            activeFilterCount={filterControls.activeFilterCount}
+            activePersonFilter={activePersonFilter}
+            bootstrap={bootstrap}
+            disciplineFilter={filterControls.filters.disciplineFilter}
+            disciplineFilterOptions={filterControls.disciplineFilterOptions}
+            isAllProjectsView={isAllProjectsView}
+            onAdjustZoom={state.adjustTimelineZoom}
+            onChangePersonFilter={setActivePersonFilter}
+            onSearchChange={setSearchFilter}
+            onIntervalChange={handleTimelineIntervalChange}
+            onShiftPeriod={state.shiftTimelinePeriod}
+            priorityFilter={filterControls.filters.priorityFilter}
+            projectFilter={filterControls.filters.projectFilter}
+            searchFilter={searchFilter}
+            setDisciplineFilter={filterControls.setDisciplineFilter}
+            setPriorityFilter={filterControls.setPriorityFilter}
+            setProjectFilter={filterControls.setProjectFilter}
+            setStatusFilter={filterControls.setStatusFilter}
+            setSubsystemFilter={filterControls.setSubsystemFilter}
+            statusFilter={filterControls.filters.statusFilter}
+            subsystemFilter={filterControls.filters.subsystemFilter}
+            subsystemFilterOptions={filterControls.subsystemFilterOptions}
+            timelinePeriodLabel={data.timelinePeriodLabel}
+            timelineZoom={state.timelineZoom}
+            timelineZoomMin={state.timelineZoomMin}
+            viewInterval={state.viewInterval}
+          />
+          <WorkspaceTopbarAddMenu
+            actions={buildSingleAddMenuAction({
+              label: "Add task",
+              onSelect: openCreateTaskModal,
+            })}
+            ariaLabel="Add to timeline"
+            title="Add to timeline"
+            tutorialTarget="timeline-create-task-button"
+          />
+        </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
 
       <div className="panel-header compact-header">
@@ -273,13 +286,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         openTaskDetailModal={actions.openTaskDetailAndSelectTask}
       />
 
-      <WorkspaceFloatingAddButton
-        ariaLabel="Add to timeline"
-        onClick={openCreateTaskModal}
-        title="Add to timeline"
-        tutorialTarget="timeline-create-task-button"
-      />
-
       <TimelineMilestoneUnderlaysPortal
         onHideMilestonePopup={data.clearHoveredMilestonePopup}
         onOpenMilestoneDetails={data.milestoneModal.openMilestoneDetailModalForMilestone}
@@ -312,9 +318,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         resolveGeometry={data.resolveMilestonePopupGeometry}
       />
 
-      <TimelineMilestoneModal
-        activeDayMilestones={data.milestoneModal.activeDayMilestones}
-        activeMilestoneDay={data.milestoneModal.activeMilestoneDay}
+      <MilestonesMilestoneModal
+        activeMilestone={bootstrap.milestones.find((milestone) => milestone.id === (data.milestoneModal.activeMilestoneDetail?.id ?? data.milestoneModal.activeMilestoneId)) ?? null}
+        projectsById={Object.fromEntries(bootstrap.projects.map((project) => [project.id, project]))}
+        onEditMilestone={data.milestoneModal.openEditMilestoneModalForMilestone}
+        onRecordResult={onCreateMilestoneReport ? (milestone) => { data.milestoneModal.closeMilestoneDetailModal(); onCreateMilestoneReport(milestone.id, () => data.milestoneModal.openMilestoneDetailModalForMilestone(milestone)); } : undefined}
         bootstrap={bootstrap}
         milestoneDraft={data.milestoneModal.milestoneDraft}
         milestoneEndDate={data.milestoneModal.milestoneEndDate}
@@ -324,13 +332,13 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         milestoneStartTime={data.milestoneModal.milestoneStartTime}
         isDeletingMilestone={data.milestoneModal.isDeletingMilestone}
         isSavingMilestone={data.milestoneModal.isSavingMilestone}
-        mode={data.milestoneModal.milestoneModalMode}
-        onClose={data.milestoneModal.closeMilestoneModal}
+        milestoneModalMode={data.milestoneModal.activeMilestoneDetail ? "detail" : data.milestoneModal.milestoneModalMode}
+        onClose={() => { data.milestoneModal.closeMilestoneModal(); data.milestoneModal.closeMilestoneDetailModal(); }}
         onCancelEdit={data.milestoneModal.cancelMilestoneEdit}
         onDelete={data.milestoneModal.handleMilestoneDelete}
         onSubmit={data.milestoneModal.handleMilestoneSubmit}
-        onSwitchToTask={data.milestoneModal.switchMilestoneCreateToTask}
-        portalTarget={data.modalPortalTarget}
+        onSwitchToTask={data.milestoneModal.milestoneModalMode === "create" ? data.milestoneModal.switchMilestoneCreateToTask : undefined}
+        modalPortalTarget={data.modalPortalTarget}
         setMilestoneDraft={data.milestoneModal.setMilestoneDraft}
         setMilestoneEndDate={data.milestoneModal.setMilestoneEndDate}
         setMilestoneEndTime={data.milestoneModal.setMilestoneEndTime}
@@ -338,13 +346,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         setMilestoneStartTime={data.milestoneModal.setMilestoneStartTime}
       />
 
-      <TimelineMilestoneDetailModal
-        bootstrap={bootstrap}
-        milestone={data.milestoneModal.activeMilestoneDetail}
-        onClose={data.milestoneModal.closeMilestoneDetailModal}
-        onEdit={data.milestoneModal.openEditMilestoneModalForMilestone}
-        portalTarget={data.modalPortalTarget}
-      />
     </section>
   );
 };

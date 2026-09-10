@@ -32,7 +32,7 @@ function createTask(
     dueDate: "2026-01-02",
     priority: "medium",
     targetMilestoneId: milestoneId,
-    dependencyIds: [],
+
     blockers: [],
     isBlocked: false,
     linkedManufacturingIds: [],
@@ -135,6 +135,7 @@ describe("milestoneTaskState", () => {
     },
     {
       name: "blocked",
+      taskBlockers: [{ id: "blocker-1", blockedTaskId: "task-2", blockerType: "other" as const, blockerId: null, description: "Waiting", severity: "medium" as const, status: "open" as const, createdByMemberId: null, createdAt: "2026-01-01", resolvedAt: null }],
       expected: "blocked",
       tasks: [
         createTask("task-1", "in-progress", "milestone-1"),
@@ -143,8 +144,8 @@ describe("milestoneTaskState", () => {
         }),
       ],
     },
-  ])("returns $expected for $name milestone states", ({ expected, tasks, taskDependencies }) => {
-    const bootstrap = createBootstrap({ tasks, taskDependencies: taskDependencies ?? [] });
+  ])("returns $expected for $name milestone states", ({ expected, tasks, taskDependencies, taskBlockers }) => {
+    const bootstrap = createBootstrap({ tasks, taskDependencies: taskDependencies ?? [], taskBlockers });
     const state = getMilestoneTaskBoardState(tasks, bootstrap);
 
     expect(state).toBe(expected);

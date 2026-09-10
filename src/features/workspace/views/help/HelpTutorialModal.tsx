@@ -1,3 +1,4 @@
+import { ModalDialog } from "@/components/ModalDialog";
 import { useEffect, useRef, useState } from "react";
 
 import { IconChevronLeft, IconChevronRight } from "@/components/shared/Icons";
@@ -37,15 +38,6 @@ export function HelpTutorialModal({
 
     closeTutorialButtonRef.current?.focus();
 
-    const handleKeyDown = (milestone: KeyboardEvent) => {
-      if (milestone.key === "Escape") {
-        milestone.preventDefault();
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [initialOpen, onClose]);
 
   if (!initialOpen) {
@@ -92,23 +84,13 @@ export function HelpTutorialModal({
   };
 
   return (
-    <div
-      className="modal-scrim help-tutorial-scrim"
-      onClick={(milestone) => {
-        if (milestone.target === milestone.currentTarget) {
-          closeTutorial();
-        }
-      }}
-      role="presentation"
-    >
+    <ModalDialog label="Guided workspace tutorial" onClose={closeTutorial} dismissOnBackdrop className="modal-scrim help-tutorial-scrim">
       <section
         aria-describedby="help-tutorial-description"
         aria-labelledby="help-tutorial-title"
-        aria-modal="true"
         className="modal-card help-tutorial-modal"
         id="help-tutorial-dialog"
         onClick={(milestone) => milestone.stopPropagation()}
-        role="dialog"
       >
         <div className="panel-header compact-header help-tutorial-modal-header">
           <div className="queue-section-header">
@@ -218,6 +200,6 @@ export function HelpTutorialModal({
           </button>
         </div>
       </section>
-    </div>
+    </ModalDialog>
   );
 }

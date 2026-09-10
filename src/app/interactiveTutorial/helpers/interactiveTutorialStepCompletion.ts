@@ -8,7 +8,6 @@ import type {
 import { getInteractiveTutorialCreationCounts } from "./interactiveTutorialCreationCounts";
 import {
   isInteractiveTutorialCreationStep,
-  isInteractiveTutorialDropdownStep,
 } from "./interactiveTutorialStepGroups";
 
 const CREATION_COUNT_KEY_BY_STEP_ID: Partial<Record<InteractiveTutorialStepId, keyof InteractiveTutorialCreationCounts>> =
@@ -29,46 +28,6 @@ const CREATION_COUNT_KEY_BY_STEP_ID: Partial<Record<InteractiveTutorialStepId, k
     "create-fabrication-job": "fabricationJobs",
     "create-document": "documents",
   };
-
-export function isInteractiveTutorialCreateStepModalInteraction(
-  step: InteractiveTutorialStep,
-  node: Node,
-) {
-  if (!isInteractiveTutorialCreationStep(step)) {
-    return false;
-  }
-
-  const element = node instanceof Element ? node : node.parentElement;
-  return Boolean(element?.closest(".modal-card"));
-}
-
-export function hasInteractiveTutorialAlternativeOption(
-  step: InteractiveTutorialStep,
-  target: HTMLSelectElement,
-  expectedValue: string | null,
-) {
-  if (!expectedValue || !isInteractiveTutorialDropdownStep(step)) {
-    return false;
-  }
-
-  return Array.from(target.options).some((option) => {
-    if (option.disabled) {
-      return false;
-    }
-
-    const optionValue = option.value.trim();
-    if (!optionValue || optionValue === expectedValue) {
-      return false;
-    }
-
-    const optionLabel = option.textContent?.trim().toLowerCase() ?? "";
-    if (optionLabel === "create new season" || optionLabel === "add robot") {
-      return false;
-    }
-
-    return true;
-  });
-}
 
 export function isInteractiveTutorialStepComplete(
   step: InteractiveTutorialStep,
@@ -93,24 +52,13 @@ export function isInteractiveTutorialStepComplete(
     return false;
   }
 
-  if (step.id === "season") {
-    return (
-      target instanceof HTMLSelectElement &&
-      typeof context.tutorialSeasonId === "string" &&
-      target.value === context.tutorialSeasonId
-    );
-  }
-
-  if (step.id === "project-robot" || step.id === "project-outreach") {
-    return (
-      target instanceof HTMLSelectElement &&
-      typeof context.tutorialProjectId === "string" &&
-      target.value === context.tutorialProjectId
-    );
-  }
+  if (step.id === "season") return Boolean(context.tutorialSeasonId && context.selectedSeasonId === context.tutorialSeasonId);
+  if (step.id === "project-robot" || step.id === "project-outreach") return Boolean(context.tutorialProjectId && context.selectedProjectId === context.tutorialProjectId);
 
   if (step.id === "timeline-week-view") {
-    return target instanceof HTMLSelectElement && target.value === "week";
+    return target.getAttribute("aria-label") === "Timeline interval: Week" || Boolean(
+      target.querySelector('[aria-label="Set timeline interval to Week"][aria-pressed="true"]'),
+    );
   }
 
   if (step.id === "timeline-shift-period") {
@@ -168,5 +116,18 @@ export function isInteractiveTutorialStepComplete(
     return context.workstreamModalMode === "edit" && context.activeWorkstreamId !== null;
   }
 
+  const viewByStep: Partial<Record<InteractiveTutorialStepId, string>> = {
+    "directory-view": "team-people", "task-queue": "work-tasks", "reports-worklogs": "work-activity",
+    "inventory-parts": "resources-parts", "inventory-purchases": "resources-purchases",
+    "subsystems-view": "resources-structure", "outreach-workflow-view": "resources-structure",
+    "manufacturing-cnc": "resources-manufacturing",
+  };
+  if (step.id === "task-timeline" || step.id === "task-milestones") {
+    const expected = step.id === "task-timeline" ? "timeline" : "milestones";
+    return target.getAttribute("data-active-view") === "work-schedule" &&
+      document.querySelector("main[data-task-view]")?.getAttribute("data-task-view") === expected;
+  }
+  if (step.id === "inventory-materials") return ["resources-materials", "resources-documents"].includes(target.getAttribute("data-active-view") ?? "");
+  if (viewByStep[step.id]) return target.getAttribute("data-active-view") === viewByStep[step.id];
   return target.getAttribute("data-active") === "true";
 }

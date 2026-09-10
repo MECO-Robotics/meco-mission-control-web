@@ -13,9 +13,11 @@ import type {
   ProjectType,
   PurchaseStatus,
   RiskAttachmentType,
+  RiskReassessmentStatus,
   RiskSeverity,
   SeasonType,
   TaskBlockerSeverity,
+  TaskBlockerSourceKind,
   TaskBlockerType,
   TaskDependencyKind,
   TaskDependencyType,
@@ -67,19 +69,9 @@ export interface ReportPayload {
   title?: string;
   status?: TestResultStatus;
   findings?: string[];
-}
-
-export interface ReportFindingPayload {
-  reportId: string;
-  mechanismId: string | null;
-  partInstanceId: string | null;
-  artifactInstanceId: string | null;
-  issueType: string;
-  severity: RiskSeverity;
-  notes: string;
-  spawnedTaskId: string | null;
-  spawnedIterationId: string | null;
-  spawnedRiskId: string | null;
+  targetRiskId?: string | null;
+  proposedRiskSeverity?: RiskSeverity | null;
+  proposedRiskStatus?: RiskReassessmentStatus | null;
 }
 
 export type QaReportPayload = ReportPayload;
@@ -263,7 +255,7 @@ export interface TaskDependencyDraft {
   id?: string;
   kind: TaskDependencyKind;
   refId: string;
-  requiredState?: string;
+  requiredState: string;
   dependencyType: TaskDependencyType;
 }
 
@@ -274,9 +266,11 @@ export interface TaskBlockerDraft {
   description: string;
   isIntentPlaceholder?: boolean;
   severity: TaskBlockerSeverity;
+  sourceKind?: string | null;
 }
 
 export interface TaskPayload {
+  checklistItems?: string[];
   projectId: string;
   workstreamId: string | null;
   workstreamIds: string[];
@@ -291,6 +285,7 @@ export interface TaskPayload {
   partInstanceIds: string[];
   artifactId?: string | null;
   artifactIds?: string[];
+  targetRiskId?: string | null;
   targetMilestoneId: string | null;
   photoUrl: string;
   ownerId: string | null;
@@ -302,7 +297,6 @@ export interface TaskPayload {
   status: TaskStatus;
   estimatedHours: number;
   actualHours: number;
-  blockers: string[];
   taskBlockers?: TaskBlockerDraft[];
   linkedManufacturingIds: string[];
   linkedPurchaseIds: string[];
@@ -315,13 +309,14 @@ export interface TaskDependencyPayload {
   taskId: string;
   kind: TaskDependencyKind;
   refId: string;
-  requiredState?: string;
+  requiredState: string;
   dependencyType: TaskDependencyType;
 }
 
 export interface TaskBlockerPayload {
   blockedTaskId: string;
-  blockerType: TaskBlockerType;
+  blockerType: TaskBlockerSourceKind;
+  issueType: TaskBlockerType;
   blockerId: string | null;
   description: string;
   severity: TaskBlockerSeverity;

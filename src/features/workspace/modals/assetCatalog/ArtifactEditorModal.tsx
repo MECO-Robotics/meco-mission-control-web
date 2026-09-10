@@ -1,3 +1,4 @@
+import { ModalDialog } from "@/components/ModalDialog";
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 import type { ArtifactPayload } from "@/types/payloads";
 import type { ArtifactStatus } from "@/types/common";
@@ -35,11 +36,9 @@ export function ArtifactEditorModal({
   );
 
   return (
-    <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
+    <ModalDialog label="Artifact editor" onClose={closeArtifactModal}>
       <section
-        aria-modal="true"
         className="modal-card"
-        role="dialog"
         style={{
           background: "var(--bg-panel)",
           border: "1px solid var(--border-base)",
@@ -254,6 +253,6 @@ export function ArtifactEditorModal({
           </div>
         </form>
       </section>
-    </div>
+    </ModalDialog>
   );
 }

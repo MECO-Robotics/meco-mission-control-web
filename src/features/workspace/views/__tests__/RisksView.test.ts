@@ -49,7 +49,7 @@ const baseTask: BootstrapPayload["tasks"][number] = {
   dueDate: "2026-04-22",
   priority: "medium",
   status: "not-started",
-  dependencyIds: [],
+
   blockers: [],
   linkedManufacturingIds: [],
   linkedPurchaseIds: [],
@@ -209,7 +209,7 @@ function createMetricsBootstrap(): BootstrapPayload {
       {
         id: "blocker-1",
         blockedTaskId: "metric-task-3",
-        blockerType: "task",
+        blockerType: "design-issue",
         blockerId: null,
         description: "design issue",
         severity: "high",
@@ -221,7 +221,7 @@ function createMetricsBootstrap(): BootstrapPayload {
       {
         id: "blocker-2",
         blockedTaskId: "metric-task-4",
-        blockerType: "part_instance",
+        blockerType: "lost-part",
         blockerId: null,
         description: "lost part",
         severity: "medium",

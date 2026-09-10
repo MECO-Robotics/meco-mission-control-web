@@ -3,34 +3,23 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } fro
 import {
   applyCadHierarchyReview,
   applyCadSnapshotMappings,
-  fetchCadHierarchyReview,
-  fetchCadPartMatchProposals,
-  fetchCadSnapshotDiff,
-  fetchCadSnapshotMappings,
   fetchCadSnapshots,
-  fetchCadSnapshotSummary,
-  fetchCadSnapshotTree,
   fetchCadStepImportRuns,
   finalizeCadSnapshot,
   uploadCadStepFile,
 } from "../api/cadStepApi";
-import { isMissingCadHierarchyReviewRoute, isMissingCadOptionalRoute } from "../cadOptionalRoutes";
 import {
   findCadImportRun,
   findCadSnapshot,
   findLatestSuccessfulStepImportRun,
 } from "./cadStepWorkflowDerivations";
+import { useCadSnapshotDetails } from "./useCadSnapshotDetails";
 import type {
-  CadHierarchyReview,
   CadHierarchyReviewDecision,
-  CadPartMatchProposal,
-  CadStepDiff,
   CadStepImportRunRecord,
-  CadStepImportSummary,
   CadStepMappingRecord,
+  CadStepMappingRuleMatchStrategy,
   CadStepSnapshotRecord,
-  CadStepTreeNode,
-  CadStepWarningRecord,
 } from "../model/cadIntegrationTypes";
 
 export function useCadStepWorkflow({
@@ -45,13 +34,6 @@ export function useCadStepWorkflow({
   const [cadSnapshots, setCadSnapshots] = useState<CadStepSnapshotRecord[]>([]);
   const [cadImportRuns, setCadImportRuns] = useState<CadStepImportRunRecord[]>([]);
   const [selectedCadSnapshotId, setSelectedCadSnapshotId] = useState("");
-  const [stepSummary, setStepSummary] = useState<CadStepImportSummary | null>(null);
-  const [stepTree, setStepTree] = useState<CadStepTreeNode[]>([]);
-  const [stepMappings, setStepMappings] = useState<CadStepMappingRecord[]>([]);
-  const [hierarchyReview, setHierarchyReview] = useState<CadHierarchyReview | null>(null);
-  const [partMatchProposals, setPartMatchProposals] = useState<CadPartMatchProposal[]>([]);
-  const [stepWarnings, setStepWarnings] = useState<CadStepWarningRecord[]>([]);
-  const [stepDiff, setStepDiff] = useState<CadStepDiff | null>(null);
   const [groupRepeatedInstances, setGroupRepeatedInstances] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
   const [isUploadingStep, setIsUploadingStep] = useState(false);
@@ -59,7 +41,6 @@ export function useCadStepWorkflow({
   const [isFinalizing, setIsFinalizing] = useState(false);
   const selectedCadSnapshotIdRef = useRef("");
   const snapshotListRequestRef = useRef(0);
-  const snapshotDetailsRequestRef = useRef(0);
   const uploadRequestRef = useRef(0);
   const groupRepeatedInstancesRef = useRef(groupRepeatedInstances);
   const latestCadSnapshotScopeRef = useRef({ projectId, seasonId });
@@ -73,6 +54,20 @@ export function useCadStepWorkflow({
   useEffect(() => {
     groupRepeatedInstancesRef.current = groupRepeatedInstances;
   }, [groupRepeatedInstances]);
+  const {
+    clearCadSnapshotDetails,
+    hierarchyReview,
+    loadCadSnapshotDetails,
+    partMatchProposals,
+    stepDiff,
+    stepMappings,
+    stepSummary,
+    stepTree,
+    stepWarnings,
+  } = useCadSnapshotDetails({
+    groupRepeatedInstancesRef,
+    selectedCadSnapshotIdRef,
+  });
 
   const selectedCadSnapshot = useMemo(
     () => findCadSnapshot(cadSnapshots, selectedCadSnapshotId),
@@ -98,46 +93,6 @@ export function useCadStepWorkflow({
     requestedSeasonId?: string | null,
   ) => uploadRequestRef.current === requestId && isCurrentScope(requestedProjectId, requestedSeasonId), [isCurrentScope]);
 
-  const loadCadSnapshotDetails = useCallback(async (snapshotId: string, options?: { groupRepeatedInstances?: boolean }) => {
-    const requestId = snapshotDetailsRequestRef.current + 1;
-    snapshotDetailsRequestRef.current = requestId;
-    const shouldGroupInstances = options?.groupRepeatedInstances ?? groupRepeatedInstancesRef.current;
-    const [summaryResponse, treeResponse, mappingsResponse, hierarchyResponse, proposalsResponse, diffResponse] = await Promise.all([
-      fetchCadSnapshotSummary(snapshotId),
-      fetchCadSnapshotTree(snapshotId, { groupInstances: shouldGroupInstances }),
-      fetchCadSnapshotMappings(snapshotId, { groupInstances: shouldGroupInstances }),
-      fetchCadHierarchyReview(snapshotId).catch((error) => {
-        if (isMissingCadHierarchyReviewRoute(error)) {
-          return null;
-        }
-        throw error;
-      }),
-      fetchCadPartMatchProposals(snapshotId).catch((error) => {
-        if (isMissingCadOptionalRoute(error, "/part-match-proposals")) {
-          return null;
-        }
-        throw error;
-      }),
-      fetchCadSnapshotDiff(snapshotId).catch((error) => {
-        if (isMissingCadOptionalRoute(error, "/diff")) {
-          return null;
-        }
-        throw error;
-      }),
-    ]);
-    if (snapshotDetailsRequestRef.current !== requestId || selectedCadSnapshotIdRef.current !== snapshotId) {
-      return false;
-    }
-    setStepSummary(summaryResponse.summary);
-    setStepTree(treeResponse.rootNodes);
-    setStepMappings(mappingsResponse.items);
-    setHierarchyReview(hierarchyResponse);
-    setPartMatchProposals(proposalsResponse?.items ?? hierarchyResponse?.partMatchProposals ?? []);
-    setStepWarnings(diffResponse?.warnings ?? []);
-    setStepDiff(diffResponse);
-    return true;
-  }, []);
-
   const loadCadSnapshots = useCallback(async (preferredSnapshotId?: string) => {
     const requestId = snapshotListRequestRef.current + 1;
     snapshotListRequestRef.current = requestId;
@@ -157,28 +112,17 @@ export function useCadStepWorkflow({
     if (nextSnapshotId) {
       await loadCadSnapshotDetails(nextSnapshotId);
     } else {
-      snapshotDetailsRequestRef.current += 1;
-      setStepSummary(null);
-      setStepTree([]);
-      setStepMappings([]);
-      setHierarchyReview(null);
-      setPartMatchProposals([]);
-      setStepWarnings([]);
-      setStepDiff(null);
+      clearCadSnapshotDetails();
     }
     return true;
-  }, [isCurrentScope, loadCadSnapshotDetails, projectId, seasonId, selectCadSnapshot]);
-
-  const clearCadSnapshotDetails = useCallback(() => {
-    snapshotDetailsRequestRef.current += 1;
-    setStepSummary(null);
-    setStepTree([]);
-    setStepMappings([]);
-    setHierarchyReview(null);
-    setPartMatchProposals([]);
-    setStepWarnings([]);
-    setStepDiff(null);
-  }, []);
+  }, [
+    clearCadSnapshotDetails,
+    isCurrentScope,
+    loadCadSnapshotDetails,
+    projectId,
+    seasonId,
+    selectCadSnapshot,
+  ]);
 
   const handleCadSnapshotDetailsError = useCallback((snapshotId: string, error: unknown) => {
     if (selectedCadSnapshotIdRef.current === snapshotId) {
@@ -246,6 +190,7 @@ export function useCadStepWorkflow({
     targetKind: CadStepMappingRecord["targetKind"];
     targetId: string | null;
     applyToFuture: boolean;
+    ruleMatchStrategy?: CadStepMappingRuleMatchStrategy;
   }) => {
     if (!selectedCadSnapshotId) {
       return;
@@ -263,6 +208,7 @@ export function useCadStepWorkflow({
           confidence: "MANUAL",
           status: "CONFIRMED",
           applyToFuture: input.applyToFuture,
+          ruleMatchStrategy: input.ruleMatchStrategy,
         }],
       });
       const didLoadSelectedSnapshot = await loadCadSnapshotDetails(selectedCadSnapshotId);

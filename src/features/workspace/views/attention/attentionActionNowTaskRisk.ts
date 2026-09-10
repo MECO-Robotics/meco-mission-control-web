@@ -1,15 +1,17 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
-import { daysSinceDate, formatOwnerLabel, isDateOverdue, mergeLatestTimestamp } from "./attentionViewHelpers";
+import { TASK_BLOCKER_TYPE_LABELS } from "@/types/common";
+import { daysSinceDate, formatOwnerLabel, isDateOverdue } from "./attentionViewHelpers";
 import {
   addReason,
-  BLOCKED_STALE_DAYS,
   formatBlockedImpact,
   pickTaskContextLabel,
   scoreAttentionItem,
   STALE_UPDATE_DAYS,
-  WAITING_QA_STALE_DAYS,
   type AttentionLookup,
 } from "./attentionActionNowShared";
+import { buildRiskActionItems } from "./attentionActionNowRisks";
+import { buildStaleTaskActionItems } from "./attentionActionNowStaleTasks";
+import type { StaleTaskResult } from "./staleTaskDetector";
 import type { AttentionNowItem, AttentionReason } from "./attentionViewTypes";
 
 interface BuildTaskAndRiskActionItemsArgs {
@@ -20,6 +22,8 @@ interface BuildTaskAndRiskActionItemsArgs {
   lookup: AttentionLookup;
   overdueTasks: BootstrapPayload["tasks"];
   reportsById: Record<string, BootstrapPayload["reports"][number]>;
+  staleTaskResults: StaleTaskResult[];
+  taskBlockersByTaskId: Map<string, NonNullable<BootstrapPayload["taskBlockers"]>>;
   taskLastUpdatedAtById: Map<string, string>;
   waitingQaTasks: BootstrapPayload["tasks"];
 }
@@ -32,6 +36,8 @@ export function buildTaskAndRiskActionItems({
   lookup,
   overdueTasks,
   reportsById,
+  staleTaskResults,
+  taskBlockersByTaskId,
   taskLastUpdatedAtById,
   waitingQaTasks,
 }: BuildTaskAndRiskActionItemsArgs) {
@@ -40,11 +46,11 @@ export function buildTaskAndRiskActionItems({
 
   for (const task of blockedTasks) {
     const lastUpdatedAt = taskLastUpdatedAtById.get(task.id);
-    const lastUpdatedDays = daysSinceDate(lastUpdatedAt);
-    const isStale = lastUpdatedDays === null || lastUpdatedDays >= BLOCKED_STALE_DAYS;
-    if (!isStale) {
+    const staleResult = staleTaskResults.find((result) => result.task.id === task.id);
+    if (!staleResult?.issueTypes.includes("blocked-too-long")) {
       continue;
     }
+    const lastUpdatedDays = staleResult.blockedAgeDays ?? daysSinceDate(lastUpdatedAt);
 
     const reasons: AttentionReason[] = ["blocked"];
     addReason(reasons, "stale", lastUpdatedDays === null || lastUpdatedDays >= STALE_UPDATE_DAYS);
@@ -52,6 +58,12 @@ export function buildTaskAndRiskActionItems({
     addReason(reasons, "overdue", isDateOverdue(task.dueDate));
 
     const downstreamBlockedCount = downstreamByTaskId.get(task.id) ?? 0;
+    const openBlockers = taskBlockersByTaskId.get(task.id) ?? [];
+    const blockerTypes = Array.from(new Set(openBlockers.map((blocker) => blocker.blockerType)));
+    const blockerTypeLabel =
+      blockerTypes.length > 0
+        ? blockerTypes.map((blockerType) => TASK_BLOCKER_TYPE_LABELS[blockerType]).join(", ")
+        : undefined;
     const ownerLabel = formatOwnerLabel(task.ownerId ? lookup.membersById[task.ownerId]?.name : null);
     const whyNow =
       lastUpdatedDays === null
@@ -61,6 +73,7 @@ export function buildTaskAndRiskActionItems({
     items.push({
       actionType: "open-task",
       blockingImpact: formatBlockedImpact(downstreamBlockedCount),
+      blockerTypeLabel,
       contextLabel: pickTaskContextLabel(task, lookup),
       dueDate: task.dueDate,
       id: `task-blocked-stale-${task.id}`,
@@ -76,6 +89,7 @@ export function buildTaskAndRiskActionItems({
       title: task.title,
       urgencyScore: scoreAttentionItem({
         blockedAgeDays: lastUpdatedDays,
+        blockerTypes,
         downstreamBlockedCount,
         dueDate: task.dueDate,
         isOwnerMissing: !task.ownerId,
@@ -92,10 +106,11 @@ export function buildTaskAndRiskActionItems({
     }
 
     const lastUpdatedAt = taskLastUpdatedAtById.get(task.id);
-    const waitingAgeDays = daysSinceDate(lastUpdatedAt);
-    if (waitingAgeDays !== null && waitingAgeDays < WAITING_QA_STALE_DAYS) {
+    const staleResult = staleTaskResults.find((result) => result.task.id === task.id);
+    if (!staleResult?.issueTypes.includes("waiting-qa-too-long")) {
       continue;
     }
+    const waitingAgeDays = staleResult.waitingQaAgeDays ?? daysSinceDate(lastUpdatedAt);
 
     const reasons: AttentionReason[] = ["waiting-qa"];
     addReason(reasons, "stale", waitingAgeDays === null || waitingAgeDays >= STALE_UPDATE_DAYS);
@@ -133,6 +148,15 @@ export function buildTaskAndRiskActionItems({
     });
     includedTaskIds.add(task.id);
   }
+
+  items.push(
+    ...buildStaleTaskActionItems({
+      downstreamByTaskId,
+      includedTaskIds,
+      lookup,
+      staleTaskResults,
+    }),
+  );
 
   for (const task of overdueTasks) {
     if (includedTaskIds.has(task.id)) {
@@ -174,88 +198,16 @@ export function buildTaskAndRiskActionItems({
     includedTaskIds.add(task.id);
   }
 
-  for (const risk of criticalRisks) {
-    const sourceTask = lookup.taskByReportId.get(risk.sourceId);
-    const sourceReport = reportsById[risk.sourceId];
-    const reasons: AttentionReason[] = ["critical-risk", "missing-mitigation"];
-    addReason(reasons, "missing-owner", !sourceTask?.ownerId);
-    const lastUpdatedAt = mergeLatestTimestamp(sourceReport?.createdAt, sourceReport?.reviewedAt ?? null);
-
-    items.push({
-      actionType: "open-risk",
-      contextLabel: sourceTask ? pickTaskContextLabel(sourceTask, lookup) : "Scope unknown",
-      id: `risk-missing-mitigation-${risk.id}`,
-      lastUpdatedAt,
-      nextAction: "Create a mitigation task, assign an owner, and set a near-term due date.",
-      openLabel: "Open risk",
-      ownerLabel: formatOwnerLabel(
-        sourceTask?.ownerId ? lookup.membersById[sourceTask.ownerId]?.name : null,
-      ),
-      reasons,
-      recordId: risk.id,
-      severityLabel: "high",
-      sourceType: "risk",
-      statusLabel: "needs-mitigation",
-      title: risk.title,
-      urgencyScore: scoreAttentionItem({
-        isOwnerMissing: !sourceTask?.ownerId,
-        reasons,
-      }),
-      whyNow: "High-severity risk has no linked mitigation task.",
-    });
-  }
-
-  for (const risk of highRisks) {
-    if (!risk.mitigationTaskId) {
-      continue;
-    }
-
-    const mitigationTask = lookup.tasksById[risk.mitigationTaskId];
-    if (!mitigationTask) {
-      continue;
-    }
-
-    const mitigationBlocked =
-      mitigationTask.isBlocked ||
-      mitigationTask.blockers.length > 0 ||
-      mitigationTask.planningState === "blocked" ||
-      mitigationTask.planningState === "waiting-on-dependency";
-    if (!mitigationBlocked) {
-      continue;
-    }
-
-    const reasons: AttentionReason[] = ["high-risk", "blocked"];
-    addReason(reasons, "overdue", isDateOverdue(mitigationTask.dueDate));
-    addReason(reasons, "missing-owner", !mitigationTask.ownerId);
-    const downstreamBlockedCount = downstreamByTaskId.get(mitigationTask.id) ?? 0;
-
-    items.push({
-      actionType: "open-risk",
-      blockingImpact: formatBlockedImpact(downstreamBlockedCount),
-      contextLabel: pickTaskContextLabel(mitigationTask, lookup),
-      dueDate: mitigationTask.dueDate,
-      id: `risk-mitigation-blocked-${risk.id}`,
-      lastUpdatedAt: taskLastUpdatedAtById.get(mitigationTask.id),
-      nextAction: "Unblock mitigation work or define an alternate mitigation path today.",
-      openLabel: "Open risk",
-      ownerLabel: formatOwnerLabel(
-        mitigationTask.ownerId ? lookup.membersById[mitigationTask.ownerId]?.name : null,
-      ),
-      reasons,
-      recordId: risk.id,
-      severityLabel: "high",
-      sourceType: "risk",
-      statusLabel: "mitigation-blocked",
-      title: risk.title,
-      urgencyScore: scoreAttentionItem({
-        downstreamBlockedCount,
-        dueDate: mitigationTask.dueDate,
-        isOwnerMissing: !mitigationTask.ownerId,
-        reasons,
-      }),
-      whyNow: "Risk mitigation task is blocked, increasing exposure.",
-    });
-  }
+  items.push(
+    ...buildRiskActionItems({
+      criticalRisks,
+      downstreamByTaskId,
+      highRisks,
+      lookup,
+      reportsById,
+      taskLastUpdatedAtById,
+    }),
+  );
 
   return {
     includedTaskIds,

@@ -71,12 +71,6 @@ export function scopeBootstrapBySelection(
         task.subsystemIds.some((subsystemId) => scopedSubsystemIds.has(subsystemId))),
   );
   const scopedTaskIds = new Set(scopedTasks.map((task) => task.id));
-  const scopedTasksWithVisibleDependencies = scopedTasks.map((task) => ({
-    ...task,
-    dependencyIds: task.dependencyIds.filter((dependencyId) =>
-      scopedTaskIds.has(dependencyId),
-    ),
-  }));
   const scopedTaskDependencies = (payload.taskDependencies ?? []).filter((dependency) => {
     if (!scopedTaskIds.has(dependency.taskId)) {
       return false;
@@ -101,23 +95,19 @@ export function scopeBootstrapBySelection(
       return false;
     }
 
-    if (!blocker.blockerId || blocker.blockerType === "external") {
+    if (!blocker.blockerId) {
       return true;
     }
 
-    if (blocker.blockerType === "task") {
-      return scopedTaskIds.has(blocker.blockerId);
+    if (blocker.blockerType === "external" || blocker.sourceKind === "external") {
+      return true;
     }
 
-    if (blocker.blockerType === "part_instance") {
-      return scopedPartInstanceIds.has(blocker.blockerId);
-    }
-
-    if (blocker.blockerType === "milestone") {
-      return scopedMilestoneIds.has(blocker.blockerId);
-    }
-
-    return true;
+    return (
+      scopedTaskIds.has(blocker.blockerId) ||
+      scopedMilestoneIds.has(blocker.blockerId) ||
+      scopedPartInstanceIds.has(blocker.blockerId)
+    );
   });
   const scopedWorkLogs = payload.workLogs.filter((workLog) => scopedTaskIds.has(workLog.taskId));
   const scopedReports = payload.reports.filter((report) => {
@@ -238,7 +228,7 @@ export function scopeBootstrapBySelection(
     meetings: scopedMeetings,
     members: scopedMembers,
     partDefinitions: scopedPartDefinitions,
-    tasks: scopedTasksWithVisibleDependencies,
+    tasks: scopedTasks,
     workLogs: scopedWorkLogs,
     reports: scopedReports,
     reportFindings: scopedReportFindings,

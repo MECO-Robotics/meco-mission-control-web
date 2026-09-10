@@ -1,7 +1,7 @@
 import type { ArtifactPayload, MaterialPayload, WorkstreamPayload } from "@/types/payloads";
 import type { ArtifactRecord, MaterialRecord } from "@/types/recordsInventory";
 import type { WorkstreamRecord } from "@/types/recordsOrganization";
-import { requestItem, requestItems } from "./common";
+import { requestItem, } from "./common";
 
 export function createMaterialRecord(
   payload: MaterialPayload,
@@ -30,10 +30,6 @@ export function updateMaterialRecord(
 
 export function deleteMaterialRecord(materialId: string, onUnauthorized?: () => void) {
   return requestItem<MaterialRecord, never>(`/materials/${materialId}`, "DELETE", undefined, onUnauthorized);
-}
-
-export function fetchArtifactRecords(onUnauthorized?: () => void) {
-  return requestItems<ArtifactRecord>("/artifacts", onUnauthorized);
 }
 
 export function createArtifactRecord(

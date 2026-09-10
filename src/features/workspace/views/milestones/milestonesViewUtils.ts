@@ -15,24 +15,12 @@ export type MilestoneSearchSuggestion = {
   title: string;
 };
 
-export const MILESTONE_ZOOM_MIN = 0.6;
-export const MILESTONE_ZOOM_MAX = 1.6;
-export const MILESTONE_ZOOM_STEP = 0.1;
 const MILESTONE_STATUS_LABELS: Record<MilestoneStatus, string> = {
   blocked: "Blocked",
   "not ready": "Not ready",
   qa: "QA",
   ready: "Ready",
 };
-
-export function clampMilestoneZoom(value: number) {
-  const normalizedValue = Math.round(value * 10) / 10;
-  return Math.min(MILESTONE_ZOOM_MAX, Math.max(MILESTONE_ZOOM_MIN, normalizedValue));
-}
-
-export function formatMilestoneZoomLabel(zoom: number) {
-  return `${Math.round(zoom * 100)}%`;
-}
 
 export function formatMilestoneDateTime(value: string) {
   return new Date(value).toLocaleString(undefined, {

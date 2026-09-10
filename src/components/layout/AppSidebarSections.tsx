@@ -23,7 +23,6 @@ interface AppSidebarSectionsProps {
   activeSection: NavigationSection | null;
   activeSubItemId: import("@/lib/workspaceNavigation").NavigationSubItemId | null;
   expandedSection: NavigationSection | null;
-  favoriteSubItems: SidebarSubItemModel[];
   isCollapsed: boolean;
   onSectionClick: (section: NavigationSection, event: ReactMouseEvent<HTMLButtonElement>) => void;
   onSubItemSelect: (
@@ -37,7 +36,6 @@ export function AppSidebarSections({
   activeSection,
   activeSubItemId,
   expandedSection,
-  favoriteSubItems,
   isCollapsed,
   onSectionClick,
   onSubItemSelect,
@@ -45,20 +43,17 @@ export function AppSidebarSections({
 }: AppSidebarSectionsProps) {
   const renderSubItem = (
     subItem: SidebarSubItemModel,
-    options: { isFavorite?: boolean } = {},
   ) => {
-    const isFavorite = options.isFavorite === true;
-
     return (
       <button
-        aria-label={isCollapsed && isFavorite ? subItem.label : undefined}
-        className={isFavorite ? "sidebar-subtab sidebar-favorite-subtab" : "sidebar-subtab"}
+        className="sidebar-subtab"
         data-active={activeSubItemId === subItem.id ? "true" : "false"}
         data-enabled={subItem.isEnabled ? "true" : "false"}
         disabled={!subItem.isEnabled}
+        data-tutorial-target={`sidebar-view-${subItem.id}`}
+        data-active-view={activeSubItemId ?? ""}
         key={subItem.id}
         onClick={() => onSubItemSelect(subItem.target, subItem.isEnabled)}
-        title={isCollapsed && isFavorite ? subItem.label : undefined}
         type="button"
       >
         <span aria-hidden="true" className="sidebar-subtab-icon">
@@ -71,20 +66,6 @@ export function AppSidebarSections({
 
   return (
     <>
-      {favoriteSubItems.length > 0 ? (
-        <div
-          className="sidebar-section-group sidebar-favorites-group"
-          data-collapsed={isCollapsed ? "true" : "false"}
-        >
-          <div className="sidebar-favorites-heading">
-            <span className="sidebar-favorites-heading-label">{isCollapsed ? "Fav" : "Favorites"}</span>
-          </div>
-          <div className="sidebar-subtab-list sidebar-favorites-list">
-            {favoriteSubItems.map((subItem) => renderSubItem(subItem, { isFavorite: true }))}
-          </div>
-        </div>
-      ) : null}
-
       {sectionModels.map(({ section, subItems, isEnabled: isSectionEnabled }) => {
         const isExpanded = !isCollapsed && expandedSection === section;
 

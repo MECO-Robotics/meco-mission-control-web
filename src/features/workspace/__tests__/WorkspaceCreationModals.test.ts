@@ -6,7 +6,6 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { MilestoneReportEditorModal } from "@/features/workspace/modals/workReports/EventReportEditorModal";
 import { QaReportEditorModal } from "@/features/workspace/modals/workReports/QaReportEditorModal";
 import { MilestonesMilestoneModal } from "@/features/workspace/views/milestones/MilestonesEventModal";
-import { TimelineMilestoneModal } from "@/features/workspace/views/timeline/TimelineMilestoneModal";
 import { buildEmptyQaReportPayload, buildEmptyTestResultPayload } from "@/lib/appUtils/payloadBuilders";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { renderTaskModal } from "./support/WorkspaceModals.task.test.helpers";
@@ -37,6 +36,7 @@ function createModalBootstrap() {
     mechanismIds: [],
     partInstanceId: null,
     partInstanceIds: [],
+    targetRiskId: "risk-1",
     targetMilestoneId: null,
     ownerId: null,
     assigneeIds: [],
@@ -45,7 +45,7 @@ function createModalBootstrap() {
     dueDate: "2026-05-03",
     priority: "medium",
     status: "waiting-for-qa",
-    dependencyIds: [],
+
     blockers: [],
     linkedManufacturingIds: [],
     linkedPurchaseIds: [],
@@ -53,6 +53,17 @@ function createModalBootstrap() {
     actualHours: 0,
     requiresDocumentation: false,
     documentationLinked: false,
+  };
+  const risk: BootstrapPayload["risks"][number] = {
+    id: "risk-1",
+    title: "Intake binding",
+    detail: "Intake can bind under load.",
+    severity: "high",
+    sourceType: "qa-report",
+    sourceId: "report-1",
+    attachmentType: "project",
+    attachmentId: "project-1",
+    mitigationTaskId: "task-1",
   };
   const milestone: BootstrapPayload["milestones"][number] = {
     id: "milestone-1",
@@ -70,6 +81,7 @@ function createModalBootstrap() {
     ...bootstrap,
     tasks: [task],
     milestones: [milestone],
+    risks: [risk],
   };
 }
 
@@ -103,47 +115,6 @@ describe("workspace creation modals", () => {
     expect(markup).toContain("Estimated hours");
     expect(markup).toContain("Requires documentation");
     expect(markup).toContain('disabled="" type="submit">Create task');
-  });
-
-  it("uses the detailed task shell for timeline milestone creation", () => {
-    const bootstrap = createModalBootstrap();
-    const markup = renderToStaticMarkup(
-      React.createElement(TimelineMilestoneModal, {
-        activeDayMilestones: [],
-        activeMilestoneDay: "2026-05-20",
-        bootstrap,
-        milestoneDraft: {
-          title: "",
-          type: "deadline",
-          isExternal: false,
-          description: "",
-          projectIds: ["project-1"],
-        },
-        milestoneEndDate: "",
-        milestoneEndTime: "",
-        milestoneError: null,
-        milestoneStartDate: "2026-05-20",
-        milestoneStartTime: "",
-        isDeletingMilestone: false,
-        isSavingMilestone: false,
-        mode: "create",
-        onClose: jest.fn(),
-        onCancelEdit: jest.fn(),
-        onDelete: jest.fn(),
-        onSubmit: jest.fn(),
-        onSwitchToTask: jest.fn(),
-        portalTarget: {} as HTMLElement,
-        setMilestoneDraft: jest.fn(),
-        setMilestoneEndDate: jest.fn(),
-        setMilestoneEndTime: jest.fn(),
-        setMilestoneStartDate: jest.fn(),
-        setMilestoneStartTime: jest.fn(),
-      }),
-    );
-
-    expect(markup).toContain("modal-card task-details-modal");
-    expect(markup).toContain("panel-header compact-header task-details-header");
-    expect(markup).toContain("task-details-close-button");
   });
 
   it("uses the detailed task shell for milestones-view creation", () => {
@@ -209,6 +180,20 @@ describe("workspace creation modals", () => {
     expect(markup).toContain("task-details-close-button");
     expect(markup).toContain('aria-label="Close QA report modal"');
     expect(markup).toContain("modal-form task-details-grid");
+    expect(markup).toContain("Risk reassessment");
+    expect(markup).toContain("Intake binding (High)");
+    expect(markup).toContain("Partial mitigation");
+    expect(markup).toContain("Full mitigation");
+    expect(markup).toContain("risk severity changes only");
+  });
+
+  it("defaults QA risk reassessment to the selected task target risk", () => {
+    const bootstrap = createModalBootstrap();
+    const payload = buildEmptyQaReportPayload(bootstrap);
+
+    expect(payload.targetRiskId).toBe("risk-1");
+    expect(payload.proposedRiskSeverity).toBeNull();
+    expect(payload.proposedRiskStatus).toBeNull();
   });
 
   it("keeps milestone report creation aligned with report modal chrome", () => {

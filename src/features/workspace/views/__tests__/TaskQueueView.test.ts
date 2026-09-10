@@ -7,6 +7,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { IconEdit, IconManufacturing, IconParts } from "@/components/shared/Icons";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import { TaskQueueCard } from "@/features/workspace/views/taskQueue/state/taskQueueKanbanCardView";
 import { TaskQueueView } from "@/features/workspace/views/taskQueue/TaskQueueView";
 import { TaskQueueKanbanBoard } from "@/features/workspace/views/taskQueue/TaskQueueKanbanBoard";
 import { getTaskQueueCardContextLabel } from "@/features/workspace/views/taskQueue/taskQueueKanbanCardMeta";
@@ -57,7 +58,7 @@ function createTask(index: number, overrides: Partial<Task> = {}): Task {
           : index === 4 || index === 8 || index === 12 || index === 16
             ? "waiting-for-qa"
             : "complete",
-    dependencyIds: [],
+
     blockers: [],
     linkedManufacturingIds: [],
     linkedPurchaseIds: [],
@@ -130,12 +131,13 @@ function createBootstrap(): BootstrapPayload {
         risks: [],
       },
     ],
+    taskDependencies: [{ id: "dependency-1", taskId: "task-3", kind: "task", refId: "task-1", requiredState: "complete", dependencyType: "hard", createdAt: "2026-01-01" }],
+    taskBlockers: [{ id: "blocker-1", blockedTaskId: "task-4", blockerType: "other", blockerId: null, description: "Waiting on parts", severity: "medium", status: "open", createdByMemberId: null, createdAt: "2026-01-01", resolvedAt: null }],
     tasks: Array.from({ length: 16 }, (_, index) => {
       const taskIndex = index + 1;
 
       return createTask(taskIndex, {
         ownerId: taskIndex === 2 ? "member-2" : "member-1",
-        dependencyIds: taskIndex === 3 ? ["task-1"] : [],
         blockers: taskIndex === 4 ? ["Waiting on parts"] : [],
       });
     }),
@@ -143,6 +145,24 @@ function createBootstrap(): BootstrapPayload {
 }
 
 describe("TaskQueueView", () => {
+  it("keeps work-log hours and help signals on the task after removing the duplicate log board", () => {
+    const bootstrap = createBootstrap();
+    bootstrap.workLogs = [
+      { id: "old", taskId: "task-1", date: "2026-01-01", participantIds: ["member-1"], hours: 2, notes: "Need help with wiring" },
+      { id: "new", taskId: "task-1", date: "2026-01-02", participantIds: ["member-1"], hours: 1.5, notes: "Prepared connector" },
+      { id: "other", taskId: "task-2", date: "2026-01-03", participantIds: [], hours: 8, notes: "Unrelated" },
+    ];
+    const markup = renderToStaticMarkup(React.createElement(TaskQueueCard, {
+      bootstrap, task: bootstrap.tasks[0], disciplinesById: {}, membersById: {}, projectsById: {},
+      subsystemsById: {}, workstreamsById: {}, isNonRobotProject: false, openEditTaskModal: jest.fn(),
+      taskQueueZoom: 1, showProjectContextOnCards: false, showProjectOnCards: false,
+    }));
+    expect(markup).toContain("3.5h logged");
+    expect(markup).toContain("Prepared connector");
+    expect(markup).toContain("Help requested");
+    expect(markup).not.toContain("Unrelated");
+  });
+
   it("formats the kanban card context from subsystems or workflows when a project is selected", () => {
     const robotTask = createTask(1, {
       projectId: "project-robot",

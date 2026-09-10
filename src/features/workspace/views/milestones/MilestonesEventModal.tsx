@@ -1,4 +1,5 @@
-import type { Dispatch, FormEvent, SetStateAction } from "react";
+import { ModalDialog } from "@/components/ModalDialog";
+import { useLayoutEffect, useRef, type Dispatch, type FormEvent, type SetStateAction } from "react";
 import { createPortal } from "react-dom";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -24,6 +25,8 @@ interface MilestonesMilestoneModalProps {
   milestoneDraft: TimelineMilestoneDraft;
   modalPortalTarget: HTMLElement | null;
   onClose: () => void;
+  onRecordResult?: (milestone: MilestoneRecord) => void;
+  onSwitchToTask?: () => void;
   onCancelEdit: () => void;
   onDelete: () => void;
   onEditMilestone: (milestone: MilestoneRecord) => void;
@@ -50,6 +53,8 @@ export function MilestonesMilestoneModal({
   milestoneDraft,
   modalPortalTarget,
   onClose,
+  onRecordResult,
+  onSwitchToTask,
   onCancelEdit,
   onDelete,
   onEditMilestone,
@@ -61,6 +66,21 @@ export function MilestonesMilestoneModal({
   setMilestoneStartTime,
   setMilestoneDraft,
 }: MilestonesMilestoneModalProps) {
+  const draftSignature = JSON.stringify([milestoneDraft, milestoneStartDate, milestoneStartTime, milestoneEndDate, milestoneEndTime]);
+  const initialDraft = useRef(draftSignature);
+  const previousMode = useRef(milestoneModalMode);
+  useLayoutEffect(() => {
+    if (previousMode.current !== milestoneModalMode) {
+      initialDraft.current = draftSignature;
+      previousMode.current = milestoneModalMode;
+    }
+  }, [draftSignature, milestoneModalMode]);
+  const leaveEditor = (leave: () => void) => {
+    if (isSavingMilestone || isDeletingMilestone) return;
+    if (milestoneModalMode !== "detail" && draftSignature !== initialDraft.current && !window.confirm("Discard unsaved changes?")) return;
+    leave();
+  };
+
   if (!milestoneModalMode || !modalPortalTarget) {
     return null;
   }
@@ -80,8 +100,9 @@ export function MilestonesMilestoneModal({
         milestoneStartDate={milestoneStartDate}
         milestoneStartTime={milestoneStartTime}
         modalPortalTarget={modalPortalTarget}
-        onClose={onClose}
-        onCancelEdit={onCancelEdit}
+        onClose={() => leaveEditor(onClose)}
+        onRecordResult={onRecordResult}
+        onCancelEdit={() => leaveEditor(onCancelEdit)}
         onDelete={onDelete}
         onEditMilestone={onEditMilestone}
         onSubmit={onSubmit}
@@ -96,37 +117,29 @@ export function MilestonesMilestoneModal({
   }
 
   return createPortal(
-    <div
-      className="modal-scrim"
-      onClick={onClose}
-      role="presentation"
-      style={{ zIndex: 2050 }}
-    >
+    <ModalDialog label="Add milestone" onClose={() => leaveEditor(onClose)} dismissOnBackdrop>
       <section
-        aria-modal="true"
         className="modal-card task-details-modal"
         data-tutorial-target="milestone-create-modal"
         onClick={(milestone) => milestone.stopPropagation()}
-        role="dialog"
         style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
       >
         <div className="panel-header compact-header task-details-header">
           <div>
-            <p className="eyebrow" style={{ color: "var(--meco-blue)" }}>
-              Timeline milestone
-            </p>
+
             <h2 style={{ color: "var(--text-title)" }}>Add milestone</h2>
           </div>
           <button
             aria-label="Close milestone modal"
             className="icon-button task-details-close-button"
-            onClick={onClose}
+            onClick={() => leaveEditor(onClose)}
             type="button"
           >
             {"\u00D7"}
           </button>
         </div>
 
+        {onSwitchToTask ? <button className="secondary-action" type="button" onClick={() => leaveEditor(onSwitchToTask)}>Create task instead</button> : null}
         <form className="modal-form task-details-grid" onSubmit={onSubmit}>
           <MilestonesMilestoneModalFields
             bootstrap={bootstrap}
@@ -153,12 +166,12 @@ export function MilestonesMilestoneModal({
             milestoneModalMode={milestoneModalMode}
             isDeletingMilestone={isDeletingMilestone}
             isSavingMilestone={isSavingMilestone}
-            onClose={onClose}
+            onClose={() => leaveEditor(onClose)}
             onDelete={onDelete}
           />
         </form>
       </section>
-    </div>,
+    </ModalDialog>,
     modalPortalTarget,
   );
 }

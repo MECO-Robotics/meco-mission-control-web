@@ -20,3 +20,11 @@
   animation: workspace-subtab-fade-in 300ms cubic-bezier(0.23, 1, 0.32, 1) both;
   will-change: opacity, transform;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace-tab-panel-enter,
+  .workspace-subtab-panel[data-swipe-direction] {
+    animation: none;
+    will-change: auto;
+  }
+}

@@ -112,7 +112,8 @@ export function ManufacturingKanbanBoard({
   return (
     <KanbanColumns
       boardClassName="task-queue-board"
-      canDropItem={(item, state) => item.status !== state}
+      canDragItem={(item) => canShowMentorQuickActions && item.process === "cnc"}
+      canDropItem={(item, state) => canShowMentorQuickActions && item.process === "cnc" && item.status !== state}
       columnBodyClassName="task-queue-board-column-body"
       columnClassName="task-queue-board-column"
       columnCountClassName="task-queue-board-column-count"
@@ -163,7 +164,7 @@ export function ManufacturingKanbanBoard({
               Qty {item.quantity}
               {" · "}
               {item.batchLabel ?? "Unbatched"}
-              {showInHouseDetails ? ` · ${item.inHouse ? "In-house" : "Outsourced"}` : ""}
+              {showInHouseDetails && item.process === "cnc" ? ` · ${item.inHouse ? "In-house" : "Outsourced"}` : ""}
             </small>
             <div className="task-queue-board-card-meta">
               <span className={getStatusPillClassName(item.status)}>
@@ -178,7 +179,7 @@ export function ManufacturingKanbanBoard({
                 }}
               >
                 <span>{item.mentorReviewed ? "Reviewed" : "Pending"}</span>
-                {canShowMentorQuickActions ? (
+                {canShowMentorQuickActions && item.process === "cnc" ? (
                   <>
                     <button
                       className="icon-button"

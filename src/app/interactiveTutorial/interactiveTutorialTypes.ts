@@ -2,7 +2,6 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type {
   InventoryViewTab,
   ManufacturingViewTab,
-  ReportsViewTab,
   RiskManagementViewTab,
   TaskViewTab,
   ViewTab,
@@ -12,6 +11,11 @@ import type {
 export type InteractiveTutorialChapterId = "planning" | "operations" | "outreach";
 
 export type InteractiveTutorialStepId =
+  | "readiness-tab"
+  | "reports-worklogs"
+  | "directory-view"
+  | "subsystems-view"
+  | "outreach-workflow-view"
   | "season"
   | "project-robot"
   | "project-outreach"
@@ -85,7 +89,6 @@ export interface InteractiveTutorialReturnState {
   taskView: TaskViewTab;
   riskManagementView: RiskManagementViewTab;
   worklogsView: WorklogsViewTab;
-  reportsView: ReportsViewTab;
   manufacturingView: ManufacturingViewTab;
   inventoryView: InventoryViewTab;
   selectedSeasonId: string | null;
@@ -142,6 +145,8 @@ export interface InteractiveTutorialOverlayProps {
 }
 
 export interface InteractiveTutorialStepCompletionContext {
+  selectedSeasonId: string | null;
+  selectedProjectId: string | null;
   bootstrap: BootstrapPayload;
   tutorialProjectId: string | null;
   tutorialSeasonId: string | null;

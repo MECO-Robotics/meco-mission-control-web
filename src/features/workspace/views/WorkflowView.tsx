@@ -3,7 +3,7 @@
 import type { ArtifactRecord } from "@/types/recordsInventory";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
-import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
+import { WorkspaceEmptyState, WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
 import { EditableHoverIndicator, TableCell } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
@@ -89,6 +89,12 @@ export function WorkflowView({
     );
   }, [search, showArchivedWorkflows, workflowRows]);
   const workflowFilterMotionClass = useFilterChangeMotionClass([search, showArchivedWorkflows]);
+  const hasWorkflowFilters = search.trim().length > 0;
+  const hasHiddenArchivedWorkflows =
+    !showArchivedWorkflows &&
+    !hasWorkflowFilters &&
+    workflowRows.length > 0 &&
+    filteredRows.length === 0;
 
   return (
     <section className={`panel dense-panel subsystem-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
@@ -225,7 +231,28 @@ export function WorkflowView({
           ))}
 
           {filteredRows.length === 0 ? (
-            <p className="empty-state">No workflows match the current search.</p>
+            <WorkspaceEmptyState
+              actionLabel={hasWorkflowFilters || hasHiddenArchivedWorkflows ? undefined : "Add workflow"}
+              onAction={
+                hasWorkflowFilters || hasHiddenArchivedWorkflows
+                  ? undefined
+                  : openCreateWorkstreamModal
+              }
+              reason={
+                hasHiddenArchivedWorkflows
+                  ? "Archived workflow lanes are hidden. Turn on Show archived to review existing lanes."
+                  : hasWorkflowFilters
+                    ? "The current search hides every workflow in this project scope."
+                    : "No workflow lanes have been created to group tasks, contributors, and artifacts for this project yet."
+              }
+              title={
+                hasHiddenArchivedWorkflows
+                  ? "Archived workflows are hidden"
+                  : hasWorkflowFilters
+                    ? "No workflows match these filters"
+                    : "Organize project workstreams here"
+              }
+            />
           ) : null}
         </div>
       </div>

@@ -1,8 +1,10 @@
 import { useEffect, type Dispatch, type SetStateAction } from "react";
 
-import { clearStoredSessionToken, loadStoredSessionToken } from "@/lib/auth/core/sessionStorage";
-import { fetchCurrentUser } from "@/lib/auth/core/request";
-import { validateSession } from "@/lib/auth/session";
+import { clearWebSessionState, getSessionGeneration } from "@/lib/auth/core/sessionStorage";
+import {
+  restoreWebSession,
+  validateSession,
+} from "@/lib/auth/session";
 import { type AuthConfig, type SessionUser } from "@/lib/auth/types";
 import { toErrorMessage } from "@/lib/appUtils/common";
 import { fetchAuthConfig } from "@/app/hooks/auth/useAppAuthSessionConfig";
@@ -14,10 +16,44 @@ interface UseAppAuthSessionBootstrapArgs {
   setSessionUser: Dispatch<SetStateAction<SessionUser | null>>;
 }
 
+interface RestoreStoredSessionArgs {
+  isCancelled?: () => boolean;
+  setSessionUser: Dispatch<SetStateAction<SessionUser | null>>;
+}
+
 interface UseAppAuthSessionValidationArgs {
   enforcedAuthConfig: AuthConfig | null;
   expireSession: (message: string) => void;
   sessionUser: SessionUser | null;
+}
+
+export async function restoreStoredSession({
+  isCancelled = () => false,
+  setSessionUser,
+}: RestoreStoredSessionArgs) {
+  const generation = getSessionGeneration();
+  try {
+    const { user } = await restoreWebSession();
+    if (isCancelled() || generation !== getSessionGeneration()) {
+      return;
+    }
+
+    setSessionUser(user);
+  } catch (error) {
+    if (isCancelled() || generation !== getSessionGeneration()) return;
+    const isUnauthorized =
+      typeof error === "object" &&
+      error !== null &&
+      "statusCode" in error &&
+      (error as { statusCode?: unknown }).statusCode === 401;
+    if (!isUnauthorized) {
+      throw error;
+    }
+
+    if (isUnauthorized) {
+      clearWebSessionState();
+    }
+  }
 }
 
 export function useAppAuthSessionBootstrap({
@@ -36,27 +72,20 @@ export function useAppAuthSessionBootstrap({
           return;
         }
 
-        setAuthConfig(config);
-
         if (!config.enabled) {
+          setAuthConfig(config);
           return;
         }
 
-        const storedToken = loadStoredSessionToken();
-        if (!storedToken) {
+        await restoreStoredSession({
+          isCancelled: () => cancelled,
+          setSessionUser,
+        });
+        if (cancelled) {
           return;
         }
 
-        try {
-          const user = await fetchCurrentUser(storedToken);
-          if (cancelled) {
-            return;
-          }
-
-          setSessionUser(user);
-        } catch {
-          clearStoredSessionToken();
-        }
+        setAuthConfig(config);
       } catch (error) {
         if (!cancelled) {
           setAuthMessage(toErrorMessage(error));
@@ -86,16 +115,19 @@ export function useAppAuthSessionValidation({
       return;
     }
 
+    let cancelled = false;
     const intervalId = window.setInterval(() => {
       void (async () => {
+        const generation = getSessionGeneration();
         const isValid = await validateSession();
-        if (!isValid) {
+        if (!cancelled && generation === getSessionGeneration() && !isValid) {
           expireSession("Your session expired. Please sign in again.");
         }
       })();
     }, 5 * 60 * 1000);
 
     return () => {
+      cancelled = true;
       window.clearInterval(intervalId);
     };
   }, [enforcedAuthConfig, expireSession, sessionUser]);

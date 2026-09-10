@@ -3,6 +3,8 @@ import type { PartDefinitionRecord } from "@/types/recordsInventory";
 
 export interface PartsViewProps {
   bootstrap: BootstrapPayload;
+  openCreatePartInstanceModal?: (mechanism: BootstrapPayload["mechanisms"][number], partDefinitionId?: string) => void;
+  openEditPartInstanceModal?: (instance: BootstrapPayload["partInstances"][number]) => void;
   openCreatePartDefinitionModal: () => void;
   openEditPartDefinitionModal: (item: PartDefinitionRecord) => void;
   mechanismsById: Record<string, BootstrapPayload["mechanisms"][number]>;

@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 
+import { WorkspaceEmptyState } from "@/features/workspace/shared/ui";
 import { EditableHoverIndicator, PaginationControls, TableCell } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { formatIterationVersion } from "@/lib/appUtils/common";
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -10,6 +11,9 @@ import { PART_DEFINITION_GRID_TEMPLATE } from "./partsViewTypes";
 interface PartsDefinitionSectionProps {
   bootstrap: BootstrapPayload;
   filteredPartDefinitions: BootstrapPayload["partDefinitions"];
+  hasActiveFilters: boolean;
+  hasHiddenArchivedPartDefinitions: boolean;
+  onCreatePartDefinition: () => void;
   onEditPartDefinition: (partDefinition: PartDefinitionRecord) => void;
   partDefinitionFilterMotionClass: string;
   pageChangeHandlers: {
@@ -28,6 +32,9 @@ interface PartsDefinitionSectionProps {
 export function PartsDefinitionSection({
   bootstrap,
   filteredPartDefinitions,
+  hasActiveFilters,
+  hasHiddenArchivedPartDefinitions,
+  onCreatePartDefinition,
   onEditPartDefinition,
   partDefinitionFilterMotionClass,
   pageChangeHandlers,
@@ -73,7 +80,7 @@ export function PartsDefinitionSection({
               role="button"
               tabIndex={0}
               style={{ "--workspace-grid-template": PART_DEFINITION_GRID_TEMPLATE } as CSSProperties}
-              title={`Edit ${partDefinition.name}`}
+              title={`Open ${partDefinition.name}`}
             >
               <span
                 className="queue-title table-cell table-cell-primary part-primary-cell"
@@ -101,7 +108,30 @@ export function PartsDefinitionSection({
           );
         })}
         {filteredPartDefinitions.length === 0 ? (
-          <p className="empty-state">No part definitions match the current search.</p>
+          <WorkspaceEmptyState
+            actionLabel={
+              hasActiveFilters || hasHiddenArchivedPartDefinitions ? undefined : "Add part definition"
+            }
+            onAction={
+              hasActiveFilters || hasHiddenArchivedPartDefinitions
+                ? undefined
+                : onCreatePartDefinition
+            }
+            reason={
+              hasHiddenArchivedPartDefinitions
+                ? "Archived part definitions are hidden. Turn on Show archived to review existing definitions."
+                : hasActiveFilters
+                  ? "The current search, subsystem, or status filters hide every reusable part definition."
+                  : "No reusable parts have been defined for fabrication, purchasing, or subsystem traceability yet."
+            }
+            title={
+              hasHiddenArchivedPartDefinitions
+                ? "Archived part definitions are hidden"
+                : hasActiveFilters
+                  ? "No part definitions match these filters"
+                  : "Catalog reusable part definitions here"
+            }
+          />
         ) : null}
         <PaginationControls {...pageChangeHandlers} label="part definitions" />
       </div>

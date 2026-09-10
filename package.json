@@ -7,16 +7,16 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "build:bundle": "vite build",
-    "audit:organization": "node ./scripts/organization-audit.mjs",
-    "audit:organization:strict": "node ./scripts/organization-audit.mjs --enforce-hard",
     "lint": "eslint .",
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit --force",
     "test": "jest",
     "test:ci": "jest --ci --maxWorkers=50%",
     "test:watch": "jest --watch",
+    "test:security-workflows": "node --test ./scripts/merge-requirements-gate.test.mjs",
+    "test:app-utils": "jest src/lib/__tests__/appUtils.test.ts src/lib/__tests__/appUtilsSelection.test.ts src/lib/__tests__/appUtilsManufacturing.test.ts src/lib/__tests__/workspaceNavigation.test.ts",
     "verify-contracts": "node ./scripts/verify-bootstrap-contract.mjs",
-    "verify": "npm run verify-contracts && npm run typecheck && npm run lint && npm run test:ci && npm run build:bundle"
+    "verify": "npm run verify-contracts && npm run test:security-workflows && npm run typecheck && npm run lint && npm run test:ci && npm run build:bundle"
   },
   "dependencies": {
     "lucide-react": "^1.14.0",
@@ -39,6 +39,14 @@
     "jest": "^30.3.0",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.59.2",
-    "vite": "^8.0.10"
+    "vite": "^8.0.16"
+  },
+  "overrides": {
+    "js-yaml": "^4.3.2",
+    "nanoid": "^3.3.18",
+    "postcss": "^8.5.26",
+    "brace-expansion@<1.1.18": "1.1.18",
+    "brace-expansion@>=2.0.0 <2.1.4": "2.1.4",
+    "brace-expansion@>=3.0.0 <5.0.9": "5.0.9"
   }
 }

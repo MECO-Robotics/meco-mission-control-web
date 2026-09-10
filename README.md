@@ -4,7 +4,19 @@ React + Vite browser frontend for MECO Mission Control.
 
 This repository contains the broad-screen web workspace for Mission Control: planning, readiness review, robot configuration, inventory, manufacturing coordination, roster operations, reports, and help/tutorial workflows. It runs against `meco-mission-control-platform` and is deployed as static assets behind `nginx`.
 
-Use this README as the contributor entry point. Use [`docs/CURRENT_WEB_SPEC.md`](docs/CURRENT_WEB_SPEC.md) as the current product/spec reference.
+Use this README as the setup entry point. Use [`docs/web-contributor-guide.md`](docs/web-contributor-guide.md) for implementation conventions and [`docs/CURRENT_WEB_SPEC.md`](docs/CURRENT_WEB_SPEC.md) as the current product/spec reference.
+
+Contributor setup, review expectations and validation are in [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Local demo and tutorials
+
+Task logged hours are derived from work logs in both demo and tutorial workspaces, including after reload. Reset existing demos to receive corrected example dates and QA records.
+
+Unsigned demo users edit an isolated workspace in browser `sessionStorage`. The initial anonymized examples are downloaded with a read-only bootstrap request; subsequent workspace reads, edits, photos, and refreshes stay in that tab. Nothing is queued or uploaded when signing in. Reload keeps demo changes; **Reset demo** downloads the current anonymized examples with a read-only request, and closing the tab ends its storage lifetime.
+
+Interactive tutorials use a separate in-memory copy of the examples, even for signed-in users. Starting a chapter restores that tutorial baseline. Ending the tutorial restores the previous workspace; tutorial changes are discarded on exit or reload. The header identifies both modes as **no sync**. Real signed-in workspaces continue using the authenticated API.
+
+STEP processing and Onshape connections require server services and are unavailable in local modes; robot maps, parts, materials, planning, roster, and reports can be edited locally. Roster assignments, report participants, work logs, and subsystem ownership use the same local member IDs. Deleting a member removes their references throughout that workspace; stale selections are rejected. Roster metrics respect season membership. Browser storage errors are surfaced without publishing failed writes. No schema reset or reseed is required. For manual demo recovery, run `sessionStorage.removeItem("meco.local-demo.v1")` in the browser console, then reload.
 
 ## Table of Contents
 
@@ -21,6 +33,8 @@ Use this README as the contributor entry point. Use [`docs/CURRENT_WEB_SPEC.md`]
 - [Environment Variables](#environment-variables)
 - [Validation and Testing](#validation-and-testing)
 - [Development Workflow](#development-workflow)
+- [Contributor Guide](docs/web-contributor-guide.md)
+- [Issue Labels](#issue-labels)
 - [Deployment and Operations](#deployment-and-operations)
 - [Release Readiness Checklist](docs/release-readiness-checklist.md)
 - [Troubleshooting](#troubleshooting)
@@ -38,21 +52,13 @@ It should be the first place to implement workflows that need:
 - configuration editing
 - timeline/board comparison
 - evidence review
+- audit activity review with retention-aware visibility
 - mentor/admin context
 - richer filtering and diagnostics
 
 The mobile app (`meco-mission-control-mobile`) remains the faster in-shop update surface. Shared behavior should stay contract-compatible, but this repo is the primary home for higher-context workflows.
 
-Current web responsibilities:
-
-- Dashboard review: calendar, activity, and metrics
-- Readiness review: action triage, milestones, subsystems, and risks
-- Work planning: timeline, task board, and manufacturing execution views
-- Robot configuration: map-first subsystem layout, mechanism editing, and part-instance context
-- Inventory and purchasing: materials, parts, purchases, and robot-only part-mapping support
-- Roster operations: workload, attendance, and directory workflows
-- Reports: work logs, QA forms, and milestone results
-- In-app help and interactive guidance
+Current web responsibilities are organized into Home, Work, Resources and Team, with contextual record editing and evidence submission. See the navigation model below.
 
 ## System Overview
 
@@ -108,6 +114,8 @@ Default local frontend API behavior expects:
 ```env
 VITE_API_BASE_URL=/api
 VITE_DEV_PROXY_TARGET=http://localhost:8080
+VITE_DEV_SERVER_HOST=127.0.0.1
+VITE_DEV_SERVER_PORT=5173
 ```
 
 ### Run locally
@@ -116,11 +124,21 @@ VITE_DEV_PROXY_TARGET=http://localhost:8080
 npm run dev
 ```
 
-Default local URL:
+Default Vite URL without an explicit port is:
 
 ```text
-http://localhost:5173
+http://127.0.0.1:5173
 ```
+
+With the committed `.env.example` values, use:
+
+```text
+http://127.0.0.1:5173
+```
+
+Hot-module replacement is intentionally disabled because React Fast Refresh injects
+an inline bootstrap script that violates the app's script CSP. Refresh the browser
+after local source changes.
 
 ### Validate before pushing
 
@@ -128,7 +146,7 @@ http://localhost:5173
 npm run verify
 ```
 
-`verify` runs typecheck, lint, Jest CI tests, and the production bundle build.
+`verify` runs bootstrap contract verification, workflow security checks, typecheck, lint, Jest CI tests, and the production bundle build.
 
 ## Common Development Tasks
 
@@ -156,10 +174,10 @@ npm run verify
 3. Update shared frontend types under `src/types/*`.
 4. Wire the action through the relevant app hook:
    - `useAppWorkspaceTaskActions`
-   - `useAppWorkspaceCatalogActions`
+   - the relevant hook in `src/app/workspaceCatalog` (material editing owns its draft and commands)
    - `useAppWorkspaceReportActions`
    - `useAppWorkspaceRosterActions`
-5. Pass the action through the controller/shell slice only as far as needed.
+5. Compose the actual component props once in `AppWorkspaceShellView`; do not add key catalogs or controller projections.
 6. Add optimistic UI, rollback, unauthorized handling, and data refresh behavior where appropriate.
 
 ### Add or change bootstrap data fields
@@ -203,26 +221,22 @@ Avoid pushing view-specific business logic into the shell. The shell should comp
 
 ## Current Navigation Model
 
-The sidebar is organized by user-facing work area rather than raw data model entity.
+The app uses the original sidebar implementation: Home shortcut, expandable Work/Resources/Team sections, icon subitems, compact flyouts, and its existing responsive overlay. The topbar displays the current page title. The native mobile app retains labeled bottom navigation.
 
-| Section | Purpose | Current subviews |
+| Area | Views | Consolidation |
 | --- | --- | --- |
-| Dashboard | Fast review of current schedule, activity, and health | Calendar, Activity, Metrics |
-| Readiness | Items that need attention before execution or events | Action Required, Milestones, Subsystems, Risks |
-| Config | Structure and directory maintenance | Robot Configuration, Part mappings, Directory |
-| Work | Execution planning and fabrication flow | Timeline, Tasks, Manufacturing |
-| Inventory | Materials, parts, and procurement | Materials, Parts, Purchases |
-| Roster | Student/mentor availability and participation | Workload, Attendance |
-| Reports | Historical and evidence-oriented records | Work logs, QA forms, Milestone results |
+| Home | Priority work, upcoming milestones, Needs attention | One attention row per source record; Project health expands on demand |
+| Work | Tasks, Schedule, Risks, Activity | Schedule offers Calendar, Timeline and Agenda; Activity filters work logs, changes, QA and milestone results |
+| Resources | Materials/Documents, Parts, Purchases, Manufacturing, Structure | Manufacturing uses a process filter; installed parts live under their definition; CAD import opens from Structure |
+| Team | People, Attendance | People combines directory, presence, availability and workload |
 
-Important scope behavior:
+Tasks opens first in Work. Robot-only Parts and Manufacturing require a robot project. Structure requires a selected project and uses the robot map or the non-robot workflow view. All-project Resources exposes Materials and Purchases. Non-robot projects use Documents and Purchases. Home remains available without a season; other collections require season data. Help and account controls remain utilities.
 
-- Manufacturing is robot-project specific.
-- Robot projects expose Materials, Parts, and Purchases under Inventory.
-- Non-robot projects collapse inventory toward Documents/Materials and Purchases.
-- Robot Configuration is the preferred home for subsystem, mechanism, and part-instance structure editing.
-- Part mappings are robot-only support context and should not be treated as a general standalone planning page.
-- `All projects` can hide or redirect project-specific views when the selected scope cannot support them.
+Task details use a drawer on desktop and fill the narrow viewport. Logging work and submitting QA open from the task; milestone results open from the milestone. The originating detail returns after save or cancel, and editors protect unsaved changes. Collection filters survive destination changes within the current season/project; changing scope resets these local filters. URLs retain canonical destination, presentation and scope. Task details support Back, Forward and refresh; browser Back restores page scroll.
+
+The former Dashboard, Readiness, Config and Reports destinations, the work-log status board, the separate part-mapping page and the standalone People workload/availability pages have been removed. Their retained behavior is owned by the views above.
+
+See [navigation-consolidation.md](docs/navigation-consolidation.md) for the cross-client scope, validation and contract changes.
 
 ## View-to-File Map
 
@@ -234,14 +248,14 @@ Use this table to find the right implementation area before changing UI behavior
 | Shell/controller composition | `src/app/hooks/useAppWorkspaceController.ts`, `src/app/shell/*` |
 | Workspace panel routing | `src/features/workspace/WorkspaceContent.tsx`, `src/features/workspace/components/WorkspaceContentPanelsView.tsx` |
 | Navigation constants | `src/lib/workspaceNavigation/types.ts`, `src/lib/workspaceNavigation/constants.ts`, `src/lib/workspaceNavigation/helpers.ts` |
-| Calendar | `src/features/workspace/views/taskQueue/TaskCalendarPlaceholderView.tsx` |
+| Calendar | `src/features/workspace/views/taskCalendar/TaskCalendarView.tsx` |
 | Timeline | `src/features/workspace/views/timeline/*` |
 | Robot Configuration | `src/features/workspace/views/taskQueue/TaskRobotMapPlaceholderView.tsx` and related robot-map helpers |
 | Tasks board | `src/features/workspace/views/taskQueue/TaskQueueView.tsx` |
 | Milestones | `src/features/workspace/views/milestones/*` |
 | Action Required / Risks / Metrics | `src/features/workspace/views/RisksView.tsx` and related risk/metrics helpers |
-| Work logs / Activity | `src/features/workspace/views/worklogs/*` |
-| Reports / QA / Milestone results | `src/features/workspace/views/reports/*` |
+| Work logs / Activity | `src/features/workspace/views/workLogs/*` |
+| Activity / QA / Milestone results | `src/features/workspace/views/WorkLogsView.tsx`, `src/features/workspace/views/workLogs/*`, `src/features/workspace/modals/workReports/*` |
 | Manufacturing | `src/features/workspace/views/manufacturing/*` |
 | Inventory | `src/features/workspace/views/inventory/*` |
 | Subsystems | `src/features/workspace/views/subsystems/*` |
@@ -291,12 +305,12 @@ The workspace controller is intentionally split:
 - `useAppWorkspaceDerived`: derived selections, filtered records, scope helpers
 - `useAppWorkspaceLoader`: workspace bootstrap loading, unauthorized handling, uploads, refresh helpers
 - `useAppWorkspaceTaskActions`: task/event/milestone-oriented mutations
-- `useAppWorkspaceCatalogActions`: inventory, subsystem, mechanism, part, manufacturing, purchase mutations
+- `src/app/workspaceCatalog`: catalog hooks receive explicit dependencies at controller composition; `useMaterialEditor` owns material draft/open/save state and commands
 - `useAppWorkspaceReportActions`: QA/report mutations
 - `useAppWorkspaceRosterActions`: member/roster mutations
-- `buildShellController`: narrows the full model/actions into the props needed by the rendered shell
+- `AppWorkspaceShellView`: derives navigation and composes actual shell/content/modal props once, without intermediate key catalogs
 
-Do not pass the full app model into new components by default. Prefer narrow props or a focused controller slice.
+Do not pass the full app model into new components by default. Prefer the concrete inputs the component uses.
 
 ## Repository Layout
 
@@ -312,7 +326,6 @@ docs/
   *.docx                  # Historical requirements/spec baselines
 
 scripts/
-  organization-audit.mjs  # File/directory/CSS guardrail audit
   codex-worktree-bootstrap.ps1
 
 src/
@@ -335,7 +348,7 @@ src/
       Workspace*.tsx      # Workspace entrypoints and modal hosts
 
   lib/
-    auth/                 # Auth, session, bootstrap, record API helpers
+    auth/                 # Auth, session, bootstrap, record API, and preference helpers
     appUtils/             # Payload builders and domain utility helpers
     workspaceNavigation/  # Navigation types, constants, helpers
 
@@ -344,7 +357,7 @@ src/
 
 Operational files:
 
-- `AGENTS.md`: workflow, branch, file-size, directory-size, CSS, and Codex worktree rules
+- `CONTRIBUTING.md`: contributor setup, ownership criteria, validation and protected PR workflow
 - `environment.toml`: Codex worktree startup source of truth
 - `.env.example`: local env template
 - `.env.production.example`: production env template
@@ -359,11 +372,12 @@ High-use endpoint groups:
 - Bootstrap and auth:
   - `GET /api/bootstrap`
   - `GET /api/auth/config`
-  - `GET /api/auth/me`
-  - `POST /api/auth/google`
+  - `GET /api/auth/web/session`
+  - `POST /api/auth/web/google`
   - `POST /api/auth/email/start`
-  - `POST /api/auth/email/verify`
-  - `POST /api/auth/dev-bypass` in non-production only
+  - `POST /api/auth/web/email/verify`
+  - `POST /api/auth/web/dev-bypass` in non-production only
+  - `POST /api/auth/web/logout`
 - Planning/workflow:
   - `POST/PATCH /api/tasks`
   - `POST/PATCH/DELETE /api/events`
@@ -380,6 +394,8 @@ High-use endpoint groups:
 - People/work logs:
   - `POST/PATCH/DELETE /api/members`
   - `POST /api/work-logs`
+- User preferences:
+  - `GET/PATCH /api/users/me/preferences`
 
 ### Bootstrap normalization
 
@@ -412,16 +428,22 @@ Startup flow:
 
 Supported sign-in paths:
 
-- Google Identity Services token exchange via `POST /api/auth/google`
+- Google Identity Services token exchange via `POST /api/auth/web/google`
 - Email code flow via:
   - `POST /api/auth/email/start`
-  - `POST /api/auth/email/verify`
-- Dev-only bypass via `POST /api/auth/dev-bypass` when backend exposes it outside production
+  - `POST /api/auth/web/email/verify`
+- Dev-only bypass via `POST /api/auth/web/dev-bypass` when backend exposes it outside production
 
 Important behavior details:
 
-- Session token is persisted in `localStorage` as `meco.session.token`.
-- On `401` responses, the token is cleared and the user is forced to re-auth.
+- The reusable session identifier is held only in a 12-hour, revocable,
+  `HttpOnly`, `SameSite=Lax` cookie. Frontend JavaScript cannot read it.
+- A session-bound CSRF token is held only in memory and sent as
+  `X-CSRF-Token` on unsafe authenticated requests.
+- Legacy `meco.session.token` values are removed from both `localStorage` and
+  `sessionStorage`; they are never migrated or replayed.
+- On `401` responses, in-memory session state is cleared and the user is forced
+  to re-authenticate. Logout revokes the server record before clearing the UI.
 - Session validity is rechecked periodically.
 - Google sign-in only renders on secure hosts:
   - localhost (`localhost`, `127.0.0.1`, `::1`)
@@ -429,11 +451,11 @@ Important behavior details:
 
 ### Local Google SSO testing
 
-Use the Vite proxy so browser origin remains `http://localhost:5173` while API traffic stays under `/api`.
+Use the Vite proxy so browser origin remains `http://127.0.0.1:5173` while API traffic stays under `/api`.
 
 If Google sign-in fails locally because the backend-provided client is not authorized for localhost:
 
-- Add `http://localhost:5173` to authorized JavaScript origins for that OAuth web client, or
+- Add `http://127.0.0.1:5173` to authorized JavaScript origins for that OAuth web client, or
 - Set `VITE_LOCAL_GOOGLE_CLIENT_ID` to a localhost-authorized client ID.
 
 The frontend never needs a Google client secret.
@@ -449,6 +471,8 @@ Frontend env vars are read by Vite through `import.meta.env`.
 | `VITE_API_BASE_URL` | `/api` | Base path for API requests from the browser client. Keep as `/api` for same-origin proxying in dev/prod. |
 | `VITE_DEV_PROXY_TARGET` | `http://localhost:8080` | Dev-server proxy target for `/api`. Only used by Vite dev server. |
 | `VITE_LOCAL_GOOGLE_CLIENT_ID` | unset | Optional localhost-only override for Google web client ID during local development. |
+| `VITE_DEV_SERVER_HOST` | `127.0.0.1` | Optional local Vite dev-server host override. |
+| `VITE_DEV_SERVER_PORT` | unset | Optional local Vite dev-server port override. `.env.example` uses `5173`. |
 
 Production example:
 
@@ -468,10 +492,13 @@ npm run verify
 
 `verify` runs:
 
-1. `npm run typecheck`
-2. `npm run lint`
-3. `npm run test:ci`
-4. `npm run build:bundle`
+1. `npm run verify-contracts`
+2. `npm run test:security-workflows`
+3. `npm run typecheck`
+4. `npm run lint`
+5. `npm run test:ci`
+6. `npm run build:bundle`
+
 
 ### Targeted commands
 
@@ -482,8 +509,8 @@ npm run verify
 | `npm run test:ci` | validating the full Jest suite in CI mode |
 | `npm run test:watch` | iterating locally on a specific unit/view test |
 | `npm run build:bundle` | checking Vite production bundle correctness |
-| `npm run audit:organization` | checking file/directory/CSS organization warnings |
-| `npm run audit:organization:strict` | enforcing hard organization limits before structural PRs |
+| `npm run verify-contracts` | validating canonical JSON Schema and matching it to the platform contract (`development` by default, `main` for main-targeting CI) |
+| `npm run test:security-workflows` | testing the trusted merge-gate validation helpers |
 
 ### Useful targeted test patterns
 
@@ -494,46 +521,32 @@ npm run test:ci -- WorkLogsView
 npm run test:ci -- AppSidebar
 ```
 
-Use targeted tests first when narrowing behavior, then run `npm run verify` before marking the PR ready.
-
-### Organization guardrails
-
-`AGENTS.md` defines the hard rules. Practical summary:
-
-- Prefer small cohesive files and directories.
-- Split React/TS files before they exceed the hard cap.
-- Split large CSS by component or responsibility.
-- Avoid flat mixed-responsibility directories.
-- Keep diagnostics and generated artifacts under `.diagnostics/`.
-- Use `environment.toml` as the Codex worktree startup source of truth.
+Timeline cases live in directly discovered, behavior-named `TimelineView.*.test.ts` suites; no side-effect test-registration imports are needed. Use targeted tests first when narrowing behavior, then run `npm run verify` before marking the PR ready.
 
 ## Development Workflow
 
-Recommended local cycle:
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, ownership criteria, validation and protected PR flow. Keep diagnostics outside tracked source. Shared skills are optional ignored local imports; synchronize explicitly rather than treating them as application dependencies.
 
-1. Start backend (`meco-mission-control-platform`) locally.
-2. Start web app (`npm run dev`).
-3. Verify login flow and scoped workspace views.
-4. Implement the smallest coherent change.
-5. Run targeted tests for the touched area.
-6. Run `npm run verify`.
-7. Push and open a PR into `development`.
+The snapshot job packages the verified bundle from the same CI run; it does not reinstall dependencies or rebuild.
 
-Branch and PR workflow is governed by `AGENTS.md`:
+## Issue Labels
 
-- `main` is production-ready only.
-- `development` is the integration branch for active work.
-- `feature/*`, `fix/*`, and `hotfix/*` are short-lived work branches.
-- PRs into `development` must come from `feature/*`, `fix/*`, or `hotfix/*`.
-- Merges into `main` should come only from `development` or `hotfix/*`.
-- Protected branches require CI, snapshot validation, review approval, conversation resolution, linear history, and admin enforcement as described in `AGENTS.md`.
+Use Mission Control labels so web issues sort consistently with the rest of the project.
 
-Codex/worktree notes:
+Every implementation issue should carry one label from each core group:
 
-- `environment.toml` is the startup source of truth for Codex worktrees.
-- Keep startup commands and dev URL in `environment.toml`, not duplicated across docs.
-- Put diagnostic screenshots, generated reports, and temporary snapshots under `.diagnostics/`, not in the repository root.
-- When working in a worktree, audit UI changes against the worktree-hosted app instance before finishing.
+| Group | Labels | Use |
+| --- | --- | --- |
+| Area | `area:web`, `area:docs`, `area:cad`, `area:qa`, `area:auth` | Primary product or technical surface affected by the issue. Add a second area only when the acceptance criteria genuinely cross surfaces. |
+| Type | `type:bug`, `type:feature`, `type:tech-debt`, `type:ux-review` | Kind of work expected from the issue. Use `type:ux-review` for assessment/refinement tickets, not for every UI change. |
+| Priority | `priority:p0`, `priority:p1`, `priority:p2`, `priority:p3` | Delivery urgency. `p0` is production-stopping, `p1` blocks important user workflows, `p2` is planned backlog work, and `p3` is polish or opportunistic cleanup. |
+
+Supporting labels:
+
+- `blocked`: work cannot proceed until the issue names a concrete dependency or missing decision.
+- `needs-design`: UX, copy, or workflow direction is needed before implementation should start.
+
+Issue templates default to web area labels and conservative priorities. Adjust labels during triage when an issue belongs to docs, CAD, QA, auth, or a different priority.
 
 ## Deployment and Operations
 
@@ -554,14 +567,16 @@ Trigger conditions:
 
 Pipeline summary:
 
-1. Validate job:
+1. Deploy source gate:
+   - allow only protected `main`, optionally with a matching release manifest
+2. Validate job:
    - install deps with `npm ci`
    - typecheck
-   - test
-   - lint
-   - build
-2. Deploy job:
-   - rebuild app
+   - build production bundle
+3. Deploy job:
+   - verify the VPS against the pre-provisioned SSH host key
+   - create a timestamped backup under `/opt/pm-backups/web`
+   - download the validated `dist` artifact
    - rsync `dist/` to `/opt/pm-web/site`
    - upload `deploy/pm-web.nginx.conf` to `/opt/pm-web/deploy/`
    - ensure `nginx` installed/configured
@@ -575,6 +590,12 @@ Set in `MECO-Robotics/meco-mission-control-web`:
 - `VPS_HOST`
 - `VPS_USER`
 - `VPS_SSH_KEY`
+- `VPS_SSH_KNOWN_HOSTS` (the exact trusted `known_hosts` entry obtained out-of-band)
+
+Do not generate `VPS_SSH_KNOWN_HOSTS` during deployment. When the VPS host key is
+intentionally rotated, confirm the new fingerprint through the VPS provider console,
+replace the production-environment secret, and run a manual deployment. A mismatch
+fails before the backup or file transfer starts.
 
 ### Runtime paths on server
 
@@ -615,10 +636,11 @@ Check:
 
 Check:
 
-- backend JWT settings and token validity
+- whether the platform's `WebSession` schema has been deployed
 - local/server clock skew
-- whether `/api/auth/me` returns `401`
-- whether a stale `meco.session.token` exists in localStorage
+- whether `/api/auth/web/session` returns `401`
+- whether the browser accepts the first-party `meco_web_session` cookie
+- whether `CORS_ORIGIN` contains the exact web origin for direct API calls
 
 ### Missing data after switching season/project
 
@@ -646,10 +668,11 @@ Check:
 
 - component still imports the correct scoped CSS entrypoint
 - global CSS was not expanded for component-specific behavior
-- organization audit passes for CSS/file/directory limits
 - affected interaction tests still cover keyboard/responsive behavior where relevant
 
 ## Cross-Repo Responsibilities
+
+Use [`docs/cross-repo-architecture.md`](docs/cross-repo-architecture.md) for the current web, mobile, platform, Postgres, storage, Slack, Onshape, and deployment relationship diagram.
 
 Related repos:
 

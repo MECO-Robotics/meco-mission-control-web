@@ -1,6 +1,9 @@
 /// <reference types="jest" />
 
-import { normalizeTaskPayload } from "@/features/workspace/tasks/domain/taskPayloadNormalization";
+import {
+  buildTaskBlockerPayload,
+  normalizeTaskPayload,
+} from "@/features/workspace/tasks/domain/taskPayloadNormalization";
 import {
   syncTaskBlockers,
   syncTaskDependencies,
@@ -23,6 +26,7 @@ function createTaskPayload(): TaskPayload {
     mechanismIds: [],
     partInstanceId: null,
     partInstanceIds: [],
+    targetRiskId: "  risk-1  ",
     targetMilestoneId: null,
     photoUrl: "",
     ownerId: null,
@@ -34,7 +38,6 @@ function createTaskPayload(): TaskPayload {
     status: "not-started",
     estimatedHours: 3,
     actualHours: 0,
-    blockers: [],
     linkedManufacturingIds: [],
     linkedPurchaseIds: [],
     requiresDocumentation: false,
@@ -49,7 +52,7 @@ function createTaskPayload(): TaskPayload {
     ],
     taskBlockers: [
       {
-        blockerType: "external",
+        blockerType: "shipping-delay",
         blockerId: null,
         description: "  Waiting on vendor reply  ",
         severity: "medium",
@@ -79,7 +82,7 @@ function createTaskRelationPersistence(): TaskRelationPersistence {
         taskId: payload.taskId ?? "task-1",
         kind: payload.kind ?? "task",
         refId: payload.refId ?? "task-upstream",
-        requiredState: payload.requiredState,
+        requiredState: payload.requiredState ?? "complete",
         dependencyType: payload.dependencyType ?? "hard",
         };
       },
@@ -107,6 +110,7 @@ function createTaskRelationPersistence(): TaskRelationPersistence {
       createdAt: "2026-05-01T00:00:00.000Z",
       resolvedAt: null,
       ...payload,
+      blockerType: payload.issueType,
         };
       },
     ),
@@ -116,7 +120,7 @@ function createTaskRelationPersistence(): TaskRelationPersistence {
         return {
       id: blockerId,
       blockedTaskId: payload.blockedTaskId ?? "task-1",
-      blockerType: payload.blockerType ?? "external",
+      blockerType: payload.issueType ?? "other",
       blockerId: payload.blockerId ?? null,
       description: payload.description ?? "",
       severity: payload.severity ?? "medium",
@@ -133,7 +137,7 @@ function createTaskRelationPersistence(): TaskRelationPersistence {
         return {
       id: blockerId,
       blockedTaskId: "task-1",
-      blockerType: "external",
+      blockerType: "other",
       blockerId: null,
       description: "",
       severity: "medium",
@@ -153,6 +157,7 @@ describe("normalizeTaskPayload", () => {
 
     expect(normalized.title).toBe("Build intake");
     expect(normalized.summary).toBe("Trim this summary");
+    expect(normalized.targetRiskId).toBe("risk-1");
     expect(normalized.assigneeIds).toEqual(["member-1", "member-2"]);
     expect(normalized.taskDependencies?.[0]).toMatchObject({
       refId: "task-upstream",
@@ -161,6 +166,40 @@ describe("normalizeTaskPayload", () => {
     expect(normalized.taskBlockers?.[0]).toMatchObject({
       description: "Waiting on vendor reply",
     });
+  });
+});
+
+describe("buildTaskBlockerPayload", () => {
+  it("keeps a part relationship while changing its issue category", () => {
+    expect(buildTaskBlockerPayload("task-1", {
+      blockerType: "broken-part", blockerId: "part-1", sourceKind: "part_instance",
+      description: "Replacement needed", severity: "high",
+    })).toEqual(expect.objectContaining({
+      blockerType: "part_instance", issueType: "broken-part", blockerId: "part-1",
+    }));
+  });
+  it("respects an explicitly changed type on an external blocker", () => {
+    expect(buildTaskBlockerPayload("task-1", {
+      blockerType: "broken-part",
+      blockerId: null,
+      description: "Broken replacement",
+      severity: "high",
+      sourceKind: "external",
+    }).issueType).toBe("broken-part");
+  });
+  it("preserves an external kind during unrelated blocker edits", () => {
+    expect(buildTaskBlockerPayload("task-1", {
+      id: "blocker-1",
+      blockerType: "external",
+      blockerId: null,
+      description: "  Updated vendor ETA  ",
+      severity: "high",
+      sourceKind: "external",
+    })).toEqual(expect.objectContaining({
+      blockerType: "external",
+      blockerId: null,
+      description: "Updated vendor ETA",
+    }));
   });
 });
 
@@ -221,6 +260,7 @@ describe("task relation sync services", () => {
             kind: "part_instance",
             refId: " part-1 ",
             dependencyType: "hard",
+            requiredState: "ready",
           },
         ],
         existingDependencies,
@@ -247,7 +287,7 @@ describe("task relation sync services", () => {
         taskId: "task-1",
         kind: "part_instance",
         refId: "part-1",
-        requiredState: undefined,
+        requiredState: "ready",
         dependencyType: "hard",
       }),
       noopUnauthorized,
@@ -265,7 +305,7 @@ describe("task relation sync services", () => {
       {
         id: "blocker-keep",
         blockedTaskId: "task-1",
-        blockerType: "external",
+        blockerType: "shipping-delay",
         blockerId: null,
         description: "Waiting on parts",
         severity: "medium",
@@ -277,7 +317,7 @@ describe("task relation sync services", () => {
       {
         id: "blocker-update",
         blockedTaskId: "task-1",
-        blockerType: "task",
+        blockerType: "design-issue",
         blockerId: "task-2",
         description: "Old detail",
         severity: "low",
@@ -289,7 +329,7 @@ describe("task relation sync services", () => {
       {
         id: "blocker-remove",
         blockedTaskId: "task-1",
-        blockerType: "part_instance",
+        blockerType: "lost-part",
         blockerId: "part-2",
         description: "Remove this blocker",
         severity: "high",
@@ -306,20 +346,21 @@ describe("task relation sync services", () => {
         desiredBlockers: [
           {
             id: "blocker-keep",
-            blockerType: "external",
+            blockerType: "shipping-delay",
             blockerId: null,
             description: "Waiting on parts",
             severity: "medium",
           },
           {
             id: "blocker-update",
-            blockerType: "milestone",
+            blockerType: "qa-failed",
             blockerId: "milestone-1",
+            sourceKind: "milestone",
             description: "  Needs milestone handoff  ",
             severity: "high",
           },
           {
-            blockerType: "external",
+            blockerType: "manufacturing-unavailable",
             blockerId: null,
             description: "  Supplier ETA unknown  ",
             severity: "low",
@@ -337,6 +378,7 @@ describe("task relation sync services", () => {
       expect.objectContaining({
         blockedTaskId: "task-1",
         blockerType: "milestone",
+        issueType: "qa-failed",
         blockerId: "milestone-1",
         description: "Needs milestone handoff",
         severity: "high",
@@ -349,6 +391,7 @@ describe("task relation sync services", () => {
       expect.objectContaining({
         blockedTaskId: "task-1",
         blockerType: "external",
+        issueType: "manufacturing-unavailable",
         blockerId: null,
         description: "Supplier ETA unknown",
         severity: "low",

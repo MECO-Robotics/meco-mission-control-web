@@ -3,6 +3,7 @@ import type {
   MilestoneType,
   MeetingType,
   TaskBlockerSeverity,
+  TaskBlockerSourceKind,
   TaskBlockerStatus,
   TaskBlockerType,
   TaskDependencyKind,
@@ -63,6 +64,7 @@ export interface TaskRecord {
   partInstanceIds: string[];
   artifactId?: string | null;
   artifactIds?: string[];
+  targetRiskId?: string | null;
   targetMilestoneId: string | null;
   photoUrl?: string;
   ownerId: string | null;
@@ -73,8 +75,8 @@ export interface TaskRecord {
   priority: TaskPriority;
   status: TaskStatus;
   planningState?: TaskPlanningState;
-  dependencyIds: string[];
   blockers: string[];
+  checklistItems?: string[];
   isBlocked?: boolean;
   isWaitingOnDependency?: boolean;
   linkedManufacturingIds: string[];
@@ -90,7 +92,7 @@ export interface TaskDependencyRecord {
   taskId: string;
   kind: TaskDependencyKind;
   refId: string;
-  requiredState?: string;
+  requiredState: string;
   dependencyType: TaskDependencyType;
   createdAt: string;
 }
@@ -100,6 +102,8 @@ export interface TaskBlockerRecord {
   blockedTaskId: string;
   blockerType: TaskBlockerType;
   blockerId: string | null;
+  sourceKind?: string | null;
+  issueType?: TaskBlockerType;
   description: string;
   severity: TaskBlockerSeverity;
   status: TaskBlockerStatus;
@@ -156,6 +160,16 @@ export interface QaReviewRecord {
   reviewedAt: string;
 }
 
+export interface QaRequestRecord {
+  id: string;
+  taskId: string | null;
+  subject: string;
+  mentorId: string;
+  requestedById: string | null;
+  createdAt: string;
+  status: "requested";
+}
+
 export interface EscalationRecord {
   title: string;
   detail: string;
@@ -179,3 +193,7 @@ export interface AuditActionRecord {
   actorMemberId: string | null;
   memberIds: string[];
 }
+
+export type TaskBlockerResponse = Omit<TaskBlockerRecord, "blockerType" | "sourceKind"> & {
+  blockerType: TaskBlockerSourceKind;
+};

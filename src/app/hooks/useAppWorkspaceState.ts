@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import "@/app/App.css";
 import { useAppAuth } from "@/app/hooks/useAppAuth";
 import { useAppShell } from "@/app/hooks/useAppShell";
+import { isPublicDemoSeasonAccess } from "@/app/publicDemoAccess";
 import { useAppWorkspaceGlobalEffects } from "@/app/hooks/workspace/derived/useAppWorkspaceGlobalEffects";
 import { useAppWorkspaceUiState } from "@/app/hooks/useAppWorkspaceUiState";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
@@ -19,7 +20,6 @@ import type {
   ManufacturingViewTab,
   RosterViewTab,
   RiskManagementViewTab,
-  ReportsViewTab,
   TaskViewTab,
   ViewTab,
   WorklogsViewTab,
@@ -31,11 +31,10 @@ export type AppWorkspaceState = ReturnType<typeof useAppWorkspaceState>;
 export function useAppWorkspaceState() {
   const [activeTab, setActiveTab] = useState<ViewTab>("home");
   const [tabSwitchDirection, setTabSwitchDirection] = useState<"up" | "down">("down");
-  const [taskView, setTaskView] = useState<TaskViewTab>("timeline");
+  const [taskView, setTaskView] = useState<TaskViewTab>("queue");
   const [riskManagementView, setRiskManagementView] =
     useState<RiskManagementViewTab>("kanban");
   const [worklogsView, setWorklogsView] = useState<WorklogsViewTab>("logs");
-  const [reportsView, setReportsView] = useState<ReportsViewTab>("qa");
   const [manufacturingView, setManufacturingView] =
     useState<ManufacturingViewTab>("all");
   const [inventoryView, setInventoryView] = useState<InventoryViewTab>("materials");
@@ -43,6 +42,7 @@ export function useAppWorkspaceState() {
   const [bootstrap, setBootstrap] = useState<BootstrapPayload>(EMPTY_BOOTSTRAP);
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [dataMessage, setDataMessage] = useState<string | null>(null);
+  const [isSignInScreenRequested, setIsSignInScreenRequested] = useState(false);
   const [taskEditNotices, setTaskEditNotices] = useState<WorkspaceToastNotice[]>([]);
   const [notificationHistory, setNotificationHistory] = useState<WorkspaceToastNotice[]>([]);
   const [isNotificationQueueOpen, setIsNotificationQueueOpen] = useState(false);
@@ -116,9 +116,14 @@ export function useAppWorkspaceState() {
     setTaskEditNotices([]);
   };
 
-  const { authBooting, authConfig, authMessage, clearAuthMessage, enforcedAuthConfig, expireSession, googleButtonRef, handleSignOut, handleDevBypassSignIn, handleRequestEmailCode, handleVerifyEmailCode, isEmailAuthAvailable, isGoogleAuthAvailable, isSigningIn, sessionUser } =
+  const handleSessionExpired = useCallback(() => {
+    setIsSignInScreenRequested(true);
+  }, []);
+
+  const { authBooting, authConfig, authMessage, clearAuthMessage, enforcedAuthConfig, expireSession, googleButtonRef, handleSignOut, handleDevBypassSignIn, handleRequestEmailCode, handleVerifyEmailCode, isEmailAuthAvailable, isGoogleAuthAvailable, isSignInForced, isSigningIn, sessionUser } =
     useAppAuth({
       isDarkMode,
+      onSessionExpired: handleSessionExpired,
       resetWorkspace: () => {
         setBootstrap(EMPTY_BOOTSTRAP);
         workspaceUiState.setActivePersonFilter([]);
@@ -133,6 +138,27 @@ export function useAppWorkspaceState() {
         setIsNotificationQueueOpen(false);
       },
     });
+  const isPublicDemoSession = isPublicDemoSeasonAccess({
+    enforcedAuthConfig,
+    selectedSeasonId: workspaceUiState.selectedSeasonId,
+    sessionUser,
+  });
+
+  useEffect(() => {
+    if (sessionUser) {
+      setIsSignInScreenRequested(false);
+    }
+  }, [sessionUser]);
+
+  const requestSignIn = () => {
+    clearAuthMessage();
+    setIsSignInScreenRequested(true);
+  };
+
+  const returnToPublicDemo = () => {
+    clearAuthMessage();
+    setIsSignInScreenRequested(false);
+  };
 
   useAppWorkspaceGlobalEffects({
     isDarkMode,
@@ -140,10 +166,6 @@ export function useAppWorkspaceState() {
     isSidebarOverlay,
     toggleSidebar,
     setDataMessage,
-    isAddSeasonPopupOpen: workspaceUiState.isAddSeasonPopupOpen,
-    setIsAddSeasonPopupOpen: workspaceUiState.setIsAddSeasonPopupOpen,
-    robotProjectModalMode: workspaceUiState.robotProjectModalMode,
-    setRobotProjectModalMode: workspaceUiState.setRobotProjectModalMode,
   });
 
   return {
@@ -167,13 +189,16 @@ export function useAppWorkspaceState() {
     isEmailAuthAvailable,
     isGoogleAuthAvailable,
     isLoadingData,
+    isSignInScreenRequested,
     isNotificationQueueOpen,
+    isPublicDemoSession,
+    isSignInForced,
     isSigningIn,
     isSidebarCollapsed,
     isSidebarOverlay,
     manufacturingView,
     pageShellStyle,
-    reportsView,
+    requestSignIn,
     rosterView,
     riskManagementView,
     setActiveTab,
@@ -183,7 +208,6 @@ export function useAppWorkspaceState() {
     setIsLoadingData,
     setManufacturingView,
     setRosterView,
-    setReportsView,
     setRiskManagementView,
     setTabSwitchDirection,
     enqueueTaskEditNotice,
@@ -200,6 +224,7 @@ export function useAppWorkspaceState() {
     worklogsView,
     suppressNextAutoWorkspaceLoadRef,
     suppressNextAutoWorkspaceLoad,
+    returnToPublicDemo,
     enforcedAuthConfig,
     clearTaskEditNotices,
     notificationHistory,

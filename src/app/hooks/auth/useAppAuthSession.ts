@@ -1,3 +1,4 @@
+import { hasPendingSignOut } from "@/lib/auth/core/sessionStorage";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -14,6 +15,7 @@ import {
 } from "@/app/hooks/auth/useAppAuthGoogleIdentity";
 import {
   useAppAuthSessionActions,
+  UNCONFIRMED_SIGN_OUT_MESSAGE,
   type UseAppAuthSessionActionsResult,
 } from "@/app/hooks/auth/useAppAuthSessionActions";
 import {
@@ -22,6 +24,7 @@ import {
 } from "@/app/hooks/auth/useAppAuthSessionLifecycle";
 
 interface UseAppAuthSessionArgs {
+  onSessionExpired?: () => void;
   resetWorkspace: () => void;
 }
 
@@ -36,7 +39,7 @@ export interface UseAppAuthSessionResult {
   handleDevBypassSignIn: (role?: DevBypassRole) => Promise<void>;
   handleGoogleCredential: (response: GoogleCredentialResponse) => Promise<void>;
   handleRequestEmailCode: (email: string) => Promise<EmailCodeDeliveryResponse>;
-  handleSignOut: () => void;
+  handleSignOut: () => Promise<void>;
   handleVerifyEmailCode: (email: string, code: string) => Promise<void>;
   hostedDomain: string;
   isEmailAuthAvailable: boolean;
@@ -44,18 +47,21 @@ export interface UseAppAuthSessionResult {
   isLocalGoogleDevHost: boolean;
   isLocalGoogleOverrideActive: boolean;
   isSigningIn: boolean;
+  isSignInForced: boolean;
   sessionUser: SessionUser | null;
   setAuthMessage: (message: string) => void;
 }
 
 export function useAppAuthSession({
+  onSessionExpired,
   resetWorkspace,
 }: UseAppAuthSessionArgs): UseAppAuthSessionResult {
   const [authConfig, setAuthConfig] = useState<AuthConfig | null>(null);
   const [sessionUser, setSessionUser] = useState<SessionUser | null>(null);
   const [authBooting, setAuthBooting] = useState(true);
   const [isSigningIn, setIsSigningIn] = useState(false);
-  const [authMessage, setAuthMessage] = useState<string | null>(null);
+  const [isSignInForced, setIsSignInForced] = useState(hasPendingSignOut);
+  const [authMessage, setAuthMessage] = useState<string | null>(() => hasPendingSignOut() ? UNCONFIRMED_SIGN_OUT_MESSAGE : null);
   const resetWorkspaceRef = useRef(resetWorkspace);
 
   useEffect(() => {
@@ -79,9 +85,11 @@ export function useAppAuthSession({
     handleVerifyEmailCode,
     setAuthMessage: setAuthMessageNow,
   }: UseAppAuthSessionActionsResult = useAppAuthSessionActions({
+    onSessionExpired,
     resetWorkspaceRef,
     setAuthMessage,
     setIsSigningIn,
+    setIsSignInForced,
     setSessionUser,
   });
 
@@ -117,6 +125,7 @@ export function useAppAuthSession({
     isLocalGoogleDevHost,
     isLocalGoogleOverrideActive,
     isSigningIn,
+    isSignInForced,
     sessionUser,
     setAuthMessage: setAuthMessageNow,
   };

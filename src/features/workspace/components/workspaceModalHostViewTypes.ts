@@ -26,6 +26,8 @@ export interface WorkspaceModalHostViewProps {
   closeMilestoneReportModal: () => void;
   closeTimelineTaskDetailsModal: () => void;
   closeWorkLogModal: () => void;
+  openCreateWorkLogModal: (taskId?: string) => void;
+  openCreateQaReportModal: (taskId?: string) => void;
   closeSubsystemModal: () => void;
   closeTaskModal: () => void;
   closeWorkstreamModal: () => void;

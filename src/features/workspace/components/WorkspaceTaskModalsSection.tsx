@@ -24,6 +24,8 @@ export function WorkspaceTaskModalsSection(props: WorkspaceModalHostViewProps) {
           closeTaskDetailsModal={props.closeTimelineTaskDetailsModal}
           advancedSectionOpen={advancedSectionOpen}
           onEditTask={props.onOpenTaskEditFromTimelineDetails}
+          onLogWork={props.openCreateWorkLogModal}
+          onSubmitQa={props.openCreateQaReportModal}
           onResolveTaskBlocker={props.handleResolveTaskBlocker}
           setAdvancedSectionOpen={setAdvancedSectionOpen}
         />

@@ -3,7 +3,9 @@ name: UX review
 about: Request a focused UX review of a workflow or page
 title: "UX: "
 labels:
-  - ux
+  - area:web
+  - type:ux-review
+  - priority:p2
 ---
 
 ## Flow / screen under review

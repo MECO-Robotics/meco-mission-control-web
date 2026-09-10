@@ -1,3 +1,5 @@
+import { createPortal } from "react-dom";
+import { useModalPortalTarget } from "@/components/useModalPortalTarget";
 import type { CSSProperties } from "react";
 
 import type { InteractiveTutorialOverlayProps } from "./interactiveTutorialTypes";
@@ -29,6 +31,7 @@ export function InteractiveTutorialOverlay({
   stepError,
   stepNumber,
 }: InteractiveTutorialOverlayProps) {
+  const portalTarget = useModalPortalTarget();
   const spotlightBounds = spotlightRect
     ? {
         top: Math.max(0, spotlightRect.top),
@@ -40,7 +43,7 @@ export function InteractiveTutorialOverlay({
 
   const dimFallback = toDimStyle(spotlightBounds, spotlightRect);
 
-  return (
+  const overlay = (
     <aside aria-label="Interactive tutorial" className="interactive-tutorial-overlay" role="dialog">
       {spotlightRect && spotlightBounds ? (
         <>
@@ -106,7 +109,7 @@ export function InteractiveTutorialOverlay({
             <h3>{currentStep.title}</h3>
             <p>{currentStep.instruction}</p>
             <p className="interactive-tutorial-context">
-              Fake tutorial season: {seasonName ?? "Tutorial Season"}
+              Local tutorial · changes are never synced. Season: {seasonName ?? "Tutorial Season"}
             </p>
             {projectName ? (
               <p className="interactive-tutorial-context">Tutorial project: {projectName}</p>
@@ -155,4 +158,5 @@ export function InteractiveTutorialOverlay({
       </section>
     </aside>
   );
+  return portalTarget ? createPortal(overlay, portalTarget) : overlay;
 }

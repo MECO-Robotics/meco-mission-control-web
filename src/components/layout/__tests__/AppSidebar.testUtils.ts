@@ -9,16 +9,16 @@ jest.mock("@/lib/branding", () => ({
 
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import type { SessionUser } from "@/lib/auth/types";
-import type { ProjectRecord } from "@/types/recordsOrganization";
-import type { NavigationItem, NavigationSubItemId, ViewTab } from "@/lib/workspaceNavigation";
+import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
+import type { NavigationItem, ViewTab } from "@/lib/workspaceNavigation";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 export function renderSidebar(
-  items: NavigationItem[],
-  activeTab: ViewTab = "reports",
+  _items: NavigationItem[],
+  activeTab: ViewTab = "worklogs",
   options?: {
-    favoriteViewIds?: NavigationSubItemId[];
+    canSignIn?: boolean;
     inventoryView?: "materials" | "parts" | "part-mappings" | "purchases";
     isCollapsed?: boolean;
     isMyViewActive?: boolean;
@@ -28,16 +28,17 @@ export function renderSidebar(
     projects?: ProjectRecord[];
     riskManagementView?: "kanban" | "metrics";
     selectedProjectId?: string | null;
+    selectedSeasonId?: string | null;
+    seasons?: SeasonRecord[];
     sessionUser?: SessionUser | null;
     taskView?: "calendar" | "timeline" | "robot-map" | "queue" | "milestones";
   },
 ) {
   const sidebarProps: React.ComponentProps<typeof AppSidebar> = {
       activeTab,
-      favoriteViewIds: options?.favoriteViewIds ?? [],
+      canSignIn: options?.canSignIn ?? (options?.sessionUser ?? null) === null,
       handleSignOut: jest.fn(),
       inventoryView: options?.inventoryView ?? "materials",
-      items,
       isDarkMode: false,
       isMyViewActive: options?.isMyViewActive ?? false,
       isCollapsed: options?.isCollapsed ?? false,
@@ -52,18 +53,18 @@ export function renderSidebar(
       onCreateTask: jest.fn(),
       onEditSelectedRobot: jest.fn(),
       onRefreshWorkspace: jest.fn(),
+      onSignIn: jest.fn(),
       onSelectSeason: jest.fn(),
       onSelectProject: jest.fn(),
       onSelectTarget: jest.fn(),
       onToggleMyView: jest.fn(),
       onToggleNotificationQueue: jest.fn(),
       projects: options?.projects ?? [],
-      reportsView: "qa",
       rosterView: "directory",
       riskManagementView: options?.riskManagementView ?? "kanban",
       selectedProjectId: options?.selectedProjectId ?? null,
-      selectedSeasonId: "season-1",
-      seasons: [
+      selectedSeasonId: options?.selectedSeasonId ?? "season-1",
+      seasons: options?.seasons ?? [
         {
           id: "season-1",
           name: "2026 Season",

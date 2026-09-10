@@ -4,7 +4,6 @@ import type { FilterSelection } from "@/features/workspace/shared/filters/worksp
 import type {
   InventoryViewTab,
   ManufacturingViewTab,
-  ReportsViewTab,
   RiskManagementViewTab,
   TaskViewTab,
   ViewTab,
@@ -17,7 +16,6 @@ export interface UseInteractiveTutorialOptions {
   taskView: TaskViewTab;
   riskManagementView: RiskManagementViewTab;
   worklogsView: WorklogsViewTab;
-  reportsView: ReportsViewTab;
   manufacturingView: ManufacturingViewTab;
   inventoryView: InventoryViewTab;
   selectedSeasonId: string | null;
@@ -31,7 +29,6 @@ export interface UseInteractiveTutorialOptions {
   setTaskView: Dispatch<SetStateAction<TaskViewTab>>;
   setRiskManagementView: Dispatch<SetStateAction<RiskManagementViewTab>>;
   setWorklogsView: Dispatch<SetStateAction<WorklogsViewTab>>;
-  setReportsView: Dispatch<SetStateAction<ReportsViewTab>>;
   setManufacturingView: Dispatch<SetStateAction<ManufacturingViewTab>>;
   setInventoryView: Dispatch<SetStateAction<InventoryViewTab>>;
   setSelectedSeasonId: Dispatch<SetStateAction<string | null>>;
@@ -40,16 +37,16 @@ export interface UseInteractiveTutorialOptions {
   setBootstrap: Dispatch<SetStateAction<BootstrapPayload>>;
   setDataMessage: Dispatch<SetStateAction<string | null>>;
   activeTimelineTaskDetailId: string | null;
-  taskModalMode: import("@/features/workspace").TaskModalMode;
+  taskModalMode: import("@/features/workspace/shared/model/workspaceModalModes").TaskModalMode;
   activeTaskId: string | null;
-  materialModalMode: import("@/features/workspace").MaterialModalMode;
+  materialModalMode: import("@/features/workspace/shared/model/workspaceModalModes").MaterialModalMode;
   activeMaterialId: string | null;
-  subsystemModalMode: import("@/features/workspace").SubsystemModalMode;
+  subsystemModalMode: import("@/features/workspace/shared/model/workspaceModalModes").SubsystemModalMode;
   activeSubsystemId: string | null;
-  mechanismModalMode: import("@/features/workspace").MechanismModalMode;
+  mechanismModalMode: import("@/features/workspace/shared/model/workspaceModalModes").MechanismModalMode;
   activeMechanismId: string | null;
-  manufacturingModalMode: import("@/features/workspace").ManufacturingModalMode;
+  manufacturingModalMode: import("@/features/workspace/shared/model/workspaceModalModes").ManufacturingModalMode;
   activeManufacturingId: string | null;
-  workstreamModalMode: import("@/features/workspace").WorkstreamModalMode;
+  workstreamModalMode: import("@/features/workspace/shared/model/workspaceModalModes").WorkstreamModalMode;
   activeWorkstreamId: string | null;
 }

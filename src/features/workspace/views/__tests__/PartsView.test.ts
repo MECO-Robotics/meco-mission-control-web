@@ -118,3 +118,17 @@ describe("PartsView filters", () => {
     expect(filteredDefinitions).toEqual([]);
   });
 });
+
+it("finds a definition by its instance name after catalog consolidation", () => {
+  expect(filterPartDefinitions({ bootstrap, partSearch: "Shoulder", partStatus: [], partSubsystem: [] }).map(part => part.id)).toEqual(["arm-part"]);
+  expect(filterPartDefinitions({ bootstrap, partSearch: "Shoulder", partStatus: ["ready"], partSubsystem: [] })).toEqual([]);
+});
+
+it("finds a definition by its allocated mechanism while honoring subsystem filters", () => {
+  const mapped = { ...bootstrap,
+    mechanisms: [{ id: "wrist", subsystemId: "arm", name: "Wrist pivot", description: "", iteration: 1 }],
+    partInstances: bootstrap.partInstances.map(instance => instance.id === "arm-needed" ? { ...instance, mechanismId: "wrist" } : instance),
+  } satisfies BootstrapPayload;
+  expect(filterPartDefinitions({ bootstrap: mapped, partSearch: "Wrist", partStatus: [], partSubsystem: ["arm"] }).map(part => part.id)).toEqual(["arm-part"]);
+  expect(filterPartDefinitions({ bootstrap: mapped, partSearch: "Wrist", partStatus: [], partSubsystem: ["drive"] })).toEqual([]);
+});

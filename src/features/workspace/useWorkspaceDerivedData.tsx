@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
 import { Home } from "lucide-react";
-import { IconHelp, IconManufacturing, IconParts, IconReports, IconRisk, IconRoster, IconSubsystems, IconTasks, IconWorkLogs } from "@/components/shared/Icons";
+import { IconHelp, IconManufacturing, IconParts, IconRisk, IconRoster, IconSubsystems, IconTasks, IconWorkLogs } from "@/components/shared/Icons";
 import type { NavigationItem } from "@/lib/workspaceNavigation";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
@@ -123,12 +123,6 @@ export function useWorkspaceDerivedData({
           icon: <IconWorkLogs />,
           count: bootstrap.workLogs.length,
         },
-        {
-          value: "reports",
-          label: "Reports",
-          icon: <IconReports />,
-          count: bootstrap.reports.length,
-        },
       ];
 
       if (showManufacturingTab) {
@@ -187,7 +181,6 @@ export function useWorkspaceDerivedData({
       bootstrap.tasks.length,
       bootstrap.risks.length,
       bootstrap.workLogs.length,
-      bootstrap.reports.length,
       bootstrap.manufacturingItems,
       bootstrap.members.length,
       showManufacturingTab,

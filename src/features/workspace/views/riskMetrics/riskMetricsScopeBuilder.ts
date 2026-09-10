@@ -1,4 +1,5 @@
-﻿import type { TaskBlockerRecord, TaskRecord } from "@/types/recordsExecution";
+﻿import { TASK_BLOCKER_TYPE_LABELS } from "@/types/common";
+import type { TaskBlockerRecord, TaskRecord } from "@/types/recordsExecution";
 
 import type { ScopeMetricRow } from "./riskMetricsTypes";
 
@@ -9,16 +10,6 @@ const BLOCKER_SEVERITY_ORDER: Record<TaskBlockerRecord["severity"], number> = {
   high: 3,
   medium: 2,
   low: 1,
-};
-
-const BLOCKER_TYPE_LABELS: Record<TaskBlockerRecord["blockerType"], string> = {
-  task: "design issue",
-  milestone: "design issue",
-  workstream: "design issue",
-  mechanism: "design issue",
-  part_instance: "lost/broken part",
-  artifact_instance: "lost/broken tool",
-  external: "other",
 };
 
 function parseTimestamp(value: string | null | undefined) {
@@ -40,7 +31,7 @@ function computeAgeDays(value: string | null | undefined, now: number) {
 }
 
 function blockerReasonLabel(blocker: TaskBlockerRecord) {
-  return BLOCKER_TYPE_LABELS[blocker.blockerType] ?? "other";
+  return (TASK_BLOCKER_TYPE_LABELS[blocker.blockerType] ?? TASK_BLOCKER_TYPE_LABELS.other).toLowerCase();
 }
 
 function selectMostSevereBlocker(blockers: TaskBlockerRecord[]) {

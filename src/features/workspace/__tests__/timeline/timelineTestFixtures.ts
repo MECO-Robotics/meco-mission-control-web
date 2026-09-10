@@ -82,7 +82,7 @@ export function createBootstrap(): BootstrapPayload {
         dueDate: "2026-04-10",
         priority: "high",
         status: "in-progress",
-        dependencyIds: [],
+
         blockers: [],
         linkedManufacturingIds: [],
         linkedPurchaseIds: [],
@@ -155,7 +155,6 @@ export function createBootstrapWithDependency(): BootstrapPayload {
         startDate: "2026-04-11",
         dueDate: "2026-04-14",
         status: "not-started",
-        dependencyIds: ["dep-1"],
       },
     ],
     taskDependencies: [
@@ -166,6 +165,7 @@ export function createBootstrapWithDependency(): BootstrapPayload {
         refId: "task-1",
         dependencyType: "hard",
         createdAt: "2026-04-01T00:00:00.000Z",
+        requiredState: "complete",
       },
     ],
   };

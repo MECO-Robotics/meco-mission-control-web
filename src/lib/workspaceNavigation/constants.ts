@@ -1,272 +1,31 @@
-import type {
-  InventoryViewTab,
-  ManufacturingViewTab,
-  NavigationSection,
-  NavigationSubItem,
-  ReportsViewTab,
-  RiskManagementViewTab,
-  TaskViewTab,
-  ViewOption,
-  ViewTab,
-  WorklogsViewTab,
-} from "./types";
+import type { NavigationSection, NavigationSubItem, ViewTab } from "./types";
 
-export const TASK_VIEW_ORDER: readonly TaskViewTab[] = [
-  "calendar",
-  "timeline",
-  "robot-map",
-  "queue",
-  "milestones",
-];
-
-export const RISK_MANAGEMENT_VIEW_ORDER: readonly RiskManagementViewTab[] = [
-  "attention",
-  "kanban",
-  "metrics",
-];
-
-export const WORKLOG_VIEW_ORDER: readonly WorklogsViewTab[] = ["logs", "kanban", "summary"];
-export const REPORTS_VIEW_ORDER: readonly ReportsViewTab[] = ["qa", "milestone-results"];
-export const MANUFACTURING_VIEW_ORDER: readonly ManufacturingViewTab[] = [
-  "all",
-  "cnc",
-  "prints",
-  "fabrication",
-];
-export const INVENTORY_VIEW_ORDER: readonly InventoryViewTab[] = [
-  "materials",
-  "parts",
-  "part-mappings",
-  "purchases",
-];
-
-export const NAVIGATION_SECTION_ORDER: readonly NavigationSection[] = [
-  "dashboard",
-  "readiness",
-  "tasks",
-  "inventory",
-  "roster",
-  "reports",
-  "config",
-];
-
+export const NAVIGATION_SECTION_ORDER: readonly NavigationSection[] = ["home", "work", "resources", "team"];
 export const NAVIGATION_SECTION_LABELS: Record<NavigationSection, string> = {
-  dashboard: "Dashboard",
-  readiness: "Readiness",
-  config: "Config",
-  tasks: "Work",
-  inventory: "Inventory",
-  roster: "Roster",
-  reports: "Reports",
+  home: "Home", work: "Work", resources: "Resources", team: "Team",
 };
-
-export const TASK_VIEW_OPTIONS: readonly ViewOption<TaskViewTab>[] = [
-  { value: "calendar", label: "Calendar" },
-  { value: "timeline", label: "Timeline" },
-  { value: "robot-map", label: "Robot Configuration" },
-  { value: "queue", label: "Tasks" },
-  { value: "milestones", label: "Milestones" },
-];
-
-export const RISK_MANAGEMENT_VIEW_OPTIONS: readonly ViewOption<RiskManagementViewTab>[] = [
-  { value: "attention", label: "Action Required" },
-  { value: "kanban", label: "Risks" },
-  { value: "metrics", label: "Metrics" },
-];
-
-export const WORKLOG_VIEW_OPTIONS: readonly ViewOption<WorklogsViewTab>[] = [
-  { value: "logs", label: "Logs" },
-  { value: "kanban", label: "Kanban" },
-  { value: "summary", label: "Summary" },
-];
-
-export const REPORTS_VIEW_OPTIONS: readonly ViewOption<ReportsViewTab>[] = [
-  { value: "qa", label: "QA" },
-  { value: "milestone-results", label: "Milestone Results" },
-];
-
-export const MANUFACTURING_VIEW_OPTIONS: readonly ViewOption<ManufacturingViewTab>[] = [
-  { value: "all", label: "All" },
-  { value: "cnc", label: "CNC" },
-  { value: "prints", label: "3D printing" },
-  { value: "fabrication", label: "Fab" },
-];
-
-export const ROBOT_INVENTORY_VIEW_OPTIONS: readonly ViewOption<InventoryViewTab>[] = [
-  { value: "materials", label: "Materials" },
-  { value: "parts", label: "Parts" },
-  { value: "purchases", label: "Purchases" },
-];
-
-export const NON_ROBOT_INVENTORY_VIEW_OPTIONS: readonly ViewOption<InventoryViewTab>[] = [
-  { value: "materials", label: "Documents" },
-  { value: "purchases", label: "Purchases" },
-];
-
 export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = [
-  {
-    id: "dashboard-calendar",
-    label: "Calendar",
-    section: "dashboard",
-    target: { tab: "tasks", taskView: "calendar" },
-  },
-  {
-    id: "dashboard-activity",
-    label: "Activity",
-    section: "dashboard",
-    target: { tab: "worklogs", worklogsView: "activity" },
-  },
-  {
-    id: "dashboard-metrics",
-    label: "Metrics",
-    section: "dashboard",
-    target: { tab: "risk-management", riskManagementView: "metrics" },
-  },
-  {
-    id: "readiness-attention",
-    label: "Action Required",
-    section: "readiness",
-    target: { tab: "risk-management", riskManagementView: "attention" },
-  },
-  {
-    id: "readiness-milestones",
-    label: "Milestones",
-    section: "readiness",
-    target: { tab: "tasks", taskView: "milestones" },
-  },
-  {
-    id: "readiness-subsystems",
-    label: "Subsystems",
-    section: "readiness",
-    target: { tab: "subsystems" },
-  },
-  {
-    id: "readiness-risks",
-    label: "Risks",
-    section: "readiness",
-    target: { tab: "risk-management", riskManagementView: "kanban" },
-  },
-  {
-    id: "config-robot-model",
-    label: "Robot Configuration",
-    section: "config",
-    target: { tab: "tasks", taskView: "robot-map" },
-  },
-  {
-    id: "config-cad",
-    label: "STEP import",
-    section: "config",
-    target: { tab: "cad" },
-  },
-  {
-    id: "config-part-mappings",
-    label: "Part mappings",
-    section: "config",
-    target: { tab: "inventory", inventoryView: "part-mappings" },
-  },
-  {
-    id: "config-directory",
-    label: "Directory",
-    section: "config",
-    target: { tab: "roster", rosterView: "directory" },
-  },
-  {
-    id: "tasks-timeline",
-    label: "Timeline",
-    section: "tasks",
-    target: { tab: "tasks", taskView: "timeline" },
-  },
-  {
-    id: "tasks-board",
-    label: "Tasks",
-    section: "tasks",
-    target: { tab: "tasks", taskView: "queue" },
-  },
-  {
-    id: "tasks-manufacturing",
-    label: "Manufacturing",
-    section: "tasks",
-    target: { tab: "manufacturing", manufacturingView: "all" },
-  },
-  {
-    id: "inventory-materials",
-    label: "Materials",
-    section: "inventory",
-    target: { tab: "inventory", inventoryView: "materials" },
-  },
-  {
-    id: "inventory-parts",
-    label: "Parts",
-    section: "inventory",
-    target: { tab: "inventory", inventoryView: "parts" },
-  },
-  {
-    id: "inventory-purchases",
-    label: "Purchases",
-    section: "inventory",
-    target: { tab: "inventory", inventoryView: "purchases" },
-  },
-  {
-    id: "roster-workload",
-    label: "Workload",
-    section: "roster",
-    target: { tab: "roster", rosterView: "workload" },
-  },
-  {
-    id: "roster-attendance",
-    label: "Attendance",
-    section: "roster",
-    target: { tab: "roster", rosterView: "attendance" },
-  },
-  {
-    id: "reports-work-logs",
-    label: "Work logs",
-    section: "reports",
-    target: { tab: "worklogs", worklogsView: "logs" },
-  },
-  {
-    id: "reports-worklogs-kanban",
-    label: "Kanban",
-    section: "reports",
-    target: { tab: "worklogs", worklogsView: "kanban" },
-  },
-  {
-    id: "reports-qa-forms",
-    label: "QA forms",
-    section: "reports",
-    target: { tab: "reports", reportsView: "qa" },
-  },
-  {
-    id: "reports-milestone-results",
-    label: "Milestone results",
-    section: "reports",
-    target: { tab: "reports", reportsView: "milestone-results" },
-  },
+  { id: "home", label: "Home", section: "home", target: { tab: "home" } },
+  { id: "work-tasks", label: "Tasks", section: "work", target: { tab: "tasks", taskView: "queue" } },
+  { id: "work-schedule", label: "Schedule", section: "work", target: { tab: "tasks", taskView: "calendar" } },
+  { id: "work-risks", label: "Risks", section: "work", target: { tab: "risk-management", riskManagementView: "kanban" } },
+  { id: "work-activity", label: "Activity", section: "work", target: { tab: "worklogs", worklogsView: "logs" } },
+  { id: "resources-materials", label: "Materials", section: "resources", target: { tab: "inventory", inventoryView: "materials" } },
+  { id: "resources-documents", label: "Documents", section: "resources", target: { tab: "inventory", inventoryView: "materials" } },
+  { id: "resources-parts", label: "Parts", section: "resources", target: { tab: "inventory", inventoryView: "parts" } },
+  { id: "resources-purchases", label: "Purchases", section: "resources", target: { tab: "inventory", inventoryView: "purchases" } },
+  { id: "resources-manufacturing", label: "Manufacturing", section: "resources", target: { tab: "manufacturing", manufacturingView: "all" } },
+  { id: "resources-structure", label: "Structure", section: "resources", target: { tab: "tasks", taskView: "robot-map" } },
+  { id: "team-people", label: "People", section: "team", target: { tab: "roster", rosterView: "directory" } },
+  { id: "team-attendance", label: "Attendance", section: "team", target: { tab: "roster", rosterView: "attendance" } },
 ];
-
-export const NAVIGATION_SUB_ITEMS_BY_SECTION: Record<
-  NavigationSection,
-  readonly NavigationSubItem[]
-> = {
-  dashboard: NAVIGATION_SUB_ITEMS.filter((item) => item.section === "dashboard"),
-  readiness: NAVIGATION_SUB_ITEMS.filter((item) => item.section === "readiness"),
-  config: NAVIGATION_SUB_ITEMS.filter((item) => item.section === "config"),
-  tasks: NAVIGATION_SUB_ITEMS.filter((item) => item.section === "tasks"),
-  inventory: NAVIGATION_SUB_ITEMS.filter((item) => item.section === "inventory"),
-  roster: NAVIGATION_SUB_ITEMS.filter((item) => item.section === "roster"),
-  reports: NAVIGATION_SUB_ITEMS.filter((item) => item.section === "reports"),
+export const NAVIGATION_SUB_ITEMS_BY_SECTION: Record<NavigationSection, readonly NavigationSubItem[]> = {
+  home: NAVIGATION_SUB_ITEMS.filter((item) => item.section === "home"),
+  work: NAVIGATION_SUB_ITEMS.filter((item) => item.section === "work"),
+  resources: NAVIGATION_SUB_ITEMS.filter((item) => item.section === "resources"),
+  team: NAVIGATION_SUB_ITEMS.filter((item) => item.section === "team"),
 };
-
 export const BASE_SECTION_LABELS: Record<ViewTab, string> = {
-  home: "Home",
-  tasks: "Work",
-  "risk-management": "Risk Management",
-  worklogs: "Worklogs",
-  reports: "Reports",
-  manufacturing: "Manufacturing",
-  inventory: "Inventory",
-  cad: "STEP import",
-  subsystems: "Subsystems",
-  roster: "Roster",
-  help: "Help",
+  home: "Home", tasks: "Work", "risk-management": "Risks", worklogs: "Activity",
+  manufacturing: "Manufacturing", inventory: "Resources", cad: "Import CAD", subsystems: "Structure", roster: "People", help: "Help",
 };

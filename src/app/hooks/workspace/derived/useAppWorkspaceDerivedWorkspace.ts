@@ -24,7 +24,6 @@ export function useAppWorkspaceDerivedWorkspace(
     milestoneReportModalMode,
     purchaseModalMode,
     manufacturingModalMode,
-    materialModalMode,
     partDefinitionModalMode,
     partInstanceModalMode,
     subsystemModalMode,
@@ -69,17 +68,6 @@ export function useAppWorkspaceDerivedWorkspace(
     [activeTimelineTaskDetailId, selection.scopedBootstrap.tasks],
   );
 
-  const visibleTabs = useMemo(
-    () => new Set<ViewTab>(navigationItems.map((item) => item.value)),
-    [navigationItems],
-  );
-
-  useEffect(() => {
-    if (!visibleTabs.has(activeTab)) {
-      setActiveTab("tasks");
-    }
-  }, [activeTab, setActiveTab, visibleTabs]);
-
   useEffect(() => {
     if (!activeTimelineTaskDetailId) {
       return;
@@ -104,7 +92,6 @@ export function useAppWorkspaceDerivedWorkspace(
       milestoneReportModalMode ||
       purchaseModalMode ||
       manufacturingModalMode ||
-      materialModalMode ||
       partDefinitionModalMode ||
       partInstanceModalMode ||
       subsystemModalMode ||

@@ -1,3 +1,4 @@
+import { ModalDialog } from "@/components/ModalDialog";
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { PartInstancePayload } from "@/types/payloads";
@@ -34,11 +35,9 @@ export function PartInstanceEditorModal({
       ?.projectId ?? bootstrap.projects[0]?.id ?? null;
 
   return (
-    <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
+    <ModalDialog label="Part instance editor" onClose={closePartInstanceModal}>
       <section
-        aria-modal="true"
         className="modal-card"
-        role="dialog"
         style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
       >
         <div className="panel-header compact-header">
@@ -266,6 +265,6 @@ export function PartInstanceEditorModal({
           </div>
         </form>
       </section>
-    </div>
+    </ModalDialog>
   );
 }

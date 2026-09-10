@@ -4,7 +4,6 @@ import { normalizePlanningRecords } from "./planning";
 import { normalizeBootstrapCatalogRecords } from "./payload-catalog";
 import { normalizeBootstrapReports } from "./payload-reports";
 import { normalizeBootstrapTaskBlockers } from "./task-blockers";
-import { normalizeBootstrapTaskDependencies } from "./task-dependencies";
 import type { LegacyBootstrapPayload } from "./shared";
 
 function normalizeMeetingRecords(source: BootstrapPayload["meetings"]): MeetingRecord[] {
@@ -51,11 +50,12 @@ export function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapP
     partInstances: catalog.partInstances,
     milestones: catalog.milestones,
     milestoneRequirements: source.milestoneRequirements ?? [],
-    taskDependencies: normalizeBootstrapTaskDependencies(source),
+    taskDependencies: source.taskDependencies ?? [],
     taskBlockers: normalizeBootstrapTaskBlockers(source),
     reports: reports.reports,
     reportFindings: reports.reportFindings,
     qaReports: reports.qaReports,
+    qaRequests: source.qaRequests ?? [],
     testResults: reports.testResults,
     qaFindings: reports.qaFindings,
     testFindings: reports.testFindings,
@@ -70,6 +70,5 @@ export function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapP
     qaReviews: source.qaReviews ?? [],
     escalations: source.escalations ?? [],
     actions: source.actions ?? [],
-    favoriteViews: source.favoriteViews ?? [],
   };
 }

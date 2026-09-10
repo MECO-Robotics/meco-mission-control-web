@@ -49,6 +49,8 @@ export async function syncTaskDependencies(
     desiredDependencies: TaskDependencyDraft[] | undefined;
     existingDependencies: TaskDependencyRecord[];
     handleUnauthorized: HandleUnauthorized;
+    onPersisted?: (draft: TaskDependencyDraft, record: TaskDependencyRecord) => void;
+    onDeleted?: (id: string) => void;
   },
   persistence: TaskRelationPersistence,
 ) {
@@ -69,11 +71,12 @@ export async function syncTaskDependencies(
     if (existingDependency) {
       desiredIds.add(existingDependency.id);
       if (isTaskDependencyPayloadChanged(existingDependency, payload)) {
-        await persistence.updateTaskDependencyRecord(
+        const updated = await persistence.updateTaskDependencyRecord(
           existingDependency.id,
           payload,
           handleUnauthorized,
         );
+        params.onPersisted?.(dependency, updated);
       }
     } else {
       const createdDependency = await persistence.createTaskDependencyRecord(
@@ -81,12 +84,14 @@ export async function syncTaskDependencies(
         handleUnauthorized,
       );
       desiredIds.add(createdDependency.id);
+      params.onPersisted?.(dependency, createdDependency);
     }
   }
 
   for (const dependency of existingDependencies) {
     if (!desiredIds.has(dependency.id)) {
       await persistence.deleteTaskDependencyRecord(dependency.id, handleUnauthorized);
+      params.onDeleted?.(dependency.id);
     }
   }
 }
@@ -97,6 +102,8 @@ export async function syncTaskBlockers(
     desiredBlockers: TaskBlockerDraft[] | undefined;
     existingBlockers: TaskBlockerRecord[];
     handleUnauthorized: HandleUnauthorized;
+    onPersisted?: (draft: TaskBlockerDraft, record: TaskBlockerRecord) => void;
+    onDeleted?: (id: string) => void;
   },
   persistence: TaskRelationPersistence,
 ) {
@@ -111,7 +118,8 @@ export async function syncTaskBlockers(
     if (existingBlocker) {
       desiredIds.add(existingBlocker.id);
       if (isTaskBlockerPayloadChanged(existingBlocker, payload)) {
-        await persistence.updateTaskBlockerRecord(existingBlocker.id, payload, handleUnauthorized);
+        const updated = await persistence.updateTaskBlockerRecord(existingBlocker.id, payload, handleUnauthorized);
+        params.onPersisted?.(blocker, updated);
       }
     } else {
       const createdBlocker = await persistence.createTaskBlockerRecord(
@@ -119,12 +127,14 @@ export async function syncTaskBlockers(
         handleUnauthorized,
       );
       desiredIds.add(createdBlocker.id);
+      params.onPersisted?.(blocker, createdBlocker);
     }
   }
 
   for (const blocker of existingBlockers) {
     if (!desiredIds.has(blocker.id)) {
       await persistence.deleteTaskBlockerRecord(blocker.id, handleUnauthorized);
+      params.onDeleted?.(blocker.id);
     }
   }
 }

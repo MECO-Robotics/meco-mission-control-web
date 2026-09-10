@@ -26,7 +26,7 @@ const baseTask: BootstrapPayload["tasks"][number] = {
   dueDate: "2026-04-22",
   priority: "medium",
   status: "not-started",
-  dependencyIds: [],
+
   blockers: [],
   linkedManufacturingIds: [],
   linkedPurchaseIds: [],
@@ -212,7 +212,6 @@ function createBootstrap(): BootstrapPayload {
       {
         ...baseTask,
         id: "task-visible",
-        dependencyIds: ["task-hidden"],
       },
       {
         ...baseTask,
@@ -284,7 +283,7 @@ function createBootstrap(): BootstrapPayload {
       {
         id: "blocker-hidden-task",
         blockedTaskId: "task-visible",
-        blockerType: "task",
+        blockerType: "other",
         blockerId: "task-hidden",
         description: "Waiting on hidden task",
         severity: "medium",
@@ -296,7 +295,7 @@ function createBootstrap(): BootstrapPayload {
       {
         id: "blocker-hidden-milestone",
         blockedTaskId: "task-visible",
-        blockerType: "milestone",
+        blockerType: "design-issue",
         blockerId: "milestone-hidden",
         description: "Waiting on hidden milestone",
         severity: "medium",
@@ -308,7 +307,7 @@ function createBootstrap(): BootstrapPayload {
       {
         id: "blocker-hidden-part",
         blockedTaskId: "task-visible",
-        blockerType: "part_instance",
+        blockerType: "lost-part",
         blockerId: "part-instance-hidden-subsystem",
         description: "Waiting on hidden part instance",
         severity: "medium",
@@ -320,8 +319,9 @@ function createBootstrap(): BootstrapPayload {
       {
         id: "blocker-external",
         blockedTaskId: "task-visible",
-        blockerType: "external",
-        blockerId: null,
+        blockerType: "shipping-delay",
+        blockerId: "vendor-order-42",
+        sourceKind: "external",
         description: "Waiting on vendor",
         severity: "medium",
         status: "open",
@@ -433,7 +433,6 @@ describe("scopeBootstrapBySelection", () => {
   it("filters task dependencies to only visible task, milestone, and part-instance targets", () => {
     const scoped = scopeBootstrapBySelection(createBootstrap(), "season-1", "project-visible");
 
-    expect(scoped.tasks[0].dependencyIds).toEqual([]);
     expect((scoped.taskDependencies ?? []).map((dependency) => dependency.id)).toEqual([
       "dependency-global-milestone",
       "dependency-visible-part",
@@ -444,6 +443,7 @@ describe("scopeBootstrapBySelection", () => {
     const scoped = scopeBootstrapBySelection(createBootstrap(), "season-1", "project-visible");
 
     expect((scoped.taskBlockers ?? []).map((blocker) => blocker.id)).toEqual(["blocker-external"]);
+    expect(scoped.taskBlockers?.[0]?.blockerId).toBe("vendor-order-42");
   });
 
   it("filters work logs to scoped task ids", () => {

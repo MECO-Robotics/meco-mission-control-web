@@ -7,6 +7,7 @@ import type {
   MilestoneRecord,
   MilestoneRequirementRecord,
   QaReviewRecord,
+  QaRequestRecord,
   TaskBlockerRecord,
   TaskDependencyRecord,
   TaskRecord,
@@ -14,13 +15,6 @@ import type {
 } from "./recordsExecution";
 import type { DesignIterationRecord, QaFindingRecord, QaReportRecord, ReportFindingRecord, ReportRecord, RiskRecord, TestFindingRecord, TestResultRecord } from "./recordsReporting";
 import type { DisciplineRecord, MechanismRecord, MemberRecord, ProjectRecord, SeasonRecord, SubsystemRecord, WorkstreamRecord } from "./recordsOrganization";
-
-export interface FavoriteViewRecord {
-  id: string;
-  userKey: string;
-  viewId: string;
-  createdAt: string;
-}
 
 export interface BootstrapPayload {
   seasons: SeasonRecord[];
@@ -41,6 +35,7 @@ export interface BootstrapPayload {
   reports: ReportRecord[];
   reportFindings: ReportFindingRecord[];
   qaReports: QaReportRecord[];
+  qaRequests: QaRequestRecord[];
   testResults: TestResultRecord[];
   qaFindings: QaFindingRecord[];
   testFindings: TestFindingRecord[];
@@ -55,7 +50,6 @@ export interface BootstrapPayload {
   qaReviews?: QaReviewRecord[];
   escalations?: EscalationRecord[];
   actions?: AuditActionRecord[];
-  favoriteViews?: FavoriteViewRecord[];
 }
 
 export type PlatformBootstrapPayload = BootstrapPayload;

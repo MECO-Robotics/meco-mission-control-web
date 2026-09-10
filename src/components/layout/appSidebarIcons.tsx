@@ -1,37 +1,25 @@
 import { createElement, type ReactNode } from "react";
 import {
-  AlertTriangle,
-  BarChart3,
+  CalendarDays, ClipboardCheck, FileText, Package, ShoppingCart, Wrench, AlertTriangle,
   Bot,
   Briefcase,
   Boxes,
-  CalendarCheck,
-  CalendarDays,
   ChartNoAxesCombined,
-  ClipboardCheck,
   Cog,
-  Columns3,
   Dumbbell,
-  FileText,
-  Flag,
   Folder,
   LayoutDashboard,
   ListTodo,
   Megaphone,
-  Package,
-  ShoppingCart,
   Users,
   Video,
-  Wrench,
 } from "lucide-react";
 
 import {
   type NavigationSection,
-  type NavigationSubItemId,
 } from "@/lib/workspaceNavigation";
 import type { ProjectType } from "@/types/common";
 import type { ProjectRecord } from "@/types/recordsOrganization";
-import { IconParts, IconReports, IconRoster } from "@/components/shared/Icons";
 
 const ROBOT_PROJECT_ICON_COLORS = [
   "#2563eb",
@@ -158,37 +146,22 @@ export function getProjectIconColor(
 }
 
 export const sectionIcons: Record<NavigationSection, ReactNode> = {
-  dashboard: createElement(LayoutDashboard, { size: 14, strokeWidth: 2 }),
-  readiness: createElement(ClipboardCheck, { size: 14, strokeWidth: 2 }),
-  config: createElement(Cog, { size: 14, strokeWidth: 2 }),
-  tasks: createElement(ListTodo, { size: 14, strokeWidth: 2 }),
-  inventory: createElement(IconParts),
-  roster: createElement(IconRoster),
-  reports: createElement(IconReports),
+  home: createElement(LayoutDashboard, { size: 20 }), work: createElement(ListTodo, { size: 20 }),
+  resources: createElement(Boxes, { size: 20 }), team: createElement(Users, { size: 20 }),
 };
 
-export const subItemIcons: Record<NavigationSubItemId, ReactNode> = {
-  "dashboard-calendar": createElement(CalendarDays, { size: 14, strokeWidth: 2 }),
-  "dashboard-activity": createElement(FileText, { size: 14, strokeWidth: 2 }),
-  "dashboard-metrics": createElement(BarChart3, { size: 14, strokeWidth: 2 }),
-  "readiness-attention": createElement(AlertTriangle, { size: 14, strokeWidth: 2 }),
-  "readiness-milestones": createElement(Flag, { size: 14, strokeWidth: 2 }),
-  "readiness-subsystems": createElement(Cog, { size: 14, strokeWidth: 2 }),
-  "readiness-risks": createElement(AlertTriangle, { size: 14, strokeWidth: 2 }),
-  "config-robot-model": createElement(Bot, { size: 14, strokeWidth: 2 }),
-  "config-cad": createElement(Boxes, { size: 14, strokeWidth: 2 }),
-  "config-part-mappings": createElement(Boxes, { size: 14, strokeWidth: 2 }),
-  "config-directory": createElement(Users, { size: 14, strokeWidth: 2 }),
-  "tasks-timeline": createElement(CalendarDays, { size: 14, strokeWidth: 2 }),
-  "tasks-board": createElement(Columns3, { size: 14, strokeWidth: 2 }),
-  "tasks-manufacturing": createElement(Wrench, { size: 14, strokeWidth: 2 }),
-  "inventory-materials": createElement(Package, { size: 14, strokeWidth: 2 }),
-  "inventory-parts": createElement(Boxes, { size: 14, strokeWidth: 2 }),
-  "inventory-purchases": createElement(ShoppingCart, { size: 14, strokeWidth: 2 }),
-  "roster-workload": createElement(BarChart3, { size: 14, strokeWidth: 2 }),
-  "roster-attendance": createElement(CalendarCheck, { size: 14, strokeWidth: 2 }),
-  "reports-work-logs": createElement(FileText, { size: 14, strokeWidth: 2 }),
-  "reports-worklogs-kanban": createElement(Columns3, { size: 14, strokeWidth: 2 }),
-  "reports-qa-forms": createElement(ClipboardCheck, { size: 14, strokeWidth: 2 }),
-  "reports-milestone-results": createElement(Flag, { size: 14, strokeWidth: 2 }),
+export const subItemIcons: Record<import("@/lib/workspaceNavigation").NavigationSubItemId, ReactNode> = {
+  home: createElement(LayoutDashboard, { size: 14 }),
+  "work-tasks": createElement(ListTodo, { size: 14 }),
+  "work-schedule": createElement(CalendarDays, { size: 14 }),
+  "work-risks": createElement(AlertTriangle, { size: 14 }),
+  "work-activity": createElement(FileText, { size: 14 }),
+  "resources-materials": createElement(Boxes, { size: 14 }),
+  "resources-documents": createElement(FileText, { size: 14 }),
+  "resources-parts": createElement(Package, { size: 14 }),
+  "resources-purchases": createElement(ShoppingCart, { size: 14 }),
+  "resources-manufacturing": createElement(Wrench, { size: 14 }),
+  "resources-structure": createElement(Bot, { size: 14 }),
+  "team-people": createElement(Users, { size: 14 }),
+  "team-attendance": createElement(ClipboardCheck, { size: 14 }),
 };

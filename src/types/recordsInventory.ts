@@ -7,6 +7,7 @@ import type {
   PartInstanceStatus,
   PurchaseStatus,
 } from "./common";
+import type { CadSourceMetadata } from "./recordsOrganization";
 
 export interface MaterialRecord {
   id: string;
@@ -33,7 +34,7 @@ export interface ArtifactRecord {
   updatedAt: string;
 }
 
-export interface PartDefinitionRecord {
+export interface PartDefinitionRecord extends CadSourceMetadata {
   id: string;
   seasonId: string;
   activeSeasonIds?: string[];
@@ -50,7 +51,7 @@ export interface PartDefinitionRecord {
   photoUrl?: string;
 }
 
-export interface PartInstanceRecord {
+export interface PartInstanceRecord extends CadSourceMetadata {
   id: string;
   subsystemId: string;
   mechanismId: string | null;
