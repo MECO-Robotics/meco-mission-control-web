@@ -194,6 +194,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
         }
       }}
       activeViewLabel={activeViewLabel}
+      projectScopeLabel={c.selectedProject?.name ?? "All projects"}
       isDarkMode={c.isDarkMode}
       isSidebarCollapsed={c.isSidebarCollapsed}
     />
