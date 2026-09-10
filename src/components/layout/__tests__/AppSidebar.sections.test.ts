@@ -1,20 +1,22 @@
 import { renderSidebar } from "./AppSidebar.testUtils";
 
-describe("original sidebar with consolidated destinations", () => {
-  it("uses the original Home shortcut and inline section subitems", () => {
+describe("flat sidebar navigation", () => {
+  it("shows every destination under noninteractive headings", () => {
     const markup = renderSidebar([], "tasks", { taskView: "calendar" });
     expect(markup).toContain("sidebar-quick-action-home");
-    expect(markup).toContain("sidebar-subtab-list");
-    expect(markup).toContain("sidebar-subtab-icon");
-    expect(markup).toContain("sidebar-section-chevron is-expanded");
-    for (const label of ["Tasks", "Schedule", "Risks", "Activity"]) expect(markup).toContain(`>${label}</span>`);
+    expect(markup).toContain("sidebar-section-heading");
+    expect(markup).toContain("sidebar-nav-item-icon");
+    expect(markup).not.toContain("sidebar-section-chevron");
+    for (const label of ["Tasks", "Schedule", "Risks", "Activity", "Parts", "People"]) expect(markup).toContain(`>${label}</span>`);
     expect(markup).not.toContain("workspace-primary-navigation");
   });
-  it("uses compact icons without inline subitems when folded", () => {
+  it("keeps destinations directly accessible when folded", () => {
     const markup = renderSidebar([], "tasks", { isCollapsed: true });
     expect(markup).not.toContain("sidebar-subtab-list");
     expect(markup).toContain('aria-label="Expand sidebar"');
-    expect(markup).toContain('data-tutorial-target="sidebar-tab-work"');
+    expect(markup).toContain('aria-label="Tasks"');
+    expect(markup).toContain('aria-label="Parts"');
+    expect(markup).not.toContain("sidebar-section-heading");
   });
   it("keeps unavailable Resources subitems visible and disabled", () => {
     const markup = renderSidebar([], "inventory");
