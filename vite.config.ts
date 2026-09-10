@@ -39,6 +39,7 @@ export default defineConfig(({ mode }) => {
       // local development enforces the same no-inline-script boundary as prod.
       hmr: false,
       host: devHost,
+      allowedHosts: ["llmhost2"],
       port: devPort,
       proxy: apiProxy,
     },
