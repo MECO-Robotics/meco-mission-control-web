@@ -116,7 +116,7 @@ const planningSteps = [
     id: "reports-worklogs",
     title: "Open Work logs",
     instruction: "Choose Activity in the sidebar, then Work logs.",
-    selector: '[data-tutorial-target="sidebar-view-work-activity"]',
+    selector: '[data-tutorial-target="activity-trigger"]',
   },
   {
     id: "create-worklog",

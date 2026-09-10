@@ -3,6 +3,7 @@ export { TaskEditorModal } from "./modals/TaskEditorModalContent";
 export { MilestoneReportEditorModal } from "./modals/workReports/EventReportEditorModal";
 export { QaReportEditorModal } from "./modals/workReports/QaReportEditorModal";
 export { WorkLogEditorModal } from "./modals/workReports/WorkLogEditorModal";
+export { ActivityModal } from "./modals/ActivityModal";
 export { ManufacturingEditorModal } from "./modals/purchaseManufacturing/ManufacturingEditorModal";
 export { PurchaseEditorModal } from "./modals/purchaseManufacturing/PurchaseEditorModal";
 export {
