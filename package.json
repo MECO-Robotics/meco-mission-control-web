@@ -19,7 +19,7 @@
     "verify": "npm run verify-contracts && npm run test:security-workflows && npm run typecheck && npm run lint && npm run test:ci && npm run build:bundle"
   },
   "dependencies": {
-    "lucide-react": "^1.14.0",
+    "lucide-react": "^1.41.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
   },
