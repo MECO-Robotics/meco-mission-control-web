@@ -24,8 +24,8 @@ const planningSteps = [
   },
   {
     id: "task-timeline",
-    title: "Switch to Timeline",
-    instruction: "Choose Schedule in the sidebar, then choose Timeline.",
+    title: "Open the schedule",
+    instruction: "Choose Schedule in the sidebar. Calendar and Timeline are shown together.",
     selector: '[data-tutorial-target="sidebar-view-work-schedule"]',
   },
   {
@@ -81,12 +81,6 @@ const planningSteps = [
     title: "Open Work",
     instruction: "Open Work from the navigation.",
     selector: '[data-tutorial-target="sidebar-tab-work"]',
-  },
-  {
-    id: "task-milestones",
-    title: "Switch to Agenda",
-    instruction: "Choose Schedule in the sidebar, then Agenda.",
-    selector: '[data-tutorial-target="sidebar-view-work-schedule"]',
   },
   {
     id: "create-milestone",
