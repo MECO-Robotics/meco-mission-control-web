@@ -22,12 +22,17 @@ describe("flat sidebar navigation", () => {
   it("keeps unavailable Resources subitems visible and openable", () => {
     const markup = renderSidebar([], "inventory");
     expect(markup).toContain('data-enabled="false"');
-    expect(markup).not.toContain('data-enabled="false" disabled=""');
+    expect(markup).toMatch(/<button(?=[^>]*data-tutorial-target="sidebar-view-resources-parts")(?![^>]*disabled)[^>]*>/);
     expect(markup).toContain(">Parts</span>");
   });
 
   it("does not grey out unavailable destinations", () => {
     const sidebarCss = require("node:fs").readFileSync("src/app/styles/shell/sidebar/sidebar.part3.css", "utf8");
     expect(sidebarCss).not.toContain("opacity: 0.48");
+  });
+
+  it("greys out Robot until a robot project is selected", () => {
+    const markup = renderSidebar([], "tasks");
+    expect(markup).toMatch(/<button(?=[^>]*data-tutorial-target="sidebar-view-resources-structure")(?=[^>]*disabled="")[^>]*>/);
   });
 });
