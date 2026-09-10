@@ -1,7 +1,6 @@
 import type { WorkspaceToastDismissReason } from "@/features/workspace/workspaceToastQueue";
 import { WorkspaceToastStack, type WorkspaceToastStackItem } from "../WorkspaceStatusToast";
 import { WorkspaceTaskSection } from "./sections/WorkspaceTaskSection";
-import { WorkspaceRiskSection } from "./sections/WorkspaceRiskSection";
 import { WorkspaceWorklogsSection } from "./sections/WorkspaceWorklogsSection";
 import { WorkspaceInventorySection } from "./sections/WorkspaceInventorySection";
 import { WorkspaceSubsystemsSection } from "./sections/WorkspaceSubsystemsSection";
@@ -10,6 +9,8 @@ import { WorkspaceHelpSection } from "./sections/WorkspaceHelpSection";
 import { WorkspaceCadSection } from "./sections/WorkspaceCadSection";
 import { WorkspaceManufacturingSection } from "./sections/WorkspaceManufacturingSection";
 import { WorkspaceHomeSection } from "./overview/WorkspaceOverviewSections";
+import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
+import { ActivityModal } from "../WorkspaceModals";
 import type { WorkspaceContentPanelsViewProps } from "./workspaceContentPanelsViewTypes";
 export function WorkspaceContentPanelsView(props: WorkspaceContentPanelsViewProps) {
   const toastItems: WorkspaceToastStackItem[] = [
@@ -67,9 +68,10 @@ export function WorkspaceContentPanelsView(props: WorkspaceContentPanelsViewProp
       ) : null}
       {props.isLoadingData ? <p className="banner">Refreshing workspace data...</p> : null}
 
+      {(["tasks", "roster", "home"] as string[]).includes(props.activeTab) ? <AppTopbarSlotPortal slot="controls"><button className="secondary-action activity-trigger" data-tutorial-target="activity-trigger" onClick={() => props.setIsActivityModalOpen(true)} type="button">Activity</button></AppTopbarSlotPortal> : null}
+
       <WorkspaceHomeSection {...props} />
       <WorkspaceTaskSection {...props} />
-      <WorkspaceRiskSection {...props} />
       <WorkspaceWorklogsSection {...props} />
       <WorkspaceManufacturingSection {...props} />
       <WorkspaceInventorySection {...props} />
@@ -77,6 +79,7 @@ export function WorkspaceContentPanelsView(props: WorkspaceContentPanelsViewProp
       <WorkspaceSubsystemsSection {...props} />
       <WorkspaceRosterSection {...props} />
       <WorkspaceHelpSection {...props} />
+      {props.isActivityModalOpen ? <ActivityModal activePersonFilter={props.activePersonFilter} bootstrap={props.bootstrap} membersById={props.membersById} openEditTaskModal={props.openTimelineTaskDetailsModal} onClose={() => props.setIsActivityModalOpen(false)} subsystemsById={props.subsystemsById} /> : null}
     </div>
   );
 }

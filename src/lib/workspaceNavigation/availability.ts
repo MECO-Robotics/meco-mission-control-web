@@ -6,7 +6,7 @@ const project = { ...seasonal, "no-project": false };
 const robot = { ...project, "all-project": false, "non-robot-project": false };
 export const NAVIGATION_SUB_ITEM_AVAILABILITY_MATRIX: Record<NavigationSubItemId, Readonly<Record<ViewAvailabilityContext, boolean>>> = {
   home: everywhere,
-  "work-tasks": seasonal, "work-schedule": seasonal, "work-risks": seasonal, "work-activity": seasonal,
+  "work-tasks": seasonal, "work-schedule": seasonal,
   "resources-materials": { ...project, "non-robot-project": false },
   "resources-documents": { ...robot, "robot-project": false, "non-robot-project": true },
   "resources-parts": robot, "resources-purchases": project, "resources-manufacturing": robot,

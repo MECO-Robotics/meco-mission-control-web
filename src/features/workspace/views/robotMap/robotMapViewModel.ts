@@ -10,6 +10,7 @@ export interface RobotConfigurationPartModel {
   id: string;
   name: string;
   quantity: number;
+  riskCount: number;
   record: BootstrapPayload["partInstances"][number];
 }
 
@@ -43,6 +44,7 @@ export interface RobotConfigurationSubsystemModel {
   linkedParts: RobotConfigurationDrilldownLinkModel[];
   linkedTasks: RobotConfigurationDrilldownLinkModel[];
   linkedRisks: RobotConfigurationDrilldownLinkModel[];
+  riskCount: number;
   linkedWorkLogs: RobotConfigurationDrilldownLinkModel[];
   linkedManufacturingItems: RobotConfigurationDrilldownLinkModel[];
   record: SubsystemRecord;
@@ -121,12 +123,14 @@ function sortLinks(left: RobotConfigurationDrilldownLinkModel, right: RobotConfi
 function buildPartModel(
   partInstance: BootstrapPayload["partInstances"][number],
   partDefinitionsById: ReadonlyMap<string, BootstrapPayload["partDefinitions"][number]>,
+  risks: BootstrapPayload["risks"],
 ): RobotConfigurationPartModel {
   return {
     cadSource: resolveCadSourceIndicator(partInstance, partDefinitionsById.get(partInstance.partDefinitionId)),
     id: partInstance.id,
     name: partInstance.name,
     quantity: Math.max(1, partInstance.quantity),
+    riskCount: risks.filter((risk) => risk.attachmentType === "part-instance" && risk.attachmentId === partInstance.id).length,
     record: partInstance,
   };
 }
@@ -167,7 +171,7 @@ export function buildRobotConfigurationViewModel(
         .sort((left, right) => left.name.localeCompare(right.name));
       const mechanisms = subsystemMechanisms.map<RobotConfigurationMechanismModel>((mechanism) => {
         const parts = (partInstancesByMechanismId[mechanism.id] ?? [])
-          .map((partInstance) => buildPartModel(partInstance, partDefinitionsById))
+          .map((partInstance) => buildPartModel(partInstance, partDefinitionsById, bootstrap.risks))
           .sort((left, right) => left.name.localeCompare(right.name));
 
         return {
@@ -190,7 +194,7 @@ export function buildRobotConfigurationViewModel(
             partInstance.subsystemId === subsystem.id &&
             (!partInstance.mechanismId || mechanismIds.has(partInstance.mechanismId)),
         )
-        .map((partInstance) => buildPartModel(partInstance, partDefinitionsById))
+        .map((partInstance) => buildPartModel(partInstance, partDefinitionsById, bootstrap.risks))
         .forEach((part) => linkedPartsById.set(part.id, part));
       const linkedParts = [...linkedPartsById.values()].sort((left, right) => left.name.localeCompare(right.name));
       const partInstanceIds = new Set(linkedParts.map((part) => part.id));
@@ -242,6 +246,7 @@ export function buildRobotConfigurationViewModel(
             meta: risk.severity,
           }))
           .sort(sortLinks),
+        riskCount: bootstrap.risks.filter((risk) => riskTargetsSubsystem(risk, mechanismIds, partInstanceIds)).length,
         linkedWorkLogs: bootstrap.workLogs
           .filter((workLog) => linkedTaskIds.has(workLog.taskId))
           .map<RobotConfigurationDrilldownLinkModel>((workLog) => ({

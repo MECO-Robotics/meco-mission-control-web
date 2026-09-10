@@ -1,4 +1,5 @@
 import type { RobotConfigurationSubsystemModel } from "./robotMapViewModel";
+import { IconRisk } from "@/components/shared/Icons";
 
 interface SubsystemMapCardProps {
   isEditable?: boolean;
@@ -25,7 +26,7 @@ export function SubsystemMapCard({
       type="button"
     >
       <strong className="robot-config-subsystem-name">{subsystem.name}</strong>
-      <small className="robot-config-subsystem-meta">{`${subsystem.mechanismCount}M | ${subsystem.partCount}P`}</small>
+      <small className="robot-config-subsystem-meta">{`${subsystem.mechanismCount}M | ${subsystem.partCount}P`}{subsystem.riskCount ? <span title={`${subsystem.riskCount} risks`}><IconRisk /> {subsystem.riskCount}</span> : null}</small>
     </button>
   );
 }

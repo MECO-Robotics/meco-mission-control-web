@@ -56,10 +56,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       c.setTaskView(target.taskView);
     }
 
-    if (target.riskManagementView) {
-      c.setRiskManagementView(target.riskManagementView);
-    }
-
     if (target.worklogsView) {
       c.setWorklogsView(target.worklogsView);
     }
@@ -265,6 +261,8 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
           handleUpdateMember={content.handleUpdateMember}
           requestMemberPhotoUpload={content.requestMemberPhotoUpload}
           isAddPersonOpen={content.isAddPersonOpen}
+          isActivityModalOpen={content.isActivityModalOpen}
+          setIsActivityModalOpen={content.setIsActivityModalOpen}
           isDeletingMember={content.isDeletingMember}
           isEditPersonOpen={content.isEditPersonOpen}
           isLoadingData={content.isLoadingData}

@@ -1,13 +1,15 @@
 import type { MilestoneRecord } from "@/types/recordsExecution";
 import { getMilestoneTypeStyle } from "@/features/workspace/shared/events/eventStyles";
 import { formatMilestoneDateTime, formatMilestoneEndDateTime } from "./milestonesViewUtils";
+import { IconRisk } from "@/components/shared/Icons";
 
 const readinessLabels = { "not ready": "Not ready", blocked: "Blocked", qa: "QA", ready: "Ready" };
 
-export function MilestonesAgendaList({ milestones, onOpenMilestone, projectLabelByMilestoneId }: {
+export function MilestonesAgendaList({ milestones, onOpenMilestone, projectLabelByMilestoneId, riskCountByMilestoneId = {} }: {
   milestones: MilestoneRecord[];
   onOpenMilestone: (milestone: MilestoneRecord) => void;
   projectLabelByMilestoneId: Record<string, string>;
+  riskCountByMilestoneId?: Record<string, number>;
 }) {
   if (milestones.length === 0) return <p className="empty-state">No milestones match these filters.</p>;
   return (
@@ -20,6 +22,7 @@ export function MilestonesAgendaList({ milestones, onOpenMilestone, projectLabel
             <span className="pill status-pill">{readinessLabels[milestone.status ?? "not ready"]}</span>
             <span>{getMilestoneTypeStyle(milestone.type).label}</span>
             <span>{projectLabelByMilestoneId[milestone.id]}</span>
+            {riskCountByMilestoneId[milestone.id] ? <span aria-label={`${riskCountByMilestoneId[milestone.id]} risks`} title={`${riskCountByMilestoneId[milestone.id]} risks`} style={{ display: "inline-flex", alignItems: "center", gap: "0.2rem" }}><IconRisk />{riskCountByMilestoneId[milestone.id]}</span> : null}
           </div>
           {milestone.description ? <p className="muted-copy" style={{ margin: "0.25rem 0 0" }}>{milestone.description}</p> : null}
         </li>
