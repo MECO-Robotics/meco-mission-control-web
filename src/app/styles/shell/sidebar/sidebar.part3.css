@@ -29,6 +29,7 @@
 
 .sidebar[data-collapsed="true"] .sidebar-nav-item {
   justify-content: center;
+  overflow: visible;
 }
 
 .sidebar-nav-item:focus-visible {
@@ -41,6 +42,7 @@
   align-items: center;
   gap: 0.4rem;
   width: 100%;
+  overflow: visible;
   border: 1px solid transparent;
   background: transparent;
   color: var(--text-copy);
@@ -133,10 +135,12 @@
     opacity 0.14s ease,
     transform 0.14s ease;
   z-index: 1205;
+  display: none;
 }
 
 .sidebar[data-collapsed="true"] .sidebar-nav-item:hover .sidebar-nav-item-rollout,
 .sidebar[data-collapsed="true"] .sidebar-nav-item:focus-visible .sidebar-nav-item-rollout {
+  display: inline-flex;
   opacity: 1;
   visibility: visible;
   transform: translateY(-50%) translateX(0);
