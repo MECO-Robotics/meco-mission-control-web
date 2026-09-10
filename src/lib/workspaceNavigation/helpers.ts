@@ -47,7 +47,7 @@ export function getActiveNavigationSubItemId(state: NavigationState, context?: V
     case "worklogs": return null;
     case "manufacturing": return "resources-manufacturing";
     case "cad": case "subsystems": return "resources-structure";
-    case "roster": return state.rosterView === "attendance" ? "team-attendance" : "team-people";
+    case "roster": return "team-people";
     case "inventory": return state.inventoryView === "purchases" ? "resources-purchases" : state.inventoryView === "materials" ? context === "non-robot-project" ? "resources-documents" : "resources-materials" : "resources-parts";
     default: return null;
   }

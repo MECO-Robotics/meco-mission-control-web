@@ -1,6 +1,6 @@
 import type { NavigationSection, NavigationSubItem, ViewTab } from "./types";
 
-export const NAVIGATION_SECTION_ORDER: readonly NavigationSection[] = ["home", "work", "resources", "team"];
+export const NAVIGATION_SECTION_ORDER: readonly NavigationSection[] = ["home", "work", "resources"];
 export const NAVIGATION_SECTION_LABELS: Record<NavigationSection, string> = {
   home: "Home", work: "Work", resources: "Resources", team: "Team",
 };
@@ -14,8 +14,7 @@ export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = [
   { id: "resources-purchases", label: "Purchases", section: "resources", target: { tab: "inventory", inventoryView: "purchases" } },
   { id: "resources-manufacturing", label: "Manufacturing", section: "resources", target: { tab: "manufacturing", manufacturingView: "all" } },
   { id: "resources-structure", label: "Structure", section: "resources", target: { tab: "tasks", taskView: "robot-map" } },
-  { id: "team-people", label: "People", section: "team", target: { tab: "roster", rosterView: "directory" } },
-  { id: "team-attendance", label: "Attendance", section: "team", target: { tab: "roster", rosterView: "attendance" } },
+  { id: "team-people", label: "People", section: "resources", target: { tab: "roster", rosterView: "directory" } },
 ];
 export const NAVIGATION_SUB_ITEMS_BY_SECTION: Record<NavigationSection, readonly NavigationSubItem[]> = {
   home: NAVIGATION_SUB_ITEMS.filter((item) => item.section === "home"),

@@ -1,3 +1,4 @@
+import { PartThumbnail } from "../../shared/media/PartThumbnail";
 import type { CSSProperties } from "react";
 
 import { WorkspaceEmptyState } from "@/features/workspace/shared/ui";
@@ -86,6 +87,7 @@ export function PartsDefinitionSection({
                 className="queue-title table-cell table-cell-primary part-primary-cell"
                 data-label="Part"
               >
+                <PartThumbnail name={partDefinition.name} imageUrl={partDefinition.photoUrl} />
                 <span className="requested-item-meta">
                   <span className="requested-item-title">{partDefinition.name}</span>
                   {partDefinition.isArchived ? (

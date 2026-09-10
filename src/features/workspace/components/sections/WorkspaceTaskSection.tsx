@@ -2,7 +2,7 @@ import { memo } from "react";
 
 import { MilestonesView } from "@/features/workspace/views/milestones/MilestonesView";
 import { TaskCalendarView } from "@/features/workspace/views/taskCalendar/TaskCalendarView";
-import { TaskRobotMapPlaceholderView } from "@/features/workspace/views/taskQueue/TaskRobotMapPlaceholderView";
+import { RobotMapView } from "@/features/workspace/views/robotMap/RobotMapView";
 import { TaskQueueView } from "@/features/workspace/views/taskQueue/TaskQueueView";
 import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
 import { WorkspaceSectionPanel, WorkspaceSubPanel } from "../../WorkspaceContentPanelShells";
@@ -34,6 +34,7 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
     openEditSubsystemModal,
     onOpenDrilldownTarget,
     removePartInstanceFromMechanism,
+    savePartImage,
     saveSubsystemLayout,
     updateSubsystemConfiguration,
     openTimelineTaskDetailsModal,
@@ -108,7 +109,7 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
         isActive={taskView === "robot-map"}
         swipeDirection={taskSwipeDirection}
       >
-        <TaskRobotMapPlaceholderView
+        <RobotMapView
           bootstrap={bootstrap}
           openCreateMechanismModal={openCreateMechanismModal}
           openCreatePartInstanceModal={openCreatePartInstanceModal}
@@ -119,6 +120,7 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
           openEditSubsystemModal={openEditSubsystemModal}
           onOpenDrilldownTarget={onOpenDrilldownTarget}
           removePartInstanceFromMechanism={removePartInstanceFromMechanism}
+          onSavePartImage={savePartImage}
           saveSubsystemLayout={saveSubsystemLayout}
           updateSubsystemConfiguration={updateSubsystemConfiguration}
         />
