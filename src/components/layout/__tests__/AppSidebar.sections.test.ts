@@ -7,7 +7,7 @@ describe("flat sidebar navigation", () => {
     expect(markup).toContain("sidebar-section-heading");
     expect(markup).toContain("sidebar-nav-item-icon");
     expect(markup).not.toContain("sidebar-section-chevron");
-    for (const label of ["Tasks", "Schedule", "Risks", "Activity", "Parts", "People"]) expect(markup).toContain(`>${label}</span>`);
+    for (const label of ["Tasks", "Schedule", "Risks", "Activity", "Robot", "Parts", "People"]) expect(markup).toContain(`>${label}</span>`);
     expect(markup).not.toContain("workspace-primary-navigation");
   });
   it("keeps destinations directly accessible when folded", () => {
@@ -22,5 +22,16 @@ describe("flat sidebar navigation", () => {
     const markup = renderSidebar([], "inventory");
     expect(markup).toContain('data-enabled="false" disabled=""');
     expect(markup).toContain(">Parts</span>");
+  });
+
+  it("places Robot in the Work section", () => {
+    const markup = renderSidebar([], "tasks");
+    const workStart = markup.indexOf('data-tutorial-target="sidebar-tab-work"');
+    const robotIndex = markup.indexOf(">Robot</span>");
+    const resourcesStart = markup.indexOf('data-tutorial-target="sidebar-tab-resources"');
+
+    expect(robotIndex).toBeGreaterThan(workStart);
+    expect(robotIndex).toBeLessThan(resourcesStart);
+    expect(markup).not.toContain(">Structure</span>");
   });
 });

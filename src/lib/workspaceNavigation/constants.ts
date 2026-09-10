@@ -15,7 +15,7 @@ export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = [
   { id: "resources-parts", label: "Parts", section: "resources", target: { tab: "inventory", inventoryView: "parts" } },
   { id: "resources-purchases", label: "Purchases", section: "resources", target: { tab: "inventory", inventoryView: "purchases" } },
   { id: "resources-manufacturing", label: "Manufacturing", section: "resources", target: { tab: "manufacturing", manufacturingView: "all" } },
-  { id: "resources-structure", label: "Structure", section: "resources", target: { tab: "tasks", taskView: "robot-map" } },
+  { id: "resources-structure", label: "Robot", section: "work", target: { tab: "tasks", taskView: "robot-map" } },
   { id: "team-people", label: "People", section: "team", target: { tab: "roster", rosterView: "directory" } },
   { id: "team-attendance", label: "Attendance", section: "team", target: { tab: "roster", rosterView: "attendance" } },
 ];
