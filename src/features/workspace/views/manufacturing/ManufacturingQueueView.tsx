@@ -15,7 +15,6 @@ import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspace
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { filterSelectionIncludes, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
-import { PaginationControls, useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import {
   WorkspaceTopbarControls,
@@ -124,7 +123,6 @@ export function ManufacturingQueueView({
       );
     });
   }, [activePersonFilter, items, material, processFilterValue, requester, search, status, subsystem]);
-  const manufacturingPagination = useWorkspacePagination(filteredItems);
   const activeFilterCount = [
     processFilterSelection,
     subsystem,
@@ -316,7 +314,7 @@ export function ManufacturingQueueView({
             <p className="empty-state">{emptyStateMessage}</p>
           ) : (
             <ManufacturingKanbanBoard
-              items={manufacturingPagination.pageItems}
+              items={filteredItems}
               membersById={membersById}
               onEdit={onEdit}
               onQuickStatusChange={onQuickStatusChange}
@@ -326,18 +324,6 @@ export function ManufacturingQueueView({
               tutorialTarget={tutorialTargetPrefix ? tutorialTarget : undefined}
             />
           )}
-          <PaginationControls
-            label={title}
-            onPageChange={manufacturingPagination.setPage}
-            onPageSizeChange={manufacturingPagination.setPageSize}
-            page={manufacturingPagination.page}
-            pageSize={manufacturingPagination.pageSize}
-            pageSizeOptions={manufacturingPagination.pageSizeOptions}
-            rangeEnd={manufacturingPagination.rangeEnd}
-            rangeStart={manufacturingPagination.rangeStart}
-            totalItems={manufacturingPagination.totalItems}
-            totalPages={manufacturingPagination.totalPages}
-          />
         </>
       </KanbanScrollFrame>
     </section>
