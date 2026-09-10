@@ -150,7 +150,7 @@ export const subItemIcons: Record<import("@/lib/workspaceNavigation").Navigation
   "resources-documents": createElement(FileText, { size: 14 }),
   "resources-parts": createElement(Package, { size: 14 }),
   "resources-purchases": createElement(ShoppingCart, { size: 14 }),
-  "resources-manufacturing": createElement(Wrench, { size: 14 }),
+  "work-manufacturing": createElement(Wrench, { size: 14 }),
   "resources-structure": createElement(Bot, { size: 14 }),
   "team-people": createElement(Users, { size: 14 }),
   "team-attendance": createElement(ClipboardCheck, { size: 14 }),

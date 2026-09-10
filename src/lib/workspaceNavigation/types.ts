@@ -30,7 +30,7 @@ export type RosterViewTab = "available" | "workload" | "directory" | "attendance
 export type NavigationSubItemId =
   | "home" | "work-tasks" | "work-schedule"
   | "resources-materials" | "resources-documents" | "resources-parts"
-  | "resources-purchases" | "resources-manufacturing" | "resources-structure"
+  | "resources-purchases" | "work-manufacturing" | "resources-structure"
   | "team-people" | "team-attendance";
 
 export interface NavigationItem {
