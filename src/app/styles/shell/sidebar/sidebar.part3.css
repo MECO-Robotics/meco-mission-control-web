@@ -110,7 +110,7 @@
 
 .sidebar[data-collapsed="true"] .sidebar-nav-item-rollout {
   position: absolute;
-  left: calc(100% + 0.48rem);
+  left: 100%;
   top: 50%;
   transform: translateY(-50%) translateX(-6px);
   display: inline-flex;
@@ -122,20 +122,18 @@
   visibility: hidden;
   pointer-events: none;
   border: 1px solid var(--border-base);
-  border-radius: 999px;
+  border-left: 0;
+  border-radius: 0;
   background: var(--bg-panel);
   color: var(--text-copy);
   box-shadow: 0 8px 20px rgba(15, 28, 52, 0.18);
-  padding: 0.28rem 0.56rem;
+  padding: 0.42rem 0.7rem;
   white-space: nowrap;
   font-size: 0.74rem;
   font-weight: 700;
   line-height: 1;
-  transition:
-    opacity 0.14s ease,
-    transform 0.14s ease;
+  transition: opacity 0.14s ease, transform 0.14s ease;
   z-index: 1205;
-  display: none;
 }
 
 .sidebar[data-collapsed="true"] .sidebar-nav-item-rollout[data-visible="true"] {

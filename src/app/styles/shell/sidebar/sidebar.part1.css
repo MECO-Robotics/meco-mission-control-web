@@ -56,7 +56,7 @@
 }
 
 .sidebar[data-collapsed="true"] {
-  overflow-x: visible;
+  overflow: visible;
 }
 
 .sidebar::-webkit-scrollbar {
