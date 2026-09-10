@@ -138,8 +138,7 @@
   display: none;
 }
 
-.sidebar[data-collapsed="true"] .sidebar-nav-item:hover .sidebar-nav-item-rollout,
-.sidebar[data-collapsed="true"] .sidebar-nav-item:focus-visible .sidebar-nav-item-rollout {
+.sidebar[data-collapsed="true"] .sidebar-nav-item-rollout[data-visible="true"] {
   display: inline-flex;
   opacity: 1;
   visibility: visible;

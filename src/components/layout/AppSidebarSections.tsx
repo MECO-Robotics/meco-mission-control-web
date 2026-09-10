@@ -1,3 +1,4 @@
+import { useState, type FocusEvent as ReactFocusEvent, type MouseEvent as ReactMouseEvent } from "react";
 import { NAVIGATION_SECTION_LABELS, type NavigationSection, type NavigationSubItemId, type NavigationTarget } from "@/lib/workspaceNavigation";
 import { subItemIcons } from "./appSidebarIcons";
 
@@ -26,6 +27,20 @@ export function AppSidebarSections({
   onSubItemSelect,
   sectionModels,
 }: AppSidebarSectionsProps) {
+  const [hoveredSubItemId, setHoveredSubItemId] = useState<NavigationSubItemId | null>(null);
+
+  const setActiveRollout = (id: NavigationSubItemId) => setHoveredSubItemId(id);
+  const clearActiveRollout = () => setHoveredSubItemId(null);
+
+  const handleEnter = (event: ReactMouseEvent<HTMLButtonElement>, id: NavigationSubItemId) => {
+    void event;
+    setActiveRollout(id);
+  };
+
+  const handleFocus = (_event: ReactFocusEvent<HTMLButtonElement>, id: NavigationSubItemId) => {
+    setActiveRollout(id);
+  };
+
   return sectionModels.map(({ section, subItems }) => (
     <section className="sidebar-section-group" aria-label={NAVIGATION_SECTION_LABELS[section]} key={section}>
       {!isCollapsed && (
@@ -38,19 +53,31 @@ export function AppSidebarSections({
           className="sidebar-nav-item"
           aria-label={item.label}
           aria-current={activeSubItemId === item.id ? "page" : undefined}
-          title={undefined}
+          title={isCollapsed ? item.label : undefined}
           data-active={activeSubItemId === item.id ? "true" : "false"}
           data-enabled={item.isEnabled ? "true" : "false"}
           disabled={!item.isEnabled}
           data-tutorial-target={`sidebar-view-${item.id}`}
           data-active-view={activeSubItemId ?? ""}
           key={item.id}
+          onMouseEnter={(event) => handleEnter(event, item.id)}
+          onMouseLeave={clearActiveRollout}
+          onFocus={(event) => handleFocus(event, item.id)}
+          onBlur={clearActiveRollout}
           onClick={() => onSubItemSelect(item.target, item.isEnabled)}
           type="button"
         >
           <span aria-hidden="true" className="sidebar-nav-item-icon">{subItemIcons[item.id]}</span>
           {!isCollapsed ? <span className="sidebar-nav-item-label">{item.label}</span> : null}
-          {isCollapsed ? <span className="sidebar-nav-item-rollout" aria-hidden="true">{item.label}</span> : null}
+          {isCollapsed ? (
+            <span
+              aria-hidden="true"
+              className="sidebar-nav-item-rollout"
+              data-visible={hoveredSubItemId === item.id ? "true" : "false"}
+            >
+              {item.label}
+            </span>
+          ) : null}
         </button>
       ))}
     </section>
