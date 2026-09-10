@@ -79,7 +79,7 @@ export function RobotMapView({
   updateSubsystemConfiguration,
 }: RobotMapViewProps) {
   const [search, setSearch] = useState("");
-  const [viewMode, setViewMode] = useState<"map" | "list" | "3d">("map");
+  const [viewMode, setViewMode] = useState<"map" | "list" | "3d">("3d");
   const [selectedSubsystemId, setSelectedSubsystemId] = useState<string | null>(null);
   const [layoutDraftBySubsystemId, setLayoutDraftBySubsystemId] = useState<
     Record<string, SubsystemLayoutFields>
