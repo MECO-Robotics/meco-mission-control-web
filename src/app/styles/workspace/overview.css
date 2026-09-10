@@ -50,7 +50,7 @@
 
 .overview-section-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1.45fr) minmax(18rem, 0.85fr);
   gap: 0.65rem;
   align-items: start;
 }
@@ -70,7 +70,6 @@
   width: 100%;
   padding: 0.58rem 0.65rem;
   border: 1px solid var(--border-base);
-  border-left: 3px solid var(--border-base);
   border-radius: 7px;
   background: var(--bg-panel);
   color: var(--text-copy);
@@ -87,14 +86,6 @@ button.overview-list-item:focus-visible {
   outline: none;
   border-color: rgba(22, 71, 142, 0.32);
   background: var(--bg-row-alt);
-}
-
-.overview-list-item[data-tone="critical"] {
-  border-left-color: #dc2626;
-}
-
-.overview-list-item[data-tone="warning"] {
-  border-left-color: #d97706;
 }
 
 .overview-list-item-title {
