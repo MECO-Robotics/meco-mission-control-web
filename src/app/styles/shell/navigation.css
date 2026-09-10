@@ -1,12 +1,9 @@
-.navigation-heading { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .workspace-primary-navigation { display: flex; flex-direction: column; gap: .4rem; padding: .8rem .45rem; }
 .workspace-primary-navigation .sidebar-section-toggle { display: flex; align-items: center; justify-content: flex-start; gap: .45rem; min-height: 44px; width: 100%; }
 .workspace-primary-navigation .sidebar-tab-label { text-overflow: clip; overflow: visible; font-size: .85rem; font-weight: 600; }
 .sidebar[data-collapsed="true"] .workspace-primary-navigation .sidebar-section-toggle { flex-direction: column; justify-content: center; gap: .3rem; padding: .55rem .1rem; }
 .sidebar[data-collapsed="true"] .workspace-primary-navigation .sidebar-tab-label { text-overflow: clip; overflow: visible; display: block; font-size: .65rem; }
 .sidebar-shell[data-collapsed="true"] .sidebar-scope-trigger-copy { display: none; }
-.workspace-view-selector { min-height: 44px; min-width: 120px; max-width: 230px; font: inherit; font-weight: 650; color: var(--text-title); background-color: var(--bg-panel); border: 1px solid var(--border-base); border-radius: 8px; padding: .5rem 2rem .5rem .65rem; }
-.workspace-primary-navigation button:focus-visible, .workspace-view-selector:focus-visible { outline: 2px solid var(--official-blue); outline-offset: 2px; }
 .sidebar-quick-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (max-width: 760px) {
   .page-shell:not(.auth-shell), .page-shell.is-sidebar-collapsed, .page-shell.is-sidebar-overlay { --shell-sidebar-width: 0px; padding-left: 0; padding-top: 150px; padding-bottom: calc(72px + env(safe-area-inset-bottom)); transition: none; }
@@ -33,6 +30,19 @@
   .local-workspace-status > span { max-width: 100px; }
   .app-topbar-view-title:has(.local-workspace-status) { flex-wrap: nowrap; }
   .local-workspace-status button { min-height: 32px; padding: .2rem .3rem; }
-  .app-topbar-view-title:has(.local-workspace-status) .workspace-view-selector { width: 140px; }
-  .workspace-view-selector { max-width: 230px; min-width: 0; width: 230px; }
+}
+
+.workspace-primary-navigation button:focus-visible { outline: 2px solid var(--official-blue); outline-offset: 2px; }
+.sidebar-area-chevron { margin-left: auto; flex-shrink: 0; }
+.sidebar-subitem-list { display: none; padding: .25rem 0 .5rem 1.25rem; }
+.sidebar-area[data-active="true"] .sidebar-subitem-list { display: grid; gap: .15rem; }
+.sidebar-subitem { text-align: left; min-height: 36px; border: 0; border-radius: 5px; background: transparent; color: var(--text-copy); font: inherit; font-size: .8rem; padding: .4rem .5rem; cursor: pointer; }
+.sidebar-subitem:hover { background: var(--bg-row-alt); }
+.sidebar-subitem[aria-current="page"] { background: var(--bg-row-alt); color: var(--text-title); font-weight: 700; }
+.sidebar[data-collapsed="true"] .sidebar-subitem-list, .sidebar[data-collapsed="true"] .sidebar-area-chevron { display: none; }
+@media (max-width: 760px) {
+  .workspace-primary-navigation .sidebar-area-chevron { display: none; }
+  .sidebar-area .sidebar-subitem-list, .sidebar-area[data-active="true"] .sidebar-subitem-list { display: none; }
+  .sidebar-area[data-open="true"] .sidebar-subitem-list { display: grid; position: fixed; left: .5rem; right: .5rem; bottom: calc(76px + env(safe-area-inset-bottom)); max-height: calc(100dvh - 240px); overflow-y: auto; padding: .5rem; background: var(--bg-panel); border: 1px solid var(--border-base); border-radius: 8px; }
+  .sidebar-subitem { min-height: 44px; font-size: .9rem; }
 }

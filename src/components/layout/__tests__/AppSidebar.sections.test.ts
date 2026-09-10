@@ -8,12 +8,12 @@ describe("primary navigation", () => {
     expect(markup.match(/data-tutorial-target="sidebar-tab-/g)).toHaveLength(4);
     for (const label of ["Home", "Work", "Resources", "Team"]) expect(markup).toContain(`aria-label="${label}"`);
     expect(markup).toMatch(/aria-current="page"[^>]*aria-label="Home"/);
-    expect(markup).not.toContain("sidebar-subtab-list");
+    expect(markup).toContain("sidebar-subitem-list");
     expect(markup).not.toContain("sidebar-quick-action-home");
   });
   it("marks Work for schedule and Resources for structure", () => {
-    expect(renderSidebar(items, "tasks", { taskView: "calendar" })).toMatch(/aria-current="page"[^>]*aria-label="Work"/);
-    expect(renderSidebar(items, "tasks", { taskView: "robot-map" })).toMatch(/aria-current="page"[^>]*aria-label="Resources"/);
+    expect(renderSidebar(items, "tasks", { taskView: "calendar" })).toMatch(/aria-current="page"[^>]*data-tutorial-target="sidebar-view-work-schedule"/);
+    expect(renderSidebar(items, "tasks", { taskView: "robot-map", selectedProjectId: "robot", projects: [{ id: "robot", seasonId: "season-1", name: "Robot", description: "", projectType: "robot", status: "active" }] })).toMatch(/aria-current="page"[^>]*data-tutorial-target="sidebar-view-resources-structure"/);
   });
   it("keeps account, scope, help and notifications separate", () => {
     const markup = renderSidebar(items, "home");

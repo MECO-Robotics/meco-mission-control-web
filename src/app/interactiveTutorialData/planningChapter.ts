@@ -25,8 +25,8 @@ const planningSteps = [
   {
     id: "task-timeline",
     title: "Switch to Timeline",
-    instruction: "Choose Schedule from the view selector, then choose Timeline.",
-    selector: '[aria-label="View"]',
+    instruction: "Choose Schedule in the sidebar, then choose Timeline.",
+    selector: '[data-tutorial-target="sidebar-view-work-schedule"]',
   },
   {
     id: "timeline-week-view",
@@ -55,8 +55,8 @@ const planningSteps = [
   {
     id: "task-queue",
     title: "Switch to Kanban",
-    instruction: "Choose Tasks from the view selector.",
-    selector: '[aria-label="View"]',
+    instruction: "Choose Tasks in the sidebar.",
+    selector: '[data-tutorial-target="sidebar-view-work-tasks"]',
   },
   {
     id: "create-task",
@@ -85,8 +85,8 @@ const planningSteps = [
   {
     id: "task-milestones",
     title: "Switch to Agenda",
-    instruction: "Choose Schedule from the view selector, then Agenda.",
-    selector: '[aria-label="View"]',
+    instruction: "Choose Schedule in the sidebar, then Agenda.",
+    selector: '[data-tutorial-target="sidebar-view-work-schedule"]',
   },
   {
     id: "create-milestone",
@@ -115,8 +115,8 @@ const planningSteps = [
   {
     id: "reports-worklogs",
     title: "Open Work logs",
-    instruction: "Choose Activity from the view selector, then Work logs.",
-    selector: '[aria-label="View"]',
+    instruction: "Choose Activity in the sidebar, then Work logs.",
+    selector: '[data-tutorial-target="sidebar-view-work-activity"]',
   },
   {
     id: "create-worklog",

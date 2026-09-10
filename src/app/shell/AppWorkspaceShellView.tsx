@@ -206,10 +206,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
           c.setDataMessage(error instanceof Error ? error.message : "The local demo could not be reset.");
         }
       }}
-      activeViewId={activeSubItemId}
-      views={availableViews.filter((view) => view.section === activeSection)}
-      favorites={availableViews.filter((view) => favoriteViewIds.has(view.id))}
-      onNavigate={handleSelectNavigationTarget}
       activeViewLabel={activeViewLabel}
       isActiveViewFavorite={isActiveViewFavorite}
       onToggleActiveViewFavorite={

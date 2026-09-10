@@ -14,7 +14,7 @@ const operationsSteps = [
     id: "directory-view",
     title: "Open People",
     instruction: "Choose People to manage demo people.",
-    selector: '[aria-label="View"]',
+    selector: '[data-tutorial-target="sidebar-view-team-people"]',
   },
   {
     id: "create-student",
@@ -31,8 +31,8 @@ const operationsSteps = [
   {
     id: "inventory-materials",
     title: "Open Materials",
-    instruction: "Choose Materials from the view selector.",
-    selector: '[aria-label="View"]',
+    instruction: "Choose Materials in the sidebar.",
+    selector: '[data-tutorial-target="sidebar-view-resources-materials"]',
   },
   {
     id: "create-material",
@@ -55,8 +55,8 @@ const operationsSteps = [
   {
     id: "inventory-parts",
     title: "Open Parts",
-    instruction: "Choose Parts from the view selector.",
-    selector: '[aria-label="View"]',
+    instruction: "Choose Parts in the sidebar.",
+    selector: '[data-tutorial-target="sidebar-view-resources-parts"]',
   },
   {
     id: "create-part",
@@ -73,8 +73,8 @@ const operationsSteps = [
   {
     id: "inventory-purchases",
     title: "Open Purchases",
-    instruction: "Choose Purchases from the view selector.",
-    selector: '[aria-label="View"]',
+    instruction: "Choose Purchases in the sidebar.",
+    selector: '[data-tutorial-target="sidebar-view-resources-purchases"]',
   },
   {
     id: "create-purchase",
@@ -97,8 +97,8 @@ const operationsSteps = [
   {
     id: "subsystems-view",
     title: "Open Structure",
-    instruction: "Choose Structure from the view selector.",
-    selector: '[aria-label="View"]',
+    instruction: "Choose Structure in the sidebar.",
+    selector: '[data-tutorial-target="sidebar-view-resources-structure"]',
   },
   {
     id: "create-subsystem",
@@ -139,8 +139,8 @@ const operationsSteps = [
   {
     id: "manufacturing-cnc",
     title: "Open manufacturing queue",
-    instruction: "Choose Manufacturing from the view selector.",
-    selector: '[aria-label="View"]',
+    instruction: "Choose Manufacturing in the sidebar.",
+    selector: '[data-tutorial-target="sidebar-view-resources-manufacturing"]',
   },
   {
     id: "create-cnc-job",

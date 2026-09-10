@@ -10,14 +10,9 @@ import {
 } from "@/lib/branding";
 import { Star, StarOff } from "lucide-react";
 
-import type { NavigationSubItemId, NavigationTarget } from "@/lib/workspaceNavigation";
 import { APP_TOPBAR_SLOT_IDS } from "./AppTopbarSlotPortal";
 
 interface AppTopbarProps {
-  activeViewId?: NavigationSubItemId | null;
-  views?: readonly { id: NavigationSubItemId; label: string; target: NavigationTarget }[];
-  favorites?: readonly { id: NavigationSubItemId; label: string; target: NavigationTarget }[];
-  onNavigate?: (target: NavigationTarget) => void;
   localMode?: "demo" | "tutorial" | null;
   onResetDemo?: () => void;
   activeViewLabel: string;
@@ -28,7 +23,6 @@ interface AppTopbarProps {
 }
 
 export function AppTopbar({
-  activeViewId, views = [], favorites = [], onNavigate,
   localMode,
   onResetDemo,
   activeViewLabel,
@@ -94,18 +88,7 @@ export function AppTopbar({
               strokeWidth={2}
             />
           </button>
-          {views.length > 1 || favorites.length > 0 ? (
-            <><h1 className="navigation-heading">{activeViewLabel}</h1><select data-active-view={activeViewId ?? ""} aria-label="View" className="workspace-view-selector" value={activeViewId ?? ""}
-              onChange={(event) => {
-                const view = [...views, ...favorites].find((item) => item.id === event.target.value);
-                if (view) onNavigate?.(view.target);
-              }}>
-              {views.map((view) => <option key={view.id} value={view.id}>{view.label}</option>)}
-              {favorites.some((item) => !views.some((view) => view.id === item.id)) ? (
-                <optgroup label="Favorites">{favorites.filter((item) => !views.some((view) => view.id === item.id)).map((view) => <option key={view.id} value={view.id}>{view.label}</option>)}</optgroup>
-              ) : null}
-            </select></>
-          ) : <h1>{activeViewLabel}</h1>}
+          <h1>{activeViewLabel}</h1>
           {localMode ? (
             <div className="local-workspace-status">
               <span title="Changes stay in this browser tab and are never synced.">{localMode === "tutorial" ? "Local tutorial" : "Local demo"} · no sync</span>

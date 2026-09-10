@@ -20,7 +20,7 @@ const outreachSteps = [
     id: "outreach-workflow-view",
     title: "Open Workflow",
     instruction: "Choose Structure to view the outreach workflow.",
-    selector: '[aria-label="View"]',
+    selector: '[data-tutorial-target="sidebar-view-resources-structure"]',
   },
   {
     id: "workflow-edit",
@@ -37,8 +37,8 @@ const outreachSteps = [
   {
     id: "inventory-materials",
     title: "Open Documents",
-    instruction: "Choose Documents from the view selector.",
-    selector: '[aria-label="View"]',
+    instruction: "Choose Documents in the sidebar.",
+    selector: '[data-tutorial-target="sidebar-view-resources-documents"]',
   },
   {
     id: "create-document",

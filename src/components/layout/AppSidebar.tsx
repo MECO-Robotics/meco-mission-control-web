@@ -121,6 +121,7 @@ export function AppSidebar({
 
   const {
     activeSection,
+    activeSubItemId,
     getSectionSubItems,
     sectionModels,
   } = useAppSidebarNavigationModels({
@@ -152,6 +153,8 @@ export function AppSidebar({
   } = useSidebarScrollHints();
 
   const handleSectionClick = (section: NavigationSection) => {
+    if (isCollapsed && window.innerWidth > 760) toggleSidebar();
+    if (section === activeSection) return;
     const firstEnabledSubItem = getSectionSubItems(section).find((item) => item.isEnabled);
     if (firstEnabledSubItem) onSelectTarget(firstEnabledSubItem.target, { keepSidebarOpen: true });
   };
@@ -227,6 +230,8 @@ export function AppSidebar({
 
         <AppSidebarSections
           activeSection={activeSection}
+          activeSubItemId={activeSubItemId}
+          onSelectTarget={target => onSelectTarget(target, { keepSidebarOpen: true })}
           onSectionClick={handleSectionClick}
           sectionModels={sectionModels}
         />
