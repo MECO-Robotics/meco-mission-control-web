@@ -72,14 +72,13 @@
 
 .sidebar-nav-item:disabled,
 .sidebar-nav-item[data-enabled="false"] {
-  opacity: 0.48;
-  cursor: not-allowed;
+  cursor: default;
 }
 
 .sidebar-nav-item:disabled:hover,
 .sidebar-nav-item[data-enabled="false"]:hover {
-  background: transparent;
-  border-color: transparent;
+  background: var(--bg-row-alt);
+  border-color: rgba(15, 28, 52, 0.08);
 }
 
 .sidebar-nav-item-icon {
