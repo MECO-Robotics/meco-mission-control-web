@@ -19,9 +19,10 @@ describe("flat sidebar navigation", () => {
     expect(markup).toContain('aria-label="Parts"');
     expect(markup).not.toContain("sidebar-section-heading");
   });
-  it("keeps unavailable Resources subitems visible and disabled", () => {
+  it("keeps unavailable Resources subitems visible and openable", () => {
     const markup = renderSidebar([], "inventory");
-    expect(markup).toContain('data-enabled="false" disabled=""');
+    expect(markup).toContain('data-enabled="false"');
+    expect(markup).not.toContain('data-enabled="false" disabled=""');
     expect(markup).toContain(">Parts</span>");
   });
 
