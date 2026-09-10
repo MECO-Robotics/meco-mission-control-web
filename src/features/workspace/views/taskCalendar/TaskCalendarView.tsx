@@ -3,17 +3,13 @@ import { useState, type FormEvent } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MeetingPayload, MilestonePayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
-import { IconCalendar, IconTasks } from "@/components/shared/Icons";
 import { toErrorMessage } from "@/lib/appUtils/common";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
-import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import {
   buildTopbarSearchProps,
-  buildTopbarAddMenuActions,
-  makeAddMenuAction,
 } from "@/features/workspace/shared/topbar";
 import { WorkspaceTopbarControls } from "@/features/workspace/shared/topbar";
 import { MilestonesMilestoneModal } from "@/features/workspace/views/milestones/MilestonesEventModal";
@@ -22,7 +18,6 @@ import { TaskCalendarFilterToolbar } from "./TaskCalendarFilterToolbar";
 import { TaskCalendarDayDetails } from "./TaskCalendarDayDetails";
 import { MeetingScheduleModal } from "./MeetingScheduleModal";
 import { TaskCalendarMonthGrid } from "./TaskCalendarMonthGrid";
-import { TaskCalendarMonthToolbar } from "./TaskCalendarMonthToolbar";
 import { formatDateKey } from "./taskCalendarLayout";
 import type { TaskCalendarEvent } from "./taskCalendarEvents";
 import { useTaskCalendarEventData } from "./useTaskCalendarEventData";
@@ -112,12 +107,6 @@ export function TaskCalendarView({
   };
   const selectedDayEvents = selectedDateKey ? calendar.eventsByDateKey.get(selectedDateKey) ?? [] : [];
 
-  const openMeetingModal = () => {
-    setMeetingDraft(createDefaultMeetingDraft(bootstrap));
-    setMeetingError(null);
-    setIsMeetingModalOpen(true);
-  };
-
   const handleMeetingSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsSavingMeeting(true);
@@ -160,27 +149,7 @@ export function TaskCalendarView({
               })}
             />
           }
-          addMenu={
-            <WorkspaceTopbarAddMenu
-              actions={buildTopbarAddMenuActions(
-                makeAddMenuAction("Add meeting", openMeetingModal, <IconCalendar />),
-                makeAddMenuAction(
-                  "Add milestone",
-                  milestoneModalState.openCreateMilestoneModal,
-                  <IconTasks />,
-                ),
-              )}
-              ariaLabel="Add calendar item"
-              title="Add calendar item"
-            />
-          }
-        >
-          <TaskCalendarMonthToolbar
-            monthLabel={calendar.monthLabel}
-            onMonthChange={() => setSelectedDateKey(null)}
-            setMonthCursor={calendar.setMonthCursor}
-          />
-        </WorkspaceTopbarControls>
+        />
       </AppTopbarSlotPortal>
 
       {calendar.unfilteredEvents.length === 0 ? (

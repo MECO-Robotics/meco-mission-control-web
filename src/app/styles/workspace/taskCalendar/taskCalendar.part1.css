@@ -47,12 +47,6 @@
   padding: 0.46rem 0.58rem;
 }
 
-.workspace-topbar-controls .task-calendar-toolbar {
-  background: transparent;
-  border-bottom: 0;
-  padding: 0;
-}
-
 .task-calendar-month-controls {
   align-items: center;
   display: inline-flex;
