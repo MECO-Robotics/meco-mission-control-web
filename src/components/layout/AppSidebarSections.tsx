@@ -38,10 +38,9 @@ export function AppSidebarSections({
           className="sidebar-nav-item"
           aria-label={item.label}
           aria-current={activeSubItemId === item.id ? "page" : undefined}
-          title={isCollapsed ? item.label : undefined}
+          title={undefined}
           data-active={activeSubItemId === item.id ? "true" : "false"}
           data-enabled={item.isEnabled ? "true" : "false"}
-          data-tab-label={item.label}
           disabled={!item.isEnabled}
           data-tutorial-target={`sidebar-view-${item.id}`}
           data-active-view={activeSubItemId ?? ""}
@@ -51,6 +50,7 @@ export function AppSidebarSections({
         >
           <span aria-hidden="true" className="sidebar-nav-item-icon">{subItemIcons[item.id]}</span>
           {!isCollapsed ? <span className="sidebar-nav-item-label">{item.label}</span> : null}
+          {isCollapsed ? <span className="sidebar-nav-item-rollout" aria-hidden="true">{item.label}</span> : null}
         </button>
       ))}
     </section>
