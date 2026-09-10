@@ -60,6 +60,7 @@ export function AppSidebarSections({
           title={isCollapsed ? item.label : undefined}
           data-active={activeSubItemId === item.id ? "true" : "false"}
           data-enabled={item.isEnabled ? "true" : "false"}
+          data-robot-disabled={isDisabled ? "true" : "false"}
           disabled={isDisabled}
           data-tutorial-target={`sidebar-view-${item.id}`}
           data-active-view={activeSubItemId ?? ""}

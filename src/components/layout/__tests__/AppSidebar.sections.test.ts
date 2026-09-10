@@ -22,7 +22,7 @@ describe("flat sidebar navigation", () => {
   it("keeps unavailable Resources subitems visible and openable", () => {
     const markup = renderSidebar([], "inventory");
     expect(markup).toContain('data-enabled="false"');
-    expect(markup).toMatch(/<button(?=[^>]*data-tutorial-target="sidebar-view-resources-parts")(?![^>]*disabled)[^>]*>/);
+    expect(markup).toMatch(/<button(?=[^>]*data-tutorial-target="sidebar-view-resources-parts")(?![^>]*\sdisabled="")[^>]*>/);
     expect(markup).toContain(">Parts</span>");
   });
 
@@ -37,13 +37,10 @@ describe("flat sidebar navigation", () => {
     expect(markup).not.toContain(">Structure</span>");
   });
 
-  it("does not grey out unavailable destinations", () => {
-    const sidebarCss = require("node:fs").readFileSync("src/app/styles/shell/sidebar/sidebar-navigation.css", "utf8");
-    expect(sidebarCss).not.toContain("opacity: 0.48");
-  });
-
   it("greys out Robot until a robot project is selected", () => {
     const markup = renderSidebar([], "tasks");
-    expect(markup).toMatch(/<button(?=[^>]*data-tutorial-target="sidebar-view-resources-structure")(?=[^>]*disabled="")[^>]*>/);
+    expect(markup).toMatch(/<button(?=[^>]*data-tutorial-target="sidebar-view-resources-structure")(?=[^>]*data-robot-disabled="true")(?=[^>]*disabled="")[^>]*>/);
+    const sidebarCss = require("node:fs").readFileSync("src/app/styles/shell/sidebar/sidebar-navigation.css", "utf8");
+    expect(sidebarCss).toMatch(/\.sidebar-nav-item\[data-robot-disabled="true"\]\s*\{[^}]*opacity:\s*0\.48;[^}]*cursor:\s*not-allowed;/);
   });
 });
