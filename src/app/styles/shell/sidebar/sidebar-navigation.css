@@ -1,11 +1,11 @@
 .sidebar-section-group {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.35rem;
 }
 
 .sidebar-section-heading {
-  margin: 1rem 0 0.3rem;
+  margin: 1.25rem 0 0.35rem;
   padding-inline: 0.5rem;
   color: var(--text-copy);
   font-size: 0.7rem;
@@ -14,7 +14,7 @@
 }
 
 .sidebar[data-collapsed="true"] .sidebar-section-group {
-  margin-top: 0.75rem;
+  margin-top: 1.25rem;
 }
 
 .sidebar[data-collapsed="true"] .sidebar-nav-item {
@@ -66,10 +66,20 @@
   cursor: default;
 }
 
+.sidebar-nav-item[data-robot-disabled="true"] {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
 .sidebar-nav-item:disabled:hover,
 .sidebar-nav-item[data-enabled="false"]:hover {
   background: var(--bg-row-alt);
   border-color: rgba(15, 28, 52, 0.08);
+}
+
+.sidebar-nav-item[data-robot-disabled="true"]:hover {
+  background: transparent;
+  border-color: transparent;
 }
 
 .sidebar-nav-item-icon {
