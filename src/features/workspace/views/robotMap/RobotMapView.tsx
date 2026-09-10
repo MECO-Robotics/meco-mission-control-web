@@ -5,6 +5,7 @@ import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspa
 import type { SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
 import type { NavigationTarget } from "@/lib/workspaceNavigation";
 
+import { CadFileViewer } from "../cad/viewer/CadPartViewer";
 import { RobotConfigurationToolbar } from "./RobotConfigurationToolbar";
 import { RobotMapCanvas } from "./RobotMapCanvas";
 import { buildAutoArrangedLayouts, buildUnplacedLayout } from "./robotMapLayout";
@@ -23,6 +24,7 @@ interface RobotMapViewProps {
   openEditSubsystemModal: (subsystem: BootstrapPayload["subsystems"][number]) => void;
   onOpenDrilldownTarget?: (target: NavigationTarget) => void;
   removePartInstanceFromMechanism: (partInstanceId: string) => Promise<boolean>;
+  onSavePartImage?: (partId: string, revision: string, imageUrl: string) => Promise<void>;
   saveSubsystemLayout: (
     subsystemId: string,
     layout: SubsystemLayoutFields,
@@ -72,11 +74,12 @@ export function RobotMapView({
   openEditSubsystemModal,
   onOpenDrilldownTarget,
   removePartInstanceFromMechanism,
+  onSavePartImage,
   saveSubsystemLayout,
   updateSubsystemConfiguration,
 }: RobotMapViewProps) {
   const [search, setSearch] = useState("");
-  const [viewMode, setViewMode] = useState<"map" | "list">("map");
+  const [viewMode, setViewMode] = useState<"map" | "list" | "3d">("map");
   const [selectedSubsystemId, setSelectedSubsystemId] = useState<string | null>(null);
   const [layoutDraftBySubsystemId, setLayoutDraftBySubsystemId] = useState<
     Record<string, SubsystemLayoutFields>
@@ -231,7 +234,15 @@ export function RobotMapView({
         viewMode={viewMode}
       />
 
-      {subsystems.length === 0 ? (
+      {viewMode === "3d" ? (
+        <CadFileViewer
+          key={primaryProjectId}
+          title="Robot parts"
+          partDefinitions={bootstrap.partDefinitions}
+          onSavePartImage={onSavePartImage}
+          description="Choose a STEP assembly to inspect the robot in 3D. Select a CAD part to save its still image to a matching part record."
+        />
+      ) : subsystems.length === 0 ? (
         <div className="empty-state robot-config-empty">
           <strong>No subsystems yet.</strong>
           <p className="section-copy">Create your first subsystem to start configuring robot structure and placement.</p>

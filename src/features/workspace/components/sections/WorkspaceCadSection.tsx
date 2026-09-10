@@ -1,3 +1,4 @@
+import { CadFileViewer } from "../../views/cad/viewer/CadPartViewer";
 import { useSyncExternalStore } from "react";
 import { getLocalWorkspaceMode, subscribeLocalWorkspace } from "@/lib/localWorkspace/session";
 import { CadIntegrationView } from "@/features/workspace/views/cad";
@@ -15,11 +16,9 @@ export function WorkspaceCadSection(props: WorkspaceContentPanelsViewProps) {
       <WorkspaceSubPanel disableAnimations={props.disablePanelAnimations} isActive>
         <div className="workspace-presentation-controls"><button className="ghost-button" onClick={() => props.onOpenDrilldownTarget({ tab: "tasks", taskView: "robot-map" })} type="button">Back to Structure</button></div>
         {localMode ? (
-          <div className="empty-state">
-            <h2>CAD connections need a signed-in workspace</h2>
-            <p>Demo and tutorial changes stay in this tab. STEP processing and Onshape sync use server services, so they are unavailable here. You can edit the robot map, subsystems, and parts locally.</p>
-          </div>
+          <CadFileViewer key={props.selectedProject?.id ?? "none"} partDefinitions={Object.values(props.partDefinitionsById)} onSavePartImage={props.savePartImage} />
         ) : <CadIntegrationView
+          onSavePartImage={props.savePartImage}
           mechanisms={Object.values(props.mechanismsById)}
           partDefinitions={Object.values(props.partDefinitionsById)}
           projectId={props.selectedProject?.id ?? null}

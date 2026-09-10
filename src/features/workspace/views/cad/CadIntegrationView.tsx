@@ -1,3 +1,4 @@
+import { CadPartViewer } from "./viewer/CadPartViewer";
 import type { MechanismRecord, PartDefinitionRecord, SubsystemRecord } from "@/types/records";
 import {
   CadOnshapeIntegrationSection,
@@ -24,12 +25,14 @@ export { getScopedDocumentRefs, resolveSelectedDocumentRefId };
 export function CadIntegrationView({
   mechanisms = [],
   partDefinitions = [],
+  onSavePartImage,
   projectId,
   seasonId,
   subsystems = [],
 }: {
   mechanisms?: MechanismRecord[];
   partDefinitions?: PartDefinitionRecord[];
+  onSavePartImage?: (partId: string, revision: string, imageUrl: string) => Promise<void>;
   projectId?: string | null;
   seasonId?: string | null;
   subsystems?: SubsystemRecord[];
@@ -56,6 +59,8 @@ export function CadIntegrationView({
         onLabelChange={cadWorkflow.setStepLabel}
         onSubmit={cadWorkflow.handleStepUpload}
       />
+
+      <CadPartViewer file={cadWorkflow.stepFile} partDefinitions={partDefinitions} onSavePartImage={onSavePartImage} />
 
       <CadStepReviewPanels
         diff={cadWorkflow.stepDiff}
