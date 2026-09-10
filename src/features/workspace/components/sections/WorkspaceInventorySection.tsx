@@ -2,7 +2,6 @@ import { ArtifactInventoryView } from "@/features/workspace/views/ArtifactInvent
 import { MaterialsView } from "@/features/workspace/views/MaterialsView";
 import { PartsView } from "@/features/workspace/views/PartsView";
 import { PurchasesView } from "@/features/workspace/views/PurchasesView";
-import { PartMappingsView } from "@/features/workspace/views/partMappings/PartMappingsView";
 import { WorkspaceSectionPanel, WorkspaceSubPanel } from "../../WorkspaceContentPanelShells";
 import type { WorkspaceContentPanelsViewProps } from "../workspaceContentPanelsViewTypes";
 
@@ -23,7 +22,6 @@ export function WorkspaceInventorySection(props: WorkspaceContentPanelsViewProps
     openCreatePurchaseModal,
     openEditArtifactModal,
     openEditMaterialModal,
-    openEditMechanismModal,
     openEditPartDefinitionModal,
     openEditPurchaseModal,
     partDefinitionsById,
@@ -66,30 +64,18 @@ export function WorkspaceInventorySection(props: WorkspaceContentPanelsViewProps
 
       <WorkspaceSubPanel
         disableAnimations={disablePanelAnimations}
-        isActive={!isNonRobotProject && effectiveInventoryView === "parts"}
+        isActive={!isNonRobotProject && (effectiveInventoryView === "parts" || effectiveInventoryView === "part-mappings")}
         swipeDirection={inventorySwipeDirection}
       >
         <PartsView
           bootstrap={bootstrap}
           openCreatePartDefinitionModal={openCreatePartDefinitionModal}
           openEditPartDefinitionModal={openEditPartDefinitionModal}
+          openCreatePartInstanceModal={openCreatePartInstanceModal}
+          openEditPartInstanceModal={props.openEditPartInstanceModal}
           mechanismsById={mechanismsById}
           partDefinitionsById={partDefinitionsById}
           subsystemsById={subsystemsById}
-        />
-      </WorkspaceSubPanel>
-
-      <WorkspaceSubPanel
-        disableAnimations={disablePanelAnimations}
-        isActive={!isNonRobotProject && effectiveInventoryView === "part-mappings"}
-        swipeDirection={inventorySwipeDirection}
-      >
-        <PartMappingsView
-          bootstrap={bootstrap}
-          openCreatePartDefinitionModal={openCreatePartDefinitionModal}
-          openCreatePartInstanceModal={openCreatePartInstanceModal}
-          openEditMechanismModal={openEditMechanismModal}
-          openEditPartDefinitionModal={openEditPartDefinitionModal}
         />
       </WorkspaceSubPanel>
 

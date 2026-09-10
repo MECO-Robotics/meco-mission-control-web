@@ -52,6 +52,7 @@ export function useAppWorkspaceLoaderWorkspace(
         selectMember,
       );
     } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") return;
       state.setDataMessage(error instanceof Error ? error.message : String(error));
     } finally {
       state.setIsLoadingData(false);

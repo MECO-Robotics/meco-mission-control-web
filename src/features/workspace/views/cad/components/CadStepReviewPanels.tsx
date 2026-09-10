@@ -21,6 +21,7 @@ import { CadStepHierarchyReviewPanel, type CadHierarchyStage } from "./CadStepHi
 import { CadStepImportSummaryCard } from "./CadStepImportSummaryCard";
 import { CadStepMappingReviewTable, type CadStepMappingConfirmInput } from "./CadStepMappingReviewTable";
 import { CadStepTreePanel } from "./CadStepTreePanel";
+import { CadStepPreviewDiffPanel } from "./stepPreview/CadStepPreviewDiffPanel";
 
 export function CadStepReviewPanels({
   diff,
@@ -110,7 +111,7 @@ export function CadStepReviewPanels({
           <p>
             {usesPlaceholderParser
               ? "Finalize is blocked for placeholder STEP output."
-              : "Finalize is blocked while required mappings are unresolved unless you explicitly allow unresolved warnings."}
+              : "Preview-only STEP data becomes a finalized Robot Configuration source after required mappings are resolved."}
           </p>
           <label className="cad-inline-check">
             <input
@@ -136,6 +137,15 @@ export function CadStepReviewPanels({
         importRun={importRun}
         isViewingOlderSnapshot={isViewingOlderSnapshot}
         tree={tree}
+      />
+
+      <CadStepPreviewDiffPanel
+        diff={diff}
+        hierarchyReview={hierarchyReview ?? null}
+        mappings={mappings}
+        onReviewMappings={() => setShowAdvancedFlatView(true)}
+        partMatchProposals={partMatchProposals}
+        warnings={warnings}
       />
 
       {hierarchyReview ? (
@@ -182,30 +192,6 @@ export function CadStepReviewPanels({
       <div className="cad-grid cad-grid-two">
         <section className="cad-card">
           <div className="cad-section-heading">
-            <span className="cad-eyebrow">Diff</span>
-            <h3>Previous snapshot comparison</h3>
-          </div>
-          {diff?.previousSnapshotId ? (
-            <div className="cad-diff-grid">
-              <span>Added assemblies: {diff.addedAssemblies.length}</span>
-              <span>Removed assemblies: {diff.removedAssemblies.length}</span>
-              <span>Moved assemblies: {diff.movedAssemblies.length}</span>
-              <span>Added parts: {diff.addedParts.length}</span>
-              <span>Removed parts: {diff.removedParts.length}</span>
-              <span>Moved part instances: {diff.movedPartInstances.length}</span>
-              <span>Mapping changes: {diff.mappingChanges.length}</span>
-              <span>Quantity changes: {diff.quantityChangedPartGroups?.length ?? 0}</span>
-              {diff.quantityChangedPartGroups?.map((change) => (
-                <span key={`${change.parentAssemblyName ?? "root"}-${change.partName}`}>
-                  {change.partName} under {change.parentAssemblyName ?? "root"} quantity changed {change.previousQuantity} {"\u2192"} {change.currentQuantity}
-                </span>
-              ))}
-            </div>
-          ) : <p className="cad-empty-copy">Upload another STEP iteration to compare snapshots.</p>}
-        </section>
-
-        <section className="cad-card">
-          <div className="cad-section-heading">
             <span className="cad-eyebrow">Warnings</span>
             <h3>Import and mapping warnings</h3>
           </div>
@@ -218,6 +204,22 @@ export function CadStepReviewPanels({
               </article>
             )) : <p className="cad-empty-copy">No warnings for this snapshot.</p>}
           </div>
+        </section>
+
+        <section className="cad-card">
+          <div className="cad-section-heading">
+            <span className="cad-eyebrow">Quantities</span>
+            <h3>Instance changes</h3>
+          </div>
+          {diff?.quantityChangedPartGroups?.length ? (
+            <div className="cad-diff-grid">
+              {diff.quantityChangedPartGroups.map((change) => (
+                <span key={`${change.parentAssemblyName ?? "root"}-${change.partName}`}>
+                  {change.partName} under {change.parentAssemblyName ?? "root"} quantity changed {change.previousQuantity} {"\u2192"} {change.currentQuantity}
+                </span>
+              ))}
+            </div>
+          ) : <p className="cad-empty-copy">No quantity changes for this snapshot.</p>}
         </section>
       </div>
     </div>

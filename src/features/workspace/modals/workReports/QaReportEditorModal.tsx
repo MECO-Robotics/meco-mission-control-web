@@ -1,7 +1,9 @@
-import type { Dispatch, FormEvent, SetStateAction } from "react";
+import { ModalDialog } from "@/components/ModalDialog";
+import { useRef, type Dispatch, type FormEvent, type SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { QaReportPayload } from "@/types/payloads";
 import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
+import { QaRiskReassessmentSection } from "./QaRiskReassessmentSection";
 
 interface QaReportEditorModalProps {
   bootstrap: BootstrapPayload;
@@ -15,22 +17,26 @@ interface QaReportEditorModalProps {
 
 export function QaReportEditorModal({
   bootstrap,
-  closeQaReportModal,
+  closeQaReportModal: onClose,
   handleQaReportSubmit,
   isSavingQaReport,
   requestPhotoUpload,
   qaReportDraft,
   setQaReportDraft,
 }: QaReportEditorModalProps) {
+  const initialDraft = useRef(JSON.stringify(qaReportDraft));
+  const closeQaReportModal = () => {
+    if (isSavingQaReport) return;
+    if (JSON.stringify(qaReportDraft) !== initialDraft.current && !window.confirm("Discard unsaved changes?")) return;
+    onClose();
+  };
   const selectedTask = bootstrap.tasks.find((task) => task.id === qaReportDraft.taskId);
   const qaReportPhotoProjectId = selectedTask?.projectId ?? bootstrap.projects[0]?.id ?? null;
 
   return (
-    <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
+    <ModalDialog label="Add QA report" onClose={closeQaReportModal}>
       <section
-        aria-modal="true"
         className="modal-card task-details-modal"
-        role="dialog"
         style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
       >
         <div className="panel-header compact-header task-details-header">
@@ -57,10 +63,14 @@ export function QaReportEditorModal({
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Task</span>
             <select
+              aria-label="Task"
               onChange={(milestone) =>
                 setQaReportDraft((current) => ({
                   ...current,
                   taskId: milestone.target.value,
+                  targetRiskId: bootstrap.tasks.find((task) => task.id === milestone.target.value)?.targetRiskId ?? null,
+                  proposedRiskSeverity: null,
+                  proposedRiskStatus: null,
                 }))
               }
               required
@@ -168,6 +178,12 @@ export function QaReportEditorModal({
             />
             <span style={{ color: "var(--text-title)" }}>Mentor approved</span>
           </label>
+          <QaRiskReassessmentSection
+            bootstrap={bootstrap}
+            qaReportDraft={qaReportDraft}
+            selectedTask={selectedTask}
+            setQaReportDraft={setQaReportDraft}
+          />
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Notes</span>
             <textarea
@@ -227,6 +243,6 @@ export function QaReportEditorModal({
           </div>
         </form>
       </section>
-    </div>
+    </ModalDialog>
   );
 }

@@ -1,0 +1,28 @@
+name: Check shared skills
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - development
+      - staging
+      - "staging/**"
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  check-skills:
+    runs-on: ubuntu-latest
+    env:
+      SKILLS_REPO: ${{ vars.SKILLS_REPO || 'https://github.com/MECO-Robotics/mission-control-skills.git' }}
+      SKILLS_REF: ${{ vars.SKILLS_REF || 'main' }}
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Import shared skills
+        shell: bash
+        run: bash scripts/check-skills-current.sh

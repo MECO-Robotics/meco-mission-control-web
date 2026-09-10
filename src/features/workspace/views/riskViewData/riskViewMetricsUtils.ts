@@ -59,15 +59,17 @@ export function startOfWeekTimestamp(now: Date) {
 export function classifyBlocker(blocker: TaskBlockerRecord): keyof BlockerBreakdown {
   const raw = `${blocker.blockerType} ${blocker.description}`.toLowerCase();
 
-  if (raw.includes("tool") || blocker.blockerType === "artifact_instance") {
+  if (blocker.blockerType === "lost-tool" || blocker.blockerType === "broken-tool" || raw.includes("tool")) {
     return "lostBrokenTool";
   }
 
-  if (raw.includes("part") || blocker.blockerType === "part_instance") {
+  if (blocker.blockerType === "lost-part" || blocker.blockerType === "broken-part" || raw.includes("part")) {
     return "lostBrokenPart";
   }
 
   if (
+    blocker.blockerType === "manufacturing-unavailable" ||
+    blocker.blockerType === "shipping-delay" ||
     raw.includes("supply") ||
     raw.includes("material") ||
     raw.includes("vendor") ||
@@ -76,13 +78,7 @@ export function classifyBlocker(blocker: TaskBlockerRecord): keyof BlockerBreakd
     return "supplyMaterial";
   }
 
-  if (
-    raw.includes("design") ||
-    blocker.blockerType === "task" ||
-    blocker.blockerType === "milestone" ||
-    blocker.blockerType === "workstream" ||
-    blocker.blockerType === "mechanism"
-  ) {
+  if (blocker.blockerType === "design-issue" || raw.includes("design")) {
     return "designIssue";
   }
 

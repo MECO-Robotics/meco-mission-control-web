@@ -1,3 +1,5 @@
+import { ReportHistoryList } from "../views/workLogs/ReportHistoryList";
+import { ModalDialog } from "@/components/ModalDialog";
 import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskPayload } from "@/types/payloads";
@@ -7,6 +9,7 @@ import { TaskDetailsDependencyBlockersSection } from "./task/TaskDetailsDependen
 import { TaskDetailsHeaderSection } from "./task/TaskDetailsHeaderSection";
 import { TaskDetailsOverviewSection } from "./task/TaskDetailsOverviewSection";
 import type { TaskDetailsEditableField } from "./task/taskModalTypes";
+import { WorkspaceAuditActionList } from "../shared/WorkspaceAuditActionList";
 
 interface TaskDetailsModalProps {
   activeTask: TaskRecord;
@@ -25,6 +28,8 @@ interface TaskDetailsModalProps {
   setAdvancedSectionOpen: Dispatch<SetStateAction<boolean>>;
   taskDraft?: TaskPayload;
   onEditTask: (task: TaskRecord) => void;
+  onLogWork?: (taskId: string) => void;
+  onSubmitQa?: (taskId: string) => void;
   onResolveTaskBlocker: (blockerId: string) => Promise<void>;
   showDependencyBlockersSection?: boolean;
   showEditButton?: boolean;
@@ -47,12 +52,22 @@ export function TaskDetailsModal({
   setAdvancedSectionOpen,
   taskDraft,
   onEditTask,
+  onLogWork,
+  onSubmitQa,
   onResolveTaskBlocker,
   showDependencyBlockersSection = true,
   showEditButton = true,
 }: TaskDetailsModalProps) {
   const [editingField, setEditingField] = useState<TaskDetailsEditableField | null>(null);
   const canInlineEdit = Boolean(taskDraft && setTaskDraft);
+  const taskAuditActions = (bootstrap.actions ?? []).filter(
+    (action) =>
+      action.taskId === activeTask.id ||
+      (action.entityType === "task" && action.entityId === activeTask.id) ||
+      (Boolean(activeTask.targetRiskId) &&
+        action.entityType === "risk" &&
+        action.entityId === activeTask.targetRiskId),
+  );
 
   useEffect(() => {
     setEditingField(null);
@@ -61,11 +76,9 @@ export function TaskDetailsModal({
   const openTaskEditModal = () => onEditTask(activeTask);
 
   return (
-    <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
+    <ModalDialog label={typeof headerTitle === "string" ? headerTitle : activeTask.title} onClose={closeTaskDetailsModal}>
       <section
-        aria-modal="true"
         className={`modal-card task-details-modal${modalClassName ? ` ${modalClassName}` : ""}`}
-        role="dialog"
         style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
       >
         <TaskDetailsHeaderSection
@@ -122,10 +135,22 @@ export function TaskDetailsModal({
             taskDraft={taskDraft}
           />
 
+          {!canInlineEdit ? <section className="modal-wide"><h3>Work history</h3>
+            {bootstrap.workLogs.filter((log) => log.taskId === activeTask.id).length ? <ul>{bootstrap.workLogs.filter((log) => log.taskId === activeTask.id).sort((a, b) => b.date.localeCompare(a.date)).map((log) => <li key={log.id}><details><summary>{log.date} · {log.hours}h · {log.participantIds.map((id) => bootstrap.members.find((member) => member.id === id)?.name ?? "Unknown member").join(", ")}</summary><p>{log.notes || "No notes."}</p>{log.photoUrl ? <a href={log.photoUrl} target="_blank" rel="noreferrer">View work evidence</a> : null}</details></li>)}</ul> : <p className="muted-copy">No work logged yet.</p>}
+          </section> : null}
+          {!canInlineEdit ? <section className="modal-wide"><h3>QA history</h3><ReportHistoryList reports={bootstrap.qaReports.filter((report) => report.taskId === activeTask.id)} bootstrap={bootstrap} /></section> : null}
+
+          <WorkspaceAuditActionList
+            actions={taskAuditActions}
+            emptyText="No task or risk reassessment audit actions are recorded yet."
+          />
+
           {beforeFooterContent}
 
           <div className="modal-actions modal-wide">
             {footerActions}
+            {onLogWork ? <button className="secondary-action" type="button" onClick={() => onLogWork(activeTask.id)}>Log work</button> : null}
+            {onSubmitQa ? <button className="secondary-action" type="button" onClick={() => onSubmitQa(activeTask.id)}>Submit QA</button> : null}
             {showEditButton ? (
               <button
                 className="primary-action task-details-edit-button"
@@ -145,6 +170,6 @@ export function TaskDetailsModal({
           </div>
         </div>
       </section>
-    </div>
+    </ModalDialog>
   );
 }

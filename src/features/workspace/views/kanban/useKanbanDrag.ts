@@ -1,6 +1,5 @@
 import {
   useCallback,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -13,24 +12,20 @@ import {
 import type { KanbanColumnDefinition } from "./KanbanColumns";
 import {
   KANBAN_DRAG_DATA_TYPE,
-  POINTER_DRAG_THRESHOLD_PX,
   buildKanbanDragLookup,
   canStartKanbanPointerFallbackDrag,
-  createOpaqueKanbanNativeDragImage,
   getKanbanDragDataItem,
   getKanbanDropStateAtPoint,
   isKanbanPointerFallbackInteractiveTarget,
   type KanbanDragLookupEntry,
 } from "./kanbanDragUtils";
+import { useKanbanNativeDragPreview } from "./useKanbanNativeDragPreview";
+import {
+  useKanbanPointerFallbackDrag,
+  type PendingKanbanPointerDrag,
+} from "./useKanbanPointerFallbackDrag";
 
 type ActiveKanbanDrag<TState extends string, TItem> = KanbanDragLookupEntry<TState, TItem>;
-
-interface PendingKanbanPointerDrag<TState extends string, TItem>
-  extends ActiveKanbanDrag<TState, TItem> {
-  isDragging: boolean;
-  startX: number;
-  startY: number;
-}
 
 export interface KanbanItemDragProps {
   className?: string;
@@ -62,9 +57,6 @@ export function useKanbanDrag<TState extends string, TItem>({
   onItemDrop,
 }: UseKanbanDragOptions<TState, TItem>) {
   const [activeDrag, setActiveDrag] = useState<ActiveKanbanDrag<TState, TItem> | null>(null);
-  const [dimmedDragItemId, setDimmedDragItemId] = useState<string | null>(null);
-  const dimmedDragFrameRef = useRef<number | null>(null);
-  const nativeDragImageRef = useRef<HTMLElement | null>(null);
   const [hoveredDropState, setHoveredDropState] = useState<TState | null>(null);
   const pendingPointerDragRef = useRef<PendingKanbanPointerDrag<TState, TItem> | null>(null);
   const suppressClickRef = useRef(false);
@@ -109,135 +101,27 @@ export function useKanbanDrag<TState extends string, TItem>({
   const clearPendingPointerDrag = () => {
     pendingPointerDragRef.current = null;
   };
-  const clearDimmedDragSource = useCallback(() => {
-    if (
-      typeof window !== "undefined" &&
-      dimmedDragFrameRef.current !== null &&
-      typeof window.cancelAnimationFrame === "function"
-    ) {
-      window.cancelAnimationFrame(dimmedDragFrameRef.current);
-    }
+  const {
+    clearDimmedDragSource,
+    clearNativeDragImage,
+    dimmedDragItemId,
+    dimSourceAfterNativeDragPreview,
+    setDimmedDragItemId,
+    setOpaqueNativeDragImage,
+  } = useKanbanNativeDragPreview();
 
-    dimmedDragFrameRef.current = null;
-    setDimmedDragItemId(null);
-  }, []);
-  const clearNativeDragImage = useCallback(() => {
-    nativeDragImageRef.current?.remove();
-    nativeDragImageRef.current = null;
-  }, []);
-  const dimSourceAfterNativeDragPreview = useCallback((itemId: string) => {
-    if (typeof window === "undefined" || typeof window.requestAnimationFrame !== "function") {
-      setDimmedDragItemId(itemId);
-      return;
-    }
-
-    if (
-      dimmedDragFrameRef.current !== null &&
-      typeof window.cancelAnimationFrame === "function"
-    ) {
-      window.cancelAnimationFrame(dimmedDragFrameRef.current);
-    }
-
-    dimmedDragFrameRef.current = window.requestAnimationFrame(() => {
-      dimmedDragFrameRef.current = null;
-      setDimmedDragItemId(itemId);
-    });
-  }, []);
-  const setOpaqueNativeDragImage = useCallback(
-    (milestone: DragEvent<HTMLElement>) => {
-      clearNativeDragImage();
-      nativeDragImageRef.current = createOpaqueKanbanNativeDragImage(milestone);
-    },
-    [clearNativeDragImage],
-  );
-
-  useEffect(() => clearNativeDragImage, [clearNativeDragImage]);
-
-  useEffect(() => {
-    if (!dragEnabled) {
-      return undefined;
-    }
-
-    const clearPointerDrag = (wasDragging: boolean) => {
-      pendingPointerDragRef.current = null;
-      setActiveDrag(null);
-      clearDimmedDragSource();
-      setHoveredDropState(null);
-      if (wasDragging) {
-        window.setTimeout(() => {
-          suppressClickRef.current = false;
-        }, 0);
-      } else {
-        suppressClickRef.current = false;
-      }
-    };
-    const handlePointerMove = (event: PointerEvent) => {
-      const pendingDrag = pendingPointerDragRef.current;
-      if (!pendingDrag) {
-        return;
-      }
-
-      const distance = Math.hypot(
-        event.clientX - pendingDrag.startX,
-        event.clientY - pendingDrag.startY,
-      );
-      if (!pendingDrag.isDragging && distance < POINTER_DRAG_THRESHOLD_PX) {
-        return;
-      }
-
-      if (!pendingDrag.isDragging) {
-        pendingDrag.isDragging = true;
-        suppressClickRef.current = true;
-        setActiveDrag({
-          id: pendingDrag.id,
-          item: pendingDrag.item,
-          sourceState: pendingDrag.sourceState,
-        });
-        setDimmedDragItemId(pendingDrag.id);
-      }
-
-      const targetState = getDropStateAtPoint(event.clientX, event.clientY);
-      setHoveredDropState(
-        targetState && canDropDraggedItem(pendingDrag, targetState) ? targetState : null,
-      );
-    };
-    const handlePointerUp = (event: PointerEvent) => {
-      const pendingDrag = pendingPointerDragRef.current;
-      if (!pendingDrag) {
-        return;
-      }
-
-      const wasDragging = pendingDrag.isDragging;
-      const targetState = getDropStateAtPoint(event.clientX, event.clientY);
-      if (wasDragging) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-
-      clearPointerDrag(wasDragging);
-      if (wasDragging && targetState && canDropDraggedItem(pendingDrag, targetState) && onItemDrop) {
-        void onItemDrop(pendingDrag.item, targetState, pendingDrag.sourceState);
-      }
-    };
-    const handlePointerCancel = (event: PointerEvent) => {
-      void event;
-      const pendingDrag = pendingPointerDragRef.current;
-      if (!pendingDrag) {
-        return;
-      }
-
-      clearPointerDrag(pendingDrag.isDragging);
-    };
-
-    window.addEventListener("pointermove", handlePointerMove);
-    window.addEventListener("pointerup", handlePointerUp);
-    window.addEventListener("pointercancel", handlePointerCancel);
-    return () => {
-      window.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("pointerup", handlePointerUp);
-      window.removeEventListener("pointercancel", handlePointerCancel);
-    };
-  }, [canDropDraggedItem, clearDimmedDragSource, dragEnabled, getDropStateAtPoint, onItemDrop]);
+  useKanbanPointerFallbackDrag({
+    canDropDraggedItem,
+    clearDimmedDragSource,
+    dragEnabled,
+    getDropStateAtPoint,
+    onItemDrop,
+    pendingPointerDragRef,
+    setActiveDrag,
+    setDimmedDragItemId,
+    setHoveredDropState,
+    suppressClickRef,
+  });
 
   const getColumnDropProps = (targetState: TState) => ({
     "data-kanban-drop-enabled": dragEnabled ? String(isDropStateEnabled(targetState)) : undefined,

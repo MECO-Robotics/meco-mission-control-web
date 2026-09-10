@@ -22,7 +22,7 @@ export function useInteractiveTutorialLifecycle({
   onAdvance,
   onClose,
 }: UseInteractiveTutorialLifecycleOptions) {
-  const { cardRef, isTargetReady, spotlightRect, stepBaselineLabelRef, targetRef } =
+  const { isTargetReady, spotlightRect, stepBaselineLabelRef, targetRef } =
     useInteractiveTutorialLifecycleTargeting({ currentStep });
   const { stepError } = useInteractiveTutorialLifecycleInteractions({
     currentStep,
@@ -31,7 +31,6 @@ export function useInteractiveTutorialLifecycle({
     tutorialProjectName,
     onAdvance,
     onClose,
-    cardRef,
     targetRef,
     stepBaselineLabelRef,
   });

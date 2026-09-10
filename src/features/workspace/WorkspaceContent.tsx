@@ -1,8 +1,284 @@
-import type { WorkspaceContentPanelsProps } from "./WorkspaceContentPanelsCoreImpl";
-import { WorkspaceContentPanels } from "./WorkspaceContentPanelsCoreImpl";
+import "./workspaceConsolidation.css";
+import { WorkspaceViewMemory } from "./shared/navigation/WorkspaceViewMemory";
+import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
 
-export type WorkspaceContentProps = WorkspaceContentPanelsProps;
+import type { ArtifactKind, TaskStatus } from "@/types/common";
+import type { ArtifactRecord, ManufacturingItemRecord, MaterialRecord, PartDefinitionRecord, PurchaseItemRecord } from "@/types/recordsInventory";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { MeetingPayload, MemberPayload, MilestonePayload, RiskPayload } from "@/types/payloads";
+import type { TaskRecord } from "@/types/recordsExecution";
+import type { SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
+import type {
+  InventoryViewTab,
+  ManufacturingViewTab,
+  NavigationTarget,
+  RosterViewTab,
+  RiskManagementViewTab,
+  TaskViewTab,
+  ViewTab,
+  WorklogsViewTab,
+} from "@/lib/workspaceNavigation";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import type {
+  WorkspaceToastDismissReason,
+  WorkspaceToastNotice,
+} from "@/features/workspace/workspaceToastQueue";
+import { WorkspaceContentPanelsView } from "./components/WorkspaceContentPanelsView";
 
-export function WorkspaceContent(props: WorkspaceContentProps) {
-  return <WorkspaceContentPanels {...props} />;
+type SwipeDirection = "left" | "right" | null;
+type TabSwitchDirection = "up" | "down";
+
+function getSwipeDirection<T extends string>(
+  previousView: T,
+  currentView: T,
+  viewOrder: readonly T[],
+): SwipeDirection {
+  if (previousView === currentView) {
+    return null;
+  }
+
+  const previousIndex = viewOrder.indexOf(previousView);
+  const currentIndex = viewOrder.indexOf(currentView);
+
+  if (previousIndex < 0 || currentIndex < 0) {
+    return null;
+  }
+
+  return currentIndex > previousIndex ? "left" : "right";
+}
+
+export interface WorkspaceContentProps {
+  currentMemberId?: string | null;
+  activePersonFilter: FilterSelection;
+  activeTab: ViewTab;
+  tabSwitchDirection: TabSwitchDirection;
+  allMembers: BootstrapPayload["members"];
+  artifacts: ArtifactRecord[];
+  availabilityBootstrap: BootstrapPayload;
+  bootstrap: BootstrapPayload;
+  cncItems: ManufacturingItemRecord[];
+  disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
+  externalMembers: BootstrapPayload["members"];
+  fabricationItems: ManufacturingItemRecord[];
+  handleCreateMember: (milestone: React.FormEvent<HTMLFormElement>) => void;
+  handleReactivateMemberForSeason: (memberId: string) => Promise<void>;
+  handleDeleteMember: (id: string) => void;
+  handleMeetingSave: (payload: MeetingPayload) => Promise<void>;
+  handleTaskStatusChange: (task: TaskRecord, status: TaskStatus) => Promise<void>;
+  handleTimelineMilestoneDelete: (milestoneId: string) => Promise<void>;
+  handleTimelineMilestoneSave: (
+    mode: "create" | "edit",
+    milestoneId: string | null,
+    payload: MilestonePayload,
+  ) => Promise<void>;
+  handleUpdateMember: (milestone: React.FormEvent<HTMLFormElement>) => void;
+  isAddPersonOpen: boolean;
+  isDeletingMember: boolean;
+  isEditPersonOpen: boolean;
+  isLoadingData: boolean;
+  isAllProjectsView: boolean;
+  isNonRobotProject: boolean;
+  isSavingMember: boolean;
+  memberEditDraft: MemberPayload | null;
+  memberForm: MemberPayload;
+  membersById: Record<string, BootstrapPayload["members"][number]>;
+  mechanismsById: Record<string, BootstrapPayload["mechanisms"][number]>;
+  openCreateManufacturingModal: (process: "cnc" | "3d-print" | "fabrication") => void;
+  openCreateArtifactModal: (kind: ArtifactKind) => void;
+  openCreateMaterialModal: () => void;
+  openCreateMechanismModal: (subsystemId?: string) => void;
+  openCreatePartInstanceModal: (mechanism: BootstrapPayload["mechanisms"][number], partDefinitionId?: string) => void;
+  openCreateSubsystemModal: () => void;
+  handleDeleteMechanism: (mechanismId: string) => Promise<void>;
+  openCreatePartDefinitionModal: () => void;
+  openCreatePurchaseModal: () => void;
+  openCreateTaskModal: () => void;
+  openCreateTaskModalForMember: (memberId: string) => void;
+  openCreateTaskModalFromTimeline: () => void;
+  openCreateWorkLogModal: (taskId?: string) => void;
+  openCreateQaReportModal: (taskId?: string) => void;
+  openCreateMilestoneReportModal: (milestoneId?: string, onReturn?: () => void) => void;
+  openCreateWorkstreamModal: () => void;
+  openEditWorkstreamModal: (workstream: BootstrapPayload["workstreams"][number]) => void;
+  onCreateRisk: (payload: RiskPayload) => Promise<void>;
+  onDeleteRisk: (riskId: string) => Promise<void>;
+  onCncQuickStatusChange: (
+    item: ManufacturingItemRecord,
+    status: ManufacturingItemRecord["status"],
+  ) => Promise<void>;
+  openEditManufacturingModal: (item: ManufacturingItemRecord) => void;
+  openEditArtifactModal: (artifact: ArtifactRecord) => void;
+  openEditMaterialModal: (item: MaterialRecord) => void;
+  openEditMechanismModal: (mechanism: BootstrapPayload["mechanisms"][number]) => void;
+  openEditPartInstanceModal: (partInstance: BootstrapPayload["partInstances"][number]) => void;
+  openEditSubsystemModal: (subsystem: BootstrapPayload["subsystems"][number]) => void;
+  removePartInstanceFromMechanism: (partInstanceId: string) => Promise<boolean>;
+  saveSubsystemLayout: (
+    subsystemId: string,
+    layout: SubsystemLayoutFields,
+  ) => Promise<boolean>;
+  updateSubsystemConfiguration: (
+    subsystemId: string,
+    patch: Partial<
+      Pick<
+        BootstrapPayload["subsystems"][number],
+        "name" | "description" | "layoutX" | "layoutY" | "layoutZone" | "layoutView" | "sortOrder"
+      >
+    >,
+  ) => Promise<boolean>;
+  openEditPartDefinitionModal: (item: PartDefinitionRecord) => void;
+  openEditPurchaseModal: (item: PurchaseItemRecord) => void;
+  openTimelineTaskDetailsModal: (task: TaskRecord) => void;
+  onUpdateRisk: (riskId: string, payload: RiskPayload) => Promise<void>;
+  partDefinitionsById: Record<string, BootstrapPayload["partDefinitions"][number]>;
+  printItems: ManufacturingItemRecord[];
+  rosterMentors: BootstrapPayload["members"];
+  showCncMentorQuickActions: boolean;
+  manufacturingView: ManufacturingViewTab;
+  setActiveTab: Dispatch<SetStateAction<ViewTab>>;
+  setInventoryView: Dispatch<SetStateAction<InventoryViewTab>>;
+  setManufacturingView: Dispatch<SetStateAction<ManufacturingViewTab>>;
+  setRiskManagementView: Dispatch<SetStateAction<RiskManagementViewTab>>;
+  setTaskView: Dispatch<SetStateAction<TaskViewTab>>;
+  setWorklogsView: Dispatch<SetStateAction<WorklogsViewTab>>;
+  inventoryView: InventoryViewTab;
+  rosterView: RosterViewTab;
+  riskManagementView: RiskManagementViewTab;
+  taskView: TaskViewTab;
+  worklogsView: WorklogsViewTab;
+  selectMember: (id: string | null, payload: BootstrapPayload) => void;
+  selectedSeasonId: string | null;
+  selectedMemberId: string | null;
+  selectedProject: BootstrapPayload["projects"][number] | null;
+  requestMemberPhotoUpload: (file: File) => Promise<string>;
+  setActivePersonFilter: (value: FilterSelection) => void;
+  setIsAddPersonOpen: (open: boolean) => void;
+  setIsEditPersonOpen: (open: boolean) => void;
+  setMemberEditDraft: Dispatch<SetStateAction<MemberPayload | null>>;
+  setMemberForm: Dispatch<SetStateAction<MemberPayload>>;
+  students: BootstrapPayload["members"];
+  subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
+  timelineMilestoneCreateSignal: number;
+  disablePanelAnimations?: boolean;
+  onStartInteractiveTutorial?: () => void;
+  onStartInteractiveTutorialChapter?: (chapterId: string) => void;
+  interactiveTutorialChapters?: Array<{
+    id: string;
+    title: string;
+    summary: string;
+    completed?: boolean;
+  }>;
+  isInteractiveTutorialActive?: boolean;
+  onDismissDataMessage: () => void;
+  onDismissNotificationHistoryItem: (noticeId: string) => void;
+  onDismissTaskEditNotice: (noticeId: string, reason?: WorkspaceToastDismissReason) => void;
+  onTaskEditCanceled: () => void;
+  onTaskEditSaved: () => void;
+  dataMessage: string | null;
+  isNotificationQueueOpen: boolean;
+  notificationHistory: WorkspaceToastNotice[];
+  taskEditNotices: WorkspaceToastNotice[];
+}
+
+export function WorkspaceContent({
+  activeTab,
+  inventoryView,
+  isNonRobotProject,
+  manufacturingView,
+  setActiveTab,
+  setInventoryView,
+  setManufacturingView,
+  setRiskManagementView,
+  setTaskView,
+  setWorklogsView,
+  taskView,
+  ...props
+}: WorkspaceContentProps) {
+  const effectiveInventoryView =
+    isNonRobotProject && (inventoryView === "parts" || inventoryView === "part-mappings")
+      ? "materials"
+      : inventoryView;
+  const previousTaskViewRef = useRef(taskView);
+  const previousManufacturingViewRef = useRef(manufacturingView);
+  const previousInventoryViewRef = useRef(effectiveInventoryView);
+
+  const taskSwipeDirection = getSwipeDirection(previousTaskViewRef.current, taskView, [
+    "calendar",
+    "timeline",
+    "robot-map",
+    "queue",
+    "milestones",
+  ]);
+  const manufacturingSwipeDirection = getSwipeDirection(
+    previousManufacturingViewRef.current,
+    manufacturingView,
+    ["all", "cnc", "prints", "fabrication"],
+  );
+  const inventorySwipeDirection = getSwipeDirection(
+    previousInventoryViewRef.current,
+    effectiveInventoryView,
+    ["materials", "parts", "part-mappings", "purchases"],
+  );
+
+  useEffect(() => {
+    previousTaskViewRef.current = taskView;
+  }, [taskView]);
+  useEffect(() => {
+    previousManufacturingViewRef.current = manufacturingView;
+  }, [manufacturingView]);
+  useEffect(() => {
+    previousInventoryViewRef.current = effectiveInventoryView;
+  }, [effectiveInventoryView]);
+
+  const handleOpenDrilldownTarget = (target: NavigationTarget) => {
+    const params = new URLSearchParams(window.location.search);
+    if (target.milestoneId) params.set("milestone", target.milestoneId);
+    else params.delete("milestone");
+    window.history.replaceState(window.history.state, "", `${window.location.pathname}?${params.toString()}${window.location.hash}`);
+    if (target.taskView) {
+      setTaskView(target.taskView);
+    }
+
+    if (target.riskManagementView) {
+      setRiskManagementView(target.riskManagementView);
+    }
+
+    if (target.worklogsView) {
+      setWorklogsView(target.worklogsView);
+    }
+
+    if (target.inventoryView) {
+      setInventoryView(target.inventoryView);
+    }
+
+    if (target.manufacturingView) {
+      setManufacturingView(target.manufacturingView);
+    }
+
+    setActiveTab(target.tab);
+  };
+
+  return (
+    <WorkspaceViewMemory key={`${props.selectedSeasonId}:${props.selectedProject?.id ?? "all"}`}>
+    <WorkspaceContentPanelsView
+      {...props}
+      activeTab={activeTab}
+      effectiveInventoryView={effectiveInventoryView}
+      inventorySwipeDirection={inventorySwipeDirection}
+      manufacturingSwipeDirection={manufacturingSwipeDirection}
+      taskSwipeDirection={taskSwipeDirection}
+      taskView={taskView}
+      manufacturingView={manufacturingView}
+      inventoryView={inventoryView}
+      isNonRobotProject={isNonRobotProject}
+      onOpenDrilldownTarget={handleOpenDrilldownTarget}
+      setActiveTab={setActiveTab}
+      setInventoryView={setInventoryView}
+      setManufacturingView={setManufacturingView}
+      setRiskManagementView={setRiskManagementView}
+      setTaskView={setTaskView}
+      setWorklogsView={setWorklogsView}
+    />
+    </WorkspaceViewMemory>
+  );
 }

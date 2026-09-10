@@ -1,45 +1,11 @@
-## Summary
+## Problem and resulting behavior
 
-- What changed (2-3 bullets):
-- Closes:
+Describe the problem and what this change does.
 
 ## Validation
 
-- [ ] `npm run verify` (`npm.cmd run verify` on Windows)
-- [ ] Visual verification complete (screenshots/video attached)
-- [ ] `snapshot-validate` impact reviewed for any changed pages or assets
-- [ ] Release safety checks confirmed (`deploy-vps.yml` source constraints / rollback path understood)
-- Additional commands/results:
+List checks actually run and their results, including any limitations.
 
-## Screenshots / Video
+## Additional evidence, when applicable
 
-- Attach before/after screenshots or short recording for UI changes:
-
-## API / contract changes
-
-- [ ] Backend contract unaffected
-- [ ] API/route/schema contract changed (describe):
-- Platform diff/coordination notes:
-
-## Migration / deploy / env changes
-
-- Env vars, secrets, or runtime config added/changed/removed:
-- Migration or deploy-order dependency:
-- Feature flags or rollout guards:
-
-## Risk / rollback notes
-
-- Known risks:
-- UX/accessibility risk:
-- Contract/data risk:
-- Rollback plan:
-
-## Breaking changes
-
-- [ ] None
-- [ ] Breaking changes:
-
-## Linked issues
-
-- Closes:
-- Related:
+Include UI screenshots, coordinated API/contract changes, or breaking changes and reset/migration commands. Omit this section when it does not apply.

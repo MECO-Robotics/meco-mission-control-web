@@ -18,7 +18,7 @@ export function applyTaskEditIntentToDraft(
         ...(taskDraft.taskBlockers ?? []),
         {
           id: createDraftRelationId("blocker"),
-          blockerType: "external",
+          blockerType: "other",
           blockerId: null,
           description: "Blocked",
           isIntentPlaceholder: true,

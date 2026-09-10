@@ -18,7 +18,8 @@ import {
 
 export type MilestonesViewState = MilestonesMilestoneModalState & {
   milestoneFilterMotionClass: string;
-  milestoneZoom: number;
+  readinessFilter: FilterSelection;
+  setReadinessFilter: Dispatch<SetStateAction<FilterSelection>>;
   processedMilestones: BootstrapPayload["milestones"];
   projectFilter: FilterSelection;
   projectLabelByMilestoneId: Record<string, string>;
@@ -29,7 +30,6 @@ export type MilestonesViewState = MilestonesMilestoneModalState & {
   setSearchFilter: Dispatch<SetStateAction<string>>;
   setSortField: Dispatch<SetStateAction<MilestoneSortField>>;
   setSortOrder: Dispatch<SetStateAction<"asc" | "desc">>;
-  setMilestoneZoom: Dispatch<SetStateAction<number>>;
   setTypeFilter: Dispatch<SetStateAction<FilterSelection>>;
   sortField: MilestoneSortField;
   sortOrder: "asc" | "desc";
@@ -64,7 +64,7 @@ export function useMilestonesViewState({
   const [projectFilter, setProjectFilter] = useState<FilterSelection>([]);
   const [typeFilter, setTypeFilter] = useState<FilterSelection>([]);
   const [searchFilter, setSearchFilter] = useState("");
-  const [milestoneZoom, setMilestoneZoom] = useState(1);
+  const [readinessFilter, setReadinessFilter] = useState<FilterSelection>([]);
 
   useEffect(() => {
     if (!isAllProjectsView && projectFilter.length > 0) {
@@ -104,7 +104,7 @@ export function useMilestonesViewState({
         sortField,
         sortOrder,
         typeFilter,
-      }),
+      }).filter((milestone) => readinessFilter.length === 0 || readinessFilter.includes(milestone.status ?? "not ready")),
     [
       activePersonFilter,
       bootstrap,
@@ -115,6 +115,7 @@ export function useMilestonesViewState({
       sortField,
       sortOrder,
       typeFilter,
+      readinessFilter,
     ],
   );
   const suggestionSourceMilestones = useMemo(
@@ -130,7 +131,7 @@ export function useMilestonesViewState({
         sortField,
         sortOrder,
         typeFilter,
-      }),
+      }).filter((milestone) => readinessFilter.length === 0 || readinessFilter.includes(milestone.status ?? "not ready")),
     [
       activePersonFilter,
       bootstrap,
@@ -140,6 +141,7 @@ export function useMilestonesViewState({
       sortField,
       sortOrder,
       typeFilter,
+      readinessFilter,
     ],
   );
   const searchSuggestions = useMemo(
@@ -184,11 +186,11 @@ export function useMilestonesViewState({
     setSearchFilter,
     setSortField,
     setSortOrder,
-    setMilestoneZoom,
+    setReadinessFilter,
     setTypeFilter,
     sortField,
     sortOrder,
-    milestoneZoom,
+    readinessFilter,
     typeFilter,
   };
 }

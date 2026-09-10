@@ -21,7 +21,7 @@ export function renderTaskModal(
   const activeTask: TaskRecord = {
     id: "task-1",
     ...taskDraft,
-    dependencyIds: [],
+
     blockers: [],
     linkedManufacturingIds: [],
     linkedPurchaseIds: [],

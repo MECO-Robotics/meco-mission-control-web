@@ -43,25 +43,142 @@ export function resolveSubsystemLayout(
   };
 }
 
+type AutoArrangeSubsystem = Pick<
+  SubsystemRecord,
+  "id" | "layoutX" | "layoutY" | "layoutZone" | "layoutView" | "sortOrder"
+>;
+
+const AUTO_ARRANGE_MINIMUM_SLOT_DISTANCE = 0.08;
+
+function isAutoArrangeSlotAvailable(
+  slot: { layoutX: number; layoutY: number },
+  occupiedSlots: Array<{ layoutX: number; layoutY: number }>,
+) {
+  return occupiedSlots.every((occupiedSlot) => {
+    const xDistance = occupiedSlot.layoutX - slot.layoutX;
+    const yDistance = occupiedSlot.layoutY - slot.layoutY;
+    return (
+      (xDistance * xDistance) + (yDistance * yDistance) >
+      AUTO_ARRANGE_MINIMUM_SLOT_DISTANCE * AUTO_ARRANGE_MINIMUM_SLOT_DISTANCE
+    );
+  });
+}
+
+function buildAutoArrangeCandidateSlots(minimumSlotCount: number) {
+  const slots: Array<{ layoutX: number; layoutY: number }> = [];
+  const seenSlots = new Set<string>();
+
+  for (let gridSize = 2; slots.length < minimumSlotCount; gridSize += 1) {
+    for (let rowIndex = 0; rowIndex < gridSize; rowIndex += 1) {
+      for (let columnIndex = 0; columnIndex < gridSize; columnIndex += 1) {
+        const layoutX = clampLayoutCoordinate((columnIndex + 1) / (gridSize + 1));
+        const layoutY = clampLayoutCoordinate((rowIndex + 1) / (gridSize + 1));
+
+        if (layoutX === null || layoutY === null) {
+          continue;
+        }
+
+        const slotKey = `${layoutX.toFixed(4)}:${layoutY.toFixed(4)}`;
+        if (seenSlots.has(slotKey)) {
+          continue;
+        }
+
+        seenSlots.add(slotKey);
+        slots.push({ layoutX, layoutY });
+      }
+    }
+  }
+
+  return slots;
+}
+
+function resolveAutoArrangeZone(
+  slot: { layoutX: number; layoutY: number },
+  existingZone: SubsystemLayoutZone | null | undefined,
+): SubsystemLayoutZone {
+  if (existingZone && existingZone !== "unplaced") {
+    return existingZone;
+  }
+
+  if (slot.layoutY < 0.34) {
+    return "front";
+  }
+
+  if (slot.layoutY > 0.66) {
+    return "rear";
+  }
+
+  if (slot.layoutX < 0.4) {
+    return "left";
+  }
+
+  if (slot.layoutX > 0.6) {
+    return "right";
+  }
+
+  return "center";
+}
+
 export function buildAutoArrangedLayouts(
-  subsystems: Array<Pick<SubsystemRecord, "id" | "layoutZone" | "layoutView">>,
+  subsystems: readonly AutoArrangeSubsystem[],
+  autoArrangeSubsystemIds?: ReadonlySet<string>,
 ): Record<string, SubsystemLayoutFields> {
   const layouts: Record<string, SubsystemLayoutFields> = {};
-  const radiusX = 0.34;
-  const radiusY = 0.26;
+  const maximumSortOrder = subsystems.reduce(
+    (maximum, subsystem) =>
+      typeof subsystem.sortOrder === "number" && Number.isFinite(subsystem.sortOrder)
+        ? Math.max(maximum, subsystem.sortOrder)
+        : maximum,
+    -1,
+  );
+  const occupiedSlots = subsystems
+    .map(resolveSubsystemLayout)
+    .filter(isSubsystemPlaced)
+    .map((layout) => ({
+      layoutX: layout.layoutX ?? 0.5,
+      layoutY: layout.layoutY ?? 0.5,
+    }));
+  const unplacedSubsystems = subsystems
+    .filter(
+      (subsystem) =>
+        !isSubsystemPlaced(resolveSubsystemLayout(subsystem)) &&
+        (!autoArrangeSubsystemIds || autoArrangeSubsystemIds.has(subsystem.id)),
+    )
+    .sort((left, right) => {
+      const leftSortOrder = left.sortOrder ?? Number.POSITIVE_INFINITY;
+      const rightSortOrder = right.sortOrder ?? Number.POSITIVE_INFINITY;
 
-  subsystems.forEach((subsystem, index) => {
-    const angle = (Math.PI * 2 * index) / Math.max(1, subsystems.length);
-    const nextZone = subsystem.layoutZone && subsystem.layoutZone !== "unplaced"
-      ? subsystem.layoutZone
-      : "center";
+      if (leftSortOrder !== rightSortOrder) {
+        return leftSortOrder - rightSortOrder;
+      }
 
+      return left.id.localeCompare(right.id);
+    });
+  const candidateSlots = buildAutoArrangeCandidateSlots(
+    Math.max(12, (subsystems.length + unplacedSubsystems.length) * 4),
+  );
+  let candidateSlotIndex = 0;
+
+  unplacedSubsystems.forEach((subsystem, index) => {
+    const nextSlot = candidateSlots.slice(candidateSlotIndex).find((slot, offset) => {
+      const isAvailable = isAutoArrangeSlotAvailable(slot, occupiedSlots);
+      if (isAvailable) {
+        candidateSlotIndex += offset + 1;
+      }
+      return isAvailable;
+    });
+
+    if (!nextSlot) {
+      return;
+    }
+
+    occupiedSlots.push(nextSlot);
     layouts[subsystem.id] = {
-      layoutX: clampLayoutCoordinate(0.5 + Math.cos(angle) * radiusX),
-      layoutY: clampLayoutCoordinate(0.5 + Math.sin(angle) * radiusY),
-      layoutZone: nextZone,
+      layoutX: nextSlot.layoutX,
+      layoutY: nextSlot.layoutY,
+      layoutZone: resolveAutoArrangeZone(nextSlot, subsystem.layoutZone),
       layoutView: subsystem.layoutView === "top" ? subsystem.layoutView : DEFAULT_SUBSYSTEM_LAYOUT_VIEW,
-      sortOrder: index,
+      sortOrder: subsystem.sortOrder ?? maximumSortOrder + index + 1,
     };
   });
 

@@ -8,6 +8,7 @@ import type {
   MeetingRecord,
   MilestoneRequirementRecord,
   QaReviewRecord,
+  QaRequestRecord,
 } from "@/types/recordsExecution";
 
 describe("normalizeBootstrapPayload", () => {
@@ -124,5 +125,95 @@ describe("normalizeBootstrapPayload", () => {
     expect(normalized.attendanceRecords).toEqual(payload.attendanceRecords);
     expect(normalized.qaReviews).toEqual(qaReviews);
     expect(normalized.escalations).toEqual(escalations);
+  });
+
+  it("preserves QA requests required by the platform bootstrap contract", () => {
+    const qaRequests: QaRequestRecord[] = [
+      {
+        id: "qa-request-1",
+        taskId: "task-1",
+        subject: "Review drivetrain wiring",
+        mentorId: "mentor-1",
+        requestedById: "student-1",
+        createdAt: "2026-03-01T20:00:00.000Z",
+        status: "requested",
+      },
+    ];
+    const payload: BootstrapPayload = {
+      ...EMPTY_BOOTSTRAP,
+      qaRequests,
+    };
+
+    expect(normalizeBootstrapPayload(payload).qaRequests).toEqual(qaRequests);
+  });
+
+  it("normalizes unknown task blocker types to other", () => {
+    const payload = {
+      ...EMPTY_BOOTSTRAP,
+      taskBlockers: [
+        {
+          id: "task-blocker-1",
+          blockedTaskId: "task-1",
+          blockerType: "vendor-shutdown",
+          blockerId: null,
+          description: "Unexpected vendor blocker",
+          severity: "medium",
+          status: "open",
+          createdByMemberId: null,
+          createdAt: "2026-01-01T00:00:00.000Z",
+          resolvedAt: null,
+        },
+      ],
+    } as unknown as BootstrapPayload;
+
+    const normalized = normalizeBootstrapPayload(payload);
+
+    expect(normalized.taskBlockers?.[0]?.blockerType).toBe("other");
+    expect(normalized.taskBlockers?.[0]?.sourceKind).toBe("external");
+  });
+
+  it("decodes issue category separately from the source relationship", () => {
+    const payload = { ...EMPTY_BOOTSTRAP, taskBlockers: [{
+      id: "blocker-1", blockedTaskId: "task-1", blockerType: "external",
+      issueType: "shipping-delay", blockerId: "vendor-order-42",
+    }] } as unknown as BootstrapPayload;
+    const blocker = normalizeBootstrapPayload(payload).taskBlockers?.[0];
+    expect(blocker?.blockerType).toBe("shipping-delay");
+    expect(blocker?.sourceKind).toBe("external");
+    expect(blocker?.blockerId).toBe("vendor-order-42");
+  });
+
+  it("retains the legacy external relationship kind and source id", () => {
+    const payload = {
+      ...EMPTY_BOOTSTRAP,
+      taskBlockers: [{
+        id: "external-blocker",
+        blockedTaskId: "task-1",
+        blockerType: "external",
+        blockerId: "vendor-order-42",
+      }],
+    } as unknown as BootstrapPayload;
+
+    const blocker = normalizeBootstrapPayload(payload).taskBlockers?.[0];
+    expect(blocker?.blockerType).toBe("external");
+    expect(blocker?.blockerId).toBe("vendor-order-42");
+    expect(blocker?.sourceKind).toBe("external");
+  });
+
+  it("derives task target risk from the authoritative risk relation", () => {
+    const payload = {
+      ...EMPTY_BOOTSTRAP,
+      risks: [{ id: "risk-1", mitigationTaskId: "task-1" }],
+      tasks: [
+        {
+          id: "task-1",
+          title: "Mitigate drivetrain risk",
+        },
+      ],
+    } as unknown as BootstrapPayload;
+
+    const normalized = normalizeBootstrapPayload(payload);
+
+    expect(normalized.tasks[0]?.targetRiskId).toBe("risk-1");
   });
 });

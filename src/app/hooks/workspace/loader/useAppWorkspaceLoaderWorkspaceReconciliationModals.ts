@@ -6,7 +6,6 @@ export {
 export {
   reconcileArtifactModal,
   reconcileMechanismModal,
-  reconcileMaterialModal,
   reconcilePartDefinitionModal,
   reconcilePartInstanceModal,
   reconcileSubsystemModal,

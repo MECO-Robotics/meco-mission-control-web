@@ -9,86 +9,114 @@ import type { MechanismRecord } from "@/types/recordsOrganization";
 
 export type MechanismActions = ReturnType<typeof useMechanismActions>;
 
-export function useMechanismActions(model: AppWorkspaceModel) {
+export function useMechanismActions({
+  activeMechanismId,
+  bootstrap,
+  handleUnauthorized,
+  loadWorkspace,
+  mechanismDraft,
+  mechanismModalMode,
+  scopedBootstrap,
+  setActiveMechanismId,
+  setDataMessage,
+  setIsDeletingMechanism,
+  setIsSavingMechanism,
+  setMechanismDraft,
+  setMechanismModalMode,
+}: {
+  activeMechanismId: AppWorkspaceModel["activeMechanismId"];
+  bootstrap: AppWorkspaceModel["bootstrap"];
+  handleUnauthorized: AppWorkspaceModel["handleUnauthorized"];
+  loadWorkspace: AppWorkspaceModel["loadWorkspace"];
+  mechanismDraft: AppWorkspaceModel["mechanismDraft"];
+  mechanismModalMode: AppWorkspaceModel["mechanismModalMode"];
+  scopedBootstrap: AppWorkspaceModel["scopedBootstrap"];
+  setActiveMechanismId: AppWorkspaceModel["setActiveMechanismId"];
+  setDataMessage: AppWorkspaceModel["setDataMessage"];
+  setIsDeletingMechanism: AppWorkspaceModel["setIsDeletingMechanism"];
+  setIsSavingMechanism: AppWorkspaceModel["setIsSavingMechanism"];
+  setMechanismDraft: AppWorkspaceModel["setMechanismDraft"];
+  setMechanismModalMode: AppWorkspaceModel["setMechanismModalMode"];
+}) {
   const openCreateMechanismModal = useCallback(() => {
-    model.setActiveMechanismId(null);
-    model.setMechanismDraft(buildEmptyMechanismPayload(model.scopedBootstrap));
-    model.setMechanismModalMode("create");
-  }, [model]);
+    setActiveMechanismId(null);
+    setMechanismDraft(buildEmptyMechanismPayload(scopedBootstrap));
+    setMechanismModalMode("create");
+  }, [scopedBootstrap, setActiveMechanismId, setMechanismDraft, setMechanismModalMode]);
 
   const openEditMechanismModal = useCallback((item: MechanismRecord) => {
-    model.setActiveMechanismId(item.id);
-    model.setMechanismDraft(item as MechanismPayload);
-    model.setMechanismModalMode("edit");
-  }, [model]);
+    setActiveMechanismId(item.id);
+    setMechanismDraft(item as MechanismPayload);
+    setMechanismModalMode("edit");
+  }, [setActiveMechanismId, setMechanismDraft, setMechanismModalMode]);
 
   const closeMechanismModal = useCallback(() => {
-    model.setMechanismModalMode(null);
-    model.setActiveMechanismId(null);
-  }, [model]);
+    setMechanismModalMode(null);
+    setActiveMechanismId(null);
+  }, [setActiveMechanismId, setMechanismModalMode]);
 
   const handleMechanismSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
-    model.setIsSavingMechanism(true);
-    model.setDataMessage(null);
+    setIsSavingMechanism(true);
+    setDataMessage(null);
 
     try {
-      if (model.mechanismModalMode === "create") {
-        await createMechanismRecord(model.mechanismDraft, model.handleUnauthorized);
-      } else if (model.mechanismModalMode === "edit" && model.activeMechanismId) {
-        await updateMechanismRecord(model.activeMechanismId, model.mechanismDraft, model.handleUnauthorized);
+      if (mechanismModalMode === "create") {
+        await createMechanismRecord(mechanismDraft, handleUnauthorized);
+      } else if (mechanismModalMode === "edit" && activeMechanismId) {
+        await updateMechanismRecord(activeMechanismId, mechanismDraft, handleUnauthorized);
       }
 
-      await model.loadWorkspace();
+      await loadWorkspace();
       closeMechanismModal();
     } catch (error) {
-      model.setDataMessage(toErrorMessage(error));
+      setDataMessage(toErrorMessage(error));
     } finally {
-      model.setIsSavingMechanism(false);
+      setIsSavingMechanism(false);
     }
-  }, [closeMechanismModal, model]);
+  }, [activeMechanismId, closeMechanismModal, handleUnauthorized, loadWorkspace, mechanismDraft, mechanismModalMode, setDataMessage, setIsSavingMechanism]);
 
   const handleDeleteMechanism = useCallback(async (mechanismId: string) => {
-    model.setIsDeletingMechanism(true);
-    model.setDataMessage(null);
+    setIsDeletingMechanism(true);
+    setDataMessage(null);
 
     try {
-      await deleteMechanismRecord(mechanismId, model.handleUnauthorized);
-      if (model.activeMechanismId === mechanismId) {
+      await deleteMechanismRecord(mechanismId, handleUnauthorized);
+      if (activeMechanismId === mechanismId) {
         closeMechanismModal();
       }
-      await model.loadWorkspace();
+      await loadWorkspace();
     } catch (error) {
-      model.setDataMessage(toErrorMessage(error));
+      setDataMessage(toErrorMessage(error));
     } finally {
-      model.setIsDeletingMechanism(false);
+      setIsDeletingMechanism(false);
     }
-  }, [closeMechanismModal, model]);
+  }, [activeMechanismId, closeMechanismModal, handleUnauthorized, loadWorkspace, setDataMessage, setIsDeletingMechanism]);
 
   const handleToggleMechanismArchived = useCallback(async (mechanismId: string) => {
-    const currentMechanism = model.bootstrap.mechanisms.find(
+    const currentMechanism = bootstrap.mechanisms.find(
       (mechanism) => mechanism.id === mechanismId,
     );
     if (!currentMechanism) {
       return;
     }
 
-    model.setIsSavingMechanism(true);
-    model.setDataMessage(null);
+    setIsSavingMechanism(true);
+    setDataMessage(null);
 
     try {
       await updateMechanismRecord(
         mechanismId,
         { isArchived: !currentMechanism.isArchived },
-        model.handleUnauthorized,
+        handleUnauthorized,
       );
-      await model.loadWorkspace();
+      await loadWorkspace();
     } catch (error) {
-      model.setDataMessage(toErrorMessage(error));
+      setDataMessage(toErrorMessage(error));
     } finally {
-      model.setIsSavingMechanism(false);
+      setIsSavingMechanism(false);
     }
-  }, [model]);
+  }, [bootstrap, handleUnauthorized, loadWorkspace, setDataMessage, setIsSavingMechanism]);
 
   return {
     closeMechanismModal,

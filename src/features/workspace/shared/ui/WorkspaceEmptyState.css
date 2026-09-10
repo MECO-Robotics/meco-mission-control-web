@@ -1,0 +1,36 @@
+.workspace-empty-state {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.85rem;
+}
+
+.workspace-empty-state-copy {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.workspace-empty-state-copy .section-copy {
+  margin: 0;
+}
+
+.workspace-empty-state-action {
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--bg-panel);
+  color: var(--text-title);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.58rem 0.72rem;
+  white-space: nowrap;
+}
+
+.workspace-empty-state-action:hover,
+.workspace-empty-state-action:focus-visible {
+  border-color: var(--meco-blue);
+  color: var(--meco-blue);
+  outline: none;
+}

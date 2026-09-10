@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRememberedViewState } from "@/features/workspace/shared/navigation/WorkspaceViewMemory";
 import type { Dispatch, SetStateAction } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -153,19 +153,19 @@ export function useTaskQueueViewState({
   membersById,
   subsystemsById,
 }: TaskQueueViewStateArgs): TaskQueueViewState {
-  const [sortField, setSortField] = useState<TaskSortField>("dueDate");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [projectFilter, setProjectFilter] = useState<FilterSelection>([]);
-  const [statusFilter, setStatusFilter] = useState<FilterSelection>([]);
-  const [disciplineFilter, setDisciplineFilter] = useState<FilterSelection>([]);
-  const [subsystemFilter, setSubsystemFilter] = useState<FilterSelection>([]);
-  const [subsystemIterationFilter, setSubsystemIterationFilter] = useState<FilterSelection>([]);
-  const [ownerFilter, setOwnerFilter] = useState<FilterSelection>([]);
-  const [priorityFilter, setPriorityFilter] = useState<FilterSelection>([]);
-  const [searchFilter, setSearchFilter] = useState("");
-  const [focusedBoardState, setFocusedBoardState] = useState<TaskQueueBoardState | null>(null);
-  const [visibleTaskCount, setVisibleTaskCount] = useState(TASK_QUEUE_LAZY_LOAD_BATCH_SIZE);
-  const [taskQueueZoom, setTaskQueueZoom] = useState(1);
+  const [sortField, setSortField] = useRememberedViewState<TaskSortField>("tasks.sortField", "dueDate");
+  const [sortOrder, setSortOrder] = useRememberedViewState<"asc" | "desc">("tasks.sortOrder", "asc");
+  const [projectFilter, setProjectFilter] = useRememberedViewState<FilterSelection>("tasks.projectFilter", []);
+  const [statusFilter, setStatusFilter] = useRememberedViewState<FilterSelection>("tasks.statusFilter", []);
+  const [disciplineFilter, setDisciplineFilter] = useRememberedViewState<FilterSelection>("tasks.disciplineFilter", []);
+  const [subsystemFilter, setSubsystemFilter] = useRememberedViewState<FilterSelection>("tasks.subsystemFilter", []);
+  const [subsystemIterationFilter, setSubsystemIterationFilter] = useRememberedViewState<FilterSelection>("tasks.subsystemIterationFilter", []);
+  const [ownerFilter, setOwnerFilter] = useRememberedViewState<FilterSelection>("tasks.ownerFilter", []);
+  const [priorityFilter, setPriorityFilter] = useRememberedViewState<FilterSelection>("tasks.priorityFilter", []);
+  const [searchFilter, setSearchFilter] = useRememberedViewState("tasks.searchFilter", "");
+  const [focusedBoardState, setFocusedBoardState] = useRememberedViewState<TaskQueueBoardState | null>("tasks.focusedBoardState", null);
+  const [visibleTaskCount, setVisibleTaskCount] = useRememberedViewState("tasks.visibleTaskCount", TASK_QUEUE_LAZY_LOAD_BATCH_SIZE);
+  const [taskQueueZoom, setTaskQueueZoom] = useRememberedViewState("tasks.taskQueueZoom", 1);
 
   const derived = useTaskQueueViewStateLogic({
     activePersonFilter,

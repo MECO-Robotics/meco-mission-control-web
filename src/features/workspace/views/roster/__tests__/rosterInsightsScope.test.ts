@@ -313,7 +313,7 @@ describe("roster insights scope helpers", () => {
           priority: "medium",
           status: "in-progress",
           planningState: "ready",
-          dependencyIds: [],
+
           blockers: [],
           linkedManufacturingIds: [],
           linkedPurchaseIds: [],

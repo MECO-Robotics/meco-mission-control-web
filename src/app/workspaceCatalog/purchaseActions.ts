@@ -10,62 +10,90 @@ import type { PurchaseItemRecord } from "@/types/recordsInventory";
 
 export type PurchaseActions = ReturnType<typeof usePurchaseActions>;
 
-export function usePurchaseActions(model: AppWorkspaceModel) {
+export function usePurchaseActions({
+  activePurchaseId,
+  bootstrap,
+  handleUnauthorized,
+  loadWorkspace,
+  purchaseDraft,
+  purchaseFinalCost,
+  purchaseModalMode,
+  setActivePurchaseId,
+  setDataMessage,
+  setIsSavingPurchase,
+  setPurchaseDraft,
+  setPurchaseFinalCost,
+  setPurchaseModalMode,
+}: {
+  activePurchaseId: AppWorkspaceModel["activePurchaseId"];
+  bootstrap: AppWorkspaceModel["bootstrap"];
+  handleUnauthorized: AppWorkspaceModel["handleUnauthorized"];
+  loadWorkspace: AppWorkspaceModel["loadWorkspace"];
+  purchaseDraft: AppWorkspaceModel["purchaseDraft"];
+  purchaseFinalCost: AppWorkspaceModel["purchaseFinalCost"];
+  purchaseModalMode: AppWorkspaceModel["purchaseModalMode"];
+  setActivePurchaseId: AppWorkspaceModel["setActivePurchaseId"];
+  setDataMessage: AppWorkspaceModel["setDataMessage"];
+  setIsSavingPurchase: AppWorkspaceModel["setIsSavingPurchase"];
+  setPurchaseDraft: AppWorkspaceModel["setPurchaseDraft"];
+  setPurchaseFinalCost: AppWorkspaceModel["setPurchaseFinalCost"];
+  setPurchaseModalMode: AppWorkspaceModel["setPurchaseModalMode"];
+}) {
   const openCreatePurchaseModal = useCallback(() => {
-    model.setActivePurchaseId(null);
-    model.setPurchaseDraft(buildEmptyPurchasePayload(model.bootstrap));
-    model.setPurchaseFinalCost("");
-    model.setPurchaseModalMode("create");
-  }, [model]);
+    setActivePurchaseId(null);
+    setPurchaseDraft(buildEmptyPurchasePayload(bootstrap));
+    setPurchaseFinalCost("");
+    setPurchaseModalMode("create");
+  }, [bootstrap, setActivePurchaseId, setPurchaseDraft, setPurchaseFinalCost, setPurchaseModalMode]);
 
   const openEditPurchaseModal = useCallback((item: PurchaseItemRecord) => {
-    model.setActivePurchaseId(item.id);
-    model.setPurchaseDraft(purchaseToPayload(item));
-    model.setPurchaseFinalCost(typeof item.finalCost === "number" ? String(item.finalCost) : "");
-    model.setPurchaseModalMode("edit");
-  }, [model]);
+    setActivePurchaseId(item.id);
+    setPurchaseDraft(purchaseToPayload(item));
+    setPurchaseFinalCost(typeof item.finalCost === "number" ? String(item.finalCost) : "");
+    setPurchaseModalMode("edit");
+  }, [setActivePurchaseId, setPurchaseDraft, setPurchaseFinalCost, setPurchaseModalMode]);
 
   const closePurchaseModal = useCallback(() => {
-    model.setPurchaseModalMode(null);
-    model.setActivePurchaseId(null);
-  }, [model]);
+    setPurchaseModalMode(null);
+    setActivePurchaseId(null);
+  }, [setActivePurchaseId, setPurchaseModalMode]);
 
   const handlePurchaseSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
-    model.setIsSavingPurchase(true);
-    model.setDataMessage(null);
+    setIsSavingPurchase(true);
+    setDataMessage(null);
 
     try {
-      const selectedPartDefinition = model.bootstrap.partDefinitions.find(
-        (partDefinition) => partDefinition.id === model.purchaseDraft.partDefinitionId,
+      const selectedPartDefinition = bootstrap.partDefinitions.find(
+        (partDefinition) => partDefinition.id === purchaseDraft.partDefinitionId,
       );
 
       if (!selectedPartDefinition) {
-        model.setDataMessage("Please choose a real part from the Parts tab before saving the purchase.");
+        setDataMessage("Please choose a real part from the Parts tab before saving the purchase.");
         return;
       }
 
       const payload: PurchaseItemPayload = {
-        ...model.purchaseDraft,
+        ...purchaseDraft,
         title: selectedPartDefinition.name,
         finalCost:
-          model.purchaseFinalCost.trim().length > 0 ? Number(model.purchaseFinalCost) : undefined,
+          purchaseFinalCost.trim().length > 0 ? Number(purchaseFinalCost) : undefined,
       };
 
-      if (model.purchaseModalMode === "create") {
-        await createPurchaseItemRecord(payload, model.handleUnauthorized);
-      } else if (model.purchaseModalMode === "edit" && model.activePurchaseId) {
-        await updatePurchaseItemRecord(model.activePurchaseId, payload, model.handleUnauthorized);
+      if (purchaseModalMode === "create") {
+        await createPurchaseItemRecord(payload, handleUnauthorized);
+      } else if (purchaseModalMode === "edit" && activePurchaseId) {
+        await updatePurchaseItemRecord(activePurchaseId, payload, handleUnauthorized);
       }
 
-      await model.loadWorkspace();
+      await loadWorkspace();
       closePurchaseModal();
     } catch (error) {
-      model.setDataMessage(toErrorMessage(error));
+      setDataMessage(toErrorMessage(error));
     } finally {
-      model.setIsSavingPurchase(false);
+      setIsSavingPurchase(false);
     }
-  }, [closePurchaseModal, model]);
+  }, [activePurchaseId, bootstrap, closePurchaseModal, handleUnauthorized, loadWorkspace, purchaseDraft, purchaseFinalCost, purchaseModalMode, setDataMessage, setIsSavingPurchase]);
 
   return {
     closePurchaseModal,

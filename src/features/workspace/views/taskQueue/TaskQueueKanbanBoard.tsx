@@ -239,13 +239,17 @@ export function TaskQueueKanbanBoard({
     <KanbanColumns
       boardClassName="task-queue-board"
       canDragItem={(task) => !pendingTaskStatusDropIds.has(task.id)}
-      canDropItem={(task, state) => {
+      canDropItem={(task, state, sourceState) => {
         if (pendingTaskStatusDropIds.has(task.id)) {
           return false;
         }
 
         if (isTaskQueueDirectStatusState(state)) {
-          return Boolean(onReassignTaskStatus) && task.status !== state;
+          return (
+            isTaskQueueDirectStatusState(sourceState) &&
+            Boolean(onReassignTaskStatus) &&
+            task.status !== state
+          );
         }
 
         return getTaskQueueBoardState(task, bootstrap) !== state;

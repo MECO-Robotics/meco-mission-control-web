@@ -131,10 +131,31 @@
 }
 
 .mc-roster-status-badge.is-overloaded,
-.mc-roster-status-badge.is-unavailable {
+.mc-roster-status-badge.is-unavailable,
+.mc-roster-status-badge.is-blocked-waiting {
   background: color-mix(in srgb, #dc2626 15%, transparent);
   border-color: color-mix(in srgb, #dc2626 35%, var(--border-base));
   color: #991b1b;
+}
+
+.mc-roster-status-badge.is-busy {
+  background: color-mix(in srgb, #2563eb 14%, transparent);
+  border-color: color-mix(in srgb, #2563eb 34%, var(--border-base));
+  color: #1d4ed8;
+}
+
+.mc-roster-available-group {
+  display: grid;
+  gap: 0.55rem;
+  min-height: 0;
+}
+
+.mc-roster-available-card {
+  align-content: start;
+}
+
+.roster-available-assign-button {
+  justify-self: start;
 }
 
 .mc-roster-attendance-grid {

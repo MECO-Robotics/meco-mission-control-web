@@ -10,6 +10,7 @@ import {
 import { formatIterationVersion } from "@/lib/appUtils/common";
 import { getTaskDisciplinesForProject } from "@/lib/taskDisciplines";
 import type { TaskDetailsEditableField } from "../../taskModalTypes";
+import { formatRiskSeverity } from "@/features/workspace/views/riskViewModel";
 
 interface UseTaskDetailsAdvancedSectionModelArgs {
   activeTask: TaskRecord;
@@ -42,6 +43,9 @@ export function useTaskDetailsAdvancedSectionModel({
   const disciplinesById = Object.fromEntries(
     bootstrap.disciplines.map((discipline) => [discipline.id, discipline] as const),
   ) as Record<string, BootstrapPayload["disciplines"][number]>;
+  const risksById = Object.fromEntries(
+    bootstrap.risks.map((risk) => [risk.id, risk] as const),
+  ) as Record<string, BootstrapPayload["risks"][number]>;
   const selectedPrimaryTargetId = editableTask.subsystemIds[0] ?? editableTask.subsystemId ?? "";
   const projectMechanisms = bootstrap.mechanisms.filter(
     (mechanism) => mechanism.subsystemId === selectedPrimaryTargetId,
@@ -130,6 +134,14 @@ export function useTaskDetailsAdvancedSectionModel({
     })
     .filter((partInstance): partInstance is { id: string; label: string } => Boolean(partInstance));
   const partsText = partLabels.length > 0 ? partLabels.join(", ") : "No part linked";
+  const targetRisk = editableTask.targetRiskId ? risksById[editableTask.targetRiskId] : null;
+  const targetRiskText = targetRisk
+    ? `${targetRisk.title} (${formatRiskSeverity(targetRisk.severity)})`
+    : "No risk targeted";
+  const riskTargetOptions = bootstrap.risks.map((risk) => ({
+    id: risk.id,
+    name: `${risk.title} (${formatRiskSeverity(risk.severity)})`,
+  }));
 
   const handleDisciplineChange = (selection: string[]) => {
     setTaskDraft?.((current) => ({
@@ -142,6 +154,13 @@ export function useTaskDetailsAdvancedSectionModel({
   const handleStartDateChange = (milestone: ChangeEvent<HTMLInputElement>) => {
     setTaskDraft?.((current) => ({ ...current, startDate: milestone.target.value }));
     setEditingField(null);
+  };
+
+  const handleTargetRiskChange = (milestone: ChangeEvent<HTMLSelectElement>) => {
+    setTaskDraft?.((current) => ({
+      ...current,
+      targetRiskId: milestone.target.value || null,
+    }));
   };
 
   const handleMechanismChange = (selection: string[]) => {
@@ -242,6 +261,7 @@ export function useTaskDetailsAdvancedSectionModel({
     handleMechanismChange,
     handlePartsChange,
     handleStartDateChange,
+    handleTargetRiskChange,
     mechanismNames,
     mechanismRows,
     partsText,
@@ -250,7 +270,9 @@ export function useTaskDetailsAdvancedSectionModel({
     removePartInstanceSelection,
     projectMechanisms,
     projectPartInstances,
+    riskTargetOptions,
     selectedMechanismIds,
     selectedPartInstanceIds,
+    targetRiskText,
   };
 }

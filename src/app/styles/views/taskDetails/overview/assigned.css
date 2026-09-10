@@ -67,7 +67,7 @@
 }
 
 .task-details-overview-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(8.5rem, 0.85fr) minmax(11rem, 1fr) minmax(13rem, 1.2fr);
   grid-template-areas:
     "priority owner assigned"
     "subsystem mentor assigned";
@@ -179,7 +179,7 @@
   align-self: start;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 900px) {
   .task-details-overview-grid {
     grid-template-columns: 1fr;
     grid-template-areas: none;

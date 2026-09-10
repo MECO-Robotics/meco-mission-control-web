@@ -102,3 +102,19 @@
   z-index: 12050 !important;
 }
 
+
+/* Keep the established full-viewport scrim in the native modal top layer. */
+dialog.modal-scrim {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  box-sizing: border-box;
+  color: inherit;
+  overscroll-behavior: contain;
+}
+
+dialog.modal-scrim:not([open]) { display: none; }
+dialog.modal-scrim::backdrop { background: transparent; }

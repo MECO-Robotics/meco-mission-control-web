@@ -1,7 +1,7 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 
 import { reconcileActivePersonFilter } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceReconciliationSelection";
-import { reconcileArtifactModal, reconcileMaterialModal, reconcileMechanismModal, reconcilePartDefinitionModal, reconcilePartInstanceModal, reconcileSubsystemModal, reconcileWorkstreamModal } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceReconciliationModalsCatalog";
+import { reconcileArtifactModal, reconcileMechanismModal, reconcilePartDefinitionModal, reconcilePartInstanceModal, reconcileSubsystemModal, reconcileWorkstreamModal } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceReconciliationModalsCatalog";
 import { reconcileManufacturingModal, reconcilePurchaseModal, reconcileTaskModal } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceReconciliationModalsTaskPurchaseManufacturing";
 import { reconcileWorkLogAndReports } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceReconciliationReports";
 import {
@@ -30,7 +30,6 @@ export function reconcileWorkspaceState(
   reconcileTaskModal(state, model, scopedPayload, payload);
   reconcilePurchaseModal(state, model, payload);
   reconcileManufacturingModal(state, model, payload, signedInScopedMember?.id ?? null);
-  reconcileMaterialModal(state, model, payload);
   reconcilePartDefinitionModal(state, model, payload);
   reconcileArtifactModal(state, model, scopedPayload, payload);
   reconcileWorkstreamModal(state, model, scopedPayload);

@@ -4,11 +4,15 @@ Mission Control treats STEP uploads as repeatable CAD iterations, not one-time i
 
 ## Export Guidance
 
-- Export from the master assembly.
-- Preserve assembly structure.
+Use `docs/step-export-conventions.md` for the current user-facing export
+expectations. In short:
+
+- Export from the master assembly or the smallest complete subsystem assembly.
+- Preserve assembly and subassembly structure.
 - Avoid flattened STEP exports.
-- Use meaningful names for assemblies and parts.
-- Prefer names such as `SUB - Shooter`, `MECH - Shooter - Flywheel`, `ASM - Shooter - Flywheel`, and `PRT - Shooter - Flywheel - Spacer`.
+- Use stable, meaningful subsystem, mechanism, assembly, and part names.
+- Prefer names such as `SUB - Shooter`, `MECH - Shooter - Flywheel`,
+  `ASM - Shooter - Flywheel`, and `PRT - Shooter - Flywheel - Spacer`.
 
 STEP files do not reliably carry every CAD identity. If an export is flattened or uses generic names, Mission Control imports what it can, creates warnings, and requires manual mapping review.
 

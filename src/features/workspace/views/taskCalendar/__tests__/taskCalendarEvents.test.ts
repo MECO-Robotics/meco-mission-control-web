@@ -1,10 +1,29 @@
 /// <reference types="jest" />
 
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
-import { buildTaskCalendarEvents } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
+import {
+  buildTaskCalendarEvents,
+  isTaskDueSoon,
+} from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
 describe("buildTaskCalendarEvents", () => {
+  it("treats a local date-only deadline as due today", () => {
+    expect(isTaskDueSoon("2026-05-07", new Date(2026, 4, 7, 8))).toBe(true);
+  });
+
+  it("uses calendar days across the fall daylight-saving transition", () => {
+    const previousTimezone = process.env.TZ;
+    process.env.TZ = "America/New_York";
+
+    try {
+      expect(isTaskDueSoon("2026-11-07", new Date(2026, 9, 31, 8))).toBe(true);
+      expect(isTaskDueSoon("2026-11-08", new Date(2026, 9, 31, 8))).toBe(false);
+    } finally {
+      process.env.TZ = previousTimezone;
+    }
+  });
+
   it("uses scheduled meeting timestamps and project context", () => {
     const bootstrap = {
       ...EMPTY_BOOTSTRAP,

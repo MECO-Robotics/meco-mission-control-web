@@ -7,26 +7,26 @@ const planningSteps = [
   {
     id: "season",
     title: "Select the fake tutorial season",
-    instruction: "Use the season dropdown and choose the fake tutorial season.",
-    selector: '[data-tutorial-target="season-select"]',
+    instruction: "Open the project / season selector, choose Season, then select Tutorial Season.",
+    selector: '.sidebar-scope-trigger',
   },
   {
     id: "project-robot",
     title: "Select the tutorial robot project",
-    instruction: "Use the project dropdown and select Tutorial Robot 2026.",
-    selector: '[data-tutorial-target="project-select"]',
+    instruction: "Open the project / season selector, choose Project, then select Tutorial Robot 2026.",
+    selector: '.sidebar-scope-trigger',
   },
   {
     id: "tasks-tab",
     title: "Open Tasks",
-    instruction: "Open the Tasks page from the sidebar.",
-    selector: '[data-tutorial-target="sidebar-tab-tasks"]',
+    instruction: "Open Work from the navigation.",
+    selector: '[data-tutorial-target="sidebar-tab-work"]',
   },
   {
     id: "task-timeline",
     title: "Switch to Timeline",
-    instruction: "In Tasks, switch to Timeline.",
-    selector: '[data-tutorial-target="task-view-timeline"]',
+    instruction: "Choose Schedule in the sidebar, then choose Timeline.",
+    selector: '[data-tutorial-target="sidebar-view-work-schedule"]',
   },
   {
     id: "timeline-week-view",
@@ -55,8 +55,8 @@ const planningSteps = [
   {
     id: "task-queue",
     title: "Switch to Kanban",
-    instruction: "Switch the Tasks subtab from Timeline to Kanban.",
-    selector: '[data-tutorial-target="task-view-queue"]',
+    instruction: "Choose Tasks in the sidebar.",
+    selector: '[data-tutorial-target="sidebar-view-work-tasks"]',
   },
   {
     id: "create-task",
@@ -68,7 +68,7 @@ const planningSteps = [
     id: "queue-filter",
     title: "Use Kanban filters",
     instruction: "Apply at least one Kanban filter.",
-    selector: '[data-tutorial-target="task-queue-filter-control"]',
+    selector: '.task-queue-toolbar',
   },
   {
     id: "queue-edit-task",
@@ -77,10 +77,16 @@ const planningSteps = [
     selector: '[data-tutorial-target="edit-task-row"]',
   },
   {
+    id: "readiness-tab",
+    title: "Open Work",
+    instruction: "Open Work from the navigation.",
+    selector: '[data-tutorial-target="sidebar-tab-work"]',
+  },
+  {
     id: "task-milestones",
-    title: "Switch to Milestones",
-    instruction: "Switch the Tasks subtab to Milestones.",
-    selector: '[data-tutorial-target="task-view-milestones"]',
+    title: "Switch to Agenda",
+    instruction: "Choose Schedule in the sidebar, then Agenda.",
+    selector: '[data-tutorial-target="sidebar-view-work-schedule"]',
   },
   {
     id: "create-milestone",
@@ -103,8 +109,14 @@ const planningSteps = [
   {
     id: "worklogs-tab",
     title: "Open Work logs",
-    instruction: "Open Work logs from the sidebar.",
-    selector: '[data-tutorial-target="sidebar-tab-worklogs"]',
+    instruction: "Open Work from the navigation.",
+    selector: '[data-tutorial-target="sidebar-tab-work"]',
+  },
+  {
+    id: "reports-worklogs",
+    title: "Open Work logs",
+    instruction: "Choose Activity in the sidebar, then Work logs.",
+    selector: '[data-tutorial-target="sidebar-view-work-activity"]',
   },
   {
     id: "create-worklog",

@@ -68,6 +68,54 @@
   overflow-wrap: anywhere;
 }
 
+.cad-sync-history-table td strong,
+.cad-sync-history-table td small {
+  display: block;
+}
+
+.cad-sync-history-table td small {
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  margin-top: 3px;
+}
+
+.cad-sync-history-table tr[data-status="failed"] td {
+  background: rgba(220, 38, 38, 0.045);
+}
+
+.cad-sync-status-pill {
+  background: rgba(15, 23, 42, 0.06);
+  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.25));
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
+  padding: 5px 8px;
+  text-transform: capitalize;
+}
+
+.cad-sync-history-table tr[data-status="completed"] .cad-sync-status-pill {
+  background: rgba(22, 163, 74, 0.1);
+  border-color: rgba(22, 163, 74, 0.25);
+  color: #166534;
+}
+
+.cad-sync-history-table tr[data-status="failed"] .cad-sync-status-pill {
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.25);
+  color: #991b1b;
+}
+
+.cad-sync-error-summary {
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  border-radius: 10px;
+  color: #991b1b !important;
+  margin-top: 8px !important;
+  padding: 8px;
+}
+
 .cad-warning-item[data-severity="error"] {
   border-color: rgba(220, 38, 38, 0.35);
 }
@@ -76,18 +124,9 @@
   border-color: rgba(245, 158, 11, 0.35);
 }
 
-.cad-empty-copy,
-.cad-compare-placeholder {
+.cad-empty-copy {
   color: var(--text-muted);
   font-size: 0.84rem;
-}
-
-.cad-compare-placeholder {
-  border: 1px dashed var(--border-subtle, rgba(148, 163, 184, 0.35));
-  border-radius: 12px;
-  margin-top: 12px;
-  padding: 12px;
-  text-align: center;
 }
 
 @media (max-width: 900px) {
@@ -100,5 +139,6 @@
     align-items: flex-start;
     text-align: left;
   }
+
 }
 

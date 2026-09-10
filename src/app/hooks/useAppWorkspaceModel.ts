@@ -1,7 +1,14 @@
+import { enterLocalDemo } from "@/lib/localWorkspace/session";
+import { useMaterialEditor } from "@/app/workspaceCatalog/materialActions";
 import { useEffect, useRef } from "react";
 import { useAppWorkspaceDerived } from "@/app/hooks/useAppWorkspaceDerived";
 import { useAppWorkspaceLoader } from "@/app/hooks/useAppWorkspaceLoader";
 import { useInteractiveTutorial } from "@/app/interactiveTutorial/useInteractiveTutorial";
+import {
+  PUBLIC_DEMO_SEASON_ID,
+  shouldAutoLoadPublicDemoWorkspace,
+  shouldResetAuthenticatedPublicDemoSeasonScope,
+} from "@/app/publicDemoAccess";
 import type { AppWorkspaceDerived } from "@/app/hooks/useAppWorkspaceDerived";
 import type { AppWorkspaceLoader } from "@/app/hooks/useAppWorkspaceLoader";
 import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
@@ -10,6 +17,7 @@ export type AppWorkspaceModel = AppWorkspaceState &
   AppWorkspaceDerived &
   AppWorkspaceLoader &
   ReturnType<typeof useInteractiveTutorial> & {
+    materialEditor: ReturnType<typeof useMaterialEditor>;
     interactiveTutorialChapters: ReturnType<typeof useInteractiveTutorial>["chapterStartOptions"];
   };
 
@@ -20,29 +28,82 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     ...derived,
   });
   const { loadWorkspace } = loader;
-  const didAutoLoadWorkspaceRef = useRef(false);
+  const materialEditor = useMaterialEditor({ handleUnauthorized: loader.handleUnauthorized, loadWorkspace, setDataMessage: state.setDataMessage });
+  const autoLoadedWorkspaceKeyRef = useRef<string | null>(null);
+  const {
+    authBooting,
+    enforcedAuthConfig,
+    isPublicDemoSession,
+    isSignInScreenRequested,
+    selectedSeasonId,
+    sessionUser,
+    setSelectedProjectId,
+    setSelectedSeasonId,
+  } = state;
 
   useEffect(() => {
-    if (state.authBooting) {
+    if (authBooting) {
       return;
     }
 
-    if (state.enforcedAuthConfig && !state.sessionUser) {
-      didAutoLoadWorkspaceRef.current = false;
+    if (enforcedAuthConfig && !sessionUser && !isPublicDemoSession) {
+      autoLoadedWorkspaceKeyRef.current = null;
       return;
     }
 
-    if (didAutoLoadWorkspaceRef.current) {
+    if (
+      isPublicDemoSession &&
+      !shouldAutoLoadPublicDemoWorkspace({
+        isPublicDemoSession,
+        isSignInScreenRequested,
+      })
+    ) {
+      autoLoadedWorkspaceKeyRef.current = null;
       return;
     }
 
-    didAutoLoadWorkspaceRef.current = true;
+    const autoLoadKey = isPublicDemoSession
+      ? `public-demo:${PUBLIC_DEMO_SEASON_ID}`
+      : sessionUser
+        ? `session:${sessionUser.accountId}`
+        : "local";
+
+    if (autoLoadedWorkspaceKeyRef.current === autoLoadKey) {
+      return;
+    }
+
+    autoLoadedWorkspaceKeyRef.current = autoLoadKey;
+    if (isPublicDemoSession) {
+      enterLocalDemo();
+      setSelectedSeasonId(PUBLIC_DEMO_SEASON_ID);
+      setSelectedProjectId(null);
+      void loadWorkspace({ seasonId: PUBLIC_DEMO_SEASON_ID, projectId: null, personId: null });
+      return;
+    }
+
+    if (
+      shouldResetAuthenticatedPublicDemoSeasonScope({
+        selectedSeasonId,
+        sessionUser,
+      })
+    ) {
+      setSelectedSeasonId(null);
+      setSelectedProjectId(null);
+      void loadWorkspace({ seasonId: null, projectId: null, personId: null });
+      return;
+    }
+
     void loadWorkspace();
   }, [
+    authBooting,
+    enforcedAuthConfig,
+    isPublicDemoSession,
+    isSignInScreenRequested,
     loadWorkspace,
-    state.authBooting,
-    state.enforcedAuthConfig,
-    state.sessionUser,
+    selectedSeasonId,
+    sessionUser,
+    setSelectedProjectId,
+    setSelectedSeasonId,
   ]);
 
   const interactiveTutorial = useInteractiveTutorial({
@@ -50,7 +111,6 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     taskView: state.taskView,
     riskManagementView: state.riskManagementView,
     worklogsView: state.worklogsView,
-    reportsView: state.reportsView,
     manufacturingView: state.manufacturingView,
     inventoryView: state.inventoryView,
     selectedSeasonId: state.selectedSeasonId,
@@ -64,7 +124,6 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     setTaskView: state.setTaskView,
     setRiskManagementView: state.setRiskManagementView,
     setWorklogsView: state.setWorklogsView,
-    setReportsView: state.setReportsView,
     setManufacturingView: state.setManufacturingView,
     setInventoryView: state.setInventoryView,
     setSelectedSeasonId: state.setSelectedSeasonId,
@@ -75,8 +134,8 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     activeTimelineTaskDetailId: state.activeTimelineTaskDetailId,
     taskModalMode: state.taskModalMode,
     activeTaskId: state.activeTaskId,
-    materialModalMode: state.materialModalMode,
-    activeMaterialId: state.activeMaterialId,
+    materialModalMode: materialEditor.materialModalMode,
+    activeMaterialId: materialEditor.activeMaterialId,
     subsystemModalMode: state.subsystemModalMode,
     activeSubsystemId: state.activeSubsystemId,
     mechanismModalMode: state.mechanismModalMode,
@@ -91,8 +150,9 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     ...state,
     ...derived,
     ...loader,
+    materialEditor,
     ...interactiveTutorial,
     interactiveTutorialChapters: interactiveTutorial.chapterStartOptions,
-    isWorkspaceModalOpen: derived.isWorkspaceModalOpen || interactiveTutorial.isInteractiveTutorialActive,
+    isWorkspaceModalOpen: derived.isWorkspaceModalOpen || materialEditor.materialModalMode !== null || interactiveTutorial.isInteractiveTutorialActive,
   };
 }

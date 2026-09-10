@@ -11,14 +11,49 @@ import type { SubsystemRecord } from "@/types/recordsOrganization";
 
 export type SubsystemActions = ReturnType<typeof useSubsystemActions>;
 
-export function useSubsystemActions(model: AppWorkspaceModel) {
+export function useSubsystemActions({
+  activeSubsystemId,
+  bootstrap,
+  handleUnauthorized,
+  loadWorkspace,
+  scopedBootstrap,
+  selectedProjectId,
+  setActiveSubsystemId,
+  setBootstrap,
+  setDataMessage,
+  setIsSavingSubsystem,
+  setSubsystemDraft,
+  setSubsystemDraftRisks,
+  setSubsystemModalMode,
+  subsystemDraft,
+  subsystemDraftRisks,
+  subsystemModalMode,
+}: {
+  activeSubsystemId: AppWorkspaceModel["activeSubsystemId"];
+  bootstrap: AppWorkspaceModel["bootstrap"];
+  handleUnauthorized: AppWorkspaceModel["handleUnauthorized"];
+  loadWorkspace: AppWorkspaceModel["loadWorkspace"];
+  scopedBootstrap: AppWorkspaceModel["scopedBootstrap"];
+  selectedProjectId: AppWorkspaceModel["selectedProjectId"];
+  setActiveSubsystemId: AppWorkspaceModel["setActiveSubsystemId"];
+  setBootstrap: AppWorkspaceModel["setBootstrap"];
+  setDataMessage: AppWorkspaceModel["setDataMessage"];
+  setIsSavingSubsystem: AppWorkspaceModel["setIsSavingSubsystem"];
+  setSubsystemDraft: AppWorkspaceModel["setSubsystemDraft"];
+  setSubsystemDraftRisks: AppWorkspaceModel["setSubsystemDraftRisks"];
+  setSubsystemModalMode: AppWorkspaceModel["setSubsystemModalMode"];
+  subsystemDraft: AppWorkspaceModel["subsystemDraft"];
+  subsystemDraftRisks: AppWorkspaceModel["subsystemDraftRisks"];
+  subsystemModalMode: AppWorkspaceModel["subsystemModalMode"];
+}) {
+  const writeTailBySubsystemIdRef = useRef<Record<string, Promise<unknown>>>({});
   const updateRequestVersionBySubsystemIdRef = useRef<Record<string, number>>({});
   const pendingUpdateCountBySubsystemIdRef = useRef<Record<string, number>>({});
   const persistedSubsystemByIdRef = useRef<Record<string, SubsystemRecord>>({});
   const persistedSubsystemVersionByIdRef = useRef<Record<string, number>>({});
 
   useEffect(() => {
-    const nextSubsystemIds = new Set(model.bootstrap.subsystems.map((subsystem) => subsystem.id));
+    const nextSubsystemIds = new Set(bootstrap.subsystems.map((subsystem) => subsystem.id));
     Object.keys(persistedSubsystemByIdRef.current).forEach((subsystemId) => {
       if (!nextSubsystemIds.has(subsystemId)) {
         delete persistedSubsystemByIdRef.current[subsystemId];
@@ -26,7 +61,7 @@ export function useSubsystemActions(model: AppWorkspaceModel) {
       }
     });
 
-    model.bootstrap.subsystems.forEach((subsystem) => {
+    bootstrap.subsystems.forEach((subsystem) => {
       if ((pendingUpdateCountBySubsystemIdRef.current[subsystem.id] ?? 0) > 0) {
         return;
       }
@@ -35,83 +70,83 @@ export function useSubsystemActions(model: AppWorkspaceModel) {
       persistedSubsystemVersionByIdRef.current[subsystem.id] =
         updateRequestVersionBySubsystemIdRef.current[subsystem.id] ?? 0;
     });
-  }, [model.bootstrap.subsystems]);
+  }, [bootstrap.subsystems]);
 
   const openCreateSubsystemModal = useCallback(() => {
-    model.setActiveSubsystemId(null);
-    model.setSubsystemDraft(buildEmptySubsystemPayload(model.scopedBootstrap));
-    model.setSubsystemDraftRisks("");
-    model.setSubsystemModalMode("create");
-  }, [model]);
+    setActiveSubsystemId(null);
+    setSubsystemDraft(buildEmptySubsystemPayload(scopedBootstrap));
+    setSubsystemDraftRisks("");
+    setSubsystemModalMode("create");
+  }, [scopedBootstrap, setActiveSubsystemId, setSubsystemDraft, setSubsystemDraftRisks, setSubsystemModalMode]);
 
   const openEditSubsystemModal = useCallback((subsystem: SubsystemRecord) => {
-    model.setActiveSubsystemId(subsystem.id);
-    model.setSubsystemDraft(subsystemToPayload(subsystem));
-    model.setSubsystemDraftRisks(subsystem.risks.join("\n"));
-    model.setSubsystemModalMode("edit");
-  }, [model]);
+    setActiveSubsystemId(subsystem.id);
+    setSubsystemDraft(subsystemToPayload(subsystem));
+    setSubsystemDraftRisks(subsystem.risks.join("\n"));
+    setSubsystemModalMode("edit");
+  }, [setActiveSubsystemId, setSubsystemDraft, setSubsystemDraftRisks, setSubsystemModalMode]);
 
   const closeSubsystemModal = useCallback(() => {
-    model.setSubsystemModalMode(null);
-    model.setActiveSubsystemId(null);
-  }, [model]);
+    setSubsystemModalMode(null);
+    setActiveSubsystemId(null);
+  }, [setActiveSubsystemId, setSubsystemModalMode]);
 
   const handleSubsystemSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
-    if (model.subsystemModalMode === "create" && !model.selectedProjectId) {
-      model.setDataMessage("Pick a project before adding a subsystem.");
+    if (subsystemModalMode === "create" && !selectedProjectId) {
+      setDataMessage("Pick a project before adding a subsystem.");
       return;
     }
 
-    model.setIsSavingSubsystem(true);
-    model.setDataMessage(null);
+    setIsSavingSubsystem(true);
+    setDataMessage(null);
 
     try {
       const payload: SubsystemPayload = {
-        ...model.subsystemDraft,
-        projectId: model.selectedProjectId ?? model.subsystemDraft.projectId,
-        risks: splitList(model.subsystemDraftRisks),
+        ...subsystemDraft,
+        projectId: selectedProjectId ?? subsystemDraft.projectId,
+        risks: splitList(subsystemDraftRisks),
       };
 
-      if (model.subsystemModalMode === "create") {
-        await createSubsystemRecord(payload, model.handleUnauthorized);
-      } else if (model.subsystemModalMode === "edit" && model.activeSubsystemId) {
-        await updateSubsystemRecord(model.activeSubsystemId, payload, model.handleUnauthorized);
+      if (subsystemModalMode === "create") {
+        await createSubsystemRecord(payload, handleUnauthorized);
+      } else if (subsystemModalMode === "edit" && activeSubsystemId) {
+        await updateSubsystemRecord(activeSubsystemId, payload, handleUnauthorized);
       }
 
-      await model.loadWorkspace();
+      await loadWorkspace();
       closeSubsystemModal();
     } catch (error) {
-      model.setDataMessage(toErrorMessage(error));
+      setDataMessage(toErrorMessage(error));
     } finally {
-      model.setIsSavingSubsystem(false);
+      setIsSavingSubsystem(false);
     }
-  }, [closeSubsystemModal, model]);
+  }, [activeSubsystemId, closeSubsystemModal, handleUnauthorized, loadWorkspace, selectedProjectId, setDataMessage, setIsSavingSubsystem, subsystemDraft, subsystemDraftRisks, subsystemModalMode]);
 
   const handleToggleSubsystemArchived = useCallback(async (subsystemId: string) => {
-    const currentSubsystem = model.bootstrap.subsystems.find(
+    const currentSubsystem = bootstrap.subsystems.find(
       (subsystem) => subsystem.id === subsystemId,
     );
     if (!currentSubsystem) {
       return;
     }
 
-    model.setIsSavingSubsystem(true);
-    model.setDataMessage(null);
+    setIsSavingSubsystem(true);
+    setDataMessage(null);
 
     try {
       await updateSubsystemRecord(
         subsystemId,
         { isArchived: !currentSubsystem.isArchived },
-        model.handleUnauthorized,
+        handleUnauthorized,
       );
-      await model.loadWorkspace();
+      await loadWorkspace();
     } catch (error) {
-      model.setDataMessage(toErrorMessage(error));
+      setDataMessage(toErrorMessage(error));
     } finally {
-      model.setIsSavingSubsystem(false);
+      setIsSavingSubsystem(false);
     }
-  }, [model]);
+  }, [bootstrap, handleUnauthorized, loadWorkspace, setDataMessage, setIsSavingSubsystem]);
 
   const updateSubsystemConfiguration = useCallback(async (
     subsystemId: string,
@@ -122,7 +157,7 @@ export function useSubsystemActions(model: AppWorkspaceModel) {
       >
     >,
   ) => {
-    const previousSubsystem = model.bootstrap.subsystems.find((subsystem) => subsystem.id === subsystemId);
+    const previousSubsystem = bootstrap.subsystems.find((subsystem) => subsystem.id === subsystemId);
     if (!previousSubsystem) {
       return false;
     }
@@ -175,7 +210,7 @@ export function useSubsystemActions(model: AppWorkspaceModel) {
 
     Object.assign(payload, normalizedLayoutPatch);
 
-    model.setBootstrap((current) => ({
+    setBootstrap((current) => ({
       ...current,
       subsystems: current.subsystems.map((subsystem) =>
         subsystem.id === subsystemId
@@ -185,11 +220,10 @@ export function useSubsystemActions(model: AppWorkspaceModel) {
     }));
 
     try {
-      const updatedSubsystem = await updateSubsystemRecord(
-        subsystemId,
-        payload,
-        model.handleUnauthorized,
-      );
+      const previousWrite = writeTailBySubsystemIdRef.current[subsystemId] ?? Promise.resolve();
+      const write = previousWrite.catch(() => undefined).then(() => updateSubsystemRecord(subsystemId, payload, handleUnauthorized));
+      writeTailBySubsystemIdRef.current[subsystemId] = write;
+      const updatedSubsystem = await write;
       const persistedVersion = persistedSubsystemVersionByIdRef.current[subsystemId] ?? 0;
       const shouldPromotePersistedSnapshot = requestVersion >= persistedVersion;
       if (shouldPromotePersistedSnapshot) {
@@ -201,7 +235,7 @@ export function useSubsystemActions(model: AppWorkspaceModel) {
       const pendingCount = pendingUpdateCountBySubsystemIdRef.current[subsystemId] ?? 1;
       const shouldApplyOutOfOrderSuccess = shouldPromotePersistedSnapshot && pendingCount === 1;
       if (latestVersion === requestVersion || shouldApplyOutOfOrderSuccess) {
-        model.setBootstrap((current) => ({
+        setBootstrap((current) => ({
           ...current,
           subsystems: current.subsystems.map((subsystem) =>
             subsystem.id === subsystemId ? { ...subsystem, ...updatedSubsystem } : subsystem,
@@ -214,13 +248,13 @@ export function useSubsystemActions(model: AppWorkspaceModel) {
       if (latestVersion === requestVersion) {
         const persistedSubsystem = persistedSubsystemByIdRef.current[subsystemId];
         const rollbackSubsystem = persistedSubsystem ? { ...persistedSubsystem } : previousSubsystem;
-        model.setBootstrap((current) => ({
+        setBootstrap((current) => ({
           ...current,
           subsystems: current.subsystems.map((subsystem) =>
             subsystem.id === subsystemId ? rollbackSubsystem : subsystem,
           ),
         }));
-        model.setDataMessage(toErrorMessage(error));
+        setDataMessage(toErrorMessage(error));
       }
       return false;
     } finally {
@@ -231,7 +265,7 @@ export function useSubsystemActions(model: AppWorkspaceModel) {
         pendingUpdateCountBySubsystemIdRef.current[subsystemId] = pendingCount;
       }
     }
-  }, [model, updateRequestVersionBySubsystemIdRef]);
+  }, [bootstrap, handleUnauthorized, setBootstrap, setDataMessage, updateRequestVersionBySubsystemIdRef]);
 
   const saveSubsystemLayout = useCallback(async (
     subsystemId: string,

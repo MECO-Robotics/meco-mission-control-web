@@ -27,6 +27,10 @@ docs/reports/lighthouse-*.txt
 # Imported shared skills
 /skills/
 
+# Codex/GitHub-review scratch artifacts
+.codex/
+.codex_*.json
+
 # Environment files
 .env
 .env.*

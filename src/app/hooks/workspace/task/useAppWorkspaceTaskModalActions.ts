@@ -18,6 +18,19 @@ export function useAppWorkspaceTaskModalActions(model: AppWorkspaceModel) {
     model.setTaskModalMode("create");
   }, [model]);
 
+  const openCreateTaskModalForMember = useCallback((memberId: string) => {
+    model.suppressNextAutoWorkspaceLoad();
+    model.setShowTimelineCreateToggleInTaskModal(false);
+    model.setActiveTimelineTaskDetailId(null);
+    model.setActiveTaskId(null);
+    model.setTaskDraft({
+      ...buildEmptyTaskPayload(model.scopedBootstrap),
+      assigneeIds: [memberId],
+      ownerId: memberId,
+    });
+    model.setTaskModalMode("create");
+  }, [model]);
+
   const openCreateTaskModalFromTimeline = useCallback(() => {
     model.suppressNextAutoWorkspaceLoad();
     model.setShowTimelineCreateToggleInTaskModal(true);
@@ -64,6 +77,7 @@ export function useAppWorkspaceTaskModalActions(model: AppWorkspaceModel) {
     closeTaskModal,
     closeTimelineTaskDetailsModal,
     openCreateTaskModal,
+    openCreateTaskModalForMember,
     openCreateTaskModalFromTimeline,
     openEditTaskModal,
     openTimelineTaskDetailsModal,

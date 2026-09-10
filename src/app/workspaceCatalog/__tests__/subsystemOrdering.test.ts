@@ -1,0 +1,26 @@
+import { useCallback, useEffect, useRef } from "react";
+import { useSubsystemActions } from "../subsystemActions";
+import { updateSubsystemRecord } from "@/lib/auth/records/structure";
+import { createBootstrap } from "@/lib/appUtilsTestFixtures";
+jest.mock("react", () => ({ ...jest.requireActual("react"), useCallback: jest.fn((callback) => callback), useEffect: jest.fn(), useRef: jest.fn() }));
+jest.mock("@/lib/auth/records/structure", () => ({ updateSubsystemRecord: jest.fn(), createSubsystemRecord: jest.fn() }));
+it("persists same-subsystem edits in issue order and continues after a failed save", async () => {
+  jest.mocked(useCallback).mockImplementation((callback) => callback);
+  jest.mocked(useEffect).mockImplementation(() => {});
+  jest.mocked(useRef).mockImplementation((initial) => ({ current: initial }));
+  let bootstrap = createBootstrap();
+  const subsystem = bootstrap.subsystems[0];
+  let reject!: (error: Error) => void;
+  jest.mocked(updateSubsystemRecord).mockImplementationOnce(() => new Promise((_resolve, rejectPromise) => { reject = rejectPromise; }));
+  jest.mocked(updateSubsystemRecord).mockImplementationOnce(async (_id, patch) => ({ ...subsystem, ...patch }));
+  const actions = useSubsystemActions({ bootstrap, setBootstrap: (next: React.SetStateAction<typeof bootstrap>) => { bootstrap = typeof next === "function" ? next(bootstrap) : next; }, setDataMessage: jest.fn() } as unknown as Parameters<typeof useSubsystemActions>[0]);
+  const first = actions.updateSubsystemConfiguration(subsystem.id, { layoutX: 0.2 });
+  const second = actions.updateSubsystemConfiguration(subsystem.id, { layoutX: 0.8 });
+  await Promise.resolve(); await Promise.resolve();
+  expect(updateSubsystemRecord).toHaveBeenCalledTimes(1);
+  reject(new Error("first write failed"));
+  expect(await first).toBe(false);
+  expect(await second).toBe(true);
+  expect(updateSubsystemRecord).toHaveBeenCalledTimes(2);
+  expect(bootstrap.subsystems[0].layoutX).toBe(0.8);
+});

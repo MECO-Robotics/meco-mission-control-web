@@ -1,9 +1,13 @@
 ﻿import type { OnshapeOverview } from "../model/cadIntegrationTypes";
 
 import { useMemo } from "react";
+import {
+  getCadConfigurationLifecycleCopy,
+  getCadConfigurationSourceCopy,
+} from "@/features/workspace/shared/model/cadSourceModel";
+import { CadSnapshotDiffPanel } from "./CadSnapshotDiffPanel";
 
 const EMPTY_ASSEMBLY_NODES: OnshapeOverview["assemblyNodes"] = [];
-const EMPTY_IMPORT_RUNS: OnshapeOverview["importRuns"] = [];
 const EMPTY_PART_DEFINITIONS: OnshapeOverview["partDefinitions"] = [];
 const EMPTY_PART_INSTANCES: OnshapeOverview["partInstances"] = [];
 const EMPTY_SNAPSHOTS: OnshapeOverview["snapshots"] = [];
@@ -31,7 +35,6 @@ function parentAssemblyName(assemblyNodeNamesById: ReadonlyMap<string, string>, 
 }
 
 export function CadDataPanels({ overview }: { overview: OnshapeOverview | null }) {
-  const runs = overview?.importRuns ?? EMPTY_IMPORT_RUNS;
   const snapshots = overview?.snapshots ?? EMPTY_SNAPSHOTS;
   const nodes = overview?.assemblyNodes ?? EMPTY_ASSEMBLY_NODES;
   const partDefinitions = overview?.partDefinitions ?? EMPTY_PART_DEFINITIONS;
@@ -57,27 +60,6 @@ export function CadDataPanels({ overview }: { overview: OnshapeOverview | null }
 
   return (
     <div className="cad-data-stack">
-      <section className="cad-card">
-        <div className="cad-section-heading">
-          <span className="cad-eyebrow">History</span>
-          <h3>Import runs</h3>
-        </div>
-        <div className="cad-table-wrap">
-          <table className="cad-table">
-            <thead><tr><th>Run</th><th>Level</th><th>Status</th><th>Calls</th><th>Completed</th></tr></thead>
-            <tbody>
-              {runs.length ? runs.map((run) => (
-                <tr key={run.id}>
-                  <td>{run.id}</td><td>{run.syncLevel}</td><td>{run.status}</td>
-                  <td>{run.callsUsed}{run.callsEstimated !== null ? ` / ${run.callsEstimated}` : ""}</td>
-                  <td>{formatDate(run.completedAt)}</td>
-                </tr>
-              )) : <tr><td colSpan={5}>No import runs yet.</td></tr>}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
       <div className="cad-grid cad-grid-two">
         <section className="cad-card">
           <div className="cad-section-heading">
@@ -104,14 +86,17 @@ export function CadDataPanels({ overview }: { overview: OnshapeOverview | null }
             {snapshots.length ? snapshots.map((snapshot) => (
               <article className="cad-snapshot-item" key={snapshot.id}>
                 <strong>{snapshot.label}</strong>
-                <span>{snapshot.immutable ? "immutable" : "workspace draft"} - {snapshot.source}</span>
+                <span>
+                  {getCadConfigurationSourceCopy(snapshot.source).label} - {getCadConfigurationLifecycleCopy(snapshot).label}
+                </span>
                 <small>{formatDate(snapshot.createdAt)}</small>
               </article>
             )) : <p className="cad-empty-copy">No snapshots yet.</p>}
           </div>
-          <div className="cad-compare-placeholder">Snapshot comparison placeholder</div>
         </section>
       </div>
+
+      <CadSnapshotDiffPanel overview={overview} />
 
       <section className="cad-card">
         <div className="cad-section-heading">

@@ -14,7 +14,11 @@ import type { TaskRecord } from "@/types/recordsExecution";
 
 interface CapturedKanbanColumnsProps {
   canDragItem?: (task: TaskRecord, state: TaskQueueBoardState) => boolean;
-  canDropItem?: (task: TaskRecord, state: TaskQueueBoardState) => boolean;
+  canDropItem?: (
+    task: TaskRecord,
+    state: TaskQueueBoardState,
+    sourceState: TaskQueueBoardState,
+  ) => boolean;
   canDropState?: (state: TaskQueueBoardState) => boolean;
   onItemDrop?: (
     task: TaskRecord,
@@ -55,7 +59,7 @@ const task: TaskRecord = {
   dueDate: "2026-03-02",
   priority: "medium",
   status: "not-started",
-  dependencyIds: [],
+
   blockers: [],
   linkedManufacturingIds: [],
   linkedPurchaseIds: [],
@@ -176,6 +180,15 @@ describe("TaskQueueKanbanBoard", () => {
     expect(openEditTaskModal).toHaveBeenNthCalledWith(2, task, { intentState: "waiting-on-dependency" });
   });
 
+  it("allows task reassignment between direct status columns only", () => {
+    const onReassignTaskStatus = jest.fn(() => Promise.resolve());
+    const kanbanProps = renderBoard(onReassignTaskStatus);
+
+    expect(kanbanProps.canDropItem?.(task, "in-progress", "not-started")).toBe(true);
+    expect(kanbanProps.canDropItem?.(task, "complete", "blocked")).toBe(false);
+    expect(kanbanProps.canDropItem?.(task, "not-started", "not-started")).toBe(false);
+  });
+
   it("allows pseudo-state columns as drag and drop targets", () => {
     const onReassignTaskStatus = jest.fn(() => Promise.resolve());
     const kanbanProps = renderBoard(onReassignTaskStatus);
@@ -183,7 +196,7 @@ describe("TaskQueueKanbanBoard", () => {
     expect(kanbanProps.canDragItem?.(task, "blocked")).toBe(true);
     expect(kanbanProps.canDropState?.("blocked")).toBe(true);
     expect(kanbanProps.canDropState?.("waiting-on-dependency")).toBe(true);
-    expect(kanbanProps.canDropItem?.(task, "blocked")).toBe(true);
-    expect(kanbanProps.canDropItem?.(task, "waiting-on-dependency")).toBe(true);
+    expect(kanbanProps.canDropItem?.(task, "blocked", "not-started")).toBe(true);
+    expect(kanbanProps.canDropItem?.(task, "waiting-on-dependency", "not-started")).toBe(true);
   });
 });

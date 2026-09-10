@@ -1,3 +1,4 @@
+import { leaveLocalWorkspace } from "@/lib/localWorkspace/session";
 import {
   startTransition,
   useCallback,
@@ -6,11 +7,12 @@ import {
   type SetStateAction,
 } from "react";
 
-import { clearStoredSessionToken, storeSessionToken } from "@/lib/auth/core/sessionStorage";
+import { beginSessionChange, clearWebSessionState, getSessionGeneration, setPendingSignOut } from "@/lib/auth/core/sessionStorage";
 import {
   exchangeGoogleCredential,
   requestDevBypassSignIn,
   requestEmailSignInCode,
+  revokeWebSession,
   verifyEmailSignInCode,
 } from "@/lib/auth/session";
 import {
@@ -23,11 +25,16 @@ import { signOutFromGoogle } from "@/app/hooks/auth/useAppAuthGoogleIdentity";
 import { toErrorMessage } from "@/lib/appUtils/common";
 
 interface UseAppAuthSessionActionsArgs {
+  onSessionExpired?: () => void;
   resetWorkspaceRef: RefObject<() => void>;
   setAuthMessage: Dispatch<SetStateAction<string | null>>;
   setIsSigningIn: Dispatch<SetStateAction<boolean>>;
+  setIsSignInForced: Dispatch<SetStateAction<boolean>>;
   setSessionUser: Dispatch<SetStateAction<SessionUser | null>>;
 }
+
+export const UNCONFIRMED_SIGN_OUT_MESSAGE =
+  "Your local session was cleared, but server sign-out could not be confirmed. Please retry when connected.";
 
 export interface UseAppAuthSessionActionsResult {
   clearAuthMessage: () => void;
@@ -35,25 +42,61 @@ export interface UseAppAuthSessionActionsResult {
   handleDevBypassSignIn: (role?: DevBypassRole) => Promise<void>;
   handleGoogleCredential: (response: GoogleCredentialResponse) => Promise<void>;
   handleRequestEmailCode: (email: string) => Promise<EmailCodeDeliveryResponse>;
-  handleSignOut: () => void;
+  handleSignOut: () => Promise<void>;
   handleVerifyEmailCode: (email: string, code: string) => Promise<void>;
   setAuthMessage: (message: string) => void;
 }
 
 function storeSignedInSession(
-  session: { token: string; user: SessionUser },
+  session: { user: SessionUser },
   setSessionUser: Dispatch<SetStateAction<SessionUser | null>>,
 ) {
-  storeSessionToken(session.token);
   startTransition(() => {
     setSessionUser(session.user);
   });
 }
 
+export async function revokeThenClearWebSession(
+  clearLocalSession: () => void,
+  onUnconfirmed: (message: string) => void = () => undefined,
+) {
+  setPendingSignOut(true);
+  const generation = beginSessionChange();
+  let confirmed = false;
+  let ownsCompletion: boolean;
+
+  try {
+    await revokeWebSession();
+    confirmed = true;
+  } catch {
+    if (generation !== getSessionGeneration()) return false;
+    try {
+      await revokeWebSession();
+      confirmed = true;
+    } catch {
+      // Local state still clears below, but the server session may remain live.
+    }
+  } finally {
+    ownsCompletion = generation === getSessionGeneration();
+    if (ownsCompletion) clearLocalSession();
+  }
+
+  if (!ownsCompletion) return false;
+  if (confirmed) setPendingSignOut(false);
+
+  if (!confirmed) {
+    onUnconfirmed(UNCONFIRMED_SIGN_OUT_MESSAGE);
+  }
+
+  return confirmed;
+}
+
 export function useAppAuthSessionActions({
+  onSessionExpired,
   resetWorkspaceRef,
   setAuthMessage,
   setIsSigningIn,
+  setIsSignInForced,
   setSessionUser,
 }: UseAppAuthSessionActionsArgs): UseAppAuthSessionActionsResult {
   const clearAuthMessage = useCallback(() => {
@@ -69,15 +112,17 @@ export function useAppAuthSessionActions({
 
   const expireSession = useCallback(
     (message: string) => {
-      clearStoredSessionToken();
+      leaveLocalWorkspace();
+      clearWebSessionState();
       signOutFromGoogle();
       resetWorkspaceRef.current?.();
       startTransition(() => {
         setSessionUser(null);
       });
+      onSessionExpired?.();
       setAuthMessage(message);
     },
-    [resetWorkspaceRef, setAuthMessage, setSessionUser],
+    [onSessionExpired, resetWorkspaceRef, setAuthMessage, setSessionUser],
   );
 
   const handleGoogleCredential = useCallback(
@@ -90,17 +135,23 @@ export function useAppAuthSessionActions({
       setIsSigningIn(true);
       setAuthMessage(null);
 
+      let generation = getSessionGeneration();
       try {
-        const session = await exchangeGoogleCredential(response.credential);
+        const pendingSession = exchangeGoogleCredential(response.credential);
+        generation = getSessionGeneration();
+        const session = await pendingSession;
+        setIsSignInForced(false);
         storeSignedInSession(session, setSessionUser);
       } catch (error) {
-        clearStoredSessionToken();
+        if (error instanceof Error && error.name === "AbortError") return;
+        clearWebSessionState();
+        generation = getSessionGeneration();
         setAuthMessage(toErrorMessage(error));
       } finally {
-        setIsSigningIn(false);
+        if (generation === getSessionGeneration()) setIsSigningIn(false);
       }
     },
-    [setAuthMessage, setIsSigningIn, setSessionUser],
+    [setAuthMessage, setIsSignInForced, setIsSigningIn, setSessionUser],
   );
 
   const handleRequestEmailCode = useCallback(
@@ -125,44 +176,69 @@ export function useAppAuthSessionActions({
       setIsSigningIn(true);
       setAuthMessage(null);
 
+      let generation = getSessionGeneration();
       try {
-        const session = await verifyEmailSignInCode(email, code);
+        const pendingSession = verifyEmailSignInCode(email, code);
+        generation = getSessionGeneration();
+        const session = await pendingSession;
+        setIsSignInForced(false);
         storeSignedInSession(session, setSessionUser);
       } catch (error) {
-        clearStoredSessionToken();
+        if (error instanceof Error && error.name === "AbortError") return;
+        clearWebSessionState();
+        generation = getSessionGeneration();
         setAuthMessage(toErrorMessage(error));
         throw error;
       } finally {
-        setIsSigningIn(false);
+        if (generation === getSessionGeneration()) setIsSigningIn(false);
       }
     },
-    [setAuthMessage, setIsSigningIn, setSessionUser],
+    [setAuthMessage, setIsSignInForced, setIsSigningIn, setSessionUser],
   );
 
-  const handleDevBypassSignIn = useCallback(async (role: DevBypassRole = "student") => {
-    setIsSigningIn(true);
-    setAuthMessage(null);
+  const handleDevBypassSignIn = useCallback(
+    async (role: DevBypassRole = "student") => {
+      setIsSigningIn(true);
+      setAuthMessage(null);
 
-    try {
-      const session = await requestDevBypassSignIn(role);
-      storeSignedInSession(session, setSessionUser);
-    } catch (error) {
-      clearStoredSessionToken();
-      setAuthMessage(toErrorMessage(error));
-    } finally {
-      setIsSigningIn(false);
-    }
-  }, [setAuthMessage, setIsSigningIn, setSessionUser]);
+      let generation = getSessionGeneration();
+      try {
+        const pendingSession = requestDevBypassSignIn(role);
+        generation = getSessionGeneration();
+        const session = await pendingSession;
+        setIsSignInForced(false);
+        storeSignedInSession(session, setSessionUser);
+      } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") return;
+        clearWebSessionState();
+        generation = getSessionGeneration();
+        setAuthMessage(toErrorMessage(error));
+      } finally {
+        if (generation === getSessionGeneration()) setIsSigningIn(false);
+      }
+    },
+    [setAuthMessage, setIsSignInForced, setIsSigningIn, setSessionUser],
+  );
 
-  const handleSignOut = useCallback(() => {
-    clearStoredSessionToken();
-    signOutFromGoogle();
-    startTransition(() => {
-      setSessionUser(null);
-    });
-    setAuthMessage(null);
-    resetWorkspaceRef.current?.();
-  }, [resetWorkspaceRef, setAuthMessage, setSessionUser]);
+  const handleSignOut = useCallback(async () => {
+    await revokeThenClearWebSession(
+      () => {
+        leaveLocalWorkspace();
+        clearWebSessionState();
+        setIsSigningIn(false);
+        signOutFromGoogle();
+        startTransition(() => {
+          setSessionUser(null);
+        });
+        setAuthMessage(null);
+        resetWorkspaceRef.current?.();
+      },
+      (message) => {
+        setAuthMessage(message);
+        setIsSignInForced(true);
+      },
+    );
+  }, [resetWorkspaceRef, setAuthMessage, setIsSignInForced, setIsSigningIn, setSessionUser]);
 
   return {
     clearAuthMessage,

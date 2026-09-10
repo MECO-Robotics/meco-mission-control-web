@@ -4,20 +4,140 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { CadStepReviewPanels } from "../components/CadStepReviewPanels";
+import { CadStepMappingReviewTable } from "../components/CadStepMappingReviewTable";
+import {
+  persistedCarryForwardRuleMode,
+  ruleMatchStrategyForMode,
+} from "../model/cadStepMappingRules";
 
 describe("CAD STEP review panel mapping state", () => {
+  it("maps selected carry-forward modes to distinct future rule strategies", () => {
+    expect(ruleMatchStrategyForMode("exact")).toBe("STABLE_SIGNATURE");
+    expect(ruleMatchStrategyForMode("normalized")).toBe("NORMALIZED_NAME");
+    expect(ruleMatchStrategyForMode("manual")).toBe("MANUAL_ONLY");
+    expect(ruleMatchStrategyForMode("ignore")).toBe("STABLE_SIGNATURE");
+    expect(ruleMatchStrategyForMode("snapshot")).toBeUndefined();
+    expect(ruleMatchStrategyForMode("split_merge_deferred")).toBeUndefined();
+  });
+
+  it("uses saved mapping rule strategy when describing persisted carry-forward rules", () => {
+    const baseMapping = {
+      id: "mapping-rule",
+      snapshotId: "cad-snapshot-2",
+      mappingRuleId: "rule",
+      sourceKind: "PART_DEFINITION" as const,
+      sourceId: "cad-part",
+      sourceName: "Roller tube",
+      targetKind: "PART_DEFINITION" as const,
+      targetId: "part-roller",
+      confidence: "HIGH" as const,
+      status: "CONFIRMED" as const,
+      updatedAt: "2026-05-10T00:00:00.000Z",
+    };
+
+    expect(persistedCarryForwardRuleMode({
+      ...baseMapping,
+      rule: { id: "rule-normalized", confidence: "HIGH", matchStrategy: "NORMALIZED_NAME" },
+    })).toBe("normalized");
+    expect(persistedCarryForwardRuleMode({
+      ...baseMapping,
+      rule: { id: "rule-manual", confidence: "MANUAL", matchStrategy: "MANUAL_ONLY" },
+    })).toBe("manual");
+  });
+
+  it("renders carry-forward rule selections and current review choices", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(CadStepMappingReviewTable, {
+        groupRepeatedInstances: true,
+        isSavingMapping: false,
+        mappings: [{
+          id: "mapping-rule-exact",
+          snapshotId: "cad-snapshot-2",
+          mappingRuleId: "rule-shooter",
+          sourceKind: "ASSEMBLY_NODE",
+          sourceId: "cad-assembly-shooter",
+          sourceName: "MECH - Shooter",
+          targetKind: "MECHANISM",
+          targetId: "mechanism-shooter",
+          confidence: "HIGH",
+          status: "CONFIRMED",
+          rule: { id: "rule-shooter", confidence: "HIGH" },
+          updatedAt: "2026-05-10T00:00:00.000Z",
+        }, {
+          id: "mapping-manual",
+          snapshotId: "cad-snapshot-2",
+          mappingRuleId: null,
+          sourceKind: "PART_DEFINITION",
+          sourceId: "cad-part-roller",
+          sourceName: "Roller tube",
+          targetKind: "PART_DEFINITION",
+          targetId: "part-roller",
+          confidence: "MANUAL",
+          status: "CONFIRMED",
+          rule: null,
+          updatedAt: "2026-05-10T00:00:00.000Z",
+        }, {
+          id: "mapping-ignore",
+          snapshotId: "cad-snapshot-2",
+          mappingRuleId: "rule-ignore-fasteners",
+          sourceKind: "PART_INSTANCE",
+          sourceId: "cad-fastener-1",
+          sourceName: "Washer <1>",
+          targetKind: "IGNORE",
+          targetId: null,
+          confidence: "MANUAL",
+          status: "CONFIRMED",
+          rule: { id: "rule-ignore-fasteners", confidence: "MANUAL" },
+          updatedAt: "2026-05-10T00:00:00.000Z",
+        }, {
+          id: "mapping-ignore-snapshot",
+          snapshotId: "cad-snapshot-2",
+          mappingRuleId: null,
+          sourceKind: "PART_INSTANCE",
+          sourceId: "cad-fastener-2",
+          sourceName: "Washer <2>",
+          targetKind: "IGNORE",
+          targetId: null,
+          confidence: "MANUAL",
+          status: "CONFIRMED",
+          rule: null,
+          updatedAt: "2026-05-10T00:00:00.000Z",
+        }],
+        onConfirmMapping: jest.fn(),
+        onGroupRepeatedInstancesChange: jest.fn(),
+        targets: {
+          subsystems: [],
+          mechanisms: [{ id: "mechanism-shooter", subsystemId: "subsystem-shooter", name: "Shooter", description: "", iteration: 1 }],
+          partDefinitions: [{ id: "part-roller", seasonId: "season-2026", name: "Roller tube", partNumber: "SHR-010", revision: "A", iteration: 1, type: "custom", source: "cad", materialId: null, description: "" }],
+        },
+        usesPlaceholderParser: false,
+      }),
+    );
+
+    expect(markup).toContain("Exact name match");
+    expect(markup).toContain("Normalized name match");
+    expect(markup).toContain("Manual override");
+    expect(markup).toContain("Ignore this item");
+    expect(markup).toContain("Split/merge deferred");
+    expect(markup).toContain("Current: Exact name match; confidence high");
+    expect(markup).toContain("Current: Ignore this item; confidence manual");
+    expect(markup).toContain("Current: This snapshot only; confidence manual");
+    expect(markup).toContain("Review choice: This snapshot only before finalize.");
+    expect(markup).toContain("Review choice: ignore item.");
+  });
+
   it("renders mapping review state with carry-forward scope and finalize guard", () => {
     const markup = renderToStaticMarkup(
       React.createElement(CadStepReviewPanels, {
         diff: {
           previousSnapshotId: "cad-snapshot-1",
           addedAssemblies: [{ id: "asm-intake", name: "MECH - Intake", instancePath: "/Robot/MECH - Intake" }],
-          removedAssemblies: [],
+          removedAssemblies: [{ id: "asm-old", name: "MECH - Old Shooter", instancePath: "/Robot/MECH - Old Shooter" }],
           movedAssemblies: [],
-          addedParts: [],
+          addedParts: [{ id: "part-roller", name: "Roller tube", partNumber: "INT-002" }],
           removedParts: [],
           movedPartInstances: [],
-          mappingChanges: [],
+          mappingChanges: [{ previousName: "Wheel spacer v1", currentName: "Wheel spacer v2" }],
           warnings: [],
         },
         importRun: null,
@@ -87,11 +207,26 @@ describe("CAD STEP review panel mapping state", () => {
     );
 
     expect(markup).toContain("MECH - Shooter - Flywheel");
-    expect(markup).toContain("This snapshot and future imports");
+    expect(markup).toContain("Source");
+    expect(markup).toContain("STEP import");
+    expect(markup).toContain("Snapshot state");
+    expect(markup).toContain("Preview only");
+    expect(markup).toContain("Preview-only STEP data becomes a finalized Robot Configuration source");
+    expect(markup).toContain("STEP export guide");
+    expect(markup).toContain("Exact name match");
     expect(markup).toContain("Select a target before confirming.");
     expect(markup).toContain("<button class=\"secondary-button compact-action\" disabled=\"\" type=\"button\">Confirm</button>");
     expect(markup).toContain("Finalize with unresolved warnings");
-    expect(markup).toContain("Added assemblies: 1");
+    expect(markup).toContain("STEP preview diff");
+    expect(markup).toContain("Review mapping decisions");
+    expect(markup).toContain("New subsystems, mechanisms, and parts");
+    expect(markup).toContain("MECH - Intake");
+    expect(markup).toContain("INT-002 - Roller tube");
+    expect(markup).toContain("Renamed or unmatched parts");
+    expect(markup).toContain("Wheel spacer v2");
+    expect(markup).toContain("Removed or unmapped items");
+    expect(markup).toContain("MECH - Old Shooter");
+    expect(markup).toContain("Confidence warnings");
     expect(markup).toContain("step_unmapped_assembly");
   });
 
@@ -192,6 +327,9 @@ describe("CAD STEP review panel mapping state", () => {
 
     const carryForwardIndex = markup.indexOf("Carry-forward");
 
+    expect(markup).toContain("Source");
+    expect(markup).toContain("STEP import");
+    expect(markup).toContain("Preview only");
     expect(markup).toContain("step-text-assembly-parser-1");
     expect(markup.indexOf("Placeholder parser output. This is not from your uploaded STEP file.")).toBeGreaterThan(-1);
     expect(markup.indexOf("Placeholder parser output. This is not from your uploaded STEP file.")).toBeLessThan(carryForwardIndex);

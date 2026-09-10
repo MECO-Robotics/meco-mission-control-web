@@ -1,10 +1,6 @@
-import type { MouseEvent as ReactMouseEvent } from "react";
-import { IconChevronRight } from "@/components/shared/Icons";
-import {
-  type NavigationSection,
-  NAVIGATION_SECTION_LABELS,
-} from "@/lib/workspaceNavigation";
-import { sectionIcons, subItemIcons } from "./appSidebarIcons";
+import { useState, type FocusEvent as ReactFocusEvent, type MouseEvent as ReactMouseEvent } from "react";
+import { NAVIGATION_SECTION_LABELS, type NavigationSection, type NavigationSubItemId, type NavigationTarget } from "@/lib/workspaceNavigation";
+import { subItemIcons } from "./appSidebarIcons";
 
 export interface SidebarSubItemModel {
   id: import("@/lib/workspaceNavigation").NavigationSubItemId;
@@ -16,115 +12,74 @@ export interface SidebarSubItemModel {
 interface SidebarSectionModel {
   section: NavigationSection;
   subItems: SidebarSubItemModel[];
-  isEnabled: boolean;
 }
 
 interface AppSidebarSectionsProps {
-  activeSection: NavigationSection | null;
-  activeSubItemId: import("@/lib/workspaceNavigation").NavigationSubItemId | null;
-  expandedSection: NavigationSection | null;
-  favoriteSubItems: SidebarSubItemModel[];
+  activeSubItemId: NavigationSubItemId | null;
   isCollapsed: boolean;
-  onSectionClick: (section: NavigationSection, event: ReactMouseEvent<HTMLButtonElement>) => void;
-  onSubItemSelect: (
-    target: import("@/lib/workspaceNavigation").NavigationTarget,
-    isEnabled: boolean,
-  ) => void;
+  onSubItemSelect: (target: NavigationTarget, isEnabled: boolean) => void;
   sectionModels: SidebarSectionModel[];
 }
 
 export function AppSidebarSections({
-  activeSection,
   activeSubItemId,
-  expandedSection,
-  favoriteSubItems,
   isCollapsed,
-  onSectionClick,
   onSubItemSelect,
   sectionModels,
 }: AppSidebarSectionsProps) {
-  const renderSubItem = (
-    subItem: SidebarSubItemModel,
-    options: { isFavorite?: boolean } = {},
-  ) => {
-    const isFavorite = options.isFavorite === true;
+  const [hoveredSubItemId, setHoveredSubItemId] = useState<NavigationSubItemId | null>(null);
 
-    return (
-      <button
-        aria-label={isCollapsed && isFavorite ? subItem.label : undefined}
-        className={isFavorite ? "sidebar-subtab sidebar-favorite-subtab" : "sidebar-subtab"}
-        data-active={activeSubItemId === subItem.id ? "true" : "false"}
-        data-enabled={subItem.isEnabled ? "true" : "false"}
-        disabled={!subItem.isEnabled}
-        key={subItem.id}
-        onClick={() => onSubItemSelect(subItem.target, subItem.isEnabled)}
-        title={isCollapsed && isFavorite ? subItem.label : undefined}
-        type="button"
-      >
-        <span aria-hidden="true" className="sidebar-subtab-icon">
-          {subItemIcons[subItem.id]}
-        </span>
-        <span className="sidebar-subtab-label">{subItem.label}</span>
-      </button>
-    );
+  const setActiveRollout = (id: NavigationSubItemId) => setHoveredSubItemId(id);
+  const clearActiveRollout = () => setHoveredSubItemId(null);
+
+  const handleEnter = (event: ReactMouseEvent<HTMLButtonElement>, id: NavigationSubItemId) => {
+    void event;
+    setActiveRollout(id);
   };
 
-  return (
-    <>
-      {favoriteSubItems.length > 0 ? (
-        <div
-          className="sidebar-section-group sidebar-favorites-group"
-          data-collapsed={isCollapsed ? "true" : "false"}
+  const handleFocus = (_event: ReactFocusEvent<HTMLButtonElement>, id: NavigationSubItemId) => {
+    setActiveRollout(id);
+  };
+
+  return sectionModels.map(({ section, subItems }) => (
+    <section className="sidebar-section-group" aria-label={NAVIGATION_SECTION_LABELS[section]} key={section}>
+      {!isCollapsed && (
+        <h2 className="sidebar-section-heading" data-tutorial-target={`sidebar-tab-${section}`}>
+          {NAVIGATION_SECTION_LABELS[section]}
+        </h2>
+      )}
+      {subItems.map((item) => (
+        <button
+          className="sidebar-nav-item"
+          aria-label={item.label}
+          aria-current={activeSubItemId === item.id ? "page" : undefined}
+          title={isCollapsed ? item.label : undefined}
+          data-active={activeSubItemId === item.id ? "true" : "false"}
+          data-enabled={item.isEnabled ? "true" : "false"}
+          disabled={!item.isEnabled}
+          data-tutorial-target={`sidebar-view-${item.id}`}
+          data-active-view={activeSubItemId ?? ""}
+          key={item.id}
+          onMouseEnter={(event) => handleEnter(event, item.id)}
+          onMouseLeave={clearActiveRollout}
+          onFocus={(event) => handleFocus(event, item.id)}
+          onBlur={clearActiveRollout}
+          onClick={() => onSubItemSelect(item.target, item.isEnabled)}
+          type="button"
         >
-          <div className="sidebar-favorites-heading">
-            <span className="sidebar-favorites-heading-label">{isCollapsed ? "Fav" : "Favorites"}</span>
-          </div>
-          <div className="sidebar-subtab-list sidebar-favorites-list">
-            {favoriteSubItems.map((subItem) => renderSubItem(subItem, { isFavorite: true }))}
-          </div>
-        </div>
-      ) : null}
-
-      {sectionModels.map(({ section, subItems, isEnabled: isSectionEnabled }) => {
-        const isExpanded = !isCollapsed && expandedSection === section;
-
-        return (
-          <div className="sidebar-section-group" key={section}>
-            <button
-              aria-disabled={!isSectionEnabled}
-              className="tab sidebar-section-toggle"
-              aria-label={NAVIGATION_SECTION_LABELS[section]}
-              data-active={activeSection === section ? "true" : "false"}
-              data-enabled={isSectionEnabled ? "true" : "false"}
-              data-tab-label={NAVIGATION_SECTION_LABELS[section]}
-              data-tutorial-target={`sidebar-tab-${section}`}
-              onClick={(event) => onSectionClick(section, event)}
-              type="button"
+          <span aria-hidden="true" className="sidebar-nav-item-icon">{subItemIcons[item.id]}</span>
+          {!isCollapsed ? <span className="sidebar-nav-item-label">{item.label}</span> : null}
+          {isCollapsed ? (
+            <span
+              aria-hidden="true"
+              className="sidebar-nav-item-rollout"
+              data-visible={hoveredSubItemId === item.id ? "true" : "false"}
             >
-              <span className="sidebar-tab-main">
-                <span aria-hidden="true" className="sidebar-tab-icon">
-                  {sectionIcons[section]}
-                </span>
-                {!isCollapsed ? <span className="sidebar-tab-label">{NAVIGATION_SECTION_LABELS[section]}</span> : null}
-              </span>
-              {!isCollapsed ? (
-                <span
-                  aria-hidden="true"
-                  className={`sidebar-section-chevron${isExpanded ? " is-expanded" : ""}`}
-                >
-                  <IconChevronRight />
-                </span>
-              ) : null}
-            </button>
-
-            {isExpanded ? (
-              <div className="sidebar-subtab-list">
-                {subItems.map((subItem) => renderSubItem(subItem))}
-              </div>
-            ) : null}
-          </div>
-        );
-      })}
-    </>
-  );
+              {item.label}
+            </span>
+          ) : null}
+        </button>
+      ))}
+    </section>
+  ));
 }

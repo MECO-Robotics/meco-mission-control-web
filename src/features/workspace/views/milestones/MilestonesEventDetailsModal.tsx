@@ -1,3 +1,5 @@
+import { ReportHistoryList } from "../workLogs/ReportHistoryList";
+import { ModalDialog } from "@/components/ModalDialog";
 import type { CSSProperties, Dispatch, FormEvent, SetStateAction } from "react";
 import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
@@ -33,6 +35,7 @@ interface MilestonesEventDetailsModalProps {
   milestoneStartTime?: string;
   modalPortalTarget: HTMLElement | null;
   onClose: () => void;
+  onRecordResult?: (milestone: MilestoneRecord) => void;
   onCancelEdit?: () => void;
   onDelete?: () => void;
   onEditMilestone: (milestone: MilestoneRecord) => void;
@@ -59,6 +62,7 @@ export function MilestonesEventDetailsModal({
   milestoneStartTime,
   modalPortalTarget,
   onClose,
+  onRecordResult,
   onCancelEdit,
   onDelete,
   onEditMilestone,
@@ -144,19 +148,15 @@ export function MilestonesEventDetailsModal({
   const milestoneEndLabel = formatMilestoneEndDateTime(activeMilestone.startDateTime, activeMilestone.endDateTime);
 
   return createPortal(
-    <div className="modal-scrim" role="presentation" style={{ zIndex: 2050 }}>
+    <ModalDialog label={activeMilestone.title} onClose={handleClose}>
       <section
-        aria-modal="true"
         className="modal-card task-details-modal"
         data-tutorial-target={isEditMode ? "milestone-edit-modal" : "milestone-detail-modal"}
-        role="dialog"
         style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
       >
         <div className="panel-header compact-header task-details-header">
           <div>
-            <p className="eyebrow" style={{ color: "var(--meco-blue)" }}>
-              {isEditMode ? "Edit milestone details" : "Timeline milestone"}
-            </p>
+
             <div className="task-detail-header-title-row">
               <div className="task-detail-header-title-stack">
                 {isEditMode ? (
@@ -220,7 +220,7 @@ export function MilestonesEventDetailsModal({
             </div>
           </div>
           <div className="panel-actions">
-            <button className="icon-button task-details-close-button" onClick={handleClose} type="button">
+            <button aria-label="Close milestone details" className="icon-button task-details-close-button" onClick={handleClose} type="button">
               {"\u00D7"}
             </button>
           </div>
@@ -280,7 +280,9 @@ export function MilestonesEventDetailsModal({
               milestoneModalMode="detail"
             />
 
+            <section className="modal-wide"><h3>Results</h3><ReportHistoryList reports={bootstrap.testResults.filter((report) => report.milestoneId === activeMilestone.id)} bootstrap={bootstrap} /></section>
             <div className="modal-actions modal-wide">
+              {onRecordResult ? <button className="secondary-action" type="button" onClick={() => onRecordResult(activeMilestone)}>Record result</button> : null}
               <button className="primary-action" onClick={() => onEditMilestone(activeMilestone)} type="button">
                 Edit milestone
               </button>
@@ -288,7 +290,7 @@ export function MilestonesEventDetailsModal({
           </div>
         )}
       </section>
-    </div>,
+    </ModalDialog>,
     modalPortalTarget,
   );
 }

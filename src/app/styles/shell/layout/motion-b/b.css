@@ -36,3 +36,11 @@
     opacity: 1;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .timeline-grid-motion[data-period-motion] {
+    animation: none;
+    transition: none;
+    will-change: auto;
+  }
+}

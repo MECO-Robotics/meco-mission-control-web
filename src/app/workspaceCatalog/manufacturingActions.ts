@@ -10,56 +10,82 @@ import type { ManufacturingItemRecord } from "@/types/recordsInventory";
 
 export type ManufacturingActions = ReturnType<typeof useManufacturingActions>;
 
-export function useManufacturingActions(model: AppWorkspaceModel) {
+export function useManufacturingActions({
+  activeManufacturingId,
+  bootstrap,
+  handleUnauthorized,
+  loadWorkspace,
+  manufacturingDraft,
+  manufacturingModalMode,
+  setActiveManufacturingId,
+  setDataMessage,
+  setIsSavingManufacturing,
+  setManufacturingDraft,
+  setManufacturingModalMode,
+  signedInMember,
+}: {
+  activeManufacturingId: AppWorkspaceModel["activeManufacturingId"];
+  bootstrap: AppWorkspaceModel["bootstrap"];
+  handleUnauthorized: AppWorkspaceModel["handleUnauthorized"];
+  loadWorkspace: AppWorkspaceModel["loadWorkspace"];
+  manufacturingDraft: AppWorkspaceModel["manufacturingDraft"];
+  manufacturingModalMode: AppWorkspaceModel["manufacturingModalMode"];
+  setActiveManufacturingId: AppWorkspaceModel["setActiveManufacturingId"];
+  setDataMessage: AppWorkspaceModel["setDataMessage"];
+  setIsSavingManufacturing: AppWorkspaceModel["setIsSavingManufacturing"];
+  setManufacturingDraft: AppWorkspaceModel["setManufacturingDraft"];
+  setManufacturingModalMode: AppWorkspaceModel["setManufacturingModalMode"];
+  signedInMember: AppWorkspaceModel["signedInMember"];
+}) {
   const openCreateManufacturingModal = useCallback((process: ManufacturingItemPayload["process"]) => {
-    model.setActiveManufacturingId(null);
-    model.setManufacturingDraft(
+    setActiveManufacturingId(null);
+    setManufacturingDraft(
       buildEmptyManufacturingPayload(
-        model.bootstrap,
+        bootstrap,
         process,
-        process === "cnc" ? model.signedInMember?.id ?? null : null,
+        process === "cnc" ? signedInMember?.id ?? null : null,
       ),
     );
-    model.setManufacturingModalMode("create");
-  }, [model]);
+    setManufacturingModalMode("create");
+  }, [bootstrap, setActiveManufacturingId, setManufacturingDraft, setManufacturingModalMode, signedInMember]);
 
   const openEditManufacturingModal = useCallback((item: ManufacturingItemRecord) => {
-    model.setActiveManufacturingId(item.id);
-    model.setManufacturingDraft(manufacturingToPayload(item));
-    model.setManufacturingModalMode("edit");
-  }, [model]);
+    setActiveManufacturingId(item.id);
+    setManufacturingDraft(manufacturingToPayload(item));
+    setManufacturingModalMode("edit");
+  }, [setActiveManufacturingId, setManufacturingDraft, setManufacturingModalMode]);
 
   const closeManufacturingModal = useCallback(() => {
-    model.setManufacturingModalMode(null);
-    model.setActiveManufacturingId(null);
-  }, [model]);
+    setManufacturingModalMode(null);
+    setActiveManufacturingId(null);
+  }, [setActiveManufacturingId, setManufacturingModalMode]);
 
   const handleManufacturingSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
-    model.setIsSavingManufacturing(true);
-    model.setDataMessage(null);
+    setIsSavingManufacturing(true);
+    setDataMessage(null);
 
     try {
-      const selectedPartDefinition = model.manufacturingDraft.partDefinitionId
-        ? model.bootstrap.partDefinitions.find(
-            (partDefinition) => partDefinition.id === model.manufacturingDraft.partDefinitionId,
+      const selectedPartDefinition = manufacturingDraft.partDefinitionId
+        ? bootstrap.partDefinitions.find(
+            (partDefinition) => partDefinition.id === manufacturingDraft.partDefinitionId,
           )
         : null;
 
       if (!selectedPartDefinition) {
-        model.setDataMessage("Please choose a real part from the Parts tab before saving the manufacturing job.");
+        setDataMessage("Please choose a real part from the Parts tab before saving the manufacturing job.");
         return;
       }
 
       const selectedPartInstanceIds =
-        model.manufacturingDraft.partInstanceIds.length > 0
-          ? model.manufacturingDraft.partInstanceIds
-          : model.manufacturingDraft.partInstanceId
-            ? [model.manufacturingDraft.partInstanceId]
+        manufacturingDraft.partInstanceIds.length > 0
+          ? manufacturingDraft.partInstanceIds
+          : manufacturingDraft.partInstanceId
+            ? [manufacturingDraft.partInstanceId]
             : [];
       const selectedPartInstances = selectedPartInstanceIds
         .map((partInstanceId) =>
-          model.bootstrap.partInstances.find((partInstance) => partInstance.id === partInstanceId),
+          bootstrap.partInstances.find((partInstance) => partInstance.id === partInstanceId),
         )
         .filter((partInstance): partInstance is NonNullable<typeof partInstance> => {
           if (!partInstance) {
@@ -73,40 +99,40 @@ export function useManufacturingActions(model: AppWorkspaceModel) {
         });
 
       if (selectedPartInstances.length === 0) {
-        model.setDataMessage("Select at least one part instance for this manufacturing job.");
+        setDataMessage("Select at least one part instance for this manufacturing job.");
         return;
       }
 
       const primaryPartInstance = selectedPartInstances[0] ?? null;
 
       const payload: ManufacturingItemPayload = {
-        ...model.manufacturingDraft,
-        subsystemId: primaryPartInstance?.subsystemId ?? model.manufacturingDraft.subsystemId,
+        ...manufacturingDraft,
+        subsystemId: primaryPartInstance?.subsystemId ?? manufacturingDraft.subsystemId,
         title: selectedPartDefinition.name,
         partInstanceId: primaryPartInstance?.id ?? null,
         partInstanceIds: selectedPartInstances.map((partInstance) => partInstance.id),
-        inHouse: model.manufacturingDraft.process === "cnc" ? model.manufacturingDraft.inHouse : false,
-        batchLabel: model.manufacturingDraft.batchLabel?.trim() || undefined,
+        inHouse: manufacturingDraft.process === "cnc" ? manufacturingDraft.inHouse : false,
+        batchLabel: manufacturingDraft.batchLabel?.trim() || undefined,
       };
 
-      if (model.manufacturingModalMode === "create") {
-        await createManufacturingItemRecord(payload, model.handleUnauthorized);
-      } else if (model.manufacturingModalMode === "edit" && model.activeManufacturingId) {
+      if (manufacturingModalMode === "create") {
+        await createManufacturingItemRecord(payload, handleUnauthorized);
+      } else if (manufacturingModalMode === "edit" && activeManufacturingId) {
         await updateManufacturingItemRecord(
-          model.activeManufacturingId,
+          activeManufacturingId,
           payload,
-          model.handleUnauthorized,
+          handleUnauthorized,
         );
       }
 
-      await model.loadWorkspace();
+      await loadWorkspace();
       closeManufacturingModal();
     } catch (error) {
-      model.setDataMessage(toErrorMessage(error));
+      setDataMessage(toErrorMessage(error));
     } finally {
-      model.setIsSavingManufacturing(false);
+      setIsSavingManufacturing(false);
     }
-  }, [closeManufacturingModal, model]);
+  }, [activeManufacturingId, bootstrap, closeManufacturingModal, handleUnauthorized, loadWorkspace, manufacturingDraft, manufacturingModalMode, setDataMessage, setIsSavingManufacturing]);
 
   const handleCncQuickStatusChange = useCallback(
     async (
@@ -117,7 +143,7 @@ export function useManufacturingActions(model: AppWorkspaceModel) {
         return;
       }
 
-      model.setDataMessage(null);
+      setDataMessage(null);
       try {
         await updateManufacturingItemRecord(
           item.id,
@@ -125,14 +151,14 @@ export function useManufacturingActions(model: AppWorkspaceModel) {
             mentorReviewed: true,
             status,
           },
-          model.handleUnauthorized,
+          handleUnauthorized,
         );
-        await model.loadWorkspace();
+        await loadWorkspace();
       } catch (error) {
-        model.setDataMessage(toErrorMessage(error));
+        setDataMessage(toErrorMessage(error));
       }
     },
-    [model],
+    [handleUnauthorized, loadWorkspace, setDataMessage],
   );
 
   return {

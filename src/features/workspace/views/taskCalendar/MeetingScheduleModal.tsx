@@ -1,3 +1,4 @@
+import { ModalDialog } from "@/components/ModalDialog";
 import type React from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -51,16 +52,8 @@ export function MeetingScheduleModal({
   const endTime = draft.endDateTime ? timePart(draft.endDateTime) : "";
 
   return (
-    <div
-      className="modal-scrim"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) {
-          onClose();
-        }
-      }}
-      role="presentation"
-    >
-      <section aria-modal="true" className="modal-card meeting-schedule-modal" role="dialog">
+    <ModalDialog label="Add meeting" onClose={onClose} dismissOnBackdrop>
+      <section  className="modal-card meeting-schedule-modal" >
         <div className="panel-header compact-header roster-modal-header">
           <div className="queue-section-header">
             <h3>Add meeting</h3>
@@ -191,6 +184,6 @@ export function MeetingScheduleModal({
           </div>
         </form>
       </section>
-    </div>
+    </ModalDialog>
   );
 }

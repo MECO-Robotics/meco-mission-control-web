@@ -1,0 +1,62 @@
+.task-editor-modal .task-details-modal {
+  width: min(920px, calc(100vw - 2rem));
+  max-width: 920px;
+}
+
+.task-editor-modal .modal-form {
+  gap: 1rem;
+}
+
+.task-editor-modal .task-details-section-grid {
+  gap: 0.95rem;
+  margin-top: 0.85rem;
+}
+
+.task-editor-modal .field input,
+.task-editor-modal .field select,
+.task-editor-modal .field textarea {
+  padding: 0.54rem 0.7rem;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.task-editor-modal .field {
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.task-editor-modal .field > span:first-child,
+.task-editor-modal .task-details-overview-assigned > span:first-child {
+  line-height: 1.25;
+}
+
+.task-editor-modal .task-details-section-title {
+  padding-top: 0.5rem;
+  padding-bottom: 0.4rem;
+}
+
+@media (max-width: 900px) {
+  .task-editor-modal .task-details-modal {
+    width: min(680px, calc(100vw - 1rem));
+    max-height: calc(100vh - 1rem);
+  }
+
+  .task-editor-modal .task-details-header {
+    padding-right: 3rem;
+  }
+
+  .task-editor-modal .task-detail-header-title-row {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .task-editor-modal .task-detail-header-side-stack {
+    align-items: flex-start;
+    padding-top: 0;
+  }
+
+  .task-editor-modal .task-details-section-grid,
+  .task-editor-modal .task-details-overview-grid {
+    grid-template-columns: 1fr;
+  }
+}

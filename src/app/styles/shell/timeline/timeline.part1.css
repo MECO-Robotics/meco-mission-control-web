@@ -9,8 +9,11 @@
   max-width: 100%;
 }
 
-.timeline-toolbar {
-  width: 100%;
+.filter-toolbar.timeline-toolbar {
+  width: auto;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;

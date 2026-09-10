@@ -63,7 +63,10 @@ export function useFilterDropdownMenuState({
     };
     const handleKeyDown = (milestone: KeyboardEvent) => {
       if (milestone.key === "Escape") {
+        milestone.preventDefault();
+        milestone.stopPropagation();
         onClose();
+        buttonRef.current?.focus();
       }
     };
 
@@ -74,7 +77,7 @@ export function useFilterDropdownMenuState({
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [filterRef, isOpen, menuRef, onClose]);
+  }, [buttonRef, filterRef, isOpen, menuRef, onClose]);
 
   useEffect(() => {
     if (!isOpen || typeof window === "undefined") {

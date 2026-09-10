@@ -196,6 +196,7 @@ export function createBootstrap(overrides: Partial<BootstrapPayload> = {}): Boot
     reports: [],
     reportFindings: [],
     qaReports: [],
+    qaRequests: [],
     testResults: [],
     qaFindings: [],
     testFindings: [],
@@ -224,7 +225,7 @@ export function createBootstrap(overrides: Partial<BootstrapPayload> = {}): Boot
         dueDate: "2026-02-01",
         priority: "medium",
         status: "not-started",
-        dependencyIds: [],
+
         blockers: [],
         linkedManufacturingIds: [],
         linkedPurchaseIds: [],
@@ -243,5 +244,6 @@ export function createBootstrap(overrides: Partial<BootstrapPayload> = {}): Boot
   return {
     ...base,
     ...overrides,
+    qaRequests: overrides.qaRequests ?? base.qaRequests,
   };
 }

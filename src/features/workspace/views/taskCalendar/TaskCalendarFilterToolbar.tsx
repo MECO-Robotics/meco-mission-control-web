@@ -1,4 +1,4 @@
-import { IconSort } from "@/components/shared/Icons";
+import { SlidersHorizontal } from "lucide-react";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import type { TaskCalendarEventType } from "./taskCalendarEvents";
 import {
@@ -22,14 +22,16 @@ export function TaskCalendarFilterToolbar({
 }: TaskCalendarFilterToolbarProps) {
   const filterIsDefault = eventFilter === "all";
   const sortIsDefault = sortMode === "date";
+  const activeViewOptionCount = (filterIsDefault ? 0 : 1) + (sortIsDefault ? 0 : 1);
 
   return (
     <div className="task-queue-toolbar-inline-actions task-calendar-filter-controls">
       <CompactFilterMenu
-        activeCount={filterIsDefault ? 0 : 1}
-        ariaLabel="Calendar filters"
-        buttonLabel="Filters"
-        className="task-queue-filter-menu"
+        activeCount={activeViewOptionCount}
+        ariaLabel="Calendar view options"
+        buttonLabel="View"
+        className="task-queue-filter-menu task-calendar-view-options-menu"
+        icon={<SlidersHorizontal size={14} strokeWidth={2} />}
         items={[
           {
             label: "Event type",
@@ -50,16 +52,6 @@ export function TaskCalendarFilterToolbar({
               </select>
             ),
           },
-        ]}
-      />
-
-      <CompactFilterMenu
-        activeCount={sortIsDefault ? 0 : 1}
-        ariaLabel="Calendar sorting"
-        buttonLabel="Sort"
-        className="task-queue-sort-menu"
-        icon={<IconSort />}
-        items={[
           {
             label: "Sort by",
             content: (

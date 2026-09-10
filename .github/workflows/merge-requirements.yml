@@ -152,15 +152,28 @@ jobs:
           WORKFLOW_RUN_PATH: ${{ steps.resolve.outputs.workflow_path }}
         run: node scripts/merge-requirements-gate.mjs validate-ci
 
+      - name: Validate platform contract and production repositories
+        id: integration
+        if: steps.resolve.outputs.has_pr == 'true'
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_BASE_REF: ${{ steps.resolve.outputs.base_ref }}
+          PR_HEAD_REF: ${{ steps.resolve.outputs.head_ref }}
+          PR_HEAD_SHA: ${{ steps.resolve.outputs.head_sha }}
+        run: node scripts/merge-requirements-gate.mjs validate-integration
+
       - name: Publish stable merge requirement status
         if: always() && steps.resolve.outputs.has_pr == 'true'
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         env:
           CI_OUTCOME: ${{ steps.ci.outcome }}
+          INTEGRATION_OUTCOME: ${{ steps.integration.outcome }}
           HEAD_SHA: ${{ steps.resolve.outputs.head_sha }}
         with:
           script: |
-            const passed = process.env.CI_OUTCOME === 'success';
+            const passed = process.env.CI_OUTCOME === 'success' &&
+              process.env.INTEGRATION_OUTCOME === 'success';
             await github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,

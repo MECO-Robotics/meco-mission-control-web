@@ -1,6 +1,7 @@
 .app-topbar-search-slot {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   height: 100%;
   flex: 1 1 auto;
   padding-inline: clamp(0.3rem, 0.9vw, 0.6rem);

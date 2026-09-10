@@ -10,6 +10,7 @@ import { AppSidebarSettingsMenu } from "./sidebar/AppSidebarSettingsMenu";
 
 interface AppSidebarProjectFooterProps {
   activeTab: import("@/lib/workspaceNavigation").ViewTab;
+  canSignIn: boolean;
   canSignOut: boolean;
   isDarkMode: boolean;
   isCollapsed: boolean;
@@ -20,6 +21,7 @@ interface AppSidebarProjectFooterProps {
   onHelpSelect: () => void;
   onNotificationQueueToggle: () => void;
   onRefreshWorkspace: () => void;
+  onSignIn: () => void;
   onSignOut: () => void;
   onToggleMyView: () => void;
   onToggleDarkMode: () => void;
@@ -32,6 +34,7 @@ interface AppSidebarProjectFooterProps {
 
 export function AppSidebarProjectFooter({
   activeTab,
+  canSignIn,
   canSignOut,
   isDarkMode,
   isCollapsed,
@@ -42,6 +45,7 @@ export function AppSidebarProjectFooter({
   onHelpSelect,
   onNotificationQueueToggle,
   onRefreshWorkspace,
+  onSignIn,
   onSignOut,
   onToggleMyView,
   onToggleDarkMode,
@@ -53,10 +57,12 @@ export function AppSidebarProjectFooter({
 }: AppSidebarProjectFooterProps) {
   const settingsMenu = (
     <AppSidebarSettingsMenu
+      canSignIn={canSignIn}
       canSignOut={canSignOut}
       isCollapsed={isCollapsed}
       isDarkMode={isDarkMode}
       onRefreshWorkspace={onRefreshWorkspace}
+      onSignIn={onSignIn}
       onSignOut={onSignOut}
       onToggleDarkMode={onToggleDarkMode}
     />

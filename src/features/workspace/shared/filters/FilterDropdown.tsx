@@ -132,7 +132,7 @@ export function FilterDropdown({
               }}
               value={value}
             />,
-            document.body,
+            buttonRef.current?.closest("dialog") ?? document.body,
           )
         ) : (
           <FilterOptionMenu

@@ -7,14 +7,20 @@ const outreachSteps = [
   {
     id: "project-outreach",
     title: "Switch project to Outreach",
-    instruction: "Use the project dropdown and switch to Outreach.",
-    selector: '[data-tutorial-target="project-select"]',
+    instruction: "Open the project / season selector, choose Project, then select the tutorial Outreach project.",
+    selector: '.sidebar-scope-trigger',
   },
   {
     id: "workflow-tab",
     title: "Open Workflow",
-    instruction: "Open Workflow from the sidebar in Outreach mode.",
-    selector: '[data-tutorial-target="sidebar-tab-subsystems"]',
+    instruction: "Open Resources from the navigation.",
+    selector: '[data-tutorial-target="sidebar-tab-resources"]',
+  },
+  {
+    id: "outreach-workflow-view",
+    title: "Open Workflow",
+    instruction: "Choose Structure to view the outreach workflow.",
+    selector: '[data-tutorial-target="sidebar-view-resources-structure"]',
   },
   {
     id: "workflow-edit",
@@ -24,15 +30,15 @@ const outreachSteps = [
   },
   {
     id: "inventory-tab",
-    title: "Open Inventory",
-    instruction: "Open Inventory from the sidebar.",
-    selector: '[data-tutorial-target="sidebar-tab-inventory"]',
+    title: "Open Resources",
+    instruction: "Open Resources from the sidebar.",
+    selector: '[data-tutorial-target="sidebar-tab-resources"]',
   },
   {
     id: "inventory-materials",
     title: "Open Documents",
-    instruction: "Switch Inventory to Documents.",
-    selector: '[data-tutorial-target="inventory-view-materials"]',
+    instruction: "Choose Documents in the sidebar.",
+    selector: '[data-tutorial-target="sidebar-view-resources-documents"]',
   },
   {
     id: "create-document",
@@ -44,7 +50,7 @@ const outreachSteps = [
     id: "help-tab",
     title: "Finish on Help",
     instruction: "Open Help to complete the tutorial.",
-    selector: '[data-tutorial-target="sidebar-tab-help"]',
+    selector: 'button[aria-label="Help"]',
   },
 ] satisfies InteractiveTutorialStep[];
 

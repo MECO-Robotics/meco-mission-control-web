@@ -2,19 +2,18 @@ import { useCallback, useMemo } from "react";
 
 import {
   NAVIGATION_SECTION_ORDER,
-  NAVIGATION_SUB_ITEMS,
   NAVIGATION_SUB_ITEMS_BY_SECTION,
   getActiveNavigationSubItemId,
-  getNavigationSectionFromSubItem,
+  getNavigationTarget,
+  isNavigationSubItemAvailable,
   type InventoryViewTab,
   type ManufacturingViewTab,
-  type NavigationItem,
   type NavigationSection,
   type NavigationSubItemId,
-  type ReportsViewTab,
   type RosterViewTab,
   type RiskManagementViewTab,
   type TaskViewTab,
+  type ViewAvailabilityContext,
   type ViewTab,
   type WorklogsViewTab,
 } from "@/lib/workspaceNavigation";
@@ -23,96 +22,64 @@ import type { SidebarSubItemModel } from "../AppSidebarSections";
 
 interface UseAppSidebarNavigationModelsArgs {
   activeTab: ViewTab;
-  favoriteViewIds: readonly NavigationSubItemId[];
   inventoryView: InventoryViewTab;
   manufacturingView: ManufacturingViewTab;
-  isRobotProject: boolean;
-  items: NavigationItem[];
-  reportsView: ReportsViewTab;
   rosterView: RosterViewTab;
   riskManagementView: RiskManagementViewTab;
   taskView: TaskViewTab;
+  viewAvailabilityContext: ViewAvailabilityContext;
   worklogsView: WorklogsViewTab;
 }
 
 export function useAppSidebarNavigationModels({
   activeTab,
-  favoriteViewIds,
   inventoryView,
   manufacturingView,
-  isRobotProject,
-  items,
-  reportsView,
   rosterView,
   riskManagementView,
   taskView,
+  viewAvailabilityContext,
   worklogsView,
 }: UseAppSidebarNavigationModelsArgs) {
-  const visibleTabs = useMemo(() => new Set(items.map((item) => item.value)), [items]);
   const activeSubItemId = getActiveNavigationSubItemId({
     activeTab,
     inventoryView,
     manufacturingView,
     rosterView,
-    reportsView,
     riskManagementView,
     taskView,
     worklogsView,
-  });
-  const activeSection = activeSubItemId
-    ? getNavigationSectionFromSubItem(activeSubItemId)
-    : null;
+  }, viewAvailabilityContext);
   const isSubItemEnabled = useCallback(
-    (subItemId: NavigationSubItemId) => {
-      const subItem = NAVIGATION_SUB_ITEMS.find((item) => item.id === subItemId);
-      if (subItem && !visibleTabs.has(subItem.target.tab)) {
-        return false;
-      }
-
-      return subItemId === "config-robot-model" ||
-        subItemId === "config-cad" ||
-        subItemId === "config-part-mappings" ||
-        subItemId === "inventory-parts"
-        ? isRobotProject
-        : true;
-    },
-    [isRobotProject, visibleTabs],
+    (subItemId: NavigationSubItemId) =>
+      isNavigationSubItemAvailable(subItemId, {
+        context: viewAvailabilityContext,
+      }),
+    [viewAvailabilityContext],
   );
   const getSectionSubItems = useCallback(
     (section: NavigationSection): SidebarSubItemModel[] =>
       NAVIGATION_SUB_ITEMS_BY_SECTION[section].map((subItem) => ({
         ...subItem,
+        target: getNavigationTarget(subItem.id, viewAvailabilityContext),
         isEnabled: isSubItemEnabled(subItem.id),
       })),
-    [isSubItemEnabled],
+    [isSubItemEnabled, viewAvailabilityContext],
   );
   const sectionModels = useMemo(
     () =>
-      NAVIGATION_SECTION_ORDER.map((section) => {
+      NAVIGATION_SECTION_ORDER.filter(section => section !== "home").map((section) => {
         const subItems = getSectionSubItems(section);
         return {
           section,
           subItems,
-          isEnabled: subItems.some((subItem) => subItem.isEnabled),
         };
       }),
     [getSectionSubItems],
   );
-  const favoriteSubItems = useMemo(() => {
-    const requestedFavoriteIds = new Set(favoriteViewIds);
-    return NAVIGATION_SUB_ITEMS
-      .filter((subItem) => requestedFavoriteIds.has(subItem.id))
-      .map((subItem) => ({
-        ...subItem,
-        isEnabled: isSubItemEnabled(subItem.id),
-      }));
-  }, [favoriteViewIds, isSubItemEnabled]);
 
   return {
-    activeSection,
     activeSubItemId,
-    favoriteSubItems,
-    getSectionSubItems,
     sectionModels,
   };
 }

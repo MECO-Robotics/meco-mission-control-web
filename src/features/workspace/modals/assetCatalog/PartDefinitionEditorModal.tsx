@@ -1,3 +1,4 @@
+import { ModalDialog } from "@/components/ModalDialog";
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { PartDefinitionPayload } from "@/types/payloads";
@@ -67,11 +68,9 @@ export function PartDefinitionEditorModal({
   const partDefinitionPhotoProjectId = bootstrap.projects[0]?.id ?? null;
 
   return (
-    <div className="modal-scrim" role="presentation" style={{ zIndex: 2000 }}>
+    <ModalDialog label="Part definition editor" onClose={closePartDefinitionModal}>
       <section
-        aria-modal="true"
         className="modal-card"
-        role="dialog"
         style={modalCardStyle}
       >
         <div className="panel-header compact-header">
@@ -290,6 +289,6 @@ export function PartDefinitionEditorModal({
           </div>
         </form>
       </section>
-    </div>
+    </ModalDialog>
   );
 }

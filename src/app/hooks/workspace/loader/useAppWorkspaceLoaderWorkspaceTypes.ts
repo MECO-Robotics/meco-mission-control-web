@@ -3,8 +3,8 @@ import type { Dispatch, SetStateAction } from "react";
 import type { AppWorkspaceDerived } from "@/app/hooks/useAppWorkspaceDerived";
 import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { ArtifactModalMode, ManufacturingModalMode, MaterialModalMode, MechanismModalMode, MilestoneReportModalMode, PartDefinitionModalMode, PartInstanceModalMode, PurchaseModalMode, QaReportModalMode, SubsystemModalMode, TaskModalMode, WorkLogModalMode, WorkstreamModalMode } from "@/features/workspace/shared/model/workspaceModalModes";
-import type { ArtifactPayload, ManufacturingItemPayload, MaterialPayload, MechanismPayload, PartDefinitionPayload, PartInstancePayload, PurchaseItemPayload, QaReportPayload, SubsystemPayload, TaskPayload, WorkLogPayload, WorkstreamPayload } from "@/types/payloads";
+import type { ArtifactModalMode, ManufacturingModalMode, MechanismModalMode, MilestoneReportModalMode, PartDefinitionModalMode, PartInstanceModalMode, PurchaseModalMode, QaReportModalMode, SubsystemModalMode, TaskModalMode, WorkLogModalMode, WorkstreamModalMode } from "@/features/workspace/shared/model/workspaceModalModes";
+import type { ArtifactPayload, ManufacturingItemPayload, MechanismPayload, PartDefinitionPayload, PartInstancePayload, PurchaseItemPayload, QaReportPayload, SubsystemPayload, TaskPayload, WorkLogPayload, WorkstreamPayload } from "@/types/payloads";
 
 export type AppWorkspaceLoaderModel = AppWorkspaceState & AppWorkspaceDerived;
 export type SelectMemberHandler = (memberId: string | null, payload: BootstrapPayload) => void;
@@ -18,7 +18,6 @@ export interface WorkspaceLoadScope {
 export type WorkspaceReconciliationState = AppWorkspaceState & {
   activeArtifactId: string | null;
   activeMechanismId: string | null;
-  activeMaterialId: string | null;
   activePartDefinitionId: string | null;
   activePartInstanceId: string | null;
   activePurchaseId: string | null;
@@ -30,8 +29,6 @@ export type WorkspaceReconciliationState = AppWorkspaceState & {
   milestoneReportModalMode: MilestoneReportModalMode;
   manufacturingDraft: ManufacturingItemPayload;
   manufacturingModalMode: ManufacturingModalMode;
-  materialDraft: MaterialPayload;
-  materialModalMode: MaterialModalMode;
   mechanismDraft: MechanismPayload;
   mechanismModalMode: MechanismModalMode;
   partDefinitionDraft: PartDefinitionPayload;
@@ -54,7 +51,6 @@ export type WorkspaceReconciliationState = AppWorkspaceState & {
   workstreamModalMode: WorkstreamModalMode;
   setActiveArtifactId: Dispatch<SetStateAction<string | null>>;
   setActiveMechanismId: Dispatch<SetStateAction<string | null>>;
-  setActiveMaterialId: Dispatch<SetStateAction<string | null>>;
   setActivePartDefinitionId: Dispatch<SetStateAction<string | null>>;
   setActivePartInstanceId: Dispatch<SetStateAction<string | null>>;
   setActivePurchaseId: Dispatch<SetStateAction<string | null>>;
@@ -66,8 +62,6 @@ export type WorkspaceReconciliationState = AppWorkspaceState & {
   setMilestoneReportModalMode: Dispatch<SetStateAction<MilestoneReportModalMode>>;
   setManufacturingDraft: Dispatch<SetStateAction<ManufacturingItemPayload>>;
   setManufacturingModalMode: Dispatch<SetStateAction<ManufacturingModalMode>>;
-  setMaterialDraft: Dispatch<SetStateAction<MaterialPayload>>;
-  setMaterialModalMode: Dispatch<SetStateAction<MaterialModalMode>>;
   setMechanismDraft: Dispatch<SetStateAction<MechanismPayload>>;
   setMechanismModalMode: Dispatch<SetStateAction<MechanismModalMode>>;
   setPartDefinitionDraft: Dispatch<SetStateAction<PartDefinitionPayload>>;

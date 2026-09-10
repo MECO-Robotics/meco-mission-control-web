@@ -1,80 +1,91 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import { buildEmptyMaterialPayload } from "@/lib/appUtils/payloadBuilders";
 import { materialToPayload } from "@/lib/appUtils/payloadConversions";
 import { toErrorMessage } from "@/lib/appUtils/common";
 import { createMaterialRecord, deleteMaterialRecord, updateMaterialRecord } from "@/lib/auth/records/inventory";
-import type { AppWorkspaceModel } from "../hooks/useAppWorkspaceModel";
 import type { MaterialPayload } from "@/types/payloads";
 import type { MaterialRecord } from "@/types/recordsInventory";
 
-export type MaterialActions = ReturnType<typeof useMaterialActions>;
-
-export function useMaterialActions(model: AppWorkspaceModel) {
+export function useMaterialEditor({
+  handleUnauthorized,
+  loadWorkspace,
+  setDataMessage,
+}: {
+  handleUnauthorized: () => void;
+  loadWorkspace: () => Promise<void>;
+  setDataMessage: (message: string | null) => void;
+}) {
+  const [materialModalMode, setMaterialModalMode] = useState<"create" | "edit" | null>(null);
+  const [activeMaterialId, setActiveMaterialId] = useState<string | null>(null);
+  const [materialDraft, setMaterialDraft] = useState<MaterialPayload>(buildEmptyMaterialPayload);
+  const [isSavingMaterial, setIsSavingMaterial] = useState(false);
+  const [isDeletingMaterial, setIsDeletingMaterial] = useState(false);
   const openCreateMaterialModal = useCallback(() => {
-    model.setActiveMaterialId(null);
-    model.setMaterialDraft(buildEmptyMaterialPayload());
-    model.setMaterialModalMode("create");
-  }, [model]);
+    setActiveMaterialId(null);
+    setMaterialDraft(buildEmptyMaterialPayload());
+    setMaterialModalMode("create");
+  }, []);
 
   const openEditMaterialModal = useCallback((item: MaterialRecord) => {
-    model.setActiveMaterialId(item.id);
-    model.setMaterialDraft(materialToPayload(item));
-    model.setMaterialModalMode("edit");
-  }, [model]);
+    setActiveMaterialId(item.id);
+    setMaterialDraft(materialToPayload(item));
+    setMaterialModalMode("edit");
+  }, []);
 
   const closeMaterialModal = useCallback(() => {
-    model.setMaterialModalMode(null);
-    model.setActiveMaterialId(null);
-  }, [model]);
+    setMaterialModalMode(null);
+    setActiveMaterialId(null);
+  }, []);
 
   const handleMaterialSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
-    model.setIsSavingMaterial(true);
-    model.setDataMessage(null);
+    setIsSavingMaterial(true);
+    setDataMessage(null);
 
     try {
       const payload: MaterialPayload =
-        model.materialModalMode === "create"
+        materialModalMode === "create"
           ? {
-              ...model.materialDraft,
-              reorderPoint: Math.floor(model.materialDraft.onHandQuantity / 2),
+              ...materialDraft,
+              reorderPoint: Math.floor(materialDraft.onHandQuantity / 2),
             }
-          : model.materialDraft;
+          : materialDraft;
 
-      if (model.materialModalMode === "create") {
-        await createMaterialRecord(payload, model.handleUnauthorized);
-      } else if (model.materialModalMode === "edit" && model.activeMaterialId) {
-        await updateMaterialRecord(model.activeMaterialId, payload, model.handleUnauthorized);
+      if (materialModalMode === "create") {
+        await createMaterialRecord(payload, handleUnauthorized);
+      } else if (materialModalMode === "edit" && activeMaterialId) {
+        await updateMaterialRecord(activeMaterialId, payload, handleUnauthorized);
       }
 
-      await model.loadWorkspace();
+      await loadWorkspace();
       closeMaterialModal();
     } catch (error) {
-      model.setDataMessage(toErrorMessage(error));
+      setDataMessage(toErrorMessage(error));
     } finally {
-      model.setIsSavingMaterial(false);
+      setIsSavingMaterial(false);
     }
-  }, [closeMaterialModal, model]);
+  }, [activeMaterialId, closeMaterialModal, handleUnauthorized, loadWorkspace, materialDraft, materialModalMode, setDataMessage]);
 
   const handleDeleteMaterial = useCallback(async (materialId: string) => {
-    model.setIsDeletingMaterial(true);
-    model.setDataMessage(null);
+    setIsDeletingMaterial(true);
+    setDataMessage(null);
 
     try {
-      await deleteMaterialRecord(materialId, model.handleUnauthorized);
-      if (model.activeMaterialId === materialId) {
+      await deleteMaterialRecord(materialId, handleUnauthorized);
+      if (activeMaterialId === materialId) {
         closeMaterialModal();
       }
-      await model.loadWorkspace();
+      await loadWorkspace();
     } catch (error) {
-      model.setDataMessage(toErrorMessage(error));
+      setDataMessage(toErrorMessage(error));
     } finally {
-      model.setIsDeletingMaterial(false);
+      setIsDeletingMaterial(false);
     }
-  }, [closeMaterialModal, model]);
+  }, [activeMaterialId, closeMaterialModal, handleUnauthorized, loadWorkspace, setDataMessage]);
 
   return {
+    materialModalMode, activeMaterialId, materialDraft, setMaterialDraft, isSavingMaterial, isDeletingMaterial,
     closeMaterialModal,
     handleDeleteMaterial,
     handleMaterialSubmit,

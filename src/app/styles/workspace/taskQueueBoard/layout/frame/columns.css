@@ -5,18 +5,18 @@
 }
 
 .task-queue-board {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(var(--task-queue-board-column-width, 15.5rem), 1fr));
+  display: flex;
+  width: max-content;
   min-width: calc((var(--task-queue-board-column-width, 15.5rem) * 6) + (0.7rem * 5));
-  width: 100%;
   gap: calc(0.7rem * var(--task-queue-zoom, 1));
   align-items: start;
 }
 
 .milestone-board {
-  display: flex;
-  width: max-content;
-  min-width: calc((var(--task-queue-board-column-width, 15.5rem) * 3) + (0.7rem * var(--task-queue-zoom, 1) * 2));
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15.5rem, 1fr));
+  min-width: 0;
+  width: 100%;
   align-items: flex-start;
 }
 

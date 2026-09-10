@@ -107,7 +107,7 @@ function createBootstrap(): BootstrapPayload {
         dueDate: "2026-03-09",
         priority: "high",
         targetMilestoneId: "milestone-1",
-        dependencyIds: [],
+
         blockers: [],
         isBlocked: false,
         linkedManufacturingIds: [],
@@ -139,7 +139,7 @@ function createBootstrap(): BootstrapPayload {
         dueDate: "2026-03-11",
         priority: "medium",
         targetMilestoneId: null,
-        dependencyIds: [],
+
         blockers: [],
         isBlocked: false,
         linkedManufacturingIds: [],
@@ -168,75 +168,17 @@ function createBootstrap(): BootstrapPayload {
 }
 
 describe("MilestonesView", () => {
-  it("renders milestones as kanban columns grouped by status", () => {
-    const markup = renderToStaticMarkup(
-      React.createElement(MilestonesView, {
-        activePersonFilter: [],
-        bootstrap: createBootstrap(),
-        isAllProjectsView: false,
-        onDeleteTimelineMilestone: jest.fn(),
-        onSaveTimelineMilestone: jest.fn(),
-      }),
-    );
-
-    expect(markup).toContain("task-queue-board");
-    expect(markup).toContain("milestone-board");
-    expect(markup).toContain("task-queue-board-column");
-    expect(markup).toContain("task-queue-board-card");
-    expect(markup).toContain("Not ready");
-    expect(markup).toContain("Ready");
-    expect(markup).toContain("In progress");
-    expect(markup).toContain("task-queue-zoom-controls");
-    expect(markup).toContain("task-queue-zoom-label");
-    expect(markup).toContain("100%");
-    expect(markup).toContain("--task-queue-board-column-width:calc(15.5rem * 1)");
-    expect((markup.match(/task-queue-board-card-due/g) ?? []).length).toBeGreaterThanOrEqual(2);
-    expect(markup).toContain("task-queue-board-card-type-badge");
-    expect(markup).toContain("Milestone type: Competition");
-  });
-
-  it("uses the shared compact zoom pill styling for milestone zoom", () => {
-    const markup = renderToStaticMarkup(
-      React.createElement(MilestonesView, {
-        activePersonFilter: [],
-        bootstrap: createBootstrap(),
-        isAllProjectsView: false,
-        onDeleteTimelineMilestone: jest.fn(),
-        onSaveTimelineMilestone: jest.fn(),
-      }),
-    );
-    const workspaceToolbarCss = readFileSync(
-      join(process.cwd(), "src/app/styles/shell/workspace/toolbars.css"),
-      "utf8",
-    );
-    const timelineToolbarCss = readFileSync(
-      join(process.cwd(), "src/app/styles/shell/timeline/timeline-toolbar-controls.css"),
-      "utf8",
-    );
-
-    expect(markup).toContain('class="task-queue-zoom-controls milestones-zoom-controls"');
-    expect(markup).toContain('class="icon-button task-queue-zoom-button milestones-zoom-button"');
-    expect(workspaceToolbarCss).toMatch(
-      /\.task-queue-zoom-controls\s*\{[\s\S]*gap:\s*0\.04rem;[\s\S]*min-height:\s*2\.05rem;[\s\S]*border-radius:\s*999px;/,
-    );
-    expect(timelineToolbarCss).not.toContain(".milestones-toolbar .milestones-zoom-controls");
-    expect(timelineToolbarCss).not.toContain(".milestones-toolbar .milestones-zoom-button");
-    expect(timelineToolbarCss).not.toContain(".milestones-toolbar .task-queue-zoom-label");
-  });
-
-  it("renders milestone type badges with the shared type palette", () => {
-    const markup = renderToStaticMarkup(
-      React.createElement(MilestonesView, {
-        activePersonFilter: [],
-        bootstrap: createBootstrap(),
-        isAllProjectsView: false,
-        onDeleteTimelineMilestone: jest.fn(),
-        onSaveTimelineMilestone: jest.fn(),
-      }),
-    );
-
-    expect(markup).toContain("milestone-type-pill");
-    expect(markup).toContain("Milestone type: Competition");
+  it("renders a chronological agenda with milestone readiness and visible detail actions", () => {
+    const markup = renderToStaticMarkup(React.createElement(MilestonesView, {
+      activePersonFilter: [], bootstrap: createBootstrap(), isAllProjectsView: false,
+      onDeleteTimelineMilestone: jest.fn(), onSaveTimelineMilestone: jest.fn(),
+    }));
+    expect(markup).toContain('aria-label="Milestone agenda"');
+    expect(markup).toContain("Regional</button>");
+    expect(markup).toContain("Design review</button>");
+    expect(markup).toContain("Blocked");
+    expect(markup).toContain("Competition");
+    expect(markup).not.toContain("task-queue-board");
   });
 
   it("renders milestone filter and sort controls as icon overlays inside search", () => {
@@ -260,6 +202,17 @@ describe("MilestonesView", () => {
     expect(markup).not.toContain('aria-label="Sort direction"');
     expect(markup).not.toContain('class="toolbar-filter-value">Filters</span>');
     expect(markup).not.toContain('class="toolbar-filter-value">Sort</span>');
+  });
+
+  it("uses wider icon-mode thresholds for milestone search on cramped topbars", () => {
+    const searchControlSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/milestones/MilestonesSearchControl.tsx"),
+      "utf8",
+    );
+
+    expect(searchControlSource).toContain("MILESTONE_SEARCH_COMPACT_SWITCH_WIDTH = 360 + MILESTONE_SEARCH_ACTION_OVERLAY_WIDTH");
+    expect(searchControlSource).toContain("MILESTONE_SEARCH_ICON_SWITCH_WIDTH = 260 + MILESTONE_SEARCH_ACTION_OVERLAY_WIDTH");
+    expect(searchControlSource).toContain("MILESTONE_SEARCH_ICON_RELEASE_WIDTH = 420 + MILESTONE_SEARCH_ACTION_OVERLAY_WIDTH");
   });
 
   it("does not toggle milestone sort direction as a side effect of opening the sort menu", () => {
@@ -297,7 +250,7 @@ describe("MilestonesView", () => {
 
     expect(markup).toContain("Regional");
     expect(markup).toContain("Design review");
-    expect(markup).toContain("Showing 2 milestones.");
+    expect((markup.match(/<time /g) ?? []).length).toBe(2);
   });
 
   it("falls back to the default style label when an milestone type is invalid", () => {

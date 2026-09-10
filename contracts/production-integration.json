@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "platform": {
+    "branch": "development",
+    "revision": "fbf974f0a1e318f940a026fc63a47c6a54f64f91"
+  },
+  "mobile": {
+    "branch": "development",
+    "revision": "908695fe2103d44666055497ea00c08a774b786e"
+  }
+}

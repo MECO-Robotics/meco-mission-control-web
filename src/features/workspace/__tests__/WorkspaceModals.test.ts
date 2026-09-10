@@ -1,5 +1,6 @@
 /// <reference types="jest" />
 
+import { readFileSync } from "node:fs";
 import { renderTaskModal } from "./support/WorkspaceModals.task.test.helpers";
 
 describe("TaskEditorModal", () => {
@@ -116,5 +117,30 @@ describe("TaskEditorModal", () => {
   it("omits task traceability text", () => {
     expect(renderTaskModal("create")).not.toContain("Task traceability");
     expect(renderTaskModal("edit")).not.toContain("Task traceability");
+  });
+
+  it("keeps task editor modal fields readable across responsive widths", () => {
+    const taskEditorModalCss = readFileSync(
+      "src/app/styles/responsive/layout/task-editor-modal.css",
+      "utf8",
+    );
+    const responsiveLayoutCss = readFileSync("src/app/styles/responsive/layout.css", "utf8");
+    const overviewCss = readFileSync(
+      "src/app/styles/views/taskDetails/overview/assigned.css",
+      "utf8",
+    );
+
+    expect(renderTaskModal("create")).toContain(
+      "task-details-section-grid task-details-overview-grid modal-wide",
+    );
+    expect(responsiveLayoutCss).toContain('@import url("./layout/task-editor-modal.css");');
+    expect(taskEditorModalCss).toContain(".task-editor-modal .task-details-modal");
+    expect(taskEditorModalCss).toContain("width: min(920px, calc(100vw - 2rem));");
+    expect(taskEditorModalCss).toContain("@media (max-width: 900px)");
+    expect(taskEditorModalCss).toContain(".task-editor-modal .field > span:first-child");
+    expect(overviewCss).toContain(
+      "grid-template-columns: minmax(8.5rem, 0.85fr) minmax(11rem, 1fr) minmax(13rem, 1.2fr);",
+    );
+    expect(overviewCss).toContain("grid-template-areas: none;");
   });
 });

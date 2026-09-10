@@ -1,5 +1,5 @@
-import type { QaReportPayload, ReportFindingPayload, ReportPayload, RiskPayload, TestResultPayload, WorkLogPayload } from "@/types/payloads";
-import type { ReportFindingRecord, ReportRecord, RiskRecord } from "@/types/recordsReporting";
+import type { QaReportPayload, ReportPayload, RiskPayload, TestResultPayload, WorkLogPayload } from "@/types/payloads";
+import type { ReportRecord, RiskRecord } from "@/types/recordsReporting";
 import type { WorkLogRecord } from "@/types/recordsExecution";
 import { requestItem } from "./common";
 
@@ -15,18 +15,6 @@ export function createReportRecord(
   onUnauthorized?: () => void,
 ) {
   return requestItem<ReportRecord, ReportPayload>("/reports", "POST", payload, onUnauthorized);
-}
-
-export function createReportFindingRecord(
-  payload: ReportFindingPayload,
-  onUnauthorized?: () => void,
-) {
-  return requestItem<ReportFindingRecord, ReportFindingPayload>(
-    "/report-findings",
-    "POST",
-    payload,
-    onUnauthorized,
-  );
 }
 
 export function createQaReportRecord(

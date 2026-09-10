@@ -32,8 +32,8 @@
     align-items: flex-start;
   }
 
-  .task-calendar-toolbar-actions {
-    flex-wrap: wrap;
+  .task-calendar-month-controls {
+    flex-wrap: nowrap;
   }
 
   .task-calendar-filter-controls {

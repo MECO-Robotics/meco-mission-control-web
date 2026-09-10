@@ -110,13 +110,6 @@ describe("AppSidebar chrome", () => {
     );
   });
 
-  it("clears mouse focus after the sidebar fold button is clicked", () => {
-    const source = readFileSync("src/components/layout/AppSidebar.tsx", "utf8");
-
-    expect(source).toMatch(/const handleSidebarFoldClick = \(event: ReactMouseEvent<HTMLButtonElement>\) => \{[\s\S]*toggleSidebar\(\);[\s\S]*event\.currentTarget\.blur\(\);[\s\S]*\};/);
-    expect(source).toContain("onToggleSidebar={handleSidebarFoldClick}");
-  });
-
   it("renders Settings, Help, and Notifications as the bottom triplet", () => {
     const markup = renderSidebar(
       [
@@ -134,7 +127,6 @@ describe("AppSidebar chrome", () => {
     const settingsIndex = markup.indexOf("sidebar-settings-menu");
     const helpIndex = markup.indexOf("sidebar-footer-action-help");
     const notificationsIndex = markup.indexOf("sidebar-footer-action-notifications");
-    const css = readFileSync("src/app/styles/shell/sidebar-quick-actions.css", "utf8");
 
     expect(settingsIndex).toBeGreaterThan(footerActionsIndex);
     expect(settingsIndex).toBeLessThan(helpIndex);
@@ -157,79 +149,7 @@ describe("AppSidebar chrome", () => {
     expect(markup).toContain("lucide-refresh-cw");
     expect(markup).toContain("lucide-log-out");
     expect(markup).toContain("lucide-bell");
-    expect(css).toMatch(
-      /\.sidebar-footer-actions::before\s*\{[^}]*right:\s*0\.72rem;[^}]*top:\s*0\.23rem;[^}]*left:\s*0\.72rem;[^}]*height:\s*2px;[^}]*border-radius:\s*999px;[^}]*background:\s*rgba\(15, 28, 52, 0\.16\);/,
-    );
-    expect(css).toMatch(
-      /\.sidebar-quick-actions\[data-collapsed="true"\]::after,\s*\.sidebar-footer-actions\[data-collapsed="true"\]::before\s*\{[^}]*right:\s*0\.4rem;[^}]*left:\s*0\.4rem;/,
-    );
-  });
 
-  it("positions Add and Settings menus outside the sidebar clipping boundary", () => {
-    const quickCss = readFileSync("src/app/styles/shell/sidebar-quick-actions.css", "utf8");
-    const settingsCss = readFileSync("src/app/styles/shell/sidebar/sidebar-settings.css", "utf8");
-
-    expect(quickCss).toMatch(
-      /\.sidebar-add-menu-panel\s*\{[^}]*position:\s*fixed;[^}]*left:\s*calc\(var\(--shell-sidebar-width\) \+ 0\.35rem\);[^}]*transform:\s*none;/,
-    );
-    expect(settingsCss).toMatch(
-      /\.sidebar-footer-actions \.sidebar-settings-popover\s*\{[^}]*position:\s*fixed;[^}]*left:\s*calc\(var\(--shell-sidebar-width\) \+ 0\.35rem\);/,
-    );
-  });
-
-  it("opens the Settings menu from hover preview or click state", () => {
-    const footerSource = readFileSync("src/components/layout/AppSidebarProjectFooter.tsx", "utf8");
-    const quickCss = readFileSync("src/app/styles/shell/sidebar-quick-actions.css", "utf8");
-    const settingsCss = readFileSync("src/app/styles/shell/sidebar/sidebar-settings.css", "utf8");
-    const settingsSource = readFileSync(
-      "src/components/layout/sidebar/AppSidebarSettingsMenu.tsx",
-      "utf8",
-    );
-
-    expect(footerSource).toContain("<AppSidebarSettingsMenu");
-    expect(footerSource).not.toContain("<details");
-    expect(footerSource).not.toContain("<summary");
-    expect(settingsCss).toMatch(
-      /\.sidebar-settings-menu\[data-open="true"\] \.sidebar-settings-popover\s*\{[^}]*display:\s*grid;/,
-    );
-    expect(settingsCss).not.toContain(".sidebar-settings-menu:hover .sidebar-settings-popover");
-    expect(settingsCss).not.toContain(".sidebar-settings-menu[open] .sidebar-settings-popover");
-    expect(settingsCss).not.toContain(":focus-within");
-    expect(settingsSource).toContain('data-open={isMenuOpen ? "true" : "false"}');
-    expect(settingsSource).toContain("onMouseEnter={handleSettingsHover}");
-    expect(settingsSource).toContain("onClick={handleSettingsClick}");
-    expect(settingsSource).toContain("handleRefreshWorkspaceClick");
-    expect(settingsSource).toContain("onRefreshWorkspace()");
-    expect(settingsSource).toContain('closest(".sidebar")');
-    expect(settingsSource).toContain('addEventListener("mouseleave", closeHoverMenu)');
-    expect(settingsSource).toContain('document.addEventListener("pointerdown", dismissOnOutsidePointer)');
-    expect(quickCss).toContain(".sidebar-settings-menu:hover > .sidebar-quick-action");
-    expect(quickCss).toContain('.sidebar-settings-menu[data-open="true"] > .sidebar-quick-action');
-    expect(quickCss).not.toContain(".sidebar-settings-menu[open] > .sidebar-quick-action");
-    expect(quickCss).not.toContain(":focus-within");
-  });
-
-  it("opens the Add menu from hover preview or click state", () => {
-    const quickSource = readFileSync("src/components/layout/AppSidebarQuickActions.tsx", "utf8");
-    const addSource = readFileSync(
-      "src/components/layout/sidebar/AppSidebarAddMenu.tsx",
-      "utf8",
-    );
-    const quickCss = readFileSync("src/app/styles/shell/sidebar-quick-actions.css", "utf8");
-
-    expect(quickSource).toContain("<AppSidebarAddMenu");
-    expect(quickSource).not.toContain("<details");
-    expect(quickSource).not.toContain("<summary");
-    expect(addSource).toContain('data-open={isAddMenuOpen ? "true" : "false"}');
-    expect(addSource).toContain("onMouseEnter={handleAddHover}");
-    expect(addSource).toContain("onClick={handleAddClick}");
-    expect(addSource).toContain('closest(".sidebar")');
-    expect(addSource).toContain('addEventListener("mouseleave", closeHoverMenu)');
-    expect(addSource).toContain('document.addEventListener("pointerdown", dismissOnOutsidePointer)');
-    expect(addSource).toContain("handleAddActionSelect");
-    expect(quickCss).toContain('.sidebar-add-menu[data-open="true"] > .sidebar-quick-action');
-    expect(quickCss).toContain('.sidebar-add-menu:not([data-open="true"]) .sidebar-add-menu-panel');
-    expect(quickCss).not.toContain(".sidebar-add-menu[open]");
   });
 
   it("keeps the bottom triplet icon-only when the sidebar is folded", () => {

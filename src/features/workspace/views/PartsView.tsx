@@ -1,168 +1,42 @@
-﻿import { useMemo, useState } from "react";
-
+import { useRememberedViewState } from "@/features/workspace/shared/navigation/WorkspaceViewMemory";
+import { useMemo, useState } from "react";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
+import { ModalDialog } from "@/components/ModalDialog";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
-import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
-import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
-
 import { filterPartDefinitions } from "./parts/partsViewData";
 import { PartsDefinitionSection } from "./parts/PartsDefinitionSection";
-import { PartsInstanceSection } from "./parts/PartsInstanceSection";
 import { PartsToolbar } from "./parts/PartsToolbar";
 import type { PartsViewProps } from "./parts/partsViewTypes";
-
 export { filterPartDefinitions } from "./parts/partsViewData";
 
-export function PartsView({
-  bootstrap,
-  openCreatePartDefinitionModal,
-  openEditPartDefinitionModal,
-  mechanismsById,
-  partDefinitionsById,
-  subsystemsById,
-}: PartsViewProps) {
-  const [partSearch, setPartSearch] = useState("");
-  const [showArchivedPartDefinitions, setShowArchivedPartDefinitions] = useState(false);
-  const [partSubsystem, setPartSubsystem] = useState<string[]>([]);
-  const [partMechanism, setPartMechanism] = useState<string[]>([]);
-  const [partStatus, setPartStatus] = useState<string[]>([]);
-
-  const filteredPartDefinitions = useMemo(
-    () =>
-      filterPartDefinitions({
-        bootstrap,
-        partSearch,
-        partStatus,
-        partSubsystem,
-        showArchivedPartDefinitions,
-      }),
-    [bootstrap, partSearch, partStatus, partSubsystem, showArchivedPartDefinitions],
-  );
-
-  const filteredPartInstances = useMemo(() => {
-    const search = partSearch.toLowerCase();
-    return bootstrap.partInstances.filter((partInstance) => {
-      const definition = partDefinitionsById[partInstance.partDefinitionId];
-      const mechanismName = partInstance.mechanismId
-        ? mechanismsById[partInstance.mechanismId]?.name ?? ""
-        : "";
-      const matchesSearch =
-        !search ||
-        partInstance.name.toLowerCase().includes(search) ||
-        definition?.name.toLowerCase().includes(search) ||
-        definition?.partNumber.toLowerCase().includes(search) ||
-        mechanismName.toLowerCase().includes(search);
-      const matchesSubsystem = partSubsystem.length === 0 || partSubsystem.includes(partInstance.subsystemId);
-      const matchesMechanism =
-        partMechanism.length === 0 || (partInstance.mechanismId ? partMechanism.includes(partInstance.mechanismId) : false);
-      const matchesStatus = partStatus.length === 0 || partStatus.includes(partInstance.status);
-      return matchesSearch && matchesSubsystem && matchesMechanism && matchesStatus;
-    });
-  }, [
-    bootstrap.partInstances,
-    mechanismsById,
-    partDefinitionsById,
-    partMechanism,
-    partSearch,
-    partStatus,
-    partSubsystem,
-  ]);
-
-  const partDefinitionPagination = useWorkspacePagination(filteredPartDefinitions);
-  const partInstancePagination = useWorkspacePagination(filteredPartInstances);
-  const partDefinitionFilterMotionClass = useFilterChangeMotionClass([
-    partSearch,
-    partStatus,
-    partSubsystem,
-    showArchivedPartDefinitions,
-  ]);
-  const partInstanceFilterMotionClass = useFilterChangeMotionClass([
-    partMechanism,
-    partSearch,
-    partStatus,
-    partSubsystem,
-  ]);
-
-  const partDefinitionPage = {
-    onPageChange: partDefinitionPagination.setPage,
-    onPageSizeChange: partDefinitionPagination.setPageSize,
-    page: partDefinitionPagination.page,
-    pageSize: partDefinitionPagination.pageSize,
-    pageSizeOptions: partDefinitionPagination.pageSizeOptions,
-    rangeEnd: partDefinitionPagination.rangeEnd,
-    rangeStart: partDefinitionPagination.rangeStart,
-    totalItems: partDefinitionPagination.totalItems,
-    totalPages: partDefinitionPagination.totalPages,
-  };
-
-  const partInstancePage = {
-    onPageChange: partInstancePagination.setPage,
-    onPageSizeChange: partInstancePagination.setPageSize,
-    page: partInstancePagination.page,
-    pageSize: partInstancePagination.pageSize,
-    pageSizeOptions: partInstancePagination.pageSizeOptions,
-    rangeEnd: partInstancePagination.rangeEnd,
-    rangeStart: partInstancePagination.rangeStart,
-    totalItems: partInstancePagination.totalItems,
-    totalPages: partInstancePagination.totalPages,
-  };
-
-  return (
-    <section className={`panel dense-panel part-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
-      <AppTopbarSlotPortal slot="controls">
-        <PartsToolbar
-          bootstrap={bootstrap}
-          partSearch={partSearch}
-          partStatus={partStatus}
-          partSubsystem={partSubsystem}
-          setPartSearch={setPartSearch}
-          setPartStatus={setPartStatus}
-          setPartSubsystem={setPartSubsystem}
-          setShowArchivedPartDefinitions={setShowArchivedPartDefinitions}
-          showArchivedPartDefinitions={showArchivedPartDefinitions}
-        />
-      </AppTopbarSlotPortal>
-
-      <div className="panel-header compact-header">
-        <div className="queue-section-header">
-          <h2>Part manager</h2>
-          <p className="section-copy">
-            Reusable part definitions and subsystem-specific part instances for traceability.
-          </p>
-        </div>
-      </div>
-
-      <WorkspaceFloatingAddButton
-        ariaLabel="Add part definition"
-        onClick={openCreatePartDefinitionModal}
-        title="Add part definition"
-        tutorialTarget="create-part-button"
-      />
-
-      <PartsDefinitionSection
-        bootstrap={bootstrap}
-        filteredPartDefinitions={partDefinitionPagination.pageItems}
-        onEditPartDefinition={openEditPartDefinitionModal}
-        partDefinitionFilterMotionClass={partDefinitionFilterMotionClass}
-        pageChangeHandlers={partDefinitionPage}
-      />
-
-      <PartsInstanceSection
-        bootstrap={bootstrap}
-        filteredPartInstances={partInstancePagination.pageItems}
-        mechanismsById={mechanismsById}
-        partDefinitionsById={partDefinitionsById}
-        partInstanceFilterMotionClass={partInstanceFilterMotionClass}
-        partMechanism={partMechanism}
-        partStatus={partStatus}
-        partSubsystem={partSubsystem}
-        setPartMechanism={setPartMechanism}
-        setPartStatus={setPartStatus}
-        setPartSubsystem={setPartSubsystem}
-        subsystemsById={subsystemsById}
-        pageChangeHandlers={partInstancePage}
-      />
-    </section>
-  );
+export function PartsView({ bootstrap, openCreatePartDefinitionModal, openEditPartDefinitionModal, openEditPartInstanceModal, openCreatePartInstanceModal, mechanismsById, subsystemsById }: PartsViewProps) {
+  const [partSearch, setPartSearch] = useRememberedViewState("parts.partSearch", "");
+  const [showArchivedPartDefinitions, setShowArchivedPartDefinitions] = useRememberedViewState("parts.showArchivedPartDefinitions", false);
+  const [partSubsystem, setPartSubsystem] = useRememberedViewState<string[]>("parts.partSubsystem", []);
+  const [partStatus, setPartStatus] = useRememberedViewState<string[]>("parts.partStatus", []);
+  const [mapping, setMapping] = useRememberedViewState("parts.mapping", "all");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [mechanismId, setMechanismId] = useState("");
+  const filtered = useMemo(() => filterPartDefinitions({ bootstrap, partSearch, partStatus, partSubsystem, showArchivedPartDefinitions }).filter(part => mapping === "all" || bootstrap.partInstances.some(instance => instance.partDefinitionId === part.id) === (mapping === "mapped")), [bootstrap, partSearch, partStatus, partSubsystem, showArchivedPartDefinitions, mapping]);
+  const pagination = useWorkspacePagination(filtered);
+  const selected = bootstrap.partDefinitions.find(part => part.id === selectedId);
+  const instances = bootstrap.partInstances.filter(instance => instance.partDefinitionId === selectedId);
+  const hasFilters = Boolean(partSearch || partStatus.length || partSubsystem.length || mapping !== "all");
+  return <section className={`panel dense-panel part-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
+    <AppTopbarSlotPortal slot="controls"><div className="panel-actions filter-toolbar">
+      <PartsToolbar bootstrap={bootstrap} partSearch={partSearch} partStatus={partStatus} partSubsystem={partSubsystem} setPartSearch={setPartSearch} setPartStatus={setPartStatus} setPartSubsystem={setPartSubsystem} setShowArchivedPartDefinitions={setShowArchivedPartDefinitions} showArchivedPartDefinitions={showArchivedPartDefinitions} />
+      <button className="primary-action" onClick={openCreatePartDefinitionModal} data-tutorial-target="create-part-button" type="button">Add part</button>
+    </div></AppTopbarSlotPortal>
+    <div className="workspace-presentation-controls"><label>Allocation <select aria-label="Part allocation" value={mapping} onChange={event => setMapping(event.target.value)}><option value="all">All parts</option><option value="mapped">Mapped</option><option value="unmapped">Needs mapping</option></select></label><span>{filtered.length} definitions</span></div>
+    <PartsDefinitionSection bootstrap={bootstrap} filteredPartDefinitions={pagination.pageItems} hasActiveFilters={hasFilters} hasHiddenArchivedPartDefinitions={!showArchivedPartDefinitions && !hasFilters && bootstrap.partDefinitions.length > 0 && filtered.length === 0} onCreatePartDefinition={openCreatePartDefinitionModal} onEditPartDefinition={part => setSelectedId(part.id)} partDefinitionFilterMotionClass="" pageChangeHandlers={{ onPageChange: pagination.setPage, onPageSizeChange: pagination.setPageSize, page: pagination.page, pageSize: pagination.pageSize, pageSizeOptions: pagination.pageSizeOptions, rangeEnd: pagination.rangeEnd, rangeStart: pagination.rangeStart, totalItems: pagination.totalItems, totalPages: pagination.totalPages }} />
+    {selected ? <ModalDialog label={selected.name} onClose={() => setSelectedId(null)} className="modal-scrim workspace-detail-dialog"><section className="modal-card workspace-detail-card">
+      <div className="workspace-section-heading"><h2>{selected.name}</h2><button className="ghost-button" onClick={() => setSelectedId(null)} type="button">Close</button></div>
+      <p>{selected.partNumber} · Revision {selected.revision} · {selected.type}</p><p>{selected.description}</p>
+      <button className="ghost-button" onClick={() => { setSelectedId(null); openEditPartDefinitionModal(selected); }} type="button">Edit definition</button>
+      <h3>Installed instances</h3>
+      {instances.length ? <ul className="workspace-record-list">{instances.map(instance => <li key={instance.id}><div><strong>{instance.name}</strong><small>{subsystemsById[instance.subsystemId]?.name} · {instance.mechanismId ? mechanismsById[instance.mechanismId]?.name : "No mechanism"} · {instance.quantity} · {instance.status}</small></div><button className="ghost-button" type="button" onClick={() => { setSelectedId(null); openEditPartInstanceModal?.(instance); }}>Edit instance</button></li>)}</ul> : <p>No instances yet. Choose a mechanism to allocate this definition.</p>}
+      {openCreatePartInstanceModal ? <div className="workspace-presentation-controls"><label>Mechanism <select aria-label="Allocate to mechanism" value={mechanismId} onChange={event => setMechanismId(event.target.value)}><option value="">Choose mechanism</option>{bootstrap.mechanisms.map(mechanism => <option key={mechanism.id} value={mechanism.id}>{subsystemsById[mechanism.subsystemId]?.name} / {mechanism.name}</option>)}</select></label><button className="primary-action" disabled={!mechanismsById[mechanismId]} type="button" onClick={() => { const mechanism = mechanismsById[mechanismId]; if (mechanism) { setSelectedId(null); openCreatePartInstanceModal(mechanism, selected.id); } }}>Add instance</button></div> : null}
+    </section></ModalDialog> : null}
+  </section>;
 }

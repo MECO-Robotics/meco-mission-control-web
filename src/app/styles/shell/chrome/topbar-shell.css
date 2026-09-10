@@ -43,10 +43,10 @@
   justify-content: flex-start;
   height: 100%;
   width: auto;
-  max-width: clamp(8rem, 17vw, 15rem);
+  max-width: none;
   min-width: 0;
   position: relative;
-  flex: 0 0 clamp(8rem, 17vw, 15rem);
+  flex: 0 0 auto;
   border-right: 0;
   padding: 0.25rem 0.55rem;
 }
@@ -57,55 +57,6 @@
   gap: 0.32rem;
   width: 100%;
   min-width: 0;
-}
-
-.app-topbar-favorite-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.65rem;
-  height: 1.65rem;
-  flex: 0 0 1.65rem;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--text-copy);
-  cursor: pointer;
-  transition:
-    background-color 0.18s ease,
-    border-color 0.18s ease,
-    color 0.18s ease;
-}
-
-.app-topbar-favorite-button:hover,
-.app-topbar-favorite-button:focus-visible {
-  outline: none;
-  background: var(--bg-row-alt);
-  border-color: rgba(15, 28, 52, 0.08);
-  color: var(--text-title);
-}
-
-.app-topbar-favorite-button[data-active="true"] {
-  background: rgba(217, 119, 6, 0.12);
-  border-color: rgba(217, 119, 6, 0.28);
-  color: #d97706;
-}
-
-.app-topbar-favorite-button:disabled,
-.app-topbar-favorite-button:disabled:hover,
-.app-topbar-favorite-button:disabled:focus-visible {
-  outline: none;
-  background: transparent;
-  border-color: transparent;
-  color: rgba(100, 116, 139, 0.7);
-  cursor: default;
-  opacity: 1;
-}
-
-.page-shell.dark-mode .app-topbar-favorite-button:disabled,
-.page-shell.dark-mode .app-topbar-favorite-button:disabled:hover,
-.page-shell.dark-mode .app-topbar-favorite-button:disabled:focus-visible {
-  color: rgba(148, 163, 184, 0.58);
 }
 
 .app-topbar-view-title h1 {
@@ -208,3 +159,12 @@
   position: relative;
 }
 
+
+.local-workspace-status { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; font-size: 0.75rem; }
+.local-workspace-status button { min-height: 32px; padding: 0.25rem 0.5rem; font-size: inherit; }
+@media (max-width: 700px) {
+  .page-shell:has(.local-workspace-status) { --shell-topbar-height: 104px; }
+  .local-workspace-status button { min-height: 44px; }
+  .app-topbar-view-title:has(.local-workspace-status) { flex-wrap: wrap; }
+  .local-workspace-status { flex-basis: 100%; }
+}

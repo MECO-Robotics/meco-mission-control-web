@@ -1,7 +1,7 @@
-import { useEffect, useState, type MutableRefObject } from "react";
+import { useEffect, useRef, useState, type MutableRefObject } from "react";
 
 import { getInteractiveTutorialStepError } from "./helpers/interactiveTutorialStepError";
-import { hasInteractiveTutorialAlternativeOption, isInteractiveTutorialCreateStepModalInteraction, isInteractiveTutorialStepComplete } from "./helpers/interactiveTutorialStepCompletion";
+import { isInteractiveTutorialStepComplete } from "./helpers/interactiveTutorialStepCompletion";
 import { isInteractiveTutorialCreationStep, isInteractiveTutorialDropdownStep, isInteractiveTutorialSearchStep } from "./helpers/interactiveTutorialStepGroups";
 import type { InteractiveTutorialStep, InteractiveTutorialStepCompletionContext } from "./interactiveTutorialTypes";
 import { useInteractiveTutorialLifecycleCreationAdvance } from "./useInteractiveTutorialLifecycleCreationAdvance";
@@ -13,7 +13,6 @@ interface UseInteractiveTutorialLifecycleInteractionsOptions {
   tutorialProjectName: string | null;
   onAdvance: () => void;
   onClose: () => void;
-  cardRef: MutableRefObject<HTMLElement | null>;
   targetRef: MutableRefObject<HTMLElement | null>;
   stepBaselineLabelRef: MutableRefObject<string | null>;
 }
@@ -25,10 +24,11 @@ export function useInteractiveTutorialLifecycleInteractions({
   tutorialProjectName,
   onAdvance,
   onClose,
-  cardRef,
   targetRef,
   stepBaselineLabelRef,
 }: UseInteractiveTutorialLifecycleInteractionsOptions) {
+  const latestContext = useRef(stepCompletionContext);
+  latestContext.current = stepCompletionContext;
   const [stepError, setStepError] = useState<string | null>(null);
 
   useInteractiveTutorialLifecycleCreationAdvance({
@@ -43,59 +43,31 @@ export function useInteractiveTutorialLifecycleInteractions({
       return;
     }
 
-    const context = {
-      ...stepCompletionContext,
-      stepBaselineLabel: stepBaselineLabelRef.current,
+    const timeouts = new Set<number>();
+    const schedule = (callback: () => void, delay: number) => {
+      const id = window.setTimeout(() => { timeouts.delete(id); callback(); }, delay);
+      timeouts.add(id);
     };
+    const completionContext = () => ({ ...latestContext.current, stepBaselineLabel: stepBaselineLabelRef.current });
 
     const handleClickCapture = (milestone: MouseEvent) => {
       const targetNode = milestone.target as Node | null;
-      if (!targetNode || cardRef.current?.contains(targetNode)) {
+      const element = targetNode instanceof Element ? targetNode : targetNode?.parentElement;
+      if (!targetNode || element?.closest(".interactive-tutorial-card")) {
         return;
       }
 
-      const highlightedTarget = targetRef.current;
-      const isTargetClick = highlightedTarget?.contains(targetNode);
-
-      if (!isTargetClick) {
-        if (isInteractiveTutorialCreateStepModalInteraction(currentStep, targetNode)) {
-          return;
-        }
-
-        milestone.preventDefault();
-        milestone.stopPropagation();
-        return;
-      }
-
+      // The tutorial guides rather than traps input: popups, editor close buttons,
+      // and keyboard-accessible controls remain usable between steps.
       if (isInteractiveTutorialDropdownStep(currentStep)) {
-        const selectionComplete = isInteractiveTutorialStepComplete(currentStep, context);
-        if (
-          highlightedTarget instanceof HTMLSelectElement &&
-          selectionComplete &&
-          !hasInteractiveTutorialAlternativeOption(
-            currentStep,
-            highlightedTarget,
-            currentStep.id === "season" ? context.tutorialSeasonId : context.tutorialProjectId,
-          )
-        ) {
-          setStepError(null);
-          onAdvance();
-          return;
+        if (element?.closest('[data-tutorial-target="season-select"], button[data-tutorial-target="project-select"]')) {
+          schedule(() => {
+            if (isInteractiveTutorialStepComplete(currentStep, completionContext())) {
+              setStepError(null);
+              onAdvance();
+            } else setStepError(getInteractiveTutorialStepError(currentStep, { ...completionContext(), tutorialSeasonName, tutorialProjectName }));
+          }, 100);
         }
-
-        if (!selectionComplete) {
-          setStepError(
-            getInteractiveTutorialStepError(currentStep, {
-              tutorialSeasonId: context.tutorialSeasonId,
-              tutorialProjectId: context.tutorialProjectId,
-              tutorialSeasonName,
-              tutorialProjectName,
-            }),
-          );
-          return;
-        }
-
-        setStepError(null);
         return;
       }
 
@@ -104,8 +76,9 @@ export function useInteractiveTutorialLifecycleInteractions({
         return;
       }
 
-      window.setTimeout(() => {
-        if (isInteractiveTutorialStepComplete(currentStep, context)) {
+      schedule(() => {
+        const context = completionContext();
+        if (isInteractiveTutorialStepComplete(currentStep, completionContext())) {
           setStepError(null);
           onAdvance();
           return;
@@ -132,8 +105,9 @@ export function useInteractiveTutorialLifecycleInteractions({
         return;
       }
 
-      window.setTimeout(() => {
-        if (isInteractiveTutorialStepComplete(currentStep, context)) {
+      schedule(() => {
+        const context = completionContext();
+        if (isInteractiveTutorialStepComplete(currentStep, completionContext())) {
           setStepError(null);
           onAdvance();
           return;
@@ -160,8 +134,9 @@ export function useInteractiveTutorialLifecycleInteractions({
         return;
       }
 
-      window.setTimeout(() => {
-        if (isInteractiveTutorialStepComplete(currentStep, context)) {
+      schedule(() => {
+        const context = completionContext();
+        if (isInteractiveTutorialStepComplete(currentStep, completionContext())) {
           setStepError(null);
           onAdvance();
           return;
@@ -191,18 +166,17 @@ export function useInteractiveTutorialLifecycleInteractions({
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
+      timeouts.forEach((id) => window.clearTimeout(id));
       document.removeEventListener("click", handleClickCapture, true);
       document.removeEventListener("change", handleChangeCapture, true);
     document.removeEventListener("input", handleInputCapture, true);
     window.removeEventListener("keydown", handleKeyDown);
   };
   }, [
-    cardRef,
     currentStep,
     onAdvance,
     onClose,
     stepBaselineLabelRef,
-    stepCompletionContext,
     targetRef,
     tutorialProjectName,
     tutorialSeasonName,

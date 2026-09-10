@@ -1,4 +1,4 @@
-import { useMemo, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 
 import type { TaskRecord } from "@/types/recordsExecution";
 import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
@@ -91,6 +91,94 @@ export function WorkLogsActivitySection({
       ) as Record<string, WorkLogsViewState["activityActions"]>,
     [activityColumns],
   );
+  const [focusedColumnId, setFocusedColumnId] = useState<string | null>(null);
+  const focusedColumn = useMemo(
+    () => activityColumns.find((column) => column.id === focusedColumnId) ?? null,
+    [activityColumns, focusedColumnId],
+  );
+  const focusedActions = focusedColumn?.actions ?? [];
+
+  const renderActionCard = (action: WorkLogsViewState["activityActions"][number]) => {
+    const task = action.taskId ? taskById[action.taskId] : undefined;
+    const participantNames = action.memberIds
+      .map((memberId) => membersById[memberId]?.name)
+      .filter((name): name is string => Boolean(name));
+    const actorName = action.actorMemberId
+      ? membersById[action.actorMemberId]?.name ?? null
+      : null;
+
+    return (
+      <article className="task-queue-board-card worklog-activity-card">
+        <div className="worklog-activity-head">
+          <strong className="font-mono">{formatActionTimestamp(action.timestamp)}</strong>
+          <strong className="font-mono worklog-activity-operation">
+            {action.operation.toUpperCase()}
+          </strong>
+        </div>
+        <div className="worklog-summary-task-meta">
+          {task ? (
+            <button
+              className="worklog-summary-task-link"
+              onClick={() => openEditTaskModal(task)}
+              type="button"
+            >
+              {task.title}
+            </button>
+          ) : (
+            <span className="worklog-summary-list-label">
+              {formatActivityLabel(action.entityType)}
+            </span>
+          )}
+          <small>{resolveSubsystemLabel(action, task, subsystemsById)}</small>
+        </div>
+        <p className="worklog-activity-meta">{action.message}</p>
+        <p className="worklog-activity-meta">
+          {actorName ? `By: ${actorName}` : "By: System"}
+          {participantNames.length > 0 ? ` | People: ${participantNames.join(", ")}` : ""}
+        </p>
+      </article>
+    );
+  };
+
+  if (focusedColumnId !== null) {
+    return (
+      <>
+        {description ? <p className="section-copy filter-copy">{description}</p> : null}
+        {groupingControls ? (
+          <div className="worklog-activity-board-controls">{groupingControls}</div>
+        ) : null}
+        <section className="task-queue-board-focused" data-board-state={focusedColumnId}>
+          <div className="task-queue-board-focused-shell">
+            <header className="task-queue-board-focused-header">
+              <div className="task-queue-board-focused-title-stack">
+                <h3 className="task-queue-board-focused-title">
+                  <span>{focusedColumn?.label ?? "Activity"}</span>
+                </h3>
+                <span className="task-queue-board-focused-count">{focusedActions.length}</span>
+              </div>
+              <button
+                aria-label="Exit focused column view"
+                className="task-queue-board-focused-exit"
+                onClick={() => setFocusedColumnId(null)}
+                type="button"
+              >
+                {"\u00d7"}
+              </button>
+            </header>
+            <div className="task-queue-board-priority-grid worklog-activity-focused-grid">
+              {focusedActions.length > 0 ? (
+                focusedActions.map((action) => (
+                  <div key={action.id}>{renderActionCard(action)}</div>
+                ))
+              ) : (
+                <p className="empty-state">No recent activity in this column.</p>
+              )}
+            </div>
+          </div>
+        </section>
+      </>
+    );
+  }
 
   if (actions.length === 0) {
     return (
@@ -110,7 +198,7 @@ export function WorkLogsActivitySection({
       <KanbanScrollFrame>
         <KanbanColumns
           boardClassName="worklog-activity-board"
-          columnBodyClassName="task-queue-board-column-body"
+          columnBodyClassName="task-queue-board-column-body worklog-activity-column-body"
           columnClassName="task-queue-board-column"
           columnCountClassName="task-queue-board-column-count"
           columnEmptyClassName="task-queue-board-column-empty"
@@ -122,46 +210,9 @@ export function WorkLogsActivitySection({
           }))}
           emptyLabel="No activity"
           itemsByState={actionsByColumn}
+          onColumnBodyClick={(state) => setFocusedColumnId(state)}
           renderItem={(action) => {
-            const task = action.taskId ? taskById[action.taskId] : undefined;
-            const participantNames = action.memberIds
-              .map((memberId) => membersById[memberId]?.name)
-              .filter((name): name is string => Boolean(name));
-            const actorName = action.actorMemberId
-              ? membersById[action.actorMemberId]?.name ?? null
-              : null;
-
-            return (
-              <article className="task-queue-board-card worklog-activity-card" key={action.id}>
-                <div className="worklog-activity-head">
-                  <strong className="font-mono">{formatActionTimestamp(action.timestamp)}</strong>
-                  <strong className="font-mono worklog-activity-operation">
-                    {action.operation.toUpperCase()}
-                  </strong>
-                </div>
-                <div className="worklog-summary-task-meta">
-                  {task ? (
-                    <button
-                      className="worklog-summary-task-link"
-                      onClick={() => openEditTaskModal(task)}
-                      type="button"
-                    >
-                      {task.title}
-                    </button>
-                  ) : (
-                    <span className="worklog-summary-list-label">
-                      {formatActivityLabel(action.entityType)}
-                    </span>
-                  )}
-                  <small>{resolveSubsystemLabel(action, task, subsystemsById)}</small>
-                </div>
-                <p className="worklog-activity-meta">{action.message}</p>
-                <p className="worklog-activity-meta">
-                  {actorName ? `By: ${actorName}` : "By: System"}
-                  {participantNames.length > 0 ? ` | People: ${participantNames.join(", ")}` : ""}
-                </p>
-              </article>
-            );
+            return renderActionCard(action);
           }}
         />
       </KanbanScrollFrame>

@@ -8,26 +8,24 @@ import {
   MECO_MAIN_LOGO_WHITE_SRC,
   MECO_MAIN_LOGO_WIDTH,
 } from "@/lib/branding";
-import { Search, Star, StarOff } from "lucide-react";
 
 import { APP_TOPBAR_SLOT_IDS } from "./AppTopbarSlotPortal";
 
 interface AppTopbarProps {
+  localMode?: "demo" | "tutorial" | null;
+  onResetDemo?: () => void;
   activeViewLabel: string;
-  isActiveViewFavorite: boolean;
   isDarkMode: boolean;
   isSidebarCollapsed: boolean;
-  onToggleActiveViewFavorite: (() => void) | null;
 }
 
 export function AppTopbar({
+  localMode,
+  onResetDemo,
   activeViewLabel,
-  isActiveViewFavorite,
   isDarkMode,
   isSidebarCollapsed,
-  onToggleActiveViewFavorite,
 }: AppTopbarProps) {
-  const canToggleFavorite = Boolean(onToggleActiveViewFavorite);
   const topbarLogo = isSidebarCollapsed
     ? {
         alt: "MECO compact team logo",
@@ -43,12 +41,6 @@ export function AppTopbar({
         variant: "full",
         width: MECO_MAIN_LOGO_WIDTH,
       };
-  const favoriteLabel = canToggleFavorite
-    ? isActiveViewFavorite
-      ? `Remove ${activeViewLabel} from favorites`
-      : `Add ${activeViewLabel} to favorites`
-    : `${activeViewLabel} cannot be favorited`;
-  const FavoriteIcon = canToggleFavorite ? Star : StarOff;
 
   return (
     <header className="topbar app-topbar" data-collapsed={isSidebarCollapsed ? "true" : "false"}>
@@ -66,45 +58,19 @@ export function AppTopbar({
       </div>
       <div className="app-topbar-left">
         <div className="app-topbar-view-title">
-          <button
-            aria-label={favoriteLabel}
-            aria-pressed={isActiveViewFavorite}
-            className="app-topbar-favorite-button"
-            data-active={isActiveViewFavorite ? "true" : "false"}
-            data-enabled={canToggleFavorite ? "true" : "false"}
-            disabled={!canToggleFavorite}
-            onClick={onToggleActiveViewFavorite ?? undefined}
-            title={favoriteLabel}
-            type="button"
-          >
-            <FavoriteIcon
-              aria-hidden="true"
-              fill={isActiveViewFavorite ? "currentColor" : "none"}
-              size={15}
-              strokeWidth={2}
-            />
-          </button>
           <h1>{activeViewLabel}</h1>
+          {localMode ? (
+            <div className="local-workspace-status">
+              <span title="Changes stay in this browser tab and are never synced.">{localMode === "tutorial" ? "Local tutorial" : "Local demo"} · no sync</span>
+              {localMode === "demo" ? <button type="button" className="secondary-action" onClick={onResetDemo}>Reset demo</button> : null}
+            </div>
+          ) : null}
         </div>
       </div>
       <div className="app-topbar-search-slot">
         <div className="app-topbar-controls-host" id={APP_TOPBAR_SLOT_IDS.controls} />
         <div className="app-topbar-search-host" id={APP_TOPBAR_SLOT_IDS.search} />
-        <label
-          className="app-topbar-search toolbar-filter toolbar-filter-compact toolbar-search"
-          htmlFor="workspace-topbar-search"
-        >
-          <span aria-hidden="true" className="toolbar-filter-icon app-topbar-search-icon">
-            <Search size={14} strokeWidth={2} />
-          </span>
-          <input
-            aria-label="Search workspace"
-            className="toolbar-search-input app-topbar-search-input"
-            id="workspace-topbar-search"
-            placeholder="Search..."
-            type="text"
-          />
-        </label>
+
       </div>
     </header>
   );

@@ -1,0 +1,90 @@
+.robot-config-detail-drilldowns {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.robot-config-detail-drilldowns h4 {
+  color: var(--text-title);
+  margin: 0;
+}
+
+.robot-config-drilldown-grid {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.robot-config-drilldown-group {
+  background: var(--bg-row-alt);
+  border: 1px solid var(--border-base);
+  border-radius: 0.5rem;
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.55rem;
+}
+
+.robot-config-drilldown-group-header {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+}
+
+.robot-config-drilldown-group-header h5 {
+  color: var(--text-title);
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.robot-config-drilldown-group-header small {
+  color: var(--text-copy);
+}
+
+.robot-config-drilldown-list {
+  display: grid;
+  gap: 0.3rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.robot-config-drilldown-link {
+  background: transparent;
+  border: 0;
+  color: #2563eb;
+  cursor: pointer;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 0;
+  text-align: left;
+  width: 100%;
+}
+
+.robot-config-drilldown-link:hover,
+.robot-config-drilldown-link:focus-visible {
+  color: #1d4ed8;
+  outline: none;
+  text-decoration: underline;
+}
+
+.robot-config-drilldown-row {
+  align-items: center;
+  color: var(--text-title);
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.robot-config-drilldown-row span,
+.robot-config-drilldown-row small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.robot-config-drilldown-row small {
+  color: var(--text-copy);
+  flex: 0 1 auto;
+}

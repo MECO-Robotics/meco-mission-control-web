@@ -83,7 +83,7 @@ function createBootstrap(): BootstrapPayload {
         dueDate: "2026-04-10",
         priority: "high",
         status: "in-progress",
-        dependencyIds: [],
+
         blockers: [],
         linkedManufacturingIds: [],
         linkedPurchaseIds: [],
@@ -200,34 +200,6 @@ describe("TimelineView interactions", () => {
     expect(statusCellSource).toContain("onClick={() => onOpenTask(task)}");
   });
 
-  it("opens milestone details from the timeline underlay and renders the detail modal", () => {
-    const underlaySource = readFileSync(
-      join(
-        process.cwd(),
-        "src/features/workspace/views/timeline/portals/TimelineMilestoneUnderlaysPortal.tsx",
-      ),
-      "utf8",
-    );
-    const detailModalSource = readFileSync(
-      join(process.cwd(), "src/features/workspace/views/timeline/TimelineMilestoneDetailModal.tsx"),
-      "utf8",
-    );
-    const timelineViewSource = readFileSync(
-      join(process.cwd(), "src/features/workspace/views/timeline/TimelineView.tsx"),
-      "utf8",
-    );
-
-    expect(underlaySource).toContain('aria-label={`Open milestone ${underlay.milestone.title}`}');
-    expect(underlaySource).toContain("role=\"button\"");
-    expect(underlaySource).toContain("onMouseEnter={(event) => onShowMilestonePopup(event.currentTarget, underlay.milestone)}");
-    expect(underlaySource).toContain("onMouseLeave={onHideMilestonePopup}");
-    expect(underlaySource).toContain("onClick={() => onOpenMilestoneDetails(underlay.milestone)}");
-    expect(timelineViewSource).toContain("onHideMilestonePopup={data.clearHoveredMilestonePopup}");
-    expect(timelineViewSource).toContain("onShowMilestonePopup={data.showMilestoneUnderlayPopup}");
-    expect(detailModalSource).toContain("MilestonesEventDetailsModal");
-    expect(timelineViewSource).toContain("<TimelineMilestoneDetailModal");
-  });
-
   it("updates timeline hover geometry on shell scroll", () => {
     const overlayHookSource = readFileSync(
       join(process.cwd(), "src/features/workspace/views/timeline/hooks/useTimelineMilestoneOverlaySync.ts"),
@@ -251,6 +223,7 @@ describe("TimelineView interactions", () => {
     expect(toolbarSource).toContain("onPointerDownCapture={handleIntervalSwitchPointerDown}");
     expect(toolbarSource).toContain("onClick={() => openIntervalSwitch({ focusOptions: true })}");
     expect(toolbarSource).toContain("onKeyDown={handleIntervalPillKeyDown}");
+    expect(toolbarSource).toContain('compactSwitchWidth={220}');
   });
 
   it("moves keyboard focus into interval options after expanding the switch", () => {

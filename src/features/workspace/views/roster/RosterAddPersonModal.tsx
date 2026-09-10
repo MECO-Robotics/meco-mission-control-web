@@ -1,3 +1,4 @@
+import { ModalDialog } from "@/components/ModalDialog";
 import React from "react";
 
 import { IconTasks } from "@/components/shared/Icons";
@@ -52,16 +53,8 @@ export const RosterAddPersonModal: React.FC<RosterAddPersonModalProps> = ({
   }
 
   return (
-    <div
-      className="modal-scrim"
-      onClick={(milestone) => {
-        if (milestone.target === milestone.currentTarget) {
-          onClose();
-        }
-      }}
-      role="presentation"
-    >
-      <section aria-modal="true" className="modal-card roster-edit-modal" role="dialog">
+    <ModalDialog label="Add person" onClose={onClose} dismissOnBackdrop>
+      <section  className="modal-card roster-edit-modal" >
         <div className="panel-header compact-header roster-modal-header">
           <div className="queue-section-header">
             <h3>Add person</h3>
@@ -179,6 +172,6 @@ export const RosterAddPersonModal: React.FC<RosterAddPersonModalProps> = ({
           </div>
         </form>
       </section>
-    </div>
+    </ModalDialog>
   );
 };

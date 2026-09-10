@@ -20,7 +20,8 @@ export interface SessionUser {
 }
 
 export interface SessionResponse {
-  token: string;
+  csrfToken: string;
+  expiresAt: string;
   user: SessionUser;
 }
 

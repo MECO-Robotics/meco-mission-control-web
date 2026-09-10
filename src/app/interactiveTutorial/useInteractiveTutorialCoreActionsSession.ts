@@ -16,7 +16,6 @@ export function useInteractiveTutorialCoreActionsSession(
     setTaskView,
     setRiskManagementView,
     setWorklogsView,
-    setReportsView,
     setManufacturingView,
     setInventoryView,
     setSelectedSeasonId,
@@ -63,7 +62,6 @@ export function useInteractiveTutorialCoreActionsSession(
       setTaskView(previousState.taskView);
       setRiskManagementView(previousState.riskManagementView);
       setWorklogsView(previousState.worklogsView);
-      setReportsView(previousState.reportsView);
       setManufacturingView(previousState.manufacturingView);
       setInventoryView(previousState.inventoryView);
       setSelectedSeasonId(previousState.selectedSeasonId);
@@ -87,7 +85,6 @@ export function useInteractiveTutorialCoreActionsSession(
     setDataMessage,
     setInventoryView,
     setManufacturingView,
-    setReportsView,
     setRiskManagementView,
     setSelectedProjectId,
     setSelectedSeasonId,

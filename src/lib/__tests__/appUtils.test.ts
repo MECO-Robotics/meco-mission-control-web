@@ -88,7 +88,6 @@ describe("appUtils", () => {
     expect(payload.dueDate).toBe("2026-01-02");
     expect(payload.priority).toBe("medium");
     expect(payload.status).toBe("not-started");
-    expect(payload.blockers).toEqual([]);
     expect(payload.taskBlockers).toEqual([]);
   });
 
@@ -135,17 +134,14 @@ describe("appUtils", () => {
     ]);
   });
 
-  it("taskToPayload carries blocker strings from task data", () => {
+  it("taskToPayload omits read-only blocker summaries", () => {
     const bootstrap = createBootstrap();
     const task = {
       ...bootstrap.tasks[0],
       blockers: ["Waiting on mentor review", "Waiting on final assembly"],
     };
 
-    expect(taskToPayload(task, bootstrap).blockers).toEqual([
-      "Waiting on mentor review",
-      "Waiting on final assembly",
-    ]);
+    expect(taskToPayload(task, bootstrap)).not.toHaveProperty("blockers");
   });
 
   it("taskToPayload carries blocker records from bootstrap data", () => {
@@ -154,7 +150,7 @@ describe("appUtils", () => {
         {
           id: "task-blocker-1",
           blockedTaskId: "task-1",
-          blockerType: "task",
+          blockerType: "design-issue",
           blockerId: "task-upstream",
           description: "Waiting on upstream task",
           severity: "high",
@@ -169,7 +165,7 @@ describe("appUtils", () => {
     expect(taskToPayload(bootstrap.tasks[0], bootstrap).taskBlockers).toEqual([
       {
         id: "task-blocker-1",
-        blockerType: "task",
+        blockerType: "design-issue",
         blockerId: "task-upstream",
         description: "Waiting on upstream task",
         severity: "high",

@@ -9,6 +9,7 @@ interface AttentionSummaryCounts {
   manufacturingBlockers: number;
   overdueTasks: number;
   purchaseDelays: number;
+  staleTasks: number;
   waitingQaTasks: number;
 }
 
@@ -21,6 +22,7 @@ export function buildAttentionSummaryGroups({
   manufacturingBlockers,
   overdueTasks,
   purchaseDelays,
+  staleTasks,
   waitingQaTasks,
 }: AttentionSummaryCounts): AttentionSummaryGroup[] {
   const cards: AttentionSummaryCard[] = [
@@ -55,6 +57,14 @@ export function buildAttentionSummaryGroups({
       label: "Waiting QA",
       targetGroupId: "waiting-qa",
       value: waitingQaTasks,
+    },
+    {
+      category: "flow",
+      helperLabel: "Needs status update",
+      id: "stale-tasks",
+      label: "Stale tasks",
+      targetGroupId: "stale-tasks",
+      value: staleTasks,
     },
     {
       category: "flow",

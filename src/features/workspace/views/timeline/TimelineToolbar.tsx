@@ -162,6 +162,7 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
         }
         ariaLabel="Search timeline"
         compactPlaceholder="Search"
+        compactSwitchWidth={220}
         onChange={onSearchChange}
         placeholder="Search timeline..."
         value={searchFilter}

@@ -1,5 +1,5 @@
 import type { ArtifactRecord, ManufacturingItemRecord, MaterialRecord, PartDefinitionRecord, PartInstanceRecord, PurchaseItemRecord } from "@/types/recordsInventory";
-import type { ArtifactPayload, ManufacturingItemPayload, MaterialPayload, MechanismPayload, PartDefinitionPayload, PartInstancePayload, PurchaseItemPayload, SubsystemPayload, WorkstreamPayload } from "@/types/payloads";
+import type { ArtifactPayload, ManufacturingItemPayload, MaterialPayload, PartDefinitionPayload, PartInstancePayload, PurchaseItemPayload, SubsystemPayload, WorkstreamPayload } from "@/types/payloads";
 import type { SubsystemRecord, WorkstreamRecord } from "@/types/recordsOrganization";
 import { normalizeIteration } from "@/lib/appUtils/common";
 import { normalizeSubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
@@ -22,7 +22,16 @@ export const manufacturingToPayload = (item: ManufacturingItemRecord): Manufactu
   batchLabel: item.batchLabel ?? "",
 });
 
-export const materialToPayload = (item: MaterialRecord): MaterialPayload => ({ ...item });
+export const materialToPayload = (item: MaterialRecord): MaterialPayload => ({
+  name: item.name,
+  category: item.category,
+  unit: item.unit,
+  onHandQuantity: item.onHandQuantity,
+  reorderPoint: item.reorderPoint,
+  location: item.location,
+  vendor: item.vendor,
+  notes: item.notes,
+});
 
 export const artifactToPayload = (item: ArtifactRecord): ArtifactPayload => ({
   ...item,
@@ -45,25 +54,15 @@ export const partDefinitionToPayload = (item: PartDefinitionRecord): PartDefinit
 });
 
 export const subsystemToPayload = (item: SubsystemRecord): SubsystemPayload => ({
-  ...item,
+  projectId: item.projectId,
+  name: item.name,
+  description: item.description,
+  parentSubsystemId: item.parentSubsystemId,
+  responsibleEngineerId: item.responsibleEngineerId,
+  mentorIds: item.mentorIds,
+  risks: item.risks,
   ...normalizeSubsystemLayoutFields(item),
   color: resolveWorkspaceColor(item.color, `${item.projectId}:${item.id}:${item.name}`, item.iteration),
-  isArchived: item.isArchived ?? false,
-  iteration: normalizeIteration(item.iteration),
-  photoUrl: item.photoUrl ?? "",
-});
-
-export const mechanismToPayload = (item: {
-  subsystemId: string;
-  name: string;
-  description: string;
-  googleSheetsUrl?: string;
-  iteration?: number;
-  isArchived?: boolean;
-  photoUrl?: string;
-}): MechanismPayload => ({
-  ...item,
-  googleSheetsUrl: item.googleSheetsUrl ?? "",
   isArchived: item.isArchived ?? false,
   iteration: normalizeIteration(item.iteration),
   photoUrl: item.photoUrl ?? "",

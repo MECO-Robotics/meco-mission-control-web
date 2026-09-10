@@ -148,6 +148,7 @@ export function normalizePlanningWorkstreams(
       artifactId: taskArtifactIds[0] ?? null,
       artifactIds: taskArtifactIds,
       targetMilestoneId: task.targetMilestoneId ?? null,
+      targetRiskId: source.risks?.find((risk) => risk.mitigationTaskId === task.id)?.id ?? null,
       ownerId: task.ownerId ?? null,
       assigneeIds: taskAssigneeIds,
       mentorId: task.mentorId ?? null,
@@ -155,9 +156,10 @@ export function normalizePlanningWorkstreams(
       dueDate: taskDueDate,
       priority: task.priority ?? "medium",
       status: task.status ?? "not-started",
-      dependencyIds: task.dependencyIds ?? [],
       blockers: task.blockers ?? [],
-      isBlocked: (task.blockers ?? []).length > 0,
+      checklistItems: task.checklistItems ?? [],
+      isBlocked: task.isBlocked ?? false,
+      isWaitingOnDependency: task.isWaitingOnDependency ?? false,
       linkedManufacturingIds: task.linkedManufacturingIds ?? [],
       linkedPurchaseIds: task.linkedPurchaseIds ?? [],
       estimatedHours: toNumberOrZero(task.estimatedHours),
@@ -167,79 +169,9 @@ export function normalizePlanningWorkstreams(
     };
   });
 
-  const normalizedDependencies = (source.taskDependencies ?? []).map((dependency, index) => {
-    const dependencyRecord = dependency as {
-      id?: string;
-      kind?: "task" | "milestone" | "part_instance" | "milestone";
-      refId?: string;
-      taskId?: string;
-      upstreamTaskId?: string;
-      downstreamTaskId?: string;
-      requiredState?: string;
-      dependencyType?: "hard" | "soft" | "blocks" | "finish_to_start";
-      createdAt?: string;
-    };
-    const kind = dependencyRecord.kind ?? "task";
-    const dependencyType: TaskDependencyRecord["dependencyType"] =
-      dependencyRecord.dependencyType === "soft" ? "soft" : "hard";
-    const refId = dependencyRecord.refId ?? dependencyRecord.upstreamTaskId ?? "";
-    const taskId = dependencyRecord.taskId ?? dependencyRecord.downstreamTaskId ?? "";
-
-    return {
-      id: dependencyRecord.id ?? `task-dependency-${index + 1}`,
-      taskId,
-      kind,
-      refId,
-      requiredState:
-        dependencyRecord.requiredState ?? (kind === "part_instance" ? "ready" : "complete"),
-      dependencyType,
-      createdAt: dependencyRecord.createdAt ?? new Date().toISOString(),
-    };
-  });
-
-  const dependencyIdsByTaskId = new Map<string, string[]>();
-  normalizedDependencies.forEach((dependency) => {
-    if (dependency.kind !== "task" || dependency.dependencyType === "soft" || !dependency.taskId) {
-      return;
-    }
-
-    const current = dependencyIdsByTaskId.get(dependency.taskId) ?? [];
-    current.push(dependency.refId);
-    dependencyIdsByTaskId.set(dependency.taskId, current);
-  });
-
-  const blockerDescriptionsByTaskId = new Map<string, string[]>();
-  (source.taskBlockers ?? []).forEach((blocker) => {
-    if (blocker.status === "resolved" || !blocker.blockedTaskId) {
-      return;
-    }
-
-    const current = blockerDescriptionsByTaskId.get(blocker.blockedTaskId) ?? [];
-    current.push(blocker.description ?? "");
-    blockerDescriptionsByTaskId.set(blocker.blockedTaskId, current);
-  });
-
-  const normalizedTasks = tasks.map((task) => {
-    const dependencyIds =
-      task.dependencyIds.length > 0
-        ? uniqueIds(task.dependencyIds)
-        : dependencyIdsByTaskId.get(task.id) ?? [];
-    const blockers =
-      task.blockers.length > 0
-        ? uniqueIds(task.blockers)
-        : blockerDescriptionsByTaskId.get(task.id) ?? [];
-
-    return {
-      ...task,
-      dependencyIds,
-      blockers,
-      isBlocked: blockers.length > 0,
-    };
-  });
-
   return {
     workstreams,
-    tasks: normalizedTasks,
-    taskDependencies: normalizedDependencies,
+    tasks,
+    taskDependencies: source.taskDependencies ?? [],
   };
 }

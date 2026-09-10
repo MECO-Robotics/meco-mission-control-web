@@ -1,0 +1,75 @@
+.cad-step-preview-card {
+  display: grid;
+  gap: 12px;
+}
+
+.cad-step-preview-heading {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.cad-step-preview-counts {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.cad-step-preview-groups {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cad-step-preview-group {
+  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24));
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.cad-step-preview-group h4 {
+  font-size: 0.92rem;
+  margin: 0;
+}
+
+.cad-step-preview-list {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cad-step-preview-item {
+  border-left: 3px solid rgba(37, 99, 235, 0.42);
+  display: grid;
+  gap: 2px;
+  padding-left: 9px;
+}
+
+.cad-step-preview-item[data-tone="added"] {
+  border-left-color: rgba(22, 163, 74, 0.65);
+}
+
+.cad-step-preview-item[data-tone="removed"] {
+  border-left-color: rgba(220, 38, 38, 0.65);
+}
+
+.cad-step-preview-item[data-tone="warning"] {
+  border-left-color: rgba(245, 158, 11, 0.75);
+}
+
+.cad-step-preview-item span {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 900px) {
+  .cad-step-preview-counts,
+  .cad-step-preview-groups {
+    grid-template-columns: 1fr;
+  }
+}

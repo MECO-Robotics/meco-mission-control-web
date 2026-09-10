@@ -180,7 +180,7 @@ describe("AppSidebar profile switch", () => {
     expect(markup).toContain(">L</span>");
   });
 
-  it("keeps the local profile fallback as an L bubble without account actions", () => {
+  it("keeps the local profile fallback as an L bubble with a settings sign-in action", () => {
     const markup = renderSidebar([
       {
         value: "tasks",
@@ -194,6 +194,8 @@ describe("AppSidebar profile switch", () => {
     expect(markup).toContain("app-topbar-local-avatar");
     expect(markup).toContain(">L</span>");
     expect(markup).toContain("Theme mode");
+    expect(markup).toContain("Sign in");
+    expect(markup).toContain("lucide-log-in");
     expect(markup).not.toContain("Sign out");
     expect(markup).not.toContain("profile-menu-popover");
     expect(markup).not.toContain("Local access");

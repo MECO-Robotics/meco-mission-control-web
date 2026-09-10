@@ -24,7 +24,7 @@ export function useInteractiveTutorialCoreActionsStart({
   state,
   onActivateTutorial,
 }: UseInteractiveTutorialCoreActionsStartOptions) {
-  const { activeTab, taskView, riskManagementView, worklogsView, reportsView, manufacturingView, inventoryView, selectedSeasonId, selectedProjectId, bootstrap, isSidebarCollapsed, toggleSidebar, closeSidebarOverlay, handleUnauthorized, setActiveTab, setTaskView, setRiskManagementView, setWorklogsView, setReportsView, setManufacturingView, setInventoryView, setSelectedSeasonId, setSelectedProjectId, setActivePersonFilter, setBootstrap, setDataMessage } = options;
+  const { activeTab, taskView, riskManagementView, worklogsView, manufacturingView, inventoryView, selectedSeasonId, selectedProjectId, bootstrap, isSidebarCollapsed, toggleSidebar, closeSidebarOverlay, handleUnauthorized, setActiveTab, setTaskView, setRiskManagementView, setWorklogsView, setManufacturingView, setInventoryView, setSelectedSeasonId, setSelectedProjectId, setActivePersonFilter, setBootstrap, setDataMessage } = options;
   const { bootstrapSnapshot, chapters, returnState, setBaselineCounts, setBootstrapSnapshot, setChapterId, setCompletedChapterId, setStepIndex, setTutorialProjectId, setTutorialProjectName, setTutorialSeasonId, setTutorialSeasonName, stepIndex } = state;
 
   const startInteractiveTutorial = useCallback(
@@ -37,25 +37,6 @@ export function useInteractiveTutorialCoreActionsStart({
       if (!chapter || chapter.steps.length === 0) {
         setDataMessage("Interactive tutorial chapter is unavailable right now.");
         return;
-      }
-
-      if (!returnState) {
-        onActivateTutorial(
-          buildInteractiveTutorialReturnState({
-            activeTab,
-            taskView,
-            riskManagementView,
-            worklogsView,
-            reportsView,
-            manufacturingView,
-            inventoryView,
-            selectedSeasonId,
-            selectedProjectId,
-          }),
-        );
-      }
-      if (!bootstrapSnapshot) {
-        setBootstrapSnapshot(structuredClone(bootstrap));
       }
 
       setDataMessage(null);
@@ -75,6 +56,24 @@ export function useInteractiveTutorialCoreActionsStart({
       } catch (error) {
         setDataMessage(toErrorMessage(error));
         return;
+      }
+
+      if (!returnState) {
+        onActivateTutorial(
+          buildInteractiveTutorialReturnState({
+            activeTab,
+            taskView,
+            riskManagementView,
+            worklogsView,
+            manufacturingView,
+            inventoryView,
+            selectedSeasonId,
+            selectedProjectId,
+          }),
+        );
+      }
+      if (!bootstrapSnapshot) {
+        setBootstrapSnapshot(structuredClone(bootstrap));
       }
 
       startTransition(() => {
@@ -132,7 +131,6 @@ export function useInteractiveTutorialCoreActionsStart({
       setTaskView("timeline");
       setRiskManagementView("kanban");
       setWorklogsView("logs");
-      setReportsView("qa");
       setManufacturingView("cnc");
       setInventoryView("materials");
       setStepIndex(0);
@@ -154,7 +152,6 @@ export function useInteractiveTutorialCoreActionsStart({
       manufacturingView,
       onActivateTutorial,
       riskManagementView,
-      reportsView,
       returnState,
       selectedProjectId,
       selectedSeasonId,
@@ -168,7 +165,6 @@ export function useInteractiveTutorialCoreActionsStart({
       setDataMessage,
       setInventoryView,
       setManufacturingView,
-      setReportsView,
       setRiskManagementView,
       setSelectedProjectId,
       setSelectedSeasonId,

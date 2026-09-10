@@ -7,6 +7,7 @@ import type {
   CadStepImportRunRecord,
   CadStepImportSummary,
   CadStepMappingRecord,
+  CadStepMappingRuleMatchStrategy,
   CadStepSnapshotRecord,
   CadStepTreeNode,
   CadStepWarningRecord,
@@ -147,6 +148,7 @@ export function applyCadSnapshotMappings(
       confidence?: CadStepMappingRecord["confidence"];
       status?: CadStepMappingRecord["status"];
       applyToFuture?: boolean;
+      ruleMatchStrategy?: CadStepMappingRuleMatchStrategy;
     }>;
   },
   onUnauthorized?: () => void,

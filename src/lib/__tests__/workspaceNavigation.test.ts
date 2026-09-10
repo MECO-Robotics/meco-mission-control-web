@@ -1,157 +1,42 @@
-/// <reference types="jest" />
-
 import {
-  BASE_SECTION_LABELS,
-  getActiveNavigationSubItemId,
-  isNavigationSubItemId,
-  targetMatchesNavigationState,
+  NAVIGATION_SECTION_ORDER, NAVIGATION_SUB_ITEMS, VIEW_AVAILABILITY_CONTEXTS,
+  getActiveNavigationSubItemId, getNavigationTarget, isNavigationSubItemAvailable,
+  readNavigationLocation, writeNavigationLocation,
   type NavigationState,
-  type NavigationTarget,
 } from "@/lib/workspaceNavigation";
-
-function createNavigationState(overrides: Partial<NavigationState> = {}): NavigationState {
-  return {
-    activeTab: "tasks",
-    taskView: "timeline",
-    riskManagementView: "kanban",
-    worklogsView: "logs",
-    reportsView: "qa",
-    inventoryView: "materials",
-    manufacturingView: "cnc",
-    rosterView: "workload",
-    ...overrides,
-  };
-}
-
-describe("getActiveNavigationSubItemId", () => {
-  it("maps tasks calendar to dashboard calendar", () => {
-    expect(
-      getActiveNavigationSubItemId(
-        createNavigationState({ activeTab: "tasks", taskView: "calendar" }),
-      ),
-    ).toBe("dashboard-calendar");
+const state: NavigationState = { activeTab: "home", taskView: "queue", riskManagementView: "kanban", worklogsView: "logs", inventoryView: "materials", manufacturingView: "all", rosterView: "directory" };
+describe("canonical workspace navigation", () => {
+  it("provides four areas and unique destinations", () => {
+    expect(NAVIGATION_SECTION_ORDER).toEqual(["home", "work", "resources", "team"]);
+    expect(new Set(NAVIGATION_SUB_ITEMS.map((item) => item.id)).size).toBe(13);
   });
-
-  it("maps tasks timeline to tasks timeline", () => {
-    expect(
-      getActiveNavigationSubItemId(
-        createNavigationState({ activeTab: "tasks", taskView: "timeline" }),
-      ),
-    ).toBe("tasks-timeline");
+  it.each(VIEW_AVAILABILITY_CONTEXTS)("round trips every available destination in %s", (context) => {
+    for (const item of NAVIGATION_SUB_ITEMS) {
+      if (!isNavigationSubItemAvailable(item.id, { context })) continue;
+      const target = getNavigationTarget(item.id, context);
+      const next = { ...state, ...target, activeTab: target.tab };
+      expect(getActiveNavigationSubItemId(next, context)).toBe(item.id);
+      expect(readNavigationLocation(writeNavigationLocation(next, context, ""), context)).toEqual(target);
+    }
   });
-
-  it("maps tasks robot map to config robot configuration", () => {
-    expect(
-      getActiveNavigationSubItemId(
-        createNavigationState({ activeTab: "tasks", taskView: "robot-map" }),
-      ),
-    ).toBe("config-robot-model");
+  it("uses distinct materials and documents destinations by project", () => {
+    expect(isNavigationSubItemAvailable("resources-documents", { context: "robot-project" })).toBe(false);
+    expect(isNavigationSubItemAvailable("resources-materials", { context: "non-robot-project" })).toBe(false);
+    expect(getNavigationTarget("resources-structure", "non-robot-project")).toEqual({ tab: "subsystems" });
   });
-
-  it("maps risk metrics to dashboard metrics", () => {
-    expect(
-      getActiveNavigationSubItemId(
-        createNavigationState({
-          activeTab: "risk-management",
-          riskManagementView: "metrics",
-        }),
-      ),
-    ).toBe("dashboard-metrics");
+  it("retains schedule presentation and unrelated URL parameters on refresh", () => {
+    const next = { ...state, activeTab: "tasks" as const, taskView: "timeline" as const };
+    const search = writeNavigationLocation(next, "robot-project", "?season=s&project=p");
+    expect(new URLSearchParams(search).get("project")).toBe("p");
+    expect(readNavigationLocation(search, "robot-project")).toEqual({ tab: "tasks", taskView: "timeline" });
   });
-
-  it("maps roster directory to config directory", () => {
-    expect(
-      getActiveNavigationSubItemId(
-        createNavigationState({ activeTab: "roster", rosterView: "directory" }),
-      ),
-    ).toBe("config-directory");
+  it("rejects unknown and unavailable destinations and presentation values", () => {
+    expect(readNavigationLocation("?view=resources-parts", "non-robot-project")).toEqual({ tab: "home" });
+    expect(readNavigationLocation("?view=unknown", "robot-project")).toEqual({ tab: "home" });
+    expect(readNavigationLocation("?view=work-schedule&mode=cad", "robot-project")).toEqual({ tab: "tasks", taskView: "calendar" });
   });
-
-  it("maps worklogs activity to dashboard activity", () => {
-    expect(
-      getActiveNavigationSubItemId(
-        createNavigationState({ activeTab: "worklogs", worklogsView: "activity" }),
-      ),
-    ).toBe("dashboard-activity");
-  });
-
-  it("maps worklogs kanban to reports worklog kanban", () => {
-    expect(
-      getActiveNavigationSubItemId(
-        createNavigationState({
-          activeTab: "worklogs",
-          worklogsView: "kanban",
-        }),
-      ),
-    ).toBe("reports-worklogs-kanban");
-  });
-
-  it("maps worklogs summary to reports work logs", () => {
-    expect(
-      getActiveNavigationSubItemId(
-        createNavigationState({ activeTab: "worklogs", worklogsView: "summary" }),
-      ),
-    ).toBe("reports-work-logs");
-  });
-
-  it("returns null for help because it has no sidebar subitem", () => {
-    expect(
-      getActiveNavigationSubItemId(
-        createNavigationState({ activeTab: "help" }),
-      ),
-    ).toBeNull();
-  });
-
-  it("returns null for home because quick actions own that page", () => {
-    expect(
-      getActiveNavigationSubItemId(
-        createNavigationState({ activeTab: "home" }),
-      ),
-    ).toBeNull();
-    expect(BASE_SECTION_LABELS.home).toBe("Home");
-  });
-});
-
-describe("isNavigationSubItemId", () => {
-  it("accepts sidebar subitems and rejects top-level quick action tabs", () => {
-    expect(isNavigationSubItemId("tasks-timeline")).toBe(true);
-    expect(isNavigationSubItemId("home")).toBe(false);
-    expect(isNavigationSubItemId("notifications")).toBe(false);
-  });
-});
-
-describe("targetMatchesNavigationState", () => {
-  it("matches a target when all specified dimensions match", () => {
-    const target: NavigationTarget = {
-      tab: "reports",
-      reportsView: "milestone-results",
-    };
-
-    expect(
-      targetMatchesNavigationState(
-        target,
-        createNavigationState({
-          activeTab: "reports",
-          reportsView: "milestone-results",
-        }),
-      ),
-    ).toBe(true);
-  });
-
-  it("does not match when a specified dimension differs", () => {
-    const target: NavigationTarget = {
-      tab: "inventory",
-      inventoryView: "parts",
-    };
-
-    expect(
-      targetMatchesNavigationState(
-        target,
-        createNavigationState({
-          activeTab: "inventory",
-          inventoryView: "materials",
-        }),
-      ),
-    ).toBe(false);
+  it("keeps CAD nested under Structure", () => {
+    expect(writeNavigationLocation({ ...state, activeTab: "cad" }, "robot-project", "")).toBe("?view=resources-structure&mode=cad");
+    expect(readNavigationLocation("?view=resources-structure&mode=cad", "robot-project")).toEqual({ tab: "cad" });
   });
 });

@@ -1,4 +1,4 @@
-import type { Dispatch, FormEvent, SetStateAction } from "react";
+import { useCallback, useLayoutEffect, useRef, type Dispatch, type FormEvent, type SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskPayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
@@ -52,6 +52,7 @@ function buildDraftTaskRecord(taskDraft: TaskPayload, activeTask: TaskRecord | n
     partInstanceIds: taskDraft.partInstanceIds,
     artifactId: taskDraft.artifactId,
     artifactIds: taskDraft.artifactIds,
+    targetRiskId: taskDraft.targetRiskId,
     targetMilestoneId: taskDraft.targetMilestoneId,
     photoUrl: taskDraft.photoUrl,
     ownerId: taskDraft.ownerId,
@@ -61,8 +62,7 @@ function buildDraftTaskRecord(taskDraft: TaskPayload, activeTask: TaskRecord | n
     dueDate: taskDraft.dueDate,
     priority: taskDraft.priority,
     status: taskDraft.status,
-    dependencyIds: [],
-    blockers: taskDraft.blockers,
+    blockers: (taskDraft.taskBlockers ?? []).map((blocker) => blocker.description),
     linkedManufacturingIds: taskDraft.linkedManufacturingIds,
     linkedPurchaseIds: taskDraft.linkedPurchaseIds,
     estimatedHours: taskDraft.estimatedHours,
@@ -93,12 +93,28 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
     setTaskDraft,
   } = props;
 
+  const initialDraft = useRef(JSON.stringify(taskDraft));
+  const confirmDiscard = () => JSON.stringify(taskDraft) === initialDraft.current || window.confirm("Discard unsaved changes?");
+  const isBusy = isSavingTask || isDeletingTask;
+  const busyRef = useRef(isBusy);
+  useLayoutEffect(() => { busyRef.current = isBusy; }, [isBusy]);
+  const updateDraftWhenIdle = useCallback<Dispatch<SetStateAction<TaskPayload>>>((update) => {
+    // Portaled menus and completed uploads can retain a callback from before save.
+    if (!busyRef.current) setTaskDraft(update);
+  }, [setTaskDraft]);
+  const resolveBlockerWhenIdle = useCallback(async (id: string) => {
+    if (!busyRef.current) await handleResolveTaskBlocker(id);
+  }, [handleResolveTaskBlocker]);
+  const closeWhenIdle = () => { if (!busyRef.current && confirmDiscard()) closeTaskModal(); };
+
   const handleTaskEditClosed = () => {
+    if (busyRef.current || !confirmDiscard()) return;
     onTaskEditCanceled();
     closeTaskModal();
   };
 
   const handleTaskEditCancel = () => {
+    if (busyRef.current || !confirmDiscard()) return;
     onTaskEditCanceled();
 
     if (activeTask) {
@@ -114,7 +130,7 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
   const canCreateTask = taskDraft.title.trim().length > 0;
 
   const handleCreateTaskSubmit = (milestone: FormEvent<HTMLFormElement>) => {
-    if (!canCreateTask) {
+    if (isBusy || !canCreateTask) {
       milestone.preventDefault();
       return;
     }
@@ -125,6 +141,7 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
   if (isEditTaskModal && activeTask) {
     return (
       <form className="task-editor-modal" onSubmit={handleTaskSubmit}>
+        <fieldset disabled={isBusy} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
         <TaskDetailsModal
           activeTask={activeTask}
           bootstrap={bootstrap}
@@ -154,13 +171,14 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
             </>
           }
           onEditTask={() => undefined}
-          onResolveTaskBlocker={handleResolveTaskBlocker}
+          onResolveTaskBlocker={resolveBlockerWhenIdle}
           setAdvancedSectionOpen={setAdvancedSectionOpen}
-          setTaskDraft={setTaskDraft}
+          setTaskDraft={updateDraftWhenIdle}
           showDependencyBlockersSection
           showEditButton={false}
           taskDraft={taskDraft}
         />
+        </fieldset>
       </form>
     );
   }
@@ -168,23 +186,24 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
   if (createTaskRecord) {
     return (
       <form className="task-editor-modal task-editor-create-modal" onSubmit={handleCreateTaskSubmit}>
+        <fieldset disabled={isBusy} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
         <TaskDetailsModal
           activeTask={createTaskRecord}
           bootstrap={bootstrap}
-          closeTaskDetailsModal={closeTaskModal}
+          closeTaskDetailsModal={closeWhenIdle}
           advancedSectionOpen={advancedSectionOpen}
           beforeOverviewContent={
             <>
               <TaskEditorCreateProjectSection
                 bootstrap={bootstrap}
                 currentTaskId={activeTask?.id ?? null}
-                setTaskDraft={setTaskDraft}
+                setTaskDraft={updateDraftWhenIdle}
                 taskDraft={taskDraft}
               />
               <TaskEditorAdvancedMediaSection
                 currentUrl={taskDraft.photoUrl}
                 onChange={(value) =>
-                  setTaskDraft((current) => ({ ...current, photoUrl: value }))
+                  updateDraftWhenIdle((current) => ({ ...current, photoUrl: value }))
                 }
                 onUpload={async (file) => {
                   const projectId = taskDraft.projectId || bootstrap.projects[0]?.id;
@@ -200,7 +219,7 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
           }
           beforeFooterContent={
             <TaskEditorCreateMetadataSection
-              setTaskDraft={setTaskDraft}
+              setTaskDraft={updateDraftWhenIdle}
               taskDraft={taskDraft}
             />
           }
@@ -212,7 +231,7 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
               {showCreateTypeToggle && onSwitchCreateTypeToMilestone ? (
                 <button
                   className="secondary-action"
-                  onClick={onSwitchCreateTypeToMilestone}
+                  onClick={() => { if (!busyRef.current) onSwitchCreateTypeToMilestone(); }}
                   type="button"
                 >
                   Switch to milestone
@@ -220,7 +239,7 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
               ) : null}
               <button
                 className="secondary-action"
-                onClick={closeTaskModal}
+                onClick={closeWhenIdle}
                 style={{
                   background: "var(--bg-row-alt)",
                   color: "var(--text-title)",
@@ -241,13 +260,14 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
           }
           modalClassName="task-editor-modal"
           onEditTask={() => undefined}
-          onResolveTaskBlocker={handleResolveTaskBlocker}
+          onResolveTaskBlocker={resolveBlockerWhenIdle}
           setAdvancedSectionOpen={setAdvancedSectionOpen}
-          setTaskDraft={setTaskDraft}
+          setTaskDraft={updateDraftWhenIdle}
           showDependencyBlockersSection
           showEditButton={false}
           taskDraft={taskDraft}
         />
+        </fieldset>
       </form>
     );
   }

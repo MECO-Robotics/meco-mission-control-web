@@ -1,10 +1,12 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
+import type { TaskBlockerType } from "@/types/common";
 import {
   ATTENTION_DUE_SOON_DAYS,
   daysUntilDate,
   formatContextLabel,
   mergeLatestTimestamp,
 } from "./attentionViewHelpers";
+import { DEFAULT_STALE_TASK_THRESHOLDS } from "./staleTaskDetector";
 import type { AttentionNowItem, AttentionReason } from "./attentionViewTypes";
 
 export interface AttentionLookup {
@@ -18,6 +20,7 @@ export interface AttentionLookup {
 
 export interface ItemScoringSignals {
   blockedAgeDays?: number | null;
+  blockerTypes?: TaskBlockerType[];
   downstreamBlockedCount?: number;
   dueDate?: string;
   isOwnerMissing?: boolean;
@@ -25,9 +28,9 @@ export interface ItemScoringSignals {
   waitingQaAgeDays?: number | null;
 }
 
-export const WAITING_QA_STALE_DAYS = 3;
-export const BLOCKED_STALE_DAYS = 4;
-export const STALE_UPDATE_DAYS = 5;
+export const WAITING_QA_STALE_DAYS = DEFAULT_STALE_TASK_THRESHOLDS.waitingQaDays;
+export const BLOCKED_STALE_DAYS = DEFAULT_STALE_TASK_THRESHOLDS.blockedDays;
+export const STALE_UPDATE_DAYS = DEFAULT_STALE_TASK_THRESHOLDS.noUpdateDays;
 
 const REASON_WEIGHTS: Record<AttentionReason, number> = {
   blocked: 18,
@@ -41,6 +44,19 @@ const REASON_WEIGHTS: Record<AttentionReason, number> = {
   "purchase-delay": 14,
   stale: 10,
   "waiting-qa": 14,
+};
+
+const BLOCKER_TYPE_WEIGHTS: Record<TaskBlockerType, number> = {
+  external: 6,
+  "broken-part": 8,
+  "broken-tool": 6,
+  "design-issue": 8,
+  "lost-part": 7,
+  "lost-tool": 5,
+  "manufacturing-unavailable": 7,
+  other: 0,
+  "qa-failed": 9,
+  "shipping-delay": 6,
 };
 
 export function addReason(reasons: AttentionReason[], reason: AttentionReason, enabled = true) {
@@ -67,6 +83,10 @@ export function scoreAttentionItem(signals: ItemScoringSignals, today = new Date
     score += Math.min(12, (signals.downstreamBlockedCount ?? 0) * 3);
   }
 
+  if (signals.blockerTypes?.length) {
+    score += Math.max(...signals.blockerTypes.map((blockerType) => BLOCKER_TYPE_WEIGHTS[blockerType] ?? 0));
+  }
+
   if ((signals.blockedAgeDays ?? 0) > 2) {
     score += Math.min(10, Math.floor((signals.blockedAgeDays ?? 0) / 2));
   }
@@ -82,19 +102,17 @@ export function scoreAttentionItem(signals: ItemScoringSignals, today = new Date
   return score;
 }
 
-export function buildTaskDownstreamCount(tasks: BootstrapPayload["tasks"]) {
+export function buildTaskDownstreamCount(bootstrap: BootstrapPayload) {
   const counts = new Map<string, number>();
-
-  for (const task of tasks) {
-    if (task.status === "complete") {
-      continue;
-    }
-
-    for (const dependencyId of task.dependencyIds) {
-      counts.set(dependencyId, (counts.get(dependencyId) ?? 0) + 1);
-    }
+  const activeTaskIds = new Set(bootstrap.tasks.filter((task) => task.status !== "complete").map((task) => task.id));
+  const edges = new Set<string>();
+  for (const dependency of bootstrap.taskDependencies ?? []) {
+    if (dependency.kind !== "task" || dependency.dependencyType !== "hard" || !activeTaskIds.has(dependency.taskId)) continue;
+    const key = `${dependency.taskId}:${dependency.refId}`;
+    if (edges.has(key)) continue;
+    edges.add(key);
+    counts.set(dependency.refId, (counts.get(dependency.refId) ?? 0) + 1);
   }
-
   return counts;
 }
 
@@ -157,6 +175,16 @@ export function buildTaskLastUpdatedAtById(bootstrap: BootstrapPayload) {
       review.subjectId,
       mergeLatestTimestamp(current, review.reviewedAt) ?? review.reviewedAt,
     );
+  }
+
+  for (const action of bootstrap.actions ?? []) {
+    if (!action.taskId && action.entityType !== "task") {
+      continue;
+    }
+
+    const taskId = action.taskId ?? action.entityId;
+    const current = latestByTaskId.get(taskId);
+    latestByTaskId.set(taskId, mergeLatestTimestamp(current, action.timestamp) ?? action.timestamp);
   }
 
   return latestByTaskId;

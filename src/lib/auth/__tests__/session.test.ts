@@ -1,30 +1,91 @@
 /// <reference types="jest" />
 
-import { requestDevBypassSignIn } from "../session";
-import { postJson } from "../core/request";
+import {
+  requestDevBypassSignIn,
+  restoreWebSession,
+  revokeWebSession,
+} from "../session";
+import { fetchWebSession, postJson, requestApi } from "../core/request";
+import {
+  hasPendingSignOut,
+  setPendingSignOut,
+  setSessionCsrfToken,
+} from "../core/sessionStorage";
 
 jest.mock("../core/request", () => ({
-  fetchCurrentUser: jest.fn(),
+  fetchWebSession: jest.fn(),
   isApiErrorLike: jest.fn(),
   postJson: jest.fn(),
+  requestApi: jest.fn(),
 }));
 
+jest.mock("../core/sessionStorage", () => ({
+  beginSessionChange: jest.fn(() => 0),
+  getSessionGeneration: jest.fn(() => 0),
+  hasPendingSignOut: jest.fn(() => false),
+  setPendingSignOut: jest.fn(),
+  getSessionCsrfToken: jest.fn(),
+  setSessionCsrfToken: jest.fn(),
+}));
+
+const fetchWebSessionMock = fetchWebSession as jest.Mock;
 const postJsonMock = postJson as jest.Mock;
+const requestApiMock = requestApi as jest.Mock;
+const setSessionCsrfTokenMock = setSessionCsrfToken as jest.Mock;
 
-describe("requestDevBypassSignIn", () => {
-  it("submits the selected local dev role", () => {
-    postJsonMock.mockReturnValue(Promise.resolve({}));
+describe("web sessions", () => {
+  afterEach(() => jest.mocked(hasPendingSignOut).mockReturnValue(false));
+  it("does not fetch a residual cookie session while sign-out is pending", async () => {
+    jest.mocked(hasPendingSignOut).mockReturnValue(true);
+    await expect(restoreWebSession()).rejects.toMatchObject({ statusCode: 401 });
+    expect(fetchWebSession).not.toHaveBeenCalled();
+  });
+  it("discards a restore response if sign-out began while it was in flight", async () => {
+    jest.mocked(hasPendingSignOut).mockReturnValueOnce(false).mockReturnValueOnce(true);
+    fetchWebSessionMock.mockResolvedValue({ csrfToken: "residual", user: {} });
+    await expect(restoreWebSession()).rejects.toMatchObject({ statusCode: 401 });
+    expect(setSessionCsrfToken).not.toHaveBeenCalled();
+  });
+  it("submits the selected role to the web-only development endpoint", async () => {
+    const response = {
+      csrfToken: "csrf-token",
+      expiresAt: "2026-08-11T00:00:00.000Z",
+      user: {},
+    };
+    postJsonMock.mockResolvedValue(response);
 
-    void requestDevBypassSignIn("mentor");
+    await expect(requestDevBypassSignIn("mentor")).resolves.toBe(response);
 
-    expect(postJsonMock).toHaveBeenCalledWith("/auth/dev-bypass", { role: "mentor" });
+    expect(postJsonMock).toHaveBeenCalledWith("/auth/web/dev-bypass", {
+      role: "mentor",
+    });
+    expect(setSessionCsrfTokenMock).toHaveBeenCalledWith("csrf-token");
+    expect(setPendingSignOut).toHaveBeenCalledWith(false);
   });
 
-  it("defaults to student mode", () => {
-    postJsonMock.mockReturnValue(Promise.resolve({}));
+  it("restores a cookie session and keeps its CSRF token in memory", async () => {
+    const response = {
+      csrfToken: "restored-csrf-token",
+      expiresAt: "2026-08-11T00:00:00.000Z",
+      user: { accountId: "user-1" },
+    };
+    fetchWebSessionMock.mockResolvedValue(response);
 
-    void requestDevBypassSignIn();
+    await expect(restoreWebSession()).resolves.toBe(response);
 
-    expect(postJsonMock).toHaveBeenCalledWith("/auth/dev-bypass", { role: "student" });
+    expect(setSessionCsrfTokenMock).toHaveBeenCalledWith(
+      "restored-csrf-token",
+    );
+  });
+
+  it("revokes the server session through an unsafe authenticated request", async () => {
+    requestApiMock.mockResolvedValue({ ok: true });
+
+    await revokeWebSession();
+
+    expect(requestApiMock).toHaveBeenCalledWith("/auth/web/logout", {
+      keepalive: true,
+      method: "POST",
+    });
   });
 });

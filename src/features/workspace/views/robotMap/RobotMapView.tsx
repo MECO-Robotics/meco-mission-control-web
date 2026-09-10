@@ -3,10 +3,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import type { SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
+import type { NavigationTarget } from "@/lib/workspaceNavigation";
 
 import { RobotConfigurationToolbar } from "./RobotConfigurationToolbar";
 import { RobotMapCanvas } from "./RobotMapCanvas";
-import { buildAutoArrangedLayouts, buildUnplacedLayout, resolveSubsystemLayout } from "./robotMapLayout";
+import { buildAutoArrangedLayouts, buildUnplacedLayout } from "./robotMapLayout";
 import { buildRobotConfigurationViewModel } from "./robotMapViewModel";
 import { SubsystemDetailPanel } from "./SubsystemDetailPanel";
 import { SubsystemMapCard } from "./SubsystemMapCard";
@@ -20,6 +21,7 @@ interface RobotMapViewProps {
   openEditMechanismModal: (mechanism: BootstrapPayload["mechanisms"][number]) => void;
   openEditPartInstanceModal: (partInstance: BootstrapPayload["partInstances"][number]) => void;
   openEditSubsystemModal: (subsystem: BootstrapPayload["subsystems"][number]) => void;
+  onOpenDrilldownTarget?: (target: NavigationTarget) => void;
   removePartInstanceFromMechanism: (partInstanceId: string) => Promise<boolean>;
   saveSubsystemLayout: (
     subsystemId: string,
@@ -68,6 +70,7 @@ export function RobotMapView({
   openEditMechanismModal,
   openEditPartInstanceModal,
   openEditSubsystemModal,
+  onOpenDrilldownTarget,
   removePartInstanceFromMechanism,
   saveSubsystemLayout,
   updateSubsystemConfiguration,
@@ -102,16 +105,6 @@ export function RobotMapView({
     }
   }, [referenceImageStorageKey]);
 
-  useEffect(() => {
-    setLayoutDraftBySubsystemId((current) => {
-      const next: Record<string, SubsystemLayoutFields> = {};
-      viewModel.subsystems.forEach((subsystem) => {
-        next[subsystem.id] = current[subsystem.id] ?? subsystem.layout;
-      });
-      return next;
-    });
-  }, [viewModel.subsystems]);
-
   const subsystems = useMemo(
     () =>
       viewModel.subsystems.map((subsystem) => ({
@@ -120,14 +113,6 @@ export function RobotMapView({
       })),
     [layoutDraftBySubsystemId, viewModel.subsystems],
   );
-  const persistedLayoutBySubsystemId = useMemo(() => {
-    const nextLayouts: Record<string, SubsystemLayoutFields> = {};
-    bootstrap.subsystems.forEach((subsystem) => {
-      nextLayouts[subsystem.id] = resolveSubsystemLayout(subsystem);
-    });
-    return nextLayouts;
-  }, [bootstrap.subsystems]);
-
   useEffect(() => {
     if (subsystems.length === 0) {
       setSelectedSubsystemId(null);
@@ -140,7 +125,10 @@ export function RobotMapView({
   }, [selectedSubsystemId, subsystems]);
 
   const selectedSubsystem = useMemo(
-    () => (selectedSubsystemId ? subsystems.find((subsystem) => subsystem.id === selectedSubsystemId) ?? null : null),
+    () =>
+      selectedSubsystemId
+        ? subsystems.find((subsystem) => subsystem.id === selectedSubsystemId) ?? subsystems[0] ?? null
+        : subsystems[0] ?? null,
     [selectedSubsystemId, subsystems],
   );
 
@@ -154,19 +142,8 @@ export function RobotMapView({
     setIsLayoutEditEnabled((current) => !current);
   }, []);
 
-  const buildRollbackLayouts = (subsystemIds: string[]) => {
-    const rollbackLayouts: Record<string, SubsystemLayoutFields> = {};
-    subsystemIds.forEach((subsystemId) => {
-      rollbackLayouts[subsystemId] = persistedLayoutBySubsystemId[subsystemId]
-        ? { ...persistedLayoutBySubsystemId[subsystemId] }
-        : buildUnplacedLayout(null);
-    });
-    return rollbackLayouts;
-  };
-
   const persistLayouts = async (
     nextLayouts: Record<string, SubsystemLayoutFields>,
-    rollbackLayoutsBySubsystemId: Record<string, SubsystemLayoutFields>,
   ) => {
     const requestVersionBySubsystemId = Object.fromEntries(
       Object.keys(nextLayouts).map((subsystemId) => {
@@ -184,41 +161,44 @@ export function RobotMapView({
       })),
     );
 
-    const failedRollbackLayouts: Record<string, SubsystemLayoutFields> = {};
-    saveResults.forEach(({ subsystemId, didPersist, requestVersion }) => {
-      if (!didPersist) {
-        const latestVersion = layoutPersistVersionBySubsystemIdRef.current[subsystemId] ?? 0;
-        if (latestVersion === requestVersion) {
-          failedRollbackLayouts[subsystemId] =
-            rollbackLayoutsBySubsystemId[subsystemId] ?? buildUnplacedLayout(null);
+    setLayoutDraftBySubsystemId((current) => {
+      const next = { ...current };
+      saveResults.forEach(({ subsystemId, requestVersion }) => {
+        if (layoutPersistVersionBySubsystemIdRef.current[subsystemId] === requestVersion && current[subsystemId] === nextLayouts[subsystemId]) {
+          // The save owner updates bootstrap; completed drafts no longer shadow it.
+          delete next[subsystemId];
         }
-      }
+      });
+      return next;
     });
-
-    if (Object.keys(failedRollbackLayouts).length > 0) {
-      setLayoutDraftBySubsystemId((current) => ({ ...current, ...failedRollbackLayouts }));
-    }
   };
 
   const handleLayoutDrop = async (subsystemId: string, layout: SubsystemLayoutFields) => {
     applyLayoutDraft(subsystemId, layout);
     await persistLayouts(
       { [subsystemId]: layout },
-      buildRollbackLayouts([subsystemId]),
     );
   };
 
   const handleAutoArrange = async () => {
+    const visibleSubsystemIds = new Set(subsystems.map((subsystem) => subsystem.id));
     const autoLayouts = buildAutoArrangedLayouts(
-      subsystems.map((subsystem) => ({
-        id: subsystem.id,
-        layoutView: subsystem.layout.layoutView,
-        layoutZone: subsystem.layout.layoutZone,
-      })),
+      bootstrap.subsystems.map((subsystem) => {
+        const draftLayout = layoutDraftBySubsystemId[subsystem.id];
+        return {
+          id: subsystem.id,
+          layoutX: draftLayout?.layoutX ?? subsystem.layoutX,
+          layoutY: draftLayout?.layoutY ?? subsystem.layoutY,
+          layoutView: draftLayout?.layoutView ?? subsystem.layoutView,
+          layoutZone: draftLayout?.layoutZone ?? subsystem.layoutZone,
+          sortOrder: draftLayout?.sortOrder ?? subsystem.sortOrder,
+        };
+      }),
+      visibleSubsystemIds,
     );
     setLayoutDraftBySubsystemId((current) => ({ ...current, ...autoLayouts }));
 
-    await persistLayouts(autoLayouts, buildRollbackLayouts(Object.keys(autoLayouts)));
+    await persistLayouts(autoLayouts);
   };
 
   const handleResetLayout = async () => {
@@ -227,7 +207,7 @@ export function RobotMapView({
     );
     setLayoutDraftBySubsystemId((current) => ({ ...current, ...resetLayouts }));
 
-    await persistLayouts(resetLayouts, buildRollbackLayouts(Object.keys(resetLayouts)));
+    await persistLayouts(resetLayouts);
   };
 
   const handleReferenceImageSelected = async (file: File) => {
@@ -299,6 +279,7 @@ export function RobotMapView({
             onEditMechanism={openEditMechanismModal}
             onEditPartInstance={openEditPartInstanceModal}
             onEditSubsystem={openEditSubsystemModal}
+            onOpenDrilldownTarget={onOpenDrilldownTarget}
             onRemovePartFromMechanism={removePartInstanceFromMechanism}
             onSaveSubsystemConfiguration={updateSubsystemConfiguration}
             selectedSubsystem={selectedSubsystem}
