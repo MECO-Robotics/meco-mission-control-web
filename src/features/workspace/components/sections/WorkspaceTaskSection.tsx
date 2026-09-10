@@ -130,7 +130,6 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
         swipeDirection={taskSwipeDirection}
       >
         <TaskQueueView
-          currentMemberId={props.currentMemberId}
           activePersonFilter={activePersonFilter}
           bootstrap={bootstrap}
           disciplinesById={disciplinesById}
