@@ -36,4 +36,8 @@ describe("flat sidebar navigation", () => {
     expect(markup).not.toContain(">Structure</span>");
   });
 
+  it("does not grey out unavailable destinations", () => {
+    const sidebarCss = require("node:fs").readFileSync("src/app/styles/shell/sidebar/sidebar.part3.css", "utf8");
+    expect(sidebarCss).not.toContain("opacity: 0.48");
+  });
 });
