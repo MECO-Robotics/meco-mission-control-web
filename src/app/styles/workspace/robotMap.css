@@ -135,57 +135,8 @@
   width: 100%;
 }
 
-.robot-config-isometric-placeholder {
-  align-items: center;
-  display: grid;
-  gap: 0.55rem;
+.robot-config-map-surface > .cad-viewer-canvas {
+  position: absolute;
   inset: 0;
-  justify-items: center;
-  position: absolute;
+  height: 100%;
 }
-
-.robot-config-isometric-placeholder small {
-  color: var(--text-copy);
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.robot-config-isometric-cube {
-  height: 152px;
-  position: relative;
-  transform: rotate(-30deg) skew(25deg);
-  width: 152px;
-}
-
-.robot-config-cube-face {
-  border: 1px solid color-mix(in srgb, var(--border-base) 70%, #16478e 30%);
-  position: absolute;
-}
-
-.robot-config-cube-face-top {
-  background: color-mix(in srgb, #16478e 35%, var(--bg-row-alt) 65%);
-  height: 72px;
-  left: 30px;
-  top: 10px;
-  transform: skewX(-45deg);
-  width: 84px;
-}
-
-.robot-config-cube-face-left {
-  background: color-mix(in srgb, #16478e 10%, var(--bg-row-alt) 90%);
-  height: 78px;
-  left: 0;
-  top: 50px;
-  transform: skewY(-45deg);
-  width: 84px;
-}
-
-.robot-config-cube-face-right {
-  background: color-mix(in srgb, #16478e 20%, var(--bg-row-alt) 80%);
-  height: 78px;
-  left: 60px;
-  top: 50px;
-  transform: skewY(45deg);
-  width: 84px;
-}
-

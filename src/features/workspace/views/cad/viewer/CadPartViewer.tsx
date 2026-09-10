@@ -50,13 +50,21 @@ function FileViewer({ file, ...imageTargets }: { file: File } & CadPartImageTarg
   </>;
 }
 
+export function EmptyCadViewer() {
+  return <div className="cad-viewer-canvas" role="img" aria-label="Empty 3D viewer">
+    <SceneBoundary><Suspense fallback={null}>
+      <CadPartScene meshes={[]} selected={null} isolated={false} wireframe={false} reset={0} onSelect={() => {}} />
+    </Suspense></SceneBoundary>
+  </div>;
+}
+
 export function CadPartViewer({ file, ...imageTargets }: { file: File | null } & CadPartImageTargets) {
   // A file identity change replaces the entire reader and selection state.
   const [current, setCurrent] = useState({ file, key: 0 });
   if (current.file !== file) setCurrent({ file, key: current.key + 1 });
   return <section className="cad-card cad-part-viewer" aria-label="CAD part viewer">
     <h3>Part viewer</h3>
-    {file ? <FileViewer key={current.key} file={file} {...imageTargets} /> : <p>Select a STEP file above to inspect its parts in 3D before importing.</p>}
+    {file ? <FileViewer key={current.key} file={file} {...imageTargets} /> : <EmptyCadViewer />}
   </section>;
 }
 

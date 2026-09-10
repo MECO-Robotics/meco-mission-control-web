@@ -14,7 +14,7 @@ function canvas(node: ReactNode): CanvasProps | undefined {
 }
 
 it("shows refreshed server layouts outside pending edits and clears only acknowledged draft versions", async () => {
-  const states: unknown[] = [];
+  const states: unknown[] = ["", "map"];
   const refs: Array<{ current: unknown }> = [];
   let stateCursor = 0;
   let refCursor = 0;
