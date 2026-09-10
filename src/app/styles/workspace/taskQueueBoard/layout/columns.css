@@ -4,10 +4,11 @@
   min-width: 0;
   width: 100%;
   gap: 0.7rem;
-  align-items: start;
+  align-items: stretch;
 }
 
 .task-queue-board-column {
+  position: relative;
   display: grid;
   gap: 0.55rem;
   min-width: 0;
@@ -16,6 +17,17 @@
   border-radius: 16px;
   background: var(--bg-panel);
   box-shadow: 0 8px 20px rgba(15, 28, 52, 0.06);
+}
+
+/* Keep status groups readable as one board while preserving each card's surface. */
+.kanban-status-column + .kanban-status-column::before {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: calc(-0.35rem - 1px);
+  width: 1px;
+  background: var(--border-base);
+  content: "";
+  pointer-events: none;
 }
 
 .task-queue-board-column-header {
