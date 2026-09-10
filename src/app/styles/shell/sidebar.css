@@ -1,5 +1,5 @@
-@import url("./sidebar/sidebar.part1.css");
-@import url("./sidebar/sidebar.part2.css");
-@import url("./sidebar/sidebar.part3.css");
+@import url("./sidebar/sidebar-core.css");
+@import url("./sidebar/sidebar-projects.css");
+@import url("./sidebar/sidebar-navigation.css");
 @import url("./sidebar/sidebar-settings.css");
 @import url("./sidebar/sidebar-scope.css");
