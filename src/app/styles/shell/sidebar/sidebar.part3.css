@@ -132,7 +132,7 @@
   font-size: 0.74rem;
   font-weight: 700;
   line-height: 1;
-  transition: opacity 0.14s ease, transform 0.14s ease;
+  transition: opacity 0.28s ease, transform 0.28s ease;
   z-index: 1205;
 }
 
