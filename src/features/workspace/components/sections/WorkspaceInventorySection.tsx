@@ -43,23 +43,27 @@ export function WorkspaceInventorySection(props: WorkspaceContentPanelsViewProps
         isActive={effectiveInventoryView === "materials"}
         swipeDirection={inventorySwipeDirection}
       >
-        {isNonRobotProject ? (
-          <ArtifactInventoryView
-            artifacts={artifacts}
-            bootstrap={bootstrap}
-            createKind="document"
-            kinds={DOCUMENT_ARTIFACT_KINDS}
-            openCreateArtifactModal={openCreateArtifactModal}
-            openEditArtifactModal={openEditArtifactModal}
-            title="Documents"
-          />
-        ) : (
-          <MaterialsView
-            bootstrap={bootstrap}
-            openCreateMaterialModal={openCreateMaterialModal}
-            openEditMaterialModal={openEditMaterialModal}
-          />
-        )}
+        <MaterialsView
+          bootstrap={bootstrap}
+          openCreateMaterialModal={openCreateMaterialModal}
+          openEditMaterialModal={openEditMaterialModal}
+        />
+      </WorkspaceSubPanel>
+
+      <WorkspaceSubPanel
+        disableAnimations={disablePanelAnimations}
+        isActive={effectiveInventoryView === "documents"}
+        swipeDirection={inventorySwipeDirection}
+      >
+        <ArtifactInventoryView
+          artifacts={artifacts}
+          bootstrap={bootstrap}
+          createKind="document"
+          kinds={DOCUMENT_ARTIFACT_KINDS}
+          openCreateArtifactModal={openCreateArtifactModal}
+          openEditArtifactModal={openEditArtifactModal}
+          title="Documents"
+        />
       </WorkspaceSubPanel>
 
       <WorkspaceSubPanel
