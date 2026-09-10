@@ -93,8 +93,10 @@ export function AppSidebarSections({
             <button
               aria-disabled={!isSectionEnabled}
               className="tab sidebar-section-toggle"
+              aria-label={NAVIGATION_SECTION_LABELS[section]}
               data-active={activeSection === section ? "true" : "false"}
               data-enabled={isSectionEnabled ? "true" : "false"}
+              data-tab-label={NAVIGATION_SECTION_LABELS[section]}
               data-tutorial-target={`sidebar-tab-${section}`}
               onClick={(event) => onSectionClick(section, event)}
               type="button"
@@ -103,9 +105,7 @@ export function AppSidebarSections({
                 <span aria-hidden="true" className="sidebar-tab-icon">
                   {sectionIcons[section]}
                 </span>
-                {!isCollapsed ? (
-                  <span className="sidebar-tab-label">{NAVIGATION_SECTION_LABELS[section]}</span>
-                ) : null}
+                {!isCollapsed ? <span className="sidebar-tab-label">{NAVIGATION_SECTION_LABELS[section]}</span> : null}
               </span>
               {!isCollapsed ? (
                 <span
