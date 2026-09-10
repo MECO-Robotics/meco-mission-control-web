@@ -3,15 +3,19 @@ import { useState, type FormEvent } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MeetingPayload, MilestonePayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
+import { IconCalendar, IconTasks } from "@/components/shared/Icons";
 import { toErrorMessage } from "@/lib/appUtils/common";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import {
+  buildTopbarAddMenuActions,
   buildTopbarSearchProps,
+  makeAddMenuAction,
 } from "@/features/workspace/shared/topbar";
 import { WorkspaceTopbarControls } from "@/features/workspace/shared/topbar";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { MilestonesMilestoneModal } from "@/features/workspace/views/milestones/MilestonesEventModal";
 import { useMilestonesMilestoneModalState } from "@/features/workspace/views/milestones/sections/useMilestonesEventModalState";
 import { TaskCalendarFilterToolbar } from "./TaskCalendarFilterToolbar";
@@ -147,6 +151,16 @@ export function TaskCalendarView({
                 placeholder: "Search calendar...",
                 value: calendar.searchFilter,
               })}
+            />
+          }
+          addMenu={
+            <WorkspaceTopbarAddMenu
+              actions={buildTopbarAddMenuActions(
+                makeAddMenuAction("Add meeting", () => setIsMeetingModalOpen(true), <IconCalendar />),
+                makeAddMenuAction("Add milestone", milestoneModalState.openCreateMilestoneModal, <IconTasks />),
+              )}
+              ariaLabel="Add calendar item"
+              title="Add calendar item"
             />
           }
         />
