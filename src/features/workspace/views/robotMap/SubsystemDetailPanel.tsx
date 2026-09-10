@@ -121,7 +121,7 @@ export function SubsystemDetailPanel({
       emptyLabel: "No linked risks yet.",
       items: selectedSubsystem.linkedRisks,
       label: "Linked risks",
-      target: { tab: "risk-management", riskManagementView: "kanban" },
+      target: { tab: "home" },
     },
     {
       emptyLabel: "No linked worklogs yet.",

@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 export type ViewTab =
   | "home"
   | "tasks"
-  | "risk-management"
   | "worklogs"
   | "manufacturing"
   | "inventory"
@@ -29,7 +28,7 @@ export type InventoryViewTab = "materials" | "parts" | "part-mappings" | "purcha
 export type RosterViewTab = "available" | "workload" | "directory" | "attendance";
 
 export type NavigationSubItemId =
-  | "home" | "work-tasks" | "work-schedule" | "work-risks" | "work-activity"
+  | "home" | "work-tasks" | "work-schedule"
   | "resources-materials" | "resources-documents" | "resources-parts"
   | "resources-purchases" | "resources-manufacturing" | "resources-structure"
   | "team-people" | "team-attendance";
@@ -45,7 +44,6 @@ export interface NavigationTarget {
   milestoneId?: string;
   tab: ViewTab;
   taskView?: TaskViewTab;
-  riskManagementView?: RiskManagementViewTab;
   worklogsView?: WorklogsViewTab;
   inventoryView?: InventoryViewTab;
   manufacturingView?: ManufacturingViewTab;

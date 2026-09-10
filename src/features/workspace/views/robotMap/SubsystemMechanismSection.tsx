@@ -1,4 +1,4 @@
-import { IconEdit, IconPlus, IconTrash } from "@/components/shared/Icons";
+import { IconEdit, IconPlus, IconRisk, IconTrash } from "@/components/shared/Icons";
 import type { MechanismRecord } from "@/types/recordsOrganization";
 import type { PartInstanceRecord } from "@/types/recordsInventory";
 
@@ -88,7 +88,8 @@ export function SubsystemMechanismSection({
                       <li key={part.id}>
                         <span className="robot-config-part-title">
                           <span>{`${part.name} (${part.quantity})`}</span>
-                          <CadSourceBadge source={part.cadSource} />
+                            <CadSourceBadge source={part.cadSource} />
+                            {part.riskCount ? <span title={`${part.riskCount} risks`}><IconRisk /> {part.riskCount}</span> : null}
                         </span>
                         <div className="robot-config-row-actions">
                           <button

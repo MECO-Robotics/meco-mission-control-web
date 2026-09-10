@@ -21,10 +21,6 @@ export function targetMatchesNavigationState(
     return false;
   }
 
-  if (target.riskManagementView && target.riskManagementView !== state.riskManagementView) {
-    return false;
-  }
-
   if (target.worklogsView && target.worklogsView !== state.worklogsView) {
     return false;
   }
@@ -48,8 +44,7 @@ export function getActiveNavigationSubItemId(state: NavigationState, context?: V
   switch (state.activeTab) {
     case "home": return "home";
     case "tasks": return state.taskView === "robot-map" ? "resources-structure" : state.taskView === "queue" ? "work-tasks" : "work-schedule";
-    case "risk-management": return state.riskManagementView === "kanban" ? "work-risks" : "home";
-    case "worklogs": return "work-activity";
+    case "worklogs": return null;
     case "manufacturing": return "resources-manufacturing";
     case "cad": case "subsystems": return "resources-structure";
     case "roster": return state.rosterView === "attendance" ? "team-attendance" : "team-people";
