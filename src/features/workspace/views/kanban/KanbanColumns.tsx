@@ -70,7 +70,7 @@ export function KanbanColumns<TState extends string, TItem>({
 
         return (
           <section
-            className={columnClassName}
+            className={`${columnClassName} kanban-status-column`}
             data-kanban-drop-column={drag.dragEnabled ? column.state : undefined}
             key={column.state}
             onClick={onColumnBodyClick ? () => onColumnBodyClick(column.state) : undefined}
