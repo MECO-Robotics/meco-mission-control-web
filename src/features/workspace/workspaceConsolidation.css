@@ -1,4 +1,5 @@
 .workspace-presentation-controls { display: flex; flex-wrap: wrap; align-items: center; gap: .65rem; padding: .8rem 1rem; }
+.workspace-schedule-scroll { display: flex; flex: 1 1 auto; flex-direction: column; gap: 1rem; min-height: 0; max-height: 100%; overflow-y: auto; padding-bottom: 1rem; }
 .workspace-presentation-controls label { display: flex; align-items: center; gap: .5rem; }
 .workspace-presentation-controls input, .workspace-presentation-controls select { min-height: 2.5rem; max-width: 100%; color: var(--text-title); background: var(--bg-panel); border: 1px solid var(--border-base); border-radius: 6px; padding: .45rem .7rem; }
 .workspace-presentation-controls [aria-pressed="true"] { background: var(--bg-row-alt); color: var(--text-title); font-weight: 700; outline: 1px solid var(--border-base); }

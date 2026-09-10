@@ -51,10 +51,38 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
       tabSwitchDirection={props.tabSwitchDirection}
     >
       {["calendar", "timeline", "milestones"].includes(taskView) ? (
-        <div className="workspace-presentation-controls" role="group" aria-label="Schedule presentation" data-tutorial-target="schedule-view">
-          {([ ["calendar", "Calendar"], ["timeline", "Timeline"], ["milestones", "Agenda"] ] as const).map(([value, label]) => (
-            <button key={value} className="ghost-button" aria-pressed={taskView === value} onClick={() => props.onOpenDrilldownTarget({ tab: "tasks", taskView: value })} type="button">{label}</button>
-          ))}
+        <div className="workspace-schedule-scroll" data-tutorial-target="schedule-view">
+          <WorkspaceSubPanel disableAnimations={disablePanelAnimations} isActive={taskView === "calendar" || taskView === "timeline"} swipeDirection={taskSwipeDirection}>
+            <TaskCalendarView
+              activePersonFilter={activePersonFilter}
+              bootstrap={bootstrap}
+              isAllProjectsView={isAllProjectsView}
+              onSaveMeeting={handleMeetingSave}
+              onCreateMilestoneReport={props.openCreateMilestoneReportModal}
+              onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
+              onSaveTimelineMilestone={handleTimelineMilestoneSave}
+              onTaskDetailOpen={openTimelineTaskDetailsModal}
+              onTaskEditCanceled={props.onTaskEditCanceled}
+              onTaskEditSaved={props.onTaskEditSaved}
+            />
+          </WorkspaceSubPanel>
+          <WorkspaceSubPanel disableAnimations={disablePanelAnimations} isActive={taskView === "calendar" || taskView === "timeline"} swipeDirection={taskSwipeDirection}>
+            <MemoizedTimelineView
+              activePersonFilter={activePersonFilter}
+              bootstrap={bootstrap}
+              isAllProjectsView={isAllProjectsView}
+              membersById={membersById}
+              onTaskEditCanceled={props.onTaskEditCanceled}
+              onTaskEditSaved={props.onTaskEditSaved}
+              onCreateMilestoneReport={props.openCreateMilestoneReportModal}
+              onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
+              onSaveTimelineMilestone={handleTimelineMilestoneSave}
+              openCreateTaskModal={openCreateTaskModalFromTimeline}
+              openTaskDetailModal={openTimelineTaskDetailsModal}
+              setActivePersonFilter={setActivePersonFilter}
+              triggerCreateMilestoneToken={timelineMilestoneCreateSignal}
+            />
+          </WorkspaceSubPanel>
         </div>
       ) : null}
       {taskView === "robot-map" ? (
@@ -62,47 +90,6 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
           <button className="ghost-button" onClick={() => props.onOpenDrilldownTarget({ tab: "cad" })} type="button">Import CAD</button>
         </div>
       ) : null}
-      <WorkspaceSubPanel
-        disableAnimations={disablePanelAnimations}
-        isActive={taskView === "calendar"}
-        swipeDirection={taskSwipeDirection}
-      >
-        <TaskCalendarView
-          activePersonFilter={activePersonFilter}
-          bootstrap={bootstrap}
-          isAllProjectsView={isAllProjectsView}
-          onSaveMeeting={handleMeetingSave}
-          onCreateMilestoneReport={props.openCreateMilestoneReportModal}
-          onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
-          onSaveTimelineMilestone={handleTimelineMilestoneSave}
-          onTaskDetailOpen={openTimelineTaskDetailsModal}
-          onTaskEditCanceled={props.onTaskEditCanceled}
-          onTaskEditSaved={props.onTaskEditSaved}
-        />
-      </WorkspaceSubPanel>
-
-      <WorkspaceSubPanel
-        disableAnimations={disablePanelAnimations}
-        isActive={taskView === "timeline"}
-        swipeDirection={taskSwipeDirection}
-      >
-        <MemoizedTimelineView
-          activePersonFilter={activePersonFilter}
-          bootstrap={bootstrap}
-          isAllProjectsView={isAllProjectsView}
-          membersById={membersById}
-          onTaskEditCanceled={props.onTaskEditCanceled}
-          onTaskEditSaved={props.onTaskEditSaved}
-          onCreateMilestoneReport={props.openCreateMilestoneReportModal}
-          onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
-          onSaveTimelineMilestone={handleTimelineMilestoneSave}
-          openCreateTaskModal={openCreateTaskModalFromTimeline}
-          openTaskDetailModal={openTimelineTaskDetailsModal}
-          setActivePersonFilter={setActivePersonFilter}
-          triggerCreateMilestoneToken={timelineMilestoneCreateSignal}
-        />
-      </WorkspaceSubPanel>
-
       <WorkspaceSubPanel
         disableAnimations={disablePanelAnimations}
         isActive={taskView === "robot-map"}
