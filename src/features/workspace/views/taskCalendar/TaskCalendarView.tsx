@@ -174,14 +174,14 @@ export function TaskCalendarView({
               title="Add calendar item"
             />
           }
-        />
+        >
+          <TaskCalendarMonthToolbar
+            monthLabel={calendar.monthLabel}
+            onMonthChange={() => setSelectedDateKey(null)}
+            setMonthCursor={calendar.setMonthCursor}
+          />
+        </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
-
-      <div className="panel-header compact-header">
-        <div className="queue-section-header">
-          <h2>Calendar</h2>
-        </div>
-      </div>
 
       {calendar.unfilteredEvents.length === 0 ? (
         <div className="empty-state">
@@ -192,12 +192,6 @@ export function TaskCalendarView({
         </div>
       ) : (
         <div className="task-calendar-frame">
-          <TaskCalendarMonthToolbar
-            monthLabel={calendar.monthLabel}
-            onMonthChange={() => setSelectedDateKey(null)}
-            setMonthCursor={calendar.setMonthCursor}
-          />
-
           {calendar.events.length === 0 ? (
             <div className="empty-state task-calendar-filter-empty">
               <strong>No events match this filter.</strong>
