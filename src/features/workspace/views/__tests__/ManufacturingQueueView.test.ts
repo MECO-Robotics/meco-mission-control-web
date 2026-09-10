@@ -3,9 +3,7 @@
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
-import { AllManufacturingView } from "@/features/workspace/views/manufacturing/AllManufacturingView";
-import { CncView } from "@/features/workspace/views/manufacturing/CncView";
-import { PrintsView } from "@/features/workspace/views/manufacturing/PrintsView";
+import { ManufacturingQueueView } from "@/features/workspace/views/manufacturing/ManufacturingQueueView";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { ManufacturingItemRecord } from "@/types/recordsInventory";
 
@@ -102,13 +100,15 @@ describe("ManufacturingQueueView", () => {
     };
 
     const allMarkup = renderToStaticMarkup(
-      React.createElement(AllManufacturingView, {
+      React.createElement(ManufacturingQueueView, {
+        title: "Manufacturing", addButtonAriaLabel: "Add job", emptyStateMessage: "No jobs", showInHouseColumn: true, tutorialTargetPrefix: "cnc",
         ...baseProps,
         processFilterValue: "all",
       }),
     );
     const printMarkup = renderToStaticMarkup(
-      React.createElement(AllManufacturingView, {
+      React.createElement(ManufacturingQueueView, {
+        title: "Manufacturing", addButtonAriaLabel: "Add job", emptyStateMessage: "No jobs", showInHouseColumn: true, tutorialTargetPrefix: "cnc",
         ...baseProps,
         processFilterValue: "prints",
       }),
@@ -126,7 +126,8 @@ describe("ManufacturingQueueView", () => {
 
   it("shows the in-house source column for CNC jobs only", () => {
     const cncMarkup = renderToStaticMarkup(
-      React.createElement(CncView, {
+      React.createElement(ManufacturingQueueView, {
+        title: "Manufacturing", addButtonAriaLabel: "Add job", emptyStateMessage: "No jobs", showInHouseColumn: true, tutorialTargetPrefix: "cnc",
         activePersonFilter: [],
         bootstrap,
         items: [manufacturingItem],
@@ -140,7 +141,8 @@ describe("ManufacturingQueueView", () => {
     );
 
     const printMarkup = renderToStaticMarkup(
-      React.createElement(PrintsView, {
+      React.createElement(ManufacturingQueueView, {
+        title: "Manufacturing", addButtonAriaLabel: "Add job", emptyStateMessage: "No jobs", showInHouseColumn: true, tutorialTargetPrefix: "cnc",
         activePersonFilter: [],
         bootstrap,
         items: [{ ...manufacturingItem, process: "3d-print" }],
@@ -151,7 +153,8 @@ describe("ManufacturingQueueView", () => {
       }),
     );
     const hiddenQuickActionsMarkup = renderToStaticMarkup(
-      React.createElement(CncView, {
+      React.createElement(ManufacturingQueueView, {
+        title: "Manufacturing", addButtonAriaLabel: "Add job", emptyStateMessage: "No jobs", showInHouseColumn: true, tutorialTargetPrefix: "cnc",
         activePersonFilter: [],
         bootstrap,
         items: [manufacturingItem],

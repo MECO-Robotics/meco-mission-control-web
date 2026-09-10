@@ -93,6 +93,8 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
     setTaskDraft,
   } = props;
 
+  const initialDraft = useRef(JSON.stringify(taskDraft));
+  const confirmDiscard = () => JSON.stringify(taskDraft) === initialDraft.current || window.confirm("Discard unsaved changes?");
   const isBusy = isSavingTask || isDeletingTask;
   const busyRef = useRef(isBusy);
   useLayoutEffect(() => { busyRef.current = isBusy; }, [isBusy]);
@@ -103,16 +105,16 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
   const resolveBlockerWhenIdle = useCallback(async (id: string) => {
     if (!busyRef.current) await handleResolveTaskBlocker(id);
   }, [handleResolveTaskBlocker]);
-  const closeWhenIdle = () => { if (!busyRef.current) closeTaskModal(); };
+  const closeWhenIdle = () => { if (!busyRef.current && confirmDiscard()) closeTaskModal(); };
 
   const handleTaskEditClosed = () => {
-    if (busyRef.current) return;
+    if (busyRef.current || !confirmDiscard()) return;
     onTaskEditCanceled();
     closeTaskModal();
   };
 
   const handleTaskEditCancel = () => {
-    if (busyRef.current) return;
+    if (busyRef.current || !confirmDiscard()) return;
     onTaskEditCanceled();
 
     if (activeTask) {

@@ -6,15 +6,15 @@ import type {
 const operationsSteps = [
   {
     id: "roster-tab",
-    title: "Open Config",
-    instruction: "Open Config from the sidebar.",
-    selector: '[data-tutorial-target="sidebar-tab-config"]',
+    title: "Open Team",
+    instruction: "Open Team from the sidebar.",
+    selector: '[data-tutorial-target="sidebar-tab-team"]',
   },
   {
     id: "directory-view",
-    title: "Open Directory",
-    instruction: "Choose Directory to manage demo people.",
-    selector: '[data-tutorial-target="config-view-config-directory"]',
+    title: "Open People",
+    instruction: "Choose People to manage demo people.",
+    selector: '[aria-label="View"]',
   },
   {
     id: "create-student",
@@ -24,15 +24,15 @@ const operationsSteps = [
   },
   {
     id: "inventory-tab",
-    title: "Open Inventory",
-    instruction: "Open Inventory from the sidebar.",
-    selector: '[data-tutorial-target="sidebar-tab-inventory"]',
+    title: "Open Resources",
+    instruction: "Open Resources from the sidebar.",
+    selector: '[data-tutorial-target="sidebar-tab-resources"]',
   },
   {
     id: "inventory-materials",
     title: "Open Materials",
-    instruction: "Switch Inventory to the Materials subtab.",
-    selector: '[data-tutorial-target="inventory-view-inventory-materials"]',
+    instruction: "Choose Materials from the view selector.",
+    selector: '[aria-label="View"]',
   },
   {
     id: "create-material",
@@ -55,8 +55,8 @@ const operationsSteps = [
   {
     id: "inventory-parts",
     title: "Open Parts",
-    instruction: "Switch Inventory to the Parts subtab.",
-    selector: '[data-tutorial-target="inventory-view-inventory-parts"]',
+    instruction: "Choose Parts from the view selector.",
+    selector: '[aria-label="View"]',
   },
   {
     id: "create-part",
@@ -73,8 +73,8 @@ const operationsSteps = [
   {
     id: "inventory-purchases",
     title: "Open Purchases",
-    instruction: "Switch Inventory to the Purchases subtab.",
-    selector: '[data-tutorial-target="inventory-view-inventory-purchases"]',
+    instruction: "Choose Purchases from the view selector.",
+    selector: '[aria-label="View"]',
   },
   {
     id: "create-purchase",
@@ -90,33 +90,33 @@ const operationsSteps = [
   },
   {
     id: "workflow-tab",
-    title: "Open Subsystems",
-    instruction: "Open Readiness from the sidebar.",
-    selector: '[data-tutorial-target="sidebar-tab-readiness"]',
+    title: "Open Structure",
+    instruction: "Open Resources from the navigation.",
+    selector: '[data-tutorial-target="sidebar-tab-resources"]',
   },
   {
     id: "subsystems-view",
-    title: "Open Subsystems",
-    instruction: "Choose Subsystems in Readiness.",
-    selector: '[data-tutorial-target="readiness-view-readiness-subsystems"]',
+    title: "Open Structure",
+    instruction: "Choose Structure from the view selector.",
+    selector: '[aria-label="View"]',
   },
   {
     id: "create-subsystem",
     title: "Create a subsystem",
     instruction: "Use Add subsystem and save it.",
-    selector: '[data-tutorial-target="create-subsystem-button"]',
+    selector: '[aria-label="Add subsystem"]',
   },
   {
     id: "edit-subsystem",
     title: "Edit a subsystem",
-    instruction: "Click the subsystem edit icon.",
-    selector: '[data-tutorial-target="edit-subsystem-button"]',
+    instruction: "Select a subsystem on the map, then choose Edit subsystem in its detail panel.",
+    selector: '[aria-label="Edit subsystem"]',
   },
   {
     id: "create-mechanism",
     title: "Add a mechanism",
     instruction: "Use Add mechanism and save it.",
-    selector: '[data-tutorial-target="create-mechanism-button"]',
+    selector: '[aria-label="Add mechanism"]',
   },
   {
     id: "edit-mechanism",
@@ -133,14 +133,14 @@ const operationsSteps = [
   {
     id: "manufacturing-tab",
     title: "Open Manufacturing",
-    instruction: "Open Tasks from the sidebar.",
-    selector: '[data-tutorial-target="sidebar-tab-tasks"]',
+    instruction: "Open Resources from the navigation.",
+    selector: '[data-tutorial-target="sidebar-tab-resources"]',
   },
   {
     id: "manufacturing-cnc",
     title: "Open manufacturing queue",
-    instruction: "Choose Manufacturing in Tasks.",
-    selector: '[data-tutorial-target="tasks-view-tasks-manufacturing"]',
+    instruction: "Choose Manufacturing from the view selector.",
+    selector: '[aria-label="View"]',
   },
   {
     id: "create-cnc-job",

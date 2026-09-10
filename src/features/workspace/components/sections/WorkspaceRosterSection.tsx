@@ -1,6 +1,4 @@
-import { RosterAvailableStudentsView } from "@/features/workspace/views/roster/RosterAvailableStudentsView";
 import { RosterAttendanceView } from "@/features/workspace/views/roster/RosterAttendanceView";
-import { RosterWorkloadView } from "@/features/workspace/views/roster/RosterWorkloadView";
 import { RosterView } from "@/features/workspace/views/RosterView";
 import { WorkspaceSectionPanel, WorkspaceSubPanel } from "../../WorkspaceContentPanelShells";
 import type { WorkspaceContentPanelsViewProps } from "../workspaceContentPanelsViewTypes";
@@ -23,7 +21,6 @@ export function WorkspaceRosterSection(props: WorkspaceContentPanelsViewProps) {
     memberEditDraft,
     memberForm,
     openTimelineTaskDetailsModal,
-    openCreateTaskModal,
     openCreateTaskModalForMember,
     requestMemberPhotoUpload,
     rosterMentors,
@@ -45,19 +42,11 @@ export function WorkspaceRosterSection(props: WorkspaceContentPanelsViewProps) {
       isActive={props.activeTab === "roster"}
       tabSwitchDirection={props.tabSwitchDirection}
     >
-      <WorkspaceSubPanel disableAnimations={disablePanelAnimations} isActive={rosterView === "available"}>
-        <RosterAvailableStudentsView
+      <WorkspaceSubPanel disableAnimations={disablePanelAnimations} isActive={rosterView !== "attendance"}>
+        <RosterView
           availabilityBootstrap={availabilityBootstrap}
-          bootstrap={bootstrap}
-          onCreateTask={openCreateTaskModal}
           onCreateTaskForMember={openCreateTaskModalForMember}
           onOpenTask={openTimelineTaskDetailsModal}
-          selectedProject={selectedProject}
-        />
-      </WorkspaceSubPanel>
-
-      <WorkspaceSubPanel disableAnimations={disablePanelAnimations} isActive={rosterView === "directory"}>
-        <RosterView
           allMembers={allMembers}
           bootstrap={bootstrap}
           selectedProject={selectedProject}
@@ -82,20 +71,6 @@ export function WorkspaceRosterSection(props: WorkspaceContentPanelsViewProps) {
           setMemberEditDraft={setMemberEditDraft}
           setMemberForm={setMemberForm}
           students={students}
-        />
-      </WorkspaceSubPanel>
-
-      <WorkspaceSubPanel disableAnimations={disablePanelAnimations} isActive={rosterView === "workload"}>
-        <RosterWorkloadView
-          bootstrap={bootstrap}
-          onOpenTask={(taskId) => {
-            const task = bootstrap.tasks.find((candidate) => candidate.id === taskId);
-            if (task) {
-              openTimelineTaskDetailsModal(task);
-            }
-          }}
-          selectedProject={selectedProject}
-          selectedSeasonId={selectedSeasonId}
         />
       </WorkspaceSubPanel>
 

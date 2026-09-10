@@ -6,6 +6,7 @@ import { RiskMetricsSection } from "../RiskMetricsSection";
 import type { useRisksViewModel } from "../riskViewModel";
 
 interface RiskMetricsPanelProps {
+  embedded?: boolean;
   mechanismMetrics: ScopeMetricRow[];
   metricsSearch: string;
   onMetricsSearchChange: (search: string) => void;
@@ -14,6 +15,7 @@ interface RiskMetricsPanelProps {
 }
 
 export function RiskMetricsPanel({
+  embedded = false,
   mechanismMetrics,
   metricsSearch,
   onMetricsSearchChange,
@@ -22,7 +24,7 @@ export function RiskMetricsPanel({
 }: RiskMetricsPanelProps) {
   return (
     <>
-      <AppTopbarSlotPortal slot="controls">
+      {!embedded ? <AppTopbarSlotPortal slot="controls">
         <div className="panel-actions filter-toolbar risk-metrics-toolbar">
           <TopbarResponsiveSearch
             ariaLabel="Search metrics"
@@ -32,7 +34,7 @@ export function RiskMetricsPanel({
             value={metricsSearch}
           />
         </div>
-      </AppTopbarSlotPortal>
+      </AppTopbarSlotPortal> : null}
 
       <RiskMetricsSection
         blockerBreakdown={viewModel.blockerBreakdown}

@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useRememberedViewState } from "@/features/workspace/shared/navigation/WorkspaceViewMemory";
+import { useMemo } from "react";
 import type { Dispatch, SetStateAction } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -11,10 +12,6 @@ import {
   DEFAULT_WORK_LOG_ACTIVITY_GROUP_MODE,
   type WorkLogActivityGroupMode,
 } from "./workLogsActivityGrouping";
-import {
-  groupActiveWorklogCards,
-  type WorkLogActiveBoard,
-} from "./workLogsActiveBoard";
 import {
   buildTaskById,
   buildWorkLogsSummaryState,
@@ -53,7 +50,6 @@ export type WorkLogPaginationState = {
 };
 
 export type WorkLogsViewState = {
-  activeBoard: WorkLogActiveBoard;
   activityActions: AuditActionRecord[];
   activityGroupMode: WorkLogActivityGroupMode;
   activityPagination: ActivityPaginationState;
@@ -175,12 +171,12 @@ export function useWorkLogsViewState({
   membersById,
   subsystemsById,
 }: WorkLogsViewStateArgs): WorkLogsViewState {
-  const [search, setSearch] = useState("");
-  const [activityGroupMode, setActivityGroupMode] = useState<WorkLogActivityGroupMode>(
+  const [search, setSearch] = useRememberedViewState("activity.search", "");
+  const [activityGroupMode, setActivityGroupMode] = useRememberedViewState<WorkLogActivityGroupMode>("activity.activityGroupMode",
     DEFAULT_WORK_LOG_ACTIVITY_GROUP_MODE,
   );
-  const [subsystemFilter, setSubsystemFilter] = useState<FilterSelection>([]);
-  const [sortMode, setSortMode] = useState<WorkLogSortMode>("recent");
+  const [subsystemFilter, setSubsystemFilter] = useRememberedViewState<FilterSelection>("activity.subsystemFilter", []);
+  const [sortMode, setSortMode] = useRememberedViewState<WorkLogSortMode>("activity.sortMode", "recent");
 
   const taskById = useMemo(() => buildTaskById(bootstrap.tasks), [bootstrap.tasks]);
   const summaryWorkLogs = useMemo(
@@ -256,27 +252,11 @@ export function useWorkLogsViewState({
 
     return [...filteredActions].sort((left, right) => right.timestamp.localeCompare(left.timestamp));
   }, [activePersonFilter, bootstrap.actions, bootstrap.workLogs, membersById, search, subsystemsById, taskById]);
-  const activeBoard = useMemo(
-    () =>
-      groupActiveWorklogCards({
-        activePersonFilter,
-        bootstrap,
-        membersById,
-        search,
-      }),
-    [activePersonFilter, bootstrap, membersById, search],
-  );
 
   const workLogPagination = useWorkspacePagination<WorkLogRecord>(workLogs);
   const activityPagination = useWorkspacePagination<AuditActionRecord>(activityActions);
-  const workLogFilterMotionClass = useFilterChangeMotionClass([
-    activePersonFilter,
-    search,
-    sortMode,
-    subsystemFilter,
-  ]);
+  const workLogFilterMotionClass = useFilterChangeMotionClass([activePersonFilter, search, sortMode, subsystemFilter]);
   return {
-    activeBoard,
     activityActions,
     activityGroupMode,
     activityPagination,

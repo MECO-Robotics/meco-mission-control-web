@@ -1,5 +1,5 @@
 import { ModalDialog } from "@/components/ModalDialog";
-import type { Dispatch, FormEvent, SetStateAction } from "react";
+import { useRef, type Dispatch, type FormEvent, type SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { WorkLogPayload } from "@/types/payloads";
 import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
@@ -16,13 +16,19 @@ interface WorkLogEditorModalProps {
 
 export function WorkLogEditorModal({
   bootstrap,
-  closeWorkLogModal,
+  closeWorkLogModal: onClose,
   handleWorkLogSubmit,
   isSavingWorkLog,
   requestPhotoUpload,
   setWorkLogDraft,
   workLogDraft,
 }: WorkLogEditorModalProps) {
+  const initialDraft = useRef(JSON.stringify(workLogDraft));
+  const closeWorkLogModal = () => {
+    if (isSavingWorkLog) return;
+    if (JSON.stringify(workLogDraft) !== initialDraft.current && !window.confirm("Discard unsaved changes?")) return;
+    onClose();
+  };
   const selectedTask = bootstrap.tasks.find((task) => task.id === workLogDraft.taskId);
   const workLogPhotoProjectId = selectedTask?.projectId ?? bootstrap.projects[0]?.id ?? null;
   const selectedSubsystem = selectedTask
@@ -59,6 +65,7 @@ export function WorkLogEditorModal({
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Task</span>
             <select
+              aria-label="Task"
               onChange={(milestone) =>
                 setWorkLogDraft((current) => ({
                   ...current,

@@ -19,14 +19,14 @@ const planningSteps = [
   {
     id: "tasks-tab",
     title: "Open Tasks",
-    instruction: "Open the Tasks page from the sidebar.",
-    selector: '[data-tutorial-target="sidebar-tab-tasks"]',
+    instruction: "Open Work from the navigation.",
+    selector: '[data-tutorial-target="sidebar-tab-work"]',
   },
   {
     id: "task-timeline",
     title: "Switch to Timeline",
-    instruction: "In Tasks, switch to Timeline.",
-    selector: '[data-tutorial-target="tasks-view-tasks-timeline"]',
+    instruction: "Choose Schedule from the view selector, then choose Timeline.",
+    selector: '[aria-label="View"]',
   },
   {
     id: "timeline-week-view",
@@ -55,8 +55,8 @@ const planningSteps = [
   {
     id: "task-queue",
     title: "Switch to Kanban",
-    instruction: "Switch the Tasks subtab from Timeline to Kanban.",
-    selector: '[data-tutorial-target="tasks-view-tasks-board"]',
+    instruction: "Choose Tasks from the view selector.",
+    selector: '[aria-label="View"]',
   },
   {
     id: "create-task",
@@ -78,15 +78,15 @@ const planningSteps = [
   },
   {
     id: "readiness-tab",
-    title: "Open Readiness",
-    instruction: "Open Readiness from the sidebar.",
-    selector: '[data-tutorial-target="sidebar-tab-readiness"]',
+    title: "Open Work",
+    instruction: "Open Work from the navigation.",
+    selector: '[data-tutorial-target="sidebar-tab-work"]',
   },
   {
     id: "task-milestones",
-    title: "Switch to Milestones",
-    instruction: "Switch Readiness to Milestones.",
-    selector: '[data-tutorial-target="readiness-view-readiness-milestones"]',
+    title: "Switch to Agenda",
+    instruction: "Choose Schedule from the view selector, then Agenda.",
+    selector: '[aria-label="View"]',
   },
   {
     id: "create-milestone",
@@ -109,14 +109,14 @@ const planningSteps = [
   {
     id: "worklogs-tab",
     title: "Open Work logs",
-    instruction: "Open Reports from the sidebar.",
-    selector: '[data-tutorial-target="sidebar-tab-reports"]',
+    instruction: "Open Work from the navigation.",
+    selector: '[data-tutorial-target="sidebar-tab-work"]',
   },
   {
     id: "reports-worklogs",
     title: "Open Work logs",
-    instruction: "Choose Work logs in Reports.",
-    selector: '[data-tutorial-target="reports-view-reports-worklogs"]',
+    instruction: "Choose Activity from the view selector, then Work logs.",
+    selector: '[aria-label="View"]',
   },
   {
     id: "create-worklog",

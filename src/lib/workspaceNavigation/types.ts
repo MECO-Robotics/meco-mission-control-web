@@ -5,7 +5,6 @@ export type ViewTab =
   | "tasks"
   | "risk-management"
   | "worklogs"
-  | "reports"
   | "manufacturing"
   | "inventory"
   | "cad"
@@ -13,14 +12,7 @@ export type ViewTab =
   | "roster"
   | "help";
 
-export type NavigationSection =
-  | "dashboard"
-  | "readiness"
-  | "config"
-  | "tasks"
-  | "inventory"
-  | "roster"
-  | "reports";
+export type NavigationSection = "home" | "work" | "resources" | "team";
 
 export type ViewAvailabilityContext =
   | "all-project"
@@ -31,37 +23,16 @@ export type ViewAvailabilityContext =
 
 export type TaskViewTab = "calendar" | "timeline" | "robot-map" | "queue" | "milestones";
 export type RiskManagementViewTab = "attention" | "kanban" | "metrics";
-export type WorklogsViewTab = "logs" | "summary" | "activity" | "kanban";
-export type ReportsViewTab = "qa" | "milestone-results";
+export type WorklogsViewTab = "logs" | "activity" | "qa" | "results";
 export type ManufacturingViewTab = "all" | "cnc" | "prints" | "fabrication";
 export type InventoryViewTab = "materials" | "parts" | "part-mappings" | "purchases";
 export type RosterViewTab = "available" | "workload" | "directory" | "attendance";
 
 export type NavigationSubItemId =
-  | "dashboard-calendar"
-  | "dashboard-activity"
-  | "dashboard-metrics"
-  | "readiness-attention"
-  | "readiness-milestones"
-  | "readiness-subsystems"
-  | "readiness-risks"
-  | "config-robot-model"
-  | "config-cad"
-  | "config-part-mappings"
-  | "config-directory"
-  | "tasks-timeline"
-  | "tasks-board"
-  | "tasks-manufacturing"
-  | "inventory-materials"
-  | "inventory-parts"
-  | "inventory-purchases"
-  | "roster-available"
-  | "roster-workload"
-  | "roster-attendance"
-  | "reports-worklogs-kanban"
-  | "reports-worklogs"
-  | "reports-qa-forms"
-  | "reports-milestone-results";
+  | "home" | "work-tasks" | "work-schedule" | "work-risks" | "work-activity"
+  | "resources-materials" | "resources-documents" | "resources-parts"
+  | "resources-purchases" | "resources-manufacturing" | "resources-structure"
+  | "team-people" | "team-attendance";
 
 export interface NavigationItem {
   value: ViewTab;
@@ -71,11 +42,11 @@ export interface NavigationItem {
 }
 
 export interface NavigationTarget {
+  milestoneId?: string;
   tab: ViewTab;
   taskView?: TaskViewTab;
   riskManagementView?: RiskManagementViewTab;
   worklogsView?: WorklogsViewTab;
-  reportsView?: ReportsViewTab;
   inventoryView?: InventoryViewTab;
   manufacturingView?: ManufacturingViewTab;
   rosterView?: RosterViewTab;
@@ -86,7 +57,6 @@ export interface NavigationState {
   taskView: TaskViewTab;
   riskManagementView: RiskManagementViewTab;
   worklogsView: WorklogsViewTab;
-  reportsView: ReportsViewTab;
   inventoryView: InventoryViewTab;
   manufacturingView: ManufacturingViewTab;
   rosterView: RosterViewTab;

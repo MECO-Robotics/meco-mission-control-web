@@ -54,6 +54,7 @@ export function SubsystemMechanismSection({
                 <div className="robot-config-row-actions">
                   <button
                     className="subsystem-manager-action-button subsystem-manager-action-button-primary"
+                    data-tutorial-target="add-part-to-mechanism-button"
                     onClick={() => onCreatePartInstance(mechanism.record)}
                     type="button"
                   >
@@ -61,6 +62,7 @@ export function SubsystemMechanismSection({
                   </button>
                   <button
                     className="subsystem-manager-action-button"
+                    data-tutorial-target="edit-mechanism-button"
                     onClick={() => onEditMechanism(mechanism.record)}
                     type="button"
                   >

@@ -116,5 +116,18 @@ export function isInteractiveTutorialStepComplete(
     return context.workstreamModalMode === "edit" && context.activeWorkstreamId !== null;
   }
 
+  const viewByStep: Partial<Record<InteractiveTutorialStepId, string>> = {
+    "directory-view": "team-people", "task-queue": "work-tasks", "reports-worklogs": "work-activity",
+    "inventory-parts": "resources-parts", "inventory-purchases": "resources-purchases",
+    "subsystems-view": "resources-structure", "outreach-workflow-view": "resources-structure",
+    "manufacturing-cnc": "resources-manufacturing",
+  };
+  if (step.id === "task-timeline" || step.id === "task-milestones") {
+    const expected = step.id === "task-timeline" ? "timeline" : "milestones";
+    return target.getAttribute("data-active-view") === "work-schedule" &&
+      document.querySelector("main[data-task-view]")?.getAttribute("data-task-view") === expected;
+  }
+  if (step.id === "inventory-materials") return ["resources-materials", "resources-documents"].includes(target.getAttribute("data-active-view") ?? "");
+  if (viewByStep[step.id]) return target.getAttribute("data-active-view") === viewByStep[step.id];
   return target.getAttribute("data-active") === "true";
 }

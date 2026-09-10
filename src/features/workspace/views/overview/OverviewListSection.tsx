@@ -5,6 +5,7 @@ interface OverviewListSectionProps {
   items: OverviewListItem[];
   onOpenTask?: (taskId: string) => void;
   title: string;
+  onOpenItem?: (id: string) => void;
 }
 
 export function OverviewListSection({
@@ -12,6 +13,7 @@ export function OverviewListSection({
   items,
   onOpenTask,
   title,
+  onOpenItem,
 }: OverviewListSectionProps) {
   return (
     <section className="panel-subsection overview-list-section">
@@ -27,7 +29,7 @@ export function OverviewListSection({
       ) : (
         <div className="overview-list">
           {items.map((item) => {
-            const canOpenTask = Boolean(item.taskId && onOpenTask);
+            const canOpenTask = Boolean((item.taskId && onOpenTask) || onOpenItem);
             const content = (
               <>
                 <span className="overview-list-item-title">{item.title}</span>
@@ -40,7 +42,7 @@ export function OverviewListSection({
                 className="overview-list-item"
                 data-tone={item.tone ?? "neutral"}
                 key={item.id}
-                onClick={() => onOpenTask?.(item.taskId ?? "")}
+                onClick={() => item.taskId ? onOpenTask?.(item.taskId) : onOpenItem?.(item.id)}
                 type="button"
               >
                 {content}

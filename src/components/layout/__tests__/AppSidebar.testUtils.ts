@@ -15,8 +15,8 @@ import type { NavigationItem, NavigationSubItemId, ViewTab } from "@/lib/workspa
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 export function renderSidebar(
-  items: NavigationItem[],
-  activeTab: ViewTab = "reports",
+  _items: NavigationItem[],
+  activeTab: ViewTab = "worklogs",
   options?: {
     favoriteViewIds?: NavigationSubItemId[];
     canSignIn?: boolean;
@@ -38,10 +38,8 @@ export function renderSidebar(
   const sidebarProps: React.ComponentProps<typeof AppSidebar> = {
       activeTab,
       canSignIn: options?.canSignIn ?? (options?.sessionUser ?? null) === null,
-      favoriteViewIds: options?.favoriteViewIds ?? [],
       handleSignOut: jest.fn(),
       inventoryView: options?.inventoryView ?? "materials",
-      items,
       isDarkMode: false,
       isMyViewActive: options?.isMyViewActive ?? false,
       isCollapsed: options?.isCollapsed ?? false,
@@ -63,7 +61,6 @@ export function renderSidebar(
       onToggleMyView: jest.fn(),
       onToggleNotificationQueue: jest.fn(),
       projects: options?.projects ?? [],
-      reportsView: "qa",
       rosterView: "directory",
       riskManagementView: options?.riskManagementView ?? "kanban",
       selectedProjectId: options?.selectedProjectId ?? null,

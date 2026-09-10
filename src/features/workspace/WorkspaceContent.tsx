@@ -1,3 +1,5 @@
+import "./workspaceConsolidation.css";
+import { WorkspaceViewMemory } from "./shared/navigation/WorkspaceViewMemory";
 import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
 
 import type { ArtifactKind, TaskStatus } from "@/types/common";
@@ -11,7 +13,6 @@ import type {
   ManufacturingViewTab,
   NavigationTarget,
   RosterViewTab,
-  ReportsViewTab,
   RiskManagementViewTab,
   TaskViewTab,
   ViewTab,
@@ -47,6 +48,7 @@ function getSwipeDirection<T extends string>(
 }
 
 export interface WorkspaceContentProps {
+  currentMemberId?: string | null;
   activePersonFilter: FilterSelection;
   activeTab: ViewTab;
   tabSwitchDirection: TabSwitchDirection;
@@ -85,7 +87,7 @@ export interface WorkspaceContentProps {
   openCreateArtifactModal: (kind: ArtifactKind) => void;
   openCreateMaterialModal: () => void;
   openCreateMechanismModal: (subsystemId?: string) => void;
-  openCreatePartInstanceModal: (mechanism: BootstrapPayload["mechanisms"][number]) => void;
+  openCreatePartInstanceModal: (mechanism: BootstrapPayload["mechanisms"][number], partDefinitionId?: string) => void;
   openCreateSubsystemModal: () => void;
   handleDeleteMechanism: (mechanismId: string) => Promise<void>;
   openCreatePartDefinitionModal: () => void;
@@ -93,9 +95,9 @@ export interface WorkspaceContentProps {
   openCreateTaskModal: () => void;
   openCreateTaskModalForMember: (memberId: string) => void;
   openCreateTaskModalFromTimeline: () => void;
-  openCreateWorkLogModal: () => void;
-  openCreateQaReportModal: () => void;
-  openCreateMilestoneReportModal: () => void;
+  openCreateWorkLogModal: (taskId?: string) => void;
+  openCreateQaReportModal: (taskId?: string) => void;
+  openCreateMilestoneReportModal: (milestoneId?: string, onReturn?: () => void) => void;
   openCreateWorkstreamModal: () => void;
   openEditWorkstreamModal: (workstream: BootstrapPayload["workstreams"][number]) => void;
   onCreateRisk: (payload: RiskPayload) => Promise<void>;
@@ -142,7 +144,6 @@ export interface WorkspaceContentProps {
   inventoryView: InventoryViewTab;
   rosterView: RosterViewTab;
   riskManagementView: RiskManagementViewTab;
-  reportsView: ReportsViewTab;
   taskView: TaskViewTab;
   worklogsView: WorklogsViewTab;
   selectMember: (id: string | null, payload: BootstrapPayload) => void;
@@ -184,7 +185,6 @@ export function WorkspaceContent({
   inventoryView,
   isNonRobotProject,
   manufacturingView,
-  reportsView,
   setActiveTab,
   setInventoryView,
   setManufacturingView,
@@ -199,7 +199,6 @@ export function WorkspaceContent({
       ? "materials"
       : inventoryView;
   const previousTaskViewRef = useRef(taskView);
-  const previousReportsViewRef = useRef(reportsView);
   const previousManufacturingViewRef = useRef(manufacturingView);
   const previousInventoryViewRef = useRef(effectiveInventoryView);
 
@@ -209,10 +208,6 @@ export function WorkspaceContent({
     "robot-map",
     "queue",
     "milestones",
-  ]);
-  const reportsSwipeDirection = getSwipeDirection(previousReportsViewRef.current, reportsView, [
-    "qa",
-    "milestone-results",
   ]);
   const manufacturingSwipeDirection = getSwipeDirection(
     previousManufacturingViewRef.current,
@@ -229,9 +224,6 @@ export function WorkspaceContent({
     previousTaskViewRef.current = taskView;
   }, [taskView]);
   useEffect(() => {
-    previousReportsViewRef.current = reportsView;
-  }, [reportsView]);
-  useEffect(() => {
     previousManufacturingViewRef.current = manufacturingView;
   }, [manufacturingView]);
   useEffect(() => {
@@ -239,6 +231,10 @@ export function WorkspaceContent({
   }, [effectiveInventoryView]);
 
   const handleOpenDrilldownTarget = (target: NavigationTarget) => {
+    const params = new URLSearchParams(window.location.search);
+    if (target.milestoneId) params.set("milestone", target.milestoneId);
+    else params.delete("milestone");
+    window.history.replaceState(window.history.state, "", `${window.location.pathname}?${params.toString()}${window.location.hash}`);
     if (target.taskView) {
       setTaskView(target.taskView);
     }
@@ -263,17 +259,16 @@ export function WorkspaceContent({
   };
 
   return (
+    <WorkspaceViewMemory key={`${props.selectedSeasonId}:${props.selectedProject?.id ?? "all"}`}>
     <WorkspaceContentPanelsView
       {...props}
       activeTab={activeTab}
       effectiveInventoryView={effectiveInventoryView}
       inventorySwipeDirection={inventorySwipeDirection}
       manufacturingSwipeDirection={manufacturingSwipeDirection}
-      reportsSwipeDirection={reportsSwipeDirection}
       taskSwipeDirection={taskSwipeDirection}
       taskView={taskView}
       manufacturingView={manufacturingView}
-      reportsView={reportsView}
       inventoryView={inventoryView}
       isNonRobotProject={isNonRobotProject}
       onOpenDrilldownTarget={handleOpenDrilldownTarget}
@@ -284,5 +279,6 @@ export function WorkspaceContent({
       setTaskView={setTaskView}
       setWorklogsView={setWorklogsView}
     />
+    </WorkspaceViewMemory>
   );
 }

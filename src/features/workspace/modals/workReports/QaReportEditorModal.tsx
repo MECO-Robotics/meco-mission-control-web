@@ -1,5 +1,5 @@
 import { ModalDialog } from "@/components/ModalDialog";
-import type { Dispatch, FormEvent, SetStateAction } from "react";
+import { useRef, type Dispatch, type FormEvent, type SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { QaReportPayload } from "@/types/payloads";
 import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
@@ -17,13 +17,19 @@ interface QaReportEditorModalProps {
 
 export function QaReportEditorModal({
   bootstrap,
-  closeQaReportModal,
+  closeQaReportModal: onClose,
   handleQaReportSubmit,
   isSavingQaReport,
   requestPhotoUpload,
   qaReportDraft,
   setQaReportDraft,
 }: QaReportEditorModalProps) {
+  const initialDraft = useRef(JSON.stringify(qaReportDraft));
+  const closeQaReportModal = () => {
+    if (isSavingQaReport) return;
+    if (JSON.stringify(qaReportDraft) !== initialDraft.current && !window.confirm("Discard unsaved changes?")) return;
+    onClose();
+  };
   const selectedTask = bootstrap.tasks.find((task) => task.id === qaReportDraft.taskId);
   const qaReportPhotoProjectId = selectedTask?.projectId ?? bootstrap.projects[0]?.id ?? null;
 
@@ -57,6 +63,7 @@ export function QaReportEditorModal({
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Task</span>
             <select
+              aria-label="Task"
               onChange={(milestone) =>
                 setQaReportDraft((current) => ({
                   ...current,

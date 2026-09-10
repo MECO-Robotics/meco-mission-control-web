@@ -7,7 +7,7 @@ import { buildEmptyTaskPayload } from "@/lib/appUtils/taskTargets/payloadDefault
 
 it.each(["create", "edit"] as const)("freezes the %s form and refuses close/cancel during a pending save", (taskModalMode) => {
   const busy = { current: false };
-  jest.mocked(useRef).mockReturnValue(busy);
+  jest.mocked(useRef).mockImplementation((initial) => typeof initial === "boolean" ? busy : { current: initial });
   jest.mocked(useCallback).mockImplementation((callback) => callback);
   jest.mocked(useLayoutEffect).mockImplementation((effect) => { effect(); });
   const bootstrap = createBootstrap();

@@ -10,7 +10,7 @@ import { createBootstrap } from "./support/attentionViewModel.fixture";
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 describe("buildAttentionViewModel", () => {
-  it("renders action required filters inside the search overlay", () => {
+  it("keeps attention source, search and review filters visible", () => {
     const markup = renderToStaticMarkup(
       React.createElement(AttentionView, {
         activePersonFilter: [],
@@ -20,13 +20,12 @@ describe("buildAttentionViewModel", () => {
       }),
     );
 
-    expect(markup).toContain("topbar-responsive-search-actions");
-    expect(markup).toContain("--topbar-responsive-search-action-overlay-width:2rem");
-    expect(markup).toContain("attention-filter-menu");
-    expect(markup).toContain('aria-label="Action required filters"');
+    expect(markup).toContain('aria-label="Search attention"');
+    expect(markup).toContain('aria-label="Attention source"');
+    expect(markup).toContain("Needs review");
   });
 
-  it("renders the action required header without the compact subtitle", () => {
+  it("renders one attention queue heading", () => {
     const markup = renderToStaticMarkup(
       React.createElement(AttentionView, {
         activePersonFilter: [],
@@ -36,7 +35,7 @@ describe("buildAttentionViewModel", () => {
       }),
     );
 
-    expect(markup).toContain("Action Required");
+    expect(markup).toContain("Needs attention");
     expect(markup).not.toContain("Operational triage for immediate intervention");
   });
 

@@ -121,16 +121,23 @@ function classifyStudent(args: {
   return { label: "Available now", state: "available" };
 }
 
+export function getPresentRosterMemberIds(
+  bootstrap: BootstrapPayload,
+  options: { today?: Date } = {},
+) {
+  const todayKey = formatRosterDateKey(options.today ?? new Date());
+  const scopedIds = new Set(bootstrap.members.map((member) => member.id));
+  return new Set((bootstrap.attendanceRecords ?? [])
+    .filter((record) => record.date === todayKey && record.totalHours > 0 && scopedIds.has(record.memberId))
+    .map((record) => record.memberId));
+}
+
 export function buildAvailableStudentRoster(
   bootstrap: BootstrapPayload,
   options: { today?: Date } = {},
 ): AvailableStudentRoster {
   const todayKey = formatRosterDateKey(options.today ?? new Date());
-  const presentMemberIds = new Set(
-    (bootstrap.attendanceRecords ?? [])
-      .filter((record) => record.date === todayKey && record.totalHours > 0)
-      .map((record) => record.memberId),
-  );
+  const presentMemberIds = getPresentRosterMemberIds(bootstrap, options);
   const students = bootstrap.members.filter(
     (member) => (member.role === "student" || member.role === "lead") && presentMemberIds.has(member.id),
   );

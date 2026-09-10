@@ -3,8 +3,6 @@ import { ArrowDownWideNarrow, ArrowUpWideNarrow, Filter } from "lucide-react";
 
 import {
   IconParts,
-  IconSearchMinus,
-  IconSearchPlus,
   IconTasks,
 } from "@/components/shared/Icons";
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -15,11 +13,6 @@ import type { FilterSelection } from "@/features/workspace/shared/filters/worksp
 import { EVENT_TYPE_STYLES as MILESTONE_TYPE_STYLES } from "@/features/workspace/shared/events/eventStyles";
 import { MilestonesSearchControl } from "./MilestonesSearchControl";
 import {
-  clampMilestoneZoom,
-  formatMilestoneZoomLabel,
-  MILESTONE_ZOOM_MAX,
-  MILESTONE_ZOOM_MIN,
-  MILESTONE_ZOOM_STEP,
   type MilestoneSearchSuggestion,
   type MilestoneSortField,
 } from "./milestonesViewUtils";
@@ -43,12 +36,12 @@ interface MilestonesToolbarProps {
   searchFilter: string;
   setProjectFilter: Dispatch<SetStateAction<FilterSelection>>;
   setSearchFilter: Dispatch<SetStateAction<string>>;
-  setMilestoneZoom: Dispatch<SetStateAction<number>>;
+  setReadinessFilter: Dispatch<SetStateAction<FilterSelection>>;
   setSortField: Dispatch<SetStateAction<MilestoneSortField>>;
   setSortOrder: Dispatch<SetStateAction<"asc" | "desc">>;
   setTypeFilter: Dispatch<SetStateAction<FilterSelection>>;
   searchSuggestions: MilestoneSearchSuggestion[];
-  milestoneZoom: number;
+  readinessFilter: FilterSelection;
   sortField: MilestoneSortField;
   sortOrder: "asc" | "desc";
   typeFilter: FilterSelection;
@@ -63,17 +56,17 @@ export function MilestonesToolbar({
   searchSuggestions,
   setProjectFilter,
   setSearchFilter,
-  setMilestoneZoom,
+  setReadinessFilter,
   setSortField,
   setSortOrder,
   setTypeFilter,
-  milestoneZoom,
+  readinessFilter,
   sortField,
   sortOrder,
   typeFilter,
 }: MilestonesToolbarProps) {
   const activeCount =
-    Number(isAllProjectsView && projectFilter.length > 0) + Number(typeFilter.length > 0);
+    Number(isAllProjectsView && projectFilter.length > 0) + Number(typeFilter.length > 0) + Number(readinessFilter.length > 0);
   const milestoneSortIsDefault = sortField === "startDateTime" && sortOrder === "asc";
   const renderSortDirectionIcon = () =>
     sortOrder === "asc" ? (
@@ -111,6 +104,10 @@ export function MilestonesToolbar({
                         value={projectFilter}
                       />
                     ),
+                  },
+                  {
+                    label: "Readiness",
+                    content: <FilterDropdown allLabel="All readiness" ariaLabel="Filter milestones by readiness" className="task-queue-filter-menu-submenu" icon={<IconTasks />} onChange={setReadinessFilter} options={[{ id: "not ready", name: "Not ready" }, { id: "blocked", name: "Blocked" }, { id: "qa", name: "QA" }, { id: "ready", name: "Ready" }]} value={readinessFilter} />,
                   },
                   {
                     label: "Type",
@@ -175,30 +172,6 @@ export function MilestonesToolbar({
           searchSuggestions={searchSuggestions}
           setSearchFilter={setSearchFilter}
         />
-      </div>
-
-      <div aria-label="Milestones zoom" className="task-queue-zoom-controls milestones-zoom-controls" role="group">
-        <button
-          aria-label="Zoom out milestones"
-          className="icon-button task-queue-zoom-button milestones-zoom-button"
-          disabled={milestoneZoom <= MILESTONE_ZOOM_MIN}
-          onClick={() => setMilestoneZoom((current) => clampMilestoneZoom(current - MILESTONE_ZOOM_STEP))}
-          title="Zoom out milestones"
-          type="button"
-        >
-          <IconSearchMinus />
-        </button>
-        <span className="task-queue-zoom-label">{formatMilestoneZoomLabel(milestoneZoom)}</span>
-        <button
-          aria-label="Zoom in milestones"
-          className="icon-button task-queue-zoom-button milestones-zoom-button"
-          disabled={milestoneZoom >= MILESTONE_ZOOM_MAX}
-          onClick={() => setMilestoneZoom((current) => clampMilestoneZoom(current + MILESTONE_ZOOM_STEP))}
-          title="Zoom in milestones"
-          type="button"
-        >
-          <IconSearchPlus />
-        </button>
       </div>
 
     </div>

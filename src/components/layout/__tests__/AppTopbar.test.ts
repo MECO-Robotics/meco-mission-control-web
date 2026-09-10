@@ -132,14 +132,10 @@ describe("AppTopbar", () => {
     expect(markup).not.toContain('aria-label="Refresh workspace"');
   });
 
-  it("uses the shared compact toolbar search styling for the default topbar search", () => {
+  it("provides page-owned controls without a nonfunctional global search", () => {
     const markup = renderTopbar();
-    const topbarSearchCss = readTopbarSearchCss();
-
-    expect(markup).toContain('class="app-topbar-search toolbar-filter toolbar-filter-compact toolbar-search"');
-    expect(markup).toContain('class="toolbar-filter-icon app-topbar-search-icon"');
-    expect(markup).toContain('class="toolbar-search-input app-topbar-search-input"');
-    expect(topbarSearchCss).toMatch(/\.app-topbar-search-slot\s*\{[^}]*justify-content:\s*flex-end;/);
+    expect(markup).toContain('id="workspace-topbar-slot-controls"');
+    expect(markup).not.toContain('aria-label="Search workspace"');
   });
 
   it("lets the topbar title area grow instead of hard-clamping its width", () => {

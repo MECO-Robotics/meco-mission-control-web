@@ -1,3 +1,4 @@
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { InteractiveTutorialOverlay } from "@/app/interactiveTutorial/InteractiveTutorialOverlay";
 import {
   type NavigationSubItemId,
@@ -7,10 +8,17 @@ import {
   getActiveNavigationSubItemId,
   getNavigationSectionFromSubItem,
   normalizeNavigationSubItemId,
+  resolveViewAvailabilityContext,
+  isNavigationSubItemAvailable,
+  getNavigationTarget,
+  readNavigationLocation,
+  targetMatchesNavigationState,
+  writeNavigationLocation,
+  type NavigationTarget,
 } from "@/lib/workspaceNavigation";
 
 import { getLocalWorkspaceMode, resetLocalDemo, subscribeLocalWorkspace } from "@/lib/localWorkspace/session";
-import { Suspense, useSyncExternalStore } from "react";
+import { Suspense, useSyncExternalStore, useEffect, useLayoutEffect, useRef } from "react";
 
 import type { AppWorkspaceController } from "@/app/hooks/useAppWorkspaceController";
 import { AddSeasonPopup, RobotProjectPopup, SidebarOverlay } from "./AppWorkspaceShellOverlays";
@@ -21,16 +29,14 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
   const c = { ...controller.model, ...controller.taskActions, ...controller.reportActions,
     ...controller.catalogActions, ...controller.rosterActions, ...controller.model.materialEditor };
   const content = c;
-  const activeSubItemId = getActiveNavigationSubItemId({
-    activeTab: c.activeTab,
-    inventoryView: c.inventoryView,
-    manufacturingView: c.manufacturingView,
-    rosterView: c.rosterView,
-    reportsView: c.reportsView,
-    riskManagementView: c.riskManagementView,
-    taskView: c.taskView,
-    worklogsView: c.worklogsView,
+  const navigationContext = resolveViewAvailabilityContext({
+    hasProjects: c.projectsInSelectedSeason.length > 0,
+    hasSeasons: c.bootstrap.seasons.length > 0,
+    selectedProjectType: c.selectedProject?.projectType ?? null,
   });
+  const { activeTab, inventoryView, manufacturingView, rosterView, riskManagementView, taskView, worklogsView } = c;
+  const navigationState = ({ activeTab, inventoryView, manufacturingView, rosterView, riskManagementView, taskView, worklogsView });
+  const activeSubItemId = getActiveNavigationSubItemId(navigationState, navigationContext);
   const activeSection = activeSubItemId
     ? getNavigationSectionFromSubItem(activeSubItemId)
     : null;
@@ -49,16 +55,12 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
   );
   const isActiveViewFavorite = activeSubItemId ? favoriteViewIds.has(activeSubItemId) : false;
 
-  const handleSelectNavigationTarget = (target: {
-    tab: typeof c.activeTab;
-    taskView?: typeof c.taskView;
-    riskManagementView?: typeof c.riskManagementView;
-    worklogsView?: typeof c.worklogsView;
-    reportsView?: typeof c.reportsView;
-    inventoryView?: typeof c.inventoryView;
-    manufacturingView?: typeof c.manufacturingView;
-    rosterView?: typeof c.rosterView;
-  }, options?: { keepSidebarOpen?: boolean }) => {
+  const handleSelectNavigationTarget = (target: NavigationTarget, options?: { keepSidebarOpen?: boolean }) => {
+    if (!restoringLocation.current) window.history.replaceState({ ...window.history.state, scrollY: window.scrollY }, "");
+    const destinationUrl = new URL(window.location.href);
+    if (target.milestoneId) destinationUrl.searchParams.set("milestone", target.milestoneId);
+    else if (target.tab !== "tasks" || target.taskView === "queue" || target.taskView === "robot-map") destinationUrl.searchParams.delete("milestone");
+    if (destinationUrl.href !== window.location.href) window.history.replaceState(window.history.state, "", destinationUrl);
     if (target.taskView) {
       c.setTaskView(target.taskView);
     }
@@ -69,10 +71,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
 
     if (target.worklogsView) {
       c.setWorklogsView(target.worklogsView);
-    }
-
-    if (target.reportsView) {
-      c.setReportsView(target.reportsView);
     }
 
     if (target.inventoryView) {
@@ -91,6 +89,98 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       keepSidebarOpen: options?.keepSidebarOpen,
     });
   };
+  const availableViews = NAVIGATION_SUB_ITEMS
+    .filter((view) => isNavigationSubItemAvailable(view.id, { context: navigationContext }))
+    .map((view) => ({ ...view, target: getNavigationTarget(view.id, navigationContext) }));
+  const restoreNavigation = () => {
+    const params = new URLSearchParams(window.location.search);
+    const seasonId = params.get("season");
+    const projectId = params.get("project");
+    const project = c.bootstrap.projects.find((item) => item.id === projectId);
+    const context = resolveViewAvailabilityContext({
+      hasProjects: c.bootstrap.projects.length > 0, hasSeasons: c.bootstrap.seasons.length > 0,
+      selectedProjectType: project?.projectType ?? null,
+    });
+    c.setSelectedSeasonId(seasonId);
+    c.setSelectedProjectId(project?.id ?? null);
+    const target = readNavigationLocation(window.location.search, context);
+    restoringLocation.current = target;
+    const taskId = params.get("task");
+    restoringTask.current = taskId && c.bootstrap.tasks.some((task) => task.id === taskId && (!projectId || task.projectId === projectId)) ? taskId : null;
+    restoringScroll.current = Number(window.history.state?.scrollY ?? 0);
+    c.setActiveTimelineTaskDetailId(restoringTask.current);
+    handleSelectNavigationTarget(target);
+  };
+  const navigationRef = useRef({ navigate: handleSelectNavigationTarget, restore: restoreNavigation });
+  navigationRef.current = { navigate: handleSelectNavigationTarget, restore: restoreNavigation };
+  const locationInitialized = useRef(false);
+  const restoringLocation = useRef<NavigationTarget | null>(null);
+  const restoringTask = useRef<string | null | undefined>(undefined);
+  const restoringScroll = useRef(0);
+  const scopeParams = new URLSearchParams(window.location.search);
+  if (c.selectedSeasonId) scopeParams.set("season", c.selectedSeasonId); else scopeParams.delete("season");
+  if (c.selectedProjectId) scopeParams.set("project", c.selectedProjectId); else scopeParams.delete("project");
+  if (c.activeTimelineTaskDetailId) scopeParams.set("task", c.activeTimelineTaskDetailId); else scopeParams.delete("task");
+  const previousContext = useRef(navigationContext);
+  const currentSearch = writeNavigationLocation(navigationState, navigationContext, scopeParams.toString());
+  useLayoutEffect(() => {
+    if (c.isLoadingData || c.bootstrap === EMPTY_BOOTSTRAP) return;
+    if (!locationInitialized.current) {
+      locationInitialized.current = true;
+      const target = readNavigationLocation(window.location.search, navigationContext);
+      const requestedTask = new URLSearchParams(window.location.search).get("task");
+      const taskId = requestedTask && c.scopedBootstrap.tasks.some((task) => task.id === requestedTask) ? requestedTask : null;
+      if (!targetMatchesNavigationState(target, navigationState) || taskId !== c.activeTimelineTaskDetailId) {
+        restoringLocation.current = target;
+        restoringTask.current = taskId;
+        restoringScroll.current = Number(window.history.state?.scrollY ?? 0);
+        c.setActiveTimelineTaskDetailId(taskId);
+        navigationRef.current.navigate(target);
+        return;
+      }
+      window.history.replaceState({ ...window.history.state, scrollY: window.history.state?.scrollY ?? window.scrollY }, "", `${window.location.pathname}${currentSearch}${window.location.hash}`);
+    }
+    if (!restoringLocation.current && previousContext.current !== navigationContext) {
+      previousContext.current = navigationContext;
+      const currentId = getActiveNavigationSubItemId(navigationState, navigationContext);
+      const currentView = availableViews.find((view) => view.id === currentId);
+      const fallback = currentView ?? availableViews.find((view) => view.section === activeSection) ?? availableViews[0];
+      if (fallback && (!currentView || (currentId === "resources-structure" && navigationContext !== "robot-project"))) {
+        navigationRef.current.navigate(fallback.target);
+        return;
+      }
+    }
+    if (restoringLocation.current) {
+      const target = restoringLocation.current;
+      const matches = targetMatchesNavigationState(target, navigationState);
+      if (!matches || (restoringTask.current !== undefined && restoringTask.current !== c.activeTimelineTaskDetailId)) return;
+      restoringLocation.current = null;
+      restoringTask.current = undefined;
+      window.history.replaceState({ ...window.history.state, scrollY: restoringScroll.current }, "", `${window.location.pathname}${currentSearch}${window.location.hash}`);
+      window.requestAnimationFrame(() => window.scrollTo({ top: restoringScroll.current, behavior: "instant" }));
+    } else if (window.location.search !== currentSearch) {
+      const previous = new URLSearchParams(window.location.search);
+      const next = new URLSearchParams(currentSearch);
+      const sameSurface = ["view", "mode", "project", "season", "utility"].every((key) => previous.get(key) === next.get(key));
+      window.history.pushState({ scrollY: sameSurface ? window.scrollY : 0 }, "", `${window.location.pathname}${currentSearch}${window.location.hash}`);
+      if (!sameSurface) window.scrollTo({ top: 0, behavior: "instant" });
+    }
+  });
+  useEffect(() => {
+    const restore = () => navigationRef.current.restore();
+    const previousRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = "manual";
+    const rememberScroll = () => {
+      if (!restoringLocation.current) window.history.replaceState({ ...window.history.state, scrollY: window.scrollY }, "");
+    };
+    window.addEventListener("scroll", rememberScroll, { passive: true });
+    window.addEventListener("popstate", restore);
+    return () => {
+      window.removeEventListener("scroll", rememberScroll);
+      window.history.scrollRestoration = previousRestoration;
+      window.removeEventListener("popstate", restore);
+    };
+  }, []);
   const handleCreateMilestone = () => {
     handleSelectNavigationTarget({ tab: "tasks", taskView: "timeline" });
     c.switchTaskCreateToMilestone();
@@ -99,6 +189,8 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
   return (
     <main
       className={`page-shell ${c.isDarkMode ? "dark-mode" : ""} ${c.isSidebarCollapsed ? "is-sidebar-collapsed" : ""} ${c.isSidebarOverlay ? "is-sidebar-overlay" : ""}`}
+      data-task-view={c.taskView}
+      data-navigation-view={activeSubItemId ?? "help"}
       style={c.pageShellStyle}
     >
       <Suspense fallback={<WorkspaceShellLoading />}>
@@ -114,6 +206,10 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
           c.setDataMessage(error instanceof Error ? error.message : "The local demo could not be reset.");
         }
       }}
+      activeViewId={activeSubItemId}
+      views={availableViews.filter((view) => view.section === activeSection)}
+      favorites={availableViews.filter((view) => favoriteViewIds.has(view.id))}
+      onNavigate={handleSelectNavigationTarget}
       activeViewLabel={activeViewLabel}
       isActiveViewFavorite={isActiveViewFavorite}
       onToggleActiveViewFavorite={
@@ -127,13 +223,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
         <AppSidebar
       activeTab={c.activeTab}
       canSignIn={c.enforcedAuthConfig !== null && c.sessionUser === null}
-      favoriteViewIds={(c.bootstrap.favoriteViews ?? [])
-        .map((favorite) => normalizeNavigationSubItemId(favorite.viewId))
-        .filter(
-          (favoriteViewId): favoriteViewId is NavigationSubItemId => favoriteViewId !== null,
-        )}
       handleSignOut={c.handleSignOut}
-      items={c.navigationItems}
       isDarkMode={c.isDarkMode}
       isMyViewActive={c.isMyViewActive}
       onSelectTarget={handleSelectNavigationTarget}
@@ -158,7 +248,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       inventoryView={c.inventoryView}
       manufacturingView={c.manufacturingView}
       rosterView={c.rosterView}
-      reportsView={c.reportsView}
       riskManagementView={c.riskManagementView}
       seasons={c.bootstrap.seasons}
       sessionUser={c.sessionUser}
@@ -173,6 +262,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
         {c.robotProjectModalMode ? <RobotProjectPopup controller={c} /> : null}
         <SidebarOverlay controller={c} />
         <WorkspaceContent
+          currentMemberId={content.signedInMember?.id ?? null}
           activePersonFilter={content.activePersonFilter}
           activeTab={content.activeTab}
           tabSwitchDirection={content.tabSwitchDirection}
@@ -248,7 +338,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
           inventoryView={content.inventoryView}
           rosterView={content.rosterView}
           riskManagementView={content.riskManagementView}
-          reportsView={content.reportsView}
           taskView={content.taskView}
           worklogsView={content.worklogsView}
           selectMember={content.selectMember}
@@ -295,6 +384,8 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       {c.isWorkspaceModalOpen ? (
         <Suspense fallback={null}>
           <WorkspaceModalHost
+            openCreateWorkLogModal={c.openCreateWorkLogModal}
+            openCreateQaReportModal={c.openCreateQaReportModal}
             activeArtifactId={c.activeArtifactId}
             activePartDefinitionId={c.activePartDefinitionId}
             activeMaterialId={c.activeMaterialId}

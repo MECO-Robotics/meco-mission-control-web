@@ -17,6 +17,7 @@ import {
 } from "./taskQueueViewState";
 
 interface TaskQueueViewProps {
+  currentMemberId?: string | null;
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
@@ -30,6 +31,7 @@ interface TaskQueueViewProps {
 }
 
 export function TaskQueueView({
+  currentMemberId,
   activePersonFilter,
   bootstrap,
   disciplinesById,
@@ -89,6 +91,14 @@ export function TaskQueueView({
     subsystemsById,
   });
 
+  const preset = ownerFilter.length === 1 && ownerFilter[0] === currentMemberId && statusFilter.length === 0
+    ? "mine"
+    : ownerFilter.length === 0 && statusFilter.length === 1 && statusFilter[0] === "waiting-for-qa"
+      ? "qa"
+      : ownerFilter.length === 0 && statusFilter.length === 2 && statusFilter.includes("blocked") && statusFilter.includes("waiting-on-dependency")
+        ? "blocked"
+        : ownerFilter.length === 0 && statusFilter.length === 0 ? "all" : null;
+
   return (
     <section className={`panel dense-panel task-queue-view ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">
@@ -143,6 +153,9 @@ export function TaskQueueView({
         </div>
       </div>
 
+      <div className="workspace-presentation-controls" role="group" aria-label="Task presets">
+        {([ ["all", "All work"], ["mine", "My work"], ["blocked", "Blocked"], ["qa", "Waiting for QA"] ] as const).map(([value, label]) => <button key={value} className="ghost-button" disabled={value === "mine" && !currentMemberId} aria-pressed={preset === value} onClick={() => { setOwnerFilter(value === "mine" && currentMemberId ? [currentMemberId] : []); setStatusFilter(value === "blocked" ? ["blocked", "waiting-on-dependency"] : value === "qa" ? ["waiting-for-qa"] : []); setFocusedBoardState(null); }} type="button">{label}</button>)}
+      </div>
       <TaskQueueBoardSection
         bootstrap={bootstrap}
         disciplinesById={disciplinesById}

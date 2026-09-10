@@ -229,10 +229,10 @@ describe("mentor action queue", () => {
       }),
     );
 
-    expect(markup).toContain("Mentor action queue");
+    expect(markup).toContain("Needs review");
     expect(markup).toContain("Pending QA approval");
     expect(markup).toContain("Purchase approval");
-    expect(markup).toContain("Open linked task");
+    expect(markup).toContain("Open task");
     expect(markup).toContain("Open risk");
   });
 });

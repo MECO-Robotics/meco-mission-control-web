@@ -1,107 +1,29 @@
-import { AllManufacturingView } from "@/features/workspace/views/manufacturing/AllManufacturingView";
-import { CncView } from "@/features/workspace/views/manufacturing/CncView";
-import { FabricationView } from "@/features/workspace/views/manufacturing/FabricationView";
-import { PrintsView } from "@/features/workspace/views/manufacturing/PrintsView";
-import { WorkspaceSectionPanel, WorkspaceSubPanel } from "../../WorkspaceContentPanelShells";
+import { ManufacturingQueueView } from "@/features/workspace/views/manufacturing/ManufacturingQueueView";
+import { WorkspaceSectionPanel } from "../../WorkspaceContentPanelShells";
 import type { WorkspaceContentPanelsViewProps } from "../workspaceContentPanelsViewTypes";
 
 export function WorkspaceManufacturingSection(props: WorkspaceContentPanelsViewProps) {
-  const {
-    activePersonFilter,
-    bootstrap,
-    cncItems,
-    disablePanelAnimations = false,
-    fabricationItems,
-    manufacturingSwipeDirection,
-    manufacturingView,
-    membersById,
-    onCncQuickStatusChange,
-    openEditManufacturingModal,
-    printItems,
-    setManufacturingView,
-    showCncMentorQuickActions,
-    tabSwitchDirection,
-  } = props;
-
+  const process = props.manufacturingView === "prints" ? "3d-print" : props.manufacturingView === "fabrication" ? "fabrication" : "cnc";
   return (
-    <WorkspaceSectionPanel
-      disableAnimations={disablePanelAnimations}
-      isActive={props.activeTab === "manufacturing"}
-      tabSwitchDirection={tabSwitchDirection}
-    >
-      <WorkspaceSubPanel
-        disableAnimations={disablePanelAnimations}
-        isActive={manufacturingView === "all"}
-        swipeDirection={manufacturingSwipeDirection}
-      >
-        <AllManufacturingView
-          activePersonFilter={activePersonFilter}
-          bootstrap={bootstrap}
-          items={bootstrap.manufacturingItems}
-          membersById={membersById}
-          onCreate={() => props.openCreateManufacturingModal("cnc")}
-          onEdit={openEditManufacturingModal}
-          onProcessFilterChange={setManufacturingView}
-          processFilterValue={manufacturingView}
-          subsystemsById={props.subsystemsById}
-        />
-      </WorkspaceSubPanel>
-
-      <WorkspaceSubPanel
-        disableAnimations={disablePanelAnimations}
-        isActive={manufacturingView === "cnc"}
-        swipeDirection={manufacturingSwipeDirection}
-      >
-        <CncView
-          activePersonFilter={activePersonFilter}
-          bootstrap={bootstrap}
-          items={cncItems}
-          membersById={membersById}
-          onCreate={() => props.openCreateManufacturingModal("cnc")}
-          onEdit={openEditManufacturingModal}
-          onProcessFilterChange={setManufacturingView}
-          onQuickStatusChange={onCncQuickStatusChange}
-          processFilterValue={manufacturingView}
-          showMentorQuickActions={showCncMentorQuickActions}
-          subsystemsById={props.subsystemsById}
-        />
-      </WorkspaceSubPanel>
-
-      <WorkspaceSubPanel
-        disableAnimations={disablePanelAnimations}
-        isActive={manufacturingView === "prints"}
-        swipeDirection={manufacturingSwipeDirection}
-      >
-        <PrintsView
-          activePersonFilter={activePersonFilter}
-          bootstrap={bootstrap}
-          items={printItems}
-          membersById={membersById}
-          onCreate={() => props.openCreateManufacturingModal("3d-print")}
-          onEdit={openEditManufacturingModal}
-          onProcessFilterChange={setManufacturingView}
-          processFilterValue={manufacturingView}
-          subsystemsById={props.subsystemsById}
-        />
-      </WorkspaceSubPanel>
-
-      <WorkspaceSubPanel
-        disableAnimations={disablePanelAnimations}
-        isActive={manufacturingView === "fabrication"}
-        swipeDirection={manufacturingSwipeDirection}
-      >
-        <FabricationView
-          activePersonFilter={activePersonFilter}
-          bootstrap={bootstrap}
-          items={fabricationItems}
-          membersById={membersById}
-          onCreate={() => props.openCreateManufacturingModal("fabrication")}
-          onEdit={openEditManufacturingModal}
-          onProcessFilterChange={setManufacturingView}
-          processFilterValue={manufacturingView}
-          subsystemsById={props.subsystemsById}
-        />
-      </WorkspaceSubPanel>
+    <WorkspaceSectionPanel disableAnimations={props.disablePanelAnimations} isActive={props.activeTab === "manufacturing"} tabSwitchDirection={props.tabSwitchDirection}>
+      <ManufacturingQueueView
+        activePersonFilter={props.activePersonFilter}
+        addButtonAriaLabel="Add manufacturing job"
+        bootstrap={props.bootstrap}
+        emptyStateMessage="No manufacturing jobs match the current filters."
+        items={props.bootstrap.manufacturingItems}
+        membersById={props.membersById}
+        onCreate={() => props.openCreateManufacturingModal(process)}
+        onEdit={props.openEditManufacturingModal}
+        onProcessFilterChange={props.setManufacturingView}
+        onQuickStatusChange={props.onCncQuickStatusChange}
+        processFilterValue={props.manufacturingView}
+        showMentorQuickActions={props.showCncMentorQuickActions}
+        showInHouseColumn
+        subsystemsById={props.subsystemsById}
+        title="Manufacturing"
+        tutorialTargetPrefix="manufacturing"
+      />
     </WorkspaceSectionPanel>
   );
 }

@@ -99,67 +99,26 @@ function createOverviewBootstrap() {
 }
 
 describe("Workspace overview views", () => {
-  it("renders Home as a top-level status overview", () => {
-    const markup = renderToStaticMarkup(
-      React.createElement(HomeView, {
-        bootstrap: createOverviewBootstrap(),
-        onOpenTask: jest.fn(),
-        today: fixedToday,
-      }),
-    );
-
-    expect(markup).toContain("<h2>Home</h2>");
-    expect(markup).toContain("Open work");
-    expect(markup).toContain("Planning confidence %");
-    expect(markup).toContain("Due soon");
-    expect(markup).toContain("High risks");
+  it("shows actionable near-term work and upcoming milestones", () => {
+    const markup = renderToStaticMarkup(React.createElement(HomeView, {
+      bootstrap: createOverviewBootstrap(), onOpenTask: jest.fn(), today: fixedToday,
+    }));
+    expect(markup).toContain("Priority work");
+    expect(markup).toContain("Upcoming milestones");
     expect(markup).toContain("Drive practice deadline");
     expect(markup).toContain("Finish bellypan CAD");
+    expect(markup).toContain("Wire intake sensor");
+    expect(markup).not.toContain("Later media recap");
+    expect(markup).not.toContain("Schedule pressure");
   });
-
-  it("renders Home with graph-led overview sections", () => {
-    const markup = renderToStaticMarkup(
-      React.createElement(HomeView, {
-        bootstrap: createOverviewBootstrap(),
-        onOpenTask: jest.fn(),
-        today: fixedToday,
-      }),
-    );
-
-    expect(markup).toContain("Schedule pressure");
-    expect(markup).toContain("Work by subsystem");
-    expect(markup).toContain("overview-graph-panel");
-    expect(markup).toContain("overview-bar-chart");
-    expect(markup).toContain("overview-donut-chart");
-  });
-
-  it("renders missing planning data as actionable overview items", () => {
+  it("keeps completed tasks out of the priority list", () => {
     const bootstrap = createOverviewBootstrap();
-    const markup = renderToStaticMarkup(
-      React.createElement(HomeView, {
-        bootstrap: {
-          ...bootstrap,
-          tasks: bootstrap.tasks.map((task) =>
-            task.id === "task-today"
-              ? {
-                  ...task,
-                  ownerId: null,
-                  assigneeIds: [],
-                  estimatedHours: 0,
-                }
-              : task,
-          ),
-        },
-        onOpenTask: jest.fn(),
-        today: fixedToday,
-      }),
-    );
-
-    expect(markup).toContain("Planning gaps");
-    expect(markup).toContain("Assign task owners");
-    expect(markup).toContain("Add hour estimates");
-    expect(markup).toContain("tasks missing owners");
-    expect(markup).toContain("First: Wire intake sensor");
+    bootstrap.tasks = bootstrap.tasks.map(task => ({ ...task, status: "complete" }));
+    const markup = renderToStaticMarkup(React.createElement(HomeView, {
+      bootstrap, onOpenTask: jest.fn(), today: fixedToday,
+    }));
+    expect(markup).toContain("No near-term task deadlines.");
+    expect(markup).not.toContain("Finish bellypan CAD");
+    expect(markup).toContain("Drive practice deadline");
   });
-
 });

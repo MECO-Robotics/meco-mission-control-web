@@ -34,12 +34,7 @@ export function useAppWorkspaceLoader(
     state.setDataMessage(null);
 
     try {
-      let favoriteViews = await updateFavoriteView(viewId, isFavorite, handleUnauthorized);
-
-      if (viewId === "reports-worklogs" && !isFavorite) {
-        await updateFavoriteView("reports-work-logs", isFavorite, handleUnauthorized);
-        favoriteViews = favoriteViews.filter((favorite) => favorite.viewId !== "reports-work-logs");
-      }
+      const favoriteViews = await updateFavoriteView(viewId, isFavorite, handleUnauthorized);
 
       state.setBootstrap((current) => ({
         ...current,

@@ -80,7 +80,7 @@ export function PartsDefinitionSection({
               role="button"
               tabIndex={0}
               style={{ "--workspace-grid-template": PART_DEFINITION_GRID_TEMPLATE } as CSSProperties}
-              title={`Edit ${partDefinition.name}`}
+              title={`Open ${partDefinition.name}`}
             >
               <span
                 className="queue-title table-cell table-cell-primary part-primary-cell"

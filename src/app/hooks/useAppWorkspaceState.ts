@@ -20,7 +20,6 @@ import type {
   ManufacturingViewTab,
   RosterViewTab,
   RiskManagementViewTab,
-  ReportsViewTab,
   TaskViewTab,
   ViewTab,
   WorklogsViewTab,
@@ -32,15 +31,14 @@ export type AppWorkspaceState = ReturnType<typeof useAppWorkspaceState>;
 export function useAppWorkspaceState() {
   const [activeTab, setActiveTab] = useState<ViewTab>("home");
   const [tabSwitchDirection, setTabSwitchDirection] = useState<"up" | "down">("down");
-  const [taskView, setTaskView] = useState<TaskViewTab>("timeline");
+  const [taskView, setTaskView] = useState<TaskViewTab>("queue");
   const [riskManagementView, setRiskManagementView] =
     useState<RiskManagementViewTab>("kanban");
   const [worklogsView, setWorklogsView] = useState<WorklogsViewTab>("logs");
-  const [reportsView, setReportsView] = useState<ReportsViewTab>("qa");
   const [manufacturingView, setManufacturingView] =
     useState<ManufacturingViewTab>("all");
   const [inventoryView, setInventoryView] = useState<InventoryViewTab>("materials");
-  const [rosterView, setRosterView] = useState<RosterViewTab>("available");
+  const [rosterView, setRosterView] = useState<RosterViewTab>("directory");
   const [bootstrap, setBootstrap] = useState<BootstrapPayload>(EMPTY_BOOTSTRAP);
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [dataMessage, setDataMessage] = useState<string | null>(null);
@@ -201,7 +199,6 @@ export function useAppWorkspaceState() {
     manufacturingView,
     pageShellStyle,
     requestSignIn,
-    reportsView,
     rosterView,
     riskManagementView,
     setActiveTab,
@@ -211,7 +208,6 @@ export function useAppWorkspaceState() {
     setIsLoadingData,
     setManufacturingView,
     setRosterView,
-    setReportsView,
     setRiskManagementView,
     setTabSwitchDirection,
     enqueueTaskEditNotice,

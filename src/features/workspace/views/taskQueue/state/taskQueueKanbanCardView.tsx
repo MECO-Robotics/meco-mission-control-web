@@ -105,6 +105,10 @@ export function TaskQueueCard({
   ...buttonProps
 }: TaskQueueCardProps) {
   const person = getTaskCardPerson(task, membersById);
+  const taskLogs = bootstrap.workLogs.filter(log => log.taskId === task.id);
+  const latestLog = [...taskLogs].sort((a, b) => b.date.localeCompare(a.date))[0];
+  const needsHelp = taskLogs.some(log => /\b(needs?|needed)\s+help\b|\bhelp\s+needed\b|\brequest(?:ing|ed)?\s+help\b/i.test(log.notes));
+  const loggedHours = taskLogs.reduce((sum, log) => sum + log.hours, 0);
   const disciplineAccentColor = task.disciplineId
     ? getTimelineTaskDisciplineColor(task.disciplineId, disciplinesById)
     : null;
@@ -204,6 +208,9 @@ export function TaskQueueCard({
           </div>
         ) : null}
       </div>
+      {latestLog ? <small className="task-queue-board-card-summary">{loggedHours.toFixed(1)}h logged · {latestLog.notes}</small> : null}
+      {needsHelp ? <small className="pill status-pill status-pill-warning">Help requested</small> : null}
+      {task.blockers.length ? <small>{task.blockers.length} blocker{task.blockers.length === 1 ? "" : "s"} · Open for help and resolution</small> : null}
       <EditableHoverIndicator className="task-queue-board-card-hover" />
     </button>
   );

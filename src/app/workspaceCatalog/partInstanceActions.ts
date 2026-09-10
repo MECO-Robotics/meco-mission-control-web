@@ -38,13 +38,13 @@ export function usePartInstanceActions({
   setPartInstanceDraft: AppWorkspaceModel["setPartInstanceDraft"];
   setPartInstanceModalMode: AppWorkspaceModel["setPartInstanceModalMode"];
 }) {
-  const openCreatePartInstanceModal = useCallback((mechanism: MechanismRecord) => {
+  const openCreatePartInstanceModal = useCallback((mechanism: MechanismRecord, partDefinitionId?: string) => {
     setActivePartInstanceId(null);
     setPartInstanceDraft(
-      buildEmptyPartInstancePayload(bootstrap, {
-        subsystemId: mechanism.subsystemId,
-        mechanismId: mechanism.id,
-      }),
+      {
+        ...buildEmptyPartInstancePayload(bootstrap, { subsystemId: mechanism.subsystemId, mechanismId: mechanism.id }),
+        ...(partDefinitionId ? { partDefinitionId } : {}),
+      },
     );
     setPartInstanceModalMode("create");
   }, [bootstrap, setActivePartInstanceId, setPartInstanceDraft, setPartInstanceModalMode]);

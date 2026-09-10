@@ -11,11 +11,11 @@ describe("HelpView", () => {
   it("documents practical workspace scope, tab behavior, and roster guidance", () => {
     const html = renderToStaticMarkup(React.createElement(HelpView));
 
-    expect(html).toContain("Start with scope");
-    expect(html).toContain("<strong>No data:</strong>");
-    expect(html).toContain("verify season, project, and person filter in that order.");
-    expect(html).toContain("CNC, prints, and fabrication queues");
-    expect(html).toContain("Students, Mentors, and External access");
+    expect(html).toContain("Find your work");
+    expect(html).toContain("Work → Tasks");
+    expect(html).toContain("Work → Schedule");
+    expect(html).toContain("Resources and structure");
+    expect(html).toContain("Team");
   });
 
   it("offers a tutorial launch point inside help", () => {
@@ -31,8 +31,8 @@ describe("HelpView", () => {
     );
 
     expect(html).toContain("Guided workspace tutorial");
-    expect(html).toContain("Step 1 of 6");
-    expect(html).toContain("Set season and project first");
+    expect(html).toContain("Step 1 of 5");
+    expect(html).toContain("Choose your workspace");
     expect(html).toContain("Next step");
     expect(html).toContain("Close tutorial");
   });

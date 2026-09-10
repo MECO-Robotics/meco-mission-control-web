@@ -26,6 +26,8 @@ interface RisksViewProps {
   openTaskDetailModal?: (task: TaskRecord) => void;
   onUpdateRisk: (riskId: string, payload: RiskPayload) => Promise<void>;
   view: RiskManagementViewTab;
+  includeHealth?: boolean;
+  onOpenSource?: (source: string, id: string) => void;
 }
 
 export function RisksView({
@@ -37,7 +39,10 @@ export function RisksView({
   openTaskDetailModal,
   onUpdateRisk,
   view,
+  includeHealth = false,
+  onOpenSource,
 }: RisksViewProps) {
+  const [healthOpen, setHealthOpen] = useState(false);
   const [metricsSearch, setMetricsSearch] = useState("");
   const pendingRiskSeverityDropIdsRef = useRef<Set<string>>(new Set());
   const [pendingRiskSeverityDropIds, setPendingRiskSeverityDropIds] = useState<ReadonlySet<string>>(
@@ -97,6 +102,7 @@ export function RisksView({
         <AttentionView
           activePersonFilter={activePersonFilter}
           bootstrap={bootstrap}
+          onOpenSource={onOpenSource}
           onOpenRisk={(riskId) => {
             const targetRisk = bootstrap.risks.find((risk) => risk.id === riskId);
             if (targetRisk) {
@@ -112,6 +118,7 @@ export function RisksView({
         />
       ) : null}
 
+      {includeHealth ? <details className="workspace-disclosure" onToggle={event => setHealthOpen(event.currentTarget.open)}><summary>Project health</summary>{healthOpen ? <RiskMetricsPanel mechanismMetrics={filteredMechanismMetrics} metricsSearch={metricsSearch} onMetricsSearchChange={setMetricsSearch} subsystemMetrics={filteredSubsystemMetrics} viewModel={viewModel} embedded /> : null}</details> : null}
       {view === "metrics" ? (
         <RiskMetricsPanel
           mechanismMetrics={filteredMechanismMetrics}

@@ -2,7 +2,6 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type {
   InventoryViewTab,
   ManufacturingViewTab,
-  ReportsViewTab,
   RiskManagementViewTab,
   TaskViewTab,
   ViewTab,
@@ -90,7 +89,6 @@ export interface InteractiveTutorialReturnState {
   taskView: TaskViewTab;
   riskManagementView: RiskManagementViewTab;
   worklogsView: WorklogsViewTab;
-  reportsView: ReportsViewTab;
   manufacturingView: ManufacturingViewTab;
   inventoryView: InventoryViewTab;
   selectedSeasonId: string | null;

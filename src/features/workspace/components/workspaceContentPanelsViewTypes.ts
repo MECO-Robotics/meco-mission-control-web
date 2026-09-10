@@ -7,7 +7,6 @@ export type WorkspaceContentPanelsViewProps = WorkspaceContentProps & {
   effectiveInventoryView: InventoryViewTab;
   onOpenDrilldownTarget: (target: NavigationTarget) => void;
   taskSwipeDirection: SwipeDirection;
-  reportsSwipeDirection: SwipeDirection;
   manufacturingSwipeDirection: SwipeDirection;
   inventorySwipeDirection: SwipeDirection;
 };

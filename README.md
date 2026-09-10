@@ -58,17 +58,7 @@ It should be the first place to implement workflows that need:
 
 The mobile app (`meco-mission-control-mobile`) remains the faster in-shop update surface. Shared behavior should stay contract-compatible, but this repo is the primary home for higher-context workflows.
 
-Current web responsibilities:
-
-- Dashboard review: calendar, activity, and metrics
-- Readiness review: action triage, milestones, subsystems, and risks
-- Work planning: timeline, task board, and manufacturing execution views
-- Robot configuration: map-first subsystem layout, mechanism editing, and part-instance context
-- Inventory and purchasing: materials, parts, purchases, and robot-only part-mapping support
-- Roster operations: workload, attendance, and directory workflows
-- Reports: work logs, QA forms, and milestone results
-- Saved navigation favorites, theme preference sync, and profile/session controls
-- In-app help and interactive guidance
+Current web responsibilities are organized into Home, Work, Resources and Team, with contextual record editing and evidence submission. See the navigation model below.
 
 ## System Overview
 
@@ -231,26 +221,22 @@ Avoid pushing view-specific business logic into the shell. The shell should comp
 
 ## Current Navigation Model
 
-The sidebar is organized by user-facing work area rather than raw data model entity.
+The app has four primary destinations. Desktop uses a sidebar; narrow web and mobile use labeled bottom navigation. Secondary destinations live in one explicit view selector.
 
-| Section | Purpose | Current subviews |
+| Area | Views | Consolidation |
 | --- | --- | --- |
-| Dashboard | Fast review of current schedule, activity, and health | Calendar, Activity, Metrics |
-| Readiness | Items that need attention before execution or events | Action Required, Milestones, Subsystems, Risks |
-| Config | Structure and directory maintenance | Robot Configuration, Part mappings, Directory |
-| Work | Execution planning and fabrication flow | Timeline, Tasks, Manufacturing |
-| Inventory | Materials, parts, and procurement | Materials, Parts, Purchases |
-| Roster | Student/mentor availability and participation | Workload, Attendance |
-| Reports | Historical and evidence-oriented records | Work logs, QA forms, Milestone results |
+| Home | Priority work, upcoming milestones, Needs attention | One attention row per source record; Project health expands on demand |
+| Work | Tasks, Schedule, Risks, Activity | Schedule offers Calendar, Timeline and Agenda; Activity filters work logs, changes, QA and milestone results |
+| Resources | Materials/Documents, Parts, Purchases, Manufacturing, Structure | Manufacturing uses a process filter; installed parts live under their definition; CAD import opens from Structure |
+| Team | People, Attendance | People combines directory, presence, availability and workload |
 
-Important scope behavior:
+Tasks opens first in Work. Robot-only Parts and Manufacturing require a robot project. Structure requires a selected project and uses the robot map or the non-robot workflow view. All-project Resources exposes Materials and Purchases. Non-robot projects use Documents and Purchases. Home remains available without a season; other collections require season data. Help and account controls remain utilities.
 
-- Manufacturing is robot-project specific.
-- Robot projects expose Materials, Parts, and Purchases under Inventory.
-- Non-robot projects collapse inventory toward Documents/Materials and Purchases.
-- Robot Configuration is the preferred home for subsystem, mechanism, and part-instance structure editing.
-- Part mappings are robot-only support context and should not be treated as a general standalone planning page.
-- `All projects` can hide or redirect project-specific views when the selected scope cannot support them.
+Task details use a drawer on desktop and fill the narrow viewport. Logging work and submitting QA open from the task; milestone results open from the milestone. The originating detail returns after save or cancel, and editors protect unsaved changes. Collection filters survive destination changes within the current season/project; changing scope resets these local filters. URLs retain canonical destination, presentation and scope. Task details support Back, Forward and refresh; browser Back restores page scroll.
+
+The former Dashboard, Readiness, Config and Reports destinations, the work-log status board, the separate part-mapping page and the standalone People workload/availability pages have been removed. Their retained behavior is owned by the views above.
+
+See [navigation-consolidation.md](docs/navigation-consolidation.md) for the cross-client scope, validation and favorite reset behavior.
 
 ## View-to-File Map
 
@@ -262,14 +248,14 @@ Use this table to find the right implementation area before changing UI behavior
 | Shell/controller composition | `src/app/hooks/useAppWorkspaceController.ts`, `src/app/shell/*` |
 | Workspace panel routing | `src/features/workspace/WorkspaceContent.tsx`, `src/features/workspace/components/WorkspaceContentPanelsView.tsx` |
 | Navigation constants | `src/lib/workspaceNavigation/types.ts`, `src/lib/workspaceNavigation/constants.ts`, `src/lib/workspaceNavigation/helpers.ts` |
-| Calendar | `src/features/workspace/views/taskQueue/TaskCalendarPlaceholderView.tsx` |
+| Calendar | `src/features/workspace/views/taskCalendar/TaskCalendarView.tsx` |
 | Timeline | `src/features/workspace/views/timeline/*` |
 | Robot Configuration | `src/features/workspace/views/taskQueue/TaskRobotMapPlaceholderView.tsx` and related robot-map helpers |
 | Tasks board | `src/features/workspace/views/taskQueue/TaskQueueView.tsx` |
 | Milestones | `src/features/workspace/views/milestones/*` |
 | Action Required / Risks / Metrics | `src/features/workspace/views/RisksView.tsx` and related risk/metrics helpers |
-| Work logs / Activity | `src/features/workspace/views/worklogs/*` |
-| Reports / QA / Milestone results | `src/features/workspace/views/reports/*` |
+| Work logs / Activity | `src/features/workspace/views/workLogs/*` |
+| Activity / QA / Milestone results | `src/features/workspace/views/WorkLogsView.tsx`, `src/features/workspace/views/workLogs/*`, `src/features/workspace/modals/workReports/*` |
 | Manufacturing | `src/features/workspace/views/manufacturing/*` |
 | Inventory | `src/features/workspace/views/inventory/*` |
 | Subsystems | `src/features/workspace/views/subsystems/*` |

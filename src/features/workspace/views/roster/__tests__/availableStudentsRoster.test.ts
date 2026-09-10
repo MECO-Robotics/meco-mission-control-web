@@ -1,19 +1,14 @@
 /// <reference types="jest" />
 
-import * as React from "react";
-import { renderToStaticMarkup } from "react-dom/server";
-
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
-import { RosterAvailableStudentsView } from "@/features/workspace/views/roster/RosterAvailableStudentsView";
 import {
   buildAvailableStudentRoster,
   formatRosterDateKey,
+  getPresentRosterMemberIds,
 } from "@/features/workspace/views/roster/availableStudentsRoster";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 import type { MemberRecord } from "@/types/recordsOrganization";
-
-(globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 const today = new Date();
 const todayIso = formatRosterDateKey(today);
@@ -169,66 +164,24 @@ describe("buildAvailableStudentRoster", () => {
   });
 });
 
-describe("RosterAvailableStudentsView", () => {
-  it("renders empty states when no students are present", () => {
-    const html = renderToStaticMarkup(
-      React.createElement(RosterAvailableStudentsView, {
-        bootstrap: createBootstrap({ attendanceRecords: [] }),
-        onCreateTask: jest.fn(),
-        onCreateTaskForMember: jest.fn(),
-        onOpenTask: jest.fn(),
-        selectedProject: null,
-      }),
-    );
-
-    expect(html).toContain("Available Students");
-    expect(html).toContain("Present today");
-    expect(html).toContain("No students here.");
-    expect(html).toContain("No present students are blocked or waiting.");
+describe("availability across scopes", () => {
+  it("keeps assignments when the visible project has no tasks", () => {
+    const full = createBootstrap();
+    const roster = buildAvailableStudentRoster(full, { today });
+    expect(roster.busy.find(row => row.member.id === "busy-task")?.activeTask?.title).toBe("Build intake");
   });
-
-  it("uses full availability data so scoped project views do not hide assignments", () => {
-    const baseBootstrap = createBootstrap();
-    const availabilityBootstrap = createBootstrap({
-      attendanceRecords: [
-        ...(baseBootstrap.attendanceRecords ?? []),
-        {
-          date: todayIso,
-          id: "attendance-other-season",
-          memberId: "other-season",
-          totalHours: 1,
-        },
-      ],
-      members: [
-        ...baseBootstrap.members,
-        baseStudent("other-season", "Other Season Student", {
-          activeSeasonIds: ["season-2"],
-          seasonId: "season-2",
-        }),
-      ],
-    });
-    const scopedBootstrap = {
-      ...availabilityBootstrap,
-      members: availabilityBootstrap.members.filter((member) => member.seasonId === "season-1"),
-      taskBlockers: [],
-      tasks: [],
-      workLogs: [],
-    };
-    const html = renderToStaticMarkup(
-      React.createElement(RosterAvailableStudentsView, {
-        availabilityBootstrap,
-        bootstrap: scopedBootstrap,
-        onCreateTask: jest.fn(),
-        onCreateTaskForMember: jest.fn(),
-        onOpenTask: jest.fn(),
-        selectedProject: availabilityBootstrap.projects[0],
-      }),
-    );
-
-    expect(html).toContain("Busy Task Student");
-    expect(html).toContain("Already assigned");
-    expect(html).toContain("Build intake");
-    expect(html).not.toContain('<button class="ghost-button" type="button">Build intake</button>');
-    expect(html).not.toContain("Other Season Student");
+  it("does not manufacture presence when attendance is empty", () => {
+    expect(buildAvailableStudentRoster(createBootstrap({ attendanceRecords: [] }), { today }).presentCount).toBe(0);
   });
+});
+
+it("records attendance for every role without turning mentors into available students", () => {
+  const members = [baseStudent("student", "Student"), baseStudent("mentor", "Mentor", { role: "mentor" }), baseStudent("admin", "Admin", { role: "admin" }), baseStudent("external", "External", { role: "external" })];
+  const bootstrap = createBootstrap({ members, tasks: [], workLogs: [], taskBlockers: [],
+    attendanceRecords: [...members.map(member => ({ id: member.id, memberId: member.id, date: todayIso, totalHours: 1 })),
+      { id: "outside", memberId: "outside", date: todayIso, totalHours: 1 }],
+  });
+  expect([...getPresentRosterMemberIds(bootstrap, { today })].sort()).toEqual(["admin", "external", "mentor", "student"]);
+  expect(buildAvailableStudentRoster(bootstrap, { today }).available.map(row => row.member.id)).toEqual(["student"]);
+  expect(getPresentRosterMemberIds({ ...bootstrap, attendanceRecords: (bootstrap.attendanceRecords ?? []).map(record => ({ ...record, totalHours: 0 })) }, { today }).size).toBe(0);
 });

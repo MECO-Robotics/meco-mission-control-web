@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from "react";
+import type { MilestoneRecord } from "@/types/recordsExecution";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MilestonePayload } from "@/types/payloads";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
@@ -8,10 +10,11 @@ import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 
 import { MilestonesToolbar } from "./MilestonesToolbar";
 import { MilestonesMilestoneModal } from "./MilestonesEventModal";
-import { MilestonesBoardSection } from "./sections/MilestonesBoardSection";
+import { MilestonesAgendaList } from "./MilestonesAgendaList";
 import { useMilestonesViewState } from "./sections/milestonesViewState";
 
 interface MilestonesViewProps {
+  onCreateMilestoneReport?: (milestoneId: string, onReturn?: () => void) => void;
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   isAllProjectsView: boolean;
@@ -26,6 +29,7 @@ interface MilestonesViewProps {
 }
 
 export function MilestonesView({
+  onCreateMilestoneReport,
   activePersonFilter,
   bootstrap,
   isAllProjectsView,
@@ -44,6 +48,38 @@ export function MilestonesView({
     onSaveTimelineMilestone,
   });
 
+  const [requestedMilestoneId, setRequestedMilestoneId] = useState(() => typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("milestone"));
+  const handledMilestoneId = useRef<string | null | undefined>(undefined);
+  const modalActions = useRef(milestones);
+  useEffect(() => { modalActions.current = milestones; });
+  useEffect(() => {
+    const restore = () => setRequestedMilestoneId(new URLSearchParams(window.location.search).get("milestone"));
+    window.addEventListener("popstate", restore);
+    return () => window.removeEventListener("popstate", restore);
+  }, []);
+  useEffect(() => {
+    if (handledMilestoneId.current === requestedMilestoneId) return;
+    handledMilestoneId.current = requestedMilestoneId;
+    const milestone = bootstrap.milestones.find((item) => item.id === requestedMilestoneId);
+    if (milestone) modalActions.current.openMilestoneDetailsModal(milestone);
+    else modalActions.current.closeMilestoneModal();
+  }, [bootstrap.milestones, requestedMilestoneId]);
+  const updateMilestoneLocation = (id: string | null) => {
+    const params = new URLSearchParams(window.location.search);
+    if (id) params.set("milestone", id); else params.delete("milestone");
+    window.history.pushState(window.history.state, "", `${window.location.pathname}?${params.toString()}${window.location.hash}`);
+    handledMilestoneId.current = id;
+    setRequestedMilestoneId(id);
+  };
+  const openMilestone = (milestone: MilestoneRecord) => {
+    updateMilestoneLocation(milestone.id);
+    milestones.openMilestoneDetailsModal(milestone);
+  };
+  const closeMilestone = () => {
+    if (requestedMilestoneId) updateMilestoneLocation(null);
+    milestones.closeMilestoneModal();
+  };
+
   return (
     <section
       className={`panel dense-panel milestone-view ${WORKSPACE_PANEL_CLASS}`}
@@ -58,12 +94,12 @@ export function MilestonesView({
         <WorkspaceTopbarControls className="milestones-toolbar">
           <MilestonesToolbar
             isAllProjectsView={isAllProjectsView}
-            milestoneZoom={milestones.milestoneZoom}
+            readinessFilter={milestones.readinessFilter}
             projectFilter={milestones.projectFilter}
             projects={bootstrap.projects}
             searchFilter={milestones.searchFilter}
             searchSuggestions={milestones.searchSuggestions}
-            setMilestoneZoom={milestones.setMilestoneZoom}
+            setReadinessFilter={milestones.setReadinessFilter}
             setProjectFilter={milestones.setProjectFilter}
             setSearchFilter={milestones.setSearchFilter}
             setSortField={milestones.setSortField}
@@ -87,19 +123,14 @@ export function MilestonesView({
 
       <div className="panel-header compact-header">
         <div className="queue-section-header">
-          <h2>Milestones</h2>
+          <h2>Milestone agenda</h2>
         </div>
       </div>
 
-      <MilestonesBoardSection
-        bootstrap={bootstrap}
+      <MilestonesAgendaList
         milestones={milestones.processedMilestones}
-        motionClassName={milestones.milestoneFilterMotionClass}
-        milestoneZoom={milestones.milestoneZoom}
-        onOpenMilestone={milestones.openMilestoneDetailsModal}
+        onOpenMilestone={openMilestone}
         projectLabelByMilestoneId={milestones.projectLabelByMilestoneId}
-        searchFilter={milestones.searchFilter}
-        setMilestoneZoom={milestones.setMilestoneZoom}
       />
 
       <MilestonesMilestoneModal
@@ -115,7 +146,8 @@ export function MilestonesView({
         isSavingMilestone={milestones.isSavingMilestone}
         milestoneDraft={milestones.milestoneDraft}
         modalPortalTarget={milestones.modalPortalTarget}
-        onClose={milestones.closeMilestoneModal}
+        onClose={closeMilestone}
+        onRecordResult={onCreateMilestoneReport ? (milestone) => { milestones.closeMilestoneModal(); onCreateMilestoneReport(milestone.id, () => milestones.openMilestoneDetailsModal(milestone)); } : undefined}
         onCancelEdit={milestones.cancelMilestoneEdit}
         onDelete={milestones.handleMilestoneDelete}
         onEditMilestone={milestones.openEditMilestoneModal}

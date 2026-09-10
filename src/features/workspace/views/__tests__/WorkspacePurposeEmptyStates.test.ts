@@ -109,7 +109,7 @@ describe("workspace purpose empty states", () => {
     expect(markup).not.toContain("workspace-empty-state-action");
   });
 
-  it("explains empty part definitions and part instances", () => {
+  it("explains the empty consolidated parts catalog", () => {
     const markup = renderToStaticMarkup(
       React.createElement(PartsView, {
         bootstrap: EMPTY_BOOTSTRAP,
@@ -124,8 +124,6 @@ describe("workspace purpose empty states", () => {
     expect(markup).toContain("Catalog reusable part definitions here");
     expect(markup).toContain("No reusable parts have been defined");
     expect(markup).toContain("Add part definition");
-    expect(markup).toContain("Track subsystem-specific part instances here");
-    expect(markup).toContain("Part instances appear after reusable definitions");
     expect(markup).not.toContain("No part definitions match the current search.");
     expect(markup).not.toContain("No part instances match the current filters.");
   });

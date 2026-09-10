@@ -1,5 +1,5 @@
 import { ModalDialog } from "@/components/ModalDialog";
-import type { Dispatch, FormEvent, SetStateAction } from "react";
+import { useRef, type Dispatch, type FormEvent, type SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TestResultPayload } from "@/types/payloads";
 import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
@@ -18,7 +18,7 @@ interface MilestoneReportEditorModalProps {
 
 export function MilestoneReportEditorModal({
   bootstrap,
-  closeMilestoneReportModal,
+  closeMilestoneReportModal: onClose,
   milestoneReportDraft,
   milestoneReportFindings,
   handleMilestoneReportSubmit,
@@ -27,6 +27,12 @@ export function MilestoneReportEditorModal({
   setMilestoneReportDraft,
   setMilestoneReportFindings,
 }: MilestoneReportEditorModalProps) {
+  const initialDraft = useRef(JSON.stringify([milestoneReportDraft, milestoneReportFindings]));
+  const closeMilestoneReportModal = () => {
+    if (isSavingMilestoneReport) return;
+    if (JSON.stringify([milestoneReportDraft, milestoneReportFindings]) !== initialDraft.current && !window.confirm("Discard unsaved changes?")) return;
+    onClose();
+  };
   const selectedMilestone = bootstrap.milestones.find((item) => item.id === milestoneReportDraft.milestoneId);
   const milestoneReportPhotoProjectId =
     selectedMilestone?.projectIds[0] ?? bootstrap.projects[0]?.id ?? null;
@@ -61,6 +67,7 @@ export function MilestoneReportEditorModal({
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Milestone</span>
             <select
+              aria-label="Milestone"
               onChange={(milestone) =>
                 setMilestoneReportDraft((current) => ({
                   ...current,

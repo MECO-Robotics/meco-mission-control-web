@@ -3,7 +3,6 @@ import { WorkspaceToastStack, type WorkspaceToastStackItem } from "../WorkspaceS
 import { WorkspaceTaskSection } from "./sections/WorkspaceTaskSection";
 import { WorkspaceRiskSection } from "./sections/WorkspaceRiskSection";
 import { WorkspaceWorklogsSection } from "./sections/WorkspaceWorklogsSection";
-import { WorkspaceReportsSection } from "./sections/WorkspaceReportsSection";
 import { WorkspaceInventorySection } from "./sections/WorkspaceInventorySection";
 import { WorkspaceSubsystemsSection } from "./sections/WorkspaceSubsystemsSection";
 import { WorkspaceRosterSection } from "./sections/WorkspaceRosterSection";
@@ -72,7 +71,6 @@ export function WorkspaceContentPanelsView(props: WorkspaceContentPanelsViewProp
       <WorkspaceTaskSection {...props} />
       <WorkspaceRiskSection {...props} />
       <WorkspaceWorklogsSection {...props} />
-      <WorkspaceReportsSection {...props} />
       <WorkspaceManufacturingSection {...props} />
       <WorkspaceInventorySection {...props} />
       <WorkspaceCadSection {...props} />

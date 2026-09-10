@@ -20,151 +20,20 @@ export interface InteractiveTutorialChapter {
 }
 
 export const HELP_SECTIONS: HelpSection[] = [
-  {
-    title: "Local demo and tutorials",
-    items: [
-      "Demo edits stay in this browser tab and are **never synced**, including after sign-in.",
-      "Reload keeps demo edits. **Reset demo** restores the examples; closing the tab ends its local storage lifetime.",
-      "Tutorials use a separate local copy. Ending or reloading a tutorial discards its edits and restores your previous workspace.",
-      "STEP processing and Onshape connections need a signed-in workspace. Robot maps, parts, and materials can be edited locally.",
-    ],
-  },
-  {
-    title: "Start with scope",
-    items: [
-      "Before editing anything, check the **season selector** and **active project** at the bottom of the sidebar.",
-      "Pick **All projects** only for planning sweeps; switch back to a single project before data entry.",
-      "If a list looks empty, first confirm you are in the expected **season and project scope**.",
-      "Timeline, Kanban, and Milestones are **project-aware**, so scope mistakes show up there first.",
-    ],
-  },
-  {
-    title: "Know what each tab is for",
-    items: [
-      "Tasks is where scheduling and execution stay aligned: Timeline for dates, Kanban for active work, and Milestones for checkpoints.",
-      "Manufacturing only appears in **robot projects**, split into CNC, prints, and fabrication queues.",
-      "Reports is always available and groups the **QA** and **Milestone Result** forms in one sidebar page.",
-      "Inventory changes by project type: **robot projects use Materials and Parts, non-robot projects use Documents**.",
-      "Workflow replaces Subsystems for non-robot projects, but the ownership flow stays the same.",
-      "Roster and Help are **always available** no matter which project is selected.",
-    ],
-  },
-  {
-    title: "Use the edit flow consistently",
-    items: [
-      "Create from the Add button in the current view, then come back by clicking the row or card to edit.",
-      "The **hover pencil is a cue only**; the row or card itself is the actual click target.",
-      "Keep updates and deletes **inside the edit modal** so changes are made in one place.",
-      "If an **Add button is disabled**, you are usually missing season or project scope.",
-      "Apply ownership and status changes before date changes to keep queue and timeline views in sync.",
-    ],
-  },
-  {
-    title: "Filter without losing context",
-    items: [
-      "Start with search when you know a task name, part number, vendor, or owner.",
-      "Layer dropdown filters after search; stacking too many at once can hide expected rows.",
-      "Use roster person filtering to trace one contributor across task and inventory surfaces.",
-      "After someone else edits data, **use refresh** before assuming your filter is wrong.",
-      "Status chips and row badges are the fastest way to spot blocked or stale work.",
-    ],
-  },
-  {
-    title: "Roster and permission checks",
-    items: [
-      "Students, Mentors, and External access are separate on purpose; keep assignments in the right group.",
-      "Clicking a roster member sets a person filter in views that support person-scoped data.",
-      "Maintain **email, role, and elevated lead/core mentor access** from the roster edit popups.",
-      "If ownership choices look wrong in another tab, verify the roster record first.",
-    ],
-  },
-  {
-    title: "Sign-in and session behavior",
-    items: [
-      "Available sign-in methods come from **server config**: Google, email-code, or local dev bypass.",
-      "Google auth requires **localhost or HTTPS** with matching allowed origins in Google Cloud.",
-      "Email-code login only works with a **valid team address** and the active one-time code.",
-      "When a session expires, **sign in again and refresh once** before retrying failed edits.",
-    ],
-  },
-  {
-    title: "Fast troubleshooting pass",
-    items: [
-      "**No data:** verify season, project, and person filter in that order.",
-      "**Save failed:** refresh workspace data and retry once before making more edits.",
-      "**Cannot sign in:** check backend status and auth config before changing browser settings.",
-      "**Filters feel stuck:** clear search and dropdowns, then switch tabs once to reset local view state.",
-    ],
-  },
+  { title: "Find your work", items: ["**Home** brings priority work, upcoming milestones, and needs attention together. Filter attention to **Needs review** for approvals and follow-up.", "**Work → Tasks** is the execution queue. Use My work, Blocked, or Waiting for QA; open a task to update it, log work, or submit QA.", "**Work → Schedule** has Calendar, Timeline, and Agenda presentations. Milestone readiness and results stay with the milestone.", "**Work → Activity** contains searchable work logs, changes, QA results, and milestone results. **Risks** keeps the complete risk register."] },
+  { title: "Resources and structure", items: ["**Resources** groups Materials, Parts, Purchases, Manufacturing, and Structure for robot projects.", "Manufacturing uses a **Process** filter for CNC, 3D print, and fabrication. Approval and QA steps remain with each job.", "Open a part definition to inspect or edit its installed instances. Use **Needs mapping** to find unallocated definitions.", "**Structure** owns robot subsystems and mechanisms; open **Import CAD** from there for STEP and Onshape workflows.", "Non-robot projects use **Documents** and workflow **Structure**, with clear labels for the selected project."] },
+  { title: "People and attendance", items: ["**Team → People** combines membership, presence, assignment status, and workload. Here today and Available now are different filters.", "Open a person to maintain their details and use **Assign work** to start a task for them. Use the separate person filter to scope workspace views.", "**Team → Attendance** shows attendance history and planned versus actual availability. Role restrictions still apply to edits and approvals."] },
+  { title: "Scope and navigation", items: ["Check the **season and project selector** before entering data. Robot-only views require a robot project.", "Choose a primary area, then use its labeled **View** selector. No page requires a swipe or hover to find it.", "Use Back to return to the previous destination. Optional favorite views appear in the view selector.", "If a collection looks empty, check project, person, and local filters before adding duplicate records."] },
+  { title: "Local demo and tutorials", items: ["Demo edits stay in this browser tab and are **never synced**, including after sign-in.", "Reload keeps demo edits. **Reset demo** restores examples; closing the tab ends its local storage lifetime.", "Tutorials use a separate local copy. Ending or reloading a tutorial discards its edits and restores your previous workspace.", "STEP processing and Onshape connections need a signed-in workspace. Robot maps, parts, and materials can be edited locally."] },
+  { title: "Editing and account", items: ["Open a row or card for details. Short create and submit actions use dialogs; larger details retain their surrounding context.", "Save or cancel before leaving an edit. If a save fails, keep your draft and follow the error message before retrying.", "Account controls contain theme, refresh, and sign-in or sign-out. If your session expires, sign in again before retrying a write."] },
 ];
 
 export const HELP_TUTORIAL_STEPS: HelpTutorialStep[] = [
-  {
-    title: "Set season and project first",
-    summary:
-      "Every reliable workflow starts with correct scope. Confirm season and project before creating or editing records.",
-    actions: [
-      "Use the sidebar footer to confirm the active season.",
-      "Set project scope in the sidebar (Robot, Outreach, Operations, or All projects).",
-      "Switch out of All projects before entering detailed task or inventory data.",
-    ],
-    cue: "Wrong scope is the most common reason data looks missing.",
-  },
-  {
-    title: "Read the shell and subtabs",
-    summary:
-      "The sidebar picks the area; some areas use subtabs in the top bar, while Reports keeps its launchers on the page.",
-    actions: [
-      "Open Tasks and move through Timeline, Kanban, and Milestones.",
-      "Open Reports to launch QA and Milestone Result forms from one place in the sidebar.",
-      "Switch projects and watch Inventory move between Materials/Parts and Documents.",
-      "Check footer notes at the bottom of each view for local interaction hints.",
-    ],
-    cue: "If a control seems missing, you are often in the wrong subtab, not the wrong tab.",
-  },
-  {
-    title: "Create, then edit in place",
-    summary:
-      "The core loop is consistent: Add from the toolbar, then return by clicking rows or cards to edit.",
-    actions: [
-      "Create a new item from the Add button in the active view.",
-      "Hover for the pencil cue, then click the row/card itself.",
-      "Apply edits and deletes from the edit modal to keep record history consistent.",
-    ],
-    cue: "Disabled Add buttons usually mean missing scope, not missing permissions.",
-  },
-  {
-    title: "Filter deliberately",
-    summary: "Use filters in order so you do not accidentally hide expected items.",
-    actions: [
-      "Search first when you know a title, owner, vendor, or material.",
-      "Then add dropdown filters for status, subsystem, requester, or approval.",
-      "Use roster person filtering when tracing one person across multiple tabs.",
-    ],
-    cue: "Empty list after filtering usually means filters are too specific, not missing data.",
-  },
-  {
-    title: "Use roster as a control surface",
-    summary:
-      "Roster is not just reference data; it controls assignment quality and person-based filtering.",
-    actions: [
-      "Keep Students, Mentors, and External access in the correct buckets.",
-      "Click a roster member to apply person filtering where supported.",
-      "Maintain email, role, and elevated lead/core mentor status from roster popups.",
-    ],
-    cue: "If assignment dropdowns look wrong, fix the roster record before editing tasks.",
-  },
-  {
-    title: "Recover from stale state quickly",
-    summary:
-      "When behavior feels off, reset the smallest likely cause before making more edits.",
-    actions: [
-      "Clear search/filters and switch tabs once if a list appears stuck.",
-      "Use refresh after another user or device updates shared records.",
-      "If save fails, refresh and retry once before changing more fields.",
-    ],
-    cue: "Scope, filters, and stale cache explain most confusing states in this app.",
-  },
+  { title: "Choose your workspace", summary: "Confirm season and project before entering data.", actions: ["Open the project and season selector.", "Choose a robot or non-robot project."], cue: "Scope determines which resources are available." },
+  { title: "Find and update work", summary: "Work opens directly to Tasks.", actions: ["Choose Work, then Tasks.", "Open a task and inspect its status, blockers, and logs.", "Choose Schedule and switch between Calendar, Timeline, and Agenda."], cue: "Views have visible labels; filters narrow their contents." },
+  { title: "Review and record results", summary: "Reports belong to the work they describe.", actions: ["Use Waiting for QA in Tasks.", "Submit QA from a task detail.", "Record a result from milestone details.", "Find past records under Work → Activity."], cue: "Creation starts with the correct task or milestone selected." },
+  { title: "Manage resources", summary: "Inventory and robot structure have one home.", actions: ["Open Resources and choose Parts or Manufacturing.", "Inspect a part and its installed instances.", "Open Structure to work with subsystems and mechanisms."], cue: "CNC, 3D print, and fabrication are process filters." },
+  { title: "Assign people", summary: "Team combines presence, load, and membership.", actions: ["Choose Team → People.", "Compare Here today with Available now.", "Assign work to a teammate or inspect Attendance."], cue: "Presence does not necessarily mean spare capacity." },
 ];
 
 export function renderHelpItem(item: string): ReactNode {

@@ -28,6 +28,7 @@ import type { TaskCalendarEvent } from "./taskCalendarEvents";
 import { useTaskCalendarEventData } from "./useTaskCalendarEventData";
 
 interface TaskCalendarViewProps {
+  onCreateMilestoneReport?: (milestoneId: string, onReturn?: () => void) => void;
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   isAllProjectsView: boolean;
@@ -62,6 +63,7 @@ function createDefaultMeetingDraft(bootstrap: BootstrapPayload): MeetingPayload 
 
 export function TaskCalendarView({
   activePersonFilter,
+  onCreateMilestoneReport,
   bootstrap,
   isAllProjectsView,
   onSaveMeeting,
@@ -241,6 +243,7 @@ export function TaskCalendarView({
         modalPortalTarget={milestoneModalState.modalPortalTarget}
         onCancelEdit={milestoneModalState.cancelMilestoneEdit}
         onClose={milestoneModalState.closeMilestoneModal}
+        onRecordResult={onCreateMilestoneReport ? (milestone) => { milestoneModalState.closeMilestoneModal(); onCreateMilestoneReport(milestone.id, () => milestoneModalState.openMilestoneDetailsModal(milestone)); } : undefined}
         onDelete={() => void milestoneModalState.handleMilestoneDelete()}
         onEditMilestone={milestoneModalState.openEditMilestoneModal}
         onSubmit={(event) => void milestoneModalState.handleMilestoneSubmit(event)}

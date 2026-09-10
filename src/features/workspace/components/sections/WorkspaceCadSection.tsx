@@ -13,6 +13,7 @@ export function WorkspaceCadSection(props: WorkspaceContentPanelsViewProps) {
       tabSwitchDirection={props.tabSwitchDirection}
     >
       <WorkspaceSubPanel disableAnimations={props.disablePanelAnimations} isActive>
+        <div className="workspace-presentation-controls"><button className="ghost-button" onClick={() => props.onOpenDrilldownTarget({ tab: "tasks", taskView: "robot-map" })} type="button">Back to Structure</button></div>
         {localMode ? (
           <div className="empty-state">
             <h2>CAD connections need a signed-in workspace</h2>

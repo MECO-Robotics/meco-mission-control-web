@@ -4,7 +4,6 @@ import type { FilterSelection } from "@/features/workspace/shared/filters/worksp
 import type {
   InventoryViewTab,
   ManufacturingViewTab,
-  ReportsViewTab,
   RiskManagementViewTab,
   TaskViewTab,
   ViewTab,
@@ -17,7 +16,6 @@ export interface UseInteractiveTutorialOptions {
   taskView: TaskViewTab;
   riskManagementView: RiskManagementViewTab;
   worklogsView: WorklogsViewTab;
-  reportsView: ReportsViewTab;
   manufacturingView: ManufacturingViewTab;
   inventoryView: InventoryViewTab;
   selectedSeasonId: string | null;
@@ -31,7 +29,6 @@ export interface UseInteractiveTutorialOptions {
   setTaskView: Dispatch<SetStateAction<TaskViewTab>>;
   setRiskManagementView: Dispatch<SetStateAction<RiskManagementViewTab>>;
   setWorklogsView: Dispatch<SetStateAction<WorklogsViewTab>>;
-  setReportsView: Dispatch<SetStateAction<ReportsViewTab>>;
   setManufacturingView: Dispatch<SetStateAction<ManufacturingViewTab>>;
   setInventoryView: Dispatch<SetStateAction<InventoryViewTab>>;
   setSelectedSeasonId: Dispatch<SetStateAction<string | null>>;

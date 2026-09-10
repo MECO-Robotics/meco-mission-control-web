@@ -13,14 +13,14 @@ const outreachSteps = [
   {
     id: "workflow-tab",
     title: "Open Workflow",
-    instruction: "Open Readiness from the sidebar in Outreach mode.",
-    selector: '[data-tutorial-target="sidebar-tab-readiness"]',
+    instruction: "Open Resources from the navigation.",
+    selector: '[data-tutorial-target="sidebar-tab-resources"]',
   },
   {
     id: "outreach-workflow-view",
     title: "Open Workflow",
-    instruction: "Choose Subsystems to view the outreach workflow.",
-    selector: '[data-tutorial-target="readiness-view-readiness-subsystems"]',
+    instruction: "Choose Structure to view the outreach workflow.",
+    selector: '[aria-label="View"]',
   },
   {
     id: "workflow-edit",
@@ -30,15 +30,15 @@ const outreachSteps = [
   },
   {
     id: "inventory-tab",
-    title: "Open Inventory",
-    instruction: "Open Inventory from the sidebar.",
-    selector: '[data-tutorial-target="sidebar-tab-inventory"]',
+    title: "Open Resources",
+    instruction: "Open Resources from the sidebar.",
+    selector: '[data-tutorial-target="sidebar-tab-resources"]',
   },
   {
     id: "inventory-materials",
     title: "Open Documents",
-    instruction: "Switch Inventory to Documents.",
-    selector: '[data-tutorial-target="inventory-view-inventory-materials"]',
+    instruction: "Choose Documents from the view selector.",
+    selector: '[aria-label="View"]',
   },
   {
     id: "create-document",

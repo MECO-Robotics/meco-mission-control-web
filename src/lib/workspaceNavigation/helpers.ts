@@ -9,24 +9,6 @@ import type {
   ViewAvailabilityScope,
 } from "./types";
 
-function normalizeNavigationState(state: NavigationState): NavigationState {
-  if (state.activeTab === "manufacturing") {
-    return {
-      ...state,
-      manufacturingView: "all",
-    };
-  }
-
-  if (state.activeTab === "worklogs" && state.worklogsView === "summary") {
-    return {
-      ...state,
-      worklogsView: "kanban",
-    };
-  }
-
-  return state;
-}
-
 export function targetMatchesNavigationState(
   target: NavigationTarget,
   state: NavigationState,
@@ -47,10 +29,6 @@ export function targetMatchesNavigationState(
     return false;
   }
 
-  if (target.reportsView && target.reportsView !== state.reportsView) {
-    return false;
-  }
-
   if (target.inventoryView && target.inventoryView !== state.inventoryView) {
     return false;
   }
@@ -66,18 +44,29 @@ export function targetMatchesNavigationState(
   return true;
 }
 
-export function getActiveNavigationSubItemId(state: NavigationState): NavigationSubItemId | null {
-  const normalizedState = normalizeNavigationState(state);
-  const matchedSubItem = NAVIGATION_SUB_ITEMS.find((item) =>
-    targetMatchesNavigationState(item.target, normalizedState),
-  );
-  return matchedSubItem?.id ?? null;
+export function getActiveNavigationSubItemId(state: NavigationState, context?: ViewAvailabilityContext): NavigationSubItemId | null {
+  switch (state.activeTab) {
+    case "home": return "home";
+    case "tasks": return state.taskView === "robot-map" ? "resources-structure" : state.taskView === "queue" ? "work-tasks" : "work-schedule";
+    case "risk-management": return state.riskManagementView === "kanban" ? "work-risks" : "home";
+    case "worklogs": return "work-activity";
+    case "manufacturing": return "resources-manufacturing";
+    case "cad": case "subsystems": return "resources-structure";
+    case "roster": return state.rosterView === "attendance" ? "team-attendance" : "team-people";
+    case "inventory": return state.inventoryView === "purchases" ? "resources-purchases" : state.inventoryView === "materials" ? context === "non-robot-project" ? "resources-documents" : "resources-materials" : "resources-parts";
+    default: return null;
+  }
+}
+
+export function getNavigationTarget(id: NavigationSubItemId, context: ViewAvailabilityContext): NavigationTarget {
+  if (id === "resources-structure" && context === "non-robot-project") return { tab: "subsystems" };
+  return NAVIGATION_SUB_ITEMS.find((item) => item.id === id)!.target;
 }
 
 export function getNavigationSectionFromSubItem(
   subItemId: NavigationSubItemId,
 ): NavigationSection {
-  return NAVIGATION_SUB_ITEMS.find((item) => item.id === subItemId)?.section ?? "dashboard";
+  return NAVIGATION_SUB_ITEMS.find((item) => item.id === subItemId)?.section ?? "home";
 }
 
 const NAVIGATION_SUB_ITEM_ID_SET = new Set<string>(
@@ -89,10 +78,6 @@ export function isNavigationSubItemId(value: string): value is NavigationSubItem
 }
 
 export function normalizeNavigationSubItemId(value: string): NavigationSubItemId | null {
-  if (value === "reports-work-logs") {
-    return "reports-worklogs";
-  }
-
   return isNavigationSubItemId(value) ? value : null;
 }
 
@@ -129,7 +114,7 @@ export function isNavigationSubItemAvailable(
     return false;
   }
 
-  if (scope.visibleTabs && !scope.visibleTabs.has(subItem.target.tab)) {
+  if (scope.visibleTabs && !scope.visibleTabs.has(getNavigationTarget(subItemId, scope.context).tab)) {
     return false;
   }
 
