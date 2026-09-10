@@ -2,10 +2,11 @@ import { useCallback, useMemo } from "react";
 
 import {
   NAVIGATION_SECTION_ORDER,
+  NAVIGATION_SUB_ITEMS,
   NAVIGATION_SUB_ITEMS_BY_SECTION,
   getActiveNavigationSubItemId,
-  getNavigationSectionFromSubItem,
   getNavigationTarget,
+  getNavigationSectionFromSubItem,
   isNavigationSubItemAvailable,
   type InventoryViewTab,
   type ManufacturingViewTab,
@@ -23,6 +24,7 @@ import type { SidebarSubItemModel } from "../AppSidebarSections";
 
 interface UseAppSidebarNavigationModelsArgs {
   activeTab: ViewTab;
+  favoriteViewIds: readonly NavigationSubItemId[];
   inventoryView: InventoryViewTab;
   manufacturingView: ManufacturingViewTab;
   rosterView: RosterViewTab;
@@ -34,6 +36,7 @@ interface UseAppSidebarNavigationModelsArgs {
 
 export function useAppSidebarNavigationModels({
   activeTab,
+  favoriteViewIds,
   inventoryView,
   manufacturingView,
   rosterView,
@@ -72,7 +75,7 @@ export function useAppSidebarNavigationModels({
   );
   const sectionModels = useMemo(
     () =>
-      NAVIGATION_SECTION_ORDER.map((section) => {
+      NAVIGATION_SECTION_ORDER.filter(section => section !== "home").map((section) => {
         const subItems = getSectionSubItems(section);
         return {
           section,
@@ -82,9 +85,21 @@ export function useAppSidebarNavigationModels({
       }),
     [getSectionSubItems],
   );
+  const favoriteSubItems = useMemo(() => {
+    const requestedFavoriteIds = new Set(favoriteViewIds);
+    return NAVIGATION_SUB_ITEMS
+      .filter((subItem) => requestedFavoriteIds.has(subItem.id))
+      .map((subItem) => ({
+        ...subItem,
+        target: getNavigationTarget(subItem.id, viewAvailabilityContext),
+        isEnabled: isSubItemEnabled(subItem.id),
+      }));
+  }, [favoriteViewIds, isSubItemEnabled, viewAvailabilityContext]);
+
   return {
     activeSection,
     activeSubItemId,
+    favoriteSubItems,
     getSectionSubItems,
     sectionModels,
   };

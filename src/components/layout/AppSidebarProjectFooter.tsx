@@ -82,11 +82,13 @@ export function AppSidebarProjectFooter({
         <CalendarDays size={13} strokeWidth={2} />
         <LayoutGrid size={13} strokeWidth={2} />
       </span>
-      <span className="sidebar-scope-trigger-copy">
+      {!isCollapsed ? (
+        <span className="sidebar-scope-trigger-copy">
           <span className="sidebar-scope-trigger-line" data-tutorial-target="project-select">
             {selectedScopeLabel}
           </span>
         </span>
+      ) : null}
       {!isCollapsed ? (
         <span aria-hidden="true" className="sidebar-scope-trigger-caret">
           <ChevronRight size={14} strokeWidth={2} />

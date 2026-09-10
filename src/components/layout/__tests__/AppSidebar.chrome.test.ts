@@ -6,7 +6,7 @@ import * as React from "react";
 import { renderSidebar, signedInUser } from "./AppSidebar.testUtils";
 
 describe("AppSidebar chrome", () => {
-  it("renders Add and Fold with profile above scope", () => {
+  it("renders the top triplet as Home, Add, and Fold with profile above scope", () => {
     const markup = renderSidebar(
       [
         {
@@ -20,13 +20,15 @@ describe("AppSidebar chrome", () => {
       { sessionUser: signedInUser },
     );
     const quickIndex = markup.indexOf("sidebar-quick-actions");
+    const homeIndex = markup.indexOf("sidebar-quick-action-home");
     const addIndex = markup.indexOf("sidebar-quick-action-add");
     const foldIndex = markup.indexOf("sidebar-quick-action-fold");
     const footerIndex = markup.indexOf("sidebar-footer-stack");
     const profileIndex = markup.indexOf("sidebar-footer-profile");
     const scopeIndex = markup.indexOf("sidebar-scope-trigger");
 
-    expect(addIndex).toBeGreaterThan(quickIndex);
+    expect(homeIndex).toBeGreaterThan(quickIndex);
+    expect(homeIndex).toBeLessThan(addIndex);
     expect(addIndex).toBeLessThan(foldIndex);
     expect(markup).toMatch(
       /<button(?=[^>]*class="[^"]*sidebar-quick-action-fold)(?=[^>]*aria-label="Collapse sidebar")[^>]*>[\s\S]*lucide-panel-left-close[\s\S]*<\/button>/,

@@ -4,6 +4,7 @@ import {
   type InventoryViewTab,
   type ManufacturingViewTab,
   type NavigationSection,
+  type NavigationSubItemId,
   type NavigationTarget,
   type RosterViewTab,
   type RiskManagementViewTab,
@@ -31,6 +32,7 @@ import { useAppSidebarPopupState } from "./useAppSidebarPopupState";
 interface AppSidebarProps {
   activeTab: ViewTab;
   canSignIn: boolean;
+  favoriteViewIds: readonly NavigationSubItemId[];
   handleSignOut: () => void;
   isDarkMode: boolean;
   isMyViewActive: boolean;
@@ -70,6 +72,7 @@ interface AppSidebarProps {
 export function AppSidebar({
   activeTab,
   canSignIn,
+  favoriteViewIds,
   handleSignOut,
   isDarkMode,
   isMyViewActive,
@@ -122,10 +125,12 @@ export function AppSidebar({
   const {
     activeSection,
     activeSubItemId,
+    favoriteSubItems,
     getSectionSubItems,
     sectionModels,
   } = useAppSidebarNavigationModels({
     activeTab,
+    favoriteViewIds,
     inventoryView,
     manufacturingView,
     rosterView,
@@ -136,14 +141,23 @@ export function AppSidebar({
   });
 
   const {
+    compactPopupRef,
+    compactPopupSection,
+    compactPopupTop,
+    expandedSection,
     isProjectPopupOpen,
     projectPopupRef,
     projectPopupTop,
     projectTriggerRef,
+    setCompactPopupSection,
+    setCompactPopupTop,
+    setExpandedSection,
     setIsProjectPopupOpen,
     setProjectPopupTop,
     sidebarShellRef,
   } = useAppSidebarPopupState({
+    activeSection,
+    isCollapsed,
     projectPopupLayoutKey: activeScopePanel,
   });
   const {
@@ -152,11 +166,34 @@ export function AppSidebar({
     sidebarScrollRef,
   } = useSidebarScrollHints();
 
-  const handleSectionClick = (section: NavigationSection) => {
-    if (isCollapsed && window.innerWidth > 760) toggleSidebar();
-    if (section === activeSection) return;
-    const firstEnabledSubItem = getSectionSubItems(section).find((item) => item.isEnabled);
-    if (firstEnabledSubItem) onSelectTarget(firstEnabledSubItem.target, { keepSidebarOpen: true });
+  const handleSectionClick = (section: NavigationSection, event: ReactMouseEvent<HTMLButtonElement>) => {
+    const subItems = getSectionSubItems(section);
+    const firstEnabledSubItem = subItems.find((subItem) => subItem.isEnabled);
+
+    if (isCollapsed) {
+      const shellRect = sidebarShellRef.current?.getBoundingClientRect();
+      const targetRect = event.currentTarget.getBoundingClientRect();
+      const popupTop = shellRect ? targetRect.top - shellRect.top : 0;
+      setCompactPopupTop(popupTop);
+      setIsProjectPopupOpen(false);
+      setCompactPopupSection((current) => (current === section ? null : section));
+      return;
+    }
+
+    setExpandedSection(section);
+
+    if (firstEnabledSubItem) {
+      onSelectTarget(firstEnabledSubItem.target, { keepSidebarOpen: true });
+    }
+  };
+
+  const handleSubItemSelect = (target: NavigationTarget, isEnabled: boolean) => {
+    if (!isEnabled) {
+      return;
+    }
+
+    onSelectTarget(target);
+    setCompactPopupSection(null);
   };
 
   const handleProjectTriggerClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
@@ -164,6 +201,10 @@ export function AppSidebar({
     const targetRect = event.currentTarget.getBoundingClientRect();
     const popupTop = shellRect ? targetRect.top - shellRect.top : 0;
     setProjectPopupTop(popupTop);
+
+    if (isCollapsed) {
+      setCompactPopupSection(null);
+    }
 
     setActiveScopePanel(null);
     setIsProjectPopupOpen((current) => !current);
@@ -194,11 +235,13 @@ export function AppSidebar({
   };
 
   const handleHelpSelect = () => {
+    setCompactPopupSection(null);
     setIsProjectPopupOpen(false);
     setActiveScopePanel(null);
     onSelectTarget({ tab: "help" }, { keepSidebarOpen: true });
   };
   const handleSidebarFoldClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
+    setCompactPopupSection(null);
     setIsProjectPopupOpen(false);
     setActiveScopePanel(null);
     toggleSidebar();
@@ -220,28 +263,33 @@ export function AppSidebar({
         ref={sidebarScrollRef}
       >
         <AppSidebarQuickActions
+          activeTab={activeTab}
           isCollapsed={isCollapsed}
           onCreateMilestone={onCreateMilestone}
           onCreatePart={onCreatePart}
           onCreateQaReport={onCreateQaReport}
           onCreateTask={onCreateTask}
+          onSelectTarget={onSelectTarget}
           onToggleSidebar={handleSidebarFoldClick}
         />
 
         <AppSidebarSections
           activeSection={activeSection}
           activeSubItemId={activeSubItemId}
-          onSelectTarget={target => onSelectTarget(target, { keepSidebarOpen: true })}
+          expandedSection={expandedSection}
+          isCollapsed={isCollapsed}
           onSectionClick={handleSectionClick}
+          onSubItemSelect={handleSubItemSelect}
+          favoriteSubItems={favoriteSubItems}
           sectionModels={sectionModels}
         />
 
         <AppSidebarProjectFooter
-          isCollapsed={isCollapsed}
           activeTab={activeTab}
           canSignIn={canSignIn}
           canSignOut={sessionUser !== null}
           isDarkMode={isDarkMode}
+          isCollapsed={isCollapsed}
           isMyViewActive={isMyViewActive}
           isNotificationQueueOpen={isNotificationQueueOpen}
           isProjectPopupOpen={isProjectPopupOpen}
@@ -261,13 +309,20 @@ export function AppSidebar({
         />
       </nav>
       <AppSidebarPopups
+        activeSubItemId={activeSubItemId}
         activeScopePanel={activeScopePanel}
+        compactPopupRef={compactPopupRef}
+        compactPopupSection={compactPopupSection}
+        compactPopupTop={compactPopupTop}
+        getSectionSubItems={getSectionSubItems}
+        isCollapsed={isCollapsed}
         isProjectPopupOpen={isProjectPopupOpen}
         isScopePopupOpen={isProjectPopupOpen}
         canEditSelectedRobot={canEditSelectedRobot}
         onEditSelectedRobot={onEditSelectedRobot}
         onSelectProjectOption={handleProjectOptionSelect}
         onSelectSeasonOption={handleSeasonOptionSelect}
+        onSubItemSelect={handleSubItemSelect}
         projectPopupRef={projectPopupRef}
         projectPopupTop={projectPopupTop}
         projects={projects}

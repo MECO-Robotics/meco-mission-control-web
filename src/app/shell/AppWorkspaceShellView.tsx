@@ -217,6 +217,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       isSidebarCollapsed={c.isSidebarCollapsed}
     />
         <AppSidebar
+          favoriteViewIds={[...favoriteViewIds]}
       activeTab={c.activeTab}
       canSignIn={c.enforcedAuthConfig !== null && c.sessionUser === null}
       handleSignOut={c.handleSignOut}

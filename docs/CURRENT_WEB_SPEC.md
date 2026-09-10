@@ -10,7 +10,7 @@ The web app owns cross-project planning, coordination, resource management, evid
 
 ## Current Navigation Contract
 
-The app has four primary destinations. Desktop uses a sidebar; narrow web and mobile use labeled bottom navigation. Secondary destinations appear as sidebar subitems under the active area. On narrow web screens, tapping an area opens the same subitems above the bottom navigation. The topbar displays the current page title.
+The app uses the original sidebar implementation: Home shortcut, expandable Work/Resources/Team sections, icon subitems, favorites, compact flyouts, and its existing responsive overlay. The topbar displays the current page title. The native mobile app retains labeled bottom navigation.
 
 | Area | Views | Consolidation |
 | --- | --- | --- |

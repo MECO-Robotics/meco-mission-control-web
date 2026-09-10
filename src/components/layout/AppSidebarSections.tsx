@@ -1,10 +1,10 @@
-import { useState, type MouseEvent as ReactMouseEvent } from "react";
-import { ChevronDown } from "lucide-react";
+import type { MouseEvent as ReactMouseEvent } from "react";
+import { IconChevronRight } from "@/components/shared/Icons";
 import {
   type NavigationSection,
   NAVIGATION_SECTION_LABELS,
 } from "@/lib/workspaceNavigation";
-import { sectionIcons } from "./appSidebarIcons";
+import { sectionIcons, subItemIcons } from "./appSidebarIcons";
 
 export interface SidebarSubItemModel {
   id: import("@/lib/workspaceNavigation").NavigationSubItemId;
@@ -21,45 +21,112 @@ interface SidebarSectionModel {
 
 interface AppSidebarSectionsProps {
   activeSection: NavigationSection | null;
-  activeSubItemId: string | null;
-  onSelectTarget: (target: SidebarSubItemModel["target"]) => void;
+  activeSubItemId: import("@/lib/workspaceNavigation").NavigationSubItemId | null;
+  expandedSection: NavigationSection | null;
+  favoriteSubItems: SidebarSubItemModel[];
+  isCollapsed: boolean;
   onSectionClick: (section: NavigationSection, event: ReactMouseEvent<HTMLButtonElement>) => void;
+  onSubItemSelect: (
+    target: import("@/lib/workspaceNavigation").NavigationTarget,
+    isEnabled: boolean,
+  ) => void;
   sectionModels: SidebarSectionModel[];
 }
 
-export function AppSidebarSections({ activeSection, activeSubItemId, onSectionClick, onSelectTarget, sectionModels }: AppSidebarSectionsProps) {
-  const [mobileOpen, setMobileOpen] = useState<NavigationSection | null>(null);
+export function AppSidebarSections({
+  activeSection,
+  activeSubItemId,
+  expandedSection,
+  favoriteSubItems,
+  isCollapsed,
+  onSectionClick,
+  onSubItemSelect,
+  sectionModels,
+}: AppSidebarSectionsProps) {
+  const renderSubItem = (
+    subItem: SidebarSubItemModel,
+    options: { isFavorite?: boolean } = {},
+  ) => {
+    const isFavorite = options.isFavorite === true;
+
+    return (
+      <button
+        aria-label={isCollapsed && isFavorite ? subItem.label : undefined}
+        className={isFavorite ? "sidebar-subtab sidebar-favorite-subtab" : "sidebar-subtab"}
+        data-active={activeSubItemId === subItem.id ? "true" : "false"}
+        data-enabled={subItem.isEnabled ? "true" : "false"}
+        disabled={!subItem.isEnabled}
+        data-tutorial-target={`sidebar-view-${subItem.id}`}
+        data-active-view={activeSubItemId ?? ""}
+        key={subItem.id}
+        onClick={() => onSubItemSelect(subItem.target, subItem.isEnabled)}
+        title={isCollapsed && isFavorite ? subItem.label : undefined}
+        type="button"
+      >
+        <span aria-hidden="true" className="sidebar-subtab-icon">
+          {subItemIcons[subItem.id]}
+        </span>
+        <span className="sidebar-subtab-label">{subItem.label}</span>
+      </button>
+    );
+  };
+
   return (
-    <div className="workspace-primary-navigation" onKeyDown={event => { if (event.key === "Escape") setMobileOpen(null); }}>
-      {sectionModels.map(({ section, isEnabled, subItems }) => (
-        <div className="sidebar-area" key={section} data-active={activeSection === section} data-open={mobileOpen === section}>
-          <button
-            aria-current={section === "home" && activeSection === section ? "page" : undefined}
-            aria-label={NAVIGATION_SECTION_LABELS[section]}
-            aria-controls={section !== "home" ? `sidebar-views-${section}` : undefined}
-            className="tab sidebar-section-toggle"
-            data-active={activeSection === section ? "true" : "false"}
-            data-tutorial-target={`sidebar-tab-${section}`}
-            disabled={!isEnabled}
-            onClick={event => { setMobileOpen(mobileOpen === section ? null : section); onSectionClick(section, event); }}
-            type="button"
-          >
-            <span aria-hidden="true" className="sidebar-tab-icon">{sectionIcons[section]}</span>
-            <span className="sidebar-tab-label">{NAVIGATION_SECTION_LABELS[section]}</span>
-            {section !== "home" ? <ChevronDown aria-hidden="true" size={14} className="sidebar-area-chevron" /> : null}
-          </button>
-          {section !== "home" ? <div className="sidebar-subitem-list" id={`sidebar-views-${section}`} aria-label={`${NAVIGATION_SECTION_LABELS[section]} views`}>
-            {subItems.filter(item => item.isEnabled).map(item => <button
-              key={item.id} type="button" className="sidebar-subitem"
-              aria-current={activeSubItemId === item.id ? "page" : undefined}
-              data-active={activeSubItemId === item.id}
-              data-active-view={activeSubItemId ?? ""}
-              data-tutorial-target={`sidebar-view-${item.id}`}
-              onClick={() => { onSelectTarget(item.target); setMobileOpen(null); }}
-            >{item.label}</button>)}
-          </div> : null}
+    <>
+      {favoriteSubItems.length > 0 ? (
+        <div
+          className="sidebar-section-group sidebar-favorites-group"
+          data-collapsed={isCollapsed ? "true" : "false"}
+        >
+          <div className="sidebar-favorites-heading">
+            <span className="sidebar-favorites-heading-label">{isCollapsed ? "Fav" : "Favorites"}</span>
+          </div>
+          <div className="sidebar-subtab-list sidebar-favorites-list">
+            {favoriteSubItems.map((subItem) => renderSubItem(subItem, { isFavorite: true }))}
+          </div>
         </div>
-      ))}
-    </div>
+      ) : null}
+
+      {sectionModels.map(({ section, subItems, isEnabled: isSectionEnabled }) => {
+        const isExpanded = !isCollapsed && expandedSection === section;
+
+        return (
+          <div className="sidebar-section-group" key={section}>
+            <button
+              aria-disabled={!isSectionEnabled}
+              className="tab sidebar-section-toggle"
+              data-active={activeSection === section ? "true" : "false"}
+              data-enabled={isSectionEnabled ? "true" : "false"}
+              data-tutorial-target={`sidebar-tab-${section}`}
+              onClick={(event) => onSectionClick(section, event)}
+              type="button"
+            >
+              <span className="sidebar-tab-main">
+                <span aria-hidden="true" className="sidebar-tab-icon">
+                  {sectionIcons[section]}
+                </span>
+                {!isCollapsed ? (
+                  <span className="sidebar-tab-label">{NAVIGATION_SECTION_LABELS[section]}</span>
+                ) : null}
+              </span>
+              {!isCollapsed ? (
+                <span
+                  aria-hidden="true"
+                  className={`sidebar-section-chevron${isExpanded ? " is-expanded" : ""}`}
+                >
+                  <IconChevronRight />
+                </span>
+              ) : null}
+            </button>
+
+            {isExpanded ? (
+              <div className="sidebar-subtab-list">
+                {subItems.map((subItem) => renderSubItem(subItem))}
+              </div>
+            ) : null}
+          </div>
+        );
+      })}
+    </>
   );
 }

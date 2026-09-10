@@ -6,7 +6,7 @@ Implemented in dedicated web, mobile and platform worktrees on `feature/navigati
 
 Consolidate the current implementation around four destinations instead of replacing the UI framework. Existing task, manufacturing, risk and evidence behavior remains useful; the duplication is primarily navigation, collection rendering and report launch pages. Remove superseded renderers and wrappers rather than preserve parallel page systems.
 
-The app has four primary destinations. Desktop uses a sidebar; narrow web and mobile use labeled bottom navigation. Secondary destinations appear as sidebar subitems under the active area. On narrow web screens, tapping an area opens the same subitems above the bottom navigation. The topbar displays the current page title.
+The app uses the original sidebar implementation: Home shortcut, expandable Work/Resources/Team sections, icon subitems, favorites, compact flyouts, and its existing responsive overlay. The topbar displays the current page title. The native mobile app retains labeled bottom navigation.
 
 | Area | Views | Consolidation |
 | --- | --- | --- |

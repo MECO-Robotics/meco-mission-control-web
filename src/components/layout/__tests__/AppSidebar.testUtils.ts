@@ -37,6 +37,7 @@ export function renderSidebar(
 ) {
   const sidebarProps: React.ComponentProps<typeof AppSidebar> = {
       activeTab,
+      favoriteViewIds: options?.favoriteViewIds ?? [],
       canSignIn: options?.canSignIn ?? (options?.sessionUser ?? null) === null,
       handleSignOut: jest.fn(),
       inventoryView: options?.inventoryView ?? "materials",
