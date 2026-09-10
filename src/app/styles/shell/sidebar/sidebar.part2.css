@@ -126,14 +126,6 @@
   max-width: 15.25rem;
 }
 
-.sidebar[data-collapsed="true"] {
-  padding-inline: 0.5rem;
-}
-
-.sidebar[data-collapsed="false"] {
-  padding-left: 0.7rem;
-}
-
 .sidebar[data-collapsed="true"] .tab {
   justify-content: center;
   padding-inline: 0.4rem;
@@ -161,9 +153,9 @@
   align-items: center;
   justify-content: flex-start;
   gap: 0.45rem;
-  border-radius: 6px;
-  padding: 0.42rem 0.02rem 0.42rem 0.42rem;
-  width: fit-content;
+  border-radius: 0;
+  padding: 0.42rem 0.5rem;
+  width: 100%;
   max-width: 100%;
   text-align: left;
   font-size: 0.84rem;
@@ -179,7 +171,7 @@
 .sidebar .tab[data-active="true"] {
   background: var(--meco-soft-blue);
   color: var(--meco-blue);
-  border-color: rgba(22, 71, 142, 0.22);
+  border-color: transparent;
 }
 
 .page-shell.dark-mode .sidebar .tab[data-active="true"] {

@@ -5,7 +5,7 @@
 
 .sidebar .tab[data-active="true"]:hover {
   background: var(--meco-soft-blue);
-  border-color: rgba(22, 71, 142, 0.22);
+  border-color: transparent;
 }
 
 .sidebar-section-group {
@@ -44,7 +44,7 @@
   border: 1px solid transparent;
   background: transparent;
   color: var(--text-copy);
-  border-radius: 6px;
+  border-radius: 0;
   font-size: 0.84rem;
   font-weight: 600;
   line-height: 1.2;
@@ -60,7 +60,7 @@
 
 .sidebar-nav-item[data-active="true"] {
   background: var(--meco-soft-blue);
-  border-color: rgba(22, 71, 142, 0.22);
+  border-color: transparent;
   color: var(--meco-blue);
 }
 
