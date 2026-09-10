@@ -1,13 +1,11 @@
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { InteractiveTutorialOverlay } from "@/app/interactiveTutorial/InteractiveTutorialOverlay";
 import {
-  type NavigationSubItemId,
   BASE_SECTION_LABELS,
   NAVIGATION_SECTION_LABELS,
   NAVIGATION_SUB_ITEMS,
   getActiveNavigationSubItemId,
   getNavigationSectionFromSubItem,
-  normalizeNavigationSubItemId,
   resolveViewAvailabilityContext,
   isNavigationSubItemAvailable,
   getNavigationTarget,
@@ -48,13 +46,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       ? NAVIGATION_SUB_ITEMS.find((subItem) => subItem.id === activeSubItemId)?.label ??
         activeSectionLabel
       : activeSectionLabel;
-  const favoriteViewIds = new Set(
-    (c.bootstrap.favoriteViews ?? [])
-      .map((favorite) => normalizeNavigationSubItemId(favorite.viewId))
-      .filter((favoriteViewId): favoriteViewId is NavigationSubItemId => favoriteViewId !== null),
-  );
-  const isActiveViewFavorite = activeSubItemId ? favoriteViewIds.has(activeSubItemId) : false;
-
   const handleSelectNavigationTarget = (target: NavigationTarget, options?: { keepSidebarOpen?: boolean }) => {
     if (!restoringLocation.current) window.history.replaceState({ ...window.history.state, scrollY: window.scrollY }, "");
     const destinationUrl = new URL(window.location.href);
@@ -207,17 +198,10 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
         }
       }}
       activeViewLabel={activeViewLabel}
-      isActiveViewFavorite={isActiveViewFavorite}
-      onToggleActiveViewFavorite={
-        activeSubItemId
-          ? () => void c.toggleFavoriteView(activeSubItemId, !isActiveViewFavorite)
-          : null
-      }
       isDarkMode={c.isDarkMode}
       isSidebarCollapsed={c.isSidebarCollapsed}
     />
         <AppSidebar
-          favoriteViewIds={[...favoriteViewIds]}
       activeTab={c.activeTab}
       canSignIn={c.enforcedAuthConfig !== null && c.sessionUser === null}
       handleSignOut={c.handleSignOut}

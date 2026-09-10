@@ -4,7 +4,6 @@ import {
   type InventoryViewTab,
   type ManufacturingViewTab,
   type NavigationSection,
-  type NavigationSubItemId,
   type NavigationTarget,
   type RosterViewTab,
   type RiskManagementViewTab,
@@ -32,7 +31,6 @@ import { useAppSidebarPopupState } from "./useAppSidebarPopupState";
 interface AppSidebarProps {
   activeTab: ViewTab;
   canSignIn: boolean;
-  favoriteViewIds: readonly NavigationSubItemId[];
   handleSignOut: () => void;
   isDarkMode: boolean;
   isMyViewActive: boolean;
@@ -72,7 +70,6 @@ interface AppSidebarProps {
 export function AppSidebar({
   activeTab,
   canSignIn,
-  favoriteViewIds,
   handleSignOut,
   isDarkMode,
   isMyViewActive,
@@ -125,12 +122,10 @@ export function AppSidebar({
   const {
     activeSection,
     activeSubItemId,
-    favoriteSubItems,
     getSectionSubItems,
     sectionModels,
   } = useAppSidebarNavigationModels({
     activeTab,
-    favoriteViewIds,
     inventoryView,
     manufacturingView,
     rosterView,
@@ -280,7 +275,6 @@ export function AppSidebar({
           isCollapsed={isCollapsed}
           onSectionClick={handleSectionClick}
           onSubItemSelect={handleSubItemSelect}
-          favoriteSubItems={favoriteSubItems}
           sectionModels={sectionModels}
         />
 

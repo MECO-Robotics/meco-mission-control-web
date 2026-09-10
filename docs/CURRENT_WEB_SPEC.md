@@ -10,7 +10,7 @@ The web app owns cross-project planning, coordination, resource management, evid
 
 ## Current Navigation Contract
 
-The app uses the original sidebar implementation: Home shortcut, expandable Work/Resources/Team sections, icon subitems, favorites, compact flyouts, and its existing responsive overlay. The topbar displays the current page title. The native mobile app retains labeled bottom navigation.
+The app uses the original sidebar implementation: Home shortcut, expandable Work/Resources/Team sections, icon subitems, compact flyouts, and its existing responsive overlay. The topbar displays the current page title. The native mobile app retains labeled bottom navigation.
 
 | Area | Views | Consolidation |
 | --- | --- | --- |
@@ -25,7 +25,7 @@ Task details use a drawer on desktop and fill the narrow viewport. Logging work 
 
 The former Dashboard, Readiness, Config and Reports destinations, the work-log status board, the separate part-mapping page and the standalone People workload/availability pages have been removed. Their retained behavior is owned by the views above.
 
-See [navigation-consolidation.md](navigation-consolidation.md) for the cross-client scope, validation and favorite reset behavior.
+See [navigation-consolidation.md](navigation-consolidation.md) for the cross-client scope, validation and contract changes.
 
 ## Data and API Contract Notes
 

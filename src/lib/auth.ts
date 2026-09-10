@@ -18,6 +18,5 @@ export {
   signOutFromGoogle,
 } from "./auth/core";
 export * from "./auth/bootstrap";
-export * from "./auth/navigationFavorites";
 export * from "./auth/records";
 export * from "./auth/session";

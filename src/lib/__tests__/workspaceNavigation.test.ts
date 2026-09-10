@@ -1,7 +1,7 @@
 import {
   NAVIGATION_SECTION_ORDER, NAVIGATION_SUB_ITEMS, VIEW_AVAILABILITY_CONTEXTS,
   getActiveNavigationSubItemId, getNavigationTarget, isNavigationSubItemAvailable,
-  normalizeNavigationSubItemId, readNavigationLocation, writeNavigationLocation,
+  readNavigationLocation, writeNavigationLocation,
   type NavigationState,
 } from "@/lib/workspaceNavigation";
 const state: NavigationState = { activeTab: "home", taskView: "queue", riskManagementView: "kanban", worklogsView: "logs", inventoryView: "materials", manufacturingView: "all", rosterView: "directory" };
@@ -9,7 +9,6 @@ describe("canonical workspace navigation", () => {
   it("provides four areas and unique destinations", () => {
     expect(NAVIGATION_SECTION_ORDER).toEqual(["home", "work", "resources", "team"]);
     expect(new Set(NAVIGATION_SUB_ITEMS.map((item) => item.id)).size).toBe(13);
-    expect(normalizeNavigationSubItemId("reports-worklogs")).toBeNull();
   });
   it.each(VIEW_AVAILABILITY_CONTEXTS)("round trips every available destination in %s", (context) => {
     for (const item of NAVIGATION_SUB_ITEMS) {

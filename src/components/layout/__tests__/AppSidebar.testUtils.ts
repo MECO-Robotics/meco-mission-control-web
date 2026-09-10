@@ -10,7 +10,7 @@ jest.mock("@/lib/branding", () => ({
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import type { SessionUser } from "@/lib/auth/types";
 import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
-import type { NavigationItem, NavigationSubItemId, ViewTab } from "@/lib/workspaceNavigation";
+import type { NavigationItem, ViewTab } from "@/lib/workspaceNavigation";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
@@ -18,7 +18,6 @@ export function renderSidebar(
   _items: NavigationItem[],
   activeTab: ViewTab = "worklogs",
   options?: {
-    favoriteViewIds?: NavigationSubItemId[];
     canSignIn?: boolean;
     inventoryView?: "materials" | "parts" | "part-mappings" | "purchases";
     isCollapsed?: boolean;
@@ -37,7 +36,6 @@ export function renderSidebar(
 ) {
   const sidebarProps: React.ComponentProps<typeof AppSidebar> = {
       activeTab,
-      favoriteViewIds: options?.favoriteViewIds ?? [],
       canSignIn: options?.canSignIn ?? (options?.sessionUser ?? null) === null,
       handleSignOut: jest.fn(),
       inventoryView: options?.inventoryView ?? "materials",

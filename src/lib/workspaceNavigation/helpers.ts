@@ -77,10 +77,6 @@ export function isNavigationSubItemId(value: string): value is NavigationSubItem
   return NAVIGATION_SUB_ITEM_ID_SET.has(value);
 }
 
-export function normalizeNavigationSubItemId(value: string): NavigationSubItemId | null {
-  return isNavigationSubItemId(value) ? value : null;
-}
-
 export function resolveViewAvailabilityContext({
   hasProjects,
   hasSeasons,

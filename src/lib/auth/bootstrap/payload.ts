@@ -70,6 +70,5 @@ export function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapP
     qaReviews: source.qaReviews ?? [],
     escalations: source.escalations ?? [],
     actions: source.actions ?? [],
-    favoriteViews: source.favoriteViews ?? [],
   };
 }

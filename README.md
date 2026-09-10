@@ -12,7 +12,7 @@ Contributor setup, review expectations and validation are in [CONTRIBUTING.md](C
 
 Task logged hours are derived from work logs in both demo and tutorial workspaces, including after reload. Reset existing demos to receive corrected example dates and QA records.
 
-Unsigned demo users edit an isolated workspace in browser `sessionStorage`. The initial anonymized examples are downloaded with a read-only bootstrap request; subsequent workspace reads, edits, photos, favorites, and refreshes stay in that tab. Nothing is queued or uploaded when signing in. Reload keeps demo changes; **Reset demo** downloads the current anonymized examples with a read-only request, and closing the tab ends its storage lifetime.
+Unsigned demo users edit an isolated workspace in browser `sessionStorage`. The initial anonymized examples are downloaded with a read-only bootstrap request; subsequent workspace reads, edits, photos, and refreshes stay in that tab. Nothing is queued or uploaded when signing in. Reload keeps demo changes; **Reset demo** downloads the current anonymized examples with a read-only request, and closing the tab ends its storage lifetime.
 
 Interactive tutorials use a separate in-memory copy of the examples, even for signed-in users. Starting a chapter restores that tutorial baseline. Ending the tutorial restores the previous workspace; tutorial changes are discarded on exit or reload. The header identifies both modes as **no sync**. Real signed-in workspaces continue using the authenticated API.
 
@@ -221,7 +221,7 @@ Avoid pushing view-specific business logic into the shell. The shell should comp
 
 ## Current Navigation Model
 
-The app uses the original sidebar implementation: Home shortcut, expandable Work/Resources/Team sections, icon subitems, favorites, compact flyouts, and its existing responsive overlay. The topbar displays the current page title. The native mobile app retains labeled bottom navigation.
+The app uses the original sidebar implementation: Home shortcut, expandable Work/Resources/Team sections, icon subitems, compact flyouts, and its existing responsive overlay. The topbar displays the current page title. The native mobile app retains labeled bottom navigation.
 
 | Area | Views | Consolidation |
 | --- | --- | --- |
@@ -236,7 +236,7 @@ Task details use a drawer on desktop and fill the narrow viewport. Logging work 
 
 The former Dashboard, Readiness, Config and Reports destinations, the work-log status board, the separate part-mapping page and the standalone People workload/availability pages have been removed. Their retained behavior is owned by the views above.
 
-See [navigation-consolidation.md](docs/navigation-consolidation.md) for the cross-client scope, validation and favorite reset behavior.
+See [navigation-consolidation.md](docs/navigation-consolidation.md) for the cross-client scope, validation and contract changes.
 
 ## View-to-File Map
 
@@ -303,7 +303,7 @@ The workspace controller is intentionally split:
 
 - `useAppWorkspaceState`: local UI state, selected tab/view, selected season/project/member, modal state, toast state
 - `useAppWorkspaceDerived`: derived selections, filtered records, scope helpers
-- `useAppWorkspaceLoader`: workspace bootstrap loading, unauthorized handling, uploads, navigation favorites, refresh helpers
+- `useAppWorkspaceLoader`: workspace bootstrap loading, unauthorized handling, uploads, refresh helpers
 - `useAppWorkspaceTaskActions`: task/event/milestone-oriented mutations
 - `src/app/workspaceCatalog`: catalog hooks receive explicit dependencies at controller composition; `useMaterialEditor` owns material draft/open/save state and commands
 - `useAppWorkspaceReportActions`: QA/report mutations
@@ -348,7 +348,7 @@ src/
       Workspace*.tsx      # Workspace entrypoints and modal hosts
 
   lib/
-    auth/                 # Auth, session, bootstrap, record API, preferences, and navigation favorite helpers
+    auth/                 # Auth, session, bootstrap, record API, and preference helpers
     appUtils/             # Payload builders and domain utility helpers
     workspaceNavigation/  # Navigation types, constants, helpers
 
@@ -396,7 +396,6 @@ High-use endpoint groups:
   - `POST /api/work-logs`
 - User preferences:
   - `GET/PATCH /api/users/me/preferences`
-  - `POST /api/users/me/navigation-favorites`
 
 ### Bootstrap normalization
 

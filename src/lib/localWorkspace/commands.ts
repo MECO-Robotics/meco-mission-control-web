@@ -135,12 +135,7 @@ export function applyLocalCommand(snapshot: BootstrapPayload, path: string, opti
   const method = (options.method ?? "GET").toUpperCase();
   const body: Record<string, unknown> = typeof options.body === "string" ? JSON.parse(options.body) : {};
   if (!body || Array.isArray(body) || typeof body !== "object") throw new Error("Expected a JSON command object.");
-  if (pathname.startsWith("/navigation/favorites/") && method === "PATCH") {
-    const viewId = decodeURIComponent(pathname.slice("/navigation/favorites/".length));
-    snapshot.favoriteViews = (snapshot.favoriteViews ?? []).filter((favorite) => favorite.viewId !== viewId);
-    if (body.isFavorite) snapshot.favoriteViews.push({ id: newLocalId(), userKey: "local", viewId, createdAt: new Date().toISOString() });
-    return { favoriteViews: snapshot.favoriteViews };
-  }
+
   const [, resource, encodedId, extra] = pathname.split("/");
   if (extra || !(resource in collections)) throw new Error(`This local workspace does not support ${method} ${pathname}; nothing was synced.`);
   const key = collections[resource as keyof typeof collections];

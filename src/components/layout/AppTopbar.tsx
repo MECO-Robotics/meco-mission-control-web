@@ -8,7 +8,6 @@ import {
   MECO_MAIN_LOGO_WHITE_SRC,
   MECO_MAIN_LOGO_WIDTH,
 } from "@/lib/branding";
-import { Star, StarOff } from "lucide-react";
 
 import { APP_TOPBAR_SLOT_IDS } from "./AppTopbarSlotPortal";
 
@@ -16,22 +15,17 @@ interface AppTopbarProps {
   localMode?: "demo" | "tutorial" | null;
   onResetDemo?: () => void;
   activeViewLabel: string;
-  isActiveViewFavorite: boolean;
   isDarkMode: boolean;
   isSidebarCollapsed: boolean;
-  onToggleActiveViewFavorite: (() => void) | null;
 }
 
 export function AppTopbar({
   localMode,
   onResetDemo,
   activeViewLabel,
-  isActiveViewFavorite,
   isDarkMode,
   isSidebarCollapsed,
-  onToggleActiveViewFavorite,
 }: AppTopbarProps) {
-  const canToggleFavorite = Boolean(onToggleActiveViewFavorite);
   const topbarLogo = isSidebarCollapsed
     ? {
         alt: "MECO compact team logo",
@@ -47,12 +41,6 @@ export function AppTopbar({
         variant: "full",
         width: MECO_MAIN_LOGO_WIDTH,
       };
-  const favoriteLabel = canToggleFavorite
-    ? isActiveViewFavorite
-      ? `Remove ${activeViewLabel} from favorites`
-      : `Add ${activeViewLabel} to favorites`
-    : `${activeViewLabel} cannot be favorited`;
-  const FavoriteIcon = canToggleFavorite ? Star : StarOff;
 
   return (
     <header className="topbar app-topbar" data-collapsed={isSidebarCollapsed ? "true" : "false"}>
@@ -70,24 +58,6 @@ export function AppTopbar({
       </div>
       <div className="app-topbar-left">
         <div className="app-topbar-view-title">
-          <button
-            aria-label={favoriteLabel}
-            aria-pressed={isActiveViewFavorite}
-            className="app-topbar-favorite-button"
-            data-active={isActiveViewFavorite ? "true" : "false"}
-            data-enabled={canToggleFavorite ? "true" : "false"}
-            disabled={!canToggleFavorite}
-            onClick={onToggleActiveViewFavorite ?? undefined}
-            title={favoriteLabel}
-            type="button"
-          >
-            <FavoriteIcon
-              aria-hidden="true"
-              fill={isActiveViewFavorite ? "currentColor" : "none"}
-              size={15}
-              strokeWidth={2}
-            />
-          </button>
           <h1>{activeViewLabel}</h1>
           {localMode ? (
             <div className="local-workspace-status">

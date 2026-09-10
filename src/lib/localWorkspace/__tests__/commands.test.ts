@@ -67,7 +67,7 @@ test("QA projections retain proposals and only approved reassessment updates lin
   expect(snapshot.reports).toHaveLength(before);
 });
 
-test("robot layouts and meeting projections round-trip; favorites are idempotent", () => {
+test("robot layouts and meeting projections round-trip", () => {
   const snapshot = createBootstrap();
   const subsystem = snapshot.subsystems[0];
   const layout = { layoutX: 0.2, layoutY: 0.7, layoutZone: "front", layoutView: "top", sortOrder: 3 };
@@ -75,9 +75,6 @@ test("robot layouts and meeting projections round-trip; favorites are idempotent
   expect(snapshot.subsystems[0]).toMatchObject(layout);
   const meeting = command(snapshot, "/meetings", { title: "Review", startDateTime: "2026-09-09T17:30:00Z" }).item;
   expect(meeting).toMatchObject({ date: "2026-09-09", time: "17:30", rsvpsYes: 0 });
-  command(snapshot, "/navigation/favorites/tasks", { isFavorite: true }, "PATCH");
-  command(snapshot, "/navigation/favorites/tasks", { isFavorite: true }, "PATCH");
-  expect(snapshot.favoriteViews?.filter((row) => row.viewId === "tasks")).toHaveLength(1);
 });
 
 test("part-definition deletion removes instances and detaches task and production links", () => {

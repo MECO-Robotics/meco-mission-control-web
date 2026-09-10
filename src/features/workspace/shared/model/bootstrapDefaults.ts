@@ -33,5 +33,4 @@ export const EMPTY_BOOTSTRAP: BootstrapPayload = {
   qaReviews: [],
   escalations: [],
   actions: [],
-  favoriteViews: [],
 };

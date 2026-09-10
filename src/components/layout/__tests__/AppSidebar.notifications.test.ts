@@ -5,14 +5,7 @@ import * as React from "react";
 
 import { renderSidebar, signedInUser } from "./AppSidebar.testUtils";
 
-describe("AppSidebar favorites and notifications", () => {
-  it("restores favorite shortcuts in the original sidebar", () => {
-    const markup = renderSidebar([], "home", { favoriteViewIds: ["work-schedule"] });
-    expect(markup).toContain("sidebar-favorites-group");
-    expect(markup).toContain("sidebar-favorite-subtab");
-    expect(markup).toContain(">Schedule</span>");
-  });
-
+describe("AppSidebar notifications", () => {
   it("delegates the notification button to the workspace toast queue", () => {
     const markup = renderSidebar(
       [

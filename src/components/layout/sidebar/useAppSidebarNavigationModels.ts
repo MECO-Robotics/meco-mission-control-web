@@ -2,7 +2,6 @@ import { useCallback, useMemo } from "react";
 
 import {
   NAVIGATION_SECTION_ORDER,
-  NAVIGATION_SUB_ITEMS,
   NAVIGATION_SUB_ITEMS_BY_SECTION,
   getActiveNavigationSubItemId,
   getNavigationTarget,
@@ -24,7 +23,6 @@ import type { SidebarSubItemModel } from "../AppSidebarSections";
 
 interface UseAppSidebarNavigationModelsArgs {
   activeTab: ViewTab;
-  favoriteViewIds: readonly NavigationSubItemId[];
   inventoryView: InventoryViewTab;
   manufacturingView: ManufacturingViewTab;
   rosterView: RosterViewTab;
@@ -36,7 +34,6 @@ interface UseAppSidebarNavigationModelsArgs {
 
 export function useAppSidebarNavigationModels({
   activeTab,
-  favoriteViewIds,
   inventoryView,
   manufacturingView,
   rosterView,
@@ -85,21 +82,10 @@ export function useAppSidebarNavigationModels({
       }),
     [getSectionSubItems],
   );
-  const favoriteSubItems = useMemo(() => {
-    const requestedFavoriteIds = new Set(favoriteViewIds);
-    return NAVIGATION_SUB_ITEMS
-      .filter((subItem) => requestedFavoriteIds.has(subItem.id))
-      .map((subItem) => ({
-        ...subItem,
-        target: getNavigationTarget(subItem.id, viewAvailabilityContext),
-        isEnabled: isSubItemEnabled(subItem.id),
-      }));
-  }, [favoriteViewIds, isSubItemEnabled, viewAvailabilityContext]);
 
   return {
     activeSection,
     activeSubItemId,
-    favoriteSubItems,
     getSectionSubItems,
     sectionModels,
   };
