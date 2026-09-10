@@ -20,10 +20,19 @@ interface AppSidebarSectionsProps {
   sectionModels: SidebarSectionModel[];
 }
 
-export function AppSidebarSections({ activeSubItemId, isCollapsed, onSubItemSelect, sectionModels }: AppSidebarSectionsProps) {
+export function AppSidebarSections({
+  activeSubItemId,
+  isCollapsed,
+  onSubItemSelect,
+  sectionModels,
+}: AppSidebarSectionsProps) {
   return sectionModels.map(({ section, subItems }) => (
     <section className="sidebar-section-group" aria-label={NAVIGATION_SECTION_LABELS[section]} key={section}>
-      {!isCollapsed && <h2 className="sidebar-section-heading" data-tutorial-target={`sidebar-tab-${section}`}>{NAVIGATION_SECTION_LABELS[section]}</h2>}
+      {!isCollapsed && (
+        <h2 className="sidebar-section-heading" data-tutorial-target={`sidebar-tab-${section}`}>
+          {NAVIGATION_SECTION_LABELS[section]}
+        </h2>
+      )}
       {subItems.map((item) => (
         <button
           className="sidebar-nav-item"
@@ -32,6 +41,7 @@ export function AppSidebarSections({ activeSubItemId, isCollapsed, onSubItemSele
           title={isCollapsed ? item.label : undefined}
           data-active={activeSubItemId === item.id ? "true" : "false"}
           data-enabled={item.isEnabled ? "true" : "false"}
+          data-tab-label={item.label}
           disabled={!item.isEnabled}
           data-tutorial-target={`sidebar-view-${item.id}`}
           data-active-view={activeSubItemId ?? ""}
@@ -40,7 +50,7 @@ export function AppSidebarSections({ activeSubItemId, isCollapsed, onSubItemSele
           type="button"
         >
           <span aria-hidden="true" className="sidebar-nav-item-icon">{subItemIcons[item.id]}</span>
-          {!isCollapsed && <span className="sidebar-nav-item-label">{item.label}</span>}
+          {!isCollapsed ? <span className="sidebar-nav-item-label">{item.label}</span> : null}
         </button>
       ))}
     </section>
