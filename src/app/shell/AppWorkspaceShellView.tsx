@@ -302,6 +302,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
           openEditPartInstanceModal={content.openEditPartInstanceModal}
           openEditSubsystemModal={content.openEditSubsystemModal}
           removePartInstanceFromMechanism={content.removePartInstanceFromMechanism}
+          savePartImage={content.savePartImage}
           saveSubsystemLayout={content.saveSubsystemLayout}
           updateSubsystemConfiguration={content.updateSubsystemConfiguration}
           openEditPartDefinitionModal={content.openEditPartDefinitionModal}

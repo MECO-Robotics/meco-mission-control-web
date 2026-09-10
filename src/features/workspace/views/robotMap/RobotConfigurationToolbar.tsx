@@ -3,9 +3,9 @@ import { CAD_SOURCE_MODEL_DOCS } from "@/features/workspace/shared/model/cadSour
 
 interface RobotConfigurationToolbarProps {
   onSearchChange: (value: string) => void;
-  onViewModeChange: (mode: "map" | "list") => void;
+  onViewModeChange: (mode: "map" | "list" | "3d") => void;
   search: string;
-  viewMode: "map" | "list";
+  viewMode: "map" | "list" | "3d";
 }
 
 export function RobotConfigurationToolbar({
@@ -26,21 +26,25 @@ export function RobotConfigurationToolbar({
         </p>
       </div>
 
-      <TopbarResponsiveSearch
+      {viewMode !== "3d" && <TopbarResponsiveSearch
         ariaLabel="Search subsystems, mechanisms, and parts"
         compactPlaceholder="Search"
         onChange={onSearchChange}
         placeholder="Search subsystem or mechanism..."
         value={search}
-      />
+      />}
 
-      <button
-        className="secondary-action queue-toolbar-action"
-        onClick={() => onViewModeChange(viewMode === "map" ? "list" : "map")}
-        type="button"
-      >
-        {viewMode === "map" ? "List View" : "Map View"}
-      </button>
+      {(["map", "list", "3d"] as const).map((mode) => (
+        <button
+          key={mode}
+          className="secondary-action queue-toolbar-action"
+          aria-pressed={viewMode === mode}
+          onClick={() => onViewModeChange(mode)}
+          type="button"
+        >
+          {mode === "3d" ? "3D View" : mode === "map" ? "Map View" : "List View"}
+        </button>
+      ))}
     </div>
   );
 }

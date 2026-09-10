@@ -175,10 +175,12 @@ test("trusted integration validation checks independent repositories", async () 
   assert.match(verifier, /deepStrictEqual\(contract, platformContract\)/);
 });
 
-test("script CSP contains no inline or eval execution allowances", async () => {
+test("document CSP contains no inline or eval execution allowances", async () => {
   for (const configFile of ["vite.config.ts", "deploy/pm-web.nginx.conf"]) {
     const config = await readFile(configFile, "utf8");
-    const scriptSources = config.match(/script-src ([^;]+)/)?.[1];
+    const documentPolicy = config.match(/default-src 'self';[^"\n]+/)?.[0];
+    assert.ok(documentPolicy, `${configFile} must declare its document policy`);
+    const scriptSources = documentPolicy.match(/script-src ([^;]+)/)?.[1];
     assert.ok(scriptSources, `${configFile} must declare script-src`);
     assert.doesNotMatch(scriptSources, /'unsafe-inline'|'unsafe-eval'/);
     assert.match(config, /script-src-attr 'none'/);

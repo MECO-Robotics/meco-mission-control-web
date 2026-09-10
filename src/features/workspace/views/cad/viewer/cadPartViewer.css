@@ -1,0 +1,23 @@
+.cad-part-viewer { min-width: 0; }
+.cad-part-viewer h3 { margin: 0; }
+.cad-viewer-filename { overflow-wrap: anywhere; }
+.cad-viewer-toolbar { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; margin: 16px 0; }
+.cad-viewer-toolbar .cad-field { flex: 1 1 220px; min-width: 0; }
+.cad-viewer-toolbar select { width: 100%; }
+.cad-viewer-toolbar [aria-pressed="true"] { outline: 2px solid currentColor; outline-offset: 2px; }
+.cad-viewer-canvas { height: clamp(280px, 52vh, 560px); overflow: hidden; border-radius: 12px; background: #17202c; color: #edf3fa; touch-action: none; }
+.cad-viewer-canvas > p { padding: 20px; }
+.cad-local-viewer { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; gap: 16px; padding: 20px; }
+.cad-local-viewer > h2, .cad-local-viewer > p { margin: 0; }
+
+.cad-viewer-toolbar button { min-height: 40px; padding: 8px 12px; border: 1px solid var(--border-subtle, #cbd5e1); border-radius: 8px; background: var(--surface-panel, #fff); color: var(--text-primary, #17202c); font: inherit; cursor: pointer; }
+.cad-viewer-toolbar button:hover:not(:disabled) { border-color: var(--official-blue, #2459a8); }
+.cad-viewer-toolbar button:disabled { opacity: 0.5; cursor: default; }
+.cad-viewer-toolbar button:focus-visible { outline: 2px solid var(--official-blue, #2459a8); outline-offset: 2px; }
+.cad-part-viewer .cad-viewer-canvas p { color: #edf3fa; }
+.cad-local-viewer > .cad-field { min-width: 0; }
+.cad-local-viewer input[type="file"] { min-width: 0; width: 100%; box-sizing: border-box; }
+
+.cad-part-image-assignment { display: grid; gap: 10px; margin: 16px 0; min-width: 0; }
+.cad-part-image-assignment .cad-field, .cad-part-image-assignment select { min-width: 0; width: 100%; }
+.cad-part-image-assignment > button { justify-self: start; }

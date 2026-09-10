@@ -113,6 +113,7 @@ export interface WorkspaceContentProps {
   openEditPartInstanceModal: (partInstance: BootstrapPayload["partInstances"][number]) => void;
   openEditSubsystemModal: (subsystem: BootstrapPayload["subsystems"][number]) => void;
   removePartInstanceFromMechanism: (partInstanceId: string) => Promise<boolean>;
+  savePartImage?: (partId: string, revision: string, imageUrl: string) => Promise<void>;
   saveSubsystemLayout: (
     subsystemId: string,
     layout: SubsystemLayoutFields,
