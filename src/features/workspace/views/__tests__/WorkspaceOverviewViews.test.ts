@@ -99,12 +99,12 @@ function createOverviewBootstrap() {
 }
 
 describe("Workspace overview views", () => {
-  it("shows actionable near-term work and upcoming milestones", () => {
+  it("shows actionable near-term work and the home agenda", () => {
     const markup = renderToStaticMarkup(React.createElement(HomeView, {
       bootstrap: createOverviewBootstrap(), onOpenTask: jest.fn(), today: fixedToday,
     }));
     expect(markup).toContain("Priority work");
-    expect(markup).toContain("Upcoming milestones");
+    expect(markup).toContain(">Agenda</h3>");
     expect(markup).toContain("Drive practice deadline");
     expect(markup).toContain("Finish bellypan CAD");
     expect(markup).toContain("Wire intake sensor");
