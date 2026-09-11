@@ -80,7 +80,10 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
   const handleOpenProfileEditor = () => {
     const memberId = c.signedInMember?.id ??
       findMemberForSessionUser(c.bootstrap.members, c.sessionUser)?.id;
-    if (!memberId) return;
+    if (!memberId) {
+      c.setDataMessage("Your profile is not available in the current roster.");
+      return;
+    }
     c.selectMember(memberId, c.bootstrap);
     c.setIsAddPersonOpen(false);
     c.setIsEditPersonOpen(true);
