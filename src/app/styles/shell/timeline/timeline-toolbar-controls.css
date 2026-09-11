@@ -7,6 +7,12 @@
   flex: 0 0 auto;
 }
 
+.workspace-topbar-controls.timeline-topbar-controls > .timeline-toolbar {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
 .filter-toolbar.timeline-topbar-controls {
   flex-wrap: nowrap;
 }
