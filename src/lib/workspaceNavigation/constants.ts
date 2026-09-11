@@ -1,11 +1,11 @@
 import type { NavigationSection, NavigationSubItem, ViewTab } from "./types";
 
-export const NAVIGATION_SECTION_ORDER: readonly NavigationSection[] = ["home", "work", "resources"];
+export const NAVIGATION_SECTION_ORDER: readonly NavigationSection[] = ["work", "resources"];
 export const NAVIGATION_SECTION_LABELS: Record<NavigationSection, string> = {
   home: "Home", work: "Work", resources: "Resources", team: "Team",
 };
 export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = [
-  { id: "home", label: "Home", section: "home", target: { tab: "home" } },
+  { id: "home", label: "Dashboard", section: "work", target: { tab: "home" } },
   { id: "work-tasks", label: "Tasks", section: "work", target: { tab: "tasks", taskView: "queue" } },
   { id: "work-schedule", label: "Schedule", section: "work", target: { tab: "tasks", taskView: "calendar" } },
   { id: "resources-materials", label: "Materials", section: "resources", target: { tab: "inventory", inventoryView: "materials" } },

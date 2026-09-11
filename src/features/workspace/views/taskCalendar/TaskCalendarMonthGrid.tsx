@@ -12,6 +12,7 @@ interface TaskCalendarMonthGridProps {
   onOpenEvent: (event: TaskCalendarEvent) => void;
   selectedDateKey: string | null;
   todayDateKey: string;
+  viewMode?: "month" | "week";
 }
 
 function eventTypeClassName(event: TaskCalendarEvent) {
@@ -42,6 +43,7 @@ export function TaskCalendarMonthGrid({
   onOpenEvent,
   selectedDateKey,
   todayDateKey,
+  viewMode = "month",
 }: TaskCalendarMonthGridProps) {
   return (
     <>
@@ -57,7 +59,7 @@ export function TaskCalendarMonthGrid({
           const cellEvents = eventsByDateKey.get(cellDateKey) ?? [];
           const visibleEvents = cellEvents.slice(0, 4);
           const hiddenEventCount = Math.max(0, cellEvents.length - visibleEvents.length);
-          const isCurrentMonth = cellDate.getMonth() === monthCursor.getMonth();
+            const isCurrentMonth = viewMode === "week" || cellDate.getMonth() === monthCursor.getMonth();
           const isSelected = cellDateKey === selectedDateKey;
           const isToday = cellDateKey === todayDateKey;
           const dayClassName = [

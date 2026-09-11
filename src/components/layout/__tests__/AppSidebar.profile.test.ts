@@ -134,20 +134,20 @@ describe("AppSidebar profile switch", () => {
         sessionUser: signedInUser,
       },
     );
-    const css = readFileSync("src/app/styles/shell/profile/my-view-toggle.css", "utf8");
+    const quickActionsCss = readFileSync("src/app/styles/shell/sidebar-quick-actions.css", "utf8");
 
-    expect(inactiveMarkup).toContain('sidebar-footer-profile" data-collapsed="true"');
+    expect(inactiveMarkup).toContain('class="sidebar-quick-action-profile"');
     expect(inactiveMarkup).toMatch(
       /<button(?=[^>]*class="[^"]*profile-trigger-view-switch)(?=[^>]*aria-pressed="false")[^>]*>/,
     );
     expect(activeMarkup).toMatch(
       /<button(?=[^>]*class="[^"]*profile-trigger-view-switch)(?=[^>]*aria-pressed="true")[^>]*>/,
     );
-    expect(css).toMatch(
-      /\.sidebar-footer-profile\[data-collapsed="true"\] \.sidebar-profile-toggle \.profile-trigger-label\s*\{[^}]*display:\s*none;/,
+    expect(quickActionsCss).toMatch(
+      /\.sidebar-quick-actions\[data-collapsed="true"\] \.sidebar-quick-action-profile \.profile-trigger-label\s*,[\s\S]*display:\s*none;/,
     );
-    expect(css).toMatch(
-      /\.sidebar-footer-profile\[data-collapsed="true"\] \.sidebar-profile-toggle \.profile-view-switch-arrow\s*\{[^}]*display:\s*none;/,
+    expect(quickActionsCss).toMatch(
+      /\.sidebar-quick-actions\[data-collapsed="true"\] \.sidebar-quick-action-profile \.profile-view-switch-arrow\s*\{[^}]*display:\s*none;/,
     );
   });
 
