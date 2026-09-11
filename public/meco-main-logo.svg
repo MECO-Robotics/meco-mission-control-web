@@ -45,7 +45,7 @@
     .rocketBody { fill:#061226; }
     .rocketAccent { fill:#1D6BFF; }
     @font-face { font-family:'MecoNasalization'; src:local('Nasalization'), local('Nasalization Rg'), local('NasalizationRg-Regular'); font-weight:400; font-style:normal; }
-    .word { font-family:'MecoNasalization', Nasalization, 'Nasalization Rg', 'NasalizationRg-Regular', Orbitron, Eurostile, Inter, Arial, sans-serif; font-weight:400; letter-spacing:0.005em; fill:#061226; }
+    .word { font-family:'MecoNasalization', Nasalization, 'Nasalization Rg', 'NasalizationRg-Regular', Orbitron, Eurostile, Inter, Arial, sans-serif; font-weight:700; letter-spacing:0.005em; fill:#061226; }
   </style>
   <defs
      id="defs1">
@@ -156,8 +156,8 @@
      y="268.55121"
      font-size="190px"
      id="text4"
-     style="font-style:normal;font-variant:normal;font-weight:400;font-stretch:normal;font-size:190px;font-family:'MecoNasalization',Nasalization,'Nasalization Rg','NasalizationRg-Regular',Orbitron,Eurostile,Inter,Arial,sans-serif;-inkscape-font-specification:Nasalization;stroke-width:1.5;fill:#16478e;fill-opacity:1"><tspan
-       style="font-style:normal;font-variant:normal;font-weight:400;font-stretch:normal;font-size:190px;font-family:'MecoNasalization',Nasalization,'Nasalization Rg','NasalizationRg-Regular',Orbitron,Eurostile,Inter,Arial,sans-serif;-inkscape-font-specification:Nasalization;fill:#16478e;fill-opacity:1"
+     style="font-style:normal;font-variant:normal;font-weight:700;font-stretch:normal;font-size:190px;font-family:'MecoNasalization',Nasalization,'Nasalization Rg','NasalizationRg-Regular',Orbitron,Eurostile,Inter,Arial,sans-serif;-inkscape-font-specification:Nasalization;stroke-width:1.5;fill:#16478e;fill-opacity:1"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:700;font-stretch:normal;font-size:190px;font-family:'MecoNasalization',Nasalization,'Nasalization Rg','NasalizationRg-Regular',Orbitron,Eurostile,Inter,Arial,sans-serif;-inkscape-font-specification:Nasalization;fill:#16478e;fill-opacity:1"
        id="tspan2">Mission</tspan></text>
   <text
      class="word"
@@ -166,7 +166,7 @@
      font-size="190px"
      id="text5"
      style="font-size:190px;stroke-width:1.5;fill:#16478e;fill-opacity:1"><tspan
-       style="font-style:normal;font-variant:normal;font-weight:400;font-stretch:normal;font-size:190px;font-family:'MecoNasalization',Nasalization,'Nasalization Rg','NasalizationRg-Regular',Orbitron,Eurostile,Inter,Arial,sans-serif;-inkscape-font-specification:Nasalization;fill:#16478e;fill-opacity:1"
+       style="font-style:normal;font-variant:normal;font-weight:700;font-stretch:normal;font-size:190px;font-family:'MecoNasalization',Nasalization,'Nasalization Rg','NasalizationRg-Regular',Orbitron,Eurostile,Inter,Arial,sans-serif;-inkscape-font-specification:Nasalization;fill:#16478e;fill-opacity:1"
        id="tspan1">Control</tspan></text>
   <metadata
      id="metadata8">
