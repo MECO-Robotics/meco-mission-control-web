@@ -3,7 +3,9 @@ import { renderSidebar } from "./AppSidebar.testUtils";
 describe("flat sidebar navigation", () => {
   it("shows every destination under noninteractive headings", () => {
     const markup = renderSidebar([], "tasks", { taskView: "calendar" });
-    expect(markup).toContain("sidebar-quick-action-home");
+    expect(markup).toContain("sidebar-quick-action-profile");
+    expect(markup).toContain('aria-label="Dashboard"');
+    expect(markup).toContain('aria-label="Work"');
     expect(markup).toContain("sidebar-section-heading");
     expect(markup).toContain("sidebar-nav-item-icon");
     expect(markup).not.toContain("sidebar-section-chevron");

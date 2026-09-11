@@ -76,6 +76,31 @@
   text-decoration: none;
 }
 
+.sidebar-quick-action-profile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  width: 100%;
+  height: 1.9rem;
+}
+
+.sidebar-quick-action-profile .sidebar-profile-toggle {
+  width: 100%;
+}
+
+.sidebar-quick-action-profile .profile-trigger {
+  width: 100%;
+  min-width: 0;
+  height: 1.9rem;
+  padding: 0.18rem 0.3rem;
+}
+
+.sidebar-quick-actions[data-collapsed="true"] .sidebar-quick-action-profile .profile-trigger-label,
+.sidebar-quick-actions[data-collapsed="true"] .sidebar-quick-action-profile .profile-view-switch-arrow {
+  display: none;
+}
+
 .sidebar-quick-action:hover,
 .sidebar-quick-action:focus-visible,
 .sidebar-add-menu[data-open="true"] > .sidebar-quick-action {

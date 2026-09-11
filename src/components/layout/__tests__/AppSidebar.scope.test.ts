@@ -35,13 +35,10 @@ describe("AppSidebar scope", () => {
         sessionUser: signedInUser,
       },
     );
-    const footerIndex = markup.indexOf("sidebar-footer-stack");
-    const profileIndex = markup.indexOf("sidebar-footer-profile");
+    const profileIndex = markup.indexOf("sidebar-quick-action-profile");
     const scopeIndex = markup.indexOf("sidebar-scope-trigger");
 
-    expect(profileIndex).toBeGreaterThan(footerIndex);
     expect(profileIndex).toBeLessThan(scopeIndex);
-    expect(scopeIndex).toBeGreaterThan(footerIndex);
     expect(markup).toContain('aria-label="Open project and season selector"');
     expect(markup).toContain('data-tutorial-target="project-select"');
     expect(markup).toContain("2026 Season - Robot 2026");

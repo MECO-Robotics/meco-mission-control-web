@@ -214,14 +214,16 @@ export function AppSidebar({
         ref={sidebarScrollRef}
       >
         <AppSidebarQuickActions
-          activeTab={activeTab}
           isCollapsed={isCollapsed}
           onCreateMilestone={onCreateMilestone}
           onCreatePart={onCreatePart}
           onCreateQaReport={onCreateQaReport}
           onCreateTask={onCreateTask}
-          onSelectTarget={onSelectTarget}
           onToggleSidebar={handleSidebarFoldClick}
+          isMyViewActive={isMyViewActive}
+          myViewMemberName={myViewMemberName}
+          onToggleMyView={onToggleMyView}
+          sessionUser={sessionUser}
         />
 
         <AppSidebarSections
@@ -237,22 +239,18 @@ export function AppSidebar({
           canSignOut={sessionUser !== null}
           isDarkMode={isDarkMode}
           isCollapsed={isCollapsed}
-          isMyViewActive={isMyViewActive}
           isNotificationQueueOpen={isNotificationQueueOpen}
           isProjectPopupOpen={isProjectPopupOpen}
-          myViewMemberName={myViewMemberName}
           onHelpSelect={handleHelpSelect}
           onProjectTriggerClick={handleProjectTriggerClick}
           onRefreshWorkspace={onRefreshWorkspace}
           onSignIn={onSignIn}
           onSignOut={handleSignOut}
-          onToggleMyView={onToggleMyView}
           onToggleDarkMode={toggleDarkMode}
           onNotificationQueueToggle={onToggleNotificationQueue}
           notificationCount={notificationCount}
           projectTriggerRef={projectTriggerRef}
           selectedScopeLabel={selectedScopeLabel}
-          sessionUser={sessionUser}
         />
       </nav>
       <AppSidebarPopups

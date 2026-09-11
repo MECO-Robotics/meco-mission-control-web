@@ -6,7 +6,7 @@ import * as React from "react";
 import { renderSidebar, signedInUser } from "./AppSidebar.testUtils";
 
 describe("AppSidebar chrome", () => {
-  it("renders the top triplet as Home, Add, and Fold with profile above scope", () => {
+  it("renders the top triplet as Profile, Add, and Fold above the scope selector", () => {
     const markup = renderSidebar(
       [
         {
@@ -20,23 +20,19 @@ describe("AppSidebar chrome", () => {
       { sessionUser: signedInUser },
     );
     const quickIndex = markup.indexOf("sidebar-quick-actions");
-    const homeIndex = markup.indexOf("sidebar-quick-action-home");
+    const profileIndex = markup.indexOf("sidebar-quick-action-profile");
     const addIndex = markup.indexOf("sidebar-quick-action-add");
     const foldIndex = markup.indexOf("sidebar-quick-action-fold");
-    const footerIndex = markup.indexOf("sidebar-footer-stack");
-    const profileIndex = markup.indexOf("sidebar-footer-profile");
-    const scopeIndex = markup.indexOf("sidebar-scope-trigger");
 
-    expect(homeIndex).toBeGreaterThan(quickIndex);
-    expect(homeIndex).toBeLessThan(addIndex);
+    expect(profileIndex).toBeGreaterThan(quickIndex);
+    expect(profileIndex).toBeLessThan(addIndex);
     expect(addIndex).toBeLessThan(foldIndex);
     expect(markup).toMatch(
       /<button(?=[^>]*class="[^"]*sidebar-quick-action-fold)(?=[^>]*aria-label="Collapse sidebar")[^>]*>[\s\S]*lucide-panel-left-close[\s\S]*<\/button>/,
     );
     expect(markup).not.toContain("sidebar-profile-fold-button");
-    expect(profileIndex).toBeGreaterThan(footerIndex);
-    expect(profileIndex).toBeLessThan(scopeIndex);
     expect(markup.indexOf("profile-view-switch")).toBeGreaterThan(profileIndex);
+    expect(markup).not.toContain("sidebar-footer-profile");
     expect(markup).not.toContain('<span class="sidebar-tab-label">Collapse sidebar</span>');
     expect(markup).toContain("Theme mode");
     expect(markup).toContain("Refresh workspace");
