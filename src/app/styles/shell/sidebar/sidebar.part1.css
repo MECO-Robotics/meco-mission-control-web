@@ -179,3 +179,6 @@
 .sidebar-footer-stack-collapsed {
   justify-items: center;
 }
+.sidebar-local-workspace-status { display: flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0.5rem; color: var(--text-muted); font-size: 0.72rem; }
+.sidebar-local-workspace-status button { min-height: 28px; padding: 0.2rem 0.45rem; font-size: inherit; }
+.sidebar-local-workspace-mark { display: grid; place-items: center; min-height: 28px; color: var(--accent); font-size: 0.7rem; }

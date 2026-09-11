@@ -23,6 +23,8 @@ interface AppSidebarProjectFooterProps {
   onProjectTriggerClick: (event: ReactMouseEvent<HTMLButtonElement>) => void;
   projectTriggerRef: RefObject<HTMLButtonElement | null>;
   selectedScopeLabel: string;
+  localMode: "demo" | "tutorial" | null;
+  onResetDemo: () => void;
 }
 
 export function AppSidebarProjectFooter({
@@ -43,6 +45,8 @@ export function AppSidebarProjectFooter({
   onProjectTriggerClick,
   projectTriggerRef,
   selectedScopeLabel,
+  localMode,
+  onResetDemo,
 }: AppSidebarProjectFooterProps) {
   const settingsMenu = (
     <AppSidebarSettingsMenu
@@ -111,11 +115,16 @@ export function AppSidebarProjectFooter({
 
   return !isCollapsed ? (
     <div className="sidebar-footer-stack">
+      {localMode ? <div className="sidebar-local-workspace-status" title="Changes stay in this browser tab and are never synced.">
+        <span>{localMode === "tutorial" ? "Local tutorial" : "Local demo"} · no sync</span>
+        {localMode === "demo" ? <button type="button" className="secondary-action" onClick={onResetDemo}>Reset demo</button> : null}
+      </div> : null}
       {scopeTrigger}
       {bottomTriplet}
     </div>
   ) : (
     <div className="sidebar-footer-stack sidebar-footer-stack-collapsed">
+      {localMode ? <span className="sidebar-local-workspace-mark" title={localMode === "tutorial" ? "Local tutorial · no sync" : "Local demo · no sync"}>●</span> : null}
       {scopeTrigger}
       {bottomTriplet}
     </div>
