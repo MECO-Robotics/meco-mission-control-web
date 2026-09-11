@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MeetingPayload, MilestonePayload } from "@/types/payloads";
@@ -74,6 +74,7 @@ export function TaskCalendarView({
 }: TaskCalendarViewProps) {
   const [isMeetingModalOpen, setIsMeetingModalOpen] = useState(false);
   const [isSavingMeeting, setIsSavingMeeting] = useState(false);
+  const [calendarViewMode, setCalendarViewMode] = useState<"month" | "week">("month");
   const [meetingDraft, setMeetingDraft] = useState<MeetingPayload>(() => createDefaultMeetingDraft(bootstrap));
   const [meetingError, setMeetingError] = useState<string | null>(null);
   const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
@@ -82,6 +83,16 @@ export function TaskCalendarView({
     bootstrap,
     isAllProjectsView,
   });
+  useEffect(() => {
+    const handleSchedulePeriodChange = (event: Event) => {
+      const anchorDate = (event as CustomEvent<{ anchorDate?: string }>).detail?.anchorDate;
+      const viewMode = (event as CustomEvent<{ viewMode?: "month" | "week" }>).detail?.viewMode;
+      if (viewMode) setCalendarViewMode(viewMode);
+      if (anchorDate) calendar.setMonthCursor(new Date(anchorDate + "T12:00:00"));
+    };
+    window.addEventListener("mission-control:schedule-period-change", handleSchedulePeriodChange);
+    return () => window.removeEventListener("mission-control:schedule-period-change", handleSchedulePeriodChange);
+  }, [calendar.setMonthCursor]);
   const milestoneModalState = useMilestonesMilestoneModalState({
     bootstrap,
     isAllProjectsView,
@@ -185,12 +196,13 @@ export function TaskCalendarView({
           ) : (
             <TaskCalendarMonthGrid
               eventsByDateKey={calendar.eventsByDateKey}
-              monthCells={calendar.monthCells}
+              monthCells={calendarViewMode === "week" ? calendar.weekCells : calendar.monthCells}
               monthCursor={calendar.monthCursor}
               onOpenDay={setSelectedDateKey}
               onOpenEvent={openEvent}
               selectedDateKey={selectedDateKey}
               todayDateKey={calendar.todayDateKey}
+              viewMode={calendarViewMode}
             />
           )}
 

@@ -7,7 +7,7 @@ import type { FilterSelection } from "@/features/workspace/shared/filters/worksp
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { WorkspaceTopbarControls } from "@/features/workspace/shared/topbar";
 import { getTimelineMinimumZoomForWidth } from "@/features/workspace/shared/timeline/timelineZoom";
-import { midpointOfTimelineDays } from "@/features/workspace/shared/timeline/timelineDateUtils";
+import { addDaysToDay, addMonthsToDay, midpointOfTimelineDays } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import { buildTimelineGridLayout } from "./model/timelineGridLayout";
 import { TimelineGridBody } from "./TimelineGridBody";
@@ -102,10 +102,23 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     (nextInterval: TimelineViewInterval) => {
       const nextAnchorDate = midpointOfTimelineDays(data.timeline.days) ?? viewAnchorDate;
       applyTimelineIntervalChange(nextInterval, nextAnchorDate);
+      window.dispatchEvent(new CustomEvent("mission-control:schedule-period-change", {
+        detail: { anchorDate: nextAnchorDate, viewMode: nextInterval === "week" ? "week" : "month" },
+      }));
     },
     [applyTimelineIntervalChange, data.timeline.days, viewAnchorDate],
   );
   const { setTimelineGridMotion } = state;
+  const handleShiftPeriod = useCallback((direction: -1 | 1) => {
+    if (state.viewInterval === "all") return;
+    const nextAnchorDate = state.viewInterval === "week"
+      ? addDaysToDay(state.viewAnchorDate, direction * 7)
+      : addMonthsToDay(state.viewAnchorDate, direction);
+    state.shiftTimelinePeriod(direction);
+    window.dispatchEvent(new CustomEvent("mission-control:schedule-period-change", {
+      detail: { anchorDate: nextAnchorDate },
+    }));
+  }, [state]);
 
   const layout = useMemo(
     () =>
@@ -199,7 +212,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             onChangePersonFilter={setActivePersonFilter}
             onSearchChange={setSearchFilter}
             onIntervalChange={handleTimelineIntervalChange}
-            onShiftPeriod={state.shiftTimelinePeriod}
+            onShiftPeriod={handleShiftPeriod}
             priorityFilter={filterControls.filters.priorityFilter}
             projectFilter={filterControls.filters.projectFilter}
             searchFilter={searchFilter}
