@@ -13,6 +13,10 @@
   max-width: 100%;
 }
 
+.workspace-topbar-controls.timeline-topbar-controls > .timeline-toolbar > .topbar-responsive-search {
+  display: none;
+}
+
 .filter-toolbar.timeline-topbar-controls {
   flex-wrap: nowrap;
 }
