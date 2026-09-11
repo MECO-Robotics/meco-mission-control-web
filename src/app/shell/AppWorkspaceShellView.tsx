@@ -76,6 +76,14 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       keepSidebarOpen: options?.keepSidebarOpen,
     });
   };
+  const handleOpenProfileEditor = () => {
+    const memberId = c.signedInMember?.id;
+    if (!memberId) return;
+    c.selectMember(memberId, c.bootstrap);
+    c.setIsAddPersonOpen(false);
+    c.setIsEditPersonOpen(true);
+    c.handleSidebarTabSelect("roster");
+  };
   const availableViews = NAVIGATION_SUB_ITEMS
     .filter((view) => isNavigationSubItemAvailable(view.id, { context: navigationContext }))
     .map((view) => ({ ...view, target: getNavigationTarget(view.id, navigationContext) }));
@@ -216,11 +224,9 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       canSignIn={c.enforcedAuthConfig !== null && c.sessionUser === null}
       handleSignOut={c.handleSignOut}
       isDarkMode={c.isDarkMode}
-      isMyViewActive={c.isMyViewActive}
       onSelectTarget={handleSelectNavigationTarget}
       isCollapsed={c.isSidebarCollapsed}
       isNotificationQueueOpen={c.isNotificationQueueOpen}
-      myViewMemberName={c.signedInMember?.name ?? null}
       notificationCount={c.notificationHistory.length}
       onCreateMilestone={handleCreateMilestone}
       onCreatePart={c.openCreatePartDefinitionModal}
@@ -230,7 +236,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       onRefreshWorkspace={c.loadWorkspace}
       onSignIn={c.requestSignIn}
       onSelectSeason={handleSelectSeason}
-      onToggleMyView={c.toggleMyView}
+      onOpenProfileEditor={handleOpenProfileEditor}
       onToggleNotificationQueue={c.toggleNotificationQueue}
       toggleSidebar={c.toggleSidebar}
       projects={c.projectsInSelectedSeason}

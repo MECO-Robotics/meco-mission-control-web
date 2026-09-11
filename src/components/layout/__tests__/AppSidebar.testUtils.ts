@@ -21,9 +21,7 @@ export function renderSidebar(
     canSignIn?: boolean;
     inventoryView?: "materials" | "parts" | "part-mappings" | "purchases";
     isCollapsed?: boolean;
-    isMyViewActive?: boolean;
     isNotificationQueueOpen?: boolean;
-    myViewMemberName?: string | null;
     notificationCount?: number;
     projects?: ProjectRecord[];
     riskManagementView?: "kanban" | "metrics";
@@ -40,10 +38,8 @@ export function renderSidebar(
       handleSignOut: jest.fn(),
       inventoryView: options?.inventoryView ?? "materials",
       isDarkMode: false,
-      isMyViewActive: options?.isMyViewActive ?? false,
       isCollapsed: options?.isCollapsed ?? false,
       isNotificationQueueOpen: options?.isNotificationQueueOpen ?? false,
-      myViewMemberName: options?.myViewMemberName === undefined ? "Ava Chen" : options.myViewMemberName,
       notificationCount: options?.notificationCount ?? 0,
       onCreateSeason: jest.fn(),
       onCreateMilestone: jest.fn(),
@@ -58,7 +54,7 @@ export function renderSidebar(
       onSelectSeason: jest.fn(),
       onSelectProject: jest.fn(),
       onSelectTarget: jest.fn(),
-      onToggleMyView: jest.fn(),
+      onOpenProfileEditor: jest.fn(),
       onToggleNotificationQueue: jest.fn(),
       projects: options?.projects ?? [],
       rosterView: "directory",

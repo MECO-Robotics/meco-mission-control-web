@@ -31,7 +31,7 @@ describe("AppSidebar chrome", () => {
       /<button(?=[^>]*class="[^"]*sidebar-quick-action-fold)(?=[^>]*aria-label="Collapse sidebar")[^>]*>[\s\S]*lucide-panel-left-close[\s\S]*<\/button>/,
     );
     expect(markup).not.toContain("sidebar-profile-fold-button");
-    expect(markup.indexOf("profile-view-switch")).toBeGreaterThan(profileIndex);
+    expect(markup.indexOf("app-profile-editor-button")).toBeGreaterThan(profileIndex);
     expect(markup).not.toContain("sidebar-footer-profile");
     expect(markup).not.toContain('<span class="sidebar-tab-label">Collapse sidebar</span>');
     expect(markup).toContain("Theme mode");

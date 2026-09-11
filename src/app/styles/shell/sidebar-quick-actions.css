@@ -96,9 +96,9 @@
   padding: 0.18rem 0.3rem;
 }
 
-.sidebar-quick-actions[data-collapsed="true"] .sidebar-quick-action-profile .profile-trigger-label,
-.sidebar-quick-actions[data-collapsed="true"] .sidebar-quick-action-profile .profile-view-switch-arrow {
-  display: none;
+.sidebar-quick-action-profile .profile-avatar {
+  width: 1.7rem;
+  height: 1.7rem;
 }
 
 .sidebar-quick-action:hover,

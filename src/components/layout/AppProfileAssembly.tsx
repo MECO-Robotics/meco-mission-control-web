@@ -1,5 +1,3 @@
-import { ArrowDownLeft, ArrowUpRight, Users } from "lucide-react";
-
 import { MECO_PROFILE_AVATAR_SIZE } from "@/lib/branding";
 import type { SessionUser } from "@/lib/auth/types";
 
@@ -45,49 +43,20 @@ function ProfileAvatar({
 }
 
 function SignedInProfileAssembly({
-  isMyViewActive,
-  myViewMemberName,
-  onToggleMyView,
+  onOpenProfileEditor,
   sessionUser,
 }: AppProfileAssemblyProps & { sessionUser: SessionUser }) {
-  const displayName = myViewMemberName || sessionUser.name || "Local access";
-  const activeViewLabel = isMyViewActive ? "Personal view" : "All users view";
-  const inactiveViewLabel = isMyViewActive ? "all users" : "personal view";
-  const profileAvatar = <ProfileAvatar displayName={displayName} sessionUser={sessionUser} />;
-  const usersAvatar = (
-    <span className="profile-view-users-icon" aria-hidden="true">
-      <Users size={15} strokeWidth={2} />
-    </span>
-  );
-  const selectedViewAvatar = isMyViewActive ? profileAvatar : usersAvatar;
-  const alternateViewAvatar = isMyViewActive ? usersAvatar : profileAvatar;
-  const SwitchArrowIcon = isMyViewActive ? ArrowDownLeft : ArrowUpRight;
-  const handleMyViewClick = () => {
-    onToggleMyView();
-  };
+  const displayName = sessionUser.name || "Local access";
 
   return (
-    <div className="profile-view-switch sidebar-profile-toggle">
+    <div className="profile-menu sidebar-profile-toggle">
       <button
-        aria-label={`${activeViewLabel}. Switch to ${inactiveViewLabel}.`}
-        aria-pressed={isMyViewActive}
-        className="user-chip profile-trigger profile-trigger-view-switch"
-        data-view={isMyViewActive ? "personal" : "all"}
-        onClick={handleMyViewClick}
+        aria-label="Edit profile"
+        className="user-chip profile-trigger app-profile-editor-button"
+        onClick={onOpenProfileEditor}
         type="button"
       >
-        <span className="profile-view-stack" aria-hidden="true">
-          <span className="profile-view-option profile-view-option-other">{alternateViewAvatar}</span>
-          <span className="profile-view-option profile-view-option-selected">{selectedViewAvatar}</span>
-        </span>
-        <span className="profile-trigger-label">Switch view</span>
-        <span
-          aria-hidden="true"
-          className="profile-view-switch-arrow"
-          data-direction={isMyViewActive ? "down-left" : "up-right"}
-        >
-          <SwitchArrowIcon size={12} strokeWidth={2.2} />
-        </span>
+        <ProfileAvatar displayName={displayName} sessionUser={sessionUser} />
       </button>
     </div>
   );
@@ -110,9 +79,7 @@ function LocalProfileAssembly() {
 }
 
 export interface AppProfileAssemblyProps {
-  isMyViewActive: boolean;
-  myViewMemberName: string | null;
-  onToggleMyView: () => void;
+  onOpenProfileEditor: () => void;
   sessionUser: SessionUser | null;
 }
 

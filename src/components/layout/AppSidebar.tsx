@@ -33,11 +33,9 @@ interface AppSidebarProps {
   canSignIn: boolean;
   handleSignOut: () => void;
   isDarkMode: boolean;
-  isMyViewActive: boolean;
   onSelectTarget: (target: NavigationTarget, options?: { keepSidebarOpen?: boolean }) => void;
   isCollapsed: boolean;
   isNotificationQueueOpen: boolean;
-  myViewMemberName: string | null;
   notificationCount: number;
   onCreateMilestone: () => void;
   onCreatePart: () => void;
@@ -47,7 +45,7 @@ interface AppSidebarProps {
   onRefreshWorkspace: () => void;
   onSignIn: () => void;
   onSelectSeason: (seasonId: string | null) => void;
-  onToggleMyView: () => void;
+  onOpenProfileEditor: () => void;
   onToggleNotificationQueue: () => void;
   toggleSidebar: () => void;
   projects: ProjectRecord[];
@@ -73,11 +71,9 @@ export function AppSidebar({
   canSignIn,
   handleSignOut,
   isDarkMode,
-  isMyViewActive,
   onSelectTarget,
   isCollapsed,
   isNotificationQueueOpen,
-  myViewMemberName,
   notificationCount,
   onCreateMilestone,
   onCreatePart,
@@ -87,7 +83,7 @@ export function AppSidebar({
   onRefreshWorkspace,
   onSignIn,
   onSelectSeason,
-  onToggleMyView,
+  onOpenProfileEditor,
   onToggleNotificationQueue,
   toggleSidebar,
   projects,
@@ -229,9 +225,7 @@ export function AppSidebar({
           onCreateQaReport={onCreateQaReport}
           onCreateTask={onCreateTask}
           onToggleSidebar={handleSidebarFoldClick}
-          isMyViewActive={isMyViewActive}
-          myViewMemberName={myViewMemberName}
-          onToggleMyView={onToggleMyView}
+          onOpenProfileEditor={onOpenProfileEditor}
           sessionUser={sessionUser}
         />
 

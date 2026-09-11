@@ -12,9 +12,7 @@ interface AppSidebarQuickActionsProps {
   onCreateQaReport: () => void;
   onCreateTask: () => void;
   onToggleSidebar: (event: ReactMouseEvent<HTMLButtonElement>) => void;
-  isMyViewActive: boolean;
-  myViewMemberName: string | null;
-  onToggleMyView: () => void;
+  onOpenProfileEditor: () => void;
   sessionUser: SessionUser | null;
 }
 
@@ -25,18 +23,14 @@ export function AppSidebarQuickActions({
   onCreateQaReport,
   onCreateTask,
   onToggleSidebar,
-  isMyViewActive,
-  myViewMemberName,
-  onToggleMyView,
+  onOpenProfileEditor,
   sessionUser,
 }: AppSidebarQuickActionsProps) {
   return (
     <div className="sidebar-quick-actions" data-collapsed={isCollapsed ? "true" : "false"}>
       <div className="sidebar-quick-action-profile">
         <AppProfileAssembly
-          isMyViewActive={isMyViewActive}
-          myViewMemberName={myViewMemberName}
-          onToggleMyView={onToggleMyView}
+          onOpenProfileEditor={onOpenProfileEditor}
           sessionUser={sessionUser}
         />
       </div>
