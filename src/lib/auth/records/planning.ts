@@ -64,6 +64,15 @@ export function updateMemberRecord(
   );
 }
 
+export function updateProfileRecord(
+  payload: Pick<MemberPayload, "name" | "email" | "photoUrl">,
+  onUnauthorized?: () => void,
+) {
+  return requestItem<MemberRecord, Pick<MemberPayload, "name" | "email" | "photoUrl">>(
+    "/users/me/profile", "PATCH", payload, onUnauthorized,
+  );
+}
+
 export function deleteMemberRecord(memberId: string, onUnauthorized?: () => void) {
   return requestItem<MemberRecord, never>(`/members/${memberId}`, "DELETE", undefined, onUnauthorized);
 }

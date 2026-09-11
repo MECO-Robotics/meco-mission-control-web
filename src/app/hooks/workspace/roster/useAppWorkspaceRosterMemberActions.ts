@@ -1,7 +1,7 @@
 import { useCallback, type FormEvent } from "react";
 
 import { getMemberActiveSeasonIds, toErrorMessage } from "@/lib/appUtils/common";
-import { createMemberRecord, deleteMemberRecord, updateMemberRecord } from "@/lib/auth/records/planning";
+import { createMemberRecord, deleteMemberRecord, updateMemberRecord, updateProfileRecord } from "@/lib/auth/records/planning";
 import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
 import { isElevatedMemberRole } from "@/app/state/workspaceMemberRoleUtils";
 
@@ -74,21 +74,22 @@ export function useAppWorkspaceRosterMemberActions(model: AppWorkspaceModel) {
 
       try {
         const normalizedRole = model.memberEditDraft.role;
-        await updateMemberRecord(
-          model.selectedMemberId,
-          {
+        const profilePayload = { name: model.memberEditDraft.name.trim(), email: model.memberEditDraft.email.trim(), photoUrl: model.memberEditDraft.photoUrl.trim() };
+        if (model.selectedMemberId === model.signedInMember?.id) {
+          await updateProfileRecord(profilePayload, model.handleUnauthorized);
+        } else {
+          await updateMemberRecord(model.selectedMemberId, {
+            ...profilePayload,
             name: model.memberEditDraft.name.trim(),
             email: model.memberEditDraft.email.trim(),
-            photoUrl: model.memberEditDraft.photoUrl.trim(),
             role: normalizedRole,
             elevated: isElevatedMemberRole(normalizedRole),
             disciplineId: model.memberEditDraft.disciplineId ?? null,
             plannedWeeklyAttendanceHours: Math.max(0, model.memberEditDraft.plannedWeeklyAttendanceHours),
             plannedAttendanceDays: model.memberEditDraft.plannedAttendanceDays,
             plannedAttendanceNotes: model.memberEditDraft.plannedAttendanceNotes.trim(),
-          },
-          model.handleUnauthorized,
-        );
+          }, model.handleUnauthorized);
+        }
         model.setIsEditPersonOpen(false);
         await model.loadWorkspace({
           projectId: model.selectedProjectId,
