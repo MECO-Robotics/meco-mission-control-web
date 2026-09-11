@@ -172,6 +172,19 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
     handleSelectNavigationTarget({ tab: "tasks", taskView: "timeline" });
     c.switchTaskCreateToMilestone();
   };
+  const handleSelectSeason = (seasonId: string | null) => {
+    c.setSelectedSeasonId(seasonId);
+    c.setSelectedProjectId(null);
+    void c.loadWorkspace({ seasonId, projectId: null, personId: null });
+  };
+  const handleSelectProject = (projectId: string | null) => {
+    c.setSelectedProjectId(projectId);
+    void c.loadWorkspace({
+      seasonId: c.selectedSeasonId,
+      projectId,
+      personId: null,
+    });
+  };
 
   return (
     <main
@@ -194,6 +207,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
         }
       }}
       activeViewLabel={activeViewLabel}
+      projectScopeLabel={c.selectedProject?.name ?? "All projects"}
       isDarkMode={c.isDarkMode}
       isSidebarCollapsed={c.isSidebarCollapsed}
     />
@@ -215,7 +229,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       onCreateTask={c.openCreateTaskModal}
       onRefreshWorkspace={c.loadWorkspace}
       onSignIn={c.requestSignIn}
-      onSelectSeason={c.setSelectedSeasonId}
+      onSelectSeason={handleSelectSeason}
       onToggleMyView={c.toggleMyView}
       onToggleNotificationQueue={c.toggleNotificationQueue}
       toggleSidebar={c.toggleSidebar}
@@ -231,7 +245,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       taskView={c.taskView}
       toggleDarkMode={c.toggleDarkMode}
       worklogsView={c.worklogsView}
-      onSelectProject={c.setSelectedProjectId}
+      onSelectProject={handleSelectProject}
       onCreateRobot={c.handleCreateRobot}
       onEditSelectedRobot={c.handleEditSelectedRobot}
     />

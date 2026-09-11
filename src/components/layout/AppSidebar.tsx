@@ -149,11 +149,7 @@ export function AppSidebar({
     sidebarScrollRef,
   } = useSidebarScrollHints();
 
-  const handleSubItemSelect = (target: NavigationTarget, isEnabled: boolean) => {
-    if (!isEnabled) {
-      return;
-    }
-
+  const handleSubItemSelect = (target: NavigationTarget) => {
     onSelectTarget(target);
   };
 

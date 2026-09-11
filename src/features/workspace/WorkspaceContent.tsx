@@ -219,7 +219,7 @@ export function WorkspaceContent({
   const inventorySwipeDirection = getSwipeDirection(
     previousInventoryViewRef.current,
     effectiveInventoryView,
-    ["materials", "parts", "part-mappings", "purchases"],
+    ["materials", "documents", "parts", "part-mappings", "purchases"],
   );
 
   useEffect(() => {

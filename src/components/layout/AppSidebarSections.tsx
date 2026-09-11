@@ -17,7 +17,7 @@ interface SidebarSectionModel {
 interface AppSidebarSectionsProps {
   activeSubItemId: NavigationSubItemId | null;
   isCollapsed: boolean;
-  onSubItemSelect: (target: NavigationTarget, isEnabled: boolean) => void;
+  onSubItemSelect: (target: NavigationTarget) => void;
   sectionModels: SidebarSectionModel[];
 }
 
@@ -56,7 +56,7 @@ export function AppSidebarSections({
           title={isCollapsed ? item.label : undefined}
           data-active={activeSubItemId === item.id ? "true" : "false"}
           data-enabled={item.isEnabled ? "true" : "false"}
-          disabled={!item.isEnabled}
+          disabled={item.id === "resources-structure" && !item.isEnabled}
           data-tutorial-target={`sidebar-view-${item.id}`}
           data-active-view={activeSubItemId ?? ""}
           key={item.id}
@@ -64,7 +64,9 @@ export function AppSidebarSections({
           onMouseLeave={clearActiveRollout}
           onFocus={(event) => handleFocus(event, item.id)}
           onBlur={clearActiveRollout}
-          onClick={() => onSubItemSelect(item.target, item.isEnabled)}
+          onClick={() => {
+            if (item.id !== "resources-structure" || item.isEnabled) onSubItemSelect(item.target);
+          }}
           type="button"
         >
           <span aria-hidden="true" className="sidebar-nav-item-icon">{subItemIcons[item.id]}</span>

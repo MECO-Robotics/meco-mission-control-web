@@ -1,0 +1,22 @@
+.workspace-modal-backdrop {
+  background: rgb(10 16 24 / 62%);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  position: fixed;
+  z-index: 1000;
+}
+.workspace-modal {
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #d7dde5);
+  border-radius: 14px;
+  box-shadow: 0 24px 80px rgb(10 16 24 / 28%);
+  padding: 1.25rem;
+}
+.workspace-modal-header { align-items: flex-start; display: flex; justify-content: space-between; margin-bottom: 1rem; }
+.workspace-modal-header h2 { margin: .2rem 0 0; }
+.modal-close-button { background: transparent; border: 0; color: inherit; cursor: pointer; font-size: 1.5rem; line-height: 1; padding: .2rem .4rem; }
+.activity-modal-backdrop { align-items: flex-start; padding: clamp(1rem, 5vh, 4rem) 1rem; }
+.activity-modal { width: min(1100px, 100%); max-height: min(900px, 90vh); overflow: auto; }
+.activity-modal-toolbar { margin: 0 0 1rem; }
+.activity-trigger { margin-left: .5rem; }

@@ -7,7 +7,7 @@ describe("flat sidebar navigation", () => {
     expect(markup).toContain("sidebar-section-heading");
     expect(markup).toContain("sidebar-nav-item-icon");
     expect(markup).not.toContain("sidebar-section-chevron");
-    for (const label of ["Tasks", "Schedule", "Activity", "Parts", "People"]) expect(markup).toContain(`>${label}</span>`);
+    for (const label of ["Tasks", "Schedule", "Parts", "People"]) expect(markup).toContain(`>${label}</span>`);
     expect(markup).not.toContain(">Risks</span>");
     expect(markup).not.toContain("workspace-primary-navigation");
   });
@@ -19,9 +19,20 @@ describe("flat sidebar navigation", () => {
     expect(markup).toContain('aria-label="Parts"');
     expect(markup).not.toContain("sidebar-section-heading");
   });
-  it("keeps unavailable Resources subitems visible and disabled", () => {
+  it("keeps unavailable Resources subitems visible and openable", () => {
     const markup = renderSidebar([], "inventory");
-    expect(markup).toContain('data-enabled="false" disabled=""');
+    expect(markup).toContain('data-enabled="false"');
+    expect(markup).toMatch(/<button(?=[^>]*data-tutorial-target="sidebar-view-resources-parts")(?![^>]*disabled)[^>]*>/);
     expect(markup).toContain(">Parts</span>");
+  });
+
+  it("does not grey out unavailable destinations", () => {
+    const sidebarCss = require("node:fs").readFileSync("src/app/styles/shell/sidebar/sidebar.part3.css", "utf8");
+    expect(sidebarCss).not.toContain("opacity: 0.48");
+  });
+
+  it("greys out Robot until a robot project is selected", () => {
+    const markup = renderSidebar([], "tasks");
+    expect(markup).toMatch(/<button(?=[^>]*data-tutorial-target="sidebar-view-resources-structure")(?=[^>]*disabled="")[^>]*>/);
   });
 });

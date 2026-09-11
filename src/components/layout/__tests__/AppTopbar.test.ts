@@ -23,6 +23,7 @@ import { AppTopbar } from "@/components/layout/AppTopbar";
 function renderTopbar(
   options: {
     activeViewLabel?: string;
+    projectScopeLabel?: string;
     isDarkMode?: boolean;
     isSidebarCollapsed?: boolean;
   } = {},
@@ -30,6 +31,7 @@ function renderTopbar(
   return renderToStaticMarkup(
     React.createElement(AppTopbar, {
       activeViewLabel: options.activeViewLabel ?? "Timeline",
+      projectScopeLabel: options.projectScopeLabel ?? "All projects",
       isDarkMode: options.isDarkMode ?? false,
       isSidebarCollapsed: options.isSidebarCollapsed ?? false,
     }),
@@ -86,6 +88,12 @@ describe("AppTopbar", () => {
 
     expect(markup).not.toContain("profile-menu");
     expect(markup).not.toContain('aria-label="Refresh workspace"');
+  });
+
+  it("shows the project scope for every workspace page", () => {
+    const markup = renderTopbar({ projectScopeLabel: "Rover" });
+
+    expect(markup).toContain("Project: Rover");
   });
 
   it("provides page-owned controls without a nonfunctional global search", () => {

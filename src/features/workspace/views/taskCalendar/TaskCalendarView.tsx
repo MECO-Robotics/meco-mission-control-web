@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MeetingPayload, MilestonePayload } from "@/types/payloads";
@@ -8,21 +8,20 @@ import { toErrorMessage } from "@/lib/appUtils/common";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
-import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import {
-  buildTopbarSearchProps,
   buildTopbarAddMenuActions,
+  buildTopbarSearchProps,
   makeAddMenuAction,
 } from "@/features/workspace/shared/topbar";
 import { WorkspaceTopbarControls } from "@/features/workspace/shared/topbar";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { MilestonesMilestoneModal } from "@/features/workspace/views/milestones/MilestonesEventModal";
 import { useMilestonesMilestoneModalState } from "@/features/workspace/views/milestones/sections/useMilestonesEventModalState";
 import { TaskCalendarFilterToolbar } from "./TaskCalendarFilterToolbar";
 import { TaskCalendarDayDetails } from "./TaskCalendarDayDetails";
 import { MeetingScheduleModal } from "./MeetingScheduleModal";
 import { TaskCalendarMonthGrid } from "./TaskCalendarMonthGrid";
-import { TaskCalendarMonthToolbar } from "./TaskCalendarMonthToolbar";
 import { formatDateKey } from "./taskCalendarLayout";
 import type { TaskCalendarEvent } from "./taskCalendarEvents";
 import { useTaskCalendarEventData } from "./useTaskCalendarEventData";
@@ -75,6 +74,7 @@ export function TaskCalendarView({
 }: TaskCalendarViewProps) {
   const [isMeetingModalOpen, setIsMeetingModalOpen] = useState(false);
   const [isSavingMeeting, setIsSavingMeeting] = useState(false);
+  const [calendarViewMode, setCalendarViewMode] = useState<"month" | "week">("month");
   const [meetingDraft, setMeetingDraft] = useState<MeetingPayload>(() => createDefaultMeetingDraft(bootstrap));
   const [meetingError, setMeetingError] = useState<string | null>(null);
   const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
@@ -83,6 +83,16 @@ export function TaskCalendarView({
     bootstrap,
     isAllProjectsView,
   });
+  useEffect(() => {
+    const handleSchedulePeriodChange = (event: Event) => {
+      const anchorDate = (event as CustomEvent<{ anchorDate?: string }>).detail?.anchorDate;
+      const viewMode = (event as CustomEvent<{ viewMode?: "month" | "week" }>).detail?.viewMode;
+      if (viewMode) setCalendarViewMode(viewMode);
+      if (anchorDate) calendar.setMonthCursor(new Date(anchorDate + "T12:00:00"));
+    };
+    window.addEventListener("mission-control:schedule-period-change", handleSchedulePeriodChange);
+    return () => window.removeEventListener("mission-control:schedule-period-change", handleSchedulePeriodChange);
+  }, [calendar.setMonthCursor]);
   const milestoneModalState = useMilestonesMilestoneModalState({
     bootstrap,
     isAllProjectsView,
@@ -111,12 +121,6 @@ export function TaskCalendarView({
     }
   };
   const selectedDayEvents = selectedDateKey ? calendar.eventsByDateKey.get(selectedDateKey) ?? [] : [];
-
-  const openMeetingModal = () => {
-    setMeetingDraft(createDefaultMeetingDraft(bootstrap));
-    setMeetingError(null);
-    setIsMeetingModalOpen(true);
-  };
 
   const handleMeetingSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -163,12 +167,8 @@ export function TaskCalendarView({
           addMenu={
             <WorkspaceTopbarAddMenu
               actions={buildTopbarAddMenuActions(
-                makeAddMenuAction("Add meeting", openMeetingModal, <IconCalendar />),
-                makeAddMenuAction(
-                  "Add milestone",
-                  milestoneModalState.openCreateMilestoneModal,
-                  <IconTasks />,
-                ),
+                makeAddMenuAction("Add meeting", () => setIsMeetingModalOpen(true), <IconCalendar />),
+                makeAddMenuAction("Add milestone", milestoneModalState.openCreateMilestoneModal, <IconTasks />),
               )}
               ariaLabel="Add calendar item"
               title="Add calendar item"
@@ -176,12 +176,6 @@ export function TaskCalendarView({
           }
         />
       </AppTopbarSlotPortal>
-
-      <div className="panel-header compact-header">
-        <div className="queue-section-header">
-          <h2>Calendar</h2>
-        </div>
-      </div>
 
       {calendar.unfilteredEvents.length === 0 ? (
         <div className="empty-state">
@@ -192,12 +186,6 @@ export function TaskCalendarView({
         </div>
       ) : (
         <div className="task-calendar-frame">
-          <TaskCalendarMonthToolbar
-            monthLabel={calendar.monthLabel}
-            onMonthChange={() => setSelectedDateKey(null)}
-            setMonthCursor={calendar.setMonthCursor}
-          />
-
           {calendar.events.length === 0 ? (
             <div className="empty-state task-calendar-filter-empty">
               <strong>No events match this filter.</strong>
@@ -208,12 +196,13 @@ export function TaskCalendarView({
           ) : (
             <TaskCalendarMonthGrid
               eventsByDateKey={calendar.eventsByDateKey}
-              monthCells={calendar.monthCells}
+              monthCells={calendarViewMode === "week" ? calendar.weekCells : calendar.monthCells}
               monthCursor={calendar.monthCursor}
               onOpenDay={setSelectedDateKey}
               onOpenEvent={openEvent}
               selectedDateKey={selectedDateKey}
               todayDateKey={calendar.todayDateKey}
+              viewMode={calendarViewMode}
             />
           )}
 
