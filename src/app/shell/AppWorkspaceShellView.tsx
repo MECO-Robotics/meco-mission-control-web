@@ -16,6 +16,7 @@ import {
 } from "@/lib/workspaceNavigation";
 
 import { getLocalWorkspaceMode, resetLocalDemo, subscribeLocalWorkspace } from "@/lib/localWorkspace/session";
+import { findMemberForSessionUser } from "@/lib/appUtils/common";
 import { Suspense, useSyncExternalStore, useEffect, useLayoutEffect, useRef } from "react";
 
 import type { AppWorkspaceController } from "@/app/hooks/useAppWorkspaceController";
@@ -77,7 +78,8 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
     });
   };
   const handleOpenProfileEditor = () => {
-    const memberId = c.signedInMember?.id;
+    const memberId = c.signedInMember?.id ??
+      findMemberForSessionUser(c.bootstrap.members, c.sessionUser)?.id;
     if (!memberId) return;
     c.selectMember(memberId, c.bootstrap);
     c.setIsAddPersonOpen(false);
