@@ -24,6 +24,29 @@
   flex: 0 0 auto;
 }
 
+.workspace-topbar-zoom-controls {
+  align-items: center;
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 0.2rem;
+  white-space: nowrap;
+}
+
+.workspace-topbar-zoom-button.icon-button {
+  height: 1.75rem;
+  min-width: 1.75rem;
+  padding: 0;
+  width: 1.75rem;
+}
+
+.workspace-topbar-zoom-label {
+  color: var(--text-title);
+  font-size: 0.72rem;
+  font-weight: 700;
+  min-width: 2.6rem;
+  text-align: center;
+}
+
 .topbar-add-menu {
   position: relative;
   display: inline-flex;
