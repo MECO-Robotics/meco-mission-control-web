@@ -29,6 +29,19 @@
   justify-content: flex-end;
 }
 
+/* Schedule keeps its add action outside the filter group so it stays last. */
+.app-topbar-controls-host > .workspace-topbar-controls.milestones-toolbar {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  max-width: none;
+}
+
+.app-topbar-controls-host > .workspace-topbar-controls.milestones-toolbar + .topbar-add-menu {
+  flex: 0 0 auto;
+  margin-left: 0.1rem;
+}
+
 .app-topbar-controls-host .filter-toolbar > *,
 .app-topbar-search-host .filter-toolbar > * {
   flex: 0 0 auto;
