@@ -26,24 +26,29 @@
 
 .workspace-topbar-zoom-controls {
   align-items: center;
+  background: var(--bg-row-alt);
+  border: 1px solid var(--border-base);
+  border-radius: 999px;
   display: inline-flex;
   flex: 0 0 auto;
-  gap: 0.2rem;
+  gap: 0.04rem;
+  min-height: 2.05rem;
+  padding: 0.12rem 0.18rem;
   white-space: nowrap;
 }
 
 .workspace-topbar-zoom-button.icon-button {
-  height: 1.75rem;
-  min-width: 1.75rem;
+  height: 1.9rem;
+  min-width: 1.9rem;
   padding: 0;
-  width: 1.75rem;
+  width: 1.9rem;
 }
 
 .workspace-topbar-zoom-label {
   color: var(--text-title);
-  font-size: 0.72rem;
-  font-weight: 700;
-  min-width: 2.6rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+  min-width: 2.9rem;
   text-align: center;
 }
 
