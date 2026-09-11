@@ -64,6 +64,8 @@ interface AppSidebarProps {
   onCreateRobot: () => void;
   onEditSelectedRobot: () => void;
   onEnqueueNotification: (notice: WorkspaceEditToastNotice) => void;
+  localMode?: "demo" | "tutorial" | null;
+  onResetDemo?: () => void;
 }
 
 export function AppSidebar({
@@ -102,6 +104,8 @@ export function AppSidebar({
   onCreateRobot,
   onEditSelectedRobot,
   onEnqueueNotification,
+  localMode,
+  onResetDemo,
 }: AppSidebarProps) {
   const selectedProject = projects.find((project) => project.id === selectedProjectId) ?? null;
   const selectedSeason = seasons.find((season) => season.id === selectedSeasonId) ?? null;
@@ -255,6 +259,8 @@ export function AppSidebar({
           notificationCount={notificationCount}
           projectTriggerRef={projectTriggerRef}
           selectedScopeLabel={selectedScopeLabel}
+          localMode={localMode ?? null}
+          onResetDemo={onResetDemo ?? (() => undefined)}
         />
       </nav>
       <AppSidebarPopups

@@ -205,19 +205,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
     >
       <Suspense fallback={<WorkspaceShellLoading />}>
         <AppTopbar
-      localMode={localMode}
-      onResetDemo={() => {
-        try {
-          resetLocalDemo();
-          c.setSelectedSeasonId("default-season");
-          c.setSelectedProjectId(null);
-          void c.loadWorkspace({ seasonId: "default-season", projectId: null, personId: null });
-        } catch (error) {
-          c.setDataMessage(error instanceof Error ? error.message : "The local demo could not be reset.");
-        }
-      }}
       activeViewLabel={activeViewLabel}
-      projectScopeLabel={c.selectedProject?.name ?? "All projects"}
       isDarkMode={c.isDarkMode}
       isSidebarCollapsed={c.isSidebarCollapsed}
     />
@@ -257,6 +245,17 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       onCreateRobot={c.handleCreateRobot}
       onEditSelectedRobot={c.handleEditSelectedRobot}
       onEnqueueNotification={c.enqueueTaskEditNotice}
+      localMode={localMode}
+      onResetDemo={() => {
+        try {
+          resetLocalDemo();
+          c.setSelectedSeasonId("default-season");
+          c.setSelectedProjectId(null);
+          void c.loadWorkspace({ seasonId: "default-season", projectId: null, personId: null });
+        } catch (error) {
+          c.setDataMessage(error instanceof Error ? error.message : "The local demo could not be reset.");
+        }
+       }}
     />
         {c.isAddSeasonPopupOpen ? <AddSeasonPopup controller={c} /> : null}
         {c.robotProjectModalMode ? <RobotProjectPopup controller={c} /> : null}
