@@ -5,7 +5,9 @@ import type { TaskRecord } from "@/types/recordsExecution";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
-import { WorkspaceTopbarControls } from "@/features/workspace/shared/topbar";
+import { IconCalendar, IconTasks } from "@/components/shared/Icons";
+import { WorkspaceTopbarControls, buildSingleAddMenuAction, buildTopbarAddMenuActions, makeAddMenuAction } from "@/features/workspace/shared/topbar";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { getTimelineMinimumZoomForWidth } from "@/features/workspace/shared/timeline/timelineZoom";
 import { addDaysToDay, addMonthsToDay, midpointOfTimelineDays } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
@@ -228,6 +230,15 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             timelineZoom={state.timelineZoom}
             timelineZoomMin={state.timelineZoomMin}
             viewInterval={state.viewInterval}
+          />
+          <WorkspaceTopbarAddMenu
+            actions={buildTopbarAddMenuActions(
+              makeAddMenuAction("Add meeting", () => window.dispatchEvent(new Event("mission-control:open-meeting")), <IconCalendar />),
+              makeAddMenuAction("Add milestone", () => window.dispatchEvent(new Event("mission-control:open-milestone")), <IconTasks />),
+              buildSingleAddMenuAction({ label: "Add task", onSelect: openCreateTaskModal })[0],
+            )}
+            ariaLabel="Add calendar item"
+            title="Add calendar item"
           />
         </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
