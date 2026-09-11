@@ -13,6 +13,7 @@ import {
 } from "@/lib/workspaceNavigation";
 import type { SessionUser } from "@/lib/auth/types";
 import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
+import type { WorkspaceEditToastNotice } from "@/features/workspace/workspaceEditToastNotice";
 
 import {
   ADD_ROBOT_PROJECT_VALUE,
@@ -64,6 +65,7 @@ interface AppSidebarProps {
   onSelectProject: (projectId: string | null) => void;
   onCreateRobot: () => void;
   onEditSelectedRobot: () => void;
+  onEnqueueNotification: (notice: WorkspaceEditToastNotice) => void;
 }
 
 export function AppSidebar({
@@ -103,6 +105,7 @@ export function AppSidebar({
   onSelectProject,
   onCreateRobot,
   onEditSelectedRobot,
+  onEnqueueNotification,
 }: AppSidebarProps) {
   const selectedProject = projects.find((project) => project.id === selectedProjectId) ?? null;
   const selectedSeason = seasons.find((season) => season.id === selectedSeasonId) ?? null;
@@ -152,6 +155,12 @@ export function AppSidebar({
   const handleSubItemSelect = (target: NavigationTarget) => {
     onSelectTarget(target);
   };
+
+  const handleDisabledSubItemSelect = () => onEnqueueNotification({
+    title: "Select Robot Project",
+    message: "Select a robot project first to open this view.",
+    tone: "error",
+  });
 
   const handleProjectTriggerClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     const shellRect = sidebarShellRef.current?.getBoundingClientRect();
@@ -228,6 +237,7 @@ export function AppSidebar({
           activeSubItemId={activeSubItemId}
           isCollapsed={isCollapsed}
           onSubItemSelect={handleSubItemSelect}
+          onDisabledSubItemSelect={handleDisabledSubItemSelect}
           sectionModels={sectionModels}
         />
 

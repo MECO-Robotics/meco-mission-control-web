@@ -248,6 +248,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       onSelectProject={handleSelectProject}
       onCreateRobot={c.handleCreateRobot}
       onEditSelectedRobot={c.handleEditSelectedRobot}
+      onEnqueueNotification={c.enqueueTaskEditNotice}
     />
         {c.isAddSeasonPopupOpen ? <AddSeasonPopup controller={c} /> : null}
         {c.robotProjectModalMode ? <RobotProjectPopup controller={c} /> : null}

@@ -52,6 +52,7 @@ export function renderSidebar(
       onCreateRobot: jest.fn(),
       onCreateTask: jest.fn(),
       onEditSelectedRobot: jest.fn(),
+      onEnqueueNotification: jest.fn(),
       onRefreshWorkspace: jest.fn(),
       onSignIn: jest.fn(),
       onSelectSeason: jest.fn(),

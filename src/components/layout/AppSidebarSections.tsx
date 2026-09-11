@@ -18,6 +18,7 @@ interface AppSidebarSectionsProps {
   activeSubItemId: NavigationSubItemId | null;
   isCollapsed: boolean;
   onSubItemSelect: (target: NavigationTarget) => void;
+  onDisabledSubItemSelect: () => void;
   sectionModels: SidebarSectionModel[];
 }
 
@@ -25,6 +26,7 @@ export function AppSidebarSections({
   activeSubItemId,
   isCollapsed,
   onSubItemSelect,
+  onDisabledSubItemSelect,
   sectionModels,
 }: AppSidebarSectionsProps) {
   const [hoveredSubItemId, setHoveredSubItemId] = useState<NavigationSubItemId | null>(null);
@@ -61,7 +63,7 @@ export function AppSidebarSections({
           data-active={activeSubItemId === item.id ? "true" : "false"}
           data-enabled={item.isEnabled ? "true" : "false"}
           data-robot-disabled={isDisabled ? "true" : "false"}
-          disabled={isDisabled}
+          aria-disabled={isDisabled ? "true" : undefined}
           data-tutorial-target={`sidebar-view-${item.id}`}
           data-active-view={activeSubItemId ?? ""}
           key={item.id}
@@ -70,7 +72,8 @@ export function AppSidebarSections({
           onFocus={(event) => handleFocus(event, item.id)}
           onBlur={clearActiveRollout}
           onClick={() => {
-            if (!isDisabled) onSubItemSelect(item.target);
+            if (isDisabled) onDisabledSubItemSelect();
+            else onSubItemSelect(item.target);
           }}
           type="button"
         >

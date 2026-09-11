@@ -62,6 +62,7 @@
 }
 
 .sidebar-nav-item:disabled,
+.sidebar-nav-item[aria-disabled="true"],
 .sidebar-nav-item[data-enabled="false"] {
   cursor: default;
 }
@@ -72,6 +73,7 @@
 }
 
 .sidebar-nav-item:disabled:hover,
+.sidebar-nav-item[aria-disabled="true"]:hover,
 .sidebar-nav-item[data-enabled="false"]:hover {
   background: var(--bg-row-alt);
   border-color: rgba(15, 28, 52, 0.08);
