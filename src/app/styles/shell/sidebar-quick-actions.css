@@ -85,20 +85,19 @@
   height: 1.9rem;
 }
 
-.sidebar-quick-action-profile .sidebar-profile-toggle {
-  width: 100%;
-}
-
 .sidebar-quick-action-profile .profile-trigger {
-  width: 100%;
-  min-width: 0;
+.sidebar-quick-action-profile .app-profile-editor-button {
+  width: 1.9rem;
+  min-width: 1.9rem;
   height: 1.9rem;
-  padding: 0.18rem 0.3rem;
+  padding: 0;
+  border-radius: 999px;
+  cursor: pointer;
 }
 
 .sidebar-quick-action-profile .profile-avatar {
-  width: 1.7rem;
-  height: 1.7rem;
+  width: 1.9rem;
+  height: 1.9rem;
 }
 
 .sidebar-quick-action:hover,

@@ -7,6 +7,7 @@ describe("AppSidebar profile", () => {
     const markup = renderSidebar([], "tasks", { sessionUser: signedInUser });
 
     expect(markup).toContain('class="sidebar-quick-action-profile"');
+    expect(markup).not.toContain("sidebar-profile-toggle");
     expect(markup).toMatch(
       /<button(?=[^>]*class="[^\"]*app-profile-editor-button)(?=[^>]*aria-label="Edit profile")[^>]*>[\s\S]*profile-avatar[\s\S]*<\/button>/,
     );

@@ -49,7 +49,7 @@ function SignedInProfileAssembly({
   const displayName = sessionUser.name || "Local access";
 
   return (
-    <div className="profile-menu sidebar-profile-toggle">
+    <div className="profile-menu">
       <button
         aria-label="Edit profile"
         className="user-chip profile-trigger app-profile-editor-button"
