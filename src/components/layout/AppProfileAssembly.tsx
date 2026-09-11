@@ -62,18 +62,19 @@ function SignedInProfileAssembly({
   );
 }
 
-function LocalProfileAssembly() {
+function LocalProfileAssembly({ onOpenProfileEditor }: AppProfileAssemblyProps) {
   return (
     <div className="profile-menu">
-      <span
-        aria-label="Local dev profile"
-        className="user-chip profile-trigger app-profile-my-view-button"
-        role="img"
+      <button
+        aria-label="Edit profile"
+        className="user-chip profile-trigger app-profile-editor-button"
+        onClick={onOpenProfileEditor}
+        type="button"
       >
         <span className="profile-avatar profile-avatar-fallback app-topbar-local-avatar">
           {LOCAL_DEV_PROFILE_INITIAL}
         </span>
-      </span>
+      </button>
     </div>
   );
 }
@@ -88,5 +89,5 @@ export function AppProfileAssembly(props: AppProfileAssemblyProps) {
     return <SignedInProfileAssembly {...props} sessionUser={props.sessionUser} />;
   }
 
-  return <LocalProfileAssembly />;
+  return <LocalProfileAssembly onOpenProfileEditor={props.onOpenProfileEditor} />;
 }

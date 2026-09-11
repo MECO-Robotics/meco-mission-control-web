@@ -19,7 +19,7 @@ describe("AppSidebar profile", () => {
   it("keeps the local development avatar visible", () => {
     const markup = renderSidebar([], "tasks");
 
-    expect(markup).toContain('aria-label="Local dev profile"');
+    expect(markup).toContain('aria-label="Edit profile"');
     expect(markup).toContain("app-topbar-local-avatar");
     expect(markup).toContain(">L</span>");
   });
