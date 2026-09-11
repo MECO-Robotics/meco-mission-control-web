@@ -40,7 +40,7 @@ export default defineConfig(({ mode }) => {
   const parsedDevPort = rawDevPort ? Number.parseInt(rawDevPort, 10) : NaN;
   const devPort = Number.isNaN(parsedDevPort) ? 5173 : parsedDevPort;
   const devAllowedHosts = (env.VITE_DEV_ALLOWED_HOSTS?.split(",").map((host) => host.trim()).filter(Boolean)
-    ?? ["llmhost2", "brianlee1731-andes.nord"]);
+    ?? ["llmhost2", "llmhost2.tail72a2a1.ts.net", "brianlee1731-andes.nord"]);
   const securityHeaders = {
     "Content-Security-Policy":
       `default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; require-trusted-types-for 'script'; trusted-types meco-mission-control-web-google goog#html meco-cad-worker; script-src ${scriptSource}; script-src-attr 'none'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://lh3.googleusercontent.com https://*.googleusercontent.com; connect-src ${connectSource}; frame-src https://accounts.google.com;`,

@@ -62,7 +62,9 @@ function SignedInProfileAssembly({
   );
 }
 
-function LocalProfileAssembly({ onOpenProfileEditor }: AppProfileAssemblyProps) {
+function LocalProfileAssembly({
+  onOpenProfileEditor,
+}: Pick<AppProfileAssemblyProps, "onOpenProfileEditor">) {
   return (
     <div className="profile-menu">
       <button
