@@ -23,6 +23,11 @@
   flex: 0 0 auto;
 }
 
+.workspace-topbar-controls.timeline-topbar-controls > .topbar-add-menu {
+  order: 999;
+  margin-left: auto;
+}
+
 .milestones-toolbar {
   align-items: center;
 }
