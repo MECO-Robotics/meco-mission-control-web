@@ -74,21 +74,27 @@ export function useAppWorkspaceRosterMemberActions(model: AppWorkspaceModel) {
 
       try {
         const normalizedRole = model.memberEditDraft.role;
-        const profilePayload = { name: model.memberEditDraft.name.trim(), email: model.memberEditDraft.email.trim(), photoUrl: model.memberEditDraft.photoUrl.trim() };
+        const profilePayload = {
+          name: model.memberEditDraft.name.trim(),
+          email: model.memberEditDraft.email.trim(),
+          photoUrl: model.memberEditDraft.photoUrl.trim(),
+        };
         if (model.selectedMemberId === model.signedInMember?.id) {
           await updateProfileRecord(profilePayload, model.handleUnauthorized);
         } else {
-          await updateMemberRecord(model.selectedMemberId, {
-            ...profilePayload,
-            name: model.memberEditDraft.name.trim(),
-            email: model.memberEditDraft.email.trim(),
-            role: normalizedRole,
-            elevated: isElevatedMemberRole(normalizedRole),
-            disciplineId: model.memberEditDraft.disciplineId ?? null,
-            plannedWeeklyAttendanceHours: Math.max(0, model.memberEditDraft.plannedWeeklyAttendanceHours),
-            plannedAttendanceDays: model.memberEditDraft.plannedAttendanceDays,
-            plannedAttendanceNotes: model.memberEditDraft.plannedAttendanceNotes.trim(),
-          }, model.handleUnauthorized);
+          await updateMemberRecord(
+            model.selectedMemberId,
+            {
+              ...profilePayload,
+              role: normalizedRole,
+              elevated: isElevatedMemberRole(normalizedRole),
+              disciplineId: model.memberEditDraft.disciplineId ?? null,
+              plannedWeeklyAttendanceHours: Math.max(0, model.memberEditDraft.plannedWeeklyAttendanceHours),
+              plannedAttendanceDays: model.memberEditDraft.plannedAttendanceDays,
+              plannedAttendanceNotes: model.memberEditDraft.plannedAttendanceNotes.trim(),
+            },
+            model.handleUnauthorized,
+          );
         }
         model.setIsEditPersonOpen(false);
         await model.loadWorkspace({

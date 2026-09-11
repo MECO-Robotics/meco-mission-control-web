@@ -69,7 +69,10 @@ export function updateProfileRecord(
   onUnauthorized?: () => void,
 ) {
   return requestItem<MemberRecord, Pick<MemberPayload, "name" | "email" | "photoUrl">>(
-    "/users/me/profile", "PATCH", payload, onUnauthorized,
+    "/users/me/profile",
+    "PATCH",
+    payload,
+    onUnauthorized,
   );
 }
 
