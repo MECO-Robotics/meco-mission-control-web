@@ -1,14 +1,16 @@
-import type { Dispatch, FormEvent, SetStateAction } from "react";
+import type { ComponentProps, Dispatch, FormEvent, SetStateAction } from "react";
 
-import type { ArtifactModalMode, ManufacturingModalMode, MaterialModalMode, MechanismModalMode, MilestoneReportModalMode, PartDefinitionModalMode, PartInstanceModalMode, PurchaseModalMode, QaReportModalMode, SubsystemModalMode, TaskModalMode, WorkLogModalMode, WorkstreamModalMode } from "@/features/workspace/shared/model/workspaceModalModes";
-import type { ArtifactPayload, ManufacturingItemPayload, MaterialPayload, MechanismPayload, PartDefinitionPayload, PartInstancePayload, PurchaseItemPayload, QaReportPayload, SubsystemPayload, TaskPayload, TestResultPayload, WorkLogPayload, WorkstreamPayload } from "@/types/payloads";
+import type { ArtifactModalMode, ManufacturingModalMode, MechanismModalMode, MilestoneReportModalMode, PartDefinitionModalMode, PartInstanceModalMode, PurchaseModalMode, QaReportModalMode, SubsystemModalMode, TaskModalMode, WorkLogModalMode, WorkstreamModalMode } from "@/features/workspace/shared/model/workspaceModalModes";
+import type { ArtifactPayload, ManufacturingItemPayload, MechanismPayload, PartDefinitionPayload, PartInstancePayload, PurchaseItemPayload, QaReportPayload, SubsystemPayload, TaskPayload, TestResultPayload, WorkLogPayload, WorkstreamPayload } from "@/types/payloads";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 
+import type { MaterialEditorModal } from "../modals/assetCatalog/MaterialEditorModal";
+
 export interface WorkspaceModalHostViewProps {
+  materialEditor: ComponentProps<typeof MaterialEditorModal>;
   activeArtifactId: string | null;
   activePartDefinitionId: string | null;
-  activeMaterialId: string | null;
   activeMechanismId: string | null;
   activeWorkstreamId: string | null;
   activeSubsystemId: string | null;
@@ -17,7 +19,6 @@ export interface WorkspaceModalHostViewProps {
   bootstrap: BootstrapPayload;
   closeManufacturingModal: () => void;
   closeArtifactModal: () => void;
-  closeMaterialModal: () => void;
   closeMechanismModal: () => void;
   closePartInstanceModal: () => void;
   closePartDefinitionModal: () => void;
@@ -35,7 +36,6 @@ export interface WorkspaceModalHostViewProps {
   requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
   milestonesById: Record<string, BootstrapPayload["milestones"][number]>;
-  handleDeleteMaterial: (materialId: string) => Promise<void>;
   handleDeleteArtifact: (artifactId: string) => Promise<void>;
   handleToggleArtifactArchived: (artifactId: string) => Promise<void>;
   handleDeletePartDefinition: (partDefinitionId: string) => Promise<void>;
@@ -48,7 +48,6 @@ export interface WorkspaceModalHostViewProps {
   handleResolveTaskBlocker: (blockerId: string) => Promise<void>;
   handlePartInstanceSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
   handleManufacturingSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
-  handleMaterialSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
   handleMechanismSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
   handlePartDefinitionSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
   handleArtifactSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
@@ -61,14 +60,12 @@ export interface WorkspaceModalHostViewProps {
   handleWorkstreamSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
   onOpenTaskEditFromTimelineDetails: (task: TaskRecord) => void;
   openTaskDetailsModal: (task: TaskRecord) => void;
-  isDeletingMaterial: boolean;
   isDeletingArtifact: boolean;
   isDeletingPartDefinition: boolean;
   isDeletingMechanism: boolean;
   isDeletingTask: boolean;
   isSavingManufacturing: boolean;
   isSavingArtifact: boolean;
-  isSavingMaterial: boolean;
   isSavingPartDefinition: boolean;
   isSavingPartInstance: boolean;
   isSavingMechanism: boolean;
@@ -83,8 +80,6 @@ export interface WorkspaceModalHostViewProps {
   artifactModalMode: ArtifactModalMode;
   manufacturingDraft: ManufacturingItemPayload;
   manufacturingModalMode: ManufacturingModalMode;
-  materialDraft: MaterialPayload;
-  materialModalMode: MaterialModalMode;
   mechanismDraft: MechanismPayload;
   mechanismModalMode: MechanismModalMode;
   mechanismsById: Record<string, BootstrapPayload["mechanisms"][number]>;
@@ -109,7 +104,6 @@ export interface WorkspaceModalHostViewProps {
   workstreamModalMode: WorkstreamModalMode;
   setArtifactDraft: Dispatch<SetStateAction<ArtifactPayload>>;
   setManufacturingDraft: Dispatch<SetStateAction<ManufacturingItemPayload>>;
-  setMaterialDraft: Dispatch<SetStateAction<MaterialPayload>>;
   setMechanismDraft: Dispatch<SetStateAction<MechanismPayload>>;
   setPartInstanceDraft: Dispatch<SetStateAction<PartInstancePayload>>;
   setPartDefinitionDraft: Dispatch<SetStateAction<PartDefinitionPayload>>;

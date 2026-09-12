@@ -389,11 +389,11 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       {c.isWorkspaceModalOpen ? (
         <Suspense fallback={null}>
           <WorkspaceModalHost
+            materialEditor={controller.model.materialEditor}
             openCreateWorkLogModal={c.openCreateWorkLogModal}
             openCreateQaReportModal={c.openCreateQaReportModal}
             activeArtifactId={c.activeArtifactId}
             activePartDefinitionId={c.activePartDefinitionId}
-            activeMaterialId={c.activeMaterialId}
             activeMechanismId={c.activeMechanismId}
             activeWorkstreamId={c.activeWorkstreamId}
             activeSubsystemId={c.activeSubsystemId}
@@ -402,7 +402,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
             bootstrap={c.scopedBootstrap}
             closeManufacturingModal={c.closeManufacturingModal}
             closeArtifactModal={c.closeArtifactModal}
-            closeMaterialModal={c.closeMaterialModal}
             closeMechanismModal={c.closeMechanismModal}
             closePartInstanceModal={c.closePartInstanceModal}
             closePartDefinitionModal={c.closePartDefinitionModal}
@@ -418,7 +417,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
             requestPhotoUpload={c.requestPhotoUpload}
             disciplinesById={c.disciplinesById}
             milestonesById={c.milestonesById}
-            handleDeleteMaterial={c.handleDeleteMaterial}
             handleDeleteArtifact={c.handleDeleteArtifact}
             handleToggleArtifactArchived={c.handleToggleArtifactArchived}
             handleDeletePartDefinition={c.handleDeletePartDefinition}
@@ -431,7 +429,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
             handlePartInstanceSubmit={c.handlePartInstanceSubmit}
             handleMechanismSubmit={c.handleMechanismSubmit}
             handleManufacturingSubmit={c.handleManufacturingSubmit}
-            handleMaterialSubmit={c.handleMaterialSubmit}
             handlePartDefinitionSubmit={c.handlePartDefinitionSubmit}
             handleArtifactSubmit={c.handleArtifactSubmit}
             handlePurchaseSubmit={c.handlePurchaseSubmit}
@@ -442,14 +439,12 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
             handleTaskSubmit={c.handleTaskSubmit}
             handleResolveTaskBlocker={c.handleResolveTaskBlocker}
             handleWorkstreamSubmit={c.handleWorkstreamSubmit}
-            isDeletingMaterial={c.isDeletingMaterial}
             isDeletingArtifact={c.isDeletingArtifact}
             isDeletingPartDefinition={c.isDeletingPartDefinition}
             isDeletingMechanism={c.isDeletingMechanism}
             isDeletingTask={c.isDeletingTask}
             isSavingManufacturing={c.isSavingManufacturing}
             isSavingArtifact={c.isSavingArtifact}
-            isSavingMaterial={c.isSavingMaterial}
             isSavingPartDefinition={c.isSavingPartDefinition}
             isSavingPartInstance={c.isSavingPartInstance}
             isSavingMechanism={c.isSavingMechanism}
@@ -464,8 +459,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
             artifactModalMode={c.artifactModalMode}
             manufacturingDraft={c.manufacturingDraft}
             manufacturingModalMode={c.manufacturingModalMode}
-            materialDraft={c.materialDraft}
-            materialModalMode={c.materialModalMode}
             mechanismsById={c.mechanismsById}
             mentors={c.mentors}
             mechanismDraft={c.mechanismDraft}
@@ -491,7 +484,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
             setArtifactDraft={c.setArtifactDraft}
             setMechanismDraft={c.setMechanismDraft}
             setManufacturingDraft={c.setManufacturingDraft}
-            setMaterialDraft={c.setMaterialDraft}
             setPartInstanceDraft={c.setPartInstanceDraft}
             setPartDefinitionDraft={c.setPartDefinitionDraft}
             setPurchaseDraft={c.setPurchaseDraft}
