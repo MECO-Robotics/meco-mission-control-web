@@ -13,7 +13,6 @@ import { APP_TOPBAR_SLOT_IDS } from "./AppTopbarSlotPortal";
 
 interface AppTopbarProps {
   activeViewLabel: string;
-  projectScopeLabel?: string;
   isDarkMode: boolean;
   isSidebarCollapsed: boolean;
 }

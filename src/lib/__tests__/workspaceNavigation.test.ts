@@ -6,9 +6,10 @@ import {
 } from "@/lib/workspaceNavigation";
 const state: NavigationState = { activeTab: "home", taskView: "queue", riskManagementView: "kanban", worklogsView: "logs", inventoryView: "materials", manufacturingView: "all", rosterView: "directory" };
 describe("canonical workspace navigation", () => {
-  it("provides four areas and unique destinations", () => {
-    expect(NAVIGATION_SECTION_ORDER).toEqual(["home", "work", "resources"]);
-    expect(new Set(NAVIGATION_SUB_ITEMS.map((item) => item.id)).size).toBe(12);
+  it("groups Dashboard under Work and keeps every destination unique", () => {
+    expect(NAVIGATION_SECTION_ORDER).toEqual(["work", "resources"]);
+    expect(NAVIGATION_SUB_ITEMS.find((item) => item.id === "home")?.section).toBe("work");
+    expect(new Set(NAVIGATION_SUB_ITEMS.map((item) => item.id)).size).toBe(NAVIGATION_SUB_ITEMS.length);
   });
   it.each(VIEW_AVAILABILITY_CONTEXTS)("round trips every available destination in %s", (context) => {
     for (const item of NAVIGATION_SUB_ITEMS) {

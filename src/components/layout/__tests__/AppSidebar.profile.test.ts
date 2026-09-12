@@ -9,7 +9,7 @@ describe("AppSidebar profile", () => {
     expect(markup).toContain('class="sidebar-quick-action-profile"');
     expect(markup).not.toContain("sidebar-profile-toggle");
     expect(markup).toMatch(
-      /<button(?=[^>]*class="[^\"]*app-profile-editor-button)(?=[^>]*aria-label="Edit profile")[^>]*>[\s\S]*profile-avatar[\s\S]*<\/button>/,
+      /<button(?=[^>]*class="[^"]*app-profile-editor-button)(?=[^>]*aria-label="Edit profile")[^>]*>[\s\S]*profile-avatar[\s\S]*<\/button>/,
     );
     expect(markup).not.toContain("profile-view-switch");
     expect(markup).not.toContain("Switch view");

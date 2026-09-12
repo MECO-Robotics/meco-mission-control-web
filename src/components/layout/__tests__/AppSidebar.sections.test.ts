@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { renderSidebar } from "./AppSidebar.testUtils";
 
 describe("flat sidebar navigation", () => {
@@ -42,7 +43,7 @@ describe("flat sidebar navigation", () => {
   it("greys out Robot until a robot project is selected", () => {
     const markup = renderSidebar([], "tasks");
     expect(markup).toMatch(/<button(?=[^>]*data-tutorial-target="sidebar-view-resources-structure")(?=[^>]*data-robot-disabled="true")(?=[^>]*aria-disabled="true")[^>]*>/);
-    const sidebarCss = require("node:fs").readFileSync("src/app/styles/shell/sidebar/sidebar-navigation.css", "utf8");
+    const sidebarCss = readFileSync("src/app/styles/shell/sidebar/sidebar-navigation.css", "utf8");
     expect(sidebarCss).toMatch(/\.sidebar-nav-item\[data-robot-disabled="true"\]\s*\{[^}]*opacity:\s*0\.48;[^}]*cursor:\s*not-allowed;/);
   });
 });
