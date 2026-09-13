@@ -1,12 +1,13 @@
 import { useState, type FocusEvent as ReactFocusEvent, type MouseEvent as ReactMouseEvent } from "react";
 import { NAVIGATION_SECTION_LABELS, type NavigationSection, type NavigationSubItemId, type NavigationTarget } from "@/lib/workspaceNavigation";
-import { subItemIcons } from "./appSidebarIcons";
+import { icons } from "lucide-react";
 
 export interface SidebarSubItemModel {
   id: import("@/lib/workspaceNavigation").NavigationSubItemId;
   label: string;
   target: import("@/lib/workspaceNavigation").NavigationTarget;
   isEnabled: boolean;
+  icon: string;
 }
 
 interface SidebarSectionModel {
@@ -77,7 +78,12 @@ export function AppSidebarSections({
           }}
           type="button"
         >
-          <span aria-hidden="true" className="sidebar-nav-item-icon">{subItemIcons[item.id]}</span>
+          <span aria-hidden="true" className="sidebar-nav-item-icon">
+            {(() => {
+              const Icon = icons[item.icon as keyof typeof icons];
+              return Icon ? <Icon size={14} /> : null;
+            })()}
+          </span>
           {!isCollapsed ? <span className="sidebar-nav-item-label">{item.label}</span> : null}
           {isCollapsed ? (
             <span

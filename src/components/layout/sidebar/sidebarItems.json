@@ -1,0 +1,12 @@
+[
+  { "id": "home", "label": "Dashboard", "section": "work", "icon": "layout-dashboard", "target": { "tab": "home" } },
+  { "id": "work-tasks", "label": "Tasks", "section": "work", "icon": "list-todo", "target": { "tab": "tasks", "taskView": "queue" }, "requires": ["project"] },
+  { "id": "work-schedule", "label": "Schedule", "section": "work", "icon": "calendar-days", "target": { "tab": "tasks", "taskView": "calendar" }, "requires": ["project"] },
+  { "id": "resources-materials", "label": "Materials", "section": "resources", "icon": "boxes", "target": { "tab": "inventory", "inventoryView": "materials" } },
+  { "id": "resources-documents", "label": "Documents", "section": "resources", "icon": "file-text", "target": { "tab": "inventory", "inventoryView": "documents" } },
+  { "id": "resources-parts", "label": "Parts", "section": "resources", "icon": "package", "target": { "tab": "inventory", "inventoryView": "parts" } },
+  { "id": "resources-purchases", "label": "Purchases", "section": "resources", "icon": "shopping-cart", "target": { "tab": "inventory", "inventoryView": "purchases" } },
+  { "id": "work-manufacturing", "label": "Manufacturing", "section": "work", "icon": "wrench", "target": { "tab": "manufacturing", "manufacturingView": "all" } },
+  { "id": "resources-structure", "label": "Robot", "section": "work", "icon": "bot", "target": { "tab": "tasks", "taskView": "robot-map" }, "requires": ["robot-project"] },
+  { "id": "team-people", "label": "People", "section": "resources", "icon": "users", "target": { "tab": "roster", "rosterView": "directory" } }
+]

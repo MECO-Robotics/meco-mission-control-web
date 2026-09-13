@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 import { IconCalendar, IconEdit, IconPlus } from "@/components/shared/Icons";
 import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
-import { getProjectIcon, getProjectIconColor } from "./appSidebarIcons";
+import { getProjectIcon, getProjectIconColor } from "./sidebarProjectIcons";
 
 export const ADD_ROBOT_PROJECT_VALUE = "__add_robot_project__";
 export const CREATE_SEASON_OPTION_VALUE = "__create_new_season__";

@@ -1,10 +1,14 @@
 import type { NavigationSection, NavigationSubItem, ViewTab } from "./types";
+import sidebarItems from "@/components/layout/sidebar/sidebarItems.json";
 
 export const NAVIGATION_SECTION_ORDER: readonly NavigationSection[] = ["work", "resources"];
 export const NAVIGATION_SECTION_LABELS: Record<NavigationSection, string> = {
   home: "Home", work: "Work", resources: "Resources", team: "Team",
 };
-export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = [
+/* Generated from the editable sidebar catalog. */
+export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = sidebarItems as NavigationSubItem[];
+/* Legacy inline catalog retained below only as a reference during migration. */
+/*
   { id: "home", label: "Dashboard", section: "work", target: { tab: "home" } },
   { id: "work-tasks", label: "Tasks", section: "work", target: { tab: "tasks", taskView: "queue" } },
   { id: "work-schedule", label: "Schedule", section: "work", target: { tab: "tasks", taskView: "calendar" } },
@@ -15,7 +19,7 @@ export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = [
   { id: "work-manufacturing", label: "Manufacturing", section: "work", target: { tab: "manufacturing", manufacturingView: "all" } },
   { id: "resources-structure", label: "Robot", section: "work", target: { tab: "tasks", taskView: "robot-map" } },
   { id: "team-people", label: "People", section: "resources", target: { tab: "roster", rosterView: "directory" } },
-];
+]; */
 export const NAVIGATION_SUB_ITEMS_BY_SECTION: Record<NavigationSection, readonly NavigationSubItem[]> = {
   home: NAVIGATION_SUB_ITEMS.filter((item) => item.section === "home"),
   work: NAVIGATION_SUB_ITEMS.filter((item) => item.section === "work"),
