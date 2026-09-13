@@ -1,5 +1,5 @@
 import { createPortal } from "react-dom";
-import { useId, useRef, useState, type ReactNode } from "react";
+import { useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
 import type { DropdownOption } from "../model/workspaceTypes";
 import {
@@ -66,6 +66,23 @@ export function FilterDropdown({
   const selectedIcon = selectedOption?.icon ?? icon;
   const selectedToneClassName = getSelectedToneClassName?.(value);
 
+  const renderMenu = (style?: CSSProperties) => (
+    <FilterOptionMenu
+      allLabel={allLabel}
+      className={menuClassName ?? className}
+      getOptionToneClassName={getOptionToneClassName}
+      menuId={menuId}
+      menuRef={menuRef}
+      menuOffsetX={menuOffsetX}
+      onChange={onChange}
+      options={options}
+      showAllOption={showAllOption}
+      singleSelect={singleSelect}
+      style={style}
+      value={value}
+    />
+  );
+
   usePrunedFilterSelection(value, options, onChange);
   const { menuOffsetX, menuPosition } = useFilterDropdownMenuState({
     buttonRef,
@@ -109,18 +126,7 @@ export function FilterDropdown({
       {isOpen ? (
         portalMenu && typeof document !== "undefined" ? (
           createPortal(
-            <FilterOptionMenu
-              allLabel={allLabel}
-              className={menuClassName ?? className}
-              getOptionToneClassName={getOptionToneClassName}
-              menuId={menuId}
-              menuRef={menuRef}
-              menuOffsetX={menuOffsetX}
-              onChange={onChange}
-              options={options}
-              showAllOption={showAllOption}
-              singleSelect={singleSelect}
-              style={{
+            renderMenu({
                 position: "fixed",
                 top: `${menuPosition?.top ?? 0}px`,
                 left: `${menuPosition?.left ?? 0}px`,
@@ -129,25 +135,11 @@ export function FilterDropdown({
                 transform: "none",
                 visibility: menuPosition ? "visible" : "hidden",
                 zIndex: 50000,
-              }}
-              value={value}
-            />,
+              }),
             buttonRef.current?.closest("dialog") ?? document.body,
           )
         ) : (
-          <FilterOptionMenu
-            allLabel={allLabel}
-            className={menuClassName ?? className}
-            getOptionToneClassName={getOptionToneClassName}
-            menuId={menuId}
-            menuRef={menuRef}
-            menuOffsetX={menuOffsetX}
-            onChange={onChange}
-            options={options}
-            showAllOption={showAllOption}
-            singleSelect={singleSelect}
-            value={value}
-          />
+          renderMenu()
         )
       ) : null}
     </span>
