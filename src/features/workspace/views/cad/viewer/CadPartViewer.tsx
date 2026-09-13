@@ -59,7 +59,6 @@ export function EmptyCadViewer() {
 }
 
 export function CadPartViewer({ file, ...imageTargets }: { file: File | null } & CadPartImageTargets) {
-  // A file identity change replaces the entire reader and selection state.
   const [current, setCurrent] = useState({ file, key: 0 });
   if (current.file !== file) setCurrent({ file, key: current.key + 1 });
   return <section className="cad-card cad-part-viewer" aria-label="CAD part viewer">
