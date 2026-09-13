@@ -1,6 +1,6 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MembersById } from "@/features/workspace/shared/model/workspaceTypes";
-import { formatIterationVersion, getDefaultSubsystemId } from "@/lib/appUtils/common";
+import { formatIterationVersion } from "@/lib/appUtils/common";
 
 import type { SubsystemCountsById } from "./subsystemsViewTypes";
 
@@ -10,10 +10,6 @@ export function formatMemberName(membersById: MembersById, memberId: string | nu
   }
 
   return membersById[memberId]?.name ?? "Unknown";
-}
-
-export function getInitialSelectedSubsystemId(bootstrap: BootstrapPayload) {
-  return getDefaultSubsystemId(bootstrap);
 }
 
 export function buildCountsBySubsystemId(

@@ -4,12 +4,12 @@ import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
+import { getDefaultSubsystemId } from "@/lib/appUtils/common";
 
 import {
   buildCountsBySubsystemId,
   buildPartDefinitionsById,
   filterSubsystems,
-  getInitialSelectedSubsystemId,
 } from "./subsystems/subsystemsViewData";
 import { SubsystemsTableSection } from "./subsystems/SubsystemsTableSection";
 import { SubsystemsToolbar } from "./subsystems/SubsystemsToolbar";
@@ -28,7 +28,7 @@ export function SubsystemsView({
   const [showArchivedSubsystems, setShowArchivedSubsystems] = useState(false);
   const [showArchivedMechanisms, setShowArchivedMechanisms] = useState(false);
   const [selectedSubsystemId, setSelectedSubsystemId] = useState(
-    getInitialSelectedSubsystemId(bootstrap),
+    getDefaultSubsystemId(bootstrap),
   );
 
   const handleSubsystemSelection = (subsystemId: string) => {
