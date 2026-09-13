@@ -1,7 +1,6 @@
 import type { TaskDetailsOverviewSectionProps } from "./TaskDetailsOverviewTypes";
 import { TaskDetailsOverviewAssignedField } from "./TaskDetailsOverviewAssignedField";
-import { TaskDetailsOverviewMentorField } from "./TaskDetailsOverviewMentorField";
-import { TaskDetailsOverviewOwnerField } from "./TaskDetailsOverviewOwnerField";
+import { TaskDetailsOverviewPersonField } from "./TaskDetailsOverviewPersonField";
 import { TaskDetailsOverviewPriorityField } from "./TaskDetailsOverviewPriorityField";
 import { TaskDetailsOverviewSubsystemField } from "./TaskDetailsOverviewSubsystemField";
 import { TaskDetailsOverviewSummaryField } from "./TaskDetailsOverviewSummaryField";
@@ -30,9 +29,9 @@ export function TaskDetailsOverviewSectionView(props: TaskDetailsOverviewSection
       <div className="task-details-section-grid task-details-overview-grid modal-wide">
         <TaskDetailsOverviewPriorityField {...fieldProps} />
         <TaskDetailsOverviewSubsystemField {...fieldProps} />
-        <TaskDetailsOverviewOwnerField {...fieldProps} />
+        <TaskDetailsOverviewPersonField kind="owner" {...fieldProps} />
         <TaskDetailsOverviewAssignedField {...fieldProps} />
-        <TaskDetailsOverviewMentorField {...fieldProps} />
+        <TaskDetailsOverviewPersonField kind="mentor" {...fieldProps} />
       </div>
     </>
   );
