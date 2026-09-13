@@ -195,9 +195,7 @@ export function getTaskPlanningState(
   return "ready";
 }
 
-export function getTaskOpenBlockersForTask(taskId: string, bootstrap: BootstrapPayload) {
-  return getOpenTaskBlockers(taskId, bootstrap);
-}
+export const getTaskOpenBlockersForTask = getOpenTaskBlockers;
 
 export function getTaskDependencyRecordsForTask(taskId: string, bootstrap: BootstrapPayload) {
   return getTaskDependencyRecords(bootstrap).filter(
@@ -205,9 +203,7 @@ export function getTaskDependencyRecordsForTask(taskId: string, bootstrap: Boots
   );
 }
 
-export function getTaskWaitingOnDependencies(taskId: string, bootstrap: BootstrapPayload) {
-  return getTaskWaitingOnDependencyRecords(taskId, bootstrap);
-}
+export const getTaskWaitingOnDependencies = getTaskWaitingOnDependencyRecords;
 
 export function getTaskBlocksDependencies(taskId: string, bootstrap: BootstrapPayload) {
   return getTaskDependencyRecords(bootstrap).filter(
@@ -225,9 +221,7 @@ export function getTaskWaitingOnTasks(taskId: string, bootstrap: BootstrapPayloa
     .filter((upstreamTaskId) => getTaskById(bootstrap, upstreamTaskId)?.status !== "complete");
 }
 
-export function getTaskBlocksTasks(taskId: string, bootstrap: BootstrapPayload) {
-  return getBlockingDownstreamTaskIds(taskId, bootstrap);
-}
+export const getTaskBlocksTasks = getBlockingDownstreamTaskIds;
 
 export function isTaskWaitingOnDependencies(
   task: Pick<TaskRecord, "id" | "status">,

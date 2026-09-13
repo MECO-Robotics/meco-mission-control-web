@@ -1,3 +1,4 @@
+import { EmptyCadViewer } from "../cad/viewer/CadPartViewer";
 import { useMemo, useRef, useState } from "react";
 
 import { LayoutGrid, Upload } from "lucide-react";
@@ -211,14 +212,7 @@ export function RobotMapCanvas({
             src={referenceImageUrl}
           />
         ) : (
-          <div className="robot-config-isometric-placeholder" aria-label="Isometric placeholder">
-            <div className="robot-config-isometric-cube">
-              <span className="robot-config-cube-face robot-config-cube-face-top" />
-              <span className="robot-config-cube-face robot-config-cube-face-left" />
-              <span className="robot-config-cube-face robot-config-cube-face-right" />
-            </div>
-            <small>Upload an isometric robot image to use as reference.</small>
-          </div>
+          <EmptyCadViewer />
         )}
 
         {placedSubsystems.map((subsystem) => (

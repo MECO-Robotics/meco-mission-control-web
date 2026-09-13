@@ -3,11 +3,9 @@ import { startTransition, useCallback } from "react";
 import { fetchBootstrap } from "@/lib/auth/bootstrap";
 import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
 import { reconcileWorkspaceState } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceReconciliation";
-import type { AppWorkspaceLoaderModel, SelectMemberHandler, UnauthorizedHandler } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
-import type { WorkspaceReconciliationState } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
+import type { AppWorkspaceLoaderModel, SelectMemberHandler, UnauthorizedHandler, WorkspaceLoadScope, WorkspaceReconciliationState } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
 import { getSinglePersonFilterId } from "@/app/state/workspaceMemberRoleUtils";
 import { scopeBootstrapBySelection } from "@/app/state/workspaceBootstrapScope";
-import type { WorkspaceLoadScope } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
 
 export function useAppWorkspaceLoaderWorkspace(
   state: AppWorkspaceState,

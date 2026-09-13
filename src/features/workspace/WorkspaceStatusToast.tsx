@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 
 import { createPausableTimeout, type PausableTimeoutController } from "./taskEditNoticeTimer";
 import type { WorkspaceToastDismissReason } from "./workspaceToastQueue";
+import type { WorkspaceToastTone } from "./workspaceToastTypes";
 import "./WorkspaceStatusToast.css";
 
 const TASK_EDIT_NOTICE_TIMEOUT_MS = 4500;
@@ -16,7 +17,7 @@ const EMPTY_NOTIFICATION_HISTORY_ITEM: WorkspaceToastStackItem = {
   tone: "neutral",
 };
 
-export type WorkspaceToastTone = "success" | "warning" | "error" | "info" | "neutral";
+export type { WorkspaceToastTone } from "./workspaceToastTypes";
 
 interface WorkspaceToastProps {
   autoDismiss?: boolean;

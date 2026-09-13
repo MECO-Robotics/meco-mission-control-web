@@ -66,13 +66,8 @@ export function withColumnOverlayTint(color: string) {
 
 export { localTodayDate };
 
-export function addDaysToDay(day: string, dayCount: number) {
-  return addDaysToLocalDate(day, dayCount);
-}
-
-export function addMonthsToDay(day: string, monthCount: number) {
-  return addMonthsToLocalDate(day, monthCount);
-}
+export const addDaysToDay = addDaysToLocalDate;
+export const addMonthsToDay = addMonthsToLocalDate;
 
 export function startOfTimelineWeek(day: string) {
   const weekStart = new Date(`${day}T12:00:00`);
