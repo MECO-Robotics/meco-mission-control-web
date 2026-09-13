@@ -44,7 +44,7 @@ const projects: ProjectRecord[] = [
   },
 ];
 
-function renderScopeMenu(activePanel: "season" | "project") {
+function renderScopeMenu(activePanel: "season" | "project", scopePanels?: ("season" | "project")[]) {
   return renderToStaticMarkup(
     React.createElement(AppSidebarScopeMenuPopup, {
       activePanel,
@@ -57,6 +57,7 @@ function renderScopeMenu(activePanel: "season" | "project") {
       seasons,
       selectedProjectId: "robot-2026",
       selectedSeasonId: "season-2026",
+      scopePanels,
     }),
   );
 }
@@ -72,6 +73,20 @@ describe("AppSidebarScopeMenuPopup", () => {
     expect(markup).toContain("2026 Season");
     expect(markup).toContain("2027 Season");
     expect(markup).toContain("Create new season");
+  });
+
+  it("packages season selection with only season panel", () => {
+    const markup = renderScopeMenu("season", ["season"]);
+
+    expect(markup).toContain("Season");
+    expect(markup).not.toContain("Project");
+  });
+
+  it("packages project selection with only project panel", () => {
+    const markup = renderScopeMenu("project", ["project"]);
+
+    expect(markup).toContain("Project");
+    expect(markup).not.toContain("Season");
   });
 
   it("places project selection above season selection in the scope stage", () => {
