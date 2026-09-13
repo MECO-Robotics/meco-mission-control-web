@@ -4,6 +4,15 @@
   line-height: 1.45;
 }
 
+.task-detail-read-only-edit {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+}
+
 .task-details-grid .task-detail-copy,
 .task-details-grid .task-detail-ellipsis-reveal {
   color: color-mix(in srgb, var(--text-title) 88%, var(--text-copy));
