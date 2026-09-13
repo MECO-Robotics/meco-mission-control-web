@@ -1,4 +1,4 @@
-import { useState, type MouseEvent as ReactMouseEvent } from "react";
+import { type MouseEvent as ReactMouseEvent } from "react";
 
 import {
   type InventoryViewTab,
@@ -25,7 +25,6 @@ import { AppSidebarQuickActions } from "./AppSidebarQuickActions";
 import { AppSidebarSections } from "./AppSidebarSections";
 import { useSidebarScrollHints } from "./sidebar/useSidebarScrollHints";
 import { useAppSidebarNavigationModels } from "./sidebar/useAppSidebarNavigationModels";
-import type { AppSidebarScopePanel } from "./AppSidebarScopeMenuPopup";
 import { useAppSidebarPopupState } from "./useAppSidebarPopupState";
 
 interface AppSidebarProps {
@@ -119,8 +118,6 @@ export function AppSidebar({
   const selectedScopeLabel = selectedSeason
     ? `${selectedSeason.name} - ${selectedProjectLabel}`
     : selectedProjectLabel;
-  const [activeScopePanel, setActiveScopePanel] = useState<AppSidebarScopePanel | null>(null);
-
   const {
     activeSubItemId,
     sectionModels,
@@ -136,15 +133,15 @@ export function AppSidebar({
   });
 
   const {
-    isProjectPopupOpen,
+    popup,
     projectPopupRef,
-    projectPopupTop,
     projectTriggerRef,
-    setIsProjectPopupOpen,
-    setProjectPopupTop,
+    closePopup,
+    togglePopup,
+    setActivePanel,
     sidebarShellRef,
   } = useAppSidebarPopupState({
-    projectPopupLayoutKey: activeScopePanel,
+    projectPopupLayoutKey: popup.activePanel,
   });
   const {
     hasBottomHint,
@@ -166,10 +163,7 @@ export function AppSidebar({
     const shellRect = sidebarShellRef.current?.getBoundingClientRect();
     const targetRect = event.currentTarget.getBoundingClientRect();
     const popupTop = shellRect ? targetRect.top - shellRect.top : 0;
-    setProjectPopupTop(popupTop);
-
-    setActiveScopePanel(null);
-    setIsProjectPopupOpen((current) => !current);
+    togglePopup(popupTop);
   };
 
   const handleProjectOptionSelect = (value: string) => {
@@ -179,31 +173,26 @@ export function AppSidebar({
       onSelectProject(value || null);
     }
 
-    setIsProjectPopupOpen(false);
-    setActiveScopePanel(null);
+    closePopup();
   };
 
   const handleSeasonOptionSelect = (value: string) => {
     if (value === CREATE_SEASON_OPTION_VALUE) {
       onCreateSeason();
-      setIsProjectPopupOpen(false);
-      setActiveScopePanel(null);
+      closePopup();
       return;
     }
 
     onSelectSeason(value || null);
-    setIsProjectPopupOpen(false);
-    setActiveScopePanel(null);
+    closePopup();
   };
 
   const handleHelpSelect = () => {
-    setIsProjectPopupOpen(false);
-    setActiveScopePanel(null);
+    closePopup();
     onSelectTarget({ tab: "help" }, { keepSidebarOpen: true });
   };
   const handleSidebarFoldClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
-    setIsProjectPopupOpen(false);
-    setActiveScopePanel(null);
+    closePopup();
     toggleSidebar();
     event.currentTarget.blur();
   };
@@ -248,7 +237,7 @@ export function AppSidebar({
           isDarkMode={isDarkMode}
           isCollapsed={isCollapsed}
           isNotificationQueueOpen={isNotificationQueueOpen}
-          isProjectPopupOpen={isProjectPopupOpen}
+          isProjectPopupOpen={popup.isOpen}
           onHelpSelect={handleHelpSelect}
           onProjectTriggerClick={handleProjectTriggerClick}
           onRefreshWorkspace={onRefreshWorkspace}
@@ -264,20 +253,17 @@ export function AppSidebar({
         />
       </nav>
       <AppSidebarPopups
-        activeScopePanel={activeScopePanel}
-        isProjectPopupOpen={isProjectPopupOpen}
-        isScopePopupOpen={isProjectPopupOpen}
+        popup={popup}
         canEditSelectedRobot={canEditSelectedRobot}
         onEditSelectedRobot={onEditSelectedRobot}
         onSelectProjectOption={handleProjectOptionSelect}
         onSelectSeasonOption={handleSeasonOptionSelect}
         projectPopupRef={projectPopupRef}
-        projectPopupTop={projectPopupTop}
         projects={projects}
         seasons={seasons}
         selectedProjectId={selectedProjectId}
         selectedSeasonId={selectedSeasonId}
-        setActiveScopePanel={setActiveScopePanel}
+        onPanelChange={setActivePanel}
       />
     </div>
   );
