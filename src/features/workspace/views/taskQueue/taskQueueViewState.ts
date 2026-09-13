@@ -91,9 +91,7 @@ export function getTaskQueueStatusToneClassName(value: string) {
   }
 }
 
-export function getTaskQueueFilterToneClassName(value: string) {
-  return getStableToneClassName(value);
-}
+export const getTaskQueueFilterToneClassName = getStableToneClassName;
 
 export interface TaskQueueViewStateArgs {
   activePersonFilter: FilterSelection;
