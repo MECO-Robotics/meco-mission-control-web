@@ -72,6 +72,47 @@ function buildDraftTaskRecord(taskDraft: TaskPayload, activeTask: TaskRecord | n
   };
 }
 
+function TaskEditorFooterActions({
+  canSubmit,
+  onCancel,
+  onSwitchCreateTypeToMilestone,
+  isSaving,
+  saveLabel,
+  savingLabel,
+}: {
+  canSubmit: boolean;
+  onCancel: () => void;
+  onSwitchCreateTypeToMilestone?: () => void;
+  isSaving: boolean;
+  saveLabel: string;
+  savingLabel: string;
+}) {
+  return (
+    <>
+      {onSwitchCreateTypeToMilestone ? (
+        <button className="secondary-action" onClick={onSwitchCreateTypeToMilestone} type="button">
+          Switch to milestone
+        </button>
+      ) : null}
+      <button
+        className="secondary-action"
+        onClick={onCancel}
+        style={{
+          background: "var(--bg-row-alt)",
+          color: "var(--text-title)",
+          border: "1px solid var(--border-base)",
+        }}
+        type="button"
+      >
+        Cancel
+      </button>
+      <button className="primary-action" disabled={!canSubmit} type="submit">
+        {isSaving ? savingLabel : saveLabel}
+      </button>
+    </>
+  );
+}
+
 export function TaskEditorModal(props: TaskEditorModalProps) {
   const {
     activeTask,
@@ -148,27 +189,13 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
           closeTaskDetailsModal={handleTaskEditClosed}
           advancedSectionOpen={advancedSectionOpen}
           footerActions={
-            <>
-              <button
-                className="secondary-action"
-                onClick={handleTaskEditCancel}
-                style={{
-                  background: "var(--bg-row-alt)",
-                  color: "var(--text-title)",
-                  border: "1px solid var(--border-base)",
-                }}
-                type="button"
-              >
-                Cancel
-              </button>
-              <button
-                className="primary-action"
-                disabled={isSavingTask || isDeletingTask}
-                type="submit"
-              >
-                {isSavingTask ? "Saving..." : "Save changes"}
-              </button>
-            </>
+            <TaskEditorFooterActions
+              canSubmit={!isSavingTask && !isDeletingTask}
+              isSaving={isSavingTask}
+              onCancel={handleTaskEditCancel}
+              saveLabel="Save changes"
+              savingLabel="Saving..."
+            />
           }
           onEditTask={() => undefined}
           onResolveTaskBlocker={resolveBlockerWhenIdle}
@@ -227,36 +254,16 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
           editableMemberOptions={props.students}
           eyebrowLabel="Create Task Details"
           footerActions={
-            <>
-              {showCreateTypeToggle && onSwitchCreateTypeToMilestone ? (
-                <button
-                  className="secondary-action"
-                  onClick={() => { if (!busyRef.current) onSwitchCreateTypeToMilestone(); }}
-                  type="button"
-                >
-                  Switch to milestone
-                </button>
-              ) : null}
-              <button
-                className="secondary-action"
-                onClick={closeWhenIdle}
-                style={{
-                  background: "var(--bg-row-alt)",
-                  color: "var(--text-title)",
-                  border: "1px solid var(--border-base)",
-                }}
-                type="button"
-              >
-                Cancel
-              </button>
-              <button
-                className="primary-action"
-                disabled={!canCreateTask || isSavingTask || isDeletingTask}
-                type="submit"
-              >
-                {isSavingTask ? "Saving..." : "Create task"}
-              </button>
-            </>
+            <TaskEditorFooterActions
+              canSubmit={canCreateTask && !isSavingTask && !isDeletingTask}
+              isSaving={isSavingTask}
+              onCancel={closeWhenIdle}
+              onSwitchCreateTypeToMilestone={showCreateTypeToggle && onSwitchCreateTypeToMilestone
+                ? () => { if (!busyRef.current) onSwitchCreateTypeToMilestone(); }
+                : undefined}
+              saveLabel="Create task"
+              savingLabel="Saving..."
+            />
           }
           modalClassName="task-editor-modal"
           onEditTask={() => undefined}
