@@ -20,7 +20,6 @@ export function TaskDetailsOverviewPersonField({
   const displayValue = isMentor ? model.mentorText : model.ownerText;
   const readOnlyValue = isMentor ? model.mentorName : model.ownerName;
   const changeHandler = isMentor ? model.handleMentorChange : model.handleOwnerChange;
-
   return (
     <label className={`field task-details-overview-${kind}`}>
       <span style={{ color: "var(--text-title)" }}>{label}</span>
@@ -51,9 +50,14 @@ export function TaskDetailsOverviewPersonField({
           </div>
         )
       ) : (
-        <p className="task-detail-copy" onDoubleClick={openTaskEditModal}>
+        <button
+          aria-label={`Edit ${label.toLowerCase()}`}
+          className="task-detail-copy task-detail-read-only-edit"
+          onClick={openTaskEditModal}
+          type="button"
+        >
           {readOnlyValue}
-        </p>
+        </button>
       )}
     </label>
   );
