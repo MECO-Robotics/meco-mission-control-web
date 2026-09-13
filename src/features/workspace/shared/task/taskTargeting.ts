@@ -223,17 +223,11 @@ export function getTaskDependencyTargetOptions(
   }));
 }
 
-export function getTaskDependencyRecordsForTask(taskId: string, bootstrap: BootstrapPayload) {
-  return getTaskDependencyRecordsForTaskFromPlanning(taskId, bootstrap);
-}
+export const getTaskDependencyRecordsForTask = getTaskDependencyRecordsForTaskFromPlanning;
 
-export function getTaskOpenBlockersForTask(taskId: string, bootstrap: BootstrapPayload) {
-  return getTaskOpenBlockersForTaskFromPlanning(taskId, bootstrap);
-}
+export const getTaskOpenBlockersForTask = getTaskOpenBlockersForTaskFromPlanning;
 
-export function getTaskWaitingOnDependencies(taskId: string, bootstrap: BootstrapPayload) {
-  return getTaskWaitingOnDependenciesFromPlanning(taskId, bootstrap);
-}
+export const getTaskWaitingOnDependencies = getTaskWaitingOnDependenciesFromPlanning;
 
 export function setTaskPrimaryTargetSelection(
   payload: TaskPayload,
