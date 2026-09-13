@@ -76,13 +76,7 @@ export function formatSubsystemNames(
     .join(", ");
 }
 
-export function formatWorkstreamNames(
-  workstreamIds: string[],
-  lookup: Record<string, BootstrapPayload["workstreams"][number]>,
-  fallback: string,
-) {
-  return formatNames(workstreamIds, lookup, fallback);
-}
+export const formatWorkstreamNames = formatNames;
 
 function formatTaskAssignees(
   task: TaskRecord,
@@ -91,12 +85,7 @@ function formatTaskAssignees(
   return formatNames(readTaskAssigneeIds(task), membersById, "Unassigned");
 }
 
-export function formatTaskQueueAssignees(
-  task: TaskRecord,
-  membersById: Record<string, BootstrapPayload["members"][number]>,
-) {
-  return formatTaskAssignees(task, membersById);
-}
+export const formatTaskQueueAssignees = formatTaskAssignees;
 
 export function filterTaskQueueTasks(
   tasks: TaskRecord[],
