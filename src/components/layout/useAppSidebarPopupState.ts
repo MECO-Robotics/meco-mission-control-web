@@ -21,18 +21,18 @@ function clampPopupTop(
   return Math.min(Math.max(preferredTop, minimumTop), maximumTop);
 }
 
-interface UseAppSidebarPopupStateArgs {
-  projectPopupLayoutKey?: unknown;
+export interface AppSidebarPopupState {
+  activePanel: AppSidebarScopePanel | null;
+  isOpen: boolean;
+  top: number;
 }
 
-export function useAppSidebarPopupState({
-  projectPopupLayoutKey,
-}: UseAppSidebarPopupStateArgs) {
+export function useAppSidebarPopupState() {
   const sidebarShellRef = useRef<HTMLDivElement | null>(null);
   const projectPopupRef = useRef<HTMLDivElement | null>(null);
   const projectTriggerRef = useRef<HTMLButtonElement | null>(null);
 
-  const [popup, setPopup] = useState({
+  const [popup, setPopup] = useState<AppSidebarPopupState>({
     activePanel: null as AppSidebarScopePanel | null,
     isOpen: false,
     top: 0,
@@ -84,7 +84,7 @@ export function useAppSidebarPopupState({
     if (Math.abs(clampedTop - popup.top) > 0.5) {
       setPopup((current) => ({ ...current, top: clampedTop }));
     }
-  }, [popup.isOpen, projectPopupLayoutKey, popup.top]);
+  }, [popup.activePanel, popup.isOpen, popup.top]);
 
   return {
     popup,

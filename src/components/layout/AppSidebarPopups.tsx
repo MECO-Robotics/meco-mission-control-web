@@ -7,13 +7,10 @@ import {
   CREATE_SEASON_OPTION_VALUE,
   type AppSidebarScopePanel,
 } from "./AppSidebarScopeMenuPopup";
+import type { AppSidebarPopupState } from "./useAppSidebarPopupState";
 
 interface AppSidebarPopupsProps {
-  popup: {
-    activePanel: AppSidebarScopePanel | null;
-    isOpen: boolean;
-    top: number;
-  };
+  popup: AppSidebarPopupState;
   canEditSelectedRobot?: boolean;
   onEditSelectedRobot?: () => void;
   onSelectProjectOption: (value: string) => void;
