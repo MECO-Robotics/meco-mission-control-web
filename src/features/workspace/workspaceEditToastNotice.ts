@@ -1,4 +1,4 @@
-import type { WorkspaceToastTone } from "./WorkspaceStatusToast";
+import type { WorkspaceToastTone } from "./workspaceToastTypes";
 
 export type WorkspaceEditToastNotice = {
   message: string;
