@@ -31,6 +31,9 @@ docs/reports/lighthouse-*.txt
 .codex/
 .codex_*.json
 
+# Graphify semantic extraction cache
+/graphify-out/cache/
+
 # Environment files
 .env
 .env.*
