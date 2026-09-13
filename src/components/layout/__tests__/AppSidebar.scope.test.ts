@@ -67,20 +67,16 @@ describe("AppSidebar scope", () => {
     };
     const scopeMarkup = renderToStaticMarkup(
       React.createElement(AppSidebarPopups, {
-        activeScopePanel: null,
-        isCollapsed: false,
-        isProjectPopupOpen: false,
-        isScopePopupOpen: true,
+        popup: { activePanel: null, isOpen: true, top: 0 },
         onEditSelectedRobot: jest.fn(),
         onSelectProjectOption: jest.fn(),
         onSelectSeasonOption: jest.fn(),
         projectPopupRef: React.createRef<HTMLDivElement>(),
-        projectPopupTop: 0,
         projects: [robotProject],
         seasons,
         selectedProjectId: robotProject.id,
         selectedSeasonId: "season-1",
-        setActiveScopePanel: jest.fn(),
+        onPanelChange: jest.fn(),
       } as React.ComponentProps<typeof AppSidebarPopups>),
     );
 
@@ -119,24 +115,20 @@ describe("AppSidebar scope", () => {
       status: "active",
     };
     const baseProps = {
-      activeScopePanel: "season",
-      isCollapsed: false,
-      isProjectPopupOpen: false,
+      popup: { activePanel: "season", isOpen: true, top: 0 },
       onEditSelectedRobot: jest.fn(),
       onSelectProjectOption: jest.fn(),
       onSelectSeasonOption: jest.fn(),
       projectPopupRef: React.createRef<HTMLDivElement>(),
-      projectPopupTop: 0,
       projects: [robotProject],
       seasons,
       selectedProjectId: robotProject.id,
       selectedSeasonId: "season-1",
-      setActiveScopePanel: jest.fn(),
+      onPanelChange: jest.fn(),
     };
     const scopeMarkup = renderToStaticMarkup(
       React.createElement(AppSidebarPopups, {
         ...baseProps,
-        isScopePopupOpen: true,
       } as React.ComponentProps<typeof AppSidebarPopups>),
     );
     const seasonPanelIndex = scopeMarkup.indexOf('data-scope-panel="season"');
