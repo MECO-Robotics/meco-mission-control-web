@@ -6,6 +6,8 @@ import type { TaskPayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { IconMapPin, IconParts, IconTasks } from "@/components/shared/Icons";
 import type { DropdownOption } from "../model/workspaceTypes";
+import type { TaskTargetKind, TaskTargetSelection } from "@/types/taskTarget";
+export type { TaskTargetKind, TaskTargetSelection };
 import {
   getTaskDependencyRecordsForTask as getTaskDependencyRecordsForTaskFromPlanning,
   getTaskOpenBlockersForTask as getTaskOpenBlockersForTaskFromPlanning,
@@ -16,13 +18,6 @@ import {
   normalizeTaskTargetPayload,
   removeId,
 } from "./taskTargetingHelpers";
-
-export type TaskTargetKind = "workstream" | "subsystem" | "mechanism" | "part-instance";
-
-export interface TaskTargetSelection {
-  kind: TaskTargetKind;
-  id: string;
-}
 
 type SelectionLookups = {
   mechanismsById: Record<string, BootstrapPayload["mechanisms"][number]>;
