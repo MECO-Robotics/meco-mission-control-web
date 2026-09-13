@@ -8,6 +8,10 @@ export interface SidebarItemConfig extends NavigationSubItem {
   isDisabled: boolean;
 }
 
+function resolveIconName(name: string) {
+  return name.split("-").map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join("");
+}
+
 interface SidebarItemProps {
   config: SidebarItemConfig;
   isActive: boolean;
@@ -19,7 +23,7 @@ interface SidebarItemProps {
 
 export function SidebarItem({ config, isActive, activeViewId, isCollapsed, onSelect, onDisabledSelect }: SidebarItemProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const Icon = icons[config.icon as keyof typeof icons];
+  const Icon = icons[resolveIconName(config.icon) as keyof typeof icons];
 
   return (
     <button
