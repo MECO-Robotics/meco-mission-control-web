@@ -140,9 +140,7 @@ export function AppSidebar({
     togglePopup,
     setActivePanel,
     sidebarShellRef,
-  } = useAppSidebarPopupState({
-    projectPopupLayoutKey: popup.activePanel,
-  });
+  } = useAppSidebarPopupState({});
   const {
     hasBottomHint,
     hasTopHint,
