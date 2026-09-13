@@ -8,8 +8,8 @@ List checks actually run and their results, including any limitations.
 
 ## Required AI workflow evidence
 
-- AI skill used: <!-- required; name the skill or state why none applies -->
-- Aislop validation: <!-- required; command/result, or explicit unavailable reason -->
+- Moyu skill used: <!-- required for AI-assisted changes; describe the scope guard applied -->
+- Aislop validation: <!-- required; CI result and any local command/result -->
 
 ## Additional evidence, when applicable
 
