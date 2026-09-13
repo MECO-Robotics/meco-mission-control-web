@@ -4,8 +4,12 @@ import {
   readNavigationLocation, writeNavigationLocation,
   type NavigationState,
 } from "@/lib/workspaceNavigation";
+import { validateSidebarCatalog } from "@/components/layout/sidebar/catalog";
 const state: NavigationState = { activeTab: "home", taskView: "queue", riskManagementView: "kanban", worklogsView: "logs", inventoryView: "materials", manufacturingView: "all", rosterView: "directory" };
 describe("canonical workspace navigation", () => {
+  it("validates catalog requirements at the JSON boundary", () => {
+    expect(() => validateSidebarCatalog([{ id: "bad", label: "Bad", section: "work", icon: "x", target: {}, requires: ["unknown"] }])).toThrow();
+  });
   it("groups Dashboard under Work and keeps every destination unique", () => {
     expect(NAVIGATION_SECTION_ORDER).toEqual(["work", "resources"]);
     expect(NAVIGATION_SUB_ITEMS.find((item) => item.id === "home")?.section).toBe("work");

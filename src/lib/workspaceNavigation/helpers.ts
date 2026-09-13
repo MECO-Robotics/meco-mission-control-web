@@ -1,5 +1,5 @@
 import { NAVIGATION_SUB_ITEMS } from "./constants";
-import { NAVIGATION_SUB_ITEM_AVAILABILITY_MATRIX } from "./availability";
+import { isCatalogNavigationSubItemAvailable } from "./availability";
 import type {
   NavigationSection,
   NavigationState,
@@ -109,7 +109,7 @@ export function isNavigationSubItemAvailable(
     return false;
   }
 
-  return NAVIGATION_SUB_ITEM_AVAILABILITY_MATRIX[subItemId][scope.context];
+  return isCatalogNavigationSubItemAvailable(subItemId, scope.context);
 }
 
 export function getAvailableNavigationSubItems(
