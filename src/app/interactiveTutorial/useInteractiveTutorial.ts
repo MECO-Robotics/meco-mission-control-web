@@ -3,7 +3,7 @@ import { useEffect, useMemo, useSyncExternalStore } from "react";
 
 import { useInteractiveTutorialLifecycle } from "./useInteractiveTutorialLifecycle";
 import { isInteractiveTutorialCreationStep } from "./helpers/interactiveTutorialStepGroups";
-import { useInteractiveTutorialCoreActions } from "./useInteractiveTutorialCoreActions";
+import { useInteractiveTutorialCoreActionsSession } from "./useInteractiveTutorialCoreActionsSession";
 import { useInteractiveTutorialCoreState } from "./core/useInteractiveTutorialCoreState";
 import type { UseInteractiveTutorialOptions } from "./core/useInteractiveTutorialCoreTypes";
 import type {
@@ -20,7 +20,7 @@ export function useInteractiveTutorial(options: UseInteractiveTutorialOptions) {
       setReturnState(null);
     }
   }, [localMode, isInteractiveTutorialActive, resetLocalTutorialState, setReturnState]);
-  const actions = useInteractiveTutorialCoreActions(options, state);
+  const actions = useInteractiveTutorialCoreActionsSession(options, state);
   const {
     advanceInteractiveTutorial,
     closeInteractiveTutorial,
