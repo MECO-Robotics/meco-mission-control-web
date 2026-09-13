@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import sidebarCatalog from "./sidebar/sidebarItems.json";
-import type { ScopePanelConfig } from "./sidebar/SidebarScopePanel";
 
-const scopePanels = (sidebarCatalog.find((item) => item.id === "scope-panels")?.panels ?? []) as ScopePanelConfig[];
+import type { AppSidebarScopePanel } from "./AppSidebarScopeMenuPopup";
 
 const POPUP_VERTICAL_MARGIN = 8;
 
@@ -34,11 +32,14 @@ export function useAppSidebarPopupState({
   const projectPopupRef = useRef<HTMLDivElement | null>(null);
   const projectTriggerRef = useRef<HTMLButtonElement | null>(null);
 
-  const [projectPopupTop, setProjectPopupTop] = useState(0);
-  const [isProjectPopupOpen, setIsProjectPopupOpen] = useState(false);
+  const [popup, setPopup] = useState({
+    activePanel: null as AppSidebarScopePanel | null,
+    isOpen: false,
+    top: 0,
+  });
 
   useEffect(() => {
-    if (!isProjectPopupOpen) {
+    if (!popup.isOpen) {
       return;
     }
 
@@ -56,14 +57,12 @@ export function useAppSidebarPopupState({
         return;
       }
 
-      if (isProjectPopupOpen) {
-        setIsProjectPopupOpen(false);
-      }
+      setPopup((current) => ({ ...current, isOpen: false, activePanel: null }));
     };
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setIsProjectPopupOpen(false);
+        setPopup((current) => ({ ...current, isOpen: false, activePanel: null }));
       }
     };
 
@@ -74,27 +73,30 @@ export function useAppSidebarPopupState({
       document.removeEventListener("pointerdown", handlePointerDown);
       document.removeEventListener("keydown", handleEscape);
     };
-  }, [isProjectPopupOpen]);
+  }, [popup.isOpen]);
 
   useEffect(() => {
-    if (!isProjectPopupOpen) {
+    if (!popup.isOpen) {
       return;
     }
 
-    const clampedTop = clampPopupTop(sidebarShellRef.current, projectPopupRef.current, projectPopupTop);
-    if (Math.abs(clampedTop - projectPopupTop) > 0.5) {
-      setProjectPopupTop(clampedTop);
+    const clampedTop = clampPopupTop(sidebarShellRef.current, projectPopupRef.current, popup.top);
+    if (Math.abs(clampedTop - popup.top) > 0.5) {
+      setPopup((current) => ({ ...current, top: clampedTop }));
     }
-  }, [isProjectPopupOpen, projectPopupLayoutKey, projectPopupTop]);
+  }, [popup.isOpen, projectPopupLayoutKey, popup.top]);
 
   return {
-    isProjectPopupOpen,
+    popup,
     projectPopupRef,
-    projectPopupTop,
     projectTriggerRef,
-    setIsProjectPopupOpen,
-    setProjectPopupTop,
     sidebarShellRef,
-    scopePanels,
+    closePopup: () => setPopup((current) => ({ ...current, isOpen: false, activePanel: null })),
+    togglePopup: (top: number) => setPopup((current) => (
+      current.isOpen
+        ? { ...current, isOpen: false, activePanel: null }
+        : { activePanel: null, isOpen: true, top }
+    )),
+    setActivePanel: (activePanel: AppSidebarScopePanel | null) => setPopup((current) => ({ ...current, activePanel })),
   };
 }

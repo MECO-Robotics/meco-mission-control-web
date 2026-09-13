@@ -1,7 +1,6 @@
 import type { RefObject } from "react";
 
 import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
-import type { ScopePanelConfig } from "./sidebar/SidebarScopePanel";
 import {
   ADD_ROBOT_PROJECT_VALUE,
   AppSidebarScopeMenuPopup,
@@ -10,63 +9,57 @@ import {
 } from "./AppSidebarScopeMenuPopup";
 
 interface AppSidebarPopupsProps {
-  activeScopePanel: AppSidebarScopePanel | null;
-  isProjectPopupOpen: boolean;
-  isScopePopupOpen?: boolean;
+  popup: {
+    activePanel: AppSidebarScopePanel | null;
+    isOpen: boolean;
+    top: number;
+  };
   canEditSelectedRobot?: boolean;
   onEditSelectedRobot?: () => void;
   onSelectProjectOption: (value: string) => void;
   onSelectSeasonOption?: (value: string) => void;
+  onPanelChange: (panel: AppSidebarScopePanel) => void;
   projectPopupRef: RefObject<HTMLDivElement | null>;
-  projectPopupTop: number;
   projects: ProjectRecord[];
   seasons?: SeasonRecord[];
   selectedProjectId: string | null;
   selectedSeasonId?: string | null;
-  setActiveScopePanel: (panel: AppSidebarScopePanel) => void;
-  scopePanels: ScopePanelConfig[];
 }
 
 export function AppSidebarPopups({
-  activeScopePanel,
-  isProjectPopupOpen,
-  isScopePopupOpen,
+  popup,
   canEditSelectedRobot,
   onEditSelectedRobot,
   onSelectProjectOption,
   onSelectSeasonOption,
+  onPanelChange,
   projectPopupRef,
-  projectPopupTop,
   projects,
   seasons = [],
   selectedProjectId,
   selectedSeasonId = null,
-  setActiveScopePanel,
-  scopePanels,
 }: AppSidebarPopupsProps) {
-  const shouldShowScopePopup = isScopePopupOpen ?? isProjectPopupOpen;
   const shouldShowEditRobot = canEditSelectedRobot ?? Boolean(onEditSelectedRobot);
 
   return (
     <>
-      {shouldShowScopePopup ? (
+      {popup.isOpen ? (
         <div
           className="sidebar-compact-popup sidebar-scope-popup-shell"
           ref={projectPopupRef}
-          style={{ top: `${projectPopupTop}px` }}
+          style={{ top: `${popup.top}px` }}
         >
           <AppSidebarScopeMenuPopup
-            activePanel={activeScopePanel}
+            activePanel={popup.activePanel}
             canEditSelectedRobot={shouldShowEditRobot}
             onEditSelectedRobot={onEditSelectedRobot ?? (() => undefined)}
-            onPanelChange={setActiveScopePanel}
+            onPanelChange={onPanelChange}
             onSelectProjectOption={onSelectProjectOption}
             onSelectSeasonOption={onSelectSeasonOption ?? (() => undefined)}
             projects={projects}
             seasons={seasons}
             selectedProjectId={selectedProjectId}
             selectedSeasonId={selectedSeasonId}
-            scopePanels={scopePanels}
           />
         </div>
       ) : null}
