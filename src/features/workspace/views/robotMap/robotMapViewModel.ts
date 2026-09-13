@@ -10,6 +10,7 @@ export interface RobotConfigurationPartModel {
   id: string;
   name: string;
   quantity: number;
+  definitionPhotoUrl?: string;
   record: BootstrapPayload["partInstances"][number];
 }
 
@@ -127,6 +128,7 @@ function buildPartModel(
     id: partInstance.id,
     name: partInstance.name,
     quantity: Math.max(1, partInstance.quantity),
+    definitionPhotoUrl: partDefinitionsById.get(partInstance.partDefinitionId)?.photoUrl,
     record: partInstance,
   };
 }

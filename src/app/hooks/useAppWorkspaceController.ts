@@ -86,6 +86,7 @@ export function useAppWorkspaceController() {
       partDefinitionModalMode: model.partDefinitionModalMode,
       selectedSeasonId: model.selectedSeasonId,
       setActivePartDefinitionId: model.setActivePartDefinitionId,
+      setBootstrap: model.setBootstrap,
       setDataMessage: model.setDataMessage,
       setIsDeletingPartDefinition: model.setIsDeletingPartDefinition,
       setIsSavingPartDefinition: model.setIsSavingPartDefinition,

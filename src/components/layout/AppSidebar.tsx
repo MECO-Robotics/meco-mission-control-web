@@ -3,7 +3,6 @@ import { useState, type MouseEvent as ReactMouseEvent } from "react";
 import {
   type InventoryViewTab,
   type ManufacturingViewTab,
-  type NavigationSection,
   type NavigationTarget,
   type RosterViewTab,
   type RiskManagementViewTab,
@@ -120,9 +119,7 @@ export function AppSidebar({
   const [activeScopePanel, setActiveScopePanel] = useState<AppSidebarScopePanel | null>(null);
 
   const {
-    activeSection,
     activeSubItemId,
-    getSectionSubItems,
     sectionModels,
   } = useAppSidebarNavigationModels({
     activeTab,
@@ -136,23 +133,14 @@ export function AppSidebar({
   });
 
   const {
-    compactPopupRef,
-    compactPopupSection,
-    compactPopupTop,
-    expandedSection,
     isProjectPopupOpen,
     projectPopupRef,
     projectPopupTop,
     projectTriggerRef,
-    setCompactPopupSection,
-    setCompactPopupTop,
-    setExpandedSection,
     setIsProjectPopupOpen,
     setProjectPopupTop,
     sidebarShellRef,
   } = useAppSidebarPopupState({
-    activeSection,
-    isCollapsed,
     projectPopupLayoutKey: activeScopePanel,
   });
   const {
@@ -161,34 +149,12 @@ export function AppSidebar({
     sidebarScrollRef,
   } = useSidebarScrollHints();
 
-  const handleSectionClick = (section: NavigationSection, event: ReactMouseEvent<HTMLButtonElement>) => {
-    const subItems = getSectionSubItems(section);
-    const firstEnabledSubItem = subItems.find((subItem) => subItem.isEnabled);
-
-    if (isCollapsed) {
-      const shellRect = sidebarShellRef.current?.getBoundingClientRect();
-      const targetRect = event.currentTarget.getBoundingClientRect();
-      const popupTop = shellRect ? targetRect.top - shellRect.top : 0;
-      setCompactPopupTop(popupTop);
-      setIsProjectPopupOpen(false);
-      setCompactPopupSection((current) => (current === section ? null : section));
-      return;
-    }
-
-    setExpandedSection(section);
-
-    if (firstEnabledSubItem) {
-      onSelectTarget(firstEnabledSubItem.target, { keepSidebarOpen: true });
-    }
-  };
-
   const handleSubItemSelect = (target: NavigationTarget, isEnabled: boolean) => {
     if (!isEnabled) {
       return;
     }
 
     onSelectTarget(target);
-    setCompactPopupSection(null);
   };
 
   const handleProjectTriggerClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
@@ -196,10 +162,6 @@ export function AppSidebar({
     const targetRect = event.currentTarget.getBoundingClientRect();
     const popupTop = shellRect ? targetRect.top - shellRect.top : 0;
     setProjectPopupTop(popupTop);
-
-    if (isCollapsed) {
-      setCompactPopupSection(null);
-    }
 
     setActiveScopePanel(null);
     setIsProjectPopupOpen((current) => !current);
@@ -230,13 +192,11 @@ export function AppSidebar({
   };
 
   const handleHelpSelect = () => {
-    setCompactPopupSection(null);
     setIsProjectPopupOpen(false);
     setActiveScopePanel(null);
     onSelectTarget({ tab: "help" }, { keepSidebarOpen: true });
   };
   const handleSidebarFoldClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
-    setCompactPopupSection(null);
     setIsProjectPopupOpen(false);
     setActiveScopePanel(null);
     toggleSidebar();
@@ -269,11 +229,8 @@ export function AppSidebar({
         />
 
         <AppSidebarSections
-          activeSection={activeSection}
           activeSubItemId={activeSubItemId}
-          expandedSection={expandedSection}
           isCollapsed={isCollapsed}
-          onSectionClick={handleSectionClick}
           onSubItemSelect={handleSubItemSelect}
           sectionModels={sectionModels}
         />
@@ -303,20 +260,13 @@ export function AppSidebar({
         />
       </nav>
       <AppSidebarPopups
-        activeSubItemId={activeSubItemId}
         activeScopePanel={activeScopePanel}
-        compactPopupRef={compactPopupRef}
-        compactPopupSection={compactPopupSection}
-        compactPopupTop={compactPopupTop}
-        getSectionSubItems={getSectionSubItems}
-        isCollapsed={isCollapsed}
         isProjectPopupOpen={isProjectPopupOpen}
         isScopePopupOpen={isProjectPopupOpen}
         canEditSelectedRobot={canEditSelectedRobot}
         onEditSelectedRobot={onEditSelectedRobot}
         onSelectProjectOption={handleProjectOptionSelect}
         onSelectSeasonOption={handleSeasonOptionSelect}
-        onSubItemSelect={handleSubItemSelect}
         projectPopupRef={projectPopupRef}
         projectPopupTop={projectPopupTop}
         projects={projects}

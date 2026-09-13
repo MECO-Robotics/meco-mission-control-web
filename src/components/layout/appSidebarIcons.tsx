@@ -15,9 +15,6 @@ import {
   Video,
 } from "lucide-react";
 
-import {
-  type NavigationSection,
-} from "@/lib/workspaceNavigation";
 import type { ProjectType } from "@/types/common";
 import type { ProjectRecord } from "@/types/recordsOrganization";
 
@@ -144,11 +141,6 @@ export function getProjectIconColor(
 
   return PROJECT_TYPE_ICON_COLORS[project.projectType];
 }
-
-export const sectionIcons: Record<NavigationSection, ReactNode> = {
-  home: createElement(LayoutDashboard, { size: 20 }), work: createElement(ListTodo, { size: 20 }),
-  resources: createElement(Boxes, { size: 20 }), team: createElement(Users, { size: 20 }),
-};
 
 export const subItemIcons: Record<import("@/lib/workspaceNavigation").NavigationSubItemId, ReactNode> = {
   home: createElement(LayoutDashboard, { size: 14 }),

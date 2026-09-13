@@ -5,7 +5,6 @@ import {
   NAVIGATION_SUB_ITEMS_BY_SECTION,
   getActiveNavigationSubItemId,
   getNavigationTarget,
-  getNavigationSectionFromSubItem,
   isNavigationSubItemAvailable,
   type InventoryViewTab,
   type ManufacturingViewTab,
@@ -51,9 +50,6 @@ export function useAppSidebarNavigationModels({
     taskView,
     worklogsView,
   }, viewAvailabilityContext);
-  const activeSection = activeSubItemId
-    ? getNavigationSectionFromSubItem(activeSubItemId)
-    : null;
   const isSubItemEnabled = useCallback(
     (subItemId: NavigationSubItemId) =>
       isNavigationSubItemAvailable(subItemId, {
@@ -77,16 +73,13 @@ export function useAppSidebarNavigationModels({
         return {
           section,
           subItems,
-          isEnabled: subItems.some((subItem) => subItem.isEnabled),
         };
       }),
     [getSectionSubItems],
   );
 
   return {
-    activeSection,
     activeSubItemId,
-    getSectionSubItems,
     sectionModels,
   };
 }

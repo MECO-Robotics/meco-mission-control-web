@@ -14,8 +14,8 @@ import {
   buildTopbarSearchProps,
   buildTopbarAddMenuActions,
   makeAddMenuAction,
+  WorkspaceTopbarControls,
 } from "@/features/workspace/shared/topbar";
-import { WorkspaceTopbarControls } from "@/features/workspace/shared/topbar";
 import { MilestonesMilestoneModal } from "@/features/workspace/views/milestones/MilestonesEventModal";
 import { useMilestonesMilestoneModalState } from "@/features/workspace/views/milestones/sections/useMilestonesEventModalState";
 import { TaskCalendarFilterToolbar } from "./TaskCalendarFilterToolbar";

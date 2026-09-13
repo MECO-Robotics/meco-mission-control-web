@@ -1,4 +1,5 @@
-export type WorkspaceToastTone = "success" | "warning" | "error" | "info" | "neutral";
+import type { WorkspaceToastTone } from "./workspaceToastTypes";
+export type { WorkspaceToastTone } from "./workspaceToastTypes";
 
 export type WorkspaceToastNotice = {
   id: string;

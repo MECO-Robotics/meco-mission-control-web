@@ -1,5 +1,7 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 
+import { getLocalWorkspaceGeneration } from "@/lib/localWorkspace/session";
+import { getSessionGeneration } from "@/lib/auth/core/sessionStorage";
 import { buildEmptyPartDefinitionPayload } from "@/lib/appUtils/payloadBuilders";
 import { partDefinitionToPayload } from "@/lib/appUtils/payloadConversions";
 import { toErrorMessage } from "@/lib/appUtils/common";
@@ -18,6 +20,7 @@ export function usePartDefinitionActions({
   partDefinitionModalMode,
   selectedSeasonId,
   setActivePartDefinitionId,
+  setBootstrap,
   setDataMessage,
   setIsDeletingPartDefinition,
   setIsSavingPartDefinition,
@@ -32,12 +35,32 @@ export function usePartDefinitionActions({
   partDefinitionModalMode: AppWorkspaceModel["partDefinitionModalMode"];
   selectedSeasonId: AppWorkspaceModel["selectedSeasonId"];
   setActivePartDefinitionId: AppWorkspaceModel["setActivePartDefinitionId"];
+  setBootstrap: AppWorkspaceModel["setBootstrap"];
   setDataMessage: AppWorkspaceModel["setDataMessage"];
   setIsDeletingPartDefinition: AppWorkspaceModel["setIsDeletingPartDefinition"];
   setIsSavingPartDefinition: AppWorkspaceModel["setIsSavingPartDefinition"];
   setPartDefinitionDraft: AppWorkspaceModel["setPartDefinitionDraft"];
   setPartDefinitionModalMode: AppWorkspaceModel["setPartDefinitionModalMode"];
 }) {
+  const currentBootstrap = useRef(bootstrap);
+  currentBootstrap.current = bootstrap;
+  const savePartImage = useCallback(async (partId: string, revision: string, imageUrl: string) => {
+    const current = currentBootstrap.current.partDefinitions.find((part) => part.id === partId);
+    if (!current || current.revision !== revision || current.isArchived) {
+      throw new Error("This part changed. Choose its current revision and try again.");
+    }
+    if (!imageUrl.startsWith("data:image/png;base64,") || imageUrl.length > 150_000) {
+      throw new Error("The generated part image is invalid or too large.");
+    }
+    const session = getSessionGeneration();
+    const workspace = getLocalWorkspaceGeneration();
+    const saved = await updatePartDefinitionRecord(partId, { photoUrl: imageUrl }, handleUnauthorized);
+    if (session !== getSessionGeneration() || workspace !== getLocalWorkspaceGeneration()) {
+      throw new Error("The workspace changed while saving the part image.");
+    }
+    setBootstrap((current) => ({ ...current, partDefinitions: current.partDefinitions.map((part) => part.id === saved.id ? saved : part) }));
+  }, [handleUnauthorized, setBootstrap]);
+
   const openCreatePartDefinitionModal = useCallback(() => {
     setActivePartDefinitionId(null);
     setPartDefinitionDraft(buildEmptyPartDefinitionPayload(bootstrap));
@@ -137,6 +160,7 @@ export function usePartDefinitionActions({
   }, [bootstrap, handleUnauthorized, loadWorkspace, setDataMessage, setIsSavingPartDefinition]);
 
   return {
+    savePartImage,
     closePartDefinitionModal,
     handleDeletePartDefinition,
     handlePartDefinitionSubmit,

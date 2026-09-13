@@ -1,0 +1,4 @@
+.part-thumbnail { width: 64px; height: 64px; flex: 0 0 64px; object-fit: contain; border: 1px solid var(--border-subtle, #cbd5e1); border-radius: 8px; background: var(--surface-panel, #fff); }
+.part-thumbnail-empty { display: inline-flex; align-items: center; justify-content: center; color: var(--text-muted, #64748b); }
+
+.part-primary-cell { display: flex; align-items: center; gap: 12px; min-width: 0; }

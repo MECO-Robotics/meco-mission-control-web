@@ -6,10 +6,18 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { createBootstrap } from "@/lib/appUtilsTestFixtures";
 import { RobotMapView } from "../RobotMapView";
 
+let showMap = false;
+jest.mock("react", () => {
+  const actual = jest.requireActual<typeof React>("react");
+  return { ...actual, useState: (initial: unknown) => actual.useState(showMap && initial === "3d" ? "map" : initial) };
+});
+beforeEach(() => { showMap = true; });
+
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 describe("RobotMapView", () => {
   it("renders Robot Configuration and avoids readiness-first metrics text", () => {
+    showMap = false;
     const bootstrap = createBootstrap({
       subsystems: [
         {
@@ -48,6 +56,8 @@ describe("RobotMapView", () => {
       }),
     );
 
+    expect(markup).toContain("Empty 3D viewer");
+    expect(markup).not.toContain("Upload an isometric");
     expect(markup).toContain("Robot Configuration");
     expect(markup).toContain("Manual configuration with finalized STEP import and Onshape sync sources.");
     expect(markup).toContain("Source model docs");
