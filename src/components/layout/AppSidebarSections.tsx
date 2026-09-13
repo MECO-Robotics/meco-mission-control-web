@@ -1,14 +1,7 @@
-import { useState, type FocusEvent as ReactFocusEvent, type MouseEvent as ReactMouseEvent } from "react";
 import { NAVIGATION_SECTION_LABELS, type NavigationSection, type NavigationSubItemId, type NavigationTarget } from "@/lib/workspaceNavigation";
-import { icons } from "lucide-react";
+import { SidebarItem, type SidebarItemConfig } from "./sidebar/SidebarItem";
 
-export interface SidebarSubItemModel {
-  id: import("@/lib/workspaceNavigation").NavigationSubItemId;
-  label: string;
-  target: import("@/lib/workspaceNavigation").NavigationTarget;
-  isEnabled: boolean;
-  icon: string;
-}
+export type SidebarSubItemModel = SidebarItemConfig;
 
 interface SidebarSectionModel {
   section: NavigationSection;
@@ -30,20 +23,6 @@ export function AppSidebarSections({
   onDisabledSubItemSelect,
   sectionModels,
 }: AppSidebarSectionsProps) {
-  const [hoveredSubItemId, setHoveredSubItemId] = useState<NavigationSubItemId | null>(null);
-
-  const setActiveRollout = (id: NavigationSubItemId) => setHoveredSubItemId(id);
-  const clearActiveRollout = () => setHoveredSubItemId(null);
-
-  const handleEnter = (event: ReactMouseEvent<HTMLButtonElement>, id: NavigationSubItemId) => {
-    void event;
-    setActiveRollout(id);
-  };
-
-  const handleFocus = (_event: ReactFocusEvent<HTMLButtonElement>, id: NavigationSubItemId) => {
-    setActiveRollout(id);
-  };
-
   return sectionModels.map(({ section, subItems }) => (
     <section className="sidebar-section-group" aria-label={NAVIGATION_SECTION_LABELS[section]} key={section}>
       {!isCollapsed && (
@@ -52,51 +31,15 @@ export function AppSidebarSections({
         </h2>
       )}
       {subItems.map((item) => (
-        (() => {
-          const isRobotDestination = item.id === "resources-structure";
-          const isDisabled = isRobotDestination && !item.isEnabled;
-          return (
-        <button
-          className="sidebar-nav-item"
-          aria-label={item.label}
-          aria-current={activeSubItemId === item.id ? "page" : undefined}
-          title={isCollapsed ? item.label : undefined}
-          data-active={activeSubItemId === item.id ? "true" : "false"}
-          data-enabled={item.isEnabled ? "true" : "false"}
-          data-robot-disabled={isDisabled ? "true" : "false"}
-          aria-disabled={isDisabled ? "true" : undefined}
-          data-tutorial-target={`sidebar-view-${item.id}`}
-          data-active-view={activeSubItemId ?? ""}
+        <SidebarItem
+          config={item}
+          isActive={activeSubItemId === item.id}
+          activeViewId={activeSubItemId ?? ""}
+          isCollapsed={isCollapsed}
+          onSelect={(config) => onSubItemSelect(config.target)}
+          onDisabledSelect={() => onDisabledSubItemSelect()}
           key={item.id}
-          onMouseEnter={(event) => handleEnter(event, item.id)}
-          onMouseLeave={clearActiveRollout}
-          onFocus={(event) => handleFocus(event, item.id)}
-          onBlur={clearActiveRollout}
-          onClick={() => {
-            if (isDisabled) onDisabledSubItemSelect();
-            else onSubItemSelect(item.target);
-          }}
-          type="button"
-        >
-          <span aria-hidden="true" className="sidebar-nav-item-icon">
-            {(() => {
-              const Icon = icons[item.icon as keyof typeof icons];
-              return Icon ? <Icon size={14} /> : null;
-            })()}
-          </span>
-          {!isCollapsed ? <span className="sidebar-nav-item-label">{item.label}</span> : null}
-          {isCollapsed ? (
-            <span
-              aria-hidden="true"
-              className="sidebar-nav-item-rollout"
-              data-visible={hoveredSubItemId === item.id ? "true" : "false"}
-            >
-              {item.label}
-            </span>
-          ) : null}
-        </button>
-          );
-        })()
+        />
       ))}
     </section>
   ));
