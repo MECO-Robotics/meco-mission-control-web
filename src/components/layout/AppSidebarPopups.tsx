@@ -16,6 +16,7 @@ interface AppSidebarPopupsProps {
   onSelectProjectOption: (value: string) => void;
   onSelectSeasonOption?: (value: string) => void;
   onPanelChange: (panel: AppSidebarScopePanel) => void;
+  scopePanels: AppSidebarScopePanel[];
   projectPopupRef: RefObject<HTMLDivElement | null>;
   projects: ProjectRecord[];
   seasons?: SeasonRecord[];
@@ -30,6 +31,7 @@ export function AppSidebarPopups({
   onSelectProjectOption,
   onSelectSeasonOption,
   onPanelChange,
+  scopePanels,
   projectPopupRef,
   projects,
   seasons = [],
@@ -57,6 +59,7 @@ export function AppSidebarPopups({
             seasons={seasons}
             selectedProjectId={selectedProjectId}
             selectedSeasonId={selectedSeasonId}
+            scopePanels={scopePanels}
           />
         </div>
       ) : null}
