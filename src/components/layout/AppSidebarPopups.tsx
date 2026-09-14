@@ -23,7 +23,6 @@ interface AppSidebarPopupsProps {
   selectedProjectId: string | null;
   selectedSeasonId?: string | null;
   setActiveScopePanel: (panel: AppSidebarScopePanel) => void;
-  scopePanels: any[];
 }
 
 export function AppSidebarPopups({
@@ -41,7 +40,6 @@ export function AppSidebarPopups({
   selectedProjectId,
   selectedSeasonId = null,
   setActiveScopePanel,
-  scopePanels,
 }: AppSidebarPopupsProps) {
   const shouldShowScopePopup = isScopePopupOpen ?? isProjectPopupOpen;
   const shouldShowEditRobot = canEditSelectedRobot ?? Boolean(onEditSelectedRobot);
@@ -65,7 +63,6 @@ export function AppSidebarPopups({
             seasons={seasons}
             selectedProjectId={selectedProjectId}
             selectedSeasonId={selectedSeasonId}
-            scopePanels={scopePanels}
           />
         </div>
       ) : null}

@@ -15,8 +15,8 @@ import type { SessionUser } from "@/lib/auth/types";
 import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
 import type { WorkspaceEditToastNotice } from "@/features/workspace/workspaceEditToastNotice";
 
-import sidebarItems from "./sidebar/sidebarItems.json";
 import {
+  ADD_ROBOT_PROJECT_VALUE,
   AppSidebarPopups,
   CREATE_SEASON_OPTION_VALUE,
 } from "./AppSidebarPopups";
@@ -135,7 +135,6 @@ export function AppSidebar({
     worklogsView,
   });
 
-  const scopePanels = sidebarItems.scopePanels;
   const {
     isProjectPopupOpen,
     projectPopupRef,
@@ -264,23 +263,22 @@ export function AppSidebar({
           onResetDemo={onResetDemo ?? (() => undefined)}
         />
       </nav>
-  <AppSidebarPopups
-    activeScopePanel={activeScopePanel}
-    isProjectPopupOpen={isProjectPopupOpen}
-    isScopePopupOpen={isProjectPopupOpen}
-    canEditSelectedRobot={canEditSelectedRobot}
-    onEditSelectedRobot={onEditSelectedRobot}
-    onSelectProjectOption={handleProjectOptionSelect}
-    onSelectSeasonOption={handleSeasonOptionSelect}
-    projectPopupRef={projectPopupRef}
-    projectPopupTop={projectPopupTop}
-    projects={projects}
-    seasons={seasons}
-    selectedProjectId={selectedProjectId}
-    selectedSeasonId={selectedSeasonId}
-    setActiveScopePanel={setActiveScopePanel}
-    scopePanels={scopePanels}
-  />
+      <AppSidebarPopups
+        activeScopePanel={activeScopePanel}
+        isProjectPopupOpen={isProjectPopupOpen}
+        isScopePopupOpen={isProjectPopupOpen}
+        canEditSelectedRobot={canEditSelectedRobot}
+        onEditSelectedRobot={onEditSelectedRobot}
+        onSelectProjectOption={handleProjectOptionSelect}
+        onSelectSeasonOption={handleSeasonOptionSelect}
+        projectPopupRef={projectPopupRef}
+        projectPopupTop={projectPopupTop}
+        projects={projects}
+        seasons={seasons}
+        selectedProjectId={selectedProjectId}
+        selectedSeasonId={selectedSeasonId}
+        setActiveScopePanel={setActiveScopePanel}
+      />
     </div>
   );
 }
