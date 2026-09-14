@@ -8,7 +8,13 @@ import { getProjectIcon, getProjectIconColor } from "./sidebarProjectIcons";
 export const ADD_ROBOT_PROJECT_VALUE = "__add_robot_project__";
 export const CREATE_SEASON_OPTION_VALUE = "__create_new_season__";
 
-export type AppSidebarScopePanel = "season" | "project";
+export interface ScopePanelConfig {
+  id: string;
+  label: string;
+  icon: string;
+}
+
+export type AppSidebarScopePanel = ScopePanelConfig["id"];
 
 interface AppSidebarScopeMenuPopupProps {
   activePanel: AppSidebarScopePanel | null;
@@ -21,6 +27,7 @@ interface AppSidebarScopeMenuPopupProps {
   seasons: SeasonRecord[];
   selectedProjectId: string | null;
   selectedSeasonId: string | null;
+  scopePanels: ScopePanelConfig[];
 }
 
 function ScopeOption({
@@ -74,6 +81,7 @@ export function AppSidebarScopeMenuPopup({
   seasons,
   selectedProjectId,
   selectedSeasonId,
+  scopePanels,
 }: AppSidebarScopeMenuPopupProps) {
   const shouldShowEditRobot = canEditSelectedRobot;
 
@@ -82,20 +90,16 @@ export function AppSidebarScopeMenuPopup({
       <div aria-label="Workspace scope" className="sidebar-scope-kind-panel" role="dialog">
         <p className="sidebar-compact-popup-title">Workspace scope</p>
         <div role="listbox">
-          <ScopeOption
-            icon={<LayoutGrid size={14} strokeWidth={2} />}
-            isActive={activePanel === "project"}
-            label="Project"
-            onClick={() => onPanelChange("project")}
-            showsNextPanel
-          />
-          <ScopeOption
-            icon={<IconCalendar />}
-            isActive={activePanel === "season"}
-            label="Season"
-            onClick={() => onPanelChange("season")}
-            showsNextPanel
-          />
+          {scopePanels.map((panel) => (
+            <ScopeOption
+              key={panel.id}
+              icon={<LayoutGrid size={14} strokeWidth={2} />}
+              isActive={activePanel === panel.id}
+              label={panel.label}
+              onClick={() => onPanelChange(panel.id)}
+              showsNextPanel
+            />
+          ))}
         </div>
       </div>
       {activePanel === "season" ? (
@@ -139,13 +143,13 @@ export function AppSidebarScopeMenuPopup({
             />
             {projects.map((project) => (
               <ScopeOption
+                key={project.id}
                 icon={
                   <span style={{ color: getProjectIconColor(project) }}>
                     {getProjectIcon(project)}
                   </span>
                 }
                 isActive={selectedProjectId === project.id}
-                key={project.id}
                 label={project.name}
                 onClick={() => onSelectProjectOption(project.id)}
                 tutorialTarget="project-select"
