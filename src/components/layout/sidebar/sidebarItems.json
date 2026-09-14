@@ -8,5 +8,12 @@
   { "id": "resources-purchases", "label": "Purchases", "section": "resources", "icon": "shopping-cart", "target": { "tab": "inventory", "inventoryView": "purchases" } },
   { "id": "work-manufacturing", "label": "Manufacturing", "section": "work", "icon": "wrench", "target": { "tab": "manufacturing", "manufacturingView": "all" } },
   { "id": "resources-structure", "label": "Robot", "section": "work", "icon": "bot", "target": { "tab": "tasks", "taskView": "robot-map" }, "requires": ["robot-project"] },
-  { "id": "team-people", "label": "People", "section": "resources", "icon": "users", "target": { "tab": "roster", "rosterView": "directory" } }
+  { "id": "team-people", "label": "People", "section": "resources", "icon": "users", "target": { "tab": "roster", "rosterView": "directory" } },
+  {
+    "id": "scopePanels",
+    "scopePanels": [
+      { "id": "project", "label": "Projects", "icon": "layout-grid" },
+      { "id": "season", "label": "Seasons", "icon": "calendar-days" }
+    ]
+  }
 ]
