@@ -44,11 +44,6 @@ const projects: ProjectRecord[] = [
   },
 ];
 
-const scopePanels = [
-  { id: "season", label: "Season", icon: "calendar" },
-  { id: "project", label: "Project", icon: "folder" },
-];
-
 function renderScopeMenu(activePanel: "season" | "project") {
   return renderToStaticMarkup(
     React.createElement(AppSidebarScopeMenuPopup, {
@@ -62,7 +57,6 @@ function renderScopeMenu(activePanel: "season" | "project") {
       seasons,
       selectedProjectId: "robot-2026",
       selectedSeasonId: "season-2026",
-      scopePanels,
     }),
   );
 }
