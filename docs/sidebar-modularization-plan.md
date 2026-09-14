@@ -2,6 +2,11 @@
 
 Goal: separate dynamic records from popup structure.
 
+Catalog shape: `sidebarItems.json` exports a JSON array of navigation items. Do
+not add properties to the array or import named exports from it. Add the
+configuration as a dedicated item with `id: "scope-panels"` and a `panels`
+array, then derive a typed `ScopePanelConfig[]` from that item at runtime.
+
 Keep projects and seasons as runtime data, but describe static scope panels and actions declaratively:
 
 ```json
