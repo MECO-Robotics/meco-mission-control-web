@@ -6,6 +6,7 @@ import {
   AppSidebarScopeMenuPopup,
   CREATE_SEASON_OPTION_VALUE,
   type AppSidebarScopePanel,
+  type ScopePanelConfig,
 } from "./AppSidebarScopeMenuPopup";
 import type { AppSidebarPopupState } from "./useAppSidebarPopupState";
 
@@ -21,6 +22,7 @@ interface AppSidebarPopupsProps {
   seasons?: SeasonRecord[];
   selectedProjectId: string | null;
   selectedSeasonId?: string | null;
+  scopePanels?: ScopePanelConfig[];
 }
 
 export function AppSidebarPopups({
@@ -35,6 +37,7 @@ export function AppSidebarPopups({
   seasons = [],
   selectedProjectId,
   selectedSeasonId = null,
+  scopePanels,
 }: AppSidebarPopupsProps) {
   const shouldShowEditRobot = canEditSelectedRobot ?? Boolean(onEditSelectedRobot);
 
@@ -57,6 +60,7 @@ export function AppSidebarPopups({
             seasons={seasons}
             selectedProjectId={selectedProjectId}
             selectedSeasonId={selectedSeasonId}
+            scopePanels={scopePanels}
           />
         </div>
       ) : null}

@@ -1,9 +1,6 @@
-/// <reference types="jest" />
-
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-
-import { AppSidebarScopeMenuPopup } from "@/components/layout/AppSidebarScopeMenuPopup";
+import { AppSidebarScopeMenuPopup, type ScopePanelConfig } from "@/components/layout/AppSidebarScopeMenuPopup";
 import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
@@ -44,7 +41,15 @@ const projects: ProjectRecord[] = [
   },
 ];
 
-function renderScopeMenu(activePanel: "season" | "project", scopePanels?: ("season" | "project")[]) {
+const scopePanels: ScopePanelConfig[] = [
+  { id: "project", label: "Projects", icon: "layout-grid" },
+  { id: "season", label: "Seasons", icon: "calendar-days" },
+];
+
+function renderScopeMenu(
+  activePanel: any,
+  scopePanels: ScopePanelConfig[] = scopePanels,
+) {
   return renderToStaticMarkup(
     React.createElement(AppSidebarScopeMenuPopup, {
       activePanel,
@@ -63,12 +68,19 @@ function renderScopeMenu(activePanel: "season" | "project", scopePanels?: ("seas
 }
 
 describe("AppSidebarScopeMenuPopup", () => {
+  it("renders scope panels from configuration", () => {
+    const markup = renderScopeMenu("project");
+
+    expect(markup).toContain("Projects");
+    expect(markup).toContain("Seasons");
+  });
+
   it("packages season selection as a second-stage scope menu", () => {
     const markup = renderScopeMenu("season");
 
     expect(markup).toContain('aria-label="Workspace scope"');
-    expect(markup).toContain("Season");
-    expect(markup).toContain("Project");
+    expect(markup).toContain("Seasons");
+    expect(markup).toContain("Projects");
     expect(markup).toContain('data-tutorial-target="season-select"');
     expect(markup).toContain("2026 Season");
     expect(markup).toContain("2027 Season");
@@ -76,30 +88,30 @@ describe("AppSidebarScopeMenuPopup", () => {
   });
 
   it("packages season selection with only season panel", () => {
-    const markup = renderScopeMenu("season", ["season"]);
+    const markup = renderScopeMenu("season", [{ id: "season", label: "Seasons", icon: "calendar-days" }]);
 
-    expect(markup).toContain("Season");
-    expect(markup).not.toContain("Project");
+    expect(markup).toContain("Seasons");
+    expect(markup).not.toContain("Projects");
   });
 
   it("packages project selection with only project panel", () => {
-    const markup = renderScopeMenu("project", ["project"]);
+    const markup = renderScopeMenu("project", [{ id: "project", label: "Projects", icon: "layout-grid" }]);
 
-    expect(markup).toContain("Project");
-    expect(markup).not.toContain("Season");
+    expect(markup).toContain("Projects");
+    expect(markup).not.toContain("Seasons");
   });
 
   it("places project selection above season selection in the scope stage", () => {
     const markup = renderScopeMenu("season");
 
-    expect(markup.indexOf(">Project</span>")).toBeLessThan(markup.indexOf(">Season</span>"));
+    expect(markup.indexOf(">Projects</span>")).toBeLessThan(markup.indexOf(">Seasons</span>"));
   });
 
   it("packages project selection as a second-stage scope menu", () => {
     const markup = renderScopeMenu("project");
 
     expect(markup).toContain('aria-label="Workspace scope"');
-    expect(markup).toContain("Project");
+    expect(markup).toContain("Projects");
     expect(markup).toContain('data-tutorial-target="project-select"');
     expect(markup).toContain("All projects");
     expect(markup).toContain("Robot 2026");
