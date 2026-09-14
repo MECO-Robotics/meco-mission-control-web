@@ -10,8 +10,15 @@ export const CREATE_SEASON_OPTION_VALUE = "__create_new_season__";
 
 export type AppSidebarScopePanel = "season" | "project";
 
+export interface ScopePanelConfig {
+  id: AppSidebarScopePanel;
+  label: string;
+  icon: string;
+}
+
 interface AppSidebarScopeMenuPopupProps {
   activePanel: AppSidebarScopePanel | null;
+  scopePanels: ScopePanelConfig[];
   canEditSelectedRobot: boolean;
   onEditSelectedRobot: () => void;
   onPanelChange: (panel: AppSidebarScopePanel) => void;
@@ -65,6 +72,7 @@ function ScopeOption({
 
 export function AppSidebarScopeMenuPopup({
   activePanel,
+  scopePanels,
   canEditSelectedRobot,
   onEditSelectedRobot,
   onPanelChange,
@@ -82,20 +90,16 @@ export function AppSidebarScopeMenuPopup({
       <div aria-label="Workspace scope" className="sidebar-scope-kind-panel" role="dialog">
         <p className="sidebar-compact-popup-title">Workspace scope</p>
         <div role="listbox">
-          <ScopeOption
-            icon={<LayoutGrid size={14} strokeWidth={2} />}
-            isActive={activePanel === "project"}
-            label="Project"
-            onClick={() => onPanelChange("project")}
-            showsNextPanel
-          />
-          <ScopeOption
-            icon={<IconCalendar />}
-            isActive={activePanel === "season"}
-            label="Season"
-            onClick={() => onPanelChange("season")}
-            showsNextPanel
-          />
+          {scopePanels.map((panel) => (
+            <ScopeOption
+              key={panel.id}
+              isActive={activePanel === panel.id}
+              label={panel.label}
+              onClick={() => onPanelChange(panel.id)}
+              showsNextPanel
+              icon={<LayoutGrid size={14} strokeWidth={2} />}
+            />
+          ))}
         </div>
       </div>
       {activePanel === "season" ? (

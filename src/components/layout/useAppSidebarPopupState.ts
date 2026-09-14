@@ -21,10 +21,12 @@ function clampPopupTop(
 
 interface UseAppSidebarPopupStateArgs {
   projectPopupLayoutKey?: unknown;
+  scopePanels?: any[];
 }
 
 export function useAppSidebarPopupState({
   projectPopupLayoutKey,
+  scopePanels,
 }: UseAppSidebarPopupStateArgs) {
   const sidebarShellRef = useRef<HTMLDivElement | null>(null);
   const projectPopupRef = useRef<HTMLDivElement | null>(null);
@@ -91,5 +93,6 @@ export function useAppSidebarPopupState({
     setIsProjectPopupOpen,
     setProjectPopupTop,
     sidebarShellRef,
+    scopePanels,
   };
 }
