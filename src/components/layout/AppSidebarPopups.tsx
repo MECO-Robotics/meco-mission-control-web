@@ -8,7 +8,6 @@ import {
   type AppSidebarScopePanel,
 } from "./AppSidebarScopeMenuPopup";
 import type { AppSidebarPopupState } from "./useAppSidebarPopupState";
-import { scopePanels as sidebarScopePanels } from "./sidebar/sidebarItems.json";
 
 interface AppSidebarPopupsProps {
   popup: AppSidebarPopupState;
@@ -22,7 +21,6 @@ interface AppSidebarPopupsProps {
   seasons?: SeasonRecord[];
   selectedProjectId: string | null;
   selectedSeasonId?: string | null;
-  scopePanels?: any[];
 }
 
 export function AppSidebarPopups({
@@ -37,10 +35,8 @@ export function AppSidebarPopups({
   seasons = [],
   selectedProjectId,
   selectedSeasonId = null,
-  scopePanels: externalScopePanels,
 }: AppSidebarPopupsProps) {
   const shouldShowEditRobot = canEditSelectedRobot ?? Boolean(onEditSelectedRobot);
-  const panels = externalScopePanels ?? (sidebarScopePanels as any)?.find((p: any) => p.id === "scope-panels")?.panels ?? [{ id: "project", label: "Project" }, { id: "season", label: "Season" }];
 
   return (
     <>
@@ -61,7 +57,6 @@ export function AppSidebarPopups({
             seasons={seasons}
             selectedProjectId={selectedProjectId}
             selectedSeasonId={selectedSeasonId}
-            scopePanels={panels}
           />
         </div>
       ) : null}
