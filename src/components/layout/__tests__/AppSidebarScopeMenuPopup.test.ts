@@ -77,7 +77,7 @@ describe("AppSidebarScopeMenuPopup", () => {
   it("places project selection above season selection in the scope stage", () => {
     const markup = renderScopeMenu("season");
 
-    expect(markup.indexOf(">Project</span>")).toBeLessThan(markup.indexOf(">Season</span>"));
+    expect(markup.indexOf(">Projects</span>")).toBeLessThan(markup.indexOf(">Seasons</span>"));
   });
 
   it("packages project selection as a second-stage scope menu", () => {
