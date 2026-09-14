@@ -1,4 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import sidebarCatalog from "./sidebar/sidebarItems.json";
+import type { ScopePanelConfig } from "./sidebar/SidebarScopePanel";
+
+const scopePanels = sidebarCatalog.scopePanels as ScopePanelConfig[];
 
 const POPUP_VERTICAL_MARGIN = 8;
 
@@ -91,5 +95,6 @@ export function useAppSidebarPopupState({
     setIsProjectPopupOpen,
     setProjectPopupTop,
     sidebarShellRef,
+    scopePanels,
   };
 }

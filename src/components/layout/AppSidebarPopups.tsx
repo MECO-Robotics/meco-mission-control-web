@@ -1,6 +1,10 @@
 import type { RefObject } from "react";
 
 import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
+import type { ScopePanelConfig } from "./sidebar/SidebarScopePanel";
+import sidebarCatalog from "./sidebar/sidebarItems.json";
+
+const DEFAULT_SCOPE_PANELS = sidebarCatalog.scopePanels as ScopePanelConfig[];
 import {
   ADD_ROBOT_PROJECT_VALUE,
   AppSidebarScopeMenuPopup,
@@ -23,6 +27,7 @@ interface AppSidebarPopupsProps {
   selectedProjectId: string | null;
   selectedSeasonId?: string | null;
   setActiveScopePanel: (panel: AppSidebarScopePanel) => void;
+  scopePanels?: ScopePanelConfig[];
 }
 
 export function AppSidebarPopups({
@@ -40,6 +45,7 @@ export function AppSidebarPopups({
   selectedProjectId,
   selectedSeasonId = null,
   setActiveScopePanel,
+  scopePanels = DEFAULT_SCOPE_PANELS,
 }: AppSidebarPopupsProps) {
   const shouldShowScopePopup = isScopePopupOpen ?? isProjectPopupOpen;
   const shouldShowEditRobot = canEditSelectedRobot ?? Boolean(onEditSelectedRobot);
@@ -63,6 +69,7 @@ export function AppSidebarPopups({
             seasons={seasons}
             selectedProjectId={selectedProjectId}
             selectedSeasonId={selectedSeasonId}
+            scopePanels={scopePanels}
           />
         </div>
       ) : null}
