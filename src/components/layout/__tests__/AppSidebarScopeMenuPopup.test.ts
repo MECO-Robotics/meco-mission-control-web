@@ -4,7 +4,9 @@ import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { AppSidebarScopeMenuPopup } from "@/components/layout/AppSidebarScopeMenuPopup";
+import type { ScopePanelConfig } from "@/components/layout/sidebar/SidebarScopePanel";
 import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
+import sidebarCatalog from "@/components/layout/sidebar/sidebarItems.json";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
@@ -45,6 +47,7 @@ const projects: ProjectRecord[] = [
 ];
 
 function renderScopeMenu(activePanel: "season" | "project") {
+  const scopePanels = (sidebarCatalog.find((item) => item.id === "scope-panels")?.panels ?? []) as ScopePanelConfig[];
   return renderToStaticMarkup(
     React.createElement(AppSidebarScopeMenuPopup, {
       activePanel,
@@ -57,11 +60,37 @@ function renderScopeMenu(activePanel: "season" | "project") {
       seasons,
       selectedProjectId: "robot-2026",
       selectedSeasonId: "season-2026",
+      scopePanels,
     }),
   );
 }
 
 describe("AppSidebarScopeMenuPopup", () => {
+  it("renders labels and icons from the scope panel catalog", () => {
+    const scopePanels = (sidebarCatalog.find((item) => item.id === "scope-panels")?.panels ?? []) as ScopePanelConfig[];
+    const markup = renderToStaticMarkup(
+      React.createElement(AppSidebarScopeMenuPopup, {
+        activePanel: null,
+        canEditSelectedRobot: false,
+        onEditSelectedRobot: jest.fn(),
+        onPanelChange: jest.fn(),
+        onSelectProjectOption: jest.fn(),
+        onSelectSeasonOption: jest.fn(),
+        projects: [],
+        seasons: [],
+        selectedProjectId: null,
+        selectedSeasonId: null,
+        scopePanels,
+      }),
+    );
+
+    expect(sidebarCatalog).toEqual(expect.any(Array));
+    expect(markup).toContain(">Projects</span>");
+    expect(markup).toContain(">Seasons</span>");
+    expect(markup).toContain("lucide-layout-grid");
+    expect(markup).toContain('width="18"');
+  });
+
   it("packages season selection as a second-stage scope menu", () => {
     const markup = renderScopeMenu("season");
 
@@ -77,7 +106,7 @@ describe("AppSidebarScopeMenuPopup", () => {
   it("places project selection above season selection in the scope stage", () => {
     const markup = renderScopeMenu("season");
 
-    expect(markup.indexOf(">Project</span>")).toBeLessThan(markup.indexOf(">Season</span>"));
+    expect(markup.indexOf(">Projects</span>")).toBeLessThan(markup.indexOf(">Seasons</span>"));
   });
 
   it("packages project selection as a second-stage scope menu", () => {

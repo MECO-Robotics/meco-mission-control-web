@@ -143,6 +143,7 @@ export function AppSidebar({
     setIsProjectPopupOpen,
     setProjectPopupTop,
     sidebarShellRef,
+    scopePanels,
   } = useAppSidebarPopupState({
     projectPopupLayoutKey: activeScopePanel,
   });
@@ -278,6 +279,7 @@ export function AppSidebar({
         selectedProjectId={selectedProjectId}
         selectedSeasonId={selectedSeasonId}
         setActiveScopePanel={setActiveScopePanel}
+        scopePanels={scopePanels}
       />
     </div>
   );
