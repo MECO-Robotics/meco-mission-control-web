@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import sidebarCatalog from "./sidebar/sidebarItems.json";
 import type { ScopePanelConfig } from "./sidebar/SidebarScopePanel";
 
-const scopePanels = sidebarCatalog.scopePanels as ScopePanelConfig[];
+const scopePanels = (sidebarCatalog.find((item) => item.id === "scope-panels")?.panels ?? []) as ScopePanelConfig[];
 
 const POPUP_VERTICAL_MARGIN = 8;
 

@@ -1,9 +1,11 @@
-{
-  "scopePanels": [
-    { "id": "project", "label": "Projects", "icon": "layout-grid" },
-    { "id": "season", "label": "Seasons", "icon": "calendar-days" }
-  ],
-  "items": [
+[
+  {
+    "id": "scope-panels",
+    "panels": [
+      { "id": "project", "label": "Projects", "icon": "layout-grid" },
+      { "id": "season", "label": "Seasons", "icon": "calendar-days" }
+    ]
+  },
   { "id": "home", "label": "Dashboard", "section": "work", "icon": "layout-dashboard", "target": { "tab": "home" } },
   { "id": "work-tasks", "label": "Tasks", "section": "work", "icon": "list-todo", "target": { "tab": "tasks", "taskView": "queue" }, "requires": ["project"] },
   { "id": "work-schedule", "label": "Schedule", "section": "work", "icon": "calendar-days", "target": { "tab": "tasks", "taskView": "calendar" }, "requires": ["project"] },
@@ -14,5 +16,4 @@
   { "id": "work-manufacturing", "label": "Manufacturing", "section": "work", "icon": "wrench", "target": { "tab": "manufacturing", "manufacturingView": "all" } },
   { "id": "resources-structure", "label": "Robot", "section": "work", "icon": "bot", "target": { "tab": "tasks", "taskView": "robot-map" }, "requires": ["robot-project"] },
   { "id": "team-people", "label": "People", "section": "resources", "icon": "users", "target": { "tab": "roster", "rosterView": "directory" } }
-  ]
-}
+]

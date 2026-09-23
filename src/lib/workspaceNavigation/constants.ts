@@ -6,7 +6,8 @@ export const NAVIGATION_SECTION_LABELS: Record<NavigationSection, string> = {
   home: "Home", work: "Work", resources: "Resources", team: "Team",
 };
 /* Generated from the editable sidebar catalog. */
-export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = sidebarCatalog.items as NavigationSubItem[];
+export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = sidebarCatalog
+  .filter((item) => item.id !== "scope-panels") as NavigationSubItem[];
 /* Legacy inline catalog retained below only as a reference during migration. */
 /*
   { id: "home", label: "Dashboard", section: "work", target: { tab: "home" } },

@@ -5,9 +5,6 @@ import { IconCalendar, IconEdit, IconPlus } from "@/components/shared/Icons";
 import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
 import { getProjectIcon, getProjectIconColor } from "./sidebarProjectIcons";
 import type { ScopePanelConfig } from "./sidebar/SidebarScopePanel";
-import sidebarCatalog from "./sidebar/sidebarItems.json";
-
-const DEFAULT_SCOPE_PANELS = sidebarCatalog.scopePanels as ScopePanelConfig[];
 
 export const ADD_ROBOT_PROJECT_VALUE = "__add_robot_project__";
 export const CREATE_SEASON_OPTION_VALUE = "__create_new_season__";
@@ -25,7 +22,7 @@ interface AppSidebarScopeMenuPopupProps {
   seasons: SeasonRecord[];
   selectedProjectId: string | null;
   selectedSeasonId: string | null;
-  scopePanels?: ScopePanelConfig[];
+  scopePanels: ScopePanelConfig[];
 }
 
 function ScopeOption({
@@ -79,7 +76,7 @@ export function AppSidebarScopeMenuPopup({
   seasons,
   selectedProjectId,
   selectedSeasonId,
-  scopePanels = DEFAULT_SCOPE_PANELS,
+  scopePanels,
 }: AppSidebarScopeMenuPopupProps) {
   const shouldShowEditRobot = canEditSelectedRobot;
 
