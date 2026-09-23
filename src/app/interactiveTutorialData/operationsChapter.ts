@@ -140,7 +140,7 @@ const operationsSteps = [
     id: "manufacturing-cnc",
     title: "Open manufacturing queue",
     instruction: "Choose Manufacturing in the sidebar.",
-    selector: '[data-tutorial-target="sidebar-view-resources-manufacturing"]',
+    selector: '[data-tutorial-target="sidebar-view-work-manufacturing"]',
   },
   {
     id: "create-cnc-job",

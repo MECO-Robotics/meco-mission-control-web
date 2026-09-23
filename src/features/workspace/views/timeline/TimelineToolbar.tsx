@@ -1,12 +1,13 @@
 import React from "react";
-import { IconCalendar, IconChevronLeft, IconChevronRight, IconSearchMinus, IconSearchPlus } from "@/components/shared/Icons";
+import { IconCalendar, IconChevronLeft, IconChevronRight } from "@/components/shared/Icons";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
-import { formatTimelineZoomLabel, TIMELINE_ZOOM_MAX } from "@/features/workspace/shared/timeline/timelineZoom";
+import { TIMELINE_ZOOM_MAX } from "@/features/workspace/shared/timeline/timelineZoom";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import { TimelineCompactFilterMenu } from "./components/TimelineCompactFilterMenu";
+import { WorkspaceTopbarZoomControls } from "@/features/workspace/shared/ui";
 
 const TIMELINE_INTERVAL_OPTIONS: Array<{ id: TimelineViewInterval; label: string; shortLabel: string }> = [
   { id: "all", label: "All", shortLabel: "A" },
@@ -246,29 +247,7 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
           </button>
         </div>
       ) : null}
-      <div aria-label="Timeline zoom" className="timeline-zoom-controls" role="group">
-        <button
-          aria-label="Zoom out timeline"
-          className="icon-button timeline-zoom-button"
-          disabled={timelineZoom <= timelineZoomMin}
-          onClick={() => onAdjustZoom(-1)}
-          title="Zoom out timeline"
-          type="button"
-        >
-          <IconSearchMinus />
-        </button>
-        <span className="timeline-zoom-label">{formatTimelineZoomLabel(timelineZoom)}</span>
-        <button
-          aria-label="Zoom in timeline"
-          className="icon-button timeline-zoom-button"
-          disabled={timelineZoom >= TIMELINE_ZOOM_MAX}
-          onClick={() => onAdjustZoom(1)}
-          title="Zoom in timeline"
-          type="button"
-        >
-          <IconSearchPlus />
-        </button>
-      </div>
+      <WorkspaceTopbarZoomControls ariaLabel="Timeline zoom" label="timeline" max={TIMELINE_ZOOM_MAX} min={timelineZoomMin} onChange={onAdjustZoom} value={timelineZoom} />
     </div>
   );
 };

@@ -9,7 +9,7 @@ interface MaterialEditorModalProps {
   isDeletingMaterial: boolean;
   isSavingMaterial: boolean;
   materialDraft: MaterialPayload;
-  materialModalMode: "create" | "edit";
+  materialModalMode: "create" | "edit" | null;
   activeMaterialId: string | null;
   setMaterialDraft: Dispatch<SetStateAction<MaterialPayload>>;
 }
@@ -25,6 +25,8 @@ export function MaterialEditorModal({
   activeMaterialId,
   setMaterialDraft,
 }: MaterialEditorModalProps) {
+  if (!materialModalMode) return null;
+
   return (
     <ModalDialog label="Material editor" onClose={closeMaterialModal}>
       <section

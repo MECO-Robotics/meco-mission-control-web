@@ -1,7 +1,6 @@
 import type { WorkspaceToastDismissReason } from "@/features/workspace/workspaceToastQueue";
 import { WorkspaceToastStack, type WorkspaceToastStackItem } from "../WorkspaceStatusToast";
 import { WorkspaceTaskSection } from "./sections/WorkspaceTaskSection";
-import { WorkspaceRiskSection } from "./sections/WorkspaceRiskSection";
 import { WorkspaceWorklogsSection } from "./sections/WorkspaceWorklogsSection";
 import { WorkspaceInventorySection } from "./sections/WorkspaceInventorySection";
 import { WorkspaceSubsystemsSection } from "./sections/WorkspaceSubsystemsSection";
@@ -69,7 +68,6 @@ export function WorkspaceContentPanelsView(props: WorkspaceContentPanelsViewProp
 
       <WorkspaceHomeSection {...props} />
       <WorkspaceTaskSection {...props} />
-      <WorkspaceRiskSection {...props} />
       <WorkspaceWorklogsSection {...props} />
       <WorkspaceManufacturingSection {...props} />
       <WorkspaceInventorySection {...props} />

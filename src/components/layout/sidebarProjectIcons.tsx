@@ -1,6 +1,6 @@
 import { createElement, type ReactNode } from "react";
 import {
-  CalendarDays, ClipboardCheck, FileText, Package, ShoppingCart, Wrench, AlertTriangle,
+  CalendarDays, ClipboardCheck, FileText, Package, ShoppingCart, Wrench,
   Bot,
   Briefcase,
   Boxes,
@@ -146,13 +146,11 @@ export const subItemIcons: Record<import("@/lib/workspaceNavigation").Navigation
   home: createElement(LayoutDashboard, { size: 14 }),
   "work-tasks": createElement(ListTodo, { size: 14 }),
   "work-schedule": createElement(CalendarDays, { size: 14 }),
-  "work-risks": createElement(AlertTriangle, { size: 14 }),
-  "work-activity": createElement(FileText, { size: 14 }),
   "resources-materials": createElement(Boxes, { size: 14 }),
   "resources-documents": createElement(FileText, { size: 14 }),
   "resources-parts": createElement(Package, { size: 14 }),
   "resources-purchases": createElement(ShoppingCart, { size: 14 }),
-  "resources-manufacturing": createElement(Wrench, { size: 14 }),
+  "work-manufacturing": createElement(Wrench, { size: 14 }),
   "resources-structure": createElement(Bot, { size: 14 }),
   "team-people": createElement(Users, { size: 14 }),
   "team-attendance": createElement(ClipboardCheck, { size: 14 }),

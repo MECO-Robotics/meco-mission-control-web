@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useRef, type ComponentProps, type ReactElement } from "react";
+import { Children, useCallback, useLayoutEffect, useRef, type ComponentProps, type ReactElement, type ReactNode } from "react";
 jest.mock("react", () => ({ ...jest.requireActual("react"), useCallback: jest.fn((callback) => callback), useLayoutEffect: jest.fn(), useRef: jest.fn() }));
 import { TaskEditorModal } from "../modals/TaskEditorModalContent";
 import { TaskDetailsModal } from "../modals/TaskDetailsModalContent";
@@ -30,8 +30,19 @@ it.each(["create", "edit"] as const)("freezes the %s form and refuses close/canc
   expect(pending.fieldset.props.disabled).toBe(true);
   expect(pending.fieldset.props.inert).toBeUndefined();
   pending.details.closeTaskDetailsModal();
-  const footer = pending.details.footerActions as ReactElement<{ children: ReactElement<{ children: string; onClick?: () => void }>[] }>;
-  footer.props.children.find((button) => button && button.props.children === "Cancel")?.props.onClick?.();
+  const clickCancel = (node: ReactNode): void => {
+    for (const child of Children.toArray(node)) {
+      if (typeof child === "object" && child !== null && "props" in child) {
+        const element = child as ReactElement<{ children?: ReactNode; onClick?: () => void }>;
+        if (element.props.children === "Cancel") {
+          element.props.onClick?.();
+          return;
+        }
+        clickCancel(element.props.children);
+      }
+    }
+  };
+  clickCancel(pending.details.footerActions);
   expect(close).not.toHaveBeenCalled(); expect(canceled).not.toHaveBeenCalled(); expect(openDetails).not.toHaveBeenCalled();
   const settled = render(false);
   expect(settled.fieldset.props.disabled).toBe(false);

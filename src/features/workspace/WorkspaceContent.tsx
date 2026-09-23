@@ -73,6 +73,7 @@ export interface WorkspaceContentProps {
   ) => Promise<void>;
   handleUpdateMember: (milestone: React.FormEvent<HTMLFormElement>) => void;
   isAddPersonOpen: boolean;
+  isActivityModalOpen: boolean;
   isDeletingMember: boolean;
   isEditPersonOpen: boolean;
   isLoadingData: boolean;
@@ -154,6 +155,7 @@ export interface WorkspaceContentProps {
   requestMemberPhotoUpload: (file: File) => Promise<string>;
   setActivePersonFilter: (value: FilterSelection) => void;
   setIsAddPersonOpen: (open: boolean) => void;
+  setIsActivityModalOpen: (open: boolean) => void;
   setIsEditPersonOpen: (open: boolean) => void;
   setMemberEditDraft: Dispatch<SetStateAction<MemberPayload | null>>;
   setMemberForm: Dispatch<SetStateAction<MemberPayload>>;
@@ -218,7 +220,7 @@ export function WorkspaceContent({
   const inventorySwipeDirection = getSwipeDirection(
     previousInventoryViewRef.current,
     effectiveInventoryView,
-    ["materials", "parts", "part-mappings", "purchases"],
+    ["materials", "documents", "parts", "part-mappings", "purchases"],
   );
 
   useEffect(() => {
@@ -238,10 +240,6 @@ export function WorkspaceContent({
     window.history.replaceState(window.history.state, "", `${window.location.pathname}?${params.toString()}${window.location.hash}`);
     if (target.taskView) {
       setTaskView(target.taskView);
-    }
-
-    if (target.riskManagementView) {
-      setRiskManagementView(target.riskManagementView);
     }
 
     if (target.worklogsView) {

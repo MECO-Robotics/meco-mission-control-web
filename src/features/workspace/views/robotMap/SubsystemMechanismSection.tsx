@@ -1,5 +1,4 @@
-import { PartThumbnail } from "../../shared/media/PartThumbnail";
-import { IconEdit, IconPlus, IconTrash } from "@/components/shared/Icons";
+import { IconEdit, IconPlus, IconRisk, IconTrash } from "@/components/shared/Icons";
 import type { MechanismRecord } from "@/types/recordsOrganization";
 import type { PartInstanceRecord } from "@/types/recordsInventory";
 
@@ -88,9 +87,9 @@ export function SubsystemMechanismSection({
                     {mechanism.parts.map((part) => (
                       <li key={part.id}>
                         <span className="robot-config-part-title">
-                          <PartThumbnail name={part.name} imageUrl={part.definitionPhotoUrl} fallbackUrl={part.record.photoUrl} />
                           <span>{`${part.name} (${part.quantity})`}</span>
-                          <CadSourceBadge source={part.cadSource} />
+                            <CadSourceBadge source={part.cadSource} />
+                            {part.riskCount ? <span title={`${part.riskCount} risks`}><IconRisk /> {part.riskCount}</span> : null}
                         </span>
                         <div className="robot-config-row-actions">
                           <button

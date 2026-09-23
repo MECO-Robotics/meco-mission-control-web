@@ -63,6 +63,7 @@ export function useAppSidebarNavigationModels({
         ...subItem,
         target: getNavigationTarget(subItem.id, viewAvailabilityContext),
         isEnabled: isSubItemEnabled(subItem.id),
+        isDisabled: subItem.id === "resources-structure" && !isSubItemEnabled(subItem.id),
       })),
     [isSubItemEnabled, viewAvailabilityContext],
   );

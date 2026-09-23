@@ -3,7 +3,8 @@ import type { ReactNode } from "react";
 
 import { IconCalendar, IconEdit, IconPlus } from "@/components/shared/Icons";
 import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
-import { getProjectIcon, getProjectIconColor } from "./appSidebarIcons";
+import { getProjectIcon, getProjectIconColor } from "./sidebarProjectIcons";
+import type { ScopePanelConfig } from "./sidebar/SidebarScopePanel";
 
 export const ADD_ROBOT_PROJECT_VALUE = "__add_robot_project__";
 export const CREATE_SEASON_OPTION_VALUE = "__create_new_season__";
@@ -21,6 +22,7 @@ interface AppSidebarScopeMenuPopupProps {
   seasons: SeasonRecord[];
   selectedProjectId: string | null;
   selectedSeasonId: string | null;
+  scopePanels: ScopePanelConfig[];
 }
 
 function ScopeOption({
@@ -74,6 +76,7 @@ export function AppSidebarScopeMenuPopup({
   seasons,
   selectedProjectId,
   selectedSeasonId,
+  scopePanels,
 }: AppSidebarScopeMenuPopupProps) {
   const shouldShowEditRobot = canEditSelectedRobot;
 
@@ -82,20 +85,16 @@ export function AppSidebarScopeMenuPopup({
       <div aria-label="Workspace scope" className="sidebar-scope-kind-panel" role="dialog">
         <p className="sidebar-compact-popup-title">Workspace scope</p>
         <div role="listbox">
-          <ScopeOption
-            icon={<LayoutGrid size={14} strokeWidth={2} />}
-            isActive={activePanel === "project"}
-            label="Project"
-            onClick={() => onPanelChange("project")}
-            showsNextPanel
-          />
-          <ScopeOption
-            icon={<IconCalendar />}
-            isActive={activePanel === "season"}
-            label="Season"
-            onClick={() => onPanelChange("season")}
-            showsNextPanel
-          />
+          {scopePanels.map((panel) => (
+            <ScopeOption
+              icon={panel.icon === "calendar-days" ? <IconCalendar /> : <LayoutGrid size={14} strokeWidth={2} />}
+              isActive={activePanel === panel.id}
+              label={panel.label}
+              onClick={() => onPanelChange(panel.id)}
+              showsNextPanel
+              key={panel.id}
+            />
+          ))}
         </div>
       </div>
       {activePanel === "season" ? (

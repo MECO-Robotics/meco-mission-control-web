@@ -5,10 +5,11 @@ import type { TaskRecord } from "@/types/recordsExecution";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
-import { WorkspaceTopbarControls, buildSingleAddMenuAction } from "@/features/workspace/shared/topbar";
+import { IconCalendar, IconTasks } from "@/components/shared/Icons";
+import { WorkspaceTopbarControls, buildSingleAddMenuAction, buildTopbarAddMenuActions, makeAddMenuAction } from "@/features/workspace/shared/topbar";
 import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { getTimelineMinimumZoomForWidth } from "@/features/workspace/shared/timeline/timelineZoom";
-import { midpointOfTimelineDays } from "@/features/workspace/shared/timeline/timelineDateUtils";
+import { addDaysToDay, addMonthsToDay, midpointOfTimelineDays } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import { buildTimelineGridLayout } from "./model/timelineGridLayout";
 import { TimelineGridBody } from "./TimelineGridBody";
@@ -103,10 +104,23 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     (nextInterval: TimelineViewInterval) => {
       const nextAnchorDate = midpointOfTimelineDays(data.timeline.days) ?? viewAnchorDate;
       applyTimelineIntervalChange(nextInterval, nextAnchorDate);
+      window.dispatchEvent(new CustomEvent("mission-control:schedule-period-change", {
+        detail: { anchorDate: nextAnchorDate, viewMode: nextInterval === "week" ? "week" : "month" },
+      }));
     },
     [applyTimelineIntervalChange, data.timeline.days, viewAnchorDate],
   );
   const { setTimelineGridMotion } = state;
+  const handleShiftPeriod = useCallback((direction: -1 | 1) => {
+    if (state.viewInterval === "all") return;
+    const nextAnchorDate = state.viewInterval === "week"
+      ? addDaysToDay(state.viewAnchorDate, direction * 7)
+      : addMonthsToDay(state.viewAnchorDate, direction);
+    state.shiftTimelinePeriod(direction);
+    window.dispatchEvent(new CustomEvent("mission-control:schedule-period-change", {
+      detail: { anchorDate: nextAnchorDate },
+    }));
+  }, [state]);
 
   const layout = useMemo(
     () =>
@@ -200,7 +214,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             onChangePersonFilter={setActivePersonFilter}
             onSearchChange={setSearchFilter}
             onIntervalChange={handleTimelineIntervalChange}
-            onShiftPeriod={state.shiftTimelinePeriod}
+            onShiftPeriod={handleShiftPeriod}
             priorityFilter={filterControls.filters.priorityFilter}
             projectFilter={filterControls.filters.projectFilter}
             searchFilter={searchFilter}
@@ -218,13 +232,13 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             viewInterval={state.viewInterval}
           />
           <WorkspaceTopbarAddMenu
-            actions={buildSingleAddMenuAction({
-              label: "Add task",
-              onSelect: openCreateTaskModal,
-            })}
-            ariaLabel="Add to timeline"
-            title="Add to timeline"
-            tutorialTarget="timeline-create-task-button"
+            actions={buildTopbarAddMenuActions(
+              makeAddMenuAction("Add meeting", () => window.dispatchEvent(new Event("mission-control:open-meeting")), <IconCalendar />),
+              makeAddMenuAction("Add milestone", () => window.dispatchEvent(new Event("mission-control:open-milestone")), <IconTasks />),
+              buildSingleAddMenuAction({ label: "Add task", onSelect: openCreateTaskModal })[0],
+            )}
+            ariaLabel="Add calendar item"
+            title="Add calendar item"
           />
         </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>

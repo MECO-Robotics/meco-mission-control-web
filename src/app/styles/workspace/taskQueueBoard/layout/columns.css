@@ -2,9 +2,10 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(15.5rem, 1fr));
   min-width: 0;
+  min-height: 100vh;
   width: 100%;
   gap: 0.7rem;
-  align-items: start;
+  align-items: stretch;
 }
 
 .task-queue-board-column {
@@ -12,10 +13,12 @@
   gap: 0.55rem;
   min-width: 0;
   padding: 0.7rem;
-  border: 1px solid var(--border-base);
-  border-radius: 16px;
-  background: var(--bg-panel);
-  box-shadow: 0 8px 20px rgba(15, 28, 52, 0.06);
+  border-inline: 1px solid var(--border-base);
+}
+
+/* Status labels stay above the lane content; the rules define the lane edges. */
+.kanban-status-column {
+  align-content: start;
 }
 
 .task-queue-board-column-header {

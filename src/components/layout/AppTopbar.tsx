@@ -12,16 +12,12 @@ import {
 import { APP_TOPBAR_SLOT_IDS } from "./AppTopbarSlotPortal";
 
 interface AppTopbarProps {
-  localMode?: "demo" | "tutorial" | null;
-  onResetDemo?: () => void;
   activeViewLabel: string;
   isDarkMode: boolean;
   isSidebarCollapsed: boolean;
 }
 
 export function AppTopbar({
-  localMode,
-  onResetDemo,
   activeViewLabel,
   isDarkMode,
   isSidebarCollapsed,
@@ -59,12 +55,6 @@ export function AppTopbar({
       <div className="app-topbar-left">
         <div className="app-topbar-view-title">
           <h1>{activeViewLabel}</h1>
-          {localMode ? (
-            <div className="local-workspace-status">
-              <span title="Changes stay in this browser tab and are never synced.">{localMode === "tutorial" ? "Local tutorial" : "Local demo"} · no sync</span>
-              {localMode === "demo" ? <button type="button" className="secondary-action" onClick={onResetDemo}>Reset demo</button> : null}
-            </div>
-          ) : null}
         </div>
       </div>
       <div className="app-topbar-search-slot">

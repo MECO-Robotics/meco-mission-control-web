@@ -37,7 +37,7 @@ export function HomeView({ bootstrap, onOpenTask, onOpenSchedule, today = new Da
           emptyLabel="No upcoming milestones."
           items={model.upcomingMilestones}
           onOpenItem={onOpenSchedule}
-          title="Upcoming milestones"
+          title="Agenda"
         />
       </div>
     </section>

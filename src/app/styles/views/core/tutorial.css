@@ -13,7 +13,8 @@
 .interactive-tutorial-overlay {
   position: fixed;
   inset: 0;
-  z-index: 2720;
+  /* Keep the tutorial's non-interactive dim layer behind workspace controls. */
+  z-index: 1190;
   pointer-events: none;
 }
 

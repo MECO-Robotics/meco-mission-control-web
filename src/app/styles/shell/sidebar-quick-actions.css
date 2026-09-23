@@ -76,6 +76,29 @@
   text-decoration: none;
 }
 
+.sidebar-quick-action-profile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  width: 100%;
+  height: 1.9rem;
+}
+
+.sidebar-quick-action-profile .app-profile-editor-button {
+  width: 1.9rem;
+  min-width: 1.9rem;
+  height: 1.9rem;
+  padding: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.sidebar-quick-action-profile .profile-avatar {
+  width: 1.9rem;
+  height: 1.9rem;
+}
+
 .sidebar-quick-action:hover,
 .sidebar-quick-action:focus-visible,
 .sidebar-add-menu[data-open="true"] > .sidebar-quick-action {

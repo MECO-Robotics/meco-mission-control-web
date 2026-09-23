@@ -2,9 +2,6 @@ import { type MouseEvent as ReactMouseEvent, type RefObject } from "react";
 import { CalendarDays, ChevronRight, LayoutGrid } from "lucide-react";
 
 import { IconHelp } from "@/components/shared/Icons";
-import type { SessionUser } from "@/lib/auth/types";
-
-import { AppProfileAssembly } from "./AppProfileAssembly";
 import { AppSidebarNotificationButton } from "./sidebar/AppSidebarNotificationButton";
 import { AppSidebarSettingsMenu } from "./sidebar/AppSidebarSettingsMenu";
 
@@ -14,22 +11,20 @@ interface AppSidebarProjectFooterProps {
   canSignOut: boolean;
   isDarkMode: boolean;
   isCollapsed: boolean;
-  isMyViewActive: boolean;
   isNotificationQueueOpen: boolean;
   isProjectPopupOpen: boolean;
-  myViewMemberName: string | null;
   onHelpSelect: () => void;
   onNotificationQueueToggle: () => void;
   onRefreshWorkspace: () => void;
   onSignIn: () => void;
   onSignOut: () => void;
-  onToggleMyView: () => void;
   onToggleDarkMode: () => void;
   notificationCount: number;
   onProjectTriggerClick: (event: ReactMouseEvent<HTMLButtonElement>) => void;
   projectTriggerRef: RefObject<HTMLButtonElement | null>;
   selectedScopeLabel: string;
-  sessionUser: SessionUser | null;
+  localMode: "demo" | "tutorial" | null;
+  onResetDemo: () => void;
 }
 
 export function AppSidebarProjectFooter({
@@ -38,22 +33,20 @@ export function AppSidebarProjectFooter({
   canSignOut,
   isDarkMode,
   isCollapsed,
-  isMyViewActive,
   isNotificationQueueOpen,
   isProjectPopupOpen,
-  myViewMemberName,
   onHelpSelect,
   onNotificationQueueToggle,
   onRefreshWorkspace,
   onSignIn,
   onSignOut,
-  onToggleMyView,
   onToggleDarkMode,
   notificationCount,
   onProjectTriggerClick,
   projectTriggerRef,
   selectedScopeLabel,
-  sessionUser,
+  localMode,
+  onResetDemo,
 }: AppSidebarProjectFooterProps) {
   const settingsMenu = (
     <AppSidebarSettingsMenu
@@ -96,16 +89,6 @@ export function AppSidebarProjectFooter({
       ) : null}
     </button>
   );
-  const profileToggle = (
-    <div className="sidebar-footer-profile" data-collapsed={isCollapsed ? "true" : "false"}>
-      <AppProfileAssembly
-        isMyViewActive={isMyViewActive}
-        myViewMemberName={myViewMemberName}
-        onToggleMyView={onToggleMyView}
-        sessionUser={sessionUser}
-      />
-    </div>
-  );
   const notificationMenu = (
     <AppSidebarNotificationButton
       isOpen={isNotificationQueueOpen}
@@ -132,13 +115,16 @@ export function AppSidebarProjectFooter({
 
   return !isCollapsed ? (
     <div className="sidebar-footer-stack">
-      {profileToggle}
+      {localMode ? <div className="sidebar-local-workspace-status" title="Changes stay in this browser tab and are never synced.">
+        <span>{localMode === "tutorial" ? "Local tutorial" : "Local demo"} · no sync</span>
+        {localMode === "demo" ? <button type="button" className="secondary-action" onClick={onResetDemo}>Reset demo</button> : null}
+      </div> : null}
       {scopeTrigger}
       {bottomTriplet}
     </div>
   ) : (
     <div className="sidebar-footer-stack sidebar-footer-stack-collapsed">
-      {profileToggle}
+      {localMode ? <span className="sidebar-local-workspace-mark" title={localMode === "tutorial" ? "Local tutorial · no sync" : "Local demo · no sync"}>●</span> : null}
       {scopeTrigger}
       {bottomTriplet}
     </div>

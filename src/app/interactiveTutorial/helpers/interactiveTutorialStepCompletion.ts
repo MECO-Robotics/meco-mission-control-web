@@ -120,7 +120,7 @@ export function isInteractiveTutorialStepComplete(
     "directory-view": "team-people", "task-queue": "work-tasks", "reports-worklogs": "work-activity",
     "inventory-parts": "resources-parts", "inventory-purchases": "resources-purchases",
     "subsystems-view": "resources-structure", "outreach-workflow-view": "resources-structure",
-    "manufacturing-cnc": "resources-manufacturing",
+    "manufacturing-cnc": "work-manufacturing",
   };
   if (step.id === "task-timeline" || step.id === "task-milestones") {
     const expected = step.id === "task-timeline" ? "timeline" : "milestones";

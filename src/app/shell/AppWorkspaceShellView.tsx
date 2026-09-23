@@ -16,6 +16,7 @@ import {
 } from "@/lib/workspaceNavigation";
 
 import { getLocalWorkspaceMode, resetLocalDemo, subscribeLocalWorkspace } from "@/lib/localWorkspace/session";
+import { findMemberForSessionUser } from "@/lib/appUtils/common";
 import { Suspense, useSyncExternalStore, useEffect, useLayoutEffect, useRef } from "react";
 
 import type { AppWorkspaceController } from "@/app/hooks/useAppWorkspaceController";
@@ -56,10 +57,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       c.setTaskView(target.taskView);
     }
 
-    if (target.riskManagementView) {
-      c.setRiskManagementView(target.riskManagementView);
-    }
-
     if (target.worklogsView) {
       c.setWorklogsView(target.worklogsView);
     }
@@ -79,6 +76,18 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
     c.handleSidebarTabSelect(target.tab, {
       keepSidebarOpen: options?.keepSidebarOpen,
     });
+  };
+  const handleOpenProfileEditor = () => {
+    const memberId = c.signedInMember?.id ??
+      findMemberForSessionUser(c.bootstrap.members, c.sessionUser)?.id;
+    if (!memberId) {
+      c.setDataMessage("Your profile is not available in the current roster.");
+      return;
+    }
+    c.selectMember(memberId, c.bootstrap);
+    c.setIsAddPersonOpen(false);
+    c.setIsEditPersonOpen(true);
+    c.handleSidebarTabSelect("roster");
   };
   const availableViews = NAVIGATION_SUB_ITEMS
     .filter((view) => isNavigationSubItemAvailable(view.id, { context: navigationContext }))
@@ -176,6 +185,19 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
     handleSelectNavigationTarget({ tab: "tasks", taskView: "timeline" });
     c.switchTaskCreateToMilestone();
   };
+  const handleSelectSeason = (seasonId: string | null) => {
+    c.setSelectedSeasonId(seasonId);
+    c.setSelectedProjectId(null);
+    void c.loadWorkspace({ seasonId, projectId: null, personId: null });
+  };
+  const handleSelectProject = (projectId: string | null) => {
+    c.setSelectedProjectId(projectId);
+    void c.loadWorkspace({
+      seasonId: c.selectedSeasonId,
+      projectId,
+      personId: null,
+    });
+  };
 
   return (
     <main
@@ -186,17 +208,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
     >
       <Suspense fallback={<WorkspaceShellLoading />}>
         <AppTopbar
-      localMode={localMode}
-      onResetDemo={() => {
-        try {
-          resetLocalDemo();
-          c.setSelectedSeasonId("default-season");
-          c.setSelectedProjectId(null);
-          void c.loadWorkspace({ seasonId: "default-season", projectId: null, personId: null });
-        } catch (error) {
-          c.setDataMessage(error instanceof Error ? error.message : "The local demo could not be reset.");
-        }
-      }}
       activeViewLabel={activeViewLabel}
       isDarkMode={c.isDarkMode}
       isSidebarCollapsed={c.isSidebarCollapsed}
@@ -206,11 +217,9 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       canSignIn={c.enforcedAuthConfig !== null && c.sessionUser === null}
       handleSignOut={c.handleSignOut}
       isDarkMode={c.isDarkMode}
-      isMyViewActive={c.isMyViewActive}
       onSelectTarget={handleSelectNavigationTarget}
       isCollapsed={c.isSidebarCollapsed}
       isNotificationQueueOpen={c.isNotificationQueueOpen}
-      myViewMemberName={c.signedInMember?.name ?? null}
       notificationCount={c.notificationHistory.length}
       onCreateMilestone={handleCreateMilestone}
       onCreatePart={c.openCreatePartDefinitionModal}
@@ -219,8 +228,8 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       onCreateTask={c.openCreateTaskModal}
       onRefreshWorkspace={c.loadWorkspace}
       onSignIn={c.requestSignIn}
-      onSelectSeason={c.setSelectedSeasonId}
-      onToggleMyView={c.toggleMyView}
+      onSelectSeason={handleSelectSeason}
+      onOpenProfileEditor={handleOpenProfileEditor}
       onToggleNotificationQueue={c.toggleNotificationQueue}
       toggleSidebar={c.toggleSidebar}
       projects={c.projectsInSelectedSeason}
@@ -235,9 +244,21 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       taskView={c.taskView}
       toggleDarkMode={c.toggleDarkMode}
       worklogsView={c.worklogsView}
-      onSelectProject={c.setSelectedProjectId}
+      onSelectProject={handleSelectProject}
       onCreateRobot={c.handleCreateRobot}
       onEditSelectedRobot={c.handleEditSelectedRobot}
+      onEnqueueNotification={c.enqueueTaskEditNotice}
+      localMode={localMode}
+      onResetDemo={() => {
+        try {
+          resetLocalDemo();
+          c.setSelectedSeasonId("default-season");
+          c.setSelectedProjectId(null);
+          void c.loadWorkspace({ seasonId: "default-season", projectId: null, personId: null });
+        } catch (error) {
+          c.setDataMessage(error instanceof Error ? error.message : "The local demo could not be reset.");
+        }
+       }}
     />
         {c.isAddSeasonPopupOpen ? <AddSeasonPopup controller={c} /> : null}
         {c.robotProjectModalMode ? <RobotProjectPopup controller={c} /> : null}
@@ -265,6 +286,8 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
           handleUpdateMember={content.handleUpdateMember}
           requestMemberPhotoUpload={content.requestMemberPhotoUpload}
           isAddPersonOpen={content.isAddPersonOpen}
+          isActivityModalOpen={content.isActivityModalOpen}
+          setIsActivityModalOpen={content.setIsActivityModalOpen}
           isDeletingMember={content.isDeletingMember}
           isEditPersonOpen={content.isEditPersonOpen}
           isLoadingData={content.isLoadingData}
@@ -366,11 +389,11 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       {c.isWorkspaceModalOpen ? (
         <Suspense fallback={null}>
           <WorkspaceModalHost
+            materialEditor={controller.model.materialEditor}
             openCreateWorkLogModal={c.openCreateWorkLogModal}
             openCreateQaReportModal={c.openCreateQaReportModal}
             activeArtifactId={c.activeArtifactId}
             activePartDefinitionId={c.activePartDefinitionId}
-            activeMaterialId={c.activeMaterialId}
             activeMechanismId={c.activeMechanismId}
             activeWorkstreamId={c.activeWorkstreamId}
             activeSubsystemId={c.activeSubsystemId}
@@ -379,7 +402,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
             bootstrap={c.scopedBootstrap}
             closeManufacturingModal={c.closeManufacturingModal}
             closeArtifactModal={c.closeArtifactModal}
-            closeMaterialModal={c.closeMaterialModal}
             closeMechanismModal={c.closeMechanismModal}
             closePartInstanceModal={c.closePartInstanceModal}
             closePartDefinitionModal={c.closePartDefinitionModal}
@@ -395,7 +417,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
             requestPhotoUpload={c.requestPhotoUpload}
             disciplinesById={c.disciplinesById}
             milestonesById={c.milestonesById}
-            handleDeleteMaterial={c.handleDeleteMaterial}
             handleDeleteArtifact={c.handleDeleteArtifact}
             handleToggleArtifactArchived={c.handleToggleArtifactArchived}
             handleDeletePartDefinition={c.handleDeletePartDefinition}
@@ -408,7 +429,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
             handlePartInstanceSubmit={c.handlePartInstanceSubmit}
             handleMechanismSubmit={c.handleMechanismSubmit}
             handleManufacturingSubmit={c.handleManufacturingSubmit}
-            handleMaterialSubmit={c.handleMaterialSubmit}
             handlePartDefinitionSubmit={c.handlePartDefinitionSubmit}
             handleArtifactSubmit={c.handleArtifactSubmit}
             handlePurchaseSubmit={c.handlePurchaseSubmit}
@@ -419,14 +439,12 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
             handleTaskSubmit={c.handleTaskSubmit}
             handleResolveTaskBlocker={c.handleResolveTaskBlocker}
             handleWorkstreamSubmit={c.handleWorkstreamSubmit}
-            isDeletingMaterial={c.isDeletingMaterial}
             isDeletingArtifact={c.isDeletingArtifact}
             isDeletingPartDefinition={c.isDeletingPartDefinition}
             isDeletingMechanism={c.isDeletingMechanism}
             isDeletingTask={c.isDeletingTask}
             isSavingManufacturing={c.isSavingManufacturing}
             isSavingArtifact={c.isSavingArtifact}
-            isSavingMaterial={c.isSavingMaterial}
             isSavingPartDefinition={c.isSavingPartDefinition}
             isSavingPartInstance={c.isSavingPartInstance}
             isSavingMechanism={c.isSavingMechanism}
@@ -441,8 +459,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
             artifactModalMode={c.artifactModalMode}
             manufacturingDraft={c.manufacturingDraft}
             manufacturingModalMode={c.manufacturingModalMode}
-            materialDraft={c.materialDraft}
-            materialModalMode={c.materialModalMode}
             mechanismsById={c.mechanismsById}
             mentors={c.mentors}
             mechanismDraft={c.mechanismDraft}
@@ -468,7 +484,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
             setArtifactDraft={c.setArtifactDraft}
             setMechanismDraft={c.setMechanismDraft}
             setManufacturingDraft={c.setManufacturingDraft}
-            setMaterialDraft={c.setMaterialDraft}
             setPartInstanceDraft={c.setPartInstanceDraft}
             setPartDefinitionDraft={c.setPartDefinitionDraft}
             setPurchaseDraft={c.setPurchaseDraft}

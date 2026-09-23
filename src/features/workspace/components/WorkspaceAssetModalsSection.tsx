@@ -6,7 +6,7 @@ import { MechanismEditorModal } from "../modals/structure/MechanismEditorModal";
 import type { WorkspaceModalHostViewProps } from "./workspaceModalHostViewTypes";
 
 export function WorkspaceAssetModalsSection(props: WorkspaceModalHostViewProps) {
-  if (!props.artifactModalMode && !props.materialModalMode && !props.mechanismModalMode && !props.partInstanceModalMode && !props.partDefinitionModalMode) {
+  if (!props.artifactModalMode && !props.materialEditor.materialModalMode && !props.mechanismModalMode && !props.partInstanceModalMode && !props.partDefinitionModalMode) {
     return null;
   }
 
@@ -28,19 +28,7 @@ export function WorkspaceAssetModalsSection(props: WorkspaceModalHostViewProps) 
         />
       ) : null}
 
-      {props.materialModalMode ? (
-        <MaterialEditorModal
-          activeMaterialId={props.activeMaterialId}
-          closeMaterialModal={props.closeMaterialModal}
-          handleDeleteMaterial={props.handleDeleteMaterial}
-          handleMaterialSubmit={props.handleMaterialSubmit}
-          isDeletingMaterial={props.isDeletingMaterial}
-          isSavingMaterial={props.isSavingMaterial}
-          materialDraft={props.materialDraft}
-          materialModalMode={props.materialModalMode}
-          setMaterialDraft={props.setMaterialDraft}
-        />
-      ) : null}
+      <MaterialEditorModal {...props.materialEditor} />
 
       {props.mechanismModalMode ? (
         <MechanismEditorModal

@@ -39,10 +39,11 @@
   border: 0;
   background: transparent;
   box-shadow: none;
-  cursor: default;
+  cursor: pointer;
 }
 
-.user-chip.profile-trigger.app-profile-my-view-button {
+.user-chip.profile-trigger.app-profile-my-view-button,
+.user-chip.profile-trigger.app-profile-editor-button {
   border: 1px solid var(--border-base);
   border-radius: 999px;
   background: var(--bg-panel);
@@ -52,7 +53,9 @@
 }
 
 .user-chip.profile-trigger.app-profile-my-view-button:hover,
-.user-chip.profile-trigger.app-profile-my-view-button:focus-visible {
+.user-chip.profile-trigger.app-profile-my-view-button:focus-visible,
+.user-chip.profile-trigger.app-profile-editor-button:hover,
+.user-chip.profile-trigger.app-profile-editor-button:focus-visible {
   border-color: rgba(22, 71, 142, 0.3);
   background: var(--bg-row-alt);
   color: var(--text-title);

@@ -6,8 +6,6 @@ import type { ManufacturingViewTab } from "@/lib/workspaceNavigation";
 import {
   IconManufacturing,
   IconPerson,
-  IconSearchMinus,
-  IconSearchPlus,
   IconTasks,
 } from "@/components/shared/Icons";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
@@ -15,14 +13,13 @@ import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspace
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { filterSelectionIncludes, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
-import { PaginationControls, useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import {
   WorkspaceTopbarControls,
   buildSingleAddMenuAction,
   buildTopbarSearchProps,
 } from "@/features/workspace/shared/topbar";
-import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
+import { WorkspaceTopbarAddMenu, WorkspaceTopbarZoomControls } from "@/features/workspace/shared/ui";
 import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { MANUFACTURING_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
@@ -34,7 +31,6 @@ import {
 } from "./manufacturingProcessFilter";
 import {
   clampTaskQueueZoom,
-  formatTaskQueueZoomLabel,
   TASK_QUEUE_ZOOM_MAX,
   TASK_QUEUE_ZOOM_MIN,
   TASK_QUEUE_ZOOM_STEP,
@@ -124,7 +120,6 @@ export function ManufacturingQueueView({
       );
     });
   }, [activePersonFilter, items, material, processFilterValue, requester, search, status, subsystem]);
-  const manufacturingPagination = useWorkspacePagination(filteredItems);
   const activeFilterCount = [
     processFilterSelection,
     subsystem,
@@ -273,33 +268,7 @@ export function ManufacturingQueueView({
           }
         >
           <div className="task-queue-toolbar-inline-actions">
-            <div aria-label="Manufacturing zoom" className="task-queue-zoom-controls" role="group">
-              <button
-                aria-label="Zoom out manufacturing"
-                className="icon-button task-queue-zoom-button"
-                disabled={manufacturingZoom <= TASK_QUEUE_ZOOM_MIN}
-                onClick={() =>
-                  setManufacturingZoom((current) => clampTaskQueueZoom(current - TASK_QUEUE_ZOOM_STEP))
-                }
-                title="Zoom out manufacturing"
-                type="button"
-              >
-                <IconSearchMinus />
-              </button>
-              <span className="task-queue-zoom-label">{formatTaskQueueZoomLabel(manufacturingZoom)}</span>
-              <button
-                aria-label="Zoom in manufacturing"
-                className="icon-button task-queue-zoom-button"
-                disabled={manufacturingZoom >= TASK_QUEUE_ZOOM_MAX}
-                onClick={() =>
-                  setManufacturingZoom((current) => clampTaskQueueZoom(current + TASK_QUEUE_ZOOM_STEP))
-                }
-                title="Zoom in manufacturing"
-                type="button"
-              >
-                <IconSearchPlus />
-              </button>
-            </div>
+            <WorkspaceTopbarZoomControls ariaLabel="Manufacturing zoom" label="manufacturing" max={TASK_QUEUE_ZOOM_MAX} min={TASK_QUEUE_ZOOM_MIN} onChange={(direction) => setManufacturingZoom((current) => clampTaskQueueZoom(current + direction * TASK_QUEUE_ZOOM_STEP))} value={manufacturingZoom} />
           </div>
         </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
@@ -316,7 +285,7 @@ export function ManufacturingQueueView({
             <p className="empty-state">{emptyStateMessage}</p>
           ) : (
             <ManufacturingKanbanBoard
-              items={manufacturingPagination.pageItems}
+              items={filteredItems}
               membersById={membersById}
               onEdit={onEdit}
               onQuickStatusChange={onQuickStatusChange}
@@ -326,18 +295,6 @@ export function ManufacturingQueueView({
               tutorialTarget={tutorialTargetPrefix ? tutorialTarget : undefined}
             />
           )}
-          <PaginationControls
-            label={title}
-            onPageChange={manufacturingPagination.setPage}
-            onPageSizeChange={manufacturingPagination.setPageSize}
-            page={manufacturingPagination.page}
-            pageSize={manufacturingPagination.pageSize}
-            pageSizeOptions={manufacturingPagination.pageSizeOptions}
-            rangeEnd={manufacturingPagination.rangeEnd}
-            rangeStart={manufacturingPagination.rangeStart}
-            totalItems={manufacturingPagination.totalItems}
-            totalPages={manufacturingPagination.totalPages}
-          />
         </>
       </KanbanScrollFrame>
     </section>

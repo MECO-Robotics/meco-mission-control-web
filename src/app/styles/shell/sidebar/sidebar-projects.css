@@ -1,0 +1,49 @@
+.sidebar-project-option {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-copy);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: left;
+  padding: 0.36rem 0.42rem;
+  cursor: pointer;
+}
+
+.sidebar-project-option-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.sidebar-project-option-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-project-option:hover {
+  background: var(--bg-row-alt);
+  border-color: rgba(15, 28, 52, 0.08);
+}
+
+.sidebar-project-option[data-active="true"] {
+  background: var(--meco-soft-blue);
+  border-color: rgba(22, 71, 142, 0.22);
+  color: var(--meco-blue);
+}
+
+.sidebar-project-option:disabled {
+  opacity: 0.64;
+  cursor: not-allowed;
+}
+

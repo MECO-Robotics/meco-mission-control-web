@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
 import { Home } from "lucide-react";
-import { IconHelp, IconManufacturing, IconParts, IconRisk, IconRoster, IconSubsystems, IconTasks, IconWorkLogs } from "@/components/shared/Icons";
+import { IconHelp, IconManufacturing, IconParts, IconRoster, IconSubsystems, IconTasks, IconWorkLogs } from "@/components/shared/Icons";
 import type { NavigationItem } from "@/lib/workspaceNavigation";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
@@ -110,12 +110,6 @@ export function useWorkspaceDerivedData({
           label: "Work",
           icon: <IconTasks />,
           count: bootstrap.tasks.length,
-        },
-        {
-          value: "risk-management",
-          label: "Risks",
-          icon: <IconRisk />,
-          count: bootstrap.risks.length,
         },
         {
           value: "worklogs",

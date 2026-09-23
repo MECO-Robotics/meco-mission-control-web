@@ -7,6 +7,16 @@
   flex: 0 0 auto;
 }
 
+.workspace-topbar-controls.timeline-topbar-controls > .timeline-toolbar {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.workspace-topbar-controls.timeline-topbar-controls > .timeline-toolbar > .topbar-responsive-search {
+  display: none;
+}
+
 .filter-toolbar.timeline-topbar-controls {
   flex-wrap: nowrap;
 }
@@ -21,6 +31,11 @@
 .timeline-topbar-controls .timeline-period-label,
 .timeline-topbar-controls .timeline-zoom-label {
   flex: 0 0 auto;
+}
+
+.workspace-topbar-controls.timeline-topbar-controls > .topbar-add-menu {
+  order: 999;
+  margin-left: auto;
 }
 
 .milestones-toolbar {
