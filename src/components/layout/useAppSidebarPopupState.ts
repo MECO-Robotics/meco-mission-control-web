@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
 import type { AppSidebarScopePanel } from "./AppSidebarScopeMenuPopup";
-import { getCatalog } from "@/catalog";
 
 const POPUP_VERTICAL_MARGIN = 8;
 
@@ -33,9 +32,7 @@ export function useAppSidebarPopupState() {
     top: 0,
   });
 
-  // Derive scope panels from catalog
-  const catalog = getCatalog();
-  const scopePanels = catalog?.scopePanels ?? [
+  const scopePanels = [
     { id: "project", label: "Projects", icon: "LayoutGrid" },
     { id: "season", label: "Seasons", icon: "CalendarDays" }
   ];

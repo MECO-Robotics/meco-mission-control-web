@@ -148,10 +148,6 @@ export function AppSidebar({
     sidebarScrollRef,
   } = useSidebarScrollHints();
 
-  const handleSubItemSelect = (target: NavigationTarget) => {
-    onSelectTarget(target);
-  };
-
   const handleDisabledSubItemSelect = () => onEnqueueNotification({
     title: "Select Robot Project",
     message: "Select a robot project first to open this view.",

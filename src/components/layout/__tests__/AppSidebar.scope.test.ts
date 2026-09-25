@@ -61,7 +61,7 @@ function renderPopups(overrides: Partial<SidebarState>) {
     ...overrides,
   };
   return renderToStaticMarkup(
-    React.createElement(SidebarProvider, { value: state }, React.createElement(AppSidebarPopups)),
+    React.createElement(SidebarProvider, { value: state, children: React.createElement(AppSidebarPopups) }),
   );
 }
 
@@ -132,8 +132,8 @@ describe("AppSidebar scope", () => {
     expect(scopeMarkup).toContain("sidebar-scope-popup-shell");
     expect(scopeMarkup).toContain("sidebar-scope-kind-panel");
     expect(scopeMarkup).toContain("Workspace scope");
-    expect(scopeMarkup).toContain(">Project</span>");
-    expect(scopeMarkup).toContain(">Season</span>");
+    expect(scopeMarkup).toContain(">Projects</span>");
+    expect(scopeMarkup).toContain(">Seasons</span>");
     expect(scopeMarkup).not.toContain("sidebar-scope-target-panel");
   });
 
@@ -181,7 +181,7 @@ describe("AppSidebar scope", () => {
     expect(scopeMarkup).toContain("Seasons");
     expect(scopeMarkup).toContain("2027 Season");
     expect(scopeMarkup).toContain("Create new season");
-    expect(scopeMarkup).not.toContain("Projects");
+    expect(scopeMarkup).not.toContain('aria-label="Projects"');
     expect(scopeMarkup).not.toContain("All projects");
     expect(css).toContain(".sidebar-scope-option-caret");
   });

@@ -10,8 +10,6 @@ import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import {
   buildTopbarSearchProps,
-  buildTopbarAddMenuActions,
-  makeAddMenuAction,
   WorkspaceTopbarControls,
 } from "@/features/workspace/shared/topbar";
 import { MilestonesMilestoneModal } from "@/features/workspace/views/milestones/MilestonesEventModal";
