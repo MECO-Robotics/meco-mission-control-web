@@ -23,6 +23,7 @@ import {
 import { AppSidebarProjectFooter } from "./AppSidebarProjectFooter";
 import { AppSidebarQuickActions } from "./AppSidebarQuickActions";
 import { AppSidebarSections } from "./AppSidebarSections";
+import { SidebarProvider, type SidebarState } from "./sidebar/context/SidebarContext";
 import { useSidebarScrollHints } from "./sidebar/useSidebarScrollHints";
 import { useAppSidebarNavigationModels } from "./sidebar/useAppSidebarNavigationModels";
 import { useAppSidebarPopupState } from "./useAppSidebarPopupState";
@@ -140,7 +141,7 @@ export function AppSidebar({
     togglePopup,
     setActivePanel,
     sidebarShellRef,
-  } = useAppSidebarPopupState({});
+  } = useAppSidebarPopupState();
   const {
     hasBottomHint,
     hasTopHint,
@@ -195,74 +196,84 @@ export function AppSidebar({
     event.currentTarget.blur();
   };
 
+  const sidebarState: SidebarState = {
+    // Navigation
+    activeTab,
+    activeSubItemId,
+    sectionModels,
+    onSelectTarget,
+    onDisabledSubItemSelect: handleDisabledSubItemSelect,
+    // Shell
+    isCollapsed,
+    toggleSidebar: handleSidebarFoldClick,
+    // Scope
+    projects,
+    seasons,
+    selectedProjectId,
+    selectedSeasonId,
+    selectedScopeLabel,
+    canEditSelectedRobot,
+    onSelectProject,
+    onSelectSeason,
+    onCreateRobot,
+    onCreateSeason,
+    onEditSelectedRobot,
+    // Popup
+    popup,
+    projectPopupRef,
+    projectTriggerRef,
+    sidebarShellRef,
+    onProjectTriggerClick: handleProjectTriggerClick,
+    onProjectOptionSelect: handleProjectOptionSelect,
+    onSeasonOptionSelect: handleSeasonOptionSelect,
+    onPanelChange: setActivePanel,
+    closePopup,
+    // Quick actions
+    sessionUser,
+    onCreateMilestone,
+    onCreatePart,
+    onCreateQaReport,
+    onCreateTask,
+    onOpenProfileEditor,
+    // Footer / settings
+    canSignIn,
+    handleSignOut,
+    onSignIn,
+    isDarkMode,
+    toggleDarkMode,
+    onRefreshWorkspace,
+    isNotificationQueueOpen,
+    notificationCount,
+    onToggleNotificationQueue,
+    onHelpSelect: handleHelpSelect,
+    // Local mode
+    localMode: localMode ?? null,
+    onResetDemo: onResetDemo ?? (() => undefined),
+    // Notifications
+    onEnqueueNotification,
+  };
+
   return (
-    <div
-      className="sidebar-shell"
-      data-collapsed={isCollapsed ? "true" : "false"}
-      data-scroll-bottom-hint={hasBottomHint ? "true" : "false"}
-      data-scroll-top-hint={hasTopHint ? "true" : "false"}
-      ref={sidebarShellRef}
-    >
-      <nav
-        aria-label="Workspace views"
-        className="sidebar"
+    <SidebarProvider value={sidebarState}>
+      <div
+        className="sidebar-shell"
         data-collapsed={isCollapsed ? "true" : "false"}
-        ref={sidebarScrollRef}
+        data-scroll-bottom-hint={hasBottomHint ? "true" : "false"}
+        data-scroll-top-hint={hasTopHint ? "true" : "false"}
+        ref={sidebarShellRef}
       >
-        <AppSidebarQuickActions
-          isCollapsed={isCollapsed}
-          onCreateMilestone={onCreateMilestone}
-          onCreatePart={onCreatePart}
-          onCreateQaReport={onCreateQaReport}
-          onCreateTask={onCreateTask}
-          onToggleSidebar={handleSidebarFoldClick}
-          onOpenProfileEditor={onOpenProfileEditor}
-          sessionUser={sessionUser}
-        />
-
-        <AppSidebarSections
-          activeSubItemId={activeSubItemId}
-          isCollapsed={isCollapsed}
-          onSubItemSelect={handleSubItemSelect}
-          onDisabledSubItemSelect={handleDisabledSubItemSelect}
-          sectionModels={sectionModels}
-        />
-
-        <AppSidebarProjectFooter
-          activeTab={activeTab}
-          canSignIn={canSignIn}
-          canSignOut={sessionUser !== null}
-          isDarkMode={isDarkMode}
-          isCollapsed={isCollapsed}
-          isNotificationQueueOpen={isNotificationQueueOpen}
-          isProjectPopupOpen={popup.isOpen}
-          onHelpSelect={handleHelpSelect}
-          onProjectTriggerClick={handleProjectTriggerClick}
-          onRefreshWorkspace={onRefreshWorkspace}
-          onSignIn={onSignIn}
-          onSignOut={handleSignOut}
-          onToggleDarkMode={toggleDarkMode}
-          onNotificationQueueToggle={onToggleNotificationQueue}
-          notificationCount={notificationCount}
-          projectTriggerRef={projectTriggerRef}
-          selectedScopeLabel={selectedScopeLabel}
-          localMode={localMode ?? null}
-          onResetDemo={onResetDemo ?? (() => undefined)}
-        />
-      </nav>
-      <AppSidebarPopups
-        popup={popup}
-        canEditSelectedRobot={canEditSelectedRobot}
-        onEditSelectedRobot={onEditSelectedRobot}
-        onSelectProjectOption={handleProjectOptionSelect}
-        onSelectSeasonOption={handleSeasonOptionSelect}
-        projectPopupRef={projectPopupRef}
-        projects={projects}
-        seasons={seasons}
-        selectedProjectId={selectedProjectId}
-        selectedSeasonId={selectedSeasonId}
-        onPanelChange={setActivePanel}
-      />
-    </div>
+        <nav
+          aria-label="Workspace views"
+          className="sidebar"
+          data-collapsed={isCollapsed ? "true" : "false"}
+          ref={sidebarScrollRef}
+        >
+          <AppSidebarQuickActions />
+          <AppSidebarSections />
+          <AppSidebarProjectFooter />
+        </nav>
+        <AppSidebarPopups />
+      </div>
+    </SidebarProvider>
   );
 }

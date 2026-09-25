@@ -1,28 +1,18 @@
-import { NAVIGATION_SECTION_LABELS, type NavigationSection, type NavigationSubItemId, type NavigationTarget } from "@/lib/workspaceNavigation";
+import { NAVIGATION_SECTION_LABELS, type NavigationSection } from "@/lib/workspaceNavigation";
 import { SidebarItem, type SidebarItemConfig } from "./sidebar/SidebarItem";
+import { useSidebarContext } from "./sidebar/context/SidebarContext";
 
 export type SidebarSubItemModel = SidebarItemConfig;
 
-interface SidebarSectionModel {
+export interface SidebarSectionModel {
   section: NavigationSection;
   subItems: SidebarSubItemModel[];
 }
 
-interface AppSidebarSectionsProps {
-  activeSubItemId: NavigationSubItemId | null;
-  isCollapsed: boolean;
-  onSubItemSelect: (target: NavigationTarget) => void;
-  onDisabledSubItemSelect: () => void;
-  sectionModels: SidebarSectionModel[];
-}
+export function AppSidebarSections() {
+  const { activeSubItemId, isCollapsed, onSelectTarget, onDisabledSubItemSelect, sectionModels } =
+    useSidebarContext();
 
-export function AppSidebarSections({
-  activeSubItemId,
-  isCollapsed,
-  onSubItemSelect,
-  onDisabledSubItemSelect,
-  sectionModels,
-}: AppSidebarSectionsProps) {
   return sectionModels.map(({ section, subItems }) => (
     <section className="sidebar-section-group" aria-label={NAVIGATION_SECTION_LABELS[section]} key={section}>
       {!isCollapsed && (
@@ -36,7 +26,7 @@ export function AppSidebarSections({
           isActive={activeSubItemId === item.id}
           activeViewId={activeSubItemId ?? ""}
           isCollapsed={isCollapsed}
-          onSelect={(config) => onSubItemSelect(config.target)}
+          onSelect={(config) => onSelectTarget(config.target)}
           onDisabledSelect={() => onDisabledSubItemSelect()}
           key={item.id}
         />

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import type { AppSidebarScopePanel } from "./AppSidebarScopeMenuPopup";
+import { getCatalog } from "@/catalog";
 
 const POPUP_VERTICAL_MARGIN = 8;
 
@@ -21,13 +22,7 @@ function clampPopupTop(
   return Math.min(Math.max(preferredTop, minimumTop), maximumTop);
 }
 
-interface UseAppSidebarPopupStateArgs {
-  projectPopupLayoutKey?: unknown;
-}
-
-export function useAppSidebarPopupState({
-  projectPopupLayoutKey,
-}: UseAppSidebarPopupStateArgs) {
+export function useAppSidebarPopupState() {
   const sidebarShellRef = useRef<HTMLDivElement | null>(null);
   const projectPopupRef = useRef<HTMLDivElement | null>(null);
   const projectTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -37,6 +32,13 @@ export function useAppSidebarPopupState({
     isOpen: false,
     top: 0,
   });
+
+  // Derive scope panels from catalog
+  const catalog = getCatalog();
+  const scopePanels = catalog?.scopePanels ?? [
+    { id: "project", label: "Projects", icon: "LayoutGrid" },
+    { id: "season", label: "Seasons", icon: "CalendarDays" }
+  ];
 
   useEffect(() => {
     if (!popup.isOpen) {
@@ -84,7 +86,7 @@ export function useAppSidebarPopupState({
     if (Math.abs(clampedTop - popup.top) > 0.5) {
       setPopup((current) => ({ ...current, top: clampedTop }));
     }
-  }, [popup.isOpen, projectPopupLayoutKey, popup.top]);
+  }, [popup.activePanel, popup.isOpen, popup.top]);
 
   return {
     popup,
@@ -98,5 +100,6 @@ export function useAppSidebarPopupState({
         : { activePanel: null, isOpen: true, top }
     )),
     setActivePanel: (activePanel: AppSidebarScopePanel | null) => setPopup((current) => ({ ...current, activePanel })),
+    scopePanels,
   };
 }

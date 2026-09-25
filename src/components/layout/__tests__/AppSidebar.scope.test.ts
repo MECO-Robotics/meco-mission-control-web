@@ -5,9 +5,65 @@ import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { AppSidebarPopups } from "@/components/layout/AppSidebarPopups";
+import { SidebarProvider, type SidebarState } from "@/components/layout/sidebar/context/SidebarContext";
 import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
 
 import { renderSidebar, signedInUser } from "./AppSidebar.testUtils";
+
+function renderPopups(overrides: Partial<SidebarState>) {
+  const state: SidebarState = {
+    activeTab: "tasks",
+    activeSubItemId: null,
+    sectionModels: [],
+    onSelectTarget: jest.fn(),
+    onDisabledSubItemSelect: jest.fn(),
+    isCollapsed: false,
+    toggleSidebar: jest.fn(),
+    projects: [],
+    seasons: [],
+    selectedProjectId: null,
+    selectedSeasonId: null,
+    selectedScopeLabel: "All projects",
+    canEditSelectedRobot: false,
+    onSelectProject: jest.fn(),
+    onSelectSeason: jest.fn(),
+    onCreateRobot: jest.fn(),
+    onCreateSeason: jest.fn(),
+    onEditSelectedRobot: jest.fn(),
+    popup: { activePanel: null, isOpen: true, top: 0 },
+    projectPopupRef: React.createRef<HTMLDivElement>(),
+    projectTriggerRef: React.createRef<HTMLButtonElement>(),
+    sidebarShellRef: React.createRef<HTMLDivElement>(),
+    onProjectTriggerClick: jest.fn(),
+    onProjectOptionSelect: jest.fn(),
+    onSeasonOptionSelect: jest.fn(),
+    onPanelChange: jest.fn(),
+    closePopup: jest.fn(),
+    sessionUser: null,
+    onCreateMilestone: jest.fn(),
+    onCreatePart: jest.fn(),
+    onCreateQaReport: jest.fn(),
+    onCreateTask: jest.fn(),
+    onOpenProfileEditor: jest.fn(),
+    canSignIn: true,
+    handleSignOut: jest.fn(),
+    onSignIn: jest.fn(),
+    isDarkMode: false,
+    toggleDarkMode: jest.fn(),
+    onRefreshWorkspace: jest.fn(),
+    isNotificationQueueOpen: false,
+    notificationCount: 0,
+    onToggleNotificationQueue: jest.fn(),
+    onHelpSelect: jest.fn(),
+    localMode: null,
+    onResetDemo: jest.fn(),
+    onEnqueueNotification: jest.fn(),
+    ...overrides,
+  };
+  return renderToStaticMarkup(
+    React.createElement(SidebarProvider, { value: state }, React.createElement(AppSidebarPopups)),
+  );
+}
 
 describe("AppSidebar scope", () => {
   it("renders the project and season scope pill below the profile switch", () => {
@@ -65,20 +121,13 @@ describe("AppSidebar scope", () => {
       description: "Test robot",
       status: "active",
     };
-    const scopeMarkup = renderToStaticMarkup(
-      React.createElement(AppSidebarPopups, {
-        popup: { activePanel: null, isOpen: true, top: 0 },
-        onEditSelectedRobot: jest.fn(),
-        onSelectProjectOption: jest.fn(),
-        onSelectSeasonOption: jest.fn(),
-        projectPopupRef: React.createRef<HTMLDivElement>(),
-        projects: [robotProject],
-        seasons,
-        selectedProjectId: robotProject.id,
-        selectedSeasonId: "season-1",
-        onPanelChange: jest.fn(),
-      } as React.ComponentProps<typeof AppSidebarPopups>),
-    );
+    const scopeMarkup = renderPopups({
+      popup: { activePanel: null, isOpen: true, top: 0 },
+      projects: [robotProject],
+      seasons,
+      selectedProjectId: robotProject.id,
+      selectedSeasonId: "season-1",
+    });
 
     expect(scopeMarkup).toContain("sidebar-scope-popup-shell");
     expect(scopeMarkup).toContain("sidebar-scope-kind-panel");
@@ -114,23 +163,13 @@ describe("AppSidebar scope", () => {
       description: "Test robot",
       status: "active",
     };
-    const baseProps = {
+    const scopeMarkup = renderPopups({
       popup: { activePanel: "season", isOpen: true, top: 0 },
-      onEditSelectedRobot: jest.fn(),
-      onSelectProjectOption: jest.fn(),
-      onSelectSeasonOption: jest.fn(),
-      projectPopupRef: React.createRef<HTMLDivElement>(),
       projects: [robotProject],
       seasons,
       selectedProjectId: robotProject.id,
       selectedSeasonId: "season-1",
-      onPanelChange: jest.fn(),
-    };
-    const scopeMarkup = renderToStaticMarkup(
-      React.createElement(AppSidebarPopups, {
-        ...baseProps,
-      } as React.ComponentProps<typeof AppSidebarPopups>),
-    );
+    });
     const seasonPanelIndex = scopeMarkup.indexOf('data-scope-panel="season"');
     const projectPanelIndex = scopeMarkup.indexOf('data-scope-panel="project"');
 

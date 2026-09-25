@@ -43,10 +43,10 @@ describe("AppSidebar notifications", () => {
     expect(markup).toContain('data-active="true"');
     expect(markup).not.toContain("sidebar-notification-queue");
     expect(markup).not.toContain("sidebar-notification-tray");
-    expect(source).toContain("onNotificationQueueToggle");
+    expect(source).toContain("useSidebarContext");
     expect(source).toContain("<AppSidebarNotificationButton");
     expect(source).toContain("isOpen={isNotificationQueueOpen}");
-    expect(source).toContain("onToggle={onNotificationQueueToggle}");
+    expect(source).toContain("onToggle={onToggleNotificationQueue}");
     expect(notificationSource).toMatch(
       /const handleNotificationQueuePreviewOpen = \(\) => \{[\s\S]*hoverOpenedNotificationQueueRef\.current = true;[\s\S]*onToggle\(\);[\s\S]*\};/,
     );
@@ -62,7 +62,7 @@ describe("AppSidebar notifications", () => {
     expect(notificationSource).not.toContain("handleNotificationQueueFocus");
     expect(notificationSource).not.toContain("onFocus=");
     expect(notificationSource).toContain("onClick={handleNotificationQueueClick}");
-    expect(sidebarSource).toContain("onNotificationQueueToggle={onToggleNotificationQueue}");
+    expect(sidebarSource).toContain("onToggleNotificationQueue");
     expect(source).not.toContain("notificationItems");
     expect(source).not.toContain("sidebar-notification-tray");
   });

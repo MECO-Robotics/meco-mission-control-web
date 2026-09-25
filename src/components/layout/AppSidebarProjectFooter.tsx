@@ -1,53 +1,35 @@
-import { type MouseEvent as ReactMouseEvent, type RefObject } from "react";
 import { CalendarDays, ChevronRight, LayoutGrid } from "lucide-react";
 
 import { IconHelp } from "@/components/shared/Icons";
 import { AppSidebarNotificationButton } from "./sidebar/AppSidebarNotificationButton";
 import { AppSidebarSettingsMenu } from "./sidebar/AppSidebarSettingsMenu";
+import { useSidebarContext } from "./sidebar/context/SidebarContext";
 
-interface AppSidebarProjectFooterProps {
-  activeTab: import("@/lib/workspaceNavigation").ViewTab;
-  canSignIn: boolean;
-  canSignOut: boolean;
-  isDarkMode: boolean;
-  isCollapsed: boolean;
-  isNotificationQueueOpen: boolean;
-  isProjectPopupOpen: boolean;
-  onHelpSelect: () => void;
-  onNotificationQueueToggle: () => void;
-  onRefreshWorkspace: () => void;
-  onSignIn: () => void;
-  onSignOut: () => void;
-  onToggleDarkMode: () => void;
-  notificationCount: number;
-  onProjectTriggerClick: (event: ReactMouseEvent<HTMLButtonElement>) => void;
-  projectTriggerRef: RefObject<HTMLButtonElement | null>;
-  selectedScopeLabel: string;
-  localMode: "demo" | "tutorial" | null;
-  onResetDemo: () => void;
-}
+export function AppSidebarProjectFooter() {
+  const {
+    activeTab,
+    canSignIn,
+    sessionUser,
+    isDarkMode,
+    isCollapsed,
+    isNotificationQueueOpen,
+    popup,
+    onHelpSelect,
+    onToggleNotificationQueue,
+    onRefreshWorkspace,
+    onSignIn,
+    handleSignOut,
+    toggleDarkMode,
+    notificationCount,
+    onProjectTriggerClick,
+    projectTriggerRef,
+    selectedScopeLabel,
+    localMode,
+    onResetDemo,
+  } = useSidebarContext();
+  const canSignOut = sessionUser !== null;
+  const isProjectPopupOpen = popup.isOpen;
 
-export function AppSidebarProjectFooter({
-  activeTab,
-  canSignIn,
-  canSignOut,
-  isDarkMode,
-  isCollapsed,
-  isNotificationQueueOpen,
-  isProjectPopupOpen,
-  onHelpSelect,
-  onNotificationQueueToggle,
-  onRefreshWorkspace,
-  onSignIn,
-  onSignOut,
-  onToggleDarkMode,
-  notificationCount,
-  onProjectTriggerClick,
-  projectTriggerRef,
-  selectedScopeLabel,
-  localMode,
-  onResetDemo,
-}: AppSidebarProjectFooterProps) {
   const settingsMenu = (
     <AppSidebarSettingsMenu
       canSignIn={canSignIn}
@@ -56,8 +38,8 @@ export function AppSidebarProjectFooter({
       isDarkMode={isDarkMode}
       onRefreshWorkspace={onRefreshWorkspace}
       onSignIn={onSignIn}
-      onSignOut={onSignOut}
-      onToggleDarkMode={onToggleDarkMode}
+      onSignOut={handleSignOut}
+      onToggleDarkMode={toggleDarkMode}
     />
   );
   const scopeTrigger = (
@@ -93,7 +75,7 @@ export function AppSidebarProjectFooter({
     <AppSidebarNotificationButton
       isOpen={isNotificationQueueOpen}
       notificationCount={notificationCount}
-      onToggle={onNotificationQueueToggle}
+      onToggle={onToggleNotificationQueue}
     />
   );
   const bottomTriplet = (

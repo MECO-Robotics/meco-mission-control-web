@@ -1,45 +1,24 @@
-import type { RefObject } from "react";
-
-import type { ProjectRecord, SeasonRecord } from "@/types/recordsOrganization";
 import {
   ADD_ROBOT_PROJECT_VALUE,
   AppSidebarScopeMenuPopup,
   CREATE_SEASON_OPTION_VALUE,
-  type AppSidebarScopePanel,
 } from "./AppSidebarScopeMenuPopup";
+import { useSidebarContext } from "./sidebar/context/SidebarContext";
 
-interface AppSidebarPopupsProps {
-  popup: {
-    activePanel: AppSidebarScopePanel | null;
-    isOpen: boolean;
-    top: number;
-  };
-  canEditSelectedRobot?: boolean;
-  onEditSelectedRobot?: () => void;
-  onSelectProjectOption: (value: string) => void;
-  onSelectSeasonOption?: (value: string) => void;
-  onPanelChange: (panel: AppSidebarScopePanel) => void;
-  projectPopupRef: RefObject<HTMLDivElement | null>;
-  projects: ProjectRecord[];
-  seasons?: SeasonRecord[];
-  selectedProjectId: string | null;
-  selectedSeasonId?: string | null;
-}
-
-export function AppSidebarPopups({
-  popup,
-  canEditSelectedRobot,
-  onEditSelectedRobot,
-  onSelectProjectOption,
-  onSelectSeasonOption,
-  onPanelChange,
-  projectPopupRef,
-  projects,
-  seasons = [],
-  selectedProjectId,
-  selectedSeasonId = null,
-}: AppSidebarPopupsProps) {
-  const shouldShowEditRobot = canEditSelectedRobot ?? Boolean(onEditSelectedRobot);
+export function AppSidebarPopups() {
+  const {
+    popup,
+    canEditSelectedRobot,
+    onEditSelectedRobot,
+    onProjectOptionSelect,
+    onSeasonOptionSelect,
+    onPanelChange,
+    projectPopupRef,
+    projects,
+    seasons,
+    selectedProjectId,
+    selectedSeasonId,
+  } = useSidebarContext();
 
   return (
     <>
@@ -51,11 +30,11 @@ export function AppSidebarPopups({
         >
           <AppSidebarScopeMenuPopup
             activePanel={popup.activePanel}
-            canEditSelectedRobot={shouldShowEditRobot}
-            onEditSelectedRobot={onEditSelectedRobot ?? (() => undefined)}
+            canEditSelectedRobot={canEditSelectedRobot}
+            onEditSelectedRobot={onEditSelectedRobot}
             onPanelChange={onPanelChange}
-            onSelectProjectOption={onSelectProjectOption}
-            onSelectSeasonOption={onSelectSeasonOption ?? (() => undefined)}
+            onSelectProjectOption={onProjectOptionSelect}
+            onSelectSeasonOption={onSeasonOptionSelect}
             projects={projects}
             seasons={seasons}
             selectedProjectId={selectedProjectId}

@@ -1,31 +1,21 @@
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
-import type { MouseEvent as ReactMouseEvent } from "react";
 
 import { AppSidebarAddMenu } from "./sidebar/AppSidebarAddMenu";
 import { AppProfileAssembly } from "./AppProfileAssembly";
-import type { SessionUser } from "@/lib/auth/types";
+import { useSidebarContext } from "./sidebar/context/SidebarContext";
 
-interface AppSidebarQuickActionsProps {
-  isCollapsed: boolean;
-  onCreateMilestone: () => void;
-  onCreatePart: () => void;
-  onCreateQaReport: () => void;
-  onCreateTask: () => void;
-  onToggleSidebar: (event: ReactMouseEvent<HTMLButtonElement>) => void;
-  onOpenProfileEditor: () => void;
-  sessionUser: SessionUser | null;
-}
+export function AppSidebarQuickActions() {
+  const {
+    isCollapsed,
+    onCreateMilestone,
+    onCreatePart,
+    onCreateQaReport,
+    onCreateTask,
+    toggleSidebar,
+    onOpenProfileEditor,
+    sessionUser,
+  } = useSidebarContext();
 
-export function AppSidebarQuickActions({
-  isCollapsed,
-  onCreateMilestone,
-  onCreatePart,
-  onCreateQaReport,
-  onCreateTask,
-  onToggleSidebar,
-  onOpenProfileEditor,
-  sessionUser,
-}: AppSidebarQuickActionsProps) {
   return (
     <div className="sidebar-quick-actions" data-collapsed={isCollapsed ? "true" : "false"}>
       <div className="sidebar-quick-action-profile">
@@ -45,7 +35,7 @@ export function AppSidebarQuickActions({
       <button
         aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         className="sidebar-quick-action sidebar-quick-action-fold"
-        onClick={onToggleSidebar}
+        onClick={toggleSidebar}
         title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         type="button"
       >
