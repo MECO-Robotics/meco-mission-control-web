@@ -1,48 +1,35 @@
-import { useCallback } from "react";
+import { useCatalogEditorLifecycle } from "./useCatalogEditorLifecycle";
+import type { WorkspaceLoader } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
+import { useCallback, useState, useEffect } from "react";
 
 import { artifactToPayload } from "@/lib/appUtils/payloadConversions";
 import { buildEmptyArtifactPayload } from "@/lib/appUtils/payloadBuilders";
 import { toErrorMessage } from "@/lib/appUtils/common";
 import { createArtifactRecord, deleteArtifactRecord, updateArtifactRecord } from "@/lib/auth/records/inventory";
-import type { AppWorkspaceModel } from "../hooks/useAppWorkspaceModel";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import type { ArtifactKind } from "@/types/common";
 import type { ArtifactPayload } from "@/types/payloads";
 import type { ArtifactRecord } from "@/types/recordsInventory";
 
-export type ArtifactActions = ReturnType<typeof useArtifactActions>;
-
-export function useArtifactActions({
-  activeArtifactId,
-  artifactDraft,
-  artifactModalMode,
-  bootstrap,
-  handleUnauthorized,
-  loadWorkspace,
-  scopedBootstrap,
-  selectedProjectId,
-  setActiveArtifactId,
-  setArtifactDraft,
-  setArtifactModalMode,
-  setDataMessage,
-  setIsDeletingArtifact,
-  setIsSavingArtifact,
-}: {
-  activeArtifactId: AppWorkspaceModel["activeArtifactId"];
-  artifactDraft: AppWorkspaceModel["artifactDraft"];
-  artifactModalMode: AppWorkspaceModel["artifactModalMode"];
-  bootstrap: AppWorkspaceModel["bootstrap"];
-  handleUnauthorized: AppWorkspaceModel["handleUnauthorized"];
-  loadWorkspace: AppWorkspaceModel["loadWorkspace"];
-  scopedBootstrap: AppWorkspaceModel["scopedBootstrap"];
-  selectedProjectId: AppWorkspaceModel["selectedProjectId"];
-  setActiveArtifactId: AppWorkspaceModel["setActiveArtifactId"];
-  setArtifactDraft: AppWorkspaceModel["setArtifactDraft"];
-  setArtifactModalMode: AppWorkspaceModel["setArtifactModalMode"];
-  setDataMessage: AppWorkspaceModel["setDataMessage"];
-  setIsDeletingArtifact: AppWorkspaceModel["setIsDeletingArtifact"];
-  setIsSavingArtifact: AppWorkspaceModel["setIsSavingArtifact"];
+export function useArtifactActions({ bootstrap, handleUnauthorized, loadWorkspace, scopedBootstrap, selectedProjectId, setDataMessage, selectedSeasonId }: {
+  selectedSeasonId: string | null;
+  bootstrap: BootstrapPayload;
+  handleUnauthorized: () => void;
+  loadWorkspace: WorkspaceLoader;
+  scopedBootstrap: BootstrapPayload;
+  selectedProjectId: string | null;
+  setDataMessage: (message: string | null) => void;
 }) {
+  const [artifactModalMode, setArtifactModalMode] = useState<"create" | "edit" | null>(null);
+  const [activeArtifactId, setActiveArtifactId] = useState<string | null>(null);
+  const [artifactDraft, setArtifactDraft] = useState<ArtifactPayload>(
+    buildEmptyArtifactPayload(EMPTY_BOOTSTRAP, { kind: "document" }),
+  );
+  const { beginOperation, resetEditor, isSaving: isSavingArtifact, isDeleting: isDeletingArtifact } =
+    useCatalogEditorLifecycle({ loadWorkspace, selectedProjectId, selectedSeasonId });
   const openCreateArtifactModal = useCallback((kind: ArtifactKind) => {
+    resetEditor();
     setActiveArtifactId(null);
     setArtifactDraft(
       buildEmptyArtifactPayload(scopedBootstrap, {
@@ -51,22 +38,34 @@ export function useArtifactActions({
       }),
     );
     setArtifactModalMode("create");
-  }, [scopedBootstrap, selectedProjectId, setActiveArtifactId, setArtifactDraft, setArtifactModalMode]);
+  }, [scopedBootstrap, selectedProjectId, resetEditor]);
 
   const openEditArtifactModal = useCallback((artifact: ArtifactRecord) => {
+    resetEditor();
     setActiveArtifactId(artifact.id);
     setArtifactDraft(artifactToPayload(artifact));
     setArtifactModalMode("edit");
-  }, [setActiveArtifactId, setArtifactDraft, setArtifactModalMode]);
+  }, [resetEditor]);
 
   const closeArtifactModal = useCallback(() => {
+    resetEditor();
     setArtifactModalMode(null);
     setActiveArtifactId(null);
-  }, [setActiveArtifactId, setArtifactModalMode]);
+  }, [resetEditor]);
+
+  useEffect(() => closeArtifactModal(), [closeArtifactModal, selectedProjectId, selectedSeasonId]);
+
+  useEffect(() => {
+    if (bootstrap === EMPTY_BOOTSTRAP || (artifactModalMode === "edit" && !bootstrap.artifacts.some((item) => item.id === activeArtifactId))) {
+      closeArtifactModal();
+    }
+  }, [activeArtifactId, bootstrap, closeArtifactModal, artifactModalMode]);
 
   const handleArtifactSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
-    setIsSavingArtifact(true);
+    if (!artifactModalMode) return;
+    const operation = beginOperation();
+    if (!operation) return;
     setDataMessage(null);
 
     try {
@@ -87,31 +86,30 @@ export function useArtifactActions({
         await updateArtifactRecord(activeArtifactId, payload, handleUnauthorized);
       }
 
-      await loadWorkspace();
-      closeArtifactModal();
+      await operation.refresh();
+      if (operation.isCurrent()) closeArtifactModal();
     } catch (error) {
-      setDataMessage(toErrorMessage(error));
+      if (operation.isCurrent()) setDataMessage(toErrorMessage(error));
     } finally {
-      setIsSavingArtifact(false);
+      operation.finish();
     }
-  }, [activeArtifactId, artifactDraft, artifactModalMode, closeArtifactModal, handleUnauthorized, loadWorkspace, setDataMessage, setIsSavingArtifact]);
+  }, [activeArtifactId, artifactDraft, artifactModalMode, closeArtifactModal, handleUnauthorized, setDataMessage, beginOperation]);
 
   const handleDeleteArtifact = useCallback(async (artifactId: string) => {
-    setIsDeletingArtifact(true);
+    const operation = beginOperation("delete");
+    if (!operation) return;
     setDataMessage(null);
 
     try {
       await deleteArtifactRecord(artifactId, handleUnauthorized);
-      if (activeArtifactId === artifactId) {
-        closeArtifactModal();
-      }
-      await loadWorkspace();
+      await operation.refresh();
+      if (operation.isCurrent() && activeArtifactId === artifactId) closeArtifactModal();
     } catch (error) {
-      setDataMessage(toErrorMessage(error));
+      if (operation.isCurrent()) setDataMessage(toErrorMessage(error));
     } finally {
-      setIsDeletingArtifact(false);
+      operation.finish();
     }
-  }, [activeArtifactId, closeArtifactModal, handleUnauthorized, loadWorkspace, setDataMessage, setIsDeletingArtifact]);
+  }, [activeArtifactId, closeArtifactModal, handleUnauthorized, setDataMessage, beginOperation]);
 
   const handleToggleArtifactArchived = useCallback(async (artifactId: string) => {
     const currentArtifact = bootstrap.artifacts.find(
@@ -121,7 +119,8 @@ export function useArtifactActions({
       return;
     }
 
-    setIsSavingArtifact(true);
+    const operation = beginOperation();
+    if (!operation) return;
     setDataMessage(null);
 
     try {
@@ -130,15 +129,21 @@ export function useArtifactActions({
         { isArchived: !(currentArtifact.isArchived ?? false) },
         handleUnauthorized,
       );
-      await loadWorkspace();
+      await operation.refresh();
     } catch (error) {
-      setDataMessage(toErrorMessage(error));
+      if (operation.isCurrent()) setDataMessage(toErrorMessage(error));
     } finally {
-      setIsSavingArtifact(false);
+      operation.finish();
     }
-  }, [bootstrap, handleUnauthorized, loadWorkspace, setDataMessage, setIsSavingArtifact]);
+  }, [bootstrap, handleUnauthorized, setDataMessage, beginOperation]);
 
   return {
+    artifactModalMode,
+    activeArtifactId,
+    artifactDraft,
+    isSavingArtifact,
+    isDeletingArtifact,
+    setArtifactDraft,
     closeArtifactModal,
     handleArtifactSubmit,
     handleDeleteArtifact,

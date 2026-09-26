@@ -1,44 +1,37 @@
-import { useCallback } from "react";
+import { useCatalogEditorLifecycle } from "./useCatalogEditorLifecycle";
+import type { WorkspaceLoader } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
+import { useCallback, useState, useEffect } from "react";
 
 import { buildEmptyPartInstancePayload } from "@/lib/appUtils/payloadBuilders";
 import { partInstanceToPayload } from "@/lib/appUtils/payloadConversions";
 import { toErrorMessage } from "@/lib/appUtils/common";
 import { createPartInstanceRecord, updatePartInstanceRecord } from "@/lib/auth/records/parts";
-import type { AppWorkspaceModel } from "../hooks/useAppWorkspaceModel";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import type { Dispatch, SetStateAction } from "react";
 import type { MechanismRecord } from "@/types/recordsOrganization";
 import type { PartInstancePayload } from "@/types/payloads";
 import type { PartInstanceRecord } from "@/types/recordsInventory";
 
-export type PartInstanceActions = ReturnType<typeof usePartInstanceActions>;
-
-export function usePartInstanceActions({
-  activePartInstanceId,
-  bootstrap,
-  handleUnauthorized,
-  loadWorkspace,
-  partInstanceDraft,
-  partInstanceModalMode,
-  setActivePartInstanceId,
-  setBootstrap,
-  setDataMessage,
-  setIsSavingPartInstance,
-  setPartInstanceDraft,
-  setPartInstanceModalMode,
-}: {
-  activePartInstanceId: AppWorkspaceModel["activePartInstanceId"];
-  bootstrap: AppWorkspaceModel["bootstrap"];
-  handleUnauthorized: AppWorkspaceModel["handleUnauthorized"];
-  loadWorkspace: AppWorkspaceModel["loadWorkspace"];
-  partInstanceDraft: AppWorkspaceModel["partInstanceDraft"];
-  partInstanceModalMode: AppWorkspaceModel["partInstanceModalMode"];
-  setActivePartInstanceId: AppWorkspaceModel["setActivePartInstanceId"];
-  setBootstrap: AppWorkspaceModel["setBootstrap"];
-  setDataMessage: AppWorkspaceModel["setDataMessage"];
-  setIsSavingPartInstance: AppWorkspaceModel["setIsSavingPartInstance"];
-  setPartInstanceDraft: AppWorkspaceModel["setPartInstanceDraft"];
-  setPartInstanceModalMode: AppWorkspaceModel["setPartInstanceModalMode"];
+export function usePartInstanceActions({ bootstrap, handleUnauthorized, loadWorkspace, setBootstrap, setDataMessage, selectedProjectId, selectedSeasonId }: {
+  selectedSeasonId: string | null;
+  selectedProjectId: string | null;
+  bootstrap: BootstrapPayload;
+  handleUnauthorized: () => void;
+  loadWorkspace: WorkspaceLoader;
+  setBootstrap: Dispatch<SetStateAction<BootstrapPayload>>;
+  setDataMessage: (message: string | null) => void;
 }) {
+  const [partInstanceModalMode, setPartInstanceModalMode] =
+    useState<"create" | "edit" | null>(null);
+  const [activePartInstanceId, setActivePartInstanceId] = useState<string | null>(null);
+  const [partInstanceDraft, setPartInstanceDraft] = useState<PartInstancePayload>(
+    buildEmptyPartInstancePayload(EMPTY_BOOTSTRAP),
+  );
+  const { beginOperation, resetEditor, isSaving: isSavingPartInstance } =
+    useCatalogEditorLifecycle({ loadWorkspace, selectedProjectId, selectedSeasonId });
   const openCreatePartInstanceModal = useCallback((mechanism: MechanismRecord, partDefinitionId?: string) => {
+    resetEditor();
     setActivePartInstanceId(null);
     setPartInstanceDraft(
       {
@@ -47,22 +40,34 @@ export function usePartInstanceActions({
       },
     );
     setPartInstanceModalMode("create");
-  }, [bootstrap, setActivePartInstanceId, setPartInstanceDraft, setPartInstanceModalMode]);
+  }, [bootstrap, resetEditor]);
 
   const openEditPartInstanceModal = useCallback((partInstance: PartInstanceRecord) => {
+    resetEditor();
     setActivePartInstanceId(partInstance.id);
     setPartInstanceDraft(partInstanceToPayload(partInstance));
     setPartInstanceModalMode("edit");
-  }, [setActivePartInstanceId, setPartInstanceDraft, setPartInstanceModalMode]);
+  }, [resetEditor]);
 
   const closePartInstanceModal = useCallback(() => {
+    resetEditor();
     setPartInstanceModalMode(null);
     setActivePartInstanceId(null);
-  }, [setActivePartInstanceId, setPartInstanceModalMode]);
+  }, [resetEditor]);
+
+  useEffect(() => closePartInstanceModal(), [closePartInstanceModal, selectedProjectId, selectedSeasonId]);
+
+  useEffect(() => {
+    if (bootstrap === EMPTY_BOOTSTRAP || (partInstanceModalMode === "edit" && !bootstrap.partInstances.some((item) => item.id === activePartInstanceId))) {
+      closePartInstanceModal();
+    }
+  }, [activePartInstanceId, bootstrap, closePartInstanceModal, partInstanceModalMode]);
 
   const handlePartInstanceSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
-    setIsSavingPartInstance(true);
+    if (!partInstanceModalMode) return;
+    const operation = beginOperation();
+    if (!operation) return;
     setDataMessage(null);
 
     try {
@@ -95,14 +100,14 @@ export function usePartInstanceActions({
         );
       }
 
-      await loadWorkspace();
-      closePartInstanceModal();
+      await operation.refresh();
+      if (operation.isCurrent()) closePartInstanceModal();
     } catch (error) {
-      setDataMessage(toErrorMessage(error));
+      if (operation.isCurrent()) setDataMessage(toErrorMessage(error));
     } finally {
-      setIsSavingPartInstance(false);
+      operation.finish();
     }
-  }, [activePartInstanceId, bootstrap, closePartInstanceModal, handleUnauthorized, loadWorkspace, partInstanceDraft, partInstanceModalMode, setDataMessage, setIsSavingPartInstance]);
+  }, [activePartInstanceId, bootstrap, closePartInstanceModal, handleUnauthorized, partInstanceDraft, partInstanceModalMode, setDataMessage, beginOperation]);
 
   const removePartInstanceFromMechanism = useCallback(async (partInstanceId: string) => {
     const previousPartInstance = bootstrap.partInstances.find(
@@ -151,6 +156,11 @@ export function usePartInstanceActions({
   }, [bootstrap, handleUnauthorized, setBootstrap, setDataMessage]);
 
   return {
+    partInstanceModalMode,
+    activePartInstanceId,
+    partInstanceDraft,
+    isSavingPartInstance,
+    setPartInstanceDraft,
     closePartInstanceModal,
     handlePartInstanceSubmit,
     openCreatePartInstanceModal,

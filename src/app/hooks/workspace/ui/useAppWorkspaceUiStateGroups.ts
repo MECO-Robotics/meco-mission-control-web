@@ -1,5 +1,4 @@
 import { useAppWorkspaceUiStateManufacturing } from "@/app/hooks/workspace/ui/useAppWorkspaceUiStateManufacturing";
-import { useAppWorkspaceUiStateStructure } from "@/app/hooks/workspace/ui/useAppWorkspaceUiStateStructure";
 import { useAppWorkspaceUiStatePeople } from "@/app/hooks/workspace/ui/useAppWorkspaceUiStatePeople";
 import { useAppWorkspaceUiStatePurchase } from "@/app/hooks/workspace/ui/useAppWorkspaceUiStatePurchase";
 import { useAppWorkspaceUiStateReports } from "@/app/hooks/workspace/ui/useAppWorkspaceUiStateReports";
@@ -13,7 +12,6 @@ export function useAppWorkspaceUiStateGroups() {
     ...useAppWorkspaceUiStateReports(),
     ...useAppWorkspaceUiStatePurchase(),
     ...useAppWorkspaceUiStateManufacturing(),
-    ...useAppWorkspaceUiStateStructure(),
     ...useAppWorkspaceUiStatePeople(),
   };
 }

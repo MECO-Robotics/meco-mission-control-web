@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { useSubsystemActions } from "../subsystemActions";
 import { updateSubsystemRecord } from "@/lib/auth/records/structure";
 import { createBootstrap } from "@/lib/appUtilsTestFixtures";
-jest.mock("react", () => ({ ...jest.requireActual("react"), useCallback: jest.fn((callback) => callback), useEffect: jest.fn(), useRef: jest.fn() }));
+jest.mock("react", () => ({ ...jest.requireActual("react"), useState: (initial: unknown) => [typeof initial === "function" ? initial() : initial, jest.fn()], useCallback: jest.fn((callback) => callback), useEffect: jest.fn(), useRef: jest.fn() }));
 jest.mock("@/lib/auth/records/structure", () => ({ updateSubsystemRecord: jest.fn(), createSubsystemRecord: jest.fn() }));
 it("persists same-subsystem edits in issue order and continues after a failed save", async () => {
   jest.mocked(useCallback).mockImplementation((callback) => callback);

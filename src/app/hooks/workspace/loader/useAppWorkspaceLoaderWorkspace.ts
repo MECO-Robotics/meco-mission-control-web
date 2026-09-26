@@ -1,4 +1,4 @@
-import { startTransition, useCallback } from "react";
+import { startTransition, useCallback, useRef } from "react";
 
 import { fetchBootstrap } from "@/lib/auth/bootstrap";
 import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
@@ -12,7 +12,11 @@ export function useAppWorkspaceLoaderWorkspace(
   handleUnauthorized: UnauthorizedHandler,
   selectMember: SelectMemberHandler,
 ) {
-  return useCallback(async (scope: WorkspaceLoadScope = {}) => {
+  const latestRequest = useRef(0);
+  return useCallback(async (scope: WorkspaceLoadScope = {}, canApply: () => boolean = () => true) => {
+    if (!canApply()) return;
+    const request = ++latestRequest.current;
+    const isCurrent = () => request === latestRequest.current && canApply();
     state.setIsLoadingData(true);
     state.setDataMessage(null);
 
@@ -31,6 +35,7 @@ export function useAppWorkspaceLoaderWorkspace(
         projectId,
         handleUnauthorized,
       );
+      if (!isCurrent()) return;
       const scopedPayload = scopeBootstrapBySelection(
         payload,
         seasonId,
@@ -38,7 +43,7 @@ export function useAppWorkspaceLoaderWorkspace(
       );
 
       startTransition(() => {
-        state.setBootstrap(payload);
+        if (isCurrent()) state.setBootstrap(payload);
       });
 
       reconcileWorkspaceState(
@@ -48,10 +53,10 @@ export function useAppWorkspaceLoaderWorkspace(
         selectMember,
       );
     } catch (error) {
-      if (error instanceof Error && error.name === "AbortError") return;
+      if (!isCurrent() || (error instanceof Error && error.name === "AbortError")) return;
       state.setDataMessage(error instanceof Error ? error.message : String(error));
     } finally {
-      state.setIsLoadingData(false);
+      if (isCurrent()) state.setIsLoadingData(false);
     }
   }, [handleUnauthorized, selectMember, state]);
 }

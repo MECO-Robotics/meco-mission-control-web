@@ -7,3 +7,5 @@ export interface WorkspaceLoadScope {
   projectId?: string | null;
   seasonId?: string | null;
 }
+
+export type WorkspaceLoader = (scope?: WorkspaceLoadScope, canApply?: () => boolean) => Promise<void>;

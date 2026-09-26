@@ -5,40 +5,26 @@ import { WorkstreamEditorModal } from "../modals/assetCatalog/WorkstreamEditorMo
 import type { WorkspaceModalHostViewProps } from "./workspaceModalHostViewTypes";
 
 export function WorkspaceStructureModalsSection(props: WorkspaceModalHostViewProps) {
-  if (!props.subsystemModalMode && !props.workstreamModalMode && !props.manufacturingModalMode && !props.purchaseModalMode) {
+  if (!props.subsystemEditor.subsystemModalMode && !props.workstreamEditor.workstreamModalMode && !props.manufacturingModalMode && !props.purchaseModalMode) {
     return null;
   }
 
   return (
     <>
-      {props.subsystemModalMode ? (
+      {props.subsystemEditor.subsystemModalMode ? (
         <SubsystemEditorModal
-          activeSubsystemId={props.activeSubsystemId}
+          {...props.subsystemEditor}
+          subsystemModalMode={props.subsystemEditor.subsystemModalMode}
           bootstrap={props.bootstrap}
-          closeSubsystemModal={props.closeSubsystemModal}
-          handleToggleSubsystemArchived={props.handleToggleSubsystemArchived}
-          handleSubsystemSubmit={props.handleSubsystemSubmit}
-          isSavingSubsystem={props.isSavingSubsystem}
           requestPhotoUpload={props.requestPhotoUpload}
-          subsystemDraft={props.subsystemDraft}
-          subsystemDraftRisks={props.subsystemDraftRisks}
-          subsystemModalMode={props.subsystemModalMode}
-          setSubsystemDraft={props.setSubsystemDraft}
-          setSubsystemDraftRisks={props.setSubsystemDraftRisks}
         />
       ) : null}
 
-      {props.workstreamModalMode ? (
+      {props.workstreamEditor.workstreamModalMode ? (
         <WorkstreamEditorModal
-          activeWorkstreamId={props.activeWorkstreamId}
+          {...props.workstreamEditor}
+          workstreamModalMode={props.workstreamEditor.workstreamModalMode}
           bootstrap={props.bootstrap}
-          closeWorkstreamModal={props.closeWorkstreamModal}
-          handleToggleWorkstreamArchived={props.handleToggleWorkstreamArchived}
-          handleWorkstreamSubmit={props.handleWorkstreamSubmit}
-          isSavingWorkstream={props.isSavingWorkstream}
-          setWorkstreamDraft={props.setWorkstreamDraft}
-          workstreamDraft={props.workstreamDraft}
-          workstreamModalMode={props.workstreamModalMode}
         />
       ) : null}
 

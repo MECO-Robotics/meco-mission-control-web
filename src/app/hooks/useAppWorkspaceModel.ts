@@ -1,3 +1,9 @@
+import { useMechanismActions } from "@/app/workspaceCatalog/mechanismActions";
+import { useSubsystemActions } from "@/app/workspaceCatalog/subsystemActions";
+import { usePartInstanceActions } from "@/app/workspaceCatalog/partInstanceActions";
+import { usePartDefinitionActions } from "@/app/workspaceCatalog/partDefinitionActions";
+import { useWorkstreamActions } from "@/app/workspaceCatalog/workstreamActions";
+import { useArtifactActions } from "@/app/workspaceCatalog/artifactActions";
 import { enterLocalDemo } from "@/lib/localWorkspace/session";
 import { useMaterialEditor } from "@/app/workspaceCatalog/materialActions";
 import { useEffect, useRef } from "react";
@@ -17,6 +23,12 @@ export type AppWorkspaceModel = AppWorkspaceState &
   AppWorkspaceDerived &
   AppWorkspaceLoader &
   ReturnType<typeof useInteractiveTutorial> & {
+    artifactEditor: ReturnType<typeof useArtifactActions>;
+    workstreamEditor: ReturnType<typeof useWorkstreamActions>;
+    partDefinitionEditor: ReturnType<typeof usePartDefinitionActions>;
+    partInstanceEditor: ReturnType<typeof usePartInstanceActions>;
+    subsystemEditor: ReturnType<typeof useSubsystemActions>;
+    mechanismEditor: ReturnType<typeof useMechanismActions>;
     materialEditor: ReturnType<typeof useMaterialEditor>;
     interactiveTutorialChapters: ReturnType<typeof useInteractiveTutorial>["chapterStartOptions"];
   };
@@ -26,6 +38,61 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
   const loader = useAppWorkspaceLoader(state);
   const { loadWorkspace } = loader;
   const materialEditor = useMaterialEditor({ handleUnauthorized: loader.handleUnauthorized, loadWorkspace, setDataMessage: state.setDataMessage });
+  const artifactEditor = useArtifactActions({
+    bootstrap: state.bootstrap,
+    handleUnauthorized: loader.handleUnauthorized,
+    loadWorkspace: loader.loadWorkspace,
+    scopedBootstrap: derived.scopedBootstrap,
+    selectedProjectId: state.selectedProjectId,
+    setDataMessage: state.setDataMessage,
+    selectedSeasonId: state.selectedSeasonId
+  });
+  const workstreamEditor = useWorkstreamActions({
+    bootstrap: state.bootstrap,
+    handleUnauthorized: loader.handleUnauthorized,
+    loadWorkspace: loader.loadWorkspace,
+    scopedBootstrap: derived.scopedBootstrap,
+    selectedProjectId: state.selectedProjectId,
+    setDataMessage: state.setDataMessage,
+    selectedSeasonId: state.selectedSeasonId
+  });
+  const partDefinitionEditor = usePartDefinitionActions({
+    bootstrap: state.bootstrap,
+    handleUnauthorized: loader.handleUnauthorized,
+    loadWorkspace: loader.loadWorkspace,
+    selectedSeasonId: state.selectedSeasonId,
+    setBootstrap: state.setBootstrap,
+    setDataMessage: state.setDataMessage,
+    selectedProjectId: state.selectedProjectId
+  });
+  const partInstanceEditor = usePartInstanceActions({
+    bootstrap: state.bootstrap,
+    handleUnauthorized: loader.handleUnauthorized,
+    loadWorkspace: loader.loadWorkspace,
+    setBootstrap: state.setBootstrap,
+    setDataMessage: state.setDataMessage,
+    selectedProjectId: state.selectedProjectId,
+    selectedSeasonId: state.selectedSeasonId
+  });
+  const subsystemEditor = useSubsystemActions({
+    bootstrap: state.bootstrap,
+    handleUnauthorized: loader.handleUnauthorized,
+    loadWorkspace: loader.loadWorkspace,
+    scopedBootstrap: derived.scopedBootstrap,
+    selectedProjectId: state.selectedProjectId,
+    setBootstrap: state.setBootstrap,
+    setDataMessage: state.setDataMessage,
+    selectedSeasonId: state.selectedSeasonId
+  });
+  const mechanismEditor = useMechanismActions({
+    bootstrap: state.bootstrap,
+    handleUnauthorized: loader.handleUnauthorized,
+    loadWorkspace: loader.loadWorkspace,
+    scopedBootstrap: derived.scopedBootstrap,
+    setDataMessage: state.setDataMessage,
+    selectedProjectId: state.selectedProjectId,
+    selectedSeasonId: state.selectedSeasonId
+  });
   const autoLoadedWorkspaceKeyRef = useRef<string | null>(null);
   const {
     authBooting,
@@ -133,23 +200,33 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     activeTaskId: state.activeTaskId,
     materialModalMode: materialEditor.materialModalMode,
     activeMaterialId: materialEditor.activeMaterialId,
-    subsystemModalMode: state.subsystemModalMode,
-    activeSubsystemId: state.activeSubsystemId,
-    mechanismModalMode: state.mechanismModalMode,
-    activeMechanismId: state.activeMechanismId,
+    subsystemModalMode: subsystemEditor.subsystemModalMode,
+    activeSubsystemId: subsystemEditor.activeSubsystemId,
+    mechanismModalMode: mechanismEditor.mechanismModalMode,
+    activeMechanismId: mechanismEditor.activeMechanismId,
     manufacturingModalMode: state.manufacturingModalMode,
     activeManufacturingId: state.activeManufacturingId,
-    workstreamModalMode: state.workstreamModalMode,
-    activeWorkstreamId: state.activeWorkstreamId,
+    workstreamModalMode: workstreamEditor.workstreamModalMode,
+    activeWorkstreamId: workstreamEditor.activeWorkstreamId,
   });
 
   return {
     ...state,
     ...derived,
     ...loader,
+    artifactEditor,
+    workstreamEditor,
+    partDefinitionEditor,
+    partInstanceEditor,
+    subsystemEditor,
+    mechanismEditor,
     materialEditor,
     ...interactiveTutorial,
     interactiveTutorialChapters: interactiveTutorial.chapterStartOptions,
-    isWorkspaceModalOpen: derived.isWorkspaceModalOpen || materialEditor.materialModalMode !== null || interactiveTutorial.isInteractiveTutorialActive,
+    isWorkspaceModalOpen: derived.isWorkspaceModalOpen || interactiveTutorial.isInteractiveTutorialActive || Boolean(
+      artifactEditor.artifactModalMode || workstreamEditor.workstreamModalMode ||
+      partDefinitionEditor.partDefinitionModalMode || partInstanceEditor.partInstanceModalMode ||
+      subsystemEditor.subsystemModalMode || mechanismEditor.mechanismModalMode || materialEditor.materialModalMode
+    ),
   };
 }

@@ -6,75 +6,47 @@ import { MechanismEditorModal } from "../modals/structure/MechanismEditorModal";
 import type { WorkspaceModalHostViewProps } from "./workspaceModalHostViewTypes";
 
 export function WorkspaceAssetModalsSection(props: WorkspaceModalHostViewProps) {
-  if (!props.artifactModalMode && !props.materialEditor.materialModalMode && !props.mechanismModalMode && !props.partInstanceModalMode && !props.partDefinitionModalMode) {
+  if (!props.artifactEditor.artifactModalMode && !props.materialEditor.materialModalMode && !props.mechanismEditor.mechanismModalMode && !props.partInstanceEditor.partInstanceModalMode && !props.partDefinitionEditor.partDefinitionModalMode) {
     return null;
   }
 
   return (
     <>
-      {props.artifactModalMode ? (
+      {props.artifactEditor.artifactModalMode ? (
         <ArtifactEditorModal
-          activeArtifactId={props.activeArtifactId}
-          artifactDraft={props.artifactDraft}
-          artifactModalMode={props.artifactModalMode}
+          {...props.artifactEditor}
+          artifactModalMode={props.artifactEditor.artifactModalMode}
           bootstrap={props.bootstrap}
-          closeArtifactModal={props.closeArtifactModal}
-          handleArtifactSubmit={props.handleArtifactSubmit}
-          handleDeleteArtifact={props.handleDeleteArtifact}
-          handleToggleArtifactArchived={props.handleToggleArtifactArchived}
-          isDeletingArtifact={props.isDeletingArtifact}
-          isSavingArtifact={props.isSavingArtifact}
-          setArtifactDraft={props.setArtifactDraft}
         />
       ) : null}
 
       <MaterialEditorModal {...props.materialEditor} />
 
-      {props.mechanismModalMode ? (
+      {props.mechanismEditor.mechanismModalMode ? (
         <MechanismEditorModal
-          activeMechanismId={props.activeMechanismId}
+          {...props.mechanismEditor}
+          mechanismModalMode={props.mechanismEditor.mechanismModalMode}
           bootstrap={props.bootstrap}
-          closeMechanismModal={props.closeMechanismModal}
-          handleDeleteMechanism={props.handleDeleteMechanism}
-          handleToggleMechanismArchived={props.handleToggleMechanismArchived}
-          handleMechanismSubmit={props.handleMechanismSubmit}
-          isDeletingMechanism={props.isDeletingMechanism}
-          isSavingMechanism={props.isSavingMechanism}
           requestPhotoUpload={props.requestPhotoUpload}
-          mechanismDraft={props.mechanismDraft}
-          mechanismModalMode={props.mechanismModalMode}
-          setMechanismDraft={props.setMechanismDraft}
         />
       ) : null}
 
-      {props.partInstanceModalMode ? (
+      {props.partInstanceEditor.partInstanceModalMode ? (
         <PartInstanceEditorModal
+          {...props.partInstanceEditor}
+          partInstanceModalMode={props.partInstanceEditor.partInstanceModalMode}
           bootstrap={props.bootstrap}
-          closePartInstanceModal={props.closePartInstanceModal}
-          handlePartInstanceSubmit={props.handlePartInstanceSubmit}
-          isSavingPartInstance={props.isSavingPartInstance}
           requestPhotoUpload={props.requestPhotoUpload}
           partDefinitionDraftsById={props.partDefinitionsById}
-          partInstanceDraft={props.partInstanceDraft}
-          partInstanceModalMode={props.partInstanceModalMode}
-          setPartInstanceDraft={props.setPartInstanceDraft}
         />
       ) : null}
 
-      {props.partDefinitionModalMode ? (
+      {props.partDefinitionEditor.partDefinitionModalMode ? (
         <PartDefinitionEditorModal
-          activePartDefinitionId={props.activePartDefinitionId}
+          {...props.partDefinitionEditor}
+          partDefinitionModalMode={props.partDefinitionEditor.partDefinitionModalMode}
           bootstrap={props.bootstrap}
-          closePartDefinitionModal={props.closePartDefinitionModal}
-          handleDeletePartDefinition={props.handleDeletePartDefinition}
-          handleTogglePartDefinitionArchived={props.handleTogglePartDefinitionArchived}
-          handlePartDefinitionSubmit={props.handlePartDefinitionSubmit}
-          isDeletingPartDefinition={props.isDeletingPartDefinition}
-          isSavingPartDefinition={props.isSavingPartDefinition}
           requestPhotoUpload={props.requestPhotoUpload}
-          partDefinitionDraft={props.partDefinitionDraft}
-          partDefinitionModalMode={props.partDefinitionModalMode}
-          setPartDefinitionDraft={props.setPartDefinitionDraft}
         />
       ) : null}
     </>

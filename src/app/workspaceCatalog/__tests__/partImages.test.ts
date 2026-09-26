@@ -3,7 +3,7 @@ import { updatePartDefinitionRecord } from "@/lib/auth/records/parts";
 import { getLocalWorkspaceGeneration } from "@/lib/localWorkspace/session";
 import { createBootstrap } from "@/lib/appUtilsTestFixtures";
 
-jest.mock("react", () => ({ ...jest.requireActual("react"), useCallback: (callback: unknown) => callback, useRef: (current: unknown) => ({ current }) }));
+jest.mock("react", () => ({ ...jest.requireActual("react"), useState: (initial: unknown) => [typeof initial === "function" ? initial() : initial, jest.fn()], useEffect: jest.fn(), useCallback: (callback: unknown) => callback, useRef: (current: unknown) => ({ current }) }));
 jest.mock("@/lib/auth/records/parts", () => ({ updatePartDefinitionRecord: jest.fn() }));
 jest.mock("@/lib/localWorkspace/session", () => ({ getLocalWorkspaceGeneration: jest.fn(() => 0) }));
 jest.mock("@/lib/auth/core/sessionStorage", () => ({ getSessionGeneration: () => 0 }));
