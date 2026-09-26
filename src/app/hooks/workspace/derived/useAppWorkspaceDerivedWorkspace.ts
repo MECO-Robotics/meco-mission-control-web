@@ -24,12 +24,7 @@ export function useAppWorkspaceDerivedWorkspace(
     milestoneReportModalMode,
     purchaseModalMode,
     manufacturingModalMode,
-    partDefinitionModalMode,
-    partInstanceModalMode,
-    subsystemModalMode,
-    mechanismModalMode,
-    artifactModalMode,
-    workstreamModalMode,
+
     isAddSeasonPopupOpen,
     robotProjectModalMode,
     toggleSidebar,
@@ -92,12 +87,7 @@ export function useAppWorkspaceDerivedWorkspace(
       milestoneReportModalMode ||
       purchaseModalMode ||
       manufacturingModalMode ||
-      partDefinitionModalMode ||
-      partInstanceModalMode ||
-      subsystemModalMode ||
-      mechanismModalMode ||
-      artifactModalMode ||
-      workstreamModalMode ||
+
       isAddSeasonPopupOpen ||
       robotProjectModalMode,
   );

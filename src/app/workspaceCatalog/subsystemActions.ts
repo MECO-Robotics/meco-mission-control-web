@@ -1,51 +1,37 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCatalogEditorLifecycle } from "./useCatalogEditorLifecycle";
+import type { WorkspaceLoader } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { buildEmptySubsystemPayload } from "@/lib/appUtils/payloadBuilders";
 import { splitList, toErrorMessage } from "@/lib/appUtils/common";
 import { subsystemToPayload } from "@/lib/appUtils/payloadConversions";
 import { normalizeSubsystemLayoutFields, type SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
 import { createSubsystemRecord, updateSubsystemRecord } from "@/lib/auth/records/structure";
-import type { AppWorkspaceModel } from "../hooks/useAppWorkspaceModel";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import type { Dispatch, SetStateAction } from "react";
 import type { SubsystemPayload } from "@/types/payloads";
 import type { SubsystemRecord } from "@/types/recordsOrganization";
 
-export type SubsystemActions = ReturnType<typeof useSubsystemActions>;
-
-export function useSubsystemActions({
-  activeSubsystemId,
-  bootstrap,
-  handleUnauthorized,
-  loadWorkspace,
-  scopedBootstrap,
-  selectedProjectId,
-  setActiveSubsystemId,
-  setBootstrap,
-  setDataMessage,
-  setIsSavingSubsystem,
-  setSubsystemDraft,
-  setSubsystemDraftRisks,
-  setSubsystemModalMode,
-  subsystemDraft,
-  subsystemDraftRisks,
-  subsystemModalMode,
-}: {
-  activeSubsystemId: AppWorkspaceModel["activeSubsystemId"];
-  bootstrap: AppWorkspaceModel["bootstrap"];
-  handleUnauthorized: AppWorkspaceModel["handleUnauthorized"];
-  loadWorkspace: AppWorkspaceModel["loadWorkspace"];
-  scopedBootstrap: AppWorkspaceModel["scopedBootstrap"];
-  selectedProjectId: AppWorkspaceModel["selectedProjectId"];
-  setActiveSubsystemId: AppWorkspaceModel["setActiveSubsystemId"];
-  setBootstrap: AppWorkspaceModel["setBootstrap"];
-  setDataMessage: AppWorkspaceModel["setDataMessage"];
-  setIsSavingSubsystem: AppWorkspaceModel["setIsSavingSubsystem"];
-  setSubsystemDraft: AppWorkspaceModel["setSubsystemDraft"];
-  setSubsystemDraftRisks: AppWorkspaceModel["setSubsystemDraftRisks"];
-  setSubsystemModalMode: AppWorkspaceModel["setSubsystemModalMode"];
-  subsystemDraft: AppWorkspaceModel["subsystemDraft"];
-  subsystemDraftRisks: AppWorkspaceModel["subsystemDraftRisks"];
-  subsystemModalMode: AppWorkspaceModel["subsystemModalMode"];
+export function useSubsystemActions({ bootstrap, handleUnauthorized, loadWorkspace, scopedBootstrap, selectedProjectId, setBootstrap, setDataMessage, selectedSeasonId }: {
+  selectedSeasonId: string | null;
+  bootstrap: BootstrapPayload;
+  handleUnauthorized: () => void;
+  loadWorkspace: WorkspaceLoader;
+  scopedBootstrap: BootstrapPayload;
+  selectedProjectId: string | null;
+  setBootstrap: Dispatch<SetStateAction<BootstrapPayload>>;
+  setDataMessage: (message: string | null) => void;
 }) {
+  const [subsystemModalMode, setSubsystemModalMode] =
+    useState<"create" | "edit" | null>(null);
+  const [activeSubsystemId, setActiveSubsystemId] = useState<string | null>(null);
+  const [subsystemDraft, setSubsystemDraft] = useState<SubsystemPayload>(
+    buildEmptySubsystemPayload(EMPTY_BOOTSTRAP),
+  );
+  const [subsystemDraftRisks, setSubsystemDraftRisks] = useState("");
+  const { beginOperation, resetEditor, isSaving: isSavingSubsystem } =
+    useCatalogEditorLifecycle({ loadWorkspace, selectedProjectId, selectedSeasonId });
   const writeTailBySubsystemIdRef = useRef<Record<string, Promise<unknown>>>({});
   const updateRequestVersionBySubsystemIdRef = useRef<Record<string, number>>({});
   const pendingUpdateCountBySubsystemIdRef = useRef<Record<string, number>>({});
@@ -73,23 +59,34 @@ export function useSubsystemActions({
   }, [bootstrap.subsystems]);
 
   const openCreateSubsystemModal = useCallback(() => {
+    resetEditor();
     setActiveSubsystemId(null);
     setSubsystemDraft(buildEmptySubsystemPayload(scopedBootstrap));
     setSubsystemDraftRisks("");
     setSubsystemModalMode("create");
-  }, [scopedBootstrap, setActiveSubsystemId, setSubsystemDraft, setSubsystemDraftRisks, setSubsystemModalMode]);
+  }, [scopedBootstrap, resetEditor]);
 
   const openEditSubsystemModal = useCallback((subsystem: SubsystemRecord) => {
+    resetEditor();
     setActiveSubsystemId(subsystem.id);
     setSubsystemDraft(subsystemToPayload(subsystem));
     setSubsystemDraftRisks(subsystem.risks.join("\n"));
     setSubsystemModalMode("edit");
-  }, [setActiveSubsystemId, setSubsystemDraft, setSubsystemDraftRisks, setSubsystemModalMode]);
+  }, [resetEditor]);
 
   const closeSubsystemModal = useCallback(() => {
+    resetEditor();
     setSubsystemModalMode(null);
     setActiveSubsystemId(null);
-  }, [setActiveSubsystemId, setSubsystemModalMode]);
+  }, [resetEditor]);
+
+  useEffect(() => closeSubsystemModal(), [closeSubsystemModal, selectedProjectId, selectedSeasonId]);
+
+  useEffect(() => {
+    if (bootstrap === EMPTY_BOOTSTRAP || (subsystemModalMode === "edit" && !scopedBootstrap.subsystems.some((item) => item.id === activeSubsystemId))) {
+      closeSubsystemModal();
+    }
+  }, [activeSubsystemId, bootstrap, closeSubsystemModal, subsystemModalMode, scopedBootstrap]);
 
   const handleSubsystemSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
@@ -98,7 +95,9 @@ export function useSubsystemActions({
       return;
     }
 
-    setIsSavingSubsystem(true);
+    if (!subsystemModalMode) return;
+    const operation = beginOperation();
+    if (!operation) return;
     setDataMessage(null);
 
     try {
@@ -114,14 +113,14 @@ export function useSubsystemActions({
         await updateSubsystemRecord(activeSubsystemId, payload, handleUnauthorized);
       }
 
-      await loadWorkspace();
-      closeSubsystemModal();
+      await operation.refresh();
+      if (operation.isCurrent()) closeSubsystemModal();
     } catch (error) {
-      setDataMessage(toErrorMessage(error));
+      if (operation.isCurrent()) setDataMessage(toErrorMessage(error));
     } finally {
-      setIsSavingSubsystem(false);
+      operation.finish();
     }
-  }, [activeSubsystemId, closeSubsystemModal, handleUnauthorized, loadWorkspace, selectedProjectId, setDataMessage, setIsSavingSubsystem, subsystemDraft, subsystemDraftRisks, subsystemModalMode]);
+  }, [activeSubsystemId, closeSubsystemModal, handleUnauthorized, selectedProjectId, setDataMessage, subsystemDraft, subsystemDraftRisks, subsystemModalMode, beginOperation]);
 
   const handleToggleSubsystemArchived = useCallback(async (subsystemId: string) => {
     const currentSubsystem = bootstrap.subsystems.find(
@@ -131,7 +130,8 @@ export function useSubsystemActions({
       return;
     }
 
-    setIsSavingSubsystem(true);
+    const operation = beginOperation();
+    if (!operation) return;
     setDataMessage(null);
 
     try {
@@ -140,13 +140,13 @@ export function useSubsystemActions({
         { isArchived: !currentSubsystem.isArchived },
         handleUnauthorized,
       );
-      await loadWorkspace();
+      await operation.refresh();
     } catch (error) {
-      setDataMessage(toErrorMessage(error));
+      if (operation.isCurrent()) setDataMessage(toErrorMessage(error));
     } finally {
-      setIsSavingSubsystem(false);
+      operation.finish();
     }
-  }, [bootstrap, handleUnauthorized, loadWorkspace, setDataMessage, setIsSavingSubsystem]);
+  }, [bootstrap, handleUnauthorized, setDataMessage, beginOperation]);
 
   const updateSubsystemConfiguration = useCallback(async (
     subsystemId: string,
@@ -273,6 +273,13 @@ export function useSubsystemActions({
   ) => updateSubsystemConfiguration(subsystemId, layout), [updateSubsystemConfiguration]);
 
   return {
+    subsystemModalMode,
+    activeSubsystemId,
+    subsystemDraft,
+    subsystemDraftRisks,
+    isSavingSubsystem,
+    setSubsystemDraft,
+    setSubsystemDraftRisks,
     closeSubsystemModal,
     handleSubsystemSubmit,
     handleToggleSubsystemArchived,

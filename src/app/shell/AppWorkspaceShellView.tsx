@@ -26,7 +26,7 @@ import { AppTopbar, AppSidebar, WorkspaceModalHost, WorkspaceContent, WorkspaceS
 export function AppWorkspaceShellView({ controller }: { controller: AppWorkspaceController }) {
   const localMode = useSyncExternalStore(subscribeLocalWorkspace, getLocalWorkspaceMode, () => null);
   const c = { ...controller.model, ...controller.taskActions, ...controller.reportActions,
-    ...controller.catalogActions, ...controller.rosterActions, ...controller.model.materialEditor };
+    ...controller.catalogActions, ...controller.rosterActions, ...controller.model.artifactEditor, ...controller.model.workstreamEditor, ...controller.model.partDefinitionEditor, ...controller.model.partInstanceEditor, ...controller.model.subsystemEditor, ...controller.model.mechanismEditor, ...controller.model.materialEditor };
   const navigationContext = resolveViewAvailabilityContext({
     hasProjects: c.projectsInSelectedSeason.length > 0,
     hasSeasons: c.bootstrap.seasons.length > 0,
