@@ -13,7 +13,6 @@ import type {
   ManufacturingViewTab,
   NavigationTarget,
   RosterViewTab,
-  RiskManagementViewTab,
   TaskViewTab,
   ViewTab,
   WorklogsViewTab,
@@ -101,7 +100,6 @@ export interface WorkspaceContentProps {
   openCreateMilestoneReportModal: (milestoneId?: string, onReturn?: () => void) => void;
   openCreateWorkstreamModal: () => void;
   openEditWorkstreamModal: (workstream: BootstrapPayload["workstreams"][number]) => void;
-  onCreateRisk: (payload: RiskPayload) => Promise<void>;
   onDeleteRisk: (riskId: string) => Promise<void>;
   onCncQuickStatusChange: (
     item: ManufacturingItemRecord,
@@ -140,12 +138,10 @@ export interface WorkspaceContentProps {
   setActiveTab: Dispatch<SetStateAction<ViewTab>>;
   setInventoryView: Dispatch<SetStateAction<InventoryViewTab>>;
   setManufacturingView: Dispatch<SetStateAction<ManufacturingViewTab>>;
-  setRiskManagementView: Dispatch<SetStateAction<RiskManagementViewTab>>;
   setTaskView: Dispatch<SetStateAction<TaskViewTab>>;
   setWorklogsView: Dispatch<SetStateAction<WorklogsViewTab>>;
   inventoryView: InventoryViewTab;
   rosterView: RosterViewTab;
-  riskManagementView: RiskManagementViewTab;
   taskView: TaskViewTab;
   worklogsView: WorklogsViewTab;
   selectMember: (id: string | null, payload: BootstrapPayload) => void;
@@ -191,7 +187,6 @@ export function WorkspaceContent({
   setActiveTab,
   setInventoryView,
   setManufacturingView,
-  setRiskManagementView,
   setTaskView,
   setWorklogsView,
   taskView,
@@ -274,7 +269,6 @@ export function WorkspaceContent({
       setActiveTab={setActiveTab}
       setInventoryView={setInventoryView}
       setManufacturingView={setManufacturingView}
-      setRiskManagementView={setRiskManagementView}
       setTaskView={setTaskView}
       setWorklogsView={setWorklogsView}
     />

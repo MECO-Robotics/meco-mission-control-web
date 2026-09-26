@@ -5,7 +5,6 @@ import {
   type ManufacturingViewTab,
   type NavigationTarget,
   type RosterViewTab,
-  type RiskManagementViewTab,
   type TaskViewTab,
   type ViewTab,
   type WorklogsViewTab,
@@ -54,7 +53,6 @@ interface AppSidebarProps {
   inventoryView: InventoryViewTab;
   manufacturingView?: ManufacturingViewTab;
   rosterView: RosterViewTab;
-  riskManagementView: RiskManagementViewTab;
   seasons: SeasonRecord[];
   sessionUser: SessionUser | null;
   taskView: TaskViewTab;
@@ -94,7 +92,6 @@ export function AppSidebar({
   inventoryView,
   manufacturingView = "all",
   rosterView,
-  riskManagementView,
   seasons,
   sessionUser,
   taskView,
@@ -129,7 +126,6 @@ export function AppSidebar({
     inventoryView,
     manufacturingView,
     rosterView,
-    riskManagementView,
     taskView,
     viewAvailabilityContext,
     worklogsView,

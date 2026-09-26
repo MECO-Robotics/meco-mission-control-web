@@ -1,46 +1,19 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
-import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
-import { useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { RiskPayload } from "@/types/payloads";
 import type { RiskRecord } from "@/types/recordsReporting";
 
-import {
-  ATTACHMENT_TYPE_LABELS,
-  RISK_SEVERITY_ORDER,
-  SEVERITY_RANK,
-  buildDefaultRiskPayload,
-  buildRisksViewData,
-  formatRiskSeverity,
-  getRiskSeverityPillClassName,
-  sanitizeRiskPayload,
-  toRiskPayload,
-  type RiskSourceFilter,
-  type RiskSeverityFilter,
-  type RiskSortField,
-  type RiskSortOrder,
-  type RiskViewData,
-  type SelectOption,
-} from "./riskViewData";
+import { buildRiskViewScopeData } from "./riskViewData/riskViewDataScope";
+import { buildRiskViewLookups } from "./riskViewData/riskViewDataLookups";
+import { sanitizeRiskPayload, toRiskPayload } from "./riskViewData/riskViewDataPayload";
 
-export type { RiskSortField, RiskSortOrder, RiskSourceFilter, RiskSeverityFilter, RiskViewData, SelectOption };
-export {
-  ATTACHMENT_TYPE_LABELS,
-  RISK_SEVERITY_ORDER,
-  SEVERITY_RANK,
-  formatRiskSeverity,
-  getRiskSeverityPillClassName,
-  toRiskPayload,
-};
-
-export type RiskEditorMode = "create" | "detail" | "edit" | null;
+type RiskEditorMode = "detail" | "edit" | null;
 
 interface UseRisksViewModelArgs {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
-  onCreateRisk: (payload: RiskPayload) => Promise<void>;
   onDeleteRisk: (riskId: string) => Promise<void>;
   onUpdateRisk: (riskId: string, payload: RiskPayload) => Promise<void>;
 }
@@ -48,43 +21,35 @@ interface UseRisksViewModelArgs {
 export function useRisksViewModel({
   activePersonFilter,
   bootstrap,
-  onCreateRisk,
   onDeleteRisk,
   onUpdateRisk,
 }: UseRisksViewModelArgs) {
-  const [search, setSearch] = useState("");
-  const [severityFilter, setSeverityFilter] = useState<RiskSeverityFilter>("all");
-  const [sourceFilter, setSourceFilter] = useState<RiskSourceFilter>("all");
-  const [sortField, setSortField] = useState<RiskSortField>("title");
-  const [sortOrder, setSortOrder] = useState<RiskSortOrder>("asc");
+  const editorSession = useRef({ pending: false });
+  useEffect(() => () => {
+    editorSession.current = { pending: false };
+  }, []);
+
   const [editorMode, setEditorMode] = useState<RiskEditorMode>(null);
   const [activeRiskId, setActiveRiskId] = useState<string | null>(null);
   const [editorError, setEditorError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const viewData = useMemo(
-    () =>
-      buildRisksViewData({
-        activePersonFilter,
-        bootstrap,
-        search,
-        severityFilter,
-        sortField,
-        sortOrder,
-        sourceFilter,
-      }),
-    [activePersonFilter, bootstrap, search, severityFilter, sortField, sortOrder, sourceFilter],
-  );
+  const viewData = useMemo(() => {
+    const { pools, metrics } = buildRiskViewScopeData({ activePersonFilter, bootstrap });
+    return { metrics, ...buildRiskViewLookups({ bootstrap, scope: pools }) };
+  }, [activePersonFilter, bootstrap]);
 
-  const [draft, setDraft] = useState<RiskPayload>(() =>
-    buildDefaultRiskPayload(
-      bootstrap,
-      viewData.qaSourceOptions,
-      viewData.testSourceOptions,
-      viewData.projectAttachmentOptions,
-    ),
-  );
+  const [draft, setDraft] = useState<RiskPayload>({
+    title: "",
+    detail: "",
+    severity: "medium",
+    sourceType: "qa-report",
+    sourceId: "",
+    attachmentType: "project",
+    attachmentId: "",
+    mitigationTaskId: null,
+  });
 
   const sourceOptions = viewData.sourceOptionsForType(draft.sourceType);
   const attachmentOptions = viewData.attachmentOptionsForType(draft.attachmentType);
@@ -93,41 +58,28 @@ export function useRisksViewModel({
     [activeRiskId, bootstrap.risks],
   );
 
-  const openCreateEditor = useCallback(() => {
-    setDraft(
-      buildDefaultRiskPayload(
-        bootstrap,
-        viewData.qaSourceOptions,
-        viewData.testSourceOptions,
-        viewData.projectAttachmentOptions,
-      ),
-    );
-    setActiveRiskId(null);
-    setEditorError(null);
-    setEditorMode("create");
-  }, [bootstrap, viewData.qaSourceOptions, viewData.testSourceOptions, viewData.projectAttachmentOptions]);
-
-  const openRiskDetails = useCallback((risk: RiskRecord) => {
-    setDraft(toRiskPayload(risk));
-    setActiveRiskId(risk.id);
-    setEditorError(null);
-    setEditorMode("detail");
-  }, []);
-
-  const openEditEditor = useCallback((risk: RiskRecord) => {
-    setDraft(toRiskPayload(risk));
-    setActiveRiskId(risk.id);
-    setEditorError(null);
-    setEditorMode("edit");
-  }, []);
-
   const closeEditor = useCallback(() => {
+    editorSession.current = { pending: false };
     setEditorMode(null);
     setActiveRiskId(null);
     setEditorError(null);
     setIsSaving(false);
     setIsDeleting(false);
   }, []);
+
+  const openRiskDetails = useCallback((risk: RiskRecord) => {
+    closeEditor();
+    setDraft(toRiskPayload(risk));
+    setActiveRiskId(risk.id);
+    setEditorMode("detail");
+  }, [closeEditor]);
+
+  const openEditEditor = useCallback((risk: RiskRecord) => {
+    closeEditor();
+    setDraft(toRiskPayload(risk));
+    setActiveRiskId(risk.id);
+    setEditorMode("edit");
+  }, [closeEditor]);
 
   useEffect(() => {
     if (!editorMode) {
@@ -156,6 +108,8 @@ export function useRisksViewModel({
   }, [attachmentOptions, draft.attachmentId, editorMode]);
 
   const handleSaveRisk = useCallback(async () => {
+    const session = editorSession.current;
+    if (session.pending || editorMode !== "edit" || !activeRiskId) return;
     const payload = sanitizeRiskPayload(draft);
 
     if (payload.title.length < 2) {
@@ -179,51 +133,48 @@ export function useRisksViewModel({
     }
 
     setEditorError(null);
+    session.pending = true;
     setIsSaving(true);
     try {
-      if (editorMode === "create") {
-        await onCreateRisk(payload);
-      } else if (editorMode === "edit" && activeRiskId) {
-        await onUpdateRisk(activeRiskId, payload);
-      }
-      closeEditor();
+      await onUpdateRisk(activeRiskId, payload);
+      if (editorSession.current === session) closeEditor();
     } catch (error) {
-      setEditorError(error instanceof Error ? error.message : "Couldn't save this risk.");
+      if (editorSession.current === session) {
+        setEditorError(error instanceof Error ? error.message : "Couldn't save this risk.");
+      }
     } finally {
-      setIsSaving(false);
+      if (editorSession.current === session) {
+        session.pending = false;
+        setIsSaving(false);
+      }
     }
-  }, [activeRiskId, closeEditor, draft, editorMode, onCreateRisk, onUpdateRisk]);
+  }, [activeRiskId, closeEditor, draft, editorMode, onUpdateRisk]);
 
   const handleDeleteRisk = useCallback(async () => {
-    if (!activeRiskId) {
-      return;
-    }
+    const session = editorSession.current;
+    if (session.pending || !activeRiskId) return;
 
     setEditorError(null);
+    session.pending = true;
     setIsDeleting(true);
     try {
       await onDeleteRisk(activeRiskId);
-      closeEditor();
+      if (editorSession.current === session) closeEditor();
     } catch (error) {
-      setEditorError(error instanceof Error ? error.message : "Couldn't delete this risk.");
+      if (editorSession.current === session) {
+        setEditorError(error instanceof Error ? error.message : "Couldn't delete this risk.");
+      }
     } finally {
-      setIsDeleting(false);
+      if (editorSession.current === session) {
+        session.pending = false;
+        setIsDeleting(false);
+      }
     }
   }, [activeRiskId, closeEditor, onDeleteRisk]);
-
-  const pagination = useWorkspacePagination(viewData.filteredRows);
-  const riskFilterMotionClass = useFilterChangeMotionClass([
-    search,
-    severityFilter,
-    sortField,
-    sortOrder,
-    sourceFilter,
-  ]);
 
   return {
     activeRisk,
     ...viewData,
-    activeRiskId,
     attachmentOptions,
     closeEditor,
     draft,
@@ -235,23 +186,9 @@ export function useRisksViewModel({
     handleSaveRisk,
     isDeleting,
     isSaving,
-    openCreateEditor,
     openRiskDetails,
     openEditEditor,
-    pagination,
-    riskFilterMotionClass,
-    search,
     setDraft,
-    setSearch,
-    setSeverityFilter,
-    setSortField,
-    setSortOrder,
-    setSourceFilter,
-    severityFilter,
-    sortField,
-    sortOrder,
-    sourceFilter,
     sourceOptions,
-    totalTaskCount: viewData.scopedTaskCount,
   };
 }

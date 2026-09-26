@@ -3,7 +3,7 @@ import type { Dispatch, SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { QaReportPayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
-import { formatRiskSeverity, getRiskSeverityPillClassName } from "@/features/workspace/views/riskViewModel";
+import { formatRiskSeverity, getRiskSeverityPillClassName } from "@/features/workspace/views/riskViewData/riskViewDataPayload";
 
 interface QaRiskReassessmentSectionProps {
   bootstrap: BootstrapPayload;

@@ -21,7 +21,6 @@ export type ViewAvailabilityContext =
   | "no-season";
 
 export type TaskViewTab = "calendar" | "timeline" | "robot-map" | "queue" | "milestones";
-export type RiskManagementViewTab = "attention" | "kanban" | "metrics";
 export type WorklogsViewTab = "logs" | "activity" | "qa" | "results";
 export type ManufacturingViewTab = "all" | "cnc" | "prints" | "fabrication";
 export type InventoryViewTab = "materials" | "documents" | "parts" | "part-mappings" | "purchases";
@@ -53,7 +52,6 @@ export interface NavigationTarget {
 export interface NavigationState {
   activeTab: ViewTab;
   taskView: TaskViewTab;
-  riskManagementView: RiskManagementViewTab;
   worklogsView: WorklogsViewTab;
   inventoryView: InventoryViewTab;
   manufacturingView: ManufacturingViewTab;

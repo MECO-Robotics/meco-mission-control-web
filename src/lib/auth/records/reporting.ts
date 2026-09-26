@@ -31,10 +31,6 @@ export function createTestResultRecord(
   return createReportRecord(payload, onUnauthorized);
 }
 
-export function createRiskRecord(payload: RiskPayload, onUnauthorized?: () => void) {
-  return requestItem<RiskRecord, RiskPayload>("/risks", "POST", payload, onUnauthorized);
-}
-
 export function updateRiskRecord(
   riskId: string,
   payload: Partial<RiskPayload>,

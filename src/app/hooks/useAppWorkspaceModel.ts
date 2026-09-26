@@ -205,7 +205,6 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
   const interactiveTutorial = useInteractiveTutorial({
     activeTab: state.activeTab,
     taskView: state.taskView,
-    riskManagementView: state.riskManagementView,
     worklogsView: state.worklogsView,
     manufacturingView: state.manufacturingView,
     inventoryView: state.inventoryView,
@@ -218,7 +217,6 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     handleUnauthorized: loader.handleUnauthorized,
     setActiveTab: state.setActiveTab,
     setTaskView: state.setTaskView,
-    setRiskManagementView: state.setRiskManagementView,
     setWorklogsView: state.setWorklogsView,
     setManufacturingView: state.setManufacturingView,
     setInventoryView: state.setInventoryView,

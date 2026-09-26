@@ -1,54 +1,13 @@
-﻿import {
+import {
   MetricStatCard,
   formatAgeDays,
   formatHours,
   formatPercent,
 } from "./RiskMetrics";
 
-export interface RiskMetricsSectionData {
-  blockerBreakdown: {
-    designIssue: number;
-    lostBrokenPart: number;
-    lostBrokenTool: number;
-    supplyMaterial: number;
-    other: number;
-  };
-  buildHealthActions: string[];
-  buildHealthReasons: string[];
-  buildHealthStatus: "On Track" | "Behind" | "Ahead" | "At Risk";
-  clampedCompletionWidth: string;
-  completedTaskCount: number;
-  hoursLoggedRate: number;
-  loggedHours: number;
-  logsThisWeekHours: number | null;
-  lowStockMaterials: number;
-  mentorActionRequiredCount: number | null;
-  oldestBlockerAgeDays: number | null;
-  oldestQaWaitingAgeDays: number | null;
-  ownerlessTaskCount: number;
-  pendingPurchaseCount: number;
-  planStatus: "On Track" | "Behind" | "Ahead" | "At Risk";
-  plannedHours: number;
-  qaPassCount: number;
-  qaWaitingCount: number;
-  remainingPlannedHours: number;
-  scopedTaskCount: number;
-  staleSubsystemCount: number | null;
-  staleTaskCount: number | null;
-  staleTaskThresholdDays: number;
-  staleTaskUnavailableCount: number;
-  studentRevisionRequiredCount: number | null;
-  supplySignals: number;
-  taskCompletionRate: number;
-  taskCompletionWidth: string;
-  totalMechanismCount: number;
-  totalSubsystemCount: number;
-  untouchedMechanismCount: number;
-  unresolvedBlockerCount: number;
-  expectedProgressRate: number | null;
-  activeSubsystemCount: number;
-  activeMechanismCount: number;
-}
+import type { RiskMetricsData } from "./riskViewData/riskViewDataScope";
+
+export type RiskMetricsSectionData = Omit<RiskMetricsData, "mechanismMetrics" | "subsystemMetrics">;
 
 function getStatusClassName(status: "On Track" | "Behind" | "Ahead" | "At Risk") {
   switch (status) {

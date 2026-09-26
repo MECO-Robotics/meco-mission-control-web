@@ -5,6 +5,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { RisksView } from "@/features/workspace/views/RisksView";
+import { RiskMetricsSection } from "../RiskMetricsSection";
+import { buildRiskViewScopeData } from "../riskViewData/riskViewDataScope";
 import { parseTimestamp } from "@/features/workspace/views/riskViewData/riskViewMetricsUtils";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
@@ -137,7 +139,7 @@ function createBootstrap(): BootstrapPayload {
         id: "risk-1",
         title: "Member one risk",
         detail: "Only Alex should see this",
-        severity: "medium",
+        severity: "high",
         sourceType: "qa-report",
         sourceId: "report-1",
         attachmentType: "project",
@@ -148,7 +150,7 @@ function createBootstrap(): BootstrapPayload {
         id: "risk-2",
         title: "Member two risk",
         detail: "Blair owns this",
-        severity: "medium",
+        severity: "high",
         sourceType: "qa-report",
         sourceId: "report-2",
         attachmentType: "project",
@@ -250,33 +252,21 @@ describe("RisksView", () => {
       React.createElement(RisksView, {
         activePersonFilter: ["member-1"],
         bootstrap: createBootstrap(),
-        isAllProjectsView: true,
-        onCreateRisk: jest.fn(),
         onDeleteRisk: jest.fn(),
         onUpdateRisk: jest.fn(),
-        view: "kanban",
       }),
     );
 
     expect(markup).toContain("Member one risk");
     expect(markup).not.toContain("Member two risk");
-    expect(markup).toContain('draggable="true"');
-    expect(markup).toContain('data-kanban-item-id="risk-1"');
-    expect(markup).toContain('data-kanban-drop-state="high"');
-    expect(markup).toContain('data-kanban-drop-enabled="true"');
   });
 
-  it("keeps hours progress and task completion semantics separate in metrics view", () => {
+  it("keeps hours progress and task completion semantics separate in dashboard health", () => {
     const markup = renderToStaticMarkup(
-      React.createElement(RisksView, {
+      React.createElement(RiskMetricsSection, buildRiskViewScopeData({
         activePersonFilter: [],
         bootstrap: createMetricsBootstrap(),
-        isAllProjectsView: true,
-        onCreateRisk: jest.fn(),
-        onDeleteRisk: jest.fn(),
-        onUpdateRisk: jest.fn(),
-        view: "metrics",
-      }),
+      }).metrics),
     );
 
     expect(markup).toContain("Build Health:");
@@ -295,15 +285,10 @@ describe("RisksView", () => {
 
   it("keeps empty filtered metric scopes neutral instead of behind", () => {
     const markup = renderToStaticMarkup(
-      React.createElement(RisksView, {
+      React.createElement(RiskMetricsSection, buildRiskViewScopeData({
         activePersonFilter: ["missing-member"],
         bootstrap: createMetricsBootstrap(),
-        isAllProjectsView: true,
-        onCreateRisk: jest.fn(),
-        onDeleteRisk: jest.fn(),
-        onUpdateRisk: jest.fn(),
-        view: "metrics",
-      }),
+      }).metrics),
     );
 
     expect(markup).toContain("Build Health: On Track");
