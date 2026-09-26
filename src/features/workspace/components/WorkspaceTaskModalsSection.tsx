@@ -4,60 +4,53 @@ import { TaskEditorModal } from "../modals/TaskEditorModalContent";
 import type { WorkspaceModalHostViewProps } from "./workspaceModalHostViewTypes";
 
 export function WorkspaceTaskModalsSection(props: WorkspaceModalHostViewProps) {
+  const editor = props.taskEditor;
   const [advancedSectionOpen, setAdvancedSectionOpen] = useState(false);
-  const modalTaskId = props.activeTimelineTaskDetail?.id ?? props.activeTask?.id ?? null;
+  const modalTaskId = editor.activeTimelineTaskDetail?.id ?? editor.activeTask?.id ?? null;
 
   useEffect(() => {
     setAdvancedSectionOpen(false);
   }, [modalTaskId]);
 
-  if (!props.activeTimelineTaskDetail && !props.taskModalMode) {
+  if (!editor.activeTimelineTaskDetail && !editor.taskModalMode) {
     return null;
   }
 
   return (
     <>
-      {props.activeTimelineTaskDetail ? (
+      {editor.activeTimelineTaskDetail ? (
         <TaskDetailsModal
-          activeTask={props.activeTimelineTaskDetail}
+          activeTask={editor.activeTimelineTaskDetail}
           bootstrap={props.bootstrap}
-          closeTaskDetailsModal={props.closeTimelineTaskDetailsModal}
+          closeTaskDetailsModal={editor.closeTimelineTaskDetailsModal}
           advancedSectionOpen={advancedSectionOpen}
-          onEditTask={props.onOpenTaskEditFromTimelineDetails}
+          onEditTask={editor.openEditTaskModal}
           onLogWork={props.openCreateWorkLogModal}
           onSubmitQa={props.openCreateQaReportModal}
-          onResolveTaskBlocker={props.handleResolveTaskBlocker}
+          onResolveTaskBlocker={editor.handleResolveTaskBlocker}
           setAdvancedSectionOpen={setAdvancedSectionOpen}
         />
       ) : null}
 
-      {props.taskModalMode ? (
+      {editor.taskModalMode ? (
         <TaskEditorModal
-          activeTask={props.activeTask}
+          {...editor}
+          taskModalMode={editor.taskModalMode}
           bootstrap={props.bootstrap}
-          closeTaskModal={props.closeTaskModal}
           advancedSectionOpen={advancedSectionOpen}
           disciplinesById={props.disciplinesById}
           milestonesById={props.milestonesById}
-          handleDeleteTask={props.handleDeleteTask}
-          handleResolveTaskBlocker={props.handleResolveTaskBlocker}
-          handleTaskSubmit={props.handleTaskSubmit}
-          isDeletingTask={props.isDeletingTask}
-          isSavingTask={props.isSavingTask}
           mechanismsById={props.mechanismsById}
           mentors={props.mentors}
           partDefinitionsById={props.partDefinitionsById}
           partInstancesById={props.partInstancesById}
           requestPhotoUpload={props.requestPhotoUpload}
-          openTaskDetailsModal={props.openTaskDetailsModal}
+          openTaskDetailsModal={editor.openTimelineTaskDetailsModal}
           onTaskEditCanceled={props.onTaskEditCanceled}
-          setTaskDraft={props.setTaskDraft}
           setAdvancedSectionOpen={setAdvancedSectionOpen}
-          showCreateTypeToggle={props.showTimelineCreateToggleInTaskModal}
-          onSwitchCreateTypeToMilestone={props.onSwitchTaskCreateToMilestone}
+          showCreateTypeToggle={editor.showTimelineCreateToggleInTaskModal}
+          onSwitchCreateTypeToMilestone={editor.switchTaskCreateToMilestone}
           students={props.students}
-          taskDraft={props.taskDraft}
-          taskModalMode={props.taskModalMode}
         />
       ) : null}
     </>

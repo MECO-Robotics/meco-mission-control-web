@@ -46,6 +46,7 @@ export interface TaskRelationPersistence {
 export async function syncTaskDependencies(
   params: {
     taskId: string;
+    canPersist?: () => boolean;
     desiredDependencies: TaskDependencyDraft[] | undefined;
     existingDependencies: TaskDependencyRecord[];
     handleUnauthorized: HandleUnauthorized;
@@ -61,6 +62,7 @@ export async function syncTaskDependencies(
   const desiredIds = new Set<string>();
 
   for (const dependency of desiredDependencies ?? []) {
+    if (params.canPersist && !params.canPersist()) return false;
     if (!dependency.refId.trim()) {
       continue;
     }
@@ -89,16 +91,19 @@ export async function syncTaskDependencies(
   }
 
   for (const dependency of existingDependencies) {
+    if (params.canPersist && !params.canPersist()) return false;
     if (!desiredIds.has(dependency.id)) {
       await persistence.deleteTaskDependencyRecord(dependency.id, handleUnauthorized);
       params.onDeleted?.(dependency.id);
     }
   }
+  return !params.canPersist || params.canPersist();
 }
 
 export async function syncTaskBlockers(
   params: {
     taskId: string;
+    canPersist?: () => boolean;
     desiredBlockers: TaskBlockerDraft[] | undefined;
     existingBlockers: TaskBlockerRecord[];
     handleUnauthorized: HandleUnauthorized;
@@ -112,6 +117,7 @@ export async function syncTaskBlockers(
   const desiredIds = new Set<string>();
 
   for (const blocker of desiredBlockers ?? []) {
+    if (params.canPersist && !params.canPersist()) return false;
     const payload = buildTaskBlockerPayload(taskId, blocker);
     const existingBlocker = blocker.id ? existingById.get(blocker.id) : null;
 
@@ -132,9 +138,11 @@ export async function syncTaskBlockers(
   }
 
   for (const blocker of existingBlockers) {
+    if (params.canPersist && !params.canPersist()) return false;
     if (!desiredIds.has(blocker.id)) {
       await persistence.deleteTaskBlockerRecord(blocker.id, handleUnauthorized);
       params.onDeleted?.(blocker.id);
     }
   }
+  return !params.canPersist || params.canPersist();
 }

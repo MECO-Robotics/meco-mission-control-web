@@ -59,10 +59,6 @@ export function useAppWorkspaceState() {
     toggleSidebar,
   } = useAppShell();
   const workspaceUiState = useAppWorkspaceUiState();
-  const suppressNextAutoWorkspaceLoadRef = useRef(false);
-  const suppressNextAutoWorkspaceLoad = () => {
-    suppressNextAutoWorkspaceLoadRef.current = true;
-  };
 
   const enqueueNotificationHistory = useCallback((notice: WorkspaceToastNotice) => {
     setNotificationHistory((current) => appendWorkspaceToastHistory(current, notice));
@@ -222,8 +218,6 @@ export function useAppWorkspaceState() {
     toggleNotificationQueue,
     toggleSidebar,
     worklogsView,
-    suppressNextAutoWorkspaceLoadRef,
-    suppressNextAutoWorkspaceLoad,
     returnToPublicDemo,
     enforcedAuthConfig,
     clearTaskEditNotices,

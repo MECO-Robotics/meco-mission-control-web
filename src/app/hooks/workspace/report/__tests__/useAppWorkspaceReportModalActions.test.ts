@@ -18,8 +18,11 @@ function setup() {
     scopedBootstrap: bootstrap, activePersonFilter: [], activeTimelineTaskDetailId: task.id,
     taskModalMode: "edit" as string | null,
     workLogModalMode: null as string | null, qaReportModalMode: null as string | null, milestoneReportModalMode: null as string | null,
-    setActiveTimelineTaskDetailId: jest.fn((id: string | null) => { state.activeTimelineTaskDetailId = id ?? ""; }),
-    setTaskModalMode: jest.fn((mode: string | null) => { state.taskModalMode = mode; }),
+    taskEditor: { leaveTaskDetails: jest.fn((taskId?: string) => {
+      state.activeTimelineTaskDetailId = "";
+      state.taskModalMode = null;
+      return () => { state.activeTimelineTaskDetailId = taskId ?? ""; };
+    }) },
     setWorkLogModalMode: jest.fn((mode: string | null) => { state.workLogModalMode = mode; }),
     setQaReportModalMode: jest.fn((mode: string | null) => { state.qaReportModalMode = mode; }),
     setMilestoneReportModalMode: jest.fn((mode: string | null) => { state.milestoneReportModalMode = mode; }),

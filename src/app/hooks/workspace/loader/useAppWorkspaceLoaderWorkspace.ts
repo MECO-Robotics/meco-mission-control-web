@@ -48,7 +48,6 @@ export function useAppWorkspaceLoaderWorkspace(
 
       reconcileWorkspaceState(
         state,
-        payload,
         scopedPayload,
         selectMember,
       );

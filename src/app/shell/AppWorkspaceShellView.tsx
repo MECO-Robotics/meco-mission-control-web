@@ -25,7 +25,7 @@ import { AppTopbar, AppSidebar, WorkspaceModalHost, WorkspaceContent, WorkspaceS
 
 export function AppWorkspaceShellView({ controller }: { controller: AppWorkspaceController }) {
   const localMode = useSyncExternalStore(subscribeLocalWorkspace, getLocalWorkspaceMode, () => null);
-  const c = { ...controller.model, ...controller.taskActions, ...controller.reportActions,
+  const c = { ...controller.model, ...controller.model.taskEditor, ...controller.model.eventActions, ...controller.reportActions,
     ...controller.rosterActions, ...controller.model.artifactEditor, ...controller.model.workstreamEditor, ...controller.model.partDefinitionEditor, ...controller.model.partInstanceEditor, ...controller.model.subsystemEditor, ...controller.model.mechanismEditor, ...controller.model.purchaseEditor, ...controller.model.manufacturingEditor, ...controller.model.materialEditor };
   const navigationContext = resolveViewAvailabilityContext({
     hasProjects: c.projectsInSelectedSeason.length > 0,
@@ -107,7 +107,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
     const taskId = params.get("task");
     restoringTask.current = taskId && c.bootstrap.tasks.some((task) => task.id === taskId && (!projectId || task.projectId === projectId)) ? taskId : null;
     restoringScroll.current = Number(window.history.state?.scrollY ?? 0);
-    c.setActiveTimelineTaskDetailId(restoringTask.current);
+    c.restoreTimelineTaskDetails(restoringTask.current);
     handleSelectNavigationTarget(target);
   };
   const navigationRef = useRef({ navigate: handleSelectNavigationTarget, restore: restoreNavigation });
@@ -133,7 +133,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
         restoringLocation.current = target;
         restoringTask.current = taskId;
         restoringScroll.current = Number(window.history.state?.scrollY ?? 0);
-        c.setActiveTimelineTaskDetailId(taskId);
+        c.restoreTimelineTaskDetails(taskId);
         navigationRef.current.navigate(target);
         return;
       }
@@ -300,9 +300,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
             {...c}
             bootstrap={c.scopedBootstrap}
             onTaskEditCanceled={c.notifyTaskEditCanceled}
-            onSwitchTaskCreateToMilestone={c.switchTaskCreateToMilestone}
-            onOpenTaskEditFromTimelineDetails={c.openEditTaskModal}
-            openTaskDetailsModal={c.openTimelineTaskDetailsModal}
           />
         </Suspense>
       ) : null}
