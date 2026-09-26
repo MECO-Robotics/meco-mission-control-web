@@ -19,7 +19,6 @@ import type {
   InventoryViewTab,
   ManufacturingViewTab,
   RosterViewTab,
-  RiskManagementViewTab,
   TaskViewTab,
   ViewTab,
   WorklogsViewTab,
@@ -32,8 +31,6 @@ export function useAppWorkspaceState() {
   const [activeTab, setActiveTab] = useState<ViewTab>("home");
   const [tabSwitchDirection, setTabSwitchDirection] = useState<"up" | "down">("down");
   const [taskView, setTaskView] = useState<TaskViewTab>("queue");
-  const [riskManagementView, setRiskManagementView] =
-    useState<RiskManagementViewTab>("kanban");
   const [worklogsView, setWorklogsView] = useState<WorklogsViewTab>("logs");
   const [manufacturingView, setManufacturingView] =
     useState<ManufacturingViewTab>("all");
@@ -196,7 +193,6 @@ export function useAppWorkspaceState() {
     pageShellStyle,
     requestSignIn,
     rosterView,
-    riskManagementView,
     setActiveTab,
     setBootstrap,
     setDataMessage,
@@ -204,7 +200,6 @@ export function useAppWorkspaceState() {
     setIsLoadingData,
     setManufacturingView,
     setRosterView,
-    setRiskManagementView,
     setTabSwitchDirection,
     enqueueTaskEditNotice,
     dismissTaskEditNotice,

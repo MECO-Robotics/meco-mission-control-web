@@ -32,8 +32,8 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
     hasSeasons: c.bootstrap.seasons.length > 0,
     selectedProjectType: c.selectedProject?.projectType ?? null,
   });
-  const { activeTab, inventoryView, manufacturingView, rosterView, riskManagementView, taskView, worklogsView } = c;
-  const navigationState = ({ activeTab, inventoryView, manufacturingView, rosterView, riskManagementView, taskView, worklogsView });
+  const { activeTab, inventoryView, manufacturingView, rosterView, taskView, worklogsView } = c;
+  const navigationState = ({ activeTab, inventoryView, manufacturingView, rosterView, taskView, worklogsView });
   const activeSubItemId = getActiveNavigationSubItemId(navigationState, navigationContext);
   const activeSection = activeSubItemId
     ? getNavigationSectionFromSubItem(activeSubItemId)
@@ -237,7 +237,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       inventoryView={c.inventoryView}
       manufacturingView={c.manufacturingView}
       rosterView={c.rosterView}
-      riskManagementView={c.riskManagementView}
       seasons={c.bootstrap.seasons}
       sessionUser={c.sessionUser}
       taskView={c.taskView}
@@ -269,7 +268,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
           artifacts={c.scopedArtifacts}
           availabilityBootstrap={c.bootstrap}
           bootstrap={c.scopedBootstrap}
-          onCreateRisk={c.handleCreateRisk}
           onDeleteRisk={c.handleDeleteRisk}
           onCncQuickStatusChange={c.handleCncQuickStatusChange}
           onUpdateRisk={c.handleUpdateRisk}

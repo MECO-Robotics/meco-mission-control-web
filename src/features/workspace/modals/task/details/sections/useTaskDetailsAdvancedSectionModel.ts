@@ -10,7 +10,7 @@ import {
 import { formatIterationVersion } from "@/lib/appUtils/common";
 import { getTaskDisciplinesForProject } from "@/lib/taskDisciplines";
 import type { TaskDetailsEditableField } from "../../taskModalTypes";
-import { formatRiskSeverity } from "@/features/workspace/views/riskViewModel";
+import { formatRiskSeverity } from "@/features/workspace/views/riskViewData/riskViewDataPayload";
 
 interface UseTaskDetailsAdvancedSectionModelArgs {
   activeTask: TaskRecord;

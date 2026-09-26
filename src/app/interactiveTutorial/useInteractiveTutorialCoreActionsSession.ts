@@ -14,7 +14,6 @@ export function useInteractiveTutorialCoreActionsSession(
   const {
     setActiveTab,
     setTaskView,
-    setRiskManagementView,
     setWorklogsView,
     setManufacturingView,
     setInventoryView,
@@ -60,7 +59,6 @@ export function useInteractiveTutorialCoreActionsSession(
     if (previousState) {
       setActiveTab(previousState.activeTab);
       setTaskView(previousState.taskView);
-      setRiskManagementView(previousState.riskManagementView);
       setWorklogsView(previousState.worklogsView);
       setManufacturingView(previousState.manufacturingView);
       setInventoryView(previousState.inventoryView);
@@ -85,7 +83,6 @@ export function useInteractiveTutorialCoreActionsSession(
     setDataMessage,
     setInventoryView,
     setManufacturingView,
-    setRiskManagementView,
     setSelectedProjectId,
     setSelectedSeasonId,
     setReturnState,

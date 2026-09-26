@@ -24,7 +24,7 @@ export function useInteractiveTutorialCoreActionsStart({
   state,
   onActivateTutorial,
 }: UseInteractiveTutorialCoreActionsStartOptions) {
-  const { activeTab, taskView, riskManagementView, worklogsView, manufacturingView, inventoryView, selectedSeasonId, selectedProjectId, bootstrap, isSidebarCollapsed, toggleSidebar, closeSidebarOverlay, handleUnauthorized, setActiveTab, setTaskView, setRiskManagementView, setWorklogsView, setManufacturingView, setInventoryView, setSelectedSeasonId, setSelectedProjectId, setActivePersonFilter, setBootstrap, setDataMessage } = options;
+  const { activeTab, taskView, worklogsView, manufacturingView, inventoryView, selectedSeasonId, selectedProjectId, bootstrap, isSidebarCollapsed, toggleSidebar, closeSidebarOverlay, handleUnauthorized, setActiveTab, setTaskView, setWorklogsView, setManufacturingView, setInventoryView, setSelectedSeasonId, setSelectedProjectId, setActivePersonFilter, setBootstrap, setDataMessage } = options;
   const { bootstrapSnapshot, chapters, returnState, setBaselineCounts, setBootstrapSnapshot, setChapterId, setCompletedChapterId, setStepIndex, setTutorialProjectId, setTutorialProjectName, setTutorialSeasonId, setTutorialSeasonName, stepIndex } = state;
 
   const startInteractiveTutorial = useCallback(
@@ -63,7 +63,6 @@ export function useInteractiveTutorialCoreActionsStart({
           buildInteractiveTutorialReturnState({
             activeTab,
             taskView,
-            riskManagementView,
             worklogsView,
             manufacturingView,
             inventoryView,
@@ -129,7 +128,6 @@ export function useInteractiveTutorialCoreActionsStart({
       setChapterId(chapter.id);
       setActiveTab("tasks");
       setTaskView("timeline");
-      setRiskManagementView("kanban");
       setWorklogsView("logs");
       setManufacturingView("cnc");
       setInventoryView("materials");
@@ -151,7 +149,6 @@ export function useInteractiveTutorialCoreActionsStart({
       isSidebarCollapsed,
       manufacturingView,
       onActivateTutorial,
-      riskManagementView,
       returnState,
       selectedProjectId,
       selectedSeasonId,
@@ -165,7 +162,6 @@ export function useInteractiveTutorialCoreActionsStart({
       setDataMessage,
       setInventoryView,
       setManufacturingView,
-      setRiskManagementView,
       setSelectedProjectId,
       setSelectedSeasonId,
       setStepIndex,

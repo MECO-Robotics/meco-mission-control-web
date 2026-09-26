@@ -1,15 +1,12 @@
-﻿import { filterSelectionMatchesTaskPeople, type FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { filterSelectionMatchesTaskPeople, type FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { getTaskBlockerRecords } from "@/features/workspace/shared/task/taskPlanningInternals";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskBlockerRecord } from "@/types/recordsExecution";
-import type { RiskRecord } from "@/types/recordsReporting";
 
 import { parseTimestamp } from "./riskViewMetricsUtils";
 
 export interface ScopedRiskViewPools {
-  scopedReportIds: Set<string>;
   scopedReports: BootstrapPayload["reports"];
-  scopedRisks: RiskRecord[];
   scopedTaskIds: Set<string>;
   scopedTasks: BootstrapPayload["tasks"];
   scopedWorkLogs: BootstrapPayload["workLogs"];
@@ -35,22 +32,8 @@ export function buildScopedRiskViewPools({
     activePersonFilter.length > 0
       ? bootstrap.reports.filter((report) => report.taskId && scopedTaskIds.has(report.taskId))
       : bootstrap.reports;
-  const scopedReportIds = new Set(scopedReports.map((report) => report.id));
-  const scopedRisks =
-    activePersonFilter.length > 0
-      ? bootstrap.risks.filter((risk) => {
-          if (risk.mitigationTaskId && scopedTaskIds.has(risk.mitigationTaskId)) {
-            return true;
-          }
-
-          return scopedReportIds.has(risk.sourceId);
-        })
-      : bootstrap.risks;
-
   return {
-    scopedReportIds,
     scopedReports,
-    scopedRisks,
     scopedTaskIds,
     scopedTasks,
     scopedWorkLogs,

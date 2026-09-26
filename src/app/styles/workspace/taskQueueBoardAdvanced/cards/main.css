@@ -129,7 +129,6 @@
   background: rgba(255, 255, 255, 0.28);
 }
 
-.risk-board .task-queue-board-card-summary-task,
 .task-queue-view .task-queue-board-card-summary-task {
   color: var(--text-title);
   font-size: calc(0.82rem * var(--task-queue-zoom, 1));

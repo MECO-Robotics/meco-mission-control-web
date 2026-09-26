@@ -5,7 +5,7 @@ import type { AuditActionRecord } from "@/types/recordsExecution";
 import type { RiskRecord } from "@/types/recordsReporting";
 import { WorkspaceAuditActionList } from "@/features/workspace/shared/WorkspaceAuditActionList";
 
-import { ATTACHMENT_TYPE_LABELS, formatRiskSeverity, getRiskSeverityPillClassName } from "./riskViewModel";
+import { ATTACHMENT_TYPE_LABELS, formatRiskSeverity, getRiskSeverityPillClassName } from "./riskViewData/riskViewDataPayload";
 import { TaskPriorityBadge } from "./taskQueue/taskQueueKanbanCardMeta";
 
 interface RiskDetailsModalProps {

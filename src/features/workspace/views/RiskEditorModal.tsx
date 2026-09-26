@@ -3,13 +3,13 @@ import type { Dispatch, SetStateAction } from "react";
 
 import type { RiskPayload } from "@/types/payloads";
 
-import type { RiskEditorMode, SelectOption } from "./riskViewModel";
+import type { SelectOption } from "./riskViewData/riskViewDataPayload";
 
 interface RiskEditorModalProps {
   attachmentOptions: SelectOption[];
   draft: RiskPayload;
   editorError: string | null;
-  editorMode: Exclude<RiskEditorMode, "detail"> | null;
+  editorMode: "edit" | null;
   getAttachmentOptionsForType: (attachmentType: RiskPayload["attachmentType"]) => SelectOption[];
   getSourceOptionsForType: (sourceType: RiskPayload["sourceType"]) => SelectOption[];
   isDeleting: boolean;
@@ -50,7 +50,7 @@ export function RiskEditorModal({
             <p className="eyebrow" style={{ color: "var(--official-red)" }}>
               Risk management
             </p>
-            <h2>{editorMode === "create" ? "Create risk" : "Edit risk"}</h2>
+            <h2>Edit risk</h2>
           </div>
           <button className="icon-button" onClick={onClose} type="button">
             Close
@@ -245,11 +245,7 @@ export function RiskEditorModal({
                 Cancel
               </button>
               <button className="primary-action" disabled={isSaving || isDeleting} type="submit">
-                {isSaving
-                  ? "Saving..."
-                  : editorMode === "create"
-                    ? "Create risk"
-                    : "Save changes"}
+                {isSaving ? "Saving..." : "Save changes"}
               </button>
             </div>
           </div>

@@ -10,10 +10,7 @@ export interface RiskViewLookups {
   getMitigationLabel: (risk: RiskRecord) => string;
   getSourceLabel: (risk: RiskRecord) => string;
   mitigationTaskOptions: SelectOption[];
-  projectAttachmentOptions: SelectOption[];
-  qaSourceOptions: SelectOption[];
   sourceOptionsForType: (sourceType: RiskRecord["sourceType"]) => SelectOption[];
-  testSourceOptions: SelectOption[];
 }
 
 interface BuildRiskViewLookupsArgs {
@@ -171,9 +168,6 @@ export function buildRiskViewLookups({
     getMitigationLabel,
     getSourceLabel,
     mitigationTaskOptions,
-    projectAttachmentOptions,
-    qaSourceOptions,
     sourceOptionsForType,
-    testSourceOptions,
   };
 }
