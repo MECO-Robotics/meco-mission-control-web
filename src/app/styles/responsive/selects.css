@@ -7,10 +7,6 @@
     padding-inline: 0.25rem;
   }
 
-  .app-topbar-project-slot {
-    padding-inline: 0.3rem 0.2rem;
-  }
-
   .filter-toolbar {
     display: flex;
     flex-wrap: wrap;
@@ -78,13 +74,8 @@
   }
 }
 
-.app-topbar-project-select,
-.profile-menu-context-select,
-.sidebar-context-select,
 .task-queue-sort-menu-select,
 .table-pagination-size select,
-.timeline-interval-filter select,
-.risk-filter-control select,
 .field select:not([multiple]),
 .task-detail-inline-edit-select:not([multiple]) {
   appearance: none;
@@ -120,20 +111,10 @@
     background-color 0.18s ease;
 }
 
-.app-topbar-project-select:focus,
-.app-topbar-project-select:focus-visible,
-.profile-menu-context-select:focus,
-.profile-menu-context-select:focus-visible,
-.sidebar-context-select:focus,
-.sidebar-context-select:focus-visible,
 .task-queue-sort-menu-select:focus,
 .task-queue-sort-menu-select:focus-visible,
 .table-pagination-size select:focus,
 .table-pagination-size select:focus-visible,
-.timeline-interval-filter select:focus,
-.timeline-interval-filter select:focus-visible,
-.risk-filter-control select:focus,
-.risk-filter-control select:focus-visible,
 .field select:not([multiple]):focus,
 .field select:not([multiple]):focus-visible,
 .task-detail-inline-edit-select:not([multiple]):focus,
@@ -143,13 +124,8 @@
   box-shadow: var(--control-select-focus-ring);
 }
 
-.app-topbar-project-select:disabled,
-.profile-menu-context-select:disabled,
-.sidebar-context-select:disabled,
 .task-queue-sort-menu-select:disabled,
 .table-pagination-size select:disabled,
-.timeline-interval-filter select:disabled,
-.risk-filter-control select:disabled,
 .field select:not([multiple]):disabled,
 .task-detail-inline-edit-select:not([multiple]):disabled {
   opacity: 0.64;
