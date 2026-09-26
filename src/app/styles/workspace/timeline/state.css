@@ -67,7 +67,7 @@
   gap: 0.2rem;
 }
 
-.table-shell.filter-results-motion.is-filtering> :is(.queue-row, .ops-row, .task-queue-board-card, .subsystem-manager-item, .empty-state),
+.table-shell.filter-results-motion.is-filtering> :is(.ops-row, .task-queue-board-card, .subsystem-manager-item, .empty-state),
 .timeline-shell.filter-results-motion.is-filtering>* {
   animation: filter-results-settle 160ms ease-out both;
   will-change: opacity;

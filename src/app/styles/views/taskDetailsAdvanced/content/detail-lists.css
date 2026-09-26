@@ -105,12 +105,6 @@
   max-width: 100%;
 }
 
-.task-detail-hour-segment {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.32rem;
-}
-
 .task-detail-hour-separator {
   color: var(--text-copy);
 }

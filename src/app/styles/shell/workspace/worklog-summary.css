@@ -1,9 +1,3 @@
-.summary-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 0.6rem;
-}
-
 .worklog-summary-stat-grid {
   margin: 0 0 0.2rem;
 }

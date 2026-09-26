@@ -1,14 +1,3 @@
-.part-instance-dropdown-chip::after {
-  content: "";
-  width: 0.34rem;
-  height: 0.34rem;
-  border-right: 1.35px solid currentColor;
-  border-bottom: 1.35px solid currentColor;
-  transform: translateY(-1px) rotate(45deg);
-  opacity: 0.65;
-  flex-shrink: 0;
-}
-
 .requested-item-meta {
   display: flex;
   flex-direction: column;
