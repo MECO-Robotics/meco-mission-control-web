@@ -22,17 +22,6 @@
   max-width: min(20rem, 38vw);
 }
 
-.timeline-interval-filter {
-  width: auto;
-  max-width: 100%;
-}
-
-.timeline-interval-filter select {
-  min-width: 96px;
-  width: auto;
-  max-width: 100%;
-}
-
 @media (max-width: 1180px) {
 
   .purchase-toolbar {

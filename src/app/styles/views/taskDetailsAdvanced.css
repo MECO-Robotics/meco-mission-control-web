@@ -26,50 +26,9 @@
   gap: 0.5rem;
 }
 
-.task-target-primary {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.task-target-primary span {
-  color: var(--text-title);
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
-.task-target-selected {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.4rem;
-  min-height: 2.1rem;
-  padding: 0.4rem;
-  border-radius: 8px;
-  border: 1px solid var(--border-base);
-  background: var(--bg-row-alt);
-}
-
-.task-target-chip {
-  display: inline-flex;
-  align-items: center;
-  max-width: 100%;
-  border-radius: 999px;
-  padding: 0.2rem 0.48rem;
-  background: rgba(22, 71, 142, 0.12);
-  color: var(--meco-blue);
-  font-size: 0.72rem;
-  font-weight: 700;
-}
-
 .task-target-empty {
   color: var(--text-copy);
   font-size: 0.78rem;
-}
-
-.task-target-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 0.5rem;
 }
 
 .task-target-group {

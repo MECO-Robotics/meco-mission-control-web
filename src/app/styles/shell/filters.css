@@ -22,15 +22,3 @@
   letter-spacing: 0.01em;
 }
 
-.app-topbar-section-tabs {
-  flex-wrap: nowrap;
-  min-width: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
-}
-
-.app-topbar-section-tabs::-webkit-scrollbar {
-  display: none;
-}
-
