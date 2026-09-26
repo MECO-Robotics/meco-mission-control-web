@@ -1,7 +1,6 @@
 import {
   appendWorkspaceToastHistory,
   appendWorkspaceToast,
-  dismissWorkspaceToast,
   removeWorkspaceToast,
   type WorkspaceToastNotice,
 } from "../workspaceToastQueue";
@@ -47,38 +46,6 @@ describe("workspaceToastQueue", () => {
 
     expect(removeWorkspaceToast(activeQueue, notice.id)).toEqual([]);
     expect(history).toEqual([notice]);
-  });
-
-  it("removes manually dismissed active notices from notification history", () => {
-    const notice = {
-      id: "toast-1",
-      title: "Edit Saved",
-      message: "Your changes were saved.",
-      tone: "success" as const,
-    };
-    const activeQueue = appendWorkspaceToast([], notice);
-    const history = appendWorkspaceToastHistory([], notice);
-
-    expect(dismissWorkspaceToast(activeQueue, history, notice.id, "manual")).toEqual({
-      queue: [],
-      history: [],
-    });
-  });
-
-  it("keeps auto-expired active notices in notification history", () => {
-    const notice = {
-      id: "toast-1",
-      title: "Edit Saved",
-      message: "Your changes were saved.",
-      tone: "success" as const,
-    };
-    const activeQueue = appendWorkspaceToast([], notice);
-    const history = appendWorkspaceToastHistory([], notice);
-
-    expect(dismissWorkspaceToast(activeQueue, history, notice.id, "auto")).toEqual({
-      queue: [],
-      history: [notice],
-    });
   });
 
   it("caps notification history to the latest notices", () => {

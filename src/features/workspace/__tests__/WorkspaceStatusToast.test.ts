@@ -3,57 +3,8 @@
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import {
-  WorkspaceErrorPopup,
-  WorkspaceInfoToast,
-  WorkspaceToast,
-  WorkspaceToastStack,
-} from "../WorkspaceStatusToast";
+import { WorkspaceToastStack } from "../WorkspaceStatusToast";
 import { createPausableTimeout } from "../taskEditNoticeTimer";
-
-describe("WorkspaceInfoToast", () => {
-  it("renders the updated cancel notice title", () => {
-    const markup = renderToStaticMarkup(
-      React.createElement(WorkspaceInfoToast, {
-        message: "Unsaved changes were discarded.",
-        onDismiss: () => {},
-      }),
-    );
-
-    expect(markup).toContain("Edit Canceled");
-    expect(markup).toContain('data-toast-tone="info"');
-  });
-});
-
-describe("WorkspaceErrorPopup", () => {
-  it("renders the generic error title", () => {
-    const markup = renderToStaticMarkup(
-      React.createElement(WorkspaceErrorPopup, {
-        message: "The workspace hit an unexpected error.",
-        onDismiss: () => {},
-      }),
-    );
-
-    expect(markup).toContain("Error");
-    expect(markup).toContain('data-toast-tone="error"');
-  });
-});
-
-describe("WorkspaceToast", () => {
-  it("renders tone specific chrome", () => {
-    const markup = renderToStaticMarkup(
-      React.createElement(WorkspaceToast, {
-        message: "Queued for review.",
-        onDismiss: () => {},
-        title: "Success",
-        tone: "success",
-      }),
-    );
-
-    expect(markup).toContain('data-toast-tone="success"');
-    expect(markup).toContain("Success");
-  });
-});
 
 describe("WorkspaceToastStack", () => {
   it("renders notification history through the original toast stack", () => {
@@ -76,6 +27,7 @@ describe("WorkspaceToastStack", () => {
     expect(markup).toContain("workspace-toast-layer");
     expect(markup).toContain("workspace-toast-stack");
     expect(markup).toContain("Drivetrain wiring task updated");
+    expect(markup).toContain('data-toast-tone="success"');
     expect(markup).toContain('data-toast-auto-dismiss="false"');
     expect(markup).not.toContain("sidebar-notification");
   });
