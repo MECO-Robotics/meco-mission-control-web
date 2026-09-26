@@ -39,7 +39,8 @@ function setup() {
   jest.mocked(relations.createTaskDependencyRecord).mockImplementation(async (payload) => ({ ...payload, id: "saved-edge", createdAt: "2026-09-08" }));
   jest.mocked(relations.createTaskBlockerRecord).mockImplementation(async (payload) => ({ ...payload, id: "saved-blocker", createdAt: "2026-09-08" } as never));
   Render().openCreateTaskModal();
-  Render().setTaskDraft((draft) => ({ ...draft, title: "Retry task", summary: "Retain writes", taskDependencies: [{ id: "draft-edge", kind: "task", refId: bootstrap.tasks[0].id, requiredState: "complete", dependencyType: "hard" }], taskBlockers: [{ id: "draft-blocker", blockerType: "external", blockerId: null, description: "Delivery", severity: "medium", status: "open" }] }));
+  Render().setTaskDraft((draft) => ({
+  ...draft, title: "Retry task", summary: "Retain writes", taskDependencies: [{ id: "draft-edge", kind: "task", refId: bootstrap.tasks[0].id, requiredState: "complete", dependencyType: "hard" }], taskBlockers: [{ id: "draft-blocker", blockerType: "external", blockerId: null, description: "Delivery", severity: "medium", status: "open" }] }));
   return { render: Render, dependencies, saved };
 }
 const event = { preventDefault: jest.fn() } as never;
@@ -82,7 +83,8 @@ it.each([false, true])("does not alter a newer draft when an older save complete
   const pending = render().handleTaskSubmit(event);
   render().closeTaskModal();
   render().openCreateTaskModalForMember("new-member");
-  render().setTaskDraft((draft) => ({ ...draft, title: "New draft" }));
+  render().setTaskDraft((draft) => ({
+  ...draft, title: "New draft" }));
   complete(); await pending;
   expect(render().taskModalMode).toBe("create");
   expect(render().activeTaskId).toBeNull();
@@ -98,7 +100,8 @@ it.each(["task", "dependency", "blocker"])("stops subsequent save stages after s
   if (stage === "task") jest.mocked(createTask).mockImplementationOnce(async () => { beginSessionChange(); return saved; });
   if (stage === "dependency") jest.mocked(relations.createTaskDependencyRecord).mockImplementationOnce(async (payload) => { beginSessionChange(); return { ...payload, id: "saved-edge", createdAt: "today" }; });
   if (stage === "blocker") jest.mocked(relations.createTaskBlockerRecord).mockImplementationOnce(async (payload) => { beginSessionChange(); return { ...payload, id: "saved-blocker", createdAt: "today" } as never; });
-  render().setTaskDraft((draft) => ({ ...draft, targetRiskId: "risk-1" }));
+  render().setTaskDraft((draft) => ({
+  ...draft, targetRiskId: "risk-1" }));
   await render().handleTaskSubmit(event);
   if (stage === "task") expect(relations.createTaskDependencyRecord).not.toHaveBeenCalled();
   if (stage !== "blocker") expect(relations.createTaskBlockerRecord).not.toHaveBeenCalled();

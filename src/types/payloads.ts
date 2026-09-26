@@ -272,19 +272,14 @@ export interface TaskBlockerDraft {
 export interface TaskPayload {
   checklistItems?: string[];
   projectId: string;
-  workstreamId: string | null;
   workstreamIds: string[];
   title: string;
   summary: string;
-  subsystemId: string;
   subsystemIds: string[];
   disciplineId: string;
-  mechanismId: string | null;
   mechanismIds: string[];
-  partInstanceId: string | null;
   partInstanceIds: string[];
-  artifactId?: string | null;
-  artifactIds?: string[];
+  artifactIds: string[];
   targetRiskId?: string | null;
   targetMilestoneId: string | null;
   photoUrl: string;

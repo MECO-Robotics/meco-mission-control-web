@@ -39,7 +39,7 @@ export function useAppWorkspaceReportModalActions(model: AppWorkspaceModel) {
     const draft = buildEmptyQaReportPayload(model.scopedBootstrap, model.activePersonFilter.length === 1 ? model.activePersonFilter[0] : null);
     const task = model.scopedBootstrap.tasks.find((candidate) => candidate.id === (taskId ?? draft.taskId));
     leaveTaskDetails(taskId);
-    model.setQaReportDraft({ ...draft, taskId: task?.id ?? "", projectId: task?.projectId ?? draft.projectId, workstreamId: task?.workstreamId ?? null, milestoneId: null, targetRiskId: task?.targetRiskId ?? null });
+    model.setQaReportDraft({ ...draft, taskId: task?.id ?? "", projectId: task?.projectId ?? draft.projectId, workstreamId: task?.workstreamIds[0] ?? null, milestoneId: null, targetRiskId: task?.targetRiskId ?? null });
     model.setQaReportModalMode("create");
   }, [leaveTaskDetails, model]);
 

@@ -22,7 +22,8 @@ it.each(["create", "edit"] as const)("freezes the %s form and refuses close/canc
   const stalePortalEdit = idle.details.setTaskDraft!;
   const staleResolve = idle.details.onResolveTaskBlocker;
   const pending = render(true);
-  stalePortalEdit((draft) => ({ ...draft, title: "Must not edit pending save" }));
+  stalePortalEdit((draft) => ({
+  ...draft, title: "Must not edit pending save" }));
   void staleResolve("pending-blocker");
   expect(updateDraft).not.toHaveBeenCalled();
   expect(resolveBlocker).not.toHaveBeenCalled();
@@ -46,7 +47,8 @@ it.each(["create", "edit"] as const)("freezes the %s form and refuses close/canc
   expect(close).not.toHaveBeenCalled(); expect(canceled).not.toHaveBeenCalled(); expect(openDetails).not.toHaveBeenCalled();
   const settled = render(false);
   expect(settled.fieldset.props.disabled).toBe(false);
-  stalePortalEdit((draft) => ({ ...draft, title: "Editable again" }));
+  stalePortalEdit((draft) => ({
+  ...draft, title: "Editable again" }));
   expect(updateDraft).toHaveBeenCalledTimes(1);
   settled.details.closeTaskDetailsModal();
   expect(close).toHaveBeenCalledTimes(1);

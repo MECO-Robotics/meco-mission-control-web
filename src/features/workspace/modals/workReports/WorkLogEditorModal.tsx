@@ -32,7 +32,7 @@ export function WorkLogEditorModal({
   const selectedTask = bootstrap.tasks.find((task) => task.id === workLogDraft.taskId);
   const workLogPhotoProjectId = selectedTask?.projectId ?? bootstrap.projects[0]?.id ?? null;
   const selectedSubsystem = selectedTask
-    ? bootstrap.subsystems.find((subsystem) => subsystem.id === selectedTask.subsystemId)
+    ? bootstrap.subsystems.find((subsystem) => selectedTask.subsystemIds.includes(subsystem.id))
     : null;
 
   return (

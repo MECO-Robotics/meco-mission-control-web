@@ -61,8 +61,8 @@ function taskMeta(task: TaskRecord, lookups: ReturnType<typeof buildLookups>, to
   const parts = [
     relativeDueLabel(daysFromToday(task.dueDate, today)),
     lookups.projectsById[task.projectId],
-    lookups.workstreamsById[task.workstreamId ?? ""],
-    lookups.subsystemsById[task.subsystemId],
+    lookups.workstreamsById[task.workstreamIds[0] ?? ""],
+    lookups.subsystemsById[task.subsystemIds[0] ?? ""],
   ].filter(Boolean);
 
   return parts.join(" | ");

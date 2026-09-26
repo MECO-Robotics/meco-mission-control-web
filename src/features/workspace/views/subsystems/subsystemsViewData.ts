@@ -107,7 +107,7 @@ export function filterSubsystems(params: {
       .map((mechanism) => mechanism.name)
       .join(" ");
     const relatedTasks = bootstrap.tasks
-      .filter((task) => task.subsystemId === subsystem.id || task.subsystemIds.includes(subsystem.id))
+      .filter((task) => task.subsystemIds.includes(subsystem.id))
       .map((task) => `${task.title} ${task.summary}`)
       .join(" ");
     const relatedPartInstances = bootstrap.partInstances

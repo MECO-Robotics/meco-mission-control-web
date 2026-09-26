@@ -2,19 +2,6 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskPayload } from "@/types/payloads";
 import { createLookupById, uniqueIds } from "../internal";
 
-export function getTaskTargetArrays(payload: Pick<
-  TaskPayload,
-  "subsystemId" | "subsystemIds" | "mechanismId" | "mechanismIds" | "partInstanceId" | "partInstanceIds"
->) {
-  return {
-    subsystemIds: payload.subsystemIds.length ? payload.subsystemIds : uniqueIds([payload.subsystemId]),
-    mechanismIds: payload.mechanismIds.length ? payload.mechanismIds : uniqueIds([payload.mechanismId]),
-    partInstanceIds: payload.partInstanceIds.length
-      ? payload.partInstanceIds
-      : uniqueIds([payload.partInstanceId]),
-  };
-}
-
 export function normalizeTaskTargetPayload(
   payload: TaskPayload,
   bootstrap: BootstrapPayload,
@@ -58,13 +45,8 @@ export function normalizeTaskTargetPayload(
 
   return {
     ...payload,
-    workstreamId: null,
-    workstreamIds: [],
-    subsystemId: normalizedSubsystemIds[0] ?? "",
     subsystemIds: normalizedSubsystemIds,
-    mechanismId: normalizedMechanismIds[0] ?? null,
     mechanismIds: normalizedMechanismIds,
-    partInstanceId: normalizedPartInstanceIds[0] ?? null,
     partInstanceIds: normalizedPartInstanceIds,
   };
 }

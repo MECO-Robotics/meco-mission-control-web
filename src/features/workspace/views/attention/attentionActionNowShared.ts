@@ -191,11 +191,11 @@ export function buildTaskLastUpdatedAtById(bootstrap: BootstrapPayload) {
 }
 
 export function pickTaskContextLabel(task: BootstrapPayload["tasks"][number], lookup: AttentionLookup) {
-  const workstreamId = task.workstreamId ?? task.workstreamIds[0] ?? null;
+  const workstreamId = task.workstreamIds[0] ?? null;
 
   return formatContextLabel({
     projectName: lookup.projectsById[task.projectId]?.name,
-    subsystemName: lookup.subsystemsById[task.subsystemId]?.name,
+    subsystemName: lookup.subsystemsById[task.subsystemIds[0] ?? ""]?.name,
     workstreamName: workstreamId ? lookup.workstreamsById[workstreamId]?.name : undefined,
   });
 }

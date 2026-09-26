@@ -89,7 +89,7 @@ export function useAppWorkspaceReportSubmitActions(model: AppWorkspaceModel) {
         projectId: task?.projectId ?? model.bootstrap.projects[0]?.id ?? "",
         taskId: task?.id ?? "",
         milestoneId: null,
-        workstreamId: task?.workstreamId ?? null,
+        workstreamId: task?.workstreamIds[0] ?? null,
         createdByMemberId: model.qaReportDraft.createdByMemberId ?? null,
         result: model.qaReportDraft.result,
         summary: model.qaReportDraft.summary.trim(),

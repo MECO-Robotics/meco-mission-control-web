@@ -11,16 +11,13 @@ function createTask(
   overrides: Partial<TaskRecord> = {},
 ): TaskRecord {
   return {
+    artifactIds: [],
     id,
     projectId: "project-1",
-    workstreamId: null,
     workstreamIds: [],
-    subsystemId: "subsystem-1",
     subsystemIds: ["subsystem-1"],
     disciplineId: "discipline-1",
-    mechanismId: null,
     mechanismIds: [],
-    partInstanceId: null,
     partInstanceIds: [],
     title: id,
     summary: id,
@@ -224,12 +221,10 @@ describe("milestoneTaskState", () => {
       tasks: [
         createTask("task-1", "in-progress", "milestone-iteration", {
           targetMilestoneId: null,
-          subsystemId: "subsystem-iteration",
           subsystemIds: ["subsystem-iteration"],
         }),
         createTask("task-2", "not-started", "milestone-iteration", {
           targetMilestoneId: null,
-          subsystemId: "subsystem-other",
           subsystemIds: ["subsystem-other"],
         }),
       ],

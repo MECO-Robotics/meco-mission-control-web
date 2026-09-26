@@ -14,17 +14,14 @@ import type { TaskBlockerRecord, TaskDependencyRecord } from "@/types/recordsExe
 
 function createTaskPayload(): TaskPayload {
   return {
+    artifactIds: [],
     projectId: "project-1",
-    workstreamId: null,
     workstreamIds: [],
     title: "  Build intake  ",
     summary: "  Trim this summary  ",
-    subsystemId: "subsystem-1",
     subsystemIds: ["subsystem-1"],
     disciplineId: "discipline-1",
-    mechanismId: null,
     mechanismIds: [],
-    partInstanceId: null,
     partInstanceIds: [],
     targetRiskId: "  risk-1  ",
     targetMilestoneId: null,

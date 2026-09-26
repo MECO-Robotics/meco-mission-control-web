@@ -1,5 +1,4 @@
-import { getProjectTaskTargetLabel } from "@/lib/appUtils/taskTargets/labels";
-import { setTaskPrimaryTargetSelection, toggleTaskTargetSelection } from "@/lib/appUtils/taskTargets/selection";
+import { setTaskPrimaryTargetSelection } from "@/lib/appUtils/taskTargets/selection";
 import type { Dispatch, SetStateAction } from "react";
 
 import { formatIterationVersion } from "@/lib/appUtils/common";
@@ -18,7 +17,6 @@ import {
   getTaskSelectedPartInstanceIds,
   getTaskSelectedPrimaryTargetId,
   getTaskSelectedScopeChips,
-  type TaskTargetKind,
 } from "../../../shared/task/taskTargeting";
 
 interface UseTaskEditorAdvancedFieldsStateOptions {
@@ -53,8 +51,6 @@ export function useTaskEditorAdvancedFieldsState({
   const taskPhotoProjectId = taskDraft.projectId || bootstrap.projects[0]?.id || null;
   const selectedProject = taskDraft.projectId ? projectsById[taskDraft.projectId] : null;
   const availableDisciplines = getTaskDisciplinesForProject(selectedProject);
-  const targetGroupLabel = getProjectTaskTargetLabel(selectedProject);
-  const targetFallback = `No ${targetGroupLabel === "Subsystems" ? "subsystem" : "workstream"}`;
   const projectSubsystems = bootstrap.subsystems.filter(
     (subsystem) => subsystem.projectId === taskDraft.projectId,
   );
@@ -113,13 +109,9 @@ export function useTaskEditorAdvancedFieldsState({
       disciplineId: isTaskDisciplineAllowedForProject(nextProject, current.disciplineId)
         ? current.disciplineId
         : getDefaultTaskDisciplineIdForProject(nextProject),
-      workstreamId: null,
       workstreamIds: [],
-      subsystemId,
       subsystemIds: subsystemId ? [subsystemId] : [],
-      mechanismId: null,
       mechanismIds: [],
-      partInstanceId: null,
       partInstanceIds: [],
       taskDependencies: (current.taskDependencies ?? []).filter((dependency) =>
         dependency.kind === "task"
@@ -156,15 +148,6 @@ export function useTaskEditorAdvancedFieldsState({
 
     updatePrimaryTarget(nextPrimaryTarget?.id ?? "");
   };
-  const toggleTarget = (kind: TaskTargetKind, id: string) => {
-    setTaskDraft((current) =>
-      toggleTaskTargetSelection(current, bootstrap, {
-        kind,
-        id,
-      }),
-    );
-  };
-
   return {
     availableDisciplines,
     getMechanismLabel,
@@ -183,10 +166,7 @@ export function useTaskEditorAdvancedFieldsState({
     selectedScopeChips,
     sortedProjectSubsystems,
     subsystemsById,
-    targetFallback,
-    targetGroupLabel,
     taskPhotoProjectId,
-    toggleTarget,
     updatePrimaryTarget,
     updatePrimaryTargetName,
   };

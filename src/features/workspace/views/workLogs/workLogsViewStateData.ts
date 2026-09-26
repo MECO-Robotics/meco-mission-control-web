@@ -224,7 +224,7 @@ export function filterAndSortWorkLogs({
       subsystemFilter.length > 0 &&
       !filterSelectionIntersects(
         subsystemFilter,
-        task ? Array.from(new Set([task.subsystemId, ...task.subsystemIds].filter(Boolean))) : [],
+        task?.subsystemIds ?? [],
       )
     ) {
       return false;
@@ -278,7 +278,7 @@ function workLogMatchesSearch({
     .map((participantId) => membersById[participantId]?.name ?? "")
     .join(" ");
   const subsystemText = task
-    ? Array.from(new Set([task.subsystemId, ...task.subsystemIds].filter(Boolean)))
+    ? task.subsystemIds
         .map((subsystemId) => subsystemsById[subsystemId]?.name ?? "")
         .join(" ")
     : "";

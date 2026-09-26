@@ -46,7 +46,7 @@ export function useTaskDetailsAdvancedSectionModel({
   const risksById = Object.fromEntries(
     bootstrap.risks.map((risk) => [risk.id, risk] as const),
   ) as Record<string, BootstrapPayload["risks"][number]>;
-  const selectedPrimaryTargetId = editableTask.subsystemIds[0] ?? editableTask.subsystemId ?? "";
+  const selectedPrimaryTargetId = editableTask.subsystemIds[0] ?? "";
   const projectMechanisms = bootstrap.mechanisms.filter(
     (mechanism) => mechanism.subsystemId === selectedPrimaryTargetId,
   );
@@ -167,7 +167,6 @@ export function useTaskDetailsAdvancedSectionModel({
     setTaskDraft?.((current) => ({
       ...current,
       mechanismIds: selection,
-      mechanismId: selection[0] ?? null,
     }));
   };
 
@@ -186,7 +185,6 @@ export function useTaskDetailsAdvancedSectionModel({
       return {
         ...current,
         mechanismIds: updatedMechanismIds,
-        mechanismId: updatedMechanismIds[0] ?? null,
       };
     });
   };
@@ -200,7 +198,6 @@ export function useTaskDetailsAdvancedSectionModel({
       return {
         ...current,
         mechanismIds: nextMechanismIds,
-        mechanismId: nextMechanismIds[0] ?? null,
       };
     });
   };
@@ -209,7 +206,6 @@ export function useTaskDetailsAdvancedSectionModel({
     setTaskDraft?.((current) => ({
       ...current,
       partInstanceIds: selection,
-      partInstanceId: selection[0] ?? null,
     }));
   };
 
@@ -228,7 +224,6 @@ export function useTaskDetailsAdvancedSectionModel({
       return {
         ...current,
         partInstanceIds: updatedPartInstanceIds,
-        partInstanceId: updatedPartInstanceIds[0] ?? null,
       };
     });
   };
@@ -242,7 +237,6 @@ export function useTaskDetailsAdvancedSectionModel({
       return {
         ...current,
         partInstanceIds: nextPartInstanceIds,
-        partInstanceId: nextPartInstanceIds[0] ?? null,
       };
     });
   };

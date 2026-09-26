@@ -16,12 +16,12 @@ export function TaskDetailsOverviewSubsystemField({
         canInlineEdit ? "task-details-inline-edit-left" : ""
       }`}
     >
-      <span style={{ color: "var(--text-title)" }}>{model.subsystemFieldLabel}</span>
+      <span style={{ color: "var(--text-title)" }}>Subsystem</span>
       {canInlineEdit ? (
         editingField === "subsystem" ? (
           <FilterDropdown
-            allLabel={`No ${model.subsystemFieldLabel.toLowerCase()} linked`}
-            ariaLabel={`Set ${model.subsystemFieldLabel.toLowerCase()}`}
+            allLabel="No subsystem linked"
+            ariaLabel="Set subsystem"
             buttonInlineEditField="subsystem"
             className="task-queue-filter-menu-submenu"
             icon={<IconManufacturing />}

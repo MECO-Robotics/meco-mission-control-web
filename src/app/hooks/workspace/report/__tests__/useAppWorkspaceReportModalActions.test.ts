@@ -10,7 +10,7 @@ function setup() {
   jest.mocked(useCallback).mockImplementation((callback) => callback);
   jest.mocked(useEffect).mockImplementation((effect) => { effect(); });
   const bootstrap = createBootstrap();
-  const task = { ...bootstrap.tasks[0], id: "selected-task", projectId: "selected-project", workstreamId: "selected-workflow", targetRiskId: "selected-risk" };
+  const task = { ...bootstrap.tasks[0], id: "selected-task", projectId: "selected-project", workstreamIds: ["selected-workflow"], targetRiskId: "selected-risk" };
   const milestone = { ...bootstrap.milestones[0], id: "selected-milestone", projectIds: ["selected-project"] };
   bootstrap.tasks.push(task);
   bootstrap.milestones.push(milestone);
@@ -48,7 +48,7 @@ it("opens work logging for the chosen task, removes its overlay, and restores de
 it("seeds QA with the chosen task's project, workflow and risk and returns after successful submission", () => {
   const { state, render, task } = setup();
   render().openCreateQaReportModal(task.id);
-  expect(state.setQaReportDraft).toHaveBeenCalledWith(expect.objectContaining({ taskId: task.id, projectId: task.projectId, workstreamId: task.workstreamId, targetRiskId: task.targetRiskId, milestoneId: null }));
+  expect(state.setQaReportDraft).toHaveBeenCalledWith(expect.objectContaining({ taskId: task.id, projectId: task.projectId, workstreamId: task.workstreamIds[0], targetRiskId: task.targetRiskId, milestoneId: null }));
   render();
   state.setQaReportModalMode(null);
   render();

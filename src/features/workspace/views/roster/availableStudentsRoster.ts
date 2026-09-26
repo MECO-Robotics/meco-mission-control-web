@@ -74,7 +74,7 @@ function buildHints({
     hints.add(member.plannedAttendanceNotes);
   }
 
-  const taskSubsystemIds = task ? [task.subsystemId, ...task.subsystemIds].filter(Boolean) : [];
+  const taskSubsystemIds = task?.subsystemIds ?? [];
   taskSubsystemIds.forEach((subsystemId) => {
     const subsystem = bootstrap.subsystems.find((candidate) => candidate.id === subsystemId);
     if (subsystem) {

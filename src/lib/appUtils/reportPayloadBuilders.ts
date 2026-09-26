@@ -60,7 +60,7 @@ export function buildEmptyReportPayload(
     bootstrap.projects[0]?.id ??
     "";
   const resolvedWorkstreamId =
-    defaults.workstreamId !== undefined ? defaults.workstreamId : task?.workstreamId ?? null;
+    defaults.workstreamId !== undefined ? defaults.workstreamId : task?.workstreamIds[0] ?? null;
 
   return {
     reportType,
@@ -100,7 +100,7 @@ export function buildEmptyQaReportPayload(
   return buildEmptyReportPayload(bootstrap, "QA", {
     taskId: task?.id ?? "",
     projectId: task?.projectId ?? bootstrap.projects[0]?.id ?? "",
-    workstreamId: task?.workstreamId ?? null,
+    workstreamId: task?.workstreamIds[0] ?? null,
     participantIds: participantId ? [participantId] : [],
     result: "pass",
     mentorApproved: false,
