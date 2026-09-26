@@ -6,15 +6,6 @@
   min-height: 0;
 }
 
-.roster-workload-topbar-controls {
-  align-items: center;
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 0.5rem;
-  justify-content: flex-end;
-  width: 100%;
-}
-
 .mc-roster-insights-note {
   margin: 0;
 }
@@ -43,69 +34,6 @@
 .mc-roster-summary-card strong {
   color: var(--text-title);
   font-size: 1.03rem;
-}
-
-.mc-roster-member-grid {
-  display: grid;
-  gap: 0.65rem;
-  grid-template-columns: repeat(auto-fit, minmax(255px, 1fr));
-  min-height: 0;
-  overflow: auto;
-  padding-right: 0.12rem;
-}
-
-.mc-roster-member-card {
-  background: var(--bg-row-alt);
-  border: 1px solid var(--border-base);
-  border-radius: 0.8rem;
-  display: grid;
-  gap: 0.5rem;
-  padding: 0.65rem;
-}
-
-.mc-roster-member-header {
-  align-items: center;
-  display: flex;
-  gap: 0.5rem;
-  justify-content: space-between;
-}
-
-.mc-roster-member-header strong {
-  color: var(--text-title);
-}
-
-.mc-roster-member-metrics {
-  color: var(--text-copy);
-  display: flex;
-  flex-wrap: wrap;
-  font-size: 0.72rem;
-  font-weight: 700;
-  gap: 0.28rem 0.68rem;
-}
-
-.mc-roster-task-list {
-  display: grid;
-  gap: 0.28rem;
-}
-
-.mc-roster-task-list .ghost-button {
-  background: var(--bg-panel);
-  border: 1px solid var(--border-base);
-  border-radius: 0.5rem;
-  color: var(--text-copy);
-  cursor: pointer;
-  font-size: 0.71rem;
-  font-weight: 700;
-  overflow: hidden;
-  padding: 0.28rem 0.45rem;
-  text-align: left;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.mc-roster-task-list .ghost-button:hover {
-  border-color: color-mix(in srgb, var(--meco-blue) 50%, var(--border-base));
-  color: var(--text-title);
 }
 
 .mc-roster-status-badge {
@@ -142,20 +70,6 @@
   background: color-mix(in srgb, #2563eb 14%, transparent);
   border-color: color-mix(in srgb, #2563eb 34%, var(--border-base));
   color: #1d4ed8;
-}
-
-.mc-roster-available-group {
-  display: grid;
-  gap: 0.55rem;
-  min-height: 0;
-}
-
-.mc-roster-available-card {
-  align-content: start;
-}
-
-.roster-available-assign-button {
-  justify-self: start;
 }
 
 .mc-roster-attendance-grid {

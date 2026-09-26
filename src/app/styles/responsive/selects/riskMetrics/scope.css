@@ -118,9 +118,6 @@
 }
 
 @media (max-width: 980px) {
-  .risk-time-metrics-shell {
-    grid-template-columns: 1fr;
-  }
 
   .metrics-hotspot-grid {
     grid-template-columns: 1fr;

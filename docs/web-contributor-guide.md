@@ -104,6 +104,8 @@ For UI work, match existing dense Mission Control patterns. Use restrained
 controls, stable dimensions, and predictable responsive behavior. Avoid adding
 marketing-style sections or decorative surfaces to operational screens.
 
+The app shell loads `src/app/App.css`; `AuthApp.css` shares the authentication leaves before workspace loading. Current home attention markup uses `workspaceConsolidation.css`. Keep CSS imports in cascade order, and remove retired selectors when replacing their owning markup. A class-name search alone does not prove a rule is unused: inspect generated class names, conditional states, media queries and shared selectors before deletion.
+
 When changing styles:
 
 - Check small and wide viewports.

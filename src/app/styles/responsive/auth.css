@@ -21,13 +21,6 @@
 }
 
 @media (max-width: 900px) {
-  .app-topbar-project-label {
-    display: none;
-  }
-
-  .app-topbar-project-select {
-    min-width: 112px;
-  }
 
   .queue-table.queue-table-header {
     display: none;

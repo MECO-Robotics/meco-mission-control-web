@@ -1,56 +1,3 @@
-.profile-menu-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  width: 100%;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
-  color: var(--official-black);
-  padding: 0.6rem 0.75rem;
-  text-align: left;
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.profile-menu-item-theme-toggle {
-  justify-content: space-between;
-  gap: 0.7rem;
-}
-
-.profile-menu-item-theme-copy {
-  display: grid;
-  gap: 0.04rem;
-  min-width: 0;
-}
-
-.profile-menu-item-refresh svg {
-  width: 0.95rem;
-  height: 0.95rem;
-  flex-shrink: 0;
-}
-
-.profile-menu-item-refresh.is-loading svg {
-  animation: refresh-spin 0.9s linear infinite;
-}
-
-.profile-menu-item-theme-title {
-  color: var(--text-title);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-
-.profile-menu-item-theme-value {
-  color: var(--text-copy);
-  font-size: 0.68rem;
-  font-weight: 600;
-  white-space: nowrap;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
 .profile-mode-selector {
   --profile-mode-width: 2.55rem;
   --profile-mode-height: 1.48rem;
@@ -108,22 +55,6 @@
 .page-shell.dark-mode .profile-mode-selector-thumb {
   background: #f8fafc;
   color: #0f172a;
-}
-
-.profile-menu-item:hover,
-.profile-menu-item:focus-visible {
-  background: rgba(22, 71, 142, 0.08);
-  outline: none;
-}
-
-.page-shell.dark-mode .profile-menu-item {
-  color: var(--text-title);
-}
-
-.page-shell.dark-mode .profile-menu-context-select {
-  background-color: rgba(12, 18, 28, 0.92);
-  color: var(--text-title);
-  border-color: var(--border-base);
 }
 
 .summary-chip span,
