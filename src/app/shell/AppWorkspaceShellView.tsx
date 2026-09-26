@@ -27,7 +27,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
   const localMode = useSyncExternalStore(subscribeLocalWorkspace, getLocalWorkspaceMode, () => null);
   const c = { ...controller.model, ...controller.taskActions, ...controller.reportActions,
     ...controller.catalogActions, ...controller.rosterActions, ...controller.model.materialEditor };
-  const content = c;
   const navigationContext = resolveViewAvailabilityContext({
     hasProjects: c.projectsInSelectedSeason.length > 0,
     hasSeasons: c.bootstrap.seasons.length > 0,
@@ -264,120 +263,29 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
         {c.robotProjectModalMode ? <RobotProjectPopup controller={c} /> : null}
         <SidebarOverlay controller={c} />
         <WorkspaceContent
-          currentMemberId={content.signedInMember?.id ?? null}
-          activePersonFilter={content.activePersonFilter}
-          activeTab={content.activeTab}
-          tabSwitchDirection={content.tabSwitchDirection}
-          allMembers={content.bootstrap.members}
-          artifacts={content.scopedArtifacts}
-          availabilityBootstrap={content.bootstrap}
-          bootstrap={content.scopedBootstrap}
-          cncItems={content.cncItems}
-          dataMessage={content.dataMessage}
-          taskEditNotices={content.taskEditNotices}
-          fabricationItems={content.fabricationItems}
-          handleCreateMember={content.handleCreateMember}
-          handleReactivateMemberForSeason={content.handleReactivateMemberForSeason}
-          handleDeleteMember={content.handleDeleteMember}
-          handleMeetingSave={content.handleMeetingSave}
-          handleTaskStatusChange={content.handleTaskStatusChange}
-          handleTimelineMilestoneDelete={content.handleTimelineMilestoneDelete}
-          handleTimelineMilestoneSave={content.handleTimelineMilestoneSave}
-          handleUpdateMember={content.handleUpdateMember}
-          requestMemberPhotoUpload={content.requestMemberPhotoUpload}
-          isAddPersonOpen={content.isAddPersonOpen}
-          isActivityModalOpen={content.isActivityModalOpen}
-          setIsActivityModalOpen={content.setIsActivityModalOpen}
-          isDeletingMember={content.isDeletingMember}
-          isEditPersonOpen={content.isEditPersonOpen}
-          isLoadingData={content.isLoadingData}
-          isNotificationQueueOpen={content.isNotificationQueueOpen}
-          isAllProjectsView={content.isAllProjectsView}
-          isNonRobotProject={content.isNonRobotProject}
-          isSavingMember={content.isSavingMember}
-          memberEditDraft={content.memberEditDraft}
-          memberForm={content.memberForm}
-          membersById={content.membersById}
-          openCreateManufacturingModal={content.openCreateManufacturingModal}
-          openCreateArtifactModal={content.openCreateArtifactModal}
-          openCreateMaterialModal={content.openCreateMaterialModal}
-          openCreateMechanismModal={content.openCreateMechanismModal}
-          openCreatePartInstanceModal={content.openCreatePartInstanceModal}
-          openCreateSubsystemModal={content.openCreateSubsystemModal}
-          openCreatePartDefinitionModal={content.openCreatePartDefinitionModal}
-          openCreatePurchaseModal={content.openCreatePurchaseModal}
-          openCreateTaskModal={content.openCreateTaskModal}
-          openCreateTaskModalForMember={content.openCreateTaskModalForMember}
-          openCreateTaskModalFromTimeline={content.openCreateTaskModalFromTimeline}
-          openCreateWorkLogModal={content.openCreateWorkLogModal}
-          openCreateQaReportModal={content.openCreateQaReportModal}
-          openCreateMilestoneReportModal={content.openCreateMilestoneReportModal}
-          openCreateWorkstreamModal={content.openCreateWorkstreamModal}
-          openEditWorkstreamModal={content.openEditWorkstreamModal}
-          onCreateRisk={content.handleCreateRisk}
-          onDeleteRisk={content.handleDeleteRisk}
-          handleDeleteMechanism={content.handleDeleteMechanism}
-          onCncQuickStatusChange={content.handleCncQuickStatusChange}
-          openEditManufacturingModal={content.openEditManufacturingModal}
-          openEditArtifactModal={content.openEditArtifactModal}
-          openEditMaterialModal={content.openEditMaterialModal}
-          openEditMechanismModal={content.openEditMechanismModal}
-          openEditPartInstanceModal={content.openEditPartInstanceModal}
-          openEditSubsystemModal={content.openEditSubsystemModal}
-          removePartInstanceFromMechanism={content.removePartInstanceFromMechanism}
-          savePartImage={content.savePartImage}
-          saveSubsystemLayout={content.saveSubsystemLayout}
-          updateSubsystemConfiguration={content.updateSubsystemConfiguration}
-          openEditPartDefinitionModal={content.openEditPartDefinitionModal}
-          openEditPurchaseModal={content.openEditPurchaseModal}
-          openTimelineTaskDetailsModal={content.openTimelineTaskDetailsModal}
-          onUpdateRisk={content.handleUpdateRisk}
-          printItems={content.printItems}
-          rosterMentors={content.rosterMentors}
+          {...c}
+          currentMemberId={c.signedInMember?.id ?? null}
+          allMembers={c.bootstrap.members}
+          artifacts={c.scopedArtifacts}
+          availabilityBootstrap={c.bootstrap}
+          bootstrap={c.scopedBootstrap}
+          onCreateRisk={c.handleCreateRisk}
+          onDeleteRisk={c.handleDeleteRisk}
+          onCncQuickStatusChange={c.handleCncQuickStatusChange}
+          onUpdateRisk={c.handleUpdateRisk}
           showCncMentorQuickActions={
-            content.signedInMember?.role === "mentor" ||
-            content.signedInMember?.role === "admin" ||
-            Boolean(content.signedInMember?.elevated)
+            c.signedInMember?.role === "mentor" ||
+            c.signedInMember?.role === "admin" ||
+            Boolean(c.signedInMember?.elevated)
           }
-          manufacturingView={content.manufacturingView}
-          inventoryView={content.inventoryView}
-          rosterView={content.rosterView}
-          riskManagementView={content.riskManagementView}
-          taskView={content.taskView}
-          worklogsView={content.worklogsView}
-          selectMember={content.selectMember}
-          selectedSeasonId={content.selectedSeasonId}
-          selectedProject={content.selectedProject}
-          selectedMemberId={content.selectedMemberId}
-          setActiveTab={content.setActiveTab}
-          setInventoryView={content.setInventoryView}
-          setIsAddPersonOpen={content.setIsAddPersonOpen}
-          setIsEditPersonOpen={content.setIsEditPersonOpen}
-          setManufacturingView={content.setManufacturingView}
-          setMemberEditDraft={content.setMemberEditDraft}
-          setMemberForm={content.setMemberForm}
-          setRiskManagementView={content.setRiskManagementView}
-          setTaskView={content.setTaskView}
-          setWorklogsView={content.setWorklogsView}
-          setActivePersonFilter={content.setActivePersonFilter}
-          students={content.students}
-          disciplinesById={content.disciplinesById}
-          externalMembers={content.externalMembers}
-          mechanismsById={content.mechanismsById}
-          partDefinitionsById={content.partDefinitionsById}
-          subsystemsById={content.subsystemsById}
-          timelineMilestoneCreateSignal={content.timelineMilestoneCreateSignal}
-          disablePanelAnimations={content.isWorkspaceModalOpen}
-          onDismissDataMessage={content.clearDataMessage}
-          onDismissNotificationHistoryItem={content.dismissNotificationHistoryItem}
-          onDismissTaskEditNotice={content.dismissTaskEditNotice}
-          onTaskEditCanceled={content.notifyTaskEditCanceled}
-          onTaskEditSaved={content.notifyTaskEditSaved}
-          onStartInteractiveTutorial={() => void content.startInteractiveTutorial("planning")}
-          onStartInteractiveTutorialChapter={(chapterId) => void content.startInteractiveTutorial(chapterId)}
-          interactiveTutorialChapters={content.interactiveTutorialChapters}
-          isInteractiveTutorialActive={content.isInteractiveTutorialActive}
-          notificationHistory={content.notificationHistory}
+          disablePanelAnimations={c.isWorkspaceModalOpen}
+          onDismissDataMessage={c.clearDataMessage}
+          onDismissNotificationHistoryItem={c.dismissNotificationHistoryItem}
+          onDismissTaskEditNotice={c.dismissTaskEditNotice}
+          onTaskEditCanceled={c.notifyTaskEditCanceled}
+          onTaskEditSaved={c.notifyTaskEditSaved}
+          onStartInteractiveTutorial={() => void c.startInteractiveTutorial("planning")}
+          onStartInteractiveTutorialChapter={(chapterId) => void c.startInteractiveTutorial(chapterId)}
         />
       </Suspense>
 
@@ -389,123 +297,12 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       {c.isWorkspaceModalOpen ? (
         <Suspense fallback={null}>
           <WorkspaceModalHost
-            materialEditor={controller.model.materialEditor}
-            openCreateWorkLogModal={c.openCreateWorkLogModal}
-            openCreateQaReportModal={c.openCreateQaReportModal}
-            activeArtifactId={c.activeArtifactId}
-            activePartDefinitionId={c.activePartDefinitionId}
-            activeMechanismId={c.activeMechanismId}
-            activeWorkstreamId={c.activeWorkstreamId}
-            activeSubsystemId={c.activeSubsystemId}
-            activeTask={c.activeTask}
-            activeTimelineTaskDetail={c.activeTimelineTaskDetail}
+            {...c}
             bootstrap={c.scopedBootstrap}
-            closeManufacturingModal={c.closeManufacturingModal}
-            closeArtifactModal={c.closeArtifactModal}
-            closeMechanismModal={c.closeMechanismModal}
-            closePartInstanceModal={c.closePartInstanceModal}
-            closePartDefinitionModal={c.closePartDefinitionModal}
-            closePurchaseModal={c.closePurchaseModal}
-            closeQaReportModal={c.closeQaReportModal}
-            closeMilestoneReportModal={c.closeMilestoneReportModal}
-            closeTimelineTaskDetailsModal={c.closeTimelineTaskDetailsModal}
-            closeWorkLogModal={c.closeWorkLogModal}
-            closeSubsystemModal={c.closeSubsystemModal}
-            closeTaskModal={c.closeTaskModal}
-            closeWorkstreamModal={c.closeWorkstreamModal}
             onTaskEditCanceled={c.notifyTaskEditCanceled}
-            requestPhotoUpload={c.requestPhotoUpload}
-            disciplinesById={c.disciplinesById}
-            milestonesById={c.milestonesById}
-            handleDeleteArtifact={c.handleDeleteArtifact}
-            handleToggleArtifactArchived={c.handleToggleArtifactArchived}
-            handleDeletePartDefinition={c.handleDeletePartDefinition}
-            handleDeleteMechanism={c.handleDeleteMechanism}
-            handleTogglePartDefinitionArchived={c.handleTogglePartDefinitionArchived}
-            handleToggleSubsystemArchived={c.handleToggleSubsystemArchived}
-            handleToggleMechanismArchived={c.handleToggleMechanismArchived}
-            handleToggleWorkstreamArchived={c.handleToggleWorkstreamArchived}
-            handleDeleteTask={c.handleDeleteTask}
-            handlePartInstanceSubmit={c.handlePartInstanceSubmit}
-            handleMechanismSubmit={c.handleMechanismSubmit}
-            handleManufacturingSubmit={c.handleManufacturingSubmit}
-            handlePartDefinitionSubmit={c.handlePartDefinitionSubmit}
-            handleArtifactSubmit={c.handleArtifactSubmit}
-            handlePurchaseSubmit={c.handlePurchaseSubmit}
-            handleQaReportSubmit={c.handleQaReportSubmit}
-            handleMilestoneReportSubmit={c.handleMilestoneReportSubmit}
-            handleWorkLogSubmit={c.handleWorkLogSubmit}
-            handleSubsystemSubmit={c.handleSubsystemSubmit}
-            handleTaskSubmit={c.handleTaskSubmit}
-            handleResolveTaskBlocker={c.handleResolveTaskBlocker}
-            handleWorkstreamSubmit={c.handleWorkstreamSubmit}
-            isDeletingArtifact={c.isDeletingArtifact}
-            isDeletingPartDefinition={c.isDeletingPartDefinition}
-            isDeletingMechanism={c.isDeletingMechanism}
-            isDeletingTask={c.isDeletingTask}
-            isSavingManufacturing={c.isSavingManufacturing}
-            isSavingArtifact={c.isSavingArtifact}
-            isSavingPartDefinition={c.isSavingPartDefinition}
-            isSavingPartInstance={c.isSavingPartInstance}
-            isSavingMechanism={c.isSavingMechanism}
-            isSavingPurchase={c.isSavingPurchase}
-            isSavingQaReport={c.isSavingQaReport}
-            isSavingMilestoneReport={c.isSavingMilestoneReport}
-            isSavingWorkLog={c.isSavingWorkLog}
-            isSavingSubsystem={c.isSavingSubsystem}
-            isSavingTask={c.isSavingTask}
-            isSavingWorkstream={c.isSavingWorkstream}
-            artifactDraft={c.artifactDraft}
-            artifactModalMode={c.artifactModalMode}
-            manufacturingDraft={c.manufacturingDraft}
-            manufacturingModalMode={c.manufacturingModalMode}
-            mechanismsById={c.mechanismsById}
-            mentors={c.mentors}
-            mechanismDraft={c.mechanismDraft}
-            mechanismModalMode={c.mechanismModalMode}
-            partInstanceDraft={c.partInstanceDraft}
-            partInstanceModalMode={c.partInstanceModalMode}
-            partDefinitionDraft={c.partDefinitionDraft}
-            partDefinitionModalMode={c.partDefinitionModalMode}
-            partDefinitionsById={c.partDefinitionsById}
-            partInstancesById={c.partInstancesById}
-            purchaseDraft={c.purchaseDraft}
-            purchaseFinalCost={c.purchaseFinalCost}
-            purchaseModalMode={c.purchaseModalMode}
-            qaReportDraft={c.qaReportDraft}
-            qaReportModalMode={c.qaReportModalMode}
-            milestoneReportDraft={c.milestoneReportDraft}
-            milestoneReportFindings={c.milestoneReportFindings}
-            milestoneReportModalMode={c.milestoneReportModalMode}
-            workLogDraft={c.workLogDraft}
-            workLogModalMode={c.workLogModalMode}
-            workstreamDraft={c.workstreamDraft}
-            workstreamModalMode={c.workstreamModalMode}
-            setArtifactDraft={c.setArtifactDraft}
-            setMechanismDraft={c.setMechanismDraft}
-            setManufacturingDraft={c.setManufacturingDraft}
-            setPartInstanceDraft={c.setPartInstanceDraft}
-            setPartDefinitionDraft={c.setPartDefinitionDraft}
-            setPurchaseDraft={c.setPurchaseDraft}
-            setPurchaseFinalCost={c.setPurchaseFinalCost}
-            setQaReportDraft={c.setQaReportDraft}
-            setMilestoneReportDraft={c.setMilestoneReportDraft}
-            setMilestoneReportFindings={c.setMilestoneReportFindings}
-            setWorkLogDraft={c.setWorkLogDraft}
-            setWorkstreamDraft={c.setWorkstreamDraft}
-            setSubsystemDraft={c.setSubsystemDraft}
-            setSubsystemDraftRisks={c.setSubsystemDraftRisks}
-            setTaskDraft={c.setTaskDraft}
-            showTimelineCreateToggleInTaskModal={c.showTimelineCreateToggleInTaskModal}
             onSwitchTaskCreateToMilestone={c.switchTaskCreateToMilestone}
             onOpenTaskEditFromTimelineDetails={c.openEditTaskModal}
             openTaskDetailsModal={c.openTimelineTaskDetailsModal}
-            students={c.students}
-            subsystemDraft={c.subsystemDraft}
-            subsystemDraftRisks={c.subsystemDraftRisks}
-            subsystemModalMode={c.subsystemModalMode}
-            taskDraft={c.taskDraft}
-            taskModalMode={c.taskModalMode}
           />
         </Suspense>
       ) : null}
