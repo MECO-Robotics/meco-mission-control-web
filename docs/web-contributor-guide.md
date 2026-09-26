@@ -57,6 +57,8 @@ intent without owning global overlay state. Existing flows use typed draft state
 selected IDs, and action callbacks passed down from app hooks into section and
 view components.
 
+Task-target selection and normalization live in `src/lib/appUtils/taskTargets/`. Editors and detail views call that owner directly; UI option and chip rendering stays in `src/features/workspace/shared/task/taskTargeting.ts`. Keep implied parent selection, child deselection and single/plural target fields consistent there.
+
 For new edit flows:
 
 - Keep draft creation and reset behavior explicit.

@@ -31,7 +31,7 @@ export function TaskDetailsOverviewSubsystemField({
             }
             singleSelect
             onChange={model.handleSubsystemChange}
-            options={model.primaryTargetNameOptions.map((name) => ({ id: name, name }))}
+            options={model.primaryTargetOptions}
             value={model.selectedPrimaryTargetId ? [model.selectedPrimaryTargetId] : []}
           />
         ) : (

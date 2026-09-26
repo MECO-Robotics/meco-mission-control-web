@@ -163,6 +163,28 @@ describe("appUtils selection helpers", () => {
     expect(next.partInstanceIds).toEqual([]);
   });
 
+  it.each(["mechanism", "part-instance"] as const)("ignores a stale %s selection without changing the draft", (kind) => {
+    const bootstrap = createBootstrap();
+    const payload = buildEmptyTaskPayload(bootstrap);
+    const before = structuredClone(payload);
+    expect(toggleTaskTargetSelection(payload, bootstrap, { kind, id: "missing" })).toBe(payload);
+    expect(payload).toEqual(before);
+  });
+
+  it("clears all target fields when the primary selection is removed", () => {
+    const bootstrap = createBootstrap();
+    const payload = toggleTaskTargetSelection(buildEmptyTaskPayload(bootstrap), bootstrap, {
+      kind: "part-instance",
+      id: "part-instance-1",
+    });
+    const next = setTaskPrimaryTargetSelection(payload, bootstrap, "");
+    expect(next).toMatchObject({
+      subsystemId: "", subsystemIds: [], mechanismId: null, mechanismIds: [],
+      partInstanceId: null, partInstanceIds: [], workstreamId: null, workstreamIds: [],
+    });
+    expect(payload.partInstanceIds).toEqual(["part-instance-1"]);
+  });
+
   it("buildEmptyArtifactPayload clears workstream when it does not match project scope", () => {
     const payload = buildEmptyArtifactPayload(createBootstrap(), {
       projectId: "project-a",
