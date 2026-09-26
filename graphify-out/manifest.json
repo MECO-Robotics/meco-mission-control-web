@@ -1667,12 +1667,6 @@
     "ast_hash": "3f0636d0dfb0654154bd0c969ea2aafe",
     "semantic_hash": ""
   },
-  "src/features/workspace/shared/WorkspaceViewShared.tsx": {
-    "mtime": 1790384374.1603408,
-    "seen": 1790384581.2601695,
-    "ast_hash": "8a94f576d0847626cb1e3fc185f9a6ea",
-    "semantic_hash": ""
-  },
   "src/features/workspace/shared/__tests__/PhotoUploadField.test.ts": {
     "mtime": 1790384374.1603408,
     "seen": 1790384581.260173,
@@ -1751,12 +1745,6 @@
     "ast_hash": "d769645fbae5c773ef2920738791fb1e",
     "semantic_hash": ""
   },
-  "src/features/workspace/shared/filters/index.ts": {
-    "mtime": 1790384374.1608188,
-    "seen": 1790384581.2602172,
-    "ast_hash": "6cc0705c1122bedde6af0d40697d0a17",
-    "semantic_hash": ""
-  },
   "src/features/workspace/shared/filters/topbarResponsiveSearch/TopbarResponsiveSearchLayout.tsx": {
     "mtime": 1790384374.1608188,
     "seen": 1790384581.2602208,
@@ -1811,22 +1799,10 @@
     "ast_hash": "1363b8204345087f593e816f63ab8309",
     "semantic_hash": ""
   },
-  "src/features/workspace/shared/filters/workspaceFilters.tsx": {
-    "mtime": 1790384374.160967,
-    "seen": 1790384581.2602603,
-    "ast_hash": "baac8e25056a2907aa9d27e50e5ef0bd",
-    "semantic_hash": ""
-  },
   "src/features/workspace/shared/filters/workspaceSearchToolbarInput.tsx": {
     "mtime": 1790384374.160967,
     "seen": 1790384581.2602637,
     "ast_hash": "5951a8587bfdac6c3f836d864d9b84e1",
-    "semantic_hash": ""
-  },
-  "src/features/workspace/shared/index.ts": {
-    "mtime": 1790384374.160967,
-    "seen": 1790384581.260267,
-    "ast_hash": "77bc5ce7d0140f2b8108fbb507dc7c1b",
     "semantic_hash": ""
   },
   "src/features/workspace/shared/media/PartThumbnail.tsx": {
@@ -1839,18 +1815,6 @@
     "mtime": 1790384374.161358,
     "seen": 1790384581.2602735,
     "ast_hash": "1f2d97dc4d50f07dba326a9215227624",
-    "semantic_hash": ""
-  },
-  "src/features/workspace/shared/media/index.ts": {
-    "mtime": 1790384374.161358,
-    "seen": 1790384581.2602766,
-    "ast_hash": "700d2f313d8fbd67b6ff0159b9810e6c",
-    "semantic_hash": ""
-  },
-  "src/features/workspace/shared/milestones/index.ts": {
-    "mtime": 1790384374.161358,
-    "seen": 1790384581.26028,
-    "ast_hash": "a9d12687d22627c8f61f1c4d0bf57f9c",
     "semantic_hash": ""
   },
   "src/features/workspace/shared/milestones/milestoneTaskState.tsx": {
@@ -1869,12 +1833,6 @@
     "mtime": 1790384374.1616018,
     "seen": 1790384581.2602894,
     "ast_hash": "5c5d2e7d913da6651ca056994e719564",
-    "semantic_hash": ""
-  },
-  "src/features/workspace/shared/model/index.ts": {
-    "mtime": 1790384374.1616018,
-    "seen": 1790384581.2602928,
-    "ast_hash": "2e9d9609553165dfb1aa77f5d4a5d3d3",
     "semantic_hash": ""
   },
   "src/features/workspace/shared/model/workspaceColors.ts": {
@@ -1911,12 +1869,6 @@
     "mtime": 1790384374.1616018,
     "seen": 1790384581.2603123,
     "ast_hash": "7c645a14d155cae73ca97415fb8ceb0a",
-    "semantic_hash": ""
-  },
-  "src/features/workspace/shared/table/index.ts": {
-    "mtime": 1790384374.1616018,
-    "seen": 1790384581.2603157,
-    "ast_hash": "61f0949e697dc7c7dd8b885ad141eabb",
     "semantic_hash": ""
   },
   "src/features/workspace/shared/table/workspaceTableChrome.tsx": {
@@ -2388,9 +2340,9 @@
     "semantic_hash": ""
   },
   "src/features/workspace/views/cad/CadIntegrationView.tsx": {
-    "mtime": 1790384374.1649392,
-    "seen": 1790384581.2605777,
-    "ast_hash": "722a21db0502e6b4df6f6c5831577255",
+    "mtime": 1790385991.6281579,
+    "seen": 1790386001.5091996,
+    "ast_hash": "664ae2fb96e721275f2c3659d763ef52",
     "semantic_hash": ""
   },
   "src/features/workspace/views/cad/__tests__/CadIntegrationView.basics.test.ts": {
@@ -2544,9 +2496,9 @@
     "semantic_hash": ""
   },
   "src/features/workspace/views/cad/components/CadStepHierarchyReviewUtils.ts": {
-    "mtime": 1790384374.1666396,
-    "seen": 1790384581.2606642,
-    "ast_hash": "c45799b6dc6390e1130b852aaf36409b",
+    "mtime": 1790385991.629192,
+    "seen": 1790386001.5093176,
+    "ast_hash": "80e0aac92b4973baff3be6fb1ce11cda",
     "semantic_hash": ""
   },
   "src/features/workspace/views/cad/components/CadStepImportHeader.tsx": {
@@ -2562,15 +2514,15 @@
     "semantic_hash": ""
   },
   "src/features/workspace/views/cad/components/CadStepMappingReviewTable.tsx": {
-    "mtime": 1790384374.1666396,
-    "seen": 1790384581.2606742,
-    "ast_hash": "0b36dcb9c4e77fbedcfdcb94f9aced07",
+    "mtime": 1790385991.6285996,
+    "seen": 1790386001.5093293,
+    "ast_hash": "2c210f5e2f3f144712216408d34e2636",
     "semantic_hash": ""
   },
   "src/features/workspace/views/cad/components/CadStepReviewPanels.tsx": {
-    "mtime": 1790384374.1666396,
-    "seen": 1790384581.2606773,
-    "ast_hash": "bd05bf42175fc76bfc6f3d7baa43ff46",
+    "mtime": 1790385991.6287656,
+    "seen": 1790386001.5093331,
+    "ast_hash": "1bd7b10d3931d3aa7a6c8dbc943f5678",
     "semantic_hash": ""
   },
   "src/features/workspace/views/cad/components/CadStepSnapshotSelector.tsx": {
@@ -4371,12 +4323,6 @@
     "mtime": 1790384374.1821043,
     "seen": 1790384581.2617075,
     "ast_hash": "f406e7d602adfd1315886f801c41c7f5",
-    "semantic_hash": ""
-  },
-  "src/types/records.ts": {
-    "mtime": 1790384374.1821043,
-    "seen": 1790384581.2617106,
-    "ast_hash": "07117bca0d1e23934a9a2a1a4d2362fb",
     "semantic_hash": ""
   },
   "src/types/recordsExecution.ts": {

@@ -1,5 +1,6 @@
 import { CadPartViewer } from "./viewer/CadPartViewer";
-import type { MechanismRecord, PartDefinitionRecord, SubsystemRecord } from "@/types/records";
+import type { MechanismRecord, SubsystemRecord } from "@/types/recordsOrganization";
+import type { PartDefinitionRecord } from "@/types/recordsInventory";
 import {
   CadOnshapeIntegrationSection,
   getScopedDocumentRefs,

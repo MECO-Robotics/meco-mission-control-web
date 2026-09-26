@@ -1,4 +1,5 @@
-import type { MechanismRecord, PartDefinitionRecord, SubsystemRecord } from "@/types/records";
+import type { MechanismRecord, SubsystemRecord } from "@/types/recordsOrganization";
+import type { PartDefinitionRecord } from "@/types/recordsInventory";
 import type {
   CadHierarchyNode,
   CadHierarchyTargetKind,
