@@ -189,10 +189,6 @@ function WorkspaceToastCard({
   );
 }
 
-export function WorkspaceToast(props: WorkspaceToastProps) {
-  return createElement(WorkspaceToastCard, props);
-}
-
 export function WorkspaceToastStack({
   historyItems = [],
   isHistoryOpen = false,
@@ -226,26 +222,4 @@ export function WorkspaceToastStack({
   );
 
   return portalTarget ? createPortal(stack, portalTarget) : stack;
-}
-
-export function WorkspaceInfoToast({
-  message,
-  title = "Edit Canceled",
-  onDismiss,
-}: {
-  message: string;
-  title?: string;
-  onDismiss: () => void;
-}) {
-  return createElement(WorkspaceToast, { message, onDismiss, title, tone: "info" });
-}
-
-export function WorkspaceErrorPopup({
-  message,
-  onDismiss,
-}: {
-  message: string;
-  onDismiss: () => void;
-}) {
-  return createElement(WorkspaceToast, { message, onDismiss, title: "Error", tone: "error" });
 }

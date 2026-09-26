@@ -104,23 +104,6 @@ export function mergeLatestTimestamp(
   return current ?? undefined;
 }
 
-export function formatAgeLabel(value: string | null | undefined, today = new Date()) {
-  const days = daysSinceDate(value, today);
-  if (days === null) {
-    return null;
-  }
-
-  if (days === 0) {
-    return "Today";
-  }
-
-  if (days === 1) {
-    return "1 day ago";
-  }
-
-  return `${days} days ago`;
-}
-
 export function isDateOverdue(value: string, today = new Date()) {
   const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
   const dueDate = parseAttentionDate(value);

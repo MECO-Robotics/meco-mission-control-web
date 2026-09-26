@@ -33,18 +33,3 @@ export function removeWorkspaceToast(
 ): WorkspaceToastNotice[] {
   return queue.filter((notice) => notice.id !== noticeId);
 }
-
-export function dismissWorkspaceToast(
-  queue: WorkspaceToastNotice[],
-  history: WorkspaceToastNotice[],
-  noticeId: string,
-  reason: WorkspaceToastDismissReason,
-): {
-  history: WorkspaceToastNotice[];
-  queue: WorkspaceToastNotice[];
-} {
-  return {
-    queue: removeWorkspaceToast(queue, noticeId),
-    history: reason === "manual" ? removeWorkspaceToast(history, noticeId) : history,
-  };
-}
