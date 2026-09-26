@@ -1,11 +1,4 @@
-import type { InteractiveTutorialStep, InteractiveTutorialStepId } from "../interactiveTutorialTypes";
-
-function targetCopyForStep(stepId: InteractiveTutorialStepId) {
-  if (stepId === "tasks-tab" || stepId === "task-timeline" || stepId === "task-queue" || stepId === "task-milestones") {
-    return "Use the highlighted control to continue.";
-  }
-  return "Use the highlighted control to continue.";
-}
+import type { InteractiveTutorialStep } from "../interactiveTutorialTypes";
 
 export function getInteractiveTutorialStepError(
   step: InteractiveTutorialStep,
@@ -95,6 +88,6 @@ export function getInteractiveTutorialStepError(
     case "create-document":
       return "Create and save one document to continue.";
     default:
-      return targetCopyForStep(step.id);
+      return "Use the highlighted control to continue.";
   }
 }

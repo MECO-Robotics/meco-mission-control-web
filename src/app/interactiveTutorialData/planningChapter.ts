@@ -17,12 +17,6 @@ const planningSteps = [
     selector: '.sidebar-scope-trigger',
   },
   {
-    id: "tasks-tab",
-    title: "Open Tasks",
-    instruction: "Open Work from the navigation.",
-    selector: '[data-tutorial-target="sidebar-tab-work"]',
-  },
-  {
     id: "task-timeline",
     title: "Open the schedule",
     instruction: "Choose Schedule in the sidebar. Calendar and Timeline are shown together.",
@@ -77,12 +71,6 @@ const planningSteps = [
     selector: '[data-tutorial-target="edit-task-row"]',
   },
   {
-    id: "readiness-tab",
-    title: "Open Work",
-    instruction: "Open Work from the navigation.",
-    selector: '[data-tutorial-target="sidebar-tab-work"]',
-  },
-  {
     id: "create-milestone",
     title: "Create a milestone",
     instruction: "Use Add and save one new milestone.",
@@ -99,12 +87,6 @@ const planningSteps = [
     title: "Open milestone details",
     instruction: "Click a milestone row to open the details popup.",
     selector: '[data-tutorial-target="edit-milestone-row"]',
-  },
-  {
-    id: "worklogs-tab",
-    title: "Open Work logs",
-    instruction: "Open Work from the navigation.",
-    selector: '[data-tutorial-target="sidebar-tab-work"]',
   },
   {
     id: "reports-worklogs",
