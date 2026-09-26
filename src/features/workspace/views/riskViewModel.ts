@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -24,6 +24,11 @@ export function useRisksViewModel({
   onDeleteRisk,
   onUpdateRisk,
 }: UseRisksViewModelArgs) {
+  const editorSession = useRef({ pending: false });
+  useEffect(() => () => {
+    editorSession.current = { pending: false };
+  }, []);
+
   const [editorMode, setEditorMode] = useState<RiskEditorMode>(null);
   const [activeRiskId, setActiveRiskId] = useState<string | null>(null);
   const [editorError, setEditorError] = useState<string | null>(null);
@@ -53,27 +58,28 @@ export function useRisksViewModel({
     [activeRiskId, bootstrap.risks],
   );
 
-  const openRiskDetails = useCallback((risk: RiskRecord) => {
-    setDraft(toRiskPayload(risk));
-    setActiveRiskId(risk.id);
-    setEditorError(null);
-    setEditorMode("detail");
-  }, []);
-
-  const openEditEditor = useCallback((risk: RiskRecord) => {
-    setDraft(toRiskPayload(risk));
-    setActiveRiskId(risk.id);
-    setEditorError(null);
-    setEditorMode("edit");
-  }, []);
-
   const closeEditor = useCallback(() => {
+    editorSession.current = { pending: false };
     setEditorMode(null);
     setActiveRiskId(null);
     setEditorError(null);
     setIsSaving(false);
     setIsDeleting(false);
   }, []);
+
+  const openRiskDetails = useCallback((risk: RiskRecord) => {
+    closeEditor();
+    setDraft(toRiskPayload(risk));
+    setActiveRiskId(risk.id);
+    setEditorMode("detail");
+  }, [closeEditor]);
+
+  const openEditEditor = useCallback((risk: RiskRecord) => {
+    closeEditor();
+    setDraft(toRiskPayload(risk));
+    setActiveRiskId(risk.id);
+    setEditorMode("edit");
+  }, [closeEditor]);
 
   useEffect(() => {
     if (!editorMode) {
@@ -102,6 +108,8 @@ export function useRisksViewModel({
   }, [attachmentOptions, draft.attachmentId, editorMode]);
 
   const handleSaveRisk = useCallback(async () => {
+    const session = editorSession.current;
+    if (session.pending || editorMode !== "edit" || !activeRiskId) return;
     const payload = sanitizeRiskPayload(draft);
 
     if (payload.title.length < 2) {
@@ -125,40 +133,48 @@ export function useRisksViewModel({
     }
 
     setEditorError(null);
+    session.pending = true;
     setIsSaving(true);
     try {
-      if (editorMode === "edit" && activeRiskId) {
-        await onUpdateRisk(activeRiskId, payload);
-      }
-      closeEditor();
+      await onUpdateRisk(activeRiskId, payload);
+      if (editorSession.current === session) closeEditor();
     } catch (error) {
-      setEditorError(error instanceof Error ? error.message : "Couldn't save this risk.");
+      if (editorSession.current === session) {
+        setEditorError(error instanceof Error ? error.message : "Couldn't save this risk.");
+      }
     } finally {
-      setIsSaving(false);
+      if (editorSession.current === session) {
+        session.pending = false;
+        setIsSaving(false);
+      }
     }
   }, [activeRiskId, closeEditor, draft, editorMode, onUpdateRisk]);
 
   const handleDeleteRisk = useCallback(async () => {
-    if (!activeRiskId) {
-      return;
-    }
+    const session = editorSession.current;
+    if (session.pending || !activeRiskId) return;
 
     setEditorError(null);
+    session.pending = true;
     setIsDeleting(true);
     try {
       await onDeleteRisk(activeRiskId);
-      closeEditor();
+      if (editorSession.current === session) closeEditor();
     } catch (error) {
-      setEditorError(error instanceof Error ? error.message : "Couldn't delete this risk.");
+      if (editorSession.current === session) {
+        setEditorError(error instanceof Error ? error.message : "Couldn't delete this risk.");
+      }
     } finally {
-      setIsDeleting(false);
+      if (editorSession.current === session) {
+        session.pending = false;
+        setIsDeleting(false);
+      }
     }
   }, [activeRiskId, closeEditor, onDeleteRisk]);
 
   return {
     activeRisk,
     ...viewData,
-    activeRiskId,
     attachmentOptions,
     closeEditor,
     draft,
