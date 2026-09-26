@@ -32,7 +32,7 @@ docs/reports/lighthouse-*.txt
 .codex_*.json
 
 # Graphify semantic extraction cache
-/graphify-out/cache/
+/graphify-out/
 
 # Environment files
 .env
@@ -51,5 +51,3 @@ docs/reports/lighthouse-*.txt
 *.sln
 *.sw?
 
-# Graphify update backups are recoverable from Git history.
-/graphify-out/20??-??-??/
