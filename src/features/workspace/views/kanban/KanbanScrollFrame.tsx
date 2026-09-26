@@ -1,14 +1,26 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
 
 import { IconChevronLeft, IconChevronRight } from "@/components/shared/Icons";
 
 interface KanbanScrollFrameProps {
   children: ReactNode;
   motionClassName?: string;
+  shellRef?: RefObject<HTMLDivElement | null>;
+  style?: CSSProperties;
+  isFocused?: boolean;
+  isCompact?: boolean;
 }
 
-export function KanbanScrollFrame({ children, motionClassName = "" }: KanbanScrollFrameProps) {
-  const shellRef = useRef<HTMLDivElement>(null);
+export function KanbanScrollFrame({
+  children,
+  motionClassName = "",
+  shellRef: providedShellRef,
+  style,
+  isFocused = false,
+  isCompact,
+}: KanbanScrollFrameProps) {
+  const internalShellRef = useRef<HTMLDivElement>(null);
+  const shellRef = providedShellRef ?? internalShellRef;
   const [scrollState, setScrollState] = useState({
     canScrollLeft: false,
     canScrollRight: false,
@@ -74,11 +86,11 @@ export function KanbanScrollFrame({ children, motionClassName = "" }: KanbanScro
       shell.removeEventListener("scroll", scheduleScrollStateUpdate);
       window.removeEventListener("resize", scheduleScrollStateUpdate);
     };
-  }, []);
+  }, [shellRef]);
 
   return (
     <div
-      className={`task-queue-board-shell-frame${scrollState.canScrollLeft ? " has-scroll-left" : ""}${scrollState.canScrollRight ? " has-scroll-right" : ""}${scrollState.hasOverflow ? " has-task-queue-board-overflow" : ""} ${motionClassName}`}
+      className={`task-queue-board-shell-frame${scrollState.canScrollLeft ? " has-scroll-left" : ""}${scrollState.canScrollRight ? " has-scroll-right" : ""}${scrollState.hasOverflow ? " has-task-queue-board-overflow" : ""}${isFocused ? " is-focused-column" : ""} ${motionClassName}`}
     >
       {scrollState.hasOverflow ? (
         <div aria-hidden="true" className="task-queue-board-scroll-hints">
@@ -100,7 +112,12 @@ export function KanbanScrollFrame({ children, motionClassName = "" }: KanbanScro
           </div>
         </div>
       ) : null}
-      <div className="table-shell task-queue-board-shell" ref={shellRef}>
+      <div
+        className={`table-shell task-queue-board-shell${isFocused ? " is-focused-column" : ""}`}
+        data-task-queue-zoom-compact={isCompact === undefined ? undefined : String(isCompact)}
+        ref={shellRef}
+        style={style}
+      >
         {children}
       </div>
     </div>
