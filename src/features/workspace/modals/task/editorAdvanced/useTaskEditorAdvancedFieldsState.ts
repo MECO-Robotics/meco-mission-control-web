@@ -1,3 +1,5 @@
+import { getProjectTaskTargetLabel } from "@/lib/appUtils/taskTargets/labels";
+import { setTaskPrimaryTargetSelection, toggleTaskTargetSelection } from "@/lib/appUtils/taskTargets/selection";
 import type { Dispatch, SetStateAction } from "react";
 
 import { formatIterationVersion } from "@/lib/appUtils/common";
@@ -16,9 +18,6 @@ import {
   getTaskSelectedPartInstanceIds,
   getTaskSelectedPrimaryTargetId,
   getTaskSelectedScopeChips,
-  getTaskTargetGroupLabel,
-  setTaskPrimaryTargetSelection,
-  toggleTaskTargetSelection,
   type TaskTargetKind,
 } from "../../../shared/task/taskTargeting";
 
@@ -54,7 +53,7 @@ export function useTaskEditorAdvancedFieldsState({
   const taskPhotoProjectId = taskDraft.projectId || bootstrap.projects[0]?.id || null;
   const selectedProject = taskDraft.projectId ? projectsById[taskDraft.projectId] : null;
   const availableDisciplines = getTaskDisciplinesForProject(selectedProject);
-  const targetGroupLabel = getTaskTargetGroupLabel(selectedProject);
+  const targetGroupLabel = getProjectTaskTargetLabel(selectedProject);
   const targetFallback = `No ${targetGroupLabel === "Subsystems" ? "subsystem" : "workstream"}`;
   const projectSubsystems = bootstrap.subsystems.filter(
     (subsystem) => subsystem.projectId === taskDraft.projectId,

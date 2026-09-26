@@ -1,3 +1,5 @@
+import { getProjectTaskTargetLabel } from "@/lib/appUtils/taskTargets/labels";
+import { setTaskPrimaryTargetSelection } from "@/lib/appUtils/taskTargets/selection";
 import type { CSSProperties, Dispatch, SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskPayload } from "@/types/payloads";
@@ -5,11 +7,8 @@ import type { TaskRecord } from "@/types/recordsExecution";
 import { formatIterationVersion } from "@/lib/appUtils/common";
 import { TASK_PRIORITY_OPTIONS } from "../../../../shared/model/workspaceOptions";
 import {
-  getTaskPrimaryTargetNameOptions,
   getTaskSelectedAssigneeIds,
   getTaskSelectedPrimaryTargetId,
-  getTaskTargetGroupLabel,
-  setTaskPrimaryTargetSelection,
 } from "../../../../shared/task/taskTargeting";
 import type { TaskDetailsEditableField } from "../../taskModalTypes";
 import { getStableToneClassName } from "./taskDetailsOverviewTone";
@@ -34,7 +33,7 @@ export function useTaskDetailsOverviewModel({
   const editableTask = taskDraft ?? activeTask;
   const selectedProject =
     bootstrap.projects.find((project) => project.id === editableTask.projectId) ?? null;
-  const targetGroupLabel = getTaskTargetGroupLabel(selectedProject);
+  const targetGroupLabel = getProjectTaskTargetLabel(selectedProject);
   const subsystemFieldLabel = targetGroupLabel === "Subsystems" ? "Subsystem" : "Workstream";
   const isDraftEditing = Boolean(taskDraft);
   const membersById = Object.fromEntries(
@@ -53,7 +52,10 @@ export function useTaskDetailsOverviewModel({
       (left, right) =>
         left.name.localeCompare(right.name) || left.iteration - right.iteration,
     );
-  const primaryTargetNameOptions = getTaskPrimaryTargetNameOptions(projectSubsystems);
+  const primaryTargetOptions = projectSubsystems.map((subsystem) => ({
+    id: subsystem.id,
+    name: `${subsystem.name} (${formatIterationVersion(subsystem.iteration)})`,
+  }));
   const selectedPrimaryTarget = selectedPrimaryTargetId
     ? subsystemsById[selectedPrimaryTargetId] ?? null
     : null;
@@ -166,7 +168,7 @@ export function useTaskDetailsOverviewModel({
     ownerIdText,
     ownerName,
     ownerText,
-    primaryTargetNameOptions,
+    primaryTargetOptions,
     priorityPillClassName,
     priorityText,
     selectedAssigneeIds,
