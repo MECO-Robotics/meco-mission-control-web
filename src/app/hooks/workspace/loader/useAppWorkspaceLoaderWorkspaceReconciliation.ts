@@ -1,40 +1,36 @@
+import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
 import { reconcileActivePersonFilter } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceReconciliationSelection";
 import { reconcileArtifactModal, reconcileMechanismModal, reconcilePartDefinitionModal, reconcilePartInstanceModal, reconcileSubsystemModal, reconcileWorkstreamModal } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceReconciliationModalsCatalog";
 import { reconcileManufacturingModal, reconcilePurchaseModal, reconcileTaskModal } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceReconciliationModalsTaskPurchaseManufacturing";
 import { reconcileWorkLogAndReports } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceReconciliationReports";
-import {
-  type AppWorkspaceLoaderModel,
-  type SelectMemberHandler,
-  type WorkspaceReconciliationState,
-} from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
+import type { SelectMemberHandler } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
 import { findMemberForSessionUser } from "@/lib/appUtils/common";
 
 export function reconcileWorkspaceState(
-  state: WorkspaceReconciliationState,
-  model: AppWorkspaceLoaderModel,
+  state: AppWorkspaceState,
   payload: BootstrapPayload,
   scopedPayload: BootstrapPayload,
   selectMember: SelectMemberHandler,
 ) {
-  const signedInScopedMember = findMemberForSessionUser(scopedPayload.members, model.sessionUser);
+  const signedInScopedMember = findMemberForSessionUser(scopedPayload.members, state.sessionUser);
   const nextMemberId =
-    model.selectedMemberId &&
-    scopedPayload.members.some((member) => member.id === model.selectedMemberId)
-      ? model.selectedMemberId
+    state.selectedMemberId &&
+    scopedPayload.members.some((member) => member.id === state.selectedMemberId)
+      ? state.selectedMemberId
       : scopedPayload.members[0]?.id ?? null;
 
-  reconcileActivePersonFilter(state, model, scopedPayload);
+  reconcileActivePersonFilter(state, scopedPayload);
   selectMember(nextMemberId, scopedPayload);
-  reconcileTaskModal(state, model, scopedPayload, payload);
-  reconcilePurchaseModal(state, model, payload);
-  reconcileManufacturingModal(state, model, payload, signedInScopedMember?.id ?? null);
-  reconcilePartDefinitionModal(state, model, payload);
-  reconcileArtifactModal(state, model, scopedPayload, payload);
-  reconcileWorkstreamModal(state, model, scopedPayload);
-  reconcilePartInstanceModal(state, model, payload);
-  reconcileSubsystemModal(state, model, scopedPayload);
-  reconcileMechanismModal(state, model, scopedPayload);
-  reconcileWorkLogAndReports(state, model, scopedPayload);
+  reconcileTaskModal(state, scopedPayload, payload);
+  reconcilePurchaseModal(state, payload);
+  reconcileManufacturingModal(state, payload, signedInScopedMember?.id ?? null);
+  reconcilePartDefinitionModal(state, payload);
+  reconcileArtifactModal(state, scopedPayload, payload);
+  reconcileWorkstreamModal(state, scopedPayload);
+  reconcilePartInstanceModal(state, payload);
+  reconcileSubsystemModal(state, scopedPayload);
+  reconcileMechanismModal(state, scopedPayload);
+  reconcileWorkLogAndReports(state, scopedPayload);
 }

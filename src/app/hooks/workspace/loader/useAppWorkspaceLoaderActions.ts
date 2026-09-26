@@ -1,18 +1,13 @@
 import { useCallback } from "react";
 
-import type { AppWorkspaceLoaderModel } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
 import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
 import type { BootstrapPayload } from "@/types/bootstrap";
-import { getRosterLinkedMemberId } from "@/lib/appUtils/common";
 import {
   buildEditCanceledNotice,
   buildMilestoneEditSuccessNotice,
 } from "@/features/workspace/workspaceEditToastNotice";
 
-export function useAppWorkspaceLoaderActions(
-  state: AppWorkspaceState,
-  model: AppWorkspaceLoaderModel,
-) {
+export function useAppWorkspaceLoaderActions(state: AppWorkspaceState) {
   const clearDataMessage = useCallback(() => {
     state.setDataMessage(null);
   }, [state]);
@@ -49,41 +44,11 @@ export function useAppWorkspaceLoaderActions(
     );
   }, [state]);
 
-  const toggleMyView = useCallback(() => {
-    const rosterLinkedSignedInMemberId = getRosterLinkedMemberId(
-      model.scopedBootstrap.members,
-      model.signedInMember,
-    );
-
-    if (!rosterLinkedSignedInMemberId) {
-      const nextIsActive = !state.isUnmatchedMyViewActive;
-      state.setActivePersonFilter([]);
-      state.setIsUnmatchedMyViewActive(nextIsActive);
-      if (nextIsActive) {
-        state.enqueueTaskEditNotice({
-          title: "My View Notice",
-          message: "No roster member is linked to this account yet.",
-          tone: "info",
-        });
-      }
-      return;
-    }
-
-    state.setIsUnmatchedMyViewActive(false);
-    state.setDataMessage(null);
-    state.setActivePersonFilter((current) =>
-      current.length === 1 && current[0] === rosterLinkedSignedInMemberId
-        ? []
-        : [rosterLinkedSignedInMemberId],
-    );
-  }, [model.scopedBootstrap.members, model.signedInMember, state]);
-
   return {
     clearDataMessage,
     clearTaskEditNotice,
     notifyTaskEditCanceled,
     notifyTaskEditSaved,
     selectMember,
-    toggleMyView,
   };
 }

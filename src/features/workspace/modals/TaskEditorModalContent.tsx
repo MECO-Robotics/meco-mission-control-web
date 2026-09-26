@@ -3,7 +3,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskPayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { TaskDetailsModal } from "./TaskDetailsModalContent";
-import { TaskEditorAdvancedMediaSection } from "./task/editorAdvanced/TaskEditorAdvancedMediaSection";
+import { PhotoUploadField } from "../shared/media/PhotoUploadField";
 import { TaskEditorCreateMetadataSection } from "./task/TaskEditorCreateMetadataSection";
 import { TaskEditorCreateProjectSection } from "./task/TaskEditorCreateProjectSection";
 
@@ -227,7 +227,8 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
                 setTaskDraft={updateDraftWhenIdle}
                 taskDraft={taskDraft}
               />
-              <TaskEditorAdvancedMediaSection
+              <PhotoUploadField
+                label="Task photo"
                 currentUrl={taskDraft.photoUrl}
                 onChange={(value) =>
                   updateDraftWhenIdle((current) => ({ ...current, photoUrl: value }))

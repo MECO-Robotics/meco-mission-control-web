@@ -3,13 +3,12 @@ import { startTransition, useCallback } from "react";
 import { fetchBootstrap } from "@/lib/auth/bootstrap";
 import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
 import { reconcileWorkspaceState } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceReconciliation";
-import type { AppWorkspaceLoaderModel, SelectMemberHandler, UnauthorizedHandler, WorkspaceLoadScope, WorkspaceReconciliationState } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
+import type { SelectMemberHandler, UnauthorizedHandler, WorkspaceLoadScope } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
 import { getSinglePersonFilterId } from "@/app/state/workspaceMemberRoleUtils";
 import { scopeBootstrapBySelection } from "@/app/state/workspaceBootstrapScope";
 
 export function useAppWorkspaceLoaderWorkspace(
   state: AppWorkspaceState,
-  model: AppWorkspaceLoaderModel,
   handleUnauthorized: UnauthorizedHandler,
   selectMember: SelectMemberHandler,
 ) {
@@ -20,12 +19,12 @@ export function useAppWorkspaceLoaderWorkspace(
     try {
       const personId =
         scope.personId === undefined
-          ? getSinglePersonFilterId(model.activePersonFilter)
+          ? getSinglePersonFilterId(state.activePersonFilter)
           : scope.personId;
       const seasonId =
-        scope.seasonId === undefined ? model.selectedSeasonId : scope.seasonId;
+        scope.seasonId === undefined ? state.selectedSeasonId : scope.seasonId;
       const projectId =
-        scope.projectId === undefined ? model.selectedProjectId : scope.projectId;
+        scope.projectId === undefined ? state.selectedProjectId : scope.projectId;
       const payload = await fetchBootstrap(
         personId,
         seasonId,
@@ -43,8 +42,7 @@ export function useAppWorkspaceLoaderWorkspace(
       });
 
       reconcileWorkspaceState(
-        state as WorkspaceReconciliationState,
-        model,
+        state,
         payload,
         scopedPayload,
         selectMember,
@@ -55,5 +53,5 @@ export function useAppWorkspaceLoaderWorkspace(
     } finally {
       state.setIsLoadingData(false);
     }
-  }, [handleUnauthorized, model, selectMember, state]);
+  }, [handleUnauthorized, selectMember, state]);
 }
