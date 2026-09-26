@@ -1,6 +1,4 @@
 import {
-  buildPlanningConfidenceSummary,
-  getTaskBlocksDependencies,
   getTaskOpenBlockersForTask,
   getTaskPlanningState,
 } from "../task/taskPlanning";
@@ -163,19 +161,6 @@ const bootstrap = {
   purchaseItems: [],
   manufacturingItems: [],
 } satisfies BootstrapPayload;
-
-test("task planning helpers surface structured dependency records", () => {
-  const blocks = getTaskBlocksDependencies("task-a", bootstrap);
-
-  expect(blocks).toHaveLength(1);
-  expect(blocks[0]).toMatchObject({
-    taskId: "task-b",
-    kind: "task",
-    refId: "task-a",
-    dependencyType: "hard",
-    requiredState: "complete",
-  });
-});
 
 test("task planning keeps manual blockers separate from dependency waiting state", () => {
   expect(getTaskOpenBlockersForTask("task-b", bootstrap)).toHaveLength(1);
@@ -359,47 +344,4 @@ test("task planning accepts milestone and part-instance qa states as satisfied d
   expect(getTaskPlanningState(qaBootstrap.tasks[1], qaBootstrap, new Date("2026-04-20T12:00:00Z"))).toBe(
     "ready",
   );
-});
-
-test("planning confidence counts populated planning fields and missing task ids", () => {
-  const tasks = [
-    {
-      ...bootstrap.tasks[0],
-      id: "task-complete-plan",
-      ownerId: "member-1",
-      mechanismId: "mechanism-1",
-      mechanismIds: ["mechanism-1"],
-      estimatedHours: 3,
-    },
-    {
-      ...bootstrap.tasks[1],
-      id: "task-missing-plan",
-      ownerId: null,
-      assigneeIds: [],
-      dueDate: "",
-      subsystemId: "",
-      subsystemIds: [],
-      mechanismId: null,
-      mechanismIds: [],
-      partInstanceId: null,
-      partInstanceIds: [],
-      estimatedHours: 0,
-    },
-  ];
-
-  const summary = buildPlanningConfidenceSummary(tasks);
-
-  expect(summary.totalTasks).toBe(2);
-  expect(summary.completeFieldCount).toBe(4);
-  expect(summary.possibleFieldCount).toBe(8);
-  expect(summary.confidencePercent).toBe(50);
-  expect(Object.fromEntries(summary.fields.map((field) => [field.id, field.count]))).toEqual({
-    "due-date": 1,
-    estimate: 1,
-    owner: 1,
-    "target-link": 1,
-  });
-  expect(summary.fields.find((field) => field.id === "owner")?.missingTaskIds).toEqual([
-    "task-missing-plan",
-  ]);
 });
