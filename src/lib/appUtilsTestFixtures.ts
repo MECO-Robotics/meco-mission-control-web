@@ -195,11 +195,7 @@ export function createBootstrap(overrides: Partial<BootstrapPayload> = {}): Boot
     milestones: [milestone],
     reports: [],
     reportFindings: [],
-    qaReports: [],
     qaRequests: [],
-    testResults: [],
-    qaFindings: [],
-    testFindings: [],
     designIterations: [],
     risks: [],
     tasks: [

@@ -217,3 +217,19 @@ describe("normalizeBootstrapPayload", () => {
     expect(normalized.tasks[0]?.targetRiskId).toBe("risk-1");
   });
 });
+
+it("keeps empty canonical report collections authoritative over stale legacy copies", () => {
+  const input = {
+    ...EMPTY_BOOTSTRAP,
+    qaReports: [{ id: "retired-qa" }],
+    testResults: [{ id: "retired-test" }],
+    qaFindings: [{ id: "retired-finding" }],
+    testFindings: [{ id: "retired-test-finding" }],
+  };
+  const normalized = normalizeBootstrapPayload(input);
+  expect(normalized.reports).toEqual([]);
+  expect(normalized.reportFindings).toEqual([]);
+  for (const field of ["qaReports", "testResults", "qaFindings", "testFindings"]) {
+    expect(normalized).not.toHaveProperty(field);
+  }
+});

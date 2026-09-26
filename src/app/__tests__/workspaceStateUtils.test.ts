@@ -584,3 +584,35 @@ describe("scopeBootstrapBySelection", () => {
     expect((scoped.actions ?? []).map((action) => action.id)).toEqual(["delete-visible-task"]);
   });
 });
+
+it("scopes canonical reports, findings and typed risk sources together", () => {
+  const payload = createBootstrap();
+  const report: BootstrapPayload["reports"][number] = {
+    id: "qa-visible", reportType: "QA", projectId: "project-visible",
+    taskId: "task-visible", milestoneId: null, workstreamId: null,
+    createdByMemberId: null, result: "pass", summary: "QA evidence", notes: "Reviewed",
+    createdAt: "2026-09-26",
+  };
+  payload.reports = [
+    report,
+    { ...report, id: "practice-visible", reportType: "Practice", taskId: null },
+    { ...report, id: "qa-hidden", projectId: "project-hidden", taskId: "task-hidden" },
+    { ...report, id: "qa-cross-project-task", taskId: "task-hidden" },
+  ];
+  payload.reportFindings = payload.reports.map((entry) => ({
+    id: `finding-${entry.id}`, reportId: entry.id, mechanismId: null,
+    partInstanceId: null, artifactInstanceId: null, issueType: "fit", severity: "low",
+    notes: "Measured", spawnedTaskId: null, spawnedIterationId: null, spawnedRiskId: null,
+  }));
+  payload.risks = payload.reports.map((entry) => ({
+    id: `risk-${entry.id}`, title: "Risk", detail: "Check", severity: "low",
+    sourceType: entry.reportType === "QA" ? "qa-report" : "test-result",
+    sourceId: entry.id, attachmentType: "project", attachmentId: entry.projectId,
+    mitigationTaskId: null,
+  }));
+  const scoped = scopeBootstrapBySelection(payload, "season-1", "project-visible");
+  expect(scoped.reports.map((entry) => entry.id)).toEqual(["qa-visible", "practice-visible"]);
+  expect(scoped.reportFindings.map((entry) => entry.reportId)).toEqual(["qa-visible", "practice-visible"]);
+  expect(scoped.risks.map((entry) => entry.sourceId)).toEqual(["qa-visible", "practice-visible"]);
+  expect(scoped.reports[0]).toEqual(report);
+});

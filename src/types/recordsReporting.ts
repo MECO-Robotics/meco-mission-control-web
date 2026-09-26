@@ -60,29 +60,6 @@ export interface ReportFindingRecord {
   updatedAt?: string;
 }
 
-export type QaReportRecord = ReportRecord;
-export type TestResultRecord = ReportRecord;
-
-export interface QaFindingRecord {
-  id: string;
-  taskId: string | null;
-  qaReportId: string | null;
-  title: string;
-  detail: string;
-  severity: RiskSeverity;
-  status: FindingStatus;
-}
-
-export interface TestFindingRecord {
-  id: string;
-  taskId: string | null;
-  testResultId: string | null;
-  title: string;
-  detail: string;
-  severity: RiskSeverity;
-  status: FindingStatus;
-}
-
 export interface DesignIterationRecord {
   id: string;
   taskId: string | null;

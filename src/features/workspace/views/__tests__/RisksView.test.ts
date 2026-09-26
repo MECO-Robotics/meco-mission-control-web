@@ -132,7 +132,6 @@ function createBootstrap(): BootstrapPayload {
         createdAt: "2026-04-21T00:00:00.000Z",
       },
     ],
-    qaReports: [],
     risks: [
       {
         id: "risk-1",

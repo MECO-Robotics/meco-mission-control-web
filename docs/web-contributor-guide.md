@@ -87,7 +87,7 @@ When adding a backend-backed feature:
 
 - Implement or confirm the platform route and response shape first.
 - Update frontend types in `src/types/`.
-- Normalize only for backward compatibility with older payloads.
+- Normalize the current transport shape once at the boundary; remove obsolete prototype adapters when replacing their consumers.
 - Keep cookie credentials, in-memory CSRF handling, auth expiry handling, and
   no-store assumptions in shared request helpers. Never persist or replay a web
   bearer credential from browser-readable storage.
@@ -95,6 +95,8 @@ When adding a backend-backed feature:
   response.
 - Add tests for empty payloads, scoped season/project payloads, unauthorized
   responses, and API failure states when the flow depends on them.
+
+Reports use only `reports` and `reportFindings` in web state. QA history selects `reportType === "QA"`; milestone history selects non-QA reports. Do not recreate the former `qaReports`, `testResults`, `qaFindings` or `testFindings` mirrors. The current platform supplies canonical collections; legacy-only report snapshots are no longer imported. No current-state reset is required.
 
 Do not duplicate platform validation rules in UI code except where immediate
 client-side feedback improves the workflow. The platform remains the source of
