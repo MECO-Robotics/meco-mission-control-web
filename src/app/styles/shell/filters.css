@@ -3,23 +3,6 @@
   min-width: 0;
 }
 
-.app-topbar-page-label {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 1.95rem;
-  padding: 0 0.15rem;
-  border: 0;
-  background: transparent;
-  color: var(--text-title);
-  font-size: 0.64rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
 .topbar h1,
 .panel-header h2,
 .auth-card h1,

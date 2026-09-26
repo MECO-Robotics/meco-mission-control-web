@@ -20,10 +20,6 @@
   color-scheme: dark;
 }
 
-.page-shell.dark-mode .toolbar-filter-select-overlay {
-  background: transparent;
-}
-
 .page-shell.dark-mode .toolbar-filter-compact select {
   color-scheme: dark;
   background-color: transparent;
