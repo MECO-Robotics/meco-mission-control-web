@@ -1,6 +1,6 @@
 import { useCatalogEditorLifecycle } from "./useCatalogEditorLifecycle";
 import type { WorkspaceLoader } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback } from "react";
 
 import { artifactToPayload } from "@/lib/appUtils/payloadConversions";
 import { buildEmptyArtifactPayload } from "@/lib/appUtils/payloadBuilders";
@@ -10,7 +10,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import type { ArtifactKind } from "@/types/common";
 import type { ArtifactPayload } from "@/types/payloads";
-import type { ArtifactRecord } from "@/types/recordsInventory";
+import { useCatalogDraftEditor } from "./useCatalogDraftEditor";
 
 export function useArtifactActions({ bootstrap, handleUnauthorized, loadWorkspace, scopedBootstrap, selectedProjectId, setDataMessage, selectedSeasonId }: {
   selectedSeasonId: string | null;
@@ -21,45 +21,31 @@ export function useArtifactActions({ bootstrap, handleUnauthorized, loadWorkspac
   selectedProjectId: string | null;
   setDataMessage: (message: string | null) => void;
 }) {
-  const [artifactModalMode, setArtifactModalMode] = useState<"create" | "edit" | null>(null);
-  const [activeArtifactId, setActiveArtifactId] = useState<string | null>(null);
-  const [artifactDraft, setArtifactDraft] = useState<ArtifactPayload>(
-    buildEmptyArtifactPayload(EMPTY_BOOTSTRAP, { kind: "document" }),
-  );
   const { beginOperation, resetEditor, isSaving: isSavingArtifact, isDeleting: isDeletingArtifact } =
     useCatalogEditorLifecycle({ loadWorkspace, selectedProjectId, selectedSeasonId });
-  const openCreateArtifactModal = useCallback((kind: ArtifactKind) => {
-    resetEditor();
-    setActiveArtifactId(null);
-    setArtifactDraft(
-      buildEmptyArtifactPayload(scopedBootstrap, {
-        projectId: selectedProjectId ?? undefined,
-        kind,
-      }),
-    );
-    setArtifactModalMode("create");
-  }, [scopedBootstrap, selectedProjectId, resetEditor]);
-
-  const openEditArtifactModal = useCallback((artifact: ArtifactRecord) => {
-    resetEditor();
-    setActiveArtifactId(artifact.id);
-    setArtifactDraft(artifactToPayload(artifact));
-    setArtifactModalMode("edit");
-  }, [resetEditor]);
-
-  const closeArtifactModal = useCallback(() => {
-    resetEditor();
-    setArtifactModalMode(null);
-    setActiveArtifactId(null);
-  }, [resetEditor]);
-
-  useEffect(() => closeArtifactModal(), [closeArtifactModal, selectedProjectId, selectedSeasonId]);
-
-  useEffect(() => {
-    if (bootstrap === EMPTY_BOOTSTRAP || (artifactModalMode === "edit" && !bootstrap.artifacts.some((item) => item.id === activeArtifactId))) {
-      closeArtifactModal();
-    }
-  }, [activeArtifactId, bootstrap, closeArtifactModal, artifactModalMode]);
+  const makeCreateArtifactDraft = useCallback((kind: ArtifactKind) =>
+    buildEmptyArtifactPayload(scopedBootstrap, {
+      projectId: selectedProjectId ?? undefined,
+      kind,
+    }), [scopedBootstrap, selectedProjectId]);
+  const {
+    modalMode: artifactModalMode,
+    activeRecordId: activeArtifactId,
+    draft: artifactDraft,
+    setDraft: setArtifactDraft,
+    openCreate: openCreateArtifactModal,
+    openEdit: openEditArtifactModal,
+    close: closeArtifactModal,
+  } = useCatalogDraftEditor({
+    bootstrapIsEmpty: bootstrap === EMPTY_BOOTSTRAP,
+    makeCreateDraft: makeCreateArtifactDraft,
+    makeInitialDraft: () => buildEmptyArtifactPayload(EMPTY_BOOTSTRAP, { kind: "document" }),
+    records: bootstrap.artifacts,
+    resetOperation: resetEditor,
+    selectedProjectId,
+    selectedSeasonId,
+    toDraft: artifactToPayload,
+  });
 
   const handleArtifactSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();

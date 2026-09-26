@@ -1,6 +1,6 @@
 import { useCatalogEditorLifecycle } from "./useCatalogEditorLifecycle";
 import type { WorkspaceLoader } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback } from "react";
 
 import { buildEmptyPartInstancePayload } from "@/lib/appUtils/payloadBuilders";
 import { partInstanceToPayload } from "@/lib/appUtils/payloadConversions";
@@ -12,6 +12,7 @@ import type { Dispatch, SetStateAction } from "react";
 import type { MechanismRecord } from "@/types/recordsOrganization";
 import type { PartInstancePayload } from "@/types/payloads";
 import type { PartInstanceRecord } from "@/types/recordsInventory";
+import { useCatalogDraftEditor } from "./useCatalogDraftEditor";
 
 export function usePartInstanceActions({ bootstrap, handleUnauthorized, loadWorkspace, setBootstrap, setDataMessage, selectedProjectId, selectedSeasonId }: {
   selectedSeasonId: string | null;
@@ -22,46 +23,31 @@ export function usePartInstanceActions({ bootstrap, handleUnauthorized, loadWork
   setBootstrap: Dispatch<SetStateAction<BootstrapPayload>>;
   setDataMessage: (message: string | null) => void;
 }) {
-  const [partInstanceModalMode, setPartInstanceModalMode] =
-    useState<"create" | "edit" | null>(null);
-  const [activePartInstanceId, setActivePartInstanceId] = useState<string | null>(null);
-  const [partInstanceDraft, setPartInstanceDraft] = useState<PartInstancePayload>(
-    buildEmptyPartInstancePayload(EMPTY_BOOTSTRAP),
-  );
   const { beginOperation, resetEditor, isSaving: isSavingPartInstance } =
     useCatalogEditorLifecycle({ loadWorkspace, selectedProjectId, selectedSeasonId });
-  const openCreatePartInstanceModal = useCallback((mechanism: MechanismRecord, partDefinitionId?: string) => {
-    resetEditor();
-    setActivePartInstanceId(null);
-    setPartInstanceDraft(
-      {
-        ...buildEmptyPartInstancePayload(bootstrap, { subsystemId: mechanism.subsystemId, mechanismId: mechanism.id }),
-        ...(partDefinitionId ? { partDefinitionId } : {}),
-      },
-    );
-    setPartInstanceModalMode("create");
-  }, [bootstrap, resetEditor]);
-
-  const openEditPartInstanceModal = useCallback((partInstance: PartInstanceRecord) => {
-    resetEditor();
-    setActivePartInstanceId(partInstance.id);
-    setPartInstanceDraft(partInstanceToPayload(partInstance));
-    setPartInstanceModalMode("edit");
-  }, [resetEditor]);
-
-  const closePartInstanceModal = useCallback(() => {
-    resetEditor();
-    setPartInstanceModalMode(null);
-    setActivePartInstanceId(null);
-  }, [resetEditor]);
-
-  useEffect(() => closePartInstanceModal(), [closePartInstanceModal, selectedProjectId, selectedSeasonId]);
-
-  useEffect(() => {
-    if (bootstrap === EMPTY_BOOTSTRAP || (partInstanceModalMode === "edit" && !bootstrap.partInstances.some((item) => item.id === activePartInstanceId))) {
-      closePartInstanceModal();
-    }
-  }, [activePartInstanceId, bootstrap, closePartInstanceModal, partInstanceModalMode]);
+  const makeCreatePartInstanceDraft = useCallback((mechanism: MechanismRecord, partDefinitionId?: string) =>
+    ({
+      ...buildEmptyPartInstancePayload(bootstrap, { subsystemId: mechanism.subsystemId, mechanismId: mechanism.id }),
+      ...(partDefinitionId ? { partDefinitionId } : {}),
+    }), [bootstrap]);
+  const {
+    modalMode: partInstanceModalMode,
+    activeRecordId: activePartInstanceId,
+    draft: partInstanceDraft,
+    setDraft: setPartInstanceDraft,
+    openCreate: openCreatePartInstanceModal,
+    openEdit: openEditPartInstanceModal,
+    close: closePartInstanceModal,
+  } = useCatalogDraftEditor({
+    bootstrapIsEmpty: bootstrap === EMPTY_BOOTSTRAP,
+    makeCreateDraft: makeCreatePartInstanceDraft,
+    makeInitialDraft: () => buildEmptyPartInstancePayload(EMPTY_BOOTSTRAP),
+    records: bootstrap.partInstances,
+    resetOperation: resetEditor,
+    selectedProjectId,
+    selectedSeasonId,
+    toDraft: partInstanceToPayload,
+  });
 
   const handlePartInstanceSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();

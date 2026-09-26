@@ -1,7 +1,6 @@
 import { useCatalogEditorLifecycle } from "./useCatalogEditorLifecycle";
 import type { WorkspaceLoader } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
-import type { PartDefinitionPayload } from "@/types/payloads";
-import { useCallback, useRef, useState, useEffect } from "react";
+import { useCallback, useRef } from "react";
 
 import { getLocalWorkspaceGeneration } from "@/lib/localWorkspace/session";
 import { getSessionGeneration } from "@/lib/auth/core/sessionStorage";
@@ -12,7 +11,7 @@ import { createPartDefinitionRecord, deletePartDefinitionRecord, updatePartDefin
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import type { Dispatch, SetStateAction } from "react";
-import type { PartDefinitionRecord } from "@/types/recordsInventory";
+import { useCatalogDraftEditor } from "./useCatalogDraftEditor";
 
 export function usePartDefinitionActions({ bootstrap, handleUnauthorized, loadWorkspace, selectedSeasonId, setBootstrap, setDataMessage, selectedProjectId }: {
   selectedProjectId: string | null;
@@ -23,15 +22,27 @@ export function usePartDefinitionActions({ bootstrap, handleUnauthorized, loadWo
   setBootstrap: Dispatch<SetStateAction<BootstrapPayload>>;
   setDataMessage: (message: string | null) => void;
 }) {
-  const [partDefinitionModalMode, setPartDefinitionModalMode] =
-    useState<"create" | "edit" | null>(null);
-  const [activePartDefinitionId, setActivePartDefinitionId] = useState<string | null>(
-    null,
-  );
-  const [partDefinitionDraft, setPartDefinitionDraft] =
-    useState<PartDefinitionPayload>(buildEmptyPartDefinitionPayload(EMPTY_BOOTSTRAP));
   const { beginOperation, resetEditor, isSaving: isSavingPartDefinition, isDeleting: isDeletingPartDefinition } =
     useCatalogEditorLifecycle({ loadWorkspace, selectedProjectId, selectedSeasonId });
+  const makeCreatePartDefinitionDraft = useCallback(() => buildEmptyPartDefinitionPayload(bootstrap), [bootstrap]);
+  const {
+    modalMode: partDefinitionModalMode,
+    activeRecordId: activePartDefinitionId,
+    draft: partDefinitionDraft,
+    setDraft: setPartDefinitionDraft,
+    openCreate: openCreatePartDefinitionModal,
+    openEdit: openEditPartDefinitionModal,
+    close: closePartDefinitionModal,
+  } = useCatalogDraftEditor({
+    bootstrapIsEmpty: bootstrap === EMPTY_BOOTSTRAP,
+    makeCreateDraft: makeCreatePartDefinitionDraft,
+    makeInitialDraft: () => buildEmptyPartDefinitionPayload(EMPTY_BOOTSTRAP),
+    records: bootstrap.partDefinitions,
+    resetOperation: resetEditor,
+    selectedProjectId,
+    selectedSeasonId,
+    toDraft: partDefinitionToPayload,
+  });
   const currentBootstrap = useRef(bootstrap);
   currentBootstrap.current = bootstrap;
   const savePartImage = useCallback(async (partId: string, revision: string, imageUrl: string) => {
@@ -50,34 +61,6 @@ export function usePartDefinitionActions({ bootstrap, handleUnauthorized, loadWo
     }
     setBootstrap((current) => ({ ...current, partDefinitions: current.partDefinitions.map((part) => part.id === saved.id ? saved : part) }));
   }, [handleUnauthorized, setBootstrap]);
-
-  const openCreatePartDefinitionModal = useCallback(() => {
-    resetEditor();
-    setActivePartDefinitionId(null);
-    setPartDefinitionDraft(buildEmptyPartDefinitionPayload(bootstrap));
-    setPartDefinitionModalMode("create");
-  }, [bootstrap, resetEditor]);
-
-  const openEditPartDefinitionModal = useCallback((item: PartDefinitionRecord) => {
-    resetEditor();
-    setActivePartDefinitionId(item.id);
-    setPartDefinitionDraft(partDefinitionToPayload(item));
-    setPartDefinitionModalMode("edit");
-  }, [resetEditor]);
-
-  const closePartDefinitionModal = useCallback(() => {
-    resetEditor();
-    setPartDefinitionModalMode(null);
-    setActivePartDefinitionId(null);
-  }, [resetEditor]);
-
-  useEffect(() => closePartDefinitionModal(), [closePartDefinitionModal, selectedProjectId, selectedSeasonId]);
-
-  useEffect(() => {
-    if (bootstrap === EMPTY_BOOTSTRAP || (partDefinitionModalMode === "edit" && !bootstrap.partDefinitions.some((item) => item.id === activePartDefinitionId))) {
-      closePartDefinitionModal();
-    }
-  }, [activePartDefinitionId, bootstrap, closePartDefinitionModal, partDefinitionModalMode]);
 
   const handlePartDefinitionSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();

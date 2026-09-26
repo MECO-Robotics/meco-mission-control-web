@@ -186,6 +186,21 @@ describe.each(cases)("$name editor ownership", (item) => {
   });
 });
 
+it.each(["workstream", "mechanism"] as const)(
+  "closes a %s draft when the record leaves view scope",
+  (name) => {
+    const item = cases.find((candidate) => candidate.name === name)!;
+    const { read, record, dependencies } = setup(item);
+    read().openEdit(record);
+    dependencies.scopedBootstrap = {
+      ...dependencies.scopedBootstrap,
+      [item.collection]: [],
+    };
+    read();
+    expect(read().mode).toBeNull();
+  },
+);
+
 it("preserves material create reorder points and converts edit records to draft payloads", async () => {
   const { read, record } = setup(cases.find((item) => item.name === "material")!);
   read().openCreate();
