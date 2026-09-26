@@ -25,7 +25,7 @@ See [navigation-consolidation.md](../README.md#current-navigation-model) for the
 
 ## Milestone editor ownership
 
-Calendar/Agenda and Timeline use `shared/milestones/useMilestoneEditor.ts` for draft dates, create/edit resets, validation and save/delete transitions. View hooks retain task grouping, day selection and detail navigation. Calendar/Agenda creation honors the project filter in all-project scope; Timeline creation uses its scoped projects. Editing retains a record's projects, falling back to the scope only when empty. The shared editor keeps failed saves open and sends edit notices only for edits. Inline schedule fields remain open when focus moves to the actions, so Save/Cancel/Delete stay in place through pointer activation; selecting another field or closing the modal exits schedule editing. No data reset is required.
+Calendar/Agenda and Timeline use `shared/milestones/useMilestoneEditor.ts` for draft dates, create/edit resets, validation and save/delete transitions. View hooks retain task grouping, day selection and detail navigation. Timeline exposes its own opening commands so callers cannot bypass the transition out of milestone details. Calendar/Agenda creation honors the project filter in all-project scope; Timeline creation uses its scoped projects. Editing retains a record's projects, falling back to the scope only when empty. The shared editor keeps failed saves open and sends edit notices only for edits. Inline schedule fields remain open when focus moves to the actions, so Save/Cancel/Delete stay in place through pointer activation; selecting another field or closing the modal exits schedule editing. No data reset is required.
 
 ## Client differences
 
