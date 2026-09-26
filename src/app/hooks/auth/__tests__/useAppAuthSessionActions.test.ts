@@ -11,7 +11,7 @@ jest.mock("@/lib/auth/session", () => ({
   revokeWebSession: jest.fn(),
 }));
 
-jest.mock("@/app/hooks/auth/useAppAuthGoogleIdentity", () => ({
+jest.mock("@/lib/auth/core/google", () => ({
   signOutFromGoogle: jest.fn(),
 }));
 

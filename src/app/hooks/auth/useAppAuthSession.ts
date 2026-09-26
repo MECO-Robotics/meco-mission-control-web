@@ -12,7 +12,7 @@ import {
   isLocalGoogleAuthHost,
   isUsingLocalGoogleClientIdOverride,
   resolveGoogleClientId,
-} from "@/app/hooks/auth/useAppAuthGoogleIdentity";
+} from "@/lib/auth/core/google";
 import {
   useAppAuthSessionActions,
   UNCONFIRMED_SIGN_OUT_MESSAGE,

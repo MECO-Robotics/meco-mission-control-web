@@ -21,7 +21,7 @@ import {
   type GoogleCredentialResponse,
   type SessionUser,
 } from "@/lib/auth/types";
-import { signOutFromGoogle } from "@/app/hooks/auth/useAppAuthGoogleIdentity";
+import { signOutFromGoogle } from "@/lib/auth/core/google";
 import { toErrorMessage } from "@/lib/appUtils/common";
 
 interface UseAppAuthSessionActionsArgs {
