@@ -61,22 +61,6 @@ const TRAINING_TASK_DISCIPLINES: DisciplineRecord[] = [
   { id: "planning", code: "planning", name: "Planning" },
 ];
 
-export const TASK_DISCIPLINE_DEFINITIONS: DisciplineRecord[] = [
-  ...ROBOT_TASK_DISCIPLINES,
-  ...OPERATIONS_TASK_DISCIPLINES.filter((discipline) =>
-    !["documentation", "planning"].includes(discipline.id),
-  ),
-  ...MEDIA_TASK_DISCIPLINES,
-  ...OUTREACH_TASK_DISCIPLINES.filter((discipline) => discipline.id !== "documentation"),
-  ...STRATEGY_TASK_DISCIPLINES.filter((discipline) =>
-    !["documentation", "planning"].includes(discipline.id),
-  ),
-  ...TRAINING_TASK_DISCIPLINES.filter((discipline) =>
-    !["documentation", "planning"].includes(discipline.id),
-  ),
-  { id: "documentation", code: "documentation", name: "Documentation" },
-];
-
 export function getTaskDisciplineBucketForProject(
   project: Pick<ProjectRecord, "name" | "projectType"> | null | undefined,
 ): TaskDisciplineBucket {
