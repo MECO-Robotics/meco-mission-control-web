@@ -1,8 +1,8 @@
 import type { ReportFindingRecord, ReportRecord } from "@/types/recordsReporting";
 import { localTodayDate } from "@/lib/dateUtils";
-import type { LegacyBootstrapPayload } from "./shared";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
-export function normalizeBootstrapReports(source: LegacyBootstrapPayload) {
+export function normalizeBootstrapReports(source: BootstrapPayload) {
   const reports: ReportRecord[] = (source.reports ?? []).map((report) => ({
     ...report,
     reportType:

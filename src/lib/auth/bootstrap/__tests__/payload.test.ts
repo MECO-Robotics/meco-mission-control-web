@@ -1,6 +1,7 @@
 /// <reference types="jest" />
 
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import { createBootstrap } from "@/lib/appUtilsTestFixtures";
 import { normalizeBootstrapPayload } from "@/lib/auth/bootstrap/payload";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type {
@@ -12,14 +13,15 @@ import type {
 } from "@/types/recordsExecution";
 
 describe("normalizeBootstrapPayload", () => {
-  it("creates separate Operations and Business projects by default", () => {
-    const normalized = normalizeBootstrapPayload(EMPTY_BOOTSTRAP);
-    const operationsProject = normalized.projects.find((project) => project.name === "Operations");
-    const businessProject = normalized.projects.find((project) => project.name === "Business");
-
-    expect(operationsProject).toBeDefined();
-    expect(businessProject).toBeDefined();
-    expect(operationsProject?.id).not.toBe(businessProject?.id);
+  it("keeps empty bootstrap empty and independent of the current date", () => {
+    const first = normalizeBootstrapPayload(EMPTY_BOOTSTRAP);
+    jest.useFakeTimers().setSystemTime(new Date("2035-12-25"));
+    try {
+      expect(normalizeBootstrapPayload(EMPTY_BOOTSTRAP)).toEqual(first);
+      expect(Object.values(first).every((records) => records.length === 0)).toBe(true);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it("preserves milestone requirements", () => {
@@ -232,4 +234,25 @@ it("keeps empty canonical report collections authoritative over stale legacy cop
   for (const field of ["qaReports", "testResults", "qaFindings", "testFindings"]) {
     expect(normalized).not.toHaveProperty(field);
   }
+});
+
+it("preserves canonical project and target identities without bucket merging or name inference", () => {
+  const source = createBootstrap();
+  source.projects = [
+    { ...source.projects[0], id: "project-a", name: "Custom outreach A", projectType: "outreach" },
+    { ...source.projects[0], id: "project-b", name: "Custom outreach B", projectType: "outreach" },
+  ];
+  source.workstreams = [{ id: "workstream-b", projectId: "project-b", name: source.subsystems[0].name, description: "" }];
+  source.tasks[0] = { ...source.tasks[0], projectId: "project-a", workstreamId: null, workstreamIds: [], photoUrl: "data:image/png;base64,photo" };
+  source.subsystems[0].projectId = "project-a";
+  const normalized = normalizeBootstrapPayload(source);
+  expect(normalized.projects).toEqual(source.projects);
+  expect(normalized.seasons).toEqual(source.seasons);
+  expect(normalized.workstreams.map(({ id, projectId, name }) => ({ id, projectId, name }))).toEqual([
+    { id: "workstream-b", projectId: "project-b", name: source.subsystems[0].name },
+  ]);
+  expect(normalized.tasks[0]).toMatchObject({ projectId: "project-a", workstreamId: null, workstreamIds: [], photoUrl: source.tasks[0].photoUrl });
+  expect(normalized.subsystems[0].projectId).toBe("project-a");
+  expect(normalizeBootstrapPayload({ ...source, workstreams: [] }).workstreams).toEqual([]);
+  expect(normalizeBootstrapPayload(normalized)).toEqual(normalized);
 });
