@@ -94,15 +94,14 @@ export function loadGoogleIdentityScript() {
     return googleScriptPromise;
   }
 
+  let script: HTMLScriptElement | null = null;
   googleScriptPromise = new Promise<void>((resolve, reject) => {
     const existingScript = document.querySelector<HTMLScriptElement>(
       'script[src="https://accounts.google.com/gsi/client"]',
     );
-    const script = existingScript ?? document.createElement("script");
+    script = existingScript ?? document.createElement("script");
     script.addEventListener("load", () => resolve(), { once: true });
     script.addEventListener("error", () => {
-      script.remove();
-      googleScriptPromise = null;
       reject(new Error("Google Identity Services failed to load."));
     }, { once: true });
 
@@ -114,6 +113,10 @@ export function loadGoogleIdentityScript() {
       script.defer = true;
       document.head.appendChild(script);
     }
+  }).catch((error: unknown) => {
+    googleScriptPromise = null;
+    script?.remove();
+    throw error;
   });
 
   return googleScriptPromise;
