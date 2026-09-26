@@ -38,5 +38,5 @@ it("retains authoritative blocking flags and QA risk proposals after bootstrap c
   bootstrap.reports = [report];
   const normalized = normalizeBootstrapPayload(bootstrap);
   expect(normalized.tasks[0]).toMatchObject({ isBlocked: true, isWaitingOnDependency: true });
-  expect(normalized.qaReports[0]).toMatchObject({ evidenceNotes: "Bench test log 12", qaRequestId: "request-1", mentorId: "mentor-1", requestedById: "member-1", targetRiskId: "risk-1", proposedRiskSeverity: "low", proposedRiskStatus: "full-mitigation" });
+  expect(normalized.reports[0]).toMatchObject({ evidenceNotes: "Bench test log 12", qaRequestId: "request-1", mentorId: "mentor-1", requestedById: "member-1", targetRiskId: "risk-1", proposedRiskSeverity: "low", proposedRiskStatus: "full-mitigation" });
 });

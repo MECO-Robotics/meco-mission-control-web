@@ -204,8 +204,6 @@ export function applyLocalCommand(snapshot: BootstrapPayload, path: string, opti
     }
     if (method === "POST") rows.push(item); else rows[index] = item;
   }
-  snapshot.qaReports = snapshot.reports.filter((report) => report.reportType === "QA");
-  snapshot.testResults = snapshot.reports.filter((report) => report.reportType === "MilestoneTest");
   refreshLocalTaskState(snapshot);
   if (resource === "task-blockers") return { item: { ...item, blockerType: item.sourceKind ?? "external", issueType: item.blockerType } };
   return { item };

@@ -34,7 +34,7 @@ export function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapP
   const source = payload as LegacyBootstrapPayload;
   const planning = normalizePlanningRecords(source);
   const catalog = normalizeBootstrapCatalogRecords(source, planning);
-  const reports = normalizeBootstrapReports(source, planning);
+  const reports = normalizeBootstrapReports(source);
 
   return {
     seasons: planning.seasons,
@@ -54,11 +54,7 @@ export function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapP
     taskBlockers: normalizeBootstrapTaskBlockers(source),
     reports: reports.reports,
     reportFindings: reports.reportFindings,
-    qaReports: reports.qaReports,
     qaRequests: source.qaRequests ?? [],
-    testResults: reports.testResults,
-    qaFindings: reports.qaFindings,
-    testFindings: reports.testFindings,
     designIterations: source.designIterations ?? [],
     risks: source.risks ?? [],
     tasks: planning.tasks,

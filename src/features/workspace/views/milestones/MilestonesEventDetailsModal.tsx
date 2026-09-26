@@ -280,7 +280,7 @@ export function MilestonesEventDetailsModal({
               milestoneModalMode="detail"
             />
 
-            <section className="modal-wide"><h3>Results</h3><ReportHistoryList reports={bootstrap.testResults.filter((report) => report.milestoneId === activeMilestone.id)} bootstrap={bootstrap} /></section>
+            <section className="modal-wide"><h3>Results</h3><ReportHistoryList reports={bootstrap.reports.filter((report) => report.reportType !== "QA" && report.milestoneId === activeMilestone.id)} bootstrap={bootstrap} /></section>
             <div className="modal-actions modal-wide">
               {onRecordResult ? <button className="secondary-action" type="button" onClick={() => onRecordResult(activeMilestone)}>Record result</button> : null}
               <button className="primary-action" onClick={() => onEditMilestone(activeMilestone)} type="button">
