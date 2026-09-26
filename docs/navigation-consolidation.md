@@ -23,6 +23,10 @@ The former Dashboard, Readiness, Config and Reports destinations, the work-log s
 
 See [navigation-consolidation.md](../README.md#current-navigation-model) for the cross-client scope, validation and contract changes.
 
+## Milestone editor ownership
+
+Calendar/Agenda and Timeline use `shared/milestones/useMilestoneEditor.ts` for draft dates, create/edit resets, validation and save/delete transitions. View hooks retain task grouping, day selection and detail navigation. Calendar/Agenda creation honors the project filter in all-project scope; Timeline creation uses its scoped projects. Editing retains a record's projects, falling back to the scope only when empty. The shared editor keeps failed saves open and sends edit notices only for edits. No data reset is required.
+
 ## Client differences
 
 Mobile Schedule offers Agenda and Timeline. Mobile does not have document/project scope or an audit-change feed in its bootstrap, so it does not advertise Documents or Changes. Mobile attendance remains explicitly session-only because the current platform has no attendance-write API. Mobile timers, offline log queues and retry remain intact, including after Refresh.
