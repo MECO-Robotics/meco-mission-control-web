@@ -20,9 +20,7 @@ export function useAppWorkspaceReportModalActions(model: AppWorkspaceModel) {
   }, [reportIsOpen]);
 
   const leaveTaskDetails = useCallback((taskId?: string) => {
-    returnToDetails.current = taskId ? () => model.setActiveTimelineTaskDetailId(taskId) : null;
-    model.setActiveTimelineTaskDetailId(null);
-    model.setTaskModalMode(null);
+    returnToDetails.current = model.taskEditor.leaveTaskDetails(taskId);
     model.setWorkLogModalMode(null);
     model.setQaReportModalMode(null);
     model.setMilestoneReportModalMode(null);

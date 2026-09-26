@@ -40,24 +40,30 @@ export function useCatalogEditorLifecycle({ loadWorkspace, selectedProjectId, se
     };
   }, []);
 
+  const captureEditor = useCallback(() => {
+    const editor = editorVersion.current;
+    const workspace = captureWorkspace();
+    return {
+      ...workspace,
+      isCurrent: () => workspace.isCurrent() && editor === editorVersion.current,
+    };
+  }, [captureWorkspace]);
+
   const beginOperation = useCallback((kind: "save" | "delete" = "save") => {
     if (busy.current) return null;
     busy.current = true;
     setPending(kind);
-    const editor = editorVersion.current;
-    const workspace = captureWorkspace();
-    const isCurrent = () => workspace.isCurrent() && editor === editorVersion.current;
+    const editor = captureEditor();
     return {
-      isCurrent,
-      refresh: workspace.refresh,
+      ...editor,
       finish() {
-        if (isCurrent()) {
+        if (editor.isCurrent()) {
           busy.current = false;
           setPending(null);
         }
       },
     };
-  }, [captureWorkspace]);
+  }, [captureEditor]);
 
-  return { captureWorkspace, beginOperation, resetEditor, isSaving: pending === "save", isDeleting: pending === "delete" };
+  return { captureWorkspace, captureEditor, beginOperation, resetEditor, isSaving: pending === "save", isDeleting: pending === "delete" };
 }

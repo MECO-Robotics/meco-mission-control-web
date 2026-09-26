@@ -81,7 +81,7 @@ it("reconciles refreshed roster selections", () => {
   state.activePersonFilter = ["removed", "ada"];
   state.selectedMemberId = "removed";
   const selectMember = jest.fn();
-  reconcileWorkspaceState(state, state.bootstrap, state.bootstrap, selectMember);
+  reconcileWorkspaceState(state, state.bootstrap, selectMember);
   expect(state.activePersonFilter).toEqual(["ada"]);
   expect(selectMember).toHaveBeenCalledWith("another", state.bootstrap);
 });

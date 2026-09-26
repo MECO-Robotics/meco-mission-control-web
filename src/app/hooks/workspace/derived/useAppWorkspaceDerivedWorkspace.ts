@@ -1,5 +1,3 @@
-import { useEffect, useMemo } from "react";
-
 import { useWorkspaceDerivedData } from "@/features/workspace/useWorkspaceDerivedData";
 import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
 import type {
@@ -13,12 +11,9 @@ export function useAppWorkspaceDerivedWorkspace(
 ) {
   const {
     activeTab,
-    activeTimelineTaskDetailId,
     isSidebarOverlay,
     setActiveTab,
-    setActiveTimelineTaskDetailId,
     setTabSwitchDirection,
-    taskModalMode,
     workLogModalMode,
     qaReportModalMode,
     milestoneReportModalMode,
@@ -29,7 +24,6 @@ export function useAppWorkspaceDerivedWorkspace(
   } = state;
 
   const {
-    activeTask,
     cncItems,
     disciplinesById,
     milestonesById,
@@ -46,41 +40,13 @@ export function useAppWorkspaceDerivedWorkspace(
     students,
     subsystemsById,
   } = useWorkspaceDerivedData({
-    activeTaskId: state.activeTaskId,
     bootstrap: selection.scopedBootstrap,
     isAllProjectsView: selection.isAllProjectsView,
     selectedProjectType: selection.selectedProjectType,
   });
 
-  const activeTimelineTaskDetail = useMemo(
-    () =>
-      activeTimelineTaskDetailId
-        ? selection.scopedBootstrap.tasks.find((task) => task.id === activeTimelineTaskDetailId) ??
-          null
-        : null,
-    [activeTimelineTaskDetailId, selection.scopedBootstrap.tasks],
-  );
-
-  useEffect(() => {
-    if (!activeTimelineTaskDetailId) {
-      return;
-    }
-
-    if (
-      !selection.scopedBootstrap.tasks.some((task) => task.id === activeTimelineTaskDetailId)
-    ) {
-      setActiveTimelineTaskDetailId(null);
-    }
-  }, [
-    activeTimelineTaskDetailId,
-    selection.scopedBootstrap.tasks,
-    setActiveTimelineTaskDetailId,
-  ]);
-
   const isWorkspaceModalOpen = Boolean(
-    activeTimelineTaskDetailId ||
-      taskModalMode ||
-      workLogModalMode ||
+    workLogModalMode ||
       qaReportModalMode ||
       milestoneReportModalMode ||
 
@@ -115,8 +81,6 @@ export function useAppWorkspaceDerivedWorkspace(
   };
 
   return {
-    activeTask,
-    activeTimelineTaskDetail,
     cncItems,
     disciplinesById,
     milestonesById,

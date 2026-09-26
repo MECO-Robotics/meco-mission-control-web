@@ -6,7 +6,6 @@ import type { NavigationItem } from "@/lib/workspaceNavigation";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
 interface UseWorkspaceDerivedDataArgs {
-  activeTaskId: string | null;
   bootstrap: BootstrapPayload;
   isAllProjectsView: boolean;
   selectedProjectType: BootstrapPayload["projects"][number]["projectType"] | null;
@@ -17,7 +16,6 @@ function recordById<T extends { id: string }>(items: T[]) {
 }
 
 export function useWorkspaceDerivedData({
-  activeTaskId,
   bootstrap,
   isAllProjectsView,
   selectedProjectType,
@@ -61,11 +59,6 @@ export function useWorkspaceDerivedData({
     [bootstrap.partInstances],
   );
   const milestonesById = useMemo(() => recordById(bootstrap.milestones), [bootstrap.milestones]);
-
-  const activeTask = useMemo(
-    () => bootstrap.tasks.find((task) => task.id === activeTaskId) ?? null,
-    [activeTaskId, bootstrap.tasks],
-  );
 
   const cncItems = useMemo(
     () => bootstrap.manufacturingItems.filter((item) => item.process === "cnc"),
@@ -188,7 +181,6 @@ export function useWorkspaceDerivedData({
   );
 
   return {
-    activeTask,
     cncItems,
     disciplinesById,
     milestonesById,

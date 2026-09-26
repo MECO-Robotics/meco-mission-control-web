@@ -1,3 +1,5 @@
+import { useTaskEditor } from "@/app/hooks/workspace/task/useTaskEditor";
+import { useWorkspaceEventActions } from "@/app/hooks/workspace/task/useWorkspaceEventActions";
 import { useManufacturingActions } from "@/app/workspaceCatalog/manufacturingActions";
 import { usePurchaseActions } from "@/app/workspaceCatalog/purchaseActions";
 import { useMechanismActions } from "@/app/workspaceCatalog/mechanismActions";
@@ -25,6 +27,8 @@ export type AppWorkspaceModel = AppWorkspaceState &
   AppWorkspaceDerived &
   AppWorkspaceLoader &
   ReturnType<typeof useInteractiveTutorial> & {
+    taskEditor: ReturnType<typeof useTaskEditor>;
+    eventActions: ReturnType<typeof useWorkspaceEventActions>;
     artifactEditor: ReturnType<typeof useArtifactActions>;
     workstreamEditor: ReturnType<typeof useWorkstreamActions>;
     partDefinitionEditor: ReturnType<typeof usePartDefinitionActions>;
@@ -41,6 +45,18 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
   const derived = useAppWorkspaceDerived(state);
   const loader = useAppWorkspaceLoader(state);
   const { loadWorkspace } = loader;
+  const taskEditor = useTaskEditor({
+    bootstrap: state.bootstrap,
+    scopedBootstrap: derived.scopedBootstrap,
+    selectedProjectId: state.selectedProjectId,
+    selectedSeasonId: state.selectedSeasonId,
+    setBootstrap: state.setBootstrap,
+    handleUnauthorized: loader.handleUnauthorized,
+    loadWorkspace,
+    setDataMessage: state.setDataMessage,
+    enqueueTaskEditNotice: state.enqueueTaskEditNotice,
+  });
+  const eventActions = useWorkspaceEventActions({ handleUnauthorized: loader.handleUnauthorized, loadWorkspace });
   const materialEditor = useMaterialEditor({
     bootstrap: state.bootstrap, selectedProjectId: state.selectedProjectId, selectedSeasonId: state.selectedSeasonId,
     handleUnauthorized: loader.handleUnauthorized, loadWorkspace, setDataMessage: state.setDataMessage,
@@ -211,9 +227,9 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     setActivePersonFilter: state.setActivePersonFilter,
     setBootstrap: state.setBootstrap,
     setDataMessage: state.setDataMessage,
-    activeTimelineTaskDetailId: state.activeTimelineTaskDetailId,
-    taskModalMode: state.taskModalMode,
-    activeTaskId: state.activeTaskId,
+    activeTimelineTaskDetailId: taskEditor.activeTimelineTaskDetailId,
+    taskModalMode: taskEditor.taskModalMode,
+    activeTaskId: taskEditor.activeTaskId,
     materialModalMode: materialEditor.materialModalMode,
     activeMaterialId: materialEditor.activeMaterialId,
     subsystemModalMode: subsystemEditor.subsystemModalMode,
@@ -230,6 +246,8 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     ...state,
     ...derived,
     ...loader,
+    taskEditor,
+    eventActions,
     artifactEditor,
     workstreamEditor,
     partDefinitionEditor,
@@ -242,6 +260,7 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     ...interactiveTutorial,
     interactiveTutorialChapters: interactiveTutorial.chapterStartOptions,
     isWorkspaceModalOpen: derived.isWorkspaceModalOpen || interactiveTutorial.isInteractiveTutorialActive || Boolean(
+      taskEditor.taskModalMode || taskEditor.activeTimelineTaskDetailId ||
       purchaseEditor.purchaseModalMode || manufacturingEditor.manufacturingModalMode ||
       artifactEditor.artifactModalMode || workstreamEditor.workstreamModalMode ||
       partDefinitionEditor.partDefinitionModalMode || partInstanceEditor.partInstanceModalMode ||

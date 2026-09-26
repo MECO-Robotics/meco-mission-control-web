@@ -1,3 +1,4 @@
+import type { TaskEditorModal } from "../modals/TaskEditorModalContent";
 import type { ManufacturingEditorModal } from "../modals/purchaseManufacturing/ManufacturingEditorModal";
 import type { PurchaseEditorModal } from "../modals/purchaseManufacturing/PurchaseEditorModal";
 import type { MechanismEditorModal } from "../modals/structure/MechanismEditorModal";
@@ -8,14 +9,26 @@ import type { WorkstreamEditorModal } from "../modals/assetCatalog/WorkstreamEdi
 import type { ArtifactEditorModal } from "../modals/assetCatalog/ArtifactEditorModal";
 import type { ComponentProps, Dispatch, FormEvent, SetStateAction } from "react";
 
-import type { MilestoneReportModalMode, QaReportModalMode, TaskModalMode, WorkLogModalMode } from "@/features/workspace/shared/model/workspaceModalModes";
-import type { QaReportPayload, TaskPayload, TestResultPayload, WorkLogPayload } from "@/types/payloads";
+import type { MilestoneReportModalMode, QaReportModalMode, WorkLogModalMode } from "@/features/workspace/shared/model/workspaceModalModes";
+import type { QaReportPayload, TestResultPayload, WorkLogPayload } from "@/types/payloads";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 
 import type { MaterialEditorModal } from "../modals/assetCatalog/MaterialEditorModal";
 
 export interface WorkspaceModalHostViewProps {
+  taskEditor: Pick<ComponentProps<typeof TaskEditorModal>,
+    "activeTask" | "closeTaskModal" | "handleDeleteTask" | "handleResolveTaskBlocker" |
+    "handleTaskSubmit" | "isDeletingTask" | "isSavingTask" | "setTaskDraft" | "taskDraft"
+  > & {
+    taskModalMode: "create" | "edit" | null;
+    activeTimelineTaskDetail: TaskRecord | null;
+    closeTimelineTaskDetailsModal: () => void;
+    openEditTaskModal: (task: TaskRecord) => void;
+    openTimelineTaskDetailsModal: (task: TaskRecord) => void;
+    showTimelineCreateToggleInTaskModal: boolean;
+    switchTaskCreateToMilestone: () => void;
+  };
   manufacturingEditor: Omit<ComponentProps<typeof ManufacturingEditorModal>, "bootstrap" | "manufacturingModalMode"> & { manufacturingModalMode: "create" | "edit" | null };
   purchaseEditor: Omit<ComponentProps<typeof PurchaseEditorModal>, "bootstrap" | "purchaseModalMode"> & { purchaseModalMode: "create" | "edit" | null };
   mechanismEditor: Omit<ComponentProps<typeof MechanismEditorModal>, "bootstrap" | "requestPhotoUpload" | "mechanismModalMode"> & { mechanismModalMode: "create" | "edit" | null };
@@ -25,36 +38,25 @@ export interface WorkspaceModalHostViewProps {
   workstreamEditor: Omit<ComponentProps<typeof WorkstreamEditorModal>, "bootstrap" | "workstreamModalMode"> & { workstreamModalMode: "create" | "edit" | null };
   artifactEditor: Omit<ComponentProps<typeof ArtifactEditorModal>, "bootstrap" | "artifactModalMode"> & { artifactModalMode: "create" | "edit" | null };
   materialEditor: ComponentProps<typeof MaterialEditorModal>;
-  activeTask: TaskRecord | null;
-  activeTimelineTaskDetail: TaskRecord | null;
   bootstrap: BootstrapPayload;
   mechanismsById: Record<string, BootstrapPayload["mechanisms"][number]>;
   partDefinitionsById: Record<string, BootstrapPayload["partDefinitions"][number]>;
   partInstancesById: Record<string, BootstrapPayload["partInstances"][number]>;
   closeQaReportModal: () => void;
   closeMilestoneReportModal: () => void;
-  closeTimelineTaskDetailsModal: () => void;
   closeWorkLogModal: () => void;
   openCreateWorkLogModal: (taskId?: string) => void;
   openCreateQaReportModal: (taskId?: string) => void;
-  closeTaskModal: () => void;
   onTaskEditCanceled: () => void;
   requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
   milestonesById: Record<string, BootstrapPayload["milestones"][number]>;
-  handleDeleteTask: (taskId: string) => Promise<void>;
-  handleResolveTaskBlocker: (blockerId: string) => Promise<void>;
   handleQaReportSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
   handleMilestoneReportSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
   handleWorkLogSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
-  handleTaskSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
-  onOpenTaskEditFromTimelineDetails: (task: TaskRecord) => void;
-  openTaskDetailsModal: (task: TaskRecord) => void;
-  isDeletingTask: boolean;
   isSavingQaReport: boolean;
   isSavingMilestoneReport: boolean;
   isSavingWorkLog: boolean;
-  isSavingTask: boolean;
   mentors: BootstrapPayload["members"];
   qaReportDraft: QaReportPayload;
   qaReportModalMode: QaReportModalMode;
@@ -67,10 +69,5 @@ export interface WorkspaceModalHostViewProps {
   setMilestoneReportDraft: Dispatch<SetStateAction<TestResultPayload>>;
   setMilestoneReportFindings: (value: string) => void;
   setWorkLogDraft: Dispatch<SetStateAction<WorkLogPayload>>;
-  setTaskDraft: Dispatch<SetStateAction<TaskPayload>>;
-  showTimelineCreateToggleInTaskModal: boolean;
-  onSwitchTaskCreateToMilestone: () => void;
   students: BootstrapPayload["members"];
-  taskDraft: TaskPayload;
-  taskModalMode: TaskModalMode;
 }
