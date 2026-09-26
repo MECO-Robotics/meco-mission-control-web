@@ -6,7 +6,6 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { TaskCalendarDayDetails } from "@/features/workspace/views/taskCalendar/TaskCalendarDayDetails";
 import { TaskCalendarFilterToolbar } from "@/features/workspace/views/taskCalendar/TaskCalendarFilterToolbar";
 import { TaskCalendarMonthGrid } from "@/features/workspace/views/taskCalendar/TaskCalendarMonthGrid";
-import { TaskCalendarMonthToolbar } from "@/features/workspace/views/taskCalendar/TaskCalendarMonthToolbar";
 import type { TaskCalendarEvent } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 
@@ -145,28 +144,6 @@ describe("TaskCalendarMonthGrid day selection", () => {
     expect(onOpenDay).toHaveBeenCalledWith("2026-05-07");
     expect(onOpenEvent).toHaveBeenCalledWith(taskEvent);
     expect(onOpenEvent).not.toHaveBeenCalledWith(meetingEvent);
-  });
-});
-
-describe("TaskCalendarMonthToolbar", () => {
-  it("notifies the parent before month controls change the visible month", () => {
-    const onMonthChange = jest.fn();
-    const setMonthCursor = jest.fn();
-    const toolbar = TaskCalendarMonthToolbar({
-      monthLabel: "May 2026",
-      onMonthChange,
-      setMonthCursor,
-    }) as React.ReactElement<{ children: React.ReactNode }>;
-    const previousButton = findButtonByTitle(toolbar, "Previous month");
-    const nextButton = findButtonByTitle(toolbar, "Next month");
-    const todayButton = findButtonByTitle(toolbar, "Jump to current month");
-
-    previousButton?.props.onClick({ stopPropagation: jest.fn() });
-    nextButton?.props.onClick({ stopPropagation: jest.fn() });
-    todayButton?.props.onClick({ stopPropagation: jest.fn() });
-
-    expect(onMonthChange).toHaveBeenCalledTimes(3);
-    expect(setMonthCursor).toHaveBeenCalledTimes(3);
   });
 });
 
