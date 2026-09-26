@@ -23,10 +23,7 @@ export type AppWorkspaceModel = AppWorkspaceState &
 
 export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceModel {
   const derived = useAppWorkspaceDerived(state);
-  const loader = useAppWorkspaceLoader(state, {
-    ...state,
-    ...derived,
-  });
+  const loader = useAppWorkspaceLoader(state);
   const { loadWorkspace } = loader;
   const materialEditor = useMaterialEditor({ handleUnauthorized: loader.handleUnauthorized, loadWorkspace, setDataMessage: state.setDataMessage });
   const autoLoadedWorkspaceKeyRef = useRef<string | null>(null);

@@ -5,20 +5,19 @@ import { buildEmptyManufacturingPayload } from "@/lib/appUtils/manufacturing";
 import { buildEmptyPurchasePayload } from "@/lib/appUtils/payloadBuilders";
 import { buildEmptyTaskPayload, taskToPayload } from "@/lib/appUtils/taskTargets";
 import { manufacturingToPayload, purchaseToPayload } from "@/lib/appUtils/payloadConversions";
-import type { AppWorkspaceLoaderModel, WorkspaceReconciliationState } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
+import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
 
 export function reconcileTaskModal(
-  state: WorkspaceReconciliationState,
-  model: AppWorkspaceLoaderModel,
+  state: AppWorkspaceState,
   scopedPayload: BootstrapPayload,
   payload: BootstrapPayload,
 ) {
-  if (model.taskModalMode === "create") {
+  if (state.taskModalMode === "create") {
     state.setTaskDraft(buildEmptyTaskPayload(scopedPayload));
   }
 
-  if (model.taskModalMode === "edit" && model.activeTaskId) {
-    const nextTask = payload.tasks.find((task) => task.id === model.activeTaskId);
+  if (state.taskModalMode === "edit" && state.activeTaskId) {
+    const nextTask = payload.tasks.find((task) => task.id === state.activeTaskId);
     if (nextTask) {
       state.setTaskDraft(taskToPayload(nextTask, scopedPayload));
     } else {
@@ -29,17 +28,16 @@ export function reconcileTaskModal(
 }
 
 export function reconcilePurchaseModal(
-  state: WorkspaceReconciliationState,
-  model: AppWorkspaceLoaderModel,
+  state: AppWorkspaceState,
   payload: BootstrapPayload,
 ) {
-  if (model.purchaseModalMode === "create") {
+  if (state.purchaseModalMode === "create") {
     state.setPurchaseDraft(buildEmptyPurchasePayload(payload));
     state.setPurchaseFinalCost("");
   }
 
-  if (model.purchaseModalMode === "edit" && model.activePurchaseId) {
-    const nextItem = payload.purchaseItems.find((item) => item.id === model.activePurchaseId);
+  if (state.purchaseModalMode === "edit" && state.activePurchaseId) {
+    const nextItem = payload.purchaseItems.find((item) => item.id === state.activePurchaseId);
     if (nextItem) {
       state.setPurchaseDraft(purchaseToPayload(nextItem));
       state.setPurchaseFinalCost(
@@ -53,12 +51,11 @@ export function reconcilePurchaseModal(
 }
 
 export function reconcileManufacturingModal(
-  state: WorkspaceReconciliationState,
-  model: AppWorkspaceLoaderModel,
+  state: AppWorkspaceState,
   payload: BootstrapPayload,
   signedInScopedMemberId: string | null,
 ) {
-  if (model.manufacturingModalMode === "create") {
+  if (state.manufacturingModalMode === "create") {
     state.setManufacturingDraft((current: ManufacturingItemPayload) =>
       buildEmptyManufacturingPayload(
         payload,
@@ -68,9 +65,9 @@ export function reconcileManufacturingModal(
     );
   }
 
-  if (model.manufacturingModalMode === "edit" && model.activeManufacturingId) {
+  if (state.manufacturingModalMode === "edit" && state.activeManufacturingId) {
     const nextItem = payload.manufacturingItems.find(
-      (item) => item.id === model.activeManufacturingId,
+      (item) => item.id === state.activeManufacturingId,
     );
     if (nextItem) {
       state.setManufacturingDraft(manufacturingToPayload(nextItem));

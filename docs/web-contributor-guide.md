@@ -23,6 +23,8 @@ The main workspace controller code is split by responsibility:
 - `src/types/` contains frontend contracts for platform payloads and workspace
   records.
 
+The workspace model composes state once. Derived hooks return calculated values and view commands; loaders read the original state for requests and reconciliation. My View selection and its unlinked-account notice belong to the derived hook, so loader refreshes do not introduce a competing command implementation.
+
 Keep view-specific business logic near the view that uses it. Promote helpers
 into `src/lib/` only when they are reused across sections or represent a shared
 contract.

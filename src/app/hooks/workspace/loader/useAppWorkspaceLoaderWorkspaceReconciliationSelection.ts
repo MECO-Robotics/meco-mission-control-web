@@ -1,22 +1,21 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 
-import type { AppWorkspaceLoaderModel, WorkspaceReconciliationState } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
+import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
 
 export function reconcileActivePersonFilter(
-  state: WorkspaceReconciliationState,
-  model: AppWorkspaceLoaderModel,
+  state: AppWorkspaceState,
   scopedPayload: BootstrapPayload,
 ) {
-  if (model.activePersonFilter.length === 0) {
+  if (state.activePersonFilter.length === 0) {
     return;
   }
 
   const scopedMemberIds = new Set(scopedPayload.members.map((member) => member.id));
-  const nextPersonFilter = model.activePersonFilter.filter((memberId) =>
+  const nextPersonFilter = state.activePersonFilter.filter((memberId) =>
     scopedMemberIds.has(memberId),
   );
 
-  if (nextPersonFilter.length !== model.activePersonFilter.length) {
+  if (nextPersonFilter.length !== state.activePersonFilter.length) {
     state.setActivePersonFilter(nextPersonFilter);
   }
 }

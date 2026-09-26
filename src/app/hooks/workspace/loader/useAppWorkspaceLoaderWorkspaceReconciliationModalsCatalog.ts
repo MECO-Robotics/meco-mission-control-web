@@ -3,20 +3,19 @@ import type { MechanismPayload } from "@/types/payloads";
 
 import { buildEmptyArtifactPayload, buildEmptyMechanismPayload, buildEmptyPartDefinitionPayload, buildEmptyPartInstancePayload, buildEmptySubsystemPayload, buildEmptyWorkstreamPayload } from "@/lib/appUtils/payloadBuilders";
 import { artifactToPayload, partDefinitionToPayload, partInstanceToPayload, subsystemToPayload, workstreamToPayload } from "@/lib/appUtils/payloadConversions";
-import type { AppWorkspaceLoaderModel, WorkspaceReconciliationState } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
+import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
 
 export function reconcilePartDefinitionModal(
-  state: WorkspaceReconciliationState,
-  model: AppWorkspaceLoaderModel,
+  state: AppWorkspaceState,
   payload: BootstrapPayload,
 ) {
-  if (model.partDefinitionModalMode === "create") {
+  if (state.partDefinitionModalMode === "create") {
     state.setPartDefinitionDraft(buildEmptyPartDefinitionPayload(payload));
   }
 
-  if (model.partDefinitionModalMode === "edit" && model.activePartDefinitionId) {
+  if (state.partDefinitionModalMode === "edit" && state.activePartDefinitionId) {
     const nextItem = payload.partDefinitions.find(
-      (item) => item.id === model.activePartDefinitionId,
+      (item) => item.id === state.activePartDefinitionId,
     );
     if (nextItem) {
       state.setPartDefinitionDraft(partDefinitionToPayload(nextItem));
@@ -28,22 +27,21 @@ export function reconcilePartDefinitionModal(
 }
 
 export function reconcileArtifactModal(
-  state: WorkspaceReconciliationState,
-  model: AppWorkspaceLoaderModel,
+  state: AppWorkspaceState,
   scopedPayload: BootstrapPayload,
   payload: BootstrapPayload,
 ) {
-  if (model.artifactModalMode === "create") {
+  if (state.artifactModalMode === "create") {
     state.setArtifactDraft(
       buildEmptyArtifactPayload(scopedPayload, {
-        projectId: model.selectedProjectId ?? undefined,
-        kind: model.artifactDraft.kind,
+        projectId: state.selectedProjectId ?? undefined,
+        kind: state.artifactDraft.kind,
       }),
     );
   }
 
-  if (model.artifactModalMode === "edit" && model.activeArtifactId) {
-    const nextArtifact = payload.artifacts.find((artifact) => artifact.id === model.activeArtifactId);
+  if (state.artifactModalMode === "edit" && state.activeArtifactId) {
+    const nextArtifact = payload.artifacts.find((artifact) => artifact.id === state.activeArtifactId);
     if (nextArtifact) {
       state.setArtifactDraft(artifactToPayload(nextArtifact));
     } else {
@@ -54,21 +52,20 @@ export function reconcileArtifactModal(
 }
 
 export function reconcileWorkstreamModal(
-  state: WorkspaceReconciliationState,
-  model: AppWorkspaceLoaderModel,
+  state: AppWorkspaceState,
   scopedPayload: BootstrapPayload,
 ) {
-  if (model.workstreamModalMode === "create") {
+  if (state.workstreamModalMode === "create") {
     state.setWorkstreamDraft(
       buildEmptyWorkstreamPayload(scopedPayload, {
-        projectId: model.selectedProjectId ?? undefined,
+        projectId: state.selectedProjectId ?? undefined,
       }),
     );
   }
 
-  if (model.workstreamModalMode === "edit" && model.activeWorkstreamId) {
+  if (state.workstreamModalMode === "edit" && state.activeWorkstreamId) {
     const nextWorkstream = scopedPayload.workstreams.find(
-      (workstream) => workstream.id === model.activeWorkstreamId,
+      (workstream) => workstream.id === state.activeWorkstreamId,
     );
     if (nextWorkstream) {
       state.setWorkstreamDraft(workstreamToPayload(nextWorkstream));
@@ -80,17 +77,16 @@ export function reconcileWorkstreamModal(
 }
 
 export function reconcilePartInstanceModal(
-  state: WorkspaceReconciliationState,
-  model: AppWorkspaceLoaderModel,
+  state: AppWorkspaceState,
   payload: BootstrapPayload,
 ) {
-  if (model.partInstanceModalMode === "create") {
+  if (state.partInstanceModalMode === "create") {
     state.setPartInstanceDraft(buildEmptyPartInstancePayload(payload));
   }
 
-  if (model.partInstanceModalMode === "edit" && model.activePartInstanceId) {
+  if (state.partInstanceModalMode === "edit" && state.activePartInstanceId) {
     const nextPartInstance = payload.partInstances.find(
-      (partInstance) => partInstance.id === model.activePartInstanceId,
+      (partInstance) => partInstance.id === state.activePartInstanceId,
     );
     if (nextPartInstance) {
       state.setPartInstanceDraft(partInstanceToPayload(nextPartInstance));
@@ -102,18 +98,17 @@ export function reconcilePartInstanceModal(
 }
 
 export function reconcileSubsystemModal(
-  state: WorkspaceReconciliationState,
-  model: AppWorkspaceLoaderModel,
+  state: AppWorkspaceState,
   scopedPayload: BootstrapPayload,
 ) {
-  if (model.subsystemModalMode === "create") {
+  if (state.subsystemModalMode === "create") {
     state.setSubsystemDraft(buildEmptySubsystemPayload(scopedPayload));
     state.setSubsystemDraftRisks("");
   }
 
-  if (model.subsystemModalMode === "edit" && model.activeSubsystemId) {
+  if (state.subsystemModalMode === "edit" && state.activeSubsystemId) {
     const nextSubsystem = scopedPayload.subsystems.find(
-      (subsystem) => subsystem.id === model.activeSubsystemId,
+      (subsystem) => subsystem.id === state.activeSubsystemId,
     );
     if (nextSubsystem) {
       state.setSubsystemDraft(subsystemToPayload(nextSubsystem));
@@ -126,17 +121,16 @@ export function reconcileSubsystemModal(
 }
 
 export function reconcileMechanismModal(
-  state: WorkspaceReconciliationState,
-  model: AppWorkspaceLoaderModel,
+  state: AppWorkspaceState,
   scopedPayload: BootstrapPayload,
 ) {
-  if (model.mechanismModalMode === "create") {
+  if (state.mechanismModalMode === "create") {
     state.setMechanismDraft(buildEmptyMechanismPayload(scopedPayload));
   }
 
-  if (model.mechanismModalMode === "edit" && model.activeMechanismId) {
+  if (state.mechanismModalMode === "edit" && state.activeMechanismId) {
     const nextMechanism = scopedPayload.mechanisms.find(
-      (mechanism) => mechanism.id === model.activeMechanismId,
+      (mechanism) => mechanism.id === state.activeMechanismId,
     );
     if (nextMechanism) {
       state.setMechanismDraft({ ...nextMechanism } as MechanismPayload);
