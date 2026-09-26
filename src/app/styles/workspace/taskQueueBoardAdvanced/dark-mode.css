@@ -69,12 +69,6 @@
   color: #cbd5e1;
 }
 
-.page-shell.dark-mode .task-queue-board-card-meta > span.task-queue-board-card-type-badge.milestone-type-pill {
-  background: var(--milestone-type-chip-bg-dark);
-  border-color: var(--milestone-type-chip-border-dark);
-  color: var(--milestone-type-chip-text-dark);
-}
-
 .page-shell.dark-mode .task-queue-board-card-due:not(.pill) {
   background: rgba(59, 130, 246, 0.16);
   color: #93c5fd;

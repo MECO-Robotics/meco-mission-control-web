@@ -131,14 +131,6 @@
   transform: translateX(0);
 }
 
-.app-topbar-project-picker {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  min-width: 0;
-  position: relative;
-}
-
 
 .local-workspace-status { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; font-size: 0.75rem; }
 .local-workspace-status button { min-height: 32px; padding: 0.25rem 0.5rem; font-size: inherit; }

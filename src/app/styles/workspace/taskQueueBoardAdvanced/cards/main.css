@@ -201,34 +201,8 @@
   letter-spacing: 0.02em;
 }
 
-.task-queue-board-card-meta > span.task-queue-board-card-type-badge.milestone-type-pill {
-  flex-shrink: 0;
-  align-self: flex-end;
-  justify-content: center;
-  min-width: calc(2.1rem * var(--task-queue-zoom, 1));
-  padding: calc(0.14rem * var(--task-queue-zoom, 1)) calc(0.48rem * var(--task-queue-zoom, 1));
-  border-radius: 999px;
-  background: var(--milestone-type-chip-bg);
-  border: 1px solid var(--milestone-type-chip-border);
-  color: var(--milestone-type-chip-text);
-  font-size: calc(0.58rem * var(--task-queue-zoom, 1));
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  line-height: 1.15;
-  overflow: visible;
-  white-space: nowrap;
-}
-
-.milestone-board .task-queue-board-card-meta > span.task-queue-board-card-type-badge.milestone-type-pill {
-  justify-self: start;
-}
-
 .milestone-board .task-queue-board-card-context-chip {
   justify-self: end;
   min-width: 0;
   max-width: 100%;
-}
-
-.task-queue-board-card-type-badge {
-  text-transform: uppercase;
 }
