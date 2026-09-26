@@ -6,29 +6,6 @@
   min-height: 0;
 }
 
-.task-calendar-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 0.7rem;
-  justify-content: flex-end;
-}
-
-.task-calendar-legend-item {
-  align-items: center;
-  color: var(--text-copy);
-  display: inline-flex;
-  font-size: 0.7rem;
-  font-weight: 700;
-  gap: 0.28rem;
-}
-
-.task-calendar-legend-dot {
-  border-radius: 999px;
-  display: inline-block;
-  height: 0.5rem;
-  width: 0.5rem;
-}
-
 .task-calendar-frame {
   background: var(--bg-panel);
   border: 1px solid var(--border-base);
@@ -36,67 +13,11 @@
   overflow: hidden;
 }
 
-.task-calendar-toolbar {
-  align-items: center;
-  background: var(--bg-row-alt);
-  border-bottom: 1px solid var(--border-base);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 0.65rem;
-  justify-content: space-between;
-  padding: 0.46rem 0.58rem;
-}
-
-.task-calendar-month-controls {
-  align-items: center;
-  display: inline-flex;
-  gap: 0.08rem;
-  min-height: 2rem;
-  max-width: 100%;
-  padding: 0.08rem 0.14rem;
-  border: 1px solid var(--border-base);
-  border-radius: 999px;
-  background: var(--bg-panel);
-}
-
-.task-calendar-month-button.icon-button {
-  align-items: center;
-  display: inline-flex;
-  justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  min-width: 1.75rem;
-  padding: 0;
-  box-shadow: none;
-}
-
-.task-calendar-today-button.secondary-action {
-  align-items: center;
-  display: inline-flex;
-  gap: 0.26rem;
-  font-size: 0.72rem;
-  min-height: 1.75rem;
-  margin-left: 0.16rem;
-  padding: 0.24rem 0.52rem;
-  box-shadow: none;
-}
-
 .meeting-schedule-modal .form-error {
   color: var(--status-danger-text);
   font-size: 0.78rem;
   font-weight: 700;
   margin: 0;
-}
-
-.task-calendar-toolbar-title {
-  color: var(--text-title);
-  font-size: 0.84rem;
-  font-weight: 800;
-  line-height: 1.1;
-  min-width: 6.2rem;
-  padding: 0 0.12rem;
-  text-align: center;
-  white-space: nowrap;
 }
 
 .task-calendar-filter-toolbar {
@@ -180,10 +101,10 @@
   white-space: nowrap;
 }
 
-:is(.task-calendar-legend-dot-milestone, .task-calendar-day-event-milestone) {
+.task-calendar-day-event-milestone {
   background: #2563eb;
 }
 
-:is(.task-calendar-legend-dot-task-due, .task-calendar-day-event-task-due) {
+.task-calendar-day-event-task-due {
   background: #4f46e5;
 }
