@@ -30,37 +30,6 @@
   padding-bottom: 0;
 }
 
-.app-topbar-search-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-copy);
-  flex: 0 0 auto;
-  pointer-events: none;
-}
-
-.app-topbar-search-icon svg {
-  display: block;
-}
-
-.app-topbar-search-input {
-  flex: 1 1 auto;
-  min-width: 0;
-  width: 100%;
-  height: var(--app-topbar-search-icon-pill-height);
-  color: var(--text-title);
-  font-family: var(--font-ui);
-  font-size: 0.96rem;
-  font-weight: 600;
-  line-height: 1.2;
-  padding: 0;
-}
-
-.app-topbar-search-input::placeholder {
-  color: var(--text-copy);
-  opacity: 0.8;
-}
-
 @media (max-width: 880px) {
   .app-topbar-search-slot {
     overflow-x: auto;
