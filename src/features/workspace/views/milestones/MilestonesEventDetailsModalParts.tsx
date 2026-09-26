@@ -1,4 +1,4 @@
-import type { Dispatch, FocusEvent, ReactNode, SetStateAction } from "react";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
 
 import type { MilestoneRecord } from "@/types/recordsExecution";
 import { EditableHoverIndicator } from "@/features/workspace/shared/table/workspaceTableChrome";
@@ -159,11 +159,6 @@ export function MilestoneEditScheduleField({
     return (
       <div
         className="task-detail-copy task-detail-header-meta-line"
-        onBlur={(event: FocusEvent<HTMLDivElement>) => {
-          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-            setEditingField(null);
-          }
-        }}
         style={{ marginTop: "0.35rem" }}
       >
         <input
