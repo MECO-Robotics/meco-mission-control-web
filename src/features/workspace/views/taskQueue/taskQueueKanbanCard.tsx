@@ -31,7 +31,7 @@ export function readTaskAssigneeIds(task: TaskRecord) {
 
 export function readTaskSubsystemIds(task: TaskRecord) {
   const subsystemIds = Array.isArray(task.subsystemIds) ? task.subsystemIds : [];
-  const candidateIds = subsystemIds.length > 0 ? subsystemIds : [task.subsystemId];
+  const candidateIds = subsystemIds;
 
   return Array.from(
     new Set(
@@ -45,7 +45,7 @@ export function readTaskSubsystemIds(task: TaskRecord) {
 
 export function readTaskWorkstreamIds(task: TaskRecord) {
   const workstreamIds = Array.isArray(task.workstreamIds) ? task.workstreamIds : [];
-  const candidateIds = workstreamIds.length > 0 ? workstreamIds : [task.workstreamId];
+  const candidateIds = workstreamIds;
 
   return Array.from(
     new Set(

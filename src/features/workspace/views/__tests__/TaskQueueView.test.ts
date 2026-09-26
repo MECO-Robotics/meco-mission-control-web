@@ -28,16 +28,13 @@ function createTask(index: number, overrides: Partial<Task> = {}): Task {
   const day = String(index).padStart(2, "0");
 
   const task: Task = {
+    artifactIds: [],
     id: `task-${index}`,
     projectId: "project-1",
-    workstreamId: null,
     workstreamIds: [],
-    subsystemId: "subsystem-1",
     subsystemIds: ["subsystem-1"],
     disciplineId: "discipline-1",
-    mechanismId: null,
     mechanismIds: [],
-    partInstanceId: null,
     partInstanceIds: [],
     title: `Task ${index}`,
     summary: `Summary ${index}`,
@@ -166,16 +163,12 @@ describe("TaskQueueView", () => {
   it("formats the kanban card context from subsystems or workflows when a project is selected", () => {
     const robotTask = createTask(1, {
       projectId: "project-robot",
-      subsystemId: "subsystem-robot",
       subsystemIds: ["subsystem-robot"],
-      workstreamId: null,
       workstreamIds: [],
     });
     const workflowTask = createTask(2, {
       projectId: "project-workflow",
-      subsystemId: "subsystem-workflow",
       subsystemIds: [],
-      workstreamId: "workstream-workflow",
       workstreamIds: ["workstream-workflow"],
     });
 

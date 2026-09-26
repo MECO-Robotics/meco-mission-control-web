@@ -29,16 +29,13 @@ const memberTwo = {
 };
 
 const baseTask: BootstrapPayload["tasks"][number] = {
+  artifactIds: [],
   id: "task-1",
   projectId: "project-1",
-  workstreamId: null,
   workstreamIds: [],
-  subsystemId: "subsystem-1",
   subsystemIds: ["subsystem-1"],
   disciplineId: "",
-  mechanismId: null,
   mechanismIds: [],
-  partInstanceId: null,
   partInstanceIds: [],
   title: "Member one task",
   summary: "",

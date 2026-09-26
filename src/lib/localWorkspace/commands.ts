@@ -66,9 +66,9 @@ function defaults(resource: string, snapshot: BootstrapPayload): Record<string, 
     case "members": return { email: "", elevated: false, role: "student", activeSeasonIds: [], plannedAttendanceDays: [] };
     case "subsystems": return { isCore: false, iteration: 1, mentorIds: [], risks: [], parentSubsystemId: null, responsibleEngineerId: null };
     case "tasks": return {
-      projectId: snapshot.projects[0]?.id ?? "", workstreamId: null, workstreamIds: [], summary: "",
-      subsystemId: "", subsystemIds: [], disciplineId: "", mechanismId: null, mechanismIds: [],
-      partInstanceId: null, partInstanceIds: [], artifactId: null, artifactIds: [], targetMilestoneId: null,
+      projectId: snapshot.projects[0]?.id ?? "", workstreamIds: [], summary: "",
+      subsystemIds: [], disciplineId: "", mechanismIds: [],
+      partInstanceIds: [], artifactIds: [], targetMilestoneId: null,
       ownerId: null, assigneeIds: [], mentorId: null, startDate: today, dueDate: today, priority: "medium",
       status: "not-started", blockers: [], linkedManufacturingIds: [], linkedPurchaseIds: [],
       estimatedHours: 0, actualHours: 0, requiresDocumentation: false, documentationLinked: false,
@@ -191,7 +191,7 @@ export function applyLocalCommand(snapshot: BootstrapPayload, path: string, opti
         const task = snapshot.tasks.find((candidate) => candidate.id === item.taskId);
         if (!task) throw new Error("QA reports require an existing task.");
         item.projectId = task.projectId;
-        item.workstreamId = task.workstreamId;
+        item.workstreamId = task.workstreamIds[0] ?? null;
         item.title = task.title;
         item.summary = item.notes ?? "";
         item.reviewedAt = item.reviewedAt ?? item.createdAt ?? new Date().toISOString();

@@ -33,9 +33,9 @@ export function buildRiskTriageItems(
     const sourceTask = taskByReportId.get(risk.sourceId);
     const taskContext = mitigationTask ?? sourceTask;
     const projectName = taskContext ? projectsById[taskContext.projectId]?.name : undefined;
-    const workstreamId = taskContext?.workstreamId ?? taskContext?.workstreamIds[0] ?? null;
+    const workstreamId = taskContext?.workstreamIds[0] ?? null;
     const workstreamName = workstreamId ? workstreamsById[workstreamId]?.name : undefined;
-    const subsystemName = taskContext ? subsystemsById[taskContext.subsystemId]?.name : undefined;
+    const subsystemName = taskContext ? subsystemsById[taskContext.subsystemIds[0] ?? ""]?.name : undefined;
 
     return {
       actionType: "open-risk",
@@ -62,13 +62,13 @@ export function buildTaskTriageItems(
   const { membersById, projectsById, subsystemsById, workstreamsById } = lookup;
 
   return rows.map<AttentionTriageItem>((task) => {
-    const workstreamId = task.workstreamId ?? task.workstreamIds[0] ?? null;
+    const workstreamId = task.workstreamIds[0] ?? null;
 
     return {
       actionType: "open-task",
       contextLabel: formatContextLabel({
         projectName: projectsById[task.projectId]?.name,
-        subsystemName: subsystemsById[task.subsystemId]?.name,
+        subsystemName: subsystemsById[task.subsystemIds[0] ?? ""]?.name,
         workstreamName: workstreamId ? workstreamsById[workstreamId]?.name : undefined,
       }),
       id: `task-${task.id}`,
@@ -146,7 +146,7 @@ export function buildReportTriageItems({
     ...failedReports.map<AttentionTriageItem>((report) => {
       const task = report.taskId ? tasksById[report.taskId] : null;
       const projectName = report.projectId ? projectsById[report.projectId]?.name : undefined;
-      const subsystemName = task ? subsystemsById[task.subsystemId]?.name : undefined;
+      const subsystemName = task ? subsystemsById[task.subsystemIds[0] ?? ""]?.name : undefined;
 
       return {
         actionType: task ? "open-task" : null,
@@ -175,7 +175,7 @@ export function buildReportTriageItems({
           ? projectsById[subsystemsById[sourceManufacturing.subsystemId]?.projectId]?.name
           : undefined;
       const subsystemName = sourceTask
-        ? subsystemsById[sourceTask.subsystemId]?.name
+        ? subsystemsById[sourceTask.subsystemIds[0] ?? ""]?.name
         : sourceManufacturing
           ? subsystemsById[sourceManufacturing.subsystemId]?.name
           : undefined;

@@ -67,8 +67,7 @@ export function scopeBootstrapBySelection(
   const scopedTasks = payload.tasks.filter(
     (task) =>
       activeProjectIds.has(task.projectId) &&
-      (scopedSubsystemIds.has(task.subsystemId) ||
-        task.subsystemIds.some((subsystemId) => scopedSubsystemIds.has(subsystemId))),
+      task.subsystemIds.some((subsystemId) => scopedSubsystemIds.has(subsystemId)),
   );
   const scopedTaskIds = new Set(scopedTasks.map((task) => task.id));
   const scopedTaskDependencies = (payload.taskDependencies ?? []).filter((dependency) => {

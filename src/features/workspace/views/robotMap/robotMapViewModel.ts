@@ -79,11 +79,8 @@ function taskTargetsSubsystem(
   partInstanceIds: ReadonlySet<string>,
 ) {
   return (
-    task.subsystemId === subsystemId ||
     includesId(task.subsystemIds, subsystemId) ||
-    (task.mechanismId ? mechanismIds.has(task.mechanismId) : false) ||
     task.mechanismIds.some((mechanismId) => mechanismIds.has(mechanismId)) ||
-    (task.partInstanceId ? partInstanceIds.has(task.partInstanceId) : false) ||
     task.partInstanceIds.some((partInstanceId) => partInstanceIds.has(partInstanceId))
   );
 }

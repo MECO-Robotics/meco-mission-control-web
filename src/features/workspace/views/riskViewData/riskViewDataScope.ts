@@ -172,7 +172,7 @@ export function buildRiskViewScopeData({
       return leadId ? membersById[leadId]?.name ?? "Unknown lead" : null;
     },
     (task, subsystem) =>
-      task.subsystemId === subsystem.id || (task.subsystemIds ?? []).includes(subsystem.id),
+      task.subsystemIds.includes(subsystem.id),
     nowTimestamp,
   );
 
@@ -196,7 +196,7 @@ export function buildRiskViewScopeData({
       return leadId ? membersById[leadId]?.name ?? "Unknown lead" : null;
     },
     (task, mechanism) =>
-      task.mechanismId === mechanism.id || (task.mechanismIds ?? []).includes(mechanism.id),
+      task.mechanismIds.includes(mechanism.id),
     nowTimestamp,
   );
 

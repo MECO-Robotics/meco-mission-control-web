@@ -98,7 +98,7 @@ function matchesIterationRequirement(
 
 function getTaskTargets(task: TaskRecord): MilestoneTaskTarget[] {
   const workstreamTargetIds = new Set<string>(
-    [task.workstreamId, ...task.workstreamIds].filter((targetId): targetId is string => Boolean(targetId)),
+    task.workstreamIds,
   );
 
   return [

@@ -174,7 +174,6 @@ describe("TimelineView", () => {
       id: "task-shared",
       title: "Shared drivetrain handoff",
       status: "complete" as const,
-      subsystemId: "subsystem-1",
       subsystemIds: ["subsystem-1", "subsystem-2"],
     };
     const timeline = buildTimelineData({

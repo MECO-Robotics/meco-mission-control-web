@@ -6,8 +6,6 @@ import type { TaskPayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { IconMapPin, IconParts, IconTasks } from "@/components/shared/Icons";
 import type { DropdownOption } from "../model/workspaceTypes";
-import type { TaskTargetKind, TaskTargetSelection } from "@/types/taskTarget";
-export type { TaskTargetKind, TaskTargetSelection };
 import {
   getTaskDependencyRecordsForTask as getTaskDependencyRecordsForTaskFromPlanning,
   getTaskOpenBlockersForTask as getTaskOpenBlockersForTaskFromPlanning,
@@ -64,34 +62,20 @@ export const TASK_DEPENDENCY_TYPE_LABELS = {
   soft: "Soft",
 } as const;
 
-export function getTaskSelectedPrimaryTargetIds(
-  payload: Pick<TaskPayload, "subsystemId" | "subsystemIds">,
-) {
-  return payload.subsystemIds.length > 0
-    ? payload.subsystemIds
-    : payload.subsystemId
-      ? [payload.subsystemId]
-      : [];
-}
-
 export function getTaskSelectedPrimaryTargetId(
-  payload: Pick<TaskPayload, "subsystemId" | "subsystemIds">,
+  payload: Pick<TaskPayload, "subsystemIds">,
 ) {
-  return getTaskSelectedPrimaryTargetIds(payload)[0] ?? "";
+  return payload.subsystemIds[0] ?? "";
 }
 
-export function getTaskSelectedMechanismIds(payload: Pick<TaskPayload, "mechanismId" | "mechanismIds">) {
-  return payload.mechanismIds.length > 0 ? payload.mechanismIds : payload.mechanismId ? [payload.mechanismId] : [];
+export function getTaskSelectedMechanismIds(payload: Pick<TaskPayload, "mechanismIds">) {
+  return payload.mechanismIds;
 }
 
 export function getTaskSelectedPartInstanceIds(
-  payload: Pick<TaskPayload, "partInstanceId" | "partInstanceIds">,
+  payload: Pick<TaskPayload, "partInstanceIds">,
 ) {
-  return payload.partInstanceIds.length > 0
-    ? payload.partInstanceIds
-    : payload.partInstanceId
-      ? [payload.partInstanceId]
-      : [];
+  return payload.partInstanceIds;
 }
 
 export function getTaskSelectedAssigneeIds(
@@ -114,7 +98,7 @@ export function getTaskPrimaryTargetNameOptions(
 }
 
 export function getTaskSelectedScopeChips(
-  payload: Pick<TaskPayload, "mechanismId" | "mechanismIds" | "partInstanceId" | "partInstanceIds">,
+  payload: Pick<TaskPayload, "mechanismIds" | "partInstanceIds">,
   lookups: SelectionLookups & {
     partDefinitionsById: Record<string, BootstrapPayload["partDefinitions"][number]>;
     formatIterationVersion: (value: number | null | undefined) => string;

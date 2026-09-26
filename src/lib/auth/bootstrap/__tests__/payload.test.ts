@@ -243,7 +243,8 @@ it("preserves canonical project and target identities without bucket merging or 
     { ...source.projects[0], id: "project-b", name: "Custom outreach B", projectType: "outreach" },
   ];
   source.workstreams = [{ id: "workstream-b", projectId: "project-b", name: source.subsystems[0].name, description: "" }];
-  source.tasks[0] = { ...source.tasks[0], projectId: "project-a", workstreamId: null, workstreamIds: [], photoUrl: "data:image/png;base64,photo" };
+  source.tasks[0] = {
+  ...source.tasks[0], projectId: "project-a", workstreamIds: [], photoUrl: "data:image/png;base64,photo" };
   source.subsystems[0].projectId = "project-a";
   const normalized = normalizeBootstrapPayload(source);
   expect(normalized.projects).toEqual(source.projects);
@@ -251,7 +252,7 @@ it("preserves canonical project and target identities without bucket merging or 
   expect(normalized.workstreams.map(({ id, projectId, name }) => ({ id, projectId, name }))).toEqual([
     { id: "workstream-b", projectId: "project-b", name: source.subsystems[0].name },
   ]);
-  expect(normalized.tasks[0]).toMatchObject({ projectId: "project-a", workstreamId: null, workstreamIds: [], photoUrl: source.tasks[0].photoUrl });
+  expect(normalized.tasks[0]).toMatchObject({ projectId: "project-a", workstreamIds: [], photoUrl: source.tasks[0].photoUrl });
   expect(normalized.subsystems[0].projectId).toBe("project-a");
   expect(normalizeBootstrapPayload({ ...source, workstreams: [] }).workstreams).toEqual([]);
   expect(normalizeBootstrapPayload(normalized)).toEqual(normalized);

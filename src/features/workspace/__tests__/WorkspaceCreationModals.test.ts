@@ -23,18 +23,15 @@ jest.mock("react-dom", () => {
 function createModalBootstrap() {
   const bootstrap = createBootstrap();
   const task: BootstrapPayload["tasks"][number] = {
+    artifactIds: [],
     id: "task-1",
     projectId: "project-1",
-    workstreamId: null,
     workstreamIds: [],
     title: "Inspect intake",
     summary: "Verify the intake can survive QA.",
-    subsystemId: "subsystem-1",
     subsystemIds: ["subsystem-1"],
     disciplineId: "design",
-    mechanismId: null,
     mechanismIds: [],
-    partInstanceId: null,
     partInstanceIds: [],
     targetRiskId: "risk-1",
     targetMilestoneId: null,
@@ -91,7 +88,6 @@ describe("workspace creation modals", () => {
       ownerId: null,
       assigneeIds: [],
       mentorId: null,
-      subsystemId: "",
       subsystemIds: [],
     });
 

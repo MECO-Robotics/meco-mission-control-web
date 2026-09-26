@@ -8,18 +8,15 @@ import {
 import type { BootstrapPayload } from "@/types/bootstrap";
 
 const baseTask: BootstrapPayload["tasks"][number] = {
+  artifactIds: [],
   id: "task-ready",
   projectId: "project-1",
-  workstreamId: null,
   workstreamIds: [],
   title: "Ready task",
   summary: "",
-  subsystemId: "subsystem-1",
   subsystemIds: ["subsystem-1"],
   disciplineId: "discipline-1",
-  mechanismId: null,
   mechanismIds: [],
-  partInstanceId: null,
   partInstanceIds: [],
   targetMilestoneId: null,
   ownerId: "member-1",

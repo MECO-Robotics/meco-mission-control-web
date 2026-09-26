@@ -19,6 +19,5 @@ it("keeps record IDs in the selector and distinguishes subsystem revisions by la
   expect(model.primaryTargetOptions).toContainEqual({ id: "drive-v2", name: "Drive (v2)" });
   model.handleSubsystemChange(["drive-v2"]);
   expect(draft.subsystemIds).toEqual(["drive-v2"]);
-  expect(draft.subsystemId).toBe("drive-v2");
   expect(setEditingField).toHaveBeenCalledWith(null);
 });

@@ -36,7 +36,6 @@ describe("TimelineView", () => {
       ...baseTask,
       id: "task-second",
       title: "Second collapsed task",
-      subsystemId: "subsystem-2",
       subsystemIds: ["subsystem-2"],
       offset: 0,
       span: 2,

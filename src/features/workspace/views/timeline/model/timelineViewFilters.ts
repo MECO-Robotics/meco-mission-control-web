@@ -37,7 +37,7 @@ const FILTER_TONE_CLASSES = [
 
 export function readTimelineTaskSubsystemIds(task: TaskRecord) {
   const subsystemIds = Array.isArray(task.subsystemIds) ? task.subsystemIds : [];
-  const candidateIds = subsystemIds.length > 0 ? subsystemIds : [task.subsystemId];
+  const candidateIds = subsystemIds;
 
   return Array.from(
     new Set(

@@ -18,7 +18,6 @@ function createTask(
 
   return {
     actualHours: 0,
-    artifactId: null,
     artifactIds: [],
     assigneeIds: ["member-1"],
     blockers: [],
@@ -31,11 +30,9 @@ function createTask(
     isBlocked: false,
     linkedManufacturingIds: [],
     linkedPurchaseIds: [],
-    mechanismId: null,
     mechanismIds: [],
     mentorId: null,
     ownerId: "member-1",
-    partInstanceId: null,
     partInstanceIds: [],
     planningState: "ready",
     priority: "medium",
@@ -43,12 +40,10 @@ function createTask(
     requiresDocumentation: false,
     startDate: "2026-05-01",
     status: status as TaskStatus,
-    subsystemId: "subsystem-1",
     subsystemIds: ["subsystem-1"],
     summary: "",
     targetMilestoneId: null,
     title: id,
-    workstreamId: "workstream-1",
     workstreamIds: ["workstream-1"],
     ...overrides,
   };

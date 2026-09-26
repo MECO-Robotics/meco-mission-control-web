@@ -1,4 +1,3 @@
-import { getProjectTaskTargetLabel } from "@/lib/appUtils/taskTargets/labels";
 import { setTaskPrimaryTargetSelection } from "@/lib/appUtils/taskTargets/selection";
 import type { CSSProperties, Dispatch, SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -31,10 +30,6 @@ export function useTaskDetailsOverviewModel({
   taskDraft,
 }: UseTaskDetailsOverviewModelArgs) {
   const editableTask = taskDraft ?? activeTask;
-  const selectedProject =
-    bootstrap.projects.find((project) => project.id === editableTask.projectId) ?? null;
-  const targetGroupLabel = getProjectTaskTargetLabel(selectedProject);
-  const subsystemFieldLabel = targetGroupLabel === "Subsystems" ? "Subsystem" : "Workstream";
   const isDraftEditing = Boolean(taskDraft);
   const membersById = Object.fromEntries(
     bootstrap.members.map((member) => [member.id, member] as const),
@@ -82,7 +77,7 @@ export function useTaskDetailsOverviewModel({
       ? `${selectedPrimaryTarget.name} (${formatIterationVersion(selectedPrimaryTarget.iteration)})`
       : "No subsystem linked"
     : isDraftEditing
-      ? `Choose ${subsystemFieldLabel.toLowerCase()}`
+      ? "Choose subsystem"
       : "No subsystem linked";
   const assigneeNames = selectedAssigneeIds
     .map((memberId) => membersById[memberId]?.name)
@@ -175,7 +170,6 @@ export function useTaskDetailsOverviewModel({
     selectedPrimaryTargetId,
     setPriority,
     setSummary,
-    subsystemFieldLabel,
     subsystemPillClassName,
     subsystemPillStyle,
     subsystemText,

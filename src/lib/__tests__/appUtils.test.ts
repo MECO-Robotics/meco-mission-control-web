@@ -72,13 +72,9 @@ describe("appUtils", () => {
     const payload = buildEmptyTaskPayload(createBootstrap());
 
     expect(payload.projectId).toBe("project-a");
-    expect(payload.workstreamId).toBeNull();
     expect(payload.workstreamIds).toEqual([]);
-    expect(payload.subsystemId).toBe("subsystem-core");
     expect(payload.subsystemIds).toEqual(["subsystem-core"]);
-    expect(payload.mechanismId).toBeNull();
     expect(payload.mechanismIds).toEqual([]);
-    expect(payload.partInstanceId).toBeNull();
     expect(payload.partInstanceIds).toEqual([]);
     expect(payload.ownerId).toBe("lead-1");
     expect(payload.assigneeIds).toEqual(["lead-1"]);

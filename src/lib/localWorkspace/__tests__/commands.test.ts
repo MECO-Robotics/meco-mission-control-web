@@ -81,11 +81,11 @@ test("part-definition deletion removes instances and detaches task and productio
   const snapshot = createBootstrap();
   const definition = snapshot.partDefinitions[0];
   const part = command(snapshot, "/part-instances", { partDefinitionId: definition.id, name: "Local instance" }).item;
-  const assigned = command(snapshot, "/tasks", { title: "Build", partInstanceId: part.id, partInstanceIds: [part.id] }).item;
+  const assigned = command(snapshot, "/tasks", { title: "Build", partInstanceIds: [part.id] }).item;
   const purchase = command(snapshot, "/purchases", { title: "Buy", partDefinitionId: definition.id }).item;
   command(snapshot, `/part-definitions/${definition.id}`, {}, "DELETE");
   expect(snapshot.partInstances.some((item) => item.id === part.id)).toBe(false);
-  expect(assigned).toMatchObject({ partInstanceId: null, partInstanceIds: [] });
+  expect(assigned).toMatchObject({ partInstanceIds: [] });
   expect(purchase).toMatchObject({ partDefinitionId: null });
 });
 
