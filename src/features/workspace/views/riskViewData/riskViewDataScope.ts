@@ -1,4 +1,4 @@
-﻿import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { buildScopeMetrics } from "../RiskMetrics";
 import {
@@ -21,7 +21,6 @@ import {
   buildOpenBlockersByTaskId,
   buildScopedRiskViewPools,
 } from "./riskViewScopeSelectors";
-import type { RiskViewScopeData } from "./riskViewScopeTypes";
 
 export type { BlockerBreakdown, HealthStatus } from "./riskViewMetricsUtils";
 
@@ -33,18 +32,17 @@ interface BuildRiskViewScopeDataArgs {
 export function buildRiskViewScopeData({
   activePersonFilter,
   bootstrap,
-}: BuildRiskViewScopeDataArgs): RiskViewScopeData {
+}: BuildRiskViewScopeDataArgs) {
   const now = new Date();
   const nowTimestamp = now.getTime();
   const weekStart = startOfWeekTimestamp(now);
+  const pools = buildScopedRiskViewPools({ activePersonFilter, bootstrap });
   const {
-    scopedReportIds,
     scopedReports,
-    scopedRisks,
     scopedTaskIds,
     scopedTasks,
     scopedWorkLogs,
-  } = buildScopedRiskViewPools({ activePersonFilter, bootstrap });
+  } = pools;
 
   const plannedHours = scopedTasks.reduce(
     (total, task) => total + Math.max(0, Number(task.estimatedHours) || 0),
@@ -55,12 +53,10 @@ export function buildRiskViewScopeData({
     0,
   );
   const remainingPlannedHours = Math.max(0, plannedHours - loggedHours);
-  const maxMetricHours = Math.max(plannedHours, loggedHours, 1);
   const hoursLoggedRate = plannedHours > 0 ? loggedHours / plannedHours : 0;
   const clampedCompletionWidth = `${Math.max(0, Math.min(100, hoursLoggedRate * 100))}%`;
   const totalTaskCount = scopedTasks.length;
   const completedTaskCount = scopedTasks.filter((task) => task.status === "complete").length;
-  const openTaskCount = Math.max(0, totalTaskCount - completedTaskCount);
   const taskCompletionRate = totalTaskCount > 0 ? completedTaskCount / totalTaskCount : 0;
   const taskCompletionWidth = `${Math.max(0, Math.min(100, taskCompletionRate * 100))}%`;
   const waitingForQaTasks = scopedTasks.filter((task) => task.status === "waiting-for-qa");
@@ -213,15 +209,10 @@ export function buildRiskViewScopeData({
     activePersonFilter.length > 0 && scopedPurchaseIds.size > 0
       ? bootstrap.purchaseItems.filter((purchase) => scopedPurchaseIds.has(purchase.id))
       : bootstrap.purchaseItems;
-  const deliveredPurchases = purchasePool.filter((purchase) => purchase.status === "delivered").length;
   const pendingPurchaseCount = purchasePool.filter((purchase) => purchase.status !== "delivered").length;
   const lowStockMaterials = bootstrap.materials.filter(
     (material) => material.onHandQuantity <= material.reorderPoint,
   ).length;
-  const attendanceHours = (bootstrap.attendanceRecords ?? []).reduce(
-    (sum, record) => sum + record.totalHours,
-    0,
-  );
   const activeSubsystemCount = subsystemMetrics.filter((metric) => metric.taskCount > 0).length;
   const activeMechanismCount = mechanismMetrics.filter((metric) => metric.taskCount > 0).length;
   const untouchedMechanismCount = Math.max(0, bootstrap.mechanisms.length - activeMechanismCount);
@@ -276,31 +267,24 @@ export function buildRiskViewScopeData({
     unresolvedBlockerCount,
   });
 
-  return {
+  const metrics = {
     activeMechanismCount,
     activeSubsystemCount,
-    attendanceHours,
     blockerBreakdown,
-    blockerCount: unresolvedBlockerCount,
     buildHealthActions: healthActions,
     buildHealthReasons: healthReasons,
     buildHealthStatus,
     clampedCompletionWidth,
-    completionRate: taskCompletionRate,
     completedTaskCount,
-    deliveredPurchases,
     expectedProgressRate,
-    filteredRowsBase: scopedRisks,
     hoursLoggedRate,
     loggedHours,
     logsThisWeekHours,
     lowStockMaterials,
-    maxMetricHours,
     mechanismMetrics,
     mentorActionRequiredCount,
     oldestBlockerAgeDays,
     oldestQaWaitingAgeDays,
-    openTaskCount,
     ownerlessTaskCount,
     pendingPurchaseCount,
     planStatus,
@@ -308,12 +292,6 @@ export function buildRiskViewScopeData({
     qaPassCount,
     qaWaitingCount,
     remainingPlannedHours,
-    scopedReportIds,
-    scopedReports,
-    scopedRisks,
-    scopedTaskIds,
-    scopedTasks,
-    scopedWorkLogs,
     staleSubsystemCount,
     staleTaskCount,
     staleTaskThresholdDays,
@@ -323,9 +301,14 @@ export function buildRiskViewScopeData({
     supplySignals,
     taskCompletionRate,
     taskCompletionWidth,
-    totalTaskCount,
+    scopedTaskCount: totalTaskCount,
+    totalMechanismCount: bootstrap.mechanisms.length,
+    totalSubsystemCount: bootstrap.subsystems.length,
     untouchedMechanismCount,
     unresolvedBlockerCount,
-    waitingForQaCount: qaWaitingCount,
   };
+
+  return { pools, metrics };
 }
+
+export type RiskMetricsData = ReturnType<typeof buildRiskViewScopeData>["metrics"];

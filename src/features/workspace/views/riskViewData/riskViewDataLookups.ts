@@ -1,27 +1,24 @@
-﻿import type { BootstrapPayload } from "@/types/bootstrap";
+import type { BootstrapPayload } from "@/types/bootstrap";
 import type { RiskRecord } from "@/types/recordsReporting";
 
 import type { SelectOption } from "./riskViewDataPayload";
-import type { RiskViewScopeData } from "./riskViewScopeTypes";
+import type { ScopedRiskViewPools } from "./riskViewScopeSelectors";
 
 export interface RiskViewLookups {
   attachmentOptionsForType: (attachmentType: RiskRecord["attachmentType"]) => SelectOption[];
   getAttachmentLabel: (risk: RiskRecord) => string;
   getMitigationLabel: (risk: RiskRecord) => string;
   getSourceLabel: (risk: RiskRecord) => string;
-  mechanismAttachmentOptions: SelectOption[];
   mitigationTaskOptions: SelectOption[];
-  partInstanceAttachmentOptions: SelectOption[];
   projectAttachmentOptions: SelectOption[];
   qaSourceOptions: SelectOption[];
   sourceOptionsForType: (sourceType: RiskRecord["sourceType"]) => SelectOption[];
   testSourceOptions: SelectOption[];
-  workstreamAttachmentOptions: SelectOption[];
 }
 
 interface BuildRiskViewLookupsArgs {
   bootstrap: BootstrapPayload;
-  scope: RiskViewScopeData;
+  scope: Pick<ScopedRiskViewPools, "scopedTasks" | "scopedReports">;
 }
 
 export function buildRiskViewLookups({
@@ -173,13 +170,10 @@ export function buildRiskViewLookups({
     getAttachmentLabel,
     getMitigationLabel,
     getSourceLabel,
-    mechanismAttachmentOptions,
     mitigationTaskOptions,
-    partInstanceAttachmentOptions,
     projectAttachmentOptions,
     qaSourceOptions,
     sourceOptionsForType,
     testSourceOptions,
-    workstreamAttachmentOptions,
   };
 }

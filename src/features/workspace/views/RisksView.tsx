@@ -57,12 +57,12 @@ export function RisksView({
   });
   const attachmentLookups = useMemo(() => buildRiskAttachmentLookups(bootstrap), [bootstrap]);
   const filteredSubsystemMetrics = useMemo(
-    () => filterMetricRows(viewModel.subsystemMetrics, metricsSearch),
-    [metricsSearch, viewModel.subsystemMetrics],
+    () => filterMetricRows(viewModel.metrics.subsystemMetrics, metricsSearch),
+    [metricsSearch, viewModel.metrics.subsystemMetrics],
   );
   const filteredMechanismMetrics = useMemo(
-    () => filterMetricRows(viewModel.mechanismMetrics, metricsSearch),
-    [metricsSearch, viewModel.mechanismMetrics],
+    () => filterMetricRows(viewModel.metrics.mechanismMetrics, metricsSearch),
+    [metricsSearch, viewModel.metrics.mechanismMetrics],
   );
 
   const setRiskSeverityDropPending = (riskId: string, isPending: boolean) => {
@@ -118,14 +118,14 @@ export function RisksView({
         />
       ) : null}
 
-      {includeHealth ? <details className="workspace-disclosure" onToggle={event => setHealthOpen(event.currentTarget.open)}><summary>Project health</summary>{healthOpen ? <RiskMetricsPanel mechanismMetrics={filteredMechanismMetrics} metricsSearch={metricsSearch} onMetricsSearchChange={setMetricsSearch} subsystemMetrics={filteredSubsystemMetrics} viewModel={viewModel} embedded /> : null}</details> : null}
+      {includeHealth ? <details className="workspace-disclosure" onToggle={event => setHealthOpen(event.currentTarget.open)}><summary>Project health</summary>{healthOpen ? <RiskMetricsPanel mechanismMetrics={filteredMechanismMetrics} metricsSearch={metricsSearch} onMetricsSearchChange={setMetricsSearch} subsystemMetrics={filteredSubsystemMetrics} metrics={viewModel.metrics} embedded /> : null}</details> : null}
       {view === "metrics" ? (
         <RiskMetricsPanel
           mechanismMetrics={filteredMechanismMetrics}
           metricsSearch={metricsSearch}
           onMetricsSearchChange={setMetricsSearch}
           subsystemMetrics={filteredSubsystemMetrics}
-          viewModel={viewModel}
+          metrics={viewModel.metrics}
         />
       ) : null}
 

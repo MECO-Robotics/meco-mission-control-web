@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
-import { useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { RiskPayload } from "@/types/payloads";
 import type { RiskRecord } from "@/types/recordsReporting";
@@ -21,11 +20,10 @@ import {
   type RiskSeverityFilter,
   type RiskSortField,
   type RiskSortOrder,
-  type RiskViewData,
   type SelectOption,
 } from "./riskViewData";
 
-export type { RiskSortField, RiskSortOrder, RiskSourceFilter, RiskSeverityFilter, RiskViewData, SelectOption };
+export type { RiskSortField, RiskSortOrder, RiskSourceFilter, RiskSeverityFilter, SelectOption };
 export {
   ATTACHMENT_TYPE_LABELS,
   RISK_SEVERITY_ORDER,
@@ -211,7 +209,6 @@ export function useRisksViewModel({
     }
   }, [activeRiskId, closeEditor, onDeleteRisk]);
 
-  const pagination = useWorkspacePagination(viewData.filteredRows);
   const riskFilterMotionClass = useFilterChangeMotionClass([
     search,
     severityFilter,
@@ -238,7 +235,6 @@ export function useRisksViewModel({
     openCreateEditor,
     openRiskDetails,
     openEditEditor,
-    pagination,
     riskFilterMotionClass,
     search,
     setDraft,
@@ -252,6 +248,5 @@ export function useRisksViewModel({
     sortOrder,
     sourceFilter,
     sourceOptions,
-    totalTaskCount: viewData.scopedTaskCount,
   };
 }
