@@ -63,15 +63,3 @@ export function updatePartInstanceRecord(
     onUnauthorized,
   );
 }
-
-export function deletePartInstanceRecord(
-  partInstanceId: string,
-  onUnauthorized?: () => void,
-) {
-  return requestItem<PartInstanceRecord, never>(
-    `/part-instances/${partInstanceId}`,
-    "DELETE",
-    undefined,
-    onUnauthorized,
-  );
-}
