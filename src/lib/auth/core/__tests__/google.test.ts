@@ -63,3 +63,21 @@ it.each([false, true])("retries after a failed script (existing=%s)", async (use
   await expect(retry).resolves.toBeUndefined();
   expect(api.createPolicy).toHaveBeenCalledTimes(1);
 });
+
+it.each(["policy", "append"])("retries after synchronous %s setup failure", async (failure) => {
+  const api = setup();
+  if (failure === "policy") {
+    api.createPolicy.mockImplementationOnce(() => { throw new Error("setup unavailable"); });
+  } else {
+    jest.spyOn(document.head, "appendChild").mockImplementationOnce(() => { throw new Error("setup unavailable"); });
+  }
+  const first = api.loadGoogleIdentityScript();
+  expect(api.loadGoogleIdentityScript()).toBe(first);
+  await expect(first).rejects.toThrow("setup unavailable");
+  expect(api.scripts[0].remove).toHaveBeenCalledTimes(1);
+  const retry = api.loadGoogleIdentityScript();
+  expect(retry).not.toBe(first);
+  expect(api.loadGoogleIdentityScript()).toBe(retry);
+  api.scripts[1].dispatchEvent(new Event("load"));
+  await expect(retry).resolves.toBeUndefined();
+});

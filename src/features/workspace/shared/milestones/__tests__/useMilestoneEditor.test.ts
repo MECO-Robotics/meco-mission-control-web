@@ -1,8 +1,9 @@
 import { useState } from "react";
 import type { MilestoneRecord } from "@/types/recordsExecution";
 import { useMilestoneEditor } from "../useMilestoneEditor";
+import { useTimelineMilestoneModal } from "@/features/workspace/views/timeline/useTimelineEventModal";
 
-jest.mock("react", () => ({ ...jest.requireActual("react"), useState: jest.fn(), useCallback: (callback: unknown) => callback }));
+jest.mock("react", () => ({ ...jest.requireActual("react"), useState: jest.fn(), useEffect: jest.fn(), useCallback: (callback: unknown) => callback }));
 
 function setup() {
   const state: unknown[] = [];
@@ -20,7 +21,17 @@ function setup() {
     onSaveTimelineMilestone: jest.fn(async () => {}),
     onDeleteTimelineMilestone: jest.fn(async () => {}),
   };
-  return { args, useEditor: () => { cursor = 0; return useMilestoneEditor(args); } };
+  return {
+    args,
+    useEditor: () => { cursor = 0; return useMilestoneEditor(args); },
+    useTimelineEditor: () => {
+      cursor = 0;
+      return useTimelineMilestoneModal({
+        ...args, dayMilestonesByDate: { "2026-10-01": [record] },
+        openCreateTaskModal: jest.fn(), triggerCreateMilestoneToken: 0,
+      });
+    },
+  };
 }
 
 const record = {
@@ -85,4 +96,18 @@ test("untimed events use noon and optional end dates; detail mode cannot submit 
   expect(args.onSaveTimelineMilestone).toHaveBeenCalledTimes(1);
   expect(args.onDeleteTimelineMilestone).not.toHaveBeenCalled();
   expect(args.onTaskEditSaved).not.toHaveBeenCalled();
+});
+
+test("timeline opening commands clear detail state before editing or creating", () => {
+  const { useTimelineEditor } = setup();
+  useTimelineEditor().openMilestoneDetailModalForMilestone(record);
+  expect(useTimelineEditor().activeMilestoneDetail).toBe(record);
+  useTimelineEditor().openEditMilestoneModalForMilestone(record);
+  expect(useTimelineEditor()).toMatchObject({ activeMilestoneDetail: null, milestoneModalMode: "edit" });
+  useTimelineEditor().openMilestoneDetailModalForMilestone(record);
+  useTimelineEditor().openMilestoneModalForDay("2026-10-02");
+  expect(useTimelineEditor()).toMatchObject({ activeMilestoneDetail: null, milestoneModalMode: "create", milestoneStartDate: "2026-10-02" });
+  expect(useTimelineEditor()).not.toHaveProperty("openCreateMilestoneModalForDay");
+  expect(useTimelineEditor()).not.toHaveProperty("openEditMilestoneModal");
+  expect(useTimelineEditor()).not.toHaveProperty("openMilestoneDetailsModal");
 });
