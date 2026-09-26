@@ -21,19 +21,8 @@
 
 @media (max-width: 900px) {
 
-  .queue-table.queue-table-header {
-    display: none;
-  }
-
   .ops-table.ops-table-header {
     display: none;
-  }
-
-  .queue-row {
-    display: grid;
-    grid-template-columns: 1fr !important;
-    gap: 0.45rem;
-    padding: 0.68rem;
   }
 
   .ops-row {
@@ -83,9 +72,5 @@
     flex: 0 1 auto;
     min-width: 0;
     max-width: 100%;
-  }
-
-  .mobile-filter-control {
-    display: inline-flex;
   }
 }

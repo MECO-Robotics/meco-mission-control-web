@@ -61,13 +61,11 @@
 .user-chip span,
 .eyebrow,
 .timeline-day,
-.queue-table-header span,
 .task-label span,
 .queue-title small,
 .member-row span,
 .subsystem-toggle span,
 .field>span,
-.auth-note,
 .auth-body,
 .banner {
   color: var(--text-copy);

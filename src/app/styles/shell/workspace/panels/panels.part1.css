@@ -84,18 +84,6 @@
   min-width: 0;
 }
 
-.filter-toolbar .risk-filter-control {
-  width: auto;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.filter-toolbar .risk-filter-control select {
-  width: auto;
-  min-width: 0;
-  max-width: 100%;
-}
-
 .task-queue-filter-menu {
   position: relative;
   display: inline-flex;

@@ -34,10 +34,6 @@
   outline: none;
 }
 
-.mobile-filter-control {
-  display: none;
-}
-
 .toolbar-search {
   min-width: 0;
   padding-inline: 0.5rem;

@@ -1,7 +1,6 @@
 .summary-chip span,
 .eyebrow,
-.timeline-day,
-.queue-table-header span {
+.timeline-day {
   display: block;
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -31,19 +30,8 @@
   color: var(--official-blue);
 }
 
-.auth-body,
-.auth-note {
+.auth-body {
   margin: 0;
   line-height: 1.55;
   font-size: 0.95rem;
-}
-
-.auth-note {
-  font-size: 0.92rem;
-}
-
-.tabbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
 }

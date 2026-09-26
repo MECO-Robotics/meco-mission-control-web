@@ -61,7 +61,6 @@
   transform: none;
 }
 
-.robot-config-detail-actions,
 .robot-config-row-actions {
   align-items: center;
   display: flex;

@@ -6,7 +6,6 @@
 .timeline-day-number-button,
 .timeline-bar,
 .subsystem-manager-row,
-.queue-row,
 .ops-row,
 .member-row {
   transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
@@ -48,7 +47,6 @@
 .subsystem-toggle:hover,
 .timeline-day-number-button:hover,
 .timeline-bar:hover,
-.queue-row:hover,
 .ops-row:hover,
 .member-row:hover,
 .tab:hover {

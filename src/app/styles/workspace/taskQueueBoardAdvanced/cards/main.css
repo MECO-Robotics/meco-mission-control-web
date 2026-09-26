@@ -150,14 +150,6 @@
   gap: calc(0.3rem * var(--task-queue-zoom, 1));
 }
 
-.milestone-board .task-queue-board-card-meta {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  justify-content: stretch;
-  gap: calc(0.35rem * var(--task-queue-zoom, 1));
-}
-
 .task-queue-board-card-meta.task-queue-board-card-meta-person-only {
   justify-content: flex-end;
 }
@@ -199,10 +191,4 @@
   font-size: calc(0.63rem * var(--task-queue-zoom, 1));
   font-weight: 700;
   letter-spacing: 0.02em;
-}
-
-.milestone-board .task-queue-board-card-context-chip {
-  justify-self: end;
-  min-width: 0;
-  max-width: 100%;
 }

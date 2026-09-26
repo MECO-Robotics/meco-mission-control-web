@@ -9,15 +9,6 @@
   padding-top: 1rem;
 }
 
-.milestone-detail-type-line {
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0.55rem;
-  min-width: 0;
-  margin-bottom: 0.15rem;
-}
-
 .milestone-detail-inline-value {
   width: auto;
   min-width: 0;

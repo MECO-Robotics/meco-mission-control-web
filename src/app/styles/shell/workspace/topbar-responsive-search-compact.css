@@ -138,24 +138,17 @@
 @media (max-width: 1340px) {
   .worklog-toolbar-topbar
     .topbar-responsive-search:not(.topbar-responsive-search-dynamic)
-    .topbar-responsive-search-full,
-  .roster-workload-topbar-controls
-    .topbar-responsive-search:not(.topbar-responsive-search-dynamic)
     .topbar-responsive-search-full {
     display: none;
   }
 
-  .worklog-toolbar-topbar .topbar-responsive-search:not(.topbar-responsive-search-dynamic),
-  .roster-workload-topbar-controls .topbar-responsive-search:not(.topbar-responsive-search-dynamic) {
+  .worklog-toolbar-topbar .topbar-responsive-search:not(.topbar-responsive-search-dynamic) {
     flex: 0 0 var(--topbar-responsive-search-icon-pill-width);
     width: var(--topbar-responsive-search-icon-pill-width);
     min-width: var(--topbar-responsive-search-icon-pill-width);
   }
 
   .worklog-toolbar-topbar
-    .topbar-responsive-search:not(.topbar-responsive-search-dynamic)
-    .topbar-responsive-search-compact,
-  .roster-workload-topbar-controls
     .topbar-responsive-search:not(.topbar-responsive-search-dynamic)
     .topbar-responsive-search-compact {
     display: inline-flex;

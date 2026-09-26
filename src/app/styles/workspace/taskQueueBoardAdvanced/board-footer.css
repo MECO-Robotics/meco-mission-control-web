@@ -58,24 +58,3 @@
 .milestone-view {
   min-height: 0;
 }
-
-.milestone-view .milestones-board-section {
-  display: flex;
-  flex: 1 1 auto;
-  min-height: 0;
-}
-
-.milestone-view .milestones-board-section .task-queue-board-shell-frame {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  min-height: 0;
-}
-
-.milestone-view .milestones-board-section .task-queue-board-shell {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior-y: contain;
-  scrollbar-gutter: stable;
-}

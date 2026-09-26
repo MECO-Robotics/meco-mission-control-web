@@ -44,12 +44,6 @@
   line-height: 1;
 }
 
-.task-queue-board-focused-subtitle {
-  margin: 0.26rem 0 0;
-  color: var(--text-copy);
-  font-size: 0.72rem;
-}
-
 .task-queue-board-focused-title-icon {
   display: inline-flex;
   align-items: center;
