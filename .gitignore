@@ -50,3 +50,6 @@ docs/reports/lighthouse-*.txt
 *.njsproj
 *.sln
 *.sw?
+
+# Graphify update backups are recoverable from Git history.
+/graphify-out/20??-??-??/

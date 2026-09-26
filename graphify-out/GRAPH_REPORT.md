@@ -1,16 +1,16 @@
-# Graph Report - meco-mission-control-web  (2026-09-13)
+# Graph Report - mission-control-web-cleanup  (2026-09-26)
 
 ## Corpus Check
-- 768 files · ~256,661 words
+- 775 files · ~257,422 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 3839 nodes · 7899 edges · 256 communities (184 shown, 37 thin omitted)
+- 3863 nodes · 7930 edges · 259 communities (182 shown, 42 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 35 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `33537c8b`
+- Built from commit: `c58af15e`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -27,7 +27,7 @@
 - properties
 - properties
 - TopbarResponsiveSearch.tsx
-- CadOnshapeIntegrationSection.tsx
+- cadIntegrationTypes.ts
 - workLogsViewState.ts
 - TaskDetailsHeaderSection.tsx
 - requestItem
@@ -45,7 +45,7 @@
 - cadSnapshotDiffViewModel.ts
 - timelineViewFilters.ts
 - timelineViewModel.ts
-- payload-catalog.ts
+- shared.ts
 - AuthScreens.tsx
 - types/bootstrap.ts
 - useAppWorkspaceModel.ts
@@ -57,10 +57,10 @@
 - RiskMetrics.tsx
 - riskViewDataScope.ts
 - CadStepMappingReviewTable.tsx
-- TimelineGridBody.tsx
+- TimelineGridHeaderContent.tsx
 - package.json
 - WorkspaceAssetModalsSection.tsx
-- TaskDetailsBlockersSectionView.tsx
+- TaskDetailsAdvancedSectionView.tsx
 - timelineGridBodyUtils.ts
 - Color Theme
 - SubsystemEditorModal.tsx
@@ -80,33 +80,33 @@
 - MECO Mission Control Web
 - draftInference.ts
 - compilerOptions
-- shared.ts
+- payload-catalog.ts
 - createBootstrap
 - AppSidebarProjectFooter.tsx
-- cadSnapshotDiffFallback.ts
-- taskQueueViewStateLogic.ts
+- Stage 5 Implementation Plan: AppSidebarPopups Catalog Integration
+- taskQueueKanbanCardView.tsx
 - taskQueueKanbanBoardState.ts
 - recordsReporting.ts
 - devDependencies
 - RiskKanbanPanel.tsx
 - compilerOptions
 - AppWorkspaceShellView.tsx
-- CadPartScene.tsx
+- CadPartViewer.tsx
 - AppSidebarSections.tsx
 - PartsView.tsx
 - timelineTestFixtures.ts
 - milestonesViewUtils.ts
 - timelineMilestoneData.ts
 - uniqueIds
-- CadPartViewer.tsx
+- cadGeometry.ts
 - TaskEditorModalContent.tsx
 - ArtifactTable.tsx
-- taskQueueKanbanCardView.tsx
+- taskQueueViewStateLogic.ts
 - catalogPayloadBuilders.ts
 - recordsOrganization.ts
 - scripts
 - useAppAuthGoogleIdentity.ts
-- CadStepImportSummaryCard.tsx
+- CadStepReviewPanels.tsx
 - MilestonesToolbar.tsx
 - WorkspaceModals.tsx
 - RisksView.tsx
@@ -118,13 +118,13 @@
 - rosterInsights.ts
 - README.md
 - useAppAuthSessionLifecycle.ts
-- cadIntegrationTypes.ts
-- CadStepReviewPanels.tsx
+- CadStepTreePanel.tsx
+- TimelineTaskBar.tsx
 - branding.ts
 - Mission Control Cross-Repo Architecture
 - Mission Control Cross-Repo Architecture
 - MilestonesEventDetailEditor.tsx
-- react-dom
+- AppTopbar.tsx
 - CadDataPanels.tsx
 - PurchasesView.tsx
 - Current Web App Specification
@@ -203,7 +203,7 @@
 - useAppWorkspaceReportRiskActions.ts
 - useAppWorkspaceReportSubmitActions.ts
 - Mission Control CSS Organization
-- ManufacturingQueueView.tsx
+- sidebar-modularization-plan.md
 - useModalPortalTarget.ts
 - useWorkspaceDerivedData.tsx
 - CAD part display
@@ -214,17 +214,17 @@
 - useAppWorkspaceReportActions.ts
 - useAppWorkspaceRosterActions.ts
 - useAppWorkspaceTaskActions.ts
-- TaskQueueView.tsx
+- useAppWorkspaceDerivedSelection.ts
 - useAppWorkspaceReportModalActions.test.ts
 - operationsChapter.ts
 - outreachChapter.ts
 - planningChapter.ts
 - AppCssTheme.test.ts
 - workspaceStateUtils.test.ts
-- useAppWorkspaceState.ts
+- useAppWorkspaceTaskMutationActions.ts
 - AppSidebar.tsx
-- SceneBoundary
-- useAppWorkspaceDerivedWorkspace.ts
+- HelpView.tsx
+- ManufacturingQueueView.test.ts
 - readCssTree.ts
 - taskEditIntent.ts
 - tsconfig.json
@@ -235,10 +235,13 @@
 - payload-catalog.test.ts
 - workspaceNavigation.test.ts
 - taskTarget.ts
-- MaterialsView.tsx
+- WorkspaceOverviewViews.test.ts
+- commit-msg
+- pre-commit
+- records/roster.ts
 
 ## God Nodes (most connected - your core abstractions)
-1. `react` - 340 edges
+1. `react` - 341 edges
 2. `requestItem()` - 59 edges
 3. `BootstrapPayload` - 34 edges
 4. `additionalProperties` - 30 edges
@@ -250,21 +253,21 @@
 10. `buildAttentionViewModel()` - 20 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `UseTaskDetailsOverviewModelArgs` --references--> `TaskDetailsEditableField`  [EXTRACTED]
-  src/features/workspace/modals/task/details/overview/useTaskDetailsOverviewModel.ts → src/features/workspace/modals/task/taskModalTypes.ts
-- `renderNodeCardMarkup()` --indirect_call--> `CadStepHierarchyNodeCard()`  [INFERRED]
-  src/features/workspace/views/cad/__tests__/cadStepHierarchyReviewTestHelpers.ts → src/features/workspace/views/cad/components/CadStepHierarchyNodeCard.tsx
+- `TaskDetailsAdvancedSectionViewProps` --references--> `TaskDetailsEditableField`  [EXTRACTED]
+  src/features/workspace/modals/task/details/sections/TaskDetailsAdvancedSectionView.tsx → src/features/workspace/modals/task/taskModalTypes.ts
+- `renderHierarchyMarkup()` --indirect_call--> `CadStepReviewPanels()`  [INFERRED]
+  src/features/workspace/views/cad/__tests__/cadStepHierarchyReviewTestHelpers.ts → src/features/workspace/views/cad/components/CadStepReviewPanels.tsx
 - `BuildRiskViewLookupsArgs` --references--> `RiskViewScopeData`  [EXTRACTED]
   src/features/workspace/views/riskViewData/riskViewDataLookups.ts → src/features/workspace/views/riskViewData/riskViewScopeTypes.ts
+- `TimelineTaskBarProps` --references--> `TimelineTaskDependencyCounts`  [EXTRACTED]
+  src/features/workspace/views/timeline/TimelineTaskBar.tsx → src/features/workspace/views/timeline/timelineGridBodyUtils.ts
 - `TimelineTaskStatusCellProps` --references--> `TimelineTaskStatusSignal`  [EXTRACTED]
   src/features/workspace/views/timeline/TimelineTaskStatusCell.tsx → src/features/workspace/views/timeline/timelineGridBodyUtils.ts
-- `TimelineTaskStatusLogoProps` --references--> `TimelineTaskStatusSignal`  [EXTRACTED]
-  src/features/workspace/views/timeline/TimelineTaskStatusLogo.tsx → src/features/workspace/views/timeline/timelineGridBodyUtils.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (256 total, 37 thin omitted)
+## Communities (259 total, 42 thin omitted)
 
 ### Community 0 - "attentionViewModel.ts"
 Cohesion: 0.06
@@ -276,7 +279,7 @@ Nodes (55): WorkspaceHomeSection(), WorkspaceCadSection(), WorkspaceHelpSection(
 
 ### Community 2 - "auth/session.ts"
 Cohesion: 0.07
-Nodes (56): fetchAuthConfig(), getGoogleTrustedTypesPolicy(), GoogleTrustedTypesPolicy, isLocalGoogleAuthHost(), isLocalHostname(), isSecureGoogleAuthHost(), isUsingLocalGoogleClientIdOverride(), loadGoogleIdentityScript() (+48 more)
+Nodes (58): fetchBootstrap(), resetInteractiveTutorialSession(), startInteractiveTutorialSession(), fetchAuthConfig(), getGoogleTrustedTypesPolicy(), GoogleTrustedTypesPolicy, isLocalGoogleAuthHost(), isLocalHostname() (+50 more)
 
 ### Community 3 - "type"
 Cohesion: 0.05
@@ -296,7 +299,7 @@ Nodes (53): CadSourceBadge(), CadSourceBadgeProps, CadSourceIndicatorModel, CadS
 
 ### Community 7 - "react"
 Cohesion: 0.03
-Nodes (13): react, AppWorkspaceDerivedSelection, useAppWorkspaceGlobalEffects(), UseAppWorkspaceGlobalEffectsOptions, AppWorkspaceTaskMutationActions, useMaterialEditor(), HelpTutorialModalProps, HelpViewProps (+5 more)
+Nodes (10): react, AppWorkspaceState, AppWorkspaceDerivedWorkspace, useAppWorkspaceGlobalEffects(), UseAppWorkspaceGlobalEffectsOptions, useMaterialEditor(), HelpTutorialModalProps, MaterialsViewProps (+2 more)
 
 ### Community 8 - "taskCalendarLayout.ts"
 Cohesion: 0.07
@@ -314,17 +317,17 @@ Nodes (55): type, enum, type, enum, type, type, anyOf, type (+47 more)
 Cohesion: 0.07
 Nodes (41): TopbarResponsiveSearch(), TopbarResponsiveSearchLayout(), collectCollisionTargets(), CollisionMeasurement, getCollisionMeasurement(), getIconPillRequiredWidth(), getTextWidthForPlaceholder(), measureTextWidth() (+33 more)
 
-### Community 12 - "CadOnshapeIntegrationSection.tsx"
-Cohesion: 0.09
-Nodes (32): createOnshapeDocumentRef(), createOnshapeOAuthAuthorizationUrl(), fetchOnshapeImportEstimate(), fetchOnshapeOverview(), runOnshapeImport(), CadIntegrationView(), CadLinkSyncPanel(), syncLevels (+24 more)
+### Community 12 - "cadIntegrationTypes.ts"
+Cohesion: 0.08
+Nodes (40): createOnshapeDocumentRef(), createOnshapeOAuthAuthorizationUrl(), fetchOnshapeImportEstimate(), fetchOnshapeOverview(), runOnshapeImport(), CadIntegrationView(), CadLinkSyncPanel(), syncLevels (+32 more)
 
 ### Community 13 - "workLogsViewState.ts"
 Cohesion: 0.08
-Nodes (43): ActivityModal(), ActivityModalProps, ReportHistoryList(), ACTION_GROUP_RANK, buildWorkLogActivityColumns(), DEFAULT_WORK_LOG_ACTIVITY_GROUP_MODE, formatActivityLabel(), getTaskSubsystemId() (+35 more)
+Nodes (42): ActivityModal(), ActivityModalProps, ACTION_GROUP_RANK, buildWorkLogActivityColumns(), DEFAULT_WORK_LOG_ACTIVITY_GROUP_MODE, formatActivityLabel(), getTaskSubsystemId(), resolveActivityColumn() (+34 more)
 
 ### Community 14 - "TaskDetailsHeaderSection.tsx"
-Cohesion: 0.10
-Nodes (25): TaskDetailsAdvancedSectionView(), TaskDetailsAdvancedSectionViewProps, TaskDetailsLinkedEntityRow, TaskDetailsLinkedEntitySection(), TaskDetailsLinkedEntitySectionProps, UseTaskDetailsAdvancedSectionModelArgs, TaskDetailReveal(), TaskDetailRevealProps (+17 more)
+Cohesion: 0.12
+Nodes (20): TaskDetailsOverviewSectionView(), TaskDetailsOverviewSectionProps, UseTaskDetailsOverviewModelArgs, UseTaskDetailsAdvancedSectionModelArgs, TaskDetailsAdvancedSectionContent(), TaskDetailsAdvancedSectionProps, TaskDetailsAdvancedSection(), TaskDetailsAdvancedSectionProps (+12 more)
 
 ### Community 15 - "requestItem"
 Cohesion: 0.09
@@ -339,8 +342,8 @@ Cohesion: 0.14
 Nodes (30): EMPTY_BOOTSTRAP, ArtifactModalMode, ManufacturingModalMode, MaterialModalMode, MechanismModalMode, MilestoneReportModalMode, PartDefinitionModalMode, PartInstanceModalMode (+22 more)
 
 ### Community 18 - "TimelineView.tsx"
-Cohesion: 0.09
-Nodes (23): TimelineRowHighlightGeometry, TimelineGridMotion, useTimelineViewActions(), UseTimelineViewActionsArgs, TimelineGridMotion, useTimelineViewState(), buildTimelineGridLayout(), PROJECT_COLUMN_WIDTH (+15 more)
+Cohesion: 0.08
+Nodes (26): react-dom, AppTopbarSlot, AppTopbarSlotPortal(), TimelineRowHighlightGeometry, TimelineGridMotion, useTimelineViewActions(), UseTimelineViewActionsArgs, TimelineGridMotion (+18 more)
 
 ### Community 19 - "taskPlanning.ts"
 Cohesion: 0.10
@@ -351,12 +354,12 @@ Cohesion: 0.10
 Nodes (37): addDaysToDay, addMonthsToDay, buildDateTime(), compareDateTimes(), datePortion(), endOfTimelineWeek(), formatMonthDayFromDay(), formatMonthDayShortYearFromDay() (+29 more)
 
 ### Community 21 - "taskTargeting.ts"
-Cohesion: 0.12
-Nodes (32): getStableToneClassName(), useTaskDetailsOverviewModel(), UseTaskDetailsOverviewModelArgs, useTaskDetailsAdvancedSectionModel(), useTaskEditorAdvancedFieldsState(), UseTaskEditorAdvancedFieldsStateOptions, TaskEditorCreateProjectSection(), TaskEditorCreateProjectSectionProps (+24 more)
+Cohesion: 0.13
+Nodes (31): getStableToneClassName(), useTaskDetailsOverviewModel(), useTaskDetailsAdvancedSectionModel(), useTaskEditorAdvancedFieldsState(), UseTaskEditorAdvancedFieldsStateOptions, TaskEditorCreateProjectSection(), TaskEditorCreateProjectSectionProps, DependencyTargetLookups (+23 more)
 
 ### Community 22 - "cadStepApi.ts"
-Cohesion: 0.16
-Nodes (26): applyCadHierarchyReview(), applyCadSnapshotMappings(), fetchCadHierarchyReview(), fetchCadPartMatchProposals(), fetchCadSnapshotDiff(), fetchCadSnapshotMappings(), fetchCadSnapshots(), fetchCadSnapshotSummary() (+18 more)
+Cohesion: 0.13
+Nodes (31): applyCadHierarchyReview(), applyCadSnapshotMappings(), fetchCadHierarchyReview(), fetchCadPartMatchProposals(), fetchCadSnapshotDiff(), fetchCadSnapshotMappings(), fetchCadSnapshots(), fetchCadSnapshotSummary() (+23 more)
 
 ### Community 23 - "localWorkspace/session.ts"
 Cohesion: 0.08
@@ -367,28 +370,28 @@ Cohesion: 0.14
 Nodes (30): RiskDetailsModal(), RiskDetailsModalProps, RISK_SORT_OPTIONS, RiskFilterToolbar(), RiskFilterToolbarProps, buildRisksViewData(), BuildRisksViewDataArgs, RiskViewData (+22 more)
 
 ### Community 25 - "CadStepHierarchyReviewPanel.tsx"
-Cohesion: 0.23
-Nodes (18): buildDecisionDraft(), CadStepHierarchyNodeCard(), DecisionControls(), targetKindRequiresTarget(), CadStepHierarchyReviewPanel(), PartProposalList(), CadHierarchyStage, cadHierarchyStages (+10 more)
+Cohesion: 0.17
+Nodes (23): buildDecisionDraft(), CadStepHierarchyNodeCard(), DecisionControls(), targetKindRequiresTarget(), CadStepHierarchyReviewPanel(), PartProposalList(), CadHierarchyStage, cadHierarchyStages (+15 more)
 
 ### Community 26 - "WorkspaceViewShared.tsx"
 Cohesion: 0.17
-Nodes (26): lucide-react, ColumnFilterDropdown(), FilterDropdown(), TopbarResponsiveSearchLayoutProps, CompactFilterMenu(), CompactFilterMenuItem, toggleFilterSelection(), useFilterDropdownMenuState() (+18 more)
+Nodes (25): lucide-react, ColumnFilterDropdown(), TopbarResponsiveSearchLayoutProps, CompactFilterMenu(), CompactFilterMenuItem, toggleFilterSelection(), useFilterDropdownMenuState(), usePrunedFilterSelection() (+17 more)
 
 ### Community 27 - "cadSnapshotDiffViewModel.ts"
-Cohesion: 0.13
-Nodes (25): CadSnapshotDiffPanel(), CadImportWarningRecord, CadSnapshotDiffStatus, CadSnapshotRecord, CadSnapshotDiffViewModel, SnapshotDiffItem, SnapshotDiffMechanismGroup, SnapshotDiffPartGroup (+17 more)
+Cohesion: 0.07
+Nodes (52): CadSnapshotDiffPanel(), CadAssemblyNodeRecord, CadImportWarningRecord, CadPartDefinitionRecord, CadPartInstanceRecord, CadSnapshotDiffRecord, CadSnapshotDiffSourceKind, CadSnapshotDiffStatus (+44 more)
 
 ### Community 28 - "timelineViewFilters.ts"
-Cohesion: 0.14
-Nodes (26): TimelineCompactFilterMenu(), TimelineCompactFilterMenuProps, UseTimelineViewDataArgs, pruneStableFilterSelection(), pruneTimelineFilterSelections(), TimelineViewFilterControls, useTimelineViewFilters(), UseTimelineViewFiltersArgs (+18 more)
+Cohesion: 0.12
+Nodes (30): TASK_QUEUE_STATUS_OPTIONS, TimelineCompactFilterMenu(), TimelineCompactFilterMenuProps, UseTimelineViewDataArgs, pruneStableFilterSelection(), pruneTimelineFilterSelections(), TimelineViewFilterControls, useTimelineViewFilters() (+22 more)
 
 ### Community 29 - "timelineViewModel.ts"
 Cohesion: 0.18
-Nodes (24): TimelineProjectSummaryCell(), TimelineProjectSummaryCellProps, TimelineSubsystemRowGroup(), TimelineSubsystemRowGroupProps, TimelineTaskTrackRow(), TimelineTaskTrackRowProps, TimelineTaskTrackRowListMode, TimelineTaskTrackRowListProps (+16 more)
+Nodes (24): TimelineProjectSummaryCell(), TimelineProjectSummaryCellProps, TimelineSubsystemRowGroup(), TimelineSubsystemRowGroupProps, TimelineTaskTrackRow(), TimelineTaskTrackRowProps, TimelineTaskTrackRowList(), TimelineTaskTrackRowListMode (+16 more)
 
-### Community 30 - "payload-catalog.ts"
-Cohesion: 0.13
-Nodes (26): fetchBootstrap(), getPartInstanceMergeKey(), isArtifactKind(), isArtifactStatus(), MILESTONE_STATUSES, normalizeBootstrapCatalogRecords(), normalizeCatalogPartInstances(), NormalizedBootstrapCatalogRecords (+18 more)
+### Community 30 - "shared.ts"
+Cohesion: 0.15
+Nodes (28): normalizeBootstrapPayload(), normalizeMeetingRecords(), normalizeBootstrapReports(), NormalizedBootstrapReports, NormalizedPlanningRecords, normalizePlanningRecords(), getTutorialSeasonName(), NormalizedPlanningProjects (+20 more)
 
 ### Community 31 - "AuthScreens.tsx"
 Cohesion: 0.11
@@ -403,8 +406,8 @@ Cohesion: 0.09
 Nodes (12): AppWorkspaceModel, ArtifactActions, ManufacturingActions, MechanismActions, PartDefinitionActions, usePartDefinitionActions(), PartInstanceActions, PurchaseActions (+4 more)
 
 ### Community 35 - "TaskDetailsDependencyRowList.tsx"
-Cohesion: 0.11
-Nodes (21): TaskDetailsDependencyAddMenu(), TaskDetailsDependencyAddMenuProps, getScopedTaskDependencyTargets(), TaskDependencyTargetScopeArgs, getDependencyDefaultState(), getDependencyKey(), TaskDetailsDependenciesSection(), TaskDetailsDependenciesSectionProps (+13 more)
+Cohesion: 0.08
+Nodes (27): TaskDetailsDependencyAddMenu(), TaskDetailsDependencyAddMenuProps, TaskDetailsBlockersSectionContent(), TaskDetailsBlockersSectionProps, getScopedTaskDependencyTargets(), TaskDependencyTargetScopeArgs, TaskDetailsBlockersSection(), TaskDetailsBlockersSectionProps (+19 more)
 
 ### Community 36 - "milestoneTaskState.tsx"
 Cohesion: 0.15
@@ -415,8 +418,8 @@ Cohesion: 0.15
 Nodes (23): KanbanColumnDefinition, KanbanColumns(), KanbanColumnsProps, buildKanbanDragLookup(), canStartKanbanPointerFallbackDrag(), createOpaqueKanbanNativeDragImage(), getKanbanDragDataItem(), getKanbanDropStateAtPoint() (+15 more)
 
 ### Community 38 - "taskQueueViewState.ts"
-Cohesion: 0.16
-Nodes (19): TaskQueueViewStateLogicArgs, TaskQueueCompactFilterMenu(), TaskQueueCompactFilterMenuProps, TASK_QUEUE_STATUS_OPTIONS, TaskQueueToolbar(), TaskQueueToolbarProps, clampTaskQueueZoom(), FILTER_TONE_CLASSES (+11 more)
+Cohesion: 0.11
+Nodes (27): MANUFACTURING_BOARD_STATES, MANUFACTURING_STATUS_LABELS, ManufacturingKanbanBoard(), ManufacturingKanbanBoardProps, filterManufacturingItemsByProcessView(), MANUFACTURING_PROCESS_FILTER_OPTIONS, MANUFACTURING_VIEW_PROCESS, ManufacturingQueueView() (+19 more)
 
 ### Community 39 - "workspaceColors.ts"
 Cohesion: 0.53
@@ -434,9 +437,9 @@ Nodes (23): buildRiskViewScopeData(), BuildRiskViewScopeDataArgs, TODO: Task rec
 Cohesion: 0.20
 Nodes (23): CadStepMappingConfirmInput, CadStepMappingReviewTable(), futureRuleStrategy(), TargetKind, targetOptions(), CadStepMappingRecord, CadStepMappingRuleMatchStrategy, CarryForwardRuleMode (+15 more)
 
-### Community 43 - "TimelineGridBody.tsx"
-Cohesion: 0.13
-Nodes (20): TimelineDayHeaderRow(), TimelineDayHeaderRowProps, TimelineFixedColumnHeader(), TimelineFixedColumnHeaderProps, TimelineGridHeaderContent(), TimelineHiddenColumnToggle, TimelineHiddenColumnToggles(), TimelineHiddenColumnTogglesProps (+12 more)
+### Community 43 - "TimelineGridHeaderContent.tsx"
+Cohesion: 0.14
+Nodes (18): TimelineDayHeaderRow(), TimelineDayHeaderRowProps, TimelineFixedColumnHeader(), TimelineFixedColumnHeaderProps, TimelineGridHeaderContent(), TimelineHiddenColumnToggle, TimelineHiddenColumnToggles(), TimelineHiddenColumnTogglesProps (+10 more)
 
 ### Community 44 - "package.json"
 Cohesion: 0.10
@@ -446,9 +449,9 @@ Nodes (21): name, private, type, version, eslint, @eslint/js, eslint-plugin-reac
 Cohesion: 0.23
 Nodes (9): WorkspaceAssetModalsSection(), WorkspaceModalHostViewProps, WorkspaceStructureModalsSection(), ArtifactEditorModal(), ArtifactEditorModalProps, MaterialEditorModal(), MaterialEditorModalProps, PartInstanceEditorModal() (+1 more)
 
-### Community 46 - "TaskDetailsBlockersSectionView.tsx"
-Cohesion: 0.16
-Nodes (11): TaskDetailsBlockerAddMenu(), TaskDetailsBlockerAddMenuProps, TaskDetailsBlockersSectionView(), TaskDetailsBlockersSectionViewProps, useTaskDetailsBlockersSectionModel(), UseTaskDetailsBlockersSectionModelArgs, TaskDetailsBlockersSectionContent(), TaskDetailsBlockersSectionProps (+3 more)
+### Community 46 - "TaskDetailsAdvancedSectionView.tsx"
+Cohesion: 0.12
+Nodes (16): TaskDetailsAssignedList(), TaskDetailsAssignedListProps, TaskDetailsAdvancedSectionView(), TaskDetailsAdvancedSectionViewProps, TaskDetailsBlockerAddMenu(), TaskDetailsBlockerAddMenuProps, TaskDetailsBlockersSectionView(), TaskDetailsBlockersSectionViewProps (+8 more)
 
 ### Community 47 - "timelineGridBodyUtils.ts"
 Cohesion: 0.13
@@ -467,12 +470,12 @@ Cohesion: 0.14
 Nodes (21): buildSyncHistoryRows(), CadSyncHistoryPanel(), changedCountFromSnapshot(), changedCountFromSummary(), countCopy(), EMPTY_ASSEMBLY_NODES, EMPTY_IMPORT_RUNS, EMPTY_PART_DEFINITIONS (+13 more)
 
 ### Community 51 - "timelineTaskColors.ts"
-Cohesion: 0.12
-Nodes (19): TimelineMergedCellColumn(), TimelineMergedCellColumnProps, TimelineProjectHeaderCell(), TimelineProjectHeaderCellProps, TimelineSubsystemHeaderCell(), TimelineSubsystemHeaderCellProps, TimelineTaskTrackRowList(), buildTimelineHighlightStyle() (+11 more)
+Cohesion: 0.14
+Nodes (17): TimelineMergedCellColumn(), TimelineMergedCellColumnProps, TimelineProjectHeaderCell(), TimelineProjectHeaderCellProps, TimelineSubsystemHeaderCell(), TimelineSubsystemHeaderCellProps, buildTimelineHighlightStyle(), buildTimelineSubsystemHighlightStyle() (+9 more)
 
 ### Community 52 - "useTimelineViewData.ts"
-Cohesion: 0.15
-Nodes (20): useTimelineRowHighlightGeometry(), useTimelineViewData(), resolveTimelineRowHighlightStyle(), buildTimelineData(), buildTimelineDateRange(), buildTimelineDayMeetings(), buildTimelineDayMilestones(), buildTimelineDays() (+12 more)
+Cohesion: 0.16
+Nodes (19): useTimelineRowHighlightGeometry(), useTimelineViewData(), buildTimelineData(), buildTimelineDateRange(), buildTimelineDayMeetings(), buildTimelineDayMilestones(), buildTimelineDays(), compareTimelineMeetingsByStart() (+11 more)
 
 ### Community 53 - "minLength"
 Cohesion: 0.09
@@ -483,8 +486,8 @@ Cohesion: 0.23
 Nodes (20): assertCheckSuiteHead(), assertExternalRevisionInBranch(), assertRequiredCheckRuns(), assertTrustedCiIdentity(), assertTrustedCiWorkflow(), assertTrustedCiWorkflowSha256(), fetchJson(), readPublicRepositoryFile() (+12 more)
 
 ### Community 55 - "cadStepPreviewDiffItems.ts"
-Cohesion: 0.16
-Nodes (25): CadStepPreviewDiffPanel(), CadHierarchyReview, CadPartMatchProposal, CadStepDiff, CadStepWarningRecord, addedAssemblyItems(), addedPartItems(), assemblyKind() (+17 more)
+Cohesion: 0.21
+Nodes (20): addedAssemblyItems(), addedPartItems(), assemblyKind(), classificationLabels, issueItems(), mappingChangeItem(), mappingReviewItems(), movedItems() (+12 more)
 
 ### Community 56 - "contract.json"
 Cohesion: 0.09
@@ -526,25 +529,25 @@ Nodes (14): inferManufacturingDraftFromPartInstanceSelection(), inferManufacturi
 Cohesion: 0.10
 Nodes (20): compilerOptions, allowImportingTsExtensions, erasableSyntaxOnly, jsx, lib, module, moduleDetection, moduleResolution (+12 more)
 
-### Community 66 - "shared.ts"
-Cohesion: 0.26
-Nodes (15): getTutorialSeasonName(), normalizePlanningProjects(), classifyProjectBucket(), dateOnly(), getRequiredProjectTemplate(), inferPlanningWindow(), isIsoDate(), LEGACY_PROJECT_ID (+7 more)
+### Community 66 - "payload-catalog.ts"
+Cohesion: 0.29
+Nodes (10): getPartInstanceMergeKey(), isArtifactKind(), isArtifactStatus(), MILESTONE_STATUSES, normalizeBootstrapCatalogRecords(), normalizeCatalogPartInstances(), NormalizedBootstrapCatalogRecords, normalizeMilestoneStatus() (+2 more)
 
 ### Community 67 - "createBootstrap"
 Cohesion: 0.21
 Nodes (8): renderTaskModal(), createBootstrap(), createModalBootstrap(), renderIterationEditors(), renderWorkstreamModal(), renderManufacturingModal(), renderManufacturingModalWithPartInstances(), renderMaterialModal()
 
 ### Community 68 - "AppSidebarProjectFooter.tsx"
-Cohesion: 0.17
-Nodes (10): AppSidebarProjectFooter(), AppSidebarProjectFooterProps, AddAction, AppSidebarAddMenu(), AppSidebarAddMenuProps, AppSidebarNotificationButton(), AppSidebarNotificationButtonProps, AppSidebarSettingsMenu() (+2 more)
+Cohesion: 0.21
+Nodes (7): AppSidebarProjectFooter(), AppSidebarProjectFooterProps, AppSidebarNotificationButton(), AppSidebarNotificationButtonProps, AppSidebarSettingsMenu(), AppSidebarSettingsMenuProps, MenuElement
 
-### Community 69 - "cadSnapshotDiffFallback.ts"
-Cohesion: 0.14
-Nodes (25): CadAssemblyNodeRecord, CadPartDefinitionRecord, CadPartInstanceRecord, assemblyItem(), buildFallbackItems(), changedFieldNames(), compactList(), EMPTY_ASSEMBLY_NODES (+17 more)
+### Community 69 - "Stage 5 Implementation Plan: AppSidebarPopups Catalog Integration"
+Cohesion: 0.33
+Nodes (5): Expected Symbols, Objective, Stage 5 Implementation Plan: AppSidebarPopups Catalog Integration, Target Files, Validation Commands
 
-### Community 70 - "taskQueueViewStateLogic.ts"
-Cohesion: 0.26
-Nodes (11): buildLookupMap(), PRIORITY_VALUES, SUBSYSTEM_ITERATION_DISCIPLINE_CODES, useTaskQueueViewStateLogic(), useTaskQueueVisibleTaskCountReset(), DISCIPLINE_ICON_BY_CODE, getTaskQueueDisciplineIcon(), TaskDisciplineBadge() (+3 more)
+### Community 70 - "taskQueueKanbanCardView.tsx"
+Cohesion: 0.27
+Nodes (10): getTaskCardDueDatePillClassName(), isTaskCardDateOverdue(), isTaskCardDateToday(), TaskQueueCard(), TaskQueueCardProps, DISCIPLINE_ICON_BY_CODE, getTaskQueueDisciplineIcon(), TaskDisciplineBadge() (+2 more)
 
 ### Community 71 - "taskQueueKanbanBoardState.ts"
 Cohesion: 0.18
@@ -570,13 +573,13 @@ Nodes (17): compilerOptions, allowImportingTsExtensions, erasableSyntaxOnly, lib
 Cohesion: 0.18
 Nodes (9): AddSeasonPopup(), OverlayProps, RobotProjectPopup(), SidebarOverlay(), AppSidebar, AppTopbar, WorkspaceContent, WorkspaceModalHost (+1 more)
 
-### Community 77 - "CadPartScene.tsx"
-Cohesion: 0.29
-Nodes (4): @react-three/drei, @react-three/fiber, three, CadPartScene
+### Community 77 - "CadPartViewer.tsx"
+Cohesion: 0.13
+Nodes (10): @react-three/drei, @react-three/fiber, three, CadPartImageAssignment(), CadPartImageTargets, CadFileViewer(), CadPartScene, CadPartViewer() (+2 more)
 
 ### Community 78 - "AppSidebarSections.tsx"
-Cohesion: 0.29
-Nodes (5): AppSidebarSections(), AppSidebarSectionsProps, SidebarSectionModel, SidebarSubItemModel, UseAppSidebarNavigationModelsArgs
+Cohesion: 0.20
+Nodes (9): AppSidebarSections(), AppSidebarSectionsProps, SidebarSectionModel, SidebarSubItemModel, SidebarItem(), SidebarItemConfig, SidebarItemProps, config (+1 more)
 
 ### Community 79 - "PartsView.tsx"
 Cohesion: 0.18
@@ -591,16 +594,16 @@ Cohesion: 0.19
 Nodes (14): buildMilestoneProjectLabels(), buildMilestoneSearchSuggestions(), filterAndSortMilestones(), formatMilestoneStatusLabel(), isSameLocalCalendarDay(), MILESTONE_STATUS_LABELS, MilestonesViewState, MilestonesViewStateArgs (+6 more)
 
 ### Community 82 - "timelineMilestoneData.ts"
-Cohesion: 0.17
-Nodes (16): useTimelineMilestoneOverlay(), UseTimelineMilestoneOverlayArgs, useTimelineMilestoneOverlayLayout(), UseTimelineMilestoneOverlayLayoutArgs, useTimelineMilestoneOverlaySync(), UseTimelineMilestoneOverlaySyncArgs, UseTimelineMilestoneOverlaySyncResult, buildTimelineDayMilestoneUnderlays() (+8 more)
+Cohesion: 0.24
+Nodes (13): useTimelineMilestoneOverlay(), UseTimelineMilestoneOverlayArgs, useTimelineMilestoneOverlayLayout(), UseTimelineMilestoneOverlayLayoutArgs, useTimelineMilestoneOverlaySync(), UseTimelineMilestoneOverlaySyncArgs, UseTimelineMilestoneOverlaySyncResult, buildTimelineDayMilestoneUnderlays() (+5 more)
 
 ### Community 83 - "uniqueIds"
 Cohesion: 0.37
 Nodes (9): createLookupById(), removeId(), uniqueIds(), getProjectTaskTargetLabel(), getTaskTargetArrays(), normalizeTaskTargetPayload(), buildEmptyTaskPayload(), setTaskPrimaryTargetSelection() (+1 more)
 
-### Community 84 - "CadPartViewer.tsx"
-Cohesion: 0.14
-Nodes (12): occt-import-js, CadGeometryResult, CadMesh, validateCadMeshes(), CadPartImageAssignment(), CadPartImageTargets, CadFileViewer(), CadPartViewer() (+4 more)
+### Community 84 - "cadGeometry.ts"
+Cohesion: 0.18
+Nodes (7): occt-import-js, CadGeometryResult, CadMesh, validateCadMeshes(), FileViewer(), workerPolicy, occt-import-js
 
 ### Community 85 - "TaskEditorModalContent.tsx"
 Cohesion: 0.16
@@ -610,9 +613,9 @@ Nodes (11): WorkspaceTaskModalsSection(), TaskEditorAdvancedMediaSection(), Task
 Cohesion: 0.22
 Nodes (11): ArtifactInventoryViewProps, ArtifactFiltersToolbar(), ArtifactFiltersToolbarProps, ARTIFACT_GRID_TEMPLATE, ARTIFACT_STATUS_DISPLAY, ARTIFACT_STATUS_OPTIONS, formatUpdatedAt(), summarizeLink() (+3 more)
 
-### Community 87 - "taskQueueKanbanCardView.tsx"
-Cohesion: 0.21
-Nodes (18): getTaskCardDueDatePillClassName(), isTaskCardDateOverdue(), isTaskCardDateToday(), TaskQueueCard(), TaskQueueCardProps, filterTaskQueueTasks(), formatNames(), formatTaskAssignees() (+10 more)
+### Community 87 - "taskQueueViewStateLogic.ts"
+Cohesion: 0.18
+Nodes (19): buildLookupMap(), PRIORITY_VALUES, SUBSYSTEM_ITERATION_DISCIPLINE_CODES, useTaskQueueViewStateLogic(), useTaskQueueVisibleTaskCountReset(), getTaskQueueBoardStateSortValue(), filterTaskQueueTasks(), formatNames() (+11 more)
 
 ### Community 88 - "catalogPayloadBuilders.ts"
 Cohesion: 0.14
@@ -623,16 +626,16 @@ Cohesion: 0.19
 Nodes (14): DisciplineCode, PlannedAttendanceDay, ProjectStatus, ProjectType, SeasonType, ProjectCreatePayload, ProjectPayload, SeasonCreatePayload (+6 more)
 
 ### Community 90 - "scripts"
-Cohesion: 0.14
-Nodes (14): scripts, build, build:bundle, dev, lint, preview, test, test:app-utils (+6 more)
+Cohesion: 0.13
+Nodes (15): scripts, build, build:bundle, dev, lint, prepare, preview, test (+7 more)
 
 ### Community 91 - "useAppAuthGoogleIdentity.ts"
 Cohesion: 0.23
 Nodes (13): getGoogleTrustedTypesPolicy(), getGoogleWindow(), GoogleIdentityNamespace, GoogleIdentityWindow, GoogleTrustedTypesPolicy, isLocalGoogleAuthHost(), isLocalHostname(), isSecureGoogleAuthHost() (+5 more)
 
-### Community 92 - "CadStepImportSummaryCard.tsx"
-Cohesion: 0.25
-Nodes (13): CadStepImportSummaryCard(), formatDate(), formatList(), readDiagnostics(), readNumber(), readString(), readStringList(), SUMMARY_WARNING_CODES (+5 more)
+### Community 92 - "CadStepReviewPanels.tsx"
+Cohesion: 0.19
+Nodes (14): CadStepImportSummaryCard(), formatDate(), formatList(), readDiagnostics(), readNumber(), readString(), readStringList(), SUMMARY_WARNING_CODES (+6 more)
 
 ### Community 93 - "MilestonesToolbar.tsx"
 Cohesion: 0.22
@@ -678,13 +681,13 @@ Nodes (5): Web agent instructions, Change and review, Contributing to Mission Co
 Cohesion: 0.24
 Nodes (9): clearWebSessionStateMock, restoreWebSessionMock, restoreStoredSession(), RestoreStoredSessionArgs, useAppAuthSessionBootstrap(), bootstrapAuth(), UseAppAuthSessionBootstrapArgs, useAppAuthSessionValidation() (+1 more)
 
-### Community 104 - "cadIntegrationTypes.ts"
-Cohesion: 0.12
-Nodes (21): CadStepTreePanel(), formatDate(), isGroupedPartInstance(), mappingTone(), partInstanceKey(), PartInstanceRow(), pluralize(), TreeCounts (+13 more)
+### Community 104 - "CadStepTreePanel.tsx"
+Cohesion: 0.31
+Nodes (10): CadStepTreePanel(), formatDate(), isGroupedPartInstance(), mappingTone(), partInstanceKey(), PartInstanceRow(), pluralize(), TreeCounts (+2 more)
 
-### Community 105 - "CadStepReviewPanels.tsx"
-Cohesion: 0.33
-Nodes (5): CadStepReviewPanels(), baseHierarchyReview(), baseHierarchyTargets(), renderHierarchyMarkup(), renderNodeCardMarkup()
+### Community 105 - "TimelineTaskBar.tsx"
+Cohesion: 0.47
+Nodes (5): hasTaskDependencies(), renderDependencyIndicator(), TimelineTaskBar(), TimelineTaskBarProps, TimelineTaskDependencyPresentation
 
 ### Community 106 - "branding.ts"
 Cohesion: 0.18
@@ -702,9 +705,9 @@ Nodes (9): Branch And Promotion Architecture, Client To Platform Flow, Cross-Rep
 Cohesion: 0.25
 Nodes (5): MILESTONE_TYPE_OPTIONS, MilestonesEventDetailEditor(), MilestonesEventDetailEditorProps, MilestonesMilestoneModalActions(), MilestonesMilestoneModalActionsProps
 
-### Community 110 - "react-dom"
-Cohesion: 0.23
-Nodes (6): react-dom, AppTopbar(), AppTopbarProps, APP_TOPBAR_SLOT_IDS, AppTopbarSlot, AppTopbarSlotPortal()
+### Community 110 - "AppTopbar.tsx"
+Cohesion: 0.50
+Nodes (3): AppTopbar(), AppTopbarProps, APP_TOPBAR_SLOT_IDS
 
 ### Community 111 - "CadDataPanels.tsx"
 Cohesion: 0.27
@@ -739,8 +742,8 @@ Cohesion: 0.31
 Nodes (7): CAD_SOURCE_MODEL_DOCS, CadConfigurationLifecycle, CadConfigurationLifecycleCopy, CadConfigurationSourceCopy, CadConfigurationSourceKind, getCadConfigurationLifecycleCopy(), getCadConfigurationSourceCopy()
 
 ### Community 120 - "workspaceTableChrome.tsx"
-Cohesion: 0.12
-Nodes (23): TaskDetailsAssignedList(), TaskDetailsAssignedListProps, TaskDetailsOverviewAssignedField(), TaskDetailsOverviewFieldProps, PersonFieldKind, TaskDetailsOverviewPersonField(), TaskDetailsOverviewPriorityField(), TaskDetailsOverviewSectionView() (+15 more)
+Cohesion: 0.15
+Nodes (20): TaskDetailsOverviewAssignedField(), TaskDetailsOverviewFieldProps, PersonFieldKind, TaskDetailsOverviewPersonField(), TaskDetailsOverviewPriorityField(), TaskDetailsOverviewSubsystemField(), TaskDetailsOverviewSummaryField(), TaskDetailsOverviewSummaryFieldProps (+12 more)
 
 ### Community 121 - "MilestonesView.tsx"
 Cohesion: 0.31
@@ -751,8 +754,8 @@ Cohesion: 0.25
 Nodes (7): MilestonesMilestoneModal(), MilestonesMilestoneModalProps, FIELD_STYLE, LABEL_STYLE, MILESTONE_TYPE_OPTIONS, MilestonesMilestoneModalFields(), MilestonesMilestoneModalFieldsProps
 
 ### Community 123 - "AppSidebarScopeMenuPopup.tsx"
-Cohesion: 0.36
-Nodes (6): AppSidebarPopupsProps, ADD_ROBOT_PROJECT_VALUE, AppSidebarScopeMenuPopup(), AppSidebarScopeMenuPopupProps, AppSidebarScopePanel, CREATE_SEASON_OPTION_VALUE
+Cohesion: 0.26
+Nodes (9): AppSidebarPopupsProps, ADD_ROBOT_PROJECT_VALUE, AppSidebarScopeMenuPopup(), AppSidebarScopeMenuPopupProps, AppSidebarScopePanel, CREATE_SEASON_OPTION_VALUE, ScopePanelConfig, scopePanels (+1 more)
 
 ### Community 124 - "MilestonesEventModalReadinessSection.tsx"
 Cohesion: 0.33
@@ -791,8 +794,8 @@ Cohesion: 0.43
 Nodes (4): scopeBootstrapRisks(), scopeBootstrapBySelection(), getSinglePersonFilterId(), isElevatedMemberRole()
 
 ### Community 134 - "TaskQueueBoardSection.tsx"
-Cohesion: 0.50
-Nodes (6): TaskQueueBoardSection(), shouldHideTaskQueueSummary(), useTaskQueueBoardLazyLoading(), useTaskQueueBoardScrollState(), useTaskQueueBoardZoomInput(), ZoomBoard
+Cohesion: 0.28
+Nodes (9): TaskQueueBoardSection(), TaskQueueView(), TaskQueueViewProps, shouldHideTaskQueueSummary(), useTaskQueueViewState(), useTaskQueueBoardLazyLoading(), useTaskQueueBoardScrollState(), useTaskQueueBoardZoomInput() (+1 more)
 
 ### Community 135 - "StructureModalShell.tsx"
 Cohesion: 0.17
@@ -823,8 +826,8 @@ Cohesion: 0.48
 Nodes (4): applyTaskEditIntentToDraft(), createDraftRelationId(), AppWorkspaceTaskModalActions, useAppWorkspaceTaskModalActions()
 
 ### Community 143 - "AppSidebarQuickActions.tsx"
-Cohesion: 0.24
-Nodes (6): AppProfileAssembly(), AppProfileAssemblyProps, getProfileFallbackInitial(), ProfileAvatar(), AppSidebarQuickActions(), AppSidebarQuickActionsProps
+Cohesion: 0.18
+Nodes (9): AppProfileAssembly(), AppProfileAssemblyProps, getProfileFallbackInitial(), ProfileAvatar(), AppSidebarQuickActions(), AppSidebarQuickActionsProps, AddAction, AppSidebarAddMenu() (+1 more)
 
 ### Community 145 - "helpContent.tsx"
 Cohesion: 0.29
@@ -903,7 +906,7 @@ Cohesion: 0.33
 Nodes (4): bootstrap, CapturedKanbanColumnsProps, mockKanbanColumns, task
 
 ### Community 167 - "sidebarProjectIcons.tsx"
-Cohesion: 0.23
+Cohesion: 0.25
 Nodes (10): getNamedProjectCategory(), getProjectIcon(), getProjectIconColor(), getProjectTypeIcon(), getRobotProjectIconColor(), NamedProjectCategory, PROJECT_CATEGORY_ICON_COLORS, PROJECT_TYPE_ICON_COLORS (+2 more)
 
 ### Community 168 - "STEP CAD Mapping MVP"
@@ -951,8 +954,8 @@ Cohesion: 0.50
 Nodes (3): Current settings, Prototype merge policy, Reinstatement
 
 ### Community 183 - "PULL_REQUEST_TEMPLATE.md"
-Cohesion: 0.50
-Nodes (3): Additional evidence, when applicable, Problem and resulting behavior, Validation
+Cohesion: 0.40
+Nodes (4): Additional evidence, when applicable, Problem and resulting behavior, Required AI workflow evidence, Validation
 
 ### Community 184 - "Deployment and Operations"
 Cohesion: 0.50
@@ -978,10 +981,6 @@ Nodes (3): AppWorkspaceReportSubmitActions, getUniqueValidMemberIds(), useAppWor
 Cohesion: 0.50
 Nodes (3): Class Naming Conventions, Layer Direction, Mission Control CSS Organization
 
-### Community 193 - "ManufacturingQueueView.tsx"
-Cohesion: 0.23
-Nodes (9): MANUFACTURING_BOARD_STATES, MANUFACTURING_STATUS_LABELS, ManufacturingKanbanBoard(), ManufacturingKanbanBoardProps, filterManufacturingItemsByProcessView(), MANUFACTURING_PROCESS_FILTER_OPTIONS, MANUFACTURING_VIEW_PROCESS, ManufacturingQueueView() (+1 more)
-
 ### Community 194 - "useModalPortalTarget.ts"
 Cohesion: 0.83
 Nodes (3): currentTarget(), subscribe(), useModalPortalTarget()
@@ -990,37 +989,33 @@ Nodes (3): currentTarget(), subscribe(), useModalPortalTarget()
 Cohesion: 0.67
 Nodes (3): recordById(), useWorkspaceDerivedData(), UseWorkspaceDerivedDataArgs
 
-### Community 205 - "TaskQueueView.tsx"
-Cohesion: 0.47
-Nodes (3): TaskQueueView(), TaskQueueViewProps, useTaskQueueViewState()
-
 ### Community 206 - "useAppWorkspaceReportModalActions.test.ts"
 Cohesion: 0.60
 Nodes (3): setup(), AppWorkspaceReportModalActions, useAppWorkspaceReportModalActions()
 
 ### Community 215 - "AppSidebar.tsx"
-Cohesion: 0.26
-Nodes (9): AppSidebar(), AppSidebarProps, AppSidebarPopups(), useAppSidebarNavigationModels(), SidebarScrollHints, useSidebarScrollHints(), clampPopupTop(), useAppSidebarPopupState() (+1 more)
+Cohesion: 0.29
+Nodes (8): AppSidebar(), AppSidebarProps, AppSidebarPopups(), useAppSidebarNavigationModels(), SidebarScrollHints, useSidebarScrollHints(), clampPopupTop(), useAppSidebarPopupState()
 
 ## Knowledge Gaps
-- **971 isolated node(s):** `$schema`, `type`, `type`, `type`, `type` (+966 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1252 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **37 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **981 isolated node(s):** `$schema`, `type`, `type`, `type`, `type` (+976 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1267 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **42 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `react` connect `react` to `attentionViewModel.ts`, `WorkspaceContentPanelsView.tsx`, `RosterView.tsx`, `interactiveTutorialTypes.ts`, `robotMapViewModel.ts`, `taskCalendarLayout.ts`, `TopbarResponsiveSearch.tsx`, `CadOnshapeIntegrationSection.tsx`, `workLogsViewState.ts`, `TaskDetailsHeaderSection.tsx`, `helpers.ts`, `TimelineView.tsx`, `taskTargeting.ts`, `cadStepApi.ts`, `riskViewModel.ts`, `CadStepHierarchyReviewPanel.tsx`, `WorkspaceViewShared.tsx`, `cadSnapshotDiffViewModel.ts`, `timelineViewFilters.ts`, `timelineViewModel.ts`, `AuthScreens.tsx`, `useAppWorkspaceModel.ts`, `TaskDetailsDependencyRowList.tsx`, `useKanbanDrag.ts`, `taskQueueViewState.ts`, `RiskMetrics.tsx`, `CadStepMappingReviewTable.tsx`, `TimelineGridBody.tsx`, `package.json`, `WorkspaceAssetModalsSection.tsx`, `TaskDetailsBlockersSectionView.tsx`, `timelineGridBodyUtils.ts`, `SubsystemEditorModal.tsx`, `CadSyncHistoryPanel.tsx`, `timelineTaskColors.ts`, `useTimelineViewData.ts`, `cadStepPreviewDiffItems.ts`, `overviewViewModel.ts`, `SubsystemsView.tsx`, `createBootstrap`, `AppSidebarProjectFooter.tsx`, `taskQueueViewStateLogic.ts`, `taskQueueKanbanBoardState.ts`, `RiskKanbanPanel.tsx`, `AppWorkspaceShellView.tsx`, `CadPartScene.tsx`, `AppSidebarSections.tsx`, `PartsView.tsx`, `timelineTestFixtures.ts`, `milestonesViewUtils.ts`, `timelineMilestoneData.ts`, `CadPartViewer.tsx`, `TaskEditorModalContent.tsx`, `ArtifactTable.tsx`, `taskQueueKanbanCardView.tsx`, `MilestonesToolbar.tsx`, `WorkspaceModals.tsx`, `RisksView.tsx`, `ManufacturingEditorFields.tsx`, `MilestonesEventDetailsModal.tsx`, `useAppAuthSessionLifecycle.ts`, `cadIntegrationTypes.ts`, `CadStepReviewPanels.tsx`, `MilestonesEventDetailEditor.tsx`, `react-dom`, `CadDataPanels.tsx`, `PurchasesView.tsx`, `App.tsx`, `useAppAuthSessionActions.ts`, `PartDefinitionEditorModal.tsx`, `AppSidebar.testUtils.ts`, `workspaceTableChrome.tsx`, `MilestonesView.tsx`, `MilestonesEventModal.tsx`, `AppSidebarScopeMenuPopup.tsx`, `MilestonesEventModalReadinessSection.tsx`, `AppErrorBoundary.tsx`, `TaskQueueBoardSection.tsx`, `StructureModalShell.tsx`, `PurchaseEditorModal.tsx`, `useAppWorkspaceRosterSeasonActions.test.ts`, `applyTaskEditIntentToDraft`, `AppSidebarQuickActions.tsx`, `AppSidebarScopeMenuPopup.test.ts`, `helpContent.tsx`, `attentionMentorQueue.test.ts`, `ManufacturingKanbanBoard.test.ts`, `useAppWorkspaceLoaderWorkspaceTypes.ts`, `useAppWorkspaceRosterMemberActions.test.ts`, `theme/index.ts`, `AppTopbar.test.ts`, `RisksView.test.ts`, `RisksViewKanbanDrop.test.ts`, `TaskQueueKanbanBoard.test.ts`, `sidebarProjectIcons.tsx`, `TimelineView.interactions.test.ts`, `useAppWorkspaceTaskSubmissionActions.ts`, `WorkstreamEditorModal.tsx`, `RosterView.test.ts`, `TaskCalendarDayDetails.test.ts`, `TaskQueueView.test.ts`, `useAppAuthGoogleButton.ts`, `useAppAuthSession.ts`, `useAppShell.ts`, `useAppWorkspaceReportRiskActions.ts`, `useAppWorkspaceReportSubmitActions.ts`, `ManufacturingQueueView.tsx`, `useModalPortalTarget.ts`, `useWorkspaceDerivedData.tsx`, `useAppWorkspaceReportModalActions.test.ts`, `useAppWorkspaceState.ts`, `AppSidebar.tsx`, `useAppWorkspaceDerivedWorkspace.ts`, `MaterialsView.tsx`?**
-  _High betweenness centrality (0.415) - this node is a cross-community bridge._
-- **Why does `devDependencies` connect `devDependencies` to `package.json`?**
-  _High betweenness centrality (0.016) - this node is a cross-community bridge._
+- **Why does `react` connect `react` to `attentionViewModel.ts`, `WorkspaceContentPanelsView.tsx`, `RosterView.tsx`, `interactiveTutorialTypes.ts`, `robotMapViewModel.ts`, `taskCalendarLayout.ts`, `TopbarResponsiveSearch.tsx`, `cadIntegrationTypes.ts`, `workLogsViewState.ts`, `TaskDetailsHeaderSection.tsx`, `helpers.ts`, `TimelineView.tsx`, `taskTargeting.ts`, `cadStepApi.ts`, `riskViewModel.ts`, `CadStepHierarchyReviewPanel.tsx`, `WorkspaceViewShared.tsx`, `cadSnapshotDiffViewModel.ts`, `timelineViewFilters.ts`, `timelineViewModel.ts`, `AuthScreens.tsx`, `useAppWorkspaceModel.ts`, `TaskDetailsDependencyRowList.tsx`, `useKanbanDrag.ts`, `taskQueueViewState.ts`, `RiskMetrics.tsx`, `CadStepMappingReviewTable.tsx`, `TimelineGridHeaderContent.tsx`, `package.json`, `WorkspaceAssetModalsSection.tsx`, `TaskDetailsAdvancedSectionView.tsx`, `timelineGridBodyUtils.ts`, `SubsystemEditorModal.tsx`, `CadSyncHistoryPanel.tsx`, `timelineTaskColors.ts`, `useTimelineViewData.ts`, `overviewViewModel.ts`, `SubsystemsView.tsx`, `createBootstrap`, `AppSidebarProjectFooter.tsx`, `taskQueueKanbanCardView.tsx`, `taskQueueKanbanBoardState.ts`, `RiskKanbanPanel.tsx`, `AppWorkspaceShellView.tsx`, `CadPartViewer.tsx`, `AppSidebarSections.tsx`, `PartsView.tsx`, `timelineTestFixtures.ts`, `milestonesViewUtils.ts`, `timelineMilestoneData.ts`, `TaskEditorModalContent.tsx`, `ArtifactTable.tsx`, `taskQueueViewStateLogic.ts`, `CadStepReviewPanels.tsx`, `MilestonesToolbar.tsx`, `WorkspaceModals.tsx`, `RisksView.tsx`, `ManufacturingEditorFields.tsx`, `MilestonesEventDetailsModal.tsx`, `useAppAuthSessionLifecycle.ts`, `CadStepTreePanel.tsx`, `TimelineTaskBar.tsx`, `MilestonesEventDetailEditor.tsx`, `CadDataPanels.tsx`, `PurchasesView.tsx`, `App.tsx`, `useAppAuthSessionActions.ts`, `PartDefinitionEditorModal.tsx`, `AppSidebar.testUtils.ts`, `workspaceTableChrome.tsx`, `MilestonesView.tsx`, `MilestonesEventModal.tsx`, `AppSidebarScopeMenuPopup.tsx`, `MilestonesEventModalReadinessSection.tsx`, `AppErrorBoundary.tsx`, `TaskQueueBoardSection.tsx`, `StructureModalShell.tsx`, `PurchaseEditorModal.tsx`, `useAppWorkspaceRosterSeasonActions.test.ts`, `applyTaskEditIntentToDraft`, `AppSidebarQuickActions.tsx`, `AppSidebarScopeMenuPopup.test.ts`, `helpContent.tsx`, `attentionMentorQueue.test.ts`, `ManufacturingKanbanBoard.test.ts`, `useAppWorkspaceLoaderWorkspaceTypes.ts`, `useAppWorkspaceRosterMemberActions.test.ts`, `theme/index.ts`, `AppTopbar.test.ts`, `RisksView.test.ts`, `RisksViewKanbanDrop.test.ts`, `TaskQueueKanbanBoard.test.ts`, `sidebarProjectIcons.tsx`, `TimelineView.interactions.test.ts`, `useAppWorkspaceTaskSubmissionActions.ts`, `WorkstreamEditorModal.tsx`, `RosterView.test.ts`, `TaskCalendarDayDetails.test.ts`, `TaskQueueView.test.ts`, `useAppAuthGoogleButton.ts`, `useAppAuthSession.ts`, `useAppShell.ts`, `useAppWorkspaceReportRiskActions.ts`, `useAppWorkspaceReportSubmitActions.ts`, `useModalPortalTarget.ts`, `useWorkspaceDerivedData.tsx`, `useAppWorkspaceDerivedSelection.ts`, `useAppWorkspaceReportModalActions.test.ts`, `useAppWorkspaceTaskMutationActions.ts`, `AppSidebar.tsx`, `HelpView.tsx`, `ManufacturingQueueView.test.ts`, `WorkspaceOverviewViews.test.ts`?**
+  _High betweenness centrality (0.442) - this node is a cross-community bridge._
 - **Why does `scripts` connect `scripts` to `package.json`?**
   _High betweenness centrality (0.009) - this node is a cross-community bridge._
 - **What connects `$schema`, `type`, `type` to the rest of the system?**
-  _971 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _981 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `attentionViewModel.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.05568268497330282 - nodes in this community are weakly interconnected._
 - **Should `WorkspaceContentPanelsView.tsx` be split into smaller, more focused modules?**
   _Cohesion score 0.055944055944055944 - nodes in this community are weakly interconnected._
 - **Should `auth/session.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.07330618289522399 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.0712280701754386 - nodes in this community are weakly interconnected._
+- **Should `type` be split into smaller, more focused modules?**
+  _Cohesion score 0.048530416951469584 - nodes in this community are weakly interconnected._
