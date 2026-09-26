@@ -1,6 +1,6 @@
 import { useCatalogEditorLifecycle } from "./useCatalogEditorLifecycle";
 import type { WorkspaceLoader } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback } from "react";
 
 import { buildEmptyMechanismPayload } from "@/lib/appUtils/payloadBuilders";
 import { toErrorMessage } from "@/lib/appUtils/common";
@@ -9,6 +9,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import type { MechanismPayload } from "@/types/payloads";
 import type { MechanismRecord } from "@/types/recordsOrganization";
+import { useCatalogDraftEditor } from "./useCatalogDraftEditor";
 
 export function useMechanismActions({ bootstrap, handleUnauthorized, loadWorkspace, scopedBootstrap, setDataMessage, selectedProjectId, selectedSeasonId }: {
   selectedSeasonId: string | null;
@@ -19,41 +20,27 @@ export function useMechanismActions({ bootstrap, handleUnauthorized, loadWorkspa
   scopedBootstrap: BootstrapPayload;
   setDataMessage: (message: string | null) => void;
 }) {
-  const [mechanismModalMode, setMechanismModalMode] =
-    useState<"create" | "edit" | null>(null);
-  const [activeMechanismId, setActiveMechanismId] = useState<string | null>(null);
-  const [mechanismDraft, setMechanismDraft] = useState<MechanismPayload>(
-    buildEmptyMechanismPayload(EMPTY_BOOTSTRAP),
-  );
   const { beginOperation, resetEditor, isSaving: isSavingMechanism, isDeleting: isDeletingMechanism } =
     useCatalogEditorLifecycle({ loadWorkspace, selectedProjectId, selectedSeasonId });
-  const openCreateMechanismModal = useCallback(() => {
-    resetEditor();
-    setActiveMechanismId(null);
-    setMechanismDraft(buildEmptyMechanismPayload(scopedBootstrap));
-    setMechanismModalMode("create");
-  }, [scopedBootstrap, resetEditor]);
-
-  const openEditMechanismModal = useCallback((item: MechanismRecord) => {
-    resetEditor();
-    setActiveMechanismId(item.id);
-    setMechanismDraft(item as MechanismPayload);
-    setMechanismModalMode("edit");
-  }, [resetEditor]);
-
-  const closeMechanismModal = useCallback(() => {
-    resetEditor();
-    setMechanismModalMode(null);
-    setActiveMechanismId(null);
-  }, [resetEditor]);
-
-  useEffect(() => closeMechanismModal(), [closeMechanismModal, selectedProjectId, selectedSeasonId]);
-
-  useEffect(() => {
-    if (bootstrap === EMPTY_BOOTSTRAP || (mechanismModalMode === "edit" && !scopedBootstrap.mechanisms.some((item) => item.id === activeMechanismId))) {
-      closeMechanismModal();
-    }
-  }, [activeMechanismId, bootstrap, closeMechanismModal, mechanismModalMode, scopedBootstrap]);
+  const makeCreateMechanismDraft = useCallback(() => buildEmptyMechanismPayload(scopedBootstrap), [scopedBootstrap]);
+  const {
+    modalMode: mechanismModalMode,
+    activeRecordId: activeMechanismId,
+    draft: mechanismDraft,
+    setDraft: setMechanismDraft,
+    openCreate: openCreateMechanismModal,
+    openEdit: openEditMechanismModal,
+    close: closeMechanismModal,
+  } = useCatalogDraftEditor({
+    bootstrapIsEmpty: bootstrap === EMPTY_BOOTSTRAP,
+    makeCreateDraft: makeCreateMechanismDraft,
+    makeInitialDraft: () => buildEmptyMechanismPayload(EMPTY_BOOTSTRAP),
+    records: scopedBootstrap.mechanisms,
+    resetOperation: resetEditor,
+    selectedProjectId,
+    selectedSeasonId,
+    toDraft: (item: MechanismRecord) => item as MechanismPayload,
+  });
 
   const handleMechanismSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();

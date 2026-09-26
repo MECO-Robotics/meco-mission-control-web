@@ -1,6 +1,6 @@
 import { useCatalogEditorLifecycle } from "./useCatalogEditorLifecycle";
 import type { WorkspaceLoader } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback } from "react";
 
 import { buildEmptyWorkstreamPayload } from "@/lib/appUtils/payloadBuilders";
 import { toErrorMessage } from "@/lib/appUtils/common";
@@ -9,7 +9,7 @@ import { createWorkstreamRecord, updateWorkstreamRecord } from "@/lib/auth/recor
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import type { WorkstreamPayload } from "@/types/payloads";
-import type { WorkstreamRecord } from "@/types/recordsOrganization";
+import { useCatalogDraftEditor } from "./useCatalogDraftEditor";
 
 export function useWorkstreamActions({ bootstrap, handleUnauthorized, loadWorkspace, scopedBootstrap, selectedProjectId, setDataMessage, selectedSeasonId }: {
   selectedSeasonId: string | null;
@@ -20,45 +20,30 @@ export function useWorkstreamActions({ bootstrap, handleUnauthorized, loadWorksp
   selectedProjectId: string | null;
   setDataMessage: (message: string | null) => void;
 }) {
-  const [workstreamModalMode, setWorkstreamModalMode] =
-    useState<"create" | "edit" | null>(null);
-  const [activeWorkstreamId, setActiveWorkstreamId] = useState<string | null>(null);
-  const [workstreamDraft, setWorkstreamDraft] = useState<WorkstreamPayload>(
-    buildEmptyWorkstreamPayload(EMPTY_BOOTSTRAP),
-  );
   const { beginOperation, resetEditor, isSaving: isSavingWorkstream } =
     useCatalogEditorLifecycle({ loadWorkspace, selectedProjectId, selectedSeasonId });
-  const openCreateWorkstreamModal = useCallback(() => {
-    resetEditor();
-    setActiveWorkstreamId(null);
-    setWorkstreamDraft(
-      buildEmptyWorkstreamPayload(scopedBootstrap, {
-        projectId: selectedProjectId ?? undefined,
-      }),
-    );
-    setWorkstreamModalMode("create");
-  }, [scopedBootstrap, selectedProjectId, resetEditor]);
-
-  const openEditWorkstreamModal = useCallback((item: WorkstreamRecord) => {
-    resetEditor();
-    setActiveWorkstreamId(item.id);
-    setWorkstreamDraft(workstreamToPayload(item));
-    setWorkstreamModalMode("edit");
-  }, [resetEditor]);
-
-  const closeWorkstreamModal = useCallback(() => {
-    resetEditor();
-    setWorkstreamModalMode(null);
-    setActiveWorkstreamId(null);
-  }, [resetEditor]);
-
-  useEffect(() => closeWorkstreamModal(), [closeWorkstreamModal, selectedProjectId, selectedSeasonId]);
-
-  useEffect(() => {
-    if (bootstrap === EMPTY_BOOTSTRAP || (workstreamModalMode === "edit" && !scopedBootstrap.workstreams.some((item) => item.id === activeWorkstreamId))) {
-      closeWorkstreamModal();
-    }
-  }, [activeWorkstreamId, bootstrap, closeWorkstreamModal, workstreamModalMode, scopedBootstrap]);
+  const makeCreateWorkstreamDraft = useCallback(() =>
+    buildEmptyWorkstreamPayload(scopedBootstrap, {
+      projectId: selectedProjectId ?? undefined,
+    }), [scopedBootstrap, selectedProjectId]);
+  const {
+    modalMode: workstreamModalMode,
+    activeRecordId: activeWorkstreamId,
+    draft: workstreamDraft,
+    setDraft: setWorkstreamDraft,
+    openCreate: openCreateWorkstreamModal,
+    openEdit: openEditWorkstreamModal,
+    close: closeWorkstreamModal,
+  } = useCatalogDraftEditor({
+    bootstrapIsEmpty: bootstrap === EMPTY_BOOTSTRAP,
+    makeCreateDraft: makeCreateWorkstreamDraft,
+    makeInitialDraft: () => buildEmptyWorkstreamPayload(EMPTY_BOOTSTRAP),
+    records: scopedBootstrap.workstreams,
+    resetOperation: resetEditor,
+    selectedProjectId,
+    selectedSeasonId,
+    toDraft: workstreamToPayload,
+  });
 
   const handleWorkstreamSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
