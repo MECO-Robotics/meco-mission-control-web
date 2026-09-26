@@ -7,7 +7,6 @@ export type {
   SessionUser,
 } from "./auth/types";
 export {
-  fetchAuthConfig,
   isLocalGoogleAuthHost,
   isSecureGoogleAuthHost,
   isUsingLocalGoogleClientIdOverride,

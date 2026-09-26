@@ -6,7 +6,6 @@ import type { DropdownOption } from "../model/workspaceTypes";
 
 const FILTER_CHANGE_ANIMATION_DURATION_MS = 220;
 
-export const WORKSPACE_COMPACT_BREAKPOINT = 900;
 export type FilterSelection = string[];
 
 type FilterMotionPart = boolean | number | string | null | undefined | readonly string[];
@@ -136,29 +135,6 @@ export function useFilterChangeMotionClass(parts: readonly FilterMotionPart[]) {
   }, [signature]);
 
   return `filter-results-motion${isAnimating ? " is-filtering" : ""}`;
-}
-
-export function useWorkspaceCompactMode(breakpoint = WORKSPACE_COMPACT_BREAKPOINT) {
-  const [isCompact, setIsCompact] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const updateCompactState = () => {
-      setIsCompact(window.innerWidth <= breakpoint);
-    };
-
-    updateCompactState();
-    window.addEventListener("resize", updateCompactState);
-
-    return () => {
-      window.removeEventListener("resize", updateCompactState);
-    };
-  }, [breakpoint]);
-
-  return isCompact;
 }
 
 export function formatFilterSelectionLabel(

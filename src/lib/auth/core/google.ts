@@ -1,5 +1,4 @@
 import type { AuthConfig } from "../types";
-import { requestApi } from "./request";
 
 let googleScriptPromise: Promise<void> | null = null;
 
@@ -62,32 +61,6 @@ export function isSecureGoogleAuthHost() {
   }
 
   return isLocalHostname(window.location.hostname) || window.location.protocol === "https:";
-}
-
-export function fetchAuthConfig() {
-  return requestApi<unknown>("/auth/config").then((payload) => {
-    if (!payload || typeof payload !== "object") {
-      throw new Error("The server returned an invalid authentication configuration.");
-    }
-
-    const candidate = payload as Record<string, unknown>;
-    if (
-      typeof candidate.enabled !== "boolean" ||
-      (typeof candidate.googleClientId !== "string" && candidate.googleClientId !== null) ||
-      typeof candidate.hostedDomain !== "string" ||
-      typeof candidate.emailEnabled !== "boolean" ||
-      (candidate.devBypassAvailable !== undefined &&
-        typeof candidate.devBypassAvailable !== "boolean")
-    ) {
-      throw new Error("The server returned an invalid authentication configuration.");
-    }
-
-    const config = candidate as unknown as AuthConfig;
-    return {
-      ...config,
-      devBypassAvailable: config.devBypassAvailable ?? false,
-    };
-  });
 }
 
 export function resolveGoogleClientId(config: AuthConfig | null) {

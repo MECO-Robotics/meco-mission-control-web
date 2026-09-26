@@ -137,3 +137,5 @@ Use browser QA for visible UI changes, especially navigation, modal, drag/drop,
 and responsive layout work.
 
 Google Identity Services loading, local client-ID overrides and host checks live in `src/lib/auth/core/google.ts`. App hooks consume that owner and the shared `Window.google` declaration; failed script loads are removed so a later attempt can retry.
+
+Import feature owners directly instead of adding forwarding modules. When checking for dead code, distinguish runtime callers from tests and internal uses; an unused export alone does not establish that its implementation is unused. Authentication configuration is fetched by `src/app/hooks/auth/useAppAuthSessionConfig.ts`.

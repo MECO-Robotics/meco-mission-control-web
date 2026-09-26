@@ -1,5 +1,3 @@
-jest.mock("../request", () => ({ requestApi: jest.fn() }));
-
 class Script extends EventTarget {
   src = "";
   async = false;

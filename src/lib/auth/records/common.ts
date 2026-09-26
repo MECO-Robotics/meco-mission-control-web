@@ -22,8 +22,3 @@ export async function requestItem<TItem, TPayload>(
 
   return response.item;
 }
-
-export async function requestItems<TItem>(path: string, onUnauthorized?: () => void) {
-  const response = await requestApi<{ items: TItem[] }>(path, {}, onUnauthorized);
-  return response.items;
-}
