@@ -21,3 +21,7 @@ For coordinated local contract work, run `PLATFORM_BOOTSTRAP_CONTRACT_SOURCE_PAT
 For UI changes, exercise affected behavior in the local application. Changes to transport or bootstrap data must update platform and relevant mobile consumers. Keep tests focused on outcomes; do not preserve obsolete wiring with source-layout assertions.
 
 CI continues to validate PRs and main/development pushes. Its results remain visible, but merge approval, required-status and workflow-digest gates are disabled during prototype development. Keep changes reviewable through PRs. Deployment approvals are unchanged. Reinstatement instructions and saved rules are in the [prototype merge policy](docs/prototype-merge-policy.md).
+
+## Local code graph
+
+Graphify output is generated local context, not tracked source. Use `graphify query "<question>"` to inspect an existing `graphify-out/graph.json`, and run `graphify update .` after changing code. If a fresh checkout has no graph, `graphify update .` builds its AST graph. Keep the graph, reports, caches and dated backups under the ignored `graphify-out/` directory; Git history owns source history.

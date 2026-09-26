@@ -110,20 +110,3 @@
   background: rgba(148, 163, 184, 0.16);
   color: #dbeafe;
 }
-
-.profile-menu-popover {
-  position: absolute;
-  top: calc(100% + 0.45rem);
-  right: 0;
-  min-width: 220px;
-  padding: 0.35rem;
-  border: 1px solid rgba(15, 28, 52, 0.1);
-  border-radius: 14px;
-  background: var(--official-white);
-  box-shadow: 0 14px 30px rgba(16, 24, 40, 0.14);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-4px);
-  transition: opacity 160ms ease, transform 160ms ease, visibility 160ms ease;
-  z-index: 1010;
-}
