@@ -22,8 +22,6 @@ export function useAppWorkspaceDerivedWorkspace(
     workLogModalMode,
     qaReportModalMode,
     milestoneReportModalMode,
-    purchaseModalMode,
-    manufacturingModalMode,
 
     isAddSeasonPopupOpen,
     robotProjectModalMode,
@@ -85,8 +83,6 @@ export function useAppWorkspaceDerivedWorkspace(
       workLogModalMode ||
       qaReportModalMode ||
       milestoneReportModalMode ||
-      purchaseModalMode ||
-      manufacturingModalMode ||
 
       isAddSeasonPopupOpen ||
       robotProjectModalMode,

@@ -301,11 +301,11 @@ App.tsx
 
 The workspace controller is intentionally split:
 
-- `useAppWorkspaceState`: local UI state, selected tab/view, selected season/project/member, task/report/purchase/manufacturing modal state, toast state
+- `useAppWorkspaceState`: local UI state, selected tab/view, selected season/project/member, task/report modal state, toast state
 - `useAppWorkspaceDerived`: derived selections, filtered records, scope helpers
 - `useAppWorkspaceLoader`: workspace bootstrap loading, unauthorized handling, uploads, refresh helpers
 - `useAppWorkspaceTaskActions`: task/event/milestone-oriented mutations
-- `src/app/workspaceCatalog`: material and six structure editors own their drafts, open/close state, and commands; `useAppWorkspaceModel` composes them with explicit dependencies. Refresh preserves unsaved drafts; missing records or a season/project change close affected structure editors. Their pending writes cannot close a newer editor or replace its error/busy state.
+- `src/app/workspaceCatalog`: material, purchase, manufacturing, and six structure editors own their drafts, open/close state, and commands; `useAppWorkspaceModel` composes them with explicit dependencies. Refresh preserves unsaved drafts; missing records or a season/project change close affected catalog editors. Their pending writes cannot close a newer editor or replace its error/busy state.
 - `useAppWorkspaceReportActions`: QA/report mutations
 - `useAppWorkspaceRosterActions`: member/roster mutations
 - `AppWorkspaceShellView`: derives navigation and composes actual shell/content/modal props once, without intermediate key catalogs

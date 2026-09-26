@@ -26,22 +26,30 @@ export function useCatalogEditorLifecycle({ loadWorkspace, selectedProjectId, se
     setPending(null);
   }, []);
 
+  const captureWorkspace = useCallback(() => {
+    const workspace = workspaceVersion.current;
+    const session = getSessionGeneration();
+    const local = getLocalWorkspaceGeneration();
+    const isCurrent = () => workspace === workspaceVersion.current &&
+      session === getSessionGeneration() && local === getLocalWorkspaceGeneration();
+    return {
+      isCurrent,
+      async refresh() {
+        if (isCurrent()) await latestLoadWorkspace.current(undefined, isCurrent);
+      },
+    };
+  }, []);
+
   const beginOperation = useCallback((kind: "save" | "delete" = "save") => {
     if (busy.current) return null;
     busy.current = true;
     setPending(kind);
     const editor = editorVersion.current;
-    const workspace = workspaceVersion.current;
-    const session = getSessionGeneration();
-    const local = getLocalWorkspaceGeneration();
-    const canRefresh = () => workspace === workspaceVersion.current &&
-      session === getSessionGeneration() && local === getLocalWorkspaceGeneration();
-    const isCurrent = () => canRefresh() && editor === editorVersion.current;
+    const workspace = captureWorkspace();
+    const isCurrent = () => workspace.isCurrent() && editor === editorVersion.current;
     return {
       isCurrent,
-      async refresh() {
-        if (canRefresh()) await latestLoadWorkspace.current(undefined, canRefresh);
-      },
+      refresh: workspace.refresh,
       finish() {
         if (isCurrent()) {
           busy.current = false;
@@ -49,7 +57,7 @@ export function useCatalogEditorLifecycle({ loadWorkspace, selectedProjectId, se
         }
       },
     };
-  }, []);
+  }, [captureWorkspace]);
 
-  return { beginOperation, resetEditor, isSaving: pending === "save", isDeleting: pending === "delete" };
+  return { captureWorkspace, beginOperation, resetEditor, isSaving: pending === "save", isDeleting: pending === "delete" };
 }

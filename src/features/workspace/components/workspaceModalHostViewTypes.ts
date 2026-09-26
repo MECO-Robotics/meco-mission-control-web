@@ -1,3 +1,5 @@
+import type { ManufacturingEditorModal } from "../modals/purchaseManufacturing/ManufacturingEditorModal";
+import type { PurchaseEditorModal } from "../modals/purchaseManufacturing/PurchaseEditorModal";
 import type { MechanismEditorModal } from "../modals/structure/MechanismEditorModal";
 import type { SubsystemEditorModal } from "../modals/structure/SubsystemEditorModal";
 import type { PartInstanceEditorModal } from "../modals/assetCatalog/PartInstanceEditorModal";
@@ -6,14 +8,16 @@ import type { WorkstreamEditorModal } from "../modals/assetCatalog/WorkstreamEdi
 import type { ArtifactEditorModal } from "../modals/assetCatalog/ArtifactEditorModal";
 import type { ComponentProps, Dispatch, FormEvent, SetStateAction } from "react";
 
-import type { ManufacturingModalMode, MilestoneReportModalMode, PurchaseModalMode, QaReportModalMode, TaskModalMode, WorkLogModalMode } from "@/features/workspace/shared/model/workspaceModalModes";
-import type { ManufacturingItemPayload, PurchaseItemPayload, QaReportPayload, TaskPayload, TestResultPayload, WorkLogPayload } from "@/types/payloads";
+import type { MilestoneReportModalMode, QaReportModalMode, TaskModalMode, WorkLogModalMode } from "@/features/workspace/shared/model/workspaceModalModes";
+import type { QaReportPayload, TaskPayload, TestResultPayload, WorkLogPayload } from "@/types/payloads";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 
 import type { MaterialEditorModal } from "../modals/assetCatalog/MaterialEditorModal";
 
 export interface WorkspaceModalHostViewProps {
+  manufacturingEditor: Omit<ComponentProps<typeof ManufacturingEditorModal>, "bootstrap" | "manufacturingModalMode"> & { manufacturingModalMode: "create" | "edit" | null };
+  purchaseEditor: Omit<ComponentProps<typeof PurchaseEditorModal>, "bootstrap" | "purchaseModalMode"> & { purchaseModalMode: "create" | "edit" | null };
   mechanismEditor: Omit<ComponentProps<typeof MechanismEditorModal>, "bootstrap" | "requestPhotoUpload" | "mechanismModalMode"> & { mechanismModalMode: "create" | "edit" | null };
   subsystemEditor: Omit<ComponentProps<typeof SubsystemEditorModal>, "bootstrap" | "requestPhotoUpload" | "subsystemModalMode"> & { subsystemModalMode: "create" | "edit" | null };
   partInstanceEditor: Omit<ComponentProps<typeof PartInstanceEditorModal>, "bootstrap" | "requestPhotoUpload" | "partDefinitionDraftsById" | "partInstanceModalMode"> & { partInstanceModalMode: "create" | "edit" | null };
@@ -27,8 +31,6 @@ export interface WorkspaceModalHostViewProps {
   mechanismsById: Record<string, BootstrapPayload["mechanisms"][number]>;
   partDefinitionsById: Record<string, BootstrapPayload["partDefinitions"][number]>;
   partInstancesById: Record<string, BootstrapPayload["partInstances"][number]>;
-  closeManufacturingModal: () => void;
-  closePurchaseModal: () => void;
   closeQaReportModal: () => void;
   closeMilestoneReportModal: () => void;
   closeTimelineTaskDetailsModal: () => void;
@@ -42,8 +44,6 @@ export interface WorkspaceModalHostViewProps {
   milestonesById: Record<string, BootstrapPayload["milestones"][number]>;
   handleDeleteTask: (taskId: string) => Promise<void>;
   handleResolveTaskBlocker: (blockerId: string) => Promise<void>;
-  handleManufacturingSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
-  handlePurchaseSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
   handleQaReportSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
   handleMilestoneReportSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
   handleWorkLogSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
@@ -51,18 +51,11 @@ export interface WorkspaceModalHostViewProps {
   onOpenTaskEditFromTimelineDetails: (task: TaskRecord) => void;
   openTaskDetailsModal: (task: TaskRecord) => void;
   isDeletingTask: boolean;
-  isSavingManufacturing: boolean;
-  isSavingPurchase: boolean;
   isSavingQaReport: boolean;
   isSavingMilestoneReport: boolean;
   isSavingWorkLog: boolean;
   isSavingTask: boolean;
-  manufacturingDraft: ManufacturingItemPayload;
-  manufacturingModalMode: ManufacturingModalMode;
   mentors: BootstrapPayload["members"];
-  purchaseDraft: PurchaseItemPayload;
-  purchaseFinalCost: string;
-  purchaseModalMode: PurchaseModalMode;
   qaReportDraft: QaReportPayload;
   qaReportModalMode: QaReportModalMode;
   milestoneReportDraft: TestResultPayload;
@@ -70,9 +63,6 @@ export interface WorkspaceModalHostViewProps {
   milestoneReportModalMode: MilestoneReportModalMode;
   workLogDraft: WorkLogPayload;
   workLogModalMode: WorkLogModalMode;
-  setManufacturingDraft: Dispatch<SetStateAction<ManufacturingItemPayload>>;
-  setPurchaseDraft: Dispatch<SetStateAction<PurchaseItemPayload>>;
-  setPurchaseFinalCost: (value: string) => void;
   setQaReportDraft: Dispatch<SetStateAction<QaReportPayload>>;
   setMilestoneReportDraft: Dispatch<SetStateAction<TestResultPayload>>;
   setMilestoneReportFindings: (value: string) => void;

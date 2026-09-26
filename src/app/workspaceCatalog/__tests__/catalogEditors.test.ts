@@ -1,3 +1,10 @@
+import { useMaterialEditor } from "../materialActions";
+import { useManufacturingActions } from "../manufacturingActions";
+import { usePurchaseActions } from "../purchaseActions";
+import { buildEmptyMaterialPayload, buildEmptyPurchasePayload } from "@/lib/appUtils/payloadBuilders";
+import { buildEmptyManufacturingPayload } from "@/lib/appUtils/manufacturing";
+import { beginSessionChange } from "@/lib/auth/core/sessionStorage";
+import * as production from "@/lib/auth/records/production";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useArtifactActions } from "../artifactActions";
 import { useWorkstreamActions } from "../workstreamActions";
@@ -14,6 +21,7 @@ jest.mock("react", () => ({ ...jest.requireActual("react"), useState: jest.fn(),
 jest.mock("@/lib/auth/records/inventory");
 jest.mock("@/lib/auth/records/parts");
 jest.mock("@/lib/auth/records/structure");
+jest.mock("@/lib/auth/records/production");
 
 // Match React's stable setters, callbacks and dependency-triggered effects while
 // exercising the owners directly, as the existing catalog tests do.
@@ -63,6 +71,9 @@ const cases = [
   { name: "partInstance", useOwner: usePartInstanceActions, collection: "partInstances", create: parts.createPartInstanceRecord, update: parts.updatePartInstanceRecord },
   { name: "subsystem", useOwner: useSubsystemActions, collection: "subsystems", create: structure.createSubsystemRecord, update: structure.updateSubsystemRecord },
   { name: "mechanism", useOwner: useMechanismActions, collection: "mechanisms", create: structure.createMechanismRecord, update: structure.updateMechanismRecord },
+  { name: "purchase", useOwner: usePurchaseActions, collection: "purchaseItems", create: production.createPurchaseItemRecord, update: production.updatePurchaseItemRecord },
+  { name: "manufacturing", useOwner: useManufacturingActions, collection: "manufacturingItems", create: production.createManufacturingItemRecord, update: production.updateManufacturingItemRecord },
+  { name: "material", useOwner: useMaterialEditor, collection: "materials", create: inventory.createMaterialRecord, update: inventory.updateMaterialRecord },
 ] as const;
 
 beforeEach(() => jest.resetAllMocks());
@@ -73,7 +84,7 @@ function setup(item: typeof cases[number]) {
   const bootstrap = createBootstrap();
   const dependencies = {
     bootstrap, scopedBootstrap: bootstrap, selectedProjectId: bootstrap.projects[0].id,
-    selectedSeasonId: bootstrap.projects[0].seasonId,
+    selectedSeasonId: bootstrap.projects[0].seasonId, signedInMemberId: bootstrap.members.at(-1)?.id ?? null,
     handleUnauthorized: jest.fn(), loadWorkspace: jest.fn(async () => {}), setDataMessage: jest.fn(), setBootstrap: jest.fn(),
   };
   const cap = item.name[0].toUpperCase() + item.name.slice(1);
@@ -81,17 +92,21 @@ function setup(item: typeof cases[number]) {
   const read = () => {
     const owner = render(() => useOwner(dependencies));
     return {
+      raw: owner,
       mode: owner[`${item.name}ModalMode`], draft: owner[`${item.name}Draft`] as Draft,
       saving: owner[`isSaving${cap}`],
       setDraft: owner[`set${cap}Draft`] as (draft: Draft) => void,
       openEdit: owner[`openEdit${cap}Modal`] as (record: Draft) => void,
-      openCreate: () => (owner[`openCreate${cap}Modal`] as (...args: unknown[]) => void)(...(item.name === "artifact" ? ["document"] : item.name === "partInstance" ? [bootstrap.mechanisms[0]] : [])),
+      openCreate: () => (owner[`openCreate${cap}Modal`] as (...args: unknown[]) => void)(...(item.name === "artifact" ? ["document"] : item.name === "partInstance" ? [bootstrap.mechanisms[0]] : item.name === "manufacturing" ? ["cnc"] : [])),
       close: owner[`close${cap}Modal`] as () => void,
       submit: () => (owner[`handle${cap}Submit`] as (event: unknown) => Promise<void>)({ preventDefault: jest.fn() }),
     };
   };
   read();
-  const record = { ...bootstrap[item.collection][0], id: "editor-record", projectId: bootstrap.projects[0].id, title: "Record", name: "Record", risks: [] } as Draft;
+  const defaults = item.name === "purchase" ? buildEmptyPurchasePayload(bootstrap)
+    : item.name === "manufacturing" ? buildEmptyManufacturingPayload(bootstrap, "cnc")
+    : item.name === "material" ? buildEmptyMaterialPayload() : {};
+  const record = { ...defaults, ...bootstrap[item.collection][0], id: "editor-record", projectId: bootstrap.projects[0].id, title: "Record", name: "Record", risks: [] } as Draft;
   dependencies.bootstrap = { ...bootstrap, [item.collection]: [record] };
   dependencies.scopedBootstrap = dependencies.bootstrap;
   jest.mocked(item.create).mockResolvedValue(record as never);
@@ -169,4 +184,67 @@ describe.each(cases)("$name editor ownership", (item) => {
     read();
     expect(read().mode).toBeNull();
   });
+});
+
+it("preserves material create reorder points and converts edit records to draft payloads", async () => {
+  const { read, record } = setup(cases.find((item) => item.name === "material")!);
+  read().openCreate();
+  read().setDraft({ ...read().draft, name: "Aluminum", onHandQuantity: 9, reorderPoint: 99 });
+  await read().submit();
+  expect(inventory.createMaterialRecord).toHaveBeenCalledWith(expect.objectContaining({ name: "Aluminum", reorderPoint: 4 }), expect.any(Function));
+  read().openEdit(record);
+  expect(read().draft).not.toHaveProperty("id");
+});
+
+it.each(["", "0", "123.45"])("preserves purchase final-cost entry %j and derives the title from the part", async (finalCost) => {
+  const { read, dependencies } = setup(cases.find((item) => item.name === "purchase")!);
+  read().openCreate();
+  const editor = read().raw as ReturnType<typeof usePurchaseActions>;
+  editor.setPurchaseFinalCost(finalCost);
+  read().setDraft({ ...read().draft, title: "Stale free text" });
+  await read().submit();
+  expect(production.createPurchaseItemRecord).toHaveBeenCalledWith(expect.objectContaining({
+    title: dependencies.bootstrap.partDefinitions[0].name,
+    finalCost: finalCost === "" ? undefined : Number(finalCost),
+  }), dependencies.handleUnauthorized);
+});
+
+it("keeps the signed-in CNC requester and validates/filter linked part instances before submission", async () => {
+  const { read, dependencies } = setup(cases.find((item) => item.name === "manufacturing")!);
+  read().openCreate();
+  expect(read().draft.requestedById).toBe(dependencies.signedInMemberId);
+  const valid = dependencies.bootstrap.partInstances[0];
+  dependencies.bootstrap = { ...dependencies.bootstrap, partInstances: [...dependencies.bootstrap.partInstances, { ...valid, id: "other-part", partDefinitionId: "other-definition" }] };
+  read().setDraft({ ...read().draft, partInstanceId: null, partInstanceIds: ["missing", "other-part"], inHouse: true });
+  await read().submit();
+  expect(production.createManufacturingItemRecord).not.toHaveBeenCalled();
+  expect(dependencies.setDataMessage).toHaveBeenLastCalledWith("Select at least one part instance for this manufacturing job.");
+  read().setDraft({ ...read().draft, process: "fabrication", title: "Stale title", subsystemId: "wrong", partInstanceIds: ["missing", valid.id, "other-part"], batchLabel: "  batch  " });
+  await read().submit();
+  expect(production.createManufacturingItemRecord).toHaveBeenCalledWith(expect.objectContaining({
+    title: dependencies.bootstrap.partDefinitions[0].name, subsystemId: valid.subsystemId,
+    partInstanceId: valid.id, partInstanceIds: [valid.id], inHouse: false, batchLabel: "batch",
+  }), dependencies.handleUnauthorized);
+});
+
+it("keeps CNC quick-status actions independent of an open editor and ignores an old-session failure", async () => {
+  const { read, record, dependencies } = setup(cases.find((item) => item.name === "manufacturing")!);
+  read().openEdit(record);
+  const editor = read().raw as ReturnType<typeof useManufacturingActions>;
+  await editor.handleCncQuickStatusChange({ ...record, status: "requested", mentorReviewed: false } as never, "in-progress");
+  expect(production.updateManufacturingItemRecord).toHaveBeenCalledWith(record.id, { mentorReviewed: true, status: "in-progress" }, dependencies.handleUnauthorized);
+  expect(read().mode).toBe("edit");
+  expect(read().saving).toBe(false);
+  expect(dependencies.loadWorkspace).toHaveBeenCalledTimes(1);
+  await editor.handleCncQuickStatusChange({ ...record, status: "in-progress", mentorReviewed: true } as never, "in-progress");
+  expect(production.updateManufacturingItemRecord).toHaveBeenCalledTimes(1);
+  let reject!: (error: Error) => void;
+  jest.mocked(production.updateManufacturingItemRecord).mockImplementationOnce(() => new Promise((_yes, no) => { reject = no; }));
+  const pending = editor.handleCncQuickStatusChange(record as never, "complete");
+  const errorCalls = dependencies.setDataMessage.mock.calls.length;
+  beginSessionChange();
+  reject(new Error("old workspace"));
+  await pending;
+  expect(dependencies.setDataMessage).toHaveBeenCalledTimes(errorCalls);
+  expect(dependencies.loadWorkspace).toHaveBeenCalledTimes(1);
 });

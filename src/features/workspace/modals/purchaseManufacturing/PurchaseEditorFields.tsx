@@ -169,6 +169,7 @@ export function PurchaseEditorFields({
           }
           style={{ background: "var(--bg-row-alt)", border: "1px solid var(--border-base)", color: "var(--text-title)" }}
           type="number"
+          step="0.01"
           value={purchaseDraft.estimatedCost}
         />
       </label>
@@ -180,6 +181,7 @@ export function PurchaseEditorFields({
           placeholder="Optional"
           style={{ background: "var(--bg-row-alt)", border: "1px solid var(--border-base)", color: "var(--text-title)" }}
           type="number"
+          step="0.01"
           value={purchaseFinalCost}
         />
       </label>

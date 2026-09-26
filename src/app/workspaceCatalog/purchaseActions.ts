@@ -1,66 +1,67 @@
-import { useCallback } from "react";
+import { useCallback, useState, useEffect } from "react";
 
 import { buildEmptyPurchasePayload } from "@/lib/appUtils/payloadBuilders";
 import { purchaseToPayload } from "@/lib/appUtils/payloadConversions";
 import { toErrorMessage } from "@/lib/appUtils/common";
 import { createPurchaseItemRecord, updatePurchaseItemRecord } from "@/lib/auth/records/production";
-import type { AppWorkspaceModel } from "../hooks/useAppWorkspaceModel";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { WorkspaceLoader } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import { useCatalogEditorLifecycle } from "./useCatalogEditorLifecycle";
 import type { PurchaseItemPayload } from "@/types/payloads";
 import type { PurchaseItemRecord } from "@/types/recordsInventory";
 
-export type PurchaseActions = ReturnType<typeof usePurchaseActions>;
-
-export function usePurchaseActions({
-  activePurchaseId,
-  bootstrap,
-  handleUnauthorized,
-  loadWorkspace,
-  purchaseDraft,
-  purchaseFinalCost,
-  purchaseModalMode,
-  setActivePurchaseId,
-  setDataMessage,
-  setIsSavingPurchase,
-  setPurchaseDraft,
-  setPurchaseFinalCost,
-  setPurchaseModalMode,
-}: {
-  activePurchaseId: AppWorkspaceModel["activePurchaseId"];
-  bootstrap: AppWorkspaceModel["bootstrap"];
-  handleUnauthorized: AppWorkspaceModel["handleUnauthorized"];
-  loadWorkspace: AppWorkspaceModel["loadWorkspace"];
-  purchaseDraft: AppWorkspaceModel["purchaseDraft"];
-  purchaseFinalCost: AppWorkspaceModel["purchaseFinalCost"];
-  purchaseModalMode: AppWorkspaceModel["purchaseModalMode"];
-  setActivePurchaseId: AppWorkspaceModel["setActivePurchaseId"];
-  setDataMessage: AppWorkspaceModel["setDataMessage"];
-  setIsSavingPurchase: AppWorkspaceModel["setIsSavingPurchase"];
-  setPurchaseDraft: AppWorkspaceModel["setPurchaseDraft"];
-  setPurchaseFinalCost: AppWorkspaceModel["setPurchaseFinalCost"];
-  setPurchaseModalMode: AppWorkspaceModel["setPurchaseModalMode"];
+export function usePurchaseActions({ bootstrap, handleUnauthorized, loadWorkspace, setDataMessage, selectedProjectId, selectedSeasonId }: {
+  bootstrap: BootstrapPayload;
+  handleUnauthorized: () => void;
+  loadWorkspace: WorkspaceLoader;
+  setDataMessage: (message: string | null) => void;
+  selectedProjectId: string | null;
+  selectedSeasonId: string | null;
 }) {
+  const [purchaseModalMode, setPurchaseModalMode] = useState<"create" | "edit" | null>(null);
+  const [activePurchaseId, setActivePurchaseId] = useState<string | null>(null);
+  const [purchaseDraft, setPurchaseDraft] = useState<PurchaseItemPayload>(
+    buildEmptyPurchasePayload(EMPTY_BOOTSTRAP),
+  );
+  const [purchaseFinalCost, setPurchaseFinalCost] = useState("");
+  const { beginOperation, resetEditor, isSaving: isSavingPurchase } =
+    useCatalogEditorLifecycle({ loadWorkspace, selectedProjectId, selectedSeasonId });
   const openCreatePurchaseModal = useCallback(() => {
+    resetEditor();
     setActivePurchaseId(null);
     setPurchaseDraft(buildEmptyPurchasePayload(bootstrap));
     setPurchaseFinalCost("");
     setPurchaseModalMode("create");
-  }, [bootstrap, setActivePurchaseId, setPurchaseDraft, setPurchaseFinalCost, setPurchaseModalMode]);
+  }, [bootstrap, resetEditor]);
 
   const openEditPurchaseModal = useCallback((item: PurchaseItemRecord) => {
+    resetEditor();
     setActivePurchaseId(item.id);
     setPurchaseDraft(purchaseToPayload(item));
     setPurchaseFinalCost(typeof item.finalCost === "number" ? String(item.finalCost) : "");
     setPurchaseModalMode("edit");
-  }, [setActivePurchaseId, setPurchaseDraft, setPurchaseFinalCost, setPurchaseModalMode]);
+  }, [resetEditor]);
 
   const closePurchaseModal = useCallback(() => {
+    resetEditor();
     setPurchaseModalMode(null);
     setActivePurchaseId(null);
-  }, [setActivePurchaseId, setPurchaseModalMode]);
+  }, [resetEditor]);
+
+  useEffect(() => closePurchaseModal(), [closePurchaseModal, selectedProjectId, selectedSeasonId]);
+
+  useEffect(() => {
+    if (bootstrap === EMPTY_BOOTSTRAP || (purchaseModalMode === "edit" && !bootstrap.purchaseItems.some((item) => item.id === activePurchaseId))) {
+      closePurchaseModal();
+    }
+  }, [activePurchaseId, bootstrap, closePurchaseModal, purchaseModalMode]);
 
   const handlePurchaseSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
-    setIsSavingPurchase(true);
+    if (!purchaseModalMode) return;
+    const operation = beginOperation();
+    if (!operation) return;
     setDataMessage(null);
 
     try {
@@ -86,16 +87,23 @@ export function usePurchaseActions({
         await updatePurchaseItemRecord(activePurchaseId, payload, handleUnauthorized);
       }
 
-      await loadWorkspace();
-      closePurchaseModal();
+      await operation.refresh();
+      if (operation.isCurrent()) closePurchaseModal();
     } catch (error) {
-      setDataMessage(toErrorMessage(error));
+      if (operation.isCurrent()) setDataMessage(toErrorMessage(error));
     } finally {
-      setIsSavingPurchase(false);
+      operation.finish();
     }
-  }, [activePurchaseId, bootstrap, closePurchaseModal, handleUnauthorized, loadWorkspace, purchaseDraft, purchaseFinalCost, purchaseModalMode, setDataMessage, setIsSavingPurchase]);
+  }, [activePurchaseId, bootstrap, closePurchaseModal, handleUnauthorized, purchaseDraft, purchaseFinalCost, purchaseModalMode, setDataMessage, beginOperation]);
 
   return {
+    purchaseModalMode,
+    activePurchaseId,
+    purchaseDraft,
+    purchaseFinalCost,
+    setPurchaseDraft,
+    isSavingPurchase,
+    setPurchaseFinalCost,
     closePurchaseModal,
     handlePurchaseSubmit,
     openCreatePurchaseModal,
