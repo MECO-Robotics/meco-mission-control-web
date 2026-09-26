@@ -1,38 +1,13 @@
 /// <reference types="jest" />
 
-import type { LegacyBootstrapPayload } from "@/lib/auth/bootstrap/shared";
-import type { NormalizedPlanningRecords } from "@/lib/auth/bootstrap/planning";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { normalizeBootstrapCatalogRecords } from "@/lib/auth/bootstrap/payload-catalog";
 
-const planning: NormalizedPlanningRecords = {
-  seasons: [
-    {
-      id: "season-1",
-      name: "Season 1",
-      type: "season",
-      startDate: "2026-01-01",
-      endDate: "2026-12-31",
-    },
-  ],
-  projects: [
-    {
-      id: "project-1",
-      seasonId: "season-1",
-      name: "Robot",
-      projectType: "robot",
-      description: "",
-      status: "active",
-    },
-  ],
-  workstreams: [],
-  tasks: [],
-  taskDependencies: [],
-  projectIdAliases: new Map(),
-};
-
 describe("normalizeBootstrapCatalogRecords", () => {
-  it("merges duplicate part instances and remaps manufacturing links", () => {
-    const source: LegacyBootstrapPayload = {
+  it("preserves distinct part identities, quantities and manufacturing links", () => {
+    const source: BootstrapPayload = {
+      ...EMPTY_BOOTSTRAP,
       subsystems: [
         {
           id: "subsystem-1",
@@ -113,17 +88,18 @@ describe("normalizeBootstrapCatalogRecords", () => {
       ],
     };
 
-    const normalized = normalizeBootstrapCatalogRecords(source, planning);
+    const normalized = normalizeBootstrapCatalogRecords(source);
 
-    expect(normalized.partInstances).toHaveLength(1);
-    expect(normalized.partInstances[0].id).toBe("part-instance-1");
-    expect(normalized.partInstances[0].quantity).toBe(5);
-    expect(normalized.manufacturingItems[0].partInstanceId).toBe("part-instance-1");
-    expect(normalized.manufacturingItems[0].partInstanceIds).toEqual(["part-instance-1"]);
+    expect(normalized.partInstances).toEqual(source.partInstances);
+    expect(normalized.partInstances.reduce((sum, part) => sum + part.quantity, 0)).toBe(5);
+    expect(normalized.manufacturingItems[0].partInstanceId).toBe("part-instance-2");
+    expect(normalized.manufacturingItems[0].partInstanceIds).toEqual(["part-instance-2"]);
+    expect(source.partInstances.map((part) => part.quantity)).toEqual([2, 3]);
   });
 
   it("normalizes missing subsystem layout fields to unplaced defaults", () => {
-    const source: LegacyBootstrapPayload = {
+    const source: BootstrapPayload = {
+      ...EMPTY_BOOTSTRAP,
       subsystems: [
         {
           id: "subsystem-1",
@@ -140,7 +116,7 @@ describe("normalizeBootstrapCatalogRecords", () => {
       ],
     };
 
-    const normalized = normalizeBootstrapCatalogRecords(source, planning);
+    const normalized = normalizeBootstrapCatalogRecords(source);
 
     expect(normalized.subsystems).toHaveLength(1);
     expect(normalized.subsystems[0].layoutZone).toBe("unplaced");

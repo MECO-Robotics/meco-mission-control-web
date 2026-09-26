@@ -119,3 +119,42 @@ it("derives cached task hours from logs across reload and tutorial entry", async
   expect((await read()).tasks[0].actualHours).toBe(expected);
   expect(fetch).not.toHaveBeenCalled();
 });
+
+it("keeps local part identities, quantities and all target links across create and reload", async () => {
+  const baseline = createBootstrap();
+  globalThis.fetch = jest.fn(async () => new Response(JSON.stringify(baseline)));
+  await read();
+  const create = async (resource: string, body: object) => requestApi<{ item: { id: string } }>(`/${resource}`, {
+    method: "POST", body: JSON.stringify(body),
+  });
+  const part = baseline.partInstances[0];
+  const first = await create("part-instances", { ...part, name: "Local bracket A", quantity: 2 });
+  const second = await create("part-instances", { ...part, name: "Local bracket B", quantity: 3 });
+  expect(first.item.id).not.toBe(second.item.id);
+  const task = await create("tasks", {
+    ...baseline.tasks[0], title: "Check both brackets", partInstanceId: second.item.id,
+    partInstanceIds: [second.item.id, first.item.id],
+  });
+  const manufacturing = await create("manufacturing", {
+    ...baseline.manufacturingItems[0], title: "Make local brackets",
+    partInstanceId: second.item.id, partInstanceIds: [second.item.id, first.item.id],
+  });
+  const dependency = await create("task-dependencies", {
+    taskId: task.item.id, kind: "part", refId: second.item.id,
+    requiredState: "ready", dependencyType: "hard",
+  });
+  leaveLocalWorkspace(); enterLocalDemo();
+  const reloaded = await read();
+  const ids = [first.item.id, second.item.id];
+  const parts = reloaded.partInstances.filter((candidate) => ids.includes(candidate.id));
+  expect(parts.map((candidate) => [candidate.id, candidate.quantity])).toEqual([[first.item.id, 2], [second.item.id, 3]]);
+  expect(parts.reduce((sum, candidate) => sum + candidate.quantity, 0)).toBe(5);
+  expect(reloaded.tasks.find((candidate) => candidate.id === task.item.id)).toMatchObject({
+    partInstanceId: second.item.id, partInstanceIds: [second.item.id, first.item.id],
+  });
+  expect(reloaded.manufacturingItems.find((candidate) => candidate.id === manufacturing.item.id)).toMatchObject({
+    partInstanceId: second.item.id, partInstanceIds: [second.item.id, first.item.id],
+  });
+  expect(reloaded.taskDependencies?.find((candidate) => candidate.id === dependency.item.id)).toMatchObject({ refId: second.item.id });
+  expect(fetch).toHaveBeenCalledTimes(1);
+});

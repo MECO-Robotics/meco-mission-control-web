@@ -1,20 +1,16 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MeetingRecord } from "@/types/recordsExecution";
-import { normalizePlanningRecords } from "./planning";
+import { resolveWorkspaceColor } from "@/features/workspace/shared/model/workspaceColors";
 import { normalizeBootstrapCatalogRecords } from "./payload-catalog";
 import { normalizeBootstrapReports } from "./payload-reports";
 import { normalizeBootstrapTaskBlockers } from "./task-blockers";
-import type { LegacyBootstrapPayload } from "./shared";
 
 function normalizeMeetingRecords(source: BootstrapPayload["meetings"]): MeetingRecord[] {
-  return (source ?? []).map((meeting, index) => {
-    const date = meeting.date || meeting.startDateTime?.slice(0, 10) || new Date().toISOString().slice(0, 10);
-    const time = meeting.time || (meeting.startDateTime?.includes("T") ? meeting.startDateTime.slice(11, 16) : "");
+  return (source ?? []).map((meeting) => {
+    const { date, time } = meeting;
 
     return {
       ...meeting,
-      id: meeting.id || `meeting-${index + 1}`,
-      title: meeting.title || `Meeting ${index + 1}`,
       meetingType: meeting.meetingType ?? "general",
       projectIds: meeting.projectIds ?? [],
       date,
@@ -30,16 +26,19 @@ function normalizeMeetingRecords(source: BootstrapPayload["meetings"]): MeetingR
   });
 }
 
-export function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapPayload {
-  const source = payload as LegacyBootstrapPayload;
-  const planning = normalizePlanningRecords(source);
-  const catalog = normalizeBootstrapCatalogRecords(source, planning);
+export function normalizeBootstrapPayload(source: BootstrapPayload): BootstrapPayload {
+  const catalog = normalizeBootstrapCatalogRecords(source);
   const reports = normalizeBootstrapReports(source);
 
   return {
-    seasons: planning.seasons,
-    projects: planning.projects,
-    workstreams: planning.workstreams,
+    seasons: source.seasons,
+    projects: source.projects,
+    workstreams: source.workstreams.map((workstream, index) => ({
+      ...workstream,
+      color: resolveWorkspaceColor(workstream.color, `${workstream.projectId}:${workstream.id}`, index),
+      description: workstream.description ?? "",
+      isArchived: workstream.isArchived ?? false,
+    })),
     members: catalog.members,
     subsystems: catalog.subsystems,
     disciplines: source.disciplines ?? [],
@@ -57,7 +56,13 @@ export function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapP
     qaRequests: source.qaRequests ?? [],
     designIterations: source.designIterations ?? [],
     risks: source.risks ?? [],
-    tasks: planning.tasks,
+    tasks: source.tasks.map((task) => ({
+      ...task,
+      targetRiskId: source.risks.find((risk) => risk.mitigationTaskId === task.id)?.id ?? null,
+      checklistItems: task.checklistItems ?? [],
+      isBlocked: task.isBlocked ?? false,
+      isWaitingOnDependency: task.isWaitingOnDependency ?? false,
+    })),
     workLogs: catalog.workLogs,
     meetings: normalizeMeetingRecords(source.meetings),
     attendanceRecords: source.attendanceRecords ?? [],
