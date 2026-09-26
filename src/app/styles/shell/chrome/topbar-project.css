@@ -1,11 +1,9 @@
-.app-topbar-project-select option,
 .sidebar-context-select option,
 .table-pagination-size select option {
   background: var(--bg-panel);
   color: var(--text-title);
 }
 
-.page-shell.dark-mode .app-topbar-project-select,
 .page-shell.dark-mode .sidebar-context-select,
 .page-shell.dark-mode .table-pagination-size select {
   color-scheme: dark;

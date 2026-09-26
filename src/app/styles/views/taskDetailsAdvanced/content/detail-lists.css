@@ -111,13 +111,6 @@
   gap: 0.32rem;
 }
 
-.task-detail-hour-label {
-  color: var(--text-copy);
-  font-size: 0.74rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
 .task-detail-hour-separator {
   color: var(--text-copy);
 }
@@ -167,24 +160,6 @@
 .task-detail-collapsible-body .workspace-detail-list-item.task-details-blocker-list-item > .task-details-blocker-row-content {
   min-width: 0;
   max-width: 100%;
-}
-
-.task-detail-collapsible-body .workspace-detail-list-item.task-details-blocker-list-item > .task-details-blocker-resolve-button {
-  flex: 0 0 auto;
-  width: 2rem;
-  height: 2rem;
-  min-width: 2rem;
-  min-height: 2rem;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-}
-
-.task-detail-collapsible-body .workspace-detail-list-item.task-details-blocker-list-item > .task-details-blocker-resolve-button svg {
-  width: 14px;
-  height: 14px;
 }
 
 .task-details-dependency-blocker-grid .task-detail-collapsible-body {

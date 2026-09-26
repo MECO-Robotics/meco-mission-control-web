@@ -42,7 +42,6 @@
   cursor: pointer;
 }
 
-.user-chip.profile-trigger.app-profile-my-view-button,
 .user-chip.profile-trigger.app-profile-editor-button {
   border: 1px solid var(--border-base);
   border-radius: 999px;
@@ -52,25 +51,12 @@
   overflow: hidden;
 }
 
-.user-chip.profile-trigger.app-profile-my-view-button:hover,
-.user-chip.profile-trigger.app-profile-my-view-button:focus-visible,
 .user-chip.profile-trigger.app-profile-editor-button:hover,
 .user-chip.profile-trigger.app-profile-editor-button:focus-visible {
   border-color: rgba(22, 71, 142, 0.3);
   background: var(--bg-row-alt);
   color: var(--text-title);
   outline: none;
-}
-
-.user-chip.profile-trigger.app-profile-my-view-button.is-active {
-  border-color: rgba(22, 71, 142, 0.36);
-  background: rgba(22, 71, 142, 0.08);
-  color: var(--meco-blue);
-}
-
-.user-chip.profile-trigger.app-profile-my-view-button[aria-disabled="true"] {
-  cursor: not-allowed;
-  opacity: 0.5;
 }
 
 .profile-avatar {
