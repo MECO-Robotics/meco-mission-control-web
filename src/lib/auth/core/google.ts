@@ -125,28 +125,22 @@ export function loadGoogleIdentityScript() {
     const existingScript = document.querySelector<HTMLScriptElement>(
       'script[src="https://accounts.google.com/gsi/client"]',
     );
-    if (existingScript) {
-      existingScript.addEventListener("load", () => resolve(), { once: true });
-      existingScript.addEventListener(
-        "error",
-        () => reject(new Error("Google Identity Services failed to load.")),
-        { once: true },
-      );
-      return;
-    }
-
-    const script = document.createElement("script");
-    const scriptUrl = "https://accounts.google.com/gsi/client";
-    const trustedScriptUrl = getGoogleTrustedTypesPolicy()?.createScriptURL(scriptUrl);
-    script.src = (trustedScriptUrl ?? scriptUrl) as string;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => resolve();
-    script.onerror = () => {
+    const script = existingScript ?? document.createElement("script");
+    script.addEventListener("load", () => resolve(), { once: true });
+    script.addEventListener("error", () => {
+      script.remove();
       googleScriptPromise = null;
       reject(new Error("Google Identity Services failed to load."));
-    };
-    document.head.appendChild(script);
+    }, { once: true });
+
+    if (!existingScript) {
+      const scriptUrl = "https://accounts.google.com/gsi/client";
+      const trustedScriptUrl = getGoogleTrustedTypesPolicy()?.createScriptURL(scriptUrl);
+      script.src = (trustedScriptUrl ?? scriptUrl) as string;
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
   });
 
   return googleScriptPromise;

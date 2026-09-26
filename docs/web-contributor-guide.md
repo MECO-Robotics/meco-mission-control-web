@@ -135,3 +135,5 @@ git diff --check
 
 Use browser QA for visible UI changes, especially navigation, modal, drag/drop,
 and responsive layout work.
+
+Google Identity Services loading, local client-ID overrides and host checks live in `src/lib/auth/core/google.ts`. App hooks consume that owner and the shared `Window.google` declaration; failed script loads are removed so a later attempt can retry.
