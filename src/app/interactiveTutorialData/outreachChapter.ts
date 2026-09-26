@@ -11,12 +11,6 @@ const outreachSteps = [
     selector: '.sidebar-scope-trigger',
   },
   {
-    id: "workflow-tab",
-    title: "Open Workflow",
-    instruction: "Open Resources from the navigation.",
-    selector: '[data-tutorial-target="sidebar-tab-resources"]',
-  },
-  {
     id: "outreach-workflow-view",
     title: "Open Workflow",
     instruction: "Choose Structure to view the outreach workflow.",
@@ -27,12 +21,6 @@ const outreachSteps = [
     title: "Edit a workflow row",
     instruction: "Click a workflow row to open the edit modal.",
     selector: '[data-tutorial-target="edit-workflow-row"]',
-  },
-  {
-    id: "inventory-tab",
-    title: "Open Resources",
-    instruction: "Open Resources from the sidebar.",
-    selector: '[data-tutorial-target="sidebar-tab-resources"]',
   },
   {
     id: "inventory-materials",

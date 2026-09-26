@@ -31,9 +31,9 @@ describe("flat sidebar navigation", () => {
 
   it("places Robot in the Work section", () => {
     const markup = renderSidebar([], "tasks");
-    const workStart = markup.indexOf('data-tutorial-target="sidebar-tab-work"');
+    const workStart = markup.indexOf('aria-label="Work"');
     const robotIndex = markup.indexOf(">Robot</span>");
-    const resourcesStart = markup.indexOf('data-tutorial-target="sidebar-tab-resources"');
+    const resourcesStart = markup.indexOf('aria-label="Resources"');
 
     expect(robotIndex).toBeGreaterThan(workStart);
     expect(robotIndex).toBeLessThan(resourcesStart);

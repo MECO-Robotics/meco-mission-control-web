@@ -26,7 +26,7 @@ export function AppSidebarSections({
   return sectionModels.map(({ section, subItems }) => (
     <section className="sidebar-section-group" aria-label={NAVIGATION_SECTION_LABELS[section]} key={section}>
       {!isCollapsed && (
-        <h2 className="sidebar-section-heading" data-tutorial-target={`sidebar-tab-${section}`}>
+        <h2 className="sidebar-section-heading">
           {NAVIGATION_SECTION_LABELS[section]}
         </h2>
       )}

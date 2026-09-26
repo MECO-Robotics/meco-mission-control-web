@@ -29,6 +29,8 @@ Keep view-specific business logic near the view that uses it. Promote helpers
 into `src/lib/` only when they are reused across sections or represent a shared
 contract.
 
+Tutorial chapters target actionable destinations and controls. Sidebar section headings are labels, not tutorial steps. Pending interaction checks retain the latest context and callbacks across ordinary rerenders; changing steps or closing the tutorial cancels them.
+
 ## View And Tab Routing
 
 User-facing navigation is defined around workspace sections instead of raw data
