@@ -108,6 +108,8 @@ truth for permissions, persistence, and schema validation.
 
 Follow [CONTRIBUTING.md](../CONTRIBUTING.md). Keep one clear owner and explicit dependencies; delete redundant representations and forwarding layers. Split or merge modules according to responsibility and reuse, without file-size quotas. Keep styles with the view or component whose cascade they control.
 
+KanbanScrollFrame owns board overflow observation and scroll hints. Task-specific zoom, focus selection and lazy loading stay in TaskQueueBoardSection; its shell ref connects those behaviors to the same scrolling element.
+
 For UI work, match existing dense Mission Control patterns. Use restrained
 controls, stable dimensions, and predictable responsive behavior. Avoid adding
 marketing-style sections or decorative surfaces to operational screens.

@@ -5,11 +5,10 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskStatus } from "@/types/common";
 import type { OpenEditTaskModalOptions } from "@/types/taskEditIntent";
 import type { TaskRecord } from "@/types/recordsExecution";
-import { IconChevronLeft, IconChevronRight } from "@/components/shared/Icons";
+import { KanbanScrollFrame } from "../kanban/KanbanScrollFrame";
 import { TaskQueueKanbanBoard } from "./TaskQueueKanbanBoard";
 import {
   useTaskQueueBoardLazyLoading,
-  useTaskQueueBoardScrollState,
   useTaskQueueBoardZoomInput,
 } from "./useTaskQueueBoardInteractions";
 import {
@@ -64,7 +63,6 @@ export function TaskQueueBoardSection({
 }: TaskQueueBoardSectionProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const taskQueueBoardShellRef = useRef<HTMLDivElement>(null);
-  const scrollState = useTaskQueueBoardScrollState(taskQueueBoardShellRef);
   const zoomBoard = useCallback(
     (direction: 1 | -1) => {
       setTaskQueueZoom((current) => clampTaskQueueZoom(current + direction * TASK_QUEUE_ZOOM_STEP));
@@ -93,69 +91,46 @@ export function TaskQueueBoardSection({
   });
 
   return (
-    <div
-      className={`task-queue-board-shell-frame${scrollState.canScrollLeft ? " has-scroll-left" : ""}${scrollState.canScrollRight ? " has-scroll-right" : ""}${scrollState.hasOverflow ? " has-task-queue-board-overflow" : ""}${isFocused ? " is-focused-column" : ""} ${taskFilterMotionClass}`}
+    <KanbanScrollFrame
+      motionClassName={taskFilterMotionClass}
+      isFocused={isFocused}
+      isCompact={isCompactZoom}
+      shellRef={taskQueueBoardShellRef}
+      style={boardStyle}
     >
-      {scrollState.hasOverflow ? (
-        <div aria-hidden="true" className="task-queue-board-scroll-hints">
-          <div
-            className={`task-queue-board-scroll-hint task-queue-board-scroll-hint-left${
-              scrollState.canScrollLeft ? "" : " is-hidden"
-            }`}
-          >
-            <IconChevronLeft />
-            <span className="task-queue-board-scroll-hint-label">Scroll</span>
-          </div>
-          <div
-            className={`task-queue-board-scroll-hint task-queue-board-scroll-hint-right${
-              scrollState.canScrollRight ? "" : " is-hidden"
-            }`}
-          >
-            <span className="task-queue-board-scroll-hint-label">Scroll</span>
-            <IconChevronRight />
-          </div>
+      {boardTasks.length > 0 ? (
+        <TaskQueueKanbanBoard
+          bootstrap={bootstrap}
+          disciplinesById={disciplinesById}
+          focusedState={focusedBoardState}
+          isNonRobotProject={isNonRobotProject}
+          membersById={membersById}
+          openEditTaskModal={openEditTaskModal}
+          projectsById={projectsById}
+          taskQueueZoom={taskQueueZoom}
+          showProjectContextOnCards={showProjectContextOnCards}
+          showProjectOnCards={showProjectOnCards}
+          onClearFocus={() => setFocusedBoardState(null)}
+          onFocusState={setFocusedBoardState}
+          onReassignTaskStatus={onReassignTaskStatus}
+          subsystemsById={subsystemsById}
+          tasks={boardTasks}
+          workstreamsById={workstreamsById}
+        />
+      ) : (
+        <p className="empty-state">No tasks match the current filters.</p>
+      )}
+      {!isFocused ? (
+        <div className="task-queue-board-footer">
+          <p className="task-queue-board-load-status">
+            Showing {loadedTaskLabel} tasks
+            {hasMoreTasks ? " - scroll to load more." : "."}
+          </p>
+          {hasMoreTasks ? (
+            <div aria-hidden="true" className="task-queue-board-load-sentinel" ref={loadMoreRef} />
+          ) : null}
         </div>
       ) : null}
-      <div
-        className={`table-shell task-queue-board-shell${isFocused ? " is-focused-column" : ""}`}
-        data-task-queue-zoom-compact={isCompactZoom ? "true" : "false"}
-        ref={taskQueueBoardShellRef}
-        style={boardStyle}
-      >
-        {boardTasks.length > 0 ? (
-          <TaskQueueKanbanBoard
-            bootstrap={bootstrap}
-            disciplinesById={disciplinesById}
-            focusedState={focusedBoardState}
-            isNonRobotProject={isNonRobotProject}
-            membersById={membersById}
-            openEditTaskModal={openEditTaskModal}
-            projectsById={projectsById}
-            taskQueueZoom={taskQueueZoom}
-            showProjectContextOnCards={showProjectContextOnCards}
-            showProjectOnCards={showProjectOnCards}
-            onClearFocus={() => setFocusedBoardState(null)}
-            onFocusState={setFocusedBoardState}
-            onReassignTaskStatus={onReassignTaskStatus}
-            subsystemsById={subsystemsById}
-            tasks={boardTasks}
-            workstreamsById={workstreamsById}
-          />
-        ) : (
-          <p className="empty-state">No tasks match the current filters.</p>
-        )}
-        {!isFocused ? (
-          <div className="task-queue-board-footer">
-            <p className="task-queue-board-load-status">
-              Showing {loadedTaskLabel} tasks
-              {hasMoreTasks ? " - scroll to load more." : "."}
-            </p>
-            {hasMoreTasks ? (
-              <div aria-hidden="true" className="task-queue-board-load-sentinel" ref={loadMoreRef} />
-            ) : null}
-          </div>
-        ) : null}
-      </div>
-    </div>
+    </KanbanScrollFrame>
   );
 }
