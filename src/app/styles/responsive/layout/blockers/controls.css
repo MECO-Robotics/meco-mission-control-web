@@ -1,13 +1,6 @@
-.task-details-blocker-editor-actions {
-  display: flex;
-  justify-content: flex-start;
-}
-
 .task-details-dependency-kind-menu,
 .task-details-dependency-target-menu,
-.task-details-dependency-type-menu,
-.task-details-blocker-type-menu,
-.task-details-blocker-target-menu {
+.task-details-dependency-type-menu {
   width: 100%;
   min-width: 0;
 }
@@ -47,9 +40,7 @@
 
 .task-details-dependency-kind-menu .toolbar-filter-menu-button,
 .task-details-dependency-target-menu .toolbar-filter-menu-button,
-.task-details-dependency-type-menu .toolbar-filter-menu-button,
-.task-details-blocker-type-menu .toolbar-filter-menu-button,
-.task-details-blocker-target-menu .toolbar-filter-menu-button {
+.task-details-dependency-type-menu .toolbar-filter-menu-button {
   width: 100%;
 }
 
@@ -147,17 +138,6 @@
   min-width: 0;
 }
 
-.task-details-blocker-remove-button {
-  width: 2rem;
-  height: 2rem;
-  min-width: 2rem;
-  min-height: 2rem;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .task-detail-collapsible-body .workspace-detail-list-item.task-details-blocker-list-item {
   width: 100%;
   min-width: 0;
@@ -173,11 +153,6 @@
   max-width: 100%;
   display: grid;
   gap: 0.1rem;
-}
-
-.task-detail-collapsible-body .workspace-detail-list-item.task-details-blocker-list-item .task-details-blocker-resolve-button {
-  flex: 0 0 auto;
-  white-space: nowrap;
 }
 
 .task-detail-inline-edit-indicator {
