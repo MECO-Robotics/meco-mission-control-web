@@ -5,7 +5,7 @@ import { WorkstreamEditorModal } from "../modals/assetCatalog/WorkstreamEditorMo
 import type { WorkspaceModalHostViewProps } from "./workspaceModalHostViewTypes";
 
 export function WorkspaceStructureModalsSection(props: WorkspaceModalHostViewProps) {
-  if (!props.subsystemEditor.subsystemModalMode && !props.workstreamEditor.workstreamModalMode && !props.manufacturingModalMode && !props.purchaseModalMode) {
+  if (!props.subsystemEditor.subsystemModalMode && !props.workstreamEditor.workstreamModalMode && !props.manufacturingEditor.manufacturingModalMode && !props.purchaseEditor.purchaseModalMode) {
     return null;
   }
 
@@ -28,29 +28,19 @@ export function WorkspaceStructureModalsSection(props: WorkspaceModalHostViewPro
         />
       ) : null}
 
-      {props.manufacturingModalMode ? (
+      {props.manufacturingEditor.manufacturingModalMode ? (
         <ManufacturingEditorModal
+          {...props.manufacturingEditor}
+          manufacturingModalMode={props.manufacturingEditor.manufacturingModalMode}
           bootstrap={props.bootstrap}
-          closeManufacturingModal={props.closeManufacturingModal}
-          handleManufacturingSubmit={props.handleManufacturingSubmit}
-          isSavingManufacturing={props.isSavingManufacturing}
-          manufacturingDraft={props.manufacturingDraft}
-          manufacturingModalMode={props.manufacturingModalMode}
-          setManufacturingDraft={props.setManufacturingDraft}
         />
       ) : null}
 
-      {props.purchaseModalMode ? (
+      {props.purchaseEditor.purchaseModalMode ? (
         <PurchaseEditorModal
+          {...props.purchaseEditor}
+          purchaseModalMode={props.purchaseEditor.purchaseModalMode}
           bootstrap={props.bootstrap}
-          closePurchaseModal={props.closePurchaseModal}
-          handlePurchaseSubmit={props.handlePurchaseSubmit}
-          isSavingPurchase={props.isSavingPurchase}
-          purchaseDraft={props.purchaseDraft}
-          purchaseFinalCost={props.purchaseFinalCost}
-          purchaseModalMode={props.purchaseModalMode}
-          setPurchaseDraft={props.setPurchaseDraft}
-          setPurchaseFinalCost={props.setPurchaseFinalCost}
         />
       ) : null}
     </>

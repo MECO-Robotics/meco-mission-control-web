@@ -2,7 +2,6 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { reconcileWorkspaceState } from "../workspace/loader/useAppWorkspaceLoaderWorkspaceReconciliation";
-import { buildEmptyManufacturingPayload } from "@/lib/appUtils/manufacturing";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { useAppWorkspaceDerived } from "../useAppWorkspaceDerived";
 import type { AppWorkspaceState } from "../useAppWorkspaceState";
@@ -76,19 +75,13 @@ it("treats synthetic local sessions as unlinked and only notifies when enabling 
   expect(state.dataMessage).toBeNull();
 });
 
-it("reconciles refreshed selections and retains the session member as CNC requester", () => {
+it("reconciles refreshed roster selections", () => {
   const state = createState();
   state.bootstrap.members.unshift({ ...state.bootstrap.members[0], id: "another", email: "another@example.test" });
   state.activePersonFilter = ["removed", "ada"];
   state.selectedMemberId = "removed";
-  state.manufacturingModalMode = "create";
-  state.manufacturingDraft = buildEmptyManufacturingPayload(state.bootstrap, "cnc");
-  state.setManufacturingDraft = (next) => {
-    state.manufacturingDraft = typeof next === "function" ? next(state.manufacturingDraft) : next;
-  };
   const selectMember = jest.fn();
   reconcileWorkspaceState(state, state.bootstrap, state.bootstrap, selectMember);
   expect(state.activePersonFilter).toEqual(["ada"]);
   expect(selectMember).toHaveBeenCalledWith("another", state.bootstrap);
-  expect(state.manufacturingDraft.requestedById).toBe("ada");
 });

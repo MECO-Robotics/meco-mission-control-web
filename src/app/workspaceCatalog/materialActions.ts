@@ -1,4 +1,8 @@
-import { useCallback, useState } from "react";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { WorkspaceLoader } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import { useCatalogEditorLifecycle } from "./useCatalogEditorLifecycle";
+import { useCallback, useState, useEffect } from "react";
 
 import { buildEmptyMaterialPayload } from "@/lib/appUtils/payloadBuilders";
 import { materialToPayload } from "@/lib/appUtils/payloadConversions";
@@ -8,39 +12,56 @@ import type { MaterialPayload } from "@/types/payloads";
 import type { MaterialRecord } from "@/types/recordsInventory";
 
 export function useMaterialEditor({
+  bootstrap, selectedProjectId, selectedSeasonId,
   handleUnauthorized,
   loadWorkspace,
   setDataMessage,
 }: {
+  bootstrap: BootstrapPayload;
+  selectedProjectId: string | null;
+  selectedSeasonId: string | null;
   handleUnauthorized: () => void;
-  loadWorkspace: () => Promise<void>;
+  loadWorkspace: WorkspaceLoader;
   setDataMessage: (message: string | null) => void;
 }) {
   const [materialModalMode, setMaterialModalMode] = useState<"create" | "edit" | null>(null);
   const [activeMaterialId, setActiveMaterialId] = useState<string | null>(null);
   const [materialDraft, setMaterialDraft] = useState<MaterialPayload>(buildEmptyMaterialPayload);
-  const [isSavingMaterial, setIsSavingMaterial] = useState(false);
-  const [isDeletingMaterial, setIsDeletingMaterial] = useState(false);
+  const { beginOperation, resetEditor, isSaving: isSavingMaterial, isDeleting: isDeletingMaterial } =
+    useCatalogEditorLifecycle({ loadWorkspace, selectedProjectId, selectedSeasonId });
   const openCreateMaterialModal = useCallback(() => {
+    resetEditor();
     setActiveMaterialId(null);
     setMaterialDraft(buildEmptyMaterialPayload());
     setMaterialModalMode("create");
-  }, []);
+  }, [resetEditor]);
 
   const openEditMaterialModal = useCallback((item: MaterialRecord) => {
+    resetEditor();
     setActiveMaterialId(item.id);
     setMaterialDraft(materialToPayload(item));
     setMaterialModalMode("edit");
-  }, []);
+  }, [resetEditor]);
 
   const closeMaterialModal = useCallback(() => {
+    resetEditor();
     setMaterialModalMode(null);
     setActiveMaterialId(null);
-  }, []);
+  }, [resetEditor]);
+
+  useEffect(() => closeMaterialModal(), [closeMaterialModal, selectedProjectId, selectedSeasonId]);
+
+  useEffect(() => {
+    if (bootstrap === EMPTY_BOOTSTRAP || (materialModalMode === "edit" && !bootstrap.materials.some((item) => item.id === activeMaterialId))) {
+      closeMaterialModal();
+    }
+  }, [activeMaterialId, bootstrap, closeMaterialModal, materialModalMode]);
 
   const handleMaterialSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
-    setIsSavingMaterial(true);
+    if (!materialModalMode) return;
+    const operation = beginOperation();
+    if (!operation) return;
     setDataMessage(null);
 
     try {
@@ -58,31 +79,30 @@ export function useMaterialEditor({
         await updateMaterialRecord(activeMaterialId, payload, handleUnauthorized);
       }
 
-      await loadWorkspace();
-      closeMaterialModal();
+      await operation.refresh();
+      if (operation.isCurrent()) closeMaterialModal();
     } catch (error) {
-      setDataMessage(toErrorMessage(error));
+      if (operation.isCurrent()) setDataMessage(toErrorMessage(error));
     } finally {
-      setIsSavingMaterial(false);
+      operation.finish();
     }
-  }, [activeMaterialId, closeMaterialModal, handleUnauthorized, loadWorkspace, materialDraft, materialModalMode, setDataMessage]);
+  }, [activeMaterialId, closeMaterialModal, handleUnauthorized, beginOperation, materialDraft, materialModalMode, setDataMessage]);
 
   const handleDeleteMaterial = useCallback(async (materialId: string) => {
-    setIsDeletingMaterial(true);
+    const operation = beginOperation("delete");
+    if (!operation) return;
     setDataMessage(null);
 
     try {
       await deleteMaterialRecord(materialId, handleUnauthorized);
-      if (activeMaterialId === materialId) {
-        closeMaterialModal();
-      }
-      await loadWorkspace();
+      await operation.refresh();
+      if (operation.isCurrent() && activeMaterialId === materialId) closeMaterialModal();
     } catch (error) {
-      setDataMessage(toErrorMessage(error));
+      if (operation.isCurrent()) setDataMessage(toErrorMessage(error));
     } finally {
-      setIsDeletingMaterial(false);
+      operation.finish();
     }
-  }, [activeMaterialId, closeMaterialModal, handleUnauthorized, loadWorkspace, setDataMessage]);
+  }, [activeMaterialId, closeMaterialModal, handleUnauthorized, beginOperation, setDataMessage]);
 
   return {
     materialModalMode, activeMaterialId, materialDraft, setMaterialDraft, isSavingMaterial, isDeletingMaterial,

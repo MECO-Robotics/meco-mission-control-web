@@ -1,68 +1,75 @@
-import { useCallback } from "react";
+import { useCallback, useState, useEffect } from "react";
 
 import { buildEmptyManufacturingPayload } from "@/lib/appUtils/manufacturing";
 import { manufacturingToPayload } from "@/lib/appUtils/payloadConversions";
 import { toErrorMessage } from "@/lib/appUtils/common";
 import { createManufacturingItemRecord, updateManufacturingItemRecord } from "@/lib/auth/records/production";
-import type { AppWorkspaceModel } from "../hooks/useAppWorkspaceModel";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { WorkspaceLoader } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import { useCatalogEditorLifecycle } from "./useCatalogEditorLifecycle";
 import type { ManufacturingItemPayload } from "@/types/payloads";
 import type { ManufacturingItemRecord } from "@/types/recordsInventory";
 
-export type ManufacturingActions = ReturnType<typeof useManufacturingActions>;
-
-export function useManufacturingActions({
-  activeManufacturingId,
-  bootstrap,
-  handleUnauthorized,
-  loadWorkspace,
-  manufacturingDraft,
-  manufacturingModalMode,
-  setActiveManufacturingId,
-  setDataMessage,
-  setIsSavingManufacturing,
-  setManufacturingDraft,
-  setManufacturingModalMode,
-  signedInMember,
-}: {
-  activeManufacturingId: AppWorkspaceModel["activeManufacturingId"];
-  bootstrap: AppWorkspaceModel["bootstrap"];
-  handleUnauthorized: AppWorkspaceModel["handleUnauthorized"];
-  loadWorkspace: AppWorkspaceModel["loadWorkspace"];
-  manufacturingDraft: AppWorkspaceModel["manufacturingDraft"];
-  manufacturingModalMode: AppWorkspaceModel["manufacturingModalMode"];
-  setActiveManufacturingId: AppWorkspaceModel["setActiveManufacturingId"];
-  setDataMessage: AppWorkspaceModel["setDataMessage"];
-  setIsSavingManufacturing: AppWorkspaceModel["setIsSavingManufacturing"];
-  setManufacturingDraft: AppWorkspaceModel["setManufacturingDraft"];
-  setManufacturingModalMode: AppWorkspaceModel["setManufacturingModalMode"];
-  signedInMember: AppWorkspaceModel["signedInMember"];
+export function useManufacturingActions({ bootstrap, handleUnauthorized, loadWorkspace, setDataMessage, selectedProjectId, selectedSeasonId, signedInMemberId }: {
+  bootstrap: BootstrapPayload;
+  handleUnauthorized: () => void;
+  loadWorkspace: WorkspaceLoader;
+  setDataMessage: (message: string | null) => void;
+  selectedProjectId: string | null;
+  selectedSeasonId: string | null;
+  signedInMemberId: string | null;
 }) {
+  const [manufacturingModalMode, setManufacturingModalMode] =
+    useState<"create" | "edit" | null>(null);
+  const [activeManufacturingId, setActiveManufacturingId] = useState<string | null>(
+    null,
+  );
+  const [manufacturingDraft, setManufacturingDraft] =
+    useState<ManufacturingItemPayload>(
+      buildEmptyManufacturingPayload(EMPTY_BOOTSTRAP, "cnc"),
+    );
+  const { beginOperation, resetEditor, isSaving: isSavingManufacturing, captureWorkspace } =
+    useCatalogEditorLifecycle({ loadWorkspace, selectedProjectId, selectedSeasonId });
   const openCreateManufacturingModal = useCallback((process: ManufacturingItemPayload["process"]) => {
+    resetEditor();
     setActiveManufacturingId(null);
     setManufacturingDraft(
       buildEmptyManufacturingPayload(
         bootstrap,
         process,
-        process === "cnc" ? signedInMember?.id ?? null : null,
+        process === "cnc" ? signedInMemberId : null,
       ),
     );
     setManufacturingModalMode("create");
-  }, [bootstrap, setActiveManufacturingId, setManufacturingDraft, setManufacturingModalMode, signedInMember]);
+  }, [bootstrap, signedInMemberId, resetEditor]);
 
   const openEditManufacturingModal = useCallback((item: ManufacturingItemRecord) => {
+    resetEditor();
     setActiveManufacturingId(item.id);
     setManufacturingDraft(manufacturingToPayload(item));
     setManufacturingModalMode("edit");
-  }, [setActiveManufacturingId, setManufacturingDraft, setManufacturingModalMode]);
+  }, [resetEditor]);
 
   const closeManufacturingModal = useCallback(() => {
+    resetEditor();
     setManufacturingModalMode(null);
     setActiveManufacturingId(null);
-  }, [setActiveManufacturingId, setManufacturingModalMode]);
+  }, [resetEditor]);
+
+  useEffect(() => closeManufacturingModal(), [closeManufacturingModal, selectedProjectId, selectedSeasonId]);
+
+  useEffect(() => {
+    if (bootstrap === EMPTY_BOOTSTRAP || (manufacturingModalMode === "edit" && !bootstrap.manufacturingItems.some((item) => item.id === activeManufacturingId))) {
+      closeManufacturingModal();
+    }
+  }, [activeManufacturingId, bootstrap, closeManufacturingModal, manufacturingModalMode]);
 
   const handleManufacturingSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
-    setIsSavingManufacturing(true);
+    if (!manufacturingModalMode) return;
+    const operation = beginOperation();
+    if (!operation) return;
     setDataMessage(null);
 
     try {
@@ -125,14 +132,14 @@ export function useManufacturingActions({
         );
       }
 
-      await loadWorkspace();
-      closeManufacturingModal();
+      await operation.refresh();
+      if (operation.isCurrent()) closeManufacturingModal();
     } catch (error) {
-      setDataMessage(toErrorMessage(error));
+      if (operation.isCurrent()) setDataMessage(toErrorMessage(error));
     } finally {
-      setIsSavingManufacturing(false);
+      operation.finish();
     }
-  }, [activeManufacturingId, bootstrap, closeManufacturingModal, handleUnauthorized, loadWorkspace, manufacturingDraft, manufacturingModalMode, setDataMessage, setIsSavingManufacturing]);
+  }, [activeManufacturingId, bootstrap, closeManufacturingModal, handleUnauthorized, manufacturingDraft, manufacturingModalMode, setDataMessage, beginOperation]);
 
   const handleCncQuickStatusChange = useCallback(
     async (
@@ -143,6 +150,7 @@ export function useManufacturingActions({
         return;
       }
 
+      const operation = captureWorkspace();
       setDataMessage(null);
       try {
         await updateManufacturingItemRecord(
@@ -153,15 +161,20 @@ export function useManufacturingActions({
           },
           handleUnauthorized,
         );
-        await loadWorkspace();
+        await operation.refresh();
       } catch (error) {
-        setDataMessage(toErrorMessage(error));
+        if (operation.isCurrent()) setDataMessage(toErrorMessage(error));
       }
     },
-    [handleUnauthorized, loadWorkspace, setDataMessage],
+    [captureWorkspace, handleUnauthorized, setDataMessage],
   );
 
   return {
+    manufacturingModalMode,
+    activeManufacturingId,
+    manufacturingDraft,
+    setManufacturingDraft,
+    isSavingManufacturing,
     closeManufacturingModal,
     handleCncQuickStatusChange,
     handleManufacturingSubmit,

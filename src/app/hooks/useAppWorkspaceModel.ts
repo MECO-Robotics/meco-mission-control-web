@@ -1,3 +1,5 @@
+import { useManufacturingActions } from "@/app/workspaceCatalog/manufacturingActions";
+import { usePurchaseActions } from "@/app/workspaceCatalog/purchaseActions";
 import { useMechanismActions } from "@/app/workspaceCatalog/mechanismActions";
 import { useSubsystemActions } from "@/app/workspaceCatalog/subsystemActions";
 import { usePartInstanceActions } from "@/app/workspaceCatalog/partInstanceActions";
@@ -29,6 +31,8 @@ export type AppWorkspaceModel = AppWorkspaceState &
     partInstanceEditor: ReturnType<typeof usePartInstanceActions>;
     subsystemEditor: ReturnType<typeof useSubsystemActions>;
     mechanismEditor: ReturnType<typeof useMechanismActions>;
+    purchaseEditor: ReturnType<typeof usePurchaseActions>;
+    manufacturingEditor: ReturnType<typeof useManufacturingActions>;
     materialEditor: ReturnType<typeof useMaterialEditor>;
     interactiveTutorialChapters: ReturnType<typeof useInteractiveTutorial>["chapterStartOptions"];
   };
@@ -37,7 +41,10 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
   const derived = useAppWorkspaceDerived(state);
   const loader = useAppWorkspaceLoader(state);
   const { loadWorkspace } = loader;
-  const materialEditor = useMaterialEditor({ handleUnauthorized: loader.handleUnauthorized, loadWorkspace, setDataMessage: state.setDataMessage });
+  const materialEditor = useMaterialEditor({
+    bootstrap: state.bootstrap, selectedProjectId: state.selectedProjectId, selectedSeasonId: state.selectedSeasonId,
+    handleUnauthorized: loader.handleUnauthorized, loadWorkspace, setDataMessage: state.setDataMessage,
+  });
   const artifactEditor = useArtifactActions({
     bootstrap: state.bootstrap,
     handleUnauthorized: loader.handleUnauthorized,
@@ -92,6 +99,15 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     setDataMessage: state.setDataMessage,
     selectedProjectId: state.selectedProjectId,
     selectedSeasonId: state.selectedSeasonId
+  });
+  const purchaseEditor = usePurchaseActions({
+    bootstrap: state.bootstrap, selectedProjectId: state.selectedProjectId, selectedSeasonId: state.selectedSeasonId,
+    handleUnauthorized: loader.handleUnauthorized, loadWorkspace, setDataMessage: state.setDataMessage,
+  });
+  const manufacturingEditor = useManufacturingActions({
+    bootstrap: state.bootstrap, selectedProjectId: state.selectedProjectId, selectedSeasonId: state.selectedSeasonId,
+    handleUnauthorized: loader.handleUnauthorized, loadWorkspace, setDataMessage: state.setDataMessage,
+    signedInMemberId: derived.signedInMember?.id ?? null,
   });
   const autoLoadedWorkspaceKeyRef = useRef<string | null>(null);
   const {
@@ -204,8 +220,8 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     activeSubsystemId: subsystemEditor.activeSubsystemId,
     mechanismModalMode: mechanismEditor.mechanismModalMode,
     activeMechanismId: mechanismEditor.activeMechanismId,
-    manufacturingModalMode: state.manufacturingModalMode,
-    activeManufacturingId: state.activeManufacturingId,
+    manufacturingModalMode: manufacturingEditor.manufacturingModalMode,
+    activeManufacturingId: manufacturingEditor.activeManufacturingId,
     workstreamModalMode: workstreamEditor.workstreamModalMode,
     activeWorkstreamId: workstreamEditor.activeWorkstreamId,
   });
@@ -220,10 +236,13 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     partInstanceEditor,
     subsystemEditor,
     mechanismEditor,
+    purchaseEditor,
+    manufacturingEditor,
     materialEditor,
     ...interactiveTutorial,
     interactiveTutorialChapters: interactiveTutorial.chapterStartOptions,
     isWorkspaceModalOpen: derived.isWorkspaceModalOpen || interactiveTutorial.isInteractiveTutorialActive || Boolean(
+      purchaseEditor.purchaseModalMode || manufacturingEditor.manufacturingModalMode ||
       artifactEditor.artifactModalMode || workstreamEditor.workstreamModalMode ||
       partDefinitionEditor.partDefinitionModalMode || partInstanceEditor.partInstanceModalMode ||
       subsystemEditor.subsystemModalMode || mechanismEditor.mechanismModalMode || materialEditor.materialModalMode
