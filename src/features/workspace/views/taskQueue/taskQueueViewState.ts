@@ -4,6 +4,10 @@ import type { Dispatch, SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import {
+  getWorkspaceFilterToneClassName,
+  getWorkspaceStatusToneClassName,
+} from "@/features/workspace/shared/filters/workspaceFilterTone";
 
 import {
   useTaskQueueViewStateLogic,
@@ -56,42 +60,8 @@ export function shouldHideTaskQueueSummary(zoom: number) {
   return zoom <= TASK_QUEUE_COMPACT_ZOOM_THRESHOLD;
 }
 
-const FILTER_TONE_CLASSES = [
-  "filter-tone-info",
-  "filter-tone-success",
-  "filter-tone-warning",
-  "filter-tone-danger",
-  "filter-tone-neutral",
-] as const;
-
-function getStableToneClassName(value: string) {
-  let hash = 0;
-
-  for (let index = 0; index < value.length; index += 1) {
-    hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
-  }
-
-  return FILTER_TONE_CLASSES[hash % FILTER_TONE_CLASSES.length];
-}
-
-export function getTaskQueueStatusToneClassName(value: string) {
-  switch (value) {
-    case "in-progress":
-    case "waiting-on-dependency":
-      return "filter-tone-warning";
-    case "waiting-for-qa":
-      return "filter-tone-info";
-    case "complete":
-      return "filter-tone-success";
-    case "blocked":
-      return "filter-tone-danger";
-    case "not-started":
-    default:
-      return "filter-tone-neutral";
-  }
-}
-
-export const getTaskQueueFilterToneClassName = getStableToneClassName;
+export const getTaskQueueStatusToneClassName = getWorkspaceStatusToneClassName;
+export const getTaskQueueFilterToneClassName = getWorkspaceFilterToneClassName;
 
 export interface TaskQueueViewStateArgs {
   activePersonFilter: FilterSelection;

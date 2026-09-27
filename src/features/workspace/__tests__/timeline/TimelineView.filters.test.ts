@@ -1,4 +1,19 @@
-import * as React from "react";import type { BootstrapPayload } from "@/types/bootstrap";import { pruneTimelineFilterSelections } from "@/features/workspace/views/timeline/hooks/useTimelineViewFilters";import { buildTimelineDisciplineFilterOptions, buildTimelineSubsystemFilterOptions, countActiveTimelineFilters, filterTimelineMilestonesByProjectSelection, filterTimelineTasks, resolveTimelineFilteredProjectIds, TIMELINE_TASK_PRIORITY_OPTIONS, TIMELINE_TASK_STATUS_OPTIONS } from "@/features/workspace/views/timeline/model/timelineViewFilters";import { createBootstrap, createTimelineMilestone } from "./timelineTestFixtures";
+import * as React from "react";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import { pruneTimelineFilterSelections } from "@/features/workspace/views/timeline/hooks/useTimelineViewFilters";
+import {
+  buildTimelineDisciplineFilterOptions,
+  buildTimelineSubsystemFilterOptions,
+  countActiveTimelineFilters,
+  filterTimelineMilestonesByProjectSelection,
+  filterTimelineTasks,
+  getTimelineFilterToneClassName,
+  getTimelineStatusToneClassName,
+  resolveTimelineFilteredProjectIds,
+  TIMELINE_TASK_PRIORITY_OPTIONS,
+  TIMELINE_TASK_STATUS_OPTIONS,
+} from "@/features/workspace/views/timeline/model/timelineViewFilters";
+import { createBootstrap, createTimelineMilestone } from "./timelineTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
@@ -10,6 +25,13 @@ describe("TimelineView", () => {
 
   afterEach(() => {
     jest.useRealTimers();
+  });
+
+  it("uses shared tones for status values and stable tones for filter options", () => {
+    expect(getTimelineStatusToneClassName("in-progress")).toBe("filter-tone-warning");
+    expect(getTimelineStatusToneClassName("complete")).toBe("filter-tone-success");
+    expect(getTimelineStatusToneClassName("unknown")).toBe("filter-tone-neutral");
+    expect(getTimelineFilterToneClassName("a")).toBe("filter-tone-warning");
   });
 
   it("filters timeline tasks by project, discipline, subsystem, status, and priority", () => {
