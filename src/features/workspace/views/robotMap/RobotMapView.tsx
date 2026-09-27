@@ -90,10 +90,7 @@ export function RobotMapView({
   const layoutPersistVersionBySubsystemIdRef = useRef<Record<string, number>>({});
 
   const primaryProjectId = bootstrap.projects[0]?.id ?? "default";
-  const referenceImageStorageKey = useMemo(
-    () => buildReferenceImageStorageKey(primaryProjectId),
-    [primaryProjectId],
-  );
+  const referenceImageStorageKey = buildReferenceImageStorageKey(primaryProjectId);
   const viewModel = useMemo(() => buildRobotConfigurationViewModel(bootstrap, search), [bootstrap, search]);
 
   useEffect(() => {
