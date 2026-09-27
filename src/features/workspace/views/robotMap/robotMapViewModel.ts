@@ -209,6 +209,10 @@ export function buildRobotConfigurationViewModel(
           .filter((task) => linkedTaskIds.has(task.id))
           .flatMap((task) => task.linkedManufacturingIds),
       );
+      const linkedRisks = bootstrap.risks.filter((risk) =>
+        riskTargetsSubsystem(risk, mechanismIds, partInstanceIds),
+      ).map((risk) => ({ id: risk.id, label: risk.title, meta: risk.severity }))
+        .sort(sortLinks);
 
       return {
         cadSource: resolveCadSourceIndicator(subsystem),
@@ -235,15 +239,8 @@ export function buildRobotConfigurationViewModel(
           }))
           .sort(sortLinks),
         linkedTasks,
-        linkedRisks: bootstrap.risks
-          .filter((risk) => riskTargetsSubsystem(risk, mechanismIds, partInstanceIds))
-          .map<RobotConfigurationDrilldownLinkModel>((risk) => ({
-            id: risk.id,
-            label: risk.title,
-            meta: risk.severity,
-          }))
-          .sort(sortLinks),
-        riskCount: bootstrap.risks.filter((risk) => riskTargetsSubsystem(risk, mechanismIds, partInstanceIds)).length,
+        linkedRisks,
+        riskCount: linkedRisks.length,
         linkedWorkLogs: bootstrap.workLogs
           .filter((workLog) => linkedTaskIds.has(workLog.taskId))
           .map<RobotConfigurationDrilldownLinkModel>((workLog) => ({

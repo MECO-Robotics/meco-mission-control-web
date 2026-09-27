@@ -263,6 +263,7 @@ describe("buildRobotConfigurationViewModel drilldowns", () => {
     expect(subsystem.linkedParts.map((link) => link.label)).toEqual(["Bumper Mount", "Left Bearing Block"]);
     expect(subsystem.linkedTasks.map((link) => link.label)).toEqual(["Machine gearbox plates", "Wire bumper mounts"]);
     expect(subsystem.linkedRisks.map((link) => link.label)).toEqual(["Gearbox tolerance", "Mount clearance"]);
+    expect(subsystem.riskCount).toBe(subsystem.linkedRisks.length);
     expect(subsystem.linkedWorkLogs.map((link) => link.label)).toEqual(["Cut first plate", "Installed direct mount"]);
     expect(subsystem.linkedManufacturingItems.map((link) => link.label)).toEqual([
       "Gearbox side plates",
