@@ -18,7 +18,7 @@ import type { MaterialEditorModal } from "../modals/assetCatalog/MaterialEditorM
 
 export interface WorkspaceModalHostViewProps {
   taskEditor: Pick<ComponentProps<typeof TaskEditorModal>,
-    "activeTask" | "closeTaskModal" | "handleDeleteTask" | "handleResolveTaskBlocker" |
+    "activeTask" | "closeTaskModal" | "handleResolveTaskBlocker" |
     "handleTaskSubmit" | "isDeletingTask" | "isSavingTask" | "setTaskDraft" | "taskDraft"
   > & {
     taskModalMode: "create" | "edit" | null;

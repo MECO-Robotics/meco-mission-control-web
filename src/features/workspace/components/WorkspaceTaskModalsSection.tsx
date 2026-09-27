@@ -38,12 +38,6 @@ export function WorkspaceTaskModalsSection(props: WorkspaceModalHostViewProps) {
           taskModalMode={editor.taskModalMode}
           bootstrap={props.bootstrap}
           advancedSectionOpen={advancedSectionOpen}
-          disciplinesById={props.disciplinesById}
-          milestonesById={props.milestonesById}
-          mechanismsById={props.mechanismsById}
-          mentors={props.mentors}
-          partDefinitionsById={props.partDefinitionsById}
-          partInstancesById={props.partInstancesById}
           requestPhotoUpload={props.requestPhotoUpload}
           openTaskDetailsModal={editor.openTimelineTaskDetailsModal}
           onTaskEditCanceled={props.onTaskEditCanceled}
