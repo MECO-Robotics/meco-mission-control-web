@@ -39,21 +39,17 @@ function DecisionControls({
   targetKind: CadHierarchyTargetKind;
 }) {
   const classificationOptions: Array<{ value: CadHierarchyTargetKind; label: string }> =
-    targetKind === "SUBSYSTEM"
+    targetKind === "SUBSYSTEM" || targetKind === "PART_DEFINITION"
       ? [
-          { value: "SUBSYSTEM", label: "Subsystem" },
+          {
+            value: targetKind,
+            label: targetKind === "SUBSYSTEM" ? "Subsystem" : "Existing part definition",
+          },
           { value: "REFERENCE_GEOMETRY", label: "Reference geometry" },
           { value: "IGNORE", label: "Ignore" },
           { value: "UNMAPPED", label: "Needs review" },
         ]
-      : targetKind === "PART_DEFINITION"
-        ? [
-            { value: "PART_DEFINITION", label: "Existing part definition" },
-            { value: "REFERENCE_GEOMETRY", label: "Reference geometry" },
-            { value: "IGNORE", label: "Ignore" },
-            { value: "UNMAPPED", label: "Needs review" },
-          ]
-        : [
+      : [
             { value: "MECHANISM", label: "Mechanism" },
             { value: "COMPONENT_ASSEMBLY", label: "Component assembly" },
             { value: "SUBSYSTEM", label: "Nested subsystem" },
