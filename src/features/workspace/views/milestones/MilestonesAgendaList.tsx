@@ -1,9 +1,7 @@
 import type { MilestoneRecord } from "@/types/recordsExecution";
 import { getMilestoneTypeStyle } from "@/features/workspace/shared/events/eventStyles";
-import { formatMilestoneDateTime, formatMilestoneEndDateTime } from "./milestonesViewUtils";
+import { formatMilestoneDateTime, formatMilestoneEndDateTime, formatMilestoneStatusLabel } from "./milestonesViewUtils";
 import { IconRisk } from "@/components/shared/Icons";
-
-const readinessLabels = { "not ready": "Not ready", blocked: "Blocked", qa: "QA", ready: "Ready" };
 
 export function MilestonesAgendaList({ milestones, onOpenMilestone, projectLabelByMilestoneId, riskCountByMilestoneId = {} }: {
   milestones: MilestoneRecord[];
@@ -19,7 +17,7 @@ export function MilestonesAgendaList({ milestones, onOpenMilestone, projectLabel
           <button type="button" className="ghost-button" style={{ padding: 0, border: 0, background: "transparent", fontWeight: 700, textAlign: "left", color: "var(--text-title)" }} onClick={() => onOpenMilestone(milestone)}>{milestone.title}</button>
           <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center", marginTop: "0.25rem" }}>
             <time dateTime={milestone.startDateTime}>{formatMilestoneDateTime(milestone.startDateTime)}{milestone.endDateTime ? ` – ${formatMilestoneEndDateTime(milestone.startDateTime, milestone.endDateTime)}` : ""}</time>
-            <span className="pill status-pill">{readinessLabels[milestone.status ?? "not ready"]}</span>
+            <span className="pill status-pill">{formatMilestoneStatusLabel(milestone.status) ?? "Not ready"}</span>
             <span>{getMilestoneTypeStyle(milestone.type).label}</span>
             <span>{projectLabelByMilestoneId[milestone.id]}</span>
             {riskCountByMilestoneId[milestone.id] ? <span aria-label={`${riskCountByMilestoneId[milestone.id]} risks`} title={`${riskCountByMilestoneId[milestone.id]} risks`} style={{ display: "inline-flex", alignItems: "center", gap: "0.2rem" }}><IconRisk />{riskCountByMilestoneId[milestone.id]}</span> : null}
