@@ -24,14 +24,7 @@
 
 @media (max-width: 1180px) {
 
-  .purchase-toolbar {
-    width: 100%;
-    grid-template-columns: repeat(auto-fit, minmax(180px, max-content));
-    justify-content: end;
-    justify-items: end;
-    margin-left: auto;
-  }
-
+  .purchase-toolbar,
   .materials-toolbar,
   .part-manager-toolbar {
     width: 100%;

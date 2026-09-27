@@ -18,7 +18,8 @@
   width: auto;
 }
 
-.milestone-detail-type-row {
+.milestone-detail-type-row,
+.modal-form {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.7rem;
@@ -44,12 +45,6 @@
 
 .roster-edit-modal {
   width: min(520px, 100%);
-}
-
-.modal-form {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.7rem;
 }
 
 .task-details-section-title {
