@@ -3,26 +3,11 @@ import type { MeetingRecord, MilestoneRecord, TaskRecord } from "@/types/records
 import { dateDiffInDays } from "@/lib/appUtils/common";
 import { datePortion, endOfTimelineWeek, monthEndFromDay, monthStartFromDay, startOfTimelineWeek } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
+import { compareTimelineMilestonesByStart } from "./timelineMilestoneData";
 import { buildTimelineSubsystemRows } from "./timelineViewDataRows";
 
 const ALL_INTERVAL_PAST_MONTHS = 9;
 const ALL_INTERVAL_FUTURE_MONTHS = 3;
-
-function compareTimelineMilestonesByStart(left: MilestoneRecord, right: MilestoneRecord) {
-  const startComparison = left.startDateTime.localeCompare(right.startDateTime);
-  if (startComparison !== 0) {
-    return startComparison;
-  }
-
-  const leftEnd = left.endDateTime ?? left.startDateTime;
-  const rightEnd = right.endDateTime ?? right.startDateTime;
-  const endComparison = leftEnd.localeCompare(rightEnd);
-  if (endComparison !== 0) {
-    return endComparison;
-  }
-
-  return left.id.localeCompare(right.id);
-}
 
 function getMeetingStartDateTime(meeting: MeetingRecord) {
   return meeting.startDateTime ?? (meeting.time ? `${meeting.date}T${meeting.time}` : meeting.date);
