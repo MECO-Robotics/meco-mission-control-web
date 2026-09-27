@@ -45,84 +45,50 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
   const derived = useAppWorkspaceDerived(state);
   const loader = useAppWorkspaceLoader(state);
   const { loadWorkspace } = loader;
-  const taskEditor = useTaskEditor({
+  const editorContext = {
     bootstrap: state.bootstrap,
-    scopedBootstrap: derived.scopedBootstrap,
-    selectedProjectId: state.selectedProjectId,
-    selectedSeasonId: state.selectedSeasonId,
-    setBootstrap: state.setBootstrap,
     handleUnauthorized: loader.handleUnauthorized,
     loadWorkspace,
+    selectedProjectId: state.selectedProjectId,
+    selectedSeasonId: state.selectedSeasonId,
     setDataMessage: state.setDataMessage,
+  };
+  const taskEditor = useTaskEditor({
+    ...editorContext,
+    scopedBootstrap: derived.scopedBootstrap,
+    setBootstrap: state.setBootstrap,
     enqueueTaskEditNotice: state.enqueueTaskEditNotice,
   });
   const eventActions = useWorkspaceEventActions({ handleUnauthorized: loader.handleUnauthorized, loadWorkspace });
-  const materialEditor = useMaterialEditor({
-    bootstrap: state.bootstrap, selectedProjectId: state.selectedProjectId, selectedSeasonId: state.selectedSeasonId,
-    handleUnauthorized: loader.handleUnauthorized, loadWorkspace, setDataMessage: state.setDataMessage,
-  });
+  const materialEditor = useMaterialEditor(editorContext);
   const artifactEditor = useArtifactActions({
-    bootstrap: state.bootstrap,
-    handleUnauthorized: loader.handleUnauthorized,
-    loadWorkspace: loader.loadWorkspace,
+    ...editorContext,
     scopedBootstrap: derived.scopedBootstrap,
-    selectedProjectId: state.selectedProjectId,
-    setDataMessage: state.setDataMessage,
-    selectedSeasonId: state.selectedSeasonId
   });
   const workstreamEditor = useWorkstreamActions({
-    bootstrap: state.bootstrap,
-    handleUnauthorized: loader.handleUnauthorized,
-    loadWorkspace: loader.loadWorkspace,
+    ...editorContext,
     scopedBootstrap: derived.scopedBootstrap,
-    selectedProjectId: state.selectedProjectId,
-    setDataMessage: state.setDataMessage,
-    selectedSeasonId: state.selectedSeasonId
   });
   const partDefinitionEditor = usePartDefinitionActions({
-    bootstrap: state.bootstrap,
-    handleUnauthorized: loader.handleUnauthorized,
-    loadWorkspace: loader.loadWorkspace,
-    selectedSeasonId: state.selectedSeasonId,
+    ...editorContext,
     setBootstrap: state.setBootstrap,
-    setDataMessage: state.setDataMessage,
-    selectedProjectId: state.selectedProjectId
   });
   const partInstanceEditor = usePartInstanceActions({
-    bootstrap: state.bootstrap,
-    handleUnauthorized: loader.handleUnauthorized,
-    loadWorkspace: loader.loadWorkspace,
+    ...editorContext,
     setBootstrap: state.setBootstrap,
-    setDataMessage: state.setDataMessage,
-    selectedProjectId: state.selectedProjectId,
-    selectedSeasonId: state.selectedSeasonId
   });
   const subsystemEditor = useSubsystemActions({
-    bootstrap: state.bootstrap,
-    handleUnauthorized: loader.handleUnauthorized,
-    loadWorkspace: loader.loadWorkspace,
+    ...editorContext,
     scopedBootstrap: derived.scopedBootstrap,
-    selectedProjectId: state.selectedProjectId,
     setBootstrap: state.setBootstrap,
-    setDataMessage: state.setDataMessage,
-    selectedSeasonId: state.selectedSeasonId
   });
   const mechanismEditor = useMechanismActions({
-    bootstrap: state.bootstrap,
-    handleUnauthorized: loader.handleUnauthorized,
-    loadWorkspace: loader.loadWorkspace,
+    ...editorContext,
     scopedBootstrap: derived.scopedBootstrap,
-    setDataMessage: state.setDataMessage,
-    selectedProjectId: state.selectedProjectId,
-    selectedSeasonId: state.selectedSeasonId
   });
-  const purchaseEditor = usePurchaseActions({
-    bootstrap: state.bootstrap, selectedProjectId: state.selectedProjectId, selectedSeasonId: state.selectedSeasonId,
-    handleUnauthorized: loader.handleUnauthorized, loadWorkspace, setDataMessage: state.setDataMessage,
-  });
+  const purchaseEditor = usePurchaseActions(editorContext);
   const manufacturingEditor = useManufacturingActions({
-    bootstrap: state.bootstrap, selectedProjectId: state.selectedProjectId, selectedSeasonId: state.selectedSeasonId,
-    handleUnauthorized: loader.handleUnauthorized, loadWorkspace, setDataMessage: state.setDataMessage,
+    ...editorContext,
     signedInMemberId: derived.signedInMember?.id ?? null,
   });
   const autoLoadedWorkspaceKeyRef = useRef<string | null>(null);
