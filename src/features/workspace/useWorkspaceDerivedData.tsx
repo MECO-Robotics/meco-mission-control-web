@@ -4,15 +4,12 @@ import { Home } from "lucide-react";
 import { IconHelp, IconManufacturing, IconParts, IconRoster, IconSubsystems, IconTasks, IconWorkLogs } from "@/components/shared/Icons";
 import type { NavigationItem } from "@/lib/workspaceNavigation";
 import type { BootstrapPayload } from "@/types/bootstrap";
+import { indexRecordsById } from "@/features/workspace/shared/model/indexRecordsById";
 
 interface UseWorkspaceDerivedDataArgs {
   bootstrap: BootstrapPayload;
   isAllProjectsView: boolean;
   selectedProjectType: BootstrapPayload["projects"][number]["projectType"] | null;
-}
-
-function recordById<T extends { id: string }>(items: T[]) {
-  return Object.fromEntries(items.map((item) => [item.id, item])) as Record<string, T>;
 }
 
 export function useWorkspaceDerivedData({
@@ -46,19 +43,19 @@ export function useWorkspaceDerivedData({
     [bootstrap.members],
   );
 
-  const membersById = useMemo(() => recordById(bootstrap.members), [bootstrap.members]);
-  const subsystemsById = useMemo(() => recordById(bootstrap.subsystems), [bootstrap.subsystems]);
-  const disciplinesById = useMemo(() => recordById(bootstrap.disciplines), [bootstrap.disciplines]);
-  const mechanismsById = useMemo(() => recordById(bootstrap.mechanisms), [bootstrap.mechanisms]);
+  const membersById = useMemo(() => indexRecordsById(bootstrap.members), [bootstrap.members]);
+  const subsystemsById = useMemo(() => indexRecordsById(bootstrap.subsystems), [bootstrap.subsystems]);
+  const disciplinesById = useMemo(() => indexRecordsById(bootstrap.disciplines), [bootstrap.disciplines]);
+  const mechanismsById = useMemo(() => indexRecordsById(bootstrap.mechanisms), [bootstrap.mechanisms]);
   const partDefinitionsById = useMemo(
-    () => recordById(bootstrap.partDefinitions),
+    () => indexRecordsById(bootstrap.partDefinitions),
     [bootstrap.partDefinitions],
   );
   const partInstancesById = useMemo(
-    () => recordById(bootstrap.partInstances),
+    () => indexRecordsById(bootstrap.partInstances),
     [bootstrap.partInstances],
   );
-  const milestonesById = useMemo(() => recordById(bootstrap.milestones), [bootstrap.milestones]);
+  const milestonesById = useMemo(() => indexRecordsById(bootstrap.milestones), [bootstrap.milestones]);
 
   const cncItems = useMemo(
     () => bootstrap.manufacturingItems.filter((item) => item.process === "cnc"),
