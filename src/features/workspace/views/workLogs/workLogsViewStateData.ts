@@ -41,6 +41,13 @@ export function buildTaskById(tasks: BootstrapPayload["tasks"]) {
   >;
 }
 
+function workLogMatchesPersonFilter(workLog: WorkLogRecord, activePersonFilter: FilterSelection) {
+  return activePersonFilter.length === 0 ||
+    workLog.participantIds.some((participantId) =>
+      filterSelectionIncludes(activePersonFilter, participantId),
+    );
+}
+
 export function filterSummaryWorkLogs(
   workLogs: BootstrapPayload["workLogs"],
   activePersonFilter: FilterSelection,
@@ -52,12 +59,7 @@ export function filterSummaryWorkLogs(
   const query = search.trim().toLowerCase();
 
   return workLogs.filter((workLog) => {
-    if (
-      activePersonFilter.length > 0 &&
-      !workLog.participantIds.some((participantId) =>
-        filterSelectionIncludes(activePersonFilter, participantId),
-      )
-    ) {
+    if (!workLogMatchesPersonFilter(workLog, activePersonFilter)) {
       return false;
     }
 
@@ -210,12 +212,7 @@ export function filterAndSortWorkLogs({
 }): WorkLogRecord[] {
   const query = search.trim().toLowerCase();
   const filtered = workLogs.filter((workLog) => {
-    if (
-      activePersonFilter.length > 0 &&
-      !workLog.participantIds.some((participantId) =>
-        filterSelectionIncludes(activePersonFilter, participantId),
-      )
-    ) {
+    if (!workLogMatchesPersonFilter(workLog, activePersonFilter)) {
       return false;
     }
 

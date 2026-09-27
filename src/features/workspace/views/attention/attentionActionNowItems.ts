@@ -2,7 +2,6 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import { buildSupplyAndQualityActionItems } from "./attentionActionNowSupplyQuality";
 import {
   buildTaskDownstreamCount,
-  buildTaskLastUpdatedAtById,
   indexLinkedTasksBySupplyId,
   sortAttentionItemsByUrgency,
   type AttentionLookup,
@@ -23,6 +22,7 @@ interface BuildAttentionActionNowItemsArgs {
   overdueTasks: BootstrapPayload["tasks"];
   purchaseDelays: BootstrapPayload["purchaseItems"];
   staleTaskResults: StaleTaskResult[];
+  taskLastUpdatedAtById: Map<string, string>;
   waitingQaTasks: BootstrapPayload["tasks"];
 }
 
@@ -38,9 +38,9 @@ export function buildAttentionActionNowItems({
   overdueTasks,
   purchaseDelays,
   staleTaskResults,
+  taskLastUpdatedAtById,
   waitingQaTasks,
 }: BuildAttentionActionNowItemsArgs): AttentionNowItem[] {
-  const taskLastUpdatedAtById = buildTaskLastUpdatedAtById(bootstrap);
   const downstreamByTaskId = buildTaskDownstreamCount(bootstrap);
   const purchaseLinkedTasksById = indexLinkedTasksBySupplyId({
     key: "linkedPurchaseIds",
