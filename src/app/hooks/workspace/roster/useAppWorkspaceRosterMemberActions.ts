@@ -5,6 +5,9 @@ import { createMemberRecord, deleteMemberRecord, updateMemberRecord, updateProfi
 import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
 import { isElevatedMemberRole } from "@/app/state/workspaceMemberRoleUtils";
 
+const reloadCurrentWorkspace = (model: AppWorkspaceModel) =>
+  model.loadWorkspace({ projectId: model.selectedProjectId, seasonId: model.selectedSeasonId });
+
 export function useAppWorkspaceRosterMemberActions(model: AppWorkspaceModel) {
   const handleCreateMember = useCallback(
     async (milestone: FormEvent<HTMLFormElement>) => {
@@ -97,10 +100,7 @@ export function useAppWorkspaceRosterMemberActions(model: AppWorkspaceModel) {
           );
         }
         model.setIsEditPersonOpen(false);
-        await model.loadWorkspace({
-          projectId: model.selectedProjectId,
-          seasonId: model.selectedSeasonId,
-        });
+        await reloadCurrentWorkspace(model);
       } catch (error) {
         model.setDataMessage(toErrorMessage(error));
       } finally {
@@ -129,10 +129,7 @@ export function useAppWorkspaceRosterMemberActions(model: AppWorkspaceModel) {
           model.setMemberEditDraft(null);
           model.setIsEditPersonOpen(false);
         }
-        await model.loadWorkspace({
-          projectId: model.selectedProjectId,
-          seasonId: model.selectedSeasonId,
-        });
+        await reloadCurrentWorkspace(model);
       } catch (error) {
         model.setDataMessage(toErrorMessage(error));
       } finally {
@@ -173,10 +170,7 @@ export function useAppWorkspaceRosterMemberActions(model: AppWorkspaceModel) {
           model.handleUnauthorized,
         );
         model.setIsAddPersonOpen(false);
-        await model.loadWorkspace({
-          projectId: model.selectedProjectId,
-          seasonId: model.selectedSeasonId,
-        });
+        await reloadCurrentWorkspace(model);
       } catch (error) {
         model.setDataMessage(toErrorMessage(error));
       } finally {
