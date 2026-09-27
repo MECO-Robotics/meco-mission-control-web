@@ -175,6 +175,7 @@ describe("MilestonesEventDetailsModal", () => {
     expect(markup).toContain('aria-label="Close milestone details"');
     expect(markup).toContain("task-detail-inline-edit-title-shell");
     expect(markup).toContain("task-detail-inline-edit-trigger-summary");
+    expect(markup).toContain("task-detail-inline-edit-trigger-chip");
     expect(markup).toContain("task-detail-inline-edit-shell");
     expect(markup).not.toContain("task-detail-inline-edit-input-title");
     expect(markup).toContain("Save milestone");
