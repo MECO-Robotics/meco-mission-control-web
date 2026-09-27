@@ -1,7 +1,8 @@
 import { ModalDialog } from "@/components/ModalDialog";
 import type { FormEvent, ReactNode } from "react";
 
-type StructureModalShellProps = {
+type EditorModalShellProps = {
+  dialogLabel?: string;
   eyebrowLabel: string;
   title: string;
   onClose: () => void;
@@ -31,15 +32,16 @@ const formStyle = {
   color: "var(--text-copy)",
 } as const;
 
-export function StructureModalShell({
+export function EditorModalShell({
   children,
+  dialogLabel,
   eyebrowLabel,
   onClose,
   onSubmit,
   title,
-}: StructureModalShellProps) {
+}: EditorModalShellProps) {
   return (
-    <ModalDialog label={title} onClose={onClose}>
+    <ModalDialog label={dialogLabel ?? title} onClose={onClose}>
       <section  className="modal-card"  style={modalCardStyle}>
         <div className="panel-header compact-header">
           <div>
