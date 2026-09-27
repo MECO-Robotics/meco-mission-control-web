@@ -54,13 +54,6 @@
   padding: var(--control-select-form-padding-block) var(--control-select-padding-inline-end) var(--control-select-form-padding-block) var(--control-select-padding-inline-start);
 }
 
-.field select:not([multiple]):focus,
-.field select:not([multiple]):focus-visible {
-  outline: none;
-  border-color: var(--control-select-focus-border);
-  box-shadow: var(--control-select-focus-ring);
-}
-
 .field select[multiple] {
   background-image: none !important;
   cursor: default;
