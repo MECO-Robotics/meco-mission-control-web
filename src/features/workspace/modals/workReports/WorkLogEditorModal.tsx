@@ -3,6 +3,7 @@ import { useRef, type Dispatch, type FormEvent, type SetStateAction } from "reac
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { WorkLogPayload } from "@/types/payloads";
 import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
+import { WorkReportEditorActions } from "./WorkReportEditorActions";
 
 interface WorkLogEditorModalProps {
   bootstrap: BootstrapPayload;
@@ -214,27 +215,12 @@ export function WorkLogEditorModal({
               return requestPhotoUpload(workLogPhotoProjectId, file);
             }}
           />
-          <div className="modal-actions modal-wide">
-            <button
-              className="secondary-action"
-              onClick={closeWorkLogModal}
-              type="button"
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              className="primary-action"
-              disabled={isSavingWorkLog || bootstrap.tasks.length === 0 || bootstrap.members.length === 0}
-              type="submit"
-            >
-              {isSavingWorkLog ? "Saving..." : "Add work log"}
-            </button>
-          </div>
+          <WorkReportEditorActions
+            disabled={isSavingWorkLog || bootstrap.tasks.length === 0 || bootstrap.members.length === 0}
+            isSaving={isSavingWorkLog}
+            onCancel={closeWorkLogModal}
+            submitLabel="Add work log"
+          />
         </form>
       </section>
     </ModalDialog>

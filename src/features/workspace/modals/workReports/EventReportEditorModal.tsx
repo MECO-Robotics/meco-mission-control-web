@@ -3,6 +3,7 @@ import { useRef, type Dispatch, type FormEvent, type SetStateAction } from "reac
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TestResultPayload } from "@/types/payloads";
 import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
+import { WorkReportEditorActions } from "./WorkReportEditorActions";
 
 interface MilestoneReportEditorModalProps {
   bootstrap: BootstrapPayload;
@@ -163,27 +164,12 @@ export function MilestoneReportEditorModal({
               return requestPhotoUpload(milestoneReportPhotoProjectId, file);
             }}
           />
-          <div className="modal-actions modal-wide">
-            <button
-              className="secondary-action"
-              onClick={closeMilestoneReportModal}
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
-              type="button"
-            >
-              Cancel
-            </button>
-            <button
-              className="primary-action"
-              disabled={isSavingMilestoneReport || bootstrap.milestones.length === 0}
-              type="submit"
-            >
-              {isSavingMilestoneReport ? "Saving..." : "Add milestone report"}
-            </button>
-          </div>
+          <WorkReportEditorActions
+            disabled={isSavingMilestoneReport || bootstrap.milestones.length === 0}
+            isSaving={isSavingMilestoneReport}
+            onCancel={closeMilestoneReportModal}
+            submitLabel="Add milestone report"
+          />
         </form>
       </section>
     </ModalDialog>

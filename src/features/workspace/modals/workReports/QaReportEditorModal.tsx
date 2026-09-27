@@ -4,6 +4,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { QaReportPayload } from "@/types/payloads";
 import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
 import { QaRiskReassessmentSection } from "./QaRiskReassessmentSection";
+import { WorkReportEditorActions } from "./WorkReportEditorActions";
 
 interface QaReportEditorModalProps {
   bootstrap: BootstrapPayload;
@@ -216,31 +217,14 @@ export function QaReportEditorModal({
               return requestPhotoUpload(qaReportPhotoProjectId, file);
             }}
           />
-          <div className="modal-actions modal-wide">
-            <button
-              className="secondary-action"
-              onClick={closeQaReportModal}
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
-              type="button"
-            >
-              Cancel
-            </button>
-            <button
-              className="primary-action"
-              disabled={
-                isSavingQaReport ||
-                bootstrap.tasks.length === 0 ||
-                bootstrap.members.length === 0
-              }
-              type="submit"
-            >
-              {isSavingQaReport ? "Saving..." : "Add QA report"}
-            </button>
-          </div>
+          <WorkReportEditorActions
+            disabled={
+              isSavingQaReport || bootstrap.tasks.length === 0 || bootstrap.members.length === 0
+            }
+            isSaving={isSavingQaReport}
+            onCancel={closeQaReportModal}
+            submitLabel="Add QA report"
+          />
         </form>
       </section>
     </ModalDialog>
