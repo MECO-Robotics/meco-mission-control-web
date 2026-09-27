@@ -69,7 +69,7 @@ describe("TimelineView", () => {
           ...bootstrap.tasks[0],
           id: "task-2",
           projectId: "project-2",
-          subsystemIds: ["subsystem-2"],
+          subsystemIds: ["subsystem-2", "", "subsystem-2"],
           disciplineId: "discipline-2",
           priority: "low",
           status: "complete",
