@@ -117,22 +117,15 @@ export function buildTaskTriageItems(
   });
 }
 
-type SupplyTriageRecord = {
-  id: string;
-  requestedById: string | null;
-  status: string;
-  subsystemId: string;
-  title: string;
-};
+type SupplyTriageRecord = Pick<BootstrapPayload["manufacturingItems"][number], "id" | "requestedById" | "subsystemId" | "title"> & { status: string };
 
-function buildSupplyTriageItems<T extends SupplyTriageRecord, K extends "manufacturing" | "purchase">
-(
+function buildSupplyTriageItems<T extends SupplyTriageRecord>(
   rows: T[],
   lookup: AttentionLookup,
-  kind: K,
+  kind: "manufacturing" | "purchase",
   severityLabel: (item: T) => string,
   subtitle: (item: T) => string,
-): AttentionTriageItem[] {
+) {
   const { membersById, projectsById, subsystemsById } = lookup;
 
   return rows.map((item) => ({
