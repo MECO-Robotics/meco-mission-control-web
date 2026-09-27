@@ -288,6 +288,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         modal={data.milestoneModal}
         modalPortalTarget={data.modalPortalTarget}
         onCreateMilestoneReport={onCreateMilestoneReport}
+        projectsById={data.projectsById}
       />
 
     </section>

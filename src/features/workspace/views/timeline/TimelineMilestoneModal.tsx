@@ -9,11 +9,13 @@ export function TimelineMilestoneModal({
   modalPortalTarget,
   modal,
   onCreateMilestoneReport,
+  projectsById,
 }: {
   bootstrap: BootstrapPayload;
   modalPortalTarget: HTMLElement | null;
   modal: TimelineMilestoneModalState;
   onCreateMilestoneReport?: (milestoneId: string, onReturn?: () => void) => void;
+  projectsById: Record<string, BootstrapPayload["projects"][number]>;
 }) {
   const activeMilestone = bootstrap.milestones.find(
     (milestone) => milestone.id === (modal.activeMilestoneDetail?.id ?? modal.activeMilestoneId),
@@ -22,7 +24,7 @@ export function TimelineMilestoneModal({
   return (
     <MilestonesMilestoneModal
       activeMilestone={activeMilestone}
-      projectsById={Object.fromEntries(bootstrap.projects.map((project) => [project.id, project]))}
+      projectsById={projectsById}
       onEditMilestone={modal.openEditMilestoneModalForMilestone}
       onRecordResult={onCreateMilestoneReport ? (milestone) => {
         modal.closeMilestoneDetailModal();
