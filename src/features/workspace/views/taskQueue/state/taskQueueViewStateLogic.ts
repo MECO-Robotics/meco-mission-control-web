@@ -18,15 +18,6 @@ const SUBSYSTEM_ITERATION_DISCIPLINE_CODES = new Set<string>([
   "electrical",
 ]);
 
-function useTaskQueueVisibleTaskCountReset(
-  processedTasksLength: number,
-  setVisibleTaskCount: Dispatch<SetStateAction<number>>,
-) {
-  useEffect(() => {
-    setVisibleTaskCount(TASK_QUEUE_LAZY_LOAD_BATCH_SIZE);
-  }, [processedTasksLength, setVisibleTaskCount]);
-}
-
 export interface TaskQueueViewStateLogicArgs {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
@@ -128,17 +119,18 @@ export function useTaskQueueViewStateLogic({
   });
 
   useEffect(() => {
-    if (!isAllProjectsView && projectFilter.length > 0) {
-      setProjectFilter([]);
+    if (!isAllProjectsView) {
+      if (projectFilter.length > 0) {
+        setProjectFilter([]);
+      }
+      return;
     }
-  }, [isAllProjectsView, projectFilter, setProjectFilter]);
 
-  useEffect(() => {
     const projectIds = new Set(bootstrap.projects.map((project) => project.id));
     if (projectFilter.some((projectId) => !projectIds.has(projectId))) {
       setProjectFilter((current) => current.filter((projectId) => projectIds.has(projectId)));
     }
-  }, [bootstrap.projects, projectFilter, setProjectFilter]);
+  }, [bootstrap.projects, isAllProjectsView, projectFilter, setProjectFilter]);
 
   useEffect(() => {
     if (!showSubsystemIterationFilter && subsystemIterationFilter.length > 0) {
@@ -178,7 +170,9 @@ export function useTaskQueueViewStateLogic({
     };
   }, [focusedBoardState, setFocusedBoardState]);
 
-  useTaskQueueVisibleTaskCountReset(processedTasks.length, setVisibleTaskCount);
+  useEffect(() => {
+    setVisibleTaskCount(TASK_QUEUE_LAZY_LOAD_BATCH_SIZE);
+  }, [processedTasks.length, setVisibleTaskCount]);
 
   const taskFilterMotionClass = useFilterChangeMotionClass([
     activePersonFilter,
