@@ -92,6 +92,19 @@ export function TaskQueueKanbanBoard({
     () => groupTasksByBoardState(tasks, bootstrap),
     [bootstrap, tasks],
   );
+  const cardProps = {
+    bootstrap,
+    disciplinesById,
+    isNonRobotProject,
+    membersById,
+    openEditTaskModal,
+    projectsById,
+    taskQueueZoom,
+    showProjectContextOnCards,
+    showProjectOnCards,
+    subsystemsById,
+    workstreamsById,
+  };
 
   const focusedTasks = useMemo(
     () => (focusedState === null ? [] : tasksByState[focusedState]),
@@ -207,20 +220,10 @@ export function TaskQueueKanbanBoard({
                   <div className="task-queue-board-priority-grid">
                     {group.tasks.map((task) => (
                       <TaskQueueCard
-                        bootstrap={bootstrap}
-                        disciplinesById={disciplinesById}
-                        isNonRobotProject={isNonRobotProject}
+                        {...cardProps}
                         key={task.id}
-                        membersById={membersById}
-                        openEditTaskModal={openEditTaskModal}
-                        projectsById={projectsById}
-                        taskQueueZoom={taskQueueZoom}
-                        showPriorityBadge={false}
-                        showProjectContextOnCards={showProjectContextOnCards}
-                        showProjectOnCards={showProjectOnCards}
-                        subsystemsById={subsystemsById}
                         task={task}
-                        workstreamsById={workstreamsById}
+                        showPriorityBadge={false}
                       />
                     ))}
                   </div>
@@ -278,20 +281,10 @@ export function TaskQueueKanbanBoard({
       renderItem={(task, _, dragProps) => (
         <TaskQueueCard
           {...dragProps}
-          bootstrap={bootstrap}
-          disciplinesById={disciplinesById}
-          isNonRobotProject={isNonRobotProject}
+          {...cardProps}
           key={task.id}
-          membersById={membersById}
-          openEditTaskModal={openEditTaskModal}
-          projectsById={projectsById}
-          taskQueueZoom={taskQueueZoom}
-          showPriorityBadge
-          showProjectContextOnCards={showProjectContextOnCards}
-          showProjectOnCards={showProjectOnCards}
-          subsystemsById={subsystemsById}
           task={task}
-          workstreamsById={workstreamsById}
+          showPriorityBadge
         />
       )}
     />
