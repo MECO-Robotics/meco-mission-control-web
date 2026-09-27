@@ -4,6 +4,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { formatIterationVersion } from "@/lib/appUtils/common";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { indexRecordsById } from "@/features/workspace/shared/model/indexRecordsById";
 
 import {
   filterTaskQueueTasks,
@@ -21,10 +22,6 @@ const PRIORITY_VALUES: Record<TaskRecord["priority"], number> = {
   medium: 2,
   low: 1,
 };
-
-function buildLookupMap<T extends { id: string }>(items: T[]) {
-  return Object.fromEntries(items.map((item) => [item.id, item])) as Record<string, T>;
-}
 
 export function useTaskQueueProcessedTasks({
   activePersonFilter,
@@ -63,8 +60,8 @@ export function useTaskQueueProcessedTasks({
   showSubsystemIterationFilter: boolean;
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
 }) {
-  const projectsById = useMemo(() => buildLookupMap(bootstrap.projects), [bootstrap.projects]);
-  const workstreamsById = useMemo(() => buildLookupMap(bootstrap.workstreams), [bootstrap.workstreams]);
+  const projectsById = useMemo(() => indexRecordsById(bootstrap.projects), [bootstrap.projects]);
+  const workstreamsById = useMemo(() => indexRecordsById(bootstrap.workstreams), [bootstrap.workstreams]);
   const subsystemFilterOptions = useMemo(
     () => bootstrap.subsystems.map((subsystem) => ({
       id: subsystem.id,
