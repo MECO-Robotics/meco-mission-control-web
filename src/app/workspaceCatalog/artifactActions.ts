@@ -11,6 +11,7 @@ import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefa
 import type { ArtifactKind } from "@/types/common";
 import type { ArtifactPayload } from "@/types/payloads";
 import { useCatalogDraftEditor } from "./useCatalogDraftEditor";
+import { useCatalogRecordActions } from "./useCatalogRecordActions";
 
 export function useArtifactActions({ bootstrap, handleUnauthorized, loadWorkspace, scopedBootstrap, selectedProjectId, setDataMessage, selectedSeasonId }: {
   selectedSeasonId: string | null;
@@ -46,6 +47,16 @@ export function useArtifactActions({ bootstrap, handleUnauthorized, loadWorkspac
     selectedSeasonId,
     toDraft: artifactToPayload,
   });
+  const { handleDelete: handleDeleteArtifact, handleToggleArchived: handleToggleArtifactArchived } = useCatalogRecordActions({
+    activeRecordId: activeArtifactId,
+    beginOperation,
+    closeEditor: closeArtifactModal,
+    deleteRecord: deleteArtifactRecord,
+    handleUnauthorized,
+    records: bootstrap.artifacts,
+    setDataMessage,
+    updateRecord: updateArtifactRecord,
+  });
 
   const handleArtifactSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
@@ -80,48 +91,6 @@ export function useArtifactActions({ bootstrap, handleUnauthorized, loadWorkspac
       operation.finish();
     }
   }, [activeArtifactId, artifactDraft, artifactModalMode, closeArtifactModal, handleUnauthorized, setDataMessage, beginOperation]);
-
-  const handleDeleteArtifact = useCallback(async (artifactId: string) => {
-    const operation = beginOperation("delete");
-    if (!operation) return;
-    setDataMessage(null);
-
-    try {
-      await deleteArtifactRecord(artifactId, handleUnauthorized);
-      await operation.refresh();
-      if (operation.isCurrent() && activeArtifactId === artifactId) closeArtifactModal();
-    } catch (error) {
-      if (operation.isCurrent()) setDataMessage(toErrorMessage(error));
-    } finally {
-      operation.finish();
-    }
-  }, [activeArtifactId, closeArtifactModal, handleUnauthorized, setDataMessage, beginOperation]);
-
-  const handleToggleArtifactArchived = useCallback(async (artifactId: string) => {
-    const currentArtifact = bootstrap.artifacts.find(
-      (artifact) => artifact.id === artifactId,
-    );
-    if (!currentArtifact) {
-      return;
-    }
-
-    const operation = beginOperation();
-    if (!operation) return;
-    setDataMessage(null);
-
-    try {
-      await updateArtifactRecord(
-        artifactId,
-        { isArchived: !(currentArtifact.isArchived ?? false) },
-        handleUnauthorized,
-      );
-      await operation.refresh();
-    } catch (error) {
-      if (operation.isCurrent()) setDataMessage(toErrorMessage(error));
-    } finally {
-      operation.finish();
-    }
-  }, [bootstrap, handleUnauthorized, setDataMessage, beginOperation]);
 
   return {
     artifactModalMode,

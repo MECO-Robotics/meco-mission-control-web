@@ -10,6 +10,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import type { WorkstreamPayload } from "@/types/payloads";
 import { useCatalogDraftEditor } from "./useCatalogDraftEditor";
+import { useCatalogRecordActions } from "./useCatalogRecordActions";
 
 export function useWorkstreamActions({ bootstrap, handleUnauthorized, loadWorkspace, scopedBootstrap, selectedProjectId, setDataMessage, selectedSeasonId }: {
   selectedSeasonId: string | null;
@@ -44,6 +45,14 @@ export function useWorkstreamActions({ bootstrap, handleUnauthorized, loadWorksp
     selectedSeasonId,
     toDraft: workstreamToPayload,
   });
+  const { handleToggleArchived: handleToggleWorkstreamArchived } = useCatalogRecordActions({
+    activeRecordId: activeWorkstreamId,
+    beginOperation,
+    handleUnauthorized,
+    records: bootstrap.workstreams,
+    setDataMessage,
+    updateRecord: updateWorkstreamRecord,
+  });
 
   const handleWorkstreamSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
@@ -76,32 +85,6 @@ export function useWorkstreamActions({ bootstrap, handleUnauthorized, loadWorksp
       operation.finish();
     }
   }, [activeWorkstreamId, closeWorkstreamModal, handleUnauthorized, setDataMessage, workstreamDraft, workstreamModalMode, beginOperation]);
-
-  const handleToggleWorkstreamArchived = useCallback(async (workstreamId: string) => {
-    const currentWorkstream = bootstrap.workstreams.find(
-      (workstream) => workstream.id === workstreamId,
-    );
-    if (!currentWorkstream) {
-      return;
-    }
-
-    const operation = beginOperation();
-    if (!operation) return;
-    setDataMessage(null);
-
-    try {
-      await updateWorkstreamRecord(
-        workstreamId,
-        { isArchived: !currentWorkstream.isArchived },
-        handleUnauthorized,
-      );
-      await operation.refresh();
-    } catch (error) {
-      if (operation.isCurrent()) setDataMessage(toErrorMessage(error));
-    } finally {
-      operation.finish();
-    }
-  }, [bootstrap, handleUnauthorized, setDataMessage, beginOperation]);
 
   return {
     workstreamModalMode,
