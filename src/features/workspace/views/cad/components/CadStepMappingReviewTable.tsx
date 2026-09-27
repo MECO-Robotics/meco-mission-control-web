@@ -118,6 +118,16 @@ export function CadStepMappingReviewTable({
               const ruleDescription = carryForwardRuleModeDescription(draft.ruleMode);
               const applyToFuture = !usesPlaceholderParser && ruleModeAppliesToFuture(draft.ruleMode);
               const ruleMatchStrategy = futureRuleStrategy(draft.ruleMode, usesPlaceholderParser);
+              const confirmMapping = (targetKind: TargetKind, targetId: string | null) =>
+                onConfirmMapping({
+                  mappingId: isGroupedRow ? undefined : mapping.id,
+                  sourceKind: isGroupedRow ? mapping.sourceKind : undefined,
+                  sourceIds,
+                  targetKind,
+                  targetId,
+                  applyToFuture,
+                  ruleMatchStrategy,
+                });
               return (
                 <tr data-status={mapping.status} key={mapping.id}>
                   <td>
@@ -198,15 +208,10 @@ export function CadStepMappingReviewTable({
                       <button
                         className="secondary-button compact-action"
                         disabled={isSavingMapping || usesPlaceholderParser || isConfirmBlocked}
-                        onClick={() => onConfirmMapping({
-                          mappingId: isGroupedRow ? undefined : mapping.id,
-                          sourceKind: isGroupedRow ? mapping.sourceKind : undefined,
-                          sourceIds,
-                          targetKind: effectiveTargetKind,
-                          targetId: effectiveTargetKind === "IGNORE" ? null : draft.targetId || null,
-                          applyToFuture,
-                          ruleMatchStrategy,
-                        })}
+                        onClick={() => confirmMapping(
+                          effectiveTargetKind,
+                          effectiveTargetKind === "IGNORE" ? null : draft.targetId || null,
+                        )}
                         type="button"
                       >
                         Confirm
@@ -214,15 +219,7 @@ export function CadStepMappingReviewTable({
                       <button
                         className="ghost-button compact-action"
                         disabled={isSavingMapping || usesPlaceholderParser}
-                        onClick={() => onConfirmMapping({
-                          mappingId: isGroupedRow ? undefined : mapping.id,
-                          sourceKind: isGroupedRow ? mapping.sourceKind : undefined,
-                          sourceIds,
-                          targetKind: "IGNORE",
-                          targetId: null,
-                          applyToFuture,
-                          ruleMatchStrategy,
-                        })}
+                        onClick={() => confirmMapping("IGNORE", null)}
                         type="button"
                       >
                         Ignore
@@ -230,15 +227,7 @@ export function CadStepMappingReviewTable({
                       <button
                         className="ghost-button compact-action"
                         disabled={isSavingMapping || usesPlaceholderParser}
-                        onClick={() => onConfirmMapping({
-                          mappingId: isGroupedRow ? undefined : mapping.id,
-                          sourceKind: isGroupedRow ? mapping.sourceKind : undefined,
-                          sourceIds,
-                          targetKind: "REFERENCE_GEOMETRY",
-                          targetId: null,
-                          applyToFuture,
-                          ruleMatchStrategy,
-                        })}
+                        onClick={() => confirmMapping("REFERENCE_GEOMETRY", null)}
                         type="button"
                       >
                         Reference
