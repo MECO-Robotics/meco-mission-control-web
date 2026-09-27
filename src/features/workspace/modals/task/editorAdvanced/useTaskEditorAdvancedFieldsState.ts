@@ -13,6 +13,7 @@ import type { TaskPayload } from "@/types/payloads/task";
 import {
   getTaskPrimaryTargetName,
   getTaskPrimaryTargetNameOptions,
+  getTaskPartInstanceLabel,
   getTaskSelectedMechanismIds,
   getTaskSelectedPartInstanceIds,
   getTaskSelectedPrimaryTargetId,
@@ -86,16 +87,8 @@ export function useTaskEditorAdvancedFieldsState({
     `${subsystem.name} (${formatIterationVersion(subsystem.iteration)})`;
   const getMechanismLabel = (mechanism: BootstrapPayload["mechanisms"][number]) =>
     `${mechanism.name} (${formatIterationVersion(mechanism.iteration)})`;
-  const getPartInstanceLabel = (partInstance: BootstrapPayload["partInstances"][number]) => {
-    const partDefinition = partDefinitionsById[partInstance.partDefinitionId];
-    const partDefinitionLabel = partDefinition
-      ? `${partDefinition.name} (${formatIterationVersion(partDefinition.iteration)})`
-      : null;
-
-    return partDefinitionLabel
-      ? `${partInstance.name} (${partDefinitionLabel})`
-      : partInstance.name;
-  };
+  const getPartInstanceLabel = (partInstance: BootstrapPayload["partInstances"][number]) =>
+    getTaskPartInstanceLabel(partInstance, partDefinitionsById, formatIterationVersion);
   const handleProjectChange = (projectId: string) => {
     const nextProject = projectsById[projectId] ?? null;
     const subsystemId = bootstrap.subsystems.find((subsystem) => subsystem.projectId === projectId)?.id ?? "";
