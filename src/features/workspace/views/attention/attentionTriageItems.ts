@@ -1,5 +1,6 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { AttentionTriageGroup, AttentionTriageItem } from "./attentionViewTypes";
+import type { AttentionLookup } from "./attentionActionNowShared";
 import { ATTENTION_DUE_SOON_DAYS } from "./attentionViewHelpers";
 import {
   formatContextLabel,
@@ -7,14 +8,7 @@ import {
   normalizeDateOnly,
 } from "./attentionViewHelpers";
 
-export interface AttentionLookup {
-  membersById: Record<string, BootstrapPayload["members"][number]>;
-  projectsById: Record<string, BootstrapPayload["projects"][number]>;
-  subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
-  tasksById: Record<string, BootstrapPayload["tasks"][number]>;
-  taskByReportId: Map<string, BootstrapPayload["tasks"][number]>;
-  workstreamsById: Record<string, BootstrapPayload["workstreams"][number]>;
-}
+export type { AttentionLookup } from "./attentionActionNowShared";
 
 export function buildAttentionTriageGroups({
   blockedTasks,
