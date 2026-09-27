@@ -63,13 +63,6 @@
   text-transform: none;
 }
 
-.table-pagination-size select:focus,
-.table-pagination-size select:focus-visible {
-  outline: none;
-  border-color: var(--control-select-focus-border);
-  box-shadow: var(--control-select-focus-ring);
-}
-
 .table-pagination-controls {
   display: inline-flex;
   align-items: center;

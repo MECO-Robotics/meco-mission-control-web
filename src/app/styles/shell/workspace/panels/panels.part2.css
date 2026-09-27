@@ -40,13 +40,6 @@
   color-scheme: light;
 }
 
-.task-queue-sort-menu-select:focus,
-.task-queue-sort-menu-select:focus-visible {
-  outline: none;
-  border-color: var(--control-select-focus-border);
-  box-shadow: var(--control-select-focus-ring);
-}
-
 .page-shell.dark-mode .task-queue-filter-menu-popover {
   background: var(--bg-panel);
   border-color: rgba(148, 163, 184, 0.34);
