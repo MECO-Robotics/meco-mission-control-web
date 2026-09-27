@@ -1,4 +1,4 @@
-import * as React from "react";import { readFileSync } from "node:fs";import { join } from "node:path";import { renderToStaticMarkup } from "react-dom/server";import { clampTimelineZoom, formatTimelineZoomLabel, getTimelineDayTrackSize, getTimelineGridMinWidth } from "@/features/workspace/shared/timeline/timelineZoom";import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";import { buildTimelineGridLayout } from "@/features/workspace/views/timeline/model/timelineGridLayout";import { createBootstrap, readAppCss, membersById } from "./timelineTestFixtures";
+import * as React from "react";import { readFileSync } from "node:fs";import { join } from "node:path";import { renderToStaticMarkup } from "react-dom/server";import { clampTimelineZoom, formatTimelineZoomLabel, getTimelineDayTrackSize, getTimelineGridMinWidth } from "@/features/workspace/shared/timeline/timelineZoom";import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";import { buildTimelineGridLayout } from "@/features/workspace/views/timeline/model/timelineGridLayout";import { createBootstrap, readAppCss } from "./timelineTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
@@ -19,7 +19,6 @@ describe("TimelineView", () => {
         isAllProjectsView: false,
         activePersonFilter: [],
         setActivePersonFilter: jest.fn(),
-        membersById,
         openTaskDetailModal: jest.fn(),
         openCreateTaskModal: jest.fn(),
         onDeleteTimelineMilestone: jest.fn(),
@@ -98,7 +97,6 @@ describe("TimelineView", () => {
         isAllProjectsView: false,
         activePersonFilter: [],
         setActivePersonFilter: jest.fn(),
-        membersById,
         openTaskDetailModal: jest.fn(),
         openCreateTaskModal: jest.fn(),
         onDeleteTimelineMilestone: jest.fn(),
