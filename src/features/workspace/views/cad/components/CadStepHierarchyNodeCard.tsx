@@ -27,17 +27,19 @@ function targetKindRequiresTarget(targetKind: CadHierarchyTargetKind) {
   return targetKind === "SUBSYSTEM" || targetKind === "MECHANISM" || targetKind === "PART_DEFINITION";
 }
 
+interface CadStepHierarchyNodeCardProps {
+  node: CadHierarchyNode;
+  onConfirm: (decision: CadHierarchyReviewDecision) => void;
+  targets: CadHierarchyTargets;
+  targetKind: CadHierarchyTargetKind;
+}
+
 function DecisionControls({
   node,
   onConfirm,
   targets,
   targetKind,
-}: {
-  node: CadHierarchyNode;
-  onConfirm: (decision: CadHierarchyReviewDecision) => void;
-  targets: CadHierarchyTargets;
-  targetKind: CadHierarchyTargetKind;
-}) {
+}: CadStepHierarchyNodeCardProps) {
   const classificationOptions: Array<{ value: CadHierarchyTargetKind; label: string }> = [
     ...(targetKind === "SUBSYSTEM" || targetKind === "PART_DEFINITION"
       ? [{
@@ -164,12 +166,7 @@ export function CadStepHierarchyNodeCard({
   onConfirm,
   targets,
   targetKind,
-}: {
-  node: CadHierarchyNode;
-  onConfirm: (decision: CadHierarchyReviewDecision) => void;
-  targets: CadHierarchyTargets;
-  targetKind: CadHierarchyTargetKind;
-}) {
+}: CadStepHierarchyNodeCardProps) {
   return (
     <article className="cad-hierarchy-node" data-status={hierarchyStatusTone(node)}>
       <div>
