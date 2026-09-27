@@ -23,23 +23,7 @@ export function useAppWorkspaceDerivedWorkspace(
     toggleSidebar,
   } = state;
 
-  const {
-    cncItems,
-    disciplinesById,
-    milestonesById,
-    externalMembers,
-    fabricationItems,
-    mechanismsById,
-    mentors,
-    membersById,
-    navigationItems,
-    partDefinitionsById,
-    partInstancesById,
-    printItems,
-    rosterMentors,
-    students,
-    subsystemsById,
-  } = useWorkspaceDerivedData({
+  const workspaceData = useWorkspaceDerivedData({
     bootstrap: selection.scopedBootstrap,
     isAllProjectsView: selection.isAllProjectsView,
     selectedProjectType: selection.selectedProjectType,
@@ -65,8 +49,8 @@ export function useAppWorkspaceDerivedWorkspace(
     options?: { keepSidebarOpen?: boolean },
   ) => {
     if (tab !== activeTab) {
-      const currentIndex = navigationItems.findIndex((item) => item.value === activeTab);
-      const nextIndex = navigationItems.findIndex((item) => item.value === tab);
+      const currentIndex = workspaceData.navigationItems.findIndex((item) => item.value === activeTab);
+      const nextIndex = workspaceData.navigationItems.findIndex((item) => item.value === tab);
 
       if (currentIndex >= 0 && nextIndex >= 0) {
         setTabSwitchDirection(nextIndex > currentIndex ? "down" : "up");
@@ -81,23 +65,9 @@ export function useAppWorkspaceDerivedWorkspace(
   };
 
   return {
-    cncItems,
-    disciplinesById,
-    milestonesById,
-    externalMembers,
-    fabricationItems,
+    ...workspaceData,
     handleSidebarTabSelect,
     isWorkspaceModalOpen,
-    mechanismsById,
-    mentors,
-    membersById,
-    navigationItems,
-    partDefinitionsById,
-    partInstancesById,
-    printItems,
-    rosterMentors,
-    students,
-    subsystemsById,
     closeSidebarOverlay,
   };
 }
