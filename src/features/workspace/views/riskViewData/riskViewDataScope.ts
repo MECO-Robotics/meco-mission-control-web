@@ -21,6 +21,8 @@ import {
   buildOpenBlockersByTaskId,
   buildScopedRiskViewPools,
 } from "./riskViewScopeSelectors";
+import { buildRiskViewSupplySignals } from "./riskViewSupplySignals";
+import { countStaleTasks } from "./riskViewTaskFreshness";
 
 export type { BlockerBreakdown, HealthStatus } from "./riskViewMetricsUtils";
 
@@ -121,22 +123,12 @@ export function buildRiskViewScopeData({
   const oldestQaWaitingAgeDays = waitingTaskAges.length > 0 ? Math.max(...waitingTaskAges) : null;
 
   const staleTaskThresholdDays = DEFAULT_STALE_TASK_DAYS;
-  // TODO: Task records do not currently expose updatedAt. This uses best-effort activity timestamps and should switch to task.updatedAt when available.
-  let staleTaskCount = 0;
-  let staleTaskUnavailableCount = 0;
-  scopedTasks
-    .filter((task) => task.status !== "complete")
-    .forEach((task) => {
-      const activityTimestamp = lastActivityByTaskId.get(task.id);
-      if (typeof activityTimestamp !== "number") {
-        staleTaskUnavailableCount += 1;
-        return;
-      }
-
-      if (toAgeDays(activityTimestamp, nowTimestamp) >= staleTaskThresholdDays) {
-        staleTaskCount += 1;
-      }
-    });
+  const { staleCount: staleTaskCount, unavailableCount: staleTaskUnavailableCount } = countStaleTasks({
+    lastActivityByTaskId,
+    nowTimestamp,
+    tasks: scopedTasks,
+    thresholdDays: staleTaskThresholdDays,
+  });
 
   const ownerlessTaskCount = scopedTasks.filter(
     (task) => task.status !== "complete" && !task.ownerId && (task.assigneeIds ?? []).length === 0,
@@ -204,15 +196,7 @@ export function buildRiskViewScopeData({
     (report) => report.result === "pass" && report.mentorApproved,
   ).length;
 
-  const scopedPurchaseIds = new Set(scopedTasks.flatMap((task) => task.linkedPurchaseIds ?? []));
-  const purchasePool =
-    activePersonFilter.length > 0 && scopedPurchaseIds.size > 0
-      ? bootstrap.purchaseItems.filter((purchase) => scopedPurchaseIds.has(purchase.id))
-      : bootstrap.purchaseItems;
-  const pendingPurchaseCount = purchasePool.filter((purchase) => purchase.status !== "delivered").length;
-  const lowStockMaterials = bootstrap.materials.filter(
-    (material) => material.onHandQuantity <= material.reorderPoint,
-  ).length;
+  const supply = buildRiskViewSupplySignals({ activePersonFilter, bootstrap, scopedTasks });
   const activeSubsystemCount = subsystemMetrics.filter((metric) => metric.taskCount > 0).length;
   const activeMechanismCount = mechanismMetrics.filter((metric) => metric.taskCount > 0).length;
   const untouchedMechanismCount = Math.max(0, bootstrap.mechanisms.length - activeMechanismCount);
@@ -222,7 +206,6 @@ export function buildRiskViewScopeData({
       metric.lastActivityAgeDays !== null &&
       metric.lastActivityAgeDays >= staleTaskThresholdDays,
   ).length;
-  const supplySignals = pendingPurchaseCount + lowStockMaterials;
   const logsThisWeekHours = scopedWorkLogs.reduce((sum, workLog) => {
     const timestamp = parseTimestamp(workLog.date);
     if (timestamp === null || timestamp < weekStart) {
@@ -263,7 +246,7 @@ export function buildRiskViewScopeData({
     qaWaitingCount,
     staleTaskCount,
     staleTaskThresholdDays,
-    supplySignals,
+    supplySignals: supply.supplySignals,
     unresolvedBlockerCount,
   });
 
@@ -280,13 +263,13 @@ export function buildRiskViewScopeData({
     hoursLoggedRate,
     loggedHours,
     logsThisWeekHours,
-    lowStockMaterials,
+    lowStockMaterials: supply.lowStockMaterials,
     mechanismMetrics,
     mentorActionRequiredCount,
     oldestBlockerAgeDays,
     oldestQaWaitingAgeDays,
     ownerlessTaskCount,
-    pendingPurchaseCount,
+    pendingPurchaseCount: supply.pendingPurchaseCount,
     planStatus,
     plannedHours,
     qaPassCount,
@@ -298,7 +281,7 @@ export function buildRiskViewScopeData({
     staleTaskUnavailableCount,
     studentRevisionRequiredCount,
     subsystemMetrics,
-    supplySignals,
+    supplySignals: supply.supplySignals,
     taskCompletionRate,
     taskCompletionWidth,
     scopedTaskCount: totalTaskCount,
