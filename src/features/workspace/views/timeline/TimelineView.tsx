@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MilestonePayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
@@ -8,13 +8,10 @@ import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspa
 import { IconCalendar, IconTasks } from "@/components/shared/Icons";
 import { WorkspaceTopbarControls, buildSingleAddMenuAction, buildTopbarAddMenuActions, makeAddMenuAction } from "@/features/workspace/shared/topbar";
 import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
-import { getTimelineMinimumZoomForWidth } from "@/features/workspace/shared/timeline/timelineZoom";
-import { addDaysToDay, addMonthsToDay, midpointOfTimelineDays } from "@/features/workspace/shared/timeline/timelineDateUtils";
-import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import { buildTimelineGridLayout } from "./model/timelineGridLayout";
 import { TimelineGridBody } from "./TimelineGridBody";
 import { TimelineMilestoneHoverLayer } from "./TimelineMilestoneHoverLayer";
-import { MilestonesMilestoneModal } from "../milestones/MilestonesEventModal";
+import { TimelineMilestoneModal } from "./TimelineMilestoneModal";
 import { TimelineMilestoneUnderlaysPortal } from "./portals/TimelineMilestoneUnderlaysPortal";
 import { TimelineRowHighlightsPortal } from "./portals/TimelineRowHighlightsPortal";
 import { TimelineTodayMarkerPortal } from "./portals/TimelineTodayMarkerPortal";
@@ -23,6 +20,9 @@ import { useTimelineViewActions } from "./hooks/useTimelineViewActions";
 import { useTimelineViewData } from "./hooks/useTimelineViewData";
 import { useTimelineViewFilters } from "./hooks/useTimelineViewFilters";
 import { useTimelineViewState } from "./hooks/useTimelineViewState";
+import { useTimelineShellSizing } from "./hooks/useTimelineShellSizing";
+import { useTimelinePeriodNavigation } from "./hooks/useTimelinePeriodNavigation";
+import { getTimelineMinimumZoomForWidth } from "@/features/workspace/shared/timeline/timelineZoom";
 
 interface TimelineViewProps {
   onCreateMilestoneReport?: (milestoneId: string, onReturn?: () => void) => void;
@@ -62,12 +62,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   void _membersById;
 
   const state = useTimelineViewState();
-  const {
-    handleTimelineIntervalChange: applyTimelineIntervalChange,
-    setTimelineZoomMin,
-    viewAnchorDate,
-  } = state;
-  const [timelineShellWidth, setTimelineShellWidth] = useState(0);
+  const { setTimelineZoomMin } = state;
   const [searchFilter, setSearchFilter] = useState("");
   const filterControls = useTimelineViewFilters({
     activePersonFilter,
@@ -100,28 +95,16 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     setViewInterval: state.setViewInterval,
     viewInterval: state.viewInterval,
   });
-  const handleTimelineIntervalChange = useCallback(
-    (nextInterval: TimelineViewInterval) => {
-      const nextAnchorDate = midpointOfTimelineDays(data.timeline.days) ?? viewAnchorDate;
-      applyTimelineIntervalChange(nextInterval, nextAnchorDate);
-      window.dispatchEvent(new CustomEvent("mission-control:schedule-period-change", {
-        detail: { anchorDate: nextAnchorDate, viewMode: nextInterval === "week" ? "week" : "month" },
-      }));
-    },
-    [applyTimelineIntervalChange, data.timeline.days, viewAnchorDate],
-  );
   const { setTimelineGridMotion } = state;
-  const handleShiftPeriod = useCallback((direction: -1 | 1) => {
-    if (state.viewInterval === "all") return;
-    const nextAnchorDate = state.viewInterval === "week"
-      ? addDaysToDay(state.viewAnchorDate, direction * 7)
-      : addMonthsToDay(state.viewAnchorDate, direction);
-    state.shiftTimelinePeriod(direction);
-    window.dispatchEvent(new CustomEvent("mission-control:schedule-period-change", {
-      detail: { anchorDate: nextAnchorDate },
-    }));
-  }, [state]);
+  const { handleTimelineIntervalChange, handleShiftPeriod } = useTimelinePeriodNavigation({
+    days: data.timeline.days,
+    onIntervalChange: state.handleTimelineIntervalChange,
+    shiftTimelinePeriod: state.shiftTimelinePeriod,
+    viewAnchorDate: state.viewAnchorDate,
+    viewInterval: state.viewInterval,
+  });
 
+  const timelineShellWidth = useTimelineShellSizing(data.timelineShellRef);
   const layout = useMemo(
     () =>
       buildTimelineGridLayout({
@@ -145,6 +128,17 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   );
 
   useEffect(() => {
+    const shell = data.timelineShellRef.current;
+    if (!shell) return;
+    setTimelineZoomMin(getTimelineMinimumZoomForWidth({
+      dayCount: data.timeline.days.length,
+      fixedColumnWidth: layout.fixedTimelineColumnWidth,
+      shellWidth: timelineShellWidth,
+      viewInterval: state.viewInterval,
+    }));
+  }, [data.timeline.days.length, data.timelineShellRef, layout.fixedTimelineColumnWidth, setTimelineZoomMin, state.viewInterval, timelineShellWidth]);
+
+  useEffect(() => {
     if (!state.timelineGridMotion.direction) {
       return undefined;
     }
@@ -159,45 +153,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       window.clearTimeout(clearMotion);
     };
   }, [state.timelineGridMotion.direction, setTimelineGridMotion]);
-
-  useEffect(() => {
-    const shell = data.timelineShellRef.current;
-    if (!shell) {
-      return undefined;
-    }
-
-    const updateZoomFloor = () => {
-      const shellWidth = shell.getBoundingClientRect().width;
-      setTimelineShellWidth((previous) => (previous === shellWidth ? previous : shellWidth));
-      setTimelineZoomMin(
-        getTimelineMinimumZoomForWidth({
-          dayCount: data.timeline.days.length,
-          fixedColumnWidth: layout.fixedTimelineColumnWidth,
-          shellWidth,
-          viewInterval: state.viewInterval,
-        }),
-      );
-    };
-
-    updateZoomFloor();
-
-    if (typeof ResizeObserver === "undefined") {
-      return undefined;
-    }
-
-    const resizeObserver = new ResizeObserver(updateZoomFloor);
-    resizeObserver.observe(shell);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [
-    data.timeline.days.length,
-    data.timelineShellRef,
-    layout.fixedTimelineColumnWidth,
-    setTimelineZoomMin,
-    state.viewInterval,
-  ]);
 
   return (
     <section className={`panel dense-panel timeline-layout ${WORKSPACE_PANEL_CLASS}`}>
@@ -332,32 +287,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         resolveGeometry={data.resolveMilestonePopupGeometry}
       />
 
-      <MilestonesMilestoneModal
-        activeMilestone={bootstrap.milestones.find((milestone) => milestone.id === (data.milestoneModal.activeMilestoneDetail?.id ?? data.milestoneModal.activeMilestoneId)) ?? null}
-        projectsById={Object.fromEntries(bootstrap.projects.map((project) => [project.id, project]))}
-        onEditMilestone={data.milestoneModal.openEditMilestoneModalForMilestone}
-        onRecordResult={onCreateMilestoneReport ? (milestone) => { data.milestoneModal.closeMilestoneDetailModal(); onCreateMilestoneReport(milestone.id, () => data.milestoneModal.openMilestoneDetailModalForMilestone(milestone)); } : undefined}
+      <TimelineMilestoneModal
         bootstrap={bootstrap}
-        milestoneDraft={data.milestoneModal.milestoneDraft}
-        milestoneEndDate={data.milestoneModal.milestoneEndDate}
-        milestoneEndTime={data.milestoneModal.milestoneEndTime}
-        milestoneError={data.milestoneModal.milestoneError}
-        milestoneStartDate={data.milestoneModal.milestoneStartDate}
-        milestoneStartTime={data.milestoneModal.milestoneStartTime}
-        isDeletingMilestone={data.milestoneModal.isDeletingMilestone}
-        isSavingMilestone={data.milestoneModal.isSavingMilestone}
-        milestoneModalMode={data.milestoneModal.activeMilestoneDetail ? "detail" : data.milestoneModal.milestoneModalMode}
-        onClose={() => { data.milestoneModal.closeMilestoneModal(); data.milestoneModal.closeMilestoneDetailModal(); }}
-        onCancelEdit={data.milestoneModal.cancelMilestoneEdit}
-        onDelete={data.milestoneModal.handleMilestoneDelete}
-        onSubmit={data.milestoneModal.handleMilestoneSubmit}
-        onSwitchToTask={data.milestoneModal.milestoneModalMode === "create" ? data.milestoneModal.switchMilestoneCreateToTask : undefined}
+        modal={data.milestoneModal}
         modalPortalTarget={data.modalPortalTarget}
-        setMilestoneDraft={data.milestoneModal.setMilestoneDraft}
-        setMilestoneEndDate={data.milestoneModal.setMilestoneEndDate}
-        setMilestoneEndTime={data.milestoneModal.setMilestoneEndTime}
-        setMilestoneStartDate={data.milestoneModal.setMilestoneStartDate}
-        setMilestoneStartTime={data.milestoneModal.setMilestoneStartTime}
+        onCreateMilestoneReport={onCreateMilestoneReport}
       />
 
     </section>
