@@ -145,6 +145,40 @@ describe("roster insights scope helpers", () => {
     expect(scoped.recentAttendance.every((row) => row.memberId === "member-season-1")).toBe(true);
   });
 
+  it("aggregates attendance windows and ignores invalid or out-of-window records", () => {
+    const today = new Date();
+    const todayUtc = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+    const dateKey = (daysAgo: number) => new Date(todayUtc.getTime() - daysAgo * 24 * 60 * 60 * 1000)
+      .toISOString().slice(0, 10);
+    const bootstrap = createBootstrapFixture();
+    const member = bootstrap.members[0];
+    const attendanceRecords = [
+      [0, 1], [6, 2], [7, 3], [13, 4], [14, 5], [29, 6], [30, 7],
+    ].map(([daysAgo, totalHours], index) => ({
+      id: `attendance-${index}`,
+      memberId: member.id,
+      date: dateKey(daysAgo),
+      totalHours,
+    }));
+    attendanceRecords.push({
+      id: "attendance-invalid",
+      memberId: member.id,
+      date: "not-a-date",
+      totalHours: 100,
+    });
+
+    const [insight] = buildRosterInsightsFromBootstrap({ ...bootstrap, attendanceRecords }, {
+      projectId: "project-season-1",
+    }).members;
+
+    expect(insight).toMatchObject({
+      attendanceHoursLast7Days: 3,
+      attendanceHoursLast14Days: 10,
+      attendanceHoursLast30Days: 21,
+      attendanceSessionsLast30Days: 6,
+    });
+  });
+
   it("bases fallback availability on planned weekly attendance", () => {
     const bootstrap = createBootstrapFixture();
     const task: BootstrapPayload["tasks"][number] = {
