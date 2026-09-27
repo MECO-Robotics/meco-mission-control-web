@@ -1,5 +1,4 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskRecord } from "@/types/recordsExecution";
 
 const collections = {
   seasons: "seasons", projects: "projects", workstreams: "workstreams", members: "members",
@@ -161,8 +160,7 @@ export function applyLocalCommand(snapshot: BootstrapPayload, path: string, opti
       delete item.taskBlockers;
       delete item.blockers;
       delete item.actualHours;
-      const task = item as unknown as TaskRecord;
-      if (task.status === "complete") {
+      if (item.status === "complete") {
         const existing = snapshot.tasks.find((candidate) => candidate.id === id);
         refreshLocalTaskState(snapshot);
         if (existing?.isBlocked || existing?.isWaitingOnDependency) throw new Error("Resolve blockers and required dependencies before completing this task.");
