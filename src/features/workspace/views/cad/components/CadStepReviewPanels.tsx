@@ -12,8 +12,8 @@ import type {
   CadStepMappingRecord,
   CadStepSnapshotRecord,
   CadStepTreeNode,
-  CadStepWarningRecord,
-} from "../model/cadIntegrationTypes";
+  CadStepWarningRecord
+} from "../model/cadStepTypes";
 import {
   PLACEHOLDER_PARSER_WARNING_TEXT,
   stepUsesPlaceholderParser,

@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import type {
   CadHierarchyNode,
   CadHierarchyReviewDecision,
-  CadHierarchyTargetKind,
-} from "../model/cadIntegrationTypes";
+  CadHierarchyTargetKind
+} from "../model/cadStepTypes";
 import {
   compactHierarchyLabel,
   hierarchyStatusTone,

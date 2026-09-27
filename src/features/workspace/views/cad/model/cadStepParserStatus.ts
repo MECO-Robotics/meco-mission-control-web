@@ -1,8 +1,8 @@
 import type {
   CadStepImportRunRecord,
   CadStepImportSummary,
-  CadStepWarningRecord,
-} from "./cadIntegrationTypes";
+  CadStepWarningRecord
+} from "./cadStepTypes";
 
 const PLACEHOLDER_PARSER_WARNING_CODE = "step_parser_placeholder_used";
 

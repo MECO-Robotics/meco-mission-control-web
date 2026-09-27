@@ -5,8 +5,8 @@ import type {
   CadPartMatchProposal,
   CadStepDiff,
   CadStepMappingRecord,
-  CadStepWarningRecord,
-} from "../../model/cadIntegrationTypes";
+  CadStepWarningRecord
+} from "../../model/cadStepTypes";
 import {
   buildCadStepPreviewDiffViewModel,
 } from "../../model/cadStepPreviewDiffViewModel";

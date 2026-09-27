@@ -19,8 +19,8 @@ import type {
   CadStepImportRunRecord,
   CadStepMappingRecord,
   CadStepMappingRuleMatchStrategy,
-  CadStepSnapshotRecord,
-} from "../model/cadIntegrationTypes";
+  CadStepSnapshotRecord
+} from "../model/cadStepTypes";
 
 export function useCadStepWorkflow({
   projectId,

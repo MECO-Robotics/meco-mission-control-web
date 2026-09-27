@@ -1,7 +1,7 @@
 import type {
   CadStepImportRunRecord,
-  CadStepSnapshotRecord,
-} from "../model/cadIntegrationTypes";
+  CadStepSnapshotRecord
+} from "../model/cadStepTypes";
 
 export function findCadSnapshot(
   snapshots: CadStepSnapshotRecord[],
