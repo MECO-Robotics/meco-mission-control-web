@@ -26,6 +26,8 @@ export function MaterialEditorModal({
   setMaterialDraft,
 }: MaterialEditorModalProps) {
   if (!materialModalMode) return null;
+  const updateDraft = <K extends keyof MaterialPayload>(field: K, value: MaterialPayload[K]) =>
+    setMaterialDraft((current) => ({ ...current, [field]: value }));
 
   return (
     <ModalDialog label="Material editor" onClose={closeMaterialModal}>
@@ -59,9 +61,7 @@ export function MaterialEditorModal({
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Name</span>
             <input
-              onChange={(milestone) =>
-                setMaterialDraft((current) => ({ ...current, name: milestone.target.value }))
-              }
+              onChange={(event) => updateDraft("name", event.target.value)}
               required
               style={{
                 background: "var(--bg-row-alt)",
@@ -74,12 +74,7 @@ export function MaterialEditorModal({
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Category</span>
             <select
-              onChange={(milestone) =>
-                setMaterialDraft((current) => ({
-                  ...current,
-                  category: milestone.target.value as MaterialPayload["category"],
-                }))
-              }
+              onChange={(event) => updateDraft("category", event.target.value as MaterialPayload["category"])}
               style={{
                 background: "var(--bg-row-alt)",
                 color: "var(--text-title)",
@@ -100,8 +95,8 @@ export function MaterialEditorModal({
             <span style={{ color: "var(--text-title)" }}>On hand</span>
             <input
               min="0"
-              onChange={(milestone) => {
-                const onHandQuantity = Number(milestone.target.value);
+              onChange={(event) => {
+                const onHandQuantity = Number(event.target.value);
                 setMaterialDraft((current) => ({
                   ...current,
                   onHandQuantity,
@@ -125,12 +120,7 @@ export function MaterialEditorModal({
             <input
               disabled={materialModalMode === "create"}
               min="0"
-              onChange={(milestone) =>
-                setMaterialDraft((current) => ({
-                  ...current,
-                  reorderPoint: Number(milestone.target.value),
-                }))
-              }
+              onChange={(event) => updateDraft("reorderPoint", Number(event.target.value))}
               style={{
                 background: "var(--bg-row-alt)",
                 color: "var(--text-title)",
@@ -148,9 +138,7 @@ export function MaterialEditorModal({
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Location</span>
             <input
-              onChange={(milestone) =>
-                setMaterialDraft((current) => ({ ...current, location: milestone.target.value }))
-              }
+              onChange={(event) => updateDraft("location", event.target.value)}
               style={{
                 background: "var(--bg-row-alt)",
                 color: "var(--text-title)",
@@ -162,9 +150,7 @@ export function MaterialEditorModal({
           <label className="field">
             <span style={{ color: "var(--text-title)" }}>Vendor</span>
             <input
-              onChange={(milestone) =>
-                setMaterialDraft((current) => ({ ...current, vendor: milestone.target.value }))
-              }
+              onChange={(event) => updateDraft("vendor", event.target.value)}
               style={{
                 background: "var(--bg-row-alt)",
                 color: "var(--text-title)",
@@ -176,9 +162,7 @@ export function MaterialEditorModal({
           <label className="field modal-wide">
             <span style={{ color: "var(--text-title)" }}>Notes</span>
             <textarea
-              onChange={(milestone) =>
-                setMaterialDraft((current) => ({ ...current, notes: milestone.target.value }))
-              }
+              onChange={(event) => updateDraft("notes", event.target.value)}
               rows={3}
               style={{
                 background: "var(--bg-row-alt)",
