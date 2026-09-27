@@ -21,6 +21,8 @@ export function compactFilterDropdownMenuItem({
   label,
   onChange,
   options,
+  selectedAllLabel,
+  singleSelect,
   value,
 }: {
   allLabel: string;
@@ -32,6 +34,8 @@ export function compactFilterDropdownMenuItem({
   label: string;
   onChange: (value: FilterSelection) => void;
   options: DropdownOption[];
+  selectedAllLabel?: string;
+  singleSelect?: boolean;
   value: FilterSelection;
 }): CompactFilterMenuItem {
   return {
@@ -47,6 +51,8 @@ export function compactFilterDropdownMenuItem({
         icon={icon}
         onChange={onChange}
         options={options}
+        selectedAllLabel={selectedAllLabel}
+        singleSelect={singleSelect}
         value={value}
       />
     ),
