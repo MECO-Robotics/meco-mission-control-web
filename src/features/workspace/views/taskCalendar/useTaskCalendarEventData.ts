@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { formatLocalDate } from "@/lib/dateUtils";
 import {
   buildTaskCalendarEvents,
   type TaskCalendarEvent,
@@ -10,7 +11,6 @@ import {
 import {
   createMonthCells,
   createWeekCells,
-  formatDateKey,
   sortTaskCalendarEvents,
   toEventDateKey,
   type TaskCalendarSortMode,
@@ -32,7 +32,7 @@ export function useTaskCalendarEventData({
     const today = new Date();
     return new Date(today.getFullYear(), today.getMonth(), 1);
   });
-  const todayDateKey = useMemo(() => formatDateKey(new Date()), []);
+  const todayDateKey = useMemo(() => formatLocalDate(new Date()), []);
   const projectsById = useMemo(
     () => Object.fromEntries(bootstrap.projects.map((project) => [project.id, project] as const)),
     [bootstrap.projects],

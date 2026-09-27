@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
+import { formatLocalDate } from "@/lib/dateUtils";
 import type { MeetingPayload, MilestonePayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { toErrorMessage } from "@/lib/appUtils/common";
@@ -18,7 +19,6 @@ import { TaskCalendarFilterToolbar } from "./TaskCalendarFilterToolbar";
 import { TaskCalendarDayDetails } from "./TaskCalendarDayDetails";
 import { MeetingScheduleModal } from "./MeetingScheduleModal";
 import { TaskCalendarMonthGrid } from "./TaskCalendarMonthGrid";
-import { formatDateKey } from "./taskCalendarLayout";
 import type { TaskCalendarEvent } from "./taskCalendarEvents";
 import { useTaskCalendarEventData } from "./useTaskCalendarEventData";
 
@@ -41,7 +41,7 @@ interface TaskCalendarViewProps {
 
 function createDefaultMeetingDraft(bootstrap: BootstrapPayload): MeetingPayload {
   const now = new Date();
-  const dateKey = formatDateKey(now);
+  const dateKey = formatLocalDate(now);
   const seasonId = bootstrap.projects[0]?.seasonId ?? bootstrap.seasons[0]?.id;
 
   return {

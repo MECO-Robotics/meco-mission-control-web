@@ -1,7 +1,7 @@
 import {
-  formatDateKey,
   WEEKDAY_LABELS,
 } from "./taskCalendarLayout";
+import { formatLocalDate } from "@/lib/dateUtils";
 import type { TaskCalendarEvent } from "./taskCalendarEvents";
 
 interface TaskCalendarMonthGridProps {
@@ -55,7 +55,7 @@ export function TaskCalendarMonthGrid({
 
       <div className="task-calendar-grid">
         {monthCells.map((cellDate) => {
-          const cellDateKey = formatDateKey(cellDate);
+          const cellDateKey = formatLocalDate(cellDate);
           const cellEvents = eventsByDateKey.get(cellDateKey) ?? [];
           const visibleEvents = cellEvents.slice(0, 4);
           const hiddenEventCount = Math.max(0, cellEvents.length - visibleEvents.length);
