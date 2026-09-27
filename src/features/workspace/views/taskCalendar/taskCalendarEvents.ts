@@ -54,84 +54,37 @@ function hasTime(value: string) {
   return value.includes("T");
 }
 
-function buildContextLabel({
+function buildProjectContextLabel({
+  allProjectIds,
   isAllProjectsView,
-  projectId,
+  projectIds,
   projectsById,
 }: {
+  allProjectIds?: string[];
   isAllProjectsView: boolean;
-  projectId: string | null;
+  projectIds: string[];
   projectsById: Record<string, BootstrapPayload["projects"][number]>;
 }) {
   if (!isAllProjectsView) {
     return null;
   }
 
-  if (!projectId) {
+  const isAllProjectsSelection =
+    projectIds.length === 0 ||
+    (allProjectIds !== undefined &&
+      projectIds.length === allProjectIds.length &&
+      projectIds.every((projectId) => allProjectIds.includes(projectId)));
+
+  if (isAllProjectsSelection) {
     return "All projects";
   }
 
-  return projectsById[projectId]?.name ?? "Unknown project";
-}
-
-function buildMilestoneContextLabel({
-  bootstrap,
-  isAllProjectsView,
-  milestone,
-  projectsById,
-}: {
-  bootstrap: BootstrapPayload;
-  isAllProjectsView: boolean;
-  milestone: BootstrapPayload["milestones"][number];
-  projectsById: Record<string, BootstrapPayload["projects"][number]>;
-}) {
-  if (!isAllProjectsView) {
-    return null;
+  if (projectIds.length === 1) {
+    return projectsById[projectIds[0]]?.name ?? "Unknown project";
   }
 
-  const milestoneProjectIds = milestone.projectIds;
-  const scopedProjectIds = bootstrap.projects.map((project) => project.id);
-  const isAllProjectsMilestone =
-    milestoneProjectIds.length === 0 ||
-    (milestoneProjectIds.length === scopedProjectIds.length &&
-      milestoneProjectIds.every((projectId) => scopedProjectIds.includes(projectId)));
-
-  if (isAllProjectsMilestone) {
-    return "All projects";
-  }
-
-  if (milestoneProjectIds.length === 1) {
-    return projectsById[milestoneProjectIds[0]]?.name ?? "Unknown project";
-  }
-
-  const firstProjectName = projectsById[milestoneProjectIds[0]]?.name ?? "Multiple projects";
-  return `${firstProjectName} +${milestoneProjectIds.length - 1}`;
-}
-
-function buildMeetingContextLabel({
-  isAllProjectsView,
-  meeting,
-  projectsById,
-}: {
-  isAllProjectsView: boolean;
-  meeting: NonNullable<BootstrapPayload["meetings"]>[number];
-  projectsById: Record<string, BootstrapPayload["projects"][number]>;
-}) {
-  if (!isAllProjectsView) {
-    return null;
-  }
-
-  const meetingProjectIds = meeting.projectIds ?? [];
-  if (meetingProjectIds.length === 0) {
-    return "All projects";
-  }
-
-  if (meetingProjectIds.length === 1) {
-    return projectsById[meetingProjectIds[0]]?.name ?? "Unknown project";
-  }
-
-  const firstProjectName = projectsById[meetingProjectIds[0]]?.name ?? "Multiple projects";
-  return `${firstProjectName} +${meetingProjectIds.length - 1}`;
+  const firstProjectName = projectsById[projectIds[0]]?.name ?? "Multiple projects";
+  return `${firstProjectName} +${projectIds.length - 1}`;
 }
 
 function prependContextLabel(title: string, contextLabel: string | null) {
@@ -155,7 +108,8 @@ export function buildTaskCalendarEvents({
   isAllProjectsView,
   projectsById,
 }: BuildTaskCalendarEventsArgs) {
-  const activeProjectIds = new Set(bootstrap.projects.map((project) => project.id));
+  const activeProjectIdList = bootstrap.projects.map((project) => project.id);
+  const activeProjectIds = new Set(activeProjectIdList);
   const subsystemProjectById = Object.fromEntries(
     bootstrap.subsystems.map((subsystem) => [subsystem.id, subsystem.projectId] as const),
   );
@@ -169,9 +123,9 @@ export function buildTaskCalendarEvents({
     )
     .map((task) => {
       const type = task.status === "waiting-for-qa" ? "qa-due" : "task-due";
-      const contextLabel = buildContextLabel({
+      const contextLabel = buildProjectContextLabel({
         isAllProjectsView,
-        projectId: task.projectId,
+        projectIds: task.projectId ? [task.projectId] : [],
         projectsById,
       });
 
@@ -202,10 +156,10 @@ export function buildTaskCalendarEvents({
       return relatedTasks.some((task) => filterSelectionMatchesTaskPeople(activePersonFilter, task));
     })
     .map((milestone) => {
-      const contextLabel = buildMilestoneContextLabel({
-        bootstrap,
+      const contextLabel = buildProjectContextLabel({
+        allProjectIds: activeProjectIdList,
         isAllProjectsView,
-        milestone,
+        projectIds: milestone.projectIds,
         projectsById,
       });
 
@@ -234,9 +188,9 @@ export function buildTaskCalendarEvents({
     )
     .map((item) => {
       const projectId = subsystemProjectById[item.subsystemId] ?? null;
-      const contextLabel = buildContextLabel({
+      const contextLabel = buildProjectContextLabel({
         isAllProjectsView,
-        projectId,
+        projectIds: projectId ? [projectId] : [],
         projectsById,
       });
 
@@ -264,9 +218,9 @@ export function buildTaskCalendarEvents({
         (meeting.time.trim().length > 0
           ? `${asDateOnly(meeting.date)}T${meeting.time.trim()}`
           : asDateOnly(meeting.date));
-      const contextLabel = buildMeetingContextLabel({
+      const contextLabel = buildProjectContextLabel({
         isAllProjectsView,
-        meeting,
+        projectIds: meeting.projectIds ?? [],
         projectsById,
       });
 
