@@ -72,7 +72,6 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
               activePersonFilter={activePersonFilter}
               bootstrap={bootstrap}
               isAllProjectsView={isAllProjectsView}
-              membersById={membersById}
               onTaskEditCanceled={props.onTaskEditCanceled}
               onTaskEditSaved={props.onTaskEditSaved}
               onCreateMilestoneReport={props.openCreateMilestoneReportModal}

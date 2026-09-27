@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { localTodayDate } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
-import { createBootstrap, createBootstrapWithTaskRows, createBootstrapWithScopedOverflowTasks, readAppCss, membersById } from "./timelineTestFixtures";
+import { createBootstrap, createBootstrapWithTaskRows, createBootstrapWithScopedOverflowTasks, readAppCss } from "./timelineTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
@@ -26,7 +26,6 @@ describe("TimelineView", () => {
         isAllProjectsView: true,
         activePersonFilter: [],
         setActivePersonFilter: jest.fn(),
-        membersById,
         openTaskDetailModal: jest.fn(),
         openCreateTaskModal: jest.fn(),
         onDeleteTimelineMilestone: jest.fn(),
@@ -46,7 +45,6 @@ describe("TimelineView", () => {
         isAllProjectsView: false,
         activePersonFilter: [],
         setActivePersonFilter: jest.fn(),
-        membersById,
         openTaskDetailModal: jest.fn(),
         openCreateTaskModal: jest.fn(),
         onDeleteTimelineMilestone: jest.fn(),
@@ -109,7 +107,6 @@ describe("TimelineView", () => {
         isAllProjectsView: false,
         activePersonFilter: [],
         setActivePersonFilter: jest.fn(),
-        membersById,
         openTaskDetailModal: jest.fn(),
         openCreateTaskModal: jest.fn(),
         onDeleteTimelineMilestone: jest.fn(),
@@ -230,7 +227,6 @@ describe("TimelineView", () => {
         isAllProjectsView: false,
         activePersonFilter: [],
         setActivePersonFilter: jest.fn(),
-        membersById,
         openTaskDetailModal: jest.fn(),
         openCreateTaskModal: jest.fn(),
         onDeleteTimelineMilestone: jest.fn(),

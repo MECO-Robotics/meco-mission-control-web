@@ -220,14 +220,3 @@ export function createBootstrapWithScopedOverflowTasks(): BootstrapPayload {
     ],
   };
 }
-
-export const membersById = {
-  "member-1": {
-    id: "member-1",
-    name: "Ada",
-    email: "ada@example.com",
-    role: "lead" as const,
-    elevated: true,
-    seasonId: "season-1",
-  },
-};

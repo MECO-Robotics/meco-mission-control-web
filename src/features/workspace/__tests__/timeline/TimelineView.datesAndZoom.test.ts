@@ -1,4 +1,4 @@
-import * as React from "react";import { readFileSync } from "node:fs";import { join } from "node:path";import { renderToStaticMarkup } from "react-dom/server";import { getTimelineMinimumZoomForWidth } from "@/features/workspace/shared/timeline/timelineZoom";import { formatTimelinePeriodLabel, midpointOfTimelineDays, midpointOfTimelineWeek, monthEndFromDay } from "@/features/workspace/shared/timeline/timelineDateUtils";import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";import { createBootstrap, readAppCss, membersById } from "./timelineTestFixtures";
+import * as React from "react";import { readFileSync } from "node:fs";import { join } from "node:path";import { renderToStaticMarkup } from "react-dom/server";import { getTimelineMinimumZoomForWidth } from "@/features/workspace/shared/timeline/timelineZoom";import { formatTimelinePeriodLabel, midpointOfTimelineDays, midpointOfTimelineWeek, monthEndFromDay } from "@/features/workspace/shared/timeline/timelineDateUtils";import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";import { createBootstrap, readAppCss } from "./timelineTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
@@ -56,7 +56,6 @@ describe("TimelineView", () => {
         isAllProjectsView: false,
         activePersonFilter: [],
         setActivePersonFilter: jest.fn(),
-        membersById,
         openTaskDetailModal: jest.fn(),
         openCreateTaskModal: jest.fn(),
         onDeleteTimelineMilestone: jest.fn(),

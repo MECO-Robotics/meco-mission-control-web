@@ -30,7 +30,6 @@ interface TimelineViewProps {
   isAllProjectsView: boolean;
   activePersonFilter: FilterSelection;
   setActivePersonFilter: (value: FilterSelection) => void;
-  membersById: Record<string, BootstrapPayload["members"][number]>;
   onTaskEditCanceled?: () => void;
   onTaskEditSaved?: () => void;
   openTaskDetailModal: (task: TaskRecord) => void;
@@ -50,7 +49,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   isAllProjectsView,
   activePersonFilter,
   setActivePersonFilter,
-  membersById: _membersById,
   onTaskEditCanceled = () => {},
   onTaskEditSaved = () => {},
   openTaskDetailModal,
@@ -59,8 +57,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   onSaveTimelineMilestone,
   triggerCreateMilestoneToken,
 }) => {
-  void _membersById;
-
   const state = useTimelineViewState();
   const { setTimelineZoomMin } = state;
   const [searchFilter, setSearchFilter] = useState("");

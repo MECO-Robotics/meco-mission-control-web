@@ -93,17 +93,6 @@ function createBootstrap(): BootstrapPayload {
   };
 }
 
-const membersById = {
-  "member-1": {
-    id: "member-1",
-    name: "Ada",
-    email: "ada@example.com",
-    role: "lead" as const,
-    elevated: true,
-    seasonId: "season-1",
-  },
-};
-
 describe("TimelineView interactions", () => {
   afterEach(() => {
     jest.resetModules();
@@ -147,7 +136,6 @@ describe("TimelineView interactions", () => {
           isAllProjectsView: false,
           activePersonFilter: [],
           setActivePersonFilter: jest.fn(),
-          membersById,
           openTaskDetailModal,
           openCreateTaskModal: jest.fn(),
           onDeleteTimelineMilestone: jest.fn(),
