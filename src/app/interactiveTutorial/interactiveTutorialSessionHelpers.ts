@@ -1,10 +1,8 @@
-import { isMemberActiveInSeason } from "@/lib/appUtils/common";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
 import type {
   InteractiveTutorialChapter,
   InteractiveTutorialChapterOption,
-  InteractiveTutorialReturnState,
 } from "./interactiveTutorialTypes";
 
 export function buildInteractiveTutorialChapterStartOptions(
@@ -17,12 +15,6 @@ export function buildInteractiveTutorialChapterStartOptions(
     summary: chapter.summary,
     completed: completedChapters.includes(chapter.id),
   })) satisfies InteractiveTutorialChapterOption[];
-}
-
-export function buildInteractiveTutorialReturnState(
-  returnState: InteractiveTutorialReturnState,
-) {
-  return returnState;
 }
 
 export function getInteractiveTutorialChapter(
@@ -84,15 +76,4 @@ export function resolveInteractiveTutorialSandboxSelection(
     tutorialSeason,
     tutorialSeasonId,
   };
-}
-
-export function countTutorialStudents(
-  payload: BootstrapPayload,
-  tutorialSeasonId: string | null,
-) {
-  return tutorialSeasonId
-    ? payload.members.filter(
-        (member) => member.role === "student" && isMemberActiveInSeason(member, tutorialSeasonId),
-      )
-    : payload.members.filter((member) => member.role === "student");
 }

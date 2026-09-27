@@ -6,7 +6,6 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 
 import { getInteractiveTutorialCreationCounts } from "./helpers/interactiveTutorialCreationCounts";
 import {
-  buildInteractiveTutorialReturnState,
   getInteractiveTutorialChapter,
   resolveInteractiveTutorialSandboxSelection,
 } from "./interactiveTutorialSessionHelpers";
@@ -59,17 +58,15 @@ export function useInteractiveTutorialCoreActionsStart({
       }
 
       if (!returnState) {
-        onActivateTutorial(
-          buildInteractiveTutorialReturnState({
-            activeTab,
-            taskView,
-            worklogsView,
-            manufacturingView,
-            inventoryView,
-            selectedSeasonId,
-            selectedProjectId,
-          }),
-        );
+        onActivateTutorial({
+          activeTab,
+          taskView,
+          worklogsView,
+          manufacturingView,
+          inventoryView,
+          selectedSeasonId,
+          selectedProjectId,
+        });
       }
       if (!bootstrapSnapshot) {
         setBootstrapSnapshot(structuredClone(bootstrap));
