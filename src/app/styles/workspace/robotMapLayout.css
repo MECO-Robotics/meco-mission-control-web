@@ -194,10 +194,6 @@
     min-height: 320px;
   }
 
-  .robot-config-card-layer {
-    max-width: min(220px, 52vw);
-  }
-
   .robot-config-unplaced-actions {
     justify-content: flex-start;
     width: 100%;
