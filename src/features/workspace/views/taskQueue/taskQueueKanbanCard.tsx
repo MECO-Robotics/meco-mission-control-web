@@ -29,32 +29,18 @@ export function readTaskAssigneeIds(task: TaskRecord) {
       : [];
 }
 
-export function readTaskSubsystemIds(task: TaskRecord) {
-  const subsystemIds = Array.isArray(task.subsystemIds) ? task.subsystemIds : [];
-  const candidateIds = subsystemIds;
+function normalizeTaskTargetIds(ids: unknown): string[] {
+  if (!Array.isArray(ids)) return [];
 
-  return Array.from(
-    new Set(
-      candidateIds.filter(
-        (subsystemId): subsystemId is string =>
-          typeof subsystemId === "string" && subsystemId.length > 0,
-      ),
-    ),
-  );
+  return Array.from(new Set(ids.filter((id): id is string => typeof id === "string" && id.length > 0)));
+}
+
+export function readTaskSubsystemIds(task: TaskRecord) {
+  return normalizeTaskTargetIds(task.subsystemIds);
 }
 
 export function readTaskWorkstreamIds(task: TaskRecord) {
-  const workstreamIds = Array.isArray(task.workstreamIds) ? task.workstreamIds : [];
-  const candidateIds = workstreamIds;
-
-  return Array.from(
-    new Set(
-      candidateIds.filter(
-        (workstreamId): workstreamId is string =>
-          typeof workstreamId === "string" && workstreamId.length > 0,
-      ),
-    ),
-  );
+  return normalizeTaskTargetIds(task.workstreamIds);
 }
 
 export function formatSubsystemNames(
