@@ -15,6 +15,7 @@ import {
   getWorkspaceFilterToneClassName,
   getWorkspaceStatusToneClassName,
 } from "@/features/workspace/shared/filters/workspaceFilterTone";
+import { normalizeTaskTargetIds } from "@/features/workspace/shared/task/normalizeTaskTargetIds";
 
 import { formatIterationVersion } from "@/lib/appUtils/common";
 import { TASK_QUEUE_STATUS_OPTIONS } from "../../taskQueue/taskQueueKanbanBoardState";
@@ -32,17 +33,7 @@ export const TIMELINE_TASK_STATUS_OPTIONS: DropdownOption[] = TASK_QUEUE_STATUS_
 export const TIMELINE_TASK_PRIORITY_OPTIONS: DropdownOption[] = TASK_PRIORITY_OPTIONS;
 
 export function readTimelineTaskSubsystemIds(task: TaskRecord) {
-  const subsystemIds = Array.isArray(task.subsystemIds) ? task.subsystemIds : [];
-  const candidateIds = subsystemIds;
-
-  return Array.from(
-    new Set(
-      candidateIds.filter(
-        (subsystemId): subsystemId is string =>
-          typeof subsystemId === "string" && subsystemId.length > 0,
-      ),
-    ),
-  );
+  return normalizeTaskTargetIds(task.subsystemIds);
 }
 
 export function buildTimelineSubsystemFilterOptions(bootstrap: BootstrapPayload): DropdownOption[] {

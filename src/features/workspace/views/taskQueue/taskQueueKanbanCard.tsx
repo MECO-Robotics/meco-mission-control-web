@@ -2,6 +2,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 
 import { formatIterationVersion } from "@/lib/appUtils/common";
+import { normalizeTaskTargetIds } from "@/features/workspace/shared/task/normalizeTaskTargetIds";
 import { filterSelectionIncludes, filterSelectionIntersects, filterSelectionMatchesTaskPeople } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 
@@ -27,12 +28,6 @@ export function readTaskAssigneeIds(task: TaskRecord) {
     : task.ownerId
       ? [task.ownerId]
       : [];
-}
-
-function normalizeTaskTargetIds(ids: unknown): string[] {
-  if (!Array.isArray(ids)) return [];
-
-  return Array.from(new Set(ids.filter((id): id is string => typeof id === "string" && id.length > 0)));
 }
 
 export function readTaskSubsystemIds(task: TaskRecord) {
