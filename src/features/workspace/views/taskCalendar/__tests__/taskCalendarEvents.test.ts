@@ -74,6 +74,72 @@ describe("buildTaskCalendarEvents", () => {
     expect(meetingEvent?.title).toBe("Robot 2026 | Meeting: Build night");
   });
 
+  it("shares project labels while preserving milestone and meeting scope rules", () => {
+    const bootstrap = {
+      ...EMPTY_BOOTSTRAP,
+      projects: [
+        {
+          id: "project-robot",
+          seasonId: "season-1",
+          name: "Robot 2026",
+          projectType: "robot" as const,
+          description: "",
+          status: "active" as const,
+        },
+        {
+          id: "project-outreach",
+          seasonId: "season-1",
+          name: "Outreach",
+          projectType: "outreach" as const,
+          description: "",
+          status: "active" as const,
+        },
+      ],
+      milestones: [
+        {
+          id: "both-projects",
+          title: "Shared milestone",
+          type: "deadline" as const,
+          startDateTime: "2026-05-07T18:00:00",
+          endDateTime: null,
+          isExternal: false,
+          description: "",
+          projectIds: ["project-robot", "project-outreach"],
+        },
+      ],
+      meetings: [
+        {
+          id: "multi-project",
+          title: "Shared meeting",
+          meetingType: "general" as const,
+          seasonId: "season-1",
+          projectIds: ["project-robot", "project-outreach"],
+          startDateTime: "2026-05-08T18:00:00",
+          endDateTime: null,
+          location: "",
+          description: "",
+          date: "2026-05-08",
+          time: "18:00",
+          rsvpsYes: 0,
+          rsvpsMaybe: 0,
+          openSignIns: 0,
+        },
+      ],
+    } satisfies BootstrapPayload;
+
+    const events = buildTaskCalendarEvents({
+      activePersonFilter: [],
+      bootstrap,
+      isAllProjectsView: true,
+      projectsById: Object.fromEntries(bootstrap.projects.map((project) => [project.id, project])),
+    });
+
+    expect(events.find((event) => event.id === "milestone:both-projects")?.extendedProps.contextLabel)
+      .toBe("All projects");
+    expect(events.find((event) => event.id === "meeting:multi-project")?.extendedProps.contextLabel)
+      .toBe("Robot 2026 +1");
+  });
+
   it("filters scheduled meetings to the active project scope", () => {
     const bootstrap = {
       ...EMPTY_BOOTSTRAP,
