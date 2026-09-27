@@ -7,7 +7,7 @@ import type { TaskRecord } from "@/types/recordsExecution";
 import { TaskDetailsAdvancedSection } from "./task/TaskDetailsAdvancedSection";
 import { TaskDetailsDependencyBlockersSection } from "./task/TaskDetailsDependencyBlockersSection";
 import { TaskDetailsHeaderSection } from "./task/TaskDetailsHeaderSection";
-import { TaskDetailsOverviewSection } from "./task/TaskDetailsOverviewSection";
+import { TaskDetailsOverviewSectionView } from "./task/details/overview/TaskDetailsOverviewSectionView";
 import type { TaskDetailsEditableField } from "./task/taskModalTypes";
 import { WorkspaceAuditActionList } from "../shared/WorkspaceAuditActionList";
 
@@ -98,7 +98,7 @@ export function TaskDetailsModal({
         <div className="modal-form task-details-grid" style={{ color: "var(--text-copy)" }}>
           {beforeOverviewContent}
 
-          <TaskDetailsOverviewSection
+          <TaskDetailsOverviewSectionView
             activeTask={activeTask}
             bootstrap={bootstrap}
             canInlineEdit={canInlineEdit}

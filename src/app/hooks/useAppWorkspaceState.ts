@@ -5,7 +5,7 @@ import { useAppAuth } from "@/app/hooks/useAppAuth";
 import { useAppShell } from "@/app/hooks/useAppShell";
 import { isPublicDemoSeasonAccess } from "@/app/publicDemoAccess";
 import { useAppWorkspaceGlobalEffects } from "@/app/hooks/workspace/derived/useAppWorkspaceGlobalEffects";
-import { useAppWorkspaceUiState } from "@/app/hooks/useAppWorkspaceUiState";
+import { useAppWorkspaceUiStateGroups } from "@/app/hooks/workspace/ui/useAppWorkspaceUiStateGroups";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import type { WorkspaceEditToastNotice } from "@/features/workspace/workspaceEditToastNotice";
 import {
@@ -53,7 +53,7 @@ export function useAppWorkspaceState() {
     toggleDarkMode,
     toggleSidebar,
   } = useAppShell();
-  const workspaceUiState = useAppWorkspaceUiState();
+  const workspaceUiState = useAppWorkspaceUiStateGroups();
 
   const enqueueNotificationHistory = useCallback((notice: WorkspaceToastNotice) => {
     setNotificationHistory((current) => appendWorkspaceToastHistory(current, notice));
