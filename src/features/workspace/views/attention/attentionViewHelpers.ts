@@ -35,8 +35,9 @@ export function parseAttentionDate(value: string | null | undefined) {
     timestamp = new Date(value).getTime();
   } else {
     const normalized = normalizeDateOnly(value);
-    const localDateTimestamp = /^\d+-\d{1,2}-\d{1,2}$/.test(normalized)
-      ? parseLocalDate(normalized)?.getTime() ?? null
+    const parts = normalized.split("-").map(Number);
+    const localDateTimestamp = parts.length === 3 && parts.every(Number.isInteger)
+      ? parseLocalDate(parts.join("-"))?.getTime() ?? null
       : null;
     timestamp = localDateTimestamp ?? new Date(normalized).getTime();
   }
