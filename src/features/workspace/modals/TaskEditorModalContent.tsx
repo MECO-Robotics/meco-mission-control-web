@@ -12,17 +12,10 @@ interface TaskEditorModalProps {
   bootstrap: BootstrapPayload;
   closeTaskModal: () => void;
   advancedSectionOpen: boolean;
-  disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
-  milestonesById: Record<string, BootstrapPayload["milestones"][number]>;
-  handleDeleteTask: (taskId: string) => Promise<void>;
   handleResolveTaskBlocker: (blockerId: string) => Promise<void>;
   handleTaskSubmit: (milestone: FormEvent<HTMLFormElement>) => void;
   isDeletingTask: boolean;
   isSavingTask: boolean;
-  mechanismsById: Record<string, BootstrapPayload["mechanisms"][number]>;
-  mentors: BootstrapPayload["members"];
-  partDefinitionsById: Record<string, BootstrapPayload["partDefinitions"][number]>;
-  partInstancesById: Record<string, BootstrapPayload["partInstances"][number]>;
   students: BootstrapPayload["members"];
   requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   openTaskDetailsModal: (task: TaskRecord) => void;
