@@ -3,7 +3,7 @@ import type { Dispatch, FormEvent, SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { SubsystemPayload } from "@/types/payloads";
 
-import { StructureModalShell } from "./StructureModalShell";
+import { EditorModalShell } from "../EditorModalShell";
 import { SubsystemEditorModalActions } from "./SubsystemEditorModalActions";
 import { SubsystemEditorModalFields } from "./SubsystemEditorModalFields";
 import { buildSubsystemEditorModalState } from "./buildSubsystemEditorModalState";
@@ -45,7 +45,7 @@ export function SubsystemEditorModal({
   });
 
   return (
-    <StructureModalShell
+    <EditorModalShell
       eyebrowLabel="Subsystem editor"
       onClose={closeSubsystemModal}
       onSubmit={handleSubsystemSubmit}
@@ -69,6 +69,6 @@ export function SubsystemEditorModal({
         subsystemDraft={subsystemDraft}
         subsystemModalMode={subsystemModalMode}
       />
-    </StructureModalShell>
+    </EditorModalShell>
   );
 }
