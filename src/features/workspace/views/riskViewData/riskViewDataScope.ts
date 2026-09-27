@@ -63,7 +63,7 @@ export function buildRiskViewScopeData({
   const taskCompletionWidth = `${Math.max(0, Math.min(100, taskCompletionRate * 100))}%`;
   const waitingForQaTasks = scopedTasks.filter((task) => task.status === "waiting-for-qa");
   const qaWaitingCount = waitingForQaTasks.length;
-  const { openBlockers, openBlockersByTaskId } = buildOpenBlockersByTaskId(
+  const openBlockersByTaskId = buildOpenBlockersByTaskId(
     scopedTaskIds,
     bootstrap,
   );
@@ -75,29 +75,26 @@ export function buildRiskViewScopeData({
     supplyMaterial: 0,
     other: 0,
   };
-  openBlockers.forEach((blocker) => {
-    blockerBreakdown[classifyBlocker(blocker)] += 1;
+  let unresolvedBlockerCount = 0;
+  let oldestBlockerAgeDays: number | null = null;
+  openBlockersByTaskId.forEach((blockers) => {
+    unresolvedBlockerCount += blockers.length;
+    blockers.forEach((blocker) => {
+      blockerBreakdown[classifyBlocker(blocker)] += 1;
+      const timestamp = parseTimestamp(blocker.createdAt);
+      if (timestamp !== null) {
+        const ageDays = toAgeDays(timestamp, nowTimestamp);
+        oldestBlockerAgeDays = Math.max(oldestBlockerAgeDays ?? ageDays, ageDays);
+      }
+    });
   });
-  const oldestBlockerAgeDays = openBlockers.reduce<number | null>((oldest, blocker) => {
-    const timestamp = parseTimestamp(blocker.createdAt);
-    if (timestamp === null) {
-      return oldest;
-    }
-
-    const ageDays = toAgeDays(timestamp, nowTimestamp);
-    if (oldest === null || ageDays > oldest) {
-      return ageDays;
-    }
-
-    return oldest;
-  }, null);
 
   const lastActivityByTaskId = buildLastActivityByTaskId({
     scopedTaskIds,
     scopedTasks,
     scopedWorkLogs,
     scopedReports,
-    openBlockers,
+    openBlockersByTaskId,
   });
 
   const qaLatestByTaskId = latestReportByTaskId(scopedReports);
@@ -216,7 +213,6 @@ export function buildRiskViewScopeData({
   }, 0);
 
   const expectedProgressRate = buildExpectedProgressRate(scopedTasks, nowTimestamp);
-  const unresolvedBlockerCount = openBlockers.length;
   const planStatus = buildPlanStatus({
     expectedProgressRate,
     hoursLoggedRate,

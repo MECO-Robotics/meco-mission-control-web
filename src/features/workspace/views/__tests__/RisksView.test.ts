@@ -58,6 +58,35 @@ describe("RisksView", () => {
     expect(markup).toContain("Build Health: On Track");
     expect(markup).toContain("No tasks in scope");
   });
+
+  it("preserves blocker counts, oldest age, and task activity metrics", () => {
+    jest.useFakeTimers().setSystemTime(new Date("2026-05-02T12:00:00.000Z"));
+    try {
+      const { metrics } = buildRiskViewScopeData({
+        activePersonFilter: [],
+        bootstrap: createMetricsBootstrap(),
+      });
+
+      expect(metrics).toMatchObject({
+        blockerBreakdown: {
+          designIssue: 1,
+          lostBrokenPart: 1,
+          lostBrokenTool: 0,
+          supplyMaterial: 0,
+          other: 0,
+        },
+        oldestBlockerAgeDays: 7,
+        unresolvedBlockerCount: 2,
+      });
+      expect(metrics.subsystemMetrics[0]).toMatchObject({
+        blockerCount: 2,
+        lastActivityAgeDays: 1,
+        oldestBlockerAgeDays: 7,
+      });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 });
 
 describe("parseTimestamp", () => {

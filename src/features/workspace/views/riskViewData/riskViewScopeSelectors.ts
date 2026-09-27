@@ -41,28 +41,29 @@ export function buildScopedRiskViewPools({
 }
 
 export function buildOpenBlockersByTaskId(scopedTaskIds: Set<string>, bootstrap: BootstrapPayload) {
-  const openBlockers = getTaskBlockerRecords(bootstrap).filter(
-    (blocker) => blocker.status === "open" && scopedTaskIds.has(blocker.blockedTaskId),
-  );
   const openBlockersByTaskId = new Map<string, TaskBlockerRecord[]>();
 
-  openBlockers.forEach((blocker) => {
+  getTaskBlockerRecords(bootstrap).forEach((blocker) => {
+    if (blocker.status !== "open" || !scopedTaskIds.has(blocker.blockedTaskId)) {
+      return;
+    }
+
     const existing = openBlockersByTaskId.get(blocker.blockedTaskId) ?? [];
     existing.push(blocker);
     openBlockersByTaskId.set(blocker.blockedTaskId, existing);
   });
 
-  return { openBlockers, openBlockersByTaskId };
+  return openBlockersByTaskId;
 }
 
 export function buildLastActivityByTaskId({
-  openBlockers,
+  openBlockersByTaskId,
   scopedReports,
   scopedTaskIds,
   scopedTasks,
   scopedWorkLogs,
 }: {
-  openBlockers: TaskBlockerRecord[];
+  openBlockersByTaskId: Map<string, TaskBlockerRecord[]>;
   scopedReports: BootstrapPayload["reports"];
   scopedTaskIds: Set<string>;
   scopedTasks: BootstrapPayload["tasks"];
@@ -95,9 +96,9 @@ export function buildLastActivityByTaskId({
   scopedReports.forEach((report) => {
     registerTaskActivity(report.taskId, report.reviewedAt ?? report.createdAt);
   });
-  openBlockers.forEach((blocker) => {
+  openBlockersByTaskId.forEach((blockers) => blockers.forEach((blocker) => {
     registerTaskActivity(blocker.blockedTaskId, blocker.createdAt);
-  });
+  }));
 
   return lastActivityByTaskId;
 }
