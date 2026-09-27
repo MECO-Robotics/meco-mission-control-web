@@ -24,7 +24,7 @@ export function useCatalogRecordActions<TRecord extends CatalogRecord>({
   handleUnauthorized: () => void;
   records: readonly TRecord[];
   setDataMessage: (message: string | null) => void;
-  updateRecord: (id: string, patch: { isArchived: boolean }, onUnauthorized: () => void) => Promise<unknown>;
+  updateRecord?: (id: string, patch: { isArchived: boolean }, onUnauthorized: () => void) => Promise<unknown>;
 }) {
   const run = useCallback(async (
     request: () => Promise<unknown>,
@@ -56,7 +56,7 @@ export function useCatalogRecordActions<TRecord extends CatalogRecord>({
 
   const handleToggleArchived = useCallback((id: string) => {
     const record = records.find((item) => item.id === id);
-    if (!record) return Promise.resolve();
+    if (!record || !updateRecord) return Promise.resolve();
     return run(() => updateRecord(id, { isArchived: !(record.isArchived ?? false) }, handleUnauthorized));
   }, [handleUnauthorized, records, run, updateRecord]);
 
