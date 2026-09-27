@@ -28,7 +28,7 @@ type TimelineMilestoneUnderlayEntry = {
   sourceOrder: number;
 };
 
-function compareTimelineMilestonesByStart(left: MilestoneRecord, right: MilestoneRecord) {
+export function compareTimelineMilestonesByStart(left: MilestoneRecord, right: MilestoneRecord) {
   const startComparison = left.startDateTime.localeCompare(right.startDateTime);
   if (startComparison !== 0) {
     return startComparison;
