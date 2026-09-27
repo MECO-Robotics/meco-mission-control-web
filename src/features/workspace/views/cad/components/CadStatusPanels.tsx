@@ -1,4 +1,8 @@
-import type { OnshapeOverview, OnshapeSyncEstimate, SyncLevel } from "../model/cadIntegrationTypes";
+import type {
+  OnshapeOverview,
+  OnshapeSyncEstimate,
+  SyncLevel
+} from "../model/cadIntegrationTypes";
 
 export type OnshapeConnectionHealth = "connected" | "expired" | "disconnected" | "unavailable";
 

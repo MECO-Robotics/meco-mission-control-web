@@ -2,7 +2,10 @@ import { useState } from "react";
 
 import type { MechanismRecord, SubsystemRecord } from "@/types/recordsOrganization";
 import type { PartDefinitionRecord } from "@/types/recordsInventory";
-import type { CadStepMappingRecord, CadStepMappingRuleMatchStrategy } from "../model/cadIntegrationTypes";
+import type {
+  CadStepMappingRecord,
+  CadStepMappingRuleMatchStrategy
+} from "../model/cadStepTypes";
 import {
   carryForwardRuleModeDescription,
   carryForwardRuleModeLabel,

@@ -2,7 +2,7 @@ import type {
   CadImportWarningRecord,
   CadSnapshotDiffSourceKind,
   CadSnapshotDiffStatus,
-  CadSnapshotRecord,
+  CadSnapshotRecord
 } from "./cadIntegrationTypes";
 
 export type SnapshotDiffItem = {

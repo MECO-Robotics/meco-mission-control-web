@@ -16,8 +16,8 @@ import type {
   CadStepImportSummary,
   CadStepMappingRecord,
   CadStepTreeNode,
-  CadStepWarningRecord,
-} from "../model/cadIntegrationTypes";
+  CadStepWarningRecord
+} from "../model/cadStepTypes";
 
 interface UseCadSnapshotDetailsArgs {
   groupRepeatedInstancesRef: MutableRefObject<boolean>;

@@ -9,8 +9,8 @@ import type { CadHierarchyStage } from "../components/CadStepHierarchyReviewPane
 import type {
   CadHierarchyNode,
   CadHierarchyReview,
-  CadHierarchyTargetKind,
-} from "../model/cadIntegrationTypes";
+  CadHierarchyTargetKind
+} from "../model/cadStepTypes";
 
 export function baseHierarchyReview(overrides: Partial<CadHierarchyReview> = {}): CadHierarchyReview {
   return {

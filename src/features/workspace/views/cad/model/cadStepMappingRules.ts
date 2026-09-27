@@ -1,4 +1,7 @@
-import type { CadStepMappingRecord, CadStepMappingRuleMatchStrategy } from "./cadIntegrationTypes";
+import type {
+  CadStepMappingRecord,
+  CadStepMappingRuleMatchStrategy
+} from "./cadStepTypes";
 
 type TargetKind = CadStepMappingRecord["targetKind"];
 

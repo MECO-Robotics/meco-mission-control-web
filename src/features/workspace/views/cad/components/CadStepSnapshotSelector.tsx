@@ -1,4 +1,6 @@
-import type { CadStepSnapshotRecord } from "../model/cadIntegrationTypes";
+import type {
+  CadStepSnapshotRecord
+} from "../model/cadStepTypes";
 
 export function CadStepSnapshotSelector({
   onSnapshotChange,

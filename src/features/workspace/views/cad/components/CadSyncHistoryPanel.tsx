@@ -2,7 +2,7 @@ import type {
   CadImportRunRecord,
   OnshapeOverview,
   OnshapeSyncJobRecord,
-  SyncLevel,
+  SyncLevel
 } from "../model/cadIntegrationTypes";
 
 type SyncHistoryRow = {

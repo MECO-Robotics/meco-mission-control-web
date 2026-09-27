@@ -2,8 +2,8 @@ import type {
   CadStepImportRunRecord,
   CadStepImportSummary,
   CadStepSnapshotRecord,
-  CadStepWarningRecord,
-} from "../model/cadIntegrationTypes";
+  CadStepWarningRecord
+} from "../model/cadStepTypes";
 import {
   CAD_SOURCE_MODEL_DOCS,
   getCadConfigurationLifecycleCopy,
