@@ -12,6 +12,27 @@ import { createTask, createTaskQueueBootstrap as createBootstrap } from "./taskQ
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 describe("Task Queue cards", () => {
+  it("uses local calendar days to color task card due dates", () => {
+    const bootstrap = createBootstrap();
+    const renderDueDateClass = (offsetDays: number) => {
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + offsetDays);
+      const dateValue = [dueDate.getFullYear(), dueDate.getMonth() + 1, dueDate.getDate()]
+        .map((part, index) => index === 0 ? String(part) : String(part).padStart(2, "0"))
+        .join("-");
+      const markup = renderToStaticMarkup(React.createElement(TaskQueueCard, {
+        bootstrap, task: createTask(1, { dueDate: dateValue }), disciplinesById: {}, membersById: {}, projectsById: {},
+        subsystemsById: {}, workstreamsById: {}, isNonRobotProject: false, openEditTaskModal: jest.fn(),
+        taskQueueZoom: 1, showProjectContextOnCards: false, showProjectOnCards: false,
+      }));
+      return markup.match(/task-detail-deadline-pill-(?:danger|warning|success)/)?.[0];
+    };
+
+    expect(renderDueDateClass(-1)).toBe("task-detail-deadline-pill-danger");
+    expect(renderDueDateClass(0)).toBe("task-detail-deadline-pill-warning");
+    expect(renderDueDateClass(1)).toBe("task-detail-deadline-pill-success");
+  });
+
   it("keeps work-log hours and help signals on the task after removing the duplicate log board", () => {
     const bootstrap = createBootstrap();
     bootstrap.workLogs = [
