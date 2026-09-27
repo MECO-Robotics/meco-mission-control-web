@@ -1,6 +1,13 @@
 import { useRememberedViewState } from "@/features/workspace/shared/navigation/WorkspaceViewMemory";
 import React from "react";
 import { buildAvailableStudentRoster, getPresentRosterMemberIds } from "./roster/availableStudentsRoster";
+import {
+  buildRosterDisciplineOptions,
+  filterRosterMembers,
+  sortMembersByElevation,
+  sortMembersByName,
+  type RosterPeopleFilter,
+} from "./roster/rosterDirectoryViewModel";
 import { useRosterInsights } from "./roster/useRosterInsights";
 import { formatAvailabilityLabel, formatHours } from "./roster/rosterInsightsViewModel";
 import type { TaskRecord } from "@/types/recordsExecution";
@@ -12,7 +19,6 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MemberPayload } from "@/types/payloads";
 import type { MemberRecord } from "@/types/recordsOrganization";
 import { isMemberActiveInSeason } from "@/lib/appUtils/common";
-import { getTaskDisciplinesForProject } from "@/lib/taskDisciplines";
 
 import { RosterAddPersonModal } from "./roster/RosterAddPersonModal";
 import { RosterEditPersonModal } from "./roster/RosterEditPersonModal";
@@ -49,12 +55,6 @@ interface RosterViewProps {
   externalMembers: MemberRecord[];
 }
 
-const isLeadStudent = (member: MemberRecord) =>
-  member.role === "lead" || (member.role === "student" && member.elevated);
-
-const isAdminMentor = (member: MemberRecord) =>
-  member.role === "admin" || (member.role === "mentor" && member.elevated);
-
 const isElevatedRole = (role: MemberPayload["role"]) => role === "lead" || role === "admin";
 
 const getEmailPlaceholder = (role: MemberPayload["role"]) =>
@@ -89,7 +89,7 @@ export const RosterView: React.FC<RosterViewProps> = ({
   rosterMentors,
   externalMembers,
 }) => {
-  const [peopleFilter, setPeopleFilter] = useRememberedViewState("people.peopleFilter", "all");
+  const [peopleFilter, setPeopleFilter] = useRememberedViewState<RosterPeopleFilter>("people.peopleFilter", "all");
   const insights = useRosterInsights({ bootstrap, projectId: selectedProject?.id ?? null, seasonId: selectedSeasonId });
   const insightById = new Map(insights.insights.members.map(row => [row.memberId, row]));
   const attendance = buildAvailableStudentRoster(availabilityBootstrap ?? bootstrap);
@@ -100,35 +100,17 @@ export const RosterView: React.FC<RosterViewProps> = ({
   const [reactivateExistingMember, setReactivateExistingMember] = React.useState(false);
   const [reactivateMemberId, setReactivateMemberId] = React.useState("");
 
-  const sortedStudents = [...students].sort((a, b) => {
-    const priority = Number(isLeadStudent(b)) - Number(isLeadStudent(a));
-    return priority !== 0 ? priority : a.name.localeCompare(b.name);
-  });
-  const sortedMentors = [...rosterMentors].sort((a, b) => {
-    const priority = Number(isAdminMentor(b)) - Number(isAdminMentor(a));
-    return priority !== 0 ? priority : a.name.localeCompare(b.name);
-  });
-  const sortedExternalMembers = [...externalMembers].sort((a, b) => a.name.localeCompare(b.name));
-
-  const sortedDisciplines = React.useMemo(() => {
-    const projectForDisciplines = selectedProject ?? bootstrap.projects[0] ?? null;
-    const allowedDisciplineIds = new Set(
-      getTaskDisciplinesForProject(projectForDisciplines).map((discipline) => discipline.id),
-    );
-    const uniqueDisciplinesByName = new Map<string, BootstrapPayload["disciplines"][number]>();
-
-    for (const discipline of bootstrap.disciplines) {
-      if (!allowedDisciplineIds.has(discipline.id)) {
-        continue;
-      }
-      const normalizedName = discipline.name.trim().toLowerCase();
-      if (!uniqueDisciplinesByName.has(normalizedName)) {
-        uniqueDisciplinesByName.set(normalizedName, discipline);
-      }
-    }
-
-    return [...uniqueDisciplinesByName.values()].sort((a, b) => a.name.localeCompare(b.name));
-  }, [bootstrap.disciplines, bootstrap.projects, selectedProject]);
+  const sortedStudents = sortMembersByElevation(students, (member) =>
+    member.role === "lead" || (member.role === "student" && member.elevated),
+  );
+  const sortedMentors = sortMembersByElevation(rosterMentors, (member) =>
+    member.role === "admin" || (member.role === "mentor" && member.elevated),
+  );
+  const sortedExternalMembers = sortMembersByName(externalMembers);
+  const sortedDisciplines = React.useMemo(
+    () => buildRosterDisciplineOptions(bootstrap, selectedProject),
+    [bootstrap, selectedProject],
+  );
 
   const disciplineOptions = React.useMemo(
     () => sortedDisciplines.map((discipline) => ({ id: discipline.id, name: discipline.name })),
@@ -138,23 +120,15 @@ export const RosterView: React.FC<RosterViewProps> = ({
     () => Object.fromEntries(bootstrap.disciplines.map((discipline) => [discipline.id, discipline.name] as const)),
     [bootstrap.disciplines],
   );
-  const normalizedSearch = searchText.trim().toLowerCase();
-  const filterMembers = (members: MemberRecord[]) => {
-    const scopedMembers = members.filter(member => peopleFilter === "all" || (peopleFilter === "present" ? presentMemberIds.has(member.id) : peopleFilter === "available" ? presenceById.get(member.id)?.state === "available" : insightById.get(member.id)?.availabilityStatus === "overloaded"));
-    if (normalizedSearch.length === 0) return scopedMembers;
-    return scopedMembers.filter((member) =>
-      [
-        member.name,
-        member.email,
-        member.role,
-        member.elevated ? "elevated" : "",
-        member.disciplineId ? disciplineById[member.disciplineId] ?? "" : "",
-      ]
-        .join(" ")
-        .toLowerCase()
-        .includes(normalizedSearch),
-    );
-  };
+  const filterMembers = (members: MemberRecord[]) => filterRosterMembers({
+    disciplineById,
+    insightById,
+    members,
+    peopleFilter,
+    presenceById,
+    presentMemberIds,
+    searchText,
+  });
   const filteredSortedStudents = filterMembers(sortedStudents);
   const filteredSortedMentors = filterMembers(sortedMentors);
   const filteredSortedExternalMembers = filterMembers(sortedExternalMembers);
@@ -272,7 +246,7 @@ export const RosterView: React.FC<RosterViewProps> = ({
         </div>
       </div>
       <div className="workspace-presentation-controls">
-        <label>People <select aria-label="Filter people" value={peopleFilter} onChange={event => setPeopleFilter(event.target.value)}><option value="all">All people</option><option value="present">Here today</option><option value="available">Available now</option><option value="overloaded">Overloaded</option></select></label>
+        <label>People <select aria-label="Filter people" value={peopleFilter} onChange={event => setPeopleFilter(event.target.value as RosterPeopleFilter)}><option value="all">All people</option><option value="present">Here today</option><option value="available">Available now</option><option value="overloaded">Overloaded</option></select></label>
         <span>{presentMemberIds.size} people here today</span>
       </div>
       <div className="roster-columns">
