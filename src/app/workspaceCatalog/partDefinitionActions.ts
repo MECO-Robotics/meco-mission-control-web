@@ -12,6 +12,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import type { Dispatch, SetStateAction } from "react";
 import { useCatalogDraftEditor } from "./useCatalogDraftEditor";
+import { useCatalogRecordActions } from "./useCatalogRecordActions";
 
 export function usePartDefinitionActions({ bootstrap, handleUnauthorized, loadWorkspace, selectedSeasonId, setBootstrap, setDataMessage, selectedProjectId }: {
   selectedProjectId: string | null;
@@ -42,6 +43,16 @@ export function usePartDefinitionActions({ bootstrap, handleUnauthorized, loadWo
     selectedProjectId,
     selectedSeasonId,
     toDraft: partDefinitionToPayload,
+  });
+  const { handleDelete: handleDeletePartDefinition, handleToggleArchived: handleTogglePartDefinitionArchived } = useCatalogRecordActions({
+    activeRecordId: activePartDefinitionId,
+    beginOperation,
+    closeEditor: closePartDefinitionModal,
+    deleteRecord: deletePartDefinitionRecord,
+    handleUnauthorized,
+    records: bootstrap.partDefinitions,
+    setDataMessage,
+    updateRecord: updatePartDefinitionRecord,
   });
   const currentBootstrap = useRef(bootstrap);
   currentBootstrap.current = bootstrap;
@@ -102,48 +113,6 @@ export function usePartDefinitionActions({ bootstrap, handleUnauthorized, loadWo
       operation.finish();
     }
   }, [activePartDefinitionId, closePartDefinitionModal, handleUnauthorized, partDefinitionDraft, partDefinitionModalMode, selectedSeasonId, setDataMessage, beginOperation]);
-
-  const handleDeletePartDefinition = useCallback(async (partDefinitionId: string) => {
-    const operation = beginOperation("delete");
-    if (!operation) return;
-    setDataMessage(null);
-
-    try {
-      await deletePartDefinitionRecord(partDefinitionId, handleUnauthorized);
-      await operation.refresh();
-      if (operation.isCurrent() && activePartDefinitionId === partDefinitionId) closePartDefinitionModal();
-    } catch (error) {
-      if (operation.isCurrent()) setDataMessage(toErrorMessage(error));
-    } finally {
-      operation.finish();
-    }
-  }, [activePartDefinitionId, closePartDefinitionModal, handleUnauthorized, setDataMessage, beginOperation]);
-
-  const handleTogglePartDefinitionArchived = useCallback(async (partDefinitionId: string) => {
-    const currentPartDefinition = bootstrap.partDefinitions.find(
-      (partDefinition) => partDefinition.id === partDefinitionId,
-    );
-    if (!currentPartDefinition) {
-      return;
-    }
-
-    const operation = beginOperation();
-    if (!operation) return;
-    setDataMessage(null);
-
-    try {
-      await updatePartDefinitionRecord(
-        partDefinitionId,
-        { isArchived: !currentPartDefinition.isArchived },
-        handleUnauthorized,
-      );
-      await operation.refresh();
-    } catch (error) {
-      if (operation.isCurrent()) setDataMessage(toErrorMessage(error));
-    } finally {
-      operation.finish();
-    }
-  }, [bootstrap, handleUnauthorized, setDataMessage, beginOperation]);
 
   return {
     partDefinitionModalMode,

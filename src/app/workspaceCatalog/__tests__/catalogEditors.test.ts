@@ -201,6 +201,29 @@ it.each(["workstream", "mechanism"] as const)(
   },
 );
 
+it("shares archive and delete lifecycles while closing only the deleted active record", async () => {
+  const { read, record, dependencies } = setup(cases.find((item) => item.name === "artifact")!);
+  dependencies.bootstrap = {
+    ...dependencies.bootstrap,
+    artifacts: [{ ...record, isArchived: false } as never],
+  };
+  read().openEdit(record);
+  const actions = read().raw as ReturnType<typeof useArtifactActions>;
+
+  await actions.handleToggleArtifactArchived(record.id as string);
+  expect(inventory.updateArtifactRecord).toHaveBeenCalledWith(
+    record.id,
+    { isArchived: true },
+    dependencies.handleUnauthorized,
+  );
+  expect(dependencies.loadWorkspace).toHaveBeenCalledTimes(1);
+
+  await actions.handleDeleteArtifact(record.id as string);
+  expect(inventory.deleteArtifactRecord).toHaveBeenCalledWith(record.id, dependencies.handleUnauthorized);
+  expect(dependencies.loadWorkspace).toHaveBeenCalledTimes(2);
+  expect(read().mode).toBeNull();
+});
+
 it("preserves material create reorder points and converts edit records to draft payloads", async () => {
   const { read, record } = setup(cases.find((item) => item.name === "material")!);
   read().openCreate();

@@ -10,6 +10,7 @@ import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefa
 import type { MechanismPayload } from "@/types/payloads";
 import type { MechanismRecord } from "@/types/recordsOrganization";
 import { useCatalogDraftEditor } from "./useCatalogDraftEditor";
+import { useCatalogRecordActions } from "./useCatalogRecordActions";
 
 export function useMechanismActions({ bootstrap, handleUnauthorized, loadWorkspace, scopedBootstrap, setDataMessage, selectedProjectId, selectedSeasonId }: {
   selectedSeasonId: string | null;
@@ -41,6 +42,16 @@ export function useMechanismActions({ bootstrap, handleUnauthorized, loadWorkspa
     selectedSeasonId,
     toDraft: (item: MechanismRecord) => item as MechanismPayload,
   });
+  const { handleDelete: handleDeleteMechanism, handleToggleArchived: handleToggleMechanismArchived } = useCatalogRecordActions({
+    activeRecordId: activeMechanismId,
+    beginOperation,
+    closeEditor: closeMechanismModal,
+    deleteRecord: deleteMechanismRecord,
+    handleUnauthorized,
+    records: bootstrap.mechanisms,
+    setDataMessage,
+    updateRecord: updateMechanismRecord,
+  });
 
   const handleMechanismSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
@@ -64,48 +75,6 @@ export function useMechanismActions({ bootstrap, handleUnauthorized, loadWorkspa
       operation.finish();
     }
   }, [activeMechanismId, closeMechanismModal, handleUnauthorized, mechanismDraft, mechanismModalMode, setDataMessage, beginOperation]);
-
-  const handleDeleteMechanism = useCallback(async (mechanismId: string) => {
-    const operation = beginOperation("delete");
-    if (!operation) return;
-    setDataMessage(null);
-
-    try {
-      await deleteMechanismRecord(mechanismId, handleUnauthorized);
-      await operation.refresh();
-      if (operation.isCurrent() && activeMechanismId === mechanismId) closeMechanismModal();
-    } catch (error) {
-      if (operation.isCurrent()) setDataMessage(toErrorMessage(error));
-    } finally {
-      operation.finish();
-    }
-  }, [activeMechanismId, closeMechanismModal, handleUnauthorized, setDataMessage, beginOperation]);
-
-  const handleToggleMechanismArchived = useCallback(async (mechanismId: string) => {
-    const currentMechanism = bootstrap.mechanisms.find(
-      (mechanism) => mechanism.id === mechanismId,
-    );
-    if (!currentMechanism) {
-      return;
-    }
-
-    const operation = beginOperation();
-    if (!operation) return;
-    setDataMessage(null);
-
-    try {
-      await updateMechanismRecord(
-        mechanismId,
-        { isArchived: !currentMechanism.isArchived },
-        handleUnauthorized,
-      );
-      await operation.refresh();
-    } catch (error) {
-      if (operation.isCurrent()) setDataMessage(toErrorMessage(error));
-    } finally {
-      operation.finish();
-    }
-  }, [bootstrap, handleUnauthorized, setDataMessage, beginOperation]);
 
   return {
     mechanismModalMode,
