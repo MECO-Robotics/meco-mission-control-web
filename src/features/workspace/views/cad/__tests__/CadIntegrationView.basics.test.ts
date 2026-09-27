@@ -181,6 +181,19 @@ describe("CAD STEP mapper basics", () => {
     expect(markup).not.toContain("onshape-oauth");
   });
 
+  it("shows the canonical Onshape base URL when connection details are unavailable", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(CadStatusPanels, {
+        overview: null,
+        selectedReferenceType: "version",
+        selectedSyncLevel: "bom",
+        syncEstimate: null,
+      }),
+    );
+
+    expect(markup).toContain("Base URL</dt><dd>https://cad.onshape.com</dd>");
+  });
+
   it("shows disconnected, expired, and backend unavailable Onshape health states", () => {
     const disconnected = buildOverview({
       oauth: {
