@@ -18,36 +18,13 @@ import { TaskDisciplineBadge } from "../taskQueueDisciplineBadge";
 import { getTaskQueueBoardState } from "../taskQueueKanbanBoardState";
 import { shouldHideTaskQueueSummary } from "../taskQueueViewState";
 
-function isTaskCardDateOverdue(dateValue: string): boolean {
-  if (!dateValue) {
-    return false;
-  }
-
+function getTaskCardDateRelation(dateValue: string): "past" | "today" | "future" | "invalid" {
   const parsedDate = new Date(`${dateValue}T00:00:00`);
-  if (Number.isNaN(parsedDate.getTime())) {
-    return false;
-  }
-
+  if (!dateValue || Number.isNaN(parsedDate.getTime())) return "invalid";
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  return parsedDate.getTime() < today.getTime();
-}
-
-function isTaskCardDateToday(dateValue: string): boolean {
-  if (!dateValue) {
-    return false;
-  }
-
-  const parsedDate = new Date(`${dateValue}T00:00:00`);
-  if (Number.isNaN(parsedDate.getTime())) {
-    return false;
-  }
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  return parsedDate.getTime() === today.getTime();
+  return parsedDate < today ? "past" : parsedDate.getTime() === today.getTime() ? "today" : "future";
 }
 
 function getTaskCardDueDatePillClassName(task: TaskRecord): string {
@@ -59,11 +36,12 @@ function getTaskCardDueDatePillClassName(task: TaskRecord): string {
     return "pill task-detail-deadline-pill task-detail-deadline-pill-success";
   }
 
-  if (isTaskCardDateOverdue(task.dueDate)) {
+  const dateRelation = getTaskCardDateRelation(task.dueDate);
+  if (dateRelation === "past") {
     return "pill task-detail-deadline-pill task-detail-deadline-pill-danger";
   }
 
-  if (isTaskCardDateToday(task.dueDate)) {
+  if (dateRelation === "today") {
     return "pill task-detail-deadline-pill task-detail-deadline-pill-warning";
   }
 
