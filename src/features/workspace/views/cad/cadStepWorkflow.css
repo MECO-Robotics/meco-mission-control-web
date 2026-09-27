@@ -7,11 +7,6 @@
   border-radius: 8px;
 }
 
-.cad-step-upload-form {
-  display: grid;
-  gap: 12px;
-}
-
 .cad-step-guidance {
   background: rgba(15, 23, 42, 0.035);
   border: 1px dashed var(--border-subtle, rgba(148, 163, 184, 0.28));
