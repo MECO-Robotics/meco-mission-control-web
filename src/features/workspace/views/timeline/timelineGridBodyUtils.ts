@@ -56,12 +56,11 @@ function hasActiveTaskBlocker(
   return task.blockers.length > 0 || activeBlockerTaskIds.has(task.id);
 }
 
-export function getTimelineTaskStatusSignal(
+function getTimelineTaskStatusSignalForTask(
   task: BootstrapPayload["tasks"][number],
   bootstrap: BootstrapPayload,
+  activeBlockerTaskIds: Set<string>,
 ): TimelineTaskStatusSignal {
-  const activeBlockerTaskIds = buildActiveBlockerTaskIds(bootstrap.taskBlockers);
-
   if (hasActiveTaskBlocker(task, activeBlockerTaskIds)) {
     return "blocked";
   }
@@ -73,20 +72,26 @@ export function getTimelineTaskStatusSignal(
   return task.status;
 }
 
+export function getTimelineTaskStatusSignal(
+  task: BootstrapPayload["tasks"][number],
+  bootstrap: BootstrapPayload,
+): TimelineTaskStatusSignal {
+  return getTimelineTaskStatusSignalForTask(
+    task,
+    bootstrap,
+    buildActiveBlockerTaskIds(bootstrap.taskBlockers),
+  );
+}
+
 export function buildTimelineTaskStatusSignalByTaskId(
   bootstrap: BootstrapPayload,
 ): Record<string, TimelineTaskStatusSignal> {
   const activeBlockerTaskIds = buildActiveBlockerTaskIds(bootstrap.taskBlockers);
 
   return Object.fromEntries(
-    bootstrap.tasks.map((task) => {
-      const signal = hasActiveTaskBlocker(task, activeBlockerTaskIds)
-        ? "blocked"
-        : getTaskWaitingOnDependencies(task.id, bootstrap).length > 0
-          ? "waiting-on-dependency"
-          : task.status;
-
-      return [task.id, signal];
-    }),
+    bootstrap.tasks.map((task) => [
+      task.id,
+      getTimelineTaskStatusSignalForTask(task, bootstrap, activeBlockerTaskIds),
+    ]),
   );
 }
