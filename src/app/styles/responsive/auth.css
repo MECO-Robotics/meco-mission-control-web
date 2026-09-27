@@ -58,19 +58,4 @@
     max-width: 100%;
   }
 
-  .filter-toolbar {
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    align-items: flex-start;
-    margin-left: auto;
-  }
-
-  .filter-toolbar>* {
-    width: auto;
-    flex: 0 1 auto;
-    min-width: 0;
-    max-width: 100%;
-  }
 }

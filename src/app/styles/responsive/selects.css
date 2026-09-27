@@ -7,28 +7,6 @@
     padding-inline: 0.25rem;
   }
 
-  .filter-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    align-items: flex-start;
-    margin-left: auto;
-  }
-
-  .filter-toolbar>* {
-    width: auto;
-    flex: 0 1 auto;
-    min-width: 0;
-    max-width: 100%;
-  }
-
-  .toolbar-search {
-    width: auto;
-    flex: 0 1 clamp(11.5rem, 24vw, 19rem);
-    min-width: 0;
-    max-width: 100%;
-  }
-
   .help-docs-list {
     grid-template-columns: 1fr;
   }
@@ -132,4 +110,3 @@
   cursor: not-allowed;
   box-shadow: none;
 }
-
