@@ -1,20 +1,6 @@
-const FILTER_TONE_CLASSES = [
-  "filter-tone-info",
-  "filter-tone-success",
-  "filter-tone-warning",
-  "filter-tone-danger",
-  "filter-tone-neutral",
-] as const;
+import { getWorkspaceFilterToneClassName } from "@/features/workspace/shared/filters/workspaceFilterTone";
 
-export function getStableToneClassName(value: string) {
-  let hash = 0;
-  for (let index = 0; index < value.length; index += 1) {
-    hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
-  }
-
-  // Keep tone assignment deterministic so the same entity always gets the same pill tone.
-  return FILTER_TONE_CLASSES[hash % FILTER_TONE_CLASSES.length];
-}
+export const getStableToneClassName = getWorkspaceFilterToneClassName;
 
 export function getPriorityToneClassName(priority: string | undefined) {
   if (priority === "critical") {

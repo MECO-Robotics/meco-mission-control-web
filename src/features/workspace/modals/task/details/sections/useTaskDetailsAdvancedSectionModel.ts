@@ -2,6 +2,7 @@ import type { ChangeEvent, CSSProperties, Dispatch, SetStateAction } from "react
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskPayload } from "@/types/payloads/task";
 import type { TaskRecord } from "@/types/recordsExecution";
+import { getWorkspaceFilterToneClassName } from "@/features/workspace/shared/filters/workspaceFilterTone";
 import { getTimelineTaskDisciplineColor } from "@/features/workspace/views/timeline/model/timelineTaskColors";
 import {
   getTaskPartInstanceLabel,
@@ -70,25 +71,10 @@ export function useTaskDetailsAdvancedSectionModel({
   const disciplinePillStyle = {
     "--task-detail-pill-accent": disciplineAccentColor ?? undefined,
   } as CSSProperties;
-  const getStableToneClassName = (value: string) => {
-    const filterToneClasses = [
-      "filter-tone-info",
-      "filter-tone-success",
-      "filter-tone-warning",
-      "filter-tone-danger",
-      "filter-tone-neutral",
-    ] as const;
-    let hash = 0;
-    for (let index = 0; index < value.length; index += 1) {
-      hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
-    }
-
-    return filterToneClasses[hash % filterToneClasses.length];
-  };
   const getDisciplineOptionToneClassName = (option: { id: string }) =>
-    getStableToneClassName(option.id);
+    getWorkspaceFilterToneClassName(option.id);
   const getSubsystemOptionToneClassName = (option: { id: string }) =>
-    getStableToneClassName(option.id);
+    getWorkspaceFilterToneClassName(option.id);
   const disciplinePillClassName = "pill task-detail-discipline-pill";
   const mechanismNames = selectedMechanismIds
     .map((mechanismId) => mechanismsById[mechanismId])
