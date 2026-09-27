@@ -1,18 +1,58 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { AttentionTriageItem } from "./attentionViewTypes";
+import type { AttentionTriageGroup, AttentionTriageItem } from "./attentionViewTypes";
+import { ATTENTION_DUE_SOON_DAYS } from "./attentionViewHelpers";
 import {
   formatContextLabel,
   formatOwnerLabel,
   normalizeDateOnly,
 } from "./attentionViewHelpers";
 
-interface AttentionLookup {
+export interface AttentionLookup {
   membersById: Record<string, BootstrapPayload["members"][number]>;
   projectsById: Record<string, BootstrapPayload["projects"][number]>;
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
   tasksById: Record<string, BootstrapPayload["tasks"][number]>;
   taskByReportId: Map<string, BootstrapPayload["tasks"][number]>;
   workstreamsById: Record<string, BootstrapPayload["workstreams"][number]>;
+}
+
+export function buildAttentionTriageGroups({
+  blockedTasks,
+  criticalRisks,
+  dueSoonTasks,
+  highRisks,
+  manufacturingItems,
+  overdueTasks,
+  purchaseItems,
+  reportItems,
+  staleTasks,
+  waitingQaTasks,
+  lookup,
+}: {
+  blockedTasks: BootstrapPayload["tasks"];
+  criticalRisks: BootstrapPayload["risks"];
+  dueSoonTasks: BootstrapPayload["tasks"];
+  highRisks: BootstrapPayload["risks"];
+  manufacturingItems: AttentionTriageItem[];
+  overdueTasks: BootstrapPayload["tasks"];
+  purchaseItems: AttentionTriageItem[];
+  reportItems: AttentionTriageItem[];
+  staleTasks: BootstrapPayload["tasks"];
+  waitingQaTasks: BootstrapPayload["tasks"];
+  lookup: AttentionLookup;
+}): AttentionTriageGroup[] {
+  return [
+    { emptyLabel: "No critical risks in scope.", id: "critical-risks", items: buildRiskTriageItems(criticalRisks, lookup), title: "Critical risks" },
+    { emptyLabel: "No high risks in scope.", id: "high-risks", items: buildRiskTriageItems(highRisks, lookup), title: "High risks" },
+    { emptyLabel: "No blocked tasks in scope.", id: "blocked-tasks", items: buildTaskTriageItems(blockedTasks, "Blocked", lookup), title: "Blocked tasks" },
+    { emptyLabel: "No tasks waiting QA in scope.", id: "waiting-qa", items: buildTaskTriageItems(waitingQaTasks, "Waiting QA", lookup), title: "Waiting for QA" },
+    { emptyLabel: "No stale tasks in scope.", id: "stale-tasks", items: buildTaskTriageItems(staleTasks, "Stale", lookup), title: "Stale tasks" },
+    { emptyLabel: "No tasks due soon in scope.", id: "due-soon", items: buildTaskTriageItems(dueSoonTasks, `Due <= ${ATTENTION_DUE_SOON_DAYS} days`, lookup), title: "Tasks due soon" },
+    { emptyLabel: "No overdue tasks in scope.", id: "overdue", items: buildTaskTriageItems(overdueTasks, "Overdue", lookup), title: "Overdue tasks" },
+    { emptyLabel: "No manufacturing blockers in scope.", id: "manufacturing-blockers", items: manufacturingItems, title: "Manufacturing blockers" },
+    { emptyLabel: "No purchase delays in scope.", id: "purchase-delays", items: purchaseItems, title: "Purchase delays" },
+    { emptyLabel: "No recent failed QA/report signals.", id: "failed-reports", items: reportItems, title: "Recently failed QA / reports" },
+  ];
 }
 
 export function buildRiskTriageItems(
