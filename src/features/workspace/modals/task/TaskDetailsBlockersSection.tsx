@@ -7,8 +7,8 @@ interface TaskDetailsBlockersSectionProps {
   activeTaskId: string;
   bootstrap: BootstrapPayload;
   canInlineEdit: boolean;
-  collapsibleOpen?: boolean;
-  onCollapsibleToggle?: (open: boolean) => void;
+  collapsibleOpen: boolean;
+  onCollapsibleToggle: (open: boolean) => void;
   onResolveTaskBlocker: (blockerId: string) => Promise<void>;
   setTaskDraft?: Dispatch<SetStateAction<TaskPayload>>;
   taskDraft?: TaskPayload;

@@ -17,8 +17,8 @@ interface TaskDetailsDependenciesSectionProps {
   activeTask: TaskRecord;
   bootstrap: BootstrapPayload;
   canInlineEdit: boolean;
-  collapsibleOpen?: boolean;
-  onCollapsibleToggle?: (open: boolean) => void;
+  collapsibleOpen: boolean;
+  onCollapsibleToggle: (open: boolean) => void;
   setTaskDraft?: Dispatch<SetStateAction<TaskPayload>>;
   targetProjectId?: string | null;
   taskDraft?: TaskPayload;
@@ -43,12 +43,6 @@ export function TaskDetailsDependenciesSection({
   taskDraft,
 }: TaskDetailsDependenciesSectionProps) {
   const [editingDependencyKey, setEditingDependencyKey] = useState<string | null>(null);
-  const [internalOpen, setInternalOpen] = useState(true);
-
-  useEffect(() => {
-    setInternalOpen(true);
-  }, [activeTask.id]);
-
   const placeholderDependencyKey = useMemo(() => {
     if (!canInlineEdit) {
       return null;
@@ -114,8 +108,6 @@ export function TaskDetailsDependenciesSection({
       partDefinitionsById,
       formatIterationVersion,
     });
-  const isOpen = collapsibleOpen ?? internalOpen;
-
   const updateDependencyDraft = (
     dependencyKey: string,
     updates: Partial<NonNullable<TaskPayload["taskDependencies"]>[number]>,
@@ -182,11 +174,10 @@ export function TaskDetailsDependenciesSection({
     <div className="task-detail-blocker-split-column task-detail-collapsible-field">
       <details
         className="task-detail-collapsible"
-        open={isOpen}
+        open={collapsibleOpen}
         onToggle={(milestone) => {
           const nextOpen = milestone.currentTarget.open;
-          setInternalOpen(nextOpen);
-          onCollapsibleToggle?.(nextOpen);
+          onCollapsibleToggle(nextOpen);
         }}
       >
         <summary className="task-detail-collapsible-summary task-detail-collapsible-summary-inline">
