@@ -63,6 +63,37 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
       id: partInstance.id,
       name: `${partInstance.name}`,
     }));
+  const renderAddControl = (
+    label: "mechanism" | "part",
+    field: "mechanism-add" | "parts-add",
+    menuKey: number,
+    setMenuKey: Dispatch<SetStateAction<number>>,
+    options: typeof mechanismAddOptions,
+    onAdd: (id: string) => void,
+  ) => options.length ? (
+    <FilterDropdown
+      key={menuKey}
+      allLabel={`Add ${label}`}
+      ariaLabel={`Add ${label}`}
+      buttonInlineEditField={field}
+      className="task-details-section-add-menu task-details-dependency-kind-menu"
+      icon={<IconPlus />}
+      menuClassName="task-details-dependency-menu-popup"
+      onChange={(selection) => {
+        const id = selection[0];
+        if (id) {
+          onAdd(id);
+          setMenuKey((current) => current + 1);
+        }
+      }}
+      options={options}
+      portalMenu
+      portalMenuPlacement="below"
+      showAllOption={false}
+      singleSelect
+      value={[]}
+    />
+  ) : null;
 
   useEffect(() => {
     setLinkedDetailsOpen(true);
@@ -192,32 +223,14 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
           </small>
         </label>
         <TaskDetailsLinkedEntitySection
-          addControl={
-            mechanismAddOptions.length > 0 ? (
-              <FilterDropdown
-                key={mechanismAddMenuKey}
-                allLabel="Add mechanism"
-                ariaLabel="Add mechanism"
-                buttonInlineEditField="mechanism-add"
-                className="task-details-section-add-menu task-details-dependency-kind-menu"
-                icon={<IconPlus />}
-                menuClassName="task-details-dependency-menu-popup"
-                onChange={(selection) => {
-                  const mechanismId = selection[0];
-                  if (mechanismId) {
-                    model.addMechanismSelection(mechanismId);
-                    setMechanismAddMenuKey((current) => current + 1);
-                  }
-                }}
-                options={mechanismAddOptions}
-                portalMenu
-                portalMenuPlacement="below"
-                showAllOption={false}
-                singleSelect
-                value={[]}
-              />
-            ) : null
-          }
+          addControl={renderAddControl(
+            "mechanism",
+            "mechanism-add",
+            mechanismAddMenuKey,
+            setMechanismAddMenuKey,
+            mechanismAddOptions,
+            model.addMechanismSelection,
+          )}
           canInlineEdit={canInlineEdit}
           emptyText="No mechanism linked"
           onDoubleClick={openTaskEditModal}
@@ -239,32 +252,14 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
           title={canInlineEdit ? "Mechanism" : "Mechanisms"}
         />
         <TaskDetailsLinkedEntitySection
-          addControl={
-            partAddOptions.length > 0 ? (
-              <FilterDropdown
-                key={partAddMenuKey}
-                allLabel="Add part"
-                ariaLabel="Add part"
-                buttonInlineEditField="parts-add"
-                className="task-details-section-add-menu task-details-dependency-kind-menu"
-                icon={<IconPlus />}
-                menuClassName="task-details-dependency-menu-popup"
-                onChange={(selection) => {
-                  const partInstanceId = selection[0];
-                  if (partInstanceId) {
-                    model.addPartInstanceSelection(partInstanceId);
-                    setPartAddMenuKey((current) => current + 1);
-                  }
-                }}
-                options={partAddOptions}
-                portalMenu
-                portalMenuPlacement="below"
-                showAllOption={false}
-                singleSelect
-                value={[]}
-              />
-            ) : null
-          }
+          addControl={renderAddControl(
+            "part",
+            "parts-add",
+            partAddMenuKey,
+            setPartAddMenuKey,
+            partAddOptions,
+            model.addPartInstanceSelection,
+          )}
           canInlineEdit={canInlineEdit}
           emptyText="No part linked"
           onDoubleClick={openTaskEditModal}
