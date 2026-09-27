@@ -4,6 +4,7 @@ import type { TaskPayload } from "@/types/payloads/task";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { getTimelineTaskDisciplineColor } from "@/features/workspace/views/timeline/model/timelineTaskColors";
 import {
+  getTaskPartInstanceLabel,
   getTaskSelectedMechanismIds,
   getTaskSelectedPartInstanceIds,
 } from "../../../../shared/task/taskTargeting";
@@ -57,16 +58,8 @@ export function useTaskDetailsAdvancedSectionModel({
   const selectedPartInstanceIds = getTaskSelectedPartInstanceIds(editableTask);
   const getMechanismLabel = (mechanism: BootstrapPayload["mechanisms"][number]) =>
     `${mechanism.name} (${formatIterationVersion(mechanism.iteration)})`;
-  const getPartInstanceLabel = (partInstance: BootstrapPayload["partInstances"][number]) => {
-    const partDefinition = partDefinitionsById[partInstance.partDefinitionId];
-    const partDefinitionLabel = partDefinition
-      ? `${partDefinition.name} (${formatIterationVersion(partDefinition.iteration)})`
-      : null;
-
-    return partDefinitionLabel
-      ? `${partInstance.name} (${partDefinitionLabel})`
-      : partInstance.name;
-  };
+  const getPartInstanceLabel = (partInstance: BootstrapPayload["partInstances"][number]) =>
+    getTaskPartInstanceLabel(partInstance, partDefinitionsById, formatIterationVersion);
   const disciplineText = editableTask.disciplineId
     ? availableDisciplines.find((discipline) => discipline.id === editableTask.disciplineId)?.name ??
       "Not set"

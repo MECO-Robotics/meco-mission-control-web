@@ -78,6 +78,17 @@ export function getTaskSelectedPartInstanceIds(
   return payload.partInstanceIds;
 }
 
+export function getTaskPartInstanceLabel(
+  partInstance: BootstrapPayload["partInstances"][number],
+  partDefinitionsById: Record<string, BootstrapPayload["partDefinitions"][number]>,
+  formatIterationVersion: (value: number | null | undefined) => string,
+) {
+  const partDefinition = partDefinitionsById[partInstance.partDefinitionId];
+  return partDefinition
+    ? `${partInstance.name} (${partDefinition.name} (${formatIterationVersion(partDefinition.iteration)}))`
+    : partInstance.name;
+}
+
 export function getTaskSelectedAssigneeIds(
   payload: Pick<TaskPayload, "assigneeIds" | "ownerId">,
 ) {
@@ -125,12 +136,13 @@ export function getTaskSelectedScopeChips(
         return null;
       }
 
-      const partDefinition = lookups.partDefinitionsById[partInstance.partDefinitionId];
       return {
         key: `part-instance-${id}`,
-        label: partDefinition
-          ? `${partInstance.name} (${partDefinition.name} (${lookups.formatIterationVersion(partDefinition.iteration)}))`
-          : partInstance.name,
+        label: getTaskPartInstanceLabel(
+          partInstance,
+          lookups.partDefinitionsById,
+          lookups.formatIterationVersion,
+        ),
       };
     }),
   ].filter((chip): chip is TaskScopeChip => Boolean(chip));

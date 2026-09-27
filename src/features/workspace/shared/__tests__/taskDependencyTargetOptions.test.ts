@@ -1,6 +1,33 @@
-import { getTaskDependencyTargetOptions } from "../task/taskTargeting";
+import { getTaskDependencyTargetOptions, getTaskPartInstanceLabel } from "../task/taskTargeting";
 import { IconMapPin, IconParts, IconTasks } from "@/components/shared/Icons";
 import { bootstrap } from "./taskPlanningFixture";
+
+test("part instance labels include a selected definition and fall back when it is missing", () => {
+  const partInstance = bootstrap.partInstances[0];
+  const formatVersion = (value: number | null | undefined) => `v${value ?? "?"}`;
+
+  expect(
+    getTaskPartInstanceLabel(
+      partInstance,
+      {
+        "part-def-1": {
+          id: "part-def-1",
+          seasonId: "season-1",
+          name: "Clamp body",
+          partNumber: "P-1",
+          revision: "A",
+          iteration: 2,
+          type: "part",
+          source: "internal",
+          materialId: null,
+          description: "",
+        },
+      },
+      formatVersion,
+    ),
+  ).toBe("Clamp (Clamp body (v2))");
+  expect(getTaskPartInstanceLabel(partInstance, {}, formatVersion)).toBe("Clamp");
+});
 
 test("dependency targets expose semantic icons for dependency menus", () => {
   const taskOptions = getTaskDependencyTargetOptions("task", {
