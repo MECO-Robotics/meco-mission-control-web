@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskPayload } from "@/types/payloads";
+import type { TaskPayload } from "@/types/payloads/task";
 import { TASK_BLOCKER_TYPE_LABELS, TASK_BLOCKER_TYPE_OPTIONS, type TaskBlockerType } from "@/types/common";
 import { IconTrash } from "@/components/shared/Icons";
 import { TaskDetailReveal } from "../TaskDetailReveal";

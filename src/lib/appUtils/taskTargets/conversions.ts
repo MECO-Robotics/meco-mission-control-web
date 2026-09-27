@@ -1,5 +1,5 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskPayload } from "@/types/payloads";
+import type { TaskPayload } from "@/types/payloads/task";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { uniqueIds } from "../internal";
 import { getTaskBlockerDrafts, getTaskDependencyDrafts } from "./dependencies";

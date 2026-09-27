@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskPayload } from "@/types/payloads";
+import type { TaskPayload } from "@/types/payloads/task";
 import { TaskDetailsBlockersSectionContent } from "./details/TaskDetailsBlockersSectionContent";
 
 interface TaskDetailsBlockersSectionProps {

@@ -1,5 +1,5 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskDependencyDraft } from "@/types/payloads";
+import type { TaskDependencyDraft } from "@/types/payloads/task";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { getTaskOpenBlockersForTask } from "@/features/workspace/shared/task/taskPlanning";
 

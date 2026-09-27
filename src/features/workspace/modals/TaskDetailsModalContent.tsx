@@ -2,7 +2,7 @@ import { ReportHistoryList } from "../views/workLogs/ReportHistoryList";
 import { ModalDialog } from "@/components/ModalDialog";
 import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskPayload } from "@/types/payloads";
+import type { TaskPayload } from "@/types/payloads/task";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { TaskDetailsAdvancedSection } from "./task/TaskDetailsAdvancedSection";
 import { TaskDetailsDependencyBlockersSection } from "./task/TaskDetailsDependencyBlockersSection";

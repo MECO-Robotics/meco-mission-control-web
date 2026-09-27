@@ -6,7 +6,7 @@ import type {
   TaskDependencyDraft,
   TaskDependencyPayload,
   TaskPayload,
-} from "@/types/payloads";
+} from "@/types/payloads/task";
 import type { TaskBlockerRecord, TaskDependencyRecord } from "@/types/recordsExecution";
 
 export function normalizeTaskPayload(taskDraft: TaskPayload): TaskPayload {
