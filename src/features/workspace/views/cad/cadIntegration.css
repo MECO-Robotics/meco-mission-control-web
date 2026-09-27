@@ -6,6 +6,29 @@
   gap: 16px;
 }
 
+.cad-step-upload-form,
+.cad-step-preview-card,
+.cad-snapshot-diff-card,
+.cad-hierarchy-review {
+  display: grid;
+  gap: 12px;
+}
+
+.cad-step-preview-heading,
+.cad-snapshot-diff-heading {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.cad-step-preview-counts,
+.cad-diff-counts {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .cad-header {
   align-items: flex-start;
   gap: 16px;
