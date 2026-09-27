@@ -67,44 +67,21 @@ interface TaskQueueKanbanBoardProps {
 }
 
 export function TaskQueueKanbanBoard({
-  bootstrap,
-  disciplinesById,
-  isNonRobotProject,
-  membersById,
-  openEditTaskModal,
-  projectsById,
-  taskQueueZoom,
-  showProjectContextOnCards,
-  showProjectOnCards,
-  subsystemsById,
   tasks,
-  workstreamsById,
   focusedState,
   onClearFocus,
   onFocusState,
   onReassignTaskStatus,
+  ...cardProps
 }: TaskQueueKanbanBoardProps) {
   const pendingTaskStatusDropIdsRef = useRef<Set<string>>(new Set());
   const [pendingTaskStatusDropIds, setPendingTaskStatusDropIds] = useState<ReadonlySet<string>>(
     () => new Set(),
   );
   const tasksByState = useMemo(
-    () => groupTasksByBoardState(tasks, bootstrap),
-    [bootstrap, tasks],
+    () => groupTasksByBoardState(tasks, cardProps.bootstrap),
+    [cardProps.bootstrap, tasks],
   );
-  const cardProps = {
-    bootstrap,
-    disciplinesById,
-    isNonRobotProject,
-    membersById,
-    openEditTaskModal,
-    projectsById,
-    taskQueueZoom,
-    showProjectContextOnCards,
-    showProjectOnCards,
-    subsystemsById,
-    workstreamsById,
-  };
 
   const focusedTasks = useMemo(
     () => (focusedState === null ? [] : tasksByState[focusedState]),
@@ -255,7 +232,7 @@ export function TaskQueueKanbanBoard({
           );
         }
 
-        return getTaskQueueBoardState(task, bootstrap) !== state;
+        return getTaskQueueBoardState(task, cardProps.bootstrap) !== state;
       }}
       canDropState={() => true}
       columnBodyClassName="task-queue-board-column-body"
@@ -275,7 +252,7 @@ export function TaskQueueKanbanBoard({
         }
 
         if (isTaskQueueEditIntentState(state)) {
-          openEditTaskModal(task, { intentState: state });
+          cardProps.openEditTaskModal(task, { intentState: state });
         }
       }}
       renderItem={(task, _, dragProps) => (
