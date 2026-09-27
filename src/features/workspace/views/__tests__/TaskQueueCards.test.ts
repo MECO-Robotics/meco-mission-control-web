@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { IconEdit, IconManufacturing, IconParts } from "@/components/shared/Icons";
 import { TaskQueueCard } from "@/features/workspace/views/taskQueue/state/taskQueueKanbanCardView";
 import { TaskQueueKanbanBoard } from "@/features/workspace/views/taskQueue/TaskQueueKanbanBoard";
+import { readTaskSubsystemIds, readTaskWorkstreamIds } from "@/features/workspace/views/taskQueue/taskQueueKanbanCard";
 import { getTaskQueueCardContextLabel } from "@/features/workspace/views/taskQueue/taskQueueKanbanCardMeta";
 import { getTaskQueueDisciplineIcon } from "@/features/workspace/views/taskQueue/taskQueueDisciplineBadge";
 import { createTask, createTaskQueueBootstrap as createBootstrap } from "./taskQueueTestFixtures";
@@ -12,6 +13,16 @@ import { createTask, createTaskQueueBootstrap as createBootstrap } from "./taskQ
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 describe("Task Queue cards", () => {
+  it("normalizes subsystem and workstream IDs consistently", () => {
+    const task = createTask(1, {
+      subsystemIds: ["subsystem-1", "", "subsystem-1"],
+      workstreamIds: ["workstream-1", "", "workstream-1"],
+    });
+
+    expect(readTaskSubsystemIds(task)).toEqual(["subsystem-1"]);
+    expect(readTaskWorkstreamIds(task)).toEqual(["workstream-1"]);
+  });
+
   it("uses local calendar days to color task card due dates", () => {
     const bootstrap = createBootstrap();
     const renderDueDateClass = (offsetDays: number) => {
