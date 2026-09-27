@@ -330,6 +330,7 @@ export function buildAttentionViewModel({
     overdueTasks,
     purchaseDelays,
     staleTaskResults,
+    taskLastUpdatedAtById,
     waitingQaTasks,
   });
   const mentorQueueItems = buildMentorActionQueueItems({
