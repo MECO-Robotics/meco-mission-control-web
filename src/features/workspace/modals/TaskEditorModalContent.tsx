@@ -36,34 +36,13 @@ interface TaskEditorModalProps {
 }
 
 function buildDraftTaskRecord(taskDraft: TaskPayload, activeTask: TaskRecord | null): TaskRecord {
+  const { taskBlockers, taskDependencies, ...recordDraft } = taskDraft;
+  void taskDependencies;
+
   return {
+    ...recordDraft,
     id: activeTask?.id ?? "__new-task__",
-    projectId: taskDraft.projectId,
-    workstreamIds: taskDraft.workstreamIds,
-    title: taskDraft.title,
-    summary: taskDraft.summary,
-    subsystemIds: taskDraft.subsystemIds,
-    disciplineId: taskDraft.disciplineId,
-    mechanismIds: taskDraft.mechanismIds,
-    partInstanceIds: taskDraft.partInstanceIds,
-    artifactIds: taskDraft.artifactIds,
-    targetRiskId: taskDraft.targetRiskId,
-    targetMilestoneId: taskDraft.targetMilestoneId,
-    photoUrl: taskDraft.photoUrl,
-    ownerId: taskDraft.ownerId,
-    assigneeIds: taskDraft.assigneeIds,
-    mentorId: taskDraft.mentorId,
-    startDate: taskDraft.startDate,
-    dueDate: taskDraft.dueDate,
-    priority: taskDraft.priority,
-    status: taskDraft.status,
-    blockers: (taskDraft.taskBlockers ?? []).map((blocker) => blocker.description),
-    linkedManufacturingIds: taskDraft.linkedManufacturingIds,
-    linkedPurchaseIds: taskDraft.linkedPurchaseIds,
-    estimatedHours: taskDraft.estimatedHours,
-    actualHours: taskDraft.actualHours,
-    requiresDocumentation: taskDraft.requiresDocumentation,
-    documentationLinked: taskDraft.documentationLinked,
+    blockers: (taskBlockers ?? []).map((blocker) => blocker.description),
   };
 }
 
