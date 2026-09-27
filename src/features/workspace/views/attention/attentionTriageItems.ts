@@ -117,50 +117,56 @@ export function buildTaskTriageItems(
   });
 }
 
-export function buildManufacturingTriageItems(
-  rows: BootstrapPayload["manufacturingItems"],
+type SupplyTriageRecord = {
+  id: string;
+  requestedById: string | null;
+  status: string;
+  subsystemId: string;
+  title: string;
+};
+
+function buildSupplyTriageItems<T extends SupplyTriageRecord, K extends "manufacturing" | "purchase">
+(
+  rows: T[],
   lookup: AttentionLookup,
-) {
+  kind: K,
+  severityLabel: (item: T) => string,
+  subtitle: (item: T) => string,
+): AttentionTriageItem[] {
   const { membersById, projectsById, subsystemsById } = lookup;
 
-  return rows.map<AttentionTriageItem>((item) => ({
+  return rows.map((item) => ({
     actionType: null,
     contextLabel: formatContextLabel({
       projectName: projectsById[subsystemsById[item.subsystemId]?.projectId]?.name,
       subsystemName: subsystemsById[item.subsystemId]?.name,
     }),
-    id: `manufacturing-${item.id}`,
-    kind: "manufacturing",
+    id: `${kind}-${item.id}`,
+    kind,
     ownerLabel: formatOwnerLabel(item.requestedById ? membersById[item.requestedById]?.name : null),
     recordId: item.id,
-    severityLabel: item.mentorReviewed ? "Watch" : "Needs review",
+    severityLabel: severityLabel(item),
     statusLabel: item.status,
-    subtitle: `Due ${normalizeDateOnly(item.dueDate)} | Qty ${item.quantity}`,
+    subtitle: subtitle(item),
     title: item.title,
   }));
+}
+
+export function buildManufacturingTriageItems(
+  rows: BootstrapPayload["manufacturingItems"],
+  lookup: AttentionLookup,
+) {
+  return buildSupplyTriageItems(rows, lookup, "manufacturing",
+    (item) => item.mentorReviewed ? "Watch" : "Needs review",
+    (item) => `Due ${normalizeDateOnly(item.dueDate)} | Qty ${item.quantity}`);
 }
 
 export function buildPurchaseTriageItems(
   rows: BootstrapPayload["purchaseItems"],
   lookup: AttentionLookup,
 ) {
-  const { membersById, projectsById, subsystemsById } = lookup;
-
-  return rows.map<AttentionTriageItem>((item) => ({
-    actionType: null,
-    contextLabel: formatContextLabel({
-      projectName: projectsById[subsystemsById[item.subsystemId]?.projectId]?.name,
-      subsystemName: subsystemsById[item.subsystemId]?.name,
-    }),
-    id: `purchase-${item.id}`,
-    kind: "purchase",
-    ownerLabel: formatOwnerLabel(item.requestedById ? membersById[item.requestedById]?.name : null),
-    recordId: item.id,
-    severityLabel: "Supply",
-    statusLabel: item.status,
-    subtitle: `${item.vendor || "Vendor unknown"} | Qty ${item.quantity}`,
-    title: item.title,
-  }));
+  return buildSupplyTriageItems(rows, lookup, "purchase", () => "Supply",
+    (item) => `${item.vendor || "Vendor unknown"} | Qty ${item.quantity}`);
 }
 
 export function buildReportTriageItems({
