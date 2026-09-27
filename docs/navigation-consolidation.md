@@ -13,7 +13,7 @@ The app uses the original sidebar implementation: Home shortcut, expandable Work
 | Home | Priority work, upcoming milestones, Needs attention | One attention row per source record; Project health expands on demand |
 | Work | Tasks, Schedule, Risks, Activity | Schedule offers Calendar, Timeline and Agenda; Activity filters work logs, changes, QA and milestone results |
 | Resources | Materials/Documents, Parts, Purchases, Manufacturing, Structure | Manufacturing uses a process filter; installed parts live under their definition; CAD import opens from Structure |
-| Team | People, Attendance | People combines directory, presence, availability and workload |
+| Team | People | People combines directory, presence, availability and workload |
 
 Tasks opens first in Work. Robot-only Parts and Manufacturing require a robot project. Structure requires a selected project and uses the robot map or the non-robot workflow view. All-project Resources exposes Materials and Purchases. Non-robot projects use Documents and Purchases. Home remains available without a season; other collections require season data. Help and account controls remain utilities.
 

@@ -25,8 +25,8 @@ export function useWorkspaceShellNavigation(c: WorkspaceShellController) {
     hasSeasons: c.bootstrap.seasons.length > 0,
     selectedProjectType: c.selectedProject?.projectType ?? null,
   });
-  const { activeTab, inventoryView, manufacturingView, rosterView, taskView, worklogsView } = c;
-  const navigationState = { activeTab, inventoryView, manufacturingView, rosterView, taskView, worklogsView };
+  const { activeTab, inventoryView, manufacturingView, taskView, worklogsView } = c;
+  const navigationState = { activeTab, inventoryView, manufacturingView, taskView, worklogsView };
   const activeSubItemId = getActiveNavigationSubItemId(navigationState, navigationContext);
   const activeSection = activeSubItemId ? getNavigationSectionFromSubItem(activeSubItemId) : null;
   const activeSectionLabel = activeSection
@@ -45,7 +45,6 @@ export function useWorkspaceShellNavigation(c: WorkspaceShellController) {
     if (target.worklogsView) c.setWorklogsView(target.worklogsView);
     if (target.inventoryView) c.setInventoryView(target.inventoryView);
     if (target.manufacturingView) c.setManufacturingView(target.manufacturingView);
-    if (target.rosterView) c.setRosterView(target.rosterView);
     c.handleSidebarTabSelect(target.tab, { keepSidebarOpen: options?.keepSidebarOpen });
   };
   const restoreNavigation = () => {

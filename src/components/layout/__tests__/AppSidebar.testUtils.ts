@@ -56,7 +56,6 @@ export function renderSidebar(
       onOpenProfileEditor: jest.fn(),
       onToggleNotificationQueue: jest.fn(),
       projects: options?.projects ?? [],
-      rosterView: "directory",
       selectedProjectId: options?.selectedProjectId ?? null,
       selectedSeasonId: options?.selectedSeasonId ?? "season-1",
       seasons: options?.seasons ?? [
