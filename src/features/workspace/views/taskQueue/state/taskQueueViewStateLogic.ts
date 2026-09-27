@@ -2,25 +2,14 @@ import { useEffect, useMemo } from "react";
 import type { Dispatch, SetStateAction } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskRecord } from "@/types/recordsExecution";
-import { formatIterationVersion } from "@/lib/appUtils/common";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 
-import {
-  filterTaskQueueTasks,
-  formatSubsystemNames,
-  formatTaskQueueAssignees,
-  readTaskSubsystemIds,
-} from "../taskQueueKanbanCard";
-import { getTaskQueueDisciplineIcon } from "../taskQueueDisciplineBadge";
-import {
-  TASK_QUEUE_LAZY_LOAD_BATCH_SIZE,
-  getTaskQueueBoardState,
-  getTaskQueueBoardStateSortValue,
-} from "../taskQueueKanbanBoardState";
+import { readTaskSubsystemIds } from "../taskQueueKanbanCard";
+import { TASK_QUEUE_LAZY_LOAD_BATCH_SIZE, getTaskQueueBoardState } from "../taskQueueKanbanBoardState";
 import type { TaskQueueBoardState } from "../taskQueueKanbanBoardState";
 import type { TaskSortField } from "../taskQueueViewState";
+import { useTaskQueueProcessedTasks } from "./useTaskQueueProcessedTasks";
 
 const SUBSYSTEM_ITERATION_DISCIPLINE_CODES = new Set<string>([
   "design",
@@ -28,17 +17,6 @@ const SUBSYSTEM_ITERATION_DISCIPLINE_CODES = new Set<string>([
   "assembly",
   "electrical",
 ]);
-
-const PRIORITY_VALUES: Record<TaskRecord["priority"], number> = {
-  critical: 4,
-  high: 3,
-  medium: 2,
-  low: 1,
-};
-
-function buildLookupMap<T extends { id: string }>(items: T[]) {
-  return Object.fromEntries(items.map((item) => [item.id, item])) as Record<string, T>;
-}
 
 function useTaskQueueVisibleTaskCountReset(
   processedTasksLength: number,
@@ -96,41 +74,6 @@ export function useTaskQueueViewStateLogic({
   subsystemIterationFilter,
   subsystemsById,
 }: TaskQueueViewStateLogicArgs) {
-  const projectsById = useMemo(
-    () => buildLookupMap(bootstrap.projects),
-    [bootstrap.projects],
-  );
-  const workstreamsById = useMemo(
-    () => buildLookupMap(bootstrap.workstreams),
-    [bootstrap.workstreams],
-  );
-  const subsystemFilterOptions = useMemo(
-    () =>
-      bootstrap.subsystems.map((subsystem) => ({
-        id: subsystem.id,
-        name: `${subsystem.name} (${formatIterationVersion(subsystem.iteration)})`,
-      })),
-    [bootstrap.subsystems],
-  );
-  const disciplineOptions = useMemo(
-    () =>
-      bootstrap.disciplines.map((discipline) => ({
-        id: discipline.id,
-        name: discipline.name,
-        icon: getTaskQueueDisciplineIcon(discipline.code),
-      })),
-    [bootstrap.disciplines],
-  );
-  const subsystemIterationOptions = useMemo(() => {
-    const uniqueIterations = Array.from(
-      new Set(bootstrap.subsystems.map((subsystem) => subsystem.iteration)),
-    ).sort((left, right) => left - right);
-
-    return uniqueIterations.map((iteration) => ({
-      id: `${iteration}`,
-      name: formatIterationVersion(iteration),
-    }));
-  }, [bootstrap.subsystems]);
   const selectedSubsystemId = subsystemFilter.length === 1 ? subsystemFilter[0] : null;
   const showSubsystemIterationFilter = useMemo(() => {
     if (!selectedSubsystemId) {
@@ -156,6 +99,33 @@ export function useTaskQueueViewStateLogic({
       (mechanism) => mechanism.subsystemId === selectedSubsystemId,
     );
   }, [bootstrap.mechanisms, bootstrap.tasks, disciplinesById, selectedSubsystemId]);
+
+  const {
+    disciplineOptions,
+    processedTasks,
+    projectsById,
+    subsystemFilterOptions,
+    subsystemIterationOptions,
+    workstreamsById,
+  } = useTaskQueueProcessedTasks({
+    activePersonFilter,
+    bootstrap,
+    disciplineFilter,
+    disciplinesById,
+    isAllProjectsView,
+    membersById,
+    ownerFilter,
+    priorityFilter,
+    projectFilter,
+    searchFilter,
+    sortField,
+    sortOrder,
+    statusFilter,
+    subsystemFilter,
+    subsystemIterationFilter,
+    showSubsystemIterationFilter,
+    subsystemsById,
+  });
 
   useEffect(() => {
     if (!isAllProjectsView && projectFilter.length > 0) {
@@ -207,80 +177,6 @@ export function useTaskQueueViewStateLogic({
       document.removeEventListener("keydown", handleEscape);
     };
   }, [focusedBoardState, setFocusedBoardState]);
-
-  const processedTasks = useMemo(() => {
-    const filteredTasks = filterTaskQueueTasks(bootstrap.tasks, bootstrap, {
-      activePersonFilter,
-      disciplineFilter,
-      isAllProjectsView,
-      ownerFilter,
-      priorityFilter,
-      projectFilter,
-      searchFilter,
-      statusFilter,
-      subsystemFilter,
-      subsystemIterationFilter,
-      showSubsystemIterationFilter,
-      subsystemsById,
-    });
-
-    const readSortValue = (task: TaskRecord): number | string => {
-      if (sortField === "priority") {
-        return PRIORITY_VALUES[task.priority] ?? 0;
-      }
-      if (sortField === "status") {
-        return getTaskQueueBoardStateSortValue(getTaskQueueBoardState(task, bootstrap));
-      }
-      if (sortField === "subsystemId") {
-        return formatSubsystemNames(readTaskSubsystemIds(task), subsystemsById, "");
-      }
-      if (sortField === "disciplineId") {
-        return task.disciplineId ? disciplinesById[task.disciplineId]?.name ?? "" : "";
-      }
-      if (sortField === "projectId") {
-        return projectsById[task.projectId]?.name ?? "";
-      }
-      if (sortField === "ownerId") {
-        return formatTaskQueueAssignees(task, membersById);
-      }
-      if (sortField === "title") {
-        return task.title.toLowerCase();
-      }
-      return task.dueDate;
-    };
-
-    return filteredTasks.sort((left, right) => {
-      const leftValue = readSortValue(left);
-      const rightValue = readSortValue(right);
-
-      if (leftValue < rightValue) {
-        return sortOrder === "asc" ? -1 : 1;
-      }
-      if (leftValue > rightValue) {
-        return sortOrder === "asc" ? 1 : -1;
-      }
-      return 0;
-    });
-  }, [
-    activePersonFilter,
-    bootstrap,
-    disciplineFilter,
-    disciplinesById,
-    isAllProjectsView,
-    membersById,
-    ownerFilter,
-    priorityFilter,
-    projectFilter,
-    projectsById,
-    searchFilter,
-    sortField,
-    sortOrder,
-    statusFilter,
-    subsystemFilter,
-    subsystemIterationFilter,
-    showSubsystemIterationFilter,
-    subsystemsById,
-  ]);
 
   useTaskQueueVisibleTaskCountReset(processedTasks.length, setVisibleTaskCount);
 
