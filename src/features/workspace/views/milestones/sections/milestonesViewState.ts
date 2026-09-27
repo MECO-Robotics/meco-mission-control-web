@@ -91,8 +91,8 @@ export function useMilestonesViewState({
     () => buildMilestoneProjectLabels(bootstrap.milestones, projectsById, scopedProjectIds),
     [bootstrap.milestones, projectsById, scopedProjectIds],
   );
-  const processedMilestones = useMemo(
-    () =>
+  const filterMilestones = useMemo(
+    () => (searchFilter: string) =>
       filterAndSortMilestones({
         activePersonFilter,
         bootstrap,
@@ -111,38 +111,19 @@ export function useMilestonesViewState({
       projectsById,
       isAllProjectsView,
       projectFilter,
-      searchFilter,
       sortField,
       sortOrder,
       typeFilter,
       readinessFilter,
     ],
   );
+  const processedMilestones = useMemo(
+    () => filterMilestones(searchFilter),
+    [filterMilestones, searchFilter],
+  );
   const suggestionSourceMilestones = useMemo(
-    () =>
-      filterAndSortMilestones({
-        activePersonFilter,
-        bootstrap,
-        projectsById,
-        milestones: bootstrap.milestones,
-        isAllProjectsView,
-        projectFilter,
-        searchFilter: "",
-        sortField,
-        sortOrder,
-        typeFilter,
-      }).filter((milestone) => readinessFilter.length === 0 || readinessFilter.includes(milestone.status ?? "not ready")),
-    [
-      activePersonFilter,
-      bootstrap,
-      projectsById,
-      isAllProjectsView,
-      projectFilter,
-      sortField,
-      sortOrder,
-      typeFilter,
-      readinessFilter,
-    ],
+    () => filterMilestones(""),
+    [filterMilestones],
   );
   const searchSuggestions = useMemo(
     () =>
