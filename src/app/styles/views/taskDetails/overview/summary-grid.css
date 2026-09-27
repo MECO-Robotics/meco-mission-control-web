@@ -24,13 +24,6 @@
   gap: 0.7rem;
 }
 
-.milestone-detail-overview-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.7rem;
-  margin-top: 0.65rem;
-}
-
 .milestone-detail-description {
   grid-column: 1 / -1;
 }

@@ -1,7 +1,12 @@
-.task-details-section-grid {
+.task-details-section-grid,
+.milestone-detail-overview-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.7rem;
+}
+
+.task-details-section-grid,
+.milestone-detail-overview-grid {
   margin-top: 0.65rem;
 }
 
