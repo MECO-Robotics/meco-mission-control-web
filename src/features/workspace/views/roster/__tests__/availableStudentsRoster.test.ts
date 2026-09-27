@@ -1,9 +1,9 @@
 /// <reference types="jest" />
 
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import { formatLocalDate } from "@/lib/dateUtils";
 import {
   buildAvailableStudentRoster,
-  formatRosterDateKey,
   getPresentRosterMemberIds,
 } from "@/features/workspace/views/roster/availableStudentsRoster";
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -11,7 +11,7 @@ import type { TaskRecord } from "@/types/recordsExecution";
 import type { MemberRecord } from "@/types/recordsOrganization";
 
 const today = new Date();
-const todayIso = formatRosterDateKey(today);
+const todayIso = formatLocalDate(today);
 
 const baseStudent = (id: string, name: string, extras: Partial<MemberRecord> = {}): MemberRecord => ({
   activeSeasonIds: ["season-1"],
