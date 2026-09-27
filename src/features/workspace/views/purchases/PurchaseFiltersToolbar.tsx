@@ -1,8 +1,10 @@
 import { IconManufacturing, IconPerson, IconTasks } from "@/components/shared/Icons";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
-import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
-import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
+import {
+  CompactFilterMenu,
+  compactFilterDropdownMenuItem,
+} from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import {
   PURCHASE_APPROVAL_OPTIONS,
@@ -58,76 +60,51 @@ export function PurchaseFiltersToolbar({
               buttonLabel="Filters"
               className="materials-filter-menu"
               items={[
-                {
+                compactFilterDropdownMenuItem({
+                  allLabel: "All subsystems",
+                  ariaLabel: "Filter purchases by subsystem",
                   label: "Subsystem",
-                  content: (
-                    <FilterDropdown
-                      allLabel="All subsystems"
-                      ariaLabel="Filter purchases by subsystem"
-                      className="task-queue-filter-menu-submenu"
-                      icon={<IconManufacturing />}
-                      onChange={setSubsystem}
-                      options={bootstrap.subsystems}
-                      value={subsystem}
-                    />
-                  ),
-                },
-                {
+                  icon: <IconManufacturing />,
+                  onChange: setSubsystem,
+                  options: bootstrap.subsystems,
+                  value: subsystem,
+                }),
+                compactFilterDropdownMenuItem({
+                  allLabel: "All requesters",
+                  ariaLabel: "Filter purchases by requester",
                   label: "Requester",
-                  content: (
-                    <FilterDropdown
-                      allLabel="All requesters"
-                      ariaLabel="Filter purchases by requester"
-                      className="task-queue-filter-menu-submenu"
-                      icon={<IconPerson />}
-                      onChange={setRequester}
-                      options={bootstrap.members}
-                      value={requester}
-                    />
-                  ),
-                },
-                {
+                  icon: <IconPerson />,
+                  onChange: setRequester,
+                  options: bootstrap.members,
+                  value: requester,
+                }),
+                compactFilterDropdownMenuItem({
+                  allLabel: "All statuses",
+                  ariaLabel: "Filter purchases by status",
                   label: "Status",
-                  content: (
-                    <FilterDropdown
-                      allLabel="All statuses"
-                      ariaLabel="Filter purchases by status"
-                      className="task-queue-filter-menu-submenu"
-                      icon={<IconTasks />}
-                      onChange={setStatus}
-                      options={PURCHASE_STATUS_OPTIONS}
-                      value={status}
-                    />
-                  ),
-                },
-                {
+                  icon: <IconTasks />,
+                  onChange: setStatus,
+                  options: PURCHASE_STATUS_OPTIONS,
+                  value: status,
+                }),
+                compactFilterDropdownMenuItem({
+                  allLabel: "All vendors",
+                  ariaLabel: "Filter purchases by vendor",
                   label: "Vendor",
-                  content: (
-                    <FilterDropdown
-                      allLabel="All vendors"
-                      ariaLabel="Filter purchases by vendor"
-                      className="task-queue-filter-menu-submenu"
-                      icon={<IconTasks />}
-                      onChange={setVendor}
-                      options={uniqueVendors}
-                      value={vendor}
-                    />
-                  ),
-                },
-                {
+                  icon: <IconTasks />,
+                  onChange: setVendor,
+                  options: uniqueVendors,
+                  value: vendor,
+                }),
+                compactFilterDropdownMenuItem({
+                  allLabel: "All approvals",
+                  ariaLabel: "Filter purchases by approval status",
                   label: "Approval",
-                  content: (
-                    <FilterDropdown
-                      allLabel="All approvals"
-                      ariaLabel="Filter purchases by approval status"
-                      className="task-queue-filter-menu-submenu"
-                      icon={<IconTasks />}
-                      onChange={setApproval}
-                      options={PURCHASE_APPROVAL_OPTIONS}
-                      value={approval}
-                    />
-                  ),
-                },
+                  icon: <IconTasks />,
+                  onChange: setApproval,
+                  options: PURCHASE_APPROVAL_OPTIONS,
+                  value: approval,
+                }),
               ]}
             />
           }
