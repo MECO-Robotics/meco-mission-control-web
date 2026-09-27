@@ -11,6 +11,7 @@ import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspace
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { EVENT_TYPE_STYLES as MILESTONE_TYPE_STYLES } from "@/features/workspace/shared/events/eventStyles";
+import { READINESS_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
 import { MilestonesSearchControl } from "./MilestonesSearchControl";
 import {
   type MilestoneSearchSuggestion,
@@ -107,7 +108,7 @@ export function MilestonesToolbar({
                   },
                   {
                     label: "Readiness",
-                    content: <FilterDropdown allLabel="All readiness" ariaLabel="Filter milestones by readiness" className="task-queue-filter-menu-submenu" icon={<IconTasks />} onChange={setReadinessFilter} options={[{ id: "not ready", name: "Not ready" }, { id: "blocked", name: "Blocked" }, { id: "qa", name: "QA" }, { id: "ready", name: "Ready" }]} value={readinessFilter} />,
+                    content: <FilterDropdown allLabel="All readiness" ariaLabel="Filter milestones by readiness" className="task-queue-filter-menu-submenu" icon={<IconTasks />} onChange={setReadinessFilter} options={READINESS_STATUS_OPTIONS} value={readinessFilter} />,
                   },
                   {
                     label: "Type",

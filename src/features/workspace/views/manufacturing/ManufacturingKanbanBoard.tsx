@@ -4,6 +4,7 @@ import { formatDate } from "@/lib/appUtils/common";
 import type { ManufacturingItemRecord } from "@/types/recordsInventory";
 import { EditableHoverIndicator, RequestedItemMeta } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
+import { MANUFACTURING_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
 import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
 import { KanbanColumns } from "@/features/workspace/views/kanban/KanbanColumns";
 
@@ -14,14 +15,6 @@ const MANUFACTURING_BOARD_STATES: readonly ManufacturingItemRecord["status"][] =
   "qa",
   "complete",
 ];
-
-const MANUFACTURING_STATUS_LABELS: Record<ManufacturingItemRecord["status"], string> = {
-  requested: "Requested",
-  approved: "Approved",
-  "in-progress": "In progress",
-  qa: "QA",
-  complete: "Complete",
-};
 
 interface ManufacturingKanbanBoardProps {
   items: ManufacturingItemRecord[];
@@ -125,7 +118,7 @@ export function ManufacturingKanbanBoard({
         header: (
           <span className={getStatusPillClassName(state)}>
             <span className="task-queue-board-column-header-label">
-              {MANUFACTURING_STATUS_LABELS[state]}
+              {MANUFACTURING_STATUS_OPTIONS.find((option) => option.id === state)?.name}
             </span>
           </span>
         ),
