@@ -236,12 +236,12 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
               savingLabel="Saving..."
             />
           }
-          modalClassName={isCreateTaskModal ? "task-editor-modal" : undefined}
+          modalClassName="task-editor-modal"
           onEditTask={() => undefined}
           onResolveTaskBlocker={resolveBlockerWhenIdle}
           setAdvancedSectionOpen={setAdvancedSectionOpen}
           setTaskDraft={updateDraftWhenIdle}
-          showDependencyBlockersSection
+          showDependencyBlockersSection={isEditTaskModal}
           showEditButton={false}
           taskDraft={taskDraft}
         />
