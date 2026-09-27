@@ -38,25 +38,21 @@ function DecisionControls({
   targets: CadHierarchyTargets;
   targetKind: CadHierarchyTargetKind;
 }) {
-  const classificationOptions: Array<{ value: CadHierarchyTargetKind; label: string }> =
-    targetKind === "SUBSYSTEM" || targetKind === "PART_DEFINITION"
-      ? [
-          {
-            value: targetKind,
-            label: targetKind === "SUBSYSTEM" ? "Subsystem" : "Existing part definition",
-          },
-          { value: "REFERENCE_GEOMETRY", label: "Reference geometry" },
-          { value: "IGNORE", label: "Ignore" },
-          { value: "UNMAPPED", label: "Needs review" },
-        ]
+  const classificationOptions: Array<{ value: CadHierarchyTargetKind; label: string }> = [
+    ...(targetKind === "SUBSYSTEM" || targetKind === "PART_DEFINITION"
+      ? [{
+          value: targetKind,
+          label: targetKind === "SUBSYSTEM" ? "Subsystem" : "Existing part definition",
+        }]
       : [
-            { value: "MECHANISM", label: "Mechanism" },
-            { value: "COMPONENT_ASSEMBLY", label: "Component assembly" },
-            { value: "SUBSYSTEM", label: "Nested subsystem" },
-            { value: "REFERENCE_GEOMETRY", label: "Reference geometry" },
-            { value: "IGNORE", label: "Ignore" },
-            { value: "UNMAPPED", label: "Needs review" },
-          ];
+          { value: "MECHANISM" as const, label: "Mechanism" },
+          { value: "COMPONENT_ASSEMBLY" as const, label: "Component assembly" },
+          { value: "SUBSYSTEM" as const, label: "Nested subsystem" },
+        ]),
+    { value: "REFERENCE_GEOMETRY" as const, label: "Reference geometry" },
+    { value: "IGNORE" as const, label: "Ignore" },
+    { value: "UNMAPPED" as const, label: "Needs review" },
+  ];
   const [draft, setDraft] = useState(() => buildDecisionDraft(node, targetKind));
   const {
     id,

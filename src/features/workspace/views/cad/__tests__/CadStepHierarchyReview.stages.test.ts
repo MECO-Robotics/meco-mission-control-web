@@ -90,8 +90,9 @@ describe("CAD STEP hierarchy review stages", () => {
     const hierarchyReview = baseHierarchyReview();
     const subsystem = hierarchyReview.root?.children.find((node) => node.id === "subsystem-intake");
     const part = hierarchyReview.root?.children[0]?.children[0]?.children.find((node) => node.id === "part-wheel");
+    const mechanism = hierarchyReview.root?.children[0]?.children[0];
 
-    if (!subsystem || !part) {
+    if (!subsystem || !part || !mechanism) {
       throw new Error("Missing classification fixtures");
     }
 
@@ -104,6 +105,11 @@ describe("CAD STEP hierarchy review stages", () => {
       expect(markup).toContain(">Reference geometry</option>");
       expect(markup).toContain(">Ignore</option>");
       expect(markup).toContain(">Needs review</option>");
+    }
+
+    const mechanismMarkup = renderNodeCardMarkup(mechanism, "MECHANISM");
+    for (const label of ["Mechanism", "Component assembly", "Nested subsystem", "Reference geometry", "Ignore", "Needs review"]) {
+      expect(mechanismMarkup).toContain(`>${label}</option>`);
     }
   });
 
