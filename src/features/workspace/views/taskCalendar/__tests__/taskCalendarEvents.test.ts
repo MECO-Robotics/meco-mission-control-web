@@ -5,6 +5,7 @@ import {
   buildTaskCalendarEvents,
   isTaskDueSoon,
 } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
+import { sortTaskCalendarEvents } from "@/features/workspace/views/taskCalendar/taskCalendarLayout";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
 describe("buildTaskCalendarEvents", () => {
@@ -155,22 +156,6 @@ describe("buildTaskCalendarEvents", () => {
       ],
       meetings: [
         {
-          id: "visible-meeting",
-          title: "Visible build night",
-          meetingType: "build" as const,
-          seasonId: "season-1",
-          projectIds: ["project-robot"],
-          startDateTime: "2026-05-07T18:00:00",
-          endDateTime: "2026-05-07T20:00:00",
-          location: "Lab",
-          description: "",
-          date: "2026-05-07",
-          time: "18:00",
-          rsvpsYes: 0,
-          rsvpsMaybe: 0,
-          openSignIns: 0,
-        },
-        {
           id: "global-meeting",
           title: "All projects sync",
           meetingType: "general" as const,
@@ -181,6 +166,22 @@ describe("buildTaskCalendarEvents", () => {
           location: "",
           description: "",
           date: "2026-05-08",
+          time: "18:00",
+          rsvpsYes: 0,
+          rsvpsMaybe: 0,
+          openSignIns: 0,
+        },
+        {
+          id: "visible-meeting",
+          title: "Visible build night",
+          meetingType: "build" as const,
+          seasonId: "season-1",
+          projectIds: ["project-robot"],
+          startDateTime: "2026-05-07T18:00:00",
+          endDateTime: "2026-05-07T20:00:00",
+          location: "Lab",
+          description: "",
+          date: "2026-05-07",
           time: "18:00",
           rsvpsYes: 0,
           rsvpsMaybe: 0,
@@ -214,7 +215,7 @@ describe("buildTaskCalendarEvents", () => {
       },
     });
 
-    expect(events.map((event) => event.id)).toEqual([
+    expect(sortTaskCalendarEvents(events, "date").map((event) => event.id)).toEqual([
       "meeting:visible-meeting",
       "meeting:global-meeting",
     ]);

@@ -91,17 +91,6 @@ function prependContextLabel(title: string, contextLabel: string | null) {
   return contextLabel ? `${contextLabel} | ${title}` : title;
 }
 
-function compareEventStartDate(left: TaskCalendarEvent, right: TaskCalendarEvent) {
-  const leftStart = left.start ? new Date(left.start).getTime() : Number.POSITIVE_INFINITY;
-  const rightStart = right.start ? new Date(right.start).getTime() : Number.POSITIVE_INFINITY;
-
-  if (leftStart === rightStart) {
-    return left.title.localeCompare(right.title);
-  }
-
-  return leftStart - rightStart;
-}
-
 export function buildTaskCalendarEvents({
   activePersonFilter,
   bootstrap,
@@ -240,9 +229,7 @@ export function buildTaskCalendarEvents({
       };
     });
 
-  return [...milestoneEvents, ...taskEvents, ...manufacturingEvents, ...meetingEvents].sort(
-    compareEventStartDate,
-  );
+  return [...milestoneEvents, ...taskEvents, ...manufacturingEvents, ...meetingEvents];
 }
 
 export function isTaskDueSoon(dueDate: string, today = new Date()) {
