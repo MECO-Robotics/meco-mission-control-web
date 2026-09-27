@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskDependencyKind, TaskDependencyType } from "@/types/common";
-import type { TaskPayload } from "@/types/payloads";
+import type { TaskPayload } from "@/types/payloads/task";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { formatIterationVersion } from "@/lib/appUtils/common";
 import {

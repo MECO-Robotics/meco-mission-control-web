@@ -243,11 +243,3 @@ export interface PartInstancePayload {
   status: PartInstanceRecordType["status"];
   photoUrl: string;
 }
-
-export type {
-  TaskBlockerDraft,
-  TaskBlockerPayload,
-  TaskDependencyDraft,
-  TaskDependencyPayload,
-  TaskPayload,
-} from "./payloads/task";

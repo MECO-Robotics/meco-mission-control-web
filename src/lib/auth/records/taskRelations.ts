@@ -1,5 +1,5 @@
 import { normalizeTaskBlockerRecord } from "../bootstrap/task-blockers";
-import type { TaskBlockerPayload, TaskDependencyPayload } from "@/types/payloads";
+import type { TaskBlockerPayload, TaskDependencyPayload } from "@/types/payloads/task";
 import type { TaskBlockerResponse, TaskDependencyRecord } from "@/types/recordsExecution";
 import { requestItem } from "./common";
 

@@ -3,7 +3,7 @@ import type {
   TaskBlockerPayload,
   TaskDependencyDraft,
   TaskDependencyPayload,
-} from "@/types/payloads";
+} from "@/types/payloads/task";
 import type { TaskBlockerRecord, TaskDependencyRecord } from "@/types/recordsExecution";
 import {
   buildTaskBlockerPayload,

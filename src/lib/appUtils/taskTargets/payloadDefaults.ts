@@ -1,5 +1,5 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskPayload } from "@/types/payloads";
+import type { TaskPayload } from "@/types/payloads/task";
 import { getDefaultTaskDisciplineIdForProject } from "@/lib/taskDisciplines";
 import { localTodayDate } from "@/lib/dateUtils";
 import { getDefaultSubsystemId } from "@/lib/appUtils/common";

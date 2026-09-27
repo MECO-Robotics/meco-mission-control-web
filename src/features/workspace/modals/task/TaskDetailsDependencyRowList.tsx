@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { TaskDependencyKind, TaskDependencyType } from "@/types/common";
-import type { TaskPayload } from "@/types/payloads";
+import type { TaskPayload } from "@/types/payloads/task";
 import { IconTasks, IconTrash } from "@/components/shared/Icons";
 import { FilterDropdown } from "../../shared/filters/FilterDropdown";
 import {

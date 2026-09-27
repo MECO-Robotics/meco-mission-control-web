@@ -1,6 +1,6 @@
 import { useCallback, useLayoutEffect, useRef, type Dispatch, type FormEvent, type SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskPayload } from "@/types/payloads";
+import type { TaskPayload } from "@/types/payloads/task";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { TaskDetailsModal } from "./TaskDetailsModalContent";
 import { PhotoUploadField } from "../shared/media/PhotoUploadField";

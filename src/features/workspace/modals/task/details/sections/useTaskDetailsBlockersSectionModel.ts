@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskBlockerType } from "@/types/common";
-import type { TaskBlockerDraft, TaskPayload } from "@/types/payloads";
+import type { TaskBlockerDraft, TaskPayload } from "@/types/payloads/task";
 import { getTaskOpenBlockersForTask } from "../../../../shared/task/taskTargeting";
 
 interface UseTaskDetailsBlockersSectionModelArgs {

@@ -2,7 +2,7 @@ import type { Dispatch, SetStateAction } from "react";
 
 import { IconTasks } from "@/components/shared/Icons";
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskPayload } from "@/types/payloads";
+import type { TaskPayload } from "@/types/payloads/task";
 
 import { FilterDropdown } from "../../shared/filters/FilterDropdown";
 import { useTaskEditorAdvancedFieldsState } from "./editorAdvanced/useTaskEditorAdvancedFieldsState";

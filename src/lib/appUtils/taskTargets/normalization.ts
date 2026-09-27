@@ -1,5 +1,5 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskPayload } from "@/types/payloads";
+import type { TaskPayload } from "@/types/payloads/task";
 import { createLookupById, uniqueIds } from "../internal";
 
 export function normalizeTaskTargetPayload(

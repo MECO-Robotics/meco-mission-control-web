@@ -1,6 +1,6 @@
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskPayload } from "@/types/payloads";
+import type { TaskPayload } from "@/types/payloads/task";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { EditableHoverIndicator } from "../../../../shared/table/workspaceTableChrome";
 import { FilterDropdown } from "../../../../shared/filters/FilterDropdown";

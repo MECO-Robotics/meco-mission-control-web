@@ -2,7 +2,7 @@ import { createElement } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskDependencyKind } from "@/types/common";
-import type { TaskPayload } from "@/types/payloads";
+import type { TaskPayload } from "@/types/payloads/task";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { IconMapPin, IconParts, IconTasks } from "@/components/shared/Icons";
 import type { DropdownOption } from "../model/workspaceTypes";
