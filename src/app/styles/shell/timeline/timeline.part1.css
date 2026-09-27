@@ -2,7 +2,9 @@
 .purchase-toolbar .toolbar-search,
 .materials-toolbar .toolbar-search,
 .part-manager-toolbar .toolbar-search,
-.subsystem-manager-toolbar .toolbar-search {
+.subsystem-manager-toolbar .toolbar-search,
+.task-queue-toolbar .toolbar-search,
+.milestones-toolbar .toolbar-search {
   width: auto;
   flex: 0 1 clamp(11.5rem, 24vw, 19rem);
   min-width: 0;
@@ -34,14 +36,6 @@
 .task-queue-toolbar>*,
 .milestones-toolbar>* {
   width: auto;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.task-queue-toolbar .toolbar-search,
-.milestones-toolbar .toolbar-search {
-  width: auto;
-  flex: 0 1 clamp(11.5rem, 24vw, 19rem);
   min-width: 0;
   max-width: 100%;
 }

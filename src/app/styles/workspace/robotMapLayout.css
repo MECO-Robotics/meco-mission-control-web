@@ -38,12 +38,7 @@
   position: relative;
 }
 
-.robot-config-reset-trigger {
-  align-items: center;
-  display: inline-flex;
-  gap: 0.28rem;
-}
-
+.robot-config-reset-trigger,
 .robot-config-auto-arrange-trigger {
   align-items: center;
   display: inline-flex;

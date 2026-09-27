@@ -32,7 +32,8 @@
 
 .task-detail-collapsible-body .workspace-detail-list,
 .task-detail-collapsible-body .task-detail-list,
-.task-detail-collapsible-body .task-details-mechanism-list {
+.task-detail-collapsible-body .task-details-mechanism-list,
+.task-details-mechanism-item .task-detail-ellipsis-reveal {
   width: 100%;
   min-width: 0;
   max-width: 100%;
@@ -95,12 +96,6 @@
 .task-details-mechanism-item {
   display: flex;
   align-items: center;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.task-details-mechanism-item .task-detail-ellipsis-reveal {
-  width: 100%;
   min-width: 0;
   max-width: 100%;
 }

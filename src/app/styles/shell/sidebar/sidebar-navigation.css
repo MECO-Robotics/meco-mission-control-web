@@ -126,13 +126,7 @@
   z-index: 1205;
 }
 
-.sidebar[data-collapsed="true"] .sidebar-nav-item-rollout[data-visible="true"] {
-  display: inline-flex;
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(-50%) translateX(0);
-}
-
+.sidebar[data-collapsed="true"] .sidebar-nav-item-rollout[data-visible="true"],
 .sidebar[data-collapsed="true"] .sidebar-nav-item[data-enabled="false"]:hover .sidebar-nav-item-rollout {
   display: inline-flex;
   opacity: 1;
