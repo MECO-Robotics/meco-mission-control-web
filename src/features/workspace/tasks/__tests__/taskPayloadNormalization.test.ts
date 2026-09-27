@@ -1,7 +1,7 @@
 /// <reference types="jest" />
 
 import { normalizeTaskPayload } from "@/features/workspace/tasks/domain/taskPayloadNormalization";
-import type { TaskPayload } from "@/types/payloads";
+import type { TaskPayload } from "@/types/payloads/task";
 
 function createTaskPayload(): TaskPayload {
   return {
