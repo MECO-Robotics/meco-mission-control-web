@@ -39,7 +39,6 @@ export function ManufacturingEditorModal(props: ManufacturingEditorModalProps) {
           className="secondary-action"
           onClick={closeManufacturingModal}
           type="button"
-          style={{ background: "var(--bg-row-alt)", border: "1px solid var(--border-base)", color: "var(--text-title)" }}
         >
           Cancel
         </button>
