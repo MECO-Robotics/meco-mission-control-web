@@ -18,7 +18,6 @@ import {
 import type {
   InventoryViewTab,
   ManufacturingViewTab,
-  RosterViewTab,
   TaskViewTab,
   ViewTab,
   WorklogsViewTab,
@@ -35,7 +34,6 @@ export function useAppWorkspaceState() {
   const [manufacturingView, setManufacturingView] =
     useState<ManufacturingViewTab>("all");
   const [inventoryView, setInventoryView] = useState<InventoryViewTab>("materials");
-  const [rosterView, setRosterView] = useState<RosterViewTab>("directory");
   const [bootstrap, setBootstrap] = useState<BootstrapPayload>(EMPTY_BOOTSTRAP);
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [dataMessage, setDataMessage] = useState<string | null>(null);
@@ -192,14 +190,12 @@ export function useAppWorkspaceState() {
     manufacturingView,
     pageShellStyle,
     requestSignIn,
-    rosterView,
     setActiveTab,
     setBootstrap,
     setDataMessage,
     setInventoryView,
     setIsLoadingData,
     setManufacturingView,
-    setRosterView,
     setTabSwitchDirection,
     enqueueTaskEditNotice,
     dismissTaskEditNotice,

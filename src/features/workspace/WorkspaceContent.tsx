@@ -12,7 +12,6 @@ import type {
   InventoryViewTab,
   ManufacturingViewTab,
   NavigationTarget,
-  RosterViewTab,
   TaskViewTab,
   ViewTab,
   WorklogsViewTab,
@@ -141,7 +140,6 @@ export interface WorkspaceContentProps {
   setTaskView: Dispatch<SetStateAction<TaskViewTab>>;
   setWorklogsView: Dispatch<SetStateAction<WorklogsViewTab>>;
   inventoryView: InventoryViewTab;
-  rosterView: RosterViewTab;
   taskView: TaskViewTab;
   worklogsView: WorklogsViewTab;
   selectMember: (id: string | null, payload: BootstrapPayload) => void;

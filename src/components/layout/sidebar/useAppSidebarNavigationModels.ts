@@ -10,7 +10,6 @@ import {
   type ManufacturingViewTab,
   type NavigationSection,
   type NavigationSubItemId,
-  type RosterViewTab,
   type TaskViewTab,
   type ViewAvailabilityContext,
   type ViewTab,
@@ -23,7 +22,6 @@ interface UseAppSidebarNavigationModelsArgs {
   activeTab: ViewTab;
   inventoryView: InventoryViewTab;
   manufacturingView: ManufacturingViewTab;
-  rosterView: RosterViewTab;
   taskView: TaskViewTab;
   viewAvailabilityContext: ViewAvailabilityContext;
   worklogsView: WorklogsViewTab;
@@ -33,7 +31,6 @@ export function useAppSidebarNavigationModels({
   activeTab,
   inventoryView,
   manufacturingView,
-  rosterView,
   taskView,
   viewAvailabilityContext,
   worklogsView,
@@ -42,7 +39,6 @@ export function useAppSidebarNavigationModels({
     activeTab,
     inventoryView,
     manufacturingView,
-    rosterView,
     taskView,
     worklogsView,
   }, viewAvailabilityContext);

@@ -57,7 +57,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       selectedSeasonId={c.selectedSeasonId}
       inventoryView={c.inventoryView}
       manufacturingView={c.manufacturingView}
-      rosterView={c.rosterView}
       seasons={c.bootstrap.seasons}
       sessionUser={c.sessionUser}
       taskView={c.taskView}
