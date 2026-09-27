@@ -1,11 +1,57 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Filter } from "lucide-react";
 
+import type { DropdownOption } from "../model/workspaceTypes";
+import type { FilterSelection } from "./workspaceFilterUtils";
+import { FilterDropdown } from "./FilterDropdown";
+
 export type CompactFilterMenuItem = {
   content: ReactNode;
   hidden?: boolean;
   label: string;
 };
+
+export function compactFilterDropdownMenuItem({
+  allLabel,
+  ariaLabel,
+  getOptionToneClassName,
+  getSelectedToneClassName,
+  hidden,
+  icon,
+  label,
+  onChange,
+  options,
+  value,
+}: {
+  allLabel: string;
+  ariaLabel: string;
+  getOptionToneClassName?: (option: DropdownOption) => string | undefined;
+  getSelectedToneClassName?: (selection: FilterSelection) => string | undefined;
+  hidden?: boolean;
+  icon: ReactNode;
+  label: string;
+  onChange: (value: FilterSelection) => void;
+  options: DropdownOption[];
+  value: FilterSelection;
+}): CompactFilterMenuItem {
+  return {
+    label,
+    hidden,
+    content: (
+      <FilterDropdown
+        allLabel={allLabel}
+        ariaLabel={ariaLabel}
+        className="task-queue-filter-menu-submenu"
+        getOptionToneClassName={getOptionToneClassName}
+        getSelectedToneClassName={getSelectedToneClassName}
+        icon={icon}
+        onChange={onChange}
+        options={options}
+        value={value}
+      />
+    ),
+  };
+}
 
 export function CompactFilterMenu({
   activeCount = 0,

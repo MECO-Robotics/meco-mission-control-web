@@ -1,7 +1,9 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { IconManufacturing, IconParts, IconPerson, IconTasks } from "@/components/shared/Icons";
-import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
-import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
+import {
+  CompactFilterMenu,
+  compactFilterDropdownMenuItem,
+} from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { TASK_PRIORITY_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
 import { TASK_QUEUE_STATUS_OPTIONS } from "./taskQueueKanbanBoardState";
 import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
@@ -66,118 +68,80 @@ export function TaskQueueCompactFilterMenu({
       buttonLabel="Filters"
       className="task-queue-filter-menu"
       items={[
-        {
+        compactFilterDropdownMenuItem({
+          allLabel: "All projects",
+          ariaLabel: "Filter tasks by project",
           label: "Project",
           hidden: !isAllProjectsView,
-          content: (
-            <FilterDropdown
-              allLabel="All projects"
-              ariaLabel="Filter tasks by project"
-              className="task-queue-filter-menu-submenu"
-              icon={<IconParts />}
-              onChange={setProjectFilter}
-              options={bootstrap.projects}
-              value={projectFilter}
-            />
-          ),
-        },
-        {
+          icon: <IconParts />,
+          onChange: setProjectFilter,
+          options: bootstrap.projects,
+          value: projectFilter,
+        }),
+        compactFilterDropdownMenuItem({
+          allLabel: "All disciplines",
+          ariaLabel: "Filter tasks by discipline",
           label: "Discipline",
-          content: (
-            <FilterDropdown
-              allLabel="All disciplines"
-              ariaLabel="Filter tasks by discipline"
-              className="task-queue-filter-menu-submenu"
-              icon={<IconTasks />}
-              getOptionToneClassName={(option) => getTaskQueueFilterToneClassName(option.id)}
-              getSelectedToneClassName={(selection) =>
-                selection.length === 1 ? getTaskQueueFilterToneClassName(selection[0]) : undefined
-              }
-              onChange={setDisciplineFilter}
-              options={disciplineOptions}
-              value={disciplineFilter}
-            />
-          ),
-        },
-        {
+          icon: <IconTasks />,
+          getOptionToneClassName: (option) => getTaskQueueFilterToneClassName(option.id),
+          getSelectedToneClassName: (selection) =>
+            selection.length === 1 ? getTaskQueueFilterToneClassName(selection[0]) : undefined,
+          onChange: setDisciplineFilter,
+          options: disciplineOptions,
+          value: disciplineFilter,
+        }),
+        compactFilterDropdownMenuItem({
+          allLabel: "All subsystems",
+          ariaLabel: "Filter tasks by subsystem",
           label: "Subsystem",
-          content: (
-            <FilterDropdown
-              allLabel="All subsystems"
-              ariaLabel="Filter tasks by subsystem"
-              className="task-queue-filter-menu-submenu"
-              icon={<IconManufacturing />}
-              getOptionToneClassName={(option) => getTaskQueueFilterToneClassName(option.id)}
-              getSelectedToneClassName={(selection) =>
-                selection.length === 1 ? getTaskQueueFilterToneClassName(selection[0]) : undefined
-              }
-              onChange={setSubsystemFilter}
-              options={subsystemFilterOptions}
-              value={subsystemFilter}
-            />
-          ),
-        },
-        {
+          icon: <IconManufacturing />,
+          getOptionToneClassName: (option) => getTaskQueueFilterToneClassName(option.id),
+          getSelectedToneClassName: (selection) =>
+            selection.length === 1 ? getTaskQueueFilterToneClassName(selection[0]) : undefined,
+          onChange: setSubsystemFilter,
+          options: subsystemFilterOptions,
+          value: subsystemFilter,
+        }),
+        compactFilterDropdownMenuItem({
+          allLabel: "All iterations",
+          ariaLabel: "Filter tasks by subsystem iteration",
           label: "Iteration",
           hidden: !showSubsystemIterationFilter,
-          content: (
-            <FilterDropdown
-              allLabel="All iterations"
-              ariaLabel="Filter tasks by subsystem iteration"
-              className="task-queue-filter-menu-submenu"
-              icon={<IconManufacturing />}
-              onChange={setSubsystemIterationFilter}
-              options={subsystemIterationOptions}
-              value={subsystemIterationFilter}
-            />
-          ),
-        },
-        {
+          icon: <IconManufacturing />,
+          onChange: setSubsystemIterationFilter,
+          options: subsystemIterationOptions,
+          value: subsystemIterationFilter,
+        }),
+        compactFilterDropdownMenuItem({
+          allLabel: "All assignees",
+          ariaLabel: "Filter tasks by assigned student",
           label: "Assignee",
-          content: (
-            <FilterDropdown
-              allLabel="All assignees"
-              ariaLabel="Filter tasks by assigned student"
-              className="task-queue-filter-menu-submenu"
-              icon={<IconPerson />}
-              onChange={setOwnerFilter}
-              options={bootstrap.members}
-              value={ownerFilter}
-            />
-          ),
-        },
-        {
+          icon: <IconPerson />,
+          onChange: setOwnerFilter,
+          options: bootstrap.members,
+          value: ownerFilter,
+        }),
+        compactFilterDropdownMenuItem({
+          allLabel: "All statuses",
+          ariaLabel: "Filter tasks by status",
           label: "Status",
-          content: (
-            <FilterDropdown
-              allLabel="All statuses"
-              ariaLabel="Filter tasks by status"
-              className="task-queue-filter-menu-submenu"
-              icon={<IconTasks />}
-              getOptionToneClassName={(option) => getTaskQueueStatusToneClassName(option.id)}
-              getSelectedToneClassName={(selection) =>
-                selection.length === 1 ? getTaskQueueStatusToneClassName(selection[0]) : undefined
-              }
-              onChange={setStatusFilter}
-              options={TASK_QUEUE_STATUS_OPTIONS}
-              value={statusFilter}
-            />
-          ),
-        },
-        {
+          icon: <IconTasks />,
+          getOptionToneClassName: (option) => getTaskQueueStatusToneClassName(option.id),
+          getSelectedToneClassName: (selection) =>
+            selection.length === 1 ? getTaskQueueStatusToneClassName(selection[0]) : undefined,
+          onChange: setStatusFilter,
+          options: TASK_QUEUE_STATUS_OPTIONS,
+          value: statusFilter,
+        }),
+        compactFilterDropdownMenuItem({
+          allLabel: "All priorities",
+          ariaLabel: "Filter tasks by priority",
           label: "Priority",
-          content: (
-            <FilterDropdown
-              allLabel="All priorities"
-              ariaLabel="Filter tasks by priority"
-              className="task-queue-filter-menu-submenu"
-              icon={<IconTasks />}
-              onChange={setPriorityFilter}
-              options={TASK_PRIORITY_OPTIONS}
-              value={priorityFilter}
-            />
-          ),
-        },
+          icon: <IconTasks />,
+          onChange: setPriorityFilter,
+          options: TASK_PRIORITY_OPTIONS,
+          value: priorityFilter,
+        }),
       ]}
     />
   );
