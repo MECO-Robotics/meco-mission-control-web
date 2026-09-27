@@ -15,19 +15,6 @@ const modalCardStyle = {
   border: "1px solid var(--border-base)",
 } as const;
 
-const eyebrowStyle = {
-  color: "var(--meco-blue)",
-} as const;
-
-const titleStyle = {
-  color: "var(--text-title)",
-} as const;
-
-const closeButtonStyle = {
-  background: "transparent",
-  color: "var(--text-copy)",
-} as const;
-
 const formStyle = {
   color: "var(--text-copy)",
 } as const;
@@ -45,12 +32,12 @@ export function EditorModalShell({
       <section  className="modal-card"  style={modalCardStyle}>
         <div className="panel-header compact-header">
           <div>
-            <p className="eyebrow" style={eyebrowStyle}>
+            <p className="eyebrow">
               {eyebrowLabel}
             </p>
-            <h2 style={titleStyle}>{title}</h2>
+            <h2>{title}</h2>
           </div>
-          <button className="icon-button" onClick={onClose} type="button" style={closeButtonStyle}>
+          <button className="icon-button" onClick={onClose} type="button">
             Close
           </button>
         </div>

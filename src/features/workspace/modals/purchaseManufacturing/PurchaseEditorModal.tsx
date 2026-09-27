@@ -35,7 +35,6 @@ export function PurchaseEditorModal(props: PurchaseEditorModalProps) {
           className="secondary-action"
           onClick={closePurchaseModal}
           type="button"
-          style={{ background: "var(--bg-row-alt)", border: "1px solid var(--border-base)", color: "var(--text-title)" }}
         >
           Cancel
         </button>
