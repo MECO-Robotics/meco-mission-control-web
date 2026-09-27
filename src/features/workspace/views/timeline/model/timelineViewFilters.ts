@@ -11,6 +11,10 @@ import {
   filterSelectionIncludes,
   filterSelectionIntersects,
 } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import {
+  getWorkspaceFilterToneClassName,
+  getWorkspaceStatusToneClassName,
+} from "@/features/workspace/shared/filters/workspaceFilterTone";
 
 import { formatIterationVersion } from "@/lib/appUtils/common";
 import { TASK_QUEUE_STATUS_OPTIONS } from "../../taskQueue/taskQueueKanbanBoardState";
@@ -26,14 +30,6 @@ export interface TimelineTaskFilters {
 
 export const TIMELINE_TASK_STATUS_OPTIONS: DropdownOption[] = TASK_QUEUE_STATUS_OPTIONS;
 export const TIMELINE_TASK_PRIORITY_OPTIONS: DropdownOption[] = TASK_PRIORITY_OPTIONS;
-
-const FILTER_TONE_CLASSES = [
-  "filter-tone-info",
-  "filter-tone-success",
-  "filter-tone-warning",
-  "filter-tone-danger",
-  "filter-tone-neutral",
-] as const;
 
 export function readTimelineTaskSubsystemIds(task: TaskRecord) {
   const subsystemIds = Array.isArray(task.subsystemIds) ? task.subsystemIds : [];
@@ -177,29 +173,5 @@ export function countActiveTimelineFilters({
   ].filter((selection) => selection.length > 0).length;
 }
 
-export function getTimelineFilterToneClassName(value: string) {
-  let hash = 0;
-
-  for (let index = 0; index < value.length; index += 1) {
-    hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
-  }
-
-  return FILTER_TONE_CLASSES[hash % FILTER_TONE_CLASSES.length];
-}
-
-export function getTimelineStatusToneClassName(value: string) {
-  switch (value) {
-    case "in-progress":
-    case "waiting-on-dependency":
-      return "filter-tone-warning";
-    case "waiting-for-qa":
-      return "filter-tone-info";
-    case "complete":
-      return "filter-tone-success";
-    case "blocked":
-      return "filter-tone-danger";
-    case "not-started":
-    default:
-      return "filter-tone-neutral";
-  }
-}
+export const getTimelineFilterToneClassName = getWorkspaceFilterToneClassName;
+export const getTimelineStatusToneClassName = getWorkspaceStatusToneClassName;
