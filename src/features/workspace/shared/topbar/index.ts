@@ -1,4 +1,5 @@
 export { WorkspaceTopbarControls } from "./WorkspaceTopbarControls";
+export { WorkspaceTopbarZoom } from "./WorkspaceTopbarZoom";
 export {
   buildSingleAddMenuAction,
   buildTopbarAddMenuActions,

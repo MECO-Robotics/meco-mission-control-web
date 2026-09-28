@@ -6,8 +6,6 @@ import type { ManufacturingViewTab } from "@/lib/workspaceNavigation";
 import {
   IconManufacturing,
   IconPerson,
-  IconSearchMinus,
-  IconSearchPlus,
   IconTasks,
 } from "@/components/shared/Icons";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
@@ -19,6 +17,7 @@ import { PaginationControls, useWorkspacePagination } from "@/features/workspace
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import {
   WorkspaceTopbarControls,
+  WorkspaceTopbarZoom,
   buildSingleAddMenuAction,
   buildTopbarSearchProps,
 } from "@/features/workspace/shared/topbar";
@@ -272,35 +271,20 @@ export function ManufacturingQueueView({
             />
           }
         >
-          <div className="task-queue-toolbar-inline-actions">
-            <div aria-label="Manufacturing zoom" className="task-queue-zoom-controls" role="group">
-              <button
-                aria-label="Zoom out manufacturing"
-                className="icon-button task-queue-zoom-button"
-                disabled={manufacturingZoom <= TASK_QUEUE_ZOOM_MIN}
-                onClick={() =>
-                  setManufacturingZoom((current) => clampTaskQueueZoom(current - TASK_QUEUE_ZOOM_STEP))
-                }
-                title="Zoom out manufacturing"
-                type="button"
-              >
-                <IconSearchMinus />
-              </button>
-              <span className="task-queue-zoom-label">{formatTaskQueueZoomLabel(manufacturingZoom)}</span>
-              <button
-                aria-label="Zoom in manufacturing"
-                className="icon-button task-queue-zoom-button"
-                disabled={manufacturingZoom >= TASK_QUEUE_ZOOM_MAX}
-                onClick={() =>
-                  setManufacturingZoom((current) => clampTaskQueueZoom(current + TASK_QUEUE_ZOOM_STEP))
-                }
-                title="Zoom in manufacturing"
-                type="button"
-              >
-                <IconSearchPlus />
-              </button>
-            </div>
-          </div>
+          <WorkspaceTopbarZoom
+            ariaLabel="Manufacturing zoom"
+            buttonClassName="task-queue-zoom-button"
+            canZoomIn={manufacturingZoom < TASK_QUEUE_ZOOM_MAX}
+            canZoomOut={manufacturingZoom > TASK_QUEUE_ZOOM_MIN}
+            className="task-queue-zoom-controls"
+            decreaseLabel="Zoom out manufacturing"
+            increaseLabel="Zoom in manufacturing"
+            labelClassName="task-queue-zoom-label"
+            onZoomIn={() => setManufacturingZoom((current) => clampTaskQueueZoom(current + TASK_QUEUE_ZOOM_STEP))}
+            onZoomOut={() => setManufacturingZoom((current) => clampTaskQueueZoom(current - TASK_QUEUE_ZOOM_STEP))}
+            toolbarClassName="task-queue-toolbar-inline-actions"
+            value={formatTaskQueueZoomLabel(manufacturingZoom)}
+          />
         </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
 

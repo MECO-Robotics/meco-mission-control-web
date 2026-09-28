@@ -4,6 +4,8 @@ import { createPortal } from "react-dom";
 export const APP_TOPBAR_SLOT_IDS = {
   controls: "workspace-topbar-slot-controls",
   search: "workspace-topbar-slot-search",
+  zoom: "workspace-topbar-slot-zoom",
+  add: "workspace-topbar-slot-add",
 } as const;
 
 export type AppTopbarSlot = keyof typeof APP_TOPBAR_SLOT_IDS;

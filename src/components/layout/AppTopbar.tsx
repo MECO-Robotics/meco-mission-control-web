@@ -14,7 +14,7 @@ import { APP_TOPBAR_SLOT_IDS } from "./AppTopbarSlotPortal";
 interface AppTopbarProps {
   localMode?: "demo" | "tutorial" | null;
   onResetDemo?: () => void;
-  activeViewLabel: string;
+  activeViewLabel?: string | null;
   isDarkMode: boolean;
   isSidebarCollapsed: boolean;
 }
@@ -56,21 +56,24 @@ export function AppTopbar({
           src={topbarLogo.src}
         />
       </div>
-      <div className="app-topbar-left">
-        <div className="app-topbar-view-title">
-          <h1>{activeViewLabel}</h1>
-          {localMode ? (
-            <div className="local-workspace-status">
-              <span title="Changes stay in this browser tab and are never synced.">{localMode === "tutorial" ? "Local tutorial" : "Local demo"} · no sync</span>
-              {localMode === "demo" ? <button type="button" className="secondary-action" onClick={onResetDemo}>Reset demo</button> : null}
-            </div>
-          ) : null}
+      {activeViewLabel || localMode ? (
+        <div className="app-topbar-left">
+          <div className="app-topbar-view-title">
+            {activeViewLabel ? <h1>{activeViewLabel}</h1> : null}
+            {localMode ? (
+              <div className="local-workspace-status">
+                <span title="Changes stay in this browser tab and are never synced.">{localMode === "tutorial" ? "Local tutorial" : "Local demo"} · no sync</span>
+                {localMode === "demo" ? <button type="button" className="secondary-action" onClick={onResetDemo}>Reset demo</button> : null}
+              </div>
+            ) : null}
+          </div>
         </div>
-      </div>
+      ) : null}
       <div className="app-topbar-search-slot">
-        <div className="app-topbar-controls-host" id={APP_TOPBAR_SLOT_IDS.controls} />
         <div className="app-topbar-search-host" id={APP_TOPBAR_SLOT_IDS.search} />
-
+        <div className="app-topbar-controls-host" id={APP_TOPBAR_SLOT_IDS.controls} />
+        <div className="app-topbar-zoom-host" id={APP_TOPBAR_SLOT_IDS.zoom} />
+        <div className="app-topbar-add-host" id={APP_TOPBAR_SLOT_IDS.add} />
       </div>
     </header>
   );

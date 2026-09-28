@@ -561,10 +561,10 @@ describe("TimelineView", () => {
     const css = readAppCss();
 
     expect(css).toMatch(
-      /\.timeline-topbar-controls \.timeline-period-controls,\s*\.timeline-topbar-controls \.timeline-zoom-controls\s*\{[\s\S]*flex:\s*0 0 auto;[\s\S]*min-width:\s*max-content;[\s\S]*max-width:\s*none;/,
+      /\.timeline-topbar-controls \.timeline-period-controls,\s*\.app-topbar-zoom-host \.timeline-zoom-controls\s*\{[\s\S]*flex:\s*0 0 auto;[\s\S]*min-width:\s*max-content;[\s\S]*max-width:\s*none;/,
     );
     expect(css).toMatch(
-      /\.timeline-topbar-controls \.timeline-period-label,\s*\.timeline-topbar-controls \.timeline-zoom-label\s*\{[\s\S]*flex:\s*0 0 auto;/,
+      /\.timeline-topbar-controls \.timeline-period-label,\s*\.app-topbar-zoom-host \.timeline-zoom-label\s*\{[\s\S]*flex:\s*0 0 auto;/,
     );
   });
 
