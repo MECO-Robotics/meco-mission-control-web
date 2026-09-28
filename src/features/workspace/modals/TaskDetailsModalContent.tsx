@@ -78,8 +78,7 @@ export function TaskDetailsModal({
   return (
     <ModalDialog label={typeof headerTitle === "string" ? headerTitle : activeTask.title} onClose={closeTaskDetailsModal}>
       <section
-        className={`modal-card task-details-modal${modalClassName ? ` ${modalClassName}` : ""}`}
-        style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
+        className={`modal-card task-details-modal${modalClassName ? ` ${modalClassName}` : ""} modal-panel-surface`}
       >
         <TaskDetailsHeaderSection
           activeTask={activeTask}

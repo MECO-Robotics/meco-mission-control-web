@@ -119,10 +119,9 @@ export function MilestonesMilestoneModal({
   return createPortal(
     <ModalDialog label="Add milestone" onClose={() => leaveEditor(onClose)} dismissOnBackdrop>
       <section
-        className="modal-card task-details-modal"
+        className="modal-card task-details-modal modal-panel-surface"
         data-tutorial-target="milestone-create-modal"
         onClick={(milestone) => milestone.stopPropagation()}
-        style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
       >
         <div className="panel-header compact-header task-details-header">
           <div>

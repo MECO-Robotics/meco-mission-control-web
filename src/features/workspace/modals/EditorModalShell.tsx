@@ -10,11 +10,6 @@ type EditorModalShellProps = {
   children: ReactNode;
 };
 
-const modalCardStyle = {
-  background: "var(--bg-panel)",
-  border: "1px solid var(--border-base)",
-} as const;
-
 const formStyle = {
   color: "var(--text-copy)",
 } as const;
@@ -29,7 +24,7 @@ export function EditorModalShell({
 }: EditorModalShellProps) {
   return (
     <ModalDialog label={dialogLabel ?? title} onClose={onClose}>
-      <section  className="modal-card"  style={modalCardStyle}>
+      <section  className="modal-card modal-panel-surface">
         <div className="panel-header compact-header">
           <div>
             <p className="eyebrow">

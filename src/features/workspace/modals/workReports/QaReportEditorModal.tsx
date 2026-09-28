@@ -37,8 +37,7 @@ export function QaReportEditorModal({
   return (
     <ModalDialog label="Add QA report" onClose={closeQaReportModal}>
       <section
-        className="modal-card task-details-modal"
-        style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
+        className="modal-card task-details-modal modal-panel-surface"
       >
         <div className="panel-header compact-header task-details-header">
           <div>
