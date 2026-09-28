@@ -77,103 +77,113 @@ export function MilestonesToolbar({
   const toggleSortOrder = () => setSortOrder((current) => (current === "asc" ? "desc" : "asc"));
 
   return (
-    <div className="panel-actions filter-toolbar milestones-toolbar">
-      <div className="milestones-search-slot" data-tutorial-target="milestone-search-input">
-        <MilestonesSearchControl
-          filterControl={
-            <>
-              <CompactFilterMenu
-                activeCount={activeCount}
-                ariaLabel="Milestone filters"
-                buttonLabel="Filters"
-                className="materials-filter-menu milestones-search-filter-menu"
-                icon={<Filter size={14} strokeWidth={2} />}
-                iconOnly
-                items={[
-                  {
-                    hidden: !isAllProjectsView,
-                    label: "Project",
-                    content: (
-                      <FilterDropdown
-                        allLabel="All projects"
-                        ariaLabel="Filter milestones by project"
-                        className="task-queue-filter-menu-submenu"
-                        icon={<IconParts />}
-                        onChange={setProjectFilter}
-                        options={projects}
-                        value={projectFilter}
-                      />
-                    ),
-                  },
-                  {
-                    label: "Readiness",
-                    content: <FilterDropdown allLabel="All readiness" ariaLabel="Filter milestones by readiness" className="task-queue-filter-menu-submenu" icon={<IconTasks />} onChange={setReadinessFilter} options={[{ id: "not ready", name: "Not ready" }, { id: "blocked", name: "Blocked" }, { id: "qa", name: "QA" }, { id: "ready", name: "Ready" }]} value={readinessFilter} />,
-                  },
-                  {
-                    label: "Type",
-                    content: (
-                      <FilterDropdown
-                        allLabel="All types"
-                        ariaLabel="Filter milestones by type"
-                        className="task-queue-filter-menu-submenu"
-                        icon={<IconTasks />}
-                        onChange={setTypeFilter}
-                        options={MILESTONE_TYPE_OPTIONS}
-                        value={typeFilter}
-                      />
-                    ),
-                  },
-                ]}
-              />
-              <CompactFilterMenu
-                activeCount={milestoneSortIsDefault ? 0 : 1}
-                ariaLabel="Sort milestones"
-                buttonLabel={sortOrder === "asc" ? "Sort ascending" : "Sort descending"}
-                className="task-queue-sort-menu milestones-search-sort-menu"
-                icon={renderSortDirectionIcon()}
-                iconOnly
-                items={[
-                  {
-                    label: "Sort by",
-                    content: (
-                      <select
-                        aria-label="Sort milestones by"
-                        className="task-queue-sort-menu-select"
-                        onChange={(milestone) => setSortField(milestone.target.value as MilestoneSortField)}
-                        value={sortField}
-                      >
-                        {MILESTONE_SORT_OPTIONS.map((option) => (
-                          <option key={option.id} value={option.id}>
-                            {option.name}
-                          </option>
-                        ))}
-                      </select>
-                    ),
-                  },
-                  {
-                    label: "Direction",
-                    content: (
-                      <button
-                        aria-label="Toggle milestone sort direction"
-                        className="icon-button milestone-sort-direction-button"
-                        onClick={toggleSortOrder}
-                        title={sortOrder === "asc" ? "Sort ascending" : "Sort descending"}
-                        type="button"
-                      >
-                        {renderSortDirectionIcon()}
-                      </button>
-                    ),
-                  },
-                ]}
-              />
-            </>
-          }
-          searchFilter={searchFilter}
-          searchSuggestions={searchSuggestions}
-          setSearchFilter={setSearchFilter}
-        />
-      </div>
-
-    </div>
+    <MilestonesSearchControl
+      filterControl={
+        <>
+          <CompactFilterMenu
+            activeCount={activeCount}
+            ariaLabel="Milestone filters"
+            buttonLabel="Filters"
+            className="materials-filter-menu milestones-search-filter-menu"
+            icon={<Filter size={14} strokeWidth={2} />}
+            iconOnly
+            items={[
+              {
+                hidden: !isAllProjectsView,
+                label: "Project",
+                content: (
+                  <FilterDropdown
+                    allLabel="All projects"
+                    ariaLabel="Filter milestones by project"
+                    className="task-queue-filter-menu-submenu"
+                    icon={<IconParts />}
+                    onChange={setProjectFilter}
+                    options={projects}
+                    value={projectFilter}
+                  />
+                ),
+              },
+              {
+                label: "Readiness",
+                content: (
+                  <FilterDropdown
+                    allLabel="All readiness"
+                    ariaLabel="Filter milestones by readiness"
+                    className="task-queue-filter-menu-submenu"
+                    icon={<IconTasks />}
+                    onChange={setReadinessFilter}
+                    options={[
+                      { id: "not ready", name: "Not ready" },
+                      { id: "blocked", name: "Blocked" },
+                      { id: "qa", name: "QA" },
+                      { id: "ready", name: "Ready" },
+                    ]}
+                    value={readinessFilter}
+                  />
+                ),
+              },
+              {
+                label: "Type",
+                content: (
+                  <FilterDropdown
+                    allLabel="All types"
+                    ariaLabel="Filter milestones by type"
+                    className="task-queue-filter-menu-submenu"
+                    icon={<IconTasks />}
+                    onChange={setTypeFilter}
+                    options={MILESTONE_TYPE_OPTIONS}
+                    value={typeFilter}
+                  />
+                ),
+              },
+            ]}
+          />
+          <CompactFilterMenu
+            activeCount={milestoneSortIsDefault ? 0 : 1}
+            ariaLabel="Sort milestones"
+            buttonLabel={sortOrder === "asc" ? "Sort ascending" : "Sort descending"}
+            className="task-queue-sort-menu milestones-search-sort-menu"
+            icon={renderSortDirectionIcon()}
+            iconOnly
+            items={[
+              {
+                label: "Sort by",
+                content: (
+                  <select
+                    aria-label="Sort milestones by"
+                    className="task-queue-sort-menu-select"
+                    onChange={(milestone) => setSortField(milestone.target.value as MilestoneSortField)}
+                    value={sortField}
+                  >
+                    {MILESTONE_SORT_OPTIONS.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.name}
+                      </option>
+                    ))}
+                  </select>
+                ),
+              },
+              {
+                label: "Direction",
+                content: (
+                  <button
+                    aria-label="Toggle milestone sort direction"
+                    className="icon-button milestone-sort-direction-button"
+                    onClick={toggleSortOrder}
+                    title={sortOrder === "asc" ? "Sort ascending" : "Sort descending"}
+                    type="button"
+                  >
+                    {renderSortDirectionIcon()}
+                  </button>
+                ),
+              },
+            ]}
+          />
+        </>
+      }
+      searchFilter={searchFilter}
+      searchSuggestions={searchSuggestions}
+      setSearchFilter={setSearchFilter}
+    />
   );
 }

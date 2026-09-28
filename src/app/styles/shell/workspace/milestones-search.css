@@ -1,17 +1,8 @@
-.milestones-toolbar .topbar-responsive-search:not(.has-actions) .toolbar-search {
+.milestones-topbar-search:not(.has-actions) .toolbar-search {
   padding-right: 0.3rem;
 }
 
-.milestones-toolbar .milestones-search-slot {
-  flex: 1 1 auto;
-  min-width: 0;
-  max-width: 100%;
-  display: flex;
-}
-
-.milestones-toolbar .milestones-search-slot > .topbar-responsive-search,
-.milestones-toolbar .milestones-search-slot > .milestones-search-control,
-.milestones-search-control > .topbar-responsive-search {
+.milestones-search-control > .milestones-topbar-search {
   flex: 1 1 auto;
   width: 100%;
   min-width: 0;
@@ -24,7 +15,7 @@
   min-width: 0;
 }
 
-.milestones-toolbar .topbar-responsive-search-dynamic:not(.has-actions) .toolbar-search {
+.milestones-topbar-search.topbar-responsive-search-dynamic:not(.has-actions) .toolbar-search {
   width: 100%;
   min-width: 0;
   flex: 1 1 auto;

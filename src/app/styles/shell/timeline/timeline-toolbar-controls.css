@@ -22,14 +22,14 @@
 }
 
 .timeline-topbar-controls .timeline-period-controls,
-.timeline-topbar-controls .timeline-zoom-controls {
+.app-topbar-zoom-host .timeline-zoom-controls {
   flex: 0 0 auto;
   min-width: max-content;
   max-width: none;
 }
 
 .timeline-topbar-controls .timeline-period-label,
-.timeline-topbar-controls .timeline-zoom-label {
+.app-topbar-zoom-host .timeline-zoom-label {
   flex: 0 0 auto;
 }
 
