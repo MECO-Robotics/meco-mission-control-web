@@ -5,7 +5,7 @@ import {
   buildTimelineMonthHeaderCells,
   getTimelineHiddenToggleLeft,
 } from "../model/timelineGridHeaderData";
-import type { TimelineGridHeaderProps } from "../timelineGridHeaderTypes";
+import type { TimelineGridHeaderProps } from "../timelineGridTypes";
 import { TimelineDayHeaderRow } from "./TimelineDayHeaderRow";
 import { TimelineFixedColumnHeader } from "./TimelineFixedColumnHeader";
 import { TimelineHiddenColumnToggles } from "./TimelineHiddenColumnToggles";

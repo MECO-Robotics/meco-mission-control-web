@@ -7,6 +7,7 @@ import type {
   TimelineProjectRow,
   TimelineSubsystemRow,
 } from "./timelineViewModel";
+import type { TimelineGridMotion } from "./timelineGridTypes";
 import { TimelineGridHeaderContent } from "./components/TimelineGridHeaderContent";
 import { TimelineProjectGroup } from "./TimelineProjectGroup";
 import { TimelineSubsystemGroup } from "./TimelineSubsystemGroup";
@@ -14,8 +15,6 @@ import {
   buildTaskDependencyCountsByTaskId,
   buildTimelineTaskStatusSignalByTaskId,
 } from "./timelineGridBodyUtils";
-
-type TimelineGridMotion = "left" | "right" | "neutral";
 
 interface TimelineGridBodyProps {
   bootstrap: BootstrapPayload;
