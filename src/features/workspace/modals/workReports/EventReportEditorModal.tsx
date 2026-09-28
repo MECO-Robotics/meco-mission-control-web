@@ -105,11 +105,6 @@ export function MilestoneReportEditorModal({
                 }))
               }
               required
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
               value={milestoneReportDraft.title ?? ""}
             />
           </label>
@@ -140,11 +135,6 @@ export function MilestoneReportEditorModal({
               onChange={(milestone) => setMilestoneReportFindings(milestone.target.value)}
               placeholder="Add findings from this milestone."
               rows={4}
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
               value={milestoneReportFindings}
             />
           </label>
