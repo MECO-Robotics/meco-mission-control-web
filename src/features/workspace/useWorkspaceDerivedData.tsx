@@ -25,11 +25,6 @@ export function useWorkspaceDerivedData({
     [bootstrap.members],
   );
 
-  const mentors = useMemo(
-    () => bootstrap.members.filter((member) => member.role === "mentor"),
-    [bootstrap.members],
-  );
-
   const rosterMentors = useMemo(
     () =>
       bootstrap.members.filter(
@@ -56,21 +51,6 @@ export function useWorkspaceDerivedData({
     [bootstrap.partInstances],
   );
   const milestonesById = useMemo(() => indexRecordsById(bootstrap.milestones), [bootstrap.milestones]);
-
-  const cncItems = useMemo(
-    () => bootstrap.manufacturingItems.filter((item) => item.process === "cnc"),
-    [bootstrap.manufacturingItems],
-  );
-
-  const printItems = useMemo(
-    () => bootstrap.manufacturingItems.filter((item) => item.process === "3d-print"),
-    [bootstrap.manufacturingItems],
-  );
-
-  const fabricationItems = useMemo(
-    () => bootstrap.manufacturingItems.filter((item) => item.process === "fabrication"),
-    [bootstrap.manufacturingItems],
-  );
 
   const isRobotProject = selectedProjectType === "robot";
   const inventoryCount = isRobotProject
@@ -178,18 +158,14 @@ export function useWorkspaceDerivedData({
   );
 
   return {
-    cncItems,
     disciplinesById,
     milestonesById,
     externalMembers,
-    fabricationItems,
     mechanismsById,
-    mentors,
     membersById,
     navigationItems,
     partDefinitionsById,
     partInstancesById,
-    printItems,
     rosterMentors,
     students,
     subsystemsById,

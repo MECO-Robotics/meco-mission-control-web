@@ -54,10 +54,8 @@ export interface WorkspaceContentProps {
   artifacts: ArtifactRecord[];
   availabilityBootstrap: BootstrapPayload;
   bootstrap: BootstrapPayload;
-  cncItems: ManufacturingItemRecord[];
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
   externalMembers: BootstrapPayload["members"];
-  fabricationItems: ManufacturingItemRecord[];
   handleCreateMember: (milestone: React.FormEvent<HTMLFormElement>) => void;
   handleReactivateMemberForSeason: (memberId: string) => Promise<void>;
   handleDeleteMember: (id: string) => void;
@@ -130,7 +128,6 @@ export interface WorkspaceContentProps {
   openTimelineTaskDetailsModal: (task: TaskRecord) => void;
   onUpdateRisk: (riskId: string, payload: RiskPayload) => Promise<void>;
   partDefinitionsById: Record<string, BootstrapPayload["partDefinitions"][number]>;
-  printItems: ManufacturingItemRecord[];
   rosterMentors: BootstrapPayload["members"];
   showCncMentorQuickActions: boolean;
   manufacturingView: ManufacturingViewTab;

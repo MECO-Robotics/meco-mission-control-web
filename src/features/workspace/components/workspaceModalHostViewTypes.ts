@@ -57,7 +57,6 @@ export interface WorkspaceModalHostViewProps {
   isSavingQaReport: boolean;
   isSavingMilestoneReport: boolean;
   isSavingWorkLog: boolean;
-  mentors: BootstrapPayload["members"];
   qaReportDraft: QaReportPayload;
   qaReportModalMode: QaReportModalMode;
   milestoneReportDraft: TestResultPayload;
