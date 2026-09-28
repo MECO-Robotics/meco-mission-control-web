@@ -130,6 +130,9 @@ describe("MilestonesEventDetailsModal", () => {
     expect(markup).toContain("Required");
     expect(markup).toContain("Complete");
     expect(markup).toContain("Iteration 1");
+    expect(markup).toContain("task-detail-inline-edit-trigger-summary");
+    expect(markup).toContain("task-detail-inline-edit-trigger-inline");
+    expect(markup).toContain("milestone-detail-inline-value");
   });
 
   it("renders the task-style shell for milestone editing", () => {
