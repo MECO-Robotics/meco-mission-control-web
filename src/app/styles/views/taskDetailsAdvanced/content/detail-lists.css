@@ -41,18 +41,10 @@
 
 .task-detail-collapsible-body {
   margin-top: 0.55rem;
-  display: flex;
-  flex-direction: column;
   justify-content: flex-start;
   gap: 0.2rem;
-  min-height: 0;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
   height: 100%;
   overflow-y: scroll;
-  overflow-x: clip;
-  scrollbar-gutter: stable;
   padding: 0.6rem 0.8rem;
   border-radius: 14px;
   border: 1px solid var(--border-base);

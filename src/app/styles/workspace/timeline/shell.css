@@ -132,14 +132,6 @@
   min-height: 38px;
 }
 
-.timeline-merged-cell-text.is-rotated {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  transform: rotate(var(--timeline-merged-cell-rotation, 240deg));
-  max-height: calc(100% - 16px);
-  max-width: none;
-}
-
 .timeline-merged-cell-column:hover,
 .timeline-merged-cell-column:focus-within {
   overflow: visible !important;
