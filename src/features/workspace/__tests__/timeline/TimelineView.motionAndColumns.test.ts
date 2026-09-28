@@ -92,9 +92,7 @@ describe("TimelineView", () => {
     expect(css).toMatch(/\.timeline-layout\s*\{[\s\S]*width:\s*calc\(100% \+ 0\.85rem\);/);
     expect(css).toMatch(/\.timeline-layout\s*\{[\s\S]*margin-right:\s*-0\.85rem;/);
     expect(css).toMatch(/\.timeline-layout \.timeline-shell\s*\{[\s\S]*width:\s*100%;/);
-    expect(css).toMatch(/\.timeline-grid,\s*\.subsystem-row\s*\{[\s\S]*width:\s*100%;/);
-    expect(css).toMatch(/\.subsystem-group\s*\{[\s\S]*width:\s*100%;/);
-    expect(css).not.toMatch(/\.timeline-grid,\s*\.subsystem-group,\s*\.subsystem-row\s*\{[\s\S]*gap:/);
+    expect(css).toMatch(/\.subsystem-group\s*\{[\s\S]*width:\s*100%;[\s\S]*overflow-x:\s*clip;/);
   });
 
   it("marks project, subsystem, and task columns as unfold-animation surfaces", () => {

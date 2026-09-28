@@ -7,35 +7,20 @@
   min-width: 0;
 }
 
-.timeline-grid,
-.subsystem-row {
-  display: grid;
-  gap: 0.35rem;
-  min-width: 0;
-  width: 100%;
-  justify-content: start;
-}
-
 .subsystem-group {
   width: 100%;
   min-width: 0;
   overflow-x: clip;
 }
 
-.header-grid {
-  margin-bottom: 0.35rem;
-}
-
 .sticky-label,
-.task-label,
 .subsystem-toggle {
   position: sticky;
   left: 0;
   z-index: 2;
 }
 
-.sticky-label,
-.task-label {
+.sticky-label {
   background: var(--official-white);
 }
 
@@ -49,8 +34,7 @@
 }
 
 .timeline-day,
-.timeline-day-slot,
-.subsystem-slot {
+.timeline-day-slot {
   min-height: 2rem;
 }
 

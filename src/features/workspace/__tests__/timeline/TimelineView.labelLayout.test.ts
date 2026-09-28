@@ -30,7 +30,7 @@ describe("TimelineView", () => {
     );
     expect(getRule(".timeline-merged-cell-title")).toMatch(/text-overflow:\s*ellipsis/);
     expect(css).toMatch(
-      /\.task-label:hover,\s*\.task-label:focus-visible,\s*\.timeline-merged-cell-text:hover,\s*\.timeline-merged-cell-text:focus-within,\s*\.timeline-merged-cell-text:focus-visible\s*\{[\s\S]*?z-index:\s*10045/,
+      /\.timeline-merged-cell-text:hover,\s*\.timeline-merged-cell-text:focus-within,\s*\.timeline-merged-cell-text:focus-visible\s*\{[\s\S]*?z-index:\s*10045/,
     );
     expect(css).toMatch(
       /\.timeline-merged-cell-column:hover,\s*\.timeline-merged-cell-column:focus-within\s*\{[\s\S]*overflow:\s*visible\s*!important;[\s\S]*z-index:\s*10045/,
