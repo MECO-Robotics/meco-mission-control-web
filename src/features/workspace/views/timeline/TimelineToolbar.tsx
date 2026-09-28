@@ -4,10 +4,10 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
-import { TIMELINE_ZOOM_MAX } from "@/features/workspace/shared/timeline/timelineZoom";
+import { formatTimelineZoomLabel, TIMELINE_ZOOM_MAX } from "@/features/workspace/shared/timeline/timelineZoom";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
+import { WorkspaceTopbarZoom } from "@/features/workspace/shared/topbar";
 import { TimelineCompactFilterMenu } from "./components/TimelineCompactFilterMenu";
-import { WorkspaceTopbarZoomControls } from "@/features/workspace/shared/ui";
 
 const TIMELINE_INTERVAL_OPTIONS: Array<{ id: TimelineViewInterval; label: string; shortLabel: string }> = [
   { id: "all", label: "All", shortLabel: "A" },
@@ -247,7 +247,19 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
           </button>
         </div>
       ) : null}
-      <WorkspaceTopbarZoomControls ariaLabel="Timeline zoom" label="timeline" max={TIMELINE_ZOOM_MAX} min={timelineZoomMin} onChange={onAdjustZoom} value={timelineZoom} />
+      <WorkspaceTopbarZoom
+        ariaLabel="Timeline zoom"
+        buttonClassName="timeline-zoom-button"
+        canZoomIn={timelineZoom < TIMELINE_ZOOM_MAX}
+        canZoomOut={timelineZoom > timelineZoomMin}
+        className="timeline-zoom-controls"
+        decreaseLabel="Zoom out timeline"
+        increaseLabel="Zoom in timeline"
+        labelClassName="timeline-zoom-label"
+        onZoomIn={() => onAdjustZoom(1)}
+        onZoomOut={() => onAdjustZoom(-1)}
+        value={formatTimelineZoomLabel(timelineZoom)}
+      />
     </div>
   );
 };

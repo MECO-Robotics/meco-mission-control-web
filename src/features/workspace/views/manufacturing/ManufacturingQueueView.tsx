@@ -9,10 +9,11 @@ import { filterSelectionIncludes, useFilterChangeMotionClass } from "@/features/
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import {
   WorkspaceTopbarControls,
+  WorkspaceTopbarZoom,
   buildSingleAddMenuAction,
   buildTopbarSearchProps,
 } from "@/features/workspace/shared/topbar";
-import { WorkspaceTopbarAddMenu, WorkspaceTopbarZoomControls } from "@/features/workspace/shared/ui";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { KanbanScrollFrame } from "@/features/workspace/views/kanban/KanbanScrollFrame";
@@ -23,6 +24,7 @@ import {
 } from "./manufacturingProcessFilter";
 import {
   clampTaskQueueZoom,
+  formatTaskQueueZoomLabel,
   TASK_QUEUE_ZOOM_MAX,
   TASK_QUEUE_ZOOM_MIN,
   TASK_QUEUE_ZOOM_STEP,
@@ -190,9 +192,20 @@ export function ManufacturingQueueView({
             />
           }
         >
-          <div className="task-queue-toolbar-inline-actions">
-            <WorkspaceTopbarZoomControls ariaLabel="Manufacturing zoom" label="manufacturing" max={TASK_QUEUE_ZOOM_MAX} min={TASK_QUEUE_ZOOM_MIN} onChange={(direction) => setManufacturingZoom((current) => clampTaskQueueZoom(current + direction * TASK_QUEUE_ZOOM_STEP))} value={manufacturingZoom} />
-          </div>
+          <WorkspaceTopbarZoom
+            ariaLabel="Manufacturing zoom"
+            buttonClassName="task-queue-zoom-button"
+            canZoomIn={manufacturingZoom < TASK_QUEUE_ZOOM_MAX}
+            canZoomOut={manufacturingZoom > TASK_QUEUE_ZOOM_MIN}
+            className="task-queue-zoom-controls"
+            decreaseLabel="Zoom out manufacturing"
+            increaseLabel="Zoom in manufacturing"
+            labelClassName="task-queue-zoom-label"
+            onZoomIn={() => setManufacturingZoom((current) => clampTaskQueueZoom(current + TASK_QUEUE_ZOOM_STEP))}
+            onZoomOut={() => setManufacturingZoom((current) => clampTaskQueueZoom(current - TASK_QUEUE_ZOOM_STEP))}
+            toolbarClassName="task-queue-toolbar-inline-actions"
+            value={formatTaskQueueZoomLabel(manufacturingZoom)}
+          />
         </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
 

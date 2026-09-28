@@ -1,4 +1,5 @@
 import { useState, type FocusEvent, type ReactNode } from "react";
+import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { MilestoneSearchHighlight } from "./MilestoneSearchHighlight";
@@ -40,68 +41,73 @@ export function MilestonesSearchControl({
   };
 
   return (
-    <div
-      className="milestones-search-control"
-      onBlur={handleBlur}
-      onFocus={(event) => {
-        const target = event.target;
-        if (target instanceof Element && target.closest(".topbar-responsive-search-actions")) {
-          setIsSuggestionsOpen(false);
-          return;
-        }
+    <AppTopbarSlotPortal slot="search">
+      <div
+        className="milestones-search-control"
+        onBlur={handleBlur}
+        onFocus={(event) => {
+          const target = event.target;
+          if (target instanceof Element && target.closest(".topbar-responsive-search-actions")) {
+            setIsSuggestionsOpen(false);
+            return;
+          }
 
-        setIsSuggestionsOpen(true);
-      }}
-      onKeyDown={(event) => {
-        if (event.key === "Escape") {
-          setIsSuggestionsOpen(false);
-        }
-      }}
-    >
-      <TopbarResponsiveSearch
-        actionCount={filterControl ? 2 : 0}
-        actions={filterControl}
-        ariaLabel="Search milestones"
-        compactPlaceholder="Search"
-        compactSwitchWidth={MILESTONE_SEARCH_COMPACT_SWITCH_WIDTH}
-        iconReleaseWidth={MILESTONE_SEARCH_ICON_RELEASE_WIDTH}
-        iconSwitchWidth={MILESTONE_SEARCH_ICON_SWITCH_WIDTH}
-        mode="dynamic-label"
-        onChange={(value) => {
-          setSearchFilter(value);
-          setIsSuggestionsOpen(value.trim() !== "");
+          setIsSuggestionsOpen(true);
         }}
-        onActionsMouseDown={() => setIsSuggestionsOpen(false)}
-        placeholder="Search milestones..."
-        value={searchFilter}
-      />
+        onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            setIsSuggestionsOpen(false);
+          }
+        }}
+      >
+        <TopbarResponsiveSearch
+          actionCount={filterControl ? 2 : 0}
+          actions={filterControl}
+          ariaLabel="Search milestones"
+          compactPlaceholder="Search"
+          compactSwitchWidth={MILESTONE_SEARCH_COMPACT_SWITCH_WIDTH}
+          iconReleaseWidth={MILESTONE_SEARCH_ICON_RELEASE_WIDTH}
+          iconSwitchWidth={MILESTONE_SEARCH_ICON_SWITCH_WIDTH}
+          mode="dynamic-label"
+          className="milestones-topbar-search"
+          onChange={(value) => {
+            setSearchFilter(value);
+            setIsSuggestionsOpen(value.trim() !== "");
+          }}
+          onActionsMouseDown={() => setIsSuggestionsOpen(false)}
+          placeholder="Search milestones..."
+          portalToTopbar={false}
+          tutorialTarget="milestone-search-input"
+          value={searchFilter}
+        />
 
-      {showSuggestions ? (
-        <div aria-label="Milestone search suggestions" className="milestones-search-suggestions" role="listbox">
-          {searchSuggestions.map((suggestion) => (
-            <button
-              className="milestones-search-suggestion"
-              key={suggestion.id}
-              onClick={() => handleSuggestionSelect(suggestion)}
-              onMouseDown={(event) => event.preventDefault()}
-              role="option"
-              type="button"
-            >
-              <span className="milestones-search-suggestion-title">
-                <MilestoneSearchHighlight searchFilter={searchFilter} text={suggestion.title} />
-              </span>
-              <span className="milestones-search-suggestion-context">
-                <MilestoneSearchHighlight searchFilter={searchFilter} text={suggestion.context} />
-              </span>
-              {suggestion.description ? (
-                <span className="milestones-search-suggestion-description">
-                  <MilestoneSearchHighlight searchFilter={searchFilter} text={suggestion.description} />
+        {showSuggestions ? (
+          <div aria-label="Milestone search suggestions" className="milestones-search-suggestions" role="listbox">
+            {searchSuggestions.map((suggestion) => (
+              <button
+                className="milestones-search-suggestion"
+                key={suggestion.id}
+                onClick={() => handleSuggestionSelect(suggestion)}
+                onMouseDown={(event) => event.preventDefault()}
+                role="option"
+                type="button"
+              >
+                <span className="milestones-search-suggestion-title">
+                  <MilestoneSearchHighlight searchFilter={searchFilter} text={suggestion.title} />
                 </span>
-              ) : null}
-            </button>
-          ))}
-        </div>
-      ) : null}
-    </div>
+                <span className="milestones-search-suggestion-context">
+                  <MilestoneSearchHighlight searchFilter={searchFilter} text={suggestion.context} />
+                </span>
+                {suggestion.description ? (
+                  <span className="milestones-search-suggestion-description">
+                    <MilestoneSearchHighlight searchFilter={searchFilter} text={suggestion.description} />
+                  </span>
+                ) : null}
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </AppTopbarSlotPortal>
   );
 }
