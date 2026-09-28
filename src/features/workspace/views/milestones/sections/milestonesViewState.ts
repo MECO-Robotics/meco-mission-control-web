@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MilestonePayload } from "@/types/payloads";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
-import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import {
   buildMilestoneProjectLabels,
   buildMilestoneSearchSuggestions,
@@ -17,7 +16,6 @@ import {
 } from "./useMilestonesEventModalState";
 
 export type MilestonesViewState = MilestonesMilestoneModalState & {
-  milestoneFilterMotionClass: string;
   readinessFilter: FilterSelection;
   setReadinessFilter: Dispatch<SetStateAction<FilterSelection>>;
   processedMilestones: BootstrapPayload["milestones"];
@@ -134,15 +132,6 @@ export function useMilestonesViewState({
       }),
     [projectLabelByMilestoneId, searchFilter, suggestionSourceMilestones],
   );
-  const milestoneFilterMotionClass = useFilterChangeMotionClass([
-    activePersonFilter,
-    isAllProjectsView,
-    projectFilter,
-    searchFilter,
-    sortField,
-    sortOrder,
-    typeFilter,
-  ]);
   const modalState = useMilestonesMilestoneModalState({
     bootstrap,
     isAllProjectsView,
@@ -156,7 +145,6 @@ export function useMilestonesViewState({
 
   return {
     ...modalState,
-    milestoneFilterMotionClass,
     processedMilestones,
     projectFilter,
     projectLabelByMilestoneId,
