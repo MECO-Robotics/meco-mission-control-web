@@ -60,6 +60,41 @@ function renderWorkLogsView(
   );
 }
 
+function createWorkLogTask(subsystemIds = ["subsystem-1"]): BootstrapPayload["tasks"][number] {
+  return {
+    actualHours: 2,
+    artifactId: null,
+    artifactIds: [],
+    assigneeIds: [],
+    blockers: [],
+    disciplineId: "discipline-1",
+    documentationLinked: false,
+    dueDate: "2026-05-01",
+    estimatedHours: 4,
+    id: "task-1",
+    linkedManufacturingIds: [],
+    linkedPurchaseIds: [],
+    mechanismId: null,
+    mechanismIds: [],
+    mentorId: null,
+    ownerId: null,
+    partInstanceId: null,
+    partInstanceIds: [],
+    priority: "medium",
+    projectId: "project-1",
+    requiresDocumentation: false,
+    startDate: "2026-05-01",
+    status: "in-progress",
+    subsystemId: "subsystem-1",
+    subsystemIds,
+    summary: "Updated drivetrain CAD",
+    targetMilestoneId: null,
+    title: "Drive CAD",
+    workstreamId: null,
+    workstreamIds: [],
+  };
+}
+
 describe("WorkLogsView", () => {
   it("keeps work log totals within Activity", () => {
     const html = renderWorkLogsView("logs");
@@ -70,41 +105,7 @@ describe("WorkLogsView", () => {
 
   it("renders activity entries for logged work", () => {
     const html = renderWorkLogsView("activity", {
-      tasks: [
-        {
-          actualHours: 2,
-          artifactId: null,
-          artifactIds: [],
-          assigneeIds: [],
-          blockers: [],
-
-          disciplineId: "discipline-1",
-          documentationLinked: false,
-          dueDate: "2026-05-01",
-          estimatedHours: 4,
-          id: "task-1",
-          linkedManufacturingIds: [],
-          linkedPurchaseIds: [],
-          mechanismId: null,
-          mechanismIds: [],
-          mentorId: null,
-          ownerId: null,
-          partInstanceId: null,
-          partInstanceIds: [],
-          priority: "medium",
-          projectId: "project-1",
-          requiresDocumentation: false,
-          startDate: "2026-05-01",
-          status: "in-progress",
-          subsystemId: "subsystem-1",
-          subsystemIds: ["subsystem-1"],
-          summary: "Updated drivetrain CAD",
-          targetMilestoneId: null,
-          title: "Drive CAD",
-          workstreamId: null,
-          workstreamIds: [],
-        },
-      ],
+      tasks: [createWorkLogTask()],
       workLogs: [
         {
           date: "2026-05-01",
@@ -212,39 +213,7 @@ describe("WorkLogsView", () => {
   });
 
   it("builds legacy activity from the unfiltered scoped work log source", () => {
-    const task: BootstrapPayload["tasks"][number] = {
-      actualHours: 2,
-      artifactId: null,
-      artifactIds: [],
-      assigneeIds: [],
-      blockers: [],
-
-      disciplineId: "discipline-1",
-      documentationLinked: false,
-      dueDate: "2026-05-01",
-      estimatedHours: 4,
-      id: "task-1",
-      linkedManufacturingIds: [],
-      linkedPurchaseIds: [],
-      mechanismId: null,
-      mechanismIds: [],
-      mentorId: null,
-      ownerId: null,
-      partInstanceId: null,
-      partInstanceIds: [],
-      priority: "medium",
-      projectId: "project-1",
-      requiresDocumentation: false,
-      startDate: "2026-05-01",
-      status: "in-progress",
-      subsystemId: "subsystem-1",
-      subsystemIds: ["subsystem-1"],
-      summary: "Updated drivetrain CAD",
-      targetMilestoneId: null,
-      title: "Drive CAD",
-      workstreamId: null,
-      workstreamIds: [],
-    };
+    const task = createWorkLogTask();
 
     const actions = selectActivityActions({
       auditActions: [],
@@ -265,39 +234,7 @@ describe("WorkLogsView", () => {
   });
 
   it("matches activity search against legacy task subsystem ids", () => {
-    const task: BootstrapPayload["tasks"][number] = {
-      actualHours: 2,
-      artifactId: null,
-      artifactIds: [],
-      assigneeIds: [],
-      blockers: [],
-
-      disciplineId: "discipline-1",
-      documentationLinked: false,
-      dueDate: "2026-05-01",
-      estimatedHours: 4,
-      id: "task-1",
-      linkedManufacturingIds: [],
-      linkedPurchaseIds: [],
-      mechanismId: null,
-      mechanismIds: [],
-      mentorId: null,
-      ownerId: null,
-      partInstanceId: null,
-      partInstanceIds: [],
-      priority: "medium",
-      projectId: "project-1",
-      requiresDocumentation: false,
-      startDate: "2026-05-01",
-      status: "in-progress",
-      subsystemId: "subsystem-1",
-      subsystemIds: [],
-      summary: "Updated drivetrain CAD",
-      targetMilestoneId: null,
-      title: "Drive CAD",
-      workstreamId: null,
-      workstreamIds: [],
-    };
+    const task = createWorkLogTask([]);
     const action: AuditActionRecord = {
       actorMemberId: "student-1",
       changedFields: [],

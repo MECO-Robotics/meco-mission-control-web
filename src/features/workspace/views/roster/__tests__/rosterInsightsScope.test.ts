@@ -71,6 +71,63 @@ function createBootstrapFixture(): BootstrapPayload {
   };
 }
 
+function createInsightsResponse(
+  memberId: string,
+  attendanceMemberId = memberId,
+): RosterInsightsResponse {
+  return {
+    summary: {
+      memberCount: 1,
+      activeMemberCount: 1,
+      openTaskCount: 0,
+      overdueTaskCount: 0,
+      blockedTaskCount: 0,
+      waitingForQaTaskCount: 0,
+      unassignedTaskCount: 0,
+      overloadedMemberCount: 0,
+      unavailableMemberCount: 0,
+      plannedWeeklyAttendanceHours: 0,
+      attendanceHoursLast14Days: 0,
+      attendanceHoursLast30Days: 0,
+      noPlannedAttendanceWithTasksCount: 0,
+      noRecentAttendanceWithTasksCount: 0,
+    },
+    members: [{
+      memberId,
+      memberName: "Season Member",
+      role: "student",
+      disciplineId: null,
+      activeTaskCount: 0,
+      blockedTaskCount: 0,
+      waitingForQaTaskCount: 0,
+      overdueTaskCount: 0,
+      dueSoonTaskCount: 0,
+      estimatedOpenHours: 0,
+      remainingOpenHours: 0,
+      attendanceHoursLast7Days: 0,
+      attendanceHoursLast14Days: 0,
+      attendanceHoursLast30Days: 0,
+      attendanceSessionsLast30Days: 0,
+      plannedWeeklyAttendanceHours: 0,
+      plannedAttendanceDays: [],
+      plannedAttendanceNotes: "",
+      availabilityStatus: "available",
+      topTasks: [],
+    }],
+    attendanceTimeline: [],
+    recentAttendance: [{
+      id: "row-1",
+      memberId: attendanceMemberId,
+      memberName: "Season Member",
+      date: "2026-04-20",
+      totalHours: 4,
+      activeTaskCount: 0,
+      availabilityStatus: "available",
+    }],
+    generatedAt: "2026-04-21T00:00:00.000Z",
+  };
+}
+
 describe("roster insights scope helpers", () => {
   it("derives scoped member ids from project/season scope", () => {
     const bootstrap = createBootstrapFixture();
@@ -83,181 +140,19 @@ describe("roster insights scope helpers", () => {
   });
 
   it("flags out-of-scope roster insights rows", () => {
-    const response: RosterInsightsResponse = {
-      summary: {
-        memberCount: 2,
-        activeMemberCount: 1,
-        openTaskCount: 0,
-        overdueTaskCount: 0,
-        blockedTaskCount: 0,
-        waitingForQaTaskCount: 0,
-        unassignedTaskCount: 0,
-        overloadedMemberCount: 0,
-        unavailableMemberCount: 0,
-        plannedWeeklyAttendanceHours: 0,
-        attendanceHoursLast14Days: 0,
-        attendanceHoursLast30Days: 0,
-        noPlannedAttendanceWithTasksCount: 0,
-        noRecentAttendanceWithTasksCount: 0,
-      },
-      members: [
-        {
-          memberId: "member-season-1",
-          memberName: "Season One Member",
-          role: "student",
-          disciplineId: null,
-          activeTaskCount: 0,
-          blockedTaskCount: 0,
-          waitingForQaTaskCount: 0,
-          overdueTaskCount: 0,
-          dueSoonTaskCount: 0,
-          estimatedOpenHours: 0,
-          remainingOpenHours: 0,
-          attendanceHoursLast7Days: 0,
-          attendanceHoursLast14Days: 0,
-          attendanceHoursLast30Days: 0,
-          attendanceSessionsLast30Days: 0,
-          plannedWeeklyAttendanceHours: 0,
-          plannedAttendanceDays: [],
-          plannedAttendanceNotes: "",
-          availabilityStatus: "available",
-          topTasks: [],
-        },
-      ],
-      attendanceTimeline: [],
-      recentAttendance: [
-        {
-          id: "row-1",
-          memberId: "member-season-2",
-          memberName: "Season Two Member",
-          date: "2026-04-20",
-          totalHours: 4,
-          activeTaskCount: 0,
-          availabilityStatus: "available",
-        },
-      ],
-      generatedAt: "2026-04-21T00:00:00.000Z",
-    };
+    const response = createInsightsResponse("member-season-1", "member-season-2");
 
     expect(areRosterInsightsRowsInScope(response, new Set(["member-season-1"]))).toBe(false);
   });
 
   it("accepts scoped response rows when attendance member ids are represented in members", () => {
-    const response: RosterInsightsResponse = {
-      summary: {
-        memberCount: 1,
-        activeMemberCount: 1,
-        openTaskCount: 0,
-        overdueTaskCount: 0,
-        blockedTaskCount: 0,
-        waitingForQaTaskCount: 0,
-        unassignedTaskCount: 0,
-        overloadedMemberCount: 0,
-        unavailableMemberCount: 0,
-        plannedWeeklyAttendanceHours: 0,
-        attendanceHoursLast14Days: 0,
-        attendanceHoursLast30Days: 0,
-        noPlannedAttendanceWithTasksCount: 0,
-        noRecentAttendanceWithTasksCount: 0,
-      },
-      members: [
-        {
-          memberId: "member-season-2",
-          memberName: "Season Two Member",
-          role: "student",
-          disciplineId: null,
-          activeTaskCount: 0,
-          blockedTaskCount: 0,
-          waitingForQaTaskCount: 0,
-          overdueTaskCount: 0,
-          dueSoonTaskCount: 0,
-          estimatedOpenHours: 0,
-          remainingOpenHours: 0,
-          attendanceHoursLast7Days: 0,
-          attendanceHoursLast14Days: 0,
-          attendanceHoursLast30Days: 0,
-          attendanceSessionsLast30Days: 0,
-          plannedWeeklyAttendanceHours: 0,
-          plannedAttendanceDays: [],
-          plannedAttendanceNotes: "",
-          availabilityStatus: "available",
-          topTasks: [],
-        },
-      ],
-      attendanceTimeline: [],
-      recentAttendance: [
-        {
-          id: "row-1",
-          memberId: "member-season-2",
-          memberName: "Season Two Member",
-          date: "2026-04-20",
-          totalHours: 4,
-          activeTaskCount: 0,
-          availabilityStatus: "available",
-        },
-      ],
-      generatedAt: "2026-04-21T00:00:00.000Z",
-    };
+    const response = createInsightsResponse("member-season-2");
 
     expect(areRosterInsightsRowsInScope(response, new Set(["member-season-2"]))).toBe(true);
   });
 
   it("flags internally consistent rows that are outside the requested scope", () => {
-    const response: RosterInsightsResponse = {
-      summary: {
-        memberCount: 1,
-        activeMemberCount: 1,
-        openTaskCount: 0,
-        overdueTaskCount: 0,
-        blockedTaskCount: 0,
-        waitingForQaTaskCount: 0,
-        unassignedTaskCount: 0,
-        overloadedMemberCount: 0,
-        unavailableMemberCount: 0,
-        plannedWeeklyAttendanceHours: 0,
-        attendanceHoursLast14Days: 0,
-        attendanceHoursLast30Days: 0,
-        noPlannedAttendanceWithTasksCount: 0,
-        noRecentAttendanceWithTasksCount: 0,
-      },
-      members: [
-        {
-          memberId: "member-season-2",
-          memberName: "Season Two Member",
-          role: "student",
-          disciplineId: null,
-          activeTaskCount: 0,
-          blockedTaskCount: 0,
-          waitingForQaTaskCount: 0,
-          overdueTaskCount: 0,
-          dueSoonTaskCount: 0,
-          estimatedOpenHours: 0,
-          remainingOpenHours: 0,
-          attendanceHoursLast7Days: 0,
-          attendanceHoursLast14Days: 0,
-          attendanceHoursLast30Days: 0,
-          attendanceSessionsLast30Days: 0,
-          plannedWeeklyAttendanceHours: 0,
-          plannedAttendanceDays: [],
-          plannedAttendanceNotes: "",
-          availabilityStatus: "available",
-          topTasks: [],
-        },
-      ],
-      attendanceTimeline: [],
-      recentAttendance: [
-        {
-          id: "row-1",
-          memberId: "member-season-2",
-          memberName: "Season Two Member",
-          date: "2026-04-20",
-          totalHours: 4,
-          activeTaskCount: 0,
-          availabilityStatus: "available",
-        },
-      ],
-      generatedAt: "2026-04-21T00:00:00.000Z",
-    };
+    const response = createInsightsResponse("member-season-2");
 
     expect(areRosterInsightsRowsInScope(response, new Set(["member-season-1"]))).toBe(false);
   });

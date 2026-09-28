@@ -7,7 +7,7 @@ import type {
   TimelineProjectRow,
   TimelineSubsystemRow,
 } from "./timelineViewModel";
-import { TimelineGridHeader } from "./TimelineGridHeader";
+import { TimelineGridHeaderContent } from "./components/TimelineGridHeaderContent";
 import { TimelineProjectGroup } from "./TimelineProjectGroup";
 import { TimelineSubsystemGroup } from "./TimelineSubsystemGroup";
 import {
@@ -211,7 +211,7 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
       });
 
   return (
-      <TimelineGridHeader
+    <TimelineGridHeaderContent
       clearHoveredMilestonePopup={clearHoveredMilestonePopup}
       firstDayGridColumn={firstDayGridColumn}
       gridMinWidth={gridMinWidth}
@@ -222,9 +222,9 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
       isWeekView={isWeekView}
       monthGroups={monthGroups}
       handleTimelineHeaderDayClick={handleTimelineHeaderDayClick}
-        projectColumnWidth={projectColumnWidth}
-        showProjectCol={showProjectCol}
-        showSubsystemCol={showSubsystemCol}
+      projectColumnWidth={projectColumnWidth}
+      showProjectCol={showProjectCol}
+      showSubsystemCol={showSubsystemCol}
       subsystemColumnIndex={subsystemColumnIndex}
       subsystemColumnWidth={subsystemColumnWidth}
       subsystemStickyLeft={subsystemStickyLeft}
@@ -240,6 +240,6 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
       toggleSubsystemColumn={toggleSubsystemColumn}
     >
       {rowChildren}
-    </TimelineGridHeader>
+    </TimelineGridHeaderContent>
   );
 };
