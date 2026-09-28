@@ -161,11 +161,11 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
             subsystemFilterOptions={subsystemFilterOptions}
           />
         }
-        ariaLabel="Search timeline"
+        ariaLabel="Search schedule"
         compactPlaceholder="Search"
         compactSwitchWidth={220}
         onChange={onSearchChange}
-        placeholder="Search timeline..."
+        placeholder="Search schedule..."
         value={searchFilter}
       />
       <div

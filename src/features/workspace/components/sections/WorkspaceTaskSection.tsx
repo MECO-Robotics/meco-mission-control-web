@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 
 import { MilestonesView } from "@/features/workspace/views/milestones/MilestonesView";
 import { TaskCalendarView } from "@/features/workspace/views/taskCalendar/TaskCalendarView";
@@ -12,6 +12,7 @@ const MemoizedTimelineView = memo(TimelineView);
 
 export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
   const disablePanelAnimations = props.disablePanelAnimations ?? false;
+  const [scheduleSearchFilter, setScheduleSearchFilter] = useState("");
   const {
     activePersonFilter,
     bootstrap,
@@ -62,6 +63,8 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
               onCreateMilestoneReport={props.openCreateMilestoneReportModal}
               onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
               onSaveTimelineMilestone={handleTimelineMilestoneSave}
+              searchFilter={scheduleSearchFilter}
+              onSearchChange={setScheduleSearchFilter}
               onTaskDetailOpen={openTimelineTaskDetailsModal}
               onTaskEditCanceled={props.onTaskEditCanceled}
               onTaskEditSaved={props.onTaskEditSaved}
@@ -77,6 +80,8 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
               onCreateMilestoneReport={props.openCreateMilestoneReportModal}
               onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
               onSaveTimelineMilestone={handleTimelineMilestoneSave}
+              searchFilter={scheduleSearchFilter}
+              onSearchChange={setScheduleSearchFilter}
               openCreateTaskModal={openCreateTaskModalFromTimeline}
               openTaskDetailModal={openTimelineTaskDetailsModal}
               setActivePersonFilter={setActivePersonFilter}

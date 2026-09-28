@@ -41,6 +41,8 @@ interface TimelineViewProps {
     payload: MilestonePayload,
   ) => Promise<void>;
   triggerCreateMilestoneToken: number;
+  searchFilter?: string;
+  onSearchChange?: (value: string) => void;
 }
 
 export const TimelineView: React.FC<TimelineViewProps> = ({
@@ -56,10 +58,14 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   onDeleteTimelineMilestone,
   onSaveTimelineMilestone,
   triggerCreateMilestoneToken,
+  searchFilter: controlledSearchFilter,
+  onSearchChange,
 }) => {
   const state = useTimelineViewState();
   const { setTimelineZoomMin } = state;
-  const [searchFilter, setSearchFilter] = useState("");
+  const [localSearchFilter, setLocalSearchFilter] = useState("");
+  const searchFilter = controlledSearchFilter ?? localSearchFilter;
+  const setSearchFilter = onSearchChange ?? setLocalSearchFilter;
   const filterControls = useTimelineViewFilters({
     activePersonFilter,
     bootstrap,

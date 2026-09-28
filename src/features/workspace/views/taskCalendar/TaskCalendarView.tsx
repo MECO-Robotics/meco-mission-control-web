@@ -8,11 +8,7 @@ import { toErrorMessage } from "@/lib/appUtils/common";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
-import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
-import {
-  buildTopbarSearchProps,
-  WorkspaceTopbarControls,
-} from "@/features/workspace/shared/topbar";
+import { WorkspaceTopbarControls } from "@/features/workspace/shared/topbar";
 import { MilestonesMilestoneModal } from "@/features/workspace/views/milestones/MilestonesEventModal";
 import { useMilestonesMilestoneModalState } from "@/features/workspace/views/milestones/sections/useMilestonesEventModalState";
 import { TaskCalendarFilterToolbar } from "./TaskCalendarFilterToolbar";
@@ -35,6 +31,8 @@ interface TaskCalendarViewProps {
     payload: MilestonePayload,
   ) => Promise<void>;
   onTaskDetailOpen: (task: TaskRecord) => void;
+  searchFilter?: string;
+  onSearchChange?: (value: string) => void;
   onTaskEditCanceled?: () => void;
   onTaskEditSaved?: () => void;
 }
@@ -65,6 +63,8 @@ export function TaskCalendarView({
   onDeleteTimelineMilestone,
   onSaveTimelineMilestone,
   onTaskDetailOpen,
+  searchFilter,
+  onSearchChange,
   onTaskEditCanceled = () => {},
   onTaskEditSaved = () => {},
 }: TaskCalendarViewProps) {
@@ -78,6 +78,8 @@ export function TaskCalendarView({
     activePersonFilter,
     bootstrap,
     isAllProjectsView,
+    searchFilter,
+    onSearchChange,
   });
   useEffect(() => {
     const handleSchedulePeriodChange = (event: Event) => {
@@ -151,26 +153,14 @@ export function TaskCalendarView({
   return (
     <section className={`panel dense-panel task-calendar-shell ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">
-        <WorkspaceTopbarControls
-          className="task-queue-toolbar task-calendar-filter-toolbar"
-          search={
-            <TopbarResponsiveSearch
-              {...buildTopbarSearchProps("calendar", {
-                actions: (
-                  <TaskCalendarFilterToolbar
-                    eventFilter={calendar.eventFilter}
-                    onEventFilterChange={calendar.setEventFilter}
-                    onSortModeChange={calendar.setSortMode}
-                    sortMode={calendar.sortMode}
-                  />
-                ),
-                onChange: calendar.setSearchFilter,
-                placeholder: "Search calendar...",
-                value: calendar.searchFilter,
-              })}
-            />
-          }
-        />
+        <WorkspaceTopbarControls className="task-queue-toolbar task-calendar-filter-toolbar">
+          <TaskCalendarFilterToolbar
+            eventFilter={calendar.eventFilter}
+            onEventFilterChange={calendar.setEventFilter}
+            onSortModeChange={calendar.setSortMode}
+            sortMode={calendar.sortMode}
+          />
+        </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
 
       {calendar.unfilteredEvents.length === 0 ? (
