@@ -69,11 +69,6 @@ export function WorkstreamEditorModal({
                 }))
               }
               required
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
               value={workstreamDraft.name}
             />
           </label>
@@ -87,11 +82,6 @@ export function WorkstreamEditorModal({
                 }))
               }
               required
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
               value={workstreamDraft.projectId}
             >
               <option value="" disabled>
@@ -115,11 +105,6 @@ export function WorkstreamEditorModal({
               }
               required
               rows={3}
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
               value={workstreamDraft.description}
             />
           </label>
@@ -148,11 +133,6 @@ export function WorkstreamEditorModal({
             <button
               className="secondary-action"
               onClick={closeWorkstreamModal}
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
               type="button"
             >
               Cancel

@@ -20,14 +20,7 @@ interface PartDefinitionEditorModalProps {
   setPartDefinitionDraft: Dispatch<SetStateAction<PartDefinitionPayload>>;
 }
 
-const fieldInputStyle = {
-  background: "var(--bg-row-alt)",
-  color: "var(--text-title)",
-  border: "1px solid var(--border-base)",
-} as const;
-
 const fieldInputMonoStyle = {
-  ...fieldInputStyle,
   fontFamily: "var(--font-mono)",
 } as const;
 
@@ -36,10 +29,6 @@ const checkboxLabelStyle = {
   alignItems: "center",
   gap: "0.5rem",
   color: "var(--text-title)",
-} as const;
-
-const cancelButtonStyle = {
-  ...fieldInputStyle,
 } as const;
 
 export function PartDefinitionEditorModal({
@@ -77,7 +66,6 @@ export function PartDefinitionEditorModal({
             setPartDefinitionDraft((current) => ({ ...current, name: milestone.target.value }))
           }
           required
-          style={fieldInputStyle}
           value={partDefinitionDraft.name}
         />
       </label>
@@ -116,7 +104,6 @@ export function PartDefinitionEditorModal({
                 iteration: Number(milestone.target.value),
               }))
             }
-            style={fieldInputStyle}
             value={partDefinitionDraft.iteration ?? 1}
           >
             {partDefinitionIterationOptions.map((iteration) => (
@@ -134,7 +121,6 @@ export function PartDefinitionEditorModal({
             setPartDefinitionDraft((current) => ({ ...current, type: milestone.target.value }))
           }
           required
-          style={fieldInputStyle}
           value={partDefinitionDraft.type}
         />
       </label>
@@ -144,7 +130,6 @@ export function PartDefinitionEditorModal({
           onChange={(milestone) =>
             setPartDefinitionDraft((current) => ({ ...current, source: milestone.target.value }))
           }
-          style={fieldInputStyle}
           value={partDefinitionDraft.source}
         />
       </label>
@@ -175,7 +160,6 @@ export function PartDefinitionEditorModal({
               materialId: milestone.target.value || null,
             }))
           }
-          style={fieldInputStyle}
           value={partDefinitionDraft.materialId ?? ""}
         >
           <option value="">No material</option>
@@ -196,7 +180,6 @@ export function PartDefinitionEditorModal({
             }))
           }
           rows={3}
-          style={fieldInputStyle}
           value={partDefinitionDraft.description}
         />
       </label>
@@ -240,7 +223,6 @@ export function PartDefinitionEditorModal({
         <button
           className="secondary-action"
           onClick={closePartDefinitionModal}
-          style={cancelButtonStyle}
           type="button"
         >
           Cancel

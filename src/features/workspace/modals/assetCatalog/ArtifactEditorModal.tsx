@@ -53,11 +53,6 @@ export function ArtifactEditorModal({
             }))
           }
           required
-          style={{
-            background: "var(--bg-row-alt)",
-            color: "var(--text-title)",
-            border: "1px solid var(--border-base)",
-          }}
           value={artifactDraft.title}
         />
       </label>
@@ -79,11 +74,6 @@ export function ArtifactEditorModal({
             })
           }
           required
-          style={{
-            background: "var(--bg-row-alt)",
-            color: "var(--text-title)",
-            border: "1px solid var(--border-base)",
-          }}
           value={artifactDraft.projectId}
         >
           <option value="" disabled>
@@ -105,11 +95,6 @@ export function ArtifactEditorModal({
               workstreamId: milestone.target.value || null,
             }))
           }
-          style={{
-            background: "var(--bg-row-alt)",
-            color: "var(--text-title)",
-            border: "1px solid var(--border-base)",
-          }}
           value={artifactDraft.workstreamId ?? ""}
         >
           <option value="">Project-level artifact</option>
@@ -129,11 +114,6 @@ export function ArtifactEditorModal({
               status: milestone.target.value as ArtifactStatus,
             }))
           }
-          style={{
-            background: "var(--bg-row-alt)",
-            color: "var(--text-title)",
-            border: "1px solid var(--border-base)",
-          }}
           value={artifactDraft.status}
         >
           <option value="draft">Draft</option>
@@ -151,11 +131,6 @@ export function ArtifactEditorModal({
             }))
           }
           rows={3}
-          style={{
-            background: "var(--bg-row-alt)",
-            color: "var(--text-title)",
-            border: "1px solid var(--border-base)",
-          }}
           value={artifactDraft.summary}
         />
       </label>
@@ -169,11 +144,6 @@ export function ArtifactEditorModal({
             }))
           }
           placeholder="https://..."
-          style={{
-            background: "var(--bg-row-alt)",
-            color: "var(--text-title)",
-            border: "1px solid var(--border-base)",
-          }}
           type="url"
           value={artifactDraft.link}
         />
@@ -206,11 +176,6 @@ export function ArtifactEditorModal({
         <button
           className="secondary-action"
           onClick={closeArtifactModal}
-          style={{
-            background: "var(--bg-row-alt)",
-            color: "var(--text-title)",
-            border: "1px solid var(--border-base)",
-          }}
           type="button"
         >
           Cancel
