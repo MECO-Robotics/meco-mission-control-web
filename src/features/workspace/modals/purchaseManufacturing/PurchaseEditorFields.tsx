@@ -25,7 +25,7 @@ export function PurchaseEditorFields({
   return (
     <>
       <label className="field modal-wide">
-        <span style={{ color: "var(--text-title)" }}>Part</span>
+        <span>Part</span>
         <select
           onChange={(milestone) => {
             const partDefinitionId = milestone.target.value;
@@ -57,7 +57,7 @@ export function PurchaseEditorFields({
         </small>
       </label>
       <label className="field">
-        <span style={{ color: "var(--text-title)" }}>Subsystem</span>
+        <span>Subsystem</span>
         <select
           onChange={(milestone) =>
             setPurchaseDraft((current) => ({
@@ -76,7 +76,7 @@ export function PurchaseEditorFields({
         </select>
       </label>
       <label className="field">
-        <span style={{ color: "var(--text-title)" }}>Requester</span>
+        <span>Requester</span>
         <select
           onChange={(milestone) =>
             setPurchaseDraft((current) => ({
@@ -96,7 +96,7 @@ export function PurchaseEditorFields({
         </select>
       </label>
       <label className="field">
-        <span style={{ color: "var(--text-title)" }}>Vendor</span>
+        <span>Vendor</span>
         <input
           onChange={(milestone) =>
             setPurchaseDraft((current) => ({
@@ -110,7 +110,7 @@ export function PurchaseEditorFields({
         />
       </label>
       <label className="field">
-        <span style={{ color: "var(--text-title)" }}>Link label</span>
+        <span>Link label</span>
         <input
           onChange={(milestone) =>
             setPurchaseDraft((current) => ({
@@ -124,7 +124,7 @@ export function PurchaseEditorFields({
         />
       </label>
       <label className="field">
-        <span style={{ color: "var(--text-title)" }}>Quantity</span>
+        <span>Quantity</span>
         <input
           min="1"
           onChange={(milestone) =>
@@ -139,7 +139,7 @@ export function PurchaseEditorFields({
         />
       </label>
       <label className="field">
-        <span style={{ color: "var(--text-title)" }}>Status</span>
+        <span>Status</span>
         <select
           onChange={(milestone) =>
             setPurchaseDraft((current) => ({
@@ -158,7 +158,7 @@ export function PurchaseEditorFields({
         </select>
       </label>
       <label className="field">
-        <span style={{ color: "var(--text-title)" }}>Estimated cost</span>
+        <span>Estimated cost</span>
         <input
           min="0"
           onChange={(milestone) =>
@@ -174,7 +174,7 @@ export function PurchaseEditorFields({
         />
       </label>
       <label className="field">
-        <span style={{ color: "var(--text-title)" }}>Final cost</span>
+        <span>Final cost</span>
         <input
           min="0"
           onChange={(milestone) => setPurchaseFinalCost(milestone.target.value)}
