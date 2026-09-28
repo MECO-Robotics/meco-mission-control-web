@@ -41,7 +41,6 @@ export interface WorkspaceModalHostViewProps {
   bootstrap: BootstrapPayload;
   mechanismsById: Record<string, BootstrapPayload["mechanisms"][number]>;
   partDefinitionsById: Record<string, BootstrapPayload["partDefinitions"][number]>;
-  partInstancesById: Record<string, BootstrapPayload["partInstances"][number]>;
   closeQaReportModal: () => void;
   closeMilestoneReportModal: () => void;
   closeWorkLogModal: () => void;
@@ -50,7 +49,6 @@ export interface WorkspaceModalHostViewProps {
   onTaskEditCanceled: () => void;
   requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
-  milestonesById: Record<string, BootstrapPayload["milestones"][number]>;
   handleQaReportSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
   handleMilestoneReportSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
   handleWorkLogSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
