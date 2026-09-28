@@ -5,12 +5,6 @@
   outline: none;
 }
 
-.member-action-danger:hover,
-.member-action-danger:focus-visible {
-  background: rgba(234, 28, 45, 0.1);
-  color: var(--official-red);
-}
-
 .member-row.active {
   border-color: var(--meco-blue);
   box-shadow: 0 10px 22px rgba(22, 71, 142, 0.12);

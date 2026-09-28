@@ -66,11 +66,6 @@
   width: 100%;
 }
 
-.task-detail-inline-edit-select-chip {
-  width: fit-content;
-  max-width: 100%;
-}
-
 .task-details-dependency-editor {
   display: grid;
   gap: 0.5rem;
@@ -141,9 +136,4 @@
 .task-details-dependency-row-remove-button svg {
   width: 14px;
   height: 14px;
-}
-
-.task-detail-inline-edit-select-status {
-  width: fit-content;
-  max-width: 100%;
 }

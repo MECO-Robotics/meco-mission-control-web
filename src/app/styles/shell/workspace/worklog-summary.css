@@ -1,7 +1,3 @@
-.worklog-summary-stat-grid {
-  margin: 0 0 0.2rem;
-}
-
 .worklog-summary-stat-card {
   border: 1px solid var(--border-base);
   border-radius: 12px;
@@ -43,14 +39,6 @@
 
 .page-shell.dark-mode .worklog-summary-card .section-copy {
   color: var(--text-title);
-}
-
-.worklog-summary-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 0.42rem;
 }
 
 .worklog-summary-list-label {
