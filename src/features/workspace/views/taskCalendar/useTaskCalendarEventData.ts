@@ -20,13 +20,19 @@ export function useTaskCalendarEventData({
   activePersonFilter,
   bootstrap,
   isAllProjectsView,
+  searchFilter: controlledSearchFilter,
+  onSearchChange,
 }: {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   isAllProjectsView: boolean;
+  searchFilter?: string;
+  onSearchChange?: (value: string) => void;
 }) {
   const [eventFilter, setEventFilter] = useState<"all" | TaskCalendarEventType>("all");
-  const [searchFilter, setSearchFilter] = useState("");
+  const [localSearchFilter, setLocalSearchFilter] = useState("");
+  const searchFilter = controlledSearchFilter ?? localSearchFilter;
+  const setSearchFilter = onSearchChange ?? setLocalSearchFilter;
   const [sortMode, setSortMode] = useState<TaskCalendarSortMode>("date");
   const [monthCursor, setMonthCursor] = useState(() => {
     const today = new Date();

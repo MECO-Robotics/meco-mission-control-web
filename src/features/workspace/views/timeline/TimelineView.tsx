@@ -42,6 +42,8 @@ interface TimelineViewProps {
     payload: MilestonePayload,
   ) => Promise<void>;
   triggerCreateMilestoneToken: number;
+  searchFilter?: string;
+  onSearchChange?: (value: string) => void;
 }
 
 export const TimelineView: React.FC<TimelineViewProps> = ({
@@ -58,6 +60,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   onDeleteTimelineMilestone,
   onSaveTimelineMilestone,
   triggerCreateMilestoneToken,
+  searchFilter: controlledSearchFilter,
+  onSearchChange,
 }) => {
   void _membersById;
 
@@ -68,7 +72,9 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
     viewAnchorDate,
   } = state;
   const [timelineShellWidth, setTimelineShellWidth] = useState(0);
-  const [searchFilter, setSearchFilter] = useState("");
+  const [localSearchFilter, setLocalSearchFilter] = useState("");
+  const searchFilter = controlledSearchFilter ?? localSearchFilter;
+  const setSearchFilter = onSearchChange ?? setLocalSearchFilter;
   const filterControls = useTimelineViewFilters({
     activePersonFilter,
     bootstrap,
