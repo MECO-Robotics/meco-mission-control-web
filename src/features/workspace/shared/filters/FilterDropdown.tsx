@@ -15,6 +15,7 @@ import {
 export function FilterDropdown({
   allLabel,
   ariaLabel,
+  appearance = "toolbar",
   className,
   buttonDataTutorialTarget,
   buttonInlineEditField,
@@ -33,6 +34,7 @@ export function FilterDropdown({
   value,
 }: {
   allLabel: string;
+  appearance?: "toolbar" | "column";
   ariaLabel?: string;
   className?: string;
   buttonDataTutorialTarget?: string;
@@ -40,7 +42,7 @@ export function FilterDropdown({
   buttonContent?: ReactNode;
   getOptionToneClassName?: (option: DropdownOption) => string | undefined;
   getSelectedToneClassName?: (value: FilterSelection) => string | undefined;
-  icon: ReactNode;
+  icon?: ReactNode;
   menuClassName?: string;
   portalMenu?: boolean;
   portalMenuPlacement?: "auto" | "above" | "below";
@@ -65,6 +67,8 @@ export function FilterDropdown({
   const selectedOption = options.find((option) => option.id === value[0]);
   const selectedIcon = selectedOption?.icon ?? icon;
   const selectedToneClassName = getSelectedToneClassName?.(value);
+  const columnAppearance = appearance === "column";
+  const accessibleLabel = `${ariaLabel ?? allLabel}${columnAppearance && !isActive ? "" : `: ${selectedLabel}`}`;
 
   const renderMenu = (style?: CSSProperties) => (
     <FilterOptionMenu
@@ -92,28 +96,33 @@ export function FilterDropdown({
     onClose: () => setIsOpen(false),
     portalMenu,
     portalMenuPlacement,
-    viewSelector: ".workspace-panel, .panel, .page-shell, .modal-card",
+    viewSelector: columnAppearance
+      ? ".workspace-panel, .panel, .page-shell"
+      : ".workspace-panel, .panel, .page-shell, .modal-card",
   });
 
   return (
     <span
-      className={`toolbar-filter toolbar-filter-dropdown${isActive ? " is-active" : ""}${isOpen ? " is-open" : ""}${selectedToneClassName ? ` ${selectedToneClassName}` : ""}${className ? ` ${className}` : ""}`}
+      className={`${columnAppearance ? "table-column-filter" : "toolbar-filter toolbar-filter-dropdown"}${isActive ? " is-active" : ""}${isOpen ? " is-open" : ""}${!columnAppearance && selectedToneClassName ? ` ${selectedToneClassName}` : ""}${!columnAppearance && className ? ` ${className}` : ""}`}
       ref={filterRef}
     >
       <button
         aria-controls={menuId}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        aria-label={`${ariaLabel ?? allLabel}: ${selectedLabel}`}
-        className="toolbar-filter-menu-button"
+        aria-label={accessibleLabel}
+        className={columnAppearance ? "table-column-filter-button" : "toolbar-filter-menu-button"}
         data-tutorial-target={buttonDataTutorialTarget}
         data-inline-edit-field={buttonInlineEditField}
         ref={buttonRef}
-        onClick={() => setIsOpen((current) => !current)}
-        title={`${ariaLabel ?? allLabel}: ${selectedLabel}`}
+        onClick={(event) => {
+          if (columnAppearance) event.stopPropagation();
+          setIsOpen((current) => !current);
+        }}
+        title={accessibleLabel}
         type="button"
       >
-        {buttonContent ?? (
+        {columnAppearance ? buttonContent : buttonContent ?? (
           <>
             <span className="toolbar-filter-icon">{selectedIcon}</span>
             <span aria-hidden="true" className="toolbar-filter-value">
