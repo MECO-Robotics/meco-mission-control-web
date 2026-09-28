@@ -62,7 +62,7 @@ export function QaReportEditorModal({
           style={{ color: "var(--text-copy)" }}
         >
           <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Task</span>
+            <span>Task</span>
             <select
               aria-label="Task"
               onChange={(milestone) =>
@@ -96,7 +96,7 @@ export function QaReportEditorModal({
             ) : null}
           </label>
           <label className="field">
-            <span style={{ color: "var(--text-title)" }}>Result</span>
+            <span>Result</span>
             <select
               onChange={(milestone) =>
                 setQaReportDraft((current) => ({
@@ -117,7 +117,7 @@ export function QaReportEditorModal({
             </select>
           </label>
           <label className="field">
-            <span style={{ color: "var(--text-title)" }}>Reviewed date</span>
+            <span>Reviewed date</span>
             <input
               onChange={(milestone) =>
                 setQaReportDraft((current) => ({
@@ -136,7 +136,7 @@ export function QaReportEditorModal({
             />
           </label>
           <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Participants</span>
+            <span>Participants</span>
             <select
               multiple
               onChange={(milestone) =>
@@ -186,7 +186,7 @@ export function QaReportEditorModal({
             setQaReportDraft={setQaReportDraft}
           />
           <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Notes</span>
+            <span>Notes</span>
             <textarea
               onChange={(milestone) =>
                 setQaReportDraft((current) => ({

@@ -66,7 +66,7 @@ export function MilestoneReportEditorModal({
           style={{ color: "var(--text-copy)" }}
         >
           <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Milestone</span>
+            <span>Milestone</span>
             <select
               aria-label="Milestone"
               onChange={(milestone) =>
@@ -97,7 +97,7 @@ export function MilestoneReportEditorModal({
             ) : null}
           </label>
           <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Title</span>
+            <span>Title</span>
             <input
               onChange={(milestone) =>
                 setMilestoneReportDraft((current) => ({
@@ -115,7 +115,7 @@ export function MilestoneReportEditorModal({
             />
           </label>
           <label className="field">
-            <span style={{ color: "var(--text-title)" }}>Status</span>
+            <span>Status</span>
             <select
               onChange={(milestone) =>
                 setMilestoneReportDraft((current) => ({
@@ -136,7 +136,7 @@ export function MilestoneReportEditorModal({
             </select>
           </label>
           <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Findings (one per line)</span>
+            <span>Findings (one per line)</span>
             <textarea
               onChange={(milestone) => setMilestoneReportFindings(milestone.target.value)}
               placeholder="Add findings from this milestone."

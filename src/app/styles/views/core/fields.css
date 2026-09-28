@@ -21,6 +21,10 @@
   gap: 0.25rem;
 }
 
+.modal-form .field > span {
+  color: var(--text-title);
+}
+
 .field input,
 .field select,
 .field textarea {

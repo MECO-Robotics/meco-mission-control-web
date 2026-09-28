@@ -64,7 +64,7 @@ export function WorkLogEditorModal({
           style={{ color: "var(--text-copy)" }}
         >
           <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Task</span>
+            <span>Task</span>
             <select
               aria-label="Task"
               onChange={(milestone) =>
@@ -114,7 +114,7 @@ export function WorkLogEditorModal({
             ) : null}
           </label>
           <label className="field">
-            <span style={{ color: "var(--text-title)" }}>Date</span>
+            <span>Date</span>
             <input
               onChange={(milestone) =>
                 setWorkLogDraft((current) => ({
@@ -133,7 +133,7 @@ export function WorkLogEditorModal({
             />
           </label>
           <label className="field">
-            <span style={{ color: "var(--text-title)" }}>Hours</span>
+            <span>Hours</span>
             <input
               min="0.5"
               onChange={(milestone) =>
@@ -154,7 +154,7 @@ export function WorkLogEditorModal({
             />
           </label>
           <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Participants</span>
+            <span>Participants</span>
             <select
               multiple
               onChange={(milestone) =>
@@ -185,7 +185,7 @@ export function WorkLogEditorModal({
             </small>
           </label>
           <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Notes</span>
+            <span>Notes</span>
             <textarea
               onChange={(milestone) =>
                 setWorkLogDraft((current) => ({
