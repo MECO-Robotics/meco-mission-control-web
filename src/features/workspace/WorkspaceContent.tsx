@@ -46,7 +46,6 @@ function getSwipeDirection<T extends string>(
 }
 
 export interface WorkspaceContentProps {
-  currentMemberId?: string | null;
   activePersonFilter: FilterSelection;
   activeTab: ViewTab;
   tabSwitchDirection: TabSwitchDirection;
@@ -69,7 +68,6 @@ export interface WorkspaceContentProps {
   ) => Promise<void>;
   handleUpdateMember: (milestone: React.FormEvent<HTMLFormElement>) => void;
   isAddPersonOpen: boolean;
-  isActivityModalOpen: boolean;
   isDeletingMember: boolean;
   isEditPersonOpen: boolean;
   isLoadingData: boolean;
@@ -146,7 +144,6 @@ export interface WorkspaceContentProps {
   requestMemberPhotoUpload: (file: File) => Promise<string>;
   setActivePersonFilter: (value: FilterSelection) => void;
   setIsAddPersonOpen: (open: boolean) => void;
-  setIsActivityModalOpen: (open: boolean) => void;
   setIsEditPersonOpen: (open: boolean) => void;
   setMemberEditDraft: Dispatch<SetStateAction<MemberPayload | null>>;
   setMemberForm: Dispatch<SetStateAction<MemberPayload>>;

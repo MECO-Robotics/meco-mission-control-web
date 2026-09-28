@@ -83,7 +83,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
         <SidebarOverlay controller={c} />
         <WorkspaceContent
           {...c}
-          currentMemberId={c.signedInMember?.id ?? null}
           allMembers={c.bootstrap.members}
           artifacts={c.scopedArtifacts}
           availabilityBootstrap={c.bootstrap}
