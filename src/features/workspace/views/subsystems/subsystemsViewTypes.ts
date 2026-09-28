@@ -15,7 +15,6 @@ export interface SubsystemsViewProps {
 
 export interface SubsystemCounts {
   mechanisms: number;
-  parts: number;
   tasks: number;
   openTasks: number;
 }
