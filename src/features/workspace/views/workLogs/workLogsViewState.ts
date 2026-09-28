@@ -206,16 +206,12 @@ export function useWorkLogsViewState({
   const workLogs = useMemo(
     () =>
       filterAndSortWorkLogs({
-        activePersonFilter,
-        membersById,
-        search,
         sortMode,
-        subsystemsById,
         subsystemFilter,
         taskById,
-        workLogs: bootstrap.workLogs,
+        workLogs: summaryWorkLogs,
       }),
-    [activePersonFilter, bootstrap.workLogs, membersById, search, sortMode, subsystemsById, subsystemFilter, taskById],
+    [sortMode, subsystemFilter, summaryWorkLogs, taskById],
   );
   const activityActions = useMemo(() => {
     const actions = selectActivityActions({
