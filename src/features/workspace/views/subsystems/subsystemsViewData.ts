@@ -21,7 +21,6 @@ export function buildCountsBySubsystemId(
       subsystem.id,
       {
         mechanisms: 0,
-        parts: 0,
         tasks: 0,
         openTasks: 0,
       },
@@ -34,28 +33,16 @@ export function buildCountsBySubsystemId(
     }
     countsBySubsystemId[mechanism.subsystemId] = countsBySubsystemId[mechanism.subsystemId] ?? {
       mechanisms: 0,
-      parts: 0,
       tasks: 0,
       openTasks: 0,
     };
     countsBySubsystemId[mechanism.subsystemId].mechanisms += 1;
   }
 
-  for (const partInstance of bootstrap.partInstances) {
-    countsBySubsystemId[partInstance.subsystemId] = countsBySubsystemId[partInstance.subsystemId] ?? {
-      mechanisms: 0,
-      parts: 0,
-      tasks: 0,
-      openTasks: 0,
-    };
-    countsBySubsystemId[partInstance.subsystemId].parts += 1;
-  }
-
   for (const task of bootstrap.tasks) {
     for (const subsystemId of task.subsystemIds) {
       countsBySubsystemId[subsystemId] = countsBySubsystemId[subsystemId] ?? {
         mechanisms: 0,
-        parts: 0,
         tasks: 0,
         openTasks: 0,
       };

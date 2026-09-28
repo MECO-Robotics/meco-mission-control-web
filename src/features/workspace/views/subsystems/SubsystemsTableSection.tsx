@@ -65,7 +65,6 @@ export function SubsystemsTableSection({
         {filteredSubsystems.map((subsystem) => {
           const counts = countsBySubsystemId[subsystem.id] ?? {
             mechanisms: 0,
-            parts: 0,
             tasks: 0,
             openTasks: 0,
           };
