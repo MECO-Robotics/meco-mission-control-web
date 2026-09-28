@@ -93,11 +93,6 @@ export function useTaskCalendarEventData({
     });
     return grouped;
   }, [events]);
-  const monthLabel = monthCursor.toLocaleDateString(undefined, {
-    month: "long",
-    year: "numeric",
-  });
-
   return {
     eventFilter,
     events,
@@ -106,7 +101,6 @@ export function useTaskCalendarEventData({
     monthCells,
     weekCells,
     monthCursor,
-    monthLabel,
     projectsById,
     scopedProjectIds,
     searchFilter,

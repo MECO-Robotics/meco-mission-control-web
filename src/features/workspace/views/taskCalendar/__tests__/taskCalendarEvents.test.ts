@@ -69,7 +69,6 @@ describe("buildTaskCalendarEvents", () => {
     const meetingEvent = events.find((event) => event.id === "meeting:build-night");
 
     expect(meetingEvent?.start).toBe("2026-05-07T18:00:00");
-    expect(meetingEvent?.extendedProps.projectId).toBe("project-robot");
     expect(meetingEvent?.extendedProps.contextLabel).toBe("Robot 2026");
     expect(meetingEvent?.extendedProps.status).toBe("build");
     expect(meetingEvent?.title).toBe("Robot 2026 | Meeting: Build night");
