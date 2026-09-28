@@ -39,8 +39,7 @@ export function WorkLogEditorModal({
   return (
     <ModalDialog label="Add work log" onClose={closeWorkLogModal}>
       <section
-        className="modal-card"
-        style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
+        className="modal-card modal-panel-surface"
       >
         <div className="panel-header compact-header">
           <div>

@@ -150,9 +150,8 @@ export function MilestonesEventDetailsModal({
   return createPortal(
     <ModalDialog label={activeMilestone.title} onClose={handleClose}>
       <section
-        className="modal-card task-details-modal"
+        className="modal-card task-details-modal modal-panel-surface"
         data-tutorial-target={isEditMode ? "milestone-edit-modal" : "milestone-detail-modal"}
-        style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
       >
         <div className="panel-header compact-header task-details-header">
           <div>

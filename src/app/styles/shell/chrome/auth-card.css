@@ -27,6 +27,8 @@
   min-width: 0;
 }
 
+.modal-card.modal-panel-surface { background: var(--bg-panel); border: 1px solid var(--border-base); }
+
 .auth-card {
   width: 100%;
   border: 1px solid rgba(15, 28, 52, 0.08);
