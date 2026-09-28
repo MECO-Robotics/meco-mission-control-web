@@ -1,6 +1,7 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MeetingRecord, TaskRecord } from "@/types/recordsExecution";
 import { dateDiffInDays } from "@/lib/appUtils/common";
+import { formatLocalDate } from "@/lib/dateUtils";
 import { datePortion, endOfTimelineWeek, monthEndFromDay, monthStartFromDay, startOfTimelineWeek } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import { compareTimelineMilestonesByStart } from "./timelineMilestoneData";
@@ -75,8 +76,8 @@ function buildTimelineDateRange({
       const fallbackEnd = new Date(now.getFullYear(), now.getMonth() + ALL_INTERVAL_FUTURE_MONTHS + 1, 0, 12);
 
       return {
-        startDate: fallbackStart.toISOString().slice(0, 10),
-        endDate: fallbackEnd.toISOString().slice(0, 10),
+        startDate: formatLocalDate(fallbackStart),
+        endDate: formatLocalDate(fallbackEnd),
       };
     }
 
@@ -98,8 +99,8 @@ function buildTimelineDateRange({
       endObj.setTime(boundedEnd.getTime());
     }
 
-    startDate = startObj.toISOString().slice(0, 10);
-    endDate = endObj.toISOString().slice(0, 10);
+    startDate = formatLocalDate(startObj);
+    endDate = formatLocalDate(endObj);
   } else {
     const now = new Date(`${viewAnchorDate}T12:00:00`);
     let start: Date;
@@ -113,8 +114,8 @@ function buildTimelineDateRange({
       end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 12);
     }
 
-    startDate = start.toISOString().slice(0, 10);
-    endDate = end.toISOString().slice(0, 10);
+    startDate = formatLocalDate(start);
+    endDate = formatLocalDate(end);
   }
 
   return { startDate, endDate };
@@ -126,7 +127,7 @@ function buildTimelineDays(startDate: string, endDate: string) {
   const dayCursor = new Date(`${startDate}T12:00:00`);
 
   for (let index = 0; index < totalDays; index += 1) {
-    days.push(dayCursor.toISOString().slice(0, 10));
+    days.push(formatLocalDate(dayCursor));
     dayCursor.setDate(dayCursor.getDate() + 1);
   }
 
@@ -155,7 +156,7 @@ function buildTimelineDayIndex<T>(
     const finalDay = new Date(`${rangeEnd}T12:00:00`);
 
     while (cursor <= finalDay) {
-      const dayKey = cursor.toISOString().slice(0, 10);
+      const dayKey = formatLocalDate(cursor);
       (recordsByDay[dayKey] ??= []).push(record);
       cursor.setDate(cursor.getDate() + 1);
     }

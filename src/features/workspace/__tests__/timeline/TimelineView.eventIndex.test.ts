@@ -5,6 +5,42 @@ import { buildTimelineData } from "@/features/workspace/views/timeline/timelineV
 import { createBootstrap, createTimelineMilestone } from "./timelineTestFixtures";
 
 describe("timeline event day indexing", () => {
+  it("keeps local calendar dates stable in UTC+14", () => {
+    const previousTimezone = process.env.TZ;
+    process.env.TZ = "Pacific/Kiritimati";
+
+    try {
+      const bootstrap = createBootstrap();
+      const timeline = buildTimelineData({
+        isAllProjectsView: true,
+        milestones: [],
+        projectsById: {
+          "project-1": bootstrap.projects[0] as BootstrapPayload["projects"][number],
+        },
+        scopedSubsystems: [],
+        scopedTasks: [],
+        viewAnchorDate: "2026-04-08",
+        viewInterval: "week",
+      });
+
+      expect(timeline.days).toEqual([
+        "2026-04-05",
+        "2026-04-06",
+        "2026-04-07",
+        "2026-04-08",
+        "2026-04-09",
+        "2026-04-10",
+        "2026-04-11",
+      ]);
+    } finally {
+      if (previousTimezone === undefined) {
+        delete process.env.TZ;
+      } else {
+        process.env.TZ = previousTimezone;
+      }
+    }
+  });
+
   it("clips event ranges to the visible week and preserves their date ordering", () => {
     const bootstrap = createBootstrap();
     const timeline = buildTimelineData({
