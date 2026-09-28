@@ -196,12 +196,9 @@ export function useWorkLogsViewState({
       buildWorkLogsSummaryState({
         activePersonFilter,
         bootstrap,
-        membersById,
-        subsystemsById,
         summaryWorkLogs,
-        taskById,
       }),
-    [activePersonFilter, bootstrap, membersById, subsystemsById, summaryWorkLogs, taskById],
+    [activePersonFilter, bootstrap, summaryWorkLogs],
   );
   const workLogs = useMemo(
     () =>
