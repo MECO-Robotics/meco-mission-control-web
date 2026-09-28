@@ -62,7 +62,6 @@ describe("TimelineView", () => {
         selectSubsystemRow: jest.fn(),
         selectTaskRow: jest.fn(),
         selectedSubsystemId: null,
-        isWeekView: true,
         showProjectCol: true,
         showSubsystemCol: true,
         statusIconColumnIndex: 3,
