@@ -18,15 +18,12 @@ export type TaskCalendarEventType =
 export interface TaskCalendarEventProps {
   contextLabel: string | null;
   priority?: string;
-  projectId: string | null;
   recordId: string;
   status?: string;
   type: TaskCalendarEventType;
 }
 
 export interface TaskCalendarEvent {
-  allDay: boolean;
-  classNames: string[];
   extendedProps: TaskCalendarEventProps;
   id: string;
   start: string;
@@ -119,12 +116,9 @@ export function buildTaskCalendarEvents({
       });
 
       return {
-        allDay: !hasTime(task.dueDate),
-        classNames: ["task-calendar-event", `task-calendar-event-${type}`],
         extendedProps: {
           contextLabel,
           priority: task.priority,
-          projectId: task.projectId,
           recordId: task.id,
           status: task.status,
           type,
@@ -153,11 +147,8 @@ export function buildTaskCalendarEvents({
       });
 
       return {
-        allDay: !hasTime(milestone.startDateTime),
-        classNames: ["task-calendar-event", "task-calendar-event-milestone"],
         extendedProps: {
           contextLabel,
-          projectId: milestone.projectIds[0] ?? null,
           recordId: milestone.id,
           status: milestone.status,
           type: "milestone",
@@ -184,11 +175,8 @@ export function buildTaskCalendarEvents({
       });
 
       return {
-        allDay: !hasTime(item.dueDate),
-        classNames: ["task-calendar-event", "task-calendar-event-manufacturing-due"],
         extendedProps: {
           contextLabel,
-          projectId,
           recordId: item.id,
           status: item.status,
           type: "manufacturing-due",
@@ -214,11 +202,8 @@ export function buildTaskCalendarEvents({
       });
 
       return {
-        allDay: !hasTime(meetingStart),
-        classNames: ["task-calendar-event", "task-calendar-event-event"],
         extendedProps: {
           contextLabel,
-          projectId: meeting.projectIds?.[0] ?? null,
           recordId: meeting.id,
           status: meeting.meetingType ?? "general",
           type: "event",

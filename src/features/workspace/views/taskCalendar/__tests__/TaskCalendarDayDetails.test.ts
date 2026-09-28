@@ -10,12 +10,9 @@ import type { TaskCalendarEvent } from "@/features/workspace/views/taskCalendar/
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 
 const taskEvent: TaskCalendarEvent = {
-  allDay: true,
-  classNames: ["task-calendar-event", "task-calendar-event-task-due"],
   extendedProps: {
     contextLabel: "Robot",
     priority: "high",
-    projectId: "project-robot",
     recordId: "task-drive",
     status: "in-progress",
     type: "task-due",
@@ -26,11 +23,8 @@ const taskEvent: TaskCalendarEvent = {
 };
 
 const meetingEvent: TaskCalendarEvent = {
-  allDay: false,
-  classNames: ["task-calendar-event", "task-calendar-event-event"],
   extendedProps: {
     contextLabel: "Robot",
-    projectId: "project-robot",
     recordId: "meeting-build",
     status: "build",
     type: "event",
