@@ -245,14 +245,14 @@ export function MilestonesEventDetailsModal({
           <div className="modal-form task-details-grid" style={{ color: "var(--text-copy)" }}>
             <div className="milestone-detail-overview-grid modal-wide">
               <div className="field modal-wide milestone-detail-description">
-                <span style={{ color: "var(--text-title)" }}>Description</span>
+                <span>Description</span>
                 <MilestoneDetailValue onOpenEditMilestone={() => onEditMilestone(activeMilestone)} showEditIndicator={isEditMode}>
                   <p className="task-detail-copy">{activeMilestone.description || "No description provided."}</p>
                 </MilestoneDetailValue>
               </div>
               <div className="milestone-detail-type-row">
                 <div className="field">
-                  <span style={{ color: "var(--text-title)" }}>Type</span>
+                  <span>Type</span>
                   <MilestoneDetailValue
                     onOpenEditMilestone={() => onEditMilestone(activeMilestone)}
                     showEditIndicator={isEditMode}
@@ -263,7 +263,7 @@ export function MilestonesEventDetailsModal({
                   </MilestoneDetailValue>
                 </div>
                 <div className="field">
-                  <span style={{ color: "var(--text-title)" }}>Related projects</span>
+                  <span>Related projects</span>
                   <MilestoneDetailValue
                     onOpenEditMilestone={() => onEditMilestone(activeMilestone)}
                     showEditIndicator={isEditMode}

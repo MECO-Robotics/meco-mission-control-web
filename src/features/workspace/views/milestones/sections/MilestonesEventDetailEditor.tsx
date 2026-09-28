@@ -94,7 +94,7 @@ export function MilestonesEventDetailEditor({
     <form className="modal-form task-details-grid" onSubmit={onSubmit} style={{ color: "var(--text-copy)" }}>
       <div className="task-details-section-grid task-details-overview-grid modal-wide">
         <div className="field modal-wide">
-          <span style={{ color: "var(--text-title)" }}>Description</span>
+          <span>Description</span>
           {editingField === "description" ? (
             <textarea
               autoFocus
@@ -117,7 +117,7 @@ export function MilestonesEventDetailEditor({
         </div>
 
         <div className="field modal-wide">
-          <span style={{ color: "var(--text-title)" }}>Type</span>
+          <span>Type</span>
           {editingField === "type" ? (
             <FilterDropdown
               allLabel="Type"
@@ -160,7 +160,7 @@ export function MilestonesEventDetailEditor({
         </div>
 
         <div className="field modal-wide">
-          <span style={{ color: "var(--text-title)" }}>Related projects</span>
+          <span>Related projects</span>
           {editingField === "projects" ? (
             <FilterDropdown
               allLabel="All projects"
@@ -197,7 +197,7 @@ export function MilestonesEventDetailEditor({
         </div>
 
         <div className="field modal-wide">
-          <span style={{ color: "var(--text-title)" }}>Visibility</span>
+          <span>Visibility</span>
           {editingField === "external" ? (
             <label className="checkbox-field" style={{ marginTop: "0.35rem" }}>
               <input

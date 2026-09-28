@@ -73,21 +73,21 @@ export function RiskDetailsModal({
 
         <div className="modal-form task-details-grid" style={{ color: "var(--text-copy)" }}>
           <div className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Summary</span>
+            <span>Summary</span>
             <p className="task-detail-copy">{activeRisk.detail || "No risk detail provided."}</p>
           </div>
           <div className="field">
-            <span style={{ color: "var(--text-title)" }}>Attachment</span>
+            <span>Attachment</span>
             <p className="task-detail-copy">
               {ATTACHMENT_TYPE_LABELS[activeRisk.attachmentType]}: {getAttachmentLabel(activeRisk)}
             </p>
           </div>
           <div className="field">
-            <span style={{ color: "var(--text-title)" }}>Mitigation task</span>
+            <span>Mitigation task</span>
             <p className="task-detail-copy">{getMitigationLabel(activeRisk)}</p>
           </div>
           <div className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Mitigation meaning</span>
+            <span>Mitigation meaning</span>
             <p className="task-detail-copy">
               Partial mitigation lowers severity while keeping the risk tracked. Full mitigation is
               a mentor-approved QA reassessment that reduces the tracked risk to low.

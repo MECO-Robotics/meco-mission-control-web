@@ -60,7 +60,7 @@ export function WorkstreamEditorModal({
           style={{ color: "var(--text-copy)" }}
         >
           <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Name</span>
+            <span>Name</span>
             <input
               onChange={(milestone) =>
                 setWorkstreamDraft((current) => ({
@@ -78,7 +78,7 @@ export function WorkstreamEditorModal({
             />
           </label>
           <label className="field">
-            <span style={{ color: "var(--text-title)" }}>Project</span>
+            <span>Project</span>
             <select
               onChange={(milestone) =>
                 setWorkstreamDraft((current) => ({
@@ -105,7 +105,7 @@ export function WorkstreamEditorModal({
             </select>
           </label>
           <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Description</span>
+            <span>Description</span>
             <textarea
               onChange={(milestone) =>
                 setWorkstreamDraft((current) => ({
