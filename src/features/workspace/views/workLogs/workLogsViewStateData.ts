@@ -5,33 +5,11 @@ import { filterSelectionIncludes, filterSelectionIntersects } from "@/features/w
 import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
 import type { WorkLogSortMode } from "./workLogsViewState";
 
-export type WorkLogsTopContributor = {
-  id: string;
-  hours: number;
-  name: string;
-};
-
-export type WorkLogsTopTask = {
-  hours: number;
-  id: string;
-  subsystemName: string;
-  title: string;
-};
-
 export type WorkLogsSummaryState = {
   activeContributorCount: number;
-  averageHoursPerLog: number;
-  clampedCompletionWidth: string;
-  isOverPlan: boolean;
   loggedHours: number;
-  maxMetricHours: number;
-  overrunHours: number;
-  plannedHours: number;
   remainingHours: number;
-  tasksWithLogsCount: number;
   totalLogs: number;
-  topContributors: WorkLogsTopContributor[];
-  topTasks: WorkLogsTopTask[];
 };
 
 export function buildTaskById(tasks: BootstrapPayload["tasks"]) {
@@ -80,17 +58,11 @@ export function filterSummaryWorkLogs(
 export function buildWorkLogsSummaryState({
   activePersonFilter,
   bootstrap,
-  membersById,
-  subsystemsById,
   summaryWorkLogs,
-  taskById,
 }: {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
-  membersById: MembersById;
-  subsystemsById: SubsystemsById;
   summaryWorkLogs: BootstrapPayload["workLogs"];
-  taskById: Record<string, BootstrapPayload["tasks"][number]>;
 }): WorkLogsSummaryState {
   const summaryTaskIds = new Set(summaryWorkLogs.map((workLog) => workLog.taskId));
   const taskPool =
@@ -107,87 +79,18 @@ export function buildWorkLogsSummaryState({
   );
 
   const totalLogs = summaryWorkLogs.length;
-  const tasksWithLogsCount = summaryTaskIds.size;
   const contributorIds = new Set<string>();
   summaryWorkLogs.forEach((workLog) => {
     workLog.participantIds.forEach((participantId) => contributorIds.add(participantId));
   });
 
-  const averageHoursPerLog = totalLogs > 0 ? loggedHours / totalLogs : 0;
-  const maxMetricHours = Math.max(plannedHours, loggedHours, 1);
-  const completionRatio = plannedHours > 0 ? loggedHours / plannedHours : 0;
-  const clampedCompletionWidth = `${Math.max(0, Math.min(100, completionRatio * 100))}%`;
-  const isOverPlan = loggedHours > plannedHours;
-  const overrunHours = Math.max(0, loggedHours - plannedHours);
   const remainingHours = Math.max(0, plannedHours - loggedHours);
-
-  const contributorHours = new Map<string, number>();
-  summaryWorkLogs.forEach((workLog) => {
-    if (workLog.participantIds.length === 0) {
-      contributorHours.set(
-        "__unassigned__",
-        (contributorHours.get("__unassigned__") ?? 0) + workLog.hours,
-      );
-      return;
-    }
-
-    const sharedHours = workLog.hours / workLog.participantIds.length;
-    workLog.participantIds.forEach((participantId) => {
-      contributorHours.set(participantId, (contributorHours.get(participantId) ?? 0) + sharedHours);
-    });
-  });
-
-  const topContributors = Array.from(contributorHours.entries())
-    .map(([participantId, hours]) => ({
-      id: participantId,
-      name:
-        participantId === "__unassigned__"
-          ? "Unassigned"
-          : membersById[participantId]?.name ?? "Unknown member",
-      hours,
-    }))
-    .sort((left, right) => right.hours - left.hours)
-    .slice(0, 5);
-
-  const taskHours = new Map<string, number>();
-  summaryWorkLogs.forEach((workLog) => {
-    taskHours.set(workLog.taskId, (taskHours.get(workLog.taskId) ?? 0) + workLog.hours);
-  });
-
-  const topTasks = Array.from(taskHours.entries())
-    .map(([taskId, hours]) => {
-      const task = taskById[taskId];
-      const subsystemName = task
-        ? task.subsystemIds
-            .map((subsystemId) => subsystemsById[subsystemId]?.name ?? "")
-            .filter(Boolean)
-            .join(", ") || "Unknown subsystem"
-        : "Unknown subsystem";
-
-      return {
-        hours,
-        id: taskId,
-        subsystemName,
-        title: task?.title ?? "Missing task",
-      };
-    })
-    .sort((left, right) => right.hours - left.hours)
-    .slice(0, 5);
 
   return {
     activeContributorCount: contributorIds.size,
-    averageHoursPerLog,
-    clampedCompletionWidth,
-    isOverPlan,
     loggedHours,
-    maxMetricHours,
-    overrunHours,
-    plannedHours,
     remainingHours,
-    tasksWithLogsCount,
     totalLogs,
-    topContributors,
-    topTasks,
   };
 }
 
