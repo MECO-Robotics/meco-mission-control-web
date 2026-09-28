@@ -1,6 +1,7 @@
 import type {
+  CadHierarchyTargetKind,
   CadStepMappingRecord,
-  CadStepMappingRuleMatchStrategy
+  CadStepMappingRuleMatchStrategy,
 } from "./cadStepTypes";
 
 type TargetKind = CadStepMappingRecord["targetKind"];
@@ -84,7 +85,7 @@ export function targetKindForSource(mapping: CadStepMappingRecord): TargetKind {
   return "SUBSYSTEM";
 }
 
-export function targetKindRequiresTarget(kind: TargetKind) {
+export function targetKindRequiresTarget(kind: TargetKind | CadHierarchyTargetKind) {
   return kind === "SUBSYSTEM" || kind === "MECHANISM" || kind === "PART_DEFINITION";
 }
 

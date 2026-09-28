@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import type {
   CadHierarchyNode,
   CadHierarchyReviewDecision,
-  CadHierarchyTargetKind
+  CadHierarchyTargetKind,
 } from "../model/cadStepTypes";
+import { targetKindRequiresTarget } from "../model/cadStepMappingRules";
 import {
   compactHierarchyLabel,
   hierarchyStatusTone,
@@ -21,10 +22,6 @@ function buildDecisionDraft(node: CadHierarchyNode, targetKind: CadHierarchyTarg
     targetId: readHierarchyTargetId(node, targetKind),
     targetKind,
   };
-}
-
-function targetKindRequiresTarget(targetKind: CadHierarchyTargetKind) {
-  return targetKind === "SUBSYSTEM" || targetKind === "MECHANISM" || targetKind === "PART_DEFINITION";
 }
 
 interface CadStepHierarchyNodeCardProps {

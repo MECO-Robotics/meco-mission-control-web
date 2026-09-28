@@ -51,9 +51,6 @@ export interface RobotConfigurationSubsystemModel {
 }
 
 export interface RobotConfigurationViewModel {
-  subsystemCount: number;
-  mechanismCount: number;
-  partCount: number;
   subsystems: RobotConfigurationSubsystemModel[];
 }
 
@@ -285,9 +282,6 @@ export function buildRobotConfigurationViewModel(
     .sort(sortSubsystemsByLayout);
 
   return {
-    subsystemCount: subsystems.length,
-    mechanismCount: subsystems.reduce((total, subsystem) => total + subsystem.mechanismCount, 0),
-    partCount: subsystems.reduce((total, subsystem) => total + subsystem.partCount, 0),
     subsystems,
   };
 }
