@@ -92,15 +92,6 @@
   font-weight: 700;
 }
 
-.subsystem-block {
-  display: grid;
-  gap: 0.25rem;
-}
-
-.subsystem-row {
-  align-items: stretch;
-}
-
 .subsystem-toggle {
   border: 0;
   border-radius: 12px;
@@ -113,9 +104,4 @@
 .subsystem-toggle strong,
 .subsystem-toggle span {
   display: block;
-}
-
-.task-timeline-row {
-  position: relative;
-  align-items: center;
 }

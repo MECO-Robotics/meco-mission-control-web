@@ -7,7 +7,6 @@
 .panel-header h2,
 .auth-card h1,
 .compact-form h3,
-.task-label strong,
 .queue-title strong,
 .member-row strong,
 .subsystem-toggle strong {
@@ -21,4 +20,3 @@
   font-weight: 600;
   letter-spacing: 0.01em;
 }
-
