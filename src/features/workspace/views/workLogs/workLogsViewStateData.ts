@@ -192,53 +192,22 @@ export function buildWorkLogsSummaryState({
 }
 
 export function filterAndSortWorkLogs({
-  activePersonFilter,
-  membersById,
-  search,
   sortMode,
-  subsystemsById,
   subsystemFilter,
   taskById,
   workLogs,
 }: {
-  activePersonFilter: FilterSelection;
-  membersById: MembersById;
-  search: string;
   sortMode: WorkLogSortMode;
-  subsystemsById: SubsystemsById;
   subsystemFilter: FilterSelection;
   taskById: Record<string, BootstrapPayload["tasks"][number]>;
   workLogs: BootstrapPayload["workLogs"];
 }): WorkLogRecord[] {
-  const query = search.trim().toLowerCase();
-  const filtered = workLogs.filter((workLog) => {
-    if (!workLogMatchesPersonFilter(workLog, activePersonFilter)) {
-      return false;
-    }
-
-    const task = taskById[workLog.taskId];
-    if (
-      subsystemFilter.length > 0 &&
-      !filterSelectionIntersects(
-        subsystemFilter,
-        task?.subsystemIds ?? [],
-      )
-    ) {
-      return false;
-    }
-
-    if (!query) {
-      return true;
-    }
-
-    return workLogMatchesSearch({
-      membersById,
-      query,
-      subsystemsById,
-      task,
-      workLog,
-    });
-  });
+  const filtered = workLogs.filter((workLog) =>
+    subsystemFilter.length === 0 || filterSelectionIntersects(
+      subsystemFilter,
+      taskById[workLog.taskId]?.subsystemIds ?? [],
+    ),
+  );
 
   const compareDate = (left: string, right: string) => left.localeCompare(right);
   return filtered.sort((left, right) => {
