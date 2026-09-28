@@ -53,11 +53,6 @@ export function PartInstanceEditorModal({
             "Installed part name"
           }
           required
-          style={{
-            background: "var(--bg-row-alt)",
-            color: "var(--text-title)",
-            border: "1px solid var(--border-base)",
-          }}
           value={partInstanceDraft.name}
         />
       </label>
@@ -72,9 +67,6 @@ export function PartInstanceEditorModal({
           }
           required
           style={{
-            background: "var(--bg-row-alt)",
-            color: "var(--text-title)",
-            border: "1px solid var(--border-base)",
             fontFamily: "var(--font-mono)",
           }}
           value={partInstanceDraft.partDefinitionId}
@@ -103,11 +95,6 @@ export function PartInstanceEditorModal({
               };
             })
           }
-          style={{
-            background: "var(--bg-row-alt)",
-            color: "var(--text-title)",
-            border: "1px solid var(--border-base)",
-          }}
           value={partInstanceDraft.subsystemId}
         >
           {bootstrap.subsystems.map((subsystem) => (
@@ -135,11 +122,6 @@ export function PartInstanceEditorModal({
             })
           }
           required
-          style={{
-            background: "var(--bg-row-alt)",
-            color: "var(--text-title)",
-            border: "1px solid var(--border-base)",
-          }}
           value={partInstanceDraft.mechanismId ?? ""}
         >
           {filteredMechanisms.map((mechanism) => (
@@ -159,11 +141,6 @@ export function PartInstanceEditorModal({
               quantity: Number(milestone.target.value),
             }))
           }
-          style={{
-            background: "var(--bg-row-alt)",
-            color: "var(--text-title)",
-            border: "1px solid var(--border-base)",
-          }}
           type="number"
           value={partInstanceDraft.quantity}
         />
@@ -177,11 +154,6 @@ export function PartInstanceEditorModal({
               status: milestone.target.value as PartInstancePayload["status"],
             }))
           }
-          style={{
-            background: "var(--bg-row-alt)",
-            color: "var(--text-title)",
-            border: "1px solid var(--border-base)",
-          }}
           value={partInstanceDraft.status}
         >
           <option value="not ready">Not ready</option>
@@ -225,11 +197,6 @@ export function PartInstanceEditorModal({
         <button
           className="secondary-action"
           onClick={closePartInstanceModal}
-          style={{
-            background: "var(--bg-row-alt)",
-            color: "var(--text-title)",
-            border: "1px solid var(--border-base)",
-          }}
           type="button"
         >
           Cancel

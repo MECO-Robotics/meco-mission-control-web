@@ -42,11 +42,6 @@ export function MaterialEditorModal({
         <input
           onChange={(event) => updateDraft("name", event.target.value)}
           required
-          style={{
-            background: "var(--bg-row-alt)",
-            color: "var(--text-title)",
-            border: "1px solid var(--border-base)",
-          }}
           value={materialDraft.name}
         />
       </label>
@@ -54,11 +49,6 @@ export function MaterialEditorModal({
         <span style={{ color: "var(--text-title)" }}>Category</span>
         <select
           onChange={(event) => updateDraft("category", event.target.value as MaterialPayload["category"])}
-          style={{
-            background: "var(--bg-row-alt)",
-            color: "var(--text-title)",
-            border: "1px solid var(--border-base)",
-          }}
           value={materialDraft.category}
         >
           <option value="metal">Metal</option>
@@ -85,11 +75,6 @@ export function MaterialEditorModal({
                   : current.reorderPoint,
             }));
           }}
-          style={{
-            background: "var(--bg-row-alt)",
-            color: "var(--text-title)",
-            border: "1px solid var(--border-base)",
-          }}
           type="number"
           value={materialDraft.onHandQuantity}
         />
@@ -100,11 +85,6 @@ export function MaterialEditorModal({
           disabled={materialModalMode === "create"}
           min="0"
           onChange={(event) => updateDraft("reorderPoint", Number(event.target.value))}
-          style={{
-            background: "var(--bg-row-alt)",
-            color: "var(--text-title)",
-            border: "1px solid var(--border-base)",
-          }}
           type="number"
           value={materialDraft.reorderPoint}
         />
@@ -118,11 +98,6 @@ export function MaterialEditorModal({
         <span style={{ color: "var(--text-title)" }}>Location</span>
         <input
           onChange={(event) => updateDraft("location", event.target.value)}
-          style={{
-            background: "var(--bg-row-alt)",
-            color: "var(--text-title)",
-            border: "1px solid var(--border-base)",
-          }}
           value={materialDraft.location}
         />
       </label>
@@ -130,11 +105,6 @@ export function MaterialEditorModal({
         <span style={{ color: "var(--text-title)" }}>Vendor</span>
         <input
           onChange={(event) => updateDraft("vendor", event.target.value)}
-          style={{
-            background: "var(--bg-row-alt)",
-            color: "var(--text-title)",
-            border: "1px solid var(--border-base)",
-          }}
           value={materialDraft.vendor}
         />
       </label>
@@ -143,11 +113,6 @@ export function MaterialEditorModal({
         <textarea
           onChange={(event) => updateDraft("notes", event.target.value)}
           rows={3}
-          style={{
-            background: "var(--bg-row-alt)",
-            color: "var(--text-title)",
-            border: "1px solid var(--border-base)",
-          }}
           value={materialDraft.notes}
         />
       </label>
@@ -165,11 +130,6 @@ export function MaterialEditorModal({
         <button
           className="secondary-action"
           onClick={closeMaterialModal}
-          style={{
-            background: "var(--bg-row-alt)",
-            color: "var(--text-title)",
-            border: "1px solid var(--border-base)",
-          }}
           type="button"
         >
           Cancel
