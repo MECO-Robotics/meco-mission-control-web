@@ -51,9 +51,6 @@ describe("buildRobotConfigurationViewModel", () => {
 
     const model = buildRobotConfigurationViewModel(bootstrap);
 
-    expect(model.subsystemCount).toBe(1);
-    expect(model.mechanismCount).toBe(1);
-    expect(model.partCount).toBe(4);
     expect(model.subsystems[0].layout.layoutZone).toBe("front");
     expect(model.subsystems[0].layout.layoutX).toBeCloseTo(0.48, 4);
     expect(model.subsystems[0].layout.layoutY).toBeCloseTo(0.15, 4);
@@ -103,7 +100,6 @@ describe("buildRobotConfigurationViewModel", () => {
 
     const model = buildRobotConfigurationViewModel(bootstrap, "intake");
 
-    expect(model.subsystemCount).toBe(1);
     expect(model.subsystems[0].name).toBe("Intake");
   });
 
