@@ -6,7 +6,6 @@ import type { WorkLogPayload } from "@/types/payloads";
 import type { WorkLogModalMode } from "@/features/workspace/shared/model/workspaceModalModes";
 
 export function useAppWorkspaceUiStateWorkLog() {
-  const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
   const [workLogModalMode, setWorkLogModalMode] = useState<WorkLogModalMode>(null);
   const [workLogDraft, setWorkLogDraft] = useState<WorkLogPayload>(
     buildEmptyWorkLogPayload(EMPTY_BOOTSTRAP),
@@ -14,8 +13,6 @@ export function useAppWorkspaceUiStateWorkLog() {
   const [isSavingWorkLog, setIsSavingWorkLog] = useState(false);
 
   return {
-    isActivityModalOpen,
-    setIsActivityModalOpen,
     isSavingWorkLog,
     setIsSavingWorkLog,
     setWorkLogDraft,
