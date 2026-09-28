@@ -46,12 +46,6 @@ export function useWorkspaceDerivedData({
     () => indexRecordsById(bootstrap.partDefinitions),
     [bootstrap.partDefinitions],
   );
-  const partInstancesById = useMemo(
-    () => indexRecordsById(bootstrap.partInstances),
-    [bootstrap.partInstances],
-  );
-  const milestonesById = useMemo(() => indexRecordsById(bootstrap.milestones), [bootstrap.milestones]);
-
   const isRobotProject = selectedProjectType === "robot";
   const inventoryCount = isRobotProject
     ? bootstrap.materials.length +
@@ -159,13 +153,11 @@ export function useWorkspaceDerivedData({
 
   return {
     disciplinesById,
-    milestonesById,
     externalMembers,
     mechanismsById,
     membersById,
     navigationItems,
     partDefinitionsById,
-    partInstancesById,
     rosterMentors,
     students,
     subsystemsById,
