@@ -13,7 +13,6 @@ import { EVENT_TYPE_STYLES as MILESTONE_TYPE_STYLES } from "@/features/workspace
 import { MilestonesMilestoneModalReadinessSection } from "./sections/MilestonesEventModalReadinessSection";
 import { MilestonesEventDetailEditor, type MilestoneDetailEditableField } from "./sections/MilestonesEventDetailEditor";
 import {
-  MilestoneDetailInlineValue,
   MilestoneDetailValue,
   MilestoneDetailsStatusIcon,
   MilestoneEditScheduleField,
@@ -191,7 +190,7 @@ export function MilestonesEventDetailsModal({
                       setMilestoneStartTime={setMilestoneStartTime ?? (() => undefined)}
                     />
                   ) : (
-                    <MilestoneDetailInlineValue onOpenEditMilestone={() => onEditMilestone(activeMilestone)}>
+                    <MilestoneDetailValue appearance="inline" onOpenEditMilestone={() => onEditMilestone(activeMilestone)}>
                       <span style={{ alignItems: "center", display: "inline-flex", gap: "0.25rem", flexWrap: "wrap" }}>
                         <span className="pill status-pill status-pill-neutral">{milestoneStartLabel}</span>
                         {milestoneEndLabel ? (
@@ -203,7 +202,7 @@ export function MilestonesEventDetailsModal({
                           </>
                         ) : null}
                       </span>
-                    </MilestoneDetailInlineValue>
+                    </MilestoneDetailValue>
                   )}
                 </div>
               </div>
