@@ -6,6 +6,7 @@ import type { TaskStatus } from "@/types/common";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { buildTaskLastUpdatedAtById } from "../attentionActionNowShared";
 import { buildAttentionViewModel } from "../attentionViewModel";
+import { buildAttentionQueue } from "../attentionQueue";
 import { detectStaleTasks } from "../staleTaskDetector";
 
 const TODAY = new Date("2026-06-04T12:00:00.000Z");
@@ -235,13 +236,11 @@ describe("stale task Action Required surfacing", () => {
       bootstrap,
     });
 
-    expect(
-      viewModel.summaryGroups
-        .flatMap((group) => group.cards)
-        .find((card) => card.id === "stale-tasks"),
-    ).toMatchObject({ label: "Stale tasks", value: 2 });
     expect(viewModel.triageGroups.find((group) => group.id === "stale-tasks")?.items).toHaveLength(2);
     expect(viewModel.actionNowItems.map((item) => item.recordId)).toEqual(
+      expect.arrayContaining(["task-stale", "task-in-progress"]),
+    );
+    expect(buildAttentionQueue(viewModel).map((row) => row.recordId)).toEqual(
       expect.arrayContaining(["task-stale", "task-in-progress"]),
     );
   });

@@ -1,6 +1,5 @@
 export type AttentionItemKind = "risk" | "task" | "manufacturing" | "purchase" | "report";
 export type AttentionActionType = "open-risk" | "open-task" | null;
-export type AttentionSummaryCategory = "risk" | "flow" | "supply" | "quality";
 export type AttentionNowSourceType = "risk" | "task" | "qa" | "purchase" | "manufacturing";
 export type MentorActionQueueSourceType = "qa" | "task" | "purchase" | "risk";
 export type AttentionReason =
@@ -15,21 +14,6 @@ export type AttentionReason =
   | "stale"
   | "missing-owner"
   | "missing-mitigation";
-
-export interface AttentionSummaryCard {
-  category: AttentionSummaryCategory;
-  helperLabel?: string;
-  id: string;
-  label: string;
-  targetGroupId?: string;
-  value: number;
-}
-
-export interface AttentionSummaryGroup {
-  id: AttentionSummaryCategory;
-  label: string;
-  cards: AttentionSummaryCard[];
-}
 
 export interface AttentionTriageItem {
   actionType: AttentionActionType;
@@ -89,6 +73,5 @@ export interface MentorActionQueueItem {
 export interface AttentionViewModel {
   actionNowItems: AttentionNowItem[];
   mentorQueueItems: MentorActionQueueItem[];
-  summaryGroups: AttentionSummaryGroup[];
   triageGroups: AttentionTriageGroup[];
 }

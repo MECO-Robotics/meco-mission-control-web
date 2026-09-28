@@ -16,23 +16,16 @@ import {
   buildReportTriageItems,
   buildAttentionTriageGroups,
 } from "./attentionTriageItems";
-import { buildAttentionSummaryGroups } from "./attentionSummaryGroups";
 import { buildAttentionActionNowItems } from "./attentionActionNowItems";
 import { buildAttentionMentorQueueInputs } from "./attentionMentorQueueInputs";
 import { buildMentorActionQueueItems } from "./mentorActionQueueModel";
 import { detectStaleTasks } from "./staleTaskDetector";
 import { buildTaskByReportId, riskMatchesPersonFilter } from "./attentionRiskScope";
-import type {
-  AttentionSummaryGroup,
-  AttentionViewModel,
-} from "./attentionViewTypes";
+import type { AttentionViewModel } from "./attentionViewTypes";
 
 export type {
   AttentionNowItem,
   AttentionReason,
-  AttentionSummaryCategory,
-  AttentionSummaryCard,
-  AttentionSummaryGroup,
   AttentionTriageGroup,
   AttentionTriageItem,
   AttentionViewModel,
@@ -198,19 +191,6 @@ export function buildAttentionViewModel({
     lookup,
   });
 
-  const summaryGroups: AttentionSummaryGroup[] = buildAttentionSummaryGroups({
-    blockedTasks: blockedTasks.length,
-    criticalRisks: criticalRisks.length,
-    dueSoonTasks: dueSoonTasks.length,
-    failedReports: reportItems.length,
-    highRisks: highRisks.length,
-    manufacturingBlockers: manufacturingItems.length,
-    overdueTasks: overdueTasks.length,
-    purchaseDelays: purchaseItems.length,
-    staleTasks: staleTaskResults.length,
-    waitingQaTasks: waitingQaTasks.length,
-  });
-
   const triageGroups = buildAttentionTriageGroups({
     blockedTasks,
     criticalRisks,
@@ -256,7 +236,6 @@ export function buildAttentionViewModel({
   return {
     actionNowItems,
     mentorQueueItems,
-    summaryGroups,
     triageGroups,
   };
 }
