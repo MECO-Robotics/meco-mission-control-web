@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",
-    "@react-three/fiber": "^9.7.0",
+    "@react-three/fiber": "^9.8.1",
     "lucide-react": "^1.14.0",
     "occt-import-js": "^0.0.23",
     "react": "~19.2.6",
