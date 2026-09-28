@@ -122,11 +122,6 @@ export function WorkLogEditorModal({
                 }))
               }
               required
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
               type="date"
               value={workLogDraft.date}
             />
@@ -143,11 +138,6 @@ export function WorkLogEditorModal({
               }
               required
               step="0.5"
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
               type="number"
               value={workLogDraft.hours}
             />
@@ -194,11 +184,6 @@ export function WorkLogEditorModal({
               }
               placeholder="What got done?"
               rows={3}
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
               value={workLogDraft.notes}
             />
           </label>

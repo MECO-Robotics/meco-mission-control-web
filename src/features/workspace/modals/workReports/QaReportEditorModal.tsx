@@ -125,11 +125,6 @@ export function QaReportEditorModal({
                 }))
               }
               required
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
               type="date"
               value={qaReportDraft.reviewedAt}
             />
@@ -195,11 +190,6 @@ export function QaReportEditorModal({
               }
               placeholder="QA observations and follow-up."
               rows={3}
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
               value={qaReportDraft.notes}
             />
           </label>
