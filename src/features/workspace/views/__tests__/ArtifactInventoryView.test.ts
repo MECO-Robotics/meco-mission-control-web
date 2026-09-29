@@ -73,6 +73,7 @@ describe("ArtifactInventoryView", () => {
     expect(markup).toContain("Brand guide");
     expect(markup).toContain("Sponsor packet");
     expect(markup).toContain("Documents");
+    expect(markup).not.toContain("Artifact inventory scoped to this project selection.");
     expect(markup).toContain('aria-label="Artifact filters"');
     expect(markup).not.toContain('aria-label="Show archived"');
     expect(markup).not.toContain("archive-filter-toggle");
