@@ -1,15 +1,21 @@
-import { useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
+import { useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent } from "react";
 
 import { formatDate } from "@/lib/appUtils/common";
 import type { TaskPriority } from "@/types/common";
 import type { ManufacturingItemRecord } from "@/types/recordsInventory";
 import type { TaskRecord } from "@/types/recordsExecution";
+import { IconManufacturing } from "@/components/shared/Icons";
 import { EditableHoverIndicator, RequestedItemMeta } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
 import { MANUFACTURING_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
 import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
 import { KanbanColumns } from "@/features/workspace/views/kanban/KanbanColumns";
-import { getMemberInitial, getTaskCardPerson, TaskPriorityBadge } from "@/features/workspace/views/taskQueue/taskQueueKanbanCardMeta";
+import {
+  getMemberInitial,
+  getTaskCardPerson,
+  getTaskPriorityLabel,
+  getTaskQueueCardPriorityAccentColor,
+} from "@/features/workspace/views/taskQueue/taskQueueKanbanCardMeta";
 
 const PRIORITY_ORDER: Record<TaskPriority, number> = {
   critical: 0,
@@ -173,7 +179,14 @@ export function ManufacturingKanbanBoard({
         const person = (linkedTask ? getTaskCardPerson(linkedTask, membersById) : null)
           ?? (item.requestedById ? membersById[item.requestedById] ?? null : null);
         const { className: dragClassName, ...dragRootProps } = dragProps ?? {};
+        const cardStyle = priority
+          ? ({
+              "--task-queue-board-card-priority-accent": getTaskQueueCardPriorityAccentColor(priority),
+            } as CSSProperties)
+          : undefined;
         const cardClassName = `task-queue-board-card editable-hover-target editable-hover-target-row${
+          priority ? " task-queue-board-card-priority-accented" : ""
+        }${
           dragClassName ? ` ${dragClassName}` : ""
         }`;
 
@@ -184,6 +197,7 @@ export function ManufacturingKanbanBoard({
                 item={item}
                 membersById={membersById}
                 subsystemsById={subsystemsById}
+                showSubtitle={false}
               />
               <span className="task-queue-board-card-due">Due {formatDate(item.dueDate)}</span>
             </div>
@@ -197,27 +211,37 @@ export function ManufacturingKanbanBoard({
             </small>
             <div className="task-queue-board-card-meta">
               <span title={projectName}>{projectName}</span>
-              {priority || person ? (
-                <div className="task-queue-board-card-meta-person-group">
-                  {priority ? <TaskPriorityBadge priority={priority} /> : null}
-                  {person ? (
-                    <span className="task-queue-board-card-person" title={person.name}>
-                      {person.photoUrl ? (
-                        <img
-                          alt={`${person.name} profile picture`}
-                          className="profile-avatar"
-                          loading="lazy"
-                          referrerPolicy="no-referrer"
-                          src={person.photoUrl}
-                        />
-                      ) : (
-                        <span className="profile-avatar profile-avatar-fallback" aria-hidden="true">
-                          {getMemberInitial(person)}
-                        </span>
-                      )}
-                    </span>
-                  ) : null}
-                </div>
+              <div className="task-queue-board-card-meta-person-group">
+                <span
+                  aria-label="Manufacturing item"
+                  className="task-queue-board-card-type-icon"
+                  role="img"
+                  title="Manufacturing item"
+                >
+                  <IconManufacturing />
+                </span>
+                {person ? (
+                  <span className="task-queue-board-card-person" title={person.name}>
+                    {person.photoUrl ? (
+                      <img
+                        alt={`${person.name} profile picture`}
+                        className="profile-avatar"
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                        src={person.photoUrl}
+                      />
+                    ) : (
+                      <span className="profile-avatar profile-avatar-fallback" aria-hidden="true">
+                        {getMemberInitial(person)}
+                      </span>
+                    )}
+                  </span>
+                ) : null}
+              </div>
+              {priority ? (
+                <span className="task-queue-board-card-priority-label">
+                  {getTaskPriorityLabel(priority)} priority
+                </span>
               ) : null}
             </div>
             {canShowMentorQuickActions && item.process === "cnc" ? (
@@ -253,11 +277,13 @@ export function ManufacturingKanbanBoard({
             <div
               {...dragRootProps}
               className={cardClassName}
+              data-priority={priority}
               data-tutorial-target={tutorialTarget?.("edit-job-row")}
               key={item.id}
               onClick={() => onEdit(item)}
               onKeyDown={(milestone) => handleCardKeyDown(milestone, item)}
               role="button"
+              style={cardStyle}
               tabIndex={0}
             >
               {cardContent}
@@ -269,9 +295,11 @@ export function ManufacturingKanbanBoard({
           <button
             {...dragRootProps}
             className={cardClassName}
+            data-priority={priority}
             data-tutorial-target={tutorialTarget?.("edit-job-row")}
             key={item.id}
             onClick={() => onEdit(item)}
+            style={cardStyle}
             type="button"
           >
             {cardContent}

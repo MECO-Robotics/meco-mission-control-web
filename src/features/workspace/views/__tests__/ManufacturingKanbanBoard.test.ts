@@ -105,7 +105,7 @@ function renderBoard(
 }
 
 describe("ManufacturingKanbanBoard", () => {
-  it("shows project, linked-task priority, and requester context on cards", () => {
+  it("shows manufacturing type and priority on the card edge without the subsystem subtitle", () => {
     const kanbanProps = renderBoard(jest.fn().mockResolvedValue(undefined), [
       createTask(1, {
         linkedManufacturingIds: [manufacturingItem.id],
@@ -116,7 +116,15 @@ describe("ManufacturingKanbanBoard", () => {
     const markup = renderToStaticMarkup(React.createElement(React.Fragment, null, card));
 
     expect(markup).toContain("Robot Project");
-    expect(markup).toContain('aria-label="High priority"');
+    expect(markup).toContain("task-queue-board-card-priority-accented");
+    expect(markup).toContain('data-priority="high"');
+    expect(markup).toContain("--task-queue-board-card-priority-accent:#e5484d");
+    expect(markup).toContain("High priority</span>");
+    expect(markup).not.toContain("task-queue-board-card-priority-high");
+    expect(markup).toContain('aria-label="Manufacturing item"');
+    expect(markup).toContain("requested-item-title");
+    expect(markup).not.toContain("requested-item-subtitle");
+    expect(markup).not.toContain("Drive / Student");
     expect(markup).toContain('title="Student"');
     expect(markup).toContain("profile-avatar-fallback");
   });

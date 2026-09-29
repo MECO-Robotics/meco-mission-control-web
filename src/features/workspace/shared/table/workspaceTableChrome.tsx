@@ -98,18 +98,22 @@ export function RequestedItemMeta({
   item,
   membersById,
   subsystemsById,
+  showSubtitle = true,
 }: {
   item: PurchaseItemRecord | ManufacturingItemRecord;
   membersById: MembersById;
   subsystemsById: SubsystemsById;
+  showSubtitle?: boolean;
 }) {
   return (
     <div className="requested-item-meta">
       <strong className="requested-item-title">{item.title}</strong>
-      <small className="requested-item-subtitle">
-        {(item.subsystemId ? subsystemsById[item.subsystemId]?.name : null) ?? "Unknown subsystem"} /{" "}
-        {(item.requestedById ? membersById[item.requestedById]?.name : null) ?? "Unassigned"}
-      </small>
+      {showSubtitle ? (
+        <small className="requested-item-subtitle">
+          {(item.subsystemId ? subsystemsById[item.subsystemId]?.name : null) ?? "Unknown subsystem"} /{" "}
+          {(item.requestedById ? membersById[item.requestedById]?.name : null) ?? "Unassigned"}
+        </small>
+      ) : null}
     </div>
   );
 }
