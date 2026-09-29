@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 
@@ -14,6 +16,16 @@ const TASK_QUEUE_CARD_PRIORITY_ACCENTS: Record<TaskRecord["priority"], string> =
 
 export function getTaskQueueCardPriorityAccentColor(priority: TaskRecord["priority"]) {
   return TASK_QUEUE_CARD_PRIORITY_ACCENTS[priority];
+}
+
+export function getTaskQueueCardPriorityPresentation(priority: TaskRecord["priority"]) {
+  return {
+    className: "task-queue-board-card-priority-accented",
+    dataPriority: priority,
+    style: {
+      "--task-queue-board-card-priority-accent": getTaskQueueCardPriorityAccentColor(priority),
+    } as CSSProperties,
+  };
 }
 
 export function getTaskPriorityLabel(priority: TaskRecord["priority"]) {
