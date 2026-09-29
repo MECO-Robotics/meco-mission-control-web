@@ -3,6 +3,7 @@ import React from "react";
 import type { MemberRecord } from "@/types/recordsOrganization";
 
 interface RosterSectionProps {
+  className?: string;
   title: string;
   count: number;
   members: MemberRecord[];
@@ -10,12 +11,13 @@ interface RosterSectionProps {
 }
 
 export const RosterSection: React.FC<RosterSectionProps> = ({
+  className,
   title,
   count,
   members,
   renderMember,
 }) => (
-  <div className="panel-subsection">
+  <div className={`panel-subsection${className ? ` ${className}` : ""}`}>
     <div className="roster-section-header">
       <div className="roster-section-title">
         <h3>{title}</h3>

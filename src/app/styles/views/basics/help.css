@@ -1,15 +1,30 @@
 .roster-columns {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 320px));
+  display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: flex-start;
   gap: 0.8rem;
 }
 
-.roster-columns>.panel-subsection {
+.roster-columns > .panel-subsection {
+  flex: 1 1 240px;
   min-width: 220px;
-  max-width: 320px;
-  flex: 0 0 auto;
+  max-width: none;
+}
+
+.roster-columns > .roster-section-students {
+  flex: 2 1 420px;
+}
+
+.roster-section-students .roster-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.roster-section-students .people-member {
+  flex: 1 1 16rem;
+  min-width: min(100%, 16rem);
 }
 
 .panel-subsection {
