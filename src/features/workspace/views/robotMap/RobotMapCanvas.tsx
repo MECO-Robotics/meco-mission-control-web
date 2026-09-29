@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState, type ReactNode } from "react";
 
-import { LayoutGrid, Upload } from "lucide-react";
+import { LayoutGrid } from "lucide-react";
 import type { SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
 
 import { buildUnplacedLayout, clampLayoutCoordinate, isSubsystemPlaced } from "./robotMapLayout";
@@ -9,20 +9,15 @@ import { SubsystemMapCard } from "./SubsystemMapCard";
 import type { RobotConfigurationSubsystemModel } from "./robotMapViewModel";
 
 interface RobotMapCanvasProps {
-  cadViewer: ReactNode;
-  is3DView: boolean;
+  cadViewer: (onOrbitingChange: (isOrbiting: boolean) => void) => ReactNode;
   isLayoutEditEnabled: boolean;
   onAddSubsystem: () => void;
   onAutoArrange: () => void;
   onDraftLayoutChange: (subsystemId: string, layout: SubsystemLayoutFields) => void;
   onLayoutDrop: (subsystemId: string, layout: SubsystemLayoutFields) => void;
-  onReferenceImageSelected: (file: File) => void;
   onResetLayout: () => void;
   onSelectSubsystem: (subsystemId: string) => void;
-  onToggle3DView: (enabled: boolean) => void;
   onToggleLayoutEdit: () => void;
-  referenceImageUrl: string | null;
-  referenceImageStorageNotice: string | null;
   selectedSubsystemId: string | null;
   subsystems: RobotConfigurationSubsystemModel[];
 }
@@ -51,28 +46,22 @@ function toLayoutCoordinates(
   return { isInsideSurface, x, y };
 }
 
-const ROBOT_MAP_UPLOAD_INPUT_ID = "robot-config-map-upload-input";
-
 export function RobotMapCanvas({
   cadViewer,
-  is3DView,
   isLayoutEditEnabled,
   onAddSubsystem,
   onAutoArrange,
   onDraftLayoutChange,
   onLayoutDrop,
-  onReferenceImageSelected,
   onResetLayout,
   onSelectSubsystem,
-  onToggle3DView,
   onToggleLayoutEdit,
-  referenceImageUrl,
-  referenceImageStorageNotice,
   selectedSubsystemId,
   subsystems,
 }: RobotMapCanvasProps) {
   const mapSurfaceRef = useRef<HTMLDivElement | null>(null);
   const [dragState, setDragState] = useState<DragState | null>(null);
+  const [isOrbiting, setIsOrbiting] = useState(false);
 
   const subsystemById = useMemo(
     () => Object.fromEntries(subsystems.map((subsystem) => [subsystem.id, subsystem] as const)),
@@ -209,24 +198,8 @@ export function RobotMapCanvas({
       onPointerMove={handlePointerMove}
       onPointerUp={(event) => stopDraggingSubsystem(event.pointerId, event.clientX, event.clientY)}
     >
-      <div className={`robot-config-map-surface${isLayoutEditEnabled && !is3DView ? " is-editing" : ""}${is3DView ? " is-3d" : ""}`} ref={mapSurfaceRef}>
-        <div aria-hidden={is3DView} className="robot-config-map-layer">
-          {referenceImageUrl ? (
-            <img
-              alt="Robot isometric reference"
-              className="robot-config-reference-image"
-              src={referenceImageUrl}
-            />
-          ) : (
-            <div className="robot-config-map-empty">
-              <p>
-                {subsystems.length > 0
-                  ? "Upload an isometric layout image to place subsystems on a robot reference."
-                  : "Create a subsystem or upload an isometric layout image to begin."}
-              </p>
-            </div>
-          )}
-
+      <div className={`robot-config-map-surface${isLayoutEditEnabled ? " is-editing" : ""}${isOrbiting ? " is-orbiting" : ""}`} ref={mapSurfaceRef}>
+        <div className="robot-config-map-layer">
           {placedSubsystems.map((subsystem) => (
             <div
               className="robot-config-card-layer"
@@ -248,29 +221,6 @@ export function RobotMapCanvas({
           ))}
 
           <div className="robot-config-map-edit-overlay">
-            <label
-              aria-label="Upload isometric image"
-              className="icon-button robot-config-map-upload-button"
-              htmlFor={ROBOT_MAP_UPLOAD_INPUT_ID}
-              title="Upload isometric image"
-            >
-              <Upload aria-hidden="true" size={14} />
-            </label>
-            <input
-              accept="image/*"
-              className="robot-config-upload-input"
-              id={ROBOT_MAP_UPLOAD_INPUT_ID}
-              onChange={(event) => {
-                const file = event.target.files?.[0];
-                if (!file) {
-                  return;
-                }
-
-                onReferenceImageSelected(file);
-                event.target.value = "";
-              }}
-              type="file"
-            />
             <button
               aria-checked={isLayoutEditEnabled}
               className={`robot-config-edit-toggle${isLayoutEditEnabled ? " is-active" : ""}`}
@@ -286,12 +236,6 @@ export function RobotMapCanvas({
             </button>
           </div>
 
-          {referenceImageStorageNotice ? (
-            <p className="robot-config-map-storage-notice" role="status">
-              {referenceImageStorageNotice}
-            </p>
-          ) : null}
-
           {!hasUnplacedSubsystems ? (
             <div className="robot-config-map-actions-overlay">
               <RobotMapCanvasActions onAddSubsystem={onAddSubsystem} onResetLayout={onResetLayout} />
@@ -299,17 +243,8 @@ export function RobotMapCanvas({
           ) : null}
         </div>
 
-        <div aria-hidden={!is3DView} className={`robot-config-embedded-cad${is3DView ? " is-active" : ""}`}>
-          {cadViewer}
-        </div>
-
-        <div aria-label="Map presentation" className="robot-config-map-mode-toggle" role="group">
-          <button aria-pressed={!is3DView} onClick={() => onToggle3DView(false)} type="button">
-            Map
-          </button>
-          <button aria-pressed={is3DView} onClick={() => onToggle3DView(true)} type="button">
-            3D
-          </button>
+        <div className="robot-config-embedded-cad">
+          {cadViewer(setIsOrbiting)}
         </div>
       </div>
 
@@ -320,7 +255,7 @@ export function RobotMapCanvas({
               <h3>Unplaced Subsystems</h3>
               <small>
                 {isLayoutEditEnabled
-                  ? "Drag onto the isometric layout to set placement."
+                  ? "Drag onto the robot view to set placement."
                   : "Enable Edit Layout to drag subsystems."}
               </small>
             </div>

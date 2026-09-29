@@ -23,9 +23,10 @@ function Part({ part, selected, wireframe, onSelect }: {
   );
 }
 
-export default function CadPartScene({ meshes, selected, isolated, wireframe, reset, onSelect }: {
+export default function CadPartScene({ meshes, selected, isolated, wireframe, reset, onSelect, onOrbitingChange }: {
   meshes: CadMesh[]; selected: number | null; isolated: boolean; wireframe: boolean; reset: number;
   onSelect: (index: number | null) => void;
+  onOrbitingChange?: (isOrbiting: boolean) => void;
 }) {
   const camera = useMemo(() => {
     const box = new Box3();
@@ -36,7 +37,7 @@ export default function CadPartScene({ meshes, selected, isolated, wireframe, re
     }
     const center = box.getCenter(new Vector3());
     const distance = Math.max(box.getSize(new Vector3()).length(), 1) * 2;
-    return { position: center.add(new Vector3(1, -1, 0.8).multiplyScalar(distance)), up: new Vector3(0, 0, 1) };
+    return { position: center.add(new Vector3(1, -1, 1).normalize().multiplyScalar(distance)), up: new Vector3(0, 0, 1) };
   }, [meshes]);
   return (
     <Canvas frameloop="demand" dpr={[1, 2]} camera={camera}
@@ -52,7 +53,12 @@ export default function CadPartScene({ meshes, selected, isolated, wireframe, re
           ))}
         </group>
       </Bounds>
-      <OrbitControls makeDefault enableDamping={false} />
+      <OrbitControls
+        makeDefault
+        enableDamping={false}
+        onStart={() => onOrbitingChange?.(true)}
+        onEnd={() => onOrbitingChange?.(false)}
+      />
     </Canvas>
   );
 }
