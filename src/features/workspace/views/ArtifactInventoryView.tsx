@@ -9,9 +9,12 @@ import { useWorkspacePagination } from "@/features/workspace/shared/table/worksp
 import { filterSelectionIncludes, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { ResourceSortMenu } from "@/features/workspace/shared/resourceList/ResourceSortMenu";
+import type { ResourceSortDirection } from "@/features/workspace/shared/resourceList/ResourceColumnHeader";
 
 import { ArtifactFiltersToolbar } from "./artifacts/ArtifactFiltersToolbar";
 import { ArtifactTable } from "./artifacts/ArtifactTable";
+import { ARTIFACT_STATUS_OPTIONS, formatUpdatedAt, sortArtifacts, type ArtifactSortField } from "./artifacts/artifactInventoryModel";
 
 interface ArtifactInventoryViewProps {
   bootstrap: BootstrapPayload;
@@ -35,7 +38,12 @@ export function ArtifactInventoryView({
   const [search, setSearch] = useState("");
   const [workstreamFilter, setWorkstreamFilter] = useState<FilterSelection>([]);
   const [statusFilter, setStatusFilter] = useState<FilterSelection>([]);
+  const [titleFilter, setTitleFilter] = useState<FilterSelection>([]);
+  const [linkFilter, setLinkFilter] = useState<FilterSelection>([]);
+  const [updatedFilter, setUpdatedFilter] = useState<FilterSelection>([]);
   const [showArchivedArtifacts, setShowArchivedArtifacts] = useState(false);
+  const [sortField, setSortField] = useState<ArtifactSortField | null>(null);
+  const [sortDirection, setSortDirection] = useState<ResourceSortDirection>("ascending");
   const artifactKinds = useMemo(
     () => (kinds.length > 0 ? kinds : [createKind ?? "document"]),
     [createKind, kinds],
@@ -79,18 +87,26 @@ export function ArtifactInventoryView({
           .includes(normalizedSearch);
       const matchesWorkstream =
         workstreamFilter.length === 0 ||
-        (artifact.workstreamId !== null && workstreamFilter.includes(artifact.workstreamId));
+        (artifact.workstreamId !== null && workstreamFilter.includes(artifact.workstreamId)) ||
+        (artifact.workstreamId === null && workstreamFilter.includes("__project-level__"));
       const matchesStatus = filterSelectionIncludes(statusFilter, artifact.status);
+      const matchesTitle = filterSelectionIncludes(titleFilter, artifact.title);
+      const matchesLink = filterSelectionIncludes(linkFilter, artifact.link || "No link");
+      const matchesUpdated = filterSelectionIncludes(updatedFilter, artifact.updatedAt);
 
-      return matchesSearch && matchesWorkstream && matchesStatus;
+      return matchesSearch && matchesWorkstream && matchesStatus && matchesTitle && matchesLink && matchesUpdated;
     });
-  }, [artifactKinds, artifacts, search, showArchivedArtifacts, statusFilter, workstreamFilter]);
-  const artifactPagination = useWorkspacePagination(filteredArtifacts);
+  }, [artifactKinds, artifacts, linkFilter, search, showArchivedArtifacts, statusFilter, titleFilter, updatedFilter, workstreamFilter]);
+  const sortedArtifacts = useMemo(() => sortField ? sortArtifacts(filteredArtifacts, sortField, sortDirection) : filteredArtifacts, [filteredArtifacts, sortDirection, sortField]);
+  const artifactPagination = useWorkspacePagination(sortedArtifacts);
   const artifactFilterMotionClass = useFilterChangeMotionClass([
     search,
     showArchivedArtifacts,
     statusFilter,
     workstreamFilter,
+    titleFilter,
+    linkFilter,
+    updatedFilter,
   ]);
 
   const sectionTitle = title ?? "Documents";
@@ -99,7 +115,25 @@ export function ArtifactInventoryView({
   const hasArtifactFilters =
     search.trim().length > 0 ||
     workstreamFilter.length > 0 ||
-    statusFilter.length > 0;
+    statusFilter.length > 0 || titleFilter.length > 0 || linkFilter.length > 0 || updatedFilter.length > 0;
+  const columnOptions = useMemo(() => ({
+    title: [...new Set(artifacts.map((artifact) => artifact.title))].sort().map((value) => ({ id: value, name: value })),
+    workstream: [...workstreamOptions, { id: "__project-level__", name: "Project-level" }],
+    status: ARTIFACT_STATUS_OPTIONS,
+    link: [...new Set(artifacts.map((artifact) => artifact.link || "No link"))].sort().map((value) => ({ id: value, name: value })),
+    updated: [...new Set(artifacts.map((artifact) => artifact.updatedAt))].sort().map((value) => ({ id: value, name: formatUpdatedAt(value) })),
+  }), [artifacts, workstreamOptions]);
+  const setColumnFilter = (field: ArtifactSortField, value: FilterSelection) => {
+    if (field === "title") setTitleFilter(value);
+    if (field === "workstream") setWorkstreamFilter(value);
+    if (field === "status") setStatusFilter(value);
+    if (field === "link") setLinkFilter(value);
+    if (field === "updated") setUpdatedFilter(value);
+  };
+  const handleSort = (field: ArtifactSortField) => {
+    if (field === sortField) setSortDirection((current) => current === "ascending" ? "descending" : "ascending");
+    else { setSortField(field); setSortDirection("ascending"); }
+  };
   const hasHiddenArchivedArtifacts =
     !showArchivedArtifacts &&
     !hasArtifactFilters &&
@@ -118,7 +152,12 @@ export function ArtifactInventoryView({
         showArchivedArtifacts={showArchivedArtifacts}
         statusFilter={statusFilter}
         workstreamFilter={workstreamFilter}
-        workstreamOptions={workstreamOptions}
+        titleFilter={titleFilter}
+        linkFilter={linkFilter}
+        updatedFilter={updatedFilter}
+        columnOptions={columnOptions}
+        setColumnFilter={setColumnFilter}
+        sortMenu={<ResourceSortMenu direction={sortDirection} field={sortField} label={artifactNoun} onDirectionChange={setSortDirection} onFieldChange={(field) => setSortField(field as ArtifactSortField | null)} options={[{ label: "Artifact", value: "title" }, { label: "Workflow", value: "workstream" }, { label: "Status", value: "status" }, { label: "Link", value: "link" }, { label: "Updated", value: "updated" }]} />}
       />
 
       <div className="panel-header compact-header">
@@ -150,8 +189,13 @@ export function ArtifactInventoryView({
         setWorkstreamFilter={setWorkstreamFilter}
         statusFilter={statusFilter}
         workstreamFilter={workstreamFilter}
-        workstreamOptions={workstreamOptions}
         workstreamsById={workstreamsById}
+        sortField={sortField}
+        sortDirection={sortDirection}
+        onSort={(field) => handleSort(field as ArtifactSortField)}
+        columnOptions={columnOptions}
+        columnFilters={{ title: titleFilter, workstream: workstreamFilter, status: statusFilter, link: linkFilter, updated: updatedFilter }}
+        setColumnFilter={setColumnFilter}
       />
     </section>
   );

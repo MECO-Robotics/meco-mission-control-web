@@ -1,5 +1,17 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { PartDefinitionRecord } from "@/types/recordsInventory";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+
+export type PartDefinitionSortField = "name" | "number" | "revision" | "iteration" | "type" | "material";
+export type PartDefinitionColumnFilters = Record<PartDefinitionSortField, FilterSelection>;
+export const PART_DEFINITION_COLUMNS: Array<{ field: PartDefinitionSortField; label: string; allLabel: string }> = [
+  { field: "name", label: "Part", allLabel: "All parts" },
+  { field: "number", label: "Number", allLabel: "All numbers" },
+  { field: "revision", label: "Revision", allLabel: "All revisions" },
+  { field: "iteration", label: "Iteration", allLabel: "All iterations" },
+  { field: "type", label: "Type", allLabel: "All types" },
+  { field: "material", label: "Material", allLabel: "All materials" },
+];
 
 export interface PartsViewProps {
   bootstrap: BootstrapPayload;

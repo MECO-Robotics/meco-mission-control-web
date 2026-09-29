@@ -1,15 +1,12 @@
-import { useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MaterialRecord } from "@/types/recordsInventory";
-import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
-import { IconManufacturing, IconTasks } from "@/components/shared/Icons";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { WorkspaceEmptyState, WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { ColumnFilterDropdown } from "@/features/workspace/shared/filters/ColumnFilterDropdown";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { EditableHoverIndicator, PaginationControls, TableCell, useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
-import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import {
@@ -19,6 +16,11 @@ import {
 } from "@/features/workspace/shared/topbar";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
+import { ResourceRecordPreview } from "@/features/workspace/shared/resourceList/ResourceRecordPreview";
+import { ResourceColumnHeader } from "@/features/workspace/shared/resourceList/ResourceColumnHeader";
+import { ResourceSortMenu } from "@/features/workspace/shared/resourceList/ResourceSortMenu";
+import { getResourceFilterOptions } from "@/features/workspace/shared/resourceList/resourceListModel";
+import { createResourceFilterMenuItem } from "@/features/workspace/shared/resourceList/ResourceFilterMenuItem";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { MATERIAL_CATEGORY_OPTIONS, MATERIAL_STOCK_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
 import {
@@ -37,48 +39,6 @@ interface MaterialsViewProps {
 
 const MATERIALS_GRID_TEMPLATE = "minmax(220px, 2.3fr) 0.75fr 1.05fr 1fr 1fr 0.8fr";
 
-function SortableMaterialHeader({
-  label,
-  field,
-  sortField,
-  sortDirection,
-  onSort,
-  children,
-}: {
-  label: string;
-  field: MaterialSortField;
-  sortField: MaterialSortField | null;
-  sortDirection: MaterialSortDirection;
-  onSort: (field: MaterialSortField) => void;
-  children?: ReactNode;
-}) {
-  const isSorted = sortField === field;
-  const directionLabel = isSorted ? sortDirection : "ascending";
-
-  return (
-    <span
-      aria-sort={isSorted ? sortDirection : "none"}
-      className="table-column-header-cell"
-      role="columnheader"
-    >
-      <button
-        aria-label={`Sort by ${label} ${directionLabel}`}
-        className="table-sort-button"
-        onClick={() => onSort(field)}
-        type="button"
-      >
-        {isSorted && (
-          <span aria-hidden="true" className="table-sort-arrow">
-            {sortDirection === "ascending" ? "↑" : "↓"}
-          </span>
-        )}
-        <span className="table-column-title">{label}</span>
-      </button>
-      {children}
-    </span>
-  );
-}
-
 export function MaterialsView({
   bootstrap,
   openCreateMaterialModal,
@@ -95,10 +55,8 @@ export function MaterialsView({
   const [sortDirection, setSortDirection] = useState<MaterialSortDirection>("ascending");
 
   const columnOptions = useMemo(() => {
-    const uniqueOptions = (getValue: (material: MaterialRecord) => string): DropdownOption[] =>
-      [...new Set(bootstrap.materials.map(getValue))]
-        .sort((left, right) => left.localeCompare(right))
-        .map((value) => ({ id: value, name: value }));
+    const uniqueOptions = (getValue: (material: MaterialRecord) => string) =>
+      getResourceFilterOptions(bootstrap.materials.map(getValue));
 
     return {
       name: uniqueOptions((material) => material.name),
@@ -157,42 +115,30 @@ export function MaterialsView({
           <TopbarResponsiveSearch
             {...buildTopbarSearchProps("materials", {
               actions: (
-                <CompactFilterMenu
-                  activeCount={[name, category, quantity, location, vendor, stock].filter((value) => value.length > 0).length}
-                  ariaLabel="Material filters"
-                  buttonLabel="Filters"
-                  className="materials-filter-menu"
-                  items={[
-                    {
-                      label: "Category",
-                      content: (
-                        <FilterDropdown
-                          allLabel="All categories"
-                          ariaLabel="Filter materials by category"
-                          className="task-queue-filter-menu-submenu"
-                          icon={<IconManufacturing />}
-                          onChange={setCategory}
-                          options={MATERIAL_CATEGORY_OPTIONS}
-                          value={category}
-                        />
-                      ),
-                    },
-                    {
-                      label: "Stock",
-                      content: (
-                        <FilterDropdown
-                          allLabel="All stock"
-                          ariaLabel="Filter materials by stock level"
-                          className="task-queue-filter-menu-submenu"
-                          icon={<IconTasks />}
-                          onChange={setStock}
-                          options={MATERIAL_STOCK_OPTIONS}
-                          value={stock}
-                        />
-                      ),
-                    },
-                   ]}
+                <>
+                  <CompactFilterMenu
+                    activeCount={[name, category, quantity, location, vendor, stock].filter((value) => value.length > 0).length}
+                    ariaLabel="Material filters"
+                    buttonLabel="Filters"
+                    className="materials-filter-menu"
+                    items={[
+                      createResourceFilterMenuItem({ allLabel: "All materials", ariaLabel: "Filter materials by name", label: "Material", onChange: setName, options: columnOptions.name, value: name }),
+                      createResourceFilterMenuItem({ allLabel: "All categories", ariaLabel: "Filter materials by category", label: "Category", onChange: setCategory, options: MATERIAL_CATEGORY_OPTIONS, value: category }),
+                      createResourceFilterMenuItem({ allLabel: "All quantities", ariaLabel: "Filter materials by on-hand and reorder quantities", label: "On hand / reorder", onChange: setQuantity, options: columnOptions.quantity, value: quantity }),
+                      createResourceFilterMenuItem({ allLabel: "All locations", ariaLabel: "Filter materials by location", label: "Location", onChange: setLocation, options: columnOptions.location, value: location }),
+                      createResourceFilterMenuItem({ allLabel: "All vendors", ariaLabel: "Filter materials by vendor", label: "Vendor", onChange: setVendor, options: columnOptions.vendor, value: vendor }),
+                      createResourceFilterMenuItem({ allLabel: "All stock", ariaLabel: "Filter materials by stock level", label: "Status", onChange: setStock, options: MATERIAL_STOCK_OPTIONS, value: stock }),
+                    ]}
                   />
+                  <ResourceSortMenu
+                    direction={sortDirection}
+                    field={sortField}
+                    label="materials"
+                    onDirectionChange={setSortDirection}
+                    onFieldChange={(field) => setSortField(field as MaterialSortField | null)}
+                    options={[{ label: "Material", value: "name" }, { label: "Category", value: "category" }, { label: "On hand / reorder", value: "quantity" }, { label: "Location", value: "location" }, { label: "Vendor", value: "vendor" }, { label: "Status", value: "status" }]}
+                  />
+                </>
                 ),
                ariaLabel: "Search materials",
               onChange: setSearch,
@@ -221,7 +167,7 @@ export function MaterialsView({
           className="ops-table ops-table-header materials-table"
           style={{ "--workspace-grid-template": MATERIALS_GRID_TEMPLATE } as CSSProperties}
         >
-          <SortableMaterialHeader field="name" label="Material" onSort={handleSort} sortDirection={sortDirection} sortField={sortField}>
+          <ResourceColumnHeader field="name" label="Material" onSort={(field) => handleSort(field as MaterialSortField)} sortDirection={sortDirection} sortField={sortField}>
             <ColumnFilterDropdown
               allLabel="All materials"
               ariaLabel="Filter materials by name"
@@ -229,8 +175,8 @@ export function MaterialsView({
               options={columnOptions.name}
               value={name}
             />
-          </SortableMaterialHeader>
-          <SortableMaterialHeader field="category" label="Category" onSort={handleSort} sortDirection={sortDirection} sortField={sortField}>
+          </ResourceColumnHeader>
+          <ResourceColumnHeader field="category" label="Category" onSort={(field) => handleSort(field as MaterialSortField)} sortDirection={sortDirection} sortField={sortField}>
             <ColumnFilterDropdown
               allLabel="All categories"
               ariaLabel="Filter materials by category"
@@ -238,8 +184,8 @@ export function MaterialsView({
               options={MATERIAL_CATEGORY_OPTIONS}
               value={category}
             />
-          </SortableMaterialHeader>
-          <SortableMaterialHeader field="quantity" label="On hand / reorder" onSort={handleSort} sortDirection={sortDirection} sortField={sortField}>
+          </ResourceColumnHeader>
+          <ResourceColumnHeader field="quantity" label="On hand / reorder" onSort={(field) => handleSort(field as MaterialSortField)} sortDirection={sortDirection} sortField={sortField}>
             <ColumnFilterDropdown
               allLabel="All quantities"
               ariaLabel="Filter materials by on-hand and reorder quantities"
@@ -247,8 +193,8 @@ export function MaterialsView({
               options={columnOptions.quantity}
               value={quantity}
             />
-          </SortableMaterialHeader>
-          <SortableMaterialHeader field="location" label="Location" onSort={handleSort} sortDirection={sortDirection} sortField={sortField}>
+          </ResourceColumnHeader>
+          <ResourceColumnHeader field="location" label="Location" onSort={(field) => handleSort(field as MaterialSortField)} sortDirection={sortDirection} sortField={sortField}>
             <ColumnFilterDropdown
               allLabel="All locations"
               ariaLabel="Filter materials by location"
@@ -256,8 +202,8 @@ export function MaterialsView({
               options={columnOptions.location}
               value={location}
             />
-          </SortableMaterialHeader>
-          <SortableMaterialHeader field="vendor" label="Vendor" onSort={handleSort} sortDirection={sortDirection} sortField={sortField}>
+          </ResourceColumnHeader>
+          <ResourceColumnHeader field="vendor" label="Vendor" onSort={(field) => handleSort(field as MaterialSortField)} sortDirection={sortDirection} sortField={sortField}>
             <ColumnFilterDropdown
               allLabel="All vendors"
               ariaLabel="Filter materials by vendor"
@@ -265,8 +211,8 @@ export function MaterialsView({
               options={columnOptions.vendor}
               value={vendor}
             />
-          </SortableMaterialHeader>
-          <SortableMaterialHeader field="status" label="Status" onSort={handleSort} sortDirection={sortDirection} sortField={sortField}>
+          </ResourceColumnHeader>
+          <ResourceColumnHeader field="status" label="Status" onSort={(field) => handleSort(field as MaterialSortField)} sortDirection={sortDirection} sortField={sortField}>
             <ColumnFilterDropdown
               allLabel="All stock"
               ariaLabel="Filter materials by stock level"
@@ -274,7 +220,7 @@ export function MaterialsView({
               options={MATERIAL_STOCK_OPTIONS}
               value={stock}
             />
-          </SortableMaterialHeader>
+          </ResourceColumnHeader>
         </div>
 
         {materialPagination.pageItems.map((material) => {
@@ -296,12 +242,7 @@ export function MaterialsView({
               type="button"
             >
               <span className="queue-title table-cell table-cell-primary material-primary-cell" data-label="Material">
-                <span className="requested-item-meta">
-                  <strong className="requested-item-title">{material.name}</strong>
-                  <small className="requested-item-subtitle" title={materialSubtitle}>
-                    {materialSubtitle}
-                  </small>
-                </span>
+                <ResourceRecordPreview photoUrl={material.photoUrl} name={material.name} subtitle={materialSubtitle} />
               </span>
               <TableCell label="Category">{material.category}</TableCell>
               <TableCell label="On hand / reorder" valueClassName={isBelowReorder ? "materials-stock-below-reorder" : undefined}>

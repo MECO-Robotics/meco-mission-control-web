@@ -155,6 +155,7 @@ export interface MaterialPayload {
   location: string;
   vendor: string;
   notes: string;
+  photoUrl?: string;
 }
 
 export interface ArtifactPayload {
@@ -167,6 +168,7 @@ export interface ArtifactPayload {
   link: string;
   isArchived?: boolean;
   updatedAt: string;
+  photoUrl?: string;
 }
 
 export interface WorkstreamPayload {

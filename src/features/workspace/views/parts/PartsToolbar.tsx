@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { IconManufacturing, IconTasks } from "@/components/shared/Icons";
 import { ArchiveFilterCheckbox } from "@/features/workspace/shared/filters/ArchiveFilterCheckbox";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
@@ -6,6 +8,8 @@ import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/Topb
 import { READINESS_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { BootstrapPayload } from "@/types/bootstrap";
+import { createResourceFilterMenuItem } from "@/features/workspace/shared/resourceList/ResourceFilterMenuItem";
+import { PART_DEFINITION_COLUMNS, type PartDefinitionColumnFilters, type PartDefinitionSortField } from "./partsViewTypes";
 
 interface PartsToolbarProps {
   bootstrap: BootstrapPayload;
@@ -19,6 +23,11 @@ interface PartsToolbarProps {
   setPartSubsystem: (value: FilterSelection) => void;
   setShowArchivedPartDefinitions: (value: boolean) => void;
   showArchivedPartDefinitions: boolean;
+  sortMenu?: ReactNode;
+  activeColumnFilterCount?: number;
+  columnFilters?: PartDefinitionColumnFilters;
+  columnOptions?: Record<PartDefinitionSortField, Array<{ id: string; name: string }>>;
+  setColumnFilter?: (field: PartDefinitionSortField, value: FilterSelection) => void;
 }
 
 export function PartsToolbar({
@@ -33,6 +42,11 @@ export function PartsToolbar({
   setPartSubsystem,
   setShowArchivedPartDefinitions,
   showArchivedPartDefinitions,
+  sortMenu,
+  activeColumnFilterCount = 0,
+  columnFilters = { name: [], number: [], revision: [], iteration: [], type: [], material: [] },
+  columnOptions = { name: [], number: [], revision: [], iteration: [], type: [], material: [] },
+  setColumnFilter = () => undefined,
 }: PartsToolbarProps) {
   return (
     <div className="panel-actions filter-toolbar part-manager-toolbar">
@@ -40,11 +54,19 @@ export function PartsToolbar({
         actions={
           <>
             <CompactFilterMenu
-              activeCount={[partSubsystem, partStatus].filter((value) => value.length > 0).length + Number(mapping !== "all") + Number(showArchivedPartDefinitions)}
+              activeCount={[partSubsystem, partStatus].filter((value) => value.length > 0).length + Number(mapping !== "all") + Number(showArchivedPartDefinitions) + activeColumnFilterCount}
               ariaLabel="Part filters"
               buttonLabel="Filters"
               className="materials-filter-menu"
               items={[
+                ...PART_DEFINITION_COLUMNS.map(({ field, label, allLabel }) => createResourceFilterMenuItem({
+                  allLabel,
+                  ariaLabel: `Filter parts by ${label.toLowerCase()}`,
+                  label,
+                  onChange: (value) => setColumnFilter(field, value),
+                  options: columnOptions[field],
+                  value: columnFilters[field],
+                })),
                 {
                   label: "Subsystem",
                   content: (
@@ -94,6 +116,7 @@ export function PartsToolbar({
                 },
               ]}
             />
+            {sortMenu}
           </>
         }
         ariaLabel="Search parts"

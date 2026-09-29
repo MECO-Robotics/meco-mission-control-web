@@ -1,12 +1,13 @@
+import type { ReactNode } from "react";
+
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
-import { IconManufacturing, IconTasks } from "@/components/shared/Icons";
 import { ArchiveFilterCheckbox } from "@/features/workspace/shared/filters/ArchiveFilterCheckbox";
-import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { createResourceFilterMenuItem } from "@/features/workspace/shared/resourceList/ResourceFilterMenuItem";
 
-import { ARTIFACT_STATUS_OPTIONS } from "./artifactInventoryModel";
+import type { ArtifactSortField } from "./artifactInventoryModel";
 
 interface ArtifactFiltersToolbarProps {
   artifactNoun: string;
@@ -18,7 +19,12 @@ interface ArtifactFiltersToolbarProps {
   showArchivedArtifacts: boolean;
   statusFilter: FilterSelection;
   workstreamFilter: FilterSelection;
-  workstreamOptions: Array<{ id: string; name: string }>;
+  sortMenu: ReactNode;
+  titleFilter: FilterSelection;
+  linkFilter: FilterSelection;
+  updatedFilter: FilterSelection;
+  columnOptions: Record<ArtifactSortField, Array<{ id: string; name: string }>>;
+  setColumnFilter: (field: ArtifactSortField, value: FilterSelection) => void;
 }
 
 export function ArtifactFiltersToolbar({
@@ -31,9 +37,14 @@ export function ArtifactFiltersToolbar({
   showArchivedArtifacts,
   statusFilter,
   workstreamFilter,
-  workstreamOptions,
+  sortMenu,
+  titleFilter,
+  linkFilter,
+  updatedFilter,
+  columnOptions,
+  setColumnFilter,
 }: ArtifactFiltersToolbarProps) {
-  const activeFilterCount = [workstreamFilter, statusFilter].filter(
+  const activeFilterCount = [workstreamFilter, statusFilter, titleFilter, linkFilter, updatedFilter].filter(
     (value) => value.length > 0,
   ).length + Number(showArchivedArtifacts);
 
@@ -42,46 +53,26 @@ export function ArtifactFiltersToolbar({
       <div className="panel-actions filter-toolbar materials-toolbar">
         <TopbarResponsiveSearch
           actions={
+            <>
             <CompactFilterMenu
               activeCount={activeFilterCount}
               ariaLabel="Artifact filters"
               buttonLabel="Filters"
               className="materials-filter-menu"
               items={[
-                {
-                  label: "Workflow",
-                  content: (
-                    <FilterDropdown
-                      allLabel="All workflows"
-                      ariaLabel="Filter artifacts by workflow"
-                      className="task-queue-filter-menu-submenu"
-                      icon={<IconManufacturing />}
-                      onChange={setWorkstreamFilter}
-                      options={workstreamOptions}
-                      value={workstreamFilter}
-                    />
-                  ),
-                },
-                {
-                  label: "Status",
-                  content: (
-                    <FilterDropdown
-                      allLabel="All statuses"
-                      ariaLabel="Filter artifacts by status"
-                      className="task-queue-filter-menu-submenu"
-                      icon={<IconTasks />}
-                      onChange={setStatusFilter}
-                      options={ARTIFACT_STATUS_OPTIONS}
-                      value={statusFilter}
-                    />
-                  ),
-                },
+                createResourceFilterMenuItem({ allLabel: "All artifacts", ariaLabel: "Filter artifacts by title", label: "Artifact", onChange: (value) => setColumnFilter("title", value), options: columnOptions.title, value: titleFilter }),
+                createResourceFilterMenuItem({ allLabel: "All workflows", ariaLabel: "Filter artifacts by workflow", label: "Workflow", onChange: (value) => { setWorkstreamFilter(value); setColumnFilter("workstream", value); }, options: columnOptions.workstream, value: workstreamFilter }),
+                createResourceFilterMenuItem({ allLabel: "All statuses", ariaLabel: "Filter artifacts by status", label: "Status", onChange: (value) => { setStatusFilter(value); setColumnFilter("status", value); }, options: columnOptions.status, value: statusFilter }),
+                createResourceFilterMenuItem({ allLabel: "All links", ariaLabel: "Filter artifacts by link", label: "Link", onChange: (value) => setColumnFilter("link", value), options: columnOptions.link, value: linkFilter }),
+                createResourceFilterMenuItem({ allLabel: "All dates", ariaLabel: "Filter artifacts by updated date", label: "Updated", onChange: (value) => setColumnFilter("updated", value), options: columnOptions.updated, value: updatedFilter }),
                 {
                   label: "Archive",
                   content: <ArchiveFilterCheckbox checked={showArchivedArtifacts} label="Show archived" onChange={setShowArchivedArtifacts} />,
                 },
               ]}
             />
+            {sortMenu}
+            </>
           }
           ariaLabel={`Search ${artifactNoun}`}
           compactPlaceholder="Search"

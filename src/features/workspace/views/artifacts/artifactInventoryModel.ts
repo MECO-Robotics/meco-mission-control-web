@@ -1,4 +1,8 @@
 import type { ArtifactStatus } from "@/types/common";
+import type { ArtifactRecord } from "@/types/recordsInventory";
+import type { ResourceSortDirection } from "@/features/workspace/shared/resourceList/ResourceColumnHeader";
+
+export type ArtifactSortField = "title" | "workstream" | "status" | "link" | "updated";
 
 export const ARTIFACT_GRID_TEMPLATE = "minmax(240px, 2fr) 1.1fr 0.9fr 1fr 0.8fr";
 
@@ -41,4 +45,13 @@ export function summarizeLink(link: string) {
   } catch {
     return link;
   }
+}
+
+export function sortArtifacts(artifacts: ArtifactRecord[], field: ArtifactSortField, direction: ResourceSortDirection) {
+  const multiplier = direction === "ascending" ? 1 : -1;
+  return [...artifacts].sort((left, right) => {
+    const leftValue = field === "title" ? left.title : field === "workstream" ? left.workstreamId ?? "" : field === "status" ? left.status : field === "link" ? left.link : left.updatedAt;
+    const rightValue = field === "title" ? right.title : field === "workstream" ? right.workstreamId ?? "" : field === "status" ? right.status : field === "link" ? right.link : right.updatedAt;
+    return multiplier * leftValue.localeCompare(rightValue, undefined, { numeric: true, sensitivity: "base" });
+  });
 }

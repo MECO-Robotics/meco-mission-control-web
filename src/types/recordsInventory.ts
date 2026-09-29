@@ -19,6 +19,7 @@ export interface MaterialRecord {
   location: string;
   vendor: string;
   notes: string;
+  photoUrl?: string;
 }
 
 export interface ArtifactRecord {
@@ -32,6 +33,7 @@ export interface ArtifactRecord {
   link: string;
   isArchived?: boolean;
   updatedAt: string;
+  photoUrl?: string;
 }
 
 export interface PartDefinitionRecord extends CadSourceMetadata {
