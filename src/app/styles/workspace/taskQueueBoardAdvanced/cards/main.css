@@ -84,6 +84,20 @@
   line-height: 1.25;
 }
 
+.task-queue-board-card-header-side {
+  display: grid;
+  flex: 0 0 auto;
+  justify-items: end;
+  gap: calc(0.12rem * var(--task-queue-zoom, 1));
+}
+
+.task-queue-board-card-work-hours {
+  color: var(--text-muted);
+  font-size: calc(0.62rem * var(--task-queue-zoom, 1));
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
 .task-queue-board-card-due {
   display: inline-flex;
   align-items: center;

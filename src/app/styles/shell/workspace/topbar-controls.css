@@ -38,16 +38,23 @@
 }
 
 .workspace-topbar-zoom-button.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 1.9rem;
   height: 1.9rem;
   min-width: 1.9rem;
   padding: 0;
   width: 1.9rem;
-}
-
-.workspace-topbar-zoom-button.icon-button {
+  line-height: 0;
   border: 0;
   background: transparent;
   box-shadow: none;
+}
+
+.workspace-topbar-zoom-button.icon-button svg {
+  display: block;
+  flex: 0 0 auto;
 }
 
 .workspace-topbar-zoom-button.icon-button:hover:not(:disabled) {

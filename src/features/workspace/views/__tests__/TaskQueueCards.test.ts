@@ -57,7 +57,10 @@ describe("Task Queue cards", () => {
       taskQueueZoom: 1, showProjectContextOnCards: false, showProjectOnCards: false,
     }));
     expect(markup).toContain("3.5h logged");
+    expect(markup).toContain("task-queue-board-card-header-side");
+    expect(markup).toContain('task-queue-board-card-work-hours">3.5h logged</small>');
     expect(markup).toContain("Prepared connector");
+    expect(markup).not.toContain("3.5h logged · Prepared connector");
     expect(markup).toContain("Help requested");
     expect(markup).not.toContain("Unrelated");
   });
