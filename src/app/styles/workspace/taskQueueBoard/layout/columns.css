@@ -96,45 +96,33 @@
   position: relative;
   min-height: 0;
   overflow: hidden;
-  isolation: isolate;
 }
 
-.task-queue-board-column-scroll-frame::before,
-.task-queue-board-column-scroll-frame::after {
-  position: absolute;
-  right: 0;
-  left: 0;
-  height: 1.35rem;
-  content: "";
-  opacity: 0;
-  pointer-events: none;
-  z-index: 1;
-  transition: opacity 140ms ease;
-}
-
-.task-queue-board-column-scroll-frame::before {
-  top: 0;
-  background: linear-gradient(
+.task-queue-board-column-body.has-scroll-fade-up.has-scroll-fade-down {
+  -webkit-mask-image: linear-gradient(
     to bottom,
-    var(--kanban-lane-surface) 0%,
-    color-mix(in srgb, var(--kanban-lane-surface) 74%, transparent) 38%,
+    transparent 0%,
+    #000 1.35rem,
+    #000 calc(100% - 1.35rem),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 1.35rem,
+    #000 calc(100% - 1.35rem),
     transparent 100%
   );
 }
 
-.task-queue-board-column-scroll-frame::after {
-  bottom: 0;
-  background: linear-gradient(
-    to top,
-    var(--kanban-lane-surface) 0%,
-    color-mix(in srgb, var(--kanban-lane-surface) 74%, transparent) 38%,
-    transparent 100%
-  );
+.task-queue-board-column-body.has-scroll-fade-up:not(.has-scroll-fade-down) {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 1.35rem, #000 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 1.35rem, #000 100%);
 }
 
-.task-queue-board-column-scroll-frame[data-can-scroll-up="true"]::before,
-.task-queue-board-column-scroll-frame[data-can-scroll-down="true"]::after {
-  opacity: 1;
+.task-queue-board-column-body.has-scroll-fade-down:not(.has-scroll-fade-up) {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 1.35rem), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 1.35rem), transparent 100%);
 }
 
 .task-queue-board-column-scroll-controls {
@@ -146,7 +134,7 @@
   justify-content: space-between;
   padding: 0.35rem 0;
   pointer-events: none;
-  z-index: 2;
+  z-index: 1;
 }
 
 .task-queue-board-column-scroll-button {
