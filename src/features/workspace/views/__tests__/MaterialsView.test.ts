@@ -1,0 +1,49 @@
+/// <reference types="jest" />
+
+import * as React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import { MATERIAL_STOCK_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
+import { MaterialsView } from "@/features/workspace/views/MaterialsView";
+import { isMaterialBelowReorder, matchesMaterialStockFilter } from "@/features/workspace/views/materialsInventoryModel";
+import type { MaterialRecord } from "@/types/recordsInventory";
+
+(globalThis as typeof globalThis & { React: typeof React }).React = React;
+
+describe("MaterialsView stock presentation", () => {
+  const material: MaterialRecord = {
+    id: "polycarbonate",
+    name: "Polycarbonate Sheet",
+    category: "plastic",
+    onHandQuantity: 2,
+    reorderPoint: 3,
+    location: "Shelf B2",
+    vendor: "McMaster-Carr",
+    unit: "sheet",
+    notes: "",
+  };
+
+  it("combines on-hand and reorder quantities and highlights stock below the threshold", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(MaterialsView, {
+        bootstrap: { ...EMPTY_BOOTSTRAP, materials: [material] },
+        openCreateMaterialModal: jest.fn(),
+        openEditMaterialModal: jest.fn(),
+      }),
+    );
+
+    expect(markup).toContain("On hand / reorder");
+    expect(markup).toContain("2 / 3");
+    expect(markup).toContain("materials-stock-below-reorder");
+    expect(markup).not.toContain('data-label="Reorder"');
+  });
+
+  it("exposes and applies the below-reorder stock filter", () => {
+    expect(MATERIAL_STOCK_OPTIONS).toContainEqual({ id: "below-reorder", name: "Below reorder" });
+    expect(isMaterialBelowReorder(material)).toBe(true);
+    expect(matchesMaterialStockFilter(material, ["below-reorder"])).toBe(true);
+    expect(matchesMaterialStockFilter({ ...material, onHandQuantity: 3 }, ["below-reorder"])).toBe(false);
+    expect(matchesMaterialStockFilter(material, ["ok"])).toBe(false);
+  });
+});

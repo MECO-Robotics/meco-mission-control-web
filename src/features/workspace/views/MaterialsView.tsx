@@ -20,6 +20,7 @@ import type { FilterSelection } from "@/features/workspace/shared/filters/worksp
 import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { MATERIAL_CATEGORY_OPTIONS, MATERIAL_STOCK_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
+import { isMaterialBelowReorder, matchesMaterialStockFilter } from "./materialsInventoryModel";
 
 interface MaterialsViewProps {
   bootstrap: BootstrapPayload;
@@ -27,7 +28,7 @@ interface MaterialsViewProps {
   openEditMaterialModal: (item: MaterialRecord) => void;
 }
 
-const MATERIALS_GRID_TEMPLATE = "minmax(220px, 2.3fr) 0.75fr 0.75fr 0.75fr 1fr 1fr 0.8fr";
+const MATERIALS_GRID_TEMPLATE = "minmax(220px, 2.3fr) 0.75fr 1.05fr 1fr 1fr 0.8fr";
 
 export function MaterialsView({
   bootstrap,
@@ -47,8 +48,7 @@ export function MaterialsView({
         material.vendor.toLowerCase().includes(normalizedSearch) ||
         material.location.toLowerCase().includes(normalizedSearch);
       const matchesCategory = filterSelectionIncludes(category, material.category);
-      const stockValue = material.onHandQuantity <= material.reorderPoint ? "low" : "ok";
-      const matchesStock = filterSelectionIncludes(stock, stockValue);
+      const matchesStock = matchesMaterialStockFilter(material, stock);
 
       return matchesSearch && matchesCategory && matchesStock;
     });
@@ -146,8 +146,7 @@ export function MaterialsView({
               value={category}
             />
           </span>
-          <span>On hand</span>
-          <span>Reorder</span>
+          <span>On hand / reorder</span>
           <span>Location</span>
           <span>Vendor</span>
           <span className="table-column-header-cell">
@@ -163,6 +162,7 @@ export function MaterialsView({
         </div>
 
         {materialPagination.pageItems.map((material) => {
+          const isBelowReorder = isMaterialBelowReorder(material);
           const isLow = material.onHandQuantity <= material.reorderPoint;
           const materialSubtitle =
             material.notes.trim().length > 0
@@ -188,11 +188,8 @@ export function MaterialsView({
                 </span>
               </span>
               <TableCell label="Category">{material.category}</TableCell>
-              <TableCell label="On hand">
-                {material.onHandQuantity}
-              </TableCell>
-              <TableCell label="Reorder">
-                {material.reorderPoint}
+              <TableCell label="On hand / reorder" valueClassName={isBelowReorder ? "materials-stock-below-reorder" : undefined}>
+                {material.onHandQuantity} / {material.reorderPoint}
               </TableCell>
               <TableCell label="Location">{material.location || "Unassigned"}</TableCell>
               <TableCell label="Vendor">{material.vendor || "Unknown"}</TableCell>
