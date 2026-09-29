@@ -4,7 +4,7 @@ import type {
   CadImportWarningRecord,
   CadSnapshotDiffStatus,
   OnshapeOverview
-} from "../model/cadIntegrationTypes";
+} from "../model/onshapeCadTypes";
 import {
   getCadConfigurationLifecycleCopy,
   getCadConfigurationSourceCopy,

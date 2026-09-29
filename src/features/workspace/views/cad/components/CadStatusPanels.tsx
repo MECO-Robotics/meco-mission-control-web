@@ -2,7 +2,7 @@ import type {
   OnshapeOverview,
   OnshapeSyncEstimate,
   SyncLevel
-} from "../model/cadIntegrationTypes";
+} from "../model/onshapeCadTypes";
 import { defaultOnshapeOverview } from "../model/onshapeIntegrationState";
 
 export type OnshapeConnectionHealth = "connected" | "expired" | "disconnected" | "unavailable";

@@ -17,7 +17,7 @@ import { CadStepImportSummaryCard } from "../components/CadStepImportSummaryCard
 import { CadStatusPanels, getOnshapeConnectionHealth } from "../components/CadStatusPanels";
 import type {
   OnshapeOverview
-} from "../model/cadIntegrationTypes";
+} from "../model/onshapeCadTypes";
 import { parseOnshapeUrl } from "../model/onshapeUrlParser";
 
 jest.mock("../api/cadStepApi", () => ({

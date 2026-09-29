@@ -3,7 +3,7 @@ import type {
   OnshapeDocumentRefRecord,
   OnshapeUrlParseResult,
   SyncLevel
-} from "../model/cadIntegrationTypes";
+} from "../model/onshapeCadTypes";
 
 const syncLevels: Array<{ value: SyncLevel; label: string }> = [
   { value: "link_only", label: "Link Only" },

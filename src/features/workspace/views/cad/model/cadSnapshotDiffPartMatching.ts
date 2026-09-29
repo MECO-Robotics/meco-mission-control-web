@@ -1,6 +1,6 @@
 import type {
   CadPartDefinitionRecord
-} from "./cadIntegrationTypes";
+} from "./onshapeCadTypes";
 
 function partConfigKey(part: CadPartDefinitionRecord) {
   return part.configuration ?? "default";
