@@ -12,7 +12,7 @@ class SceneBoundary extends Component<{ children: ReactNode }, { failed: boolean
   render() { return this.state.failed ? <p role="alert">3D display is unavailable. Enable WebGL and reload to try again.</p> : this.props.children; }
 }
 
-function FileViewer({ file, ...imageTargets }: { file: File } & CadPartImageTargets) {
+function FileViewer({ file, onOrbitingChange, ...imageTargets }: { file: File; onOrbitingChange?: (isOrbiting: boolean) => void } & CadPartImageTargets) {
   const [meshes, setMeshes] = useState<CadMesh[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
@@ -43,7 +43,7 @@ function FileViewer({ file, ...imageTargets }: { file: File } & CadPartImageTarg
       </div>
       <div className="cad-viewer-canvas" role="img" aria-label={`3D preview of ${file.name}, ${meshes.length} parts`}>
         <SceneBoundary><Suspense fallback={<p role="status">Loading 3D viewer…</p>}>
-          <CadPartScene meshes={meshes} selected={selected} isolated={isolated} wireframe={wireframe} reset={reset} onSelect={select} />
+          <CadPartScene meshes={meshes} selected={selected} isolated={isolated} wireframe={wireframe} reset={reset} onSelect={select} onOrbitingChange={onOrbitingChange} />
         </Suspense></SceneBoundary>
       </div>
       <CadPartImageAssignment key={selected ?? "none"} mesh={selected === null ? null : meshes[selected]} {...imageTargets} />
@@ -52,10 +52,10 @@ function FileViewer({ file, ...imageTargets }: { file: File } & CadPartImageTarg
   </>;
 }
 
-export function EmptyCadViewer() {
+export function EmptyCadViewer({ onOrbitingChange }: { onOrbitingChange?: (isOrbiting: boolean) => void }) {
   return <div className="cad-viewer-canvas" role="img" aria-label="Empty 3D viewer">
     <SceneBoundary><Suspense fallback={null}>
-      <CadPartScene meshes={[]} selected={null} isolated={false} wireframe={false} reset={0} onSelect={() => {}} />
+      <CadPartScene meshes={[]} selected={null} isolated={false} wireframe={false} reset={0} onSelect={() => {}} onOrbitingChange={onOrbitingChange} />
     </Suspense></SceneBoundary>
   </div>;
 }
@@ -63,13 +63,14 @@ export function EmptyCadViewer() {
 export function CadPartViewer({
   file,
   title = "Part viewer",
+  onOrbitingChange,
   ...imageTargets
-}: { file: File | null; title?: string | null } & CadPartImageTargets) {
+}: { file: File | null; title?: string | null; onOrbitingChange?: (isOrbiting: boolean) => void } & CadPartImageTargets) {
   const [current, setCurrent] = useState({ file, key: 0 });
   if (current.file !== file) setCurrent({ file, key: current.key + 1 });
   return <section className="cad-card cad-part-viewer" aria-label="CAD part viewer">
     {title ? <h3>{title}</h3> : null}
-    {file ? <FileViewer key={current.key} file={file} {...imageTargets} /> : <EmptyCadViewer />}
+    {file ? <FileViewer key={current.key} file={file} onOrbitingChange={onOrbitingChange} {...imageTargets} /> : <EmptyCadViewer onOrbitingChange={onOrbitingChange} />}
   </section>;
 }
 
@@ -79,6 +80,7 @@ export function CadFileViewer({
   importPlacement = "inline",
   embeddedInMap = false,
   onOpenCadWorkspace,
+  onOrbitingChange,
   ...imageTargets
 }: {
   title?: string;
@@ -86,6 +88,7 @@ export function CadFileViewer({
   embeddedInMap?: boolean;
   importPlacement?: "inline" | "topbar";
   onOpenCadWorkspace?: () => void;
+  onOrbitingChange?: (isOrbiting: boolean) => void;
 } & CadPartImageTargets) {
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -118,6 +121,6 @@ export function CadFileViewer({
         <input type="file" accept=".step,.stp" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
       </label>
     )}
-    <CadPartViewer file={file} title={embeddedInMap ? null : "Part viewer"} {...imageTargets} />
+    <CadPartViewer file={file} title={embeddedInMap ? null : "Part viewer"} onOrbitingChange={onOrbitingChange} {...imageTargets} />
   </div>;
 }

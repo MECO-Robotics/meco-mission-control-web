@@ -40,29 +40,6 @@ interface RobotMapViewProps {
   ) => Promise<boolean>;
 }
 
-const REFERENCE_IMAGE_STORAGE_ERROR_MESSAGE =
-  "Image loaded for this session, but local browser storage is unavailable.";
-
-function buildReferenceImageStorageKey(primaryProjectId: string) {
-  return `robot-config-reference-image:${primaryProjectId}`;
-}
-
-function readImageAsDataUrl(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error("Could not read image file."));
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        resolve(reader.result);
-        return;
-      }
-
-      reject(new Error("Could not convert selected image."));
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
 export function RobotMapView({
   bootstrap,
   handleDeleteMechanism,
@@ -80,31 +57,15 @@ export function RobotMapView({
   updateSubsystemConfiguration,
 }: RobotMapViewProps) {
   const [search, setSearch] = useState("");
-  const [isThreeDimensionalView, setIsThreeDimensionalView] = useState(true);
   const [selectedSubsystemId, setSelectedSubsystemId] = useState<string | null>(null);
   const [layoutDraftBySubsystemId, setLayoutDraftBySubsystemId] = useState<
     Record<string, SubsystemLayoutFields>
   >({});
   const [isLayoutEditEnabled, setIsLayoutEditEnabled] = useState(false);
-  const [referenceImageUrl, setReferenceImageUrl] = useState<string | null>(null);
-  const [referenceImageStorageNotice, setReferenceImageStorageNotice] = useState<string | null>(null);
   const layoutPersistVersionBySubsystemIdRef = useRef<Record<string, number>>({});
 
   const primaryProjectId = bootstrap.projects[0]?.id ?? "default";
-  const referenceImageStorageKey = buildReferenceImageStorageKey(primaryProjectId);
   const viewModel = useMemo(() => buildRobotConfigurationViewModel(bootstrap, search), [bootstrap, search]);
-
-  useEffect(() => {
-    try {
-      const storedImage = window.localStorage.getItem(referenceImageStorageKey);
-      setReferenceImageUrl(storedImage);
-      setReferenceImageStorageNotice(null);
-    } catch (error) {
-      setReferenceImageUrl(null);
-      setReferenceImageStorageNotice(REFERENCE_IMAGE_STORAGE_ERROR_MESSAGE);
-      console.warn("Failed to read robot reference image from local storage.", error);
-    }
-  }, [referenceImageStorageKey]);
 
   const subsystems = useMemo(
     () =>
@@ -211,18 +172,6 @@ export function RobotMapView({
     await persistLayouts(resetLayouts);
   };
 
-  const handleReferenceImageSelected = async (file: File) => {
-    const nextImage = await readImageAsDataUrl(file);
-    setReferenceImageUrl(nextImage);
-    try {
-      window.localStorage.setItem(referenceImageStorageKey, nextImage);
-      setReferenceImageStorageNotice(null);
-    } catch (error) {
-      setReferenceImageStorageNotice(REFERENCE_IMAGE_STORAGE_ERROR_MESSAGE);
-      console.warn("Failed to persist robot reference image locally.", error);
-    }
-  };
-
   return (
     <section className={`panel dense-panel robot-config-shell ${WORKSPACE_PANEL_CLASS}`}>
       <RobotConfigurationToolbar
@@ -232,29 +181,25 @@ export function RobotMapView({
 
       <div className={`robot-config-main robot-config-main-map${selectedSubsystem ? "" : " is-empty"}`}>
         <RobotMapCanvas
-          cadViewer={
+          cadViewer={(onOrbitingChange) => (
             <CadFileViewer
               embeddedInMap
               importPlacement="topbar"
               key={primaryProjectId}
+              onOrbitingChange={onOrbitingChange}
               onOpenCadWorkspace={onOpenCadWorkspace}
               partDefinitions={bootstrap.partDefinitions}
               onSavePartImage={onSavePartImage}
             />
-          }
-          is3DView={isThreeDimensionalView}
+          )}
           isLayoutEditEnabled={isLayoutEditEnabled}
           onAddSubsystem={openCreateSubsystemModal}
           onAutoArrange={handleAutoArrange}
           onDraftLayoutChange={applyLayoutDraft}
           onLayoutDrop={handleLayoutDrop}
-          onReferenceImageSelected={(file) => void handleReferenceImageSelected(file)}
           onResetLayout={handleResetLayout}
           onSelectSubsystem={setSelectedSubsystemId}
-          onToggle3DView={setIsThreeDimensionalView}
           onToggleLayoutEdit={toggleLayoutEdit}
-          referenceImageUrl={referenceImageUrl}
-          referenceImageStorageNotice={referenceImageStorageNotice}
           selectedSubsystemId={selectedSubsystemId}
           subsystems={subsystems}
         />
