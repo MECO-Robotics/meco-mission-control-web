@@ -129,6 +129,12 @@
   cursor: grab;
   touch-action: auto;
   z-index: 1;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.task-queue-board-shell::-webkit-scrollbar {
+  display: none;
 }
 
 .task-queue-board-shell:active {

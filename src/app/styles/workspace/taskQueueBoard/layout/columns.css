@@ -3,7 +3,8 @@
   gap: 0.55rem;
   min-width: 0;
   padding: 0.7rem;
-  border-inline: 1px solid var(--border-base);
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, var(--bg-panel) 90%, var(--text-copy) 10%);
 }
 
 /* Status labels stay above the lane content; the rules define the lane edges. */
@@ -80,6 +81,59 @@
   display: grid;
   gap: 0.55rem;
   min-width: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.task-queue-board-column-body::-webkit-scrollbar {
+  display: none;
+}
+
+.task-queue-board-column-scroll-frame {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.task-queue-board-column-scroll-controls {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 0;
+  pointer-events: none;
+}
+
+.task-queue-board-column-scroll-button {
+  display: grid;
+  width: 1.8rem;
+  height: 1.8rem;
+  place-items: center;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--border-base) 75%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--bg-panel) 92%, transparent);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--official-black) 12%, transparent);
+  color: var(--text-title);
+  cursor: pointer;
+  pointer-events: auto;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease,
+    transform 120ms ease;
+}
+
+.task-queue-board-column-scroll-button:hover {
+  background: var(--bg-panel);
+  color: var(--official-blue);
+  transform: scale(1.05);
+}
+
+.task-queue-board-column-scroll-button:focus-visible {
+  outline: 2px solid var(--official-blue);
+  outline-offset: 2px;
 }
 
 .task-queue-board-column-body.is-kanban-drop-target {
@@ -110,11 +164,11 @@
   cursor: default;
 }
 
-.task-queue-board-column[role="button"] {
+.task-queue-board-column-header[role="button"] {
   cursor: pointer;
 }
 
-.task-queue-board-column[role="button"]:focus-visible {
+.task-queue-board-column-header[role="button"]:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--official-blue) 38%, transparent);
   outline-offset: 2px;
 }
