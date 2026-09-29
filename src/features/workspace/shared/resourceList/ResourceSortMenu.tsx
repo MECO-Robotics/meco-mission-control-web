@@ -1,4 +1,4 @@
-import { ArrowDownUp } from "lucide-react";
+import { ArrowDown, ArrowDownUp, ArrowUp } from "lucide-react";
 
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import type { ResourceSortDirection } from "./ResourceColumnHeader";
@@ -40,10 +40,28 @@ export function ResourceSortMenu({
         {
           label: "Direction",
           content: (
-            <select aria-label={`Sort ${label} direction`} className="toolbar-filter-select" onChange={(event) => onDirectionChange(event.target.value as ResourceSortDirection)} value={direction}>
-              <option value="ascending">Ascending</option>
-              <option value="descending">Descending</option>
-            </select>
+            <div aria-label={`Sort ${label} direction`} className="resource-sort-direction" role="group">
+              <button
+                aria-label={`Sort ${label} ascending`}
+                aria-pressed={direction === "ascending"}
+                className="resource-sort-direction-button"
+                onClick={() => onDirectionChange("ascending")}
+                title="Ascending"
+                type="button"
+              >
+                <ArrowUp aria-hidden="true" size={15} />
+              </button>
+              <button
+                aria-label={`Sort ${label} descending`}
+                aria-pressed={direction === "descending"}
+                className="resource-sort-direction-button"
+                onClick={() => onDirectionChange("descending")}
+                title="Descending"
+                type="button"
+              >
+                <ArrowDown aria-hidden="true" size={15} />
+              </button>
+            </div>
           ),
         },
       ]}
