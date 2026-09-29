@@ -168,16 +168,13 @@ export function TaskQueueToolbar({
 
       <WorkspaceTopbarZoom
         ariaLabel="Task queue zoom"
-        buttonClassName="task-queue-zoom-button"
         canZoomIn={taskQueueZoom < TASK_QUEUE_ZOOM_MAX}
         canZoomOut={taskQueueZoom > TASK_QUEUE_ZOOM_MIN}
-        className="task-queue-zoom-controls"
         decreaseLabel="Zoom out task queue"
         increaseLabel="Zoom in task queue"
-        labelClassName="task-queue-zoom-label"
         onZoomIn={() => setTaskQueueZoom((current) => clampTaskQueueZoom(current + TASK_QUEUE_ZOOM_STEP))}
         onZoomOut={() => setTaskQueueZoom((current) => clampTaskQueueZoom(current - TASK_QUEUE_ZOOM_STEP))}
-        toolbarClassName="task-queue-toolbar-inline-actions"
+        toolbarClassName="workspace-topbar-zoom-slot-actions"
         value={formatTaskQueueZoomLabel(taskQueueZoom)}
       />
     </div>

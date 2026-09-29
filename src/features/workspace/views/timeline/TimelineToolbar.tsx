@@ -277,13 +277,10 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
       </div>
       <WorkspaceTopbarZoom
         ariaLabel="Timeline zoom"
-        buttonClassName="timeline-zoom-button"
         canZoomIn={timelineZoom < TIMELINE_ZOOM_MAX}
         canZoomOut={timelineZoom > timelineZoomMin}
-        className="timeline-zoom-controls"
         decreaseLabel="Zoom out timeline"
         increaseLabel="Zoom in timeline"
-        labelClassName="timeline-zoom-label"
         onZoomIn={() => onAdjustZoom(1)}
         onZoomOut={() => onAdjustZoom(-1)}
         value={formatTimelineZoomLabel(timelineZoom)}

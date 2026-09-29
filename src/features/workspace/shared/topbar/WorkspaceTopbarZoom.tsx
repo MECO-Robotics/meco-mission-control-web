@@ -1,15 +1,12 @@
-import { IconSearchMinus, IconSearchPlus } from "@/components/shared/Icons";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
+import { WorkspaceTopbarZoomControls } from "@/features/workspace/shared/ui/WorkspaceTopbarZoomControls";
 
 interface WorkspaceTopbarZoomProps {
   ariaLabel: string;
   canZoomIn: boolean;
   canZoomOut: boolean;
-  className: string;
   decreaseLabel: string;
   increaseLabel: string;
-  buttonClassName: string;
-  labelClassName: string;
   onZoomIn: () => void;
   onZoomOut: () => void;
   toolbarClassName?: string;
@@ -20,40 +17,24 @@ export function WorkspaceTopbarZoom({
   ariaLabel,
   canZoomIn,
   canZoomOut,
-  className,
   decreaseLabel,
   increaseLabel,
-  buttonClassName,
-  labelClassName,
   onZoomIn,
   onZoomOut,
   toolbarClassName,
   value,
 }: WorkspaceTopbarZoomProps) {
   const controls = (
-    <div aria-label={ariaLabel} className={className} role="group">
-      <button
-        aria-label={decreaseLabel}
-        className={`icon-button ${buttonClassName}`}
-        disabled={!canZoomOut}
-        onClick={onZoomOut}
-        title={decreaseLabel}
-        type="button"
-      >
-        <IconSearchMinus />
-      </button>
-      <span className={labelClassName}>{value}</span>
-      <button
-        aria-label={increaseLabel}
-        className={`icon-button ${buttonClassName}`}
-        disabled={!canZoomIn}
-        onClick={onZoomIn}
-        title={increaseLabel}
-        type="button"
-      >
-        <IconSearchPlus />
-      </button>
-    </div>
+    <WorkspaceTopbarZoomControls
+      ariaLabel={ariaLabel}
+      canZoomIn={canZoomIn}
+      canZoomOut={canZoomOut}
+      decreaseLabel={decreaseLabel}
+      increaseLabel={increaseLabel}
+      onZoomIn={onZoomIn}
+      onZoomOut={onZoomOut}
+      value={value}
+    />
   );
 
   return (

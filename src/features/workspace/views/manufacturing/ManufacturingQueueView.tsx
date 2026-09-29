@@ -202,16 +202,13 @@ export function ManufacturingQueueView({
         >
           <WorkspaceTopbarZoom
             ariaLabel="Manufacturing zoom"
-            buttonClassName="task-queue-zoom-button"
             canZoomIn={manufacturingZoom < TASK_QUEUE_ZOOM_MAX}
             canZoomOut={manufacturingZoom > TASK_QUEUE_ZOOM_MIN}
-            className="task-queue-zoom-controls"
             decreaseLabel="Zoom out manufacturing"
             increaseLabel="Zoom in manufacturing"
-            labelClassName="task-queue-zoom-label"
             onZoomIn={() => setManufacturingZoom((current) => clampTaskQueueZoom(current + TASK_QUEUE_ZOOM_STEP))}
             onZoomOut={() => setManufacturingZoom((current) => clampTaskQueueZoom(current - TASK_QUEUE_ZOOM_STEP))}
-            toolbarClassName="task-queue-toolbar-inline-actions"
+            toolbarClassName="workspace-topbar-zoom-slot-actions"
             value={formatTaskQueueZoomLabel(manufacturingZoom)}
           />
         </WorkspaceTopbarControls>

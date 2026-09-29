@@ -22,14 +22,14 @@
 }
 
 .timeline-topbar-controls .timeline-period-controls,
-.app-topbar-zoom-host .timeline-zoom-controls {
+.app-topbar-zoom-host .workspace-topbar-zoom-controls {
   flex: 0 0 auto;
   min-width: max-content;
   max-width: none;
 }
 
 .timeline-topbar-controls .timeline-period-label,
-.app-topbar-zoom-host .timeline-zoom-label {
+.app-topbar-zoom-host .workspace-topbar-zoom-label {
   flex: 0 0 auto;
 }
 
@@ -190,41 +190,6 @@
 .timeline-period-label {
   min-width: 3.95rem;
   max-width: 11rem;
-  padding: 0 0.04rem;
-  color: var(--text-title);
-  font-size: 0.78rem;
-  font-weight: 800;
-  line-height: 1.1;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.timeline-zoom-controls {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.04rem;
-  min-height: 2.05rem;
-  max-width: 100%;
-  padding: 0.12rem 0.18rem;
-  border: 1px solid var(--border-base);
-  border-radius: 999px;
-  background: var(--bg-row-alt);
-}
-
-.timeline-zoom-button.icon-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.9rem;
-  height: 1.9rem;
-  min-width: 1.9rem;
-  padding: 0;
-  font-size: 1rem;
-  font-weight: 800;
-  line-height: 1;
-}
-.timeline-zoom-label {
-  min-width: 2.9rem;
   padding: 0 0.04rem;
   color: var(--text-title);
   font-size: 0.78rem;

@@ -59,45 +59,10 @@
   min-width: 0;
 }
 
-.app-topbar-zoom-host > .task-queue-toolbar-inline-actions:has(.task-queue-zoom-controls) {
+.app-topbar-zoom-host > .workspace-topbar-zoom-slot-actions:has(.workspace-topbar-zoom-controls) {
   flex: 0 0 max-content;
   flex-wrap: nowrap;
   min-width: max-content;
-}
-
-.task-queue-zoom-controls {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.04rem;
-  min-height: 2.05rem;
-  padding: 0.12rem 0.18rem;
-  border: 1px solid var(--border-base);
-  border-radius: 999px;
-  background: var(--bg-row-alt);
-}
-
-.task-queue-zoom-button.icon-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.6rem;
-  height: 1.9rem;
-  min-width: 1.6rem;
-  padding: 0;
-  font-size: 1rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.task-queue-zoom-label {
-  min-width: 2.5rem;
-  padding: 0;
-  color: var(--text-title);
-  font-size: 0.78rem;
-  font-weight: 800;
-  line-height: 1.1;
-  text-align: center;
-  white-space: nowrap;
 }
 
 .materials-toolbar {

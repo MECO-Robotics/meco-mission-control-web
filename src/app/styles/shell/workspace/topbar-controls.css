@@ -44,24 +44,18 @@
   width: 1.9rem;
 }
 
-.workspace-topbar-zoom-button.icon-button,
-.task-queue-zoom-button.icon-button,
-.timeline-zoom-button.icon-button {
+.workspace-topbar-zoom-button.icon-button {
   border: 0;
   background: transparent;
   box-shadow: none;
 }
 
-.workspace-topbar-zoom-button.icon-button:hover:not(:disabled),
-.task-queue-zoom-button.icon-button:hover:not(:disabled),
-.timeline-zoom-button.icon-button:hover:not(:disabled) {
+.workspace-topbar-zoom-button.icon-button:hover:not(:disabled) {
   background: transparent;
   color: var(--official-blue);
 }
 
-.workspace-topbar-zoom-button.icon-button:focus-visible,
-.task-queue-zoom-button.icon-button:focus-visible,
-.timeline-zoom-button.icon-button:focus-visible {
+.workspace-topbar-zoom-button.icon-button:focus-visible {
   outline: 2px solid var(--official-blue);
   outline-offset: 1px;
 }
