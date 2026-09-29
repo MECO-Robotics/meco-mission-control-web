@@ -6,6 +6,7 @@ interface RosterSectionProps {
   className?: string;
   title: string;
   count: number;
+  presentCount: number;
   members: MemberRecord[];
   renderMember: (member: MemberRecord) => React.ReactNode;
 }
@@ -14,6 +15,7 @@ export const RosterSection: React.FC<RosterSectionProps> = ({
   className,
   title,
   count,
+  presentCount,
   members,
   renderMember,
 }) => (
@@ -21,7 +23,7 @@ export const RosterSection: React.FC<RosterSectionProps> = ({
     <div className="roster-section-header">
       <div className="roster-section-title">
         <h3>{title}</h3>
-        <span className="sidebar-tab-count">{count}</span>
+        <span aria-label={`${presentCount} of ${count} here today`} className="sidebar-tab-count">{presentCount}/{count} here</span>
       </div>
     </div>
     <div className="roster-list">{members.map(renderMember)}</div>

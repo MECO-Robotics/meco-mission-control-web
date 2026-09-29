@@ -105,7 +105,14 @@ describe("RosterView", () => {
     expect(html.indexOf("Mentors")).toBeLessThan(html.indexOf("External access"));
     expect(html).toContain("External access");
     expect(html).toContain("Sponsor Viewer");
-    expect(html).toContain("viewer@sponsor.example");
+    expect(html).not.toContain("viewer@sponsor.example");
+    expect(html).not.toContain("No attendance recorded today");
+    expect(html).not.toContain("people here today</div>");
+    expect(html).toContain("0/1 here");
+    expect(html).toContain("assigned / week");
+    expect(html).toContain('aria-label="Task breakdown"');
+    expect(html).toContain("Active</span><strong>0</strong>");
+    expect(html).not.toContain("Planned:");
     expect(html).toContain("https://cdn.example.test/people/student-one.png");
     expect(html).toContain('aria-label="Assign work to Student"');
     expect(html).toContain('title="Assign work to Student"');

@@ -217,15 +217,24 @@ export const RosterView: React.FC<RosterViewProps> = ({
   };
 
   const renderMember = (member: MemberRecord) => {
-    const presence = presenceById.get(member.id);
     const load = insightById.get(member.id);
     return <div className="people-member" key={member.id}>
       <RosterMemberRow disciplines={bootstrap.disciplines} member={member} onEditMember={openEditPersonPopup} onSelectMember={openEditPersonPopup} selectedMemberId={selectedMemberId} />
       <div className="people-member-context">
-        <small>{presence ? `Here today · ${presence.stateLabel}` : presentMemberIds.has(member.id) ? "Here today" : "No attendance recorded today"}</small>
-        {load ? <small>Capacity: {formatAvailabilityLabel(load.availabilityStatus)} · {load.activeTaskCount} active · {load.blockedTaskCount} blocked · {load.overdueTaskCount} overdue · {formatHours(load.remainingOpenHours)} remaining</small> : null}
+        <div className="people-member-load-summary">
+          <div aria-label="Weekly capacity" className="people-member-capacity">
+            <small>Capacity</small>
+            <span>{load ? formatAvailabilityLabel(load.availabilityStatus) : "Unrated"} · <strong>{formatHours(load?.plannedWeeklyAttendanceHours ?? member.plannedWeeklyAttendanceHours)} assigned / week</strong></span>
+            <span><strong>{formatHours(load?.remainingOpenHours)}</strong> remaining</span>
+          </div>
+          <div aria-label="Task breakdown" className="people-member-task-counts">
+            <div><span>Active</span><strong>{load?.activeTaskCount ?? 0}</strong></div>
+            <div><span>Blocked</span><strong>{load?.blockedTaskCount ?? 0}</strong></div>
+            <div><span>Overdue</span><strong>{load?.overdueTaskCount ?? 0}</strong></div>
+          </div>
+        </div>
         <div className="people-member-activity">
-          {load ? <details className="people-workload-details"><summary>Workload and recent activity</summary><small>{formatHours(load.plannedWeeklyAttendanceHours)} planned/week · {formatHours(load.attendanceHoursLast14Days)} attended in 14 days</small>
+          {load ? <details className="people-workload-details"><summary>Workload and recent activity</summary>
           {load.topTasks.map(task => <button className="ghost-button" key={task.id} type="button" onClick={() => { const record = bootstrap.tasks.find(item => item.id === task.id); if (record) onOpenTask?.(record); }}>{task.title}</button>)}</details> : null}
           {onCreateTaskForMember && member.role !== "external" ? (
             <button
@@ -319,12 +328,12 @@ export const RosterView: React.FC<RosterViewProps> = ({
           <h2>People</h2>
         </div>
       </div>
-      <div className="workspace-inline-summary">{presentMemberIds.size} people here today</div>
       <div className="roster-columns">
         {rosterSections.filter((section) => section.members.length > 0).map((section) => (
           <RosterSection
             className={section.className}
             count={section.members.length}
+            presentCount={section.members.filter((member) => presentMemberIds.has(member.id)).length}
             key={section.title}
             members={section.members}
             renderMember={renderMember}
