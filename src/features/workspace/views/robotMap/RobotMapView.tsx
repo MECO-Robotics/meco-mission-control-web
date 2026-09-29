@@ -19,6 +19,7 @@ interface RobotMapViewProps {
   openCreateMechanismModal: (subsystemId?: string) => void;
   openCreatePartInstanceModal: (mechanism: BootstrapPayload["mechanisms"][number]) => void;
   openCreateSubsystemModal: () => void;
+  onOpenCadWorkspace?: () => void;
   openEditMechanismModal: (mechanism: BootstrapPayload["mechanisms"][number]) => void;
   openEditPartInstanceModal: (partInstance: BootstrapPayload["partInstances"][number]) => void;
   openEditSubsystemModal: (subsystem: BootstrapPayload["subsystems"][number]) => void;
@@ -69,6 +70,7 @@ export function RobotMapView({
   openCreateMechanismModal,
   openCreatePartInstanceModal,
   openCreateSubsystemModal,
+  onOpenCadWorkspace,
   openEditMechanismModal,
   openEditPartInstanceModal,
   openEditSubsystemModal,
@@ -236,6 +238,7 @@ export function RobotMapView({
           key={primaryProjectId}
           title="Robot parts"
           importPlacement="topbar"
+          onOpenCadWorkspace={onOpenCadWorkspace}
           partDefinitions={bootstrap.partDefinitions}
           onSavePartImage={onSavePartImage}
           description="Choose a STEP assembly to inspect the robot in 3D. Select a CAD part to save its still image to a matching part record."

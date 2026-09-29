@@ -90,11 +90,6 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
           </WorkspaceSubPanel>
         </div>
       ) : null}
-      {taskView === "robot-map" ? (
-        <div className="workspace-presentation-controls">
-          <button className="ghost-button" onClick={() => props.onOpenDrilldownTarget({ tab: "cad" })} type="button">Import CAD</button>
-        </div>
-      ) : null}
       <WorkspaceSubPanel
         disableAnimations={disablePanelAnimations}
         isActive={taskView === "robot-map"}
@@ -110,6 +105,7 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
           openEditPartInstanceModal={openEditPartInstanceModal}
           openEditSubsystemModal={openEditSubsystemModal}
           onOpenDrilldownTarget={onOpenDrilldownTarget}
+          onOpenCadWorkspace={() => onOpenDrilldownTarget({ tab: "cad" })}
           removePartInstanceFromMechanism={removePartInstanceFromMechanism}
           onSavePartImage={savePartImage}
           saveSubsystemLayout={saveSubsystemLayout}
