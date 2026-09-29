@@ -9,6 +9,14 @@
   grid-template-columns: var(--workspace-grid-template, 2.4fr 1fr 0.5fr 0.8fr 0.8fr 0.8fr 0.8fr);
 }
 
+.purchase-table-header {
+  color: var(--text-copy);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
 .manufacturing-table {
   grid-template-columns: var(--workspace-grid-template, 2.5fr 1fr 0.45fr 0.7fr 0.75fr 0.8fr 0.8fr);
 }
