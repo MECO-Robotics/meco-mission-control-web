@@ -75,6 +75,7 @@ export function TimelineCompactFilterMenu({
       ariaLabel={showCalendarFilters ? "Schedule filters" : "Timeline filters"}
       buttonLabel="Filters"
       className="materials-filter-menu timeline-roster-filter"
+      inlineItems={showCalendarFilters}
       items={[
         compactFilterDropdownMenuItem({
           allLabel: "All projects",

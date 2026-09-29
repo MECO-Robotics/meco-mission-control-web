@@ -4,6 +4,7 @@ import { useId, useRef, useState, type CSSProperties, type ReactNode } from "rea
 import type { DropdownOption } from "../model/workspaceTypes";
 import {
   type FilterSelection,
+  formatCompactFilterSelectionLabel,
   formatFilterSelectionLabel,
 } from "./workspaceFilterUtils";
 import { FilterOptionMenu } from "./workspaceFilterDropdownMenu";
@@ -17,6 +18,7 @@ export function FilterDropdown({
   ariaLabel,
   appearance = "toolbar",
   className,
+  compactSummary = false,
   buttonDataTutorialTarget,
   buttonInlineEditField,
   buttonContent,
@@ -37,6 +39,7 @@ export function FilterDropdown({
   appearance?: "toolbar" | "column";
   ariaLabel?: string;
   className?: string;
+  compactSummary?: boolean;
   buttonDataTutorialTarget?: string;
   buttonInlineEditField?: string;
   buttonContent?: ReactNode;
@@ -64,6 +67,9 @@ export function FilterDropdown({
     options,
     value,
   );
+  const displaySelectedLabel = compactSummary
+    ? formatCompactFilterSelectionLabel(options, value)
+    : selectedLabel;
   const selectedOption = options.find((option) => option.id === value[0]);
   const selectedIcon = selectedOption?.icon ?? icon;
   const selectedToneClassName = getSelectedToneClassName?.(value);
@@ -126,7 +132,7 @@ export function FilterDropdown({
           <>
             <span className="toolbar-filter-icon">{selectedIcon}</span>
             <span aria-hidden="true" className="toolbar-filter-value">
-              {selectedLabel}
+              {displaySelectedLabel}
             </span>
             <span aria-hidden="true" className="toolbar-filter-chevron" />
           </>

@@ -171,12 +171,17 @@ describe("TimelineCompactFilterMenu", () => {
       activeCount: number;
       ariaLabel: string;
       buttonLabel: string;
-      items: Array<{ label: string }>;
+      inlineItems: boolean;
+      menuTitle?: string;
+      items: Array<{ label: string; content?: React.ReactElement<{ compactSummary?: boolean }> }>;
     }>;
 
     expect(menu.type).toBe(CompactFilterMenu);
     expect(menu.props.ariaLabel).toBe("Schedule filters");
     expect(menu.props.buttonLabel).toBe("Filters");
+    expect(menu.props.menuTitle).toBe("Selection");
+    expect(menu.props.inlineItems).toBe(true);
+    expect(menu.props.items.find((item) => item.label === "Roster")?.content?.props.compactSummary).toBe(true);
     expect(menu.props.activeCount).toBe(3);
     expect(menu.props.items.map((item) => item.label)).toEqual([
       "Project",
