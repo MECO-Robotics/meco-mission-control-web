@@ -1,6 +1,6 @@
-import { Archive } from "lucide-react";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { IconManufacturing, IconTasks } from "@/components/shared/Icons";
+import { ArchiveFilterCheckbox } from "@/features/workspace/shared/filters/ArchiveFilterCheckbox";
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
@@ -35,7 +35,7 @@ export function ArtifactFiltersToolbar({
 }: ArtifactFiltersToolbarProps) {
   const activeFilterCount = [workstreamFilter, statusFilter].filter(
     (value) => value.length > 0,
-  ).length;
+  ).length + Number(showArchivedArtifacts);
 
   return (
     <AppTopbarSlotPortal slot="controls">
@@ -76,6 +76,10 @@ export function ArtifactFiltersToolbar({
                     />
                   ),
                 },
+                {
+                  label: "Archive",
+                  content: <ArchiveFilterCheckbox checked={showArchivedArtifacts} label="Show archived" onChange={setShowArchivedArtifacts} />,
+                },
               ]}
             />
           }
@@ -85,16 +89,6 @@ export function ArtifactFiltersToolbar({
           placeholder={`Search ${artifactNoun}...`}
           value={search}
         />
-        <button
-          aria-label="Show archived"
-          aria-pressed={showArchivedArtifacts}
-          className={`archive-filter-toggle${showArchivedArtifacts ? " is-active" : ""}`}
-          onClick={() => setShowArchivedArtifacts(!showArchivedArtifacts)}
-          title="Show archived"
-          type="button"
-        >
-          <Archive aria-hidden="true" size={14} strokeWidth={2} />
-        </button>
       </div>
     </AppTopbarSlotPortal>
   );
