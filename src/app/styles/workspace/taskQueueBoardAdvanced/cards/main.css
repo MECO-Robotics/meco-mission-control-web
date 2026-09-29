@@ -44,10 +44,10 @@
   box-shadow: 0 8px 18px rgba(15, 28, 52, 0.05);
 }
 
-.task-queue-board-card-discipline-accented {
+.task-queue-board-card-priority-accented {
   border-color: color-mix(
     in srgb,
-    var(--task-queue-board-card-discipline-accent) 56%,
+    var(--task-queue-board-card-priority-accent) 56%,
     var(--border-base)
   );
   box-shadow:
@@ -55,15 +55,44 @@
     0 0 0 1.5px
       color-mix(
         in srgb,
-        var(--task-queue-board-card-discipline-accent) 26%,
+        var(--task-queue-board-card-priority-accent) 26%,
         transparent
       ),
     inset 0 0 0 1px
       color-mix(
         in srgb,
-        var(--task-queue-board-card-discipline-accent) 16%,
+        var(--task-queue-board-card-priority-accent) 16%,
         transparent
       );
+}
+
+.task-queue-board-card-priority-accented[data-priority="low"] {
+  border-style: dashed;
+}
+
+.task-queue-board-card-priority-accented[data-priority="medium"] {
+  border-style: solid;
+}
+
+.task-queue-board-card-priority-accented[data-priority="high"] {
+  border-width: 2px;
+}
+
+.task-queue-board-card-priority-accented[data-priority="critical"] {
+  border-style: double;
+  border-width: 3px;
+}
+
+.task-queue-board-card-priority-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 .task-queue-board-card.editable-hover-target-row {

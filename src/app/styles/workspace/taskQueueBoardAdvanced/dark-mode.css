@@ -43,10 +43,10 @@
   box-shadow: 0 10px 20px rgba(2, 6, 23, 0.25);
 }
 
-.page-shell.dark-mode .task-queue-board-card-discipline-accented {
+.page-shell.dark-mode .task-queue-board-card-priority-accented {
   border-color: color-mix(
     in srgb,
-    var(--task-queue-board-card-discipline-accent) 48%,
+    var(--task-queue-board-card-priority-accent) 48%,
     rgba(148, 163, 184, 0.2)
   );
   box-shadow:
@@ -54,13 +54,13 @@
     0 0 0 1.5px
       color-mix(
         in srgb,
-        var(--task-queue-board-card-discipline-accent) 28%,
+        var(--task-queue-board-card-priority-accent) 28%,
         transparent
       ),
     inset 0 0 0 1px
       color-mix(
         in srgb,
-        var(--task-queue-board-card-discipline-accent) 20%,
+        var(--task-queue-board-card-priority-accent) 20%,
         transparent
       );
 }

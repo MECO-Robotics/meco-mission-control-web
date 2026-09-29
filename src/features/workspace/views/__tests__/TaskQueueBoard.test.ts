@@ -51,15 +51,15 @@ describe("Task Queue board", () => {
     expect(markup).toContain("status-pill-success");
     expect(markup).not.toContain("table-pagination");
     expect(markup).not.toContain("Unknown project");
-    expect(markup).toContain("task-queue-board-card-priority-critical");
-    expect(markup).toContain("task-queue-board-card-priority-high");
-    expect(markup).toContain("task-queue-board-card-priority-medium");
-    expect(markup).toContain("task-queue-board-card-priority-low");
-    expect(markup).toContain("task-queue-board-card-discipline-accented");
-    expect(markup).toContain("--task-queue-board-card-discipline-accent");
-    expect(markup).toContain('aria-label="Critical priority"');
-    expect(markup).toContain('aria-label="Low priority"');
-    expect(markup.indexOf("task-queue-board-card-priority")).toBeLessThan(markup.indexOf("profile-avatar"));
+    expect(markup).toContain("task-queue-board-card-priority-accented");
+    expect(markup).toContain("--task-queue-board-card-priority-accent");
+    expect(markup).not.toContain('aria-label="Critical priority"');
+    expect(markup).not.toContain('aria-label="Low priority"');
+    expect(markup).toContain("Critical priority</span>");
+    expect(markup).toContain("Low priority</span>");
+    expect(markup).toContain('data-priority="critical"');
+    expect(markup).toContain('data-priority="low"');
+    expect(markup).toContain('aria-label="Design discipline"');
     expect(markup).toContain('alt="Alex Builder profile picture"');
     expect(markup).toContain('src="https://example.com/alex.png"');
     expect(markup).toContain("profile-avatar-fallback");
@@ -145,7 +145,7 @@ describe("Task Queue board", () => {
     expect(markup).toContain("Zulu priority task");
     expect(markup).toContain("Alpha priority task");
     expect(markup.indexOf("Zulu priority task")).toBeLessThan(markup.indexOf("Alpha priority task"));
-    expect(markup).not.toContain('aria-label="Design discipline"');
+    expect(markup).toContain('aria-label="Design discipline"');
   });
 
   it("enables drag-drop reassignment for task cards on direct status columns", () => {
