@@ -20,8 +20,6 @@ export type ViewAvailabilityContext =
   | "no-project"
   | "no-season";
 
-export type NavigationRequirement = "project" | "season" | "robot-project" | "non-robot-project";
-
 export type TaskViewTab = "calendar" | "timeline" | "robot-map" | "queue" | "milestones";
 export type WorklogsViewTab = "logs" | "activity" | "qa" | "results";
 export type ManufacturingViewTab = "all" | "cnc" | "prints" | "fabrication";
@@ -62,7 +60,6 @@ export interface NavigationSubItem {
   section: NavigationSection;
   target: NavigationTarget;
   icon: string;
-  requires?: NavigationRequirement[];
 }
 
 export interface ViewAvailabilityScope {

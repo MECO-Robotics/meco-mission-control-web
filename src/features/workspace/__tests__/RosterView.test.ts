@@ -109,7 +109,7 @@ describe("RosterView", () => {
     expect(html).not.toContain("No attendance recorded today");
     expect(html).not.toContain("people here today</div>");
     expect(html).toContain("0/1 here");
-    expect(html).toContain("assigned / week");
+    expect(html).toContain("planned / week");
     expect(html).toContain('aria-label="Task breakdown"');
     expect(html).toContain("Active</span><strong>0</strong>");
     expect(html).not.toContain("Planned:");

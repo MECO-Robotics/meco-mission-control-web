@@ -224,7 +224,7 @@ export const RosterView: React.FC<RosterViewProps> = ({
         <div className="people-member-load-summary">
           <div aria-label="Weekly capacity" className="people-member-capacity">
             <small>Capacity</small>
-            <span>{load ? formatAvailabilityLabel(load.availabilityStatus) : "Unrated"} · <strong>{formatHours(load?.plannedWeeklyAttendanceHours ?? member.plannedWeeklyAttendanceHours)} assigned / week</strong></span>
+            <span>{load ? formatAvailabilityLabel(load.availabilityStatus) : "Unrated"} · <strong>{formatHours(load?.plannedWeeklyAttendanceHours ?? member.plannedWeeklyAttendanceHours)} planned / week</strong></span>
             <span><strong>{formatHours(load?.remainingOpenHours)}</strong> remaining</span>
           </div>
           <div aria-label="Task breakdown" className="people-member-task-counts">

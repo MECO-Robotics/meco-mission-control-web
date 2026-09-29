@@ -14,7 +14,7 @@ import type { ResourceSortDirection } from "@/features/workspace/shared/resource
 
 import { ArtifactFiltersToolbar } from "./artifacts/ArtifactFiltersToolbar";
 import { ArtifactTable } from "./artifacts/ArtifactTable";
-import { ARTIFACT_STATUS_OPTIONS, formatUpdatedAt, sortArtifacts, type ArtifactSortField } from "./artifacts/artifactInventoryModel";
+import { ARTIFACT_STATUS_OPTIONS, formatUpdatedAt, getUpdatedDateKey, sortArtifacts, type ArtifactSortField } from "./artifacts/artifactInventoryModel";
 
 interface ArtifactInventoryViewProps {
   bootstrap: BootstrapPayload;
@@ -92,12 +92,12 @@ export function ArtifactInventoryView({
       const matchesStatus = filterSelectionIncludes(statusFilter, artifact.status);
       const matchesTitle = filterSelectionIncludes(titleFilter, artifact.title);
       const matchesLink = filterSelectionIncludes(linkFilter, artifact.link || "No link");
-      const matchesUpdated = filterSelectionIncludes(updatedFilter, artifact.updatedAt);
+      const matchesUpdated = filterSelectionIncludes(updatedFilter, getUpdatedDateKey(artifact.updatedAt));
 
       return matchesSearch && matchesWorkstream && matchesStatus && matchesTitle && matchesLink && matchesUpdated;
     });
   }, [artifactKinds, artifacts, linkFilter, search, showArchivedArtifacts, statusFilter, titleFilter, updatedFilter, workstreamFilter]);
-  const sortedArtifacts = useMemo(() => sortField ? sortArtifacts(filteredArtifacts, sortField, sortDirection) : filteredArtifacts, [filteredArtifacts, sortDirection, sortField]);
+  const sortedArtifacts = useMemo(() => sortField ? sortArtifacts(filteredArtifacts, sortField, sortDirection, workstreamsById) : filteredArtifacts, [filteredArtifacts, sortDirection, sortField, workstreamsById]);
   const artifactPagination = useWorkspacePagination(sortedArtifacts);
   const artifactFilterMotionClass = useFilterChangeMotionClass([
     search,
@@ -121,7 +121,9 @@ export function ArtifactInventoryView({
     workstream: [...workstreamOptions, { id: "__project-level__", name: "Project-level" }],
     status: ARTIFACT_STATUS_OPTIONS,
     link: [...new Set(artifacts.map((artifact) => artifact.link || "No link"))].sort().map((value) => ({ id: value, name: value })),
-    updated: [...new Set(artifacts.map((artifact) => artifact.updatedAt))].sort().map((value) => ({ id: value, name: formatUpdatedAt(value) })),
+    updated: [...new Map(artifacts.map((artifact) => [getUpdatedDateKey(artifact.updatedAt), formatUpdatedAt(artifact.updatedAt)]))]
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([id, name]) => ({ id, name })),
   }), [artifacts, workstreamOptions]);
   const setColumnFilter = (field: ArtifactSortField, value: FilterSelection) => {
     if (field === "title") setTitleFilter(value);

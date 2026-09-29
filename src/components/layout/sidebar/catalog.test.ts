@@ -9,7 +9,6 @@ describe("validateSidebarCatalog", () => {
         section: "work",
         icon: "layout-dashboard",
         target: { tab: "home" },
-        requires: ["season"],
       },
     ])).toHaveLength(1);
   });
@@ -18,7 +17,6 @@ describe("validateSidebarCatalog", () => {
     ["a non-array", {}],
     ["an item without required strings", [{ target: {} }]],
     ["an item without a target", [{ id: "home", label: "Dashboard", section: "work", icon: "home" }]],
-    ["an item with an unknown requirement", [{ id: "home", label: "Dashboard", section: "work", icon: "home", target: { tab: "home" }, requires: ["unknown"] }]],
   ])("rejects %s", (_description, value) => {
     expect(() => validateSidebarCatalog(value)).toThrow();
   });

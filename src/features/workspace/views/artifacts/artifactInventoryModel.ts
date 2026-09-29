@@ -34,6 +34,17 @@ export function formatUpdatedAt(value: string) {
   return date.toLocaleDateString();
 }
 
+export function getUpdatedDateKey(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
 export function summarizeLink(link: string) {
   if (!link.trim()) {
     return "No link";
@@ -47,11 +58,34 @@ export function summarizeLink(link: string) {
   }
 }
 
-export function sortArtifacts(artifacts: ArtifactRecord[], field: ArtifactSortField, direction: ResourceSortDirection) {
+export function sortArtifacts(
+  artifacts: ArtifactRecord[],
+  field: ArtifactSortField,
+  direction: ResourceSortDirection,
+  workstreamsById: Record<string, string>,
+) {
   const multiplier = direction === "ascending" ? 1 : -1;
+  const getSortValue = (artifact: ArtifactRecord) => {
+    switch (field) {
+      case "title":
+        return artifact.title;
+      case "workstream":
+        return artifact.workstreamId
+          ? workstreamsById[artifact.workstreamId] ?? "Unknown workflow"
+          : "Project-level";
+      case "status":
+        return artifact.status;
+      case "link":
+        return artifact.link;
+      case "updated":
+        return artifact.updatedAt;
+    }
+  };
+
   return [...artifacts].sort((left, right) => {
-    const leftValue = field === "title" ? left.title : field === "workstream" ? left.workstreamId ?? "" : field === "status" ? left.status : field === "link" ? left.link : left.updatedAt;
-    const rightValue = field === "title" ? right.title : field === "workstream" ? right.workstreamId ?? "" : field === "status" ? right.status : field === "link" ? right.link : right.updatedAt;
-    return multiplier * leftValue.localeCompare(rightValue, undefined, { numeric: true, sensitivity: "base" });
+    return multiplier * getSortValue(left).localeCompare(getSortValue(right), undefined, {
+      numeric: true,
+      sensitivity: "base",
+    });
   });
 }
