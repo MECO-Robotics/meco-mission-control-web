@@ -1,4 +1,6 @@
-import { Component, lazy, Suspense, useEffect, useState, type ReactNode } from "react";
+import { Component, lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
+import { buildSingleAddMenuAction } from "@/features/workspace/shared/topbar";
 import { CadPartImageAssignment, type CadPartImageTargets } from "./CadPartImageAssignment";
 import type { CadMesh } from "./cadGeometry";
 import "./cadPartViewer.css";
@@ -70,15 +72,35 @@ export function CadPartViewer({ file, ...imageTargets }: { file: File | null } &
 export function CadFileViewer({
   title = "CAD parts",
   description = "Inspect a STEP file locally. Sign in to import its structure into a workspace or connect Onshape.",
+  importPlacement = "inline",
   ...imageTargets
-}: { title?: string; description?: string } & CadPartImageTargets) {
+}: { title?: string; description?: string; importPlacement?: "inline" | "topbar" } & CadPartImageTargets) {
   const [file, setFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   return <div className="cad-local-viewer">
     <h2>{title}</h2>
     <p>{description}</p>
-    <label className="cad-field"><span>STEP file</span>
-      <input type="file" accept=".step,.stp" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
-    </label>
+    {importPlacement === "topbar" ? (
+      <>
+        <input
+          accept=".step,.stp"
+          hidden
+          onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+          ref={fileInputRef}
+          type="file"
+        />
+        <WorkspaceTopbarAddMenu
+          actions={buildSingleAddMenuAction({ label: "Import CAD", onSelect: () => fileInputRef.current?.click() })}
+          ariaLabel="Import CAD"
+          title="Import CAD"
+          tutorialTarget="import-cad-button"
+        />
+      </>
+    ) : (
+      <label className="cad-field"><span>STEP file</span>
+        <input type="file" accept=".step,.stp" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+      </label>
+    )}
     <CadPartViewer file={file} {...imageTargets} />
   </div>;
 }

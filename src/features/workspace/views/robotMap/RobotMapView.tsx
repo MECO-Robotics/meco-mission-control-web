@@ -235,6 +235,7 @@ export function RobotMapView({
         <CadFileViewer
           key={primaryProjectId}
           title="Robot parts"
+          importPlacement="topbar"
           partDefinitions={bootstrap.partDefinitions}
           onSavePartImage={onSavePartImage}
           description="Choose a STEP assembly to inspect the robot in 3D. Select a CAD part to save its still image to a matching part record."
