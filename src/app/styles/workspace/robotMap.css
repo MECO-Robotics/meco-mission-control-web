@@ -38,23 +38,17 @@
 }
 
 .robot-config-main-map {
-  grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.85fr);
+  grid-template-columns: minmax(260px, 1fr) minmax(260px, 1fr) minmax(300px, 1fr);
 }
 
 .robot-config-main-map.is-empty {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.robot-config-center {
-  display: grid;
-  gap: 0.75rem;
-  min-height: 0;
+  grid-template-columns: minmax(240px, 0.8fr) minmax(280px, 1fr);
 }
 
 .robot-config-cad-viewer {
-  border-top: 1px solid var(--border-base);
+  border-left: 1px solid var(--border-base);
   min-width: 0;
-  padding-top: 0.75rem;
+  padding-left: 0.75rem;
 }
 
 .robot-config-cad-viewer .cad-local-viewer {
