@@ -1,3 +1,4 @@
+import { Archive } from "lucide-react";
 import { IconManufacturing, IconTasks } from "@/components/shared/Icons";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
@@ -18,14 +19,6 @@ interface PartsToolbarProps {
   showArchivedPartDefinitions: boolean;
 }
 
-const ARCHIVED_LABEL_STYLE = {
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "0.35rem",
-  color: "var(--text-copy)",
-  fontSize: "0.85rem",
-} as const;
-
 export function PartsToolbar({
   bootstrap,
   partSearch,
@@ -41,42 +34,54 @@ export function PartsToolbar({
     <div className="panel-actions filter-toolbar part-manager-toolbar">
       <TopbarResponsiveSearch
         actions={
-          <CompactFilterMenu
-            activeCount={[partSubsystem, partStatus].filter((value) => value.length > 0).length}
-            ariaLabel="Part filters"
-            buttonLabel="Filters"
-            className="materials-filter-menu"
-            items={[
-              {
-                label: "Subsystem",
-                content: (
-                  <FilterDropdown
-                    allLabel="All subsystems"
-                    ariaLabel="Filter parts by subsystem"
-                    className="task-queue-filter-menu-submenu"
-                    icon={<IconManufacturing />}
-                    onChange={setPartSubsystem}
-                    options={bootstrap.subsystems}
-                    value={partSubsystem}
-                  />
-                ),
-              },
-              {
-                label: "Status",
-                content: (
-                  <FilterDropdown
-                    allLabel="All statuses"
-                    ariaLabel="Filter parts by status"
-                    className="task-queue-filter-menu-submenu"
-                    icon={<IconTasks />}
-                    onChange={setPartStatus}
-                    options={PART_STATUS_OPTIONS}
-                    value={partStatus}
-                  />
-                ),
-              },
-            ]}
-          />
+          <>
+            <CompactFilterMenu
+              activeCount={[partSubsystem, partStatus].filter((value) => value.length > 0).length}
+              ariaLabel="Part filters"
+              buttonLabel="Filters"
+              className="materials-filter-menu"
+              items={[
+                {
+                  label: "Subsystem",
+                  content: (
+                    <FilterDropdown
+                      allLabel="All subsystems"
+                      ariaLabel="Filter parts by subsystem"
+                      className="task-queue-filter-menu-submenu"
+                      icon={<IconManufacturing />}
+                      onChange={setPartSubsystem}
+                      options={bootstrap.subsystems}
+                      value={partSubsystem}
+                    />
+                  ),
+                },
+                {
+                  label: "Status",
+                  content: (
+                    <FilterDropdown
+                      allLabel="All statuses"
+                      ariaLabel="Filter parts by status"
+                      className="task-queue-filter-menu-submenu"
+                      icon={<IconTasks />}
+                      onChange={setPartStatus}
+                      options={PART_STATUS_OPTIONS}
+                      value={partStatus}
+                    />
+                  ),
+                },
+              ]}
+            />
+            <button
+              aria-label="Show archived definitions"
+              aria-pressed={showArchivedPartDefinitions}
+              className={`parts-archived-toggle${showArchivedPartDefinitions ? " is-active" : ""}`}
+              onClick={() => setShowArchivedPartDefinitions(!showArchivedPartDefinitions)}
+              title="Show archived definitions"
+              type="button"
+            >
+              <Archive aria-hidden="true" size={14} strokeWidth={2} />
+            </button>
+          </>
         }
         ariaLabel="Search parts"
         compactPlaceholder="Search"
@@ -85,15 +90,6 @@ export function PartsToolbar({
         tutorialTarget="parts-search-input"
         value={partSearch}
       />
-      <label style={ARCHIVED_LABEL_STYLE}>
-        <input
-          checked={showArchivedPartDefinitions}
-          onChange={(milestone) => setShowArchivedPartDefinitions(milestone.target.checked)}
-          type="checkbox"
-        />
-        Show archived definitions
-      </label>
-
     </div>
   );
 }

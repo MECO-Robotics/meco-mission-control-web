@@ -37,6 +37,27 @@
   color: var(--text-copy);
 }
 
+.topbar-responsive-search-actions .parts-archived-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-copy);
+  cursor: pointer;
+}
+
+.topbar-responsive-search-actions .parts-archived-toggle:hover,
+.topbar-responsive-search-actions .parts-archived-toggle:focus-visible,
+.topbar-responsive-search-actions .parts-archived-toggle.is-active {
+  background: color-mix(in srgb, var(--meco-blue) 10%, transparent);
+  color: var(--official-blue);
+}
+
 .topbar-responsive-search-actions .toolbar-filter-value,
 .topbar-responsive-search-actions .toolbar-filter-chevron {
   display: none;
