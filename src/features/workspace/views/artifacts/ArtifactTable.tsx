@@ -125,7 +125,9 @@ export function ArtifactTable({
                 {statusMeta.label}
               </span>
             </TableCell>
-            <TableCell label="Link">{summarizeLink(artifact.link)}</TableCell>
+            <TableCell label="Link" valueClassName="artifact-link-value">
+              {summarizeLink(artifact.link)}
+            </TableCell>
             <TableCell label="Updated" valueClassName="font-mono">
               {formatUpdatedAt(artifact.updatedAt)}
             </TableCell>
