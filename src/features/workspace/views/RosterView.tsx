@@ -284,7 +284,7 @@ export const RosterView: React.FC<RosterViewProps> = ({
         <span>{presentMemberIds.size} people here today</span>
       </div>
       <div className="roster-columns">
-        {rosterSections.map((section) => (
+        {rosterSections.filter((section) => section.members.length > 0).map((section) => (
           <RosterSection
             className={section.className}
             count={section.members.length}
