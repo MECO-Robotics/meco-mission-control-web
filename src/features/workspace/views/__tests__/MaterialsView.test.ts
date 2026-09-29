@@ -6,7 +6,12 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { MATERIAL_STOCK_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
 import { MaterialsView } from "@/features/workspace/views/MaterialsView";
-import { filterMaterialInventory, isMaterialBelowReorder, matchesMaterialStockFilter } from "@/features/workspace/views/materialsInventoryModel";
+import {
+  filterMaterialInventory,
+  isMaterialBelowReorder,
+  matchesMaterialStockFilter,
+  sortMaterialInventory,
+} from "@/features/workspace/views/materialsInventoryModel";
 import type { MaterialRecord } from "@/types/recordsInventory";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
@@ -89,5 +94,22 @@ describe("MaterialsView stock presentation", () => {
         stock: ["below-reorder"],
       }),
     ).toEqual([material]);
+  });
+
+  it("sorts inventory by the selected column and direction", () => {
+    const secondMaterial = { ...material, id: "filament", name: "Onyx Filament", onHandQuantity: 1 };
+
+    expect(sortMaterialInventory([material, secondMaterial], "name", "ascending")).toEqual([
+      secondMaterial,
+      material,
+    ]);
+    expect(sortMaterialInventory([material, secondMaterial], "quantity", "ascending")).toEqual([
+      secondMaterial,
+      material,
+    ]);
+    expect(sortMaterialInventory([material, secondMaterial], "name", "descending")).toEqual([
+      material,
+      secondMaterial,
+    ]);
   });
 });
