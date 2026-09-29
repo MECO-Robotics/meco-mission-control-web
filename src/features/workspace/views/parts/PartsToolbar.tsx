@@ -9,10 +9,12 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 
 interface PartsToolbarProps {
   bootstrap: BootstrapPayload;
+  mapping: string;
   partSearch: string;
   partStatus: FilterSelection;
   partSubsystem: FilterSelection;
   setPartSearch: (value: string) => void;
+  setMapping: (value: string) => void;
   setPartStatus: (value: FilterSelection) => void;
   setPartSubsystem: (value: FilterSelection) => void;
   setShowArchivedPartDefinitions: (value: boolean) => void;
@@ -21,10 +23,12 @@ interface PartsToolbarProps {
 
 export function PartsToolbar({
   bootstrap,
+  mapping,
   partSearch,
   partStatus,
   partSubsystem,
   setPartSearch,
+  setMapping,
   setPartStatus,
   setPartSubsystem,
   setShowArchivedPartDefinitions,
@@ -36,7 +40,7 @@ export function PartsToolbar({
         actions={
           <>
             <CompactFilterMenu
-              activeCount={[partSubsystem, partStatus].filter((value) => value.length > 0).length}
+              activeCount={[partSubsystem, partStatus].filter((value) => value.length > 0).length + Number(mapping !== "all")}
               ariaLabel="Part filters"
               buttonLabel="Filters"
               className="materials-filter-menu"
@@ -67,6 +71,21 @@ export function PartsToolbar({
                       options={PART_STATUS_OPTIONS}
                       value={partStatus}
                     />
+                  ),
+                },
+                {
+                  label: "Allocation",
+                  content: (
+                    <select
+                      aria-label="Part allocation"
+                      className="toolbar-filter-select"
+                      onChange={(event) => setMapping(event.target.value)}
+                      value={mapping}
+                    >
+                      <option value="all">All parts</option>
+                      <option value="mapped">Mapped</option>
+                      <option value="unmapped">Needs mapping</option>
+                    </select>
                   ),
                 },
               ]}
