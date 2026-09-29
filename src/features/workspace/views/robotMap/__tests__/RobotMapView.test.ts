@@ -59,6 +59,8 @@ describe("RobotMapView", () => {
     expect(markup).toContain("Empty 3D viewer");
     expect(markup).not.toContain("Upload an isometric");
     expect(markup).toContain("Robot Configuration");
+    expect(markup).toContain('aria-label="Import CAD"');
+    expect(markup).toContain('data-tutorial-target="import-cad-button"');
     expect(markup).toContain("Manual configuration with finalized STEP import and Onshape sync sources.");
     expect(markup).toContain("Source model docs");
     expect(markup).toContain("/docs/CURRENT_WEB_SPEC.md#robot-configuration");

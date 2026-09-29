@@ -1,6 +1,6 @@
 import { Component, lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
-import { buildSingleAddMenuAction } from "@/features/workspace/shared/topbar";
+import { buildTopbarAddMenuActions, makeAddMenuAction } from "@/features/workspace/shared/topbar";
 import { CadPartImageAssignment, type CadPartImageTargets } from "./CadPartImageAssignment";
 import type { CadMesh } from "./cadGeometry";
 import "./cadPartViewer.css";
@@ -73,8 +73,14 @@ export function CadFileViewer({
   title = "CAD parts",
   description = "Inspect a STEP file locally. Sign in to import its structure into a workspace or connect Onshape.",
   importPlacement = "inline",
+  onOpenCadWorkspace,
   ...imageTargets
-}: { title?: string; description?: string; importPlacement?: "inline" | "topbar" } & CadPartImageTargets) {
+}: {
+  title?: string;
+  description?: string;
+  importPlacement?: "inline" | "topbar";
+  onOpenCadWorkspace?: () => void;
+} & CadPartImageTargets) {
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   return <div className="cad-local-viewer">
@@ -90,7 +96,12 @@ export function CadFileViewer({
           type="file"
         />
         <WorkspaceTopbarAddMenu
-          actions={buildSingleAddMenuAction({ label: "Import CAD", onSelect: () => fileInputRef.current?.click() })}
+          actions={buildTopbarAddMenuActions(
+            makeAddMenuAction("Import STEP file", () => fileInputRef.current?.click()),
+            ...(onOpenCadWorkspace
+              ? [makeAddMenuAction("Open CAD integration", onOpenCadWorkspace)]
+              : []),
+          )}
           ariaLabel="Import CAD"
           title="Import CAD"
           tutorialTarget="import-cad-button"
