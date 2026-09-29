@@ -84,10 +84,22 @@
   height: 1.9rem;
   min-width: 1.9rem;
   padding: 0;
+  border: 0;
+  background: transparent;
   box-shadow: none;
   font-size: 1rem;
   font-weight: 800;
   line-height: 1;
+}
+
+.task-queue-zoom-button.icon-button:hover:not(:disabled) {
+  background: transparent;
+  color: var(--official-blue);
+}
+
+.task-queue-zoom-button.icon-button:focus-visible {
+  outline: 2px solid var(--official-blue);
+  outline-offset: 1px;
 }
 
 .task-queue-zoom-label {
