@@ -51,12 +51,19 @@ describe("RobotMapView", () => {
     expect(markup).toContain("Empty 3D viewer");
     expect(markup).not.toContain("<h2>Robot Configuration</h2>");
     expect(markup).toContain("Upload an isometric layout image");
-    expect(markup).toContain("Inspect the robot assembly in 3D.");
+    expect(markup).not.toContain("Inspect the robot assembly in 3D.");
     expect(markup).not.toContain("Map View");
     expect(markup).not.toContain("List View");
     expect(markup).not.toContain("3D View");
     expect(markup).toContain('aria-label="Import CAD"');
     expect(markup).toContain('data-tutorial-target="import-cad-button"');
+    expect(markup).toContain('aria-label="Map presentation"');
+    expect(markup).toMatch(/<button aria-pressed="true"[^>]*>Map<\/button>/);
+    expect(markup).toMatch(/<button aria-pressed="false"[^>]*>3D<\/button>/);
+    expect(markup).not.toContain("robot-config-cad-viewer");
+    expect(markup.indexOf('class="robot-config-map-surface')).toBeLessThan(
+      markup.indexOf('class="robot-config-embedded-cad'),
+    );
     expect(markup).not.toContain("Manual configuration with finalized STEP import and Onshape sync sources.");
     expect(markup).not.toContain("Source model docs");
     expect(markup).not.toContain("Unplaced Subsystems");

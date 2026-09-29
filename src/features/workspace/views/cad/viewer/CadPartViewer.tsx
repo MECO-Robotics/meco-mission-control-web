@@ -60,11 +60,15 @@ export function EmptyCadViewer() {
   </div>;
 }
 
-export function CadPartViewer({ file, ...imageTargets }: { file: File | null } & CadPartImageTargets) {
+export function CadPartViewer({
+  file,
+  title = "Part viewer",
+  ...imageTargets
+}: { file: File | null; title?: string | null } & CadPartImageTargets) {
   const [current, setCurrent] = useState({ file, key: 0 });
   if (current.file !== file) setCurrent({ file, key: current.key + 1 });
   return <section className="cad-card cad-part-viewer" aria-label="CAD part viewer">
-    <h3>Part viewer</h3>
+    {title ? <h3>{title}</h3> : null}
     {file ? <FileViewer key={current.key} file={file} {...imageTargets} /> : <EmptyCadViewer />}
   </section>;
 }
@@ -73,19 +77,21 @@ export function CadFileViewer({
   title = "CAD parts",
   description = "Inspect a STEP file locally. Sign in to import its structure into a workspace or connect Onshape.",
   importPlacement = "inline",
+  embeddedInMap = false,
   onOpenCadWorkspace,
   ...imageTargets
 }: {
   title?: string;
   description?: string;
+  embeddedInMap?: boolean;
   importPlacement?: "inline" | "topbar";
   onOpenCadWorkspace?: () => void;
 } & CadPartImageTargets) {
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  return <div className="cad-local-viewer">
-    <h2>{title}</h2>
-    <p>{description}</p>
+  return <div className={`cad-local-viewer${embeddedInMap ? " cad-local-viewer-embedded" : ""}`}>
+    {!embeddedInMap ? <h2>{title}</h2> : null}
+    {!embeddedInMap ? <p>{description}</p> : null}
     {importPlacement === "topbar" ? (
       <>
         <input
@@ -112,6 +118,6 @@ export function CadFileViewer({
         <input type="file" accept=".step,.stp" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
       </label>
     )}
-    <CadPartViewer file={file} {...imageTargets} />
+    <CadPartViewer file={file} title={embeddedInMap ? null : "Part viewer"} {...imageTargets} />
   </div>;
 }

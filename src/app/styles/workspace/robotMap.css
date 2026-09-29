@@ -29,21 +29,11 @@
 }
 
 .robot-config-main-map {
-  grid-template-columns: minmax(260px, 1fr) minmax(260px, 1fr) minmax(300px, 1fr);
+  grid-template-columns: minmax(0, 1.65fr) minmax(300px, 0.9fr);
 }
 
 .robot-config-main-map.is-empty {
-  grid-template-columns: minmax(240px, 0.8fr) minmax(280px, 1fr);
-}
-
-.robot-config-cad-viewer {
-  border-left: 1px solid var(--border-base);
-  min-width: 0;
-  padding-left: 0.75rem;
-}
-
-.robot-config-cad-viewer .cad-local-viewer {
-  padding: 0;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .robot-config-map-empty {
@@ -74,6 +64,100 @@
   min-height: 420px;
   overflow: hidden;
   position: relative;
+}
+
+.robot-config-map-surface.is-3d {
+  min-height: clamp(420px, 58vh, 680px);
+}
+
+.robot-config-map-layer {
+  inset: 0;
+  position: absolute;
+}
+
+.robot-config-map-surface.is-3d .robot-config-map-layer {
+  display: none;
+}
+
+.robot-config-embedded-cad {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  visibility: hidden;
+}
+
+.robot-config-embedded-cad.is-active {
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.robot-config-embedded-cad .cad-local-viewer-embedded {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.65rem;
+}
+
+.robot-config-embedded-cad .cad-part-viewer {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0;
+}
+
+.robot-config-embedded-cad .cad-viewer-canvas {
+  flex: 1 0 280px;
+  height: clamp(280px, 48vh, 560px);
+  min-height: 280px;
+}
+
+.robot-config-map-mode-toggle {
+  align-items: center;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-base);
+  border-radius: 0.65rem;
+  box-shadow: 0 4px 12px color-mix(in srgb, #0f172a 12%, transparent);
+  display: inline-flex;
+  gap: 0.15rem;
+  left: 0.65rem;
+  padding: 0.18rem;
+  position: absolute;
+  top: 0.65rem;
+  z-index: 5;
+}
+
+.robot-config-map-mode-toggle button {
+  background: transparent;
+  border: 0;
+  border-radius: 0.42rem;
+  color: var(--text-copy);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  min-height: 1.8rem;
+  min-width: 2.8rem;
+  padding: 0.25rem 0.55rem;
+}
+
+.robot-config-map-mode-toggle button[aria-pressed="true"] {
+  background: var(--meco-soft-blue);
+  color: var(--meco-blue);
+}
+
+.robot-config-map-mode-toggle button:focus-visible {
+  outline: 2px solid var(--official-blue);
+  outline-offset: 2px;
+  position: relative;
+  z-index: 1;
 }
 
 .robot-config-map-surface.is-editing {
