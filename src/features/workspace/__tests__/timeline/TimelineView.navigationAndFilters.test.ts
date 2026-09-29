@@ -227,7 +227,7 @@ describe("TimelineView", () => {
 
     expect(markup).toContain('aria-label="Previous month"');
     expect(markup).toContain('aria-label="Next month"');
-    expect(markup).toContain("April &#x27;26");
+    expect(markup).toContain("Apr &#x27;26");
   });
 
   it("filters timeline tasks by project, discipline, subsystem, status, and priority", () => {
@@ -404,6 +404,10 @@ describe("TimelineView", () => {
         "2026-04-12",
       ]),
     ).toBe("4/6 - 4/12/26");
+  });
+
+  it("abbreviates the month in month-period labels", () => {
+    expect(formatTimelinePeriodLabel("month", ["2026-09-01", "2026-09-30"])).toBe("Sep '26");
   });
 
   it("keeps month-end bounds in the same calendar month for month-edge dates", () => {
