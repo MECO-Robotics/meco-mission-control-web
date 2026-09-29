@@ -39,6 +39,7 @@ describe("MaterialsView stock presentation", () => {
     );
 
     expect(markup).toContain("On hand / reorder");
+    expect(markup).toContain('resource-list-primary-cell" data-label="Material"');
     expect(markup).toContain("2 / 3");
     expect(markup).toContain("materials-stock-below-reorder");
     expect(markup).not.toContain('data-label="Reorder"');

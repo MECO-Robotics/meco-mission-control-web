@@ -11,7 +11,7 @@ import {
 } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { WorkspaceEmptyState } from "@/features/workspace/shared/ui";
 import type { ArtifactRecord } from "@/types/recordsInventory";
-import { ResourceRecordPreview } from "@/features/workspace/shared/resourceList/ResourceRecordPreview";
+import { ResourceRecordCell } from "@/features/workspace/shared/resourceList/ResourceRecordCell";
 import { ResourceColumnHeader, type ResourceSortDirection } from "@/features/workspace/shared/resourceList/ResourceColumnHeader";
 import type { ArtifactSortField } from "./artifactInventoryModel";
 
@@ -117,9 +117,7 @@ export function ArtifactTable({
             title={`Edit ${artifact.title}`}
             type="button"
           >
-            <TableCell label="Artifact">
-              <ResourceRecordPreview archived={artifact.isArchived} photoUrl={artifact.photoUrl} name={artifact.title} subtitle={artifact.summary || "No summary yet."} />
-            </TableCell>
+            <ResourceRecordCell archived={artifact.isArchived} label="Artifact" photoUrl={artifact.photoUrl} name={artifact.title} subtitle={artifact.summary || "No summary yet."} />
             <TableCell label="Workflow">{workflowName}</TableCell>
             <TableCell label="Status" valueClassName="table-cell-pill">
               <span className={getStatusPillClassName(statusMeta.statusValue)}>
