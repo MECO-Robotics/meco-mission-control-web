@@ -136,7 +136,11 @@ export function TaskQueueCard({
         <strong>{task.title}</strong>
         <span className="task-queue-board-card-header-side">
           <span className={`task-queue-board-card-due ${dueDatePillClassName}`}>{dueDateText}</span>
-          {latestLog ? (
+          {task.blockers.length ? (
+            <small className="task-queue-board-card-blocker-count">
+              {task.blockers.length} blocker{task.blockers.length === 1 ? "" : "s"}
+            </small>
+          ) : latestLog ? (
             <small className="task-queue-board-card-work-hours">{loggedHours.toFixed(1)}h logged</small>
           ) : null}
         </span>
@@ -186,7 +190,6 @@ export function TaskQueueCard({
         ) : null}
       </div>
       {needsHelp ? <small className="pill status-pill status-pill-warning">Help requested</small> : null}
-      {task.blockers.length ? <small>{task.blockers.length} blocker{task.blockers.length === 1 ? "" : "s"} · Open for help and resolution</small> : null}
       <EditableHoverIndicator className="task-queue-board-card-hover" />
     </button>
   );

@@ -64,6 +64,23 @@ describe("Task Queue cards", () => {
     expect(markup).not.toContain("Unrelated");
   });
 
+  it("shows blocker count in place of logged hours when blockers exist", () => {
+    const bootstrap = createBootstrap();
+    bootstrap.workLogs = [
+      { id: "log-1", taskId: "task-1", date: "2026-01-02", participantIds: ["member-1"], hours: 3.5, notes: "Prepared connector" },
+    ];
+    const task = createTask(1, { blockers: ["Needs material"] });
+    const markup = renderToStaticMarkup(React.createElement(TaskQueueCard, {
+      bootstrap, task, disciplinesById: {}, membersById: {}, projectsById: {},
+      subsystemsById: {}, workstreamsById: {}, isNonRobotProject: false, openEditTaskModal: jest.fn(),
+      taskQueueZoom: 1, showProjectContextOnCards: false, showProjectOnCards: false,
+    }));
+
+    expect(markup).toContain('task-queue-board-card-blocker-count">1 blocker</small>');
+    expect(markup).not.toContain("3.5h logged");
+    expect(markup).not.toContain("Open for help and resolution");
+  });
+
   it("formats the kanban card context from subsystems or workflows when a project is selected", () => {
     const robotTask = createTask(1, {
       projectId: "project-robot",
