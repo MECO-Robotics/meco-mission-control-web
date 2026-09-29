@@ -14,15 +14,6 @@
   justify-content: flex-start;
 }
 
-.robot-config-toolbar-title {
-  margin-right: auto;
-}
-
-.robot-config-toolbar-title h2 {
-  color: var(--text-title);
-  margin: 0;
-}
-
 .robot-config-upload-input {
   height: 0;
   opacity: 0;

@@ -9,7 +9,7 @@ import { RobotMapView } from "../RobotMapView";
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 describe("RobotMapView", () => {
-  it("renders Robot Configuration and avoids readiness-first metrics text", () => {
+  it("keeps the robot view free of duplicated configuration copy and readiness-first metrics", () => {
     const bootstrap = createBootstrap({
       subsystems: [
         {
@@ -49,7 +49,7 @@ describe("RobotMapView", () => {
     );
 
     expect(markup).toContain("Empty 3D viewer");
-    expect(markup).toContain("Robot Configuration");
+    expect(markup).not.toContain("<h2>Robot Configuration</h2>");
     expect(markup).toContain("Upload an isometric layout image");
     expect(markup).toContain("Inspect the robot assembly in 3D.");
     expect(markup).not.toContain("Map View");
@@ -57,9 +57,8 @@ describe("RobotMapView", () => {
     expect(markup).not.toContain("3D View");
     expect(markup).toContain('aria-label="Import CAD"');
     expect(markup).toContain('data-tutorial-target="import-cad-button"');
-    expect(markup).toContain("Manual configuration with finalized STEP import and Onshape sync sources.");
-    expect(markup).toContain("Source model docs");
-    expect(markup).toContain("/docs/CURRENT_WEB_SPEC.md#robot-configuration");
+    expect(markup).not.toContain("Manual configuration with finalized STEP import and Onshape sync sources.");
+    expect(markup).not.toContain("Source model docs");
     expect(markup).not.toContain("Unplaced Subsystems");
     expect(markup).not.toContain("All subsystems are currently placed.");
     expect(markup).not.toContain("Enable Edit Layout to drag subsystems.");
