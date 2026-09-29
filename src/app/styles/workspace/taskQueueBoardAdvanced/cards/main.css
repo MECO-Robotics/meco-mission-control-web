@@ -204,7 +204,8 @@
   margin-left: auto;
 }
 
-.task-queue-board-card-discipline {
+.task-queue-board-card-discipline,
+.task-queue-board-card-type-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -216,7 +217,13 @@
   flex-shrink: 0;
 }
 
-.task-queue-board-card-discipline svg {
+.task-queue-board-card-type-icon {
+  background: color-mix(in srgb, var(--official-blue) 12%, transparent);
+  color: var(--official-blue);
+}
+
+.task-queue-board-card-discipline svg,
+.task-queue-board-card-type-icon svg {
   display: block;
   width: calc(0.88rem * var(--task-queue-zoom, 1));
   height: calc(0.88rem * var(--task-queue-zoom, 1));
