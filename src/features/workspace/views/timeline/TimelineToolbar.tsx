@@ -194,84 +194,87 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
         value={searchFilter}
       />
       <div
-        aria-label="Timeline interval"
-        className={`timeline-interval-switch${isIntervalSwitchExpanded ? " is-expanded" : ""}`}
-        ref={intervalSwitchRef}
-        onBlurCapture={handleIntervalSwitchBlur}
-        onMouseEnter={() => openIntervalSwitch()}
-        onMouseLeave={closeIntervalSwitch}
-        onFocusCapture={handleIntervalSwitchFocusCapture}
-        onPointerDownCapture={handleIntervalSwitchPointerDown}
-        role="group"
+        aria-label={viewInterval === "all" ? "Timeline view controls" : "Timeline period controls"}
+        className={`timeline-period-controls${viewInterval === "week" ? " is-week" : ""}${viewInterval === "all" ? " is-all" : ""}`}
       >
-        {isIntervalSwitchExpanded ? (
-          <div
-            aria-label="Timeline interval options"
-            className="timeline-interval-toggle-rail"
-            data-tutorial-target="timeline-interval-select"
-          >
-            {TIMELINE_INTERVAL_OPTIONS.map((option) => (
-              <button
-                key={option.id}
-                aria-label={`Set timeline interval to ${option.label}`}
-                aria-pressed={viewInterval === option.id}
-                className={`timeline-interval-toggle-option${viewInterval === option.id ? " is-active" : ""}`}
-                onClick={() => {
-                  onIntervalChange(option.id);
-                  closeIntervalSwitch();
-                }}
-                title={option.label}
-                type="button"
-              >
-                {option.shortLabel}
-              </button>
-            ))}
-          </div>
-        ) : (
-          <button
-            aria-label={`Timeline interval: ${activeIntervalOption.label}`}
-            className="timeline-interval-pill"
-            data-tutorial-target="timeline-interval-select"
-            onClick={() => openIntervalSwitch({ focusOptions: true })}
-            onKeyDown={handleIntervalPillKeyDown}
-            title={`Timeline interval: ${activeIntervalOption.label}`}
-            type="button"
-          >
-            <span className="timeline-interval-pill-icon">
-              <IconCalendar />
-            </span>
-            <span className="timeline-interval-pill-label">{activeIntervalOption.label}</span>
-          </button>
-        )}
-      </div>
-      {viewInterval !== "all" ? (
         <div
-          aria-label="Timeline period controls"
-          className={`timeline-period-controls${viewInterval === "week" ? " is-week" : ""}`}
+          aria-label="Timeline interval"
+          className={`timeline-interval-switch${isIntervalSwitchExpanded ? " is-expanded" : ""}`}
+          ref={intervalSwitchRef}
+          onBlurCapture={handleIntervalSwitchBlur}
+          onMouseEnter={() => openIntervalSwitch()}
+          onMouseLeave={closeIntervalSwitch}
+          onFocusCapture={handleIntervalSwitchFocusCapture}
+          onPointerDownCapture={handleIntervalSwitchPointerDown}
+          role="group"
         >
-          <button
-            aria-label={`Previous ${viewInterval}`}
-            className="icon-button timeline-period-button"
-            data-tutorial-target="timeline-period-prev-button"
-            onClick={() => onShiftPeriod(-1)}
-            title={`Previous ${viewInterval}`}
-            type="button"
-          >
-            <IconChevronLeft />
-          </button>
-          <span className="timeline-period-label">{timelinePeriodLabel}</span>
-          <button
-            aria-label={`Next ${viewInterval}`}
-            className="icon-button timeline-period-button"
-            data-tutorial-target="timeline-period-next-button"
-            onClick={() => onShiftPeriod(1)}
-            title={`Next ${viewInterval}`}
-            type="button"
-          >
-            <IconChevronRight />
-          </button>
+          {isIntervalSwitchExpanded ? (
+            <div
+              aria-label="Timeline interval options"
+              className="timeline-interval-toggle-rail"
+              data-tutorial-target="timeline-interval-select"
+            >
+              {TIMELINE_INTERVAL_OPTIONS.map((option) => (
+                <button
+                  key={option.id}
+                  aria-label={`Set timeline interval to ${option.label}`}
+                  aria-pressed={viewInterval === option.id}
+                  className={`timeline-interval-toggle-option${viewInterval === option.id ? " is-active" : ""}`}
+                  onClick={() => {
+                    onIntervalChange(option.id);
+                    closeIntervalSwitch();
+                  }}
+                  title={option.label}
+                  type="button"
+                >
+                  {option.shortLabel}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <button
+              aria-label={`Timeline interval: ${activeIntervalOption.label}`}
+              className="timeline-interval-pill"
+              data-tutorial-target="timeline-interval-select"
+              onClick={() => openIntervalSwitch({ focusOptions: true })}
+              onKeyDown={handleIntervalPillKeyDown}
+              title={`Timeline interval: ${activeIntervalOption.label}`}
+              type="button"
+            >
+              <span className="timeline-interval-pill-icon">
+                <IconCalendar />
+              </span>
+              <span className="timeline-interval-pill-label">{activeIntervalOption.label}</span>
+            </button>
+          )}
         </div>
-      ) : null}
+        {viewInterval !== "all" ? (
+          <>
+            <span aria-hidden="true" className="timeline-period-divider" />
+            <button
+              aria-label={`Previous ${viewInterval}`}
+              className="icon-button timeline-period-button"
+              data-tutorial-target="timeline-period-prev-button"
+              onClick={() => onShiftPeriod(-1)}
+              title={`Previous ${viewInterval}`}
+              type="button"
+            >
+              <IconChevronLeft />
+            </button>
+            <span className="timeline-period-label">{timelinePeriodLabel}</span>
+            <button
+              aria-label={`Next ${viewInterval}`}
+              className="icon-button timeline-period-button"
+              data-tutorial-target="timeline-period-next-button"
+              onClick={() => onShiftPeriod(1)}
+              title={`Next ${viewInterval}`}
+              type="button"
+            >
+              <IconChevronRight />
+            </button>
+          </>
+        ) : null}
+      </div>
       <WorkspaceTopbarZoom
         ariaLabel="Timeline zoom"
         buttonClassName="timeline-zoom-button"
