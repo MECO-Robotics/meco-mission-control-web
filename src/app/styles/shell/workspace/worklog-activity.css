@@ -4,10 +4,13 @@
     auto-fit,
     minmax(var(--worklog-activity-column-width, 17rem), 1fr)
   );
-  align-items: flex-start;
   gap: 0.7rem;
   min-width: 0;
   width: 100%;
+  height: clamp(14rem, calc(100dvh - 20rem), 48rem);
+  min-height: 0;
+  align-items: stretch;
+  grid-template-rows: minmax(0, 1fr);
 }
 
 .worklog-activity-board .task-queue-board-column {

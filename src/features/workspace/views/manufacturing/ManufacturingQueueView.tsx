@@ -143,6 +143,7 @@ export function ManufacturingQueueView({
   const manufacturingBoardStyle = {
     "--task-queue-zoom": manufacturingZoom,
     "--task-queue-board-column-width": `calc(15.5rem * ${manufacturingZoom})`,
+    "--kanban-board-viewport-offset": "9rem",
   } as CSSProperties;
   const handleProcessFilterChange = (value: FilterSelection) => {
     const [nextValue] = value;
@@ -154,7 +155,10 @@ export function ManufacturingQueueView({
   };
 
   return (
-    <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`} style={manufacturingBoardStyle}>
+    <section
+      className={`panel dense-panel manufacturing-queue-view workspace-kanban-scroll-view ${WORKSPACE_PANEL_CLASS}`}
+      style={manufacturingBoardStyle}
+    >
       <AppTopbarSlotPortal slot="controls">
         <WorkspaceTopbarControls
           className="queue-toolbar"

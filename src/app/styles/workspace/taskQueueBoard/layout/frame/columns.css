@@ -31,24 +31,24 @@
   width: var(--task-queue-board-column-width, 15.5rem);
 }
 
-.task-queue-view .task-queue-board {
-  height: calc(100dvh - 8rem);
+.workspace-kanban-scroll-view .task-queue-board {
+  height: calc(100dvh - var(--kanban-board-viewport-offset, 8rem));
   min-height: 0;
 }
 
-.task-queue-view .task-queue-board-column {
+.task-queue-board .task-queue-board-column {
   grid-template-rows: auto minmax(0, 1fr);
   overflow: hidden;
   min-height: 0;
 }
 
-.task-queue-view .task-queue-board-column-body {
+.task-queue-board .task-queue-board-column-body {
   align-content: start;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior-y: contain;
 }
 
-.task-queue-view .task-queue-board-shell {
+.task-queue-board-shell {
   touch-action: auto;
 }
