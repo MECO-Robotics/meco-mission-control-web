@@ -1,0 +1,13 @@
+.artifact-table {
+  text-align: left;
+}
+
+.artifact-table .table-column-header-cell {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+.artifact-table .resource-record-preview,
+.artifact-table .requested-item-meta {
+  text-align: left;
+}
