@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent } from "react";
+import { useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
 
 import { formatDate } from "@/lib/appUtils/common";
 import type { TaskPriority } from "@/types/common";
@@ -14,7 +14,7 @@ import {
   getMemberInitial,
   getTaskCardPerson,
   getTaskPriorityLabel,
-  getTaskQueueCardPriorityAccentColor,
+  getTaskQueueCardPriorityPresentation,
 } from "@/features/workspace/views/taskQueue/taskQueueKanbanCardMeta";
 
 const PRIORITY_ORDER: Record<TaskPriority, number> = {
@@ -179,13 +179,10 @@ export function ManufacturingKanbanBoard({
         const person = (linkedTask ? getTaskCardPerson(linkedTask, membersById) : null)
           ?? (item.requestedById ? membersById[item.requestedById] ?? null : null);
         const { className: dragClassName, ...dragRootProps } = dragProps ?? {};
-        const cardStyle = priority
-          ? ({
-              "--task-queue-board-card-priority-accent": getTaskQueueCardPriorityAccentColor(priority),
-            } as CSSProperties)
-          : undefined;
+        const priorityPresentation = priority ? getTaskQueueCardPriorityPresentation(priority) : null;
+        const cardStyle = priorityPresentation?.style;
         const cardClassName = `task-queue-board-card editable-hover-target editable-hover-target-row${
-          priority ? " task-queue-board-card-priority-accented" : ""
+          priorityPresentation ? ` ${priorityPresentation.className}` : ""
         }${
           dragClassName ? ` ${dragClassName}` : ""
         }`;
@@ -277,7 +274,7 @@ export function ManufacturingKanbanBoard({
             <div
               {...dragRootProps}
               className={cardClassName}
-              data-priority={priority}
+              data-priority={priorityPresentation?.dataPriority}
               data-tutorial-target={tutorialTarget?.("edit-job-row")}
               key={item.id}
               onClick={() => onEdit(item)}
@@ -295,7 +292,7 @@ export function ManufacturingKanbanBoard({
           <button
             {...dragRootProps}
             className={cardClassName}
-            data-priority={priority}
+            data-priority={priorityPresentation?.dataPriority}
             data-tutorial-target={tutorialTarget?.("edit-job-row")}
             key={item.id}
             onClick={() => onEdit(item)}
