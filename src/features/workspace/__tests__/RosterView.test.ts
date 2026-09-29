@@ -44,10 +44,10 @@ const external: MemberRecord = {
   photoUrl: "",
 };
 
-function renderRosterView(isAddPersonOpen = false) {
+function renderRosterView(isAddPersonOpen = false, externalMembers: MemberRecord[] = [external]) {
   const bootstrap: BootstrapPayload = {
     ...EMPTY_BOOTSTRAP,
-    members: [student, mentor, external],
+    members: [student, mentor, ...externalMembers],
   };
   const memberForm: MemberPayload = {
     name: "",
@@ -62,7 +62,7 @@ function renderRosterView(isAddPersonOpen = false) {
 
   return renderToStaticMarkup(
     React.createElement(RosterView, {
-      allMembers: [student, mentor, external],
+      allMembers: [student, mentor, ...externalMembers],
       bootstrap,
       selectedProject: null,
       selectedMemberId: null,
@@ -85,7 +85,7 @@ function renderRosterView(isAddPersonOpen = false) {
       isDeletingMember: false,
       students: [student],
       rosterMentors: [mentor],
-      externalMembers: [external],
+      externalMembers,
     }),
   );
 }
@@ -103,6 +103,14 @@ describe("RosterView", () => {
     expect(html).toContain('aria-label="Add person"');
     expect(html.match(/topbar-add-menu-trigger/g)).toHaveLength(1);
     expect(html).not.toContain("roster-section-add");
+  });
+
+  it("omits the external access section when it has no members", () => {
+    const html = renderRosterView(false, []);
+
+    expect(html).toContain("Students");
+    expect(html).toContain("Mentors");
+    expect(html).not.toContain("External access");
   });
 
   it("renders a profile photo upload control in the add-person modal", () => {
