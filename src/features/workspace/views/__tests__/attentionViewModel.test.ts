@@ -23,7 +23,7 @@ describe("buildAttentionViewModel", () => {
     expect(markup).toContain('aria-label="Search attention"');
     expect(markup).toContain('aria-label="Attention filters"');
     expect(markup).toContain("topbar-responsive-search-actions");
-    expect(markup).toContain("Needs review");
+    expect(markup).not.toContain('class="workspace-presentation-controls"');
   });
 
   it("renders one attention queue heading", () => {
