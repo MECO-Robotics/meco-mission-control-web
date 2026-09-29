@@ -91,7 +91,7 @@ function renderRosterView(isAddPersonOpen = false, externalMembers: MemberRecord
 }
 
 describe("RosterView", () => {
-  it("renders external access as a third roster column", () => {
+  it("renders roster sections in student-first order", () => {
     const html = renderRosterView();
 
     expect(html).toContain("Students");
@@ -100,6 +100,8 @@ describe("RosterView", () => {
     expect(html).toContain('aria-label="People filters"');
     expect(html).toContain('title="Filter people"');
     expect(html).toContain("people-search-filter-menu");
+    expect(html.indexOf("Students")).toBeLessThan(html.indexOf("Mentors"));
+    expect(html.indexOf("Mentors")).toBeLessThan(html.indexOf("External access"));
     expect(html).toContain("External access");
     expect(html).toContain("Sponsor Viewer");
     expect(html).toContain("viewer@sponsor.example");
