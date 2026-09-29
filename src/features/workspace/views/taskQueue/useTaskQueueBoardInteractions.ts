@@ -101,6 +101,13 @@ export function useTaskQueueBoardLazyLoading({
       }
     };
 
+    const ensureScrollableLane = () => {
+      const laneBodies = shell.querySelectorAll<HTMLElement>(".task-queue-board-column-body");
+      if (![...laneBodies].some((laneBody) => laneBody.scrollHeight > laneBody.clientHeight + 1)) {
+        loadMore();
+      }
+    };
+
     const handleColumnScroll = (event: Event) => {
       const columnBody = event.target;
       if (
@@ -125,7 +132,9 @@ export function useTaskQueueBoardLazyLoading({
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", ensureScrollableLane);
     shell.addEventListener("scroll", handleColumnScroll, true);
+    ensureScrollableLane();
 
     return () => {
       if (rafId !== undefined) {
@@ -133,6 +142,7 @@ export function useTaskQueueBoardLazyLoading({
       }
 
       window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", ensureScrollableLane);
       shell.removeEventListener("scroll", handleColumnScroll, true);
     };
   }, [

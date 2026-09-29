@@ -43,6 +43,7 @@
 }
 
 .task-queue-view .task-queue-board-column-body {
+  align-content: start;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior-y: contain;
