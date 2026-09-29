@@ -178,8 +178,7 @@
 }
 
 @media (max-width: 1100px) {
-  .robot-config-main-map,
-  .robot-config-main-list {
+  .robot-config-main-map:not(.is-empty) {
     grid-template-columns: minmax(0, 1fr);
   }
 }

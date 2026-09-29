@@ -1,3 +1,5 @@
+import { useMemo, useRef, useState } from "react";
+
 import { EmptyCadViewer } from "../cad/viewer/CadPartViewer";
 import { LayoutGrid, Upload } from "lucide-react";
 import type { SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
@@ -68,7 +70,9 @@ export function RobotMapCanvas({
             src={referenceImageUrl}
           />
         ) : (
-          <EmptyCadViewer />
+          <div className="robot-config-map-empty">
+            <p>Upload an isometric layout image to place subsystems on a robot reference.</p>
+          </div>
         )}
 
         {placedSubsystems.map((subsystem) => (
