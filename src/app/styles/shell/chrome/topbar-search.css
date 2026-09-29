@@ -4,8 +4,8 @@
   justify-content: flex-end;
   height: 100%;
   flex: 1 1 auto;
-  gap: clamp(0.55rem, 1vw, 0.8rem);
-  padding-inline: clamp(0.55rem, 1vw, 0.8rem);
+  gap: clamp(0.275rem, 0.5vw, 0.4rem);
+  padding-inline: clamp(0.275rem, 0.5vw, 0.4rem);
   min-width: 0;
   overflow: visible;
 }
