@@ -63,6 +63,7 @@ function renderRosterView(isAddPersonOpen = false, externalMembers: MemberRecord
   return renderToStaticMarkup(
     React.createElement(RosterView, {
       allMembers: [student, mentor, ...externalMembers],
+      onCreateTaskForMember: jest.fn(),
       bootstrap,
       selectedProject: null,
       selectedMemberId: null,
@@ -106,6 +107,10 @@ describe("RosterView", () => {
     expect(html).toContain("Sponsor Viewer");
     expect(html).toContain("viewer@sponsor.example");
     expect(html).toContain("https://cdn.example.test/people/student-one.png");
+    expect(html).toContain('aria-label="Assign work to Student"');
+    expect(html).toContain('title="Assign work to Student"');
+    expect(html).toContain("<svg");
+    expect(html).not.toContain("Assign work to Student</button>");
     expect(html).toContain('aria-label="Add person"');
     expect(html.match(/topbar-add-menu-trigger/g)).toHaveLength(1);
     expect(html).not.toContain("roster-section-add");
