@@ -80,7 +80,7 @@
 
 .task-queue-board-card-priority-accented[data-priority="critical"] {
   border-style: double;
-  border-width: 3px;
+  border-width: 5px;
 }
 
 .task-queue-board-card-priority-label {
@@ -123,6 +123,14 @@
 .task-queue-board-card-work-hours {
   color: var(--text-muted);
   font-size: calc(0.62rem * var(--task-queue-zoom, 1));
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.task-queue-board-card-blocker-count {
+  color: var(--status-danger-text);
+  font-size: calc(0.62rem * var(--task-queue-zoom, 1));
+  font-weight: 800;
   line-height: 1.2;
   white-space: nowrap;
 }
