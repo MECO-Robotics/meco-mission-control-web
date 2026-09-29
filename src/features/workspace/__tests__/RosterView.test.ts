@@ -53,10 +53,16 @@ const external: MemberRecord = {
   photoUrl: "",
 };
 
-function renderRosterView(isAddPersonOpen = false, externalMembers: MemberRecord[] = [external]) {
+function renderRosterView(
+  isAddPersonOpen = false,
+  externalMembers: MemberRecord[] = [external],
+  rosterMembers: { students?: MemberRecord[]; mentors?: MemberRecord[] } = {},
+) {
+  const students = rosterMembers.students ?? [student];
+  const rosterMentors = rosterMembers.mentors ?? [mentor];
   const bootstrap: BootstrapPayload = {
     ...EMPTY_BOOTSTRAP,
-    members: [student, mentor, ...externalMembers],
+    members: [...students, ...rosterMentors, ...externalMembers],
   };
   const memberForm: MemberPayload = {
     name: "",
@@ -71,7 +77,7 @@ function renderRosterView(isAddPersonOpen = false, externalMembers: MemberRecord
 
   return renderToStaticMarkup(
     React.createElement(RosterView, {
-      allMembers: [student, mentor, ...externalMembers],
+      allMembers: [...students, ...rosterMentors, ...externalMembers],
       onCreateTaskForMember: jest.fn(),
       bootstrap,
       selectedProject: null,
@@ -93,8 +99,8 @@ function renderRosterView(isAddPersonOpen = false, externalMembers: MemberRecord
       requestMemberPhotoUpload: jest.fn(async () => "https://cdn.example.test/uploaded.png"),
       isSavingMember: false,
       isDeletingMember: false,
-      students: [student],
-      rosterMentors: [mentor],
+      students,
+      rosterMentors,
       externalMembers,
     }),
   );
@@ -143,13 +149,25 @@ describe("RosterView", () => {
 
   it("shows a message when search filters out every roster member", () => {
     mockSearchText.value = "no matching person";
-    const html = renderRosterView();
-    mockSearchText.value = null;
+    let html: string;
+    try {
+      html = renderRosterView();
+    } finally {
+      mockSearchText.value = null;
+    }
 
     expect(html).toContain('role="status"');
     expect(html).toContain("No people match the current search or filters.");
     expect(html).not.toContain("Student One");
     expect(html).not.toContain("Mentor One");
+  });
+
+  it("shows onboarding guidance when the roster has no members", () => {
+    const html = renderRosterView(false, [], { students: [], mentors: [] });
+
+    expect(html).toContain('role="status"');
+    expect(html).toContain("No people in this roster yet.");
+    expect(html).toContain("Add a student, mentor, or external member to get started.");
   });
 
   it("renders a profile photo upload control in the add-person modal", () => {

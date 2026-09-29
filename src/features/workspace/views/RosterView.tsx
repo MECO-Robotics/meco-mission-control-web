@@ -331,9 +331,11 @@ export const RosterView: React.FC<RosterViewProps> = ({
         </div>
       </div>
       <div className="roster-columns">
-        {hasRosterMembers && visibleRosterSections.length === 0 ? (
+        {visibleRosterSections.length === 0 ? (
           <p className="empty-state" role="status">
-            No people match the current search or filters. Try clearing your search or filters.
+            {hasRosterMembers
+              ? "No people match the current search or filters. Try clearing your search or filters."
+              : "No people in this roster yet. Add a student, mentor, or external member to get started."}
           </p>
         ) : null}
         {visibleRosterSections.map((section) => (
