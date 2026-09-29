@@ -36,7 +36,7 @@
   min-height: 0;
 }
 
-.task-queue-board .task-queue-board-column {
+:is(.task-queue-board, .worklog-activity-board) .task-queue-board-column {
   grid-template-rows: auto minmax(0, 1fr);
   overflow: hidden;
   min-height: 0;
