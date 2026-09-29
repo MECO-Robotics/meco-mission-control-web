@@ -26,6 +26,8 @@ import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspa
 import { MANUFACTURING_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
 import { KanbanScrollFrame } from "@/features/workspace/views/kanban/KanbanScrollFrame";
 import { ManufacturingKanbanBoard } from "./ManufacturingKanbanBoard";
+import { ManufacturingSortMenu } from "./ManufacturingSortMenu";
+import { sortManufacturingItems, type ManufacturingSortField } from "./manufacturingSort";
 import {
   MANUFACTURING_PROCESS_FILTER_OPTIONS,
   filterManufacturingItemsByProcessView,
@@ -84,6 +86,7 @@ export function ManufacturingQueueView({
   const [status, setStatus] = useState<FilterSelection>([]);
   const [material, setMaterial] = useState<FilterSelection>([]);
   const [manufacturingZoom, setManufacturingZoom] = useState(1);
+  const [sortField, setSortField] = useState<ManufacturingSortField>("dueDate");
   const processFilterSelection =
     processFilterValue && processFilterValue !== "all" ? [processFilterValue] : [];
 
@@ -122,6 +125,10 @@ export function ManufacturingQueueView({
       );
     });
   }, [activePersonFilter, items, material, processFilterValue, requester, search, status, subsystem]);
+  const sortedItems = useMemo(
+    () => sortManufacturingItems(filteredItems, sortField, membersById, subsystemsById),
+    [filteredItems, membersById, sortField, subsystemsById],
+  );
   const activeFilterCount = [
     processFilterSelection,
     subsystem,
@@ -162,92 +169,96 @@ export function ManufacturingQueueView({
           search={
             <TopbarResponsiveSearch
               {...buildTopbarSearchProps("manufacturing", {
+                actionCount: 2,
                 actions: (
-                  <CompactFilterMenu
-                    activeCount={activeFilterCount}
-                    ariaLabel={`${title} filters`}
-                    buttonLabel="Filters"
-                    className="materials-filter-menu"
-                    items={[
-                      {
-                        hidden: !onProcessFilterChange,
-                        label: "Process",
-                        content: (
-                          <FilterDropdown
-                            allLabel="All processes"
-                            ariaLabel={`Filter ${title} by process`}
-                            className="task-queue-filter-menu-submenu"
-                            icon={<IconManufacturing />}
-                            onChange={handleProcessFilterChange}
-                            options={MANUFACTURING_PROCESS_FILTER_OPTIONS}
-                            selectedAllLabel="All"
-                            singleSelect
-                            value={processFilterSelection}
-                          />
-                        ),
-                      },
-                      {
-                        label: "Subsystem",
-                        content: (
-                          <FilterDropdown
-                            allLabel="All subsystems"
-                            ariaLabel={`Filter ${title} by subsystem`}
-                            className="task-queue-filter-menu-submenu"
-                            icon={<IconManufacturing />}
-                            onChange={setSubsystem}
-                            options={bootstrap.subsystems}
-                            selectedAllLabel="All"
-                            value={subsystem}
-                          />
-                        ),
-                      },
-                      {
-                        label: "Requester",
-                        content: (
-                          <FilterDropdown
-                            allLabel="All requesters"
-                            ariaLabel={`Filter ${title} by requester`}
-                            className="task-queue-filter-menu-submenu"
-                            icon={<IconPerson />}
-                            onChange={setRequester}
-                            options={bootstrap.members}
-                            selectedAllLabel="All"
-                            value={requester}
-                          />
-                        ),
-                      },
-                      {
-                        label: "Material",
-                        content: (
-                          <FilterDropdown
-                            allLabel="All materials"
-                            ariaLabel={`Filter ${title} by material`}
-                            className="task-queue-filter-menu-submenu"
-                            icon={<IconManufacturing />}
-                            onChange={setMaterial}
-                            options={uniqueMaterials}
-                            selectedAllLabel="All"
-                            value={material}
-                          />
-                        ),
-                      },
-                      {
-                        label: "Status",
-                        content: (
-                          <FilterDropdown
-                            allLabel="All statuses"
-                            ariaLabel={`Filter ${title} by status`}
-                            className="task-queue-filter-menu-submenu"
-                            icon={<IconTasks />}
-                            onChange={setStatus}
-                            options={MANUFACTURING_STATUS_OPTIONS}
-                            selectedAllLabel="All"
-                            value={status}
-                          />
-                        ),
-                      },
-                    ]}
-                  />
+                  <>
+                    <CompactFilterMenu
+                      activeCount={activeFilterCount}
+                      ariaLabel={`${title} filters`}
+                      buttonLabel="Filters"
+                      className="materials-filter-menu"
+                      items={[
+                        {
+                          hidden: !onProcessFilterChange,
+                          label: "Process",
+                          content: (
+                            <FilterDropdown
+                              allLabel="All processes"
+                              ariaLabel={`Filter ${title} by process`}
+                              className="task-queue-filter-menu-submenu"
+                              icon={<IconManufacturing />}
+                              onChange={handleProcessFilterChange}
+                              options={MANUFACTURING_PROCESS_FILTER_OPTIONS}
+                              selectedAllLabel="All"
+                              singleSelect
+                              value={processFilterSelection}
+                            />
+                          ),
+                        },
+                        {
+                          label: "Subsystem",
+                          content: (
+                            <FilterDropdown
+                              allLabel="All subsystems"
+                              ariaLabel={`Filter ${title} by subsystem`}
+                              className="task-queue-filter-menu-submenu"
+                              icon={<IconManufacturing />}
+                              onChange={setSubsystem}
+                              options={bootstrap.subsystems}
+                              selectedAllLabel="All"
+                              value={subsystem}
+                            />
+                          ),
+                        },
+                        {
+                          label: "Requester",
+                          content: (
+                            <FilterDropdown
+                              allLabel="All requesters"
+                              ariaLabel={`Filter ${title} by requester`}
+                              className="task-queue-filter-menu-submenu"
+                              icon={<IconPerson />}
+                              onChange={setRequester}
+                              options={bootstrap.members}
+                              selectedAllLabel="All"
+                              value={requester}
+                            />
+                          ),
+                        },
+                        {
+                          label: "Material",
+                          content: (
+                            <FilterDropdown
+                              allLabel="All materials"
+                              ariaLabel={`Filter ${title} by material`}
+                              className="task-queue-filter-menu-submenu"
+                              icon={<IconManufacturing />}
+                              onChange={setMaterial}
+                              options={uniqueMaterials}
+                              selectedAllLabel="All"
+                              value={material}
+                            />
+                          ),
+                        },
+                        {
+                          label: "Status",
+                          content: (
+                            <FilterDropdown
+                              allLabel="All statuses"
+                              ariaLabel={`Filter ${title} by status`}
+                              className="task-queue-filter-menu-submenu"
+                              icon={<IconTasks />}
+                              onChange={setStatus}
+                              options={MANUFACTURING_STATUS_OPTIONS}
+                              selectedAllLabel="All"
+                              value={status}
+                            />
+                          ),
+                        },
+                      ]}
+                    />
+                    <ManufacturingSortMenu onChange={setSortField} sortField={sortField} />
+                  </>
                 ),
                 ariaLabel: `Search ${title}`,
                 onChange: setSearch,
@@ -298,7 +309,7 @@ export function ManufacturingQueueView({
             <p className="empty-state">{emptyStateMessage}</p>
           ) : (
             <ManufacturingKanbanBoard
-              items={filteredItems}
+              items={sortedItems}
               membersById={membersById}
               onEdit={onEdit}
               onQuickStatusChange={onQuickStatusChange}
