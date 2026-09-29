@@ -19,6 +19,8 @@ import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspa
 import { KanbanScrollFrame } from "@/features/workspace/views/kanban/KanbanScrollFrame";
 import { ManufacturingKanbanBoard } from "./ManufacturingKanbanBoard";
 import { ManufacturingQueueFilters } from "./ManufacturingQueueFilters";
+import { ManufacturingSortMenu } from "./ManufacturingSortMenu";
+import { sortManufacturingItems, type ManufacturingSortField } from "./manufacturingSort";
 import {
   filterManufacturingItemsByProcessView,
 } from "./manufacturingProcessFilter";
@@ -76,6 +78,7 @@ export function ManufacturingQueueView({
   const [status, setStatus] = useState<FilterSelection>([]);
   const [material, setMaterial] = useState<FilterSelection>([]);
   const [manufacturingZoom, setManufacturingZoom] = useState(1);
+  const [sortField, setSortField] = useState<ManufacturingSortField>("dueDate");
   const processFilterSelection =
     processFilterValue && processFilterValue !== "all" ? [processFilterValue] : [];
 
@@ -114,6 +117,10 @@ export function ManufacturingQueueView({
       );
     });
   }, [activePersonFilter, items, material, processFilterValue, requester, search, status, subsystem]);
+  const sortedItems = useMemo(
+    () => sortManufacturingItems(filteredItems, sortField, membersById, subsystemsById),
+    [filteredItems, membersById, sortField, subsystemsById],
+  );
   const activeFilterCount = [
     processFilterSelection,
     subsystem,
@@ -171,6 +178,7 @@ export function ManufacturingQueueView({
                     title={title}
                     uniqueMaterials={uniqueMaterials}
                   />
+                  <ManufacturingSortMenu onChange={setSortField} sortField={sortField} />
                 ),
                 ariaLabel: `Search ${title}`,
                 onChange: setSearch,
@@ -217,11 +225,11 @@ export function ManufacturingQueueView({
 
       <KanbanScrollFrame motionClassName={manufacturingFilterMotionClass}>
         <>
-          {filteredItems.length === 0 ? (
+          {sortedItems.length === 0 ? (
             <p className="empty-state">{emptyStateMessage}</p>
           ) : (
             <ManufacturingKanbanBoard
-              items={filteredItems}
+              items={sortedItems}
               membersById={membersById}
               onEdit={onEdit}
               onQuickStatusChange={onQuickStatusChange}
