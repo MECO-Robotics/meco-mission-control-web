@@ -1,10 +1,11 @@
 import { useMemo, useRef, useState, type ReactNode } from "react";
 
-import { LayoutGrid } from "lucide-react";
+import { Layers3 } from "lucide-react";
 import type { SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
 
 import { buildUnplacedLayout, clampLayoutCoordinate, isSubsystemPlaced } from "./robotMapLayout";
 import { RobotMapCanvasActions } from "./RobotMapCanvasActions";
+import { RobotMapUnplacedModal } from "./RobotMapUnplacedModal";
 import { SubsystemMapCard } from "./SubsystemMapCard";
 import type { RobotConfigurationSubsystemModel } from "./robotMapViewModel";
 
@@ -62,6 +63,8 @@ export function RobotMapCanvas({
   const mapSurfaceRef = useRef<HTMLDivElement | null>(null);
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [isOrbiting, setIsOrbiting] = useState(false);
+  const [isUnplacedModalOpen, setIsUnplacedModalOpen] = useState(false);
+  const [pendingPlacementSubsystemId, setPendingPlacementSubsystemId] = useState<string | null>(null);
 
   const subsystemById = useMemo(
     () => Object.fromEntries(subsystems.map((subsystem) => [subsystem.id, subsystem] as const)),
@@ -70,6 +73,43 @@ export function RobotMapCanvas({
   const placedSubsystems = subsystems.filter((subsystem) => isSubsystemPlaced(subsystem.layout));
   const unplacedSubsystems = subsystems.filter((subsystem) => !isSubsystemPlaced(subsystem.layout));
   const hasUnplacedSubsystems = unplacedSubsystems.length > 0;
+
+  const placePendingSubsystem = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!pendingPlacementSubsystemId) {
+      return;
+    }
+
+    if (event.target instanceof Element && event.target.closest("button")) {
+      return;
+    }
+
+    const mapSurfaceBounds = mapSurfaceRef.current?.getBoundingClientRect();
+    const subsystem = subsystemById[pendingPlacementSubsystemId];
+    if (!mapSurfaceBounds || !subsystem) {
+      return;
+    }
+
+    const pointer = toLayoutCoordinates(mapSurfaceBounds, event.clientX, event.clientY);
+    if (!pointer.isInsideSurface || pointer.x === null || pointer.y === null) {
+      return;
+    }
+
+    onSelectSubsystem(subsystem.id);
+    onLayoutDrop(subsystem.id, {
+      layoutX: pointer.x,
+      layoutY: pointer.y,
+      layoutZone: "center",
+      layoutView: "top",
+      sortOrder: subsystem.layout.sortOrder,
+    });
+    setPendingPlacementSubsystemId(null);
+  };
+
+  const beginSubsystemPlacement = (subsystemId: string) => {
+    onSelectSubsystem(subsystemId);
+    setPendingPlacementSubsystemId(subsystemId);
+    setIsUnplacedModalOpen(false);
+  };
 
   const startDraggingSubsystem = (
     event: React.PointerEvent<HTMLButtonElement>,
@@ -198,7 +238,11 @@ export function RobotMapCanvas({
       onPointerMove={handlePointerMove}
       onPointerUp={(event) => stopDraggingSubsystem(event.pointerId, event.clientX, event.clientY)}
     >
-      <div className={`robot-config-map-surface${isLayoutEditEnabled ? " is-editing" : ""}${isOrbiting ? " is-orbiting" : ""}`} ref={mapSurfaceRef}>
+      <div
+        className={`robot-config-map-surface${isLayoutEditEnabled ? " is-editing" : ""}${isOrbiting ? " is-orbiting" : ""}${pendingPlacementSubsystemId ? " is-placing-subsystem" : ""}`}
+        onClick={placePendingSubsystem}
+        ref={mapSurfaceRef}
+      >
         <div className="robot-config-map-layer">
           {placedSubsystems.map((subsystem) => (
             <div
@@ -221,6 +265,20 @@ export function RobotMapCanvas({
           ))}
 
           <div className="robot-config-map-edit-overlay">
+            {hasUnplacedSubsystems ? (
+              <button
+                aria-expanded={isUnplacedModalOpen}
+                aria-haspopup="dialog"
+                aria-label={`Show ${unplacedSubsystems.length} unplaced subsystems`}
+                className="secondary-action queue-toolbar-action robot-config-unplaced-trigger"
+                onClick={() => setIsUnplacedModalOpen(true)}
+                type="button"
+              >
+                <Layers3 aria-hidden="true" size={14} />
+                <span>Unplaced</span>
+                <span className="robot-config-unplaced-count">{unplacedSubsystems.length}</span>
+              </button>
+            ) : null}
             <button
               aria-checked={isLayoutEditEnabled}
               className={`robot-config-edit-toggle${isLayoutEditEnabled ? " is-active" : ""}`}
@@ -241,6 +299,15 @@ export function RobotMapCanvas({
               <RobotMapCanvasActions onAddSubsystem={onAddSubsystem} onResetLayout={onResetLayout} />
             </div>
           ) : null}
+
+          {pendingPlacementSubsystemId ? (
+            <div className="robot-config-placement-prompt" role="status">
+              <span>Click the robot view to place {subsystemById[pendingPlacementSubsystemId]?.name ?? "subsystem"}.</span>
+              <button className="ghost-button" onClick={() => setPendingPlacementSubsystemId(null)} type="button">
+                Cancel
+              </button>
+            </div>
+          ) : null}
         </div>
 
         <div className="robot-config-embedded-cad">
@@ -248,43 +315,17 @@ export function RobotMapCanvas({
         </div>
       </div>
 
-      {hasUnplacedSubsystems ? (
-        <section className="robot-config-unplaced">
-          <header className="robot-config-unplaced-header">
-            <div>
-              <h3>Unplaced Subsystems</h3>
-              <small>
-                {isLayoutEditEnabled
-                  ? "Drag onto the robot view to set placement."
-                  : "Enable Edit Layout to drag subsystems."}
-              </small>
-            </div>
-            <div className="robot-config-unplaced-actions">
-              <button
-                className="secondary-action queue-toolbar-action robot-config-auto-arrange-trigger"
-                onClick={onAutoArrange}
-                type="button"
-              >
-                <LayoutGrid aria-hidden="true" size={14} />
-                <span>Auto-arrange</span>
-              </button>
-              <RobotMapCanvasActions onAddSubsystem={onAddSubsystem} onResetLayout={onResetLayout} />
-            </div>
-          </header>
-          <div className="robot-config-unplaced-grid">
-            {unplacedSubsystems.map((subsystem) => (
-              <SubsystemMapCard
-                key={subsystem.id}
-                isDragging={dragState?.subsystemId === subsystem.id}
-                isEditable={isLayoutEditEnabled}
-                isSelected={selectedSubsystemId === subsystem.id}
-                onPointerDown={(event) => startDraggingSubsystem(event, subsystem)}
-                onSelect={() => onSelectSubsystem(subsystem.id)}
-                subsystem={subsystem}
-              />
-            ))}
-          </div>
-        </section>
+      {isUnplacedModalOpen && hasUnplacedSubsystems ? (
+        <RobotMapUnplacedModal
+          onAddSubsystem={onAddSubsystem}
+          onAutoArrange={onAutoArrange}
+          onClose={() => setIsUnplacedModalOpen(false)}
+          onPlaceSubsystem={beginSubsystemPlacement}
+          onResetLayout={onResetLayout}
+          onSelectSubsystem={onSelectSubsystem}
+          selectedSubsystemId={selectedSubsystemId}
+          subsystems={unplacedSubsystems}
+        />
       ) : null}
     </div>
   );
