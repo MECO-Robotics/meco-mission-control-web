@@ -1,6 +1,10 @@
 /// <reference types="jest" />
 
+import * as React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import { PartsToolbar } from "@/features/workspace/views/parts/PartsToolbar";
 import { filterPartDefinitions } from "@/features/workspace/views/PartsView";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
@@ -96,6 +100,28 @@ const bootstrap: BootstrapPayload = {
 };
 
 describe("PartsView filters", () => {
+  it("places the archive control in the topbar filter menu", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(PartsToolbar, {
+        bootstrap,
+        mapping: "all",
+        partSearch: "",
+        partStatus: [],
+        partSubsystem: [],
+        setPartSearch: jest.fn(),
+        setMapping: jest.fn(),
+        setPartStatus: jest.fn(),
+        setPartSubsystem: jest.fn(),
+        setShowArchivedPartDefinitions: jest.fn(),
+        showArchivedPartDefinitions: false,
+      }),
+    );
+
+    expect(markup).toContain('aria-label="Part filters"');
+    expect(markup).not.toContain('aria-label="Show archived definitions"');
+    expect(markup).not.toContain("archive-filter-toggle");
+  });
+
   it("filters part definitions by linked instance subsystem and status", () => {
     const filteredDefinitions = filterPartDefinitions({
       bootstrap,
