@@ -6,6 +6,7 @@ import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/Topb
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import {
   HELP_SECTIONS,
+  getHelpItemText,
   renderHelpItem,
   type InteractiveTutorialChapter,
 } from "@/features/workspace/views/help/helpContent";
@@ -51,7 +52,7 @@ export function HelpView({
       .map((section) => ({
         ...section,
         items: section.items.filter((item) =>
-          [section.title, item].join(" ").toLowerCase().includes(normalizedSearch),
+          [section.title, getHelpItemText(item)].join(" ").toLowerCase().includes(normalizedSearch),
         ),
       }))
       .filter((section) => section.items.length > 0);
@@ -136,7 +137,7 @@ export function HelpView({
             <h3>{section.title}</h3>
             <ul>
               {section.items.map((item) => (
-                <li key={item}>{renderHelpItem(item)}</li>
+                <li key={typeof item === "string" ? item : item.href}>{renderHelpItem(item)}</li>
               ))}
             </ul>
           </article>
