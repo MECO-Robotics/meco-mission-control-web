@@ -21,6 +21,19 @@ export function KanbanScrollFrame({
 }: KanbanScrollFrameProps) {
   const internalShellRef = useRef<HTMLDivElement>(null);
   const shellRef = providedShellRef ?? internalShellRef;
+  const scrollHorizontally = (direction: "left" | "right") => {
+    const shell = shellRef.current;
+    if (!shell) return;
+
+    shell.scrollBy({
+      left: (direction === "left" ? -1 : 1) * Math.max(shell.clientWidth * 0.8, 120),
+      behavior:
+        typeof window.matchMedia === "function" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+    });
+  };
   const [scrollState, setScrollState] = useState({
     canScrollLeft: false,
     canScrollRight: false,
@@ -93,23 +106,29 @@ export function KanbanScrollFrame({
       className={`task-queue-board-shell-frame${scrollState.canScrollLeft ? " has-scroll-left" : ""}${scrollState.canScrollRight ? " has-scroll-right" : ""}${scrollState.hasOverflow ? " has-task-queue-board-overflow" : ""}${isFocused ? " is-focused-column" : ""} ${motionClassName}`}
     >
       {scrollState.hasOverflow ? (
-        <div aria-hidden="true" className="task-queue-board-scroll-hints">
-          <div
+        <div className="task-queue-board-scroll-hints">
+          <button
+            aria-label="Scroll Kanban board left"
             className={`task-queue-board-scroll-hint task-queue-board-scroll-hint-left${scrollState.canScrollLeft ? "" : " is-hidden"}`}
+            onClick={() => scrollHorizontally("left")}
+            type="button"
           >
             <IconChevronLeft />
             <span aria-hidden="true" className="task-queue-board-scroll-hint-label">
               Scroll
             </span>
-          </div>
-          <div
+          </button>
+          <button
+            aria-label="Scroll Kanban board right"
             className={`task-queue-board-scroll-hint task-queue-board-scroll-hint-right${scrollState.canScrollRight ? "" : " is-hidden"}`}
+            onClick={() => scrollHorizontally("right")}
+            type="button"
           >
             <span aria-hidden="true" className="task-queue-board-scroll-hint-label">
               Scroll
             </span>
             <IconChevronRight />
-          </div>
+          </button>
         </div>
       ) : null}
       <div
