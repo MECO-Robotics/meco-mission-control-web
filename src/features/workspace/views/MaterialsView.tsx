@@ -2,6 +2,7 @@ import { useMemo, useState, type CSSProperties } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MaterialRecord } from "@/types/recordsInventory";
+import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
 import { IconManufacturing, IconTasks } from "@/components/shared/Icons";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { WorkspaceEmptyState, WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
@@ -9,7 +10,7 @@ import { ColumnFilterDropdown } from "@/features/workspace/shared/filters/Column
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { EditableHoverIndicator, PaginationControls, TableCell, useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
-import { filterSelectionIncludes, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import {
   WorkspaceTopbarControls,
@@ -20,7 +21,7 @@ import type { FilterSelection } from "@/features/workspace/shared/filters/worksp
 import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { MATERIAL_CATEGORY_OPTIONS, MATERIAL_STOCK_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
-import { isMaterialBelowReorder, matchesMaterialStockFilter } from "./materialsInventoryModel";
+import { filterMaterialInventory, isMaterialBelowReorder } from "./materialsInventoryModel";
 
 interface MaterialsViewProps {
   bootstrap: BootstrapPayload;
@@ -36,32 +37,55 @@ export function MaterialsView({
   openEditMaterialModal,
 }: MaterialsViewProps) {
   const [search, setSearch] = useState("");
+  const [name, setName] = useState<FilterSelection>([]);
   const [category, setCategory] = useState<FilterSelection>([]);
+  const [quantity, setQuantity] = useState<FilterSelection>([]);
+  const [location, setLocation] = useState<FilterSelection>([]);
+  const [vendor, setVendor] = useState<FilterSelection>([]);
   const [stock, setStock] = useState<FilterSelection>([]);
 
-  const filteredMaterials = useMemo(() => {
-    return bootstrap.materials.filter((material) => {
-      const normalizedSearch = search.toLowerCase();
-      const matchesSearch =
-        !normalizedSearch ||
-        material.name.toLowerCase().includes(normalizedSearch) ||
-        material.vendor.toLowerCase().includes(normalizedSearch) ||
-        material.location.toLowerCase().includes(normalizedSearch);
-      const matchesCategory = filterSelectionIncludes(category, material.category);
-      const matchesStock = matchesMaterialStockFilter(material, stock);
+  const columnOptions = useMemo(() => {
+    const uniqueOptions = (getValue: (material: MaterialRecord) => string): DropdownOption[] =>
+      [...new Set(bootstrap.materials.map(getValue))]
+        .sort((left, right) => left.localeCompare(right))
+        .map((value) => ({ id: value, name: value }));
 
-      return matchesSearch && matchesCategory && matchesStock;
+    return {
+      name: uniqueOptions((material) => material.name),
+      quantity: uniqueOptions((material) => `${material.onHandQuantity} / ${material.reorderPoint}`),
+      location: uniqueOptions((material) => material.location || "Unassigned"),
+      vendor: uniqueOptions((material) => material.vendor || "Unknown"),
+    };
+  }, [bootstrap.materials]);
+
+  const filteredMaterials = useMemo(() => {
+    return filterMaterialInventory(bootstrap.materials, {
+      search,
+      name,
+      category,
+      quantity,
+      location,
+      vendor,
+      stock,
     });
-  }, [bootstrap.materials, category, search, stock]);
+  }, [bootstrap.materials, category, location, name, quantity, search, stock, vendor]);
   const materialPagination = useWorkspacePagination(filteredMaterials);
   const materialsFilterMotionClass = useFilterChangeMotionClass([
     category,
+    location,
+    name,
+    quantity,
     search,
     stock,
+    vendor,
   ]);
   const hasMaterialFilters =
     search.trim().length > 0 ||
+    name.length > 0 ||
     category.length > 0 ||
+    quantity.length > 0 ||
+    location.length > 0 ||
+    vendor.length > 0 ||
     stock.length > 0;
 
   return (
@@ -72,7 +96,7 @@ export function MaterialsView({
             {...buildTopbarSearchProps("materials", {
               actions: (
                 <CompactFilterMenu
-                  activeCount={[category, stock].filter((value) => value.length > 0).length}
+                  activeCount={[name, category, quantity, location, vendor, stock].filter((value) => value.length > 0).length}
                   ariaLabel="Material filters"
                   buttonLabel="Filters"
                   className="materials-filter-menu"
@@ -135,7 +159,16 @@ export function MaterialsView({
           className="ops-table ops-table-header materials-table"
           style={{ "--workspace-grid-template": MATERIALS_GRID_TEMPLATE } as CSSProperties}
         >
-          <span>Material</span>
+          <span className="table-column-header-cell">
+            <span className="table-column-title">Material</span>
+            <ColumnFilterDropdown
+              allLabel="All materials"
+              ariaLabel="Filter materials by name"
+              onChange={setName}
+              options={columnOptions.name}
+              value={name}
+            />
+          </span>
           <span className="table-column-header-cell">
             <span className="table-column-title">Category</span>
             <ColumnFilterDropdown
@@ -146,9 +179,36 @@ export function MaterialsView({
               value={category}
             />
           </span>
-          <span>On hand / reorder</span>
-          <span>Location</span>
-          <span>Vendor</span>
+          <span className="table-column-header-cell">
+            <span className="table-column-title">On hand / reorder</span>
+            <ColumnFilterDropdown
+              allLabel="All quantities"
+              ariaLabel="Filter materials by on-hand and reorder quantities"
+              onChange={setQuantity}
+              options={columnOptions.quantity}
+              value={quantity}
+            />
+          </span>
+          <span className="table-column-header-cell">
+            <span className="table-column-title">Location</span>
+            <ColumnFilterDropdown
+              allLabel="All locations"
+              ariaLabel="Filter materials by location"
+              onChange={setLocation}
+              options={columnOptions.location}
+              value={location}
+            />
+          </span>
+          <span className="table-column-header-cell">
+            <span className="table-column-title">Vendor</span>
+            <ColumnFilterDropdown
+              allLabel="All vendors"
+              ariaLabel="Filter materials by vendor"
+              onChange={setVendor}
+              options={columnOptions.vendor}
+              value={vendor}
+            />
+          </span>
           <span className="table-column-header-cell">
             <span className="table-column-title">Status</span>
             <ColumnFilterDropdown
@@ -209,7 +269,7 @@ export function MaterialsView({
             onAction={hasMaterialFilters ? undefined : openCreateMaterialModal}
             reason={
               hasMaterialFilters
-                ? "The current search, category, or stock filter hides every material record in this scope."
+                ? "The current search or filters hide every material record in this scope."
                 : "No stock, vendor, location, or reorder threshold records have been added for this workspace yet."
             }
             title={
