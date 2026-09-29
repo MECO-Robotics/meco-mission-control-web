@@ -39,6 +39,10 @@ describe("PurchaseFiltersToolbar", () => {
       subsystem: ["subsystem-1"],
       uniqueVendors,
       vendor: ["vendor-1"],
+      sortField: null,
+      sortDirection: "ascending",
+      onSortFieldChange: jest.fn(),
+      onSortDirectionChange: jest.fn(),
     });
     const toolbarContent = toolbar.props.children as React.ReactElement<{
       children: React.ReactElement;
@@ -46,7 +50,9 @@ describe("PurchaseFiltersToolbar", () => {
     const search = toolbarContent.props.children as React.ReactElement<{
       actions: React.ReactElement;
     }>;
-    const menu = search.props.actions as React.ReactElement<{
+    const actions = search.props.actions as React.ReactElement<{ children: React.ReactNode }>;
+    const filterMenu = React.Children.toArray(actions.props.children)[0] as React.ReactElement;
+    const menu = filterMenu as React.ReactElement<{
       activeCount: number;
       items: CompactFilterMenuItem[];
     }>;
