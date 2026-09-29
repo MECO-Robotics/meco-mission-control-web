@@ -159,42 +159,30 @@ export function ManufacturingKanbanBoard({
               {item.batchLabel ?? "Unbatched"}
               {showInHouseDetails && item.process === "cnc" ? ` · ${item.inHouse ? "In-house" : "Outsourced"}` : ""}
             </small>
-            <div className="task-queue-board-card-meta">
-              <span
-                style={{
-                  alignItems: "center",
-                  display: "inline-flex",
-                  flexWrap: "wrap",
-                  gap: "0.35rem",
-                }}
-              >
-                <span>{item.mentorReviewed ? "Reviewed" : "Pending"}</span>
-                {canShowMentorQuickActions && item.process === "cnc" ? (
-                  <>
-                    <button
-                      className="icon-button"
-                      data-tutorial-target={tutorialTarget?.("approve-job-button")}
-                      disabled={isAnyActionPending || item.status !== "requested"}
-                      onClick={(milestone) => handleQuickStatusChange(milestone, item, "approved")}
-                      style={{ padding: "0.15rem 0.4rem" }}
-                      type="button"
-                    >
-                      {isApprovePending ? "Approving..." : "Approve"}
-                    </button>
-                    <button
-                      className="icon-button"
-                      data-tutorial-target={tutorialTarget?.("complete-job-button")}
-                      disabled={isAnyActionPending || item.status === "complete"}
-                      onClick={(milestone) => handleQuickStatusChange(milestone, item, "complete")}
-                      style={{ padding: "0.15rem 0.4rem" }}
-                      type="button"
-                    >
-                      {isCompletePending ? "Completing..." : "Complete"}
-                    </button>
-                  </>
-                ) : null}
-              </span>
-            </div>
+            {canShowMentorQuickActions && item.process === "cnc" ? (
+              <div className="task-queue-board-card-meta" style={{ justifyContent: "flex-start" }}>
+                <button
+                  className="icon-button"
+                  data-tutorial-target={tutorialTarget?.("approve-job-button")}
+                  disabled={isAnyActionPending || item.status !== "requested"}
+                  onClick={(milestone) => handleQuickStatusChange(milestone, item, "approved")}
+                  style={{ padding: "0.15rem 0.4rem" }}
+                  type="button"
+                >
+                  {isApprovePending ? "Approving..." : "Approve"}
+                </button>
+                <button
+                  className="icon-button"
+                  data-tutorial-target={tutorialTarget?.("complete-job-button")}
+                  disabled={isAnyActionPending || item.status === "complete"}
+                  onClick={(milestone) => handleQuickStatusChange(milestone, item, "complete")}
+                  style={{ padding: "0.15rem 0.4rem" }}
+                  type="button"
+                >
+                  {isCompletePending ? "Completing..." : "Complete"}
+                </button>
+              </div>
+            ) : null}
             <EditableHoverIndicator className="task-queue-board-card-hover" />
           </>
         );
