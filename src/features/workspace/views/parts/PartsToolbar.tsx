@@ -1,4 +1,3 @@
-import { Archive } from "lucide-react";
 import { IconManufacturing, IconTasks } from "@/components/shared/Icons";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
@@ -6,6 +5,14 @@ import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/Topb
 import { READINESS_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { BootstrapPayload } from "@/types/bootstrap";
+
+const FILTER_CHECKBOX_LABEL_STYLE = {
+  alignItems: "center",
+  color: "var(--text-copy)",
+  display: "inline-flex",
+  fontSize: "0.85rem",
+  gap: "0.35rem",
+} as const;
 
 interface PartsToolbarProps {
   bootstrap: BootstrapPayload;
@@ -40,7 +47,7 @@ export function PartsToolbar({
         actions={
           <>
             <CompactFilterMenu
-              activeCount={[partSubsystem, partStatus].filter((value) => value.length > 0).length + Number(mapping !== "all")}
+              activeCount={[partSubsystem, partStatus].filter((value) => value.length > 0).length + Number(mapping !== "all") + Number(showArchivedPartDefinitions)}
               ariaLabel="Part filters"
               buttonLabel="Filters"
               className="materials-filter-menu"
@@ -88,18 +95,24 @@ export function PartsToolbar({
                     </select>
                   ),
                 },
+                {
+                  label: "Archive",
+                  content: (
+                    <div className="task-queue-filter-menu-checkboxes">
+                      <label style={FILTER_CHECKBOX_LABEL_STYLE}>
+                        <input
+                          aria-label="Show archived definitions"
+                          checked={showArchivedPartDefinitions}
+                          onChange={(event) => setShowArchivedPartDefinitions(event.target.checked)}
+                          type="checkbox"
+                        />
+                        Show archived definitions
+                      </label>
+                    </div>
+                  ),
+                },
               ]}
             />
-            <button
-              aria-label="Show archived definitions"
-              aria-pressed={showArchivedPartDefinitions}
-              className={`archive-filter-toggle${showArchivedPartDefinitions ? " is-active" : ""}`}
-              onClick={() => setShowArchivedPartDefinitions(!showArchivedPartDefinitions)}
-              title="Show archived definitions"
-              type="button"
-            >
-              <Archive aria-hidden="true" size={14} strokeWidth={2} />
-            </button>
           </>
         }
         ariaLabel="Search parts"
