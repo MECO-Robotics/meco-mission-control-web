@@ -1,18 +1,11 @@
 import { IconManufacturing, IconTasks } from "@/components/shared/Icons";
+import { ArchiveFilterCheckbox } from "@/features/workspace/shared/filters/ArchiveFilterCheckbox";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { PART_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { BootstrapPayload } from "@/types/bootstrap";
-
-const FILTER_CHECKBOX_LABEL_STYLE = {
-  alignItems: "center",
-  color: "var(--text-copy)",
-  display: "inline-flex",
-  fontSize: "0.85rem",
-  gap: "0.35rem",
-} as const;
 
 interface PartsToolbarProps {
   bootstrap: BootstrapPayload;
@@ -97,19 +90,7 @@ export function PartsToolbar({
                 },
                 {
                   label: "Archive",
-                  content: (
-                    <div className="task-queue-filter-menu-checkboxes">
-                      <label style={FILTER_CHECKBOX_LABEL_STYLE}>
-                        <input
-                          aria-label="Show archived definitions"
-                          checked={showArchivedPartDefinitions}
-                          onChange={(event) => setShowArchivedPartDefinitions(event.target.checked)}
-                          type="checkbox"
-                        />
-                        Show archived definitions
-                      </label>
-                    </div>
-                  ),
+                  content: <ArchiveFilterCheckbox checked={showArchivedPartDefinitions} label="Show archived definitions" onChange={setShowArchivedPartDefinitions} />,
                 },
               ]}
             />
