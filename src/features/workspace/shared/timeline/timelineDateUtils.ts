@@ -25,15 +25,6 @@ function formatMonthDayShortYearFromDay(day: string) {
   return `${Number.parseInt(month, 10)}/${Number.parseInt(monthDay, 10)}/${year.slice(2, 4)}`;
 }
 
-function formatMonthDayFromDay(day: string) {
-  const [, month, monthDay] = day.split("-");
-  if (!month || !monthDay) {
-    return day;
-  }
-
-  return `${Number.parseInt(month, 10)}/${Number.parseInt(monthDay, 10)}`;
-}
-
 export function datePortion(dateTime: string) {
   return dateTime.slice(0, 10);
 }
@@ -120,7 +111,7 @@ export function formatTimelinePeriodLabel(viewInterval: TimelineViewInterval, da
   }
 
   if (viewInterval === "week") {
-    return `${formatMonthDayFromDay(startDay)} - ${formatMonthDayShortYearFromDay(endDay)}`;
+    return formatMonthDayShortYearFromDay(startDay);
   }
 
   return "Recent window";

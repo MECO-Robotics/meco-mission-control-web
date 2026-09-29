@@ -392,7 +392,7 @@ describe("TimelineView", () => {
     expect(scopedProjectIds).toEqual(["project-1", "project-2"]);
   });
 
-  it("formats week period labels with year only on the ending day", () => {
+  it("formats week period labels with only the starting day", () => {
     expect(
       formatTimelinePeriodLabel("week", [
         "2026-04-06",
@@ -403,7 +403,7 @@ describe("TimelineView", () => {
         "2026-04-11",
         "2026-04-12",
       ]),
-    ).toBe("4/6 - 4/12/26");
+    ).toBe("4/6/26");
   });
 
   it("abbreviates the month in month-period labels", () => {
