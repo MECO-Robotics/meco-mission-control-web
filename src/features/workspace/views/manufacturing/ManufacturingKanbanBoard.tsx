@@ -160,9 +160,6 @@ export function ManufacturingKanbanBoard({
               {showInHouseDetails && item.process === "cnc" ? ` · ${item.inHouse ? "In-house" : "Outsourced"}` : ""}
             </small>
             <div className="task-queue-board-card-meta">
-              <span className={getStatusPillClassName(item.status)}>
-                {item.status.replace("-", " ")}
-              </span>
               <span
                 style={{
                   alignItems: "center",
