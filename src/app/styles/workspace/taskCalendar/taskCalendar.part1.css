@@ -99,14 +99,6 @@
   white-space: nowrap;
 }
 
-.task-calendar-filter-toolbar {
-  width: 100%;
-}
-
-.task-calendar-filter-controls {
-  gap: 0.35rem;
-}
-
 .task-calendar-weekdays {
   border-bottom: 1px solid var(--border-base);
   display: grid;

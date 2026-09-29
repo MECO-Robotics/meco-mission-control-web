@@ -36,10 +36,6 @@
     flex-wrap: nowrap;
   }
 
-  .task-calendar-filter-controls {
-    width: 100%;
-  }
-
   .task-calendar-day {
     min-height: 5.8rem;
   }

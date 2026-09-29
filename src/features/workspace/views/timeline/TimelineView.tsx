@@ -11,6 +11,8 @@ import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { getTimelineMinimumZoomForWidth } from "@/features/workspace/shared/timeline/timelineZoom";
 import { addDaysToDay, addMonthsToDay, midpointOfTimelineDays } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
+import type { TaskCalendarEventType } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
+import type { TaskCalendarSortMode } from "@/features/workspace/views/taskCalendar/taskCalendarLayout";
 import { buildTimelineGridLayout } from "./model/timelineGridLayout";
 import { TimelineGridBody } from "./TimelineGridBody";
 import { TimelineMilestoneHoverLayer } from "./TimelineMilestoneHoverLayer";
@@ -44,6 +46,11 @@ interface TimelineViewProps {
   triggerCreateMilestoneToken: number;
   searchFilter?: string;
   onSearchChange?: (value: string) => void;
+  calendarEventFilter?: "all" | TaskCalendarEventType;
+  onCalendarEventFilterChange?: (value: "all" | TaskCalendarEventType) => void;
+  calendarSortMode?: TaskCalendarSortMode;
+  onCalendarSortModeChange?: (value: TaskCalendarSortMode) => void;
+  showCalendarFilters?: boolean;
 }
 
 export const TimelineView: React.FC<TimelineViewProps> = ({
@@ -62,10 +69,21 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   triggerCreateMilestoneToken,
   searchFilter: controlledSearchFilter,
   onSearchChange,
+  calendarEventFilter,
+  onCalendarEventFilterChange,
+  calendarSortMode,
+  onCalendarSortModeChange,
+  showCalendarFilters = false,
 }) => {
   void _membersById;
 
   const state = useTimelineViewState();
+  const [localCalendarEventFilter, setLocalCalendarEventFilter] = useState<"all" | TaskCalendarEventType>("all");
+  const [localCalendarSortMode, setLocalCalendarSortMode] = useState<TaskCalendarSortMode>("date");
+  const activeCalendarEventFilter = calendarEventFilter ?? localCalendarEventFilter;
+  const updateCalendarEventFilter = onCalendarEventFilterChange ?? setLocalCalendarEventFilter;
+  const activeCalendarSortMode = calendarSortMode ?? localCalendarSortMode;
+  const updateCalendarSortMode = onCalendarSortModeChange ?? setLocalCalendarSortMode;
   const {
     handleTimelineIntervalChange: applyTimelineIntervalChange,
     setTimelineZoomMin,
@@ -211,6 +229,9 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         <WorkspaceTopbarControls className="timeline-toolbar timeline-topbar-controls">
           <TimelineToolbar
             activeFilterCount={filterControls.activeFilterCount}
+            calendarEventFilter={activeCalendarEventFilter}
+            calendarSortMode={activeCalendarSortMode}
+            showCalendarFilters={showCalendarFilters}
             activePersonFilter={activePersonFilter}
             bootstrap={bootstrap}
             disciplineFilter={filterControls.filters.disciplineFilter}
@@ -218,6 +239,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             isAllProjectsView={isAllProjectsView}
             onAdjustZoom={state.adjustTimelineZoom}
             onChangePersonFilter={setActivePersonFilter}
+            onCalendarEventFilterChange={updateCalendarEventFilter}
+            onCalendarSortModeChange={updateCalendarSortMode}
             onSearchChange={setSearchFilter}
             onIntervalChange={handleTimelineIntervalChange}
             onShiftPeriod={handleShiftPeriod}
