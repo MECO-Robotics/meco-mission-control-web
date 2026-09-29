@@ -127,7 +127,7 @@
   padding-bottom: 0.25rem;
   overscroll-behavior-x: contain;
   cursor: grab;
-  touch-action: pan-x;
+  touch-action: auto;
   z-index: 1;
 }
 
