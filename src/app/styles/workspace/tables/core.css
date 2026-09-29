@@ -21,6 +21,11 @@
   grid-template-columns: var(--workspace-grid-template, 2.5fr 1fr 0.45fr 0.75fr 0.8fr 0.8fr);
 }
 
+.materials-stock-below-reorder {
+  color: var(--status-danger-text);
+  font-weight: 700;
+}
+
 .queue-table-header {
   padding: 0 0.45rem 0.2rem;
   border-bottom: 1px solid var(--border-base);
