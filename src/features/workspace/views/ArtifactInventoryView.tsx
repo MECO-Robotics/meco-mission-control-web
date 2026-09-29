@@ -124,9 +124,6 @@ export function ArtifactInventoryView({
       <div className="panel-header compact-header">
         <div className="queue-section-header">
           <h2>{sectionTitle}</h2>
-          <p className="section-copy">
-            Artifact inventory scoped to this project selection.
-          </p>
         </div>
       </div>
 
