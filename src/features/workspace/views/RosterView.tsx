@@ -230,10 +230,12 @@ export const RosterView: React.FC<RosterViewProps> = ({
   };
 
   const rosterSections: Array<{
+    className?: string;
     title: string;
     members: MemberRecord[];
   }> = [
     {
+      className: "roster-section-students",
       members: filteredSortedStudents,
       title: "Students",
     },
@@ -284,6 +286,7 @@ export const RosterView: React.FC<RosterViewProps> = ({
       <div className="roster-columns">
         {rosterSections.map((section) => (
           <RosterSection
+            className={section.className}
             count={section.members.length}
             key={section.title}
             members={section.members}
