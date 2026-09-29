@@ -139,7 +139,7 @@ describe("Task Queue cards", () => {
         showProjectContextOnCards: true,
         showProjectOnCards: false,
         subsystemsById: { "subsystem-1": bootstrap.subsystems[0] },
-        tasks: [createTask(1)],
+        tasks: [createTask(1, { priority: "medium" })],
         workstreamsById: {},
       }),
     );
@@ -151,12 +151,10 @@ describe("Task Queue cards", () => {
     expect(markup).toContain("Drive (v1)");
     expect(markup).toContain("task-queue-board-card-discipline");
     expect(markup).toContain('aria-label="Design discipline"');
-    expect(
-      markup.indexOf(
-        "task-queue-board-card-priority",
-        markup.indexOf("task-queue-board-card-meta-person-group"),
-      ),
-    ).toBeLessThan(markup.indexOf('aria-label="Design discipline"'));
+    expect(markup).not.toContain("task-queue-board-card-priority-medium");
+    expect(markup).toContain("task-queue-board-card-priority-accented");
+    expect(markup).toContain("--task-queue-board-card-priority-accent:#c58a00");
+    expect(markup).toContain("Medium priority</span>");
     expect(markup.indexOf('aria-label="Design discipline"')).toBeLessThan(
       markup.indexOf("profile-avatar"),
     );

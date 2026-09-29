@@ -200,7 +200,6 @@ export function TaskQueueKanbanBoard({
                         {...cardProps}
                         key={task.id}
                         task={task}
-                        showPriorityBadge={false}
                       />
                     ))}
                   </div>
@@ -261,7 +260,6 @@ export function TaskQueueKanbanBoard({
           {...cardProps}
           key={task.id}
           task={task}
-          showPriorityBadge
         />
       )}
     />

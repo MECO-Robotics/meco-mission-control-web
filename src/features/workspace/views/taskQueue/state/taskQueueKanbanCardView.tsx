@@ -12,7 +12,8 @@ import {
   getTaskCardPerson,
   getTaskQueueCardContextAccentColor,
   getTaskQueueCardContextLabel,
-  TaskPriorityBadge,
+  getTaskQueueCardPriorityAccentColor,
+  getTaskPriorityLabel,
 } from "../taskQueueKanbanCardMeta";
 import { TaskDisciplineBadge } from "../taskQueueDisciplineBadge";
 import { getTaskQueueBoardState } from "../taskQueueKanbanBoardState";
@@ -61,7 +62,6 @@ interface TaskQueueCardProps extends Omit<ComponentPropsWithoutRef<"button">, "c
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
   task: TaskRecord;
   workstreamsById: Record<string, BootstrapPayload["workstreams"][number]>;
-  showPriorityBadge?: boolean;
 }
 
 export function TaskQueueCard({
@@ -73,7 +73,6 @@ export function TaskQueueCard({
   openEditTaskModal,
   projectsById,
   taskQueueZoom,
-  showPriorityBadge = true,
   showProjectContextOnCards,
   showProjectOnCards,
   style,
@@ -90,14 +89,10 @@ export function TaskQueueCard({
   const disciplineAccentColor = task.disciplineId
     ? getTimelineTaskDisciplineColor(task.disciplineId, disciplinesById)
     : null;
-  const cardStyle = disciplineAccentColor || style
-    ? ({
-        ...style,
-        ...(disciplineAccentColor
-          ? { "--task-queue-board-card-discipline-accent": disciplineAccentColor }
-          : {}),
-      } as CSSProperties)
-    : undefined;
+  const cardStyle = {
+    ...style,
+    "--task-queue-board-card-priority-accent": getTaskQueueCardPriorityAccentColor(task.priority),
+  } as CSSProperties;
   const boardState = getTaskQueueBoardState(task, bootstrap);
   const dueDateText = task.dueDate ? `Due ${formatDate(task.dueDate)}` : "Not set";
   const dueDatePillClassName = getTaskCardDueDatePillClassName(task);
@@ -120,15 +115,14 @@ export function TaskQueueCard({
     "--task-queue-board-card-context-border": `color-mix(in srgb, ${taskContextAccentColor} 54%, transparent)`,
   } as CSSProperties;
   const hideSummary = shouldHideTaskQueueSummary(taskQueueZoom);
-  const showDisciplineBadge = Boolean(!showProjectOnCards && showProjectContextOnCards && discipline);
+  const taskPriorityLabel = `${getTaskPriorityLabel(task.priority)} priority`;
 
   return (
     <button
       {...buttonProps}
-      className={`task-queue-board-card editable-hover-target editable-hover-target-row${
-        disciplineAccentColor ? " task-queue-board-card-discipline-accented" : ""
-      }${className ? ` ${className}` : ""}`}
+      className={`task-queue-board-card editable-hover-target editable-hover-target-row task-queue-board-card-priority-accented${className ? ` ${className}` : ""}`}
       data-board-state={boardState}
+      data-priority={task.priority}
       data-tutorial-target="edit-task-row"
       onClick={(milestone) => {
         milestone.stopPropagation();
@@ -137,6 +131,7 @@ export function TaskQueueCard({
       style={cardStyle}
       type="button"
     >
+      <span className="task-queue-board-card-priority-label">{taskPriorityLabel}</span>
       <div className="task-queue-board-card-header">
         <strong>{task.title}</strong>
         <span className="task-queue-board-card-header-side">
@@ -165,10 +160,9 @@ export function TaskQueueCard({
             {taskContextLabel}
           </span>
         ) : null}
-        {showPriorityBadge || person ? (
+        {discipline || person ? (
           <div className="task-queue-board-card-meta-person-group">
-            {showPriorityBadge ? <TaskPriorityBadge priority={task.priority} /> : null}
-            {showDisciplineBadge && discipline ? (
+            {discipline ? (
               <TaskDisciplineBadge accentColor={disciplineAccentColor ?? "#7a8799"} discipline={discipline} />
             ) : null}
             {person ? (
