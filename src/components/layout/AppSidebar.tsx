@@ -1,11 +1,9 @@
-import { type MouseEvent as ReactMouseEvent } from "react";
+import { useState, type MouseEvent as ReactMouseEvent } from "react";
 
 import {
   type InventoryViewTab,
   type ManufacturingViewTab,
   type NavigationTarget,
-  type RosterViewTab,
-  type RiskManagementViewTab,
   type TaskViewTab,
   type ViewTab,
   type WorklogsViewTab,
@@ -25,6 +23,7 @@ import { AppSidebarQuickActions } from "./AppSidebarQuickActions";
 import { AppSidebarSections } from "./AppSidebarSections";
 import { useSidebarScrollHints } from "./sidebar/useSidebarScrollHints";
 import { useAppSidebarNavigationModels } from "./sidebar/useAppSidebarNavigationModels";
+import type { AppSidebarScopePanel } from "./AppSidebarScopeMenuPopup";
 import { useAppSidebarPopupState } from "./useAppSidebarPopupState";
 
 interface AppSidebarProps {
@@ -52,8 +51,6 @@ interface AppSidebarProps {
   selectedSeasonId: string | null;
   inventoryView: InventoryViewTab;
   manufacturingView?: ManufacturingViewTab;
-  rosterView: RosterViewTab;
-  riskManagementView: RiskManagementViewTab;
   seasons: SeasonRecord[];
   sessionUser: SessionUser | null;
   taskView: TaskViewTab;
@@ -92,8 +89,6 @@ export function AppSidebar({
   selectedSeasonId,
   inventoryView,
   manufacturingView = "all",
-  rosterView,
-  riskManagementView,
   seasons,
   sessionUser,
   taskView,
@@ -118,6 +113,8 @@ export function AppSidebar({
   const selectedScopeLabel = selectedSeason
     ? `${selectedSeason.name} - ${selectedProjectLabel}`
     : selectedProjectLabel;
+  const [activeScopePanel, setActiveScopePanel] = useState<AppSidebarScopePanel | null>(null);
+
   const {
     activeSubItemId,
     sectionModels,
@@ -125,22 +122,23 @@ export function AppSidebar({
     activeTab,
     inventoryView,
     manufacturingView,
-    rosterView,
-    riskManagementView,
     taskView,
     viewAvailabilityContext,
     worklogsView,
   });
 
   const {
-    popup,
+    isProjectPopupOpen,
     projectPopupRef,
+    projectPopupTop,
     projectTriggerRef,
-    closePopup,
-    togglePopup,
-    setActivePanel,
+    setIsProjectPopupOpen,
+    setProjectPopupTop,
     sidebarShellRef,
-  } = useAppSidebarPopupState({});
+    scopePanels,
+  } = useAppSidebarPopupState({
+    projectPopupLayoutKey: activeScopePanel,
+  });
   const {
     hasBottomHint,
     hasTopHint,
@@ -161,7 +159,10 @@ export function AppSidebar({
     const shellRect = sidebarShellRef.current?.getBoundingClientRect();
     const targetRect = event.currentTarget.getBoundingClientRect();
     const popupTop = shellRect ? targetRect.top - shellRect.top : 0;
-    togglePopup(popupTop);
+    setProjectPopupTop(popupTop);
+
+    setActiveScopePanel(null);
+    setIsProjectPopupOpen((current) => !current);
   };
 
   const handleProjectOptionSelect = (value: string) => {
@@ -171,26 +172,31 @@ export function AppSidebar({
       onSelectProject(value || null);
     }
 
-    closePopup();
+    setIsProjectPopupOpen(false);
+    setActiveScopePanel(null);
   };
 
   const handleSeasonOptionSelect = (value: string) => {
     if (value === CREATE_SEASON_OPTION_VALUE) {
       onCreateSeason();
-      closePopup();
+      setIsProjectPopupOpen(false);
+      setActiveScopePanel(null);
       return;
     }
 
     onSelectSeason(value || null);
-    closePopup();
+    setIsProjectPopupOpen(false);
+    setActiveScopePanel(null);
   };
 
   const handleHelpSelect = () => {
-    closePopup();
+    setIsProjectPopupOpen(false);
+    setActiveScopePanel(null);
     onSelectTarget({ tab: "help" }, { keepSidebarOpen: true });
   };
   const handleSidebarFoldClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
-    closePopup();
+    setIsProjectPopupOpen(false);
+    setActiveScopePanel(null);
     toggleSidebar();
     event.currentTarget.blur();
   };
@@ -235,7 +241,7 @@ export function AppSidebar({
           isDarkMode={isDarkMode}
           isCollapsed={isCollapsed}
           isNotificationQueueOpen={isNotificationQueueOpen}
-          isProjectPopupOpen={popup.isOpen}
+          isProjectPopupOpen={isProjectPopupOpen}
           onHelpSelect={handleHelpSelect}
           onProjectTriggerClick={handleProjectTriggerClick}
           onRefreshWorkspace={onRefreshWorkspace}
@@ -251,17 +257,21 @@ export function AppSidebar({
         />
       </nav>
       <AppSidebarPopups
-        popup={popup}
+        activeScopePanel={activeScopePanel}
+        isProjectPopupOpen={isProjectPopupOpen}
+        isScopePopupOpen={isProjectPopupOpen}
         canEditSelectedRobot={canEditSelectedRobot}
         onEditSelectedRobot={onEditSelectedRobot}
         onSelectProjectOption={handleProjectOptionSelect}
         onSelectSeasonOption={handleSeasonOptionSelect}
         projectPopupRef={projectPopupRef}
+        projectPopupTop={projectPopupTop}
         projects={projects}
         seasons={seasons}
         selectedProjectId={selectedProjectId}
         selectedSeasonId={selectedSeasonId}
-        onPanelChange={setActivePanel}
+        setActiveScopePanel={setActiveScopePanel}
+        scopePanels={scopePanels}
       />
     </div>
   );

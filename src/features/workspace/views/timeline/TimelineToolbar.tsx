@@ -6,6 +6,8 @@ import type { FilterSelection } from "@/features/workspace/shared/filters/worksp
 import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
 import { formatTimelineZoomLabel, TIMELINE_ZOOM_MAX } from "@/features/workspace/shared/timeline/timelineZoom";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
+import type { TaskCalendarEventType } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
+import type { TaskCalendarSortMode } from "@/features/workspace/views/taskCalendar/taskCalendarLayout";
 import { WorkspaceTopbarZoom } from "@/features/workspace/shared/topbar";
 import { TimelineCompactFilterMenu } from "./components/TimelineCompactFilterMenu";
 
@@ -17,6 +19,9 @@ const TIMELINE_INTERVAL_OPTIONS: Array<{ id: TimelineViewInterval; label: string
 
 interface TimelineToolbarProps {
   activeFilterCount: number;
+  calendarEventFilter: "all" | TaskCalendarEventType;
+  calendarSortMode: TaskCalendarSortMode;
+  showCalendarFilters: boolean;
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   disciplineFilter: FilterSelection;
@@ -24,6 +29,8 @@ interface TimelineToolbarProps {
   isAllProjectsView: boolean;
   onAdjustZoom: (direction: 1 | -1) => void;
   onChangePersonFilter: (value: FilterSelection) => void;
+  onCalendarEventFilterChange: (value: "all" | TaskCalendarEventType) => void;
+  onCalendarSortModeChange: (value: TaskCalendarSortMode) => void;
   onIntervalChange: (value: TimelineViewInterval) => void;
   onSearchChange: (value: string) => void;
   onShiftPeriod: (direction: -1 | 1) => void;
@@ -46,6 +53,9 @@ interface TimelineToolbarProps {
 
 export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   activeFilterCount,
+  calendarEventFilter,
+  calendarSortMode,
+  showCalendarFilters,
   activePersonFilter,
   bootstrap,
   disciplineFilter,
@@ -53,6 +63,8 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   isAllProjectsView,
   onAdjustZoom,
   onChangePersonFilter,
+  onCalendarEventFilterChange,
+  onCalendarSortModeChange,
   onIntervalChange,
   onSearchChange,
   onShiftPeriod,
@@ -143,12 +155,17 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
         actions={
           <TimelineCompactFilterMenu
             activeFilterCount={activeFilterCount}
+            calendarEventFilter={calendarEventFilter}
+            calendarSortMode={calendarSortMode}
+            showCalendarFilters={showCalendarFilters}
             activePersonFilter={activePersonFilter}
             bootstrap={bootstrap}
             disciplineFilter={disciplineFilter}
             disciplineFilterOptions={disciplineFilterOptions}
             isAllProjectsView={isAllProjectsView}
             onChangePersonFilter={onChangePersonFilter}
+            onCalendarEventFilterChange={onCalendarEventFilterChange}
+            onCalendarSortModeChange={onCalendarSortModeChange}
             priorityFilter={priorityFilter}
             projectFilter={projectFilter}
             setDisciplineFilter={setDisciplineFilter}

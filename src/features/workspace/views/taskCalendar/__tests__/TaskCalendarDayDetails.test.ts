@@ -4,10 +4,11 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { TaskCalendarDayDetails } from "@/features/workspace/views/taskCalendar/TaskCalendarDayDetails";
-import { TaskCalendarFilterToolbar } from "@/features/workspace/views/taskCalendar/TaskCalendarFilterToolbar";
 import { TaskCalendarMonthGrid } from "@/features/workspace/views/taskCalendar/TaskCalendarMonthGrid";
 import type { TaskCalendarEvent } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
+import { TimelineCompactFilterMenu } from "@/features/workspace/views/timeline/components/TimelineCompactFilterMenu";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 
 const taskEvent: TaskCalendarEvent = {
   extendedProps: {
@@ -141,25 +142,51 @@ describe("TaskCalendarMonthGrid day selection", () => {
   });
 });
 
-describe("TaskCalendarFilterToolbar", () => {
-  it("keeps event filtering and sorting in one compact view menu", () => {
-    const toolbar = TaskCalendarFilterToolbar({
-      eventFilter: "qa-due",
-      onEventFilterChange: jest.fn(),
-      onSortModeChange: jest.fn(),
-      sortMode: "priority",
-    }) as React.ReactElement<{ children: React.ReactNode }>;
-    const [viewOptionsMenu] = React.Children.toArray(toolbar.props.children) as React.ReactElement<{
+describe("TimelineCompactFilterMenu", () => {
+  it("combines timeline filters with calendar event and sort options", () => {
+    const menu = TimelineCompactFilterMenu({
+      activeFilterCount: 1,
+      calendarEventFilter: "qa-due",
+      calendarSortMode: "priority",
+      showCalendarFilters: true,
+      onCalendarEventFilterChange: jest.fn(),
+      onCalendarSortModeChange: jest.fn(),
+      activePersonFilter: [],
+      bootstrap: EMPTY_BOOTSTRAP,
+      disciplineFilter: [],
+      disciplineFilterOptions: [],
+      isAllProjectsView: false,
+      onChangePersonFilter: jest.fn(),
+      priorityFilter: [],
+      projectFilter: [],
+      setDisciplineFilter: jest.fn(),
+      setPriorityFilter: jest.fn(),
+      setProjectFilter: jest.fn(),
+      setStatusFilter: jest.fn(),
+      setSubsystemFilter: jest.fn(),
+      statusFilter: [],
+      subsystemFilter: [],
+      subsystemFilterOptions: [],
+    }) as React.ReactElement<{
       activeCount: number;
       ariaLabel: string;
       buttonLabel: string;
       items: Array<{ label: string }>;
-    }>[];
+    }>;
 
-    expect(viewOptionsMenu.type).toBe(CompactFilterMenu);
-    expect(viewOptionsMenu.props.ariaLabel).toBe("Calendar view options");
-    expect(viewOptionsMenu.props.buttonLabel).toBe("View");
-    expect(viewOptionsMenu.props.activeCount).toBe(2);
-    expect(viewOptionsMenu.props.items.map((item) => item.label)).toEqual(["Event type", "Sort by"]);
+    expect(menu.type).toBe(CompactFilterMenu);
+    expect(menu.props.ariaLabel).toBe("Schedule filters");
+    expect(menu.props.buttonLabel).toBe("Filters");
+    expect(menu.props.activeCount).toBe(3);
+    expect(menu.props.items.map((item) => item.label)).toEqual([
+      "Project",
+      "Roster",
+      "Discipline",
+      "Subsystem",
+      "Status",
+      "Priority",
+      "Event type",
+      "Sort by",
+    ]);
   });
 });

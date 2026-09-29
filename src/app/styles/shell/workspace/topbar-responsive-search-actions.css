@@ -10,14 +10,6 @@
 }
 
 .topbar-responsive-search-actions .task-queue-toolbar-inline-actions,
-.topbar-responsive-search-actions .task-calendar-filter-controls {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.08rem;
-  flex-wrap: nowrap;
-  width: auto;
-}
-
 .topbar-responsive-search-actions .task-queue-filter-menu.toolbar-filter-dropdown {
   width: 1.7rem;
   height: 1.7rem;

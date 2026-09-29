@@ -3,7 +3,7 @@ import { IconManufacturing, IconTasks } from "@/components/shared/Icons";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
-import { PART_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
+import { READINESS_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
@@ -68,7 +68,7 @@ export function PartsToolbar({
                       className="task-queue-filter-menu-submenu"
                       icon={<IconTasks />}
                       onChange={setPartStatus}
-                      options={PART_STATUS_OPTIONS}
+                      options={READINESS_STATUS_OPTIONS}
                       value={partStatus}
                     />
                   ),

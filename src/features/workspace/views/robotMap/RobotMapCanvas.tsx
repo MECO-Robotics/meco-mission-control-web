@@ -1,6 +1,3 @@
-import { useMemo, useRef, useState } from "react";
-
-import { EmptyCadViewer } from "../cad/viewer/CadPartViewer";
 import { LayoutGrid, Upload } from "lucide-react";
 import type { SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
 
