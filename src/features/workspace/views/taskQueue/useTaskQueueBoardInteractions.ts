@@ -94,20 +94,20 @@ export function useTaskQueueBoardLazyLoading({
       );
     };
 
-    const maybeFillViewport = () => {
-      if (window.scrollY > 4) {
-        return;
-      }
-
-      const shellRect = shell.getBoundingClientRect();
-      if (shellRect.bottom < window.innerHeight) {
+    const maybePrefetchMore = () => {
+      const sentinelRect = sentinel.getBoundingClientRect();
+      if (sentinelRect.top <= window.innerHeight + 240) {
         loadMore();
       }
     };
 
-    const maybePrefetchMore = () => {
-      const sentinelRect = sentinel.getBoundingClientRect();
-      if (sentinelRect.top <= window.innerHeight + 240) {
+    const handleColumnScroll = (event: Event) => {
+      const columnBody = event.target;
+      if (
+        columnBody instanceof HTMLElement &&
+        columnBody.classList.contains("task-queue-board-column-body") &&
+        columnBody.scrollTop + columnBody.clientHeight >= columnBody.scrollHeight - 240
+      ) {
         loadMore();
       }
     };
@@ -125,8 +125,7 @@ export function useTaskQueueBoardLazyLoading({
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", maybeFillViewport);
-    maybeFillViewport();
+    shell.addEventListener("scroll", handleColumnScroll, true);
 
     return () => {
       if (rafId !== undefined) {
@@ -134,7 +133,7 @@ export function useTaskQueueBoardLazyLoading({
       }
 
       window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", maybeFillViewport);
+      shell.removeEventListener("scroll", handleColumnScroll, true);
     };
   }, [
     boardShellRef,
