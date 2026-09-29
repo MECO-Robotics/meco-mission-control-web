@@ -26,7 +26,8 @@
 }
 
 .page-shell.dark-mode .task-queue-board-column {
-  background: rgba(15, 23, 42, 0.68);
+  --kanban-lane-surface: rgba(15, 23, 42, 0.68);
+  background: var(--kanban-lane-surface);
   border-color: rgba(148, 163, 184, 0.24);
   box-shadow: 0 10px 22px rgba(2, 6, 23, 0.28);
 }

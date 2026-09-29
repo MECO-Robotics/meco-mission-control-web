@@ -101,8 +101,20 @@ function KanbanColumnScrollArea({
   };
 
   return (
-    <div className="task-queue-board-column-scroll-frame">
-      <div className={className} ref={bodyRef} {...dropProps}>
+    <div
+      className="task-queue-board-column-scroll-frame"
+    >
+      <div
+        className={[
+          className,
+          scrollState.canScrollUp && "has-scroll-fade-up",
+          scrollState.canScrollDown && "has-scroll-fade-down",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        ref={bodyRef}
+        {...dropProps}
+      >
         {children}
       </div>
       {scrollState.canScrollUp || scrollState.canScrollDown ? (
