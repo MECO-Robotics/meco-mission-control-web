@@ -27,11 +27,6 @@
   gap: 0.3rem;
 }
 
-.roster-columns .people-assign-work-button {
-  justify-self: end;
-  margin-top: 0.15rem;
-}
-
 .panel-subsection {
   display: flex;
   flex-direction: column;

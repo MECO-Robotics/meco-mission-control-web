@@ -109,6 +109,7 @@ describe("RosterView", () => {
     expect(html).toContain("https://cdn.example.test/people/student-one.png");
     expect(html).toContain('aria-label="Assign work to Student"');
     expect(html).toContain('title="Assign work to Student"');
+    expect(html).toMatch(/people-member-activity[\s\S]*people-workload-details[\s\S]*Workload and recent activity[\s\S]*people-assign-work-button/);
     expect(html).toContain("<svg");
     expect(html).not.toContain("Assign work to Student</button>");
     expect(html).toContain('aria-label="Add person"');

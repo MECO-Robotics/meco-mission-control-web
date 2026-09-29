@@ -224,19 +224,21 @@ export const RosterView: React.FC<RosterViewProps> = ({
       <div className="people-member-context">
         <small>{presence ? `Here today · ${presence.stateLabel}` : presentMemberIds.has(member.id) ? "Here today" : "No attendance recorded today"}</small>
         {load ? <small>Capacity: {formatAvailabilityLabel(load.availabilityStatus)} · {load.activeTaskCount} active · {load.blockedTaskCount} blocked · {load.overdueTaskCount} overdue · {formatHours(load.remainingOpenHours)} remaining</small> : null}
-        {load ? <details className="people-workload-details"><summary>Workload and recent activity</summary><small>{formatHours(load.plannedWeeklyAttendanceHours)} planned/week · {formatHours(load.attendanceHoursLast14Days)} attended in 14 days</small>
-        {load?.topTasks.map(task => <button className="ghost-button" key={task.id} type="button" onClick={() => { const record = bootstrap.tasks.find(item => item.id === task.id); if (record) onOpenTask?.(record); }}>{task.title}</button>)}</details> : null}
-        {onCreateTaskForMember && member.role !== "external" ? (
-          <button
-            aria-label={`Assign work to ${member.name.split(" ")[0]}`}
-            className="icon-button people-assign-work-button"
-            title={`Assign work to ${member.name.split(" ")[0]}`}
-            type="button"
-            onClick={() => onCreateTaskForMember(member.id)}
-          >
-            <Briefcase aria-hidden="true" size={16} />
-          </button>
-        ) : null}
+        <div className="people-member-activity">
+          {load ? <details className="people-workload-details"><summary>Workload and recent activity</summary><small>{formatHours(load.plannedWeeklyAttendanceHours)} planned/week · {formatHours(load.attendanceHoursLast14Days)} attended in 14 days</small>
+          {load.topTasks.map(task => <button className="ghost-button" key={task.id} type="button" onClick={() => { const record = bootstrap.tasks.find(item => item.id === task.id); if (record) onOpenTask?.(record); }}>{task.title}</button>)}</details> : null}
+          {onCreateTaskForMember && member.role !== "external" ? (
+            <button
+              aria-label={`Assign work to ${member.name.split(" ")[0]}`}
+              className="icon-button people-assign-work-button"
+              title={`Assign work to ${member.name.split(" ")[0]}`}
+              type="button"
+              onClick={() => onCreateTaskForMember(member.id)}
+            >
+              <Briefcase aria-hidden="true" size={16} />
+            </button>
+          ) : null}
+        </div>
       </div>
     </div>;
   };
