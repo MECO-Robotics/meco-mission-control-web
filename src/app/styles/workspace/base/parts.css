@@ -38,6 +38,10 @@
   --part-manager-danger-text: #b42318;
 }
 
+.part-manager-shell > .panel-subsection {
+  margin-top: 0.7rem;
+}
+
 .page-shell.dark-mode .part-manager-shell {
   --part-manager-surface: rgba(30, 41, 59, 0.92);
   --part-manager-surface-strong: rgba(51, 65, 85, 0.98);
