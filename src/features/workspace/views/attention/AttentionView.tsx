@@ -1,4 +1,7 @@
 import { useMemo } from "react";
+import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
+import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { useRememberedViewState } from "@/features/workspace/shared/navigation/WorkspaceViewMemory";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
@@ -25,12 +28,33 @@ export function AttentionView({ activePersonFilter, bootstrap, onOpenRisk, onOpe
   const filtered = rows.filter(row => (!reviewOnly || row.needsReview) && (source === "all" || row.source === source) && [row.title, row.context, ...row.reasons].join(" ").toLowerCase().includes(search.toLowerCase()));
   const visible = showAll ? filtered : filtered.slice(0, 6);
   return <section className="home-attention" aria-label="Needs attention">
+    <AppTopbarSlotPortal slot="search">
+      <TopbarResponsiveSearch
+        actions={
+          <CompactFilterMenu
+            activeCount={Number(source !== "all")}
+            ariaLabel="Attention filters"
+            buttonLabel="Filters"
+            className="materials-filter-menu"
+            items={[{
+              label: "Source",
+              content: (
+                <select aria-label="Attention source" className="toolbar-filter-select" value={source} onChange={event => setSource(event.target.value)}>
+                  <option value="all">All sources</option><option value="task">Tasks</option><option value="risk">Risks</option><option value="qa">QA / reports</option><option value="manufacturing">Manufacturing</option><option value="purchase">Purchases</option>
+                </select>
+              ),
+            }]}
+          />
+        }
+        ariaLabel="Search attention"
+        compactPlaceholder="Search"
+        onChange={setSearch}
+        placeholder="Search attention…"
+        value={search}
+      />
+    </AppTopbarSlotPortal>
     <div className="workspace-section-heading"><h2>Needs attention</h2><span>{filtered.length} items</span></div>
     <div className="workspace-presentation-controls">
-      <input aria-label="Search attention" placeholder="Search attention…" value={search} onChange={event => setSearch(event.target.value)} />
-      <select aria-label="Attention source" value={source} onChange={event => setSource(event.target.value)}>
-        <option value="all">All sources</option><option value="task">Tasks</option><option value="risk">Risks</option><option value="qa">QA / reports</option><option value="manufacturing">Manufacturing</option><option value="purchase">Purchases</option>
-      </select>
       <button className="ghost-button" aria-pressed={reviewOnly} onClick={() => setReviewOnly(!reviewOnly)} type="button">Needs review</button>
     </div>
     {visible.length ? <ul className="workspace-record-list">{visible.map(row => <li key={row.key}>
