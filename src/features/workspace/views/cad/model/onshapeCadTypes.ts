@@ -216,4 +216,3 @@ export interface CadGraphImportResult {
   warningCount: number;
   stoppedReason?: string;
 }
-

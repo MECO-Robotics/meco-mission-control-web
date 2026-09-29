@@ -162,6 +162,7 @@ export function ManufacturingQueueView({
             <TopbarResponsiveSearch
               {...buildTopbarSearchProps("manufacturing", {
                 actions: (
+                  <>
                   <ManufacturingQueueFilters
                     activeCount={activeFilterCount}
                     bootstrap={bootstrap}
@@ -179,6 +180,7 @@ export function ManufacturingQueueView({
                     uniqueMaterials={uniqueMaterials}
                   />
                   <ManufacturingSortMenu onChange={setSortField} sortField={sortField} />
+                  </>
                 ),
                 ariaLabel: `Search ${title}`,
                 onChange: setSearch,

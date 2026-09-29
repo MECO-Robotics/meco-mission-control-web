@@ -158,7 +158,7 @@ describe("AppSidebar scope", () => {
     expect(css).toContain(".sidebar-scope-option-caret");
   });
 
-  it("renders the project scope trigger as a larger footer control", () => {
+  it("renders the project scope trigger as a compact footer control", () => {
     const css = readFileSync("src/app/styles/shell/sidebar/sidebar-scope.css", "utf8");
     const markup = renderSidebar(
       [
@@ -178,7 +178,7 @@ describe("AppSidebar scope", () => {
     expect(markup).toContain("sidebar-scope-trigger-caret");
     expect(markup).toContain("lucide-chevron-right");
     expect(css).toMatch(
-      /\.sidebar-scope-trigger\s*\{[^}]*min-height:\s*2\.35rem;[^}]*padding:\s*0\.48rem 0\.54rem;/,
+      /\.sidebar-scope-trigger\s*\{[^}]*min-height:\s*2\.15rem;[^}]*padding:\s*0\.38rem 0\.45rem;/,
     );
     expect(css).toMatch(
       /\.sidebar-scope-trigger-line\s*\{[^}]*font-size:\s*0\.78rem;[^}]*font-weight:\s*760;/,

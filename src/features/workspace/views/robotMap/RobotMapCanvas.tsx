@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Layers3, LayoutGrid } from "lucide-react";
+import { Layers3 } from "lucide-react";
 import type { SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
 
 import { clampLayoutCoordinate, isSubsystemPlaced } from "./robotMapLayout";
