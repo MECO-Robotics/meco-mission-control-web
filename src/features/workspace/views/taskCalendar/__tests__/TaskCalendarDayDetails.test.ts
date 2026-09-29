@@ -173,6 +173,7 @@ describe("TimelineCompactFilterMenu", () => {
       inlineItems: boolean;
       menuTitle?: string;
       items: Array<{
+        hidden?: boolean;
         label: string;
         icon?: React.ReactNode;
         content?: React.ReactElement<{ compactSummary?: boolean; hideButtonIcon?: boolean; options?: Array<{ id: string; name: string }>; singleSelect?: boolean; value?: string[] }>;
@@ -198,6 +199,13 @@ describe("TimelineCompactFilterMenu", () => {
       { id: "qa-due", name: "Waiting QA" },
     ]));
     expect(menu.props.activeCount).toBe(2);
+    expect(menu.props.items.filter((item) => item.hidden).map((item) => item.label)).toEqual([
+      "Project",
+      "Discipline",
+      "Subsystem",
+      "Status",
+      "Priority",
+    ]);
     expect(menu.props.items.map((item) => item.label)).toEqual([
       "Project",
       "Roster",

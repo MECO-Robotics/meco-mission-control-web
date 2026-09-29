@@ -66,7 +66,7 @@
   min-height: 0;
   overflow-y: auto;
   padding: 0.65rem;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .robot-config-embedded-cad .cad-part-viewer {
@@ -78,7 +78,7 @@
   flex-direction: column;
   min-height: 0;
   padding: 0;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .robot-config-embedded-cad .cad-viewer-canvas {

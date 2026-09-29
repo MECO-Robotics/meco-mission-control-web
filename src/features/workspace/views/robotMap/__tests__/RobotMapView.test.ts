@@ -1,6 +1,7 @@
 /// <reference types="jest" />
 
 import * as React from "react";
+import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { createBootstrap } from "@/lib/appUtilsTestFixtures";
@@ -95,6 +96,18 @@ describe("RobotMapView", () => {
     expect(markup).not.toContain("Waiting QA");
     expect(markup).not.toContain("MFG open");
     expect(markup).not.toContain("High risk");
+  });
+
+  it("keeps the embedded CAD controls interactive over the click-through overlay", () => {
+    const css = readFileSync("src/app/styles/workspace/robotMap.css", "utf8");
+
+    expect(css).toMatch(/\.robot-config-embedded-cad\s*\{[^}]*pointer-events:\s*none;/);
+    expect(css).toMatch(
+      /\.robot-config-embedded-cad \.cad-local-viewer-embedded\s*\{[^}]*pointer-events:\s*auto;/,
+    );
+    expect(css).toMatch(
+      /\.robot-config-embedded-cad \.cad-part-viewer\s*\{[^}]*pointer-events:\s*auto;/,
+    );
   });
 
   it("opens unplaced subsystem management from the robot viewport instead of expanding it inline", () => {

@@ -179,7 +179,11 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
       <AppTopbarSlotPortal slot="controls">
         <WorkspaceTopbarControls className="timeline-toolbar timeline-topbar-controls">
           <TimelineToolbar
-            activeFilterCount={filterControls.activeFilterCount}
+            activeFilterCount={
+              showCalendarFilters
+                ? Number(activePersonFilter.length > 0)
+                : filterControls.activeFilterCount
+            }
             calendarEventFilter={activeCalendarEventFilter}
             calendarSortMode={activeCalendarSortMode}
             showCalendarFilters={showCalendarFilters}
