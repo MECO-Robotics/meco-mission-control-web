@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { PartsToolbar } from "@/features/workspace/views/parts/PartsToolbar";
+import { PartsDefinitionSection } from "@/features/workspace/views/parts/PartsDefinitionSection";
 import { filterPartDefinitions } from "@/features/workspace/views/PartsView";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
@@ -100,6 +101,44 @@ const bootstrap: BootstrapPayload = {
 };
 
 describe("PartsView filters", () => {
+  it("uses the shared resource-list cell and native button row", () => {
+    const columnFilters = { name: [], number: [], revision: [], iteration: [], type: [], material: [] };
+    const columnOptions = { name: [], number: [], revision: [], iteration: [], type: [], material: [] };
+    const markup = renderToStaticMarkup(
+      React.createElement(PartsDefinitionSection, {
+        bootstrap,
+        filteredPartDefinitions: bootstrap.partDefinitions,
+        hasActiveFilters: false,
+        hasHiddenArchivedPartDefinitions: false,
+        onCreatePartDefinition: jest.fn(),
+        onEditPartDefinition: jest.fn(),
+        partDefinitionFilterMotionClass: "",
+        pageChangeHandlers: {
+          onPageChange: jest.fn(),
+          onPageSizeChange: jest.fn(),
+          page: 1,
+          pageSize: 15,
+          pageSizeOptions: [15, 30, 60],
+          rangeEnd: bootstrap.partDefinitions.length,
+          rangeStart: 1,
+          totalItems: bootstrap.partDefinitions.length,
+          totalPages: 1,
+        },
+        columnFilters,
+        columnOptions,
+        setColumnFilter: jest.fn(),
+        sortField: null,
+        sortDirection: "ascending",
+        onSort: jest.fn(),
+      }),
+    );
+
+    expect(markup).toContain('<button class="ops-table ops-row materials-table editable-hover-target editable-hover-target-row"');
+    expect(markup).toContain('resource-list-primary-cell" data-label="Part"');
+    expect(markup).toContain("Drive rail");
+    expect(markup).not.toContain('role="button"');
+  });
+
   it("places the archive control in the topbar filter menu", () => {
     const markup = renderToStaticMarkup(
       React.createElement(PartsToolbar, {

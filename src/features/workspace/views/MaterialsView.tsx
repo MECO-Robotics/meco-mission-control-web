@@ -16,7 +16,7 @@ import {
 } from "@/features/workspace/shared/topbar";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
-import { ResourceRecordPreview } from "@/features/workspace/shared/resourceList/ResourceRecordPreview";
+import { ResourceRecordCell } from "@/features/workspace/shared/resourceList/ResourceRecordCell";
 import { ResourceColumnHeader } from "@/features/workspace/shared/resourceList/ResourceColumnHeader";
 import { ResourceSortMenu } from "@/features/workspace/shared/resourceList/ResourceSortMenu";
 import { getResourceFilterOptions } from "@/features/workspace/shared/resourceList/resourceListModel";
@@ -241,9 +241,7 @@ export function MaterialsView({
               title={`Edit ${material.name}`}
               type="button"
             >
-              <span className="queue-title table-cell table-cell-primary material-primary-cell" data-label="Material">
-                <ResourceRecordPreview photoUrl={material.photoUrl} name={material.name} subtitle={materialSubtitle} />
-              </span>
+              <ResourceRecordCell label="Material" photoUrl={material.photoUrl} name={material.name} subtitle={materialSubtitle} />
               <TableCell label="Category">{material.category}</TableCell>
               <TableCell label="On hand / reorder" valueClassName={isBelowReorder ? "materials-stock-below-reorder" : undefined}>
                 {material.onHandQuantity} / {material.reorderPoint}
