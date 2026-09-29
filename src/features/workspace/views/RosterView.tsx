@@ -15,6 +15,8 @@ import type { TaskRecord } from "@/types/recordsExecution";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
+import { buildTopbarAddMenuActions, makeAddMenuAction } from "@/features/workspace/shared/topbar";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MemberPayload } from "@/types/payloads";
 import type { MemberRecord } from "@/types/recordsOrganization";
@@ -203,23 +205,17 @@ export const RosterView: React.FC<RosterViewProps> = ({
 
   const rosterSections: Array<{
     title: string;
-    addTarget: "student" | "mentor" | "external";
     members: MemberRecord[];
-    tutorialTarget?: string;
   }> = [
     {
-      addTarget: "student",
       members: filteredSortedStudents,
       title: "Students",
-      tutorialTarget: "create-student-button",
     },
     {
-      addTarget: "mentor",
       members: filteredSortedMentors,
       title: "Mentors",
     },
     {
-      addTarget: "external",
       members: filteredSortedExternalMembers,
       title: "External access",
     },
@@ -238,6 +234,16 @@ export const RosterView: React.FC<RosterViewProps> = ({
           />
         </div>
       </AppTopbarSlotPortal>
+      <WorkspaceTopbarAddMenu
+        actions={buildTopbarAddMenuActions(
+          makeAddMenuAction("Add student", () => openAddPersonPanel("student")),
+          makeAddMenuAction("Add mentor", () => openAddPersonPanel("mentor")),
+          makeAddMenuAction("Add external member", () => openAddPersonPanel("external")),
+        )}
+        ariaLabel="Add person"
+        title="Add person"
+        tutorialTarget="create-person-button"
+      />
 
       <div className="panel-header compact-header">
         <div className="queue-section-header">
@@ -252,14 +258,11 @@ export const RosterView: React.FC<RosterViewProps> = ({
       <div className="roster-columns">
         {rosterSections.map((section) => (
           <RosterSection
-            addTarget={section.addTarget}
             count={section.members.length}
             key={section.title}
             members={section.members}
-            onAdd={openAddPersonPanel}
             renderMember={renderMember}
             title={section.title}
-            tutorialTarget={section.tutorialTarget}
           />
         ))}
       </div>

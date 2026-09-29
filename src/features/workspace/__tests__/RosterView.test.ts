@@ -100,6 +100,9 @@ describe("RosterView", () => {
     expect(html).toContain("Sponsor Viewer");
     expect(html).toContain("viewer@sponsor.example");
     expect(html).toContain("https://cdn.example.test/people/student-one.png");
+    expect(html).toContain('aria-label="Add person"');
+    expect(html.match(/topbar-add-menu-trigger/g)).toHaveLength(1);
+    expect(html).not.toContain("roster-section-add");
   });
 
   it("renders a profile photo upload control in the add-person modal", () => {
