@@ -1,10 +1,11 @@
 .task-queue-board-column {
+  --kanban-lane-surface: color-mix(in srgb, var(--bg-panel) 90%, var(--text-copy) 10%);
   display: grid;
   gap: 0.55rem;
   min-width: 0;
   padding: 0.7rem;
   border-radius: 0.8rem;
-  background: color-mix(in srgb, var(--bg-panel) 90%, var(--text-copy) 10%);
+  background: var(--kanban-lane-surface);
 }
 
 /* Status labels stay above the lane content; the rules define the lane edges. */
@@ -95,6 +96,45 @@
   position: relative;
   min-height: 0;
   overflow: hidden;
+  isolation: isolate;
+}
+
+.task-queue-board-column-scroll-frame::before,
+.task-queue-board-column-scroll-frame::after {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 1.35rem;
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 140ms ease;
+}
+
+.task-queue-board-column-scroll-frame::before {
+  top: 0;
+  background: linear-gradient(
+    to bottom,
+    var(--kanban-lane-surface) 0%,
+    color-mix(in srgb, var(--kanban-lane-surface) 74%, transparent) 38%,
+    transparent 100%
+  );
+}
+
+.task-queue-board-column-scroll-frame::after {
+  bottom: 0;
+  background: linear-gradient(
+    to top,
+    var(--kanban-lane-surface) 0%,
+    color-mix(in srgb, var(--kanban-lane-surface) 74%, transparent) 38%,
+    transparent 100%
+  );
+}
+
+.task-queue-board-column-scroll-frame[data-can-scroll-up="true"]::before,
+.task-queue-board-column-scroll-frame[data-can-scroll-down="true"]::after {
+  opacity: 1;
 }
 
 .task-queue-board-column-scroll-controls {
@@ -106,31 +146,31 @@
   justify-content: space-between;
   padding: 0.35rem 0;
   pointer-events: none;
+  z-index: 2;
 }
 
 .task-queue-board-column-scroll-button {
   display: grid;
-  width: 1.8rem;
+  width: 2rem;
   height: 1.8rem;
   place-items: center;
   padding: 0;
-  border: 1px solid color-mix(in srgb, var(--border-base) 75%, transparent);
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--bg-panel) 92%, transparent);
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--official-black) 12%, transparent);
-  color: var(--text-title);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: color-mix(in srgb, var(--text-title) 72%, transparent);
   cursor: pointer;
   pointer-events: auto;
+  opacity: 0.82;
   transition:
-    background-color 120ms ease,
-    color 120ms ease,
-    transform 120ms ease;
+    opacity 120ms ease,
+    color 120ms ease;
 }
 
 .task-queue-board-column-scroll-button:hover {
-  background: var(--bg-panel);
   color: var(--official-blue);
-  transform: scale(1.05);
+  opacity: 1;
 }
 
 .task-queue-board-column-scroll-button:focus-visible {
