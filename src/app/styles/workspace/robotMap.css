@@ -41,12 +41,39 @@
   grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.85fr);
 }
 
-.robot-config-main-list {
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.9fr);
+.robot-config-main-map.is-empty {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .robot-config-center {
+  display: grid;
+  gap: 0.75rem;
   min-height: 0;
+}
+
+.robot-config-cad-viewer {
+  border-top: 1px solid var(--border-base);
+  min-width: 0;
+  padding-top: 0.75rem;
+}
+
+.robot-config-cad-viewer .cad-local-viewer {
+  padding: 0;
+}
+
+.robot-config-map-empty {
+  align-items: center;
+  color: var(--text-copy);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 1rem;
+  position: absolute;
+  text-align: center;
+}
+
+.robot-config-map-empty p {
+  max-width: 32ch;
 }
 
 .robot-config-canvas-shell {
