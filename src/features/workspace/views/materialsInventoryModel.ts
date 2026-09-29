@@ -11,6 +11,9 @@ export interface MaterialInventoryFilters {
   stock: string[];
 }
 
+export type MaterialSortField = "name" | "category" | "quantity" | "location" | "vendor" | "status";
+export type MaterialSortDirection = "ascending" | "descending";
+
 type MaterialStockValues = Pick<MaterialRecord, "onHandQuantity" | "reorderPoint">;
 
 export function isMaterialBelowReorder(material: MaterialStockValues) {
@@ -65,4 +68,40 @@ export function filterMaterialInventory(
       matchesMaterialStockFilter(material, filters.stock)
     );
   });
+}
+
+export function sortMaterialInventory(
+  materials: MaterialRecord[],
+  field: MaterialSortField,
+  direction: MaterialSortDirection,
+) {
+  const multiplier = direction === "ascending" ? 1 : -1;
+  const compare = (left: MaterialRecord, right: MaterialRecord) => {
+    let result = 0;
+
+    switch (field) {
+      case "name":
+        result = left.name.localeCompare(right.name, undefined, { numeric: true });
+        break;
+      case "category":
+        result = left.category.localeCompare(right.category, undefined, { numeric: true });
+        break;
+      case "quantity":
+        result = left.onHandQuantity - right.onHandQuantity || left.reorderPoint - right.reorderPoint;
+        break;
+      case "location":
+        result = (left.location || "Unassigned").localeCompare(right.location || "Unassigned", undefined, { numeric: true });
+        break;
+      case "vendor":
+        result = (left.vendor || "Unknown").localeCompare(right.vendor || "Unknown", undefined, { numeric: true });
+        break;
+      case "status":
+        result = Number(matchesMaterialStockFilter(left, ["low"])) - Number(matchesMaterialStockFilter(right, ["low"]));
+        break;
+    }
+
+    return multiplier * (result || left.name.localeCompare(right.name, undefined, { numeric: true }));
+  };
+
+  return [...materials].sort(compare);
 }

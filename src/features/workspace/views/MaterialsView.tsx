@@ -1,4 +1,4 @@
-import { useMemo, useState, type CSSProperties } from "react";
+import { useMemo, useState, type CSSProperties, type ReactNode } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MaterialRecord } from "@/types/recordsInventory";
@@ -21,7 +21,13 @@ import type { FilterSelection } from "@/features/workspace/shared/filters/worksp
 import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { MATERIAL_CATEGORY_OPTIONS, MATERIAL_STOCK_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
-import { filterMaterialInventory, isMaterialBelowReorder } from "./materialsInventoryModel";
+import {
+  filterMaterialInventory,
+  isMaterialBelowReorder,
+  sortMaterialInventory,
+  type MaterialSortDirection,
+  type MaterialSortField,
+} from "./materialsInventoryModel";
 
 interface MaterialsViewProps {
   bootstrap: BootstrapPayload;
@@ -30,6 +36,46 @@ interface MaterialsViewProps {
 }
 
 const MATERIALS_GRID_TEMPLATE = "minmax(220px, 2.3fr) 0.75fr 1.05fr 1fr 1fr 0.8fr";
+
+function SortableMaterialHeader({
+  label,
+  field,
+  sortField,
+  sortDirection,
+  onSort,
+  children,
+}: {
+  label: string;
+  field: MaterialSortField;
+  sortField: MaterialSortField | null;
+  sortDirection: MaterialSortDirection;
+  onSort: (field: MaterialSortField) => void;
+  children?: ReactNode;
+}) {
+  const isSorted = sortField === field;
+  const directionLabel = isSorted ? sortDirection : "ascending";
+
+  return (
+    <span
+      aria-sort={isSorted ? sortDirection : "none"}
+      className="table-column-header-cell"
+      role="columnheader"
+    >
+      <button
+        aria-label={`Sort by ${label} ${directionLabel}`}
+        className="table-sort-button"
+        onClick={() => onSort(field)}
+        type="button"
+      >
+        <span className="table-column-title">{label}</span>
+        <span aria-hidden="true" className="table-sort-arrow">
+          {isSorted ? (sortDirection === "ascending" ? "↑" : "↓") : "↕"}
+        </span>
+      </button>
+      {children}
+    </span>
+  );
+}
 
 export function MaterialsView({
   bootstrap,
@@ -43,6 +89,8 @@ export function MaterialsView({
   const [location, setLocation] = useState<FilterSelection>([]);
   const [vendor, setVendor] = useState<FilterSelection>([]);
   const [stock, setStock] = useState<FilterSelection>([]);
+  const [sortField, setSortField] = useState<MaterialSortField | null>(null);
+  const [sortDirection, setSortDirection] = useState<MaterialSortDirection>("ascending");
 
   const columnOptions = useMemo(() => {
     const uniqueOptions = (getValue: (material: MaterialRecord) => string): DropdownOption[] =>
@@ -69,7 +117,11 @@ export function MaterialsView({
       stock,
     });
   }, [bootstrap.materials, category, location, name, quantity, search, stock, vendor]);
-  const materialPagination = useWorkspacePagination(filteredMaterials);
+  const sortedMaterials = useMemo(
+    () => sortField ? sortMaterialInventory(filteredMaterials, sortField, sortDirection) : filteredMaterials,
+    [filteredMaterials, sortDirection, sortField],
+  );
+  const materialPagination = useWorkspacePagination(sortedMaterials);
   const materialsFilterMotionClass = useFilterChangeMotionClass([
     category,
     location,
@@ -87,6 +139,14 @@ export function MaterialsView({
     location.length > 0 ||
     vendor.length > 0 ||
     stock.length > 0;
+  const handleSort = (field: MaterialSortField) => {
+    if (field === sortField) {
+      setSortDirection((current) => current === "ascending" ? "descending" : "ascending");
+      return;
+    }
+    setSortField(field);
+    setSortDirection("ascending");
+  };
 
   return (
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
@@ -159,8 +219,7 @@ export function MaterialsView({
           className="ops-table ops-table-header materials-table"
           style={{ "--workspace-grid-template": MATERIALS_GRID_TEMPLATE } as CSSProperties}
         >
-          <span className="table-column-header-cell">
-            <span className="table-column-title">Material</span>
+          <SortableMaterialHeader field="name" label="Material" onSort={handleSort} sortDirection={sortDirection} sortField={sortField}>
             <ColumnFilterDropdown
               allLabel="All materials"
               ariaLabel="Filter materials by name"
@@ -168,9 +227,8 @@ export function MaterialsView({
               options={columnOptions.name}
               value={name}
             />
-          </span>
-          <span className="table-column-header-cell">
-            <span className="table-column-title">Category</span>
+          </SortableMaterialHeader>
+          <SortableMaterialHeader field="category" label="Category" onSort={handleSort} sortDirection={sortDirection} sortField={sortField}>
             <ColumnFilterDropdown
               allLabel="All categories"
               ariaLabel="Filter materials by category"
@@ -178,9 +236,8 @@ export function MaterialsView({
               options={MATERIAL_CATEGORY_OPTIONS}
               value={category}
             />
-          </span>
-          <span className="table-column-header-cell">
-            <span className="table-column-title">On hand / reorder</span>
+          </SortableMaterialHeader>
+          <SortableMaterialHeader field="quantity" label="On hand / reorder" onSort={handleSort} sortDirection={sortDirection} sortField={sortField}>
             <ColumnFilterDropdown
               allLabel="All quantities"
               ariaLabel="Filter materials by on-hand and reorder quantities"
@@ -188,9 +245,8 @@ export function MaterialsView({
               options={columnOptions.quantity}
               value={quantity}
             />
-          </span>
-          <span className="table-column-header-cell">
-            <span className="table-column-title">Location</span>
+          </SortableMaterialHeader>
+          <SortableMaterialHeader field="location" label="Location" onSort={handleSort} sortDirection={sortDirection} sortField={sortField}>
             <ColumnFilterDropdown
               allLabel="All locations"
               ariaLabel="Filter materials by location"
@@ -198,9 +254,8 @@ export function MaterialsView({
               options={columnOptions.location}
               value={location}
             />
-          </span>
-          <span className="table-column-header-cell">
-            <span className="table-column-title">Vendor</span>
+          </SortableMaterialHeader>
+          <SortableMaterialHeader field="vendor" label="Vendor" onSort={handleSort} sortDirection={sortDirection} sortField={sortField}>
             <ColumnFilterDropdown
               allLabel="All vendors"
               ariaLabel="Filter materials by vendor"
@@ -208,9 +263,8 @@ export function MaterialsView({
               options={columnOptions.vendor}
               value={vendor}
             />
-          </span>
-          <span className="table-column-header-cell">
-            <span className="table-column-title">Status</span>
+          </SortableMaterialHeader>
+          <SortableMaterialHeader field="status" label="Status" onSort={handleSort} sortDirection={sortDirection} sortField={sortField}>
             <ColumnFilterDropdown
               allLabel="All stock"
               ariaLabel="Filter materials by stock level"
@@ -218,7 +272,7 @@ export function MaterialsView({
               options={MATERIAL_STOCK_OPTIONS}
               value={stock}
             />
-          </span>
+          </SortableMaterialHeader>
         </div>
 
         {materialPagination.pageItems.map((material) => {
