@@ -72,6 +72,8 @@ describe("ArtifactInventoryView", () => {
     expect(markup).toContain("Brand guide");
     expect(markup).toContain("Sponsor packet");
     expect(markup).toContain("Documents");
+    expect(markup).toContain('aria-label="Show archived"');
+    expect(markup).not.toContain("Show archived</label>");
     expect(markup).not.toContain("Non-Technical");
   });
 });

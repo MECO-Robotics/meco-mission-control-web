@@ -93,7 +93,7 @@ export function PartsToolbar({
             <button
               aria-label="Show archived definitions"
               aria-pressed={showArchivedPartDefinitions}
-              className={`parts-archived-toggle${showArchivedPartDefinitions ? " is-active" : ""}`}
+              className={`archive-filter-toggle${showArchivedPartDefinitions ? " is-active" : ""}`}
               onClick={() => setShowArchivedPartDefinitions(!showArchivedPartDefinitions)}
               title="Show archived definitions"
               type="button"

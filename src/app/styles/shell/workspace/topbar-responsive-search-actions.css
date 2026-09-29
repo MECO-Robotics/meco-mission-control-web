@@ -37,7 +37,7 @@
   color: var(--text-copy);
 }
 
-.topbar-responsive-search-actions .parts-archived-toggle {
+.topbar-responsive-search-actions .archive-filter-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -51,9 +51,9 @@
   cursor: pointer;
 }
 
-.topbar-responsive-search-actions .parts-archived-toggle:hover,
-.topbar-responsive-search-actions .parts-archived-toggle:focus-visible,
-.topbar-responsive-search-actions .parts-archived-toggle.is-active {
+.topbar-responsive-search-actions .archive-filter-toggle:hover,
+.topbar-responsive-search-actions .archive-filter-toggle:focus-visible,
+.topbar-responsive-search-actions .archive-filter-toggle.is-active {
   background: color-mix(in srgb, var(--meco-blue) 10%, transparent);
   color: var(--official-blue);
 }
