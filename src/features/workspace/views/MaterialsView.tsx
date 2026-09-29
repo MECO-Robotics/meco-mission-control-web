@@ -127,9 +127,6 @@ export function MaterialsView({
       <div className="panel-header compact-header">
         <div className="queue-section-header">
           <h2>Materials manager</h2>
-          <p className="section-copy">
-            Live inventory for stock, reorder thresholds, vendors, and shop locations.
-          </p>
         </div>
       </div>
 
