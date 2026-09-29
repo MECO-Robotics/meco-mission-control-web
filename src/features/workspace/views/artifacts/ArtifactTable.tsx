@@ -13,6 +13,7 @@ import { WorkspaceEmptyState } from "@/features/workspace/shared/ui";
 import type { ArtifactRecord } from "@/types/recordsInventory";
 import { ResourceRecordCell } from "@/features/workspace/shared/resourceList/ResourceRecordCell";
 import { ResourceColumnHeader, type ResourceSortDirection } from "@/features/workspace/shared/resourceList/ResourceColumnHeader";
+import "./ArtifactTable.css";
 import type { ArtifactSortField } from "./artifactInventoryModel";
 
 import {
@@ -70,7 +71,7 @@ export function ArtifactTable({
   return (
     <div className={`table-shell ${filterMotionClass}`}>
       <div
-        className="ops-table ops-table-header materials-table"
+        className="ops-table ops-table-header materials-table artifact-table"
         style={{ "--workspace-grid-template": ARTIFACT_GRID_TEMPLATE } as CSSProperties}
       >
         <ResourceColumnHeader field="title" label="Artifact" onSort={(field) => onSort(field as ArtifactSortField)} sortDirection={sortDirection} sortField={sortField}>
@@ -110,7 +111,7 @@ export function ArtifactTable({
 
         return (
           <button
-            className="ops-table ops-row materials-table editable-hover-target editable-hover-target-row"
+            className="ops-table ops-row materials-table artifact-table editable-hover-target editable-hover-target-row"
             key={artifact.id}
             onClick={() => openEditArtifactModal(artifact)}
             style={{ "--workspace-grid-template": ARTIFACT_GRID_TEMPLATE } as CSSProperties}
