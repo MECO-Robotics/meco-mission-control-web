@@ -93,6 +93,10 @@ export function ManufacturingQueueView({
       .sort()
       .map((value) => ({ id: value, name: value }));
   }, [bootstrap.materials, items]);
+  const projectsById = useMemo(
+    () => Object.fromEntries(bootstrap.projects.map((project) => [project.id, project])),
+    [bootstrap.projects],
+  );
 
   const filteredItems = useMemo(() => {
     const processItems = processFilterValue
@@ -234,6 +238,8 @@ export function ManufacturingQueueView({
             <ManufacturingKanbanBoard
               items={sortedItems}
               membersById={membersById}
+              projectsById={projectsById}
+              tasks={bootstrap.tasks}
               onEdit={onEdit}
               onQuickStatusChange={onQuickStatusChange}
               showInHouseDetails={showInHouseColumn}

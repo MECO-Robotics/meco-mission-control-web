@@ -1,12 +1,22 @@
 import { useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
 
 import { formatDate } from "@/lib/appUtils/common";
+import type { TaskPriority } from "@/types/common";
 import type { ManufacturingItemRecord } from "@/types/recordsInventory";
+import type { TaskRecord } from "@/types/recordsExecution";
 import { EditableHoverIndicator, RequestedItemMeta } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
 import { MANUFACTURING_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
 import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
 import { KanbanColumns } from "@/features/workspace/views/kanban/KanbanColumns";
+import { getMemberInitial, getTaskCardPerson, TaskPriorityBadge } from "@/features/workspace/views/taskQueue/taskQueueKanbanCardMeta";
+
+const PRIORITY_ORDER: Record<TaskPriority, number> = {
+  critical: 0,
+  high: 1,
+  medium: 2,
+  low: 3,
+};
 
 const MANUFACTURING_BOARD_STATES: readonly ManufacturingItemRecord["status"][] = [
   "requested",
@@ -19,6 +29,8 @@ const MANUFACTURING_BOARD_STATES: readonly ManufacturingItemRecord["status"][] =
 interface ManufacturingKanbanBoardProps {
   items: ManufacturingItemRecord[];
   membersById: MembersById;
+  projectsById: Record<string, { id: string; name: string }>;
+  tasks: TaskRecord[];
   onEdit: (item: ManufacturingItemRecord) => void;
   onQuickStatusChange?: (
     item: ManufacturingItemRecord,
@@ -33,6 +45,8 @@ interface ManufacturingKanbanBoardProps {
 export function ManufacturingKanbanBoard({
   items,
   membersById,
+  projectsById,
+  tasks,
   onEdit,
   onQuickStatusChange,
   showInHouseDetails = false,
@@ -43,6 +57,20 @@ export function ManufacturingKanbanBoard({
   const [pendingQuickActionKey, setPendingQuickActionKey] = useState<string | null>(null);
   const pendingQuickActionKeyRef = useRef<string | null>(null);
   const canShowMentorQuickActions = Boolean(showMentorQuickActions && onQuickStatusChange);
+  const taskByManufacturingId = useMemo(() => {
+    const linkedTasks = new Map<string, TaskRecord>();
+
+    for (const task of tasks) {
+      for (const manufacturingId of task.linkedManufacturingIds ?? []) {
+        const currentTask = linkedTasks.get(manufacturingId);
+        if (!currentTask || PRIORITY_ORDER[task.priority] < PRIORITY_ORDER[currentTask.priority]) {
+          linkedTasks.set(manufacturingId, task);
+        }
+      }
+    }
+
+    return linkedTasks;
+  }, [tasks]);
 
   const itemsByStatus = useMemo(() => {
     const grouped: Record<ManufacturingItemRecord["status"], ManufacturingItemRecord[]> = {
@@ -136,6 +164,14 @@ export function ManufacturingKanbanBoard({
         const isApprovePending = pendingQuickActionKey === approveActionKey;
         const isCompletePending = pendingQuickActionKey === completeActionKey;
         const isAnyActionPending = Boolean(pendingQuickActionKey);
+        const projectId = subsystemsById[item.subsystemId]?.projectId;
+        const projectName = projectId
+          ? projectsById[projectId]?.name ?? "Unknown project"
+          : "Unknown project";
+        const linkedTask = taskByManufacturingId.get(item.id);
+        const priority = linkedTask?.priority;
+        const person = (linkedTask ? getTaskCardPerson(linkedTask, membersById) : null)
+          ?? (item.requestedById ? membersById[item.requestedById] ?? null : null);
         const { className: dragClassName, ...dragRootProps } = dragProps ?? {};
         const cardClassName = `task-queue-board-card editable-hover-target editable-hover-target-row${
           dragClassName ? ` ${dragClassName}` : ""
@@ -159,6 +195,31 @@ export function ManufacturingKanbanBoard({
               {item.batchLabel ?? "Unbatched"}
               {showInHouseDetails && item.process === "cnc" ? ` · ${item.inHouse ? "In-house" : "Outsourced"}` : ""}
             </small>
+            <div className="task-queue-board-card-meta">
+              <span title={projectName}>{projectName}</span>
+              {priority || person ? (
+                <div className="task-queue-board-card-meta-person-group">
+                  {priority ? <TaskPriorityBadge priority={priority} /> : null}
+                  {person ? (
+                    <span className="task-queue-board-card-person" title={person.name}>
+                      {person.photoUrl ? (
+                        <img
+                          alt={`${person.name} profile picture`}
+                          className="profile-avatar"
+                          loading="lazy"
+                          referrerPolicy="no-referrer"
+                          src={person.photoUrl}
+                        />
+                      ) : (
+                        <span className="profile-avatar profile-avatar-fallback" aria-hidden="true">
+                          {getMemberInitial(person)}
+                        </span>
+                      )}
+                    </span>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
             {canShowMentorQuickActions && item.process === "cnc" ? (
               <div className="task-queue-board-card-meta" style={{ justifyContent: "flex-start" }}>
                 <button
