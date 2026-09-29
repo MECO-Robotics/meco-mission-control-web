@@ -7,11 +7,7 @@ import {
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
 import type { TaskCalendarEventType } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
-import {
-  TASK_CALENDAR_EVENT_FILTER_OPTIONS,
-  TASK_CALENDAR_SORT_OPTIONS,
-  type TaskCalendarSortMode,
-} from "@/features/workspace/views/taskCalendar/taskCalendarLayout";
+import { TASK_CALENDAR_EVENT_FILTER_OPTIONS } from "@/features/workspace/views/taskCalendar/taskCalendarLayout";
 
 import {
   getTimelineFilterToneClassName,
@@ -23,10 +19,8 @@ import {
 interface TimelineCompactFilterMenuProps {
   activeFilterCount: number;
   calendarEventFilter: "all" | TaskCalendarEventType;
-  calendarSortMode: TaskCalendarSortMode;
   showCalendarFilters: boolean;
   onCalendarEventFilterChange: (value: "all" | TaskCalendarEventType) => void;
-  onCalendarSortModeChange: (value: TaskCalendarSortMode) => void;
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   disciplineFilter: FilterSelection;
@@ -48,10 +42,8 @@ interface TimelineCompactFilterMenuProps {
 export function TimelineCompactFilterMenu({
   activeFilterCount,
   calendarEventFilter,
-  calendarSortMode,
   showCalendarFilters,
   onCalendarEventFilterChange,
-  onCalendarSortModeChange,
   activePersonFilter,
   bootstrap,
   disciplineFilter,
@@ -71,7 +63,7 @@ export function TimelineCompactFilterMenu({
 }: TimelineCompactFilterMenuProps) {
   return (
     <CompactFilterMenu
-      activeCount={activeFilterCount + (showCalendarFilters ? Number(calendarEventFilter !== "all") + Number(calendarSortMode !== "date") : 0)}
+      activeCount={activeFilterCount + (showCalendarFilters ? Number(calendarEventFilter !== "all") : 0)}
       ariaLabel={showCalendarFilters ? "Schedule filters" : "Timeline filters"}
       buttonLabel="Filters"
       className="materials-filter-menu timeline-roster-filter"
@@ -152,24 +144,6 @@ export function TimelineCompactFilterMenu({
               value={calendarEventFilter}
             >
               {TASK_CALENDAR_EVENT_FILTER_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          ),
-        },
-        {
-          label: "Sort by",
-          hidden: !showCalendarFilters,
-          content: (
-            <select
-              aria-label="Sort calendar events by"
-              className="task-queue-sort-menu-select"
-              onChange={(event) => onCalendarSortModeChange(event.currentTarget.value as TaskCalendarSortMode)}
-              value={calendarSortMode}
-            >
-              {TASK_CALENDAR_SORT_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
