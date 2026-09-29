@@ -191,7 +191,6 @@ export function TaskQueueCard({
           </div>
         ) : null}
       </div>
-      {latestLog?.notes ? <small className="task-queue-board-card-summary">{latestLog.notes}</small> : null}
       {needsHelp ? <small className="pill status-pill status-pill-warning">Help requested</small> : null}
       {task.blockers.length ? <small>{task.blockers.length} blocker{task.blockers.length === 1 ? "" : "s"} · Open for help and resolution</small> : null}
       <EditableHoverIndicator className="task-queue-board-card-hover" />
