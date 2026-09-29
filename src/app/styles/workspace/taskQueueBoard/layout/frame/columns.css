@@ -26,3 +26,8 @@
   flex: 0 0 var(--task-queue-board-column-width, 15.5rem);
   width: var(--task-queue-board-column-width, 15.5rem);
 }
+
+.task-queue-board .task-queue-board-column {
+  flex: 0 0 var(--task-queue-board-column-width, 15.5rem);
+  width: var(--task-queue-board-column-width, 15.5rem);
+}
