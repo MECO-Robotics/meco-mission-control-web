@@ -90,6 +90,8 @@
 }
 
 .task-queue-board-column-scroll-frame {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
   position: relative;
   min-height: 0;
   overflow: hidden;

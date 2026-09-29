@@ -64,12 +64,14 @@
   background: transparent;
   box-shadow: none;
   color: var(--text-title);
+  font: inherit;
   font-size: calc(0.62rem * var(--task-queue-zoom, 1));
   font-weight: 800;
   letter-spacing: 0.08em;
   line-height: 1;
   text-transform: uppercase;
   backdrop-filter: none;
+  cursor: pointer;
 }
 
 .task-queue-board-scroll-hint.is-hidden {
@@ -113,6 +115,11 @@
 
 .task-queue-board-scroll-hint-right .task-queue-board-scroll-hint-label {
   margin-right: 0.05rem;
+}
+
+.task-queue-board-scroll-hint:focus-visible {
+  outline: 2px solid var(--official-blue);
+  outline-offset: 2px;
 }
 
 .task-queue-board-shell {
