@@ -37,11 +37,6 @@ export const TASK_SORT_OPTIONS: DropdownOption[] = [
   { id: "priority", name: "Priority" },
 ];
 
-export const SORT_DIRECTION_OPTIONS: DropdownOption[] = [
-  { id: "asc", name: "Ascending" },
-  { id: "desc", name: "Descending" },
-];
-
 export const TASK_QUEUE_ZOOM_MIN = 0.6;
 export const TASK_QUEUE_ZOOM_MAX = 1.6;
 export const TASK_QUEUE_ZOOM_STEP = 0.1;

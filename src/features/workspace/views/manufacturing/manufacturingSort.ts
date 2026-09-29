@@ -16,6 +16,7 @@ export function sortManufacturingItems(
   field: ManufacturingSortField,
   membersById: MembersById,
   subsystemsById: SubsystemsById,
+  direction: "asc" | "desc" = "asc",
 ) {
   const getValue = (item: ManufacturingItemRecord) => {
     switch (field) {
@@ -32,8 +33,9 @@ export function sortManufacturingItems(
     }
   };
 
-  return [...items].sort((left, right) =>
+  const directionFactor = direction === "asc" ? 1 : -1;
+  return [...items].sort((left, right) => directionFactor * (
     getValue(left).localeCompare(getValue(right), undefined, { numeric: true }) ||
-    left.title.localeCompare(right.title),
-  );
+    left.title.localeCompare(right.title)
+  ));
 }

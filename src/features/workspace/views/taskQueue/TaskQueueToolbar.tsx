@@ -6,12 +6,12 @@ import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/Topb
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
+import { SortDirectionToggle } from "@/features/workspace/shared/filters/SortDirectionToggle";
 
 import { TaskQueueCompactFilterMenu } from "./TaskQueueCompactFilterMenu";
 import {
   clampTaskQueueZoom,
   formatTaskQueueZoomLabel,
-  SORT_DIRECTION_OPTIONS,
   TASK_QUEUE_ZOOM_MAX,
   TASK_QUEUE_ZOOM_MIN,
   TASK_QUEUE_ZOOM_STEP,
@@ -122,6 +122,9 @@ export function TaskQueueToolbar({
               items={[
                 {
                   label: "Sort by",
+                  labelControl: (
+                    <SortDirectionToggle direction={sortOrder} label="tasks" onChange={setSortOrder} />
+                  ),
                   content: (
                     <select
                       aria-label="Sort tasks by"
@@ -130,23 +133,6 @@ export function TaskQueueToolbar({
                       value={sortField}
                     >
                       {TASK_SORT_OPTIONS.map((option) => (
-                        <option key={option.id} value={option.id}>
-                          {option.name}
-                        </option>
-                      ))}
-                    </select>
-                  ),
-                },
-                {
-                  label: "Direction",
-                  content: (
-                    <select
-                      aria-label="Sort direction"
-                      className="task-queue-sort-menu-select"
-                      onChange={(milestone) => setSortOrder(milestone.target.value as "asc" | "desc")}
-                      value={sortOrder}
-                    >
-                      {SORT_DIRECTION_OPTIONS.map((option) => (
                         <option key={option.id} value={option.id}>
                           {option.name}
                         </option>

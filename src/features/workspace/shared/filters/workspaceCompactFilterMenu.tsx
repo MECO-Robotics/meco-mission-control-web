@@ -9,6 +9,7 @@ export type CompactFilterMenuItem = {
   content: ReactNode;
   hidden?: boolean;
   icon?: ReactNode;
+  labelControl?: ReactNode;
   label: string;
 };
 
@@ -171,6 +172,7 @@ export function CompactFilterMenu({
           {visibleItems.map((item) => (
             <div className="task-queue-filter-menu-item" key={item.label}>
               <span className="task-queue-filter-menu-label">
+                {item.labelControl ? <span className="task-queue-filter-menu-label-control">{item.labelControl}</span> : null}
                 {item.icon ? <span aria-hidden="true" className="task-queue-filter-menu-label-icon">{item.icon}</span> : null}
                 {item.label}
               </span>

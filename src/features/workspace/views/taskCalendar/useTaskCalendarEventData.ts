@@ -24,6 +24,8 @@ export function useTaskCalendarEventData({
   isAllProjectsView,
   sortMode,
   onSortModeChange,
+  sortDirection,
+  onSortDirectionChange,
   searchFilter: controlledSearchFilter,
   onSearchChange,
 }: {
@@ -34,6 +36,8 @@ export function useTaskCalendarEventData({
   isAllProjectsView: boolean;
   sortMode: TaskCalendarSortMode;
   onSortModeChange: (value: TaskCalendarSortMode) => void;
+  sortDirection: "asc" | "desc";
+  onSortDirectionChange: (value: "asc" | "desc") => void;
   searchFilter?: string;
   onSearchChange?: (value: string) => void;
 }) {
@@ -93,8 +97,8 @@ export function useTaskCalendarEventData({
       );
     }
 
-    return sortTaskCalendarEvents(scopedEvents, sortMode);
-  }, [eventFilter, searchFilter, sortMode, unfilteredEvents]);
+    return sortTaskCalendarEvents(scopedEvents, sortMode, sortDirection);
+  }, [eventFilter, searchFilter, sortDirection, sortMode, unfilteredEvents]);
   const monthCells = useMemo(() => createMonthCells(monthCursor), [monthCursor]);
   const weekCells = useMemo(() => createWeekCells(monthCursor), [monthCursor]);
   const eventsByDateKey = useMemo(() => {
@@ -120,6 +124,8 @@ export function useTaskCalendarEventData({
     setMonthCursor,
     setSearchFilter,
     setSortMode: onSortModeChange,
+    setSortDirection: onSortDirectionChange,
+    sortDirection,
     sortMode,
     tasksById,
     todayDateKey,

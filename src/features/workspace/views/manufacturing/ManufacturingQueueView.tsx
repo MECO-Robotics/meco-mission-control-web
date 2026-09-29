@@ -83,6 +83,7 @@ export function ManufacturingQueueView({
   const [material, setMaterial] = useState<FilterSelection>([]);
   const [manufacturingZoom, setManufacturingZoom] = useState(1);
   const [sortField, setSortField] = useState<ManufacturingSortField>("dueDate");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const processFilterSelection =
     processFilterValue && processFilterValue !== "all" ? [processFilterValue] : [];
 
@@ -133,8 +134,8 @@ export function ManufacturingQueueView({
     });
   }, [activePersonFilter, bootstrap.tasks, items, material, processFilterValue, requester, search, status, subsystem]);
   const sortedItems = useMemo(
-    () => sortManufacturingItems(filteredItems, sortField, membersById, subsystemsById),
-    [filteredItems, membersById, sortField, subsystemsById],
+    () => sortManufacturingItems(filteredItems, sortField, membersById, subsystemsById, sortOrder),
+    [filteredItems, membersById, sortField, sortOrder, subsystemsById],
   );
   const activeFilterCount = [
     processFilterSelection,
@@ -198,7 +199,7 @@ export function ManufacturingQueueView({
                     title={title}
                     uniqueMaterials={uniqueMaterials}
                   />
-                  <ManufacturingSortMenu onChange={setSortField} sortField={sortField} />
+                  <ManufacturingSortMenu onChange={setSortField} onSortOrderChange={setSortOrder} sortOrder={sortOrder} sortField={sortField} />
                   </>
                 ),
                 ariaLabel: `Search ${title}`,

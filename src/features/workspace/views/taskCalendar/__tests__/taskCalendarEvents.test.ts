@@ -218,5 +218,9 @@ describe("buildTaskCalendarEvents", () => {
       "meeting:visible-meeting",
       "meeting:global-meeting",
     ]);
+    expect(sortTaskCalendarEvents(events, "date", "desc").map((event) => event.id)).toEqual([
+      "meeting:global-meeting",
+      "meeting:visible-meeting",
+    ]);
   });
 });
