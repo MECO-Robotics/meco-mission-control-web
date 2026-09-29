@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { useRememberedViewState } from "@/features/workspace/shared/navigation/WorkspaceViewMemory";
@@ -37,8 +36,7 @@ export function AttentionView({ activePersonFilter, bootstrap, onOpenRisk, onOpe
   const filtered = rows.filter(row => (!reviewOnly || row.needsReview) && (source === "all" || row.source === source) && [row.title, row.context, ...row.reasons].join(" ").toLowerCase().includes(search.toLowerCase()));
   const visible = showAll ? filtered : filtered.slice(0, 6);
   return <section className="home-attention" aria-label="Needs attention">
-    <AppTopbarSlotPortal slot="search">
-      <TopbarResponsiveSearch
+    <TopbarResponsiveSearch
         actions={
           <CompactFilterMenu
             activeCount={Number(source !== "all") + Number(reviewOnly)}
@@ -73,8 +71,7 @@ export function AttentionView({ activePersonFilter, bootstrap, onOpenRisk, onOpe
         onChange={setSearch}
         placeholder="Search attention…"
         value={search}
-      />
-    </AppTopbarSlotPortal>
+    />
     <div className="workspace-section-heading"><h2>Needs attention</h2><span>{filtered.length} items</span></div>
     {visible.length ? <ul className="workspace-record-list">{visible.map(row => <li key={row.key}>
       <div><strong>{row.action === "open-task" ? bootstrap.tasks.find(task => task.id === row.recordId)?.title ?? row.title : row.title}</strong><small>{row.context}</small><p>{row.reasons.slice(0, 2).join(" · ")}</p>{row.reasons.length > 2 ? <details className="attention-reasons"><summary>{row.reasons.length - 2} more signals</summary><ul>{row.reasons.slice(2).map(reason => <li key={reason}>{reason}</li>)}</ul></details> : null}</div>

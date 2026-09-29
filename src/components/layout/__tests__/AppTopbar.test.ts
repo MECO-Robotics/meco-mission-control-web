@@ -88,6 +88,13 @@ describe("AppTopbar", () => {
     expect(markup).not.toContain('aria-label="Refresh workspace"');
   });
 
+  it("leaves local demo controls to the sidebar", () => {
+    const markup = renderTopbar();
+
+    expect(markup).not.toContain("Local demo");
+    expect(markup).not.toContain("Reset demo");
+  });
+
   it("provides page-owned controls without a nonfunctional global search", () => {
     const markup = renderTopbar();
     expect(markup).toContain('id="workspace-topbar-slot-controls"');
