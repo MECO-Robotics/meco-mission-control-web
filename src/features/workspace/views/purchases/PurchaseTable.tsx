@@ -70,7 +70,7 @@ export function PurchaseTable({
   return (
     <div className={`table-shell ${filterMotionClass}`}>
       <div
-        className="ops-table ops-table-header purchase-table"
+        className="ops-table ops-table-header purchase-table purchase-table-header queue-table-header"
         style={{ "--workspace-grid-template": PURCHASE_GRID_TEMPLATE } as CSSProperties}
       >
         <span className="table-column-header-cell">
