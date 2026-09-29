@@ -71,10 +71,10 @@ describe("TimelineView", () => {
     expect(css).toContain(".workspace-topbar-zoom-controls");
     expect(css).toContain(".workspace-topbar-zoom-label");
     expect(css).toMatch(
-      /\.workspace-topbar-zoom-controls\s*\{[\s\S]*gap:\s*0\.04rem;[\s\S]*min-height:\s*2\.05rem;/,
+      /\.workspace-topbar-zoom-controls\s*\{[\s\S]*gap:\s*0;[\s\S]*min-height:\s*2rem;[\s\S]*padding:\s*0\.08rem 0\.1rem;/,
     );
     expect(css).toMatch(
-      /\.workspace-topbar-zoom-label\s*\{[\s\S]*min-width:\s*2\.9rem;/,
+      /\.workspace-topbar-zoom-label\s*\{[\s\S]*min-width:\s*2\.6rem;/,
     );
   });
 
