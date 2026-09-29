@@ -44,6 +44,19 @@ describe("MaterialsView stock presentation", () => {
     expect(markup).not.toContain('data-label="Reorder"');
   });
 
+  it("shows sort direction only on the active column, before its label", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(MaterialsView, {
+        bootstrap: { ...EMPTY_BOOTSTRAP, materials: [material] },
+        openCreateMaterialModal: jest.fn(),
+        openEditMaterialModal: jest.fn(),
+      }),
+    );
+
+    expect(markup).toContain('aria-sort="none"');
+    expect(markup).not.toContain("table-sort-arrow");
+  });
+
   it("exposes and applies the below-reorder stock filter", () => {
     expect(MATERIAL_STOCK_OPTIONS).toContainEqual({ id: "below-reorder", name: "Below reorder" });
     expect(isMaterialBelowReorder(material)).toBe(true);

@@ -67,10 +67,12 @@ function SortableMaterialHeader({
         onClick={() => onSort(field)}
         type="button"
       >
+        {isSorted && (
+          <span aria-hidden="true" className="table-sort-arrow">
+            {sortDirection === "ascending" ? "↑" : "↓"}
+          </span>
+        )}
         <span className="table-column-title">{label}</span>
-        <span aria-hidden="true" className="table-sort-arrow">
-          {isSorted ? (sortDirection === "ascending" ? "↑" : "↓") : "↕"}
-        </span>
       </button>
       {children}
     </span>
