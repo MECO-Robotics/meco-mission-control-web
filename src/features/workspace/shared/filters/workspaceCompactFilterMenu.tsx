@@ -8,6 +8,7 @@ import { FilterDropdown } from "./FilterDropdown";
 export type CompactFilterMenuItem = {
   content: ReactNode;
   hidden?: boolean;
+  icon?: ReactNode;
   label: string;
 };
 
@@ -16,7 +17,9 @@ export function compactFilterDropdownMenuItem({
   ariaLabel,
   getOptionToneClassName,
   getSelectedToneClassName,
+  compactSummary,
   hidden,
+  hideButtonIcon,
   icon,
   label,
   onChange,
@@ -29,7 +32,9 @@ export function compactFilterDropdownMenuItem({
   ariaLabel: string;
   getOptionToneClassName?: (option: DropdownOption) => string | undefined;
   getSelectedToneClassName?: (selection: FilterSelection) => string | undefined;
+  compactSummary?: boolean;
   hidden?: boolean;
+  hideButtonIcon?: boolean;
   icon: ReactNode;
   label: string;
   onChange: (value: FilterSelection) => void;
@@ -41,14 +46,17 @@ export function compactFilterDropdownMenuItem({
   return {
     label,
     hidden,
+    icon,
     content: (
       <FilterDropdown
         allLabel={allLabel}
         ariaLabel={ariaLabel}
         className="task-queue-filter-menu-submenu"
+        compactSummary={compactSummary}
         getOptionToneClassName={getOptionToneClassName}
         getSelectedToneClassName={getSelectedToneClassName}
         icon={icon}
+        hideButtonIcon={hideButtonIcon}
         onChange={onChange}
         options={options}
         selectedAllLabel={selectedAllLabel}
@@ -162,7 +170,10 @@ export function CompactFilterMenu({
           {menuTitle ? <h2 className="task-queue-filter-menu-title">{menuTitle}</h2> : null}
           {visibleItems.map((item) => (
             <div className="task-queue-filter-menu-item" key={item.label}>
-              <span className="task-queue-filter-menu-label">{item.label}</span>
+              <span className="task-queue-filter-menu-label">
+                {item.icon ? <span aria-hidden="true" className="task-queue-filter-menu-label-icon">{item.icon}</span> : null}
+                {item.label}
+              </span>
               {item.content}
             </div>
           ))}

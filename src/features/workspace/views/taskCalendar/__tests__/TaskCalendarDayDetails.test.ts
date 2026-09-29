@@ -172,17 +172,31 @@ describe("TimelineCompactFilterMenu", () => {
       buttonLabel: string;
       inlineItems: boolean;
       menuTitle?: string;
-      items: Array<{ label: string; content?: React.ReactElement<{ compactSummary?: boolean }> }>;
+      items: Array<{
+        label: string;
+        icon?: React.ReactNode;
+        content?: React.ReactElement<{ compactSummary?: boolean; hideButtonIcon?: boolean; options?: Array<{ id: string; name: string }>; singleSelect?: boolean; value?: string[] }>;
+      }>;
     }>;
 
     expect(menu.type).toBe(CompactFilterMenu);
     expect(menu.props.ariaLabel).toBe("Schedule filters");
     expect(menu.props.buttonLabel).toBe("Filters");
-    expect(menu.props.menuTitle).toBe("Selection");
+    expect(menu.props.menuTitle).toBeUndefined();
     expect(menu.props.inlineItems).toBe(true);
     expect(
       menu.props.items.find((item) => item.label === "Roster")?.content?.props.compactSummary,
     ).toBe(true);
+    expect(menu.props.items.find((item) => item.label === "Roster")?.icon).toBeTruthy();
+    expect(menu.props.items.find((item) => item.label === "Roster")?.content?.props.hideButtonIcon).toBe(true);
+    const eventTypeFilter = menu.props.items.find((item) => item.label === "Event type");
+    expect(eventTypeFilter?.icon).toBeTruthy();
+    expect(eventTypeFilter?.content?.props.singleSelect).toBe(true);
+    expect(eventTypeFilter?.content?.props.value).toEqual(["qa-due"]);
+    expect(eventTypeFilter?.content?.props.options).toEqual(expect.arrayContaining([
+      { id: "milestone", name: "Milestones" },
+      { id: "qa-due", name: "Waiting QA" },
+    ]));
     expect(menu.props.activeCount).toBe(2);
     expect(menu.props.items.map((item) => item.label)).toEqual([
       "Project",

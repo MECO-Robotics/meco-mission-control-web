@@ -1,13 +1,15 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
+import { CalendarDays } from "lucide-react";
 import { IconManufacturing, IconParts, IconPerson, IconSubsystems, IconTasks } from "@/components/shared/Icons";
 import {
   CompactFilterMenu,
   compactFilterDropdownMenuItem,
 } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
+import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
 import type { TaskCalendarEventType } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
-import { TASK_CALENDAR_EVENT_FILTER_OPTIONS } from "@/features/workspace/views/taskCalendar/taskCalendarLayout";
+import { TASK_CALENDAR_EVENT_FILTER_OPTIONS, TASK_CALENDAR_SORT_OPTIONS, type TaskCalendarSortMode } from "@/features/workspace/views/taskCalendar/taskCalendarLayout";
 
 import {
   getTimelineFilterToneClassName,
@@ -19,8 +21,10 @@ import {
 interface TimelineCompactFilterMenuProps {
   activeFilterCount: number;
   calendarEventFilter: "all" | TaskCalendarEventType;
+  calendarSortMode: TaskCalendarSortMode;
   showCalendarFilters: boolean;
   onCalendarEventFilterChange: (value: "all" | TaskCalendarEventType) => void;
+  onCalendarSortModeChange: (value: TaskCalendarSortMode) => void;
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   disciplineFilter: FilterSelection;
@@ -42,8 +46,10 @@ interface TimelineCompactFilterMenuProps {
 export function TimelineCompactFilterMenu({
   activeFilterCount,
   calendarEventFilter,
+  calendarSortMode,
   showCalendarFilters,
   onCalendarEventFilterChange,
+  onCalendarSortModeChange,
   activePersonFilter,
   bootstrap,
   disciplineFilter,
@@ -63,7 +69,7 @@ export function TimelineCompactFilterMenu({
 }: TimelineCompactFilterMenuProps) {
   return (
     <CompactFilterMenu
-      activeCount={activeFilterCount + (showCalendarFilters ? Number(calendarEventFilter !== "all") : 0)}
+      activeCount={activeFilterCount + (showCalendarFilters ? Number(calendarEventFilter !== "all") + Number(calendarSortMode !== "date") : 0)}
       ariaLabel={showCalendarFilters ? "Schedule filters" : "Timeline filters"}
       buttonLabel="Filters"
       className="materials-filter-menu timeline-roster-filter"
@@ -75,6 +81,8 @@ export function TimelineCompactFilterMenu({
           label: "Project",
           hidden: !isAllProjectsView,
           icon: <IconParts />,
+          compactSummary: showCalendarFilters,
+          hideButtonIcon: showCalendarFilters,
           onChange: setProjectFilter,
           options: bootstrap.projects,
           value: projectFilter,
@@ -84,6 +92,8 @@ export function TimelineCompactFilterMenu({
           ariaLabel: "Filter person",
           label: "Roster",
           icon: <IconPerson />,
+          compactSummary: showCalendarFilters,
+          hideButtonIcon: showCalendarFilters,
           onChange: onChangePersonFilter,
           options: bootstrap.members,
           value: activePersonFilter,
@@ -93,6 +103,8 @@ export function TimelineCompactFilterMenu({
           ariaLabel: "Filter timeline by discipline",
           label: "Discipline",
           icon: <IconTasks />,
+          compactSummary: showCalendarFilters,
+          hideButtonIcon: showCalendarFilters,
           getOptionToneClassName: (option) => getTimelineFilterToneClassName(option.id),
           getSelectedToneClassName: (selection) =>
             selection.length === 1 ? getTimelineFilterToneClassName(selection[0]) : undefined,
@@ -105,6 +117,8 @@ export function TimelineCompactFilterMenu({
           ariaLabel: "Filter timeline by subsystem",
           label: "Subsystem",
           icon: <IconSubsystems />,
+          compactSummary: showCalendarFilters,
+          hideButtonIcon: showCalendarFilters,
           getOptionToneClassName: (option) => getTimelineFilterToneClassName(option.id),
           getSelectedToneClassName: (selection) =>
             selection.length === 1 ? getTimelineFilterToneClassName(selection[0]) : undefined,
@@ -117,6 +131,8 @@ export function TimelineCompactFilterMenu({
           ariaLabel: "Filter timeline by status",
           label: "Status",
           icon: <IconTasks />,
+          compactSummary: showCalendarFilters,
+          hideButtonIcon: showCalendarFilters,
           getOptionToneClassName: (option) => getTimelineStatusToneClassName(option.id),
           getSelectedToneClassName: (selection) =>
             selection.length === 1 ? getTimelineStatusToneClassName(selection[0]) : undefined,
@@ -129,6 +145,8 @@ export function TimelineCompactFilterMenu({
           ariaLabel: "Filter timeline by priority",
           label: "Priority",
           icon: <IconManufacturing />,
+          compactSummary: showCalendarFilters,
+          hideButtonIcon: showCalendarFilters,
           onChange: setPriorityFilter,
           options: TIMELINE_TASK_PRIORITY_OPTIONS,
           value: priorityFilter,
@@ -136,19 +154,38 @@ export function TimelineCompactFilterMenu({
         {
           label: "Event type",
           hidden: !showCalendarFilters,
+          icon: <CalendarDays size={14} />,
           content: (
-            <select
-              aria-label="Filter calendar by event type"
-              className="task-queue-sort-menu-select"
-              onChange={(event) => onCalendarEventFilterChange(event.currentTarget.value as "all" | TaskCalendarEventType)}
-              value={calendarEventFilter}
-            >
-              {TASK_CALENDAR_EVENT_FILTER_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <FilterDropdown
+              compactSummary
+              hideButtonIcon
+              allLabel="All events"
+              ariaLabel="Filter calendar by event type"
+              icon={<CalendarDays size={14} />}
+              onChange={(value) => onCalendarEventFilterChange((value[0] as TaskCalendarEventType | undefined) ?? "all")}
+              options={TASK_CALENDAR_EVENT_FILTER_OPTIONS.filter((option) => option.value !== "all").map((option) => ({ id: option.value, name: option.label }))}
+              singleSelect
+              value={calendarEventFilter === "all" ? [] : [calendarEventFilter]}
+            />
+          ),
+        },
+        {
+          label: "Sort by",
+          hidden: !showCalendarFilters,
+          icon: <IconTasks />,
+          content: (
+            <FilterDropdown
+              compactSummary
+              hideButtonIcon
+              allLabel="Date"
+              ariaLabel="Sort calendar events by"
+              icon={<IconTasks />}
+              onChange={(value) => onCalendarSortModeChange((value[0] as TaskCalendarSortMode | undefined) ?? "date")}
+              options={TASK_CALENDAR_SORT_OPTIONS.filter((option) => option.value !== "date").map((option) => ({ id: option.value, name: option.label }))}
+              selectedAllLabel="Date"
+              singleSelect
+              value={calendarSortMode === "date" ? [] : [calendarSortMode]}
+            />
           ),
         },
       ]}

@@ -24,6 +24,7 @@ export function FilterDropdown({
   buttonContent,
   getOptionToneClassName,
   getSelectedToneClassName,
+  hideButtonIcon = false,
   icon,
   menuClassName,
   portalMenu,
@@ -46,6 +47,7 @@ export function FilterDropdown({
   getOptionToneClassName?: (option: DropdownOption) => string | undefined;
   getSelectedToneClassName?: (value: FilterSelection) => string | undefined;
   icon?: ReactNode;
+  hideButtonIcon?: boolean;
   menuClassName?: string;
   portalMenu?: boolean;
   portalMenuPlacement?: "auto" | "above" | "below";
@@ -130,7 +132,7 @@ export function FilterDropdown({
       >
         {columnAppearance ? buttonContent : buttonContent ?? (
           <>
-            <span className="toolbar-filter-icon">{selectedIcon}</span>
+            {hideButtonIcon ? null : <span className="toolbar-filter-icon">{selectedIcon}</span>}
             <span aria-hidden="true" className="toolbar-filter-value">
               {displaySelectedLabel}
             </span>
