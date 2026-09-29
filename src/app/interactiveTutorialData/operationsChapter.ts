@@ -19,8 +19,8 @@ const operationsSteps = [
   {
     id: "create-student",
     title: "Add a student",
-    instruction: "In Students, click + and save a new student.",
-    selector: '[data-tutorial-target="create-student-button"]',
+    instruction: "Open Add person in the top bar, choose Add student, and save the new student.",
+    selector: '[data-tutorial-target="create-person-button"]',
   },
   {
     id: "inventory-tab",
