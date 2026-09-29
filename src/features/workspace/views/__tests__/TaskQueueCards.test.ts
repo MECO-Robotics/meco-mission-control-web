@@ -44,7 +44,7 @@ describe("Task Queue cards", () => {
     expect(renderDueDateClass(1)).toBe("task-detail-deadline-pill-success");
   });
 
-  it("keeps work-log hours and help signals on the task after removing the duplicate log board", () => {
+  it("keeps work-log hours and help signals without showing work-log notes on task cards", () => {
     const bootstrap = createBootstrap();
     bootstrap.workLogs = [
       { id: "old", taskId: "task-1", date: "2026-01-01", participantIds: ["member-1"], hours: 2, notes: "Need help with wiring" },
@@ -59,8 +59,7 @@ describe("Task Queue cards", () => {
     expect(markup).toContain("3.5h logged");
     expect(markup).toContain("task-queue-board-card-header-side");
     expect(markup).toContain('task-queue-board-card-work-hours">3.5h logged</small>');
-    expect(markup).toContain("Prepared connector");
-    expect(markup).not.toContain("3.5h logged · Prepared connector");
+    expect(markup).not.toContain("Prepared connector");
     expect(markup).toContain("Help requested");
     expect(markup).not.toContain("Unrelated");
   });
