@@ -4,11 +4,34 @@ import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { createBootstrap } from "@/lib/appUtilsTestFixtures";
+import { buildRobotConfigurationViewModel } from "../robotMapViewModel";
+import { RobotMapUnplacedModal } from "../RobotMapUnplacedModal";
 import { RobotMapView } from "../RobotMapView";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 describe("RobotMapView", () => {
+  it("shows subsystem placement and layout actions inside the unplaced modal", () => {
+    const subsystem = buildRobotConfigurationViewModel(createBootstrap(), "").subsystems[0];
+    const markup = renderToStaticMarkup(
+      React.createElement(RobotMapUnplacedModal, {
+        onAddSubsystem: jest.fn(),
+        onAutoArrange: jest.fn(),
+        onClose: jest.fn(),
+        onPlaceSubsystem: jest.fn(),
+        onResetLayout: jest.fn(),
+        onSelectSubsystem: jest.fn(),
+        selectedSubsystemId: null,
+        subsystems: [subsystem],
+      }),
+    );
+
+    expect(markup).toContain('aria-label="Unplaced subsystems"');
+    expect(markup).toContain("Place");
+    expect(markup).toContain("Auto-arrange");
+    expect(markup).toContain("Reset");
+  });
+
   it("keeps the robot view free of duplicated configuration copy and readiness-first metrics", () => {
     const bootstrap = createBootstrap({
       subsystems: [
@@ -74,7 +97,7 @@ describe("RobotMapView", () => {
     expect(markup).not.toContain("High risk");
   });
 
-  it("shows the Unplaced Subsystems section when at least one subsystem is unplaced", () => {
+  it("opens unplaced subsystem management from the robot viewport instead of expanding it inline", () => {
     const bootstrap = createBootstrap({
       subsystems: [
         {
@@ -113,8 +136,10 @@ describe("RobotMapView", () => {
       }),
     );
 
-    expect(markup).toContain("Unplaced Subsystems");
-    expect(markup).toContain("Enable Edit Layout to drag subsystems.");
+    expect(markup).toContain('aria-label="Show 1 unplaced subsystems"');
+    expect(markup).toContain('aria-haspopup="dialog"');
+    expect(markup).not.toContain('class="robot-config-unplaced"');
+    expect(markup).not.toContain("robot-config-unplaced-grid");
   });
 
 });
