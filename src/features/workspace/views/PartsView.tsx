@@ -27,7 +27,7 @@ export function PartsView({ bootstrap, openCreatePartDefinitionModal, openEditPa
   const hasFilters = Boolean(partSearch || partStatus.length || partSubsystem.length || mapping !== "all");
   return <section className={`panel dense-panel part-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
     <AppTopbarSlotPortal slot="controls"><div className="panel-actions filter-toolbar">
-      <PartsToolbar bootstrap={bootstrap} partSearch={partSearch} partStatus={partStatus} partSubsystem={partSubsystem} setPartSearch={setPartSearch} setPartStatus={setPartStatus} setPartSubsystem={setPartSubsystem} setShowArchivedPartDefinitions={setShowArchivedPartDefinitions} showArchivedPartDefinitions={showArchivedPartDefinitions} />
+      <PartsToolbar bootstrap={bootstrap} mapping={mapping} partSearch={partSearch} partStatus={partStatus} partSubsystem={partSubsystem} setPartSearch={setPartSearch} setMapping={setMapping} setPartStatus={setPartStatus} setPartSubsystem={setPartSubsystem} setShowArchivedPartDefinitions={setShowArchivedPartDefinitions} showArchivedPartDefinitions={showArchivedPartDefinitions} />
       <WorkspaceTopbarAddMenu
         actions={buildSingleAddMenuAction({ label: "Add part", onSelect: openCreatePartDefinitionModal })}
         ariaLabel="Add part"
@@ -35,7 +35,7 @@ export function PartsView({ bootstrap, openCreatePartDefinitionModal, openEditPa
         tutorialTarget="create-part-button"
       />
     </div></AppTopbarSlotPortal>
-    <div className="workspace-presentation-controls"><label>Allocation <select aria-label="Part allocation" value={mapping} onChange={event => setMapping(event.target.value)}><option value="all">All parts</option><option value="mapped">Mapped</option><option value="unmapped">Needs mapping</option></select></label><span>{filtered.length} definitions</span></div>
+    <div className="workspace-inline-summary">{filtered.length} definitions</div>
     <PartsDefinitionSection bootstrap={bootstrap} filteredPartDefinitions={pagination.pageItems} hasActiveFilters={hasFilters} hasHiddenArchivedPartDefinitions={!showArchivedPartDefinitions && !hasFilters && bootstrap.partDefinitions.length > 0 && filtered.length === 0} onCreatePartDefinition={openCreatePartDefinitionModal} onEditPartDefinition={part => setSelectedId(part.id)} partDefinitionFilterMotionClass="" pageChangeHandlers={{ onPageChange: pagination.setPage, onPageSizeChange: pagination.setPageSize, page: pagination.page, pageSize: pagination.pageSize, pageSizeOptions: pagination.pageSizeOptions, rangeEnd: pagination.rangeEnd, rangeStart: pagination.rangeStart, totalItems: pagination.totalItems, totalPages: pagination.totalPages }} />
     {selected ? <ModalDialog label={selected.name} onClose={() => setSelectedId(null)} className="modal-scrim workspace-detail-dialog"><section className="modal-card workspace-detail-card">
       <div className="workspace-section-heading"><h2>{selected.name}</h2><button className="ghost-button" onClick={() => setSelectedId(null)} type="button">Close</button></div>
