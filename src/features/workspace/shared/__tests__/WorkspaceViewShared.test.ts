@@ -1,6 +1,6 @@
 /// <reference types="jest" />
 
-import { filterSelectionIncludes, filterSelectionIntersects, formatFilterSelectionLabel, getPortalMenuPosition, pruneFilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { filterSelectionIncludes, filterSelectionIntersects, formatCompactFilterSelectionLabel, formatFilterSelectionLabel, getPortalMenuPosition, pruneFilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 
 describe("WorkspaceViewShared filters", () => {
   it("treats an empty selection as the all option", () => {
@@ -15,6 +15,17 @@ describe("WorkspaceViewShared filters", () => {
         [{ id: "current-subsystem", name: "Current subsystem" }],
       ),
     ).toEqual(["current-subsystem"]);
+  });
+
+  it("formats compact filter summaries as All, one name, or a selection count", () => {
+    const options = [
+      { id: "requested", name: "Requested" },
+      { id: "approved", name: "Approved" },
+    ];
+
+    expect(formatCompactFilterSelectionLabel(options, [])).toBe("All");
+    expect(formatCompactFilterSelectionLabel(options, ["requested"])).toBe("Requested");
+    expect(formatCompactFilterSelectionLabel(options, ["requested", "approved"])).toBe("2");
   });
 
   it("preserves caller-provided empty-selection labels", () => {

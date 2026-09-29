@@ -161,6 +161,21 @@ export function useWorkspaceCompactMode(breakpoint = WORKSPACE_COMPACT_BREAKPOIN
   return isCompact;
 }
 
+export function formatCompactFilterSelectionLabel(
+  options: DropdownOption[],
+  value: FilterSelection,
+) {
+  if (value.length === 0) {
+    return "All";
+  }
+
+  if (value.length > 1) {
+    return String(value.length);
+  }
+
+  return options.find((option) => option.id === value[0])?.name ?? "1";
+}
+
 export function formatFilterSelectionLabel(
   allLabel: string,
   options: DropdownOption[],

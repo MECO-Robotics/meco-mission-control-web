@@ -88,6 +88,11 @@
   min-width: 13.5rem;
 }
 
+.topbar-responsive-search-actions .task-queue-filter-menu-popover.is-inline-selection {
+  width: min(22rem, 92vw);
+  min-width: min(18rem, 92vw);
+}
+
 .topbar-responsive-search-actions .task-queue-filter-menu-item {
   width: 100%;
 }

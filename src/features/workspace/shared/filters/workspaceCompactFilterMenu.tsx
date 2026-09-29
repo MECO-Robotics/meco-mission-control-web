@@ -14,6 +14,8 @@ export function CompactFilterMenu({
   className,
   icon,
   iconOnly = false,
+  inlineItems = false,
+  menuTitle,
   onButtonClick,
   items,
 }: {
@@ -23,6 +25,8 @@ export function CompactFilterMenu({
   className?: string;
   icon?: ReactNode;
   iconOnly?: boolean;
+  inlineItems?: boolean;
+  menuTitle?: string;
   onButtonClick?: () => void;
   items: CompactFilterMenuItem[];
 }) {
@@ -97,7 +101,13 @@ export function CompactFilterMenu({
       </button>
 
       {isOpen ? (
-        <div aria-label={ariaLabel} className="task-queue-filter-menu-popover" id={menuId} role="menu">
+        <div
+          aria-label={ariaLabel}
+          className={`task-queue-filter-menu-popover${inlineItems ? " is-inline-selection" : ""}`}
+          id={menuId}
+          role="menu"
+        >
+          {menuTitle ? <h2 className="task-queue-filter-menu-title">{menuTitle}</h2> : null}
           {visibleItems.map((item) => (
             <div className="task-queue-filter-menu-item" key={item.label}>
               <span className="task-queue-filter-menu-label">{item.label}</span>

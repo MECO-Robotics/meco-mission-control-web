@@ -157,6 +157,51 @@
   gap: 0.28rem;
 }
 
+.task-queue-filter-menu-title {
+  margin: 0 0 0.05rem;
+  color: var(--text-title);
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.task-queue-filter-menu-popover.is-inline-selection {
+  width: min(22rem, 92vw);
+  min-width: min(18rem, 92vw);
+  justify-items: stretch;
+}
+
+.task-queue-filter-menu-popover.is-inline-selection .task-queue-filter-menu-item {
+  grid-template-columns: minmax(5rem, 0.45fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.task-queue-filter-menu-popover.is-inline-selection .task-queue-filter-menu-label {
+  font-size: 0.72rem;
+  letter-spacing: normal;
+  line-height: 1.2;
+  text-transform: none;
+}
+
+.task-queue-filter-menu-popover.is-inline-selection .toolbar-filter-menu-button {
+  width: 100%;
+  min-width: 0;
+  justify-content: flex-start;
+}
+
+.task-queue-filter-menu-popover.is-inline-selection .toolbar-filter-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.task-queue-filter-menu-popover.is-inline-selection .task-queue-sort-menu-select {
+  width: 100%;
+  min-width: 0;
+}
+
 .task-queue-filter-menu-label {
   color: var(--text-copy);
   font-size: 0.63rem;

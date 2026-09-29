@@ -73,12 +73,15 @@ export function TimelineCompactFilterMenu({
       ariaLabel={showCalendarFilters ? "Schedule filters" : "Timeline filters"}
       buttonLabel="Filters"
       className="materials-filter-menu timeline-roster-filter"
+      inlineItems={showCalendarFilters}
+      menuTitle={showCalendarFilters ? "Selection" : undefined}
       items={[
         {
           label: "Project",
           hidden: !isAllProjectsView,
           content: (
             <FilterDropdown
+              compactSummary={showCalendarFilters}
               allLabel="All projects"
               ariaLabel="Filter timeline by project"
               className="task-queue-filter-menu-submenu"
@@ -93,6 +96,7 @@ export function TimelineCompactFilterMenu({
           label: "Roster",
           content: (
             <FilterDropdown
+              compactSummary={showCalendarFilters}
               allLabel="All roster"
               ariaLabel="Filter person"
               className="task-queue-filter-menu-submenu"
@@ -107,6 +111,7 @@ export function TimelineCompactFilterMenu({
           label: "Discipline",
           content: (
             <FilterDropdown
+              compactSummary={showCalendarFilters}
               allLabel="All disciplines"
               ariaLabel="Filter timeline by discipline"
               className="task-queue-filter-menu-submenu"
@@ -125,6 +130,7 @@ export function TimelineCompactFilterMenu({
           label: "Subsystem",
           content: (
             <FilterDropdown
+              compactSummary={showCalendarFilters}
               allLabel="All subsystems"
               ariaLabel="Filter timeline by subsystem"
               className="task-queue-filter-menu-submenu"
@@ -143,6 +149,7 @@ export function TimelineCompactFilterMenu({
           label: "Status",
           content: (
             <FilterDropdown
+              compactSummary={showCalendarFilters}
               allLabel="All statuses"
               ariaLabel="Filter timeline by status"
               className="task-queue-filter-menu-submenu"
@@ -161,6 +168,7 @@ export function TimelineCompactFilterMenu({
           label: "Priority",
           content: (
             <FilterDropdown
+              compactSummary={showCalendarFilters}
               allLabel="All priorities"
               ariaLabel="Filter timeline by priority"
               className="task-queue-filter-menu-submenu"
