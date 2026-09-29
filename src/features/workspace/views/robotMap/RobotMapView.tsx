@@ -80,6 +80,7 @@ export function RobotMapView({
   updateSubsystemConfiguration,
 }: RobotMapViewProps) {
   const [search, setSearch] = useState("");
+  const [isThreeDimensionalView, setIsThreeDimensionalView] = useState(false);
   const [selectedSubsystemId, setSelectedSubsystemId] = useState<string | null>(null);
   const [layoutDraftBySubsystemId, setLayoutDraftBySubsystemId] = useState<
     Record<string, SubsystemLayoutFields>
@@ -232,44 +233,34 @@ export function RobotMapView({
         search={search}
       />
 
-      <div className={`robot-config-main robot-config-main-map${subsystems.length === 0 ? " is-empty" : ""}`}>
-        {subsystems.length > 0 ? (
-          <RobotMapCanvas
-            isLayoutEditEnabled={isLayoutEditEnabled}
-            onAddSubsystem={openCreateSubsystemModal}
-            onAutoArrange={handleAutoArrange}
-            onDraftLayoutChange={applyLayoutDraft}
-            onLayoutDrop={handleLayoutDrop}
-            onReferenceImageSelected={(file) => void handleReferenceImageSelected(file)}
-            onResetLayout={handleResetLayout}
-            onSelectSubsystem={setSelectedSubsystemId}
-            onToggleLayoutEdit={toggleLayoutEdit}
-            referenceImageUrl={referenceImageUrl}
-            referenceImageStorageNotice={referenceImageStorageNotice}
-            selectedSubsystemId={selectedSubsystemId}
-            subsystems={subsystems}
-          />
-        ) : (
-          <div className="empty-state robot-config-empty">
-            <strong>No subsystems yet.</strong>
-            <p className="section-copy">Create your first subsystem to start configuring robot structure and placement.</p>
-            <button className="primary-action" onClick={openCreateSubsystemModal} type="button">
-              Add subsystem
-            </button>
-          </div>
-        )}
-
-        <div className="robot-config-cad-viewer">
-          <CadFileViewer
-            key={primaryProjectId}
-            title="Robot parts"
-            importPlacement="topbar"
-            onOpenCadWorkspace={onOpenCadWorkspace}
-            partDefinitions={bootstrap.partDefinitions}
-            onSavePartImage={onSavePartImage}
-            description="Inspect the robot assembly in 3D. Select a part to save its still image to a matching part record."
-          />
-        </div>
+      <div className={`robot-config-main robot-config-main-map${selectedSubsystem ? "" : " is-empty"}`}>
+        <RobotMapCanvas
+          cadViewer={
+            <CadFileViewer
+              embeddedInMap
+              importPlacement="topbar"
+              key={primaryProjectId}
+              onOpenCadWorkspace={onOpenCadWorkspace}
+              partDefinitions={bootstrap.partDefinitions}
+              onSavePartImage={onSavePartImage}
+            />
+          }
+          is3DView={isThreeDimensionalView}
+          isLayoutEditEnabled={isLayoutEditEnabled}
+          onAddSubsystem={openCreateSubsystemModal}
+          onAutoArrange={handleAutoArrange}
+          onDraftLayoutChange={applyLayoutDraft}
+          onLayoutDrop={handleLayoutDrop}
+          onReferenceImageSelected={(file) => void handleReferenceImageSelected(file)}
+          onResetLayout={handleResetLayout}
+          onSelectSubsystem={setSelectedSubsystemId}
+          onToggle3DView={setIsThreeDimensionalView}
+          onToggleLayoutEdit={toggleLayoutEdit}
+          referenceImageUrl={referenceImageUrl}
+          referenceImageStorageNotice={referenceImageStorageNotice}
+          selectedSubsystemId={selectedSubsystemId}
+          subsystems={subsystems}
+        />
 
         {selectedSubsystem ? <SubsystemDetailPanel
             onCreateMechanism={openCreateMechanismModal}

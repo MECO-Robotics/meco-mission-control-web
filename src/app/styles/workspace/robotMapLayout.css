@@ -173,27 +173,12 @@
   padding-right: 0.15rem;
 }
 
-.robot-config-empty {
-  border: 1px dashed var(--border-base);
-  border-radius: 1rem;
-  display: grid;
-  gap: 0.5rem;
-  justify-items: start;
-  padding: 1rem;
-}
-
 @media (max-width: 1100px) {
   .robot-config-main-map,
   .robot-config-main-map.is-empty {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .robot-config-cad-viewer {
-    border-left: 0;
-    border-top: 1px solid var(--border-base);
-    padding-left: 0;
-    padding-top: 0.75rem;
-  }
 }
 
 @media (max-width: 780px) {
