@@ -1,11 +1,14 @@
 /// <reference types="jest" />
 
 import * as React from "react";
+import type { ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { ManufacturingKanbanBoard } from "@/features/workspace/views/manufacturing/ManufacturingKanbanBoard";
 import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
 import type { ManufacturingItemRecord } from "@/types/recordsInventory";
+import type { TaskRecord } from "@/types/recordsExecution";
+import { createTask } from "@/features/workspace/views/__tests__/taskQueueTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
@@ -55,6 +58,7 @@ const subsystemsById: SubsystemsById = {
 };
 
 interface CapturedKanbanColumnsProps {
+  renderItem?: (item: ManufacturingItemRecord, state: ManufacturingItemRecord["status"]) => ReactNode;
   onItemDrop?: (
     item: ManufacturingItemRecord,
     targetState: ManufacturingItemRecord["status"],
@@ -76,12 +80,15 @@ function renderBoard(
     item: ManufacturingItemRecord,
     status: ManufacturingItemRecord["status"],
   ) => Promise<void>,
+  tasks: TaskRecord[] = [],
 ) {
   mockKanbanColumns.mockClear();
   renderToStaticMarkup(
     React.createElement(ManufacturingKanbanBoard, {
       items: [manufacturingItem],
       membersById,
+      projectsById: { "project-1": { id: "project-1", name: "Robot Project" } },
+      tasks,
       onEdit: jest.fn(),
       onQuickStatusChange,
       showMentorQuickActions: true,
@@ -98,6 +105,22 @@ function renderBoard(
 }
 
 describe("ManufacturingKanbanBoard", () => {
+  it("shows project, linked-task priority, and requester context on cards", () => {
+    const kanbanProps = renderBoard(jest.fn().mockResolvedValue(undefined), [
+      createTask(1, {
+        linkedManufacturingIds: [manufacturingItem.id],
+        priority: "high",
+      }),
+    ]);
+    const card = kanbanProps.renderItem?.(manufacturingItem, "requested");
+    const markup = renderToStaticMarkup(React.createElement(React.Fragment, null, card));
+
+    expect(markup).toContain("Robot Project");
+    expect(markup).toContain('aria-label="High priority"');
+    expect(markup).toContain('title="Student"');
+    expect(markup).toContain("profile-avatar-fallback");
+  });
+
   it("ignores drag-drop status changes while a quick action is already pending", async () => {
     let resolveFirstChange!: () => void;
     const onQuickStatusChange = jest.fn(

@@ -5,7 +5,11 @@ import type { ManufacturingItemRecord } from "@/types/recordsInventory";
 import type { ManufacturingViewTab } from "@/lib/workspaceNavigation";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
-import { filterSelectionIncludes, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import {
+  filterSelectionIncludes,
+  filterSelectionMatchesTaskPeople,
+  useFilterChangeMotionClass,
+} from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import {
   WorkspaceTopbarControls,
@@ -93,6 +97,10 @@ export function ManufacturingQueueView({
       .sort()
       .map((value) => ({ id: value, name: value }));
   }, [bootstrap.materials, items]);
+  const projectsById = useMemo(
+    () => Object.fromEntries(bootstrap.projects.map((project) => [project.id, project])),
+    [bootstrap.projects],
+  );
 
   const filteredItems = useMemo(() => {
     const processItems = processFilterValue
@@ -105,7 +113,14 @@ export function ManufacturingQueueView({
       const matchesRequester = filterSelectionIncludes(requester, item.requestedById);
       const matchesStatus = filterSelectionIncludes(status, item.status);
       const matchesMaterial = filterSelectionIncludes(material, item.material);
-      const matchesPerson = filterSelectionIncludes(activePersonFilter, item.requestedById);
+      const matchesPerson =
+        activePersonFilter.length === 0 ||
+        filterSelectionIncludes(activePersonFilter, item.requestedById) ||
+        bootstrap.tasks.some(
+          (task) =>
+            task.linkedManufacturingIds.includes(item.id) &&
+            filterSelectionMatchesTaskPeople(activePersonFilter, task),
+        );
 
       return (
         matchesSearch &&
@@ -116,7 +131,7 @@ export function ManufacturingQueueView({
         matchesPerson
       );
     });
-  }, [activePersonFilter, items, material, processFilterValue, requester, search, status, subsystem]);
+  }, [activePersonFilter, bootstrap.tasks, items, material, processFilterValue, requester, search, status, subsystem]);
   const sortedItems = useMemo(
     () => sortManufacturingItems(filteredItems, sortField, membersById, subsystemsById),
     [filteredItems, membersById, sortField, subsystemsById],
@@ -234,6 +249,8 @@ export function ManufacturingQueueView({
             <ManufacturingKanbanBoard
               items={sortedItems}
               membersById={membersById}
+              projectsById={projectsById}
+              tasks={bootstrap.tasks}
               onEdit={onEdit}
               onQuickStatusChange={onQuickStatusChange}
               showInHouseDetails={showInHouseColumn}
