@@ -16,7 +16,7 @@ import type {
   OnshapeOverview,
   OnshapeSyncEstimate,
   SyncLevel
-} from "../model/cadIntegrationTypes";
+} from "../model/onshapeCadTypes";
 import { parseOnshapeUrl } from "../model/onshapeUrlParser";
 import { defaultOnshapeOverview, getScopedDocumentRefs, resolveSelectedDocumentRefId } from "../model/onshapeIntegrationState";
 

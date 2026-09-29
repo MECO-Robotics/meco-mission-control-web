@@ -44,6 +44,22 @@
   width: 1.9rem;
 }
 
+.workspace-topbar-zoom-button.icon-button {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.workspace-topbar-zoom-button.icon-button:hover:not(:disabled) {
+  background: transparent;
+  color: var(--official-blue);
+}
+
+.workspace-topbar-zoom-button.icon-button:focus-visible {
+  outline: 2px solid var(--official-blue);
+  outline-offset: 1px;
+}
+
 .workspace-topbar-zoom-label {
   color: var(--text-title);
   font-size: 0.78rem;

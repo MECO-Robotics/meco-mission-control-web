@@ -12,7 +12,7 @@ describe("TimelineView", () => {
     jest.useRealTimers();
   });
 
-  it("formats week period labels with year only on the ending day", () => {
+  it("shows only the first day in week period labels", () => {
     expect(
       formatTimelinePeriodLabel("week", [
         "2026-04-06",
@@ -23,7 +23,7 @@ describe("TimelineView", () => {
         "2026-04-11",
         "2026-04-12",
       ]),
-    ).toBe("4/6 - 4/12/26");
+    ).toBe("4/6/26");
   });
 
   it("keeps month-end bounds in the same calendar month for month-edge dates", () => {

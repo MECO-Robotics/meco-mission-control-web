@@ -17,10 +17,11 @@ export function WorkspaceAssetModalsSection(props: WorkspaceModalHostViewProps) 
           {...props.artifactEditor}
           artifactModalMode={props.artifactEditor.artifactModalMode}
           bootstrap={props.bootstrap}
+          requestPhotoUpload={props.requestPhotoUpload}
         />
       ) : null}
 
-      <MaterialEditorModal {...props.materialEditor} />
+      <MaterialEditorModal {...props.materialEditor} bootstrap={props.bootstrap} requestPhotoUpload={props.requestPhotoUpload} />
 
       {props.mechanismEditor.mechanismModalMode ? (
         <MechanismEditorModal

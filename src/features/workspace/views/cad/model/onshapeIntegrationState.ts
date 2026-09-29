@@ -1,4 +1,4 @@
-import type { OnshapeDocumentRefRecord, OnshapeOverview } from "./cadIntegrationTypes";
+import type { OnshapeDocumentRefRecord, OnshapeOverview } from "./onshapeCadTypes";
 
 export const defaultOnshapeOverview: OnshapeOverview = {
   connection: {

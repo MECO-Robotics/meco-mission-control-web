@@ -62,14 +62,19 @@ describe("TimelineView", () => {
     ).toBe(918);
   });
 
-  it("keeps timeline period and zoom pills from shrinking in the topbar", () => {
+  it("uses shared topbar controls for timeline period and zoom", () => {
     const css = readAppCss();
 
     expect(css).toMatch(
-      /\.timeline-topbar-controls \.timeline-period-controls,\s*\.timeline-topbar-controls \.timeline-zoom-controls\s*\{[\s\S]*flex:\s*0 0 auto;[\s\S]*min-width:\s*max-content;[\s\S]*max-width:\s*none;/,
+      /\.workspace-topbar-controls\s*\{[\s\S]*display:\s*flex;[\s\S]*align-items:\s*center;/,
+    );
+    expect(css).toContain(".workspace-topbar-zoom-controls");
+    expect(css).toContain(".workspace-topbar-zoom-label");
+    expect(css).toMatch(
+      /\.workspace-topbar-zoom-controls\s*\{[\s\S]*gap:\s*0\.04rem;[\s\S]*min-height:\s*2\.05rem;/,
     );
     expect(css).toMatch(
-      /\.timeline-topbar-controls \.timeline-period-label,\s*\.timeline-topbar-controls \.timeline-zoom-label\s*\{[\s\S]*flex:\s*0 0 auto;/,
+      /\.workspace-topbar-zoom-label\s*\{[\s\S]*min-width:\s*2\.9rem;/,
     );
   });
 

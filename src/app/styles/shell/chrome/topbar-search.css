@@ -4,7 +4,8 @@
   justify-content: flex-end;
   height: 100%;
   flex: 1 1 auto;
-  padding-inline: clamp(0.3rem, 0.9vw, 0.6rem);
+  gap: clamp(0.275rem, 0.5vw, 0.4rem);
+  padding-inline: clamp(0.275rem, 0.5vw, 0.4rem);
   min-width: 0;
   overflow: visible;
 }
@@ -39,7 +40,9 @@
   }
 
   .app-topbar-search-slot:has(.app-topbar-controls-host:not(:empty)),
-  .app-topbar-search-slot:has(.app-topbar-search-host:not(:empty)) {
+  .app-topbar-search-slot:has(.app-topbar-search-host:not(:empty)),
+  .app-topbar-search-slot:has(.app-topbar-zoom-host:not(:empty)),
+  .app-topbar-search-slot:has(.app-topbar-add-host:not(:empty)) {
     --app-topbar-scroll-hint-size: 1.25rem;
     -webkit-mask-image: linear-gradient(
       to right,

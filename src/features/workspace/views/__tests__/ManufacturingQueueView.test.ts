@@ -6,6 +6,7 @@ import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefa
 import { ManufacturingQueueView } from "@/features/workspace/views/manufacturing/ManufacturingQueueView";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { ManufacturingItemRecord } from "@/types/recordsInventory";
+import { sortManufacturingItems } from "@/features/workspace/views/manufacturing/manufacturingSort";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
@@ -115,6 +116,7 @@ describe("ManufacturingQueueView", () => {
     );
 
     expect(allMarkup).not.toContain("manufacturing-process-filter");
+    expect(allMarkup).toContain('aria-label="Sort manufacturing"');
     expect(allMarkup).toContain("CNC drive plate");
     expect(allMarkup).toContain("3D printed spacer");
     expect(allMarkup).toContain("Fab belly pan");
@@ -183,5 +185,20 @@ describe("ManufacturingQueueView", () => {
     expect(hiddenQuickActionsMarkup).not.toContain("cnc-complete-job-button");
     expect(hiddenQuickActionsMarkup).not.toContain('draggable="true"');
     expect(hiddenQuickActionsMarkup).not.toContain('data-kanban-drop-enabled="true"');
+  });
+  it("sorts manufacturing items by date or title without mutating input", () => {
+    const late = { ...manufacturingItem, id: "late", title: "Z Swerve", dueDate: "2026-05-10" };
+    const early = { ...manufacturingItem, id: "early", title: "A Intake", dueDate: "2026-05-01" };
+    const items = [late, early];
+    const membersById = { "member-1": bootstrap.members[0] };
+    const subsystemsById = { "subsystem-1": bootstrap.subsystems[0] };
+
+    expect(
+      sortManufacturingItems(items, "dueDate", membersById, subsystemsById).map((item) => item.id),
+    ).toEqual(["early", "late"]);
+    expect(
+      sortManufacturingItems(items, "title", membersById, subsystemsById).map((item) => item.id),
+    ).toEqual(["early", "late"]);
+    expect(items.map((item) => item.id)).toEqual(["late", "early"]);
   });
 });

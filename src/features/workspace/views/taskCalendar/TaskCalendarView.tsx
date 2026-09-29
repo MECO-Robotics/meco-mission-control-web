@@ -7,25 +7,23 @@ import type { TaskRecord } from "@/types/recordsExecution";
 import { toErrorMessage } from "@/lib/appUtils/common";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
-import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
-import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
-import {
-  buildTopbarSearchProps,
-  WorkspaceTopbarControls,
-} from "@/features/workspace/shared/topbar";
 import { MilestonesMilestoneModal } from "@/features/workspace/views/milestones/MilestonesEventModal";
 import { useMilestonesMilestoneModalState } from "@/features/workspace/views/milestones/sections/useMilestonesEventModalState";
-import { TaskCalendarFilterToolbar } from "./TaskCalendarFilterToolbar";
 import { TaskCalendarDayDetails } from "./TaskCalendarDayDetails";
 import { MeetingScheduleModal } from "./MeetingScheduleModal";
 import { TaskCalendarMonthGrid } from "./TaskCalendarMonthGrid";
-import type { TaskCalendarEvent } from "./taskCalendarEvents";
+import type { TaskCalendarSortMode } from "./taskCalendarLayout";
+import type { TaskCalendarEvent, TaskCalendarEventType } from "./taskCalendarEvents";
 import { useTaskCalendarEventData } from "./useTaskCalendarEventData";
 
 interface TaskCalendarViewProps {
   onCreateMilestoneReport?: (milestoneId: string, onReturn?: () => void) => void;
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
+  eventFilter: "all" | TaskCalendarEventType;
+  onEventFilterChange: (value: "all" | TaskCalendarEventType) => void;
+  sortMode: TaskCalendarSortMode;
+  onSortModeChange: (value: TaskCalendarSortMode) => void;
   isAllProjectsView: boolean;
   onSaveMeeting: (payload: MeetingPayload) => Promise<void>;
   onDeleteTimelineMilestone: (milestoneId: string) => Promise<void>;
@@ -35,6 +33,8 @@ interface TaskCalendarViewProps {
     payload: MilestonePayload,
   ) => Promise<void>;
   onTaskDetailOpen: (task: TaskRecord) => void;
+  searchFilter?: string;
+  onSearchChange?: (value: string) => void;
   onTaskEditCanceled?: () => void;
   onTaskEditSaved?: () => void;
 }
@@ -60,11 +60,17 @@ export function TaskCalendarView({
   activePersonFilter,
   onCreateMilestoneReport,
   bootstrap,
+  eventFilter,
+  onEventFilterChange,
+  sortMode,
+  onSortModeChange,
   isAllProjectsView,
   onSaveMeeting,
   onDeleteTimelineMilestone,
   onSaveTimelineMilestone,
   onTaskDetailOpen,
+  searchFilter,
+  onSearchChange,
   onTaskEditCanceled = () => {},
   onTaskEditSaved = () => {},
 }: TaskCalendarViewProps) {
@@ -77,7 +83,13 @@ export function TaskCalendarView({
   const calendar = useTaskCalendarEventData({
     activePersonFilter,
     bootstrap,
+    eventFilter,
+    onEventFilterChange,
     isAllProjectsView,
+    searchFilter,
+    onSearchChange,
+    sortMode,
+    onSortModeChange,
   });
   useEffect(() => {
     const handleSchedulePeriodChange = (event: Event) => {
@@ -150,29 +162,6 @@ export function TaskCalendarView({
 
   return (
     <section className={`panel dense-panel task-calendar-shell ${WORKSPACE_PANEL_CLASS}`}>
-      <AppTopbarSlotPortal slot="controls">
-        <WorkspaceTopbarControls
-          className="task-queue-toolbar task-calendar-filter-toolbar"
-          search={
-            <TopbarResponsiveSearch
-              {...buildTopbarSearchProps("calendar", {
-                actions: (
-                  <TaskCalendarFilterToolbar
-                    eventFilter={calendar.eventFilter}
-                    onEventFilterChange={calendar.setEventFilter}
-                    onSortModeChange={calendar.setSortMode}
-                    sortMode={calendar.sortMode}
-                  />
-                ),
-                onChange: calendar.setSearchFilter,
-                placeholder: "Search calendar...",
-                value: calendar.searchFilter,
-              })}
-            />
-          }
-        />
-      </AppTopbarSlotPortal>
-
       {calendar.unfilteredEvents.length === 0 ? (
         <div className="empty-state">
           <strong>No dated records in scope.</strong>

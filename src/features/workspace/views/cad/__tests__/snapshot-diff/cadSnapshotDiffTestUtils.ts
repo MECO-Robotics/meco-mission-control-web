@@ -1,7 +1,7 @@
 import type {
   CadSnapshotRecord,
   OnshapeOverview
-} from "../../model/cadIntegrationTypes";
+} from "../../model/onshapeCadTypes";
 
 export function createOverview(overrides: Partial<OnshapeOverview> = {}): OnshapeOverview {
   return {

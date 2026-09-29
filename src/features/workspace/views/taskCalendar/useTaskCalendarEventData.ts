@@ -19,15 +19,27 @@ import {
 export function useTaskCalendarEventData({
   activePersonFilter,
   bootstrap,
+  eventFilter,
+  onEventFilterChange,
   isAllProjectsView,
+  sortMode,
+  onSortModeChange,
+  searchFilter: controlledSearchFilter,
+  onSearchChange,
 }: {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
+  eventFilter: "all" | TaskCalendarEventType;
+  onEventFilterChange: (value: "all" | TaskCalendarEventType) => void;
   isAllProjectsView: boolean;
+  sortMode: TaskCalendarSortMode;
+  onSortModeChange: (value: TaskCalendarSortMode) => void;
+  searchFilter?: string;
+  onSearchChange?: (value: string) => void;
 }) {
-  const [eventFilter, setEventFilter] = useState<"all" | TaskCalendarEventType>("all");
-  const [searchFilter, setSearchFilter] = useState("");
-  const [sortMode, setSortMode] = useState<TaskCalendarSortMode>("date");
+  const [localSearchFilter, setLocalSearchFilter] = useState("");
+  const searchFilter = controlledSearchFilter ?? localSearchFilter;
+  const setSearchFilter = onSearchChange ?? setLocalSearchFilter;
   const [monthCursor, setMonthCursor] = useState(() => {
     const today = new Date();
     return new Date(today.getFullYear(), today.getMonth(), 1);
@@ -104,10 +116,10 @@ export function useTaskCalendarEventData({
     projectsById,
     scopedProjectIds,
     searchFilter,
-    setEventFilter,
+    setEventFilter: onEventFilterChange,
     setMonthCursor,
     setSearchFilter,
-    setSortMode,
+    setSortMode: onSortModeChange,
     sortMode,
     tasksById,
     todayDateKey,

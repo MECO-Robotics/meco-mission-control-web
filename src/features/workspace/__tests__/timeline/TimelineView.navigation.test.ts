@@ -209,6 +209,6 @@ describe("TimelineView", () => {
 
     expect(markup).toContain('aria-label="Previous month"');
     expect(markup).toContain('aria-label="Next month"');
-    expect(markup).toContain("April &#x27;26");
+    expect(markup).toContain("Apr &#x27;26");
   });
 });

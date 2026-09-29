@@ -3,7 +3,7 @@ import type {
   CadSnapshotDiffSourceKind,
   CadSnapshotDiffStatus,
   CadSnapshotRecord
-} from "./cadIntegrationTypes";
+} from "./onshapeCadTypes";
 
 export type SnapshotDiffItem = {
   id: string;

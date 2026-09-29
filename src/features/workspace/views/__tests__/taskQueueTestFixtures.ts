@@ -1,15 +1,9 @@
 /// <reference types="jest" />
 
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
 type Task = BootstrapPayload["tasks"][number];
-
-function readWorkspaceToolbarsCss() {
-  return readFileSync(join(process.cwd(), "src/app/styles/shell/workspace/toolbars.css"), "utf8");
-}
 
 function createTask(index: number, overrides: Partial<Task> = {}): Task {
   const day = String(index).padStart(2, "0");
@@ -128,4 +122,4 @@ function createTaskQueueBootstrap(): BootstrapPayload {
   };
 }
 
-export { createTask, createTaskQueueBootstrap, readWorkspaceToolbarsCss };
+export { createTask, createTaskQueueBootstrap };

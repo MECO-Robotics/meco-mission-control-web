@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
-
 import type { BootstrapPayload } from "@/types/bootstrap";
-import { IconSearchMinus, IconSearchPlus, IconSort } from "@/components/shared/Icons";
+import { IconSort } from "@/components/shared/Icons";
+import { WorkspaceTopbarZoom } from "@/features/workspace/shared/topbar";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
@@ -166,35 +166,17 @@ export function TaskQueueToolbar({
         value={searchFilter}
       />
 
-      <div className="task-queue-toolbar-inline-actions">
-        <div aria-label="Task queue zoom" className="task-queue-zoom-controls" role="group">
-          <button
-            aria-label="Zoom out task queue"
-            className="icon-button task-queue-zoom-button"
-            disabled={taskQueueZoom <= TASK_QUEUE_ZOOM_MIN}
-            onClick={() =>
-              setTaskQueueZoom((current) => clampTaskQueueZoom(current - TASK_QUEUE_ZOOM_STEP))
-            }
-            title="Zoom out task queue"
-            type="button"
-          >
-            <IconSearchMinus />
-          </button>
-          <span className="task-queue-zoom-label">{formatTaskQueueZoomLabel(taskQueueZoom)}</span>
-          <button
-            aria-label="Zoom in task queue"
-            className="icon-button task-queue-zoom-button"
-            disabled={taskQueueZoom >= TASK_QUEUE_ZOOM_MAX}
-            onClick={() =>
-              setTaskQueueZoom((current) => clampTaskQueueZoom(current + TASK_QUEUE_ZOOM_STEP))
-            }
-            title="Zoom in task queue"
-            type="button"
-          >
-            <IconSearchPlus />
-          </button>
-        </div>
-      </div>
+      <WorkspaceTopbarZoom
+        ariaLabel="Task queue zoom"
+        canZoomIn={taskQueueZoom < TASK_QUEUE_ZOOM_MAX}
+        canZoomOut={taskQueueZoom > TASK_QUEUE_ZOOM_MIN}
+        decreaseLabel="Zoom out task queue"
+        increaseLabel="Zoom in task queue"
+        onZoomIn={() => setTaskQueueZoom((current) => clampTaskQueueZoom(current + TASK_QUEUE_ZOOM_STEP))}
+        onZoomOut={() => setTaskQueueZoom((current) => clampTaskQueueZoom(current - TASK_QUEUE_ZOOM_STEP))}
+        toolbarClassName="workspace-topbar-zoom-slot-actions"
+        value={formatTaskQueueZoomLabel(taskQueueZoom)}
+      />
     </div>
   );
 }

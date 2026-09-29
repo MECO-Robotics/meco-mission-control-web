@@ -1,46 +1,44 @@
-import { EmptyCadViewer } from "../cad/viewer/CadPartViewer";
-import { LayoutGrid, Upload } from "lucide-react";
+import { useState, type ReactNode } from "react";
+import { Layers3 } from "lucide-react";
 import type { SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
 
-import { isSubsystemPlaced } from "./robotMapLayout";
+import { clampLayoutCoordinate, isSubsystemPlaced } from "./robotMapLayout";
 import { RobotMapCanvasActions } from "./RobotMapCanvasActions";
+import { RobotMapUnplacedModal } from "./RobotMapUnplacedModal";
 import { SubsystemMapCard } from "./SubsystemMapCard";
 import { useRobotMapCanvasDrag } from "./useRobotMapCanvasDrag";
 import type { RobotConfigurationSubsystemModel } from "./robotMapViewModel";
 
 interface RobotMapCanvasProps {
+  cadViewer: (onOrbitingChange: (isOrbiting: boolean) => void) => ReactNode;
   isLayoutEditEnabled: boolean;
   onAddSubsystem: () => void;
   onAutoArrange: () => void;
   onDraftLayoutChange: (subsystemId: string, layout: SubsystemLayoutFields) => void;
   onLayoutDrop: (subsystemId: string, layout: SubsystemLayoutFields) => void;
-  onReferenceImageSelected: (file: File) => void;
   onResetLayout: () => void;
   onSelectSubsystem: (subsystemId: string) => void;
   onToggleLayoutEdit: () => void;
-  referenceImageUrl: string | null;
-  referenceImageStorageNotice: string | null;
   selectedSubsystemId: string | null;
   subsystems: RobotConfigurationSubsystemModel[];
 }
 
-const ROBOT_MAP_UPLOAD_INPUT_ID = "robot-config-map-upload-input";
-
 export function RobotMapCanvas({
+  cadViewer,
   isLayoutEditEnabled,
   onAddSubsystem,
   onAutoArrange,
   onDraftLayoutChange,
   onLayoutDrop,
-  onReferenceImageSelected,
   onResetLayout,
   onSelectSubsystem,
   onToggleLayoutEdit,
-  referenceImageUrl,
-  referenceImageStorageNotice,
   selectedSubsystemId,
   subsystems,
 }: RobotMapCanvasProps) {
+  const [isOrbiting, setIsOrbiting] = useState(false);
+  const [isUnplacedModalOpen, setIsUnplacedModalOpen] = useState(false);
+  const [pendingPlacementSubsystemId, setPendingPlacementSubsystemId] = useState<string | null>(null);
   const { dragState, handlePointerMove, mapSurfaceRef, startDraggingSubsystem, stopDraggingSubsystem } =
     useRobotMapCanvasDrag({
       isLayoutEditEnabled,
@@ -53,6 +51,30 @@ export function RobotMapCanvas({
   const unplacedSubsystems = subsystems.filter((subsystem) => !isSubsystemPlaced(subsystem.layout));
   const hasUnplacedSubsystems = unplacedSubsystems.length > 0;
 
+  const beginSubsystemPlacement = (subsystemId: string) => {
+    onSelectSubsystem(subsystemId);
+    setPendingPlacementSubsystemId(subsystemId);
+    setIsUnplacedModalOpen(false);
+  };
+
+  const placePendingSubsystem = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!pendingPlacementSubsystemId || (event.target instanceof Element && event.target.closest("button"))) return;
+    const bounds = mapSurfaceRef.current?.getBoundingClientRect();
+    const subsystem = subsystems.find((item) => item.id === pendingPlacementSubsystemId);
+    if (!bounds || !subsystem || bounds.width <= 0 || bounds.height <= 0) return;
+    const x = (event.clientX - bounds.left) / bounds.width;
+    const y = (event.clientY - bounds.top) / bounds.height;
+    if (x < 0 || x > 1 || y < 0 || y > 1) return;
+    onLayoutDrop(subsystem.id, {
+      layoutX: clampLayoutCoordinate(x),
+      layoutY: clampLayoutCoordinate(y),
+      layoutZone: "center",
+      layoutView: "top",
+      sortOrder: subsystem.layout.sortOrder,
+    });
+    setPendingPlacementSubsystemId(null);
+  };
+
   return (
     <div
       className="robot-config-canvas-shell"
@@ -60,116 +82,18 @@ export function RobotMapCanvas({
       onPointerMove={handlePointerMove}
       onPointerUp={(event) => stopDraggingSubsystem(event.pointerId, event.clientX, event.clientY)}
     >
-      <div className={`robot-config-map-surface${isLayoutEditEnabled ? " is-editing" : ""}`} ref={mapSurfaceRef}>
-        {referenceImageUrl ? (
-          <img
-            alt="Robot isometric reference"
-            className="robot-config-reference-image"
-            src={referenceImageUrl}
-          />
-        ) : (
-          <EmptyCadViewer />
-        )}
-
-        {placedSubsystems.map((subsystem) => (
-          <div
-            className="robot-config-card-layer"
-            key={subsystem.id}
-            style={{
-              left: `${(subsystem.layout.layoutX ?? 0.5) * 100}%`,
-              top: `${(subsystem.layout.layoutY ?? 0.5) * 100}%`,
-            }}
-          >
-            <SubsystemMapCard
-              isDragging={dragState?.subsystemId === subsystem.id}
-              isEditable={isLayoutEditEnabled}
-              isSelected={selectedSubsystemId === subsystem.id}
-              onPointerDown={(event) => startDraggingSubsystem(event, subsystem)}
-              onSelect={() => onSelectSubsystem(subsystem.id)}
-              subsystem={subsystem}
-            />
-          </div>
-        ))}
-
-        <div className="robot-config-map-edit-overlay">
-          <label
-            aria-label="Upload isometric image"
-            className="icon-button robot-config-map-upload-button"
-            htmlFor={ROBOT_MAP_UPLOAD_INPUT_ID}
-            title="Upload isometric image"
-          >
-            <Upload aria-hidden="true" size={14} />
-          </label>
-          <input
-            accept="image/*"
-            className="robot-config-upload-input"
-            id={ROBOT_MAP_UPLOAD_INPUT_ID}
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              if (!file) {
-                return;
-              }
-
-              onReferenceImageSelected(file);
-              event.target.value = "";
-            }}
-            type="file"
-          />
-          <button
-            aria-checked={isLayoutEditEnabled}
-            className={`robot-config-edit-toggle${isLayoutEditEnabled ? " is-active" : ""}`}
-            onClick={onToggleLayoutEdit}
-            role="switch"
-            title={isLayoutEditEnabled ? "Disable edit mode" : "Enable edit mode"}
-            type="button"
-          >
-            <span className="robot-config-edit-toggle-label">Edit</span>
-            <span aria-hidden="true" className="robot-config-edit-toggle-track">
-              <span className="robot-config-edit-toggle-thumb" />
-            </span>
-          </button>
-        </div>
-
-        {referenceImageStorageNotice ? (
-          <p className="robot-config-map-storage-notice" role="status">
-            {referenceImageStorageNotice}
-          </p>
-        ) : null}
-
-        {!hasUnplacedSubsystems ? (
-          <div className="robot-config-map-actions-overlay">
-            <RobotMapCanvasActions onAddSubsystem={onAddSubsystem} onResetLayout={onResetLayout} />
-          </div>
-        ) : null}
-      </div>
-
-      {hasUnplacedSubsystems ? (
-        <section className="robot-config-unplaced">
-          <header className="robot-config-unplaced-header">
-            <div>
-              <h3>Unplaced Subsystems</h3>
-              <small>
-                {isLayoutEditEnabled
-                  ? "Drag onto the isometric layout to set placement."
-                  : "Enable Edit Layout to drag subsystems."}
-              </small>
-            </div>
-            <div className="robot-config-unplaced-actions">
-              <button
-                className="secondary-action queue-toolbar-action robot-config-auto-arrange-trigger"
-                onClick={onAutoArrange}
-                type="button"
-              >
-                <LayoutGrid aria-hidden="true" size={14} />
-                <span>Auto-arrange</span>
-              </button>
-              <RobotMapCanvasActions onAddSubsystem={onAddSubsystem} onResetLayout={onResetLayout} />
-            </div>
-          </header>
-          <div className="robot-config-unplaced-grid">
-            {unplacedSubsystems.map((subsystem) => (
+      <div className={`robot-config-map-surface${isLayoutEditEnabled ? " is-editing" : ""}${isOrbiting ? " is-orbiting" : ""}${pendingPlacementSubsystemId ? " is-placing-subsystem" : ""}`} onClick={placePendingSubsystem} ref={mapSurfaceRef}>
+        <div className="robot-config-map-layer">
+          {placedSubsystems.map((subsystem) => (
+            <div
+              className="robot-config-card-layer"
+              key={subsystem.id}
+              style={{
+                left: `${(subsystem.layout.layoutX ?? 0.5) * 100}%`,
+                top: `${(subsystem.layout.layoutY ?? 0.5) * 100}%`,
+              }}
+            >
               <SubsystemMapCard
-                key={subsystem.id}
                 isDragging={dragState?.subsystemId === subsystem.id}
                 isEditable={isLayoutEditEnabled}
                 isSelected={selectedSubsystemId === subsystem.id}
@@ -177,9 +101,61 @@ export function RobotMapCanvas({
                 onSelect={() => onSelectSubsystem(subsystem.id)}
                 subsystem={subsystem}
               />
-            ))}
+            </div>
+          ))}
+
+          <div className="robot-config-map-edit-overlay">
+            {hasUnplacedSubsystems ? (
+              <button aria-expanded={isUnplacedModalOpen} aria-haspopup="dialog" aria-label={`Show ${unplacedSubsystems.length} unplaced subsystems`} className="secondary-action queue-toolbar-action robot-config-unplaced-trigger" onClick={() => setIsUnplacedModalOpen(true)} type="button">
+                <Layers3 aria-hidden="true" size={14} />
+                <span>Unplaced</span>
+                <span className="robot-config-unplaced-count">{unplacedSubsystems.length}</span>
+              </button>
+            ) : null}
+            <button
+              aria-checked={isLayoutEditEnabled}
+              className={`robot-config-edit-toggle${isLayoutEditEnabled ? " is-active" : ""}`}
+              onClick={onToggleLayoutEdit}
+              role="switch"
+              title={isLayoutEditEnabled ? "Disable edit mode" : "Enable edit mode"}
+              type="button"
+            >
+              <span className="robot-config-edit-toggle-label">Edit</span>
+              <span aria-hidden="true" className="robot-config-edit-toggle-track">
+                <span className="robot-config-edit-toggle-thumb" />
+              </span>
+            </button>
           </div>
-        </section>
+
+          {!hasUnplacedSubsystems ? (
+            <div className="robot-config-map-actions-overlay">
+              <RobotMapCanvasActions onAddSubsystem={onAddSubsystem} onResetLayout={onResetLayout} />
+            </div>
+          ) : null}
+          {pendingPlacementSubsystemId ? (
+            <div className="robot-config-placement-prompt" role="status">
+              <span>Click the robot view to place {subsystems.find((item) => item.id === pendingPlacementSubsystemId)?.name ?? "subsystem"}.</span>
+              <button className="ghost-button" onClick={() => setPendingPlacementSubsystemId(null)} type="button">Cancel</button>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="robot-config-embedded-cad">
+          {cadViewer(setIsOrbiting)}
+        </div>
+      </div>
+
+      {isUnplacedModalOpen && hasUnplacedSubsystems ? (
+        <RobotMapUnplacedModal
+          onAddSubsystem={onAddSubsystem}
+          onAutoArrange={onAutoArrange}
+          onClose={() => setIsUnplacedModalOpen(false)}
+          onPlaceSubsystem={beginSubsystemPlacement}
+          onResetLayout={onResetLayout}
+          onSelectSubsystem={onSelectSubsystem}
+          selectedSubsystemId={selectedSubsystemId}
+          subsystems={unplacedSubsystems}
+        />
       ) : null}
     </div>
   );

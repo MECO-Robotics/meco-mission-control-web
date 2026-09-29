@@ -28,7 +28,7 @@ describe("workspace purpose empty states", () => {
     expect(markup).not.toContain("No materials match the current filters.");
   });
 
-  it("explains empty purchase requests and offers the create action", () => {
+  it("explains empty purchase requests without an in-content create action", () => {
     const markup = renderToStaticMarkup(
       React.createElement(PurchasesView, {
         activePersonFilter: [],
@@ -42,11 +42,11 @@ describe("workspace purpose empty states", () => {
 
     expect(markup).toContain("Track requested parts and materials here");
     expect(markup).toContain("has not captured any parts, tools, or materials");
-    expect(markup).toContain("Add purchase");
+    expect(markup).not.toContain("workspace-empty-state-action");
     expect(markup).not.toContain("No purchase requests match the current filters.");
   });
 
-  it("explains empty document inventory and offers the create action", () => {
+  it("explains empty document inventory without an in-content create action", () => {
     const markup = renderToStaticMarkup(
       React.createElement(ArtifactInventoryView, {
         artifacts: [],
@@ -61,7 +61,7 @@ describe("workspace purpose empty states", () => {
 
     expect(markup).toContain("Documents collect project files and handoffs here");
     expect(markup).toContain("has not linked any documents");
-    expect(markup).toContain("Add document");
+    expect(markup).not.toContain("workspace-empty-state-action");
     expect(markup).not.toContain("No documents artifacts match the current filters.");
   });
 

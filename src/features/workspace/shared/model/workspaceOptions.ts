@@ -60,6 +60,7 @@ export const MATERIAL_CATEGORY_OPTIONS: DropdownOption[] = [
 export const MATERIAL_STOCK_OPTIONS: DropdownOption[] = [
   { id: "ok", name: "Stock OK" },
   { id: "low", name: "Low stock" },
+  { id: "below-reorder", name: "Below reorder" },
 ];
 
 export const READINESS_STATUS_OPTIONS: DropdownOption[] = [

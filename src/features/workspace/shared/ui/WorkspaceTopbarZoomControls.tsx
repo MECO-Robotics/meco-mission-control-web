@@ -1,20 +1,22 @@
 import { IconSearchMinus, IconSearchPlus } from "@/components/shared/Icons";
 
-export function WorkspaceTopbarZoomControls({ ariaLabel, label, max, min, onChange, value }: {
+export function WorkspaceTopbarZoomControls({ ariaLabel, canZoomIn, canZoomOut, decreaseLabel, increaseLabel, onZoomIn, onZoomOut, value }: {
   ariaLabel: string;
-  label: string;
-  max: number;
-  min: number;
-  onChange: (direction: 1 | -1) => void;
-  value: number;
+  canZoomIn: boolean;
+  canZoomOut: boolean;
+  decreaseLabel: string;
+  increaseLabel: string;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
+  value: string;
 }) {
   return (
     <div aria-label={ariaLabel} className="workspace-topbar-zoom-controls" role="group">
-      <button aria-label={"Zoom out " + label} className="icon-button workspace-topbar-zoom-button" disabled={value <= min} onClick={() => onChange(-1)} title={"Zoom out " + label} type="button">
+      <button aria-label={decreaseLabel} className="icon-button workspace-topbar-zoom-button" disabled={!canZoomOut} onClick={onZoomOut} title={decreaseLabel} type="button">
         <IconSearchMinus />
       </button>
-      <span className="workspace-topbar-zoom-label">{Math.round(value * 100)}%</span>
-      <button aria-label={"Zoom in " + label} className="icon-button workspace-topbar-zoom-button" disabled={value >= max} onClick={() => onChange(1)} title={"Zoom in " + label} type="button">
+      <span className="workspace-topbar-zoom-label">{value}</span>
+      <button aria-label={increaseLabel} className="icon-button workspace-topbar-zoom-button" disabled={!canZoomIn} onClick={onZoomIn} title={increaseLabel} type="button">
         <IconSearchPlus />
       </button>
     </div>

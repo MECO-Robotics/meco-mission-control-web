@@ -31,6 +31,7 @@ export const materialToPayload = (item: MaterialRecord): MaterialPayload => ({
   location: item.location,
   vendor: item.vendor,
   notes: item.notes,
+  photoUrl: item.photoUrl ?? "",
 });
 
 export const artifactToPayload = (item: ArtifactRecord): ArtifactPayload => ({

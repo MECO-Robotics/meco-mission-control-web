@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import { Plus } from "lucide-react";
+import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 
 export interface TopbarAddMenuAction {
   icon?: ReactNode;
@@ -93,6 +94,7 @@ export function WorkspaceTopbarAddMenu({
   }
 
   return (
+    <AppTopbarSlotPortal slot="add">
     <div
       className="topbar-add-menu"
       data-open={isMenuOpen ? "true" : "false"}
@@ -129,5 +131,6 @@ export function WorkspaceTopbarAddMenu({
         </div>
       ) : null}
     </div>
+    </AppTopbarSlotPortal>
   );
 }

@@ -1,6 +1,8 @@
 import { EditorModalShell } from "@/features/workspace/modals/EditorModalShell";
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 import type { MaterialPayload } from "@/types/payloads";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
 
 interface MaterialEditorModalProps {
   closeMaterialModal: () => void;
@@ -12,6 +14,8 @@ interface MaterialEditorModalProps {
   materialModalMode: "create" | "edit" | null;
   activeMaterialId: string | null;
   setMaterialDraft: Dispatch<SetStateAction<MaterialPayload>>;
+  bootstrap: BootstrapPayload;
+  requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
 }
 
 export function MaterialEditorModal({
@@ -24,6 +28,8 @@ export function MaterialEditorModal({
   materialModalMode,
   activeMaterialId,
   setMaterialDraft,
+  bootstrap,
+  requestPhotoUpload,
 }: MaterialEditorModalProps) {
   if (!materialModalMode) return null;
   const updateDraft = <K extends keyof MaterialPayload>(field: K, value: MaterialPayload[K]) =>
@@ -116,6 +122,16 @@ export function MaterialEditorModal({
           value={materialDraft.notes}
         />
       </label>
+      <PhotoUploadField
+        currentUrl={materialDraft.photoUrl ?? ""}
+        label="Material photo"
+        onChange={(value) => setMaterialDraft((current) => ({ ...current, photoUrl: value }))}
+        onUpload={(file) => {
+          const projectId = bootstrap.projects[0]?.id;
+          if (!projectId) return Promise.reject(new Error("No project is available for photo upload."));
+          return requestPhotoUpload(projectId, file);
+        }}
+      />
       <div className="modal-actions modal-wide">
         {materialModalMode === "edit" && activeMaterialId ? (
           <button

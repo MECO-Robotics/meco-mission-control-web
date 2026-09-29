@@ -4,6 +4,7 @@ import { useId, useRef, useState, type CSSProperties, type ReactNode } from "rea
 import type { DropdownOption } from "../model/workspaceTypes";
 import {
   type FilterSelection,
+  formatCompactFilterSelectionLabel,
   formatFilterSelectionLabel,
 } from "./workspaceFilterUtils";
 import { FilterOptionMenu } from "./workspaceFilterDropdownMenu";
@@ -17,11 +18,13 @@ export function FilterDropdown({
   ariaLabel,
   appearance = "toolbar",
   className,
+  compactSummary = false,
   buttonDataTutorialTarget,
   buttonInlineEditField,
   buttonContent,
   getOptionToneClassName,
   getSelectedToneClassName,
+  hideButtonIcon = false,
   icon,
   menuClassName,
   portalMenu,
@@ -37,12 +40,14 @@ export function FilterDropdown({
   appearance?: "toolbar" | "column";
   ariaLabel?: string;
   className?: string;
+  compactSummary?: boolean;
   buttonDataTutorialTarget?: string;
   buttonInlineEditField?: string;
   buttonContent?: ReactNode;
   getOptionToneClassName?: (option: DropdownOption) => string | undefined;
   getSelectedToneClassName?: (value: FilterSelection) => string | undefined;
   icon?: ReactNode;
+  hideButtonIcon?: boolean;
   menuClassName?: string;
   portalMenu?: boolean;
   portalMenuPlacement?: "auto" | "above" | "below";
@@ -64,6 +69,9 @@ export function FilterDropdown({
     options,
     value,
   );
+  const displaySelectedLabel = compactSummary
+    ? formatCompactFilterSelectionLabel(options, value)
+    : selectedLabel;
   const selectedOption = options.find((option) => option.id === value[0]);
   const selectedIcon = selectedOption?.icon ?? icon;
   const selectedToneClassName = getSelectedToneClassName?.(value);
@@ -124,9 +132,9 @@ export function FilterDropdown({
       >
         {columnAppearance ? buttonContent : buttonContent ?? (
           <>
-            <span className="toolbar-filter-icon">{selectedIcon}</span>
+            {hideButtonIcon ? null : <span className="toolbar-filter-icon">{selectedIcon}</span>}
             <span aria-hidden="true" className="toolbar-filter-value">
-              {selectedLabel}
+              {displaySelectedLabel}
             </span>
             <span aria-hidden="true" className="toolbar-filter-chevron" />
           </>

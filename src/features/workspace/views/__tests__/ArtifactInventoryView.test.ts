@@ -4,6 +4,7 @@ import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import { ArchiveFilterCheckbox } from "@/features/workspace/shared/filters/ArchiveFilterCheckbox";
 import { ArtifactInventoryView } from "@/features/workspace/views/ArtifactInventoryView";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
@@ -72,6 +73,24 @@ describe("ArtifactInventoryView", () => {
     expect(markup).toContain("Brand guide");
     expect(markup).toContain("Sponsor packet");
     expect(markup).toContain("Documents");
+    expect(markup).not.toContain("Artifact inventory scoped to this project selection.");
+    expect(markup).toContain('aria-label="Artifact filters"');
+    expect(markup).not.toContain('aria-label="Show archived"');
+    expect(markup).not.toContain("archive-filter-toggle");
     expect(markup).not.toContain("Non-Technical");
+  });
+
+  it("uses the shared archive checkbox control", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(ArchiveFilterCheckbox, {
+        checked: true,
+        label: "Show archived",
+        onChange: jest.fn(),
+      }),
+    );
+
+    expect(markup).toContain('aria-label="Show archived"');
+    expect(markup).toContain('type="checkbox"');
+    expect(markup).toContain("checked=\"\"");
   });
 });

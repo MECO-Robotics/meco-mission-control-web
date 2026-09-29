@@ -62,11 +62,12 @@ export function normalizeBootstrapCatalogRecords(source: BootstrapPayload) {
       googleSheetsUrl: mechanism.googleSheetsUrl ?? "",
       isArchived: mechanism.isArchived ?? false,
     })),
-    materials: source.materials,
+    materials: source.materials.map((material) => ({ ...material, photoUrl: material.photoUrl ?? "" })),
     artifacts: source.artifacts.map((artifact) => ({
       ...artifact,
       summary: artifact.summary ?? "",
       link: artifact.link ?? "",
+      photoUrl: artifact.photoUrl ?? "",
       isArchived: artifact.isArchived ?? false,
     })),
     partDefinitions: source.partDefinitions.map((partDefinition) => ({

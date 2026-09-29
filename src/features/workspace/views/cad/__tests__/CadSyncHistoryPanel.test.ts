@@ -6,7 +6,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { buildSyncHistoryRows, CadSyncHistoryPanel } from "../components/CadSyncHistoryPanel";
 import type {
   OnshapeOverview
-} from "../model/cadIntegrationTypes";
+} from "../model/onshapeCadTypes";
 
 function createOverview(overrides: Partial<OnshapeOverview> = {}): OnshapeOverview {
   return {

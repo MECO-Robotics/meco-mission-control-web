@@ -229,7 +229,7 @@ describe("mentor action queue", () => {
       }),
     );
 
-    expect(markup).toContain("Needs review");
+    expect(markup).not.toContain('class="workspace-presentation-controls"');
     expect(markup).toContain("Pending QA approval");
     expect(markup).toContain("Purchase approval");
     expect(markup).toContain("Open task");

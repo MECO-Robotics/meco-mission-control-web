@@ -1,4 +1,5 @@
 import { useRef, type CSSProperties, type ReactNode } from "react";
+import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 
 import {
   ACTION_BUTTON_WIDTH_PX,
@@ -31,6 +32,7 @@ export type TopbarResponsiveSearchProps = {
   onChange: (value: string) => void;
   onCompactModeChange?: (mode: SearchCompactMode, detail: SearchCompactModeChangeDetail) => void;
   placeholder: string;
+  portalToTopbar?: boolean;
   tutorialTarget?: string;
   value: string;
 };
@@ -53,6 +55,7 @@ export function TopbarResponsiveSearch({
   onChange,
   onCompactModeChange,
   placeholder,
+  portalToTopbar = true,
   tutorialTarget,
   value,
 }: TopbarResponsiveSearchProps) {
@@ -102,7 +105,7 @@ export function TopbarResponsiveSearch({
         } as CSSProperties)
       : undefined;
 
-  return (
+  const layout = (
     <TopbarResponsiveSearchLayout
       actions={actions}
       ariaLabel={ariaLabel}
@@ -126,4 +129,8 @@ export function TopbarResponsiveSearch({
       value={value}
     />
   );
+
+  return portalToTopbar ? (
+    <AppTopbarSlotPortal slot="search">{layout}</AppTopbarSlotPortal>
+  ) : layout;
 }

@@ -1,8 +1,16 @@
 import { type ReactNode } from "react";
+import { CAD_SOURCE_MODEL_DOCS } from "@/features/workspace/shared/model/cadSourceModel";
+
+export interface HelpLink {
+  href: string;
+  label: string;
+}
+
+export type HelpItem = string | HelpLink;
 
 export interface HelpSection {
+  items: HelpItem[];
   title: string;
-  items: string[];
 }
 
 export interface HelpTutorialStep {
@@ -21,8 +29,8 @@ export interface InteractiveTutorialChapter {
 
 export const HELP_SECTIONS: HelpSection[] = [
   { title: "Find your work", items: ["**Home** brings priority work, upcoming milestones, and needs attention together. Filter attention to **Needs review** for approvals and follow-up.", "**Work → Tasks** is the execution queue. Use My work, Blocked, or Waiting for QA; open a task to update it, log work, or submit QA.", "**Work → Schedule** has Calendar, Timeline, and Agenda presentations. Milestone readiness and results stay with the milestone.", "**Work → Activity** contains searchable work logs, changes, QA results, and milestone results. **Risks** keeps the complete risk register."] },
-  { title: "Resources and structure", items: ["**Resources** groups Materials, Parts, Purchases, Manufacturing, and Structure for robot projects.", "Manufacturing uses a **Process** filter for CNC, 3D print, and fabrication. Approval and QA steps remain with each job.", "Open a part definition to inspect or edit its installed instances. Use **Needs mapping** to find unallocated definitions.", "**Structure** owns robot subsystems and mechanisms; open **Import CAD** from there for STEP and Onshape workflows.", "Non-robot projects use **Documents** and workflow **Structure**, with clear labels for the selected project."] },
-  { title: "People and attendance", items: ["**Team → People** combines membership, presence, capacity, and workload. Here today and Available now are different filters.", "Open a person to maintain their details and use **Assign work** to start a task for them. Use the separate person filter to scope workspace views.", "Review planned hours and recent activity in a member’s workload details. Role restrictions still apply to edits and approvals."] },
+  { title: "Resources and structure", items: ["**Resources** groups Materials, Parts, Purchases, Manufacturing, and Structure for robot projects.", "Manufacturing uses a **Process** filter for CNC, 3D print, and fabrication. Approval and QA steps remain with each job.", "Open a part definition to inspect or edit its installed instances. Use **Needs mapping** to find unallocated definitions.", "**Structure** owns robot subsystems and mechanisms; open **Import CAD** from there for STEP and Onshape workflows.", { label: "Robot Configuration source model docs", href: CAD_SOURCE_MODEL_DOCS.robotConfiguration }, "Non-robot projects use **Documents** and workflow **Structure**, with clear labels for the selected project."] },
+  { title: "People and attendance", items: ["**Team → People** combines membership, presence, capacity, assignment status, and workload. Here today and Available now are different filters.", "Open a person to maintain their details and use **Assign work** to start a task for them. Use the separate person filter to scope workspace views.", "Review planned weekly capacity and open tasks in a member’s workload details. Role restrictions still apply to edits and approvals."] },
   { title: "Scope and navigation", items: ["Check the **season and project selector** before entering data. Robot-only views require a robot project.", "Choose a primary area, then use its labeled **View** selector. No page requires a swipe or hover to find it.", "Use Back to return to the previous destination. Choose secondary destinations from the sidebar subitems.", "If a collection looks empty, check project, person, and local filters before adding duplicate records."] },
   { title: "Local demo and tutorials", items: ["Demo edits stay in this browser tab and are **never synced**, including after sign-in.", "Reload keeps demo edits. **Reset demo** restores examples; closing the tab ends its local storage lifetime.", "Tutorials use a separate local copy. Ending or reloading a tutorial discards its edits and restores your previous workspace.", "STEP processing and Onshape connections need a signed-in workspace. Robot maps, parts, and materials can be edited locally."] },
   { title: "Editing and account", items: ["Open a row or card for details. Short create and submit actions use dialogs; larger details retain their surrounding context.", "Save or cancel before leaving an edit. If a save fails, keep your draft and follow the error message before retrying.", "Account controls contain theme, refresh, and sign-in or sign-out. If your session expires, sign in again before retrying a write."] },
@@ -36,7 +44,19 @@ export const HELP_TUTORIAL_STEPS: HelpTutorialStep[] = [
   { title: "Assign people", summary: "Team combines presence, load, and membership.", actions: ["Choose Team → People.", "Compare Here today with Available now.", "Assign work to a teammate or review member workload."], cue: "Presence does not necessarily mean spare capacity." },
 ];
 
-export function renderHelpItem(item: string): ReactNode {
+export function getHelpItemText(item: HelpItem) {
+  return typeof item === "string" ? item : item.label;
+}
+
+export function renderHelpItem(item: HelpItem): ReactNode {
+  if (typeof item !== "string") {
+    return (
+      <a href={item.href} rel="noreferrer" target="_blank">
+        {item.label}
+      </a>
+    );
+  }
+
   const parts = item.split("**");
   if (parts.length === 1) {
     return item;

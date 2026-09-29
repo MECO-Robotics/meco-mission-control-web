@@ -3,6 +3,7 @@ import type { Dispatch, FormEvent, SetStateAction } from "react";
 import type { ArtifactPayload } from "@/types/payloads";
 import type { ArtifactStatus } from "@/types/common";
 import type { BootstrapPayload } from "@/types/bootstrap";
+import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
 
 interface ArtifactEditorModalProps {
   activeArtifactId: string | null;
@@ -16,6 +17,7 @@ interface ArtifactEditorModalProps {
   isDeletingArtifact: boolean;
   isSavingArtifact: boolean;
   setArtifactDraft: Dispatch<SetStateAction<ArtifactPayload>>;
+  requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
 }
 
 export function ArtifactEditorModal({
@@ -30,6 +32,7 @@ export function ArtifactEditorModal({
   isDeletingArtifact,
   isSavingArtifact,
   setArtifactDraft,
+  requestPhotoUpload,
 }: ArtifactEditorModalProps) {
   const filteredWorkstreams = bootstrap.workstreams.filter(
     (workstream) => workstream.projectId === artifactDraft.projectId,
@@ -148,6 +151,16 @@ export function ArtifactEditorModal({
           value={artifactDraft.link}
         />
       </label>
+      <PhotoUploadField
+        currentUrl={artifactDraft.photoUrl ?? ""}
+        label="Document photo"
+        onChange={(value) => setArtifactDraft((current) => ({ ...current, photoUrl: value }))}
+        onUpload={(file) => {
+          const projectId = artifactDraft.projectId || bootstrap.projects[0]?.id;
+          if (!projectId) return Promise.reject(new Error("Select a project before uploading a photo."));
+          return requestPhotoUpload(projectId, file);
+        }}
+      />
       <div className="modal-actions modal-wide">
         {artifactModalMode === "edit" && activeArtifactId ? (
           <button

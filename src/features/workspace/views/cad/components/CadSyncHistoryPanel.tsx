@@ -3,7 +3,7 @@ import type {
   OnshapeOverview,
   OnshapeSyncJobRecord,
   SyncLevel
-} from "../model/cadIntegrationTypes";
+} from "../model/onshapeCadTypes";
 
 type SyncHistoryRow = {
   id: string;

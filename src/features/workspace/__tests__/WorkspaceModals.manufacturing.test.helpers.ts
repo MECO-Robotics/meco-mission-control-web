@@ -1,6 +1,7 @@
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MaterialEditorModal } from "@/features/workspace/modals/assetCatalog/MaterialEditorModal";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { ManufacturingEditorModal } from "@/features/workspace/modals/purchaseManufacturing/ManufacturingEditorModal";
 import { buildEmptyManufacturingPayload } from "@/lib/appUtils/manufacturing";
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -49,6 +50,8 @@ export function renderMaterialModal(materialModalMode: "create" | "edit") {
       },
       materialModalMode,
       setMaterialDraft: jest.fn(),
+      bootstrap: EMPTY_BOOTSTRAP,
+      requestPhotoUpload: jest.fn(async () => "https://example.test/material.png"),
     }),
   );
 }

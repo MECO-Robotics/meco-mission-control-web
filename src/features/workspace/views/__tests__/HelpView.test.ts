@@ -16,6 +16,10 @@ describe("HelpView", () => {
     expect(html).toContain("Work → Schedule");
     expect(html).toContain("Resources and structure");
     expect(html).toContain("Team");
+    expect(html).toContain("planned weekly capacity and open tasks");
+    expect(html).not.toContain("Team → Attendance");
+    expect(html).toContain('href="/docs/CURRENT_WEB_SPEC.md#robot-configuration"');
+    expect(html).toContain("Robot Configuration source model docs");
   });
 
   it("offers a tutorial launch point inside help", () => {

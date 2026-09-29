@@ -14,28 +14,6 @@
   white-space: nowrap;
 }
 
-.roster-section-add {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border: 1px solid var(--border-base);
-  border-radius: 999px;
-  background: var(--bg-panel);
-  color: var(--meco-blue);
-  opacity: 1;
-  pointer-events: auto;
-  transition: opacity 160ms ease, transform 160ms ease, background 160ms ease;
-}
-
-.roster-section-add:hover,
-.roster-section-add:focus-visible {
-  background: var(--meco-soft-blue);
-  transform: translateY(-1px);
-  outline: none;
-}
-
 .roster-list,
 .compact-form {
   display: grid;
@@ -106,7 +84,7 @@
   height: 2.25rem;
 }
 
-.member-row-email {
+.member-row-discipline {
   font-size: 0.74rem;
   white-space: nowrap;
   overflow: hidden;

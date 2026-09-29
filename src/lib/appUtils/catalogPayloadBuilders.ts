@@ -44,6 +44,7 @@ export function buildEmptyMaterialPayload(): MaterialPayload {
     location: "",
     vendor: "",
     notes: "",
+    photoUrl: "",
   };
 }
 
@@ -84,6 +85,7 @@ export function buildEmptyArtifactPayload(
     link: "",
     isArchived: false,
     updatedAt: new Date().toISOString(),
+    photoUrl: "",
   };
 }
 

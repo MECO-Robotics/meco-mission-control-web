@@ -6,7 +6,7 @@ import { TaskQueueView } from "@/features/workspace/views/taskQueue/TaskQueueVie
 import { TaskQueueKanbanBoard } from "@/features/workspace/views/taskQueue/TaskQueueKanbanBoard";
 import { TASK_QUEUE_LAZY_LOAD_BATCH_SIZE } from "@/features/workspace/views/taskQueue/taskQueueKanbanBoardState";
 import { shouldHideTaskQueueSummary } from "@/features/workspace/views/taskQueue/taskQueueViewState";
-import { createTask, createTaskQueueBootstrap as createBootstrap, readWorkspaceToolbarsCss } from "./taskQueueTestFixtures";
+import { createTask, createTaskQueueBootstrap as createBootstrap } from "./taskQueueTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
@@ -34,10 +34,10 @@ describe("Task Queue board", () => {
     expect(markup).toContain("task-queue-board-load-status");
     expect(markup).toContain("task-queue-board-load-sentinel");
     expect(markup).toContain("task-queue-board-card-due");
-    expect(markup).toContain("task-queue-zoom-controls");
-    expect(markup).toContain("task-queue-zoom-label");
+    expect(markup).toContain("workspace-topbar-zoom-controls");
+    expect(markup).toContain("workspace-topbar-zoom-label");
     expect(markup).toContain("100%");
-    expect(markup).toContain("task-queue-toolbar-inline-actions");
+    expect(markup).toContain("workspace-topbar-zoom-slot-actions");
     expect(markup).toContain("task-queue-board-column-header-icon");
     expect(markup).toContain("timeline-task-status-logo-signal-not-started");
     expect(markup).toContain("timeline-task-status-logo-signal-in-progress");
@@ -72,7 +72,7 @@ describe("Task Queue board", () => {
     expect(markup).not.toContain("Task 16");
   });
 
-  it("renders task zoom as the same compact icon pill used by timeline zoom", () => {
+  it("renders task zoom with the shared workspace topbar controls", () => {
     const bootstrap = createBootstrap();
     const markup = renderToStaticMarkup(
       React.createElement(TaskQueueView, {
@@ -90,21 +90,10 @@ describe("Task Queue board", () => {
         subsystemsById: { "subsystem-1": bootstrap.subsystems[0] },
       }),
     );
-    const toolbarsCss = readWorkspaceToolbarsCss();
-
     expect(markup).toContain('aria-label="Zoom out task queue"');
     expect(markup).toContain('aria-label="Zoom in task queue"');
     expect(markup).toContain('d="M8 11h6"');
     expect(markup).toContain('d="M11 8v6"');
-    expect(toolbarsCss).toMatch(
-      /\.task-queue-zoom-controls\s*\{[\s\S]*gap:\s*0\.04rem;[\s\S]*min-height:\s*2\.05rem;/,
-    );
-    expect(toolbarsCss).toMatch(
-      /\.task-queue-zoom-label\s*\{[\s\S]*min-width:\s*2\.9rem;[\s\S]*padding:\s*0 0\.04rem;/,
-    );
-    expect(toolbarsCss).toMatch(
-      /\.task-queue-toolbar\s*>\s*\.task-queue-toolbar-inline-actions:has\(\.task-queue-zoom-controls\)\s*\{[\s\S]*flex:\s*0 0 max-content;[\s\S]*flex-wrap:\s*nowrap;[\s\S]*min-width:\s*max-content;/,
-    );
   });
 
   it("hides task summaries once zoom is compact enough", () => {

@@ -10,13 +10,14 @@ import {
   type useWorkspacePagination,
 } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { WorkspaceEmptyState } from "@/features/workspace/shared/ui";
-import type { ArtifactKind } from "@/types/common";
 import type { ArtifactRecord } from "@/types/recordsInventory";
+import { ResourceRecordPreview } from "@/features/workspace/shared/resourceList/ResourceRecordPreview";
+import { ResourceColumnHeader, type ResourceSortDirection } from "@/features/workspace/shared/resourceList/ResourceColumnHeader";
+import type { ArtifactSortField } from "./artifactInventoryModel";
 
 import {
   ARTIFACT_GRID_TEMPLATE,
   ARTIFACT_STATUS_DISPLAY,
-  ARTIFACT_STATUS_OPTIONS,
   formatUpdatedAt,
   summarizeLink,
 } from "./artifactInventoryModel";
@@ -29,17 +30,20 @@ interface ArtifactTableProps {
   filterMotionClass: string;
   hasArtifactFilters: boolean;
   hasHiddenArchivedArtifacts: boolean;
-  openCreateArtifactModal: (kind: ArtifactKind) => void;
   openEditArtifactModal: (artifact: ArtifactRecord) => void;
   pagination: ArtifactPagination;
-  primaryKind: ArtifactKind;
   sectionTitle: string;
   setStatusFilter: (value: FilterSelection) => void;
   setWorkstreamFilter: (value: FilterSelection) => void;
   statusFilter: FilterSelection;
   workstreamFilter: FilterSelection;
-  workstreamOptions: Array<{ id: string; name: string }>;
   workstreamsById: Record<string, string>;
+  sortField: ArtifactSortField | null;
+  sortDirection: ResourceSortDirection;
+  onSort: (field: ArtifactSortField) => void;
+  columnOptions: Record<ArtifactSortField, Array<{ id: string; name: string }>>;
+  columnFilters: Record<ArtifactSortField, FilterSelection>;
+  setColumnFilter: (field: ArtifactSortField, value: FilterSelection) => void;
 }
 
 export function ArtifactTable({
@@ -48,49 +52,54 @@ export function ArtifactTable({
   filterMotionClass,
   hasArtifactFilters,
   hasHiddenArchivedArtifacts,
-  openCreateArtifactModal,
   openEditArtifactModal,
   pagination,
-  primaryKind,
   sectionTitle,
   setStatusFilter,
   setWorkstreamFilter,
   statusFilter,
   workstreamFilter,
-  workstreamOptions,
   workstreamsById,
+  sortField,
+  sortDirection,
+  onSort,
+  columnOptions,
+  columnFilters,
+  setColumnFilter,
 }: ArtifactTableProps) {
-  const addLabel = "Add document";
-
   return (
     <div className={`table-shell ${filterMotionClass}`}>
       <div
         className="ops-table ops-table-header materials-table"
         style={{ "--workspace-grid-template": ARTIFACT_GRID_TEMPLATE } as CSSProperties}
       >
-        <span>Artifact</span>
-        <span className="table-column-header-cell">
-          <span className="table-column-title">Workflow</span>
+        <ResourceColumnHeader field="title" label="Artifact" onSort={(field) => onSort(field as ArtifactSortField)} sortDirection={sortDirection} sortField={sortField}>
+          <ColumnFilterDropdown allLabel="All artifacts" ariaLabel="Filter artifacts by title" onChange={(value) => setColumnFilter("title", value)} options={columnOptions.title} value={columnFilters.title} />
+        </ResourceColumnHeader>
+        <ResourceColumnHeader field="workstream" label="Workflow" onSort={(field) => onSort(field as ArtifactSortField)} sortDirection={sortDirection} sortField={sortField}>
           <ColumnFilterDropdown
             allLabel="All workflows"
             ariaLabel="Filter artifacts by workflow"
-            onChange={setWorkstreamFilter}
-            options={workstreamOptions}
+            onChange={(value) => { setWorkstreamFilter(value); setColumnFilter("workstream", value); }}
+            options={columnOptions.workstream}
             value={workstreamFilter}
           />
-        </span>
-        <span className="table-column-header-cell">
-          <span className="table-column-title">Status</span>
+        </ResourceColumnHeader>
+        <ResourceColumnHeader field="status" label="Status" onSort={(field) => onSort(field as ArtifactSortField)} sortDirection={sortDirection} sortField={sortField}>
           <ColumnFilterDropdown
             allLabel="All statuses"
             ariaLabel="Filter artifacts by status"
-            onChange={setStatusFilter}
-            options={ARTIFACT_STATUS_OPTIONS}
+            onChange={(value) => { setStatusFilter(value); setColumnFilter("status", value); }}
+            options={columnOptions.status}
             value={statusFilter}
           />
-        </span>
-        <span>Link</span>
-        <span>Updated</span>
+        </ResourceColumnHeader>
+        <ResourceColumnHeader field="link" label="Link" onSort={(field) => onSort(field as ArtifactSortField)} sortDirection={sortDirection} sortField={sortField}>
+          <ColumnFilterDropdown allLabel="All links" ariaLabel="Filter artifacts by link" onChange={(value) => setColumnFilter("link", value)} options={columnOptions.link} value={columnFilters.link} />
+        </ResourceColumnHeader>
+        <ResourceColumnHeader field="updated" label="Updated" onSort={(field) => onSort(field as ArtifactSortField)} sortDirection={sortDirection} sortField={sortField}>
+          <ColumnFilterDropdown allLabel="All dates" ariaLabel="Filter artifacts by updated date" onChange={(value) => setColumnFilter("updated", value)} options={columnOptions.updated} value={columnFilters.updated} />
+        </ResourceColumnHeader>
       </div>
 
       {pagination.pageItems.map((artifact) => {
@@ -109,9 +118,7 @@ export function ArtifactTable({
             type="button"
           >
             <TableCell label="Artifact">
-              <strong>{artifact.title}</strong>
-              {artifact.isArchived ? <small>Archived</small> : null}
-              <small>{artifact.summary || "No summary yet."}</small>
+              <ResourceRecordPreview archived={artifact.isArchived} photoUrl={artifact.photoUrl} name={artifact.title} subtitle={artifact.summary || "No summary yet."} />
             </TableCell>
             <TableCell label="Workflow">{workflowName}</TableCell>
             <TableCell label="Status" valueClassName="table-cell-pill">
@@ -130,12 +137,6 @@ export function ArtifactTable({
 
       {filteredArtifacts.length === 0 ? (
         <WorkspaceEmptyState
-          actionLabel={hasArtifactFilters || hasHiddenArchivedArtifacts ? undefined : addLabel}
-          onAction={
-            hasArtifactFilters || hasHiddenArchivedArtifacts
-              ? undefined
-              : () => openCreateArtifactModal(primaryKind)
-          }
           reason={
             hasHiddenArchivedArtifacts
               ? `Archived ${artifactNoun} are hidden. Turn on Show archived to review existing records.`

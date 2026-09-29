@@ -59,17 +59,17 @@
   min-height: calc(1.65rem * var(--task-queue-zoom, 1));
   pointer-events: auto;
   padding: calc(0.22rem * var(--task-queue-zoom, 1)) calc(0.5rem * var(--task-queue-zoom, 1));
-  border: 1px solid color-mix(in srgb, var(--border-base) 78%, transparent);
+  border: 0;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--bg-panel) 88%, transparent);
-  box-shadow: 0 8px 18px rgba(15, 28, 52, 0.14);
+  background: transparent;
+  box-shadow: none;
   color: var(--text-title);
   font-size: calc(0.62rem * var(--task-queue-zoom, 1));
   font-weight: 800;
   letter-spacing: 0.08em;
   line-height: 1;
   text-transform: uppercase;
-  backdrop-filter: blur(4px);
+  backdrop-filter: none;
 }
 
 .task-queue-board-scroll-hint.is-hidden {

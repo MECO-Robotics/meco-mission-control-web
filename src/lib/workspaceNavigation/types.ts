@@ -60,7 +60,6 @@ export interface NavigationSubItem {
   section: NavigationSection;
   target: NavigationTarget;
   icon: string;
-  requires?: string[];
 }
 
 export interface ViewAvailabilityScope {

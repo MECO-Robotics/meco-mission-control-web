@@ -2,7 +2,8 @@ import { useMemo, useState } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { PurchaseItemRecord } from "@/types/recordsInventory";
-import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
+import { buildSingleAddMenuAction } from "@/features/workspace/shared/topbar";
 import { useWorkspacePagination } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { filterSelectionIncludes, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
@@ -120,9 +121,9 @@ export function PurchasesView({
         </div>
       </div>
 
-      <WorkspaceFloatingAddButton
+      <WorkspaceTopbarAddMenu
+        actions={buildSingleAddMenuAction({ label: "Add purchase", onSelect: openCreatePurchaseModal })}
         ariaLabel="Add purchase"
-        onClick={openCreatePurchaseModal}
         title="Add purchase"
         tutorialTarget="create-purchase-button"
       />
@@ -134,7 +135,6 @@ export function PurchasesView({
         filterMotionClass={purchaseFilterMotionClass}
         hasPurchaseFilters={hasPurchaseFilters}
         membersById={membersById}
-        openCreatePurchaseModal={openCreatePurchaseModal}
         openEditPurchaseModal={openEditPurchaseModal}
         pagination={purchasePagination}
         requester={requester}

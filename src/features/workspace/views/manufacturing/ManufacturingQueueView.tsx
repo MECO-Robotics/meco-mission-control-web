@@ -9,20 +9,24 @@ import { filterSelectionIncludes, useFilterChangeMotionClass } from "@/features/
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import {
   WorkspaceTopbarControls,
+  WorkspaceTopbarZoom,
   buildSingleAddMenuAction,
   buildTopbarSearchProps,
 } from "@/features/workspace/shared/topbar";
-import { WorkspaceTopbarAddMenu, WorkspaceTopbarZoomControls } from "@/features/workspace/shared/ui";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { KanbanScrollFrame } from "@/features/workspace/views/kanban/KanbanScrollFrame";
 import { ManufacturingKanbanBoard } from "./ManufacturingKanbanBoard";
 import { ManufacturingQueueFilters } from "./ManufacturingQueueFilters";
+import { ManufacturingSortMenu } from "./ManufacturingSortMenu";
+import { sortManufacturingItems, type ManufacturingSortField } from "./manufacturingSort";
 import {
   filterManufacturingItemsByProcessView,
 } from "./manufacturingProcessFilter";
 import {
   clampTaskQueueZoom,
+  formatTaskQueueZoomLabel,
   TASK_QUEUE_ZOOM_MAX,
   TASK_QUEUE_ZOOM_MIN,
   TASK_QUEUE_ZOOM_STEP,
@@ -74,6 +78,7 @@ export function ManufacturingQueueView({
   const [status, setStatus] = useState<FilterSelection>([]);
   const [material, setMaterial] = useState<FilterSelection>([]);
   const [manufacturingZoom, setManufacturingZoom] = useState(1);
+  const [sortField, setSortField] = useState<ManufacturingSortField>("dueDate");
   const processFilterSelection =
     processFilterValue && processFilterValue !== "all" ? [processFilterValue] : [];
 
@@ -112,6 +117,10 @@ export function ManufacturingQueueView({
       );
     });
   }, [activePersonFilter, items, material, processFilterValue, requester, search, status, subsystem]);
+  const sortedItems = useMemo(
+    () => sortManufacturingItems(filteredItems, sortField, membersById, subsystemsById),
+    [filteredItems, membersById, sortField, subsystemsById],
+  );
   const activeFilterCount = [
     processFilterSelection,
     subsystem,
@@ -153,6 +162,7 @@ export function ManufacturingQueueView({
             <TopbarResponsiveSearch
               {...buildTopbarSearchProps("manufacturing", {
                 actions: (
+                  <>
                   <ManufacturingQueueFilters
                     activeCount={activeFilterCount}
                     bootstrap={bootstrap}
@@ -169,6 +179,8 @@ export function ManufacturingQueueView({
                     title={title}
                     uniqueMaterials={uniqueMaterials}
                   />
+                  <ManufacturingSortMenu onChange={setSortField} sortField={sortField} />
+                  </>
                 ),
                 ariaLabel: `Search ${title}`,
                 onChange: setSearch,
@@ -190,9 +202,17 @@ export function ManufacturingQueueView({
             />
           }
         >
-          <div className="task-queue-toolbar-inline-actions">
-            <WorkspaceTopbarZoomControls ariaLabel="Manufacturing zoom" label="manufacturing" max={TASK_QUEUE_ZOOM_MAX} min={TASK_QUEUE_ZOOM_MIN} onChange={(direction) => setManufacturingZoom((current) => clampTaskQueueZoom(current + direction * TASK_QUEUE_ZOOM_STEP))} value={manufacturingZoom} />
-          </div>
+          <WorkspaceTopbarZoom
+            ariaLabel="Manufacturing zoom"
+            canZoomIn={manufacturingZoom < TASK_QUEUE_ZOOM_MAX}
+            canZoomOut={manufacturingZoom > TASK_QUEUE_ZOOM_MIN}
+            decreaseLabel="Zoom out manufacturing"
+            increaseLabel="Zoom in manufacturing"
+            onZoomIn={() => setManufacturingZoom((current) => clampTaskQueueZoom(current + TASK_QUEUE_ZOOM_STEP))}
+            onZoomOut={() => setManufacturingZoom((current) => clampTaskQueueZoom(current - TASK_QUEUE_ZOOM_STEP))}
+            toolbarClassName="workspace-topbar-zoom-slot-actions"
+            value={formatTaskQueueZoomLabel(manufacturingZoom)}
+          />
         </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
 
@@ -204,11 +224,11 @@ export function ManufacturingQueueView({
 
       <KanbanScrollFrame motionClassName={manufacturingFilterMotionClass}>
         <>
-          {filteredItems.length === 0 ? (
+          {sortedItems.length === 0 ? (
             <p className="empty-state">{emptyStateMessage}</p>
           ) : (
             <ManufacturingKanbanBoard
-              items={filteredItems}
+              items={sortedItems}
               membersById={membersById}
               onEdit={onEdit}
               onQuickStatusChange={onQuickStatusChange}

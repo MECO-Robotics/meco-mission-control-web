@@ -1,38 +1,31 @@
 .app-topbar-controls-host,
-.app-topbar-search-host {
+.app-topbar-search-host,
+.app-topbar-zoom-host,
+.app-topbar-add-host {
   display: none;
   align-items: center;
   justify-content: flex-end;
   gap: 0.4rem;
-  width: 100%;
   min-width: 0;
   overflow: visible;
   flex-wrap: nowrap;
+  flex: 0 0 auto;
 }
 
 .app-topbar-controls-host:not(:empty),
-.app-topbar-search-host:not(:empty) {
+.app-topbar-search-host:not(:empty),
+.app-topbar-zoom-host:not(:empty),
+.app-topbar-add-host:not(:empty) {
   display: flex;
 }
 
-.app-topbar-controls-host .filter-toolbar,
-.app-topbar-search-host .filter-toolbar {
-  flex-wrap: nowrap;
-  align-items: center;
-  justify-content: flex-end;
-  width: 100%;
+.app-topbar-controls-host:has(> .filter-toolbar:empty) {
+  display: none;
 }
 
-.app-topbar-controls-host .workspace-topbar-controls,
-.app-topbar-search-host .workspace-topbar-controls {
+.app-topbar-search-host {
+  flex: 1 1 16rem;
   width: 100%;
-  justify-content: flex-end;
-}
-
-.app-topbar-controls-host > .workspace-topbar-controls.task-calendar-filter-toolbar {
-  flex: 1 1 auto;
-  width: auto;
-  min-width: 0;
 }
 
 .app-topbar-controls-host > .workspace-topbar-controls.timeline-topbar-controls {
@@ -59,46 +52,50 @@
   margin-left: 0.1rem;
 }
 
+.app-topbar-controls-host .filter-toolbar,
+.app-topbar-search-host .filter-toolbar,
+.app-topbar-zoom-host .filter-toolbar,
+.app-topbar-add-host .filter-toolbar {
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.app-topbar-controls-host .filter-toolbar,
+.app-topbar-zoom-host .filter-toolbar,
+.app-topbar-add-host .filter-toolbar {
+  width: auto;
+}
+
+.app-topbar-search-host .filter-toolbar {
+  width: 100%;
+}
+
+.app-topbar-controls-host .workspace-topbar-controls,
+.app-topbar-search-host .workspace-topbar-controls {
+  justify-content: flex-end;
+}
+
 .app-topbar-controls-host .filter-toolbar > *,
-.app-topbar-search-host .filter-toolbar > * {
+.app-topbar-search-host .filter-toolbar > *,
+.app-topbar-zoom-host .filter-toolbar > *,
+.app-topbar-add-host .filter-toolbar > * {
   flex: 0 0 auto;
-}
-
-.app-topbar-controls-host .milestones-toolbar > .milestones-search-slot {
-  flex: 1 1 auto;
-  min-width: 0;
-  max-width: none;
-  display: flex;
-}
-
-.app-topbar-controls-host .milestones-toolbar > .milestones-search-slot > .topbar-responsive-search,
-.app-topbar-controls-host .milestones-toolbar > .milestones-search-slot > .milestones-search-control {
-  width: 100%;
-  min-width: 0;
-}
-
-.app-topbar-controls-host .milestones-toolbar .topbar-responsive-search-full,
-.app-topbar-controls-host .milestones-toolbar .topbar-responsive-search-full-compact,
-.app-topbar-controls-host .milestones-toolbar .topbar-responsive-search .toolbar-search,
-.app-topbar-controls-host .milestones-toolbar .topbar-responsive-search .toolbar-search-input {
-  width: 100%;
-  min-width: 0;
-}
-
-.app-topbar-controls-host:not(:empty) ~ .app-topbar-search,
-.app-topbar-search-host:not(:empty) + .app-topbar-search {
-  display: none;
 }
 
 @media (max-width: 880px) {
   .app-topbar-controls-host:not(:empty),
-  .app-topbar-search-host:not(:empty) {
+  .app-topbar-search-host:not(:empty),
+  .app-topbar-zoom-host:not(:empty),
+  .app-topbar-add-host:not(:empty) {
     justify-content: flex-start;
-    min-width: 100%;
+    min-width: max-content;
   }
 
   .app-topbar-controls-host .filter-toolbar,
-  .app-topbar-search-host .filter-toolbar {
+  .app-topbar-search-host .filter-toolbar,
+  .app-topbar-zoom-host .filter-toolbar,
+  .app-topbar-add-host .filter-toolbar {
     justify-content: flex-start;
     min-width: max-content;
   }

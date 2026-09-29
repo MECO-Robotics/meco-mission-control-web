@@ -5,7 +5,7 @@ import type {
   OnshapeOverview,
   OnshapeSyncEstimate,
   SyncLevel
-} from "../model/cadIntegrationTypes";
+} from "../model/onshapeCadTypes";
 
 export function fetchOnshapeOverview(onUnauthorized?: () => void) {
   return requestApi<OnshapeOverview>("/onshape/overview", {}, onUnauthorized);

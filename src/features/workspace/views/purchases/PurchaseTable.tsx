@@ -28,7 +28,6 @@ interface PurchaseTableProps {
   filterMotionClass: string;
   hasPurchaseFilters: boolean;
   membersById: MembersById;
-  openCreatePurchaseModal: () => void;
   openEditPurchaseModal: (item: PurchaseItemRecord) => void;
   pagination: PurchasePagination;
   requester: FilterSelection;
@@ -53,7 +52,6 @@ export function PurchaseTable({
   filterMotionClass,
   hasPurchaseFilters,
   membersById,
-  openCreatePurchaseModal,
   openEditPurchaseModal,
   pagination,
   requester,
@@ -157,8 +155,6 @@ export function PurchaseTable({
 
       {filteredPurchases.length === 0 ? (
         <WorkspaceEmptyState
-          actionLabel={hasPurchaseFilters ? undefined : "Add purchase"}
-          onAction={hasPurchaseFilters ? undefined : openCreatePurchaseModal}
           reason={
             hasPurchaseFilters
               ? "The current search, person, status, vendor, or approval filters hide every purchase request in this scope."

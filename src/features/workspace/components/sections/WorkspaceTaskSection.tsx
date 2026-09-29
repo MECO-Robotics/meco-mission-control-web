@@ -1,10 +1,12 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 
 import { MilestonesView } from "@/features/workspace/views/milestones/MilestonesView";
 import { TaskCalendarView } from "@/features/workspace/views/taskCalendar/TaskCalendarView";
 import { RobotMapView } from "@/features/workspace/views/robotMap/RobotMapView";
 import { TaskQueueView } from "@/features/workspace/views/taskQueue/TaskQueueView";
 import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
+import type { TaskCalendarEventType } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
+import type { TaskCalendarSortMode } from "@/features/workspace/views/taskCalendar/taskCalendarLayout";
 import { WorkspaceSectionPanel, WorkspaceSubPanel } from "../../WorkspaceContentPanelShells";
 import type { WorkspaceContentPanelsViewProps } from "../workspaceContentPanelsViewTypes";
 
@@ -12,6 +14,9 @@ const MemoizedTimelineView = memo(TimelineView);
 
 export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
   const disablePanelAnimations = props.disablePanelAnimations ?? false;
+  const [scheduleSearchFilter, setScheduleSearchFilter] = useState("");
+  const [calendarEventFilter, setCalendarEventFilter] = useState<"all" | TaskCalendarEventType>("all");
+  const [calendarSortMode, setCalendarSortMode] = useState<TaskCalendarSortMode>("date");
   const {
     activePersonFilter,
     bootstrap,
@@ -62,6 +67,12 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
               onCreateMilestoneReport={props.openCreateMilestoneReportModal}
               onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
               onSaveTimelineMilestone={handleTimelineMilestoneSave}
+              searchFilter={scheduleSearchFilter}
+              onSearchChange={setScheduleSearchFilter}
+              eventFilter={calendarEventFilter}
+              onEventFilterChange={setCalendarEventFilter}
+              sortMode={calendarSortMode}
+              onSortModeChange={setCalendarSortMode}
               onTaskDetailOpen={openTimelineTaskDetailsModal}
               onTaskEditCanceled={props.onTaskEditCanceled}
               onTaskEditSaved={props.onTaskEditSaved}
@@ -77,17 +88,19 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
               onCreateMilestoneReport={props.openCreateMilestoneReportModal}
               onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
               onSaveTimelineMilestone={handleTimelineMilestoneSave}
+              searchFilter={scheduleSearchFilter}
+              onSearchChange={setScheduleSearchFilter}
+              calendarEventFilter={calendarEventFilter}
+              onCalendarEventFilterChange={setCalendarEventFilter}
+              calendarSortMode={calendarSortMode}
+              onCalendarSortModeChange={setCalendarSortMode}
+              showCalendarFilters={taskView === "calendar"}
               openCreateTaskModal={openCreateTaskModalFromTimeline}
               openTaskDetailModal={openTimelineTaskDetailsModal}
               setActivePersonFilter={setActivePersonFilter}
               triggerCreateMilestoneToken={timelineMilestoneCreateSignal}
             />
           </WorkspaceSubPanel>
-        </div>
-      ) : null}
-      {taskView === "robot-map" ? (
-        <div className="workspace-presentation-controls">
-          <button className="ghost-button" onClick={() => props.onOpenDrilldownTarget({ tab: "cad" })} type="button">Import CAD</button>
         </div>
       ) : null}
       <WorkspaceSubPanel
@@ -105,6 +118,7 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
           openEditPartInstanceModal={openEditPartInstanceModal}
           openEditSubsystemModal={openEditSubsystemModal}
           onOpenDrilldownTarget={onOpenDrilldownTarget}
+          onOpenCadWorkspace={() => onOpenDrilldownTarget({ tab: "cad" })}
           removePartInstanceFromMechanism={removePartInstanceFromMechanism}
           onSavePartImage={savePartImage}
           saveSubsystemLayout={saveSubsystemLayout}

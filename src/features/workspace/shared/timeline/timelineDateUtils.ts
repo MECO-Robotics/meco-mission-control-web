@@ -8,9 +8,10 @@ import {
 export type TimelineViewInterval = "all" | "week" | "month";
 
 const MONTH_LABEL_FORMATTER = new Intl.DateTimeFormat(undefined, { month: "long" });
+const MONTH_ABBREVIATED_LABEL_FORMATTER = new Intl.DateTimeFormat(undefined, { month: "short" });
 
 function formatMonthShortYearFromDay(day: string) {
-  const monthLabel = monthLabelFromDay(day);
+  const monthLabel = MONTH_ABBREVIATED_LABEL_FORMATTER.format(new Date(`${day.slice(0, 7)}-01T00:00:00`));
   const yearShort = day.slice(2, 4);
   return `${monthLabel} '${yearShort}`;
 }
@@ -22,15 +23,6 @@ function formatMonthDayShortYearFromDay(day: string) {
   }
 
   return `${Number.parseInt(month, 10)}/${Number.parseInt(monthDay, 10)}/${year.slice(2, 4)}`;
-}
-
-function formatMonthDayFromDay(day: string) {
-  const [, month, monthDay] = day.split("-");
-  if (!month || !monthDay) {
-    return day;
-  }
-
-  return `${Number.parseInt(month, 10)}/${Number.parseInt(monthDay, 10)}`;
 }
 
 export function datePortion(dateTime: string) {
@@ -119,7 +111,7 @@ export function formatTimelinePeriodLabel(viewInterval: TimelineViewInterval, da
   }
 
   if (viewInterval === "week") {
-    return `${formatMonthDayFromDay(startDay)} - ${formatMonthDayShortYearFromDay(endDay)}`;
+    return formatMonthDayShortYearFromDay(startDay);
   }
 
   return "Recent window";
