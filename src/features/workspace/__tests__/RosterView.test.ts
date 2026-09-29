@@ -9,6 +9,15 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MemberPayload } from "@/types/payloads";
 import type { MemberRecord } from "@/types/recordsOrganization";
 
+const mockSearchText = { value: null as string | null };
+
+jest.mock("@/features/workspace/shared/navigation/WorkspaceViewMemory", () => ({
+  useRememberedViewState: (key: string, initial: unknown) => [
+    key === "people.searchText" ? mockSearchText.value ?? initial : initial,
+    jest.fn(),
+  ],
+}));
+
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 const student: MemberRecord = {
@@ -130,6 +139,17 @@ describe("RosterView", () => {
     expect(html).toContain("Students");
     expect(html).toContain("Mentors");
     expect(html).not.toContain("External access");
+  });
+
+  it("shows a message when search filters out every roster member", () => {
+    mockSearchText.value = "no matching person";
+    const html = renderRosterView();
+    mockSearchText.value = null;
+
+    expect(html).toContain('role="status"');
+    expect(html).toContain("No people match the current search or filters.");
+    expect(html).not.toContain("Student One");
+    expect(html).not.toContain("Mentor One");
   });
 
   it("renders a profile photo upload control in the add-person modal", () => {

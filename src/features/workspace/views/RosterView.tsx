@@ -271,6 +271,8 @@ export const RosterView: React.FC<RosterViewProps> = ({
       title: "External access",
     },
   ];
+  const visibleRosterSections = rosterSections.filter((section) => section.members.length > 0);
+  const hasRosterMembers = sortedStudents.length + sortedMentors.length + sortedExternalMembers.length > 0;
 
   return (
     <section className={`panel dense-panel roster-layout ${WORKSPACE_PANEL_CLASS}`}>
@@ -329,7 +331,12 @@ export const RosterView: React.FC<RosterViewProps> = ({
         </div>
       </div>
       <div className="roster-columns">
-        {rosterSections.filter((section) => section.members.length > 0).map((section) => (
+        {hasRosterMembers && visibleRosterSections.length === 0 ? (
+          <p className="empty-state" role="status">
+            No people match the current search or filters. Try clearing your search or filters.
+          </p>
+        ) : null}
+        {visibleRosterSections.map((section) => (
           <RosterSection
             className={section.className}
             count={section.members.length}
