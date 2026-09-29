@@ -7,6 +7,7 @@ import type { TaskRecord } from "@/types/recordsExecution";
 
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
+import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { buildTopbarAddMenuActions, makeAddMenuAction } from "@/features/workspace/shared/topbar";
 import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
@@ -254,6 +255,33 @@ export const RosterView: React.FC<RosterViewProps> = ({
       <AppTopbarSlotPortal slot="controls">
         <div className="panel-actions filter-toolbar roster-directory-toolbar">
           <TopbarResponsiveSearch
+            actions={
+              <CompactFilterMenu
+                activeCount={peopleFilter === "all" ? 0 : 1}
+                ariaLabel="People filters"
+                buttonLabel="Filter people"
+                className="people-search-filter-menu"
+                iconOnly
+                items={[
+                  {
+                    label: "People",
+                    content: (
+                      <select
+                        aria-label="Filter people"
+                        className="toolbar-filter-select"
+                        onChange={(event) => setPeopleFilter(event.target.value)}
+                        value={peopleFilter}
+                      >
+                        <option value="all">All people</option>
+                        <option value="present">Here today</option>
+                        <option value="available">Available now</option>
+                        <option value="overloaded">Overloaded</option>
+                      </select>
+                    ),
+                  },
+                ]}
+              />
+            }
             ariaLabel="Search people"
             compactPlaceholder="Search"
             onChange={setSearchText}
@@ -276,13 +304,9 @@ export const RosterView: React.FC<RosterViewProps> = ({
       <div className="panel-header compact-header">
         <div className="queue-section-header">
           <h2>People</h2>
-          <p className="section-copy">Find available teammates, balance assignments, and manage membership.</p>
         </div>
       </div>
-      <div className="workspace-presentation-controls">
-        <label>People <select aria-label="Filter people" value={peopleFilter} onChange={event => setPeopleFilter(event.target.value)}><option value="all">All people</option><option value="present">Here today</option><option value="available">Available now</option><option value="overloaded">Overloaded</option></select></label>
-        <span>{presentMemberIds.size} people here today</span>
-      </div>
+      <div className="workspace-inline-summary">{presentMemberIds.size} people here today</div>
       <div className="roster-columns">
         {rosterSections.filter((section) => section.members.length > 0).map((section) => (
           <RosterSection

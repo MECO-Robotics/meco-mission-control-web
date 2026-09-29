@@ -96,6 +96,10 @@ describe("RosterView", () => {
 
     expect(html).toContain("Students");
     expect(html).toContain("Mentors");
+    expect(html).not.toContain("Find available teammates, balance assignments, and manage membership.");
+    expect(html).toContain('aria-label="People filters"');
+    expect(html).toContain('title="Filter people"');
+    expect(html).toContain("people-search-filter-menu");
     expect(html).toContain("External access");
     expect(html).toContain("Sponsor Viewer");
     expect(html).toContain("viewer@sponsor.example");
