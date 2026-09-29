@@ -9,6 +9,7 @@ import { TaskCalendarMonthToolbar } from "@/features/workspace/views/taskCalenda
 import type { TaskCalendarEvent } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { TimelineCompactFilterMenu } from "@/features/workspace/views/timeline/components/TimelineCompactFilterMenu";
+import { TimelineCalendarSortMenu } from "@/features/workspace/views/timeline/components/TimelineCalendarSortMenu";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 
 const taskEvent: TaskCalendarEvent = {
@@ -172,14 +173,12 @@ describe("TaskCalendarMonthToolbar", () => {
 });
 
 describe("TimelineCompactFilterMenu", () => {
-  it("combines timeline filters with calendar event and sort options", () => {
+  it("keeps calendar event filters separate from sorting", () => {
     const menu = TimelineCompactFilterMenu({
       activeFilterCount: 1,
       calendarEventFilter: "qa-due",
-      calendarSortMode: "priority",
       showCalendarFilters: true,
       onCalendarEventFilterChange: jest.fn(),
-      onCalendarSortModeChange: jest.fn(),
       activePersonFilter: [],
       bootstrap: EMPTY_BOOTSTRAP,
       disciplineFilter: [],
@@ -210,8 +209,10 @@ describe("TimelineCompactFilterMenu", () => {
     expect(menu.props.buttonLabel).toBe("Filters");
     expect(menu.props.menuTitle).toBe("Selection");
     expect(menu.props.inlineItems).toBe(true);
-    expect(menu.props.items.find((item) => item.label === "Roster")?.content?.props.compactSummary).toBe(true);
-    expect(menu.props.activeCount).toBe(3);
+    expect(
+      menu.props.items.find((item) => item.label === "Roster")?.content?.props.compactSummary,
+    ).toBe(true);
+    expect(menu.props.activeCount).toBe(2);
     expect(menu.props.items.map((item) => item.label)).toEqual([
       "Project",
       "Roster",
@@ -220,7 +221,29 @@ describe("TimelineCompactFilterMenu", () => {
       "Status",
       "Priority",
       "Event type",
-      "Sort by",
     ]);
+  });
+
+  it("renders calendar sorting as a separate search-bar sort menu", () => {
+    const onChange = jest.fn();
+    const menu = TimelineCalendarSortMenu({ onChange, sortMode: "priority" }) as React.ReactElement<{
+      activeCount: number;
+      ariaLabel: string;
+      items: Array<{
+        label: string;
+        content: React.ReactElement<{
+          value: string;
+          onChange: (event: { currentTarget: { value: string } }) => void;
+        }>;
+      }>;
+    }>;
+
+    expect(menu.type).toBe(CompactFilterMenu);
+    expect(menu.props.ariaLabel).toBe("Sort calendar events");
+    expect(menu.props.activeCount).toBe(1);
+    expect(menu.props.items.map((item) => item.label)).toEqual(["Sort by"]);
+    expect(menu.props.items[0].content.props.value).toBe("priority");
+    menu.props.items[0].content.props.onChange({ currentTarget: { value: "date" } });
+    expect(onChange).toHaveBeenCalledWith("date");
   });
 });

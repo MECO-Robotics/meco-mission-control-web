@@ -10,6 +10,7 @@ import type { TaskCalendarEventType } from "@/features/workspace/views/taskCalen
 import type { TaskCalendarSortMode } from "@/features/workspace/views/taskCalendar/taskCalendarLayout";
 import { WorkspaceTopbarZoom } from "@/features/workspace/shared/topbar";
 import { TimelineCompactFilterMenu } from "./components/TimelineCompactFilterMenu";
+import { TimelineCalendarSortMenu } from "./components/TimelineCalendarSortMenu";
 
 const TIMELINE_INTERVAL_OPTIONS: Array<{ id: TimelineViewInterval; label: string; shortLabel: string }> = [
   { id: "all", label: "All", shortLabel: "A" },
@@ -152,31 +153,38 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   return (
     <div className="panel-actions filter-toolbar timeline-toolbar timeline-topbar-controls">
       <TopbarResponsiveSearch
+        actionCount={showCalendarFilters ? 2 : 1}
         actions={
-          <TimelineCompactFilterMenu
-            activeFilterCount={activeFilterCount}
-            calendarEventFilter={calendarEventFilter}
-            calendarSortMode={calendarSortMode}
-            showCalendarFilters={showCalendarFilters}
-            activePersonFilter={activePersonFilter}
-            bootstrap={bootstrap}
-            disciplineFilter={disciplineFilter}
-            disciplineFilterOptions={disciplineFilterOptions}
-            isAllProjectsView={isAllProjectsView}
-            onChangePersonFilter={onChangePersonFilter}
-            onCalendarEventFilterChange={onCalendarEventFilterChange}
-            onCalendarSortModeChange={onCalendarSortModeChange}
-            priorityFilter={priorityFilter}
-            projectFilter={projectFilter}
-            setDisciplineFilter={setDisciplineFilter}
-            setPriorityFilter={setPriorityFilter}
-            setProjectFilter={setProjectFilter}
-            setStatusFilter={setStatusFilter}
-            setSubsystemFilter={setSubsystemFilter}
-            statusFilter={statusFilter}
-            subsystemFilter={subsystemFilter}
-            subsystemFilterOptions={subsystemFilterOptions}
-          />
+          <>
+            <TimelineCompactFilterMenu
+              activeFilterCount={activeFilterCount}
+              calendarEventFilter={calendarEventFilter}
+              showCalendarFilters={showCalendarFilters}
+              activePersonFilter={activePersonFilter}
+              bootstrap={bootstrap}
+              disciplineFilter={disciplineFilter}
+              disciplineFilterOptions={disciplineFilterOptions}
+              isAllProjectsView={isAllProjectsView}
+              onChangePersonFilter={onChangePersonFilter}
+              onCalendarEventFilterChange={onCalendarEventFilterChange}
+              priorityFilter={priorityFilter}
+              projectFilter={projectFilter}
+              setDisciplineFilter={setDisciplineFilter}
+              setPriorityFilter={setPriorityFilter}
+              setProjectFilter={setProjectFilter}
+              setStatusFilter={setStatusFilter}
+              setSubsystemFilter={setSubsystemFilter}
+              statusFilter={statusFilter}
+              subsystemFilter={subsystemFilter}
+              subsystemFilterOptions={subsystemFilterOptions}
+            />
+            {showCalendarFilters ? (
+              <TimelineCalendarSortMenu
+                onChange={onCalendarSortModeChange}
+                sortMode={calendarSortMode}
+              />
+            ) : null}
+          </>
         }
         ariaLabel="Search schedule"
         compactPlaceholder="Search"
