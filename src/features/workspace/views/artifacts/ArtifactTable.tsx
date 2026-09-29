@@ -10,7 +10,6 @@ import {
   type useWorkspacePagination,
 } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { WorkspaceEmptyState } from "@/features/workspace/shared/ui";
-import type { ArtifactKind } from "@/types/common";
 import type { ArtifactRecord } from "@/types/recordsInventory";
 
 import {
@@ -29,10 +28,8 @@ interface ArtifactTableProps {
   filterMotionClass: string;
   hasArtifactFilters: boolean;
   hasHiddenArchivedArtifacts: boolean;
-  openCreateArtifactModal: (kind: ArtifactKind) => void;
   openEditArtifactModal: (artifact: ArtifactRecord) => void;
   pagination: ArtifactPagination;
-  primaryKind: ArtifactKind;
   sectionTitle: string;
   setStatusFilter: (value: FilterSelection) => void;
   setWorkstreamFilter: (value: FilterSelection) => void;
@@ -48,10 +45,8 @@ export function ArtifactTable({
   filterMotionClass,
   hasArtifactFilters,
   hasHiddenArchivedArtifacts,
-  openCreateArtifactModal,
   openEditArtifactModal,
   pagination,
-  primaryKind,
   sectionTitle,
   setStatusFilter,
   setWorkstreamFilter,
@@ -60,8 +55,6 @@ export function ArtifactTable({
   workstreamOptions,
   workstreamsById,
 }: ArtifactTableProps) {
-  const addLabel = "Add document";
-
   return (
     <div className={`table-shell ${filterMotionClass}`}>
       <div
@@ -130,12 +123,6 @@ export function ArtifactTable({
 
       {filteredArtifacts.length === 0 ? (
         <WorkspaceEmptyState
-          actionLabel={hasArtifactFilters || hasHiddenArchivedArtifacts ? undefined : addLabel}
-          onAction={
-            hasArtifactFilters || hasHiddenArchivedArtifacts
-              ? undefined
-              : () => openCreateArtifactModal(primaryKind)
-          }
           reason={
             hasHiddenArchivedArtifacts
               ? `Archived ${artifactNoun} are hidden. Turn on Show archived to review existing records.`

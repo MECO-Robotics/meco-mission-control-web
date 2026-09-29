@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 
-import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
+import { buildSingleAddMenuAction } from "@/features/workspace/shared/topbar";
 import type { ArtifactKind } from "@/types/common";
 import type { ArtifactRecord } from "@/types/recordsInventory";
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -129,9 +130,12 @@ export function ArtifactInventoryView({
         </div>
       </div>
 
-      <WorkspaceFloatingAddButton
+      <WorkspaceTopbarAddMenu
+        actions={buildSingleAddMenuAction({
+          label: addLabel,
+          onSelect: () => openCreateArtifactModal(primaryKind),
+        })}
         ariaLabel={addLabel}
-        onClick={() => openCreateArtifactModal(primaryKind)}
         title={addLabel}
         tutorialTarget="create-document-button"
       />
@@ -142,10 +146,8 @@ export function ArtifactInventoryView({
         filterMotionClass={artifactFilterMotionClass}
         hasArtifactFilters={hasArtifactFilters}
         hasHiddenArchivedArtifacts={hasHiddenArchivedArtifacts}
-        openCreateArtifactModal={openCreateArtifactModal}
         openEditArtifactModal={openEditArtifactModal}
         pagination={artifactPagination}
-        primaryKind={primaryKind}
         sectionTitle={sectionTitle}
         setStatusFilter={setStatusFilter}
         setWorkstreamFilter={setWorkstreamFilter}
