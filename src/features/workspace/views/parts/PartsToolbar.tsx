@@ -6,7 +6,7 @@ import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspace
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { READINESS_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
-import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { ALL_FILTER_LABEL, type FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { createResourceFilterMenuItem } from "@/features/workspace/shared/resourceList/ResourceFilterMenuItem";
 import { PART_DEFINITION_COLUMNS, type PartDefinitionColumnFilters, type PartDefinitionSortField } from "./partsViewTypes";
@@ -104,7 +104,7 @@ export function PartsToolbar({
                       onChange={(event) => setMapping(event.target.value)}
                       value={mapping}
                     >
-                      <option value="all">All parts</option>
+                      <option value="all">{ALL_FILTER_LABEL}</option>
                       <option value="mapped">Mapped</option>
                       <option value="unmapped">Needs mapping</option>
                     </select>

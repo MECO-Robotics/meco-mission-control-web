@@ -9,6 +9,7 @@ import type { TaskRecord } from "@/types/recordsExecution";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
+import { ALL_FILTER_LABEL } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { buildTopbarAddMenuActions, makeAddMenuAction } from "@/features/workspace/shared/topbar";
 import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
@@ -296,7 +297,7 @@ export const RosterView: React.FC<RosterViewProps> = ({
                         onChange={(event) => setPeopleFilter(event.target.value)}
                         value={peopleFilter}
                       >
-                        <option value="all">All people</option>
+                        <option value="all">{ALL_FILTER_LABEL}</option>
                         <option value="present">Here today</option>
                         <option value="available">Available now</option>
                         <option value="overloaded">Overloaded</option>
