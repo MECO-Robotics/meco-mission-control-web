@@ -170,7 +170,7 @@ export function formatCompactFilterSelectionLabel(
   }
 
   if (value.length > 1) {
-    return String(value.length);
+    return `${value.length}...`;
   }
 
   return options.find((option) => option.id === value[0])?.name ?? "1";
