@@ -5,7 +5,7 @@ export function ReportHistoryList({ reports, bootstrap, onOpenTask, onOpenMilest
   if (reports.length === 0) return <p className="muted-copy">No results recorded yet.</p>;
   return (
     <ul className="workspace-report-history" style={{ paddingLeft: "1.25rem" }}>
-      {[...reports].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map((report) => (
+      {reports.map((report) => (
         <li key={report.id} style={{ marginBottom: "0.75rem" }}>
           <details>
             <summary>
