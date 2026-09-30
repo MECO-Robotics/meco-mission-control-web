@@ -80,7 +80,6 @@ export function TaskCalendarView({
 }: TaskCalendarViewProps) {
   const [isMeetingModalOpen, setIsMeetingModalOpen] = useState(false);
   const [isSavingMeeting, setIsSavingMeeting] = useState(false);
-  const [calendarViewMode, setCalendarViewMode] = useState<"month" | "week">("month");
   const [meetingDraft, setMeetingDraft] = useState<MeetingPayload>(() => createDefaultMeetingDraft(bootstrap));
   const [meetingError, setMeetingError] = useState<string | null>(null);
   const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
@@ -97,16 +96,7 @@ export function TaskCalendarView({
     sortDirection,
     onSortDirectionChange,
   });
-  useEffect(() => {
-    const handleSchedulePeriodChange = (event: Event) => {
-      const anchorDate = (event as CustomEvent<{ anchorDate?: string }>).detail?.anchorDate;
-      const viewMode = (event as CustomEvent<{ viewMode?: "month" | "week" }>).detail?.viewMode;
-      if (viewMode) setCalendarViewMode(viewMode);
-      if (anchorDate) calendar.setMonthCursor(new Date(anchorDate + "T12:00:00"));
-    };
-    window.addEventListener("mission-control:schedule-period-change", handleSchedulePeriodChange);
-    return () => window.removeEventListener("mission-control:schedule-period-change", handleSchedulePeriodChange);
-  }, [calendar.setMonthCursor]);
+  const monthLabel = calendar.monthCursor.toLocaleDateString(undefined, { month: "long", year: "numeric" });
   const milestoneModalState = useMilestonesMilestoneModalState({
     bootstrap,
     isAllProjectsView,
@@ -168,6 +158,15 @@ export function TaskCalendarView({
 
   return (
     <section className={`panel dense-panel task-calendar-shell ${WORKSPACE_PANEL_CLASS}`}>
+      <h2 className="schedule-calendar-heading">Calendar</h2>
+      <div className="task-calendar-toolbar">
+        <div className="task-calendar-month-controls" role="group" aria-label="Calendar month navigation">
+          <button className="icon-button task-calendar-month-button" aria-label="Previous month" onClick={() => calendar.setMonthCursor((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))} type="button">‹</button>
+          <strong className="task-calendar-toolbar-title">{monthLabel}</strong>
+          <button className="icon-button task-calendar-month-button" aria-label="Next month" onClick={() => calendar.setMonthCursor((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1))} type="button">›</button>
+          <button className="secondary-action task-calendar-today-button" onClick={() => { const now = new Date(); calendar.setMonthCursor(new Date(now.getFullYear(), now.getMonth(), 1)); }} type="button">Today</button>
+        </div>
+      </div>
       {calendar.unfilteredEvents.length === 0 ? (
         <div className="empty-state">
           <strong>No dated records in scope.</strong>
@@ -187,13 +186,13 @@ export function TaskCalendarView({
           ) : (
             <TaskCalendarMonthGrid
               eventsByDateKey={calendar.eventsByDateKey}
-              monthCells={calendarViewMode === "week" ? calendar.weekCells : calendar.monthCells}
+              monthCells={calendar.monthCells}
               monthCursor={calendar.monthCursor}
               onOpenDay={setSelectedDateKey}
               onOpenEvent={openEvent}
               selectedDateKey={selectedDateKey}
               todayDateKey={calendar.todayDateKey}
-              viewMode={calendarViewMode}
+              viewMode="month"
             />
           )}
 
