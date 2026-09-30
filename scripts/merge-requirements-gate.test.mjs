@@ -104,7 +104,7 @@ test("trusted CI identity and revision checks reject unrelated or stale runs", (
 
 test("trusted CI digest accepts the finalized workflow and rejects PR edits", async () => {
   const workflow = await readFile(".github/workflows/ci.yml");
-  assert.equal(createHash("sha256").update(workflow).digest("hex"), "b976f372bb4b5cfc0e8165c1ed99c6de2c85ecfdea497bfbf0e8c48d714f7af7");
+  assert.equal(createHash("sha256").update(workflow).digest("hex"), "1c2097ca36254e4330f095e311879e44e1bfa76d17b524edab03a48a66e95024");
   assert.doesNotThrow(() => assertTrustedCiWorkflow(workflow));
   assert.throws(
     () => assertTrustedCiWorkflow(Buffer.concat([workflow, Buffer.from("# attacker edit\n")])),
@@ -188,7 +188,8 @@ test("document CSP contains no inline or eval execution allowances", async () =>
   }
 });
 
- test("accepts only the reviewed CI transition digests", () => {
+test("accepts only the reviewed CI transition digests", () => {
+  assert.doesNotThrow(() => assertTrustedCiWorkflowSha256("1c2097ca36254e4330f095e311879e44e1bfa76d17b524edab03a48a66e95024"));
   assert.doesNotThrow(() => assertTrustedCiWorkflowSha256("b976f372bb4b5cfc0e8165c1ed99c6de2c85ecfdea497bfbf0e8c48d714f7af7"));
   assert.doesNotThrow(() => assertTrustedCiWorkflowSha256("2660805581abe2cffbb85d3db98a99fa192b20d23624ffa186da04d9c943c894"));
   assert.doesNotThrow(() => assertTrustedCiWorkflowSha256("5686aa7904ff3e24ff56cb1941572511d19dca8e4286c0a14502b7f0ec762fd5"));
