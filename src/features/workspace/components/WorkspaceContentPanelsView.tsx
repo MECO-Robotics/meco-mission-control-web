@@ -7,7 +7,6 @@ import { WorkspaceSubsystemsSection } from "./sections/WorkspaceSubsystemsSectio
 import { WorkspaceRosterSection } from "./sections/WorkspaceRosterSection";
 import { WorkspaceHelpSection } from "./sections/WorkspaceHelpSection";
 import { WorkspaceCadSection } from "./sections/WorkspaceCadSection";
-import { WorkspaceManufacturingSection } from "./sections/WorkspaceManufacturingSection";
 import { WorkspaceHomeSection } from "./overview/WorkspaceOverviewSections";
 import type { WorkspaceContentPanelsViewProps } from "./workspaceContentPanelsViewTypes";
 export function WorkspaceContentPanelsView(props: WorkspaceContentPanelsViewProps) {
@@ -69,7 +68,6 @@ export function WorkspaceContentPanelsView(props: WorkspaceContentPanelsViewProp
       <WorkspaceHomeSection {...props} />
       <WorkspaceTaskSection {...props} />
       <WorkspaceWorklogsSection {...props} />
-      <WorkspaceManufacturingSection {...props} />
       <WorkspaceInventorySection {...props} />
       <WorkspaceCadSection {...props} />
       <WorkspaceSubsystemsSection {...props} />

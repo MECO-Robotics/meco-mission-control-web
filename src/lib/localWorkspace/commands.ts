@@ -46,11 +46,12 @@ export function refreshLocalTaskState(snapshot: BootstrapPayload) {
       .map((blocker) => blocker.description))];
     task.isBlocked = (snapshot.taskBlockers ?? []).some((b) => b.blockedTaskId === task.id && b.status === "open");
     task.isWaitingOnDependency = task.status !== "complete" && (snapshot.taskDependencies ?? []).some((dependency) => {
-      if (dependency.taskId !== task.id || dependency.dependencyType !== "hard") return false;
-      const targets = dependency.kind === "task" ? snapshot.tasks : dependency.kind === "milestone" ? snapshot.milestones : snapshot.partInstances;
-      const target = targets.find((candidate) => candidate.id === dependency.refId);
+      if ((dependency.workItemId ?? dependency.taskId) !== task.id || (dependency.sourceType ?? "task") !== "task" || dependency.dependencyType !== "hard") return false;
+      const workTarget = dependency.kind === "work_item" ? snapshot.workItems?.find((candidate) => candidate.sourceType === dependency.refType && candidate.sourceId === dependency.refId) : undefined;
+      const targets = dependency.kind === "work_item" ? (workTarget ? [workTarget] : []) : dependency.kind === "task" ? snapshot.tasks : dependency.kind === "milestone" ? snapshot.milestones : snapshot.partInstances;
+      const target = dependency.kind === "work_item" ? workTarget : targets.find((candidate) => candidate.id === dependency.refId);
       if (!target) return true;
-      if (dependency.kind === "task") return target.status !== dependency.requiredState;
+      if (dependency.kind === "work_item" || dependency.kind === "task") return target.status !== dependency.requiredState;
       const order: Record<string, number> = { "not ready": 0, blocked: 1, qa: 2, ready: 3 };
       return !(order[target.status ?? "not ready"] >= order[dependency.requiredState]);
     });
@@ -172,7 +173,20 @@ export function applyLocalCommand(snapshot: BootstrapPayload, path: string, opti
       if (!snapshot.tasks.some((task) => task.id === item.taskId)) throw new Error("The work log task no longer exists.");
       if (typeof item.hours !== "number" || !Number.isFinite(item.hours) || item.hours <= 0) throw new Error("Work log hours must be a positive number.");
     }
-    if (resource === "task-dependencies" && !snapshot.tasks.some((task) => task.id === item.taskId)) throw new Error("Dependency task does not exist.");
+    if (resource === "task-dependencies") {
+      const ownerId = item.workItemId ?? item.taskId;
+      const ownerType = item.sourceType ?? "task";
+      const ownerExists = ownerType === "manufacturing"
+        ? snapshot.manufacturingItems.some((work) => work.id === ownerId)
+        : snapshot.tasks.some((task) => task.id === ownerId);
+      if (!ownerExists) throw new Error("Dependency work item does not exist.");
+      if (item.kind === "work_item") {
+        const targetExists = item.refType === "manufacturing"
+          ? snapshot.manufacturingItems.some((work) => work.id === item.refId)
+          : snapshot.tasks.some((task) => task.id === item.refId);
+        if (!targetExists || ownerId === item.refId && ownerType === item.refType) throw new Error("Dependency target does not exist or is self-referential.");
+      }
+    }
     if (resource === "task-blockers") {
       if (!snapshot.tasks.some((task) => task.id === item.blockedTaskId)) throw new Error("Blocked task does not exist.");
       item.sourceKind = body.blockerType ?? item.sourceKind ?? "external";

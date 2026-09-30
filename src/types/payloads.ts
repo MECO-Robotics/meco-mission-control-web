@@ -20,6 +20,8 @@ import type {
   TaskBlockerSourceKind,
   TaskBlockerType,
   TaskDependencyKind,
+  RobotWorkType,
+  ResponsibleGroup,
   TaskDependencyType,
   TaskPriority,
   TaskStatus,
@@ -87,10 +89,13 @@ export interface WorkLogPayload {
 }
 
 export interface ManufacturingItemPayload {
+  taskDependencies?: TaskDependencyDraft[];
   title: string;
   subsystemId: string;
   requestedById: string | null;
   process: ManufacturingProcess;
+  workType?: RobotWorkType;
+  responsibleGroup?: ResponsibleGroup | null;
   dueDate: string;
   material: string;
   materialId: string | null;
@@ -254,6 +259,7 @@ export interface PartInstancePayload {
 export interface TaskDependencyDraft {
   id?: string;
   kind: TaskDependencyKind;
+  refType?: "task" | "manufacturing";
   refId: string;
   requiredState: string;
   dependencyType: TaskDependencyType;
@@ -275,6 +281,8 @@ export interface TaskPayload {
   workstreamId: string | null;
   workstreamIds: string[];
   title: string;
+  workType?: RobotWorkType;
+  responsibleGroup?: ResponsibleGroup | null;
   summary: string;
   subsystemId: string;
   subsystemIds: string[];
@@ -306,8 +314,11 @@ export interface TaskPayload {
 }
 
 export interface TaskDependencyPayload {
-  taskId: string;
+  workItemId?: string;
+  sourceType?: "task" | "manufacturing";
+  taskId?: string;
   kind: TaskDependencyKind;
+  refType?: "task" | "manufacturing";
   refId: string;
   requiredState: string;
   dependencyType: TaskDependencyType;

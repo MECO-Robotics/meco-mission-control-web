@@ -4,6 +4,8 @@ import { buildEmptyManufacturingPayload } from "@/lib/appUtils/manufacturing";
 import { manufacturingToPayload } from "@/lib/appUtils/payloadConversions";
 import { toErrorMessage } from "@/lib/appUtils/common";
 import { createManufacturingItemRecord, updateManufacturingItemRecord } from "@/lib/auth/records/production";
+import { createTaskDependencyRecord, updateTaskDependencyRecord, deleteTaskDependencyRecord } from "@/lib/auth/records/taskRelations";
+import { syncTaskDependencies } from "@/features/workspace/tasks/services/taskRelationsSync";
 import type { AppWorkspaceModel } from "../hooks/useAppWorkspaceModel";
 import type { ManufacturingItemPayload } from "@/types/payloads";
 import type { ManufacturingItemRecord } from "@/types/recordsInventory";
@@ -51,9 +53,12 @@ export function useManufacturingActions({
 
   const openEditManufacturingModal = useCallback((item: ManufacturingItemRecord) => {
     setActiveManufacturingId(item.id);
-    setManufacturingDraft(manufacturingToPayload(item));
+    setManufacturingDraft({
+      ...manufacturingToPayload(item),
+      taskDependencies: (bootstrap.taskDependencies ?? []).filter((dependency) => (dependency.workItemId ?? dependency.taskId) === item.id && (dependency.sourceType ?? "task") === "manufacturing").map(({ id, kind, refType, refId, requiredState, dependencyType }) => ({ id, kind, refType, refId, requiredState, dependencyType })),
+    });
     setManufacturingModalMode("edit");
-  }, [setActiveManufacturingId, setManufacturingDraft, setManufacturingModalMode]);
+  }, [bootstrap.taskDependencies, setActiveManufacturingId, setManufacturingDraft, setManufacturingModalMode]);
 
   const closeManufacturingModal = useCallback(() => {
     setManufacturingModalMode(null);
@@ -114,15 +119,28 @@ export function useManufacturingActions({
         inHouse: manufacturingDraft.process === "cnc" ? manufacturingDraft.inHouse : false,
         batchLabel: manufacturingDraft.batchLabel?.trim() || undefined,
       };
+      delete payload.taskDependencies;
 
+      let workItemId = activeManufacturingId;
       if (manufacturingModalMode === "create") {
-        await createManufacturingItemRecord(payload, handleUnauthorized);
+        const created = await createManufacturingItemRecord(payload, handleUnauthorized);
+        workItemId = created.id;
       } else if (manufacturingModalMode === "edit" && activeManufacturingId) {
         await updateManufacturingItemRecord(
           activeManufacturingId,
           payload,
           handleUnauthorized,
         );
+      }
+
+      if (workItemId) {
+        await syncTaskDependencies({
+          taskId: workItemId,
+          sourceType: "manufacturing",
+          desiredDependencies: manufacturingDraft.taskDependencies,
+          existingDependencies: (bootstrap.taskDependencies ?? []).filter((dependency) => (dependency.workItemId ?? dependency.taskId) === workItemId && (dependency.sourceType ?? "task") === "manufacturing"),
+          handleUnauthorized,
+        }, { createTaskDependencyRecord, updateTaskDependencyRecord, deleteTaskDependencyRecord });
       }
 
       await loadWorkspace();

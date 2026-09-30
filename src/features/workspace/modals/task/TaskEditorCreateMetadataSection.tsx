@@ -19,6 +19,18 @@ export function TaskEditorCreateMetadataSection({
       </summary>
       <div className="task-details-section-grid">
         <label className="field">
+          <span>Robot work type</span>
+          <select value={taskDraft.workType ?? "Design"} onChange={(event) => setTaskDraft((current) => ({ ...current, workType: event.target.value as TaskPayload["workType"] }))}>
+            {["Design", "Manufacturing", "Assembly", "Electrical/Wiring", "Programming", "Testing", "Driving"].map((value) => <option key={value}>{value}</option>)}
+          </select>
+        </label>
+        <label className="field">
+          <span>Responsible group</span>
+          <select value={taskDraft.responsibleGroup ?? ""} onChange={(event) => setTaskDraft((current) => ({ ...current, responsibleGroup: (event.target.value || null) as TaskPayload["responsibleGroup"] }))}>
+            <option value="">Unassigned</option><option>Mechanical</option><option>Electrical</option><option>Programming</option>
+          </select>
+        </label>
+        <label className="field">
           <span style={{ color: "var(--text-title)" }}>Status</span>
           <select
             onChange={(milestone) =>

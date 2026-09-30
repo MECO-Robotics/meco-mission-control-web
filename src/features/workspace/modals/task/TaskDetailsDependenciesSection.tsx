@@ -79,6 +79,7 @@ export function TaskDetailsDependenciesSection({
   );
   const {
     targetMilestonesById,
+    targetManufacturingItems,
     targetPartInstancesById,
     targetTasksById,
   } = getScopedTaskDependencyTargets({
@@ -90,14 +91,18 @@ export function TaskDetailsDependenciesSection({
   });
   const dependencyRows = (
     taskDraft?.taskDependencies ??
-    getTaskDependencyRecordsForTask(activeTask.id, bootstrap).filter((dependency) => dependency.taskId === activeTask.id)
+    getTaskDependencyRecordsForTask(activeTask.id, bootstrap).filter((dependency) => (dependency.workItemId ?? dependency.taskId) === activeTask.id && (dependency.sourceType ?? "task") === "task")
   ).map((dependency, index) => {
     const key = getDependencyKey(dependency, index);
 
     return {
         ...dependency,
         key,
-        name: getTaskDependencyTargetName(dependency.kind, dependency.refId, {
+        name: dependency.kind === "work_item"
+          ? dependency.refType === "manufacturing"
+            ? bootstrap.manufacturingItems.find((item) => item.id === dependency.refId)?.title ?? "Manufacturing work item"
+            : tasksById[dependency.refId]?.title ?? "Task"
+          : getTaskDependencyTargetName(dependency.kind, dependency.refId, {
           tasksById,
           milestonesById,
           partInstancesById,
@@ -109,6 +114,7 @@ export function TaskDetailsDependenciesSection({
   const getDependencyTargetOptions = (kind: TaskDependencyKind) =>
     getTaskDependencyTargetOptions(kind, {
       tasksById: targetTasksById,
+      manufacturingItems: targetManufacturingItems,
       milestonesById: targetMilestonesById,
       partInstancesById: targetPartInstancesById,
       partDefinitionsById,
@@ -159,6 +165,7 @@ export function TaskDetailsDependenciesSection({
         {
           id: dependencyId,
           kind,
+          refType: kind === "work_item" ? "task" : undefined,
           refId,
           requiredState: getDependencyDefaultState(kind),
           dependencyType: "hard" as TaskDependencyType,

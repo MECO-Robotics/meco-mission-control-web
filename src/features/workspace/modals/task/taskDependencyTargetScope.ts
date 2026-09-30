@@ -41,9 +41,14 @@ export function getScopedTaskDependencyTargets({
       })
       .map((partInstance) => [partInstance.id, partInstance] as const),
   );
+  const targetManufacturingItems = bootstrap.manufacturingItems.filter((item) => {
+    const subsystem = bootstrap.subsystems.find((candidate) => candidate.id === item.subsystemId);
+    return !targetProjectId || subsystem?.projectId === targetProjectId;
+  });
 
   return {
     targetMilestonesById,
+    targetManufacturingItems,
     targetPartInstancesById,
     targetTasksById,
   };

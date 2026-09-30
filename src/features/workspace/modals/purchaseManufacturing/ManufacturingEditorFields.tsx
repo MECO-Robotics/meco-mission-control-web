@@ -3,11 +3,13 @@ import type { Dispatch, SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { ManufacturingItemPayload } from "@/types/payloads";
 import { inferManufacturingDraftFromPartSelection } from "@/lib/appUtils/manufacturing";
+import { WorkDependenciesEditor } from "@/features/workspace/shared/task/WorkDependenciesEditor";
 
 import { ManufacturingPartInstancesSection } from "./ManufacturingPartInstancesSection";
 import { useManufacturingEditorState } from "./useManufacturingEditorState";
 
 interface ManufacturingEditorFieldsProps {
+  activeManufacturingId?: string | null;
   bootstrap: BootstrapPayload;
   manufacturingDraft: ManufacturingItemPayload;
   manufacturingModalMode: "create" | "edit";
@@ -15,6 +17,7 @@ interface ManufacturingEditorFieldsProps {
 }
 
 export function ManufacturingEditorFields({
+  activeManufacturingId,
   bootstrap,
   manufacturingDraft,
   manufacturingModalMode,
@@ -68,6 +71,25 @@ export function ManufacturingEditorFields({
         selectedPartInstanceIds={selectedPartInstanceIds}
         setManufacturingDraft={setManufacturingDraft}
         bootstrap={bootstrap}
+      />
+      <label className="field">
+        <span>Robot work type</span>
+        <select value={manufacturingDraft.workType ?? "Manufacturing"} onChange={(event) => setManufacturingDraft((current) => ({ ...current, workType: event.target.value as ManufacturingItemPayload["workType"] }))}>
+          {["Design", "Manufacturing", "Assembly", "Electrical/Wiring", "Programming", "Testing", "Driving"].map((value) => <option key={value}>{value}</option>)}
+        </select>
+      </label>
+      <label className="field">
+        <span>Responsible group</span>
+        <select value={manufacturingDraft.responsibleGroup ?? "Mechanical"} onChange={(event) => setManufacturingDraft((current) => ({ ...current, responsibleGroup: event.target.value as ManufacturingItemPayload["responsibleGroup"] }))}>
+          <option>Mechanical</option><option>Electrical</option><option>Programming</option>
+        </select>
+      </label>
+      <WorkDependenciesEditor
+        bootstrap={bootstrap}
+        ownerId={activeManufacturingId ?? "new-manufacturing-item"}
+        ownerType="manufacturing"
+        dependencies={manufacturingDraft.taskDependencies ?? []}
+        onChange={(dependencies) => setManufacturingDraft((current) => ({ ...current, taskDependencies: dependencies }))}
       />
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Requester</span>

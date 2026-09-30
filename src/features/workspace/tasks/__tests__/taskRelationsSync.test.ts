@@ -211,8 +211,10 @@ describe("task relation sync services", () => {
     const existingDependencies: TaskDependencyRecord[] = [
       {
         id: "dep-keep",
-        taskId: "task-1",
-        kind: "task",
+        workItemId: "task-1",
+        sourceType: "task",
+        kind: "work_item",
+        refType: "task",
         refId: "task-upstream",
         requiredState: "complete",
         dependencyType: "hard",
@@ -220,8 +222,10 @@ describe("task relation sync services", () => {
       },
       {
         id: "dep-update",
-        taskId: "task-1",
-        kind: "task",
+        workItemId: "task-1",
+        sourceType: "task",
+        kind: "work_item",
+        refType: "task",
         refId: "old-task",
         requiredState: "open",
         dependencyType: "hard",
@@ -229,7 +233,8 @@ describe("task relation sync services", () => {
       },
       {
         id: "dep-remove",
-        taskId: "task-1",
+        workItemId: "task-1",
+        sourceType: "task",
         kind: "milestone",
         refId: "milestone-2",
         requiredState: "complete",
@@ -244,7 +249,8 @@ describe("task relation sync services", () => {
         desiredDependencies: [
           {
             id: "dep-keep",
-            kind: "task",
+            kind: "work_item",
+            refType: "task",
             refId: "task-upstream",
             requiredState: "complete",
             dependencyType: "hard",
@@ -273,7 +279,8 @@ describe("task relation sync services", () => {
     expect(persistence.updateTaskDependencyRecord).toHaveBeenCalledWith(
       "dep-update",
       expect.objectContaining({
-        taskId: "task-1",
+        workItemId: "task-1",
+        sourceType: "task",
         kind: "milestone",
         refId: "milestone-1",
         requiredState: "ready",
@@ -284,7 +291,8 @@ describe("task relation sync services", () => {
     expect(persistence.createTaskDependencyRecord).toHaveBeenCalledTimes(1);
     expect(persistence.createTaskDependencyRecord).toHaveBeenCalledWith(
       expect.objectContaining({
-        taskId: "task-1",
+        workItemId: "task-1",
+        sourceType: "task",
         kind: "part_instance",
         refId: "part-1",
         requiredState: "ready",
@@ -404,5 +412,20 @@ describe("task relation sync services", () => {
       "blocker-remove",
       noopUnauthorized,
     );
+  });
+
+  it("creates manufacturing-owned dependencies on task work items", async () => {
+    const persistence = createTaskRelationPersistence();
+    await syncTaskDependencies({
+      taskId: "manufacturing-1",
+      sourceType: "manufacturing",
+      desiredDependencies: [{ kind: "work_item", refType: "task", refId: "task-1", requiredState: "complete", dependencyType: "hard" }],
+      existingDependencies: [],
+      handleUnauthorized: noopUnauthorized,
+    }, persistence);
+
+    expect(persistence.createTaskDependencyRecord).toHaveBeenCalledWith(expect.objectContaining({
+      workItemId: "manufacturing-1", sourceType: "manufacturing", kind: "work_item", refType: "task", refId: "task-1",
+    }), noopUnauthorized);
   });
 });

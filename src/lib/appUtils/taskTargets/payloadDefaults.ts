@@ -24,6 +24,8 @@ export function buildEmptyTaskPayload(bootstrap: BootstrapPayload): TaskPayload 
     workstreamId: null,
     workstreamIds: [],
     title: "",
+    workType: "Design",
+    responsibleGroup: null,
     summary: "",
     photoUrl: "",
     subsystemId: firstSubsystem,

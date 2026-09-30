@@ -54,6 +54,8 @@ export interface TaskRecord {
   workstreamId: string | null;
   workstreamIds: string[];
   title: string;
+  workType?: import("./common").RobotWorkType;
+  responsibleGroup?: import("./common").ResponsibleGroup | null;
   summary: string;
   subsystemId: string;
   subsystemIds: string[];
@@ -89,12 +91,36 @@ export interface TaskRecord {
 
 export interface TaskDependencyRecord {
   id: string;
-  taskId: string;
+  workItemId?: string;
+  sourceType?: "task" | "manufacturing";
+  taskId?: string;
   kind: TaskDependencyKind;
+  refType?: "task" | "manufacturing";
   refId: string;
   requiredState: string;
   dependencyType: TaskDependencyType;
   createdAt: string;
+}
+
+export interface WorkItemRecord {
+  id: string;
+  sourceType: "task" | "manufacturing";
+  sourceId: string;
+  taskId: string | null;
+  title: string;
+  workType: import("./common").RobotWorkType;
+  responsibleGroup: import("./common").ResponsibleGroup | null;
+  manufacturingProcess: import("./common").ManufacturingProcess | null;
+  subsystemId: string;
+  dueDate: string;
+  status: string;
+  quantity: number | null;
+  material: string | null;
+  materialId: string | null;
+  partDefinitionId: string | null;
+  partInstanceIds: string[];
+  batchLabel: string | null;
+  mentorReviewed: boolean | null;
 }
 
 export interface TaskBlockerRecord {

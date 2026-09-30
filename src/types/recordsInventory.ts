@@ -66,6 +66,8 @@ export interface PartInstanceRecord extends CadSourceMetadata {
 export interface ManufacturingItemRecord {
   id: string;
   title: string;
+  workType?: import("./common").RobotWorkType;
+  responsibleGroup?: import("./common").ResponsibleGroup | null;
   subsystemId: string;
   requestedById: string | null;
   process: ManufacturingProcess;

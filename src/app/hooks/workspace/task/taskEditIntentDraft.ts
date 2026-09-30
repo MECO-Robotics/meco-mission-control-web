@@ -35,7 +35,8 @@ export function applyTaskEditIntentToDraft(
         ...(taskDraft.taskDependencies ?? []),
         {
           id: createDraftRelationId("dependency"),
-          kind: "task",
+          kind: "work_item",
+          refType: "task",
           refId: "",
           requiredState: "complete",
           dependencyType: "hard",

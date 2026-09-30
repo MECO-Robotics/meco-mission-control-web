@@ -137,7 +137,7 @@ export function getTaskWaitingOnDependencyRecords(
 ) {
   return getTaskDependencyRecords(bootstrap).filter(
     (dependency) =>
-      dependency.taskId === taskId &&
+      (dependency.workItemId ?? dependency.taskId) === taskId && (dependency.sourceType ?? "task") === "task" &&
       HARD_DEPENDENCY_TYPES.has(dependency.dependencyType) &&
       !isTaskDependencySatisfied(dependency, bootstrap, now),
   );
@@ -199,7 +199,7 @@ export const getTaskOpenBlockersForTask = getOpenTaskBlockers;
 
 export function getTaskDependencyRecordsForTask(taskId: string, bootstrap: BootstrapPayload) {
   return getTaskDependencyRecords(bootstrap).filter(
-    (dependency) => dependency.taskId === taskId || dependency.refId === taskId,
+    (dependency) => (dependency.workItemId ?? dependency.taskId) === taskId || dependency.refId === taskId,
   );
 }
 
@@ -209,14 +209,14 @@ export function getTaskBlocksDependencies(taskId: string, bootstrap: BootstrapPa
   return getTaskDependencyRecords(bootstrap).filter(
     (dependency) =>
       dependency.refId === taskId &&
-      dependency.kind === "task" &&
+      (dependency.kind === "work_item" && dependency.refType === "task" || dependency.kind === "task") &&
       HARD_DEPENDENCY_TYPES.has(dependency.dependencyType),
   );
 }
 
 export function getTaskWaitingOnTasks(taskId: string, bootstrap: BootstrapPayload) {
   return getTaskWaitingOnDependencyRecords(taskId, bootstrap)
-    .filter((dependency) => dependency.kind === "task")
+    .filter((dependency) => dependency.kind === "work_item" && dependency.refType === "task" || dependency.kind === "task")
     .map((dependency) => dependency.refId)
     .filter((upstreamTaskId) => getTaskById(bootstrap, upstreamTaskId)?.status !== "complete");
 }

@@ -9,6 +9,8 @@ export const taskToPayload = (task: TaskRecord, bootstrap?: BootstrapPayload): T
   projectId: task.projectId,
   workstreamId: task.workstreamId,
   title: task.title,
+  workType: task.workType ?? "Design",
+  responsibleGroup: task.responsibleGroup ?? null,
   summary: task.summary,
   subsystemId: task.subsystemId,
   disciplineId: task.disciplineId,

@@ -4,6 +4,11 @@ import { requestItem } from "./common";
 
 function taskCommand(payload: Partial<TaskPayload>) {
   const command = { ...payload };
+  delete command.workstreamId;
+  delete command.subsystemId;
+  delete command.mechanismId;
+  delete command.partInstanceId;
+  delete command.artifactId;
   delete command.taskDependencies;
   delete command.taskBlockers;
   delete command.targetRiskId;

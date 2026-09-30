@@ -8,9 +8,9 @@ export function getTaskDependencyDrafts(
   bootstrap?: BootstrapPayload,
 ): TaskDependencyDraft[] {
   return (bootstrap?.taskDependencies ?? [])
-    .filter((dependency) => dependency.taskId === task.id)
-    .map(({ id, kind, refId, requiredState, dependencyType }) => ({
-      id, kind, refId, requiredState, dependencyType,
+    .filter((dependency) => (dependency.workItemId ?? dependency.taskId) === task.id && (dependency.sourceType ?? "task") === "task")
+    .map(({ id, kind, refType, refId, requiredState, dependencyType }) => ({
+      id, kind, refType, refId, requiredState, dependencyType,
     }));
 }
 
