@@ -1,7 +1,7 @@
 /// <reference types="jest" />
 
 import { type TaskRelationPersistence } from "@/features/workspace/tasks/services/taskRelationsSync";
-import type { TaskBlockerRecord, TaskDependencyRecord } from "@/types/recordsExecution";
+import type { TaskDependencyRecord } from "@/types/recordsExecution";
 
 export function createTaskRelationPersistence(): TaskRelationPersistence {
   return {
@@ -40,53 +40,6 @@ export function createTaskRelationPersistence(): TaskRelationPersistence {
       refId: "task-upstream",
       requiredState: "complete",
       dependencyType: "hard",
-        };
-      },
-    ),
-    createTaskBlockerRecord: jest.fn(
-      async (payload, onUnauthorized): Promise<TaskBlockerRecord> => {
-        void onUnauthorized;
-        return {
-      id: "created-blocker",
-      createdByMemberId: null,
-      createdAt: "2026-05-01T00:00:00.000Z",
-      resolvedAt: null,
-      ...payload,
-      blockerType: payload.issueType,
-        };
-      },
-    ),
-    updateTaskBlockerRecord: jest.fn(
-      async (blockerId, payload, onUnauthorized): Promise<TaskBlockerRecord> => {
-        void onUnauthorized;
-        return {
-      id: blockerId,
-      blockedTaskId: payload.blockedTaskId ?? "task-1",
-      blockerType: payload.issueType ?? "other",
-      blockerId: payload.blockerId ?? null,
-      description: payload.description ?? "",
-      severity: payload.severity ?? "medium",
-      status: payload.status ?? "open",
-      createdByMemberId: null,
-      createdAt: "2026-05-01T00:00:00.000Z",
-      resolvedAt: null,
-        };
-      },
-    ),
-    deleteTaskBlockerRecord: jest.fn(
-      async (blockerId, onUnauthorized): Promise<TaskBlockerRecord> => {
-        void onUnauthorized;
-        return {
-      id: blockerId,
-      blockedTaskId: "task-1",
-      blockerType: "other",
-      blockerId: null,
-      description: "",
-      severity: "medium",
-      status: "open",
-      createdByMemberId: null,
-      createdAt: "2026-05-01T00:00:00.000Z",
-      resolvedAt: null,
         };
       },
     ),

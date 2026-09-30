@@ -33,24 +33,21 @@ describe("workspace purpose empty states", () => {
       React.createElement(PurchasesView, {
         activePersonFilter: [],
         bootstrap: EMPTY_BOOTSTRAP,
-        membersById: {},
         openCreatePurchaseModal: jest.fn(),
         openEditPurchaseModal: jest.fn(),
-        subsystemsById: {},
       }),
     );
 
-    expect(markup).toContain("Track requested parts and materials here");
-    expect(markup).toContain("has not captured any parts, tools, or materials");
+    expect(markup).toContain("Track commercial acquisition here");
+    expect(markup).toContain("No task-linked purchase lines have been captured");
     expect(markup).not.toContain("workspace-empty-state-action");
-    expect(markup).not.toContain("No purchase requests match the current filters.");
+    expect(markup).not.toContain("No purchases match these filters");
   });
 
   it("explains empty document inventory without an in-content create action", () => {
     const markup = renderToStaticMarkup(
       React.createElement(ArtifactInventoryView, {
         artifacts: [],
-        bootstrap: EMPTY_BOOTSTRAP,
         createKind: "document",
         kinds: ["document"],
         openCreateArtifactModal: jest.fn(),
@@ -128,37 +125,6 @@ describe("workspace purpose empty states", () => {
     expect(markup).not.toContain("No part instances match the current filters.");
   });
 
-  it("distinguishes archived-only artifacts from truly empty artifacts", () => {
-    const markup = renderToStaticMarkup(
-      React.createElement(ArtifactInventoryView, {
-        artifacts: [
-          {
-            id: "artifact-archived",
-            projectId: "project-1",
-            workstreamId: null,
-            kind: "document",
-            title: "Archived document",
-            summary: "",
-            status: "draft",
-            link: "",
-            isArchived: true,
-            updatedAt: "2026-01-01T00:00:00.000Z",
-          },
-        ],
-        bootstrap: EMPTY_BOOTSTRAP,
-        createKind: "document",
-        kinds: ["document"],
-        openCreateArtifactModal: jest.fn(),
-        openEditArtifactModal: jest.fn(),
-        title: "Documents",
-      }),
-    );
-
-    expect(markup).toContain("Archived documents are hidden");
-    expect(markup).toContain("Turn on Show archived");
-    expect(markup).not.toContain("workspace-empty-state-action");
-  });
-
   it("distinguishes archived-only part definitions from truly empty definitions", () => {
     const markup = renderToStaticMarkup(
       React.createElement(PartsView, {
@@ -174,7 +140,7 @@ describe("workspace purpose empty states", () => {
               iteration: 1,
               isArchived: true,
               type: "COTS",
-              source: "vendor",
+              defaultAcquisitionMethod: "purchase-cots",
               materialId: null,
               description: "",
             },

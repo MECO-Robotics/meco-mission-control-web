@@ -90,7 +90,15 @@ export function PartsView({ bootstrap, openCreatePartDefinitionModal, openEditPa
       <p>{selected.partNumber} · Revision {selected.revision} · {selected.type}</p><p>{selected.description}</p>
       <button className="ghost-button" onClick={() => { setSelectedId(null); openEditPartDefinitionModal(selected); }} type="button">Edit definition</button>
       <h3>Installed instances</h3>
-      {instances.length ? <ul className="workspace-record-list">{instances.map(instance => <li key={instance.id}><div><strong>{instance.name}</strong><small>{subsystemsById[instance.subsystemId]?.name} · {instance.mechanismId ? mechanismsById[instance.mechanismId]?.name : "No mechanism"} · {instance.quantity} · {instance.status}</small></div><button className="ghost-button" type="button" onClick={() => { setSelectedId(null); openEditPartInstanceModal?.(instance); }}>Edit instance</button></li>)}</ul> : <p>No instances yet. Choose a mechanism to allocate this definition.</p>}
+      {instances.length ? <ul className="workspace-record-list">{instances.map(instance => {
+        const location = instance.location;
+        const locationLabel = location.kind === "installed"
+          ? `${subsystemsById[location.subsystemId]?.name ?? "Unknown subsystem"} · ${location.mechanismId ? mechanismsById[location.mechanismId]?.name ?? "Unknown mechanism" : "No mechanism"}`
+          : location.kind === "stock" || location.kind === "repair" || location.kind === "retired"
+            ? `${location.kind} · ${location.location ?? "No location"}`
+            : location.kind;
+        return <li key={instance.id}><div><strong>{selected.name} · {instance.id}</strong><small>{locationLabel} · Readiness: {instance.readinessStatus ?? "not assessed"}</small></div><button className="ghost-button" type="button" onClick={() => { setSelectedId(null); openEditPartInstanceModal?.(instance); }}>Edit instance</button></li>;
+      })}</ul> : <p>No physical instances yet.</p>}
       {openCreatePartInstanceModal ? <div className="workspace-presentation-controls"><label>Mechanism <select aria-label="Allocate to mechanism" value={mechanismId} onChange={event => setMechanismId(event.target.value)}><option value="">Choose mechanism</option>{bootstrap.mechanisms.map(mechanism => <option key={mechanism.id} value={mechanism.id}>{subsystemsById[mechanism.subsystemId]?.name} / {mechanism.name}</option>)}</select></label><button className="primary-action" disabled={!mechanismsById[mechanismId]} type="button" onClick={() => { const mechanism = mechanismsById[mechanismId]; if (mechanism) { setSelectedId(null); openCreatePartInstanceModal(mechanism, selected.id); } }}>Add instance</button></div> : null}
     </section></ModalDialog> : null}
   </section>;

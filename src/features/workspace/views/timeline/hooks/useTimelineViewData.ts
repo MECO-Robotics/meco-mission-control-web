@@ -1,4 +1,4 @@
-﻿import { useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MilestonePayload } from "@/types/payloads";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
@@ -51,7 +51,7 @@ export function useTimelineViewData({
   viewInterval,
 }: UseTimelineViewDataArgs) {
   const {
-    disciplinesById,
+    workTypesById,
     projectsById,
     scopedMeetings,
     scopedMilestones,
@@ -143,8 +143,8 @@ export function useTimelineViewData({
 
   const resolveTaskRowHighlightStyle = useCallback(
     (anchorKey: string) =>
-      resolveTimelineRowHighlightStyle(anchorKey, tasksById, subsystemsById, disciplinesById),
-    [disciplinesById, subsystemsById, tasksById],
+      resolveTimelineRowHighlightStyle(anchorKey, tasksById, subsystemsById, workTypesById),
+    [workTypesById, subsystemsById, tasksById],
   );
   const modalPortalTarget =
     typeof document !== "undefined"
@@ -153,7 +153,7 @@ export function useTimelineViewData({
 
   return {
     clearHoveredMilestonePopup,
-    disciplinesById,
+    workTypesById,
     milestoneModal,
     handleTimelineDayMouseEnter,
     isTimelineShellScrolling,

@@ -17,6 +17,6 @@ export const NAVIGATION_SUB_ITEMS_BY_SECTION: Record<NavigationSection, readonly
   team: NAVIGATION_SUB_ITEMS.filter((item) => item.section === "team"),
 };
 export const BASE_SECTION_LABELS: Record<ViewTab, string> = {
-  home: "Home", tasks: "Work", worklogs: "History",
-  manufacturing: "Manufacturing", inventory: "Resources", cad: "Import CAD", subsystems: "Structure", roster: "People", help: "Help",
+  home: "Home", tasks: "Kanban", worklogs: "History", risks: "Risks", documents: "Documents",
+  inventory: "Resources", cad: "Import CAD", subsystems: "Structure", roster: "People", help: "Help",
 };

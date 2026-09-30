@@ -15,7 +15,6 @@ export function useInteractiveTutorialCoreActionsSession(
     setActiveTab,
     setTaskView,
     setWorklogsView,
-    setManufacturingView,
     setInventoryView,
     setSelectedSeasonId,
     setSelectedProjectId,
@@ -60,7 +59,6 @@ export function useInteractiveTutorialCoreActionsSession(
       setActiveTab(previousState.activeTab);
       setTaskView(previousState.taskView);
       setWorklogsView(previousState.worklogsView);
-      setManufacturingView(previousState.manufacturingView);
       setInventoryView(previousState.inventoryView);
       setSelectedSeasonId(previousState.selectedSeasonId);
       setSelectedProjectId(previousState.selectedProjectId);
@@ -82,7 +80,6 @@ export function useInteractiveTutorialCoreActionsSession(
     setBootstrap,
     setDataMessage,
     setInventoryView,
-    setManufacturingView,
     setSelectedProjectId,
     setSelectedSeasonId,
     setReturnState,

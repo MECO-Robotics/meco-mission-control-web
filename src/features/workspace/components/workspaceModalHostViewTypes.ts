@@ -1,5 +1,4 @@
 import type { TaskEditorModal } from "../modals/TaskEditorModalContent";
-import type { ManufacturingEditorModal } from "../modals/purchaseManufacturing/ManufacturingEditorModal";
 import type { PurchaseEditorModal } from "../modals/purchaseManufacturing/PurchaseEditorModal";
 import type { MechanismEditorModal } from "../modals/structure/MechanismEditorModal";
 import type { SubsystemEditorModal } from "../modals/structure/SubsystemEditorModal";
@@ -18,7 +17,7 @@ import type { MaterialEditorModal } from "../modals/assetCatalog/MaterialEditorM
 
 export interface WorkspaceModalHostViewProps {
   taskEditor: Pick<ComponentProps<typeof TaskEditorModal>,
-    "activeTask" | "closeTaskModal" | "handleResolveTaskBlocker" |
+    "activeTask" | "closeTaskModal" |
     "handleTaskSubmit" | "isDeletingTask" | "isSavingTask" | "setTaskDraft" | "taskDraft"
   > & {
     taskModalMode: "create" | "edit" | null;
@@ -29,7 +28,6 @@ export interface WorkspaceModalHostViewProps {
     showTimelineCreateToggleInTaskModal: boolean;
     switchTaskCreateToMilestone: () => void;
   };
-  manufacturingEditor: Omit<ComponentProps<typeof ManufacturingEditorModal>, "bootstrap" | "manufacturingModalMode"> & { manufacturingModalMode: "create" | "edit" | null };
   purchaseEditor: Omit<ComponentProps<typeof PurchaseEditorModal>, "bootstrap" | "purchaseModalMode"> & { purchaseModalMode: "create" | "edit" | null };
   mechanismEditor: Omit<ComponentProps<typeof MechanismEditorModal>, "bootstrap" | "requestPhotoUpload" | "mechanismModalMode"> & { mechanismModalMode: "create" | "edit" | null };
   subsystemEditor: Omit<ComponentProps<typeof SubsystemEditorModal>, "bootstrap" | "requestPhotoUpload" | "subsystemModalMode"> & { subsystemModalMode: "create" | "edit" | null };
@@ -48,7 +46,7 @@ export interface WorkspaceModalHostViewProps {
   openCreateQaReportModal: (taskId?: string) => void;
   onTaskEditCanceled: () => void;
   requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
-  disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
+  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>;
   handleQaReportSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
   handleMilestoneReportSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
   handleWorkLogSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;

@@ -46,7 +46,6 @@ function renderWorkLogsView(
           parentSubsystemId: null,
           projectId: "project-1",
           responsibleEngineerId: null,
-          risks: [],
         },
       },
       view,
@@ -68,29 +67,27 @@ describe("WorkLogsView", () => {
       tasks: [
         {
           actualHours: 2,
-          artifactIds: [],
           assigneeIds: [],
-          blockers: [],
-
-          disciplineId: "discipline-1",
-          documentationLinked: false,
+          workTypeId: "work-type-design",
+          responsibleGroupId: null,
           dueDate: "2026-05-01",
           estimatedHours: 4,
           id: "task-1",
-          linkedManufacturingIds: [],
-          linkedPurchaseIds: [],
           mechanismIds: [],
           mentorId: null,
           ownerId: null,
           partInstanceIds: [],
+          scheduleRefs: [],
+          requestedById: null,
           priority: "medium",
           projectId: "project-1",
+          checklistItems: [],
+          manufacturingDetails: null,
           requiresDocumentation: false,
           startDate: "2026-05-01",
           status: "in-progress",
           subsystemIds: ["subsystem-1"],
           summary: "Updated drivetrain CAD",
-          targetMilestoneId: null,
           title: "Drive CAD",
           workstreamIds: [],
         },
@@ -133,10 +130,10 @@ describe("WorkLogsView", () => {
   });
 
   it("keeps QA and milestone history as filters rather than duplicate task lists", () => {
-    const base = { projectId: "p", taskId: null, milestoneId: null, workstreamId: null, createdByMemberId: null, result: "pass", notes: "", createdAt: "2026-09-10" };
+    const base = { projectId: "p", targetRefs: [], createdByMemberId: null, participantIds: [], mentorId: null, requestedById: null, result: "pass", status: "submitted" as const, notes: "", createdAt: "2026-09-10" };
     const reports: BootstrapPayload["reports"] = [
-      { ...base, id: "qa", reportType: "QA", title: "Sensor QA", summary: "Verified calibration" },
-      { ...base, id: "result", reportType: "MilestoneTest", title: "Scrimmage result", summary: "Drive test complete" },
+      { ...base, id: "qa", reportType: "qa", summary: "Sensor QA" },
+      { ...base, id: "result", reportType: "review", summary: "Scrimmage result" },
     ];
     const qa = renderWorkLogsView("qa", { reports });
     expect(qa).toContain("Sensor QA");
@@ -152,29 +149,27 @@ describe("WorkLogsView", () => {
       tasks: [
         {
           actualHours: 2,
-          artifactIds: [],
           assigneeIds: [],
-          blockers: [],
-
-          disciplineId: "discipline-1",
-          documentationLinked: false,
+          workTypeId: "work-type-design",
+          responsibleGroupId: null,
           dueDate: "2026-05-01",
           estimatedHours: 4,
           id: "task-1",
-          linkedManufacturingIds: [],
-          linkedPurchaseIds: [],
           mechanismIds: [],
           mentorId: null,
           ownerId: null,
           partInstanceIds: [],
+          scheduleRefs: [],
+          requestedById: null,
           priority: "medium",
           projectId: "project-1",
+          checklistItems: [],
+          manufacturingDetails: null,
           requiresDocumentation: false,
           startDate: "2026-05-01",
           status: "in-progress",
           subsystemIds: ["subsystem-1"],
           summary: "Updated drivetrain CAD",
-          targetMilestoneId: null,
           title: "Drive CAD",
           workstreamIds: [],
         },

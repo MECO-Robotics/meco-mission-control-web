@@ -21,9 +21,6 @@ export function renderTaskModal(
   const activeTask: TaskRecord = {
     id: "task-1",
     ...taskDraft,
-    blockers: [],
-    linkedManufacturingIds: [],
-    linkedPurchaseIds: [],
   };
 
   return renderToStaticMarkup(
@@ -31,7 +28,6 @@ export function renderTaskModal(
       activeTask: taskModalMode === "edit" ? activeTask : null,
       bootstrap,
       closeTaskModal: jest.fn(),
-      handleResolveTaskBlocker: jest.fn(async () => undefined),
       handleTaskSubmit: jest.fn(),
       isDeletingTask: false,
       isSavingTask: false,

@@ -41,18 +41,18 @@ export function useRisksViewModel({
   }, [activePersonFilter, bootstrap]);
 
   const [draft, setDraft] = useState<RiskPayload>({
+    projectId: bootstrap.projects[0]?.id ?? "",
     title: "",
     detail: "",
+    category: "other",
     severity: "medium",
-    sourceType: "qa-report",
-    sourceId: "",
-    attachmentType: "project",
-    attachmentId: "",
+    status: "open",
+    blocksWork: false,
+    source: { kind: "manual" },
+    relatedTargets: [],
     mitigationTaskId: null,
+    ownerGroupId: null,
   });
-
-  const sourceOptions = viewData.sourceOptionsForType(draft.sourceType);
-  const attachmentOptions = viewData.attachmentOptionsForType(draft.attachmentType);
   const activeRisk = useMemo(
     () => bootstrap.risks.find((risk) => risk.id === activeRiskId) ?? null,
     [activeRiskId, bootstrap.risks],
@@ -81,32 +81,6 @@ export function useRisksViewModel({
     setEditorMode("edit");
   }, [closeEditor]);
 
-  useEffect(() => {
-    if (!editorMode) {
-      return;
-    }
-
-    if (!sourceOptions.some((option) => option.id === draft.sourceId)) {
-      setDraft((current) => ({
-        ...current,
-        sourceId: sourceOptions[0]?.id ?? "",
-      }));
-    }
-  }, [draft.sourceId, editorMode, sourceOptions]);
-
-  useEffect(() => {
-    if (!editorMode) {
-      return;
-    }
-
-    if (!attachmentOptions.some((option) => option.id === draft.attachmentId)) {
-      setDraft((current) => ({
-        ...current,
-        attachmentId: attachmentOptions[0]?.id ?? "",
-      }));
-    }
-  }, [attachmentOptions, draft.attachmentId, editorMode]);
-
   const handleSaveRisk = useCallback(async () => {
     const session = editorSession.current;
     if (session.pending || editorMode !== "edit" || !activeRiskId) return;
@@ -119,16 +93,6 @@ export function useRisksViewModel({
 
     if (payload.detail.length < 2) {
       setEditorError("Please provide risk details.");
-      return;
-    }
-
-    if (!payload.sourceId) {
-      setEditorError("Please choose a real source.");
-      return;
-    }
-
-    if (!payload.attachmentId) {
-      setEditorError("Please choose a real attachment target.");
       return;
     }
 
@@ -175,13 +139,10 @@ export function useRisksViewModel({
   return {
     activeRisk,
     ...viewData,
-    attachmentOptions,
     closeEditor,
     draft,
     editorError,
     editorMode,
-    getAttachmentOptionsForType: viewData.attachmentOptionsForType,
-    getSourceOptionsForType: viewData.sourceOptionsForType,
     handleDeleteRisk,
     handleSaveRisk,
     isDeleting,
@@ -189,6 +150,5 @@ export function useRisksViewModel({
     openRiskDetails,
     openEditEditor,
     setDraft,
-    sourceOptions,
   };
 }

@@ -27,7 +27,6 @@ export function WorkspaceTaskModalsSection(props: WorkspaceModalHostViewProps) {
           onEditTask={editor.openEditTaskModal}
           onLogWork={props.openCreateWorkLogModal}
           onSubmitQa={props.openCreateQaReportModal}
-          onResolveTaskBlocker={editor.handleResolveTaskBlocker}
           setAdvancedSectionOpen={setAdvancedSectionOpen}
         />
       ) : null}

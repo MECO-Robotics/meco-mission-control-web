@@ -18,7 +18,6 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MemberPayload } from "@/types/payloads";
 import type { MemberRecord } from "@/types/recordsOrganization";
 import { isMemberActiveInSeason } from "@/lib/appUtils/common";
-import { getTaskDisciplinesForProject } from "@/lib/taskDisciplines";
 
 import { RosterAddPersonModal } from "./roster/RosterAddPersonModal";
 import { RosterEditPersonModal } from "./roster/RosterEditPersonModal";
@@ -118,34 +117,19 @@ export const RosterView: React.FC<RosterViewProps> = ({
   });
   const sortedExternalMembers = [...externalMembers].sort((a, b) => a.name.localeCompare(b.name));
 
-  const sortedDisciplines = React.useMemo(() => {
-    const projectForDisciplines = selectedProject ?? bootstrap.projects[0] ?? null;
-    const allowedDisciplineIds = new Set(
-      getTaskDisciplinesForProject(projectForDisciplines).map((discipline) => discipline.id),
-    );
-    const uniqueDisciplinesByName = new Map<string, BootstrapPayload["disciplines"][number]>();
-
-    for (const discipline of bootstrap.disciplines) {
-      if (!allowedDisciplineIds.has(discipline.id)) {
-        continue;
-      }
-      const normalizedName = discipline.name.trim().toLowerCase();
-      if (!uniqueDisciplinesByName.has(normalizedName)) {
-        uniqueDisciplinesByName.set(normalizedName, discipline);
-      }
-    }
-
-    return [...uniqueDisciplinesByName.values()].sort((a, b) => a.name.localeCompare(b.name));
-  }, [bootstrap.disciplines, bootstrap.projects, selectedProject]);
-
-  const disciplineOptions = React.useMemo(
-    () => sortedDisciplines.map((discipline) => ({ id: discipline.id, name: discipline.name })),
-    [sortedDisciplines],
+  const responsibleGroups = React.useMemo(
+    () => bootstrap.responsibleGroups.filter((group) => !group.isArchived && (!selectedProject || group.projectIds.includes(selectedProject.id))),
+    [bootstrap.responsibleGroups, selectedProject],
   );
-  const disciplineById = React.useMemo(
-    () => Object.fromEntries(bootstrap.disciplines.map((discipline) => [discipline.id, discipline.name] as const)),
-    [bootstrap.disciplines],
-  );
+  const groupNamesByMemberId = React.useMemo(() => {
+    const groups = new Map<string, string[]>();
+    responsibleGroups.forEach((group) => group.memberIds.forEach((memberId) => {
+      const names = groups.get(memberId) ?? [];
+      names.push(group.name);
+      groups.set(memberId, names);
+    }));
+    return groups;
+  }, [responsibleGroups]);
   const normalizedSearch = searchText.trim().toLowerCase();
   const filterMembers = (members: MemberRecord[]) => {
     const scopedMembers = members.filter(member => peopleFilter === "all" || (peopleFilter === "present" ? presentMemberIds.has(member.id) : peopleFilter === "available" ? presenceById.get(member.id)?.state === "available" : insightById.get(member.id)?.availabilityStatus === "overloaded"));
@@ -155,15 +139,15 @@ export const RosterView: React.FC<RosterViewProps> = ({
         member.email,
         member.role,
         member.elevated ? "elevated" : "",
-        member.disciplineId ? disciplineById[member.disciplineId] ?? "" : "",
+        (groupNamesByMemberId.get(member.id) ?? []).join(" "),
       ]
         .join(" ")
         .toLowerCase()
         .includes(normalizedSearch),
     );
-    const disciplineName = (member: MemberRecord) => member.disciplineId ? disciplineById[member.disciplineId] ?? "" : "";
+    const groupName = (member: MemberRecord) => (groupNamesByMemberId.get(member.id) ?? []).join(", ");
     return [...searchedMembers].sort((a, b) => {
-      const priority = peopleSort === "discipline" ? disciplineName(a).localeCompare(disciplineName(b)) : peopleSort === "role" ? a.role.localeCompare(b.role) : a.name.localeCompare(b.name);
+      const priority = peopleSort === "group" ? groupName(a).localeCompare(groupName(b)) : peopleSort === "role" ? a.role.localeCompare(b.role) : a.name.localeCompare(b.name);
       return priority * (peopleSortDirection === "asc" ? 1 : -1);
     });
   };
@@ -188,7 +172,6 @@ export const RosterView: React.FC<RosterViewProps> = ({
       photoUrl: "",
       role,
       elevated: isElevatedRole(role),
-      disciplineId: null,
       plannedWeeklyAttendanceHours: 0,
       plannedAttendanceDays: [],
       plannedAttendanceNotes: "",
@@ -227,7 +210,7 @@ export const RosterView: React.FC<RosterViewProps> = ({
   const renderMember = (member: MemberRecord) => {
     const load = insightById.get(member.id);
     return <div className="people-member" key={member.id}>
-      <RosterMemberRow disciplines={bootstrap.disciplines} member={member} onEditMember={openEditPersonPopup} onSelectMember={openEditPersonPopup} selectedMemberId={selectedMemberId} />
+      <RosterMemberRow responsibleGroups={responsibleGroups} member={member} onEditMember={openEditPersonPopup} onSelectMember={openEditPersonPopup} selectedMemberId={selectedMemberId} />
       <div className="people-member-context">
         <div className="people-member-load-summary">
           <div aria-label="Weekly capacity" className="people-member-capacity">
@@ -288,7 +271,7 @@ export const RosterView: React.FC<RosterViewProps> = ({
         <div className="panel-actions filter-toolbar roster-directory-toolbar">
           <TopbarResponsiveSearch
             actions={<>
-              <WorkspaceSortMenu direction={peopleSortDirection} field={peopleSort} label="people" onDirectionChange={setPeopleSortDirection} onFieldChange={setPeopleSort} options={[{ label: "Name", value: "name" }, { label: "Discipline", value: "discipline" }, { label: "Role", value: "role" }]} />
+              <WorkspaceSortMenu direction={peopleSortDirection} field={peopleSort} label="people" onDirectionChange={setPeopleSortDirection} onFieldChange={setPeopleSort} options={[{ label: "Name", value: "name" }, { label: "Group", value: "group" }, { label: "Role", value: "role" }]} />
               <CompactFilterMenu
                 activeCount={peopleFilter === "all" ? 0 : 1}
                 ariaLabel="People filters"
@@ -360,7 +343,6 @@ export const RosterView: React.FC<RosterViewProps> = ({
         ))}
       </div>
       <RosterAddPersonModal
-        disciplineOptions={disciplineOptions}
         getEmailPlaceholder={getEmailPlaceholder}
         inactiveMembers={inactiveMembers}
         isElevatedRole={isElevatedRole}
@@ -377,7 +359,6 @@ export const RosterView: React.FC<RosterViewProps> = ({
         setReactivateMemberId={setReactivateMemberId}
       />
       <RosterEditPersonModal
-        disciplineOptions={disciplineOptions}
         getEmailPlaceholder={getEmailPlaceholder}
         isDeletingMember={isDeletingMember}
         isElevatedRole={isElevatedRole}

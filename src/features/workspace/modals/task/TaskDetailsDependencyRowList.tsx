@@ -1,5 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { TaskDependencyKind, TaskDependencyType } from "@/types/common";
+import type { PartInstanceDependencyCondition } from "@/types/common";
 import type { TaskPayload } from "@/types/payloads/task";
 import { IconTasks, IconTrash } from "@/components/shared/Icons";
 import { FilterDropdown } from "../../shared/filters/FilterDropdown";
@@ -22,6 +23,7 @@ interface TaskDetailsDependencyRow {
   name: string;
   refId: string;
   requiredState?: string | null;
+  requiredCondition?: PartInstanceDependencyCondition;
 }
 
 interface TaskDetailsDependencyRowListProps {
@@ -106,23 +108,57 @@ export function TaskDetailsDependencyRowList({
                   value={dependency.refId ? [dependency.refId] : []}
                 />
               </label>
-              <label className="field task-details-dependency-editor-field">
-                <span style={{ color: "var(--text-title)" }}>Required state</span>
-                <input
-                  onChange={(milestone) =>
-                    updateDependencyDraft(dependency.key, {
-                      requiredState: milestone.target.value,
-                    })
-                  }
-                  placeholder={getDependencyDefaultState(dependency.kind)}
-                  style={{
-                    background: "var(--bg-panel)",
-                    border: "1px solid var(--border-base)",
-                    color: "var(--text-title)",
-                  }}
-                  value={dependency.requiredState ?? ""}
-                />
-              </label>
+              {dependency.kind === "part-instance" ? (
+                <>
+                  <label className="field task-details-dependency-editor-field">
+                    <span style={{ color: "var(--text-title)" }}>Condition</span>
+                    <select
+                      onChange={(event) => updateDependencyDraft(dependency.key, {
+                        requiredCondition: event.target.value === "physical-location"
+                          ? { kind: "physical-location", value: "stock" }
+                          : { kind: "derived-readiness", value: "ready" },
+                      })}
+                      value={dependency.requiredCondition?.kind ?? "physical-location"}
+                    >
+                      <option value="physical-location">Physical location</option>
+                      <option value="derived-readiness">Derived readiness</option>
+                    </select>
+                  </label>
+                  <label className="field task-details-dependency-editor-field">
+                    <span style={{ color: "var(--text-title)" }}>
+                      {dependency.requiredCondition?.kind === "derived-readiness" ? "Required readiness" : "Required location"}
+                    </span>
+                    <select
+                      onChange={(event) => updateDependencyDraft(dependency.key, {
+                        requiredCondition: dependency.requiredCondition?.kind === "derived-readiness"
+                          ? { kind: "derived-readiness", value: event.target.value as "not-ready" | "blocked" | "qa" | "ready" }
+                          : { kind: "physical-location", value: event.target.value as "stock" | "installed" | "repair" | "retired" | "lost" | "unlocated" },
+                      })}
+                      value={dependency.requiredCondition?.value ?? "stock"}
+                    >
+                      {dependency.requiredCondition?.kind === "derived-readiness" ? (
+                        <>
+                          <option value="not-ready">Not ready</option><option value="blocked">Blocked</option><option value="qa">QA</option><option value="ready">Ready</option>
+                        </>
+                      ) : (
+                        <>
+                          <option value="stock">Stock</option><option value="installed">Installed</option><option value="repair">Repair</option><option value="retired">Retired</option><option value="lost">Lost</option><option value="unlocated">Unlocated</option>
+                        </>
+                      )}
+                    </select>
+                  </label>
+                </>
+              ) : (
+                <label className="field task-details-dependency-editor-field">
+                  <span style={{ color: "var(--text-title)" }}>Required state</span>
+                  <input
+                    onChange={(event) => updateDependencyDraft(dependency.key, { requiredState: event.target.value })}
+                    placeholder={getDependencyDefaultState(dependency.kind)}
+                    style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)", color: "var(--text-title)" }}
+                    value={dependency.requiredState ?? ""}
+                  />
+                </label>
+              )}
               <label className="field task-details-dependency-editor-field">
                 <span style={{ color: "var(--text-title)" }}>Dependency type</span>
                 <FilterDropdown

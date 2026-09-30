@@ -40,8 +40,8 @@ export function WorkflowView({
         const openTaskCount = workstreamTasks.filter(
           (task) => task.status !== "complete",
         ).length;
-        const workstreamArtifacts = artifacts.filter(
-          (artifact) => artifact.workstreamId === workstream.id,
+        const workstreamArtifacts = artifacts.filter((artifact) =>
+          artifact.targetRefs.some((target) => target.kind === "workstream" && target.id === workstream.id),
         );
         const contributorNames = Array.from(
           new Set(

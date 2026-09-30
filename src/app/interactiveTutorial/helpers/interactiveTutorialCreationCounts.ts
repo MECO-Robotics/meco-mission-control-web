@@ -28,7 +28,7 @@ export function getInteractiveTutorialCreationCounts(
     workLogs: payload.workLogs.filter((workLog) => scopedTaskIds.has(workLog.taskId)).length,
     partDefinitions: payload.partDefinitions.length,
     partInstances: payload.partInstances.filter((partInstance) =>
-      scopedSubsystemIds.has(partInstance.subsystemId),
+      Boolean(partInstance.intendedSubsystemId && scopedSubsystemIds.has(partInstance.intendedSubsystemId)),
     ).length,
     subsystems: scopedSubsystems.length,
     mechanisms: payload.mechanisms.filter((mechanism) =>
@@ -36,32 +36,9 @@ export function getInteractiveTutorialCreationCounts(
     ).length,
     students: scopedStudents.length,
     materials: payload.materials.length,
-    purchaseItems: payload.purchaseItems.filter((item) =>
-      scopedSubsystemIds.has(item.subsystemId),
-    ).length,
+    purchaseItems: payload.purchaseItems.filter((item) => scopedTaskIds.has(item.taskId)).length,
     milestones: payload.milestones.filter((milestone) =>
       tutorialProjectId ? milestone.projectIds.includes(tutorialProjectId) : true,
-    ).length,
-    cncJobs: payload.manufacturingItems.filter(
-      (item) =>
-        item.process === "cnc" &&
-        (scopedSubsystemIds.size === 0 || scopedSubsystemIds.has(item.subsystemId)),
-    ).length,
-    printJobs: payload.manufacturingItems.filter(
-      (item) =>
-        item.process === "3d-print" &&
-        (scopedSubsystemIds.size === 0 || scopedSubsystemIds.has(item.subsystemId)),
-    ).length,
-    fabricationJobs: payload.manufacturingItems.filter(
-      (item) =>
-        item.process === "fabrication" &&
-        (scopedSubsystemIds.size === 0 || scopedSubsystemIds.has(item.subsystemId)),
-    ).length,
-    completedPrintJobs: payload.manufacturingItems.filter(
-      (item) =>
-        item.process === "3d-print" &&
-        item.status === "complete" &&
-        (scopedSubsystemIds.size === 0 || scopedSubsystemIds.has(item.subsystemId)),
     ).length,
     documents: payload.artifacts.filter((artifact) =>
       tutorialProjectId ? artifact.projectId === tutorialProjectId : true,

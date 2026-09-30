@@ -10,15 +10,15 @@ describe("flat sidebar navigation", () => {
     expect(markup).toContain("sidebar-section-heading");
     expect(markup).toContain("sidebar-nav-item-icon");
     expect(markup).not.toContain("sidebar-section-chevron");
-    for (const label of ["Tasks", "Schedule", "Robot", "Parts", "People"]) expect(markup).toContain(`>${label}</span>`);
-    expect(markup).not.toContain(">Risks</span>");
+    for (const label of ["Kanban", "Schedule", "Robot", "Parts", "People"]) expect(markup).toContain(`>${label}</span>`);
+    expect(markup).toContain(">Risks</span>");
     expect(markup).not.toContain("workspace-primary-navigation");
   });
   it("keeps destinations directly accessible when folded", () => {
     const markup = renderSidebar([], "tasks", { isCollapsed: true });
     expect(markup).not.toContain("sidebar-subtab-list");
     expect(markup).toContain('aria-label="Expand sidebar"');
-    expect(markup).toContain('aria-label="Tasks"');
+    expect(markup).toContain('aria-label="Kanban"');
     expect(markup).toContain('aria-label="Parts"');
     expect(markup).not.toContain("sidebar-section-heading");
   });

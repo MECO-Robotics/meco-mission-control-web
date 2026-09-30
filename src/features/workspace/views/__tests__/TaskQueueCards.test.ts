@@ -32,7 +32,7 @@ describe("Task Queue cards", () => {
         .map((part, index) => index === 0 ? String(part) : String(part).padStart(2, "0"))
         .join("-");
       const markup = renderToStaticMarkup(React.createElement(TaskQueueCard, {
-        bootstrap, task: createTask(1, { dueDate: dateValue }), disciplinesById: {}, membersById: {}, projectsById: {},
+        bootstrap, task: createTask(1, { dueDate: dateValue }), workTypesById: {}, membersById: {}, projectsById: {},
         subsystemsById: {}, workstreamsById: {}, isNonRobotProject: false, openEditTaskModal: jest.fn(),
         taskQueueZoom: 1, showProjectContextOnCards: false, showProjectOnCards: false,
       }));
@@ -52,7 +52,7 @@ describe("Task Queue cards", () => {
       { id: "other", taskId: "task-2", date: "2026-01-03", participantIds: [], hours: 8, notes: "Unrelated" },
     ];
     const markup = renderToStaticMarkup(React.createElement(TaskQueueCard, {
-      bootstrap, task: bootstrap.tasks[0], disciplinesById: {}, membersById: {}, projectsById: {},
+      bootstrap, task: bootstrap.tasks[0], workTypesById: {}, membersById: {}, projectsById: {},
       subsystemsById: {}, workstreamsById: {}, isNonRobotProject: false, openEditTaskModal: jest.fn(),
       taskQueueZoom: 1, showProjectContextOnCards: false, showProjectOnCards: false,
     }));
@@ -66,12 +66,13 @@ describe("Task Queue cards", () => {
 
   it("shows blocker count in place of logged hours when blockers exist", () => {
     const bootstrap = createBootstrap();
+    bootstrap.risks = [{ id: "risk-blocker", projectId: "project-1", title: "Needs material", detail: "Part stock is unavailable", category: "supply", severity: "medium", status: "open", blocksWork: true, source: { kind: "manual" }, relatedTargets: [{ kind: "task", id: "task-1" }], mitigationTaskId: null, ownerGroupId: null, createdAt: "2026-01-01", updatedAt: "2026-01-01", resolvedAt: null }];
     bootstrap.workLogs = [
       { id: "log-1", taskId: "task-1", date: "2026-01-02", participantIds: ["member-1"], hours: 3.5, notes: "Prepared connector" },
     ];
-    const task = createTask(1, { blockers: ["Needs material"] });
+    const task = createTask(1);
     const markup = renderToStaticMarkup(React.createElement(TaskQueueCard, {
-      bootstrap, task, disciplinesById: {}, membersById: {}, projectsById: {},
+      bootstrap, task, workTypesById: {}, membersById: {}, projectsById: {},
       subsystemsById: {}, workstreamsById: {}, isNonRobotProject: false, openEditTaskModal: jest.fn(),
       taskQueueZoom: 1, showProjectContextOnCards: false, showProjectOnCards: false,
     }));
@@ -110,7 +111,6 @@ describe("Task Queue cards", () => {
             parentSubsystemId: null,
             responsibleEngineerId: null,
             mentorIds: [],
-            risks: [],
           },
         },
         {},
@@ -141,7 +141,7 @@ describe("Task Queue cards", () => {
     const markup = renderToStaticMarkup(
       React.createElement(TaskQueueKanbanBoard, {
         bootstrap,
-        disciplinesById: { "discipline-1": bootstrap.disciplines[0] },
+        workTypesById: { "work-type-design": bootstrap.workTypes[0] },
         focusedState: null,
         isNonRobotProject: false,
         membersById: {

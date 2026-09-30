@@ -22,7 +22,7 @@ export interface TaskQueueViewStateLogicArgs {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   disciplineFilter: FilterSelection;
-  disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
+  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>;
   focusedBoardState: TaskQueueBoardState | null;
   isAllProjectsView: boolean;
   membersById: Record<string, BootstrapPayload["members"][number]>;
@@ -46,7 +46,7 @@ export function useTaskQueueViewStateLogic({
   activePersonFilter,
   bootstrap,
   disciplineFilter,
-  disciplinesById,
+  workTypesById,
   focusedBoardState,
   isAllProjectsView,
   membersById,
@@ -72,8 +72,8 @@ export function useTaskQueueViewStateLogic({
     }
 
     const hasIterationSensitiveTask = bootstrap.tasks.some((task) => {
-      const disciplineCode = task.disciplineId
-        ? disciplinesById[task.disciplineId]?.code
+      const disciplineCode = task.workTypeId
+        ? workTypesById[task.workTypeId]?.code
         : null;
 
       return (
@@ -89,7 +89,7 @@ export function useTaskQueueViewStateLogic({
     return bootstrap.mechanisms.some(
       (mechanism) => mechanism.subsystemId === selectedSubsystemId,
     );
-  }, [bootstrap.mechanisms, bootstrap.tasks, disciplinesById, selectedSubsystemId]);
+  }, [bootstrap.mechanisms, bootstrap.tasks, workTypesById, selectedSubsystemId]);
 
   const {
     disciplineOptions,
@@ -102,7 +102,7 @@ export function useTaskQueueViewStateLogic({
     activePersonFilter,
     bootstrap,
     disciplineFilter,
-    disciplinesById,
+    workTypesById,
     isAllProjectsView,
     membersById,
     ownerFilter,

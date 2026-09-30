@@ -20,7 +20,7 @@ import type { TaskQueueBoardState } from "./taskQueueKanbanBoardState";
 
 interface TaskQueueBoardSectionProps {
   bootstrap: BootstrapPayload;
-  disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
+  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>;
   focusedBoardState: TaskQueueBoardState | null;
   isNonRobotProject: boolean;
   membersById: Record<string, BootstrapPayload["members"][number]>;
@@ -42,7 +42,7 @@ interface TaskQueueBoardSectionProps {
 
 export function TaskQueueBoardSection({
   bootstrap,
-  disciplinesById,
+  workTypesById,
   focusedBoardState,
   isNonRobotProject,
   membersById,
@@ -101,7 +101,7 @@ export function TaskQueueBoardSection({
       {boardTasks.length > 0 ? (
         <TaskQueueKanbanBoard
           bootstrap={bootstrap}
-          disciplinesById={disciplinesById}
+          workTypesById={workTypesById}
           focusedState={focusedBoardState}
           isNonRobotProject={isNonRobotProject}
           membersById={membersById}

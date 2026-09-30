@@ -98,13 +98,16 @@ export function filterSubsystems(params: {
       .map((task) => `${task.title} ${task.summary}`)
       .join(" ");
     const relatedPartInstances = bootstrap.partInstances
-      .filter((partInstance) => partInstance.subsystemId === subsystem.id)
+      .filter((partInstance) => partInstance.intendedSubsystemId === subsystem.id)
       .map((partInstance) => {
         const partDefinition = partDefinitionsById[partInstance.partDefinitionId];
-        return `${partInstance.name} ${partDefinition?.name ?? ""}`;
+        return partDefinition?.name ?? "";
       })
       .join(" ");
-    const relatedRisks = subsystem.risks.join(" ");
+    const relatedRisks = bootstrap.risks
+      .filter((risk) => risk.relatedTargets.some((target) => target.kind === "subsystem" && target.id === subsystem.id))
+      .map((risk) => `${risk.title} ${risk.detail}`)
+      .join(" ");
     const responsibleEngineer = formatMemberName(membersById, subsystem.responsibleEngineerId);
     const mentorNames = subsystem.mentorIds
       .map((mentorId) => membersById[mentorId]?.name ?? "")

@@ -28,7 +28,6 @@ describe("isInteractiveTutorialStepComplete", () => {
         activeMaterialId: null,
         activeSubsystemId: null,
         activeMechanismId: null,
-        activeManufacturingId: null,
         activeWorkstreamId: null,
         bootstrap: { milestones: [], tasks: [] } as never,
         stepBaselineLabel: "",
@@ -36,7 +35,6 @@ describe("isInteractiveTutorialStepComplete", () => {
         materialModalMode: null,
         subsystemModalMode: null,
         mechanismModalMode: null,
-        manufacturingModalMode: null,
         workstreamModalMode: null,
       } as never),
     ).toBe(true);
@@ -59,7 +57,6 @@ describe("isInteractiveTutorialStepComplete", () => {
         activeMaterialId: null,
         activeSubsystemId: null,
         activeMechanismId: null,
-        activeManufacturingId: null,
         activeWorkstreamId: null,
         bootstrap: { milestones: [], tasks: [] } as never,
         stepBaselineLabel: "",
@@ -67,7 +64,6 @@ describe("isInteractiveTutorialStepComplete", () => {
         materialModalMode: null,
         subsystemModalMode: null,
         mechanismModalMode: null,
-        manufacturingModalMode: null,
         workstreamModalMode: null,
       } as never),
     ).toBe(true);

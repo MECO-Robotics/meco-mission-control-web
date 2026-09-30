@@ -15,7 +15,7 @@ describe("AppSidebar scope", () => {
   it("renders the project and season scope pill below the profile switch", () => {
     const robotProject: ProjectRecord = {
       id: "robot-1",
-      name: "Robot 2026",
+      name: "Robot",
       projectType: "robot",
       seasonId: "season-1",
       description: "Test robot",
@@ -43,8 +43,8 @@ describe("AppSidebar scope", () => {
     expect(profileIndex).toBeLessThan(scopeIndex);
     expect(markup).toContain('aria-label="Open project and season selector"');
     expect(markup).toContain('data-tutorial-target="project-select"');
-    expect(markup).toContain("2026 Season - Robot 2026");
-    expect(markup).toContain("Robot 2026");
+    expect(markup).toContain("2026 Season - Robot");
+    expect(markup).toContain("Robot");
     expect(markup).not.toContain("sidebar-season-select");
     expect(markup).not.toContain("sidebar-project-trigger");
   });
@@ -53,6 +53,7 @@ describe("AppSidebar scope", () => {
     const seasons: SeasonRecord[] = [
       {
         id: "season-1",
+        teamId: "team-1",
         name: "2026 Season",
         type: "season",
         startDate: "2026-01-01",
@@ -61,7 +62,7 @@ describe("AppSidebar scope", () => {
     ];
     const robotProject: ProjectRecord = {
       id: "robot-1",
-      name: "Robot 2026",
+      name: "Robot",
       projectType: "robot",
       seasonId: "season-1",
       description: "Test robot",
@@ -100,6 +101,7 @@ describe("AppSidebar scope", () => {
     const seasons: SeasonRecord[] = [
       {
         id: "season-1",
+        teamId: "team-1",
         name: "2026 Season",
         type: "season",
         startDate: "2026-01-01",
@@ -107,6 +109,7 @@ describe("AppSidebar scope", () => {
       },
       {
         id: "season-2",
+        teamId: "team-1",
         name: "2027 Season",
         type: "season",
         startDate: "2027-01-01",
@@ -115,7 +118,7 @@ describe("AppSidebar scope", () => {
     ];
     const robotProject: ProjectRecord = {
       id: "robot-1",
-      name: "Robot 2026",
+      name: "Robot",
       projectType: "robot",
       seasonId: "season-1",
       description: "Test robot",

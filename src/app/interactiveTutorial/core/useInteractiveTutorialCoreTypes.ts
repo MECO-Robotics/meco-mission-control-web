@@ -3,7 +3,6 @@ import type { Dispatch, SetStateAction } from "react";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type {
   InventoryViewTab,
-  ManufacturingViewTab,
   TaskViewTab,
   ViewTab,
   WorklogsViewTab,
@@ -14,7 +13,6 @@ export interface UseInteractiveTutorialOptions {
   activeTab: ViewTab;
   taskView: TaskViewTab;
   worklogsView: WorklogsViewTab;
-  manufacturingView: ManufacturingViewTab;
   inventoryView: InventoryViewTab;
   selectedSeasonId: string | null;
   selectedProjectId: string | null;
@@ -26,7 +24,6 @@ export interface UseInteractiveTutorialOptions {
   setActiveTab: Dispatch<SetStateAction<ViewTab>>;
   setTaskView: Dispatch<SetStateAction<TaskViewTab>>;
   setWorklogsView: Dispatch<SetStateAction<WorklogsViewTab>>;
-  setManufacturingView: Dispatch<SetStateAction<ManufacturingViewTab>>;
   setInventoryView: Dispatch<SetStateAction<InventoryViewTab>>;
   setSelectedSeasonId: Dispatch<SetStateAction<string | null>>;
   setSelectedProjectId: Dispatch<SetStateAction<string | null>>;
@@ -42,8 +39,6 @@ export interface UseInteractiveTutorialOptions {
   activeSubsystemId: string | null;
   mechanismModalMode: import("@/features/workspace/shared/model/workspaceModalModes").MechanismModalMode;
   activeMechanismId: string | null;
-  manufacturingModalMode: import("@/features/workspace/shared/model/workspaceModalModes").ManufacturingModalMode;
-  activeManufacturingId: string | null;
   workstreamModalMode: import("@/features/workspace/shared/model/workspaceModalModes").WorkstreamModalMode;
   activeWorkstreamId: string | null;
 }

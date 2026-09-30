@@ -1,7 +1,6 @@
 import { createElement } from "react";
 import {
   Bot,
-  Briefcase,
   ChartNoAxesCombined,
   Cog,
   Dumbbell,
@@ -22,52 +21,14 @@ const ROBOT_PROJECT_ICON_COLORS = [
   "#0369a1",
 ];
 
-const PROJECT_TYPE_ICON_COLORS: Record<Exclude<ProjectType, "robot">, string> = {
-  operations: "#0f766e",
-  outreach: "#d97706",
-  other: "#475569",
-};
-
-type NamedProjectCategory =
-  | "media"
-  | "strategy"
-  | "training"
-  | "business"
-  | "operations";
-
-const PROJECT_CATEGORY_ICON_COLORS: Record<NamedProjectCategory, string> = {
+const PROJECT_TYPE_ICON_COLORS: Record<ProjectType, string> = {
+  robot: "#2563eb",
   media: "#dc2626",
+  outreach: "#d97706",
+  operations: "#0f766e",
   strategy: "#2563eb",
   training: "#9333ea",
-  business: "#b45309",
-  operations: "#0f766e",
 };
-
-function getNamedProjectCategory(name: string): NamedProjectCategory | null {
-  const normalizedName = name.toLowerCase();
-
-  if (normalizedName.includes("media")) {
-    return "media";
-  }
-
-  if (normalizedName.includes("strategy")) {
-    return "strategy";
-  }
-
-  if (normalizedName.includes("training") || normalizedName.includes("scouting")) {
-    return "training";
-  }
-
-  if (normalizedName.includes("business")) {
-    return "business";
-  }
-
-  if (normalizedName.includes("operations")) {
-    return "operations";
-  }
-
-  return null;
-}
 
 function getProjectTypeIcon(projectType: ProjectType | null) {
   switch (projectType) {
@@ -77,35 +38,18 @@ function getProjectTypeIcon(projectType: ProjectType | null) {
       return createElement(Cog, { size: 14, strokeWidth: 2 });
     case "outreach":
       return createElement(Megaphone, { size: 14, strokeWidth: 2 });
+    case "media":
+      return createElement(Video, { size: 14, strokeWidth: 2 });
+    case "strategy":
+      return createElement(ChartNoAxesCombined, { size: 14, strokeWidth: 2 });
+    case "training":
+      return createElement(Dumbbell, { size: 14, strokeWidth: 2 });
     default:
       return createElement(Folder, { size: 14, strokeWidth: 2 });
   }
 }
 
 export function getProjectIcon(project: Pick<ProjectRecord, "name" | "projectType"> | null) {
-  if (project) {
-    const namedCategory = getNamedProjectCategory(project.name);
-    if (namedCategory === "media") {
-      return createElement(Video, { size: 14, strokeWidth: 2 });
-    }
-
-    if (namedCategory === "strategy") {
-      return createElement(ChartNoAxesCombined, { size: 14, strokeWidth: 2 });
-    }
-
-    if (namedCategory === "training") {
-      return createElement(Dumbbell, { size: 14, strokeWidth: 2 });
-    }
-
-    if (namedCategory === "business") {
-      return createElement(Briefcase, { size: 14, strokeWidth: 2 });
-    }
-
-    if (namedCategory === "operations") {
-      return createElement(Cog, { size: 14, strokeWidth: 2 });
-    }
-  }
-
   return getProjectTypeIcon(project?.projectType ?? null);
 }
 
@@ -125,14 +69,7 @@ export function getProjectIconColor(
     return "var(--official-blue)";
   }
 
-  if (project.projectType === "robot") {
-    return getRobotProjectIconColor(project.id);
-  }
-
-  const namedCategory = getNamedProjectCategory(project.name);
-  if (namedCategory) {
-    return PROJECT_CATEGORY_ICON_COLORS[namedCategory];
-  }
-
-  return PROJECT_TYPE_ICON_COLORS[project.projectType];
+  return project.projectType === "robot"
+    ? getRobotProjectIconColor(project.id)
+    : PROJECT_TYPE_ICON_COLORS[project.projectType];
 }

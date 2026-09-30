@@ -1,7 +1,6 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type {
   InventoryViewTab,
-  ManufacturingViewTab,
   TaskViewTab,
   ViewTab,
   WorklogsViewTab,
@@ -46,14 +45,6 @@ export type InteractiveTutorialStepId =
   | "create-mechanism"
   | "edit-mechanism"
   | "add-part-to-mechanism"
-  | "manufacturing-cnc"
-  | "create-cnc-job"
-  | "inspect-cnc-job"
-  | "create-print-job"
-  | "complete-print-job"
-  | "manufacturing-search"
-  | "create-fabrication-job"
-  | "inspect-fabrication-job"
   | "workflow-edit"
   | "create-document"
   | "help-tab";
@@ -77,7 +68,6 @@ export interface InteractiveTutorialReturnState {
   activeTab: ViewTab;
   taskView: TaskViewTab;
   worklogsView: WorklogsViewTab;
-  manufacturingView: ManufacturingViewTab;
   inventoryView: InventoryViewTab;
   selectedSeasonId: string | null;
   selectedProjectId: string | null;
@@ -94,10 +84,6 @@ export interface InteractiveTutorialCreationCounts {
   materials: number;
   purchaseItems: number;
   milestones: number;
-  cncJobs: number;
-  printJobs: number;
-  fabricationJobs: number;
-  completedPrintJobs: number;
   documents: number;
 }
 
@@ -148,8 +134,6 @@ export interface InteractiveTutorialStepCompletionContext {
   activeSubsystemId: string | null;
   mechanismModalMode: "create" | "edit" | null;
   activeMechanismId: string | null;
-  manufacturingModalMode: "create" | "edit" | null;
-  activeManufacturingId: string | null;
   workstreamModalMode: "create" | "edit" | null;
   activeWorkstreamId: string | null;
   stepBaselineLabel: string | null;

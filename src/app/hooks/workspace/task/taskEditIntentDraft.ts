@@ -11,22 +11,7 @@ export function applyTaskEditIntentToDraft(
   taskDraft: TaskPayload,
   options?: OpenEditTaskModalOptions,
 ): TaskPayload {
-  if (options?.intentState === "blocked") {
-    return {
-      ...taskDraft,
-      taskBlockers: [
-        ...(taskDraft.taskBlockers ?? []),
-        {
-          id: createDraftRelationId("blocker"),
-          blockerType: "other",
-          blockerId: null,
-          description: "Blocked",
-          isIntentPlaceholder: true,
-          severity: "medium",
-        },
-      ],
-    };
-  }
+  if (options?.intentState === "blocked") return taskDraft;
 
   if (options?.intentState === "waiting-on-dependency") {
     return {

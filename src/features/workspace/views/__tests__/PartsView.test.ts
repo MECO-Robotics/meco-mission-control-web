@@ -20,7 +20,7 @@ const bootstrap: BootstrapPayload = {
       onHandQuantity: 12,
       reorderPoint: 4,
       location: "Rack",
-      vendor: "Local Metals",
+      preferredVendorId: null,
       notes: "",
     },
   ],
@@ -35,7 +35,6 @@ const bootstrap: BootstrapPayload = {
       parentSubsystemId: null,
       responsibleEngineerId: null,
       mentorIds: [],
-      risks: [],
     },
     {
       id: "arm",
@@ -47,7 +46,6 @@ const bootstrap: BootstrapPayload = {
       parentSubsystemId: null,
       responsibleEngineerId: null,
       mentorIds: [],
-      risks: [],
     },
   ],
   partDefinitions: [
@@ -59,7 +57,7 @@ const bootstrap: BootstrapPayload = {
       revision: "A",
       iteration: 1,
       type: "machined",
-      source: "in-house",
+      defaultAcquisitionMethod: "manufacture",
       materialId: "material-aluminum",
       description: "",
     },
@@ -71,7 +69,7 @@ const bootstrap: BootstrapPayload = {
       revision: "A",
       iteration: 1,
       type: "printed",
-      source: "in-house",
+      defaultAcquisitionMethod: "manufacture",
       materialId: null,
       description: "",
     },
@@ -79,23 +77,19 @@ const bootstrap: BootstrapPayload = {
   partInstances: [
     {
       id: "drive-installed",
-      subsystemId: "drive",
-      mechanismId: null,
       partDefinitionId: "drive-part",
-      name: "Left drive rail",
-      quantity: 1,
-      trackIndividually: true,
-      status: "ready",
+      intendedSubsystemId: "drive",
+      intendedMechanismId: null,
+      location: { kind: "installed", subsystemId: "drive", mechanismId: null },
+      readinessStatus: "ready",
     },
     {
       id: "arm-needed",
-      subsystemId: "arm",
-      mechanismId: null,
       partDefinitionId: "arm-part",
-      name: "Shoulder bracket",
-      quantity: 1,
-      trackIndividually: true,
-      status: "blocked",
+      intendedSubsystemId: "arm",
+      intendedMechanismId: null,
+      location: { kind: "stock", location: "Parts cabinet" },
+      readinessStatus: "blocked",
     },
   ],
 };
@@ -184,15 +178,15 @@ describe("PartsView filters", () => {
   });
 });
 
-it("finds a definition by its instance name after catalog consolidation", () => {
-  expect(filterPartDefinitions({ bootstrap, partSearch: "Shoulder", partStatus: [], partSubsystem: [] }).map(part => part.id)).toEqual(["arm-part"]);
-  expect(filterPartDefinitions({ bootstrap, partSearch: "Shoulder", partStatus: ["ready"], partSubsystem: [] })).toEqual([]);
+it("finds a definition by physical instance ID and readiness", () => {
+  expect(filterPartDefinitions({ bootstrap, partSearch: "arm-needed", partStatus: [], partSubsystem: [] }).map(part => part.id)).toEqual(["arm-part"]);
+  expect(filterPartDefinitions({ bootstrap, partSearch: "arm-needed", partStatus: ["ready"], partSubsystem: [] })).toEqual([]);
 });
 
 it("finds a definition by its allocated mechanism while honoring subsystem filters", () => {
   const mapped = { ...bootstrap,
     mechanisms: [{ id: "wrist", subsystemId: "arm", name: "Wrist pivot", description: "", iteration: 1 }],
-    partInstances: bootstrap.partInstances.map(instance => instance.id === "arm-needed" ? { ...instance, mechanismId: "wrist" } : instance),
+    partInstances: bootstrap.partInstances.map(instance => instance.id === "arm-needed" ? { ...instance, intendedMechanismId: "wrist" } : instance),
   } satisfies BootstrapPayload;
   expect(filterPartDefinitions({ bootstrap: mapped, partSearch: "Wrist", partStatus: [], partSubsystem: ["arm"] }).map(part => part.id)).toEqual(["arm-part"]);
   expect(filterPartDefinitions({ bootstrap: mapped, partSearch: "Wrist", partStatus: [], partSubsystem: ["drive"] })).toEqual([]);

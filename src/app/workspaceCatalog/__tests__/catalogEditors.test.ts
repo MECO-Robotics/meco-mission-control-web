@@ -1,9 +1,6 @@
 import { useMaterialEditor } from "../materialActions";
-import { useManufacturingActions } from "../manufacturingActions";
 import { usePurchaseActions } from "../purchaseActions";
 import { buildEmptyMaterialPayload, buildEmptyPurchasePayload } from "@/lib/appUtils/payloadBuilders";
-import { buildEmptyManufacturingPayload } from "@/lib/appUtils/manufacturing";
-import { beginSessionChange } from "@/lib/auth/core/sessionStorage";
 import * as production from "@/lib/auth/records/production";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useArtifactActions } from "../artifactActions";
@@ -72,7 +69,6 @@ const cases = [
   { name: "subsystem", useOwner: useSubsystemActions, collection: "subsystems", create: structure.createSubsystemRecord, update: structure.updateSubsystemRecord },
   { name: "mechanism", useOwner: useMechanismActions, collection: "mechanisms", create: structure.createMechanismRecord, update: structure.updateMechanismRecord },
   { name: "purchase", useOwner: usePurchaseActions, collection: "purchaseItems", create: production.createPurchaseItemRecord, update: production.updatePurchaseItemRecord },
-  { name: "manufacturing", useOwner: useManufacturingActions, collection: "manufacturingItems", create: production.createManufacturingItemRecord, update: production.updateManufacturingItemRecord },
   { name: "material", useOwner: useMaterialEditor, collection: "materials", create: inventory.createMaterialRecord, update: inventory.updateMaterialRecord },
 ] as const;
 
@@ -97,14 +93,13 @@ function setup(item: typeof cases[number]) {
       saving: owner[`isSaving${cap}`],
       setDraft: owner[`set${cap}Draft`] as (draft: Draft) => void,
       openEdit: owner[`openEdit${cap}Modal`] as (record: Draft) => void,
-      openCreate: () => (owner[`openCreate${cap}Modal`] as (...args: unknown[]) => void)(...(item.name === "artifact" ? ["document"] : item.name === "partInstance" ? [bootstrap.mechanisms[0]] : item.name === "manufacturing" ? ["cnc"] : [])),
+      openCreate: () => (owner[`openCreate${cap}Modal`] as (...args: unknown[]) => void)(...(item.name === "artifact" ? ["document"] : item.name === "partInstance" ? [bootstrap.mechanisms[0]] : [])),
       close: owner[`close${cap}Modal`] as () => void,
       submit: () => (owner[`handle${cap}Submit`] as (event: unknown) => Promise<void>)({ preventDefault: jest.fn() }),
     };
   };
   read();
   const defaults = item.name === "purchase" ? buildEmptyPurchasePayload(bootstrap)
-    : item.name === "manufacturing" ? buildEmptyManufacturingPayload(bootstrap, "cnc")
     : item.name === "material" ? buildEmptyMaterialPayload() : {};
   const record = { ...defaults, ...bootstrap[item.collection][0], id: "editor-record", projectId: bootstrap.projects[0].id, title: "Record", name: "Record", risks: [] } as Draft;
   dependencies.bootstrap = { ...bootstrap, [item.collection]: [record] };
@@ -201,7 +196,7 @@ it.each(["workstream", "mechanism"] as const)(
   },
 );
 
-it("shares archive and delete lifecycles while closing only the deleted active record", async () => {
+it("deletes the active artifact and closes its editor", async () => {
   const { read, record, dependencies } = setup(cases.find((item) => item.name === "artifact")!);
   dependencies.bootstrap = {
     ...dependencies.bootstrap,
@@ -210,17 +205,9 @@ it("shares archive and delete lifecycles while closing only the deleted active r
   read().openEdit(record);
   const actions = read().raw as ReturnType<typeof useArtifactActions>;
 
-  await actions.handleToggleArtifactArchived(record.id as string);
-  expect(inventory.updateArtifactRecord).toHaveBeenCalledWith(
-    record.id,
-    { isArchived: true },
-    dependencies.handleUnauthorized,
-  );
-  expect(dependencies.loadWorkspace).toHaveBeenCalledTimes(1);
-
   await actions.handleDeleteArtifact(record.id as string);
   expect(inventory.deleteArtifactRecord).toHaveBeenCalledWith(record.id, dependencies.handleUnauthorized);
-  expect(dependencies.loadWorkspace).toHaveBeenCalledTimes(2);
+  expect(dependencies.loadWorkspace).toHaveBeenCalledTimes(1);
   expect(read().mode).toBeNull();
 });
 
@@ -234,7 +221,7 @@ it("preserves material create reorder points and converts edit records to draft 
   expect(read().draft).not.toHaveProperty("id");
 });
 
-it.each(["", "0", "123.45"])("preserves purchase final-cost entry %j and derives the title from the part", async (finalCost) => {
+it.each(["", "0", "123.45"])("stores purchase final cost %j as a commercial amount", async (finalCost) => {
   const { read, dependencies } = setup(cases.find((item) => item.name === "purchase")!);
   read().openCreate();
   const editor = read().raw as ReturnType<typeof usePurchaseActions>;
@@ -242,47 +229,8 @@ it.each(["", "0", "123.45"])("preserves purchase final-cost entry %j and derives
   read().setDraft({ ...read().draft, title: "Stale free text" });
   await read().submit();
   expect(production.createPurchaseItemRecord).toHaveBeenCalledWith(expect.objectContaining({
-    title: dependencies.bootstrap.partDefinitions[0].name,
-    finalCost: finalCost === "" ? undefined : Number(finalCost),
+    title: "Stale free text",
+    taskId: "task-1",
+    finalCost: finalCost === "" ? null : { amount: Number(finalCost), currency: "USD" },
   }), dependencies.handleUnauthorized);
-});
-
-it("keeps the signed-in CNC requester and validates/filter linked part instances before submission", async () => {
-  const { read, dependencies } = setup(cases.find((item) => item.name === "manufacturing")!);
-  read().openCreate();
-  expect(read().draft.requestedById).toBe(dependencies.signedInMemberId);
-  const valid = dependencies.bootstrap.partInstances[0];
-  dependencies.bootstrap = { ...dependencies.bootstrap, partInstances: [...dependencies.bootstrap.partInstances, { ...valid, id: "other-part", partDefinitionId: "other-definition" }] };
-  read().setDraft({ ...read().draft, partInstanceId: null, partInstanceIds: ["missing", "other-part"], inHouse: true });
-  await read().submit();
-  expect(production.createManufacturingItemRecord).not.toHaveBeenCalled();
-  expect(dependencies.setDataMessage).toHaveBeenLastCalledWith("Select at least one part instance for this manufacturing job.");
-  read().setDraft({ ...read().draft, process: "fabrication", title: "Stale title", subsystemId: "wrong", partInstanceIds: ["missing", valid.id, "other-part"], batchLabel: "  batch  " });
-  await read().submit();
-  expect(production.createManufacturingItemRecord).toHaveBeenCalledWith(expect.objectContaining({
-    title: dependencies.bootstrap.partDefinitions[0].name, subsystemId: valid.subsystemId,
-    partInstanceId: valid.id, partInstanceIds: [valid.id], inHouse: false, batchLabel: "batch",
-  }), dependencies.handleUnauthorized);
-});
-
-it("keeps CNC quick-status actions independent of an open editor and ignores an old-session failure", async () => {
-  const { read, record, dependencies } = setup(cases.find((item) => item.name === "manufacturing")!);
-  read().openEdit(record);
-  const editor = read().raw as ReturnType<typeof useManufacturingActions>;
-  await editor.handleCncQuickStatusChange({ ...record, status: "requested", mentorReviewed: false } as never, "in-progress");
-  expect(production.updateManufacturingItemRecord).toHaveBeenCalledWith(record.id, { mentorReviewed: true, status: "in-progress" }, dependencies.handleUnauthorized);
-  expect(read().mode).toBe("edit");
-  expect(read().saving).toBe(false);
-  expect(dependencies.loadWorkspace).toHaveBeenCalledTimes(1);
-  await editor.handleCncQuickStatusChange({ ...record, status: "in-progress", mentorReviewed: true } as never, "in-progress");
-  expect(production.updateManufacturingItemRecord).toHaveBeenCalledTimes(1);
-  let reject!: (error: Error) => void;
-  jest.mocked(production.updateManufacturingItemRecord).mockImplementationOnce(() => new Promise((_yes, no) => { reject = no; }));
-  const pending = editor.handleCncQuickStatusChange(record as never, "complete");
-  const errorCalls = dependencies.setDataMessage.mock.calls.length;
-  beginSessionChange();
-  reject(new Error("old workspace"));
-  await pending;
-  expect(dependencies.setDataMessage).toHaveBeenCalledTimes(errorCalls);
-  expect(dependencies.loadWorkspace).toHaveBeenCalledTimes(1);
 });

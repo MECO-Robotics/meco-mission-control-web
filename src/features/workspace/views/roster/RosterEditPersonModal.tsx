@@ -1,22 +1,15 @@
 import { ModalDialog } from "@/components/ModalDialog";
 import React from "react";
 
-import { IconTasks, IconTrash } from "@/components/shared/Icons";
-import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
+import { IconTrash } from "@/components/shared/Icons";
 import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
 import type { MemberPayload } from "@/types/payloads";
 import { RosterAttendanceFields } from "./RosterAttendanceFields";
-
-interface DisciplineOption {
-  id: string;
-  name: string;
-}
 
 interface RosterEditPersonModalProps {
   isOpen: boolean;
   memberEditDraft: MemberPayload | null;
   setMemberEditDraft: React.Dispatch<React.SetStateAction<MemberPayload | null>>;
-  disciplineOptions: DisciplineOption[];
   selectedMemberId: string | null;
   isSavingMember: boolean;
   isDeletingMember: boolean;
@@ -32,7 +25,6 @@ export const RosterEditPersonModal: React.FC<RosterEditPersonModalProps> = ({
   isOpen,
   memberEditDraft,
   setMemberEditDraft,
-  disciplineOptions,
   selectedMemberId,
   isSavingMember,
   isDeletingMember,
@@ -74,21 +66,6 @@ export const RosterEditPersonModal: React.FC<RosterEditPersonModalProps> = ({
               placeholder={getEmailPlaceholder(memberEditDraft.role)}
               type="email"
               value={memberEditDraft.email}
-            />
-          </label>
-          <label className="field">
-            <span>Discipline</span>
-            <FilterDropdown
-              allLabel="None"
-              ariaLabel="Set person discipline"
-              className="task-queue-filter-menu-submenu"
-              icon={<IconTasks />}
-              onChange={(selection) => {
-                setMemberEditDraft((curr) => (curr ? { ...curr, disciplineId: selection[0] ?? null } : null));
-              }}
-              options={disciplineOptions}
-              singleSelect
-              value={memberEditDraft.disciplineId ? [memberEditDraft.disciplineId] : []}
             />
           </label>
           <label className="field">

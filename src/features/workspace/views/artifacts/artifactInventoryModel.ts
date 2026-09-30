@@ -2,7 +2,7 @@ import type { ArtifactStatus } from "@/types/common";
 import type { ArtifactRecord } from "@/types/recordsInventory";
 import type { ResourceSortDirection } from "@/features/workspace/shared/resourceList/ResourceColumnHeader";
 
-export type ArtifactSortField = "title" | "workstream" | "status" | "link" | "updated";
+export type ArtifactSortField = "title" | "targets" | "status" | "uri" | "updated";
 
 export const ARTIFACT_GRID_TEMPLATE = "minmax(240px, 2fr) 1.1fr 0.9fr 1fr 0.8fr";
 
@@ -45,16 +45,16 @@ export function getUpdatedDateKey(value: string) {
   return `${date.getFullYear()}-${month}-${day}`;
 }
 
-export function summarizeLink(link: string) {
-  if (!link.trim()) {
+export function summarizeUri(uri: string) {
+  if (!uri.trim()) {
     return "No link";
   }
 
   try {
-    const url = new URL(link);
+    const url = new URL(uri);
     return `${url.hostname}${url.pathname}`;
   } catch {
-    return link;
+    return uri;
   }
 }
 
@@ -62,21 +62,18 @@ export function sortArtifacts(
   artifacts: ArtifactRecord[],
   field: ArtifactSortField,
   direction: ResourceSortDirection,
-  workstreamsById: Record<string, string>,
 ) {
   const multiplier = direction === "ascending" ? 1 : -1;
   const getSortValue = (artifact: ArtifactRecord) => {
     switch (field) {
       case "title":
         return artifact.title;
-      case "workstream":
-        return artifact.workstreamId
-          ? workstreamsById[artifact.workstreamId] ?? "Unknown workflow"
-          : "Project-level";
+      case "targets":
+        return artifact.targetRefs.map((target) => `${target.kind}:${target.id}`).join(" ");
       case "status":
         return artifact.status;
-      case "link":
-        return artifact.link;
+      case "uri":
+        return artifact.uri;
       case "updated":
         return artifact.updatedAt;
     }

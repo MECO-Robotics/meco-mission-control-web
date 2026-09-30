@@ -1,46 +1,13 @@
-import type {
-  TaskBlockerDraft,
-  TaskBlockerPayload,
-  TaskDependencyDraft,
-  TaskDependencyPayload,
-} from "@/types/payloads/task";
-import type { TaskBlockerRecord, TaskDependencyRecord } from "@/types/recordsExecution";
-import {
-  buildTaskBlockerPayload,
-  buildTaskDependencyPayload,
-  isTaskBlockerPayloadChanged,
-  isTaskDependencyPayloadChanged,
-} from "@/features/workspace/tasks/domain/taskPayloadNormalization";
+import type { TaskDependencyDraft, TaskDependencyPayload } from "@/types/payloads/task";
+import type { TaskDependencyRecord } from "@/types/recordsExecution";
+import { buildTaskDependencyPayload, isTaskDependencyPayloadChanged } from "@/features/workspace/tasks/domain/taskPayloadNormalization";
 
 type HandleUnauthorized = (() => void) | undefined;
 
 export interface TaskRelationPersistence {
-  createTaskDependencyRecord: (
-    payload: TaskDependencyPayload,
-    onUnauthorized?: HandleUnauthorized,
-  ) => Promise<TaskDependencyRecord>;
-  updateTaskDependencyRecord: (
-    dependencyId: string,
-    payload: Partial<TaskDependencyPayload>,
-    onUnauthorized?: HandleUnauthorized,
-  ) => Promise<TaskDependencyRecord>;
-  deleteTaskDependencyRecord: (
-    dependencyId: string,
-    onUnauthorized?: HandleUnauthorized,
-  ) => Promise<TaskDependencyRecord>;
-  createTaskBlockerRecord: (
-    payload: TaskBlockerPayload,
-    onUnauthorized?: HandleUnauthorized,
-  ) => Promise<TaskBlockerRecord>;
-  updateTaskBlockerRecord: (
-    blockerId: string,
-    payload: Partial<TaskBlockerPayload>,
-    onUnauthorized?: HandleUnauthorized,
-  ) => Promise<TaskBlockerRecord>;
-  deleteTaskBlockerRecord: (
-    blockerId: string,
-    onUnauthorized?: HandleUnauthorized,
-  ) => Promise<TaskBlockerRecord>;
+  createTaskDependencyRecord: (payload: TaskDependencyPayload, onUnauthorized?: HandleUnauthorized) => Promise<TaskDependencyRecord>;
+  updateTaskDependencyRecord: (dependencyId: string, payload: Partial<TaskDependencyPayload>, onUnauthorized?: HandleUnauthorized) => Promise<TaskDependencyRecord>;
+  deleteTaskDependencyRecord: (dependencyId: string, onUnauthorized?: HandleUnauthorized) => Promise<TaskDependencyRecord>;
 }
 
 export async function syncTaskDependencies(
@@ -56,37 +23,29 @@ export async function syncTaskDependencies(
   persistence: TaskRelationPersistence,
 ) {
   const { taskId, desiredDependencies, existingDependencies, handleUnauthorized } = params;
-  const existingById = new Map(
-    existingDependencies.map((dependency) => [dependency.id, dependency] as const),
-  );
+  const existingById = new Map(existingDependencies.map((dependency) => [dependency.id, dependency] as const));
   const desiredIds = new Set<string>();
 
   for (const dependency of desiredDependencies ?? []) {
     if (params.canPersist && !params.canPersist()) return false;
-    if (!dependency.refId.trim()) {
-      continue;
-    }
-
+    if (!dependency.refId.trim()) continue;
     const payload = buildTaskDependencyPayload(taskId, dependency);
     const existingDependency = dependency.id ? existingById.get(dependency.id) : null;
-
     if (existingDependency) {
       desiredIds.add(existingDependency.id);
-      if (isTaskDependencyPayloadChanged(existingDependency, payload)) {
-        const updated = await persistence.updateTaskDependencyRecord(
+      const changed = isTaskDependencyPayloadChanged(existingDependency, payload);
+      if (changed) {
+        const updatedDependency = await persistence.updateTaskDependencyRecord(
           existingDependency.id,
           payload,
           handleUnauthorized,
         );
-        params.onPersisted?.(dependency, updated);
+        params.onPersisted?.(dependency, updatedDependency);
       }
     } else {
-      const createdDependency = await persistence.createTaskDependencyRecord(
-        payload,
-        handleUnauthorized,
-      );
-      desiredIds.add(createdDependency.id);
-      params.onPersisted?.(dependency, createdDependency);
+      const created = await persistence.createTaskDependencyRecord(payload, handleUnauthorized);
+      desiredIds.add(created.id);
+      params.onPersisted?.(dependency, created);
     }
   }
 
@@ -95,53 +54,6 @@ export async function syncTaskDependencies(
     if (!desiredIds.has(dependency.id)) {
       await persistence.deleteTaskDependencyRecord(dependency.id, handleUnauthorized);
       params.onDeleted?.(dependency.id);
-    }
-  }
-  return !params.canPersist || params.canPersist();
-}
-
-export async function syncTaskBlockers(
-  params: {
-    taskId: string;
-    canPersist?: () => boolean;
-    desiredBlockers: TaskBlockerDraft[] | undefined;
-    existingBlockers: TaskBlockerRecord[];
-    handleUnauthorized: HandleUnauthorized;
-    onPersisted?: (draft: TaskBlockerDraft, record: TaskBlockerRecord) => void;
-    onDeleted?: (id: string) => void;
-  },
-  persistence: TaskRelationPersistence,
-) {
-  const { taskId, desiredBlockers, existingBlockers, handleUnauthorized } = params;
-  const existingById = new Map(existingBlockers.map((blocker) => [blocker.id, blocker] as const));
-  const desiredIds = new Set<string>();
-
-  for (const blocker of desiredBlockers ?? []) {
-    if (params.canPersist && !params.canPersist()) return false;
-    const payload = buildTaskBlockerPayload(taskId, blocker);
-    const existingBlocker = blocker.id ? existingById.get(blocker.id) : null;
-
-    if (existingBlocker) {
-      desiredIds.add(existingBlocker.id);
-      if (isTaskBlockerPayloadChanged(existingBlocker, payload)) {
-        const updated = await persistence.updateTaskBlockerRecord(existingBlocker.id, payload, handleUnauthorized);
-        params.onPersisted?.(blocker, updated);
-      }
-    } else {
-      const createdBlocker = await persistence.createTaskBlockerRecord(
-        payload,
-        handleUnauthorized,
-      );
-      desiredIds.add(createdBlocker.id);
-      params.onPersisted?.(blocker, createdBlocker);
-    }
-  }
-
-  for (const blocker of existingBlockers) {
-    if (params.canPersist && !params.canPersist()) return false;
-    if (!desiredIds.has(blocker.id)) {
-      await persistence.deleteTaskBlockerRecord(blocker.id, handleUnauthorized);
-      params.onDeleted?.(blocker.id);
     }
   }
   return !params.canPersist || params.canPersist();

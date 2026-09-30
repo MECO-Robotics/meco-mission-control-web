@@ -34,7 +34,6 @@ function makeInsightMember(memberId: string, memberName: string): InsightMember 
     memberId,
     memberName,
     role: "student",
-    disciplineId: null,
     activeTaskCount: 0,
     blockedTaskCount: 0,
     waitingForQaTaskCount: 0,
@@ -84,8 +83,8 @@ function createBootstrapFixture(): BootstrapPayload {
   return {
     ...EMPTY_BOOTSTRAP,
     projects: [
-      { id: "project-season-1", seasonId: "season-1", name: "Robot 2026", projectType: "robot", description: "", status: "active" },
-      { id: "project-season-2", seasonId: "season-2", name: "Outreach 2026", projectType: "outreach", description: "", status: "active" },
+      { id: "project-season-1", seasonId: "season-1", name: "Robot", projectType: "robot", description: "", status: "active" },
+      { id: "project-season-2", seasonId: "season-2", name: "Outreach", projectType: "outreach", description: "", status: "active" },
     ],
     members: [
       { id: "member-season-1", name: "Season One Member", email: "one@example.com", role: "student", elevated: false, seasonId: "season-1", activeSeasonIds: ["season-1"] },
@@ -182,17 +181,20 @@ describe("roster insights scope helpers", () => {
   it("bases fallback availability on planned weekly attendance", () => {
     const bootstrap = createBootstrapFixture();
     const task: BootstrapPayload["tasks"][number] = {
-      artifactIds: [],
       id: "season-task",
       projectId: "project-season-1",
       workstreamIds: [],
       title: "Season task",
       summary: "",
       subsystemIds: ["subsystem-1"],
-      disciplineId: "design",
+      workTypeId: "robot-design",
+      responsibleGroupId: null,
+      requestedById: null,
       mechanismIds: [],
       partInstanceIds: [],
-      targetMilestoneId: null,
+      scheduleRefs: [],
+      checklistItems: [],
+      manufacturingDetails: null,
       ownerId: "member-season-1",
       assigneeIds: [],
       mentorId: null,
@@ -200,14 +202,9 @@ describe("roster insights scope helpers", () => {
       dueDate: "2099-05-08",
       priority: "medium",
       status: "in-progress",
-      planningState: "ready",
-      blockers: [],
-      linkedManufacturingIds: [],
-      linkedPurchaseIds: [],
       estimatedHours: 3,
       actualHours: 0,
       requiresDocumentation: false,
-      documentationLinked: false,
     };
     const noSchedule = buildRosterInsightsFromBootstrap({
       ...bootstrap,

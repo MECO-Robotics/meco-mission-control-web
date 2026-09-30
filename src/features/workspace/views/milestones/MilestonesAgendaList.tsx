@@ -3,6 +3,15 @@ import { getMilestoneTypeStyle } from "@/features/workspace/shared/events/eventS
 import { formatMilestoneDateTime, formatMilestoneEndDateTime, formatMilestoneStatusLabel } from "./milestonesViewUtils";
 import { IconRisk } from "@/components/shared/Icons";
 
+function readinessLabel(status: MilestoneRecord["readinessStatus"]) {
+  switch (status) {
+    case "blocked": return "Blocked";
+    case "qa": return "QA";
+    case "ready": return "Ready";
+    default: return "Not ready";
+  }
+}
+
 export function MilestonesAgendaList({ milestones, onOpenMilestone, projectLabelByMilestoneId, riskCountByMilestoneId = {} }: {
   milestones: MilestoneRecord[];
   onOpenMilestone: (milestone: MilestoneRecord) => void;
@@ -16,8 +25,9 @@ export function MilestonesAgendaList({ milestones, onOpenMilestone, projectLabel
         <li key={milestone.id} style={{ borderBottom: "1px solid var(--border-base)", padding: "0.75rem 0" }}>
           <button type="button" className="ghost-button" style={{ padding: 0, border: 0, background: "transparent", fontWeight: 700, textAlign: "left", color: "var(--text-title)" }} onClick={() => onOpenMilestone(milestone)}>{milestone.title}</button>
           <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center", marginTop: "0.25rem" }}>
-            <time dateTime={milestone.startDateTime}>{formatMilestoneDateTime(milestone.startDateTime)}{milestone.endDateTime ? ` – ${formatMilestoneEndDateTime(milestone.startDateTime, milestone.endDateTime)}` : ""}</time>
+            <time dateTime={milestone.startAt}>{formatMilestoneDateTime(milestone.startAt)}{milestone.endAt ? ` – ${formatMilestoneEndDateTime(milestone.startAt, milestone.endAt)}` : ""}</time>
             <span className="pill status-pill">{formatMilestoneStatusLabel(milestone.status) ?? "Not ready"}</span>
+            <span className="pill status-pill">{readinessLabel(milestone.readinessStatus)}</span>
             <span>{getMilestoneTypeStyle(milestone.type).label}</span>
             <span>{projectLabelByMilestoneId[milestone.id]}</span>
             {riskCountByMilestoneId[milestone.id] ? <span aria-label={`${riskCountByMilestoneId[milestone.id]} risks`} title={`${riskCountByMilestoneId[milestone.id]} risks`} style={{ display: "inline-flex", alignItems: "center", gap: "0.2rem" }}><IconRisk />{riskCountByMilestoneId[milestone.id]}</span> : null}

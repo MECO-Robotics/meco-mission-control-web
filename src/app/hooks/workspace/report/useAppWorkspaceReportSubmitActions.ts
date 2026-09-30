@@ -59,7 +59,8 @@ export function useAppWorkspaceReportSubmitActions(model: AppWorkspaceModel) {
     model.setDataMessage(null);
 
     try {
-      const taskExists = model.bootstrap.tasks.some((task) => task.id === model.qaReportDraft.taskId);
+      const taskRef = model.qaReportDraft.targetRefs.find((ref) => ref.kind === "task");
+      const taskExists = model.bootstrap.tasks.some((task) => task.id === taskRef?.id);
       if (!taskExists) {
         model.setDataMessage("Please choose a real task before saving the QA report.");
         return;
@@ -71,39 +72,23 @@ export function useAppWorkspaceReportSubmitActions(model: AppWorkspaceModel) {
         return;
       }
 
-      const task = model.bootstrap.tasks.find((candidate) => candidate.id === model.qaReportDraft.taskId) ?? null;
-      const targetRiskId =
-        model.qaReportDraft.targetRiskId === undefined
-          ? task?.targetRiskId ?? null
-          : model.qaReportDraft.targetRiskId || null;
-      const targetRisk = targetRiskId
-        ? model.bootstrap.risks.find((risk) => risk.id === targetRiskId) ?? null
-        : null;
-      const proposedRiskSeverity = model.qaReportDraft.proposedRiskSeverity || null;
-      const proposedRiskStatus = model.qaReportDraft.proposedRiskStatus || null;
-      const effectiveProposedRiskSeverity =
-        proposedRiskStatus === "full-mitigation" ? "low" : proposedRiskSeverity;
+      const task = model.bootstrap.tasks.find((candidate) => candidate.id === taskRef?.id) ?? null;
       const reportDate = model.qaReportDraft.createdAt ?? localTodayDate();
       const payload: QaReportPayload = {
-        reportType: "QA",
+        reportType: "qa",
         projectId: task?.projectId ?? model.bootstrap.projects[0]?.id ?? "",
-        taskId: task?.id ?? "",
-        milestoneId: null,
-        workstreamId: task?.workstreamIds[0] ?? null,
+        targetRefs: task ? [{ kind: "task", id: task.id }] : [],
         createdByMemberId: model.qaReportDraft.createdByMemberId ?? null,
+        requestedById: model.qaReportDraft.requestedById ?? null,
+        mentorId: model.qaReportDraft.mentorId ?? null,
         result: model.qaReportDraft.result,
         summary: model.qaReportDraft.summary.trim(),
         participantIds,
-        mentorApproved: model.qaReportDraft.mentorApproved ?? false,
         notes: model.qaReportDraft.notes.trim(),
         createdAt: reportDate,
-        reviewedAt: model.qaReportDraft.reviewedAt ?? reportDate,
-        title: model.qaReportDraft.title?.trim() || undefined,
+        reviewedAt: model.qaReportDraft.reviewedAt ?? null,
         status: model.qaReportDraft.status,
-        findings: model.qaReportDraft.findings ?? [],
-        targetRiskId,
-        proposedRiskSeverity: targetRisk ? effectiveProposedRiskSeverity : null,
-        proposedRiskStatus: targetRisk ? proposedRiskStatus : null,
+        evidenceNotes: model.qaReportDraft.evidenceNotes?.trim() || "",
         photoUrl: model.qaReportDraft.photoUrl ?? "",
       };
 
@@ -124,15 +109,16 @@ export function useAppWorkspaceReportSubmitActions(model: AppWorkspaceModel) {
     model.setDataMessage(null);
 
     try {
-      const milestoneExists = model.bootstrap.milestones.some((item) => item.id === model.milestoneReportDraft.milestoneId);
+      const milestoneRef = model.milestoneReportDraft.targetRefs.find((ref) => ref.kind === "milestone");
+      const milestoneExists = model.bootstrap.milestones.some((item) => item.id === milestoneRef?.id);
       if (!milestoneExists) {
         model.setDataMessage("Please choose a real milestone before saving the milestone report.");
         return;
       }
 
-      const normalizedTitle = (model.milestoneReportDraft.title ?? "").trim();
-      if (normalizedTitle.length < 2) {
-        model.setDataMessage("Please provide an milestone report title before saving.");
+      const normalizedSummary = model.milestoneReportDraft.summary.trim();
+      if (normalizedSummary.length < 2) {
+        model.setDataMessage("Please provide a report summary before saving.");
         return;
       }
 
@@ -145,25 +131,23 @@ export function useAppWorkspaceReportSubmitActions(model: AppWorkspaceModel) {
         ),
       );
 
-      const milestone = model.bootstrap.milestones.find((candidate) => candidate.id === model.milestoneReportDraft.milestoneId) ?? null;
+      const milestone = model.bootstrap.milestones.find((candidate) => candidate.id === milestoneRef?.id) ?? null;
       const reportDate = model.milestoneReportDraft.createdAt ?? localTodayDate();
       const payload: TestResultPayload = {
-        reportType: "MilestoneTest",
+        reportType: "practice",
         projectId: milestone?.projectIds[0] ?? model.bootstrap.projects[0]?.id ?? "",
-        taskId: null,
-        milestoneId: milestone?.id ?? "",
-        workstreamId: null,
+        targetRefs: milestone ? [{ kind: "milestone", id: milestone.id }] : [],
         createdByMemberId: model.milestoneReportDraft.createdByMemberId ?? null,
+        requestedById: model.milestoneReportDraft.requestedById ?? null,
+        mentorId: model.milestoneReportDraft.mentorId ?? null,
         result: model.milestoneReportDraft.result,
-        summary: normalizedTitle,
+        summary: normalizedSummary,
         notes: findings.join("\n"),
         createdAt: reportDate,
         participantIds: model.milestoneReportDraft.participantIds ?? [],
-        mentorApproved: model.milestoneReportDraft.mentorApproved ?? false,
-        reviewedAt: model.milestoneReportDraft.reviewedAt ?? reportDate,
-        title: normalizedTitle,
+        reviewedAt: model.milestoneReportDraft.reviewedAt ?? null,
+        evidenceNotes: model.milestoneReportDraft.evidenceNotes ?? "",
         status: model.milestoneReportDraft.status,
-        findings,
         photoUrl: model.milestoneReportDraft.photoUrl ?? "",
       };
 

@@ -93,7 +93,7 @@ describe("TaskCalendarDayDetails", () => {
     expect(markup).toContain("high");
     expect(markup).toContain("in-progress");
     expect(markup).toContain("Robot | Meeting: Build night");
-    expect(markup).toContain("Meeting / event");
+    expect(markup).toContain("Meeting");
     expect(markup).toContain('aria-label="Open Robot | Wire drivetrain"');
     expect(markup).not.toContain('aria-label="Open Robot | Meeting: Build night"');
   });
@@ -152,13 +152,13 @@ describe("TimelineCompactFilterMenu", () => {
       onCalendarEventFilterChange: jest.fn(),
       activePersonFilter: [],
       bootstrap: EMPTY_BOOTSTRAP,
-      disciplineFilter: [],
-      disciplineFilterOptions: [],
+      workTypeFilter: [],
+      workTypeFilterOptions: [],
       isAllProjectsView: false,
       onChangePersonFilter: jest.fn(),
       priorityFilter: [],
       projectFilter: [],
-      setDisciplineFilter: jest.fn(),
+      setWorkTypeFilter: jest.fn(),
       setPriorityFilter: jest.fn(),
       setProjectFilter: jest.fn(),
       setStatusFilter: jest.fn(),
@@ -201,7 +201,7 @@ describe("TimelineCompactFilterMenu", () => {
     expect(menu.props.activeCount).toBe(2);
     expect(menu.props.items.filter((item) => item.hidden).map((item) => item.label)).toEqual([
       "Project",
-      "Discipline",
+      "Work type",
       "Subsystem",
       "Status",
       "Priority",
@@ -209,7 +209,7 @@ describe("TimelineCompactFilterMenu", () => {
     expect(menu.props.items.map((item) => item.label)).toEqual([
       "Project",
       "Roster",
-      "Discipline",
+      "Work type",
       "Subsystem",
       "Status",
       "Priority",

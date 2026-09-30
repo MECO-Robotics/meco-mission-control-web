@@ -4,7 +4,7 @@ import type { MilestoneRecord, TaskRecord } from "@/types/recordsExecution";
 export interface TimelineMilestoneDraft {
   title: string;
   type: MilestoneRecord["type"];
-  isExternal: boolean;
+  status: MilestoneRecord["status"];
   description: string;
   projectIds: string[];
 }
@@ -42,7 +42,7 @@ export function emptyTimelineMilestoneDraft(defaultMilestoneType: MilestoneRecor
   return {
     title: "",
     type: defaultMilestoneType,
-    isExternal: false,
+    status: "planned",
     description: "",
     projectIds: [],
   };
@@ -52,7 +52,7 @@ export function timelineMilestoneDraftFromRecord(record: MilestoneRecord): Timel
   return {
     title: record.title,
     type: record.type,
-    isExternal: record.isExternal,
+    status: record.status,
     description: record.description,
     projectIds: record.projectIds,
   };

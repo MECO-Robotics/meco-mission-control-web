@@ -71,7 +71,6 @@ const subsystemsById: SubsystemsById = {
     parentSubsystemId: null,
     projectId: "project-1",
     responsibleEngineerId: null,
-    risks: [],
   },
 };
 

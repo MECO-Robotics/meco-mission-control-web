@@ -11,7 +11,7 @@ const ALL_INTERVAL_PAST_MONTHS = 9;
 const ALL_INTERVAL_FUTURE_MONTHS = 3;
 
 function getMeetingStartDateTime(meeting: MeetingRecord) {
-  return meeting.startDateTime ?? (meeting.time ? `${meeting.date}T${meeting.time}` : meeting.date);
+  return meeting.startAt;
 }
 
 function compareTimelineMeetingsByStart(left: MeetingRecord, right: MeetingRecord) {
@@ -54,14 +54,14 @@ function buildTimelineDateRange({
     });
 
     milestones.forEach((milestone) => {
-      includeCandidate(datePortion(milestone.startDateTime));
-      includeCandidate(datePortion(milestone.endDateTime ?? milestone.startDateTime));
+      includeCandidate(datePortion(milestone.startAt));
+      includeCandidate(datePortion(milestone.endAt ?? milestone.startAt));
     });
 
     meetings.forEach((meeting) => {
       includeCandidate(datePortion(getMeetingStartDateTime(meeting)));
-      if (meeting.endDateTime) {
-        includeCandidate(datePortion(meeting.endDateTime));
+      if (meeting.endAt) {
+        includeCandidate(datePortion(meeting.endAt));
       }
     });
 
@@ -175,8 +175,8 @@ function buildTimelineDayMilestones(
     endDate,
     milestones,
     compareTimelineMilestonesByStart,
-    (milestone) => datePortion(milestone.startDateTime),
-    (milestone) => datePortion(milestone.endDateTime ?? milestone.startDateTime),
+    (milestone) => datePortion(milestone.startAt),
+    (milestone) => datePortion(milestone.endAt ?? milestone.startAt),
   );
 }
 
@@ -191,7 +191,7 @@ function buildTimelineDayMeetings(
     meetings,
     compareTimelineMeetingsByStart,
     (meeting) => datePortion(getMeetingStartDateTime(meeting)),
-    (meeting) => datePortion(meeting.endDateTime ?? getMeetingStartDateTime(meeting)),
+    (meeting) => datePortion(meeting.endAt ?? getMeetingStartDateTime(meeting)),
   );
 }
 

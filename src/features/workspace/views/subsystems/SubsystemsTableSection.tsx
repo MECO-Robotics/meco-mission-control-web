@@ -163,7 +163,9 @@ export function SubsystemsTableSection({
                   <strong style={{ color: "var(--text-title)" }}>{counts.openTasks}</strong>
                   <small>{counts.tasks} total</small>
                 </TableCell>
-                <TableCell label="Risks">{subsystem.risks.length}</TableCell>
+                <TableCell label="Risks">
+                  {bootstrap.risks.filter((risk) => risk.relatedTargets.some((target) => target.kind === "subsystem" && target.id === subsystem.id)).length}
+                </TableCell>
                 <div className="subsystem-manager-row-actions">
                   <button
                     className="subsystem-manager-action-button subsystem-manager-action-button-primary"

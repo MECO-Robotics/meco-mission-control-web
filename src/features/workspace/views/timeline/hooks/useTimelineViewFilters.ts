@@ -9,7 +9,7 @@ import {
 } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 
 import {
-  buildTimelineDisciplineFilterOptions,
+  buildTimelineWorkTypeFilterOptions,
   buildTimelineSubsystemFilterOptions,
   countActiveTimelineFilters,
   TIMELINE_TASK_PRIORITY_OPTIONS,
@@ -25,9 +25,9 @@ interface UseTimelineViewFiltersArgs {
 
 export interface TimelineViewFilterControls {
   activeFilterCount: number;
-  disciplineFilterOptions: DropdownOption[];
+  workTypeFilterOptions: DropdownOption[];
   filters: TimelineTaskFilters;
-  setDisciplineFilter: Dispatch<SetStateAction<FilterSelection>>;
+  setWorkTypeFilter: Dispatch<SetStateAction<FilterSelection>>;
   setPriorityFilter: Dispatch<SetStateAction<FilterSelection>>;
   setProjectFilter: Dispatch<SetStateAction<FilterSelection>>;
   setStatusFilter: Dispatch<SetStateAction<FilterSelection>>;
@@ -51,21 +51,21 @@ function pruneStableFilterSelection(selection: FilterSelection, options: Dropdow
 export function pruneTimelineFilterSelections(
   filters: TimelineTaskFilters,
   {
-    disciplineFilterOptions,
+    workTypeFilterOptions,
     isAllProjectsView,
     projectFilterOptions,
     subsystemFilterOptions,
   }: {
-    disciplineFilterOptions: DropdownOption[];
+    workTypeFilterOptions: DropdownOption[];
     isAllProjectsView: boolean;
     projectFilterOptions: DropdownOption[];
     subsystemFilterOptions: DropdownOption[];
   },
 ): TimelineTaskFilters {
   return {
-    disciplineFilter: pruneStableFilterSelection(
-      filters.disciplineFilter,
-      disciplineFilterOptions,
+    workTypeFilter: pruneStableFilterSelection(
+      filters.workTypeFilter,
+      workTypeFilterOptions,
     ),
     priorityFilter: pruneStableFilterSelection(
       filters.priorityFilter,
@@ -91,13 +91,13 @@ export function useTimelineViewFilters({
   isAllProjectsView,
 }: UseTimelineViewFiltersArgs): TimelineViewFilterControls {
   const [projectFilter, setProjectFilter] = useState<FilterSelection>([]);
-  const [disciplineFilter, setDisciplineFilter] = useState<FilterSelection>([]);
+  const [workTypeFilter, setWorkTypeFilter] = useState<FilterSelection>([]);
   const [subsystemFilter, setSubsystemFilter] = useState<FilterSelection>([]);
   const [statusFilter, setStatusFilter] = useState<FilterSelection>([]);
   const [priorityFilter, setPriorityFilter] = useState<FilterSelection>([]);
 
-  const disciplineFilterOptions = useMemo(
-    () => buildTimelineDisciplineFilterOptions(bootstrap),
+  const workTypeFilterOptions = useMemo(
+    () => buildTimelineWorkTypeFilterOptions(bootstrap),
     [bootstrap],
   );
   const subsystemFilterOptions = useMemo(
@@ -108,18 +108,18 @@ export function useTimelineViewFilters({
 
   const filters = useMemo(
     () => ({
-      disciplineFilter,
+      workTypeFilter,
       priorityFilter,
       projectFilter,
       statusFilter,
       subsystemFilter,
     }),
-    [disciplineFilter, priorityFilter, projectFilter, statusFilter, subsystemFilter],
+    [workTypeFilter, priorityFilter, projectFilter, statusFilter, subsystemFilter],
   );
 
   useEffect(() => {
     const prunedFilters = pruneTimelineFilterSelections(filters, {
-      disciplineFilterOptions,
+      workTypeFilterOptions,
       isAllProjectsView,
       projectFilterOptions,
       subsystemFilterOptions,
@@ -128,8 +128,8 @@ export function useTimelineViewFilters({
     if (prunedFilters.projectFilter !== filters.projectFilter) {
       setProjectFilter(prunedFilters.projectFilter);
     }
-    if (prunedFilters.disciplineFilter !== filters.disciplineFilter) {
-      setDisciplineFilter(prunedFilters.disciplineFilter);
+    if (prunedFilters.workTypeFilter !== filters.workTypeFilter) {
+      setWorkTypeFilter(prunedFilters.workTypeFilter);
     }
     if (prunedFilters.subsystemFilter !== filters.subsystemFilter) {
       setSubsystemFilter(prunedFilters.subsystemFilter);
@@ -141,7 +141,7 @@ export function useTimelineViewFilters({
       setPriorityFilter(prunedFilters.priorityFilter);
     }
   }, [
-    disciplineFilterOptions,
+    workTypeFilterOptions,
     filters,
     isAllProjectsView,
     projectFilterOptions,
@@ -156,9 +156,9 @@ export function useTimelineViewFilters({
 
   return {
     activeFilterCount,
-    disciplineFilterOptions,
+    workTypeFilterOptions,
     filters,
-    setDisciplineFilter,
+    setWorkTypeFilter,
     setPriorityFilter,
     setProjectFilter,
     setStatusFilter,

@@ -117,8 +117,10 @@ export function MilestonesEventDetailsModal({
             : "pill task-detail-hours-pill task-detail-hours-pill-danger"
       : "pill task-detail-hours-pill task-detail-hours-pill-neutral";
   const projectNames = activeMilestone.projectIds
-    .map((projectId) => projectsById[projectId]?.name)
-    .filter((projectName): projectName is string => Boolean(projectName));
+    .flatMap((projectId) => {
+      const projectName = projectsById[projectId]?.name;
+      return projectName ? [projectName] : [];
+    });
   const relatedProjectItems =
     projectNames.length > 0
       ? projectNames.map((projectName, index) => (
@@ -135,16 +137,16 @@ export function MilestonesEventDetailsModal({
     milestoneDraft ?? {
       title: activeMilestone.title,
       type: activeMilestone.type,
+      status: activeMilestone.status,
       description: activeMilestone.description,
-      isExternal: activeMilestone.isExternal,
       projectIds: activeMilestone.projectIds,
     };
-  const editableStartDate = milestoneStartDate ?? activeMilestone.startDateTime.slice(0, 10);
-  const editableStartTime = milestoneStartTime ?? activeMilestone.startDateTime.slice(11, 16);
-  const editableEndDate = milestoneEndDate ?? activeMilestone.endDateTime?.slice(0, 10) ?? "";
-  const editableEndTime = milestoneEndTime ?? activeMilestone.endDateTime?.slice(11, 16) ?? "";
-  const milestoneStartLabel = formatMilestoneDateTime(activeMilestone.startDateTime);
-  const milestoneEndLabel = formatMilestoneEndDateTime(activeMilestone.startDateTime, activeMilestone.endDateTime);
+  const editableStartDate = milestoneStartDate ?? activeMilestone.startAt.slice(0, 10);
+  const editableStartTime = milestoneStartTime ?? activeMilestone.startAt.slice(11, 16);
+  const editableEndDate = milestoneEndDate ?? activeMilestone.endAt?.slice(0, 10) ?? "";
+  const editableEndTime = milestoneEndTime ?? activeMilestone.endAt?.slice(11, 16) ?? "";
+  const milestoneStartLabel = formatMilestoneDateTime(activeMilestone.startAt);
+  const milestoneEndLabel = formatMilestoneEndDateTime(activeMilestone.startAt, activeMilestone.endAt);
 
   return createPortal(
     <ModalDialog label={activeMilestone.title} onClose={handleClose}>
@@ -278,7 +280,7 @@ export function MilestonesEventDetailsModal({
               milestoneModalMode="detail"
             />
 
-            <section className="modal-wide"><h3>Results</h3><ReportHistoryList reports={bootstrap.reports.filter((report) => report.reportType !== "QA" && report.milestoneId === activeMilestone.id)} bootstrap={bootstrap} /></section>
+            <section className="modal-wide"><h3>Results</h3><ReportHistoryList reports={bootstrap.reports.filter((report) => report.targetRefs.some((target) => target.kind === "milestone" && target.id === activeMilestone.id))} bootstrap={bootstrap} /></section>
             <div className="modal-actions modal-wide">
               {onRecordResult ? <button className="secondary-action" type="button" onClick={() => onRecordResult(activeMilestone)}>Record result</button> : null}
               <button className="primary-action" onClick={() => onEditMilestone(activeMilestone)} type="button">

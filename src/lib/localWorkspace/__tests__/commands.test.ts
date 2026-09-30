@@ -1,140 +1,50 @@
-import { createBootstrap } from "@/lib/appUtilsTestFixtures";
-import { applyLocalCommand } from "../commands";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskRecord } from "@/types/recordsExecution";
+import { applyLocalCommand } from "../commands";
 
-function command(snapshot: BootstrapPayload, path: string, body: object = {}, method = "POST") {
-  return applyLocalCommand(snapshot, path, { method, body: JSON.stringify(body) }) as { item: TaskRecord };
+function snapshot(): BootstrapPayload {
+  const state = structuredClone(EMPTY_BOOTSTRAP);
+  state.projects.push({ id: "robot-project", seasonId: "season", name: "Robot", projectType: "robot", description: "", status: "active" });
+  state.workTypes.push({ id: "robot:planning", projectType: "robot", code: "planning", name: "Planning", isActive: true });
+  state.tasks.push({
+    id: "task", projectId: "robot-project", workTypeId: "robot:planning", responsibleGroupId: null,
+    workstreamIds: [], title: "Work", summary: "", subsystemIds: [], mechanismIds: [], partInstanceIds: [], scheduleRefs: [],
+    requestedById: null, ownerId: null, assigneeIds: [], mentorId: null, startDate: "2026-09-01", dueDate: "2026-09-30",
+    priority: "medium", status: "not-started", checklistItems: [], manufacturingDetails: null,
+    estimatedHours: 1, actualHours: 0, requiresDocumentation: false,
+  });
+  return state;
 }
-function task(snapshot: BootstrapPayload, title: string) {
-  return command(snapshot, "/tasks", { title }).item;
+
+function command(state: BootstrapPayload, path: string, body: object = {}, method = "POST") {
+  return applyLocalCommand(state, path, { method, body: JSON.stringify(body) }) as { item: { id: string } };
 }
 
-test("local creates, edits and deletes operate on actual records and reject missing records/routes", () => {
-  const snapshot = createBootstrap();
-  const created = task(snapshot, "Local task");
-  command(snapshot, `/tasks/${created.id}`, { title: "Edited" }, "PATCH");
-  expect(snapshot.tasks.find((row) => row.id === created.id)?.title).toBe("Edited");
-  command(snapshot, `/tasks/${created.id}`, {}, "DELETE");
-  expect(snapshot.tasks.some((row) => row.id === created.id)).toBe(false);
-  expect(() => command(snapshot, `/tasks/${created.id}`, {}, "PATCH")).toThrow("no longer exists");
-  expect(() => command(snapshot, "/cad/imports")).toThrow("nothing was synced");
+test("local CRUD writes canonical Task records and rejects removed ManufacturingItem routes", () => {
+  const state = snapshot();
+  const created = command(state, "/tasks", { title: "Local task" }).item;
+  expect(state.tasks.find(({ id }) => id === created.id)).toMatchObject({ title: "Local task", manufacturingDetails: null });
+  expect(state.tasks.find(({ id }) => id === created.id)).not.toHaveProperty("blockers");
+  expect(() => command(state, "/tasks", { title: "Invalid", linkedManufacturingIds: ["old"] })).toThrow("removed Task fields");
+  expect(() => command(state, "/manufacturing", { title: "Duplicate work" })).toThrow("nothing was synced");
 });
 
-test("hard dependencies honor requested state, missing targets block, and soft dependencies do not", () => {
-  const snapshot = createBootstrap();
-  const target = task(snapshot, "Target");
-  const dependent = task(snapshot, "Dependent");
-  const dependency = command(snapshot, "/task-dependencies", { taskId: dependent.id, kind: "task", refId: target.id, requiredState: "in-progress", dependencyType: "hard" }).item;
-  expect(dependent.isWaitingOnDependency).toBe(true);
-  expect(() => command(snapshot, `/tasks/${dependent.id}`, { status: "complete" }, "PATCH")).toThrow("Resolve blockers");
-  command(snapshot, `/tasks/${target.id}`, { status: "in-progress" }, "PATCH");
-  expect(dependent.isWaitingOnDependency).toBe(false);
-  command(snapshot, `/tasks/${target.id}`, {}, "DELETE");
-  expect(dependent.isWaitingOnDependency).toBe(true);
-  command(snapshot, `/task-dependencies/${dependency.id}`, { dependencyType: "soft" }, "PATCH");
-  expect(dependent.isWaitingOnDependency).toBe(false);
+test("local Tasks derive blocked state from canonical Risks and dependencies", () => {
+  const state = snapshot();
+  const task = state.tasks[0];
+  state.risks.push({
+    id: "risk", projectId: task.projectId, title: "Blocked", detail: "", category: "supply", severity: "high",
+    status: "open", blocksWork: true, source: { kind: "manual" }, relatedTargets: [{ kind: "task", id: task.id }],
+    mitigationTaskId: null, ownerGroupId: null, createdAt: "2026-09-01", updatedAt: "2026-09-01", resolvedAt: null,
+  });
+  applyLocalCommand(state, "/risks/risk", { method: "PATCH", body: JSON.stringify({ status: "resolved" }) });
+  expect(task.isBlocked).toBe(false);
 });
 
-test("milestone dependency threshold and duplicate blockers match readiness semantics", () => {
-  const snapshot = createBootstrap();
-  const dependent = task(snapshot, "Dependent");
-  const milestone = command(snapshot, "/milestones", { title: "Ready", status: "ready" }).item;
-  command(snapshot, "/task-dependencies", { taskId: dependent.id, kind: "milestone", refId: milestone.id, requiredState: "qa", dependencyType: "hard" });
-  expect(dependent.isWaitingOnDependency).toBe(false);
-  const blocker = { blockedTaskId: dependent.id, blockerType: "external", issueType: "lost-tool", description: "Missing tool", severity: "medium", status: "open" };
-  const first = command(snapshot, "/task-blockers", blocker).item;
-  const second = command(snapshot, "/task-blockers", blocker).item;
-  expect(dependent.blockers).toEqual(["Missing tool"]);
-  command(snapshot, `/task-blockers/${first.id}`, { status: "resolved" }, "PATCH");
-  expect(dependent.isBlocked).toBe(true);
-  command(snapshot, `/task-blockers/${second.id}`, {}, "DELETE");
-  expect(dependent.isBlocked).toBe(false);
-});
-
-test("QA projections retain proposals and only approved reassessment updates linked risk", () => {
-  const snapshot = createBootstrap();
-  const subject = task(snapshot, "Review me");
-  const risk = command(snapshot, "/risks", { title: "Risk", severity: "high", mitigationTaskId: null }).item;
-  const proposal = { reportType: "QA", taskId: subject.id, notes: "Evidence", targetRiskId: risk.id, proposedRiskStatus: "full-mitigation", mentorApproved: false };
-  const report = command(snapshot, "/reports", proposal).item;
-  expect(snapshot.reports.find((row) => row.id === report.id)).toMatchObject({ summary: "Evidence", proposedRiskStatus: "full-mitigation" });
-  expect(snapshot.risks.find((row) => row.id === risk.id)?.severity).toBe("high");
-  command(snapshot, "/reports", { ...proposal, mentorApproved: true });
-  expect(snapshot.risks.find((row) => row.id === risk.id)).toMatchObject({ severity: "low", mitigationTaskId: subject.id });
-  const before = snapshot.reports.length;
-  expect(() => command(snapshot, "/reports", { ...proposal, targetRiskId: "missing" })).toThrow("target risk");
-  expect(snapshot.reports).toHaveLength(before);
-});
-
-test("robot layouts and meeting projections round-trip", () => {
-  const snapshot = createBootstrap();
-  const subsystem = snapshot.subsystems[0];
-  const layout = { layoutX: 0.2, layoutY: 0.7, layoutZone: "front", layoutView: "top", sortOrder: 3 };
-  command(snapshot, `/subsystems/${subsystem.id}`, layout, "PATCH");
-  expect(snapshot.subsystems[0]).toMatchObject(layout);
-  const meeting = command(snapshot, "/meetings", { title: "Review", startDateTime: "2026-09-09T17:30:00Z" }).item;
-  expect(meeting).toMatchObject({ date: "2026-09-09", time: "17:30", rsvpsYes: 0 });
-});
-
-test("part-definition deletion removes instances and detaches task and production links", () => {
-  const snapshot = createBootstrap();
-  const definition = snapshot.partDefinitions[0];
-  const part = command(snapshot, "/part-instances", { partDefinitionId: definition.id, name: "Local instance" }).item;
-  const assigned = command(snapshot, "/tasks", { title: "Build", partInstanceIds: [part.id] }).item;
-  const purchase = command(snapshot, "/purchases", { title: "Buy", partDefinitionId: definition.id }).item;
-  command(snapshot, `/part-definitions/${definition.id}`, {}, "DELETE");
-  expect(snapshot.partInstances.some((item) => item.id === part.id)).toBe(false);
-  expect(assigned).toMatchObject({ partInstanceIds: [] });
-  expect(purchase).toMatchObject({ partDefinitionId: null });
-});
-
-test("deleting a roster member clears work, report, subsystem and procurement references together", () => {
-  const snapshot = createBootstrap();
-  const member = snapshot.members[0];
-  const subject = task(snapshot, "Roster cleanup");
-  command(snapshot, `/tasks/${subject.id}`, { ownerId: member.id, assigneeIds: [member.id], mentorId: member.id }, "PATCH");
-  command(snapshot, `/subsystems/${snapshot.subsystems[0].id}`, { responsibleEngineerId: member.id, mentorIds: [member.id] }, "PATCH");
-  command(snapshot, "/work-logs", { taskId: subject.id, participantIds: [member.id], hours: 1, date: "2026-09-09", notes: "Example" });
-  command(snapshot, "/reports", { reportType: "QA", taskId: subject.id, createdByMemberId: member.id, participantIds: [member.id], notes: "Example" });
-  command(snapshot, "/manufacturing", { requestedById: member.id, title: "Example" });
-  snapshot.qaReviews = [{ id: "review", subjectId: subject.id, subjectType: "task", subjectTitle: subject.title, participantIds: [member.id], result: "pass", mentorApproved: true, notes: "Example", reviewedAt: "2026-09-09" }];
-  snapshot.qaRequests = [{ id: "request", taskId: subject.id, subject: subject.title, mentorId: member.id, requestedById: null, createdAt: "2026-09-09", status: "requested" }];
-  snapshot.attendanceRecords = [{ id: "attendance", memberId: member.id, date: "2026-09-09", totalHours: 1 }];
-  command(snapshot, `/members/${member.id}`, {}, "DELETE");
-  expect(snapshot.tasks.find((row) => row.id === subject.id)).toMatchObject({ ownerId: null, mentorId: null, assigneeIds: [] });
-  expect(snapshot.subsystems[0]).toMatchObject({ responsibleEngineerId: null, mentorIds: [] });
-  expect(snapshot.workLogs.at(-1)?.participantIds).toEqual([]);
-  expect(snapshot.reports.at(-1)).toMatchObject({ createdByMemberId: null, participantIds: [] });
-  expect(snapshot.qaReviews[0].participantIds).toEqual([]);
-  expect(snapshot.manufacturingItems.at(-1)?.requestedById).toBeNull();
-  expect(snapshot.qaRequests).toEqual([]);
-  expect(snapshot.attendanceRecords).toEqual([]);
-});
-
-test("stale person selections cannot recreate dangling assignments after roster deletion", () => {
-  const snapshot = createBootstrap();
-  const member = snapshot.members[0];
-  const subject = task(snapshot, "Assignment");
-  command(snapshot, `/members/${member.id}`, {}, "DELETE");
-  expect(() => command(snapshot, `/tasks/${subject.id}`, { assigneeIds: [member.id] }, "PATCH")).toThrow("local roster");
-  expect(() => command(snapshot, "/reports", { reportType: "QA", taskId: subject.id, createdByMemberId: member.id })).toThrow("local roster");
-  expect(subject.assigneeIds).toEqual([]);
-});
-
-test("logged hours follow work-log creation, edits, moves and deletion rather than task writes", () => {
-  const snapshot = createBootstrap();
-  const first = task(snapshot, "First");
-  const second = task(snapshot, "Second");
-  const log = command(snapshot, "/work-logs", { taskId: first.id, hours: 1.25, participantIds: [], date: "2026-09-09", notes: "Example" }).item;
-  expect(first.actualHours).toBe(1.25);
-  command(snapshot, `/work-logs/${log.id}`, { hours: 2.5 }, "PATCH");
-  expect(first.actualHours).toBe(2.5);
-  command(snapshot, `/work-logs/${log.id}`, { taskId: second.id }, "PATCH");
-  expect(first.actualHours).toBe(0);
-  expect(second.actualHours).toBe(2.5);
-  command(snapshot, `/tasks/${second.id}`, { actualHours: 999 }, "PATCH");
-  expect(snapshot.tasks.find((row) => row.id === second.id)?.actualHours).toBe(2.5);
-  command(snapshot, `/work-logs/${log.id}`, {}, "DELETE");
-  expect(snapshot.tasks.find((row) => row.id === second.id)?.actualHours).toBe(0);
+test("purchase records require a human execution Task and are removed with that Task", () => {
+  const state = snapshot();
+  expect(() => command(state, "/purchases", { title: "No Task" })).toThrow("link to a procurement or manufacturing Task");
+  const purchase = command(state, "/purchases", { taskId: "task", kind: "cots-goods", title: "Sensor", quantity: 1 }).item;
+  command(state, "/tasks/task", {}, "DELETE");
+  expect(state.purchaseItems.some(({ id }) => id === purchase.id)).toBe(false);
 });

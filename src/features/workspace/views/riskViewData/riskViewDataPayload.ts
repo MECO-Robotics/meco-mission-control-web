@@ -1,69 +1,33 @@
 import type { RiskPayload } from "@/types/payloads";
 import type { RiskRecord } from "@/types/recordsReporting";
 
-export interface SelectOption {
-  id: string;
-  name: string;
-}
-
-export const ATTACHMENT_TYPE_LABELS: Record<RiskPayload["attachmentType"], string> = {
-  project: "Project",
-  workstream: "Workflow",
-  mechanism: "Mechanism",
-  "part-instance": "Part instance",
-};
+export interface SelectOption { id: string; name: string }
 
 export function formatRiskSeverity(severity: RiskPayload["severity"]) {
-  switch (severity) {
-    case "high":
-      return "High";
-    case "medium":
-      return "Medium";
-    case "low":
-      return "Low";
-    default:
-      return severity;
-  }
+  return severity === "critical" ? "Critical" : severity === "high" ? "High" : severity === "medium" ? "Medium" : "Low";
 }
 
 export function getRiskSeverityPillClassName(severity: RiskPayload["severity"]) {
-  switch (severity) {
-    case "high":
-      return "status-pill status-pill-danger";
-    case "medium":
-      return "status-pill status-pill-warning";
-    case "low":
-      return "status-pill status-pill-neutral";
-    default:
-      return "status-pill status-pill-neutral";
-  }
+  return severity === "critical" || severity === "high" ? "status-pill status-pill-danger" : severity === "medium" ? "status-pill status-pill-warning" : "status-pill status-pill-neutral";
 }
 
 export function toRiskPayload(risk: RiskRecord): RiskPayload {
   return {
-    title: risk.title,
-    detail: risk.detail,
-    severity: risk.severity,
-    sourceType: risk.sourceType,
-    sourceId: risk.sourceId,
-    attachmentType: risk.attachmentType,
-    attachmentId: risk.attachmentId,
-    mitigationTaskId: risk.mitigationTaskId,
+    projectId: risk.projectId, title: risk.title, detail: risk.detail,
+    category: risk.category, severity: risk.severity, status: risk.status,
+    blocksWork: risk.blocksWork, source: risk.source,
+    relatedTargets: risk.relatedTargets, mitigationTaskId: risk.mitigationTaskId,
+    ownerGroupId: risk.ownerGroupId,
   };
 }
 
 export function sanitizeRiskPayload(payload: RiskPayload): RiskPayload {
-  const mitigationTaskId =
-    typeof payload.mitigationTaskId === "string" && payload.mitigationTaskId.trim().length > 0
-      ? payload.mitigationTaskId.trim()
-      : null;
-
   return {
     ...payload,
     title: payload.title.trim(),
     detail: payload.detail.trim(),
-    sourceId: payload.sourceId.trim(),
-    attachmentId: payload.attachmentId.trim(),
-    mitigationTaskId,
+    mitigationTaskId: payload.mitigationTaskId?.trim() || null,
+    ownerGroupId: payload.ownerGroupId?.trim() || null,
+    relatedTargets: payload.relatedTargets.filter((target) => target.id.trim()).map((target) => ({ ...target, id: target.id.trim() })),
   };
 }

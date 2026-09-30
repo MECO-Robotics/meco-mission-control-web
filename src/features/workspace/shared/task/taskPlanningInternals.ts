@@ -3,19 +3,7 @@ import type { TaskDependencyRecord, TaskRecord } from "@/types/recordsExecution"
 
 export const HARD_DEPENDENCY_TYPES = new Set<TaskDependencyRecord["dependencyType"]>(["hard"]);
 
-const PART_INSTANCE_STATUS_ORDER: Record<string, number> = {
-  "not ready": 0,
-  blocked: 1,
-  qa: 2,
-  ready: 3,
-};
-
-const MILESTONE_STATUS_ORDER: Record<string, number> = {
-  "not ready": 0,
-  blocked: 1,
-  qa: 2,
-  ready: 3,
-};
+const READINESS_ORDER = { "not-ready": 0, blocked: 1, qa: 2, ready: 3 } as const;
 
 function uniqueIds(values: Array<string | null | undefined>) {
   return Array.from(new Set(values.filter((value): value is string => Boolean(value))));
@@ -23,10 +11,6 @@ function uniqueIds(values: Array<string | null | undefined>) {
 
 export function getTaskDependencyRecords(bootstrap: BootstrapPayload) {
   return bootstrap.taskDependencies ?? [];
-}
-
-export function getTaskBlockerRecords(bootstrap: BootstrapPayload) {
-  return bootstrap.taskBlockers ?? [];
 }
 
 export function getTaskById(bootstrap: BootstrapPayload, taskId: string) {
@@ -45,61 +29,39 @@ function isMilestoneDependencySatisfied(
   bootstrap: BootstrapPayload,
   milestoneId: string,
   requiredState: string | undefined,
-  now: Date,
 ) {
   const milestone = getMilestoneById(bootstrap, milestoneId);
   if (!milestone) {
     return false;
   }
 
-  const milestoneStatus = milestone.status ?? null;
-  if (milestoneStatus) {
-    const targetOrder = MILESTONE_STATUS_ORDER[milestoneStatus];
-    const requiredOrder = MILESTONE_STATUS_ORDER[requiredState ?? "ready"];
-
-    if (targetOrder !== undefined && requiredOrder !== undefined) {
-      return targetOrder >= requiredOrder;
-    }
-  }
-
-  const startDate = new Date(milestone.startDateTime);
-  const endDate = milestone.endDateTime ? new Date(milestone.endDateTime) : startDate;
-
-  if (requiredState === "started" || requiredState === "available") {
-    return !Number.isNaN(startDate.getTime()) && now.getTime() >= startDate.getTime();
-  }
-
-  if (Number.isNaN(endDate.getTime())) {
-    return false;
-  }
-
-  return now.getTime() >= endDate.getTime();
+  const targetOrder = milestone.readinessStatus ? READINESS_ORDER[milestone.readinessStatus] : undefined;
+  const requiredOrder = READINESS_ORDER[(requiredState ?? "ready") as keyof typeof READINESS_ORDER];
+  return targetOrder !== undefined && requiredOrder !== undefined && targetOrder >= requiredOrder;
 }
 
 function isPartInstanceDependencySatisfied(
   bootstrap: BootstrapPayload,
   partInstanceId: string,
-  requiredState: string | undefined,
+  requiredCondition: TaskDependencyRecord["requiredCondition"],
 ) {
   const partInstance = getPartInstanceById(bootstrap, partInstanceId);
   if (!partInstance) {
     return false;
   }
 
-  const requiredOrder = PART_INSTANCE_STATUS_ORDER[requiredState ?? "ready"];
-  const targetOrder = PART_INSTANCE_STATUS_ORDER[partInstance.status];
-
-  if (requiredOrder === undefined || targetOrder === undefined) {
-    return partInstance.status === (requiredState ?? "ready");
+  if (!requiredCondition) return false;
+  if (requiredCondition.kind === "physical-location") {
+    return partInstance.location.kind === requiredCondition.value;
   }
-
-  return targetOrder >= requiredOrder;
+  const targetOrder = partInstance.readinessStatus ? READINESS_ORDER[partInstance.readinessStatus] : undefined;
+  const requiredOrder = READINESS_ORDER[requiredCondition.value];
+  return targetOrder !== undefined && targetOrder >= requiredOrder;
 }
 
 export function isTaskDependencySatisfied(
   dependency: TaskDependencyRecord,
   bootstrap: BootstrapPayload,
-  now: Date,
 ) {
   if (dependency.dependencyType === "soft") {
     return true;
@@ -109,20 +71,20 @@ export function isTaskDependencySatisfied(
     return getTaskById(bootstrap, dependency.refId)?.status === (dependency.requiredState ?? "complete");
   }
 
-  if (dependency.kind === "part_instance") {
-    return isPartInstanceDependencySatisfied(bootstrap, dependency.refId, dependency.requiredState);
+  if (dependency.kind === "part-instance") {
+    return isPartInstanceDependencySatisfied(bootstrap, dependency.refId, dependency.requiredCondition);
   }
 
   if (dependency.kind === "milestone") {
-    return isMilestoneDependencySatisfied(bootstrap, dependency.refId, dependency.requiredState, now);
+    return isMilestoneDependencySatisfied(bootstrap, dependency.refId, dependency.requiredState);
   }
 
   return false;
 }
 
 export function getOpenTaskBlockers(taskId: string, bootstrap: BootstrapPayload) {
-  return getTaskBlockerRecords(bootstrap).filter(
-    (blocker) => blocker.blockedTaskId === taskId && blocker.status === "open",
+  return bootstrap.risks.filter((risk) =>
+    risk.blocksWork && risk.status !== "resolved" && risk.relatedTargets.some((target) => target.kind === "task" && target.id === taskId),
   );
 }
 

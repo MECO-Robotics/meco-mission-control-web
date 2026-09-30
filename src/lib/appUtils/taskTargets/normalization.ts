@@ -32,10 +32,12 @@ export function normalizeTaskTargetPayload(
       return;
     }
 
-    subsystemIds = uniqueIds([...subsystemIds, partInstance.subsystemId]);
+    const subsystemId = partInstance.intendedSubsystemId ?? (partInstance.location.kind === "installed" ? partInstance.location.subsystemId : null);
+    if (subsystemId) subsystemIds = uniqueIds([...subsystemIds, subsystemId]);
 
-    if (partInstance.mechanismId) {
-      mechanismIds = uniqueIds([...mechanismIds, partInstance.mechanismId]);
+    const mechanismId = partInstance.intendedMechanismId ?? (partInstance.location.kind === "installed" ? partInstance.location.mechanismId : null);
+    if (mechanismId) {
+      mechanismIds = uniqueIds([...mechanismIds, mechanismId]);
     }
   });
 

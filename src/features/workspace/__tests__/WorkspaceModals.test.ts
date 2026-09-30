@@ -87,13 +87,13 @@ describe("TaskEditorModal", () => {
     expect(markup).toContain('data-inline-edit-field="assigned"');
   });
 
-  it("limits task disciplines to media options for media projects", () => {
+  it("limits task work types to media options for media projects", () => {
     const markup = renderTaskModal(
       "create",
       {
         projectId: "project-2",
         subsystemIds: ["subsystem-2"],
-        disciplineId: "photography",
+        workTypeId: "work-type-photography",
       },
       true,
     );
@@ -108,7 +108,6 @@ describe("TaskEditorModal", () => {
 
     expect(markup).not.toContain("Actual hours");
     expect(markup).toContain("Dependencies");
-    expect(markup).toContain("Blockers");
     expect(markup).toContain("Cancel");
     expect(markup).toContain("Save changes");
   });

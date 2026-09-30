@@ -1,51 +1,29 @@
 import { getTaskOpenBlockersForTask, getTaskPlanningState } from "../task/taskPlanning";
+import { isTaskDependencySatisfied } from "../task/taskPlanningInternals";
 import { bootstrap } from "./taskPlanningFixture";
-import type { BootstrapPayload } from "@/types/bootstrap";
 
-test("task planning keeps manual blockers separate from dependency waiting state", () => {
+test("blocking unresolved Risks feed Kanban triage without a Task blocker store", () => {
   expect(getTaskOpenBlockersForTask("task-b", bootstrap)).toHaveLength(1);
-  expect(getTaskPlanningState(bootstrap.tasks[1], bootstrap, new Date("2026-04-20T12:00:00Z"))).toBe(
-    "blocked",
-  );
+  expect(getTaskPlanningState(bootstrap.tasks[1], bootstrap, new Date("2026-04-20T12:00:00Z"))).toBe("blocked");
 });
 
-test("task planning accepts milestone and part-instance qa states as satisfied dependency targets", () => {
-  const qaBootstrap = {
-    ...bootstrap,
-    milestones: [
-      {
-        ...bootstrap.milestones[0],
-        status: "qa" as const,
-      },
-    ],
-    partInstances: [
-      {
-        ...bootstrap.partInstances[0],
-        status: "qa" as const,
-      },
-    ],
-    taskDependencies: bootstrap.taskDependencies.map((dependency) => {
-      if (dependency.id === "task-dependency-part") {
-        return {
-          ...dependency,
-          requiredState: "qa",
-        };
-      }
+test("PartInstance dependency conditions evaluate physical location separately from readiness", () => {
+  const physicalLocation = {
+    id: "location-condition",
+    taskId: "task-b",
+    kind: "part-instance" as const,
+    refId: "part-instance-1",
+    requiredCondition: { kind: "physical-location" as const, value: "stock" as const },
+    dependencyType: "hard" as const,
+    createdAt: "2026-04-20T00:00:00.000Z",
+  };
+  const readiness = {
+    ...physicalLocation,
+    id: "readiness-condition",
+    requiredCondition: { kind: "derived-readiness" as const, value: "ready" as const },
+  };
 
-      if (dependency.id === "task-dependency-milestone") {
-        return {
-          ...dependency,
-          dependencyType: "hard" as const,
-          requiredState: "qa",
-        };
-      }
-
-      return dependency;
-    }),
-    taskBlockers: [],
-  } satisfies BootstrapPayload;
-
-  expect(getTaskPlanningState(qaBootstrap.tasks[1], qaBootstrap, new Date("2026-04-20T12:00:00Z"))).toBe(
-    "ready",
-  );
+  expect(isTaskDependencySatisfied(physicalLocation, bootstrap)).toBe(true);
+  expect(isTaskDependencySatisfied(readiness, bootstrap)).toBe(true);
+  expect(isTaskDependencySatisfied({ ...readiness, requiredCondition: { kind: "physical-location", value: "installed" } }, bootstrap)).toBe(false);
 });

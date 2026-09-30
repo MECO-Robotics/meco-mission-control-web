@@ -113,7 +113,7 @@ export function filterTaskQueueTasks(
     );
   }
   if (disciplineFilter.length > 0) {
-    result = result.filter((task) => filterSelectionIncludes(disciplineFilter, task.disciplineId));
+    result = result.filter((task) => filterSelectionIncludes(disciplineFilter, task.workTypeId));
   }
   if (subsystemFilter.length > 0) {
     result = result.filter((task) =>

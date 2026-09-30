@@ -29,22 +29,20 @@ export function targetMatchesNavigationState(
     return false;
   }
 
-  if (target.manufacturingView && target.manufacturingView !== state.manufacturingView) {
-    return false;
-  }
-
   return true;
 }
 
 export function getActiveNavigationSubItemId(state: NavigationState, context?: ViewAvailabilityContext): NavigationSubItemId | null {
+  void context;
   switch (state.activeTab) {
     case "home": return "home";
+    case "risks": return "work-risks";
+    case "documents": return "resources-documents";
     case "tasks": return state.taskView === "robot-map" ? "resources-structure" : state.taskView === "queue" ? "work-tasks" : "work-schedule";
     case "worklogs": return null;
-    case "manufacturing": return "work-manufacturing";
     case "cad": case "subsystems": return "resources-structure";
     case "roster": return "team-people";
-    case "inventory": return state.inventoryView === "purchases" ? "resources-purchases" : state.inventoryView === "documents" ? "resources-documents" : state.inventoryView === "materials" ? context === "non-robot-project" ? "resources-documents" : "resources-materials" : "resources-parts";
+    case "inventory": return state.inventoryView === "purchases" ? "resources-purchases" : state.inventoryView === "materials" ? "resources-materials" : "resources-parts";
     default: return null;
   }
 }

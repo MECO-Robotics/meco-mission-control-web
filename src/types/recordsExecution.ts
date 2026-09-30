@@ -2,27 +2,26 @@ import type {
   MilestoneStatus,
   MilestoneType,
   MeetingType,
-  TaskBlockerSeverity,
-  TaskBlockerSourceKind,
-  TaskBlockerStatus,
-  TaskBlockerType,
   TaskDependencyKind,
   TaskDependencyType,
-  TaskPlanningState,
   TaskPriority,
   TaskStatus,
+  ReadinessStatus,
+  ScheduleReference,
+  PartInstanceDependencyCondition,
 } from "./common";
 
 export interface MilestoneRecord {
   id: string;
+  seasonId: string;
+  projectIds: string[];
   title: string;
   type: MilestoneType;
-  status?: MilestoneStatus;
-  startDateTime: string;
-  endDateTime: string | null;
-  isExternal: boolean;
+  status: MilestoneStatus;
+  startAt: string;
+  endAt: string | null;
   description: string;
-  projectIds: string[];
+  readinessStatus?: ReadinessStatus;
   photoUrl?: string;
 }
 
@@ -39,9 +38,8 @@ export type MilestoneRequirementConditionType = "iteration" | "workflow_state" |
 export interface MilestoneRequirementRecord {
   id: string;
   milestoneId: string;
-  targetType: MilestoneRequirementTargetType;
-  targetId: string;
-  conditionType: MilestoneRequirementConditionType;
+  targetRefs: import("./common").DomainReference[];
+  conditionType: "iteration" | "workflow-state" | "custom";
   conditionValue: string;
   required: boolean;
   sortOrder: number;
@@ -50,17 +48,20 @@ export interface MilestoneRequirementRecord {
 
 export interface TaskRecord {
   id: string;
+  createdAt?: string;
+  serialNumber?: number;
+  serial?: string;
   projectId: string;
+  workTypeId: string;
+  responsibleGroupId: string | null;
   workstreamIds: string[];
   title: string;
   summary: string;
   subsystemIds: string[];
-  disciplineId: string;
   mechanismIds: string[];
   partInstanceIds: string[];
-  artifactIds: string[];
-  targetRiskId?: string | null;
-  targetMilestoneId: string | null;
+  scheduleRefs: ScheduleReference[];
+  requestedById: string | null;
   photoUrl?: string;
   ownerId: string | null;
   assigneeIds: string[];
@@ -69,17 +70,33 @@ export interface TaskRecord {
   dueDate: string;
   priority: TaskPriority;
   status: TaskStatus;
-  planningState?: TaskPlanningState;
-  blockers: string[];
-  checklistItems?: string[];
+  checklistItems: string[];
   isBlocked?: boolean;
   isWaitingOnDependency?: boolean;
-  linkedManufacturingIds: string[];
-  linkedPurchaseIds: string[];
+  manufacturingDetails: ManufacturingDetailsRecord | null;
   estimatedHours: number;
   actualHours: number;
   requiresDocumentation: boolean;
-  documentationLinked: boolean;
+}
+
+export type ManufacturedPartRef =
+  | { kind: "part-definition"; partDefinitionId: string }
+  | { kind: "provisional"; partNumber: string; revision: string };
+
+export type MaterialRequirement =
+  | { kind: "inventory-material"; materialId: string }
+  | { kind: "specified-material"; name: string };
+
+export interface ManufacturingDetailsRecord {
+  part: ManufacturedPartRef;
+  quantity: number;
+  processId: string;
+  fulfillmentSource: "in-house" | "outsourced";
+  material: MaterialRequirement;
+  fileArtifactIds: string[];
+  tolerances: string[];
+  qaRequirements: string[];
+  batchLabel?: string;
 }
 
 export interface TaskDependencyRecord {
@@ -87,24 +104,10 @@ export interface TaskDependencyRecord {
   taskId: string;
   kind: TaskDependencyKind;
   refId: string;
-  requiredState: string;
+  requiredState?: string;
+  requiredCondition?: PartInstanceDependencyCondition;
   dependencyType: TaskDependencyType;
   createdAt: string;
-}
-
-export interface TaskBlockerRecord {
-  id: string;
-  blockedTaskId: string;
-  blockerType: TaskBlockerType;
-  blockerId: string | null;
-  sourceKind?: string | null;
-  issueType?: TaskBlockerType;
-  description: string;
-  severity: TaskBlockerSeverity;
-  status: TaskBlockerStatus;
-  createdByMemberId: string | null;
-  createdAt: string;
-  resolvedAt: string | null;
 }
 
 export interface WorkLogRecord {
@@ -126,19 +129,33 @@ export interface AttendanceRecord {
 
 export interface MeetingRecord {
   id: string;
+  seasonId: string;
+  projectIds: string[];
   title: string;
-  meetingType?: MeetingType;
-  seasonId?: string;
-  projectIds?: string[];
-  startDateTime?: string;
-  endDateTime?: string | null;
-  location?: string;
-  description?: string;
-  date: string;
-  time: string;
-  rsvpsYes: number;
-  rsvpsMaybe: number;
-  openSignIns: number;
+  meetingType: MeetingType;
+  startAt: string;
+  endAt: string | null;
+  location: string;
+  description: string;
+}
+
+export interface EventRecord {
+  id: string;
+  seasonId: string;
+  projectIds: string[];
+  eventType: "competition" | "practice" | "other";
+  title: string;
+  startAt: string;
+  endAt: string | null;
+  location: string;
+  description: string;
+}
+
+export interface ManufacturingProcessRecord {
+  id: string;
+  code: string;
+  name: string;
+  isActive: boolean;
 }
 
 export type QaReviewResult = "pass" | "minor-fix" | "iteration-worthy";
@@ -146,7 +163,7 @@ export type QaReviewResult = "pass" | "minor-fix" | "iteration-worthy";
 export interface QaReviewRecord {
   id: string;
   subjectId: string;
-  subjectType: "task" | "manufacturing";
+  subjectType: "task";
   subjectTitle: string;
   participantIds: string[];
   result: QaReviewResult;
@@ -157,12 +174,13 @@ export interface QaReviewRecord {
 
 export interface QaRequestRecord {
   id: string;
-  taskId: string | null;
+  projectId: string;
+  targetRefs: import("./common").DomainReference[];
   subject: string;
-  mentorId: string;
+  mentorId: string | null;
   requestedById: string | null;
   createdAt: string;
-  status: "requested";
+  status: "requested" | "in-review" | "complete" | "cancelled";
 }
 
 export interface EscalationRecord {
@@ -188,7 +206,3 @@ export interface AuditActionRecord {
   actorMemberId: string | null;
   memberIds: string[];
 }
-
-export type TaskBlockerResponse = Omit<TaskBlockerRecord, "blockerType" | "sourceKind"> & {
-  blockerType: TaskBlockerSourceKind;
-};

@@ -1,63 +1,33 @@
 import { useEffect, useState } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MilestoneRecord, MilestoneRequirementRecord } from "@/types/recordsExecution";
+import type { DomainReference } from "@/types/common";
 import { getMilestoneRequirementsForMilestone, getMilestoneRequirementTasks, getMilestoneTaskBoardState, MilestoneTaskStateIcon } from "@/features/workspace/shared/milestones/milestoneTaskState";
 
 function getMilestoneRequirementTargetLabel(
-  requirement: MilestoneRequirementRecord,
+  target: DomainReference,
   bootstrap: BootstrapPayload,
 ) {
-  const project = bootstrap.projects.find((item) => item.id === requirement.targetId);
-  const workstream = bootstrap.workstreams.find((item) => item.id === requirement.targetId);
-  const artifact = bootstrap.artifacts.find((item) => item.id === requirement.targetId);
-  const subsystem = bootstrap.subsystems.find((item) => item.id === requirement.targetId);
-  const mechanism = bootstrap.mechanisms.find((item) => item.id === requirement.targetId);
-  const partInstance = bootstrap.partInstances.find((item) => item.id === requirement.targetId);
-
-  const targetName =
-    requirement.targetType === "project"
-      ? project?.name
-      : requirement.targetType === "workflow"
-        ? workstream?.name
-        : requirement.targetType === "artifact"
-          ? artifact?.title
-          : requirement.targetType === "subsystem"
-            ? subsystem?.name
-            : requirement.targetType === "mechanism"
-              ? mechanism?.name
-              : requirement.targetType === "part-instance"
-                ? partInstance?.name
-                : null;
-
-  return targetName ?? requirement.targetId;
+  switch (target.kind) {
+    case "project": return bootstrap.projects.find((item) => item.id === target.id)?.name ?? target.id;
+    case "workstream": return bootstrap.workstreams.find((item) => item.id === target.id)?.name ?? target.id;
+    case "artifact": return bootstrap.artifacts.find((item) => item.id === target.id)?.title ?? target.id;
+    case "subsystem": return bootstrap.subsystems.find((item) => item.id === target.id)?.name ?? target.id;
+    case "mechanism": return bootstrap.mechanisms.find((item) => item.id === target.id)?.name ?? target.id;
+    case "part-instance": {
+      const instance = bootstrap.partInstances.find((item) => item.id === target.id);
+      return bootstrap.partDefinitions.find((item) => item.id === instance?.partDefinitionId)?.name ?? target.id;
+    }
+    default: return target.id;
+  }
 }
 
-function getMilestoneRequirementTargetTypeLabel(requirement: MilestoneRequirementRecord) {
-  if (requirement.targetType === "project") {
-    return "Project";
-  }
-
-  if (requirement.targetType === "workflow") {
-    return "Workflow";
-  }
-
-  if (requirement.targetType === "artifact") {
-    return "Artifact";
-  }
-
-  if (requirement.targetType === "subsystem") {
-    return "Subsystem";
-  }
-
-  if (requirement.targetType === "mechanism") {
-    return "Mechanism";
-  }
-
-  if (requirement.targetType === "part-instance") {
-    return "Part instance";
-  }
-
-  return requirement.targetType;
+function getMilestoneRequirementTargetTypeLabel(target: DomainReference) {
+  const labels: Partial<Record<DomainReference["kind"], string>> = {
+    project: "Project", workstream: "Workstream", artifact: "Artifact", subsystem: "Subsystem",
+    mechanism: "Mechanism", "part-instance": "Part instance",
+  };
+  return labels[target.kind] ?? target.kind;
 }
 
 function isInScopeValue(raw: string) {
@@ -77,7 +47,7 @@ function getMilestoneRequirementConditionLabel(requirement: MilestoneRequirement
     return requirement.conditionValue.trim() || "Iteration";
   }
 
-  if (requirement.conditionType === "workflow_state") {
+  if (requirement.conditionType === "workflow-state") {
     const normalizedConditionValue = requirement.conditionValue
       .trim()
       .toLowerCase()
@@ -106,9 +76,11 @@ function MilestoneRequirementCard({
 }) {
   const requirementTasks = getMilestoneRequirementTasks(requirement, bootstrap);
   const requirementState = getMilestoneTaskBoardState(requirementTasks, bootstrap);
-  const requirementTargetLabel = getMilestoneRequirementTargetLabel(requirement, bootstrap);
+  const requirementTargets = requirement.targetRefs.map((target) => ({
+    label: getMilestoneRequirementTargetLabel(target, bootstrap),
+    typeLabel: getMilestoneRequirementTargetTypeLabel(target),
+  }));
   const requirementConditionLabel = getMilestoneRequirementConditionLabel(requirement);
-  const requirementTargetTypeLabel = getMilestoneRequirementTargetTypeLabel(requirement);
 
   return (
     <article className="milestone-requirement-item">
@@ -117,12 +89,12 @@ function MilestoneRequirementCard({
           <MilestoneTaskStateIcon compact state={requirementState} />
         </span>
         <span className="task-detail-copy milestone-requirement-title milestone-requirement-typography">
-          {requirementTargetLabel}
+          {requirementTargets.map((target) => target.label).join(", ") || "No target"}
         </span>
       </div>
       <div className="milestone-requirement-type-row">
         <span className="task-detail-copy milestone-requirement-type milestone-requirement-typography">
-          {requirementTargetTypeLabel}
+          {requirementTargets.map((target) => target.typeLabel).join(", ")}
         </span>
       </div>
       <span className="task-detail-copy milestone-requirement-condition milestone-requirement-typography">

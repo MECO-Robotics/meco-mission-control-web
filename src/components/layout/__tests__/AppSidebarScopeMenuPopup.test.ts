@@ -13,6 +13,7 @@ import sidebarCatalog from "@/components/layout/sidebar/sidebarItems.json";
 const seasons: SeasonRecord[] = [
   {
     id: "season-2026",
+        teamId: "team-1",
     name: "2026 Season",
     type: "season",
     startDate: "2026-01-01",
@@ -20,6 +21,7 @@ const seasons: SeasonRecord[] = [
   },
   {
     id: "season-2027",
+        teamId: "team-1",
     name: "2027 Season",
     type: "season",
     startDate: "2027-01-01",
@@ -30,7 +32,7 @@ const seasons: SeasonRecord[] = [
 const projects: ProjectRecord[] = [
   {
     id: "robot-2026",
-    name: "Robot 2026",
+    name: "Robot",
     projectType: "robot",
     seasonId: "season-2026",
     description: "Competition robot",
@@ -116,7 +118,7 @@ describe("AppSidebarScopeMenuPopup", () => {
     expect(markup).toContain("Project");
     expect(markup).toContain('data-tutorial-target="project-select"');
     expect(markup).toContain("All projects");
-    expect(markup).toContain("Robot 2026");
+    expect(markup).toContain("Robot");
     expect(markup).toContain("Outreach");
     expect(markup).toContain("Add robot");
     expect(markup).toContain("Edit robot name");

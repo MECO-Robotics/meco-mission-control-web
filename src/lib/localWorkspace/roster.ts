@@ -19,7 +19,7 @@ export function localRosterInsights(snapshot: BootstrapPayload, query: URLSearch
     const remainingOpenHours = tasks.reduce((sum, task) => sum + Math.max(0, task.estimatedHours - task.actualHours), 0);
     const plannedWeeklyAttendanceHours = member.plannedWeeklyAttendanceHours ?? 0;
     return {
-      memberId: member.id, memberName: member.name, role: member.role ?? "student", disciplineId: member.disciplineId ?? null,
+      memberId: member.id, memberName: member.name, role: member.role ?? "student",
       activeTaskCount: tasks.length, blockedTaskCount: tasks.filter((task) => task.isBlocked).length,
       waitingForQaTaskCount: tasks.filter((task) => task.status === "waiting-for-qa").length,
       overdueTaskCount: tasks.filter((task) => task.dueDate && task.dueDate < today).length,

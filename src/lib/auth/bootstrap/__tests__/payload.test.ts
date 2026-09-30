@@ -30,8 +30,7 @@ describe("normalizeBootstrapPayload", () => {
       {
         id: "milestone-requirement-1",
         milestoneId,
-        targetType: "project",
-        targetId: "project-1",
+        targetRefs: [{ kind: "project", id: "project-1" }],
         conditionType: "custom",
         conditionValue: "in_scope",
         required: true,
@@ -45,12 +44,13 @@ describe("normalizeBootstrapPayload", () => {
       milestones: [
         {
           id: milestoneId,
+          seasonId: "season-1",
           title: "Milestone 1",
           type: "internal-review",
-          status: "blocked",
-          startDateTime: "2026-01-10T12:00:00",
-          endDateTime: null,
-          isExternal: false,
+          status: "planned",
+          readinessStatus: "blocked",
+          startAt: "2026-01-10T12:00:00",
+          endAt: null,
           description: "",
           projectIds: ["project-1"],
         },
@@ -61,7 +61,7 @@ describe("normalizeBootstrapPayload", () => {
     const normalized = normalizeBootstrapPayload(payload);
 
     expect(normalized.milestoneRequirements).toEqual(milestoneRequirements);
-    expect(normalized.milestones[0]?.status).toBe("blocked");
+    expect(normalized.milestones[0]?.readinessStatus).toBe("blocked");
   });
 
   it("preserves calendar and triage bootstrap records", () => {
@@ -69,11 +69,13 @@ describe("normalizeBootstrapPayload", () => {
       {
         id: "meeting-1",
         title: "Build Standup",
-        date: "2026-03-01",
-        time: "17:30",
-        rsvpsYes: 5,
-        rsvpsMaybe: 2,
-        openSignIns: 1,
+        meetingType: "build",
+        seasonId: "season-1",
+        projectIds: [],
+        startAt: "2026-03-01T17:30",
+        endAt: null,
+        location: "",
+        description: "",
       },
     ];
     const qaReviews: QaReviewRecord[] = [
@@ -113,17 +115,7 @@ describe("normalizeBootstrapPayload", () => {
 
     const normalized = normalizeBootstrapPayload(payload);
 
-    expect(normalized.meetings).toEqual([
-      {
-        ...meetings[0],
-        meetingType: "general",
-        projectIds: [],
-        startDateTime: "2026-03-01T17:30",
-        endDateTime: null,
-        location: "",
-        description: "",
-      },
-    ]);
+    expect(normalized.meetings).toEqual(meetings);
     expect(normalized.attendanceRecords).toEqual(payload.attendanceRecords);
     expect(normalized.qaReviews).toEqual(qaReviews);
     expect(normalized.escalations).toEqual(escalations);
@@ -133,7 +125,8 @@ describe("normalizeBootstrapPayload", () => {
     const qaRequests: QaRequestRecord[] = [
       {
         id: "qa-request-1",
-        taskId: "task-1",
+        projectId: "project-1",
+        targetRefs: [{ kind: "task", id: "task-1" }],
         subject: "Review drivetrain wiring",
         mentorId: "mentor-1",
         requestedById: "student-1",
@@ -149,98 +142,49 @@ describe("normalizeBootstrapPayload", () => {
     expect(normalizeBootstrapPayload(payload).qaRequests).toEqual(qaRequests);
   });
 
-  it("normalizes unknown task blocker types to other", () => {
-    const payload = {
-      ...EMPTY_BOOTSTRAP,
-      taskBlockers: [
-        {
-          id: "task-blocker-1",
-          blockedTaskId: "task-1",
-          blockerType: "vendor-shutdown",
-          blockerId: null,
-          description: "Unexpected vendor blocker",
-          severity: "medium",
-          status: "open",
-          createdByMemberId: null,
-          createdAt: "2026-01-01T00:00:00.000Z",
-          resolvedAt: null,
-        },
-      ],
-    } as unknown as BootstrapPayload;
+  it("preserves canonical risk targets without storing duplicate task blocker fields", () => {
+    const source = createBootstrap();
+    const risk = {
+      id: "risk-1",
+      projectId: source.projects[0].id,
+      title: "Drive train interference",
+      detail: "The chain may contact the frame.",
+      category: "design" as const,
+      severity: "medium" as const,
+      status: "open" as const,
+      blocksWork: true,
+      source: { kind: "manual" as const },
+      relatedTargets: [{ kind: "task" as const, id: source.tasks[0].id }],
+      mitigationTaskId: null,
+      ownerGroupId: null,
+      createdAt: "2026-01-01T00:00:00.000Z",
+      updatedAt: "2026-01-01T00:00:00.000Z",
+      resolvedAt: null,
+    };
+    source.risks = [risk];
 
-    const normalized = normalizeBootstrapPayload(payload);
+    const normalized = normalizeBootstrapPayload(source);
 
-    expect(normalized.taskBlockers?.[0]?.blockerType).toBe("other");
-    expect(normalized.taskBlockers?.[0]?.sourceKind).toBe("external");
-  });
-
-  it("decodes issue category separately from the source relationship", () => {
-    const payload = { ...EMPTY_BOOTSTRAP, taskBlockers: [{
-      id: "blocker-1", blockedTaskId: "task-1", blockerType: "external",
-      issueType: "shipping-delay", blockerId: "vendor-order-42",
-    }] } as unknown as BootstrapPayload;
-    const blocker = normalizeBootstrapPayload(payload).taskBlockers?.[0];
-    expect(blocker?.blockerType).toBe("shipping-delay");
-    expect(blocker?.sourceKind).toBe("external");
-    expect(blocker?.blockerId).toBe("vendor-order-42");
-  });
-
-  it("retains the legacy external relationship kind and source id", () => {
-    const payload = {
-      ...EMPTY_BOOTSTRAP,
-      taskBlockers: [{
-        id: "external-blocker",
-        blockedTaskId: "task-1",
-        blockerType: "external",
-        blockerId: "vendor-order-42",
-      }],
-    } as unknown as BootstrapPayload;
-
-    const blocker = normalizeBootstrapPayload(payload).taskBlockers?.[0];
-    expect(blocker?.blockerType).toBe("external");
-    expect(blocker?.blockerId).toBe("vendor-order-42");
-    expect(blocker?.sourceKind).toBe("external");
-  });
-
-  it("derives task target risk from the authoritative risk relation", () => {
-    const payload = {
-      ...EMPTY_BOOTSTRAP,
-      risks: [{ id: "risk-1", mitigationTaskId: "task-1" }],
-      tasks: [
-        {
-          id: "task-1",
-          title: "Mitigate drivetrain risk",
-        },
-      ],
-    } as unknown as BootstrapPayload;
-
-    const normalized = normalizeBootstrapPayload(payload);
-
-    expect(normalized.tasks[0]?.targetRiskId).toBe("risk-1");
+    expect(normalized.risks).toEqual([risk]);
+    expect(normalized.tasks[0]).not.toHaveProperty("blockers");
+    expect(normalized.tasks[0]).not.toHaveProperty("targetRiskId");
   });
 });
 
-it("keeps empty canonical report collections authoritative over stale legacy copies", () => {
-  const input = {
-    ...EMPTY_BOOTSTRAP,
-    qaReports: [{ id: "retired-qa" }],
-    testResults: [{ id: "retired-test" }],
-    qaFindings: [{ id: "retired-finding" }],
-    testFindings: [{ id: "retired-test-finding" }],
-  };
-  const normalized = normalizeBootstrapPayload(input);
-  expect(normalized.reports).toEqual([]);
-  expect(normalized.reportFindings).toEqual([]);
-  for (const field of ["qaReports", "testResults", "qaFindings", "testFindings"]) {
-    expect(normalized).not.toHaveProperty(field);
-  }
+it("preserves canonical report and evidence collections", () => {
+  const source = createBootstrap();
+  const normalized = normalizeBootstrapPayload(source);
+  expect(normalized.reports).toEqual(source.reports);
+  expect(normalized.qaFindings).toEqual(source.qaFindings);
+  expect(normalized.testResults).toEqual(source.testResults);
+  expect(normalized.testFindings).toEqual(source.testFindings);
 });
 
 it("preserves canonical project and target identities without bucket merging or name inference", () => {
   const source = createBootstrap();
   source.projects = [
-    { ...source.projects[0], id: "project-a", name: "Custom outreach A", projectType: "outreach" },
-    { ...source.projects[0], id: "project-b", name: "Custom outreach B", projectType: "outreach" },
+    { ...source.projects[0], id: "project-a", name: "Robot", projectType: "robot" },
+    { ...source.projects[0], id: "project-b", name: "Outreach", projectType: "outreach" },
   ];
   source.workstreams = [{ id: "workstream-b", projectId: "project-b", name: source.subsystems[0].name, description: "" }];
   source.tasks[0] = {

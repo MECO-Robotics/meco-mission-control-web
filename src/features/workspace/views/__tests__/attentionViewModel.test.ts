@@ -46,7 +46,8 @@ describe("buildAttentionViewModel", () => {
       bootstrap: createBootstrap(),
     });
 
-    expect(viewModel.actionNowItems.some((item) => item.sourceType === "qa")).toBe(true);
+    expect(viewModel.actionNowItems.some((item) => item.sourceType === "qa")).toBe(false);
+    expect(viewModel.actionNowItems.some((item) => item.sourceType === "risk" && item.title === "Drive overheating")).toBe(true);
     expect(viewModel.actionNowItems.some((item) => item.title === "Drive overheating")).toBe(true);
 
     for (let i = 1; i < viewModel.actionNowItems.length; i += 1) {

@@ -73,19 +73,6 @@ export function TaskEditorCreateMetadataSection({
             />
             <span style={{ color: "var(--text-title)" }}>Requires documentation</span>
           </label>
-          <label className="checkbox-field">
-            <input
-              checked={taskDraft.documentationLinked}
-              onChange={(milestone) =>
-                setTaskDraft((current) => ({
-                  ...current,
-                  documentationLinked: milestone.target.checked,
-                }))
-              }
-              type="checkbox"
-            />
-            <span style={{ color: "var(--text-title)" }}>Documentation linked</span>
-          </label>
         </div>
       </div>
     </details>

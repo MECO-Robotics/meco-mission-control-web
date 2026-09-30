@@ -169,21 +169,6 @@ export function MilestonesMilestoneModalFields({
         </select>
       </label>
 
-      <label className="field modal-wide" style={{ display: "flex", alignItems: "center" }}>
-        <input
-          checked={milestoneDraft.isExternal}
-          onChange={(milestone) =>
-            setMilestoneDraft((current) => ({
-              ...current,
-              isExternal: milestone.target.checked,
-            }))
-          }
-          style={{ width: "auto" }}
-          type="checkbox"
-        />
-        <span style={LABEL_STYLE}>External milestone</span>
-      </label>
-
       {milestoneError ? (
         <p className="section-copy" style={{ color: "var(--official-red)" }}>
           {milestoneError}

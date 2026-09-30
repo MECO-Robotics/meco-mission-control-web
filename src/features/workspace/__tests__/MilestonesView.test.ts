@@ -19,6 +19,7 @@ describe("MilestonesView", () => {
     expect(markup).toContain('aria-label="Milestone agenda"');
     expect(markup).toContain("Regional</button>");
     expect(markup).toContain("Design review</button>");
+    expect(markup).toContain("Planned");
     expect(markup).toContain("Blocked");
     expect(markup).toContain("Competition");
     expect(markup).not.toContain("task-queue-board");

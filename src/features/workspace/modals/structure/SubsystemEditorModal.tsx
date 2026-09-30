@@ -17,10 +17,8 @@ interface SubsystemEditorModalProps {
   isSavingSubsystem: boolean;
   requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   subsystemDraft: SubsystemPayload;
-  subsystemDraftRisks: string;
   subsystemModalMode: "create" | "edit";
   setSubsystemDraft: Dispatch<SetStateAction<SubsystemPayload>>;
-  setSubsystemDraftRisks: (value: string) => void;
 }
 
 export function SubsystemEditorModal({
@@ -32,10 +30,8 @@ export function SubsystemEditorModal({
   isSavingSubsystem,
   requestPhotoUpload,
   subsystemDraft,
-  subsystemDraftRisks,
   subsystemModalMode,
   setSubsystemDraft,
-  setSubsystemDraftRisks,
 }: SubsystemEditorModalProps) {
   const subsystemState = buildSubsystemEditorModalState({
     activeSubsystemId,
@@ -55,10 +51,8 @@ export function SubsystemEditorModal({
         bootstrap={bootstrap}
         requestPhotoUpload={requestPhotoUpload}
         subsystemDraft={subsystemDraft}
-        subsystemDraftRisks={subsystemDraftRisks}
         subsystemModalMode={subsystemModalMode}
         setSubsystemDraft={setSubsystemDraft}
-        setSubsystemDraftRisks={setSubsystemDraftRisks}
         subsystemState={subsystemState}
       />
       <SubsystemEditorModalActions

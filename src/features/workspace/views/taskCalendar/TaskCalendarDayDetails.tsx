@@ -8,8 +8,8 @@ interface TaskCalendarDayDetailsProps {
 }
 
 const EVENT_TYPE_LABELS: Record<TaskCalendarEventType, string> = {
-  event: "Meeting / event",
-  "manufacturing-due": "Manufacturing due",
+  meeting: "Meeting",
+  event: "Event (read-only)",
   milestone: "Milestone",
   "qa-due": "Waiting QA",
   "task-due": "Task due",
@@ -69,7 +69,7 @@ export function TaskCalendarDayDetails({
         <div className="empty-state task-calendar-day-details-empty">
           <strong>No things due.</strong>
           <p className="section-copy">
-            This date has no due tasks, milestones, meetings, or manufacturing items in the current scope.
+            This date has no tasks, milestones, meetings, or events in the current scope.
           </p>
         </div>
       ) : (

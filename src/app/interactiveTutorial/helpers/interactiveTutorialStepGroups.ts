@@ -9,7 +9,6 @@ const DROPDOWN_STEP_IDS = new Set<InteractiveTutorialStepId>([
 const SEARCH_STEP_IDS = new Set<InteractiveTutorialStepId>([
   "part-search",
   "milestone-search",
-  "manufacturing-search",
 ]);
 
 const CREATION_STEP_IDS = new Set<InteractiveTutorialStepId>([
@@ -23,10 +22,6 @@ const CREATION_STEP_IDS = new Set<InteractiveTutorialStepId>([
   "create-mechanism",
   "add-part-to-mechanism",
   "create-student",
-  "create-cnc-job",
-  "create-print-job",
-  "complete-print-job",
-  "create-fabrication-job",
   "create-document",
 ]);
 

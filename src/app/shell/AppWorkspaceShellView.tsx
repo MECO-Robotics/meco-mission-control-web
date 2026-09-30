@@ -56,7 +56,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       selectedProjectId={c.selectedProjectId}
       selectedSeasonId={c.selectedSeasonId}
       inventoryView={c.inventoryView}
-      manufacturingView={c.manufacturingView}
       seasons={c.bootstrap.seasons}
       sessionUser={c.sessionUser}
       taskView={c.taskView}
@@ -88,7 +87,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
           availabilityBootstrap={c.bootstrap}
           bootstrap={c.scopedBootstrap}
           onDeleteRisk={c.handleDeleteRisk}
-          onCncQuickStatusChange={c.handleCncQuickStatusChange}
           onUpdateRisk={c.handleUpdateRisk}
           showCncMentorQuickActions={
             c.signedInMember?.role === "mentor" ||

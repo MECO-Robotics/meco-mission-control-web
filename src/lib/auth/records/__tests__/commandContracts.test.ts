@@ -24,20 +24,32 @@ it.each(["task", "subsystem"])("%s editor emits only fields accepted by the cano
   expect(Object.keys(serialized).filter((key) => !(key in contract.x_commands[kind].properties))).toEqual([]);
   expect(contract.x_commands[kind].required.filter((key: string) => !(key in serialized))).toEqual([]);
   expect(serialized).not.toHaveProperty("id");
-  expect(serialized).not.toHaveProperty("actualHours");
   expect(serialized).not.toHaveProperty("blockers");
   expect(serialized).not.toHaveProperty("dependencyIds");
   expect(serialized).not.toHaveProperty("taskDependencies");
   if (kind === "subsystem") expect(serialized).toMatchObject({ layoutX: 0.7, layoutY: 0.4, layoutZone: "front", layoutView: "top", sortOrder: 1 });
 });
 
-it("retains authoritative blocking flags and QA risk proposals after bootstrap conversion", () => {
+it("retains typed report targets and evidence after bootstrap normalization", () => {
   const bootstrap = createBootstrap();
-  bootstrap.tasks[0] = {
-  ...bootstrap.tasks[0], isBlocked: true, isWaitingOnDependency: true };
-  const report = { id: "report-1", reportType: "QA" as const, projectId: bootstrap.projects[0].id, taskId: bootstrap.tasks[0].id, milestoneId: null, workstreamId: null, createdByMemberId: null, result: "pass", summary: "Reassess", notes: "Reviewed", evidenceNotes: "Bench test log 12", qaRequestId: "request-1", mentorId: "mentor-1", requestedById: "member-1", photoUrl: "", createdAt: "2026-09-08", targetRiskId: "risk-1", proposedRiskSeverity: "low" as const, proposedRiskStatus: "full-mitigation" as const };
+  const report = {
+    id: "report-1",
+    reportType: "qa" as const,
+    projectId: bootstrap.projects[0].id,
+    targetRefs: [{ kind: "task" as const, id: bootstrap.tasks[0].id }],
+    createdByMemberId: null,
+    participantIds: ["member-1"],
+    mentorId: "mentor-1",
+    requestedById: "member-1",
+    result: "pass",
+    status: "submitted" as const,
+    summary: "Reassess",
+    notes: "Reviewed",
+    evidenceNotes: "Bench test log 12",
+    photoUrl: "",
+    createdAt: "2026-09-08",
+  };
   bootstrap.reports = [report];
   const normalized = normalizeBootstrapPayload(bootstrap);
-  expect(normalized.tasks[0]).toMatchObject({ isBlocked: true, isWaitingOnDependency: true });
-  expect(normalized.reports[0]).toMatchObject({ evidenceNotes: "Bench test log 12", qaRequestId: "request-1", mentorId: "mentor-1", requestedById: "member-1", targetRiskId: "risk-1", proposedRiskSeverity: "low", proposedRiskStatus: "full-mitigation" });
+  expect(normalized.reports[0]).toEqual(report);
 });

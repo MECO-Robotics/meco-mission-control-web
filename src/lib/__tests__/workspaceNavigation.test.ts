@@ -4,7 +4,7 @@ import {
   readNavigationLocation, writeNavigationLocation,
   type NavigationState,
 } from "@/lib/workspaceNavigation";
-const state: NavigationState = { activeTab: "home", taskView: "queue", worklogsView: "logs", inventoryView: "materials", manufacturingView: "all" };
+const state: NavigationState = { activeTab: "home", taskView: "queue", worklogsView: "logs", inventoryView: "materials" };
 describe("canonical workspace navigation", () => {
   it("groups Dashboard under Work and keeps every destination unique", () => {
     expect(NAVIGATION_SECTION_ORDER).toEqual(["work", "resources"]);
@@ -21,7 +21,7 @@ describe("canonical workspace navigation", () => {
     }
   });
   it("uses distinct materials and documents destinations by project", () => {
-    expect(isNavigationSubItemAvailable("resources-documents", { context: "robot-project" })).toBe(false);
+    expect(isNavigationSubItemAvailable("resources-documents", { context: "robot-project" })).toBe(true);
     expect(isNavigationSubItemAvailable("resources-materials", { context: "non-robot-project" })).toBe(false);
     expect(getNavigationTarget("resources-structure", "non-robot-project")).toEqual({ tab: "subsystems" });
   });
@@ -34,7 +34,7 @@ describe("canonical workspace navigation", () => {
   it("rejects unknown and unavailable destinations and presentation values", () => {
     expect(readNavigationLocation("?view=resources-parts", "non-robot-project")).toEqual({ tab: "home" });
     expect(readNavigationLocation("?view=unknown", "robot-project")).toEqual({ tab: "home" });
-    expect(readNavigationLocation("?view=work-schedule&mode=cad", "robot-project")).toEqual({ tab: "tasks", taskView: "timeline" });
+    expect(readNavigationLocation("?view=work-schedule&mode=cad", "robot-project")).toEqual({ tab: "tasks", taskView: "calendar" });
   });
   it("keeps CAD nested under Structure", () => {
     expect(writeNavigationLocation({ ...state, activeTab: "cad" }, "robot-project", "")).toBe("?view=resources-structure&mode=cad");

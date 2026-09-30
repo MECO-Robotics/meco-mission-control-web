@@ -27,11 +27,12 @@ export function filterPartDefinitions({
     const materialName = partDefinition.materialId
       ? bootstrap.materials.find((material) => material.id === partDefinition.materialId)?.name ?? ""
       : "";
-    const matchingInstances = bootstrap.partInstances.filter((instance) =>
-      instance.partDefinitionId === partDefinition.id &&
-      filterSelectionIncludes(partSubsystem, instance.subsystemId) &&
-      filterSelectionIncludes(partStatus, instance.status),
-    );
+    const matchingInstances = bootstrap.partInstances.filter((instance) => {
+      const subsystemId = instance.location.kind === "installed" ? instance.location.subsystemId : instance.intendedSubsystemId;
+      return instance.partDefinitionId === partDefinition.id &&
+        filterSelectionIncludes(partSubsystem, subsystemId) &&
+        filterSelectionIncludes(partStatus, instance.readinessStatus);
+    });
     const matchesSearch =
       !search ||
       partDefinition.name.toLowerCase().includes(search) ||
@@ -39,10 +40,10 @@ export function filterPartDefinitions({
       `iteration ${partDefinition.iteration}`.includes(search) ||
       formatIterationVersion(partDefinition.iteration).toLowerCase().includes(search) ||
       partDefinition.type.toLowerCase().includes(search) ||
-      partDefinition.source.toLowerCase().includes(search) ||
+      partDefinition.defaultAcquisitionMethod.toLowerCase().includes(search) ||
       materialName.toLowerCase().includes(search) ||
-      matchingInstances.some((instance) => instance.name.toLowerCase().includes(search) ||
-        bootstrap.mechanisms.some((mechanism) => mechanism.id === instance.mechanismId && mechanism.name.toLowerCase().includes(search)),
+      matchingInstances.some((instance) => instance.id.toLowerCase().includes(search) ||
+        bootstrap.mechanisms.some((mechanism) => mechanism.id === (instance.location.kind === "installed" ? instance.location.mechanismId : instance.intendedMechanismId) && mechanism.name.toLowerCase().includes(search)),
       );
 
     if (!matchesSearch) {

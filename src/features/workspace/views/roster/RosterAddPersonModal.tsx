@@ -1,23 +1,15 @@
 import { ModalDialog } from "@/components/ModalDialog";
 import React from "react";
 
-import { IconTasks } from "@/components/shared/Icons";
-import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
 import type { MemberPayload } from "@/types/payloads";
 import type { MemberRecord } from "@/types/recordsOrganization";
 import { RosterAttendanceFields } from "./RosterAttendanceFields";
 
-interface DisciplineOption {
-  id: string;
-  name: string;
-}
-
 interface RosterAddPersonModalProps {
   isOpen: boolean;
   memberForm: MemberPayload;
   setMemberForm: React.Dispatch<React.SetStateAction<MemberPayload>>;
-  disciplineOptions: DisciplineOption[];
   inactiveMembers: MemberRecord[];
   reactivateExistingMember: boolean;
   setReactivateExistingMember: React.Dispatch<React.SetStateAction<boolean>>;
@@ -35,7 +27,6 @@ export const RosterAddPersonModal: React.FC<RosterAddPersonModalProps> = ({
   isOpen,
   memberForm,
   setMemberForm,
-  disciplineOptions,
   inactiveMembers,
   reactivateExistingMember,
   setReactivateExistingMember,
@@ -116,24 +107,6 @@ export const RosterAddPersonModal: React.FC<RosterAddPersonModalProps> = ({
                   placeholder={getEmailPlaceholder(memberForm.role)}
                   type="email"
                   value={memberForm.email}
-                />
-              </label>
-              <label className="field">
-                <span>Discipline</span>
-                <FilterDropdown
-                  allLabel="None"
-                  ariaLabel="Set person discipline"
-                  className="task-queue-filter-menu-submenu"
-                  icon={<IconTasks />}
-                  onChange={(selection) => {
-                    setMemberForm((curr) => ({
-                      ...curr,
-                      disciplineId: selection[0] ?? null,
-                    }));
-                  }}
-                  options={disciplineOptions}
-                  singleSelect
-                  value={memberForm.disciplineId ? [memberForm.disciplineId] : []}
                 />
               </label>
               <label className="field">

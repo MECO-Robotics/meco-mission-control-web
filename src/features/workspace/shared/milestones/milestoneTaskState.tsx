@@ -7,10 +7,7 @@ import {
   type TaskQueueBoardState,
 } from "@/features/workspace/views/taskQueue/taskQueueKanbanBoardState";
 
-type MilestoneTaskTarget = {
-  targetId: string;
-  targetType: MilestoneRequirementRecord["targetType"];
-};
+type MilestoneTaskTarget = { kind: import("@/types/common").DomainReference["kind"]; id: string };
 
 function parseRequirementIteration(conditionValue: string) {
   const normalized = conditionValue.trim().toLowerCase();
@@ -35,16 +32,16 @@ function getComparableIterationForTarget(
   target: MilestoneTaskTarget,
   bootstrap: BootstrapPayload,
 ) {
-  if (target.targetType === "subsystem") {
-    return bootstrap.subsystems.find((subsystem) => subsystem.id === target.targetId)?.iteration ?? null;
+  if (target.kind === "subsystem") {
+    return bootstrap.subsystems.find((subsystem) => subsystem.id === target.id)?.iteration ?? null;
   }
 
-  if (target.targetType === "mechanism") {
-    return bootstrap.mechanisms.find((mechanism) => mechanism.id === target.targetId)?.iteration ?? null;
+  if (target.kind === "mechanism") {
+    return bootstrap.mechanisms.find((mechanism) => mechanism.id === target.id)?.iteration ?? null;
   }
 
-  if (target.targetType === "part-instance") {
-    const partInstance = bootstrap.partInstances.find((entry) => entry.id === target.targetId);
+  if (target.kind === "part-instance") {
+    const partInstance = bootstrap.partInstances.find((entry) => entry.id === target.id);
     if (!partInstance) {
       return null;
     }
@@ -96,18 +93,14 @@ function matchesIterationRequirement(
   return false;
 }
 
-function getTaskTargets(task: TaskRecord): MilestoneTaskTarget[] {
-  const workstreamTargetIds = new Set<string>(
-    task.workstreamIds,
-  );
-
+function getTaskTargets(task: TaskRecord, bootstrap: BootstrapPayload): MilestoneTaskTarget[] {
   return [
-    { targetType: "project", targetId: task.projectId },
-    ...Array.from(workstreamTargetIds).map((targetId) => ({ targetType: "workflow" as const, targetId })),
-    ...task.subsystemIds.map((targetId) => ({ targetType: "subsystem" as const, targetId })),
-    ...task.mechanismIds.map((targetId) => ({ targetType: "mechanism" as const, targetId })),
-    ...task.partInstanceIds.map((targetId) => ({ targetType: "part-instance" as const, targetId })),
-    ...(task.artifactIds ?? []).map((targetId) => ({ targetType: "artifact" as const, targetId })),
+    { kind: "project", id: task.projectId },
+    ...task.workstreamIds.map((id) => ({ kind: "workstream" as const, id })),
+    ...task.subsystemIds.map((id) => ({ kind: "subsystem" as const, id })),
+    ...task.mechanismIds.map((id) => ({ kind: "mechanism" as const, id })),
+    ...task.partInstanceIds.map((id) => ({ kind: "part-instance" as const, id })),
+    ...bootstrap.artifacts.filter((artifact) => artifact.targetRefs.some((ref) => ref.kind === "task" && ref.id === task.id)).map((artifact) => ({ kind: "artifact" as const, id: artifact.id })),
   ];
 }
 
@@ -116,7 +109,7 @@ function matchesMilestoneRequirement(
   target: MilestoneTaskTarget,
   bootstrap: BootstrapPayload,
 ) {
-  if (requirement.targetType !== target.targetType || requirement.targetId !== target.targetId) {
+  if (!requirement.targetRefs.some((ref) => ref.kind === target.kind && ref.id === target.id)) {
     return false;
   }
 
@@ -147,7 +140,7 @@ export function getMilestoneRequirementTasks(
   const matchedTaskIds = new Set<string>();
 
   bootstrap.tasks.forEach((task) => {
-    const targets = getTaskTargets(task);
+    const targets = getTaskTargets(task, bootstrap);
     if (
       targets.some((target) =>
         matchesMilestoneRequirement(requirement, target, bootstrap),
@@ -165,7 +158,7 @@ export function getMilestoneTasksForState(
   bootstrap: BootstrapPayload,
 ) {
   const directMilestoneTasks = bootstrap.tasks.filter(
-    (task) => task.targetMilestoneId === milestone.id,
+    (task) => task.scheduleRefs.some((ref) => ref.kind === "milestone" && ref.id === milestone.id),
   );
   const milestoneRequirements = getMilestoneRequirementsForMilestone(milestone, bootstrap);
 
@@ -180,7 +173,7 @@ export function getMilestoneTasksForState(
       return;
     }
 
-    const targets = getTaskTargets(task);
+    const targets = getTaskTargets(task, bootstrap);
     if (
       targets.some((target) =>
         milestoneRequirements.some((requirement) =>

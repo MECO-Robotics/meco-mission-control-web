@@ -5,9 +5,6 @@ import { requestItem } from "./common";
 function taskCommand(payload: Partial<TaskPayload>) {
   const command = { ...payload };
   delete command.taskDependencies;
-  delete command.taskBlockers;
-  delete command.targetRiskId;
-  delete command.actualHours;
   return command;
 }
 

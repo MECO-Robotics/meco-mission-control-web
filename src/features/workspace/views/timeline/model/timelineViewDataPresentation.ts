@@ -52,9 +52,9 @@ export function buildTimelineDayHeaderCells(
     const meetingsOnDay = dayMeetingsByDate[day] ?? [];
     const primaryMilestone = milestonesOnDay[0];
     const dayStyle = primaryMilestone ? getMilestoneTypeStyle(primaryMilestone.type) : null;
-    const primaryMilestoneStartDay = primaryMilestone ? datePortion(primaryMilestone.startDateTime) : day;
-    const primaryMilestoneEndDay = primaryMilestone?.endDateTime
-      ? datePortion(primaryMilestone.endDateTime)
+    const primaryMilestoneStartDay = primaryMilestone ? datePortion(primaryMilestone.startAt) : day;
+    const primaryMilestoneEndDay = primaryMilestone?.endAt
+      ? datePortion(primaryMilestone.endAt)
       : primaryMilestoneStartDay;
     const dayDate = new Date(`${day}T00:00:00`);
 
@@ -126,8 +126,8 @@ export function filterTimelineMilestonesByPersonSelection({
 
   const matchingMilestoneIds = new Set(
     tasks.flatMap((task) =>
-      task.targetMilestoneId && filterSelectionMatchesTaskPeople(activePersonFilter, task)
-        ? [task.targetMilestoneId]
+      filterSelectionMatchesTaskPeople(activePersonFilter, task)
+        ? task.scheduleRefs.filter((ref) => ref.kind === "milestone").map((ref) => ref.id)
         : [],
     ),
   );

@@ -2,12 +2,13 @@ import { EditorModalShell } from "@/features/workspace/modals/EditorModalShell";
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { PartInstancePayload } from "@/types/payloads";
+import type { PartInstanceLocation } from "@/types/common";
 import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
 
 interface PartInstanceEditorModalProps {
   bootstrap: BootstrapPayload;
   closePartInstanceModal: () => void;
-  handlePartInstanceSubmit: (milestone: FormEvent<HTMLFormElement>) => void;
+  handlePartInstanceSubmit: (event: FormEvent<HTMLFormElement>) => void;
   isSavingPartInstance: boolean;
   requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   partDefinitionDraftsById: Record<string, BootstrapPayload["partDefinitions"][number]>;
@@ -17,198 +18,72 @@ interface PartInstanceEditorModalProps {
 }
 
 export function PartInstanceEditorModal({
-  bootstrap,
-  closePartInstanceModal,
-  handlePartInstanceSubmit,
-  isSavingPartInstance,
-  requestPhotoUpload,
-  partDefinitionDraftsById,
-  partInstanceDraft,
-  partInstanceModalMode,
-  setPartInstanceDraft,
+  bootstrap, closePartInstanceModal, handlePartInstanceSubmit, isSavingPartInstance,
+  requestPhotoUpload, partDefinitionDraftsById, partInstanceDraft, partInstanceModalMode, setPartInstanceDraft,
 }: PartInstanceEditorModalProps) {
-  const filteredMechanisms = bootstrap.mechanisms.filter(
-    (mechanism) => mechanism.subsystemId === partInstanceDraft.subsystemId,
-  );
-  const partInstancePhotoProjectId =
-    bootstrap.subsystems.find((subsystem) => subsystem.id === partInstanceDraft.subsystemId)
-      ?.projectId ?? bootstrap.projects[0]?.id ?? null;
+  const location = partInstanceDraft.location;
+  const locationSubsystemId = location.kind === "installed" ? location.subsystemId : "";
+  const locationMechanisms = bootstrap.mechanisms.filter((item) => item.subsystemId === locationSubsystemId);
+  const projectId = bootstrap.subsystems.find((item) => item.id === partInstanceDraft.intendedSubsystemId)?.projectId ?? bootstrap.projects[0]?.id ?? null;
+  const setLocation = (next: PartInstanceLocation) => setPartInstanceDraft((current) => ({ ...current, location: next }));
+  const setIntendedSubsystem = (subsystemId: string) => setPartInstanceDraft((current) => ({
+    ...current,
+    intendedSubsystemId: subsystemId || null,
+    intendedMechanismId: bootstrap.mechanisms.find((item) => item.subsystemId === subsystemId)?.id ?? null,
+  }));
 
   return (
     <EditorModalShell
       dialogLabel="Part instance editor"
-      eyebrowLabel="Part instance editor"
-      title={partInstanceModalMode === "create" ? "Add part instance" : "Edit part instance"}
+      eyebrowLabel="Physical inventory"
+      title={partInstanceModalMode === "create" ? "Add physical part" : "Edit physical part"}
       onClose={closePartInstanceModal}
       onSubmit={handlePartInstanceSubmit}
     >
       <label className="field modal-wide">
-        <span style={{ color: "var(--text-title)" }}>Name</span>
-        <input
-          onChange={(milestone) =>
-            setPartInstanceDraft((current) => ({ ...current, name: milestone.target.value }))
-          }
-          placeholder={
-            partDefinitionDraftsById[partInstanceDraft.partDefinitionId]?.name ??
-            "Installed part name"
-          }
-          required
-          value={partInstanceDraft.name}
-        />
-      </label>
-      <label className="field">
-        <span style={{ color: "var(--text-title)" }}>Part definition</span>
-        <select
-          onChange={(milestone) =>
-            setPartInstanceDraft((current) => ({
-              ...current,
-              partDefinitionId: milestone.target.value,
-            }))
-          }
-          required
-          style={{
-            fontFamily: "var(--font-mono)",
-          }}
-          value={partInstanceDraft.partDefinitionId}
-        >
-          {bootstrap.partDefinitions.map((partDefinition) => (
-            <option key={partDefinition.id} value={partDefinition.id}>
-              {partDefinition.partNumber} - {partDefinition.name}
-            </option>
-          ))}
+        <span>Part definition</span>
+        <select required value={partInstanceDraft.partDefinitionId} onChange={(event) => setPartInstanceDraft((current) => ({ ...current, partDefinitionId: event.target.value }))}>
+          {Object.values(partDefinitionDraftsById).map((part) => <option key={part.id} value={part.id}>{part.partNumber} — {part.name}</option>)}
         </select>
       </label>
       <label className="field">
-        <span style={{ color: "var(--text-title)" }}>Subsystem</span>
-        <select
-          onChange={(milestone) =>
-            setPartInstanceDraft((current) => {
-              const subsystemId = milestone.target.value;
-              const nextMechanisms = bootstrap.mechanisms.filter(
-                (mechanism) => mechanism.subsystemId === subsystemId,
-              );
-
-              return {
-                ...current,
-                subsystemId,
-                mechanismId: nextMechanisms[0]?.id ?? null,
-              };
-            })
-          }
-          value={partInstanceDraft.subsystemId}
-        >
-          {bootstrap.subsystems.map((subsystem) => (
-            <option key={subsystem.id} value={subsystem.id}>
-              {subsystem.name}
-            </option>
-          ))}
+        <span>Intended subsystem</span>
+        <select value={partInstanceDraft.intendedSubsystemId ?? ""} onChange={(event) => setIntendedSubsystem(event.target.value)}>
+          <option value="">No intended subsystem</option>
+          {bootstrap.subsystems.map((subsystem) => <option key={subsystem.id} value={subsystem.id}>{subsystem.name}</option>)}
         </select>
       </label>
       <label className="field">
-        <span style={{ color: "var(--text-title)" }}>Mechanism</span>
-        <select
-          onChange={(milestone) =>
-            setPartInstanceDraft((current) => {
-              const mechanismId = milestone.target.value || null;
-              const selectedMechanism = mechanismId
-                ? bootstrap.mechanisms.find((mechanism) => mechanism.id === mechanismId) ?? null
-                : null;
-
-              return {
-                ...current,
-                subsystemId: selectedMechanism?.subsystemId ?? current.subsystemId,
-                mechanismId,
-              };
-            })
-          }
-          required
-          value={partInstanceDraft.mechanismId ?? ""}
-        >
-          {filteredMechanisms.map((mechanism) => (
-            <option key={mechanism.id} value={mechanism.id}>
-              {mechanism.name}
-            </option>
-          ))}
+        <span>Intended mechanism</span>
+        <select value={partInstanceDraft.intendedMechanismId ?? ""} onChange={(event) => setPartInstanceDraft((current) => ({ ...current, intendedMechanismId: event.target.value || null }))}>
+          <option value="">No intended mechanism</option>
+          {bootstrap.mechanisms.filter((item) => !partInstanceDraft.intendedSubsystemId || item.subsystemId === partInstanceDraft.intendedSubsystemId).map((mechanism) => <option key={mechanism.id} value={mechanism.id}>{mechanism.name}</option>)}
         </select>
       </label>
       <label className="field">
-        <span style={{ color: "var(--text-title)" }}>Quantity</span>
-        <input
-          min="1"
-          onChange={(milestone) =>
-            setPartInstanceDraft((current) => ({
-              ...current,
-              quantity: Number(milestone.target.value),
-            }))
-          }
-          type="number"
-          value={partInstanceDraft.quantity}
-        />
-      </label>
-      <label className="field">
-        <span style={{ color: "var(--text-title)" }}>Status</span>
-        <select
-          onChange={(milestone) =>
-            setPartInstanceDraft((current) => ({
-              ...current,
-              status: milestone.target.value as PartInstancePayload["status"],
-            }))
-          }
-          value={partInstanceDraft.status}
-        >
-          <option value="not ready">Not ready</option>
-          <option value="blocked">Blocked</option>
-          <option value="qa">QA</option>
-          <option value="ready">Ready</option>
+        <span>Physical location</span>
+        <select value={location.kind} onChange={(event) => {
+          const kind = event.target.value as PartInstanceLocation["kind"];
+          if (kind === "installed") setLocation({ kind, subsystemId: partInstanceDraft.intendedSubsystemId ?? bootstrap.subsystems[0]?.id ?? "", mechanismId: partInstanceDraft.intendedMechanismId });
+          else if (kind === "stock" || kind === "repair") setLocation({ kind, location: "" });
+          else if (kind === "retired") setLocation({ kind, location: null });
+          else setLocation({ kind });
+        }}>
+          <option value="stock">Stock</option><option value="installed">Installed</option><option value="repair">Repair</option><option value="retired">Retired</option><option value="lost">Lost</option><option value="unlocated">Unlocated</option>
         </select>
       </label>
-      <div className="checkbox-row modal-wide">
-        <label className="checkbox-field">
-          <input
-            checked={partInstanceDraft.trackIndividually}
-            onChange={(milestone) =>
-              setPartInstanceDraft((current) => ({
-                ...current,
-                trackIndividually: milestone.target.checked,
-              }))
-            }
-            type="checkbox"
-          />
-          <span style={{ color: "var(--text-title)" }}>
-            Track each physical part separately
-          </span>
-        </label>
-      </div>
-      <PhotoUploadField
-        currentUrl={partInstanceDraft.photoUrl}
-        label="Part photo"
-        onChange={(value) =>
-          setPartInstanceDraft((current) => ({ ...current, photoUrl: value }))
-        }
-        onUpload={async (file) => {
-          if (!partInstancePhotoProjectId) {
-            throw new Error("No project is available for photo upload.");
-          }
-
-          return requestPhotoUpload(partInstancePhotoProjectId, file);
-        }}
-      />
-      <div className="modal-actions modal-wide">
-        <button
-          className="secondary-action"
-          onClick={closePartInstanceModal}
-          type="button"
-        >
-          Cancel
-        </button>
-        <button className="primary-action" disabled={isSavingPartInstance} type="submit">
-          {isSavingPartInstance
-            ? "Saving..."
-            : partInstanceModalMode === "create"
-              ? "Add instance"
-              : "Save changes"}
-        </button>
-      </div>
+      {location.kind === "installed" ? (
+        <>
+          <label className="field"><span>Installed subsystem</span><select value={location.subsystemId} onChange={(event) => setLocation({ ...location, subsystemId: event.target.value, mechanismId: null })}>{bootstrap.subsystems.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+          <label className="field"><span>Installed mechanism</span><select value={location.mechanismId ?? ""} onChange={(event) => setLocation({ ...location, mechanismId: event.target.value || null })}><option value="">No mechanism</option>{locationMechanisms.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+        </>
+      ) : null}
+      {location.kind === "stock" || location.kind === "repair" || location.kind === "retired" ? (
+        <label className="field"><span>{location.kind === "stock" ? "Stock location" : location.kind === "repair" ? "Repair location" : "Retirement location"}</span><input value={location.location ?? ""} onChange={(event) => setLocation({ ...location, location: event.target.value })} /></label>
+      ) : null}
+      <p className="section-copy modal-wide">Robot readiness is derived from QA, open Risks, and Task state; this form only records physical location.</p>
+      <PhotoUploadField currentUrl={partInstanceDraft.photoUrl} label="Part photo" onChange={(value) => setPartInstanceDraft((current) => ({ ...current, photoUrl: value }))} onUpload={(file) => projectId ? requestPhotoUpload(projectId, file) : Promise.reject(new Error("Choose an intended subsystem or ensure a project exists before uploading."))} />
+      <div className="modal-actions modal-wide"><button className="secondary-action" onClick={closePartInstanceModal} type="button">Cancel</button><button className="primary-action" disabled={isSavingPartInstance} type="submit">{isSavingPartInstance ? "Saving..." : partInstanceModalMode === "create" ? "Add instance" : "Save changes"}</button></div>
     </EditorModalShell>
   );
 }

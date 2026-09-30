@@ -35,9 +35,13 @@ function setup() {
 }
 
 const record = {
-  id: "event", title: "Competition", type: "competition", isExternal: true,
+  id: "milestone-1",
+  seasonId: "season-1",
+  title: "Competition",
+  type: "competition",
+  status: "planned",
   description: "Travel", projectIds: ["project"],
-  startDateTime: "2026-10-01T09:00:00", endDateTime: "2026-10-02T17:00:00",
+  startAt: "2026-10-01T09:00:00", endAt: "2026-10-02T17:00:00",
 } as MilestoneRecord;
 const submit = { preventDefault: jest.fn() } as never;
 
@@ -45,7 +49,7 @@ test("editing keeps record dates and projects; cancel and create reset drafts wi
   const { args, useEditor } = setup();
   useEditor().openEditMilestoneModal(record);
   expect(useEditor()).toMatchObject({
-    milestoneModalMode: "edit", activeMilestoneId: "event", milestoneStartDate: "2026-10-01",
+    milestoneModalMode: "edit", activeMilestoneId: "milestone-1", milestoneStartDate: "2026-10-01",
     milestoneStartTime: "09:00", milestoneEndDate: "2026-10-02", milestoneEndTime: "17:00",
     milestoneDraft: { title: "Competition", projectIds: ["project"] },
   });
@@ -78,7 +82,7 @@ test("time pairs and date order block saves; failed edits remain open and a retr
   await useEditor().handleMilestoneSubmit(submit);
   expect(useEditor()).toMatchObject({ milestoneModalMode: "edit", milestoneError: "offline", isSavingMilestone: false });
   await useEditor().handleMilestoneSubmit(submit);
-  expect(args.onSaveTimelineMilestone).toHaveBeenLastCalledWith("edit", "event", expect.objectContaining({ title: "Revised", description: "Notes", projectIds: ["project"] }));
+  expect(args.onSaveTimelineMilestone).toHaveBeenLastCalledWith("edit", "milestone-1", expect.objectContaining({ title: "Revised", description: "Notes", projectIds: ["project"] }));
   expect(args.onTaskEditSaved).toHaveBeenCalledTimes(1);
   expect(useEditor().milestoneModalMode).toBeNull();
 });
@@ -89,7 +93,7 @@ test("untimed events use noon and optional end dates; detail mode cannot submit 
   useEditor().setMilestoneStartTime("");
   useEditor().setMilestoneDraft({ ...useEditor().milestoneDraft, title: "Untimed" });
   await useEditor().handleMilestoneSubmit(submit);
-  expect(args.onSaveTimelineMilestone).toHaveBeenLastCalledWith("create", null, expect.objectContaining({ startDateTime: "2026-11-03T12:00:00", endDateTime: null }));
+  expect(args.onSaveTimelineMilestone).toHaveBeenLastCalledWith("create", null, expect.objectContaining({ startAt: "2026-11-03T12:00:00", endAt: null }));
   useEditor().openMilestoneDetailsModal(record);
   await useEditor().handleMilestoneSubmit(submit);
   await useEditor().handleMilestoneDelete();
