@@ -11,7 +11,6 @@ export type { AttentionNowItem, AttentionReason, AttentionTriageGroup, Attention
 export function buildAttentionViewModel({ activePersonFilter, bootstrap }: { activePersonFilter: FilterSelection; bootstrap: BootstrapPayload }): AttentionViewModel {
   const membersById = new Map(bootstrap.members.map((member) => [member.id, member]));
   const projectsById = new Map(bootstrap.projects.map((project) => [project.id, project]));
-  const tasksById = new Map(bootstrap.tasks.map((task) => [task.id, task]));
   const scopedTasks = bootstrap.tasks.filter((task) => filterSelectionMatchesTaskPeople(activePersonFilter, task));
   const scopedTaskIds = new Set(scopedTasks.map((task) => task.id));
   const scopedRisks = bootstrap.risks.filter((risk) => activePersonFilter.length === 0 || risk.relatedTargets.some((ref) => ref.kind === "task" && scopedTaskIds.has(ref.id)) || (risk.mitigationTaskId ? scopedTaskIds.has(risk.mitigationTaskId) : false));

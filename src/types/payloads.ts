@@ -12,14 +12,9 @@ import type {
   PlannedAttendanceDay,
   ProjectStatus,
   ProjectType,
-  PurchaseStatus,
-  RiskAttachmentType,
-  RiskReassessmentStatus,
   RiskSeverity,
   SeasonType,
-  TestResultStatus,
 } from "./common";
-import type { PartInstanceRecord as PartInstanceRecordType } from "./recordsInventory";
 import type { SubsystemLayoutView, SubsystemLayoutZone } from "./recordsOrganization";
 
 export interface MilestonePayload {

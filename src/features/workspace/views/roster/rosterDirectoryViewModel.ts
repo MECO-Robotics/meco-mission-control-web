@@ -1,7 +1,6 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MemberRecord } from "@/types/recordsOrganization";
 import type { RosterInsightsMember } from "@/types/rosterInsights";
-import { getTaskDisciplinesForProject } from "@/lib/taskDisciplines";
 import type { AvailableStudentRosterRow } from "./availableStudentsRoster";
 
 export type RosterPeopleFilter = "all" | "present" | "available" | "overloaded";
@@ -24,7 +23,9 @@ export function buildRosterDisciplineOptions(
   selectedProject: BootstrapPayload["projects"][number] | null,
 ) {
   const project = selectedProject ?? bootstrap.projects[0] ?? null;
-  const allowedIds = new Set(getTaskDisciplinesForProject(project).map((item) => item.id));
+  const allowedIds = new Set(
+    project ? bootstrap.workTypes.filter((item) => item.projectType === project.projectType && item.isActive).map((item) => item.id) : [],
+  );
   const byName = new Map<string, BootstrapPayload["workTypes"][number]>();
 
   bootstrap.workTypes.forEach((discipline) => {
