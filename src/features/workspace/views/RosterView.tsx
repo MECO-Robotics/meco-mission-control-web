@@ -11,6 +11,7 @@ import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspa
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { ALL_FILTER_LABEL } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
+import { WorkspaceSortMenu } from "@/features/workspace/shared/filters/WorkspaceSortMenu";
 import { buildTopbarAddMenuActions, makeAddMenuAction } from "@/features/workspace/shared/topbar";
 import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -95,6 +96,8 @@ export const RosterView: React.FC<RosterViewProps> = ({
   externalMembers,
 }) => {
   const [peopleFilter, setPeopleFilter] = useRememberedViewState("people.peopleFilter", "all");
+  const [peopleSort, setPeopleSort] = useRememberedViewState("people.sort", "name");
+  const [peopleSortDirection, setPeopleSortDirection] = useRememberedViewState<"asc" | "desc">("people.sortDirection", "asc");
   const insights = useRosterInsights({ bootstrap, projectId: selectedProject?.id ?? null, seasonId: selectedSeasonId });
   const insightById = new Map(insights.insights.members.map(row => [row.memberId, row]));
   const attendance = buildAvailableStudentRoster(availabilityBootstrap ?? bootstrap);
@@ -146,8 +149,7 @@ export const RosterView: React.FC<RosterViewProps> = ({
   const normalizedSearch = searchText.trim().toLowerCase();
   const filterMembers = (members: MemberRecord[]) => {
     const scopedMembers = members.filter(member => peopleFilter === "all" || (peopleFilter === "present" ? presentMemberIds.has(member.id) : peopleFilter === "available" ? presenceById.get(member.id)?.state === "available" : insightById.get(member.id)?.availabilityStatus === "overloaded"));
-    if (normalizedSearch.length === 0) return scopedMembers;
-    return scopedMembers.filter((member) =>
+    const searchedMembers = normalizedSearch.length === 0 ? scopedMembers : scopedMembers.filter((member) =>
       [
         member.name,
         member.email,
@@ -159,6 +161,11 @@ export const RosterView: React.FC<RosterViewProps> = ({
         .toLowerCase()
         .includes(normalizedSearch),
     );
+    const disciplineName = (member: MemberRecord) => member.disciplineId ? disciplineById[member.disciplineId] ?? "" : "";
+    return [...searchedMembers].sort((a, b) => {
+      const priority = peopleSort === "discipline" ? disciplineName(a).localeCompare(disciplineName(b)) : peopleSort === "role" ? a.role.localeCompare(b.role) : a.name.localeCompare(b.name);
+      return priority * (peopleSortDirection === "asc" ? 1 : -1);
+    });
   };
   const filteredSortedStudents = filterMembers(sortedStudents);
   const filteredSortedMentors = filterMembers(sortedMentors);
@@ -280,7 +287,8 @@ export const RosterView: React.FC<RosterViewProps> = ({
       <AppTopbarSlotPortal slot="controls">
         <div className="panel-actions filter-toolbar roster-directory-toolbar">
           <TopbarResponsiveSearch
-            actions={
+            actions={<>
+              <WorkspaceSortMenu direction={peopleSortDirection} field={peopleSort} label="people" onDirectionChange={setPeopleSortDirection} onFieldChange={setPeopleSort} options={[{ label: "Name", value: "name" }, { label: "Discipline", value: "discipline" }, { label: "Role", value: "role" }]} />
               <CompactFilterMenu
                 activeCount={peopleFilter === "all" ? 0 : 1}
                 ariaLabel="People filters"
@@ -306,7 +314,7 @@ export const RosterView: React.FC<RosterViewProps> = ({
                   },
                 ]}
               />
-            }
+            </>}
             ariaLabel="Search people"
             compactPlaceholder="Search"
             onChange={setSearchText}

@@ -116,22 +116,6 @@
   min-width: min(16rem, 92vw);
 }
 
-.topbar-responsive-search-actions .resource-sort-menu .task-queue-filter-menu-popover {
-  width: min(13rem, 92vw);
-  min-width: min(13rem, 92vw);
-  gap: 0.55rem;
-}
-
-.topbar-responsive-search-actions .resource-sort-menu .task-queue-filter-menu-item {
-  grid-template-columns: 4.75rem minmax(0, 1fr);
-  gap: 0.4rem;
-}
-
-.topbar-responsive-search-actions .resource-sort-menu .task-queue-filter-menu-item > .toolbar-filter-select {
-  width: 100%;
-  min-width: 0;
-}
-
 .topbar-responsive-search-actions .task-queue-filter-menu-item {
   display: grid;
   grid-template-columns: minmax(6rem, 0.55fr) minmax(0, 1fr);

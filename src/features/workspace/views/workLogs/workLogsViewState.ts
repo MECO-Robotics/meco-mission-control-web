@@ -21,6 +21,7 @@ import {
 } from "./workLogsViewStateData";
 
 export type WorkLogSortMode = "recent" | "oldest" | "longest" | "shortest";
+export type ActivitySortMode = "date" | "title";
 
 const WORKLOG_SORT_OPTIONS: DropdownOption[] = [
   { id: "recent", name: "Newest first" },
@@ -52,9 +53,13 @@ export type WorkLogPaginationState = {
 export type WorkLogsViewState = {
   activityActions: AuditActionRecord[];
   activityGroupMode: WorkLogActivityGroupMode;
+  activitySortMode: ActivitySortMode;
+  activitySortDirection: "asc" | "desc";
   activityPagination: ActivityPaginationState;
   search: string;
   setActivityGroupMode: Dispatch<SetStateAction<WorkLogActivityGroupMode>>;
+  setActivitySortMode: Dispatch<SetStateAction<ActivitySortMode>>;
+  setActivitySortDirection: Dispatch<SetStateAction<"asc" | "desc">>;
   setSearch: Dispatch<SetStateAction<string>>;
   setSortMode: Dispatch<SetStateAction<WorkLogSortMode>>;
   setSubsystemFilter: Dispatch<SetStateAction<FilterSelection>>;
@@ -175,6 +180,8 @@ export function useWorkLogsViewState({
   const [activityGroupMode, setActivityGroupMode] = useRememberedViewState<WorkLogActivityGroupMode>("activity.activityGroupMode",
     DEFAULT_WORK_LOG_ACTIVITY_GROUP_MODE,
   );
+  const [activitySortMode, setActivitySortMode] = useRememberedViewState<ActivitySortMode>("activity.sort", "date");
+  const [activitySortDirection, setActivitySortDirection] = useRememberedViewState<"asc" | "desc">("activity.sortDirection", "desc");
   const [subsystemFilter, setSubsystemFilter] = useRememberedViewState<FilterSelection>("activity.subsystemFilter", []);
   const [sortMode, setSortMode] = useRememberedViewState<WorkLogSortMode>("activity.sortMode", "recent");
 
@@ -243,8 +250,10 @@ export function useWorkLogsViewState({
             }),
           );
 
-    return [...filteredActions].sort((left, right) => right.timestamp.localeCompare(left.timestamp));
-  }, [activePersonFilter, bootstrap.actions, bootstrap.workLogs, membersById, search, subsystemsById, taskById]);
+    return [...filteredActions].sort((left, right) => (activitySortMode === "title"
+      ? left.entityLabel.localeCompare(right.entityLabel)
+      : left.timestamp.localeCompare(right.timestamp)) * (activitySortDirection === "asc" ? 1 : -1));
+  }, [activePersonFilter, activitySortDirection, activitySortMode, bootstrap.actions, bootstrap.workLogs, membersById, search, subsystemsById, taskById]);
 
   const workLogPagination = useWorkspacePagination<WorkLogRecord>(workLogs);
   const activityPagination = useWorkspacePagination<AuditActionRecord>(activityActions);
@@ -252,9 +261,13 @@ export function useWorkLogsViewState({
   return {
     activityActions,
     activityGroupMode,
+    activitySortMode,
+    activitySortDirection,
     activityPagination,
     search,
     setActivityGroupMode,
+    setActivitySortMode,
+    setActivitySortDirection,
     setSearch,
     setSortMode,
     setSubsystemFilter,

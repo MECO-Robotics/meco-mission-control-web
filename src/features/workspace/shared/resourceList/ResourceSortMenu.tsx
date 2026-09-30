@@ -1,7 +1,4 @@
-import { ArrowDownUp } from "lucide-react";
-
-import { SortDirectionToggle } from "@/features/workspace/shared/filters/SortDirectionToggle";
-import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
+import { WorkspaceSortMenu } from "@/features/workspace/shared/filters/WorkspaceSortMenu";
 import type { ResourceSortDirection } from "./ResourceColumnHeader";
 
 export function ResourceSortMenu({
@@ -20,26 +17,14 @@ export function ResourceSortMenu({
   options: Array<{ label: string; value: string }>;
 }) {
   return (
-    <CompactFilterMenu
+    <WorkspaceSortMenu
       activeCount={1}
-      ariaLabel={`Sort ${label}`}
-      buttonLabel="Sort"
-      icon={<ArrowDownUp size={14} />}
-      iconOnly
-      className="resource-sort-menu"
-      items={[
-        {
-          label: "Sort by",
-          labelControl: (
-            <SortDirectionToggle direction={direction} label={label} onChange={onDirectionChange} />
-          ),
-          content: (
-            <select aria-label={`Sort ${label} by`} className="toolbar-filter-select" onChange={(event) => onFieldChange(event.target.value)} value={field}>
-              {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-            </select>
-          ),
-        },
-      ]}
+      direction={direction}
+      field={field}
+      label={label}
+      onDirectionChange={onDirectionChange}
+      onFieldChange={onFieldChange}
+      options={options}
     />
   );
 }

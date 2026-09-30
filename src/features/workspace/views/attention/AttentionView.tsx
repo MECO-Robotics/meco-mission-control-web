@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
+import { WorkspaceSortMenu } from "@/features/workspace/shared/filters/WorkspaceSortMenu";
 import { useRememberedViewState } from "@/features/workspace/shared/navigation/WorkspaceViewMemory";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { ALL_FILTER_LABEL, type FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
@@ -32,12 +33,20 @@ export function AttentionView({ activePersonFilter, bootstrap, onOpenRisk, onOpe
   const [source, setSource] = useRememberedViewState("home.source", "all");
   const [reviewOnly, setReviewOnly] = useRememberedViewState("home.reviewOnly", false);
   const [showAll, setShowAll] = useRememberedViewState("home.showAll", false);
+  const [sortField, setSortField] = useRememberedViewState("home.sortField", "urgency");
+  const [sortDirection, setSortDirection] = useRememberedViewState<"asc" | "desc">("home.sortDirection", "asc");
   const rows = useMemo(() => buildAttentionQueue(buildAttentionViewModel({ activePersonFilter, bootstrap })), [activePersonFilter, bootstrap]);
   const filtered = rows.filter(row => (!reviewOnly || row.needsReview) && (source === "all" || row.source === source) && [row.title, row.context, ...row.reasons].join(" ").toLowerCase().includes(search.toLowerCase()));
-  const visible = showAll ? filtered : filtered.slice(0, 6);
+  const sorted = [...filtered].sort((a, b) => {
+    const direction = sortDirection === "asc" ? 1 : -1;
+    if (sortField === "title") return a.title.localeCompare(b.title) * direction;
+    if (sortField === "source") return a.source.localeCompare(b.source) * direction;
+    return (rows.indexOf(a) - rows.indexOf(b)) * direction;
+  });
+  const visible = showAll ? sorted : sorted.slice(0, 6);
   return <section className="home-attention" aria-label="Needs attention">
     <TopbarResponsiveSearch
-        actions={
+        actions={ <>
           <CompactFilterMenu
             activeCount={Number(source !== "all") + Number(reviewOnly)}
             ariaLabel="Attention filters"
@@ -65,7 +74,8 @@ export function AttentionView({ activePersonFilter, bootstrap, onOpenRisk, onOpe
               },
             ]}
           />
-        }
+          <WorkspaceSortMenu direction={sortDirection} field={sortField} label="attention" onDirectionChange={setSortDirection} onFieldChange={setSortField} options={[{ label: "Priority", value: "urgency" }, { label: "Title", value: "title" }, { label: "Source", value: "source" }]} />
+        </> }
         ariaLabel="Search attention"
         compactPlaceholder="Search"
         onChange={setSearch}

@@ -3,6 +3,7 @@ import type { Dispatch, SetStateAction } from "react";
 import { IconPerson } from "@/components/shared/Icons";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
+import { WorkspaceSortMenu } from "@/features/workspace/shared/filters/WorkspaceSortMenu";
 import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
 
 import {
@@ -13,23 +14,31 @@ import {
 
 interface WorkLogsActivityToolbarProps {
   activityGroupMode: WorkLogActivityGroupMode;
+  activitySortMode: "date" | "title";
+  activitySortDirection: "asc" | "desc";
   defaultGroupMode?: WorkLogActivityGroupMode;
   groupOptions?: readonly DropdownOption[];
   search: string;
   searchAriaLabel?: string;
   searchPlaceholder?: string;
   setActivityGroupMode: Dispatch<SetStateAction<WorkLogActivityGroupMode>>;
+  setActivitySortMode: Dispatch<SetStateAction<"date" | "title">>;
+  setActivitySortDirection: Dispatch<SetStateAction<"asc" | "desc">>;
   setSearch: Dispatch<SetStateAction<string>>;
 }
 
 export function WorkLogsActivityToolbar({
   activityGroupMode,
+  activitySortMode,
+  activitySortDirection,
   defaultGroupMode = DEFAULT_WORK_LOG_ACTIVITY_GROUP_MODE,
   groupOptions = WORK_LOG_ACTIVITY_GROUP_OPTIONS,
   search,
   searchAriaLabel = "Search activity",
   searchPlaceholder = "Search activity...",
   setActivityGroupMode,
+  setActivitySortMode,
+  setActivitySortDirection,
   setSearch,
 }: WorkLogsActivityToolbarProps) {
   const selectedGroupLabel =
@@ -39,8 +48,9 @@ export function WorkLogsActivityToolbar({
   return (
     <div className="panel-actions filter-toolbar worklog-toolbar worklog-toolbar-topbar">
       <TopbarResponsiveSearch
-        actionCount={1}
-        actions={
+        actionCount={2}
+        actions={<>
+          <WorkspaceSortMenu direction={activitySortDirection} field={activitySortMode} label="activity" onDirectionChange={setActivitySortDirection} onFieldChange={(field) => setActivitySortMode(field as "date" | "title")} options={[{ label: "Date", value: "date" }, { label: "Title", value: "title" }]} />
           <CompactFilterMenu
             activeCount={activityGroupMode !== defaultGroupMode ? 1 : 0}
             ariaLabel={groupAriaLabel}
@@ -69,7 +79,7 @@ export function WorkLogsActivityToolbar({
               },
             ]}
           />
-        }
+        </>}
         ariaLabel={searchAriaLabel}
         compactPlaceholder="Search"
         onChange={setSearch}

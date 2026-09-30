@@ -57,6 +57,8 @@ export function RobotMapView({
   updateSubsystemConfiguration,
 }: RobotMapViewProps) {
   const [search, setSearch] = useState("");
+  const [sortField, setSortField] = useState("layout");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [selectedSubsystemId, setSelectedSubsystemId] = useState<string | null>(null);
   const [layoutDraftBySubsystemId, setLayoutDraftBySubsystemId] = useState<
     Record<string, SubsystemLayoutFields>
@@ -69,11 +71,15 @@ export function RobotMapView({
 
   const subsystems = useMemo(
     () =>
-      viewModel.subsystems.map((subsystem) => ({
+      [...viewModel.subsystems].sort((a, b) => {
+        const direction = sortDirection === "asc" ? 1 : -1;
+        const value = sortField === "name" ? a.name.localeCompare(b.name) : sortField === "mechanisms" ? a.mechanismCount - b.mechanismCount : sortField === "parts" ? a.partCount - b.partCount : (a.layout.sortOrder ?? Number.MAX_SAFE_INTEGER) - (b.layout.sortOrder ?? Number.MAX_SAFE_INTEGER);
+        return value * direction;
+      }).map((subsystem) => ({
         ...subsystem,
         layout: layoutDraftBySubsystemId[subsystem.id] ?? subsystem.layout,
       })),
-    [layoutDraftBySubsystemId, viewModel.subsystems],
+    [layoutDraftBySubsystemId, sortDirection, sortField, viewModel.subsystems],
   );
   useEffect(() => {
     if (subsystems.length === 0) {
@@ -176,7 +182,11 @@ export function RobotMapView({
     <section className={`panel dense-panel robot-config-shell ${WORKSPACE_PANEL_CLASS}`}>
       <RobotConfigurationToolbar
         onSearchChange={setSearch}
+        onSortDirectionChange={setSortDirection}
+        onSortFieldChange={setSortField}
         search={search}
+        sortDirection={sortDirection}
+        sortField={sortField}
       />
 
       <div className={`robot-config-main robot-config-main-map${selectedSubsystem ? "" : " is-empty"}`}>
