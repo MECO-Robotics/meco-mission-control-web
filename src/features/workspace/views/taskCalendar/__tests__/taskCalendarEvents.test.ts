@@ -43,4 +43,27 @@ describe("buildTaskCalendarEvents", () => {
     expect(events.map(({ id }) => id)).toContain("event:event");
     expect(events.map(({ id }) => id)).not.toContain("event:outreach-event");
   });
+
+  it("uses the Task deadline as the only manufacturing work deadline in Schedule", () => {
+    const bootstrap = base();
+    bootstrap.tasks.push({
+      id: "manufacturing-task", projectId: "robot", workTypeId: "robot:manufacturing", responsibleGroupId: null,
+      workstreamIds: [], title: "Fabricate gearbox plate", summary: "", subsystemIds: [], mechanismIds: [],
+      partInstanceIds: [], scheduleRefs: [], requestedById: null, ownerId: null, assigneeIds: [], mentorId: null,
+      startDate: "2026-05-01", dueDate: "2026-05-12", priority: "high", status: "in-progress", checklistItems: [],
+      manufacturingDetails: {
+        part: { kind: "provisional", partNumber: "GB-01", revision: "A" }, quantity: 1, processId: "cnc",
+        fulfillmentSource: "in-house", material: { kind: "specified-material", name: "Aluminum" },
+        fileArtifactIds: [], tolerances: [], qaRequirements: [],
+      }, estimatedHours: 0, actualHours: 0, requiresDocumentation: false,
+    });
+    const events = buildTaskCalendarEvents({
+      activePersonFilter: [], bootstrap, isAllProjectsView: false,
+      projectsById: Object.fromEntries(bootstrap.projects.map((project) => [project.id, project])),
+    });
+
+    expect(events.filter(({ extendedProps }) => extendedProps.type === "task-due")).toMatchObject([
+      { id: "task:manufacturing-task", start: "2026-05-12" },
+    ]);
+  });
 });

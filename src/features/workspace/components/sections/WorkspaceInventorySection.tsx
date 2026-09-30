@@ -69,10 +69,8 @@ export function WorkspaceInventorySection(props: WorkspaceContentPanelsViewProps
         <PurchasesView
           activePersonFilter={activePersonFilter}
           bootstrap={bootstrap}
-          membersById={membersById}
           openCreatePurchaseModal={openCreatePurchaseModal}
           openEditPurchaseModal={openEditPurchaseModal}
-          subsystemsById={subsystemsById}
         />
       </WorkspaceSubPanel>
     </WorkspaceSectionPanel>
