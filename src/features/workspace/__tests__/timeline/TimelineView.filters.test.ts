@@ -2,7 +2,7 @@ import * as React from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { pruneTimelineFilterSelections } from "@/features/workspace/views/timeline/hooks/useTimelineViewFilters";
 import {
-  buildTimelineDisciplineFilterOptions,
+  buildTimelineWorkTypeFilterOptions,
   buildTimelineSubsystemFilterOptions,
   countActiveTimelineFilters,
   filterTimelineMilestonesByProjectSelection,
@@ -34,7 +34,7 @@ describe("TimelineView", () => {
     expect(getTimelineFilterToneClassName("a")).toBe("filter-tone-warning");
   });
 
-  it("filters timeline tasks by project, discipline, subsystem, status, and priority", () => {
+  it("filters timeline tasks by project, work type, subsystem, status, and priority", () => {
     const bootstrap = createBootstrap();
     const scopedBootstrap: BootstrapPayload = {
       ...bootstrap,
@@ -43,7 +43,8 @@ describe("TimelineView", () => {
         {
           ...bootstrap.projects[0],
           id: "project-2",
-          name: "Pit Display",
+          name: "Strategy",
+          projectType: "strategy",
         },
       ],
       subsystems: [
@@ -55,12 +56,14 @@ describe("TimelineView", () => {
           projectId: "project-2",
         },
       ],
-      disciplines: [
+      workTypes: [
         ...bootstrap.workTypes,
         {
-          id: "discipline-2",
-          code: "programming",
-          name: "Software",
+          id: "work-type-strategy-analysis",
+          projectType: "strategy",
+          code: "game_analysis",
+          name: "Game analysis",
+          isActive: true,
         },
       ],
       tasks: [
@@ -70,7 +73,7 @@ describe("TimelineView", () => {
           id: "task-2",
           projectId: "project-2",
           subsystemIds: ["subsystem-2", "", "subsystem-2"],
-          disciplineId: "discipline-2",
+          workTypeId: "work-type-strategy-analysis",
           priority: "low",
           status: "complete",
           title: "Driver station status panel",
@@ -80,7 +83,7 @@ describe("TimelineView", () => {
 
     const filteredTasks = filterTimelineTasks({
       bootstrap: scopedBootstrap,
-      disciplineFilter: ["discipline-2"],
+      workTypeFilter: ["work-type-strategy-analysis"],
       isAllProjectsView: true,
       priorityFilter: ["low"],
       projectFilter: ["project-2"],
@@ -93,7 +96,7 @@ describe("TimelineView", () => {
     expect(
       countActiveTimelineFilters({
         activePersonFilter: ["member-1"],
-        disciplineFilter: ["discipline-2"],
+        workTypeFilter: ["work-type-strategy-analysis"],
         isAllProjectsView: true,
         priorityFilter: ["low"],
         projectFilter: ["project-2"],
@@ -104,7 +107,7 @@ describe("TimelineView", () => {
     expect(
       countActiveTimelineFilters({
         activePersonFilter: ["member-1"],
-        disciplineFilter: ["discipline-2"],
+        workTypeFilter: ["work-type-strategy-analysis"],
         isAllProjectsView: false,
         priorityFilter: ["low"],
         projectFilter: ["project-2"],
@@ -120,14 +123,14 @@ describe("TimelineView", () => {
     const priorityId = TIMELINE_TASK_PRIORITY_OPTIONS[0]!.id;
     const prunedFilters = pruneTimelineFilterSelections(
       {
-        disciplineFilter: ["discipline-1", "stale-discipline"],
+        workTypeFilter: ["work-type-design", "stale-work-type"],
         priorityFilter: [priorityId, "stale-priority"],
         projectFilter: ["project-1", "stale-project"],
         statusFilter: [statusId, "stale-status"],
         subsystemFilter: ["subsystem-1", "stale-subsystem"],
       },
       {
-        disciplineFilterOptions: buildTimelineDisciplineFilterOptions(bootstrap),
+        workTypeFilterOptions: buildTimelineWorkTypeFilterOptions(bootstrap),
         isAllProjectsView: true,
         projectFilterOptions: bootstrap.projects,
         subsystemFilterOptions: buildTimelineSubsystemFilterOptions(bootstrap),
@@ -135,7 +138,7 @@ describe("TimelineView", () => {
     );
 
     expect(prunedFilters).toEqual({
-      disciplineFilter: ["discipline-1"],
+      workTypeFilter: ["work-type-design"],
       priorityFilter: [priorityId],
       projectFilter: ["project-1"],
       statusFilter: [statusId],
@@ -144,7 +147,7 @@ describe("TimelineView", () => {
 
     expect(
       pruneTimelineFilterSelections(prunedFilters, {
-        disciplineFilterOptions: buildTimelineDisciplineFilterOptions(bootstrap),
+        workTypeFilterOptions: buildTimelineWorkTypeFilterOptions(bootstrap),
         isAllProjectsView: false,
         projectFilterOptions: bootstrap.projects,
         subsystemFilterOptions: buildTimelineSubsystemFilterOptions(bootstrap),

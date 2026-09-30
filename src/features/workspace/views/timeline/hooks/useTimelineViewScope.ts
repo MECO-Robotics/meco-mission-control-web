@@ -182,7 +182,7 @@ export function useTimelineViewScope({
   const timelineFilterMotionClass = useFilterChangeMotionClass([
     activePersonFilter,
     searchFilter,
-    timelineFilters.disciplineFilter,
+    timelineFilters.workTypeFilter,
     timelineFilters.priorityFilter,
     timelineFilters.projectFilter,
     timelineFilters.statusFilter,

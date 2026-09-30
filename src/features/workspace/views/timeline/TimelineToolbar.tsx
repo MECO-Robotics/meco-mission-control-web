@@ -26,8 +26,8 @@ interface TimelineToolbarProps {
   showCalendarFilters: boolean;
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
-  disciplineFilter: FilterSelection;
-  disciplineFilterOptions: DropdownOption[];
+  workTypeFilter: FilterSelection;
+  workTypeFilterOptions: DropdownOption[];
   isAllProjectsView: boolean;
   onAdjustZoom: (direction: 1 | -1) => void;
   onChangePersonFilter: (value: FilterSelection) => void;
@@ -40,7 +40,7 @@ interface TimelineToolbarProps {
   priorityFilter: FilterSelection;
   projectFilter: FilterSelection;
   searchFilter: string;
-  setDisciplineFilter: (value: FilterSelection) => void;
+  setWorkTypeFilter: (value: FilterSelection) => void;
   setPriorityFilter: (value: FilterSelection) => void;
   setProjectFilter: (value: FilterSelection) => void;
   setStatusFilter: (value: FilterSelection) => void;
@@ -62,8 +62,8 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   showCalendarFilters,
   activePersonFilter,
   bootstrap,
-  disciplineFilter,
-  disciplineFilterOptions,
+  workTypeFilter,
+  workTypeFilterOptions,
   isAllProjectsView,
   onAdjustZoom,
   onChangePersonFilter,
@@ -76,7 +76,7 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   priorityFilter,
   projectFilter,
   searchFilter,
-  setDisciplineFilter,
+  setWorkTypeFilter,
   setPriorityFilter,
   setProjectFilter,
   setStatusFilter,
@@ -166,14 +166,14 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
               showCalendarFilters={showCalendarFilters}
               activePersonFilter={activePersonFilter}
               bootstrap={bootstrap}
-              disciplineFilter={disciplineFilter}
-              disciplineFilterOptions={disciplineFilterOptions}
+              workTypeFilter={workTypeFilter}
+              workTypeFilterOptions={workTypeFilterOptions}
               isAllProjectsView={isAllProjectsView}
               onChangePersonFilter={onChangePersonFilter}
               onCalendarEventFilterChange={onCalendarEventFilterChange}
               priorityFilter={priorityFilter}
               projectFilter={projectFilter}
-              setDisciplineFilter={setDisciplineFilter}
+              setWorkTypeFilter={setWorkTypeFilter}
               setPriorityFilter={setPriorityFilter}
               setProjectFilter={setProjectFilter}
               setStatusFilter={setStatusFilter}

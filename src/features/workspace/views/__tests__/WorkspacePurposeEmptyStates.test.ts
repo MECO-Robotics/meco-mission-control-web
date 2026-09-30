@@ -33,17 +33,15 @@ describe("workspace purpose empty states", () => {
       React.createElement(PurchasesView, {
         activePersonFilter: [],
         bootstrap: EMPTY_BOOTSTRAP,
-        membersById: {},
         openCreatePurchaseModal: jest.fn(),
         openEditPurchaseModal: jest.fn(),
-        subsystemsById: {},
       }),
     );
 
-    expect(markup).toContain("Track requested parts and materials here");
-    expect(markup).toContain("has not captured any parts, tools, or materials");
+    expect(markup).toContain("Track commercial acquisition here");
+    expect(markup).toContain("No task-linked purchase lines have been captured");
     expect(markup).not.toContain("workspace-empty-state-action");
-    expect(markup).not.toContain("No purchase requests match the current filters.");
+    expect(markup).not.toContain("No purchases match these filters");
   });
 
   it("explains empty document inventory without an in-content create action", () => {

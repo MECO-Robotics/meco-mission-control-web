@@ -50,7 +50,7 @@ const baseTask = (id: string, assigneeId: string, extras: Partial<TaskRecord> = 
 
 function createBootstrap(overrides: Partial<BootstrapPayload> = {}): BootstrapPayload {
   const members = [
-    baseStudent("available", "Available Student", { disciplineId: "robot-design", plannedAttendanceNotes: "CAD" }),
+    baseStudent("available", "Available Student", { plannedAttendanceNotes: "CAD" }),
     baseStudent("blocked", "Blocked Student"),
     baseStudent("busy-task", "Busy Task Student"),
     baseStudent("busy-log", "Busy Log Student"),
@@ -63,7 +63,7 @@ function createBootstrap(overrides: Partial<BootstrapPayload> = {}): BootstrapPa
     })),
     members,
     projects: [{ description: "", id: "project-1", name: "Robot", projectType: "robot", seasonId: "season-1", status: "active" }],
-    responsibleGroups: [],
+    responsibleGroups: [{ id: "group-design", seasonId: "season-1", name: "Robot Design Group", projectIds: ["project-1"], memberIds: ["available"], isArchived: false }],
     risks: [{
       blocksWork: true,
       category: "dependency",
@@ -105,9 +105,10 @@ describe("buildAvailableStudentRoster", () => {
     expect(roster.busy.map((row) => row.member.id)).toEqual(["busy-log", "busy-task"]);
   });
 
-  it("exposes the member work type, attendance note, and subsystem hints", () => {
+  it("exposes responsible group, attendance note, and subsystem hints separately from task work type", () => {
     const roster = buildAvailableStudentRoster(createBootstrap(), { today });
-    expect(roster.available[0].hints).toEqual(["Design", "CAD"]);
+    expect(roster.available[0].hints).toEqual(["Robot Design Group", "CAD"]);
+    expect(roster.available[0].hints).not.toContain("Design");
     expect(roster.blockedWaiting[0].hints).toContain("Drive");
   });
 

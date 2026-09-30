@@ -6,19 +6,23 @@ import {
   getTimelineTaskStatusSignal,
 } from "@/features/workspace/views/timeline/timelineGridBodyUtils";
 import type { BootstrapPayload } from "@/types/bootstrap";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 
 const baseTask: BootstrapPayload["tasks"][number] = {
-  artifactIds: [],
   id: "task-ready",
   projectId: "project-1",
   workstreamIds: [],
   title: "Ready task",
   summary: "",
   subsystemIds: ["subsystem-1"],
-  disciplineId: "discipline-1",
+  workTypeId: "work-type-design",
+  responsibleGroupId: null,
   mechanismIds: [],
   partInstanceIds: [],
-  targetMilestoneId: null,
+  scheduleRefs: [],
+  requestedById: null,
+  checklistItems: [],
+  manufacturingDetails: null,
   ownerId: "member-1",
   assigneeIds: ["member-1"],
   mentorId: null,
@@ -27,13 +31,9 @@ const baseTask: BootstrapPayload["tasks"][number] = {
   priority: "medium",
   status: "not-started",
 
-  blockers: [],
-  linkedManufacturingIds: [],
-  linkedPurchaseIds: [],
   estimatedHours: 1,
   actualHours: 0,
   requiresDocumentation: false,
-  documentationLinked: false,
 };
 
 describe("timeline task dependency counts and status", () => {
@@ -158,39 +158,45 @@ describe("timeline task dependency counts and status", () => {
   });
 
   it("prioritizes active blockers over dependency and status icons", () => {
-    const bootstrap = {
+    const bootstrap: BootstrapPayload = {
+      ...EMPTY_BOOTSTRAP,
       tasks: [
         { ...baseTask, id: "task-upstream", status: "in-progress" },
-        { ...baseTask, id: "task-blocked", blockers: ["Waiting on material"] },
+        { ...baseTask, id: "task-blocked" },
         { ...baseTask, id: "task-waiting" },
         { ...baseTask, id: "task-qa", status: "waiting-for-qa" },
       ],
       taskDependencies: [
         {
           id: "dependency-1",
-        taskId: "task-waiting",
-        kind: "task",
-        refId: "task-upstream",
-        dependencyType: "hard",
+          taskId: "task-waiting",
+          kind: "task",
+          refId: "task-upstream",
+          dependencyType: "hard",
           createdAt: "2026-02-01T00:00:00.000Z",
           requiredState: "complete",
         },
       ],
-      taskBlockers: [
+      risks: [
         {
-          id: "blocker-1",
-          blockedTaskId: "task-blocked",
-          blockerType: "other",
-          blockerId: null,
-          description: "Waiting on material",
+          id: "risk-1",
+          projectId: "project-1",
+          title: "Waiting on material",
+          detail: "Material unavailable",
+          category: "inventory",
           severity: "medium",
           status: "open",
-          createdByMemberId: null,
+          blocksWork: true,
+          source: { kind: "manual" },
+          relatedTargets: [{ kind: "task", id: "task-blocked" }],
+          mitigationTaskId: null,
+          ownerGroupId: null,
           createdAt: "2026-02-01T00:00:00.000Z",
+          updatedAt: "2026-02-01T00:00:00.000Z",
           resolvedAt: null,
         },
       ],
-    } as unknown as BootstrapPayload;
+    };
 
     const signals = buildTimelineTaskStatusSignalByTaskId(bootstrap);
 

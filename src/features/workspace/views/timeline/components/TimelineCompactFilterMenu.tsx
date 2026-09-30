@@ -25,13 +25,13 @@ interface TimelineCompactFilterMenuProps {
   onCalendarEventFilterChange: (value: "all" | TaskCalendarEventType) => void;
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
-  disciplineFilter: FilterSelection;
-  disciplineFilterOptions: DropdownOption[];
+  workTypeFilter: FilterSelection;
+  workTypeFilterOptions: DropdownOption[];
   isAllProjectsView: boolean;
   onChangePersonFilter: (value: FilterSelection) => void;
   priorityFilter: FilterSelection;
   projectFilter: FilterSelection;
-  setDisciplineFilter: (value: FilterSelection) => void;
+  setWorkTypeFilter: (value: FilterSelection) => void;
   setPriorityFilter: (value: FilterSelection) => void;
   setProjectFilter: (value: FilterSelection) => void;
   setStatusFilter: (value: FilterSelection) => void;
@@ -48,13 +48,13 @@ export function TimelineCompactFilterMenu({
   onCalendarEventFilterChange,
   activePersonFilter,
   bootstrap,
-  disciplineFilter,
-  disciplineFilterOptions,
+  workTypeFilter,
+  workTypeFilterOptions,
   isAllProjectsView,
   onChangePersonFilter,
   priorityFilter,
   projectFilter,
-  setDisciplineFilter,
+  setWorkTypeFilter,
   setPriorityFilter,
   setProjectFilter,
   setStatusFilter,
@@ -95,9 +95,9 @@ export function TimelineCompactFilterMenu({
           value: activePersonFilter,
         }),
         compactFilterDropdownMenuItem({
-          allLabel: "All disciplines",
-          ariaLabel: "Filter timeline by discipline",
-          label: "Discipline",
+          allLabel: "All work types",
+          ariaLabel: "Filter timeline by work type",
+          label: "Work type",
           hidden: showCalendarFilters,
           icon: <IconTasks />,
           compactSummary: showCalendarFilters,
@@ -105,9 +105,9 @@ export function TimelineCompactFilterMenu({
           getOptionToneClassName: (option) => getTimelineFilterToneClassName(option.id),
           getSelectedToneClassName: (selection) =>
             selection.length === 1 ? getTimelineFilterToneClassName(selection[0]) : undefined,
-          onChange: setDisciplineFilter,
-          options: disciplineFilterOptions,
-          value: disciplineFilter,
+          onChange: setWorkTypeFilter,
+          options: workTypeFilterOptions,
+          value: workTypeFilter,
         }),
         compactFilterDropdownMenuItem({
           allLabel: "All subsystems",

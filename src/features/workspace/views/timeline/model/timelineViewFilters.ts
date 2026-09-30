@@ -22,7 +22,7 @@ import { TASK_QUEUE_STATUS_OPTIONS } from "../../taskQueue/taskQueueKanbanBoardS
 import { getTimelineTaskStatusSignal } from "../timelineGridBodyUtils";
 
 export interface TimelineTaskFilters {
-  disciplineFilter: FilterSelection;
+  workTypeFilter: FilterSelection;
   priorityFilter: FilterSelection;
   projectFilter: FilterSelection;
   statusFilter: FilterSelection;
@@ -43,16 +43,16 @@ export function buildTimelineSubsystemFilterOptions(bootstrap: BootstrapPayload)
   }));
 }
 
-export function buildTimelineDisciplineFilterOptions(bootstrap: BootstrapPayload): DropdownOption[] {
-  return bootstrap.workTypes.map((discipline) => ({
-    id: discipline.id,
-    name: discipline.name,
+export function buildTimelineWorkTypeFilterOptions(bootstrap: BootstrapPayload): DropdownOption[] {
+  return bootstrap.workTypes.map((workType) => ({
+    id: workType.id,
+    name: workType.name,
   }));
 }
 
 export function filterTimelineTasks({
   bootstrap,
-  disciplineFilter,
+  workTypeFilter,
   isAllProjectsView,
   priorityFilter,
   projectFilter,
@@ -69,8 +69,8 @@ export function filterTimelineTasks({
   if (isAllProjectsView && projectFilter.length > 0) {
     result = result.filter((task) => filterSelectionIncludes(projectFilter, task.projectId));
   }
-  if (disciplineFilter.length > 0) {
-    result = result.filter((task) => filterSelectionIncludes(disciplineFilter, task.workTypeId));
+  if (workTypeFilter.length > 0) {
+    result = result.filter((task) => filterSelectionIncludes(workTypeFilter, task.workTypeId));
   }
   if (subsystemFilter.length > 0) {
     result = result.filter((task) =>
@@ -126,7 +126,7 @@ export function resolveTimelineFilteredProjectIds({
 }
 
 export function hasActiveTimelineTaskFilters({
-  disciplineFilter,
+  workTypeFilter,
   isAllProjectsView,
   priorityFilter,
   projectFilter,
@@ -135,7 +135,7 @@ export function hasActiveTimelineTaskFilters({
 }: TimelineTaskFilters & { isAllProjectsView: boolean }) {
   return [
     isAllProjectsView ? projectFilter : [],
-    disciplineFilter,
+    workTypeFilter,
     subsystemFilter,
     statusFilter,
     priorityFilter,
@@ -144,7 +144,7 @@ export function hasActiveTimelineTaskFilters({
 
 export function countActiveTimelineFilters({
   activePersonFilter,
-  disciplineFilter,
+  workTypeFilter,
   isAllProjectsView,
   priorityFilter,
   projectFilter,
@@ -157,7 +157,7 @@ export function countActiveTimelineFilters({
   return [
     activePersonFilter,
     isAllProjectsView ? projectFilter : [],
-    disciplineFilter,
+    workTypeFilter,
     subsystemFilter,
     statusFilter,
     priorityFilter,
