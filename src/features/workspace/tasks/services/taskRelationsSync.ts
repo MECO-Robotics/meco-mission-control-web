@@ -33,8 +33,14 @@ export async function syncTaskDependencies(
     const existingDependency = dependency.id ? existingById.get(dependency.id) : null;
     if (existingDependency) {
       desiredIds.add(existingDependency.id);
-      if (isTaskDependencyPayloadChanged(existingDependency, payload)) {
-        params.onPersisted?.(dependency, await persistence.updateTaskDependencyRecord(existingDependency.id, payload, handleUnauthorized));
+      const changed = isTaskDependencyPayloadChanged(existingDependency, payload);
+      if (changed) {
+        const updatedDependency = await persistence.updateTaskDependencyRecord(
+          existingDependency.id,
+          payload,
+          handleUnauthorized,
+        );
+        params.onPersisted?.(dependency, updatedDependency);
       }
     } else {
       const created = await persistence.createTaskDependencyRecord(payload, handleUnauthorized);
