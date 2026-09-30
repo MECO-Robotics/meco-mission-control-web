@@ -23,6 +23,8 @@ export function buildEmptyTaskPayload(bootstrap: BootstrapPayload): TaskPayload 
     projectId: firstProject,
     workstreamIds: [],
     title: "",
+    workType: "Design",
+    responsibleGroup: null,
     summary: "",
     photoUrl: "",
     subsystemIds: uniqueIds([firstSubsystem]),

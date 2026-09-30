@@ -14,7 +14,7 @@ it.each(["task", "subsystem"])("%s editor emits only fields accepted by the cano
   const bootstrap = createBootstrap();
   if (kind === "task") {
     const draft = taskToPayload(bootstrap.tasks[0], bootstrap);
-    draft.taskDependencies = [{ kind: "task", refId: "upstream", requiredState: "in-progress", dependencyType: "hard" }];
+    draft.taskDependencies = [{ kind: "work_item", refType: "task", refId: "upstream", requiredState: "in-progress", dependencyType: "hard" }];
     await createTask(draft);
   } else {
     await createSubsystemRecord(subsystemToPayload({ ...bootstrap.subsystems[0], isCore: true, layoutX: 0.7, layoutY: 0.4, layoutZone: "front", layoutView: "top", sortOrder: 1 }));

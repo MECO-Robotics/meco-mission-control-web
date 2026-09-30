@@ -7,6 +7,7 @@ import { EditorModalShell } from "../EditorModalShell";
 import { ManufacturingEditorFields } from "./ManufacturingEditorFields";
 
 export interface ManufacturingEditorModalProps {
+  activeManufacturingId?: string | null;
   bootstrap: BootstrapPayload;
   closeManufacturingModal: () => void;
   handleManufacturingSubmit: (milestone: FormEvent<HTMLFormElement>) => void;

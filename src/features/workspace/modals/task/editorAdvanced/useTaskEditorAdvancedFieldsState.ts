@@ -107,7 +107,7 @@ export function useTaskEditorAdvancedFieldsState({
       mechanismIds: [],
       partInstanceIds: [],
       taskDependencies: (current.taskDependencies ?? []).filter((dependency) =>
-        dependency.kind === "task"
+        dependency.kind === "work_item" && dependency.refType === "task"
           ? validDependencyTaskIds.has(dependency.refId)
           : dependency.kind === "milestone"
             ? bootstrap.milestones.some(

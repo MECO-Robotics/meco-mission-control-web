@@ -107,8 +107,9 @@ export function buildTaskDownstreamCount(bootstrap: BootstrapPayload) {
   const activeTaskIds = new Set(bootstrap.tasks.filter((task) => task.status !== "complete").map((task) => task.id));
   const edges = new Set<string>();
   for (const dependency of bootstrap.taskDependencies ?? []) {
-    if (dependency.kind !== "task" || dependency.dependencyType !== "hard" || !activeTaskIds.has(dependency.taskId)) continue;
-    const key = `${dependency.taskId}:${dependency.refId}`;
+    const dependentTaskId = dependency.workItemId;
+    if (dependency.kind !== "work_item" || dependency.refType !== "task" || dependency.dependencyType !== "hard" || !activeTaskIds.has(dependentTaskId)) continue;
+    const key = `${dependentTaskId}:${dependency.refId}`;
     if (edges.has(key)) continue;
     edges.add(key);
     counts.set(dependency.refId, (counts.get(dependency.refId) ?? 0) + 1);

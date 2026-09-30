@@ -11,6 +11,7 @@ import type {
   TaskBlockerRecord,
   TaskDependencyRecord,
   TaskRecord,
+  WorkItemRecord,
   WorkLogRecord,
 } from "./recordsExecution";
 import type { DesignIterationRecord, ReportFindingRecord, ReportRecord, RiskRecord } from "./recordsReporting";
@@ -39,6 +40,7 @@ export interface BootstrapPayload {
   risks: RiskRecord[];
   tasks: TaskRecord[];
   workLogs: WorkLogRecord[];
+  workItems?: WorkItemRecord[];
   meetings?: MeetingRecord[];
   attendanceRecords?: AttendanceRecord[];
   purchaseItems: PurchaseItemRecord[];

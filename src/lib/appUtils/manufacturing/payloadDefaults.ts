@@ -18,6 +18,7 @@ export function buildEmptyManufacturingPayload(
       : bootstrap.members[0]?.id ?? null;
   const basePayload: ManufacturingItemPayload = {
     title: firstPartDefinition?.name ?? "",
+    responsibleGroup: "Mechanical",
     subsystemId: getDefaultSubsystemId(bootstrap),
     requestedById: requesterId,
     process,

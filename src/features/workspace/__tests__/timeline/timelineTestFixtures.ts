@@ -157,8 +157,10 @@ export function createBootstrapWithDependency(): BootstrapPayload {
     taskDependencies: [
       {
         id: "dep-1",
-        taskId: "task-2",
-        kind: "task",
+        workItemId: "task-2",
+        sourceType: "task",
+        kind: "work_item",
+        refType: "task",
         refId: "task-1",
         dependencyType: "hard",
         createdAt: "2026-04-01T00:00:00.000Z",

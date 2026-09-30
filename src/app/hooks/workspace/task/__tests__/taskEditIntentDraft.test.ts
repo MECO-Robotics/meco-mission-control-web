@@ -32,7 +32,8 @@ describe("applyTaskEditIntentToDraft", () => {
     expect(updatedDraft.taskDependencies).toEqual([
       expect.objectContaining({
         dependencyType: "hard",
-        kind: "task",
+        kind: "work_item",
+        refType: "task",
         refId: "",
         requiredState: "complete",
       }),

@@ -36,12 +36,15 @@ export function normalizeTaskPayload(taskDraft: TaskPayload): TaskPayload {
 }
 
 export function buildTaskDependencyPayload(
-  taskId: string,
+  workItemId: string,
+  sourceType: "task" | "manufacturing",
   dependency: TaskDependencyDraft,
 ): TaskDependencyPayload {
   return {
-    taskId,
+    workItemId,
+    sourceType,
     kind: dependency.kind,
+    refType: dependency.refType,
     refId: dependency.refId.trim(),
     requiredState: dependency.requiredState.trim(),
     dependencyType: dependency.dependencyType,
@@ -53,7 +56,10 @@ export function isTaskDependencyPayloadChanged(
   payload: TaskDependencyPayload,
 ) {
   return (
+    existingDependency.workItemId !== payload.workItemId ||
+    existingDependency.sourceType !== payload.sourceType ||
     existingDependency.kind !== payload.kind ||
+    existingDependency.refType !== payload.refType ||
     existingDependency.refId !== payload.refId ||
     existingDependency.requiredState !== payload.requiredState ||
     existingDependency.dependencyType !== payload.dependencyType

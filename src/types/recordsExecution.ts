@@ -53,6 +53,8 @@ export interface TaskRecord {
   projectId: string;
   workstreamIds: string[];
   title: string;
+  workType?: import("./common").RobotWorkType;
+  responsibleGroup?: import("./common").ResponsibleGroup | null;
   summary: string;
   subsystemIds: string[];
   disciplineId: string;
@@ -82,10 +84,43 @@ export interface TaskRecord {
   documentationLinked: boolean;
 }
 
+export interface WorkItemRecord {
+  id: string;
+  sourceType: "task" | "manufacturing";
+  sourceId: string;
+  taskId: string | null;
+  title: string;
+  workType: import("./common").RobotWorkType;
+  responsibleGroup: import("./common").ResponsibleGroup | null;
+  manufacturingProcess: import("./common").ManufacturingProcess | null;
+  subsystemId: string;
+  dueDate: string;
+  status: string;
+  quantity: number | null;
+  material: string | null;
+  materialId: string | null;
+  partDefinitionId: string | null;
+  partInstanceIds: string[];
+  batchLabel: string | null;
+  mentorReviewed: boolean | null;
+}
+
 export interface TaskDependencyRecord {
   id: string;
-  taskId: string;
+  workItemId: string;
+  sourceType: "task" | "manufacturing";
   kind: TaskDependencyKind;
+  refType?: "task" | "manufacturing";
+  refId: string;
+  requiredState: string;
+  dependencyType: TaskDependencyType;
+  createdAt: string;
+}
+
+export interface LegacyTaskDependencyRecord {
+  id: string;
+  taskId: string;
+  kind: "task" | "milestone" | "part_instance";
   refId: string;
   requiredState: string;
   dependencyType: TaskDependencyType;

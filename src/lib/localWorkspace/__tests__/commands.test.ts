@@ -25,7 +25,7 @@ test("hard dependencies honor requested state, missing targets block, and soft d
   const snapshot = createBootstrap();
   const target = task(snapshot, "Target");
   const dependent = task(snapshot, "Dependent");
-  const dependency = command(snapshot, "/task-dependencies", { taskId: dependent.id, kind: "task", refId: target.id, requiredState: "in-progress", dependencyType: "hard" }).item;
+  const dependency = command(snapshot, "/task-dependencies", { workItemId: dependent.id, sourceType: "task", kind: "work_item", refType: "task", refId: target.id, requiredState: "in-progress", dependencyType: "hard" }).item;
   expect(dependent.isWaitingOnDependency).toBe(true);
   expect(() => command(snapshot, `/tasks/${dependent.id}`, { status: "complete" }, "PATCH")).toThrow("Resolve blockers");
   command(snapshot, `/tasks/${target.id}`, { status: "in-progress" }, "PATCH");
@@ -40,7 +40,7 @@ test("milestone dependency threshold and duplicate blockers match readiness sema
   const snapshot = createBootstrap();
   const dependent = task(snapshot, "Dependent");
   const milestone = command(snapshot, "/milestones", { title: "Ready", status: "ready" }).item;
-  command(snapshot, "/task-dependencies", { taskId: dependent.id, kind: "milestone", refId: milestone.id, requiredState: "qa", dependencyType: "hard" });
+  command(snapshot, "/task-dependencies", { workItemId: dependent.id, sourceType: "task", kind: "milestone", refId: milestone.id, requiredState: "qa", dependencyType: "hard" });
   expect(dependent.isWaitingOnDependency).toBe(false);
   const blocker = { blockedTaskId: dependent.id, blockerType: "external", issueType: "lost-tool", description: "Missing tool", severity: "medium", status: "open" };
   const first = command(snapshot, "/task-blockers", blocker).item;

@@ -113,8 +113,10 @@ describe("milestoneTaskState", () => {
       taskDependencies: [
         {
           id: "task-2:dependency:1",
-          taskId: "task-2",
-          kind: "task" as const,
+          workItemId: "task-2",
+          sourceType: "task" as const,
+          kind: "work_item" as const,
+          refType: "task" as const,
           refId: "task-1",
           requiredState: "complete",
           dependencyType: "hard" as const,

@@ -109,8 +109,10 @@ describe("appUtils", () => {
       taskDependencies: [
         {
           id: "task-dependency-1",
-          taskId: "task-1",
-          kind: "task",
+          workItemId: "task-1",
+          sourceType: "task",
+          kind: "work_item",
+          refType: "task",
           refId: "task-upstream",
           requiredState: "complete",
           dependencyType: "hard",
@@ -122,7 +124,8 @@ describe("appUtils", () => {
     expect(taskToPayload(bootstrap.tasks[0], bootstrap).taskDependencies).toEqual([
       {
         id: "task-dependency-1",
-        kind: "task",
+        kind: "work_item",
+        refType: "task",
         refId: "task-upstream",
         requiredState: "complete",
         dependencyType: "hard",

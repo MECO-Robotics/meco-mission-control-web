@@ -8,6 +8,8 @@ export const taskToPayload = (task: TaskRecord, bootstrap?: BootstrapPayload): T
   checklistItems: task.checklistItems ?? [],
   projectId: task.projectId,
   title: task.title,
+  workType: task.workType ?? "Design",
+  responsibleGroup: task.responsibleGroup ?? null,
   summary: task.summary,
   disciplineId: task.disciplineId,
   targetMilestoneId: task.targetMilestoneId,

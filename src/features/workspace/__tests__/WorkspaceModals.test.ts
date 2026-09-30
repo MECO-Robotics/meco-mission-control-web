@@ -87,7 +87,7 @@ describe("TaskEditorModal", () => {
     expect(markup).toContain('data-inline-edit-field="assigned"');
   });
 
-  it("limits task disciplines to media options for media projects", () => {
+  it("keeps the media discipline while offering the shared work-type taxonomy", () => {
     const markup = renderTaskModal(
       "create",
       {
@@ -99,8 +99,8 @@ describe("TaskEditorModal", () => {
     );
 
     expect(markup).toContain("Photography");
-    expect(markup).not.toContain("Design");
-    expect(markup).not.toContain("Manufacturing");
+    expect(markup).toContain("Design");
+    expect(markup).toContain("Manufacturing");
   });
 
   it("shows save and cancel controls in edit mode", () => {

@@ -14,6 +14,7 @@ export const purchaseToPayload = (item: PurchaseItemRecord): PurchaseItemPayload
 
 export const manufacturingToPayload = (item: ManufacturingItemRecord): ManufacturingItemPayload => ({
   ...item,
+  responsibleGroup: item.responsibleGroup ?? "Mechanical",
   materialId: item.materialId ?? null,
   partDefinitionId: item.partDefinitionId ?? null,
   partInstanceId: item.partInstanceId ?? null,

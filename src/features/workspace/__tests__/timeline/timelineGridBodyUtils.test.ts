@@ -41,8 +41,7 @@ describe("timeline task dependency counts and status", () => {
     const dependencies: Parameters<typeof buildTaskDependencyCountsByTaskId>[0] = [
       {
         id: "dependency-1",
-        taskId: "task-target",
-        kind: "task",
+        workItemId: "task-target", sourceType: "task", kind: "work_item", refType: "task",
         refId: "task-upstream-1",
         dependencyType: "hard",
         createdAt: "2026-02-01T00:00:00.000Z",
@@ -50,8 +49,7 @@ describe("timeline task dependency counts and status", () => {
       },
       {
         id: "dependency-2",
-        taskId: "task-target",
-        kind: "task",
+        workItemId: "task-target", sourceType: "task", kind: "work_item", refType: "task",
         refId: "task-upstream-2",
         dependencyType: "hard",
         createdAt: "2026-02-01T00:00:00.000Z",
@@ -59,8 +57,7 @@ describe("timeline task dependency counts and status", () => {
       },
       {
         id: "dependency-3",
-        taskId: "task-downstream",
-        kind: "task",
+        workItemId: "task-downstream", sourceType: "task", kind: "work_item", refType: "task",
         refId: "task-target",
         dependencyType: "hard",
         createdAt: "2026-02-01T00:00:00.000Z",
@@ -68,8 +65,7 @@ describe("timeline task dependency counts and status", () => {
       },
       {
         id: "dependency-4",
-        taskId: "task-unrelated",
-        kind: "task",
+        workItemId: "task-unrelated", sourceType: "task", kind: "work_item", refType: "task",
         refId: "task-other",
         dependencyType: "hard",
         createdAt: "2026-02-01T00:00:00.000Z",
@@ -88,8 +84,7 @@ describe("timeline task dependency counts and status", () => {
     const lookup = buildTaskDependencyCountsByTaskId([
       {
         id: "dependency-1",
-        taskId: "task-b",
-        kind: "task",
+        workItemId: "task-b", sourceType: "task", kind: "work_item", refType: "task",
         refId: "task-a",
         dependencyType: "hard",
         createdAt: "2026-02-01T00:00:00.000Z",
@@ -97,8 +92,7 @@ describe("timeline task dependency counts and status", () => {
       },
       {
         id: "dependency-2",
-        taskId: "task-c",
-        kind: "task",
+        workItemId: "task-c", sourceType: "task", kind: "work_item", refType: "task",
         refId: "task-b",
         dependencyType: "hard",
         createdAt: "2026-02-01T00:00:00.000Z",
@@ -106,8 +100,7 @@ describe("timeline task dependency counts and status", () => {
       },
       {
         id: "dependency-3",
-        taskId: "task-c",
-        kind: "task",
+        workItemId: "task-c", sourceType: "task", kind: "work_item", refType: "task",
         refId: "task-a",
         dependencyType: "hard",
         createdAt: "2026-02-01T00:00:00.000Z",
@@ -168,8 +161,10 @@ describe("timeline task dependency counts and status", () => {
       taskDependencies: [
         {
           id: "dependency-1",
-        taskId: "task-waiting",
-        kind: "task",
+        workItemId: "task-waiting",
+        sourceType: "task",
+        kind: "work_item",
+        refType: "task",
         refId: "task-upstream",
         dependencyType: "hard",
           createdAt: "2026-02-01T00:00:00.000Z",

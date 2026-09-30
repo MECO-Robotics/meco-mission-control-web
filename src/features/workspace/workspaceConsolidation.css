@@ -7,6 +7,13 @@
 .workspace-presentation-controls [aria-pressed="true"] { background: var(--bg-row-alt); color: var(--text-title); font-weight: 700; outline: 1px solid var(--border-base); }
 .workspace-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .workspace-record-list { margin: 0; padding: 0; list-style: none; }
+.work-item-list { display: grid; gap: .4rem; padding: .75rem; }
+.work-item-row { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem .8rem; width: 100%; padding: .35rem .75rem; border: 1px solid var(--border-base); border-radius: 8px; background: var(--bg-panel); color: var(--text-copy); }
+.work-item-open { display: flex; flex: 1 1 32rem; flex-wrap: wrap; align-items: center; gap: .45rem .8rem; padding: .35rem 0; text-align: left; border: 0; background: transparent; color: var(--text-copy); cursor: pointer; }
+.work-item-open:hover { background: var(--bg-row-alt); }
+.work-item-actions { display: inline-flex; gap: .4rem; }
+.work-item-actions button { min-height: 2.25rem; border: 1px solid var(--border-base); border-radius: 6px; background: var(--bg-panel); color: var(--text-title); cursor: pointer; }
+.work-item-title { flex: 1 1 14rem; color: var(--text-title); font-weight: 650; }
 .workspace-record-list > li { display: flex; align-items: start; justify-content: space-between; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--border-base); }
 .workspace-record-list small { display: block; margin-top: .3rem; color: var(--text-copy); }
 .workspace-record-list p { margin: .4rem 0 0; max-width: 75ch; color: var(--text-copy); }
