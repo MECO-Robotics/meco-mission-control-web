@@ -1,13 +1,15 @@
 import * as React from "react";
-import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
-import { SortDirectionToggle } from "@/features/workspace/shared/filters/SortDirectionToggle";
-import { ResourceSortMenu } from "../ResourceSortMenu";
+import { ArrowDownUp } from "lucide-react";
 
-describe("ResourceSortMenu", () => {
-  it("uses the shared inline direction toggle beside the sort field", () => {
+import { FilterDropdown } from "../FilterDropdown";
+import { SortDirectionToggle } from "../SortDirectionToggle";
+import { WorkspaceSortMenu } from "../WorkspaceSortMenu";
+
+describe("WorkspaceSortMenu", () => {
+  it("shares the sort icon, field picker, and direction toggle across views", () => {
     const onDirectionChange = jest.fn();
     const onFieldChange = jest.fn();
-    const menu = ResourceSortMenu({
+    const menu = WorkspaceSortMenu({
       direction: "ascending",
       field: "project",
       label: "tasks",
@@ -26,11 +28,12 @@ describe("ResourceSortMenu", () => {
     }>;
     const sortBy = items[0];
 
-    expect(items).toHaveLength(1);
-    expect(menu.props.menuTitle).toBeUndefined();
+    expect(menu.props.iconOnly).toBe(true);
+    expect((menu.props.icon as React.ReactElement).type).toBe(ArrowDownUp);
     expect(sortBy?.label).toBe("Sort by");
     expect(sortBy?.labelControl?.type).toBe(SortDirectionToggle);
     expect(sortBy?.labelControl?.props).toMatchObject({ direction: "ascending", label: "tasks" });
+
     const fieldPicker = sortBy?.content as React.ReactElement<{
       onChange: (selection: string[]) => void;
       options: Array<{ id: string; name: string }>;

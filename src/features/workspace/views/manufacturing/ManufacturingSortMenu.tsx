@@ -1,6 +1,4 @@
-import { IconSort } from "@/components/shared/Icons";
-import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
-import { SortDirectionToggle } from "@/features/workspace/shared/filters/SortDirectionToggle";
+import { WorkspaceSortMenu } from "@/features/workspace/shared/filters/WorkspaceSortMenu";
 
 import { MANUFACTURING_SORT_OPTIONS, type ManufacturingSortField } from "./manufacturingSort";
 
@@ -16,34 +14,14 @@ export function ManufacturingSortMenu({
   sortField: ManufacturingSortField;
 }) {
   return (
-    <CompactFilterMenu
+    <WorkspaceSortMenu
       activeCount={Number(sortField !== "dueDate") + Number(sortOrder !== "asc")}
-      ariaLabel="Sort manufacturing"
-      buttonLabel="Sort"
-      className="task-queue-sort-menu"
-      icon={<IconSort />}
-      items={[
-        {
-          label: "Sort by",
-          labelControl: (
-            <SortDirectionToggle direction={sortOrder} label="manufacturing" onChange={onSortOrderChange} />
-          ),
-          content: (
-            <select
-              aria-label="Sort manufacturing by"
-              className="task-queue-sort-menu-select"
-              onChange={(event) => onChange(event.currentTarget.value as ManufacturingSortField)}
-              value={sortField}
-            >
-              {MANUFACTURING_SORT_OPTIONS.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.name}
-                </option>
-              ))}
-            </select>
-          ),
-        },
-      ]}
+      direction={sortOrder}
+      field={sortField}
+      label="manufacturing"
+      onDirectionChange={onSortOrderChange}
+      onFieldChange={(field) => onChange(field as ManufacturingSortField)}
+      options={MANUFACTURING_SORT_OPTIONS.map(({ id: value, name: label }) => ({ label, value }))}
     />
   );
 }
