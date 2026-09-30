@@ -39,7 +39,7 @@ describe("PurchaseFiltersToolbar", () => {
       subsystem: ["subsystem-1"],
       uniqueVendors,
       vendor: ["vendor-1"],
-      sortField: null,
+      sortField: "item",
       sortDirection: "ascending",
       onSortFieldChange: jest.fn(),
       onSortDirectionChange: jest.fn(),

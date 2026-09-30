@@ -51,7 +51,7 @@ export function MaterialsView({
   const [location, setLocation] = useState<FilterSelection>([]);
   const [vendor, setVendor] = useState<FilterSelection>([]);
   const [stock, setStock] = useState<FilterSelection>([]);
-  const [sortField, setSortField] = useState<MaterialSortField | null>(null);
+  const [sortField, setSortField] = useState<MaterialSortField>("name");
   const [sortDirection, setSortDirection] = useState<MaterialSortDirection>("ascending");
 
   const columnOptions = useMemo(() => {
@@ -78,7 +78,7 @@ export function MaterialsView({
     });
   }, [bootstrap.materials, category, location, name, quantity, search, stock, vendor]);
   const sortedMaterials = useMemo(
-    () => sortField ? sortMaterialInventory(filteredMaterials, sortField, sortDirection) : filteredMaterials,
+    () => sortMaterialInventory(filteredMaterials, sortField, sortDirection),
     [filteredMaterials, sortDirection, sortField],
   );
   const materialPagination = useWorkspacePagination(sortedMaterials);
@@ -135,7 +135,7 @@ export function MaterialsView({
                     field={sortField}
                     label="materials"
                     onDirectionChange={setSortDirection}
-                    onFieldChange={(field) => setSortField(field as MaterialSortField | null)}
+                    onFieldChange={(field) => setSortField(field as MaterialSortField)}
                     options={[{ label: "Material", value: "name" }, { label: "Category", value: "category" }, { label: "On hand / reorder", value: "quantity" }, { label: "Location", value: "location" }, { label: "Vendor", value: "vendor" }, { label: "Status", value: "status" }]}
                   />
                 </>

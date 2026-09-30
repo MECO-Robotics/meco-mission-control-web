@@ -219,11 +219,13 @@ describe("TimelineCompactFilterMenu", () => {
 
   it("renders calendar sorting as a separate search-bar sort menu", () => {
     const onChange = jest.fn();
-    const menu = TimelineCalendarSortMenu({ onChange, sortMode: "priority" }) as React.ReactElement<{
+    const onDirectionChange = jest.fn();
+    const menu = TimelineCalendarSortMenu({ onChange, direction: "asc", onDirectionChange, sortMode: "priority" }) as React.ReactElement<{
       activeCount: number;
       ariaLabel: string;
       items: Array<{
         label: string;
+        labelControl: React.ReactElement<{ direction: string; onChange: (value: "asc" | "desc") => void }>;
         content: React.ReactElement<{
           value: string;
           onChange: (event: { currentTarget: { value: string } }) => void;
@@ -235,6 +237,9 @@ describe("TimelineCompactFilterMenu", () => {
     expect(menu.props.ariaLabel).toBe("Sort calendar events");
     expect(menu.props.activeCount).toBe(1);
     expect(menu.props.items.map((item) => item.label)).toEqual(["Sort by"]);
+    expect(menu.props.items[0].labelControl.props.direction).toBe("asc");
+    menu.props.items[0].labelControl.props.onChange("desc");
+    expect(onDirectionChange).toHaveBeenCalledWith("desc");
     expect(menu.props.items[0].content.props.value).toBe("priority");
     menu.props.items[0].content.props.onChange({ currentTarget: { value: "date" } });
     expect(onChange).toHaveBeenCalledWith("date");

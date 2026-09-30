@@ -22,6 +22,7 @@ interface TimelineToolbarProps {
   activeFilterCount: number;
   calendarEventFilter: "all" | TaskCalendarEventType;
   calendarSortMode: TaskCalendarSortMode;
+  calendarSortDirection: "asc" | "desc";
   showCalendarFilters: boolean;
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
@@ -32,6 +33,7 @@ interface TimelineToolbarProps {
   onChangePersonFilter: (value: FilterSelection) => void;
   onCalendarEventFilterChange: (value: "all" | TaskCalendarEventType) => void;
   onCalendarSortModeChange: (value: TaskCalendarSortMode) => void;
+  onCalendarSortDirectionChange: (value: "asc" | "desc") => void;
   onIntervalChange: (value: TimelineViewInterval) => void;
   onSearchChange: (value: string) => void;
   onShiftPeriod: (direction: -1 | 1) => void;
@@ -56,6 +58,7 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   activeFilterCount,
   calendarEventFilter,
   calendarSortMode,
+  calendarSortDirection,
   showCalendarFilters,
   activePersonFilter,
   bootstrap,
@@ -66,6 +69,7 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   onChangePersonFilter,
   onCalendarEventFilterChange,
   onCalendarSortModeChange,
+  onCalendarSortDirectionChange,
   onIntervalChange,
   onSearchChange,
   onShiftPeriod,
@@ -181,6 +185,8 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
             {showCalendarFilters ? (
               <TimelineCalendarSortMenu
                 onChange={onCalendarSortModeChange}
+                direction={calendarSortDirection}
+                onDirectionChange={onCalendarSortDirectionChange}
                 sortMode={calendarSortMode}
               />
             ) : null}

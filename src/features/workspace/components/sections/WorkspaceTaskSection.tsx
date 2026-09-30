@@ -17,6 +17,7 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
   const [scheduleSearchFilter, setScheduleSearchFilter] = useState("");
   const [calendarEventFilter, setCalendarEventFilter] = useState<"all" | TaskCalendarEventType>("all");
   const [calendarSortMode, setCalendarSortMode] = useState<TaskCalendarSortMode>("date");
+  const [calendarSortDirection, setCalendarSortDirection] = useState<"asc" | "desc">("asc");
   const {
     activePersonFilter,
     bootstrap,
@@ -73,6 +74,8 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
               onEventFilterChange={setCalendarEventFilter}
               sortMode={calendarSortMode}
               onSortModeChange={setCalendarSortMode}
+              sortDirection={calendarSortDirection}
+              onSortDirectionChange={setCalendarSortDirection}
               onTaskDetailOpen={openTimelineTaskDetailsModal}
               onTaskEditCanceled={props.onTaskEditCanceled}
               onTaskEditSaved={props.onTaskEditSaved}
@@ -94,6 +97,8 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
               onCalendarEventFilterChange={setCalendarEventFilter}
               calendarSortMode={calendarSortMode}
               onCalendarSortModeChange={setCalendarSortMode}
+              calendarSortDirection={calendarSortDirection}
+              onCalendarSortDirectionChange={setCalendarSortDirection}
               showCalendarFilters={taskView === "calendar"}
               openCreateTaskModal={openCreateTaskModalFromTimeline}
               openTaskDetailModal={openTimelineTaskDetailsModal}

@@ -49,6 +49,8 @@ interface TimelineViewProps {
   onCalendarEventFilterChange?: (value: "all" | TaskCalendarEventType) => void;
   calendarSortMode?: TaskCalendarSortMode;
   onCalendarSortModeChange?: (value: TaskCalendarSortMode) => void;
+  calendarSortDirection?: "asc" | "desc";
+  onCalendarSortDirectionChange?: (value: "asc" | "desc") => void;
   showCalendarFilters?: boolean;
 }
 
@@ -71,16 +73,21 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   onCalendarEventFilterChange,
   calendarSortMode,
   onCalendarSortModeChange,
+  calendarSortDirection,
+  onCalendarSortDirectionChange,
   showCalendarFilters = false,
 }) => {
   const state = useTimelineViewState();
   const { setTimelineZoomMin } = state;
   const [localCalendarEventFilter, setLocalCalendarEventFilter] = useState<"all" | TaskCalendarEventType>("all");
   const [localCalendarSortMode, setLocalCalendarSortMode] = useState<TaskCalendarSortMode>("date");
+  const [localCalendarSortDirection, setLocalCalendarSortDirection] = useState<"asc" | "desc">("asc");
   const activeCalendarEventFilter = calendarEventFilter ?? localCalendarEventFilter;
   const updateCalendarEventFilter = onCalendarEventFilterChange ?? setLocalCalendarEventFilter;
   const activeCalendarSortMode = calendarSortMode ?? localCalendarSortMode;
   const updateCalendarSortMode = onCalendarSortModeChange ?? setLocalCalendarSortMode;
+  const activeCalendarSortDirection = calendarSortDirection ?? localCalendarSortDirection;
+  const updateCalendarSortDirection = onCalendarSortDirectionChange ?? setLocalCalendarSortDirection;
   const [localSearchFilter, setLocalSearchFilter] = useState("");
   const searchFilter = controlledSearchFilter ?? localSearchFilter;
   const setSearchFilter = onSearchChange ?? setLocalSearchFilter;
@@ -186,6 +193,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             }
             calendarEventFilter={activeCalendarEventFilter}
             calendarSortMode={activeCalendarSortMode}
+            calendarSortDirection={activeCalendarSortDirection}
             showCalendarFilters={showCalendarFilters}
             activePersonFilter={activePersonFilter}
             bootstrap={bootstrap}
@@ -196,6 +204,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             onChangePersonFilter={setActivePersonFilter}
             onCalendarEventFilterChange={updateCalendarEventFilter}
             onCalendarSortModeChange={updateCalendarSortMode}
+            onCalendarSortDirectionChange={updateCalendarSortDirection}
             onSearchChange={setSearchFilter}
             onIntervalChange={handleTimelineIntervalChange}
             onShiftPeriod={handleShiftPeriod}

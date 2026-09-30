@@ -26,7 +26,7 @@ export function PartsView({ bootstrap, openCreatePartDefinitionModal, openEditPa
   const [partStatus, setPartStatus] = useRememberedViewState<string[]>("parts.partStatus", []);
   const [mapping, setMapping] = useRememberedViewState("parts.mapping", "all");
   const [columnFilters, setColumnFilters] = useState<PartDefinitionColumnFilters>({ name: [], number: [], revision: [], iteration: [], type: [], material: [] });
-  const [sortField, setSortField] = useState<PartDefinitionSortField | null>(null);
+  const [sortField, setSortField] = useState<PartDefinitionSortField>("name");
   const [sortDirection, setSortDirection] = useState<ResourceSortDirection>("ascending");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mechanismId, setMechanismId] = useState("");
@@ -54,7 +54,6 @@ export function PartsView({ bootstrap, openCreatePartDefinitionModal, openEditPa
         filterSelectionIncludes(columnFilters.material, material);
     }), [bootstrap, columnFilters, mapping, partSearch, partStatus, partSubsystem, showArchivedPartDefinitions]);
   const sorted = useMemo(() => {
-    if (!sortField) return filtered;
     const value = (part: BootstrapPayload["partDefinitions"][number]) => {
       if (sortField === "iteration") return part.iteration;
       if (sortField === "material") return bootstrap.materials.find((material) => material.id === part.materialId)?.name ?? "Unassigned";
@@ -77,7 +76,7 @@ export function PartsView({ bootstrap, openCreatePartDefinitionModal, openEditPa
   };
   return <section className={`panel dense-panel part-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
     <AppTopbarSlotPortal slot="controls"><div className="panel-actions filter-toolbar">
-      <PartsToolbar bootstrap={bootstrap} mapping={mapping} partSearch={partSearch} partStatus={partStatus} partSubsystem={partSubsystem} setPartSearch={setPartSearch} setMapping={setMapping} setPartStatus={setPartStatus} setPartSubsystem={setPartSubsystem} setShowArchivedPartDefinitions={setShowArchivedPartDefinitions} showArchivedPartDefinitions={showArchivedPartDefinitions} activeColumnFilterCount={Object.values(columnFilters).filter((value) => value.length > 0).length} columnFilters={columnFilters} columnOptions={columnOptions} setColumnFilter={setColumnFilter} sortMenu={<ResourceSortMenu direction={sortDirection} field={sortField} label="parts" onDirectionChange={setSortDirection} onFieldChange={(field) => setSortField(field as PartDefinitionSortField | null)} options={PART_DEFINITION_COLUMNS.map(({ field, label }) => ({ label, value: field }))} />} />
+      <PartsToolbar bootstrap={bootstrap} mapping={mapping} partSearch={partSearch} partStatus={partStatus} partSubsystem={partSubsystem} setPartSearch={setPartSearch} setMapping={setMapping} setPartStatus={setPartStatus} setPartSubsystem={setPartSubsystem} setShowArchivedPartDefinitions={setShowArchivedPartDefinitions} showArchivedPartDefinitions={showArchivedPartDefinitions} activeColumnFilterCount={Object.values(columnFilters).filter((value) => value.length > 0).length} columnFilters={columnFilters} columnOptions={columnOptions} setColumnFilter={setColumnFilter} sortMenu={<ResourceSortMenu direction={sortDirection} field={sortField} label="parts" onDirectionChange={setSortDirection} onFieldChange={(field) => setSortField(field as PartDefinitionSortField)} options={PART_DEFINITION_COLUMNS.map(({ field, label }) => ({ label, value: field }))} />} />
       <WorkspaceTopbarAddMenu
         actions={buildSingleAddMenuAction({ label: "Add part", onSelect: openCreatePartDefinitionModal })}
         ariaLabel="Add part"

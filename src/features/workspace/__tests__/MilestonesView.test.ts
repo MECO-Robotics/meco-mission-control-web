@@ -41,7 +41,6 @@ describe("MilestonesView", () => {
     expect(markup).toContain("milestones-search-sort-menu");
     expect(markup).toContain('aria-label="Milestone filters"');
     expect(markup).toContain('aria-label="Sort milestones"');
-    expect(markup).toContain("lucide-arrow-up-wide-narrow");
     expect(markup).not.toContain('aria-label="Sort direction"');
     expect(markup).not.toContain('class="toolbar-filter-value">Filters</span>');
     expect(markup).not.toContain('class="toolbar-filter-value">Sort</span>');
@@ -65,7 +64,7 @@ describe("MilestonesView", () => {
     );
 
     expect(toolbarSource).not.toContain("onButtonClick={() => setSortOrder");
-    expect(toolbarSource).toContain('aria-label="Toggle milestone sort direction"');
+    expect(toolbarSource).toContain("<SortDirectionToggle direction={sortOrder}");
   });
 
   it("closes milestone suggestions when keyboard focus moves into search actions", () => {

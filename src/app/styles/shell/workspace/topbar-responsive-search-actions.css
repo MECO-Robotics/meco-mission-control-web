@@ -88,6 +88,29 @@
   min-width: min(16rem, 92vw);
 }
 
+.topbar-responsive-search-actions .task-queue-sort-menu .task-queue-filter-menu-popover {
+  width: min(13rem, 92vw);
+  min-width: min(13rem, 92vw);
+}
+
+.topbar-responsive-search-actions .task-queue-sort-menu .task-queue-filter-menu-item {
+  grid-template-columns: 4.75rem minmax(0, 1fr);
+  gap: 0.4rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.topbar-responsive-search-actions .task-queue-sort-menu .task-queue-filter-menu-label {
+  gap: 0.2rem;
+}
+
+.topbar-responsive-search-actions .task-queue-sort-menu .task-queue-filter-menu-item > .task-queue-sort-menu-select {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 .topbar-responsive-search-actions .task-queue-filter-menu-popover.is-inline-selection {
   width: min(17rem, 92vw);
   min-width: min(16rem, 92vw);
@@ -100,46 +123,13 @@
 }
 
 .topbar-responsive-search-actions .resource-sort-menu .task-queue-filter-menu-item {
-  grid-template-columns: 3.5rem minmax(0, 1fr);
+  grid-template-columns: 4.75rem minmax(0, 1fr);
   gap: 0.4rem;
 }
 
 .topbar-responsive-search-actions .resource-sort-menu .task-queue-filter-menu-item > .toolbar-filter-select {
   width: 100%;
   min-width: 0;
-}
-
-.resource-sort-direction {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.resource-sort-direction-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.75rem;
-  height: 1.65rem;
-  padding: 0;
-  border: 1px solid var(--border-base);
-  border-radius: 0.45rem;
-  background: var(--bg-row-alt);
-  color: var(--text-copy);
-  cursor: pointer;
-}
-
-.resource-sort-direction-button:hover,
-.resource-sort-direction-button:focus-visible,
-.resource-sort-direction-button[aria-pressed="true"] {
-  border-color: color-mix(in srgb, var(--official-blue) 38%, var(--border-base));
-  background: color-mix(in srgb, var(--meco-blue) 10%, var(--bg-panel));
-  color: var(--official-blue);
-}
-
-.resource-sort-direction-button:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--official-blue) 65%, transparent);
-  outline-offset: 2px;
 }
 
 .topbar-responsive-search-actions .task-queue-filter-menu-item {

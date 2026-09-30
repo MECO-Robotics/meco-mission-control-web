@@ -17,7 +17,7 @@ describe("WorkspaceViewShared filters", () => {
     ).toEqual(["current-subsystem"]);
   });
 
-  it("formats compact filter summaries as All, one name, or a selection count", () => {
+  it("formats compact filter summaries as All, one name, or an ellipsis after selection counts", () => {
     const options = [
       { id: "requested", name: "Requested" },
       { id: "approved", name: "Approved" },
@@ -25,7 +25,7 @@ describe("WorkspaceViewShared filters", () => {
 
     expect(formatCompactFilterSelectionLabel(options, [])).toBe("All");
     expect(formatCompactFilterSelectionLabel(options, ["requested"])).toBe("Requested");
-    expect(formatCompactFilterSelectionLabel(options, ["requested", "approved"])).toBe("2");
+    expect(formatCompactFilterSelectionLabel(options, ["requested", "approved"])).toBe("2...");
   });
 
   it("preserves caller-provided empty-selection labels", () => {

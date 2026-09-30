@@ -249,6 +249,9 @@ describe("ManufacturingQueueView", () => {
     expect(
       sortManufacturingItems(items, "title", membersById, subsystemsById).map((item) => item.id),
     ).toEqual(["early", "late"]);
+    expect(
+      sortManufacturingItems(items, "title", membersById, subsystemsById, "desc").map((item) => item.id),
+    ).toEqual(["late", "early"]);
     expect(items.map((item) => item.id)).toEqual(["late", "early"]);
   });
 });

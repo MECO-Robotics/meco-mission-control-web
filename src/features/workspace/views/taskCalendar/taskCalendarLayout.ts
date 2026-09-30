@@ -116,19 +116,23 @@ function compareTaskCalendarEventsByPriority(left: TaskCalendarEvent, right: Tas
 export function sortTaskCalendarEvents(
   events: TaskCalendarEvent[],
   sortMode: TaskCalendarSortMode,
+  sortDirection: "asc" | "desc" = "asc",
 ) {
   const sortedEvents = [...events];
 
   if (sortMode === "category") {
     sortedEvents.sort(compareTaskCalendarEventsByCategory);
+    if (sortDirection === "desc") sortedEvents.reverse();
     return sortedEvents;
   }
 
   if (sortMode === "priority") {
     sortedEvents.sort(compareTaskCalendarEventsByPriority);
+    if (sortDirection === "desc") sortedEvents.reverse();
     return sortedEvents;
   }
 
   sortedEvents.sort(compareTaskCalendarEventsByDate);
+  if (sortDirection === "desc") sortedEvents.reverse();
   return sortedEvents;
 }

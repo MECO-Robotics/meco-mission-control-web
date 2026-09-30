@@ -24,6 +24,8 @@ interface TaskCalendarViewProps {
   onEventFilterChange: (value: "all" | TaskCalendarEventType) => void;
   sortMode: TaskCalendarSortMode;
   onSortModeChange: (value: TaskCalendarSortMode) => void;
+  sortDirection: "asc" | "desc";
+  onSortDirectionChange: (value: "asc" | "desc") => void;
   isAllProjectsView: boolean;
   onSaveMeeting: (payload: MeetingPayload) => Promise<void>;
   onDeleteTimelineMilestone: (milestoneId: string) => Promise<void>;
@@ -64,6 +66,8 @@ export function TaskCalendarView({
   onEventFilterChange,
   sortMode,
   onSortModeChange,
+  sortDirection,
+  onSortDirectionChange,
   isAllProjectsView,
   onSaveMeeting,
   onDeleteTimelineMilestone,
@@ -90,6 +94,8 @@ export function TaskCalendarView({
     onSearchChange,
     sortMode,
     onSortModeChange,
+    sortDirection,
+    onSortDirectionChange,
   });
   useEffect(() => {
     const handleSchedulePeriodChange = (event: Event) => {
