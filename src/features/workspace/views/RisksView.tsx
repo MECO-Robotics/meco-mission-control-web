@@ -62,26 +62,24 @@ export function RisksView({
       </details>
 
       <RiskEditorModal
-        attachmentOptions={viewModel.attachmentOptions}
         draft={viewModel.draft}
         editorError={viewModel.editorError}
         editorMode={viewModel.editorMode === "detail" ? null : viewModel.editorMode}
-        getAttachmentOptionsForType={viewModel.getAttachmentOptionsForType}
-        getSourceOptionsForType={viewModel.getSourceOptionsForType}
         isDeleting={viewModel.isDeleting}
         isSaving={viewModel.isSaving}
         mitigationTaskOptions={viewModel.mitigationTaskOptions}
+        targetOptions={viewModel.targetOptions}
+        responsibleGroupOptions={viewModel.responsibleGroupOptions}
         onClose={viewModel.closeEditor}
         onDelete={() => void viewModel.handleDeleteRisk()}
         onSave={() => void viewModel.handleSaveRisk()}
         setDraft={viewModel.setDraft}
-        sourceOptions={viewModel.sourceOptions}
       />
       {viewModel.editorMode === "detail" && viewModel.activeRisk ? (
         <RiskDetailsModal
           activeRisk={viewModel.activeRisk}
           auditActions={riskAuditActions(bootstrap.actions, viewModel.activeRisk)}
-          getAttachmentLabel={viewModel.getAttachmentLabel}
+          getTargetLabel={viewModel.getTargetLabel}
           getMitigationLabel={viewModel.getMitigationLabel}
           getSourceLabel={viewModel.getSourceLabel}
           onClose={viewModel.closeEditor}

@@ -1,241 +1,46 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
-import {
-  filterSelectionIncludes,
-  filterSelectionMatchesTaskPeople,
-} from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { filterSelectionMatchesTaskPeople } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { getTaskPlanningState } from "@/features/workspace/shared/task/taskPlanning";
 import { isTaskDueSoon } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
-import { buildTaskLastUpdatedAtById } from "./attentionActionNowShared";
-import {
-  isDateOverdue,
-  isWithinRecentWindow,
-} from "./attentionViewHelpers";
-import {
-  buildManufacturingTriageItems,
-  buildPurchaseTriageItems,
-  buildReportTriageItems,
-  buildAttentionTriageGroups,
-} from "./attentionTriageItems";
-import { buildAttentionActionNowItems } from "./attentionActionNowItems";
-import { buildAttentionMentorQueueInputs } from "./attentionMentorQueueInputs";
-import { buildMentorActionQueueItems } from "./mentorActionQueueModel";
-import { detectStaleTasks } from "./staleTaskDetector";
-import { buildTaskByReportId, riskMatchesPersonFilter } from "./attentionRiskScope";
-import type { AttentionViewModel } from "./attentionViewTypes";
+import type { AttentionViewModel, AttentionTriageItem, AttentionNowItem } from "./attentionViewTypes";
+import { isDateOverdue } from "./attentionViewHelpers";
 
-export type {
-  AttentionNowItem,
-  AttentionReason,
-  AttentionTriageGroup,
-  AttentionTriageItem,
-  AttentionViewModel,
-  MentorActionQueueItem,
-} from "./attentionViewTypes";
+export type { AttentionNowItem, AttentionReason, AttentionTriageGroup, AttentionTriageItem, AttentionViewModel, MentorActionQueueItem } from "./attentionViewTypes";
 
-interface BuildAttentionViewModelArgs {
-  activePersonFilter: FilterSelection;
-  bootstrap: BootstrapPayload;
-}
+export function buildAttentionViewModel({ activePersonFilter, bootstrap }: { activePersonFilter: FilterSelection; bootstrap: BootstrapPayload }): AttentionViewModel {
+  const membersById = new Map(bootstrap.members.map((member) => [member.id, member]));
+  const projectsById = new Map(bootstrap.projects.map((project) => [project.id, project]));
+  const tasksById = new Map(bootstrap.tasks.map((task) => [task.id, task]));
+  const scopedTasks = bootstrap.tasks.filter((task) => filterSelectionMatchesTaskPeople(activePersonFilter, task));
+  const scopedTaskIds = new Set(scopedTasks.map((task) => task.id));
+  const scopedRisks = bootstrap.risks.filter((risk) => activePersonFilter.length === 0 || risk.relatedTargets.some((ref) => ref.kind === "task" && scopedTaskIds.has(ref.id)) || (risk.mitigationTaskId ? scopedTaskIds.has(risk.mitigationTaskId) : false));
+  const blockedTasks = scopedTasks.filter((task) => getTaskPlanningState(task, bootstrap) === "blocked");
+  const waitingQaTasks = scopedTasks.filter((task) => task.status === "waiting-for-qa");
+  const overdueTasks = scopedTasks.filter((task) => task.dueDate && isDateOverdue(task.dueDate));
+  const dueSoonTasks = scopedTasks.filter((task) => task.dueDate && !isDateOverdue(task.dueDate) && isTaskDueSoon(task.dueDate, new Date()));
+  const openRisks = scopedRisks.filter((risk) => risk.status !== "resolved");
 
-export function buildAttentionViewModel({
-  activePersonFilter,
-  bootstrap,
-}: BuildAttentionViewModelArgs): AttentionViewModel {
-  const membersById = Object.fromEntries(
-    bootstrap.members.map((member) => [member.id, member] as const),
-  );
-  const projectsById = Object.fromEntries(
-    bootstrap.projects.map((project) => [project.id, project] as const),
-  );
-  const subsystemsById = Object.fromEntries(
-    bootstrap.subsystems.map((subsystem) => [subsystem.id, subsystem] as const),
-  );
-  const workstreamsById = Object.fromEntries(
-    bootstrap.workstreams.map((workstream) => [workstream.id, workstream] as const),
-  );
-  const tasksById = Object.fromEntries(bootstrap.tasks.map((task) => [task.id, task] as const));
-
-  const filteredTasks = bootstrap.tasks.filter(
-    (task) =>
-      filterSelectionMatchesTaskPeople(activePersonFilter, task) && task.status !== "complete",
-  );
-
-  const taskByReportId = buildTaskByReportId(bootstrap, tasksById);
-
-  const criticalRisks = bootstrap.risks
-    .filter((risk) => risk.severity === "high" && !risk.mitigationTaskId)
-    .filter((risk) =>
-      riskMatchesPersonFilter({
-        activePersonFilter,
-        risk,
-        taskByReportId,
-        tasksById,
-      }),
-    );
-
-  const highRisks = bootstrap.risks
-    .filter((risk) => risk.severity === "high" && Boolean(risk.mitigationTaskId))
-    .filter((risk) =>
-      riskMatchesPersonFilter({
-        activePersonFilter,
-        risk,
-        taskByReportId,
-        tasksById,
-      }),
-    );
-
-  const blockedTasks = filteredTasks.filter(
-    (task) =>
-      task.isBlocked ||
-      task.blockers.length > 0 ||
-      task.planningState === "blocked" ||
-      task.planningState === "waiting-on-dependency",
-  );
-  const waitingQaTasks = filteredTasks.filter((task) => task.status === "waiting-for-qa");
-  const overdueTasks = filteredTasks.filter((task) => task.dueDate && isDateOverdue(task.dueDate));
-  const dueSoonTasks = filteredTasks.filter(
-    (task) =>
-      task.dueDate &&
-      !isDateOverdue(task.dueDate) &&
-      isTaskDueSoon(task.dueDate, new Date()) &&
-      task.status !== "waiting-for-qa",
-  );
-  const taskLastUpdatedAtById = buildTaskLastUpdatedAtById(bootstrap);
-  const staleTaskResults = detectStaleTasks({
-    taskBlockers: bootstrap.taskBlockers,
-    taskLastUpdatedAtById,
-    tasks: filteredTasks,
-  });
-  const staleTasks = staleTaskResults.map((result) => result.task);
-
-  const manufacturingBlockers = bootstrap.manufacturingItems
-    .filter(
-      (item) =>
-        item.status !== "complete" &&
-        filterSelectionIncludes(activePersonFilter, item.requestedById) &&
-        (!item.mentorReviewed ||
-          item.status === "requested" ||
-          item.status === "approved" ||
-          isDateOverdue(item.dueDate)),
-    )
-    .sort((left, right) => left.dueDate.localeCompare(right.dueDate));
-
-  const purchaseDelays = bootstrap.purchaseItems
-    .filter(
-      (item) =>
-        item.status !== "delivered" &&
-        filterSelectionIncludes(activePersonFilter, item.requestedById),
-    )
-    .sort((left, right) => left.status.localeCompare(right.status));
-
-  const failedReports = bootstrap.reports
-    .filter((report) => report.status === "fail" || report.status === "blocked")
-    .filter((report) => {
-      if (activePersonFilter.length > 0) {
-        const sourceTask = report.taskId ? tasksById[report.taskId] : null;
-        if (
-          !filterSelectionIncludes(activePersonFilter, report.createdByMemberId) &&
-          !(sourceTask && filterSelectionMatchesTaskPeople(activePersonFilter, sourceTask))
-        ) {
-          return false;
-        }
-      }
-
-      return report.createdAt ? isWithinRecentWindow(report.createdAt) : true;
-    });
-
-  const failedQaReviews = (bootstrap.qaReviews ?? []).filter((review) => {
-    if (review.result === "pass") {
-      return false;
-    }
-
-    if (activePersonFilter.length > 0) {
-      const participantMatches = review.participantIds.some((memberId) =>
-        activePersonFilter.includes(memberId),
-      );
-      if (!participantMatches) {
-        return false;
-      }
-    }
-
-    return isWithinRecentWindow(review.reviewedAt);
-  });
-  const {
-    pendingPurchaseApprovals,
-    pendingQaReports,
-    pendingQaReviews,
-    purchaseLinkedTasksById,
-    scopedPurchaseLinkedTasksById,
-  } = buildAttentionMentorQueueInputs({
-    activePersonFilter,
-    bootstrap,
-    filteredTasks,
-    tasksById,
-  });
-
-  const lookup = {
-    membersById,
-    projectsById,
-    subsystemsById,
-    tasksById,
-    taskByReportId,
-    workstreamsById,
-  };
-
-  const manufacturingItems = buildManufacturingTriageItems(manufacturingBlockers, lookup);
-  const purchaseItems = buildPurchaseTriageItems(purchaseDelays, lookup);
-  const reportItems = buildReportTriageItems({
-    bootstrap,
-    failedQaReviews,
-    failedReports,
-    lookup,
-  });
-
-  const triageGroups = buildAttentionTriageGroups({
-    blockedTasks,
-    criticalRisks,
-    dueSoonTasks,
-    highRisks,
-    lookup,
-    manufacturingItems,
-    overdueTasks,
-    purchaseItems,
-    reportItems,
-    staleTasks,
-    waitingQaTasks,
-  });
-
-  const actionNowItems = buildAttentionActionNowItems({
-    blockedTasks,
-    bootstrap,
-    criticalRisks,
-    failedQaReviews,
-    failedReports,
-    highRisks,
-    lookup,
-    manufacturingBlockers,
-    overdueTasks,
-    purchaseDelays,
-    staleTaskResults,
-    taskLastUpdatedAtById,
-    waitingQaTasks,
-  });
-  const mentorQueueItems = buildMentorActionQueueItems({
-    blockedTasks,
-    lookup,
-    pendingQaReports,
-    pendingQaReviews,
-    pendingPurchaseApprovals,
-    purchaseLinkedTasksById,
-    riskReviewItems: [...criticalRisks, ...highRisks],
-    scopedPurchaseLinkedTasksById,
-    staleTaskResults,
-    waitingQaTasks,
-  });
-
-  return {
-    actionNowItems,
-    mentorQueueItems,
-    triageGroups,
-  };
+  const taskRows = (tasks: typeof scopedTasks, status: string): AttentionTriageItem[] => tasks.map((task) => ({
+    actionType: "open-task", contextLabel: projectsById.get(task.projectId)?.name ?? "Project", id: `task-${task.id}`, kind: "task",
+    ownerLabel: task.ownerId ? membersById.get(task.ownerId)?.name ?? "Unassigned" : "Unassigned", recordId: task.id,
+    severityLabel: task.priority, statusLabel: status, subtitle: task.summary, title: task.title,
+  }));
+  const riskRows: AttentionTriageItem[] = openRisks.map((risk) => ({
+    actionType: "open-risk", contextLabel: projectsById.get(risk.projectId)?.name ?? "Project", id: `risk-${risk.id}`, kind: "risk",
+    ownerLabel: risk.ownerGroupId ? bootstrap.responsibleGroups.find((group) => group.id === risk.ownerGroupId)?.name ?? "Unassigned" : "Unassigned",
+    recordId: risk.id, severityLabel: risk.severity, statusLabel: risk.status, subtitle: risk.detail, title: risk.title,
+  }));
+  const groups = [
+    { emptyLabel: "No risks in scope.", id: "open-risks", items: riskRows, title: "Open risks" },
+    { emptyLabel: "No blocked tasks in scope.", id: "blocked-tasks", items: taskRows(blockedTasks, "Blocked"), title: "Blocked tasks" },
+    { emptyLabel: "No tasks waiting for QA.", id: "waiting-qa", items: taskRows(waitingQaTasks, "Waiting for QA"), title: "Waiting for QA" },
+    { emptyLabel: "No tasks due soon.", id: "due-soon", items: taskRows(dueSoonTasks, "Due soon"), title: "Tasks due soon" },
+    { emptyLabel: "No overdue tasks.", id: "overdue", items: taskRows(overdueTasks, "Overdue"), title: "Overdue tasks" },
+  ];
+  const actionNowItems: AttentionNowItem[] = [
+    ...blockedTasks.map((task) => ({ actionType: "open-task" as const, contextLabel: projectsById.get(task.projectId)?.name, id: `blocked-${task.id}`, nextAction: "Review the linked risk or dependency and agree on the unblock plan.", openLabel: "Open task", recordId: task.id, reasons: ["blocked" as const], sourceType: "task" as const, title: task.title, urgencyScore: 90, whyNow: "This task is blocked." })),
+    ...openRisks.filter((risk) => risk.severity === "critical" || risk.severity === "high").map((risk) => ({ actionType: "open-risk" as const, contextLabel: projectsById.get(risk.projectId)?.name, id: `risk-${risk.id}`, nextAction: risk.blocksWork ? "Review the blocking risk and assign mitigation work." : "Review the risk owner and next action.", openLabel: "Open risk", recordId: risk.id, reasons: [risk.blocksWork ? "blocked" as const : "high-risk" as const], sourceType: "risk" as const, title: risk.title, urgencyScore: risk.blocksWork ? 95 : 70, whyNow: risk.detail })),
+  ];
+  return { actionNowItems, mentorQueueItems: [], triageGroups: groups };
 }

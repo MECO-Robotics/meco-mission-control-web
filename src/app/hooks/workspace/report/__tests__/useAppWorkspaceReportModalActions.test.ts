@@ -45,10 +45,10 @@ it("opens work logging for the chosen task, removes its overlay, and restores de
   expect(state.activeTimelineTaskDetailId).toBe(task.id);
 });
 
-it("seeds QA with the chosen task's project, workflow and risk and returns after successful submission", () => {
+it("seeds QA with the chosen task as a typed evidence target and returns after submission", () => {
   const { state, render, task } = setup();
   render().openCreateQaReportModal(task.id);
-  expect(state.setQaReportDraft).toHaveBeenCalledWith(expect.objectContaining({ taskId: task.id, projectId: task.projectId, workstreamId: task.workstreamIds[0], targetRiskId: task.targetRiskId, milestoneId: null }));
+  expect(state.setQaReportDraft).toHaveBeenCalledWith(expect.objectContaining({ projectId: task.projectId, targetRefs: [{ kind: "task", id: task.id }] }));
   render();
   state.setQaReportModalMode(null);
   render();
@@ -59,7 +59,7 @@ it("seeds milestone reporting independently of task selection and restores its o
   const { state, render, milestone } = setup();
   const restore = jest.fn();
   render().openCreateMilestoneReportModal(milestone.id, restore);
-  expect(state.setMilestoneReportDraft).toHaveBeenCalledWith(expect.objectContaining({ milestoneId: milestone.id, projectId: "selected-project", taskId: null, workstreamId: null }));
+  expect(state.setMilestoneReportDraft).toHaveBeenCalledWith(expect.objectContaining({ projectId: "selected-project", targetRefs: [{ kind: "milestone", id: milestone.id }] }));
   render();
   expect(restore).not.toHaveBeenCalled();
   state.setMilestoneReportModalMode(null);

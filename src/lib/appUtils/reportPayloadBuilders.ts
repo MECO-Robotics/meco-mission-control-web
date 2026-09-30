@@ -26,48 +26,40 @@ export function buildEmptyReportPayload(
   bootstrap: BootstrapPayload,
   reportType: ReportPayload["reportType"],
   defaults: {
-    taskId?: string | null;
-    milestoneId?: string | null;
+    targetRefs?: ReportPayload["targetRefs"];
     projectId?: string;
-    workstreamId?: string | null;
     createdByMemberId?: string | null;
-    result?: string;
+    requestedById?: string | null;
+    result?: string | null;
     summary?: string;
     notes?: string;
     photoUrl?: string;
     participantIds?: string[];
-    mentorApproved?: boolean;
+    mentorId?: string | null;
     reviewedAt?: string;
-    title?: string;
     status?: ReportPayload["status"];
-    findings?: string[];
-    targetRiskId?: string | null;
-    proposedRiskSeverity?: ReportPayload["proposedRiskSeverity"];
-    proposedRiskStatus?: ReportPayload["proposedRiskStatus"];
+    evidenceNotes?: string;
   } = {},
 ): ReportPayload {
   const today = localTodayDate();
-  const task = defaults.taskId
-    ? bootstrap.tasks.find((candidate) => candidate.id === defaults.taskId) ?? null
-    : bootstrap.tasks[0] ?? null;
-  const milestone = defaults.milestoneId
-    ? bootstrap.milestones.find((candidate) => candidate.id === defaults.milestoneId) ?? null
-    : bootstrap.milestones[0] ?? null;
+  const task = bootstrap.tasks[0] ?? null;
+  const milestone = bootstrap.milestones[0] ?? null;
   const resolvedProjectId =
     defaults.projectId ??
     task?.projectId ??
-    milestone?.projectIds?.[0] ??
+    milestone?.projectIds[0] ??
     bootstrap.projects[0]?.id ??
     "";
-  const resolvedWorkstreamId =
-    defaults.workstreamId !== undefined ? defaults.workstreamId : task?.workstreamIds[0] ?? null;
+  const defaultTarget = reportType === "qa" && task
+    ? [{ kind: "task" as const, id: task.id }]
+    : (reportType === "practice" || reportType === "competition") && milestone
+      ? [{ kind: "milestone" as const, id: milestone.id }]
+      : [];
 
   return {
     reportType,
     projectId: resolvedProjectId,
-    taskId: defaults.taskId ?? task?.id ?? null,
-    milestoneId: defaults.milestoneId ?? milestone?.id ?? null,
-    workstreamId: resolvedWorkstreamId,
+    targetRefs: defaults.targetRefs ?? defaultTarget,
     createdByMemberId: defaults.createdByMemberId ?? bootstrap.members[0]?.id ?? null,
     result: defaults.result ?? "pass",
     summary: defaults.summary ?? "",
@@ -75,14 +67,11 @@ export function buildEmptyReportPayload(
     photoUrl: defaults.photoUrl ?? "",
     createdAt: today,
     participantIds: defaults.participantIds ?? [],
-    mentorApproved: defaults.mentorApproved ?? false,
-    reviewedAt: defaults.reviewedAt ?? today,
-    title: defaults.title ?? "",
-    status: defaults.status ?? "pass",
-    findings: defaults.findings ?? [],
-    targetRiskId: defaults.targetRiskId ?? null,
-    proposedRiskSeverity: defaults.proposedRiskSeverity ?? null,
-    proposedRiskStatus: defaults.proposedRiskStatus ?? null,
+    mentorId: defaults.mentorId ?? null,
+    requestedById: defaults.requestedById ?? null,
+    reviewedAt: defaults.reviewedAt ?? null,
+    evidenceNotes: defaults.evidenceNotes ?? "",
+    status: defaults.status ?? "draft",
   };
 }
 
@@ -90,41 +79,33 @@ export function buildEmptyQaReportPayload(
   bootstrap: BootstrapPayload,
   defaultParticipantId: string | null = null,
 ): QaReportPayload {
-  const task = bootstrap.tasks[0] ?? null;
   const participantId =
     defaultParticipantId &&
     bootstrap.members.some((member) => member.id === defaultParticipantId)
       ? defaultParticipantId
       : bootstrap.members[0]?.id ?? null;
 
-  return buildEmptyReportPayload(bootstrap, "QA", {
-    taskId: task?.id ?? "",
-    projectId: task?.projectId ?? bootstrap.projects[0]?.id ?? "",
-    workstreamId: task?.workstreamIds[0] ?? null,
+  return buildEmptyReportPayload(bootstrap, "qa", {
+    targetRefs: bootstrap.tasks[0] ? [{ kind: "task", id: bootstrap.tasks[0].id }] : [],
+    projectId: bootstrap.tasks[0]?.projectId ?? bootstrap.projects[0]?.id ?? "",
     participantIds: participantId ? [participantId] : [],
     result: "pass",
-    mentorApproved: false,
     notes: "",
     reviewedAt: localTodayDate(),
     photoUrl: "",
-    targetRiskId: task?.targetRiskId ?? null,
-    proposedRiskSeverity: null,
-    proposedRiskStatus: null,
   });
 }
 
 export function buildEmptyTestResultPayload(bootstrap: BootstrapPayload): TestResultPayload {
   const milestone = bootstrap.milestones[0] ?? null;
 
-  return buildEmptyReportPayload(bootstrap, "MilestoneTest", {
-    milestoneId: milestone?.id ?? "",
+  return buildEmptyReportPayload(bootstrap, "practice", {
+    targetRefs: milestone ? [{ kind: "milestone", id: milestone.id }] : [],
     projectId: milestone?.projectIds?.[0] ?? bootstrap.projects[0]?.id ?? "",
-    result: "pass",
+    result: null,
     summary: "",
     notes: "",
-    title: "",
-    status: "pass",
-    findings: [],
+    status: "draft",
     photoUrl: "",
   });
 }

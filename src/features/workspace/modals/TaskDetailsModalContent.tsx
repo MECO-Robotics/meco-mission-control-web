@@ -135,7 +135,7 @@ export function TaskDetailsModal({
           {!canInlineEdit ? <section className="modal-wide"><h3>Work history</h3>
             {bootstrap.workLogs.filter((log) => log.taskId === activeTask.id).length ? <ul>{bootstrap.workLogs.filter((log) => log.taskId === activeTask.id).sort((a, b) => b.date.localeCompare(a.date)).map((log) => <li key={log.id}><details><summary>{log.date} · {log.hours}h · {log.participantIds.map((id) => bootstrap.members.find((member) => member.id === id)?.name ?? "Unknown member").join(", ")}</summary><p>{log.notes || "No notes."}</p>{log.photoUrl ? <a href={log.photoUrl} target="_blank" rel="noreferrer">View work evidence</a> : null}</details></li>)}</ul> : <p className="muted-copy">No work logged yet.</p>}
           </section> : null}
-          {!canInlineEdit ? <section className="modal-wide"><h3>QA history</h3><ReportHistoryList reports={bootstrap.reports.filter((report) => report.reportType === "QA" && report.taskId === activeTask.id)} bootstrap={bootstrap} /></section> : null}
+          {!canInlineEdit ? <section className="modal-wide"><h3>QA history</h3><ReportHistoryList reports={bootstrap.reports.filter((report) => report.reportType === "qa" && report.targetRefs.some((ref) => ref.kind === "task" && ref.id === activeTask.id))} bootstrap={bootstrap} /></section> : null}
 
           <WorkspaceAuditActionList
             actions={taskAuditActions}

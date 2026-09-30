@@ -1,8 +1,7 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskStatus } from "@/types/common";
-import { getTaskWaitingOnDependencies } from "@/features/workspace/shared/task/taskPlanning";
+import { getTaskOpenBlockersForTask, getTaskWaitingOnDependencies } from "@/features/workspace/shared/task/taskPlanning";
 
-export type TimelineTaskBlockerRecord = NonNullable<BootstrapPayload["taskBlockers"]>[number];
 export type TimelineTaskStatusSignal = TaskStatus | "blocked" | "waiting-on-dependency";
 
 export interface TimelineTaskDependencyCounts {
@@ -41,27 +40,11 @@ export function buildTaskDependencyCountsByTaskId(
   return dependencyCountsByTaskId;
 }
 
-function buildActiveBlockerTaskIds(blockers: TimelineTaskBlockerRecord[] = []) {
-  return new Set(
-    blockers.flatMap((blocker) =>
-      blocker.status === "open" && blocker.blockedTaskId ? [blocker.blockedTaskId] : [],
-    ),
-  );
-}
-
-function hasActiveTaskBlocker(
-  task: BootstrapPayload["tasks"][number],
-  activeBlockerTaskIds: Set<string>,
-) {
-  return task.blockers.length > 0 || activeBlockerTaskIds.has(task.id);
-}
-
 function getTimelineTaskStatusSignalForTask(
   task: BootstrapPayload["tasks"][number],
   bootstrap: BootstrapPayload,
-  activeBlockerTaskIds: Set<string>,
 ): TimelineTaskStatusSignal {
-  if (hasActiveTaskBlocker(task, activeBlockerTaskIds)) {
+  if (getTaskOpenBlockersForTask(task.id, bootstrap).length > 0) {
     return "blocked";
   }
 
@@ -76,22 +59,16 @@ export function getTimelineTaskStatusSignal(
   task: BootstrapPayload["tasks"][number],
   bootstrap: BootstrapPayload,
 ): TimelineTaskStatusSignal {
-  return getTimelineTaskStatusSignalForTask(
-    task,
-    bootstrap,
-    buildActiveBlockerTaskIds(bootstrap.taskBlockers),
-  );
+  return getTimelineTaskStatusSignalForTask(task, bootstrap);
 }
 
 export function buildTimelineTaskStatusSignalByTaskId(
   bootstrap: BootstrapPayload,
 ): Record<string, TimelineTaskStatusSignal> {
-  const activeBlockerTaskIds = buildActiveBlockerTaskIds(bootstrap.taskBlockers);
-
   return Object.fromEntries(
     bootstrap.tasks.map((task) => [
       task.id,
-      getTimelineTaskStatusSignalForTask(task, bootstrap, activeBlockerTaskIds),
+      getTimelineTaskStatusSignalForTask(task, bootstrap),
     ]),
   );
 }

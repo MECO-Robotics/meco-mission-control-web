@@ -1,5 +1,5 @@
 ﻿import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskBlockerRecord } from "@/types/recordsExecution";
+import type { RiskRecord } from "@/types/recordsReporting";
 
 const CALENDAR_DAY_MS = 24 * 60 * 60 * 1000;
 const DATE_ONLY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
@@ -56,20 +56,16 @@ export function startOfWeekTimestamp(now: Date) {
   return cursor.getTime();
 }
 
-export function classifyBlocker(blocker: TaskBlockerRecord): keyof BlockerBreakdown {
-  const raw = `${blocker.blockerType} ${blocker.description}`.toLowerCase();
-
-  if (blocker.blockerType === "lost-tool" || blocker.blockerType === "broken-tool" || raw.includes("tool")) {
-    return "lostBrokenTool";
-  }
-
-  if (blocker.blockerType === "lost-part" || blocker.blockerType === "broken-part" || raw.includes("part")) {
+export function classifyBlocker(blocker: RiskRecord): keyof BlockerBreakdown {
+  const raw = `${blocker.category} ${blocker.title} ${blocker.detail}`.toLowerCase();
+  if (raw.includes("tool")) return "lostBrokenTool";
+  if (raw.includes("part")) {
     return "lostBrokenPart";
   }
 
   if (
-    blocker.blockerType === "manufacturing-unavailable" ||
-    blocker.blockerType === "shipping-delay" ||
+    blocker.category === "supply" ||
+    blocker.category === "manufacturing" ||
     raw.includes("supply") ||
     raw.includes("material") ||
     raw.includes("vendor") ||
@@ -78,7 +74,7 @@ export function classifyBlocker(blocker: TaskBlockerRecord): keyof BlockerBreakd
     return "supplyMaterial";
   }
 
-  if (blocker.blockerType === "design-issue" || raw.includes("design")) {
+  if (blocker.category === "design" || raw.includes("design")) {
     return "designIssue";
   }
 
@@ -210,18 +206,14 @@ export function latestReportByTaskId(reports: BootstrapPayload["reports"]) {
   const byTask = new Map<string, BootstrapPayload["reports"][number]>();
 
   reports
-    .filter((report) => report.reportType === "QA" && report.taskId)
+    .filter((report) => report.reportType === "qa")
     .forEach((report) => {
-      const taskId = report.taskId as string;
-      const previous = byTask.get(taskId);
-      const reportTimestamp = parseTimestamp(report.reviewedAt ?? report.createdAt) ?? Number.NEGATIVE_INFINITY;
-      const previousTimestamp = previous
-        ? parseTimestamp(previous.reviewedAt ?? previous.createdAt) ?? Number.NEGATIVE_INFINITY
-        : Number.NEGATIVE_INFINITY;
-
-      if (!previous || reportTimestamp > previousTimestamp) {
-        byTask.set(taskId, report);
-      }
+      report.targetRefs.filter((target) => target.kind === "task").forEach(({ id }) => {
+        const previous = byTask.get(id);
+        const reportTimestamp = parseTimestamp(report.reviewedAt ?? report.createdAt) ?? Number.NEGATIVE_INFINITY;
+        const previousTimestamp = previous ? parseTimestamp(previous.reviewedAt ?? previous.createdAt) ?? Number.NEGATIVE_INFINITY : Number.NEGATIVE_INFINITY;
+        if (!previous || reportTimestamp > previousTimestamp) byTask.set(id, report);
+      });
     });
 
   return byTask;

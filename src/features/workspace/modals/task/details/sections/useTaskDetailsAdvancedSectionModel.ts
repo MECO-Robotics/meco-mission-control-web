@@ -10,9 +10,8 @@ import {
   getTaskSelectedPartInstanceIds,
 } from "../../../../shared/task/taskTargeting";
 import { formatIterationVersion } from "@/lib/appUtils/common";
-import { getTaskDisciplinesForProject } from "@/lib/taskDisciplines";
+import { getWorkTypesForProject } from "@/lib/taskDisciplines";
 import type { TaskDetailsEditableField } from "../../taskModalTypes";
-import { formatRiskSeverity } from "@/features/workspace/views/riskViewData/riskViewDataPayload";
 
 interface UseTaskDetailsAdvancedSectionModelArgs {
   activeTask: TaskRecord;
@@ -32,7 +31,7 @@ export function useTaskDetailsAdvancedSectionModel({
   const editableTask = taskDraft ?? activeTask;
   const selectedProject =
     bootstrap.projects.find((project) => project.id === editableTask.projectId) ?? null;
-  const availableDisciplines = getTaskDisciplinesForProject(selectedProject);
+  const availableDisciplines = getWorkTypesForProject(bootstrap, selectedProject);
   const mechanismsById = Object.fromEntries(
     bootstrap.mechanisms.map((mechanism) => [mechanism.id, mechanism] as const),
   ) as Record<string, BootstrapPayload["mechanisms"][number]>;
@@ -45,15 +44,12 @@ export function useTaskDetailsAdvancedSectionModel({
   const workTypesById = Object.fromEntries(
     bootstrap.workTypes.map((discipline) => [discipline.id, discipline] as const),
   ) as Record<string, BootstrapPayload["workTypes"][number]>;
-  const risksById = Object.fromEntries(
-    bootstrap.risks.map((risk) => [risk.id, risk] as const),
-  ) as Record<string, BootstrapPayload["risks"][number]>;
   const selectedPrimaryTargetId = editableTask.subsystemIds[0] ?? "";
   const projectMechanisms = bootstrap.mechanisms.filter(
     (mechanism) => mechanism.subsystemId === selectedPrimaryTargetId,
   );
   const projectPartInstances = bootstrap.partInstances.filter(
-    (partInstance) => partInstance.subsystemId === selectedPrimaryTargetId,
+    (partInstance) => partInstance.intendedSubsystemId === selectedPrimaryTargetId,
   );
   const selectedMechanismIds = getTaskSelectedMechanismIds(editableTask);
   const selectedPartInstanceIds = getTaskSelectedPartInstanceIds(editableTask);
@@ -61,12 +57,12 @@ export function useTaskDetailsAdvancedSectionModel({
     `${mechanism.name} (${formatIterationVersion(mechanism.iteration)})`;
   const getPartInstanceLabel = (partInstance: BootstrapPayload["partInstances"][number]) =>
     getTaskPartInstanceLabel(partInstance, partDefinitionsById, formatIterationVersion);
-  const disciplineText = editableTask.disciplineId
-    ? availableDisciplines.find((discipline) => discipline.id === editableTask.disciplineId)?.name ??
+  const disciplineText = editableTask.workTypeId
+    ? availableDisciplines.find((discipline) => discipline.id === editableTask.workTypeId)?.name ??
       "Not set"
     : "Not set";
-  const disciplineAccentColor = editableTask.disciplineId
-    ? getTimelineTaskDisciplineColor(editableTask.disciplineId, workTypesById)
+  const disciplineAccentColor = editableTask.workTypeId
+    ? getTimelineTaskDisciplineColor(editableTask.workTypeId, workTypesById)
     : null;
   const disciplinePillStyle = {
     "--task-detail-pill-accent": disciplineAccentColor ?? undefined,
@@ -113,19 +109,10 @@ export function useTaskDetailsAdvancedSectionModel({
     })
     .filter((partInstance): partInstance is { id: string; label: string } => Boolean(partInstance));
   const partsText = partLabels.length > 0 ? partLabels.join(", ") : "No part linked";
-  const targetRisk = editableTask.targetRiskId ? risksById[editableTask.targetRiskId] : null;
-  const targetRiskText = targetRisk
-    ? `${targetRisk.title} (${formatRiskSeverity(targetRisk.severity)})`
-    : "No risk targeted";
-  const riskTargetOptions = bootstrap.risks.map((risk) => ({
-    id: risk.id,
-    name: `${risk.title} (${formatRiskSeverity(risk.severity)})`,
-  }));
-
   const handleDisciplineChange = (selection: string[]) => {
     setTaskDraft?.((current) => ({
       ...current,
-      disciplineId: selection[0] ?? "",
+      workTypeId: selection[0] ?? "",
     }));
     setEditingField(null);
   };
@@ -133,13 +120,6 @@ export function useTaskDetailsAdvancedSectionModel({
   const handleStartDateChange = (milestone: ChangeEvent<HTMLInputElement>) => {
     setTaskDraft?.((current) => ({ ...current, startDate: milestone.target.value }));
     setEditingField(null);
-  };
-
-  const handleTargetRiskChange = (milestone: ChangeEvent<HTMLSelectElement>) => {
-    setTaskDraft?.((current) => ({
-      ...current,
-      targetRiskId: milestone.target.value || null,
-    }));
   };
 
   const handleMechanismChange = (selection: string[]) => {
@@ -234,7 +214,6 @@ export function useTaskDetailsAdvancedSectionModel({
     handleMechanismChange,
     handlePartsChange,
     handleStartDateChange,
-    handleTargetRiskChange,
     mechanismNames,
     mechanismRows,
     partsText,
@@ -243,9 +222,7 @@ export function useTaskDetailsAdvancedSectionModel({
     removePartInstanceSelection,
     projectMechanisms,
     projectPartInstances,
-    riskTargetOptions,
     selectedMechanismIds,
     selectedPartInstanceIds,
-    targetRiskText,
   };
 }

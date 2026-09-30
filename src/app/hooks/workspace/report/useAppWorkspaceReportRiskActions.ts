@@ -4,24 +4,9 @@ import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
 import { toErrorMessage } from "@/lib/appUtils/common";
 import { deleteRiskRecord, updateRiskRecord } from "@/lib/auth/records/reporting";
 import type { RiskPayload } from "@/types/payloads";
+import { sanitizeRiskPayload } from "@/features/workspace/views/riskViewData/riskViewDataPayload";
 
 export type AppWorkspaceReportRiskActions = ReturnType<typeof useAppWorkspaceReportRiskActions>;
-
-function normalizeRiskPayload(payload: RiskPayload): RiskPayload {
-  const mitigationTaskId =
-    typeof payload.mitigationTaskId === "string" && payload.mitigationTaskId.trim().length > 0
-      ? payload.mitigationTaskId.trim()
-      : null;
-
-  return {
-    ...payload,
-    title: payload.title.trim(),
-    detail: payload.detail.trim(),
-    sourceId: payload.sourceId.trim(),
-    attachmentId: payload.attachmentId.trim(),
-    mitigationTaskId,
-  };
-}
 
 export function useAppWorkspaceReportRiskActions(model: AppWorkspaceModel) {
   const handleUpdateRisk = useCallback(
@@ -29,7 +14,7 @@ export function useAppWorkspaceReportRiskActions(model: AppWorkspaceModel) {
       model.setDataMessage(null);
 
       try {
-        await updateRiskRecord(riskId, normalizeRiskPayload(payload), model.handleUnauthorized);
+        await updateRiskRecord(riskId, sanitizeRiskPayload(payload), model.handleUnauthorized);
         await model.loadWorkspace();
       } catch (error) {
         model.setDataMessage(toErrorMessage(error));

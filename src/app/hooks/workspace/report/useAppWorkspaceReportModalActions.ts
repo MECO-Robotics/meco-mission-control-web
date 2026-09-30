@@ -37,9 +37,9 @@ export function useAppWorkspaceReportModalActions(model: AppWorkspaceModel) {
 
   const openCreateQaReportModal = useCallback((taskId?: string) => {
     const draft = buildEmptyQaReportPayload(model.scopedBootstrap, model.activePersonFilter.length === 1 ? model.activePersonFilter[0] : null);
-    const task = model.scopedBootstrap.tasks.find((candidate) => candidate.id === (taskId ?? draft.taskId));
+    const task = model.scopedBootstrap.tasks.find((candidate) => candidate.id === taskId) ?? model.scopedBootstrap.tasks[0];
     leaveTaskDetails(taskId);
-    model.setQaReportDraft({ ...draft, taskId: task?.id ?? "", projectId: task?.projectId ?? draft.projectId, workstreamId: task?.workstreamIds[0] ?? null, milestoneId: null, targetRiskId: task?.targetRiskId ?? null });
+    model.setQaReportDraft({ ...draft, targetRefs: task ? [{ kind: "task", id: task.id }] : [], projectId: task?.projectId ?? draft.projectId });
     model.setQaReportModalMode("create");
   }, [leaveTaskDetails, model]);
 
@@ -47,10 +47,11 @@ export function useAppWorkspaceReportModalActions(model: AppWorkspaceModel) {
 
   const openCreateMilestoneReportModal = useCallback((milestoneId?: string, onReturn?: () => void) => {
     const draft = buildEmptyTestResultPayload(model.scopedBootstrap);
-    const milestone = model.scopedBootstrap.milestones.find((candidate) => candidate.id === (milestoneId ?? draft.milestoneId));
+    const defaultMilestoneId = draft.targetRefs.find((ref) => ref.kind === "milestone")?.id;
+    const milestone = model.scopedBootstrap.milestones.find((candidate) => candidate.id === (milestoneId ?? defaultMilestoneId));
     leaveTaskDetails();
     returnToDetails.current = onReturn ?? null;
-    model.setMilestoneReportDraft({ ...draft, milestoneId: milestone?.id ?? "", projectId: milestone?.projectIds[0] ?? draft.projectId, taskId: null, workstreamId: null });
+    model.setMilestoneReportDraft({ ...draft, targetRefs: milestone ? [{ kind: "milestone", id: milestone.id }] : [], projectId: milestone?.projectIds[0] ?? draft.projectId });
     model.setMilestoneReportFindings("");
     model.setMilestoneReportModalMode("create");
   }, [leaveTaskDetails, model]);

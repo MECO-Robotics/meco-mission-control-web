@@ -34,7 +34,8 @@ export function MilestoneReportEditorModal({
     if (JSON.stringify([milestoneReportDraft, milestoneReportFindings]) !== initialDraft.current && !window.confirm("Discard unsaved changes?")) return;
     onClose();
   };
-  const selectedMilestone = bootstrap.milestones.find((item) => item.id === milestoneReportDraft.milestoneId);
+  const milestoneRef = milestoneReportDraft.targetRefs.find((ref) => ref.kind === "milestone");
+  const selectedMilestone = bootstrap.milestones.find((item) => item.id === milestoneRef?.id);
   const milestoneReportPhotoProjectId =
     selectedMilestone?.projectIds[0] ?? bootstrap.projects[0]?.id ?? null;
 
@@ -71,7 +72,8 @@ export function MilestoneReportEditorModal({
               onChange={(milestone) =>
                 setMilestoneReportDraft((current) => ({
                   ...current,
-                  milestoneId: milestone.target.value,
+                  projectId: bootstrap.milestones.find((item) => item.id === milestone.target.value)?.projectIds[0] ?? current.projectId,
+                  targetRefs: [{ kind: "milestone", id: milestone.target.value }],
                 }))
               }
               required
@@ -80,7 +82,7 @@ export function MilestoneReportEditorModal({
                 color: "var(--text-title)",
                 border: "1px solid var(--border-base)",
               }}
-              value={milestoneReportDraft.milestoneId ?? ""}
+              value={milestoneRef?.id ?? ""}
             >
               <option disabled value="">
                 Choose a milestone
@@ -101,11 +103,11 @@ export function MilestoneReportEditorModal({
               onChange={(milestone) =>
                 setMilestoneReportDraft((current) => ({
                   ...current,
-                  title: milestone.target.value,
+                  summary: milestone.target.value,
                 }))
               }
               required
-              value={milestoneReportDraft.title ?? ""}
+              value={milestoneReportDraft.summary}
             />
           </label>
           <label className="field">
@@ -124,9 +126,9 @@ export function MilestoneReportEditorModal({
               }}
               value={milestoneReportDraft.status}
             >
-              <option value="pass">Pass</option>
-              <option value="fail">Fail</option>
-              <option value="blocked">Blocked</option>
+              <option value="draft">Draft</option>
+              <option value="submitted">Submitted</option>
+              <option value="reviewed">Reviewed</option>
             </select>
           </label>
           <label className="field modal-wide">
@@ -140,7 +142,7 @@ export function MilestoneReportEditorModal({
           </label>
           <PhotoUploadField
             accept="image/*,video/*"
-            currentUrl={milestoneReportDraft.photoUrl}
+            currentUrl={milestoneReportDraft.photoUrl ?? ""}
             label="Milestone report media"
             onChange={(value) =>
               setMilestoneReportDraft((current) => ({ ...current, photoUrl: value }))

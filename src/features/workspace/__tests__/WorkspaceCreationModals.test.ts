@@ -176,20 +176,15 @@ describe("workspace creation modals", () => {
     expect(markup).toContain("task-details-close-button");
     expect(markup).toContain('aria-label="Close QA report modal"');
     expect(markup).toContain("modal-form task-details-grid");
-    expect(markup).toContain("Risk reassessment");
-    expect(markup).toContain("Intake binding (High)");
-    expect(markup).toContain("Partial mitigation");
-    expect(markup).toContain("Full mitigation");
-    expect(markup).toContain("risk severity changes only");
+    expect(markup).toContain("Result");
+    expect(markup).toContain("Notes");
   });
 
-  it("defaults QA risk reassessment to the selected task target risk", () => {
+  it("targets QA evidence at the selected task", () => {
     const bootstrap = createModalBootstrap();
     const payload = buildEmptyQaReportPayload(bootstrap);
 
-    expect(payload.targetRiskId).toBe("risk-1");
-    expect(payload.proposedRiskSeverity).toBeNull();
-    expect(payload.proposedRiskStatus).toBeNull();
+    expect(payload.targetRefs).toEqual([{ kind: "task", id: "task-1" }]);
   });
 
   it("keeps milestone report creation aligned with report modal chrome", () => {
