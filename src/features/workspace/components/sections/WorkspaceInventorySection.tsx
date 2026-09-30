@@ -20,7 +20,6 @@ export function WorkspaceInventorySection(props: WorkspaceContentPanelsViewProps
     openEditPurchaseModal,
     partDefinitionsById,
     mechanismsById,
-    membersById,
     tabSwitchDirection,
     subsystemsById,
     activePersonFilter,
