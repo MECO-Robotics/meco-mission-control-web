@@ -9,6 +9,9 @@ import type { MembersById, SubsystemsById } from "@/features/workspace/shared/mo
 import type { ManufacturingItemRecord } from "@/types/recordsInventory";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { createTask } from "@/features/workspace/views/__tests__/taskQueueTestFixtures";
+import { ManufacturingProcessIcon } from "@/features/workspace/shared/manufacturing/ManufacturingProcessPresentation";
+import { ManufacturingEditorFields } from "@/features/workspace/modals/purchaseManufacturing/ManufacturingEditorFields";
+import { createBootstrap } from "@/lib/appUtilsTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
@@ -121,12 +124,49 @@ describe("ManufacturingKanbanBoard", () => {
     expect(markup).toContain("--task-queue-board-card-priority-accent:#e5484d");
     expect(markup).toContain("High priority</span>");
     expect(markup).not.toContain("task-queue-board-card-priority-high");
-    expect(markup).toContain('aria-label="Manufacturing item"');
+    expect(markup).toContain('aria-label="CNC machining manufacturing method"');
     expect(markup).toContain("requested-item-title");
     expect(markup).not.toContain("requested-item-subtitle");
     expect(markup).not.toContain("Drive / Student");
     expect(markup).toContain('title="Student"');
     expect(markup).toContain("profile-avatar-fallback");
+  });
+
+  it("uses distinct method icons and shows the method in the manufacturing detail editor", () => {
+    const processes = ["3d-print", "cnc", "fabrication"] as const;
+    const iconMarkup = processes.map((process) =>
+      renderToStaticMarkup(React.createElement(ManufacturingProcessIcon, { process })),
+    );
+    expect(new Set(iconMarkup).size).toBe(3);
+    expect(iconMarkup[0]).toContain("3D printing manufacturing method");
+    expect(iconMarkup[1]).toContain("CNC machining manufacturing method");
+    expect(iconMarkup[2]).toContain("Fabrication manufacturing method");
+
+    const detailMarkup = renderToStaticMarkup(
+      React.createElement(ManufacturingEditorFields, {
+        bootstrap: createBootstrap(),
+        manufacturingDraft: {
+          title: "Drive Plate",
+          subsystemId: "subsystem-core",
+          requestedById: null,
+          process: "cnc",
+          dueDate: "2026-05-01",
+          material: "Aluminum 6061",
+          materialId: null,
+          partDefinitionId: null,
+          partInstanceId: null,
+          partInstanceIds: [],
+          quantity: 1,
+          status: "requested",
+          mentorReviewed: false,
+          inHouse: true,
+        },
+        manufacturingModalMode: "edit",
+        setManufacturingDraft: jest.fn(),
+      }),
+    );
+    expect(detailMarkup).toContain("CNC machining");
+    expect(detailMarkup).toContain("Manufacturing method");
   });
 
   it("ignores drag-drop status changes while a quick action is already pending", async () => {

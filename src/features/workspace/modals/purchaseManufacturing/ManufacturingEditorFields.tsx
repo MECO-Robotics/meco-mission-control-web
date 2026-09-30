@@ -6,6 +6,7 @@ import { inferManufacturingDraftFromPartSelection } from "@/lib/appUtils/manufac
 
 import { ManufacturingPartInstancesSection } from "./ManufacturingPartInstancesSection";
 import { useManufacturingEditorState } from "./useManufacturingEditorState";
+import { ManufacturingProcessIcon, getManufacturingProcessLabel } from "@/features/workspace/shared/manufacturing/ManufacturingProcessPresentation";
 
 interface ManufacturingEditorFieldsProps {
   bootstrap: BootstrapPayload;
@@ -30,6 +31,16 @@ export function ManufacturingEditorFields({
 
   return (
     <>
+      <div
+        className="manufacturing-process-detail modal-wide"
+        style={{ alignItems: "center", background: "var(--bg-row-alt)", border: "1px solid var(--border-base)", borderRadius: "0.65rem", display: "flex", gap: "0.65rem", padding: "0.7rem 0.85rem" }}
+      >
+        <ManufacturingProcessIcon process={manufacturingDraft.process} />
+        <div style={{ display: "grid", gap: "0.1rem" }}>
+          <strong style={{ color: "var(--text-title)" }}>{getManufacturingProcessLabel(manufacturingDraft.process)}</strong>
+          <small style={{ color: "var(--text-copy)" }}>Manufacturing method</small>
+        </div>
+      </div>
       <label className="field modal-wide">
         <span>Part definition</span>
         <select

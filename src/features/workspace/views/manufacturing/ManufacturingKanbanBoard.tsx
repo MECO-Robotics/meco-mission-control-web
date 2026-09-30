@@ -4,12 +4,12 @@ import { formatDate } from "@/lib/appUtils/common";
 import type { TaskPriority } from "@/types/common";
 import type { ManufacturingItemRecord } from "@/types/recordsInventory";
 import type { TaskRecord } from "@/types/recordsExecution";
-import { IconManufacturing } from "@/components/shared/Icons";
 import { EditableHoverIndicator, RequestedItemMeta } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
 import { MANUFACTURING_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
 import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
 import { KanbanColumns } from "@/features/workspace/views/kanban/KanbanColumns";
+import { ManufacturingProcessIcon } from "@/features/workspace/shared/manufacturing/ManufacturingProcessPresentation";
 import {
   getMemberInitial,
   getTaskCardPerson,
@@ -209,14 +209,7 @@ export function ManufacturingKanbanBoard({
             <div className="task-queue-board-card-meta">
               <span title={projectName}>{projectName}</span>
               <div className="task-queue-board-card-meta-person-group">
-                <span
-                  aria-label="Manufacturing item"
-                  className="task-queue-board-card-type-icon"
-                  role="img"
-                  title="Manufacturing item"
-                >
-                  <IconManufacturing />
-                </span>
+                <ManufacturingProcessIcon process={item.process} />
                 {person ? (
                   <span className="task-queue-board-card-person" title={person.name}>
                     {person.photoUrl ? (
