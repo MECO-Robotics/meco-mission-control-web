@@ -50,3 +50,20 @@ describe("FilterDropdown column appearance", () => {
     expect(pruneFilterSelection(["approved", "removed"], options)).toEqual(["approved"]);
   });
 });
+
+describe("FilterDropdown toolbar summary", () => {
+  it("shows All for an unfiltered selection while keeping the descriptive accessible label", () => {
+    const markup = renderToStaticMarkup(
+      createElement(FilterDropdown, {
+        allLabel: "All disciplines",
+        ariaLabel: "Filter by discipline",
+        onChange: jest.fn(),
+        options,
+        value: [],
+      }),
+    );
+
+    expect(markup).toContain('aria-label="Filter by discipline: All disciplines"');
+    expect(markup).toContain('class="toolbar-filter-value">All</span>');
+  });
+});

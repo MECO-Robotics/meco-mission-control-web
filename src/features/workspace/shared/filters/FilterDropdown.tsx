@@ -69,7 +69,7 @@ export function FilterDropdown({
     options,
     value,
   );
-  const displaySelectedLabel = compactSummary
+  const displaySelectedLabel = compactSummary || value.length === 0
     ? formatCompactFilterSelectionLabel(options, value)
     : selectedLabel;
   const selectedOption = options.find((option) => option.id === value[0]);
