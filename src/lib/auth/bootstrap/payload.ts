@@ -4,6 +4,7 @@ import { normalizePlanningRecords } from "./planning";
 import { normalizeBootstrapCatalogRecords } from "./payload-catalog";
 import { normalizeBootstrapReports } from "./payload-reports";
 import { normalizeBootstrapTaskBlockers } from "./task-blockers";
+import { normalizeTaskDependencies } from "./task-dependencies";
 import type { LegacyBootstrapPayload } from "./shared";
 
 function normalizeMeetingRecords(source: BootstrapPayload["meetings"]): MeetingRecord[] {
@@ -50,7 +51,7 @@ export function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapP
     partInstances: catalog.partInstances,
     milestones: catalog.milestones,
     milestoneRequirements: source.milestoneRequirements ?? [],
-    taskDependencies: source.taskDependencies ?? [],
+    taskDependencies: normalizeTaskDependencies(source.taskDependencies),
     taskBlockers: normalizeBootstrapTaskBlockers(source),
     reports: reports.reports,
     reportFindings: reports.reportFindings,
@@ -62,6 +63,7 @@ export function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapP
     designIterations: source.designIterations ?? [],
     risks: source.risks ?? [],
     tasks: planning.tasks,
+    workItems: source.workItems ?? [],
     workLogs: catalog.workLogs,
     meetings: normalizeMeetingRecords(source.meetings),
     attendanceRecords: source.attendanceRecords ?? [],

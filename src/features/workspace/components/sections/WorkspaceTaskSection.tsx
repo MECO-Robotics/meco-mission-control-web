@@ -3,7 +3,7 @@ import { memo } from "react";
 import { MilestonesView } from "@/features/workspace/views/milestones/MilestonesView";
 import { TaskCalendarView } from "@/features/workspace/views/taskCalendar/TaskCalendarView";
 import { RobotMapView } from "@/features/workspace/views/robotMap/RobotMapView";
-import { TaskQueueView } from "@/features/workspace/views/taskQueue/TaskQueueView";
+import { WorkQueueView } from "@/features/workspace/views/work/WorkQueueView";
 import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
 import { WorkspaceSectionPanel, WorkspaceSubPanel } from "../../WorkspaceContentPanelShells";
 import type { WorkspaceContentPanelsViewProps } from "../workspaceContentPanelsViewTypes";
@@ -15,13 +15,10 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
   const {
     activePersonFilter,
     bootstrap,
-    disciplinesById,
     handleMeetingSave,
-    handleTaskStatusChange,
     handleTimelineMilestoneDelete,
     handleTimelineMilestoneSave,
     isAllProjectsView,
-    isNonRobotProject,
     membersById,
     openCreateTaskModal,
     openCreateTaskModalFromTimeline,
@@ -39,7 +36,6 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
     updateSubsystemConfiguration,
     openTimelineTaskDetailsModal,
     setActivePersonFilter,
-    subsystemsById,
     taskSwipeDirection,
     taskView,
     timelineMilestoneCreateSignal,
@@ -131,18 +127,14 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
         isActive={taskView === "queue"}
         swipeDirection={taskSwipeDirection}
       >
-        <TaskQueueView
-          currentMemberId={props.currentMemberId}
-          activePersonFilter={activePersonFilter}
+        <WorkQueueView
           bootstrap={bootstrap}
-          disciplinesById={disciplinesById}
-          isAllProjectsView={isAllProjectsView}
-          isNonRobotProject={isNonRobotProject}
-          membersById={membersById}
-          openCreateTaskModal={openCreateTaskModal}
-          openEditTaskModal={openTimelineTaskDetailsModal}
-          onReassignTaskStatus={handleTaskStatusChange}
-          subsystemsById={subsystemsById}
+          onCreateTask={openCreateTaskModal}
+          onCreateManufacturing={(process) => props.openCreateManufacturingModal(process)}
+          onEditTask={openTimelineTaskDetailsModal}
+          onEditManufacturing={props.openEditManufacturingModal}
+          onManufacturingStatusChange={props.onCncQuickStatusChange}
+          showMentorQuickActions={props.showCncMentorQuickActions}
         />
       </WorkspaceSubPanel>
 

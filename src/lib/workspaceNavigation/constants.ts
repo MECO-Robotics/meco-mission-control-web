@@ -6,7 +6,7 @@ export const NAVIGATION_SECTION_LABELS: Record<NavigationSection, string> = {
 };
 export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = [
   { id: "home", label: "Home", section: "home", target: { tab: "home" } },
-  { id: "work-tasks", label: "Tasks", section: "work", target: { tab: "tasks", taskView: "queue" } },
+  { id: "work-tasks", label: "Work", section: "work", target: { tab: "tasks", taskView: "queue" } },
   { id: "work-schedule", label: "Schedule", section: "work", target: { tab: "tasks", taskView: "calendar" } },
   { id: "work-risks", label: "Risks", section: "work", target: { tab: "risk-management", riskManagementView: "kanban" } },
   { id: "work-activity", label: "Activity", section: "work", target: { tab: "worklogs", worklogsView: "logs" } },
@@ -14,7 +14,6 @@ export const NAVIGATION_SUB_ITEMS: readonly NavigationSubItem[] = [
   { id: "resources-documents", label: "Documents", section: "resources", target: { tab: "inventory", inventoryView: "materials" } },
   { id: "resources-parts", label: "Parts", section: "resources", target: { tab: "inventory", inventoryView: "parts" } },
   { id: "resources-purchases", label: "Purchases", section: "resources", target: { tab: "inventory", inventoryView: "purchases" } },
-  { id: "resources-manufacturing", label: "Manufacturing", section: "resources", target: { tab: "manufacturing", manufacturingView: "all" } },
   { id: "resources-structure", label: "Structure", section: "resources", target: { tab: "tasks", taskView: "robot-map" } },
   { id: "team-people", label: "People", section: "team", target: { tab: "roster", rosterView: "directory" } },
   { id: "team-attendance", label: "Attendance", section: "team", target: { tab: "roster", rosterView: "attendance" } },

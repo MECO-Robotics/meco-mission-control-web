@@ -26,6 +26,7 @@ type SelectionLookups = {
 
 type TaskDependencyTargetLookups = {
   tasksById: Record<string, TaskRecord>;
+  manufacturingItems?: BootstrapPayload["manufacturingItems"];
   milestonesById: Record<string, BootstrapPayload["milestones"][number]>;
   partInstancesById: Record<string, BootstrapPayload["partInstances"][number]>;
   partDefinitionsById: Record<string, BootstrapPayload["partDefinitions"][number]>;
@@ -38,6 +39,7 @@ type TaskScopeChip = {
 };
 
 export const TASK_DEPENDENCY_KIND_LABELS: Record<TaskDependencyKind, string> = {
+  work_item: "Work item",
   task: "Task",
   milestone: "Milestone",
   part_instance: "Part instance",
@@ -46,6 +48,7 @@ export const TASK_DEPENDENCY_KIND_LABELS: Record<TaskDependencyKind, string> = {
 export const TASK_DEPENDENCY_KIND_OPTIONS: DropdownOption[] = (
   Object.entries(TASK_DEPENDENCY_KIND_LABELS) as Array<[TaskDependencyKind, string]>
 )
+  .filter(([kind]) => kind !== "task")
   .map(([kind, label]) => ({
     id: kind,
     name: label,
@@ -56,6 +59,7 @@ type DependencyTargetLookups = TaskDependencyTargetLookups;
 
 function getDependencyKindIcon(kind: TaskDependencyKind) {
   switch (kind) {
+    case "work_item":
     case "task":
       return createElement(IconTasks);
     case "milestone":
@@ -171,6 +175,10 @@ export function getTaskDependencyTargetName(
   refId: string,
   lookups: TaskDependencyTargetLookups,
 ) {
+  if (dependencyKind === "work_item") {
+    return lookups.tasksById[refId]?.title ?? "Unknown work item";
+  }
+
   if (dependencyKind === "task") {
     return lookups.tasksById[refId]?.title ?? "Unknown task";
   }
@@ -196,6 +204,13 @@ export function getTaskDependencyTargetOptions(
   dependencyKind: TaskDependencyKind,
   lookups: DependencyTargetLookups,
 ) {
+  if (dependencyKind === "work_item") {
+    return [
+      ...Object.values(lookups.tasksById).map((task) => ({ id: `task:${task.id}`, name: task.title, icon: createElement(IconTasks) })),
+      ...(lookups.manufacturingItems ?? []).map((item) => ({ id: `manufacturing:${item.id}`, name: `Manufacturing · ${item.title}`, icon: createElement(IconTasks) })),
+    ].sort((left, right) => left.name.localeCompare(right.name));
+  }
+
   if (dependencyKind === "task") {
     return Object.values(lookups.tasksById)
       .sort((left, right) => left.title.localeCompare(right.title))

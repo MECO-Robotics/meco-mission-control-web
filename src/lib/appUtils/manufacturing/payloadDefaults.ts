@@ -21,6 +21,8 @@ export function buildEmptyManufacturingPayload(
     subsystemId: getDefaultSubsystemId(bootstrap),
     requestedById: requesterId,
     process,
+    workType: "Manufacturing",
+    responsibleGroup: "Mechanical",
     dueDate: localTodayDate(),
     material: firstMaterial?.name ?? "",
     materialId: firstMaterial?.id ?? null,

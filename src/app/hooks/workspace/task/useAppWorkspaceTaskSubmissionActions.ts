@@ -68,7 +68,7 @@ export function useAppWorkspaceTaskSubmissionActions(
           taskId: savedTask.id,
           desiredDependencies: model.taskDraft.taskDependencies,
           existingDependencies: (model.bootstrap.taskDependencies ?? []).filter(
-            (dependency): dependency is TaskDependencyRecord => dependency.taskId === savedTask.id,
+            (dependency): dependency is TaskDependencyRecord => (dependency.workItemId ?? dependency.taskId) === savedTask.id && (dependency.sourceType ?? "task") === "task",
           ),
           handleUnauthorized: model.handleUnauthorized,
           onPersisted: (draft, record) => {

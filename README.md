@@ -226,11 +226,11 @@ The app uses the original sidebar implementation: Home shortcut, expandable Work
 | Area | Views | Consolidation |
 | --- | --- | --- |
 | Home | Priority work, upcoming milestones, Needs attention | One attention row per source record; Project health expands on demand |
-| Work | Tasks, Schedule, Risks, Activity | Schedule offers Calendar, Timeline and Agenda; Activity filters work logs, changes, QA and milestone results |
-| Resources | Materials/Documents, Parts, Purchases, Manufacturing, Structure | Manufacturing uses a process filter; installed parts live under their definition; CAD import opens from Structure |
+| Work | Work, Manufacturing, Schedule, Risks, Activity | Work and manufacturing share one queue; manufacturing retains CNC, 3D Print and Fabrication processes. Schedule offers Calendar, Timeline and Agenda; Activity filters work logs, changes, QA and milestone results |
+| Resources | Materials/Documents, Parts, Purchases, Structure | Installed parts live under their definition; CAD import opens from Structure |
 | Team | People, Attendance | People combines directory, presence, availability and workload |
 
-Tasks opens first in Work. Robot-only Parts and Manufacturing require a robot project. Structure requires a selected project and uses the robot map or the non-robot workflow view. All-project Resources exposes Materials and Purchases. Non-robot projects use Documents and Purchases. Home remains available without a season; other collections require season data. Help and account controls remain utilities.
+Work opens first in Work. Robot-only Parts and manufacturing work require a robot project. Structure requires a selected project and uses the robot map or the non-robot workflow view. All-project Resources exposes Materials and Purchases. Non-robot projects use Documents and Purchases. Home remains available without a season; other collections require season data. Help and account controls remain utilities.
 
 Task details use a drawer on desktop and fill the narrow viewport. Logging work and submitting QA open from the task; milestone results open from the milestone. The originating detail returns after save or cancel, and editors protect unsaved changes. Collection filters survive destination changes within the current season/project; changing scope resets these local filters. URLs retain canonical destination, presentation and scope. Task details support Back, Forward and refresh; browser Back restores page scroll.
 

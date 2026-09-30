@@ -562,6 +562,41 @@
       "items": {
         "type": "object",
         "properties": {
+          "workstreamIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "subsystemIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "mechanismIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "partInstanceIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "artifactIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
           "id": {
             "type": "string"
           },
@@ -594,6 +629,11 @@
           }
         },
         "required": [
+          "workstreamIds",
+          "subsystemIds",
+          "mechanismIds",
+          "partInstanceIds",
+          "artifactIds",
           "id",
           "status",
           "checklistItems",
@@ -604,6 +644,182 @@
         "additionalProperties": {}
       }
     },
+    "workItems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string",
+            "enum": [
+              "task",
+              "manufacturing"
+            ]
+          },
+          "sourceId": {
+            "type": "string"
+          },
+          "taskId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "workType": {
+            "type": "string",
+            "enum": [
+              "Design",
+              "Manufacturing",
+              "Assembly",
+              "Electrical/Wiring",
+              "Programming",
+              "Testing",
+              "Driving"
+            ]
+          },
+          "responsibleGroup": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Mechanical",
+                  "Electrical",
+                  "Programming"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "manufacturingProcess": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "3d-print",
+                  "cnc",
+                  "fabrication"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "subsystemId": {
+            "type": "string"
+          },
+          "dueDate": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "quantity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "material": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "materialId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "partDefinitionId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "partInstanceIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "batchLabel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mentorReviewed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "isWaitingOnDependency": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "sourceType",
+          "sourceId",
+          "taskId",
+          "title",
+          "workType",
+          "responsibleGroup",
+          "manufacturingProcess",
+          "subsystemId",
+          "dueDate",
+          "status",
+          "quantity",
+          "material",
+          "materialId",
+          "partDefinitionId",
+          "partInstanceIds",
+          "batchLabel",
+          "mentorReviewed",
+          "isWaitingOnDependency"
+        ],
+        "additionalProperties": false
+      }
+    },
     "taskDependencies": {
       "type": "array",
       "items": {
@@ -611,9 +827,16 @@
           {
             "type": "object",
             "properties": {
-              "taskId": {
+              "workItemId": {
                 "type": "string",
                 "minLength": 1
+              },
+              "sourceType": {
+                "type": "string",
+                "enum": [
+                  "task",
+                  "manufacturing"
+                ]
               },
               "refId": {
                 "type": "string",
@@ -628,7 +851,14 @@
               },
               "kind": {
                 "type": "string",
-                "const": "task"
+                "const": "work_item"
+              },
+              "refType": {
+                "type": "string",
+                "enum": [
+                  "task",
+                  "manufacturing"
+                ]
               },
               "requiredState": {
                 "type": "string",
@@ -647,10 +877,12 @@
               }
             },
             "required": [
-              "taskId",
+              "workItemId",
+              "sourceType",
               "refId",
               "dependencyType",
               "kind",
+              "refType",
               "requiredState",
               "id",
               "createdAt"
@@ -660,9 +892,16 @@
           {
             "type": "object",
             "properties": {
-              "taskId": {
+              "workItemId": {
                 "type": "string",
                 "minLength": 1
+              },
+              "sourceType": {
+                "type": "string",
+                "enum": [
+                  "task",
+                  "manufacturing"
+                ]
               },
               "refId": {
                 "type": "string",
@@ -696,7 +935,8 @@
               }
             },
             "required": [
-              "taskId",
+              "workItemId",
+              "sourceType",
               "refId",
               "dependencyType",
               "kind",
@@ -709,9 +949,16 @@
           {
             "type": "object",
             "properties": {
-              "taskId": {
+              "workItemId": {
                 "type": "string",
                 "minLength": 1
+              },
+              "sourceType": {
+                "type": "string",
+                "enum": [
+                  "task",
+                  "manufacturing"
+                ]
               },
               "refId": {
                 "type": "string",
@@ -745,7 +992,8 @@
               }
             },
             "required": [
-              "taskId",
+              "workItemId",
+              "sourceType",
               "refId",
               "dependencyType",
               "kind",
@@ -880,6 +1128,7 @@
     "testResults",
     "risks",
     "tasks",
+    "workItems",
     "taskDependencies",
     "taskBlockers",
     "workLogs",
@@ -906,39 +1155,12 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "type": "object",
       "properties": {
-        "projectId": {
-          "type": "string",
-          "minLength": 1
-        },
-        "workstreamId": {
-          "anyOf": [
-            {
-              "type": "string",
-              "minLength": 1
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "workstreamIds": {
           "type": "array",
           "items": {
             "type": "string",
             "minLength": 1
           }
-        },
-        "title": {
-          "type": "string",
-          "minLength": 3
-        },
-        "summary": {
-          "type": "string",
-          "minLength": 3
-        },
-        "subsystemId": {
-          "type": "string",
-          "minLength": 1
         },
         "subsystemIds": {
           "type": "array",
@@ -947,38 +1169,12 @@
             "minLength": 1
           }
         },
-        "disciplineId": {
-          "type": "string",
-          "minLength": 1
-        },
-        "mechanismId": {
-          "anyOf": [
-            {
-              "type": "string",
-              "minLength": 1
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "mechanismIds": {
           "type": "array",
           "items": {
             "type": "string",
             "minLength": 1
           }
-        },
-        "partInstanceId": {
-          "anyOf": [
-            {
-              "type": "string",
-              "minLength": 1
-            },
-            {
-              "type": "null"
-            }
-          ]
         },
         "partInstanceIds": {
           "type": "array",
@@ -987,23 +1183,55 @@
             "minLength": 1
           }
         },
-        "artifactId": {
-          "anyOf": [
-            {
-              "type": "string",
-              "minLength": 1
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "artifactIds": {
           "type": "array",
           "items": {
             "type": "string",
             "minLength": 1
           }
+        },
+        "projectId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 3
+        },
+        "workType": {
+          "type": "string",
+          "enum": [
+            "Design",
+            "Manufacturing",
+            "Assembly",
+            "Electrical/Wiring",
+            "Programming",
+            "Testing",
+            "Driving"
+          ]
+        },
+        "responsibleGroup": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Mechanical",
+                "Electrical",
+                "Programming"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 3
+        },
+        "disciplineId": {
+          "type": "string",
+          "minLength": 1
         },
         "targetMilestoneId": {
           "anyOf": [
@@ -1133,39 +1361,12 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "type": "object",
       "properties": {
-        "projectId": {
-          "type": "string",
-          "minLength": 1
-        },
-        "workstreamId": {
-          "anyOf": [
-            {
-              "type": "string",
-              "minLength": 1
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "workstreamIds": {
           "type": "array",
           "items": {
             "type": "string",
             "minLength": 1
           }
-        },
-        "title": {
-          "type": "string",
-          "minLength": 3
-        },
-        "summary": {
-          "type": "string",
-          "minLength": 3
-        },
-        "subsystemId": {
-          "type": "string",
-          "minLength": 1
         },
         "subsystemIds": {
           "type": "array",
@@ -1174,38 +1375,12 @@
             "minLength": 1
           }
         },
-        "disciplineId": {
-          "type": "string",
-          "minLength": 1
-        },
-        "mechanismId": {
-          "anyOf": [
-            {
-              "type": "string",
-              "minLength": 1
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "mechanismIds": {
           "type": "array",
           "items": {
             "type": "string",
             "minLength": 1
           }
-        },
-        "partInstanceId": {
-          "anyOf": [
-            {
-              "type": "string",
-              "minLength": 1
-            },
-            {
-              "type": "null"
-            }
-          ]
         },
         "partInstanceIds": {
           "type": "array",
@@ -1214,23 +1389,55 @@
             "minLength": 1
           }
         },
-        "artifactId": {
-          "anyOf": [
-            {
-              "type": "string",
-              "minLength": 1
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "artifactIds": {
           "type": "array",
           "items": {
             "type": "string",
             "minLength": 1
           }
+        },
+        "projectId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 3
+        },
+        "workType": {
+          "type": "string",
+          "enum": [
+            "Design",
+            "Manufacturing",
+            "Assembly",
+            "Electrical/Wiring",
+            "Programming",
+            "Testing",
+            "Driving"
+          ]
+        },
+        "responsibleGroup": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "Mechanical",
+                "Electrical",
+                "Programming"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 3
+        },
+        "disciplineId": {
+          "type": "string",
+          "minLength": 1
         },
         "targetMilestoneId": {
           "anyOf": [
@@ -1244,7 +1451,6 @@
           ]
         },
         "photoUrl": {
-          "default": "",
           "type": "string"
         },
         "ownerId": {
@@ -1259,7 +1465,6 @@
           ]
         },
         "assigneeIds": {
-          "default": [],
           "type": "array",
           "items": {
             "type": "string",
@@ -1310,7 +1515,6 @@
           "minimum": 0
         },
         "checklistItems": {
-          "default": [],
           "type": "array",
           "items": {
             "type": "string",
@@ -1318,7 +1522,6 @@
           }
         },
         "linkedManufacturingIds": {
-          "default": [],
           "type": "array",
           "items": {
             "type": "string",
@@ -1326,7 +1529,6 @@
           }
         },
         "linkedPurchaseIds": {
-          "default": [],
           "type": "array",
           "items": {
             "type": "string",
@@ -1334,11 +1536,9 @@
           }
         },
         "requiresDocumentation": {
-          "default": false,
           "type": "boolean"
         },
         "documentationLinked": {
-          "default": false,
           "type": "boolean"
         }
       },
@@ -1659,17 +1859,14 @@
           "minLength": 3
         },
         "photoUrl": {
-          "default": "",
           "type": "string"
         },
         "iteration": {
-          "default": 1,
           "type": "integer",
           "minimum": 1,
           "maximum": 9007199254740991
         },
         "isArchived": {
-          "default": false,
           "type": "boolean"
         },
         "parentSubsystemId": {
@@ -1695,7 +1892,6 @@
           ]
         },
         "mentorIds": {
-          "default": [],
           "type": "array",
           "items": {
             "type": "string",
@@ -1703,7 +1899,6 @@
           }
         },
         "risks": {
-          "default": [],
           "type": "array",
           "items": {
             "type": "string",
@@ -2083,9 +2278,16 @@
         {
           "type": "object",
           "properties": {
-            "taskId": {
+            "workItemId": {
               "type": "string",
               "minLength": 1
+            },
+            "sourceType": {
+              "type": "string",
+              "enum": [
+                "task",
+                "manufacturing"
+              ]
             },
             "refId": {
               "type": "string",
@@ -2100,7 +2302,14 @@
             },
             "kind": {
               "type": "string",
-              "const": "task"
+              "const": "work_item"
+            },
+            "refType": {
+              "type": "string",
+              "enum": [
+                "task",
+                "manufacturing"
+              ]
             },
             "requiredState": {
               "type": "string",
@@ -2113,10 +2322,12 @@
             }
           },
           "required": [
-            "taskId",
+            "workItemId",
+            "sourceType",
             "refId",
             "dependencyType",
             "kind",
+            "refType",
             "requiredState"
           ],
           "additionalProperties": false
@@ -2124,9 +2335,16 @@
         {
           "type": "object",
           "properties": {
-            "taskId": {
+            "workItemId": {
               "type": "string",
               "minLength": 1
+            },
+            "sourceType": {
+              "type": "string",
+              "enum": [
+                "task",
+                "manufacturing"
+              ]
             },
             "refId": {
               "type": "string",
@@ -2154,7 +2372,8 @@
             }
           },
           "required": [
-            "taskId",
+            "workItemId",
+            "sourceType",
             "refId",
             "dependencyType",
             "kind",
@@ -2165,9 +2384,16 @@
         {
           "type": "object",
           "properties": {
-            "taskId": {
+            "workItemId": {
               "type": "string",
               "minLength": 1
+            },
+            "sourceType": {
+              "type": "string",
+              "enum": [
+                "task",
+                "manufacturing"
+              ]
             },
             "refId": {
               "type": "string",
@@ -2195,7 +2421,8 @@
             }
           },
           "required": [
-            "taskId",
+            "workItemId",
+            "sourceType",
             "refId",
             "dependencyType",
             "kind",

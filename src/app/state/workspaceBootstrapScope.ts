@@ -71,9 +71,18 @@ export function scopeBootstrapBySelection(
         task.subsystemIds.some((subsystemId) => scopedSubsystemIds.has(subsystemId))),
   );
   const scopedTaskIds = new Set(scopedTasks.map((task) => task.id));
+  const scopedManufacturingIds = new Set(scopedManufacturingItems.map((item) => item.id));
   const scopedTaskDependencies = (payload.taskDependencies ?? []).filter((dependency) => {
-    if (!scopedTaskIds.has(dependency.taskId)) {
+    const ownerType = dependency.sourceType ?? "task";
+    const ownerId = dependency.workItemId ?? dependency.taskId;
+    if (ownerType === "task" ? !ownerId || !scopedTaskIds.has(ownerId) : !ownerId || !scopedManufacturingIds.has(ownerId)) {
       return false;
+    }
+
+    if (dependency.kind === "work_item") {
+      return dependency.refType === "manufacturing"
+        ? scopedManufacturingIds.has(dependency.refId)
+        : scopedTaskIds.has(dependency.refId);
     }
 
     if (dependency.kind === "task") {

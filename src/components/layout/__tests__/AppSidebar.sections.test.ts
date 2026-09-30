@@ -7,14 +7,15 @@ describe("flat sidebar navigation", () => {
     expect(markup).toContain("sidebar-section-heading");
     expect(markup).toContain("sidebar-nav-item-icon");
     expect(markup).not.toContain("sidebar-section-chevron");
-    for (const label of ["Tasks", "Schedule", "Risks", "Activity", "Parts", "People"]) expect(markup).toContain(`>${label}</span>`);
+    for (const label of ["Work", "Schedule", "Risks", "Activity", "Materials", "Parts", "People"]) expect(markup).toContain(`>${label}</span>`);
+    expect(markup).not.toContain(">Manufacturing</span>");
     expect(markup).not.toContain("workspace-primary-navigation");
   });
   it("keeps destinations directly accessible when folded", () => {
     const markup = renderSidebar([], "tasks", { isCollapsed: true });
     expect(markup).not.toContain("sidebar-subtab-list");
     expect(markup).toContain('aria-label="Expand sidebar"');
-    expect(markup).toContain('aria-label="Tasks"');
+    expect(markup).toContain('aria-label="Work"');
     expect(markup).toContain('aria-label="Parts"');
     expect(markup).not.toContain("sidebar-section-heading");
   });

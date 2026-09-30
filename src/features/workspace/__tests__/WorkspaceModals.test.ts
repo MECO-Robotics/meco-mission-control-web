@@ -87,7 +87,7 @@ describe("TaskEditorModal", () => {
     expect(markup).toContain('data-inline-edit-field="assigned"');
   });
 
-  it("limits task disciplines to media options for media projects", () => {
+  it("keeps robot work type available for media projects", () => {
     const markup = renderTaskModal(
       "create",
       {
@@ -99,9 +99,9 @@ describe("TaskEditorModal", () => {
       true,
     );
 
-    expect(markup).toContain("Photography");
-    expect(markup).not.toContain("Design");
-    expect(markup).not.toContain("Manufacturing");
+    expect(markup).toContain("Robot work type");
+    expect(markup).toContain(">Design</option>");
+    expect(markup).toContain(">Manufacturing</option>");
   });
 
   it("shows save and cancel controls in edit mode", () => {
