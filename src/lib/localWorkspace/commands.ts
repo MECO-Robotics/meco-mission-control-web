@@ -44,7 +44,7 @@ export function refreshLocalTaskState(snapshot: BootstrapPayload) {
     task.actualHours = loggedHours.get(task.id) ?? 0;
     task.isBlocked = snapshot.risks.some((risk) => risk.projectId === task.projectId && risk.blocksWork && risk.status !== "resolved" && risk.relatedTargets.some((target) => target.kind === "task" && target.id === task.id));
     task.isWaitingOnDependency = task.status !== "complete" && snapshot.taskDependencies.some((dependency) =>
-      dependency.taskId === task.id && dependency.dependencyType === "hard" && !isTaskDependencySatisfied(dependency, snapshot, new Date()),
+      dependency.taskId === task.id && dependency.dependencyType === "hard" && !isTaskDependencySatisfied(dependency, snapshot),
     );
   }
 }

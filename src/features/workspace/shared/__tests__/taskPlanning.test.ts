@@ -23,7 +23,7 @@ test("PartInstance dependency conditions evaluate physical location separately f
     requiredCondition: { kind: "derived-readiness" as const, value: "ready" as const },
   };
 
-  expect(isTaskDependencySatisfied(physicalLocation, bootstrap, new Date())).toBe(true);
-  expect(isTaskDependencySatisfied(readiness, bootstrap, new Date())).toBe(true);
-  expect(isTaskDependencySatisfied({ ...readiness, requiredCondition: { kind: "physical-location", value: "installed" } }, bootstrap, new Date())).toBe(false);
+  expect(isTaskDependencySatisfied(physicalLocation, bootstrap)).toBe(true);
+  expect(isTaskDependencySatisfied(readiness, bootstrap)).toBe(true);
+  expect(isTaskDependencySatisfied({ ...readiness, requiredCondition: { kind: "physical-location", value: "installed" } }, bootstrap)).toBe(false);
 });

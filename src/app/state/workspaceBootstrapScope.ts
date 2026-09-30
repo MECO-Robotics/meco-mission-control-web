@@ -20,11 +20,9 @@ export function scopeBootstrapBySelection(
   const tasks = payload.tasks.filter(({ projectId }) => projectIds.has(projectId));
   const taskIds = new Set(tasks.map(({ id }) => id));
   const workstreams = payload.workstreams.filter(({ projectId }) => projectIds.has(projectId));
-  const workstreamIds = new Set(workstreams.map(({ id }) => id));
   const subsystems = payload.subsystems.filter(({ projectId }) => projectIds.has(projectId));
   const subsystemIds = new Set(subsystems.map(({ id }) => id));
   const mechanisms = payload.mechanisms.filter(({ subsystemId }) => subsystemIds.has(subsystemId));
-  const mechanismIds = new Set(mechanisms.map(({ id }) => id));
   const partDefinitions = selectedSeasonId
     ? payload.partDefinitions.filter((part) => isPartDefinitionActiveInSeason(part, selectedSeasonId))
     : payload.partDefinitions;

@@ -13,13 +13,12 @@ import {
 export function getTaskWaitingOnDependencyRecords(
   taskId: string,
   bootstrap: BootstrapPayload,
-  now: Date = new Date(),
 ) {
   return getTaskDependencyRecords(bootstrap).filter(
     (dependency) =>
       dependency.taskId === taskId &&
       HARD_DEPENDENCY_TYPES.has(dependency.dependencyType) &&
-      !isTaskDependencySatisfied(dependency, bootstrap, now),
+      !isTaskDependencySatisfied(dependency, bootstrap),
   );
 }
 
@@ -36,7 +35,7 @@ export function getTaskPlanningState(
     return "blocked";
   }
 
-  if (getTaskWaitingOnDependencyRecords(task.id, bootstrap, now).length > 0) {
+  if (getTaskWaitingOnDependencyRecords(task.id, bootstrap).length > 0) {
     return "waiting-on-dependency";
   }
 

@@ -135,11 +135,9 @@ export function buildAvailableStudentRoster(
   const students = bootstrap.members.filter(
     (member) => (member.role === "student" || member.role === "lead") && presentMemberIds.has(member.id),
   );
-  const openBlockerTaskIds = new Set(
-    (bootstrap.taskBlockers ?? [])
-      .filter((blocker) => blocker.status === "open")
-      .map((blocker) => blocker.blockedTaskId),
-  );
+  const openBlockerTaskIds = new Set(bootstrap.risks
+    .filter((risk) => risk.blocksWork && risk.status !== "resolved")
+    .flatMap((risk) => risk.relatedTargets.filter((target) => target.kind === "task").map((target) => target.id)));
   const taskById = new Map(bootstrap.tasks.map((task) => [task.id, task] as const));
   const rows = students.map<AvailableStudentRosterRow>((member) => {
     const activeTask = pickActiveTask(getAssignedOpenTasks(member.id, bootstrap.tasks), openBlockerTaskIds);

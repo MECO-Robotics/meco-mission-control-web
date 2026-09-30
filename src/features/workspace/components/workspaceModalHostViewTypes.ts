@@ -1,5 +1,4 @@
 import type { TaskEditorModal } from "../modals/TaskEditorModalContent";
-import type { ManufacturingEditorModal } from "../modals/purchaseManufacturing/ManufacturingEditorModal";
 import type { PurchaseEditorModal } from "../modals/purchaseManufacturing/PurchaseEditorModal";
 import type { MechanismEditorModal } from "../modals/structure/MechanismEditorModal";
 import type { SubsystemEditorModal } from "../modals/structure/SubsystemEditorModal";
@@ -29,7 +28,6 @@ export interface WorkspaceModalHostViewProps {
     showTimelineCreateToggleInTaskModal: boolean;
     switchTaskCreateToMilestone: () => void;
   };
-  manufacturingEditor: Omit<ComponentProps<typeof ManufacturingEditorModal>, "bootstrap" | "manufacturingModalMode"> & { manufacturingModalMode: "create" | "edit" | null };
   purchaseEditor: Omit<ComponentProps<typeof PurchaseEditorModal>, "bootstrap" | "purchaseModalMode"> & { purchaseModalMode: "create" | "edit" | null };
   mechanismEditor: Omit<ComponentProps<typeof MechanismEditorModal>, "bootstrap" | "requestPhotoUpload" | "mechanismModalMode"> & { mechanismModalMode: "create" | "edit" | null };
   subsystemEditor: Omit<ComponentProps<typeof SubsystemEditorModal>, "bootstrap" | "requestPhotoUpload" | "subsystemModalMode"> & { subsystemModalMode: "create" | "edit" | null };

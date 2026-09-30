@@ -6,7 +6,6 @@ export type ViewTab =
   | "worklogs"
   | "risks"
   | "documents"
-  | "manufacturing"
   | "inventory"
   | "cad"
   | "subsystems"
@@ -24,12 +23,11 @@ export type ViewAvailabilityContext =
 
 export type TaskViewTab = "calendar" | "timeline" | "robot-map" | "queue" | "milestones";
 export type WorklogsViewTab = "logs" | "activity" | "qa" | "results";
-export type ManufacturingViewTab = "all" | "cnc" | "prints" | "fabrication";
 export type InventoryViewTab = "materials" | "documents" | "parts" | "part-mappings" | "purchases";
 export type NavigationSubItemId =
   | "home" | "work-tasks" | "work-schedule" | "work-risks"
   | "resources-materials" | "resources-documents" | "resources-parts"
-  | "resources-purchases" | "work-manufacturing" | "resources-structure"
+  | "resources-purchases" | "resources-structure"
   | "team-people";
 
 export interface NavigationItem {
@@ -45,7 +43,6 @@ export interface NavigationTarget {
   taskView?: TaskViewTab;
   worklogsView?: WorklogsViewTab;
   inventoryView?: InventoryViewTab;
-  manufacturingView?: ManufacturingViewTab;
 }
 
 export interface NavigationState {
@@ -53,7 +50,6 @@ export interface NavigationState {
   taskView: TaskViewTab;
   worklogsView: WorklogsViewTab;
   inventoryView: InventoryViewTab;
-  manufacturingView: ManufacturingViewTab;
 }
 
 export interface NavigationSubItem {

@@ -9,7 +9,7 @@ export const NAVIGATION_SUB_ITEM_AVAILABILITY_MATRIX: Record<NavigationSubItemId
   "work-tasks": seasonal, "work-schedule": seasonal, "work-risks": seasonal,
   "resources-materials": { ...project, "non-robot-project": false },
   "resources-documents": { ...seasonal },
-  "resources-parts": robot, "resources-purchases": project, "work-manufacturing": robot,
+  "resources-parts": robot, "resources-purchases": project,
   "resources-structure": { ...project, "all-project": false },
   "team-people": seasonal,
 };

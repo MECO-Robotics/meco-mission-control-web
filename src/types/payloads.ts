@@ -6,8 +6,6 @@ import type {
   PartInstanceLocation,
   MilestoneType,
   MilestoneStatus,
-  ManufacturingProcess,
-  ManufacturingStatus,
   MaterialCategory,
   MeetingType,
   MemberRole,
@@ -74,24 +72,6 @@ export interface WorkLogPayload {
   participantIds: string[];
   notes: string;
   photoUrl: string;
-}
-
-export interface ManufacturingItemPayload {
-  title: string;
-  subsystemId: string;
-  requestedById: string | null;
-  process: ManufacturingProcess;
-  dueDate: string;
-  material: string;
-  materialId: string | null;
-  partDefinitionId: string | null;
-  partInstanceId: string | null;
-  partInstanceIds: string[];
-  quantity: number;
-  status: ManufacturingStatus;
-  mentorReviewed: boolean;
-  inHouse: boolean;
-  batchLabel?: string;
 }
 
 export interface PurchaseItemPayload {

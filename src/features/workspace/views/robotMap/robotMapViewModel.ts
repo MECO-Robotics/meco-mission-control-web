@@ -46,7 +46,6 @@ export interface RobotConfigurationSubsystemModel {
   linkedRisks: RobotConfigurationDrilldownLinkModel[];
   riskCount: number;
   linkedWorkLogs: RobotConfigurationDrilldownLinkModel[];
-  linkedManufacturingItems: RobotConfigurationDrilldownLinkModel[];
   record: SubsystemRecord;
 }
 
@@ -87,26 +86,9 @@ function riskTargetsSubsystem(
   mechanismIds: ReadonlySet<string>,
   partInstanceIds: ReadonlySet<string>,
 ) {
-  if (risk.attachmentType === "mechanism") {
-    return mechanismIds.has(risk.attachmentId);
-  }
-
-  if (risk.attachmentType === "part-instance") {
-    return partInstanceIds.has(risk.attachmentId);
-  }
-
-  return false;
-}
-
-function manufacturingTargetsSubsystem(
-  item: BootstrapPayload["manufacturingItems"][number],
-  subsystemId: string,
-  partInstanceIds: ReadonlySet<string>,
-) {
-  return (
-    item.subsystemId === subsystemId ||
-    (item.partInstanceId ? partInstanceIds.has(item.partInstanceId) : false) ||
-    item.partInstanceIds.some((partInstanceId) => partInstanceIds.has(partInstanceId))
+  return (risk.relatedTargets ?? []).some((ref) =>
+    (ref.kind === "mechanism" && mechanismIds.has(ref.id)) ||
+    (ref.kind === "part-instance" && partInstanceIds.has(ref.id)),
   );
 }
 
@@ -122,9 +104,9 @@ function buildPartModel(
   return {
     cadSource: resolveCadSourceIndicator(partInstance, partDefinitionsById.get(partInstance.partDefinitionId)),
     id: partInstance.id,
-    name: partInstance.name,
-    quantity: Math.max(1, partInstance.quantity),
-    riskCount: risks.filter((risk) => risk.attachmentType === "part-instance" && risk.attachmentId === partInstance.id).length,
+    name: partDefinitionsById.get(partInstance.partDefinitionId)?.name ?? "Unnamed part",
+    quantity: 1,
+    riskCount: risks.filter((risk) => risk.relatedTargets.some((ref) => ref.kind === "part-instance" && ref.id === partInstance.id)).length,
     record: partInstance,
   };
 }
@@ -135,12 +117,12 @@ export function buildRobotConfigurationViewModel(
 ): RobotConfigurationViewModel {
   const partInstancesByMechanismId = bootstrap.partInstances.reduce<Record<string, BootstrapPayload["partInstances"]>>(
     (result, partInstance) => {
-      if (!partInstance.mechanismId) {
+      if (!partInstance.intendedMechanismId) {
         return result;
       }
 
-      result[partInstance.mechanismId] = result[partInstance.mechanismId] ?? [];
-      result[partInstance.mechanismId].push(partInstance);
+      result[partInstance.intendedMechanismId] = result[partInstance.intendedMechanismId] ?? [];
+      result[partInstance.intendedMechanismId].push(partInstance);
       return result;
     },
     {},
@@ -185,8 +167,8 @@ export function buildRobotConfigurationViewModel(
       bootstrap.partInstances
         .filter(
           (partInstance) =>
-            partInstance.subsystemId === subsystem.id &&
-            (!partInstance.mechanismId || mechanismIds.has(partInstance.mechanismId)),
+            partInstance.intendedSubsystemId === subsystem.id &&
+            (!partInstance.intendedMechanismId || mechanismIds.has(partInstance.intendedMechanismId)),
         )
         .map((partInstance) => buildPartModel(partInstance, partDefinitionsById, bootstrap.risks))
         .forEach((part) => linkedPartsById.set(part.id, part));
@@ -201,11 +183,6 @@ export function buildRobotConfigurationViewModel(
         }))
         .sort(sortLinks);
       const linkedTaskIds = new Set(linkedTasks.map((task) => task.id));
-      const linkedManufacturingIdsFromTasks = new Set(
-        bootstrap.tasks
-          .filter((task) => linkedTaskIds.has(task.id))
-          .flatMap((task) => task.linkedManufacturingIds),
-      );
       const linkedRisks = bootstrap.risks.filter((risk) =>
         riskTargetsSubsystem(risk, mechanismIds, partInstanceIds),
       ).map((risk) => ({ id: risk.id, label: risk.title, meta: risk.severity }))
@@ -244,18 +221,6 @@ export function buildRobotConfigurationViewModel(
             id: workLog.id,
             label: workLog.notes || workLog.date,
             meta: `${workLog.hours}h / ${workLog.date}`,
-          }))
-          .sort(sortLinks),
-        linkedManufacturingItems: bootstrap.manufacturingItems
-          .filter(
-            (item) =>
-              manufacturingTargetsSubsystem(item, subsystem.id, partInstanceIds) ||
-              linkedManufacturingIdsFromTasks.has(item.id),
-          )
-          .map<RobotConfigurationDrilldownLinkModel>((item) => ({
-            id: item.id,
-            label: item.title,
-            meta: `${item.process} / ${item.status}`,
           }))
           .sort(sortLinks),
         record: subsystem,

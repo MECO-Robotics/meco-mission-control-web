@@ -12,10 +12,8 @@ interface SubsystemEditorModalFieldsProps {
   bootstrap: BootstrapPayload;
   requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   subsystemDraft: SubsystemPayload;
-  subsystemDraftRisks: string;
   subsystemModalMode: "create" | "edit";
   setSubsystemDraft: Dispatch<SetStateAction<SubsystemPayload>>;
-  setSubsystemDraftRisks: (value: string) => void;
   subsystemState: SubsystemEditorModalState;
 }
 
@@ -38,10 +36,8 @@ export function SubsystemEditorModalFields({
   bootstrap,
   requestPhotoUpload,
   subsystemDraft,
-  subsystemDraftRisks,
   subsystemModalMode,
   setSubsystemDraft,
-  setSubsystemDraftRisks,
   subsystemState,
 }: SubsystemEditorModalFieldsProps) {
   return (
@@ -191,17 +187,6 @@ export function SubsystemEditorModalFields({
               </option>
             ))}
         </select>
-      </label>
-
-      <label className="field modal-wide">
-        <span style={labelStyle}>Risks</span>
-        <textarea
-          onChange={(milestone) => setSubsystemDraftRisks(milestone.target.value)}
-          placeholder="Comma-separated risks"
-          rows={3}
-          style={fieldStyle}
-          value={subsystemDraftRisks}
-        />
       </label>
 
       <PhotoUploadField

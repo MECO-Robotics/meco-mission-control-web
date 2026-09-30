@@ -62,7 +62,6 @@ function isPartInstanceDependencySatisfied(
 export function isTaskDependencySatisfied(
   dependency: TaskDependencyRecord,
   bootstrap: BootstrapPayload,
-  now: Date,
 ) {
   if (dependency.dependencyType === "soft") {
     return true;

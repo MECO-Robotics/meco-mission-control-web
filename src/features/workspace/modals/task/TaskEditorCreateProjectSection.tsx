@@ -9,20 +9,17 @@ import { useTaskEditorAdvancedFieldsState } from "./editorAdvanced/useTaskEditor
 
 interface TaskEditorCreateProjectSectionProps {
   bootstrap: BootstrapPayload;
-  currentTaskId: string | null;
   setTaskDraft: Dispatch<SetStateAction<TaskPayload>>;
   taskDraft: TaskPayload;
 }
 
 export function TaskEditorCreateProjectSection({
   bootstrap,
-  currentTaskId,
   setTaskDraft,
   taskDraft,
 }: TaskEditorCreateProjectSectionProps) {
   const { handleProjectChange } = useTaskEditorAdvancedFieldsState({
     bootstrap,
-    currentTaskId,
     setTaskDraft,
     taskDraft,
   });

@@ -61,7 +61,7 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
     .filter((partInstance) => !model.selectedPartInstanceIds.includes(partInstance.id))
     .map((partInstance) => ({
       id: partInstance.id,
-      name: `${partInstance.name}`,
+      name: model.getPartInstanceLabel(partInstance),
     }));
   const renderAddControl = (
     label: "mechanism" | "part",

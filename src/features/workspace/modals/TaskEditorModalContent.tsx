@@ -159,7 +159,6 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
             <>
               <TaskEditorCreateProjectSection
                 bootstrap={bootstrap}
-                currentTaskId={activeTask?.id ?? null}
                 setTaskDraft={updateDraftWhenIdle}
                 taskDraft={taskDraft}
               />

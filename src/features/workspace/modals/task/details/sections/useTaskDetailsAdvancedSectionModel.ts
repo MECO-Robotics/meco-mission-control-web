@@ -222,6 +222,7 @@ export function useTaskDetailsAdvancedSectionModel({
     removePartInstanceSelection,
     projectMechanisms,
     projectPartInstances,
+    getPartInstanceLabel,
     selectedMechanismIds,
     selectedPartInstanceIds,
   };

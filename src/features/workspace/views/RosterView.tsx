@@ -18,7 +18,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MemberPayload } from "@/types/payloads";
 import type { MemberRecord } from "@/types/recordsOrganization";
 import { isMemberActiveInSeason } from "@/lib/appUtils/common";
-import { getTaskDisciplinesForProject } from "@/lib/taskDisciplines";
+import { getWorkTypesForProject } from "@/lib/taskDisciplines";
 
 import { RosterAddPersonModal } from "./roster/RosterAddPersonModal";
 import { RosterEditPersonModal } from "./roster/RosterEditPersonModal";
@@ -121,7 +121,7 @@ export const RosterView: React.FC<RosterViewProps> = ({
   const sortedDisciplines = React.useMemo(() => {
     const projectForDisciplines = selectedProject ?? bootstrap.projects[0] ?? null;
     const allowedDisciplineIds = new Set(
-      getTaskDisciplinesForProject(projectForDisciplines).map((discipline) => discipline.id),
+      getWorkTypesForProject(bootstrap, projectForDisciplines).map((workType) => workType.id),
     );
     const uniqueDisciplinesByName = new Map<string, BootstrapPayload["workTypes"][number]>();
 

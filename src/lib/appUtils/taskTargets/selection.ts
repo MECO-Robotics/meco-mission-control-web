@@ -23,7 +23,9 @@ export function setTaskPrimaryTargetSelection(
   );
   const partInstanceIds = payload.partInstanceIds.filter((partInstanceId) =>
     bootstrap.partInstances.some(
-      (partInstance) => partInstance.id === partInstanceId && partInstance.subsystemId === selectedSubsystem.id,
+      (partInstance) => partInstance.id === partInstanceId &&
+        (partInstance.intendedSubsystemId === selectedSubsystem.id ||
+          (partInstance.location.kind === "installed" && partInstance.location.subsystemId === selectedSubsystem.id)),
     ),
   );
 

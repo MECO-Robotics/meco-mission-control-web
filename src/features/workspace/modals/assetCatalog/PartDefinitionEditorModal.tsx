@@ -124,15 +124,6 @@ export function PartDefinitionEditorModal({
           value={partDefinitionDraft.type}
         />
       </label>
-      <label className="field">
-        <span style={{ color: "var(--text-title)" }}>Source</span>
-        <input
-          onChange={(milestone) =>
-            setPartDefinitionDraft((current) => ({ ...current, source: milestone.target.value }))
-          }
-          value={partDefinitionDraft.source}
-        />
-      </label>
       <div className="field">
         <span style={{ color: "var(--text-title)" }}>Part type</span>
         <div>

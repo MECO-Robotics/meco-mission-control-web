@@ -1,6 +1,5 @@
 import { useTaskEditor } from "@/app/hooks/workspace/task/useTaskEditor";
 import { useWorkspaceEventActions } from "@/app/hooks/workspace/task/useWorkspaceEventActions";
-import { useManufacturingActions } from "@/app/workspaceCatalog/manufacturingActions";
 import { usePurchaseActions } from "@/app/workspaceCatalog/purchaseActions";
 import { useMechanismActions } from "@/app/workspaceCatalog/mechanismActions";
 import { useSubsystemActions } from "@/app/workspaceCatalog/subsystemActions";
@@ -36,7 +35,6 @@ export type AppWorkspaceModel = AppWorkspaceState &
     subsystemEditor: ReturnType<typeof useSubsystemActions>;
     mechanismEditor: ReturnType<typeof useMechanismActions>;
     purchaseEditor: ReturnType<typeof usePurchaseActions>;
-    manufacturingEditor: ReturnType<typeof useManufacturingActions>;
     materialEditor: ReturnType<typeof useMaterialEditor>;
     interactiveTutorialChapters: ReturnType<typeof useInteractiveTutorial>["chapterStartOptions"];
   };
@@ -87,10 +85,6 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     scopedBootstrap: derived.scopedBootstrap,
   });
   const purchaseEditor = usePurchaseActions(editorContext);
-  const manufacturingEditor = useManufacturingActions({
-    ...editorContext,
-    signedInMemberId: derived.signedInMember?.id ?? null,
-  });
   const autoLoadedWorkspaceKeyRef = useRef<string | null>(null);
   const {
     authBooting,
@@ -172,7 +166,6 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     activeTab: state.activeTab,
     taskView: state.taskView,
     worklogsView: state.worklogsView,
-    manufacturingView: state.manufacturingView,
     inventoryView: state.inventoryView,
     selectedSeasonId: state.selectedSeasonId,
     selectedProjectId: state.selectedProjectId,
@@ -184,7 +177,6 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     setActiveTab: state.setActiveTab,
     setTaskView: state.setTaskView,
     setWorklogsView: state.setWorklogsView,
-    setManufacturingView: state.setManufacturingView,
     setInventoryView: state.setInventoryView,
     setSelectedSeasonId: state.setSelectedSeasonId,
     setSelectedProjectId: state.setSelectedProjectId,
@@ -200,8 +192,6 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     activeSubsystemId: subsystemEditor.activeSubsystemId,
     mechanismModalMode: mechanismEditor.mechanismModalMode,
     activeMechanismId: mechanismEditor.activeMechanismId,
-    manufacturingModalMode: manufacturingEditor.manufacturingModalMode,
-    activeManufacturingId: manufacturingEditor.activeManufacturingId,
     workstreamModalMode: workstreamEditor.workstreamModalMode,
     activeWorkstreamId: workstreamEditor.activeWorkstreamId,
   });
@@ -219,13 +209,12 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     subsystemEditor,
     mechanismEditor,
     purchaseEditor,
-    manufacturingEditor,
     materialEditor,
     ...interactiveTutorial,
     interactiveTutorialChapters: interactiveTutorial.chapterStartOptions,
     isWorkspaceModalOpen: derived.isWorkspaceModalOpen || interactiveTutorial.isInteractiveTutorialActive || Boolean(
       taskEditor.taskModalMode || taskEditor.activeTimelineTaskDetailId ||
-      purchaseEditor.purchaseModalMode || manufacturingEditor.manufacturingModalMode ||
+      purchaseEditor.purchaseModalMode ||
       artifactEditor.artifactModalMode || workstreamEditor.workstreamModalMode ||
       partDefinitionEditor.partDefinitionModalMode || partInstanceEditor.partInstanceModalMode ||
       subsystemEditor.subsystemModalMode || mechanismEditor.mechanismModalMode || materialEditor.materialModalMode

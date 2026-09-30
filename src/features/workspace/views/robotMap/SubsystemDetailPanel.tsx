@@ -129,12 +129,6 @@ export function SubsystemDetailPanel({
       label: "Linked worklogs",
       target: { tab: "worklogs", worklogsView: "logs" },
     },
-    {
-      emptyLabel: "No linked manufacturing items yet.",
-      items: selectedSubsystem.linkedManufacturingItems,
-      label: "Linked manufacturing",
-      target: { tab: "manufacturing", manufacturingView: "all" },
-    },
   ];
 
   return (

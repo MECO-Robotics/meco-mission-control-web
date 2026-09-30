@@ -14,7 +14,6 @@ export function mergeWorkspaceShellController(controller: AppWorkspaceController
     ...controller.model.subsystemEditor,
     ...controller.model.mechanismEditor,
     ...controller.model.purchaseEditor,
-    ...controller.model.manufacturingEditor,
     ...controller.model.materialEditor,
   };
 }

@@ -22,12 +22,18 @@ describe("RobotMapView drilldowns", () => {
           id: "risk-1",
           title: "Bearing fit risk",
           detail: "Tolerance stackup needs review.",
+          projectId: "project-a",
+          category: "design",
           severity: "medium",
-          sourceType: "test-result",
-          sourceId: "test-1",
-          attachmentType: "part-instance",
-          attachmentId: "part-instance-1",
+          status: "open",
+          blocksWork: false,
+          source: { kind: "manual" },
+          relatedTargets: [{ kind: "part-instance", id: "part-instance-1" }],
           mitigationTaskId: null,
+          ownerGroupId: null,
+          createdAt: "2026-01-01",
+          updatedAt: "2026-01-01",
+          resolvedAt: null,
         },
       ],
       workLogs: [
@@ -38,25 +44,6 @@ describe("RobotMapView drilldowns", () => {
           hours: 2,
           participantIds: ["student-1"],
           notes: "Assembled gearbox",
-        },
-      ],
-      manufacturingItems: [
-        {
-          id: "manufacturing-1",
-          title: "Bearing block batch",
-          subsystemId: "subsystem-core",
-          requestedById: null,
-          process: "cnc",
-          dueDate: "2026-02-04",
-          material: "Aluminum",
-          materialId: null,
-          partDefinitionId: "part-def-1",
-          partInstanceId: "part-instance-1",
-          partInstanceIds: ["part-instance-1"],
-          quantity: 2,
-          status: "approved",
-          mentorReviewed: true,
-          inHouse: true,
         },
       ],
     });
@@ -81,15 +68,13 @@ describe("RobotMapView drilldowns", () => {
     expect(markup).toContain("Linked mechanisms");
     expect(markup).toContain("Gearbox");
     expect(markup).toContain("Linked parts");
-    expect(markup).toContain("Left Bearing Block");
+    expect(markup).toContain("Bearing Block");
     expect(markup).toContain("Linked tasks");
     expect(markup).toContain("Initial task");
     expect(markup).toContain("Linked risks");
     expect(markup).toContain("Bearing fit risk");
     expect(markup).toContain("Linked worklogs");
     expect(markup).toContain("Assembled gearbox");
-    expect(markup).toContain("Linked manufacturing");
-    expect(markup).toContain("Bearing block batch");
   });
 
   it("renders CAD source indicators in PM object details", () => {
@@ -129,7 +114,7 @@ describe("RobotMapView drilldowns", () => {
           iteration: 1,
           isHardware: false,
           type: "assembly",
-          source: "Onshape",
+          defaultAcquisitionMethod: "manufacture",
           materialId: null,
           description: "",
           cadSource: "STEP_UPLOAD",
@@ -138,13 +123,10 @@ describe("RobotMapView drilldowns", () => {
       partInstances: [
         {
           id: "part-instance-1",
-          subsystemId: "subsystem-drive",
-          mechanismId: "mechanism-1",
+          intendedSubsystemId: "subsystem-drive",
+          intendedMechanismId: "mechanism-1",
           partDefinitionId: "part-def-1",
-          name: "Wheel Module",
-          quantity: 4,
-          trackIndividually: false,
-          status: "not ready",
+          location: { kind: "installed", subsystemId: "subsystem-drive", mechanismId: "mechanism-1" },
           cadEditedAfterImport: true,
         },
       ],
@@ -174,7 +156,6 @@ describe("RobotMapView drilldowns", () => {
   it("renders subsystem drilldown missing-data states", () => {
     const bootstrap = createBootstrap({
       mechanisms: [],
-      manufacturingItems: [],
       partInstances: [],
       risks: [],
       tasks: [],
@@ -203,6 +184,5 @@ describe("RobotMapView drilldowns", () => {
     expect(markup).toContain("No linked tasks yet.");
     expect(markup).toContain("No linked risks yet.");
     expect(markup).toContain("No linked worklogs yet.");
-    expect(markup).toContain("No linked manufacturing items yet.");
   });
 });

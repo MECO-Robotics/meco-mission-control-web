@@ -38,6 +38,7 @@ export function buildEmptyTaskPayload(bootstrap: BootstrapPayload): TaskPayload 
     dueDate: today,
     priority: "medium",
     status: "not-started",
+    checklistItems: [],
     estimatedHours: 4,
     actualHours: 0,
     taskDependencies: [],

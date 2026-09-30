@@ -22,10 +22,6 @@ const CREATION_COUNT_KEY_BY_STEP_ID: Partial<Record<InteractiveTutorialStepId, k
     "create-mechanism": "mechanisms",
     "add-part-to-mechanism": "partInstances",
     "create-student": "students",
-    "create-cnc-job": "cncJobs",
-    "create-print-job": "printJobs",
-    "complete-print-job": "completedPrintJobs",
-    "create-fabrication-job": "fabricationJobs",
     "create-document": "documents",
   };
 
@@ -82,7 +78,7 @@ export function isInteractiveTutorialStepComplete(
     return Boolean(target.querySelector(".toolbar-filter-dropdown.is-active"));
   }
 
-  if (step.id === "part-search" || step.id === "milestone-search" || step.id === "manufacturing-search") {
+  if (step.id === "part-search" || step.id === "milestone-search") {
     const input =
       target.querySelector<HTMLInputElement>("input[type='text']") ??
       target.querySelector<HTMLInputElement>("input");
@@ -108,10 +104,6 @@ export function isInteractiveTutorialStepComplete(
     return context.mechanismModalMode === "edit" && context.activeMechanismId !== null;
   }
 
-  if (step.id === "inspect-cnc-job" || step.id === "inspect-fabrication-job") {
-    return context.manufacturingModalMode === "edit" && context.activeManufacturingId !== null;
-  }
-
   if (step.id === "workflow-edit") {
     return context.workstreamModalMode === "edit" && context.activeWorkstreamId !== null;
   }
@@ -121,7 +113,6 @@ export function isInteractiveTutorialStepComplete(
     "directory-view": "team-people", "task-queue": "work-tasks", "reports-worklogs": "work-activity",
     "inventory-parts": "resources-parts", "inventory-purchases": "resources-purchases",
     "subsystems-view": "resources-structure", "outreach-workflow-view": "resources-structure",
-    "manufacturing-cnc": "work-manufacturing",
   };
   if (step.id === "inventory-materials") return ["resources-materials", "resources-documents"].includes(target.getAttribute("data-active-view") ?? "");
   if (viewByStep[step.id]) return target.getAttribute("data-active-view") === viewByStep[step.id];
