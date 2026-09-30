@@ -45,17 +45,24 @@ describe("MaterialsView stock presentation", () => {
     expect(markup).not.toContain('data-label="Reorder"');
   });
 
-  it("shows sort direction only on the active column, before its label", () => {
+  it("defaults to ascending Material sort and marks only that column active", () => {
     const markup = renderToStaticMarkup(
       React.createElement(MaterialsView, {
-        bootstrap: { ...EMPTY_BOOTSTRAP, materials: [material] },
+        bootstrap: {
+          ...EMPTY_BOOTSTRAP,
+          materials: [
+            { ...material, id: "zinc", name: "Zinc Sheet" },
+            { ...material, id: "aluminum", name: "Aluminum Sheet" },
+          ],
+        },
         openCreateMaterialModal: jest.fn(),
         openEditMaterialModal: jest.fn(),
       }),
     );
 
-    expect(markup).toContain('aria-sort="none"');
-    expect(markup).not.toContain("table-sort-arrow");
+    expect(markup).toContain('aria-sort="ascending"');
+    expect(markup).toContain("table-sort-arrow");
+    expect(markup.indexOf("Aluminum Sheet")).toBeLessThan(markup.indexOf("Zinc Sheet"));
   });
 
   it("exposes and applies the below-reorder stock filter", () => {

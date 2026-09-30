@@ -25,9 +25,9 @@ interface PurchaseFiltersToolbarProps {
   subsystem: FilterSelection;
   uniqueVendors: Array<{ id: string; name: string }>;
   vendor: FilterSelection;
-  sortField: PurchaseColumn | null;
+  sortField: PurchaseColumn;
   sortDirection: ResourceSortDirection;
-  onSortFieldChange: (field: string | null) => void;
+  onSortFieldChange: (field: string) => void;
   onSortDirectionChange: (direction: ResourceSortDirection) => void;
 }
 

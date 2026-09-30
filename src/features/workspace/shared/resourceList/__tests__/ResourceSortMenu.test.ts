@@ -20,13 +20,17 @@ describe("ResourceSortMenu", () => {
         label: string;
         onChange: (direction: "ascending" | "descending") => void;
       }>;
+      content?: React.ReactNode;
     }>;
     const sortBy = items[0];
 
     expect(items).toHaveLength(1);
+    expect(menu.props.menuTitle).toBeUndefined();
     expect(sortBy?.label).toBe("Sort by");
     expect(sortBy?.labelControl?.type).toBe(SortDirectionToggle);
     expect(sortBy?.labelControl?.props).toMatchObject({ direction: "ascending", label: "tasks" });
+    const select = sortBy?.content as React.ReactElement<{ children: React.ReactNode }>;
+    expect(React.Children.toArray(select.props.children)).toHaveLength(1);
     sortBy?.labelControl?.props.onChange("descending");
     expect(onDirectionChange).toHaveBeenCalledWith("descending");
   });

@@ -42,7 +42,7 @@ export function ArtifactInventoryView({
   const [linkFilter, setLinkFilter] = useState<FilterSelection>([]);
   const [updatedFilter, setUpdatedFilter] = useState<FilterSelection>([]);
   const [showArchivedArtifacts, setShowArchivedArtifacts] = useState(false);
-  const [sortField, setSortField] = useState<ArtifactSortField | null>(null);
+  const [sortField, setSortField] = useState<ArtifactSortField>("title");
   const [sortDirection, setSortDirection] = useState<ResourceSortDirection>("ascending");
   const artifactKinds = useMemo(
     () => (kinds.length > 0 ? kinds : [createKind ?? "document"]),
@@ -97,7 +97,7 @@ export function ArtifactInventoryView({
       return matchesSearch && matchesWorkstream && matchesStatus && matchesTitle && matchesLink && matchesUpdated;
     });
   }, [artifactKinds, artifacts, linkFilter, search, showArchivedArtifacts, statusFilter, titleFilter, updatedFilter, workstreamFilter]);
-  const sortedArtifacts = useMemo(() => sortField ? sortArtifacts(filteredArtifacts, sortField, sortDirection, workstreamsById) : filteredArtifacts, [filteredArtifacts, sortDirection, sortField, workstreamsById]);
+  const sortedArtifacts = useMemo(() => sortArtifacts(filteredArtifacts, sortField, sortDirection, workstreamsById), [filteredArtifacts, sortDirection, sortField, workstreamsById]);
   const artifactPagination = useWorkspacePagination(sortedArtifacts);
   const artifactFilterMotionClass = useFilterChangeMotionClass([
     search,
@@ -159,7 +159,7 @@ export function ArtifactInventoryView({
         updatedFilter={updatedFilter}
         columnOptions={columnOptions}
         setColumnFilter={setColumnFilter}
-        sortMenu={<ResourceSortMenu direction={sortDirection} field={sortField} label={artifactNoun} onDirectionChange={setSortDirection} onFieldChange={(field) => setSortField(field as ArtifactSortField | null)} options={[{ label: "Artifact", value: "title" }, { label: "Workflow", value: "workstream" }, { label: "Status", value: "status" }, { label: "Link", value: "link" }, { label: "Updated", value: "updated" }]} />}
+        sortMenu={<ResourceSortMenu direction={sortDirection} field={sortField} label={artifactNoun} onDirectionChange={setSortDirection} onFieldChange={(field) => setSortField(field as ArtifactSortField)} options={[{ label: "Artifact", value: "title" }, { label: "Workflow", value: "workstream" }, { label: "Status", value: "status" }, { label: "Link", value: "link" }, { label: "Updated", value: "updated" }]} />}
       />
 
       <div className="panel-header compact-header">

@@ -32,7 +32,7 @@ export function PurchasesView({ activePersonFilter, bootstrap, membersById, open
   const [vendor, setVendor] = useState<FilterSelection>([]);
   const [approval, setApproval] = useState<FilterSelection>([]);
   const [columnFilters, setColumnFilters] = useState<PurchaseColumnFilters>({});
-  const [sortField, setSortField] = useState<PurchaseColumn | null>(null);
+  const [sortField, setSortField] = useState<PurchaseColumn>("item");
   const [sortDirection, setSortDirection] = useState<ResourceSortDirection>("ascending");
 
   const uniqueVendors = useMemo(() => getResourceFilterOptions(bootstrap.purchaseItems.map((item) => item.vendor).filter(Boolean)), [bootstrap.purchaseItems]);
@@ -73,7 +73,7 @@ export function PurchasesView({ activePersonFilter, bootstrap, membersById, open
 
   return (
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
-      <PurchaseFiltersToolbar approval={approval} bootstrap={bootstrap} requester={requester} search={search} setApproval={setApproval} setRequester={setRequester} setSearch={setSearch} setStatus={setStatus} setSubsystem={setSubsystem} setVendor={setVendor} status={status} subsystem={subsystem} uniqueVendors={uniqueVendors} vendor={vendor} sortField={sortField} sortDirection={sortDirection} onSortFieldChange={(field) => setSortField(field as PurchaseColumn | null)} onSortDirectionChange={setSortDirection} />
+      <PurchaseFiltersToolbar approval={approval} bootstrap={bootstrap} requester={requester} search={search} setApproval={setApproval} setRequester={setRequester} setSearch={setSearch} setStatus={setStatus} setSubsystem={setSubsystem} setVendor={setVendor} status={status} subsystem={subsystem} uniqueVendors={uniqueVendors} vendor={vendor} sortField={sortField} sortDirection={sortDirection} onSortFieldChange={(field) => setSortField(field as PurchaseColumn)} onSortDirectionChange={setSortDirection} />
       <WorkspaceTopbarAddMenu actions={buildSingleAddMenuAction({ label: "Add purchase", onSelect: openCreatePurchaseModal })} ariaLabel="Add purchase" title="Add purchase" tutorialTarget="create-purchase-button" />
       <PurchaseTable bootstrap={bootstrap} filteredPurchases={pagination.pageItems} filterMotionClass={filterMotionClass} hasPurchaseFilters={hasFilters} membersById={membersById} openEditPurchaseModal={openEditPurchaseModal} pagination={pagination} subsystemsById={subsystemsById} columnFilters={columnFilters} columnOptions={columnOptions} setColumnFilter={setColumnFilter} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} />
     </section>

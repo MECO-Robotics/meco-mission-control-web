@@ -13,21 +13,20 @@ export function ResourceSortMenu({
   options,
 }: {
   direction: ResourceSortDirection;
-  field: string | null;
+  field: string;
   label: string;
   onDirectionChange: (direction: ResourceSortDirection) => void;
-  onFieldChange: (field: string | null) => void;
+  onFieldChange: (field: string) => void;
   options: Array<{ label: string; value: string }>;
 }) {
   return (
     <CompactFilterMenu
-      activeCount={field ? 1 : 0}
+      activeCount={1}
       ariaLabel={`Sort ${label}`}
       buttonLabel="Sort"
       icon={<ArrowDownUp size={14} />}
       iconOnly
       className="resource-sort-menu"
-      menuTitle="Sort"
       items={[
         {
           label: "Sort by",
@@ -35,8 +34,7 @@ export function ResourceSortMenu({
             <SortDirectionToggle direction={direction} label={label} onChange={onDirectionChange} />
           ),
           content: (
-            <select aria-label={`Sort ${label} by`} className="toolbar-filter-select" onChange={(event) => onFieldChange(event.target.value || null)} value={field ?? ""}>
-              <option value="">Default order</option>
+            <select aria-label={`Sort ${label} by`} className="toolbar-filter-select" onChange={(event) => onFieldChange(event.target.value)} value={field}>
               {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
           ),
