@@ -132,7 +132,7 @@ export function applyLocalCommand(snapshot: BootstrapPayload, path: string, opti
   const item = { ...(method === "POST" ? defaults(resource, snapshot) : rows[index]), ...body, id: id ?? newLocalId() } as Row;
   validateRosterReferences(snapshot, item);
   if (resource === "tasks") {
-    const removedFields = ["disciplineId", "blockers", "linkedManufacturingIds", "linkedPurchaseIds", "targetMilestoneId", "artifactIds"];
+    const removedFields = ["disciplineId", "blockers", "linkedManufacturingIds", "linkedPurchaseIds", "artifactIds"];
     if (removedFields.some((field) => Object.hasOwn(body, field))) throw new Error("Task commands use workTypeId, scheduleRefs, and typed domain references; removed Task fields are not accepted.");
     delete item.taskDependencies;
     delete item.actualHours;

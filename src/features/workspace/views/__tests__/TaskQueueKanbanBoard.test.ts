@@ -37,17 +37,18 @@ jest.mock("@/features/workspace/views/kanban/KanbanColumns", () => ({
 }));
 
 const task: TaskRecord = {
-  artifactIds: [],
   id: "task-1",
   projectId: "project-1",
   workstreamIds: [],
   subsystemIds: ["subsystem-1"],
-  disciplineId: "discipline-1",
+  workTypeId: "work-type-design",
+  responsibleGroupId: null,
   mechanismIds: [],
   partInstanceIds: [],
   title: "Wire Swerve Module",
   summary: "",
-  targetMilestoneId: null,
+  scheduleRefs: [],
+  requestedById: null,
   photoUrl: "",
   ownerId: "member-1",
   assigneeIds: [],
@@ -57,19 +58,17 @@ const task: TaskRecord = {
   priority: "medium",
   status: "not-started",
 
-  blockers: [],
-  linkedManufacturingIds: [],
-  linkedPurchaseIds: [],
+  checklistItems: [],
+  manufacturingDetails: null,
   estimatedHours: 1,
   actualHours: 0,
   requiresDocumentation: false,
-  documentationLinked: false,
   isBlocked: false,
 };
 
 const bootstrap: BootstrapPayload = {
   ...EMPTY_BOOTSTRAP,
-  disciplines: [{ id: "discipline-1", code: "design", name: "Design" }],
+  workTypes: [{ id: "work-type-design", projectType: "robot", code: "design", name: "Design", isActive: true }],
   members: [
     {
       id: "member-1",
@@ -103,7 +102,6 @@ const bootstrap: BootstrapPayload = {
       parentSubsystemId: null,
       responsibleEngineerId: null,
       mentorIds: [],
-      risks: [],
     },
   ],
   tasks: [task],
@@ -117,7 +115,7 @@ function renderBoard(
   renderToStaticMarkup(
     React.createElement(TaskQueueKanbanBoard, {
       bootstrap,
-      workTypesById: { "discipline-1": bootstrap.workTypes[0] },
+      workTypesById: { "work-type-design": bootstrap.workTypes[0] },
       focusedState: null,
       isNonRobotProject: false,
       membersById: { "member-1": bootstrap.members[0] },

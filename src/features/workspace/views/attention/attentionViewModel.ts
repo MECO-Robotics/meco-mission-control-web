@@ -41,5 +41,6 @@ export function buildAttentionViewModel({ activePersonFilter, bootstrap }: { act
     ...blockedTasks.map((task) => ({ actionType: "open-task" as const, contextLabel: projectsById.get(task.projectId)?.name, id: `blocked-${task.id}`, nextAction: "Review the linked risk or dependency and agree on the unblock plan.", openLabel: "Open task", recordId: task.id, reasons: ["blocked" as const], sourceType: "task" as const, title: task.title, urgencyScore: 90, whyNow: "This task is blocked." })),
     ...openRisks.filter((risk) => risk.severity === "critical" || risk.severity === "high").map((risk) => ({ actionType: "open-risk" as const, contextLabel: projectsById.get(risk.projectId)?.name, id: `risk-${risk.id}`, nextAction: risk.blocksWork ? "Review the blocking risk and assign mitigation work." : "Review the risk owner and next action.", openLabel: "Open risk", recordId: risk.id, reasons: [risk.blocksWork ? "blocked" as const : "high-risk" as const], sourceType: "risk" as const, title: risk.title, urgencyScore: risk.blocksWork ? 95 : 70, whyNow: risk.detail })),
   ];
+  actionNowItems.sort((left, right) => right.urgencyScore - left.urgencyScore);
   return { actionNowItems, mentorQueueItems: [], triageGroups: groups };
 }

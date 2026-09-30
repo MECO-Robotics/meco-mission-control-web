@@ -9,7 +9,6 @@ function createTask(index: number, overrides: Partial<Task> = {}): Task {
   const day = String(index).padStart(2, "0");
 
   const task: Task = {
-    artifactIds: [],
     id: `task-${index}`,
     projectId: "project-1",
     workstreamIds: [],
@@ -21,7 +20,8 @@ function createTask(index: number, overrides: Partial<Task> = {}): Task {
     partInstanceIds: [],
     title: `Task ${index}`,
     summary: `Summary ${index}`,
-    targetMilestoneId: null,
+    scheduleRefs: [],
+    requestedById: null,
     photoUrl: "",
     ownerId: "member-1",
     assigneeIds: [],
@@ -41,8 +41,8 @@ function createTask(index: number, overrides: Partial<Task> = {}): Task {
 
     estimatedHours: 0,
     actualHours: 0,
+    checklistItems: [],
     requiresDocumentation: false,
-    documentationLinked: false,
     ...overrides,
   };
 
@@ -107,7 +107,6 @@ function createTaskQueueBootstrap(): BootstrapPayload {
         parentSubsystemId: null,
         responsibleEngineerId: null,
         mentorIds: [],
-        risks: [],
       },
     ],
     taskDependencies: [{ id: "dependency-1", taskId: "task-3", kind: "task", refId: "task-1", requiredState: "complete", dependencyType: "hard", createdAt: "2026-01-01" }],

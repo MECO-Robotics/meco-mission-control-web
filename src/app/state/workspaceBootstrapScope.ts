@@ -23,14 +23,17 @@ export function scopeBootstrapBySelection(
   const subsystems = payload.subsystems.filter(({ projectId }) => projectIds.has(projectId));
   const subsystemIds = new Set(subsystems.map(({ id }) => id));
   const mechanisms = payload.mechanisms.filter(({ subsystemId }) => subsystemIds.has(subsystemId));
+  const mechanismIds = new Set(mechanisms.map(({ id }) => id));
   const partDefinitions = selectedSeasonId
     ? payload.partDefinitions.filter((part) => isPartDefinitionActiveInSeason(part, selectedSeasonId))
     : payload.partDefinitions;
   const partDefinitionIds = new Set(partDefinitions.map(({ id }) => id));
   const partInstances = payload.partInstances.filter((part) => {
     if (partDefinitionIds.has(part.partDefinitionId)) return true;
+    if (part.intendedMechanismId && !mechanismIds.has(part.intendedMechanismId)) return false;
     if (part.intendedSubsystemId && subsystemIds.has(part.intendedSubsystemId)) return true;
-    return part.location.kind === "installed" && subsystemIds.has(part.location.subsystemId);
+    return part.location.kind === "installed" && subsystemIds.has(part.location.subsystemId) &&
+      (!part.location.mechanismId || mechanismIds.has(part.location.mechanismId));
   });
   const partInstanceIds = new Set(partInstances.map(({ id }) => id));
   const milestones = payload.milestones.filter((item) =>
@@ -102,7 +105,9 @@ export function scopeBootstrapBySelection(
     designIterations: payload.designIterations?.filter((record) => !record.taskId || taskIds.has(record.taskId)),
     qaReviews: payload.qaReviews?.filter((review) => review.subjectType === "task" && taskIds.has(review.subjectId)),
     actions: payload.actions?.filter((action) =>
-      (!action.projectId || projectIds.has(action.projectId)) && (!action.taskId || taskIds.has(action.taskId)),
+      (!action.projectId || projectIds.has(action.projectId)) &&
+      (!action.taskId || taskIds.has(action.taskId)) &&
+      (!action.subsystemId || subsystemIds.has(action.subsystemId)),
     ),
     escalations: payload.escalations,
     manufacturingProcesses: payload.manufacturingProcesses,

@@ -20,7 +20,7 @@ export function createBootstrap(): BootstrapPayload {
         id: "project-2",
         seasonId: "season-1",
         name: "Media",
-        projectType: "other",
+        projectType: "media",
         description: "",
         status: "active",
       },
@@ -62,7 +62,6 @@ export function createBootstrap(): BootstrapPayload {
         parentSubsystemId: null,
         responsibleEngineerId: null,
         mentorIds: [],
-        risks: [],
       },
       {
         id: "subsystem-2",
@@ -74,29 +73,36 @@ export function createBootstrap(): BootstrapPayload {
         parentSubsystemId: null,
         responsibleEngineerId: null,
         mentorIds: [],
-        risks: [],
       },
     ],
-    disciplines: [
+    workTypes: [
       {
         id: "design",
+        projectType: "robot",
         code: "design",
         name: "Design",
+        isActive: true,
       },
       {
         id: "manufacturing",
+        projectType: "robot",
         code: "manufacturing",
         name: "Manufacturing",
+        isActive: true,
       },
       {
         id: "photography",
+        projectType: "media",
         code: "photography",
         name: "Photography",
+        isActive: true,
       },
       {
         id: "social_media",
+        projectType: "media",
         code: "social_media",
         name: "Social Media",
+        isActive: true,
       },
     ],
   };

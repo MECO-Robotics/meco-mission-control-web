@@ -34,6 +34,7 @@ function buildDraftTaskRecord(taskDraft: TaskPayload, activeTask: TaskRecord | n
   return {
     ...recordDraft,
     id: activeTask?.id ?? "__new-task__",
+    actualHours: activeTask?.actualHours ?? 0,
   };
 }
 

@@ -111,7 +111,6 @@ describe("Task Queue cards", () => {
             parentSubsystemId: null,
             responsibleEngineerId: null,
             mentorIds: [],
-            risks: [],
           },
         },
         {},

@@ -13,6 +13,7 @@ function createBootstrap(): BootstrapPayload {
     seasons: [
       {
         id: "season-1",
+        teamId: "team-1",
         name: "2026",
         type: "season",
         startDate: "2026-01-01",
@@ -50,29 +51,33 @@ function createBootstrap(): BootstrapPayload {
         parentSubsystemId: null,
         responsibleEngineerId: "member-1",
         mentorIds: [],
-        risks: [],
       },
     ],
-    disciplines: [
+    workTypes: [
       {
-        id: "discipline-1",
+        id: "work-type-design",
+        projectType: "robot",
         code: "design",
         name: "Design",
+        isActive: true,
       },
     ],
     tasks: [
       {
-        artifactIds: [],
         id: "task-1",
         projectId: "project-1",
         workstreamIds: [],
         title: "Frame rail layout",
         summary: "",
         subsystemIds: ["subsystem-1"],
-        disciplineId: "discipline-1",
+        workTypeId: "work-type-design",
+        responsibleGroupId: null,
         mechanismIds: [],
         partInstanceIds: [],
-        targetMilestoneId: null,
+        scheduleRefs: [],
+        requestedById: null,
+        checklistItems: [],
+        manufacturingDetails: null,
         ownerId: "member-1",
         assigneeIds: ["member-1"],
         mentorId: null,
@@ -81,13 +86,9 @@ function createBootstrap(): BootstrapPayload {
         priority: "high",
         status: "in-progress",
 
-        blockers: [],
-        linkedManufacturingIds: [],
-        linkedPurchaseIds: [],
         estimatedHours: 4,
         actualHours: 1,
         requiresDocumentation: false,
-        documentationLinked: false,
       },
     ],
   };

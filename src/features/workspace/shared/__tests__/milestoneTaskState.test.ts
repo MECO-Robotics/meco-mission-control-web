@@ -11,12 +11,12 @@ function createTask(
   overrides: Partial<TaskRecord> = {},
 ): TaskRecord {
   return {
-    artifactIds: [],
     id,
     projectId: "project-1",
     workstreamIds: [],
     subsystemIds: ["subsystem-1"],
-    disciplineId: "discipline-1",
+    workTypeId: "work-type-design",
+    responsibleGroupId: null,
     mechanismIds: [],
     partInstanceIds: [],
     title: id,
@@ -28,16 +28,15 @@ function createTask(
     startDate: "2026-01-01",
     dueDate: "2026-01-02",
     priority: "medium",
-    targetMilestoneId: milestoneId,
+    scheduleRefs: [{ kind: "milestone", id: milestoneId }],
+    requestedById: null,
 
-    blockers: [],
     isBlocked: false,
-    linkedManufacturingIds: [],
-    linkedPurchaseIds: [],
+    checklistItems: [],
+    manufacturingDetails: null,
     estimatedHours: 0,
     actualHours: 0,
     requiresDocumentation: false,
-    documentationLinked: false,
     ...overrides,
   };
 }
@@ -49,10 +48,10 @@ function createBootstrap({
       id: "milestone-1",
       title: "Milestone 1",
       type: "deadline",
-      status: "not ready",
-      startDateTime: "2026-01-01T00:00:00.000Z",
-      endDateTime: null,
-      isExternal: false,
+      status: "planned",
+      seasonId: "season-1",
+      startAt: "2026-01-01T00:00:00.000Z",
+      endAt: null,
       description: "",
       projectIds: ["project-1"],
     },
@@ -60,14 +59,14 @@ function createBootstrap({
   subsystems = [],
   milestoneRequirements = [],
   taskDependencies = [],
-  taskBlockers = [],
+  risks = [],
 }: {
   tasks: TaskRecord[];
   milestones?: MilestoneRecord[];
   subsystems?: BootstrapPayload["subsystems"];
   milestoneRequirements?: MilestoneRequirementRecord[];
   taskDependencies?: BootstrapPayload["taskDependencies"];
-  taskBlockers?: BootstrapPayload["taskBlockers"];
+  risks?: BootstrapPayload["risks"];
 }): BootstrapPayload {
   return {
     ...EMPTY_BOOTSTRAP,
@@ -76,7 +75,7 @@ function createBootstrap({
     milestoneRequirements,
     tasks,
     taskDependencies,
-    taskBlockers,
+    risks,
   };
 }
 
@@ -132,17 +131,22 @@ describe("milestoneTaskState", () => {
     },
     {
       name: "blocked",
-      taskBlockers: [{ id: "blocker-1", blockedTaskId: "task-2", blockerType: "other" as const, blockerId: null, description: "Waiting", severity: "medium" as const, status: "open" as const, createdByMemberId: null, createdAt: "2026-01-01", resolvedAt: null }],
+      risks: [{
+        id: "risk-1", projectId: "project-1", title: "Waiting", detail: "Waiting on hardware",
+        category: "inventory" as const, severity: "medium" as const, status: "open" as const,
+        blocksWork: true, source: { kind: "manual" as const },
+        relatedTargets: [{ kind: "task" as const, id: "task-2" }], mitigationTaskId: null,
+        ownerGroupId: null, createdAt: "2026-01-01", updatedAt: "2026-01-01", resolvedAt: null,
+      }],
       expected: "blocked",
       tasks: [
         createTask("task-1", "in-progress", "milestone-1"),
         createTask("task-2", "not-started", "milestone-1", {
-          blockers: ["Waiting on hardware"],
         }),
       ],
     },
-  ])("returns $expected for $name milestone states", ({ expected, tasks, taskDependencies, taskBlockers }) => {
-    const bootstrap = createBootstrap({ tasks, taskDependencies: taskDependencies ?? [], taskBlockers });
+  ])("returns $expected for $name milestone states", ({ expected, tasks, taskDependencies, risks }) => {
+    const bootstrap = createBootstrap({ tasks, taskDependencies: taskDependencies ?? [], risks });
     const state = getMilestoneTaskBoardState(tasks, bootstrap);
 
     expect(state).toBe(expected);
@@ -169,10 +173,10 @@ describe("milestoneTaskState", () => {
       id: "milestone-iteration",
       title: "Iteration milestone",
       type: "deadline",
-      status: "not ready",
-      startDateTime: "2026-01-01T00:00:00.000Z",
-      endDateTime: null,
-      isExternal: false,
+      status: "planned",
+      seasonId: "season-1",
+      startAt: "2026-01-01T00:00:00.000Z",
+      endAt: null,
       description: "",
       projectIds: ["project-1"],
     };
@@ -180,8 +184,7 @@ describe("milestoneTaskState", () => {
       {
         id: "milestone-iteration:requirement:1",
         milestoneId: "milestone-iteration",
-        targetType: "subsystem",
-        targetId: "subsystem-iteration",
+        targetRefs: [{ kind: "subsystem", id: "subsystem-iteration" }],
         conditionType: "iteration",
         conditionValue: "iteration = 3",
         required: true,
@@ -201,7 +204,6 @@ describe("milestoneTaskState", () => {
         parentSubsystemId: null,
         responsibleEngineerId: null,
         mentorIds: [],
-        risks: [],
       },
       {
         id: "subsystem-other",
@@ -214,17 +216,16 @@ describe("milestoneTaskState", () => {
         parentSubsystemId: null,
         responsibleEngineerId: null,
         mentorIds: [],
-        risks: [],
       },
     ] satisfies BootstrapPayload["subsystems"];
     const bootstrap = createBootstrap({
       tasks: [
         createTask("task-1", "in-progress", "milestone-iteration", {
-          targetMilestoneId: null,
+          scheduleRefs: [],
           subsystemIds: ["subsystem-iteration"],
         }),
         createTask("task-2", "not-started", "milestone-iteration", {
-          targetMilestoneId: null,
+          scheduleRefs: [],
           subsystemIds: ["subsystem-other"],
         }),
       ],

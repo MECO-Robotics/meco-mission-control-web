@@ -9,7 +9,7 @@ function createTaskPayload(): TaskPayload {
     title: "  Build intake  ", summary: "  Trim this summary  ", subsystemIds: ["subsystem-1"],
     mechanismIds: [], partInstanceIds: [], scheduleRefs: [], requestedById: null, photoUrl: "", ownerId: null,
     assigneeIds: ["member-1", "member-1", "member-2"], mentorId: null, startDate: "2026-05-01", dueDate: "2026-05-03",
-    priority: "medium", status: "not-started", checklistItems: [], estimatedHours: 3, actualHours: 0,
+    priority: "medium", status: "not-started", checklistItems: [], estimatedHours: 3,
     requiresDocumentation: false, manufacturingDetails: null,
     taskDependencies: [{ kind: "task", refId: "  task-upstream  ", requiredState: "  complete  ", dependencyType: "hard" }],
   };

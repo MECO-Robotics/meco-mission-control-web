@@ -61,6 +61,7 @@ export function renderSidebar(
       seasons: options?.seasons ?? [
         {
           id: "season-1",
+        teamId: "team-1",
           name: "2026 Season",
           type: "season",
           startDate: "2026-01-01",

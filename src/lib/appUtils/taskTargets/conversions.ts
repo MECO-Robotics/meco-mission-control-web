@@ -18,7 +18,6 @@ export const taskToPayload = (task: TaskRecord, bootstrap?: BootstrapPayload): T
   priority: task.priority,
   status: task.status,
   estimatedHours: task.estimatedHours,
-  actualHours: task.actualHours,
   requiresDocumentation: task.requiresDocumentation,
   manufacturingDetails: task.manufacturingDetails,
   workstreamIds: task.workstreamIds,

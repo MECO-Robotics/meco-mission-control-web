@@ -100,12 +100,12 @@ describe("TimelineView", () => {
     const morningMilestone = createTimelineMilestone({
       id: "milestone-b",
       title: "Morning review",
-      startDateTime: "2026-04-08T09:00:00.000Z",
+      startAt: "2026-04-08T09:00:00.000Z",
     });
     const afternoonMilestone = createTimelineMilestone({
       id: "milestone-a",
       title: "Afternoon review",
-      startDateTime: "2026-04-08T14:00:00.000Z",
+      startAt: "2026-04-08T14:00:00.000Z",
     });
     const underlays = buildTimelineDayMilestoneUnderlays({
       milestones: [afternoonMilestone, morningMilestone],
@@ -139,12 +139,12 @@ describe("TimelineView", () => {
     const firstMilestone = createTimelineMilestone({
       id: "milestone-a",
       title: "First review",
-      startDateTime: "2026-04-08T09:00:00.000Z",
+      startAt: "2026-04-08T09:00:00.000Z",
     });
     const secondMilestone = createTimelineMilestone({
       id: "milestone-b",
       title: "Second review",
-      startDateTime: "2026-04-08T14:00:00.000Z",
+      startAt: "2026-04-08T14:00:00.000Z",
     });
     const underlays = buildTimelineDayMilestoneUnderlays({
       milestones: [firstMilestone, secondMilestone],
@@ -213,15 +213,10 @@ describe("TimelineView", () => {
           meetingType: "build",
           seasonId: "season-1",
           projectIds: ["project-1"],
-          startDateTime: "2026-04-08T18:00:00",
-          endDateTime: "2026-04-08T20:00:00",
+          startAt: "2026-04-08T18:00:00",
+          endAt: "2026-04-08T20:00:00",
           location: "Lab",
           description: "",
-          date: "2026-04-08",
-          time: "18:00",
-          rsvpsYes: 0,
-          rsvpsMaybe: 0,
-          openSignIns: 0,
         },
       ],
       milestones: [],
@@ -253,7 +248,7 @@ describe("TimelineView", () => {
     const hiddenMilestone = createTimelineMilestone({
       id: "milestone-hidden",
       title: "Unassigned review",
-      startDateTime: "2026-04-09T09:00:00.000Z",
+      startAt: "2026-04-09T09:00:00.000Z",
     });
     const filteredMilestones = filterTimelineMilestonesByPersonSelection({
       activePersonFilter: ["member-1"],
@@ -262,7 +257,7 @@ describe("TimelineView", () => {
         {
           ...bootstrap.tasks[0],
           id: "task-targeting-visible-milestone",
-          targetMilestoneId: "milestone-matching",
+          scheduleRefs: [{ kind: "milestone", id: "milestone-matching" }],
           ownerId: "member-1",
           assigneeIds: [],
           mentorId: null,
@@ -270,7 +265,7 @@ describe("TimelineView", () => {
         {
           ...bootstrap.tasks[0],
           id: "task-targeting-hidden-milestone",
-          targetMilestoneId: "milestone-hidden",
+          scheduleRefs: [{ kind: "milestone", id: "milestone-hidden" }],
           ownerId: null,
           assigneeIds: [],
           mentorId: null,

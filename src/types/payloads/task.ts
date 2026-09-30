@@ -39,7 +39,6 @@ export interface TaskPayload {
   status: TaskStatus;
   checklistItems: string[];
   estimatedHours: number;
-  actualHours: number;
   requiresDocumentation: boolean;
   manufacturingDetails: ManufacturingDetailsRecord | null;
   taskDependencies?: TaskDependencyDraft[];

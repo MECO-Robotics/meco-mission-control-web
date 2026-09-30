@@ -40,7 +40,6 @@ export function buildEmptyTaskPayload(bootstrap: BootstrapPayload): TaskPayload 
     status: "not-started",
     checklistItems: [],
     estimatedHours: 4,
-    actualHours: 0,
     taskDependencies: [],
     manufacturingDetails: null,
     requiresDocumentation: false,
