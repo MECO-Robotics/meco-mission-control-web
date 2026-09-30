@@ -18,6 +18,10 @@ function normalizeScheduleTimes<T extends ScheduleRecord>(record: T) {
 export function normalizeBootstrapPayload(payload: BootstrapPayload): BootstrapPayload {
   return {
     ...payload,
+    artifacts: payload.artifacts.map((artifact) => {
+      const platformArtifact = artifact as typeof artifact & { link?: string };
+      return { ...artifact, uri: artifact.uri ?? platformArtifact.link ?? "" };
+    }),
     meetings: payload.meetings.map(normalizeScheduleTimes),
     events: payload.events.map(normalizeScheduleTimes),
     milestones: payload.milestones.map(normalizeScheduleTimes),
