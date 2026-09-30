@@ -61,18 +61,15 @@ export function createBootstrap(): BootstrapPayload {
     ],
     tasks: [
       {
+        artifactIds: [],
         id: "task-1",
         projectId: "project-1",
-        workstreamId: null,
         workstreamIds: [],
         title: "Frame rail layout",
         summary: "",
-        subsystemId: "subsystem-1",
         subsystemIds: ["subsystem-1"],
         disciplineId: "discipline-1",
-        mechanismId: null,
         mechanismIds: [],
-        partInstanceId: null,
         partInstanceIds: [],
         targetMilestoneId: null,
         ownerId: "member-1",
@@ -223,14 +220,3 @@ export function createBootstrapWithScopedOverflowTasks(): BootstrapPayload {
     ],
   };
 }
-
-export const membersById = {
-  "member-1": {
-    id: "member-1",
-    name: "Ada",
-    email: "ada@example.com",
-    role: "lead" as const,
-    elevated: true,
-    seasonId: "season-1",
-  },
-};

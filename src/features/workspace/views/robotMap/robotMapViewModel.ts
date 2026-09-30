@@ -51,9 +51,6 @@ export interface RobotConfigurationSubsystemModel {
 }
 
 export interface RobotConfigurationViewModel {
-  subsystemCount: number;
-  mechanismCount: number;
-  partCount: number;
   subsystems: RobotConfigurationSubsystemModel[];
 }
 
@@ -79,11 +76,8 @@ function taskTargetsSubsystem(
   partInstanceIds: ReadonlySet<string>,
 ) {
   return (
-    task.subsystemId === subsystemId ||
     includesId(task.subsystemIds, subsystemId) ||
-    (task.mechanismId ? mechanismIds.has(task.mechanismId) : false) ||
     task.mechanismIds.some((mechanismId) => mechanismIds.has(mechanismId)) ||
-    (task.partInstanceId ? partInstanceIds.has(task.partInstanceId) : false) ||
     task.partInstanceIds.some((partInstanceId) => partInstanceIds.has(partInstanceId))
   );
 }
@@ -212,6 +206,10 @@ export function buildRobotConfigurationViewModel(
           .filter((task) => linkedTaskIds.has(task.id))
           .flatMap((task) => task.linkedManufacturingIds),
       );
+      const linkedRisks = bootstrap.risks.filter((risk) =>
+        riskTargetsSubsystem(risk, mechanismIds, partInstanceIds),
+      ).map((risk) => ({ id: risk.id, label: risk.title, meta: risk.severity }))
+        .sort(sortLinks);
 
       return {
         cadSource: resolveCadSourceIndicator(subsystem),
@@ -238,15 +236,8 @@ export function buildRobotConfigurationViewModel(
           }))
           .sort(sortLinks),
         linkedTasks,
-        linkedRisks: bootstrap.risks
-          .filter((risk) => riskTargetsSubsystem(risk, mechanismIds, partInstanceIds))
-          .map<RobotConfigurationDrilldownLinkModel>((risk) => ({
-            id: risk.id,
-            label: risk.title,
-            meta: risk.severity,
-          }))
-          .sort(sortLinks),
-        riskCount: bootstrap.risks.filter((risk) => riskTargetsSubsystem(risk, mechanismIds, partInstanceIds)).length,
+        linkedRisks,
+        riskCount: linkedRisks.length,
         linkedWorkLogs: bootstrap.workLogs
           .filter((workLog) => linkedTaskIds.has(workLog.taskId))
           .map<RobotConfigurationDrilldownLinkModel>((workLog) => ({
@@ -291,9 +282,6 @@ export function buildRobotConfigurationViewModel(
     .sort(sortSubsystemsByLayout);
 
   return {
-    subsystemCount: subsystems.length,
-    mechanismCount: subsystems.reduce((total, subsystem) => total + subsystem.mechanismCount, 0),
-    partCount: subsystems.reduce((total, subsystem) => total + subsystem.partCount, 0),
     subsystems,
   };
 }

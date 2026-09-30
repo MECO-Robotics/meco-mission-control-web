@@ -21,8 +21,9 @@ describe("buildAttentionViewModel", () => {
     );
 
     expect(markup).toContain('aria-label="Search attention"');
-    expect(markup).toContain('aria-label="Attention source"');
-    expect(markup).toContain("Needs review");
+    expect(markup).toContain('aria-label="Attention filters"');
+    expect(markup).toContain("topbar-responsive-search-actions");
+    expect(markup).not.toContain('class="workspace-presentation-controls"');
   });
 
   it("renders one attention queue heading", () => {
@@ -39,24 +40,11 @@ describe("buildAttentionViewModel", () => {
     expect(markup).not.toContain("Operational triage for immediate intervention");
   });
 
-  it("builds grouped summary cards and ranked action-now items", () => {
+  it("builds ranked action-now items with attention signals", () => {
     const viewModel = buildAttentionViewModel({
       activePersonFilter: [],
       bootstrap: createBootstrap(),
     });
-
-    expect(viewModel.summaryGroups.map((group) => group.label)).toEqual([
-      "Risk",
-      "Flow",
-      "Supply",
-      "Quality",
-    ]);
-
-    const allCards = viewModel.summaryGroups.flatMap((group) => group.cards);
-    expect(allCards.some((card) => card.label === "Blocked tasks" && card.helperLabel)).toBe(true);
-    expect(allCards.some((card) => card.label === "Failed QA/reports" && card.helperLabel)).toBe(
-      true,
-    );
 
     expect(viewModel.actionNowItems.some((item) => item.sourceType === "qa")).toBe(true);
     expect(viewModel.actionNowItems.some((item) => item.title === "Drive overheating")).toBe(true);

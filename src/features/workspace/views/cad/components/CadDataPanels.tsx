@@ -1,4 +1,6 @@
-﻿import type { OnshapeOverview } from "../model/cadIntegrationTypes";
+import type {
+  OnshapeOverview
+} from "../model/onshapeCadTypes";
 
 import { useMemo } from "react";
 import {

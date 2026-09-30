@@ -1,80 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import type { Dispatch, RefObject, SetStateAction } from "react";
 
 import { TASK_QUEUE_LAZY_LOAD_BATCH_SIZE } from "./taskQueueKanbanBoardState";
 
 type ZoomBoard = (direction: 1 | -1) => void;
-
-export function useTaskQueueBoardScrollState(boardShellRef: RefObject<HTMLDivElement | null>) {
-  const [scrollState, setScrollState] = useState({
-    canScrollLeft: false,
-    canScrollRight: false,
-    hasOverflow: false,
-  });
-
-  useEffect(() => {
-    const shell = boardShellRef.current;
-    if (!shell) {
-      setScrollState({
-        canScrollLeft: false,
-        canScrollRight: false,
-        hasOverflow: false,
-      });
-      return;
-    }
-
-    const updateScrollState = () => {
-      const maxScrollLeft = Math.max(0, shell.scrollWidth - shell.clientWidth);
-      const nextHasOverflow = shell.scrollWidth > shell.clientWidth + 4;
-      const nextCanScrollLeft = nextHasOverflow && shell.scrollLeft > 4;
-      const nextCanScrollRight = nextHasOverflow && shell.scrollLeft < maxScrollLeft - 4;
-
-      setScrollState((current) =>
-        current.hasOverflow === nextHasOverflow &&
-        current.canScrollLeft === nextCanScrollLeft &&
-        current.canScrollRight === nextCanScrollRight
-          ? current
-          : {
-              canScrollLeft: nextCanScrollLeft,
-              canScrollRight: nextCanScrollRight,
-              hasOverflow: nextHasOverflow,
-            },
-      );
-    };
-
-    let rafId: number | undefined;
-    const scheduleScrollStateUpdate = () => {
-      if (rafId !== undefined) {
-        return;
-      }
-
-      rafId = window.requestAnimationFrame(() => {
-        rafId = undefined;
-        updateScrollState();
-      });
-    };
-
-    const resizeObserver =
-      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(scheduleScrollStateUpdate);
-
-    resizeObserver?.observe(shell);
-    shell.addEventListener("scroll", scheduleScrollStateUpdate, { passive: true });
-    window.addEventListener("resize", scheduleScrollStateUpdate);
-    updateScrollState();
-
-    return () => {
-      if (rafId !== undefined) {
-        window.cancelAnimationFrame(rafId);
-      }
-
-      resizeObserver?.disconnect();
-      shell.removeEventListener("scroll", scheduleScrollStateUpdate);
-      window.removeEventListener("resize", scheduleScrollStateUpdate);
-    };
-  }, [boardShellRef]);
-
-  return scrollState;
-}
 
 export function useTaskQueueBoardZoomInput(
   boardShellRef: RefObject<HTMLDivElement | null>,
@@ -165,20 +94,27 @@ export function useTaskQueueBoardLazyLoading({
       );
     };
 
-    const maybeFillViewport = () => {
-      if (window.scrollY > 4) {
-        return;
-      }
-
-      const shellRect = shell.getBoundingClientRect();
-      if (shellRect.bottom < window.innerHeight) {
+    const maybePrefetchMore = () => {
+      const sentinelRect = sentinel.getBoundingClientRect();
+      if (sentinelRect.top <= window.innerHeight + 240) {
         loadMore();
       }
     };
 
-    const maybePrefetchMore = () => {
-      const sentinelRect = sentinel.getBoundingClientRect();
-      if (sentinelRect.top <= window.innerHeight + 240) {
+    const ensureScrollableLane = () => {
+      const laneBodies = shell.querySelectorAll<HTMLElement>(".task-queue-board-column-body");
+      if (![...laneBodies].some((laneBody) => laneBody.scrollHeight > laneBody.clientHeight + 1)) {
+        loadMore();
+      }
+    };
+
+    const handleColumnScroll = (event: Event) => {
+      const columnBody = event.target;
+      if (
+        columnBody instanceof HTMLElement &&
+        columnBody.classList.contains("task-queue-board-column-body") &&
+        columnBody.scrollTop + columnBody.clientHeight >= columnBody.scrollHeight - 240
+      ) {
         loadMore();
       }
     };
@@ -196,8 +132,9 @@ export function useTaskQueueBoardLazyLoading({
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", maybeFillViewport);
-    maybeFillViewport();
+    window.addEventListener("resize", ensureScrollableLane);
+    shell.addEventListener("scroll", handleColumnScroll, true);
+    ensureScrollableLane();
 
     return () => {
       if (rafId !== undefined) {
@@ -205,7 +142,8 @@ export function useTaskQueueBoardLazyLoading({
       }
 
       window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", maybeFillViewport);
+      window.removeEventListener("resize", ensureScrollableLane);
+      shell.removeEventListener("scroll", handleColumnScroll, true);
     };
   }, [
     boardShellRef,

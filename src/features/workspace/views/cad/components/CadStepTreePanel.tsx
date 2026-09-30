@@ -4,8 +4,8 @@ import { IconChevronRight } from "@/components/shared/Icons";
 import type {
   CadStepImportRunRecord,
   CadStepTreePartInstanceRecord,
-  CadStepTreeNode,
-} from "../model/cadIntegrationTypes";
+  CadStepTreeNode
+} from "../model/cadStepTypes";
 
 function mappingTone(mapping?: CadStepTreeNode["mapping"] | CadStepTreeNode["partInstances"][number]["mapping"] | null) {
   if (!mapping || mapping.status === "NEEDS_REVIEW" || mapping.targetKind === "UNMAPPED") {

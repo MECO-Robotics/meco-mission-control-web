@@ -6,6 +6,8 @@ import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefa
 import { ManufacturingQueueView } from "@/features/workspace/views/manufacturing/ManufacturingQueueView";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { ManufacturingItemRecord } from "@/types/recordsInventory";
+import { sortManufacturingItems } from "@/features/workspace/views/manufacturing/manufacturingSort";
+import { createTask } from "@/features/workspace/views/__tests__/taskQueueTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
@@ -115,6 +117,7 @@ describe("ManufacturingQueueView", () => {
     );
 
     expect(allMarkup).not.toContain("manufacturing-process-filter");
+    expect(allMarkup).toContain('aria-label="Sort manufacturing"');
     expect(allMarkup).toContain("CNC drive plate");
     expect(allMarkup).toContain("3D printed spacer");
     expect(allMarkup).toContain("Fab belly pan");
@@ -183,5 +186,72 @@ describe("ManufacturingQueueView", () => {
     expect(hiddenQuickActionsMarkup).not.toContain("cnc-complete-job-button");
     expect(hiddenQuickActionsMarkup).not.toContain('draggable="true"');
     expect(hiddenQuickActionsMarkup).not.toContain('data-kanban-drop-enabled="true"');
+  });
+
+  it("matches the active person filter against assignees of linked tasks", () => {
+    const linkedTask = createTask(1, {
+      assigneeIds: ["member-2"],
+      linkedManufacturingIds: [manufacturingItem.id],
+    });
+    const markup = renderToStaticMarkup(
+      React.createElement(ManufacturingQueueView, {
+        title: "Manufacturing",
+        addButtonAriaLabel: "Add job",
+        emptyStateMessage: "No jobs",
+        activePersonFilter: ["member-2"],
+        bootstrap: {
+          ...bootstrap,
+          tasks: [linkedTask],
+          members: [
+            ...bootstrap.members,
+            {
+              id: "member-2",
+              name: "Assigned Member",
+              email: "assigned@meco.test",
+              role: "student",
+              elevated: false,
+              seasonId: "season-1",
+            },
+          ],
+        },
+        items: [manufacturingItem],
+        membersById: {
+          "member-1": bootstrap.members[0],
+          "member-2": {
+            id: "member-2",
+            name: "Assigned Member",
+            email: "assigned@meco.test",
+            role: "student",
+            elevated: false,
+            seasonId: "season-1",
+          },
+        },
+        onCreate: jest.fn(),
+        onEdit: jest.fn(),
+        subsystemsById: { "subsystem-1": bootstrap.subsystems[0] },
+      }),
+    );
+
+    expect(markup).toContain("Drive Plate");
+    expect(markup).toContain('title="Assigned Member"');
+  });
+
+  it("sorts manufacturing items by date or title without mutating input", () => {
+    const late = { ...manufacturingItem, id: "late", title: "Z Swerve", dueDate: "2026-05-10" };
+    const early = { ...manufacturingItem, id: "early", title: "A Intake", dueDate: "2026-05-01" };
+    const items = [late, early];
+    const membersById = { "member-1": bootstrap.members[0] };
+    const subsystemsById = { "subsystem-1": bootstrap.subsystems[0] };
+
+    expect(
+      sortManufacturingItems(items, "dueDate", membersById, subsystemsById).map((item) => item.id),
+    ).toEqual(["early", "late"]);
+    expect(
+      sortManufacturingItems(items, "title", membersById, subsystemsById).map((item) => item.id),
+    ).toEqual(["early", "late"]);
+    expect(
+      sortManufacturingItems(items, "title", membersById, subsystemsById, "desc").map((item) => item.id),
+    ).toEqual(["late", "early"]);
+    expect(items.map((item) => item.id)).toEqual(["late", "early"]);
   });
 });

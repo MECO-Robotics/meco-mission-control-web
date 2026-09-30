@@ -2,7 +2,6 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type {
   InventoryViewTab,
   ManufacturingViewTab,
-  RiskManagementViewTab,
   TaskViewTab,
   ViewTab,
   WorklogsViewTab,
@@ -11,7 +10,6 @@ import type {
 export type InteractiveTutorialChapterId = "planning" | "operations" | "outreach";
 
 export type InteractiveTutorialStepId =
-  | "readiness-tab"
   | "reports-worklogs"
   | "directory-view"
   | "subsystems-view"
@@ -19,7 +17,6 @@ export type InteractiveTutorialStepId =
   | "season"
   | "project-robot"
   | "project-outreach"
-  | "tasks-tab"
   | "task-timeline"
   | "timeline-week-view"
   | "timeline-shift-period"
@@ -29,15 +26,11 @@ export type InteractiveTutorialStepId =
   | "create-task"
   | "queue-filter"
   | "queue-edit-task"
-  | "task-milestones"
   | "create-milestone"
   | "milestone-search"
   | "milestone-edit"
-  | "worklogs-tab"
   | "create-worklog"
-  | "roster-tab"
   | "create-student"
-  | "inventory-tab"
   | "inventory-materials"
   | "create-material"
   | "material-filter"
@@ -48,21 +41,17 @@ export type InteractiveTutorialStepId =
   | "inventory-purchases"
   | "create-purchase"
   | "purchase-sort"
-  | "workflow-tab"
   | "create-subsystem"
   | "edit-subsystem"
   | "create-mechanism"
   | "edit-mechanism"
   | "add-part-to-mechanism"
-  | "manufacturing-tab"
   | "manufacturing-cnc"
   | "create-cnc-job"
   | "inspect-cnc-job"
-  | "manufacturing-prints"
   | "create-print-job"
   | "complete-print-job"
   | "manufacturing-search"
-  | "manufacturing-fabrication"
   | "create-fabrication-job"
   | "inspect-fabrication-job"
   | "workflow-edit"
@@ -87,7 +76,6 @@ export interface InteractiveTutorialChapter {
 export interface InteractiveTutorialReturnState {
   activeTab: ViewTab;
   taskView: TaskViewTab;
-  riskManagementView: RiskManagementViewTab;
   worklogsView: WorklogsViewTab;
   manufacturingView: ManufacturingViewTab;
   inventoryView: InventoryViewTab;

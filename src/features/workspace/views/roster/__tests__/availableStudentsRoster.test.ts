@@ -1,9 +1,9 @@
 /// <reference types="jest" />
 
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import { formatLocalDate } from "@/lib/dateUtils";
 import {
   buildAvailableStudentRoster,
-  formatRosterDateKey,
   getPresentRosterMemberIds,
 } from "@/features/workspace/views/roster/availableStudentsRoster";
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -11,7 +11,7 @@ import type { TaskRecord } from "@/types/recordsExecution";
 import type { MemberRecord } from "@/types/recordsOrganization";
 
 const today = new Date();
-const todayIso = formatRosterDateKey(today);
+const todayIso = formatLocalDate(today);
 
 const baseStudent = (id: string, name: string, extras: Partial<MemberRecord> = {}): MemberRecord => ({
   activeSeasonIds: ["season-1"],
@@ -26,6 +26,7 @@ const baseStudent = (id: string, name: string, extras: Partial<MemberRecord> = {
 });
 
 const baseTask = (id: string, assigneeId: string, extras: Partial<TaskRecord> = {}): TaskRecord => ({
+  artifactIds: [],
   actualHours: 0,
   assigneeIds: [assigneeId],
   blockers: [],
@@ -37,11 +38,9 @@ const baseTask = (id: string, assigneeId: string, extras: Partial<TaskRecord> = 
   id,
   linkedManufacturingIds: [],
   linkedPurchaseIds: [],
-  mechanismId: null,
   mechanismIds: [],
   mentorId: null,
   ownerId: null,
-  partInstanceId: null,
   partInstanceIds: [],
   photoUrl: "",
   planningState: "ready",
@@ -50,12 +49,10 @@ const baseTask = (id: string, assigneeId: string, extras: Partial<TaskRecord> = 
   requiresDocumentation: false,
   startDate: "2026-06-04",
   status: "in-progress",
-  subsystemId: "drive",
   subsystemIds: ["drive"],
   summary: "",
   targetMilestoneId: null,
   title: id,
-  workstreamId: null,
   workstreamIds: [],
   ...extras,
 });

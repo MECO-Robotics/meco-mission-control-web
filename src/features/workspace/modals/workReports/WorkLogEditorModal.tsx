@@ -3,6 +3,7 @@ import { useRef, type Dispatch, type FormEvent, type SetStateAction } from "reac
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { WorkLogPayload } from "@/types/payloads";
 import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
+import { WorkReportEditorActions } from "./WorkReportEditorActions";
 
 interface WorkLogEditorModalProps {
   bootstrap: BootstrapPayload;
@@ -32,14 +33,13 @@ export function WorkLogEditorModal({
   const selectedTask = bootstrap.tasks.find((task) => task.id === workLogDraft.taskId);
   const workLogPhotoProjectId = selectedTask?.projectId ?? bootstrap.projects[0]?.id ?? null;
   const selectedSubsystem = selectedTask
-    ? bootstrap.subsystems.find((subsystem) => subsystem.id === selectedTask.subsystemId)
+    ? bootstrap.subsystems.find((subsystem) => subsystem.id === selectedTask.subsystemIds[0])
     : null;
 
   return (
     <ModalDialog label="Add work log" onClose={closeWorkLogModal}>
       <section
-        className="modal-card"
-        style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
+        className="modal-card modal-panel-surface"
       >
         <div className="panel-header compact-header">
           <div>
@@ -63,7 +63,7 @@ export function WorkLogEditorModal({
           style={{ color: "var(--text-copy)" }}
         >
           <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Task</span>
+            <span>Task</span>
             <select
               aria-label="Task"
               onChange={(milestone) =>
@@ -113,7 +113,7 @@ export function WorkLogEditorModal({
             ) : null}
           </label>
           <label className="field">
-            <span style={{ color: "var(--text-title)" }}>Date</span>
+            <span>Date</span>
             <input
               onChange={(milestone) =>
                 setWorkLogDraft((current) => ({
@@ -122,17 +122,12 @@ export function WorkLogEditorModal({
                 }))
               }
               required
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
               type="date"
               value={workLogDraft.date}
             />
           </label>
           <label className="field">
-            <span style={{ color: "var(--text-title)" }}>Hours</span>
+            <span>Hours</span>
             <input
               min="0.5"
               onChange={(milestone) =>
@@ -143,17 +138,12 @@ export function WorkLogEditorModal({
               }
               required
               step="0.5"
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
               type="number"
               value={workLogDraft.hours}
             />
           </label>
           <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Participants</span>
+            <span>Participants</span>
             <select
               multiple
               onChange={(milestone) =>
@@ -184,7 +174,7 @@ export function WorkLogEditorModal({
             </small>
           </label>
           <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Notes</span>
+            <span>Notes</span>
             <textarea
               onChange={(milestone) =>
                 setWorkLogDraft((current) => ({
@@ -194,11 +184,6 @@ export function WorkLogEditorModal({
               }
               placeholder="What got done?"
               rows={3}
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
               value={workLogDraft.notes}
             />
           </label>
@@ -214,27 +199,12 @@ export function WorkLogEditorModal({
               return requestPhotoUpload(workLogPhotoProjectId, file);
             }}
           />
-          <div className="modal-actions modal-wide">
-            <button
-              className="secondary-action"
-              onClick={closeWorkLogModal}
-              type="button"
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              className="primary-action"
-              disabled={isSavingWorkLog || bootstrap.tasks.length === 0 || bootstrap.members.length === 0}
-              type="submit"
-            >
-              {isSavingWorkLog ? "Saving..." : "Add work log"}
-            </button>
-          </div>
+          <WorkReportEditorActions
+            disabled={isSavingWorkLog || bootstrap.tasks.length === 0 || bootstrap.members.length === 0}
+            isSaving={isSavingWorkLog}
+            onCancel={closeWorkLogModal}
+            submitLabel="Add work log"
+          />
         </form>
       </section>
     </ModalDialog>

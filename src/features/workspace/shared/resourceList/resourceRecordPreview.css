@@ -1,0 +1,4 @@
+.resource-record-preview { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
+.resource-record-preview .requested-item-meta { min-width: 0; }
+.resource-record-preview .requested-item-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.resource-record-preview .requested-item-subtitle { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

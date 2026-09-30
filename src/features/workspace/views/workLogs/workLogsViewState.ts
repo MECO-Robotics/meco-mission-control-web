@@ -100,7 +100,7 @@ function buildLegacyActivityActions(
       changedFields: [],
       projectId: task?.projectId ?? null,
       taskId: workLog.taskId,
-      subsystemId: task?.subsystemId ?? null,
+      subsystemId: task?.subsystemIds[0] ?? null,
       actorMemberId: null,
       memberIds: workLog.participantIds,
     };
@@ -141,7 +141,7 @@ export function actionMatchesSearch({
     new Set(
       [
         action.subsystemId,
-        ...(task ? [task.subsystemId, ...task.subsystemIds] : []),
+        ...(task?.subsystemIds ?? []),
       ].filter((subsystemId): subsystemId is string => Boolean(subsystemId)),
     ),
   );
@@ -196,26 +196,19 @@ export function useWorkLogsViewState({
       buildWorkLogsSummaryState({
         activePersonFilter,
         bootstrap,
-        membersById,
-        subsystemsById,
         summaryWorkLogs,
-        taskById,
       }),
-    [activePersonFilter, bootstrap, membersById, subsystemsById, summaryWorkLogs, taskById],
+    [activePersonFilter, bootstrap, summaryWorkLogs],
   );
   const workLogs = useMemo(
     () =>
       filterAndSortWorkLogs({
-        activePersonFilter,
-        membersById,
-        search,
         sortMode,
-        subsystemsById,
         subsystemFilter,
         taskById,
-        workLogs: bootstrap.workLogs,
+        workLogs: summaryWorkLogs,
       }),
-    [activePersonFilter, bootstrap.workLogs, membersById, search, sortMode, subsystemsById, subsystemFilter, taskById],
+    [sortMode, subsystemFilter, summaryWorkLogs, taskById],
   );
   const activityActions = useMemo(() => {
     const actions = selectActivityActions({

@@ -35,8 +35,7 @@ export function buildTimelineSubsystemRows({
       spillsRight: task.dueDate > endDate,
     };
 
-    const targetSubsystemIds =
-      task.subsystemIds.length > 0 ? task.subsystemIds : [task.subsystemId];
+    const targetSubsystemIds = task.subsystemIds;
     for (const subsystemId of targetSubsystemIds) {
       const existingTasks = tasksBySubsystem.get(subsystemId);
       if (existingTasks) {

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
-import type { MechanismRecord, PartDefinitionRecord, SubsystemRecord } from "@/types/records";
+import type { MechanismRecord, SubsystemRecord } from "@/types/recordsOrganization";
+import type { PartDefinitionRecord } from "@/types/recordsInventory";
 import type {
   CadHierarchyReview,
   CadHierarchyReviewDecision,
@@ -11,8 +12,8 @@ import type {
   CadStepMappingRecord,
   CadStepSnapshotRecord,
   CadStepTreeNode,
-  CadStepWarningRecord,
-} from "../model/cadIntegrationTypes";
+  CadStepWarningRecord
+} from "../model/cadStepTypes";
 import {
   PLACEHOLDER_PARSER_WARNING_TEXT,
   stepUsesPlaceholderParser,

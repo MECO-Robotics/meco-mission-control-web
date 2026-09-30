@@ -3,8 +3,8 @@ import type {
   CadPartMatchProposal,
   CadStepDiff,
   CadStepMappingRecord,
-  CadStepWarningRecord,
-} from "./cadIntegrationTypes";
+  CadStepWarningRecord
+} from "./cadStepTypes";
 import {
   addedAssemblyItems,
   addedPartItems,

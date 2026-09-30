@@ -4,7 +4,6 @@ import type { FilterSelection } from "@/features/workspace/shared/filters/worksp
 import type {
   InventoryViewTab,
   ManufacturingViewTab,
-  RiskManagementViewTab,
   TaskViewTab,
   ViewTab,
   WorklogsViewTab,
@@ -14,7 +13,6 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 export interface UseInteractiveTutorialOptions {
   activeTab: ViewTab;
   taskView: TaskViewTab;
-  riskManagementView: RiskManagementViewTab;
   worklogsView: WorklogsViewTab;
   manufacturingView: ManufacturingViewTab;
   inventoryView: InventoryViewTab;
@@ -27,7 +25,6 @@ export interface UseInteractiveTutorialOptions {
   handleUnauthorized: () => void;
   setActiveTab: Dispatch<SetStateAction<ViewTab>>;
   setTaskView: Dispatch<SetStateAction<TaskViewTab>>;
-  setRiskManagementView: Dispatch<SetStateAction<RiskManagementViewTab>>;
   setWorklogsView: Dispatch<SetStateAction<WorklogsViewTab>>;
   setManufacturingView: Dispatch<SetStateAction<ManufacturingViewTab>>;
   setInventoryView: Dispatch<SetStateAction<InventoryViewTab>>;

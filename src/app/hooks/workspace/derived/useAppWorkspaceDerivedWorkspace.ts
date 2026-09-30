@@ -1,5 +1,3 @@
-import { useEffect, useMemo } from "react";
-
 import { useWorkspaceDerivedData } from "@/features/workspace/useWorkspaceDerivedData";
 import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
 import type {
@@ -13,91 +11,29 @@ export function useAppWorkspaceDerivedWorkspace(
 ) {
   const {
     activeTab,
-    activeTimelineTaskDetailId,
     isSidebarOverlay,
     setActiveTab,
-    setActiveTimelineTaskDetailId,
     setTabSwitchDirection,
-    taskModalMode,
     workLogModalMode,
     qaReportModalMode,
     milestoneReportModalMode,
-    purchaseModalMode,
-    manufacturingModalMode,
-    partDefinitionModalMode,
-    partInstanceModalMode,
-    subsystemModalMode,
-    mechanismModalMode,
-    artifactModalMode,
-    workstreamModalMode,
+
     isAddSeasonPopupOpen,
     robotProjectModalMode,
     toggleSidebar,
   } = state;
 
-  const {
-    activeTask,
-    cncItems,
-    disciplinesById,
-    milestonesById,
-    externalMembers,
-    fabricationItems,
-    mechanismsById,
-    mentors,
-    membersById,
-    navigationItems,
-    partDefinitionsById,
-    partInstancesById,
-    printItems,
-    rosterMentors,
-    students,
-    subsystemsById,
-  } = useWorkspaceDerivedData({
-    activeTaskId: state.activeTaskId,
+  const workspaceData = useWorkspaceDerivedData({
     bootstrap: selection.scopedBootstrap,
     isAllProjectsView: selection.isAllProjectsView,
     selectedProjectType: selection.selectedProjectType,
   });
 
-  const activeTimelineTaskDetail = useMemo(
-    () =>
-      activeTimelineTaskDetailId
-        ? selection.scopedBootstrap.tasks.find((task) => task.id === activeTimelineTaskDetailId) ??
-          null
-        : null,
-    [activeTimelineTaskDetailId, selection.scopedBootstrap.tasks],
-  );
-
-  useEffect(() => {
-    if (!activeTimelineTaskDetailId) {
-      return;
-    }
-
-    if (
-      !selection.scopedBootstrap.tasks.some((task) => task.id === activeTimelineTaskDetailId)
-    ) {
-      setActiveTimelineTaskDetailId(null);
-    }
-  }, [
-    activeTimelineTaskDetailId,
-    selection.scopedBootstrap.tasks,
-    setActiveTimelineTaskDetailId,
-  ]);
-
   const isWorkspaceModalOpen = Boolean(
-    activeTimelineTaskDetailId ||
-      taskModalMode ||
-      workLogModalMode ||
+    workLogModalMode ||
       qaReportModalMode ||
       milestoneReportModalMode ||
-      purchaseModalMode ||
-      manufacturingModalMode ||
-      partDefinitionModalMode ||
-      partInstanceModalMode ||
-      subsystemModalMode ||
-      mechanismModalMode ||
-      artifactModalMode ||
-      workstreamModalMode ||
+
       isAddSeasonPopupOpen ||
       robotProjectModalMode,
   );
@@ -113,8 +49,8 @@ export function useAppWorkspaceDerivedWorkspace(
     options?: { keepSidebarOpen?: boolean },
   ) => {
     if (tab !== activeTab) {
-      const currentIndex = navigationItems.findIndex((item) => item.value === activeTab);
-      const nextIndex = navigationItems.findIndex((item) => item.value === tab);
+      const currentIndex = workspaceData.navigationItems.findIndex((item) => item.value === activeTab);
+      const nextIndex = workspaceData.navigationItems.findIndex((item) => item.value === tab);
 
       if (currentIndex >= 0 && nextIndex >= 0) {
         setTabSwitchDirection(nextIndex > currentIndex ? "down" : "up");
@@ -129,25 +65,9 @@ export function useAppWorkspaceDerivedWorkspace(
   };
 
   return {
-    activeTask,
-    activeTimelineTaskDetail,
-    cncItems,
-    disciplinesById,
-    milestonesById,
-    externalMembers,
-    fabricationItems,
+    ...workspaceData,
     handleSidebarTabSelect,
     isWorkspaceModalOpen,
-    mechanismsById,
-    mentors,
-    membersById,
-    navigationItems,
-    partDefinitionsById,
-    partInstancesById,
-    printItems,
-    rosterMentors,
-    students,
-    subsystemsById,
     closeSidebarOverlay,
   };
 }

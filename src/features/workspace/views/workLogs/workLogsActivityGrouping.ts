@@ -45,7 +45,7 @@ export function formatActivityLabel(value: string) {
 function getTaskSubsystemId(
   task: BootstrapPayload["tasks"][number] | undefined,
 ) {
-  return task ? task.subsystemId || task.subsystemIds[0] || null : null;
+  return task?.subsystemIds[0] ?? null;
 }
 
 function resolveActivityColumn({

@@ -1,6 +1,6 @@
 .timeline-topbar-controls {
   align-items: center;
-  gap: 0.32rem;
+  gap: 0.12rem;
 }
 
 .timeline-topbar-controls > * {
@@ -22,14 +22,14 @@
 }
 
 .timeline-topbar-controls .timeline-period-controls,
-.timeline-topbar-controls .timeline-zoom-controls {
+.app-topbar-zoom-host .workspace-topbar-zoom-controls {
   flex: 0 0 auto;
   min-width: max-content;
   max-width: none;
 }
 
 .timeline-topbar-controls .timeline-period-label,
-.timeline-topbar-controls .timeline-zoom-label {
+.app-topbar-zoom-host .workspace-topbar-zoom-label {
   flex: 0 0 auto;
 }
 
@@ -42,34 +42,24 @@
   align-items: center;
 }
 
-.timeline-toolbar-filters {
-  display: flex;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.28rem;
-  width: auto;
-  flex: 0 1 auto;
-  max-width: 100%;
-}
-
 .timeline-interval-switch {
   display: inline-flex;
   align-items: center;
   min-height: 2.05rem;
+  flex: 0 0 auto;
 }
 
 .timeline-interval-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.24rem;
-  min-height: 2.05rem;
-  min-width: 5.15rem;
-  padding: 0.12rem 0.42rem;
-  border: 1px solid var(--border-base);
+  gap: 0.2rem;
+  min-height: 1.8rem;
+  min-width: 4.05rem;
+  padding: 0.06rem 0.28rem;
+  border: 1px solid transparent;
   border-radius: 999px;
-  background: var(--bg-row-alt);
+  background: transparent;
   color: var(--text-title);
   font: inherit;
   font-size: 0.75rem;
@@ -81,12 +71,12 @@
 
 .timeline-interval-pill:hover,
 .timeline-interval-pill:focus-visible {
-  border-color: color-mix(in srgb, var(--meco-blue) 32%, var(--border-base));
+  color: var(--official-blue);
 }
 
 .timeline-interval-pill:focus-visible {
   outline: none;
-  box-shadow: var(--control-select-focus-ring);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--meco-blue) 45%, transparent);
 }
 
 .timeline-interval-pill-icon {
@@ -146,24 +136,50 @@
 .timeline-period-controls {
   display: inline-flex;
   align-items: center;
-  gap: 0.08rem;
+  gap: 0.04rem;
   min-height: 2.05rem;
   max-width: 100%;
-  padding: 0.08rem 0.14rem;
+  padding: 0.06rem 0.1rem;
   border: 1px solid var(--border-base);
   border-radius: 999px;
   background: var(--bg-row-alt);
+}
+
+.timeline-period-controls.is-all .timeline-interval-switch {
+  margin: 0;
+}
+
+.timeline-period-divider {
+  width: 1px;
+  height: 1rem;
+  margin: 0 0.04rem;
+  background: var(--border-base);
+  flex: 0 0 auto;
 }
 
 .timeline-period-button.icon-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.9rem;
-  height: 1.9rem;
-  min-width: 1.9rem;
+  width: 1.55rem;
+  height: 1.7rem;
+  min-width: 1.55rem;
   padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-copy);
   box-shadow: none;
+}
+
+.timeline-period-button.icon-button:hover {
+  background: transparent;
+  color: var(--official-blue);
+  transform: none;
+}
+
+.timeline-period-button.icon-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--meco-blue) 45%, transparent);
 }
 
 .timeline-period-button svg {
@@ -172,45 +188,8 @@
 }
 
 .timeline-period-label {
-  min-width: 6.45rem;
+  min-width: 3.95rem;
   max-width: 11rem;
-  padding: 0 0.16rem;
-  color: var(--text-title);
-  font-size: 0.78rem;
-  font-weight: 800;
-  line-height: 1.1;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.timeline-zoom-controls {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.04rem;
-  min-height: 2.05rem;
-  max-width: 100%;
-  padding: 0.12rem 0.18rem;
-  border: 1px solid var(--border-base);
-  border-radius: 999px;
-  background: var(--bg-row-alt);
-}
-
-.timeline-zoom-button.icon-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.9rem;
-  height: 1.9rem;
-  min-width: 1.9rem;
-  padding: 0;
-  box-shadow: none;
-  font-size: 1rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.timeline-zoom-label {
-  min-width: 2.9rem;
   padding: 0 0.04rem;
   color: var(--text-title);
   font-size: 0.78rem;
@@ -221,6 +200,6 @@
 }
 
 .timeline-period-controls.is-week .timeline-period-label {
-  min-width: 4.4rem;
-  padding: 0 0.08rem;
+  min-width: 3.95rem;
+  padding: 0 0.04rem;
 }

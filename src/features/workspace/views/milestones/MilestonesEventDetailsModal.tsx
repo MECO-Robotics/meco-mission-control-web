@@ -13,7 +13,6 @@ import { EVENT_TYPE_STYLES as MILESTONE_TYPE_STYLES } from "@/features/workspace
 import { MilestonesMilestoneModalReadinessSection } from "./sections/MilestonesEventModalReadinessSection";
 import { MilestonesEventDetailEditor, type MilestoneDetailEditableField } from "./sections/MilestonesEventDetailEditor";
 import {
-  MilestoneDetailInlineValue,
   MilestoneDetailValue,
   MilestoneDetailsStatusIcon,
   MilestoneEditScheduleField,
@@ -150,9 +149,8 @@ export function MilestonesEventDetailsModal({
   return createPortal(
     <ModalDialog label={activeMilestone.title} onClose={handleClose}>
       <section
-        className="modal-card task-details-modal"
+        className="modal-card task-details-modal modal-panel-surface"
         data-tutorial-target={isEditMode ? "milestone-edit-modal" : "milestone-detail-modal"}
-        style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
       >
         <div className="panel-header compact-header task-details-header">
           <div>
@@ -192,7 +190,7 @@ export function MilestonesEventDetailsModal({
                       setMilestoneStartTime={setMilestoneStartTime ?? (() => undefined)}
                     />
                   ) : (
-                    <MilestoneDetailInlineValue onOpenEditMilestone={() => onEditMilestone(activeMilestone)}>
+                    <MilestoneDetailValue appearance="inline" onOpenEditMilestone={() => onEditMilestone(activeMilestone)}>
                       <span style={{ alignItems: "center", display: "inline-flex", gap: "0.25rem", flexWrap: "wrap" }}>
                         <span className="pill status-pill status-pill-neutral">{milestoneStartLabel}</span>
                         {milestoneEndLabel ? (
@@ -204,7 +202,7 @@ export function MilestonesEventDetailsModal({
                           </>
                         ) : null}
                       </span>
-                    </MilestoneDetailInlineValue>
+                    </MilestoneDetailValue>
                   )}
                 </div>
               </div>
@@ -245,14 +243,14 @@ export function MilestonesEventDetailsModal({
           <div className="modal-form task-details-grid" style={{ color: "var(--text-copy)" }}>
             <div className="milestone-detail-overview-grid modal-wide">
               <div className="field modal-wide milestone-detail-description">
-                <span style={{ color: "var(--text-title)" }}>Description</span>
+                <span>Description</span>
                 <MilestoneDetailValue onOpenEditMilestone={() => onEditMilestone(activeMilestone)} showEditIndicator={isEditMode}>
                   <p className="task-detail-copy">{activeMilestone.description || "No description provided."}</p>
                 </MilestoneDetailValue>
               </div>
               <div className="milestone-detail-type-row">
                 <div className="field">
-                  <span style={{ color: "var(--text-title)" }}>Type</span>
+                  <span>Type</span>
                   <MilestoneDetailValue
                     onOpenEditMilestone={() => onEditMilestone(activeMilestone)}
                     showEditIndicator={isEditMode}
@@ -263,7 +261,7 @@ export function MilestonesEventDetailsModal({
                   </MilestoneDetailValue>
                 </div>
                 <div className="field">
-                  <span style={{ color: "var(--text-title)" }}>Related projects</span>
+                  <span>Related projects</span>
                   <MilestoneDetailValue
                     onOpenEditMilestone={() => onEditMilestone(activeMilestone)}
                     showEditIndicator={isEditMode}
@@ -280,7 +278,7 @@ export function MilestonesEventDetailsModal({
               milestoneModalMode="detail"
             />
 
-            <section className="modal-wide"><h3>Results</h3><ReportHistoryList reports={bootstrap.testResults.filter((report) => report.milestoneId === activeMilestone.id)} bootstrap={bootstrap} /></section>
+            <section className="modal-wide"><h3>Results</h3><ReportHistoryList reports={bootstrap.reports.filter((report) => report.reportType !== "QA" && report.milestoneId === activeMilestone.id)} bootstrap={bootstrap} /></section>
             <div className="modal-actions modal-wide">
               {onRecordResult ? <button className="secondary-action" type="button" onClick={() => onRecordResult(activeMilestone)}>Record result</button> : null}
               <button className="primary-action" onClick={() => onEditMilestone(activeMilestone)} type="button">

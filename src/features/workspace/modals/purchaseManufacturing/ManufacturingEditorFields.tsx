@@ -31,7 +31,7 @@ export function ManufacturingEditorFields({
   return (
     <>
       <label className="field modal-wide">
-        <span style={{ color: "var(--text-title)" }}>Part definition</span>
+        <span>Part definition</span>
         <select
           onChange={(milestone) => {
             const partDefinitionId = milestone.target.value;
@@ -70,7 +70,7 @@ export function ManufacturingEditorFields({
         bootstrap={bootstrap}
       />
       <label className="field">
-        <span style={{ color: "var(--text-title)" }}>Requester</span>
+        <span>Requester</span>
         <select
           onChange={(milestone) =>
             setManufacturingDraft((current) => ({
@@ -90,7 +90,7 @@ export function ManufacturingEditorFields({
         </select>
       </label>
       <label className="field">
-        <span style={{ color: "var(--text-title)" }}>Due date</span>
+        <span>Due date</span>
         <input
           onChange={(milestone) =>
             setManufacturingDraft((current) => ({
@@ -104,7 +104,7 @@ export function ManufacturingEditorFields({
         />
       </label>
       <label className="field">
-        <span style={{ color: "var(--text-title)" }}>Material</span>
+        <span>Material</span>
         <select
           onChange={(milestone) => {
             const selectedId = milestone.target.value;
@@ -128,7 +128,7 @@ export function ManufacturingEditorFields({
         </select>
       </label>
       <label className="field">
-        <span style={{ color: "var(--text-title)" }}>Quantity</span>
+        <span>Quantity</span>
         <input
           min="1"
           onChange={(milestone) =>
@@ -143,7 +143,7 @@ export function ManufacturingEditorFields({
         />
       </label>
       <label className="field">
-        <span style={{ color: "var(--text-title)" }}>Status</span>
+        <span>Status</span>
         <select
           onChange={(milestone) =>
             setManufacturingDraft((current) => ({
@@ -162,7 +162,7 @@ export function ManufacturingEditorFields({
         </select>
       </label>
       <label className="field">
-        <span style={{ color: "var(--text-title)" }}>Batch label</span>
+        <span>Batch label</span>
         <input
           onChange={(milestone) =>
             setManufacturingDraft((current) => ({

@@ -10,14 +10,6 @@
 }
 
 .topbar-responsive-search-actions .task-queue-toolbar-inline-actions,
-.topbar-responsive-search-actions .task-calendar-filter-controls {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.08rem;
-  flex-wrap: nowrap;
-  width: auto;
-}
-
 .topbar-responsive-search-actions .task-queue-filter-menu.toolbar-filter-dropdown {
   width: 1.7rem;
   height: 1.7rem;
@@ -35,6 +27,27 @@
   padding: 0;
   border-radius: 999px;
   color: var(--text-copy);
+}
+
+.topbar-responsive-search-actions .archive-filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-copy);
+  cursor: pointer;
+}
+
+.topbar-responsive-search-actions .archive-filter-toggle:hover,
+.topbar-responsive-search-actions .archive-filter-toggle:focus-visible,
+.topbar-responsive-search-actions .archive-filter-toggle.is-active {
+  background: color-mix(in srgb, var(--meco-blue) 10%, transparent);
+  color: var(--official-blue);
 }
 
 .topbar-responsive-search-actions .toolbar-filter-value,
@@ -71,11 +84,105 @@
 .topbar-responsive-search-actions .task-queue-filter-menu-popover {
   top: calc(100% + 0.38rem);
   right: 0;
-  width: max-content;
-  min-width: 13.5rem;
+  width: min(17rem, 92vw);
+  min-width: min(16rem, 92vw);
+}
+
+.topbar-responsive-search-actions .task-queue-sort-menu .task-queue-filter-menu-popover {
+  width: min(13rem, 92vw);
+  min-width: min(13rem, 92vw);
+}
+
+.topbar-responsive-search-actions .task-queue-sort-menu .task-queue-filter-menu-item {
+  grid-template-columns: 4.75rem minmax(0, 1fr);
+  gap: 0.4rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.topbar-responsive-search-actions .task-queue-sort-menu .task-queue-filter-menu-label {
+  gap: 0.2rem;
+}
+
+.topbar-responsive-search-actions .task-queue-sort-menu .task-queue-filter-menu-item > .task-queue-sort-menu-select {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.topbar-responsive-search-actions .task-queue-filter-menu-popover.is-inline-selection {
+  width: min(17rem, 92vw);
+  min-width: min(16rem, 92vw);
+}
+
+.topbar-responsive-search-actions .resource-sort-menu .task-queue-filter-menu-popover {
+  width: min(13rem, 92vw);
+  min-width: min(13rem, 92vw);
+  gap: 0.55rem;
+}
+
+.topbar-responsive-search-actions .resource-sort-menu .task-queue-filter-menu-item {
+  grid-template-columns: 4.75rem minmax(0, 1fr);
+  gap: 0.4rem;
+}
+
+.topbar-responsive-search-actions .resource-sort-menu .task-queue-filter-menu-item > .toolbar-filter-select {
+  width: 100%;
+  min-width: 0;
 }
 
 .topbar-responsive-search-actions .task-queue-filter-menu-item {
+  display: grid;
+  grid-template-columns: minmax(6rem, 0.55fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.topbar-responsive-search-actions .task-queue-filter-menu-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  min-width: 0;
+  font-size: 0.72rem;
+  letter-spacing: normal;
+  line-height: 1.2;
+  text-transform: none;
+}
+
+.topbar-responsive-search-actions .task-queue-filter-menu-label-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 1rem;
+  color: var(--text-copy);
+}
+
+.topbar-responsive-search-actions .task-queue-filter-menu-label-icon svg {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.topbar-responsive-search-actions .task-queue-filter-menu-item > .toolbar-filter-dropdown {
+  width: 100%;
+  min-width: 0;
+}
+
+.topbar-responsive-search-actions .task-queue-filter-menu-item > .toolbar-filter-dropdown .toolbar-filter-menu-button {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.topbar-responsive-search-actions .task-queue-filter-menu-item > .toolbar-filter-dropdown .toolbar-filter-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.topbar-responsive-search-actions .task-queue-filter-menu-item > .toolbar-filter-select {
+  min-width: 0;
   width: 100%;
 }
 

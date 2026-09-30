@@ -1,6 +1,5 @@
-import { useMemo, useRef, useState } from "react";
+import { useState } from "react";
 
-import type { RiskManagementViewTab } from "@/lib/workspaceNavigation";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { RiskPayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
@@ -10,134 +9,57 @@ import { AttentionView } from "@/features/workspace/views/attention/AttentionVie
 
 import { RiskEditorModal } from "./RiskEditorModal";
 import { RiskDetailsModal } from "./RiskDetailsModal";
-import { RiskKanbanPanel } from "./risks/RiskKanbanPanel";
-import { RiskMetricsPanel } from "./risks/RiskMetricsPanel";
+import { RiskMetricsSection } from "./RiskMetricsSection";
 import { riskAuditActions } from "./riskViewData/riskAuditActions";
-import { toRiskPayload, useRisksViewModel } from "./riskViewModel";
-import { buildRiskAttachmentLookups } from "./riskViewData/riskAttachmentResolvers";
-import { filterMetricRows } from "./risks/riskMetricsRows";
+import { useRisksViewModel } from "./riskViewModel";
 
 interface RisksViewProps {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
-  isAllProjectsView: boolean;
-  onCreateRisk: (payload: RiskPayload) => Promise<void>;
   onDeleteRisk: (riskId: string) => Promise<void>;
   openTaskDetailModal?: (task: TaskRecord) => void;
   onUpdateRisk: (riskId: string, payload: RiskPayload) => Promise<void>;
-  view: RiskManagementViewTab;
-  includeHealth?: boolean;
   onOpenSource?: (source: string, id: string) => void;
 }
 
 export function RisksView({
   activePersonFilter,
   bootstrap,
-  isAllProjectsView,
-  onCreateRisk,
   onDeleteRisk,
   openTaskDetailModal,
   onUpdateRisk,
-  view,
-  includeHealth = false,
   onOpenSource,
 }: RisksViewProps) {
   const [healthOpen, setHealthOpen] = useState(false);
-  const [metricsSearch, setMetricsSearch] = useState("");
-  const pendingRiskSeverityDropIdsRef = useRef<Set<string>>(new Set());
-  const [pendingRiskSeverityDropIds, setPendingRiskSeverityDropIds] = useState<ReadonlySet<string>>(
-    () => new Set(),
-  );
   const viewModel = useRisksViewModel({
     activePersonFilter,
     bootstrap,
-    onCreateRisk,
     onDeleteRisk,
     onUpdateRisk,
   });
-  const attachmentLookups = useMemo(() => buildRiskAttachmentLookups(bootstrap), [bootstrap]);
-  const filteredSubsystemMetrics = useMemo(
-    () => filterMetricRows(viewModel.subsystemMetrics, metricsSearch),
-    [metricsSearch, viewModel.subsystemMetrics],
-  );
-  const filteredMechanismMetrics = useMemo(
-    () => filterMetricRows(viewModel.mechanismMetrics, metricsSearch),
-    [metricsSearch, viewModel.mechanismMetrics],
-  );
-
-  const setRiskSeverityDropPending = (riskId: string, isPending: boolean) => {
-    const nextPendingIds = new Set(pendingRiskSeverityDropIdsRef.current);
-    if (isPending) {
-      nextPendingIds.add(riskId);
-    } else {
-      nextPendingIds.delete(riskId);
-    }
-
-    pendingRiskSeverityDropIdsRef.current = nextPendingIds;
-    setPendingRiskSeverityDropIds(nextPendingIds);
-  };
-
-  const runRiskSeverityDrop = async (
-    risk: BootstrapPayload["risks"][number],
-    severity: BootstrapPayload["risks"][number]["severity"],
-  ) => {
-    if (pendingRiskSeverityDropIdsRef.current.has(risk.id)) {
-      return;
-    }
-
-    setRiskSeverityDropPending(risk.id, true);
-    try {
-      await onUpdateRisk(risk.id, {
-        ...toRiskPayload(risk),
-        severity,
-      }).catch(() => undefined);
-    } finally {
-      setRiskSeverityDropPending(risk.id, false);
-    }
-  };
-
   return (
     <section className={`panel dense-panel subsystem-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
-      {view === "attention" ? (
-        <AttentionView
-          activePersonFilter={activePersonFilter}
-          bootstrap={bootstrap}
-          onOpenSource={onOpenSource}
-          onOpenRisk={(riskId) => {
-            const targetRisk = bootstrap.risks.find((risk) => risk.id === riskId);
-            if (targetRisk) {
-              viewModel.openRiskDetails(targetRisk);
-            }
-          }}
-          onOpenTask={(taskId) => {
-            const task = attachmentLookups.tasksById[taskId];
-            if (task && openTaskDetailModal) {
-              openTaskDetailModal(task);
-            }
-          }}
-        />
-      ) : null}
-
-      {includeHealth ? <details className="workspace-disclosure" onToggle={event => setHealthOpen(event.currentTarget.open)}><summary>Project health</summary>{healthOpen ? <RiskMetricsPanel mechanismMetrics={filteredMechanismMetrics} metricsSearch={metricsSearch} onMetricsSearchChange={setMetricsSearch} subsystemMetrics={filteredSubsystemMetrics} viewModel={viewModel} embedded /> : null}</details> : null}
-      {view === "metrics" ? (
-        <RiskMetricsPanel
-          mechanismMetrics={filteredMechanismMetrics}
-          metricsSearch={metricsSearch}
-          onMetricsSearchChange={setMetricsSearch}
-          subsystemMetrics={filteredSubsystemMetrics}
-          viewModel={viewModel}
-        />
-      ) : null}
-
-      {view === "kanban" ? (
-        <RiskKanbanPanel
-          attachmentLookups={attachmentLookups}
-          isAllProjectsView={isAllProjectsView}
-          onRiskSeverityDrop={runRiskSeverityDrop}
-          pendingRiskSeverityDropIds={pendingRiskSeverityDropIds}
-          viewModel={viewModel}
-        />
-      ) : null}
+      <AttentionView
+        activePersonFilter={activePersonFilter}
+        bootstrap={bootstrap}
+        onOpenSource={onOpenSource}
+        onOpenRisk={(riskId) => {
+          const targetRisk = bootstrap.risks.find((risk) => risk.id === riskId);
+          if (targetRisk) {
+            viewModel.openRiskDetails(targetRisk);
+          }
+        }}
+        onOpenTask={(taskId) => {
+          const task = bootstrap.tasks.find((item) => item.id === taskId);
+          if (task && openTaskDetailModal) {
+            openTaskDetailModal(task);
+          }
+        }}
+      />
+      <details className="workspace-disclosure" onToggle={(event) => setHealthOpen(event.currentTarget.open)}>
+        <summary>Project health</summary>
+        {healthOpen ? <RiskMetricsSection {...viewModel.metrics} /> : null}
+      </details>
 
       <RiskEditorModal
         attachmentOptions={viewModel.attachmentOptions}

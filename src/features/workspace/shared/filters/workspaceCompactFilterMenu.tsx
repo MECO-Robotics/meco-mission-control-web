@@ -1,11 +1,72 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Filter } from "lucide-react";
 
+import type { DropdownOption } from "../model/workspaceTypes";
+import type { FilterSelection } from "./workspaceFilterUtils";
+import { FilterDropdown } from "./FilterDropdown";
+
 export type CompactFilterMenuItem = {
   content: ReactNode;
   hidden?: boolean;
+  icon?: ReactNode;
+  labelControl?: ReactNode;
   label: string;
 };
+
+export function compactFilterDropdownMenuItem({
+  allLabel,
+  ariaLabel,
+  getOptionToneClassName,
+  getSelectedToneClassName,
+  compactSummary,
+  hidden,
+  hideButtonIcon,
+  icon,
+  label,
+  onChange,
+  options,
+  selectedAllLabel,
+  singleSelect,
+  value,
+}: {
+  allLabel: string;
+  ariaLabel: string;
+  getOptionToneClassName?: (option: DropdownOption) => string | undefined;
+  getSelectedToneClassName?: (selection: FilterSelection) => string | undefined;
+  compactSummary?: boolean;
+  hidden?: boolean;
+  hideButtonIcon?: boolean;
+  icon: ReactNode;
+  label: string;
+  onChange: (value: FilterSelection) => void;
+  options: DropdownOption[];
+  selectedAllLabel?: string;
+  singleSelect?: boolean;
+  value: FilterSelection;
+}): CompactFilterMenuItem {
+  return {
+    label,
+    hidden,
+    icon,
+    content: (
+      <FilterDropdown
+        allLabel={allLabel}
+        ariaLabel={ariaLabel}
+        className="task-queue-filter-menu-submenu"
+        compactSummary={compactSummary}
+        getOptionToneClassName={getOptionToneClassName}
+        getSelectedToneClassName={getSelectedToneClassName}
+        icon={icon}
+        hideButtonIcon={hideButtonIcon}
+        onChange={onChange}
+        options={options}
+        selectedAllLabel={selectedAllLabel}
+        singleSelect={singleSelect}
+        value={value}
+      />
+    ),
+  };
+}
 
 export function CompactFilterMenu({
   activeCount = 0,
@@ -14,6 +75,8 @@ export function CompactFilterMenu({
   className,
   icon,
   iconOnly = false,
+  inlineItems = false,
+  menuTitle,
   onButtonClick,
   items,
 }: {
@@ -23,6 +86,8 @@ export function CompactFilterMenu({
   className?: string;
   icon?: ReactNode;
   iconOnly?: boolean;
+  inlineItems?: boolean;
+  menuTitle?: string;
   onButtonClick?: () => void;
   items: CompactFilterMenuItem[];
 }) {
@@ -97,10 +162,20 @@ export function CompactFilterMenu({
       </button>
 
       {isOpen ? (
-        <div aria-label={ariaLabel} className="task-queue-filter-menu-popover" id={menuId} role="menu">
+        <div
+          aria-label={ariaLabel}
+          className={`task-queue-filter-menu-popover${inlineItems ? " is-inline-selection" : ""}`}
+          id={menuId}
+          role="menu"
+        >
+          {menuTitle ? <h2 className="task-queue-filter-menu-title">{menuTitle}</h2> : null}
           {visibleItems.map((item) => (
             <div className="task-queue-filter-menu-item" key={item.label}>
-              <span className="task-queue-filter-menu-label">{item.label}</span>
+              <span className="task-queue-filter-menu-label">
+                {item.labelControl ? <span className="task-queue-filter-menu-label-control">{item.labelControl}</span> : null}
+                {item.icon ? <span aria-hidden="true" className="task-queue-filter-menu-label-icon">{item.icon}</span> : null}
+                {item.label}
+              </span>
               {item.content}
             </div>
           ))}

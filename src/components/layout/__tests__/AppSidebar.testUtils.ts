@@ -24,7 +24,6 @@ export function renderSidebar(
     isNotificationQueueOpen?: boolean;
     notificationCount?: number;
     projects?: ProjectRecord[];
-    riskManagementView?: "kanban" | "metrics";
     selectedProjectId?: string | null;
     selectedSeasonId?: string | null;
     seasons?: SeasonRecord[];
@@ -57,8 +56,6 @@ export function renderSidebar(
       onOpenProfileEditor: jest.fn(),
       onToggleNotificationQueue: jest.fn(),
       projects: options?.projects ?? [],
-      rosterView: "directory",
-      riskManagementView: options?.riskManagementView ?? "kanban",
       selectedProjectId: options?.selectedProjectId ?? null,
       selectedSeasonId: options?.selectedSeasonId ?? "season-1",
       seasons: options?.seasons ?? [

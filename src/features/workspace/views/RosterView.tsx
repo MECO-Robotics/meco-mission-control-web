@@ -1,3 +1,4 @@
+import { Briefcase } from "lucide-react";
 import { useRememberedViewState } from "@/features/workspace/shared/navigation/WorkspaceViewMemory";
 import React from "react";
 import { buildAvailableStudentRoster, getPresentRosterMemberIds } from "./roster/availableStudentsRoster";
@@ -7,7 +8,11 @@ import type { TaskRecord } from "@/types/recordsExecution";
 
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
+import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
+import { ALL_FILTER_LABEL } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
+import { buildTopbarAddMenuActions, makeAddMenuAction } from "@/features/workspace/shared/topbar";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MemberPayload } from "@/types/payloads";
 import type { MemberRecord } from "@/types/recordsOrganization";
@@ -213,49 +218,95 @@ export const RosterView: React.FC<RosterViewProps> = ({
   };
 
   const renderMember = (member: MemberRecord) => {
-    const presence = presenceById.get(member.id);
     const load = insightById.get(member.id);
     return <div className="people-member" key={member.id}>
       <RosterMemberRow disciplines={bootstrap.disciplines} member={member} onEditMember={openEditPersonPopup} onSelectMember={openEditPersonPopup} selectedMemberId={selectedMemberId} />
       <div className="people-member-context">
-        <small>{presence ? `Here today · ${presence.stateLabel}` : presentMemberIds.has(member.id) ? "Here today" : "No attendance recorded today"}</small>
-        {load ? <small>Capacity: {formatAvailabilityLabel(load.availabilityStatus)} · {load.activeTaskCount} active · {load.blockedTaskCount} blocked · {load.overdueTaskCount} overdue · {formatHours(load.remainingOpenHours)} remaining</small> : null}
-        {load ? <details className="people-workload-details"><summary>Workload and recent activity</summary><small>{formatHours(load.plannedWeeklyAttendanceHours)} planned/week · {formatHours(load.attendanceHoursLast14Days)} attended in 14 days</small>
-        {load?.topTasks.map(task => <button className="ghost-button" key={task.id} type="button" onClick={() => { const record = bootstrap.tasks.find(item => item.id === task.id); if (record) onOpenTask?.(record); }}>{task.title}</button>)}</details> : null}
-        {onCreateTaskForMember && member.role !== "external" ? <button className="ghost-button" type="button" onClick={() => onCreateTaskForMember(member.id)}>Assign work to {member.name.split(" ")[0]}</button> : null}
+        <div className="people-member-load-summary">
+          <div aria-label="Weekly capacity" className="people-member-capacity">
+            <small>Capacity</small>
+            <span>{load ? formatAvailabilityLabel(load.availabilityStatus) : "Unrated"} · <strong>{formatHours(load?.plannedWeeklyAttendanceHours ?? member.plannedWeeklyAttendanceHours)} planned / week</strong></span>
+            <span><strong>{formatHours(load?.remainingOpenHours)}</strong> remaining</span>
+          </div>
+          <div aria-label="Task breakdown" className="people-member-task-counts">
+            <div><span>Active</span><strong>{load?.activeTaskCount ?? 0}</strong></div>
+            <div><span>Blocked</span><strong>{load?.blockedTaskCount ?? 0}</strong></div>
+            <div><span>Overdue</span><strong>{load?.overdueTaskCount ?? 0}</strong></div>
+          </div>
+        </div>
+        <div className="people-member-activity">
+          {load ? <details className="people-workload-details"><summary>Workload and recent activity</summary>
+          {load.topTasks.map(task => <button className="ghost-button" key={task.id} type="button" onClick={() => { const record = bootstrap.tasks.find(item => item.id === task.id); if (record) onOpenTask?.(record); }}>{task.title}</button>)}</details> : null}
+          {onCreateTaskForMember && member.role !== "external" ? (
+            <button
+              aria-label={`Assign work to ${member.name.split(" ")[0]}`}
+              className="icon-button people-assign-work-button"
+              title={`Assign work to ${member.name.split(" ")[0]}`}
+              type="button"
+              onClick={() => onCreateTaskForMember(member.id)}
+            >
+              <Briefcase aria-hidden="true" size={16} />
+            </button>
+          ) : null}
+        </div>
       </div>
     </div>;
   };
 
   const rosterSections: Array<{
+    className?: string;
     title: string;
-    addTarget: "student" | "mentor" | "external";
     members: MemberRecord[];
-    tutorialTarget?: string;
   }> = [
     {
-      addTarget: "student",
+      className: "roster-section-students",
       members: filteredSortedStudents,
       title: "Students",
-      tutorialTarget: "create-student-button",
     },
     {
-      addTarget: "mentor",
       members: filteredSortedMentors,
       title: "Mentors",
     },
     {
-      addTarget: "external",
       members: filteredSortedExternalMembers,
       title: "External access",
     },
   ];
+  const visibleRosterSections = rosterSections.filter((section) => section.members.length > 0);
+  const hasRosterMembers = sortedStudents.length + sortedMentors.length + sortedExternalMembers.length > 0;
 
   return (
     <section className={`panel dense-panel roster-layout ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">
         <div className="panel-actions filter-toolbar roster-directory-toolbar">
           <TopbarResponsiveSearch
+            actions={
+              <CompactFilterMenu
+                activeCount={peopleFilter === "all" ? 0 : 1}
+                ariaLabel="People filters"
+                buttonLabel="Filter people"
+                className="people-search-filter-menu"
+                iconOnly
+                items={[
+                  {
+                    label: "People",
+                    content: (
+                      <select
+                        aria-label="Filter people"
+                        className="toolbar-filter-select"
+                        onChange={(event) => setPeopleFilter(event.target.value)}
+                        value={peopleFilter}
+                      >
+                        <option value="all">{ALL_FILTER_LABEL}</option>
+                        <option value="present">Here today</option>
+                        <option value="available">Available now</option>
+                        <option value="overloaded">Overloaded</option>
+                      </select>
+                    ),
+                  },
+                ]}
+              />
+            }
             ariaLabel="Search people"
             compactPlaceholder="Search"
             onChange={setSearchText}
@@ -264,28 +315,39 @@ export const RosterView: React.FC<RosterViewProps> = ({
           />
         </div>
       </AppTopbarSlotPortal>
+      <WorkspaceTopbarAddMenu
+        actions={buildTopbarAddMenuActions(
+          makeAddMenuAction("Add student", () => openAddPersonPanel("student")),
+          makeAddMenuAction("Add mentor", () => openAddPersonPanel("mentor")),
+          makeAddMenuAction("Add external member", () => openAddPersonPanel("external")),
+        )}
+        ariaLabel="Add person"
+        title="Add person"
+        tutorialTarget="create-person-button"
+      />
 
       <div className="panel-header compact-header">
         <div className="queue-section-header">
           <h2>People</h2>
-          <p className="section-copy">Find available teammates, balance assignments, and manage membership.</p>
         </div>
       </div>
-      <div className="workspace-presentation-controls">
-        <label>People <select aria-label="Filter people" value={peopleFilter} onChange={event => setPeopleFilter(event.target.value)}><option value="all">All people</option><option value="present">Here today</option><option value="available">Available now</option><option value="overloaded">Overloaded</option></select></label>
-        <span>{presentMemberIds.size} people here today</span>
-      </div>
       <div className="roster-columns">
-        {rosterSections.map((section) => (
+        {visibleRosterSections.length === 0 ? (
+          <p className="empty-state" role="status">
+            {hasRosterMembers
+              ? "No people match the current search or filters. Try clearing your search or filters."
+              : "No people in this roster yet. Add a student, mentor, or external member to get started."}
+          </p>
+        ) : null}
+        {visibleRosterSections.map((section) => (
           <RosterSection
-            addTarget={section.addTarget}
+            className={section.className}
             count={section.members.length}
+            presentCount={section.members.filter((member) => presentMemberIds.has(member.id)).length}
             key={section.title}
             members={section.members}
-            onAdd={openAddPersonPanel}
             renderMember={renderMember}
             title={section.title}
-            tutorialTarget={section.tutorialTarget}
           />
         ))}
       </div>

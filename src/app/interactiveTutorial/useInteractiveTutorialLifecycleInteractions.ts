@@ -27,8 +27,8 @@ export function useInteractiveTutorialLifecycleInteractions({
   targetRef,
   stepBaselineLabelRef,
 }: UseInteractiveTutorialLifecycleInteractionsOptions) {
-  const latestContext = useRef(stepCompletionContext);
-  latestContext.current = stepCompletionContext;
+  const latestInteraction = useRef({ stepCompletionContext, onAdvance, onClose });
+  latestInteraction.current = { stepCompletionContext, onAdvance, onClose };
   const [stepError, setStepError] = useState<string | null>(null);
 
   useInteractiveTutorialLifecycleCreationAdvance({
@@ -44,11 +44,24 @@ export function useInteractiveTutorialLifecycleInteractions({
     }
 
     const timeouts = new Set<number>();
-    const schedule = (callback: () => void, delay: number) => {
-      const id = window.setTimeout(() => { timeouts.delete(id); callback(); }, delay);
+    const scheduleCompletion = (delay: number) => {
+      const id = window.setTimeout(() => {
+        timeouts.delete(id);
+        const context = { ...latestInteraction.current.stepCompletionContext, stepBaselineLabel: stepBaselineLabelRef.current };
+        if (isInteractiveTutorialStepComplete(currentStep, context)) {
+          setStepError(null);
+          latestInteraction.current.onAdvance();
+        } else {
+          setStepError(getInteractiveTutorialStepError(currentStep, {
+            tutorialSeasonId: context.tutorialSeasonId,
+            tutorialProjectId: context.tutorialProjectId,
+            tutorialSeasonName,
+            tutorialProjectName,
+          }));
+        }
+      }, delay);
       timeouts.add(id);
     };
-    const completionContext = () => ({ ...latestContext.current, stepBaselineLabel: stepBaselineLabelRef.current });
 
     const handleClickCapture = (milestone: MouseEvent) => {
       const targetNode = milestone.target as Node | null;
@@ -61,12 +74,7 @@ export function useInteractiveTutorialLifecycleInteractions({
       // and keyboard-accessible controls remain usable between steps.
       if (isInteractiveTutorialDropdownStep(currentStep)) {
         if (element?.closest('[data-tutorial-target="season-select"], button[data-tutorial-target="project-select"]')) {
-          schedule(() => {
-            if (isInteractiveTutorialStepComplete(currentStep, completionContext())) {
-              setStepError(null);
-              onAdvance();
-            } else setStepError(getInteractiveTutorialStepError(currentStep, { ...completionContext(), tutorialSeasonName, tutorialProjectName }));
-          }, 100);
+          scheduleCompletion(100);
         }
         return;
       }
@@ -76,106 +84,40 @@ export function useInteractiveTutorialLifecycleInteractions({
         return;
       }
 
-      schedule(() => {
-        const context = completionContext();
-        if (isInteractiveTutorialStepComplete(currentStep, completionContext())) {
-          setStepError(null);
-          onAdvance();
-          return;
-        }
-
-        setStepError(
-          getInteractiveTutorialStepError(currentStep, {
-            tutorialSeasonId: context.tutorialSeasonId,
-            tutorialProjectId: context.tutorialProjectId,
-            tutorialSeasonName,
-            tutorialProjectName,
-          }),
-        );
-      }, 100);
+      scheduleCompletion(100);
     };
 
-    const handleChangeCapture = (event: Event) => {
-      if (!isInteractiveTutorialDropdownStep(currentStep) && currentStep.id !== "timeline-week-view") {
-        return;
-      }
-
+    const handleFieldCapture = (event: Event) => {
+      const acceptsEvent = event.type === "input"
+        ? isInteractiveTutorialSearchStep(currentStep)
+        : isInteractiveTutorialDropdownStep(currentStep) || currentStep.id === "timeline-week-view";
       const targetNode = event.target as Node | null;
-      if (!targetNode || !targetRef.current?.contains(targetNode)) {
-        return;
+      if (acceptsEvent && targetNode && targetRef.current?.contains(targetNode)) {
+        scheduleCompletion(0);
       }
-
-      schedule(() => {
-        const context = completionContext();
-        if (isInteractiveTutorialStepComplete(currentStep, completionContext())) {
-          setStepError(null);
-          onAdvance();
-          return;
-        }
-
-        setStepError(
-          getInteractiveTutorialStepError(currentStep, {
-            tutorialSeasonId: context.tutorialSeasonId,
-            tutorialProjectId: context.tutorialProjectId,
-            tutorialSeasonName,
-            tutorialProjectName,
-          }),
-        );
-      }, 0);
-    };
-
-    const handleInputCapture = (event: Event) => {
-      if (!isInteractiveTutorialSearchStep(currentStep)) {
-        return;
-      }
-
-      const targetNode = event.target as Node | null;
-      if (!targetNode || !targetRef.current?.contains(targetNode)) {
-        return;
-      }
-
-      schedule(() => {
-        const context = completionContext();
-        if (isInteractiveTutorialStepComplete(currentStep, completionContext())) {
-          setStepError(null);
-          onAdvance();
-          return;
-        }
-
-        setStepError(
-          getInteractiveTutorialStepError(currentStep, {
-            tutorialSeasonId: context.tutorialSeasonId,
-            tutorialProjectId: context.tutorialProjectId,
-            tutorialSeasonName,
-            tutorialProjectName,
-          }),
-        );
-      }, 0);
     };
 
     const handleKeyDown = (milestone: KeyboardEvent) => {
       if (milestone.key === "Escape") {
         milestone.preventDefault();
-        onClose();
+        latestInteraction.current.onClose();
       }
     };
 
     document.addEventListener("click", handleClickCapture, true);
-    document.addEventListener("change", handleChangeCapture, true);
-    document.addEventListener("input", handleInputCapture, true);
+    document.addEventListener("change", handleFieldCapture, true);
+    document.addEventListener("input", handleFieldCapture, true);
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
       timeouts.forEach((id) => window.clearTimeout(id));
       document.removeEventListener("click", handleClickCapture, true);
-      document.removeEventListener("change", handleChangeCapture, true);
-    document.removeEventListener("input", handleInputCapture, true);
-    window.removeEventListener("keydown", handleKeyDown);
-  };
+      document.removeEventListener("change", handleFieldCapture, true);
+      document.removeEventListener("input", handleFieldCapture, true);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, [
     currentStep,
-    onAdvance,
-    onClose,
     stepBaselineLabelRef,
     targetRef,
     tutorialProjectName,

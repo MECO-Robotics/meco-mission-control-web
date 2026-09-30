@@ -21,7 +21,7 @@ import {
   type GoogleCredentialResponse,
   type SessionUser,
 } from "@/lib/auth/types";
-import { signOutFromGoogle } from "@/app/hooks/auth/useAppAuthGoogleIdentity";
+import { signOutFromGoogle } from "@/lib/auth/core/google";
 import { toErrorMessage } from "@/lib/appUtils/common";
 
 interface UseAppAuthSessionActionsArgs {
@@ -46,6 +46,8 @@ export interface UseAppAuthSessionActionsResult {
   handleVerifyEmailCode: (email: string, code: string) => Promise<void>;
   setAuthMessage: (message: string) => void;
 }
+
+type SignInRequest = () => Promise<{ user: SessionUser }>;
 
 function storeSignedInSession(
   session: { user: SessionUser },
@@ -125,19 +127,14 @@ export function useAppAuthSessionActions({
     [onSessionExpired, resetWorkspaceRef, setAuthMessage, setSessionUser],
   );
 
-  const handleGoogleCredential = useCallback(
-    async (response: GoogleCredentialResponse) => {
-      if (!response.credential) {
-        setAuthMessage("Google did not return a credential to verify.");
-        return;
-      }
-
+  const runSignInRequest = useCallback(
+    async (request: SignInRequest, rethrowError = false) => {
       setIsSigningIn(true);
       setAuthMessage(null);
 
       let generation = getSessionGeneration();
       try {
-        const pendingSession = exchangeGoogleCredential(response.credential);
+        const pendingSession = request();
         generation = getSessionGeneration();
         const session = await pendingSession;
         setIsSignInForced(false);
@@ -147,11 +144,25 @@ export function useAppAuthSessionActions({
         clearWebSessionState();
         generation = getSessionGeneration();
         setAuthMessage(toErrorMessage(error));
+        if (rethrowError) throw error;
       } finally {
         if (generation === getSessionGeneration()) setIsSigningIn(false);
       }
     },
     [setAuthMessage, setIsSignInForced, setIsSigningIn, setSessionUser],
+  );
+
+  const handleGoogleCredential = useCallback(
+    async (response: GoogleCredentialResponse) => {
+      const credential = response.credential;
+      if (!credential) {
+        setAuthMessage("Google did not return a credential to verify.");
+        return;
+      }
+
+      return runSignInRequest(() => exchangeGoogleCredential(credential));
+    },
+    [runSignInRequest, setAuthMessage],
   );
 
   const handleRequestEmailCode = useCallback(
@@ -172,52 +183,15 @@ export function useAppAuthSessionActions({
   );
 
   const handleVerifyEmailCode = useCallback(
-    async (email: string, code: string) => {
-      setIsSigningIn(true);
-      setAuthMessage(null);
-
-      let generation = getSessionGeneration();
-      try {
-        const pendingSession = verifyEmailSignInCode(email, code);
-        generation = getSessionGeneration();
-        const session = await pendingSession;
-        setIsSignInForced(false);
-        storeSignedInSession(session, setSessionUser);
-      } catch (error) {
-        if (error instanceof Error && error.name === "AbortError") return;
-        clearWebSessionState();
-        generation = getSessionGeneration();
-        setAuthMessage(toErrorMessage(error));
-        throw error;
-      } finally {
-        if (generation === getSessionGeneration()) setIsSigningIn(false);
-      }
-    },
-    [setAuthMessage, setIsSignInForced, setIsSigningIn, setSessionUser],
+    (email: string, code: string) =>
+      runSignInRequest(() => verifyEmailSignInCode(email, code), true),
+    [runSignInRequest],
   );
 
   const handleDevBypassSignIn = useCallback(
-    async (role: DevBypassRole = "student") => {
-      setIsSigningIn(true);
-      setAuthMessage(null);
-
-      let generation = getSessionGeneration();
-      try {
-        const pendingSession = requestDevBypassSignIn(role);
-        generation = getSessionGeneration();
-        const session = await pendingSession;
-        setIsSignInForced(false);
-        storeSignedInSession(session, setSessionUser);
-      } catch (error) {
-        if (error instanceof Error && error.name === "AbortError") return;
-        clearWebSessionState();
-        generation = getSessionGeneration();
-        setAuthMessage(toErrorMessage(error));
-      } finally {
-        if (generation === getSessionGeneration()) setIsSigningIn(false);
-      }
-    },
-    [setAuthMessage, setIsSignInForced, setIsSigningIn, setSessionUser],
+    (role: DevBypassRole = "student") =>
+      runSignInRequest(() => requestDevBypassSignIn(role)),
+    [runSignInRequest],
   );
 
   const handleSignOut = useCallback(async () => {

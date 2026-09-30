@@ -35,36 +35,16 @@ const MILESTONE_TYPE_OPTIONS: DropdownOption[] = EVENT_TYPE_OPTIONS.map((option)
 function MilestoneFieldValue({
   children,
   onOpenEditField,
+  variant = "summary",
 }: {
   children: ReactNode;
   onOpenEditField: () => void;
+  variant?: "summary" | "chip";
 }) {
   return (
     <div className="task-detail-inline-edit-shell">
       <button
-        className="task-detail-inline-edit-trigger task-detail-inline-edit-trigger-summary"
-        onClick={onOpenEditField}
-        onDoubleClick={onOpenEditField}
-        type="button"
-      >
-        {children}
-      </button>
-      <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator" />
-    </div>
-  );
-}
-
-function MilestoneFieldChipValue({
-  children,
-  onOpenEditField,
-}: {
-  children: ReactNode;
-  onOpenEditField: () => void;
-}) {
-  return (
-    <div className="task-detail-inline-edit-shell">
-      <button
-        className="task-detail-inline-edit-trigger task-detail-inline-edit-trigger-chip"
+        className={`task-detail-inline-edit-trigger task-detail-inline-edit-trigger-${variant}`}
         onClick={onOpenEditField}
         onDoubleClick={onOpenEditField}
         type="button"
@@ -114,7 +94,7 @@ export function MilestonesEventDetailEditor({
     <form className="modal-form task-details-grid" onSubmit={onSubmit} style={{ color: "var(--text-copy)" }}>
       <div className="task-details-section-grid task-details-overview-grid modal-wide">
         <div className="field modal-wide">
-          <span style={{ color: "var(--text-title)" }}>Description</span>
+          <span>Description</span>
           {editingField === "description" ? (
             <textarea
               autoFocus
@@ -137,7 +117,7 @@ export function MilestonesEventDetailEditor({
         </div>
 
         <div className="field modal-wide">
-          <span style={{ color: "var(--text-title)" }}>Type</span>
+          <span>Type</span>
           {editingField === "type" ? (
             <FilterDropdown
               allLabel="Type"
@@ -171,16 +151,16 @@ export function MilestonesEventDetailEditor({
               value={milestoneDraft.type ? [milestoneDraft.type] : []}
             />
           ) : (
-            <MilestoneFieldChipValue onOpenEditField={() => setEditingField("type")}>
+            <MilestoneFieldValue onOpenEditField={() => setEditingField("type")} variant="chip">
               <span className="pill status-pill milestone-type-pill" style={milestoneTypeStyleVariables}>
                 {typeLabel}
               </span>
-            </MilestoneFieldChipValue>
+            </MilestoneFieldValue>
           )}
         </div>
 
         <div className="field modal-wide">
-          <span style={{ color: "var(--text-title)" }}>Related projects</span>
+          <span>Related projects</span>
           {editingField === "projects" ? (
             <FilterDropdown
               allLabel="All projects"
@@ -217,7 +197,7 @@ export function MilestonesEventDetailEditor({
         </div>
 
         <div className="field modal-wide">
-          <span style={{ color: "var(--text-title)" }}>Visibility</span>
+          <span>Visibility</span>
           {editingField === "external" ? (
             <label className="checkbox-field" style={{ marginTop: "0.35rem" }}>
               <input
@@ -234,9 +214,9 @@ export function MilestonesEventDetailEditor({
               <span style={{ color: "var(--text-title)" }}>External milestone</span>
             </label>
           ) : (
-            <MilestoneFieldChipValue onOpenEditField={() => setEditingField("external")}>
+            <MilestoneFieldValue onOpenEditField={() => setEditingField("external")} variant="chip">
               <span className="pill status-pill status-pill-neutral">{isExternalLabel}</span>
-            </MilestoneFieldChipValue>
+            </MilestoneFieldValue>
           )}
         </div>
       </div>

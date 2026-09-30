@@ -1,61 +1,38 @@
-﻿import type { BootstrapPayload } from "@/types/bootstrap";
+import type { BootstrapPayload } from "@/types/bootstrap";
 import type { RiskRecord } from "@/types/recordsReporting";
+import { indexRecordsById } from "@/features/workspace/shared/model/indexRecordsById";
 
 import type { SelectOption } from "./riskViewDataPayload";
-import type { RiskViewScopeData } from "./riskViewScopeTypes";
+import type { ScopedRiskViewPools } from "./riskViewScopeSelectors";
 
 export interface RiskViewLookups {
   attachmentOptionsForType: (attachmentType: RiskRecord["attachmentType"]) => SelectOption[];
   getAttachmentLabel: (risk: RiskRecord) => string;
   getMitigationLabel: (risk: RiskRecord) => string;
   getSourceLabel: (risk: RiskRecord) => string;
-  mechanismAttachmentOptions: SelectOption[];
   mitigationTaskOptions: SelectOption[];
-  partInstanceAttachmentOptions: SelectOption[];
-  projectAttachmentOptions: SelectOption[];
-  qaSourceOptions: SelectOption[];
   sourceOptionsForType: (sourceType: RiskRecord["sourceType"]) => SelectOption[];
-  testSourceOptions: SelectOption[];
-  workstreamAttachmentOptions: SelectOption[];
 }
 
 interface BuildRiskViewLookupsArgs {
   bootstrap: BootstrapPayload;
-  scope: RiskViewScopeData;
+  scope: Pick<ScopedRiskViewPools, "scopedTasks" | "scopedReports">;
 }
 
 export function buildRiskViewLookups({
   bootstrap,
   scope,
 }: BuildRiskViewLookupsArgs): RiskViewLookups {
-  const tasksById = Object.fromEntries(scope.scopedTasks.map((task) => [task.id, task] as const));
-  const projectsById = Object.fromEntries(bootstrap.projects.map((project) => [project.id, project] as const));
-  const workstreamsById = Object.fromEntries(
-    bootstrap.workstreams.map((workstream) => [workstream.id, workstream] as const),
-  );
-  const subsystemsById = Object.fromEntries(
-    bootstrap.subsystems.map((subsystem) => [subsystem.id, subsystem] as const),
-  );
-  const partDefinitionsById = Object.fromEntries(
-    bootstrap.partDefinitions.map((partDefinition) => [partDefinition.id, partDefinition] as const),
-  );
-  const mechanismsById = Object.fromEntries(
-    bootstrap.mechanisms.map((mechanism) => [mechanism.id, mechanism] as const),
-  );
-  const partInstancesById = Object.fromEntries(
-    bootstrap.partInstances.map((partInstance) => [partInstance.id, partInstance] as const),
-  );
-  const milestonesById = Object.fromEntries(bootstrap.milestones.map((milestone) => [milestone.id, milestone] as const));
-  const testResultsById = Object.fromEntries(
-    scope.scopedReports
-      .filter((report) => report.reportType !== "QA")
-      .map((testResult) => [testResult.id, testResult] as const),
-  );
-  const qaReportsById = Object.fromEntries(
-    scope.scopedReports
-      .filter((report) => report.reportType === "QA")
-      .map((qaReport) => [qaReport.id, qaReport] as const),
-  );
+  const tasksById = indexRecordsById(scope.scopedTasks);
+  const projectsById = indexRecordsById(bootstrap.projects);
+  const workstreamsById = indexRecordsById(bootstrap.workstreams);
+  const subsystemsById = indexRecordsById(bootstrap.subsystems);
+  const partDefinitionsById = indexRecordsById(bootstrap.partDefinitions);
+  const mechanismsById = indexRecordsById(bootstrap.mechanisms);
+  const partInstancesById = indexRecordsById(bootstrap.partInstances);
+  const milestonesById = indexRecordsById(bootstrap.milestones);
+  const testResultsById = indexRecordsById(scope.scopedReports.filter((report) => report.reportType !== "QA"));
+  const qaReportsById = indexRecordsById(scope.scopedReports.filter((report) => report.reportType === "QA"));
 
   const qaSourceOptions = scope.scopedReports
     .filter((report) => report.reportType === "QA")
@@ -173,13 +150,7 @@ export function buildRiskViewLookups({
     getAttachmentLabel,
     getMitigationLabel,
     getSourceLabel,
-    mechanismAttachmentOptions,
     mitigationTaskOptions,
-    partInstanceAttachmentOptions,
-    projectAttachmentOptions,
-    qaSourceOptions,
     sourceOptionsForType,
-    testSourceOptions,
-    workstreamAttachmentOptions,
   };
 }

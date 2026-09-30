@@ -5,7 +5,7 @@ import type { MechanismPayload } from "@/types/payloads";
 import { buildIterationOptions, formatIterationVersion } from "@/lib/appUtils/common";
 import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
 
-import { StructureModalShell } from "./StructureModalShell";
+import { EditorModalShell } from "../EditorModalShell";
 
 interface MechanismEditorModalProps {
   activeMechanismId: string | null;
@@ -57,7 +57,7 @@ export function MechanismEditorModal({
       ?.projectId ?? bootstrap.projects[0]?.id ?? null;
 
   return (
-    <StructureModalShell
+    <EditorModalShell
       eyebrowLabel="Mechanism editor"
       onClose={closeMechanismModal}
       onSubmit={handleMechanismSubmit}
@@ -206,6 +206,6 @@ export function MechanismEditorModal({
               : "Save changes"}
         </button>
       </div>
-    </StructureModalShell>
+    </EditorModalShell>
   );
 }

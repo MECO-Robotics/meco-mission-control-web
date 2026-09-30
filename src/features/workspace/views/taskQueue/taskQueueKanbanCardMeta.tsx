@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 
@@ -5,7 +7,28 @@ import { resolveWorkspaceColor } from "@/features/workspace/shared/model/workspa
 
 import { readTaskAssigneeIds, readTaskSubsystemIds, readTaskWorkstreamIds, formatSubsystemNames, formatWorkstreamNames } from "./taskQueueKanbanCard";
 
-function getTaskPriorityLabel(priority: TaskRecord["priority"]) {
+const TASK_QUEUE_CARD_PRIORITY_ACCENTS: Record<TaskRecord["priority"], string> = {
+  critical: "#b42318",
+  high: "#e5484d",
+  medium: "#c58a00",
+  low: "#2563eb",
+};
+
+export function getTaskQueueCardPriorityAccentColor(priority: TaskRecord["priority"]) {
+  return TASK_QUEUE_CARD_PRIORITY_ACCENTS[priority];
+}
+
+export function getTaskQueueCardPriorityPresentation(priority: TaskRecord["priority"]) {
+  return {
+    className: "task-queue-board-card-priority-accented",
+    dataPriority: priority,
+    style: {
+      "--task-queue-board-card-priority-accent": getTaskQueueCardPriorityAccentColor(priority),
+    } as CSSProperties,
+  };
+}
+
+export function getTaskPriorityLabel(priority: TaskRecord["priority"]) {
   switch (priority) {
     case "critical":
       return "Critical";

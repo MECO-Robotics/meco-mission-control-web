@@ -22,30 +22,9 @@
   max-width: min(20rem, 38vw);
 }
 
-.timeline-interval-filter {
-  width: auto;
-  max-width: 100%;
-}
-
-.timeline-interval-filter select {
-  min-width: 96px;
-  width: auto;
-  max-width: 100%;
-}
-
 @media (max-width: 1180px) {
-  .app-topbar-page-label {
-    display: none;
-  }
 
-  .purchase-toolbar {
-    width: 100%;
-    grid-template-columns: repeat(auto-fit, minmax(180px, max-content));
-    justify-content: end;
-    justify-items: end;
-    margin-left: auto;
-  }
-
+  .purchase-toolbar,
   .materials-toolbar,
   .part-manager-toolbar {
     width: 100%;

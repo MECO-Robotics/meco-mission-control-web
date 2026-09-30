@@ -5,7 +5,7 @@ import { useAppAuth } from "@/app/hooks/useAppAuth";
 import { useAppShell } from "@/app/hooks/useAppShell";
 import { isPublicDemoSeasonAccess } from "@/app/publicDemoAccess";
 import { useAppWorkspaceGlobalEffects } from "@/app/hooks/workspace/derived/useAppWorkspaceGlobalEffects";
-import { useAppWorkspaceUiState } from "@/app/hooks/useAppWorkspaceUiState";
+import { useAppWorkspaceUiStateGroups } from "@/app/hooks/workspace/ui/useAppWorkspaceUiStateGroups";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import type { WorkspaceEditToastNotice } from "@/features/workspace/workspaceEditToastNotice";
 import {
@@ -18,8 +18,6 @@ import {
 import type {
   InventoryViewTab,
   ManufacturingViewTab,
-  RosterViewTab,
-  RiskManagementViewTab,
   TaskViewTab,
   ViewTab,
   WorklogsViewTab,
@@ -32,13 +30,10 @@ export function useAppWorkspaceState() {
   const [activeTab, setActiveTab] = useState<ViewTab>("home");
   const [tabSwitchDirection, setTabSwitchDirection] = useState<"up" | "down">("down");
   const [taskView, setTaskView] = useState<TaskViewTab>("queue");
-  const [riskManagementView, setRiskManagementView] =
-    useState<RiskManagementViewTab>("kanban");
   const [worklogsView, setWorklogsView] = useState<WorklogsViewTab>("logs");
   const [manufacturingView, setManufacturingView] =
     useState<ManufacturingViewTab>("all");
   const [inventoryView, setInventoryView] = useState<InventoryViewTab>("materials");
-  const [rosterView, setRosterView] = useState<RosterViewTab>("directory");
   const [bootstrap, setBootstrap] = useState<BootstrapPayload>(EMPTY_BOOTSTRAP);
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [dataMessage, setDataMessage] = useState<string | null>(null);
@@ -58,11 +53,7 @@ export function useAppWorkspaceState() {
     toggleDarkMode,
     toggleSidebar,
   } = useAppShell();
-  const workspaceUiState = useAppWorkspaceUiState();
-  const suppressNextAutoWorkspaceLoadRef = useRef(false);
-  const suppressNextAutoWorkspaceLoad = () => {
-    suppressNextAutoWorkspaceLoadRef.current = true;
-  };
+  const workspaceUiState = useAppWorkspaceUiStateGroups();
 
   const enqueueNotificationHistory = useCallback((notice: WorkspaceToastNotice) => {
     setNotificationHistory((current) => appendWorkspaceToastHistory(current, notice));
@@ -199,16 +190,12 @@ export function useAppWorkspaceState() {
     manufacturingView,
     pageShellStyle,
     requestSignIn,
-    rosterView,
-    riskManagementView,
     setActiveTab,
     setBootstrap,
     setDataMessage,
     setInventoryView,
     setIsLoadingData,
     setManufacturingView,
-    setRosterView,
-    setRiskManagementView,
     setTabSwitchDirection,
     enqueueTaskEditNotice,
     dismissTaskEditNotice,
@@ -222,8 +209,6 @@ export function useAppWorkspaceState() {
     toggleNotificationQueue,
     toggleSidebar,
     worklogsView,
-    suppressNextAutoWorkspaceLoadRef,
-    suppressNextAutoWorkspaceLoad,
     returnToPublicDemo,
     enforcedAuthConfig,
     clearTaskEditNotices,

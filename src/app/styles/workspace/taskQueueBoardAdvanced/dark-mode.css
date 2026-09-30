@@ -26,7 +26,8 @@
 }
 
 .page-shell.dark-mode .task-queue-board-column {
-  background: rgba(15, 23, 42, 0.68);
+  --kanban-lane-surface: rgba(15, 23, 42, 0.68);
+  background: var(--kanban-lane-surface);
   border-color: rgba(148, 163, 184, 0.24);
   box-shadow: 0 10px 22px rgba(2, 6, 23, 0.28);
 }
@@ -42,10 +43,10 @@
   box-shadow: 0 10px 20px rgba(2, 6, 23, 0.25);
 }
 
-.page-shell.dark-mode .task-queue-board-card-discipline-accented {
+.page-shell.dark-mode .task-queue-board-card-priority-accented {
   border-color: color-mix(
     in srgb,
-    var(--task-queue-board-card-discipline-accent) 48%,
+    var(--task-queue-board-card-priority-accent) 48%,
     rgba(148, 163, 184, 0.2)
   );
   box-shadow:
@@ -53,13 +54,13 @@
     0 0 0 1.5px
       color-mix(
         in srgb,
-        var(--task-queue-board-card-discipline-accent) 28%,
+        var(--task-queue-board-card-priority-accent) 28%,
         transparent
       ),
     inset 0 0 0 1px
       color-mix(
         in srgb,
-        var(--task-queue-board-card-discipline-accent) 20%,
+        var(--task-queue-board-card-priority-accent) 20%,
         transparent
       );
 }
@@ -67,12 +68,6 @@
 .page-shell.dark-mode .task-queue-board-card-meta > span:not(.task-queue-board-card-person) {
   background: rgba(148, 163, 184, 0.14);
   color: #cbd5e1;
-}
-
-.page-shell.dark-mode .task-queue-board-card-meta > span.task-queue-board-card-type-badge.milestone-type-pill {
-  background: var(--milestone-type-chip-bg-dark);
-  border-color: var(--milestone-type-chip-border-dark);
-  color: var(--milestone-type-chip-text-dark);
 }
 
 .page-shell.dark-mode .task-queue-board-card-due:not(.pill) {

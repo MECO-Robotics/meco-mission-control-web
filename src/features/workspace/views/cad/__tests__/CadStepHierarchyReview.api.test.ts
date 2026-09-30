@@ -1,7 +1,9 @@
 /// <reference types="jest" />
 
 import { applyCadHierarchyReview } from "../api/cadStepApi";
-import type { CadHierarchyReviewDecision } from "../model/cadIntegrationTypes";
+import type {
+  CadHierarchyReviewDecision
+} from "../model/cadStepTypes";
 
 const requestApiMock = jest.fn();
 

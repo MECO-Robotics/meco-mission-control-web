@@ -28,14 +28,10 @@ export function useRosterInsights({
     [bootstrap, projectId, seasonId],
   );
   const [remoteInsights, setRemoteInsights] = useState<RosterInsightsResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     let disposed = false;
 
-    setIsLoading(true);
-    setErrorMessage(null);
     setRemoteInsights(null);
 
     fetchRosterInsights({ projectId, seasonId })
@@ -46,25 +42,14 @@ export function useRosterInsights({
             !areRosterInsightsRowsInScope(response, scopedMemberIds)
           ) {
             setRemoteInsights(null);
-            setErrorMessage("Scoped roster insights are unavailable right now.");
             return;
           }
           setRemoteInsights(response);
         }
       })
-      .catch((error) => {
+      .catch(() => {
         if (!disposed) {
-          const message =
-            error instanceof Error && error.message.trim().length > 0
-              ? error.message
-              : "Roster insights are unavailable right now.";
-          setErrorMessage(message);
           setRemoteInsights(null);
-        }
-      })
-      .finally(() => {
-        if (!disposed) {
-          setIsLoading(false);
         }
       });
 
@@ -74,9 +59,6 @@ export function useRosterInsights({
   }, [bootstrap, projectId, scopedMemberIds, seasonId]);
 
   return {
-    errorMessage,
     insights: remoteInsights ?? fallbackInsights,
-    isLoading,
-    isRemote: remoteInsights !== null,
   };
 }

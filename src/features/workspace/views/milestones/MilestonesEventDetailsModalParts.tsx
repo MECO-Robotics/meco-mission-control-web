@@ -1,4 +1,4 @@
-import type { Dispatch, FocusEvent, ReactNode, SetStateAction } from "react";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
 
 import type { MilestoneRecord } from "@/types/recordsExecution";
 import { EditableHoverIndicator } from "@/features/workspace/shared/table/workspaceTableChrome";
@@ -8,17 +8,19 @@ import { formatMilestoneDateTime, formatMilestoneEndDateTime } from "./milestone
 import type { MilestoneDetailEditableField } from "./sections/MilestonesEventDetailEditor";
 
 export function MilestoneDetailValue({
+  appearance = "summary",
   children,
   onOpenEditMilestone,
   showEditIndicator = false,
 }: {
+  appearance?: "inline" | "summary";
   children: ReactNode;
   onOpenEditMilestone: () => void;
   showEditIndicator?: boolean;
 }) {
-  return (
+  const value = (
     <button
-      className="task-detail-inline-edit-trigger task-detail-inline-edit-trigger-summary"
+      className={`task-detail-inline-edit-trigger task-detail-inline-edit-trigger-${appearance}`}
       onClick={onOpenEditMilestone}
       onDoubleClick={onOpenEditMilestone}
       type="button"
@@ -29,32 +31,16 @@ export function MilestoneDetailValue({
       ) : null}
     </button>
   );
-}
 
-export function MilestoneDetailInlineValue({
-  children,
-  onOpenEditMilestone,
-  showEditIndicator = false,
-}: {
-  children: ReactNode;
-  onOpenEditMilestone: () => void;
-  showEditIndicator?: boolean;
-}) {
-  return (
-    <span className="task-detail-inline-edit-shell task-detail-inline-edit-shell-inline milestone-detail-inline-value">
-      <button
-        className="task-detail-inline-edit-trigger task-detail-inline-edit-trigger-inline"
-        onClick={onOpenEditMilestone}
-        onDoubleClick={onOpenEditMilestone}
-        type="button"
-      >
-        {children}
-        {showEditIndicator ? (
-          <EditableHoverIndicator className="editable-hover-indicator-inline task-detail-inline-edit-indicator" />
-        ) : null}
-      </button>
-    </span>
-  );
+  if (appearance === "inline") {
+    return (
+      <span className="task-detail-inline-edit-shell task-detail-inline-edit-shell-inline milestone-detail-inline-value">
+        {value}
+      </span>
+    );
+  }
+
+  return value;
 }
 
 export function MilestoneDetailsStatusIcon({
@@ -159,11 +145,6 @@ export function MilestoneEditScheduleField({
     return (
       <div
         className="task-detail-copy task-detail-header-meta-line"
-        onBlur={(event: FocusEvent<HTMLDivElement>) => {
-          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-            setEditingField(null);
-          }
-        }}
         style={{ marginTop: "0.35rem" }}
       >
         <input
@@ -202,7 +183,7 @@ export function MilestoneEditScheduleField({
   }
 
   return (
-    <MilestoneDetailInlineValue onOpenEditMilestone={() => setEditingField("schedule")}>
+    <MilestoneDetailValue appearance="inline" onOpenEditMilestone={() => setEditingField("schedule")}>
       <span className="pill status-pill status-pill-neutral">{startValue}</span>
       {endValue ? (
         <>
@@ -210,6 +191,6 @@ export function MilestoneEditScheduleField({
           <span className="pill status-pill status-pill-neutral">{endValue}</span>
         </>
       ) : null}
-    </MilestoneDetailInlineValue>
+    </MilestoneDetailValue>
   );
 }

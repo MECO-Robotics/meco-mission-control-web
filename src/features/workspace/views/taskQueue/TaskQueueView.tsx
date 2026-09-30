@@ -90,7 +90,9 @@ export function TaskQueueView({
   });
 
   return (
-    <section className={`panel dense-panel task-queue-view ${WORKSPACE_PANEL_CLASS}`}>
+    <section
+      className={`panel dense-panel task-queue-view workspace-kanban-scroll-view ${WORKSPACE_PANEL_CLASS}`}
+    >
       <AppTopbarSlotPortal slot="controls">
         <WorkspaceTopbarControls className="task-queue-toolbar">
           <TaskQueueToolbar

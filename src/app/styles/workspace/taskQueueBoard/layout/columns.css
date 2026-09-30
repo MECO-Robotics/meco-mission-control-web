@@ -1,19 +1,11 @@
-.risk-board {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15.5rem, 1fr));
-  min-width: 0;
-  min-height: 100vh;
-  width: 100%;
-  gap: 0.7rem;
-  align-items: stretch;
-}
-
 .task-queue-board-column {
+  --kanban-lane-surface: color-mix(in srgb, var(--bg-panel) 90%, var(--text-copy) 10%);
   display: grid;
   gap: 0.55rem;
   min-width: 0;
   padding: 0.7rem;
-  border-inline: 1px solid var(--border-base);
+  border-radius: 0.8rem;
+  background: var(--kanban-lane-surface);
 }
 
 /* Status labels stay above the lane content; the rules define the lane edges. */
@@ -75,18 +67,6 @@
   flex: 0 0 auto;
 }
 
-.task-queue-board-column-header-icon .timeline-task-status-logo {
-  position: static;
-  top: auto;
-  right: auto;
-  left: auto;
-  transform: none;
-  width: 100%;
-  height: 100%;
-  min-width: 0;
-  min-height: 0;
-}
-
 .task-queue-board-column-header-icon .timeline-task-status-logo svg {
   width: calc(0.64rem * var(--task-queue-zoom, 1));
   height: calc(0.64rem * var(--task-queue-zoom, 1));
@@ -102,6 +82,88 @@
   display: grid;
   gap: 0.55rem;
   min-width: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.task-queue-board-column-body::-webkit-scrollbar {
+  display: none;
+}
+
+.task-queue-board-column-scroll-frame {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.task-queue-board-column-body.has-scroll-fade-up.has-scroll-fade-down {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 1.35rem,
+    #000 calc(100% - 1.35rem),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 1.35rem,
+    #000 calc(100% - 1.35rem),
+    transparent 100%
+  );
+}
+
+.task-queue-board-column-body.has-scroll-fade-up:not(.has-scroll-fade-down) {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 1.35rem, #000 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 1.35rem, #000 100%);
+}
+
+.task-queue-board-column-body.has-scroll-fade-down:not(.has-scroll-fade-up) {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 1.35rem), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 1.35rem), transparent 100%);
+}
+
+.task-queue-board-column-scroll-controls {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.task-queue-board-column-scroll-button {
+  display: grid;
+  width: 2rem;
+  height: 1.8rem;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: color-mix(in srgb, var(--text-title) 72%, transparent);
+  cursor: pointer;
+  pointer-events: auto;
+  opacity: 0.82;
+  transition:
+    opacity 120ms ease,
+    color 120ms ease;
+}
+
+.task-queue-board-column-scroll-button:hover {
+  color: var(--official-blue);
+  opacity: 1;
+}
+
+.task-queue-board-column-scroll-button:focus-visible {
+  outline: 2px solid var(--official-blue);
+  outline-offset: 2px;
 }
 
 .task-queue-board-column-body.is-kanban-drop-target {
@@ -132,11 +194,11 @@
   cursor: default;
 }
 
-.task-queue-board-column[role="button"] {
+.task-queue-board-column-header[role="button"] {
   cursor: pointer;
 }
 
-.task-queue-board-column[role="button"]:focus-visible {
+.task-queue-board-column-header[role="button"]:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--official-blue) 38%, transparent);
   outline-offset: 2px;
 }

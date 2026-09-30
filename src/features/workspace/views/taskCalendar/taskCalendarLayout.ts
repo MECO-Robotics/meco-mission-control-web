@@ -42,13 +42,6 @@ const CALENDAR_DEFAULT_PRIORITY_ORDER = 9;
 
 export type TaskCalendarSortMode = (typeof TASK_CALENDAR_SORT_OPTIONS)[number]["value"];
 
-export function formatDateKey(date: Date) {
-  const year = date.getFullYear();
-  const month = `${date.getMonth() + 1}`.padStart(2, "0");
-  const day = `${date.getDate()}`.padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
 export function toEventDateKey(start: string) {
   const calendarDateMatch = start.match(/^(\d{4}-\d{2}-\d{2})/);
   if (calendarDateMatch) {
@@ -123,19 +116,23 @@ function compareTaskCalendarEventsByPriority(left: TaskCalendarEvent, right: Tas
 export function sortTaskCalendarEvents(
   events: TaskCalendarEvent[],
   sortMode: TaskCalendarSortMode,
+  sortDirection: "asc" | "desc" = "asc",
 ) {
   const sortedEvents = [...events];
 
   if (sortMode === "category") {
     sortedEvents.sort(compareTaskCalendarEventsByCategory);
+    if (sortDirection === "desc") sortedEvents.reverse();
     return sortedEvents;
   }
 
   if (sortMode === "priority") {
     sortedEvents.sort(compareTaskCalendarEventsByPriority);
+    if (sortDirection === "desc") sortedEvents.reverse();
     return sortedEvents;
   }
 
   sortedEvents.sort(compareTaskCalendarEventsByDate);
+  if (sortDirection === "desc") sortedEvents.reverse();
   return sortedEvents;
 }

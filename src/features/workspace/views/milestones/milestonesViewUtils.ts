@@ -1,6 +1,7 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MilestoneStatus } from "@/types/common";
 import type { MilestoneRecord } from "@/types/recordsExecution";
+import { READINESS_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
 import { filterSelectionIncludes, filterSelectionIntersects, filterSelectionMatchesTaskPeople } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { getMilestoneTasksForState } from "@/features/workspace/shared/milestones/milestoneTaskState";
@@ -13,13 +14,6 @@ export type MilestoneSearchSuggestion = {
   description: string;
   id: string;
   title: string;
-};
-
-const MILESTONE_STATUS_LABELS: Record<MilestoneStatus, string> = {
-  blocked: "Blocked",
-  "not ready": "Not ready",
-  qa: "QA",
-  ready: "Ready",
 };
 
 export function formatMilestoneDateTime(value: string) {
@@ -84,8 +78,10 @@ export function buildMilestoneProjectLabels(
   return labels;
 }
 
-function formatMilestoneStatusLabel(status: MilestoneStatus | undefined) {
-  return status ? MILESTONE_STATUS_LABELS[status] : null;
+export function formatMilestoneStatusLabel(status: MilestoneStatus | undefined) {
+  return status
+    ? READINESS_STATUS_OPTIONS.find((option) => option.id === status)?.name ?? null
+    : null;
 }
 
 export function buildMilestoneSearchSuggestions({

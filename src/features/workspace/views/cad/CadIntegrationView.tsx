@@ -1,10 +1,8 @@
 import { CadPartViewer } from "./viewer/CadPartViewer";
-import type { MechanismRecord, PartDefinitionRecord, SubsystemRecord } from "@/types/records";
-import {
-  CadOnshapeIntegrationSection,
-  getScopedDocumentRefs,
-  resolveSelectedDocumentRefId,
-} from "./components/CadOnshapeIntegrationSection";
+import type { MechanismRecord, SubsystemRecord } from "@/types/recordsOrganization";
+import type { PartDefinitionRecord } from "@/types/recordsInventory";
+import { CadOnshapeIntegrationSection } from "./components/CadOnshapeIntegrationSection";
+import { getScopedDocumentRefs, resolveSelectedDocumentRefId } from "./model/onshapeIntegrationState";
 import { CadStepImportHeader } from "./components/CadStepImportHeader";
 import { CadStepReviewPanels } from "./components/CadStepReviewPanels";
 import { CadStepSnapshotSelector } from "./components/CadStepSnapshotSelector";

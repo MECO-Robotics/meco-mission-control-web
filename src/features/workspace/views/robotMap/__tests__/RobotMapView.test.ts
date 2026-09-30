@@ -1,23 +1,39 @@
 /// <reference types="jest" />
 
 import * as React from "react";
+import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { createBootstrap } from "@/lib/appUtilsTestFixtures";
+import { buildRobotConfigurationViewModel } from "../robotMapViewModel";
+import { RobotMapUnplacedModal } from "../RobotMapUnplacedModal";
 import { RobotMapView } from "../RobotMapView";
-
-let showMap = false;
-jest.mock("react", () => {
-  const actual = jest.requireActual<typeof React>("react");
-  return { ...actual, useState: (initial: unknown) => actual.useState(showMap && initial === "3d" ? "map" : initial) };
-});
-beforeEach(() => { showMap = true; });
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
 describe("RobotMapView", () => {
-  it("renders Robot Configuration and avoids readiness-first metrics text", () => {
-    showMap = false;
+  it("shows subsystem placement and layout actions inside the unplaced modal", () => {
+    const subsystem = buildRobotConfigurationViewModel(createBootstrap(), "").subsystems[0];
+    const markup = renderToStaticMarkup(
+      React.createElement(RobotMapUnplacedModal, {
+        onAddSubsystem: jest.fn(),
+        onAutoArrange: jest.fn(),
+        onClose: jest.fn(),
+        onPlaceSubsystem: jest.fn(),
+        onResetLayout: jest.fn(),
+        onSelectSubsystem: jest.fn(),
+        selectedSubsystemId: null,
+        subsystems: [subsystem],
+      }),
+    );
+
+    expect(markup).toContain('aria-label="Unplaced subsystems"');
+    expect(markup).toContain("Place");
+    expect(markup).toContain("Auto-arrange");
+    expect(markup).toContain("Reset");
+  });
+
+  it("keeps the robot view free of duplicated configuration copy and readiness-first metrics", () => {
     const bootstrap = createBootstrap({
       subsystems: [
         {
@@ -57,11 +73,22 @@ describe("RobotMapView", () => {
     );
 
     expect(markup).toContain("Empty 3D viewer");
-    expect(markup).not.toContain("Upload an isometric");
-    expect(markup).toContain("Robot Configuration");
-    expect(markup).toContain("Manual configuration with finalized STEP import and Onshape sync sources.");
-    expect(markup).toContain("Source model docs");
-    expect(markup).toContain("/docs/CURRENT_WEB_SPEC.md#robot-configuration");
+    expect(markup).not.toContain("<h2>Robot Configuration</h2>");
+    expect(markup).not.toContain("Upload an isometric layout image");
+    expect(markup).not.toContain("Inspect the robot assembly in 3D.");
+    expect(markup).not.toContain("Map View");
+    expect(markup).not.toContain("List View");
+    expect(markup).not.toContain("3D View");
+    expect(markup).toContain('aria-label="Import CAD"');
+    expect(markup).toContain('data-tutorial-target="import-cad-button"');
+    expect(markup).not.toContain('aria-label="Map presentation"');
+    expect(markup).not.toContain('aria-label="Upload isometric image"');
+    expect(markup).not.toContain("robot-config-cad-viewer");
+    expect(markup.indexOf('class="robot-config-map-surface')).toBeLessThan(
+      markup.indexOf('class="robot-config-embedded-cad'),
+    );
+    expect(markup).not.toContain("Manual configuration with finalized STEP import and Onshape sync sources.");
+    expect(markup).not.toContain("Source model docs");
     expect(markup).not.toContain("Unplaced Subsystems");
     expect(markup).not.toContain("All subsystems are currently placed.");
     expect(markup).not.toContain("Enable Edit Layout to drag subsystems.");
@@ -71,7 +98,19 @@ describe("RobotMapView", () => {
     expect(markup).not.toContain("High risk");
   });
 
-  it("shows the Unplaced Subsystems section when at least one subsystem is unplaced", () => {
+  it("keeps the embedded CAD controls interactive over the click-through overlay", () => {
+    const css = readFileSync("src/app/styles/workspace/robotMap.css", "utf8");
+
+    expect(css).toMatch(/\.robot-config-embedded-cad\s*\{[^}]*pointer-events:\s*none;/);
+    expect(css).toMatch(
+      /\.robot-config-embedded-cad \.cad-local-viewer-embedded\s*\{[^}]*pointer-events:\s*auto;/,
+    );
+    expect(css).toMatch(
+      /\.robot-config-embedded-cad \.cad-part-viewer\s*\{[^}]*pointer-events:\s*auto;/,
+    );
+  });
+
+  it("opens unplaced subsystem management from the robot viewport instead of expanding it inline", () => {
     const bootstrap = createBootstrap({
       subsystems: [
         {
@@ -110,198 +149,10 @@ describe("RobotMapView", () => {
       }),
     );
 
-    expect(markup).toContain("Unplaced Subsystems");
-    expect(markup).toContain("Enable Edit Layout to drag subsystems.");
+    expect(markup).toContain('aria-label="Show 1 unplaced subsystems"');
+    expect(markup).toContain('aria-haspopup="dialog"');
+    expect(markup).not.toContain('class="robot-config-unplaced"');
+    expect(markup).not.toContain("robot-config-unplaced-grid");
   });
 
-  it("renders subsystem drilldown links for related records", () => {
-    const bootstrap = createBootstrap({
-      risks: [
-        {
-          id: "risk-1",
-          title: "Bearing fit risk",
-          detail: "Tolerance stackup needs review.",
-          severity: "medium",
-          sourceType: "test-result",
-          sourceId: "test-1",
-          attachmentType: "part-instance",
-          attachmentId: "part-instance-1",
-          mitigationTaskId: null,
-        },
-      ],
-      workLogs: [
-        {
-          id: "worklog-1",
-          taskId: "task-1",
-          date: "2026-02-03",
-          hours: 2,
-          participantIds: ["student-1"],
-          notes: "Assembled gearbox",
-        },
-      ],
-      manufacturingItems: [
-        {
-          id: "manufacturing-1",
-          title: "Bearing block batch",
-          subsystemId: "subsystem-core",
-          requestedById: null,
-          process: "cnc",
-          dueDate: "2026-02-04",
-          material: "Aluminum",
-          materialId: null,
-          partDefinitionId: "part-def-1",
-          partInstanceId: "part-instance-1",
-          partInstanceIds: ["part-instance-1"],
-          quantity: 2,
-          status: "approved",
-          mentorReviewed: true,
-          inHouse: true,
-        },
-      ],
-    });
-
-    const markup = renderToStaticMarkup(
-      React.createElement(RobotMapView, {
-        bootstrap,
-        handleDeleteMechanism: jest.fn(async () => {}),
-        onOpenDrilldownTarget: jest.fn(),
-        openCreateMechanismModal: jest.fn(),
-        openCreatePartInstanceModal: jest.fn(),
-        openCreateSubsystemModal: jest.fn(),
-        openEditMechanismModal: jest.fn(),
-        openEditPartInstanceModal: jest.fn(),
-        openEditSubsystemModal: jest.fn(),
-        removePartInstanceFromMechanism: jest.fn(async () => true),
-        saveSubsystemLayout: jest.fn(async () => true),
-        updateSubsystemConfiguration: jest.fn(async () => true),
-      }),
-    );
-
-    expect(markup).toContain("Linked mechanisms");
-    expect(markup).toContain("Gearbox");
-    expect(markup).toContain("Linked parts");
-    expect(markup).toContain("Left Bearing Block");
-    expect(markup).toContain("Linked tasks");
-    expect(markup).toContain("Initial task");
-    expect(markup).toContain("Linked risks");
-    expect(markup).toContain("Bearing fit risk");
-    expect(markup).toContain("Linked worklogs");
-    expect(markup).toContain("Assembled gearbox");
-    expect(markup).toContain("Linked manufacturing");
-    expect(markup).toContain("Bearing block batch");
-  });
-
-  it("renders CAD source indicators in PM object details", () => {
-    const bootstrap = createBootstrap({
-      subsystems: [
-        {
-          id: "subsystem-drive",
-          projectId: "project-a",
-          name: "Drivetrain",
-          description: "",
-          iteration: 1,
-          isCore: true,
-          parentSubsystemId: null,
-          responsibleEngineerId: null,
-          mentorIds: [],
-          risks: [],
-          cadImportSource: "STEP_UPLOAD",
-        },
-      ],
-      mechanisms: [
-        {
-          id: "mechanism-1",
-          subsystemId: "subsystem-drive",
-          name: "Swerve Modules",
-          description: "",
-          iteration: 1,
-          cadSource: "ONSHAPE_API",
-        },
-      ],
-      partDefinitions: [
-        {
-          id: "part-def-1",
-          seasonId: "season-2026",
-          name: "Wheel Module",
-          partNumber: "WM-001",
-          revision: "A",
-          iteration: 1,
-          isHardware: false,
-          type: "assembly",
-          source: "Onshape",
-          materialId: null,
-          description: "",
-          cadSource: "STEP_UPLOAD",
-        },
-      ],
-      partInstances: [
-        {
-          id: "part-instance-1",
-          subsystemId: "subsystem-drive",
-          mechanismId: "mechanism-1",
-          partDefinitionId: "part-def-1",
-          name: "Wheel Module",
-          quantity: 4,
-          trackIndividually: false,
-          status: "not ready",
-          cadEditedAfterImport: true,
-        },
-      ],
-    });
-
-    const markup = renderToStaticMarkup(
-      React.createElement(RobotMapView, {
-        bootstrap,
-        handleDeleteMechanism: jest.fn(async () => {}),
-        openCreateMechanismModal: jest.fn(),
-        openCreatePartInstanceModal: jest.fn(),
-        openCreateSubsystemModal: jest.fn(),
-        openEditMechanismModal: jest.fn(),
-        openEditPartInstanceModal: jest.fn(),
-        openEditSubsystemModal: jest.fn(),
-        removePartInstanceFromMechanism: jest.fn(async () => true),
-        saveSubsystemLayout: jest.fn(async () => true),
-        updateSubsystemConfiguration: jest.fn(async () => true),
-      }),
-    );
-
-    expect(markup).toContain("STEP import");
-    expect(markup).toContain("Onshape sync");
-    expect(markup).toContain("Edited after import");
-  });
-
-  it("renders subsystem drilldown missing-data states", () => {
-    const bootstrap = createBootstrap({
-      mechanisms: [],
-      manufacturingItems: [],
-      partInstances: [],
-      risks: [],
-      tasks: [],
-      workLogs: [],
-    });
-
-    const markup = renderToStaticMarkup(
-      React.createElement(RobotMapView, {
-        bootstrap,
-        handleDeleteMechanism: jest.fn(async () => {}),
-        onOpenDrilldownTarget: jest.fn(),
-        openCreateMechanismModal: jest.fn(),
-        openCreatePartInstanceModal: jest.fn(),
-        openCreateSubsystemModal: jest.fn(),
-        openEditMechanismModal: jest.fn(),
-        openEditPartInstanceModal: jest.fn(),
-        openEditSubsystemModal: jest.fn(),
-        removePartInstanceFromMechanism: jest.fn(async () => true),
-        saveSubsystemLayout: jest.fn(async () => true),
-        updateSubsystemConfiguration: jest.fn(async () => true),
-      }),
-    );
-
-    expect(markup).toContain("No linked mechanisms yet.");
-    expect(markup).toContain("No linked parts yet.");
-    expect(markup).toContain("No linked tasks yet.");
-    expect(markup).toContain("No linked risks yet.");
-    expect(markup).toContain("No linked worklogs yet.");
-    expect(markup).toContain("No linked manufacturing items yet.");
-  });
 });

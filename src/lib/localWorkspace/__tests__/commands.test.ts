@@ -58,7 +58,7 @@ test("QA projections retain proposals and only approved reassessment updates lin
   const risk = command(snapshot, "/risks", { title: "Risk", severity: "high", mitigationTaskId: null }).item;
   const proposal = { reportType: "QA", taskId: subject.id, notes: "Evidence", targetRiskId: risk.id, proposedRiskStatus: "full-mitigation", mentorApproved: false };
   const report = command(snapshot, "/reports", proposal).item;
-  expect(snapshot.qaReports.find((row) => row.id === report.id)).toMatchObject({ summary: "Evidence", proposedRiskStatus: "full-mitigation" });
+  expect(snapshot.reports.find((row) => row.id === report.id)).toMatchObject({ summary: "Evidence", proposedRiskStatus: "full-mitigation" });
   expect(snapshot.risks.find((row) => row.id === risk.id)?.severity).toBe("high");
   command(snapshot, "/reports", { ...proposal, mentorApproved: true });
   expect(snapshot.risks.find((row) => row.id === risk.id)).toMatchObject({ severity: "low", mitigationTaskId: subject.id });
@@ -81,11 +81,11 @@ test("part-definition deletion removes instances and detaches task and productio
   const snapshot = createBootstrap();
   const definition = snapshot.partDefinitions[0];
   const part = command(snapshot, "/part-instances", { partDefinitionId: definition.id, name: "Local instance" }).item;
-  const assigned = command(snapshot, "/tasks", { title: "Build", partInstanceId: part.id, partInstanceIds: [part.id] }).item;
+  const assigned = command(snapshot, "/tasks", { title: "Build", partInstanceIds: [part.id] }).item;
   const purchase = command(snapshot, "/purchases", { title: "Buy", partDefinitionId: definition.id }).item;
   command(snapshot, `/part-definitions/${definition.id}`, {}, "DELETE");
   expect(snapshot.partInstances.some((item) => item.id === part.id)).toBe(false);
-  expect(assigned).toMatchObject({ partInstanceId: null, partInstanceIds: [] });
+  expect(assigned).toMatchObject({ partInstanceIds: [] });
   expect(purchase).toMatchObject({ partDefinitionId: null });
 });
 
@@ -106,7 +106,6 @@ test("deleting a roster member clears work, report, subsystem and procurement re
   expect(snapshot.subsystems[0]).toMatchObject({ responsibleEngineerId: null, mentorIds: [] });
   expect(snapshot.workLogs.at(-1)?.participantIds).toEqual([]);
   expect(snapshot.reports.at(-1)).toMatchObject({ createdByMemberId: null, participantIds: [] });
-  expect(snapshot.qaReports.at(-1)?.participantIds).toEqual([]);
   expect(snapshot.qaReviews[0].participantIds).toEqual([]);
   expect(snapshot.manufacturingItems.at(-1)?.requestedById).toBeNull();
   expect(snapshot.qaRequests).toEqual([]);

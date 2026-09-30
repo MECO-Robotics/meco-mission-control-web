@@ -1,11 +1,28 @@
 import { useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
 
 import { formatDate } from "@/lib/appUtils/common";
+import type { TaskPriority } from "@/types/common";
 import type { ManufacturingItemRecord } from "@/types/recordsInventory";
+import type { TaskRecord } from "@/types/recordsExecution";
+import { IconManufacturing } from "@/components/shared/Icons";
 import { EditableHoverIndicator, RequestedItemMeta } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { getStatusPillClassName } from "@/features/workspace/shared/model/workspaceUtils";
+import { MANUFACTURING_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
 import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
 import { KanbanColumns } from "@/features/workspace/views/kanban/KanbanColumns";
+import {
+  getMemberInitial,
+  getTaskCardPerson,
+  getTaskPriorityLabel,
+  getTaskQueueCardPriorityPresentation,
+} from "@/features/workspace/views/taskQueue/taskQueueKanbanCardMeta";
+
+const PRIORITY_ORDER: Record<TaskPriority, number> = {
+  critical: 0,
+  high: 1,
+  medium: 2,
+  low: 3,
+};
 
 const MANUFACTURING_BOARD_STATES: readonly ManufacturingItemRecord["status"][] = [
   "requested",
@@ -15,17 +32,11 @@ const MANUFACTURING_BOARD_STATES: readonly ManufacturingItemRecord["status"][] =
   "complete",
 ];
 
-const MANUFACTURING_STATUS_LABELS: Record<ManufacturingItemRecord["status"], string> = {
-  requested: "Requested",
-  approved: "Approved",
-  "in-progress": "In progress",
-  qa: "QA",
-  complete: "Complete",
-};
-
 interface ManufacturingKanbanBoardProps {
   items: ManufacturingItemRecord[];
   membersById: MembersById;
+  projectsById: Record<string, { id: string; name: string }>;
+  tasks: TaskRecord[];
   onEdit: (item: ManufacturingItemRecord) => void;
   onQuickStatusChange?: (
     item: ManufacturingItemRecord,
@@ -40,6 +51,8 @@ interface ManufacturingKanbanBoardProps {
 export function ManufacturingKanbanBoard({
   items,
   membersById,
+  projectsById,
+  tasks,
   onEdit,
   onQuickStatusChange,
   showInHouseDetails = false,
@@ -50,6 +63,20 @@ export function ManufacturingKanbanBoard({
   const [pendingQuickActionKey, setPendingQuickActionKey] = useState<string | null>(null);
   const pendingQuickActionKeyRef = useRef<string | null>(null);
   const canShowMentorQuickActions = Boolean(showMentorQuickActions && onQuickStatusChange);
+  const taskByManufacturingId = useMemo(() => {
+    const linkedTasks = new Map<string, TaskRecord>();
+
+    for (const task of tasks) {
+      for (const manufacturingId of task.linkedManufacturingIds ?? []) {
+        const currentTask = linkedTasks.get(manufacturingId);
+        if (!currentTask || PRIORITY_ORDER[task.priority] < PRIORITY_ORDER[currentTask.priority]) {
+          linkedTasks.set(manufacturingId, task);
+        }
+      }
+    }
+
+    return linkedTasks;
+  }, [tasks]);
 
   const itemsByStatus = useMemo(() => {
     const grouped: Record<ManufacturingItemRecord["status"], ManufacturingItemRecord[]> = {
@@ -125,7 +152,7 @@ export function ManufacturingKanbanBoard({
         header: (
           <span className={getStatusPillClassName(state)}>
             <span className="task-queue-board-column-header-label">
-              {MANUFACTURING_STATUS_LABELS[state]}
+              {MANUFACTURING_STATUS_OPTIONS.find((option) => option.id === state)?.name}
             </span>
           </span>
         ),
@@ -143,8 +170,20 @@ export function ManufacturingKanbanBoard({
         const isApprovePending = pendingQuickActionKey === approveActionKey;
         const isCompletePending = pendingQuickActionKey === completeActionKey;
         const isAnyActionPending = Boolean(pendingQuickActionKey);
+        const projectId = subsystemsById[item.subsystemId]?.projectId;
+        const projectName = projectId
+          ? projectsById[projectId]?.name ?? "Unknown project"
+          : "Unknown project";
+        const linkedTask = taskByManufacturingId.get(item.id);
+        const priority = linkedTask?.priority;
+        const person = (linkedTask ? getTaskCardPerson(linkedTask, membersById) : null)
+          ?? (item.requestedById ? membersById[item.requestedById] ?? null : null);
         const { className: dragClassName, ...dragRootProps } = dragProps ?? {};
+        const priorityPresentation = priority ? getTaskQueueCardPriorityPresentation(priority) : null;
+        const cardStyle = priorityPresentation?.style;
         const cardClassName = `task-queue-board-card editable-hover-target editable-hover-target-row${
+          priorityPresentation ? ` ${priorityPresentation.className}` : ""
+        }${
           dragClassName ? ` ${dragClassName}` : ""
         }`;
 
@@ -155,6 +194,7 @@ export function ManufacturingKanbanBoard({
                 item={item}
                 membersById={membersById}
                 subsystemsById={subsystemsById}
+                showSubtitle={false}
               />
               <span className="task-queue-board-card-due">Due {formatDate(item.dueDate)}</span>
             </div>
@@ -167,44 +207,64 @@ export function ManufacturingKanbanBoard({
               {showInHouseDetails && item.process === "cnc" ? ` · ${item.inHouse ? "In-house" : "Outsourced"}` : ""}
             </small>
             <div className="task-queue-board-card-meta">
-              <span className={getStatusPillClassName(item.status)}>
-                {item.status.replace("-", " ")}
-              </span>
-              <span
-                style={{
-                  alignItems: "center",
-                  display: "inline-flex",
-                  flexWrap: "wrap",
-                  gap: "0.35rem",
-                }}
-              >
-                <span>{item.mentorReviewed ? "Reviewed" : "Pending"}</span>
-                {canShowMentorQuickActions && item.process === "cnc" ? (
-                  <>
-                    <button
-                      className="icon-button"
-                      data-tutorial-target={tutorialTarget?.("approve-job-button")}
-                      disabled={isAnyActionPending || item.status !== "requested"}
-                      onClick={(milestone) => handleQuickStatusChange(milestone, item, "approved")}
-                      style={{ padding: "0.15rem 0.4rem" }}
-                      type="button"
-                    >
-                      {isApprovePending ? "Approving..." : "Approve"}
-                    </button>
-                    <button
-                      className="icon-button"
-                      data-tutorial-target={tutorialTarget?.("complete-job-button")}
-                      disabled={isAnyActionPending || item.status === "complete"}
-                      onClick={(milestone) => handleQuickStatusChange(milestone, item, "complete")}
-                      style={{ padding: "0.15rem 0.4rem" }}
-                      type="button"
-                    >
-                      {isCompletePending ? "Completing..." : "Complete"}
-                    </button>
-                  </>
+              <span title={projectName}>{projectName}</span>
+              <div className="task-queue-board-card-meta-person-group">
+                <span
+                  aria-label="Manufacturing item"
+                  className="task-queue-board-card-type-icon"
+                  role="img"
+                  title="Manufacturing item"
+                >
+                  <IconManufacturing />
+                </span>
+                {person ? (
+                  <span className="task-queue-board-card-person" title={person.name}>
+                    {person.photoUrl ? (
+                      <img
+                        alt={`${person.name} profile picture`}
+                        className="profile-avatar"
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                        src={person.photoUrl}
+                      />
+                    ) : (
+                      <span className="profile-avatar profile-avatar-fallback" aria-hidden="true">
+                        {getMemberInitial(person)}
+                      </span>
+                    )}
+                  </span>
                 ) : null}
-              </span>
+              </div>
+              {priority ? (
+                <span className="task-queue-board-card-priority-label">
+                  {getTaskPriorityLabel(priority)} priority
+                </span>
+              ) : null}
             </div>
+            {canShowMentorQuickActions && item.process === "cnc" ? (
+              <div className="task-queue-board-card-meta" style={{ justifyContent: "flex-start" }}>
+                <button
+                  className="icon-button"
+                  data-tutorial-target={tutorialTarget?.("approve-job-button")}
+                  disabled={isAnyActionPending || item.status !== "requested"}
+                  onClick={(milestone) => handleQuickStatusChange(milestone, item, "approved")}
+                  style={{ padding: "0.15rem 0.4rem" }}
+                  type="button"
+                >
+                  {isApprovePending ? "Approving..." : "Approve"}
+                </button>
+                <button
+                  className="icon-button"
+                  data-tutorial-target={tutorialTarget?.("complete-job-button")}
+                  disabled={isAnyActionPending || item.status === "complete"}
+                  onClick={(milestone) => handleQuickStatusChange(milestone, item, "complete")}
+                  style={{ padding: "0.15rem 0.4rem" }}
+                  type="button"
+                >
+                  {isCompletePending ? "Completing..." : "Complete"}
+                </button>
+              </div>
+            ) : null}
             <EditableHoverIndicator className="task-queue-board-card-hover" />
           </>
         );
@@ -214,11 +274,13 @@ export function ManufacturingKanbanBoard({
             <div
               {...dragRootProps}
               className={cardClassName}
+              data-priority={priorityPresentation?.dataPriority}
               data-tutorial-target={tutorialTarget?.("edit-job-row")}
               key={item.id}
               onClick={() => onEdit(item)}
               onKeyDown={(milestone) => handleCardKeyDown(milestone, item)}
               role="button"
+              style={cardStyle}
               tabIndex={0}
             >
               {cardContent}
@@ -230,9 +292,11 @@ export function ManufacturingKanbanBoard({
           <button
             {...dragRootProps}
             className={cardClassName}
+            data-priority={priorityPresentation?.dataPriority}
             data-tutorial-target={tutorialTarget?.("edit-job-row")}
             key={item.id}
             onClick={() => onEdit(item)}
+            style={cardStyle}
             type="button"
           >
             {cardContent}

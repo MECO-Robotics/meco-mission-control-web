@@ -38,6 +38,10 @@
   --part-manager-danger-text: #b42318;
 }
 
+.part-manager-shell > .panel-subsection {
+  margin-top: 0.7rem;
+}
+
 .page-shell.dark-mode .part-manager-shell {
   --part-manager-surface: rgba(30, 41, 59, 0.92);
   --part-manager-surface-strong: rgba(51, 65, 85, 0.98);
@@ -73,15 +77,6 @@
   color: var(--part-manager-danger-text);
 }
 
-.part-manager-shell .part-manager-toolbar-action.secondary-action {
-  background: var(--part-manager-surface);
-  color: var(--part-manager-secondary-text);
-}
-
-.page-shell.dark-mode .part-manager-shell .part-manager-toolbar-action.secondary-action {
-  background: rgba(51, 65, 85, 0.98);
-}
-
 .part-manager-shell .part-manager-row-actions {
   flex-wrap: wrap;
 }
@@ -93,7 +88,6 @@
   background: #f1f5f9;
 }
 
-.banner-error,
 .auth-error {
   background: rgba(234, 28, 45, 0.1);
   color: var(--official-red);

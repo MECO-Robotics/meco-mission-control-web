@@ -1,15 +1,12 @@
-﻿import { filterSelectionMatchesTaskPeople, type FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { filterSelectionMatchesTaskPeople, type FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { getTaskBlockerRecords } from "@/features/workspace/shared/task/taskPlanningInternals";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskBlockerRecord } from "@/types/recordsExecution";
-import type { RiskRecord } from "@/types/recordsReporting";
 
 import { parseTimestamp } from "./riskViewMetricsUtils";
 
 export interface ScopedRiskViewPools {
-  scopedReportIds: Set<string>;
   scopedReports: BootstrapPayload["reports"];
-  scopedRisks: RiskRecord[];
   scopedTaskIds: Set<string>;
   scopedTasks: BootstrapPayload["tasks"];
   scopedWorkLogs: BootstrapPayload["workLogs"];
@@ -35,22 +32,8 @@ export function buildScopedRiskViewPools({
     activePersonFilter.length > 0
       ? bootstrap.reports.filter((report) => report.taskId && scopedTaskIds.has(report.taskId))
       : bootstrap.reports;
-  const scopedReportIds = new Set(scopedReports.map((report) => report.id));
-  const scopedRisks =
-    activePersonFilter.length > 0
-      ? bootstrap.risks.filter((risk) => {
-          if (risk.mitigationTaskId && scopedTaskIds.has(risk.mitigationTaskId)) {
-            return true;
-          }
-
-          return scopedReportIds.has(risk.sourceId);
-        })
-      : bootstrap.risks;
-
   return {
-    scopedReportIds,
     scopedReports,
-    scopedRisks,
     scopedTaskIds,
     scopedTasks,
     scopedWorkLogs,
@@ -58,28 +41,29 @@ export function buildScopedRiskViewPools({
 }
 
 export function buildOpenBlockersByTaskId(scopedTaskIds: Set<string>, bootstrap: BootstrapPayload) {
-  const openBlockers = getTaskBlockerRecords(bootstrap).filter(
-    (blocker) => blocker.status === "open" && scopedTaskIds.has(blocker.blockedTaskId),
-  );
   const openBlockersByTaskId = new Map<string, TaskBlockerRecord[]>();
 
-  openBlockers.forEach((blocker) => {
+  getTaskBlockerRecords(bootstrap).forEach((blocker) => {
+    if (blocker.status !== "open" || !scopedTaskIds.has(blocker.blockedTaskId)) {
+      return;
+    }
+
     const existing = openBlockersByTaskId.get(blocker.blockedTaskId) ?? [];
     existing.push(blocker);
     openBlockersByTaskId.set(blocker.blockedTaskId, existing);
   });
 
-  return { openBlockers, openBlockersByTaskId };
+  return openBlockersByTaskId;
 }
 
 export function buildLastActivityByTaskId({
-  openBlockers,
+  openBlockersByTaskId,
   scopedReports,
   scopedTaskIds,
   scopedTasks,
   scopedWorkLogs,
 }: {
-  openBlockers: TaskBlockerRecord[];
+  openBlockersByTaskId: Map<string, TaskBlockerRecord[]>;
   scopedReports: BootstrapPayload["reports"];
   scopedTaskIds: Set<string>;
   scopedTasks: BootstrapPayload["tasks"];
@@ -112,9 +96,9 @@ export function buildLastActivityByTaskId({
   scopedReports.forEach((report) => {
     registerTaskActivity(report.taskId, report.reviewedAt ?? report.createdAt);
   });
-  openBlockers.forEach((blocker) => {
+  openBlockersByTaskId.forEach((blockers) => blockers.forEach((blocker) => {
     registerTaskActivity(blocker.blockedTaskId, blocker.createdAt);
-  });
+  }));
 
   return lastActivityByTaskId;
 }

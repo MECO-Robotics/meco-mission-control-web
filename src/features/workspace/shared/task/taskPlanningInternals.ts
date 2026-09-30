@@ -143,19 +143,6 @@ function getBlockingUpstreamTaskIds(taskId: string, bootstrap: BootstrapPayload)
   );
 }
 
-export function getBlockingDownstreamTaskIds(taskId: string, bootstrap: BootstrapPayload) {
-  return uniqueIds(
-    getTaskDependencyRecords(bootstrap)
-      .filter(
-        (dependency) =>
-          dependency.refId === taskId &&
-          dependency.kind === "task" &&
-          HARD_DEPENDENCY_TYPES.has(dependency.dependencyType),
-      )
-      .map((dependency) => dependency.taskId),
-  );
-}
-
 export function getCriticalPathHours(
   taskId: string,
   bootstrap: BootstrapPayload,

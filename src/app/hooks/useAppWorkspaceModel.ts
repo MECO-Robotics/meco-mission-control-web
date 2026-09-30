@@ -1,3 +1,13 @@
+import { useTaskEditor } from "@/app/hooks/workspace/task/useTaskEditor";
+import { useWorkspaceEventActions } from "@/app/hooks/workspace/task/useWorkspaceEventActions";
+import { useManufacturingActions } from "@/app/workspaceCatalog/manufacturingActions";
+import { usePurchaseActions } from "@/app/workspaceCatalog/purchaseActions";
+import { useMechanismActions } from "@/app/workspaceCatalog/mechanismActions";
+import { useSubsystemActions } from "@/app/workspaceCatalog/subsystemActions";
+import { usePartInstanceActions } from "@/app/workspaceCatalog/partInstanceActions";
+import { usePartDefinitionActions } from "@/app/workspaceCatalog/partDefinitionActions";
+import { useWorkstreamActions } from "@/app/workspaceCatalog/workstreamActions";
+import { useArtifactActions } from "@/app/workspaceCatalog/artifactActions";
 import { enterLocalDemo } from "@/lib/localWorkspace/session";
 import { useMaterialEditor } from "@/app/workspaceCatalog/materialActions";
 import { useEffect, useRef } from "react";
@@ -17,18 +27,70 @@ export type AppWorkspaceModel = AppWorkspaceState &
   AppWorkspaceDerived &
   AppWorkspaceLoader &
   ReturnType<typeof useInteractiveTutorial> & {
+    taskEditor: ReturnType<typeof useTaskEditor>;
+    eventActions: ReturnType<typeof useWorkspaceEventActions>;
+    artifactEditor: ReturnType<typeof useArtifactActions>;
+    workstreamEditor: ReturnType<typeof useWorkstreamActions>;
+    partDefinitionEditor: ReturnType<typeof usePartDefinitionActions>;
+    partInstanceEditor: ReturnType<typeof usePartInstanceActions>;
+    subsystemEditor: ReturnType<typeof useSubsystemActions>;
+    mechanismEditor: ReturnType<typeof useMechanismActions>;
+    purchaseEditor: ReturnType<typeof usePurchaseActions>;
+    manufacturingEditor: ReturnType<typeof useManufacturingActions>;
     materialEditor: ReturnType<typeof useMaterialEditor>;
     interactiveTutorialChapters: ReturnType<typeof useInteractiveTutorial>["chapterStartOptions"];
   };
 
 export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceModel {
   const derived = useAppWorkspaceDerived(state);
-  const loader = useAppWorkspaceLoader(state, {
-    ...state,
-    ...derived,
-  });
+  const loader = useAppWorkspaceLoader(state);
   const { loadWorkspace } = loader;
-  const materialEditor = useMaterialEditor({ handleUnauthorized: loader.handleUnauthorized, loadWorkspace, setDataMessage: state.setDataMessage });
+  const editorContext = {
+    bootstrap: state.bootstrap,
+    handleUnauthorized: loader.handleUnauthorized,
+    loadWorkspace,
+    selectedProjectId: state.selectedProjectId,
+    selectedSeasonId: state.selectedSeasonId,
+    setDataMessage: state.setDataMessage,
+  };
+  const taskEditor = useTaskEditor({
+    ...editorContext,
+    scopedBootstrap: derived.scopedBootstrap,
+    setBootstrap: state.setBootstrap,
+    enqueueTaskEditNotice: state.enqueueTaskEditNotice,
+  });
+  const eventActions = useWorkspaceEventActions({ handleUnauthorized: loader.handleUnauthorized, loadWorkspace });
+  const materialEditor = useMaterialEditor(editorContext);
+  const artifactEditor = useArtifactActions({
+    ...editorContext,
+    scopedBootstrap: derived.scopedBootstrap,
+  });
+  const workstreamEditor = useWorkstreamActions({
+    ...editorContext,
+    scopedBootstrap: derived.scopedBootstrap,
+  });
+  const partDefinitionEditor = usePartDefinitionActions({
+    ...editorContext,
+    setBootstrap: state.setBootstrap,
+  });
+  const partInstanceEditor = usePartInstanceActions({
+    ...editorContext,
+    setBootstrap: state.setBootstrap,
+  });
+  const subsystemEditor = useSubsystemActions({
+    ...editorContext,
+    scopedBootstrap: derived.scopedBootstrap,
+    setBootstrap: state.setBootstrap,
+  });
+  const mechanismEditor = useMechanismActions({
+    ...editorContext,
+    scopedBootstrap: derived.scopedBootstrap,
+  });
+  const purchaseEditor = usePurchaseActions(editorContext);
+  const manufacturingEditor = useManufacturingActions({
+    ...editorContext,
+    signedInMemberId: derived.signedInMember?.id ?? null,
+  });
   const autoLoadedWorkspaceKeyRef = useRef<string | null>(null);
   const {
     authBooting,
@@ -109,7 +171,6 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
   const interactiveTutorial = useInteractiveTutorial({
     activeTab: state.activeTab,
     taskView: state.taskView,
-    riskManagementView: state.riskManagementView,
     worklogsView: state.worklogsView,
     manufacturingView: state.manufacturingView,
     inventoryView: state.inventoryView,
@@ -122,7 +183,6 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     handleUnauthorized: loader.handleUnauthorized,
     setActiveTab: state.setActiveTab,
     setTaskView: state.setTaskView,
-    setRiskManagementView: state.setRiskManagementView,
     setWorklogsView: state.setWorklogsView,
     setManufacturingView: state.setManufacturingView,
     setInventoryView: state.setInventoryView,
@@ -131,28 +191,44 @@ export function useAppWorkspaceModel(state: AppWorkspaceState): AppWorkspaceMode
     setActivePersonFilter: state.setActivePersonFilter,
     setBootstrap: state.setBootstrap,
     setDataMessage: state.setDataMessage,
-    activeTimelineTaskDetailId: state.activeTimelineTaskDetailId,
-    taskModalMode: state.taskModalMode,
-    activeTaskId: state.activeTaskId,
+    activeTimelineTaskDetailId: taskEditor.activeTimelineTaskDetailId,
+    taskModalMode: taskEditor.taskModalMode,
+    activeTaskId: taskEditor.activeTaskId,
     materialModalMode: materialEditor.materialModalMode,
     activeMaterialId: materialEditor.activeMaterialId,
-    subsystemModalMode: state.subsystemModalMode,
-    activeSubsystemId: state.activeSubsystemId,
-    mechanismModalMode: state.mechanismModalMode,
-    activeMechanismId: state.activeMechanismId,
-    manufacturingModalMode: state.manufacturingModalMode,
-    activeManufacturingId: state.activeManufacturingId,
-    workstreamModalMode: state.workstreamModalMode,
-    activeWorkstreamId: state.activeWorkstreamId,
+    subsystemModalMode: subsystemEditor.subsystemModalMode,
+    activeSubsystemId: subsystemEditor.activeSubsystemId,
+    mechanismModalMode: mechanismEditor.mechanismModalMode,
+    activeMechanismId: mechanismEditor.activeMechanismId,
+    manufacturingModalMode: manufacturingEditor.manufacturingModalMode,
+    activeManufacturingId: manufacturingEditor.activeManufacturingId,
+    workstreamModalMode: workstreamEditor.workstreamModalMode,
+    activeWorkstreamId: workstreamEditor.activeWorkstreamId,
   });
 
   return {
     ...state,
     ...derived,
     ...loader,
+    taskEditor,
+    eventActions,
+    artifactEditor,
+    workstreamEditor,
+    partDefinitionEditor,
+    partInstanceEditor,
+    subsystemEditor,
+    mechanismEditor,
+    purchaseEditor,
+    manufacturingEditor,
     materialEditor,
     ...interactiveTutorial,
     interactiveTutorialChapters: interactiveTutorial.chapterStartOptions,
-    isWorkspaceModalOpen: derived.isWorkspaceModalOpen || materialEditor.materialModalMode !== null || interactiveTutorial.isInteractiveTutorialActive,
+    isWorkspaceModalOpen: derived.isWorkspaceModalOpen || interactiveTutorial.isInteractiveTutorialActive || Boolean(
+      taskEditor.taskModalMode || taskEditor.activeTimelineTaskDetailId ||
+      purchaseEditor.purchaseModalMode || manufacturingEditor.manufacturingModalMode ||
+      artifactEditor.artifactModalMode || workstreamEditor.workstreamModalMode ||
+      partDefinitionEditor.partDefinitionModalMode || partInstanceEditor.partInstanceModalMode ||
+      subsystemEditor.subsystemModalMode || mechanismEditor.mechanismModalMode || materialEditor.materialModalMode
+    ),
   };
 }

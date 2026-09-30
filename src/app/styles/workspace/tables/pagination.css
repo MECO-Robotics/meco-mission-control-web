@@ -63,13 +63,6 @@
   text-transform: none;
 }
 
-.table-pagination-size select:focus,
-.table-pagination-size select:focus-visible {
-  outline: none;
-  border-color: var(--control-select-focus-border);
-  box-shadow: var(--control-select-focus-ring);
-}
-
 .table-pagination-controls {
   display: inline-flex;
   align-items: center;
@@ -97,11 +90,4 @@
   color: var(--text-copy);
   font-size: 0.7rem;
   font-weight: 600;
-}
-
-.queue-table {
-  display: grid;
-  grid-template-columns: var(--workspace-grid-template, 2.2fr 1fr 1fr 0.9fr 0.8fr 0.8fr);
-  gap: 0.5rem;
-  align-items: center;
 }

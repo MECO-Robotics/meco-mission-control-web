@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
+import { indexRecordsById } from "@/features/workspace/shared/model/indexRecordsById";
 import { isMeetingVisibleInProjectScope } from "@/features/workspace/shared/events";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import {
@@ -26,10 +27,6 @@ interface UseTimelineViewScopeArgs {
   timelineFilters: TimelineTaskFilters;
 }
 
-function buildLookupMap<T extends { id: string }>(items: T[]) {
-  return Object.fromEntries(items.map((item) => [item.id, item])) as Record<string, T>;
-}
-
 export function useTimelineViewScope({
   activePersonFilter,
   bootstrap,
@@ -37,10 +34,10 @@ export function useTimelineViewScope({
   searchFilter,
   timelineFilters,
 }: UseTimelineViewScopeArgs) {
-  const projectsById = useMemo(() => buildLookupMap(bootstrap.projects), [bootstrap.projects]);
-  const subsystemsById = useMemo(() => buildLookupMap(bootstrap.subsystems), [bootstrap.subsystems]);
-  const disciplinesById = useMemo(() => buildLookupMap(bootstrap.disciplines), [bootstrap.disciplines]);
-  const tasksById = useMemo(() => buildLookupMap(bootstrap.tasks), [bootstrap.tasks]);
+  const projectsById = useMemo(() => indexRecordsById(bootstrap.projects), [bootstrap.projects]);
+  const subsystemsById = useMemo(() => indexRecordsById(bootstrap.subsystems), [bootstrap.subsystems]);
+  const disciplinesById = useMemo(() => indexRecordsById(bootstrap.disciplines), [bootstrap.disciplines]);
+  const tasksById = useMemo(() => indexRecordsById(bootstrap.tasks), [bootstrap.tasks]);
   const scopedProjectIds = useMemo(() => bootstrap.projects.map((project) => project.id), [bootstrap.projects]);
   const filteredProjectIds = useMemo(
     () =>

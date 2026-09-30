@@ -40,37 +40,28 @@ export interface WorkspaceToastStackItem extends WorkspaceToastProps {
 }
 
 function createToastIcon(tone: WorkspaceToastTone) {
+  let children;
   switch (tone) {
     case "success":
-      return createElement(
-        "svg",
-        { viewBox: "0 0 20 20", "aria-hidden": "true" },
-        createElement("path", { d: "M8.4 12.6 5.8 10l-1.3 1.3 3.9 3.9 7.2-7.2-1.3-1.3-5.9 5.9Z", fill: "currentColor" }),
-      );
+      children = [createElement("path", { d: "M8.4 12.6 5.8 10l-1.3 1.3 3.9 3.9 7.2-7.2-1.3-1.3-5.9 5.9Z", fill: "currentColor" })];
+      break;
     case "warning":
-      return createElement(
-        "svg",
-        { viewBox: "0 0 20 20", "aria-hidden": "true" },
+      children = [
         createElement("path", { d: "M10 4.1c.55 0 1 .45 1 1v5.2c0 .55-.45 1-1 1s-1-.45-1-1V5.1c0-.55.45-1 1-1Z", fill: "currentColor" }),
         createElement("circle", { cx: "10", cy: "14.2", r: "1.1", fill: "currentColor" }),
-      );
+      ];
+      break;
     case "error":
-      return createElement(
-        "svg",
-        { viewBox: "0 0 20 20", "aria-hidden": "true" },
-        createElement("path", {
+      children = [createElement("path", {
           d: "M6.1 6.1 13.9 13.9M13.9 6.1 6.1 13.9",
           fill: "none",
           stroke: "currentColor",
           strokeLinecap: "round",
           strokeWidth: "2.2",
-        }),
-      );
+        })];
+      break;
     case "info":
-      return createElement(
-        "svg",
-        { viewBox: "0 0 20 20", "aria-hidden": "true" },
-          createElement(
+      children = [createElement(
             "text",
             {
               x: "10",
@@ -83,13 +74,15 @@ function createToastIcon(tone: WorkspaceToastTone) {
               fontFamily: "var(--font-ui)",
             },
             "i",
-        ),
-      );
+        )];
+      break;
     case "neutral":
       return null;
     default:
       return null;
   }
+
+  return createElement("svg", { viewBox: "0 0 20 20", "aria-hidden": "true" }, ...children);
 }
 
 function createDismissIcon() {
@@ -189,10 +182,6 @@ function WorkspaceToastCard({
   );
 }
 
-export function WorkspaceToast(props: WorkspaceToastProps) {
-  return createElement(WorkspaceToastCard, props);
-}
-
 export function WorkspaceToastStack({
   historyItems = [],
   isHistoryOpen = false,
@@ -226,26 +215,4 @@ export function WorkspaceToastStack({
   );
 
   return portalTarget ? createPortal(stack, portalTarget) : stack;
-}
-
-export function WorkspaceInfoToast({
-  message,
-  title = "Edit Canceled",
-  onDismiss,
-}: {
-  message: string;
-  title?: string;
-  onDismiss: () => void;
-}) {
-  return createElement(WorkspaceToast, { message, onDismiss, title, tone: "info" });
-}
-
-export function WorkspaceErrorPopup({
-  message,
-  onDismiss,
-}: {
-  message: string;
-  onDismiss: () => void;
-}) {
-  return createElement(WorkspaceToast, { message, onDismiss, title: "Error", tone: "error" });
 }

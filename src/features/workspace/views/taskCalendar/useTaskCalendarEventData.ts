@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { formatLocalDate } from "@/lib/dateUtils";
 import {
   buildTaskCalendarEvents,
   type TaskCalendarEvent,
@@ -10,7 +11,6 @@ import {
 import {
   createMonthCells,
   createWeekCells,
-  formatDateKey,
   sortTaskCalendarEvents,
   toEventDateKey,
   type TaskCalendarSortMode,
@@ -19,20 +19,36 @@ import {
 export function useTaskCalendarEventData({
   activePersonFilter,
   bootstrap,
+  eventFilter,
+  onEventFilterChange,
   isAllProjectsView,
+  sortMode,
+  onSortModeChange,
+  sortDirection,
+  onSortDirectionChange,
+  searchFilter: controlledSearchFilter,
+  onSearchChange,
 }: {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
+  eventFilter: "all" | TaskCalendarEventType;
+  onEventFilterChange: (value: "all" | TaskCalendarEventType) => void;
   isAllProjectsView: boolean;
+  sortMode: TaskCalendarSortMode;
+  onSortModeChange: (value: TaskCalendarSortMode) => void;
+  sortDirection: "asc" | "desc";
+  onSortDirectionChange: (value: "asc" | "desc") => void;
+  searchFilter?: string;
+  onSearchChange?: (value: string) => void;
 }) {
-  const [eventFilter, setEventFilter] = useState<"all" | TaskCalendarEventType>("all");
-  const [searchFilter, setSearchFilter] = useState("");
-  const [sortMode, setSortMode] = useState<TaskCalendarSortMode>("date");
+  const [localSearchFilter, setLocalSearchFilter] = useState("");
+  const searchFilter = controlledSearchFilter ?? localSearchFilter;
+  const setSearchFilter = onSearchChange ?? setLocalSearchFilter;
   const [monthCursor, setMonthCursor] = useState(() => {
     const today = new Date();
     return new Date(today.getFullYear(), today.getMonth(), 1);
   });
-  const todayDateKey = useMemo(() => formatDateKey(new Date()), []);
+  const todayDateKey = useMemo(() => formatLocalDate(new Date()), []);
   const projectsById = useMemo(
     () => Object.fromEntries(bootstrap.projects.map((project) => [project.id, project] as const)),
     [bootstrap.projects],
@@ -81,8 +97,8 @@ export function useTaskCalendarEventData({
       );
     }
 
-    return sortTaskCalendarEvents(scopedEvents, sortMode);
-  }, [eventFilter, searchFilter, sortMode, unfilteredEvents]);
+    return sortTaskCalendarEvents(scopedEvents, sortMode, sortDirection);
+  }, [eventFilter, searchFilter, sortDirection, sortMode, unfilteredEvents]);
   const monthCells = useMemo(() => createMonthCells(monthCursor), [monthCursor]);
   const weekCells = useMemo(() => createWeekCells(monthCursor), [monthCursor]);
   const eventsByDateKey = useMemo(() => {
@@ -93,11 +109,6 @@ export function useTaskCalendarEventData({
     });
     return grouped;
   }, [events]);
-  const monthLabel = monthCursor.toLocaleDateString(undefined, {
-    month: "long",
-    year: "numeric",
-  });
-
   return {
     eventFilter,
     events,
@@ -106,14 +117,15 @@ export function useTaskCalendarEventData({
     monthCells,
     weekCells,
     monthCursor,
-    monthLabel,
     projectsById,
     scopedProjectIds,
     searchFilter,
-    setEventFilter,
+    setEventFilter: onEventFilterChange,
     setMonthCursor,
     setSearchFilter,
-    setSortMode,
+    setSortMode: onSortModeChange,
+    setSortDirection: onSortDirectionChange,
+    sortDirection,
     sortMode,
     tasksById,
     todayDateKey,

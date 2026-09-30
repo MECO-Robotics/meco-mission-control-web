@@ -1,4 +1,5 @@
-.task-details-section-grid {
+.task-details-section-grid,
+.milestone-detail-overview-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.7rem;
@@ -31,7 +32,8 @@
   height: 100%;
 }
 
-.task-detail-collapsible-field > .task-detail-collapsible {
+.task-detail-collapsible-field > .task-detail-collapsible,
+.task-detail-blocker-split-column > .task-detail-collapsible {
   display: grid !important;
   grid-template-rows: auto minmax(0, 1fr) !important;
   min-height: 0;
@@ -56,14 +58,6 @@
   max-width: 100%;
   min-height: 0;
   contain: inline-size;
-}
-
-.task-detail-blocker-split-column > .task-detail-collapsible {
-  display: grid !important;
-  grid-template-rows: auto minmax(0, 1fr) !important;
-  min-height: 0;
-  height: 100%;
-  width: 100%;
 }
 
 .task-details-overview-grid {

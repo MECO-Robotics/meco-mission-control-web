@@ -4,7 +4,7 @@ import {
   readNavigationLocation, writeNavigationLocation,
   type NavigationState,
 } from "@/lib/workspaceNavigation";
-const state: NavigationState = { activeTab: "home", taskView: "queue", riskManagementView: "kanban", worklogsView: "logs", inventoryView: "materials", manufacturingView: "all", rosterView: "directory" };
+const state: NavigationState = { activeTab: "home", taskView: "queue", worklogsView: "logs", inventoryView: "materials", manufacturingView: "all" };
 describe("canonical workspace navigation", () => {
   it("groups Dashboard under Work and keeps every destination unique", () => {
     expect(NAVIGATION_SECTION_ORDER).toEqual(["work", "resources"]);

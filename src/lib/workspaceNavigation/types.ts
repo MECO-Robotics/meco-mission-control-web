@@ -21,17 +21,14 @@ export type ViewAvailabilityContext =
   | "no-season";
 
 export type TaskViewTab = "calendar" | "timeline" | "robot-map" | "queue" | "milestones";
-export type RiskManagementViewTab = "attention" | "kanban" | "metrics";
 export type WorklogsViewTab = "logs" | "activity" | "qa" | "results";
 export type ManufacturingViewTab = "all" | "cnc" | "prints" | "fabrication";
 export type InventoryViewTab = "materials" | "documents" | "parts" | "part-mappings" | "purchases";
-export type RosterViewTab = "available" | "workload" | "directory" | "attendance";
-
 export type NavigationSubItemId =
   | "home" | "work-tasks" | "work-schedule"
   | "resources-materials" | "resources-documents" | "resources-parts"
   | "resources-purchases" | "work-manufacturing" | "resources-structure"
-  | "team-people" | "team-attendance";
+  | "team-people";
 
 export interface NavigationItem {
   value: ViewTab;
@@ -47,17 +44,14 @@ export interface NavigationTarget {
   worklogsView?: WorklogsViewTab;
   inventoryView?: InventoryViewTab;
   manufacturingView?: ManufacturingViewTab;
-  rosterView?: RosterViewTab;
 }
 
 export interface NavigationState {
   activeTab: ViewTab;
   taskView: TaskViewTab;
-  riskManagementView: RiskManagementViewTab;
   worklogsView: WorklogsViewTab;
   inventoryView: InventoryViewTab;
   manufacturingView: ManufacturingViewTab;
-  rosterView: RosterViewTab;
 }
 
 export interface NavigationSubItem {
@@ -66,7 +60,6 @@ export interface NavigationSubItem {
   section: NavigationSection;
   target: NavigationTarget;
   icon: string;
-  requires?: string[];
 }
 
 export interface ViewAvailabilityScope {

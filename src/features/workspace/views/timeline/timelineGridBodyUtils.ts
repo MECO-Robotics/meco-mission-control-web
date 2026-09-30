@@ -2,22 +2,6 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskStatus } from "@/types/common";
 import { getTaskWaitingOnDependencies } from "@/features/workspace/shared/task/taskPlanning";
 
-type LegacyTaskDependencyRecord = {
-  id: string;
-  upstreamTaskId: string;
-  downstreamTaskId: string;
-  dependencyType: "blocks" | "soft" | "finish_to_start";
-  createdAt: string;
-  kind?: string;
-  refId?: string;
-  requiredState?: string;
-  taskId?: string;
-};
-
-export type TimelineTaskDependencyRecord =
-  | NonNullable<BootstrapPayload["taskDependencies"]>[number]
-  | LegacyTaskDependencyRecord;
-
 export type TimelineTaskBlockerRecord = NonNullable<BootstrapPayload["taskBlockers"]>[number];
 export type TimelineTaskStatusSignal = TaskStatus | "blocked" | "waiting-on-dependency";
 
@@ -31,22 +15,6 @@ const EMPTY_DEPENDENCY_COUNTS: TimelineTaskDependencyCounts = {
   outgoing: 0,
 };
 
-function getDependencyTaskId(dependency: TimelineTaskDependencyRecord) {
-  const dependencyRecord = dependency as {
-    taskId?: string;
-    downstreamTaskId?: string;
-  };
-  return dependencyRecord.taskId ?? dependencyRecord.downstreamTaskId ?? "";
-}
-
-function getDependencyRefId(dependency: TimelineTaskDependencyRecord) {
-  const dependencyRecord = dependency as {
-    refId?: string;
-    upstreamTaskId?: string;
-  };
-  return dependencyRecord.refId ?? dependencyRecord.upstreamTaskId ?? "";
-}
-
 function getOrCreateDependencyCounts(
   countsByTaskId: Record<string, TimelineTaskDependencyCounts>,
   taskId: string,
@@ -58,46 +26,19 @@ function getOrCreateDependencyCounts(
   return countsByTaskId[taskId];
 }
 
-export function getTaskDependencyCounts(
-  taskId: string,
-  dependencies: TimelineTaskDependencyRecord[] = [],
-): TimelineTaskDependencyCounts {
-  let incoming = 0;
-  let outgoing = 0;
-
-  dependencies.forEach((dependency) => {
-    if (getDependencyTaskId(dependency) === taskId) {
-      incoming += 1;
-    }
-    if (getDependencyRefId(dependency) === taskId) {
-      outgoing += 1;
-    }
-  });
-
-  return {
-    incoming,
-    outgoing,
-  };
-}
-
 export function buildTaskDependencyCountsByTaskId(
-  dependencies: TimelineTaskDependencyRecord[] = [],
+  dependencies: BootstrapPayload["taskDependencies"] = [],
 ) {
   const dependencyCountsByTaskId: Record<string, TimelineTaskDependencyCounts> = {};
 
   dependencies.forEach((dependency) => {
-    getOrCreateDependencyCounts(dependencyCountsByTaskId, getDependencyTaskId(dependency)).incoming += 1;
-    getOrCreateDependencyCounts(dependencyCountsByTaskId, getDependencyRefId(dependency)).outgoing += 1;
+    getOrCreateDependencyCounts(dependencyCountsByTaskId, dependency.taskId).incoming += 1;
+    if (dependency.kind === "task") {
+      getOrCreateDependencyCounts(dependencyCountsByTaskId, dependency.refId).outgoing += 1;
+    }
   });
 
   return dependencyCountsByTaskId;
-}
-
-export function getTaskDependencyCountsFromLookup(
-  countsByTaskId: Record<string, TimelineTaskDependencyCounts>,
-  taskId: string,
-) {
-  return countsByTaskId[taskId] ?? EMPTY_DEPENDENCY_COUNTS;
 }
 
 function buildActiveBlockerTaskIds(blockers: TimelineTaskBlockerRecord[] = []) {
@@ -115,12 +56,11 @@ function hasActiveTaskBlocker(
   return task.blockers.length > 0 || activeBlockerTaskIds.has(task.id);
 }
 
-export function getTimelineTaskStatusSignal(
+function getTimelineTaskStatusSignalForTask(
   task: BootstrapPayload["tasks"][number],
   bootstrap: BootstrapPayload,
+  activeBlockerTaskIds: Set<string>,
 ): TimelineTaskStatusSignal {
-  const activeBlockerTaskIds = buildActiveBlockerTaskIds(bootstrap.taskBlockers);
-
   if (hasActiveTaskBlocker(task, activeBlockerTaskIds)) {
     return "blocked";
   }
@@ -132,20 +72,26 @@ export function getTimelineTaskStatusSignal(
   return task.status;
 }
 
+export function getTimelineTaskStatusSignal(
+  task: BootstrapPayload["tasks"][number],
+  bootstrap: BootstrapPayload,
+): TimelineTaskStatusSignal {
+  return getTimelineTaskStatusSignalForTask(
+    task,
+    bootstrap,
+    buildActiveBlockerTaskIds(bootstrap.taskBlockers),
+  );
+}
+
 export function buildTimelineTaskStatusSignalByTaskId(
   bootstrap: BootstrapPayload,
 ): Record<string, TimelineTaskStatusSignal> {
   const activeBlockerTaskIds = buildActiveBlockerTaskIds(bootstrap.taskBlockers);
 
   return Object.fromEntries(
-    bootstrap.tasks.map((task) => {
-      const signal = hasActiveTaskBlocker(task, activeBlockerTaskIds)
-        ? "blocked"
-        : getTaskWaitingOnDependencies(task.id, bootstrap).length > 0
-          ? "waiting-on-dependency"
-          : task.status;
-
-      return [task.id, signal];
-    }),
+    bootstrap.tasks.map((task) => [
+      task.id,
+      getTimelineTaskStatusSignalForTask(task, bootstrap, activeBlockerTaskIds),
+    ]),
   );
 }

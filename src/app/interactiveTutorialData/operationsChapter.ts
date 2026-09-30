@@ -5,12 +5,6 @@ import type {
 
 const operationsSteps = [
   {
-    id: "roster-tab",
-    title: "Open Team",
-    instruction: "Open Team from the sidebar.",
-    selector: '[data-tutorial-target="sidebar-tab-team"]',
-  },
-  {
     id: "directory-view",
     title: "Open People",
     instruction: "Choose People to manage demo people.",
@@ -19,14 +13,8 @@ const operationsSteps = [
   {
     id: "create-student",
     title: "Add a student",
-    instruction: "In Students, click + and save a new student.",
-    selector: '[data-tutorial-target="create-student-button"]',
-  },
-  {
-    id: "inventory-tab",
-    title: "Open Resources",
-    instruction: "Open Resources from the sidebar.",
-    selector: '[data-tutorial-target="sidebar-tab-resources"]',
+    instruction: "Open Add person in the top bar, choose Add student, and save the new student.",
+    selector: '[data-tutorial-target="create-person-button"]',
   },
   {
     id: "inventory-materials",
@@ -89,12 +77,6 @@ const operationsSteps = [
     selector: '.purchase-toolbar',
   },
   {
-    id: "workflow-tab",
-    title: "Open Structure",
-    instruction: "Open Resources from the navigation.",
-    selector: '[data-tutorial-target="sidebar-tab-resources"]',
-  },
-  {
     id: "subsystems-view",
     title: "Open Structure",
     instruction: "Choose Structure in the sidebar.",
@@ -129,12 +111,6 @@ const operationsSteps = [
     title: "Add a part to a mechanism",
     instruction: "Use the Add part button on a mechanism and save it.",
     selector: '[data-tutorial-target="add-part-to-mechanism-button"]',
-  },
-  {
-    id: "manufacturing-tab",
-    title: "Open Manufacturing",
-    instruction: "Open Resources from the navigation.",
-    selector: '[data-tutorial-target="sidebar-tab-resources"]',
   },
   {
     id: "manufacturing-cnc",

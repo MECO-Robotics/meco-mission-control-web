@@ -13,7 +13,7 @@ The app uses the original sidebar implementation: Home shortcut, expandable Work
 | Home | Priority work, upcoming milestones, Needs attention | One attention row per source record; Project health expands on demand |
 | Work | Tasks, Schedule, Risks, Activity | Schedule offers Calendar, Timeline and Agenda; Activity filters work logs, changes, QA and milestone results |
 | Resources | Materials/Documents, Parts, Purchases, Manufacturing, Structure | Manufacturing uses a process filter; installed parts live under their definition; CAD import opens from Structure |
-| Team | People, Attendance | People combines directory, presence, availability and workload |
+| Team | People | People combines directory, presence, availability and workload |
 
 Tasks opens first in Work. Robot-only Parts and Manufacturing require a robot project. Structure requires a selected project and uses the robot map or the non-robot workflow view. All-project Resources exposes Materials and Purchases. Non-robot projects use Documents and Purchases. Home remains available without a season; other collections require season data. Help and account controls remain utilities.
 
@@ -22,6 +22,10 @@ Task details use a drawer on desktop and fill the narrow viewport. Logging work 
 The former Dashboard, Readiness, Config and Reports destinations, the work-log status board, the separate part-mapping page and the standalone People workload/availability pages have been removed. Their retained behavior is owned by the views above.
 
 See [navigation-consolidation.md](../README.md#current-navigation-model) for the cross-client scope, validation and contract changes.
+
+## Milestone editor ownership
+
+Calendar/Agenda and Timeline use `shared/milestones/useMilestoneEditor.ts` for draft dates, create/edit resets, validation and save/delete transitions. View hooks retain task grouping, day selection and detail navigation. Timeline exposes its own opening commands so callers cannot bypass the transition out of milestone details. Calendar/Agenda creation honors the project filter in all-project scope; Timeline creation uses its scoped projects. Editing retains a record's projects, falling back to the scope only when empty. The shared editor keeps failed saves open and sends edit notices only for edits. Inline schedule fields remain open when focus moves to the actions, so Save/Cancel/Delete stay in place through pointer activation; selecting another field or closing the modal exits schedule editing. No data reset is required.
 
 ## Client differences
 

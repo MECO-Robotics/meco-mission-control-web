@@ -6,6 +6,7 @@ import type { TaskStatus } from "@/types/common";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { buildTaskLastUpdatedAtById } from "../attentionActionNowShared";
 import { buildAttentionViewModel } from "../attentionViewModel";
+import { buildAttentionQueue } from "../attentionQueue";
 import { detectStaleTasks } from "../staleTaskDetector";
 
 const TODAY = new Date("2026-06-04T12:00:00.000Z");
@@ -18,7 +19,6 @@ function createTask(
 
   return {
     actualHours: 0,
-    artifactId: null,
     artifactIds: [],
     assigneeIds: ["member-1"],
     blockers: [],
@@ -31,11 +31,9 @@ function createTask(
     isBlocked: false,
     linkedManufacturingIds: [],
     linkedPurchaseIds: [],
-    mechanismId: null,
     mechanismIds: [],
     mentorId: null,
     ownerId: "member-1",
-    partInstanceId: null,
     partInstanceIds: [],
     planningState: "ready",
     priority: "medium",
@@ -43,12 +41,10 @@ function createTask(
     requiresDocumentation: false,
     startDate: "2026-05-01",
     status: status as TaskStatus,
-    subsystemId: "subsystem-1",
     subsystemIds: ["subsystem-1"],
     summary: "",
     targetMilestoneId: null,
     title: id,
-    workstreamId: "workstream-1",
     workstreamIds: ["workstream-1"],
     ...overrides,
   };
@@ -240,13 +236,11 @@ describe("stale task Action Required surfacing", () => {
       bootstrap,
     });
 
-    expect(
-      viewModel.summaryGroups
-        .flatMap((group) => group.cards)
-        .find((card) => card.id === "stale-tasks"),
-    ).toMatchObject({ label: "Stale tasks", value: 2 });
     expect(viewModel.triageGroups.find((group) => group.id === "stale-tasks")?.items).toHaveLength(2);
     expect(viewModel.actionNowItems.map((item) => item.recordId)).toEqual(
+      expect.arrayContaining(["task-stale", "task-in-progress"]),
+    );
+    expect(buildAttentionQueue(viewModel).map((row) => row.recordId)).toEqual(
       expect.arrayContaining(["task-stale", "task-in-progress"]),
     );
   });

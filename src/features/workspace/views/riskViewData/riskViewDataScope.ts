@@ -1,4 +1,4 @@
-﻿import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { buildScopeMetrics } from "../RiskMetrics";
 import {
@@ -21,7 +21,8 @@ import {
   buildOpenBlockersByTaskId,
   buildScopedRiskViewPools,
 } from "./riskViewScopeSelectors";
-import type { RiskViewScopeData } from "./riskViewScopeTypes";
+import { buildRiskViewSupplySignals } from "./riskViewSupplySignals";
+import { countStaleTasks } from "./riskViewTaskFreshness";
 
 export type { BlockerBreakdown, HealthStatus } from "./riskViewMetricsUtils";
 
@@ -33,18 +34,17 @@ interface BuildRiskViewScopeDataArgs {
 export function buildRiskViewScopeData({
   activePersonFilter,
   bootstrap,
-}: BuildRiskViewScopeDataArgs): RiskViewScopeData {
+}: BuildRiskViewScopeDataArgs) {
   const now = new Date();
   const nowTimestamp = now.getTime();
   const weekStart = startOfWeekTimestamp(now);
+  const pools = buildScopedRiskViewPools({ activePersonFilter, bootstrap });
   const {
-    scopedReportIds,
     scopedReports,
-    scopedRisks,
     scopedTaskIds,
     scopedTasks,
     scopedWorkLogs,
-  } = buildScopedRiskViewPools({ activePersonFilter, bootstrap });
+  } = pools;
 
   const plannedHours = scopedTasks.reduce(
     (total, task) => total + Math.max(0, Number(task.estimatedHours) || 0),
@@ -55,17 +55,15 @@ export function buildRiskViewScopeData({
     0,
   );
   const remainingPlannedHours = Math.max(0, plannedHours - loggedHours);
-  const maxMetricHours = Math.max(plannedHours, loggedHours, 1);
   const hoursLoggedRate = plannedHours > 0 ? loggedHours / plannedHours : 0;
   const clampedCompletionWidth = `${Math.max(0, Math.min(100, hoursLoggedRate * 100))}%`;
   const totalTaskCount = scopedTasks.length;
   const completedTaskCount = scopedTasks.filter((task) => task.status === "complete").length;
-  const openTaskCount = Math.max(0, totalTaskCount - completedTaskCount);
   const taskCompletionRate = totalTaskCount > 0 ? completedTaskCount / totalTaskCount : 0;
   const taskCompletionWidth = `${Math.max(0, Math.min(100, taskCompletionRate * 100))}%`;
   const waitingForQaTasks = scopedTasks.filter((task) => task.status === "waiting-for-qa");
   const qaWaitingCount = waitingForQaTasks.length;
-  const { openBlockers, openBlockersByTaskId } = buildOpenBlockersByTaskId(
+  const openBlockersByTaskId = buildOpenBlockersByTaskId(
     scopedTaskIds,
     bootstrap,
   );
@@ -77,29 +75,26 @@ export function buildRiskViewScopeData({
     supplyMaterial: 0,
     other: 0,
   };
-  openBlockers.forEach((blocker) => {
-    blockerBreakdown[classifyBlocker(blocker)] += 1;
+  let unresolvedBlockerCount = 0;
+  let oldestBlockerAgeDays: number | null = null;
+  openBlockersByTaskId.forEach((blockers) => {
+    unresolvedBlockerCount += blockers.length;
+    blockers.forEach((blocker) => {
+      blockerBreakdown[classifyBlocker(blocker)] += 1;
+      const timestamp = parseTimestamp(blocker.createdAt);
+      if (timestamp !== null) {
+        const ageDays = toAgeDays(timestamp, nowTimestamp);
+        oldestBlockerAgeDays = Math.max(oldestBlockerAgeDays ?? ageDays, ageDays);
+      }
+    });
   });
-  const oldestBlockerAgeDays = openBlockers.reduce<number | null>((oldest, blocker) => {
-    const timestamp = parseTimestamp(blocker.createdAt);
-    if (timestamp === null) {
-      return oldest;
-    }
-
-    const ageDays = toAgeDays(timestamp, nowTimestamp);
-    if (oldest === null || ageDays > oldest) {
-      return ageDays;
-    }
-
-    return oldest;
-  }, null);
 
   const lastActivityByTaskId = buildLastActivityByTaskId({
     scopedTaskIds,
     scopedTasks,
     scopedWorkLogs,
     scopedReports,
-    openBlockers,
+    openBlockersByTaskId,
   });
 
   const qaLatestByTaskId = latestReportByTaskId(scopedReports);
@@ -125,22 +120,12 @@ export function buildRiskViewScopeData({
   const oldestQaWaitingAgeDays = waitingTaskAges.length > 0 ? Math.max(...waitingTaskAges) : null;
 
   const staleTaskThresholdDays = DEFAULT_STALE_TASK_DAYS;
-  // TODO: Task records do not currently expose updatedAt. This uses best-effort activity timestamps and should switch to task.updatedAt when available.
-  let staleTaskCount = 0;
-  let staleTaskUnavailableCount = 0;
-  scopedTasks
-    .filter((task) => task.status !== "complete")
-    .forEach((task) => {
-      const activityTimestamp = lastActivityByTaskId.get(task.id);
-      if (typeof activityTimestamp !== "number") {
-        staleTaskUnavailableCount += 1;
-        return;
-      }
-
-      if (toAgeDays(activityTimestamp, nowTimestamp) >= staleTaskThresholdDays) {
-        staleTaskCount += 1;
-      }
-    });
+  const { staleCount: staleTaskCount, unavailableCount: staleTaskUnavailableCount } = countStaleTasks({
+    lastActivityByTaskId,
+    nowTimestamp,
+    tasks: scopedTasks,
+    thresholdDays: staleTaskThresholdDays,
+  });
 
   const ownerlessTaskCount = scopedTasks.filter(
     (task) => task.status !== "complete" && !task.ownerId && (task.assigneeIds ?? []).length === 0,
@@ -176,7 +161,7 @@ export function buildRiskViewScopeData({
       return leadId ? membersById[leadId]?.name ?? "Unknown lead" : null;
     },
     (task, subsystem) =>
-      task.subsystemId === subsystem.id || (task.subsystemIds ?? []).includes(subsystem.id),
+      task.subsystemIds.includes(subsystem.id),
     nowTimestamp,
   );
 
@@ -200,7 +185,7 @@ export function buildRiskViewScopeData({
       return leadId ? membersById[leadId]?.name ?? "Unknown lead" : null;
     },
     (task, mechanism) =>
-      task.mechanismId === mechanism.id || (task.mechanismIds ?? []).includes(mechanism.id),
+      task.mechanismIds.includes(mechanism.id),
     nowTimestamp,
   );
 
@@ -208,20 +193,7 @@ export function buildRiskViewScopeData({
     (report) => report.result === "pass" && report.mentorApproved,
   ).length;
 
-  const scopedPurchaseIds = new Set(scopedTasks.flatMap((task) => task.linkedPurchaseIds ?? []));
-  const purchasePool =
-    activePersonFilter.length > 0 && scopedPurchaseIds.size > 0
-      ? bootstrap.purchaseItems.filter((purchase) => scopedPurchaseIds.has(purchase.id))
-      : bootstrap.purchaseItems;
-  const deliveredPurchases = purchasePool.filter((purchase) => purchase.status === "delivered").length;
-  const pendingPurchaseCount = purchasePool.filter((purchase) => purchase.status !== "delivered").length;
-  const lowStockMaterials = bootstrap.materials.filter(
-    (material) => material.onHandQuantity <= material.reorderPoint,
-  ).length;
-  const attendanceHours = (bootstrap.attendanceRecords ?? []).reduce(
-    (sum, record) => sum + record.totalHours,
-    0,
-  );
+  const supply = buildRiskViewSupplySignals({ activePersonFilter, bootstrap, scopedTasks });
   const activeSubsystemCount = subsystemMetrics.filter((metric) => metric.taskCount > 0).length;
   const activeMechanismCount = mechanismMetrics.filter((metric) => metric.taskCount > 0).length;
   const untouchedMechanismCount = Math.max(0, bootstrap.mechanisms.length - activeMechanismCount);
@@ -231,7 +203,6 @@ export function buildRiskViewScopeData({
       metric.lastActivityAgeDays !== null &&
       metric.lastActivityAgeDays >= staleTaskThresholdDays,
   ).length;
-  const supplySignals = pendingPurchaseCount + lowStockMaterials;
   const logsThisWeekHours = scopedWorkLogs.reduce((sum, workLog) => {
     const timestamp = parseTimestamp(workLog.date);
     if (timestamp === null || timestamp < weekStart) {
@@ -242,7 +213,6 @@ export function buildRiskViewScopeData({
   }, 0);
 
   const expectedProgressRate = buildExpectedProgressRate(scopedTasks, nowTimestamp);
-  const unresolvedBlockerCount = openBlockers.length;
   const planStatus = buildPlanStatus({
     expectedProgressRate,
     hoursLoggedRate,
@@ -272,60 +242,52 @@ export function buildRiskViewScopeData({
     qaWaitingCount,
     staleTaskCount,
     staleTaskThresholdDays,
-    supplySignals,
+    supplySignals: supply.supplySignals,
     unresolvedBlockerCount,
   });
 
-  return {
+  const metrics = {
     activeMechanismCount,
     activeSubsystemCount,
-    attendanceHours,
     blockerBreakdown,
-    blockerCount: unresolvedBlockerCount,
     buildHealthActions: healthActions,
     buildHealthReasons: healthReasons,
     buildHealthStatus,
     clampedCompletionWidth,
-    completionRate: taskCompletionRate,
     completedTaskCount,
-    deliveredPurchases,
     expectedProgressRate,
-    filteredRowsBase: scopedRisks,
     hoursLoggedRate,
     loggedHours,
     logsThisWeekHours,
-    lowStockMaterials,
-    maxMetricHours,
+    lowStockMaterials: supply.lowStockMaterials,
     mechanismMetrics,
     mentorActionRequiredCount,
     oldestBlockerAgeDays,
     oldestQaWaitingAgeDays,
-    openTaskCount,
     ownerlessTaskCount,
-    pendingPurchaseCount,
+    pendingPurchaseCount: supply.pendingPurchaseCount,
     planStatus,
     plannedHours,
     qaPassCount,
     qaWaitingCount,
     remainingPlannedHours,
-    scopedReportIds,
-    scopedReports,
-    scopedRisks,
-    scopedTaskIds,
-    scopedTasks,
-    scopedWorkLogs,
     staleSubsystemCount,
     staleTaskCount,
     staleTaskThresholdDays,
     staleTaskUnavailableCount,
     studentRevisionRequiredCount,
     subsystemMetrics,
-    supplySignals,
+    supplySignals: supply.supplySignals,
     taskCompletionRate,
     taskCompletionWidth,
-    totalTaskCount,
+    scopedTaskCount: totalTaskCount,
+    totalMechanismCount: bootstrap.mechanisms.length,
+    totalSubsystemCount: bootstrap.subsystems.length,
     untouchedMechanismCount,
     unresolvedBlockerCount,
-    waitingForQaCount: qaWaitingCount,
   };
+
+  return { pools, metrics };
 }
+
+export type RiskMetricsData = ReturnType<typeof buildRiskViewScopeData>["metrics"];

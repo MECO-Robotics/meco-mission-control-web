@@ -5,8 +5,9 @@ import type { TaskRecord } from "@/types/recordsExecution";
 import type { DropdownOption } from "../model/workspaceTypes";
 
 const FILTER_CHANGE_ANIMATION_DURATION_MS = 220;
-
 export const WORKSPACE_COMPACT_BREAKPOINT = 900;
+export const ALL_FILTER_LABEL = "All";
+
 export type FilterSelection = string[];
 
 type FilterMotionPart = boolean | number | string | null | undefined | readonly string[];
@@ -159,6 +160,21 @@ export function useWorkspaceCompactMode(breakpoint = WORKSPACE_COMPACT_BREAKPOIN
   }, [breakpoint]);
 
   return isCompact;
+}
+
+export function formatCompactFilterSelectionLabel(
+  options: DropdownOption[],
+  value: FilterSelection,
+) {
+  if (value.length === 0) {
+    return ALL_FILTER_LABEL;
+  }
+
+  if (value.length > 1) {
+    return `${value.length}...`;
+  }
+
+  return options.find((option) => option.id === value[0])?.name ?? "1";
 }
 
 export function formatFilterSelectionLabel(

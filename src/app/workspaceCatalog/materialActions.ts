@@ -1,46 +1,65 @@
-import { useCallback, useState } from "react";
+import type { BootstrapPayload } from "@/types/bootstrap";
+import type { WorkspaceLoader } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import { useCatalogEditorLifecycle } from "./useCatalogEditorLifecycle";
+import { useCallback } from "react";
+import { useCatalogDraftEditor } from "./useCatalogDraftEditor";
+import { useCatalogRecordActions } from "./useCatalogRecordActions";
 
 import { buildEmptyMaterialPayload } from "@/lib/appUtils/payloadBuilders";
 import { materialToPayload } from "@/lib/appUtils/payloadConversions";
 import { toErrorMessage } from "@/lib/appUtils/common";
 import { createMaterialRecord, deleteMaterialRecord, updateMaterialRecord } from "@/lib/auth/records/inventory";
 import type { MaterialPayload } from "@/types/payloads";
-import type { MaterialRecord } from "@/types/recordsInventory";
 
 export function useMaterialEditor({
+  bootstrap, selectedProjectId, selectedSeasonId,
   handleUnauthorized,
   loadWorkspace,
   setDataMessage,
 }: {
+  bootstrap: BootstrapPayload;
+  selectedProjectId: string | null;
+  selectedSeasonId: string | null;
   handleUnauthorized: () => void;
-  loadWorkspace: () => Promise<void>;
+  loadWorkspace: WorkspaceLoader;
   setDataMessage: (message: string | null) => void;
 }) {
-  const [materialModalMode, setMaterialModalMode] = useState<"create" | "edit" | null>(null);
-  const [activeMaterialId, setActiveMaterialId] = useState<string | null>(null);
-  const [materialDraft, setMaterialDraft] = useState<MaterialPayload>(buildEmptyMaterialPayload);
-  const [isSavingMaterial, setIsSavingMaterial] = useState(false);
-  const [isDeletingMaterial, setIsDeletingMaterial] = useState(false);
-  const openCreateMaterialModal = useCallback(() => {
-    setActiveMaterialId(null);
-    setMaterialDraft(buildEmptyMaterialPayload());
-    setMaterialModalMode("create");
-  }, []);
-
-  const openEditMaterialModal = useCallback((item: MaterialRecord) => {
-    setActiveMaterialId(item.id);
-    setMaterialDraft(materialToPayload(item));
-    setMaterialModalMode("edit");
-  }, []);
-
-  const closeMaterialModal = useCallback(() => {
-    setMaterialModalMode(null);
-    setActiveMaterialId(null);
-  }, []);
+  const { beginOperation, resetEditor, isSaving: isSavingMaterial, isDeleting: isDeletingMaterial } =
+    useCatalogEditorLifecycle({ loadWorkspace, selectedProjectId, selectedSeasonId });
+  const {
+    modalMode: materialModalMode,
+    activeRecordId: activeMaterialId,
+    draft: materialDraft,
+    setDraft: setMaterialDraft,
+    openCreate: openCreateMaterialModal,
+    openEdit: openEditMaterialModal,
+    close: closeMaterialModal,
+  } = useCatalogDraftEditor({
+    bootstrapIsEmpty: bootstrap === EMPTY_BOOTSTRAP,
+    makeCreateDraft: buildEmptyMaterialPayload,
+    makeInitialDraft: buildEmptyMaterialPayload,
+    records: bootstrap.materials,
+    resetOperation: resetEditor,
+    selectedProjectId,
+    selectedSeasonId,
+    toDraft: materialToPayload,
+  });
+  const { handleDelete: handleDeleteMaterial } = useCatalogRecordActions({
+    activeRecordId: activeMaterialId,
+    beginOperation,
+    closeEditor: closeMaterialModal,
+    deleteRecord: deleteMaterialRecord,
+    handleUnauthorized,
+    records: bootstrap.materials,
+    setDataMessage,
+  });
 
   const handleMaterialSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
-    setIsSavingMaterial(true);
+    if (!materialModalMode) return;
+    const operation = beginOperation();
+    if (!operation) return;
     setDataMessage(null);
 
     try {
@@ -58,31 +77,14 @@ export function useMaterialEditor({
         await updateMaterialRecord(activeMaterialId, payload, handleUnauthorized);
       }
 
-      await loadWorkspace();
-      closeMaterialModal();
+      await operation.refresh();
+      if (operation.isCurrent()) closeMaterialModal();
     } catch (error) {
-      setDataMessage(toErrorMessage(error));
+      if (operation.isCurrent()) setDataMessage(toErrorMessage(error));
     } finally {
-      setIsSavingMaterial(false);
+      operation.finish();
     }
-  }, [activeMaterialId, closeMaterialModal, handleUnauthorized, loadWorkspace, materialDraft, materialModalMode, setDataMessage]);
-
-  const handleDeleteMaterial = useCallback(async (materialId: string) => {
-    setIsDeletingMaterial(true);
-    setDataMessage(null);
-
-    try {
-      await deleteMaterialRecord(materialId, handleUnauthorized);
-      if (activeMaterialId === materialId) {
-        closeMaterialModal();
-      }
-      await loadWorkspace();
-    } catch (error) {
-      setDataMessage(toErrorMessage(error));
-    } finally {
-      setIsDeletingMaterial(false);
-    }
-  }, [activeMaterialId, closeMaterialModal, handleUnauthorized, loadWorkspace, setDataMessage]);
+  }, [activeMaterialId, closeMaterialModal, handleUnauthorized, beginOperation, materialDraft, materialModalMode, setDataMessage]);
 
   return {
     materialModalMode, activeMaterialId, materialDraft, setMaterialDraft, isSavingMaterial, isDeletingMaterial,

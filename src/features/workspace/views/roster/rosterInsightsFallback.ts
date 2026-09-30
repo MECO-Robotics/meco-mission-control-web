@@ -164,22 +164,21 @@ export function buildRosterInsightsFromBootstrap(
       const plannedWeeklyAttendanceHours = Number(
         Math.max(0, member.plannedWeeklyAttendanceHours ?? 0).toFixed(1),
       );
-      const attendanceHoursLast7Days = memberAttendanceRecords.reduce((sum, record) => {
-        const attendanceDate = parseDateValue(record.date);
-        return !attendanceDate || attendanceDate < day7Start ? sum : sum + record.totalHours;
-      }, 0);
-      const attendanceHoursLast14Days = memberAttendanceRecords.reduce((sum, record) => {
-        const attendanceDate = parseDateValue(record.date);
-        return !attendanceDate || attendanceDate < day14Start ? sum : sum + record.totalHours;
-      }, 0);
-      const attendanceHoursLast30Days = memberAttendanceRecords.reduce((sum, record) => {
-        const attendanceDate = parseDateValue(record.date);
-        return !attendanceDate || attendanceDate < day30Start ? sum : sum + record.totalHours;
-      }, 0);
-      const attendanceSessionsLast30Days = memberAttendanceRecords.filter((record) => {
-        const attendanceDate = parseDateValue(record.date);
-        return Boolean(attendanceDate && attendanceDate >= day30Start);
-      }).length;
+      const [attendanceHoursLast7Days, attendanceHoursLast14Days, attendanceHoursLast30Days, attendanceSessionsLast30Days] =
+        memberAttendanceRecords.reduce<[number, number, number, number]>((metrics, record) => {
+          const attendanceDate = parseDateValue(record.date);
+          if (attendanceDate && attendanceDate >= day30Start) {
+            metrics[2] += record.totalHours;
+            metrics[3] += 1;
+            if (attendanceDate >= day14Start) {
+              metrics[1] += record.totalHours;
+              if (attendanceDate >= day7Start) {
+                metrics[0] += record.totalHours;
+              }
+            }
+          }
+          return metrics;
+        }, [0, 0, 0, 0]);
 
       return {
         memberId: member.id,

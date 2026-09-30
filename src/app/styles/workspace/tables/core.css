@@ -3,10 +3,23 @@
   gap: 0.5rem;
   align-items: center;
   grid-template-columns: var(--workspace-grid-template, auto);
+  text-align: left;
+}
+
+.ops-table .table-column-header-cell {
+  justify-content: flex-start;
 }
 
 .purchase-table {
   grid-template-columns: var(--workspace-grid-template, 2.4fr 1fr 0.5fr 0.8fr 0.8fr 0.8fr 0.8fr);
+}
+
+.purchase-table-header {
+  color: var(--text-copy);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .manufacturing-table {
@@ -19,6 +32,11 @@
 
 .print-table {
   grid-template-columns: var(--workspace-grid-template, 2.5fr 1fr 0.45fr 0.75fr 0.8fr 0.8fr);
+}
+
+.materials-stock-below-reorder {
+  color: var(--status-danger-text);
+  font-weight: 700;
 }
 
 .queue-table-header {
@@ -54,7 +72,6 @@
   line-height: 1;
   text-align: center;
 }
-
 .table-column-header-cell {
   display: inline-flex !important;
   align-items: center;

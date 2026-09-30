@@ -1,12 +1,10 @@
-import { AuthIntroPanel, AuthStatusCard, DevBypassButton, GoogleAuthChip, MobileReleasePanel } from "./AuthScreenSections";
+import { AuthIntroPanel, DevBypassButton, GoogleAuthChip, MobileReleasePanel } from "./AuthScreenSections";
 import { detectMobileDevice } from "./authDevice";
 import { getSignInScreenCopy } from "./authCopy";
 import { EmailAuthPanel } from "./EmailAuthPanel";
-import type { AuthStatusScreenProps, SignInScreenProps } from "./authTypes";
+import type { SignInScreenProps } from "./authTypes";
 
-export function AuthStatusScreen(props: AuthStatusScreenProps) {
-  return <AuthStatusCard {...props} />;
-}
+export { AuthStatusCard as AuthStatusScreen } from "./AuthScreenSections";
 
 export function SignInScreen({
   authMessage,

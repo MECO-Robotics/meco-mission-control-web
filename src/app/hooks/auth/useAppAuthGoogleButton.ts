@@ -4,8 +4,7 @@ import { getGoogleButtonTheme } from "@/app/theme/googleButtonTheme";
 import {
   isSecureGoogleAuthHost,
   loadGoogleIdentityScript,
-  type GoogleIdentityWindow,
-} from "@/app/hooks/auth/useAppAuthGoogleIdentity";
+} from "@/lib/auth/core/google";
 import { type GoogleCredentialResponse, type SessionUser } from "@/lib/auth/types";
 import { toErrorMessage } from "@/lib/appUtils/common";
 
@@ -54,16 +53,15 @@ export function useAppAuthGoogleButton({
       try {
         await loadGoogleIdentityScript();
         const activeButtonSlot = googleButtonRef.current;
-        const googleWindow = window as GoogleIdentityWindow;
-        if (cancelled || !googleWindow.google || !activeButtonSlot) {
+        if (cancelled || !window.google || !activeButtonSlot) {
           return;
         }
 
         activeButtonSlot.replaceChildren();
-        googleWindow.google.accounts.id.initialize({
+        window.google.accounts.id.initialize({
           client_id: activeGoogleClientId,
           callback: (response) => {
-            void handleGoogleCredential(response as GoogleCredentialResponse);
+            void handleGoogleCredential(response);
           },
           error_callback: (error) => {
             const errorType =
@@ -84,7 +82,7 @@ export function useAppAuthGoogleButton({
           auto_select: false,
           cancel_on_tap_outside: true,
         });
-        googleWindow.google.accounts.id.renderButton(activeButtonSlot, {
+        window.google.accounts.id.renderButton(activeButtonSlot, {
           type: "standard",
           theme: getGoogleButtonTheme(isDarkMode),
           size: "large",

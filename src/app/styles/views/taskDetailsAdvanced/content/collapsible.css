@@ -21,40 +21,6 @@
   color: color-mix(in srgb, var(--task-detail-pill-accent) 86%, var(--text-title));
 }
 
-.task-detail-hours-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.42rem;
-  margin: 0.25rem 0 0;
-}
-
-.task-detail-pair-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 0.42rem;
-  margin: 0.25rem 0 0;
-}
-
-.task-detail-pair-segment {
-  display: inline-flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 0.32rem;
-}
-
-.task-detail-pair-label {
-  color: var(--text-copy);
-  font-size: 0.74rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.task-detail-pair-separator {
-  color: var(--text-copy);
-}
-
 .task-detail-collapsible-field .task-detail-collapsible {
   margin-top: 0.25rem;
   display: flex;
@@ -63,15 +29,6 @@
   min-width: 0;
   max-width: 100%;
   contain: inline-size;
-}
-
-.task-detail-list-header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  width: 100%;
-  min-width: 0;
 }
 
 .task-detail-collapsible-summary-main {

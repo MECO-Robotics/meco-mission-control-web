@@ -3,6 +3,7 @@ import { useRef, type Dispatch, type FormEvent, type SetStateAction } from "reac
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TestResultPayload } from "@/types/payloads";
 import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
+import { WorkReportEditorActions } from "./WorkReportEditorActions";
 
 interface MilestoneReportEditorModalProps {
   bootstrap: BootstrapPayload;
@@ -40,8 +41,7 @@ export function MilestoneReportEditorModal({
   return (
     <ModalDialog label="Add milestone report" onClose={closeMilestoneReportModal}>
       <section
-        className="modal-card task-details-modal"
-        style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
+        className="modal-card task-details-modal modal-panel-surface"
       >
         <div className="panel-header compact-header task-details-header">
           <div>
@@ -65,7 +65,7 @@ export function MilestoneReportEditorModal({
           style={{ color: "var(--text-copy)" }}
         >
           <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Milestone</span>
+            <span>Milestone</span>
             <select
               aria-label="Milestone"
               onChange={(milestone) =>
@@ -96,7 +96,7 @@ export function MilestoneReportEditorModal({
             ) : null}
           </label>
           <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Title</span>
+            <span>Title</span>
             <input
               onChange={(milestone) =>
                 setMilestoneReportDraft((current) => ({
@@ -105,16 +105,11 @@ export function MilestoneReportEditorModal({
                 }))
               }
               required
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
               value={milestoneReportDraft.title ?? ""}
             />
           </label>
           <label className="field">
-            <span style={{ color: "var(--text-title)" }}>Status</span>
+            <span>Status</span>
             <select
               onChange={(milestone) =>
                 setMilestoneReportDraft((current) => ({
@@ -135,16 +130,11 @@ export function MilestoneReportEditorModal({
             </select>
           </label>
           <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Findings (one per line)</span>
+            <span>Findings (one per line)</span>
             <textarea
               onChange={(milestone) => setMilestoneReportFindings(milestone.target.value)}
               placeholder="Add findings from this milestone."
               rows={4}
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
               value={milestoneReportFindings}
             />
           </label>
@@ -163,27 +153,12 @@ export function MilestoneReportEditorModal({
               return requestPhotoUpload(milestoneReportPhotoProjectId, file);
             }}
           />
-          <div className="modal-actions modal-wide">
-            <button
-              className="secondary-action"
-              onClick={closeMilestoneReportModal}
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
-              type="button"
-            >
-              Cancel
-            </button>
-            <button
-              className="primary-action"
-              disabled={isSavingMilestoneReport || bootstrap.milestones.length === 0}
-              type="submit"
-            >
-              {isSavingMilestoneReport ? "Saving..." : "Add milestone report"}
-            </button>
-          </div>
+          <WorkReportEditorActions
+            disabled={isSavingMilestoneReport || bootstrap.milestones.length === 0}
+            isSaving={isSavingMilestoneReport}
+            onCancel={closeMilestoneReportModal}
+            submitLabel="Add milestone report"
+          />
         </form>
       </section>
     </ModalDialog>

@@ -4,19 +4,17 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { TaskCalendarDayDetails } from "@/features/workspace/views/taskCalendar/TaskCalendarDayDetails";
-import { TaskCalendarFilterToolbar } from "@/features/workspace/views/taskCalendar/TaskCalendarFilterToolbar";
 import { TaskCalendarMonthGrid } from "@/features/workspace/views/taskCalendar/TaskCalendarMonthGrid";
-import { TaskCalendarMonthToolbar } from "@/features/workspace/views/taskCalendar/TaskCalendarMonthToolbar";
 import type { TaskCalendarEvent } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
+import { TimelineCompactFilterMenu } from "@/features/workspace/views/timeline/components/TimelineCompactFilterMenu";
+import { TimelineCalendarSortMenu } from "@/features/workspace/views/timeline/components/TimelineCalendarSortMenu";
+import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 
 const taskEvent: TaskCalendarEvent = {
-  allDay: true,
-  classNames: ["task-calendar-event", "task-calendar-event-task-due"],
   extendedProps: {
     contextLabel: "Robot",
     priority: "high",
-    projectId: "project-robot",
     recordId: "task-drive",
     status: "in-progress",
     type: "task-due",
@@ -27,11 +25,8 @@ const taskEvent: TaskCalendarEvent = {
 };
 
 const meetingEvent: TaskCalendarEvent = {
-  allDay: false,
-  classNames: ["task-calendar-event", "task-calendar-event-event"],
   extendedProps: {
     contextLabel: "Robot",
-    projectId: "project-robot",
     recordId: "meeting-build",
     status: "build",
     type: "event",
@@ -148,47 +143,105 @@ describe("TaskCalendarMonthGrid day selection", () => {
   });
 });
 
-describe("TaskCalendarMonthToolbar", () => {
-  it("notifies the parent before month controls change the visible month", () => {
-    const onMonthChange = jest.fn();
-    const setMonthCursor = jest.fn();
-    const toolbar = TaskCalendarMonthToolbar({
-      monthLabel: "May 2026",
-      onMonthChange,
-      setMonthCursor,
-    }) as React.ReactElement<{ children: React.ReactNode }>;
-    const previousButton = findButtonByTitle(toolbar, "Previous month");
-    const nextButton = findButtonByTitle(toolbar, "Next month");
-    const todayButton = findButtonByTitle(toolbar, "Jump to current month");
-
-    previousButton?.props.onClick({ stopPropagation: jest.fn() });
-    nextButton?.props.onClick({ stopPropagation: jest.fn() });
-    todayButton?.props.onClick({ stopPropagation: jest.fn() });
-
-    expect(onMonthChange).toHaveBeenCalledTimes(3);
-    expect(setMonthCursor).toHaveBeenCalledTimes(3);
-  });
-});
-
-describe("TaskCalendarFilterToolbar", () => {
-  it("keeps event filtering and sorting in one compact view menu", () => {
-    const toolbar = TaskCalendarFilterToolbar({
-      eventFilter: "qa-due",
-      onEventFilterChange: jest.fn(),
-      onSortModeChange: jest.fn(),
-      sortMode: "priority",
-    }) as React.ReactElement<{ children: React.ReactNode }>;
-    const [viewOptionsMenu] = React.Children.toArray(toolbar.props.children) as React.ReactElement<{
+describe("TimelineCompactFilterMenu", () => {
+  it("keeps calendar event filters separate from sorting", () => {
+    const menu = TimelineCompactFilterMenu({
+      activeFilterCount: 1,
+      calendarEventFilter: "qa-due",
+      showCalendarFilters: true,
+      onCalendarEventFilterChange: jest.fn(),
+      activePersonFilter: [],
+      bootstrap: EMPTY_BOOTSTRAP,
+      disciplineFilter: [],
+      disciplineFilterOptions: [],
+      isAllProjectsView: false,
+      onChangePersonFilter: jest.fn(),
+      priorityFilter: [],
+      projectFilter: [],
+      setDisciplineFilter: jest.fn(),
+      setPriorityFilter: jest.fn(),
+      setProjectFilter: jest.fn(),
+      setStatusFilter: jest.fn(),
+      setSubsystemFilter: jest.fn(),
+      statusFilter: [],
+      subsystemFilter: [],
+      subsystemFilterOptions: [],
+    }) as React.ReactElement<{
       activeCount: number;
       ariaLabel: string;
       buttonLabel: string;
-      items: Array<{ label: string }>;
-    }>[];
+      inlineItems: boolean;
+      menuTitle?: string;
+      items: Array<{
+        hidden?: boolean;
+        label: string;
+        icon?: React.ReactNode;
+        content?: React.ReactElement<{ compactSummary?: boolean; hideButtonIcon?: boolean; options?: Array<{ id: string; name: string }>; singleSelect?: boolean; value?: string[] }>;
+      }>;
+    }>;
 
-    expect(viewOptionsMenu.type).toBe(CompactFilterMenu);
-    expect(viewOptionsMenu.props.ariaLabel).toBe("Calendar view options");
-    expect(viewOptionsMenu.props.buttonLabel).toBe("View");
-    expect(viewOptionsMenu.props.activeCount).toBe(2);
-    expect(viewOptionsMenu.props.items.map((item) => item.label)).toEqual(["Event type", "Sort by"]);
+    expect(menu.type).toBe(CompactFilterMenu);
+    expect(menu.props.ariaLabel).toBe("Schedule filters");
+    expect(menu.props.buttonLabel).toBe("Filters");
+    expect(menu.props.menuTitle).toBeUndefined();
+    expect(menu.props.inlineItems).toBe(true);
+    expect(
+      menu.props.items.find((item) => item.label === "Roster")?.content?.props.compactSummary,
+    ).toBe(true);
+    expect(menu.props.items.find((item) => item.label === "Roster")?.icon).toBeTruthy();
+    expect(menu.props.items.find((item) => item.label === "Roster")?.content?.props.hideButtonIcon).toBe(true);
+    const eventTypeFilter = menu.props.items.find((item) => item.label === "Event type");
+    expect(eventTypeFilter?.icon).toBeTruthy();
+    expect(eventTypeFilter?.content?.props.singleSelect).toBe(true);
+    expect(eventTypeFilter?.content?.props.value).toEqual(["qa-due"]);
+    expect(eventTypeFilter?.content?.props.options).toEqual(expect.arrayContaining([
+      { id: "milestone", name: "Milestones" },
+      { id: "qa-due", name: "Waiting QA" },
+    ]));
+    expect(menu.props.activeCount).toBe(2);
+    expect(menu.props.items.filter((item) => item.hidden).map((item) => item.label)).toEqual([
+      "Project",
+      "Discipline",
+      "Subsystem",
+      "Status",
+      "Priority",
+    ]);
+    expect(menu.props.items.map((item) => item.label)).toEqual([
+      "Project",
+      "Roster",
+      "Discipline",
+      "Subsystem",
+      "Status",
+      "Priority",
+      "Event type",
+    ]);
+  });
+
+  it("renders calendar sorting as a separate search-bar sort menu", () => {
+    const onChange = jest.fn();
+    const onDirectionChange = jest.fn();
+    const menu = TimelineCalendarSortMenu({ onChange, direction: "asc", onDirectionChange, sortMode: "priority" }) as React.ReactElement<{
+      activeCount: number;
+      ariaLabel: string;
+      items: Array<{
+        label: string;
+        labelControl: React.ReactElement<{ direction: string; onChange: (value: "asc" | "desc") => void }>;
+        content: React.ReactElement<{
+          value: string;
+          onChange: (event: { currentTarget: { value: string } }) => void;
+        }>;
+      }>;
+    }>;
+
+    expect(menu.type).toBe(CompactFilterMenu);
+    expect(menu.props.ariaLabel).toBe("Sort calendar events");
+    expect(menu.props.activeCount).toBe(1);
+    expect(menu.props.items.map((item) => item.label)).toEqual(["Sort by"]);
+    expect(menu.props.items[0].labelControl.props.direction).toBe("asc");
+    menu.props.items[0].labelControl.props.onChange("desc");
+    expect(onDirectionChange).toHaveBeenCalledWith("desc");
+    expect(menu.props.items[0].content.props.value).toBe("priority");
+    menu.props.items[0].content.props.onChange({ currentTarget: { value: "date" } });
+    expect(onChange).toHaveBeenCalledWith("date");
   });
 });

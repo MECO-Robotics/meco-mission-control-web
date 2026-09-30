@@ -67,8 +67,7 @@ export function scopeBootstrapBySelection(
   const scopedTasks = payload.tasks.filter(
     (task) =>
       activeProjectIds.has(task.projectId) &&
-      (scopedSubsystemIds.has(task.subsystemId) ||
-        task.subsystemIds.some((subsystemId) => scopedSubsystemIds.has(subsystemId))),
+      task.subsystemIds.some((subsystemId) => scopedSubsystemIds.has(subsystemId)),
   );
   const scopedTaskIds = new Set(scopedTasks.map((task) => task.id));
   const scopedTaskDependencies = (payload.taskDependencies ?? []).filter((dependency) => {
@@ -125,59 +124,12 @@ export function scopeBootstrapBySelection(
 
     return true;
   });
-  const scopedReportsById = new Map(scopedReports.map((report) => [report.id, report] as const));
+  const scopedReportIds = new Set(scopedReports.map((report) => report.id));
   const scopedReportFindings = payload.reportFindings.filter((finding) =>
-    scopedReports.some((report) => report.id === finding.reportId),
+    scopedReportIds.has(finding.reportId),
   );
-  const scopedQaReports = scopedReports.filter((report) => report.reportType === "QA");
-  const scopedTestResults = scopedReports.filter((report) => report.reportType !== "QA");
-  const scopedQaReportIds = new Set(scopedQaReports.map((report) => report.id));
-  const scopedTestResultIds = new Set(scopedTestResults.map((report) => report.id));
-  const scopedQaFindings = scopedReportFindings
-    .filter((finding) => scopedQaReportIds.has(finding.reportId))
-    .map((finding) => {
-      const report = scopedReportsById.get(finding.reportId);
-      return {
-        id: finding.id,
-        qaReportId: finding.reportId || null,
-        taskId: finding.taskId ?? report?.taskId ?? null,
-        projectId: finding.projectId ?? report?.projectId ?? "",
-        workstreamId: finding.workstreamId ?? report?.workstreamId ?? null,
-        subsystemId: finding.subsystemId ?? null,
-        mechanismId: finding.mechanismId ?? null,
-        partInstanceId: finding.partInstanceId ?? null,
-        artifactId: finding.artifactInstanceId ?? null,
-        title: finding.title ?? finding.issueType,
-        detail: finding.detail ?? finding.notes,
-        severity: finding.severity,
-        status: finding.status ?? "open",
-        createdAt: finding.createdAt ?? new Date().toISOString(),
-        updatedAt: finding.updatedAt ?? finding.createdAt ?? new Date().toISOString(),
-      };
-    });
-  const scopedTestFindings = scopedReportFindings
-    .filter((finding) => scopedTestResultIds.has(finding.reportId))
-    .map((finding) => {
-      const report = scopedReportsById.get(finding.reportId);
-      return {
-        id: finding.id,
-        testResultId: finding.reportId || null,
-        milestoneId: finding.milestoneId ?? report?.milestoneId ?? null,
-        taskId: finding.taskId ?? report?.taskId ?? null,
-        projectId: finding.projectId ?? report?.projectId ?? "",
-        workstreamId: finding.workstreamId ?? report?.workstreamId ?? null,
-        subsystemId: finding.subsystemId ?? null,
-        mechanismId: finding.mechanismId ?? null,
-        partInstanceId: finding.partInstanceId ?? null,
-        artifactId: finding.artifactInstanceId ?? null,
-        title: finding.title ?? finding.issueType,
-        detail: finding.detail ?? finding.notes,
-        severity: finding.severity,
-        status: finding.status ?? "open",
-        createdAt: finding.createdAt ?? new Date().toISOString(),
-        updatedAt: finding.updatedAt ?? finding.createdAt ?? new Date().toISOString(),
-      };
-    });
+  const scopedQaReportIds = new Set(scopedReports.filter((report) => report.reportType === "QA").map((report) => report.id));
+  const scopedTestResultIds = new Set(scopedReports.filter((report) => report.reportType !== "QA").map((report) => report.id));
   const scopedRisks = scopeBootstrapRisks(
     payload,
     activeProjectIds,
@@ -232,10 +184,6 @@ export function scopeBootstrapBySelection(
     workLogs: scopedWorkLogs,
     reports: scopedReports,
     reportFindings: scopedReportFindings,
-    qaReports: scopedQaReports,
-    testResults: scopedTestResults,
-    qaFindings: scopedQaFindings,
-    testFindings: scopedTestFindings,
     risks: scopedRisks,
     taskDependencies: scopedTaskDependencies,
     taskBlockers: scopedTaskBlockers,

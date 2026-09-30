@@ -1,16 +1,18 @@
 import type { ChangeEvent, CSSProperties, Dispatch, SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskPayload } from "@/types/payloads";
+import type { TaskPayload } from "@/types/payloads/task";
 import type { TaskRecord } from "@/types/recordsExecution";
+import { getWorkspaceFilterToneClassName } from "@/features/workspace/shared/filters/workspaceFilterTone";
 import { getTimelineTaskDisciplineColor } from "@/features/workspace/views/timeline/model/timelineTaskColors";
 import {
+  getTaskPartInstanceLabel,
   getTaskSelectedMechanismIds,
   getTaskSelectedPartInstanceIds,
 } from "../../../../shared/task/taskTargeting";
 import { formatIterationVersion } from "@/lib/appUtils/common";
 import { getTaskDisciplinesForProject } from "@/lib/taskDisciplines";
 import type { TaskDetailsEditableField } from "../../taskModalTypes";
-import { formatRiskSeverity } from "@/features/workspace/views/riskViewModel";
+import { formatRiskSeverity } from "@/features/workspace/views/riskViewData/riskViewDataPayload";
 
 interface UseTaskDetailsAdvancedSectionModelArgs {
   activeTask: TaskRecord;
@@ -46,7 +48,7 @@ export function useTaskDetailsAdvancedSectionModel({
   const risksById = Object.fromEntries(
     bootstrap.risks.map((risk) => [risk.id, risk] as const),
   ) as Record<string, BootstrapPayload["risks"][number]>;
-  const selectedPrimaryTargetId = editableTask.subsystemIds[0] ?? editableTask.subsystemId ?? "";
+  const selectedPrimaryTargetId = editableTask.subsystemIds[0] ?? "";
   const projectMechanisms = bootstrap.mechanisms.filter(
     (mechanism) => mechanism.subsystemId === selectedPrimaryTargetId,
   );
@@ -57,16 +59,8 @@ export function useTaskDetailsAdvancedSectionModel({
   const selectedPartInstanceIds = getTaskSelectedPartInstanceIds(editableTask);
   const getMechanismLabel = (mechanism: BootstrapPayload["mechanisms"][number]) =>
     `${mechanism.name} (${formatIterationVersion(mechanism.iteration)})`;
-  const getPartInstanceLabel = (partInstance: BootstrapPayload["partInstances"][number]) => {
-    const partDefinition = partDefinitionsById[partInstance.partDefinitionId];
-    const partDefinitionLabel = partDefinition
-      ? `${partDefinition.name} (${formatIterationVersion(partDefinition.iteration)})`
-      : null;
-
-    return partDefinitionLabel
-      ? `${partInstance.name} (${partDefinitionLabel})`
-      : partInstance.name;
-  };
+  const getPartInstanceLabel = (partInstance: BootstrapPayload["partInstances"][number]) =>
+    getTaskPartInstanceLabel(partInstance, partDefinitionsById, formatIterationVersion);
   const disciplineText = editableTask.disciplineId
     ? availableDisciplines.find((discipline) => discipline.id === editableTask.disciplineId)?.name ??
       "Not set"
@@ -77,25 +71,10 @@ export function useTaskDetailsAdvancedSectionModel({
   const disciplinePillStyle = {
     "--task-detail-pill-accent": disciplineAccentColor ?? undefined,
   } as CSSProperties;
-  const getStableToneClassName = (value: string) => {
-    const filterToneClasses = [
-      "filter-tone-info",
-      "filter-tone-success",
-      "filter-tone-warning",
-      "filter-tone-danger",
-      "filter-tone-neutral",
-    ] as const;
-    let hash = 0;
-    for (let index = 0; index < value.length; index += 1) {
-      hash = (hash * 31 + value.charCodeAt(index)) >>> 0;
-    }
-
-    return filterToneClasses[hash % filterToneClasses.length];
-  };
   const getDisciplineOptionToneClassName = (option: { id: string }) =>
-    getStableToneClassName(option.id);
+    getWorkspaceFilterToneClassName(option.id);
   const getSubsystemOptionToneClassName = (option: { id: string }) =>
-    getStableToneClassName(option.id);
+    getWorkspaceFilterToneClassName(option.id);
   const disciplinePillClassName = "pill task-detail-discipline-pill";
   const mechanismNames = selectedMechanismIds
     .map((mechanismId) => mechanismsById[mechanismId])
@@ -167,7 +146,6 @@ export function useTaskDetailsAdvancedSectionModel({
     setTaskDraft?.((current) => ({
       ...current,
       mechanismIds: selection,
-      mechanismId: selection[0] ?? null,
     }));
   };
 
@@ -186,7 +164,6 @@ export function useTaskDetailsAdvancedSectionModel({
       return {
         ...current,
         mechanismIds: updatedMechanismIds,
-        mechanismId: updatedMechanismIds[0] ?? null,
       };
     });
   };
@@ -200,7 +177,6 @@ export function useTaskDetailsAdvancedSectionModel({
       return {
         ...current,
         mechanismIds: nextMechanismIds,
-        mechanismId: nextMechanismIds[0] ?? null,
       };
     });
   };
@@ -209,7 +185,6 @@ export function useTaskDetailsAdvancedSectionModel({
     setTaskDraft?.((current) => ({
       ...current,
       partInstanceIds: selection,
-      partInstanceId: selection[0] ?? null,
     }));
   };
 
@@ -228,7 +203,6 @@ export function useTaskDetailsAdvancedSectionModel({
       return {
         ...current,
         partInstanceIds: updatedPartInstanceIds,
-        partInstanceId: updatedPartInstanceIds[0] ?? null,
       };
     });
   };
@@ -242,7 +216,6 @@ export function useTaskDetailsAdvancedSectionModel({
       return {
         ...current,
         partInstanceIds: nextPartInstanceIds,
-        partInstanceId: nextPartInstanceIds[0] ?? null,
       };
     });
   };

@@ -92,7 +92,6 @@ describe("TaskEditorModal", () => {
       "create",
       {
         projectId: "project-2",
-        subsystemId: "subsystem-2",
         subsystemIds: ["subsystem-2"],
         disciplineId: "photography",
       },

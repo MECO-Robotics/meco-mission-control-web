@@ -62,18 +62,15 @@ function createBootstrap(): BootstrapPayload {
     ],
     tasks: [
       {
+        artifactIds: [],
         id: "task-1",
         projectId: "project-1",
-        workstreamId: null,
         workstreamIds: [],
         title: "Frame rail layout",
         summary: "",
-        subsystemId: "subsystem-1",
         subsystemIds: ["subsystem-1"],
         disciplineId: "discipline-1",
-        mechanismId: null,
         mechanismIds: [],
-        partInstanceId: null,
         partInstanceIds: [],
         targetMilestoneId: null,
         ownerId: "member-1",
@@ -95,17 +92,6 @@ function createBootstrap(): BootstrapPayload {
     ],
   };
 }
-
-const membersById = {
-  "member-1": {
-    id: "member-1",
-    name: "Ada",
-    email: "ada@example.com",
-    role: "lead" as const,
-    elevated: true,
-    seasonId: "season-1",
-  },
-};
 
 describe("TimelineView interactions", () => {
   afterEach(() => {
@@ -150,7 +136,6 @@ describe("TimelineView interactions", () => {
           isAllProjectsView: false,
           activePersonFilter: [],
           setActivePersonFilter: jest.fn(),
-          membersById,
           openTaskDetailModal,
           openCreateTaskModal: jest.fn(),
           onDeleteTimelineMilestone: jest.fn(),
@@ -224,6 +209,21 @@ describe("TimelineView interactions", () => {
     expect(toolbarSource).toContain("onClick={() => openIntervalSwitch({ focusOptions: true })}");
     expect(toolbarSource).toContain("onKeyDown={handleIntervalPillKeyDown}");
     expect(toolbarSource).toContain('compactSwitchWidth={220}');
+    expect(toolbarSource.indexOf('className={`timeline-period-controls')).toBeLessThan(
+      toolbarSource.indexOf('className={`timeline-interval-switch'),
+    );
+    expect(toolbarSource).toContain('aria-label={viewInterval === "all" ? "Timeline view controls" : "Timeline period controls"}');
+  });
+
+  it("keeps the date range compact and renders navigation as icon-only controls", () => {
+    const toolbarStyles = readFileSync(
+      join(process.cwd(), "src/app/styles/shell/timeline/timeline-toolbar-controls.css"),
+      "utf8",
+    );
+
+    expect(toolbarStyles).toMatch(/\.timeline-topbar-controls\s*\{[^}]*gap:\s*0\.12rem;/);
+    expect(toolbarStyles).toMatch(/\.timeline-period-button\.icon-button\s*\{[^}]*border:\s*0;[^}]*background:\s*transparent;/);
+    expect(toolbarStyles).toMatch(/\.timeline-period-controls\s*\{[^}]*padding:\s*0\.06rem 0\.1rem;/);
   });
 
   it("moves keyboard focus into interval options after expanding the switch", () => {

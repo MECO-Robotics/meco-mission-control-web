@@ -12,8 +12,6 @@ import type {
   InventoryViewTab,
   ManufacturingViewTab,
   NavigationTarget,
-  RosterViewTab,
-  RiskManagementViewTab,
   TaskViewTab,
   ViewTab,
   WorklogsViewTab,
@@ -48,7 +46,6 @@ function getSwipeDirection<T extends string>(
 }
 
 export interface WorkspaceContentProps {
-  currentMemberId?: string | null;
   activePersonFilter: FilterSelection;
   activeTab: ViewTab;
   tabSwitchDirection: TabSwitchDirection;
@@ -56,10 +53,8 @@ export interface WorkspaceContentProps {
   artifacts: ArtifactRecord[];
   availabilityBootstrap: BootstrapPayload;
   bootstrap: BootstrapPayload;
-  cncItems: ManufacturingItemRecord[];
   disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
   externalMembers: BootstrapPayload["members"];
-  fabricationItems: ManufacturingItemRecord[];
   handleCreateMember: (milestone: React.FormEvent<HTMLFormElement>) => void;
   handleReactivateMemberForSeason: (memberId: string) => Promise<void>;
   handleDeleteMember: (id: string) => void;
@@ -73,7 +68,6 @@ export interface WorkspaceContentProps {
   ) => Promise<void>;
   handleUpdateMember: (milestone: React.FormEvent<HTMLFormElement>) => void;
   isAddPersonOpen: boolean;
-  isActivityModalOpen: boolean;
   isDeletingMember: boolean;
   isEditPersonOpen: boolean;
   isLoadingData: boolean;
@@ -101,7 +95,6 @@ export interface WorkspaceContentProps {
   openCreateMilestoneReportModal: (milestoneId?: string, onReturn?: () => void) => void;
   openCreateWorkstreamModal: () => void;
   openEditWorkstreamModal: (workstream: BootstrapPayload["workstreams"][number]) => void;
-  onCreateRisk: (payload: RiskPayload) => Promise<void>;
   onDeleteRisk: (riskId: string) => Promise<void>;
   onCncQuickStatusChange: (
     item: ManufacturingItemRecord,
@@ -133,19 +126,15 @@ export interface WorkspaceContentProps {
   openTimelineTaskDetailsModal: (task: TaskRecord) => void;
   onUpdateRisk: (riskId: string, payload: RiskPayload) => Promise<void>;
   partDefinitionsById: Record<string, BootstrapPayload["partDefinitions"][number]>;
-  printItems: ManufacturingItemRecord[];
   rosterMentors: BootstrapPayload["members"];
   showCncMentorQuickActions: boolean;
   manufacturingView: ManufacturingViewTab;
   setActiveTab: Dispatch<SetStateAction<ViewTab>>;
   setInventoryView: Dispatch<SetStateAction<InventoryViewTab>>;
   setManufacturingView: Dispatch<SetStateAction<ManufacturingViewTab>>;
-  setRiskManagementView: Dispatch<SetStateAction<RiskManagementViewTab>>;
   setTaskView: Dispatch<SetStateAction<TaskViewTab>>;
   setWorklogsView: Dispatch<SetStateAction<WorklogsViewTab>>;
   inventoryView: InventoryViewTab;
-  rosterView: RosterViewTab;
-  riskManagementView: RiskManagementViewTab;
   taskView: TaskViewTab;
   worklogsView: WorklogsViewTab;
   selectMember: (id: string | null, payload: BootstrapPayload) => void;
@@ -155,7 +144,6 @@ export interface WorkspaceContentProps {
   requestMemberPhotoUpload: (file: File) => Promise<string>;
   setActivePersonFilter: (value: FilterSelection) => void;
   setIsAddPersonOpen: (open: boolean) => void;
-  setIsActivityModalOpen: (open: boolean) => void;
   setIsEditPersonOpen: (open: boolean) => void;
   setMemberEditDraft: Dispatch<SetStateAction<MemberPayload | null>>;
   setMemberForm: Dispatch<SetStateAction<MemberPayload>>;
@@ -191,7 +179,6 @@ export function WorkspaceContent({
   setActiveTab,
   setInventoryView,
   setManufacturingView,
-  setRiskManagementView,
   setTaskView,
   setWorklogsView,
   taskView,
@@ -274,7 +261,6 @@ export function WorkspaceContent({
       setActiveTab={setActiveTab}
       setInventoryView={setInventoryView}
       setManufacturingView={setManufacturingView}
-      setRiskManagementView={setRiskManagementView}
       setTaskView={setTaskView}
       setWorklogsView={setWorklogsView}
     />

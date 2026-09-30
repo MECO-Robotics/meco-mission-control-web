@@ -1,5 +1,5 @@
 import type { OpenEditTaskModalOptions } from "@/types/taskEditIntent";
-import type { TaskPayload } from "@/types/payloads";
+import type { TaskPayload } from "@/types/payloads/task";
 
 function createDraftRelationId(prefix: string) {
   return typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"

@@ -5,7 +5,6 @@ import {
   getManufacturingDraftPartInstanceIds,
   getManufacturingMaterialFromPart,
   getPreferredManufacturingPartInstance,
-  getSubsystemManufacturingPartInstance,
 } from "./partSelection";
 import { normalizeManufacturingPartInstanceSelection } from "./selection";
 
@@ -55,58 +54,6 @@ export function inferManufacturingDraftFromPartSelection(
   );
 }
 
-export function inferManufacturingDraftFromSubsystemSelection(
-  bootstrap: BootstrapPayload,
-  draft: ManufacturingItemPayload,
-  subsystemId: string,
-): ManufacturingItemPayload {
-  const partInstance = getSubsystemManufacturingPartInstance(
-    bootstrap,
-    draft.partDefinitionId,
-    subsystemId,
-  );
-
-  return normalizeManufacturingPartInstanceSelection(
-    bootstrap,
-    {
-      ...draft,
-      subsystemId,
-    },
-    uniqueIds([partInstance?.id]),
-  );
-}
-
-export function inferManufacturingDraftFromPartInstanceSelection(
-  bootstrap: BootstrapPayload,
-  draft: ManufacturingItemPayload,
-  partInstanceId: string,
-): ManufacturingItemPayload {
-  const partInstance = bootstrap.partInstances.find((item) => item.id === partInstanceId) ?? null;
-  if (!partInstance) {
-    return {
-      ...draft,
-      partInstanceId: null,
-      partInstanceIds: [],
-    };
-  }
-
-  const partDefinition =
-    bootstrap.partDefinitions.find((part) => part.id === partInstance.partDefinitionId) ?? null;
-  const material = getManufacturingMaterialFromPart(bootstrap, partDefinition);
-
-  return normalizeManufacturingPartInstanceSelection(
-    bootstrap,
-    {
-      ...draft,
-      title: partDefinition?.name ?? draft.title,
-      material: material?.name ?? "",
-      materialId: material?.id ?? null,
-      partDefinitionId: partDefinition?.id ?? draft.partDefinitionId,
-    },
-    [partInstance.id],
-  );
-}
-
 export function toggleManufacturingDraftPartInstanceSelection(
   bootstrap: BootstrapPayload,
   draft: ManufacturingItemPayload,
@@ -140,29 +87,4 @@ export function toggleManufacturingDraftPartInstanceSelection(
     },
     nextPartInstanceIds,
   );
-}
-
-export function inferManufacturingDraftFromProcessSelection(
-  bootstrap: BootstrapPayload,
-  draft: ManufacturingItemPayload,
-  process: ManufacturingItemPayload["process"],
-): ManufacturingItemPayload {
-  const nextDraft = {
-    ...draft,
-    process,
-    inHouse: process === "cnc" ? draft.inHouse ?? true : false,
-  };
-
-  if (nextDraft.partDefinitionId) {
-    return inferManufacturingDraftFromPartSelection(
-      bootstrap,
-      nextDraft,
-      nextDraft.partDefinitionId,
-    );
-  }
-
-  const defaultPartDefinition = bootstrap.partDefinitions[0] ?? null;
-  return defaultPartDefinition
-    ? inferManufacturingDraftFromPartSelection(bootstrap, nextDraft, defaultPartDefinition.id)
-    : nextDraft;
 }

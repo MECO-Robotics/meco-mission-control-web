@@ -1,6 +1,10 @@
 import { useMemo } from "react";
 
-import type { CadImportWarningRecord, CadSnapshotDiffStatus, OnshapeOverview } from "../model/cadIntegrationTypes";
+import type {
+  CadImportWarningRecord,
+  CadSnapshotDiffStatus,
+  OnshapeOverview
+} from "../model/onshapeCadTypes";
 import {
   getCadConfigurationLifecycleCopy,
   getCadConfigurationSourceCopy,

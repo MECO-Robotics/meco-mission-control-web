@@ -12,7 +12,7 @@ import {
 import { APP_TOPBAR_SLOT_IDS } from "./AppTopbarSlotPortal";
 
 interface AppTopbarProps {
-  activeViewLabel: string;
+  activeViewLabel?: string | null;
   isDarkMode: boolean;
   isSidebarCollapsed: boolean;
 }
@@ -52,15 +52,18 @@ export function AppTopbar({
           src={topbarLogo.src}
         />
       </div>
-      <div className="app-topbar-left">
-        <div className="app-topbar-view-title">
-          <h1>{activeViewLabel}</h1>
+      {activeViewLabel ? (
+        <div className="app-topbar-left">
+          <div className="app-topbar-view-title">
+            <h1>{activeViewLabel}</h1>
+          </div>
         </div>
-      </div>
+      ) : null}
       <div className="app-topbar-search-slot">
-        <div className="app-topbar-controls-host" id={APP_TOPBAR_SLOT_IDS.controls} />
         <div className="app-topbar-search-host" id={APP_TOPBAR_SLOT_IDS.search} />
-
+        <div className="app-topbar-controls-host" id={APP_TOPBAR_SLOT_IDS.controls} />
+        <div className="app-topbar-zoom-host" id={APP_TOPBAR_SLOT_IDS.zoom} />
+        <div className="app-topbar-add-host" id={APP_TOPBAR_SLOT_IDS.add} />
       </div>
     </header>
   );

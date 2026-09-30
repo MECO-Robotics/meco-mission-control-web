@@ -1,18 +1,52 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { AttentionTriageItem } from "./attentionViewTypes";
+import type { AttentionTriageGroup, AttentionTriageItem } from "./attentionViewTypes";
+import type { AttentionLookup } from "./attentionActionNowShared";
+import { ATTENTION_DUE_SOON_DAYS } from "./attentionViewHelpers";
 import {
   formatContextLabel,
   formatOwnerLabel,
   normalizeDateOnly,
 } from "./attentionViewHelpers";
 
-interface AttentionLookup {
-  membersById: Record<string, BootstrapPayload["members"][number]>;
-  projectsById: Record<string, BootstrapPayload["projects"][number]>;
-  subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
-  tasksById: Record<string, BootstrapPayload["tasks"][number]>;
-  taskByReportId: Map<string, BootstrapPayload["tasks"][number]>;
-  workstreamsById: Record<string, BootstrapPayload["workstreams"][number]>;
+export type { AttentionLookup } from "./attentionActionNowShared";
+
+export function buildAttentionTriageGroups({
+  blockedTasks,
+  criticalRisks,
+  dueSoonTasks,
+  highRisks,
+  manufacturingItems,
+  overdueTasks,
+  purchaseItems,
+  reportItems,
+  staleTasks,
+  waitingQaTasks,
+  lookup,
+}: {
+  blockedTasks: BootstrapPayload["tasks"];
+  criticalRisks: BootstrapPayload["risks"];
+  dueSoonTasks: BootstrapPayload["tasks"];
+  highRisks: BootstrapPayload["risks"];
+  manufacturingItems: AttentionTriageItem[];
+  overdueTasks: BootstrapPayload["tasks"];
+  purchaseItems: AttentionTriageItem[];
+  reportItems: AttentionTriageItem[];
+  staleTasks: BootstrapPayload["tasks"];
+  waitingQaTasks: BootstrapPayload["tasks"];
+  lookup: AttentionLookup;
+}): AttentionTriageGroup[] {
+  return [
+    { emptyLabel: "No critical risks in scope.", id: "critical-risks", items: buildRiskTriageItems(criticalRisks, lookup), title: "Critical risks" },
+    { emptyLabel: "No high risks in scope.", id: "high-risks", items: buildRiskTriageItems(highRisks, lookup), title: "High risks" },
+    { emptyLabel: "No blocked tasks in scope.", id: "blocked-tasks", items: buildTaskTriageItems(blockedTasks, "Blocked", lookup), title: "Blocked tasks" },
+    { emptyLabel: "No tasks waiting QA in scope.", id: "waiting-qa", items: buildTaskTriageItems(waitingQaTasks, "Waiting QA", lookup), title: "Waiting for QA" },
+    { emptyLabel: "No stale tasks in scope.", id: "stale-tasks", items: buildTaskTriageItems(staleTasks, "Stale", lookup), title: "Stale tasks" },
+    { emptyLabel: "No tasks due soon in scope.", id: "due-soon", items: buildTaskTriageItems(dueSoonTasks, `Due <= ${ATTENTION_DUE_SOON_DAYS} days`, lookup), title: "Tasks due soon" },
+    { emptyLabel: "No overdue tasks in scope.", id: "overdue", items: buildTaskTriageItems(overdueTasks, "Overdue", lookup), title: "Overdue tasks" },
+    { emptyLabel: "No manufacturing blockers in scope.", id: "manufacturing-blockers", items: manufacturingItems, title: "Manufacturing blockers" },
+    { emptyLabel: "No purchase delays in scope.", id: "purchase-delays", items: purchaseItems, title: "Purchase delays" },
+    { emptyLabel: "No recent failed QA/report signals.", id: "failed-reports", items: reportItems, title: "Recently failed QA / reports" },
+  ];
 }
 
 export function buildRiskTriageItems(
@@ -33,9 +67,9 @@ export function buildRiskTriageItems(
     const sourceTask = taskByReportId.get(risk.sourceId);
     const taskContext = mitigationTask ?? sourceTask;
     const projectName = taskContext ? projectsById[taskContext.projectId]?.name : undefined;
-    const workstreamId = taskContext?.workstreamId ?? taskContext?.workstreamIds[0] ?? null;
+    const workstreamId = taskContext?.workstreamIds[0] ?? null;
     const workstreamName = workstreamId ? workstreamsById[workstreamId]?.name : undefined;
-    const subsystemName = taskContext ? subsystemsById[taskContext.subsystemId]?.name : undefined;
+    const subsystemName = taskContext ? subsystemsById[taskContext.subsystemIds[0] ?? ""]?.name : undefined;
 
     return {
       actionType: "open-risk",
@@ -62,13 +96,13 @@ export function buildTaskTriageItems(
   const { membersById, projectsById, subsystemsById, workstreamsById } = lookup;
 
   return rows.map<AttentionTriageItem>((task) => {
-    const workstreamId = task.workstreamId ?? task.workstreamIds[0] ?? null;
+    const workstreamId = task.workstreamIds[0] ?? null;
 
     return {
       actionType: "open-task",
       contextLabel: formatContextLabel({
         projectName: projectsById[task.projectId]?.name,
-        subsystemName: subsystemsById[task.subsystemId]?.name,
+        subsystemName: subsystemsById[task.subsystemIds[0] ?? ""]?.name,
         workstreamName: workstreamId ? workstreamsById[workstreamId]?.name : undefined,
       }),
       id: `task-${task.id}`,
@@ -83,50 +117,49 @@ export function buildTaskTriageItems(
   });
 }
 
-export function buildManufacturingTriageItems(
-  rows: BootstrapPayload["manufacturingItems"],
+type SupplyTriageRecord = Pick<BootstrapPayload["manufacturingItems"][number], "id" | "requestedById" | "subsystemId" | "title"> & { status: string };
+
+function buildSupplyTriageItems<T extends SupplyTriageRecord>(
+  rows: T[],
   lookup: AttentionLookup,
+  kind: "manufacturing" | "purchase",
+  severityLabel: (item: T) => string,
+  subtitle: (item: T) => string,
 ) {
   const { membersById, projectsById, subsystemsById } = lookup;
 
-  return rows.map<AttentionTriageItem>((item) => ({
+  return rows.map((item) => ({
     actionType: null,
     contextLabel: formatContextLabel({
       projectName: projectsById[subsystemsById[item.subsystemId]?.projectId]?.name,
       subsystemName: subsystemsById[item.subsystemId]?.name,
     }),
-    id: `manufacturing-${item.id}`,
-    kind: "manufacturing",
+    id: `${kind}-${item.id}`,
+    kind,
     ownerLabel: formatOwnerLabel(item.requestedById ? membersById[item.requestedById]?.name : null),
     recordId: item.id,
-    severityLabel: item.mentorReviewed ? "Watch" : "Needs review",
+    severityLabel: severityLabel(item),
     statusLabel: item.status,
-    subtitle: `Due ${normalizeDateOnly(item.dueDate)} | Qty ${item.quantity}`,
+    subtitle: subtitle(item),
     title: item.title,
   }));
+}
+
+export function buildManufacturingTriageItems(
+  rows: BootstrapPayload["manufacturingItems"],
+  lookup: AttentionLookup,
+) {
+  return buildSupplyTriageItems(rows, lookup, "manufacturing",
+    (item) => item.mentorReviewed ? "Watch" : "Needs review",
+    (item) => `Due ${normalizeDateOnly(item.dueDate)} | Qty ${item.quantity}`);
 }
 
 export function buildPurchaseTriageItems(
   rows: BootstrapPayload["purchaseItems"],
   lookup: AttentionLookup,
 ) {
-  const { membersById, projectsById, subsystemsById } = lookup;
-
-  return rows.map<AttentionTriageItem>((item) => ({
-    actionType: null,
-    contextLabel: formatContextLabel({
-      projectName: projectsById[subsystemsById[item.subsystemId]?.projectId]?.name,
-      subsystemName: subsystemsById[item.subsystemId]?.name,
-    }),
-    id: `purchase-${item.id}`,
-    kind: "purchase",
-    ownerLabel: formatOwnerLabel(item.requestedById ? membersById[item.requestedById]?.name : null),
-    recordId: item.id,
-    severityLabel: "Supply",
-    statusLabel: item.status,
-    subtitle: `${item.vendor || "Vendor unknown"} | Qty ${item.quantity}`,
-    title: item.title,
-  }));
+  return buildSupplyTriageItems(rows, lookup, "purchase", () => "Supply",
+    (item) => `${item.vendor || "Vendor unknown"} | Qty ${item.quantity}`);
 }
 
 export function buildReportTriageItems({
@@ -146,7 +179,7 @@ export function buildReportTriageItems({
     ...failedReports.map<AttentionTriageItem>((report) => {
       const task = report.taskId ? tasksById[report.taskId] : null;
       const projectName = report.projectId ? projectsById[report.projectId]?.name : undefined;
-      const subsystemName = task ? subsystemsById[task.subsystemId]?.name : undefined;
+      const subsystemName = task ? subsystemsById[task.subsystemIds[0] ?? ""]?.name : undefined;
 
       return {
         actionType: task ? "open-task" : null,
@@ -175,7 +208,7 @@ export function buildReportTriageItems({
           ? projectsById[subsystemsById[sourceManufacturing.subsystemId]?.projectId]?.name
           : undefined;
       const subsystemName = sourceTask
-        ? subsystemsById[sourceTask.subsystemId]?.name
+        ? subsystemsById[sourceTask.subsystemIds[0] ?? ""]?.name
         : sourceManufacturing
           ? subsystemsById[sourceManufacturing.subsystemId]?.name
           : undefined;

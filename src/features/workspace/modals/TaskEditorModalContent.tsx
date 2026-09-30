@@ -1,9 +1,9 @@
 import { useCallback, useLayoutEffect, useRef, type Dispatch, type FormEvent, type SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskPayload } from "@/types/payloads";
+import type { TaskPayload } from "@/types/payloads/task";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { TaskDetailsModal } from "./TaskDetailsModalContent";
-import { TaskEditorAdvancedMediaSection } from "./task/editorAdvanced/TaskEditorAdvancedMediaSection";
+import { PhotoUploadField } from "../shared/media/PhotoUploadField";
 import { TaskEditorCreateMetadataSection } from "./task/TaskEditorCreateMetadataSection";
 import { TaskEditorCreateProjectSection } from "./task/TaskEditorCreateProjectSection";
 
@@ -12,17 +12,10 @@ interface TaskEditorModalProps {
   bootstrap: BootstrapPayload;
   closeTaskModal: () => void;
   advancedSectionOpen: boolean;
-  disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
-  milestonesById: Record<string, BootstrapPayload["milestones"][number]>;
-  handleDeleteTask: (taskId: string) => Promise<void>;
   handleResolveTaskBlocker: (blockerId: string) => Promise<void>;
   handleTaskSubmit: (milestone: FormEvent<HTMLFormElement>) => void;
   isDeletingTask: boolean;
   isSavingTask: boolean;
-  mechanismsById: Record<string, BootstrapPayload["mechanisms"][number]>;
-  mentors: BootstrapPayload["members"];
-  partDefinitionsById: Record<string, BootstrapPayload["partDefinitions"][number]>;
-  partInstancesById: Record<string, BootstrapPayload["partInstances"][number]>;
   students: BootstrapPayload["members"];
   requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   openTaskDetailsModal: (task: TaskRecord) => void;
@@ -36,39 +29,13 @@ interface TaskEditorModalProps {
 }
 
 function buildDraftTaskRecord(taskDraft: TaskPayload, activeTask: TaskRecord | null): TaskRecord {
+  const { taskBlockers, taskDependencies, ...recordDraft } = taskDraft;
+  void taskDependencies;
+
   return {
+    ...recordDraft,
     id: activeTask?.id ?? "__new-task__",
-    projectId: taskDraft.projectId,
-    workstreamId: taskDraft.workstreamId,
-    workstreamIds: taskDraft.workstreamIds,
-    title: taskDraft.title,
-    summary: taskDraft.summary,
-    subsystemId: taskDraft.subsystemId,
-    subsystemIds: taskDraft.subsystemIds,
-    disciplineId: taskDraft.disciplineId,
-    mechanismId: taskDraft.mechanismId,
-    mechanismIds: taskDraft.mechanismIds,
-    partInstanceId: taskDraft.partInstanceId,
-    partInstanceIds: taskDraft.partInstanceIds,
-    artifactId: taskDraft.artifactId,
-    artifactIds: taskDraft.artifactIds,
-    targetRiskId: taskDraft.targetRiskId,
-    targetMilestoneId: taskDraft.targetMilestoneId,
-    photoUrl: taskDraft.photoUrl,
-    ownerId: taskDraft.ownerId,
-    assigneeIds: taskDraft.assigneeIds,
-    mentorId: taskDraft.mentorId,
-    startDate: taskDraft.startDate,
-    dueDate: taskDraft.dueDate,
-    priority: taskDraft.priority,
-    status: taskDraft.status,
-    blockers: (taskDraft.taskBlockers ?? []).map((blocker) => blocker.description),
-    linkedManufacturingIds: taskDraft.linkedManufacturingIds,
-    linkedPurchaseIds: taskDraft.linkedPurchaseIds,
-    estimatedHours: taskDraft.estimatedHours,
-    actualHours: taskDraft.actualHours,
-    requiresDocumentation: taskDraft.requiresDocumentation,
-    documentationLinked: taskDraft.documentationLinked,
+    blockers: (taskBlockers ?? []).map((blocker) => blocker.description),
   };
 }
 
@@ -179,47 +146,22 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
     handleTaskSubmit(milestone);
   };
 
-  if (isEditTaskModal && activeTask) {
-    return (
-      <form className="task-editor-modal" onSubmit={handleTaskSubmit}>
-        <fieldset disabled={isBusy} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
-        <TaskDetailsModal
-          activeTask={activeTask}
-          bootstrap={bootstrap}
-          closeTaskDetailsModal={handleTaskEditClosed}
-          advancedSectionOpen={advancedSectionOpen}
-          footerActions={
-            <TaskEditorFooterActions
-              canSubmit={!isSavingTask && !isDeletingTask}
-              isSaving={isSavingTask}
-              onCancel={handleTaskEditCancel}
-              saveLabel="Save changes"
-              savingLabel="Saving..."
-            />
-          }
-          onEditTask={() => undefined}
-          onResolveTaskBlocker={resolveBlockerWhenIdle}
-          setAdvancedSectionOpen={setAdvancedSectionOpen}
-          setTaskDraft={updateDraftWhenIdle}
-          showDependencyBlockersSection
-          showEditButton={false}
-          taskDraft={taskDraft}
-        />
-        </fieldset>
-      </form>
-    );
-  }
+  const taskRecord = isCreateTaskModal ? createTaskRecord : isEditTaskModal ? activeTask : null;
 
-  if (createTaskRecord) {
-    return (
-      <form className="task-editor-modal task-editor-create-modal" onSubmit={handleCreateTaskSubmit}>
-        <fieldset disabled={isBusy} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
+  if (!taskRecord) return null;
+
+  return (
+    <form
+      className={`task-editor-modal${isCreateTaskModal ? " task-editor-create-modal" : ""}`}
+      onSubmit={isCreateTaskModal ? handleCreateTaskSubmit : handleTaskSubmit}
+    >
+      <fieldset disabled={isBusy} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
         <TaskDetailsModal
-          activeTask={createTaskRecord}
+          activeTask={taskRecord}
           bootstrap={bootstrap}
-          closeTaskDetailsModal={closeWhenIdle}
+          closeTaskDetailsModal={isCreateTaskModal ? closeWhenIdle : handleTaskEditClosed}
           advancedSectionOpen={advancedSectionOpen}
-          beforeOverviewContent={
+          beforeOverviewContent={isCreateTaskModal ? (
             <>
               <TaskEditorCreateProjectSection
                 bootstrap={bootstrap}
@@ -227,7 +169,8 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
                 setTaskDraft={updateDraftWhenIdle}
                 taskDraft={taskDraft}
               />
-              <TaskEditorAdvancedMediaSection
+              <PhotoUploadField
+                label="Task photo"
                 currentUrl={taskDraft.photoUrl}
                 onChange={(value) =>
                   updateDraftWhenIdle((current) => ({ ...current, photoUrl: value }))
@@ -243,25 +186,25 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
                 }}
               />
             </>
-          }
-          beforeFooterContent={
+          ) : undefined}
+          beforeFooterContent={isCreateTaskModal ? (
             <TaskEditorCreateMetadataSection
               setTaskDraft={updateDraftWhenIdle}
               taskDraft={taskDraft}
             />
-          }
-          dependencyTargetProjectId={taskDraft.projectId}
-          editableMemberOptions={props.students}
-          eyebrowLabel="Create Task Details"
+          ) : undefined}
+          dependencyTargetProjectId={isCreateTaskModal ? taskDraft.projectId : undefined}
+          editableMemberOptions={isCreateTaskModal ? props.students : undefined}
+          eyebrowLabel={isCreateTaskModal ? "Create Task Details" : undefined}
           footerActions={
             <TaskEditorFooterActions
-              canSubmit={canCreateTask && !isSavingTask && !isDeletingTask}
+              canSubmit={!isBusy && (!isCreateTaskModal || canCreateTask)}
               isSaving={isSavingTask}
-              onCancel={closeWhenIdle}
-              onSwitchCreateTypeToMilestone={showCreateTypeToggle && onSwitchCreateTypeToMilestone
+              onCancel={isCreateTaskModal ? closeWhenIdle : handleTaskEditCancel}
+              onSwitchCreateTypeToMilestone={isCreateTaskModal && showCreateTypeToggle && onSwitchCreateTypeToMilestone
                 ? () => { if (!busyRef.current) onSwitchCreateTypeToMilestone(); }
                 : undefined}
-              saveLabel="Create task"
+              saveLabel={isCreateTaskModal ? "Create task" : "Save changes"}
               savingLabel="Saving..."
             />
           }
@@ -270,14 +213,11 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
           onResolveTaskBlocker={resolveBlockerWhenIdle}
           setAdvancedSectionOpen={setAdvancedSectionOpen}
           setTaskDraft={updateDraftWhenIdle}
-          showDependencyBlockersSection
+          showDependencyBlockersSection={isEditTaskModal}
           showEditButton={false}
           taskDraft={taskDraft}
         />
-        </fieldset>
-      </form>
-    );
-  }
-
-  return null;
+      </fieldset>
+    </form>
+  );
 }

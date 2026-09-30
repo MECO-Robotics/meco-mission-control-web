@@ -15,7 +15,9 @@ import { CadIntegrationView } from "../CadIntegrationView";
 import { isMissingCadHierarchyReviewRoute, isMissingCadOptionalRoute } from "../cadOptionalRoutes";
 import { CadStepImportSummaryCard } from "../components/CadStepImportSummaryCard";
 import { CadStatusPanels, getOnshapeConnectionHealth } from "../components/CadStatusPanels";
-import type { OnshapeOverview } from "../model/cadIntegrationTypes";
+import type {
+  OnshapeOverview
+} from "../model/onshapeCadTypes";
 import { parseOnshapeUrl } from "../model/onshapeUrlParser";
 
 jest.mock("../api/cadStepApi", () => ({
@@ -177,6 +179,19 @@ describe("CAD STEP mapper basics", () => {
     expect(markup).toContain("OAuth2Read");
     expect(markup).not.toContain("oauth-access-token");
     expect(markup).not.toContain("onshape-oauth");
+  });
+
+  it("shows the canonical Onshape base URL when connection details are unavailable", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(CadStatusPanels, {
+        overview: null,
+        selectedReferenceType: "version",
+        selectedSyncLevel: "bom",
+        syncEstimate: null,
+      }),
+    );
+
+    expect(markup).toContain("Base URL</dt><dd>https://cad.onshape.com</dd>");
   });
 
   it("shows disconnected, expired, and backend unavailable Onshape health states", () => {

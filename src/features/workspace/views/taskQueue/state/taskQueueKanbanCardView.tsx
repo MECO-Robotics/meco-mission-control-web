@@ -12,42 +12,20 @@ import {
   getTaskCardPerson,
   getTaskQueueCardContextAccentColor,
   getTaskQueueCardContextLabel,
-  TaskPriorityBadge,
+  getTaskQueueCardPriorityPresentation,
+  getTaskPriorityLabel,
 } from "../taskQueueKanbanCardMeta";
 import { TaskDisciplineBadge } from "../taskQueueDisciplineBadge";
 import { getTaskQueueBoardState } from "../taskQueueKanbanBoardState";
 import { shouldHideTaskQueueSummary } from "../taskQueueViewState";
 
-function isTaskCardDateOverdue(dateValue: string): boolean {
-  if (!dateValue) {
-    return false;
-  }
-
+function getTaskCardDateRelation(dateValue: string): "past" | "today" | "future" | "invalid" {
   const parsedDate = new Date(`${dateValue}T00:00:00`);
-  if (Number.isNaN(parsedDate.getTime())) {
-    return false;
-  }
-
+  if (!dateValue || Number.isNaN(parsedDate.getTime())) return "invalid";
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  return parsedDate.getTime() < today.getTime();
-}
-
-function isTaskCardDateToday(dateValue: string): boolean {
-  if (!dateValue) {
-    return false;
-  }
-
-  const parsedDate = new Date(`${dateValue}T00:00:00`);
-  if (Number.isNaN(parsedDate.getTime())) {
-    return false;
-  }
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  return parsedDate.getTime() === today.getTime();
+  return parsedDate < today ? "past" : parsedDate.getTime() === today.getTime() ? "today" : "future";
 }
 
 function getTaskCardDueDatePillClassName(task: TaskRecord): string {
@@ -59,11 +37,12 @@ function getTaskCardDueDatePillClassName(task: TaskRecord): string {
     return "pill task-detail-deadline-pill task-detail-deadline-pill-success";
   }
 
-  if (isTaskCardDateOverdue(task.dueDate)) {
+  const dateRelation = getTaskCardDateRelation(task.dueDate);
+  if (dateRelation === "past") {
     return "pill task-detail-deadline-pill task-detail-deadline-pill-danger";
   }
 
-  if (isTaskCardDateToday(task.dueDate)) {
+  if (dateRelation === "today") {
     return "pill task-detail-deadline-pill task-detail-deadline-pill-warning";
   }
 
@@ -83,7 +62,6 @@ interface TaskQueueCardProps extends Omit<ComponentPropsWithoutRef<"button">, "c
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
   task: TaskRecord;
   workstreamsById: Record<string, BootstrapPayload["workstreams"][number]>;
-  showPriorityBadge?: boolean;
 }
 
 export function TaskQueueCard({
@@ -95,7 +73,6 @@ export function TaskQueueCard({
   openEditTaskModal,
   projectsById,
   taskQueueZoom,
-  showPriorityBadge = true,
   showProjectContextOnCards,
   showProjectOnCards,
   style,
@@ -112,14 +89,8 @@ export function TaskQueueCard({
   const disciplineAccentColor = task.disciplineId
     ? getTimelineTaskDisciplineColor(task.disciplineId, disciplinesById)
     : null;
-  const cardStyle = disciplineAccentColor || style
-    ? ({
-        ...style,
-        ...(disciplineAccentColor
-          ? { "--task-queue-board-card-discipline-accent": disciplineAccentColor }
-          : {}),
-      } as CSSProperties)
-    : undefined;
+  const priorityPresentation = getTaskQueueCardPriorityPresentation(task.priority);
+  const cardStyle = { ...style, ...priorityPresentation.style } as CSSProperties;
   const boardState = getTaskQueueBoardState(task, bootstrap);
   const dueDateText = task.dueDate ? `Due ${formatDate(task.dueDate)}` : "Not set";
   const dueDatePillClassName = getTaskCardDueDatePillClassName(task);
@@ -142,15 +113,14 @@ export function TaskQueueCard({
     "--task-queue-board-card-context-border": `color-mix(in srgb, ${taskContextAccentColor} 54%, transparent)`,
   } as CSSProperties;
   const hideSummary = shouldHideTaskQueueSummary(taskQueueZoom);
-  const showDisciplineBadge = Boolean(!showProjectOnCards && showProjectContextOnCards && discipline);
+  const taskPriorityLabel = `${getTaskPriorityLabel(task.priority)} priority`;
 
   return (
     <button
       {...buttonProps}
-      className={`task-queue-board-card editable-hover-target editable-hover-target-row${
-        disciplineAccentColor ? " task-queue-board-card-discipline-accented" : ""
-      }${className ? ` ${className}` : ""}`}
+      className={`task-queue-board-card editable-hover-target editable-hover-target-row ${priorityPresentation.className}${className ? ` ${className}` : ""}`}
       data-board-state={boardState}
+      data-priority={priorityPresentation.dataPriority}
       data-tutorial-target="edit-task-row"
       onClick={(milestone) => {
         milestone.stopPropagation();
@@ -159,9 +129,19 @@ export function TaskQueueCard({
       style={cardStyle}
       type="button"
     >
+      <span className="task-queue-board-card-priority-label">{taskPriorityLabel}</span>
       <div className="task-queue-board-card-header">
         <strong>{task.title}</strong>
-        <span className={`task-queue-board-card-due ${dueDatePillClassName}`}>{dueDateText}</span>
+        <span className="task-queue-board-card-header-side">
+          <span className={`task-queue-board-card-due ${dueDatePillClassName}`}>{dueDateText}</span>
+          {task.blockers.length ? (
+            <small className="task-queue-board-card-blocker-count">
+              {task.blockers.length} blocker{task.blockers.length === 1 ? "" : "s"}
+            </small>
+          ) : latestLog ? (
+            <small className="task-queue-board-card-work-hours">{loggedHours.toFixed(1)}h logged</small>
+          ) : null}
+        </span>
       </div>
       {!hideSummary ? (
         <small className="task-queue-board-card-summary task-queue-board-card-summary-task">
@@ -182,10 +162,9 @@ export function TaskQueueCard({
             {taskContextLabel}
           </span>
         ) : null}
-        {showPriorityBadge || person ? (
+        {discipline || person ? (
           <div className="task-queue-board-card-meta-person-group">
-            {showPriorityBadge ? <TaskPriorityBadge priority={task.priority} /> : null}
-            {showDisciplineBadge && discipline ? (
+            {discipline ? (
               <TaskDisciplineBadge accentColor={disciplineAccentColor ?? "#7a8799"} discipline={discipline} />
             ) : null}
             {person ? (
@@ -208,9 +187,7 @@ export function TaskQueueCard({
           </div>
         ) : null}
       </div>
-      {latestLog ? <small className="task-queue-board-card-summary">{loggedHours.toFixed(1)}h logged · {latestLog.notes}</small> : null}
       {needsHelp ? <small className="pill status-pill status-pill-warning">Help requested</small> : null}
-      {task.blockers.length ? <small>{task.blockers.length} blocker{task.blockers.length === 1 ? "" : "s"} · Open for help and resolution</small> : null}
       <EditableHoverIndicator className="task-queue-board-card-hover" />
     </button>
   );

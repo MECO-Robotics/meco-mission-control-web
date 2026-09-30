@@ -4,10 +4,13 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
-import { TIMELINE_ZOOM_MAX } from "@/features/workspace/shared/timeline/timelineZoom";
+import { formatTimelineZoomLabel, TIMELINE_ZOOM_MAX } from "@/features/workspace/shared/timeline/timelineZoom";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
+import type { TaskCalendarEventType } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
+import type { TaskCalendarSortMode } from "@/features/workspace/views/taskCalendar/taskCalendarLayout";
+import { WorkspaceTopbarZoom } from "@/features/workspace/shared/topbar";
 import { TimelineCompactFilterMenu } from "./components/TimelineCompactFilterMenu";
-import { WorkspaceTopbarZoomControls } from "@/features/workspace/shared/ui";
+import { TimelineCalendarSortMenu } from "./components/TimelineCalendarSortMenu";
 
 const TIMELINE_INTERVAL_OPTIONS: Array<{ id: TimelineViewInterval; label: string; shortLabel: string }> = [
   { id: "all", label: "All", shortLabel: "A" },
@@ -17,6 +20,10 @@ const TIMELINE_INTERVAL_OPTIONS: Array<{ id: TimelineViewInterval; label: string
 
 interface TimelineToolbarProps {
   activeFilterCount: number;
+  calendarEventFilter: "all" | TaskCalendarEventType;
+  calendarSortMode: TaskCalendarSortMode;
+  calendarSortDirection: "asc" | "desc";
+  showCalendarFilters: boolean;
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   disciplineFilter: FilterSelection;
@@ -24,6 +31,9 @@ interface TimelineToolbarProps {
   isAllProjectsView: boolean;
   onAdjustZoom: (direction: 1 | -1) => void;
   onChangePersonFilter: (value: FilterSelection) => void;
+  onCalendarEventFilterChange: (value: "all" | TaskCalendarEventType) => void;
+  onCalendarSortModeChange: (value: TaskCalendarSortMode) => void;
+  onCalendarSortDirectionChange: (value: "asc" | "desc") => void;
   onIntervalChange: (value: TimelineViewInterval) => void;
   onSearchChange: (value: string) => void;
   onShiftPeriod: (direction: -1 | 1) => void;
@@ -46,6 +56,10 @@ interface TimelineToolbarProps {
 
 export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   activeFilterCount,
+  calendarEventFilter,
+  calendarSortMode,
+  calendarSortDirection,
+  showCalendarFilters,
   activePersonFilter,
   bootstrap,
   disciplineFilter,
@@ -53,6 +67,9 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   isAllProjectsView,
   onAdjustZoom,
   onChangePersonFilter,
+  onCalendarEventFilterChange,
+  onCalendarSortModeChange,
+  onCalendarSortDirectionChange,
   onIntervalChange,
   onSearchChange,
   onShiftPeriod,
@@ -140,114 +157,140 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   return (
     <div className="panel-actions filter-toolbar timeline-toolbar timeline-topbar-controls">
       <TopbarResponsiveSearch
+        actionCount={showCalendarFilters ? 2 : 1}
         actions={
-          <TimelineCompactFilterMenu
-            activeFilterCount={activeFilterCount}
-            activePersonFilter={activePersonFilter}
-            bootstrap={bootstrap}
-            disciplineFilter={disciplineFilter}
-            disciplineFilterOptions={disciplineFilterOptions}
-            isAllProjectsView={isAllProjectsView}
-            onChangePersonFilter={onChangePersonFilter}
-            priorityFilter={priorityFilter}
-            projectFilter={projectFilter}
-            setDisciplineFilter={setDisciplineFilter}
-            setPriorityFilter={setPriorityFilter}
-            setProjectFilter={setProjectFilter}
-            setStatusFilter={setStatusFilter}
-            setSubsystemFilter={setSubsystemFilter}
-            statusFilter={statusFilter}
-            subsystemFilter={subsystemFilter}
-            subsystemFilterOptions={subsystemFilterOptions}
-          />
+          <>
+            <TimelineCompactFilterMenu
+              activeFilterCount={activeFilterCount}
+              calendarEventFilter={calendarEventFilter}
+              showCalendarFilters={showCalendarFilters}
+              activePersonFilter={activePersonFilter}
+              bootstrap={bootstrap}
+              disciplineFilter={disciplineFilter}
+              disciplineFilterOptions={disciplineFilterOptions}
+              isAllProjectsView={isAllProjectsView}
+              onChangePersonFilter={onChangePersonFilter}
+              onCalendarEventFilterChange={onCalendarEventFilterChange}
+              priorityFilter={priorityFilter}
+              projectFilter={projectFilter}
+              setDisciplineFilter={setDisciplineFilter}
+              setPriorityFilter={setPriorityFilter}
+              setProjectFilter={setProjectFilter}
+              setStatusFilter={setStatusFilter}
+              setSubsystemFilter={setSubsystemFilter}
+              statusFilter={statusFilter}
+              subsystemFilter={subsystemFilter}
+              subsystemFilterOptions={subsystemFilterOptions}
+            />
+            {showCalendarFilters ? (
+              <TimelineCalendarSortMenu
+                onChange={onCalendarSortModeChange}
+                direction={calendarSortDirection}
+                onDirectionChange={onCalendarSortDirectionChange}
+                sortMode={calendarSortMode}
+              />
+            ) : null}
+          </>
         }
-        ariaLabel="Search timeline"
+        ariaLabel="Search schedule"
         compactPlaceholder="Search"
         compactSwitchWidth={220}
         onChange={onSearchChange}
-        placeholder="Search timeline..."
+        placeholder="Search schedule..."
         value={searchFilter}
       />
       <div
-        aria-label="Timeline interval"
-        className={`timeline-interval-switch${isIntervalSwitchExpanded ? " is-expanded" : ""}`}
-        ref={intervalSwitchRef}
-        onBlurCapture={handleIntervalSwitchBlur}
-        onMouseEnter={() => openIntervalSwitch()}
-        onMouseLeave={closeIntervalSwitch}
-        onFocusCapture={handleIntervalSwitchFocusCapture}
-        onPointerDownCapture={handleIntervalSwitchPointerDown}
-        role="group"
+        aria-label={viewInterval === "all" ? "Timeline view controls" : "Timeline period controls"}
+        className={`timeline-period-controls${viewInterval === "week" ? " is-week" : ""}${viewInterval === "all" ? " is-all" : ""}`}
       >
-        {isIntervalSwitchExpanded ? (
-          <div
-            aria-label="Timeline interval options"
-            className="timeline-interval-toggle-rail"
-            data-tutorial-target="timeline-interval-select"
-          >
-            {TIMELINE_INTERVAL_OPTIONS.map((option) => (
-              <button
-                key={option.id}
-                aria-label={`Set timeline interval to ${option.label}`}
-                aria-pressed={viewInterval === option.id}
-                className={`timeline-interval-toggle-option${viewInterval === option.id ? " is-active" : ""}`}
-                onClick={() => {
-                  onIntervalChange(option.id);
-                  closeIntervalSwitch();
-                }}
-                title={option.label}
-                type="button"
-              >
-                {option.shortLabel}
-              </button>
-            ))}
-          </div>
-        ) : (
-          <button
-            aria-label={`Timeline interval: ${activeIntervalOption.label}`}
-            className="timeline-interval-pill"
-            data-tutorial-target="timeline-interval-select"
-            onClick={() => openIntervalSwitch({ focusOptions: true })}
-            onKeyDown={handleIntervalPillKeyDown}
-            title={`Timeline interval: ${activeIntervalOption.label}`}
-            type="button"
-          >
-            <span className="timeline-interval-pill-icon">
-              <IconCalendar />
-            </span>
-            <span className="timeline-interval-pill-label">{activeIntervalOption.label}</span>
-          </button>
-        )}
-      </div>
-      {viewInterval !== "all" ? (
         <div
-          aria-label="Timeline period controls"
-          className={`timeline-period-controls${viewInterval === "week" ? " is-week" : ""}`}
+          aria-label="Timeline interval"
+          className={`timeline-interval-switch${isIntervalSwitchExpanded ? " is-expanded" : ""}`}
+          ref={intervalSwitchRef}
+          onBlurCapture={handleIntervalSwitchBlur}
+          onMouseEnter={() => openIntervalSwitch()}
+          onMouseLeave={closeIntervalSwitch}
+          onFocusCapture={handleIntervalSwitchFocusCapture}
+          onPointerDownCapture={handleIntervalSwitchPointerDown}
+          role="group"
         >
-          <button
-            aria-label={`Previous ${viewInterval}`}
-            className="icon-button timeline-period-button"
-            data-tutorial-target="timeline-period-prev-button"
-            onClick={() => onShiftPeriod(-1)}
-            title={`Previous ${viewInterval}`}
-            type="button"
-          >
-            <IconChevronLeft />
-          </button>
-          <span className="timeline-period-label">{timelinePeriodLabel}</span>
-          <button
-            aria-label={`Next ${viewInterval}`}
-            className="icon-button timeline-period-button"
-            data-tutorial-target="timeline-period-next-button"
-            onClick={() => onShiftPeriod(1)}
-            title={`Next ${viewInterval}`}
-            type="button"
-          >
-            <IconChevronRight />
-          </button>
+          {isIntervalSwitchExpanded ? (
+            <div
+              aria-label="Timeline interval options"
+              className="timeline-interval-toggle-rail"
+              data-tutorial-target="timeline-interval-select"
+            >
+              {TIMELINE_INTERVAL_OPTIONS.map((option) => (
+                <button
+                  key={option.id}
+                  aria-label={`Set timeline interval to ${option.label}`}
+                  aria-pressed={viewInterval === option.id}
+                  className={`timeline-interval-toggle-option${viewInterval === option.id ? " is-active" : ""}`}
+                  onClick={() => {
+                    onIntervalChange(option.id);
+                    closeIntervalSwitch();
+                  }}
+                  title={option.label}
+                  type="button"
+                >
+                  {option.shortLabel}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <button
+              aria-label={`Timeline interval: ${activeIntervalOption.label}`}
+              className="timeline-interval-pill"
+              data-tutorial-target="timeline-interval-select"
+              onClick={() => openIntervalSwitch({ focusOptions: true })}
+              onKeyDown={handleIntervalPillKeyDown}
+              title={`Timeline interval: ${activeIntervalOption.label}`}
+              type="button"
+            >
+              <span className="timeline-interval-pill-icon">
+                <IconCalendar />
+              </span>
+              <span className="timeline-interval-pill-label">{activeIntervalOption.label}</span>
+            </button>
+          )}
         </div>
-      ) : null}
-      <WorkspaceTopbarZoomControls ariaLabel="Timeline zoom" label="timeline" max={TIMELINE_ZOOM_MAX} min={timelineZoomMin} onChange={onAdjustZoom} value={timelineZoom} />
+        {viewInterval !== "all" ? (
+          <>
+            <span aria-hidden="true" className="timeline-period-divider" />
+            <button
+              aria-label={`Previous ${viewInterval}`}
+              className="icon-button timeline-period-button"
+              data-tutorial-target="timeline-period-prev-button"
+              onClick={() => onShiftPeriod(-1)}
+              title={`Previous ${viewInterval}`}
+              type="button"
+            >
+              <IconChevronLeft />
+            </button>
+            <span className="timeline-period-label">{timelinePeriodLabel}</span>
+            <button
+              aria-label={`Next ${viewInterval}`}
+              className="icon-button timeline-period-button"
+              data-tutorial-target="timeline-period-next-button"
+              onClick={() => onShiftPeriod(1)}
+              title={`Next ${viewInterval}`}
+              type="button"
+            >
+              <IconChevronRight />
+            </button>
+          </>
+        ) : null}
+      </div>
+      <WorkspaceTopbarZoom
+        ariaLabel="Timeline zoom"
+        canZoomIn={timelineZoom < TIMELINE_ZOOM_MAX}
+        canZoomOut={timelineZoom > timelineZoomMin}
+        decreaseLabel="Zoom out timeline"
+        increaseLabel="Zoom in timeline"
+        onZoomIn={() => onAdjustZoom(1)}
+        onZoomOut={() => onAdjustZoom(-1)}
+        value={formatTimelineZoomLabel(timelineZoom)}
+      />
     </div>
   );
 };

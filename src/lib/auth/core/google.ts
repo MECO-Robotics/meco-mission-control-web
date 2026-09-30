@@ -1,5 +1,4 @@
 import type { AuthConfig } from "../types";
-import { requestApi } from "./request";
 
 let googleScriptPromise: Promise<void> | null = null;
 
@@ -64,32 +63,6 @@ export function isSecureGoogleAuthHost() {
   return isLocalHostname(window.location.hostname) || window.location.protocol === "https:";
 }
 
-export function fetchAuthConfig() {
-  return requestApi<unknown>("/auth/config").then((payload) => {
-    if (!payload || typeof payload !== "object") {
-      throw new Error("The server returned an invalid authentication configuration.");
-    }
-
-    const candidate = payload as Record<string, unknown>;
-    if (
-      typeof candidate.enabled !== "boolean" ||
-      (typeof candidate.googleClientId !== "string" && candidate.googleClientId !== null) ||
-      typeof candidate.hostedDomain !== "string" ||
-      typeof candidate.emailEnabled !== "boolean" ||
-      (candidate.devBypassAvailable !== undefined &&
-        typeof candidate.devBypassAvailable !== "boolean")
-    ) {
-      throw new Error("The server returned an invalid authentication configuration.");
-    }
-
-    const config = candidate as unknown as AuthConfig;
-    return {
-      ...config,
-      devBypassAvailable: config.devBypassAvailable ?? false,
-    };
-  });
-}
-
 export function resolveGoogleClientId(config: AuthConfig | null) {
   if (!config?.enabled || !config.googleClientId) {
     return null;
@@ -121,32 +94,29 @@ export function loadGoogleIdentityScript() {
     return googleScriptPromise;
   }
 
+  let script: HTMLScriptElement | null = null;
   googleScriptPromise = new Promise<void>((resolve, reject) => {
     const existingScript = document.querySelector<HTMLScriptElement>(
       'script[src="https://accounts.google.com/gsi/client"]',
     );
-    if (existingScript) {
-      existingScript.addEventListener("load", () => resolve(), { once: true });
-      existingScript.addEventListener(
-        "error",
-        () => reject(new Error("Google Identity Services failed to load.")),
-        { once: true },
-      );
-      return;
-    }
-
-    const script = document.createElement("script");
-    const scriptUrl = "https://accounts.google.com/gsi/client";
-    const trustedScriptUrl = getGoogleTrustedTypesPolicy()?.createScriptURL(scriptUrl);
-    script.src = (trustedScriptUrl ?? scriptUrl) as string;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => resolve();
-    script.onerror = () => {
-      googleScriptPromise = null;
+    script = existingScript ?? document.createElement("script");
+    script.addEventListener("load", () => resolve(), { once: true });
+    script.addEventListener("error", () => {
       reject(new Error("Google Identity Services failed to load."));
-    };
-    document.head.appendChild(script);
+    }, { once: true });
+
+    if (!existingScript) {
+      const scriptUrl = "https://accounts.google.com/gsi/client";
+      const trustedScriptUrl = getGoogleTrustedTypesPolicy()?.createScriptURL(scriptUrl);
+      script.src = (trustedScriptUrl ?? scriptUrl) as string;
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
+  }).catch((error: unknown) => {
+    googleScriptPromise = null;
+    script?.remove();
+    throw error;
   });
 
   return googleScriptPromise;

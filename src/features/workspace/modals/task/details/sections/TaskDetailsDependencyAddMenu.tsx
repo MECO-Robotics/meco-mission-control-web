@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 
 import type { TaskDependencyKind } from "@/types/common";
@@ -16,6 +16,24 @@ interface TaskDetailsDependencyAddMenuProps {
   getTargetOptions: (kind: TaskDependencyKind) => DropdownOption[];
   onAddDependency: (kind: TaskDependencyKind, targetId: string) => void;
 }
+
+const panelStyle: CSSProperties = {
+  position: "static",
+  top: "auto",
+  right: "auto",
+  bottom: "auto",
+  left: "auto",
+  flex: "0 0 auto",
+};
+
+const headingStyle: CSSProperties = {
+  color: "var(--text-title)",
+  fontSize: "0.75rem",
+  fontWeight: 800,
+  letterSpacing: "0.03em",
+  padding: "0.15rem 0.15rem 0.35rem",
+  textTransform: "uppercase",
+};
 
 export function TaskDetailsDependencyAddMenu({
   className,
@@ -114,25 +132,9 @@ export function TaskDetailsDependencyAddMenu({
           >
             <div
               className="task-details-dependency-menu-popup table-column-filter-menu task-details-dependency-menu-panel task-details-dependency-kind-panel"
-              style={{
-                position: "static",
-                top: "auto",
-                right: "auto",
-                bottom: "auto",
-                left: "auto",
-                flex: "0 0 auto",
-              }}
+              style={panelStyle}
             >
-              <div
-                style={{
-                  color: "var(--text-title)",
-                  fontSize: "0.75rem",
-                  fontWeight: 800,
-                  letterSpacing: "0.03em",
-                  padding: "0.15rem 0.15rem 0.35rem",
-                  textTransform: "uppercase",
-                }}
-              >
+              <div style={headingStyle}>
                 Add dependency
               </div>
               <div className="task-details-dependency-menu-option-stack" role="listbox">
@@ -168,25 +170,9 @@ export function TaskDetailsDependencyAddMenu({
             {selectedKind ? (
               <div
                 className="task-details-dependency-menu-popup table-column-filter-menu task-details-dependency-menu-panel task-details-dependency-target-panel"
-                style={{
-                  position: "static",
-                  top: "auto",
-                  right: "auto",
-                  bottom: "auto",
-                  left: "auto",
-                  flex: "0 0 auto",
-                }}
+                style={panelStyle}
               >
-                <div
-                  style={{
-                    color: "var(--text-title)",
-                    fontSize: "0.75rem",
-                    fontWeight: 800,
-                    letterSpacing: "0.03em",
-                    padding: "0.15rem 0.15rem 0.35rem",
-                    textTransform: "uppercase",
-                  }}
-                >
+                <div style={headingStyle}>
                   {TASK_DEPENDENCY_KIND_LABELS[selectedKind]} targets
                 </div>
                 <div className="task-details-dependency-menu-option-stack" role="listbox">

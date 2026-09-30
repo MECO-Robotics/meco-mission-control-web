@@ -44,10 +44,10 @@
   box-shadow: 0 8px 18px rgba(15, 28, 52, 0.05);
 }
 
-.task-queue-board-card-discipline-accented {
+.task-queue-board-card-priority-accented {
   border-color: color-mix(
     in srgb,
-    var(--task-queue-board-card-discipline-accent) 56%,
+    var(--task-queue-board-card-priority-accent) 56%,
     var(--border-base)
   );
   box-shadow:
@@ -55,15 +55,44 @@
     0 0 0 1.5px
       color-mix(
         in srgb,
-        var(--task-queue-board-card-discipline-accent) 26%,
+        var(--task-queue-board-card-priority-accent) 26%,
         transparent
       ),
     inset 0 0 0 1px
       color-mix(
         in srgb,
-        var(--task-queue-board-card-discipline-accent) 16%,
+        var(--task-queue-board-card-priority-accent) 16%,
         transparent
       );
+}
+
+.task-queue-board-card-priority-accented[data-priority="low"] {
+  border-style: dashed;
+}
+
+.task-queue-board-card-priority-accented[data-priority="medium"] {
+  border-style: solid;
+}
+
+.task-queue-board-card-priority-accented[data-priority="high"] {
+  border-width: 2px;
+}
+
+.task-queue-board-card-priority-accented[data-priority="critical"] {
+  border-style: double;
+  border-width: 5px;
+}
+
+.task-queue-board-card-priority-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 .task-queue-board-card.editable-hover-target-row {
@@ -82,6 +111,28 @@
   color: var(--text-title);
   font-size: calc(0.92rem * var(--task-queue-zoom, 1));
   line-height: 1.25;
+}
+
+.task-queue-board-card-header-side {
+  display: grid;
+  flex: 0 0 auto;
+  justify-items: end;
+  gap: calc(0.12rem * var(--task-queue-zoom, 1));
+}
+
+.task-queue-board-card-work-hours {
+  color: var(--text-muted);
+  font-size: calc(0.62rem * var(--task-queue-zoom, 1));
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.task-queue-board-card-blocker-count {
+  color: var(--status-danger-text);
+  font-size: calc(0.62rem * var(--task-queue-zoom, 1));
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .task-queue-board-card-due {
@@ -129,7 +180,6 @@
   background: rgba(255, 255, 255, 0.28);
 }
 
-.risk-board .task-queue-board-card-summary-task,
 .task-queue-view .task-queue-board-card-summary-task {
   color: var(--text-title);
   font-size: calc(0.82rem * var(--task-queue-zoom, 1));
@@ -150,14 +200,6 @@
   gap: calc(0.3rem * var(--task-queue-zoom, 1));
 }
 
-.milestone-board .task-queue-board-card-meta {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  justify-content: stretch;
-  gap: calc(0.35rem * var(--task-queue-zoom, 1));
-}
-
 .task-queue-board-card-meta.task-queue-board-card-meta-person-only {
   justify-content: flex-end;
 }
@@ -170,7 +212,8 @@
   margin-left: auto;
 }
 
-.task-queue-board-card-discipline {
+.task-queue-board-card-discipline,
+.task-queue-board-card-type-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -182,7 +225,13 @@
   flex-shrink: 0;
 }
 
-.task-queue-board-card-discipline svg {
+.task-queue-board-card-type-icon {
+  background: color-mix(in srgb, var(--official-blue) 12%, transparent);
+  color: var(--official-blue);
+}
+
+.task-queue-board-card-discipline svg,
+.task-queue-board-card-type-icon svg {
   display: block;
   width: calc(0.88rem * var(--task-queue-zoom, 1));
   height: calc(0.88rem * var(--task-queue-zoom, 1));
@@ -199,36 +248,4 @@
   font-size: calc(0.63rem * var(--task-queue-zoom, 1));
   font-weight: 700;
   letter-spacing: 0.02em;
-}
-
-.task-queue-board-card-meta > span.task-queue-board-card-type-badge.milestone-type-pill {
-  flex-shrink: 0;
-  align-self: flex-end;
-  justify-content: center;
-  min-width: calc(2.1rem * var(--task-queue-zoom, 1));
-  padding: calc(0.14rem * var(--task-queue-zoom, 1)) calc(0.48rem * var(--task-queue-zoom, 1));
-  border-radius: 999px;
-  background: var(--milestone-type-chip-bg);
-  border: 1px solid var(--milestone-type-chip-border);
-  color: var(--milestone-type-chip-text);
-  font-size: calc(0.58rem * var(--task-queue-zoom, 1));
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  line-height: 1.15;
-  overflow: visible;
-  white-space: nowrap;
-}
-
-.milestone-board .task-queue-board-card-meta > span.task-queue-board-card-type-badge.milestone-type-pill {
-  justify-self: start;
-}
-
-.milestone-board .task-queue-board-card-context-chip {
-  justify-self: end;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.task-queue-board-card-type-badge {
-  text-transform: uppercase;
 }

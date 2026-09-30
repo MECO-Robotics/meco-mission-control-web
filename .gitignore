@@ -32,7 +32,7 @@ docs/reports/lighthouse-*.txt
 .codex_*.json
 
 # Graphify semantic extraction cache
-/graphify-out/cache/
+/graphify-out/
 
 # Environment files
 .env
@@ -50,3 +50,4 @@ docs/reports/lighthouse-*.txt
 *.njsproj
 *.sln
 *.sw?
+

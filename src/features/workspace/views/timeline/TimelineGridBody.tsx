@@ -7,15 +7,14 @@ import type {
   TimelineProjectRow,
   TimelineSubsystemRow,
 } from "./timelineViewModel";
-import { TimelineGridHeader } from "./TimelineGridHeader";
+import type { TimelineGridMotion } from "./timelineGridTypes";
+import { TimelineGridHeaderContent } from "./components/TimelineGridHeaderContent";
 import { TimelineProjectGroup } from "./TimelineProjectGroup";
 import { TimelineSubsystemGroup } from "./TimelineSubsystemGroup";
 import {
   buildTaskDependencyCountsByTaskId,
   buildTimelineTaskStatusSignalByTaskId,
 } from "./timelineGridBodyUtils";
-
-type TimelineGridMotion = "left" | "right" | "neutral";
 
 interface TimelineGridBodyProps {
   bootstrap: BootstrapPayload;
@@ -159,7 +158,6 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
           selectTaskRow={selectTaskRow}
           showProjectCol={showProjectCol}
           showSubsystemCol={showSubsystemCol}
-          isWeekView={isWeekView}
           subsystemColumnIndex={subsystemColumnIndex}
           subsystemStickyLeft={subsystemStickyLeft}
           taskDependencyCountsById={taskDependencyCountsById}
@@ -191,7 +189,6 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
             hoverSubsystemRow={hoverSubsystemRow}
             selectSubsystemRow={selectSubsystemRow}
             selectTaskRow={selectTaskRow}
-            showProjectCol={showProjectCol}
             showSubsystemCol={showSubsystemCol}
             subsystem={subsystem}
             subsystemColumnIndex={subsystemColumnIndex}
@@ -211,7 +208,7 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
       });
 
   return (
-      <TimelineGridHeader
+      <TimelineGridHeaderContent
       clearHoveredMilestonePopup={clearHoveredMilestonePopup}
       firstDayGridColumn={firstDayGridColumn}
       gridMinWidth={gridMinWidth}
@@ -240,6 +237,6 @@ export const TimelineGridBody: React.FC<TimelineGridBodyProps> = ({
       toggleSubsystemColumn={toggleSubsystemColumn}
     >
       {rowChildren}
-    </TimelineGridHeader>
+      </TimelineGridHeaderContent>
   );
 };

@@ -1,6 +1,6 @@
 import { TASK_BLOCKER_TYPE_LABELS, type TaskBlockerSourceKind } from "@/types/common";
 import type { TaskBlockerRecord } from "@/types/recordsExecution";
-import type { LegacyBootstrapPayload } from "./shared";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
 const LEGACY_BLOCKER_TYPE_FALLBACKS: Record<string, TaskBlockerRecord["blockerType"]> = {
   artifact_instance: "other",
@@ -27,7 +27,7 @@ function normalizeBlockerType(blockerType: string | undefined): TaskBlockerRecor
 }
 
 export function normalizeBootstrapTaskBlockers(
-  source: LegacyBootstrapPayload,
+  source: BootstrapPayload,
 ): TaskBlockerRecord[] {
   return (source.taskBlockers ?? []).map(normalizeTaskBlockerRecord);
 }

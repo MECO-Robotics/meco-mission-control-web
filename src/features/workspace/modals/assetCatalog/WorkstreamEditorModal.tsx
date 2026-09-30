@@ -30,11 +30,7 @@ export function WorkstreamEditorModal({
   return (
     <ModalDialog label="Workstream editor" onClose={closeWorkstreamModal}>
       <section
-        className="modal-card"
-        style={{
-          background: "var(--bg-panel)",
-          border: "1px solid var(--border-base)",
-        }}
+        className="modal-card modal-panel-surface"
       >
         <div className="panel-header compact-header">
           <div>
@@ -60,7 +56,7 @@ export function WorkstreamEditorModal({
           style={{ color: "var(--text-copy)" }}
         >
           <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Name</span>
+            <span>Name</span>
             <input
               onChange={(milestone) =>
                 setWorkstreamDraft((current) => ({
@@ -69,16 +65,11 @@ export function WorkstreamEditorModal({
                 }))
               }
               required
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
               value={workstreamDraft.name}
             />
           </label>
           <label className="field">
-            <span style={{ color: "var(--text-title)" }}>Project</span>
+            <span>Project</span>
             <select
               onChange={(milestone) =>
                 setWorkstreamDraft((current) => ({
@@ -87,11 +78,6 @@ export function WorkstreamEditorModal({
                 }))
               }
               required
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
               value={workstreamDraft.projectId}
             >
               <option value="" disabled>
@@ -105,7 +91,7 @@ export function WorkstreamEditorModal({
             </select>
           </label>
           <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Description</span>
+            <span>Description</span>
             <textarea
               onChange={(milestone) =>
                 setWorkstreamDraft((current) => ({
@@ -115,11 +101,6 @@ export function WorkstreamEditorModal({
               }
               required
               rows={3}
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
               value={workstreamDraft.description}
             />
           </label>
@@ -148,11 +129,6 @@ export function WorkstreamEditorModal({
             <button
               className="secondary-action"
               onClick={closeWorkstreamModal}
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
               type="button"
             >
               Cancel

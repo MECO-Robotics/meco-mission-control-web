@@ -3,34 +3,34 @@ import { useMemo, useState, type CSSProperties } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { ManufacturingItemRecord } from "@/types/recordsInventory";
 import type { ManufacturingViewTab } from "@/lib/workspaceNavigation";
-import {
-  IconManufacturing,
-  IconPerson,
-  IconTasks,
-} from "@/components/shared/Icons";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
-import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
-import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
-import { filterSelectionIncludes, useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import {
+  filterSelectionIncludes,
+  filterSelectionMatchesTaskPeople,
+  useFilterChangeMotionClass,
+} from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import {
   WorkspaceTopbarControls,
+  WorkspaceTopbarZoom,
   buildSingleAddMenuAction,
   buildTopbarSearchProps,
 } from "@/features/workspace/shared/topbar";
-import { WorkspaceTopbarAddMenu, WorkspaceTopbarZoomControls } from "@/features/workspace/shared/ui";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import type { MembersById, SubsystemsById } from "@/features/workspace/shared/model/workspaceTypes";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
-import { MANUFACTURING_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
 import { KanbanScrollFrame } from "@/features/workspace/views/kanban/KanbanScrollFrame";
 import { ManufacturingKanbanBoard } from "./ManufacturingKanbanBoard";
+import { ManufacturingQueueFilters } from "./ManufacturingQueueFilters";
+import { ManufacturingSortMenu } from "./ManufacturingSortMenu";
+import { sortManufacturingItems, type ManufacturingSortField } from "./manufacturingSort";
 import {
-  MANUFACTURING_PROCESS_FILTER_OPTIONS,
   filterManufacturingItemsByProcessView,
 } from "./manufacturingProcessFilter";
 import {
   clampTaskQueueZoom,
+  formatTaskQueueZoomLabel,
   TASK_QUEUE_ZOOM_MAX,
   TASK_QUEUE_ZOOM_MIN,
   TASK_QUEUE_ZOOM_STEP,
@@ -82,6 +82,8 @@ export function ManufacturingQueueView({
   const [status, setStatus] = useState<FilterSelection>([]);
   const [material, setMaterial] = useState<FilterSelection>([]);
   const [manufacturingZoom, setManufacturingZoom] = useState(1);
+  const [sortField, setSortField] = useState<ManufacturingSortField>("dueDate");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const processFilterSelection =
     processFilterValue && processFilterValue !== "all" ? [processFilterValue] : [];
 
@@ -96,6 +98,10 @@ export function ManufacturingQueueView({
       .sort()
       .map((value) => ({ id: value, name: value }));
   }, [bootstrap.materials, items]);
+  const projectsById = useMemo(
+    () => Object.fromEntries(bootstrap.projects.map((project) => [project.id, project])),
+    [bootstrap.projects],
+  );
 
   const filteredItems = useMemo(() => {
     const processItems = processFilterValue
@@ -108,7 +114,14 @@ export function ManufacturingQueueView({
       const matchesRequester = filterSelectionIncludes(requester, item.requestedById);
       const matchesStatus = filterSelectionIncludes(status, item.status);
       const matchesMaterial = filterSelectionIncludes(material, item.material);
-      const matchesPerson = filterSelectionIncludes(activePersonFilter, item.requestedById);
+      const matchesPerson =
+        activePersonFilter.length === 0 ||
+        filterSelectionIncludes(activePersonFilter, item.requestedById) ||
+        bootstrap.tasks.some(
+          (task) =>
+            task.linkedManufacturingIds.includes(item.id) &&
+            filterSelectionMatchesTaskPeople(activePersonFilter, task),
+        );
 
       return (
         matchesSearch &&
@@ -119,7 +132,11 @@ export function ManufacturingQueueView({
         matchesPerson
       );
     });
-  }, [activePersonFilter, items, material, processFilterValue, requester, search, status, subsystem]);
+  }, [activePersonFilter, bootstrap.tasks, items, material, processFilterValue, requester, search, status, subsystem]);
+  const sortedItems = useMemo(
+    () => sortManufacturingItems(filteredItems, sortField, membersById, subsystemsById, sortOrder),
+    [filteredItems, membersById, sortField, sortOrder, subsystemsById],
+  );
   const activeFilterCount = [
     processFilterSelection,
     subsystem,
@@ -142,6 +159,7 @@ export function ManufacturingQueueView({
   const manufacturingBoardStyle = {
     "--task-queue-zoom": manufacturingZoom,
     "--task-queue-board-column-width": `calc(15.5rem * ${manufacturingZoom})`,
+    "--kanban-board-viewport-offset": "9rem",
   } as CSSProperties;
   const handleProcessFilterChange = (value: FilterSelection) => {
     const [nextValue] = value;
@@ -153,7 +171,10 @@ export function ManufacturingQueueView({
   };
 
   return (
-    <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`} style={manufacturingBoardStyle}>
+    <section
+      className={`panel dense-panel manufacturing-queue-view workspace-kanban-scroll-view ${WORKSPACE_PANEL_CLASS}`}
+      style={manufacturingBoardStyle}
+    >
       <AppTopbarSlotPortal slot="controls">
         <WorkspaceTopbarControls
           className="queue-toolbar"
@@ -161,91 +182,25 @@ export function ManufacturingQueueView({
             <TopbarResponsiveSearch
               {...buildTopbarSearchProps("manufacturing", {
                 actions: (
-                  <CompactFilterMenu
+                  <>
+                  <ManufacturingQueueFilters
                     activeCount={activeFilterCount}
-                    ariaLabel={`${title} filters`}
-                    buttonLabel="Filters"
-                    className="materials-filter-menu"
-                    items={[
-                      {
-                        hidden: !onProcessFilterChange,
-                        label: "Process",
-                        content: (
-                          <FilterDropdown
-                            allLabel="All processes"
-                            ariaLabel={`Filter ${title} by process`}
-                            className="task-queue-filter-menu-submenu"
-                            icon={<IconManufacturing />}
-                            onChange={handleProcessFilterChange}
-                            options={MANUFACTURING_PROCESS_FILTER_OPTIONS}
-                            selectedAllLabel="All"
-                            singleSelect
-                            value={processFilterSelection}
-                          />
-                        ),
-                      },
-                      {
-                        label: "Subsystem",
-                        content: (
-                          <FilterDropdown
-                            allLabel="All subsystems"
-                            ariaLabel={`Filter ${title} by subsystem`}
-                            className="task-queue-filter-menu-submenu"
-                            icon={<IconManufacturing />}
-                            onChange={setSubsystem}
-                            options={bootstrap.subsystems}
-                            selectedAllLabel="All"
-                            value={subsystem}
-                          />
-                        ),
-                      },
-                      {
-                        label: "Requester",
-                        content: (
-                          <FilterDropdown
-                            allLabel="All requesters"
-                            ariaLabel={`Filter ${title} by requester`}
-                            className="task-queue-filter-menu-submenu"
-                            icon={<IconPerson />}
-                            onChange={setRequester}
-                            options={bootstrap.members}
-                            selectedAllLabel="All"
-                            value={requester}
-                          />
-                        ),
-                      },
-                      {
-                        label: "Material",
-                        content: (
-                          <FilterDropdown
-                            allLabel="All materials"
-                            ariaLabel={`Filter ${title} by material`}
-                            className="task-queue-filter-menu-submenu"
-                            icon={<IconManufacturing />}
-                            onChange={setMaterial}
-                            options={uniqueMaterials}
-                            selectedAllLabel="All"
-                            value={material}
-                          />
-                        ),
-                      },
-                      {
-                        label: "Status",
-                        content: (
-                          <FilterDropdown
-                            allLabel="All statuses"
-                            ariaLabel={`Filter ${title} by status`}
-                            className="task-queue-filter-menu-submenu"
-                            icon={<IconTasks />}
-                            onChange={setStatus}
-                            options={MANUFACTURING_STATUS_OPTIONS}
-                            selectedAllLabel="All"
-                            value={status}
-                          />
-                        ),
-                      },
-                    ]}
+                    bootstrap={bootstrap}
+                    onMaterialChange={setMaterial}
+                    onProcessChange={onProcessFilterChange ? handleProcessFilterChange : undefined}
+                    onRequesterChange={setRequester}
+                    onStatusChange={setStatus}
+                    onSubsystemChange={setSubsystem}
+                    processSelection={processFilterSelection}
+                    requester={requester}
+                    material={material}
+                    status={status}
+                    subsystem={subsystem}
+                    title={title}
+                    uniqueMaterials={uniqueMaterials}
                   />
+                  <ManufacturingSortMenu onChange={setSortField} onSortOrderChange={setSortOrder} sortOrder={sortOrder} sortField={sortField} />
+                  </>
                 ),
                 ariaLabel: `Search ${title}`,
                 onChange: setSearch,
@@ -267,9 +222,17 @@ export function ManufacturingQueueView({
             />
           }
         >
-          <div className="task-queue-toolbar-inline-actions">
-            <WorkspaceTopbarZoomControls ariaLabel="Manufacturing zoom" label="manufacturing" max={TASK_QUEUE_ZOOM_MAX} min={TASK_QUEUE_ZOOM_MIN} onChange={(direction) => setManufacturingZoom((current) => clampTaskQueueZoom(current + direction * TASK_QUEUE_ZOOM_STEP))} value={manufacturingZoom} />
-          </div>
+          <WorkspaceTopbarZoom
+            ariaLabel="Manufacturing zoom"
+            canZoomIn={manufacturingZoom < TASK_QUEUE_ZOOM_MAX}
+            canZoomOut={manufacturingZoom > TASK_QUEUE_ZOOM_MIN}
+            decreaseLabel="Zoom out manufacturing"
+            increaseLabel="Zoom in manufacturing"
+            onZoomIn={() => setManufacturingZoom((current) => clampTaskQueueZoom(current + TASK_QUEUE_ZOOM_STEP))}
+            onZoomOut={() => setManufacturingZoom((current) => clampTaskQueueZoom(current - TASK_QUEUE_ZOOM_STEP))}
+            toolbarClassName="workspace-topbar-zoom-slot-actions"
+            value={formatTaskQueueZoomLabel(manufacturingZoom)}
+          />
         </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
 
@@ -281,12 +244,14 @@ export function ManufacturingQueueView({
 
       <KanbanScrollFrame motionClassName={manufacturingFilterMotionClass}>
         <>
-          {filteredItems.length === 0 ? (
+          {sortedItems.length === 0 ? (
             <p className="empty-state">{emptyStateMessage}</p>
           ) : (
             <ManufacturingKanbanBoard
-              items={filteredItems}
+              items={sortedItems}
               membersById={membersById}
+              projectsById={projectsById}
+              tasks={bootstrap.tasks}
               onEdit={onEdit}
               onQuickStatusChange={onQuickStatusChange}
               showInHouseDetails={showInHouseColumn}

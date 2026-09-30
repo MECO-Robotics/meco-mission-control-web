@@ -1,28 +1,14 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { MeetingRecord, MilestoneRecord, TaskRecord } from "@/types/recordsExecution";
+import type { MeetingRecord, TaskRecord } from "@/types/recordsExecution";
 import { dateDiffInDays } from "@/lib/appUtils/common";
+import { formatLocalDate } from "@/lib/dateUtils";
 import { datePortion, endOfTimelineWeek, monthEndFromDay, monthStartFromDay, startOfTimelineWeek } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
+import { compareTimelineMilestonesByStart } from "./timelineMilestoneData";
 import { buildTimelineSubsystemRows } from "./timelineViewDataRows";
 
 const ALL_INTERVAL_PAST_MONTHS = 9;
 const ALL_INTERVAL_FUTURE_MONTHS = 3;
-
-function compareTimelineMilestonesByStart(left: MilestoneRecord, right: MilestoneRecord) {
-  const startComparison = left.startDateTime.localeCompare(right.startDateTime);
-  if (startComparison !== 0) {
-    return startComparison;
-  }
-
-  const leftEnd = left.endDateTime ?? left.startDateTime;
-  const rightEnd = right.endDateTime ?? right.startDateTime;
-  const endComparison = leftEnd.localeCompare(rightEnd);
-  if (endComparison !== 0) {
-    return endComparison;
-  }
-
-  return left.id.localeCompare(right.id);
-}
 
 function getMeetingStartDateTime(meeting: MeetingRecord) {
   return meeting.startDateTime ?? (meeting.time ? `${meeting.date}T${meeting.time}` : meeting.date);
@@ -90,8 +76,8 @@ function buildTimelineDateRange({
       const fallbackEnd = new Date(now.getFullYear(), now.getMonth() + ALL_INTERVAL_FUTURE_MONTHS + 1, 0, 12);
 
       return {
-        startDate: fallbackStart.toISOString().slice(0, 10),
-        endDate: fallbackEnd.toISOString().slice(0, 10),
+        startDate: formatLocalDate(fallbackStart),
+        endDate: formatLocalDate(fallbackEnd),
       };
     }
 
@@ -113,8 +99,8 @@ function buildTimelineDateRange({
       endObj.setTime(boundedEnd.getTime());
     }
 
-    startDate = startObj.toISOString().slice(0, 10);
-    endDate = endObj.toISOString().slice(0, 10);
+    startDate = formatLocalDate(startObj);
+    endDate = formatLocalDate(endObj);
   } else {
     const now = new Date(`${viewAnchorDate}T12:00:00`);
     let start: Date;
@@ -128,8 +114,8 @@ function buildTimelineDateRange({
       end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 12);
     }
 
-    startDate = start.toISOString().slice(0, 10);
-    endDate = end.toISOString().slice(0, 10);
+    startDate = formatLocalDate(start);
+    endDate = formatLocalDate(end);
   }
 
   return { startDate, endDate };
@@ -141,11 +127,42 @@ function buildTimelineDays(startDate: string, endDate: string) {
   const dayCursor = new Date(`${startDate}T12:00:00`);
 
   for (let index = 0; index < totalDays; index += 1) {
-    days.push(dayCursor.toISOString().slice(0, 10));
+    days.push(formatLocalDate(dayCursor));
     dayCursor.setDate(dayCursor.getDate() + 1);
   }
 
   return days;
+}
+
+function buildTimelineDayIndex<T>(
+  startDate: string,
+  endDate: string,
+  records: readonly T[],
+  compare: (left: T, right: T) => number,
+  getStartDate: (record: T) => string,
+  getEndDate: (record: T) => string,
+) {
+  const recordsByDay: Record<string, T[]> = {};
+
+  for (const record of [...records].sort(compare)) {
+    const recordStart = getStartDate(record);
+    const recordEnd = getEndDate(record);
+
+    if (recordStart > endDate || recordEnd < startDate) continue;
+
+    const rangeStart = recordStart < startDate ? startDate : recordStart;
+    const rangeEnd = recordEnd > endDate ? endDate : recordEnd;
+    const cursor = new Date(`${rangeStart}T12:00:00`);
+    const finalDay = new Date(`${rangeEnd}T12:00:00`);
+
+    while (cursor <= finalDay) {
+      const dayKey = formatLocalDate(cursor);
+      (recordsByDay[dayKey] ??= []).push(record);
+      cursor.setDate(cursor.getDate() + 1);
+    }
+  }
+
+  return recordsByDay;
 }
 
 function buildTimelineDayMilestones(
@@ -153,35 +170,14 @@ function buildTimelineDayMilestones(
   endDate: string,
   milestones: BootstrapPayload["milestones"],
 ) {
-  const dayMilestones: Record<string, MilestoneRecord[]> = {};
-  const milestonesSortedByStart = [...milestones].sort(compareTimelineMilestonesByStart);
-
-  milestonesSortedByStart.forEach((milestone) => {
-    const milestoneStart = datePortion(milestone.startDateTime);
-    const milestoneEnd = datePortion(milestone.endDateTime ?? milestone.startDateTime);
-
-    if (milestoneStart > endDate || milestoneEnd < startDate) {
-      return;
-    }
-
-    const rangeStart = milestoneStart < startDate ? startDate : milestoneStart;
-    const rangeEnd = milestoneEnd > endDate ? endDate : milestoneEnd;
-    const cursor = new Date(`${rangeStart}T12:00:00`);
-    const finalDay = new Date(`${rangeEnd}T12:00:00`);
-
-    while (cursor <= finalDay) {
-      const dayKey = cursor.toISOString().slice(0, 10);
-      const existing = dayMilestones[dayKey];
-      if (existing) {
-        existing.push(milestone);
-      } else {
-        dayMilestones[dayKey] = [milestone];
-      }
-      cursor.setDate(cursor.getDate() + 1);
-    }
-  });
-
-  return dayMilestones;
+  return buildTimelineDayIndex(
+    startDate,
+    endDate,
+    milestones,
+    compareTimelineMilestonesByStart,
+    (milestone) => datePortion(milestone.startDateTime),
+    (milestone) => datePortion(milestone.endDateTime ?? milestone.startDateTime),
+  );
 }
 
 function buildTimelineDayMeetings(
@@ -189,35 +185,14 @@ function buildTimelineDayMeetings(
   endDate: string,
   meetings: NonNullable<BootstrapPayload["meetings"]>,
 ) {
-  const dayMeetings: Record<string, MeetingRecord[]> = {};
-  const meetingsSortedByStart = [...meetings].sort(compareTimelineMeetingsByStart);
-
-  meetingsSortedByStart.forEach((meeting) => {
-    const meetingStart = datePortion(getMeetingStartDateTime(meeting));
-    const meetingEnd = datePortion(meeting.endDateTime ?? getMeetingStartDateTime(meeting));
-
-    if (meetingStart > endDate || meetingEnd < startDate) {
-      return;
-    }
-
-    const rangeStart = meetingStart < startDate ? startDate : meetingStart;
-    const rangeEnd = meetingEnd > endDate ? endDate : meetingEnd;
-    const cursor = new Date(`${rangeStart}T12:00:00`);
-    const finalDay = new Date(`${rangeEnd}T12:00:00`);
-
-    while (cursor <= finalDay) {
-      const dayKey = cursor.toISOString().slice(0, 10);
-      const existing = dayMeetings[dayKey];
-      if (existing) {
-        existing.push(meeting);
-      } else {
-        dayMeetings[dayKey] = [meeting];
-      }
-      cursor.setDate(cursor.getDate() + 1);
-    }
-  });
-
-  return dayMeetings;
+  return buildTimelineDayIndex(
+    startDate,
+    endDate,
+    meetings,
+    compareTimelineMeetingsByStart,
+    (meeting) => datePortion(getMeetingStartDateTime(meeting)),
+    (meeting) => datePortion(meeting.endDateTime ?? getMeetingStartDateTime(meeting)),
+  );
 }
 
 export function buildTimelineData({

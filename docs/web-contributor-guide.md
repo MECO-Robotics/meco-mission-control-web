@@ -23,9 +23,13 @@ The main workspace controller code is split by responsibility:
 - `src/types/` contains frontend contracts for platform payloads and workspace
   records.
 
+The workspace model composes state once. Derived hooks return calculated values and view commands; loaders read the original state for requests and reconciliation. My View selection and its unlinked-account notice belong to the derived hook, so loader refreshes do not introduce a competing command implementation.
+
 Keep view-specific business logic near the view that uses it. Promote helpers
 into `src/lib/` only when they are reused across sections or represent a shared
 contract.
+
+Tutorial chapters target actionable destinations and controls. Sidebar section headings are labels, not tutorial steps. Pending interaction checks retain the latest context and callbacks across ordinary rerenders; changing steps or closing the tutorial cancels them.
 
 ## View And Tab Routing
 
@@ -55,6 +59,8 @@ intent without owning global overlay state. Existing flows use typed draft state
 selected IDs, and action callbacks passed down from app hooks into section and
 view components.
 
+Task-target selection and normalization live in `src/lib/appUtils/taskTargets/`. Editors and detail views call that owner directly; UI option and chip rendering stays in `src/features/workspace/shared/task/taskTargeting.ts`. Keep implied parent selection, child deselection and single/plural target fields consistent there.
+
 For new edit flows:
 
 - Keep draft creation and reset behavior explicit.
@@ -83,7 +89,7 @@ When adding a backend-backed feature:
 
 - Implement or confirm the platform route and response shape first.
 - Update frontend types in `src/types/`.
-- Normalize only for backward compatibility with older payloads.
+- Normalize the current transport shape once at the boundary; remove obsolete prototype adapters when replacing their consumers.
 - Keep cookie credentials, in-memory CSRF handling, auth expiry handling, and
   no-store assumptions in shared request helpers. Never persist or replay a web
   bearer credential from browser-readable storage.
@@ -91,6 +97,8 @@ When adding a backend-backed feature:
   response.
 - Add tests for empty payloads, scoped season/project payloads, unauthorized
   responses, and API failure states when the flow depends on them.
+
+Reports use only `reports` and `reportFindings` in web state. QA history selects `reportType === "QA"`; milestone history selects non-QA reports. Do not recreate the former `qaReports`, `testResults`, `qaFindings` or `testFindings` mirrors. The current platform supplies canonical collections; legacy-only report snapshots are no longer imported. No current-state reset is required.
 
 Do not duplicate platform validation rules in UI code except where immediate
 client-side feedback improves the workflow. The platform remains the source of
@@ -100,9 +108,13 @@ truth for permissions, persistence, and schema validation.
 
 Follow [CONTRIBUTING.md](../CONTRIBUTING.md). Keep one clear owner and explicit dependencies; delete redundant representations and forwarding layers. Split or merge modules according to responsibility and reuse, without file-size quotas. Keep styles with the view or component whose cascade they control.
 
+KanbanScrollFrame owns board overflow observation and scroll hints. Task-specific zoom, focus selection and lazy loading stay in TaskQueueBoardSection; its shell ref connects those behaviors to the same scrolling element.
+
 For UI work, match existing dense Mission Control patterns. Use restrained
 controls, stable dimensions, and predictable responsive behavior. Avoid adding
 marketing-style sections or decorative surfaces to operational screens.
+
+The app shell loads `src/app/App.css`; `AuthApp.css` shares the authentication leaves before workspace loading. Current home attention markup uses `workspaceConsolidation.css`. Keep CSS imports in cascade order, and remove retired selectors when replacing their owning markup. A class-name search alone does not prove a rule is unused: inspect generated class names, conditional states, media queries and shared selectors before deletion.
 
 When changing styles:
 
@@ -129,3 +141,15 @@ git diff --check
 
 Use browser QA for visible UI changes, especially navigation, modal, drag/drop,
 and responsive layout work.
+
+Google Identity Services loading, local client-ID overrides and host checks live in `src/lib/auth/core/google.ts`. App hooks consume that owner and the shared `Window.google` declaration; failed script loads and synchronous policy/DOM setup failures share one cleanup path, allowing a later attempt to retry without duplicating an in-flight load.
+
+Import feature owners directly instead of adding forwarding modules. When checking for dead code, distinguish runtime callers from tests and internal uses; an unused export alone does not establish that its implementation is unused. Authentication configuration is fetched by `src/app/hooks/auth/useAppAuthSessionConfig.ts`.
+
+Bootstrap decoding preserves the platform's supplied identities, names, ordering and links. It does not invent seasons, standard projects or workstreams, merge same-category projects, or infer task workstreams from subsystem names. An empty bootstrap remains empty. Optional presentation defaults and current blocker/risk mappings remain at this boundary; local demo starts from the platform's public demo bootstrap.
+
+Local demo part instances now also retain their supplied identities on reload, including multiple instances with the same definition and placement. Quantities and task, manufacturing and dependency references are preserved; the former read-time merge and partial link remapping are retired. Platform command-time consolidation is unchanged. No reset or migration command is required for current canonical snapshots; legacy synthesis/import is deliberately unsupported.
+
+Dashboard attention and health share `RisksView`; `riskViewModel` owns its risk detail/edit/delete lifecycle. `riskViewDataScope` produces the health metrics separately from private scoped collections, and the health cards consume that metric type directly. The dashboard is the only risk presentation: the retired standalone risk board, metrics search, manual-create flow and navigation mode had no URL or sidebar target and are removed. Report-generated risks, attention filtering, modal validation, cancellation and persisted edits remain supported.
+
+Risk writes belong to the editor session that started them. Closing, opening another risk or unmounting retires that session: a late success or failure cannot close a newer editor, replace its error, or clear its busy state. Save and delete share one pending guard; a current-session failure keeps its draft available for retry.

@@ -4,8 +4,8 @@ import type {
   CadHierarchyReview,
   CadHierarchyReviewDecision,
   CadHierarchyTargetKind,
-  CadPartMatchProposal,
-} from "../model/cadIntegrationTypes";
+  CadPartMatchProposal
+} from "../model/cadStepTypes";
 import { CadStepHierarchyNodeCard } from "./CadStepHierarchyNodeCard";
 import {
   cadHierarchyStages,

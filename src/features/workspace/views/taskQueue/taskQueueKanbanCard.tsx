@@ -2,6 +2,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 
 import { formatIterationVersion } from "@/lib/appUtils/common";
+import { normalizeTaskTargetIds } from "@/features/workspace/shared/task/normalizeTaskTargetIds";
 import { filterSelectionIncludes, filterSelectionIntersects, filterSelectionMatchesTaskPeople } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 
@@ -30,31 +31,11 @@ export function readTaskAssigneeIds(task: TaskRecord) {
 }
 
 export function readTaskSubsystemIds(task: TaskRecord) {
-  const subsystemIds = Array.isArray(task.subsystemIds) ? task.subsystemIds : [];
-  const candidateIds = subsystemIds.length > 0 ? subsystemIds : [task.subsystemId];
-
-  return Array.from(
-    new Set(
-      candidateIds.filter(
-        (subsystemId): subsystemId is string =>
-          typeof subsystemId === "string" && subsystemId.length > 0,
-      ),
-    ),
-  );
+  return normalizeTaskTargetIds(task.subsystemIds);
 }
 
 export function readTaskWorkstreamIds(task: TaskRecord) {
-  const workstreamIds = Array.isArray(task.workstreamIds) ? task.workstreamIds : [];
-  const candidateIds = workstreamIds.length > 0 ? workstreamIds : [task.workstreamId];
-
-  return Array.from(
-    new Set(
-      candidateIds.filter(
-        (workstreamId): workstreamId is string =>
-          typeof workstreamId === "string" && workstreamId.length > 0,
-      ),
-    ),
-  );
+  return normalizeTaskTargetIds(task.workstreamIds);
 }
 
 export function formatSubsystemNames(

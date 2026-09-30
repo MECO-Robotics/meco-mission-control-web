@@ -32,7 +32,6 @@ interface TimelineSubsystemGroupProps {
   selectTaskRow: (task: TaskRecord) => void;
   selectedSubsystemId: string | null;
   selectedTaskId?: string | null;
-  showProjectCol: boolean;
   showSubsystemCol: boolean;
   subsystem: TimelineSubsystemRow;
   subsystemColumnIndex: number;

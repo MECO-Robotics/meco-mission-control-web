@@ -1,0 +1,15 @@
+.artifact-table .table-column-header-cell {
+  width: 100%;
+}
+
+.artifact-table > .table-cell:nth-child(4) {
+  min-width: 0;
+}
+
+.artifact-link-value {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

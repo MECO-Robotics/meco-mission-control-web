@@ -5,6 +5,7 @@ import {
   buildTaskCalendarEvents,
   isTaskDueSoon,
 } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
+import { sortTaskCalendarEvents } from "@/features/workspace/views/taskCalendar/taskCalendarLayout";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
 describe("buildTaskCalendarEvents", () => {
@@ -68,10 +69,75 @@ describe("buildTaskCalendarEvents", () => {
     const meetingEvent = events.find((event) => event.id === "meeting:build-night");
 
     expect(meetingEvent?.start).toBe("2026-05-07T18:00:00");
-    expect(meetingEvent?.extendedProps.projectId).toBe("project-robot");
     expect(meetingEvent?.extendedProps.contextLabel).toBe("Robot 2026");
     expect(meetingEvent?.extendedProps.status).toBe("build");
     expect(meetingEvent?.title).toBe("Robot 2026 | Meeting: Build night");
+  });
+
+  it("shares project labels while preserving milestone and meeting scope rules", () => {
+    const bootstrap = {
+      ...EMPTY_BOOTSTRAP,
+      projects: [
+        {
+          id: "project-robot",
+          seasonId: "season-1",
+          name: "Robot 2026",
+          projectType: "robot" as const,
+          description: "",
+          status: "active" as const,
+        },
+        {
+          id: "project-outreach",
+          seasonId: "season-1",
+          name: "Outreach",
+          projectType: "outreach" as const,
+          description: "",
+          status: "active" as const,
+        },
+      ],
+      milestones: [
+        {
+          id: "both-projects",
+          title: "Shared milestone",
+          type: "deadline" as const,
+          startDateTime: "2026-05-07T18:00:00",
+          endDateTime: null,
+          isExternal: false,
+          description: "",
+          projectIds: ["project-robot", "project-outreach"],
+        },
+      ],
+      meetings: [
+        {
+          id: "multi-project",
+          title: "Shared meeting",
+          meetingType: "general" as const,
+          seasonId: "season-1",
+          projectIds: ["project-robot", "project-outreach"],
+          startDateTime: "2026-05-08T18:00:00",
+          endDateTime: null,
+          location: "",
+          description: "",
+          date: "2026-05-08",
+          time: "18:00",
+          rsvpsYes: 0,
+          rsvpsMaybe: 0,
+          openSignIns: 0,
+        },
+      ],
+    } satisfies BootstrapPayload;
+
+    const events = buildTaskCalendarEvents({
+      activePersonFilter: [],
+      bootstrap,
+      isAllProjectsView: true,
+      projectsById: Object.fromEntries(bootstrap.projects.map((project) => [project.id, project])),
+    });
+
+    expect(events.find((event) => event.id === "milestone:both-projects")?.extendedProps.contextLabel)
+      .toBe("All projects");
+    expect(events.find((event) => event.id === "meeting:multi-project")?.extendedProps.contextLabel)
+      .toBe("Robot 2026 +1");
   });
 
   it("filters scheduled meetings to the active project scope", () => {
@@ -89,22 +155,6 @@ describe("buildTaskCalendarEvents", () => {
       ],
       meetings: [
         {
-          id: "visible-meeting",
-          title: "Visible build night",
-          meetingType: "build" as const,
-          seasonId: "season-1",
-          projectIds: ["project-robot"],
-          startDateTime: "2026-05-07T18:00:00",
-          endDateTime: "2026-05-07T20:00:00",
-          location: "Lab",
-          description: "",
-          date: "2026-05-07",
-          time: "18:00",
-          rsvpsYes: 0,
-          rsvpsMaybe: 0,
-          openSignIns: 0,
-        },
-        {
           id: "global-meeting",
           title: "All projects sync",
           meetingType: "general" as const,
@@ -115,6 +165,22 @@ describe("buildTaskCalendarEvents", () => {
           location: "",
           description: "",
           date: "2026-05-08",
+          time: "18:00",
+          rsvpsYes: 0,
+          rsvpsMaybe: 0,
+          openSignIns: 0,
+        },
+        {
+          id: "visible-meeting",
+          title: "Visible build night",
+          meetingType: "build" as const,
+          seasonId: "season-1",
+          projectIds: ["project-robot"],
+          startDateTime: "2026-05-07T18:00:00",
+          endDateTime: "2026-05-07T20:00:00",
+          location: "Lab",
+          description: "",
+          date: "2026-05-07",
           time: "18:00",
           rsvpsYes: 0,
           rsvpsMaybe: 0,
@@ -148,9 +214,13 @@ describe("buildTaskCalendarEvents", () => {
       },
     });
 
-    expect(events.map((event) => event.id)).toEqual([
+    expect(sortTaskCalendarEvents(events, "date").map((event) => event.id)).toEqual([
       "meeting:visible-meeting",
       "meeting:global-meeting",
+    ]);
+    expect(sortTaskCalendarEvents(events, "date", "desc").map((event) => event.id)).toEqual([
+      "meeting:global-meeting",
+      "meeting:visible-meeting",
     ]);
   });
 });

@@ -11,7 +11,6 @@ import { RobotMapCanvas } from "./RobotMapCanvas";
 import { buildAutoArrangedLayouts, buildUnplacedLayout } from "./robotMapLayout";
 import { buildRobotConfigurationViewModel } from "./robotMapViewModel";
 import { SubsystemDetailPanel } from "./SubsystemDetailPanel";
-import { SubsystemMapCard } from "./SubsystemMapCard";
 
 interface RobotMapViewProps {
   bootstrap: BootstrapPayload;
@@ -19,6 +18,7 @@ interface RobotMapViewProps {
   openCreateMechanismModal: (subsystemId?: string) => void;
   openCreatePartInstanceModal: (mechanism: BootstrapPayload["mechanisms"][number]) => void;
   openCreateSubsystemModal: () => void;
+  onOpenCadWorkspace?: () => void;
   openEditMechanismModal: (mechanism: BootstrapPayload["mechanisms"][number]) => void;
   openEditPartInstanceModal: (partInstance: BootstrapPayload["partInstances"][number]) => void;
   openEditSubsystemModal: (subsystem: BootstrapPayload["subsystems"][number]) => void;
@@ -40,35 +40,13 @@ interface RobotMapViewProps {
   ) => Promise<boolean>;
 }
 
-const REFERENCE_IMAGE_STORAGE_ERROR_MESSAGE =
-  "Image loaded for this session, but local browser storage is unavailable.";
-
-function buildReferenceImageStorageKey(primaryProjectId: string) {
-  return `robot-config-reference-image:${primaryProjectId}`;
-}
-
-function readImageAsDataUrl(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error("Could not read image file."));
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        resolve(reader.result);
-        return;
-      }
-
-      reject(new Error("Could not convert selected image."));
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
 export function RobotMapView({
   bootstrap,
   handleDeleteMechanism,
   openCreateMechanismModal,
   openCreatePartInstanceModal,
   openCreateSubsystemModal,
+  onOpenCadWorkspace,
   openEditMechanismModal,
   openEditPartInstanceModal,
   openEditSubsystemModal,
@@ -79,34 +57,15 @@ export function RobotMapView({
   updateSubsystemConfiguration,
 }: RobotMapViewProps) {
   const [search, setSearch] = useState("");
-  const [viewMode, setViewMode] = useState<"map" | "list" | "3d">("3d");
   const [selectedSubsystemId, setSelectedSubsystemId] = useState<string | null>(null);
   const [layoutDraftBySubsystemId, setLayoutDraftBySubsystemId] = useState<
     Record<string, SubsystemLayoutFields>
   >({});
   const [isLayoutEditEnabled, setIsLayoutEditEnabled] = useState(false);
-  const [referenceImageUrl, setReferenceImageUrl] = useState<string | null>(null);
-  const [referenceImageStorageNotice, setReferenceImageStorageNotice] = useState<string | null>(null);
   const layoutPersistVersionBySubsystemIdRef = useRef<Record<string, number>>({});
 
   const primaryProjectId = bootstrap.projects[0]?.id ?? "default";
-  const referenceImageStorageKey = useMemo(
-    () => buildReferenceImageStorageKey(primaryProjectId),
-    [primaryProjectId],
-  );
   const viewModel = useMemo(() => buildRobotConfigurationViewModel(bootstrap, search), [bootstrap, search]);
-
-  useEffect(() => {
-    try {
-      const storedImage = window.localStorage.getItem(referenceImageStorageKey);
-      setReferenceImageUrl(storedImage);
-      setReferenceImageStorageNotice(null);
-    } catch (error) {
-      setReferenceImageUrl(null);
-      setReferenceImageStorageNotice(REFERENCE_IMAGE_STORAGE_ERROR_MESSAGE);
-      console.warn("Failed to read robot reference image from local storage.", error);
-    }
-  }, [referenceImageStorageKey]);
 
   const subsystems = useMemo(
     () =>
@@ -213,77 +172,39 @@ export function RobotMapView({
     await persistLayouts(resetLayouts);
   };
 
-  const handleReferenceImageSelected = async (file: File) => {
-    const nextImage = await readImageAsDataUrl(file);
-    setReferenceImageUrl(nextImage);
-    try {
-      window.localStorage.setItem(referenceImageStorageKey, nextImage);
-      setReferenceImageStorageNotice(null);
-    } catch (error) {
-      setReferenceImageStorageNotice(REFERENCE_IMAGE_STORAGE_ERROR_MESSAGE);
-      console.warn("Failed to persist robot reference image locally.", error);
-    }
-  };
-
   return (
     <section className={`panel dense-panel robot-config-shell ${WORKSPACE_PANEL_CLASS}`}>
       <RobotConfigurationToolbar
         onSearchChange={setSearch}
-        onViewModeChange={setViewMode}
         search={search}
-        viewMode={viewMode}
       />
 
-      {viewMode === "3d" ? (
-        <CadFileViewer
-          key={primaryProjectId}
-          title="Robot parts"
-          partDefinitions={bootstrap.partDefinitions}
-          onSavePartImage={onSavePartImage}
-          description="Choose a STEP assembly to inspect the robot in 3D. Select a CAD part to save its still image to a matching part record."
+      <div className={`robot-config-main robot-config-main-map${selectedSubsystem ? "" : " is-empty"}`}>
+        <RobotMapCanvas
+          cadViewer={(onOrbitingChange) => (
+            <CadFileViewer
+              embeddedInMap
+              importPlacement="topbar"
+              key={primaryProjectId}
+              onOrbitingChange={onOrbitingChange}
+              onOpenCadWorkspace={onOpenCadWorkspace}
+              partDefinitions={bootstrap.partDefinitions}
+              onSavePartImage={onSavePartImage}
+            />
+          )}
+          isLayoutEditEnabled={isLayoutEditEnabled}
+          onAddSubsystem={openCreateSubsystemModal}
+          onAutoArrange={handleAutoArrange}
+          onDraftLayoutChange={applyLayoutDraft}
+          onLayoutDrop={handleLayoutDrop}
+          onResetLayout={handleResetLayout}
+          onSelectSubsystem={setSelectedSubsystemId}
+          onToggleLayoutEdit={toggleLayoutEdit}
+          selectedSubsystemId={selectedSubsystemId}
+          subsystems={subsystems}
         />
-      ) : subsystems.length === 0 ? (
-        <div className="empty-state robot-config-empty">
-          <strong>No subsystems yet.</strong>
-          <p className="section-copy">Create your first subsystem to start configuring robot structure and placement.</p>
-          <button className="primary-action" onClick={openCreateSubsystemModal} type="button">
-            Add subsystem
-          </button>
-        </div>
-      ) : (
-        <div className={`robot-config-main robot-config-main-${viewMode}`}>
-          <div className="robot-config-center">
-            {viewMode === "map" ? (
-              <RobotMapCanvas
-                isLayoutEditEnabled={isLayoutEditEnabled}
-                onAddSubsystem={openCreateSubsystemModal}
-                onAutoArrange={handleAutoArrange}
-                onDraftLayoutChange={applyLayoutDraft}
-                onLayoutDrop={handleLayoutDrop}
-                onReferenceImageSelected={(file) => void handleReferenceImageSelected(file)}
-                onResetLayout={handleResetLayout}
-                onSelectSubsystem={setSelectedSubsystemId}
-                onToggleLayoutEdit={toggleLayoutEdit}
-                referenceImageUrl={referenceImageUrl}
-                referenceImageStorageNotice={referenceImageStorageNotice}
-                selectedSubsystemId={selectedSubsystemId}
-                subsystems={subsystems}
-              />
-            ) : (
-              <div className="robot-config-list-view">
-                {subsystems.map((subsystem) => (
-                  <SubsystemMapCard
-                    key={subsystem.id}
-                    isSelected={selectedSubsystemId === subsystem.id}
-                    onSelect={() => setSelectedSubsystemId(subsystem.id)}
-                    subsystem={subsystem}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
 
-          <SubsystemDetailPanel
+        {selectedSubsystem ? <SubsystemDetailPanel
             onCreateMechanism={openCreateMechanismModal}
             onCreatePartInstance={openCreatePartInstanceModal}
             onDeleteMechanism={handleDeleteMechanism}
@@ -294,9 +215,8 @@ export function RobotMapView({
             onRemovePartFromMechanism={removePartInstanceFromMechanism}
             onSaveSubsystemConfiguration={updateSubsystemConfiguration}
             selectedSubsystem={selectedSubsystem}
-          />
-        </div>
-      )}
+        /> : null}
+      </div>
     </section>
   );
 }

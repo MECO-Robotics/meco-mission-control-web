@@ -3,25 +3,20 @@
 import {
   buildTaskDependencyCountsByTaskId,
   buildTimelineTaskStatusSignalByTaskId,
-  getTaskDependencyCounts,
-  getTaskDependencyCountsFromLookup,
   getTimelineTaskStatusSignal,
 } from "@/features/workspace/views/timeline/timelineGridBodyUtils";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
 const baseTask: BootstrapPayload["tasks"][number] = {
+  artifactIds: [],
   id: "task-ready",
   projectId: "project-1",
-  workstreamId: null,
   workstreamIds: [],
   title: "Ready task",
   summary: "",
-  subsystemId: "subsystem-1",
   subsystemIds: ["subsystem-1"],
   disciplineId: "discipline-1",
-  mechanismId: null,
   mechanismIds: [],
-  partInstanceId: null,
   partInstanceIds: [],
   targetMilestoneId: null,
   ownerId: "member-1",
@@ -41,9 +36,9 @@ const baseTask: BootstrapPayload["tasks"][number] = {
   documentationLinked: false,
 };
 
-describe("getTaskDependencyCounts", () => {
+describe("timeline task dependency counts and status", () => {
   it("counts incoming and outgoing task dependencies for a task", () => {
-    const dependencies: Parameters<typeof getTaskDependencyCounts>[1] = [
+    const dependencies: Parameters<typeof buildTaskDependencyCountsByTaskId>[0] = [
       {
         id: "dependency-1",
         taskId: "task-target",
@@ -81,7 +76,7 @@ describe("getTaskDependencyCounts", () => {
         requiredState: "complete",
       },
     ];
-    const counts = getTaskDependencyCounts("task-target", dependencies);
+    const counts = buildTaskDependencyCountsByTaskId(dependencies)["task-target"];
 
     expect(counts).toEqual({
       incoming: 2,
@@ -120,22 +115,46 @@ describe("getTaskDependencyCounts", () => {
       },
     ]);
 
-    expect(getTaskDependencyCountsFromLookup(lookup, "task-a")).toEqual({
+    expect(lookup["task-a"]).toEqual({
       incoming: 0,
       outgoing: 2,
     });
-    expect(getTaskDependencyCountsFromLookup(lookup, "task-b")).toEqual({
+    expect(lookup["task-b"]).toEqual({
       incoming: 1,
       outgoing: 1,
     });
-    expect(getTaskDependencyCountsFromLookup(lookup, "task-c")).toEqual({
+    expect(lookup["task-c"]).toEqual({
       incoming: 2,
       outgoing: 0,
     });
-    expect(getTaskDependencyCountsFromLookup(lookup, "task-unrelated")).toEqual({
-      incoming: 0,
-      outgoing: 0,
-    });
+    expect(lookup["task-unrelated"]).toBeUndefined();
+  });
+
+  it("does not treat a non-task reference with a matching ID as an outgoing task edge", () => {
+    const lookup = buildTaskDependencyCountsByTaskId([
+      {
+        id: "milestone-edge",
+        taskId: "task-dependent",
+        kind: "milestone",
+        refId: "shared-id",
+        requiredState: "complete",
+        dependencyType: "hard",
+        createdAt: "2026-02-01T00:00:00.000Z",
+      },
+      {
+        id: "task-edge",
+        taskId: "shared-id",
+        kind: "task",
+        refId: "task-upstream",
+        requiredState: "complete",
+        dependencyType: "hard",
+        createdAt: "2026-02-01T00:00:00.000Z",
+      },
+    ]);
+
+    expect(lookup["shared-id"]).toEqual({ incoming: 1, outgoing: 0 });
+    expect(lookup["task-dependent"]).toEqual({ incoming: 1, outgoing: 0 });
+    expect(lookup["task-upstream"]).toEqual({ incoming: 0, outgoing: 1 });
   });
 
   it("prioritizes active blockers over dependency and status icons", () => {

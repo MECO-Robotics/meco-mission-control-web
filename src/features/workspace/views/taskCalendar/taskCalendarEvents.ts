@@ -18,15 +18,12 @@ export type TaskCalendarEventType =
 export interface TaskCalendarEventProps {
   contextLabel: string | null;
   priority?: string;
-  projectId: string | null;
   recordId: string;
   status?: string;
   type: TaskCalendarEventType;
 }
 
 export interface TaskCalendarEvent {
-  allDay: boolean;
-  classNames: string[];
   extendedProps: TaskCalendarEventProps;
   id: string;
   start: string;
@@ -54,99 +51,41 @@ function hasTime(value: string) {
   return value.includes("T");
 }
 
-function buildContextLabel({
+function buildProjectContextLabel({
+  allProjectIds,
   isAllProjectsView,
-  projectId,
+  projectIds,
   projectsById,
 }: {
+  allProjectIds?: string[];
   isAllProjectsView: boolean;
-  projectId: string | null;
+  projectIds: string[];
   projectsById: Record<string, BootstrapPayload["projects"][number]>;
 }) {
   if (!isAllProjectsView) {
     return null;
   }
 
-  if (!projectId) {
+  const isAllProjectsSelection =
+    projectIds.length === 0 ||
+    (allProjectIds !== undefined &&
+      projectIds.length === allProjectIds.length &&
+      projectIds.every((projectId) => allProjectIds.includes(projectId)));
+
+  if (isAllProjectsSelection) {
     return "All projects";
   }
 
-  return projectsById[projectId]?.name ?? "Unknown project";
-}
-
-function buildMilestoneContextLabel({
-  bootstrap,
-  isAllProjectsView,
-  milestone,
-  projectsById,
-}: {
-  bootstrap: BootstrapPayload;
-  isAllProjectsView: boolean;
-  milestone: BootstrapPayload["milestones"][number];
-  projectsById: Record<string, BootstrapPayload["projects"][number]>;
-}) {
-  if (!isAllProjectsView) {
-    return null;
+  if (projectIds.length === 1) {
+    return projectsById[projectIds[0]]?.name ?? "Unknown project";
   }
 
-  const milestoneProjectIds = milestone.projectIds;
-  const scopedProjectIds = bootstrap.projects.map((project) => project.id);
-  const isAllProjectsMilestone =
-    milestoneProjectIds.length === 0 ||
-    (milestoneProjectIds.length === scopedProjectIds.length &&
-      milestoneProjectIds.every((projectId) => scopedProjectIds.includes(projectId)));
-
-  if (isAllProjectsMilestone) {
-    return "All projects";
-  }
-
-  if (milestoneProjectIds.length === 1) {
-    return projectsById[milestoneProjectIds[0]]?.name ?? "Unknown project";
-  }
-
-  const firstProjectName = projectsById[milestoneProjectIds[0]]?.name ?? "Multiple projects";
-  return `${firstProjectName} +${milestoneProjectIds.length - 1}`;
-}
-
-function buildMeetingContextLabel({
-  isAllProjectsView,
-  meeting,
-  projectsById,
-}: {
-  isAllProjectsView: boolean;
-  meeting: NonNullable<BootstrapPayload["meetings"]>[number];
-  projectsById: Record<string, BootstrapPayload["projects"][number]>;
-}) {
-  if (!isAllProjectsView) {
-    return null;
-  }
-
-  const meetingProjectIds = meeting.projectIds ?? [];
-  if (meetingProjectIds.length === 0) {
-    return "All projects";
-  }
-
-  if (meetingProjectIds.length === 1) {
-    return projectsById[meetingProjectIds[0]]?.name ?? "Unknown project";
-  }
-
-  const firstProjectName = projectsById[meetingProjectIds[0]]?.name ?? "Multiple projects";
-  return `${firstProjectName} +${meetingProjectIds.length - 1}`;
+  const firstProjectName = projectsById[projectIds[0]]?.name ?? "Multiple projects";
+  return `${firstProjectName} +${projectIds.length - 1}`;
 }
 
 function prependContextLabel(title: string, contextLabel: string | null) {
   return contextLabel ? `${contextLabel} | ${title}` : title;
-}
-
-function compareEventStartDate(left: TaskCalendarEvent, right: TaskCalendarEvent) {
-  const leftStart = left.start ? new Date(left.start).getTime() : Number.POSITIVE_INFINITY;
-  const rightStart = right.start ? new Date(right.start).getTime() : Number.POSITIVE_INFINITY;
-
-  if (leftStart === rightStart) {
-    return left.title.localeCompare(right.title);
-  }
-
-  return leftStart - rightStart;
 }
 
 export function buildTaskCalendarEvents({
@@ -155,7 +94,8 @@ export function buildTaskCalendarEvents({
   isAllProjectsView,
   projectsById,
 }: BuildTaskCalendarEventsArgs) {
-  const activeProjectIds = new Set(bootstrap.projects.map((project) => project.id));
+  const activeProjectIdList = bootstrap.projects.map((project) => project.id);
+  const activeProjectIds = new Set(activeProjectIdList);
   const subsystemProjectById = Object.fromEntries(
     bootstrap.subsystems.map((subsystem) => [subsystem.id, subsystem.projectId] as const),
   );
@@ -169,19 +109,16 @@ export function buildTaskCalendarEvents({
     )
     .map((task) => {
       const type = task.status === "waiting-for-qa" ? "qa-due" : "task-due";
-      const contextLabel = buildContextLabel({
+      const contextLabel = buildProjectContextLabel({
         isAllProjectsView,
-        projectId: task.projectId,
+        projectIds: task.projectId ? [task.projectId] : [],
         projectsById,
       });
 
       return {
-        allDay: !hasTime(task.dueDate),
-        classNames: ["task-calendar-event", `task-calendar-event-${type}`],
         extendedProps: {
           contextLabel,
           priority: task.priority,
-          projectId: task.projectId,
           recordId: task.id,
           status: task.status,
           type,
@@ -202,19 +139,16 @@ export function buildTaskCalendarEvents({
       return relatedTasks.some((task) => filterSelectionMatchesTaskPeople(activePersonFilter, task));
     })
     .map((milestone) => {
-      const contextLabel = buildMilestoneContextLabel({
-        bootstrap,
+      const contextLabel = buildProjectContextLabel({
+        allProjectIds: activeProjectIdList,
         isAllProjectsView,
-        milestone,
+        projectIds: milestone.projectIds,
         projectsById,
       });
 
       return {
-        allDay: !hasTime(milestone.startDateTime),
-        classNames: ["task-calendar-event", "task-calendar-event-milestone"],
         extendedProps: {
           contextLabel,
-          projectId: milestone.projectIds[0] ?? null,
           recordId: milestone.id,
           status: milestone.status,
           type: "milestone",
@@ -234,18 +168,15 @@ export function buildTaskCalendarEvents({
     )
     .map((item) => {
       const projectId = subsystemProjectById[item.subsystemId] ?? null;
-      const contextLabel = buildContextLabel({
+      const contextLabel = buildProjectContextLabel({
         isAllProjectsView,
-        projectId,
+        projectIds: projectId ? [projectId] : [],
         projectsById,
       });
 
       return {
-        allDay: !hasTime(item.dueDate),
-        classNames: ["task-calendar-event", "task-calendar-event-manufacturing-due"],
         extendedProps: {
           contextLabel,
-          projectId,
           recordId: item.id,
           status: item.status,
           type: "manufacturing-due",
@@ -264,18 +195,15 @@ export function buildTaskCalendarEvents({
         (meeting.time.trim().length > 0
           ? `${asDateOnly(meeting.date)}T${meeting.time.trim()}`
           : asDateOnly(meeting.date));
-      const contextLabel = buildMeetingContextLabel({
+      const contextLabel = buildProjectContextLabel({
         isAllProjectsView,
-        meeting,
+        projectIds: meeting.projectIds ?? [],
         projectsById,
       });
 
       return {
-        allDay: !hasTime(meetingStart),
-        classNames: ["task-calendar-event", "task-calendar-event-event"],
         extendedProps: {
           contextLabel,
-          projectId: meeting.projectIds?.[0] ?? null,
           recordId: meeting.id,
           status: meeting.meetingType ?? "general",
           type: "event",
@@ -286,9 +214,7 @@ export function buildTaskCalendarEvents({
       };
     });
 
-  return [...milestoneEvents, ...taskEvents, ...manufacturingEvents, ...meetingEvents].sort(
-    compareEventStartDate,
-  );
+  return [...milestoneEvents, ...taskEvents, ...manufacturingEvents, ...meetingEvents];
 }
 
 export function isTaskDueSoon(dueDate: string, today = new Date()) {

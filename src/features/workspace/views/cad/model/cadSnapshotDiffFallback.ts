@@ -5,8 +5,8 @@ import type {
   CadPartInstanceRecord,
   CadSnapshotDiffStatus,
   CadSnapshotRecord,
-  OnshapeOverview,
-} from "./cadIntegrationTypes";
+  OnshapeOverview
+} from "./onshapeCadTypes";
 import { createPartDefinitionMatcher } from "./cadSnapshotDiffPartMatching";
 import type { SnapshotDiffItem } from "./cadSnapshotDiffTypes";
 

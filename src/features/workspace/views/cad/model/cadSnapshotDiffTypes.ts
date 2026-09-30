@@ -2,8 +2,8 @@ import type {
   CadImportWarningRecord,
   CadSnapshotDiffSourceKind,
   CadSnapshotDiffStatus,
-  CadSnapshotRecord,
-} from "./cadIntegrationTypes";
+  CadSnapshotRecord
+} from "./onshapeCadTypes";
 
 export type SnapshotDiffItem = {
   id: string;

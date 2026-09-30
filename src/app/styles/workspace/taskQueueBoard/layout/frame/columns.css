@@ -1,14 +1,13 @@
 .page-shell.dark-mode .task-queue-board-scroll-hint {
-  background: color-mix(in srgb, var(--bg-panel) 84%, transparent);
-  border-color: color-mix(in srgb, var(--border-base) 90%, transparent);
-  box-shadow: 0 10px 20px rgba(2, 6, 23, 0.24);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
 
 .task-queue-board {
   display: flex;
   width: max-content;
   min-height: 100vh;
-  min-width: calc((var(--task-queue-board-column-width, 15.5rem) * 6) + (0.7rem * 5));
   gap: calc(0.7rem * var(--task-queue-zoom, 1));
   align-items: stretch;
 }
@@ -25,4 +24,31 @@
 .milestone-board .task-queue-board-column {
   flex: 0 0 var(--task-queue-board-column-width, 15.5rem);
   width: var(--task-queue-board-column-width, 15.5rem);
+}
+
+:is(.task-queue-board, .worklog-activity-board) .task-queue-board-column {
+  flex: 0 0 var(--task-queue-board-column-width, 15.5rem);
+  width: var(--task-queue-board-column-width, 15.5rem);
+}
+
+.workspace-kanban-scroll-view .task-queue-board {
+  height: calc(100dvh - var(--kanban-board-viewport-offset, 8rem));
+  min-height: 0;
+}
+
+:is(.task-queue-board, .worklog-activity-board) .task-queue-board-column {
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+  min-height: 0;
+}
+
+:is(.task-queue-board, .worklog-activity-board) .task-queue-board-column-body {
+  align-content: start;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+}
+
+.task-queue-board-shell {
+  touch-action: auto;
 }

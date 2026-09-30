@@ -5,7 +5,7 @@ import type { AuditActionRecord } from "@/types/recordsExecution";
 import type { RiskRecord } from "@/types/recordsReporting";
 import { WorkspaceAuditActionList } from "@/features/workspace/shared/WorkspaceAuditActionList";
 
-import { ATTACHMENT_TYPE_LABELS, formatRiskSeverity, getRiskSeverityPillClassName } from "./riskViewModel";
+import { ATTACHMENT_TYPE_LABELS, formatRiskSeverity, getRiskSeverityPillClassName } from "./riskViewData/riskViewDataPayload";
 import { TaskPriorityBadge } from "./taskQueue/taskQueueKanbanCardMeta";
 
 interface RiskDetailsModalProps {
@@ -37,8 +37,7 @@ export function RiskDetailsModal({
   const modal = (
     <ModalDialog label={activeRisk.title} onClose={onClose} dismissOnBackdrop>
       <section
-        className="modal-card task-details-modal"
-        style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
+        className="modal-card task-details-modal modal-panel-surface"
       >
         <div className="panel-header compact-header task-details-header">
           <div>
@@ -73,21 +72,21 @@ export function RiskDetailsModal({
 
         <div className="modal-form task-details-grid" style={{ color: "var(--text-copy)" }}>
           <div className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Summary</span>
+            <span>Summary</span>
             <p className="task-detail-copy">{activeRisk.detail || "No risk detail provided."}</p>
           </div>
           <div className="field">
-            <span style={{ color: "var(--text-title)" }}>Attachment</span>
+            <span>Attachment</span>
             <p className="task-detail-copy">
               {ATTACHMENT_TYPE_LABELS[activeRisk.attachmentType]}: {getAttachmentLabel(activeRisk)}
             </p>
           </div>
           <div className="field">
-            <span style={{ color: "var(--text-title)" }}>Mitigation task</span>
+            <span>Mitigation task</span>
             <p className="task-detail-copy">{getMitigationLabel(activeRisk)}</p>
           </div>
           <div className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Mitigation meaning</span>
+            <span>Mitigation meaning</span>
             <p className="task-detail-copy">
               Partial mitigation lowers severity while keeping the risk tracked. Full mitigation is
               a mentor-approved QA reassessment that reduces the tracked risk to low.

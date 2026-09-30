@@ -1,21 +1,3 @@
-.cad-step-preview-card {
-  display: grid;
-  gap: 12px;
-}
-
-.cad-step-preview-heading {
-  align-items: flex-start;
-  display: flex;
-  gap: 12px;
-  justify-content: space-between;
-}
-
-.cad-step-preview-counts {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
 .cad-step-preview-groups {
   display: grid;
   gap: 12px;

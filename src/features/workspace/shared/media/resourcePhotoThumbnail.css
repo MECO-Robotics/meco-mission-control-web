@@ -1,0 +1,2 @@
+.resource-photo-thumbnail { width: 40px; height: 40px; flex: 0 0 40px; object-fit: contain; border: 1px solid var(--border-subtle, #cbd5e1); border-radius: 8px; background: var(--surface-panel, #fff); }
+.resource-photo-thumbnail-empty { display: inline-flex; align-items: center; justify-content: center; color: var(--text-muted, #64748b); }

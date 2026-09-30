@@ -10,8 +10,8 @@ import type {
   CadStepMappingRuleMatchStrategy,
   CadStepSnapshotRecord,
   CadStepTreeNode,
-  CadStepWarningRecord,
-} from "../model/cadIntegrationTypes";
+  CadStepWarningRecord
+} from "../model/cadStepTypes";
 
 export function uploadCadStepFile(
   payload: {

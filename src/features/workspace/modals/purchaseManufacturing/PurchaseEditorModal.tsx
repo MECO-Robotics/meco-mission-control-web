@@ -1,9 +1,9 @@
-import { ModalDialog } from "@/components/ModalDialog";
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { PurchaseItemPayload } from "@/types/payloads";
 
+import { EditorModalShell } from "../EditorModalShell";
 import { PurchaseEditorFields } from "./PurchaseEditorFields";
 
 export interface PurchaseEditorModalProps {
@@ -22,46 +22,26 @@ export function PurchaseEditorModal(props: PurchaseEditorModalProps) {
   const { closePurchaseModal, handlePurchaseSubmit, isSavingPurchase, purchaseModalMode } = props;
 
   return (
-    <ModalDialog label="Purchase editor" onClose={closePurchaseModal}>
-      <section
-        className="modal-card"
-        style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
-      >
-        <div className="panel-header compact-header">
-          <div>
-            <p className="eyebrow" style={{ color: "var(--meco-blue)" }}>
-              Purchase editor
-            </p>
-            <h2 style={{ color: "var(--text-title)" }}>
-              {purchaseModalMode === "create" ? "Add purchase" : "Edit purchase"}
-            </h2>
-          </div>
-          <button
-            className="icon-button"
-            onClick={closePurchaseModal}
-            type="button"
-            style={{ background: "transparent", color: "var(--text-copy)" }}
-          >
-            Close
-          </button>
-        </div>
-        <form className="modal-form" onSubmit={handlePurchaseSubmit} style={{ color: "var(--text-copy)" }}>
-          <PurchaseEditorFields {...props} />
-          <div className="modal-actions modal-wide">
-            <button
-              className="secondary-action"
-              onClick={closePurchaseModal}
-              type="button"
-              style={{ background: "var(--bg-row-alt)", border: "1px solid var(--border-base)", color: "var(--text-title)" }}
-            >
-              Cancel
-            </button>
-            <button className="primary-action" disabled={isSavingPurchase} type="submit">
-              {isSavingPurchase ? "Saving..." : purchaseModalMode === "create" ? "Add purchase" : "Save changes"}
-            </button>
-          </div>
-        </form>
-      </section>
-    </ModalDialog>
+    <EditorModalShell
+      dialogLabel="Purchase editor"
+      eyebrowLabel="Purchase editor"
+      onClose={closePurchaseModal}
+      onSubmit={handlePurchaseSubmit}
+      title={purchaseModalMode === "create" ? "Add purchase" : "Edit purchase"}
+    >
+      <PurchaseEditorFields {...props} />
+      <div className="modal-actions modal-wide">
+        <button
+          className="secondary-action"
+          onClick={closePurchaseModal}
+          type="button"
+        >
+          Cancel
+        </button>
+        <button className="primary-action" disabled={isSavingPurchase} type="submit">
+          {isSavingPurchase ? "Saving..." : purchaseModalMode === "create" ? "Add purchase" : "Save changes"}
+        </button>
+      </div>
+    </EditorModalShell>
   );
 }

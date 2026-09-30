@@ -24,9 +24,7 @@ function createOverviewBootstrap() {
         id: "task-overdue",
         title: "Finish bellypan CAD",
         projectId: project.id,
-        workstreamId: workstream.id,
         workstreamIds: [workstream.id],
-        subsystemId: subsystem.id,
         subsystemIds: [subsystem.id],
         disciplineId: discipline.id,
         dueDate: "2026-05-16",
@@ -38,9 +36,7 @@ function createOverviewBootstrap() {
         id: "task-today",
         title: "Wire intake sensor",
         projectId: project.id,
-        workstreamId: workstream.id,
         workstreamIds: [workstream.id],
-        subsystemId: subsystem.id,
         subsystemIds: [subsystem.id],
         disciplineId: discipline.id,
         dueDate: "2026-05-17",
@@ -52,9 +48,7 @@ function createOverviewBootstrap() {
         id: "task-soon",
         title: "Review shooter checklist",
         projectId: project.id,
-        workstreamId: workstream.id,
         workstreamIds: [workstream.id],
-        subsystemId: subsystem.id,
         subsystemIds: [subsystem.id],
         disciplineId: discipline.id,
         dueDate: "2026-05-19",
@@ -65,9 +59,7 @@ function createOverviewBootstrap() {
         id: "task-later",
         title: "Later media recap",
         projectId: project.id,
-        workstreamId: workstream.id,
         workstreamIds: [workstream.id],
-        subsystemId: subsystem.id,
         subsystemIds: [subsystem.id],
         disciplineId: discipline.id,
         dueDate: "2026-06-15",
@@ -113,7 +105,8 @@ describe("Workspace overview views", () => {
   });
   it("keeps completed tasks out of the priority list", () => {
     const bootstrap = createOverviewBootstrap();
-    bootstrap.tasks = bootstrap.tasks.map(task => ({ ...task, status: "complete" }));
+    bootstrap.tasks = bootstrap.tasks.map(task => ({
+  ...task, status: "complete" }));
     const markup = renderToStaticMarkup(React.createElement(HomeView, {
       bootstrap, onOpenTask: jest.fn(), today: fixedToday,
     }));

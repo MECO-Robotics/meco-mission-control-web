@@ -3,8 +3,8 @@ import type {
   CadSnapshotDiffRecord,
   CadSnapshotDiffStatus,
   CadSnapshotRecord,
-  OnshapeOverview,
-} from "./cadIntegrationTypes";
+  OnshapeOverview
+} from "./onshapeCadTypes";
 import { buildFallbackItems } from "./cadSnapshotDiffFallback";
 import type { CadSnapshotDiffViewModel, SnapshotDiffItem } from "./cadSnapshotDiffTypes";
 

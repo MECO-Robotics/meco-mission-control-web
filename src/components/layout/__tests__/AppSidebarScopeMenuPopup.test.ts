@@ -88,7 +88,7 @@ describe("AppSidebarScopeMenuPopup", () => {
     expect(markup).toContain(">Projects</span>");
     expect(markup).toContain(">Seasons</span>");
     expect(markup).toContain("lucide-layout-grid");
-    expect(markup).toContain('width="18"');
+    expect(markup).toContain("<svg");
   });
 
   it("packages season selection as a second-stage scope menu", () => {

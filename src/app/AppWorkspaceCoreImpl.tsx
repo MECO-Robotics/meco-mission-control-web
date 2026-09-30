@@ -7,7 +7,7 @@ import { shouldShowEnforcedSignInScreen } from "@/app/publicDemoAccess";
 
 export default function AppWorkspaceCoreImpl() {
   const c = useAppWorkspaceController();
-  const auth = c.auth;
+  const auth = c.model;
 
   if (auth.authBooting) {
     return (

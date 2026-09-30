@@ -1,16 +1,19 @@
 import type { Dispatch, SetStateAction } from "react";
-import { ArrowDownWideNarrow, ArrowUpWideNarrow, Filter } from "lucide-react";
+import { Filter } from "lucide-react";
 
 import {
   IconParts,
+  IconSort,
   IconTasks,
 } from "@/components/shared/Icons";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MilestoneType } from "@/types/common";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
+import { SortDirectionToggle } from "@/features/workspace/shared/filters/SortDirectionToggle";
 import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { EVENT_TYPE_STYLES as MILESTONE_TYPE_STYLES } from "@/features/workspace/shared/events/eventStyles";
+import { READINESS_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
 import { MilestonesSearchControl } from "./MilestonesSearchControl";
 import {
   type MilestoneSearchSuggestion,
@@ -68,14 +71,6 @@ export function MilestonesToolbar({
   const activeCount =
     Number(isAllProjectsView && projectFilter.length > 0) + Number(typeFilter.length > 0) + Number(readinessFilter.length > 0);
   const milestoneSortIsDefault = sortField === "startDateTime" && sortOrder === "asc";
-  const renderSortDirectionIcon = () =>
-    sortOrder === "asc" ? (
-      <ArrowUpWideNarrow size={14} strokeWidth={2} />
-    ) : (
-      <ArrowDownWideNarrow size={14} strokeWidth={2} />
-    );
-  const toggleSortOrder = () => setSortOrder((current) => (current === "asc" ? "desc" : "asc"));
-
   return (
     <div className="panel-actions filter-toolbar milestones-toolbar">
       <div className="milestones-search-slot" data-tutorial-target="milestone-search-input">
@@ -107,7 +102,7 @@ export function MilestonesToolbar({
                   },
                   {
                     label: "Readiness",
-                    content: <FilterDropdown allLabel="All readiness" ariaLabel="Filter milestones by readiness" className="task-queue-filter-menu-submenu" icon={<IconTasks />} onChange={setReadinessFilter} options={[{ id: "not ready", name: "Not ready" }, { id: "blocked", name: "Blocked" }, { id: "qa", name: "QA" }, { id: "ready", name: "Ready" }]} value={readinessFilter} />,
+                    content: <FilterDropdown allLabel="All readiness" ariaLabel="Filter milestones by readiness" className="task-queue-filter-menu-submenu" icon={<IconTasks />} onChange={setReadinessFilter} options={READINESS_STATUS_OPTIONS} value={readinessFilter} />,
                   },
                   {
                     label: "Type",
@@ -128,13 +123,16 @@ export function MilestonesToolbar({
               <CompactFilterMenu
                 activeCount={milestoneSortIsDefault ? 0 : 1}
                 ariaLabel="Sort milestones"
-                buttonLabel={sortOrder === "asc" ? "Sort ascending" : "Sort descending"}
+                buttonLabel="Sort"
                 className="task-queue-sort-menu milestones-search-sort-menu"
-                icon={renderSortDirectionIcon()}
+                icon={<IconSort />}
                 iconOnly
                 items={[
                   {
                     label: "Sort by",
+                    labelControl: (
+                      <SortDirectionToggle direction={sortOrder} label="milestones" onChange={setSortOrder} />
+                    ),
                     content: (
                       <select
                         aria-label="Sort milestones by"
@@ -148,20 +146,6 @@ export function MilestonesToolbar({
                           </option>
                         ))}
                       </select>
-                    ),
-                  },
-                  {
-                    label: "Direction",
-                    content: (
-                      <button
-                        aria-label="Toggle milestone sort direction"
-                        className="icon-button milestone-sort-direction-button"
-                        onClick={toggleSortOrder}
-                        title={sortOrder === "asc" ? "Sort ascending" : "Sort descending"}
-                        type="button"
-                      >
-                        {renderSortDirectionIcon()}
-                      </button>
                     ),
                   },
                 ]}

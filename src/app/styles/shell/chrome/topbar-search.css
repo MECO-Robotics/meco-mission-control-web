@@ -4,7 +4,8 @@
   justify-content: flex-end;
   height: 100%;
   flex: 1 1 auto;
-  padding-inline: clamp(0.3rem, 0.9vw, 0.6rem);
+  gap: clamp(0.275rem, 0.5vw, 0.4rem);
+  padding-inline: clamp(0.275rem, 0.5vw, 0.4rem);
   min-width: 0;
   overflow: visible;
 }
@@ -30,37 +31,6 @@
   padding-bottom: 0;
 }
 
-.app-topbar-search-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-copy);
-  flex: 0 0 auto;
-  pointer-events: none;
-}
-
-.app-topbar-search-icon svg {
-  display: block;
-}
-
-.app-topbar-search-input {
-  flex: 1 1 auto;
-  min-width: 0;
-  width: 100%;
-  height: var(--app-topbar-search-icon-pill-height);
-  color: var(--text-title);
-  font-family: var(--font-ui);
-  font-size: 0.96rem;
-  font-weight: 600;
-  line-height: 1.2;
-  padding: 0;
-}
-
-.app-topbar-search-input::placeholder {
-  color: var(--text-copy);
-  opacity: 0.8;
-}
-
 @media (max-width: 880px) {
   .app-topbar-search-slot {
     overflow-x: auto;
@@ -70,7 +40,9 @@
   }
 
   .app-topbar-search-slot:has(.app-topbar-controls-host:not(:empty)),
-  .app-topbar-search-slot:has(.app-topbar-search-host:not(:empty)) {
+  .app-topbar-search-slot:has(.app-topbar-search-host:not(:empty)),
+  .app-topbar-search-slot:has(.app-topbar-zoom-host:not(:empty)),
+  .app-topbar-search-slot:has(.app-topbar-add-host:not(:empty)) {
     --app-topbar-scroll-hint-size: 1.25rem;
     -webkit-mask-image: linear-gradient(
       to right,

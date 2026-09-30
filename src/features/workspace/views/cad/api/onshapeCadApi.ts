@@ -1,11 +1,11 @@
-﻿import { requestApi } from "@/lib/auth/core/request";
+import { requestApi } from "@/lib/auth/core/request";
 import type {
   CadGraphImportResult,
   OnshapeDocumentRefRecord,
   OnshapeOverview,
   OnshapeSyncEstimate,
-  SyncLevel,
-} from "../model/cadIntegrationTypes";
+  SyncLevel
+} from "../model/onshapeCadTypes";
 
 export function fetchOnshapeOverview(onUnauthorized?: () => void) {
   return requestApi<OnshapeOverview>("/onshape/overview", {}, onUnauthorized);

@@ -32,7 +32,6 @@ export function WorkflowView({
       .map((workstream) => {
         const workstreamTasks = bootstrap.tasks.filter(
           (task) =>
-            task.workstreamId === workstream.id ||
             task.workstreamIds.includes(workstream.id),
         );
         const openTaskCount = workstreamTasks.filter(

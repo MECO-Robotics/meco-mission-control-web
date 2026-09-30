@@ -4,8 +4,8 @@ import type {
   CadPartMatchProposal,
   CadStepDiff,
   CadStepMappingRecord,
-  CadStepWarningRecord,
-} from "./cadIntegrationTypes";
+  CadStepWarningRecord
+} from "./cadStepTypes";
 import type { CadStepPreviewDiffItem } from "./cadStepPreviewDiffTypes";
 
 const classificationLabels: Record<string, string> = {

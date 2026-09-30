@@ -86,6 +86,33 @@ describe("CAD STEP hierarchy review stages", () => {
     expect(markup).toContain('<button class="secondary-button compact-action" disabled="" type="button">Confirm</button>');
   });
 
+  it("keeps shared classification choices for subsystem and part-definition review", () => {
+    const hierarchyReview = baseHierarchyReview();
+    const subsystem = hierarchyReview.root?.children.find((node) => node.id === "subsystem-intake");
+    const part = hierarchyReview.root?.children[0]?.children[0]?.children.find((node) => node.id === "part-wheel");
+    const mechanism = hierarchyReview.root?.children[0]?.children[0];
+
+    if (!subsystem || !part || !mechanism) {
+      throw new Error("Missing classification fixtures");
+    }
+
+    for (const [node, targetKind, firstLabel] of [
+      [subsystem, "SUBSYSTEM", "Subsystem"],
+      [part, "PART_DEFINITION", "Existing part definition"],
+    ] as const) {
+      const markup = renderNodeCardMarkup(node, targetKind);
+      expect(markup).toContain(`>${firstLabel}</option>`);
+      expect(markup).toContain(">Reference geometry</option>");
+      expect(markup).toContain(">Ignore</option>");
+      expect(markup).toContain(">Needs review</option>");
+    }
+
+    const mechanismMarkup = renderNodeCardMarkup(mechanism, "MECHANISM");
+    for (const label of ["Mechanism", "Component assembly", "Nested subsystem", "Reference geometry", "Ignore", "Needs review"]) {
+      expect(mechanismMarkup).toContain(`>${label}</option>`);
+    }
+  });
+
   it("keeps component assembly confirmations available without a hierarchy target", () => {
     const hierarchyReview = baseHierarchyReview();
     const mechanismNode = hierarchyReview.root?.children[0]?.children[0];

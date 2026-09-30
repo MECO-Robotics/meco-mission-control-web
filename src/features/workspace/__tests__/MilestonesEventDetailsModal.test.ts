@@ -74,18 +74,15 @@ function createBootstrap(): BootstrapPayload {
     ],
     tasks: [
       {
+        artifactIds: [],
         id: "task-1",
         projectId: "project-1",
-        workstreamId: null,
         workstreamIds: [],
         title: "Build frame rails",
         summary: "",
-        subsystemId: "subsystem-1",
         subsystemIds: ["subsystem-1"],
         disciplineId: "discipline-1",
-        mechanismId: null,
         mechanismIds: [],
-        partInstanceId: null,
         partInstanceIds: [],
         targetMilestoneId: null,
         ownerId: null,
@@ -133,6 +130,9 @@ describe("MilestonesEventDetailsModal", () => {
     expect(markup).toContain("Required");
     expect(markup).toContain("Complete");
     expect(markup).toContain("Iteration 1");
+    expect(markup).toContain("task-detail-inline-edit-trigger-summary");
+    expect(markup).toContain("task-detail-inline-edit-trigger-inline");
+    expect(markup).toContain("milestone-detail-inline-value");
   });
 
   it("renders the task-style shell for milestone editing", () => {
@@ -178,6 +178,7 @@ describe("MilestonesEventDetailsModal", () => {
     expect(markup).toContain('aria-label="Close milestone details"');
     expect(markup).toContain("task-detail-inline-edit-title-shell");
     expect(markup).toContain("task-detail-inline-edit-trigger-summary");
+    expect(markup).toContain("task-detail-inline-edit-trigger-chip");
     expect(markup).toContain("task-detail-inline-edit-shell");
     expect(markup).not.toContain("task-detail-inline-edit-input-title");
     expect(markup).toContain("Save milestone");

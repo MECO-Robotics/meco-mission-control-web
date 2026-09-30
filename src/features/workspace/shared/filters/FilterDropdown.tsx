@@ -4,6 +4,7 @@ import { useId, useRef, useState, type CSSProperties, type ReactNode } from "rea
 import type { DropdownOption } from "../model/workspaceTypes";
 import {
   type FilterSelection,
+  formatCompactFilterSelectionLabel,
   formatFilterSelectionLabel,
 } from "./workspaceFilterUtils";
 import { FilterOptionMenu } from "./workspaceFilterDropdownMenu";
@@ -15,12 +16,15 @@ import {
 export function FilterDropdown({
   allLabel,
   ariaLabel,
+  appearance = "toolbar",
   className,
+  compactSummary = false,
   buttonDataTutorialTarget,
   buttonInlineEditField,
   buttonContent,
   getOptionToneClassName,
   getSelectedToneClassName,
+  hideButtonIcon = false,
   icon,
   menuClassName,
   portalMenu,
@@ -33,14 +37,17 @@ export function FilterDropdown({
   value,
 }: {
   allLabel: string;
+  appearance?: "toolbar" | "column";
   ariaLabel?: string;
   className?: string;
+  compactSummary?: boolean;
   buttonDataTutorialTarget?: string;
   buttonInlineEditField?: string;
   buttonContent?: ReactNode;
   getOptionToneClassName?: (option: DropdownOption) => string | undefined;
   getSelectedToneClassName?: (value: FilterSelection) => string | undefined;
-  icon: ReactNode;
+  icon?: ReactNode;
+  hideButtonIcon?: boolean;
   menuClassName?: string;
   portalMenu?: boolean;
   portalMenuPlacement?: "auto" | "above" | "below";
@@ -62,9 +69,14 @@ export function FilterDropdown({
     options,
     value,
   );
+  const displaySelectedLabel = compactSummary || value.length === 0
+    ? formatCompactFilterSelectionLabel(options, value)
+    : selectedLabel;
   const selectedOption = options.find((option) => option.id === value[0]);
   const selectedIcon = selectedOption?.icon ?? icon;
   const selectedToneClassName = getSelectedToneClassName?.(value);
+  const columnAppearance = appearance === "column";
+  const accessibleLabel = `${ariaLabel ?? allLabel}${columnAppearance && !isActive ? "" : `: ${selectedLabel}`}`;
 
   const renderMenu = (style?: CSSProperties) => (
     <FilterOptionMenu
@@ -92,32 +104,37 @@ export function FilterDropdown({
     onClose: () => setIsOpen(false),
     portalMenu,
     portalMenuPlacement,
-    viewSelector: ".workspace-panel, .panel, .page-shell, .modal-card",
+    viewSelector: columnAppearance
+      ? ".workspace-panel, .panel, .page-shell"
+      : ".workspace-panel, .panel, .page-shell, .modal-card",
   });
 
   return (
     <span
-      className={`toolbar-filter toolbar-filter-dropdown${isActive ? " is-active" : ""}${isOpen ? " is-open" : ""}${selectedToneClassName ? ` ${selectedToneClassName}` : ""}${className ? ` ${className}` : ""}`}
+      className={`${columnAppearance ? "table-column-filter" : "toolbar-filter toolbar-filter-dropdown"}${isActive ? " is-active" : ""}${isOpen ? " is-open" : ""}${!columnAppearance && selectedToneClassName ? ` ${selectedToneClassName}` : ""}${!columnAppearance && className ? ` ${className}` : ""}`}
       ref={filterRef}
     >
       <button
         aria-controls={menuId}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        aria-label={`${ariaLabel ?? allLabel}: ${selectedLabel}`}
-        className="toolbar-filter-menu-button"
+        aria-label={accessibleLabel}
+        className={columnAppearance ? "table-column-filter-button" : "toolbar-filter-menu-button"}
         data-tutorial-target={buttonDataTutorialTarget}
         data-inline-edit-field={buttonInlineEditField}
         ref={buttonRef}
-        onClick={() => setIsOpen((current) => !current)}
-        title={`${ariaLabel ?? allLabel}: ${selectedLabel}`}
+        onClick={(event) => {
+          if (columnAppearance) event.stopPropagation();
+          setIsOpen((current) => !current);
+        }}
+        title={accessibleLabel}
         type="button"
       >
-        {buttonContent ?? (
+        {columnAppearance ? buttonContent : buttonContent ?? (
           <>
-            <span className="toolbar-filter-icon">{selectedIcon}</span>
+            {hideButtonIcon ? null : <span className="toolbar-filter-icon">{selectedIcon}</span>}
             <span aria-hidden="true" className="toolbar-filter-value">
-              {selectedLabel}
+              {displaySelectedLabel}
             </span>
             <span aria-hidden="true" className="toolbar-filter-chevron" />
           </>

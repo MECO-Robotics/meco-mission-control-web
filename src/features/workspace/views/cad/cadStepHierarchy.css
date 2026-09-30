@@ -1,8 +1,3 @@
-.cad-hierarchy-review {
-  display: grid;
-  gap: 12px;
-}
-
 .cad-hierarchy-tabs {
   background: var(--surface-muted, rgba(148, 163, 184, 0.12));
   border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.22));

@@ -2,12 +2,12 @@ import { ReportHistoryList } from "../views/workLogs/ReportHistoryList";
 import { ModalDialog } from "@/components/ModalDialog";
 import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskPayload } from "@/types/payloads";
+import type { TaskPayload } from "@/types/payloads/task";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { TaskDetailsAdvancedSection } from "./task/TaskDetailsAdvancedSection";
 import { TaskDetailsDependencyBlockersSection } from "./task/TaskDetailsDependencyBlockersSection";
 import { TaskDetailsHeaderSection } from "./task/TaskDetailsHeaderSection";
-import { TaskDetailsOverviewSection } from "./task/TaskDetailsOverviewSection";
+import { TaskDetailsOverviewSectionView } from "./task/details/overview/TaskDetailsOverviewSectionView";
 import type { TaskDetailsEditableField } from "./task/taskModalTypes";
 import { WorkspaceAuditActionList } from "../shared/WorkspaceAuditActionList";
 
@@ -78,8 +78,7 @@ export function TaskDetailsModal({
   return (
     <ModalDialog label={typeof headerTitle === "string" ? headerTitle : activeTask.title} onClose={closeTaskDetailsModal}>
       <section
-        className={`modal-card task-details-modal${modalClassName ? ` ${modalClassName}` : ""}`}
-        style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
+        className={`modal-card task-details-modal${modalClassName ? ` ${modalClassName}` : ""} modal-panel-surface`}
       >
         <TaskDetailsHeaderSection
           activeTask={activeTask}
@@ -98,7 +97,7 @@ export function TaskDetailsModal({
         <div className="modal-form task-details-grid" style={{ color: "var(--text-copy)" }}>
           {beforeOverviewContent}
 
-          <TaskDetailsOverviewSection
+          <TaskDetailsOverviewSectionView
             activeTask={activeTask}
             bootstrap={bootstrap}
             canInlineEdit={canInlineEdit}
@@ -138,7 +137,7 @@ export function TaskDetailsModal({
           {!canInlineEdit ? <section className="modal-wide"><h3>Work history</h3>
             {bootstrap.workLogs.filter((log) => log.taskId === activeTask.id).length ? <ul>{bootstrap.workLogs.filter((log) => log.taskId === activeTask.id).sort((a, b) => b.date.localeCompare(a.date)).map((log) => <li key={log.id}><details><summary>{log.date} · {log.hours}h · {log.participantIds.map((id) => bootstrap.members.find((member) => member.id === id)?.name ?? "Unknown member").join(", ")}</summary><p>{log.notes || "No notes."}</p>{log.photoUrl ? <a href={log.photoUrl} target="_blank" rel="noreferrer">View work evidence</a> : null}</details></li>)}</ul> : <p className="muted-copy">No work logged yet.</p>}
           </section> : null}
-          {!canInlineEdit ? <section className="modal-wide"><h3>QA history</h3><ReportHistoryList reports={bootstrap.qaReports.filter((report) => report.taskId === activeTask.id)} bootstrap={bootstrap} /></section> : null}
+          {!canInlineEdit ? <section className="modal-wide"><h3>QA history</h3><ReportHistoryList reports={bootstrap.reports.filter((report) => report.reportType === "QA" && report.taskId === activeTask.id)} bootstrap={bootstrap} /></section> : null}
 
           <WorkspaceAuditActionList
             actions={taskAuditActions}

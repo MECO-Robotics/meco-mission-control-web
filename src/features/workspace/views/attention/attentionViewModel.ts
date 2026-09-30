@@ -7,7 +7,6 @@ import {
 import { isTaskDueSoon } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
 import { buildTaskLastUpdatedAtById } from "./attentionActionNowShared";
 import {
-  ATTENTION_DUE_SOON_DAYS,
   isDateOverdue,
   isWithinRecentWindow,
 } from "./attentionViewHelpers";
@@ -15,26 +14,18 @@ import {
   buildManufacturingTriageItems,
   buildPurchaseTriageItems,
   buildReportTriageItems,
-  buildRiskTriageItems,
-  buildTaskTriageItems,
+  buildAttentionTriageGroups,
 } from "./attentionTriageItems";
-import { buildAttentionSummaryGroups } from "./attentionSummaryGroups";
 import { buildAttentionActionNowItems } from "./attentionActionNowItems";
 import { buildAttentionMentorQueueInputs } from "./attentionMentorQueueInputs";
 import { buildMentorActionQueueItems } from "./mentorActionQueueModel";
 import { detectStaleTasks } from "./staleTaskDetector";
-import type {
-  AttentionSummaryGroup,
-  AttentionTriageGroup,
-  AttentionViewModel,
-} from "./attentionViewTypes";
+import { buildTaskByReportId, riskMatchesPersonFilter } from "./attentionRiskScope";
+import type { AttentionViewModel } from "./attentionViewTypes";
 
 export type {
   AttentionNowItem,
   AttentionReason,
-  AttentionSummaryCategory,
-  AttentionSummaryCard,
-  AttentionSummaryGroup,
   AttentionTriageGroup,
   AttentionTriageItem,
   AttentionViewModel,
@@ -44,48 +35,6 @@ export type {
 interface BuildAttentionViewModelArgs {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
-}
-
-function buildTaskByReportId(
-  bootstrap: BootstrapPayload,
-  tasksById: Record<string, BootstrapPayload["tasks"][number]>,
-) {
-  const taskByReportId = new Map<string, BootstrapPayload["tasks"][number]>();
-
-  for (const report of bootstrap.reports) {
-    if (!report.taskId) {
-      continue;
-    }
-
-    const task = tasksById[report.taskId];
-    if (task) {
-      taskByReportId.set(report.id, task);
-    }
-  }
-
-  return taskByReportId;
-}
-
-function riskMatchesPersonFilter({
-  activePersonFilter,
-  risk,
-  taskByReportId,
-  tasksById,
-}: {
-  activePersonFilter: FilterSelection;
-  risk: BootstrapPayload["risks"][number];
-  taskByReportId: Map<string, BootstrapPayload["tasks"][number]>;
-  tasksById: Record<string, BootstrapPayload["tasks"][number]>;
-}) {
-  if (activePersonFilter.length === 0) {
-    return true;
-  }
-
-  const mitigationTask = risk.mitigationTaskId ? tasksById[risk.mitigationTaskId] : null;
-  const sourceTask = taskByReportId.get(risk.sourceId);
-  return [mitigationTask, sourceTask]
-    .filter((task): task is BootstrapPayload["tasks"][number] => Boolean(task))
-    .some((task) => filterSelectionMatchesTaskPeople(activePersonFilter, task));
 }
 
 export function buildAttentionViewModel({
@@ -242,81 +191,19 @@ export function buildAttentionViewModel({
     lookup,
   });
 
-  const summaryGroups: AttentionSummaryGroup[] = buildAttentionSummaryGroups({
-    blockedTasks: blockedTasks.length,
-    criticalRisks: criticalRisks.length,
-    dueSoonTasks: dueSoonTasks.length,
-    failedReports: reportItems.length,
-    highRisks: highRisks.length,
-    manufacturingBlockers: manufacturingItems.length,
-    overdueTasks: overdueTasks.length,
-    purchaseDelays: purchaseItems.length,
-    staleTasks: staleTaskResults.length,
-    waitingQaTasks: waitingQaTasks.length,
+  const triageGroups = buildAttentionTriageGroups({
+    blockedTasks,
+    criticalRisks,
+    dueSoonTasks,
+    highRisks,
+    lookup,
+    manufacturingItems,
+    overdueTasks,
+    purchaseItems,
+    reportItems,
+    staleTasks,
+    waitingQaTasks,
   });
-
-  const triageGroups: AttentionTriageGroup[] = [
-    {
-      emptyLabel: "No critical risks in scope.",
-      id: "critical-risks",
-      items: buildRiskTriageItems(criticalRisks, lookup),
-      title: "Critical risks",
-    },
-    {
-      emptyLabel: "No high risks in scope.",
-      id: "high-risks",
-      items: buildRiskTriageItems(highRisks, lookup),
-      title: "High risks",
-    },
-    {
-      emptyLabel: "No blocked tasks in scope.",
-      id: "blocked-tasks",
-      items: buildTaskTriageItems(blockedTasks, "Blocked", lookup),
-      title: "Blocked tasks",
-    },
-    {
-      emptyLabel: "No tasks waiting QA in scope.",
-      id: "waiting-qa",
-      items: buildTaskTriageItems(waitingQaTasks, "Waiting QA", lookup),
-      title: "Waiting for QA",
-    },
-    {
-      emptyLabel: "No stale tasks in scope.",
-      id: "stale-tasks",
-      items: buildTaskTriageItems(staleTasks, "Stale", lookup),
-      title: "Stale tasks",
-    },
-    {
-      emptyLabel: "No tasks due soon in scope.",
-      id: "due-soon",
-      items: buildTaskTriageItems(dueSoonTasks, `Due <= ${ATTENTION_DUE_SOON_DAYS} days`, lookup),
-      title: "Tasks due soon",
-    },
-    {
-      emptyLabel: "No overdue tasks in scope.",
-      id: "overdue",
-      items: buildTaskTriageItems(overdueTasks, "Overdue", lookup),
-      title: "Overdue tasks",
-    },
-    {
-      emptyLabel: "No manufacturing blockers in scope.",
-      id: "manufacturing-blockers",
-      items: manufacturingItems,
-      title: "Manufacturing blockers",
-    },
-    {
-      emptyLabel: "No purchase delays in scope.",
-      id: "purchase-delays",
-      items: purchaseItems,
-      title: "Purchase delays",
-    },
-    {
-      emptyLabel: "No recent failed QA/report signals.",
-      id: "failed-reports",
-      items: reportItems,
-      title: "Recently failed QA / reports",
-    },
-  ];
 
   const actionNowItems = buildAttentionActionNowItems({
     blockedTasks,
@@ -330,6 +217,7 @@ export function buildAttentionViewModel({
     overdueTasks,
     purchaseDelays,
     staleTaskResults,
+    taskLastUpdatedAtById,
     waitingQaTasks,
   });
   const mentorQueueItems = buildMentorActionQueueItems({
@@ -348,7 +236,6 @@ export function buildAttentionViewModel({
   return {
     actionNowItems,
     mentorQueueItems,
-    summaryGroups,
     triageGroups,
   };
 }

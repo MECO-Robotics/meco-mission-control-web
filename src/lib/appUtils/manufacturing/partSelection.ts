@@ -27,20 +27,6 @@ export function getPreferredManufacturingPartInstance(
   );
 }
 
-export function getSubsystemManufacturingPartInstance(
-  bootstrap: BootstrapPayload,
-  partDefinitionId: string | null,
-  subsystemId: string,
-): PartInstanceRecord | null {
-  return (
-    bootstrap.partInstances.find(
-      (partInstance) =>
-        partInstance.subsystemId === subsystemId &&
-        (!partDefinitionId || partInstance.partDefinitionId === partDefinitionId),
-    ) ?? null
-  );
-}
-
 export function getManufacturingDraftPartInstanceIds(draft: ManufacturingItemPayload) {
   return draft.partInstanceIds.length ? uniqueIds(draft.partInstanceIds) : uniqueIds([draft.partInstanceId]);
 }

@@ -1,6 +1,7 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord, WorkLogRecord } from "@/types/recordsExecution";
 import type { MemberRecord } from "@/types/recordsOrganization";
+import { formatLocalDate } from "@/lib/dateUtils";
 
 export type AvailableStudentRosterState = "available" | "blocked-waiting" | "busy";
 
@@ -18,13 +19,6 @@ export interface AvailableStudentRoster {
   blockedWaiting: AvailableStudentRosterRow[];
   busy: AvailableStudentRosterRow[];
   presentCount: number;
-}
-
-export function formatRosterDateKey(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
 }
 
 function isOpenTask(task: TaskRecord) {
@@ -74,7 +68,7 @@ function buildHints({
     hints.add(member.plannedAttendanceNotes);
   }
 
-  const taskSubsystemIds = task ? [task.subsystemId, ...task.subsystemIds].filter(Boolean) : [];
+  const taskSubsystemIds = task?.subsystemIds ?? [];
   taskSubsystemIds.forEach((subsystemId) => {
     const subsystem = bootstrap.subsystems.find((candidate) => candidate.id === subsystemId);
     if (subsystem) {
@@ -125,7 +119,7 @@ export function getPresentRosterMemberIds(
   bootstrap: BootstrapPayload,
   options: { today?: Date } = {},
 ) {
-  const todayKey = formatRosterDateKey(options.today ?? new Date());
+  const todayKey = formatLocalDate(options.today ?? new Date());
   const scopedIds = new Set(bootstrap.members.map((member) => member.id));
   return new Set((bootstrap.attendanceRecords ?? [])
     .filter((record) => record.date === todayKey && record.totalHours > 0 && scopedIds.has(record.memberId))
@@ -136,7 +130,7 @@ export function buildAvailableStudentRoster(
   bootstrap: BootstrapPayload,
   options: { today?: Date } = {},
 ): AvailableStudentRoster {
-  const todayKey = formatRosterDateKey(options.today ?? new Date());
+  const todayKey = formatLocalDate(options.today ?? new Date());
   const presentMemberIds = getPresentRosterMemberIds(bootstrap, options);
   const students = bootstrap.members.filter(
     (member) => (member.role === "student" || member.role === "lead") && presentMemberIds.has(member.id),

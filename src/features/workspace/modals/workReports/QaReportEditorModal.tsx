@@ -4,6 +4,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { QaReportPayload } from "@/types/payloads";
 import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
 import { QaRiskReassessmentSection } from "./QaRiskReassessmentSection";
+import { WorkReportEditorActions } from "./WorkReportEditorActions";
 
 interface QaReportEditorModalProps {
   bootstrap: BootstrapPayload;
@@ -36,8 +37,7 @@ export function QaReportEditorModal({
   return (
     <ModalDialog label="Add QA report" onClose={closeQaReportModal}>
       <section
-        className="modal-card task-details-modal"
-        style={{ background: "var(--bg-panel)", border: "1px solid var(--border-base)" }}
+        className="modal-card task-details-modal modal-panel-surface"
       >
         <div className="panel-header compact-header task-details-header">
           <div>
@@ -61,7 +61,7 @@ export function QaReportEditorModal({
           style={{ color: "var(--text-copy)" }}
         >
           <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Task</span>
+            <span>Task</span>
             <select
               aria-label="Task"
               onChange={(milestone) =>
@@ -95,7 +95,7 @@ export function QaReportEditorModal({
             ) : null}
           </label>
           <label className="field">
-            <span style={{ color: "var(--text-title)" }}>Result</span>
+            <span>Result</span>
             <select
               onChange={(milestone) =>
                 setQaReportDraft((current) => ({
@@ -116,7 +116,7 @@ export function QaReportEditorModal({
             </select>
           </label>
           <label className="field">
-            <span style={{ color: "var(--text-title)" }}>Reviewed date</span>
+            <span>Reviewed date</span>
             <input
               onChange={(milestone) =>
                 setQaReportDraft((current) => ({
@@ -125,17 +125,12 @@ export function QaReportEditorModal({
                 }))
               }
               required
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
               type="date"
               value={qaReportDraft.reviewedAt}
             />
           </label>
           <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Participants</span>
+            <span>Participants</span>
             <select
               multiple
               onChange={(milestone) =>
@@ -185,7 +180,7 @@ export function QaReportEditorModal({
             setQaReportDraft={setQaReportDraft}
           />
           <label className="field modal-wide">
-            <span style={{ color: "var(--text-title)" }}>Notes</span>
+            <span>Notes</span>
             <textarea
               onChange={(milestone) =>
                 setQaReportDraft((current) => ({
@@ -195,11 +190,6 @@ export function QaReportEditorModal({
               }
               placeholder="QA observations and follow-up."
               rows={3}
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
               value={qaReportDraft.notes}
             />
           </label>
@@ -216,31 +206,14 @@ export function QaReportEditorModal({
               return requestPhotoUpload(qaReportPhotoProjectId, file);
             }}
           />
-          <div className="modal-actions modal-wide">
-            <button
-              className="secondary-action"
-              onClick={closeQaReportModal}
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
-              type="button"
-            >
-              Cancel
-            </button>
-            <button
-              className="primary-action"
-              disabled={
-                isSavingQaReport ||
-                bootstrap.tasks.length === 0 ||
-                bootstrap.members.length === 0
-              }
-              type="submit"
-            >
-              {isSavingQaReport ? "Saving..." : "Add QA report"}
-            </button>
-          </div>
+          <WorkReportEditorActions
+            disabled={
+              isSavingQaReport || bootstrap.tasks.length === 0 || bootstrap.members.length === 0
+            }
+            isSaving={isSavingQaReport}
+            onCancel={closeQaReportModal}
+            submitLabel="Add QA report"
+          />
         </form>
       </section>
     </ModalDialog>

@@ -1,37 +1,41 @@
-import { startTransition, useCallback } from "react";
+import { startTransition, useCallback, useRef } from "react";
 
 import { fetchBootstrap } from "@/lib/auth/bootstrap";
 import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
 import { reconcileWorkspaceState } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceReconciliation";
-import type { AppWorkspaceLoaderModel, SelectMemberHandler, UnauthorizedHandler, WorkspaceLoadScope, WorkspaceReconciliationState } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
+import type { SelectMemberHandler, UnauthorizedHandler, WorkspaceLoadScope } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
 import { getSinglePersonFilterId } from "@/app/state/workspaceMemberRoleUtils";
 import { scopeBootstrapBySelection } from "@/app/state/workspaceBootstrapScope";
 
 export function useAppWorkspaceLoaderWorkspace(
   state: AppWorkspaceState,
-  model: AppWorkspaceLoaderModel,
   handleUnauthorized: UnauthorizedHandler,
   selectMember: SelectMemberHandler,
 ) {
-  return useCallback(async (scope: WorkspaceLoadScope = {}) => {
+  const latestRequest = useRef(0);
+  return useCallback(async (scope: WorkspaceLoadScope = {}, canApply: () => boolean = () => true) => {
+    if (!canApply()) return;
+    const request = ++latestRequest.current;
+    const isCurrent = () => request === latestRequest.current && canApply();
     state.setIsLoadingData(true);
     state.setDataMessage(null);
 
     try {
       const personId =
         scope.personId === undefined
-          ? getSinglePersonFilterId(model.activePersonFilter)
+          ? getSinglePersonFilterId(state.activePersonFilter)
           : scope.personId;
       const seasonId =
-        scope.seasonId === undefined ? model.selectedSeasonId : scope.seasonId;
+        scope.seasonId === undefined ? state.selectedSeasonId : scope.seasonId;
       const projectId =
-        scope.projectId === undefined ? model.selectedProjectId : scope.projectId;
+        scope.projectId === undefined ? state.selectedProjectId : scope.projectId;
       const payload = await fetchBootstrap(
         personId,
         seasonId,
         projectId,
         handleUnauthorized,
       );
+      if (!isCurrent()) return;
       const scopedPayload = scopeBootstrapBySelection(
         payload,
         seasonId,
@@ -39,21 +43,19 @@ export function useAppWorkspaceLoaderWorkspace(
       );
 
       startTransition(() => {
-        state.setBootstrap(payload);
+        if (isCurrent()) state.setBootstrap(payload);
       });
 
       reconcileWorkspaceState(
-        state as WorkspaceReconciliationState,
-        model,
-        payload,
+        state,
         scopedPayload,
         selectMember,
       );
     } catch (error) {
-      if (error instanceof Error && error.name === "AbortError") return;
+      if (!isCurrent() || (error instanceof Error && error.name === "AbortError")) return;
       state.setDataMessage(error instanceof Error ? error.message : String(error));
     } finally {
-      state.setIsLoadingData(false);
+      if (isCurrent()) state.setIsLoadingData(false);
     }
-  }, [handleUnauthorized, model, selectMember, state]);
+  }, [handleUnauthorized, selectMember, state]);
 }

@@ -29,7 +29,7 @@ See [navigation-consolidation.md](navigation-consolidation.md) for the cross-cli
 
 ## Data and API Contract Notes
 
-The frontend still performs bootstrap normalization to tolerate legacy and evolving payload shapes. This compatibility layer is intentional, but new backend changes should tighten the source contract rather than expand frontend patching indefinitely.
+The frontend normalizes bootstrap data at its boundary. Reports use the canonical `reports` and `reportFindings` collections; derived QA/test mirrors and their legacy import path are removed. Tighten the source contract and remove obsolete prototype adapters instead of expanding compatibility scaffolding.
 
 When changing data contracts:
 

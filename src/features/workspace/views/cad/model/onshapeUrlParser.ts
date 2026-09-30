@@ -1,4 +1,6 @@
-﻿import type { OnshapeUrlParseResult } from "./cadIntegrationTypes";
+import type {
+  OnshapeUrlParseResult
+} from "./onshapeCadTypes";
 
 const ONSHAPE_HOST_PATTERN = /(^|\.)onshape\.com$/i;
 

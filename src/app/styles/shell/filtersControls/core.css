@@ -4,7 +4,6 @@
 }
 
 .toolbar-filter .toolbar-filter-value,
-.toolbar-filter-select,
 .toolbar-filter-compact select,
 .toolbar-search-input {
   font-family: inherit;
@@ -12,13 +11,6 @@
   font-weight: 500;
   line-height: 1.2;
   letter-spacing: 0;
-}
-
-.toolbar-filter-label {
-  color: var(--text-copy);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-size: 0.62rem;
 }
 
 .toolbar-filter select {

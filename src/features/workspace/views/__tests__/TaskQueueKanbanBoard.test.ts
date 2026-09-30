@@ -37,16 +37,13 @@ jest.mock("@/features/workspace/views/kanban/KanbanColumns", () => ({
 }));
 
 const task: TaskRecord = {
+  artifactIds: [],
   id: "task-1",
   projectId: "project-1",
-  workstreamId: null,
   workstreamIds: [],
-  subsystemId: "subsystem-1",
   subsystemIds: ["subsystem-1"],
   disciplineId: "discipline-1",
-  mechanismId: null,
   mechanismIds: [],
-  partInstanceId: null,
   partInstanceIds: [],
   title: "Wire Swerve Module",
   summary: "",

@@ -9,7 +9,7 @@ jest.mock("@/features/auth/AuthScreens", () => ({ AuthStatusScreen: jest.fn(), S
 it.each([true, false])("offers demo return only when sign-in is not forced (%s)", (forced) => {
   const returnToPublicDemo = jest.fn();
   jest.mocked(useAppWorkspaceController).mockReturnValue({
-    auth: { authBooting: false, authConfig: {}, enforcedAuthConfig: {},
+    model: { authBooting: false, authConfig: {}, enforcedAuthConfig: {},
       isPublicDemoSession: true, isSignInScreenRequested: true, sessionUser: null,
       isSignInForced: forced, returnToPublicDemo, authMessage: "Sign-out was not confirmed" },
     shell: {},

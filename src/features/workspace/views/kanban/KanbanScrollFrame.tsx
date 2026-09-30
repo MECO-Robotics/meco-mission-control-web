@@ -1,14 +1,39 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
 
 import { IconChevronLeft, IconChevronRight } from "@/components/shared/Icons";
 
 interface KanbanScrollFrameProps {
   children: ReactNode;
   motionClassName?: string;
+  shellRef?: RefObject<HTMLDivElement | null>;
+  style?: CSSProperties;
+  isFocused?: boolean;
+  isCompact?: boolean;
 }
 
-export function KanbanScrollFrame({ children, motionClassName = "" }: KanbanScrollFrameProps) {
-  const shellRef = useRef<HTMLDivElement>(null);
+export function KanbanScrollFrame({
+  children,
+  motionClassName = "",
+  shellRef: providedShellRef,
+  style,
+  isFocused = false,
+  isCompact,
+}: KanbanScrollFrameProps) {
+  const internalShellRef = useRef<HTMLDivElement>(null);
+  const shellRef = providedShellRef ?? internalShellRef;
+  const scrollHorizontally = (direction: "left" | "right") => {
+    const shell = shellRef.current;
+    if (!shell) return;
+
+    shell.scrollBy({
+      left: (direction === "left" ? -1 : 1) * Math.max(shell.clientWidth * 0.8, 120),
+      behavior:
+        typeof window.matchMedia === "function" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+    });
+  };
   const [scrollState, setScrollState] = useState({
     canScrollLeft: false,
     canScrollRight: false,
@@ -74,33 +99,44 @@ export function KanbanScrollFrame({ children, motionClassName = "" }: KanbanScro
       shell.removeEventListener("scroll", scheduleScrollStateUpdate);
       window.removeEventListener("resize", scheduleScrollStateUpdate);
     };
-  }, []);
+  }, [shellRef]);
 
   return (
     <div
-      className={`task-queue-board-shell-frame${scrollState.canScrollLeft ? " has-scroll-left" : ""}${scrollState.canScrollRight ? " has-scroll-right" : ""}${scrollState.hasOverflow ? " has-task-queue-board-overflow" : ""} ${motionClassName}`}
+      className={`task-queue-board-shell-frame${scrollState.canScrollLeft ? " has-scroll-left" : ""}${scrollState.canScrollRight ? " has-scroll-right" : ""}${scrollState.hasOverflow ? " has-task-queue-board-overflow" : ""}${isFocused ? " is-focused-column" : ""} ${motionClassName}`}
     >
       {scrollState.hasOverflow ? (
-        <div aria-hidden="true" className="task-queue-board-scroll-hints">
-          <div
+        <div className="task-queue-board-scroll-hints">
+          <button
+            aria-label="Scroll Kanban board left"
             className={`task-queue-board-scroll-hint task-queue-board-scroll-hint-left${scrollState.canScrollLeft ? "" : " is-hidden"}`}
+            onClick={() => scrollHorizontally("left")}
+            type="button"
           >
             <IconChevronLeft />
             <span aria-hidden="true" className="task-queue-board-scroll-hint-label">
               Scroll
             </span>
-          </div>
-          <div
+          </button>
+          <button
+            aria-label="Scroll Kanban board right"
             className={`task-queue-board-scroll-hint task-queue-board-scroll-hint-right${scrollState.canScrollRight ? "" : " is-hidden"}`}
+            onClick={() => scrollHorizontally("right")}
+            type="button"
           >
             <span aria-hidden="true" className="task-queue-board-scroll-hint-label">
               Scroll
             </span>
             <IconChevronRight />
-          </div>
+          </button>
         </div>
       ) : null}
-      <div className="table-shell task-queue-board-shell" ref={shellRef}>
+      <div
+        className={`table-shell task-queue-board-shell${isFocused ? " is-focused-column" : ""}`}
+        data-task-queue-zoom-compact={isCompact === undefined ? undefined : String(isCompact)}
+        ref={shellRef}
+        style={style}
+      >
         {children}
       </div>
     </div>

@@ -1,7 +1,7 @@
 import type { Dispatch, SetStateAction } from "react";
 
 import { formatTaskStatusLabel } from "@/features/workspace/shared/model/workspaceOptions";
-import type { TaskPayload } from "@/types/payloads";
+import type { TaskPayload } from "@/types/payloads/task";
 
 interface TaskEditorCreateMetadataSectionProps {
   setTaskDraft: Dispatch<SetStateAction<TaskPayload>>;

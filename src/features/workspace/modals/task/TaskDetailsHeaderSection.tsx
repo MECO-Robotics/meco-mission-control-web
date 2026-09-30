@@ -1,6 +1,6 @@
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskPayload } from "@/types/payloads";
+import type { TaskPayload } from "@/types/payloads/task";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { EditableHoverIndicator } from "../../shared/table/workspaceTableChrome";
 import { FilterDropdown } from "../../shared/filters/FilterDropdown";
@@ -25,49 +25,23 @@ interface TaskDetailsHeaderSectionProps {
   canInlineEdit: boolean;
 }
 
-function formatTaskDetailDate(dateValue: string): string {
+function getTaskDetailDatePresentation(dateValue: string) {
   if (!dateValue) {
-    return "Not set";
+    return { text: "Not set", isOverdue: false, isToday: false };
   }
 
   const parsedDate = new Date(`${dateValue}T00:00:00`);
   if (Number.isNaN(parsedDate.getTime())) {
-    return dateValue;
-  }
-
-  return parsedDate.toLocaleDateString();
-}
-
-function isTaskDetailDateOverdue(dateValue: string): boolean {
-  if (!dateValue) {
-    return false;
-  }
-
-  const parsedDate = new Date(`${dateValue}T00:00:00`);
-  if (Number.isNaN(parsedDate.getTime())) {
-    return false;
+    return { text: dateValue, isOverdue: false, isToday: false };
   }
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-
-  return parsedDate.getTime() < today.getTime();
-}
-
-function isTaskDetailDateToday(dateValue: string): boolean {
-  if (!dateValue) {
-    return false;
-  }
-
-  const parsedDate = new Date(`${dateValue}T00:00:00`);
-  if (Number.isNaN(parsedDate.getTime())) {
-    return false;
-  }
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  return parsedDate.getTime() === today.getTime();
+  return {
+    text: parsedDate.toLocaleDateString(),
+    isOverdue: parsedDate < today,
+    isToday: parsedDate.getTime() === today.getTime(),
+  };
 }
 
 function TaskDetailsStatusIcon({
@@ -107,11 +81,7 @@ export function TaskDetailsHeaderSection({
   canInlineEdit,
 }: TaskDetailsHeaderSectionProps) {
   const editableTask = taskDraft ?? activeTask;
-  const milestonesById = Object.fromEntries(bootstrap.milestones.map((milestone) => [milestone.id, milestone]));
-  const linkedMilestone =
-    editableTask.targetMilestoneId && milestonesById[editableTask.targetMilestoneId]
-      ? milestonesById[editableTask.targetMilestoneId]
-      : null;
+  const linkedMilestone = bootstrap.milestones.find(({ id }) => id === editableTask.targetMilestoneId);
   const openBlockers = getTaskOpenBlockersForTask(activeTask.id, bootstrap);
   const isBlockedByDependency = openBlockers.length > 0;
   const statusText = taskDraft?.status ?? activeTask.status;
@@ -120,13 +90,14 @@ export function TaskDetailsHeaderSection({
   const detailStatusLabel = isBlockedByDependency ? "Blocked" : formatTaskStatusLabel(statusText);
   const estimatedHours = Number(activeTask.estimatedHours);
   const actualHours = Number(activeTask.actualHours);
-  const dueDateText = formatTaskDetailDate(editableTask.dueDate);
+  const dueDate = getTaskDetailDatePresentation(editableTask.dueDate);
+  const dueDateText = dueDate.text;
   const dueDatePillClassName = editableTask.dueDate
     ? statusText === "complete"
       ? "pill task-detail-deadline-pill task-detail-deadline-pill-success"
-      : isTaskDetailDateOverdue(editableTask.dueDate)
+      : dueDate.isOverdue
         ? "pill task-detail-deadline-pill task-detail-deadline-pill-danger"
-        : isTaskDetailDateToday(editableTask.dueDate)
+        : dueDate.isToday
           ? "pill task-detail-deadline-pill task-detail-deadline-pill-warning"
           : "pill task-detail-deadline-pill task-detail-deadline-pill-success"
     : "pill status-pill status-pill-neutral";

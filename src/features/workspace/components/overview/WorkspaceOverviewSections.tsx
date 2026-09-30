@@ -19,6 +19,6 @@ export function WorkspaceHomeSection(props: WorkspaceContentPanelsViewProps) {
   };
   return <WorkspaceSectionPanel disableAnimations={props.disablePanelAnimations} isActive={props.activeTab === "home"} tabSwitchDirection={props.tabSwitchDirection}>
     <HomeView bootstrap={props.bootstrap} onOpenTask={openTask} onOpenSchedule={(milestoneId) => props.onOpenDrilldownTarget({ tab: "tasks", taskView: "milestones", milestoneId })} />
-    <RisksView activePersonFilter={props.activePersonFilter} bootstrap={props.bootstrap} isAllProjectsView={props.isAllProjectsView} onCreateRisk={props.onCreateRisk} onDeleteRisk={props.onDeleteRisk} onUpdateRisk={props.onUpdateRisk} openTaskDetailModal={props.openTimelineTaskDetailsModal} onOpenSource={openSource} view="attention" includeHealth />
+    <RisksView activePersonFilter={props.activePersonFilter} bootstrap={props.bootstrap} onDeleteRisk={props.onDeleteRisk} onUpdateRisk={props.onUpdateRisk} openTaskDetailModal={props.openTimelineTaskDetailsModal} onOpenSource={openSource} />
   </WorkspaceSectionPanel>;
 }

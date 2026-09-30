@@ -62,7 +62,6 @@ describe("TimelineView", () => {
         selectSubsystemRow: jest.fn(),
         selectTaskRow: jest.fn(),
         selectedSubsystemId: null,
-        isWeekView: true,
         showProjectCol: true,
         showSubsystemCol: true,
         statusIconColumnIndex: 3,
@@ -174,7 +173,6 @@ describe("TimelineView", () => {
       id: "task-shared",
       title: "Shared drivetrain handoff",
       status: "complete" as const,
-      subsystemId: "subsystem-1",
       subsystemIds: ["subsystem-1", "subsystem-2"],
     };
     const timeline = buildTimelineData({

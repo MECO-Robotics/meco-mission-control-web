@@ -33,6 +33,8 @@ describe("TaskDetailsBlockersSectionView", () => {
         activeTaskId: "task-1",
         bootstrap: createBootstrap(),
         canInlineEdit: false,
+        collapsibleOpen: true,
+        onCollapsibleToggle: jest.fn(),
         onResolveTaskBlocker: jest.fn(),
       }),
     );

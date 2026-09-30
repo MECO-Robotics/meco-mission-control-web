@@ -1,5 +1,5 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskPayload } from "@/types/payloads";
+import type { TaskPayload } from "@/types/payloads/task";
 import { getDefaultTaskDisciplineIdForProject } from "@/lib/taskDisciplines";
 import { localTodayDate } from "@/lib/dateUtils";
 import { getDefaultSubsystemId } from "@/lib/appUtils/common";
@@ -21,19 +21,14 @@ export function buildEmptyTaskPayload(bootstrap: BootstrapPayload): TaskPayload 
 
   return {
     projectId: firstProject,
-    workstreamId: null,
     workstreamIds: [],
     title: "",
     summary: "",
     photoUrl: "",
-    subsystemId: firstSubsystem,
     subsystemIds: uniqueIds([firstSubsystem]),
     disciplineId: firstDiscipline,
-    mechanismId: null,
     mechanismIds: [],
-    partInstanceId: null,
     partInstanceIds: [],
-    artifactId: null,
     artifactIds: [],
     targetRiskId: null,
     targetMilestoneId: firstMilestone,

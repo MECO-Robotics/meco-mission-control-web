@@ -1,4 +1,9 @@
-import type { OnshapeOverview, OnshapeSyncEstimate, SyncLevel } from "../model/cadIntegrationTypes";
+import type {
+  OnshapeOverview,
+  OnshapeSyncEstimate,
+  SyncLevel
+} from "../model/onshapeCadTypes";
+import { defaultOnshapeOverview } from "../model/onshapeIntegrationState";
 
 export type OnshapeConnectionHealth = "connected" | "expired" | "disconnected" | "unavailable";
 
@@ -66,7 +71,7 @@ export function CadStatusPanels({
         <p>{healthCopy.description}</p>
         <dl className="cad-key-values">
           <div><dt>Auth mode</dt><dd>{connection?.authMode === "oauth" ? "OAuth2" : "not configured"}</dd></div>
-          <div><dt>Base URL</dt><dd>{connection?.baseUrl ?? "https://cad.onshape.com"}</dd></div>
+          <div><dt>Base URL</dt><dd>{connection?.baseUrl ?? defaultOnshapeOverview.connection.baseUrl}</dd></div>
           <div><dt>OAuth app</dt><dd>{oauth?.clientConfigured ? "configured" : "not configured"}</dd></div>
           <div><dt>Credential source</dt><dd>{credentialSource}</dd></div>
           <div><dt>Scopes</dt><dd>{oauth?.scopes.length ? oauth.scopes.join(", ") : "not configured"}</dd></div>

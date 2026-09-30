@@ -6,15 +6,15 @@ import {
   WORK_LOG_ACTIVITY_GROUP_OPTIONS,
   buildWorkLogActivityColumns,
 } from "@/features/workspace/views/workLogs/workLogsActivityGrouping";
-import type { BootstrapPayload } from "@/types/bootstrap";
+import { createBootstrap } from "@/lib/appUtilsTestFixtures";
 import type { AuditActionRecord } from "@/types/recordsExecution";
 
 const task = {
+  ...createBootstrap().tasks[0],
   id: "task-1",
-  subsystemId: "subsystem-1",
   subsystemIds: ["subsystem-1"],
   title: "Drive CAD",
-} as BootstrapPayload["tasks"][number];
+};
 
 const actions: AuditActionRecord[] = [
   {
