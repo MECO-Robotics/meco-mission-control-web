@@ -34,7 +34,7 @@ describe("canonical workspace navigation", () => {
   it("rejects unknown and unavailable destinations and presentation values", () => {
     expect(readNavigationLocation("?view=resources-parts", "non-robot-project")).toEqual({ tab: "home" });
     expect(readNavigationLocation("?view=unknown", "robot-project")).toEqual({ tab: "home" });
-    expect(readNavigationLocation("?view=work-schedule&mode=cad", "robot-project")).toEqual({ tab: "tasks", taskView: "calendar" });
+    expect(readNavigationLocation("?view=work-schedule&mode=cad", "robot-project")).toEqual({ tab: "tasks", taskView: "timeline" });
   });
   it("keeps CAD nested under Structure", () => {
     expect(writeNavigationLocation({ ...state, activeTab: "cad" }, "robot-project", "")).toBe("?view=resources-structure&mode=cad");
