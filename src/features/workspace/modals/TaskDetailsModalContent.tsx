@@ -30,7 +30,6 @@ interface TaskDetailsModalProps {
   onEditTask: (task: TaskRecord) => void;
   onLogWork?: (taskId: string) => void;
   onSubmitQa?: (taskId: string) => void;
-  onResolveTaskBlocker: (blockerId: string) => Promise<void>;
   showDependencyBlockersSection?: boolean;
   showEditButton?: boolean;
 }
@@ -54,19 +53,19 @@ export function TaskDetailsModal({
   onEditTask,
   onLogWork,
   onSubmitQa,
-  onResolveTaskBlocker,
   showDependencyBlockersSection = true,
   showEditButton = true,
 }: TaskDetailsModalProps) {
   const [editingField, setEditingField] = useState<TaskDetailsEditableField | null>(null);
   const canInlineEdit = Boolean(taskDraft && setTaskDraft);
+  const linkedRiskIds = new Set(bootstrap.risks.filter((risk) => risk.relatedTargets.some(
+    (target) => target.kind === "task" && target.id === activeTask.id,
+  )).map((risk) => risk.id));
   const taskAuditActions = (bootstrap.actions ?? []).filter(
     (action) =>
       action.taskId === activeTask.id ||
       (action.entityType === "task" && action.entityId === activeTask.id) ||
-      (Boolean(activeTask.targetRiskId) &&
-        action.entityType === "risk" &&
-        action.entityId === activeTask.targetRiskId),
+      (action.entityType === "risk" && linkedRiskIds.has(action.entityId)),
   );
 
   useEffect(() => {
@@ -115,7 +114,6 @@ export function TaskDetailsModal({
               bootstrap={bootstrap}
               canInlineEdit={canInlineEdit}
               dependencyTargetProjectId={dependencyTargetProjectId}
-              onResolveTaskBlocker={onResolveTaskBlocker}
               setTaskDraft={setTaskDraft}
               taskDraft={taskDraft}
             />

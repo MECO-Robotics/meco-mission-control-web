@@ -44,7 +44,7 @@ export function buildTimelineSubsystemFilterOptions(bootstrap: BootstrapPayload)
 }
 
 export function buildTimelineDisciplineFilterOptions(bootstrap: BootstrapPayload): DropdownOption[] {
-  return bootstrap.disciplines.map((discipline) => ({
+  return bootstrap.workTypes.map((discipline) => ({
     id: discipline.id,
     name: discipline.name,
   }));
@@ -70,7 +70,7 @@ export function filterTimelineTasks({
     result = result.filter((task) => filterSelectionIncludes(projectFilter, task.projectId));
   }
   if (disciplineFilter.length > 0) {
-    result = result.filter((task) => filterSelectionIncludes(disciplineFilter, task.disciplineId));
+    result = result.filter((task) => filterSelectionIncludes(disciplineFilter, task.workTypeId));
   }
   if (subsystemFilter.length > 0) {
     result = result.filter((task) =>

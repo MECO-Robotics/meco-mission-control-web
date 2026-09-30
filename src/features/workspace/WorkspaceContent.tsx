@@ -53,7 +53,7 @@ export interface WorkspaceContentProps {
   artifacts: ArtifactRecord[];
   availabilityBootstrap: BootstrapPayload;
   bootstrap: BootstrapPayload;
-  disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
+  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>;
   externalMembers: BootstrapPayload["members"];
   handleCreateMember: (milestone: React.FormEvent<HTMLFormElement>) => void;
   handleReactivateMemberForSeason: (memberId: string) => Promise<void>;
@@ -185,7 +185,7 @@ export function WorkspaceContent({
   ...props
 }: WorkspaceContentProps) {
   const effectiveInventoryView =
-    isNonRobotProject && (inventoryView === "parts" || inventoryView === "part-mappings")
+    inventoryView === "documents" || (isNonRobotProject && (inventoryView === "parts" || inventoryView === "part-mappings"))
       ? "materials"
       : inventoryView;
   const previousTaskViewRef = useRef(taskView);

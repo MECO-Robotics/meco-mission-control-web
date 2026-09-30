@@ -61,7 +61,7 @@ export function TaskDisciplineBadge({
   discipline,
 }: {
   accentColor: string;
-  discipline: Pick<BootstrapPayload["disciplines"][number], "code" | "name">;
+  discipline: Pick<BootstrapPayload["workTypes"][number], "code" | "name">;
 }) {
   const label = `${discipline.name} discipline`;
 

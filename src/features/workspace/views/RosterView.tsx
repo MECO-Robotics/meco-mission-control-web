@@ -123,9 +123,9 @@ export const RosterView: React.FC<RosterViewProps> = ({
     const allowedDisciplineIds = new Set(
       getTaskDisciplinesForProject(projectForDisciplines).map((discipline) => discipline.id),
     );
-    const uniqueDisciplinesByName = new Map<string, BootstrapPayload["disciplines"][number]>();
+    const uniqueDisciplinesByName = new Map<string, BootstrapPayload["workTypes"][number]>();
 
-    for (const discipline of bootstrap.disciplines) {
+    for (const discipline of bootstrap.workTypes) {
       if (!allowedDisciplineIds.has(discipline.id)) {
         continue;
       }
@@ -136,15 +136,15 @@ export const RosterView: React.FC<RosterViewProps> = ({
     }
 
     return [...uniqueDisciplinesByName.values()].sort((a, b) => a.name.localeCompare(b.name));
-  }, [bootstrap.disciplines, bootstrap.projects, selectedProject]);
+  }, [bootstrap.workTypes, bootstrap.projects, selectedProject]);
 
   const disciplineOptions = React.useMemo(
     () => sortedDisciplines.map((discipline) => ({ id: discipline.id, name: discipline.name })),
     [sortedDisciplines],
   );
   const disciplineById = React.useMemo(
-    () => Object.fromEntries(bootstrap.disciplines.map((discipline) => [discipline.id, discipline.name] as const)),
-    [bootstrap.disciplines],
+    () => Object.fromEntries(bootstrap.workTypes.map((discipline) => [discipline.id, discipline.name] as const)),
+    [bootstrap.workTypes],
   );
   const normalizedSearch = searchText.trim().toLowerCase();
   const filterMembers = (members: MemberRecord[]) => {
@@ -227,7 +227,7 @@ export const RosterView: React.FC<RosterViewProps> = ({
   const renderMember = (member: MemberRecord) => {
     const load = insightById.get(member.id);
     return <div className="people-member" key={member.id}>
-      <RosterMemberRow disciplines={bootstrap.disciplines} member={member} onEditMember={openEditPersonPopup} onSelectMember={openEditPersonPopup} selectedMemberId={selectedMemberId} />
+      <RosterMemberRow disciplines={bootstrap.workTypes} member={member} onEditMember={openEditPersonPopup} onSelectMember={openEditPersonPopup} selectedMemberId={selectedMemberId} />
       <div className="people-member-context">
         <div className="people-member-load-summary">
           <div aria-label="Weekly capacity" className="people-member-capacity">

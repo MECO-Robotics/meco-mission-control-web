@@ -13,7 +13,6 @@ interface ArtifactEditorModalProps {
   closeArtifactModal: () => void;
   handleArtifactSubmit: (milestone: FormEvent<HTMLFormElement>) => void;
   handleDeleteArtifact: (artifactId: string) => Promise<void>;
-  handleToggleArtifactArchived: (artifactId: string) => Promise<void>;
   isDeletingArtifact: boolean;
   isSavingArtifact: boolean;
   setArtifactDraft: Dispatch<SetStateAction<ArtifactPayload>>;
@@ -28,15 +27,21 @@ export function ArtifactEditorModal({
   closeArtifactModal,
   handleArtifactSubmit,
   handleDeleteArtifact,
-  handleToggleArtifactArchived,
   isDeletingArtifact,
   isSavingArtifact,
   setArtifactDraft,
   requestPhotoUpload,
 }: ArtifactEditorModalProps) {
-  const filteredWorkstreams = bootstrap.workstreams.filter(
-    (workstream) => workstream.projectId === artifactDraft.projectId,
-  );
+  const targets = [
+    ...bootstrap.tasks.map((x) => ({ kind: "task" as const, id: x.id, label: `Task · ${x.title}` })),
+    ...bootstrap.subsystems.map((x) => ({ kind: "subsystem" as const, id: x.id, label: `Subsystem · ${x.name}` })),
+    ...bootstrap.mechanisms.map((x) => ({ kind: "mechanism" as const, id: x.id, label: `Mechanism · ${x.name}` })),
+    ...bootstrap.partDefinitions.map((x) => ({ kind: "part-definition" as const, id: x.id, label: `Part · ${x.name}` })),
+    ...bootstrap.meetings.map((x) => ({ kind: "meeting" as const, id: x.id, label: `Meeting · ${x.title}` })),
+    ...bootstrap.events.map((x) => ({ kind: "event" as const, id: x.id, label: `Event · ${x.title}` })),
+    ...bootstrap.milestones.map((x) => ({ kind: "milestone" as const, id: x.id, label: `Milestone · ${x.title}` })),
+    ...bootstrap.projects.map((x) => ({ kind: "project" as const, id: x.id, label: `Project · ${x.name}` })),
+  ];
 
   return (
     <EditorModalShell
@@ -65,14 +70,9 @@ export function ArtifactEditorModal({
           onChange={(milestone) =>
             setArtifactDraft((current) => {
               const projectId = milestone.target.value;
-              const defaultWorkstreamId =
-                bootstrap.workstreams.find(
-                  (workstream) => workstream.projectId === projectId,
-                )?.id ?? null;
               return {
                 ...current,
                 projectId,
-                workstreamId: defaultWorkstreamId,
               };
             })
           }
@@ -89,24 +89,17 @@ export function ArtifactEditorModal({
           ))}
         </select>
       </label>
-      <label className="field">
-        <span style={{ color: "var(--text-title)" }}>Workflow</span>
-        <select
-          onChange={(milestone) =>
-            setArtifactDraft((current) => ({
-              ...current,
-              workstreamId: milestone.target.value || null,
-            }))
-          }
-          value={artifactDraft.workstreamId ?? ""}
-        >
-          <option value="">Project-level artifact</option>
-          {filteredWorkstreams.map((workstream) => (
-            <option key={workstream.id} value={workstream.id}>
-              {workstream.name}
-            </option>
-          ))}
+      <label className="field modal-wide">
+        <span style={{ color: "var(--text-title)" }}>Linked domain record</span>
+        <select onChange={(event) => {
+          const [kind, id] = event.target.value.split(":");
+          if (!kind || !id) return;
+          setArtifactDraft((current) => current.targetRefs.some((ref) => ref.kind === kind && ref.id === id) ? current : { ...current, targetRefs: [...current.targetRefs, { kind, id } as (typeof current.targetRefs)[number]] });
+        }} value="">
+          <option value="">Add a linked record…</option>
+          {targets.map((target) => <option key={`${target.kind}:${target.id}`} value={`${target.kind}:${target.id}`}>{target.label}</option>)}
         </select>
+        <span>{artifactDraft.targetRefs.map((ref) => <button key={`${ref.kind}:${ref.id}`} className="secondary-action" type="button" onClick={() => setArtifactDraft((current) => ({ ...current, targetRefs: current.targetRefs.filter((item) => item.kind !== ref.kind || item.id !== ref.id) }))}>{ref.kind} · {ref.id} ×</button>)}</span>
       </label>
       <label className="field">
         <span style={{ color: "var(--text-title)" }}>Status</span>
@@ -138,17 +131,17 @@ export function ArtifactEditorModal({
         />
       </label>
       <label className="field modal-wide">
-        <span style={{ color: "var(--text-title)" }}>Link</span>
+        <span style={{ color: "var(--text-title)" }}>Document URI</span>
         <input
           onChange={(milestone) =>
             setArtifactDraft((current) => ({
               ...current,
-              link: milestone.target.value,
+              uri: milestone.target.value,
             }))
           }
           placeholder="https://..."
           type="url"
-          value={artifactDraft.link}
+          value={artifactDraft.uri}
         />
       </label>
       <PhotoUploadField
@@ -172,18 +165,6 @@ export function ArtifactEditorModal({
             type="button"
           >
             {isDeletingArtifact ? "Deleting..." : "Delete artifact"}
-          </button>
-        ) : null}
-        {artifactModalMode === "edit" && activeArtifactId ? (
-          <button
-            className={artifactDraft.isArchived ? "secondary-action" : "danger-action"}
-            disabled={isSavingArtifact || isDeletingArtifact}
-            onClick={() => {
-              void handleToggleArtifactArchived(activeArtifactId);
-            }}
-            type="button"
-          >
-            {artifactDraft.isArchived ? "Restore artifact" : "Archive artifact"}
           </button>
         ) : null}
         <button

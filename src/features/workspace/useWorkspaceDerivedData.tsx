@@ -40,7 +40,7 @@ export function useWorkspaceDerivedData({
 
   const membersById = useMemo(() => indexRecordsById(bootstrap.members), [bootstrap.members]);
   const subsystemsById = useMemo(() => indexRecordsById(bootstrap.subsystems), [bootstrap.subsystems]);
-  const disciplinesById = useMemo(() => indexRecordsById(bootstrap.disciplines), [bootstrap.disciplines]);
+  const workTypesById = useMemo(() => indexRecordsById(bootstrap.workTypes), [bootstrap.workTypes]);
   const mechanismsById = useMemo(() => indexRecordsById(bootstrap.mechanisms), [bootstrap.mechanisms]);
   const partDefinitionsById = useMemo(
     () => indexRecordsById(bootstrap.partDefinitions),
@@ -152,7 +152,7 @@ export function useWorkspaceDerivedData({
   );
 
   return {
-    disciplinesById,
+    workTypesById,
     externalMembers,
     mechanismsById,
     membersById,

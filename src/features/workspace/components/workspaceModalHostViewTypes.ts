@@ -18,7 +18,7 @@ import type { MaterialEditorModal } from "../modals/assetCatalog/MaterialEditorM
 
 export interface WorkspaceModalHostViewProps {
   taskEditor: Pick<ComponentProps<typeof TaskEditorModal>,
-    "activeTask" | "closeTaskModal" | "handleResolveTaskBlocker" |
+    "activeTask" | "closeTaskModal" |
     "handleTaskSubmit" | "isDeletingTask" | "isSavingTask" | "setTaskDraft" | "taskDraft"
   > & {
     taskModalMode: "create" | "edit" | null;
@@ -48,7 +48,7 @@ export interface WorkspaceModalHostViewProps {
   openCreateQaReportModal: (taskId?: string) => void;
   onTaskEditCanceled: () => void;
   requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
-  disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
+  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>;
   handleQaReportSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
   handleMilestoneReportSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
   handleWorkLogSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;

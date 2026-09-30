@@ -25,9 +25,9 @@ export function buildRosterDisciplineOptions(
 ) {
   const project = selectedProject ?? bootstrap.projects[0] ?? null;
   const allowedIds = new Set(getTaskDisciplinesForProject(project).map((item) => item.id));
-  const byName = new Map<string, BootstrapPayload["disciplines"][number]>();
+  const byName = new Map<string, BootstrapPayload["workTypes"][number]>();
 
-  bootstrap.disciplines.forEach((discipline) => {
+  bootstrap.workTypes.forEach((discipline) => {
     const key = discipline.name.trim().toLowerCase();
     if (allowedIds.has(discipline.id) && !byName.has(key)) byName.set(key, discipline);
   });

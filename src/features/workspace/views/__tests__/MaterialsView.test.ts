@@ -24,7 +24,7 @@ describe("MaterialsView stock presentation", () => {
     onHandQuantity: 2,
     reorderPoint: 3,
     location: "Shelf B2",
-    vendor: "McMaster-Carr",
+    preferredVendorId: "vendor-mcmaster",
     unit: "sheet",
     notes: "",
   };
@@ -101,7 +101,7 @@ describe("MaterialsView stock presentation", () => {
       onHandQuantity: 1,
       reorderPoint: 2,
       location: "Filament cabinet",
-      vendor: "Markforged",
+      preferredVendorId: "vendor-markforged",
     };
 
     expect(
@@ -111,9 +111,9 @@ describe("MaterialsView stock presentation", () => {
         category: ["plastic"],
         quantity: ["2 / 3"],
         location: ["Shelf B2"],
-        vendor: ["McMaster-Carr"],
-        stock: ["below-reorder"],
-      }),
+      vendor: ["McMaster-Carr"],
+      stock: ["below-reorder"],
+    }, { "vendor-mcmaster": "McMaster-Carr", "vendor-markforged": "Markforged" }),
     ).toEqual([material]);
   });
 

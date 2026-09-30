@@ -42,13 +42,13 @@ const TIMELINE_TASK_DISCIPLINE_COLORS: Record<DisciplineCode, string> = {
 
 export function getTimelineTaskDisciplineColor(
   disciplineId: string | null,
-  disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>,
+  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>,
 ) {
   if (!disciplineId) {
     return FALLBACK_TIMELINE_TASK_DISCIPLINE_COLOR;
   }
 
-  const code = disciplinesById[disciplineId]?.code;
+  const code = workTypesById[disciplineId]?.code;
   return code ? TIMELINE_TASK_DISCIPLINE_COLORS[code] ?? FALLBACK_TIMELINE_TASK_DISCIPLINE_COLOR : FALLBACK_TIMELINE_TASK_DISCIPLINE_COLOR;
 }
 
@@ -75,11 +75,11 @@ export function getTimelineRowHighlightHoverFill(accentColor: string) {
 
 export function buildTimelineTaskHighlightStyle(
   disciplineId: string | null,
-  disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>,
+  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>,
   extras?: TimelineTaskToneExtras,
 ) {
   return buildTimelineHighlightStyle(
-    getTimelineTaskDisciplineColor(disciplineId, disciplinesById),
+    getTimelineTaskDisciplineColor(disciplineId, workTypesById),
     extras,
   );
 }
@@ -98,7 +98,7 @@ export function resolveTimelineRowHighlightStyle(
   anchorKey: string,
   tasksById: Record<string, TaskRecord>,
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>,
-  disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>,
+  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>,
 ) {
   if (anchorKey.startsWith("task:")) {
     const task = tasksById[anchorKey.slice(5)];
@@ -106,7 +106,7 @@ export function resolveTimelineRowHighlightStyle(
       return null;
     }
 
-    return buildTimelineTaskHighlightStyle(task.disciplineId, disciplinesById);
+    return buildTimelineTaskHighlightStyle(task.workTypeId, workTypesById);
   }
 
   if (anchorKey.startsWith("subsystem:")) {
@@ -123,11 +123,11 @@ export function resolveTimelineRowHighlightStyle(
 
 export function buildTimelineTaskToneStyle(
   disciplineId: string | null,
-  disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>,
+  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>,
   extras?: TimelineTaskToneExtras,
 ) {
-  return buildTimelineTaskHighlightStyle(disciplineId, disciplinesById, {
-    "--timeline-task-discipline-accent": getTimelineTaskDisciplineColor(disciplineId, disciplinesById),
+  return buildTimelineTaskHighlightStyle(disciplineId, workTypesById, {
+    "--timeline-task-discipline-accent": getTimelineTaskDisciplineColor(disciplineId, workTypesById),
     ...extras,
   });
 }

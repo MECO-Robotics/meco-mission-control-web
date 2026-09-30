@@ -93,7 +93,7 @@ describe("TaskCalendarDayDetails", () => {
     expect(markup).toContain("high");
     expect(markup).toContain("in-progress");
     expect(markup).toContain("Robot | Meeting: Build night");
-    expect(markup).toContain("Meeting / event");
+    expect(markup).toContain("Meeting");
     expect(markup).toContain('aria-label="Open Robot | Wire drivetrain"');
     expect(markup).not.toContain('aria-label="Open Robot | Meeting: Build night"');
   });

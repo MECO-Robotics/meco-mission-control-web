@@ -18,7 +18,7 @@ interface TimelineProjectGroupProps {
   clearHoveredMilestonePopup: () => void;
   collapsedProjects: Record<string, boolean>;
   collapsedSubsystems: Record<string, boolean>;
-  disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
+  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>;
   firstDayGridColumn: number;
   gridMinWidth: number;
   handleTimelineDayMouseEnter: (milestone: React.MouseEvent<HTMLElement>) => void;
@@ -54,7 +54,7 @@ export const TimelineProjectGroup: React.FC<TimelineProjectGroupProps> = ({
   clearHoveredMilestonePopup,
   collapsedProjects,
   collapsedSubsystems,
-  disciplinesById,
+  workTypesById,
   firstDayGridColumn,
   gridMinWidth,
   handleTimelineDayMouseEnter,
@@ -133,7 +133,7 @@ export const TimelineProjectGroup: React.FC<TimelineProjectGroupProps> = ({
             <TimelineTaskTrackRowList
               clearHoveredMilestonePopup={clearHoveredMilestonePopup}
               clearHoveredTaskRow={clearHoveredTaskRow}
-              disciplinesById={disciplinesById}
+              workTypesById={workTypesById}
               firstDayGridColumn={firstDayGridColumn}
               handleTimelineDayMouseEnter={handleTimelineDayMouseEnter}
               hoveredTaskId={hoveredTaskId}
@@ -175,7 +175,7 @@ export const TimelineProjectGroup: React.FC<TimelineProjectGroupProps> = ({
                 clearHoveredSubsystemRow={clearHoveredSubsystemRow}
                 clearHoveredTaskRow={clearHoveredTaskRow}
                 collapsedSubsystems={collapsedSubsystems}
-                disciplinesById={disciplinesById}
+                workTypesById={workTypesById}
                 firstDayGridColumn={firstDayGridColumn}
                 handleTimelineDayMouseEnter={handleTimelineDayMouseEnter}
                 hoveredSubsystemId={hoveredSubsystemId}

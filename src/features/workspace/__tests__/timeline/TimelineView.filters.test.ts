@@ -56,7 +56,7 @@ describe("TimelineView", () => {
         },
       ],
       disciplines: [
-        ...bootstrap.disciplines,
+        ...bootstrap.workTypes,
         {
           id: "discipline-2",
           code: "programming",

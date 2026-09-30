@@ -1,6 +1,9 @@
 import type {
   ArtifactKind,
   ArtifactStatus,
+  AcquisitionMethod,
+  DomainReference,
+  PartInstanceLocation,
   MilestoneType,
   MilestoneStatus,
   ManufacturingProcess,
@@ -24,13 +27,11 @@ import type { SubsystemLayoutView, SubsystemLayoutZone } from "./recordsOrganiza
 export interface MilestonePayload {
   title: string;
   type: MilestoneType;
-  status?: MilestoneStatus;
-  startDateTime: string;
-  endDateTime: string | null;
-  isExternal: boolean;
+  status: MilestoneStatus;
+  startAt: string;
+  endAt: string | null;
   description: string;
   projectIds: string[];
-  photoUrl?: string;
 }
 
 export interface MeetingPayload {
@@ -38,33 +39,29 @@ export interface MeetingPayload {
   meetingType: MeetingType;
   seasonId?: string;
   projectIds: string[];
-  startDateTime: string;
-  endDateTime?: string | null;
+  startAt: string;
+  endAt: string | null;
   location: string;
   description: string;
 }
 
 export interface ReportPayload {
-  reportType: "QA" | "MilestoneTest" | "Practice" | "Competition" | "Review";
+  reportType: "qa" | "practice" | "competition" | "review";
   projectId: string;
-  taskId: string | null;
-  milestoneId: string | null;
-  workstreamId: string | null;
+  targetRefs: DomainReference[];
   createdByMemberId: string | null;
-  result: string;
+  participantIds: string[];
+  mentorId: string | null;
+  requestedById: string | null;
   summary: string;
   notes: string;
-  photoUrl: string;
+  evidenceNotes?: string;
+  photoUrl?: string;
   createdAt: string;
-  participantIds?: string[];
-  mentorApproved?: boolean;
-  reviewedAt?: string;
-  title?: string;
-  status?: TestResultStatus;
-  findings?: string[];
-  targetRiskId?: string | null;
-  proposedRiskSeverity?: RiskSeverity | null;
-  proposedRiskStatus?: RiskReassessmentStatus | null;
+  status: "draft" | "submitted" | "reviewed";
+  result: string | null;
+  reviewedById?: string | null;
+  reviewedAt?: string | null;
 }
 
 export type QaReportPayload = ReportPayload;
@@ -98,17 +95,25 @@ export interface ManufacturingItemPayload {
 }
 
 export interface PurchaseItemPayload {
+  taskId: string;
+  kind: "cots-goods" | "manufacturing-service";
   title: string;
-  subsystemId: string;
-  requestedById: string | null;
   partDefinitionId: string | null;
+  materialId: string | null;
   quantity: number;
-  vendor: string;
-  linkLabel: string;
-  estimatedCost: number;
-  finalCost?: number;
-  approvedByMentor: boolean;
-  status: PurchaseStatus;
+  quotes: Array<{ id: string; vendorId: string; reference: string | null; amount: { amount: number; currency: string | null } | null; url?: string; expiresAt?: string | null; quotedAt: string | null }>;
+  selectedQuoteId: string | null;
+  approvalStatus: "pending" | "approved" | "rejected";
+  approvedById: string | null;
+  approvedAt: string | null;
+  purchaseOrderNumber: string | null;
+  orderStatus: "not-ordered" | "ordered" | "shipped" | "delivered" | "cancelled";
+  finalCost: { amount: number; currency: string | null } | null;
+  expectedDeliveryDate: string | null;
+  trackingNumber: string | null;
+  trackingUrl: string | null;
+  orderedAt: string | null;
+  deliveredAt: string | null;
 }
 
 export interface SeasonCreatePayload {
@@ -153,20 +158,19 @@ export interface MaterialPayload {
   onHandQuantity: number;
   reorderPoint: number;
   location: string;
-  vendor: string;
+  preferredVendorId: string | null;
   notes: string;
   photoUrl?: string;
 }
 
 export interface ArtifactPayload {
   projectId: string;
-  workstreamId: string | null;
+  targetRefs: DomainReference[];
   kind: ArtifactKind;
   title: string;
   summary: string;
   status: ArtifactStatus;
-  link: string;
-  isArchived?: boolean;
+  uri: string;
   updatedAt: string;
   photoUrl?: string;
 }
@@ -180,14 +184,17 @@ export interface WorkstreamPayload {
 }
 
 export interface RiskPayload {
+  projectId: string;
   title: string;
   detail: string;
   severity: RiskSeverity;
-  sourceType: "qa-report" | "test-result";
-  sourceId: string;
-  attachmentType: RiskAttachmentType;
-  attachmentId: string;
+  category: "dependency" | "design" | "manufacturing" | "supply" | "schedule" | "qa" | "inventory" | "other";
+  status: "open" | "mitigating" | "accepted" | "resolved";
+  blocksWork: boolean;
+  source: { kind: "manual" } | { kind: "task" | "task-dependency" | "qa-finding" | "test-finding" | "qa-request" | "test-result" | "report" | "event" | "milestone" | "manufacturing-details" | "part-instance" | "material"; id: string };
+  relatedTargets: DomainReference[];
   mitigationTaskId: string | null;
+  ownerGroupId: string | null;
 }
 
 export interface PartDefinitionPayload {
@@ -200,7 +207,7 @@ export interface PartDefinitionPayload {
   isArchived?: boolean;
   isHardware: boolean;
   type: string;
-  source: string;
+  defaultAcquisitionMethod: AcquisitionMethod;
   materialId: string | null;
   description: string;
   photoUrl: string;
@@ -217,7 +224,6 @@ export interface SubsystemPayload {
   parentSubsystemId: string | null;
   responsibleEngineerId: string | null;
   mentorIds: string[];
-  risks: string[];
   layoutX?: number | null;
   layoutY?: number | null;
   layoutZone?: SubsystemLayoutZone | null;
@@ -236,12 +242,9 @@ export interface MechanismPayload {
 }
 
 export interface PartInstancePayload {
-  subsystemId: string;
-  mechanismId: string | null;
   partDefinitionId: string;
-  name: string;
-  quantity: number;
-  trackIndividually: boolean;
-  status: PartInstanceRecordType["status"];
+  intendedSubsystemId: string | null;
+  intendedMechanismId: string | null;
+  location: PartInstanceLocation;
   photoUrl: string;
 }

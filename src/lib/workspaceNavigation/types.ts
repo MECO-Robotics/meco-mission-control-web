@@ -4,6 +4,8 @@ export type ViewTab =
   | "home"
   | "tasks"
   | "worklogs"
+  | "risks"
+  | "documents"
   | "manufacturing"
   | "inventory"
   | "cad"
@@ -25,7 +27,7 @@ export type WorklogsViewTab = "logs" | "activity" | "qa" | "results";
 export type ManufacturingViewTab = "all" | "cnc" | "prints" | "fabrication";
 export type InventoryViewTab = "materials" | "documents" | "parts" | "part-mappings" | "purchases";
 export type NavigationSubItemId =
-  | "home" | "work-tasks" | "work-schedule"
+  | "home" | "work-tasks" | "work-schedule" | "work-risks"
   | "resources-materials" | "resources-documents" | "resources-parts"
   | "resources-purchases" | "work-manufacturing" | "resources-structure"
   | "team-people";

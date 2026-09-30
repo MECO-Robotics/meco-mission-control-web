@@ -66,15 +66,7 @@ export function usePartInstanceActions({ bootstrap, handleUnauthorized, loadWork
         return;
       }
 
-      if (!partInstanceDraft.mechanismId) {
-        setDataMessage("Please choose a mechanism before saving the part instance.");
-        return;
-      }
-
-      const payload: PartInstancePayload = {
-        ...partInstanceDraft,
-        name: partInstanceDraft.name.trim(),
-      };
+      const payload: PartInstancePayload = partInstanceDraft;
 
       if (partInstanceModalMode === "create") {
         await createPartInstanceRecord(payload, handleUnauthorized);
@@ -99,13 +91,13 @@ export function usePartInstanceActions({ bootstrap, handleUnauthorized, loadWork
     const previousPartInstance = bootstrap.partInstances.find(
       (partInstance) => partInstance.id === partInstanceId,
     );
-    if (!previousPartInstance || !previousPartInstance.mechanismId) {
+    if (!previousPartInstance || previousPartInstance.location.kind !== "installed") {
       return false;
     }
 
     const optimisticPartInstance: PartInstanceRecord = {
       ...previousPartInstance,
-      mechanismId: null,
+      location: { kind: "unlocated" },
     };
 
     setBootstrap((current) => ({
@@ -118,7 +110,7 @@ export function usePartInstanceActions({ bootstrap, handleUnauthorized, loadWork
     try {
       const updatedPartInstance = await updatePartInstanceRecord(
         partInstanceId,
-        { mechanismId: null },
+        { location: { kind: "unlocated" } },
         handleUnauthorized,
       );
 

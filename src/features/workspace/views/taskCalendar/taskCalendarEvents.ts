@@ -1,7 +1,6 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import {
-  filterSelectionIncludes,
   filterSelectionMatchesTaskPeople,
 } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { isMeetingVisibleInProjectScope } from "@/features/workspace/shared/events";
@@ -12,8 +11,8 @@ export type TaskCalendarEventType =
   | "milestone"
   | "task-due"
   | "qa-due"
-  | "event"
-  | "manufacturing-due";
+  | "meeting"
+  | "event";
 
 export interface TaskCalendarEventProps {
   contextLabel: string | null;
@@ -96,10 +95,6 @@ export function buildTaskCalendarEvents({
 }: BuildTaskCalendarEventsArgs) {
   const activeProjectIdList = bootstrap.projects.map((project) => project.id);
   const activeProjectIds = new Set(activeProjectIdList);
-  const subsystemProjectById = Object.fromEntries(
-    bootstrap.subsystems.map((subsystem) => [subsystem.id, subsystem.projectId] as const),
-  );
-
   const taskEvents: TaskCalendarEvent[] = bootstrap.tasks
     .filter(
       (task) =>
@@ -154,47 +149,15 @@ export function buildTaskCalendarEvents({
           type: "milestone",
         },
         id: `milestone:${milestone.id}`,
-        start: milestone.startDateTime,
+        start: milestone.startAt,
         title: prependContextLabel(milestone.title, contextLabel),
-      };
-    });
-
-  const manufacturingEvents: TaskCalendarEvent[] = bootstrap.manufacturingItems
-    .filter(
-      (item) =>
-        Boolean(item.dueDate) &&
-        item.status !== "complete" &&
-        filterSelectionIncludes(activePersonFilter, item.requestedById),
-    )
-    .map((item) => {
-      const projectId = subsystemProjectById[item.subsystemId] ?? null;
-      const contextLabel = buildProjectContextLabel({
-        isAllProjectsView,
-        projectIds: projectId ? [projectId] : [],
-        projectsById,
-      });
-
-      return {
-        extendedProps: {
-          contextLabel,
-          recordId: item.id,
-          status: item.status,
-          type: "manufacturing-due",
-        },
-        id: `manufacturing:${item.id}`,
-        start: hasTime(item.dueDate) ? item.dueDate : asDateOnly(item.dueDate),
-        title: prependContextLabel(`MFG: ${item.title}`, contextLabel),
       };
     });
 
   const meetingEvents: TaskCalendarEvent[] = (bootstrap.meetings ?? [])
     .filter((meeting) => isMeetingVisibleInProjectScope(meeting, activeProjectIds))
     .map((meeting) => {
-      const meetingStart =
-        meeting.startDateTime ??
-        (meeting.time.trim().length > 0
-          ? `${asDateOnly(meeting.date)}T${meeting.time.trim()}`
-          : asDateOnly(meeting.date));
+      const meetingStart = meeting.startAt;
       const contextLabel = buildProjectContextLabel({
         isAllProjectsView,
         projectIds: meeting.projectIds ?? [],
@@ -205,8 +168,8 @@ export function buildTaskCalendarEvents({
         extendedProps: {
           contextLabel,
           recordId: meeting.id,
-          status: meeting.meetingType ?? "general",
-          type: "event",
+          status: meeting.meetingType,
+          type: "meeting",
         },
         id: `meeting:${meeting.id}`,
         start: hasTime(meetingStart) ? meetingStart : asDateOnly(meetingStart),
@@ -214,7 +177,23 @@ export function buildTaskCalendarEvents({
       };
     });
 
-  return [...milestoneEvents, ...taskEvents, ...manufacturingEvents, ...meetingEvents];
+  const eventEvents: TaskCalendarEvent[] = bootstrap.events
+    .filter((event) => isMeetingVisibleInProjectScope(event, activeProjectIds))
+    .map((event) => {
+      const contextLabel = buildProjectContextLabel({
+        isAllProjectsView,
+        projectIds: event.projectIds,
+        projectsById,
+      });
+      return {
+        extendedProps: { contextLabel, recordId: event.id, status: event.eventType, type: "event" },
+        id: `event:${event.id}`,
+        start: hasTime(event.startAt) ? event.startAt : asDateOnly(event.startAt),
+        title: prependContextLabel(event.title, contextLabel),
+      };
+    });
+
+  return [...milestoneEvents, ...taskEvents, ...meetingEvents, ...eventEvents];
 }
 
 export function isTaskDueSoon(dueDate: string, today = new Date()) {

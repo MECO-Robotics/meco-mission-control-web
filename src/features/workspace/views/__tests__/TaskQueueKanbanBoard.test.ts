@@ -117,7 +117,7 @@ function renderBoard(
   renderToStaticMarkup(
     React.createElement(TaskQueueKanbanBoard, {
       bootstrap,
-      disciplinesById: { "discipline-1": bootstrap.disciplines[0] },
+      workTypesById: { "discipline-1": bootstrap.workTypes[0] },
       focusedState: null,
       isNonRobotProject: false,
       membersById: { "member-1": bootstrap.members[0] },

@@ -42,9 +42,9 @@ export function useTaskDetailsAdvancedSectionModel({
   const partDefinitionsById = Object.fromEntries(
     bootstrap.partDefinitions.map((partDefinition) => [partDefinition.id, partDefinition] as const),
   ) as Record<string, BootstrapPayload["partDefinitions"][number]>;
-  const disciplinesById = Object.fromEntries(
-    bootstrap.disciplines.map((discipline) => [discipline.id, discipline] as const),
-  ) as Record<string, BootstrapPayload["disciplines"][number]>;
+  const workTypesById = Object.fromEntries(
+    bootstrap.workTypes.map((discipline) => [discipline.id, discipline] as const),
+  ) as Record<string, BootstrapPayload["workTypes"][number]>;
   const risksById = Object.fromEntries(
     bootstrap.risks.map((risk) => [risk.id, risk] as const),
   ) as Record<string, BootstrapPayload["risks"][number]>;
@@ -66,7 +66,7 @@ export function useTaskDetailsAdvancedSectionModel({
       "Not set"
     : "Not set";
   const disciplineAccentColor = editableTask.disciplineId
-    ? getTimelineTaskDisciplineColor(editableTask.disciplineId, disciplinesById)
+    ? getTimelineTaskDisciplineColor(editableTask.disciplineId, workTypesById)
     : null;
   const disciplinePillStyle = {
     "--task-detail-pill-accent": disciplineAccentColor ?? undefined,

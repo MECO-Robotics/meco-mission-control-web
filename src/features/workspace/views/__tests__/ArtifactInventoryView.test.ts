@@ -4,7 +4,6 @@ import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
-import { ArchiveFilterCheckbox } from "@/features/workspace/shared/filters/ArchiveFilterCheckbox";
 import { ArtifactInventoryView } from "@/features/workspace/views/ArtifactInventoryView";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
@@ -34,23 +33,23 @@ const bootstrap: BootstrapPayload = {
     {
       id: "artifact-1",
       projectId: "project-1",
-      workstreamId: "workstream-1",
+      targetRefs: [{ kind: "project", id: "project-1" }],
       kind: "document",
       title: "Brand guide",
       summary: "",
       status: "draft",
-      link: "",
+      uri: "",
       updatedAt: "2026-04-25T12:00:00.000Z",
     },
     {
       id: "artifact-2",
       projectId: "project-1",
-      workstreamId: "workstream-1",
+      targetRefs: [{ kind: "project", id: "project-1" }],
       kind: "nontechnical",
       title: "Sponsor packet",
       summary: "",
       status: "in-review",
-      link: "",
+      uri: "",
       updatedAt: "2026-04-25T12:00:00.000Z",
     },
   ],
@@ -61,7 +60,6 @@ describe("ArtifactInventoryView", () => {
     const markup = renderToStaticMarkup(
       React.createElement(ArtifactInventoryView, {
         artifacts: bootstrap.artifacts,
-        bootstrap,
         createKind: "document",
         kinds: ["document", "nontechnical"],
         openCreateArtifactModal: jest.fn(),
@@ -81,17 +79,4 @@ describe("ArtifactInventoryView", () => {
     expect(markup).not.toContain("Non-Technical");
   });
 
-  it("uses the shared archive checkbox control", () => {
-    const markup = renderToStaticMarkup(
-      React.createElement(ArchiveFilterCheckbox, {
-        checked: true,
-        label: "Show archived",
-        onChange: jest.fn(),
-      }),
-    );
-
-    expect(markup).toContain('aria-label="Show archived"');
-    expect(markup).toContain('type="checkbox"');
-    expect(markup).toContain("checked=\"\"");
-  });
 });

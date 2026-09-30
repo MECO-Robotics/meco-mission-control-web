@@ -12,7 +12,6 @@ interface TaskEditorModalProps {
   bootstrap: BootstrapPayload;
   closeTaskModal: () => void;
   advancedSectionOpen: boolean;
-  handleResolveTaskBlocker: (blockerId: string) => Promise<void>;
   handleTaskSubmit: (milestone: FormEvent<HTMLFormElement>) => void;
   isDeletingTask: boolean;
   isSavingTask: boolean;
@@ -29,13 +28,12 @@ interface TaskEditorModalProps {
 }
 
 function buildDraftTaskRecord(taskDraft: TaskPayload, activeTask: TaskRecord | null): TaskRecord {
-  const { taskBlockers, taskDependencies, ...recordDraft } = taskDraft;
+  const { taskDependencies, ...recordDraft } = taskDraft;
   void taskDependencies;
 
   return {
     ...recordDraft,
     id: activeTask?.id ?? "__new-task__",
-    blockers: (taskBlockers ?? []).map((blocker) => blocker.description),
   };
 }
 
@@ -86,7 +84,6 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
     bootstrap,
     closeTaskModal,
     advancedSectionOpen,
-    handleResolveTaskBlocker,
     handleTaskSubmit,
     isDeletingTask,
     isSavingTask,
@@ -110,9 +107,6 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
     // Portaled menus and completed uploads can retain a callback from before save.
     if (!busyRef.current) setTaskDraft(update);
   }, [setTaskDraft]);
-  const resolveBlockerWhenIdle = useCallback(async (id: string) => {
-    if (!busyRef.current) await handleResolveTaskBlocker(id);
-  }, [handleResolveTaskBlocker]);
   const closeWhenIdle = () => { if (!busyRef.current && confirmDiscard()) closeTaskModal(); };
 
   const handleTaskEditClosed = () => {
@@ -210,7 +204,6 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
           }
           modalClassName="task-editor-modal"
           onEditTask={() => undefined}
-          onResolveTaskBlocker={resolveBlockerWhenIdle}
           setAdvancedSectionOpen={setAdvancedSectionOpen}
           setTaskDraft={updateDraftWhenIdle}
           showDependencyBlockersSection={isEditTaskModal}

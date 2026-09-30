@@ -51,7 +51,7 @@ export function useTimelineViewData({
   viewInterval,
 }: UseTimelineViewDataArgs) {
   const {
-    disciplinesById,
+    workTypesById,
     projectsById,
     scopedMeetings,
     scopedMilestones,
@@ -143,8 +143,8 @@ export function useTimelineViewData({
 
   const resolveTaskRowHighlightStyle = useCallback(
     (anchorKey: string) =>
-      resolveTimelineRowHighlightStyle(anchorKey, tasksById, subsystemsById, disciplinesById),
-    [disciplinesById, subsystemsById, tasksById],
+      resolveTimelineRowHighlightStyle(anchorKey, tasksById, subsystemsById, workTypesById),
+    [workTypesById, subsystemsById, tasksById],
   );
   const modalPortalTarget =
     typeof document !== "undefined"
@@ -153,7 +153,7 @@ export function useTimelineViewData({
 
   return {
     clearHoveredMilestonePopup,
-    disciplinesById,
+    workTypesById,
     milestoneModal,
     handleTimelineDayMouseEnter,
     isTimelineShellScrolling,

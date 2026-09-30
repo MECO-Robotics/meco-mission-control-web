@@ -58,7 +58,7 @@ function buildHints({
   task: TaskRecord | null;
 }) {
   const hints = new Set<string>();
-  const discipline = bootstrap.disciplines.find((candidate) => candidate.id === member.disciplineId);
+  const discipline = bootstrap.workTypes.find((candidate) => candidate.id === member.disciplineId);
   if (discipline) {
     hints.add(discipline.name);
   }

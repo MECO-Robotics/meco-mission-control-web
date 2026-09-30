@@ -28,8 +28,8 @@ describe("TimelineView", () => {
         clearHoveredTaskRow: jest.fn(),
         collapsedProjects: { "project-1": true },
         collapsedSubsystems: {},
-        disciplinesById: {
-          "discipline-1": bootstrap.disciplines[0] as BootstrapPayload["disciplines"][number],
+        workTypesById: {
+          "discipline-1": bootstrap.workTypes[0] as BootstrapPayload["workTypes"][number],
         },
         firstDayGridColumn: 3,
         gridMinWidth: 420,

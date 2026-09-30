@@ -10,10 +10,6 @@ import {
   isTaskDependencySatisfied,
 } from "./taskPlanningInternals";
 
-function getMilestoneById(bootstrap: BootstrapPayload, milestoneId: string) {
-  return bootstrap.milestones.find((candidate) => candidate.id === milestoneId) ?? null;
-}
-
 export function getTaskWaitingOnDependencyRecords(
   taskId: string,
   bootstrap: BootstrapPayload,
@@ -32,15 +28,11 @@ export function getTaskPlanningState(
   bootstrap: BootstrapPayload,
   now: Date = new Date(),
 ): TaskPlanningState {
-  if (task.planningState) {
-    return task.planningState;
-  }
-
   if (task.status === "complete") {
     return "ready";
   }
 
-  if (getOpenTaskBlockers(task.id, bootstrap).length > 0) {
+  if (task.isBlocked || getOpenTaskBlockers(task.id, bootstrap).length > 0) {
     return "blocked";
   }
 
@@ -48,15 +40,8 @@ export function getTaskPlanningState(
     return "waiting-on-dependency";
   }
 
-  const deadlineDay = task.targetMilestoneId && getMilestoneById(bootstrap, task.targetMilestoneId)
-    ? (() => {
-        const milestone = getMilestoneById(bootstrap, task.targetMilestoneId);
-        const milestoneDay = milestone?.startDateTime.slice(0, 10) ?? task.dueDate;
-        return milestoneDay < task.dueDate ? milestoneDay : task.dueDate;
-      })()
-    : task.dueDate;
   const hoursUntilDeadline = (() => {
-    const deadline = new Date(`${deadlineDay}T12:00:00Z`);
+    const deadline = new Date(`${task.dueDate}T12:00:00Z`);
     const deltaMs = deadline.getTime() - now.getTime();
     return deltaMs <= 0 ? 0 : deltaMs / (1000 * 60 * 60);
   })();

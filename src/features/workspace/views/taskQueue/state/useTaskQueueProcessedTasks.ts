@@ -27,7 +27,7 @@ export function useTaskQueueProcessedTasks({
   activePersonFilter,
   bootstrap,
   disciplineFilter,
-  disciplinesById,
+  workTypesById,
   isAllProjectsView,
   membersById,
   ownerFilter,
@@ -45,7 +45,7 @@ export function useTaskQueueProcessedTasks({
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   disciplineFilter: FilterSelection;
-  disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
+  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>;
   isAllProjectsView: boolean;
   membersById: Record<string, BootstrapPayload["members"][number]>;
   ownerFilter: FilterSelection;
@@ -70,12 +70,12 @@ export function useTaskQueueProcessedTasks({
     [bootstrap.subsystems],
   );
   const disciplineOptions = useMemo(
-    () => bootstrap.disciplines.map((discipline) => ({
+    () => bootstrap.workTypes.map((discipline) => ({
       id: discipline.id,
       name: discipline.name,
       icon: getTaskQueueDisciplineIcon(discipline.code),
     })),
-    [bootstrap.disciplines],
+    [bootstrap.workTypes],
   );
   const subsystemIterationOptions = useMemo(() => {
     const iterations = Array.from(new Set(bootstrap.subsystems.map(({ iteration }) => iteration)))
@@ -101,7 +101,7 @@ export function useTaskQueueProcessedTasks({
       if (sortField === "priority") return PRIORITY_VALUES[task.priority] ?? 0;
       if (sortField === "status") return getTaskQueueBoardStateSortValue(getTaskQueueBoardState(task, bootstrap));
       if (sortField === "subsystemId") return formatSubsystemNames(readTaskSubsystemIds(task), subsystemsById, "");
-      if (sortField === "disciplineId") return task.disciplineId ? disciplinesById[task.disciplineId]?.name ?? "" : "";
+      if (sortField === "disciplineId") return task.workTypeId ? workTypesById[task.workTypeId]?.name ?? "" : "";
       if (sortField === "projectId") return projectsById[task.projectId]?.name ?? "";
       if (sortField === "ownerId") return formatTaskQueueAssignees(task, membersById);
       if (sortField === "title") return task.title.toLowerCase();
@@ -116,7 +116,7 @@ export function useTaskQueueProcessedTasks({
       return sortOrder === "asc" ? order : -order;
     });
   }, [
-    activePersonFilter, bootstrap, disciplineFilter, disciplinesById, isAllProjectsView,
+    activePersonFilter, bootstrap, disciplineFilter, workTypesById, isAllProjectsView,
     membersById, ownerFilter, priorityFilter, projectFilter, projectsById, searchFilter,
     sortField, sortOrder, statusFilter, subsystemFilter, subsystemIterationFilter,
     showSubsystemIterationFilter, subsystemsById,

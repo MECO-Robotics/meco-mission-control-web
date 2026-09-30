@@ -45,13 +45,14 @@ export function matchesMaterialStockFilter(material: MaterialStockValues, filter
 export function filterMaterialInventory(
   materials: MaterialRecord[],
   filters: MaterialInventoryFilters,
+  vendorNames: Record<string, string> = {},
 ) {
   const search = filters.search.trim().toLowerCase();
 
   return materials.filter((material) => {
     const quantity = `${material.onHandQuantity} / ${material.reorderPoint}`;
     const location = material.location || "Unassigned";
-    const vendor = material.vendor || "Unknown";
+    const vendor = material.preferredVendorId ? vendorNames[material.preferredVendorId] ?? "Unknown vendor" : "No preferred vendor";
     const matchesSearch =
       !search ||
       material.name.toLowerCase().includes(search) ||
@@ -74,6 +75,7 @@ export function sortMaterialInventory(
   materials: MaterialRecord[],
   field: MaterialSortField,
   direction: MaterialSortDirection,
+  vendorNames: Record<string, string> = {},
 ) {
   const multiplier = direction === "ascending" ? 1 : -1;
   const compare = (left: MaterialRecord, right: MaterialRecord) => {
@@ -93,7 +95,7 @@ export function sortMaterialInventory(
         result = (left.location || "Unassigned").localeCompare(right.location || "Unassigned", undefined, { numeric: true });
         break;
       case "vendor":
-        result = (left.vendor || "Unknown").localeCompare(right.vendor || "Unknown", undefined, { numeric: true });
+        result = (left.preferredVendorId ? vendorNames[left.preferredVendorId] ?? "Unknown vendor" : "No preferred vendor").localeCompare(right.preferredVendorId ? vendorNames[right.preferredVendorId] ?? "Unknown vendor" : "No preferred vendor", undefined, { numeric: true });
         break;
       case "status":
         result = Number(matchesMaterialStockFilter(left, ["low"])) - Number(matchesMaterialStockFilter(right, ["low"]));

@@ -11,7 +11,6 @@ import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefa
 import type { ArtifactKind } from "@/types/common";
 import type { ArtifactPayload } from "@/types/payloads";
 import { useCatalogDraftEditor } from "./useCatalogDraftEditor";
-import { useCatalogRecordActions } from "./useCatalogRecordActions";
 
 export function useArtifactActions({ bootstrap, handleUnauthorized, loadWorkspace, scopedBootstrap, selectedProjectId, setDataMessage, selectedSeasonId }: {
   selectedSeasonId: string | null;
@@ -47,16 +46,19 @@ export function useArtifactActions({ bootstrap, handleUnauthorized, loadWorkspac
     selectedSeasonId,
     toDraft: artifactToPayload,
   });
-  const { handleDelete: handleDeleteArtifact, handleToggleArchived: handleToggleArtifactArchived } = useCatalogRecordActions({
-    activeRecordId: activeArtifactId,
-    beginOperation,
-    closeEditor: closeArtifactModal,
-    deleteRecord: deleteArtifactRecord,
-    handleUnauthorized,
-    records: bootstrap.artifacts,
-    setDataMessage,
-    updateRecord: updateArtifactRecord,
-  });
+  const handleDeleteArtifact = useCallback(async (id: string) => {
+    const operation = beginOperation();
+    if (!operation) return;
+    try {
+      await deleteArtifactRecord(id, handleUnauthorized);
+      await operation.refresh();
+      if (operation.isCurrent()) closeArtifactModal();
+    } catch (error) {
+      if (operation.isCurrent()) setDataMessage(toErrorMessage(error));
+    } finally {
+      operation.finish();
+    }
+  }, [beginOperation, closeArtifactModal, handleUnauthorized, setDataMessage]);
 
   const handleArtifactSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
@@ -70,7 +72,7 @@ export function useArtifactActions({ bootstrap, handleUnauthorized, loadWorkspac
         ...artifactDraft,
         title: artifactDraft.title.trim(),
         summary: artifactDraft.summary.trim(),
-        link: artifactDraft.link.trim(),
+        uri: artifactDraft.uri.trim(),
       };
       if (!payload.projectId) {
         setDataMessage("Pick a project before saving an artifact.");
@@ -102,7 +104,6 @@ export function useArtifactActions({ bootstrap, handleUnauthorized, loadWorkspac
     closeArtifactModal,
     handleArtifactSubmit,
     handleDeleteArtifact,
-    handleToggleArtifactArchived,
     openCreateArtifactModal,
     openEditArtifactModal,
   };

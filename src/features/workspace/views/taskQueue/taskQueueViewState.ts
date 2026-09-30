@@ -61,7 +61,7 @@ export const getTaskQueueFilterToneClassName = getWorkspaceFilterToneClassName;
 export interface TaskQueueViewStateArgs {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
-  disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
+  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>;
   isAllProjectsView: boolean;
   membersById: Record<string, BootstrapPayload["members"][number]>;
   subsystemsById: Record<string, BootstrapPayload["subsystems"][number]>;
@@ -111,7 +111,7 @@ export interface TaskQueueViewState {
 export function useTaskQueueViewState({
   activePersonFilter,
   bootstrap,
-  disciplinesById,
+  workTypesById,
   isAllProjectsView,
   membersById,
   subsystemsById,
@@ -134,7 +134,7 @@ export function useTaskQueueViewState({
     activePersonFilter,
     bootstrap,
     disciplineFilter,
-    disciplinesById,
+    workTypesById,
     focusedBoardState,
     isAllProjectsView,
     membersById,

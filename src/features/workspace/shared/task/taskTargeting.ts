@@ -32,7 +32,7 @@ type TaskScopeChip = {
 export const TASK_DEPENDENCY_KIND_LABELS: Record<TaskDependencyKind, string> = {
   task: "Task",
   milestone: "Milestone",
-  part_instance: "Part instance",
+  "part-instance": "Part instance",
 };
 
 export const TASK_DEPENDENCY_KIND_OPTIONS: DropdownOption[] = (
@@ -52,7 +52,7 @@ function getDependencyKindIcon(kind: TaskDependencyKind) {
       return createElement(IconTasks);
     case "milestone":
       return createElement(IconMapPin);
-    case "part_instance":
+    case "part-instance":
       return createElement(IconParts);
   }
 }
@@ -84,9 +84,10 @@ export function getTaskPartInstanceLabel(
   formatIterationVersion: (value: number | null | undefined) => string,
 ) {
   const partDefinition = partDefinitionsById[partInstance.partDefinitionId];
+  const partLabel = partDefinition?.name ?? "Unknown part";
   return partDefinition
-    ? `${partInstance.name} (${partDefinition.name} (${formatIterationVersion(partDefinition.iteration)}))`
-    : partInstance.name;
+    ? `${partLabel} (${formatIterationVersion(partDefinition.iteration)}) · ${partInstance.id}`
+    : `${partLabel} · ${partInstance.id}`;
 }
 
 export function getTaskSelectedAssigneeIds(
@@ -168,10 +169,10 @@ export function getTaskDependencyTargetName(
 
   const partDefinition = lookups.partDefinitionsById[partInstance.partDefinitionId];
   if (!partDefinition) {
-    return partInstance.name;
+    return `Unknown part · ${partInstance.id}`;
   }
 
-  return `${partInstance.name} (${partDefinition.name} (${lookups.formatIterationVersion(partDefinition.iteration)}))`;
+  return `${partDefinition.name} (${lookups.formatIterationVersion(partDefinition.iteration)}) · ${partInstance.id}`;
 }
 
 export function getTaskDependencyTargetOptions(
@@ -200,7 +201,7 @@ export function getTaskDependencyTargetOptions(
 
   return Object.values(lookups.partInstancesById).map((partInstance) => ({
     id: partInstance.id,
-    name: partInstance.name,
+    name: getTaskPartInstanceLabel(partInstance, lookups.partDefinitionsById, lookups.formatIterationVersion),
     icon: createElement(IconParts),
   }));
 }

@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
-import { ArchiveFilterCheckbox } from "@/features/workspace/shared/filters/ArchiveFilterCheckbox";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
@@ -13,15 +12,12 @@ interface ArtifactFiltersToolbarProps {
   artifactNoun: string;
   search: string;
   setSearch: (value: string) => void;
-  setShowArchivedArtifacts: (value: boolean) => void;
   setStatusFilter: (value: FilterSelection) => void;
-  setWorkstreamFilter: (value: FilterSelection) => void;
-  showArchivedArtifacts: boolean;
   statusFilter: FilterSelection;
-  workstreamFilter: FilterSelection;
+  targetFilter: FilterSelection;
   sortMenu: ReactNode;
   titleFilter: FilterSelection;
-  linkFilter: FilterSelection;
+  uriFilter: FilterSelection;
   updatedFilter: FilterSelection;
   columnOptions: Record<ArtifactSortField, Array<{ id: string; name: string }>>;
   setColumnFilter: (field: ArtifactSortField, value: FilterSelection) => void;
@@ -31,22 +27,19 @@ export function ArtifactFiltersToolbar({
   artifactNoun,
   search,
   setSearch,
-  setShowArchivedArtifacts,
   setStatusFilter,
-  setWorkstreamFilter,
-  showArchivedArtifacts,
   statusFilter,
-  workstreamFilter,
+  targetFilter,
   sortMenu,
   titleFilter,
-  linkFilter,
+  uriFilter,
   updatedFilter,
   columnOptions,
   setColumnFilter,
 }: ArtifactFiltersToolbarProps) {
-  const activeFilterCount = [workstreamFilter, statusFilter, titleFilter, linkFilter, updatedFilter].filter(
+  const activeFilterCount = [statusFilter, titleFilter, uriFilter, updatedFilter].filter(
     (value) => value.length > 0,
-  ).length + Number(showArchivedArtifacts);
+  ).length;
 
   return (
     <AppTopbarSlotPortal slot="controls">
@@ -61,14 +54,10 @@ export function ArtifactFiltersToolbar({
               className="materials-filter-menu"
               items={[
                 createResourceFilterMenuItem({ allLabel: "All artifacts", ariaLabel: "Filter artifacts by title", label: "Artifact", onChange: (value) => setColumnFilter("title", value), options: columnOptions.title, value: titleFilter }),
-                createResourceFilterMenuItem({ allLabel: "All workflows", ariaLabel: "Filter artifacts by workflow", label: "Workflow", onChange: (value) => { setWorkstreamFilter(value); setColumnFilter("workstream", value); }, options: columnOptions.workstream, value: workstreamFilter }),
+                createResourceFilterMenuItem({ allLabel: "All targets", ariaLabel: "Filter artifacts by linked target", label: "Linked to", onChange: (value) => setColumnFilter("targets", value), options: columnOptions.targets, value: targetFilter }),
                 createResourceFilterMenuItem({ allLabel: "All statuses", ariaLabel: "Filter artifacts by status", label: "Status", onChange: (value) => { setStatusFilter(value); setColumnFilter("status", value); }, options: columnOptions.status, value: statusFilter }),
-                createResourceFilterMenuItem({ allLabel: "All links", ariaLabel: "Filter artifacts by link", label: "Link", onChange: (value) => setColumnFilter("link", value), options: columnOptions.link, value: linkFilter }),
+                createResourceFilterMenuItem({ allLabel: "All URIs", ariaLabel: "Filter artifacts by URI", label: "URI", onChange: (value) => setColumnFilter("uri", value), options: columnOptions.uri, value: uriFilter }),
                 createResourceFilterMenuItem({ allLabel: "All dates", ariaLabel: "Filter artifacts by updated date", label: "Updated", onChange: (value) => setColumnFilter("updated", value), options: columnOptions.updated, value: updatedFilter }),
-                {
-                  label: "Archive",
-                  content: <ArchiveFilterCheckbox checked={showArchivedArtifacts} label="Show archived" onChange={setShowArchivedArtifacts} />,
-                },
               ]}
             />
             {sortMenu}

@@ -13,8 +13,8 @@ export const TASK_CALENDAR_EVENT_FILTER_OPTIONS: Array<{
   { label: "Milestones", value: "milestone" },
   { label: "Task due", value: "task-due" },
   { label: "Waiting QA", value: "qa-due" },
-  { label: "Manufacturing due", value: "manufacturing-due" },
-  { label: "Meetings / events", value: "event" },
+  { label: "Meetings", value: "meeting" },
+  { label: "Events (read-only)", value: "event" },
 ];
 
 export const TASK_CALENDAR_SORT_OPTIONS = [
@@ -27,7 +27,7 @@ const TASK_CALENDAR_EVENT_TYPE_SORT_ORDER: Record<TaskCalendarEventType, number>
   milestone: 0,
   "task-due": 1,
   "qa-due": 2,
-  "manufacturing-due": 3,
+  meeting: 3,
   event: 4,
 };
 

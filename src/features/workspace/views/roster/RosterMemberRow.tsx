@@ -7,7 +7,7 @@ import type { MemberRecord } from "@/types/recordsOrganization";
 interface RosterMemberRowProps {
   member: MemberRecord;
   selectedMemberId: string | null;
-  disciplines: BootstrapPayload["disciplines"];
+  disciplines: BootstrapPayload["workTypes"];
   onSelectMember: (id: string) => void;
   onEditMember: (id: string) => void;
 }
@@ -38,7 +38,7 @@ const getInitials = (name: string): string => {
   return initials || name.slice(0, 1).toUpperCase();
 };
 
-const getDisciplineName = (member: MemberRecord, disciplines: BootstrapPayload["disciplines"]): string | null => {
+const getDisciplineName = (member: MemberRecord, disciplines: BootstrapPayload["workTypes"]): string | null => {
   if (!member.disciplineId) {
     return null;
   }

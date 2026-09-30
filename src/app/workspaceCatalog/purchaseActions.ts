@@ -49,7 +49,7 @@ export function usePurchaseActions({ bootstrap, handleUnauthorized, loadWorkspac
 
   const openEditPurchaseModalAndSetFinalCost = useCallback((item: PurchaseItemRecord) => {
     openEditPurchaseModal(item);
-    setPurchaseFinalCost(typeof item.finalCost === "number" ? String(item.finalCost) : "");
+    setPurchaseFinalCost(item.finalCost ? String(item.finalCost.amount) : "");
   }, [openEditPurchaseModal]);
 
   const handlePurchaseSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
@@ -60,20 +60,17 @@ export function usePurchaseActions({ bootstrap, handleUnauthorized, loadWorkspac
     setDataMessage(null);
 
     try {
-      const selectedPartDefinition = bootstrap.partDefinitions.find(
-        (partDefinition) => partDefinition.id === purchaseDraft.partDefinitionId,
-      );
-
-      if (!selectedPartDefinition) {
-        setDataMessage("Please choose a real part from the Parts tab before saving the purchase.");
+      if (!bootstrap.tasks.some((task) => task.id === purchaseDraft.taskId)) {
+        setDataMessage("Choose the Kanban Task that represents this procurement work.");
         return;
       }
 
       const payload: PurchaseItemPayload = {
         ...purchaseDraft,
-        title: selectedPartDefinition.name,
-        finalCost:
-          purchaseFinalCost.trim().length > 0 ? Number(purchaseFinalCost) : undefined,
+        title: purchaseDraft.title.trim(),
+        finalCost: purchaseFinalCost.trim().length > 0
+          ? { amount: Number(purchaseFinalCost), currency: "USD" }
+          : null,
       };
 
       if (purchaseModalMode === "create") {

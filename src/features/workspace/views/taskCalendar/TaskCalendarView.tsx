@@ -158,7 +158,7 @@ export function TaskCalendarView({
 
   return (
     <section className={`panel dense-panel task-calendar-shell ${WORKSPACE_PANEL_CLASS}`}>
-      <h2 className="schedule-calendar-heading">Calendar</h2>
+      <h2 className="schedule-calendar-heading">Schedule</h2>
       <div className="task-calendar-toolbar">
         <div className="task-calendar-month-controls" role="group" aria-label="Calendar month navigation">
           <button className="icon-button task-calendar-month-button" aria-label="Previous month" onClick={() => calendar.setMonthCursor((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))} type="button">‹</button>

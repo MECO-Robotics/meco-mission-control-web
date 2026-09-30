@@ -1,15 +1,14 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskPayload } from "@/types/payloads/task";
-import { getDefaultTaskDisciplineIdForProject } from "@/lib/taskDisciplines";
+import { getDefaultWorkTypeIdForProject } from "@/lib/taskDisciplines";
 import { localTodayDate } from "@/lib/dateUtils";
 import { getDefaultSubsystemId } from "@/lib/appUtils/common";
 import { uniqueIds } from "../internal";
 
 export function buildEmptyTaskPayload(bootstrap: BootstrapPayload): TaskPayload {
   const firstProject = bootstrap.projects[0]?.id ?? "";
-  const firstSubsystem = getDefaultSubsystemId(bootstrap);
-  const firstDiscipline = getDefaultTaskDisciplineIdForProject(bootstrap.projects[0]);
-  const firstMilestone = bootstrap.milestones[0]?.id ?? null;
+  const firstProjectRecord = bootstrap.projects[0] ?? null;
+  const firstWorkType = getDefaultWorkTypeIdForProject(bootstrap, firstProjectRecord);
   const firstStudent =
     bootstrap.members.find((m) => m.role === "lead")?.id ??
     bootstrap.members.find((m) => m.role === "student")?.id ??
@@ -25,13 +24,13 @@ export function buildEmptyTaskPayload(bootstrap: BootstrapPayload): TaskPayload 
     title: "",
     summary: "",
     photoUrl: "",
-    subsystemIds: uniqueIds([firstSubsystem]),
-    disciplineId: firstDiscipline,
+    subsystemIds: firstProjectRecord?.projectType === "robot" ? uniqueIds([getDefaultSubsystemId(bootstrap)]) : [],
+    workTypeId: firstWorkType,
+    responsibleGroupId: null,
     mechanismIds: [],
     partInstanceIds: [],
-    artifactIds: [],
-    targetRiskId: null,
-    targetMilestoneId: firstMilestone,
+    scheduleRefs: [],
+    requestedById: null,
     ownerId: firstStudent,
     assigneeIds: uniqueIds([firstStudent]),
     mentorId: firstMentor,
@@ -42,10 +41,7 @@ export function buildEmptyTaskPayload(bootstrap: BootstrapPayload): TaskPayload 
     estimatedHours: 4,
     actualHours: 0,
     taskDependencies: [],
-    taskBlockers: [],
-    linkedManufacturingIds: [],
-    linkedPurchaseIds: [],
+    manufacturingDetails: null,
     requiresDocumentation: false,
-    documentationLinked: false,
   };
 }

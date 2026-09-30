@@ -77,7 +77,7 @@ export function PartsDefinitionSection({
           const partSubtitle =
             partDefinition.description.trim().length > 0
               ? partDefinition.description
-              : `Source: ${partDefinition.source} | Material: ${materialName}`;
+              : `Acquisition: ${partDefinition.defaultAcquisitionMethod} | Material: ${materialName}`;
 
           return (
             <button

@@ -18,6 +18,7 @@ import {
 import { TaskDisciplineBadge } from "../taskQueueDisciplineBadge";
 import { getTaskQueueBoardState } from "../taskQueueKanbanBoardState";
 import { shouldHideTaskQueueSummary } from "../taskQueueViewState";
+import { getTaskOpenBlockersForTask } from "@/features/workspace/shared/task/taskPlanning";
 
 function getTaskCardDateRelation(dateValue: string): "past" | "today" | "future" | "invalid" {
   const parsedDate = new Date(`${dateValue}T00:00:00`);
@@ -51,7 +52,7 @@ function getTaskCardDueDatePillClassName(task: TaskRecord): string {
 
 interface TaskQueueCardProps extends Omit<ComponentPropsWithoutRef<"button">, "children" | "onClick" | "type"> {
   bootstrap: BootstrapPayload;
-  disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
+  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>;
   isNonRobotProject: boolean;
   membersById: Record<string, BootstrapPayload["members"][number]>;
   openEditTaskModal: (task: TaskRecord, options?: OpenEditTaskModalOptions) => void;
@@ -67,7 +68,7 @@ interface TaskQueueCardProps extends Omit<ComponentPropsWithoutRef<"button">, "c
 export function TaskQueueCard({
   bootstrap,
   className,
-  disciplinesById,
+  workTypesById,
   isNonRobotProject,
   membersById,
   openEditTaskModal,
@@ -86,8 +87,8 @@ export function TaskQueueCard({
   const latestLog = [...taskLogs].sort((a, b) => b.date.localeCompare(a.date))[0];
   const needsHelp = taskLogs.some(log => /\b(needs?|needed)\s+help\b|\bhelp\s+needed\b|\brequest(?:ing|ed)?\s+help\b/i.test(log.notes));
   const loggedHours = taskLogs.reduce((sum, log) => sum + log.hours, 0);
-  const disciplineAccentColor = task.disciplineId
-    ? getTimelineTaskDisciplineColor(task.disciplineId, disciplinesById)
+  const disciplineAccentColor = task.workTypeId
+    ? getTimelineTaskDisciplineColor(task.workTypeId, workTypesById)
     : null;
   const priorityPresentation = getTaskQueueCardPriorityPresentation(task.priority);
   const cardStyle = { ...style, ...priorityPresentation.style } as CSSProperties;
@@ -106,7 +107,7 @@ export function TaskQueueCard({
     subsystemsById,
     workstreamsById,
   );
-  const discipline = task.disciplineId ? disciplinesById[task.disciplineId] ?? null : null;
+  const discipline = task.workTypeId ? workTypesById[task.workTypeId] ?? null : null;
   const taskContextStyle = {
     "--task-queue-board-card-context-accent": taskContextAccentColor,
     "--task-queue-board-card-context-bg": `color-mix(in srgb, ${taskContextAccentColor} 24%, transparent)`,
@@ -114,6 +115,7 @@ export function TaskQueueCard({
   } as CSSProperties;
   const hideSummary = shouldHideTaskQueueSummary(taskQueueZoom);
   const taskPriorityLabel = `${getTaskPriorityLabel(task.priority)} priority`;
+  const openRisks = getTaskOpenBlockersForTask(task.id, bootstrap);
 
   return (
     <button
@@ -134,9 +136,9 @@ export function TaskQueueCard({
         <strong>{task.title}</strong>
         <span className="task-queue-board-card-header-side">
           <span className={`task-queue-board-card-due ${dueDatePillClassName}`}>{dueDateText}</span>
-          {task.blockers.length ? (
+          {openRisks.length ? (
             <small className="task-queue-board-card-blocker-count">
-              {task.blockers.length} blocker{task.blockers.length === 1 ? "" : "s"}
+              {openRisks.length} blocker{openRisks.length === 1 ? "" : "s"}
             </small>
           ) : latestLog ? (
             <small className="task-queue-board-card-work-hours">{loggedHours.toFixed(1)}h logged</small>
