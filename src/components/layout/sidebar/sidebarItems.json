@@ -13,7 +13,6 @@
   { "id": "resources-documents", "label": "Documents", "section": "resources", "icon": "FileText", "target": { "tab": "inventory", "inventoryView": "documents" } },
   { "id": "resources-parts", "label": "Parts", "section": "resources", "icon": "Package", "target": { "tab": "inventory", "inventoryView": "parts" } },
   { "id": "resources-purchases", "label": "Purchases", "section": "resources", "icon": "ShoppingCart", "target": { "tab": "inventory", "inventoryView": "purchases" } },
-  { "id": "work-manufacturing", "label": "Manufacturing", "section": "work", "icon": "Wrench", "target": { "tab": "manufacturing", "manufacturingView": "all" } },
   { "id": "resources-structure", "label": "Robot", "section": "work", "icon": "Bot", "target": { "tab": "tasks", "taskView": "robot-map" } },
   { "id": "team-people", "label": "People", "section": "resources", "icon": "Users", "target": { "tab": "roster", "rosterView": "directory" } }
 ]

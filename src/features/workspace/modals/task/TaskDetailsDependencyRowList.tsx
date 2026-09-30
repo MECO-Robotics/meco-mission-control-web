@@ -16,6 +16,7 @@ type TaskDependencyDraft = NonNullable<TaskPayload["taskDependencies"]>[number];
 type DependencyTargetOptions = ReturnType<typeof getTaskDependencyTargetOptions>;
 
 interface TaskDetailsDependencyRow {
+  refType?: "task" | "manufacturing";
   dependencyType?: TaskDependencyType | null;
   key: string;
   kind: TaskDependencyKind;
@@ -75,6 +76,7 @@ export function TaskDetailsDependencyRowList({
                   onChange={(selection) =>
                     updateDependencyDraft(dependency.key, {
                       kind: selection[0] as TaskDependencyKind,
+                      refType: selection[0] === "work_item" ? "task" : undefined,
                       refId: "",
                     })
                   }
@@ -94,16 +96,17 @@ export function TaskDetailsDependencyRowList({
                   className="task-queue-filter-menu-submenu task-details-dependency-target-menu"
                   icon={<IconTasks />}
                   menuClassName="task-details-dependency-menu-popup"
-                  onChange={(selection) =>
-                    updateDependencyDraft(dependency.key, {
-                      refId: selection[0] ?? "",
-                    })
-                  }
+                  onChange={(selection) => {
+                    const [refType, ...id] = (selection[0] ?? "").split(":");
+                    updateDependencyDraft(dependency.key, dependency.kind === "work_item"
+                      ? { refType: refType === "manufacturing" ? "manufacturing" : "task", refId: id.join(":") }
+                      : { refId: selection[0] ?? "" });
+                  }}
                   options={targetOptions}
                   portalMenu
                   portalMenuPlacement="below"
                   singleSelect
-                  value={dependency.refId ? [dependency.refId] : []}
+                  value={dependency.refId ? [dependency.kind === "work_item" ? `${dependency.refType ?? "task"}:${dependency.refId}` : dependency.refId] : []}
                 />
               </label>
               <label className="field task-details-dependency-editor-field">

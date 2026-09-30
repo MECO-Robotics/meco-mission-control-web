@@ -32,12 +32,12 @@ export function createScopeBootstrap(): BootstrapPayload {
       ["task-season-2", "project-season-2", "subsystem-season-2"],
     ] as const).map(([id, projectId, subsystemId]) => record<BootstrapPayload["tasks"][number]>({ id, projectId, subsystemIds: [subsystemId] })),
     taskDependencies: ([
-      ["dep-hidden-task", "task-hidden", "task", "task-hidden"],
+      ["dep-hidden-task", "task-hidden", "work_item", "task-hidden"],
       ["dep-global-milestone", "task-visible", "milestone", "milestone-global"],
       ["dep-hidden-milestone", "task-visible", "milestone", "milestone-hidden"],
       ["dep-visible-part", "task-visible", "part_instance", "part-visible"],
       ["dep-hidden-part", "task-visible", "part_instance", "part-hidden-subsystem"],
-    ] as const).map(([id, taskId, kind, refId]) => record<NonNullable<BootstrapPayload["taskDependencies"]>[number]>({ id, taskId, kind, refId })),
+    ] as const).map(([id, taskId, kind, refId]) => record<NonNullable<BootstrapPayload["taskDependencies"]>[number]>({ id, workItemId: taskId, sourceType: "task", kind, refType: kind === "work_item" ? "task" : undefined, refId })),
     taskBlockers: ([
       ["blocker-task", "task-hidden", "other", "task"],
       ["blocker-milestone", "milestone-hidden", "design-issue", "milestone"],

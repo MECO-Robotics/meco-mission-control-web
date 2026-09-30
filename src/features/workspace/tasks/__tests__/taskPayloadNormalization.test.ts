@@ -32,7 +32,8 @@ function createTaskPayload(): TaskPayload {
     documentationLinked: false,
     taskDependencies: [
       {
-        kind: "task",
+        kind: "work_item",
+        refType: "task",
         refId: "  task-upstream  ",
         requiredState: "  complete  ",
         dependencyType: "hard",

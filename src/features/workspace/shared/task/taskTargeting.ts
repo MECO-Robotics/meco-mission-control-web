@@ -183,7 +183,7 @@ export function getTaskDependencyTargetOptions(
   lookups: DependencyTargetLookups,
 ) {
   if (dependencyKind === "work_item") {
-    return [...Object.values(lookups.tasksById).map((task) => ({ id: task.id, name: task.title })), ...(lookups.manufacturingItems?.map((item) => ({ id: item.id, name: `Manufacturing · ${item.title}` })) ?? [])]
+    return [...Object.values(lookups.tasksById).map((task) => ({ id: `task:${task.id}`, name: task.title })), ...(lookups.manufacturingItems?.map((item) => ({ id: `manufacturing:${item.id}`, name: `Manufacturing · ${item.title}` })) ?? [])]
       .sort((left, right) => left.name.localeCompare(right.name))
       .map((task) => ({ ...task, icon: createElement(IconTasks) }));
   }

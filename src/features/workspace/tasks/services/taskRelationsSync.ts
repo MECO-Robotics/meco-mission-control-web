@@ -43,9 +43,15 @@ export interface TaskRelationPersistence {
   ) => Promise<TaskBlockerRecord>;
 }
 
+type TaskDependencyPersistence = Pick<
+  TaskRelationPersistence,
+  "createTaskDependencyRecord" | "updateTaskDependencyRecord" | "deleteTaskDependencyRecord"
+>;
+
 export async function syncTaskDependencies(
   params: {
     taskId: string;
+    sourceType?: "task" | "manufacturing";
     canPersist?: () => boolean;
     desiredDependencies: TaskDependencyDraft[] | undefined;
     existingDependencies: TaskDependencyRecord[];
@@ -53,7 +59,7 @@ export async function syncTaskDependencies(
     onPersisted?: (draft: TaskDependencyDraft, record: TaskDependencyRecord) => void;
     onDeleted?: (id: string) => void;
   },
-  persistence: TaskRelationPersistence,
+  persistence: TaskDependencyPersistence,
 ) {
   const { taskId, desiredDependencies, existingDependencies, handleUnauthorized } = params;
   const existingById = new Map(
@@ -67,7 +73,7 @@ export async function syncTaskDependencies(
       continue;
     }
 
-    const payload = buildTaskDependencyPayload(taskId, dependency);
+    const payload = buildTaskDependencyPayload(taskId, params.sourceType ?? "task", dependency);
     const existingDependency = dependency.id ? existingById.get(dependency.id) : null;
 
     if (existingDependency) {

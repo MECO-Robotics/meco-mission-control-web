@@ -7,8 +7,10 @@ import { inferManufacturingDraftFromPartSelection } from "@/lib/appUtils/manufac
 import { ManufacturingPartInstancesSection } from "./ManufacturingPartInstancesSection";
 import { useManufacturingEditorState } from "./useManufacturingEditorState";
 import { ManufacturingProcessIcon, getManufacturingProcessLabel } from "@/features/workspace/shared/manufacturing/ManufacturingProcessPresentation";
+import { WorkDependenciesEditor } from "@/features/workspace/shared/task/WorkDependenciesEditor";
 
 interface ManufacturingEditorFieldsProps {
+  activeManufacturingId?: string | null;
   bootstrap: BootstrapPayload;
   manufacturingDraft: ManufacturingItemPayload;
   manufacturingModalMode: "create" | "edit";
@@ -16,6 +18,7 @@ interface ManufacturingEditorFieldsProps {
 }
 
 export function ManufacturingEditorFields({
+  activeManufacturingId,
   bootstrap,
   manufacturingDraft,
   manufacturingModalMode,
@@ -79,6 +82,13 @@ export function ManufacturingEditorFields({
         selectedPartInstanceIds={selectedPartInstanceIds}
         setManufacturingDraft={setManufacturingDraft}
         bootstrap={bootstrap}
+      />
+      <WorkDependenciesEditor
+        bootstrap={bootstrap}
+        ownerId={activeManufacturingId ?? "new-manufacturing-item"}
+        ownerType="manufacturing"
+        dependencies={manufacturingDraft.taskDependencies ?? []}
+        onChange={(dependencies) => setManufacturingDraft((current) => ({ ...current, taskDependencies: dependencies }))}
       />
       <label className="field">
         <span>Requester</span>

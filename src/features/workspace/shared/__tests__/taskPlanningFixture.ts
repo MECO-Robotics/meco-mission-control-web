@@ -101,8 +101,10 @@ export const bootstrap = {
   taskDependencies: [
     {
       id: "task-dependency-task",
-      taskId: "task-b",
-      kind: "task",
+      workItemId: "task-b",
+      sourceType: "task",
+      kind: "work_item",
+        refType: "task",
       refId: "task-a",
       requiredState: "complete",
       dependencyType: "hard",
@@ -110,7 +112,8 @@ export const bootstrap = {
     },
     {
       id: "task-dependency-part",
-      taskId: "task-b",
+      workItemId: "task-b",
+      sourceType: "task",
       kind: "part_instance",
       refId: "part-instance-1",
       requiredState: "ready",
@@ -119,7 +122,8 @@ export const bootstrap = {
     },
     {
       id: "task-dependency-milestone",
-      taskId: "task-b",
+      workItemId: "task-b",
+      sourceType: "task",
       kind: "milestone",
       refId: "milestone-1",
       requiredState: "complete",

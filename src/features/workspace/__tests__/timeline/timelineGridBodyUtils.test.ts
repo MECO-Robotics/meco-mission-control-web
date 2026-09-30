@@ -127,7 +127,8 @@ describe("timeline task dependency counts and status", () => {
     const lookup = buildTaskDependencyCountsByTaskId([
       {
         id: "milestone-edge",
-        taskId: "task-dependent",
+        workItemId: "task-dependent",
+        sourceType: "task",
         kind: "milestone",
         refId: "shared-id",
         requiredState: "complete",
@@ -136,8 +137,10 @@ describe("timeline task dependency counts and status", () => {
       },
       {
         id: "task-edge",
-        taskId: "shared-id",
-        kind: "task",
+        workItemId: "shared-id",
+        sourceType: "task",
+        kind: "work_item",
+        refType: "task",
         refId: "task-upstream",
         requiredState: "complete",
         dependencyType: "hard",

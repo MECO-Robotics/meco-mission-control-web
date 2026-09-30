@@ -30,7 +30,7 @@ test("part instance labels include a selected definition and fall back when it i
 });
 
 test("dependency targets expose semantic icons for dependency menus", () => {
-  const taskOptions = getTaskDependencyTargetOptions("task", {
+  const taskOptions = getTaskDependencyTargetOptions("work_item", {
     tasksById: {
       taskA: {
         ...bootstrap.tasks[0],

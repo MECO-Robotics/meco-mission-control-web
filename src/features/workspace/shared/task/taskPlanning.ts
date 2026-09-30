@@ -21,7 +21,7 @@ export function getTaskWaitingOnDependencyRecords(
 ) {
   return getTaskDependencyRecords(bootstrap).filter(
     (dependency) =>
-      dependency.taskId === taskId &&
+      dependency.workItemId === taskId && dependency.sourceType === "task" &&
       HARD_DEPENDENCY_TYPES.has(dependency.dependencyType) &&
       !isTaskDependencySatisfied(dependency, bootstrap, now),
   );
@@ -83,7 +83,7 @@ export const getTaskOpenBlockersForTask = getOpenTaskBlockers;
 
 export function getTaskDependencyRecordsForTask(taskId: string, bootstrap: BootstrapPayload) {
   return getTaskDependencyRecords(bootstrap).filter(
-    (dependency) => dependency.taskId === taskId || dependency.refId === taskId,
+    (dependency) => (dependency.workItemId === taskId && dependency.sourceType === "task") || dependency.refId === taskId,
   );
 }
 

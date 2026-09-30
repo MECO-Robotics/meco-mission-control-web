@@ -32,8 +32,8 @@ export function buildTaskDependencyCountsByTaskId(
   const dependencyCountsByTaskId: Record<string, TimelineTaskDependencyCounts> = {};
 
   dependencies.forEach((dependency) => {
-    getOrCreateDependencyCounts(dependencyCountsByTaskId, dependency.taskId).incoming += 1;
-    if (dependency.kind === "task") {
+    getOrCreateDependencyCounts(dependencyCountsByTaskId, dependency.workItemId).incoming += 1;
+    if (dependency.kind === "work_item" && dependency.refType === "task") {
       getOrCreateDependencyCounts(dependencyCountsByTaskId, dependency.refId).outgoing += 1;
     }
   });

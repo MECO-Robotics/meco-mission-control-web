@@ -140,7 +140,7 @@ it("keeps local part identities, quantities and all target links across create a
     partInstanceId: second.item.id, partInstanceIds: [second.item.id, first.item.id],
   });
   const dependency = await create("task-dependencies", {
-    taskId: task.item.id, kind: "part", refId: second.item.id,
+    workItemId: task.item.id, sourceType: "task", kind: "part_instance", refId: second.item.id,
     requiredState: "ready", dependencyType: "hard",
   });
   leaveLocalWorkspace(); enterLocalDemo();

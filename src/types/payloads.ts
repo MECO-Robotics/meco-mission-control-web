@@ -17,9 +17,11 @@ import type {
   RiskSeverity,
   SeasonType,
   TestResultStatus,
+  ResponsibleGroup,
 } from "./common";
 import type { PartInstanceRecord as PartInstanceRecordType } from "./recordsInventory";
 import type { SubsystemLayoutView, SubsystemLayoutZone } from "./recordsOrganization";
+export type { TaskDependencyDraft, TaskPayload, TaskDependencyPayload } from "./payloads/task";
 
 export interface MilestonePayload {
   title: string;
@@ -80,10 +82,12 @@ export interface WorkLogPayload {
 }
 
 export interface ManufacturingItemPayload {
+  taskDependencies?: import("./payloads/task").TaskDependencyDraft[];
   title: string;
   subsystemId: string;
   requestedById: string | null;
   process: ManufacturingProcess;
+  responsibleGroup?: ResponsibleGroup | null;
   dueDate: string;
   material: string;
   materialId: string | null;

@@ -11,6 +11,7 @@ import type {
 export interface TaskDependencyDraft {
   id?: string;
   kind: TaskDependencyKind;
+  refType?: "task" | "manufacturing";
   refId: string;
   requiredState: string;
   dependencyType: TaskDependencyType;
@@ -31,6 +32,8 @@ export interface TaskPayload {
   projectId: string;
   workstreamIds: string[];
   title: string;
+  workType?: import("../common").RobotWorkType;
+  responsibleGroup?: import("../common").ResponsibleGroup | null;
   summary: string;
   subsystemIds: string[];
   disciplineId: string;
@@ -58,8 +61,10 @@ export interface TaskPayload {
 }
 
 export interface TaskDependencyPayload {
-  taskId: string;
+  workItemId: string;
+  sourceType: "task" | "manufacturing";
   kind: TaskDependencyKind;
+  refType?: "task" | "manufacturing";
   refId: string;
   requiredState: string;
   dependencyType: TaskDependencyType;

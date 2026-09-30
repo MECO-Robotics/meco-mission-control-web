@@ -105,8 +105,11 @@ export function isTaskDependencySatisfied(
     return true;
   }
 
-  if (dependency.kind === "task") {
-    return getTaskById(bootstrap, dependency.refId)?.status === (dependency.requiredState ?? "complete");
+  if (dependency.kind === "work_item") {
+    const targetStatus = dependency.refType === "task"
+      ? getTaskById(bootstrap, dependency.refId)?.status
+      : bootstrap.workItems?.find((item) => item.sourceType === dependency.refType && item.sourceId === dependency.refId)?.status;
+    return targetStatus === (dependency.requiredState ?? "complete");
   }
 
   if (dependency.kind === "part_instance") {
@@ -135,8 +138,8 @@ function getBlockingUpstreamTaskIds(taskId: string, bootstrap: BootstrapPayload)
     getTaskDependencyRecords(bootstrap)
       .filter(
         (dependency) =>
-          dependency.taskId === taskId &&
-          dependency.kind === "task" &&
+          dependency.workItemId === taskId && dependency.sourceType === "task" &&
+          dependency.kind === "work_item" && dependency.refType === "task" &&
           HARD_DEPENDENCY_TYPES.has(dependency.dependencyType),
       )
       .map((dependency) => dependency.refId),

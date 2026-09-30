@@ -145,7 +145,7 @@ export function useTaskEditor({ bootstrap, scopedBootstrap, selectedProjectId, s
         canPersist: workspace.isCurrent,
         desiredDependencies: taskDraft.taskDependencies,
         existingDependencies: (bootstrap.taskDependencies ?? []).filter(
-          (dependency): dependency is TaskDependencyRecord => dependency.taskId === savedTask.id,
+          (dependency): dependency is TaskDependencyRecord => dependency.workItemId === savedTask.id && dependency.sourceType === "task",
         ),
         handleUnauthorized,
         onPersisted: (draft, record) => {

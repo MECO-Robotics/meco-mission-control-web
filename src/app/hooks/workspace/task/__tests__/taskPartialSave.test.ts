@@ -40,7 +40,8 @@ function setup() {
   jest.mocked(relations.createTaskBlockerRecord).mockImplementation(async (payload) => ({ ...payload, id: "saved-blocker", createdAt: "2026-09-08" } as never));
   Render().openCreateTaskModal();
   Render().setTaskDraft((draft) => ({
-  ...draft, title: "Retry task", summary: "Retain writes", taskDependencies: [{ id: "draft-edge", kind: "task", refId: bootstrap.tasks[0].id, requiredState: "complete", dependencyType: "hard" }], taskBlockers: [{ id: "draft-blocker", blockerType: "external", blockerId: null, description: "Delivery", severity: "medium", status: "open" }] }));
+  ...draft, title: "Retry task", summary: "Retain writes", taskDependencies: [{ id: "draft-edge", kind: "work_item",
+        refType: "task", refId: bootstrap.tasks[0].id, requiredState: "complete", dependencyType: "hard" }], taskBlockers: [{ id: "draft-blocker", blockerType: "external", blockerId: null, description: "Delivery", severity: "medium", status: "open" }] }));
   return { render: Render, dependencies, saved };
 }
 const event = { preventDefault: jest.fn() } as never;
