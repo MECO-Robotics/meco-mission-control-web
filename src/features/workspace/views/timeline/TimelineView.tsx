@@ -274,7 +274,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
 
       <div className="panel-header compact-header">
         <div className="queue-section-header">
-          <h2 style={{ color: "var(--text-title)" }}>Subsystem timeline</h2>
+          <h2 style={{ color: "var(--text-title)" }}>Timeline</h2>
         </div>
       </div>
 

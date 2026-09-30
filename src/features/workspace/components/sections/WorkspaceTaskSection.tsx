@@ -1,12 +1,9 @@
 import { memo, useState } from "react";
 
 import { MilestonesView } from "@/features/workspace/views/milestones/MilestonesView";
-import { TaskCalendarView } from "@/features/workspace/views/taskCalendar/TaskCalendarView";
 import { RobotMapView } from "@/features/workspace/views/robotMap/RobotMapView";
 import { TaskQueueView } from "@/features/workspace/views/taskQueue/TaskQueueView";
 import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
-import type { TaskCalendarEventType } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
-import type { TaskCalendarSortMode } from "@/features/workspace/views/taskCalendar/taskCalendarLayout";
 import { WorkspaceSectionPanel, WorkspaceSubPanel } from "../../WorkspaceContentPanelShells";
 import type { WorkspaceContentPanelsViewProps } from "../workspaceContentPanelsViewTypes";
 
@@ -15,13 +12,10 @@ const MemoizedTimelineView = memo(TimelineView);
 export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
   const disablePanelAnimations = props.disablePanelAnimations ?? false;
   const [scheduleSearchFilter, setScheduleSearchFilter] = useState("");
-  const [calendarEventFilter, setCalendarEventFilter] = useState<"all" | TaskCalendarEventType>("all");
-  const [calendarSortMode, setCalendarSortMode] = useState<TaskCalendarSortMode>("date");
   const {
     activePersonFilter,
     bootstrap,
     disciplinesById,
-    handleMeetingSave,
     handleTaskStatusChange,
     handleTimelineMilestoneDelete,
     handleTimelineMilestoneSave,
@@ -56,29 +50,9 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
       isActive={props.activeTab === "tasks"}
       tabSwitchDirection={props.tabSwitchDirection}
     >
-      {["calendar", "timeline", "milestones"].includes(taskView) ? (
+      {taskView === "calendar" || taskView === "timeline" ? (
         <div className="workspace-schedule-scroll" data-tutorial-target="schedule-view">
-          <WorkspaceSubPanel disableAnimations={disablePanelAnimations} isActive={taskView === "calendar" || taskView === "timeline"} swipeDirection={taskSwipeDirection}>
-            <TaskCalendarView
-              activePersonFilter={activePersonFilter}
-              bootstrap={bootstrap}
-              isAllProjectsView={isAllProjectsView}
-              onSaveMeeting={handleMeetingSave}
-              onCreateMilestoneReport={props.openCreateMilestoneReportModal}
-              onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
-              onSaveTimelineMilestone={handleTimelineMilestoneSave}
-              searchFilter={scheduleSearchFilter}
-              onSearchChange={setScheduleSearchFilter}
-              eventFilter={calendarEventFilter}
-              onEventFilterChange={setCalendarEventFilter}
-              sortMode={calendarSortMode}
-              onSortModeChange={setCalendarSortMode}
-              onTaskDetailOpen={openTimelineTaskDetailsModal}
-              onTaskEditCanceled={props.onTaskEditCanceled}
-              onTaskEditSaved={props.onTaskEditSaved}
-            />
-          </WorkspaceSubPanel>
-          <WorkspaceSubPanel disableAnimations={disablePanelAnimations} isActive={taskView === "calendar" || taskView === "timeline"} swipeDirection={taskSwipeDirection}>
+          <WorkspaceSubPanel disableAnimations={disablePanelAnimations} isActive swipeDirection={taskSwipeDirection}>
             <MemoizedTimelineView
               activePersonFilter={activePersonFilter}
               bootstrap={bootstrap}
@@ -91,11 +65,6 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
               onSaveTimelineMilestone={handleTimelineMilestoneSave}
               searchFilter={scheduleSearchFilter}
               onSearchChange={setScheduleSearchFilter}
-              calendarEventFilter={calendarEventFilter}
-              onCalendarEventFilterChange={setCalendarEventFilter}
-              calendarSortMode={calendarSortMode}
-              onCalendarSortModeChange={setCalendarSortMode}
-              showCalendarFilters={taskView === "calendar"}
               openCreateTaskModal={openCreateTaskModalFromTimeline}
               openTaskDetailModal={openTimelineTaskDetailsModal}
               setActivePersonFilter={setActivePersonFilter}

@@ -1,5 +1,6 @@
 import { HomeView } from "@/features/workspace/views/overview";
 import { RisksView } from "@/features/workspace/views/RisksView";
+import { TaskCalendarView } from "@/features/workspace/views/taskCalendar/TaskCalendarView";
 import { WorkspaceSectionPanel } from "../../WorkspaceContentPanelShells";
 import type { WorkspaceContentPanelsViewProps } from "../workspaceContentPanelsViewTypes";
 
@@ -19,6 +20,18 @@ export function WorkspaceHomeSection(props: WorkspaceContentPanelsViewProps) {
   };
   return <WorkspaceSectionPanel disableAnimations={props.disablePanelAnimations} isActive={props.activeTab === "home"} tabSwitchDirection={props.tabSwitchDirection}>
     <HomeView bootstrap={props.bootstrap} onOpenTask={openTask} onOpenSchedule={(milestoneId) => props.onOpenDrilldownTarget({ tab: "tasks", taskView: "milestones", milestoneId })} />
+    <TaskCalendarView
+      activePersonFilter={props.activePersonFilter}
+      bootstrap={props.bootstrap}
+      isAllProjectsView={props.isAllProjectsView}
+      onSaveMeeting={props.handleMeetingSave}
+      onDeleteTimelineMilestone={props.handleTimelineMilestoneDelete}
+      onSaveTimelineMilestone={props.handleTimelineMilestoneSave}
+      onTaskDetailOpen={props.openTimelineTaskDetailsModal}
+      onCreateMilestoneReport={props.openCreateMilestoneReportModal}
+      onTaskEditCanceled={props.onTaskEditCanceled}
+      onTaskEditSaved={props.onTaskEditSaved}
+    />
     <RisksView activePersonFilter={props.activePersonFilter} bootstrap={props.bootstrap} isAllProjectsView={props.isAllProjectsView} onCreateRisk={props.onCreateRisk} onDeleteRisk={props.onDeleteRisk} onUpdateRisk={props.onUpdateRisk} openTaskDetailModal={props.openTimelineTaskDetailsModal} onOpenSource={openSource} view="attention" includeHealth />
   </WorkspaceSectionPanel>;
 }

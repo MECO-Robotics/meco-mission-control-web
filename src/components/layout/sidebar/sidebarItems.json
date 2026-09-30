@@ -1,7 +1,7 @@
 [
   { "id": "home", "label": "Dashboard", "section": "work", "icon": "LayoutDashboard", "target": { "tab": "home" } },
   { "id": "work-tasks", "label": "Tasks", "section": "work", "icon": "ListTodo", "target": { "tab": "tasks", "taskView": "queue" }, "requires": ["project", "season"] },
-  { "id": "work-schedule", "label": "Schedule", "section": "work", "icon": "CalendarDays", "target": { "tab": "tasks", "taskView": "calendar" }, "requires": ["project", "season"] },
+  { "id": "work-schedule", "label": "Schedule", "section": "work", "icon": "CalendarDays", "target": { "tab": "tasks", "taskView": "timeline" }, "requires": ["project", "season"] },
   { "id": "resources-materials", "label": "Materials", "section": "resources", "icon": "Boxes", "target": { "tab": "inventory", "inventoryView": "materials" }, "requires": ["project", "season", "robot-project"] },
   { "id": "resources-documents", "label": "Documents", "section": "resources", "icon": "FileText", "target": { "tab": "inventory", "inventoryView": "documents" }, "requires": ["project", "season", "non-robot-project"] },
   { "id": "resources-parts", "label": "Parts", "section": "resources", "icon": "Package", "target": { "tab": "inventory", "inventoryView": "parts" }, "requires": ["project", "season", "robot-project"] },
