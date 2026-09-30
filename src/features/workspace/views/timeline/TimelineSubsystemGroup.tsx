@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { buildTimelineSubsystemHighlightStyle } from "./model/timelineTaskColors";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";

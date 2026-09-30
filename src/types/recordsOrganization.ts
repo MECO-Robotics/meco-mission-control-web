@@ -14,7 +14,6 @@ export interface MemberRecord {
   photoUrl?: string;
   role: MemberRole;
   elevated: boolean;
-  disciplineId?: string | null;
   seasonId: string;
   activeSeasonIds?: string[];
   plannedWeeklyAttendanceHours?: number;

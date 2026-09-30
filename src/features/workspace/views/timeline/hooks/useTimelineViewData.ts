@@ -1,4 +1,4 @@
-﻿import { useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MilestonePayload } from "@/types/payloads";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";

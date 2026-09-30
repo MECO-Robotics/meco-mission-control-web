@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { TimelineTaskTrackRow } from "./TimelineTaskTrackRow";

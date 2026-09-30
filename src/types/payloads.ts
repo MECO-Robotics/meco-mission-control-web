@@ -115,7 +115,6 @@ export interface MemberPayload {
   photoUrl: string;
   role: MemberRole;
   elevated: boolean;
-  disciplineId?: string | null;
   activeSeasonIds?: string[];
   plannedWeeklyAttendanceHours: number;
   plannedAttendanceDays: PlannedAttendanceDay[];

@@ -30,7 +30,7 @@ const MILESTONE_TYPE_OPTIONS: { id: MilestoneType; name: string }[] = (
 const MILESTONE_SORT_OPTIONS: { id: MilestoneSortField; name: string }[] = [
   { id: "title", name: "Milestone" },
   { id: "type", name: "Type" },
-  { id: "startDateTime", name: "Start" },
+  { id: "startAt", name: "Start" },
 ];
 
 interface MilestonesToolbarProps {
@@ -70,7 +70,7 @@ export function MilestonesToolbar({
 }: MilestonesToolbarProps) {
   const activeCount =
     Number(isAllProjectsView && projectFilter.length > 0) + Number(typeFilter.length > 0) + Number(readinessFilter.length > 0);
-  const milestoneSortIsDefault = sortField === "startDateTime" && sortOrder === "asc";
+  const milestoneSortIsDefault = sortField === "startAt" && sortOrder === "asc";
   return (
     <div className="panel-actions filter-toolbar milestones-toolbar">
       <div className="milestones-search-slot" data-tutorial-target="milestone-search-input">

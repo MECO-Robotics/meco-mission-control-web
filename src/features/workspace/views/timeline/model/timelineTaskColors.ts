@@ -49,7 +49,9 @@ export function getTimelineTaskDisciplineColor(
   }
 
   const code = workTypesById[disciplineId]?.code;
-  return code ? TIMELINE_TASK_DISCIPLINE_COLORS[code] ?? FALLBACK_TIMELINE_TASK_DISCIPLINE_COLOR : FALLBACK_TIMELINE_TASK_DISCIPLINE_COLOR;
+  return code && code in TIMELINE_TASK_DISCIPLINE_COLORS
+    ? TIMELINE_TASK_DISCIPLINE_COLORS[code as DisciplineCode]
+    : FALLBACK_TIMELINE_TASK_DISCIPLINE_COLOR;
 }
 
 function buildTimelineHighlightStyle(

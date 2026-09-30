@@ -60,10 +60,9 @@ function buildHints({
   task: TaskRecord | null;
 }) {
   const hints = new Set<string>();
-  const workType = bootstrap.workTypes.find((candidate) => candidate.id === member.disciplineId);
-  if (workType) {
-    hints.add(workType.name);
-  }
+  bootstrap.responsibleGroups
+    .filter((group) => !group.isArchived && group.memberIds.includes(member.id))
+    .forEach((group) => hints.add(group.name));
 
   (member.plannedAttendanceDays ?? []).forEach((day) => hints.add(day));
   if (member.plannedAttendanceNotes) {

@@ -51,8 +51,8 @@ function createDefaultMeetingDraft(bootstrap: BootstrapPayload): MeetingPayload 
     meetingType: "general",
     seasonId,
     projectIds: bootstrap.projects[0]?.id ? [bootstrap.projects[0].id] : [],
-    startDateTime: `${dateKey}T18:00`,
-    endDateTime: `${dateKey}T20:00`,
+    startAt: `${dateKey}T18:00`,
+    endAt: `${dateKey}T20:00`,
     location: "",
     description: "",
   };

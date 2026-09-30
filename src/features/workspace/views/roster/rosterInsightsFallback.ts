@@ -182,7 +182,6 @@ export function buildRosterInsightsFromBootstrap(
         memberId: member.id,
         memberName: member.name,
         role: member.role,
-        disciplineId: member.disciplineId ?? null,
         activeTaskCount: assignedTasks.length,
         blockedTaskCount,
         waitingForQaTaskCount,

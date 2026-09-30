@@ -10,7 +10,7 @@ import type { DropdownOption } from "@/features/workspace/shared/model/workspace
 import { MilestonesMilestoneModalActions } from "./MilestonesEventModalActions";
 import { MilestonesMilestoneModalReadinessSection } from "./MilestonesEventModalReadinessSection";
 
-export type MilestoneDetailEditableField = "title" | "schedule" | "description" | "type" | "projects" | "external";
+export type MilestoneDetailEditableField = "title" | "schedule" | "description" | "type" | "projects";
 
 interface MilestonesEventDetailEditorProps {
   activeMilestone: MilestoneRecord;
@@ -73,8 +73,10 @@ export function MilestonesEventDetailEditor({
   const milestoneTypeStyle =
     MILESTONE_TYPE_STYLES[milestoneDraft.type] ?? MILESTONE_TYPE_STYLES["internal-review"];
   const projectNames = milestoneDraft.projectIds
-    .map((projectId) => bootstrap.projects.find((project) => project.id === projectId)?.name)
-    .filter((projectName): projectName is string => Boolean(projectName));
+    .flatMap((projectId) => {
+      const projectName = bootstrap.projects.find((project) => project.id === projectId)?.name;
+      return projectName ? [projectName] : [];
+    });
   const projectOptions = bootstrap.projects.map((project) => ({
     id: project.id,
     name: project.name,
@@ -88,7 +90,6 @@ export function MilestonesEventDetailEditor({
     "--milestone-type-chip-border-dark": milestoneTypeStyle.darkColumnBorder,
     "--milestone-type-chip-text-dark": milestoneTypeStyle.darkChipText,
   } as CSSProperties;
-  const isExternalLabel = milestoneDraft.isExternal ? "External milestone" : "Internal milestone";
 
   return (
     <form className="modal-form task-details-grid" onSubmit={onSubmit} style={{ color: "var(--text-copy)" }}>
@@ -196,29 +197,6 @@ export function MilestonesEventDetailEditor({
           )}
         </div>
 
-        <div className="field modal-wide">
-          <span>Visibility</span>
-          {editingField === "external" ? (
-            <label className="checkbox-field" style={{ marginTop: "0.35rem" }}>
-              <input
-                checked={milestoneDraft.isExternal}
-                onChange={(milestone) => {
-                  setMilestoneDraft((current) => ({
-                    ...current,
-                    isExternal: milestone.target.checked,
-                  }));
-                  setEditingField(null);
-                }}
-                type="checkbox"
-              />
-              <span style={{ color: "var(--text-title)" }}>External milestone</span>
-            </label>
-          ) : (
-            <MilestoneFieldValue onOpenEditField={() => setEditingField("external")} variant="chip">
-              <span className="pill status-pill status-pill-neutral">{isExternalLabel}</span>
-            </MilestoneFieldValue>
-          )}
-        </div>
       </div>
 
       <MilestonesMilestoneModalReadinessSection
