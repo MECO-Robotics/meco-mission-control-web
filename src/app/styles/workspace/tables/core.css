@@ -3,6 +3,11 @@
   gap: 0.5rem;
   align-items: center;
   grid-template-columns: var(--workspace-grid-template, auto);
+  text-align: left;
+}
+
+.ops-table .table-column-header-cell {
+  justify-content: flex-start;
 }
 
 .purchase-table {
