@@ -19,7 +19,9 @@ describe("PurchaseFiltersToolbar", () => {
     const actions = search.props.actions;
     const menu = React.Children.toArray(actions.props.children)[0] as React.ReactElement<{ items: CompactFilterMenuItem[] }>;
     expect(menu.props.items.map((item) => item.label)).toEqual(["Project", "Order", "Vendor", "Approval"]);
-    expect(menu.props.items.map((item) => item.content?.props.options)).toEqual([
+    expect(menu.props.items.map((item) => React.isValidElement(item.content)
+      ? (item.content.props as { options?: unknown }).options
+      : undefined)).toEqual([
       bootstrap.projects,
       PURCHASE_ORDER_STATUS_OPTIONS,
       [],

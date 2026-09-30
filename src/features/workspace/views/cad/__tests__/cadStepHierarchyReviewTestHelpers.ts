@@ -190,9 +190,9 @@ export function baseHierarchyReview(overrides: Partial<CadHierarchyReview> = {})
 
 function baseHierarchyTargets() {
   return {
-    subsystems: [{ id: "subsystem-drive", projectId: "project-robot", name: "Drivebase", description: "", iteration: 1, isCore: true, parentSubsystemId: null, responsibleEngineerId: null, mentorIds: [], risks: [] }],
+    subsystems: [{ id: "subsystem-drive", projectId: "project-robot", name: "Drivebase", description: "", iteration: 1, isCore: true, parentSubsystemId: null, responsibleEngineerId: null, mentorIds: [] }],
     mechanisms: [{ id: "mechanism-module", subsystemId: "subsystem-drive", name: "Swerve Module", description: "", iteration: 1 }],
-    partDefinitions: [{ id: "part-wheel", seasonId: "season-2026", name: "Wheel tread", partNumber: "WHD-001", revision: "A", iteration: 1, type: "custom", source: "cad", materialId: null, description: "" }],
+    partDefinitions: [{ id: "part-wheel", seasonId: "season-2026", name: "Wheel tread", partNumber: "WHD-001", revision: "A", iteration: 1, type: "custom", defaultAcquisitionMethod: "manufacture" as const, materialId: null, description: "" }],
   };
 }
 
