@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from "react";
 import { IconHelp } from "@/components/shared/Icons";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
+import { WorkspaceSortMenu } from "@/features/workspace/shared/filters/WorkspaceSortMenu";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import {
   HELP_SECTIONS,
@@ -31,6 +32,8 @@ export function HelpView({
 }: HelpViewProps) {
   const [isTutorialOpen, setIsTutorialOpen] = useState(tutorialInitiallyOpen);
   const [searchFilter, setSearchFilter] = useState("");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [sortField, setSortField] = useState("curated");
 
   const closeTutorial = useCallback(() => {
     setIsTutorialOpen(false);
@@ -44,11 +47,7 @@ export function HelpView({
     Boolean(onStartInteractiveTutorialChapter) && interactiveTutorialChapters.length > 0;
   const filteredHelpSections = useMemo(() => {
     const normalizedSearch = searchFilter.trim().toLowerCase();
-    if (normalizedSearch.length === 0) {
-      return HELP_SECTIONS;
-    }
-
-    return HELP_SECTIONS
+    const sections = normalizedSearch.length === 0 ? HELP_SECTIONS : HELP_SECTIONS
       .map((section) => ({
         ...section,
         items: section.items.filter((item) =>
@@ -56,13 +55,20 @@ export function HelpView({
         ),
       }))
       .filter((section) => section.items.length > 0);
-  }, [searchFilter]);
+    if (sortField === "curated") return sections;
+    const direction = sortDirection === "asc" ? 1 : -1;
+    return sections.map((section) => ({
+      ...section,
+      items: [...section.items].sort((a, b) => getHelpItemText(a).localeCompare(getHelpItemText(b)) * direction),
+    })).sort((a, b) => a.title.localeCompare(b.title) * direction);
+  }, [searchFilter, sortDirection, sortField]);
 
   return (
     <section className={`panel dense-panel help-page ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">
         <div className="panel-actions filter-toolbar help-toolbar">
           <TopbarResponsiveSearch
+            actions={<WorkspaceSortMenu direction={sortDirection} field={sortField} label="help topics" onDirectionChange={setSortDirection} onFieldChange={setSortField} options={[{ label: "Featured order", value: "curated" }, { label: "Alphabetical", value: "alphabetical" }]} />}
             ariaLabel="Search help"
             compactPlaceholder="Search"
             onChange={setSearchFilter}

@@ -6,6 +6,7 @@ import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { WorkspaceEmptyState, WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
 import { EditableHoverIndicator, TableCell } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
+import { WorkspaceSortMenu } from "@/features/workspace/shared/filters/WorkspaceSortMenu";
 import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 
@@ -26,6 +27,8 @@ export function WorkflowView({
 }: WorkflowViewProps) {
   const [search, setSearch] = useState("");
   const [showArchivedWorkflows, setShowArchivedWorkflows] = useState(false);
+  const [sortField, setSortField] = useState("name");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   const workflowRows = useMemo(() => {
     return bootstrap.workstreams
@@ -62,8 +65,7 @@ export function WorkflowView({
           taskCount: workstreamTasks.length,
           workstream,
         };
-      })
-      .sort((left, right) => left.workstream.name.localeCompare(right.workstream.name));
+      });
   }, [artifacts, bootstrap.tasks, bootstrap.workstreams, membersById]);
 
   const filteredRows = useMemo(() => {
@@ -72,11 +74,7 @@ export function WorkflowView({
       showArchivedWorkflows ? true : !row.workstream.isArchived,
     );
 
-    if (normalizedSearch.length === 0) {
-      return rows;
-    }
-
-    return rows.filter((row) =>
+    const searchedRows = normalizedSearch.length === 0 ? rows : rows.filter((row) =>
       [
         row.workstream.name,
         row.workstream.description,
@@ -86,8 +84,26 @@ export function WorkflowView({
         .toLowerCase()
         .includes(normalizedSearch),
     );
-  }, [search, showArchivedWorkflows, workflowRows]);
-  const workflowFilterMotionClass = useFilterChangeMotionClass([search, showArchivedWorkflows]);
+    const direction = sortDirection === "asc" ? 1 : -1;
+    return [...searchedRows].sort((left, right) => {
+      const a = sortField === "openTasks"
+        ? left.openTaskCount
+        : sortField === "artifacts"
+          ? left.artifactCount
+          : sortField === "contributors"
+            ? left.contributorNames.length
+            : left.workstream.name;
+      const b = sortField === "openTasks"
+        ? right.openTaskCount
+        : sortField === "artifacts"
+          ? right.artifactCount
+          : sortField === "contributors"
+            ? right.contributorNames.length
+            : right.workstream.name;
+      return (typeof a === "number" && typeof b === "number" ? a - b : String(a).localeCompare(String(b))) * direction;
+    });
+  }, [search, showArchivedWorkflows, sortDirection, sortField, workflowRows]);
+  const workflowFilterMotionClass = useFilterChangeMotionClass([search, showArchivedWorkflows, sortDirection, sortField]);
   const hasWorkflowFilters = search.trim().length > 0;
   const hasHiddenArchivedWorkflows =
     !showArchivedWorkflows &&
@@ -100,6 +116,7 @@ export function WorkflowView({
       <AppTopbarSlotPortal slot="controls">
         <div className="panel-actions filter-toolbar subsystem-manager-toolbar">
           <TopbarResponsiveSearch
+            actions={<WorkspaceSortMenu direction={sortDirection} field={sortField} label="workflows" onDirectionChange={setSortDirection} onFieldChange={setSortField} options={[{ label: "Name", value: "name" }, { label: "Open tasks", value: "openTasks" }, { label: "Artifacts", value: "artifacts" }, { label: "Contributors", value: "contributors" }]} />}
             ariaLabel="Search workflows"
             compactPlaceholder="Search"
             onChange={setSearch}

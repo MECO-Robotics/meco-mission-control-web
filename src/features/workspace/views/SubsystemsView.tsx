@@ -27,6 +27,8 @@ export function SubsystemsView({
   const [search, setSearch] = useState("");
   const [showArchivedSubsystems, setShowArchivedSubsystems] = useState(false);
   const [showArchivedMechanisms, setShowArchivedMechanisms] = useState(false);
+  const [sortField, setSortField] = useState("name");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [selectedSubsystemId, setSelectedSubsystemId] = useState(
     getDefaultSubsystemId(bootstrap),
   );
@@ -47,25 +49,42 @@ export function SubsystemsView({
 
   const partDefinitionsById = useMemo(() => buildPartDefinitionsById(bootstrap), [bootstrap]);
 
-  const filteredSubsystems = useMemo(
-    () =>
-      filterSubsystems({
+  const filteredSubsystems = useMemo(() => {
+    const subsystems = filterSubsystems({
         bootstrap,
         membersById,
         partDefinitionsById,
         search,
         showArchivedMechanisms,
         showArchivedSubsystems,
-      }),
-    [
-      bootstrap,
-      membersById,
-      partDefinitionsById,
-      search,
-      showArchivedMechanisms,
-      showArchivedSubsystems,
-    ],
-  );
+    });
+    const direction = sortDirection === "asc" ? 1 : -1;
+    return [...subsystems].sort((a, b) => {
+      const valueA = sortField === "iteration"
+        ? a.iteration
+        : sortField === "openTasks"
+          ? countsBySubsystemId[a.id]?.openTasks ?? 0
+          : a.name;
+      const valueB = sortField === "iteration"
+        ? b.iteration
+        : sortField === "openTasks"
+          ? countsBySubsystemId[b.id]?.openTasks ?? 0
+          : b.name;
+      return (typeof valueA === "number" && typeof valueB === "number"
+        ? valueA - valueB
+        : String(valueA ?? "").localeCompare(String(valueB ?? ""))) * direction;
+    });
+  }, [
+    bootstrap,
+    countsBySubsystemId,
+    membersById,
+    partDefinitionsById,
+    search,
+    showArchivedMechanisms,
+    showArchivedSubsystems,
+    sortDirection,
+    sortField,
+  ]);
 
   const subsystemFilterMotionClass = useFilterChangeMotionClass([
     search,
@@ -83,6 +102,10 @@ export function SubsystemsView({
           setShowArchivedSubsystems={setShowArchivedSubsystems}
           showArchivedMechanisms={showArchivedMechanisms}
           showArchivedSubsystems={showArchivedSubsystems}
+          sortDirection={sortDirection}
+          sortField={sortField}
+          setSortDirection={setSortDirection}
+          setSortField={setSortField}
         />
       </AppTopbarSlotPortal>
 
