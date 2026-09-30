@@ -1,5 +1,6 @@
 import { ArrowDownUp } from "lucide-react";
 
+import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 import { SortDirectionToggle } from "@/features/workspace/shared/filters/SortDirectionToggle";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import type { ResourceSortDirection } from "./ResourceColumnHeader";
@@ -34,9 +35,16 @@ export function ResourceSortMenu({
             <SortDirectionToggle direction={direction} label={label} onChange={onDirectionChange} />
           ),
           content: (
-            <select aria-label={`Sort ${label} by`} className="toolbar-filter-select" onChange={(event) => onFieldChange(event.target.value)} value={field}>
-              {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-            </select>
+            <FilterDropdown
+              allLabel={`Sort ${label} by`}
+              ariaLabel={`Sort ${label} by`}
+              className="task-queue-filter-menu-submenu"
+              onChange={(selection) => onFieldChange(selection[0] ?? options[0]?.value ?? field)}
+              options={options.map(({ label: optionLabel, value }) => ({ id: value, name: optionLabel }))}
+              showAllOption={false}
+              singleSelect
+              value={[field]}
+            />
           ),
         },
       ]}
