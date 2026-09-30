@@ -29,11 +29,11 @@ export function targetMatchesNavigationState(
     return false;
   }
 
-
   return true;
 }
 
-export function getActiveNavigationSubItemId(state: NavigationState, _context?: ViewAvailabilityContext): NavigationSubItemId | null {
+export function getActiveNavigationSubItemId(state: NavigationState, context?: ViewAvailabilityContext): NavigationSubItemId | null {
+  void context;
   switch (state.activeTab) {
     case "home": return "home";
     case "risks": return "work-risks";

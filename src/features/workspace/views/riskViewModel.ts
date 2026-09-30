@@ -81,7 +81,6 @@ export function useRisksViewModel({
     setEditorMode("edit");
   }, [closeEditor]);
 
-
   const handleSaveRisk = useCallback(async () => {
     const session = editorSession.current;
     if (session.pending || editorMode !== "edit" || !activeRiskId) return;
