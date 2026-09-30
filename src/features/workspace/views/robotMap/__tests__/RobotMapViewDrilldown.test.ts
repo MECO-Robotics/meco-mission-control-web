@@ -90,7 +90,6 @@ describe("RobotMapView drilldowns", () => {
           parentSubsystemId: null,
           responsibleEngineerId: null,
           mentorIds: [],
-          risks: [],
           cadImportSource: "STEP_UPLOAD",
         },
       ],
