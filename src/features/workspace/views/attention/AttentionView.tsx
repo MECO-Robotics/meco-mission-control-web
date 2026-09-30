@@ -3,7 +3,7 @@ import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/Topb
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { useRememberedViewState } from "@/features/workspace/shared/navigation/WorkspaceViewMemory";
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { ALL_FILTER_LABEL, type FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { buildAttentionViewModel, type MentorActionQueueItem } from "./attentionViewModel";
 import { buildAttentionQueue } from "./attentionQueue";
 
@@ -48,7 +48,7 @@ export function AttentionView({ activePersonFilter, bootstrap, onOpenRisk, onOpe
                 label: "Source",
                 content: (
                   <select aria-label="Attention source" className="toolbar-filter-select" value={source} onChange={event => setSource(event.target.value)}>
-                    <option value="all">All sources</option><option value="task">Tasks</option><option value="risk">Risks</option><option value="qa">QA / reports</option><option value="manufacturing">Manufacturing</option><option value="purchase">Purchases</option>
+                    <option value="all">{ALL_FILTER_LABEL}</option><option value="task">Tasks</option><option value="risk">Risks</option><option value="qa">QA / reports</option><option value="manufacturing">Manufacturing</option><option value="purchase">Purchases</option>
                   </select>
                 ),
               },

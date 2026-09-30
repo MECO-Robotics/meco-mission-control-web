@@ -6,6 +6,7 @@ import type { DropdownOption } from "../model/workspaceTypes";
 
 const FILTER_CHANGE_ANIMATION_DURATION_MS = 220;
 export const WORKSPACE_COMPACT_BREAKPOINT = 900;
+export const ALL_FILTER_LABEL = "All";
 
 export type FilterSelection = string[];
 
@@ -166,7 +167,7 @@ export function formatCompactFilterSelectionLabel(
   value: FilterSelection,
 ) {
   if (value.length === 0) {
-    return "All";
+    return ALL_FILTER_LABEL;
   }
 
   if (value.length > 1) {

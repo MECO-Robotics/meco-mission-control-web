@@ -1,6 +1,6 @@
 /// <reference types="jest" />
 
-import { filterSelectionIncludes, filterSelectionIntersects, formatCompactFilterSelectionLabel, formatFilterSelectionLabel, getPortalMenuPosition, pruneFilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { ALL_FILTER_LABEL, filterSelectionIncludes, filterSelectionIntersects, formatCompactFilterSelectionLabel, formatFilterSelectionLabel, getPortalMenuPosition, pruneFilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 
 describe("WorkspaceViewShared filters", () => {
   it("treats an empty selection as the all option", () => {
@@ -23,7 +23,7 @@ describe("WorkspaceViewShared filters", () => {
       { id: "approved", name: "Approved" },
     ];
 
-    expect(formatCompactFilterSelectionLabel(options, [])).toBe("All");
+    expect(formatCompactFilterSelectionLabel(options, [])).toBe(ALL_FILTER_LABEL);
     expect(formatCompactFilterSelectionLabel(options, ["requested"])).toBe("Requested");
     expect(formatCompactFilterSelectionLabel(options, ["requested", "approved"])).toBe("2...");
   });
