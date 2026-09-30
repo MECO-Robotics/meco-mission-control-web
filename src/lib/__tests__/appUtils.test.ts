@@ -79,12 +79,11 @@ describe("appUtils", () => {
     expect(payload.ownerId).toBe("lead-1");
     expect(payload.assigneeIds).toEqual(["lead-1"]);
     expect(payload.mentorId).toBe("mentor-1");
-    expect(payload.targetMilestoneId).toBe("milestone-1");
+    expect(payload.scheduleRefs).toEqual([]);
     expect(payload.startDate).toBe("2026-01-02");
     expect(payload.dueDate).toBe("2026-01-02");
     expect(payload.priority).toBe("medium");
     expect(payload.status).toBe("not-started");
-    expect(payload.taskBlockers).toEqual([]);
   });
 
   it("buildEmptySubsystemPayload defaults new subsystems to unplaced layout", () => {
@@ -130,42 +129,12 @@ describe("appUtils", () => {
     ]);
   });
 
-  it("taskToPayload omits read-only blocker summaries", () => {
+  it("taskToPayload keeps procurement and risk ownership outside Task", () => {
     const bootstrap = createBootstrap();
-    const task = {
-      ...bootstrap.tasks[0],
-      blockers: ["Waiting on mentor review", "Waiting on final assembly"],
-    };
+    const payload = taskToPayload(bootstrap.tasks[0], bootstrap);
 
-    expect(taskToPayload(task, bootstrap)).not.toHaveProperty("blockers");
-  });
-
-  it("taskToPayload carries blocker records from bootstrap data", () => {
-    const bootstrap = createBootstrap({
-      taskBlockers: [
-        {
-          id: "task-blocker-1",
-          blockedTaskId: "task-1",
-          blockerType: "design-issue",
-          blockerId: "task-upstream",
-          description: "Waiting on upstream task",
-          severity: "high",
-          status: "open",
-          createdByMemberId: "mentor-1",
-          createdAt: "2026-02-01T00:00:00.000Z",
-          resolvedAt: null,
-        },
-      ],
-    });
-
-    expect(taskToPayload(bootstrap.tasks[0], bootstrap).taskBlockers).toEqual([
-      {
-        id: "task-blocker-1",
-        blockerType: "design-issue",
-        blockerId: "task-upstream",
-        description: "Waiting on upstream task",
-        severity: "high",
-      },
-    ]);
+    expect(payload).not.toHaveProperty("purchaseItems");
+    expect(payload).not.toHaveProperty("risks");
+    expect(payload).not.toHaveProperty("blockers");
   });
 });

@@ -95,14 +95,14 @@ describe("appUtils selection helpers", () => {
     expect(payload.partInstanceIds).toEqual(["part-instance-1"]);
   });
 
-  it("buildEmptyArtifactPayload clears workstream when it does not match project scope", () => {
+  it("buildEmptyArtifactPayload preserves typed artifact targets", () => {
     const payload = buildEmptyArtifactPayload(createBootstrap(), {
       projectId: "project-a",
-      workstreamId: "workstream-b",
+      targetRefs: [{ kind: "workstream", id: "workstream-b" }],
     });
 
     expect(payload.projectId).toBe("project-a");
-    expect(payload.workstreamId).toBeNull();
+    expect(payload.targetRefs).toEqual([{ kind: "workstream", id: "workstream-b" }]);
   });
 
   it("buildEmptyWorkLogPayload uses a valid preferred participant id", () => {
