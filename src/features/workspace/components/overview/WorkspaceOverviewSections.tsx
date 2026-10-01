@@ -14,7 +14,11 @@ export function WorkspaceHomeSection(props: WorkspaceContentPanelsViewProps) {
       isActive={props.activeTab === "home"}
       tabSwitchDirection={props.tabSwitchDirection}
     >
-      <HomeView bootstrap={props.bootstrap} onOpenTask={openTask} />
+      <HomeView
+        bootstrap={props.bootstrap}
+        onOpenTask={openTask}
+        onOpenSchedule={(milestoneId) => props.onOpenDrilldownTarget({ tab: "tasks", taskView: "agenda", milestoneId })}
+      />
     </WorkspaceSectionPanel>
   );
 }

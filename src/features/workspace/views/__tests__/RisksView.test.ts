@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { RisksView } from "@/features/workspace/views/RisksView";
 import { RiskMetricsSection } from "../RiskMetricsSection";
 import { buildRiskViewScopeData } from "../riskViewData/riskViewDataScope";
+import { getRiskScheduleMilestoneId } from "../riskViewData/riskViewDataLookups";
 import { parseTimestamp } from "@/features/workspace/views/riskViewData/riskViewMetricsUtils";
 import { createBootstrap, createMetricsBootstrap } from "./riskViewTestFixtures";
 
@@ -97,4 +98,11 @@ describe("parseTimestamp", () => {
   it("returns null for invalid date-only values", () => {
     expect(parseTimestamp("2026-02-31")).toBeNull();
   });
+});
+
+it("routes milestone-linked risks back to the Schedule record", () => {
+  const risk = createBootstrap().risks[0];
+  expect(getRiskScheduleMilestoneId({ ...risk, source: { kind: "milestone", id: "milestone-from-source" }, relatedTargets: [] })).toBe("milestone-from-source");
+  expect(getRiskScheduleMilestoneId({ ...risk, source: { kind: "manual" }, relatedTargets: [{ kind: "milestone", id: "milestone-related" }] })).toBe("milestone-related");
+  expect(getRiskScheduleMilestoneId({ ...risk, source: { kind: "manual" }, relatedTargets: [] })).toBeNull();
 });

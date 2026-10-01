@@ -8,7 +8,6 @@ import type {
   EscalationRecord,
   MeetingRecord,
   MilestoneRequirementRecord,
-  QaReviewRecord,
   QaRequestRecord,
 } from "@/types/recordsExecution";
 
@@ -78,19 +77,6 @@ describe("normalizeBootstrapPayload", () => {
         description: "",
       },
     ];
-    const qaReviews: QaReviewRecord[] = [
-      {
-        id: "qa-review-1",
-        subjectId: "task-1",
-        subjectType: "task",
-        subjectTitle: "Wire drive train",
-        participantIds: ["member-1"],
-        result: "pass",
-        mentorApproved: true,
-        notes: "Ready for next step",
-        reviewedAt: "2026-03-01T20:00:00.000Z",
-      },
-    ];
     const escalations: EscalationRecord[] = [
       {
         title: "Battery shipment delayed",
@@ -109,7 +95,6 @@ describe("normalizeBootstrapPayload", () => {
           totalHours: 3,
         },
       ],
-      qaReviews,
       escalations,
     };
 
@@ -117,7 +102,6 @@ describe("normalizeBootstrapPayload", () => {
 
     expect(normalized.meetings).toEqual(meetings);
     expect(normalized.attendanceRecords).toEqual(payload.attendanceRecords);
-    expect(normalized.qaReviews).toEqual(qaReviews);
     expect(normalized.escalations).toEqual(escalations);
   });
 

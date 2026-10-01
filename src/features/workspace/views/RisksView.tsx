@@ -20,6 +20,7 @@ interface RisksViewProps {
   openTaskDetailModal?: (task: TaskRecord) => void;
   onUpdateRisk: (riskId: string, payload: RiskPayload) => Promise<void>;
   onOpenSource?: (source: string, id: string) => void;
+  onOpenSchedule?: (milestoneId: string) => void;
 }
 
 export function RisksView({
@@ -29,6 +30,7 @@ export function RisksView({
   openTaskDetailModal,
   onUpdateRisk,
   onOpenSource,
+  onOpenSchedule,
 }: RisksViewProps) {
   const [healthOpen, setHealthOpen] = useState(false);
   const viewModel = useRisksViewModel({
@@ -84,6 +86,7 @@ export function RisksView({
           getSourceLabel={viewModel.getSourceLabel}
           onClose={viewModel.closeEditor}
           onEditRisk={() => viewModel.openEditEditor(viewModel.activeRisk!)}
+          onOpenSchedule={(milestoneId) => { viewModel.closeEditor(); onOpenSchedule?.(milestoneId); }}
         />
       ) : null}
     </section>

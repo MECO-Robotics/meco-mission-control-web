@@ -85,7 +85,6 @@ export const TASK_BLOCKER_TYPE_OPTIONS = Object.entries(TASK_BLOCKER_TYPE_LABELS
 );
 export type TaskBlockerSeverity = "low" | "medium" | "high" | "critical";
 export type TaskBlockerStatus = "open" | "resolved";
-export type ManufacturingProcess = "3d-print" | "cnc" | "fabrication";
 export type ManufacturingStatus = "requested" | "approved" | "in-progress" | "qa" | "complete";
 export type PurchaseStatus = "requested" | "approved" | "purchased" | "shipped" | "delivered";
 export type MaterialCategory = "metal" | "plastic" | "filament" | "electronics" | "hardware" | "consumable" | "other";
@@ -95,7 +94,6 @@ export type SeasonType = "season" | "offseason" | "initiative";
 export type ProjectType = "robot" | "media" | "outreach" | "operations" | "strategy" | "training";
 export type ProjectStatus = "planned" | "active" | "paused" | "complete";
 export type TestResultStatus = "pass" | "fail" | "blocked";
-export type ReportType = "QA" | "MilestoneTest" | "Practice" | "Competition" | "Review";
 export type RiskSeverity = "critical" | "high" | "medium" | "low";
 export type RiskReassessmentStatus = "partial-mitigation" | "full-mitigation";
 export type RiskAttachmentType = "project" | "workstream" | "mechanism" | "part-instance";

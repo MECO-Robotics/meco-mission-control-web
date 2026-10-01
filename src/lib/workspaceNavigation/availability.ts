@@ -8,7 +8,7 @@ export const NAVIGATION_SUB_ITEM_AVAILABILITY_MATRIX: Record<NavigationSubItemId
   home: everywhere,
   "work-tasks": seasonal, "work-schedule": seasonal, "work-risks": seasonal,
   "resources-materials": { ...project, "non-robot-project": false },
-  "resources-documents": { ...seasonal },
+  "resources-documents": { ...seasonal }, "resources-qa-reports": seasonal,
   "resources-parts": robot, "resources-purchases": project,
   "resources-structure": { ...project, "all-project": false },
   "team-people": seasonal,

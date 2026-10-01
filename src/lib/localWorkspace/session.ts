@@ -4,6 +4,7 @@ import { localRosterInsights } from "./roster";
 import { applyLocalCommand, refreshLocalTaskState } from "./commands";
 
 const STORAGE_KEY = "meco.local-demo.v1";
+const SNAPSHOT_SCHEMA_VERSION = 1;
 export type LocalWorkspaceMode = "demo" | "tutorial" | null;
 type Workspace = { mode: Exclude<LocalWorkspaceMode, null>; snapshot: BootstrapPayload | null; ready: Promise<void> | null };
 let active: Workspace | null = null;
@@ -40,19 +41,34 @@ async function initialize(workspace: Workspace, loadSeed: () => Promise<Bootstra
       if (workspace.mode === "demo") {
         const saved = window.sessionStorage.getItem(STORAGE_KEY);
         if (saved) {
-          const parsed = JSON.parse(saved) as { baseline: BootstrapPayload; snapshot: BootstrapPayload };
-          if (!Array.isArray(parsed.snapshot?.tasks) || !Array.isArray(parsed.baseline?.members)) {
-            throw new Error("Local demo data is invalid. Use Reset demo to restore the examples.");
+          let parsed: unknown;
+          try {
+            parsed = JSON.parse(saved);
+          } catch {
+            parsed = null;
           }
-          seed = normalizeBootstrapPayload(parsed.baseline);
-          workspace.snapshot = normalizeBootstrapPayload(parsed.snapshot);
-          return;
+          const candidate = parsed && typeof parsed === "object" ? parsed as { schemaVersion?: number; baseline?: BootstrapPayload; snapshot?: BootstrapPayload } : null;
+          const valid = candidate?.schemaVersion === SNAPSHOT_SCHEMA_VERSION &&
+            Array.isArray(candidate.snapshot?.tasks) && Array.isArray(candidate.baseline?.members);
+          if (!valid) {
+            const version = candidate?.schemaVersion ?? "unknown";
+            let archiveKey = `${STORAGE_KEY}.incompatible.${version}`;
+            let suffix = 1;
+            while (window.sessionStorage.getItem(archiveKey) !== null) archiveKey = `${STORAGE_KEY}.incompatible.${version}.${suffix++}`;
+            window.sessionStorage.setItem(archiveKey, saved);
+            window.sessionStorage.removeItem(STORAGE_KEY);
+            console.warn(`Local demo snapshot schema ${version} is incompatible with schema ${SNAPSHOT_SCHEMA_VERSION}; archived as ${archiveKey} and reset to the current examples.`);
+          } else {
+            seed = normalizeBootstrapPayload(candidate!.baseline!);
+            workspace.snapshot = normalizeBootstrapPayload(candidate!.snapshot!);
+            return;
+          }
         }
       }
       const baseline = seed ?? normalizeBootstrapPayload(await loadSeed());
       if (workspace !== active) throw new Error("The workspace changed. This local operation was cancelled.");
       const snapshot = structuredClone(baseline);
-      if (workspace.mode === "demo") window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ baseline, snapshot }));
+      if (workspace.mode === "demo") window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ schemaVersion: SNAPSHOT_SCHEMA_VERSION, baseline, snapshot }));
       seed = baseline;
       workspace.snapshot = snapshot;
     })().catch((error: unknown) => {
@@ -127,7 +143,7 @@ export async function requestLocalWorkspace<T>(
   if ((options.method ?? "GET").toUpperCase() !== "GET") {
     if (workspace.mode === "demo") {
       // Save before publishing. Quota/privacy errors leave the previous state intact.
-      window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ baseline: seed, snapshot: draft }));
+      window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ schemaVersion: SNAPSHOT_SCHEMA_VERSION, baseline: seed, snapshot: draft }));
     }
     workspace.snapshot = draft;
   }

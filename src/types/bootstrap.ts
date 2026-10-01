@@ -6,7 +6,6 @@ import type {
   MeetingRecord,
   MilestoneRecord,
   MilestoneRequirementRecord,
-  QaReviewRecord,
   QaRequestRecord,
   TaskDependencyRecord,
   TaskRecord,
@@ -47,7 +46,6 @@ export interface BootstrapPayload {
   purchaseItems: PurchaseItemRecord[];
   manufacturingProcesses: import("./recordsExecution").ManufacturingProcessRecord[];
   milestoneRequirements: MilestoneRequirementRecord[];
-  qaReviews?: QaReviewRecord[];
   escalations?: EscalationRecord[];
   actions?: AuditActionRecord[];
 }

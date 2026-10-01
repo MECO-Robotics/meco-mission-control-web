@@ -4,7 +4,7 @@ import {
   readNavigationLocation, writeNavigationLocation,
   type NavigationState,
 } from "@/lib/workspaceNavigation";
-const state: NavigationState = { activeTab: "home", taskView: "queue", worklogsView: "logs", inventoryView: "materials" };
+const state: NavigationState = { activeTab: "home", taskView: "kanban", worklogsView: "logs", inventoryView: "materials" };
 describe("canonical workspace navigation", () => {
   it("groups Dashboard under Work and keeps every destination unique", () => {
     expect(NAVIGATION_SECTION_ORDER).toEqual(["work", "resources"]);
@@ -29,12 +29,16 @@ describe("canonical workspace navigation", () => {
     const next = { ...state, activeTab: "tasks" as const, taskView: "timeline" as const };
     const search = writeNavigationLocation(next, "robot-project", "?season=s&project=p");
     expect(new URLSearchParams(search).get("project")).toBe("p");
+    expect(new URLSearchParams(search).get("presentation")).toBe("timeline");
+    expect(new URLSearchParams(search).has("mode")).toBe(false);
     expect(readNavigationLocation(search, "robot-project")).toEqual({ tab: "tasks", taskView: "timeline" });
+    expect(readNavigationLocation("?view=work-schedule&presentation=agenda&milestone=review-1", "robot-project")).toEqual({ tab: "tasks", taskView: "agenda", milestoneId: "review-1" });
   });
   it("rejects unknown and unavailable destinations and presentation values", () => {
     expect(readNavigationLocation("?view=resources-parts", "non-robot-project")).toEqual({ tab: "home" });
     expect(readNavigationLocation("?view=unknown", "robot-project")).toEqual({ tab: "home" });
-    expect(readNavigationLocation("?view=work-schedule&mode=cad", "robot-project")).toEqual({ tab: "tasks", taskView: "calendar" });
+    expect(readNavigationLocation("?view=work-schedule&presentation=cad", "robot-project")).toEqual({ tab: "tasks", taskView: "calendar" });
+    expect(getActiveNavigationSubItemId({ ...state, activeTab: "worklogs", worklogsView: "qa" })).toBe("resources-qa-reports");
   });
   it("keeps CAD nested under Structure", () => {
     expect(writeNavigationLocation({ ...state, activeTab: "cad" }, "robot-project", "")).toBe("?view=resources-structure&mode=cad");

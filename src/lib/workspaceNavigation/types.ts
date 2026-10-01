@@ -21,12 +21,12 @@ export type ViewAvailabilityContext =
   | "no-project"
   | "no-season";
 
-export type TaskViewTab = "calendar" | "timeline" | "robot-map" | "queue" | "milestones";
+export type TaskViewTab = "calendar" | "timeline" | "robot-map" | "kanban" | "agenda";
 export type WorklogsViewTab = "logs" | "activity" | "qa" | "results";
 export type InventoryViewTab = "materials" | "documents" | "parts" | "part-mappings" | "purchases";
 export type NavigationSubItemId =
   | "home" | "work-tasks" | "work-schedule" | "work-risks"
-  | "resources-materials" | "resources-documents" | "resources-parts"
+  | "resources-materials" | "resources-documents" | "resources-qa-reports" | "resources-parts"
   | "resources-purchases" | "resources-structure"
   | "team-people";
 

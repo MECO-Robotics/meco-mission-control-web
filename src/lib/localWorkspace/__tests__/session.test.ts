@@ -106,12 +106,24 @@ it("Reset demo reloads the current roster baseline instead of retaining the cach
   expect(jest.mocked(fetch).mock.calls[0][1]).toMatchObject({ credentials: "omit" });
 });
 
+it("archives an incompatible snapshot intact and starts from the current canonical examples", async () => {
+  const incompatible = JSON.stringify({ schemaVersion: 0, baseline: { old: "prototype" }, snapshot: { tasks: [] } });
+  data.set("meco.local-demo.v1", incompatible);
+  const warning = jest.spyOn(console, "warn").mockImplementation(() => {});
+  await read();
+  expect(data.get("meco.local-demo.v1.incompatible.0")).toBe(incompatible);
+  expect(JSON.parse(data.get("meco.local-demo.v1")!)).toMatchObject({ schemaVersion: 1 });
+  expect((await read()).projects).toEqual(seed.projects);
+  expect(warning).toHaveBeenCalledWith(expect.stringContaining("archived as meco.local-demo.v1.incompatible.0"));
+  warning.mockRestore();
+});
+
 it("derives cached task hours from logs across reload and tutorial entry", async () => {
   const snapshot = createBootstrap();
   snapshot.tasks[0].actualHours = 999;
   const taskId = snapshot.tasks[0].id;
   const expected = snapshot.workLogs.filter((log) => log.taskId === taskId).reduce((sum, log) => sum + log.hours, 0);
-  data.set("meco.local-demo.v1", JSON.stringify({ baseline: snapshot, snapshot }));
+  data.set("meco.local-demo.v1", JSON.stringify({ schemaVersion: 1, baseline: snapshot, snapshot }));
   expect((await read()).tasks[0].actualHours).toBe(expected);
   leaveLocalWorkspace(); enterLocalDemo();
   expect((await read()).tasks[0].actualHours).toBe(expected);

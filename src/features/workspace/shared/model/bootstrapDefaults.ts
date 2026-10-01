@@ -31,7 +31,6 @@ export const EMPTY_BOOTSTRAP: BootstrapPayload = {
   attendanceRecords: [],
   purchaseItems: [],
   manufacturingProcesses: [],
-  qaReviews: [],
   escalations: [],
   actions: [],
 };

@@ -103,7 +103,6 @@ export function scopeBootstrapBySelection(
       ? payload.attendanceRecords.filter(({ memberId }) => payload.members.some((member) => member.id === memberId && isMemberActiveInSeason(member, selectedSeasonId)))
       : payload.attendanceRecords,
     designIterations: payload.designIterations?.filter((record) => !record.taskId || taskIds.has(record.taskId)),
-    qaReviews: payload.qaReviews?.filter((review) => review.subjectType === "task" && taskIds.has(review.subjectId)),
     actions: payload.actions?.filter((action) =>
       (!action.projectId || projectIds.has(action.projectId)) &&
       (!action.taskId || taskIds.has(action.taskId)) &&

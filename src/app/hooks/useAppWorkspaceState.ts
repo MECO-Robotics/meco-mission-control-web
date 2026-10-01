@@ -28,7 +28,7 @@ export type AppWorkspaceState = ReturnType<typeof useAppWorkspaceState>;
 export function useAppWorkspaceState() {
   const [activeTab, setActiveTab] = useState<ViewTab>("home");
   const [tabSwitchDirection, setTabSwitchDirection] = useState<"up" | "down">("down");
-  const [taskView, setTaskView] = useState<TaskViewTab>("queue");
+  const [taskView, setTaskView] = useState<TaskViewTab>("kanban");
   const [worklogsView, setWorklogsView] = useState<WorklogsViewTab>("logs");
   const [inventoryView, setInventoryView] = useState<InventoryViewTab>("materials");
   const [bootstrap, setBootstrap] = useState<BootstrapPayload>(EMPTY_BOOTSTRAP);

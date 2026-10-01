@@ -115,7 +115,7 @@ export function SubsystemDetailPanel({
       emptyLabel: "No linked tasks yet.",
       items: selectedSubsystem.linkedTasks,
       label: "Linked tasks",
-      target: { tab: "tasks", taskView: "queue" },
+      target: { tab: "tasks", taskView: "kanban" },
     },
     {
       emptyLabel: "No linked risks yet.",

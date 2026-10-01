@@ -14,6 +14,11 @@ export interface RiskViewLookups {
   mitigationTaskOptions: SelectOption[];
 }
 
+export function getRiskScheduleMilestoneId(risk: RiskRecord): string | null {
+  if (risk.source.kind === "milestone") return risk.source.id;
+  return risk.relatedTargets.find((target) => target.kind === "milestone")?.id ?? null;
+}
+
 interface BuildRiskViewLookupsArgs {
   bootstrap: BootstrapPayload;
   scope: Pick<ScopedRiskViewPools, "scopedTasks" | "scopedReports">;

@@ -25,21 +25,13 @@ export interface MilestoneRecord {
   photoUrl?: string;
 }
 
-export type MilestoneRequirementTargetType =
-  | "project"
-  | "workflow"
-  | "artifact"
-  | "subsystem"
-  | "mechanism"
-  | "part-instance";
-
-export type MilestoneRequirementConditionType = "iteration" | "workflow_state" | "custom";
+export type MilestoneRequirementConditionType = "iteration" | "workflow-state" | "custom";
 
 export interface MilestoneRequirementRecord {
   id: string;
   milestoneId: string;
   targetRefs: import("./common").DomainReference[];
-  conditionType: "iteration" | "workflow-state" | "custom";
+  conditionType: MilestoneRequirementConditionType;
   conditionValue: string;
   required: boolean;
   sortOrder: number;
@@ -156,20 +148,6 @@ export interface ManufacturingProcessRecord {
   code: string;
   name: string;
   isActive: boolean;
-}
-
-export type QaReviewResult = "pass" | "minor-fix" | "iteration-worthy";
-
-export interface QaReviewRecord {
-  id: string;
-  subjectId: string;
-  subjectType: "task";
-  subjectTitle: string;
-  participantIds: string[];
-  result: QaReviewResult;
-  mentorApproved: boolean;
-  notes: string;
-  reviewedAt: string;
 }
 
 export interface QaRequestRecord {

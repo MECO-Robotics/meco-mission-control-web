@@ -8,6 +8,7 @@ import { IconManufacturing, IconPlus } from "@/components/shared/Icons";
 import type { TaskDetailsEditableField } from "../../taskModalTypes";
 import { TaskDetailReveal } from "../TaskDetailReveal";
 import { TaskDetailsLinkedEntitySection } from "./TaskDetailsLinkedEntitySection";
+import { TaskManufacturingDetailsFields } from "./TaskManufacturingDetailsFields";
 import { useTaskDetailsAdvancedSectionModel } from "./useTaskDetailsAdvancedSectionModel";
 
 interface TaskDetailsAdvancedSectionViewProps {
@@ -159,6 +160,13 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
             </p>
           )}
         </label>
+        <TaskManufacturingDetailsFields
+          activeTask={activeTask}
+          bootstrap={bootstrap}
+          canEdit={canInlineEdit}
+          setTaskDraft={setTaskDraft}
+          taskDraft={taskDraft}
+        />
         <label className={`field task-detail-row ${canInlineEdit ? "task-details-inline-edit-left" : ""}`}>
           <span style={{ color: "var(--text-title)" }}>Start date</span>
           {canInlineEdit ? (
