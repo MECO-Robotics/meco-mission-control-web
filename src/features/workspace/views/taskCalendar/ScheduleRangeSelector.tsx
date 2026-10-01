@@ -29,6 +29,7 @@ export function ScheduleRangeSelector({
   return (
     <SegmentedSelector
       ariaLabel="Schedule date range"
+      collapsible={isTimeline}
       dataTutorialTarget={isTimeline ? "timeline-interval-select" : undefined}
       onChange={(range) => onChange?.(range)}
       options={options}

@@ -95,14 +95,16 @@ describe("ScheduleRangeSelector", () => {
     expect(markup).not.toContain(">Month</button>");
   });
 
-  it("uses the Week, Month, and All range for Gantt", () => {
+  it("collapses the Gantt Week, Month, and All scope selector by default", () => {
     const markup = renderToStaticMarkup(
       React.createElement(ScheduleRangeSelector, { presentation: "timeline", value: "month" }),
     );
 
-    expect(markup).toContain(">Week</button>");
+    expect(markup).toContain("topbar-segmented-selector is-collapsed");
+    expect(markup).toContain('aria-label="Schedule date range: Month"');
     expect(markup).toContain(">Month</button>");
-    expect(markup).toContain(">All</button>");
+    expect(markup).not.toContain(">Week</button>");
+    expect(markup).not.toContain(">All</button>");
     expect(markup).not.toContain('disabled=""');
   });
 });
