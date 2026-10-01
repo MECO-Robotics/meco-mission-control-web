@@ -84,6 +84,8 @@
 }
 
 .topbar-segmented-selector.is-collapsed {
+  width: max-content;
+  flex: 0 0 auto;
   min-width: max-content;
 }
 
