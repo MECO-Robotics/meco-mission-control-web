@@ -220,7 +220,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             subsystemFilter={filterControls.filters.subsystemFilter}
             subsystemFilterOptions={filterControls.subsystemFilterOptions}
             timelinePeriodLabel={data.timelinePeriodLabel}
-            viewAnchorDate={state.viewAnchorDate}
             onViewAnchorDateChange={state.setViewAnchorDate}
             timelineZoom={state.timelineZoom}
             timelineZoomMin={state.timelineZoomMin}

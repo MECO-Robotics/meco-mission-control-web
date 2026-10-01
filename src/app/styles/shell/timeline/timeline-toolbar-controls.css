@@ -153,6 +153,30 @@
   white-space: nowrap;
 }
 
+.schedule-today-button {
+  min-height: 1.7rem;
+  padding: 0 0.55rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-copy);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.schedule-today-button:hover {
+  background: color-mix(in srgb, var(--meco-blue) 12%, transparent);
+  color: var(--official-blue);
+}
+
+.schedule-today-button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--meco-blue) 55%, transparent);
+  outline-offset: 1px;
+}
+
 .timeline-period-controls.is-week .timeline-period-label {
   min-width: 3.95rem;
   padding: 0 0.04rem;
