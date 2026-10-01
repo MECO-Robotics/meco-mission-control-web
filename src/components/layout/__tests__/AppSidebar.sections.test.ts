@@ -20,6 +20,7 @@ describe("flat sidebar navigation", () => {
     expect(activeSchedule).toContain('aria-label="Calendar"');
     expect(activeSchedule).toContain('aria-label="Agenda"');
     expect(activeSchedule).toContain('aria-label="Gantt"');
+    expect(activeSchedule.match(/sidebar-nested-nav-icon/g)).toHaveLength(3);
     expect(activeSchedule).toMatch(/aria-current="page"[^>]*class="sidebar-nested-nav-item"[^>]*data-active="true"/);
 
     const kanban = renderSidebar([], "tasks", { taskView: "kanban" });
