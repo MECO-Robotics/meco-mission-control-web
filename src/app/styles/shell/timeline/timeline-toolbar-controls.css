@@ -83,6 +83,10 @@
   background: color-mix(in srgb, var(--meco-blue) 16%, var(--bg-panel));
 }
 
+.topbar-segmented-selector.is-collapsed {
+  min-width: max-content;
+}
+
 .timeline-period-controls {
   display: inline-flex;
   align-items: center;

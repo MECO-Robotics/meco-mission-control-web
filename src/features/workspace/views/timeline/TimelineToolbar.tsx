@@ -10,7 +10,7 @@ import type { TaskCalendarEventType } from "@/features/workspace/views/taskCalen
 import type { TaskCalendarSortMode } from "@/features/workspace/views/taskCalendar/taskCalendarLayout";
 import { SchedulePresentationSelector, type SchedulePresentation } from "@/features/workspace/views/taskCalendar/SchedulePresentationSelector";
 import { ScheduleDateSelector } from "@/features/workspace/views/taskCalendar/ScheduleDateSelector";
-import { WorkspaceTopbarZoom } from "@/features/workspace/shared/topbar";
+import { SegmentedSelector, WorkspaceTopbarZoom } from "@/features/workspace/shared/topbar";
 import { TimelineCompactFilterMenu } from "./components/TimelineCompactFilterMenu";
 import { TimelineCalendarSortMenu } from "./components/TimelineCalendarSortMenu";
 
@@ -148,25 +148,13 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
         aria-label={viewInterval === "all" ? "Timeline view controls" : "Timeline period controls"}
         className={`timeline-period-controls${viewInterval === "week" ? " is-week" : ""}${viewInterval === "all" ? " is-all" : ""}`}
       >
-        <div
-          aria-label="Timeline interval"
-          className="timeline-interval-toggle-rail"
-          data-tutorial-target="timeline-interval-select"
-          role="group"
-        >
-          {TIMELINE_INTERVAL_OPTIONS.map((option) => (
-            <button
-              key={option.id}
-              aria-label={`Set timeline interval to ${option.label}`}
-              aria-pressed={viewInterval === option.id}
-              className={`timeline-interval-toggle-option${viewInterval === option.id ? " is-active" : ""}`}
-              onClick={() => onIntervalChange(option.id)}
-              type="button"
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
+        <SegmentedSelector
+          ariaLabel="Timeline interval"
+          dataTutorialTarget="timeline-interval-select"
+          onChange={onIntervalChange}
+          options={TIMELINE_INTERVAL_OPTIONS}
+          value={viewInterval}
+        />
         {viewInterval !== "all" ? (
           <>
             <span aria-hidden="true" className="timeline-period-divider" />

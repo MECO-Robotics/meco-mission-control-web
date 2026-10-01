@@ -208,12 +208,12 @@ describe("TimelineView interactions", () => {
     expect(toolbarSource).toContain('{ id: "week", label: "Week" }');
     expect(toolbarSource).toContain('{ id: "month", label: "Month" }');
     expect(toolbarSource).toContain('{ id: "all", label: "All" }');
-    expect(toolbarSource).toContain('aria-pressed={viewInterval === option.id}');
-    expect(toolbarSource).toContain('onClick={() => onIntervalChange(option.id)}');
-    expect(toolbarSource).not.toContain("isIntervalSwitchExpanded");
+    expect(toolbarSource).toContain("<SegmentedSelector");
+    expect(toolbarSource).toContain("value={viewInterval}");
+    expect(toolbarSource).not.toContain("collapsible");
     expect(toolbarSource).toContain('compactSwitchWidth={220}');
     expect(toolbarSource.indexOf('className={`timeline-period-controls')).toBeLessThan(
-      toolbarSource.indexOf('className="timeline-interval-toggle-rail"'),
+      toolbarSource.indexOf("<SegmentedSelector"),
     );
     expect(toolbarSource).toContain('aria-label={viewInterval === "all" ? "Timeline view controls" : "Timeline period controls"}');
   });

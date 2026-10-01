@@ -1,10 +1,12 @@
+import { SegmentedSelector } from "@/features/workspace/shared/topbar";
+
 export type SchedulePresentation = "agenda" | "calendar" | "timeline";
 
-const PRESENTATIONS: Array<{ id: SchedulePresentation; label: string }> = [
+const PRESENTATIONS = [
   { id: "agenda", label: "Agenda" },
   { id: "calendar", label: "Calendar" },
   { id: "timeline", label: "Gantt" },
-];
+] satisfies Array<{ id: SchedulePresentation; label: string }>;
 
 export function SchedulePresentationSelector({
   value,
@@ -14,22 +16,12 @@ export function SchedulePresentationSelector({
   onChange: (value: SchedulePresentation) => void;
 }) {
   return (
-    <div
-      aria-label="Schedule presentations"
-      className="schedule-presentation-tabs timeline-interval-toggle-rail"
-      role="group"
-    >
-      {PRESENTATIONS.map(({ id, label }) => (
-        <button
-          aria-pressed={value === id}
-          className={`timeline-interval-toggle-option${value === id ? " is-active" : ""}`}
-          key={id}
-          onClick={() => onChange(id)}
-          type="button"
-        >
-          {label}
-        </button>
-      ))}
-    </div>
+    <SegmentedSelector
+      ariaLabel="Schedule presentations"
+      collapsible
+      onChange={onChange}
+      options={PRESENTATIONS}
+      value={value}
+    />
   );
 }
