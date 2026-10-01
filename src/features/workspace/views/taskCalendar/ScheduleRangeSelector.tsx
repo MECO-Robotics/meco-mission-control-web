@@ -1,6 +1,6 @@
 import { SegmentedSelector } from "@/features/workspace/shared/topbar";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
-import type { SchedulePresentation } from "./SchedulePresentationSelector";
+export type SchedulePresentation = "agenda" | "calendar" | "timeline";
 
 const TIMELINE_RANGES: Array<{ id: TimelineViewInterval; label: string }> = [
   { id: "week", label: "Week" },

@@ -18,13 +18,11 @@ import { TaskCalendarMonthStack } from "./TaskCalendarMonthStack";
 import { groupTaskCalendarEventsByMonth, type TaskCalendarSortMode } from "./taskCalendarLayout";
 import type { TaskCalendarEvent, TaskCalendarEventType } from "./taskCalendarEvents";
 import { useTaskCalendarEventData } from "./useTaskCalendarEventData";
-import { SchedulePresentationSelector, type SchedulePresentation } from "./SchedulePresentationSelector";
 import { ScheduleDateSelector } from "./ScheduleDateSelector";
 import { ScheduleRangeSelector } from "./ScheduleRangeSelector";
 
 interface TaskCalendarViewProps {
   presentation?: "calendar" | "agenda";
-  onPresentationChange?: (value: SchedulePresentation) => void;
   onCreateMilestoneReport?: (milestoneId: string, onReturn?: () => void) => void;
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
@@ -68,7 +66,6 @@ function createDefaultMeetingDraft(bootstrap: BootstrapPayload): MeetingPayload 
 
 export function TaskCalendarView({
   presentation = "calendar",
-  onPresentationChange,
   activePersonFilter,
   onCreateMilestoneReport,
   bootstrap,
@@ -206,7 +203,6 @@ export function TaskCalendarView({
     <section className={`panel dense-panel task-calendar-shell ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">
         <WorkspaceTopbarControls className="schedule-topbar-controls">
-          {onPresentationChange ? <SchedulePresentationSelector value={presentation} onChange={onPresentationChange} /> : null}
           <ScheduleRangeSelector presentation={presentation} value={presentation === "calendar" ? "month" : "all"} />
           <ScheduleDateSelector
             onChange={(date) => {

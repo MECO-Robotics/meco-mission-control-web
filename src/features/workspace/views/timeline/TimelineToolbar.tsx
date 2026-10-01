@@ -8,7 +8,6 @@ import { formatTimelineZoomLabel, TIMELINE_ZOOM_MAX } from "@/features/workspace
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import type { TaskCalendarEventType } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
 import type { TaskCalendarSortMode } from "@/features/workspace/views/taskCalendar/taskCalendarLayout";
-import { SchedulePresentationSelector, type SchedulePresentation } from "@/features/workspace/views/taskCalendar/SchedulePresentationSelector";
 import { ScheduleDateSelector } from "@/features/workspace/views/taskCalendar/ScheduleDateSelector";
 import { ScheduleRangeSelector } from "@/features/workspace/views/taskCalendar/ScheduleRangeSelector";
 import { WorkspaceTopbarZoom } from "@/features/workspace/shared/topbar";
@@ -51,7 +50,6 @@ interface TimelineToolbarProps {
   viewInterval: TimelineViewInterval;
   viewAnchorDate: string;
   onViewAnchorDateChange: (value: string) => void;
-  onSchedulePresentationChange?: (value: SchedulePresentation) => void;
 }
 
 export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
@@ -90,11 +88,9 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   viewInterval,
   viewAnchorDate,
   onViewAnchorDateChange,
-  onSchedulePresentationChange,
 }) => {
   return (
     <div className="panel-actions filter-toolbar timeline-toolbar timeline-topbar-controls">
-      {onSchedulePresentationChange ? <SchedulePresentationSelector value="timeline" onChange={onSchedulePresentationChange} /> : null}
       <ScheduleDateSelector value={viewAnchorDate} onChange={onViewAnchorDateChange} />
       <TopbarResponsiveSearch
         actionCount={showCalendarFilters ? 2 : 1}

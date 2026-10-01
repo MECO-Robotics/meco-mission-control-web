@@ -3,25 +3,9 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import React from "react";
 
-import { SchedulePresentationSelector } from "../SchedulePresentationSelector";
 import { ScheduleDateSelector } from "../ScheduleDateSelector";
 import { ScheduleRangeSelector } from "../ScheduleRangeSelector";
 import { SegmentedSelector } from "@/features/workspace/shared/topbar/SegmentedSelector";
-
-describe("SchedulePresentationSelector", () => {
-  it("collapses to the active presentation until expanded", () => {
-    const markup = renderToStaticMarkup(
-      React.createElement(SchedulePresentationSelector, { value: "timeline", onChange: jest.fn() }),
-    );
-
-    expect(markup).toContain('aria-label="Schedule presentations"');
-    expect(markup).toContain('class="timeline-interval-toggle-rail topbar-segmented-selector is-collapsed"');
-    expect(markup).toContain('aria-expanded="false" aria-pressed="true"');
-    expect(markup).toContain(">Gantt</button>");
-    expect(markup).not.toContain(">Agenda</button>");
-    expect(markup).not.toContain(">Calendar</button>");
-  });
-});
 
 describe("SegmentedSelector", () => {
   it("keeps timeline range choices visible unless collapse is requested", () => {

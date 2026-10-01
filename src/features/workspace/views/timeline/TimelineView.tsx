@@ -25,7 +25,6 @@ import { useTimelineViewState } from "./hooks/useTimelineViewState";
 import { useTimelineShellSizing } from "./hooks/useTimelineShellSizing";
 import { useTimelinePeriodNavigation } from "./hooks/useTimelinePeriodNavigation";
 import { getTimelineMinimumZoomForWidth } from "@/features/workspace/shared/timeline/timelineZoom";
-import type { SchedulePresentation } from "@/features/workspace/views/taskCalendar/SchedulePresentationSelector";
 
 interface TimelineViewProps {
   onCreateMilestoneReport?: (milestoneId: string, onReturn?: () => void) => void;
@@ -53,7 +52,6 @@ interface TimelineViewProps {
   calendarSortDirection?: "asc" | "desc";
   onCalendarSortDirectionChange?: (value: "asc" | "desc") => void;
   showCalendarFilters?: boolean;
-  onSchedulePresentationChange?: (value: SchedulePresentation) => void;
 }
 
 export const TimelineView: React.FC<TimelineViewProps> = ({
@@ -78,7 +76,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
   calendarSortDirection,
   onCalendarSortDirectionChange,
   showCalendarFilters = false,
-  onSchedulePresentationChange,
 }) => {
   const state = useTimelineViewState();
   const { setTimelineZoomMin } = state;
@@ -225,7 +222,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             timelinePeriodLabel={data.timelinePeriodLabel}
             viewAnchorDate={state.viewAnchorDate}
             onViewAnchorDateChange={state.setViewAnchorDate}
-            onSchedulePresentationChange={onSchedulePresentationChange}
             timelineZoom={state.timelineZoom}
             timelineZoomMin={state.timelineZoomMin}
             viewInterval={state.viewInterval}
