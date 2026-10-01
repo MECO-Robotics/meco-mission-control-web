@@ -57,13 +57,23 @@ describe("ScheduleDateSelector", () => {
 });
 
 describe("ScheduleRangeSelector", () => {
-  it.each(["agenda", "calendar"] as const)("uses the All-only range for %s", (presentation) => {
+  it("uses Month for Calendar", () => {
     const markup = renderToStaticMarkup(
-      React.createElement(ScheduleRangeSelector, { presentation, value: "all" }),
+      React.createElement(ScheduleRangeSelector, { presentation: "calendar", value: "month" }),
     );
 
     expect(markup).toContain('aria-label="Schedule date range"');
     expect(markup).toContain('aria-pressed="true"');
+    expect(markup).toContain(">Month</button>");
+    expect(markup).not.toContain(">Week</button>");
+    expect(markup).not.toContain(">All</button>");
+  });
+
+  it("uses All for Agenda", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(ScheduleRangeSelector, { presentation: "agenda", value: "all" }),
+    );
+
     expect(markup).toContain(">All</button>");
     expect(markup).not.toContain(">Week</button>");
     expect(markup).not.toContain(">Month</button>");

@@ -2,15 +2,16 @@ import { SegmentedSelector } from "@/features/workspace/shared/topbar";
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import type { SchedulePresentation } from "./SchedulePresentationSelector";
 
-const GANTT_RANGES: Array<{ id: TimelineViewInterval; label: string }> = [
+const TIMELINE_RANGES: Array<{ id: TimelineViewInterval; label: string }> = [
   { id: "week", label: "Week" },
   { id: "month", label: "Month" },
   { id: "all", label: "All" },
 ];
 
-const ALL_RANGE: Array<{ id: TimelineViewInterval; label: string }> = [
-  { id: "all", label: "All" },
-];
+const SINGLE_RANGES: Record<Exclude<SchedulePresentation, "timeline">, Array<{ id: TimelineViewInterval; label: string }>> = {
+  agenda: [{ id: "all", label: "All" }],
+  calendar: [{ id: "month", label: "Month" }],
+};
 
 export function ScheduleRangeSelector({
   onChange,
@@ -21,15 +22,17 @@ export function ScheduleRangeSelector({
   presentation: SchedulePresentation;
   value: TimelineViewInterval;
 }) {
-  const isGantt = presentation === "timeline";
+  const isTimeline = presentation === "timeline";
+  const options = isTimeline ? TIMELINE_RANGES : SINGLE_RANGES[presentation];
+  const selectedRange = isTimeline ? value : presentation === "calendar" ? "month" : "all";
 
   return (
     <SegmentedSelector
       ariaLabel="Schedule date range"
-      dataTutorialTarget={isGantt ? "timeline-interval-select" : undefined}
+      dataTutorialTarget={isTimeline ? "timeline-interval-select" : undefined}
       onChange={(range) => onChange?.(range)}
-      options={isGantt ? GANTT_RANGES : ALL_RANGE}
-      value={isGantt ? value : "all"}
+      options={options}
+      value={selectedRange}
     />
   );
 }

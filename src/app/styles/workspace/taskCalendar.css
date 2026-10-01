@@ -38,6 +38,26 @@
   padding: 0;
 }
 
+.schedule-agenda-months {
+  display: grid;
+  gap: 1rem;
+}
+
+.schedule-agenda-month {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.schedule-agenda-month h3,
+.task-calendar-month-section h3 {
+  background: var(--bg-panel);
+  color: var(--text-title);
+  font-size: 0.9rem;
+  font-weight: 800;
+  margin: 0;
+  padding: 0.35rem 0.15rem;
+}
+
 .schedule-agenda-list li {
   align-items: center;
   background: var(--bg-panel);
@@ -66,6 +86,57 @@
   border: 1px solid var(--border-base);
   border-radius: 0.85rem;
   overflow: hidden;
+}
+
+.task-calendar-month-stack {
+  display: grid;
+  flex: 0 1 auto;
+  gap: 1rem;
+  max-height: min(72vh, 56rem);
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.1rem 0.15rem 0.5rem;
+  scroll-padding-top: 0.5rem;
+  scrollbar-color: var(--border-base) transparent;
+  scrollbar-width: thin;
+}
+
+.task-calendar-month-stack:focus-visible {
+  outline: 2px solid var(--meco-blue);
+  outline-offset: 2px;
+}
+
+.task-calendar-month-stack::-webkit-scrollbar {
+  width: 0.55rem;
+}
+
+.task-calendar-month-stack::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.task-calendar-month-stack::-webkit-scrollbar-thumb {
+  background: var(--border-base);
+  background-clip: content-box;
+  border: 2px solid transparent;
+  border-radius: 999px;
+}
+
+.task-calendar-month-stack::-webkit-scrollbar-thumb:hover {
+  background: var(--text-copy);
+  background-clip: content-box;
+}
+
+.task-calendar-month-section {
+  display: grid;
+  flex: 0 0 auto;
+  gap: 0.35rem;
+}
+
+.task-calendar-month-section h3 {
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .meeting-schedule-modal .form-error {
