@@ -6,7 +6,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { TaskCalendarMonthStack } from "../TaskCalendarMonthStack";
 
 describe("TaskCalendarMonthStack", () => {
-  it("renders a scrollable sequence of full months from the selected month", () => {
+  it("renders scrollable calendar history and future around the selected month", () => {
     const markup = renderToStaticMarkup(
       React.createElement(TaskCalendarMonthStack, {
         eventsByDateKey: new Map(),
@@ -20,8 +20,10 @@ describe("TaskCalendarMonthStack", () => {
     );
 
     expect(markup).toContain('aria-label="Calendar months"');
+    expect(markup).toContain(">October 2025</h3>");
     expect(markup).toContain(">October 2026</h3>");
-    expect(markup).toContain(">September 2027</h3>");
-    expect(markup.match(/class="task-calendar-month-section"/g)).toHaveLength(12);
+    expect(markup).toContain(">October 2027</h3>");
+    expect(markup).not.toContain(">September 2025</h3>");
+    expect(markup.match(/class="task-calendar-month-section"/g)).toHaveLength(25);
   });
 });
