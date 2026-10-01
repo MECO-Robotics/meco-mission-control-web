@@ -106,7 +106,7 @@ describe("TaskCalendarMonthGrid day selection", () => {
       React.createElement(TaskCalendarMonthGrid, {
         eventsByDateKey: new Map([["2026-05-07", [taskEvent, meetingEvent]]]),
         monthCells: [new Date(2026, 4, 7)],
-        monthCursor: new Date(2026, 4, 1),
+        onCloseSelectedDay: jest.fn(),
         onOpenDay: jest.fn(),
         onOpenEvent: jest.fn(),
         selectedDateKey: "2026-05-07",
@@ -125,7 +125,7 @@ describe("TaskCalendarMonthGrid day selection", () => {
     const grid = TaskCalendarMonthGrid({
       eventsByDateKey: new Map([["2026-05-07", [taskEvent, meetingEvent]]]),
       monthCells: [new Date(2026, 4, 7)],
-      monthCursor: new Date(2026, 4, 1),
+      onCloseSelectedDay: jest.fn(),
       onOpenDay,
       onOpenEvent,
       selectedDateKey: null,

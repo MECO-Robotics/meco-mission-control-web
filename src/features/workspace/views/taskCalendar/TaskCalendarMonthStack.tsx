@@ -1,8 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type UIEvent } from "react";
 
-import { createMonthCells } from "./taskCalendarLayout";
+import { createContinuousCalendarDates } from "./taskCalendarLayout";
 import type { TaskCalendarEvent } from "./taskCalendarEvents";
-import { TaskCalendarDayDetails } from "./TaskCalendarDayDetails";
 import { TaskCalendarMonthGrid } from "./TaskCalendarMonthGrid";
 
 const MONTHS_PER_APPEND = 6;
@@ -36,14 +35,14 @@ export function TaskCalendarMonthStack({
   const monthsBefore = monthWindow.cursorKey === cursorKey ? monthWindow.monthsBefore : INITIAL_MONTHS_EACH_DIRECTION;
   const monthsAfter = monthWindow.cursorKey === cursorKey ? monthWindow.monthsAfter : INITIAL_MONTHS_EACH_DIRECTION;
   const stackRef = useRef<HTMLDivElement>(null);
-  const selectedMonthRef = useRef<HTMLElement>(null);
-  const cursorMonthRef = useRef<HTMLElement>(null);
+  const selectedDayRef = useRef<HTMLElement>(null);
+  const cursorDayRef = useRef<HTMLElement>(null);
   const previousStackHeightRef = useRef<number | null>(null);
   useEffect(() => {
-    if (!selectedDateKey) cursorMonthRef.current?.scrollIntoView({ block: "start" });
+    if (!selectedDateKey) cursorDayRef.current?.scrollIntoView({ block: "start" });
   }, [cursorKey, selectedDateKey]);
   useEffect(() => {
-    selectedMonthRef.current?.scrollIntoView({ block: "nearest" });
+    if (selectedDateKey) selectedDayRef.current?.scrollIntoView({ block: "nearest" });
   }, [selectedDateKey]);
   useLayoutEffect(() => {
     const stack = stackRef.current;
@@ -53,17 +52,13 @@ export function TaskCalendarMonthStack({
       previousStackHeightRef.current = null;
     }
   }, [monthsBefore]);
-  const months = useMemo(
-    () => Array.from({ length: monthsBefore + monthsAfter + 1 }, (_, index) =>
-      new Date(cursorYear, cursorMonth + index - monthsBefore, 1)),
+  const calendarDates = useMemo(
+    () => createContinuousCalendarDates(
+      new Date(cursorYear, cursorMonth - monthsBefore, 1),
+      monthsBefore + monthsAfter + 1,
+    ),
     [cursorMonth, cursorYear, monthsAfter, monthsBefore],
   );
-  const monthViews = useMemo(() => months.map((month) => ({
-    cells: createMonthCells(month),
-    key: `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, "0")}`,
-    label: month.toLocaleDateString(undefined, { month: "long", year: "numeric" }),
-    month,
-  })), [months]);
 
   const appendMonthsWhenNearEnd = (event: UIEvent<HTMLDivElement>) => {
     const container = event.currentTarget;
@@ -86,49 +81,30 @@ export function TaskCalendarMonthStack({
 
   return (
     <div
-      aria-label="Calendar months"
+      aria-label="Calendar"
       className="task-calendar-month-stack"
       onScroll={appendMonthsWhenNearEnd}
       ref={stackRef}
       role="region"
       tabIndex={0}
     >
-      {monthViews.map(({ cells, key: monthKey, label: monthLabel, month }) => {
-        const isSelectedMonth = selectedDateKey?.startsWith(monthKey) ?? false;
-        return (
-          <section
-            aria-label={monthLabel}
-            className="task-calendar-month-section"
-            key={monthKey}
-            ref={(element) => {
-              if (isSelectedMonth) selectedMonthRef.current = element;
-              if (month.getFullYear() === cursorYear && month.getMonth() === cursorMonth) cursorMonthRef.current = element;
-            }}
-          >
-            <h3>{monthLabel}</h3>
-            <div className="task-calendar-frame">
-              <TaskCalendarMonthGrid
-                eventsByDateKey={eventsByDateKey}
-                monthCells={cells}
-                monthCursor={month}
-                onOpenDay={onOpenDay}
-                onOpenEvent={onOpenEvent}
-                selectedDateKey={selectedDateKey}
-                todayDateKey={todayDateKey}
-                showAdjacentDates={false}
-              />
-            </div>
-            {isSelectedMonth && selectedDateKey ? (
-              <TaskCalendarDayDetails
-                dateKey={selectedDateKey}
-                events={eventsByDateKey.get(selectedDateKey) ?? []}
-                onClose={onCloseSelectedDay}
-                onOpenEvent={onOpenEvent}
-              />
-            ) : null}
-          </section>
-        );
-      })}
+      <div className="task-calendar-frame">
+        <TaskCalendarMonthGrid
+          eventsByDateKey={eventsByDateKey}
+          monthCells={calendarDates}
+          onOpenDay={onOpenDay}
+          onOpenEvent={onOpenEvent}
+          selectedDateKey={selectedDateKey}
+          todayDateKey={todayDateKey}
+          onCloseSelectedDay={onCloseSelectedDay}
+          dayRef={(dateKey, element) => {
+            if (dateKey === selectedDateKey) selectedDayRef.current = element;
+            if (dateKey === `${cursorYear}-${String(cursorMonth + 1).padStart(2, "0")}-01`) {
+              cursorDayRef.current = element;
+            }
+          }}
+        />
+      </div>
     </div>
   );
 }

@@ -59,16 +59,19 @@ export function toEventDateKey(start: string) {
   return start.slice(0, 10);
 }
 
-export function createMonthCells(cursor: Date) {
-  const startOfMonth = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
-  const endOfMonth = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0);
-  const gridStart = new Date(cursor.getFullYear(), cursor.getMonth(), 1 - startOfMonth.getDay());
-  const totalSlots = Math.ceil((startOfMonth.getDay() + endOfMonth.getDate()) / 7) * 7;
+export function createContinuousCalendarDates(firstMonth: Date, monthCount: number) {
+  const gridStart = new Date(firstMonth.getFullYear(), firstMonth.getMonth(), 1);
+  gridStart.setDate(gridStart.getDate() - gridStart.getDay());
 
-  return Array.from({ length: totalSlots }, (_, index) => {
-    const cellDate = new Date(gridStart);
-    cellDate.setDate(gridStart.getDate() + index);
-    return cellDate;
+  const lastMonth = new Date(firstMonth.getFullYear(), firstMonth.getMonth() + monthCount, 0);
+  const gridEnd = new Date(lastMonth);
+  gridEnd.setDate(gridEnd.getDate() + (6 - gridEnd.getDay()));
+
+  const dayCount = Math.round((gridEnd.getTime() - gridStart.getTime()) / 86_400_000) + 1;
+  return Array.from({ length: dayCount }, (_, index) => {
+    const date = new Date(gridStart);
+    date.setDate(gridStart.getDate() + index);
+    return date;
   });
 }
 

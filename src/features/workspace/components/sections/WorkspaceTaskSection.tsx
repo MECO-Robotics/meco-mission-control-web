@@ -56,7 +56,7 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
       tabSwitchDirection={props.tabSwitchDirection}
     >
       {taskView === "calendar" || taskView === "agenda" ? (
-        <div className="workspace-schedule-scroll" data-tutorial-target="schedule-view">
+        <div className={`workspace-schedule-scroll${taskView === "calendar" ? " is-calendar-workspace" : ""}`} data-tutorial-target="schedule-view">
           <WorkspaceSubPanel disableAnimations={disablePanelAnimations} isActive swipeDirection={taskSwipeDirection}>
             <TaskCalendarView
               presentation={taskView === "agenda" ? "agenda" : "calendar"}
