@@ -10,15 +10,10 @@ import type { TaskCalendarEventType } from "@/features/workspace/views/taskCalen
 import type { TaskCalendarSortMode } from "@/features/workspace/views/taskCalendar/taskCalendarLayout";
 import { SchedulePresentationSelector, type SchedulePresentation } from "@/features/workspace/views/taskCalendar/SchedulePresentationSelector";
 import { ScheduleDateSelector } from "@/features/workspace/views/taskCalendar/ScheduleDateSelector";
-import { SegmentedSelector, WorkspaceTopbarZoom } from "@/features/workspace/shared/topbar";
+import { ScheduleRangeSelector } from "@/features/workspace/views/taskCalendar/ScheduleRangeSelector";
+import { WorkspaceTopbarZoom } from "@/features/workspace/shared/topbar";
 import { TimelineCompactFilterMenu } from "./components/TimelineCompactFilterMenu";
 import { TimelineCalendarSortMenu } from "./components/TimelineCalendarSortMenu";
-
-const TIMELINE_INTERVAL_OPTIONS: Array<{ id: TimelineViewInterval; label: string }> = [
-  { id: "week", label: "Week" },
-  { id: "month", label: "Month" },
-  { id: "all", label: "All" },
-];
 
 interface TimelineToolbarProps {
   activeFilterCount: number;
@@ -148,11 +143,9 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
         aria-label={viewInterval === "all" ? "Timeline view controls" : "Timeline period controls"}
         className={`timeline-period-controls${viewInterval === "week" ? " is-week" : ""}${viewInterval === "all" ? " is-all" : ""}`}
       >
-        <SegmentedSelector
-          ariaLabel="Timeline interval"
-          dataTutorialTarget="timeline-interval-select"
+        <ScheduleRangeSelector
           onChange={onIntervalChange}
-          options={TIMELINE_INTERVAL_OPTIONS}
+          presentation="timeline"
           value={viewInterval}
         />
         {viewInterval !== "all" ? (

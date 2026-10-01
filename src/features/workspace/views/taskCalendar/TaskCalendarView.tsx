@@ -20,6 +20,7 @@ import type { TaskCalendarEvent, TaskCalendarEventType } from "./taskCalendarEve
 import { useTaskCalendarEventData } from "./useTaskCalendarEventData";
 import { SchedulePresentationSelector, type SchedulePresentation } from "./SchedulePresentationSelector";
 import { ScheduleDateSelector } from "./ScheduleDateSelector";
+import { ScheduleRangeSelector } from "./ScheduleRangeSelector";
 
 interface TaskCalendarViewProps {
   presentation?: "calendar" | "agenda";
@@ -170,6 +171,11 @@ export function TaskCalendarView({
   };
   const selectedDayEvents = selectedDateKey ? calendar.eventsByDateKey.get(selectedDateKey) ?? [] : [];
   const agendaEvents = calendar.events.filter((event) => event.start.slice(0, 10) >= agendaStartDate);
+  const agendaEmptyState = calendar.unfilteredEvents.length === 0
+    ? { title: "No schedule data yet.", description: "Add a meeting, event, milestone, or task deadline to build the agenda." }
+    : calendar.events.length === 0
+      ? { title: "No matching schedule items.", description: "Adjust search or filters to see more schedule items." }
+      : { title: "No upcoming schedule items.", description: "Choose another start date or add an upcoming schedule item." };
 
   const handleMeetingSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -196,6 +202,7 @@ export function TaskCalendarView({
       <AppTopbarSlotPortal slot="controls">
         <WorkspaceTopbarControls className="schedule-topbar-controls">
           {onPresentationChange ? <SchedulePresentationSelector value={presentation} onChange={onPresentationChange} /> : null}
+          <ScheduleRangeSelector presentation={presentation} value="all" />
           <ScheduleDateSelector
             onChange={(date) => {
               if (!date) return;
@@ -227,15 +234,13 @@ export function TaskCalendarView({
         />
       </AppTopbarSlotPortal>
       <h2 className="schedule-calendar-heading">Schedule</h2>
-      {calendar.unfilteredEvents.length === 0 ? (
-        <div className="empty-state">
-          <strong>No dated records in scope.</strong>
-          <p className="section-copy">
-            Add milestone dates or task due dates to populate this month view.
-          </p>
-        </div>
-      ) : (
-        presentation === "agenda" ? (
+      {presentation === "agenda" ? (
+        agendaEvents.length === 0 ? (
+          <div aria-live="polite" className="empty-state schedule-agenda-empty-state">
+            <strong>{agendaEmptyState.title}</strong>
+            <p className="section-copy">{agendaEmptyState.description}</p>
+          </div>
+        ) : (
           <ol aria-label="Schedule agenda" className="schedule-agenda-list">
             {agendaEvents.map((event) => {
               const canOpen = event.extendedProps.type === "milestone" || event.extendedProps.type === "task-due" || event.extendedProps.type === "qa-due";
@@ -243,7 +248,16 @@ export function TaskCalendarView({
               return <li key={event.id}><time dateTime={event.start}>{date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" })}{date.toString() !== "Invalid Date" && event.start.includes("T") ? ` · ${date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}` : ""}</time>{canOpen ? <button className="task-calendar-day-details-title" onClick={() => openEvent(event)} type="button">{event.title}</button> : <span>{event.title}</span>}<small>{event.extendedProps.type.replaceAll("-", " ")}{event.extendedProps.status ? ` · ${event.extendedProps.status}` : ""}</small></li>;
             })}
           </ol>
-        ) : <div className="task-calendar-frame">
+        )
+      ) : calendar.unfilteredEvents.length === 0 ? (
+        <div className="empty-state">
+          <strong>No dated records in scope.</strong>
+          <p className="section-copy">
+            Add milestone dates or task due dates to populate this month view.
+          </p>
+        </div>
+      ) : (
+        <div className="task-calendar-frame">
           {calendar.events.length === 0 ? (
             <div className="empty-state task-calendar-filter-empty">
               <strong>No events match this filter.</strong>
