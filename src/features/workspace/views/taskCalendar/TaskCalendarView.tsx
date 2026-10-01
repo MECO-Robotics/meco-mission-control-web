@@ -222,7 +222,7 @@ export function TaskCalendarView({
   };
 
   return (
-    <section className={`panel dense-panel task-calendar-shell ${WORKSPACE_PANEL_CLASS}`}>
+    <section className={`panel dense-panel task-calendar-shell ${presentation === "calendar" ? "task-calendar-full-height" : ""} ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">
         <WorkspaceTopbarControls className="schedule-topbar-controls">
           <SchedulePeriodControls
