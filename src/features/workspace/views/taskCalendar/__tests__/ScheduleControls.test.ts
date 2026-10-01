@@ -3,8 +3,8 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import React from "react";
 
-import { ScheduleDateSelector } from "../ScheduleDateSelector";
 import { ScheduleRangeSelector } from "../ScheduleRangeSelector";
+import { SchedulePeriodControls } from "../SchedulePeriodControls";
 import { SegmentedSelector } from "@/features/workspace/shared/topbar/SegmentedSelector";
 
 describe("SegmentedSelector", () => {
@@ -28,15 +28,39 @@ describe("SegmentedSelector", () => {
   });
 });
 
-describe("ScheduleDateSelector", () => {
-  it("renders the shared accessible date control used by every Schedule presentation", () => {
+describe("SchedulePeriodControls", () => {
+  it("provides month navigation and a Today action for Calendar", () => {
     const markup = renderToStaticMarkup(
-      React.createElement(ScheduleDateSelector, { value: "2026-10-01", onChange: jest.fn() }),
+      React.createElement(SchedulePeriodControls, {
+        onShiftPeriod: jest.fn(),
+        onToday: jest.fn(),
+        periodLabel: "October 2026",
+        presentation: "calendar",
+        range: "month",
+      }),
     );
 
-    expect(markup).toContain('aria-label="Go to date"');
-    expect(markup).toContain('type="date"');
-    expect(markup).toContain('value="2026-10-01"');
+    expect(markup).toContain('aria-label="Previous month"');
+    expect(markup).toContain('aria-label="Next month"');
+    expect(markup).toContain(">October 2026</span>");
+    expect(markup).toContain('aria-label="Go to today"');
+    expect(markup).toContain(">Today</button>");
+  });
+
+  it("keeps Today available when Gantt is showing all dates", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(SchedulePeriodControls, {
+        onShiftPeriod: jest.fn(),
+        onToday: jest.fn(),
+        periodLabel: "",
+        presentation: "timeline",
+        range: "all",
+      }),
+    );
+
+    expect(markup).toContain(">All</button>");
+    expect(markup).toContain('aria-label="Go to today"');
+    expect(markup).not.toContain('aria-label="Previous month"');
   });
 });
 

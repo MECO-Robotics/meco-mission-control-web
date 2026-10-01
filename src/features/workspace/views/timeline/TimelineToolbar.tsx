@@ -1,15 +1,13 @@
 import React from "react";
-import { IconChevronLeft, IconChevronRight } from "@/components/shared/Icons";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { DropdownOption } from "@/features/workspace/shared/model/workspaceTypes";
 import { formatTimelineZoomLabel, TIMELINE_ZOOM_MAX } from "@/features/workspace/shared/timeline/timelineZoom";
-import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
+import { localTodayDate, type TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import type { TaskCalendarEventType } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
 import type { TaskCalendarSortMode } from "@/features/workspace/views/taskCalendar/taskCalendarLayout";
-import { ScheduleDateSelector } from "@/features/workspace/views/taskCalendar/ScheduleDateSelector";
-import { ScheduleRangeSelector } from "@/features/workspace/views/taskCalendar/ScheduleRangeSelector";
+import { SchedulePeriodControls } from "@/features/workspace/views/taskCalendar/SchedulePeriodControls";
 import { WorkspaceTopbarZoom } from "@/features/workspace/shared/topbar";
 import { TimelineCompactFilterMenu } from "./components/TimelineCompactFilterMenu";
 import { TimelineCalendarSortMenu } from "./components/TimelineCalendarSortMenu";
@@ -48,7 +46,6 @@ interface TimelineToolbarProps {
   timelineZoom: number;
   timelineZoomMin: number;
   viewInterval: TimelineViewInterval;
-  viewAnchorDate: string;
   onViewAnchorDateChange: (value: string) => void;
 }
 
@@ -86,12 +83,10 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   timelineZoom,
   timelineZoomMin,
   viewInterval,
-  viewAnchorDate,
   onViewAnchorDateChange,
 }) => {
   return (
     <div className="panel-actions filter-toolbar timeline-toolbar timeline-topbar-controls">
-      <ScheduleDateSelector value={viewAnchorDate} onChange={onViewAnchorDateChange} />
       <TopbarResponsiveSearch
         actionCount={showCalendarFilters ? 2 : 1}
         actions={
@@ -135,42 +130,14 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
         placeholder="Search schedule..."
         value={searchFilter}
       />
-      <div
-        aria-label={viewInterval === "all" ? "Timeline view controls" : "Timeline period controls"}
-        className={`timeline-period-controls${viewInterval === "week" ? " is-week" : ""}${viewInterval === "all" ? " is-all" : ""}`}
-      >
-        <ScheduleRangeSelector
-          onChange={onIntervalChange}
-          presentation="timeline"
-          value={viewInterval}
-        />
-        {viewInterval !== "all" ? (
-          <>
-            <span aria-hidden="true" className="timeline-period-divider" />
-            <button
-              aria-label={`Previous ${viewInterval}`}
-              className="icon-button timeline-period-button"
-              data-tutorial-target="timeline-period-prev-button"
-              onClick={() => onShiftPeriod(-1)}
-              title={`Previous ${viewInterval}`}
-              type="button"
-            >
-              <IconChevronLeft />
-            </button>
-            <span className="timeline-period-label">{timelinePeriodLabel}</span>
-            <button
-              aria-label={`Next ${viewInterval}`}
-              className="icon-button timeline-period-button"
-              data-tutorial-target="timeline-period-next-button"
-              onClick={() => onShiftPeriod(1)}
-              title={`Next ${viewInterval}`}
-              type="button"
-            >
-              <IconChevronRight />
-            </button>
-          </>
-        ) : null}
-      </div>
+      <SchedulePeriodControls
+        onRangeChange={onIntervalChange}
+        onShiftPeriod={onShiftPeriod}
+        onToday={() => onViewAnchorDateChange(localTodayDate())}
+        periodLabel={timelinePeriodLabel}
+        presentation="timeline"
+        range={viewInterval}
+      />
       <WorkspaceTopbarZoom
         ariaLabel="Timeline zoom"
         canZoomIn={timelineZoom < TIMELINE_ZOOM_MAX}

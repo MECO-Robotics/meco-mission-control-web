@@ -212,15 +212,20 @@ describe("TimelineView interactions", () => {
     expect(rangeSelectorSource).toContain('{ id: "week", label: "Week" }');
     expect(rangeSelectorSource).toContain('{ id: "month", label: "Month" }');
     expect(rangeSelectorSource).toContain('{ id: "all", label: "All" }');
-    expect(toolbarSource).toContain('<ScheduleRangeSelector');
+    expect(toolbarSource).toContain('<SchedulePeriodControls');
     expect(toolbarSource).toContain('presentation="timeline"');
-    expect(toolbarSource).toContain("value={viewInterval}");
+    expect(toolbarSource).toContain("range={viewInterval}");
     expect(toolbarSource).not.toContain("collapsible");
     expect(toolbarSource).toContain('compactSwitchWidth={220}');
-    expect(toolbarSource.indexOf('className={`timeline-period-controls')).toBeLessThan(
-      toolbarSource.indexOf("<ScheduleRangeSelector"),
+    const periodControlsSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/taskCalendar/SchedulePeriodControls.tsx"),
+      "utf8",
     );
-    expect(toolbarSource).toContain('aria-label={viewInterval === "all" ? "Timeline view controls" : "Timeline period controls"}');
+    expect(periodControlsSource.indexOf('className={`timeline-period-controls')).toBeLessThan(
+      periodControlsSource.indexOf("<ScheduleRangeSelector"),
+    );
+    expect(periodControlsSource).toContain('aria-label={presentation === "timeline" ? "Timeline period controls"');
+    expect(periodControlsSource).toContain('aria-label="Go to today"');
   });
 
   it("keeps the date range compact and renders navigation as icon-only controls", () => {

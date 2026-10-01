@@ -18,8 +18,7 @@ import { TaskCalendarMonthStack } from "./TaskCalendarMonthStack";
 import { groupTaskCalendarEventsByMonth, type TaskCalendarSortMode } from "./taskCalendarLayout";
 import type { TaskCalendarEvent, TaskCalendarEventType } from "./taskCalendarEvents";
 import { useTaskCalendarEventData } from "./useTaskCalendarEventData";
-import { ScheduleDateSelector } from "./ScheduleDateSelector";
-import { ScheduleRangeSelector } from "./ScheduleRangeSelector";
+import { SchedulePeriodControls } from "./SchedulePeriodControls";
 
 interface TaskCalendarViewProps {
   presentation?: "calendar" | "agenda";
@@ -178,6 +177,29 @@ export function TaskCalendarView({
     : calendar.events.length === 0
       ? { title: "No matching schedule items.", description: "Adjust search or filters to see more schedule items." }
       : { title: "No upcoming schedule items.", description: "Choose another start date or add an upcoming schedule item." };
+  const periodDate = presentation === "agenda"
+    ? new Date(`${agendaStartDate}T12:00:00`)
+    : calendar.monthCursor;
+  const periodLabel = periodDate.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+
+  const shiftPeriod = (direction: -1 | 1) => {
+    if (presentation === "agenda") {
+      setAgendaStartDate(formatLocalDate(new Date(periodDate.getFullYear(), periodDate.getMonth() + direction, 1)));
+    } else {
+      calendar.setMonthCursor(new Date(calendar.monthCursor.getFullYear(), calendar.monthCursor.getMonth() + direction, 1));
+      setSelectedDateKey(null);
+    }
+  };
+
+  const goToToday = () => {
+    if (presentation === "agenda") {
+      setAgendaStartDate(calendar.todayDateKey);
+    } else {
+      const today = new Date();
+      calendar.setMonthCursor(new Date(today.getFullYear(), today.getMonth(), 1));
+      setSelectedDateKey(null);
+    }
+  };
 
   const handleMeetingSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -203,19 +225,12 @@ export function TaskCalendarView({
     <section className={`panel dense-panel task-calendar-shell ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">
         <WorkspaceTopbarControls className="schedule-topbar-controls">
-          <ScheduleRangeSelector presentation={presentation} value={presentation === "calendar" ? "month" : "all"} />
-          <ScheduleDateSelector
-            onChange={(date) => {
-              if (!date) return;
-              if (presentation === "agenda") {
-                setAgendaStartDate(date);
-                return;
-              }
-              const [year, month] = date.split("-").map(Number);
-              calendar.setMonthCursor(new Date(year, month - 1, 1));
-              setSelectedDateKey(null);
-            }}
-            value={presentation === "agenda" ? agendaStartDate : selectedDateKey ?? formatLocalDate(new Date())}
+          <SchedulePeriodControls
+            onShiftPeriod={shiftPeriod}
+            onToday={goToToday}
+            periodLabel={periodLabel}
+            presentation={presentation}
+            range={presentation === "calendar" ? "month" : "all"}
           />
         </WorkspaceTopbarControls>
         <TopbarResponsiveSearch
