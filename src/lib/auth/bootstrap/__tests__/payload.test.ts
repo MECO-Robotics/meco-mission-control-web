@@ -3,6 +3,8 @@
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { createBootstrap } from "@/lib/appUtilsTestFixtures";
 import { normalizeBootstrapPayload } from "@/lib/auth/bootstrap/payload";
+import { buildHomeViewModel } from "@/features/workspace/views/overview/overviewViewModel";
+import { summarizeUri } from "@/features/workspace/views/artifacts/artifactInventoryModel";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type {
   EscalationRecord,
@@ -61,6 +63,50 @@ describe("normalizeBootstrapPayload", () => {
 
     expect(normalized.milestoneRequirements).toEqual(milestoneRequirements);
     expect(normalized.milestones[0]?.readinessStatus).toBe("blocked");
+  });
+
+  it("normalizes platform schedule date fields before the Home view reads milestones", () => {
+    const payload = {
+      ...structuredClone(EMPTY_BOOTSTRAP),
+      milestones: [{
+        id: "milestone-1",
+        title: "Robot checkpoint",
+        type: "practice",
+        startDateTime: "2026-09-28T00:00:00.000Z",
+        endDateTime: null,
+        description: "",
+        projectIds: [],
+      }],
+    } as unknown as BootstrapPayload;
+
+    const normalized = normalizeBootstrapPayload(payload);
+
+    expect(normalized.milestones[0]).toMatchObject({ startAt: "2026-09-28T00:00:00.000Z", endAt: null });
+    expect(buildHomeViewModel(normalized, new Date("2026-09-27T12:00:00")).upcomingMilestones).toMatchObject([
+      { id: "milestone-1", title: "Robot checkpoint" },
+    ]);
+  });
+
+  it("maps the platform artifact link field for Documents", () => {
+    const payload = {
+      ...structuredClone(EMPTY_BOOTSTRAP),
+      artifacts: [{
+        id: "document-1",
+        projectId: "project-1",
+        targetRefs: [{ kind: "project", id: "project-1" }],
+        kind: "document",
+        title: "Build notes",
+        summary: "Robot build notes",
+        status: "published",
+        link: "https://example.org/build-notes",
+        updatedAt: "2026-09-30T00:00:00.000Z",
+      }],
+    } as unknown as BootstrapPayload;
+
+    const normalized = normalizeBootstrapPayload(payload);
+
+    expect(normalized.artifacts[0]?.uri).toBe("https://example.org/build-notes");
+    expect(summarizeUri(normalized.artifacts[0]!.uri)).toBe("example.org/build-notes");
   });
 
   it("preserves calendar and triage bootstrap records", () => {
