@@ -6,6 +6,13 @@ import React from "react";
 import { ScheduleRangeSelector } from "../ScheduleRangeSelector";
 import { SchedulePeriodControls } from "../SchedulePeriodControls";
 import { SegmentedSelector } from "@/features/workspace/shared/topbar/SegmentedSelector";
+import { formatMonthYearLabel } from "@/features/workspace/shared/timeline/timelineDateUtils";
+
+describe("shared Schedule month label", () => {
+  it("uses the same abbreviated month and short year format across presentations", () => {
+    expect(formatMonthYearLabel("2026-10-01")).toBe("Oct '26");
+  });
+});
 
 describe("SegmentedSelector", () => {
   it("keeps timeline range choices visible unless collapse is requested", () => {
@@ -34,7 +41,7 @@ describe("SchedulePeriodControls", () => {
       React.createElement(SchedulePeriodControls, {
         onShiftPeriod: jest.fn(),
         onToday: jest.fn(),
-        periodLabel: "October 2026",
+        periodLabel: "Oct '26",
         presentation: "calendar",
         range: "month",
       }),
@@ -42,9 +49,10 @@ describe("SchedulePeriodControls", () => {
 
     expect(markup).toContain('aria-label="Previous month"');
     expect(markup).toContain('aria-label="Next month"');
-    expect(markup).toContain(">October 2026</span>");
+    expect(markup).toContain(">Oct &#x27;26</span>");
     expect(markup).toContain('aria-label="Go to today"');
     expect(markup).toContain(">Today</button>");
+    expect(markup).not.toContain('type="date"');
   });
 
   it("keeps Today available when Gantt is showing all dates", () => {

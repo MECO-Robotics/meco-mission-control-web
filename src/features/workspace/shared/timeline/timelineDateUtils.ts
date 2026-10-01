@@ -10,7 +10,7 @@ export type TimelineViewInterval = "all" | "week" | "month";
 const MONTH_LABEL_FORMATTER = new Intl.DateTimeFormat(undefined, { month: "long" });
 const MONTH_ABBREVIATED_LABEL_FORMATTER = new Intl.DateTimeFormat(undefined, { month: "short" });
 
-function formatMonthShortYearFromDay(day: string) {
+export function formatMonthYearLabel(day: string) {
   const monthLabel = MONTH_ABBREVIATED_LABEL_FORMATTER.format(new Date(`${day.slice(0, 7)}-01T00:00:00`));
   const yearShort = day.slice(2, 4);
   return `${monthLabel} '${yearShort}`;
@@ -107,7 +107,7 @@ export function formatTimelinePeriodLabel(viewInterval: TimelineViewInterval, da
   }
 
   if (viewInterval === "month") {
-    return formatMonthShortYearFromDay(startDay);
+    return formatMonthYearLabel(startDay);
   }
 
   if (viewInterval === "week") {

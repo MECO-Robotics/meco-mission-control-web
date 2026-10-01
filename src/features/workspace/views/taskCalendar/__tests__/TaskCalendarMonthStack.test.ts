@@ -15,6 +15,7 @@ describe("TaskCalendarMonthStack", () => {
         onOpenDay: jest.fn(),
         onOpenEvent: jest.fn(),
         onCloseSelectedDay: jest.fn(),
+        onVisibleMonthChange: jest.fn(),
         selectedDateKey: null,
         todayDateKey: "2026-10-01",
       }),

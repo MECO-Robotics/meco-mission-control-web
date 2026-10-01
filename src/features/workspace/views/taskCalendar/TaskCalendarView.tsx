@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { formatLocalDate } from "@/lib/dateUtils";
+import { formatMonthYearLabel } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import type { MeetingPayload, MilestonePayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { toErrorMessage } from "@/lib/appUtils/common";
@@ -180,7 +181,7 @@ export function TaskCalendarView({
   const periodDate = presentation === "agenda"
     ? new Date(`${agendaStartDate}T12:00:00`)
     : calendar.monthCursor;
-  const periodLabel = periodDate.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+  const periodLabel = formatMonthYearLabel(formatLocalDate(periodDate));
 
   const shiftPeriod = (direction: -1 | 1) => {
     if (presentation === "agenda") {
@@ -259,6 +260,7 @@ export function TaskCalendarView({
           <TaskCalendarMonthStack
             eventsByDateKey={calendar.eventsByDateKey}
             monthCursor={calendar.monthCursor}
+            onVisibleMonthChange={calendar.setMonthCursor}
             onOpenDay={setSelectedDateKey}
             onOpenEvent={openEvent}
             onCloseSelectedDay={() => setSelectedDateKey(null)}
