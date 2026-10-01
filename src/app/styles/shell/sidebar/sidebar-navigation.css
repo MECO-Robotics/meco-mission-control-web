@@ -107,6 +107,9 @@
 }
 
 .sidebar-nested-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   min-height: 30px;
   padding: 4px 10px;
   border: 0;
@@ -117,6 +120,11 @@
   font: inherit;
   font-size: 0.875rem;
   cursor: pointer;
+}
+
+.sidebar-nested-nav-icon {
+  flex: 0 0 auto;
+  color: currentColor;
 }
 
 .sidebar-nested-nav-item:hover,

@@ -1,10 +1,12 @@
+import { CalendarDays, ChartGantt, List } from "lucide-react";
+
 import { NAVIGATION_SECTION_LABELS, type NavigationSection, type NavigationSubItemId, type NavigationTarget, type TaskViewTab } from "@/lib/workspaceNavigation";
 import { SidebarItem, type SidebarItemConfig } from "./sidebar/SidebarItem";
 
 const SCHEDULE_VIEWS = [
-  { label: "Calendar", taskView: "calendar" },
-  { label: "Agenda", taskView: "agenda" },
-  { label: "Gantt", taskView: "timeline" },
+  { icon: CalendarDays, label: "Calendar", taskView: "calendar" },
+  { icon: List, label: "Agenda", taskView: "agenda" },
+  { icon: ChartGantt, label: "Gantt", taskView: "timeline" },
 ] as const;
 
 export type SidebarSubItemModel = SidebarItemConfig;
@@ -50,7 +52,7 @@ export function AppSidebarSections({
         />
         {item.id === "work-schedule" && activeSubItemId === "work-schedule" && !isCollapsed ? (
           <div aria-label="Schedule views" className="sidebar-nested-nav">
-            {SCHEDULE_VIEWS.map(({ label, taskView }) => {
+            {SCHEDULE_VIEWS.map(({ icon: Icon, label, taskView }) => {
               const isActiveView = activeTaskView === taskView;
               return (
                 <button
@@ -62,6 +64,7 @@ export function AppSidebarSections({
                   onClick={() => onSubItemSelect({ tab: "tasks", taskView })}
                   type="button"
                 >
+                  <Icon aria-hidden="true" className="sidebar-nested-nav-icon" size={14} strokeWidth={1.9} />
                   {label}
                 </button>
               );
