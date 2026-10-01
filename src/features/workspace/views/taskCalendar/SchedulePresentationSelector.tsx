@@ -14,11 +14,15 @@ export function SchedulePresentationSelector({
   onChange: (value: SchedulePresentation) => void;
 }) {
   return (
-    <nav aria-label="Schedule presentations" className="schedule-presentation-tabs">
+    <div
+      aria-label="Schedule presentations"
+      className="schedule-presentation-tabs timeline-interval-toggle-rail"
+      role="group"
+    >
       {PRESENTATIONS.map(({ id, label }) => (
         <button
           aria-pressed={value === id}
-          className={value === id ? "is-active" : ""}
+          className={`timeline-interval-toggle-option${value === id ? " is-active" : ""}`}
           key={id}
           onClick={() => onChange(id)}
           type="button"
@@ -26,6 +30,6 @@ export function SchedulePresentationSelector({
           {label}
         </button>
       ))}
-    </nav>
+    </div>
   );
 }

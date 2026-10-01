@@ -13,9 +13,10 @@ describe("SchedulePresentationSelector", () => {
     );
 
     expect(markup).toContain('aria-label="Schedule presentations"');
+    expect(markup).toContain('class="schedule-presentation-tabs timeline-interval-toggle-rail"');
     expect(markup).toContain(">Agenda</button>");
     expect(markup).toContain(">Calendar</button>");
-    expect(markup).toContain('aria-pressed="true" class="is-active" type="button">Gantt</button>');
+    expect(markup).toContain('aria-pressed="true" class="timeline-interval-toggle-option is-active" type="button">Gantt</button>');
   });
 });
 
