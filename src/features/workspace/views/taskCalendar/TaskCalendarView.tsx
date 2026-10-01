@@ -230,7 +230,6 @@ export function TaskCalendarView({
           value={calendar.searchFilter}
         />
       </AppTopbarSlotPortal>
-      <h2 className="schedule-calendar-heading">Schedule</h2>
       {presentation === "agenda" ? (
         agendaEvents.length === 0 ? (
           <div aria-live="polite" className="empty-state schedule-agenda-empty-state">
