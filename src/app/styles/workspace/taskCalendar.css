@@ -12,6 +12,48 @@
   gap: 0.35rem;
 }
 
+.schedule-presentation-tabs button {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-base);
+  border-radius: 999px;
+  color: var(--text-copy);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.4rem 0.7rem;
+}
+
+.schedule-presentation-tabs button.is-active {
+  background: var(--bg-subtle, var(--bg-panel));
+  border-color: var(--accent, var(--border-strong));
+  color: var(--text-title);
+}
+
+.schedule-date-selector {
+  align-items: center;
+  color: var(--text-copy);
+  display: inline-flex;
+  font-size: 0.76rem;
+  font-weight: 700;
+  gap: 0.4rem;
+}
+
+.schedule-date-selector input {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-base);
+  border-radius: 0.55rem;
+  color: var(--text-title);
+  font: inherit;
+  min-height: 2rem;
+  padding: 0.2rem 0.45rem;
+}
+
+.schedule-topbar-controls {
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .schedule-agenda-list {
   display: grid;
   gap: 0.5rem;

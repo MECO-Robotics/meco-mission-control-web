@@ -5,6 +5,7 @@ import { TaskQueueView } from "@/features/workspace/views/taskQueue/TaskQueueVie
 import { TaskCalendarView } from "@/features/workspace/views/taskCalendar/TaskCalendarView";
 import type { TaskCalendarEventType } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
 import type { TaskCalendarSortMode } from "@/features/workspace/views/taskCalendar/taskCalendarLayout";
+import type { SchedulePresentation } from "@/features/workspace/views/taskCalendar/SchedulePresentationSelector";
 import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
 import { WorkspaceSectionPanel, WorkspaceSubPanel } from "../../WorkspaceContentPanelShells";
 import type { WorkspaceContentPanelsViewProps } from "../workspaceContentPanelsViewTypes";
@@ -56,16 +57,12 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
       isActive={props.activeTab === "tasks"}
       tabSwitchDirection={props.tabSwitchDirection}
     >
-      {(taskView === "calendar" || taskView === "timeline" || taskView === "agenda") ? (
-        <nav aria-label="Schedule presentations" className="schedule-presentation-tabs">
-          {(["calendar", "timeline", "agenda"] as const).map((view) => <button aria-pressed={taskView === view} className={taskView === view ? "is-active" : ""} key={view} onClick={() => setTaskView(view)} type="button">{view === "calendar" ? "Calendar" : view === "timeline" ? "Timeline" : "Agenda"}</button>)}
-        </nav>
-      ) : null}
       {taskView === "calendar" || taskView === "agenda" ? (
         <div className="workspace-schedule-scroll" data-tutorial-target="schedule-view">
           <WorkspaceSubPanel disableAnimations={disablePanelAnimations} isActive swipeDirection={taskSwipeDirection}>
             <TaskCalendarView
               presentation={taskView === "agenda" ? "agenda" : "calendar"}
+              onPresentationChange={(view: SchedulePresentation) => setTaskView(view)}
               activePersonFilter={activePersonFilter}
               bootstrap={bootstrap}
               isAllProjectsView={isAllProjectsView}
@@ -106,6 +103,7 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
               openTaskDetailModal={openTimelineTaskDetailsModal}
               setActivePersonFilter={setActivePersonFilter}
               triggerCreateMilestoneToken={timelineMilestoneCreateSignal}
+              onSchedulePresentationChange={(view: SchedulePresentation) => setTaskView(view)}
             />
           </WorkspaceSubPanel>
         </div>
