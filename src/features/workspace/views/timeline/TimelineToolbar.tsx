@@ -9,6 +9,7 @@ import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/
 import type { TaskCalendarEventType } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
 import type { TaskCalendarSortMode } from "@/features/workspace/views/taskCalendar/taskCalendarLayout";
 import { SchedulePresentationSelector, type SchedulePresentation } from "@/features/workspace/views/taskCalendar/SchedulePresentationSelector";
+import { ScheduleDateSelector } from "@/features/workspace/views/taskCalendar/ScheduleDateSelector";
 import { WorkspaceTopbarZoom } from "@/features/workspace/shared/topbar";
 import { TimelineCompactFilterMenu } from "./components/TimelineCompactFilterMenu";
 import { TimelineCalendarSortMenu } from "./components/TimelineCalendarSortMenu";
@@ -99,18 +100,7 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   return (
     <div className="panel-actions filter-toolbar timeline-toolbar timeline-topbar-controls">
       {onSchedulePresentationChange ? <SchedulePresentationSelector value="timeline" onChange={onSchedulePresentationChange} /> : null}
-      <label className="schedule-date-selector">
-        <span>Date</span>
-        <input
-          aria-label="Go to date"
-          onChange={(event) => {
-            if (!event.target.value) return;
-            onViewAnchorDateChange(event.target.value);
-          }}
-          type="date"
-          value={viewAnchorDate}
-        />
-      </label>
+      <ScheduleDateSelector value={viewAnchorDate} onChange={onViewAnchorDateChange} />
       <TopbarResponsiveSearch
         actionCount={showCalendarFilters ? 2 : 1}
         actions={

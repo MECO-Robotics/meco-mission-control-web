@@ -19,6 +19,7 @@ import type { TaskCalendarSortMode } from "./taskCalendarLayout";
 import type { TaskCalendarEvent, TaskCalendarEventType } from "./taskCalendarEvents";
 import { useTaskCalendarEventData } from "./useTaskCalendarEventData";
 import { SchedulePresentationSelector, type SchedulePresentation } from "./SchedulePresentationSelector";
+import { ScheduleDateSelector } from "./ScheduleDateSelector";
 
 interface TaskCalendarViewProps {
   presentation?: "calendar" | "agenda";
@@ -195,24 +196,19 @@ export function TaskCalendarView({
       <AppTopbarSlotPortal slot="controls">
         <WorkspaceTopbarControls className="schedule-topbar-controls">
           {onPresentationChange ? <SchedulePresentationSelector value={presentation} onChange={onPresentationChange} /> : null}
-          <label className="schedule-date-selector">
-            <span>Date</span>
-            <input
-              aria-label="Go to date"
-              onChange={(event) => {
-                if (!event.target.value) return;
-                if (presentation === "agenda") {
-                  setAgendaStartDate(event.target.value);
-                  return;
-                }
-                const [year, month] = event.target.value.split("-").map(Number);
-                calendar.setMonthCursor(new Date(year, month - 1, 1));
-                setSelectedDateKey(event.target.value);
-              }}
-              type="date"
-              value={presentation === "agenda" ? agendaStartDate : selectedDateKey ?? formatLocalDate(new Date())}
-            />
-          </label>
+          <ScheduleDateSelector
+            onChange={(date) => {
+              if (!date) return;
+              if (presentation === "agenda") {
+                setAgendaStartDate(date);
+                return;
+              }
+              const [year, month] = date.split("-").map(Number);
+              calendar.setMonthCursor(new Date(year, month - 1, 1));
+              setSelectedDateKey(date);
+            }}
+            value={presentation === "agenda" ? agendaStartDate : selectedDateKey ?? formatLocalDate(new Date())}
+          />
           {presentation === "calendar" ? (
             <div className="task-calendar-month-controls" role="group" aria-label="Calendar month navigation">
               <button className="icon-button task-calendar-month-button" aria-label="Previous month" onClick={() => calendar.setMonthCursor((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))} type="button">‹</button>
