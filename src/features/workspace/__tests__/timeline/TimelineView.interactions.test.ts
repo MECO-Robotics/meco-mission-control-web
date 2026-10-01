@@ -204,16 +204,21 @@ describe("TimelineView interactions", () => {
       join(process.cwd(), "src/features/workspace/views/timeline/TimelineToolbar.tsx"),
       "utf8",
     );
+    const rangeSelectorSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/taskCalendar/ScheduleRangeSelector.tsx"),
+      "utf8",
+    );
 
-    expect(toolbarSource).toContain('{ id: "week", label: "Week" }');
-    expect(toolbarSource).toContain('{ id: "month", label: "Month" }');
-    expect(toolbarSource).toContain('{ id: "all", label: "All" }');
-    expect(toolbarSource).toContain("<SegmentedSelector");
+    expect(rangeSelectorSource).toContain('{ id: "week", label: "Week" }');
+    expect(rangeSelectorSource).toContain('{ id: "month", label: "Month" }');
+    expect(rangeSelectorSource).toContain('{ id: "all", label: "All" }');
+    expect(toolbarSource).toContain('<ScheduleRangeSelector');
+    expect(toolbarSource).toContain('presentation="timeline"');
     expect(toolbarSource).toContain("value={viewInterval}");
     expect(toolbarSource).not.toContain("collapsible");
     expect(toolbarSource).toContain('compactSwitchWidth={220}');
     expect(toolbarSource.indexOf('className={`timeline-period-controls')).toBeLessThan(
-      toolbarSource.indexOf("<SegmentedSelector"),
+      toolbarSource.indexOf("<ScheduleRangeSelector"),
     );
     expect(toolbarSource).toContain('aria-label={viewInterval === "all" ? "Timeline view controls" : "Timeline period controls"}');
   });

@@ -5,6 +5,7 @@ import React from "react";
 
 import { SchedulePresentationSelector } from "../SchedulePresentationSelector";
 import { ScheduleDateSelector } from "../ScheduleDateSelector";
+import { ScheduleRangeSelector } from "../ScheduleRangeSelector";
 import { SegmentedSelector } from "@/features/workspace/shared/topbar/SegmentedSelector";
 
 describe("SchedulePresentationSelector", () => {
@@ -52,5 +53,30 @@ describe("ScheduleDateSelector", () => {
     expect(markup).toContain('aria-label="Go to date"');
     expect(markup).toContain('type="date"');
     expect(markup).toContain('value="2026-10-01"');
+  });
+});
+
+describe("ScheduleRangeSelector", () => {
+  it.each(["agenda", "calendar"] as const)("uses the All-only range for %s", (presentation) => {
+    const markup = renderToStaticMarkup(
+      React.createElement(ScheduleRangeSelector, { presentation, value: "all" }),
+    );
+
+    expect(markup).toContain('aria-label="Schedule date range"');
+    expect(markup).toContain('aria-pressed="true"');
+    expect(markup).toContain(">All</button>");
+    expect(markup).not.toContain(">Week</button>");
+    expect(markup).not.toContain(">Month</button>");
+  });
+
+  it("uses the Week, Month, and All range for Gantt", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(ScheduleRangeSelector, { presentation: "timeline", value: "month" }),
+    );
+
+    expect(markup).toContain(">Week</button>");
+    expect(markup).toContain(">Month</button>");
+    expect(markup).toContain(">All</button>");
+    expect(markup).not.toContain('disabled=""');
   });
 });
