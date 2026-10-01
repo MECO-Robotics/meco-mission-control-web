@@ -199,19 +199,21 @@ describe("TimelineView interactions", () => {
     expect(overlayHookSource).toContain("setIsTimelineShellScrolling(false)");
   });
 
-  it("supports keyboard and touch activation for the timeline interval switch", () => {
+  it("keeps Week, Month, and All visible as direct timeline interval options", () => {
     const toolbarSource = readFileSync(
       join(process.cwd(), "src/features/workspace/views/timeline/TimelineToolbar.tsx"),
       "utf8",
     );
 
-    expect(toolbarSource).toContain("onFocusCapture={handleIntervalSwitchFocusCapture}");
-    expect(toolbarSource).toContain("onPointerDownCapture={handleIntervalSwitchPointerDown}");
-    expect(toolbarSource).toContain("onClick={() => openIntervalSwitch({ focusOptions: true })}");
-    expect(toolbarSource).toContain("onKeyDown={handleIntervalPillKeyDown}");
+    expect(toolbarSource).toContain('{ id: "week", label: "Week" }');
+    expect(toolbarSource).toContain('{ id: "month", label: "Month" }');
+    expect(toolbarSource).toContain('{ id: "all", label: "All" }');
+    expect(toolbarSource).toContain('aria-pressed={viewInterval === option.id}');
+    expect(toolbarSource).toContain('onClick={() => onIntervalChange(option.id)}');
+    expect(toolbarSource).not.toContain("isIntervalSwitchExpanded");
     expect(toolbarSource).toContain('compactSwitchWidth={220}');
     expect(toolbarSource.indexOf('className={`timeline-period-controls')).toBeLessThan(
-      toolbarSource.indexOf('className={`timeline-interval-switch'),
+      toolbarSource.indexOf('className="timeline-interval-toggle-rail"'),
     );
     expect(toolbarSource).toContain('aria-label={viewInterval === "all" ? "Timeline view controls" : "Timeline period controls"}');
   });
@@ -227,17 +229,4 @@ describe("TimelineView interactions", () => {
     expect(toolbarStyles).toMatch(/\.timeline-period-controls\s*\{[^}]*padding:\s*0\.06rem 0\.1rem;/);
   });
 
-  it("moves keyboard focus into interval options after expanding the switch", () => {
-    const toolbarSource = readFileSync(
-      join(process.cwd(), "src/features/workspace/views/timeline/TimelineToolbar.tsx"),
-      "utf8",
-    );
-
-    expect(toolbarSource).toContain("const intervalSwitchRef = React.useRef<HTMLDivElement>(null)");
-    expect(toolbarSource).toContain("const shouldFocusIntervalOptionRef = React.useRef(false)");
-    expect(toolbarSource).toContain("const suppressBlurCloseRef = React.useRef(false)");
-    expect(toolbarSource).toContain("if (suppressBlurCloseRef.current) {");
-    expect(toolbarSource).toContain(".timeline-interval-toggle-option.is-active");
-    expect(toolbarSource).toContain("nextFocusTarget?.focus()");
-  });
 });

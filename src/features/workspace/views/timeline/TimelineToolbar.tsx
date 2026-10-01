@@ -1,5 +1,5 @@
 import React from "react";
-import { IconCalendar, IconChevronLeft, IconChevronRight } from "@/components/shared/Icons";
+import { IconChevronLeft, IconChevronRight } from "@/components/shared/Icons";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
@@ -13,10 +13,10 @@ import { WorkspaceTopbarZoom } from "@/features/workspace/shared/topbar";
 import { TimelineCompactFilterMenu } from "./components/TimelineCompactFilterMenu";
 import { TimelineCalendarSortMenu } from "./components/TimelineCalendarSortMenu";
 
-const TIMELINE_INTERVAL_OPTIONS: Array<{ id: TimelineViewInterval; label: string; shortLabel: string }> = [
-  { id: "all", label: "All", shortLabel: "A" },
-  { id: "month", label: "Month", shortLabel: "M" },
-  { id: "week", label: "Week", shortLabel: "W" },
+const TIMELINE_INTERVAL_OPTIONS: Array<{ id: TimelineViewInterval; label: string }> = [
+  { id: "week", label: "Week" },
+  { id: "month", label: "Month" },
+  { id: "all", label: "All" },
 ];
 
 interface TimelineToolbarProps {
@@ -96,71 +96,6 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   onViewAnchorDateChange,
   onSchedulePresentationChange,
 }) => {
-  const [isIntervalSwitchExpanded, setIsIntervalSwitchExpanded] = React.useState(false);
-  const intervalSwitchRef = React.useRef<HTMLDivElement>(null);
-  const shouldFocusIntervalOptionRef = React.useRef(false);
-  const suppressBlurCloseRef = React.useRef(false);
-  const activeIntervalOption = TIMELINE_INTERVAL_OPTIONS.find((option) => option.id === viewInterval) ?? TIMELINE_INTERVAL_OPTIONS[0];
-  const closeIntervalSwitch = () => {
-    suppressBlurCloseRef.current = false;
-    shouldFocusIntervalOptionRef.current = false;
-    setIsIntervalSwitchExpanded(false);
-  };
-  const openIntervalSwitch = ({ focusOptions = false }: { focusOptions?: boolean } = {}) => {
-    if (focusOptions) {
-      shouldFocusIntervalOptionRef.current = true;
-      suppressBlurCloseRef.current = true;
-    }
-
-    setIsIntervalSwitchExpanded(true);
-  };
-  React.useEffect(() => {
-    if (!isIntervalSwitchExpanded || !shouldFocusIntervalOptionRef.current) {
-      return;
-    }
-
-    shouldFocusIntervalOptionRef.current = false;
-    suppressBlurCloseRef.current = false;
-    const root = intervalSwitchRef.current;
-    if (!root) {
-      return;
-    }
-
-    const nextFocusTarget =
-      root.querySelector<HTMLButtonElement>(".timeline-interval-toggle-option.is-active") ??
-      root.querySelector<HTMLButtonElement>(".timeline-interval-toggle-option");
-    nextFocusTarget?.focus();
-  }, [isIntervalSwitchExpanded, viewInterval]);
-
-  const handleIntervalSwitchBlur = (event: React.FocusEvent<HTMLDivElement>) => {
-    if (suppressBlurCloseRef.current) {
-      return;
-    }
-
-    const nextFocusedElement = event.relatedTarget;
-    if (nextFocusedElement instanceof Node && event.currentTarget.contains(nextFocusedElement)) {
-      return;
-    }
-
-    closeIntervalSwitch();
-  };
-  const handleIntervalSwitchPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (event.pointerType === "touch" || event.pointerType === "pen") {
-      openIntervalSwitch();
-    }
-  };
-  const handleIntervalSwitchFocusCapture = () => {
-    if (!isIntervalSwitchExpanded) {
-      openIntervalSwitch({ focusOptions: true });
-    }
-  };
-  const handleIntervalPillKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
-    if (event.key === "Enter" || event.key === " " || event.key === "ArrowDown") {
-      event.preventDefault();
-      openIntervalSwitch({ focusOptions: true });
-    }
-  };
-
   return (
     <div className="panel-actions filter-toolbar timeline-toolbar timeline-topbar-controls">
       {onSchedulePresentationChange ? <SchedulePresentationSelector value="timeline" onChange={onSchedulePresentationChange} /> : null}
@@ -225,54 +160,22 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
       >
         <div
           aria-label="Timeline interval"
-          className={`timeline-interval-switch${isIntervalSwitchExpanded ? " is-expanded" : ""}`}
-          ref={intervalSwitchRef}
-          onBlurCapture={handleIntervalSwitchBlur}
-          onMouseEnter={() => openIntervalSwitch()}
-          onMouseLeave={closeIntervalSwitch}
-          onFocusCapture={handleIntervalSwitchFocusCapture}
-          onPointerDownCapture={handleIntervalSwitchPointerDown}
+          className="timeline-interval-toggle-rail"
+          data-tutorial-target="timeline-interval-select"
           role="group"
         >
-          {isIntervalSwitchExpanded ? (
-            <div
-              aria-label="Timeline interval options"
-              className="timeline-interval-toggle-rail"
-              data-tutorial-target="timeline-interval-select"
-            >
-              {TIMELINE_INTERVAL_OPTIONS.map((option) => (
-                <button
-                  key={option.id}
-                  aria-label={`Set timeline interval to ${option.label}`}
-                  aria-pressed={viewInterval === option.id}
-                  className={`timeline-interval-toggle-option${viewInterval === option.id ? " is-active" : ""}`}
-                  onClick={() => {
-                    onIntervalChange(option.id);
-                    closeIntervalSwitch();
-                  }}
-                  title={option.label}
-                  type="button"
-                >
-                  {option.shortLabel}
-                </button>
-              ))}
-            </div>
-          ) : (
+          {TIMELINE_INTERVAL_OPTIONS.map((option) => (
             <button
-              aria-label={`Timeline interval: ${activeIntervalOption.label}`}
-              className="timeline-interval-pill"
-              data-tutorial-target="timeline-interval-select"
-              onClick={() => openIntervalSwitch({ focusOptions: true })}
-              onKeyDown={handleIntervalPillKeyDown}
-              title={`Timeline interval: ${activeIntervalOption.label}`}
+              key={option.id}
+              aria-label={`Set timeline interval to ${option.label}`}
+              aria-pressed={viewInterval === option.id}
+              className={`timeline-interval-toggle-option${viewInterval === option.id ? " is-active" : ""}`}
+              onClick={() => onIntervalChange(option.id)}
               type="button"
             >
-              <span className="timeline-interval-pill-icon">
-                <IconCalendar />
-              </span>
-              <span className="timeline-interval-pill-label">{activeIntervalOption.label}</span>
+              {option.label}
             </button>
-          )}
+          ))}
         </div>
         {viewInterval !== "all" ? (
           <>
