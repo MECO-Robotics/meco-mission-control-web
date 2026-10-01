@@ -6,6 +6,7 @@ import type { RiskRecord } from "@/types/recordsReporting";
 import { WorkspaceAuditActionList } from "@/features/workspace/shared/WorkspaceAuditActionList";
 
 import { formatRiskSeverity, getRiskSeverityPillClassName } from "./riskViewData/riskViewDataPayload";
+import { getRiskScheduleMilestoneId } from "./riskViewData/riskViewDataLookups";
 import { TaskPriorityBadge } from "./taskQueue/taskQueueKanbanCardMeta";
 
 interface RiskDetailsModalProps {
@@ -16,6 +17,7 @@ interface RiskDetailsModalProps {
   getSourceLabel: (risk: RiskRecord) => string;
   onClose: () => void;
   onEditRisk: () => void;
+  onOpenSchedule?: (milestoneId: string) => void;
 }
 
 export function RiskDetailsModal({
@@ -26,9 +28,11 @@ export function RiskDetailsModal({
   getSourceLabel,
   onClose,
   onEditRisk,
+  onOpenSchedule,
 }: RiskDetailsModalProps) {
   const sourceTypeLabel = activeRisk.source.kind === "manual" ? "Manual" : activeRisk.source.kind;
   const riskPriority = activeRisk.severity;
+  const scheduleMilestoneId = getRiskScheduleMilestoneId(activeRisk);
 
   if (typeof document === "undefined") {
     return null;
@@ -75,6 +79,9 @@ export function RiskDetailsModal({
             <span>Summary</span>
             <p className="task-detail-copy">{activeRisk.detail || "No risk detail provided."}</p>
           </div>
+          {scheduleMilestoneId && onOpenSchedule ? <div className="modal-actions modal-wide">
+            <button className="secondary-action" onClick={() => onOpenSchedule(scheduleMilestoneId)} type="button">Open milestone in Schedule</button>
+          </div> : null}
           <div className="field">
             <span>Related domain records</span>
             <p className="task-detail-copy">

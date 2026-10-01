@@ -60,8 +60,20 @@ export function usePurchaseActions({ bootstrap, handleUnauthorized, loadWorkspac
     setDataMessage(null);
 
     try {
-      if (!bootstrap.tasks.some((task) => task.id === purchaseDraft.taskId)) {
+      const task = bootstrap.tasks.find((candidate) => candidate.id === purchaseDraft.taskId);
+      if (!task) {
         setDataMessage("Choose the Kanban Task that represents this procurement work.");
+        return;
+      }
+      const project = bootstrap.projects.find((candidate) => candidate.id === task.projectId);
+      const workType = bootstrap.workTypes.find((candidate) => candidate.id === task.workTypeId);
+      const isManufacturingTask = project?.projectType === "robot" && workType?.code === "manufacturing";
+      if (purchaseDraft.kind === "manufacturing-service" && (!isManufacturingTask || !task.manufacturingDetails)) {
+        setDataMessage("Outsourced manufacturing purchases must link to a Robot Manufacturing Task with technical manufacturing details.");
+        return;
+      }
+      if (purchaseDraft.kind === "cots-goods" && task.manufacturingDetails) {
+        setDataMessage("COTS purchases use Purchasing only. Choose a procurement Task without Manufacturing Details.");
         return;
       }
 

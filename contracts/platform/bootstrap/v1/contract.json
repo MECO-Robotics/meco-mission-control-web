@@ -27,7 +27,15 @@
             "type": "string"
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "Robot",
+              "Media",
+              "Outreach",
+              "Operations",
+              "Strategy",
+              "Training"
+            ]
           },
           "projectType": {
             "type": "string",
@@ -510,7 +518,7 @@
               "published"
             ]
           },
-          "link": {
+          "uri": {
             "default": "",
             "type": "string"
           },
@@ -533,7 +541,7 @@
           "title",
           "summary",
           "status",
-          "link",
+          "uri",
           "isArchived",
           "id"
         ],
@@ -868,9 +876,77 @@
       "type": "array",
       "items": {
         "type": "object",
-        "propertyNames": {
-          "type": "string"
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "startAt": {
+            "type": "string"
+          },
+          "endAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "seasonId": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "planned",
+              "active",
+              "complete"
+            ]
+          },
+          "readinessStatus": {
+            "type": "string",
+            "enum": [
+              "not-ready",
+              "blocked",
+              "qa",
+              "ready"
+            ]
+          },
+          "isExternal": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "projectIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "photoUrl": {
+            "type": "string"
+          }
         },
+        "required": [
+          "id",
+          "title",
+          "startAt",
+          "endAt",
+          "type",
+          "status",
+          "readinessStatus",
+          "isExternal",
+          "description",
+          "projectIds"
+        ],
         "additionalProperties": {}
       }
     },
@@ -1155,16 +1231,6 @@
               "additionalProperties": false
             }
           },
-          "taskId": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "projectId": {
             "type": "string"
           },
@@ -1198,7 +1264,6 @@
         "required": [
           "id",
           "targetRefs",
-          "taskId",
           "projectId",
           "title",
           "detail",
@@ -1362,16 +1427,6 @@
               "additionalProperties": false
             }
           },
-          "taskId": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "projectId": {
             "type": "string"
           },
@@ -1405,7 +1460,6 @@
         "required": [
           "id",
           "targetRefs",
-          "taskId",
           "projectId",
           "title",
           "detail",
@@ -2209,9 +2263,63 @@
       "type": "array",
       "items": {
         "type": "object",
-        "propertyNames": {
-          "type": "string"
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "startAt": {
+            "type": "string"
+          },
+          "endAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "meetingType": {
+            "type": "string"
+          },
+          "seasonId": {
+            "type": "string"
+          },
+          "projectIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "location": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "rsvpsYes": {
+            "type": "number"
+          },
+          "rsvpsMaybe": {
+            "type": "number"
+          },
+          "openSignIns": {
+            "type": "number"
+          }
         },
+        "required": [
+          "id",
+          "title",
+          "startAt",
+          "endAt",
+          "rsvpsYes",
+          "rsvpsMaybe",
+          "openSignIns"
+        ],
         "additionalProperties": {}
       }
     },
@@ -2219,9 +2327,54 @@
       "type": "array",
       "items": {
         "type": "object",
-        "propertyNames": {
-          "type": "string"
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "startAt": {
+            "type": "string"
+          },
+          "endAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "seasonId": {
+            "type": "string"
+          },
+          "projectIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
         },
+        "required": [
+          "id",
+          "title",
+          "startAt",
+          "endAt",
+          "seasonId",
+          "projectIds",
+          "eventType"
+        ],
         "additionalProperties": {}
       }
     },
@@ -3531,14 +3684,6 @@
             "type": "string",
             "minLength": 1
           }
-        },
-        "risks": {
-          "default": [],
-          "type": "array",
-          "items": {
-            "type": "string",
-            "minLength": 1
-          }
         }
       },
       "required": [
@@ -3714,13 +3859,6 @@
             "type": "string",
             "minLength": 1
           }
-        },
-        "risks": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "minLength": 1
-          }
         }
       },
       "additionalProperties": false
@@ -3770,6 +3908,7 @@
           ]
         },
         "targetRefs": {
+          "default": [],
           "type": "array",
           "items": {
             "type": "object",
@@ -3825,39 +3964,6 @@
         "projectId": {
           "type": "string",
           "minLength": 1
-        },
-        "taskId": {
-          "anyOf": [
-            {
-              "type": "string",
-              "minLength": 1
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "milestoneId": {
-          "anyOf": [
-            {
-              "type": "string",
-              "minLength": 1
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "workstreamId": {
-          "anyOf": [
-            {
-              "type": "string",
-              "minLength": 1
-            },
-            {
-              "type": "null"
-            }
-          ]
         },
         "createdByMemberId": {
           "anyOf": [
@@ -3928,9 +4034,6 @@
       "required": [
         "reportType",
         "projectId",
-        "taskId",
-        "milestoneId",
-        "workstreamId",
         "createdByMemberId",
         "result",
         "createdAt"
@@ -4873,6 +4976,40 @@
           "additionalProperties": false
         }
       ]
+    },
+    "manufacturingProcessCreate": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "code",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "manufacturingProcessArchive": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "isActive": {
+          "type": "boolean",
+          "const": false
+        }
+      },
+      "required": [
+        "isActive"
+      ],
+      "additionalProperties": false
     }
   }
 }

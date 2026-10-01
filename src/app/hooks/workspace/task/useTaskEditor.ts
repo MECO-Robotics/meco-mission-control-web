@@ -114,6 +114,17 @@ export function useTaskEditor({ bootstrap, scopedBootstrap, selectedProjectId, s
 
     try {
       const payload = normalizeTaskPayload(taskDraft);
+      const taskProject = bootstrap.projects.find((project) => project.id === payload.projectId);
+      const taskWorkType = bootstrap.workTypes.find((workType) => workType.id === payload.workTypeId);
+      const isRobotManufacturing = taskProject?.projectType === "robot" && taskWorkType?.code === "manufacturing";
+      if (isRobotManufacturing && !payload.manufacturingDetails) {
+        setDataMessage("Add the technical manufacturing details before saving this Robot Manufacturing Task.");
+        return;
+      }
+      if (payload.manufacturingDetails && !isRobotManufacturing) {
+        setDataMessage("Manufacturing details can only be attached to a Robot Manufacturing Task.");
+        return;
+      }
       const isEdit = taskModalMode === "edit";
       let savedTask: TaskRecord;
 

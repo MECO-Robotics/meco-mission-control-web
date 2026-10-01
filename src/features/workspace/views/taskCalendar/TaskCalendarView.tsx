@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { formatLocalDate } from "@/lib/dateUtils";
@@ -17,6 +17,7 @@ import type { TaskCalendarEvent, TaskCalendarEventType } from "./taskCalendarEve
 import { useTaskCalendarEventData } from "./useTaskCalendarEventData";
 
 interface TaskCalendarViewProps {
+  presentation?: "calendar" | "agenda";
   onCreateMilestoneReport?: (milestoneId: string, onReturn?: () => void) => void;
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
@@ -59,6 +60,7 @@ function createDefaultMeetingDraft(bootstrap: BootstrapPayload): MeetingPayload 
 }
 
 export function TaskCalendarView({
+  presentation = "calendar",
   activePersonFilter,
   onCreateMilestoneReport,
   bootstrap,
@@ -83,6 +85,8 @@ export function TaskCalendarView({
   const [meetingDraft, setMeetingDraft] = useState<MeetingPayload>(() => createDefaultMeetingDraft(bootstrap));
   const [meetingError, setMeetingError] = useState<string | null>(null);
   const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
+  const [requestedMilestoneId, setRequestedMilestoneId] = useState(() => typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("milestone"));
+  const handledMilestoneId = useRef<string | null | undefined>(undefined);
   const calendar = useTaskCalendarEventData({
     activePersonFilter,
     bootstrap,
@@ -107,22 +111,44 @@ export function TaskCalendarView({
     projectFilter: [],
     scopedProjectIds: calendar.scopedProjectIds,
   });
+  const milestoneModalActions = useRef(milestoneModalState);
+  useEffect(() => { milestoneModalActions.current = milestoneModalState; });
   useEffect(() => {
     const openMeeting = () => setIsMeetingModalOpen(true);
-    const openMilestone = () => milestoneModalState.openCreateMilestoneModal();
+    const openMilestone = () => milestoneModalActions.current.openCreateMilestoneModal();
     window.addEventListener("mission-control:open-meeting", openMeeting);
     window.addEventListener("mission-control:open-milestone", openMilestone);
     return () => {
       window.removeEventListener("mission-control:open-meeting", openMeeting);
       window.removeEventListener("mission-control:open-milestone", openMilestone);
     };
-  }, [milestoneModalState.openCreateMilestoneModal]);
+  }, []);
+  useEffect(() => {
+    const restore = () => setRequestedMilestoneId(new URLSearchParams(window.location.search).get("milestone"));
+    window.addEventListener("popstate", restore);
+    return () => window.removeEventListener("popstate", restore);
+  }, []);
+  useEffect(() => {
+    if (handledMilestoneId.current === requestedMilestoneId) return;
+    handledMilestoneId.current = requestedMilestoneId;
+    const milestone = calendar.milestonesById[requestedMilestoneId ?? ""];
+    if (milestone) milestoneModalActions.current.openMilestoneDetailsModal(milestone);
+  }, [calendar.milestonesById, requestedMilestoneId]);
+
+  const updateMilestoneLocation = (id: string | null) => {
+    const params = new URLSearchParams(window.location.search);
+    if (id) params.set("milestone", id); else params.delete("milestone");
+    window.history.pushState(window.history.state, "", `${window.location.pathname}?${params.toString()}${window.location.hash}`);
+    handledMilestoneId.current = id;
+    setRequestedMilestoneId(id);
+  };
 
   const openEvent = (event: TaskCalendarEvent) => {
     if (event.extendedProps.type === "milestone") {
       const milestone = calendar.milestonesById[event.extendedProps.recordId];
       if (milestone) {
-        milestoneModalState.openMilestoneDetailsModal(milestone);
+        updateMilestoneLocation(milestone.id);
+        milestoneModalActions.current.openMilestoneDetailsModal(milestone);
       }
       return;
     }
@@ -159,14 +185,14 @@ export function TaskCalendarView({
   return (
     <section className={`panel dense-panel task-calendar-shell ${WORKSPACE_PANEL_CLASS}`}>
       <h2 className="schedule-calendar-heading">Schedule</h2>
-      <div className="task-calendar-toolbar">
+      {presentation === "calendar" ? <div className="task-calendar-toolbar">
         <div className="task-calendar-month-controls" role="group" aria-label="Calendar month navigation">
           <button className="icon-button task-calendar-month-button" aria-label="Previous month" onClick={() => calendar.setMonthCursor((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))} type="button">‹</button>
           <strong className="task-calendar-toolbar-title">{monthLabel}</strong>
           <button className="icon-button task-calendar-month-button" aria-label="Next month" onClick={() => calendar.setMonthCursor((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1))} type="button">›</button>
           <button className="secondary-action task-calendar-today-button" onClick={() => { const now = new Date(); calendar.setMonthCursor(new Date(now.getFullYear(), now.getMonth(), 1)); }} type="button">Today</button>
         </div>
-      </div>
+      </div> : null}
       {calendar.unfilteredEvents.length === 0 ? (
         <div className="empty-state">
           <strong>No dated records in scope.</strong>
@@ -175,7 +201,15 @@ export function TaskCalendarView({
           </p>
         </div>
       ) : (
-        <div className="task-calendar-frame">
+        presentation === "agenda" ? (
+          <ol aria-label="Schedule agenda" className="schedule-agenda-list">
+            {calendar.events.map((event) => {
+              const canOpen = event.extendedProps.type === "milestone" || event.extendedProps.type === "task-due" || event.extendedProps.type === "qa-due";
+              const date = new Date(event.start);
+              return <li key={event.id}><time dateTime={event.start}>{date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" })}{date.toString() !== "Invalid Date" && event.start.includes("T") ? ` · ${date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}` : ""}</time>{canOpen ? <button className="task-calendar-day-details-title" onClick={() => openEvent(event)} type="button">{event.title}</button> : <span>{event.title}</span>}<small>{event.extendedProps.type.replaceAll("-", " ")}{event.extendedProps.status ? ` · ${event.extendedProps.status}` : ""}</small></li>;
+            })}
+          </ol>
+        ) : <div className="task-calendar-frame">
           {calendar.events.length === 0 ? (
             <div className="empty-state task-calendar-filter-empty">
               <strong>No events match this filter.</strong>
@@ -221,7 +255,7 @@ export function TaskCalendarView({
         milestoneStartTime={milestoneModalState.milestoneStartTime}
         modalPortalTarget={milestoneModalState.modalPortalTarget}
         onCancelEdit={milestoneModalState.cancelMilestoneEdit}
-        onClose={milestoneModalState.closeMilestoneModal}
+        onClose={() => { if (requestedMilestoneId) updateMilestoneLocation(null); milestoneModalState.closeMilestoneModal(); }}
         onRecordResult={onCreateMilestoneReport ? (milestone) => { milestoneModalState.closeMilestoneModal(); onCreateMilestoneReport(milestone.id, () => milestoneModalState.openMilestoneDetailsModal(milestone)); } : undefined}
         onDelete={() => void milestoneModalState.handleMilestoneDelete()}
         onEditMilestone={milestoneModalState.openEditMilestoneModal}

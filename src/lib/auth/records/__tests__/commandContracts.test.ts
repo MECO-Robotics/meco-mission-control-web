@@ -4,6 +4,7 @@ import { taskToPayload } from "@/lib/appUtils/taskTargets";
 import { subsystemToPayload } from "@/lib/appUtils/payloadConversions";
 import { createTask } from "../task";
 import { createSubsystemRecord } from "../structure";
+import { archiveManufacturingProcessRecord, createManufacturingProcessRecord } from "../production";
 import { requestItem } from "../common";
 import { normalizeBootstrapPayload } from "../../bootstrap/payload";
 
@@ -28,6 +29,25 @@ it.each(["task", "subsystem"])("%s editor emits only fields accepted by the cano
   expect(serialized).not.toHaveProperty("dependencyIds");
   expect(serialized).not.toHaveProperty("taskDependencies");
   if (kind === "subsystem") expect(serialized).toMatchObject({ layoutX: 0.7, layoutY: 0.4, layoutZone: "front", layoutView: "top", sortOrder: 1 });
+});
+
+it("manufacturing process catalog controls emit canonical create and archive commands", async () => {
+  await createManufacturingProcessRecord({ code: "laser-cut", name: "Laser Cut" });
+  await archiveManufacturingProcessRecord("process-cnc");
+  const createCall = jest.mocked(requestItem).mock.calls.at(-2)!;
+  const archiveCall = jest.mocked(requestItem).mock.calls.at(-1)!;
+  expect(createCall.slice(0, 3)).toEqual([
+    "/manufacturing/processes", "POST", { code: "laser-cut", name: "Laser Cut" },
+  ]);
+  expect(archiveCall.slice(0, 3)).toEqual([
+    "/manufacturing/processes/process-cnc", "PATCH", { isActive: false },
+  ]);
+  for (const [key, body] of [["manufacturingProcessCreate", createCall[2]], ["manufacturingProcessArchive", archiveCall[2]]] as const) {
+    const command = contract.x_commands[key];
+    const serialized = JSON.parse(JSON.stringify(body));
+    expect(Object.keys(serialized).filter((field) => !(field in command.properties))).toEqual([]);
+    expect(command.required.filter((field: string) => !(field in serialized))).toEqual([]);
+  }
 });
 
 it("retains typed report targets and evidence after bootstrap normalization", () => {

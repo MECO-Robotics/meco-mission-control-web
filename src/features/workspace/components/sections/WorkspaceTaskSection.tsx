@@ -1,6 +1,5 @@
 import { memo, useState } from "react";
 
-import { MilestonesView } from "@/features/workspace/views/milestones/MilestonesView";
 import { RobotMapView } from "@/features/workspace/views/robotMap/RobotMapView";
 import { TaskQueueView } from "@/features/workspace/views/taskQueue/TaskQueueView";
 import { TaskCalendarView } from "@/features/workspace/views/taskCalendar/TaskCalendarView";
@@ -47,6 +46,7 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
     subsystemsById,
     taskSwipeDirection,
     taskView,
+    setTaskView,
     timelineMilestoneCreateSignal,
   } = props;
 
@@ -56,10 +56,16 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
       isActive={props.activeTab === "tasks"}
       tabSwitchDirection={props.tabSwitchDirection}
     >
-      {taskView === "calendar" ? (
+      {(taskView === "calendar" || taskView === "timeline" || taskView === "agenda") ? (
+        <nav aria-label="Schedule presentations" className="schedule-presentation-tabs">
+          {(["calendar", "timeline", "agenda"] as const).map((view) => <button aria-pressed={taskView === view} className={taskView === view ? "is-active" : ""} key={view} onClick={() => setTaskView(view)} type="button">{view === "calendar" ? "Calendar" : view === "timeline" ? "Timeline" : "Agenda"}</button>)}
+        </nav>
+      ) : null}
+      {taskView === "calendar" || taskView === "agenda" ? (
         <div className="workspace-schedule-scroll" data-tutorial-target="schedule-view">
           <WorkspaceSubPanel disableAnimations={disablePanelAnimations} isActive swipeDirection={taskSwipeDirection}>
             <TaskCalendarView
+              presentation={taskView === "agenda" ? "agenda" : "calendar"}
               activePersonFilter={activePersonFilter}
               bootstrap={bootstrap}
               isAllProjectsView={isAllProjectsView}
@@ -129,7 +135,7 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
 
       <WorkspaceSubPanel
         disableAnimations={disablePanelAnimations}
-        isActive={taskView === "queue"}
+        isActive={taskView === "kanban"}
         swipeDirection={taskSwipeDirection}
       >
         <TaskQueueView
@@ -143,23 +149,6 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
           openEditTaskModal={openTimelineTaskDetailsModal}
           onReassignTaskStatus={handleTaskStatusChange}
           subsystemsById={subsystemsById}
-        />
-      </WorkspaceSubPanel>
-
-      <WorkspaceSubPanel
-        disableAnimations={disablePanelAnimations}
-        isActive={taskView === "milestones"}
-        swipeDirection={taskSwipeDirection}
-      >
-        <MilestonesView
-          activePersonFilter={activePersonFilter}
-          bootstrap={bootstrap}
-          isAllProjectsView={isAllProjectsView}
-          onTaskEditCanceled={props.onTaskEditCanceled}
-          onTaskEditSaved={props.onTaskEditSaved}
-          onCreateMilestoneReport={props.openCreateMilestoneReportModal}
-          onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
-          onSaveTimelineMilestone={handleTimelineMilestoneSave}
         />
       </WorkspaceSubPanel>
     </WorkspaceSectionPanel>

@@ -38,8 +38,8 @@ export function getActiveNavigationSubItemId(state: NavigationState, context?: V
     case "home": return "home";
     case "risks": return "work-risks";
     case "documents": return "resources-documents";
-    case "tasks": return state.taskView === "robot-map" ? "resources-structure" : state.taskView === "queue" ? "work-tasks" : "work-schedule";
-    case "worklogs": return null;
+    case "tasks": return state.taskView === "robot-map" ? "resources-structure" : state.taskView === "kanban" ? "work-tasks" : "work-schedule";
+    case "worklogs": return state.worklogsView === "qa" || state.worklogsView === "results" ? "resources-qa-reports" : null;
     case "cad": case "subsystems": return "resources-structure";
     case "roster": return "team-people";
     case "inventory": return state.inventoryView === "purchases" ? "resources-purchases" : state.inventoryView === "materials" ? "resources-materials" : "resources-parts";

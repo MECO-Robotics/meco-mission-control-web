@@ -184,8 +184,8 @@ export function WorkspaceContent({
     "calendar",
     "timeline",
     "robot-map",
-    "queue",
-    "milestones",
+    "kanban",
+    "agenda",
   ]);
   const inventorySwipeDirection = getSwipeDirection(
     previousInventoryViewRef.current,

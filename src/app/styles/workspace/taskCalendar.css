@@ -6,6 +6,43 @@
   min-height: 0;
 }
 
+.schedule-presentation-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.schedule-agenda-list {
+  display: grid;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.schedule-agenda-list li {
+  align-items: center;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-base);
+  border-radius: 0.65rem;
+  display: grid;
+  gap: 0.2rem 0.75rem;
+  grid-template-columns: minmax(10rem, 0.7fr) minmax(12rem, 2fr) minmax(8rem, 0.7fr);
+  padding: 0.65rem 0.8rem;
+}
+
+.schedule-agenda-list time,
+.schedule-agenda-list small {
+  color: var(--text-copy);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 760px) {
+  .schedule-agenda-list li {
+    grid-template-columns: 1fr;
+  }
+}
+
 .task-calendar-frame {
   background: var(--bg-panel);
   border: 1px solid var(--border-base);
