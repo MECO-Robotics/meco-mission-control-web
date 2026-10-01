@@ -4,7 +4,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { TaskCalendarMonthStack } from "../TaskCalendarMonthStack";
-import { createContinuousCalendarDates } from "../taskCalendarLayout";
+import { createContinuousCalendarDates, getCalendarMonthWeekCount } from "../taskCalendarLayout";
 
 describe("TaskCalendarMonthStack", () => {
   it("renders a continuous date grid with one sticky weekday header and month labels on day one", () => {
@@ -42,5 +42,11 @@ describe("TaskCalendarMonthStack", () => {
       expected.setDate(expected.getDate() + 1);
       return date.getTime() === expected.getTime();
     })).toBe(true);
+  });
+
+  it("counts the calendar rows the focused month needs", () => {
+    expect(getCalendarMonthWeekCount(new Date(2015, 1, 1))).toBe(4);
+    expect(getCalendarMonthWeekCount(new Date(2026, 9, 1))).toBe(5);
+    expect(getCalendarMonthWeekCount(new Date(2026, 7, 1))).toBe(6);
   });
 });

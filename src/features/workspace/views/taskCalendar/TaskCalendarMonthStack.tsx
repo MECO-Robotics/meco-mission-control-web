@@ -1,6 +1,6 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type UIEvent } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type UIEvent } from "react";
 
-import { createContinuousCalendarDates } from "./taskCalendarLayout";
+import { createContinuousCalendarDates, getCalendarMonthWeekCount } from "./taskCalendarLayout";
 import type { TaskCalendarEvent } from "./taskCalendarEvents";
 import { TaskCalendarMonthGrid } from "./TaskCalendarMonthGrid";
 
@@ -35,9 +35,25 @@ export function TaskCalendarMonthStack({
   const monthsBefore = monthWindow.cursorKey === cursorKey ? monthWindow.monthsBefore : INITIAL_MONTHS_EACH_DIRECTION;
   const monthsAfter = monthWindow.cursorKey === cursorKey ? monthWindow.monthsAfter : INITIAL_MONTHS_EACH_DIRECTION;
   const stackRef = useRef<HTMLDivElement>(null);
+  const [stackHeight, setStackHeight] = useState(0);
   const selectedDayRef = useRef<HTMLElement>(null);
   const cursorDayRef = useRef<HTMLElement>(null);
   const previousStackHeightRef = useRef<number | null>(null);
+  useEffect(() => {
+    const stack = stackRef.current;
+    if (!stack) return;
+
+    const updateHeight = () => setStackHeight(stack.clientHeight);
+    updateHeight();
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", updateHeight);
+      return () => window.removeEventListener("resize", updateHeight);
+    }
+
+    const observer = new ResizeObserver(updateHeight);
+    observer.observe(stack);
+    return () => observer.disconnect();
+  }, []);
   useEffect(() => {
     if (!selectedDateKey) cursorDayRef.current?.scrollIntoView({ block: "start" });
   }, [cursorKey, selectedDateKey]);
@@ -59,6 +75,12 @@ export function TaskCalendarMonthStack({
     ),
     [cursorMonth, cursorYear, monthsAfter, monthsBefore],
   );
+  const weekHeight = stackHeight > 0
+    ? `${Math.max(0, (stackHeight * 0.95 - 32) / getCalendarMonthWeekCount(monthCursor))}px`
+    : undefined;
+  const stackStyle = weekHeight
+    ? { "--task-calendar-week-height": weekHeight } as CSSProperties
+    : undefined;
 
   const appendMonthsWhenNearEnd = (event: UIEvent<HTMLDivElement>) => {
     const container = event.currentTarget;
@@ -86,6 +108,7 @@ export function TaskCalendarMonthStack({
       onScroll={appendMonthsWhenNearEnd}
       ref={stackRef}
       role="region"
+      style={stackStyle}
       tabIndex={0}
     >
       <div className="task-calendar-frame">
