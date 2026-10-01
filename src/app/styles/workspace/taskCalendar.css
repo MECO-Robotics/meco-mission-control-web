@@ -1,8 +1,9 @@
-.task-calendar-shell {
+.panel.dense-panel.task-calendar-shell.task-calendar-full-height {
   display: flex;
-  flex: 1 1 auto;
   flex-direction: column;
   gap: 0.2rem;
+  height: calc(100dvh - var(--shell-topbar-height));
+  flex: 1 1 auto;
   min-height: 0;
 }
 
@@ -71,9 +72,9 @@
 
 .task-calendar-month-stack {
   display: grid;
-  flex: 1 1 auto;
+  flex: 1 1 0;
   gap: 1rem;
-  max-height: calc(100dvh - 11rem);
+  max-height: none;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
