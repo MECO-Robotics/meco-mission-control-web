@@ -57,6 +57,7 @@ function createBootstrap({
     },
   ],
   subsystems = [],
+  artifacts = [],
   milestoneRequirements = [],
   taskDependencies = [],
   risks = [],
@@ -64,6 +65,7 @@ function createBootstrap({
   tasks: TaskRecord[];
   milestones?: MilestoneRecord[];
   subsystems?: BootstrapPayload["subsystems"];
+  artifacts?: BootstrapPayload["artifacts"];
   milestoneRequirements?: MilestoneRequirementRecord[];
   taskDependencies?: BootstrapPayload["taskDependencies"];
   risks?: BootstrapPayload["risks"];
@@ -72,6 +74,7 @@ function createBootstrap({
     ...EMPTY_BOOTSTRAP,
     milestones,
     subsystems,
+    artifacts,
     milestoneRequirements,
     tasks,
     taskDependencies,
@@ -238,5 +241,28 @@ describe("milestoneTaskState", () => {
       "task-1",
     ]);
     expect(getMilestoneTaskBoardStateForMilestone(milestone, bootstrap)).toBe("in-progress");
+  });
+
+  it("matches workflow-state requirements through typed artifact targets", () => {
+    const milestone: MilestoneRecord = {
+      id: "milestone-artifact-state", title: "Evidence milestone", type: "deadline", status: "planned",
+      seasonId: "season-1", startAt: "2026-01-01T00:00:00.000Z", endAt: null, description: "", projectIds: ["project-1"],
+    };
+    const task = createTask("task-evidence", "in-progress", milestone.id, { scheduleRefs: [], subsystemIds: [] });
+    const bootstrap = createBootstrap({
+      tasks: [task],
+      milestones: [milestone],
+      artifacts: [{
+        id: "artifact-published", projectId: "project-1", targetRefs: [{ kind: "task", id: task.id }],
+        kind: "document", title: "Build evidence", summary: "", status: "published", uri: "https://example.test/evidence", updatedAt: "2026-01-01T00:00:00.000Z",
+      }],
+      milestoneRequirements: [{
+        id: "requirement-published", milestoneId: milestone.id,
+        targetRefs: [{ kind: "artifact", id: "artifact-published" }], conditionType: "workflow-state",
+        conditionValue: "state=COMPLETE", required: true, sortOrder: 1, notes: "",
+      }],
+    });
+
+    expect(getMilestoneTasksForState(milestone, bootstrap).map(({ id }) => id)).toEqual([task.id]);
   });
 });

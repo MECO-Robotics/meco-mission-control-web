@@ -25,21 +25,13 @@ export interface MilestoneRecord {
   photoUrl?: string;
 }
 
-export type MilestoneRequirementTargetType =
-  | "project"
-  | "workflow"
-  | "artifact"
-  | "subsystem"
-  | "mechanism"
-  | "part-instance";
-
-export type MilestoneRequirementConditionType = "iteration" | "workflow_state" | "custom";
+export type MilestoneRequirementConditionType = "iteration" | "workflow-state" | "custom";
 
 export interface MilestoneRequirementRecord {
   id: string;
   milestoneId: string;
   targetRefs: import("./common").DomainReference[];
-  conditionType: "iteration" | "workflow-state" | "custom";
+  conditionType: MilestoneRequirementConditionType;
   conditionValue: string;
   required: boolean;
   sortOrder: number;

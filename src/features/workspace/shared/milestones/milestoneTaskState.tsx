@@ -93,6 +93,34 @@ function matchesIterationRequirement(
   return false;
 }
 
+function matchesWorkflowStateRequirement(
+  requirement: MilestoneRequirementRecord,
+  target: MilestoneTaskTarget,
+  bootstrap: BootstrapPayload,
+) {
+  const expected = requirement.conditionValue
+    .replace(/^state\s*=\s*/i, "")
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9_]/g, "_");
+  if (!expected || expected === "STATE") return false;
+
+  const actual = target.kind === "artifact"
+    ? bootstrap.artifacts.find((artifact) => artifact.id === target.id)?.status
+    : target.kind === "part-instance"
+      ? bootstrap.partInstances.find((instance) => instance.id === target.id)?.readinessStatus
+      : undefined;
+  if (!actual) return false;
+
+  const normalizedActual = actual.toUpperCase().replace(/[^A-Z0-9_]/g, "_");
+  const aliases: Record<string, string[]> = {
+    COMPLETE: ["COMPLETE", "DONE", "PASS", "PASSED", "OK", "PUBLISHED", "INSTALLED"],
+    IN_REVIEW: ["IN_REVIEW", "REVIEW", "UNDER_REVIEW", "REVIEWING"],
+    QA_PASSED: ["QA_PASSED", "PASSED", "APPROVED", "COMPLETE", "PUBLISHED"],
+  };
+  return normalizedActual === expected || (aliases[expected] ?? []).includes(normalizedActual);
+}
+
 function getTaskTargets(task: TaskRecord, bootstrap: BootstrapPayload): MilestoneTaskTarget[] {
   return [
     { kind: "project", id: task.projectId },
@@ -121,7 +149,7 @@ function matchesMilestoneRequirement(
     return matchesIterationRequirement(requirement, target, bootstrap);
   }
 
-  return false;
+  return matchesWorkflowStateRequirement(requirement, target, bootstrap);
 }
 
 export function getMilestoneRequirementsForMilestone(
