@@ -5,7 +5,6 @@ import { TaskQueueView } from "@/features/workspace/views/taskQueue/TaskQueueVie
 import { TaskCalendarView } from "@/features/workspace/views/taskCalendar/TaskCalendarView";
 import type { TaskCalendarEventType } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
 import type { TaskCalendarSortMode } from "@/features/workspace/views/taskCalendar/taskCalendarLayout";
-import type { SchedulePresentation } from "@/features/workspace/views/taskCalendar/SchedulePresentationSelector";
 import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
 import { WorkspaceSectionPanel, WorkspaceSubPanel } from "../../WorkspaceContentPanelShells";
 import type { WorkspaceContentPanelsViewProps } from "../workspaceContentPanelsViewTypes";
@@ -47,7 +46,6 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
     subsystemsById,
     taskSwipeDirection,
     taskView,
-    setTaskView,
     timelineMilestoneCreateSignal,
   } = props;
 
@@ -62,7 +60,6 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
           <WorkspaceSubPanel disableAnimations={disablePanelAnimations} isActive swipeDirection={taskSwipeDirection}>
             <TaskCalendarView
               presentation={taskView === "agenda" ? "agenda" : "calendar"}
-              onPresentationChange={(view: SchedulePresentation) => setTaskView(view)}
               activePersonFilter={activePersonFilter}
               bootstrap={bootstrap}
               isAllProjectsView={isAllProjectsView}
@@ -103,7 +100,6 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
               openTaskDetailModal={openTimelineTaskDetailsModal}
               setActivePersonFilter={setActivePersonFilter}
               triggerCreateMilestoneToken={timelineMilestoneCreateSignal}
-              onSchedulePresentationChange={(view: SchedulePresentation) => setTaskView(view)}
             />
           </WorkspaceSubPanel>
         </div>

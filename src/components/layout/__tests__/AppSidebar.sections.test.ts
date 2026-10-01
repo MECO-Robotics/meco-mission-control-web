@@ -14,6 +14,17 @@ describe("flat sidebar navigation", () => {
     expect(markup).toContain(">Risks</span>");
     expect(markup).not.toContain("workspace-primary-navigation");
   });
+  it("nests schedule presentations only while Schedule is active", () => {
+    const activeSchedule = renderSidebar([], "tasks", { taskView: "timeline" });
+    expect(activeSchedule).toContain('aria-label="Schedule views"');
+    expect(activeSchedule).toContain('aria-label="Calendar"');
+    expect(activeSchedule).toContain('aria-label="Agenda"');
+    expect(activeSchedule).toContain('aria-label="Gantt"');
+    expect(activeSchedule).toMatch(/aria-current="page"[^>]*class="sidebar-nested-nav-item"[^>]*data-active="true"/);
+
+    const kanban = renderSidebar([], "tasks", { taskView: "kanban" });
+    expect(kanban).not.toContain('aria-label="Schedule views"');
+  });
   it("keeps destinations directly accessible when folded", () => {
     const markup = renderSidebar([], "tasks", { isCollapsed: true });
     expect(markup).not.toContain("sidebar-subtab-list");

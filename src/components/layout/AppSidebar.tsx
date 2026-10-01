@@ -228,6 +228,7 @@ export function AppSidebar({
           onSubItemSelect={handleSubItemSelect}
           onDisabledSubItemSelect={handleDisabledSubItemSelect}
           sectionModels={sectionModels}
+          activeTaskView={taskView}
         />
 
         <AppSidebarProjectFooter
