@@ -8,6 +8,7 @@ import { formatTimelineZoomLabel, TIMELINE_ZOOM_MAX } from "@/features/workspace
 import type { TimelineViewInterval } from "@/features/workspace/shared/timeline/timelineDateUtils";
 import type { TaskCalendarEventType } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
 import type { TaskCalendarSortMode } from "@/features/workspace/views/taskCalendar/taskCalendarLayout";
+import { SchedulePresentationSelector, type SchedulePresentation } from "@/features/workspace/views/taskCalendar/SchedulePresentationSelector";
 import { WorkspaceTopbarZoom } from "@/features/workspace/shared/topbar";
 import { TimelineCompactFilterMenu } from "./components/TimelineCompactFilterMenu";
 import { TimelineCalendarSortMenu } from "./components/TimelineCalendarSortMenu";
@@ -52,6 +53,9 @@ interface TimelineToolbarProps {
   timelineZoom: number;
   timelineZoomMin: number;
   viewInterval: TimelineViewInterval;
+  viewAnchorDate: string;
+  onViewAnchorDateChange: (value: string) => void;
+  onSchedulePresentationChange?: (value: SchedulePresentation) => void;
 }
 
 export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
@@ -88,6 +92,9 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
   timelineZoom,
   timelineZoomMin,
   viewInterval,
+  viewAnchorDate,
+  onViewAnchorDateChange,
+  onSchedulePresentationChange,
 }) => {
   const [isIntervalSwitchExpanded, setIsIntervalSwitchExpanded] = React.useState(false);
   const intervalSwitchRef = React.useRef<HTMLDivElement>(null);
@@ -156,6 +163,19 @@ export const TimelineToolbar: React.FC<TimelineToolbarProps> = ({
 
   return (
     <div className="panel-actions filter-toolbar timeline-toolbar timeline-topbar-controls">
+      {onSchedulePresentationChange ? <SchedulePresentationSelector value="timeline" onChange={onSchedulePresentationChange} /> : null}
+      <label className="schedule-date-selector">
+        <span>Date</span>
+        <input
+          aria-label="Go to date"
+          onChange={(event) => {
+            if (!event.target.value) return;
+            onViewAnchorDateChange(event.target.value);
+          }}
+          type="date"
+          value={viewAnchorDate}
+        />
+      </label>
       <TopbarResponsiveSearch
         actionCount={showCalendarFilters ? 2 : 1}
         actions={

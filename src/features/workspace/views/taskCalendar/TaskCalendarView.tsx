@@ -6,6 +6,9 @@ import type { MeetingPayload, MilestonePayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { toErrorMessage } from "@/lib/appUtils/common";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
+import { WorkspaceTopbarControls } from "@/features/workspace/shared/topbar";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { MilestonesMilestoneModal } from "@/features/workspace/views/milestones/MilestonesEventModal";
 import { useMilestonesMilestoneModalState } from "@/features/workspace/views/milestones/sections/useMilestonesEventModalState";
@@ -15,9 +18,11 @@ import { TaskCalendarMonthGrid } from "./TaskCalendarMonthGrid";
 import type { TaskCalendarSortMode } from "./taskCalendarLayout";
 import type { TaskCalendarEvent, TaskCalendarEventType } from "./taskCalendarEvents";
 import { useTaskCalendarEventData } from "./useTaskCalendarEventData";
+import { SchedulePresentationSelector, type SchedulePresentation } from "./SchedulePresentationSelector";
 
 interface TaskCalendarViewProps {
   presentation?: "calendar" | "agenda";
+  onPresentationChange?: (value: SchedulePresentation) => void;
   onCreateMilestoneReport?: (milestoneId: string, onReturn?: () => void) => void;
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
@@ -61,6 +66,7 @@ function createDefaultMeetingDraft(bootstrap: BootstrapPayload): MeetingPayload 
 
 export function TaskCalendarView({
   presentation = "calendar",
+  onPresentationChange,
   activePersonFilter,
   onCreateMilestoneReport,
   bootstrap,
@@ -85,6 +91,7 @@ export function TaskCalendarView({
   const [meetingDraft, setMeetingDraft] = useState<MeetingPayload>(() => createDefaultMeetingDraft(bootstrap));
   const [meetingError, setMeetingError] = useState<string | null>(null);
   const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
+  const [agendaStartDate, setAgendaStartDate] = useState(() => formatLocalDate(new Date()));
   const [requestedMilestoneId, setRequestedMilestoneId] = useState(() => typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("milestone"));
   const handledMilestoneId = useRef<string | null | undefined>(undefined);
   const calendar = useTaskCalendarEventData({
@@ -161,6 +168,7 @@ export function TaskCalendarView({
     }
   };
   const selectedDayEvents = selectedDateKey ? calendar.eventsByDateKey.get(selectedDateKey) ?? [] : [];
+  const agendaEvents = calendar.events.filter((event) => event.start.slice(0, 10) >= agendaStartDate);
 
   const handleMeetingSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -184,15 +192,45 @@ export function TaskCalendarView({
 
   return (
     <section className={`panel dense-panel task-calendar-shell ${WORKSPACE_PANEL_CLASS}`}>
+      <AppTopbarSlotPortal slot="controls">
+        <WorkspaceTopbarControls className="schedule-topbar-controls">
+          {onPresentationChange ? <SchedulePresentationSelector value={presentation} onChange={onPresentationChange} /> : null}
+          <label className="schedule-date-selector">
+            <span>Date</span>
+            <input
+              aria-label="Go to date"
+              onChange={(event) => {
+                if (!event.target.value) return;
+                if (presentation === "agenda") {
+                  setAgendaStartDate(event.target.value);
+                  return;
+                }
+                const [year, month] = event.target.value.split("-").map(Number);
+                calendar.setMonthCursor(new Date(year, month - 1, 1));
+                setSelectedDateKey(event.target.value);
+              }}
+              type="date"
+              value={presentation === "agenda" ? agendaStartDate : selectedDateKey ?? formatLocalDate(new Date())}
+            />
+          </label>
+          {presentation === "calendar" ? (
+            <div className="task-calendar-month-controls" role="group" aria-label="Calendar month navigation">
+              <button className="icon-button task-calendar-month-button" aria-label="Previous month" onClick={() => calendar.setMonthCursor((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))} type="button">‹</button>
+              <strong className="task-calendar-toolbar-title">{monthLabel}</strong>
+              <button className="icon-button task-calendar-month-button" aria-label="Next month" onClick={() => calendar.setMonthCursor((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1))} type="button">›</button>
+              <button className="secondary-action task-calendar-today-button" onClick={() => { const now = new Date(); calendar.setMonthCursor(new Date(now.getFullYear(), now.getMonth(), 1)); setSelectedDateKey(null); }} type="button">Today</button>
+            </div>
+          ) : null}
+        </WorkspaceTopbarControls>
+        <TopbarResponsiveSearch
+          ariaLabel="Search schedule"
+          compactPlaceholder="Search"
+          onChange={calendar.setSearchFilter}
+          placeholder="Search schedule..."
+          value={calendar.searchFilter}
+        />
+      </AppTopbarSlotPortal>
       <h2 className="schedule-calendar-heading">Schedule</h2>
-      {presentation === "calendar" ? <div className="task-calendar-toolbar">
-        <div className="task-calendar-month-controls" role="group" aria-label="Calendar month navigation">
-          <button className="icon-button task-calendar-month-button" aria-label="Previous month" onClick={() => calendar.setMonthCursor((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))} type="button">‹</button>
-          <strong className="task-calendar-toolbar-title">{monthLabel}</strong>
-          <button className="icon-button task-calendar-month-button" aria-label="Next month" onClick={() => calendar.setMonthCursor((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1))} type="button">›</button>
-          <button className="secondary-action task-calendar-today-button" onClick={() => { const now = new Date(); calendar.setMonthCursor(new Date(now.getFullYear(), now.getMonth(), 1)); }} type="button">Today</button>
-        </div>
-      </div> : null}
       {calendar.unfilteredEvents.length === 0 ? (
         <div className="empty-state">
           <strong>No dated records in scope.</strong>
@@ -203,7 +241,7 @@ export function TaskCalendarView({
       ) : (
         presentation === "agenda" ? (
           <ol aria-label="Schedule agenda" className="schedule-agenda-list">
-            {calendar.events.map((event) => {
+            {agendaEvents.map((event) => {
               const canOpen = event.extendedProps.type === "milestone" || event.extendedProps.type === "task-due" || event.extendedProps.type === "qa-due";
               const date = new Date(event.start);
               return <li key={event.id}><time dateTime={event.start}>{date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" })}{date.toString() !== "Invalid Date" && event.start.includes("T") ? ` · ${date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}` : ""}</time>{canOpen ? <button className="task-calendar-day-details-title" onClick={() => openEvent(event)} type="button">{event.title}</button> : <span>{event.title}</span>}<small>{event.extendedProps.type.replaceAll("-", " ")}{event.extendedProps.status ? ` · ${event.extendedProps.status}` : ""}</small></li>;
