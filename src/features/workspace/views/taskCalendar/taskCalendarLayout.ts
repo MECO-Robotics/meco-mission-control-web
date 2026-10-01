@@ -75,6 +75,12 @@ export function createContinuousCalendarDates(firstMonth: Date, monthCount: numb
   });
 }
 
+export function getCalendarMonthWeekCount(cursor: Date) {
+  const firstWeekday = new Date(cursor.getFullYear(), cursor.getMonth(), 1).getDay();
+  const daysInMonth = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0).getDate();
+  return Math.ceil((firstWeekday + daysInMonth) / 7);
+}
+
 function compareTaskCalendarEventsByDate(left: TaskCalendarEvent, right: TaskCalendarEvent) {
   const leftStart = new Date(left.start).getTime();
   const rightStart = new Date(right.start).getTime();
