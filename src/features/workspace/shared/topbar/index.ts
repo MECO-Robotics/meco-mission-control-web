@@ -1,5 +1,6 @@
 export { WorkspaceTopbarControls } from "./WorkspaceTopbarControls";
 export { WorkspaceTopbarZoom } from "./WorkspaceTopbarZoom";
+export { SegmentedSelector, type SegmentedSelectorOption } from "./SegmentedSelector";
 export {
   buildSingleAddMenuAction,
   buildTopbarAddMenuActions,
