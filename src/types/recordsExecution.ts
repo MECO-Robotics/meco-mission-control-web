@@ -158,20 +158,6 @@ export interface ManufacturingProcessRecord {
   isActive: boolean;
 }
 
-export type QaReviewResult = "pass" | "minor-fix" | "iteration-worthy";
-
-export interface QaReviewRecord {
-  id: string;
-  subjectId: string;
-  subjectType: "task";
-  subjectTitle: string;
-  participantIds: string[];
-  result: QaReviewResult;
-  mentorApproved: boolean;
-  notes: string;
-  reviewedAt: string;
-}
-
 export interface QaRequestRecord {
   id: string;
   projectId: string;
