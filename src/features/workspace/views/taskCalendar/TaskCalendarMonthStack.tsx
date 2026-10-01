@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type UIEvent } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type UIEvent } from "react";
 
 import { createMonthCells } from "./taskCalendarLayout";
 import type { TaskCalendarEvent } from "./taskCalendarEvents";
@@ -6,7 +6,7 @@ import { TaskCalendarDayDetails } from "./TaskCalendarDayDetails";
 import { TaskCalendarMonthGrid } from "./TaskCalendarMonthGrid";
 
 const MONTHS_PER_APPEND = 6;
-const INITIAL_MONTHS = 12;
+const INITIAL_MONTHS_EACH_DIRECTION = 12;
 
 export function TaskCalendarMonthStack({
   eventsByDateKey,
@@ -28,22 +28,35 @@ export function TaskCalendarMonthStack({
   const cursorYear = monthCursor.getFullYear();
   const cursorMonth = monthCursor.getMonth();
   const cursorKey = `${cursorYear}-${cursorMonth}`;
-  const [monthWindow, setMonthWindow] = useState({ cursorKey, count: INITIAL_MONTHS });
-  const monthCount = monthWindow.cursorKey === cursorKey ? monthWindow.count : INITIAL_MONTHS;
+  const [monthWindow, setMonthWindow] = useState({
+    cursorKey,
+    monthsBefore: INITIAL_MONTHS_EACH_DIRECTION,
+    monthsAfter: INITIAL_MONTHS_EACH_DIRECTION,
+  });
+  const monthsBefore = monthWindow.cursorKey === cursorKey ? monthWindow.monthsBefore : INITIAL_MONTHS_EACH_DIRECTION;
+  const monthsAfter = monthWindow.cursorKey === cursorKey ? monthWindow.monthsAfter : INITIAL_MONTHS_EACH_DIRECTION;
   const stackRef = useRef<HTMLDivElement>(null);
   const selectedMonthRef = useRef<HTMLElement>(null);
+  const cursorMonthRef = useRef<HTMLElement>(null);
+  const previousStackHeightRef = useRef<number | null>(null);
   useEffect(() => {
-    stackRef.current?.scrollTo({ top: 0 });
-  }, [cursorMonth, cursorYear]);
+    if (!selectedDateKey) cursorMonthRef.current?.scrollIntoView({ block: "start" });
+  }, [cursorKey, selectedDateKey]);
   useEffect(() => {
     selectedMonthRef.current?.scrollIntoView({ block: "nearest" });
   }, [selectedDateKey]);
+  useLayoutEffect(() => {
+    const stack = stackRef.current;
+    const previousHeight = previousStackHeightRef.current;
+    if (stack && previousHeight !== null) {
+      stack.scrollTop += stack.scrollHeight - previousHeight;
+      previousStackHeightRef.current = null;
+    }
+  }, [monthsBefore]);
   const months = useMemo(
-    () => Array.from(
-      { length: monthCount },
-      (_, index) => new Date(cursorYear, cursorMonth + index, 1),
-    ),
-    [cursorMonth, cursorYear, monthCount],
+    () => Array.from({ length: monthsBefore + monthsAfter + 1 }, (_, index) =>
+      new Date(cursorYear, cursorMonth + index - monthsBefore, 1)),
+    [cursorMonth, cursorYear, monthsAfter, monthsBefore],
   );
   const monthViews = useMemo(() => months.map((month) => ({
     cells: createMonthCells(month),
@@ -54,10 +67,19 @@ export function TaskCalendarMonthStack({
 
   const appendMonthsWhenNearEnd = (event: UIEvent<HTMLDivElement>) => {
     const container = event.currentTarget;
+    if (container.scrollTop <= 160 && previousStackHeightRef.current === null) {
+      previousStackHeightRef.current = container.scrollHeight;
+      setMonthWindow((current) => ({
+        cursorKey,
+        monthsBefore: (current.cursorKey === cursorKey ? current.monthsBefore : INITIAL_MONTHS_EACH_DIRECTION) + MONTHS_PER_APPEND,
+        monthsAfter: current.cursorKey === cursorKey ? current.monthsAfter : INITIAL_MONTHS_EACH_DIRECTION,
+      }));
+    }
     if (container.scrollTop + container.clientHeight >= container.scrollHeight - 240) {
       setMonthWindow((current) => ({
         cursorKey,
-        count: (current.cursorKey === cursorKey ? current.count : INITIAL_MONTHS) + MONTHS_PER_APPEND,
+        monthsBefore: current.cursorKey === cursorKey ? current.monthsBefore : INITIAL_MONTHS_EACH_DIRECTION,
+        monthsAfter: (current.cursorKey === cursorKey ? current.monthsAfter : INITIAL_MONTHS_EACH_DIRECTION) + MONTHS_PER_APPEND,
       }));
     }
   };
@@ -78,7 +100,10 @@ export function TaskCalendarMonthStack({
             aria-label={monthLabel}
             className="task-calendar-month-section"
             key={monthKey}
-            ref={isSelectedMonth ? selectedMonthRef : undefined}
+            ref={(element) => {
+              if (isSelectedMonth) selectedMonthRef.current = element;
+              if (month.getFullYear() === cursorYear && month.getMonth() === cursorMonth) cursorMonthRef.current = element;
+            }}
           >
             <h3>{monthLabel}</h3>
             <div className="task-calendar-frame">
