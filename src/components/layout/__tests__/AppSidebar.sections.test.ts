@@ -10,7 +10,8 @@ describe("flat sidebar navigation", () => {
     expect(markup).toContain("sidebar-section-heading");
     expect(markup).toContain("sidebar-nav-item-icon");
     expect(markup).not.toContain("sidebar-section-chevron");
-    for (const label of ["Kanban", "Schedule", "Robot", "Parts", "People"]) expect(markup).toContain(`>${label}</span>`);
+    for (const label of ["Kanban", "Schedule", "Robot", "Parts", "People", "Teams"]) expect(markup).toContain(`>${label}</span>`);
+    expect(markup.indexOf('aria-label="Team"')).toBeLessThan(markup.indexOf('aria-label="Resources"'));
     expect(markup).toContain(">Risks</span>");
     expect(markup).not.toContain("workspace-primary-navigation");
   });

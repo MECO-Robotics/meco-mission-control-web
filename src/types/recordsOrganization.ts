@@ -13,6 +13,7 @@ export interface MemberRecord {
   email: string;
   photoUrl?: string;
   role: MemberRole;
+  classYear?: "freshman" | "sophomore" | "junior" | "senior" | null;
   elevated: boolean;
   seasonId: string;
   activeSeasonIds?: string[];

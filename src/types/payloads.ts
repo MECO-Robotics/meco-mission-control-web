@@ -114,6 +114,7 @@ export interface MemberPayload {
   email: string;
   photoUrl: string;
   role: MemberRole;
+  classYear?: "freshman" | "sophomore" | "junior" | "senior" | null;
   elevated: boolean;
   activeSeasonIds?: string[];
   plannedWeeklyAttendanceHours: number;
@@ -123,6 +124,14 @@ export interface MemberPayload {
 
 export interface MemberCreatePayload extends MemberPayload {
   seasonId: string;
+}
+
+export interface ResponsibleGroupPayload {
+  seasonId: string;
+  name: string;
+  projectIds: string[];
+  memberIds: string[];
+  isArchived: boolean;
 }
 
 export interface MaterialPayload {

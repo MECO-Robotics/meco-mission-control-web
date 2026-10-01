@@ -62,6 +62,7 @@ export const RosterMemberRow: React.FC<RosterMemberRowProps> = ({
         )}
         <span className="member-row-copy">
           <strong>{member.name}</strong>
+          {(member.role === "student" || member.role === "lead") && member.classYear ? <span className="member-row-discipline">{member.classYear}</span> : null}
           {groupNames.length > 0 ? <span className="member-row-discipline">{groupNames.join(", ")}</span> : null}
         </span>
       </button>

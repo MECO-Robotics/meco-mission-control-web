@@ -114,7 +114,7 @@ export const RosterAddPersonModal: React.FC<RosterAddPersonModalProps> = ({
                 <select
                   onChange={(e) => {
                     const nextRole = e.target.value as MemberPayload["role"];
-                    setMemberForm((curr) => ({ ...curr, role: nextRole, elevated: isElevatedRole(nextRole) }));
+                    setMemberForm((curr) => ({ ...curr, role: nextRole, elevated: isElevatedRole(nextRole), classYear: nextRole === "student" || nextRole === "lead" ? curr.classYear ?? null : null }));
                   }}
                   value={memberForm.role}
                 >
@@ -125,6 +125,7 @@ export const RosterAddPersonModal: React.FC<RosterAddPersonModalProps> = ({
                   <option value="external">External access</option>
                 </select>
               </label>
+              {memberForm.role === "student" || memberForm.role === "lead" ? <label className="field"><span>Class year</span><select value={memberForm.classYear ?? ""} onChange={(e) => setMemberForm((curr) => ({ ...curr, classYear: (e.target.value || null) as MemberPayload["classYear"] }))}><option value="">Unknown</option><option value="freshman">Freshman</option><option value="sophomore">Sophomore</option><option value="junior">Junior</option><option value="senior">Senior</option></select></label> : null}
               <RosterAttendanceFields
                 onChange={(patch) => setMemberForm((curr) => ({ ...curr, ...patch }))}
                 value={memberForm}

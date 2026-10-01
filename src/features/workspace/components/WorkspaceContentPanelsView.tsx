@@ -5,6 +5,7 @@ import { WorkspaceWorklogsSection } from "./sections/WorkspaceWorklogsSection";
 import { WorkspaceInventorySection } from "./sections/WorkspaceInventorySection";
 import { WorkspaceSubsystemsSection } from "./sections/WorkspaceSubsystemsSection";
 import { WorkspaceRosterSection } from "./sections/WorkspaceRosterSection";
+import { WorkspaceTeamsSection } from "./sections/WorkspaceTeamsSection";
 import { WorkspaceHelpSection } from "./sections/WorkspaceHelpSection";
 import { WorkspaceCadSection } from "./sections/WorkspaceCadSection";
 import { WorkspaceHomeSection } from "./overview/WorkspaceOverviewSections";
@@ -76,6 +77,7 @@ export function WorkspaceContentPanelsView(props: WorkspaceContentPanelsViewProp
       <WorkspaceCadSection {...props} />
       <WorkspaceSubsystemsSection {...props} />
       <WorkspaceRosterSection {...props} />
+      <WorkspaceTeamsSection {...props} />
       <WorkspaceHelpSection {...props} />
     </div>
   );
