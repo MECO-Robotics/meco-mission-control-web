@@ -19,12 +19,12 @@ export function SchedulePeriodControls({
 }) {
   const isTimeline = presentation === "timeline";
   const showsPeriodNavigation = !isTimeline || range !== "all";
-  const periodUnit = isTimeline && range === "week" ? "week" : "month";
+  const periodUnit = range === "week" ? "week" : "month";
 
   return (
     <div
       aria-label={presentation === "timeline" ? "Timeline period controls" : `${presentation} period controls`}
-      className={`timeline-period-controls${isTimeline && range === "week" ? " is-week" : ""}${isTimeline && range === "all" ? " is-all" : ""}`}
+      className={`timeline-period-controls${range === "week" ? " is-week" : ""}${isTimeline && range === "all" ? " is-all" : ""}`}
     >
       <ScheduleRangeSelector
         onChange={onRangeChange}

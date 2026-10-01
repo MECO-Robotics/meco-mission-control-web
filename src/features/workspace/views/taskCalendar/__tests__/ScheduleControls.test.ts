@@ -70,6 +70,21 @@ describe("SchedulePeriodControls", () => {
     expect(markup).toContain('aria-label="Go to today"');
     expect(markup).not.toContain('aria-label="Previous month"');
   });
+
+  it("labels Agenda navigation by the selected period", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(SchedulePeriodControls, {
+        onShiftPeriod: jest.fn(),
+        onToday: jest.fn(),
+        periodLabel: "10/4/26",
+        presentation: "agenda",
+        range: "week",
+      }),
+    );
+
+    expect(markup).toContain('aria-label="Previous week"');
+    expect(markup).toContain('aria-label="Next week"');
+  });
 });
 
 describe("ScheduleRangeSelector", () => {
@@ -85,14 +100,14 @@ describe("ScheduleRangeSelector", () => {
     expect(markup).not.toContain(">All</button>");
   });
 
-  it("uses All for Agenda", () => {
+  it("allows Agenda to use Week, Month, or All scope", () => {
     const markup = renderToStaticMarkup(
       React.createElement(ScheduleRangeSelector, { presentation: "agenda", value: "all" }),
     );
 
+    expect(markup).toContain(">Week</button>");
+    expect(markup).toContain(">Month</button>");
     expect(markup).toContain(">All</button>");
-    expect(markup).not.toContain(">Week</button>");
-    expect(markup).not.toContain(">Month</button>");
   });
 
   it("collapses the Gantt Week, Month, and All scope selector by default", () => {

@@ -8,10 +8,9 @@ const TIMELINE_RANGES: Array<{ id: TimelineViewInterval; label: string }> = [
   { id: "all", label: "All" },
 ];
 
-const SINGLE_RANGES: Record<Exclude<SchedulePresentation, "timeline">, Array<{ id: TimelineViewInterval; label: string }>> = {
-  agenda: [{ id: "all", label: "All" }],
-  calendar: [{ id: "month", label: "Month" }],
-};
+const CALENDAR_RANGE: Array<{ id: TimelineViewInterval; label: string }> = [
+  { id: "month", label: "Month" },
+];
 
 export function ScheduleRangeSelector({
   onChange,
@@ -23,8 +22,8 @@ export function ScheduleRangeSelector({
   value: TimelineViewInterval;
 }) {
   const isTimeline = presentation === "timeline";
-  const options = isTimeline ? TIMELINE_RANGES : SINGLE_RANGES[presentation];
-  const selectedRange = isTimeline ? value : presentation === "calendar" ? "month" : "all";
+  const options = presentation === "calendar" ? CALENDAR_RANGE : TIMELINE_RANGES;
+  const selectedRange = presentation === "calendar" ? "month" : value;
 
   return (
     <SegmentedSelector

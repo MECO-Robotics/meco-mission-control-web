@@ -2,7 +2,13 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { formatLocalDate } from "@/lib/dateUtils";
-import { formatMonthYearLabel } from "@/features/workspace/shared/timeline/timelineDateUtils";
+import {
+  addDaysToDay,
+  formatMonthYearLabel,
+  formatTimelinePeriodLabel,
+  getSchedulePeriodBounds,
+  type TimelineViewInterval,
+} from "@/features/workspace/shared/timeline/timelineDateUtils";
 import type { MeetingPayload, MilestonePayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { toErrorMessage } from "@/lib/appUtils/common";
@@ -16,7 +22,7 @@ import { useMilestonesMilestoneModalState } from "@/features/workspace/views/mil
 import { MeetingScheduleModal } from "./MeetingScheduleModal";
 import { ScheduleAgendaMonthList } from "./ScheduleAgendaMonthList";
 import { TaskCalendarMonthStack } from "./TaskCalendarMonthStack";
-import { groupTaskCalendarEventsByMonth, type TaskCalendarSortMode } from "./taskCalendarLayout";
+import { groupTaskCalendarEventsByMonth, toEventDateKey, type TaskCalendarSortMode } from "./taskCalendarLayout";
 import type { TaskCalendarEvent, TaskCalendarEventType } from "./taskCalendarEvents";
 import { useTaskCalendarEventData } from "./useTaskCalendarEventData";
 import { SchedulePeriodControls } from "./SchedulePeriodControls";
@@ -91,6 +97,7 @@ export function TaskCalendarView({
   const [meetingError, setMeetingError] = useState<string | null>(null);
   const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
   const [agendaStartDate, setAgendaStartDate] = useState(() => formatLocalDate(new Date()));
+  const [agendaRange, setAgendaRange] = useState<TimelineViewInterval>("all");
   const [requestedMilestoneId, setRequestedMilestoneId] = useState(() => typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("milestone"));
   const handledMilestoneId = useRef<string | null | undefined>(undefined);
   const calendar = useTaskCalendarEventData({
@@ -165,10 +172,11 @@ export function TaskCalendarView({
       }
     }
   };
-  const agendaEvents = useMemo(
-    () => calendar.events.filter((event) => event.start.slice(0, 10) >= agendaStartDate),
-    [agendaStartDate, calendar.events],
-  );
+  const agendaBounds = getSchedulePeriodBounds(agendaStartDate, agendaRange);
+  const agendaEvents = useMemo(() => calendar.events.filter((event) => {
+    const eventDate = toEventDateKey(event.start);
+    return eventDate >= agendaBounds.startDate && (!agendaBounds.endDate || eventDate <= agendaBounds.endDate);
+  }), [agendaBounds.endDate, agendaBounds.startDate, calendar.events]);
   const agendaMonths = useMemo(
     () => groupTaskCalendarEventsByMonth(agendaEvents),
     [agendaEvents],
@@ -181,11 +189,21 @@ export function TaskCalendarView({
   const periodDate = presentation === "agenda"
     ? new Date(`${agendaStartDate}T12:00:00`)
     : calendar.monthCursor;
-  const periodLabel = formatMonthYearLabel(formatLocalDate(periodDate));
+  const periodLabel = presentation === "agenda" && agendaRange === "week"
+    ? formatTimelinePeriodLabel("week", [agendaBounds.startDate])
+    : formatMonthYearLabel(formatLocalDate(periodDate));
+
+  const changeScheduleRange = (range: TimelineViewInterval) => {
+    if (presentation !== "agenda") return;
+    setAgendaRange(range);
+    setAgendaStartDate(getSchedulePeriodBounds(agendaStartDate, range).startDate);
+  };
 
   const shiftPeriod = (direction: -1 | 1) => {
     if (presentation === "agenda") {
-      setAgendaStartDate(formatLocalDate(new Date(periodDate.getFullYear(), periodDate.getMonth() + direction, 1)));
+      setAgendaStartDate(agendaRange === "week"
+        ? addDaysToDay(agendaStartDate, direction * 7)
+        : formatLocalDate(new Date(periodDate.getFullYear(), periodDate.getMonth() + direction, 1)));
     } else {
       calendar.setMonthCursor(new Date(calendar.monthCursor.getFullYear(), calendar.monthCursor.getMonth() + direction, 1));
       setSelectedDateKey(null);
@@ -194,7 +212,7 @@ export function TaskCalendarView({
 
   const goToToday = () => {
     if (presentation === "agenda") {
-      setAgendaStartDate(calendar.todayDateKey);
+      setAgendaStartDate(getSchedulePeriodBounds(calendar.todayDateKey, agendaRange).startDate);
     } else {
       const today = new Date();
       calendar.setMonthCursor(new Date(today.getFullYear(), today.getMonth(), 1));
@@ -227,11 +245,12 @@ export function TaskCalendarView({
       <AppTopbarSlotPortal slot="controls">
         <WorkspaceTopbarControls className="schedule-topbar-controls">
           <SchedulePeriodControls
+            onRangeChange={presentation === "agenda" ? changeScheduleRange : undefined}
             onShiftPeriod={shiftPeriod}
             onToday={goToToday}
             periodLabel={periodLabel}
             presentation={presentation}
-            range={presentation === "calendar" ? "month" : "all"}
+            range={presentation === "calendar" ? "month" : agendaRange}
           />
         </WorkspaceTopbarControls>
         <TopbarResponsiveSearch

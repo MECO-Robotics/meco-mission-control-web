@@ -95,6 +95,20 @@ export function monthEndFromDay(day: string) {
   return `${yearText}-${monthText}-${String(dayCount).padStart(2, "0")}`;
 }
 
+export function getSchedulePeriodBounds(day: string, interval: TimelineViewInterval) {
+  const startDate = interval === "week"
+    ? startOfTimelineWeek(day)
+    : interval === "month"
+      ? monthStartFromDay(day)
+      : day;
+  const endDate = interval === "week"
+    ? endOfTimelineWeek(day)
+    : interval === "month"
+      ? monthEndFromDay(day)
+      : null;
+  return { startDate, endDate };
+}
+
 export function monthLabelFromDay(day: string) {
   return MONTH_LABEL_FORMATTER.format(new Date(`${day.slice(0, 7)}-01T00:00:00`));
 }
