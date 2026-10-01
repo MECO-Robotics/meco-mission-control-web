@@ -6,30 +6,6 @@
   min-height: 0;
 }
 
-.schedule-presentation-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-.schedule-presentation-tabs button {
-  background: var(--bg-panel);
-  border: 1px solid var(--border-base);
-  border-radius: 999px;
-  color: var(--text-copy);
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.78rem;
-  font-weight: 700;
-  padding: 0.4rem 0.7rem;
-}
-
-.schedule-presentation-tabs button.is-active {
-  background: var(--bg-subtle, var(--bg-panel));
-  border-color: var(--accent, var(--border-strong));
-  color: var(--text-title);
-}
-
 .schedule-date-selector {
   align-items: center;
   color: var(--text-copy);
