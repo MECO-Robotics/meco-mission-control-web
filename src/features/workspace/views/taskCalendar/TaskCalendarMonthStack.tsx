@@ -13,6 +13,7 @@ export function TaskCalendarMonthStack({
   onOpenDay,
   onOpenEvent,
   onCloseSelectedDay,
+  onVisibleMonthChange,
   selectedDateKey,
   todayDateKey,
 }: {
@@ -21,6 +22,7 @@ export function TaskCalendarMonthStack({
   onOpenDay: (dateKey: string) => void;
   onOpenEvent: (event: TaskCalendarEvent) => void;
   onCloseSelectedDay: () => void;
+  onVisibleMonthChange: (month: Date) => void;
   selectedDateKey: string | null;
   todayDateKey: string;
 }) {
@@ -38,6 +40,7 @@ export function TaskCalendarMonthStack({
   const [stackHeight, setStackHeight] = useState(0);
   const selectedDayRef = useRef<HTMLElement>(null);
   const cursorDayRef = useRef<HTMLElement>(null);
+  const scrollUpdatedCursorKeyRef = useRef<string | null>(null);
   const previousStackHeightRef = useRef<number | null>(null);
   useEffect(() => {
     const stack = stackRef.current;
@@ -55,6 +58,10 @@ export function TaskCalendarMonthStack({
     return () => observer.disconnect();
   }, []);
   useEffect(() => {
+    if (scrollUpdatedCursorKeyRef.current === cursorKey) {
+      scrollUpdatedCursorKeyRef.current = null;
+      return;
+    }
     if (!selectedDateKey) cursorDayRef.current?.scrollIntoView({ block: "start" });
   }, [cursorKey, selectedDateKey]);
   useEffect(() => {
@@ -98,6 +105,36 @@ export function TaskCalendarMonthStack({
         monthsBefore: current.cursorKey === cursorKey ? current.monthsBefore : INITIAL_MONTHS_EACH_DIRECTION,
         monthsAfter: (current.cursorKey === cursorKey ? current.monthsAfter : INITIAL_MONTHS_EACH_DIRECTION) + MONTHS_PER_APPEND,
       }));
+    }
+    const stickyHeaderHeight = container.querySelector<HTMLElement>(".task-calendar-weekdays")?.offsetHeight ?? 0;
+    const visibleDay = Array.from(container.querySelectorAll<HTMLElement>(".task-calendar-day[data-date]")).find(
+      (day) => day.getBoundingClientRect().bottom > container.getBoundingClientRect().top + stickyHeaderHeight,
+    );
+    const visibleDate = visibleDay?.dataset.date;
+    if (visibleDate) {
+      const [year, month] = visibleDate.split("-").map(Number);
+      const visibleMonth = new Date(year, month - 1, 1);
+      const visibleMonthKey = `${year}-${month - 1}`;
+      if (visibleMonthKey !== cursorKey) {
+        const monthDelta = year * 12 + month - 1 - (cursorYear * 12 + cursorMonth);
+        setMonthWindow((current) => {
+          const currentBefore = current.cursorKey === cursorKey ? current.monthsBefore : INITIAL_MONTHS_EACH_DIRECTION;
+          const currentAfter = current.cursorKey === cursorKey ? current.monthsAfter : INITIAL_MONTHS_EACH_DIRECTION;
+          let nextBefore = currentBefore + monthDelta;
+          let nextAfter = currentAfter - monthDelta;
+          if (nextBefore < 6) {
+            nextAfter += 6 - nextBefore;
+            nextBefore = 6;
+          }
+          if (nextAfter < 6) {
+            nextBefore += 6 - nextAfter;
+            nextAfter = 6;
+          }
+          return { cursorKey: visibleMonthKey, monthsBefore: nextBefore, monthsAfter: nextAfter };
+        });
+        scrollUpdatedCursorKeyRef.current = visibleMonthKey;
+        onVisibleMonthChange(visibleMonth);
+      }
     }
   };
 
