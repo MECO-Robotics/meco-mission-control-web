@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { formatLocalDate } from "@/lib/dateUtils";
@@ -12,10 +12,10 @@ import { WorkspaceTopbarControls } from "@/features/workspace/shared/topbar";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { MilestonesMilestoneModal } from "@/features/workspace/views/milestones/MilestonesEventModal";
 import { useMilestonesMilestoneModalState } from "@/features/workspace/views/milestones/sections/useMilestonesEventModalState";
-import { TaskCalendarDayDetails } from "./TaskCalendarDayDetails";
 import { MeetingScheduleModal } from "./MeetingScheduleModal";
-import { TaskCalendarMonthGrid } from "./TaskCalendarMonthGrid";
-import type { TaskCalendarSortMode } from "./taskCalendarLayout";
+import { ScheduleAgendaMonthList } from "./ScheduleAgendaMonthList";
+import { TaskCalendarMonthStack } from "./TaskCalendarMonthStack";
+import { groupTaskCalendarEventsByMonth, type TaskCalendarSortMode } from "./taskCalendarLayout";
 import type { TaskCalendarEvent, TaskCalendarEventType } from "./taskCalendarEvents";
 import { useTaskCalendarEventData } from "./useTaskCalendarEventData";
 import { SchedulePresentationSelector, type SchedulePresentation } from "./SchedulePresentationSelector";
@@ -109,7 +109,6 @@ export function TaskCalendarView({
     sortDirection,
     onSortDirectionChange,
   });
-  const monthLabel = calendar.monthCursor.toLocaleDateString(undefined, { month: "long", year: "numeric" });
   const milestoneModalState = useMilestonesMilestoneModalState({
     bootstrap,
     isAllProjectsView,
@@ -169,8 +168,14 @@ export function TaskCalendarView({
       }
     }
   };
-  const selectedDayEvents = selectedDateKey ? calendar.eventsByDateKey.get(selectedDateKey) ?? [] : [];
-  const agendaEvents = calendar.events.filter((event) => event.start.slice(0, 10) >= agendaStartDate);
+  const agendaEvents = useMemo(
+    () => calendar.events.filter((event) => event.start.slice(0, 10) >= agendaStartDate),
+    [agendaStartDate, calendar.events],
+  );
+  const agendaMonths = useMemo(
+    () => groupTaskCalendarEventsByMonth(agendaEvents),
+    [agendaEvents],
+  );
   const agendaEmptyState = calendar.unfilteredEvents.length === 0
     ? { title: "No schedule data yet.", description: "Add a meeting, event, milestone, or task deadline to build the agenda." }
     : calendar.events.length === 0
@@ -202,7 +207,7 @@ export function TaskCalendarView({
       <AppTopbarSlotPortal slot="controls">
         <WorkspaceTopbarControls className="schedule-topbar-controls">
           {onPresentationChange ? <SchedulePresentationSelector value={presentation} onChange={onPresentationChange} /> : null}
-          <ScheduleRangeSelector presentation={presentation} value="all" />
+          <ScheduleRangeSelector presentation={presentation} value={presentation === "calendar" ? "month" : "all"} />
           <ScheduleDateSelector
             onChange={(date) => {
               if (!date) return;
@@ -212,18 +217,10 @@ export function TaskCalendarView({
               }
               const [year, month] = date.split("-").map(Number);
               calendar.setMonthCursor(new Date(year, month - 1, 1));
-              setSelectedDateKey(date);
+              setSelectedDateKey(null);
             }}
             value={presentation === "agenda" ? agendaStartDate : selectedDateKey ?? formatLocalDate(new Date())}
           />
-          {presentation === "calendar" ? (
-            <div className="task-calendar-month-controls" role="group" aria-label="Calendar month navigation">
-              <button className="icon-button task-calendar-month-button" aria-label="Previous month" onClick={() => calendar.setMonthCursor((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))} type="button">‹</button>
-              <strong className="task-calendar-toolbar-title">{monthLabel}</strong>
-              <button className="icon-button task-calendar-month-button" aria-label="Next month" onClick={() => calendar.setMonthCursor((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1))} type="button">›</button>
-              <button className="secondary-action task-calendar-today-button" onClick={() => { const now = new Date(); calendar.setMonthCursor(new Date(now.getFullYear(), now.getMonth(), 1)); setSelectedDateKey(null); }} type="button">Today</button>
-            </div>
-          ) : null}
         </WorkspaceTopbarControls>
         <TopbarResponsiveSearch
           ariaLabel="Search schedule"
@@ -240,53 +237,25 @@ export function TaskCalendarView({
             <strong>{agendaEmptyState.title}</strong>
             <p className="section-copy">{agendaEmptyState.description}</p>
           </div>
-        ) : (
-          <ol aria-label="Schedule agenda" className="schedule-agenda-list">
-            {agendaEvents.map((event) => {
-              const canOpen = event.extendedProps.type === "milestone" || event.extendedProps.type === "task-due" || event.extendedProps.type === "qa-due";
-              const date = new Date(event.start);
-              return <li key={event.id}><time dateTime={event.start}>{date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" })}{date.toString() !== "Invalid Date" && event.start.includes("T") ? ` · ${date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}` : ""}</time>{canOpen ? <button className="task-calendar-day-details-title" onClick={() => openEvent(event)} type="button">{event.title}</button> : <span>{event.title}</span>}<small>{event.extendedProps.type.replaceAll("-", " ")}{event.extendedProps.status ? ` · ${event.extendedProps.status}` : ""}</small></li>;
-            })}
-          </ol>
-        )
-      ) : calendar.unfilteredEvents.length === 0 ? (
-        <div className="empty-state">
-          <strong>No dated records in scope.</strong>
-          <p className="section-copy">
-            Add milestone dates or task due dates to populate this month view.
-          </p>
-        </div>
+        ) : <ScheduleAgendaMonthList groups={agendaMonths} onOpenEvent={openEvent} />
       ) : (
-        <div className="task-calendar-frame">
+        <>
           {calendar.events.length === 0 ? (
             <div className="empty-state task-calendar-filter-empty">
-              <strong>No events match this filter.</strong>
-              <p className="section-copy">
-                Adjust filter or sort settings to view more records in this month.
-              </p>
+              <strong>{calendar.unfilteredEvents.length === 0 ? "No schedule data yet." : "No events match this filter."}</strong>
+              <p className="section-copy">The full calendar remains available below. Adjust filters or add dated schedule items to populate it.</p>
             </div>
-          ) : (
-            <TaskCalendarMonthGrid
-              eventsByDateKey={calendar.eventsByDateKey}
-              monthCells={calendar.monthCells}
-              monthCursor={calendar.monthCursor}
-              onOpenDay={setSelectedDateKey}
-              onOpenEvent={openEvent}
-              selectedDateKey={selectedDateKey}
-              todayDateKey={calendar.todayDateKey}
-              viewMode="month"
-            />
-          )}
-
-          {selectedDateKey ? (
-            <TaskCalendarDayDetails
-              dateKey={selectedDateKey}
-              events={selectedDayEvents}
-              onClose={() => setSelectedDateKey(null)}
-              onOpenEvent={openEvent}
-            />
           ) : null}
-        </div>
+          <TaskCalendarMonthStack
+            eventsByDateKey={calendar.eventsByDateKey}
+            monthCursor={calendar.monthCursor}
+            onOpenDay={setSelectedDateKey}
+            onOpenEvent={openEvent}
+            onCloseSelectedDay={() => setSelectedDateKey(null)}
+            selectedDateKey={selectedDateKey}
+            todayDateKey={calendar.todayDateKey}
+          />
+        </>
       )}
 
       <MilestonesMilestoneModal

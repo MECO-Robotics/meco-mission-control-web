@@ -72,11 +72,6 @@ export function createMonthCells(cursor: Date) {
   });
 }
 
-export function createWeekCells(cursor: Date) {
-  const start = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() - cursor.getDay());
-  return Array.from({ length: 7 }, (_, index) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + index));
-}
-
 function compareTaskCalendarEventsByDate(left: TaskCalendarEvent, right: TaskCalendarEvent) {
   const leftStart = new Date(left.start).getTime();
   const rightStart = new Date(right.start).getTime();
@@ -135,4 +130,15 @@ export function sortTaskCalendarEvents(
   sortedEvents.sort(compareTaskCalendarEventsByDate);
   if (sortDirection === "desc") sortedEvents.reverse();
   return sortedEvents;
+}
+
+export function groupTaskCalendarEventsByMonth(events: TaskCalendarEvent[]) {
+  const groups = new Map<string, TaskCalendarEvent[]>();
+  for (const event of sortTaskCalendarEvents(events, "date")) {
+    const monthKey = toEventDateKey(event.start).slice(0, 7);
+    const monthEvents = groups.get(monthKey);
+    if (monthEvents) monthEvents.push(event);
+    else groups.set(monthKey, [event]);
+  }
+  return [...groups.entries()].map(([monthKey, monthEvents]) => ({ monthKey, events: monthEvents }));
 }

@@ -12,7 +12,7 @@ interface TaskCalendarMonthGridProps {
   onOpenEvent: (event: TaskCalendarEvent) => void;
   selectedDateKey: string | null;
   todayDateKey: string;
-  viewMode?: "month" | "week";
+  showAdjacentDates?: boolean;
 }
 
 function eventTypeClassName(event: TaskCalendarEvent) {
@@ -43,7 +43,7 @@ export function TaskCalendarMonthGrid({
   onOpenEvent,
   selectedDateKey,
   todayDateKey,
-  viewMode = "month",
+  showAdjacentDates = true,
 }: TaskCalendarMonthGridProps) {
   return (
     <>
@@ -56,10 +56,14 @@ export function TaskCalendarMonthGrid({
       <div className="task-calendar-grid">
         {monthCells.map((cellDate) => {
           const cellDateKey = formatLocalDate(cellDate);
+          const isCurrentMonth = cellDate.getFullYear() === monthCursor.getFullYear() &&
+            cellDate.getMonth() === monthCursor.getMonth();
+          if (!isCurrentMonth && !showAdjacentDates) {
+            return <div aria-hidden="true" className="task-calendar-day is-outside-month is-placeholder" key={cellDateKey} />;
+          }
           const cellEvents = eventsByDateKey.get(cellDateKey) ?? [];
           const visibleEvents = cellEvents.slice(0, 4);
           const hiddenEventCount = Math.max(0, cellEvents.length - visibleEvents.length);
-            const isCurrentMonth = viewMode === "week" || cellDate.getMonth() === monthCursor.getMonth();
           const isSelected = cellDateKey === selectedDateKey;
           const isToday = cellDateKey === todayDateKey;
           const dayClassName = [
