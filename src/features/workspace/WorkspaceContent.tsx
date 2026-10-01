@@ -66,6 +66,9 @@ export interface WorkspaceContentProps {
     payload: MilestonePayload,
   ) => Promise<void>;
   handleUpdateMember: (milestone: React.FormEvent<HTMLFormElement>) => void;
+  loadWorkspace: () => Promise<unknown>;
+  handleUnauthorized: () => void;
+  setDataMessage: (message: string | null) => void;
   isAddPersonOpen: boolean;
   isDeletingMember: boolean;
   isEditPersonOpen: boolean;

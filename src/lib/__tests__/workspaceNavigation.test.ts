@@ -7,7 +7,9 @@ import {
 const state: NavigationState = { activeTab: "home", taskView: "kanban", worklogsView: "logs", inventoryView: "materials" };
 describe("canonical workspace navigation", () => {
   it("groups Dashboard under Work and keeps every destination unique", () => {
-    expect(NAVIGATION_SECTION_ORDER).toEqual(["work", "resources"]);
+    expect(NAVIGATION_SECTION_ORDER).toEqual(["work", "team", "resources"]);
+    expect(NAVIGATION_SUB_ITEMS.find((item) => item.id === "team-people")?.section).toBe("team");
+    expect(NAVIGATION_SUB_ITEMS.find((item) => item.id === "team-teams")?.target.tab).toBe("teams");
     expect(NAVIGATION_SUB_ITEMS.find((item) => item.id === "home")?.section).toBe("work");
     expect(new Set(NAVIGATION_SUB_ITEMS.map((item) => item.id)).size).toBe(NAVIGATION_SUB_ITEMS.length);
   });

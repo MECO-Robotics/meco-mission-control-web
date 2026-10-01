@@ -54,7 +54,8 @@ function defaults(resource: string, snapshot: BootstrapPayload): Record<string, 
   switch (resource) {
     case "seasons": return { type: "season", startDate: today, endDate: today };
     case "projects": return { description: "", status: "planned" };
-    case "members": return { email: "", elevated: false, role: "student", activeSeasonIds: [], plannedAttendanceDays: [] };
+    case "members": return { email: "", elevated: false, role: "student", classYear: null, activeSeasonIds: [], plannedAttendanceDays: [] };
+    case "responsible-groups": return { seasonId: snapshot.seasons[0]?.id ?? "", name: "", projectIds: [], memberIds: [], isArchived: false };
     case "subsystems": return { isCore: false, iteration: 1, mentorIds: [], parentSubsystemId: null, responsibleEngineerId: null };
     case "tasks": return {
       projectId: snapshot.projects[0]?.id ?? "", workTypeId: "", responsibleGroupId: null, workstreamIds: [], title: "", summary: "",
@@ -131,6 +132,17 @@ export function applyLocalCommand(snapshot: BootstrapPayload, path: string, opti
 
   const item = { ...(method === "POST" ? defaults(resource, snapshot) : rows[index]), ...body, id: id ?? newLocalId() } as Row;
   validateRosterReferences(snapshot, item);
+  if (resource === "members") {
+    if ((item.classYear != null && !["freshman", "sophomore", "junior", "senior"].includes(String(item.classYear))) || (item.role !== "student" && item.role !== "lead" && item.classYear != null)) throw new Error("Class year is only available to students and student leads and must be a valid year.");
+  }
+  if (resource === "responsible-groups") {
+    if (!snapshot.seasons.some(season => season.id === item.seasonId) || (item.projectIds as string[]).some(projectId => !snapshot.projects.some(project => project.id === projectId && project.seasonId === item.seasonId)) || (item.memberIds as string[]).some(memberId => !snapshot.members.some(member => member.id === memberId && (member.activeSeasonIds ?? [member.seasonId]).includes(String(item.seasonId))))) throw new Error("Teams must reference projects and members in the selected season.");
+  }
+  if (resource === "tasks" && item.responsibleGroupId) {
+    const group = snapshot.responsibleGroups.find(candidate => candidate.id === item.responsibleGroupId);
+    const project = snapshot.projects.find(candidate => candidate.id === item.projectId);
+    if (!group || !project || group.seasonId !== project.seasonId || (group.projectIds.length > 0 && !group.projectIds.includes(project.id)) || (group.isArchived && group.id !== rows[index]?.responsibleGroupId)) throw new Error("The selected team does not belong to this task's season and project.");
+  }
   if (resource === "tasks") {
     const removedFields = ["disciplineId", "blockers", "linkedManufacturingIds", "linkedPurchaseIds", "artifactIds"];
     if (removedFields.some((field) => Object.hasOwn(body, field))) throw new Error("Task commands use workTypeId, scheduleRefs, and typed domain references; removed Task fields are not accepted.");

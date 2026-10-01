@@ -12,4 +12,5 @@ export const NAVIGATION_SUB_ITEM_AVAILABILITY_MATRIX: Record<NavigationSubItemId
   "resources-parts": robot, "resources-purchases": project,
   "resources-structure": { ...project, "all-project": false },
   "team-people": seasonal,
+  "team-teams": seasonal,
 };

@@ -74,7 +74,7 @@ export const RosterEditPersonModal: React.FC<RosterEditPersonModalProps> = ({
               onChange={(e) => {
                 const nextRole = e.target.value as MemberPayload["role"];
                 setMemberEditDraft((curr) =>
-                  curr ? { ...curr, role: nextRole, elevated: isElevatedRole(nextRole) } : null,
+                  curr ? { ...curr, role: nextRole, elevated: isElevatedRole(nextRole), classYear: nextRole === "student" || nextRole === "lead" ? curr.classYear ?? null : null } : null,
                 );
               }}
               value={memberEditDraft.role}
@@ -86,6 +86,7 @@ export const RosterEditPersonModal: React.FC<RosterEditPersonModalProps> = ({
               <option value="external">External access</option>
             </select>
           </label>
+          {memberEditDraft.role === "student" || memberEditDraft.role === "lead" ? <label className="field"><span>Class year</span><select value={memberEditDraft.classYear ?? ""} onChange={(e) => setMemberEditDraft((curr) => curr ? { ...curr, classYear: (e.target.value || null) as MemberPayload["classYear"] } : null)}><option value="">Unknown</option><option value="freshman">Freshman</option><option value="sophomore">Sophomore</option><option value="junior">Junior</option><option value="senior">Senior</option></select></label> : null}
           <RosterAttendanceFields
             onChange={(patch) => setMemberEditDraft((curr) => (curr ? { ...curr, ...patch } : null))}
             value={memberEditDraft}

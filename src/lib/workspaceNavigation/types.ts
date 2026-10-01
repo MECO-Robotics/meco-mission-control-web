@@ -10,6 +10,7 @@ export type ViewTab =
   | "cad"
   | "subsystems"
   | "roster"
+  | "teams"
   | "help";
 
 export type NavigationSection = "home" | "work" | "resources" | "team";
@@ -28,7 +29,7 @@ export type NavigationSubItemId =
   | "home" | "work-tasks" | "work-schedule" | "work-risks"
   | "resources-materials" | "resources-documents" | "resources-qa-reports" | "resources-parts"
   | "resources-purchases" | "resources-structure"
-  | "team-people";
+  | "team-people" | "team-teams";
 
 export interface NavigationItem {
   value: ViewTab;

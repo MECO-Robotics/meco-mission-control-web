@@ -2,7 +2,7 @@ import type { NavigationSection, NavigationSubItem, ViewTab } from "./types";
 import sidebarItems from "@/components/layout/sidebar/sidebarItems.json";
 import { validateSidebarCatalog } from "@/components/layout/sidebar/catalog";
 
-export const NAVIGATION_SECTION_ORDER: readonly NavigationSection[] = ["work", "resources"];
+export const NAVIGATION_SECTION_ORDER: readonly NavigationSection[] = ["work", "team", "resources"];
 export const NAVIGATION_SECTION_LABELS: Record<NavigationSection, string> = {
   home: "Home", work: "Work", resources: "Resources", team: "Team",
 };
@@ -18,5 +18,5 @@ export const NAVIGATION_SUB_ITEMS_BY_SECTION: Record<NavigationSection, readonly
 };
 export const BASE_SECTION_LABELS: Record<ViewTab, string> = {
   home: "Home", tasks: "Kanban", worklogs: "History", risks: "Risks", documents: "Documents",
-  inventory: "Resources", cad: "Import CAD", subsystems: "Structure", roster: "People", help: "Help",
+  inventory: "Resources", cad: "Import CAD", subsystems: "Structure", roster: "People", teams: "Teams", help: "Help",
 };
