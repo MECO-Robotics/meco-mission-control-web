@@ -60,7 +60,7 @@ export function SegmentedSelector<Value extends string>({
       }}
       onMouseLeave={() => {
         hoveredRef.current = false;
-        if (collapsible && !rootRef.current?.contains(document.activeElement)) setExpanded(false);
+        if (collapsible) setExpanded(false);
       }}
       ref={rootRef}
       role="group"
