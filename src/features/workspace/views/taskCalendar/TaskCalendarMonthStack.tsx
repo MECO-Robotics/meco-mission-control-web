@@ -148,23 +148,21 @@ export function TaskCalendarMonthStack({
       style={stackStyle}
       tabIndex={0}
     >
-      <div className="task-calendar-frame">
-        <TaskCalendarMonthGrid
-          eventsByDateKey={eventsByDateKey}
-          monthCells={calendarDates}
-          onOpenDay={onOpenDay}
-          onOpenEvent={onOpenEvent}
-          selectedDateKey={selectedDateKey}
-          todayDateKey={todayDateKey}
-          onCloseSelectedDay={onCloseSelectedDay}
-          dayRef={(dateKey, element) => {
-            if (dateKey === selectedDateKey) selectedDayRef.current = element;
-            if (dateKey === `${cursorYear}-${String(cursorMonth + 1).padStart(2, "0")}-01`) {
-              cursorDayRef.current = element;
-            }
-          }}
-        />
-      </div>
+      <TaskCalendarMonthGrid
+        eventsByDateKey={eventsByDateKey}
+        monthCells={calendarDates}
+        onOpenDay={onOpenDay}
+        onOpenEvent={onOpenEvent}
+        selectedDateKey={selectedDateKey}
+        todayDateKey={todayDateKey}
+        onCloseSelectedDay={onCloseSelectedDay}
+        dayRef={(dateKey, element) => {
+          if (dateKey === selectedDateKey) selectedDayRef.current = element;
+          if (dateKey === `${cursorYear}-${String(cursorMonth + 1).padStart(2, "0")}-01`) {
+            cursorDayRef.current = element;
+          }
+        }}
+      />
     </div>
   );
 }

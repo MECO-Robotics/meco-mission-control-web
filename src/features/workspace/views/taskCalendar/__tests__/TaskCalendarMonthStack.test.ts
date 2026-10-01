@@ -23,6 +23,10 @@ describe("TaskCalendarMonthStack", () => {
 
     expect(markup).toContain('aria-label="Calendar"');
     expect(markup.match(/class="task-calendar-weekdays"/g)).toHaveLength(1);
+    ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].forEach((weekday) => {
+      expect(markup).toContain(`>${weekday}</span>`);
+    });
+    expect(markup).not.toContain("task-calendar-frame");
     expect(markup).toContain(">October 2025</strong>");
     expect(markup).toContain(">October 2026</strong>");
     expect(markup).toContain(">October 2027</strong>");
