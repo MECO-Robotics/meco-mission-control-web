@@ -90,9 +90,9 @@
 
 .task-calendar-month-stack {
   display: grid;
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   gap: 1rem;
-  max-height: min(72vh, 56rem);
+  max-height: calc(100dvh - 11rem);
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
