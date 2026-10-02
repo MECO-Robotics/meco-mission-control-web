@@ -31,6 +31,10 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       activeViewLabel={activeViewLabel}
       isDarkMode={c.isDarkMode}
       isSidebarCollapsed={c.isSidebarCollapsed}
+      onCreateMilestone={handleCreateMilestone}
+      onCreatePart={c.openCreatePartDefinitionModal}
+      onCreateQaReport={c.openCreateQaReportModal}
+      onCreateTask={c.openCreateTaskModal}
     />
         <AppSidebar
       activeTab={c.activeTab}

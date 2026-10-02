@@ -178,6 +178,12 @@
   transform: none;
 }
 
+.app-topbar-add-menu-panel {
+  top: calc(var(--shell-topbar-height) + 0.35rem);
+  right: 0.5rem;
+  left: auto;
+}
+
 .page-shell.is-sidebar-overlay .sidebar-add-menu-panel {
   left: calc(var(--shell-sidebar-expanded-width) + 0.35rem);
 }

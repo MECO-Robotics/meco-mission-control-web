@@ -10,17 +10,26 @@ import {
 } from "@/lib/branding";
 
 import { APP_TOPBAR_SLOT_IDS } from "./AppTopbarSlotPortal";
+import { AppSidebarAddMenu } from "./sidebar/AppSidebarAddMenu";
 
 interface AppTopbarProps {
   activeViewLabel?: string | null;
   isDarkMode: boolean;
   isSidebarCollapsed: boolean;
+  onCreateMilestone: () => void;
+  onCreatePart: () => void;
+  onCreateQaReport: () => void;
+  onCreateTask: () => void;
 }
 
 export function AppTopbar({
   activeViewLabel,
   isDarkMode,
   isSidebarCollapsed,
+  onCreateMilestone,
+  onCreatePart,
+  onCreateQaReport,
+  onCreateTask,
 }: AppTopbarProps) {
   const topbarLogo = isSidebarCollapsed
     ? {
@@ -64,6 +73,15 @@ export function AppTopbar({
         <div className="app-topbar-controls-host" id={APP_TOPBAR_SLOT_IDS.controls} />
         <div className="app-topbar-zoom-host" id={APP_TOPBAR_SLOT_IDS.zoom} />
         <div className="app-topbar-add-host" id={APP_TOPBAR_SLOT_IDS.add} />
+        <div className="app-topbar-add-fallback">
+          <AppSidebarAddMenu
+            onCreateMilestone={onCreateMilestone}
+            onCreatePart={onCreatePart}
+            onCreateQaReport={onCreateQaReport}
+            onCreateTask={onCreateTask}
+            placement="topbar"
+          />
+        </div>
       </div>
     </header>
   );
