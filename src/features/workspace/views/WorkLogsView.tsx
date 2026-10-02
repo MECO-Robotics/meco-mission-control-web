@@ -35,8 +35,17 @@ export function WorkLogsView({ activePersonFilter, bootstrap, membersById, openC
     <AppTopbarSlotPortal slot="controls"><div className="panel-actions filter-toolbar">
       {view === "logs" ? <WorkLogsToolbar bootstrap={bootstrap} renderMode="topbar" search={state.search} setSearch={state.setSearch} setSortMode={state.setSortMode} setSubsystemFilter={state.setSubsystemFilter} sortMode={state.sortMode} sortOptions={state.sortOptions} subsystemFilter={state.subsystemFilter} /> : view === "activity" ? <WorkLogsActivityToolbar activityGroupMode={state.activityGroupMode} activitySortMode={state.activitySortMode} activitySortDirection={state.activitySortDirection} search={state.search} setActivityGroupMode={state.setActivityGroupMode} setActivitySortMode={state.setActivitySortMode} setActivitySortDirection={state.setActivitySortDirection} setSearch={state.setSearch} /> : <TopbarResponsiveSearch actions={<WorkspaceSortMenu direction={reportSortDirection} field={reportSort} label="history" onDirectionChange={setReportSortDirection} onFieldChange={setReportSort} options={[{ label: "Date", value: "recent" }, { label: "Title", value: "title" }]} />} ariaLabel="Search report history" compactPlaceholder="Search" onChange={state.setSearch} placeholder="Search report history…" value={state.search} />}
     </div></AppTopbarSlotPortal>
-    <div className="workspace-presentation-controls">
-      <label>History <select aria-label="Activity type" value={view} onChange={event => onViewChange(event.target.value as WorklogsViewTab)}><option value="logs">Work logs</option><option value="activity">Changes</option><option value="qa">QA results</option><option value="results">Milestone results</option></select></label>
+    <div className="workspace-presentation-controls" role="group" aria-label="Activity views">
+      {([
+        ["logs", "Work logs"],
+        ["activity", "Changes"],
+        ["qa", "QA results"],
+        ["results", "Milestone results"],
+      ] as const).map(([value, label]) => (
+        <button key={value} aria-pressed={view === value} type="button" onClick={() => onViewChange(value)}>
+          {label}
+        </button>
+      ))}
       {view === "logs" ? <button className="primary-action" onClick={() => openCreateWorkLogModal()} type="button">Log work</button> : null}
     </div>
     {view === "logs" ? <>
