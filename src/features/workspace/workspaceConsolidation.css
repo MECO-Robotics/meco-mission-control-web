@@ -37,7 +37,7 @@
 .team-card { display: grid; gap: .35rem; padding: .35rem 0 .5rem; border: 0; border-bottom: 1px solid var(--border-base); border-radius: 0; background: transparent; }
 .teams-list > .team-card:nth-of-type(odd) { padding-inline: .4rem; background: color-mix(in srgb, var(--meco-blue) 3%, var(--bg-panel)); }
 .teams-list > .team-card:nth-of-type(even) { padding-inline: .4rem; background: color-mix(in srgb, var(--meco-red) 3%, var(--bg-panel)); }
-.team-card > .panel-header { align-items: center; gap: .5rem; margin: 0; }
+.team-card > .panel-header { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; margin: 0; }
 .team-card-identity { display: flex; align-items: baseline; flex-wrap: wrap; column-gap: .65rem; row-gap: .1rem; min-width: 0; }
 .team-card-identity h3 { margin: 0; white-space: nowrap; }
 .team-card-identity > span { color: var(--text-copy); font-size: .82rem; }
@@ -47,7 +47,7 @@
 .team-actions-menu > summary:hover { background: var(--bg-row-alt); }
 .team-actions-menu-panel { position: absolute; top: calc(100% + .2rem); right: 0; z-index: 5; display: flex; gap: .2rem; padding: .25rem; border: 1px solid var(--border-base); background: var(--bg-panel); box-shadow: 0 4px 12px rgb(0 0 0 / 12%); }
 .team-actions-menu-panel .icon-button { width: 34px; height: 34px; }
-.team-card > .metric-grid { display: grid; grid-template-columns: minmax(12rem, .8fr) minmax(0, 2fr); gap: 0; padding-block: .28rem; border-block: 1px solid var(--border-base); }
+.team-card-header > .metric-grid { display: grid; flex: 1 1 38rem; grid-template-columns: minmax(12rem, .8fr) minmax(0, 2fr); min-width: min(100%, 34rem); gap: 0; padding-block: .28rem; border-block: 1px solid var(--border-base); }
 .team-card .metric-grid > div, .team-card .metric-grid > button { display: flex; align-items: center; justify-content: space-between; gap: .35rem; min-width: 0; padding: .2rem .45rem; border: 0; border-right: 1px solid var(--border-base); border-radius: 0; background: transparent; color: var(--text-copy); text-align: left; }
 .team-card .metric-grid > :last-child { border-right: 0; }
 .team-card .team-task-breakdown { justify-content: flex-start; gap: .65rem; }
@@ -112,7 +112,7 @@
   .workspace-detail-card, .modal-scrim .task-details-modal, .modal-scrim .risk-details-modal { width: 100%; max-width: none; min-height: 100dvh; }
   .workspace-presentation-controls { padding: .65rem; }
   .home-attention { padding: .75rem; }
-  .team-card > .metric-grid { grid-template-columns: minmax(0, 1fr); }
+  .team-card-header > .metric-grid { grid-template-columns: minmax(0, 1fr); }
   .team-card .metric-grid > div { border-right: 0; }
   .team-card .team-task-breakdown { flex-wrap: wrap; }
   .team-card .team-task-metrics { justify-content: space-between; flex-basis: 100%; }
