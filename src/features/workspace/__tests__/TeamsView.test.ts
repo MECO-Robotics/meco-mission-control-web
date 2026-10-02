@@ -20,6 +20,9 @@ it("derives team workload for all-project groups and excludes archived work from
   expect(html).toContain("5.0h");
   expect(html).toContain("blocked tasks");
   expect(html).toContain("overdue tasks");
+  expect(html).toContain('aria-label="0 open, 1 blocked, 0 overdue, and 0 completed tasks"');
+  expect(html).toContain('class="is-blocked"><strong>1</strong> blocked');
+  expect(html).toContain('class="is-overdue"><strong>1</strong> overdue');
   expect(html).toContain("Initial task · not-started");
   expect(html).toContain("Primary");
   expect(html).toContain("Secondary");
