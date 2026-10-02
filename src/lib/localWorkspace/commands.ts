@@ -138,6 +138,13 @@ export function applyLocalCommand(snapshot: BootstrapPayload, path: string, opti
   validateRosterReferences(snapshot, item);
   if (resource === "responsible-groups") {
     if (!snapshot.seasons.some(season => season.id === item.seasonId) || (item.projectIds as string[]).some(projectId => !snapshot.projects.some(project => project.id === projectId && project.seasonId === item.seasonId)) || (item.memberIds as string[]).some(memberId => !snapshot.members.some(member => member.id === memberId && (member.activeSeasonIds ?? [member.seasonId]).includes(String(item.seasonId))))) throw new Error("Teams must reference projects and members in the selected season.");
+    const memberIds = item.memberIds as string[];
+    const primaryMemberIds = item.primaryMemberIds as string[];
+    if (primaryMemberIds.some(memberId => !memberIds.includes(memberId) || !snapshot.members.some(member => member.id === memberId && (member.role === "student" || member.role === "lead")))) throw new Error("Primary team members must be selected students or leads.");
+    for (const group of snapshot.responsibleGroups) {
+      if (group.id === item.id || group.seasonId !== item.seasonId || group.isArchived) continue;
+      group.primaryMemberIds = group.primaryMemberIds.filter(memberId => !primaryMemberIds.includes(memberId));
+    }
   }
   if (resource === "tasks" && item.responsibleGroupId) {
     const group = snapshot.responsibleGroups.find(candidate => candidate.id === item.responsibleGroupId);
