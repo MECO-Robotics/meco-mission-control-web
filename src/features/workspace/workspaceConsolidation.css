@@ -51,7 +51,7 @@
 .team-card .metric-grid > div, .team-card .metric-grid > button { display: flex; align-items: center; justify-content: space-between; gap: .35rem; min-width: 0; padding: .2rem .45rem; border: 0; border-right: 1px solid var(--border-base); border-radius: 0; background: transparent; color: var(--text-copy); text-align: left; }
 .team-card .metric-grid > :last-child { border-right: 0; }
 .team-card .team-task-breakdown { justify-content: flex-start; gap: .65rem; }
-.team-card .team-task-pie { flex: 0 0 1.35rem; width: 1.35rem; aspect-ratio: 1; border-radius: 50%; background: conic-gradient(var(--status-warning-text) 0deg var(--team-task-open-end), var(--official-blue) var(--team-task-open-end) 360deg); }
+.team-card .team-task-pie { flex: 0 0 1.35rem; width: 1.35rem; aspect-ratio: 1; border-radius: 50%; background: conic-gradient(var(--team-task-open-chart) 0deg var(--team-task-open-end), var(--team-task-blocked-chart) var(--team-task-open-end) var(--team-task-blocked-end), var(--team-task-overdue-chart) var(--team-task-blocked-end) var(--team-task-overdue-end), var(--official-blue) var(--team-task-overdue-end) 360deg); }
 .team-card .team-task-pie.is-empty { background: var(--border-base); }
 .team-card .team-task-legend { display: flex; align-items: center; gap: .45rem; color: var(--text-copy); font-size: .72rem; white-space: nowrap; }
 .team-card .team-task-legend > span { display: inline-flex; align-items: baseline; gap: .18rem; }
@@ -59,6 +59,9 @@
 .team-card .team-task-open-filter:hover, .team-card .team-task-open-filter[aria-pressed="true"] { color: var(--official-blue); }
 .team-card .team-task-open-filter:focus-visible { outline: 2px solid var(--official-blue); outline-offset: 2px; }
 .team-card .team-task-legend strong { color: var(--text-title); font-variant-numeric: tabular-nums; }
+.team-card .team-task-open-filter strong { color: var(--team-task-open-text); }
+.team-card .team-task-metrics > button strong.is-blocked { color: var(--team-task-blocked-text); }
+.team-card .team-task-metrics > button strong.is-overdue { color: var(--team-task-overdue-text); }
 .team-card .team-task-metrics { display: flex; align-items: center; justify-content: flex-end; gap: .15rem; flex: 1 1 auto; min-width: 0; }
 .team-card .team-task-metrics > button { display: inline-flex; align-items: baseline; gap: .25rem; min-width: 0; padding: .2rem .45rem; border: 0; border-right: 1px solid var(--border-base); border-radius: 0; background: transparent; color: var(--text-copy); cursor: pointer; font: inherit; text-align: left; }
 .team-card .team-task-metrics > button:last-child { border-right: 0; }
@@ -83,8 +86,9 @@
 .team-member-load > span:nth-child(2), .team-member-capacity { font-size: .76rem; }
 .team-member-load > .team-member-task-metrics { display: flex; justify-content: flex-end; gap: .5rem; color: var(--text-copy); text-align: right; }
 .team-member-task-metrics strong { font-weight: 600; }
-.team-member-task-metrics .is-open strong { color: var(--status-warning-text); }
-.team-member-task-metrics .is-alert strong { color: var(--status-danger-text); }
+.team-member-task-metrics .is-open strong { color: var(--team-task-open-text); }
+.team-member-task-metrics .is-blocked strong { color: var(--team-task-blocked-text); }
+.team-member-task-metrics .is-overdue strong { color: var(--team-task-overdue-text); }
 .team-member-capacity.is-at-capacity { color: var(--status-warning-text); font-weight: 600; }
 .team-member-capacity.is-over-capacity { color: var(--status-danger-text); font-weight: 600; }
 .team-capacity-track { grid-column: 1 / -1; height: .3rem; overflow: hidden; border-radius: 3px; background: var(--border-base); }

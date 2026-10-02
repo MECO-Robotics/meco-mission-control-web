@@ -128,10 +128,11 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
       const tasks = taskByGroup.get(group.id) ?? [];
       const totalTasks = scopedTasks.filter(task => task.responsibleGroupId === group.id).length;
       const openTasks = group.isArchived ? [] : tasks;
+      const today = new Date().toISOString().slice(0, 10);
       const blocked = openTasks.filter(task => task.isBlocked);
-      const overdue = openTasks.filter(task => task.dueDate < new Date().toISOString().slice(0, 10));
+      const overdue = openTasks.filter(task => task.dueDate < today);
       const metric = (label: string, count: number, filter: "open" | "blocked" | "overdue") => <button aria-label={`${count} ${label.toLowerCase()} tasks`} aria-pressed={taskDrilldown?.groupId === group.id && taskDrilldown.filter === filter} key={filter} onClick={() => setTaskDrilldown({ groupId: group.id, filter })}>
-        <span className="team-metric-label">{label}</span><strong>{count}</strong>
+        <span className="team-metric-label">{label}</span><strong className={`is-${filter}`}>{count}</strong>
       </button>;
       const drilldownTasks = taskDrilldown?.groupId !== group.id ? tasks : taskDrilldown.filter === "blocked" ? blocked : taskDrilldown.filter === "overdue" ? overdue : openTasks;
       const remaining = openTasks.reduce((sum, task) => sum + Math.max(0, task.estimatedHours - task.actualHours), 0);
@@ -156,7 +157,14 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
       const primaryMembers = sortedGroupMembers.filter(member => !isStudent(member) || group.primaryMemberIds.includes(member.id));
       const secondaryMembers = sortedGroupMembers.filter(member => isStudent(member) && !group.primaryMemberIds.includes(member.id));
       const completedTasks = group.isArchived ? 0 : Math.max(0, totalTasks - tasks.length);
-      const taskPiePercent = openTasks.length + completedTasks > 0 ? openTasks.length / (openTasks.length + completedTasks) * 100 : 0;
+      const blockedIds = new Set(blocked.map(task => task.id));
+      const overdueForPie = overdue.filter(task => !blockedIds.has(task.id));
+      const openForPie = openTasks.filter(task => !blockedIds.has(task.id) && task.dueDate >= today);
+      const taskPieTotal = openForPie.length + blocked.length + overdueForPie.length + completedTasks;
+      const taskPieDegrees = (count: number) => taskPieTotal > 0 ? count / taskPieTotal * 360 : 0;
+      const taskPieOpenEnd = taskPieDegrees(openForPie.length);
+      const taskPieBlockedEnd = taskPieOpenEnd + taskPieDegrees(blocked.length);
+      const taskPieOverdueEnd = taskPieBlockedEnd + taskPieDegrees(overdueForPie.length);
       const memberSection = (label: string, sectionMembers: typeof sortedGroupMembers) => {
         const students = sectionMembers.filter(isStudent).length;
         const mentors = sectionMembers.filter(member => member.role === "mentor").length;
@@ -165,7 +173,7 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
           <div className="team-member-grid">{sectionMembers.map(member => {
             const assigned = openTasks.filter(task => task.ownerId === member.id || task.assigneeIds.includes(member.id) || task.mentorId === member.id);
             const blockedForMember = assigned.filter(task => task.isBlocked);
-            const overdueForMember = assigned.filter(task => task.dueDate < new Date().toISOString().slice(0, 10));
+            const overdueForMember = assigned.filter(task => task.dueDate < today);
             const hours = assigned.reduce((sum, task) => sum + Math.max(0, task.estimatedHours - task.actualHours), 0);
             const primaryGroup = isStudent(member) ? bootstrap.responsibleGroups.find(other => !other.isArchived && other.seasonId === group.seasonId && other.primaryMemberIds.includes(member.id)) : undefined;
             const memberCapacity = group.isArchived || (primaryGroup && primaryGroup.id !== group.id) ? 0 : member.plannedWeeklyAttendanceHours ?? 0;
@@ -175,8 +183,8 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
               <span className="team-member-name">{member.name}{member.role === "lead" || member.role === "mentor" ? <small>{member.role === "lead" ? "L" : "M"}</small> : null}</span>
               <span className="team-member-task-metrics" aria-label={`${assigned.length} open, ${blockedForMember.length} blocked, ${overdueForMember.length} overdue`}>
                 {assigned.length > 0 ? <span className="is-open"><strong>{assigned.length}</strong> open</span> : null}
-                {blockedForMember.length > 0 ? <span className="is-alert"><strong>{blockedForMember.length}</strong> blocked</span> : null}
-                {overdueForMember.length > 0 ? <span className="is-alert"><strong>{overdueForMember.length}</strong> overdue</span> : null}
+                {blockedForMember.length > 0 ? <span className="is-blocked"><strong>{blockedForMember.length}</strong> blocked</span> : null}
+                {overdueForMember.length > 0 ? <span className="is-overdue"><strong>{overdueForMember.length}</strong> overdue</span> : null}
               </span>
               <span className={`team-member-capacity ${capacityState}`} aria-label={`${formatHours(hours)} remaining / ${formatHours(memberCapacity)} planned weekly`}>
                 {formatHours(hours).replace(/h$/, "")}/{formatHours(memberCapacity).replace(/h$/, "")}hrs
@@ -207,7 +215,7 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
             <span className="team-metric-label">Capacity</span><strong>{formatHours(effectiveCapacity)} / {formatHours(remaining)}</strong>
           </div>
           <div className="team-task-breakdown">
-            <span className={`team-task-pie${openTasks.length + completedTasks === 0 ? " is-empty" : ""}`} role="img" aria-label={`${openTasks.length} open and ${completedTasks} completed tasks`} style={{ "--team-task-open-end": `${taskPiePercent * 3.6}deg` } as React.CSSProperties} />
+            <span className={`team-task-pie${taskPieTotal === 0 ? " is-empty" : ""}`} role="img" aria-label={`${openForPie.length} open, ${blocked.length} blocked, ${overdueForPie.length} overdue, and ${completedTasks} completed tasks`} style={{ "--team-task-open-end": `${taskPieOpenEnd}deg`, "--team-task-blocked-end": `${taskPieBlockedEnd}deg`, "--team-task-overdue-end": `${taskPieOverdueEnd}deg` } as React.CSSProperties} />
             <span className="team-task-legend">
               <button type="button" className="team-task-open-filter" aria-label={`${openTasks.length} open tasks`} aria-pressed={taskDrilldown?.groupId === group.id && taskDrilldown.filter === "open"} onClick={() => setTaskDrilldown({ groupId: group.id, filter: "open" })}>Open <strong>{openTasks.length}</strong></button>
               <span>Done <strong>{completedTasks}</strong></span>
