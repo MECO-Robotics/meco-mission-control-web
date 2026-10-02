@@ -41,7 +41,7 @@
 .team-card-identity { display: flex; align-items: baseline; flex-wrap: wrap; column-gap: .65rem; row-gap: .1rem; min-width: 0; }
 .team-card-identity h3 { margin: 0; white-space: nowrap; }
 .team-card-identity > span { color: var(--text-copy); font-size: .82rem; }
-.team-actions-menu { position: relative; display: inline-flex; align-self: center; border: 0; }
+.team-actions-menu { position: relative; display: inline-flex; flex: 0 0 auto; align-self: center; margin-left: auto; border: 0; }
 .team-actions-menu > summary { display: grid; width: 30px; height: 30px; place-items: center; list-style: none; color: var(--text-copy); cursor: pointer; }
 .team-actions-menu > summary::-webkit-details-marker { display: none; }
 .team-actions-menu > summary:hover { background: var(--bg-row-alt); }
@@ -53,20 +53,17 @@
 .team-card .team-task-breakdown { justify-content: flex-start; gap: .65rem; }
 .team-card .team-task-pie { flex: 0 0 1.35rem; width: 1.35rem; aspect-ratio: 1; border-radius: 50%; background: conic-gradient(var(--team-task-open-chart) 0deg var(--team-task-open-end), var(--team-task-blocked-chart) var(--team-task-open-end) var(--team-task-blocked-end), var(--team-task-overdue-chart) var(--team-task-blocked-end) var(--team-task-overdue-end), var(--official-blue) var(--team-task-overdue-end) 360deg); }
 .team-card .team-task-pie.is-empty { background: var(--border-base); }
-.team-card .team-task-legend { display: flex; align-items: center; gap: .45rem; color: var(--text-copy); font-size: .72rem; white-space: nowrap; }
+.team-card .team-task-legend { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; color: var(--text-copy); font-size: .72rem; white-space: nowrap; }
 .team-card .team-task-legend > span { display: inline-flex; align-items: baseline; gap: .18rem; }
-.team-card .team-task-legend > .team-task-open-filter { display: inline-flex; align-items: baseline; gap: .18rem; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; font: inherit; }
+.team-card .team-task-legend > button { display: inline-flex; align-items: baseline; gap: .25rem; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; font: inherit; }
+.team-card .team-task-legend > button:focus-visible { outline: 2px solid var(--official-blue); outline-offset: 2px; }
 .team-card .team-task-open-filter:hover, .team-card .team-task-open-filter[aria-pressed="true"] { color: var(--official-blue); }
-.team-card .team-task-open-filter:focus-visible { outline: 2px solid var(--official-blue); outline-offset: 2px; }
 .team-card .team-task-legend strong { color: var(--text-title); font-variant-numeric: tabular-nums; }
 .team-card .team-task-open-filter strong { color: var(--team-task-open-text); }
-.team-card .team-task-metrics > button strong.is-blocked { color: var(--team-task-blocked-text); }
-.team-card .team-task-metrics > button strong.is-overdue { color: var(--team-task-overdue-text); }
-.team-card .team-task-metrics { display: flex; align-items: center; justify-content: flex-end; gap: .15rem; flex: 1 1 auto; min-width: 0; }
-.team-card .team-task-metrics > button { display: inline-flex; align-items: baseline; gap: .25rem; min-width: 0; padding: .2rem .45rem; border: 0; border-right: 1px solid var(--border-base); border-radius: 0; background: transparent; color: var(--text-copy); cursor: pointer; font: inherit; text-align: left; }
-.team-card .team-task-metrics > button:last-child { border-right: 0; }
-.team-card .team-task-metrics > button:hover, .team-member-load:hover { background: var(--bg-row-alt); }
-.team-card .team-task-metrics > button[aria-pressed="true"] { color: var(--official-blue); }
+.team-card .team-task-status-filter.is-blocked strong { color: var(--team-task-blocked-text); }
+.team-card .team-task-status-filter.is-overdue strong { color: var(--team-task-overdue-text); }
+.team-card .team-task-status-filter:hover, .team-card .team-task-status-filter[aria-pressed="true"], .team-member-load:hover { background: var(--bg-row-alt); }
+.team-card .team-task-status-filter[aria-pressed="true"] { color: var(--official-blue); }
 .team-card .metric-grid .team-metric-label { color: var(--text-copy); font-size: .74rem; line-height: 1.15; }
 .team-card .metric-grid strong { color: var(--text-title); font-size: .92rem; font-variant-numeric: tabular-nums; }
 .team-card .team-metric-pie { flex: 0 0 1.15rem; width: 1.15rem; aspect-ratio: 1; border-radius: 50%; background: conic-gradient(var(--team-metric-color) var(--team-metric-progress), var(--border-base) 0); }
@@ -115,7 +112,6 @@
   .team-card-header > .metric-grid { grid-template-columns: minmax(0, 1fr); }
   .team-card .metric-grid > div { border-right: 0; }
   .team-card .team-task-breakdown { flex-wrap: wrap; }
-  .team-card .team-task-metrics { justify-content: space-between; flex-basis: 100%; }
   .team-card-header { flex-wrap: wrap; }
   .team-member-load { grid-template-columns: minmax(5rem, 1fr) auto; }
   .team-member-load > span:nth-child(2) { text-align: right; }
