@@ -107,16 +107,25 @@ export function TaskCalendarMonthStack({
       }));
     }
     const stickyHeaderHeight = container.querySelector<HTMLElement>(".task-calendar-weekdays")?.offsetHeight ?? 0;
+    const firstUncoveredRowTop = container.getBoundingClientRect().top + stickyHeaderHeight;
     const visibleDay = Array.from(container.querySelectorAll<HTMLElement>(".task-calendar-day[data-date]")).find(
-      (day) => day.getBoundingClientRect().bottom > container.getBoundingClientRect().top + stickyHeaderHeight,
+      (day) => day.getBoundingClientRect().top >= firstUncoveredRowTop,
     );
     const visibleDate = visibleDay?.dataset.date;
     if (visibleDate) {
-      const [year, month] = visibleDate.split("-").map(Number);
-      const visibleMonth = new Date(year, month - 1, 1);
-      const visibleMonthKey = `${year}-${month - 1}`;
+      const [year, month, day] = visibleDate.split("-").map(Number);
+      const visibleDayDate = new Date(year, month - 1, day);
+      const nextMonthStart = new Date(year, month, 1);
+      const daysUntilNextMonth = new Date(year, month, 0).getDate() - day + 1;
+      const visibleMonth =
+        daysUntilNextMonth <= 6 - visibleDayDate.getDay()
+          ? nextMonthStart
+          : new Date(year, month - 1, 1);
+      const visibleMonthYear = visibleMonth.getFullYear();
+      const visibleMonthIndex = visibleMonth.getMonth();
+      const visibleMonthKey = `${visibleMonthYear}-${visibleMonthIndex}`;
       if (visibleMonthKey !== cursorKey) {
-        const monthDelta = year * 12 + month - 1 - (cursorYear * 12 + cursorMonth);
+        const monthDelta = visibleMonthYear * 12 + visibleMonthIndex - (cursorYear * 12 + cursorMonth);
         setMonthWindow((current) => {
           const currentBefore = current.cursorKey === cursorKey ? current.monthsBefore : INITIAL_MONTHS_EACH_DIRECTION;
           const currentAfter = current.cursorKey === cursorKey ? current.monthsAfter : INITIAL_MONTHS_EACH_DIRECTION;
