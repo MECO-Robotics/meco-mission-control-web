@@ -131,7 +131,7 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
       const today = new Date().toISOString().slice(0, 10);
       const blocked = openTasks.filter(task => task.isBlocked);
       const overdue = openTasks.filter(task => task.dueDate < today);
-      const metric = (label: string, count: number, filter: "open" | "blocked" | "overdue") => <button aria-label={`${count} ${label.toLowerCase()} tasks`} aria-pressed={taskDrilldown?.groupId === group.id && taskDrilldown.filter === filter} key={filter} onClick={() => setTaskDrilldown({ groupId: group.id, filter })}>
+      const metric = (label: string, count: number, filter: "blocked" | "overdue") => <button type="button" className={`team-task-status-filter is-${filter}`} aria-label={`${count} ${label.toLowerCase()} tasks`} aria-pressed={taskDrilldown?.groupId === group.id && taskDrilldown.filter === filter} key={filter} onClick={() => setTaskDrilldown({ groupId: group.id, filter })}>
         <span className="team-metric-label">{label}</span><strong className={`is-${filter}`}>{count}</strong>
       </button>;
       const drilldownTasks = taskDrilldown?.groupId !== group.id ? tasks : taskDrilldown.filter === "blocked" ? blocked : taskDrilldown.filter === "overdue" ? overdue : openTasks;
@@ -198,14 +198,6 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
         <header className="panel-header team-card-header">
           <div className="team-card-identity">
             <h3>{group.name}{group.isArchived ? " · Archived" : ""}</h3>
-            <details className="team-actions-menu" onClick={event => { if ((event.target as HTMLElement).closest("button")) event.currentTarget.open = false; }}>
-              <summary aria-label={`Actions for ${group.name}`} title="Team actions"><Ellipsis aria-hidden="true" size={18}/></summary>
-              <div className="team-actions-menu-panel" role="menu" aria-label={`${group.name} actions`}>
-                <button aria-label={`Edit ${group.name}`} className="icon-button" onClick={() => edit(group)} title="Edit" type="button"><Pencil aria-hidden="true" size={16}/></button>
-                <button aria-label={`${group.isArchived ? "Restore" : "Archive"} ${group.name}`} className="icon-button" onClick={() => void archive(group)} title={group.isArchived ? "Restore" : "Archive"} type="button">{group.isArchived ? <ArchiveRestore aria-hidden="true" size={16}/> : <Archive aria-hidden="true" size={16}/>}</button>
-                <button aria-label={`Remove ${group.name}`} className="icon-button" onClick={() => void remove(group)} title="Remove" type="button"><Trash2 aria-hidden="true" size={16}/></button>
-              </div>
-            </details>
             {group.projectIds.length ? <span>{group.projectIds.map(id => projects.find(project => project.id === id)?.name ?? "Unknown project").join(", ")}</span> : null}
           </div>
           <div className="metric-grid">
@@ -218,10 +210,18 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
               <span className="team-task-legend">
                 <button type="button" className="team-task-open-filter" aria-label={`${openTasks.length} open tasks`} aria-pressed={taskDrilldown?.groupId === group.id && taskDrilldown.filter === "open"} onClick={() => setTaskDrilldown({ groupId: group.id, filter: "open" })}>Open <strong>{openTasks.length}</strong></button>
                 <span>Done <strong>{completedTasks}</strong></span>
+                {metric("Blocked", blocked.length, "blocked")}{metric("Overdue", overdue.length, "overdue")}
               </span>
-              <span className="team-task-metrics">{metric("Blocked", blocked.length, "blocked")}{metric("Overdue", overdue.length, "overdue")}</span>
             </div>
           </div>
+          <details className="team-actions-menu" onClick={event => { if ((event.target as HTMLElement).closest("button")) event.currentTarget.open = false; }}>
+            <summary aria-label={`Actions for ${group.name}`} title="Team actions"><Ellipsis aria-hidden="true" size={18}/></summary>
+            <div className="team-actions-menu-panel" role="menu" aria-label={`${group.name} actions`}>
+              <button aria-label={`Edit ${group.name}`} className="icon-button" onClick={() => edit(group)} title="Edit" type="button"><Pencil aria-hidden="true" size={16}/></button>
+              <button aria-label={`${group.isArchived ? "Restore" : "Archive"} ${group.name}`} className="icon-button" onClick={() => void archive(group)} title={group.isArchived ? "Restore" : "Archive"} type="button">{group.isArchived ? <ArchiveRestore aria-hidden="true" size={16}/> : <Archive aria-hidden="true" size={16}/>}</button>
+              <button aria-label={`Remove ${group.name}`} className="icon-button" onClick={() => void remove(group)} title="Remove" type="button"><Trash2 aria-hidden="true" size={16}/></button>
+            </div>
+          </details>
         </header>
         <div className="team-load">{memberSection("Primary", primaryMembers)}{memberSection("Secondary", secondaryMembers)}{contributorMembers.length ? memberSection("Assigned contributors", contributorMembers) : null}</div>
         <details open={taskDrilldown?.groupId === group.id}><summary>{taskDrilldown?.groupId === group.id ? `${taskDrilldown.filter[0].toUpperCase()}${taskDrilldown.filter.slice(1)} tasks` : "Tasks"}</summary>{drilldownTasks.length ? drilldownTasks.map(task => <button className="ghost-button" key={task.id} onClick={() => onOpenTask(task)}>{task.title} · {task.status}</button>) : <p>No tasks match this metric.</p>}</details>

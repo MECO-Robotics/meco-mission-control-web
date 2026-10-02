@@ -29,7 +29,8 @@ it("derives team workload for all-project groups and excludes archived work from
   expect(html).not.toContain("<h2>Teams</h2>");
   expect(html).not.toContain("Manage subteams");
   expect(html).toContain('aria-label="Search teams"');
-  expect(html).toMatch(/<header class="panel-header team-card-header">[\s\S]*class="metric-grid"[\s\S]*<\/header>/);
+  expect(html).toMatch(/<header class="panel-header team-card-header">[\s\S]*class="metric-grid"[\s\S]*class="team-actions-menu"[\s\S]*<\/header>/);
+  expect(html).toMatch(/class="team-task-legend">[\s\S]*team-task-open-filter[\s\S]*Done[\s\S]*team-task-status-filter is-blocked[\s\S]*team-task-status-filter is-overdue/);
   expect(html).toMatch(/class="topbar-responsive-search[^"]*"[\s\S]*aria-label="Filter teams"[\s\S]*aria-label="Sort teams"[\s\S]*?<\/div>/);
   expect(html).toContain('aria-label="Create team"');
   expect(html.match(/class="team-member-load"/g)).toHaveLength(3);
