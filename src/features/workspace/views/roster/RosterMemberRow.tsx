@@ -46,7 +46,12 @@ export const RosterMemberRow: React.FC<RosterMemberRowProps> = ({
   onEditMember,
 }) => {
   const roleBadge = getRoleBadge(member);
-  const groupNames = responsibleGroups.filter((group) => group.memberIds.includes(member.id)).map((group) => group.name);
+  const memberGroups = responsibleGroups.filter((group) => group.memberIds.includes(member.id));
+  const primaryGroup = (member.role === "student" || member.role === "lead") ? memberGroups.find((group) => group.primaryMemberIds.includes(member.id)) : undefined;
+  const groupNames = [
+    ...(primaryGroup ? [`${primaryGroup.name} · Primary`] : []),
+    ...memberGroups.filter((group) => group.id !== primaryGroup?.id).map((group) => group.name),
+  ];
   const rowClassName =
     member.id === selectedMemberId ? "member-row active editable-action-host" : "member-row editable-action-host";
 
@@ -62,7 +67,6 @@ export const RosterMemberRow: React.FC<RosterMemberRowProps> = ({
         )}
         <span className="member-row-copy">
           <strong>{member.name}</strong>
-          {(member.role === "student" || member.role === "lead") && member.classYear ? <span className="member-row-discipline">{member.classYear}</span> : null}
           {groupNames.length > 0 ? <span className="member-row-discipline">{groupNames.join(", ")}</span> : null}
         </span>
       </button>

@@ -63,7 +63,7 @@ function createBootstrap(overrides: Partial<BootstrapPayload> = {}): BootstrapPa
     })),
     members,
     projects: [{ description: "", id: "project-1", name: "Robot", projectType: "robot", seasonId: "season-1", status: "active" }],
-    responsibleGroups: [{ id: "group-design", seasonId: "season-1", name: "Robot Design Group", projectIds: ["project-1"], memberIds: ["available"], isArchived: false }],
+    responsibleGroups: [{ id: "group-design", seasonId: "season-1", name: "Robot Design Group", projectIds: ["project-1"], workTypeIds: [], memberIds: ["available"], primaryMemberIds: ["available"], isArchived: false }],
     risks: [{
       blocksWork: true,
       category: "dependency",

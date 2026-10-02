@@ -54,7 +54,7 @@ function defaults(resource: string, snapshot: BootstrapPayload): Record<string, 
   switch (resource) {
     case "seasons": return { type: "season", startDate: today, endDate: today };
     case "projects": return { description: "", status: "planned" };
-    case "members": return { email: "", elevated: false, role: "student", classYear: null, activeSeasonIds: [], plannedAttendanceDays: [] };
+    case "members": return { email: "", elevated: false, role: "student", activeSeasonIds: [], plannedAttendanceDays: [] };
     case "responsible-groups": return { seasonId: snapshot.seasons[0]?.id ?? "", name: "", projectIds: [], memberIds: [], isArchived: false };
     case "subsystems": return { isCore: false, iteration: 1, mentorIds: [], parentSubsystemId: null, responsibleEngineerId: null };
     case "tasks": return {
@@ -132,9 +132,6 @@ export function applyLocalCommand(snapshot: BootstrapPayload, path: string, opti
 
   const item = { ...(method === "POST" ? defaults(resource, snapshot) : rows[index]), ...body, id: id ?? newLocalId() } as Row;
   validateRosterReferences(snapshot, item);
-  if (resource === "members") {
-    if ((item.classYear != null && !["freshman", "sophomore", "junior", "senior"].includes(String(item.classYear))) || (item.role !== "student" && item.role !== "lead" && item.classYear != null)) throw new Error("Class year is only available to students and student leads and must be a valid year.");
-  }
   if (resource === "responsible-groups") {
     if (!snapshot.seasons.some(season => season.id === item.seasonId) || (item.projectIds as string[]).some(projectId => !snapshot.projects.some(project => project.id === projectId && project.seasonId === item.seasonId)) || (item.memberIds as string[]).some(memberId => !snapshot.members.some(member => member.id === memberId && (member.activeSeasonIds ?? [member.seasonId]).includes(String(item.seasonId))))) throw new Error("Teams must reference projects and members in the selected season.");
   }

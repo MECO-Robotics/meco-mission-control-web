@@ -4,6 +4,7 @@ import { taskToPayload } from "@/lib/appUtils/taskTargets";
 import { subsystemToPayload } from "@/lib/appUtils/payloadConversions";
 import { createTask } from "../task";
 import { createSubsystemRecord } from "../structure";
+import { deleteResponsibleGroup } from "../responsibleGroups";
 import { archiveManufacturingProcessRecord, createManufacturingProcessRecord } from "../production";
 import { requestItem } from "../common";
 import { normalizeBootstrapPayload } from "../../bootstrap/payload";
@@ -48,6 +49,13 @@ it("manufacturing process catalog controls emit canonical create and archive com
     expect(Object.keys(serialized).filter((field) => !(field in command.properties))).toEqual([]);
     expect(command.required.filter((field: string) => !(field in serialized))).toEqual([]);
   }
+});
+
+it("team removal uses the ResponsibleGroup delete endpoint", async () => {
+  await deleteResponsibleGroup("team-mechanical");
+  expect(jest.mocked(requestItem).mock.calls.at(-1)?.slice(0, 3)).toEqual([
+    "/responsible-groups/team-mechanical", "DELETE", undefined,
+  ]);
 });
 
 it("retains typed report targets and evidence after bootstrap normalization", () => {

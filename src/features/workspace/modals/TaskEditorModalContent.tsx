@@ -130,7 +130,8 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
   const isCreateTaskModal = taskModalMode === "create";
   const isEditTaskModal = taskModalMode === "edit";
   const createTaskRecord = isCreateTaskModal ? buildDraftTaskRecord(taskDraft, activeTask) : null;
-  const canCreateTask = taskDraft.title.trim().length > 0;
+  const hasTaskPerson = Boolean(taskDraft.ownerId || taskDraft.mentorId || taskDraft.assigneeIds.some(Boolean));
+  const canCreateTask = taskDraft.title.trim().length > 0 && hasTaskPerson;
 
   const handleCreateTaskSubmit = (milestone: FormEvent<HTMLFormElement>) => {
     if (isBusy || !canCreateTask) {
@@ -182,10 +183,13 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
             </>
           ) : undefined}
           beforeFooterContent={isCreateTaskModal ? (
-            <TaskEditorCreateMetadataSection
-              setTaskDraft={updateDraftWhenIdle}
-              taskDraft={taskDraft}
-            />
+            <>
+              <TaskEditorCreateMetadataSection
+                setTaskDraft={updateDraftWhenIdle}
+                taskDraft={taskDraft}
+              />
+              {!hasTaskPerson ? <p role="status" style={{ color: "var(--status-warning-text)", fontSize: ".82rem" }}>Assign a student or lead, or choose a mentor, before creating this task.</p> : null}
+            </>
           ) : undefined}
           dependencyTargetProjectId={isCreateTaskModal ? taskDraft.projectId : undefined}
           editableMemberOptions={isCreateTaskModal ? props.students : undefined}

@@ -13,7 +13,6 @@ export interface MemberRecord {
   email: string;
   photoUrl?: string;
   role: MemberRole;
-  classYear?: "freshman" | "sophomore" | "junior" | "senior" | null;
   elevated: boolean;
   seasonId: string;
   activeSeasonIds?: string[];
@@ -124,6 +123,8 @@ export interface ResponsibleGroupRecord {
   seasonId: string;
   name: string;
   projectIds: string[];
+  workTypeIds: string[];
   memberIds: string[];
+  primaryMemberIds: string[];
   isArchived: boolean;
 }
