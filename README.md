@@ -399,7 +399,7 @@ High-use endpoint groups:
   - `GET/POST /api/responsible-groups`
   - `PATCH /api/responsible-groups/:groupId` (including archive/restore with `isArchived`)
 
-`Member.classYear` is nullable and applies to students and student leads (`freshman`, `sophomore`, `junior`, `senior`). Class year is an analytics dimension, not a Task owner. ResponsibleGroup remains the Task assignment dimension; group workload and capacity are derived from Members, Tasks, and WorkLogs and are never persisted as totals.
+ResponsibleGroup remains the Task assignment dimension; group workload and capacity are derived from Members, Tasks, and WorkLogs and are never persisted as totals.
 - User preferences:
   - `GET/PATCH /api/users/me/preferences`
 

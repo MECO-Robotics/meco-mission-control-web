@@ -48,3 +48,37 @@ test("purchase records require a human execution Task and are removed with that 
   command(state, "/tasks/task", {}, "DELETE");
   expect(state.purchaseItems.some(({ id }) => id === purchase.id)).toBe(false);
 });
+
+test("deleting a local team clears Task and risk ownership references", () => {
+  const state = snapshot();
+  const team = { id: "team", seasonId: "season", name: "Team", projectIds: [], workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: false };
+  state.responsibleGroups.push(team);
+  state.tasks[0].responsibleGroupId = team.id;
+  state.risks.push({
+    id: "risk", projectId: state.tasks[0].projectId, title: "Risk", detail: "", category: "other", severity: "low",
+    status: "open", blocksWork: false, source: { kind: "manual" }, relatedTargets: [], mitigationTaskId: null,
+    ownerGroupId: team.id, createdAt: "2026-09-01", updatedAt: "2026-09-01", resolvedAt: null,
+  });
+
+  command(state, `/responsible-groups/${team.id}`, {}, "DELETE");
+
+  expect(state.tasks[0].responsibleGroupId).toBeNull();
+  expect(state.risks[0].ownerGroupId).toBeNull();
+});
+
+test("making a local team primary transfers students from their previous primary team", () => {
+  const state = snapshot();
+  const studentId = "student";
+  state.seasons.push({ id: "season", teamId: "team-1", name: "Season", type: "season", startDate: "2026-01-01", endDate: "2026-12-31" });
+  state.members.push({ id: studentId, name: "Student", email: "student@example.com", role: "student", elevated: false, seasonId: "season" });
+  state.responsibleGroups.push(
+    { id: "old-team", seasonId: "season", name: "Old Team", projectIds: [], workTypeIds: [], memberIds: [studentId], primaryMemberIds: [studentId], isArchived: false },
+    { id: "new-team", seasonId: "season", name: "New Team", projectIds: [], workTypeIds: [], memberIds: [studentId], primaryMemberIds: [], isArchived: false },
+  );
+
+  command(state, "/responsible-groups/new-team", { primaryMemberIds: [studentId] }, "PATCH");
+
+  expect(state.responsibleGroups.find(group => group.id === "old-team")?.primaryMemberIds).toEqual([]);
+  expect(state.responsibleGroups.find(group => group.id === "new-team")?.primaryMemberIds).toEqual([studentId]);
+  expect(state.responsibleGroups.filter(group => group.primaryMemberIds.includes(studentId))).toHaveLength(1);
+});

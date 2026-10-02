@@ -54,8 +54,8 @@ function defaults(resource: string, snapshot: BootstrapPayload): Record<string, 
   switch (resource) {
     case "seasons": return { type: "season", startDate: today, endDate: today };
     case "projects": return { description: "", status: "planned" };
-    case "members": return { email: "", elevated: false, role: "student", classYear: null, activeSeasonIds: [], plannedAttendanceDays: [] };
-    case "responsible-groups": return { seasonId: snapshot.seasons[0]?.id ?? "", name: "", projectIds: [], memberIds: [], isArchived: false };
+    case "members": return { email: "", elevated: false, role: "student", activeSeasonIds: [], plannedAttendanceDays: [] };
+    case "responsible-groups": return { seasonId: snapshot.seasons[0]?.id ?? "", name: "", projectIds: [], workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: false };
     case "subsystems": return { isCore: false, iteration: 1, mentorIds: [], parentSubsystemId: null, responsibleEngineerId: null };
     case "tasks": return {
       projectId: snapshot.projects[0]?.id ?? "", workTypeId: "", responsibleGroupId: null, workstreamIds: [], title: "", summary: "",
@@ -72,6 +72,10 @@ function defaults(resource: string, snapshot: BootstrapPayload): Record<string, 
 
 function removeReferences(snapshot: BootstrapPayload, resource: string, id: string) {
   if (resource === "part-definitions") snapshot.partInstances = snapshot.partInstances.filter((part) => part.partDefinitionId !== id);
+  if (resource === "responsible-groups") {
+    for (const task of snapshot.tasks) if (task.responsibleGroupId === id) task.responsibleGroupId = null;
+    for (const risk of snapshot.risks) if (risk.ownerGroupId === id) risk.ownerGroupId = null;
+  }
   if (resource === "tasks") {
     snapshot.taskDependencies = snapshot.taskDependencies.filter((dependency) => dependency.taskId !== id);
     snapshot.workLogs = snapshot.workLogs.filter((log) => log.taskId !== id);
@@ -132,11 +136,15 @@ export function applyLocalCommand(snapshot: BootstrapPayload, path: string, opti
 
   const item = { ...(method === "POST" ? defaults(resource, snapshot) : rows[index]), ...body, id: id ?? newLocalId() } as Row;
   validateRosterReferences(snapshot, item);
-  if (resource === "members") {
-    if ((item.classYear != null && !["freshman", "sophomore", "junior", "senior"].includes(String(item.classYear))) || (item.role !== "student" && item.role !== "lead" && item.classYear != null)) throw new Error("Class year is only available to students and student leads and must be a valid year.");
-  }
   if (resource === "responsible-groups") {
     if (!snapshot.seasons.some(season => season.id === item.seasonId) || (item.projectIds as string[]).some(projectId => !snapshot.projects.some(project => project.id === projectId && project.seasonId === item.seasonId)) || (item.memberIds as string[]).some(memberId => !snapshot.members.some(member => member.id === memberId && (member.activeSeasonIds ?? [member.seasonId]).includes(String(item.seasonId))))) throw new Error("Teams must reference projects and members in the selected season.");
+    const memberIds = item.memberIds as string[];
+    const primaryMemberIds = item.primaryMemberIds as string[];
+    if (primaryMemberIds.some(memberId => !memberIds.includes(memberId) || !snapshot.members.some(member => member.id === memberId && (member.role === "student" || member.role === "lead")))) throw new Error("Primary team members must be selected students or leads.");
+    for (const group of snapshot.responsibleGroups) {
+      if (group.id === item.id || group.seasonId !== item.seasonId || group.isArchived) continue;
+      group.primaryMemberIds = group.primaryMemberIds.filter(memberId => !primaryMemberIds.includes(memberId));
+    }
   }
   if (resource === "tasks" && item.responsibleGroupId) {
     const group = snapshot.responsibleGroups.find(candidate => candidate.id === item.responsibleGroupId);

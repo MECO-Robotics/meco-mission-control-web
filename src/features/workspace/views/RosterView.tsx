@@ -3,7 +3,7 @@ import { useRememberedViewState } from "@/features/workspace/shared/navigation/W
 import React from "react";
 import { buildAvailableStudentRoster, getPresentRosterMemberIds } from "./roster/availableStudentsRoster";
 import { useRosterInsights } from "./roster/useRosterInsights";
-import { formatAvailabilityLabel, formatHours } from "./roster/rosterInsightsViewModel";
+import { buildAttendanceWeek } from "./roster/rosterAttendanceWeek";
 import type { TaskRecord } from "@/types/recordsExecution";
 
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
@@ -95,7 +95,6 @@ export const RosterView: React.FC<RosterViewProps> = ({
   externalMembers,
 }) => {
   const [peopleFilter, setPeopleFilter] = useRememberedViewState("people.peopleFilter", "all");
-  const [classYearFilter, setClassYearFilter] = useRememberedViewState("people.classYearFilter", "all");
   const [peopleSort, setPeopleSort] = useRememberedViewState("people.sort", "name");
   const [peopleSortDirection, setPeopleSortDirection] = useRememberedViewState<"asc" | "desc">("people.sortDirection", "asc");
   const insights = useRosterInsights({ bootstrap, projectId: selectedProject?.id ?? null, seasonId: selectedSeasonId });
@@ -152,7 +151,7 @@ export const RosterView: React.FC<RosterViewProps> = ({
       return priority * (peopleSortDirection === "asc" ? 1 : -1);
     });
   };
-  const filteredSortedStudents = filterMembers(sortedStudents.filter(member => classYearFilter === "all" || (member.classYear ?? "unknown") === classYearFilter));
+  const filteredSortedStudents = filterMembers(sortedStudents);
   const filteredSortedMentors = filterMembers(sortedMentors);
   const filteredSortedExternalMembers = filterMembers(sortedExternalMembers);
 
@@ -210,20 +209,27 @@ export const RosterView: React.FC<RosterViewProps> = ({
 
   const renderMember = (member: MemberRecord) => {
     const load = insightById.get(member.id);
+    const weeklyAttendance = buildAttendanceWeek(
+      member,
+      bootstrap.attendanceRecords.filter((record) => record.memberId === member.id),
+    );
     return <div className="people-member" key={member.id}>
       <RosterMemberRow responsibleGroups={responsibleGroups} member={member} onEditMember={openEditPersonPopup} onSelectMember={openEditPersonPopup} selectedMemberId={selectedMemberId} />
       <div className="people-member-context">
-        <div className="people-member-load-summary">
-          <div aria-label="Weekly capacity" className="people-member-capacity">
-            <small>Capacity</small>
-            <span>{load ? formatAvailabilityLabel(load.availabilityStatus) : "Unrated"} · <strong>{formatHours(load?.plannedWeeklyAttendanceHours ?? member.plannedWeeklyAttendanceHours)} planned / week</strong></span>
-            <span><strong>{formatHours(load?.remainingOpenHours)}</strong> remaining</span>
+        <div className="people-attendance-summary">
+          <div aria-label="Attendance this week" className="people-attendance-days" role="group">
+            {weeklyAttendance.days.map((day) => (
+              <span
+                aria-label={`${day.label} ${day.date}: ${day.state.replace("-", " ")}`}
+                className={`people-attendance-day is-${day.state}`}
+                key={day.date}
+                title={`${day.label} ${day.date}: ${day.state.replace("-", " ")}`}
+              />
+            ))}
           </div>
-          <div aria-label="Task breakdown" className="people-member-task-counts">
-            <div><span>Active</span><strong>{load?.activeTaskCount ?? 0}</strong></div>
-            <div><span>Blocked</span><strong>{load?.blockedTaskCount ?? 0}</strong></div>
-            <div><span>Overdue</span><strong>{load?.overdueTaskCount ?? 0}</strong></div>
-          </div>
+          <span className="people-attendance-percentage">
+            {weeklyAttendance.percentage === null ? "—" : `${weeklyAttendance.percentage}%`} this week
+          </span>
         </div>
         <div className="people-member-activity">
           {load ? <details className="people-workload-details"><summary>Workload and recent activity</summary>
@@ -265,16 +271,6 @@ export const RosterView: React.FC<RosterViewProps> = ({
   ];
   const visibleRosterSections = rosterSections.filter((section) => section.members.length > 0);
   const hasRosterMembers = sortedStudents.length + sortedMentors.length + sortedExternalMembers.length > 0;
-  const cohortBootstrap = availabilityBootstrap ?? bootstrap;
-  const cohortRows = (["freshman", "sophomore", "junior", "senior"] as const).map(year => {
-    const cohort = cohortBootstrap.members.filter(member => (member.role === "student" || member.role === "lead") && member.classYear === year && (!selectedSeasonId || member.seasonId === selectedSeasonId || member.activeSeasonIds?.includes(selectedSeasonId)));
-    const cohortIds = new Set(cohort.map(member => member.id));
-    const groupIds = new Set(cohortBootstrap.responsibleGroups.filter(group => !group.isArchived && group.memberIds.some(id => cohortIds.has(id))).map(group => group.id));
-    const tasks = cohortBootstrap.tasks.filter(task => task.status !== "complete" && ([task.ownerId, ...task.assigneeIds].some(id => id !== null && cohortIds.has(id)) || (task.responsibleGroupId !== null && groupIds.has(task.responsibleGroupId))));
-    const loggedHours = cohortBootstrap.workLogs.filter(log => log.participantIds.some(id => cohortIds.has(id))).reduce((sum, log) => sum + log.hours, 0);
-    return { year, members: cohort.length, tasks, remaining: tasks.reduce((sum, task) => sum + Math.max(0, task.estimatedHours - task.actualHours), 0), loggedHours };
-  });
-
   return (
     <section className={`panel dense-panel roster-layout ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">
@@ -283,7 +279,7 @@ export const RosterView: React.FC<RosterViewProps> = ({
             actions={<>
               <WorkspaceSortMenu direction={peopleSortDirection} field={peopleSort} label="people" onDirectionChange={setPeopleSortDirection} onFieldChange={setPeopleSort} options={[{ label: "Name", value: "name" }, { label: "Group", value: "group" }, { label: "Role", value: "role" }]} />
               <CompactFilterMenu
-                activeCount={(peopleFilter === "all" ? 0 : 1) + (classYearFilter === "all" ? 0 : 1)}
+                activeCount={peopleFilter === "all" ? 0 : 1}
                 ariaLabel="People filters"
                 buttonLabel="Filter people"
                 className="people-search-filter-menu"
@@ -305,7 +301,6 @@ export const RosterView: React.FC<RosterViewProps> = ({
                       </select>
                     ),
                   },
-                  { label: "Class year", content: <select aria-label="Filter by class year" className="toolbar-filter-select" value={classYearFilter} onChange={event => setClassYearFilter(event.target.value)}><option value="all">All class years</option><option value="freshman">Freshman</option><option value="sophomore">Sophomore</option><option value="junior">Junior</option><option value="senior">Senior</option><option value="unknown">Unknown</option></select> },
                 ]}
               />
             </>}
@@ -333,7 +328,6 @@ export const RosterView: React.FC<RosterViewProps> = ({
           <h2>People</h2>
         </div>
       </div>
-      <section className="cohort-metrics" aria-label="Student cohort metrics"><h3>Class year</h3><div className="metric-grid">{cohortRows.map(row => <button key={row.year} onClick={() => setClassYearFilter(classYearFilter === row.year ? "all" : row.year)} aria-pressed={classYearFilter === row.year}><small>{row.year[0].toUpperCase() + row.year.slice(1)}</small><strong>{row.members} members</strong><span>{row.tasks.length} open tasks · {formatHours(row.remaining)} remaining · {formatHours(row.loggedHours)} logged</span></button>)}</div></section>
       <div className="roster-columns">
         {visibleRosterSections.length === 0 ? (
           <p className="empty-state" role="status">
