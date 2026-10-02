@@ -17,5 +17,5 @@
   { "id": "resources-purchases", "label": "Purchases", "section": "resources", "icon": "ShoppingCart", "target": { "tab": "inventory", "inventoryView": "purchases" } },
   { "id": "resources-structure", "label": "Robot", "section": "work", "icon": "Bot", "target": { "tab": "tasks", "taskView": "robot-map" } },
   { "id": "team-people", "label": "People", "section": "team", "icon": "Users", "target": { "tab": "roster", "rosterView": "directory" } },
-  { "id": "team-teams", "label": "Teams", "section": "team", "icon": "UsersRound", "target": { "tab": "teams" } }
+  { "id": "team-teams", "label": "Teams", "section": "team", "icon": "Network", "target": { "tab": "teams" } }
 ]

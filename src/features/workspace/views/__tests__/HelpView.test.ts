@@ -17,7 +17,7 @@ describe("HelpView", () => {
     expect(html).toContain("Resources and structure");
     expect(html).toContain("Team");
     expect(html).toContain("Team → Teams");
-    expect(html).toContain("student leads can have a class year too");
+    expect(html).not.toContain("class year");
     expect(html).toContain("derived open, blocked, overdue");
     expect(html).not.toContain("Team → Attendance");
     expect(html).toContain('href="/docs/CURRENT_WEB_SPEC.md#robot-configuration"');
