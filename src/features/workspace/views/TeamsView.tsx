@@ -208,8 +208,11 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
           </div>
           <div className="team-task-breakdown">
             <span className={`team-task-pie${openTasks.length + completedTasks === 0 ? " is-empty" : ""}`} role="img" aria-label={`${openTasks.length} open and ${completedTasks} completed tasks`} style={{ "--team-task-open-end": `${taskPiePercent * 3.6}deg` } as React.CSSProperties} />
-            <span className="team-task-legend"><span>Open <strong>{openTasks.length}</strong></span><span>Done <strong>{completedTasks}</strong></span></span>
-            <span className="team-task-metrics">{metric("Open", openTasks.length, "open")}{metric("Blocked", blocked.length, "blocked")}{metric("Overdue", overdue.length, "overdue")}</span>
+            <span className="team-task-legend">
+              <button type="button" className="team-task-open-filter" aria-label={`${openTasks.length} open tasks`} aria-pressed={taskDrilldown?.groupId === group.id && taskDrilldown.filter === "open"} onClick={() => setTaskDrilldown({ groupId: group.id, filter: "open" })}>Open <strong>{openTasks.length}</strong></button>
+              <span>Done <strong>{completedTasks}</strong></span>
+            </span>
+            <span className="team-task-metrics">{metric("Blocked", blocked.length, "blocked")}{metric("Overdue", overdue.length, "overdue")}</span>
           </div>
         </div>
         <div className="team-load">{memberSection("Primary", primaryMembers)}{memberSection("Secondary", secondaryMembers)}{contributorMembers.length ? memberSection("Assigned contributors", contributorMembers) : null}</div>
