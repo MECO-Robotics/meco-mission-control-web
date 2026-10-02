@@ -69,7 +69,7 @@ test("deleting a local team clears Task and risk ownership references", () => {
 test("making a local team primary transfers students from their previous primary team", () => {
   const state = snapshot();
   const studentId = "student";
-  state.seasons.push({ id: "season", name: "Season", type: "season", startDate: "2026-01-01", endDate: "2026-12-31" });
+  state.seasons.push({ id: "season", teamId: "team-1", name: "Season", type: "season", startDate: "2026-01-01", endDate: "2026-12-31" });
   state.members.push({ id: studentId, name: "Student", email: "student@example.com", role: "student", elevated: false, seasonId: "season" });
   state.responsibleGroups.push(
     { id: "old-team", seasonId: "season", name: "Old Team", projectIds: [], workTypeIds: [], memberIds: [studentId], primaryMemberIds: [studentId], isArchived: false },
