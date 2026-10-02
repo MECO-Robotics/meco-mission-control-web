@@ -55,7 +55,7 @@ function defaults(resource: string, snapshot: BootstrapPayload): Record<string, 
     case "seasons": return { type: "season", startDate: today, endDate: today };
     case "projects": return { description: "", status: "planned" };
     case "members": return { email: "", elevated: false, role: "student", activeSeasonIds: [], plannedAttendanceDays: [] };
-    case "responsible-groups": return { seasonId: snapshot.seasons[0]?.id ?? "", name: "", projectIds: [], memberIds: [], isArchived: false };
+    case "responsible-groups": return { seasonId: snapshot.seasons[0]?.id ?? "", name: "", projectIds: [], workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: false };
     case "subsystems": return { isCore: false, iteration: 1, mentorIds: [], parentSubsystemId: null, responsibleEngineerId: null };
     case "tasks": return {
       projectId: snapshot.projects[0]?.id ?? "", workTypeId: "", responsibleGroupId: null, workstreamIds: [], title: "", summary: "",
@@ -72,6 +72,10 @@ function defaults(resource: string, snapshot: BootstrapPayload): Record<string, 
 
 function removeReferences(snapshot: BootstrapPayload, resource: string, id: string) {
   if (resource === "part-definitions") snapshot.partInstances = snapshot.partInstances.filter((part) => part.partDefinitionId !== id);
+  if (resource === "responsible-groups") {
+    for (const task of snapshot.tasks) if (task.responsibleGroupId === id) task.responsibleGroupId = null;
+    for (const risk of snapshot.risks) if (risk.ownerGroupId === id) risk.ownerGroupId = null;
+  }
   if (resource === "tasks") {
     snapshot.taskDependencies = snapshot.taskDependencies.filter((dependency) => dependency.taskId !== id);
     snapshot.workLogs = snapshot.workLogs.filter((log) => log.taskId !== id);

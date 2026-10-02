@@ -48,3 +48,20 @@ test("purchase records require a human execution Task and are removed with that 
   command(state, "/tasks/task", {}, "DELETE");
   expect(state.purchaseItems.some(({ id }) => id === purchase.id)).toBe(false);
 });
+
+test("deleting a local team clears Task and risk ownership references", () => {
+  const state = snapshot();
+  const team = { id: "team", seasonId: "season", name: "Team", projectIds: [], workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: false };
+  state.responsibleGroups.push(team);
+  state.tasks[0].responsibleGroupId = team.id;
+  state.risks.push({
+    id: "risk", projectId: state.tasks[0].projectId, title: "Risk", detail: "", category: "other", severity: "low",
+    status: "open", blocksWork: false, source: { kind: "manual" }, relatedTargets: [], mitigationTaskId: null,
+    ownerGroupId: team.id, createdAt: "2026-09-01", updatedAt: "2026-09-01", resolvedAt: null,
+  });
+
+  command(state, `/responsible-groups/${team.id}`, {}, "DELETE");
+
+  expect(state.tasks[0].responsibleGroupId).toBeNull();
+  expect(state.risks[0].ownerGroupId).toBeNull();
+});

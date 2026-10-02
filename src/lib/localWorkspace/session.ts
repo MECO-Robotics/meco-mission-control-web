@@ -4,7 +4,7 @@ import { localRosterInsights } from "./roster";
 import { applyLocalCommand, refreshLocalTaskState } from "./commands";
 
 const STORAGE_KEY = "meco.local-demo.v1";
-const SNAPSHOT_SCHEMA_VERSION = 1;
+const SNAPSHOT_SCHEMA_VERSION = 2;
 export type LocalWorkspaceMode = "demo" | "tutorial" | null;
 type Workspace = { mode: Exclude<LocalWorkspaceMode, null>; snapshot: BootstrapPayload | null; ready: Promise<void> | null };
 let active: Workspace | null = null;
