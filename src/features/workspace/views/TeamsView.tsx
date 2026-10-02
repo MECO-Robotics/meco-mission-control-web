@@ -208,21 +208,21 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
             </details>
             {group.projectIds.length ? <span>{group.projectIds.map(id => projects.find(project => project.id === id)?.name ?? "Unknown project").join(", ")}</span> : null}
           </div>
+          <div className="metric-grid">
+            <div aria-label={`${formatHours(effectiveCapacity)} planned weekly capacity; one week covers ${Math.round(capacityCoverage)}% of ${formatHours(remaining)} estimated hours remaining`}>
+              <span className="team-metric-pie is-capacity" style={{ "--team-metric-progress": `${capacityCoverage}%` } as React.CSSProperties} aria-hidden="true" />
+              <span className="team-metric-label">Capacity</span><strong>{formatHours(effectiveCapacity)} / {formatHours(remaining)}</strong>
+            </div>
+            <div className="team-task-breakdown">
+              <span className={`team-task-pie${taskPieTotal === 0 ? " is-empty" : ""}`} role="img" aria-label={`${openForPie.length} open, ${blocked.length} blocked, ${overdueForPie.length} overdue, and ${completedTasks} completed tasks`} style={{ "--team-task-open-end": `${taskPieOpenEnd}deg`, "--team-task-blocked-end": `${taskPieBlockedEnd}deg`, "--team-task-overdue-end": `${taskPieOverdueEnd}deg` } as React.CSSProperties} />
+              <span className="team-task-legend">
+                <button type="button" className="team-task-open-filter" aria-label={`${openTasks.length} open tasks`} aria-pressed={taskDrilldown?.groupId === group.id && taskDrilldown.filter === "open"} onClick={() => setTaskDrilldown({ groupId: group.id, filter: "open" })}>Open <strong>{openTasks.length}</strong></button>
+                <span>Done <strong>{completedTasks}</strong></span>
+              </span>
+              <span className="team-task-metrics">{metric("Blocked", blocked.length, "blocked")}{metric("Overdue", overdue.length, "overdue")}</span>
+            </div>
+          </div>
         </header>
-        <div className="metric-grid">
-          <div aria-label={`${formatHours(effectiveCapacity)} planned weekly capacity; one week covers ${Math.round(capacityCoverage)}% of ${formatHours(remaining)} estimated hours remaining`}>
-            <span className="team-metric-pie is-capacity" style={{ "--team-metric-progress": `${capacityCoverage}%` } as React.CSSProperties} aria-hidden="true" />
-            <span className="team-metric-label">Capacity</span><strong>{formatHours(effectiveCapacity)} / {formatHours(remaining)}</strong>
-          </div>
-          <div className="team-task-breakdown">
-            <span className={`team-task-pie${taskPieTotal === 0 ? " is-empty" : ""}`} role="img" aria-label={`${openForPie.length} open, ${blocked.length} blocked, ${overdueForPie.length} overdue, and ${completedTasks} completed tasks`} style={{ "--team-task-open-end": `${taskPieOpenEnd}deg`, "--team-task-blocked-end": `${taskPieBlockedEnd}deg`, "--team-task-overdue-end": `${taskPieOverdueEnd}deg` } as React.CSSProperties} />
-            <span className="team-task-legend">
-              <button type="button" className="team-task-open-filter" aria-label={`${openTasks.length} open tasks`} aria-pressed={taskDrilldown?.groupId === group.id && taskDrilldown.filter === "open"} onClick={() => setTaskDrilldown({ groupId: group.id, filter: "open" })}>Open <strong>{openTasks.length}</strong></button>
-              <span>Done <strong>{completedTasks}</strong></span>
-            </span>
-            <span className="team-task-metrics">{metric("Blocked", blocked.length, "blocked")}{metric("Overdue", overdue.length, "overdue")}</span>
-          </div>
-        </div>
         <div className="team-load">{memberSection("Primary", primaryMembers)}{memberSection("Secondary", secondaryMembers)}{contributorMembers.length ? memberSection("Assigned contributors", contributorMembers) : null}</div>
         <details open={taskDrilldown?.groupId === group.id}><summary>{taskDrilldown?.groupId === group.id ? `${taskDrilldown.filter[0].toUpperCase()}${taskDrilldown.filter.slice(1)} tasks` : "Tasks"}</summary>{drilldownTasks.length ? drilldownTasks.map(task => <button className="ghost-button" key={task.id} onClick={() => onOpenTask(task)}>{task.title} · {task.status}</button>) : <p>No tasks match this metric.</p>}</details>
       </article>;
