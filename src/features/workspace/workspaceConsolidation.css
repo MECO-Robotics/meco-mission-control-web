@@ -55,6 +55,9 @@
 .team-card .team-task-pie.is-empty { background: var(--border-base); }
 .team-card .team-task-legend { display: flex; align-items: center; gap: .45rem; color: var(--text-copy); font-size: .72rem; white-space: nowrap; }
 .team-card .team-task-legend > span { display: inline-flex; align-items: baseline; gap: .18rem; }
+.team-card .team-task-legend > .team-task-open-filter { display: inline-flex; align-items: baseline; gap: .18rem; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; font: inherit; }
+.team-card .team-task-open-filter:hover, .team-card .team-task-open-filter[aria-pressed="true"] { color: var(--official-blue); }
+.team-card .team-task-open-filter:focus-visible { outline: 2px solid var(--official-blue); outline-offset: 2px; }
 .team-card .team-task-legend strong { color: var(--text-title); font-variant-numeric: tabular-nums; }
 .team-card .team-task-metrics { display: flex; align-items: center; justify-content: flex-end; gap: .15rem; flex: 1 1 auto; min-width: 0; }
 .team-card .team-task-metrics > button { display: inline-flex; align-items: baseline; gap: .25rem; min-width: 0; padding: .2rem .45rem; border: 0; border-right: 1px solid var(--border-base); border-radius: 0; background: transparent; color: var(--text-copy); cursor: pointer; font: inherit; text-align: left; }
