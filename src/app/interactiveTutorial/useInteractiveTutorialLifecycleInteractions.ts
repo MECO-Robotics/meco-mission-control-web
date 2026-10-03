@@ -4,7 +4,6 @@ import { getInteractiveTutorialStepError } from "./helpers/interactiveTutorialSt
 import { isInteractiveTutorialStepComplete } from "./helpers/interactiveTutorialStepCompletion";
 import { isInteractiveTutorialCreationStep, isInteractiveTutorialDropdownStep, isInteractiveTutorialSearchStep } from "./helpers/interactiveTutorialStepGroups";
 import type { InteractiveTutorialStep, InteractiveTutorialStepCompletionContext } from "./interactiveTutorialTypes";
-import { useInteractiveTutorialLifecycleCreationAdvance } from "./useInteractiveTutorialLifecycleCreationAdvance";
 
 interface UseInteractiveTutorialLifecycleInteractionsOptions {
   currentStep: InteractiveTutorialStep | null;
@@ -31,12 +30,22 @@ export function useInteractiveTutorialLifecycleInteractions({
   latestContext.current = stepCompletionContext;
   const [stepError, setStepError] = useState<string | null>(null);
 
-  useInteractiveTutorialLifecycleCreationAdvance({
-    currentStep,
-    stepCompletionContext,
-    stepBaselineLabelRef,
-    onAdvance,
-  });
+  useEffect(() => {
+    if (!currentStep || !isInteractiveTutorialCreationStep(currentStep)) {
+      return;
+    }
+
+    const context = {
+      ...stepCompletionContext,
+      stepBaselineLabel: stepBaselineLabelRef.current,
+    };
+    if (!isInteractiveTutorialStepComplete(currentStep, context)) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(onAdvance, 120);
+    return () => window.clearTimeout(timeoutId);
+  }, [currentStep, onAdvance, stepBaselineLabelRef, stepCompletionContext]);
 
   useEffect(() => {
     if (!currentStep) {
@@ -169,9 +178,9 @@ export function useInteractiveTutorialLifecycleInteractions({
       timeouts.forEach((id) => window.clearTimeout(id));
       document.removeEventListener("click", handleClickCapture, true);
       document.removeEventListener("change", handleChangeCapture, true);
-    document.removeEventListener("input", handleInputCapture, true);
-    window.removeEventListener("keydown", handleKeyDown);
-  };
+      document.removeEventListener("input", handleInputCapture, true);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, [
     currentStep,
     onAdvance,
