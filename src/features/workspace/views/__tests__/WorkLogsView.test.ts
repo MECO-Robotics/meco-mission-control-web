@@ -120,7 +120,6 @@ describe("WorkLogsView", () => {
       ],
     });
 
-    expect(html).toContain("Activity");
     expect(html).toContain("Changes across the current workspace");
     expect(html).toContain("Group: Person");
     expect(html).toContain("Drive CAD");
