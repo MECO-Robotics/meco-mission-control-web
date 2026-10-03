@@ -2,13 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import { useInteractiveTutorialLifecycleInteractions } from "../useInteractiveTutorialLifecycleInteractions";
 import { isInteractiveTutorialStepComplete } from "../helpers/interactiveTutorialStepCompletion";
 import type { InteractiveTutorialStepId, InteractiveTutorialStepCompletionContext } from "../interactiveTutorialTypes";
+import type { BootstrapPayload } from "@/types/bootstrap";
 
 jest.mock("react", () => ({ useEffect: jest.fn(), useState: jest.fn(), useRef: jest.fn() }));
-jest.mock("../useInteractiveTutorialLifecycleCreationAdvance", () => ({ useInteractiveTutorialLifecycleCreationAdvance: jest.fn() }));
 
 const listeners = new Map<string, (event: unknown) => void>();
 const setError = jest.fn();
-let cleanup: (() => void) | undefined;
+const effectCleanups: Array<() => void> = [];
+function cleanup() {
+  effectCleanups.splice(0).forEach((dispose) => dispose());
+}
 class TestElement {
   value = "";
   private readonly card: boolean;
@@ -26,14 +29,31 @@ class TestElement {
   getAttribute() { return "Timeline interval: Week"; }
 }
 const context = { tutorialSeasonId: "tutorial", selectedSeasonId: "tutorial", tutorialProjectId: "robot" } as InteractiveTutorialStepCompletionContext;
+const completedTaskContext = {
+  ...context,
+  tutorialProjectId: "tutorial-project",
+  tutorialSeasonId: null,
+  baselineCounts: {
+    tasks: 0, workLogs: 0, partDefinitions: 0, partInstances: 0, subsystems: 0, mechanisms: 0,
+    students: 0, materials: 0, purchaseItems: 0, milestones: 0, cncJobs: 0, printJobs: 0,
+    fabricationJobs: 0, completedPrintJobs: 0, documents: 0,
+  },
+  bootstrap: {
+    tasks: [{ id: "task-1", projectId: "tutorial-project" }],
+    workLogs: [], partDefinitions: [], partInstances: [], subsystems: [], mechanisms: [], members: [],
+    materials: [], purchaseItems: [], milestones: [], manufacturingItems: [], artifacts: [],
+  } as unknown as BootstrapPayload,
+} as InteractiveTutorialStepCompletionContext;
 beforeEach(() => {
   jest.resetAllMocks();
   jest.useFakeTimers();
   listeners.clear();
-  cleanup = undefined;
-  jest.mocked(useEffect).mockImplementation((effect) => { cleanup = effect() as typeof cleanup; });
+  effectCleanups.length = 0;
+  jest.mocked(useEffect).mockImplementation((effect) => {
+    const dispose = effect();
+    if (typeof dispose === "function") effectCleanups.push(dispose);
+  });
   jest.mocked(useState).mockReturnValue([null, setError]);
-  jest.mocked(useRef).mockReturnValue({ current: context });
   const addEventListener = (name: string, listener: (event: unknown) => void) => listeners.set(name, listener);
   const removeEventListener = (name: string, listener: (event: unknown) => void) => {
     if (listeners.get(name) === listener) listeners.delete(name);
@@ -45,31 +65,36 @@ beforeEach(() => {
   });
 });
 afterEach(() => {
-  cleanup?.();
+  cleanup();
   jest.useRealTimers();
-  Reflect.deleteProperty(globalThis, "window"); Reflect.deleteProperty(globalThis, "document"); Reflect.deleteProperty(globalThis, "Element");
+  Reflect.deleteProperty(globalThis, "window");
+  Reflect.deleteProperty(globalThis, "document");
+  Reflect.deleteProperty(globalThis, "Element");
 });
-function InteractionHarness(id: InteractiveTutorialStepId = "season") {
+function InteractionHarness(
+  id: InteractiveTutorialStepId = "season",
+  stepCompletionContext: InteractiveTutorialStepCompletionContext = context,
+) {
   const target = new TestElement();
+  const interactionRef = { current: {} as { stepCompletionContext: InteractiveTutorialStepCompletionContext; onAdvance: () => void; onClose: () => void } };
   const options = {
     currentStep: { id, title: "Step", instruction: "Continue", selector: ".target" },
-    stepCompletionContext: context, tutorialSeasonName: "Tutorial", tutorialProjectName: "Robot",
+    stepCompletionContext, tutorialSeasonName: "Tutorial", tutorialProjectName: "Robot",
     onAdvance: jest.fn(), onClose: jest.fn(), targetRef: { current: target as unknown as HTMLElement }, stepBaselineLabelRef: { current: null },
   };
+  interactionRef.current = { stepCompletionContext, onAdvance: options.onAdvance, onClose: options.onClose };
+  jest.mocked(useRef).mockReturnValue(interactionRef);
   const Render = () => useInteractiveTutorialLifecycleInteractions(options);
   Render();
   return {
     ...options, target,
     updateCallbacks(onAdvance: () => void, onClose: () => void) {
       Object.assign(options, { onAdvance, onClose });
-      jest.mocked(useEffect).mockImplementationOnce(() => {});
-      Render();
+      interactionRef.current = { ...interactionRef.current, onAdvance, onClose };
     },
     updateContext(next: InteractiveTutorialStepCompletionContext) {
       options.stepCompletionContext = next;
-      // Context changes update the ref without reinstalling this effect.
-      jest.mocked(useEffect).mockImplementationOnce(() => {});
-      Render();
+      interactionRef.current = { ...interactionRef.current, stepCompletionContext: next };
     },
   };
 }
@@ -151,7 +176,7 @@ test("ordinary clicks retain the delayed error path and creation clicks leave ad
   jest.advanceTimersByTime(100);
   expect(first.onAdvance).not.toHaveBeenCalled();
   expect(setError).toHaveBeenLastCalledWith("Click Edit task from the timeline task details popup.");
-  cleanup?.();
+  cleanup();
   const creation = InteractionHarness("create-task");
   emit("click", new TestElement());
   expect(setError).toHaveBeenLastCalledWith(null);
@@ -159,12 +184,25 @@ test("ordinary clicks retain the delayed error path and creation clicks leave ad
   expect(creation.onAdvance).not.toHaveBeenCalled();
 });
 
+test("completed creation steps advance after a delay and cleanup cancels pending advances", () => {
+  const pending = InteractionHarness("create-task", completedTaskContext);
+  jest.advanceTimersByTime(119);
+  expect(pending.onAdvance).not.toHaveBeenCalled();
+  cleanup();
+  jest.runAllTimers();
+  expect(pending.onAdvance).not.toHaveBeenCalled();
+
+  const completed = InteractionHarness("create-task", completedTaskContext);
+  jest.advanceTimersByTime(120);
+  expect(completed.onAdvance).toHaveBeenCalledTimes(1);
+});
+
 test("cleanup cancels click and change timers and removes every listener", () => {
   const { target, onAdvance } = InteractionHarness();
   emit("click", new TestElement(false, true));
   emit("change", target);
   expect(jest.getTimerCount()).toBe(2);
-  cleanup?.();
+  cleanup();
   expect(listeners.size).toBe(0);
   jest.runAllTimers();
   expect(onAdvance).not.toHaveBeenCalled();
