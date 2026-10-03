@@ -32,6 +32,10 @@ function renderTopbar(
       activeViewLabel: options.activeViewLabel ?? "Timeline",
       isDarkMode: options.isDarkMode ?? false,
       isSidebarCollapsed: options.isSidebarCollapsed ?? false,
+      onCreateMilestone: jest.fn(),
+      onCreatePart: jest.fn(),
+      onCreateQaReport: jest.fn(),
+      onCreateTask: jest.fn(),
     }),
   );
 }

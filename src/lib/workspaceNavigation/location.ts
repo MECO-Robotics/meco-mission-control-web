@@ -11,6 +11,8 @@ export function readNavigationLocation(search: string, context: ViewAvailability
   const presentation = params.get("presentation");
   if (id === "work-schedule" && params.get("milestone")) return { ...target, taskView: "agenda", milestoneId: params.get("milestone")! };
   if (id === "work-schedule" && (presentation === "timeline" || presentation === "agenda")) return { ...target, taskView: presentation };
+  if (id === "work-activity" && presentation === "activity") return { ...target, worklogsView: "activity" };
+  if (id === "resources-qa-reports" && presentation === "results") return { ...target, worklogsView: "results" };
   if (id === "resources-structure" && mode === "cad" && context === "robot-project") return { tab: "cad" };
   return target;
 }
@@ -25,6 +27,8 @@ export function writeNavigationLocation(state: NavigationState, context: ViewAva
   params.delete("utility");
   if (state.activeTab === "help") params.set("utility", "help");
   if (id === "work-schedule" && state.taskView !== "calendar") params.set("presentation", state.taskView);
+  if (id === "work-activity" && state.worklogsView !== "logs") params.set("presentation", state.worklogsView);
+  if (id === "resources-qa-reports" && state.worklogsView !== "qa") params.set("presentation", state.worklogsView);
   if (id === "resources-structure" && state.activeTab === "cad") params.set("mode", "cad");
   return `?${params.toString()}`;
 }
