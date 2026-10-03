@@ -49,7 +49,6 @@ function renderWorkLogsView(
         },
       },
       view,
-      onViewChange: jest.fn(),
     }),
   );
 }

@@ -9,6 +9,7 @@
   { "id": "home", "label": "Dashboard", "section": "work", "icon": "LayoutDashboard", "target": { "tab": "home" } },
   { "id": "work-tasks", "label": "Kanban", "section": "work", "icon": "ListTodo", "target": { "tab": "tasks", "taskView": "kanban" } },
   { "id": "work-schedule", "label": "Schedule", "section": "work", "icon": "CalendarDays", "target": { "tab": "tasks", "taskView": "calendar" } },
+  { "id": "work-activity", "label": "Activity", "section": "work", "icon": "Activity", "target": { "tab": "worklogs", "worklogsView": "logs" } },
   { "id": "work-risks", "label": "Risks", "section": "work", "icon": "ShieldAlert", "target": { "tab": "risks" } },
   { "id": "resources-materials", "label": "Materials", "section": "resources", "icon": "Boxes", "target": { "tab": "inventory", "inventoryView": "materials" } },
   { "id": "resources-documents", "label": "Documents", "section": "resources", "icon": "FileText", "target": { "tab": "documents" } },
