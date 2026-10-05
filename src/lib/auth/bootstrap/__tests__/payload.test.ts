@@ -187,6 +187,8 @@ describe("normalizeBootstrapPayload", () => {
       relatedTargets: [{ kind: "task" as const, id: source.tasks[0].id }],
       mitigationTaskId: null,
       ownerGroupId: null,
+        ownerMemberId: null,
+        mitigationDueDate: null,
       createdAt: "2026-01-01T00:00:00.000Z",
       updatedAt: "2026-01-01T00:00:00.000Z",
       resolvedAt: null,

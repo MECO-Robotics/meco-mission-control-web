@@ -97,6 +97,7 @@ export interface WorkspaceContentProps {
   openCreateWorkstreamModal: () => void;
   openEditWorkstreamModal: (workstream: BootstrapPayload["workstreams"][number]) => void;
   onDeleteRisk: (riskId: string) => Promise<void>;
+  onCreateRisk: (payload: RiskPayload) => Promise<void>;
   openEditArtifactModal: (artifact: ArtifactRecord) => void;
   openEditMaterialModal: (item: MaterialRecord) => void;
   openEditMechanismModal: (mechanism: BootstrapPayload["mechanisms"][number]) => void;

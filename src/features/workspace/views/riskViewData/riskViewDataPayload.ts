@@ -18,6 +18,8 @@ export function toRiskPayload(risk: RiskRecord): RiskPayload {
     blocksWork: risk.blocksWork, source: risk.source,
     relatedTargets: risk.relatedTargets, mitigationTaskId: risk.mitigationTaskId,
     ownerGroupId: risk.ownerGroupId,
+    ownerMemberId: risk.ownerMemberId,
+    mitigationDueDate: risk.mitigationDueDate,
   };
 }
 
@@ -28,6 +30,8 @@ export function sanitizeRiskPayload(payload: RiskPayload): RiskPayload {
     detail: payload.detail.trim(),
     mitigationTaskId: payload.mitigationTaskId?.trim() || null,
     ownerGroupId: payload.ownerGroupId?.trim() || null,
+    ownerMemberId: payload.ownerMemberId?.trim() || null,
+    mitigationDueDate: payload.mitigationDueDate?.trim() || null,
     relatedTargets: payload.relatedTargets.filter((target) => target.id.trim()).map((target) => ({ ...target, id: target.id.trim() })),
   };
 }

@@ -87,6 +87,8 @@ function createOverviewBootstrap() {
         relatedTargets: [{ kind: "project", id: project.id }],
         mitigationTaskId: null,
         ownerGroupId: null,
+        ownerMemberId: null,
+        mitigationDueDate: null,
         createdAt: "2026-05-17",
         updatedAt: "2026-05-17",
         resolvedAt: null,

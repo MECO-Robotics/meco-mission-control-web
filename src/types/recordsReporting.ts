@@ -54,7 +54,7 @@ export interface RiskRecord {
   detail: string;
   category: "dependency" | "design" | "manufacturing" | "supply" | "schedule" | "qa" | "inventory" | "other";
   severity: RiskSeverity;
-  status: "open" | "mitigating" | "accepted" | "resolved";
+  status: "open" | "in-progress" | "blocked" | "resolved";
   blocksWork: boolean;
   source:
     | { kind: "manual" }
@@ -62,6 +62,8 @@ export interface RiskRecord {
   relatedTargets: DomainReference[];
   mitigationTaskId: string | null;
   ownerGroupId: string | null;
+  ownerMemberId: string | null;
+  mitigationDueDate: string | null;
   createdAt: string;
   updatedAt: string;
   resolvedAt: string | null;

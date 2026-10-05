@@ -66,7 +66,9 @@ describe("Task Queue cards", () => {
 
   it("shows blocker count in place of logged hours when blockers exist", () => {
     const bootstrap = createBootstrap();
-    bootstrap.risks = [{ id: "risk-blocker", projectId: "project-1", title: "Needs material", detail: "Part stock is unavailable", category: "supply", severity: "medium", status: "open", blocksWork: true, source: { kind: "manual" }, relatedTargets: [{ kind: "task", id: "task-1" }], mitigationTaskId: null, ownerGroupId: null, createdAt: "2026-01-01", updatedAt: "2026-01-01", resolvedAt: null }];
+    bootstrap.risks = [{ id: "risk-blocker", projectId: "project-1", title: "Needs material", detail: "Part stock is unavailable", category: "supply", severity: "medium", status: "open", blocksWork: true, source: { kind: "manual" }, relatedTargets: [{ kind: "task", id: "task-1" }], mitigationTaskId: null, ownerGroupId: null,
+        ownerMemberId: null,
+        mitigationDueDate: null, createdAt: "2026-01-01", updatedAt: "2026-01-01", resolvedAt: null }];
     bootstrap.workLogs = [
       { id: "log-1", taskId: "task-1", date: "2026-01-02", participantIds: ["member-1"], hours: 3.5, notes: "Prepared connector" },
     ];

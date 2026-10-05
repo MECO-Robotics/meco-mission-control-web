@@ -27,7 +27,7 @@ export function buildAttentionViewModel({ activePersonFilter, bootstrap }: { act
   }));
   const riskRows: AttentionTriageItem[] = openRisks.map((risk) => ({
     actionType: "open-risk", contextLabel: projectsById.get(risk.projectId)?.name ?? "Project", id: `risk-${risk.id}`, kind: "risk",
-    ownerLabel: risk.ownerGroupId ? bootstrap.responsibleGroups.find((group) => group.id === risk.ownerGroupId)?.name ?? "Unassigned" : "Unassigned",
+    ownerLabel: risk.ownerMemberId ? bootstrap.members.find((member) => member.id === risk.ownerMemberId)?.name ?? "Unassigned" : "Unassigned",
     recordId: risk.id, severityLabel: risk.severity, statusLabel: risk.status, subtitle: risk.detail, title: risk.title,
   }));
   const groups = [

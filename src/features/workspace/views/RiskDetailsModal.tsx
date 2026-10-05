@@ -15,6 +15,7 @@ interface RiskDetailsModalProps {
   getTargetLabel: (target: RiskRecord["relatedTargets"][number]) => string;
   getMitigationLabel: (risk: RiskRecord) => string;
   getSourceLabel: (risk: RiskRecord) => string;
+  ownerLabel: string;
   onClose: () => void;
   onEditRisk: () => void;
   onOpenSchedule?: (milestoneId: string) => void;
@@ -26,6 +27,7 @@ export function RiskDetailsModal({
   getTargetLabel,
   getMitigationLabel,
   getSourceLabel,
+  ownerLabel,
   onClose,
   onEditRisk,
   onOpenSchedule,
@@ -91,6 +93,14 @@ export function RiskDetailsModal({
           <div className="field">
             <span>Mitigation task</span>
             <p className="task-detail-copy">{getMitigationLabel(activeRisk)}</p>
+          </div>
+          <div className="field">
+            <span>Owner</span>
+            <p className="task-detail-copy">{ownerLabel}</p>
+          </div>
+          <div className="field">
+            <span>Status · mitigation due</span>
+            <p className="task-detail-copy">{activeRisk.status} · {activeRisk.mitigationDueDate ?? "No due date"}</p>
           </div>
           <div className="field modal-wide">
             <span>Risk ownership</span>

@@ -91,6 +91,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
           availabilityBootstrap={c.bootstrap}
           bootstrap={c.scopedBootstrap}
           onDeleteRisk={c.handleDeleteRisk}
+          onCreateRisk={c.handleCreateRisk}
           onUpdateRisk={c.handleUpdateRisk}
           showCncMentorQuickActions={
             c.signedInMember?.role === "mentor" ||

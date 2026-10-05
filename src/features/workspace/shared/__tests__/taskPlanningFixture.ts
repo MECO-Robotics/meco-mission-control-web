@@ -83,6 +83,8 @@ export const bootstrap: BootstrapPayload = {
     relatedTargets: [{ kind: "task", id: "task-b" }],
     mitigationTaskId: null,
     ownerGroupId: null,
+        ownerMemberId: null,
+        mitigationDueDate: null,
     createdAt: "2026-04-20T00:00:00.000Z",
     updatedAt: "2026-04-20T00:00:00.000Z",
     resolvedAt: null,

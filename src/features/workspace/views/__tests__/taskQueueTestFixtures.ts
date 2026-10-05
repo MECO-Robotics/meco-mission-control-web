@@ -110,7 +110,9 @@ function createTaskQueueBootstrap(): BootstrapPayload {
       },
     ],
     taskDependencies: [{ id: "dependency-1", taskId: "task-3", kind: "task", refId: "task-1", requiredState: "complete", dependencyType: "hard", createdAt: "2026-01-01" }],
-    risks: [{ id: "risk-1", projectId: "project-1", title: "Waiting on parts", detail: "Parts are not available", category: "supply", severity: "medium", status: "open", blocksWork: true, source: { kind: "manual" }, relatedTargets: [{ kind: "task", id: "task-4" }], mitigationTaskId: null, ownerGroupId: null, createdAt: "2026-01-01", updatedAt: "2026-01-01", resolvedAt: null }],
+    risks: [{ id: "risk-1", projectId: "project-1", title: "Waiting on parts", detail: "Parts are not available", category: "supply", severity: "medium", status: "open", blocksWork: true, source: { kind: "manual" }, relatedTargets: [{ kind: "task", id: "task-4" }], mitigationTaskId: null, ownerGroupId: null,
+        ownerMemberId: null,
+        mitigationDueDate: null, createdAt: "2026-01-01", updatedAt: "2026-01-01", resolvedAt: null }],
     tasks: Array.from({ length: 16 }, (_, index) => {
       const taskIndex = index + 1;
 

@@ -172,12 +172,14 @@ export interface RiskPayload {
   detail: string;
   severity: RiskSeverity;
   category: "dependency" | "design" | "manufacturing" | "supply" | "schedule" | "qa" | "inventory" | "other";
-  status: "open" | "mitigating" | "accepted" | "resolved";
+  status: "open" | "in-progress" | "blocked" | "resolved";
   blocksWork: boolean;
   source: { kind: "manual" } | { kind: "task" | "task-dependency" | "qa-finding" | "test-finding" | "qa-request" | "test-result" | "report" | "event" | "milestone" | "manufacturing-details" | "part-instance" | "material"; id: string };
   relatedTargets: DomainReference[];
   mitigationTaskId: string | null;
   ownerGroupId: string | null;
+  ownerMemberId: string | null;
+  mitigationDueDate: string | null;
 }
 
 export interface PartDefinitionPayload {

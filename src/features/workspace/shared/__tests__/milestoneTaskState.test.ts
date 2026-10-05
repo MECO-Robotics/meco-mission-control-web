@@ -139,7 +139,9 @@ describe("milestoneTaskState", () => {
         category: "inventory" as const, severity: "medium" as const, status: "open" as const,
         blocksWork: true, source: { kind: "manual" as const },
         relatedTargets: [{ kind: "task" as const, id: "task-2" }], mitigationTaskId: null,
-        ownerGroupId: null, createdAt: "2026-01-01", updatedAt: "2026-01-01", resolvedAt: null,
+        ownerGroupId: null,
+        ownerMemberId: null,
+        mitigationDueDate: null, createdAt: "2026-01-01", updatedAt: "2026-01-01", resolvedAt: null,
       }],
       expected: "blocked",
       tasks: [
