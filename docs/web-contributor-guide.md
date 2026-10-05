@@ -54,22 +54,26 @@ needed.
 
 ## Workspace Topbar Contract
 
-The app topbar owns the page title. Do not repeat that title as a heading inside
-the view. Keep operational screens free of explanatory header paragraphs; put
+The app topbar and navigation own the page context. Views must not render a
+title, eyebrow, subtitle, tagline, or introductory header at the top of their
+content. Keep operational screens free of explanatory header paragraphs; put
 product instructions in Help or tutorial content.
 
-Every workspace view must use the standard shared topbar. Put responsive search,
-filters, and sort controls together in the search bar, using its action area for
-filters and sorting. Put extra view-specific controls in the controls slot and
-creation actions in the plus slot. Use `TopbarResponsiveSearch`,
-`WorkspaceTopbarControls`, `WorkspaceSortMenu`/`CompactFilterMenu`, and
-`WorkspaceTopbarAddMenu` rather than inline substitutes. Each control must act
-on the current view's data. If a control does not apply to a destination, do not
-show a dead or decorative placeholder.
+Every workspace view must use the standard shared topbar. New view-local
+**Add**/**Create** buttons are prohibited unless the product spec explicitly
+requires a view-local button. Put creation actions in the existing plus slot.
 
-Before adding a view header or action, check `AppTopbar` and existing slot
-consumers. Add view guidance to Help/tutorial content instead of duplicating it
-above the data.
+Do not add a view-local filter bar or controls. Add filters only when explicitly
+required by the product spec, and place them in the shared topbar search bar's
+action area alongside sorting. Put other view-specific controls in the controls
+slot. Use `TopbarResponsiveSearch`, `WorkspaceTopbarControls`,
+`WorkspaceSortMenu`/`CompactFilterMenu`, and `WorkspaceTopbarAddMenu` rather than
+inline substitutes. Each control must act on the current view's data. If a
+control does not apply to a destination, do not show a dead or decorative
+placeholder.
+
+Before changing view chrome, check `AppTopbar` and existing slot consumers. Add
+view guidance to Help/tutorial content instead of duplicating it above the data.
 
 ## Modal And Edit Flows
 
