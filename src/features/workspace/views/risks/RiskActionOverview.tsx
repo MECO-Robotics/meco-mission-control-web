@@ -1,9 +1,11 @@
-import { useMemo, useState, type DragEvent } from "react";
+import { useMemo, useState } from "react";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { buildSingleAddMenuAction } from "@/features/workspace/shared/topbar";
 import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
+import { KanbanColumns } from "@/features/workspace/views/kanban/KanbanColumns";
+import { KanbanScrollFrame } from "@/features/workspace/views/kanban/KanbanScrollFrame";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { RiskPayload } from "@/types/payloads";
 import type { RiskRecord } from "@/types/recordsReporting";
@@ -66,10 +68,17 @@ export function RiskActionOverview({ activePersonFilter, bootstrap, onCreateRisk
     const task = bootstrap.tasks.find((item) => item.id === risk.mitigationTaskId);
     return task ? `Mitigation · ${task.title} · ${task.status}` : "No mitigation task";
   };
-  const moveSeverity = (event: DragEvent<HTMLElement>, severity: RiskRecord["severity"]) => {
-    const id = event.dataTransfer.getData("text/risk-id");
-    changeRiskSeverity(bootstrap.risks, id, severity, onUpdateRisk);
-  };
+  const risksBySeverity = useMemo(() => ({
+    critical: risks.filter((risk) => risk.severity === "critical"),
+    high: risks.filter((risk) => risk.severity === "high"),
+    medium: risks.filter((risk) => risk.severity === "medium"),
+    low: risks.filter((risk) => risk.severity === "low"),
+  }), [risks]);
+  const severityColumns = useMemo(() => severities.map((severity) => ({
+    state: severity,
+    count: risksBySeverity[severity].length,
+    header: <h3>{severity}</h3>,
+  })), [risksBySeverity]);
   return <>
     <TopbarResponsiveSearch
       actions={<CompactFilterMenu
@@ -99,10 +108,34 @@ export function RiskActionOverview({ activePersonFilter, bootstrap, onCreateRisk
     <div className="risk-action-counts">
       {actionCounts.map(({ label, risks: rows }) => <section className="risk-action-count" key={label}><span>{label}</span><strong>{rows.length}</strong><ul>{rows.map((risk) => <li key={risk.id}><button className="ghost-button" onClick={() => onOpenRisk(risk)} type="button">{risk.title}</button></li>)}</ul></section>)}
     </div>
-    <div className="risk-severity-board" aria-label="Risks by severity">{severities.map((severity) => {
-      const lane = risks.filter((risk) => risk.severity === severity);
-      return <section className="risk-severity-lane" key={severity} onDragOver={(event) => event.preventDefault()} onDrop={(event) => moveSeverity(event, severity)}><h3>{severity} <span>{lane.length}</span></h3>{lane.map((risk) => <article className="risk-board-card" draggable onDragStart={(event) => event.dataTransfer.setData("text/risk-id", risk.id)} key={risk.id}><button className="risk-board-title" onClick={() => onOpenRisk(risk)} type="button">{risk.title}</button><p>{ownerName(risk)} · {risk.status}</p><small>{risk.mitigationDueDate ? `${overdueIds.has(risk.id) ? "Overdue · " : "Due · "}${risk.mitigationDueDate}` : "No due date"}</small><small>{taskName(risk)}</small></article>)}</section>;
-    })}</div>
+    <KanbanScrollFrame>
+      <KanbanColumns
+        boardClassName="task-queue-board risk-severity-kanban"
+        canDropItem={(risk, severity) => risk.severity !== severity}
+        columnBodyClassName="task-queue-board-column-body"
+        columnClassName="task-queue-board-column"
+        columnEmptyClassName="task-queue-board-column-empty"
+        columnHeaderClassName="task-queue-board-column-header"
+        columnCountClassName="task-queue-board-column-count"
+        columns={severityColumns}
+        emptyLabel="No risks"
+        getItemDragLabel={(risk) => risk.title}
+        getItemId={(risk) => risk.id}
+        itemsByState={risksBySeverity}
+        onItemDrop={(risk, severity) => changeRiskSeverity(bootstrap.risks, risk.id, severity, onUpdateRisk)}
+        renderItem={(risk, _severity, dragProps) => (
+          <article
+            {...dragProps}
+            className={`task-queue-board-card risk-board-card${dragProps?.className ? ` ${dragProps.className}` : ""}`}
+          >
+            <button className="risk-board-title" onClick={() => onOpenRisk(risk)} type="button">{risk.title}</button>
+            <p>{ownerName(risk)} · {risk.status}</p>
+            <small>{risk.mitigationDueDate ? `${overdueIds.has(risk.id) ? "Overdue · " : "Due · "}${risk.mitigationDueDate}` : "No due date"}</small>
+            <small>{taskName(risk)}</small>
+          </article>
+        )}
+      />
+    </KanbanScrollFrame>
     </section>
   </>;
 }
