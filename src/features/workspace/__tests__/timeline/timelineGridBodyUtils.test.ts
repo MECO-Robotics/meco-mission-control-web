@@ -191,6 +191,8 @@ describe("timeline task dependency counts and status", () => {
           relatedTargets: [{ kind: "task", id: "task-blocked" }],
           mitigationTaskId: null,
           ownerGroupId: null,
+        ownerMemberId: null,
+        mitigationDueDate: null,
           createdAt: "2026-02-01T00:00:00.000Z",
           updatedAt: "2026-02-01T00:00:00.000Z",
           resolvedAt: null,

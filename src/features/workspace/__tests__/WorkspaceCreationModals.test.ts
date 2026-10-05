@@ -62,6 +62,8 @@ function createModalBootstrap() {
     relatedTargets: [{ kind: "project", id: "project-1" }],
     mitigationTaskId: "task-1",
     ownerGroupId: null,
+        ownerMemberId: null,
+        mitigationDueDate: null,
     createdAt: "2026-05-01",
     updatedAt: "2026-05-01",
     resolvedAt: null,

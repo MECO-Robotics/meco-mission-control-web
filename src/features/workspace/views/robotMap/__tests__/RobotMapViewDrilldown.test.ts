@@ -31,6 +31,8 @@ describe("RobotMapView drilldowns", () => {
           relatedTargets: [{ kind: "part-instance", id: "part-instance-1" }],
           mitigationTaskId: null,
           ownerGroupId: null,
+        ownerMemberId: null,
+        mitigationDueDate: null,
           createdAt: "2026-01-01",
           updatedAt: "2026-01-01",
           resolvedAt: null,

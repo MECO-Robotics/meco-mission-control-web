@@ -72,6 +72,8 @@ function createBootstrap(overrides: Partial<BootstrapPayload> = {}): BootstrapPa
       id: "risk-1",
       mitigationTaskId: null,
       ownerGroupId: null,
+        ownerMemberId: null,
+        mitigationDueDate: null,
       projectId: "project-1",
       relatedTargets: [{ id: "blocked-task", kind: "task" }],
       resolvedAt: null,

@@ -2,13 +2,23 @@ import { useCallback } from "react";
 
 import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
 import { toErrorMessage } from "@/lib/appUtils/common";
-import { deleteRiskRecord, updateRiskRecord } from "@/lib/auth/records/reporting";
+import { createRiskRecord, deleteRiskRecord, updateRiskRecord } from "@/lib/auth/records/reporting";
 import type { RiskPayload } from "@/types/payloads";
 import { sanitizeRiskPayload } from "@/features/workspace/views/riskViewData/riskViewDataPayload";
 
 export type AppWorkspaceReportRiskActions = ReturnType<typeof useAppWorkspaceReportRiskActions>;
 
 export function useAppWorkspaceReportRiskActions(model: AppWorkspaceModel) {
+  const handleCreateRisk = useCallback(async (payload: RiskPayload) => {
+    model.setDataMessage(null);
+    try {
+      await createRiskRecord(sanitizeRiskPayload(payload), model.handleUnauthorized);
+      await model.loadWorkspace();
+    } catch (error) {
+      model.setDataMessage(toErrorMessage(error));
+      throw error;
+    }
+  }, [model]);
   const handleUpdateRisk = useCallback(
     async (riskId: string, payload: RiskPayload) => {
       model.setDataMessage(null);
@@ -40,6 +50,7 @@ export function useAppWorkspaceReportRiskActions(model: AppWorkspaceModel) {
   );
 
   return {
+    handleCreateRisk,
     handleDeleteRisk,
     handleUpdateRisk,
   };

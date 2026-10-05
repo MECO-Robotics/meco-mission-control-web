@@ -128,3 +128,19 @@
 .attention-reasons summary, .people-workload-details summary { cursor: pointer; font-size: .875rem; }
 .attention-reasons li { margin-block: .4rem; max-width: 75ch; }
 .people-workload-details[open] { display: flex; flex-direction: column; gap: .4rem; }
+/* Action-first risk overview and severity triage. */
+.risk-action-workspace { display: grid; gap: 1rem; margin: 1rem 0; }
+.risk-action-counts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+.risk-action-count, .risk-severity-lane { min-width: 0; padding: .8rem; border: 1px solid var(--border-base); border-radius: .75rem; background: var(--bg-row-alt); }
+.risk-action-count > span { color: var(--text-copy); }
+.risk-action-count > strong { display: block; font-size: 1.5rem; }
+.risk-action-count ul { margin: .4rem 0 0; padding-left: 1.2rem; }
+.risk-action-filters { display: flex; flex-wrap: wrap; gap: .75rem; }
+.risk-action-filters label { display: grid; gap: .25rem; color: var(--text-copy); font-size: .85rem; }
+.risk-severity-board { display: grid; grid-template-columns: repeat(4, minmax(13rem, 1fr)); gap: .75rem; overflow-x: auto; }
+.risk-severity-lane { min-height: 8rem; }
+.risk-severity-lane h3 { display: flex; justify-content: space-between; text-transform: capitalize; }
+.risk-board-card { display: grid; gap: .25rem; margin: .5rem 0; padding: .65rem; border: 1px solid var(--border-base); border-radius: .55rem; background: var(--bg-panel); cursor: grab; }
+.risk-board-card p, .risk-board-card small { margin: 0; color: var(--text-copy); }
+.risk-board-title { padding: 0; border: 0; background: none; color: var(--text-title); font: inherit; font-weight: 650; text-align: left; cursor: pointer; }
+@media (max-width: 760px) { .risk-action-counts { grid-template-columns: 1fr; } }

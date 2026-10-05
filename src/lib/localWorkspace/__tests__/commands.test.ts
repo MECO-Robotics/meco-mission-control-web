@@ -35,7 +35,9 @@ test("local Tasks derive blocked state from canonical Risks and dependencies", (
   state.risks.push({
     id: "risk", projectId: task.projectId, title: "Blocked", detail: "", category: "supply", severity: "high",
     status: "open", blocksWork: true, source: { kind: "manual" }, relatedTargets: [{ kind: "task", id: task.id }],
-    mitigationTaskId: null, ownerGroupId: null, createdAt: "2026-09-01", updatedAt: "2026-09-01", resolvedAt: null,
+    mitigationTaskId: null, ownerGroupId: null,
+        ownerMemberId: null,
+        mitigationDueDate: null, createdAt: "2026-09-01", updatedAt: "2026-09-01", resolvedAt: null,
   });
   applyLocalCommand(state, "/risks/risk", { method: "PATCH", body: JSON.stringify({ status: "resolved" }) });
   expect(task.isBlocked).toBe(false);
@@ -57,7 +59,7 @@ test("deleting a local team clears Task and risk ownership references", () => {
   state.risks.push({
     id: "risk", projectId: state.tasks[0].projectId, title: "Risk", detail: "", category: "other", severity: "low",
     status: "open", blocksWork: false, source: { kind: "manual" }, relatedTargets: [], mitigationTaskId: null,
-    ownerGroupId: team.id, createdAt: "2026-09-01", updatedAt: "2026-09-01", resolvedAt: null,
+    ownerGroupId: team.id, ownerMemberId: null, mitigationDueDate: null, createdAt: "2026-09-01", updatedAt: "2026-09-01", resolvedAt: null,
   });
 
   command(state, `/responsible-groups/${team.id}`, {}, "DELETE");

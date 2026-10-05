@@ -12,11 +12,13 @@ import { RiskDetailsModal } from "./RiskDetailsModal";
 import { RiskMetricsSection } from "./RiskMetricsSection";
 import { riskAuditActions } from "./riskViewData/riskAuditActions";
 import { useRisksViewModel } from "./riskViewModel";
+import { RiskActionOverview } from "./risks/RiskActionOverview";
 
 interface RisksViewProps {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   onDeleteRisk: (riskId: string) => Promise<void>;
+  onCreateRisk: (payload: RiskPayload) => Promise<void>;
   openTaskDetailModal?: (task: TaskRecord) => void;
   onUpdateRisk: (riskId: string, payload: RiskPayload) => Promise<void>;
   onOpenSource?: (source: string, id: string) => void;
@@ -27,6 +29,7 @@ export function RisksView({
   activePersonFilter,
   bootstrap,
   onDeleteRisk,
+  onCreateRisk,
   openTaskDetailModal,
   onUpdateRisk,
   onOpenSource,
@@ -37,10 +40,12 @@ export function RisksView({
     activePersonFilter,
     bootstrap,
     onDeleteRisk,
+    onCreateRisk,
     onUpdateRisk,
   });
   return (
     <section className={`panel dense-panel subsystem-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
+      <RiskActionOverview activePersonFilter={activePersonFilter} bootstrap={bootstrap} onCreateRisk={viewModel.openCreateEditor} onOpenRisk={viewModel.openRiskDetails} onUpdateRisk={onUpdateRisk} />
       <AttentionView
         activePersonFilter={activePersonFilter}
         bootstrap={bootstrap}
@@ -72,6 +77,7 @@ export function RisksView({
         mitigationTaskOptions={viewModel.mitigationTaskOptions}
         targetOptions={viewModel.targetOptions}
         responsibleGroupOptions={viewModel.responsibleGroupOptions}
+        ownerOptions={bootstrap.members.map((member) => ({ id: member.id, name: member.name }))}
         onClose={viewModel.closeEditor}
         onDelete={() => void viewModel.handleDeleteRisk()}
         onSave={() => void viewModel.handleSaveRisk()}
@@ -84,6 +90,7 @@ export function RisksView({
           getTargetLabel={viewModel.getTargetLabel}
           getMitigationLabel={viewModel.getMitigationLabel}
           getSourceLabel={viewModel.getSourceLabel}
+          ownerLabel={bootstrap.members.find((member) => member.id === viewModel.activeRisk?.ownerMemberId)?.name ?? "Unassigned"}
           onClose={viewModel.closeEditor}
           onEditRisk={() => viewModel.openEditEditor(viewModel.activeRisk!)}
           onOpenSchedule={(milestoneId) => { viewModel.closeEditor(); onOpenSchedule?.(milestoneId); }}

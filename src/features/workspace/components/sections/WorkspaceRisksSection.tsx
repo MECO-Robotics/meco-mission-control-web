@@ -17,6 +17,7 @@ export function WorkspaceRisksSection(props: WorkspaceContentPanelsViewProps) {
       <RisksView
         activePersonFilter={props.activePersonFilter}
         bootstrap={props.bootstrap}
+        onCreateRisk={props.onCreateRisk}
         onDeleteRisk={props.onDeleteRisk}
         onUpdateRisk={props.onUpdateRisk}
         openTaskDetailModal={props.openTimelineTaskDetailsModal}

@@ -58,6 +58,8 @@ export function createScopeBootstrap(): BootstrapPayload {
       source: { kind: "manual" },
       mitigationTaskId: null,
       ownerGroupId: null,
+        ownerMemberId: null,
+        mitigationDueDate: null,
       createdAt: "2026-01-01",
       updatedAt: "2026-01-01",
       resolvedAt: null,

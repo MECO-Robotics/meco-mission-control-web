@@ -60,7 +60,9 @@ describe("buildRobotConfigurationViewModel drilldowns", () => {
           projectId: "project-a", category: "design", status: "open", blocksWork: false,
           source: { kind: "manual" }, relatedTargets: [{ kind: "mechanism", id: "mechanism-1" }],
           mitigationTaskId: null,
-          ownerGroupId: null, createdAt: "2026-01-01", updatedAt: "2026-01-01", resolvedAt: null,
+          ownerGroupId: null,
+        ownerMemberId: null,
+        mitigationDueDate: null, createdAt: "2026-01-01", updatedAt: "2026-01-01", resolvedAt: null,
         },
         {
           id: "risk-direct",
@@ -70,7 +72,9 @@ describe("buildRobotConfigurationViewModel drilldowns", () => {
           projectId: "project-a", category: "design", status: "open", blocksWork: false,
           source: { kind: "manual" }, relatedTargets: [{ kind: "part-instance", id: "part-instance-direct" }],
           mitigationTaskId: null,
-          ownerGroupId: null, createdAt: "2026-01-01", updatedAt: "2026-01-01", resolvedAt: null,
+          ownerGroupId: null,
+        ownerMemberId: null,
+        mitigationDueDate: null, createdAt: "2026-01-01", updatedAt: "2026-01-01", resolvedAt: null,
         },
         {
           id: "risk-archived",
@@ -80,7 +84,9 @@ describe("buildRobotConfigurationViewModel drilldowns", () => {
           projectId: "project-a", category: "design", status: "open", blocksWork: false,
           source: { kind: "manual" }, relatedTargets: [{ kind: "part-instance", id: "part-instance-archived" }],
           mitigationTaskId: null,
-          ownerGroupId: null, createdAt: "2026-01-01", updatedAt: "2026-01-01", resolvedAt: null,
+          ownerGroupId: null,
+        ownerMemberId: null,
+        mitigationDueDate: null, createdAt: "2026-01-01", updatedAt: "2026-01-01", resolvedAt: null,
         },
       ],
       tasks: [

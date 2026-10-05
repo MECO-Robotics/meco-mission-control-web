@@ -17,6 +17,7 @@ describe("RisksView", () => {
       React.createElement(RisksView, {
         activePersonFilter: ["member-1"],
         bootstrap: createBootstrap(),
+        onCreateRisk: jest.fn(),
         onDeleteRisk: jest.fn(),
         onUpdateRisk: jest.fn(),
       }),

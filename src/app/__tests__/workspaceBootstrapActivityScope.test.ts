@@ -57,7 +57,9 @@ describe("workspace activity scope", () => {
       id: `risk-${entry.id}`, projectId: entry.projectId, title: "Risk", detail: "Check",
       category: "qa", severity: "low", status: "open", blocksWork: false,
       source: { kind: "report", id: entry.id }, relatedTargets: [], mitigationTaskId: null,
-      ownerGroupId: null, createdAt: "2026-09-26", updatedAt: "2026-09-26", resolvedAt: null,
+      ownerGroupId: null,
+        ownerMemberId: null,
+        mitigationDueDate: null, createdAt: "2026-09-26", updatedAt: "2026-09-26", resolvedAt: null,
     }));
 
     const scoped = scopeBootstrapBySelection(payload, "season-1", "project-visible");

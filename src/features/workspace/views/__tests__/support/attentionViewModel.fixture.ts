@@ -76,6 +76,8 @@ export function createBootstrap(): BootstrapPayload {
         severity: "high",
         title: "Drive overheating",
         ownerGroupId: null,
+        ownerMemberId: null,
+        mitigationDueDate: null,
         createdAt: `${isoDateOffset(-1)}T10:00:00.000Z`,
         updatedAt: `${isoDateOffset(-1)}T10:00:00.000Z`,
         resolvedAt: null,
