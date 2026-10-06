@@ -59,6 +59,11 @@
   min-width: 0;
 }
 
+.overview-list-section .roster-section-title > h2 {
+  font-size: 1.17em;
+  margin-block: 1em;
+}
+
 .overview-list {
   display: grid;
   gap: 0.4rem;
