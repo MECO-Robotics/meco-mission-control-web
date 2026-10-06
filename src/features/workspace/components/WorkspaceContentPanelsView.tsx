@@ -1,17 +1,30 @@
+import { lazy, Suspense, useEffect, useState, type ReactNode } from "react";
+
 import type { WorkspaceToastDismissReason } from "@/features/workspace/workspaceToastQueue";
 import { WorkspaceToastStack, type WorkspaceToastStackItem } from "../WorkspaceStatusToast";
-import { WorkspaceTaskSection } from "./sections/WorkspaceTaskSection";
-import { WorkspaceWorklogsSection } from "./sections/WorkspaceWorklogsSection";
-import { WorkspaceInventorySection } from "./sections/WorkspaceInventorySection";
-import { WorkspaceSubsystemsSection } from "./sections/WorkspaceSubsystemsSection";
-import { WorkspaceRosterSection } from "./sections/WorkspaceRosterSection";
-import { WorkspaceTeamsSection } from "./sections/WorkspaceTeamsSection";
-import { WorkspaceHelpSection } from "./sections/WorkspaceHelpSection";
-import { WorkspaceCadSection } from "./sections/WorkspaceCadSection";
 import { WorkspaceHomeSection } from "./overview/WorkspaceOverviewSections";
-import { WorkspaceRisksSection } from "./sections/WorkspaceRisksSection";
-import { WorkspaceDocumentsSection } from "./sections/WorkspaceDocumentsSection";
 import type { WorkspaceContentPanelsViewProps } from "./workspaceContentPanelsViewTypes";
+
+const WorkspaceTaskSection = lazy(() => import("./sections/WorkspaceTaskSection").then((module) => ({ default: module.WorkspaceTaskSection })));
+const WorkspaceWorklogsSection = lazy(() => import("./sections/WorkspaceWorklogsSection").then((module) => ({ default: module.WorkspaceWorklogsSection })));
+const WorkspaceInventorySection = lazy(() => import("./sections/WorkspaceInventorySection").then((module) => ({ default: module.WorkspaceInventorySection })));
+const WorkspaceSubsystemsSection = lazy(() => import("./sections/WorkspaceSubsystemsSection").then((module) => ({ default: module.WorkspaceSubsystemsSection })));
+const WorkspaceRosterSection = lazy(() => import("./sections/WorkspaceRosterSection").then((module) => ({ default: module.WorkspaceRosterSection })));
+const WorkspaceHelpSection = lazy(() => import("./sections/WorkspaceHelpSection").then((module) => ({ default: module.WorkspaceHelpSection })));
+const WorkspaceCadSection = lazy(() => import("./sections/WorkspaceCadSection").then((module) => ({ default: module.WorkspaceCadSection })));
+const WorkspaceTeamsSection = lazy(() => import("./sections/WorkspaceTeamsSection").then((module) => ({ default: module.WorkspaceTeamsSection })));
+const WorkspaceRisksSection = lazy(() => import("./sections/WorkspaceRisksSection").then((module) => ({ default: module.WorkspaceRisksSection })));
+const WorkspaceDocumentsSection = lazy(() => import("./sections/WorkspaceDocumentsSection").then((module) => ({ default: module.WorkspaceDocumentsSection })));
+
+function RetainVisitedSection({ active, children }: { active: boolean; children: ReactNode }) {
+  const [visited, setVisited] = useState(active);
+  useEffect(() => {
+    if (active) setVisited(true);
+  }, [active]);
+  if (!visited) return null;
+  return <Suspense fallback={<p className="banner" role="status">Loading view…</p>}>{children}</Suspense>;
+}
+
 export function WorkspaceContentPanelsView(props: WorkspaceContentPanelsViewProps) {
   const toastItems: WorkspaceToastStackItem[] = [
     ...props.taskEditNotices.map((notice) => ({
@@ -69,16 +82,16 @@ export function WorkspaceContentPanelsView(props: WorkspaceContentPanelsViewProp
       {props.isLoadingData ? <p className="banner">Refreshing workspace data...</p> : null}
 
       <WorkspaceHomeSection {...props} />
-      <WorkspaceRisksSection {...props} />
-      <WorkspaceDocumentsSection {...props} />
-      <WorkspaceTaskSection {...props} />
-      <WorkspaceWorklogsSection {...props} />
-      <WorkspaceInventorySection {...props} />
-      <WorkspaceCadSection {...props} />
-      <WorkspaceSubsystemsSection {...props} />
-      <WorkspaceRosterSection {...props} />
-      <WorkspaceTeamsSection {...props} />
-      <WorkspaceHelpSection {...props} />
+      <RetainVisitedSection active={props.activeTab === "risks"}><WorkspaceRisksSection {...props} /></RetainVisitedSection>
+      <RetainVisitedSection active={props.activeTab === "documents"}><WorkspaceDocumentsSection {...props} /></RetainVisitedSection>
+      <RetainVisitedSection active={props.activeTab === "tasks"}><WorkspaceTaskSection {...props} /></RetainVisitedSection>
+      <RetainVisitedSection active={props.activeTab === "worklogs"}><WorkspaceWorklogsSection {...props} /></RetainVisitedSection>
+      <RetainVisitedSection active={props.activeTab === "inventory"}><WorkspaceInventorySection {...props} /></RetainVisitedSection>
+      <RetainVisitedSection active={props.activeTab === "cad"}><WorkspaceCadSection {...props} /></RetainVisitedSection>
+      <RetainVisitedSection active={props.activeTab === "subsystems"}><WorkspaceSubsystemsSection {...props} /></RetainVisitedSection>
+      <RetainVisitedSection active={props.activeTab === "roster"}><WorkspaceRosterSection {...props} /></RetainVisitedSection>
+      <RetainVisitedSection active={props.activeTab === "teams"}><WorkspaceTeamsSection {...props} /></RetainVisitedSection>
+      <RetainVisitedSection active={props.activeTab === "help"}><WorkspaceHelpSection {...props} /></RetainVisitedSection>
     </div>
   );
 }
