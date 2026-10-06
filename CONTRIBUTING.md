@@ -2,7 +2,7 @@
 
 ## Start here
 
-Use Node22 (see `.nvmrc`), run `npm ci`, and follow the [README quick start](README.md#quick-start) for the local API and environment configuration. `npm run dev` starts Vite; Codex worktrees use `environment.toml`. Shared skills are optional ignored local imports, installed explicitly with `scripts/sync-skills.sh` or its PowerShell counterpart. They are not required to run the application. The existing skills workflow validates that import operation, not freshness of tracked application source.
+Use Node22 (see `.nvmrc`), run `npm ci`, and follow the [README quick start](README.md#quick-start) for the local API and environment configuration. `npm run dev` starts Vite; Codex worktrees use `environment.toml` and the cross-platform Node bootstrap below. Shared skills are optional ignored local imports, installed explicitly with `scripts/sync-skills.sh` or its PowerShell counterpart. They are not required to run the application. The existing skills workflow validates that import operation, not freshness of tracked application source.
 
 ## Change and review
 
@@ -14,7 +14,7 @@ PRs should explain the problem, resulting behavior and validation. Include scree
 
 ## Validation
 
-Use focused tests while developing. Before marking a code or CI change ready, run `npm run verify`: it owns contract validation, workflow security checks, TypeScript, lint, Jest and the production bundle build. Do not repeat these commands separately after that same revision passes. Documentation-only changes require link/command review and `git diff --check`.
+Use focused tests while developing. Before marking a code or CI change ready, run `npm run verify`: it owns contract validation, workflow security checks, worktree bootstrap checks, TypeScript, lint, Jest and the production bundle build. Do not repeat these commands separately after that same revision passes. Documentation-only changes require link/command review and `git diff --check`.
 
 For coordinated local contract work, run `PLATFORM_BOOTSTRAP_CONTRACT_SOURCE_PATH=/absolute/path/to/platform/contracts/platform/bootstrap/v1/contract.json npm run verify`. The explicit source must match the checked-in artifact; local sources are rejected in CI, which retains the pinned manifest checks.
 
@@ -25,3 +25,24 @@ CI continues to validate PRs and main/development pushes. Its results remain vis
 ## Local code graph
 
 Graphify output is generated local context, not tracked source. Use `graphify query "<question>"` to inspect an existing `graphify-out/graph.json`, and run `graphify update .` after changing code. If a fresh checkout has no graph, `graphify update .` builds its AST graph. Keep the graph, reports, caches and dated backups under the ignored `graphify-out/` directory; Git history owns source history.
+
+## Fast worktree setup and focused checks
+
+```sh
+node scripts/codex-worktree-bootstrap.mjs --setup-only
+node scripts/codex-worktree-bootstrap.mjs --host 127.0.0.1 --port 5173
+npm test -- --runTestsByPath src/lib/__tests__/workspaceNavigation.test.ts --runInBand
+npm test -- --findRelatedTests src/lib/workspaceNavigation.ts --runInBand
+```
+
+The bootstrap uses npm ci on first setup or changed manifest/lockfile, Node
+version, OS or architecture. A successful stamp, installed lockfile and npm's
+direct-dependency check allow unchanged setup to skip installation. It starts
+Vite with strict port selection and reports its ready URL, PID and local log;
+stop that PID when finished. Occupied ports fail without terminating another
+process. Dependencies remain isolated per worktree. On this host npm downloads
+use the HDD-backed mission-control-cache/npm directory; elsewhere set
+NPM_CONFIG_CACHE explicitly if desired. Manual npm ci remains supported and
+causes the next bootstrap to refresh its stamp when needed.
+
+Use npm run verify before handoff; focused tests do not replace it.

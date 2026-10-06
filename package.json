@@ -17,7 +17,8 @@
     "test:security-workflows": "node --test ./scripts/merge-requirements-gate.test.mjs",
     "test:app-utils": "jest src/lib/__tests__/appUtils.test.ts src/lib/__tests__/appUtilsSelection.test.ts src/lib/__tests__/workspaceNavigation.test.ts",
     "verify-contracts": "node ./scripts/verify-bootstrap-contract.mjs",
-    "verify": "npm run verify-contracts && npm run test:security-workflows && npm run typecheck && npm run lint && npm run test:ci && npm run build:bundle"
+    "verify": "npm run verify-contracts && npm run test:security-workflows && npm run test:worktree-bootstrap && npm run typecheck && npm run lint && npm run test:ci && npm run build:bundle",
+    "test:worktree-bootstrap": "node --test scripts/codex-worktree-bootstrap.test.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.8",

@@ -327,7 +327,7 @@ docs/
   *.docx                  # Historical requirements/spec baselines
 
 scripts/
-  codex-worktree-bootstrap.ps1
+  codex-worktree-bootstrap.mjs
 
 src/
   app/
