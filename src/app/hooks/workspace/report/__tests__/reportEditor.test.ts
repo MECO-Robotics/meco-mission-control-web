@@ -210,3 +210,35 @@ it("keeps the newer report save busy when an older save finishes", async () => {
   expect(render().isSavingWorkLog).toBe(false);
   expect(state.workLogModalMode).toBeNull();
 });
+
+it("submits QA with canonical timestamps, required nullable reviewer and an allowed empty summary", async () => {
+  const { state, render, task } = setup();
+  render().openCreateQaReportModal(task.id);
+  state.qaReportDraft.reviewedAt = "2026-10-10T00:00:00.000Z";
+  jest.mocked(createQaReportRecord).mockResolvedValueOnce({} as never);
+  await render().handleQaReportSubmit({ preventDefault: jest.fn() } as never);
+  expect(createQaReportRecord).toHaveBeenCalledWith({
+    reportType: "qa", projectId: task.projectId, targetRefs: [{ kind: "task", id: task.id }],
+    createdByMemberId: state.bootstrap.members[0].id, requestedById: null, mentorId: null,
+    result: "pass", summary: "", notes: "", participantIds: [state.bootstrap.members[0].id],
+    createdAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
+    reviewedAt: "2026-10-10T00:00:00.000Z", reviewedById: null, status: "draft", evidenceNotes: "", photoUrl: "",
+  }, state.handleUnauthorized);
+  expect(state.qaReportModalMode).toBeNull();
+});
+
+it("submits an empty-summary milestone report without QA-only review fields", async () => {
+  const { state, render, milestone } = setup();
+  render().openCreateMilestoneReportModal(milestone.id);
+  state.milestoneReportFindings = "Evidence only";
+  jest.mocked(createTestResultRecord).mockResolvedValueOnce({} as never);
+  await render().handleMilestoneReportSubmit({ preventDefault: jest.fn() } as never);
+  expect(createTestResultRecord).toHaveBeenCalledWith({
+    reportType: "practice", projectId: milestone.projectIds[0], targetRefs: [{ kind: "milestone", id: milestone.id }],
+    createdByMemberId: state.bootstrap.members[0].id, requestedById: null, mentorId: null,
+    result: null, summary: "", notes: "Evidence only", participantIds: [],
+    createdAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
+    status: "draft", evidenceNotes: "", photoUrl: "",
+  }, state.handleUnauthorized);
+  expect(state.milestoneReportModalMode).toBeNull();
+});

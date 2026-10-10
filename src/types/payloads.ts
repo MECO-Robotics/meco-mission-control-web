@@ -38,8 +38,7 @@ export interface MeetingPayload {
   description: string;
 }
 
-export interface ReportPayload {
-  reportType: "qa" | "practice" | "competition" | "review";
+interface ReportPayloadBase {
   projectId: string;
   targetRefs: DomainReference[];
   createdByMemberId: string | null;
@@ -52,13 +51,21 @@ export interface ReportPayload {
   photoUrl?: string;
   createdAt: string;
   status: "draft" | "submitted" | "reviewed";
-  result: string | null;
-  reviewedById?: string | null;
-  reviewedAt?: string | null;
 }
 
-export type QaReportPayload = ReportPayload;
-export type TestResultPayload = ReportPayload;
+export interface QaReportPayload extends ReportPayloadBase {
+  reportType: "qa";
+  result: "pass" | "minor-fix" | "iteration-worthy";
+  reviewedById: string | null;
+  reviewedAt: string | null;
+}
+
+export interface TestResultPayload extends ReportPayloadBase {
+  reportType: "practice" | "competition" | "review";
+  result: string | null;
+}
+
+export type ReportPayload = QaReportPayload | TestResultPayload;
 
 export interface WorkLogPayload {
   taskId: string;

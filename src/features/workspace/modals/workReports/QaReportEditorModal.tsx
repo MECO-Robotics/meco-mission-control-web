@@ -1,3 +1,4 @@
+import { localTodayDate, parseLocalDate } from "@/lib/dateUtils";
 import { ModalDialog } from "@/components/ModalDialog";
 import { useRef, type Dispatch, type FormEvent, type SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -118,11 +119,11 @@ export function QaReportEditorModal({
               onChange={(milestone) =>
                 setQaReportDraft((current) => ({
                   ...current,
-                  reviewedAt: milestone.target.value,
+                  reviewedAt: parseLocalDate(milestone.target.value)?.toISOString() ?? null,
                 }))
               }
               type="date"
-              value={qaReportDraft.reviewedAt ?? ""}
+              value={qaReportDraft.reviewedAt ? localTodayDate(new Date(qaReportDraft.reviewedAt)) : ""}
             />
           </label>
           <label className="field modal-wide">

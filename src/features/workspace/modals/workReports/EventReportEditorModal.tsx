@@ -105,7 +105,6 @@ export function MilestoneReportEditorModal({
                   summary: milestone.target.value,
                 }))
               }
-              required
               value={milestoneReportDraft.summary}
             />
           </label>

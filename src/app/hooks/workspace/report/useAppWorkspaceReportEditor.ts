@@ -6,7 +6,6 @@ import { buildEmptyQaReportPayload, buildEmptyTestResultPayload, buildEmptyWorkL
 import { useCatalogEditorLifecycle } from "@/app/workspaceCatalog/useCatalogEditorLifecycle";
 import { toErrorMessage } from "@/lib/appUtils/common";
 import { createQaReportRecord, createTestResultRecord, createWorkLogRecord } from "@/lib/auth/records/reporting";
-import { localTodayDate } from "@/lib/dateUtils";
 import type { QaReportPayload, TestResultPayload, WorkLogPayload } from "@/types/payloads";
 
 function getUniqueValidMemberIds(candidateIds: string[] | null | undefined, model: AppWorkspaceModel) {
@@ -148,7 +147,7 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
       }
 
       const task = model.bootstrap.tasks.find((candidate) => candidate.id === taskRef?.id) ?? null;
-      const reportDate = model.qaReportDraft.createdAt ?? localTodayDate();
+      const reportDate = model.qaReportDraft.createdAt;
       const payload: QaReportPayload = {
         reportType: "qa",
         projectId: task?.projectId ?? model.bootstrap.projects[0]?.id ?? "",
@@ -161,7 +160,8 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
         participantIds,
         notes: model.qaReportDraft.notes.trim(),
         createdAt: reportDate,
-        reviewedAt: model.qaReportDraft.reviewedAt ?? null,
+        reviewedAt: model.qaReportDraft.reviewedAt,
+        reviewedById: model.qaReportDraft.reviewedById,
         status: model.qaReportDraft.status,
         evidenceNotes: model.qaReportDraft.evidenceNotes?.trim() || "",
         photoUrl: model.qaReportDraft.photoUrl ?? "",
@@ -194,10 +194,6 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
       }
 
       const normalizedSummary = model.milestoneReportDraft.summary.trim();
-      if (normalizedSummary.length < 2) {
-        model.setDataMessage("Please provide a report summary before saving.");
-        return;
-      }
 
       const findings: string[] = Array.from(
         new Set(
@@ -209,7 +205,7 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
       );
 
       const milestone = model.bootstrap.milestones.find((candidate) => candidate.id === milestoneRef?.id) ?? null;
-      const reportDate = model.milestoneReportDraft.createdAt ?? localTodayDate();
+      const reportDate = model.milestoneReportDraft.createdAt;
       const payload: TestResultPayload = {
         reportType: "practice",
         projectId: milestone?.projectIds[0] ?? model.bootstrap.projects[0]?.id ?? "",
@@ -222,7 +218,6 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
         notes: findings.join("\n"),
         createdAt: reportDate,
         participantIds: model.milestoneReportDraft.participantIds ?? [],
-        reviewedAt: model.milestoneReportDraft.reviewedAt ?? null,
         evidenceNotes: model.milestoneReportDraft.evidenceNotes ?? "",
         status: model.milestoneReportDraft.status,
         photoUrl: model.milestoneReportDraft.photoUrl ?? "",
