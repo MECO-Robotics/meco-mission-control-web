@@ -38,9 +38,9 @@ function FileViewer({ file, search = "", onOrbitingChange, ...imageTargets }: { 
     <p className="cad-viewer-filename">{file.name} · File preview · Dimensions in millimeters</p>
     {error ? <p role="alert">{error}</p> : !meshes ? <p role="status">Preparing part geometry…</p> : <>
       <div className="cad-viewer-toolbar">
-        <button type="button" className="secondary-button" onClick={() => setReset((value) => value + 1)}>Fit view</button>
-        <button type="button" className="secondary-button" aria-pressed={wireframe} onClick={() => setWireframe(!wireframe)}>Wireframe</button>
-        <button type="button" className="secondary-button" disabled={selected === null} aria-pressed={isolated} onClick={() => setIsolated(!isolated)}>Isolate part</button>
+        <button type="button" className="secondary-action" onClick={() => setReset((value) => value + 1)}>Fit view</button>
+        <button type="button" className="secondary-action" aria-pressed={wireframe} onClick={() => setWireframe(!wireframe)}>Wireframe</button>
+        <button type="button" className="secondary-action" disabled={selected === null} aria-pressed={isolated} onClick={() => setIsolated(!isolated)}>Isolate part</button>
         <label className="cad-field"><span>Part</span><select value={selected ?? ""} onChange={(event) => select(event.target.value === "" ? null : Number(event.target.value))}>
           <option value="">All parts ({meshes.length})</option>
           {matchingMeshes?.map(({ mesh: part, index }) => <option key={index} value={index}>{part.name || `Part ${index + 1}`}</option>)}

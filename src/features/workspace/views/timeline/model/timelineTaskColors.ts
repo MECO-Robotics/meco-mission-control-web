@@ -8,6 +8,19 @@ type TimelineTaskToneExtras = CSSProperties & Record<string, string | number | u
 const FALLBACK_TIMELINE_TASK_DISCIPLINE_COLOR = "#7a8799";
 const FALLBACK_TIMELINE_SUBSYSTEM_HIGHLIGHT_COLOR = "#4F86C6";
 
+function getReadableTextColor(background: string) {
+  const hex = background.match(/^#([\da-f]{6})$/i)?.[1];
+  if (!hex) return "#000000";
+  const channels = [0, 2, 4].map((offset) => {
+    const value = Number.parseInt(hex.slice(offset, offset + 2), 16) / 255;
+    return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+  });
+  const luminance = channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+  const whiteContrast = 1.05 / (luminance + 0.05);
+  const darkContrast = (luminance + 0.05) / 0.05;
+  return whiteContrast >= darkContrast ? "#ffffff" : "#000000";
+}
+
 const TIMELINE_TASK_DISCIPLINE_COLORS: Record<DisciplineCode, string> = {
   design: "#c67b1f",
   manufacturing: "#b86125",
@@ -128,8 +141,10 @@ export function buildTimelineTaskToneStyle(
   workTypesById: Record<string, BootstrapPayload["workTypes"][number]>,
   extras?: TimelineTaskToneExtras,
 ) {
+  const accentColor = getTimelineTaskDisciplineColor(disciplineId, workTypesById);
   return buildTimelineTaskHighlightStyle(disciplineId, workTypesById, {
-    "--timeline-task-discipline-accent": getTimelineTaskDisciplineColor(disciplineId, workTypesById),
+    "--timeline-task-discipline-accent": accentColor,
+    "--timeline-task-bar-text-color": getReadableTextColor(accentColor),
     ...extras,
   });
 }

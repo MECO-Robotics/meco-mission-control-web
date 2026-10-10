@@ -184,3 +184,13 @@
 .timeline-task-status-logo-signal-waiting-on-dependency {
   color: #c25a14;
 }
+
+@media (max-width: 640px) {
+  .timeline-task-status-icon-button,
+  .timeline-task-status-icon-button.is-compact {
+    width: 24px;
+    min-width: 24px;
+    height: 24px;
+    margin-right: -12px;
+  }
+}

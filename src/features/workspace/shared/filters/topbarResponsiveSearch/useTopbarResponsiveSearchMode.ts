@@ -23,6 +23,7 @@ type UseTopbarResponsiveSearchModeOptions = {
   placeholder: string;
   resolvedActionCount: number;
   resolvedMode: "multi-state" | "dynamic-label";
+  forceCompactAtNarrowWidth: boolean;
   searchRef: RefObject<HTMLDivElement | null>;
   shouldUseCollisionDetection: boolean;
 };
@@ -41,10 +42,15 @@ export function useTopbarResponsiveSearchMode({
   placeholder,
   resolvedActionCount,
   resolvedMode,
+  forceCompactAtNarrowWidth,
   searchRef,
   shouldUseCollisionDetection,
 }: UseTopbarResponsiveSearchModeOptions) {
-  const [searchMode, setSearchMode] = useState<SearchCompactMode>("full");
+  const [searchMode, setSearchMode] = useState<SearchCompactMode>(() =>
+    forceCompactAtNarrowWidth && typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches
+      ? "icon"
+      : "full",
+  );
   const [searchWidth, setSearchWidth] = useState<number | null>(null);
 
   useEffect(() => {
@@ -62,6 +68,21 @@ export function useTopbarResponsiveSearchMode({
     }
 
     const updateSearchMode = () => {
+      if (
+        forceCompactAtNarrowWidth &&
+        element.closest(".app-topbar") &&
+        window.matchMedia("(max-width: 640px)").matches
+      ) {
+        setSearchWidth(container.clientWidth);
+        setSearchMode((current) => {
+          if (current !== "icon") {
+            onCompactModeChange?.("icon", { widthPx: container.clientWidth, blockers: 0 });
+          }
+          return "icon";
+        });
+        return;
+      }
+
       const nextSearchWidth = shouldUseCollisionDetection
         ? getCollisionMeasurement(searchRef, effectivePadding, collisionRoots)
         : { availableWidthPx: container.clientWidth, blockers: 0 };
@@ -131,6 +152,7 @@ export function useTopbarResponsiveSearchMode({
     collisionRoots,
     effectiveCompactBias,
     effectivePadding,
+    forceCompactAtNarrowWidth,
     iconSwitchWidth,
     legacyIconReleaseWidth,
     legacyIconWidth,

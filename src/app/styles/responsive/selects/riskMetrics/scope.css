@@ -114,7 +114,7 @@
   background: linear-gradient(90deg,
       color-mix(in srgb, var(--meco-blue) 72%, #ffffff 28%),
       var(--official-green));
-  transition: width 220ms ease;
+  transition: width 220ms ease; /* impeccable-disable-line layout-transition: communicates changing completion percentage */
 }
 
 @media (max-width: 980px) {

@@ -20,7 +20,7 @@ The browser theme color also uses `#16478e`.
 
 ## Global Surface
 
-The global type stack uses a serif reading face first, then common serif fallbacks. Headline and control-heavy UI uses a geometric sans stack, with broad fallback coverage.
+The global type stack uses system sans-serif for both display and interface text, with platform fallbacks.
 
 The app background is a light layered field: a white-to-cool-slate page base with soft blue and red radial washes. Auth and shell backgrounds reuse the same brand wash idea, with stronger blue/red atmosphere in dark mode.
 
@@ -36,7 +36,7 @@ Light mode uses:
 | Alternate row surface | `#f8fafc` |
 | Border | `#e5e7eb` |
 | Title text | `#000000` |
-| Copy text | `#64748b` |
+| Copy text | `#475569` |
 | Page lower wash | `#f5f7fb` |
 
 Dark mode uses:

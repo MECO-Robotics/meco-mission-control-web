@@ -21,14 +21,14 @@
 
 .cad-table th,
 .cad-table td {
-  border-bottom: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.22));
+  border-bottom: 1px solid var(--border-base);
   padding: 9px 8px;
   text-align: left;
   vertical-align: top;
 }
 
 .cad-table th {
-  color: var(--text-muted);
+  color: var(--text-copy);
   font-size: 0.7rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -44,8 +44,8 @@
 .cad-tree-row,
 .cad-snapshot-item,
 .cad-warning-item {
-  background: rgba(15, 23, 42, 0.035);
-  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.2));
+  background: color-mix(in srgb, var(--bg-panel) 96%, var(--text-title) 4%);
+  border: 1px solid var(--border-base);
   border-radius: 12px;
   display: grid;
   gap: 4px;
@@ -56,7 +56,7 @@
 .cad-snapshot-item span,
 .cad-warning-item span,
 .cad-snapshot-item small {
-  color: var(--text-muted);
+  color: var(--text-copy);
   font-size: 0.78rem;
 }
 
@@ -74,7 +74,7 @@
 }
 
 .cad-sync-history-table td small {
-  color: var(--text-muted);
+  color: var(--text-copy);
   font-size: 0.74rem;
   margin-top: 3px;
 }
@@ -84,8 +84,8 @@
 }
 
 .cad-sync-status-pill {
-  background: rgba(15, 23, 42, 0.06);
-  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.25));
+  background: color-mix(in srgb, var(--bg-panel) 94%, var(--text-title) 6%);
+  border: 1px solid var(--border-base);
   border-radius: 999px;
   display: inline-flex;
   font-size: 0.72rem;
@@ -96,22 +96,22 @@
 }
 
 .cad-sync-history-table tr[data-status="completed"] .cad-sync-status-pill {
-  background: rgba(22, 163, 74, 0.1);
+  background: var(--status-success-bg);
   border-color: rgba(22, 163, 74, 0.25);
-  color: #166534;
+  color: var(--status-success-text);
 }
 
 .cad-sync-history-table tr[data-status="failed"] .cad-sync-status-pill {
-  background: rgba(220, 38, 38, 0.1);
+  background: var(--status-danger-bg);
   border-color: rgba(220, 38, 38, 0.25);
-  color: #991b1b;
+  color: var(--status-danger-text);
 }
 
 .cad-sync-error-summary {
-  background: rgba(220, 38, 38, 0.08);
+  background: var(--status-danger-bg);
   border: 1px solid rgba(220, 38, 38, 0.2);
   border-radius: 10px;
-  color: #991b1b !important;
+  color: var(--status-danger-text) !important;
   margin-top: 8px !important;
   padding: 8px;
 }
@@ -125,7 +125,7 @@
 }
 
 .cad-empty-copy {
-  color: var(--text-muted);
+  color: var(--text-copy);
   font-size: 0.84rem;
 }
 
@@ -141,4 +141,3 @@
   }
 
 }
-

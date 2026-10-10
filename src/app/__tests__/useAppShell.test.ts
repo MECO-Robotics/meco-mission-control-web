@@ -7,8 +7,10 @@ import {
 
 describe("useAppShell storage helpers", () => {
   const originalWindow = globalThis.window;
+  const originalDocument = globalThis.document;
 
   afterEach(() => {
+    Object.defineProperty(globalThis, "document", { configurable: true, value: originalDocument });
     Object.defineProperty(globalThis, "window", {
       configurable: true,
       value: originalWindow,
@@ -23,6 +25,16 @@ describe("useAppShell storage helpers", () => {
 
     expect(readStoredThemePreference()).toBe(false);
     expect(() => writeStoredThemePreference(true)).not.toThrow();
+  });
+
+  it("respects the dark mode already applied to the document root", () => {
+    Object.defineProperty(globalThis, "document", {
+      configurable: true,
+      value: { documentElement: { classList: { contains: (value: string) => value === "dark-mode" } } },
+    });
+    Object.defineProperty(globalThis, "window", { configurable: true, value: { localStorage: { getItem: () => null } } });
+
+    expect(readStoredThemePreference()).toBe(true);
   });
 
   it("does not throw when localStorage access is blocked", () => {

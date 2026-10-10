@@ -80,7 +80,7 @@ export function CadStatusPanels({
           {connection?.lastError ? <div><dt>Last error</dt><dd>{connection.lastError}</dd></div> : null}
         </dl>
         {connectActionLabel && oauth?.authorizationUrlAvailable && onConnectOAuth ? (
-          <button className="secondary-button cad-oauth-button" disabled={isConnectingOAuth} onClick={onConnectOAuth} type="button">
+          <button className="secondary-action cad-oauth-button" disabled={isConnectingOAuth} onClick={onConnectOAuth} type="button">
             {isConnectingOAuth ? "Opening Onshape..." : connectActionLabel}
           </button>
         ) : null}
@@ -102,7 +102,7 @@ export function CadStatusPanels({
           </p>
         ) : null}
         {onRefreshEstimate ? (
-          <button className="secondary-button cad-oauth-button" disabled={isRefreshingEstimate} onClick={onRefreshEstimate} type="button">
+          <button className="secondary-action cad-oauth-button" disabled={isRefreshingEstimate} onClick={onRefreshEstimate} type="button">
             {isRefreshingEstimate ? "Refreshing estimate..." : "Refresh estimate"}
           </button>
         ) : null}

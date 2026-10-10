@@ -63,7 +63,7 @@ export function AppSidebarProjectFooter({
   const scopeTrigger = (
     <button
       aria-expanded={isProjectPopupOpen ? "true" : "false"}
-      aria-label="Open project and season selector"
+      aria-label="Project and season"
       className="sidebar-scope-trigger"
       data-active={isProjectPopupOpen ? "true" : "false"}
       onClick={onProjectTriggerClick}

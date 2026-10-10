@@ -50,7 +50,7 @@ export function CadStepUploadPanel({
           <span>ASM - Intake</span>
           <span>PRT - Drivetrain - Bearing Block</span>
         </div>
-        <button className="primary-button" disabled={!fileName || isUploading} type="submit">
+        <button className="primary-action" disabled={!fileName || isUploading} type="submit">
           {isUploading ? "Uploading STEP..." : "Upload STEP"}
         </button>
       </form>

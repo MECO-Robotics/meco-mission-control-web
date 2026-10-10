@@ -8,8 +8,8 @@
 }
 
 .cad-step-guidance {
-  background: rgba(15, 23, 42, 0.035);
-  border: 1px dashed var(--border-subtle, rgba(148, 163, 184, 0.28));
+  background: color-mix(in srgb, var(--bg-panel) 96%, var(--text-title) 4%);
+  border: 1px dashed var(--border-base);
   border-radius: 8px;
   display: grid;
   gap: 4px;
@@ -19,7 +19,7 @@
 .cad-step-guidance strong,
 .cad-step-guidance span,
 .cad-inline-check {
-  color: var(--text-muted);
+  color: var(--text-copy);
   font-size: 0.82rem;
 }
 
@@ -30,10 +30,10 @@
 }
 
 .cad-parser-alert {
-  background: rgba(220, 38, 38, 0.1);
+  background: var(--status-danger-bg);
   border: 1px solid rgba(220, 38, 38, 0.3);
   border-radius: 8px;
-  color: #991b1b !important;
+  color: var(--status-danger-text) !important;
   font-weight: 800;
   margin-top: 12px !important;
   padding: 10px 12px;
@@ -46,7 +46,7 @@
 }
 
 .cad-summary-warning-item {
-  background: rgba(245, 158, 11, 0.1);
+  background: var(--status-warning-bg);
   border: 1px solid rgba(245, 158, 11, 0.28);
   border-radius: 8px;
   display: grid;
@@ -55,12 +55,12 @@
 }
 
 .cad-summary-warning-item[data-severity="error"] {
-  background: rgba(220, 38, 38, 0.1);
+  background: var(--status-danger-bg);
   border-color: rgba(220, 38, 38, 0.3);
 }
 
 .cad-summary-warning-item span {
-  color: var(--text-muted);
+  color: var(--text-copy);
   font-size: 0.78rem;
 }
 
@@ -86,14 +86,14 @@
 
 .cad-group-toggle {
   align-items: center;
-  color: var(--text-muted);
+  color: var(--text-copy);
   display: inline-flex;
   font-size: 0.82rem;
   gap: 8px;
 }
 
 .cad-mapping-table small {
-  color: var(--text-muted);
+  color: var(--text-copy);
   display: block;
   font-size: 0.76rem;
 }
@@ -109,21 +109,21 @@
 }
 
 .cad-quantity-pill {
-  background: rgba(14, 165, 233, 0.12);
-  color: #075985;
+  background: var(--status-info-bg);
+  color: var(--status-info-text);
 }
 
 .cad-warning-badge {
-  background: rgba(245, 158, 11, 0.16);
-  color: #92400e;
+  background: var(--status-warning-bg);
+  color: var(--status-warning-text);
   margin-top: 5px;
 }
 
 .cad-mapping-table select {
-  background: var(--surface-input, rgba(255, 255, 255, 0.86));
-  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.3));
+  background: var(--bg-panel);
+  border: 1px solid var(--border-base);
   border-radius: 8px;
-  color: var(--text-primary);
+  color: var(--text-title);
   display: block;
   font: inherit;
   margin-bottom: 6px;
@@ -139,7 +139,7 @@
 }
 
 .cad-mapping-choice {
-  color: var(--text-muted);
+  color: var(--text-copy);
   font-size: 0.78rem;
   font-weight: 700;
   line-height: 1.35;
@@ -152,7 +152,7 @@
 }
 
 .cad-diff-grid {
-  color: var(--text-muted);
+  color: var(--text-copy);
   display: grid;
   font-size: 0.84rem;
   gap: 7px;

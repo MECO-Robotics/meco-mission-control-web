@@ -23,6 +23,7 @@
 .people-attendance-day.is-missed { border-color: var(--official-red); background: var(--official-red); }
 .people-attendance-day.is-upcoming { border-color: var(--border-base); background: var(--bg-row-alt); }
 .people-attendance-day.is-not-scheduled { border-color: var(--border-base); background: var(--bg-panel); }
+.roster-section-title h2 { margin: 0; font-size: .95rem; }
 .people-attendance-percentage { color: var(--text-copy); font-size: .78rem; font-variant-numeric: tabular-nums; }
 .teams-list, .teams-editor { display: grid; gap: .45rem; }
 .teams-editor { padding: .85rem; border: 1px solid var(--border-base); border-radius: 10px; background: var(--bg-row-alt); }
@@ -39,7 +40,7 @@
 .teams-list > .team-card:nth-of-type(even) { padding-inline: .4rem; background: color-mix(in srgb, var(--meco-red) 3%, var(--bg-panel)); }
 .team-card > .panel-header { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; margin: 0; }
 .team-card-identity { display: flex; align-items: baseline; flex-wrap: wrap; column-gap: .65rem; row-gap: .1rem; min-width: 0; }
-.team-card-identity h3 { margin: 0; white-space: nowrap; }
+.team-card-identity :is(h2, h3) { margin: 0; font-size: 1rem; white-space: nowrap; }
 .team-card-identity > span { color: var(--text-copy); font-size: .82rem; }
 .team-actions-menu { position: relative; display: inline-flex; flex: 0 0 auto; align-self: center; margin-left: auto; border: 0; }
 .team-actions-menu > summary { display: grid; width: 30px; height: 30px; place-items: center; list-style: none; color: var(--text-copy); cursor: pointer; }
@@ -73,13 +74,13 @@
 .team-member-section > summary { padding: .28rem .35rem; color: var(--text-title); cursor: pointer; font-size: .82rem; font-weight: 600; }
 .team-member-counts { display: inline-flex; align-items: flex-start; flex-wrap: nowrap; gap: .4rem; margin-left: .45rem; font-size: .72rem; font-weight: 400; line-height: 1; white-space: nowrap; }
 .team-member-counts > span { display: inline-flex; align-items: flex-start; gap: .08rem; line-height: 1; }
-.team-member-counts small { color: var(--text-copy); opacity: .72; line-height: 1; }
+.team-member-counts small { color: var(--text-copy); line-height: 1; }
 .team-member-counts strong { color: var(--text-title); font-weight: 700; line-height: 1; }
 .team-member-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: 0 .75rem; }
 .team-member-grid > .empty-state { grid-column: 1 / -1; margin: 0; padding: .2rem .35rem; }
 .team-member-load { display: grid; grid-template-columns: minmax(5rem, 1fr) auto auto; align-items: center; gap: .12rem .5rem; width: 100%; max-width: none; padding: .3rem .35rem; border: 0; border-bottom: 1px solid var(--border-base); border-radius: 0; background: transparent; color: var(--text-copy); text-align: left; font: inherit; cursor: pointer; }
 .team-member-load > .team-member-name { display: flex; align-items: baseline; gap: .35rem; min-width: 0; color: var(--text-title); font-weight: 600; white-space: nowrap; }
-.team-member-name small { color: var(--text-copy); font-size: .7rem; font-weight: 400; opacity: .72; }
+.team-member-name small { color: var(--text-copy); font-size: .7rem; font-weight: 400; }
 .team-member-load > span:nth-child(2), .team-member-capacity { font-size: .76rem; }
 .team-member-load > .team-member-task-metrics { display: flex; justify-content: flex-end; gap: .5rem; color: var(--text-copy); text-align: right; }
 .team-member-task-metrics strong { font-weight: 600; }

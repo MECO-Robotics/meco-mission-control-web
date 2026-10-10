@@ -44,6 +44,21 @@ function formatExpectedDayLabel(dateKey: string) {
   });
 }
 
+function findButtonByClass(element: React.ReactNode, className: string): React.ReactElement<{
+  children?: React.ReactNode;
+  className?: string;
+  onClick?: (event: { stopPropagation: () => void }) => void;
+}> | null {
+  if (!React.isValidElement(element)) return null;
+  const candidate = element as React.ReactElement<{ children?: React.ReactNode; className?: string; onClick?: (event: { stopPropagation: () => void }) => void }>;
+  if (candidate.type === "button" && candidate.props.className === className) return candidate;
+  for (const child of React.Children.toArray(candidate.props.children)) {
+    const match = findButtonByClass(child, className);
+    if (match) return match;
+  }
+  return null;
+}
+
 function findButtonByTitle(element: React.ReactNode, title: string): React.ReactElement<{
   onClick: (event: { stopPropagation: () => void }) => void;
   title?: string;
@@ -114,12 +129,13 @@ describe("TaskCalendarMonthGrid day selection", () => {
       }),
     );
 
-    expect(markup).toContain(`aria-label="View details for ${dayLabel} with 2 items"`);
+    expect(markup).toContain(`aria-describedby="2026-05-07-details"`);
+    expect(markup).toContain(`View details for ${dayLabel} with 2 items`);
     expect(markup).toContain("task-calendar-day is-selected");
     expect(markup).toContain("task-calendar-day-open");
   });
 
-  it("opens day details from event chips that do not have a direct modal", () => {
+  it("opens day details from the date control while keeping event chips informational", () => {
     const onOpenDay = jest.fn();
     const onOpenEvent = jest.fn();
     const grid = TaskCalendarMonthGrid({
@@ -131,15 +147,14 @@ describe("TaskCalendarMonthGrid day selection", () => {
       selectedDateKey: null,
       todayDateKey: "2026-05-08",
     });
-    const meetingButton = findButtonByTitle(grid, meetingEvent.title);
-    const taskButton = findButtonByTitle(grid, taskEvent.title);
+    const dayButton = findButtonByClass(grid, "task-calendar-day-open");
+    const eventButton = findButtonByTitle(grid, meetingEvent.title);
 
-    meetingButton?.props.onClick({ stopPropagation: jest.fn() });
-    taskButton?.props.onClick({ stopPropagation: jest.fn() });
+    dayButton?.props.onClick?.({ stopPropagation: jest.fn() });
 
     expect(onOpenDay).toHaveBeenCalledWith("2026-05-07");
-    expect(onOpenEvent).toHaveBeenCalledWith(taskEvent);
-    expect(onOpenEvent).not.toHaveBeenCalledWith(meetingEvent);
+    expect(eventButton).toBeNull();
+    expect(onOpenEvent).not.toHaveBeenCalled();
   });
 });
 

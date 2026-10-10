@@ -18,6 +18,7 @@ export function ResourceSortMenu({
 }) {
   return (
     <WorkspaceSortMenu
+      ariaLabel={`Sort ${label}`}
       activeCount={1}
       direction={direction}
       field={field}

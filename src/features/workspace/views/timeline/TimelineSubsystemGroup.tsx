@@ -83,7 +83,7 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
   const accentColor = subsystem.color;
   const groupStyle = buildTimelineSubsystemHighlightStyle(accentColor, {
     boxShadow: `inset 3px 0 0 ${accentColor}`,
-    gridAutoRows: "38px",
+    gridAutoRows: "var(--timeline-row-height, 38px)",
   });
 
   return (
@@ -94,7 +94,7 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
         width: "100%",
         minWidth: `${gridMinWidth}px`,
         gridTemplateColumns: timelineGridTemplate,
-        gridAutoRows: "38px",
+        gridAutoRows: "var(--timeline-row-height, 38px)",
         background: groupBackground,
         borderBottom: "1px solid var(--border-base)",
         position: "relative",
@@ -118,7 +118,7 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
         rowBackground={groupBackground}
         rowIndex={rowIndex}
         rowStyle={groupStyle}
-        gridAutoRows="38px"
+        gridAutoRows="var(--timeline-row-height, 38px)"
         selectSubsystemRow={selectSubsystemRow}
         selectTaskRow={selectTaskRow}
         selectedSubsystemId={selectedSubsystemId}

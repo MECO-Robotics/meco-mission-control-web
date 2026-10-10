@@ -103,7 +103,7 @@ export function HelpView({
 
       {hasInteractiveChapterLauncher ? (
         <div className="panel-subsection help-doc-section">
-          <h3>Interactive tutorial chapters</h3>
+          <h2>Interactive tutorial chapters</h2>
           <p>
             Start any chapter directly. At the end of each chapter, you can end or continue.
           </p>
@@ -131,7 +131,7 @@ export function HelpView({
       <div className="panel-subsection help-docs-list">
         {filteredHelpSections.map((section) => (
           <article className="help-doc-section" key={section.title}>
-            <h3>{section.title}</h3>
+            <h2>{section.title}</h2>
             <ul>
               {section.items.map((item) => (
                 <li key={typeof item === "string" ? item : item.href}>{renderHelpItem(item)}</li>

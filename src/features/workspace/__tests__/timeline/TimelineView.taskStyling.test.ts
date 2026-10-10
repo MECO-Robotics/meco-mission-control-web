@@ -89,9 +89,13 @@ describe("TimelineView", () => {
     expect(css).toMatch(/\.timeline-task-status-logo-signal-in-progress\s*\{[\s\S]*color:\s*#b77900/);
     expect(css).toMatch(/\.timeline-task-status-logo-signal-waiting-for-qa\s*\{[\s\S]*color:\s*#275098/);
     expect(css).toMatch(/\.timeline-task-status-logo-signal-blocked\s*\{[\s\S]*color:\s*var\(--official-red\)/);
-    expect(css).toMatch(/\.timeline-task-status-logo-signal-waiting-on-dependency\s*\{[\s\S]*color:\s*#c25a14/);
+    const timelineTaskStatusCss = readFileSync(
+      join(process.cwd(), "src/app/styles/workspace/timelineTaskStatus.css"),
+      "utf8",
+    );
+    expect(timelineTaskStatusCss).toMatch(/\.timeline-task-status-logo-signal-waiting-on-dependency\s*\{[\s\S]*color:\s*#c25a14/);
     expect(css).toMatch(
-      /\.timeline-bar \.timeline-bar-title\.timeline-ellipsis-reveal\s*\{[\s\S]*--timeline-reveal-color:/,
+      /\.timeline-bar\s*\{[\s\S]*--timeline-reveal-color:/,
     );
     expect(css).toMatch(
       /\.timeline-bar \.timeline-bar-title\.timeline-ellipsis-reveal\s*\{[\s\S]*text-overflow:\s*ellipsis/,

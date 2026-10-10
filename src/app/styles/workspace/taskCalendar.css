@@ -47,7 +47,7 @@
   gap: 0.45rem;
 }
 
-.schedule-agenda-month h3 {
+.schedule-agenda-month :is(h2, h3) {
   background: var(--bg-panel);
   color: var(--text-title);
   font-size: 0.9rem;
@@ -217,7 +217,8 @@
   font-weight: 700;
   line-height: 1.22;
   overflow: hidden;
-  padding: 0.11rem 0.3rem;
+  min-height: 24px;
+  padding: 0.12rem 0.3rem;
   text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -241,6 +242,10 @@
 
 .task-calendar-day-event-event {
   background: #475569;
+}
+
+.task-calendar-day-event-meeting {
+  background: var(--official-blue);
 }
 
 .task-calendar-more {

@@ -19,7 +19,7 @@ export function OverviewListSection({
     <section className="panel-subsection overview-list-section">
       <div className="roster-section-header">
         <div className="roster-section-title">
-          <h3>{title}</h3>
+          <h2>{title}</h2>
         </div>
         <span className="pill status-pill status-pill-neutral">{items.length}</span>
       </div>

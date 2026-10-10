@@ -146,7 +146,7 @@ truth for permissions, persistence, and schema validation.
 
 Follow [CONTRIBUTING.md](../CONTRIBUTING.md). Keep one clear owner and explicit dependencies; delete redundant representations and forwarding layers. Split or merge modules according to responsibility and reuse, without file-size quotas. Keep styles with the view or component whose cascade they control.
 
-Treat the current visual system as a hard constraint. Preserve established typography, spacing, surfaces, colors, controls, and responsive behavior; compose existing components and styles instead of introducing a new one-off look. Add a visual exception only when the product spec explicitly requires it.
+Treat the current visual system as a hard constraint. Preserve established typography, spacing, surfaces, colors, controls, and responsive behavior; compose existing components and styles instead of introducing a new one-off look. Add a visual exception only when the product spec explicitly requires it. Keep shared actions on the established button classes and use only defined semantic theme tokens for text, surfaces, borders, and statuses. Check light and dark modes, including empty and disabled states. Colored side borders on cards, list items, callouts, or alerts must stay at 1px or less.
 
 Before implementing an additional feature, inspect and reuse the existing modules, components, and layouts that already own the relevant behavior. Extend a shared owner when the behavior is genuinely shared; keep domain-specific data and presentation at the view boundary. Do not rebuild an existing layout or interaction in parallel. For Kanban views, reuse `KanbanColumns`, `KanbanScrollFrame`, and their drag behavior, supplying view-specific columns and cards.
 

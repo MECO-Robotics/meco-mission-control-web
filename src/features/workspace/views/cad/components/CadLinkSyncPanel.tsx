@@ -67,7 +67,7 @@ export function CadLinkSyncPanel({
           <span>Onshape URL</span>
           <textarea value={url} onChange={(event) => onUrlChange(event.target.value)} placeholder="https://cad.onshape.com/documents/..." rows={4} />
         </label>
-        <button className="primary-button" disabled={!parsedUrl?.ok || isSaving} type="submit">
+        <button className="primary-action" disabled={!parsedUrl?.ok || isSaving} type="submit">
           {isSaving ? "Saving link..." : "Save link"}
         </button>
       </form>
@@ -103,7 +103,7 @@ export function CadLinkSyncPanel({
             {syncLevels.map((level) => <option key={level.value} value={level.value}>{level.label}</option>)}
           </select>
         </label>
-        <button className="secondary-button" disabled={!selectedDocumentRefId || isSyncing} onClick={onSync} type="button">
+        <button className="secondary-action" disabled={!selectedDocumentRefId || isSyncing} onClick={onSync} type="button">
           {isSyncing ? "Syncing..." : "Run selected sync"}
         </button>
       </article>

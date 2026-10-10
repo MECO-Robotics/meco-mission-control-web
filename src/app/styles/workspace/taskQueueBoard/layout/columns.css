@@ -22,7 +22,7 @@
   min-width: 0;
 }
 
-.task-queue-board-column-header h3 {
+.task-queue-board-column-header :is(h2, h3) {
   margin: 0;
   color: var(--text-title);
   font-size: calc(0.74rem * var(--task-queue-zoom, 1));

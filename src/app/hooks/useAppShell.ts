@@ -8,7 +8,7 @@ export function readStoredThemePreference() {
   }
 
   try {
-    return window.localStorage.getItem("meco-theme") === "dark";
+    return document.documentElement.classList.contains("dark-mode") || window.localStorage.getItem("meco-theme") === "dark";
   } catch {
     return false;
   }

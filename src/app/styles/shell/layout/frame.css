@@ -21,7 +21,7 @@
   box-sizing: border-box;
   padding-top: var(--shell-topbar-height);
   padding-left: var(--shell-sidebar-width);
-  transition: padding-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: padding-left 0.25s cubic-bezier(0.4, 0, 0.2, 1); /* impeccable-disable-line layout-transition: preserves the shell content shift when the sidebar collapses */
   overflow-x: clip;
 }
 

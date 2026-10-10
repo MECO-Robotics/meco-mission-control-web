@@ -78,7 +78,6 @@ export const TimelineTaskTrackRowList: React.FC<TimelineTaskTrackRowListProps> =
           zIndex: 10018,
           borderRadius: "4px",
               border: "none",
-              color: "#fff",
               fontSize: "0.7rem",
               textAlign: "left",
               cursor: "pointer",
@@ -87,7 +86,7 @@ export const TimelineTaskTrackRowList: React.FC<TimelineTaskTrackRowListProps> =
               whiteSpace: "nowrap",
           boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
           alignSelf: "center",
-          minWidth: 0,
+          minWidth: 32,
         });
     }
 
@@ -103,7 +102,7 @@ export const TimelineTaskTrackRowList: React.FC<TimelineTaskTrackRowListProps> =
       border: "none",
       cursor: "pointer",
       alignSelf: "center",
-      minWidth: 0,
+      minWidth: 32,
       opacity: 0.7,
     });
   };

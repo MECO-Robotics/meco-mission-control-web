@@ -18,12 +18,6 @@ function eventTypeClassName(event: TaskCalendarEvent) {
   return `task-calendar-day-event-${event.extendedProps.type}`;
 }
 
-function canOpenEventDirectly(event: TaskCalendarEvent) {
-  return event.extendedProps.type === "milestone" ||
-    event.extendedProps.type === "task-due" ||
-    event.extendedProps.type === "qa-due";
-}
-
 function formatDayButtonLabel(dateKey: string, eventCount: number) {
   const dayLabel = new Date(`${dateKey}T00:00:00`).toLocaleDateString(undefined, {
     day: "numeric",
@@ -92,7 +86,7 @@ export function TaskCalendarMonthGrid({
                         </strong>
                       ) : null}
                       <button
-                        aria-label={dayButtonLabel}
+                        aria-describedby={`${cellDateKey}-details`}
                         className="task-calendar-day-open"
                         onClick={(event) => {
                           event.stopPropagation();
@@ -102,27 +96,19 @@ export function TaskCalendarMonthGrid({
                       >
                         <span>{cellDate.getDate()}</span>
                         {cellEvents.length > 0 ? <small>{cellEvents.length}</small> : null}
+                        <span className="visually-hidden" id={`${cellDateKey}-details`}>{dayButtonLabel}</span>
                       </button>
                     </header>
 
                     <div className="task-calendar-day-events">
                       {visibleEvents.map((event) => (
-                        <button
+                        <div
                           className={`task-calendar-day-event ${eventTypeClassName(event)}`}
                           key={event.id}
-                          onClick={(clickEvent) => {
-                            clickEvent.stopPropagation();
-                            if (canOpenEventDirectly(event)) {
-                              onOpenEvent(event);
-                              return;
-                            }
-                            onOpenDay(cellDateKey);
-                          }}
                           title={event.title}
-                          type="button"
                         >
                           {event.title}
-                        </button>
+                        </div>
                       ))}
                       {hiddenEventCount > 0 ? (
                         <small className="task-calendar-more">+{hiddenEventCount} more</small>

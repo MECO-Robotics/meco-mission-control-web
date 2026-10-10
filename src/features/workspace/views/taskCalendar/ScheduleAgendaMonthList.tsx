@@ -18,7 +18,7 @@ export function ScheduleAgendaMonthList({
 
         return (
           <section aria-label={monthLabel} className="schedule-agenda-month" key={monthKey}>
-            <h3>{monthLabel}</h3>
+            <h2>{monthLabel}</h2>
             <ol className="schedule-agenda-list">
               {events.map((event) => {
                 const canOpen = ["milestone", "task-due", "qa-due"].includes(event.extendedProps.type);

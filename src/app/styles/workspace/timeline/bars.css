@@ -7,6 +7,7 @@
 
 .timeline-bar {
   --timeline-task-discipline-accent: #7a8799;
+  --timeline-task-bar-text-color: #000000;
   --timeline-task-status-accent: #54627b;
   --timeline-reveal-color: var(--official-white);
   --timeline-reveal-background: var(--timeline-task-discipline-accent);
@@ -16,12 +17,13 @@
   --timeline-task-status-size: 1.9rem;
   --timeline-bar-overflow-fade: calc(14px * var(--timeline-zoom, 1));
   --timeline-bar-overflow-edge-mask: rgba(0, 0, 0, 0.42);
-  min-height: 1.55rem;
+  min-width: 32px;
+  min-height: 32px;
   border: 0;
   border-radius: var(--timeline-task-bar-radius, 999px);
   padding: 0 var(--timeline-task-status-edge-padding) 0 var(--timeline-task-bar-padding-start);
   text-align: left;
-  color: var(--official-white);
+  color: var(--timeline-task-bar-text-color);
   font-weight: 700;
   width: 100%;
   cursor: pointer;
@@ -86,7 +88,7 @@
 }
 
 .timeline-bar .timeline-bar-title.timeline-ellipsis-reveal {
-  --timeline-reveal-color: color-mix(in srgb, var(--timeline-task-status-accent) 34%, var(--official-white) 66%);
+  color: var(--timeline-task-bar-text-color);
   display: block;
   flex: 1 1 auto;
   min-width: 0;

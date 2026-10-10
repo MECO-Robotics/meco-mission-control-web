@@ -18,8 +18,8 @@ it("derives team workload for all-project groups and excludes archived work from
   expect(html).toContain("Archived Team");
   expect(html).toContain("estimated hours remaining");
   expect(html).toContain("5.0h");
-  expect(html).toContain("blocked tasks");
-  expect(html).toContain("overdue tasks");
+  expect(html).toContain('aria-label="Blocked 1"');
+  expect(html).toContain('aria-label="Overdue 1"');
   expect(html).toContain('aria-label="0 open, 1 blocked, 0 overdue, and 0 completed tasks"');
   expect(html).toContain('class="is-blocked"><strong>1</strong> blocked');
   expect(html).toContain('class="is-overdue"><strong>1</strong> overdue');
@@ -31,7 +31,7 @@ it("derives team workload for all-project groups and excludes archived work from
   expect(html).toContain('aria-label="Search teams"');
   expect(html).toMatch(/<header class="panel-header team-card-header">[\s\S]*class="metric-grid"[\s\S]*class="team-actions-menu"[\s\S]*<\/header>/);
   expect(html).toMatch(/class="team-task-legend">[\s\S]*team-task-open-filter[\s\S]*Done[\s\S]*team-task-status-filter is-blocked[\s\S]*team-task-status-filter is-overdue/);
-  expect(html).toMatch(/class="topbar-responsive-search[^"]*"[\s\S]*aria-label="Filter teams"[\s\S]*aria-label="Sort teams"[\s\S]*?<\/div>/);
+  expect(html).toMatch(/class="topbar-responsive-search[^"]*"[\s\S]*aria-label="Filter teams"[\s\S]*aria-label="Sort teams, 1 active"[\s\S]*?<\/div>/);
   expect(html).toContain('aria-label="Create team"');
   expect(html.match(/class="team-member-load"/g)).toHaveLength(3);
   expect(html).toContain("Capacity");

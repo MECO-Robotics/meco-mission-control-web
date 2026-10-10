@@ -1,5 +1,5 @@
 .cad-diff-context {
-  color: var(--text-muted);
+  color: var(--text-copy);
   font-size: 0.84rem;
 }
 
@@ -15,7 +15,7 @@
 }
 
 .cad-diff-count {
-  border: 1px solid var(--border-subtle, rgba(148, 163, 184, 0.24));
+  border: 1px solid var(--border-base);
   border-radius: 8px;
   display: grid;
   gap: 2px;

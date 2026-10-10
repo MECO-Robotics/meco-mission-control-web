@@ -223,6 +223,7 @@ export const RosterView: React.FC<RosterViewProps> = ({
                 aria-label={`${day.label} ${day.date}: ${day.state.replace("-", " ")}`}
                 className={`people-attendance-day is-${day.state}`}
                 key={day.date}
+                role="img"
                 title={`${day.label} ${day.date}: ${day.state.replace("-", " ")}`}
               />
             ))}

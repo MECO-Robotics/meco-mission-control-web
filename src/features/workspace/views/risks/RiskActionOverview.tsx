@@ -78,7 +78,7 @@ export function RiskActionOverview({ activePersonFilter, bootstrap, onCreateRisk
   const severityColumns = useMemo(() => severities.map((severity) => ({
     state: severity,
     count: risksBySeverity[severity].length,
-    header: <h3>{severity}</h3>,
+    header: <h2>{severity}</h2>,
   })), [risksBySeverity]);
   return <>
     <TopbarResponsiveSearch

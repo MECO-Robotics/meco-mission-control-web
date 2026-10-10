@@ -63,6 +63,20 @@
   gap: 0.2rem;
 }
 
+@media (max-width: 900px) {
+  .table-shell:has(> .ops-table-header) {
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table-shell:has(> .ops-table-header) > .ops-table {
+    min-width: max-content;
+  }
+}
+
 .table-shell.filter-results-motion.is-filtering> :is(.ops-row, .task-queue-board-card, .subsystem-manager-item, .empty-state),
 .timeline-shell.filter-results-motion.is-filtering>* {
   animation: filter-results-settle 160ms ease-out both;

@@ -177,7 +177,7 @@ describe("CAD STEP review panel mapping state", () => {
     expect(markup).toContain("STEP export guide");
     expect(markup).toContain("Exact name match");
     expect(markup).toContain("Select a target before confirming.");
-    expect(markup).toContain("<button class=\"secondary-button compact-action\" disabled=\"\" type=\"button\">Confirm</button>");
+    expect(markup).toContain("<button class=\"secondary-action compact-action\" disabled=\"\" type=\"button\">Confirm</button>");
     expect(markup).toContain("Finalize with unresolved warnings");
     expect(markup).toContain("STEP preview diff");
     expect(markup).toContain("Review mapping decisions");

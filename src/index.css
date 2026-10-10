@@ -11,6 +11,10 @@
   --official-grey: #bbbbbb;
   --official-black: #000000;
   --official-white: #ffffff;
+  --border-strong: #cbd5e1;
+  --text-muted: #475569;
+  --official-green: #166534;
+  --text-copy: #475569;
   --meco-blue: var(--official-blue);
   --meco-red: var(--official-red);
   --meco-soft-blue: rgba(22, 71, 142, 0.08);

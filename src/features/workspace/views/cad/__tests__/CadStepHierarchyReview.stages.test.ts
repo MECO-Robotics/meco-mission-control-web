@@ -83,7 +83,7 @@ describe("CAD STEP hierarchy review stages", () => {
 
     const markup = renderNodeCardMarkup(unresolvedSubsystem, "SUBSYSTEM");
 
-    expect(markup).toContain('<button class="secondary-button compact-action" disabled="" type="button">Confirm</button>');
+    expect(markup).toContain('<button class="secondary-action compact-action" disabled="" type="button">Confirm</button>');
   });
 
   it("keeps shared classification choices for subsystem and part-definition review", () => {
@@ -124,7 +124,7 @@ describe("CAD STEP hierarchy review stages", () => {
 
     const markup = renderNodeCardMarkup(componentNode, "COMPONENT_ASSEMBLY");
 
-    expect(markup).toContain('<button class="secondary-button compact-action" type="button">Confirm</button>');
+    expect(markup).toContain('<button class="secondary-action compact-action" type="button">Confirm</button>');
   });
 
   it("summarizes grouped parts without rendering every raw STEP instance and exposes ambiguous matches", () => {

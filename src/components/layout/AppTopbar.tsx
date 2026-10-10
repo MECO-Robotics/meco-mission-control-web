@@ -82,6 +82,7 @@ export function AppTopbar({
             )}
             ariaLabel="Add workspace item"
             title="Add to workspace"
+            portal={false}
           />
         </div>
       </div>

@@ -206,7 +206,7 @@ export function CadStepMappingReviewTable({
                     </p>
                     <div className="cad-row-actions">
                       <button
-                        className="secondary-button compact-action"
+                        className="secondary-action compact-action"
                         disabled={isSavingMapping || usesPlaceholderParser || isConfirmBlocked}
                         onClick={() => confirmMapping(
                           effectiveTargetKind,

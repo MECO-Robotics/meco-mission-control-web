@@ -16,23 +16,23 @@
 }
 
 .cad-tree-import-meta dt {
-  color: var(--text-muted);
+  color: var(--text-copy);
   font-size: 0.72rem;
   font-weight: 800;
   text-transform: uppercase;
 }
 
 .cad-tree-import-meta dd {
-  color: var(--text-primary);
+  color: var(--text-title);
   font-size: 0.84rem;
   margin: 0;
 }
 
 .cad-old-snapshot-alert {
-  background: rgba(245, 158, 11, 0.1);
+  background: var(--status-warning-bg);
   border: 1px solid rgba(245, 158, 11, 0.28);
   border-radius: 8px;
-  color: #92400e;
+  color: var(--status-warning-text);
   font-size: 0.84rem;
   font-weight: 800;
   margin: 0 0 10px;

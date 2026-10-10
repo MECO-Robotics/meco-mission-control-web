@@ -6,7 +6,7 @@
   z-index: 900;
   width: var(--shell-sidebar-width);
   height: calc(100vh - var(--shell-topbar-height));
-  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1); /* impeccable-disable-line layout-transition: animates the interactive sidebar collapse */
 }
 
 .sidebar-compact-popup {

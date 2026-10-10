@@ -28,19 +28,9 @@ export const TimelineMilestoneUnderlaysPortal: React.FC<TimelineMilestoneUnderla
         <div
           key={`timeline-underlay-${underlay.id}`}
           className="timeline-day-milestone-underlay"
-          aria-label={`Open milestone ${underlay.milestone.title}`}
           onMouseEnter={(event) => onShowMilestonePopup(event.currentTarget, underlay.milestone)}
           onMouseLeave={onHideMilestonePopup}
-          onClick={() => onOpenMilestoneDetails(underlay.milestone)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter" || event.key === " ") {
-              event.preventDefault();
-              onOpenMilestoneDetails(underlay.milestone);
-            }
-          }}
-          role="button"
           title={underlay.lines.join(", ")}
-          tabIndex={0}
           style={{
             left: `${underlay.geometry.left + underlay.horizontalOffset}px`,
             top: `${underlay.geometry.bodyTop}px`,
@@ -52,18 +42,15 @@ export const TimelineMilestoneUnderlaysPortal: React.FC<TimelineMilestoneUnderla
             justifyContent: "center",
             color: underlay.color,
             pointerEvents: "auto",
-            cursor: "pointer",
             zIndex: 4 + underlay.stackOrder,
           }}
         >
-          <div
-            style={{
-              display: "grid",
-              gap: "0.28rem",
-              justifyItems: "center",
-              transform: `rotate(${underlay.rotationDeg}deg)`,
-              transformOrigin: "center",
-            }}
+          <button
+            aria-label={`Open milestone ${underlay.milestone.title}`}
+            className="timeline-day-milestone-underlay-label"
+            onClick={() => onOpenMilestoneDetails(underlay.milestone)}
+            type="button"
+            style={{ transform: `rotate(${underlay.rotationDeg}deg)` }}
           >
             {underlay.lines.map((line, index) => (
               <span
@@ -73,7 +60,7 @@ export const TimelineMilestoneUnderlaysPortal: React.FC<TimelineMilestoneUnderla
                 {line}
               </span>
             ))}
-          </div>
+          </button>
         </div>
       ))}
     </>,

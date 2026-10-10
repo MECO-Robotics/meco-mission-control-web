@@ -20,6 +20,7 @@ interface WorkspaceTopbarAddMenuProps {
   ariaLabel: string;
   title: string;
   tutorialTarget?: string;
+  portal?: boolean;
 }
 
 export function WorkspaceTopbarAddMenu({
@@ -27,6 +28,7 @@ export function WorkspaceTopbarAddMenu({
   ariaLabel,
   title,
   tutorialTarget,
+  portal = true,
 }: WorkspaceTopbarAddMenuProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
@@ -93,8 +95,7 @@ export function WorkspaceTopbarAddMenu({
     return null;
   }
 
-  return (
-    <AppTopbarSlotPortal slot="add">
+  const menu = (
     <div
       className="topbar-add-menu"
       data-open={isMenuOpen ? "true" : "false"}
@@ -131,6 +132,7 @@ export function WorkspaceTopbarAddMenu({
         </div>
       ) : null}
     </div>
-    </AppTopbarSlotPortal>
   );
+
+  return portal ? <AppTopbarSlotPortal slot="add">{menu}</AppTopbarSlotPortal> : menu;
 }
