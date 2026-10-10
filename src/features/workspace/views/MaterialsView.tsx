@@ -57,14 +57,15 @@ export function MaterialsView({
   const columnOptions = useMemo(() => {
     const uniqueOptions = (getValue: (material: MaterialRecord) => string) =>
       getResourceFilterOptions(bootstrap.materials.map(getValue));
+    const vendorName = (material: MaterialRecord) => material.preferredVendorId ? bootstrap.vendors.find((vendor) => vendor.id === material.preferredVendorId)?.name ?? "Unknown vendor" : "No preferred vendor";
 
     return {
       name: uniqueOptions((material) => material.name),
       quantity: uniqueOptions((material) => `${material.onHandQuantity} / ${material.reorderPoint}`),
       location: uniqueOptions((material) => material.location || "Unassigned"),
-      vendor: uniqueOptions((material) => material.vendor || "Unknown"),
+      vendor: uniqueOptions(vendorName),
     };
-  }, [bootstrap.materials]);
+  }, [bootstrap.materials, bootstrap.vendors]);
 
   const filteredMaterials = useMemo(() => {
     return filterMaterialInventory(bootstrap.materials, {
@@ -75,11 +76,11 @@ export function MaterialsView({
       location,
       vendor,
       stock,
-    });
-  }, [bootstrap.materials, category, location, name, quantity, search, stock, vendor]);
+    }, Object.fromEntries(bootstrap.vendors.map((item) => [item.id, item.name])));
+  }, [bootstrap.materials, bootstrap.vendors, category, location, name, quantity, search, stock, vendor]);
   const sortedMaterials = useMemo(
-    () => sortMaterialInventory(filteredMaterials, sortField, sortDirection),
-    [filteredMaterials, sortDirection, sortField],
+    () => sortMaterialInventory(filteredMaterials, sortField, sortDirection, Object.fromEntries(bootstrap.vendors.map((item) => [item.id, item.name]))),
+    [bootstrap.vendors, filteredMaterials, sortDirection, sortField],
   );
   const materialPagination = useWorkspacePagination(sortedMaterials);
   const materialsFilterMotionClass = useFilterChangeMotionClass([
@@ -229,7 +230,7 @@ export function MaterialsView({
           const materialSubtitle =
             material.notes.trim().length > 0
               ? material.notes
-              : `Vendor: ${material.vendor || "Unknown"} | Location: ${material.location || "Unassigned"}`;
+              : `Preferred vendor: ${material.preferredVendorId ? bootstrap.vendors.find((item) => item.id === material.preferredVendorId)?.name ?? "Unknown vendor" : "None"} | Bulk location: ${material.location || "Unassigned"}`;
 
           return (
             <button
@@ -247,7 +248,7 @@ export function MaterialsView({
                 {material.onHandQuantity} / {material.reorderPoint}
               </TableCell>
               <TableCell label="Location">{material.location || "Unassigned"}</TableCell>
-              <TableCell label="Vendor">{material.vendor || "Unknown"}</TableCell>
+              <TableCell label="Preferred vendor">{material.preferredVendorId ? bootstrap.vendors.find((item) => item.id === material.preferredVendorId)?.name ?? "Unknown vendor" : "None"}</TableCell>
               <TableCell label="Status" valueClassName="table-cell-pill">
                 <span className={getStatusPillClassName(isLow ? "critical" : "complete")}>
                   {isLow ? "Low stock" : "Stock OK"}

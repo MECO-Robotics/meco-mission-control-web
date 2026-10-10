@@ -7,7 +7,6 @@ import {
   getNavigationTarget,
   isNavigationSubItemAvailable,
   type InventoryViewTab,
-  type ManufacturingViewTab,
   type NavigationSection,
   type NavigationSubItemId,
   type TaskViewTab,
@@ -21,7 +20,6 @@ import type { SidebarSubItemModel } from "../AppSidebarSections";
 interface UseAppSidebarNavigationModelsArgs {
   activeTab: ViewTab;
   inventoryView: InventoryViewTab;
-  manufacturingView: ManufacturingViewTab;
   taskView: TaskViewTab;
   viewAvailabilityContext: ViewAvailabilityContext;
   worklogsView: WorklogsViewTab;
@@ -30,7 +28,6 @@ interface UseAppSidebarNavigationModelsArgs {
 export function useAppSidebarNavigationModels({
   activeTab,
   inventoryView,
-  manufacturingView,
   taskView,
   viewAvailabilityContext,
   worklogsView,
@@ -38,7 +35,6 @@ export function useAppSidebarNavigationModels({
   const activeSubItemId = getActiveNavigationSubItemId({
     activeTab,
     inventoryView,
-    manufacturingView,
     taskView,
     worklogsView,
   }, viewAvailabilityContext);

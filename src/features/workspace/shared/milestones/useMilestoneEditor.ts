@@ -84,10 +84,10 @@ export function useMilestoneEditor({
       ...timelineMilestoneDraftFromRecord(milestone),
       projectIds: milestone.projectIds.length > 0 ? milestone.projectIds : scopedProjectIds,
     });
-    setMilestoneStartDate(datePortion(milestone.startDateTime));
-    setMilestoneStartTime(timePortion(milestone.startDateTime));
-    setMilestoneEndDate(milestone.endDateTime ? datePortion(milestone.endDateTime) : "");
-    setMilestoneEndTime(milestone.endDateTime ? timePortion(milestone.endDateTime) : "");
+    setMilestoneStartDate(datePortion(milestone.startAt));
+    setMilestoneStartTime(timePortion(milestone.startAt));
+    setMilestoneEndDate(milestone.endAt ? datePortion(milestone.endAt) : "");
+    setMilestoneEndTime(milestone.endAt ? timePortion(milestone.endAt) : "");
     setMilestoneError(null);
   }, [scopedProjectIds]);
 
@@ -116,16 +116,16 @@ export function useMilestoneEditor({
     }
 
     const normalizedStartTime = milestoneStartTime.trim().length > 0 ? milestoneStartTime : "12:00";
-    const startDateTime = buildDateTime(milestoneStartDate, normalizedStartTime);
+    const startAt = buildDateTime(milestoneStartDate, normalizedStartTime);
     const includeEndDate = milestoneEndDate.trim().length > 0 || milestoneEndTime.trim().length > 0;
-    const endDateTime = includeEndDate
+    const endAt = includeEndDate
       ? buildDateTime(
           milestoneEndDate.trim().length > 0 ? milestoneEndDate : milestoneStartDate,
           milestoneEndTime.trim().length > 0 ? milestoneEndTime : normalizedStartTime,
         )
       : null;
 
-    if (endDateTime && compareDateTimes(endDateTime, startDateTime) < 0) {
+    if (endAt && compareDateTimes(endAt, startAt) < 0) {
       setMilestoneError("End date/time must be after the start date/time.");
       return;
     }
@@ -137,9 +137,9 @@ export function useMilestoneEditor({
       const payload: MilestonePayload = {
         title: normalizedTitle,
         type: milestoneDraft.type,
-        startDateTime,
-        endDateTime,
-        isExternal: milestoneDraft.isExternal,
+        status: milestoneDraft.status,
+        startAt,
+        endAt,
         description: milestoneDraft.description.trim(),
         projectIds: Array.from(new Set(milestoneDraft.projectIds)),
       };

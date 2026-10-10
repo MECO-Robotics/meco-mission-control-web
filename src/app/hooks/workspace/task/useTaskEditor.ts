@@ -1,25 +1,20 @@
-import { updateRiskRecord } from "@/lib/auth/records/reporting";
 import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from "react";
 
 import { toErrorMessage } from "@/lib/appUtils/common";
 import { createTask, updateTaskRecord, deleteTaskRecord } from "@/lib/auth/records/task";
 import {
-  createTaskBlockerRecord,
   createTaskDependencyRecord,
-  deleteTaskBlockerRecord,
   deleteTaskDependencyRecord,
-  updateTaskBlockerRecord,
   updateTaskDependencyRecord,
 } from "@/lib/auth/records/taskRelations";
 import {
   normalizeTaskPayload,
 } from "@/features/workspace/tasks/domain/taskPayloadNormalization";
 import {
-  syncTaskBlockers,
   syncTaskDependencies,
   type TaskRelationPersistence,
 } from "@/features/workspace/tasks/services/taskRelationsSync";
-import type { TaskBlockerRecord, TaskDependencyRecord, TaskRecord } from "@/types/recordsExecution";
+import type { TaskDependencyRecord, TaskRecord } from "@/types/recordsExecution";
 import { buildTaskEditSuccessNotice } from "@/features/workspace/workspaceEditToastNotice";
 
 import { buildEmptyTaskPayload, taskToPayload } from "@/lib/appUtils/taskTargets";
@@ -37,9 +32,6 @@ const TASK_RELATION_PERSISTENCE: TaskRelationPersistence = {
   createTaskDependencyRecord,
   updateTaskDependencyRecord,
   deleteTaskDependencyRecord,
-  createTaskBlockerRecord,
-  updateTaskBlockerRecord,
-  deleteTaskBlockerRecord,
 };
 
 export function useTaskEditor({ bootstrap, scopedBootstrap, selectedProjectId, selectedSeasonId,
@@ -122,6 +114,17 @@ export function useTaskEditor({ bootstrap, scopedBootstrap, selectedProjectId, s
 
     try {
       const payload = normalizeTaskPayload(taskDraft);
+      const taskProject = bootstrap.projects.find((project) => project.id === payload.projectId);
+      const taskWorkType = bootstrap.workTypes.find((workType) => workType.id === payload.workTypeId);
+      const isRobotManufacturing = taskProject?.projectType === "robot" && taskWorkType?.code === "manufacturing";
+      if (isRobotManufacturing && !payload.manufacturingDetails) {
+        setDataMessage("Add the technical manufacturing details before saving this Robot Manufacturing Task.");
+        return;
+      }
+      if (payload.manufacturingDetails && !isRobotManufacturing) {
+        setDataMessage("Manufacturing details can only be attached to a Robot Manufacturing Task.");
+        return;
+      }
       const isEdit = taskModalMode === "edit";
       let savedTask: TaskRecord;
 
@@ -155,32 +158,10 @@ export function useTaskEditor({ bootstrap, scopedBootstrap, selectedProjectId, s
         },
         onDeleted: (id) => { if (workspace.isCurrent()) publish((current) => ({ ...current, taskDependencies: (current.taskDependencies ?? []).filter((item) => item.id !== id) })); },
       }, TASK_RELATION_PERSISTENCE)) return;
-      if (!await syncTaskBlockers({
-        taskId: savedTask.id,
-        canPersist: workspace.isCurrent,
-        desiredBlockers: taskDraft.taskBlockers,
-        existingBlockers: (bootstrap.taskBlockers ?? []).filter(
-          (blocker): blocker is TaskBlockerRecord => blocker.blockedTaskId === savedTask.id,
-        ),
-        handleUnauthorized,
-        onPersisted: (draft, record) => {
-          if (!workspace.isCurrent()) return;
-          if (operation.isCurrent()) setTaskDraft((current) => operation.isCurrent() ? ({ ...current, taskBlockers: current.taskBlockers?.map((item) => item === draft || (draft.id && item.id === draft.id) ? { ...item, id: record.id } : item) }) : current);
-          publish((current) => ({ ...current, taskBlockers: [...(current.taskBlockers ?? []).filter((item) => item.id !== record.id), record] }));
-        },
-        onDeleted: (id) => { if (workspace.isCurrent()) publish((current) => ({ ...current, taskBlockers: (current.taskBlockers ?? []).filter((item) => item.id !== id) })); },
-      }, TASK_RELATION_PERSISTENCE)) return;
       if (!workspace.isCurrent()) return;
-      const previousRisk = scopedBootstrap.risks.find((risk) => risk.mitigationTaskId === savedTask.id);
-      const nextRiskId = taskDraft.targetRiskId ?? null;
-      if (previousRisk?.id !== nextRiskId) {
-        if (previousRisk) await updateRiskRecord(previousRisk.id, { mitigationTaskId: null }, handleUnauthorized);
-        if (!workspace.isCurrent()) return;
-        if (nextRiskId) await updateRiskRecord(nextRiskId, { mitigationTaskId: savedTask.id }, handleUnauthorized);
-      }
-      await workspace.refresh();
+      const refreshed = await operation.refresh();
       if (operation.isCurrent()) {
-        if (isEdit) enqueueTaskEditNotice(buildTaskEditSuccessNotice());
+        if (isEdit && refreshed) enqueueTaskEditNotice(buildTaskEditSuccessNotice());
         closeTaskModal();
       }
     } catch (error) {
@@ -196,8 +177,8 @@ export function useTaskEditor({ bootstrap, scopedBootstrap, selectedProjectId, s
     setDataMessage(null);
     try {
       await updateTaskRecord(task.id, { status }, handleUnauthorized);
-      await workspace.refresh();
-      if (workspace.isCurrent()) enqueueTaskEditNotice(buildTaskEditSuccessNotice());
+      const refreshed = await workspace.refresh();
+      if (refreshed && workspace.isCurrent()) enqueueTaskEditNotice(buildTaskEditSuccessNotice());
     } catch (error) {
       if (workspace.isCurrent()) setDataMessage(toErrorMessage(error));
     }
@@ -216,16 +197,6 @@ export function useTaskEditor({ bootstrap, scopedBootstrap, selectedProjectId, s
       operation.finish();
     }
   }
-  async function handleResolveTaskBlocker(blockerId: string) {
-    const workspace = captureWorkspace();
-    setDataMessage(null);
-    try {
-      await updateTaskBlockerRecord(blockerId, { status: "resolved" }, handleUnauthorized);
-      await workspace.refresh();
-    } catch (error) {
-      if (workspace.isCurrent()) setDataMessage(toErrorMessage(error));
-    }
-  }
   return {
     taskModalMode, activeTaskId, taskDraft, setTaskDraft, activeTask,
     activeTimelineTaskDetailId, activeTimelineTaskDetail, isSavingTask, isDeletingTask,
@@ -235,6 +206,6 @@ export function useTaskEditor({ bootstrap, scopedBootstrap, selectedProjectId, s
     openCreateTaskModalFromTimeline: () => openCreateTaskModal({ fromTimeline: true }),
     openTimelineTaskDetailsModal: (task: TaskRecord) => restoreTimelineTaskDetails(task.id),
     closeTimelineTaskDetailsModal: () => restoreTimelineTaskDetails(null),
-    switchTaskCreateToMilestone, handleTaskSubmit, handleDeleteTask, handleTaskStatusChange, handleResolveTaskBlocker,
+    switchTaskCreateToMilestone, handleTaskSubmit, handleDeleteTask, handleTaskStatusChange,
   };
 }

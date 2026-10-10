@@ -1,5 +1,6 @@
-import type { ManufacturingItemPayload, PurchaseItemPayload } from "@/types/payloads";
-import type { ManufacturingItemRecord, PurchaseItemRecord } from "@/types/recordsInventory";
+import type { PurchaseItemPayload } from "@/types/payloads";
+import type { PurchaseItemRecord } from "@/types/recordsInventory";
+import type { ManufacturingProcessRecord } from "@/types/recordsExecution";
 import { requestItem } from "./common";
 
 export function createPurchaseItemRecord(
@@ -27,27 +28,23 @@ export function updatePurchaseItemRecord(
   );
 }
 
-export function createManufacturingItemRecord(
-  payload: ManufacturingItemPayload,
+export function createManufacturingProcessRecord(
+  payload: Pick<ManufacturingProcessRecord, "code" | "name">,
   onUnauthorized?: () => void,
 ) {
-  return requestItem<ManufacturingItemRecord, ManufacturingItemPayload>(
-    "/manufacturing",
+  return requestItem<ManufacturingProcessRecord, Pick<ManufacturingProcessRecord, "code" | "name">>(
+    "/manufacturing/processes",
     "POST",
     payload,
     onUnauthorized,
   );
 }
 
-export function updateManufacturingItemRecord(
-  itemId: string,
-  payload: Partial<ManufacturingItemPayload>,
-  onUnauthorized?: () => void,
-) {
-  return requestItem<ManufacturingItemRecord, Partial<ManufacturingItemPayload>>(
-    `/manufacturing/${itemId}`,
+export function archiveManufacturingProcessRecord(processId: string, onUnauthorized?: () => void) {
+  return requestItem<ManufacturingProcessRecord, { isActive: false }>(
+    `/manufacturing/processes/${processId}`,
     "PATCH",
-    payload,
+    { isActive: false },
     onUnauthorized,
   );
 }

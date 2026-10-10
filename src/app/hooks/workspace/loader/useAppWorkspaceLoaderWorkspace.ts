@@ -13,12 +13,12 @@ export function useAppWorkspaceLoaderWorkspace(
   selectMember: SelectMemberHandler,
 ) {
   const latestRequest = useRef(0);
-  return useCallback(async (scope: WorkspaceLoadScope = {}, canApply: () => boolean = () => true) => {
-    if (!canApply()) return;
+  return useCallback(async (scope: WorkspaceLoadScope = {}, canApply: () => boolean = () => true, canNotify: () => boolean = canApply) => {
+    if (!canApply()) return false;
     const request = ++latestRequest.current;
     const isCurrent = () => request === latestRequest.current && canApply();
     state.setIsLoadingData(true);
-    state.setDataMessage(null);
+    if (canNotify()) state.setDataMessage(null);
 
     try {
       const personId =
@@ -35,7 +35,7 @@ export function useAppWorkspaceLoaderWorkspace(
         projectId,
         handleUnauthorized,
       );
-      if (!isCurrent()) return;
+      if (!isCurrent()) return false;
       const scopedPayload = scopeBootstrapBySelection(
         payload,
         seasonId,
@@ -51,9 +51,11 @@ export function useAppWorkspaceLoaderWorkspace(
         scopedPayload,
         selectMember,
       );
+      return true;
     } catch (error) {
-      if (!isCurrent() || (error instanceof Error && error.name === "AbortError")) return;
-      state.setDataMessage(error instanceof Error ? error.message : String(error));
+      if (!isCurrent() || (error instanceof Error && error.name === "AbortError")) return false;
+      if (canNotify()) state.setDataMessage(error instanceof Error ? error.message : String(error));
+      return false;
     } finally {
       if (isCurrent()) state.setIsLoadingData(false);
     }

@@ -9,20 +9,17 @@ import { useTaskEditorAdvancedFieldsState } from "./editorAdvanced/useTaskEditor
 
 interface TaskEditorCreateProjectSectionProps {
   bootstrap: BootstrapPayload;
-  currentTaskId: string | null;
   setTaskDraft: Dispatch<SetStateAction<TaskPayload>>;
   taskDraft: TaskPayload;
 }
 
 export function TaskEditorCreateProjectSection({
   bootstrap,
-  currentTaskId,
   setTaskDraft,
   taskDraft,
 }: TaskEditorCreateProjectSectionProps) {
   const { handleProjectChange } = useTaskEditorAdvancedFieldsState({
     bootstrap,
-    currentTaskId,
     setTaskDraft,
     taskDraft,
   });
@@ -30,6 +27,14 @@ export function TaskEditorCreateProjectSection({
     id: project.id,
     name: project.name,
   }));
+  const selectedProject = bootstrap.projects.find(({ id }) => id === taskDraft.projectId);
+  const workTypeOptions = bootstrap.workTypes.filter((workType) =>
+    workType.isActive && workType.projectType === selectedProject?.projectType,
+  );
+  const responsibleGroups = bootstrap.responsibleGroups.filter((group) =>
+    !group.isArchived && group.seasonId === selectedProject?.seasonId &&
+    (group.projectIds.length === 0 || group.projectIds.includes(taskDraft.projectId)),
+  );
 
   return (
     <div className="task-details-section-grid modal-wide">
@@ -54,6 +59,25 @@ export function TaskEditorCreateProjectSection({
           options={projectOptions}
           value={taskDraft.projectId ? [taskDraft.projectId] : []}
         />
+      </label>
+      <label className="field task-detail-row task-detail-row-chip">
+        <span style={{ color: "var(--text-title)" }}>Work type</span>
+        <select
+          onChange={(event) => setTaskDraft((current) => ({ ...current, workTypeId: event.target.value }))}
+          value={taskDraft.workTypeId}
+        >
+          {workTypeOptions.map((workType) => <option key={workType.id} value={workType.id}>{workType.name}</option>)}
+        </select>
+      </label>
+      <label className="field task-detail-row task-detail-row-chip">
+        <span style={{ color: "var(--text-title)" }}>Responsible group</span>
+        <select
+          onChange={(event) => setTaskDraft((current) => ({ ...current, responsibleGroupId: event.target.value || null }))}
+          value={taskDraft.responsibleGroupId ?? ""}
+        >
+          <option value="">Unassigned group</option>
+          {responsibleGroups.map((group) => <option key={group.id} value={group.id}>{group.name}</option>)}
+        </select>
       </label>
     </div>
   );

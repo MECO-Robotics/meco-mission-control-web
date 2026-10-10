@@ -44,6 +44,10 @@ export function updateRiskRecord(
   );
 }
 
+export function createRiskRecord(payload: RiskPayload, onUnauthorized?: () => void) {
+  return requestItem<RiskRecord, RiskPayload>("/risks", "POST", payload, onUnauthorized);
+}
+
 export function deleteRiskRecord(riskId: string, onUnauthorized?: () => void) {
   return requestItem<RiskRecord, never>(`/risks/${riskId}`, "DELETE", undefined, onUnauthorized);
 }

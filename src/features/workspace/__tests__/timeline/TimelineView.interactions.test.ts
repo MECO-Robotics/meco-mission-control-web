@@ -13,6 +13,7 @@ function createBootstrap(): BootstrapPayload {
     seasons: [
       {
         id: "season-1",
+        teamId: "team-1",
         name: "2026",
         type: "season",
         startDate: "2026-01-01",
@@ -50,29 +51,33 @@ function createBootstrap(): BootstrapPayload {
         parentSubsystemId: null,
         responsibleEngineerId: "member-1",
         mentorIds: [],
-        risks: [],
       },
     ],
-    disciplines: [
+    workTypes: [
       {
-        id: "discipline-1",
+        id: "work-type-design",
+        projectType: "robot",
         code: "design",
         name: "Design",
+        isActive: true,
       },
     ],
     tasks: [
       {
-        artifactIds: [],
         id: "task-1",
         projectId: "project-1",
         workstreamIds: [],
         title: "Frame rail layout",
         summary: "",
         subsystemIds: ["subsystem-1"],
-        disciplineId: "discipline-1",
+        workTypeId: "work-type-design",
+        responsibleGroupId: null,
         mechanismIds: [],
         partInstanceIds: [],
-        targetMilestoneId: null,
+        scheduleRefs: [],
+        requestedById: null,
+        checklistItems: [],
+        manufacturingDetails: null,
         ownerId: "member-1",
         assigneeIds: ["member-1"],
         mentorId: null,
@@ -81,13 +86,9 @@ function createBootstrap(): BootstrapPayload {
         priority: "high",
         status: "in-progress",
 
-        blockers: [],
-        linkedManufacturingIds: [],
-        linkedPurchaseIds: [],
         estimatedHours: 4,
         actualHours: 1,
         requiresDocumentation: false,
-        documentationLinked: false,
       },
     ],
   };
@@ -198,21 +199,33 @@ describe("TimelineView interactions", () => {
     expect(overlayHookSource).toContain("setIsTimelineShellScrolling(false)");
   });
 
-  it("supports keyboard and touch activation for the timeline interval switch", () => {
+  it("keeps Week, Month, and All visible as direct timeline interval options", () => {
     const toolbarSource = readFileSync(
       join(process.cwd(), "src/features/workspace/views/timeline/TimelineToolbar.tsx"),
       "utf8",
     );
-
-    expect(toolbarSource).toContain("onFocusCapture={handleIntervalSwitchFocusCapture}");
-    expect(toolbarSource).toContain("onPointerDownCapture={handleIntervalSwitchPointerDown}");
-    expect(toolbarSource).toContain("onClick={() => openIntervalSwitch({ focusOptions: true })}");
-    expect(toolbarSource).toContain("onKeyDown={handleIntervalPillKeyDown}");
-    expect(toolbarSource).toContain('compactSwitchWidth={220}');
-    expect(toolbarSource.indexOf('className={`timeline-period-controls')).toBeLessThan(
-      toolbarSource.indexOf('className={`timeline-interval-switch'),
+    const rangeSelectorSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/taskCalendar/ScheduleRangeSelector.tsx"),
+      "utf8",
     );
-    expect(toolbarSource).toContain('aria-label={viewInterval === "all" ? "Timeline view controls" : "Timeline period controls"}');
+
+    expect(rangeSelectorSource).toContain('{ id: "week", label: "Week" }');
+    expect(rangeSelectorSource).toContain('{ id: "month", label: "Month" }');
+    expect(rangeSelectorSource).toContain('{ id: "all", label: "All" }');
+    expect(toolbarSource).toContain('<SchedulePeriodControls');
+    expect(toolbarSource).toContain('presentation="timeline"');
+    expect(toolbarSource).toContain("range={viewInterval}");
+    expect(toolbarSource).not.toContain("collapsible");
+    expect(toolbarSource).toContain('compactSwitchWidth={220}');
+    const periodControlsSource = readFileSync(
+      join(process.cwd(), "src/features/workspace/views/taskCalendar/SchedulePeriodControls.tsx"),
+      "utf8",
+    );
+    expect(periodControlsSource.indexOf('className={`timeline-period-controls')).toBeLessThan(
+      periodControlsSource.indexOf("<ScheduleRangeSelector"),
+    );
+    expect(periodControlsSource).toContain('aria-label={presentation === "timeline" ? "Timeline period controls"');
+    expect(periodControlsSource).toContain('aria-label="Go to today"');
   });
 
   it("keeps the date range compact and renders navigation as icon-only controls", () => {
@@ -226,17 +239,4 @@ describe("TimelineView interactions", () => {
     expect(toolbarStyles).toMatch(/\.timeline-period-controls\s*\{[^}]*padding:\s*0\.06rem 0\.1rem;/);
   });
 
-  it("moves keyboard focus into interval options after expanding the switch", () => {
-    const toolbarSource = readFileSync(
-      join(process.cwd(), "src/features/workspace/views/timeline/TimelineToolbar.tsx"),
-      "utf8",
-    );
-
-    expect(toolbarSource).toContain("const intervalSwitchRef = React.useRef<HTMLDivElement>(null)");
-    expect(toolbarSource).toContain("const shouldFocusIntervalOptionRef = React.useRef(false)");
-    expect(toolbarSource).toContain("const suppressBlurCloseRef = React.useRef(false)");
-    expect(toolbarSource).toContain("if (suppressBlurCloseRef.current) {");
-    expect(toolbarSource).toContain(".timeline-interval-toggle-option.is-active");
-    expect(toolbarSource).toContain("nextFocusTarget?.focus()");
-  });
 });

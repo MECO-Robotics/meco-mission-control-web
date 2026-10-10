@@ -3,7 +3,7 @@ import { useRememberedViewState } from "@/features/workspace/shared/navigation/W
 import React from "react";
 import { buildAvailableStudentRoster, getPresentRosterMemberIds } from "./roster/availableStudentsRoster";
 import { useRosterInsights } from "./roster/useRosterInsights";
-import { formatAvailabilityLabel, formatHours } from "./roster/rosterInsightsViewModel";
+import { buildAttendanceWeek } from "./roster/rosterAttendanceWeek";
 import type { TaskRecord } from "@/types/recordsExecution";
 
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
@@ -18,7 +18,6 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MemberPayload } from "@/types/payloads";
 import type { MemberRecord } from "@/types/recordsOrganization";
 import { isMemberActiveInSeason } from "@/lib/appUtils/common";
-import { getTaskDisciplinesForProject } from "@/lib/taskDisciplines";
 
 import { RosterAddPersonModal } from "./roster/RosterAddPersonModal";
 import { RosterEditPersonModal } from "./roster/RosterEditPersonModal";
@@ -118,34 +117,19 @@ export const RosterView: React.FC<RosterViewProps> = ({
   });
   const sortedExternalMembers = [...externalMembers].sort((a, b) => a.name.localeCompare(b.name));
 
-  const sortedDisciplines = React.useMemo(() => {
-    const projectForDisciplines = selectedProject ?? bootstrap.projects[0] ?? null;
-    const allowedDisciplineIds = new Set(
-      getTaskDisciplinesForProject(projectForDisciplines).map((discipline) => discipline.id),
-    );
-    const uniqueDisciplinesByName = new Map<string, BootstrapPayload["disciplines"][number]>();
-
-    for (const discipline of bootstrap.disciplines) {
-      if (!allowedDisciplineIds.has(discipline.id)) {
-        continue;
-      }
-      const normalizedName = discipline.name.trim().toLowerCase();
-      if (!uniqueDisciplinesByName.has(normalizedName)) {
-        uniqueDisciplinesByName.set(normalizedName, discipline);
-      }
-    }
-
-    return [...uniqueDisciplinesByName.values()].sort((a, b) => a.name.localeCompare(b.name));
-  }, [bootstrap.disciplines, bootstrap.projects, selectedProject]);
-
-  const disciplineOptions = React.useMemo(
-    () => sortedDisciplines.map((discipline) => ({ id: discipline.id, name: discipline.name })),
-    [sortedDisciplines],
+  const responsibleGroups = React.useMemo(
+    () => bootstrap.responsibleGroups.filter((group) => !group.isArchived && (!selectedProject || group.projectIds.includes(selectedProject.id))),
+    [bootstrap.responsibleGroups, selectedProject],
   );
-  const disciplineById = React.useMemo(
-    () => Object.fromEntries(bootstrap.disciplines.map((discipline) => [discipline.id, discipline.name] as const)),
-    [bootstrap.disciplines],
-  );
+  const groupNamesByMemberId = React.useMemo(() => {
+    const groups = new Map<string, string[]>();
+    responsibleGroups.forEach((group) => group.memberIds.forEach((memberId) => {
+      const names = groups.get(memberId) ?? [];
+      names.push(group.name);
+      groups.set(memberId, names);
+    }));
+    return groups;
+  }, [responsibleGroups]);
   const normalizedSearch = searchText.trim().toLowerCase();
   const filterMembers = (members: MemberRecord[]) => {
     const scopedMembers = members.filter(member => peopleFilter === "all" || (peopleFilter === "present" ? presentMemberIds.has(member.id) : peopleFilter === "available" ? presenceById.get(member.id)?.state === "available" : insightById.get(member.id)?.availabilityStatus === "overloaded"));
@@ -155,15 +139,15 @@ export const RosterView: React.FC<RosterViewProps> = ({
         member.email,
         member.role,
         member.elevated ? "elevated" : "",
-        member.disciplineId ? disciplineById[member.disciplineId] ?? "" : "",
+        (groupNamesByMemberId.get(member.id) ?? []).join(" "),
       ]
         .join(" ")
         .toLowerCase()
         .includes(normalizedSearch),
     );
-    const disciplineName = (member: MemberRecord) => member.disciplineId ? disciplineById[member.disciplineId] ?? "" : "";
+    const groupName = (member: MemberRecord) => (groupNamesByMemberId.get(member.id) ?? []).join(", ");
     return [...searchedMembers].sort((a, b) => {
-      const priority = peopleSort === "discipline" ? disciplineName(a).localeCompare(disciplineName(b)) : peopleSort === "role" ? a.role.localeCompare(b.role) : a.name.localeCompare(b.name);
+      const priority = peopleSort === "group" ? groupName(a).localeCompare(groupName(b)) : peopleSort === "role" ? a.role.localeCompare(b.role) : a.name.localeCompare(b.name);
       return priority * (peopleSortDirection === "asc" ? 1 : -1);
     });
   };
@@ -188,7 +172,6 @@ export const RosterView: React.FC<RosterViewProps> = ({
       photoUrl: "",
       role,
       elevated: isElevatedRole(role),
-      disciplineId: null,
       plannedWeeklyAttendanceHours: 0,
       plannedAttendanceDays: [],
       plannedAttendanceNotes: "",
@@ -226,20 +209,27 @@ export const RosterView: React.FC<RosterViewProps> = ({
 
   const renderMember = (member: MemberRecord) => {
     const load = insightById.get(member.id);
+    const weeklyAttendance = buildAttendanceWeek(
+      member,
+      bootstrap.attendanceRecords.filter((record) => record.memberId === member.id),
+    );
     return <div className="people-member" key={member.id}>
-      <RosterMemberRow disciplines={bootstrap.disciplines} member={member} onEditMember={openEditPersonPopup} onSelectMember={openEditPersonPopup} selectedMemberId={selectedMemberId} />
+      <RosterMemberRow responsibleGroups={responsibleGroups} member={member} onEditMember={openEditPersonPopup} onSelectMember={openEditPersonPopup} selectedMemberId={selectedMemberId} />
       <div className="people-member-context">
-        <div className="people-member-load-summary">
-          <div aria-label="Weekly capacity" className="people-member-capacity">
-            <small>Capacity</small>
-            <span>{load ? formatAvailabilityLabel(load.availabilityStatus) : "Unrated"} · <strong>{formatHours(load?.plannedWeeklyAttendanceHours ?? member.plannedWeeklyAttendanceHours)} planned / week</strong></span>
-            <span><strong>{formatHours(load?.remainingOpenHours)}</strong> remaining</span>
+        <div className="people-attendance-summary">
+          <div aria-label="Attendance this week" className="people-attendance-days" role="group">
+            {weeklyAttendance.days.map((day) => (
+              <span
+                aria-label={`${day.label} ${day.date}: ${day.state.replace("-", " ")}`}
+                className={`people-attendance-day is-${day.state}`}
+                key={day.date}
+                title={`${day.label} ${day.date}: ${day.state.replace("-", " ")}`}
+              />
+            ))}
           </div>
-          <div aria-label="Task breakdown" className="people-member-task-counts">
-            <div><span>Active</span><strong>{load?.activeTaskCount ?? 0}</strong></div>
-            <div><span>Blocked</span><strong>{load?.blockedTaskCount ?? 0}</strong></div>
-            <div><span>Overdue</span><strong>{load?.overdueTaskCount ?? 0}</strong></div>
-          </div>
+          <span className="people-attendance-percentage">
+            {weeklyAttendance.percentage === null ? "—" : `${weeklyAttendance.percentage}%`} this week
+          </span>
         </div>
         <div className="people-member-activity">
           {load ? <details className="people-workload-details"><summary>Workload and recent activity</summary>
@@ -281,14 +271,13 @@ export const RosterView: React.FC<RosterViewProps> = ({
   ];
   const visibleRosterSections = rosterSections.filter((section) => section.members.length > 0);
   const hasRosterMembers = sortedStudents.length + sortedMentors.length + sortedExternalMembers.length > 0;
-
   return (
     <section className={`panel dense-panel roster-layout ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">
         <div className="panel-actions filter-toolbar roster-directory-toolbar">
           <TopbarResponsiveSearch
             actions={<>
-              <WorkspaceSortMenu direction={peopleSortDirection} field={peopleSort} label="people" onDirectionChange={setPeopleSortDirection} onFieldChange={setPeopleSort} options={[{ label: "Name", value: "name" }, { label: "Discipline", value: "discipline" }, { label: "Role", value: "role" }]} />
+              <WorkspaceSortMenu direction={peopleSortDirection} field={peopleSort} label="people" onDirectionChange={setPeopleSortDirection} onFieldChange={setPeopleSort} options={[{ label: "Name", value: "name" }, { label: "Group", value: "group" }, { label: "Role", value: "role" }]} />
               <CompactFilterMenu
                 activeCount={peopleFilter === "all" ? 0 : 1}
                 ariaLabel="People filters"
@@ -360,7 +349,6 @@ export const RosterView: React.FC<RosterViewProps> = ({
         ))}
       </div>
       <RosterAddPersonModal
-        disciplineOptions={disciplineOptions}
         getEmailPlaceholder={getEmailPlaceholder}
         inactiveMembers={inactiveMembers}
         isElevatedRole={isElevatedRole}
@@ -377,7 +365,6 @@ export const RosterView: React.FC<RosterViewProps> = ({
         setReactivateMemberId={setReactivateMemberId}
       />
       <RosterEditPersonModal
-        disciplineOptions={disciplineOptions}
         getEmailPlaceholder={getEmailPlaceholder}
         isDeletingMember={isDeletingMember}
         isElevatedRole={isElevatedRole}

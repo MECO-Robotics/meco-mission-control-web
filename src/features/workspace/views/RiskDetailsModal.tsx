@@ -5,30 +5,36 @@ import type { AuditActionRecord } from "@/types/recordsExecution";
 import type { RiskRecord } from "@/types/recordsReporting";
 import { WorkspaceAuditActionList } from "@/features/workspace/shared/WorkspaceAuditActionList";
 
-import { ATTACHMENT_TYPE_LABELS, formatRiskSeverity, getRiskSeverityPillClassName } from "./riskViewData/riskViewDataPayload";
+import { formatRiskSeverity, getRiskSeverityPillClassName } from "./riskViewData/riskViewDataPayload";
+import { getRiskScheduleMilestoneId } from "./riskViewData/riskViewDataLookups";
 import { TaskPriorityBadge } from "./taskQueue/taskQueueKanbanCardMeta";
 
 interface RiskDetailsModalProps {
   activeRisk: RiskRecord;
   auditActions?: AuditActionRecord[];
-  getAttachmentLabel: (risk: RiskRecord) => string;
+  getTargetLabel: (target: RiskRecord["relatedTargets"][number]) => string;
   getMitigationLabel: (risk: RiskRecord) => string;
   getSourceLabel: (risk: RiskRecord) => string;
+  ownerLabel: string;
   onClose: () => void;
   onEditRisk: () => void;
+  onOpenSchedule?: (milestoneId: string) => void;
 }
 
 export function RiskDetailsModal({
   activeRisk,
   auditActions = [],
-  getAttachmentLabel,
+  getTargetLabel,
   getMitigationLabel,
   getSourceLabel,
+  ownerLabel,
   onClose,
   onEditRisk,
+  onOpenSchedule,
 }: RiskDetailsModalProps) {
-  const sourceTypeLabel = activeRisk.sourceType === "qa-report" ? "QA report" : "Test result";
-  const riskPriority: "high" | "medium" | "low" = activeRisk.severity;
+  const sourceTypeLabel = activeRisk.source.kind === "manual" ? "Manual" : activeRisk.source.kind;
+  const riskPriority = activeRisk.severity;
+  const scheduleMilestoneId = getRiskScheduleMilestoneId(activeRisk);
 
   if (typeof document === "undefined") {
     return null;
@@ -75,21 +81,31 @@ export function RiskDetailsModal({
             <span>Summary</span>
             <p className="task-detail-copy">{activeRisk.detail || "No risk detail provided."}</p>
           </div>
+          {scheduleMilestoneId && onOpenSchedule ? <div className="modal-actions modal-wide">
+            <button className="secondary-action" onClick={() => onOpenSchedule(scheduleMilestoneId)} type="button">Open milestone in Schedule</button>
+          </div> : null}
           <div className="field">
-            <span>Attachment</span>
+            <span>Related domain records</span>
             <p className="task-detail-copy">
-              {ATTACHMENT_TYPE_LABELS[activeRisk.attachmentType]}: {getAttachmentLabel(activeRisk)}
+              {activeRisk.relatedTargets.map(getTargetLabel).join(", ") || "No related targets"}
             </p>
           </div>
           <div className="field">
             <span>Mitigation task</span>
             <p className="task-detail-copy">{getMitigationLabel(activeRisk)}</p>
           </div>
+          <div className="field">
+            <span>Owner</span>
+            <p className="task-detail-copy">{ownerLabel}</p>
+          </div>
+          <div className="field">
+            <span>Status · mitigation due</span>
+            <p className="task-detail-copy">{activeRisk.status} · {activeRisk.mitigationDueDate ?? "No due date"}</p>
+          </div>
           <div className="field modal-wide">
-            <span>Mitigation meaning</span>
+            <span>Risk ownership</span>
             <p className="task-detail-copy">
-              Partial mitigation lowers severity while keeping the risk tracked. Full mitigation is
-              a mentor-approved QA reassessment that reduces the tracked risk to low.
+              {activeRisk.blocksWork ? "This unresolved risk blocks work." : "This risk is tracked without blocking work."}
             </p>
           </div>
           <WorkspaceAuditActionList

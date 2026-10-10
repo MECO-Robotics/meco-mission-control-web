@@ -12,7 +12,6 @@ interface TaskEditorModalProps {
   bootstrap: BootstrapPayload;
   closeTaskModal: () => void;
   advancedSectionOpen: boolean;
-  handleResolveTaskBlocker: (blockerId: string) => Promise<void>;
   handleTaskSubmit: (milestone: FormEvent<HTMLFormElement>) => void;
   isDeletingTask: boolean;
   isSavingTask: boolean;
@@ -29,13 +28,13 @@ interface TaskEditorModalProps {
 }
 
 function buildDraftTaskRecord(taskDraft: TaskPayload, activeTask: TaskRecord | null): TaskRecord {
-  const { taskBlockers, taskDependencies, ...recordDraft } = taskDraft;
+  const { taskDependencies, ...recordDraft } = taskDraft;
   void taskDependencies;
 
   return {
     ...recordDraft,
     id: activeTask?.id ?? "__new-task__",
-    blockers: (taskBlockers ?? []).map((blocker) => blocker.description),
+    actualHours: activeTask?.actualHours ?? 0,
   };
 }
 
@@ -86,7 +85,6 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
     bootstrap,
     closeTaskModal,
     advancedSectionOpen,
-    handleResolveTaskBlocker,
     handleTaskSubmit,
     isDeletingTask,
     isSavingTask,
@@ -110,9 +108,6 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
     // Portaled menus and completed uploads can retain a callback from before save.
     if (!busyRef.current) setTaskDraft(update);
   }, [setTaskDraft]);
-  const resolveBlockerWhenIdle = useCallback(async (id: string) => {
-    if (!busyRef.current) await handleResolveTaskBlocker(id);
-  }, [handleResolveTaskBlocker]);
   const closeWhenIdle = () => { if (!busyRef.current && confirmDiscard()) closeTaskModal(); };
 
   const handleTaskEditClosed = () => {
@@ -135,7 +130,8 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
   const isCreateTaskModal = taskModalMode === "create";
   const isEditTaskModal = taskModalMode === "edit";
   const createTaskRecord = isCreateTaskModal ? buildDraftTaskRecord(taskDraft, activeTask) : null;
-  const canCreateTask = taskDraft.title.trim().length > 0;
+  const hasTaskPerson = Boolean(taskDraft.ownerId || taskDraft.mentorId || taskDraft.assigneeIds.some(Boolean));
+  const canCreateTask = taskDraft.title.trim().length > 0 && hasTaskPerson;
 
   const handleCreateTaskSubmit = (milestone: FormEvent<HTMLFormElement>) => {
     if (isBusy || !canCreateTask) {
@@ -165,7 +161,6 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
             <>
               <TaskEditorCreateProjectSection
                 bootstrap={bootstrap}
-                currentTaskId={activeTask?.id ?? null}
                 setTaskDraft={updateDraftWhenIdle}
                 taskDraft={taskDraft}
               />
@@ -188,10 +183,13 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
             </>
           ) : undefined}
           beforeFooterContent={isCreateTaskModal ? (
-            <TaskEditorCreateMetadataSection
-              setTaskDraft={updateDraftWhenIdle}
-              taskDraft={taskDraft}
-            />
+            <>
+              <TaskEditorCreateMetadataSection
+                setTaskDraft={updateDraftWhenIdle}
+                taskDraft={taskDraft}
+              />
+              {!hasTaskPerson ? <p role="status" style={{ color: "var(--status-warning-text)", fontSize: ".82rem" }}>Assign a student or lead, or choose a mentor, before creating this task.</p> : null}
+            </>
           ) : undefined}
           dependencyTargetProjectId={isCreateTaskModal ? taskDraft.projectId : undefined}
           editableMemberOptions={isCreateTaskModal ? props.students : undefined}
@@ -210,7 +208,6 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
           }
           modalClassName="task-editor-modal"
           onEditTask={() => undefined}
-          onResolveTaskBlocker={resolveBlockerWhenIdle}
           setAdvancedSectionOpen={setAdvancedSectionOpen}
           setTaskDraft={updateDraftWhenIdle}
           showDependencyBlockersSection={isEditTaskModal}

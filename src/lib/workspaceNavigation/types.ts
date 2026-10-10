@@ -4,11 +4,13 @@ export type ViewTab =
   | "home"
   | "tasks"
   | "worklogs"
-  | "manufacturing"
+  | "risks"
+  | "documents"
   | "inventory"
   | "cad"
   | "subsystems"
   | "roster"
+  | "teams"
   | "help";
 
 export type NavigationSection = "home" | "work" | "resources" | "team";
@@ -20,15 +22,14 @@ export type ViewAvailabilityContext =
   | "no-project"
   | "no-season";
 
-export type TaskViewTab = "calendar" | "timeline" | "robot-map" | "queue" | "milestones";
+export type TaskViewTab = "calendar" | "timeline" | "robot-map" | "kanban" | "agenda";
 export type WorklogsViewTab = "logs" | "activity" | "qa" | "results";
-export type ManufacturingViewTab = "all" | "cnc" | "prints" | "fabrication";
 export type InventoryViewTab = "materials" | "documents" | "parts" | "part-mappings" | "purchases";
 export type NavigationSubItemId =
-  | "home" | "work-tasks" | "work-schedule"
-  | "resources-materials" | "resources-documents" | "resources-parts"
-  | "resources-purchases" | "work-manufacturing" | "resources-structure"
-  | "team-people";
+  | "home" | "work-tasks" | "work-schedule" | "work-activity" | "work-risks"
+  | "resources-materials" | "resources-documents" | "resources-qa-reports" | "resources-parts"
+  | "resources-purchases" | "resources-structure"
+  | "team-people" | "team-teams";
 
 export interface NavigationItem {
   value: ViewTab;
@@ -43,7 +44,6 @@ export interface NavigationTarget {
   taskView?: TaskViewTab;
   worklogsView?: WorklogsViewTab;
   inventoryView?: InventoryViewTab;
-  manufacturingView?: ManufacturingViewTab;
 }
 
 export interface NavigationState {
@@ -51,7 +51,6 @@ export interface NavigationState {
   taskView: TaskViewTab;
   worklogsView: WorklogsViewTab;
   inventoryView: InventoryViewTab;
-  manufacturingView: ManufacturingViewTab;
 }
 
 export interface NavigationSubItem {

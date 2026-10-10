@@ -11,8 +11,8 @@ it.each(["create", "edit"] as const)("freezes the %s form and refuses close/canc
   jest.mocked(useCallback).mockImplementation((callback) => callback);
   jest.mocked(useLayoutEffect).mockImplementation((effect) => { effect(); });
   const bootstrap = createBootstrap();
-  const close = jest.fn(); const canceled = jest.fn(); const openDetails = jest.fn(); const updateDraft = jest.fn(); const resolveBlocker = jest.fn();
-  const props = { bootstrap, taskDraft: buildEmptyTaskPayload(bootstrap), activeTask: bootstrap.tasks[0], taskModalMode, isSavingTask: true, isDeletingTask: false, closeTaskModal: close, onTaskEditCanceled: canceled, openTaskDetailsModal: openDetails, setTaskDraft: updateDraft, handleResolveTaskBlocker: resolveBlocker } as unknown as ComponentProps<typeof TaskEditorModal>;
+  const close = jest.fn(); const canceled = jest.fn(); const openDetails = jest.fn(); const updateDraft = jest.fn();
+  const props = { bootstrap, taskDraft: buildEmptyTaskPayload(bootstrap), activeTask: bootstrap.tasks[0], taskModalMode, isSavingTask: true, isDeletingTask: false, closeTaskModal: close, onTaskEditCanceled: canceled, openTaskDetailsModal: openDetails, setTaskDraft: updateDraft } as unknown as ComponentProps<typeof TaskEditorModal>;
   const render = (saving: boolean) => {
     const form = TaskEditorModal({ ...props, isSavingTask: saving })!;
     const fieldset = form.props.children as ReactElement<{ disabled: boolean; inert?: boolean; children: ReactElement<ComponentProps<typeof TaskDetailsModal>> }>;
@@ -20,13 +20,10 @@ it.each(["create", "edit"] as const)("freezes the %s form and refuses close/canc
   };
   const idle = render(false);
   const stalePortalEdit = idle.details.setTaskDraft!;
-  const staleResolve = idle.details.onResolveTaskBlocker;
   const pending = render(true);
   stalePortalEdit((draft) => ({
   ...draft, title: "Must not edit pending save" }));
-  void staleResolve("pending-blocker");
   expect(updateDraft).not.toHaveBeenCalled();
-  expect(resolveBlocker).not.toHaveBeenCalled();
   expect(pending.fieldset.type).toBe("fieldset");
   expect(pending.fieldset.props.disabled).toBe(true);
   expect(pending.fieldset.props.inert).toBeUndefined();

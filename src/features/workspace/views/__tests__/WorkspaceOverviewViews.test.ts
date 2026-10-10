@@ -15,7 +15,7 @@ function createOverviewBootstrap() {
   const [project] = base.projects;
   const [workstream] = base.workstreams;
   const [subsystem] = base.subsystems;
-  const [discipline] = base.disciplines;
+  const [workType] = base.workTypes;
 
   return createBootstrap({
     tasks: [
@@ -26,10 +26,9 @@ function createOverviewBootstrap() {
         projectId: project.id,
         workstreamIds: [workstream.id],
         subsystemIds: [subsystem.id],
-        disciplineId: discipline.id,
+        workTypeId: workType.id,
         dueDate: "2026-05-16",
         priority: "critical",
-        planningState: "overdue",
       },
       {
         ...base.tasks[0],
@@ -38,7 +37,7 @@ function createOverviewBootstrap() {
         projectId: project.id,
         workstreamIds: [workstream.id],
         subsystemIds: [subsystem.id],
-        disciplineId: discipline.id,
+        workTypeId: workType.id,
         dueDate: "2026-05-17",
         priority: "high",
         status: "in-progress",
@@ -50,7 +49,7 @@ function createOverviewBootstrap() {
         projectId: project.id,
         workstreamIds: [workstream.id],
         subsystemIds: [subsystem.id],
-        disciplineId: discipline.id,
+        workTypeId: workType.id,
         dueDate: "2026-05-19",
         priority: "medium",
       },
@@ -61,7 +60,7 @@ function createOverviewBootstrap() {
         projectId: project.id,
         workstreamIds: [workstream.id],
         subsystemIds: [subsystem.id],
-        disciplineId: discipline.id,
+        workTypeId: workType.id,
         dueDate: "2026-06-15",
         priority: "low",
       },
@@ -71,20 +70,28 @@ function createOverviewBootstrap() {
         ...base.milestones[0],
         id: "milestone-soon",
         title: "Drive practice deadline",
-        startDateTime: "2026-05-20T18:00:00.000Z",
+        startAt: "2026-05-20T18:00:00.000Z",
       },
     ],
     risks: [
       {
         id: "risk-high",
+        projectId: project.id,
         title: "Battery cart not inspected",
         detail: "Inspection checklist is still open.",
+        category: "qa",
         severity: "high",
-        sourceType: "qa-report",
-        sourceId: "report-1",
-        attachmentType: "project",
-        attachmentId: project.id,
+        status: "open",
+        blocksWork: true,
+        source: { kind: "report", id: "report-1" },
+        relatedTargets: [{ kind: "project", id: project.id }],
         mitigationTaskId: null,
+        ownerGroupId: null,
+        ownerMemberId: null,
+        mitigationDueDate: null,
+        createdAt: "2026-05-17",
+        updatedAt: "2026-05-17",
+        resolvedAt: null,
       },
     ],
   });

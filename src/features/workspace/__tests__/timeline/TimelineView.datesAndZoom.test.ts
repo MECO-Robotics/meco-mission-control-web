@@ -1,4 +1,4 @@
-import * as React from "react";import { readFileSync } from "node:fs";import { join } from "node:path";import { renderToStaticMarkup } from "react-dom/server";import { getTimelineMinimumZoomForWidth } from "@/features/workspace/shared/timeline/timelineZoom";import { formatTimelinePeriodLabel, midpointOfTimelineDays, midpointOfTimelineWeek, monthEndFromDay } from "@/features/workspace/shared/timeline/timelineDateUtils";import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";import { createBootstrap, readAppCss } from "./timelineTestFixtures";
+import * as React from "react";import { readFileSync } from "node:fs";import { join } from "node:path";import { renderToStaticMarkup } from "react-dom/server";import { getTimelineMinimumZoomForWidth } from "@/features/workspace/shared/timeline/timelineZoom";import { formatTimelinePeriodLabel, getSchedulePeriodBounds, midpointOfTimelineDays, midpointOfTimelineWeek, monthEndFromDay } from "@/features/workspace/shared/timeline/timelineDateUtils";import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";import { createBootstrap, readAppCss } from "./timelineTestFixtures";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
@@ -30,6 +30,21 @@ describe("TimelineView", () => {
     expect(monthEndFromDay("2026-01-31")).toBe("2026-01-31");
     expect(monthEndFromDay("2026-04-30")).toBe("2026-04-30");
     expect(monthEndFromDay("2026-02-14")).toBe("2026-02-28");
+  });
+
+  it("bounds Agenda Week and Month scopes to the selected period", () => {
+    expect(getSchedulePeriodBounds("2026-10-01", "week")).toEqual({
+      startDate: "2026-09-27",
+      endDate: "2026-10-03",
+    });
+    expect(getSchedulePeriodBounds("2026-10-01", "month")).toEqual({
+      startDate: "2026-10-01",
+      endDate: "2026-10-31",
+    });
+    expect(getSchedulePeriodBounds("2026-10-01", "all")).toEqual({
+      startDate: "2026-10-01",
+      endDate: null,
+    });
   });
 
   it("centers the month view on the midpoint of the current week when switching from week to month", () => {

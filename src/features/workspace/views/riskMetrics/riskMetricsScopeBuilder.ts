@@ -1,11 +1,11 @@
-﻿import { TASK_BLOCKER_TYPE_LABELS } from "@/types/common";
-import type { TaskBlockerRecord, TaskRecord } from "@/types/recordsExecution";
+import type { TaskRecord } from "@/types/recordsExecution";
+import type { RiskRecord } from "@/types/recordsReporting";
 
 import type { ScopeMetricRow } from "./riskMetricsTypes";
 
 const CALENDAR_DAY_MS = 24 * 60 * 60 * 1000;
 
-const BLOCKER_SEVERITY_ORDER: Record<TaskBlockerRecord["severity"], number> = {
+const RISK_SEVERITY_ORDER: Record<RiskRecord["severity"], number> = {
   critical: 4,
   high: 3,
   medium: 2,
@@ -30,20 +30,20 @@ function computeAgeDays(value: string | null | undefined, now: number) {
   return Math.max(0, Math.floor((now - timestamp) / CALENDAR_DAY_MS));
 }
 
-function blockerReasonLabel(blocker: TaskBlockerRecord) {
-  return (TASK_BLOCKER_TYPE_LABELS[blocker.blockerType] ?? TASK_BLOCKER_TYPE_LABELS.other).toLowerCase();
+function riskReasonLabel(risk: RiskRecord) {
+  return risk.category.replaceAll("-", " ");
 }
 
-function selectMostSevereBlocker(blockers: TaskBlockerRecord[]) {
-  return blockers.reduce<TaskBlockerRecord | null>((selected, blocker) => {
+function selectMostSevereRisk(risks: RiskRecord[]) {
+  return risks.reduce<RiskRecord | null>((selected, risk) => {
     if (!selected) {
-      return blocker;
+      return risk;
     }
 
-    const selectedOrder = BLOCKER_SEVERITY_ORDER[selected.severity];
-    const blockerOrder = BLOCKER_SEVERITY_ORDER[blocker.severity];
-    if (blockerOrder > selectedOrder) {
-      return blocker;
+    const selectedOrder = RISK_SEVERITY_ORDER[selected.severity];
+    const riskOrder = RISK_SEVERITY_ORDER[risk.severity];
+    if (riskOrder > selectedOrder) {
+      return risk;
     }
 
     return selected;
@@ -55,7 +55,7 @@ export function buildScopeMetrics<T extends { id: string; name: string }>(
   tasks: TaskRecord[],
   workHoursByTaskId: Map<string, number>,
   qaPassTaskIds: Set<string>,
-  openBlockersByTaskId: Map<string, TaskBlockerRecord[]>,
+  openBlockersByTaskId: Map<string, RiskRecord[]>,
   lastActivityByTaskId: Map<string, number>,
   getSubtitle: (item: T) => string,
   getLinkedSummary: (item: T) => string,
@@ -75,9 +75,9 @@ export function buildScopeMetrics<T extends { id: string; name: string }>(
         (task) => openBlockersByTaskId.get(task.id) ?? [],
       );
       const blockerCount = openBlockers.length;
-      const mostSevereBlocker = selectMostSevereBlocker(openBlockers);
-      const oldestBlockerAgeDays = openBlockers.reduce<number | null>((oldest, blocker) => {
-        const ageDays = computeAgeDays(blocker.createdAt, now);
+      const mostSevereBlocker = selectMostSevereRisk(openBlockers);
+      const oldestBlockerAgeDays = openBlockers.reduce<number | null>((oldest, risk) => {
+        const ageDays = computeAgeDays(risk.createdAt, now);
         if (ageDays === null) {
           return oldest;
         }
@@ -110,7 +110,7 @@ export function buildScopeMetrics<T extends { id: string; name: string }>(
         : null;
       const taskCompletionRate = completeTaskCount / Math.max(scopedTasks.length, 1);
       const mostSevereReason = mostSevereBlocker
-        ? `Blocked by ${blockerReasonLabel(mostSevereBlocker)}`
+        ? `Blocked by ${riskReasonLabel(mostSevereBlocker)}`
         : waitingForQaCount > 0
           ? "Waiting for QA"
           : scopedTasks.length > 0 && taskCompletionRate < 0.35

@@ -14,7 +14,6 @@ export interface MemberRecord {
   photoUrl?: string;
   role: MemberRole;
   elevated: boolean;
-  disciplineId?: string | null;
   seasonId: string;
   activeSeasonIds?: string[];
   plannedWeeklyAttendanceHours?: number;
@@ -60,7 +59,6 @@ export interface SubsystemRecord extends CadSourceMetadata {
   parentSubsystemId: string | null;
   responsibleEngineerId: string | null;
   mentorIds: string[];
-  risks: string[];
   layoutX?: number | null;
   layoutY?: number | null;
   layoutZone?: SubsystemLayoutZone | null;
@@ -87,6 +85,7 @@ export interface MechanismRecord extends CadSourceMetadata {
 
 export interface SeasonRecord {
   id: string;
+  teamId: string;
   name: string;
   type: SeasonType;
   startDate: string;
@@ -96,7 +95,7 @@ export interface SeasonRecord {
 export interface ProjectRecord {
   id: string;
   seasonId: string;
-  name: string;
+  name: "Robot" | "Media" | "Outreach" | "Operations" | "Strategy" | "Training";
   projectType: ProjectType;
   description: string;
   status: ProjectStatus;
@@ -109,4 +108,23 @@ export interface WorkstreamRecord {
   color?: string;
   description: string;
   isArchived?: boolean;
+}
+
+export interface WorkTypeRecord {
+  id: string;
+  projectType: ProjectType;
+  code: string;
+  name: string;
+  isActive: boolean;
+}
+
+export interface ResponsibleGroupRecord {
+  id: string;
+  seasonId: string;
+  name: string;
+  projectIds: string[];
+  workTypeIds: string[];
+  memberIds: string[];
+  primaryMemberIds: string[];
+  isArchived: boolean;
 }

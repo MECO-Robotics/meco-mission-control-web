@@ -28,7 +28,7 @@ export function renderSidebar(
     selectedSeasonId?: string | null;
     seasons?: SeasonRecord[];
     sessionUser?: SessionUser | null;
-    taskView?: "calendar" | "timeline" | "robot-map" | "queue" | "milestones";
+    taskView?: "calendar" | "timeline" | "robot-map" | "kanban" | "agenda";
   },
 ) {
   const sidebarProps: React.ComponentProps<typeof AppSidebar> = {
@@ -61,6 +61,7 @@ export function renderSidebar(
       seasons: options?.seasons ?? [
         {
           id: "season-1",
+        teamId: "team-1",
           name: "2026 Season",
           type: "season",
           startDate: "2026-01-01",
@@ -68,7 +69,7 @@ export function renderSidebar(
         },
       ],
       sessionUser: options?.sessionUser ?? null,
-      taskView: options?.taskView ?? "queue",
+      taskView: options?.taskView ?? "kanban",
       toggleDarkMode: jest.fn(),
       toggleSidebar: jest.fn(),
       worklogsView: "logs",

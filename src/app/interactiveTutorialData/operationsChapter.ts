@@ -112,60 +112,12 @@ const operationsSteps = [
     instruction: "Use the Add part button on a mechanism and save it.",
     selector: '[data-tutorial-target="add-part-to-mechanism-button"]',
   },
-  {
-    id: "manufacturing-cnc",
-    title: "Open manufacturing queue",
-    instruction: "Choose Manufacturing in the sidebar.",
-    selector: '[data-tutorial-target="sidebar-view-work-manufacturing"]',
-  },
-  {
-    id: "create-cnc-job",
-    title: "Add CNC job",
-    instruction: "Use Add, choose CNC as the process, and save the job.",
-    selector: '[data-tutorial-target="manufacturing-create-job-button"]',
-  },
-  {
-    id: "inspect-cnc-job",
-    title: "Inspect a CNC job",
-    instruction: "Click any CNC row to open the job editor.",
-    selector: '[data-tutorial-target="manufacturing-edit-job-row"]',
-  },
-  {
-    id: "create-print-job",
-    title: "Add 3D print job",
-    instruction: "Use Add, choose 3D print as the process, and save the job.",
-    selector: '[data-tutorial-target="manufacturing-create-job-button"]',
-  },
-  {
-    id: "complete-print-job",
-    title: "Complete a 3D print job",
-    instruction: "Open a print job and save it with Complete status.",
-    selector: '[data-tutorial-target="manufacturing-edit-job-row"]',
-  },
-  {
-    id: "manufacturing-search",
-    title: "Search manufacturing queue",
-    instruction: "Use the manufacturing queue search box.",
-    selector: '[data-tutorial-target="manufacturing-search-input"]',
-  },
-  {
-    id: "create-fabrication-job",
-    title: "Add fabrication job",
-    instruction: "Use Add, choose Fabrication as the process, and save the job.",
-    selector: '[data-tutorial-target="manufacturing-create-job-button"]',
-  },
-  {
-    id: "inspect-fabrication-job",
-    title: "Inspect a fabrication job",
-    instruction: "Click any fabrication row to open the job editor.",
-    selector: '[data-tutorial-target="manufacturing-edit-job-row"]',
-  },
 ] satisfies InteractiveTutorialStep[];
 
 export const operationsChapter = {
   id: "operations",
   title: "Chapter 2: Build Operations",
-  summary: "Roster, Inventory, Subsystems, and Manufacturing end-to-end.",
+  summary: "Roster, Inventory, Subsystems, and Kanban end-to-end.",
   preferredProjectType: "robot",
   steps: operationsSteps,
 } satisfies InteractiveTutorialChapter;

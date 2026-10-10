@@ -20,7 +20,7 @@ import {
   ARTIFACT_GRID_TEMPLATE,
   ARTIFACT_STATUS_DISPLAY,
   formatUpdatedAt,
-  summarizeLink,
+  summarizeUri,
 } from "./artifactInventoryModel";
 
 type ArtifactPagination = ReturnType<typeof useWorkspacePagination<ArtifactRecord>>;
@@ -30,15 +30,11 @@ interface ArtifactTableProps {
   filteredArtifacts: ArtifactRecord[];
   filterMotionClass: string;
   hasArtifactFilters: boolean;
-  hasHiddenArchivedArtifacts: boolean;
   openEditArtifactModal: (artifact: ArtifactRecord) => void;
   pagination: ArtifactPagination;
   sectionTitle: string;
   setStatusFilter: (value: FilterSelection) => void;
-  setWorkstreamFilter: (value: FilterSelection) => void;
   statusFilter: FilterSelection;
-  workstreamFilter: FilterSelection;
-  workstreamsById: Record<string, string>;
   sortField: ArtifactSortField | null;
   sortDirection: ResourceSortDirection;
   onSort: (field: ArtifactSortField) => void;
@@ -52,15 +48,11 @@ export function ArtifactTable({
   filteredArtifacts,
   filterMotionClass,
   hasArtifactFilters,
-  hasHiddenArchivedArtifacts,
   openEditArtifactModal,
   pagination,
   sectionTitle,
   setStatusFilter,
-  setWorkstreamFilter,
   statusFilter,
-  workstreamFilter,
-  workstreamsById,
   sortField,
   sortDirection,
   onSort,
@@ -77,14 +69,8 @@ export function ArtifactTable({
         <ResourceColumnHeader field="title" label="Artifact" onSort={(field) => onSort(field as ArtifactSortField)} sortDirection={sortDirection} sortField={sortField}>
           <ColumnFilterDropdown allLabel="All artifacts" ariaLabel="Filter artifacts by title" onChange={(value) => setColumnFilter("title", value)} options={columnOptions.title} value={columnFilters.title} />
         </ResourceColumnHeader>
-        <ResourceColumnHeader field="workstream" label="Workflow" onSort={(field) => onSort(field as ArtifactSortField)} sortDirection={sortDirection} sortField={sortField}>
-          <ColumnFilterDropdown
-            allLabel="All workflows"
-            ariaLabel="Filter artifacts by workflow"
-            onChange={(value) => { setWorkstreamFilter(value); setColumnFilter("workstream", value); }}
-            options={columnOptions.workstream}
-            value={workstreamFilter}
-          />
+        <ResourceColumnHeader field="targets" label="Linked to" onSort={(field) => onSort(field as ArtifactSortField)} sortDirection={sortDirection} sortField={sortField}>
+          <ColumnFilterDropdown allLabel="All targets" ariaLabel="Filter artifacts by linked target" onChange={(value) => setColumnFilter("targets", value)} options={columnOptions.targets} value={columnFilters.targets} />
         </ResourceColumnHeader>
         <ResourceColumnHeader field="status" label="Status" onSort={(field) => onSort(field as ArtifactSortField)} sortDirection={sortDirection} sortField={sortField}>
           <ColumnFilterDropdown
@@ -95,8 +81,8 @@ export function ArtifactTable({
             value={statusFilter}
           />
         </ResourceColumnHeader>
-        <ResourceColumnHeader field="link" label="Link" onSort={(field) => onSort(field as ArtifactSortField)} sortDirection={sortDirection} sortField={sortField}>
-          <ColumnFilterDropdown allLabel="All links" ariaLabel="Filter artifacts by link" onChange={(value) => setColumnFilter("link", value)} options={columnOptions.link} value={columnFilters.link} />
+        <ResourceColumnHeader field="uri" label="URI" onSort={(field) => onSort(field as ArtifactSortField)} sortDirection={sortDirection} sortField={sortField}>
+          <ColumnFilterDropdown allLabel="All URIs" ariaLabel="Filter artifacts by URI" onChange={(value) => setColumnFilter("uri", value)} options={columnOptions.uri} value={columnFilters.uri} />
         </ResourceColumnHeader>
         <ResourceColumnHeader field="updated" label="Updated" onSort={(field) => onSort(field as ArtifactSortField)} sortDirection={sortDirection} sortField={sortField}>
           <ColumnFilterDropdown allLabel="All dates" ariaLabel="Filter artifacts by updated date" onChange={(value) => setColumnFilter("updated", value)} options={columnOptions.updated} value={columnFilters.updated} />
@@ -104,9 +90,7 @@ export function ArtifactTable({
       </div>
 
       {pagination.pageItems.map((artifact) => {
-        const workflowName = artifact.workstreamId
-          ? workstreamsById[artifact.workstreamId] ?? "Unknown workflow"
-          : "Project-level";
+        const linkedTargets = artifact.targetRefs.map((target) => `${target.kind}: ${target.id}`).join(", ") || "Project-level";
         const statusMeta = ARTIFACT_STATUS_DISPLAY[artifact.status];
 
         return (
@@ -118,15 +102,15 @@ export function ArtifactTable({
             title={`Edit ${artifact.title}`}
             type="button"
           >
-            <ResourceRecordCell archived={artifact.isArchived} label="Artifact" photoUrl={artifact.photoUrl} name={artifact.title} subtitle={artifact.summary || "No summary yet."} />
-            <TableCell label="Workflow">{workflowName}</TableCell>
+            <ResourceRecordCell label="Artifact" photoUrl={artifact.photoUrl} name={artifact.title} subtitle={artifact.summary || "No summary yet."} />
+            <TableCell label="Linked to">{linkedTargets}</TableCell>
             <TableCell label="Status" valueClassName="table-cell-pill">
               <span className={getStatusPillClassName(statusMeta.statusValue)}>
                 {statusMeta.label}
               </span>
             </TableCell>
-            <TableCell label="Link" valueClassName="artifact-link-value">
-              {summarizeLink(artifact.link)}
+            <TableCell label="URI" valueClassName="artifact-link-value">
+              {summarizeUri(artifact.uri)}
             </TableCell>
             <TableCell label="Updated" valueClassName="font-mono">
               {formatUpdatedAt(artifact.updatedAt)}
@@ -139,16 +123,12 @@ export function ArtifactTable({
       {filteredArtifacts.length === 0 ? (
         <WorkspaceEmptyState
           reason={
-            hasHiddenArchivedArtifacts
-              ? `Archived ${artifactNoun} are hidden. Turn on Show archived to review existing records.`
-              : hasArtifactFilters
-                ? "The current search, workflow, or status filters hide every artifact in this project scope."
+            hasArtifactFilters
+                ? "The current search, target, or status filters hide every document in this project scope."
                 : `This project has not linked any ${artifactNoun} for planning notes, files, or handoffs yet.`
           }
           title={
-            hasHiddenArchivedArtifacts
-              ? `Archived ${artifactNoun} are hidden`
-              : hasArtifactFilters
+            hasArtifactFilters
                 ? `No ${artifactNoun} match these filters`
                 : `${sectionTitle} collect project files and handoffs here`
           }

@@ -5,10 +5,12 @@ import { WorkspaceWorklogsSection } from "./sections/WorkspaceWorklogsSection";
 import { WorkspaceInventorySection } from "./sections/WorkspaceInventorySection";
 import { WorkspaceSubsystemsSection } from "./sections/WorkspaceSubsystemsSection";
 import { WorkspaceRosterSection } from "./sections/WorkspaceRosterSection";
+import { WorkspaceTeamsSection } from "./sections/WorkspaceTeamsSection";
 import { WorkspaceHelpSection } from "./sections/WorkspaceHelpSection";
 import { WorkspaceCadSection } from "./sections/WorkspaceCadSection";
-import { WorkspaceManufacturingSection } from "./sections/WorkspaceManufacturingSection";
 import { WorkspaceHomeSection } from "./overview/WorkspaceOverviewSections";
+import { WorkspaceRisksSection } from "./sections/WorkspaceRisksSection";
+import { WorkspaceDocumentsSection } from "./sections/WorkspaceDocumentsSection";
 import type { WorkspaceContentPanelsViewProps } from "./workspaceContentPanelsViewTypes";
 export function WorkspaceContentPanelsView(props: WorkspaceContentPanelsViewProps) {
   const toastItems: WorkspaceToastStackItem[] = [
@@ -67,13 +69,15 @@ export function WorkspaceContentPanelsView(props: WorkspaceContentPanelsViewProp
       {props.isLoadingData ? <p className="banner">Refreshing workspace data...</p> : null}
 
       <WorkspaceHomeSection {...props} />
+      <WorkspaceRisksSection {...props} />
+      <WorkspaceDocumentsSection {...props} />
       <WorkspaceTaskSection {...props} />
       <WorkspaceWorklogsSection {...props} />
-      <WorkspaceManufacturingSection {...props} />
       <WorkspaceInventorySection {...props} />
       <WorkspaceCadSection {...props} />
       <WorkspaceSubsystemsSection {...props} />
       <WorkspaceRosterSection {...props} />
+      <WorkspaceTeamsSection {...props} />
       <WorkspaceHelpSection {...props} />
     </div>
   );

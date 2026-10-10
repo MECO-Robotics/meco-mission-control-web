@@ -17,10 +17,8 @@ describe("workspace season and project scope", () => {
     expect(ids(scope().taskDependencies)).toEqual(["dep-global-milestone", "dep-visible-part"]);
   });
 
-  it("keeps external blockers and filters blockers linked to hidden records", () => {
-    const blockers = scope().taskBlockers ?? [];
-    expect(ids(blockers)).toEqual(["blocker-external"]);
-    expect(blockers[0]?.blockerId).toBe("vendor-order-42");
+  it("filters canonical risks by their project ownership", () => {
+    expect(ids(scope().risks)).toEqual(["risk-visible"]);
   });
 
   it("filters work logs by visible task and retains global milestones and meetings", () => {

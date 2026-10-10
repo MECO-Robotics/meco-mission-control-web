@@ -3,7 +3,7 @@ import type { WorkspaceLoader } from "@/app/hooks/workspace/loader/useAppWorkspa
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { buildEmptySubsystemPayload } from "@/lib/appUtils/payloadBuilders";
-import { splitList, toErrorMessage } from "@/lib/appUtils/common";
+import { toErrorMessage } from "@/lib/appUtils/common";
 import { subsystemToPayload } from "@/lib/appUtils/payloadConversions";
 import { normalizeSubsystemLayoutFields, type SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
 import { createSubsystemRecord, updateSubsystemRecord } from "@/lib/auth/records/structure";
@@ -29,7 +29,6 @@ export function useSubsystemActions({ bootstrap, handleUnauthorized, loadWorkspa
   const [subsystemDraft, setSubsystemDraft] = useState<SubsystemPayload>(
     buildEmptySubsystemPayload(EMPTY_BOOTSTRAP),
   );
-  const [subsystemDraftRisks, setSubsystemDraftRisks] = useState("");
   const { beginOperation, resetEditor, isSaving: isSavingSubsystem } =
     useCatalogEditorLifecycle({ loadWorkspace, selectedProjectId, selectedSeasonId });
   const writeTailBySubsystemIdRef = useRef<Record<string, Promise<unknown>>>({});
@@ -62,7 +61,6 @@ export function useSubsystemActions({ bootstrap, handleUnauthorized, loadWorkspa
     resetEditor();
     setActiveSubsystemId(null);
     setSubsystemDraft(buildEmptySubsystemPayload(scopedBootstrap));
-    setSubsystemDraftRisks("");
     setSubsystemModalMode("create");
   }, [scopedBootstrap, resetEditor]);
 
@@ -70,7 +68,6 @@ export function useSubsystemActions({ bootstrap, handleUnauthorized, loadWorkspa
     resetEditor();
     setActiveSubsystemId(subsystem.id);
     setSubsystemDraft(subsystemToPayload(subsystem));
-    setSubsystemDraftRisks(subsystem.risks.join("\n"));
     setSubsystemModalMode("edit");
   }, [resetEditor]);
 
@@ -104,7 +101,6 @@ export function useSubsystemActions({ bootstrap, handleUnauthorized, loadWorkspa
       const payload: SubsystemPayload = {
         ...subsystemDraft,
         projectId: selectedProjectId ?? subsystemDraft.projectId,
-        risks: splitList(subsystemDraftRisks),
       };
 
       if (subsystemModalMode === "create") {
@@ -120,7 +116,7 @@ export function useSubsystemActions({ bootstrap, handleUnauthorized, loadWorkspa
     } finally {
       operation.finish();
     }
-  }, [activeSubsystemId, closeSubsystemModal, handleUnauthorized, selectedProjectId, setDataMessage, subsystemDraft, subsystemDraftRisks, subsystemModalMode, beginOperation]);
+  }, [activeSubsystemId, closeSubsystemModal, handleUnauthorized, selectedProjectId, setDataMessage, subsystemDraft, subsystemModalMode, beginOperation]);
 
   const handleToggleSubsystemArchived = useCallback(async (subsystemId: string) => {
     const currentSubsystem = bootstrap.subsystems.find(
@@ -276,10 +272,8 @@ export function useSubsystemActions({ bootstrap, handleUnauthorized, loadWorkspa
     subsystemModalMode,
     activeSubsystemId,
     subsystemDraft,
-    subsystemDraftRisks,
     isSavingSubsystem,
     setSubsystemDraft,
-    setSubsystemDraftRisks,
     closeSubsystemModal,
     handleSubsystemSubmit,
     handleToggleSubsystemArchived,

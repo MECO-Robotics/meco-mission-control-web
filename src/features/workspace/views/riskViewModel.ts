@@ -9,12 +9,13 @@ import { buildRiskViewScopeData } from "./riskViewData/riskViewDataScope";
 import { buildRiskViewLookups } from "./riskViewData/riskViewDataLookups";
 import { sanitizeRiskPayload, toRiskPayload } from "./riskViewData/riskViewDataPayload";
 
-type RiskEditorMode = "detail" | "edit" | null;
+type RiskEditorMode = "detail" | "edit" | "create" | null;
 
 interface UseRisksViewModelArgs {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   onDeleteRisk: (riskId: string) => Promise<void>;
+  onCreateRisk: (payload: RiskPayload) => Promise<void>;
   onUpdateRisk: (riskId: string, payload: RiskPayload) => Promise<void>;
 }
 
@@ -22,6 +23,7 @@ export function useRisksViewModel({
   activePersonFilter,
   bootstrap,
   onDeleteRisk,
+  onCreateRisk,
   onUpdateRisk,
 }: UseRisksViewModelArgs) {
   const editorSession = useRef({ pending: false });
@@ -41,18 +43,20 @@ export function useRisksViewModel({
   }, [activePersonFilter, bootstrap]);
 
   const [draft, setDraft] = useState<RiskPayload>({
+    projectId: bootstrap.projects[0]?.id ?? "",
     title: "",
     detail: "",
+    category: "other",
     severity: "medium",
-    sourceType: "qa-report",
-    sourceId: "",
-    attachmentType: "project",
-    attachmentId: "",
+    status: "open",
+    blocksWork: false,
+    source: { kind: "manual" },
+    relatedTargets: [],
     mitigationTaskId: null,
+    ownerGroupId: null,
+        ownerMemberId: null,
+        mitigationDueDate: null,
   });
-
-  const sourceOptions = viewData.sourceOptionsForType(draft.sourceType);
-  const attachmentOptions = viewData.attachmentOptionsForType(draft.attachmentType);
   const activeRisk = useMemo(
     () => bootstrap.risks.find((risk) => risk.id === activeRiskId) ?? null,
     [activeRiskId, bootstrap.risks],
@@ -81,35 +85,15 @@ export function useRisksViewModel({
     setEditorMode("edit");
   }, [closeEditor]);
 
-  useEffect(() => {
-    if (!editorMode) {
-      return;
-    }
-
-    if (!sourceOptions.some((option) => option.id === draft.sourceId)) {
-      setDraft((current) => ({
-        ...current,
-        sourceId: sourceOptions[0]?.id ?? "",
-      }));
-    }
-  }, [draft.sourceId, editorMode, sourceOptions]);
-
-  useEffect(() => {
-    if (!editorMode) {
-      return;
-    }
-
-    if (!attachmentOptions.some((option) => option.id === draft.attachmentId)) {
-      setDraft((current) => ({
-        ...current,
-        attachmentId: attachmentOptions[0]?.id ?? "",
-      }));
-    }
-  }, [attachmentOptions, draft.attachmentId, editorMode]);
+  const openCreateEditor = useCallback(() => {
+    closeEditor();
+    setDraft({ projectId: bootstrap.projects[0]?.id ?? "", title: "", detail: "", category: "other", severity: "medium", status: "open", blocksWork: false, source: { kind: "manual" }, relatedTargets: [], mitigationTaskId: null, ownerGroupId: null, ownerMemberId: null, mitigationDueDate: null });
+    setEditorMode("create");
+  }, [bootstrap.projects, closeEditor]);
 
   const handleSaveRisk = useCallback(async () => {
     const session = editorSession.current;
-    if (session.pending || editorMode !== "edit" || !activeRiskId) return;
+    if (session.pending || (editorMode !== "edit" && editorMode !== "create") || (editorMode === "edit" && !activeRiskId)) return;
     const payload = sanitizeRiskPayload(draft);
 
     if (payload.title.length < 2) {
@@ -122,21 +106,12 @@ export function useRisksViewModel({
       return;
     }
 
-    if (!payload.sourceId) {
-      setEditorError("Please choose a real source.");
-      return;
-    }
-
-    if (!payload.attachmentId) {
-      setEditorError("Please choose a real attachment target.");
-      return;
-    }
-
     setEditorError(null);
     session.pending = true;
     setIsSaving(true);
     try {
-      await onUpdateRisk(activeRiskId, payload);
+      if (editorMode === "create") await onCreateRisk(payload);
+      else await onUpdateRisk(activeRiskId!, payload);
       if (editorSession.current === session) closeEditor();
     } catch (error) {
       if (editorSession.current === session) {
@@ -148,7 +123,7 @@ export function useRisksViewModel({
         setIsSaving(false);
       }
     }
-  }, [activeRiskId, closeEditor, draft, editorMode, onUpdateRisk]);
+  }, [activeRiskId, closeEditor, draft, editorMode, onCreateRisk, onUpdateRisk]);
 
   const handleDeleteRisk = useCallback(async () => {
     const session = editorSession.current;
@@ -175,20 +150,17 @@ export function useRisksViewModel({
   return {
     activeRisk,
     ...viewData,
-    attachmentOptions,
     closeEditor,
     draft,
     editorError,
     editorMode,
-    getAttachmentOptionsForType: viewData.attachmentOptionsForType,
-    getSourceOptionsForType: viewData.sourceOptionsForType,
     handleDeleteRisk,
     handleSaveRisk,
     isDeleting,
     isSaving,
     openRiskDetails,
     openEditEditor,
+    openCreateEditor,
     setDraft,
-    sourceOptions,
   };
 }

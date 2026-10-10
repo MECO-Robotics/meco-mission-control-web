@@ -23,7 +23,7 @@ export function useInteractiveTutorialCoreActionsStart({
   state,
   onActivateTutorial,
 }: UseInteractiveTutorialCoreActionsStartOptions) {
-  const { activeTab, taskView, worklogsView, manufacturingView, inventoryView, selectedSeasonId, selectedProjectId, bootstrap, isSidebarCollapsed, toggleSidebar, closeSidebarOverlay, handleUnauthorized, setActiveTab, setTaskView, setWorklogsView, setManufacturingView, setInventoryView, setSelectedSeasonId, setSelectedProjectId, setActivePersonFilter, setBootstrap, setDataMessage } = options;
+  const { activeTab, taskView, worklogsView, inventoryView, selectedSeasonId, selectedProjectId, bootstrap, isSidebarCollapsed, toggleSidebar, closeSidebarOverlay, handleUnauthorized, setActiveTab, setTaskView, setWorklogsView, setInventoryView, setSelectedSeasonId, setSelectedProjectId, setActivePersonFilter, setBootstrap, setDataMessage } = options;
   const { bootstrapSnapshot, chapters, returnState, setBaselineCounts, setBootstrapSnapshot, setChapterId, setCompletedChapterId, setStepIndex, setTutorialProjectId, setTutorialProjectName, setTutorialSeasonId, setTutorialSeasonName, stepIndex } = state;
 
   const startInteractiveTutorial = useCallback(
@@ -62,7 +62,6 @@ export function useInteractiveTutorialCoreActionsStart({
           activeTab,
           taskView,
           worklogsView,
-          manufacturingView,
           inventoryView,
           selectedSeasonId,
           selectedProjectId,
@@ -126,7 +125,6 @@ export function useInteractiveTutorialCoreActionsStart({
       setActiveTab("tasks");
       setTaskView("timeline");
       setWorklogsView("logs");
-      setManufacturingView("cnc");
       setInventoryView("materials");
       setStepIndex(0);
 
@@ -144,7 +142,6 @@ export function useInteractiveTutorialCoreActionsStart({
       handleUnauthorized,
       inventoryView,
       isSidebarCollapsed,
-      manufacturingView,
       onActivateTutorial,
       returnState,
       selectedProjectId,
@@ -158,7 +155,6 @@ export function useInteractiveTutorialCoreActionsStart({
       setCompletedChapterId,
       setDataMessage,
       setInventoryView,
-      setManufacturingView,
       setSelectedProjectId,
       setSelectedSeasonId,
       setStepIndex,

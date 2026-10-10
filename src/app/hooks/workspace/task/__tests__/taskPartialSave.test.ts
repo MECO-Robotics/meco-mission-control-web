@@ -3,7 +3,6 @@ import { useTaskEditor } from "../useTaskEditor";
 import { createBootstrap } from "@/lib/appUtilsTestFixtures";
 import { createTask, updateTaskRecord } from "@/lib/auth/records/task";
 import * as relations from "@/lib/auth/records/taskRelations";
-import { updateRiskRecord } from "@/lib/auth/records/reporting";
 import { beginSessionChange } from "@/lib/auth/core/sessionStorage";
 
 jest.mock("react", () => ({ ...jest.requireActual("react"), useState: jest.fn(), useRef: jest.fn(), useEffect: jest.fn(), useCallback: jest.fn() }));
@@ -30,25 +29,24 @@ function setup() {
       dependencies.bootstrap = typeof next === "function" ? next(dependencies.bootstrap) : next;
       dependencies.scopedBootstrap = dependencies.bootstrap;
     },
-    setDataMessage: jest.fn(), handleUnauthorized: jest.fn(), loadWorkspace: jest.fn(async () => {}), enqueueTaskEditNotice: jest.fn(),
+    setDataMessage: jest.fn(), handleUnauthorized: jest.fn(), loadWorkspace: jest.fn(async () => true), enqueueTaskEditNotice: jest.fn(),
   };
   const Render = () => { cursor = 0; return useTaskEditor(dependencies); };
   const saved = { ...bootstrap.tasks[0], id: "new-task" };
   jest.mocked(createTask).mockResolvedValue(saved);
   jest.mocked(updateTaskRecord).mockResolvedValue(saved);
   jest.mocked(relations.createTaskDependencyRecord).mockImplementation(async (payload) => ({ ...payload, id: "saved-edge", createdAt: "2026-09-08" }));
-  jest.mocked(relations.createTaskBlockerRecord).mockImplementation(async (payload) => ({ ...payload, id: "saved-blocker", createdAt: "2026-09-08" } as never));
   Render().openCreateTaskModal();
   Render().setTaskDraft((draft) => ({
-  ...draft, title: "Retry task", summary: "Retain writes", taskDependencies: [{ id: "draft-edge", kind: "task", refId: bootstrap.tasks[0].id, requiredState: "complete", dependencyType: "hard" }], taskBlockers: [{ id: "draft-blocker", blockerType: "external", blockerId: null, description: "Delivery", severity: "medium", status: "open" }] }));
+  ...draft, title: "Retry task", summary: "Retain writes", taskDependencies: [{ id: "draft-edge", kind: "task", refId: bootstrap.tasks[0].id, requiredState: "complete", dependencyType: "hard" }] }));
   return { render: Render, dependencies, saved };
 }
 const event = { preventDefault: jest.fn() } as never;
 beforeEach(() => jest.resetAllMocks());
 
-it("retries acknowledged task and dependency without duplicating them after a blocker failure", async () => {
+it("retries dependency creation after the Task write has succeeded", async () => {
   const { render } = setup();
-  jest.mocked(relations.createTaskBlockerRecord).mockRejectedValueOnce(new Error("blocker unavailable"));
+  jest.mocked(relations.createTaskDependencyRecord).mockRejectedValueOnce(new Error("dependency unavailable"));
   let finishCreate!: () => void;
   const saved = { ...createBootstrap().tasks[0], id: "new-task" };
   jest.mocked(createTask).mockImplementationOnce(() => new Promise((resolve) => { finishCreate = () => resolve(saved); }));
@@ -59,13 +57,11 @@ it("retries acknowledged task and dependency without duplicating them after a bl
   await pending;
   expect(render().activeTaskId).toBe("new-task");
   expect(render().taskModalMode).toBe("edit");
-  expect(render().taskDraft.taskDependencies?.[0].id).toBe("saved-edge");
   expect(render().taskDraft.title).toBe("Retry task");
   await render().handleTaskSubmit(event);
   expect(createTask).toHaveBeenCalledTimes(1);
   expect(updateTaskRecord).toHaveBeenCalledTimes(1);
-  expect(relations.createTaskDependencyRecord).toHaveBeenCalledTimes(1);
-  expect(relations.createTaskBlockerRecord).toHaveBeenCalledTimes(2);
+  expect(relations.createTaskDependencyRecord).toHaveBeenCalledTimes(2);
   expect(render().taskModalMode).toBeNull();
 });
 
@@ -95,17 +91,12 @@ it.each([false, true])("does not alter a newer draft when an older save complete
   expect(dependencies.loadWorkspace).toHaveBeenCalledTimes(reject ? 0 : 1);
 });
 
-it.each(["task", "dependency", "blocker"])("stops subsequent save stages after session changes during %s", async (stage) => {
+it.each(["task", "dependency"])("stops subsequent save stages after session changes during %s", async (stage) => {
   const { render, dependencies, saved } = setup();
   if (stage === "task") jest.mocked(createTask).mockImplementationOnce(async () => { beginSessionChange(); return saved; });
   if (stage === "dependency") jest.mocked(relations.createTaskDependencyRecord).mockImplementationOnce(async (payload) => { beginSessionChange(); return { ...payload, id: "saved-edge", createdAt: "today" }; });
-  if (stage === "blocker") jest.mocked(relations.createTaskBlockerRecord).mockImplementationOnce(async (payload) => { beginSessionChange(); return { ...payload, id: "saved-blocker", createdAt: "today" } as never; });
-  render().setTaskDraft((draft) => ({
-  ...draft, targetRiskId: "risk-1" }));
   await render().handleTaskSubmit(event);
   if (stage === "task") expect(relations.createTaskDependencyRecord).not.toHaveBeenCalled();
-  if (stage !== "blocker") expect(relations.createTaskBlockerRecord).not.toHaveBeenCalled();
-  expect(updateRiskRecord).not.toHaveBeenCalled();
   expect(dependencies.loadWorkspace).not.toHaveBeenCalled();
 });
 
@@ -118,7 +109,7 @@ it("preserves create contexts, edit intent, and report return without stacking d
   expect(render().timelineMilestoneCreateSignal).toBe(1);
   const task = dependencies.bootstrap.tasks[0];
   render().openEditTaskModal(task, { intentState: "blocked" });
-  expect(render().taskDraft.taskBlockers).toEqual(expect.arrayContaining([expect.objectContaining({ isIntentPlaceholder: true })]));
+  expect(render().taskDraft.taskDependencies).toEqual([]);
   const restore = render().leaveTaskDetails(task.id);
   expect(render().taskModalMode).toBeNull();
   restore();
@@ -140,4 +131,13 @@ it("does not restore an old report's task over a newer editor or details selecti
   render().restoreTimelineTaskDetails("other-task");
   secondReturn();
   expect(render().activeTimelineTaskDetailId).toBe("other-task");
+});
+
+it("does not announce a reconciled status change when the refresh failed", async () => {
+  const { render, dependencies } = setup();
+  jest.mocked(dependencies.loadWorkspace).mockResolvedValueOnce(false);
+  const task = dependencies.bootstrap.tasks[0];
+  await render().handleTaskStatusChange(task, task.status === "complete" ? "not-started" : "complete");
+  expect(updateTaskRecord).toHaveBeenCalledTimes(1);
+  expect(dependencies.enqueueTaskEditNotice).not.toHaveBeenCalled();
 });

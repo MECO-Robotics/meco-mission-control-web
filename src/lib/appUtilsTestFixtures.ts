@@ -36,7 +36,6 @@ export function createSubsystem(overrides: Partial<SubsystemRecord> = {}): Subsy
     parentSubsystemId: null,
     responsibleEngineerId: null,
     mentorIds: [],
-    risks: [],
     layoutX: null,
     layoutY: null,
     layoutZone: "unplaced",
@@ -55,7 +54,7 @@ export function createMaterial(overrides: Partial<MaterialRecord> = {}): Materia
     onHandQuantity: 4,
     reorderPoint: 1,
     location: "Rack",
-    vendor: "",
+    preferredVendorId: null,
     notes: "",
     ...overrides,
   };
@@ -70,7 +69,7 @@ export function createPartDefinition(overrides: Partial<PartDefinitionRecord> = 
     revision: "A",
     iteration: 1,
     type: "custom",
-    source: "in-house",
+    defaultAcquisitionMethod: "manufacture",
     materialId: null,
     description: "",
     ...overrides,
@@ -80,13 +79,10 @@ export function createPartDefinition(overrides: Partial<PartDefinitionRecord> = 
 export function createPartInstance(overrides: Partial<PartInstanceRecord> = {}): PartInstanceRecord {
   return {
     id: "part-instance-1",
-    subsystemId: "subsystem-core",
-    mechanismId: "mechanism-1",
+    intendedSubsystemId: "subsystem-core",
+    intendedMechanismId: "mechanism-1",
     partDefinitionId: "part-def-1",
-    name: "Left Bearing Block",
-    quantity: 1,
-    trackIndividually: false,
-    status: "not ready",
+    location: { kind: "installed", subsystemId: "subsystem-core", mechanismId: "mechanism-1" },
     ...overrides,
   };
 }
@@ -94,11 +90,12 @@ export function createPartInstance(overrides: Partial<PartInstanceRecord> = {}):
 function createMilestone(overrides: Partial<MilestoneRecord>): MilestoneRecord {
   return {
     id: "milestone-1",
+    seasonId: "season-2026",
     title: "Regional",
     type: "competition",
-    startDateTime: "2026-03-10T14:00:00.000Z",
-    endDateTime: null,
-    isExternal: true,
+    status: "planned",
+    startAt: "2026-03-10T14:00:00.000Z",
+    endAt: null,
     description: "",
     projectIds: ["project-a"],
     ...overrides,
@@ -125,16 +122,16 @@ export function createBootstrap(overrides: Partial<BootstrapPayload> = {}): Boot
   const partDefinition = createPartDefinition({});
   const milestone = createMilestone({});
   const partInstance = createPartInstance({
-    mechanismId: "mechanism-1",
     partDefinitionId: partDefinition.id,
-    subsystemId: "subsystem-core",
-    name: "Left Bearing Block",
+    intendedSubsystemId: "subsystem-core",
+    intendedMechanismId: "mechanism-1",
   });
 
   const base: BootstrapPayload = {
     seasons: [
       {
         id: "season-2026",
+        teamId: "team-1",
         name: "2026 Season",
         type: "season",
         startDate: "2026-01-01",
@@ -142,7 +139,13 @@ export function createBootstrap(overrides: Partial<BootstrapPayload> = {}): Boot
       },
     ],
     projects: [projectA, projectB],
+    workTypes: [
+      { id: "robot:design", projectType: "robot", code: "design", name: "Design", isActive: true },
+      { id: "outreach:planning", projectType: "outreach", code: "planning", name: "Planning", isActive: true },
+    ],
+    responsibleGroups: [],
     workstreams: [workstreamA, workstreamB],
+    vendors: [],
     members: [
       {
         id: "lead-1",
@@ -178,7 +181,6 @@ export function createBootstrap(overrides: Partial<BootstrapPayload> = {}): Boot
         isCore: false,
       }),
     ],
-    disciplines: [{ id: "discipline-design", code: "design", name: "Design" }],
     mechanisms: [
       {
         id: "mechanism-1",
@@ -194,23 +196,23 @@ export function createBootstrap(overrides: Partial<BootstrapPayload> = {}): Boot
     partInstances: [partInstance],
     milestones: [milestone],
     reports: [],
-    reportFindings: [],
     qaRequests: [],
     designIterations: [],
     risks: [],
     tasks: [
       {
-        artifactIds: [],
         id: "task-1",
         projectId: projectA.id,
+        workTypeId: "robot:design",
+        responsibleGroupId: null,
         workstreamIds: [workstreamA.id],
         title: "Initial task",
         summary: "",
         subsystemIds: ["subsystem-core"],
-        disciplineId: "discipline-design",
         mechanismIds: [],
         partInstanceIds: [],
-        targetMilestoneId: null,
+        scheduleRefs: [],
+        requestedById: null,
         ownerId: null,
         assigneeIds: [],
         mentorId: null,
@@ -219,18 +221,24 @@ export function createBootstrap(overrides: Partial<BootstrapPayload> = {}): Boot
         priority: "medium",
         status: "not-started",
 
-        blockers: [],
-        linkedManufacturingIds: [],
-        linkedPurchaseIds: [],
+        manufacturingDetails: null,
+        checklistItems: [],
         estimatedHours: 2,
         actualHours: 0,
         requiresDocumentation: false,
-        documentationLinked: false,
       },
     ],
     workLogs: [],
     purchaseItems: [],
-    manufacturingItems: [],
+    manufacturingProcesses: [],
+    taskDependencies: [],
+    events: [],
+    meetings: [],
+    attendanceRecords: [],
+    milestoneRequirements: [],
+    qaFindings: [],
+    testFindings: [],
+    testResults: [],
     ...overrides,
   };
 

@@ -19,6 +19,17 @@
   display: flex;
 }
 
+.app-topbar-add-fallback {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  margin-left: 0.35rem;
+}
+
+.app-topbar-add-host:not(:empty) ~ .app-topbar-add-fallback {
+  display: none;
+}
+
 .app-topbar-controls-host:has(> .filter-toolbar:empty) {
   display: none;
 }

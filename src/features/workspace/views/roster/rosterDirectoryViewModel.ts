@@ -1,7 +1,5 @@
-import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MemberRecord } from "@/types/recordsOrganization";
 import type { RosterInsightsMember } from "@/types/rosterInsights";
-import { getTaskDisciplinesForProject } from "@/lib/taskDisciplines";
 import type { AvailableStudentRosterRow } from "./availableStudentsRoster";
 
 export type RosterPeopleFilter = "all" | "present" | "available" | "overloaded";
@@ -19,22 +17,6 @@ export function sortMembersByElevation<T extends MemberRecord>(
   );
 }
 
-export function buildRosterDisciplineOptions(
-  bootstrap: BootstrapPayload,
-  selectedProject: BootstrapPayload["projects"][number] | null,
-) {
-  const project = selectedProject ?? bootstrap.projects[0] ?? null;
-  const allowedIds = new Set(getTaskDisciplinesForProject(project).map((item) => item.id));
-  const byName = new Map<string, BootstrapPayload["disciplines"][number]>();
-
-  bootstrap.disciplines.forEach((discipline) => {
-    const key = discipline.name.trim().toLowerCase();
-    if (allowedIds.has(discipline.id) && !byName.has(key)) byName.set(key, discipline);
-  });
-
-  return [...byName.values()].sort((left, right) => left.name.localeCompare(right.name));
-}
-
 export function filterRosterMembers(args: {
   members: MemberRecord[];
   peopleFilter: RosterPeopleFilter;
@@ -42,9 +24,9 @@ export function filterRosterMembers(args: {
   presenceById: ReadonlyMap<string, AvailableStudentRosterRow>;
   insightById: ReadonlyMap<string, RosterInsightsMember>;
   searchText: string;
-  disciplineById: Record<string, string>;
+  groupNamesByMemberId: ReadonlyMap<string, readonly string[]>;
 }) {
-  const { members, peopleFilter, presentMemberIds, presenceById, insightById, disciplineById } = args;
+  const { members, peopleFilter, presentMemberIds, presenceById, insightById, groupNamesByMemberId } = args;
   const scoped = members.filter((member) => {
     if (peopleFilter === "present") return presentMemberIds.has(member.id);
     if (peopleFilter === "available") return presenceById.get(member.id)?.state === "available";
@@ -59,6 +41,6 @@ export function filterRosterMembers(args: {
     member.email,
     member.role,
     member.elevated ? "elevated" : "",
-    member.disciplineId ? disciplineById[member.disciplineId] ?? "" : "",
+    (groupNamesByMemberId.get(member.id) ?? []).join(" "),
   ].join(" ").toLowerCase().includes(query));
 }

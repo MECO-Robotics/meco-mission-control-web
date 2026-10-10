@@ -13,6 +13,7 @@ interface AppSidebarAddMenuProps {
   onCreatePart: () => void;
   onCreateQaReport: () => void;
   onCreateTask: () => void;
+  placement?: "sidebar" | "topbar";
 }
 
 interface AddAction {
@@ -26,6 +27,7 @@ export function AppSidebarAddMenu({
   onCreatePart,
   onCreateQaReport,
   onCreateTask,
+  placement = "sidebar",
 }: AppSidebarAddMenuProps) {
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
   const hoverOpenedAddMenuRef = useRef(false);
@@ -136,24 +138,31 @@ export function AppSidebarAddMenu({
 
   return (
     <div
-      className="sidebar-add-menu"
+      className={placement === "topbar" ? "sidebar-add-menu app-topbar-add-menu" : "sidebar-add-menu"}
       data-open={isAddMenuOpen ? "true" : "false"}
-      onMouseEnter={handleAddHover}
+      onMouseEnter={placement === "sidebar" ? handleAddHover : undefined}
       ref={menuRef}
     >
       <button
         aria-expanded={isAddMenuOpen ? "true" : "false"}
         aria-haspopup="menu"
-        aria-label="Add new"
-        className="sidebar-quick-action sidebar-quick-action-add"
+        aria-label={placement === "topbar" ? "Add" : "Add new"}
+        className={placement === "topbar" ? "primary-action app-topbar-add-button" : "sidebar-quick-action sidebar-quick-action-add"}
         onClick={handleAddClick}
         onKeyDown={handleAddKeyDown}
         title="Add"
         type="button"
       >
-        <Plus aria-hidden="true" size={14} strokeWidth={2} />
+        {placement === "topbar" ? (
+          <>
+            <Plus aria-hidden="true" size={14} strokeWidth={2} />
+            Add
+          </>
+        ) : (
+          <Plus aria-hidden="true" size={14} strokeWidth={2} />
+        )}
       </button>
-      <div aria-label="Add menu" className="sidebar-add-menu-panel" role="menu">
+      <div aria-label="Add menu" className={`sidebar-add-menu-panel${placement === "topbar" ? " app-topbar-add-menu-panel" : ""}`} role="menu">
         {addActions.map((action) => (
           <button
             className="sidebar-add-menu-item"

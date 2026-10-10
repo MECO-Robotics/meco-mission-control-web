@@ -197,8 +197,8 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             showCalendarFilters={showCalendarFilters}
             activePersonFilter={activePersonFilter}
             bootstrap={bootstrap}
-            disciplineFilter={filterControls.filters.disciplineFilter}
-            disciplineFilterOptions={filterControls.disciplineFilterOptions}
+            workTypeFilter={filterControls.filters.workTypeFilter}
+            workTypeFilterOptions={filterControls.workTypeFilterOptions}
             isAllProjectsView={isAllProjectsView}
             onAdjustZoom={state.adjustTimelineZoom}
             onChangePersonFilter={setActivePersonFilter}
@@ -211,7 +211,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             priorityFilter={filterControls.filters.priorityFilter}
             projectFilter={filterControls.filters.projectFilter}
             searchFilter={searchFilter}
-            setDisciplineFilter={filterControls.setDisciplineFilter}
+            setWorkTypeFilter={filterControls.setWorkTypeFilter}
             setPriorityFilter={filterControls.setPriorityFilter}
             setProjectFilter={filterControls.setProjectFilter}
             setStatusFilter={filterControls.setStatusFilter}
@@ -220,6 +220,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             subsystemFilter={filterControls.filters.subsystemFilter}
             subsystemFilterOptions={filterControls.subsystemFilterOptions}
             timelinePeriodLabel={data.timelinePeriodLabel}
+            onViewAnchorDateChange={state.setViewAnchorDate}
             timelineZoom={state.timelineZoom}
             timelineZoomMin={state.timelineZoomMin}
             viewInterval={state.viewInterval}
@@ -238,7 +239,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
 
       <div className="panel-header compact-header">
         <div className="queue-section-header">
-          <h2 style={{ color: "var(--text-title)" }}>Subsystem timeline</h2>
+          <h2 style={{ color: "var(--text-title)" }}>Timeline</h2>
         </div>
       </div>
 
@@ -247,7 +248,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         clearHoveredMilestonePopup={data.clearHoveredMilestonePopup}
         collapsedProjects={state.collapsedProjects}
         collapsedSubsystems={state.collapsedSubsystems}
-        disciplinesById={data.disciplinesById}
+        workTypesById={data.workTypesById}
         firstDayGridColumn={layout.firstDayGridColumn}
         gridMinWidth={layout.gridMinWidth}
         handleTimelineDayMouseEnter={data.handleTimelineDayMouseEnter}

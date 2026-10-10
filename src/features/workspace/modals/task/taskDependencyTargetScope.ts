@@ -35,7 +35,7 @@ export function getScopedTaskDependencyTargets({
     Object.values(partInstancesById)
       .filter((partInstance) => {
         const subsystem = bootstrap.subsystems.find(
-          (candidate) => candidate.id === partInstance.subsystemId,
+          (candidate) => candidate.id === partInstance.intendedSubsystemId,
         );
         return !targetProjectId || subsystem?.projectId === targetProjectId;
       })

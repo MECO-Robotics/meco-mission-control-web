@@ -52,6 +52,29 @@ Prefer user-facing labels from `docs/CURRENT_WEB_SPEC.md` in copy and docs.
 Route keys and tab IDs are implementation details unless a code reference is
 needed.
 
+## Workspace Topbar Contract
+
+The app topbar and navigation own the page context. Views must not render a
+title, eyebrow, subtitle, tagline, or introductory header at the top of their
+content. Keep operational screens free of explanatory header paragraphs; put
+product instructions in Help or tutorial content.
+
+Every workspace view must use the standard shared topbar. New view-local
+**Add**/**Create** buttons are prohibited unless the product spec explicitly
+requires a view-local button. Put creation actions in the existing plus slot.
+
+Do not add a view-local filter bar or controls. Add filters only when explicitly
+required by the product spec, and place them in the shared topbar search bar's
+action area alongside sorting. Put other view-specific controls in the controls
+slot. Use `TopbarResponsiveSearch`, `WorkspaceTopbarControls`,
+`WorkspaceSortMenu`/`CompactFilterMenu`, and `WorkspaceTopbarAddMenu` rather than
+inline substitutes. Each control must act on the current view's data. If a
+control does not apply to a destination, do not show a dead or decorative
+placeholder.
+
+Before changing view chrome, check `AppTopbar` and existing slot consumers. Add
+view guidance to Help/tutorial content instead of duplicating it above the data.
+
 ## Modal And Edit Flows
 
 Modal state is coordinated from the app shell so views can request an edit
@@ -73,6 +96,8 @@ For new edit flows:
   writes.
 - Show unauthorized, validation, network, and rollback states in the initiating
   view or modal.
+
+Work-log, QA and milestone-report actions share one editor lifecycle. Cancel and close remain available during saves, retaining dirty-draft confirmation. Opening or closing a report retires pending editor callbacks; a completed write may refresh its original workspace but cannot close or report an error in a newer draft. Bootstrap refreshes never initialize report drafts. Workspace publication and editor notifications have separate lifetime guards, so a retired editor refresh cannot clear or replace the newer editor’s error. Workspace loads return whether the latest applicable payload was reconciled; task success notices require that result. An acknowledged create closes even when refresh fails, leaving the workspace error visible and avoiding duplicate create retries.
 
 Pseudo-state workflows, such as blocked or waiting-on-dependency task drops,
 should open an edit intent with the relevant draft context instead of silently
@@ -107,6 +132,10 @@ truth for permissions, persistence, and schema validation.
 ## Ownership and styles
 
 Follow [CONTRIBUTING.md](../CONTRIBUTING.md). Keep one clear owner and explicit dependencies; delete redundant representations and forwarding layers. Split or merge modules according to responsibility and reuse, without file-size quotas. Keep styles with the view or component whose cascade they control.
+
+Treat the current visual system as a hard constraint. Preserve established typography, spacing, surfaces, colors, controls, and responsive behavior; compose existing components and styles instead of introducing a new one-off look. Add a visual exception only when the product spec explicitly requires it.
+
+Before implementing an additional feature, inspect and reuse the existing modules, components, and layouts that already own the relevant behavior. Extend a shared owner when the behavior is genuinely shared; keep domain-specific data and presentation at the view boundary. Do not rebuild an existing layout or interaction in parallel. For Kanban views, reuse `KanbanColumns`, `KanbanScrollFrame`, and their drag behavior, supplying view-specific columns and cards.
 
 KanbanScrollFrame owns board overflow observation and scroll hints. Task-specific zoom, focus selection and lazy loading stay in TaskQueueBoardSection; its shell ref connects those behaviors to the same scrolling element.
 

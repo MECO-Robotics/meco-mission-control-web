@@ -109,9 +109,9 @@ export function useTimelineMilestoneOverlay({
 
       const timelineStart = days[0] ?? null;
       const timelineEnd = days[days.length - 1] ?? null;
-      const milestoneStartDay = datePortion(primaryMilestone.startDateTime);
-      const milestoneEndDay = primaryMilestone.endDateTime
-        ? datePortion(primaryMilestone.endDateTime)
+      const milestoneStartDay = datePortion(primaryMilestone.startAt);
+      const milestoneEndDay = primaryMilestone.endAt
+        ? datePortion(primaryMilestone.endAt)
         : milestoneStartDay;
       const popupItems = getTimelineMilestonePopupItems(milestonesOnDay, timelineDayMilestoneUnderlays);
       const anchorStartDay =
@@ -135,8 +135,8 @@ export function useTimelineMilestoneOverlay({
 
   const showMilestoneUnderlayPopup = useCallback(
     (anchor: HTMLElement, milestone: MilestoneRecord) => {
-      const startDay = datePortion(milestone.startDateTime);
-      const endDay = milestone.endDateTime ? datePortion(milestone.endDateTime) : startDay;
+      const startDay = datePortion(milestone.startAt);
+      const endDay = milestone.endAt ? datePortion(milestone.endAt) : startDay;
       const milestonesOnDay = dayMilestonesByDate[startDay] ?? [milestone];
       const popupItems = getTimelineMilestonePopupItems(
         milestonesOnDay,

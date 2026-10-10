@@ -10,14 +10,14 @@ The web app owns cross-project planning, coordination, resource management, evid
 
 ## Current Navigation Contract
 
-The app uses the original sidebar implementation: Home shortcut, expandable Work/Resources/Team sections, icon subitems, compact flyouts, and its existing responsive overlay. The topbar displays the current page title. The native mobile app retains labeled bottom navigation.
+The app uses the original sidebar implementation: Home shortcut, expandable Work/Resources/Team sections, icon subitems, compact flyouts, and its existing responsive overlay. The topbar displays the current page title. Workspace views use the shared search, controls, and plus slots for functional view actions; the topbar title is not repeated inside the view. The native mobile app retains labeled bottom navigation.
 
 | Area | Views | Consolidation |
 | --- | --- | --- |
 | Home | Priority work, upcoming milestones, Needs attention | One attention row per source record; Project health expands on demand |
 | Work | Tasks, Schedule, Risks, Activity | Schedule offers Calendar, Timeline and Agenda; Activity filters work logs, changes, QA and milestone results |
 | Resources | Materials/Documents, Parts, Purchases, Manufacturing, Structure | Manufacturing uses a process filter; installed parts live under their definition; CAD import opens from Structure |
-| Team | People, Attendance | People combines directory, presence, availability and workload |
+| Team | People, Teams | People combines directory, presence, availability and individual workload; Teams manages ResponsibleGroups, adds or reuses matching WorkType disciplines, and derives team workload/capacity |
 
 Tasks opens first in Work. Robot-only Parts and Manufacturing require a robot project. Structure requires a selected project and uses the robot map or the non-robot workflow view. All-project Resources exposes Materials and Purchases. Non-robot projects use Documents and Purchases. Home remains available without a season; other collections require season data. Help and account controls remain utilities.
 
@@ -45,6 +45,7 @@ When changing data contracts:
 - Do not create another standalone page when a workflow can be handled inside the responsible domain view.
 - Prefer derived signals over new entities when the same meaning can be computed from tasks, work logs, QA, risks, manufacturing, purchases, and audit actions.
 - Preserve keyboard and responsive behavior in topbar and timeline interactions.
+- Use the shared topbar slots for functional search, filters, sort, view-specific controls, and create actions. Do not add duplicate in-view page headings or operational-summary prose; place instructions in Help/tutorial content. See [web-contributor-guide.md](web-contributor-guide.md#workspace-topbar-contract).
 - Keep empty, loading, rollback, and storage-failure states explicit.
 
 ## Implementation Guardrails

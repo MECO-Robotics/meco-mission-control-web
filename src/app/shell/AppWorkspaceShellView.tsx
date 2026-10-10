@@ -31,6 +31,10 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       activeViewLabel={activeViewLabel}
       isDarkMode={c.isDarkMode}
       isSidebarCollapsed={c.isSidebarCollapsed}
+      onCreateMilestone={handleCreateMilestone}
+      onCreatePart={c.openCreatePartDefinitionModal}
+      onCreateQaReport={c.openCreateQaReportModal}
+      onCreateTask={c.openCreateTaskModal}
     />
         <AppSidebar
       activeTab={c.activeTab}
@@ -56,7 +60,6 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       selectedProjectId={c.selectedProjectId}
       selectedSeasonId={c.selectedSeasonId}
       inventoryView={c.inventoryView}
-      manufacturingView={c.manufacturingView}
       seasons={c.bootstrap.seasons}
       sessionUser={c.sessionUser}
       taskView={c.taskView}
@@ -88,7 +91,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
           availabilityBootstrap={c.bootstrap}
           bootstrap={c.scopedBootstrap}
           onDeleteRisk={c.handleDeleteRisk}
-          onCncQuickStatusChange={c.handleCncQuickStatusChange}
+          onCreateRisk={c.handleCreateRisk}
           onUpdateRisk={c.handleUpdateRisk}
           showCncMentorQuickActions={
             c.signedInMember?.role === "mentor" ||

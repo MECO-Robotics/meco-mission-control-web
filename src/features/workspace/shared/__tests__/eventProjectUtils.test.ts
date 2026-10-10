@@ -6,11 +6,12 @@ import type { MilestoneRecord } from "@/types/recordsExecution";
 function createMilestone(overrides: Partial<MilestoneRecord>): MilestoneRecord {
   return {
     id: "milestone-1",
+    seasonId: "season-1",
     title: "Milestone",
     type: "demo",
-    startDateTime: "2026-05-01T12:00:00",
-    endDateTime: null,
-    isExternal: false,
+    status: "planned",
+    startAt: "2026-05-01T12:00:00",
+    endAt: null,
     description: "",
     projectIds: [],
     ...overrides,

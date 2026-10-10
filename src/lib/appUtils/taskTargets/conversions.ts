@@ -2,15 +2,15 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskPayload } from "@/types/payloads/task";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { uniqueIds } from "../internal";
-import { getTaskBlockerDrafts, getTaskDependencyDrafts } from "./dependencies";
+import { getTaskDependencyDrafts } from "./dependencies";
 
 export const taskToPayload = (task: TaskRecord, bootstrap?: BootstrapPayload): TaskPayload => ({
   checklistItems: task.checklistItems ?? [],
   projectId: task.projectId,
   title: task.title,
   summary: task.summary,
-  disciplineId: task.disciplineId,
-  targetMilestoneId: task.targetMilestoneId,
+  workTypeId: task.workTypeId,
+  responsibleGroupId: task.responsibleGroupId,
   ownerId: task.ownerId,
   mentorId: task.mentorId,
   startDate: task.startDate,
@@ -18,19 +18,15 @@ export const taskToPayload = (task: TaskRecord, bootstrap?: BootstrapPayload): T
   priority: task.priority,
   status: task.status,
   estimatedHours: task.estimatedHours,
-  actualHours: task.actualHours,
-  linkedManufacturingIds: task.linkedManufacturingIds,
-  linkedPurchaseIds: task.linkedPurchaseIds,
   requiresDocumentation: task.requiresDocumentation,
-  documentationLinked: task.documentationLinked,
+  manufacturingDetails: task.manufacturingDetails,
   workstreamIds: task.workstreamIds,
   subsystemIds: task.subsystemIds,
   mechanismIds: task.mechanismIds,
   partInstanceIds: task.partInstanceIds,
-  artifactIds: task.artifactIds,
-  targetRiskId: bootstrap?.risks.find((risk) => risk.mitigationTaskId === task.id)?.id ?? null,
+  scheduleRefs: task.scheduleRefs,
+  requestedById: task.requestedById,
   photoUrl: task.photoUrl ?? "",
   assigneeIds: task.assigneeIds?.length ? uniqueIds(task.assigneeIds) : uniqueIds([task.ownerId]),
-  taskBlockers: getTaskBlockerDrafts(task, bootstrap),
   taskDependencies: getTaskDependencyDrafts(task, bootstrap),
 });

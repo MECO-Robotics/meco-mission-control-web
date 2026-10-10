@@ -98,7 +98,7 @@ describe("CAD STEP grouped repeated instances", () => {
         targets: {
           subsystems: [],
           mechanisms: [],
-          partDefinitions: [{ id: "part-spacer", seasonId: "season-2026", name: "Spacer", partNumber: "SHR-001", revision: "A", iteration: 1, type: "custom", source: "cad", materialId: null, description: "" }],
+          partDefinitions: [{ id: "part-spacer", seasonId: "season-2026", name: "Spacer", partNumber: "SHR-001", revision: "A", iteration: 1, type: "custom", defaultAcquisitionMethod: "manufacture", materialId: null, description: "" }],
         },
         tree: [{
           id: "root",

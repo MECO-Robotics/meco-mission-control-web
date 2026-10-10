@@ -29,8 +29,7 @@ export function WorkspaceWorklogsSection(props: WorkspaceContentPanelsViewProps)
           openEditTaskModal={openTimelineTaskDetailsModal}
           subsystemsById={props.subsystemsById}
           view={worklogsView}
-          onViewChange={props.setWorklogsView}
-          onOpenSchedule={(milestoneId) => props.onOpenDrilldownTarget({ tab: "tasks", taskView: "milestones", milestoneId })}
+          onOpenSchedule={(milestoneId) => props.onOpenDrilldownTarget({ tab: "tasks", taskView: "agenda", milestoneId })}
         />
       </WorkspaceSubPanel>
     </WorkspaceSectionPanel>

@@ -1,83 +1,80 @@
-import type {
-  DesignIterationSourceType,
-  FindingStatus,
-  ReportType,
-  RiskReassessmentStatus,
-  RiskAttachmentType,
-  RiskSeverity,
-  TestResultStatus,
-} from "./common";
+import type { DomainReference, RiskSeverity } from "./common";
+
+export type ReportStatus = "draft" | "submitted" | "reviewed";
 
 export interface ReportRecord {
   id: string;
-  reportType: ReportType;
   projectId: string;
-  taskId: string | null;
-  milestoneId: string | null;
-  workstreamId: string | null;
+  reportType: "qa" | "practice" | "competition" | "review";
+  targetRefs: DomainReference[];
   createdByMemberId: string | null;
-  result: string;
+  participantIds: string[];
+  mentorId: string | null;
+  requestedById: string | null;
   summary: string;
   notes: string;
   evidenceNotes?: string;
-  qaRequestId?: string | null;
-  mentorId?: string | null;
-  requestedById?: string | null;
   photoUrl?: string;
   createdAt: string;
-  participantIds?: string[];
-  mentorApproved?: boolean;
-  reviewedAt?: string;
-  title?: string;
-  status?: TestResultStatus;
-  findings?: string[];
-  targetRiskId?: string | null;
-  proposedRiskSeverity?: RiskSeverity | null;
-  proposedRiskStatus?: RiskReassessmentStatus | null;
+  status: ReportStatus;
+  result: string | null;
+  reviewedById?: string | null;
+  reviewedAt?: string | null;
 }
 
-export interface ReportFindingRecord {
+export interface QaFindingRecord {
   id: string;
-  reportId: string;
-  mechanismId: string | null;
-  partInstanceId: string | null;
-  artifactInstanceId: string | null;
-  issueType: string;
+  reportId: string | null;
+  projectId: string;
+  targetRefs: DomainReference[];
+  title: string;
+  detail: string;
   severity: RiskSeverity;
-  notes: string;
-  spawnedTaskId: string | null;
-  spawnedIterationId: string | null;
-  spawnedRiskId: string | null;
-  title?: string;
-  detail?: string;
-  status?: FindingStatus;
-  projectId?: string;
-  workstreamId?: string | null;
-  subsystemId?: string | null;
-  taskId?: string | null;
-  milestoneId?: string | null;
-  createdAt?: string;
-  updatedAt?: string;
+  status: "open" | "in-progress" | "resolved";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TestResultRecord {
+  id: string;
+  projectId: string;
+  targetRefs: DomainReference[];
+  title: string;
+  status: "pass" | "fail" | "blocked";
+}
+
+export interface TestFindingRecord extends QaFindingRecord {
+  testResultId: string;
+}
+
+export interface RiskRecord {
+  id: string;
+  projectId: string;
+  title: string;
+  detail: string;
+  category: "dependency" | "design" | "manufacturing" | "supply" | "schedule" | "qa" | "inventory" | "other";
+  severity: RiskSeverity;
+  status: "open" | "in-progress" | "blocked" | "resolved";
+  blocksWork: boolean;
+  source:
+    | { kind: "manual" }
+    | { kind: "task" | "task-dependency" | "qa-finding" | "test-finding" | "qa-request" | "test-result" | "report" | "event" | "milestone" | "manufacturing-details" | "part-instance" | "material"; id: string };
+  relatedTargets: DomainReference[];
+  mitigationTaskId: string | null;
+  ownerGroupId: string | null;
+  ownerMemberId: string | null;
+  mitigationDueDate: string | null;
+  createdAt: string;
+  updatedAt: string;
+  resolvedAt: string | null;
 }
 
 export interface DesignIterationRecord {
   id: string;
   taskId: string | null;
-  sourceType: DesignIterationSourceType;
+  sourceType: "qa-finding" | "test-finding" | "manual";
   sourceId: string | null;
   title: string;
   summary: string;
   createdAt: string;
-}
-
-export interface RiskRecord {
-  id: string;
-  title: string;
-  detail: string;
-  severity: RiskSeverity;
-  sourceType: "qa-report" | "test-result";
-  sourceId: string;
-  attachmentType: RiskAttachmentType;
-  attachmentId: string;
-  mitigationTaskId: string | null;
 }

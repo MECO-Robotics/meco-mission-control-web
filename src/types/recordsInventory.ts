@@ -1,11 +1,13 @@
 import type {
+  AcquisitionMethod,
   ArtifactKind,
   ArtifactStatus,
-  ManufacturingProcess,
-  ManufacturingStatus,
+  DomainReference,
   MaterialCategory,
-  PartInstanceStatus,
-  PurchaseStatus,
+  PartInstanceLocation,
+  PurchaseApprovalStatus,
+  PurchaseKind,
+  PurchaseOrderStatus,
 } from "./common";
 import type { CadSourceMetadata } from "./recordsOrganization";
 
@@ -17,7 +19,7 @@ export interface MaterialRecord {
   onHandQuantity: number;
   reorderPoint: number;
   location: string;
-  vendor: string;
+  preferredVendorId: string | null;
   notes: string;
   photoUrl?: string;
 }
@@ -25,13 +27,12 @@ export interface MaterialRecord {
 export interface ArtifactRecord {
   id: string;
   projectId: string;
-  workstreamId: string | null;
+  targetRefs: DomainReference[];
   kind: ArtifactKind;
   title: string;
   summary: string;
   status: ArtifactStatus;
-  link: string;
-  isArchived?: boolean;
+  uri: string;
   updatedAt: string;
   photoUrl?: string;
 }
@@ -47,7 +48,7 @@ export interface PartDefinitionRecord extends CadSourceMetadata {
   isArchived?: boolean;
   isHardware?: boolean;
   type: string;
-  source: string;
+  defaultAcquisitionMethod: AcquisitionMethod;
   materialId: string | null;
   description: string;
   photoUrl?: string;
@@ -55,46 +56,50 @@ export interface PartDefinitionRecord extends CadSourceMetadata {
 
 export interface PartInstanceRecord extends CadSourceMetadata {
   id: string;
-  subsystemId: string;
-  mechanismId: string | null;
   partDefinitionId: string;
-  name: string;
-  quantity: number;
-  trackIndividually: boolean;
-  status: PartInstanceStatus;
+  intendedSubsystemId: string | null;
+  intendedMechanismId: string | null;
+  location: PartInstanceLocation;
+  readinessStatus?: "not-ready" | "blocked" | "qa" | "ready";
   photoUrl?: string;
 }
 
-export interface ManufacturingItemRecord {
+export interface PurchaseQuoteRecord {
   id: string;
-  title: string;
-  subsystemId: string;
-  requestedById: string | null;
-  process: ManufacturingProcess;
-  dueDate: string;
-  material: string;
-  materialId: string | null;
-  partDefinitionId: string | null;
-  partInstanceId: string | null;
-  partInstanceIds: string[];
-  quantity: number;
-  status: ManufacturingStatus;
-  mentorReviewed: boolean;
-  inHouse: boolean;
-  batchLabel?: string;
+  vendorId: string;
+  reference: string | null;
+  amount: { amount: number; currency: string | null } | null;
+  url?: string;
+  expiresAt?: string | null;
+  quotedAt: string | null;
 }
 
 export interface PurchaseItemRecord {
   id: string;
-  title: string;
-  subsystemId: string;
-  requestedById: string | null;
+  taskId: string;
+  kind: PurchaseKind;
   partDefinitionId: string | null;
+  materialId: string | null;
+  title: string;
   quantity: number;
-  vendor: string;
-  linkLabel: string;
-  estimatedCost: number;
-  finalCost?: number;
-  approvedByMentor: boolean;
-  status: PurchaseStatus;
+  quotes: PurchaseQuoteRecord[];
+  selectedQuoteId: string | null;
+  approvalStatus: PurchaseApprovalStatus;
+  approvedById: string | null;
+  approvedAt: string | null;
+  purchaseOrderNumber: string | null;
+  orderStatus: PurchaseOrderStatus;
+  finalCost: { amount: number; currency: string | null } | null;
+  expectedDeliveryDate: string | null;
+  trackingNumber: string | null;
+  trackingUrl: string | null;
+  orderedAt: string | null;
+  deliveredAt: string | null;
+}
+
+export interface VendorRecord {
+  id: string;
+  name: string;
+  website: string | null;
+  isArchived: boolean;
 }

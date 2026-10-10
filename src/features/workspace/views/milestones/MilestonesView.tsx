@@ -38,9 +38,10 @@ export function MilestonesView({
   onDeleteTimelineMilestone,
   onSaveTimelineMilestone,
 }: MilestonesViewProps) {
-  const riskCountByMilestoneId = bootstrap.reports.filter((report) => report.reportType !== "QA").reduce<Record<string, number>>((counts, report) => {
-    const count = bootstrap.risks.filter((risk) => risk.sourceType === "test-result" && risk.sourceId === report.id).length;
-    if (report.milestoneId && count) counts[report.milestoneId] = (counts[report.milestoneId] ?? 0) + count;
+  const riskCountByMilestoneId = bootstrap.risks.reduce<Record<string, number>>((counts, risk) => {
+    risk.relatedTargets.forEach((target) => {
+      if (target.kind === "milestone") counts[target.id] = (counts[target.id] ?? 0) + 1;
+    });
     return counts;
   }, {});
   const milestones = useMilestonesViewState({

@@ -55,8 +55,8 @@ describe("TimelineView", () => {
         clearHoveredTaskRow: jest.fn(),
         collapsedProjects: {},
         collapsedSubsystems: { "subsystem-2": true },
-        disciplinesById: {
-          "discipline-1": bootstrap.disciplines[0] as BootstrapPayload["disciplines"][number],
+        workTypesById: {
+          "discipline-1": bootstrap.workTypes[0] as BootstrapPayload["workTypes"][number],
         },
         firstDayGridColumn: 3,
         gridMinWidth: 420,
@@ -170,8 +170,8 @@ describe("TimelineView", () => {
         clearHoveredSubsystemRow: jest.fn(),
         clearHoveredTaskRow: jest.fn(),
         collapsedSubsystems: { "subsystem-2": true },
-        disciplinesById: {
-          "discipline-1": bootstrap.disciplines[0] as BootstrapPayload["disciplines"][number],
+        workTypesById: {
+          "discipline-1": bootstrap.workTypes[0] as BootstrapPayload["workTypes"][number],
         },
         firstDayGridColumn: 2,
         gridMinWidth: 420,
@@ -278,7 +278,7 @@ describe("TimelineView", () => {
       `subsystem:${subsystem.id}`,
       Object.fromEntries(bootstrap.tasks.map((task) => [task.id, task])),
       Object.fromEntries(bootstrap.subsystems.map((row) => [row.id, row])),
-      Object.fromEntries(bootstrap.disciplines.map((discipline) => [discipline.id, discipline])),
+      Object.fromEntries(bootstrap.workTypes.map((discipline) => [discipline.id, discipline])),
     );
     const highlightStyle = style as Record<string, string | undefined> | null;
     const selectedFill = highlightStyle?.["--timeline-row-highlight-selected-fill"];

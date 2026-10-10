@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { TimelineTaskTrackRow } from "./TimelineTaskTrackRow";
@@ -14,7 +14,7 @@ type TimelineTaskTrackRowListMode = "project-collapsed" | "subsystem-collapsed" 
 interface TimelineTaskTrackRowListProps {
   clearHoveredMilestonePopup: () => void;
   clearHoveredTaskRow: () => void;
-  disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
+  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>;
   firstDayGridColumn: number;
   handleTimelineDayMouseEnter: (milestone: React.MouseEvent<HTMLElement>) => void;
   hoveredTaskId?: string | null;
@@ -42,7 +42,7 @@ interface TimelineTaskTrackRowListProps {
 export const TimelineTaskTrackRowList: React.FC<TimelineTaskTrackRowListProps> = ({
   clearHoveredMilestonePopup,
   clearHoveredTaskRow,
-  disciplinesById,
+  workTypesById,
   firstDayGridColumn,
   handleTimelineDayMouseEnter,
   hoveredTaskId,
@@ -69,7 +69,7 @@ export const TimelineTaskTrackRowList: React.FC<TimelineTaskTrackRowListProps> =
   const isCollapsed = mode !== "subsystem-expanded";
   const buildTaskBarStyle = (task: TimelineTaskSpan, index: number) => {
     if (mode === "subsystem-expanded") {
-        return buildTimelineTaskToneStyle(task.disciplineId, disciplinesById, {
+        return buildTimelineTaskToneStyle(task.workTypeId, workTypesById, {
           gridRow: rowStart + index,
           gridColumn: `${task.offset + firstDayGridColumn} / span ${task.span}`,
           margin: 0,
@@ -91,7 +91,7 @@ export const TimelineTaskTrackRowList: React.FC<TimelineTaskTrackRowListProps> =
         });
     }
 
-    return buildTimelineTaskToneStyle(task.disciplineId, disciplinesById, {
+    return buildTimelineTaskToneStyle(task.workTypeId, workTypesById, {
       gridRow: rowStart,
       gridColumn: `${task.offset + firstDayGridColumn} / span ${task.span}`,
           height: "8px",

@@ -1,22 +1,34 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { formatLocalDate } from "@/lib/dateUtils";
+import {
+  addDaysToDay,
+  formatMonthYearLabel,
+  formatTimelinePeriodLabel,
+  getSchedulePeriodBounds,
+  type TimelineViewInterval,
+} from "@/features/workspace/shared/timeline/timelineDateUtils";
 import type { MeetingPayload, MilestonePayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
 import { toErrorMessage } from "@/lib/appUtils/common";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
+import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
+import { WorkspaceTopbarControls } from "@/features/workspace/shared/topbar";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { MilestonesMilestoneModal } from "@/features/workspace/views/milestones/MilestonesEventModal";
 import { useMilestonesMilestoneModalState } from "@/features/workspace/views/milestones/sections/useMilestonesEventModalState";
-import { TaskCalendarDayDetails } from "./TaskCalendarDayDetails";
 import { MeetingScheduleModal } from "./MeetingScheduleModal";
-import { TaskCalendarMonthGrid } from "./TaskCalendarMonthGrid";
-import type { TaskCalendarSortMode } from "./taskCalendarLayout";
+import { ScheduleAgendaMonthList } from "./ScheduleAgendaMonthList";
+import { TaskCalendarMonthStack } from "./TaskCalendarMonthStack";
+import { groupTaskCalendarEventsByMonth, toEventDateKey, type TaskCalendarSortMode } from "./taskCalendarLayout";
 import type { TaskCalendarEvent, TaskCalendarEventType } from "./taskCalendarEvents";
 import { useTaskCalendarEventData } from "./useTaskCalendarEventData";
+import { SchedulePeriodControls } from "./SchedulePeriodControls";
 
 interface TaskCalendarViewProps {
+  presentation?: "calendar" | "agenda";
   onCreateMilestoneReport?: (milestoneId: string, onReturn?: () => void) => void;
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
@@ -51,14 +63,15 @@ function createDefaultMeetingDraft(bootstrap: BootstrapPayload): MeetingPayload 
     meetingType: "general",
     seasonId,
     projectIds: bootstrap.projects[0]?.id ? [bootstrap.projects[0].id] : [],
-    startDateTime: `${dateKey}T18:00`,
-    endDateTime: `${dateKey}T20:00`,
+    startAt: `${dateKey}T18:00`,
+    endAt: `${dateKey}T20:00`,
     location: "",
     description: "",
   };
 }
 
 export function TaskCalendarView({
+  presentation = "calendar",
   activePersonFilter,
   onCreateMilestoneReport,
   bootstrap,
@@ -80,10 +93,13 @@ export function TaskCalendarView({
 }: TaskCalendarViewProps) {
   const [isMeetingModalOpen, setIsMeetingModalOpen] = useState(false);
   const [isSavingMeeting, setIsSavingMeeting] = useState(false);
-  const [calendarViewMode, setCalendarViewMode] = useState<"month" | "week">("month");
   const [meetingDraft, setMeetingDraft] = useState<MeetingPayload>(() => createDefaultMeetingDraft(bootstrap));
   const [meetingError, setMeetingError] = useState<string | null>(null);
   const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
+  const [agendaStartDate, setAgendaStartDate] = useState(() => formatLocalDate(new Date()));
+  const [agendaRange, setAgendaRange] = useState<TimelineViewInterval>("all");
+  const [requestedMilestoneId, setRequestedMilestoneId] = useState(() => typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("milestone"));
+  const handledMilestoneId = useRef<string | null | undefined>(undefined);
   const calendar = useTaskCalendarEventData({
     activePersonFilter,
     bootstrap,
@@ -97,16 +113,6 @@ export function TaskCalendarView({
     sortDirection,
     onSortDirectionChange,
   });
-  useEffect(() => {
-    const handleSchedulePeriodChange = (event: Event) => {
-      const anchorDate = (event as CustomEvent<{ anchorDate?: string }>).detail?.anchorDate;
-      const viewMode = (event as CustomEvent<{ viewMode?: "month" | "week" }>).detail?.viewMode;
-      if (viewMode) setCalendarViewMode(viewMode);
-      if (anchorDate) calendar.setMonthCursor(new Date(anchorDate + "T12:00:00"));
-    };
-    window.addEventListener("mission-control:schedule-period-change", handleSchedulePeriodChange);
-    return () => window.removeEventListener("mission-control:schedule-period-change", handleSchedulePeriodChange);
-  }, [calendar.setMonthCursor]);
   const milestoneModalState = useMilestonesMilestoneModalState({
     bootstrap,
     isAllProjectsView,
@@ -117,22 +123,44 @@ export function TaskCalendarView({
     projectFilter: [],
     scopedProjectIds: calendar.scopedProjectIds,
   });
+  const milestoneModalActions = useRef(milestoneModalState);
+  useEffect(() => { milestoneModalActions.current = milestoneModalState; });
   useEffect(() => {
     const openMeeting = () => setIsMeetingModalOpen(true);
-    const openMilestone = () => milestoneModalState.openCreateMilestoneModal();
+    const openMilestone = () => milestoneModalActions.current.openCreateMilestoneModal();
     window.addEventListener("mission-control:open-meeting", openMeeting);
     window.addEventListener("mission-control:open-milestone", openMilestone);
     return () => {
       window.removeEventListener("mission-control:open-meeting", openMeeting);
       window.removeEventListener("mission-control:open-milestone", openMilestone);
     };
-  }, [milestoneModalState.openCreateMilestoneModal]);
+  }, []);
+  useEffect(() => {
+    const restore = () => setRequestedMilestoneId(new URLSearchParams(window.location.search).get("milestone"));
+    window.addEventListener("popstate", restore);
+    return () => window.removeEventListener("popstate", restore);
+  }, []);
+  useEffect(() => {
+    if (handledMilestoneId.current === requestedMilestoneId) return;
+    handledMilestoneId.current = requestedMilestoneId;
+    const milestone = calendar.milestonesById[requestedMilestoneId ?? ""];
+    if (milestone) milestoneModalActions.current.openMilestoneDetailsModal(milestone);
+  }, [calendar.milestonesById, requestedMilestoneId]);
+
+  const updateMilestoneLocation = (id: string | null) => {
+    const params = new URLSearchParams(window.location.search);
+    if (id) params.set("milestone", id); else params.delete("milestone");
+    window.history.pushState(window.history.state, "", `${window.location.pathname}?${params.toString()}${window.location.hash}`);
+    handledMilestoneId.current = id;
+    setRequestedMilestoneId(id);
+  };
 
   const openEvent = (event: TaskCalendarEvent) => {
     if (event.extendedProps.type === "milestone") {
       const milestone = calendar.milestonesById[event.extendedProps.recordId];
       if (milestone) {
-        milestoneModalState.openMilestoneDetailsModal(milestone);
+        updateMilestoneLocation(milestone.id);
+        milestoneModalActions.current.openMilestoneDetailsModal(milestone);
       }
       return;
     }
@@ -144,7 +172,53 @@ export function TaskCalendarView({
       }
     }
   };
-  const selectedDayEvents = selectedDateKey ? calendar.eventsByDateKey.get(selectedDateKey) ?? [] : [];
+  const agendaBounds = getSchedulePeriodBounds(agendaStartDate, agendaRange);
+  const agendaEvents = useMemo(() => calendar.events.filter((event) => {
+    const eventDate = toEventDateKey(event.start);
+    return eventDate >= agendaBounds.startDate && (!agendaBounds.endDate || eventDate <= agendaBounds.endDate);
+  }), [agendaBounds.endDate, agendaBounds.startDate, calendar.events]);
+  const agendaMonths = useMemo(
+    () => groupTaskCalendarEventsByMonth(agendaEvents),
+    [agendaEvents],
+  );
+  const agendaEmptyState = calendar.unfilteredEvents.length === 0
+    ? { title: "No schedule data yet.", description: "Add a meeting, event, milestone, or task deadline to build the agenda." }
+    : calendar.events.length === 0
+      ? { title: "No matching schedule items.", description: "Adjust search or filters to see more schedule items." }
+      : { title: "No upcoming schedule items.", description: "Choose another start date or add an upcoming schedule item." };
+  const periodDate = presentation === "agenda"
+    ? new Date(`${agendaStartDate}T12:00:00`)
+    : calendar.monthCursor;
+  const periodLabel = presentation === "agenda" && agendaRange === "week"
+    ? formatTimelinePeriodLabel("week", [agendaBounds.startDate])
+    : formatMonthYearLabel(formatLocalDate(periodDate));
+
+  const changeScheduleRange = (range: TimelineViewInterval) => {
+    if (presentation !== "agenda") return;
+    setAgendaRange(range);
+    setAgendaStartDate(getSchedulePeriodBounds(agendaStartDate, range).startDate);
+  };
+
+  const shiftPeriod = (direction: -1 | 1) => {
+    if (presentation === "agenda") {
+      setAgendaStartDate(agendaRange === "week"
+        ? addDaysToDay(agendaStartDate, direction * 7)
+        : formatLocalDate(new Date(periodDate.getFullYear(), periodDate.getMonth() + direction, 1)));
+    } else {
+      calendar.setMonthCursor(new Date(calendar.monthCursor.getFullYear(), calendar.monthCursor.getMonth() + direction, 1));
+      setSelectedDateKey(null);
+    }
+  };
+
+  const goToToday = () => {
+    if (presentation === "agenda") {
+      setAgendaStartDate(getSchedulePeriodBounds(calendar.todayDateKey, agendaRange).startDate);
+    } else {
+      const today = new Date();
+      calendar.setMonthCursor(new Date(today.getFullYear(), today.getMonth(), 1));
+      setSelectedDateKey(null);
+    }
+  };
 
   const handleMeetingSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -167,45 +241,52 @@ export function TaskCalendarView({
   };
 
   return (
-    <section className={`panel dense-panel task-calendar-shell ${WORKSPACE_PANEL_CLASS}`}>
-      {calendar.unfilteredEvents.length === 0 ? (
-        <div className="empty-state">
-          <strong>No dated records in scope.</strong>
-          <p className="section-copy">
-            Add milestone dates or task due dates to populate this month view.
-          </p>
-        </div>
+    <section className={`panel dense-panel task-calendar-shell ${presentation === "calendar" ? "task-calendar-full-height" : ""} ${WORKSPACE_PANEL_CLASS}`}>
+      <AppTopbarSlotPortal slot="controls">
+        <WorkspaceTopbarControls className="schedule-topbar-controls">
+          <SchedulePeriodControls
+            onRangeChange={presentation === "agenda" ? changeScheduleRange : undefined}
+            onShiftPeriod={shiftPeriod}
+            onToday={goToToday}
+            periodLabel={periodLabel}
+            presentation={presentation}
+            range={presentation === "calendar" ? "month" : agendaRange}
+          />
+        </WorkspaceTopbarControls>
+        <TopbarResponsiveSearch
+          ariaLabel="Search schedule"
+          compactPlaceholder="Search"
+          onChange={calendar.setSearchFilter}
+          placeholder="Search schedule..."
+          value={calendar.searchFilter}
+        />
+      </AppTopbarSlotPortal>
+      {presentation === "agenda" ? (
+        agendaEvents.length === 0 ? (
+          <div aria-live="polite" className="empty-state schedule-agenda-empty-state">
+            <strong>{agendaEmptyState.title}</strong>
+            <p className="section-copy">{agendaEmptyState.description}</p>
+          </div>
+        ) : <ScheduleAgendaMonthList groups={agendaMonths} onOpenEvent={openEvent} />
       ) : (
-        <div className="task-calendar-frame">
+        <>
           {calendar.events.length === 0 ? (
             <div className="empty-state task-calendar-filter-empty">
-              <strong>No events match this filter.</strong>
-              <p className="section-copy">
-                Adjust filter or sort settings to view more records in this month.
-              </p>
+              <strong>{calendar.unfilteredEvents.length === 0 ? "No schedule data yet." : "No events match this filter."}</strong>
+              <p className="section-copy">The full calendar remains available below. Adjust filters or add dated schedule items to populate it.</p>
             </div>
-          ) : (
-            <TaskCalendarMonthGrid
-              eventsByDateKey={calendar.eventsByDateKey}
-              monthCells={calendarViewMode === "week" ? calendar.weekCells : calendar.monthCells}
-              monthCursor={calendar.monthCursor}
-              onOpenDay={setSelectedDateKey}
-              onOpenEvent={openEvent}
-              selectedDateKey={selectedDateKey}
-              todayDateKey={calendar.todayDateKey}
-              viewMode={calendarViewMode}
-            />
-          )}
-
-          {selectedDateKey ? (
-            <TaskCalendarDayDetails
-              dateKey={selectedDateKey}
-              events={selectedDayEvents}
-              onClose={() => setSelectedDateKey(null)}
-              onOpenEvent={openEvent}
-            />
           ) : null}
-        </div>
+          <TaskCalendarMonthStack
+            eventsByDateKey={calendar.eventsByDateKey}
+            monthCursor={calendar.monthCursor}
+            onVisibleMonthChange={calendar.setMonthCursor}
+            onOpenDay={setSelectedDateKey}
+            onOpenEvent={openEvent}
+            onCloseSelectedDay={() => setSelectedDateKey(null)}
+            selectedDateKey={selectedDateKey}
+            todayDateKey={calendar.todayDateKey}
+          />
+        </>
       )}
 
       <MilestonesMilestoneModal
@@ -222,7 +303,7 @@ export function TaskCalendarView({
         milestoneStartTime={milestoneModalState.milestoneStartTime}
         modalPortalTarget={milestoneModalState.modalPortalTarget}
         onCancelEdit={milestoneModalState.cancelMilestoneEdit}
-        onClose={milestoneModalState.closeMilestoneModal}
+        onClose={() => { if (requestedMilestoneId) updateMilestoneLocation(null); milestoneModalState.closeMilestoneModal(); }}
         onRecordResult={onCreateMilestoneReport ? (milestone) => { milestoneModalState.closeMilestoneModal(); onCreateMilestoneReport(milestone.id, () => milestoneModalState.openMilestoneDetailsModal(milestone)); } : undefined}
         onDelete={() => void milestoneModalState.handleMilestoneDelete()}
         onEditMilestone={milestoneModalState.openEditMilestoneModal}

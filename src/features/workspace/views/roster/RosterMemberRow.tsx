@@ -1,13 +1,13 @@
 import React from "react";
 
 import { IconEdit } from "@/components/shared/Icons";
-import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MemberRecord } from "@/types/recordsOrganization";
+import type { ResponsibleGroupRecord } from "@/types/recordsOrganization";
 
 interface RosterMemberRowProps {
   member: MemberRecord;
   selectedMemberId: string | null;
-  disciplines: BootstrapPayload["disciplines"];
+  responsibleGroups: ResponsibleGroupRecord[];
   onSelectMember: (id: string) => void;
   onEditMember: (id: string) => void;
 }
@@ -38,22 +38,20 @@ const getInitials = (name: string): string => {
   return initials || name.slice(0, 1).toUpperCase();
 };
 
-const getDisciplineName = (member: MemberRecord, disciplines: BootstrapPayload["disciplines"]): string | null => {
-  if (!member.disciplineId) {
-    return null;
-  }
-  return disciplines.find((discipline) => discipline.id === member.disciplineId)?.name ?? member.disciplineId;
-};
-
 export const RosterMemberRow: React.FC<RosterMemberRowProps> = ({
   member,
   selectedMemberId,
-  disciplines,
+  responsibleGroups,
   onSelectMember,
   onEditMember,
 }) => {
   const roleBadge = getRoleBadge(member);
-  const disciplineName = getDisciplineName(member, disciplines);
+  const memberGroups = responsibleGroups.filter((group) => group.memberIds.includes(member.id));
+  const primaryGroup = (member.role === "student" || member.role === "lead") ? memberGroups.find((group) => group.primaryMemberIds.includes(member.id)) : undefined;
+  const groupNames = [
+    ...(primaryGroup ? [`${primaryGroup.name} · Primary`] : []),
+    ...memberGroups.filter((group) => group.id !== primaryGroup?.id).map((group) => group.name),
+  ];
   const rowClassName =
     member.id === selectedMemberId ? "member-row active editable-action-host" : "member-row editable-action-host";
 
@@ -69,7 +67,7 @@ export const RosterMemberRow: React.FC<RosterMemberRowProps> = ({
         )}
         <span className="member-row-copy">
           <strong>{member.name}</strong>
-          {disciplineName ? <span className="member-row-discipline">{disciplineName}</span> : null}
+          {groupNames.length > 0 ? <span className="member-row-discipline">{groupNames.join(", ")}</span> : null}
         </span>
       </button>
       <div className="member-row-trailing">

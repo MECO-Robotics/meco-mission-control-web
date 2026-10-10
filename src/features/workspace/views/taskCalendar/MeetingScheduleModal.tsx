@@ -46,10 +46,10 @@ export function MeetingScheduleModal({
     return null;
   }
 
-  const startDate = datePart(draft.startDateTime);
-  const startTime = timePart(draft.startDateTime);
-  const endDate = draft.endDateTime ? datePart(draft.endDateTime) : startDate;
-  const endTime = draft.endDateTime ? timePart(draft.endDateTime) : "";
+  const startDate = datePart(draft.startAt);
+  const startTime = timePart(draft.startAt);
+  const endDate = draft.endAt ? datePart(draft.endAt) : startDate;
+  const endTime = draft.endAt ? timePart(draft.endAt) : "";
 
   return (
     <ModalDialog label="Add meeting" onClose={onClose} dismissOnBackdrop>
@@ -112,7 +112,7 @@ export function MeetingScheduleModal({
               onChange={(event) =>
                 setDraft((current) => ({
                   ...current,
-                  startDateTime: combineDateTime(event.target.value, startTime),
+                  startAt: combineDateTime(event.target.value, startTime),
                 }))
               }
               required
@@ -126,7 +126,7 @@ export function MeetingScheduleModal({
               onChange={(event) =>
                 setDraft((current) => ({
                   ...current,
-                  startDateTime: combineDateTime(startDate, event.target.value),
+                  startAt: combineDateTime(startDate, event.target.value),
                 }))
               }
               type="time"
@@ -139,7 +139,7 @@ export function MeetingScheduleModal({
               onChange={(event) =>
                 setDraft((current) => ({
                   ...current,
-                  endDateTime: resolveEndDateTime(event.target.value, endTime),
+                  endAt: resolveEndDateTime(event.target.value, endTime),
                 }))
               }
               type="date"
@@ -152,7 +152,7 @@ export function MeetingScheduleModal({
               onChange={(event) =>
                 setDraft((current) => ({
                   ...current,
-                  endDateTime: resolveEndDateTime(endDate, event.target.value),
+                  endAt: resolveEndDateTime(endDate, event.target.value),
                 }))
               }
               type="time"

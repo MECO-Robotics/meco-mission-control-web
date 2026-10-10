@@ -58,7 +58,7 @@ describe("task dependency sync", () => {
             dependencyType: "soft",
           },
           {
-            kind: "part_instance",
+            kind: "part-instance",
             refId: " part-1 ",
             dependencyType: "hard",
             requiredState: "ready",
@@ -86,7 +86,7 @@ describe("task dependency sync", () => {
     expect(persistence.createTaskDependencyRecord).toHaveBeenCalledWith(
       expect.objectContaining({
         taskId: "task-1",
-        kind: "part_instance",
+        kind: "part-instance",
         refId: "part-1",
         requiredState: "ready",
         dependencyType: "hard",

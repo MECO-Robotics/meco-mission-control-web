@@ -18,19 +18,28 @@ import {
 
 export function buildEmptyPurchasePayload(bootstrap: BootstrapPayload): PurchaseItemPayload {
   const firstPartDefinition = bootstrap.partDefinitions[0] ?? null;
+  const firstTask = bootstrap.tasks[0] ?? null;
 
   return {
     title: firstPartDefinition?.name ?? "",
-    subsystemId: getDefaultSubsystemId(bootstrap),
-    requestedById: bootstrap.members[0]?.id ?? null,
+    taskId: firstTask?.id ?? "",
+    kind: "cots-goods",
     partDefinitionId: firstPartDefinition?.id ?? null,
+    materialId: null,
     quantity: 1,
-    vendor: "",
-    linkLabel: "",
-    estimatedCost: 0,
-    finalCost: undefined,
-    approvedByMentor: false,
-    status: "requested",
+    quotes: [],
+    selectedQuoteId: null,
+    approvalStatus: "pending",
+    approvedById: null,
+    approvedAt: null,
+    purchaseOrderNumber: null,
+    orderStatus: "not-ordered",
+    finalCost: null,
+    expectedDeliveryDate: null,
+    trackingNumber: null,
+    trackingUrl: null,
+    orderedAt: null,
+    deliveredAt: null,
   };
 }
 
@@ -42,7 +51,7 @@ export function buildEmptyMaterialPayload(): MaterialPayload {
     onHandQuantity: 0,
     reorderPoint: 0,
     location: "",
-    vendor: "",
+    preferredVendorId: null,
     notes: "",
     photoUrl: "",
   };
@@ -52,7 +61,7 @@ export function buildEmptyArtifactPayload(
   bootstrap: BootstrapPayload,
   defaults: {
     projectId?: string;
-    workstreamId?: string | null;
+    targetRefs?: ArtifactPayload["targetRefs"];
     kind?: ArtifactPayload["kind"];
   } = {},
 ): ArtifactPayload {
@@ -61,29 +70,14 @@ export function buildEmptyArtifactPayload(
       ? defaults.projectId
       : bootstrap.projects[0]?.id ?? "";
 
-  const resolvedWorkstreamId =
-    defaults.workstreamId !== undefined
-      ? defaults.workstreamId
-      : bootstrap.workstreams.find((workstream) => workstream.projectId === resolvedProjectId)?.id ?? null;
-
-  const projectScopedWorkstreamId =
-    resolvedWorkstreamId &&
-    bootstrap.workstreams.some(
-      (workstream) =>
-        workstream.id === resolvedWorkstreamId && workstream.projectId === resolvedProjectId,
-    )
-      ? resolvedWorkstreamId
-      : null;
-
   return {
     projectId: resolvedProjectId,
-    workstreamId: projectScopedWorkstreamId,
+    targetRefs: defaults.targetRefs ?? [],
     kind: defaults.kind ?? "document",
     title: "",
     summary: "",
     status: "draft",
-    link: "",
-    isArchived: false,
+    uri: "",
     updatedAt: new Date().toISOString(),
     photoUrl: "",
   };
@@ -118,7 +112,7 @@ export function buildEmptyPartDefinitionPayload(bootstrap: BootstrapPayload): Pa
     isArchived: false,
     isHardware: false,
     type: "custom",
-    source: "",
+    defaultAcquisitionMethod: "stock",
     materialId: bootstrap.materials[0]?.id ?? null,
     description: "",
     photoUrl: "",
@@ -153,7 +147,6 @@ export function buildEmptySubsystemPayload(bootstrap: BootstrapPayload): Subsyst
     parentSubsystemId: defaultParentSubsystemId,
     responsibleEngineerId: firstResponsibleEngineer,
     mentorIds: firstMentor ? [firstMentor] : [],
-    risks: [],
     layoutX: null,
     layoutY: null,
     layoutZone: DEFAULT_SUBSYSTEM_LAYOUT_ZONE,
@@ -194,13 +187,12 @@ export function buildEmptyPartInstancePayload(
       ? defaults.mechanismId
       : bootstrap.mechanisms.find((mechanism) => mechanism.subsystemId === firstSubsystem)?.id ?? null;
   return {
-    subsystemId: firstSubsystem,
-    mechanismId: firstMechanism,
     partDefinitionId: defaults.partDefinitionId ?? bootstrap.partDefinitions[0]?.id ?? "",
-    name: "",
-    quantity: 1,
-    trackIndividually: false,
-    status: "not ready",
+    intendedSubsystemId: firstSubsystem || null,
+    intendedMechanismId: firstMechanism,
+    location: firstMechanism
+      ? { kind: "installed", subsystemId: firstSubsystem, mechanismId: firstMechanism }
+      : { kind: "stock", location: "" },
     photoUrl: "",
   };
 }

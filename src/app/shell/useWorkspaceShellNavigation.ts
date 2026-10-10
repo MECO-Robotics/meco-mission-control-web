@@ -25,8 +25,8 @@ export function useWorkspaceShellNavigation(c: WorkspaceShellController) {
     hasSeasons: c.bootstrap.seasons.length > 0,
     selectedProjectType: c.selectedProject?.projectType ?? null,
   });
-  const { activeTab, inventoryView, manufacturingView, taskView, worklogsView } = c;
-  const navigationState = { activeTab, inventoryView, manufacturingView, taskView, worklogsView };
+  const { activeTab, inventoryView, taskView, worklogsView } = c;
+  const navigationState = { activeTab, inventoryView, taskView, worklogsView };
   const activeSubItemId = getActiveNavigationSubItemId(navigationState, navigationContext);
   const activeSection = activeSubItemId ? getNavigationSectionFromSubItem(activeSubItemId) : null;
   const activeSectionLabel = activeSection
@@ -39,12 +39,11 @@ export function useWorkspaceShellNavigation(c: WorkspaceShellController) {
     if (!restoringLocation.current) window.history.replaceState({ ...window.history.state, scrollY: window.scrollY }, "");
     const destinationUrl = new URL(window.location.href);
     if (target.milestoneId) destinationUrl.searchParams.set("milestone", target.milestoneId);
-    else if (target.tab !== "tasks" || target.taskView === "queue" || target.taskView === "robot-map") destinationUrl.searchParams.delete("milestone");
+    else if (target.tab !== "tasks" || target.taskView === "kanban" || target.taskView === "robot-map") destinationUrl.searchParams.delete("milestone");
     if (destinationUrl.href !== window.location.href) window.history.replaceState(window.history.state, "", destinationUrl);
     if (target.taskView) c.setTaskView(target.taskView);
     if (target.worklogsView) c.setWorklogsView(target.worklogsView);
     if (target.inventoryView) c.setInventoryView(target.inventoryView);
-    if (target.manufacturingView) c.setManufacturingView(target.manufacturingView);
     c.handleSidebarTabSelect(target.tab, { keepSidebarOpen: options?.keepSidebarOpen });
   };
   const restoreNavigation = () => {

@@ -2,7 +2,6 @@ import { useState, type MouseEvent as ReactMouseEvent } from "react";
 
 import {
   type InventoryViewTab,
-  type ManufacturingViewTab,
   type NavigationTarget,
   type TaskViewTab,
   type ViewTab,
@@ -50,7 +49,6 @@ interface AppSidebarProps {
   selectedProjectId: string | null;
   selectedSeasonId: string | null;
   inventoryView: InventoryViewTab;
-  manufacturingView?: ManufacturingViewTab;
   seasons: SeasonRecord[];
   sessionUser: SessionUser | null;
   taskView: TaskViewTab;
@@ -88,7 +86,6 @@ export function AppSidebar({
   selectedProjectId,
   selectedSeasonId,
   inventoryView,
-  manufacturingView = "all",
   seasons,
   sessionUser,
   taskView,
@@ -121,7 +118,6 @@ export function AppSidebar({
   } = useAppSidebarNavigationModels({
     activeTab,
     inventoryView,
-    manufacturingView,
     taskView,
     viewAvailabilityContext,
     worklogsView,
@@ -232,6 +228,8 @@ export function AppSidebar({
           onSubItemSelect={handleSubItemSelect}
           onDisabledSubItemSelect={handleDisabledSubItemSelect}
           sectionModels={sectionModels}
+          activeTaskView={taskView}
+          activeWorklogsView={worklogsView}
         />
 
         <AppSidebarProjectFooter

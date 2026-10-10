@@ -23,7 +23,7 @@ describe("milestone search suggestions", () => {
           title: "Regional",
         }),
         expect.objectContaining({
-          context: expect.stringContaining("Blocked"),
+          context: expect.stringContaining("Planned"),
           id: "milestone-2",
           title: "Design review",
         }),

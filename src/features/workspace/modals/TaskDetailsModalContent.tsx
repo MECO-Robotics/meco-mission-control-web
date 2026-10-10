@@ -30,7 +30,6 @@ interface TaskDetailsModalProps {
   onEditTask: (task: TaskRecord) => void;
   onLogWork?: (taskId: string) => void;
   onSubmitQa?: (taskId: string) => void;
-  onResolveTaskBlocker: (blockerId: string) => Promise<void>;
   showDependencyBlockersSection?: boolean;
   showEditButton?: boolean;
 }
@@ -54,19 +53,19 @@ export function TaskDetailsModal({
   onEditTask,
   onLogWork,
   onSubmitQa,
-  onResolveTaskBlocker,
   showDependencyBlockersSection = true,
   showEditButton = true,
 }: TaskDetailsModalProps) {
   const [editingField, setEditingField] = useState<TaskDetailsEditableField | null>(null);
   const canInlineEdit = Boolean(taskDraft && setTaskDraft);
+  const linkedRiskIds = new Set(bootstrap.risks.filter((risk) => risk.relatedTargets.some(
+    (target) => target.kind === "task" && target.id === activeTask.id,
+  )).map((risk) => risk.id));
   const taskAuditActions = (bootstrap.actions ?? []).filter(
     (action) =>
       action.taskId === activeTask.id ||
       (action.entityType === "task" && action.entityId === activeTask.id) ||
-      (Boolean(activeTask.targetRiskId) &&
-        action.entityType === "risk" &&
-        action.entityId === activeTask.targetRiskId),
+      (action.entityType === "risk" && linkedRiskIds.has(action.entityId)),
   );
 
   useEffect(() => {
@@ -115,7 +114,6 @@ export function TaskDetailsModal({
               bootstrap={bootstrap}
               canInlineEdit={canInlineEdit}
               dependencyTargetProjectId={dependencyTargetProjectId}
-              onResolveTaskBlocker={onResolveTaskBlocker}
               setTaskDraft={setTaskDraft}
               taskDraft={taskDraft}
             />
@@ -137,7 +135,7 @@ export function TaskDetailsModal({
           {!canInlineEdit ? <section className="modal-wide"><h3>Work history</h3>
             {bootstrap.workLogs.filter((log) => log.taskId === activeTask.id).length ? <ul>{bootstrap.workLogs.filter((log) => log.taskId === activeTask.id).sort((a, b) => b.date.localeCompare(a.date)).map((log) => <li key={log.id}><details><summary>{log.date} · {log.hours}h · {log.participantIds.map((id) => bootstrap.members.find((member) => member.id === id)?.name ?? "Unknown member").join(", ")}</summary><p>{log.notes || "No notes."}</p>{log.photoUrl ? <a href={log.photoUrl} target="_blank" rel="noreferrer">View work evidence</a> : null}</details></li>)}</ul> : <p className="muted-copy">No work logged yet.</p>}
           </section> : null}
-          {!canInlineEdit ? <section className="modal-wide"><h3>QA history</h3><ReportHistoryList reports={bootstrap.reports.filter((report) => report.reportType === "QA" && report.taskId === activeTask.id)} bootstrap={bootstrap} /></section> : null}
+          {!canInlineEdit ? <section className="modal-wide"><h3>QA history</h3><ReportHistoryList reports={bootstrap.reports.filter((report) => report.reportType === "qa" && report.targetRefs.some((ref) => ref.kind === "task" && ref.id === activeTask.id))} bootstrap={bootstrap} /></section> : null}
 
           <WorkspaceAuditActionList
             actions={taskAuditActions}

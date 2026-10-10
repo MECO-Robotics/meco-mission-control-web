@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
 import { Home } from "lucide-react";
-import { IconHelp, IconManufacturing, IconParts, IconRoster, IconSubsystems, IconTasks, IconWorkLogs } from "@/components/shared/Icons";
+import { IconHelp, IconParts, IconRoster, IconSubsystems, IconTasks, IconWorkLogs } from "@/components/shared/Icons";
 import type { NavigationItem } from "@/lib/workspaceNavigation";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { indexRecordsById } from "@/features/workspace/shared/model/indexRecordsById";
@@ -40,7 +40,7 @@ export function useWorkspaceDerivedData({
 
   const membersById = useMemo(() => indexRecordsById(bootstrap.members), [bootstrap.members]);
   const subsystemsById = useMemo(() => indexRecordsById(bootstrap.subsystems), [bootstrap.subsystems]);
-  const disciplinesById = useMemo(() => indexRecordsById(bootstrap.disciplines), [bootstrap.disciplines]);
+  const workTypesById = useMemo(() => indexRecordsById(bootstrap.workTypes), [bootstrap.workTypes]);
   const mechanismsById = useMemo(() => indexRecordsById(bootstrap.mechanisms), [bootstrap.mechanisms]);
   const partDefinitionsById = useMemo(
     () => indexRecordsById(bootstrap.partDefinitions),
@@ -53,7 +53,6 @@ export function useWorkspaceDerivedData({
       bootstrap.partInstances.length +
       bootstrap.purchaseItems.length
     : bootstrap.artifacts.length + bootstrap.purchaseItems.length;
-  const showManufacturingTab = !isAllProjectsView && isRobotProject;
   const showProjectInventoryTab = !isAllProjectsView;
   const showProjectWorkflowTab = !isAllProjectsView;
   const workflowLabel = isRobotProject ? "Subsystems" : "Workflow";
@@ -71,7 +70,7 @@ export function useWorkspaceDerivedData({
         },
         {
           value: "tasks",
-          label: "Work",
+          label: "Kanban",
           icon: <IconTasks />,
           count: bootstrap.tasks.length,
         },
@@ -82,15 +81,6 @@ export function useWorkspaceDerivedData({
           count: bootstrap.workLogs.length,
         },
       ];
-
-      if (showManufacturingTab) {
-        items.push({
-          value: "manufacturing",
-          label: "Manufacturing",
-          icon: <IconManufacturing />,
-          count: bootstrap.manufacturingItems.length,
-        });
-      }
 
       if (showProjectInventoryTab) {
         items.push({
@@ -137,11 +127,8 @@ export function useWorkspaceDerivedData({
     },
     [
       bootstrap.tasks.length,
-      bootstrap.risks.length,
       bootstrap.workLogs.length,
-      bootstrap.manufacturingItems,
       bootstrap.members.length,
-      showManufacturingTab,
       showProjectInventoryTab,
       showProjectWorkflowTab,
       isRobotProject,
@@ -152,7 +139,7 @@ export function useWorkspaceDerivedData({
   );
 
   return {
-    disciplinesById,
+    workTypesById,
     externalMembers,
     mechanismsById,
     membersById,

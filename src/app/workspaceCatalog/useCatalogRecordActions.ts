@@ -16,7 +16,7 @@ export function useCatalogRecordActions<TRecord extends CatalogRecord>({
   activeRecordId: string | null;
   beginOperation: (kind?: "save" | "delete") => {
     isCurrent: () => boolean;
-    refresh: () => Promise<void>;
+    refresh: () => Promise<boolean>;
     finish: () => void;
   } | null;
   closeEditor?: () => void;

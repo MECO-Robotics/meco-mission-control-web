@@ -57,7 +57,7 @@ export function useMilestonesViewState({
   onDeleteTimelineMilestone,
   onSaveTimelineMilestone,
 }: MilestonesViewStateArgs): MilestonesViewState {
-  const [sortField, setSortField] = useState<MilestoneSortField>("startDateTime");
+  const [sortField, setSortField] = useState<MilestoneSortField>("startAt");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [projectFilter, setProjectFilter] = useState<FilterSelection>([]);
   const [typeFilter, setTypeFilter] = useState<FilterSelection>([]);
@@ -102,7 +102,7 @@ export function useMilestonesViewState({
         sortField,
         sortOrder,
         typeFilter,
-      }).filter((milestone) => readinessFilter.length === 0 || readinessFilter.includes(milestone.status ?? "not ready")),
+      }).filter((milestone) => readinessFilter.length === 0 || readinessFilter.includes(milestone.readinessStatus ?? "not-ready")),
     [
       activePersonFilter,
       bootstrap,

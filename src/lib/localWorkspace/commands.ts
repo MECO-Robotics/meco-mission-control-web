@@ -1,25 +1,28 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
+import { isTaskDependencySatisfied } from "@/features/workspace/shared/task/taskPlanningInternals";
 
-const collections = {
-  seasons: "seasons", projects: "projects", workstreams: "workstreams", members: "members",
-  materials: "materials", artifacts: "artifacts", subsystems: "subsystems", mechanisms: "mechanisms",
-  "part-definitions": "partDefinitions", "part-instances": "partInstances",
-  milestones: "milestones", "milestone-requirements": "milestoneRequirements", meetings: "meetings",
-  tasks: "tasks", "task-dependencies": "taskDependencies", "task-blockers": "taskBlockers",
-  reports: "reports", risks: "risks", "work-logs": "workLogs",
-  purchases: "purchaseItems", manufacturing: "manufacturingItems",
-} as const satisfies Record<string, keyof BootstrapPayload>;
+type CollectionKey = Exclude<keyof BootstrapPayload, "x_contract">;
 type Row = Record<string, unknown> & { id: string };
 
-// These are roster foreign keys across planning, reports, work logs and inventory.
+const collections: Record<string, CollectionKey> = {
+  seasons: "seasons", projects: "projects", "work-types": "workTypes", "responsible-groups": "responsibleGroups",
+  workstreams: "workstreams", vendors: "vendors", members: "members", tasks: "tasks",
+  "task-dependencies": "taskDependencies", "manufacturing/processes": "manufacturingProcesses",
+  purchases: "purchaseItems", materials: "materials", "part-definitions": "partDefinitions",
+  "part-instances": "partInstances", meetings: "meetings", events: "events", milestones: "milestones",
+  risks: "risks", reports: "reports", "qa-requests": "qaRequests", "qa-findings": "qaFindings",
+  "test-results": "testResults", "test-findings": "testFindings", artifacts: "artifacts",
+  "work-logs": "workLogs", "attendance-records": "attendanceRecords", "milestone-requirements": "milestoneRequirements",
+};
+
 const memberFields = new Set([
-  "ownerId", "mentorId", "responsibleEngineerId", "createdByMemberId", "createdById",
-  "requestedById", "requestedByMemberId", "reviewedById", "approvedById", "actorMemberId", "memberId",
+  "ownerId", "mentorId", "responsibleEngineerId", "createdByMemberId", "createdById", "requestedById",
+  "reviewedById", "approvedById", "actorMemberId", "memberId",
 ]);
 const memberListFields = new Set(["assigneeIds", "mentorIds", "participantIds", "memberIds"]);
 
 function validateRosterReferences(snapshot: BootstrapPayload, item: Row) {
-  const memberIds = new Set(snapshot.members.map((member) => member.id));
+  const memberIds = new Set(snapshot.members.map(({ id }) => id));
   for (const [field, value] of Object.entries(item)) {
     if (memberFields.has(field) && value != null && value !== "" && !memberIds.has(String(value))) {
       throw new Error("The selected person is no longer in the local roster. Choose a current roster member.");
@@ -30,7 +33,6 @@ function validateRosterReferences(snapshot: BootstrapPayload, item: Row) {
   }
 }
 
-// getRandomValues also works on HTTP Meshnet hosts, unlike randomUUID.
 function newLocalId() {
   return `local-${Array.from(crypto.getRandomValues(new Uint32Array(4)), (part) => part.toString(16).padStart(8, "0")).join("")}`;
 }
@@ -40,20 +42,10 @@ export function refreshLocalTaskState(snapshot: BootstrapPayload) {
   for (const log of snapshot.workLogs) loggedHours.set(log.taskId, (loggedHours.get(log.taskId) ?? 0) + log.hours);
   for (const task of snapshot.tasks) {
     task.actualHours = loggedHours.get(task.id) ?? 0;
-    task.blockers = [...new Set((snapshot.taskBlockers ?? [])
-      .filter((blocker) => blocker.blockedTaskId === task.id && blocker.status === "open")
-      .map((blocker) => blocker.description))];
-    task.isBlocked = (snapshot.taskBlockers ?? []).some((b) => b.blockedTaskId === task.id && b.status === "open");
-    task.isWaitingOnDependency = task.status !== "complete" && (snapshot.taskDependencies ?? []).some((dependency) => {
-      if (dependency.taskId !== task.id || dependency.dependencyType !== "hard") return false;
-      const targets = dependency.kind === "task" ? snapshot.tasks : dependency.kind === "milestone" ? snapshot.milestones : snapshot.partInstances;
-      const target = targets.find((candidate) => candidate.id === dependency.refId);
-      if (!target) return true;
-      if (dependency.kind === "task") return target.status !== dependency.requiredState;
-      const order: Record<string, number> = { "not ready": 0, blocked: 1, qa: 2, ready: 3 };
-      return !(order[target.status ?? "not ready"] >= order[dependency.requiredState]);
-    });
-    task.planningState = task.isBlocked ? "blocked" : task.isWaitingOnDependency ? "waiting-on-dependency" : "ready";
+    task.isBlocked = snapshot.risks.some((risk) => risk.projectId === task.projectId && risk.blocksWork && risk.status !== "resolved" && risk.relatedTargets.some((target) => target.kind === "task" && target.id === task.id));
+    task.isWaitingOnDependency = task.status !== "complete" && snapshot.taskDependencies.some((dependency) =>
+      dependency.taskId === task.id && dependency.dependencyType === "hard" && !isTaskDependencySatisfied(dependency, snapshot),
+    );
   }
 }
 
@@ -61,148 +53,122 @@ function defaults(resource: string, snapshot: BootstrapPayload): Record<string, 
   const today = new Date().toISOString().slice(0, 10);
   switch (resource) {
     case "seasons": return { type: "season", startDate: today, endDate: today };
-    case "projects": return { description: "", status: "active" };
+    case "projects": return { description: "", status: "planned" };
     case "members": return { email: "", elevated: false, role: "student", activeSeasonIds: [], plannedAttendanceDays: [] };
-    case "subsystems": return { isCore: false, iteration: 1, mentorIds: [], risks: [], parentSubsystemId: null, responsibleEngineerId: null };
+    case "responsible-groups": return { seasonId: snapshot.seasons[0]?.id ?? "", name: "", projectIds: [], workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: false };
+    case "subsystems": return { isCore: false, iteration: 1, mentorIds: [], parentSubsystemId: null, responsibleEngineerId: null };
     case "tasks": return {
-      projectId: snapshot.projects[0]?.id ?? "", workstreamIds: [], summary: "",
-      subsystemIds: [], disciplineId: "", mechanismIds: [],
-      partInstanceIds: [], artifactIds: [], targetMilestoneId: null,
-      ownerId: null, assigneeIds: [], mentorId: null, startDate: today, dueDate: today, priority: "medium",
-      status: "not-started", blockers: [], linkedManufacturingIds: [], linkedPurchaseIds: [],
-      estimatedHours: 0, actualHours: 0, requiresDocumentation: false, documentationLinked: false,
+      projectId: snapshot.projects[0]?.id ?? "", workTypeId: "", responsibleGroupId: null, workstreamIds: [], title: "", summary: "",
+      subsystemIds: [], mechanismIds: [], partInstanceIds: [], scheduleRefs: [], requestedById: null, ownerId: null, assigneeIds: [], mentorId: null,
+      startDate: today, dueDate: today, priority: "medium", status: "not-started", checklistItems: [], manufacturingDetails: null,
+      estimatedHours: 0, actualHours: 0, requiresDocumentation: false,
     };
     case "task-dependencies": return { createdAt: new Date().toISOString() };
-    case "task-blockers": return { status: "open", createdAt: new Date().toISOString(), resolvedAt: null, createdByMemberId: null, blockerId: null };
-    case "meetings": return { rsvpsYes: 0, rsvpsMaybe: 0, openSignIns: 0 };
+    case "meetings": case "events": return { projectIds: [], endAt: null, location: "", description: "" };
+    case "milestones": return { projectIds: [], endAt: null, status: "planned", description: "" };
     default: return {};
   }
 }
 
 function removeReferences(snapshot: BootstrapPayload, resource: string, id: string) {
-  if (resource === "part-definitions") {
-    const instances = snapshot.partInstances.filter((part) => part.partDefinitionId === id);
-    snapshot.partInstances = snapshot.partInstances.filter((part) => part.partDefinitionId !== id);
-    for (const part of instances) removeReferences(snapshot, "part-instances", part.id);
-  }
-  const referenceFields: Record<string, [string, string?]> = {
-    mechanisms: ["mechanismId", "mechanismIds"], "part-instances": ["partInstanceId", "partInstanceIds"],
-    "part-definitions": ["partDefinitionId"], artifacts: ["artifactId", "artifactIds"],
-    materials: ["materialId"], milestones: ["targetMilestoneId"], risks: ["targetRiskId"],
-  };
-  const fields = referenceFields[resource];
-  if (fields) {
-    for (const collection of Object.values(snapshot)) {
-      if (!Array.isArray(collection)) continue;
-      for (const record of collection as unknown as Record<string, unknown>[]) {
-        const [single, multiple] = fields;
-        if (multiple && Array.isArray(record[multiple])) record[multiple] = (record[multiple] as unknown[]).filter((value) => value !== id);
-        if (record[single] === id) record[single] = multiple ? (record[multiple] as unknown[] | undefined)?.[0] ?? null : null;
-      }
-    }
-  }
-  if (resource === "milestones") {
-    snapshot.milestoneRequirements = (snapshot.milestoneRequirements ?? []).filter((requirement) => requirement.milestoneId !== id);
-    snapshot.reports = snapshot.reports.filter((report) => report.milestoneId !== id);
+  if (resource === "part-definitions") snapshot.partInstances = snapshot.partInstances.filter((part) => part.partDefinitionId !== id);
+  if (resource === "responsible-groups") {
+    for (const task of snapshot.tasks) if (task.responsibleGroupId === id) task.responsibleGroupId = null;
+    for (const risk of snapshot.risks) if (risk.ownerGroupId === id) risk.ownerGroupId = null;
   }
   if (resource === "tasks") {
-    snapshot.taskDependencies = (snapshot.taskDependencies ?? []).filter((d) => d.taskId !== id);
-    snapshot.taskBlockers = (snapshot.taskBlockers ?? []).filter((b) => b.blockedTaskId !== id);
+    snapshot.taskDependencies = snapshot.taskDependencies.filter((dependency) => dependency.taskId !== id);
     snapshot.workLogs = snapshot.workLogs.filter((log) => log.taskId !== id);
-    snapshot.qaRequests = snapshot.qaRequests.filter((request) => request.taskId !== id);
-    for (const report of snapshot.reports) if (report.taskId === id) report.taskId = null;
+    snapshot.purchaseItems = snapshot.purchaseItems.filter((item) => item.taskId !== id);
     for (const risk of snapshot.risks) if (risk.mitigationTaskId === id) risk.mitigationTaskId = null;
   }
   if (resource === "members") {
-    snapshot.attendanceRecords = (snapshot.attendanceRecords ?? []).filter((record) => record.memberId !== id);
-    snapshot.qaRequests = snapshot.qaRequests.filter((request) => request.mentorId !== id);
+    snapshot.attendanceRecords = snapshot.attendanceRecords.filter((record) => record.memberId !== id);
     for (const collection of Object.values(snapshot)) {
       if (!Array.isArray(collection)) continue;
       for (const record of collection as unknown as Record<string, unknown>[]) {
         for (const field of memberFields) if (record[field] === id) record[field] = null;
-        for (const field of memberListFields) {
-          if (Array.isArray(record[field])) record[field] = record[field].filter((memberId: unknown) => memberId !== id);
-        }
+        for (const field of memberListFields) if (Array.isArray(record[field])) record[field] = (record[field] as unknown[]).filter((memberId) => memberId !== id);
       }
+    }
+  }
+  const kind = ({ tasks: "task", "part-instances": "part-instance", "part-definitions": "part-definition", materials: "material", artifacts: "artifact", milestones: "milestone", meetings: "meeting", events: "event", risks: "risk", "workstreams": "workstream", vendors: "vendor" } as Record<string, string>)[resource];
+  if (kind) {
+    for (const record of [...snapshot.reports, ...snapshot.qaFindings, ...snapshot.testFindings, ...snapshot.testResults, ...snapshot.artifacts, ...snapshot.milestoneRequirements, ...snapshot.risks]) {
+      if ("targetRefs" in record && Array.isArray(record.targetRefs)) record.targetRefs = record.targetRefs.filter((target) => target.kind !== kind || target.id !== id);
+      if ("relatedTargets" in record && Array.isArray(record.relatedTargets)) record.relatedTargets = record.relatedTargets.filter((target) => target.kind !== kind || target.id !== id);
+    }
+    for (const task of snapshot.tasks) {
+      task.scheduleRefs = task.scheduleRefs.filter((reference) => reference.kind !== kind || reference.id !== id);
+      task.partInstanceIds = task.partInstanceIds.filter((targetId) => kind !== "part-instance" || targetId !== id);
+      task.subsystemIds = task.subsystemIds.filter((targetId) => kind !== "subsystem" || targetId !== id);
+      task.mechanismIds = task.mechanismIds.filter((targetId) => kind !== "mechanism" || targetId !== id);
     }
   }
 }
 
 /** Applies browser workspace commands only. Caller clones and persists the draft atomically. */
 export function applyLocalCommand(snapshot: BootstrapPayload, path: string, options: RequestInit = {}): unknown {
-  const pathname = path.split("?")[0].replace(/^\/api\//, "/");
+  const pathname = path.split("?")[0].replace(/^\/api\//, "").replace(/^\//, "");
   const method = (options.method ?? "GET").toUpperCase();
   const body: Record<string, unknown> = typeof options.body === "string" ? JSON.parse(options.body) : {};
   if (!body || Array.isArray(body) || typeof body !== "object") throw new Error("Expected a JSON command object.");
 
-  const [, resource, encodedId, extra] = pathname.split("/");
-  if (extra || !(resource in collections)) throw new Error(`This local workspace does not support ${method} ${pathname}; nothing was synced.`);
-  const key = collections[resource as keyof typeof collections];
-  const rows = (snapshot[key] ?? []) as unknown as Row[];
-  // Optional bootstrap collections are initialized only when their command is supported.
-  (snapshot as unknown as Record<string, unknown>)[key] = rows;
+  const parts = pathname.split("/");
+  const resource = parts[0] === "manufacturing" && parts[1] === "processes" ? "manufacturing/processes" : parts[0];
+  const encodedId = resource === "manufacturing/processes" ? parts[2] : parts[1];
+  const extra = resource === "manufacturing/processes" ? parts[3] : parts[2];
+  if (extra || !(resource in collections)) throw new Error(`This local workspace does not support ${method} /${pathname}; nothing was synced.`);
+  const key = collections[resource];
+  const rows = snapshot[key] as unknown as Row[];
   const id = encodedId ? decodeURIComponent(encodedId) : undefined;
   const index = rows.findIndex((row) => row.id === id);
   if (id && index < 0) throw new Error(`The ${resource} record no longer exists in this local workspace.`);
   if (method === "GET") return id ? { item: rows[index] } : { items: rows };
-  if (!((method === "POST" && !id) || ((method === "PATCH" || method === "DELETE") && id))) {
-    throw new Error(`This local workspace does not support ${method} ${pathname}; nothing was synced.`);
-  }
-  let item: Row;
+  if (!((method === "POST" && !id) || ((method === "PATCH" || method === "DELETE") && id))) throw new Error(`This local workspace does not support ${method} /${pathname}; nothing was synced.`);
+
   if (method === "DELETE") {
-    item = rows.splice(index, 1)[0];
-    removeReferences(snapshot, resource, item.id);
-  } else {
-    item = { ...(method === "POST" ? defaults(resource, snapshot) : rows[index]), ...body, id: id ?? newLocalId() };
-    validateRosterReferences(snapshot, item);
-    if (resource === "tasks") {
-      delete item.taskDependencies;
-      delete item.taskBlockers;
-      delete item.blockers;
-      delete item.actualHours;
-      if (item.status === "complete") {
-        const existing = snapshot.tasks.find((candidate) => candidate.id === id);
-        refreshLocalTaskState(snapshot);
-        if (existing?.isBlocked || existing?.isWaitingOnDependency) throw new Error("Resolve blockers and required dependencies before completing this task.");
-      }
-    }
-    if (resource === "work-logs") {
-      if (!snapshot.tasks.some((task) => task.id === item.taskId)) throw new Error("The work log task no longer exists.");
-      if (typeof item.hours !== "number" || !Number.isFinite(item.hours) || item.hours <= 0) throw new Error("Work log hours must be a positive number.");
-    }
-    if (resource === "task-dependencies" && !snapshot.tasks.some((task) => task.id === item.taskId)) throw new Error("Dependency task does not exist.");
-    if (resource === "task-blockers") {
-      if (!snapshot.tasks.some((task) => task.id === item.blockedTaskId)) throw new Error("Blocked task does not exist.");
-      item.sourceKind = body.blockerType ?? item.sourceKind ?? "external";
-      item.blockerType = body.issueType ?? item.issueType ?? item.blockerType;
-      item.resolvedAt = item.status === "resolved" ? item.resolvedAt ?? new Date().toISOString() : null;
-    }
-    if (resource === "meetings") {
-      item.date = String(item.startDateTime ?? "").slice(0, 10);
-      item.time = String(item.startDateTime ?? "").slice(11, 16);
-    }
-    if (resource === "reports") {
-      if ((item.proposedRiskSeverity || item.proposedRiskStatus) && !item.targetRiskId) throw new Error("A risk reassessment requires a target risk.");
-      const risk = snapshot.risks.find((candidate) => candidate.id === item.targetRiskId);
-      if (item.targetRiskId && !risk) throw new Error("The target risk does not exist.");
-      if (item.reportType === "QA") {
-        const task = snapshot.tasks.find((candidate) => candidate.id === item.taskId);
-        if (!task) throw new Error("QA reports require an existing task.");
-        item.projectId = task.projectId;
-        item.workstreamId = task.workstreamIds[0] ?? null;
-        item.title = task.title;
-        item.summary = item.notes ?? "";
-        item.reviewedAt = item.reviewedAt ?? item.createdAt ?? new Date().toISOString();
-        item.createdAt = item.reviewedAt;
-        if (risk && item.mentorApproved) {
-          risk.severity = item.proposedRiskStatus === "full-mitigation" ? "low" : (item.proposedRiskSeverity as typeof risk.severity | undefined) ?? risk.severity;
-          risk.mitigationTaskId = risk.mitigationTaskId ?? task.id;
-        }
-      }
-    }
-    if (method === "POST") rows.push(item); else rows[index] = item;
+    const [removed] = rows.splice(index, 1);
+    removeReferences(snapshot, resource, removed.id);
+    refreshLocalTaskState(snapshot);
+    return { item: removed };
   }
+
+  const item = { ...(method === "POST" ? defaults(resource, snapshot) : rows[index]), ...body, id: id ?? newLocalId() } as Row;
+  validateRosterReferences(snapshot, item);
+  if (resource === "responsible-groups") {
+    if (!snapshot.seasons.some(season => season.id === item.seasonId) || (item.projectIds as string[]).some(projectId => !snapshot.projects.some(project => project.id === projectId && project.seasonId === item.seasonId)) || (item.memberIds as string[]).some(memberId => !snapshot.members.some(member => member.id === memberId && (member.activeSeasonIds ?? [member.seasonId]).includes(String(item.seasonId))))) throw new Error("Teams must reference projects and members in the selected season.");
+    const memberIds = item.memberIds as string[];
+    const primaryMemberIds = item.primaryMemberIds as string[];
+    if (primaryMemberIds.some(memberId => !memberIds.includes(memberId) || !snapshot.members.some(member => member.id === memberId && (member.role === "student" || member.role === "lead")))) throw new Error("Primary team members must be selected students or leads.");
+    for (const group of snapshot.responsibleGroups) {
+      if (group.id === item.id || group.seasonId !== item.seasonId || group.isArchived) continue;
+      group.primaryMemberIds = group.primaryMemberIds.filter(memberId => !primaryMemberIds.includes(memberId));
+    }
+  }
+  if (resource === "tasks" && item.responsibleGroupId) {
+    const group = snapshot.responsibleGroups.find(candidate => candidate.id === item.responsibleGroupId);
+    const project = snapshot.projects.find(candidate => candidate.id === item.projectId);
+    if (!group || !project || group.seasonId !== project.seasonId || (group.projectIds.length > 0 && !group.projectIds.includes(project.id)) || (group.isArchived && group.id !== rows[index]?.responsibleGroupId)) throw new Error("The selected team does not belong to this task's season and project.");
+  }
+  if (resource === "tasks") {
+    const removedFields = ["disciplineId", "blockers", "linkedManufacturingIds", "linkedPurchaseIds", "artifactIds"];
+    if (removedFields.some((field) => Object.hasOwn(body, field))) throw new Error("Task commands use workTypeId, scheduleRefs, and typed domain references; removed Task fields are not accepted.");
+    delete item.taskDependencies;
+    delete item.actualHours;
+    if (item.status === "complete") {
+      refreshLocalTaskState(snapshot);
+      const existing = snapshot.tasks.find((task) => task.id === id);
+      if (existing?.isBlocked || existing?.isWaitingOnDependency) throw new Error("Resolve Risks and required dependencies before completing this task.");
+    }
+  }
+  if (resource === "work-logs") {
+    if (!snapshot.tasks.some((task) => task.id === item.taskId)) throw new Error("The work log Task no longer exists.");
+    if (typeof item.hours !== "number" || !Number.isFinite(item.hours) || item.hours <= 0) throw new Error("Work log hours must be a positive number.");
+  }
+  if (resource === "task-dependencies" && !snapshot.tasks.some((task) => task.id === item.taskId)) throw new Error("Dependency Task does not exist.");
+  if (resource === "purchases" && !snapshot.tasks.some((task) => task.id === item.taskId)) throw new Error("Purchasing records must link to a procurement or manufacturing Task.");
+  if (method === "POST") rows.push(item); else rows[index] = item;
   refreshLocalTaskState(snapshot);
-  if (resource === "task-blockers") return { item: { ...item, blockerType: item.sourceKind ?? "external", issueType: item.blockerType } };
   return { item };
 }

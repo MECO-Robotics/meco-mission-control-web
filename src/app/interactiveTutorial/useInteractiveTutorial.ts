@@ -1,10 +1,11 @@
 import { getLocalWorkspaceMode, subscribeLocalWorkspace } from "@/lib/localWorkspace/session";
 import { useEffect, useMemo, useSyncExternalStore } from "react";
 
-import { useInteractiveTutorialLifecycle } from "./useInteractiveTutorialLifecycle";
 import { isInteractiveTutorialCreationStep } from "./helpers/interactiveTutorialStepGroups";
 import { useInteractiveTutorialCoreActionsSession } from "./useInteractiveTutorialCoreActionsSession";
 import { useInteractiveTutorialCoreState } from "./core/useInteractiveTutorialCoreState";
+import { useInteractiveTutorialLifecycleInteractions } from "./useInteractiveTutorialLifecycleInteractions";
+import { useInteractiveTutorialLifecycleTargeting } from "./useInteractiveTutorialLifecycleTargeting";
 import type { UseInteractiveTutorialOptions } from "./core/useInteractiveTutorialCoreTypes";
 import type {
   InteractiveTutorialOverlayProps,
@@ -45,13 +46,10 @@ export function useInteractiveTutorial(options: UseInteractiveTutorialOptions) {
       activeSubsystemId: options.activeSubsystemId,
       mechanismModalMode: options.mechanismModalMode,
       activeMechanismId: options.activeMechanismId,
-      manufacturingModalMode: options.manufacturingModalMode,
-      activeManufacturingId: options.activeManufacturingId,
       workstreamModalMode: options.workstreamModalMode,
       activeWorkstreamId: options.activeWorkstreamId,
     }),
     [
-      options.activeManufacturingId,
       options.activeMaterialId,
       options.activeSubsystemId,
       options.activeTaskId,
@@ -61,7 +59,6 @@ export function useInteractiveTutorial(options: UseInteractiveTutorialOptions) {
       options.bootstrap,
       options.selectedSeasonId,
       options.selectedProjectId,
-      options.manufacturingModalMode,
       options.materialModalMode,
       options.mechanismModalMode,
       options.subsystemModalMode,
@@ -73,13 +70,17 @@ export function useInteractiveTutorial(options: UseInteractiveTutorialOptions) {
     ],
   );
 
-  const { isTargetReady, spotlightRect, stepError } = useInteractiveTutorialLifecycle({
+  const { isTargetReady, spotlightRect, stepBaselineLabelRef, targetRef } =
+    useInteractiveTutorialLifecycleTargeting({ currentStep: state.currentStep });
+  const { stepError } = useInteractiveTutorialLifecycleInteractions({
     currentStep: state.currentStep,
     stepCompletionContext,
     tutorialSeasonName: state.tutorialSeasonName,
     tutorialProjectName: state.tutorialProjectName,
     onAdvance: advanceInteractiveTutorial,
     onClose: closeInteractiveTutorial,
+    targetRef,
+    stepBaselineLabelRef,
   });
 
   const interactiveTutorialOverlayProps = useMemo<InteractiveTutorialOverlayProps | null>(() => {

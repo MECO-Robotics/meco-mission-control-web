@@ -13,8 +13,8 @@ export const TASK_CALENDAR_EVENT_FILTER_OPTIONS: Array<{
   { label: "Milestones", value: "milestone" },
   { label: "Task due", value: "task-due" },
   { label: "Waiting QA", value: "qa-due" },
-  { label: "Manufacturing due", value: "manufacturing-due" },
-  { label: "Meetings / events", value: "event" },
+  { label: "Meetings", value: "meeting" },
+  { label: "Events (read-only)", value: "event" },
 ];
 
 export const TASK_CALENDAR_SORT_OPTIONS = [
@@ -27,7 +27,7 @@ const TASK_CALENDAR_EVENT_TYPE_SORT_ORDER: Record<TaskCalendarEventType, number>
   milestone: 0,
   "task-due": 1,
   "qa-due": 2,
-  "manufacturing-due": 3,
+  meeting: 3,
   event: 4,
 };
 
@@ -59,22 +59,26 @@ export function toEventDateKey(start: string) {
   return start.slice(0, 10);
 }
 
-export function createMonthCells(cursor: Date) {
-  const startOfMonth = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
-  const endOfMonth = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0);
-  const gridStart = new Date(cursor.getFullYear(), cursor.getMonth(), 1 - startOfMonth.getDay());
-  const totalSlots = Math.ceil((startOfMonth.getDay() + endOfMonth.getDate()) / 7) * 7;
+export function createContinuousCalendarDates(firstMonth: Date, monthCount: number) {
+  const gridStart = new Date(firstMonth.getFullYear(), firstMonth.getMonth(), 1);
+  gridStart.setDate(gridStart.getDate() - gridStart.getDay());
 
-  return Array.from({ length: totalSlots }, (_, index) => {
-    const cellDate = new Date(gridStart);
-    cellDate.setDate(gridStart.getDate() + index);
-    return cellDate;
+  const lastMonth = new Date(firstMonth.getFullYear(), firstMonth.getMonth() + monthCount, 0);
+  const gridEnd = new Date(lastMonth);
+  gridEnd.setDate(gridEnd.getDate() + (6 - gridEnd.getDay()));
+
+  const dayCount = Math.round((gridEnd.getTime() - gridStart.getTime()) / 86_400_000) + 1;
+  return Array.from({ length: dayCount }, (_, index) => {
+    const date = new Date(gridStart);
+    date.setDate(gridStart.getDate() + index);
+    return date;
   });
 }
 
-export function createWeekCells(cursor: Date) {
-  const start = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() - cursor.getDay());
-  return Array.from({ length: 7 }, (_, index) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + index));
+export function getCalendarMonthWeekCount(cursor: Date) {
+  const firstWeekday = new Date(cursor.getFullYear(), cursor.getMonth(), 1).getDay();
+  const daysInMonth = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0).getDate();
+  return Math.ceil((firstWeekday + daysInMonth) / 7);
 }
 
 function compareTaskCalendarEventsByDate(left: TaskCalendarEvent, right: TaskCalendarEvent) {
@@ -135,4 +139,15 @@ export function sortTaskCalendarEvents(
   sortedEvents.sort(compareTaskCalendarEventsByDate);
   if (sortDirection === "desc") sortedEvents.reverse();
   return sortedEvents;
+}
+
+export function groupTaskCalendarEventsByMonth(events: TaskCalendarEvent[]) {
+  const groups = new Map<string, TaskCalendarEvent[]>();
+  for (const event of sortTaskCalendarEvents(events, "date")) {
+    const monthKey = toEventDateKey(event.start).slice(0, 7);
+    const monthEvents = groups.get(monthKey);
+    if (monthEvents) monthEvents.push(event);
+    else groups.set(monthKey, [event]);
+  }
+  return [...groups.entries()].map(([monthKey, monthEvents]) => ({ monthKey, events: monthEvents }));
 }

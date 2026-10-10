@@ -135,11 +135,11 @@ export function MilestoneEditScheduleField({
   const startValue =
     milestoneStartDate && milestoneStartTime
       ? formatMilestoneDateTime(`${milestoneStartDate}T${milestoneStartTime}:00`)
-      : formatMilestoneDateTime(activeMilestone.startDateTime);
+      : formatMilestoneDateTime(activeMilestone.startAt);
   const endValue =
     milestoneEndDate && milestoneEndTime
       ? formatMilestoneDateTime(`${milestoneEndDate}T${milestoneEndTime}:00`)
-      : formatMilestoneEndDateTime(activeMilestone.startDateTime, activeMilestone.endDateTime);
+      : formatMilestoneEndDateTime(activeMilestone.startAt, activeMilestone.endAt);
 
   if (editingField === "schedule") {
     return (

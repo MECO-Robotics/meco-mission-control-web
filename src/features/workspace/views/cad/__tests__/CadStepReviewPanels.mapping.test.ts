@@ -70,7 +70,7 @@ describe("CAD STEP review panel mapping state", () => {
         targets: {
           subsystems: [],
           mechanisms: [{ id: "mechanism-shooter", subsystemId: "subsystem-shooter", name: "Shooter", description: "", iteration: 1 }],
-          partDefinitions: [{ id: "part-roller", seasonId: "season-2026", name: "Roller tube", partNumber: "SHR-010", revision: "A", iteration: 1, type: "custom", source: "cad", materialId: null, description: "" }],
+          partDefinitions: [{ id: "part-roller", seasonId: "season-2026", name: "Roller tube", partNumber: "SHR-010", revision: "A", iteration: 1, type: "custom", defaultAcquisitionMethod: "manufacture", materialId: null, description: "" }],
         },
         usesPlaceholderParser: false,
       }),
@@ -148,9 +148,9 @@ describe("CAD STEP review panel mapping state", () => {
           mappingCount: 3,
         },
         targets: {
-          subsystems: [{ id: "subsystem-shooter", projectId: "project-robot-2026", name: "Shooter", description: "", iteration: 1, isCore: false, parentSubsystemId: null, responsibleEngineerId: null, mentorIds: [], risks: [] }],
+          subsystems: [{ id: "subsystem-shooter", projectId: "project-robot-2026", name: "Shooter", description: "", iteration: 1, isCore: false, parentSubsystemId: null, responsibleEngineerId: null, mentorIds: [] }],
           mechanisms: [{ id: "mechanism-flywheel", subsystemId: "subsystem-shooter", name: "Flywheel", description: "", iteration: 1 }],
-          partDefinitions: [{ id: "part-spacer", seasonId: "season-2026", name: "Spacer", partNumber: "SHR-001", revision: "A", iteration: 1, type: "custom", source: "cad", materialId: null, description: "" }],
+          partDefinitions: [{ id: "part-spacer", seasonId: "season-2026", name: "Spacer", partNumber: "SHR-001", revision: "A", iteration: 1, type: "custom", defaultAcquisitionMethod: "manufacture", materialId: null, description: "" }],
         },
         tree: [],
         warnings: [{

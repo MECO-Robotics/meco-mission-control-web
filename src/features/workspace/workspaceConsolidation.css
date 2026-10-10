@@ -1,5 +1,6 @@
 .workspace-presentation-controls { display: flex; flex-wrap: wrap; align-items: center; gap: .65rem; padding: .8rem 1rem; }
-.workspace-schedule-scroll { display: flex; flex: 1 1 auto; flex-direction: column; gap: 1rem; min-height: 0; max-height: 100%; overflow-y: auto; padding-bottom: 1rem; }
+.workspace-schedule-scroll { display: flex; flex: 1 1 auto; flex-direction: column; gap: 1rem; min-height: 0; max-height: 100%; overflow-x: clip; overflow-y: auto; padding-bottom: 1rem; }
+.workspace-schedule-scroll .timeline-layout { width: 100%; margin-right: 0; }
 .workspace-presentation-controls label { display: flex; align-items: center; gap: .5rem; }
 .workspace-presentation-controls input, .workspace-presentation-controls select { min-height: 2.5rem; max-width: 100%; color: var(--text-title); background: var(--bg-panel); border: 1px solid var(--border-base); border-radius: 6px; padding: .45rem .7rem; }
 .workspace-presentation-controls [aria-pressed="true"] { background: var(--bg-row-alt); color: var(--text-title); font-weight: 700; outline: 1px solid var(--border-base); }
@@ -15,11 +16,85 @@
 .workspace-inline-summary { padding: 0 1rem; color: var(--text-copy); }
 .people-member { padding-bottom: 1rem; border-bottom: 1px solid var(--border-base); }
 .people-member-context { display: flex; flex-direction: column; align-items: flex-start; gap: .4rem; padding: .5rem; }
-.people-member-load-summary { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: .75rem; width: 100%; min-width: 0; }
-.people-member-capacity, .people-member-task-counts { display: grid; align-content: start; gap: .18rem; min-width: 0; color: var(--text-copy); font-size: .75rem; }
-.people-member-capacity > small { color: var(--text-title); font-weight: 700; }
-.people-member-task-counts > div { display: flex; align-items: baseline; justify-content: space-between; gap: .55rem; white-space: nowrap; }
-.people-member-load-summary strong { color: var(--text-title); font-weight: 700; }
+.people-attendance-summary { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; width: 100%; min-width: 0; }
+.people-attendance-days { display: flex; align-items: center; gap: .28rem; }
+.people-attendance-day { display: block; width: .78rem; height: .78rem; border: 1px solid var(--border-base); border-radius: 2px; background: var(--bg-panel); }
+.people-attendance-day.is-attended { border-color: var(--official-blue); background: var(--official-blue); }
+.people-attendance-day.is-missed { border-color: var(--official-red); background: var(--official-red); }
+.people-attendance-day.is-upcoming { border-color: var(--border-base); background: var(--bg-row-alt); }
+.people-attendance-day.is-not-scheduled { border-color: var(--border-base); background: var(--bg-panel); }
+.people-attendance-percentage { color: var(--text-copy); font-size: .78rem; font-variant-numeric: tabular-nums; }
+.teams-list, .teams-editor { display: grid; gap: .45rem; }
+.teams-editor { padding: .85rem; border: 1px solid var(--border-base); border-radius: 10px; background: var(--bg-row-alt); }
+.teams-editor h3 { margin: 0; }
+.teams-editor fieldset { min-width: 0; margin: 0; padding: .55rem .7rem; border: 1px solid var(--border-base); border-radius: 8px; }
+.teams-editor legend { padding-inline: .25rem; color: var(--text-title); font-weight: 600; }
+.teams-editor .checkbox-field { display: inline-flex; align-items: center; gap: .4rem; margin: .2rem .75rem .2rem 0; }
+.team-primary-help { margin: 0 0 .4rem; color: var(--text-copy); font-size: .82rem; }
+.team-member-option { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding-block: .2rem; border-bottom: 1px solid var(--border-base); }
+.team-member-option .secondary-action { padding: .25rem .5rem; font-size: .8rem; }
+.team-member-option .secondary-action:disabled { opacity: .7; }
+.team-card { display: grid; gap: .35rem; padding: .35rem 0 .5rem; border: 0; border-bottom: 1px solid var(--border-base); border-radius: 0; background: transparent; }
+.teams-list > .team-card:nth-of-type(odd) { padding-inline: .4rem; background: color-mix(in srgb, var(--meco-blue) 3%, var(--bg-panel)); }
+.teams-list > .team-card:nth-of-type(even) { padding-inline: .4rem; background: color-mix(in srgb, var(--meco-red) 3%, var(--bg-panel)); }
+.team-card > .panel-header { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; margin: 0; }
+.team-card-identity { display: flex; align-items: baseline; flex-wrap: wrap; column-gap: .65rem; row-gap: .1rem; min-width: 0; }
+.team-card-identity h3 { margin: 0; white-space: nowrap; }
+.team-card-identity > span { color: var(--text-copy); font-size: .82rem; }
+.team-actions-menu { position: relative; display: inline-flex; flex: 0 0 auto; align-self: center; margin-left: auto; border: 0; }
+.team-actions-menu > summary { display: grid; width: 30px; height: 30px; place-items: center; list-style: none; color: var(--text-copy); cursor: pointer; }
+.team-actions-menu > summary::-webkit-details-marker { display: none; }
+.team-actions-menu > summary:hover { background: var(--bg-row-alt); }
+.team-actions-menu-panel { position: absolute; top: calc(100% + .2rem); right: 0; z-index: 5; display: flex; gap: .2rem; padding: .25rem; border: 1px solid var(--border-base); background: var(--bg-panel); box-shadow: 0 4px 12px rgb(0 0 0 / 12%); }
+.team-actions-menu-panel .icon-button { width: 34px; height: 34px; }
+.team-card-header > .metric-grid { display: grid; flex: 1 1 38rem; grid-template-columns: minmax(12rem, .8fr) minmax(0, 2fr); min-width: min(100%, 34rem); gap: 0; padding-block: .28rem; border-block: 1px solid var(--border-base); }
+.team-card .metric-grid > div, .team-card .metric-grid > button { display: flex; align-items: center; justify-content: space-between; gap: .35rem; min-width: 0; padding: .2rem .45rem; border: 0; border-right: 1px solid var(--border-base); border-radius: 0; background: transparent; color: var(--text-copy); text-align: left; }
+.team-card .metric-grid > :last-child { border-right: 0; }
+.team-card .team-task-breakdown { justify-content: flex-start; gap: .65rem; }
+.team-card .team-task-pie { flex: 0 0 1.35rem; width: 1.35rem; aspect-ratio: 1; border-radius: 50%; background: conic-gradient(var(--team-task-open-chart) 0deg var(--team-task-open-end), var(--team-task-blocked-chart) var(--team-task-open-end) var(--team-task-blocked-end), var(--team-task-overdue-chart) var(--team-task-blocked-end) var(--team-task-overdue-end), var(--official-blue) var(--team-task-overdue-end) 360deg); }
+.team-card .team-task-pie.is-empty { background: var(--border-base); }
+.team-card .team-task-legend { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; color: var(--text-copy); font-size: .72rem; white-space: nowrap; }
+.team-card .team-task-legend > span { display: inline-flex; align-items: baseline; gap: .18rem; }
+.team-card .team-task-legend > button { display: inline-flex; align-items: baseline; gap: .25rem; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; font: inherit; }
+.team-card .team-task-legend > button:focus-visible { outline: 2px solid var(--official-blue); outline-offset: 2px; }
+.team-card .team-task-open-filter:hover, .team-card .team-task-open-filter[aria-pressed="true"] { color: var(--official-blue); }
+.team-card .team-task-legend strong { color: var(--text-title); font-variant-numeric: tabular-nums; }
+.team-card .team-task-open-filter strong { color: var(--team-task-open-text); }
+.team-card .team-task-status-filter.is-blocked strong { color: var(--team-task-blocked-text); }
+.team-card .team-task-status-filter.is-overdue strong { color: var(--team-task-overdue-text); }
+.team-card .team-task-status-filter:hover, .team-card .team-task-status-filter[aria-pressed="true"], .team-member-load:hover { background: var(--bg-row-alt); }
+.team-card .team-task-status-filter[aria-pressed="true"] { color: var(--official-blue); }
+.team-card .metric-grid .team-metric-label { color: var(--text-copy); font-size: .74rem; line-height: 1.15; }
+.team-card .metric-grid strong { color: var(--text-title); font-size: .92rem; font-variant-numeric: tabular-nums; }
+.team-card .team-metric-pie { flex: 0 0 1.15rem; width: 1.15rem; aspect-ratio: 1; border-radius: 50%; background: conic-gradient(var(--team-metric-color) var(--team-metric-progress), var(--border-base) 0); }
+.team-card .team-metric-pie.is-capacity { --team-metric-color: var(--official-blue); }
+.team-load { display: grid; grid-template-columns: minmax(0, 1fr); }
+.team-member-section { border: 0; border-bottom: 1px solid var(--border-base); }
+.team-member-section > summary { padding: .28rem .35rem; color: var(--text-title); cursor: pointer; font-size: .82rem; font-weight: 600; }
+.team-member-counts { display: inline-flex; align-items: flex-start; flex-wrap: nowrap; gap: .4rem; margin-left: .45rem; font-size: .72rem; font-weight: 400; line-height: 1; white-space: nowrap; }
+.team-member-counts > span { display: inline-flex; align-items: flex-start; gap: .08rem; line-height: 1; }
+.team-member-counts small { color: var(--text-copy); opacity: .72; line-height: 1; }
+.team-member-counts strong { color: var(--text-title); font-weight: 700; line-height: 1; }
+.team-member-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: 0 .75rem; }
+.team-member-grid > .empty-state { grid-column: 1 / -1; margin: 0; padding: .2rem .35rem; }
+.team-member-load { display: grid; grid-template-columns: minmax(5rem, 1fr) auto auto; align-items: center; gap: .12rem .5rem; width: 100%; max-width: none; padding: .3rem .35rem; border: 0; border-bottom: 1px solid var(--border-base); border-radius: 0; background: transparent; color: var(--text-copy); text-align: left; font: inherit; cursor: pointer; }
+.team-member-load > .team-member-name { display: flex; align-items: baseline; gap: .35rem; min-width: 0; color: var(--text-title); font-weight: 600; white-space: nowrap; }
+.team-member-name small { color: var(--text-copy); font-size: .7rem; font-weight: 400; opacity: .72; }
+.team-member-load > span:nth-child(2), .team-member-capacity { font-size: .76rem; }
+.team-member-load > .team-member-task-metrics { display: flex; justify-content: flex-end; gap: .5rem; color: var(--text-copy); text-align: right; }
+.team-member-task-metrics strong { font-weight: 600; }
+.team-member-task-metrics .is-open strong { color: var(--team-task-open-text); }
+.team-member-task-metrics .is-blocked strong { color: var(--team-task-blocked-text); }
+.team-member-task-metrics .is-overdue strong { color: var(--team-task-overdue-text); }
+.team-member-capacity.is-at-capacity { color: var(--status-warning-text); font-weight: 600; }
+.team-member-capacity.is-over-capacity { color: var(--status-danger-text); font-weight: 600; }
+.team-capacity-track { grid-column: 1 / -1; height: .3rem; overflow: hidden; border-radius: 3px; background: var(--border-base); }
+.team-capacity-track i { display: block; height: 100%; background: var(--official-blue); }
+.team-capacity-track.is-at-capacity i { background: var(--status-warning-text); }
+.team-capacity-track.is-over-capacity i { background: var(--status-danger-text); }
+.team-card details { border-top: 1px solid var(--border-base); }
+.team-card details > summary { padding: .32rem 0; color: var(--text-title); cursor: pointer; font-size: .86rem; font-weight: 600; }
+.team-card details > .ghost-button { margin: 0 .4rem .4rem 0; }
 .people-member-activity { display: flex; align-items: center; justify-content: space-between; gap: .5rem; width: 100%; min-width: 0; }
 .people-member-activity .people-workload-details { flex: 1 1 auto; min-width: 0; }
 .people-member-context small { color: var(--text-copy); }
@@ -34,7 +109,13 @@
   .workspace-detail-card, .modal-scrim .task-details-modal, .modal-scrim .risk-details-modal { width: 100%; max-width: none; min-height: 100dvh; }
   .workspace-presentation-controls { padding: .65rem; }
   .home-attention { padding: .75rem; }
-  .people-member-load-summary { grid-template-columns: minmax(0, 1fr) auto; gap: .4rem; }
+  .team-card-header > .metric-grid { grid-template-columns: minmax(0, 1fr); }
+  .team-card .metric-grid > div { border-right: 0; }
+  .team-card .team-task-breakdown { flex-wrap: wrap; }
+  .team-card-header { flex-wrap: wrap; }
+  .team-member-load { grid-template-columns: minmax(5rem, 1fr) auto; }
+  .team-member-load > span:nth-child(2) { text-align: right; }
+  .team-member-capacity { grid-column: 2; }
 }
 
 .workspace-presentation-controls button, .workspace-record-list .ghost-button, .people-member-context .ghost-button, .home-attention > .ghost-button { font: inherit; min-height: 40px; padding: .45rem .8rem; border: 1px solid var(--border-base); border-radius: 7px; background: var(--bg-panel); color: var(--text-title); cursor: pointer; }
@@ -47,3 +128,15 @@
 .attention-reasons summary, .people-workload-details summary { cursor: pointer; font-size: .875rem; }
 .attention-reasons li { margin-block: .4rem; max-width: 75ch; }
 .people-workload-details[open] { display: flex; flex-direction: column; gap: .4rem; }
+/* Action-first risk overview and severity triage. */
+.risk-action-workspace { display: grid; gap: 1rem; margin: 1rem 0; }
+.risk-action-counts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+.risk-action-count { min-width: 0; padding: .8rem; border: 1px solid var(--border-base); border-radius: .75rem; background: var(--bg-row-alt); }
+.risk-action-count > span { color: var(--text-copy); }
+.risk-action-count > strong { display: block; font-size: 1.5rem; }
+.risk-action-count ul { margin: .4rem 0 0; padding-left: 1.2rem; }
+.risk-severity-kanban.task-queue-board { min-height: 20rem; }
+.risk-board-card { cursor: grab; }
+.risk-board-card p, .risk-board-card small { margin: 0; color: var(--text-copy); }
+.risk-board-title { padding: 0; border: 0; background: none; color: var(--text-title); font: inherit; font-weight: 650; text-align: left; cursor: pointer; }
+@media (max-width: 760px) { .risk-action-counts { grid-template-columns: 1fr; } }

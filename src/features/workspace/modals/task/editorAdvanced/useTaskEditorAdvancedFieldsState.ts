@@ -3,9 +3,9 @@ import type { Dispatch, SetStateAction } from "react";
 
 import { formatIterationVersion } from "@/lib/appUtils/common";
 import {
-  getDefaultTaskDisciplineIdForProject,
-  getTaskDisciplinesForProject,
-  isTaskDisciplineAllowedForProject,
+  getDefaultWorkTypeIdForProject,
+  getWorkTypesForProject,
+  isWorkTypeAllowedForProject,
 } from "@/lib/taskDisciplines";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskPayload } from "@/types/payloads/task";
@@ -22,14 +22,12 @@ import {
 
 interface UseTaskEditorAdvancedFieldsStateOptions {
   bootstrap: BootstrapPayload;
-  currentTaskId: string | null;
   setTaskDraft: Dispatch<SetStateAction<TaskPayload>>;
   taskDraft: TaskPayload;
 }
 
 export function useTaskEditorAdvancedFieldsState({
   bootstrap,
-  currentTaskId,
   setTaskDraft,
   taskDraft,
 }: UseTaskEditorAdvancedFieldsStateOptions) {
@@ -51,7 +49,7 @@ export function useTaskEditorAdvancedFieldsState({
 
   const taskPhotoProjectId = taskDraft.projectId || bootstrap.projects[0]?.id || null;
   const selectedProject = taskDraft.projectId ? projectsById[taskDraft.projectId] : null;
-  const availableDisciplines = getTaskDisciplinesForProject(selectedProject);
+  const availableWorkTypes = getWorkTypesForProject(bootstrap, selectedProject);
   const projectSubsystems = bootstrap.subsystems.filter(
     (subsystem) => subsystem.projectId === taskDraft.projectId,
   );
@@ -72,7 +70,8 @@ export function useTaskEditorAdvancedFieldsState({
     (mechanism) => mechanism.subsystemId === selectedPrimaryTargetId,
   );
   const projectPartInstances = bootstrap.partInstances.filter(
-    (partInstance) => partInstance.subsystemId === selectedPrimaryTargetId,
+    (partInstance) => partInstance.intendedSubsystemId === selectedPrimaryTargetId ||
+      (partInstance.location.kind === "installed" && partInstance.location.subsystemId === selectedPrimaryTargetId),
   );
   const selectedMechanismIds = getTaskSelectedMechanismIds(taskDraft);
   const selectedPartInstanceIds = getTaskSelectedPartInstanceIds(taskDraft);
@@ -91,42 +90,27 @@ export function useTaskEditorAdvancedFieldsState({
     getTaskPartInstanceLabel(partInstance, partDefinitionsById, formatIterationVersion);
   const handleProjectChange = (projectId: string) => {
     const nextProject = projectsById[projectId] ?? null;
-    const subsystemId = bootstrap.subsystems.find((subsystem) => subsystem.projectId === projectId)?.id ?? "";
-    const validDependencyTaskIds = new Set(
-      bootstrap.tasks.filter((task) => task.projectId === projectId && task.id !== currentTaskId).map((task) => task.id),
+    const subsystemId = nextProject?.projectType === "robot"
+      ? bootstrap.subsystems.find((subsystem) => subsystem.projectId === projectId)?.id ?? ""
+      : "";
+    const validWorkTypeId = isWorkTypeAllowedForProject(bootstrap, nextProject, taskDraft.workTypeId)
+      ? taskDraft.workTypeId
+      : getDefaultWorkTypeIdForProject(bootstrap, nextProject);
+    const validGroup = bootstrap.responsibleGroups.some((group) =>
+      group.id === taskDraft.responsibleGroupId && group.seasonId === nextProject?.seasonId &&
+      (group.projectIds.length === 0 || group.projectIds.includes(projectId)),
     );
 
     setTaskDraft((current) => ({
       ...current,
       projectId,
-      disciplineId: isTaskDisciplineAllowedForProject(nextProject, current.disciplineId)
-        ? current.disciplineId
-        : getDefaultTaskDisciplineIdForProject(nextProject),
+      workTypeId: validWorkTypeId,
+      responsibleGroupId: validGroup ? current.responsibleGroupId : null,
       workstreamIds: [],
       subsystemIds: subsystemId ? [subsystemId] : [],
       mechanismIds: [],
       partInstanceIds: [],
-      taskDependencies: (current.taskDependencies ?? []).filter((dependency) =>
-        dependency.kind === "task"
-          ? validDependencyTaskIds.has(dependency.refId)
-          : dependency.kind === "milestone"
-            ? bootstrap.milestones.some(
-                (milestone) =>
-                  (milestone.projectIds.length === 0 || milestone.projectIds.includes(projectId)) &&
-                  milestone.id === dependency.refId,
-              )
-            : dependency.kind === "part_instance"
-              ? bootstrap.partInstances.some((partInstance) => {
-                  if (partInstance.id !== dependency.refId) {
-                    return false;
-                  }
-
-                  return bootstrap.subsystems.some(
-                    (subsystem) => subsystem.id === partInstance.subsystemId && subsystem.projectId === projectId,
-                  );
-                })
-              : false,
-      ),
+      taskDependencies: current.taskDependencies,
     }));
   };
   const updatePrimaryTarget = (subsystemId: string) => {
@@ -142,7 +126,7 @@ export function useTaskEditorAdvancedFieldsState({
     updatePrimaryTarget(nextPrimaryTarget?.id ?? "");
   };
   return {
-    availableDisciplines,
+    availableWorkTypes,
     getMechanismLabel,
     getPartInstanceLabel,
     getSubsystemLabel,

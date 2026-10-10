@@ -16,7 +16,6 @@ export interface RosterInsightsMember {
   memberId: string;
   memberName: string;
   role: MemberRole;
-  disciplineId: string | null;
   activeTaskCount: number;
   blockedTaskCount: number;
   waitingForQaTaskCount: number;

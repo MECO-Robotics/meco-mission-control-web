@@ -1,4 +1,4 @@
-import type { ArtifactRecord, ManufacturingItemRecord, MaterialRecord, PartDefinitionRecord, PartInstanceRecord, PurchaseItemRecord } from "./recordsInventory";
+import type { ArtifactRecord, MaterialRecord, PartDefinitionRecord, PartInstanceRecord, PurchaseItemRecord, VendorRecord } from "./recordsInventory";
 import type {
   AuditActionRecord,
   AttendanceRecord,
@@ -6,44 +6,46 @@ import type {
   MeetingRecord,
   MilestoneRecord,
   MilestoneRequirementRecord,
-  QaReviewRecord,
   QaRequestRecord,
-  TaskBlockerRecord,
   TaskDependencyRecord,
   TaskRecord,
   WorkLogRecord,
+  EventRecord,
 } from "./recordsExecution";
-import type { DesignIterationRecord, ReportFindingRecord, ReportRecord, RiskRecord } from "./recordsReporting";
-import type { DisciplineRecord, MechanismRecord, MemberRecord, ProjectRecord, SeasonRecord, SubsystemRecord, WorkstreamRecord } from "./recordsOrganization";
+import type { DesignIterationRecord, QaFindingRecord, ReportRecord, RiskRecord, TestFindingRecord, TestResultRecord } from "./recordsReporting";
+import type { MechanismRecord, MemberRecord, ProjectRecord, ResponsibleGroupRecord, SeasonRecord, SubsystemRecord, WorkstreamRecord, WorkTypeRecord } from "./recordsOrganization";
 
 export interface BootstrapPayload {
   seasons: SeasonRecord[];
   projects: ProjectRecord[];
+  workTypes: WorkTypeRecord[];
+  responsibleGroups: ResponsibleGroupRecord[];
   workstreams: WorkstreamRecord[];
+  vendors: VendorRecord[];
   members: MemberRecord[];
   subsystems: SubsystemRecord[];
-  disciplines: DisciplineRecord[];
   mechanisms: MechanismRecord[];
   materials: MaterialRecord[];
   artifacts: ArtifactRecord[];
   partDefinitions: PartDefinitionRecord[];
   partInstances: PartInstanceRecord[];
   milestones: MilestoneRecord[];
-  milestoneRequirements?: MilestoneRequirementRecord[];
-  taskDependencies?: TaskDependencyRecord[];
-  taskBlockers?: TaskBlockerRecord[];
+  taskDependencies: TaskDependencyRecord[];
   reports: ReportRecord[];
-  reportFindings: ReportFindingRecord[];
+  qaFindings: QaFindingRecord[];
+  testResults: TestResultRecord[];
+  testFindings: TestFindingRecord[];
   qaRequests: QaRequestRecord[];
   designIterations?: DesignIterationRecord[];
   risks: RiskRecord[];
   tasks: TaskRecord[];
   workLogs: WorkLogRecord[];
-  meetings?: MeetingRecord[];
-  attendanceRecords?: AttendanceRecord[];
+  meetings: MeetingRecord[];
+  events: EventRecord[];
+  attendanceRecords: AttendanceRecord[];
   purchaseItems: PurchaseItemRecord[];
-  manufacturingItems: ManufacturingItemRecord[];
-  qaReviews?: QaReviewRecord[];
+  manufacturingProcesses: import("./recordsExecution").ManufacturingProcessRecord[];
+  milestoneRequirements: MilestoneRequirementRecord[];
   escalations?: EscalationRecord[];
   actions?: AuditActionRecord[];
 }

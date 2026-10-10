@@ -10,7 +10,7 @@ export type TimelineViewInterval = "all" | "week" | "month";
 const MONTH_LABEL_FORMATTER = new Intl.DateTimeFormat(undefined, { month: "long" });
 const MONTH_ABBREVIATED_LABEL_FORMATTER = new Intl.DateTimeFormat(undefined, { month: "short" });
 
-function formatMonthShortYearFromDay(day: string) {
+export function formatMonthYearLabel(day: string) {
   const monthLabel = MONTH_ABBREVIATED_LABEL_FORMATTER.format(new Date(`${day.slice(0, 7)}-01T00:00:00`));
   const yearShort = day.slice(2, 4);
   return `${monthLabel} '${yearShort}`;
@@ -95,6 +95,20 @@ export function monthEndFromDay(day: string) {
   return `${yearText}-${monthText}-${String(dayCount).padStart(2, "0")}`;
 }
 
+export function getSchedulePeriodBounds(day: string, interval: TimelineViewInterval) {
+  const startDate = interval === "week"
+    ? startOfTimelineWeek(day)
+    : interval === "month"
+      ? monthStartFromDay(day)
+      : day;
+  const endDate = interval === "week"
+    ? endOfTimelineWeek(day)
+    : interval === "month"
+      ? monthEndFromDay(day)
+      : null;
+  return { startDate, endDate };
+}
+
 export function monthLabelFromDay(day: string) {
   return MONTH_LABEL_FORMATTER.format(new Date(`${day.slice(0, 7)}-01T00:00:00`));
 }
@@ -107,7 +121,7 @@ export function formatTimelinePeriodLabel(viewInterval: TimelineViewInterval, da
   }
 
   if (viewInterval === "month") {
-    return formatMonthShortYearFromDay(startDay);
+    return formatMonthYearLabel(startDay);
   }
 
   if (viewInterval === "week") {

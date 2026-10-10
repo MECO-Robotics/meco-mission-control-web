@@ -1,11 +1,10 @@
-import { ManufacturingEditorModal } from "../modals/purchaseManufacturing/ManufacturingEditorModal";
 import { PurchaseEditorModal } from "../modals/purchaseManufacturing/PurchaseEditorModal";
 import { SubsystemEditorModal } from "../modals/structure/SubsystemEditorModal";
 import { WorkstreamEditorModal } from "../modals/assetCatalog/WorkstreamEditorModal";
 import type { WorkspaceModalHostViewProps } from "./workspaceModalHostViewTypes";
 
 export function WorkspaceStructureModalsSection(props: WorkspaceModalHostViewProps) {
-  if (!props.subsystemEditor.subsystemModalMode && !props.workstreamEditor.workstreamModalMode && !props.manufacturingEditor.manufacturingModalMode && !props.purchaseEditor.purchaseModalMode) {
+  if (!props.subsystemEditor.subsystemModalMode && !props.workstreamEditor.workstreamModalMode && !props.purchaseEditor.purchaseModalMode) {
     return null;
   }
 
@@ -24,14 +23,6 @@ export function WorkspaceStructureModalsSection(props: WorkspaceModalHostViewPro
         <WorkstreamEditorModal
           {...props.workstreamEditor}
           workstreamModalMode={props.workstreamEditor.workstreamModalMode}
-          bootstrap={props.bootstrap}
-        />
-      ) : null}
-
-      {props.manufacturingEditor.manufacturingModalMode ? (
-        <ManufacturingEditorModal
-          {...props.manufacturingEditor}
-          manufacturingModalMode={props.manufacturingEditor.manufacturingModalMode}
           bootstrap={props.bootstrap}
         />
       ) : null}

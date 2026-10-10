@@ -1,9 +1,9 @@
+import { localTodayDate, parseLocalDate } from "@/lib/dateUtils";
 import { ModalDialog } from "@/components/ModalDialog";
 import { useRef, type Dispatch, type FormEvent, type SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { QaReportPayload } from "@/types/payloads";
 import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
-import { QaRiskReassessmentSection } from "./QaRiskReassessmentSection";
 import { WorkReportEditorActions } from "./WorkReportEditorActions";
 
 interface QaReportEditorModalProps {
@@ -27,11 +27,11 @@ export function QaReportEditorModal({
 }: QaReportEditorModalProps) {
   const initialDraft = useRef(JSON.stringify(qaReportDraft));
   const closeQaReportModal = () => {
-    if (isSavingQaReport) return;
     if (JSON.stringify(qaReportDraft) !== initialDraft.current && !window.confirm("Discard unsaved changes?")) return;
     onClose();
   };
-  const selectedTask = bootstrap.tasks.find((task) => task.id === qaReportDraft.taskId);
+  const taskRef = qaReportDraft.targetRefs.find((ref) => ref.kind === "task");
+  const selectedTask = bootstrap.tasks.find((task) => task.id === taskRef?.id);
   const qaReportPhotoProjectId = selectedTask?.projectId ?? bootstrap.projects[0]?.id ?? null;
 
   return (
@@ -67,10 +67,8 @@ export function QaReportEditorModal({
               onChange={(milestone) =>
                 setQaReportDraft((current) => ({
                   ...current,
-                  taskId: milestone.target.value,
-                  targetRiskId: bootstrap.tasks.find((task) => task.id === milestone.target.value)?.targetRiskId ?? null,
-                  proposedRiskSeverity: null,
-                  proposedRiskStatus: null,
+                  projectId: bootstrap.tasks.find((task) => task.id === milestone.target.value)?.projectId ?? current.projectId,
+                  targetRefs: [{ kind: "task", id: milestone.target.value }],
                 }))
               }
               required
@@ -79,7 +77,7 @@ export function QaReportEditorModal({
                 color: "var(--text-title)",
                 border: "1px solid var(--border-base)",
               }}
-              value={qaReportDraft.taskId ?? ""}
+              value={taskRef?.id ?? ""}
             >
               <option disabled value="">
                 Choose a task
@@ -108,7 +106,7 @@ export function QaReportEditorModal({
                 color: "var(--text-title)",
                 border: "1px solid var(--border-base)",
               }}
-              value={qaReportDraft.result}
+              value={qaReportDraft.result ?? ""}
             >
               <option value="pass">Pass</option>
               <option value="minor-fix">Minor fix</option>
@@ -121,12 +119,11 @@ export function QaReportEditorModal({
               onChange={(milestone) =>
                 setQaReportDraft((current) => ({
                   ...current,
-                  reviewedAt: milestone.target.value,
+                  reviewedAt: parseLocalDate(milestone.target.value)?.toISOString() ?? null,
                 }))
               }
-              required
               type="date"
-              value={qaReportDraft.reviewedAt}
+              value={qaReportDraft.reviewedAt ? localTodayDate(new Date(qaReportDraft.reviewedAt)) : ""}
             />
           </label>
           <label className="field modal-wide">
@@ -160,25 +157,6 @@ export function QaReportEditorModal({
               Hold Ctrl or Cmd to select multiple people.
             </small>
           </label>
-          <label className="checkbox-field modal-wide">
-            <input
-              checked={qaReportDraft.mentorApproved}
-              onChange={(milestone) =>
-                setQaReportDraft((current) => ({
-                  ...current,
-                  mentorApproved: milestone.target.checked,
-                }))
-              }
-              type="checkbox"
-            />
-            <span style={{ color: "var(--text-title)" }}>Mentor approved</span>
-          </label>
-          <QaRiskReassessmentSection
-            bootstrap={bootstrap}
-            qaReportDraft={qaReportDraft}
-            selectedTask={selectedTask}
-            setQaReportDraft={setQaReportDraft}
-          />
           <label className="field modal-wide">
             <span>Notes</span>
             <textarea
@@ -195,7 +173,7 @@ export function QaReportEditorModal({
           </label>
           <PhotoUploadField
             accept="image/*,video/*"
-            currentUrl={qaReportDraft.photoUrl}
+            currentUrl={qaReportDraft.photoUrl ?? ""}
             label="QA report media"
             onChange={(value) => setQaReportDraft((current) => ({ ...current, photoUrl: value }))}
             onUpload={async (file) => {

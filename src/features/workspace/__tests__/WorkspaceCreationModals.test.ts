@@ -23,18 +23,18 @@ jest.mock("react-dom", () => {
 function createModalBootstrap() {
   const bootstrap = createBootstrap();
   const task: BootstrapPayload["tasks"][number] = {
-    artifactIds: [],
     id: "task-1",
     projectId: "project-1",
     workstreamIds: [],
     title: "Inspect intake",
     summary: "Verify the intake can survive QA.",
     subsystemIds: ["subsystem-1"],
-    disciplineId: "design",
+    workTypeId: "work-type-design",
+    responsibleGroupId: null,
     mechanismIds: [],
     partInstanceIds: [],
-    targetRiskId: "risk-1",
-    targetMilestoneId: null,
+    scheduleRefs: [],
+    requestedById: null,
     ownerId: null,
     assigneeIds: [],
     mentorId: null,
@@ -43,33 +43,39 @@ function createModalBootstrap() {
     priority: "medium",
     status: "waiting-for-qa",
 
-    blockers: [],
-    linkedManufacturingIds: [],
-    linkedPurchaseIds: [],
+    checklistItems: [],
+    manufacturingDetails: null,
     estimatedHours: 0,
     actualHours: 0,
     requiresDocumentation: false,
-    documentationLinked: false,
   };
   const risk: BootstrapPayload["risks"][number] = {
     id: "risk-1",
+    projectId: "project-1",
     title: "Intake binding",
     detail: "Intake can bind under load.",
+    category: "design",
     severity: "high",
-    sourceType: "qa-report",
-    sourceId: "report-1",
-    attachmentType: "project",
-    attachmentId: "project-1",
+    status: "open",
+    blocksWork: true,
+    source: { kind: "report", id: "report-1" },
+    relatedTargets: [{ kind: "project", id: "project-1" }],
     mitigationTaskId: "task-1",
+    ownerGroupId: null,
+        ownerMemberId: null,
+        mitigationDueDate: null,
+    createdAt: "2026-05-01",
+    updatedAt: "2026-05-01",
+    resolvedAt: null,
   };
   const milestone: BootstrapPayload["milestones"][number] = {
     id: "milestone-1",
     title: "Intake signoff",
     type: "deadline",
-    status: "ready",
-    startDateTime: "2026-05-20T12:00:00.000Z",
-    endDateTime: null,
-    isExternal: false,
+    status: "planned",
+    seasonId: "season-1",
+    startAt: "2026-05-20T12:00:00.000Z",
+    endAt: null,
     description: "Complete intake review.",
     projectIds: ["project-1"],
   };
@@ -130,7 +136,7 @@ describe("workspace creation modals", () => {
         milestoneDraft: {
           title: "",
           type: "deadline",
-          isExternal: false,
+          status: "planned",
           description: "",
           projectIds: ["project-1"],
         },
@@ -176,20 +182,15 @@ describe("workspace creation modals", () => {
     expect(markup).toContain("task-details-close-button");
     expect(markup).toContain('aria-label="Close QA report modal"');
     expect(markup).toContain("modal-form task-details-grid");
-    expect(markup).toContain("Risk reassessment");
-    expect(markup).toContain("Intake binding (High)");
-    expect(markup).toContain("Partial mitigation");
-    expect(markup).toContain("Full mitigation");
-    expect(markup).toContain("risk severity changes only");
+    expect(markup).toContain("Result");
+    expect(markup).toContain("Notes");
   });
 
-  it("defaults QA risk reassessment to the selected task target risk", () => {
+  it("targets QA evidence at the selected task", () => {
     const bootstrap = createModalBootstrap();
     const payload = buildEmptyQaReportPayload(bootstrap);
 
-    expect(payload.targetRiskId).toBe("risk-1");
-    expect(payload.proposedRiskSeverity).toBeNull();
-    expect(payload.proposedRiskStatus).toBeNull();
+    expect(payload.targetRefs).toEqual([{ kind: "task", id: "task-1" }]);
   });
 
   it("keeps milestone report creation aligned with report modal chrome", () => {

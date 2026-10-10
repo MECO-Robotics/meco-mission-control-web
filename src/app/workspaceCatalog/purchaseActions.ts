@@ -49,7 +49,7 @@ export function usePurchaseActions({ bootstrap, handleUnauthorized, loadWorkspac
 
   const openEditPurchaseModalAndSetFinalCost = useCallback((item: PurchaseItemRecord) => {
     openEditPurchaseModal(item);
-    setPurchaseFinalCost(typeof item.finalCost === "number" ? String(item.finalCost) : "");
+    setPurchaseFinalCost(item.finalCost ? String(item.finalCost.amount) : "");
   }, [openEditPurchaseModal]);
 
   const handlePurchaseSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
@@ -60,20 +60,29 @@ export function usePurchaseActions({ bootstrap, handleUnauthorized, loadWorkspac
     setDataMessage(null);
 
     try {
-      const selectedPartDefinition = bootstrap.partDefinitions.find(
-        (partDefinition) => partDefinition.id === purchaseDraft.partDefinitionId,
-      );
-
-      if (!selectedPartDefinition) {
-        setDataMessage("Please choose a real part from the Parts tab before saving the purchase.");
+      const task = bootstrap.tasks.find((candidate) => candidate.id === purchaseDraft.taskId);
+      if (!task) {
+        setDataMessage("Choose the Kanban Task that represents this procurement work.");
+        return;
+      }
+      const project = bootstrap.projects.find((candidate) => candidate.id === task.projectId);
+      const workType = bootstrap.workTypes.find((candidate) => candidate.id === task.workTypeId);
+      const isManufacturingTask = project?.projectType === "robot" && workType?.code === "manufacturing";
+      if (purchaseDraft.kind === "manufacturing-service" && (!isManufacturingTask || !task.manufacturingDetails)) {
+        setDataMessage("Outsourced manufacturing purchases must link to a Robot Manufacturing Task with technical manufacturing details.");
+        return;
+      }
+      if (purchaseDraft.kind === "cots-goods" && task.manufacturingDetails) {
+        setDataMessage("COTS purchases use Purchasing only. Choose a procurement Task without Manufacturing Details.");
         return;
       }
 
       const payload: PurchaseItemPayload = {
         ...purchaseDraft,
-        title: selectedPartDefinition.name,
-        finalCost:
-          purchaseFinalCost.trim().length > 0 ? Number(purchaseFinalCost) : undefined,
+        title: purchaseDraft.title.trim(),
+        finalCost: purchaseFinalCost.trim().length > 0
+          ? { amount: Number(purchaseFinalCost), currency: "USD" }
+          : null,
       };
 
       if (purchaseModalMode === "create") {

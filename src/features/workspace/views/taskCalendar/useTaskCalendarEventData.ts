@@ -9,8 +9,6 @@ import {
   type TaskCalendarEventType,
 } from "./taskCalendarEvents";
 import {
-  createMonthCells,
-  createWeekCells,
   sortTaskCalendarEvents,
   toEventDateKey,
   type TaskCalendarSortMode,
@@ -99,8 +97,6 @@ export function useTaskCalendarEventData({
 
     return sortTaskCalendarEvents(scopedEvents, sortMode, sortDirection);
   }, [eventFilter, searchFilter, sortDirection, sortMode, unfilteredEvents]);
-  const monthCells = useMemo(() => createMonthCells(monthCursor), [monthCursor]);
-  const weekCells = useMemo(() => createWeekCells(monthCursor), [monthCursor]);
   const eventsByDateKey = useMemo(() => {
     const grouped = new Map<string, TaskCalendarEvent[]>();
     events.forEach((event) => {
@@ -114,8 +110,6 @@ export function useTaskCalendarEventData({
     events,
     eventsByDateKey,
     milestonesById,
-    monthCells,
-    weekCells,
     monthCursor,
     projectsById,
     scopedProjectIds,

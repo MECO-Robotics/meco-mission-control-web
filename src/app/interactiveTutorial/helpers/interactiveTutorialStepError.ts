@@ -69,20 +69,6 @@ export function getInteractiveTutorialStepError(
       return "Add a part instance to the mechanism to continue.";
     case "create-student":
       return "Create and save one student to continue.";
-    case "create-cnc-job":
-      return "Create and save one CNC job to continue.";
-    case "inspect-cnc-job":
-      return "Open a CNC job in edit mode to continue.";
-    case "create-print-job":
-      return "Create and save one 3D print job to continue.";
-    case "complete-print-job":
-      return "Mark one 3D print job complete to continue.";
-    case "manufacturing-search":
-      return "Type in the manufacturing search input to continue.";
-    case "create-fabrication-job":
-      return "Create and save one fabrication job to continue.";
-    case "inspect-fabrication-job":
-      return "Open a fabrication job in edit mode to continue.";
     case "workflow-edit":
       return "Open workflow edit mode to continue.";
     case "create-document":

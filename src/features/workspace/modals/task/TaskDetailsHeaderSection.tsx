@@ -81,7 +81,8 @@ export function TaskDetailsHeaderSection({
   canInlineEdit,
 }: TaskDetailsHeaderSectionProps) {
   const editableTask = taskDraft ?? activeTask;
-  const linkedMilestone = bootstrap.milestones.find(({ id }) => id === editableTask.targetMilestoneId);
+  const targetMilestoneRef = editableTask.scheduleRefs.find((ref) => ref.kind === "milestone");
+  const linkedMilestone = bootstrap.milestones.find(({ id }) => id === targetMilestoneRef?.id);
   const openBlockers = getTaskOpenBlockersForTask(activeTask.id, bootstrap);
   const isBlockedByDependency = openBlockers.length > 0;
   const statusText = taskDraft?.status ?? activeTask.status;
@@ -212,12 +213,15 @@ export function TaskDetailsHeaderSection({
                     onChange={(selection) => {
                       setTaskDraft?.((current) => ({
                         ...current,
-                        targetMilestoneId: selection[0] ?? null,
+                        scheduleRefs: [
+                          ...current.scheduleRefs.filter((ref) => ref.kind !== "milestone"),
+                          ...(selection[0] ? [{ kind: "milestone" as const, id: selection[0] }] : []),
+                        ],
                       }));
                       setEditingField(null);
                     }}
                     options={targetMilestoneOptions}
-                    value={editableTask.targetMilestoneId ? [editableTask.targetMilestoneId] : []}
+                    value={targetMilestoneRef ? [targetMilestoneRef.id] : []}
                   />
                 ) : (
                   <span className="task-detail-inline-edit-shell task-detail-inline-edit-shell-inline">

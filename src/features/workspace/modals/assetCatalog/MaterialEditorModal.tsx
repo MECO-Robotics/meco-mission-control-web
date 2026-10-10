@@ -108,11 +108,11 @@ export function MaterialEditorModal({
         />
       </label>
       <label className="field">
-        <span style={{ color: "var(--text-title)" }}>Vendor</span>
-        <input
-          onChange={(event) => updateDraft("vendor", event.target.value)}
-          value={materialDraft.vendor}
-        />
+        <span style={{ color: "var(--text-title)" }}>Preferred vendor</span>
+        <select onChange={(event) => updateDraft("preferredVendorId", event.target.value || null)} value={materialDraft.preferredVendorId ?? ""}>
+          <option value="">No preferred vendor</option>
+          {bootstrap.vendors.filter((vendor) => !vendor.isArchived).map((vendor) => <option key={vendor.id} value={vendor.id}>{vendor.name}</option>)}
+        </select>
       </label>
       <label className="field modal-wide">
         <span style={{ color: "var(--text-title)" }}>Notes</span>

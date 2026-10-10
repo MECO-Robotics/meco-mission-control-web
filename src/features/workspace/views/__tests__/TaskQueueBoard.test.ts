@@ -17,7 +17,7 @@ describe("Task Queue board", () => {
       React.createElement(TaskQueueView, {
         activePersonFilter: [],
         bootstrap,
-        disciplinesById: { "discipline-1": bootstrap.disciplines[0] },
+        workTypesById: { "work-type-design": bootstrap.workTypes[0] },
         isAllProjectsView: false,
         isNonRobotProject: false,
         membersById: {
@@ -78,7 +78,7 @@ describe("Task Queue board", () => {
       React.createElement(TaskQueueView, {
         activePersonFilter: [],
         bootstrap,
-        disciplinesById: { "discipline-1": bootstrap.disciplines[0] },
+        workTypesById: { "work-type-design": bootstrap.workTypes[0] },
         isAllProjectsView: false,
         isNonRobotProject: false,
         membersById: {
@@ -107,7 +107,7 @@ describe("Task Queue board", () => {
     const markup = renderToStaticMarkup(
       React.createElement(TaskQueueKanbanBoard, {
         bootstrap,
-        disciplinesById: { "discipline-1": bootstrap.disciplines[0] },
+        workTypesById: { "work-type-design": bootstrap.workTypes[0] },
         focusedState: "not-started",
         isNonRobotProject: false,
         membersById: {
@@ -153,7 +153,7 @@ describe("Task Queue board", () => {
     const markup = renderToStaticMarkup(
       React.createElement(TaskQueueKanbanBoard, {
         bootstrap,
-        disciplinesById: { "discipline-1": bootstrap.disciplines[0] },
+        workTypesById: { "work-type-design": bootstrap.workTypes[0] },
         focusedState: null,
         isNonRobotProject: false,
         membersById: {

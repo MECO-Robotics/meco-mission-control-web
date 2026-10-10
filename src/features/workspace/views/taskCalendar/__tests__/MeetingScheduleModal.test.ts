@@ -52,12 +52,12 @@ function findInputByLabel(node: unknown, label: string) {
 
 const draft: MeetingPayload = {
   description: "",
-  endDateTime: null,
+  endAt: null,
   location: "",
   meetingType: "general",
   projectIds: [],
   seasonId: "season-1",
-  startDateTime: "2026-05-07T18:00",
+  startAt: "2026-05-07T18:00",
   title: "Build night",
 };
 
@@ -81,6 +81,6 @@ describe("MeetingScheduleModal", () => {
 
     const updater = setDraft.mock.calls[0][0] as (current: MeetingPayload) => MeetingPayload;
 
-    expect(updater(draft).endDateTime).toBe("2026-05-09");
+    expect(updater(draft).endAt).toBe("2026-05-09");
   });
 });

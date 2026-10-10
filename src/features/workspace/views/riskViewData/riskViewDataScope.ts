@@ -104,7 +104,7 @@ export function buildRiskViewScopeData({
     .map((task) => {
       const latestQaReport = qaLatestByTaskId.get(task.id);
       if (latestQaReport) {
-        if (latestQaReport.mentorApproved !== true) {
+        if (latestQaReport.status !== "reviewed") {
           mentorActionRequiredCount += 1;
         }
 
@@ -175,7 +175,7 @@ export function buildRiskViewScopeData({
     (mechanism) => `Subsystem: ${subsystemsById[mechanism.subsystemId]?.name ?? "Unknown subsystem"}`,
     (mechanism) => {
       const partInstanceCount = bootstrap.partInstances.filter(
-        (partInstance) => partInstance.mechanismId === mechanism.id,
+        (partInstance) => partInstance.location.kind === "installed" && partInstance.location.mechanismId === mechanism.id,
       ).length;
       return `${partInstanceCount} part instance${partInstanceCount === 1 ? "" : "s"}`;
     },
@@ -190,7 +190,7 @@ export function buildRiskViewScopeData({
   );
 
   const qaPassCount = scopedReports.filter(
-    (report) => report.result === "pass" && report.mentorApproved,
+    (report) => report.reportType === "qa" && report.result === "pass" && report.status === "reviewed",
   ).length;
 
   const supply = buildRiskViewSupplySignals({ activePersonFilter, bootstrap, scopedTasks });

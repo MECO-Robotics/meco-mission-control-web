@@ -25,7 +25,11 @@ interface TaskDetailsDependenciesSectionProps {
 }
 
 function getDependencyDefaultState(kind: TaskDependencyKind) {
-  return kind === "part_instance" || kind === "milestone" ? "ready" : "complete";
+  return kind === "milestone" ? "ready" : "complete";
+}
+
+function getDefaultPartInstanceCondition(): NonNullable<TaskPayload["taskDependencies"]>[number]["requiredCondition"] {
+  return { kind: "physical-location", value: "stock" };
 }
 
 function getDependencyKey(dependency: { id?: string } | undefined, index: number) {
@@ -126,8 +130,12 @@ export function TaskDetailsDependenciesSection({
         ...existingDraft,
         requiredState:
           updates.kind !== undefined && updates.kind !== existingDraft.kind
-            ? getDependencyDefaultState(updates.kind)
+            ? updates.kind === "part-instance" ? undefined : getDependencyDefaultState(updates.kind)
             : updates.requiredState ?? existingDraft.requiredState,
+        requiredCondition:
+          updates.kind !== undefined && updates.kind !== existingDraft.kind
+            ? updates.kind === "part-instance" ? getDefaultPartInstanceCondition() : undefined
+            : updates.requiredCondition ?? existingDraft.requiredCondition,
         ...updates,
       };
 
@@ -152,7 +160,9 @@ export function TaskDetailsDependenciesSection({
           id: dependencyId,
           kind,
           refId,
-          requiredState: getDependencyDefaultState(kind),
+          ...(kind === "part-instance"
+            ? { requiredCondition: getDefaultPartInstanceCondition() }
+            : { requiredState: getDependencyDefaultState(kind) }),
           dependencyType: "hard" as TaskDependencyType,
         },
       ],

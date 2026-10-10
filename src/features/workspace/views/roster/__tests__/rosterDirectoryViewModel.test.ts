@@ -10,7 +10,6 @@ const member = (id: string, name: string, elevated = false): MemberRecord => ({
   role: "student",
   elevated,
   seasonId: "season-1",
-  disciplineId: "mechanical",
 });
 
 describe("roster directory view model", () => {
@@ -20,7 +19,7 @@ describe("roster directory view model", () => {
       .toEqual(["alex", "blair", "zoe"]);
   });
 
-  it("searches member details and their discipline label", () => {
+  it("searches member details and their responsible group label", () => {
     const rows = [member("alex", "Alex"), member("zoe", "Zoe")];
     const filtered = filterRosterMembers({
       members: rows,
@@ -29,7 +28,7 @@ describe("roster directory view model", () => {
       presenceById: new Map(),
       insightById: new Map(),
       searchText: "mechanical",
-      disciplineById: { mechanical: "Mechanical Engineering" },
+      groupNamesByMemberId: new Map([["alex", ["Mechanical Group"]], ["zoe", ["Mechanical Group"]]]),
     });
 
     expect(filtered.map((row) => row.id)).toEqual(["alex", "zoe"]);

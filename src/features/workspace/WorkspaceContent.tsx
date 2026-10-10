@@ -3,14 +3,13 @@ import { WorkspaceViewMemory } from "./shared/navigation/WorkspaceViewMemory";
 import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
 
 import type { ArtifactKind, TaskStatus } from "@/types/common";
-import type { ArtifactRecord, ManufacturingItemRecord, MaterialRecord, PartDefinitionRecord, PurchaseItemRecord } from "@/types/recordsInventory";
+import type { ArtifactRecord, MaterialRecord, PartDefinitionRecord, PurchaseItemRecord } from "@/types/recordsInventory";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MeetingPayload, MemberPayload, MilestonePayload, RiskPayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
 import type { SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
 import type {
   InventoryViewTab,
-  ManufacturingViewTab,
   NavigationTarget,
   TaskViewTab,
   ViewTab,
@@ -53,7 +52,7 @@ export interface WorkspaceContentProps {
   artifacts: ArtifactRecord[];
   availabilityBootstrap: BootstrapPayload;
   bootstrap: BootstrapPayload;
-  disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
+  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>;
   externalMembers: BootstrapPayload["members"];
   handleCreateMember: (milestone: React.FormEvent<HTMLFormElement>) => void;
   handleReactivateMemberForSeason: (memberId: string) => Promise<void>;
@@ -67,6 +66,9 @@ export interface WorkspaceContentProps {
     payload: MilestonePayload,
   ) => Promise<void>;
   handleUpdateMember: (milestone: React.FormEvent<HTMLFormElement>) => void;
+  loadWorkspace: () => Promise<unknown>;
+  handleUnauthorized: () => void;
+  setDataMessage: (message: string | null) => void;
   isAddPersonOpen: boolean;
   isDeletingMember: boolean;
   isEditPersonOpen: boolean;
@@ -78,7 +80,6 @@ export interface WorkspaceContentProps {
   memberForm: MemberPayload;
   membersById: Record<string, BootstrapPayload["members"][number]>;
   mechanismsById: Record<string, BootstrapPayload["mechanisms"][number]>;
-  openCreateManufacturingModal: (process: "cnc" | "3d-print" | "fabrication") => void;
   openCreateArtifactModal: (kind: ArtifactKind) => void;
   openCreateMaterialModal: () => void;
   openCreateMechanismModal: (subsystemId?: string) => void;
@@ -96,11 +97,7 @@ export interface WorkspaceContentProps {
   openCreateWorkstreamModal: () => void;
   openEditWorkstreamModal: (workstream: BootstrapPayload["workstreams"][number]) => void;
   onDeleteRisk: (riskId: string) => Promise<void>;
-  onCncQuickStatusChange: (
-    item: ManufacturingItemRecord,
-    status: ManufacturingItemRecord["status"],
-  ) => Promise<void>;
-  openEditManufacturingModal: (item: ManufacturingItemRecord) => void;
+  onCreateRisk: (payload: RiskPayload) => Promise<void>;
   openEditArtifactModal: (artifact: ArtifactRecord) => void;
   openEditMaterialModal: (item: MaterialRecord) => void;
   openEditMechanismModal: (mechanism: BootstrapPayload["mechanisms"][number]) => void;
@@ -128,10 +125,8 @@ export interface WorkspaceContentProps {
   partDefinitionsById: Record<string, BootstrapPayload["partDefinitions"][number]>;
   rosterMentors: BootstrapPayload["members"];
   showCncMentorQuickActions: boolean;
-  manufacturingView: ManufacturingViewTab;
   setActiveTab: Dispatch<SetStateAction<ViewTab>>;
   setInventoryView: Dispatch<SetStateAction<InventoryViewTab>>;
-  setManufacturingView: Dispatch<SetStateAction<ManufacturingViewTab>>;
   setTaskView: Dispatch<SetStateAction<TaskViewTab>>;
   setWorklogsView: Dispatch<SetStateAction<WorklogsViewTab>>;
   inventoryView: InventoryViewTab;
@@ -175,35 +170,27 @@ export function WorkspaceContent({
   activeTab,
   inventoryView,
   isNonRobotProject,
-  manufacturingView,
   setActiveTab,
   setInventoryView,
-  setManufacturingView,
   setTaskView,
   setWorklogsView,
   taskView,
   ...props
 }: WorkspaceContentProps) {
   const effectiveInventoryView =
-    isNonRobotProject && (inventoryView === "parts" || inventoryView === "part-mappings")
+    inventoryView === "documents" || (isNonRobotProject && (inventoryView === "parts" || inventoryView === "part-mappings"))
       ? "materials"
       : inventoryView;
   const previousTaskViewRef = useRef(taskView);
-  const previousManufacturingViewRef = useRef(manufacturingView);
   const previousInventoryViewRef = useRef(effectiveInventoryView);
 
   const taskSwipeDirection = getSwipeDirection(previousTaskViewRef.current, taskView, [
     "calendar",
     "timeline",
     "robot-map",
-    "queue",
-    "milestones",
+    "kanban",
+    "agenda",
   ]);
-  const manufacturingSwipeDirection = getSwipeDirection(
-    previousManufacturingViewRef.current,
-    manufacturingView,
-    ["all", "cnc", "prints", "fabrication"],
-  );
   const inventorySwipeDirection = getSwipeDirection(
     previousInventoryViewRef.current,
     effectiveInventoryView,
@@ -213,9 +200,6 @@ export function WorkspaceContent({
   useEffect(() => {
     previousTaskViewRef.current = taskView;
   }, [taskView]);
-  useEffect(() => {
-    previousManufacturingViewRef.current = manufacturingView;
-  }, [manufacturingView]);
   useEffect(() => {
     previousInventoryViewRef.current = effectiveInventoryView;
   }, [effectiveInventoryView]);
@@ -237,10 +221,6 @@ export function WorkspaceContent({
       setInventoryView(target.inventoryView);
     }
 
-    if (target.manufacturingView) {
-      setManufacturingView(target.manufacturingView);
-    }
-
     setActiveTab(target.tab);
   };
 
@@ -251,16 +231,13 @@ export function WorkspaceContent({
       activeTab={activeTab}
       effectiveInventoryView={effectiveInventoryView}
       inventorySwipeDirection={inventorySwipeDirection}
-      manufacturingSwipeDirection={manufacturingSwipeDirection}
       taskSwipeDirection={taskSwipeDirection}
       taskView={taskView}
-      manufacturingView={manufacturingView}
       inventoryView={inventoryView}
       isNonRobotProject={isNonRobotProject}
       onOpenDrilldownTarget={handleOpenDrilldownTarget}
       setActiveTab={setActiveTab}
       setInventoryView={setInventoryView}
-      setManufacturingView={setManufacturingView}
       setTaskView={setTaskView}
       setWorklogsView={setWorklogsView}
     />

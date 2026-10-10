@@ -1,44 +1,34 @@
 import type {
-  TaskBlockerSeverity,
-  TaskBlockerSourceKind,
-  TaskBlockerType,
+  PartInstanceDependencyCondition,
+  ScheduleReference,
   TaskDependencyKind,
   TaskDependencyType,
   TaskPriority,
   TaskStatus,
 } from "../common";
+import type { ManufacturingDetailsRecord } from "../recordsExecution";
 
 export interface TaskDependencyDraft {
   id?: string;
   kind: TaskDependencyKind;
   refId: string;
-  requiredState: string;
+  requiredState?: string;
+  requiredCondition?: PartInstanceDependencyCondition;
   dependencyType: TaskDependencyType;
 }
 
-export interface TaskBlockerDraft {
-  id?: string;
-  blockerType: TaskBlockerType;
-  blockerId: string | null;
-  description: string;
-  isIntentPlaceholder?: boolean;
-  severity: TaskBlockerSeverity;
-  sourceKind?: string | null;
-}
-
 export interface TaskPayload {
-  checklistItems?: string[];
   projectId: string;
+  workTypeId: string;
+  responsibleGroupId: string | null;
   workstreamIds: string[];
   title: string;
   summary: string;
   subsystemIds: string[];
-  disciplineId: string;
   mechanismIds: string[];
   partInstanceIds: string[];
-  artifactIds: string[];
-  targetRiskId?: string | null;
-  targetMilestoneId: string | null;
+  scheduleRefs: ScheduleReference[];
+  requestedById: string | null;
   photoUrl: string;
   ownerId: string | null;
   assigneeIds: string[];
@@ -47,13 +37,10 @@ export interface TaskPayload {
   dueDate: string;
   priority: TaskPriority;
   status: TaskStatus;
+  checklistItems: string[];
   estimatedHours: number;
-  actualHours: number;
-  taskBlockers?: TaskBlockerDraft[];
-  linkedManufacturingIds: string[];
-  linkedPurchaseIds: string[];
   requiresDocumentation: boolean;
-  documentationLinked: boolean;
+  manufacturingDetails: ManufacturingDetailsRecord | null;
   taskDependencies?: TaskDependencyDraft[];
 }
 
@@ -61,19 +48,7 @@ export interface TaskDependencyPayload {
   taskId: string;
   kind: TaskDependencyKind;
   refId: string;
-  requiredState: string;
+  requiredState?: string;
+  requiredCondition?: PartInstanceDependencyCondition;
   dependencyType: TaskDependencyType;
-}
-
-export interface TaskBlockerPayload {
-  blockedTaskId: string;
-  blockerType: TaskBlockerSourceKind;
-  issueType: TaskBlockerType;
-  blockerId: string | null;
-  description: string;
-  severity: TaskBlockerSeverity;
-  status: "open" | "resolved";
-  createdByMemberId?: string | null;
-  createdAt?: string;
-  resolvedAt?: string | null;
 }

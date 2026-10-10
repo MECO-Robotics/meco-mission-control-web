@@ -1,6 +1,5 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { isMemberActiveInSeason, isPartDefinitionActiveInSeason } from "@/lib/appUtils/common";
-import { isMeetingVisibleInProjectScope } from "@/features/workspace/shared/events";
 import { scopeBootstrapRisks } from "./workspaceBootstrapRiskScope";
 
 export function scopeBootstrapBySelection(
@@ -8,185 +7,108 @@ export function scopeBootstrapBySelection(
   selectedSeasonId: string | null,
   selectedProjectId: string | null,
 ): BootstrapPayload {
-  const seasonScopedProjects = selectedSeasonId
-    ? payload.projects.filter((project) => project.seasonId === selectedSeasonId)
+  const seasons = selectedSeasonId ? payload.seasons.filter(({ id }) => id === selectedSeasonId) : payload.seasons;
+  const seasonProjects = selectedSeasonId
+    ? payload.projects.filter(({ seasonId }) => seasonId === selectedSeasonId)
     : payload.projects;
-  const selectedProjectIsValid =
-    selectedProjectId !== null &&
-    seasonScopedProjects.some((project) => project.id === selectedProjectId);
-  const activeProjectIds = new Set(
-    (selectedProjectIsValid
-      ? seasonScopedProjects.filter((project) => project.id === selectedProjectId)
-      : seasonScopedProjects
-    ).map((project) => project.id),
-  );
-  const scopedSeasons = selectedSeasonId
-    ? payload.seasons.filter((season) => season.id === selectedSeasonId)
-    : payload.seasons;
-  const scopedProjects = seasonScopedProjects.filter((project) =>
-    activeProjectIds.has(project.id),
-  );
-  const scopedWorkstreams = payload.workstreams.filter((workstream) =>
-    activeProjectIds.has(workstream.projectId),
-  );
-  const scopedSubsystems = payload.subsystems.filter((subsystem) =>
-    activeProjectIds.has(subsystem.projectId),
-  );
-  const scopedSubsystemIds = new Set(scopedSubsystems.map((subsystem) => subsystem.id));
-  const scopedMechanisms = payload.mechanisms.filter((mechanism) =>
-    scopedSubsystemIds.has(mechanism.subsystemId),
-  );
-  const scopedMechanismIds = new Set(scopedMechanisms.map((mechanism) => mechanism.id));
-  const scopedPartInstances = payload.partInstances.filter(
-    (partInstance) =>
-      scopedSubsystemIds.has(partInstance.subsystemId) &&
-      (!partInstance.mechanismId || scopedMechanismIds.has(partInstance.mechanismId)),
-  );
-  const scopedPurchaseItems = payload.purchaseItems.filter((item) =>
-    scopedSubsystemIds.has(item.subsystemId),
-  );
-  const scopedManufacturingItems = payload.manufacturingItems.filter((item) =>
-    scopedSubsystemIds.has(item.subsystemId),
-  );
-  const scopedMilestones = payload.milestones.filter((milestone) => {
-    const milestoneProjectIds = milestone.projectIds ?? [];
-    return milestoneProjectIds.length === 0
-      ? true
-      : milestoneProjectIds.some((projectId) => activeProjectIds.has(projectId));
-  });
-  const scopedMeetings = (payload.meetings ?? []).filter((meeting) => {
-    if (selectedSeasonId && meeting.seasonId && meeting.seasonId !== selectedSeasonId) {
-      return false;
-    }
-
-    return isMeetingVisibleInProjectScope(meeting, activeProjectIds);
-  });
-  const scopedWorkstreamIds = new Set(scopedWorkstreams.map((workstream) => workstream.id));
-  const scopedMilestoneIds = new Set(scopedMilestones.map((milestone) => milestone.id));
-  const scopedPartInstanceIds = new Set(scopedPartInstances.map((partInstance) => partInstance.id));
-  const scopedTasks = payload.tasks.filter(
-    (task) =>
-      activeProjectIds.has(task.projectId) &&
-      task.subsystemIds.some((subsystemId) => scopedSubsystemIds.has(subsystemId)),
-  );
-  const scopedTaskIds = new Set(scopedTasks.map((task) => task.id));
-  const scopedTaskDependencies = (payload.taskDependencies ?? []).filter((dependency) => {
-    if (!scopedTaskIds.has(dependency.taskId)) {
-      return false;
-    }
-
-    if (dependency.kind === "task") {
-      return scopedTaskIds.has(dependency.refId);
-    }
-
-    if (dependency.kind === "milestone") {
-      return scopedMilestoneIds.has(dependency.refId);
-    }
-
-    if (dependency.kind === "part_instance") {
-      return scopedPartInstanceIds.has(dependency.refId);
-    }
-
-    return false;
-  });
-  const scopedTaskBlockers = (payload.taskBlockers ?? []).filter((blocker) => {
-    if (!scopedTaskIds.has(blocker.blockedTaskId)) {
-      return false;
-    }
-
-    if (!blocker.blockerId) {
-      return true;
-    }
-
-    if (blocker.blockerType === "external" || blocker.sourceKind === "external") {
-      return true;
-    }
-
-    return (
-      scopedTaskIds.has(blocker.blockerId) ||
-      scopedMilestoneIds.has(blocker.blockerId) ||
-      scopedPartInstanceIds.has(blocker.blockerId)
-    );
-  });
-  const scopedWorkLogs = payload.workLogs.filter((workLog) => scopedTaskIds.has(workLog.taskId));
-  const scopedReports = payload.reports.filter((report) => {
-    if (!activeProjectIds.has(report.projectId)) {
-      return false;
-    }
-
-    if (report.taskId && !scopedTaskIds.has(report.taskId)) {
-      return false;
-    }
-
-    if (report.milestoneId && !scopedMilestoneIds.has(report.milestoneId)) {
-      return false;
-    }
-
-    return true;
-  });
-  const scopedReportIds = new Set(scopedReports.map((report) => report.id));
-  const scopedReportFindings = payload.reportFindings.filter((finding) =>
-    scopedReportIds.has(finding.reportId),
-  );
-  const scopedQaReportIds = new Set(scopedReports.filter((report) => report.reportType === "QA").map((report) => report.id));
-  const scopedTestResultIds = new Set(scopedReports.filter((report) => report.reportType !== "QA").map((report) => report.id));
-  const scopedRisks = scopeBootstrapRisks(
-    payload,
-    activeProjectIds,
-    scopedWorkstreamIds,
-    scopedTaskIds,
-    scopedQaReportIds,
-    scopedTestResultIds,
-  );
-  const scopedMembers = selectedSeasonId
-    ? payload.members.filter((member) => isMemberActiveInSeason(member, selectedSeasonId))
-    : payload.members;
-  const scopedPartDefinitions = selectedSeasonId
-    ? payload.partDefinitions.filter((partDefinition) =>
-        isPartDefinitionActiveInSeason(partDefinition, selectedSeasonId),
-      )
+  const selectedProjectValid = Boolean(selectedProjectId && seasonProjects.some(({ id }) => id === selectedProjectId));
+  const projects = selectedProjectValid
+    ? seasonProjects.filter(({ id }) => id === selectedProjectId)
+    : seasonProjects;
+  const projectIds = new Set(projects.map(({ id }) => id));
+  const projectTypes = new Set(projects.map(({ projectType }) => projectType));
+  const tasks = payload.tasks.filter(({ projectId }) => projectIds.has(projectId));
+  const taskIds = new Set(tasks.map(({ id }) => id));
+  const workstreams = payload.workstreams.filter(({ projectId }) => projectIds.has(projectId));
+  const subsystems = payload.subsystems.filter(({ projectId }) => projectIds.has(projectId));
+  const subsystemIds = new Set(subsystems.map(({ id }) => id));
+  const mechanisms = payload.mechanisms.filter(({ subsystemId }) => subsystemIds.has(subsystemId));
+  const mechanismIds = new Set(mechanisms.map(({ id }) => id));
+  const partDefinitions = selectedSeasonId
+    ? payload.partDefinitions.filter((part) => isPartDefinitionActiveInSeason(part, selectedSeasonId))
     : payload.partDefinitions;
-  const scopedActions = (payload.actions ?? []).filter((action) => {
-    if (action.projectId && !activeProjectIds.has(action.projectId)) {
-      return false;
-    }
-
-    const actionTaskId = action.taskId ?? (action.entityType === "task" ? action.entityId : null);
-    const actionSubsystemId =
-      action.subsystemId ?? (action.entityType === "subsystem" ? action.entityId : null);
-
-    if (actionTaskId && !scopedTaskIds.has(actionTaskId)) {
-      return false;
-    }
-
-    if (actionSubsystemId && !scopedSubsystemIds.has(actionSubsystemId)) {
-      return false;
-    }
-
-    return true;
+  const partDefinitionIds = new Set(partDefinitions.map(({ id }) => id));
+  const partInstances = payload.partInstances.filter((part) => {
+    if (partDefinitionIds.has(part.partDefinitionId)) return true;
+    if (part.intendedMechanismId && !mechanismIds.has(part.intendedMechanismId)) return false;
+    if (part.intendedSubsystemId && subsystemIds.has(part.intendedSubsystemId)) return true;
+    return part.location.kind === "installed" && subsystemIds.has(part.location.subsystemId) &&
+      (!part.location.mechanismId || mechanismIds.has(part.location.mechanismId));
   });
+  const partInstanceIds = new Set(partInstances.map(({ id }) => id));
+  const milestones = payload.milestones.filter((item) =>
+    (!selectedSeasonId || item.seasonId === selectedSeasonId) &&
+    (item.projectIds.length === 0 || item.projectIds.some((id) => projectIds.has(id))),
+  );
+  const milestoneIds = new Set(milestones.map(({ id }) => id));
+  const meetings = payload.meetings.filter((item) =>
+    (!selectedSeasonId || item.seasonId === selectedSeasonId) &&
+    (item.projectIds.length === 0 || item.projectIds.some((id) => projectIds.has(id))),
+  );
+  const events = payload.events.filter((item) =>
+    (!selectedSeasonId || item.seasonId === selectedSeasonId) &&
+    (item.projectIds.length === 0 || item.projectIds.some((id) => projectIds.has(id))),
+  );
+  const reports = payload.reports.filter(({ projectId }) => projectIds.has(projectId));
+  const qaRequests = payload.qaRequests.filter(({ projectId }) => projectIds.has(projectId));
+  const qaFindings = payload.qaFindings.filter(({ projectId }) => projectIds.has(projectId));
+  const testResults = payload.testResults.filter(({ projectId }) => projectIds.has(projectId));
+  const testFindings = payload.testFindings.filter(({ projectId }) => projectIds.has(projectId));
+  const risks = scopeBootstrapRisks(payload, projectIds);
+  const artifacts = payload.artifacts.filter(({ projectId }) => projectIds.has(projectId));
+  const purchaseItems = payload.purchaseItems.filter(({ taskId }) => taskIds.has(taskId));
+  const neededVendorIds = new Set([
+    ...purchaseItems.flatMap(({ quotes }) => quotes.map(({ vendorId }) => vendorId)),
+    ...payload.materials.flatMap(({ preferredVendorId }) => preferredVendorId ? [preferredVendorId] : []),
+  ]);
 
   return {
     ...payload,
-    seasons: scopedSeasons,
-    projects: scopedProjects,
-    workstreams: scopedWorkstreams,
-    subsystems: scopedSubsystems,
-    mechanisms: scopedMechanisms,
-    partInstances: scopedPartInstances,
-    purchaseItems: scopedPurchaseItems,
-    manufacturingItems: scopedManufacturingItems,
-    milestones: scopedMilestones,
-    meetings: scopedMeetings,
-    members: scopedMembers,
-    partDefinitions: scopedPartDefinitions,
-    tasks: scopedTasks,
-    workLogs: scopedWorkLogs,
-    reports: scopedReports,
-    reportFindings: scopedReportFindings,
-    risks: scopedRisks,
-    taskDependencies: scopedTaskDependencies,
-    taskBlockers: scopedTaskBlockers,
-    actions: scopedActions,
+    seasons,
+    projects,
+    workTypes: payload.workTypes.filter(({ projectType }) => projectTypes.has(projectType)),
+    responsibleGroups: payload.responsibleGroups.filter((group) =>
+      (!selectedSeasonId || group.seasonId === selectedSeasonId) &&
+      (group.projectIds.length === 0 || group.projectIds.some((id) => projectIds.has(id))),
+    ),
+    workstreams,
+    vendors: payload.vendors.filter(({ id }) => neededVendorIds.has(id)),
+    members: selectedSeasonId ? payload.members.filter((member) => isMemberActiveInSeason(member, selectedSeasonId)) : payload.members,
+    subsystems,
+    mechanisms,
+    partDefinitions,
+    partInstances,
+    tasks,
+    taskDependencies: payload.taskDependencies.filter((dependency) => {
+      if (!taskIds.has(dependency.taskId)) return false;
+      if (dependency.kind === "task") return taskIds.has(dependency.refId);
+      if (dependency.kind === "milestone") return milestoneIds.has(dependency.refId);
+      return partInstanceIds.has(dependency.refId);
+    }),
+    materials: payload.materials,
+    purchaseItems,
+    meetings,
+    events,
+    milestones,
+    milestoneRequirements: payload.milestoneRequirements.filter(({ milestoneId }) => milestoneIds.has(milestoneId)),
+    reports,
+    qaRequests,
+    qaFindings,
+    testResults,
+    testFindings,
+    risks,
+    artifacts,
+    workLogs: payload.workLogs.filter(({ taskId }) => taskIds.has(taskId)),
+    attendanceRecords: selectedSeasonId
+      ? payload.attendanceRecords.filter(({ memberId }) => payload.members.some((member) => member.id === memberId && isMemberActiveInSeason(member, selectedSeasonId)))
+      : payload.attendanceRecords,
+    designIterations: payload.designIterations?.filter((record) => !record.taskId || taskIds.has(record.taskId)),
+    actions: payload.actions?.filter((action) =>
+      (!action.projectId || projectIds.has(action.projectId)) &&
+      (!action.taskId || taskIds.has(action.taskId)) &&
+      (!action.subsystemId || subsystemIds.has(action.subsystemId)),
+    ),
+    escalations: payload.escalations,
+    manufacturingProcesses: payload.manufacturingProcesses,
   };
 }

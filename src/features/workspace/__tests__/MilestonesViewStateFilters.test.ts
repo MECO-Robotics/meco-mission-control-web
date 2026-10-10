@@ -21,8 +21,8 @@ it("keeps search out of suggestion candidates while readiness filters both miles
     sortOrder: "asc" as const,
     typeFilter: [],
   };
-  const filterByReadiness = (milestones: typeof bootstrap.milestones, status: string) =>
-    milestones.filter((milestone) => milestone.status === status);
+  const filterByReadiness = (milestones: typeof bootstrap.milestones, readinessStatus: string) =>
+    milestones.filter((milestone) => (milestone.readinessStatus ?? "not-ready") === readinessStatus);
 
   const visibleMilestones = filterByReadiness(
     filterAndSortMilestones({ ...sharedFilters, searchFilter: "Design" }),

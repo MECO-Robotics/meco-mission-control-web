@@ -7,13 +7,16 @@
     ]
   },
   { "id": "home", "label": "Dashboard", "section": "work", "icon": "LayoutDashboard", "target": { "tab": "home" } },
-  { "id": "work-tasks", "label": "Tasks", "section": "work", "icon": "ListTodo", "target": { "tab": "tasks", "taskView": "queue" } },
+  { "id": "work-tasks", "label": "Kanban", "section": "work", "icon": "ListTodo", "target": { "tab": "tasks", "taskView": "kanban" } },
   { "id": "work-schedule", "label": "Schedule", "section": "work", "icon": "CalendarDays", "target": { "tab": "tasks", "taskView": "calendar" } },
+  { "id": "work-activity", "label": "Activity", "section": "work", "icon": "Activity", "target": { "tab": "worklogs", "worklogsView": "logs" } },
+  { "id": "work-risks", "label": "Risks", "section": "work", "icon": "ShieldAlert", "target": { "tab": "risks" } },
   { "id": "resources-materials", "label": "Materials", "section": "resources", "icon": "Boxes", "target": { "tab": "inventory", "inventoryView": "materials" } },
-  { "id": "resources-documents", "label": "Documents", "section": "resources", "icon": "FileText", "target": { "tab": "inventory", "inventoryView": "documents" } },
+  { "id": "resources-documents", "label": "Documents", "section": "resources", "icon": "FileText", "target": { "tab": "documents" } },
+  { "id": "resources-qa-reports", "label": "QA / Reports", "section": "resources", "icon": "ClipboardCheck", "target": { "tab": "worklogs", "worklogsView": "qa" } },
   { "id": "resources-parts", "label": "Parts", "section": "resources", "icon": "Package", "target": { "tab": "inventory", "inventoryView": "parts" } },
   { "id": "resources-purchases", "label": "Purchases", "section": "resources", "icon": "ShoppingCart", "target": { "tab": "inventory", "inventoryView": "purchases" } },
-  { "id": "work-manufacturing", "label": "Manufacturing", "section": "work", "icon": "Wrench", "target": { "tab": "manufacturing", "manufacturingView": "all" } },
   { "id": "resources-structure", "label": "Robot", "section": "work", "icon": "Bot", "target": { "tab": "tasks", "taskView": "robot-map" } },
-  { "id": "team-people", "label": "People", "section": "resources", "icon": "Users", "target": { "tab": "roster", "rosterView": "directory" } }
+  { "id": "team-people", "label": "People", "section": "team", "icon": "Users", "target": { "tab": "roster", "rosterView": "directory" } },
+  { "id": "team-teams", "label": "Teams", "section": "team", "icon": "Network", "target": { "tab": "teams" } }
 ]

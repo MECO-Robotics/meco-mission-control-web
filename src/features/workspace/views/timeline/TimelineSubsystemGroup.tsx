@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { buildTimelineSubsystemHighlightStyle } from "./model/timelineTaskColors";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord } from "@/types/recordsExecution";
@@ -17,7 +17,7 @@ interface TimelineSubsystemGroupProps {
   clearHoveredTaskRow: () => void;
   clearHoveredMilestonePopup: () => void;
   collapsedSubsystems: Record<string, boolean>;
-  disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
+  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>;
   firstDayGridColumn: number;
   gridMinWidth: number;
   handleTimelineDayMouseEnter: (milestone: React.MouseEvent<HTMLElement>) => void;
@@ -51,7 +51,7 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
   clearHoveredTaskRow,
   clearHoveredMilestonePopup,
   collapsedSubsystems,
-  disciplinesById,
+  workTypesById,
   firstDayGridColumn,
   gridMinWidth,
   handleTimelineDayMouseEnter,
@@ -107,7 +107,7 @@ export const TimelineSubsystemGroup: React.FC<TimelineSubsystemGroupProps> = ({
         clearHoveredSubsystemRow={clearHoveredSubsystemRow}
         clearHoveredTaskRow={clearHoveredTaskRow}
         collapsedSubsystems={collapsedSubsystems}
-        disciplinesById={disciplinesById}
+        workTypesById={workTypesById}
         firstDayGridColumn={firstDayGridColumn}
         handleTimelineDayMouseEnter={handleTimelineDayMouseEnter}
         hoveredSubsystemId={hoveredSubsystemId}

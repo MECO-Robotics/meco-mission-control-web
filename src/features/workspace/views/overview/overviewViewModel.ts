@@ -83,7 +83,7 @@ function milestoneToItem(
   milestone: BootstrapPayload["milestones"][number],
   today: Date,
 ): OverviewListItem {
-  const days = daysFromToday(milestone.startDateTime, today);
+  const days = daysFromToday(milestone.startAt, today);
   return {
     id: milestone.id,
     meta: `${relativeDueLabel(days)} | ${milestone.type}`,
@@ -107,10 +107,10 @@ export function buildHomeViewModel(bootstrap: BootstrapPayload, today = new Date
 
   const upcomingMilestones = bootstrap.milestones
     .filter((milestone) => {
-      const days = daysFromToday(milestone.startDateTime, today);
+      const days = daysFromToday(milestone.startAt, today);
       return days >= 0 && days <= 14;
     })
-    .sort((left, right) => left.startDateTime.localeCompare(right.startDateTime))
+    .sort((left, right) => left.startAt.localeCompare(right.startAt))
     .slice(0, 4)
     .map((milestone) => milestoneToItem(milestone, today));
 

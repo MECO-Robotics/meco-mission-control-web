@@ -29,13 +29,13 @@ type TimelineMilestoneUnderlayEntry = {
 };
 
 export function compareTimelineMilestonesByStart(left: MilestoneRecord, right: MilestoneRecord) {
-  const startComparison = left.startDateTime.localeCompare(right.startDateTime);
+  const startComparison = left.startAt.localeCompare(right.startAt);
   if (startComparison !== 0) {
     return startComparison;
   }
 
-  const leftEnd = left.endDateTime ?? left.startDateTime;
-  const rightEnd = right.endDateTime ?? right.startDateTime;
+  const leftEnd = left.endAt ?? left.startAt;
+  const rightEnd = right.endAt ?? right.startAt;
   const endComparison = leftEnd.localeCompare(rightEnd);
   if (endComparison !== 0) {
     return endComparison;
@@ -78,8 +78,8 @@ export function buildTimelineDayMilestoneUnderlays({
   const underlayEntries = [...milestones]
     .sort(compareTimelineMilestonesByStart)
     .map<TimelineMilestoneUnderlayEntry | null>((milestone, sourceOrder) => {
-      const milestoneStartDay = datePortion(milestone.startDateTime);
-      const milestoneEndDay = datePortion(milestone.endDateTime ?? milestone.startDateTime);
+      const milestoneStartDay = datePortion(milestone.startAt);
+      const milestoneEndDay = datePortion(milestone.endAt ?? milestone.startAt);
       const clampedStartDay = milestoneStartDay < timelineStart ? timelineStart : milestoneStartDay;
       const clampedEndDay = milestoneEndDay > timelineEnd ? timelineEnd : milestoneEndDay;
 

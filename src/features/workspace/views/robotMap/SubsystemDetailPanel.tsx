@@ -115,7 +115,7 @@ export function SubsystemDetailPanel({
       emptyLabel: "No linked tasks yet.",
       items: selectedSubsystem.linkedTasks,
       label: "Linked tasks",
-      target: { tab: "tasks", taskView: "queue" },
+      target: { tab: "tasks", taskView: "kanban" },
     },
     {
       emptyLabel: "No linked risks yet.",
@@ -128,12 +128,6 @@ export function SubsystemDetailPanel({
       items: selectedSubsystem.linkedWorkLogs,
       label: "Linked worklogs",
       target: { tab: "worklogs", worklogsView: "logs" },
-    },
-    {
-      emptyLabel: "No linked manufacturing items yet.",
-      items: selectedSubsystem.linkedManufacturingItems,
-      label: "Linked manufacturing",
-      target: { tab: "manufacturing", manufacturingView: "all" },
     },
   ];
 

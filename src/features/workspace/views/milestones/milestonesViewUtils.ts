@@ -1,14 +1,13 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { MilestoneStatus } from "@/types/common";
 import type { MilestoneRecord } from "@/types/recordsExecution";
-import { READINESS_STATUS_OPTIONS } from "@/features/workspace/shared/model/workspaceOptions";
 import { filterSelectionIncludes, filterSelectionIntersects, filterSelectionMatchesTaskPeople } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { getMilestoneTasksForState } from "@/features/workspace/shared/milestones/milestoneTaskState";
 import { getMilestoneProjectIds } from "@/features/workspace/shared/events/eventProjectUtils";
 import { getMilestoneTypeStyle } from "@/features/workspace/shared/events/eventStyles";
 
-export type MilestoneSortField = "startDateTime" | "title" | "type";
+export type MilestoneSortField = "startAt" | "title" | "type";
 export type MilestoneSearchSuggestion = {
   context: string;
   description: string;
@@ -33,13 +32,13 @@ function isSameLocalCalendarDay(start: Date, end: Date) {
   );
 }
 
-export function formatMilestoneEndDateTime(startDateTime: string, endDateTime: string | null) {
-  if (!endDateTime) {
+export function formatMilestoneEndDateTime(startAt: string, endAt: string | null) {
+  if (!endAt) {
     return null;
   }
 
-  const start = new Date(startDateTime);
-  const end = new Date(endDateTime);
+  const start = new Date(startAt);
+  const end = new Date(endAt);
 
   if (isSameLocalCalendarDay(start, end)) {
     return end.toLocaleTimeString(undefined, {
@@ -48,7 +47,7 @@ export function formatMilestoneEndDateTime(startDateTime: string, endDateTime: s
     });
   }
 
-  return formatMilestoneDateTime(endDateTime);
+  return formatMilestoneDateTime(endAt);
 }
 
 export function buildMilestoneProjectLabels(
@@ -79,9 +78,10 @@ export function buildMilestoneProjectLabels(
 }
 
 export function formatMilestoneStatusLabel(status: MilestoneStatus | undefined) {
-  return status
-    ? READINESS_STATUS_OPTIONS.find((option) => option.id === status)?.name ?? null
-    : null;
+  if (status === "planned") return "Planned";
+  if (status === "active") return "Active";
+  if (status === "complete") return "Complete";
+  return null;
 }
 
 export function buildMilestoneSearchSuggestions({
@@ -105,7 +105,7 @@ export function buildMilestoneSearchSuggestions({
     .flatMap((milestone) => {
       const typeLabel = getMilestoneTypeStyle(milestone.type).label;
       const statusLabel = formatMilestoneStatusLabel(milestone.status);
-      const dateLabel = formatMilestoneDateTime(milestone.startDateTime);
+      const dateLabel = formatMilestoneDateTime(milestone.startAt);
       const projectLabel = projectLabelByMilestoneId[milestone.id] ?? "All projects";
       const description = milestone.description.trim();
       const searchableText = [
@@ -214,7 +214,7 @@ export function filterAndSortMilestones({
       return getMilestoneTypeStyle(milestone.type).label;
     }
 
-    return milestone.startDateTime;
+    return milestone.startAt;
   };
 
   return result.sort((left, right) => {

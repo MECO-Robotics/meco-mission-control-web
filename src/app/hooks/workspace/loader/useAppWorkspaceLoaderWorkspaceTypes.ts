@@ -8,4 +8,4 @@ export interface WorkspaceLoadScope {
   seasonId?: string | null;
 }
 
-export type WorkspaceLoader = (scope?: WorkspaceLoadScope, canApply?: () => boolean) => Promise<void>;
+export type WorkspaceLoader = (scope?: WorkspaceLoadScope, canApply?: () => boolean, canNotify?: () => boolean) => Promise<boolean>;

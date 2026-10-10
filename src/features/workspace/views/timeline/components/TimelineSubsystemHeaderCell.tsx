@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { TimelineCollapseArrow } from "../TimelineCollapseArrow";
 import { TimelineMergedCellColumn } from "./TimelineMergedCellColumn";
 import { buildTimelineSubsystemHighlightStyle } from "../model/timelineTaskColors";

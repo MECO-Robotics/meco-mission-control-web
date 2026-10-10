@@ -2,6 +2,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskRecord, WorkLogRecord } from "@/types/recordsExecution";
 import type { MemberRecord } from "@/types/recordsOrganization";
 import { formatLocalDate } from "@/lib/dateUtils";
+import { getTaskPlanningState } from "@/features/workspace/shared/task/taskPlanning";
 
 export type AvailableStudentRosterState = "available" | "blocked-waiting" | "busy";
 
@@ -25,12 +26,13 @@ function isOpenTask(task: TaskRecord) {
   return task.status !== "complete";
 }
 
-function isBlockedOrWaitingTask(task: TaskRecord, openBlockerTaskIds: Set<string>) {
+function isBlockedOrWaitingTask(task: TaskRecord, openBlockerTaskIds: Set<string>, bootstrap: BootstrapPayload) {
+  const planningState = getTaskPlanningState(task, bootstrap);
   return (
     task.isBlocked ||
     task.isWaitingOnDependency ||
-    task.planningState === "blocked" ||
-    task.planningState === "waiting-on-dependency" ||
+    planningState === "blocked" ||
+    planningState === "waiting-on-dependency" ||
     task.status === "waiting-for-qa" ||
     openBlockerTaskIds.has(task.id)
   );
@@ -58,10 +60,9 @@ function buildHints({
   task: TaskRecord | null;
 }) {
   const hints = new Set<string>();
-  const discipline = bootstrap.disciplines.find((candidate) => candidate.id === member.disciplineId);
-  if (discipline) {
-    hints.add(discipline.name);
-  }
+  bootstrap.responsibleGroups
+    .filter((group) => !group.isArchived && group.memberIds.includes(member.id))
+    .forEach((group) => hints.add(group.name));
 
   (member.plannedAttendanceDays ?? []).forEach((day) => hints.add(day));
   if (member.plannedAttendanceNotes) {
@@ -79,11 +80,11 @@ function buildHints({
   return [...hints];
 }
 
-function pickActiveTask(tasks: TaskRecord[], openBlockerTaskIds: Set<string>) {
+function pickActiveTask(tasks: TaskRecord[], openBlockerTaskIds: Set<string>, bootstrap: BootstrapPayload) {
   return [...tasks].sort((left, right) => {
     const blockedDelta =
-      Number(isBlockedOrWaitingTask(right, openBlockerTaskIds)) -
-      Number(isBlockedOrWaitingTask(left, openBlockerTaskIds));
+      Number(isBlockedOrWaitingTask(right, openBlockerTaskIds, bootstrap)) -
+      Number(isBlockedOrWaitingTask(left, openBlockerTaskIds, bootstrap));
     if (blockedDelta !== 0) {
       return blockedDelta;
     }
@@ -96,13 +97,14 @@ function classifyStudent(args: {
   activeTask: TaskRecord | null;
   openBlockerTaskIds: Set<string>;
   taskById: Map<string, TaskRecord>;
+  bootstrap: BootstrapPayload;
   todayWorkLogs: WorkLogRecord[];
 }): { label: string; state: AvailableStudentRosterState } {
   const worklogTasks = args.todayWorkLogs
     .map((workLog) => args.taskById.get(workLog.taskId))
     .filter((task): task is TaskRecord => Boolean(task));
   const waitingTask = [args.activeTask, ...worklogTasks].find(
-    (task) => task && isBlockedOrWaitingTask(task, args.openBlockerTaskIds),
+    (task) => task && isBlockedOrWaitingTask(task, args.openBlockerTaskIds, args.bootstrap),
   );
   if (waitingTask) {
     return { label: "Blocked / waiting", state: "blocked-waiting" };
@@ -135,16 +137,14 @@ export function buildAvailableStudentRoster(
   const students = bootstrap.members.filter(
     (member) => (member.role === "student" || member.role === "lead") && presentMemberIds.has(member.id),
   );
-  const openBlockerTaskIds = new Set(
-    (bootstrap.taskBlockers ?? [])
-      .filter((blocker) => blocker.status === "open")
-      .map((blocker) => blocker.blockedTaskId),
-  );
+  const openBlockerTaskIds = new Set(bootstrap.risks
+    .filter((risk) => risk.blocksWork && risk.status !== "resolved")
+    .flatMap((risk) => risk.relatedTargets.filter((target) => target.kind === "task").map((target) => target.id)));
   const taskById = new Map(bootstrap.tasks.map((task) => [task.id, task] as const));
   const rows = students.map<AvailableStudentRosterRow>((member) => {
-    const activeTask = pickActiveTask(getAssignedOpenTasks(member.id, bootstrap.tasks), openBlockerTaskIds);
+    const activeTask = pickActiveTask(getAssignedOpenTasks(member.id, bootstrap.tasks), openBlockerTaskIds, bootstrap);
     const todayWorkLogs = getTodayWorkLogs(member.id, bootstrap.workLogs, todayKey);
-    const classification = classifyStudent({ activeTask, openBlockerTaskIds, taskById, todayWorkLogs });
+    const classification = classifyStudent({ activeTask, openBlockerTaskIds, taskById, todayWorkLogs, bootstrap });
 
     return {
       activeTask,

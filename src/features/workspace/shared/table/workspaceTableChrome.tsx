@@ -1,9 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { IconEdit } from "@/components/shared/Icons";
-import type { ManufacturingItemRecord, PurchaseItemRecord } from "@/types/recordsInventory";
-
-import type { MembersById, SubsystemsById } from "../model/workspaceTypes";
 
 const PAGE_SIZE_OPTIONS = [15, 30, 60] as const;
 type PageSizeOption = (typeof PAGE_SIZE_OPTIONS)[number];
@@ -91,30 +88,6 @@ export function EditableHoverIndicator({
     >
       <IconEdit />
     </span>
-  );
-}
-
-export function RequestedItemMeta({
-  item,
-  membersById,
-  subsystemsById,
-  showSubtitle = true,
-}: {
-  item: PurchaseItemRecord | ManufacturingItemRecord;
-  membersById: MembersById;
-  subsystemsById: SubsystemsById;
-  showSubtitle?: boolean;
-}) {
-  return (
-    <div className="requested-item-meta">
-      <strong className="requested-item-title">{item.title}</strong>
-      {showSubtitle ? (
-        <small className="requested-item-subtitle">
-          {(item.subsystemId ? subsystemsById[item.subsystemId]?.name : null) ?? "Unknown subsystem"} /{" "}
-          {(item.requestedById ? membersById[item.requestedById]?.name : null) ?? "Unassigned"}
-        </small>
-      ) : null}
-    </div>
   );
 }
 

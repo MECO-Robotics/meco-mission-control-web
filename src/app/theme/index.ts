@@ -45,6 +45,12 @@ function getThemeVars(mode: ThemeMode) {
     "--status-warning-text": isDarkMode ? "#fbbf24" : "#92400e",
     "--status-danger-bg": isDarkMode ? "#450a0a" : "#fee2e2",
     "--status-danger-text": isDarkMode ? "#f87171" : "#991b1b",
+    "--team-task-open-chart": isDarkMode ? "#facc15" : "#eab308",
+    "--team-task-open-text": isDarkMode ? "#facc15" : "#a16207",
+    "--team-task-blocked-chart": brandColors.red,
+    "--team-task-blocked-text": isDarkMode ? "#f87171" : "#b91c1c",
+    "--team-task-overdue-chart": isDarkMode ? "#fb923c" : "#f97316",
+    "--team-task-overdue-text": isDarkMode ? "#fb923c" : "#c2410c",
     "--status-neutral-bg": isDarkMode ? "#1e293b" : "#f1f5f9",
     "--status-neutral-text": isDarkMode ? "#94a3b8" : "#475569",
   } as const;

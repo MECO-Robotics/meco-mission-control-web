@@ -9,17 +9,19 @@ function createTask(index: number, overrides: Partial<Task> = {}): Task {
   const day = String(index).padStart(2, "0");
 
   const task: Task = {
-    artifactIds: [],
     id: `task-${index}`,
     projectId: "project-1",
     workstreamIds: [],
     subsystemIds: ["subsystem-1"],
-    disciplineId: "discipline-1",
+    workTypeId: "work-type-design",
+    responsibleGroupId: null,
+    manufacturingDetails: null,
     mechanismIds: [],
     partInstanceIds: [],
     title: `Task ${index}`,
     summary: `Summary ${index}`,
-    targetMilestoneId: null,
+    scheduleRefs: [],
+    requestedById: null,
     photoUrl: "",
     ownerId: "member-1",
     assigneeIds: [],
@@ -37,30 +39,29 @@ function createTask(index: number, overrides: Partial<Task> = {}): Task {
             ? "waiting-for-qa"
             : "complete",
 
-    blockers: [],
-    linkedManufacturingIds: [],
-    linkedPurchaseIds: [],
     estimatedHours: 0,
     actualHours: 0,
+    checklistItems: [],
     requiresDocumentation: false,
-    documentationLinked: false,
     ...overrides,
   };
 
   return {
     ...task,
-    isBlocked: (task.blockers ?? []).length > 0,
+    isBlocked: false,
   };
 }
 
 function createTaskQueueBootstrap(): BootstrapPayload {
   return {
     ...EMPTY_BOOTSTRAP,
-    disciplines: [
+    workTypes: [
       {
-        id: "discipline-1",
+        id: "work-type-design",
+        projectType: "robot",
         code: "design",
         name: "Design",
+        isActive: true,
       },
     ],
     members: [
@@ -106,17 +107,17 @@ function createTaskQueueBootstrap(): BootstrapPayload {
         parentSubsystemId: null,
         responsibleEngineerId: null,
         mentorIds: [],
-        risks: [],
       },
     ],
     taskDependencies: [{ id: "dependency-1", taskId: "task-3", kind: "task", refId: "task-1", requiredState: "complete", dependencyType: "hard", createdAt: "2026-01-01" }],
-    taskBlockers: [{ id: "blocker-1", blockedTaskId: "task-4", blockerType: "other", blockerId: null, description: "Waiting on parts", severity: "medium", status: "open", createdByMemberId: null, createdAt: "2026-01-01", resolvedAt: null }],
+    risks: [{ id: "risk-1", projectId: "project-1", title: "Waiting on parts", detail: "Parts are not available", category: "supply", severity: "medium", status: "open", blocksWork: true, source: { kind: "manual" }, relatedTargets: [{ kind: "task", id: "task-4" }], mitigationTaskId: null, ownerGroupId: null,
+        ownerMemberId: null,
+        mitigationDueDate: null, createdAt: "2026-01-01", updatedAt: "2026-01-01", resolvedAt: null }],
     tasks: Array.from({ length: 16 }, (_, index) => {
       const taskIndex = index + 1;
 
       return createTask(taskIndex, {
         ownerId: taskIndex === 2 ? "member-2" : "member-1",
-        blockers: taskIndex === 4 ? ["Waiting on parts"] : [],
       });
     }),
   };

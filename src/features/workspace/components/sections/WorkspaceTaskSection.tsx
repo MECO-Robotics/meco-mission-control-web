@@ -1,12 +1,11 @@
 import { memo, useState } from "react";
 
-import { MilestonesView } from "@/features/workspace/views/milestones/MilestonesView";
-import { TaskCalendarView } from "@/features/workspace/views/taskCalendar/TaskCalendarView";
 import { RobotMapView } from "@/features/workspace/views/robotMap/RobotMapView";
 import { TaskQueueView } from "@/features/workspace/views/taskQueue/TaskQueueView";
-import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
+import { TaskCalendarView } from "@/features/workspace/views/taskCalendar/TaskCalendarView";
 import type { TaskCalendarEventType } from "@/features/workspace/views/taskCalendar/taskCalendarEvents";
 import type { TaskCalendarSortMode } from "@/features/workspace/views/taskCalendar/taskCalendarLayout";
+import { TimelineView } from "@/features/workspace/views/timeline/TimelineView";
 import { WorkspaceSectionPanel, WorkspaceSubPanel } from "../../WorkspaceContentPanelShells";
 import type { WorkspaceContentPanelsViewProps } from "../workspaceContentPanelsViewTypes";
 
@@ -21,8 +20,7 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
   const {
     activePersonFilter,
     bootstrap,
-    disciplinesById,
-    handleMeetingSave,
+    workTypesById,
     handleTaskStatusChange,
     handleTimelineMilestoneDelete,
     handleTimelineMilestoneSave,
@@ -57,31 +55,36 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
       isActive={props.activeTab === "tasks"}
       tabSwitchDirection={props.tabSwitchDirection}
     >
-      {["calendar", "timeline", "milestones"].includes(taskView) ? (
-        <div className="workspace-schedule-scroll" data-tutorial-target="schedule-view">
-          <WorkspaceSubPanel disableAnimations={disablePanelAnimations} isActive={taskView === "calendar" || taskView === "timeline"} swipeDirection={taskSwipeDirection}>
+      {taskView === "calendar" || taskView === "agenda" ? (
+        <div className={`workspace-schedule-scroll${taskView === "calendar" ? " is-calendar-workspace" : ""}`} data-tutorial-target="schedule-view">
+          <WorkspaceSubPanel disableAnimations={disablePanelAnimations} isActive swipeDirection={taskSwipeDirection}>
             <TaskCalendarView
+              presentation={taskView === "agenda" ? "agenda" : "calendar"}
               activePersonFilter={activePersonFilter}
               bootstrap={bootstrap}
               isAllProjectsView={isAllProjectsView}
-              onSaveMeeting={handleMeetingSave}
-              onCreateMilestoneReport={props.openCreateMilestoneReportModal}
+              onSaveMeeting={props.handleMeetingSave}
               onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
               onSaveTimelineMilestone={handleTimelineMilestoneSave}
-              searchFilter={scheduleSearchFilter}
-              onSearchChange={setScheduleSearchFilter}
+              onTaskDetailOpen={openTimelineTaskDetailsModal}
+              onCreateMilestoneReport={props.openCreateMilestoneReportModal}
+              onTaskEditCanceled={props.onTaskEditCanceled}
+              onTaskEditSaved={props.onTaskEditSaved}
               eventFilter={calendarEventFilter}
               onEventFilterChange={setCalendarEventFilter}
               sortMode={calendarSortMode}
               onSortModeChange={setCalendarSortMode}
               sortDirection={calendarSortDirection}
               onSortDirectionChange={setCalendarSortDirection}
-              onTaskDetailOpen={openTimelineTaskDetailsModal}
-              onTaskEditCanceled={props.onTaskEditCanceled}
-              onTaskEditSaved={props.onTaskEditSaved}
+              searchFilter={scheduleSearchFilter}
+              onSearchChange={setScheduleSearchFilter}
             />
           </WorkspaceSubPanel>
-          <WorkspaceSubPanel disableAnimations={disablePanelAnimations} isActive={taskView === "calendar" || taskView === "timeline"} swipeDirection={taskSwipeDirection}>
+        </div>
+      ) : null}
+      {taskView === "timeline" ? (
+        <div className="workspace-schedule-scroll" data-tutorial-target="schedule-view">
+          <WorkspaceSubPanel disableAnimations={disablePanelAnimations} isActive swipeDirection={taskSwipeDirection}>
             <MemoizedTimelineView
               activePersonFilter={activePersonFilter}
               bootstrap={bootstrap}
@@ -93,13 +96,6 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
               onSaveTimelineMilestone={handleTimelineMilestoneSave}
               searchFilter={scheduleSearchFilter}
               onSearchChange={setScheduleSearchFilter}
-              calendarEventFilter={calendarEventFilter}
-              onCalendarEventFilterChange={setCalendarEventFilter}
-              calendarSortMode={calendarSortMode}
-              onCalendarSortModeChange={setCalendarSortMode}
-              calendarSortDirection={calendarSortDirection}
-              onCalendarSortDirectionChange={setCalendarSortDirection}
-              showCalendarFilters={taskView === "calendar"}
               openCreateTaskModal={openCreateTaskModalFromTimeline}
               openTaskDetailModal={openTimelineTaskDetailsModal}
               setActivePersonFilter={setActivePersonFilter}
@@ -133,13 +129,13 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
 
       <WorkspaceSubPanel
         disableAnimations={disablePanelAnimations}
-        isActive={taskView === "queue"}
+        isActive={taskView === "kanban"}
         swipeDirection={taskSwipeDirection}
       >
         <TaskQueueView
           activePersonFilter={activePersonFilter}
           bootstrap={bootstrap}
-          disciplinesById={disciplinesById}
+          workTypesById={workTypesById}
           isAllProjectsView={isAllProjectsView}
           isNonRobotProject={isNonRobotProject}
           membersById={membersById}
@@ -147,23 +143,6 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
           openEditTaskModal={openTimelineTaskDetailsModal}
           onReassignTaskStatus={handleTaskStatusChange}
           subsystemsById={subsystemsById}
-        />
-      </WorkspaceSubPanel>
-
-      <WorkspaceSubPanel
-        disableAnimations={disablePanelAnimations}
-        isActive={taskView === "milestones"}
-        swipeDirection={taskSwipeDirection}
-      >
-        <MilestonesView
-          activePersonFilter={activePersonFilter}
-          bootstrap={bootstrap}
-          isAllProjectsView={isAllProjectsView}
-          onTaskEditCanceled={props.onTaskEditCanceled}
-          onTaskEditSaved={props.onTaskEditSaved}
-          onCreateMilestoneReport={props.openCreateMilestoneReportModal}
-          onDeleteTimelineMilestone={handleTimelineMilestoneDelete}
-          onSaveTimelineMilestone={handleTimelineMilestoneSave}
         />
       </WorkspaceSubPanel>
     </WorkspaceSectionPanel>

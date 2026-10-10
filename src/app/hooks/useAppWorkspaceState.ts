@@ -17,7 +17,6 @@ import {
 } from "@/features/workspace/workspaceToastQueue";
 import type {
   InventoryViewTab,
-  ManufacturingViewTab,
   TaskViewTab,
   ViewTab,
   WorklogsViewTab,
@@ -29,10 +28,8 @@ export type AppWorkspaceState = ReturnType<typeof useAppWorkspaceState>;
 export function useAppWorkspaceState() {
   const [activeTab, setActiveTab] = useState<ViewTab>("home");
   const [tabSwitchDirection, setTabSwitchDirection] = useState<"up" | "down">("down");
-  const [taskView, setTaskView] = useState<TaskViewTab>("queue");
+  const [taskView, setTaskView] = useState<TaskViewTab>("kanban");
   const [worklogsView, setWorklogsView] = useState<WorklogsViewTab>("logs");
-  const [manufacturingView, setManufacturingView] =
-    useState<ManufacturingViewTab>("all");
   const [inventoryView, setInventoryView] = useState<InventoryViewTab>("materials");
   const [bootstrap, setBootstrap] = useState<BootstrapPayload>(EMPTY_BOOTSTRAP);
   const [isLoadingData, setIsLoadingData] = useState(false);
@@ -187,7 +184,6 @@ export function useAppWorkspaceState() {
     isSigningIn,
     isSidebarCollapsed,
     isSidebarOverlay,
-    manufacturingView,
     pageShellStyle,
     requestSignIn,
     setActiveTab,
@@ -195,7 +191,6 @@ export function useAppWorkspaceState() {
     setDataMessage,
     setInventoryView,
     setIsLoadingData,
-    setManufacturingView,
     setTabSwitchDirection,
     enqueueTaskEditNotice,
     dismissTaskEditNotice,

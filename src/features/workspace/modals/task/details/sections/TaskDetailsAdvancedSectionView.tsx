@@ -8,6 +8,7 @@ import { IconManufacturing, IconPlus } from "@/components/shared/Icons";
 import type { TaskDetailsEditableField } from "../../taskModalTypes";
 import { TaskDetailReveal } from "../TaskDetailReveal";
 import { TaskDetailsLinkedEntitySection } from "./TaskDetailsLinkedEntitySection";
+import { TaskManufacturingDetailsFields } from "./TaskManufacturingDetailsFields";
 import { useTaskDetailsAdvancedSectionModel } from "./useTaskDetailsAdvancedSectionModel";
 
 interface TaskDetailsAdvancedSectionViewProps {
@@ -61,7 +62,7 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
     .filter((partInstance) => !model.selectedPartInstanceIds.includes(partInstance.id))
     .map((partInstance) => ({
       id: partInstance.id,
-      name: `${partInstance.name}`,
+      name: model.getPartInstanceLabel(partInstance),
     }));
   const renderAddControl = (
     label: "mechanism" | "part",
@@ -134,7 +135,7 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
                 singleSelect
                 onChange={model.handleDisciplineChange}
                 options={model.availableDisciplines}
-                value={editableTask.disciplineId ? [editableTask.disciplineId] : []}
+                value={editableTask.workTypeId ? [editableTask.workTypeId] : []}
               />
             ) : (
               <span className="task-detail-inline-edit-shell task-detail-inline-edit-shell-inline task-detail-inline-edit-shell-inline-left">
@@ -159,6 +160,13 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
             </p>
           )}
         </label>
+        <TaskManufacturingDetailsFields
+          activeTask={activeTask}
+          bootstrap={bootstrap}
+          canEdit={canInlineEdit}
+          setTaskDraft={setTaskDraft}
+          taskDraft={taskDraft}
+        />
         <label className={`field task-detail-row ${canInlineEdit ? "task-details-inline-edit-left" : ""}`}>
           <span style={{ color: "var(--text-title)" }}>Start date</span>
           {canInlineEdit ? (
@@ -195,32 +203,6 @@ export function TaskDetailsAdvancedSectionView(props: TaskDetailsAdvancedSection
               </span>
             </p>
           )}
-        </label>
-        <label className={`field task-detail-row ${canInlineEdit ? "task-details-inline-edit-left" : ""}`}>
-          <span style={{ color: "var(--text-title)" }}>Target risk</span>
-          {canInlineEdit ? (
-            <select
-              aria-label="Target risk"
-              className="task-detail-inline-edit-select"
-              onChange={model.handleTargetRiskChange}
-              value={editableTask.targetRiskId ?? ""}
-            >
-              <option value="">No risk targeted</option>
-              {model.riskTargetOptions.map((risk) => (
-                <option key={risk.id} value={risk.id}>
-                  {risk.name}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <p className="task-detail-copy" onDoubleClick={openTaskEditModal}>
-              <span className="pill status-pill status-pill-neutral">{model.targetRiskText}</span>
-            </p>
-          )}
-          <small style={{ color: "var(--text-copy)" }}>
-            Target one risk when this task is mitigation work. A later QA report can propose partial
-            mitigation by lowering severity or full mitigation by lowering it to low.
-          </small>
         </label>
         <TaskDetailsLinkedEntitySection
           addControl={renderAddControl(

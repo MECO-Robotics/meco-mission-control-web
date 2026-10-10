@@ -1,5 +1,10 @@
 # Web agent instructions
 
+- At the start of every Codex task in this repository, read and follow
+  [docs/web-contributor-guide.md](docs/web-contributor-guide.md), including for
+  documentation-only tasks. Treat its guidance as required, not optional. For
+  workspace views, enforce the **Workspace Topbar Contract**: shared topbar
+  actions and filters only when specified, with no view-level title or eyebrow.
 - Follow [CONTRIBUTING.md](CONTRIBUTING.md) for setup, validation and PR policy.
 - Work in dedicated worktrees outside base checkouts. Base checkouts are for inspection, fetching and worktree creation.
 - This is an undeployed prototype with disposable development data. Prefer coherent replacement over compatibility scaffolding; update affected consumers and describe resets or breaking changes.

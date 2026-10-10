@@ -42,59 +42,10 @@
   align-items: center;
 }
 
-.timeline-interval-switch {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.05rem;
-  flex: 0 0 auto;
-}
-
-.timeline-interval-pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.2rem;
-  min-height: 1.8rem;
-  min-width: 4.05rem;
-  padding: 0.06rem 0.28rem;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--text-title);
-  font: inherit;
-  font-size: 0.75rem;
-  font-weight: 800;
-  line-height: 1;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.timeline-interval-pill:hover,
-.timeline-interval-pill:focus-visible {
-  color: var(--official-blue);
-}
-
-.timeline-interval-pill:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--meco-blue) 45%, transparent);
-}
-
-.timeline-interval-pill-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-copy);
-}
-
-.timeline-interval-pill-icon svg {
-  width: 14px;
-  height: 14px;
-}
-
 .timeline-interval-toggle-rail {
   display: inline-flex;
   align-items: center;
-  gap: 0.08rem;
+  gap: 0.12rem;
   min-height: 2.05rem;
   padding: 0.08rem;
   border: 1px solid var(--border-base);
@@ -103,15 +54,14 @@
 }
 
 .timeline-interval-toggle-option {
-  width: 1.9rem;
-  height: 1.9rem;
-  min-width: 1.9rem;
+  min-height: 1.9rem;
+  min-width: 3.2rem;
   border: 1px solid transparent;
   border-radius: 999px;
   background: transparent;
   color: var(--text-copy);
   font: inherit;
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   font-weight: 800;
   line-height: 1;
   cursor: pointer;
@@ -131,6 +81,12 @@
   color: var(--text-title);
   border-color: color-mix(in srgb, var(--meco-blue) 40%, var(--border-base));
   background: color-mix(in srgb, var(--meco-blue) 16%, var(--bg-panel));
+}
+
+.topbar-segmented-selector.is-collapsed {
+  width: max-content;
+  flex: 0 0 auto;
+  min-width: max-content;
 }
 
 .timeline-period-controls {
@@ -197,6 +153,30 @@
   line-height: 1.1;
   text-align: center;
   white-space: nowrap;
+}
+
+.schedule-today-button {
+  min-height: 1.7rem;
+  padding: 0 0.55rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-copy);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.schedule-today-button:hover {
+  background: color-mix(in srgb, var(--meco-blue) 12%, transparent);
+  color: var(--official-blue);
+}
+
+.schedule-today-button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--meco-blue) 55%, transparent);
+  outline-offset: 1px;
 }
 
 .timeline-period-controls.is-week .timeline-period-label {

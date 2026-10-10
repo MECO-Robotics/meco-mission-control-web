@@ -19,7 +19,7 @@ import {
 interface TaskQueueViewProps {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
-  disciplinesById: Record<string, BootstrapPayload["disciplines"][number]>;
+  workTypesById: Record<string, BootstrapPayload["workTypes"][number]>;
   isAllProjectsView: boolean;
   isNonRobotProject: boolean;
   membersById: Record<string, BootstrapPayload["members"][number]>;
@@ -32,7 +32,7 @@ interface TaskQueueViewProps {
 export function TaskQueueView({
   activePersonFilter,
   bootstrap,
-  disciplinesById,
+  workTypesById,
   isAllProjectsView,
   isNonRobotProject,
   membersById,
@@ -83,7 +83,7 @@ export function TaskQueueView({
   } = useTaskQueueViewState({
     activePersonFilter,
     bootstrap,
-    disciplinesById,
+    workTypesById,
     isAllProjectsView,
     membersById,
     subsystemsById,
@@ -141,13 +141,13 @@ export function TaskQueueView({
 
       <div className="panel-header compact-header">
         <div className="queue-section-header">
-          <h2>Tasks</h2>
+          <h2>Kanban</h2>
         </div>
       </div>
 
       <TaskQueueBoardSection
         bootstrap={bootstrap}
-        disciplinesById={disciplinesById}
+        workTypesById={workTypesById}
         focusedBoardState={focusedBoardState}
         isNonRobotProject={isNonRobotProject}
         membersById={membersById}

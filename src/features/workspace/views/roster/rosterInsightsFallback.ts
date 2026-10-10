@@ -96,11 +96,9 @@ export function buildRosterInsightsFromBootstrap(
   const scopedMembers = bootstrap.members.filter((member) => isMemberInSeason(member, scopedSeasonId));
   const scopedMemberIds = new Set(scopedMembers.map((member) => member.id));
   const scopedAttendanceRecords = attendanceRecords.filter((record) => scopedMemberIds.has(record.memberId));
-  const openTaskBlockerIds = new Set(
-    (bootstrap.taskBlockers ?? [])
-      .filter((blocker) => blocker.status === "open")
-      .map((blocker) => blocker.blockedTaskId),
-  );
+  const openTaskBlockerIds = new Set(bootstrap.risks
+    .filter((risk) => risk.blocksWork && risk.status !== "resolved")
+    .flatMap((risk) => risk.relatedTargets.filter((target) => target.kind === "task").map((target) => target.id)));
   const openTasks = bootstrap.tasks.filter((task) => {
     if (task.status === "complete") {
       return false;
@@ -184,7 +182,6 @@ export function buildRosterInsightsFromBootstrap(
         memberId: member.id,
         memberName: member.name,
         role: member.role,
-        disciplineId: member.disciplineId ?? null,
         activeTaskCount: assignedTasks.length,
         blockedTaskCount,
         waitingForQaTaskCount,

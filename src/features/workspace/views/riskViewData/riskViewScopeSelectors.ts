@@ -1,7 +1,6 @@
 import { filterSelectionMatchesTaskPeople, type FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
-import { getTaskBlockerRecords } from "@/features/workspace/shared/task/taskPlanningInternals";
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { TaskBlockerRecord } from "@/types/recordsExecution";
+import type { RiskRecord } from "@/types/recordsReporting";
 
 import { parseTimestamp } from "./riskViewMetricsUtils";
 
@@ -30,7 +29,7 @@ export function buildScopedRiskViewPools({
       : bootstrap.workLogs;
   const scopedReports =
     activePersonFilter.length > 0
-      ? bootstrap.reports.filter((report) => report.taskId && scopedTaskIds.has(report.taskId))
+      ? bootstrap.reports.filter((report) => report.targetRefs.some((ref) => ref.kind === "task" && scopedTaskIds.has(ref.id)))
       : bootstrap.reports;
   return {
     scopedReports,
@@ -41,16 +40,15 @@ export function buildScopedRiskViewPools({
 }
 
 export function buildOpenBlockersByTaskId(scopedTaskIds: Set<string>, bootstrap: BootstrapPayload) {
-  const openBlockersByTaskId = new Map<string, TaskBlockerRecord[]>();
-
-  getTaskBlockerRecords(bootstrap).forEach((blocker) => {
-    if (blocker.status !== "open" || !scopedTaskIds.has(blocker.blockedTaskId)) {
-      return;
-    }
-
-    const existing = openBlockersByTaskId.get(blocker.blockedTaskId) ?? [];
-    existing.push(blocker);
-    openBlockersByTaskId.set(blocker.blockedTaskId, existing);
+  const openBlockersByTaskId = new Map<string, RiskRecord[]>();
+  bootstrap.risks.forEach((risk) => {
+    if (!risk.blocksWork || risk.status === "resolved") return;
+    risk.relatedTargets.filter((target) => target.kind === "task" && scopedTaskIds.has(target.id)).forEach((target) => {
+      if (target.kind !== "task") return;
+      const existing = openBlockersByTaskId.get(target.id) ?? [];
+      existing.push(risk);
+      openBlockersByTaskId.set(target.id, existing);
+    });
   });
 
   return openBlockersByTaskId;
@@ -63,7 +61,7 @@ export function buildLastActivityByTaskId({
   scopedTasks,
   scopedWorkLogs,
 }: {
-  openBlockersByTaskId: Map<string, TaskBlockerRecord[]>;
+  openBlockersByTaskId: Map<string, RiskRecord[]>;
   scopedReports: BootstrapPayload["reports"];
   scopedTaskIds: Set<string>;
   scopedTasks: BootstrapPayload["tasks"];
@@ -94,10 +92,10 @@ export function buildLastActivityByTaskId({
     registerTaskActivity(workLog.taskId, workLog.date);
   });
   scopedReports.forEach((report) => {
-    registerTaskActivity(report.taskId, report.reviewedAt ?? report.createdAt);
+    report.targetRefs.filter((target) => target.kind === "task").forEach((target) => registerTaskActivity(target.id, report.reviewedAt ?? report.createdAt));
   });
-  openBlockersByTaskId.forEach((blockers) => blockers.forEach((blocker) => {
-    registerTaskActivity(blocker.blockedTaskId, blocker.createdAt);
+  openBlockersByTaskId.forEach((risks, taskId) => risks.forEach((risk) => {
+    registerTaskActivity(taskId, risk.updatedAt);
   }));
 
   return lastActivityByTaskId;
@@ -122,8 +120,8 @@ export function buildScopeMetricInputs({
 
   const qaPassTaskIds = new Set<string>();
   scopedReports.forEach((report) => {
-    if (report.result === "pass" && report.mentorApproved && report.taskId) {
-      qaPassTaskIds.add(report.taskId);
+    if (report.reportType === "qa" && report.result === "pass" && report.status === "reviewed") {
+      report.targetRefs.filter((target) => target.kind === "task").forEach((target) => qaPassTaskIds.add(target.id));
     }
   });
 
