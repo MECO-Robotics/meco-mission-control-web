@@ -100,7 +100,7 @@ function createOverviewBootstrap() {
 describe("Workspace overview views", () => {
   it("shows actionable near-term work and the home agenda", () => {
     const markup = renderToStaticMarkup(React.createElement(HomeView, {
-      bootstrap: createOverviewBootstrap(), onOpenTask: jest.fn(), today: fixedToday,
+      bootstrap: createOverviewBootstrap(), onOpenTask: jest.fn(), openCreateQaReportModal: jest.fn(), openCreateTaskModal: jest.fn(), today: fixedToday,
     }));
     expect(markup).toContain("Priority work");
     expect(markup).toContain(">Agenda</h3>");
@@ -115,7 +115,7 @@ describe("Workspace overview views", () => {
     bootstrap.tasks = bootstrap.tasks.map(task => ({
   ...task, status: "complete" }));
     const markup = renderToStaticMarkup(React.createElement(HomeView, {
-      bootstrap, onOpenTask: jest.fn(), today: fixedToday,
+      bootstrap, onOpenTask: jest.fn(), openCreateQaReportModal: jest.fn(), openCreateTaskModal: jest.fn(), today: fixedToday,
     }));
     expect(markup).toContain("No near-term task deadlines.");
     expect(markup).not.toContain("Finish bellypan CAD");

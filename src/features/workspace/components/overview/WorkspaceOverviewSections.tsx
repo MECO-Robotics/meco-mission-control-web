@@ -16,6 +16,8 @@ export function WorkspaceHomeSection(props: WorkspaceContentPanelsViewProps) {
     >
       <HomeView
         bootstrap={props.bootstrap}
+        openCreateQaReportModal={() => props.openCreateQaReportModal()}
+        openCreateTaskModal={props.openCreateTaskModal}
         onOpenTask={openTask}
         onOpenSchedule={(milestoneId) => props.onOpenDrilldownTarget({ tab: "tasks", taskView: "agenda", milestoneId })}
       />
