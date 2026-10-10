@@ -1,3 +1,4 @@
+import { localTodayDate } from "@/lib/dateUtils";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { isTaskDependencySatisfied } from "@/features/workspace/shared/task/taskPlanningInternals";
 
@@ -6,7 +7,7 @@ type Row = Record<string, unknown> & { id: string };
 
 const collections: Record<string, CollectionKey> = {
   seasons: "seasons", projects: "projects", "work-types": "workTypes", "responsible-groups": "responsibleGroups",
-  workstreams: "workstreams", vendors: "vendors", members: "members", tasks: "tasks",
+  subsystems: "subsystems", mechanisms: "mechanisms", workstreams: "workstreams", vendors: "vendors", members: "members", tasks: "tasks",
   "task-dependencies": "taskDependencies", "manufacturing/processes": "manufacturingProcesses",
   purchases: "purchaseItems", materials: "materials", "part-definitions": "partDefinitions",
   "part-instances": "partInstances", meetings: "meetings", events: "events", milestones: "milestones",
@@ -50,13 +51,14 @@ export function refreshLocalTaskState(snapshot: BootstrapPayload) {
 }
 
 function defaults(resource: string, snapshot: BootstrapPayload): Record<string, unknown> {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localTodayDate();
   switch (resource) {
     case "seasons": return { type: "season", startDate: today, endDate: today };
     case "projects": return { description: "", status: "planned" };
     case "members": return { email: "", elevated: false, role: "student", activeSeasonIds: [], plannedAttendanceDays: [] };
     case "responsible-groups": return { seasonId: snapshot.seasons[0]?.id ?? "", name: "", projectIds: [], workTypeIds: [], memberIds: [], primaryMemberIds: [], isArchived: false };
     case "subsystems": return { isCore: false, iteration: 1, mentorIds: [], parentSubsystemId: null, responsibleEngineerId: null };
+    case "mechanisms": return { name: "", description: "", iteration: 1 };
     case "tasks": return {
       projectId: snapshot.projects[0]?.id ?? "", workTypeId: "", responsibleGroupId: null, workstreamIds: [], title: "", summary: "",
       subsystemIds: [], mechanismIds: [], partInstanceIds: [], scheduleRefs: [], requestedById: null, ownerId: null, assigneeIds: [], mentorId: null,
@@ -71,7 +73,38 @@ function defaults(resource: string, snapshot: BootstrapPayload): Record<string, 
 }
 
 function removeReferences(snapshot: BootstrapPayload, resource: string, id: string) {
-  if (resource === "part-definitions") snapshot.partInstances = snapshot.partInstances.filter((part) => part.partDefinitionId !== id);
+  if (resource === "subsystems") {
+    for (const child of snapshot.subsystems.filter((subsystem) => subsystem.parentSubsystemId === id)) {
+      snapshot.subsystems = snapshot.subsystems.filter((subsystem) => subsystem.id !== child.id);
+      removeReferences(snapshot, "subsystems", child.id);
+    }
+    for (const mechanism of snapshot.mechanisms.filter((record) => record.subsystemId === id)) {
+      snapshot.mechanisms = snapshot.mechanisms.filter((record) => record.id !== mechanism.id);
+      removeReferences(snapshot, "mechanisms", mechanism.id);
+    }
+  }
+  if (resource === "part-definitions" || resource === "subsystems" || resource === "mechanisms") {
+    const removedParts = snapshot.partInstances.filter((part) => resource === "part-definitions"
+      ? part.partDefinitionId === id
+      : resource === "subsystems"
+        ? part.intendedSubsystemId === id || (part.location.kind === "installed" && part.location.subsystemId === id)
+        : part.intendedMechanismId === id || (part.location.kind === "installed" && part.location.mechanismId === id));
+    const removedIds = new Set(removedParts.map((part) => part.id));
+    if (resource !== "part-definitions") {
+      const removedTasks = snapshot.tasks.filter((task) => task.partInstanceIds.some((partId) => removedIds.has(partId)));
+      const removedTaskIds = new Set(removedTasks.map((task) => task.id));
+      snapshot.tasks = snapshot.tasks.filter((task) => !removedTaskIds.has(task.id));
+      for (const task of removedTasks) removeReferences(snapshot, "tasks", task.id);
+    }
+    snapshot.partInstances = snapshot.partInstances.filter((part) => !removedIds.has(part.id));
+    for (const part of removedParts) removeReferences(snapshot, "part-instances", part.id);
+  }
+  if (resource === "subsystems" || resource === "mechanisms") {
+    const removedTasks = snapshot.tasks.filter((task) => resource === "subsystems" ? task.subsystemIds.includes(id) : task.mechanismIds.includes(id));
+    const removedIds = new Set(removedTasks.map((task) => task.id));
+    snapshot.tasks = snapshot.tasks.filter((task) => !removedIds.has(task.id));
+    for (const task of removedTasks) removeReferences(snapshot, "tasks", task.id);
+  }
   if (resource === "responsible-groups") {
     for (const task of snapshot.tasks) if (task.responsibleGroupId === id) task.responsibleGroupId = null;
     for (const risk of snapshot.risks) if (risk.ownerGroupId === id) risk.ownerGroupId = null;
@@ -92,9 +125,9 @@ function removeReferences(snapshot: BootstrapPayload, resource: string, id: stri
       }
     }
   }
-  const kind = ({ tasks: "task", "part-instances": "part-instance", "part-definitions": "part-definition", materials: "material", artifacts: "artifact", milestones: "milestone", meetings: "meeting", events: "event", risks: "risk", "workstreams": "workstream", vendors: "vendor" } as Record<string, string>)[resource];
+  const kind = ({ subsystems: "subsystem", mechanisms: "mechanism", tasks: "task", "part-instances": "part-instance", "part-definitions": "part-definition", materials: "material", artifacts: "artifact", milestones: "milestone", meetings: "meeting", events: "event", risks: "risk", "workstreams": "workstream", vendors: "vendor" } as Record<string, string>)[resource];
   if (kind) {
-    for (const record of [...snapshot.reports, ...snapshot.qaFindings, ...snapshot.testFindings, ...snapshot.testResults, ...snapshot.artifacts, ...snapshot.milestoneRequirements, ...snapshot.risks]) {
+    for (const record of [...snapshot.qaRequests, ...snapshot.reports, ...snapshot.qaFindings, ...snapshot.testFindings, ...snapshot.testResults, ...snapshot.artifacts, ...snapshot.milestoneRequirements, ...snapshot.risks]) {
       if ("targetRefs" in record && Array.isArray(record.targetRefs)) record.targetRefs = record.targetRefs.filter((target) => target.kind !== kind || target.id !== id);
       if ("relatedTargets" in record && Array.isArray(record.relatedTargets)) record.relatedTargets = record.relatedTargets.filter((target) => target.kind !== kind || target.id !== id);
     }
@@ -118,6 +151,14 @@ export function applyLocalCommand(snapshot: BootstrapPayload, path: string, opti
   const resource = parts[0] === "manufacturing" && parts[1] === "processes" ? "manufacturing/processes" : parts[0];
   const encodedId = resource === "manufacturing/processes" ? parts[2] : parts[1];
   const extra = resource === "manufacturing/processes" ? parts[3] : parts[2];
+  if (resource === "purchases" && extra === "transition" && parts.length === 3 && method === "POST") {
+    if (Object.keys(body).some((field) => field !== "orderStatus" && field !== "finalCost" && field !== "purchaseOrderNumber")) throw new Error("Unsupported purchase transition fields.");
+    return applyLocalCommand(snapshot, `/purchases/${encodedId}`, { ...options, method: "PATCH" });
+  }
+  if (resource === "purchases" && extra === "approval" && parts.length === 3 && method === "PUT") {
+    if (Object.keys(body).some((field) => field !== "approvalStatus")) throw new Error("Unsupported purchase approval fields.");
+    return applyLocalCommand(snapshot, `/purchases/${encodedId}`, { ...options, method: "PATCH" });
+  }
   if (extra || !(resource in collections)) throw new Error(`This local workspace does not support ${method} /${pathname}; nothing was synced.`);
   const key = collections[resource];
   const rows = snapshot[key] as unknown as Row[];
@@ -128,6 +169,7 @@ export function applyLocalCommand(snapshot: BootstrapPayload, path: string, opti
   if (!((method === "POST" && !id) || ((method === "PATCH" || method === "DELETE") && id))) throw new Error(`This local workspace does not support ${method} /${pathname}; nothing was synced.`);
 
   if (method === "DELETE") {
+    if (resource === "part-definitions" && snapshot.tasks.some((task) => task.manufacturingDetails?.part.kind === "part-definition" && task.manufacturingDetails.part.partDefinitionId === id)) throw new Error("Retarget or remove manufacturing work before deleting its part definition.");
     const [removed] = rows.splice(index, 1);
     removeReferences(snapshot, resource, removed.id);
     refreshLocalTaskState(snapshot);
@@ -144,6 +186,32 @@ export function applyLocalCommand(snapshot: BootstrapPayload, path: string, opti
     for (const group of snapshot.responsibleGroups) {
       if (group.id === item.id || group.seasonId !== item.seasonId || group.isArchived) continue;
       group.primaryMemberIds = group.primaryMemberIds.filter(memberId => !primaryMemberIds.includes(memberId));
+    }
+  }
+  if (resource === "subsystems") {
+    if (method === "PATCH" && rows[index].projectId !== item.projectId) throw new Error("Subsystems cannot move between projects.");
+    if (item.isCore) item.parentSubsystemId = null;
+    if (!snapshot.projects.some((project) => project.id === item.projectId)) throw new Error("Subsystem Project does not exist.");
+    const visited = new Set([item.id]);
+    let parentId = item.parentSubsystemId;
+    while (parentId) {
+      const parent = snapshot.subsystems.find((record) => record.id === parentId);
+      if (!parent || parent.projectId !== item.projectId || visited.has(parent.id)) throw new Error("Choose a parent in this project without creating a hierarchy cycle.");
+      visited.add(parent.id);
+      parentId = parent.parentSubsystemId;
+    }
+  }
+  if (resource === "mechanisms") {
+    const subsystem = snapshot.subsystems.find((record) => record.id === item.subsystemId);
+    if (!subsystem) throw new Error("Mechanism Subsystem does not exist.");
+    const previous = snapshot.subsystems.find((record) => record.id === rows[index]?.subsystemId);
+    if (previous && previous.projectId !== subsystem.projectId) throw new Error("Mechanisms cannot move between projects.");
+    if (previous && previous.id !== subsystem.id) {
+      for (const task of snapshot.tasks.filter((task) => task.mechanismIds.includes(item.id))) {
+        const stillTargetsPrevious = task.mechanismIds.some((mechanismId) => mechanismId !== item.id && snapshot.mechanisms.some((record) => record.id === mechanismId && record.subsystemId === previous.id)) ||
+          task.partInstanceIds.some((partId) => snapshot.partInstances.some((part) => part.id === partId && (part.intendedSubsystemId === previous.id || (part.location.kind === "installed" && part.location.subsystemId === previous.id))));
+        task.subsystemIds = [...new Set([...task.subsystemIds.filter((targetId) => targetId !== previous.id || stillTargetsPrevious), subsystem.id])];
+      }
     }
   }
   if (resource === "tasks" && item.responsibleGroupId) {
