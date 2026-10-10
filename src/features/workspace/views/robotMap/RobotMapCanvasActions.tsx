@@ -1,9 +1,8 @@
 ﻿import { useEffect, useRef, useState } from "react";
 
-import { RotateCcw, SquarePlus } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 
 interface RobotMapCanvasActionsProps {
-  onAddSubsystem: () => void;
   onResetLayout: () => void;
 }
 
@@ -27,7 +26,6 @@ export function RobotMapResetConfirmation({ onConfirm }: RobotMapResetConfirmati
 }
 
 export function RobotMapCanvasActions({
-  onAddSubsystem,
   onResetLayout,
 }: RobotMapCanvasActionsProps) {
   const resetMenuRef = useRef<HTMLDivElement | null>(null);
@@ -72,15 +70,6 @@ export function RobotMapCanvasActions({
           />
         ) : null}
       </div>
-      <button
-        aria-label="Add subsystem"
-        className="icon-button robot-config-unplaced-add-button"
-        onClick={onAddSubsystem}
-        title="Add subsystem"
-        type="button"
-      >
-        <SquarePlus aria-hidden="true" size={14} />
-      </button>
     </>
   );
 }

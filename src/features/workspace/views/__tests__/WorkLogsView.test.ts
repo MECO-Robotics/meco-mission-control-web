@@ -34,6 +34,7 @@ function renderWorkLogsView(
         },
       },
       openCreateQaReportModal: jest.fn(),
+      openCreateMilestoneReportModal: jest.fn(),
       openCreateWorkLogModal: jest.fn(),
       openEditTaskModal: jest.fn(),
       subsystemsById: {
@@ -139,6 +140,13 @@ describe("WorkLogsView", () => {
     const html = renderWorkLogsView("qa");
 
     expect(html).toContain('aria-label="Add QA report"');
+    expect(html).toContain('class="topbar-add-button topbar-add-menu-trigger secondary-action icon-button"');
+  });
+
+  it("provides the shared Add milestone report plus action on Results", () => {
+    const html = renderWorkLogsView("results");
+
+    expect(html).toContain('aria-label="Add milestone report"');
     expect(html).toContain('class="topbar-add-button topbar-add-menu-trigger secondary-action icon-button"');
   });
 

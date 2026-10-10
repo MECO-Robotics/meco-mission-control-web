@@ -16,7 +16,6 @@ describe("RobotMapView", () => {
     const subsystem = buildRobotConfigurationViewModel(createBootstrap(), "").subsystems[0];
     const markup = renderToStaticMarkup(
       React.createElement(RobotMapUnplacedModal, {
-        onAddSubsystem: jest.fn(),
         onAutoArrange: jest.fn(),
         onClose: jest.fn(),
         onPlaceSubsystem: jest.fn(),

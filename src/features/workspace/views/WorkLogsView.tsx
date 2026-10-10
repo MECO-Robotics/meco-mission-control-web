@@ -22,13 +22,14 @@ interface WorkLogsViewProps {
   bootstrap: BootstrapPayload;
   membersById: MembersById;
   openCreateQaReportModal: () => void;
+  openCreateMilestoneReportModal: () => void;
   openCreateWorkLogModal: () => void;
   openEditTaskModal: (task: TaskRecord) => void;
   onOpenSchedule?: (milestoneId: string) => void;
   subsystemsById: SubsystemsById;
   view: WorklogsViewTab;
 }
-export function WorkLogsView({ activePersonFilter, bootstrap, membersById, openCreateQaReportModal, openCreateWorkLogModal, openEditTaskModal, onOpenSchedule, subsystemsById, view }: WorkLogsViewProps) {
+export function WorkLogsView({ activePersonFilter, bootstrap, membersById, openCreateMilestoneReportModal, openCreateQaReportModal, openCreateWorkLogModal, openEditTaskModal, onOpenSchedule, subsystemsById, view }: WorkLogsViewProps) {
   const state = useWorkLogsViewState({ activePersonFilter, bootstrap, membersById, subsystemsById });
   const [reportSort, setReportSort] = useRememberedViewState("history.sort", "recent");
   const [reportSortDirection, setReportSortDirection] = useRememberedViewState<"asc" | "desc">("history.sortDirection", "desc");
@@ -37,7 +38,7 @@ export function WorkLogsView({ activePersonFilter, bootstrap, membersById, openC
     <AppTopbarSlotPortal slot="controls"><div className="panel-actions filter-toolbar">
       {view === "logs" ? <WorkLogsToolbar bootstrap={bootstrap} renderMode="topbar" search={state.search} setSearch={state.setSearch} setSortMode={state.setSortMode} setSubsystemFilter={state.setSubsystemFilter} sortMode={state.sortMode} sortOptions={state.sortOptions} subsystemFilter={state.subsystemFilter} /> : view === "activity" ? <WorkLogsActivityToolbar activityGroupMode={state.activityGroupMode} activitySortMode={state.activitySortMode} activitySortDirection={state.activitySortDirection} search={state.search} setActivityGroupMode={state.setActivityGroupMode} setActivitySortMode={state.setActivitySortMode} setActivitySortDirection={state.setActivitySortDirection} setSearch={state.setSearch} /> : <TopbarResponsiveSearch actions={<WorkspaceSortMenu direction={reportSortDirection} field={reportSort} label="history" onDirectionChange={setReportSortDirection} onFieldChange={setReportSort} options={[{ label: "Date", value: "recent" }, { label: "Title", value: "title" }]} />} ariaLabel="Search report history" compactPlaceholder="Search" onChange={state.setSearch} placeholder="Search report history…" value={state.search} />}
     </div></AppTopbarSlotPortal>
-    {view === "qa" ? <WorkspaceTopbarAddMenu actions={buildSingleAddMenuAction({ label: "Add QA report", onSelect: openCreateQaReportModal })} ariaLabel="Add QA report" title="Add QA report" /> : view === "logs" || view === "activity" ? <WorkspaceTopbarAddMenu actions={buildSingleAddMenuAction({ label: "Log work", onSelect: openCreateWorkLogModal })} ariaLabel="Log work" title="Log work" /> : null}
+    {view === "qa" ? <WorkspaceTopbarAddMenu actions={buildSingleAddMenuAction({ label: "Add QA report", onSelect: openCreateQaReportModal })} ariaLabel="Add QA report" title="Add QA report" /> : view === "results" ? <WorkspaceTopbarAddMenu actions={buildSingleAddMenuAction({ label: "Add milestone report", onSelect: openCreateMilestoneReportModal })} ariaLabel="Add milestone report" title="Add milestone report" /> : <WorkspaceTopbarAddMenu actions={buildSingleAddMenuAction({ label: "Log work", onSelect: openCreateWorkLogModal })} ariaLabel="Log work" title="Log work" />}
     {view === "logs" ? <>
       <p className="workspace-inline-summary">{state.summary.totalLogs} logs · {state.summary.loggedHours.toFixed(1)} hours · {state.summary.activeContributorCount} contributors · {state.summary.remainingHours.toFixed(1)} planned hours remaining</p>
       <WorkLogsTableSection membersById={membersById} openEditTaskModal={openEditTaskModal} subsystemsById={subsystemsById} taskById={state.taskById} workLogFilterMotionClass={state.workLogFilterMotionClass} workLogPagination={state.workLogPagination} workLogs={state.workLogs} />

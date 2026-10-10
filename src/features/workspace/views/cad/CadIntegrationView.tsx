@@ -1,9 +1,12 @@
+import { useRef, useState } from "react";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
+import { buildSingleAddMenuAction } from "@/features/workspace/shared/topbar";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { CadPartViewer } from "./viewer/CadPartViewer";
 import type { MechanismRecord, SubsystemRecord } from "@/types/recordsOrganization";
 import type { PartDefinitionRecord } from "@/types/recordsInventory";
 import { CadOnshapeIntegrationSection } from "./components/CadOnshapeIntegrationSection";
 import { getScopedDocumentRefs, resolveSelectedDocumentRefId } from "./model/onshapeIntegrationState";
-import { CadStepImportHeader } from "./components/CadStepImportHeader";
 import { CadStepReviewPanels } from "./components/CadStepReviewPanels";
 import { CadStepSnapshotSelector } from "./components/CadStepSnapshotSelector";
 import { CadStepUploadPanel } from "./components/CadStepUploadPanel";
@@ -36,10 +39,19 @@ export function CadIntegrationView({
   subsystems?: SubsystemRecord[];
 }) {
   const cadWorkflow = useCadStepWorkflow({ projectId, seasonId });
+  const [search, setSearch] = useState("");
+  const stepFileInputRef = useRef<HTMLInputElement>(null);
+  const searchTerm = search.trim().toLowerCase();
+  const matchingRecords = <T extends { name: string; description?: string | null }>(records: T[]) =>
+    searchTerm ? records.filter((record) => `${record.name} ${record.description ?? ""}`.toLowerCase().includes(searchTerm)) : records;
+  const matchingPartDefinitions = searchTerm
+    ? partDefinitions.filter((part) => `${part.name} ${part.partNumber} ${part.description ?? ""}`.toLowerCase().includes(searchTerm))
+    : partDefinitions;
 
   return (
     <section className="panel dense-panel cad-integration-shell">
-      <CadStepImportHeader selectedSnapshot={cadWorkflow.selectedCadSnapshot} />
+      <TopbarResponsiveSearch ariaLabel="Search CAD records" onChange={setSearch} placeholder="Search CAD records…" value={search} />
+      <WorkspaceTopbarAddMenu actions={buildSingleAddMenuAction({ label: "Choose STEP file", onSelect: () => stepFileInputRef.current?.click() })} ariaLabel="Add CAD import" title="Add CAD import" />
 
       {cadWorkflow.message ? <div className="cad-message" role="status">{cadWorkflow.message}</div> : null}
 
@@ -51,6 +63,7 @@ export function CadIntegrationView({
 
       <CadStepUploadPanel
         fileName={cadWorkflow.stepFile?.name ?? ""}
+        fileInputRef={stepFileInputRef}
         isUploading={cadWorkflow.isUploadingStep}
         label={cadWorkflow.stepLabel}
         onFileChange={cadWorkflow.setStepFile}
@@ -58,7 +71,7 @@ export function CadIntegrationView({
         onSubmit={cadWorkflow.handleStepUpload}
       />
 
-      <CadPartViewer file={cadWorkflow.stepFile} partDefinitions={partDefinitions} onSavePartImage={onSavePartImage} />
+      <CadPartViewer file={cadWorkflow.stepFile} partDefinitions={matchingPartDefinitions} onSavePartImage={onSavePartImage} search={search} />
 
       <CadStepReviewPanels
         diff={cadWorkflow.stepDiff}
@@ -76,7 +89,7 @@ export function CadIntegrationView({
         latestImportRunId={cadWorkflow.latestCadImportRun?.id ?? null}
         snapshot={cadWorkflow.selectedCadSnapshot}
         summary={cadWorkflow.stepSummary}
-        targets={{ subsystems, mechanisms, partDefinitions }}
+        targets={{ subsystems: matchingRecords(subsystems), mechanisms: matchingRecords(mechanisms), partDefinitions: matchingPartDefinitions }}
         tree={cadWorkflow.stepTree}
         warnings={cadWorkflow.stepWarnings}
       />

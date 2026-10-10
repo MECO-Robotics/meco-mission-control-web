@@ -10,7 +10,8 @@ import {
 } from "@/lib/branding";
 
 import { APP_TOPBAR_SLOT_IDS } from "./AppTopbarSlotPortal";
-import { AppSidebarAddMenu } from "./sidebar/AppSidebarAddMenu";
+import { buildTopbarAddMenuActions, makeAddMenuAction } from "@/features/workspace/shared/topbar";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 
 interface AppTopbarProps {
   activeViewLabel?: string | null;
@@ -72,12 +73,15 @@ export function AppTopbar({
         <div className="app-topbar-zoom-host" id={APP_TOPBAR_SLOT_IDS.zoom} />
         <div className="app-topbar-add-host" id={APP_TOPBAR_SLOT_IDS.add} />
         <div className="app-topbar-add-fallback">
-          <AppSidebarAddMenu
-            onCreateMilestone={onCreateMilestone}
-            onCreatePart={onCreatePart}
-            onCreateQaReport={onCreateQaReport}
-            onCreateTask={onCreateTask}
-            placement="topbar"
+          <WorkspaceTopbarAddMenu
+            actions={buildTopbarAddMenuActions(
+              makeAddMenuAction("Add task", onCreateTask),
+              makeAddMenuAction("Add milestone", onCreateMilestone),
+              makeAddMenuAction("Add part", onCreatePart),
+              makeAddMenuAction("Add QA report", onCreateQaReport),
+            )}
+            ariaLabel="Add workspace item"
+            title="Add to workspace"
           />
         </div>
       </div>

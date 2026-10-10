@@ -71,6 +71,11 @@ button. Put creation actions in `WorkspaceTopbarAddMenu` in the shared plus
 slot. The shell fallback supplies the standard plus action where a view has no
 specialized create action.
 
+Apply this contract to every registered destination and every subview or mode,
+including views that share a renderer. When auditing a shell or navigation
+change, check all route owners and confirm each one still renders the shared
+title, responsive search, controls/custom controls slot, and shared plus menu.
+
 Do not add a view-local filter bar or a second row of controls. Add filters only
 when explicitly required by the product spec, and place them in the shared
 topbar search bar's action area alongside sorting. Put other view-specific

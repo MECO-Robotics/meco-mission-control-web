@@ -103,6 +103,8 @@ describe("AppTopbar", () => {
     const markup = renderTopbar();
     expect(markup).toContain('id="workspace-topbar-slot-controls"');
     expect(markup).not.toContain('aria-label="Search workspace"');
+    expect(markup).toContain('aria-label="Add workspace item"');
+    expect(markup).toContain('class="topbar-add-button topbar-add-menu-trigger secondary-action icon-button"');
   });
 
   it("lets the topbar title area grow instead of hard-clamping its width", () => {

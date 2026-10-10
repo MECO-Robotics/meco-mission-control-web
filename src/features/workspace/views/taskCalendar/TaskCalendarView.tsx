@@ -15,7 +15,8 @@ import { toErrorMessage } from "@/lib/appUtils/common";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
-import { WorkspaceTopbarControls } from "@/features/workspace/shared/topbar";
+import { buildTopbarAddMenuActions, makeAddMenuAction, WorkspaceTopbarControls } from "@/features/workspace/shared/topbar";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { MilestonesMilestoneModal } from "@/features/workspace/views/milestones/MilestonesEventModal";
 import { useMilestonesMilestoneModalState } from "@/features/workspace/views/milestones/sections/useMilestonesEventModalState";
@@ -47,6 +48,7 @@ interface TaskCalendarViewProps {
     payload: MilestonePayload,
   ) => Promise<void>;
   onTaskDetailOpen: (task: TaskRecord) => void;
+  openCreateTaskModal: () => void;
   searchFilter?: string;
   onSearchChange?: (value: string) => void;
   onTaskEditCanceled?: () => void;
@@ -86,6 +88,7 @@ export function TaskCalendarView({
   onDeleteTimelineMilestone,
   onSaveTimelineMilestone,
   onTaskDetailOpen,
+  openCreateTaskModal,
   searchFilter,
   onSearchChange,
   onTaskEditCanceled = () => {},
@@ -261,6 +264,15 @@ export function TaskCalendarView({
           value={calendar.searchFilter}
         />
       </AppTopbarSlotPortal>
+      <WorkspaceTopbarAddMenu
+        actions={buildTopbarAddMenuActions(
+          makeAddMenuAction("Add meeting", () => window.dispatchEvent(new Event("mission-control:open-meeting"))),
+          makeAddMenuAction("Add milestone", () => window.dispatchEvent(new Event("mission-control:open-milestone"))),
+          makeAddMenuAction("Add task", openCreateTaskModal),
+        )}
+        ariaLabel="Add schedule item"
+        title="Add schedule item"
+      />
       {presentation === "agenda" ? (
         agendaEvents.length === 0 ? (
           <div aria-live="polite" className="empty-state schedule-agenda-empty-state">

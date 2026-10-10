@@ -68,6 +68,7 @@ export function WorkspaceTaskSection(props: WorkspaceContentPanelsViewProps) {
               onSaveTimelineMilestone={handleTimelineMilestoneSave}
               onTaskDetailOpen={openTimelineTaskDetailsModal}
               onCreateMilestoneReport={props.openCreateMilestoneReportModal}
+              openCreateTaskModal={openCreateTaskModalFromTimeline}
               onTaskEditCanceled={props.onTaskEditCanceled}
               onTaskEditSaved={props.onTaskEditSaved}
               eventFilter={calendarEventFilter}

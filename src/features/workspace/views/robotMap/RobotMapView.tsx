@@ -4,6 +4,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import type { SubsystemLayoutFields } from "@/lib/appUtils/subsystemLayout";
 import type { NavigationTarget } from "@/lib/workspaceNavigation";
+import { makeAddMenuAction } from "@/features/workspace/shared/topbar";
 
 import { CadFileViewer } from "../cad/viewer/CadPartViewer";
 import { RobotConfigurationToolbar } from "./RobotConfigurationToolbar";
@@ -196,6 +197,7 @@ export function RobotMapView({
               embeddedInMap
               importPlacement="topbar"
               key={primaryProjectId}
+              additionalTopbarActions={[makeAddMenuAction("Add subsystem", openCreateSubsystemModal)]}
               onOrbitingChange={onOrbitingChange}
               onOpenCadWorkspace={onOpenCadWorkspace}
               partDefinitions={bootstrap.partDefinitions}
@@ -203,7 +205,6 @@ export function RobotMapView({
             />
           )}
           isLayoutEditEnabled={isLayoutEditEnabled}
-          onAddSubsystem={openCreateSubsystemModal}
           onAutoArrange={handleAutoArrange}
           onDraftLayoutChange={applyLayoutDraft}
           onLayoutDrop={handleLayoutDrop}

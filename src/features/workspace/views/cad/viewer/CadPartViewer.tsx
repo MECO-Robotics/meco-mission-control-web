@@ -1,6 +1,8 @@
 import { Component, lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { buildTopbarAddMenuActions, makeAddMenuAction } from "@/features/workspace/shared/topbar";
+import type { TopbarAddMenuAction } from "@/features/workspace/shared/ui/WorkspaceTopbarAddMenu";
+import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { CadPartImageAssignment, type CadPartImageTargets } from "./CadPartImageAssignment";
 import type { CadMesh } from "./cadGeometry";
 import "./cadPartViewer.css";
@@ -12,7 +14,7 @@ class SceneBoundary extends Component<{ children: ReactNode }, { failed: boolean
   render() { return this.state.failed ? <p role="alert">3D display is unavailable. Enable WebGL and reload to try again.</p> : this.props.children; }
 }
 
-function FileViewer({ file, onOrbitingChange, ...imageTargets }: { file: File; onOrbitingChange?: (isOrbiting: boolean) => void } & CadPartImageTargets) {
+function FileViewer({ file, search = "", onOrbitingChange, ...imageTargets }: { file: File; search?: string; onOrbitingChange?: (isOrbiting: boolean) => void } & CadPartImageTargets) {
   const [meshes, setMeshes] = useState<CadMesh[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
@@ -29,6 +31,9 @@ function FileViewer({ file, onOrbitingChange, ...imageTargets }: { file: File; o
     return () => controller.abort();
   }, [file]);
   const select = (index: number | null) => { setSelected(index); if (index === null) setIsolated(false); };
+  const matchingMeshes = meshes?.map((mesh, index) => ({ mesh, index })).filter(({ mesh, index }) =>
+    (mesh.name || `Part ${index + 1}`).toLowerCase().includes(search.trim().toLowerCase()),
+  );
   return <>
     <p className="cad-viewer-filename">{file.name} · File preview · Dimensions in millimeters</p>
     {error ? <p role="alert">{error}</p> : !meshes ? <p role="status">Preparing part geometry…</p> : <>
@@ -38,7 +43,7 @@ function FileViewer({ file, onOrbitingChange, ...imageTargets }: { file: File; o
         <button type="button" className="secondary-button" disabled={selected === null} aria-pressed={isolated} onClick={() => setIsolated(!isolated)}>Isolate part</button>
         <label className="cad-field"><span>Part</span><select value={selected ?? ""} onChange={(event) => select(event.target.value === "" ? null : Number(event.target.value))}>
           <option value="">All parts ({meshes.length})</option>
-          {meshes.map((part, index) => <option key={index} value={index}>{part.name || `Part ${index + 1}`}</option>)}
+          {matchingMeshes?.map(({ mesh: part, index }) => <option key={index} value={index}>{part.name || `Part ${index + 1}`}</option>)}
         </select></label>
       </div>
       <div className="cad-viewer-canvas" role="img" aria-label={`3D preview of ${file.name}, ${meshes.length} parts`}>
@@ -62,39 +67,36 @@ export function EmptyCadViewer({ onOrbitingChange }: { onOrbitingChange?: (isOrb
 
 export function CadPartViewer({
   file,
-  title = "Part viewer",
+  search,
   onOrbitingChange,
   ...imageTargets
-}: { file: File | null; title?: string | null; onOrbitingChange?: (isOrbiting: boolean) => void } & CadPartImageTargets) {
+}: { file: File | null; search?: string; onOrbitingChange?: (isOrbiting: boolean) => void } & CadPartImageTargets) {
   const [current, setCurrent] = useState({ file, key: 0 });
   if (current.file !== file) setCurrent({ file, key: current.key + 1 });
   return <section className="cad-card cad-part-viewer" aria-label="CAD part viewer">
-    {title ? <h3>{title}</h3> : null}
-    {file ? <FileViewer key={current.key} file={file} onOrbitingChange={onOrbitingChange} {...imageTargets} /> : <EmptyCadViewer onOrbitingChange={onOrbitingChange} />}
+    {file ? <FileViewer key={current.key} file={file} search={search} onOrbitingChange={onOrbitingChange} {...imageTargets} /> : <EmptyCadViewer onOrbitingChange={onOrbitingChange} />}
   </section>;
 }
 
 export function CadFileViewer({
-  title = "CAD parts",
-  description = "Inspect a STEP file locally. Sign in to import its structure into a workspace or connect Onshape.",
   importPlacement = "inline",
   embeddedInMap = false,
   onOpenCadWorkspace,
+  additionalTopbarActions = [],
   onOrbitingChange,
   ...imageTargets
 }: {
-  title?: string;
-  description?: string;
   embeddedInMap?: boolean;
   importPlacement?: "inline" | "topbar";
   onOpenCadWorkspace?: () => void;
+  additionalTopbarActions?: TopbarAddMenuAction[];
   onOrbitingChange?: (isOrbiting: boolean) => void;
 } & CadPartImageTargets) {
   const [file, setFile] = useState<File | null>(null);
+  const [search, setSearch] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   return <div className={`cad-local-viewer${embeddedInMap ? " cad-local-viewer-embedded" : ""}`}>
-    {!embeddedInMap ? <h2>{title}</h2> : null}
-    {!embeddedInMap ? <p>{description}</p> : null}
+    {!embeddedInMap ? <TopbarResponsiveSearch ariaLabel="Search CAD parts" onChange={setSearch} placeholder="Search CAD parts…" value={search} /> : null}
     {importPlacement === "topbar" ? (
       <>
         <input
@@ -107,6 +109,7 @@ export function CadFileViewer({
         <WorkspaceTopbarAddMenu
           actions={buildTopbarAddMenuActions(
             makeAddMenuAction("Import STEP file", () => fileInputRef.current?.click()),
+            ...additionalTopbarActions,
             ...(onOpenCadWorkspace
               ? [makeAddMenuAction("Open CAD integration", onOpenCadWorkspace)]
               : []),
@@ -121,6 +124,6 @@ export function CadFileViewer({
         <input type="file" accept=".step,.stp" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
       </label>
     )}
-    <CadPartViewer file={file} title={embeddedInMap ? null : "Part viewer"} onOrbitingChange={onOrbitingChange} {...imageTargets} />
+    <CadPartViewer file={file} search={search} onOrbitingChange={onOrbitingChange} {...imageTargets} />
   </div>;
 }

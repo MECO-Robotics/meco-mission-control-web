@@ -1,7 +1,8 @@
-import type { ChangeEvent, FormEvent } from "react";
+import type { ChangeEvent, FormEvent, Ref } from "react";
 
 export function CadStepUploadPanel({
   fileName,
+  fileInputRef,
   isUploading,
   label,
   onFileChange,
@@ -9,6 +10,7 @@ export function CadStepUploadPanel({
   onSubmit,
 }: {
   fileName: string;
+  fileInputRef?: Ref<HTMLInputElement>;
   isUploading: boolean;
   label: string;
   onFileChange: (file: File | null) => void;
@@ -39,7 +41,7 @@ export function CadStepUploadPanel({
         </label>
         <label className="cad-field">
           <span>STEP file</span>
-          <input accept=".step,.stp" onChange={handleFileChange} type="file" />
+          <input accept=".step,.stp" onChange={handleFileChange} ref={fileInputRef} type="file" />
         </label>
         <div className="cad-step-guidance">
           <strong>Naming conventions</strong>

@@ -79,10 +79,6 @@
   white-space: nowrap;
 }
 
-.robot-config-unplaced-add-button svg {
-  display: block;
-}
-
 @media (max-width: 780px) {
   .robot-config-card-layer {
     max-width: min(220px, 52vw);
