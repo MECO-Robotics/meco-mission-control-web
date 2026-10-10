@@ -1,3 +1,4 @@
+import { localTodayDate } from "@/lib/dateUtils";
 import { useMemo, useState } from "react";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { CompactFilterMenu } from "@/features/workspace/shared/filters/workspaceCompactFilterMenu";
@@ -54,7 +55,7 @@ export function RiskActionOverview({ activePersonFilter, bootstrap, onCreateRisk
   const [statusFilter, setStatusFilter] = useState<RiskStatus | "active">("active");
   const [dueFilter, setDueFilter] = useState("all");
   const [searchFilter, setSearchFilter] = useState("");
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localTodayDate();
   const risks = useMemo(() => filterRiskRecords(bootstrap.risks, { owner: ownerFilter, status: statusFilter, due: dueFilter, people: activePersonFilter, search: searchFilter }, today), [activePersonFilter, bootstrap.risks, dueFilter, ownerFilter, searchFilter, statusFilter, today]);
   const actionCountsByType = countRiskActions(bootstrap.risks.filter((risk) => !activePersonFilter.length || (risk.ownerMemberId !== null && activePersonFilter.includes(risk.ownerMemberId))), today);
   const overdueIds = new Set(actionCountsByType.overdue.map((risk) => risk.id));
