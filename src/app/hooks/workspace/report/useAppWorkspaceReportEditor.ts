@@ -1,12 +1,13 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
+import { buildEmptyQaReportPayload, buildEmptyTestResultPayload, buildEmptyWorkLogPayload } from "@/lib/appUtils/payloadBuilders";
+
+import { useCatalogEditorLifecycle } from "@/app/workspaceCatalog/useCatalogEditorLifecycle";
 import { toErrorMessage } from "@/lib/appUtils/common";
 import { createQaReportRecord, createTestResultRecord, createWorkLogRecord } from "@/lib/auth/records/reporting";
 import { localTodayDate } from "@/lib/dateUtils";
 import type { QaReportPayload, TestResultPayload, WorkLogPayload } from "@/types/payloads";
-
-export type AppWorkspaceReportSubmitActions = ReturnType<typeof useAppWorkspaceReportSubmitActions>;
 
 function getUniqueValidMemberIds(candidateIds: string[] | null | undefined, model: AppWorkspaceModel) {
   return Array.from(
@@ -18,10 +19,82 @@ function getUniqueValidMemberIds(candidateIds: string[] | null | undefined, mode
   );
 }
 
-export function useAppWorkspaceReportSubmitActions(model: AppWorkspaceModel) {
+export type AppWorkspaceReportEditor = ReturnType<typeof useAppWorkspaceReportEditor>;
+
+export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
+  const lifecycle = useCatalogEditorLifecycle(model);
+  const { resetEditor } = lifecycle;
+  const { selectedProjectId, selectedSeasonId, setWorkLogModalMode, setQaReportModalMode, setMilestoneReportModalMode } = model;
+  const returnToDetails = useRef<(() => void) | null>(null);
+  const reportIsOpen = Boolean(model.workLogModalMode || model.qaReportModalMode || model.milestoneReportModalMode);
+
+  // Successful submissions close through their own handlers; dismissal and save both
+  // return to the record that launched this action without stacking dialogs.
+  useEffect(() => {
+    if (!reportIsOpen && returnToDetails.current) {
+      const restore = returnToDetails.current;
+      returnToDetails.current = null;
+      restore();
+    }
+  }, [reportIsOpen]);
+
+  useEffect(() => {
+    resetEditor();
+    returnToDetails.current = null;
+    setWorkLogModalMode(null);
+    setQaReportModalMode(null);
+    setMilestoneReportModalMode(null);
+  }, [selectedProjectId, selectedSeasonId, setWorkLogModalMode, setQaReportModalMode, setMilestoneReportModalMode, resetEditor]);
+
+  const leaveTaskDetails = useCallback((taskId?: string) => {
+    resetEditor();
+    returnToDetails.current = model.taskEditor.leaveTaskDetails(taskId);
+    model.setWorkLogModalMode(null);
+    model.setQaReportModalMode(null);
+    model.setMilestoneReportModalMode(null);
+  }, [model, resetEditor]);
+
+  const openCreateWorkLogModal = useCallback((taskId?: string) => {
+    const draft = buildEmptyWorkLogPayload(model.scopedBootstrap, model.activePersonFilter.length === 1 ? model.activePersonFilter[0] : null);
+    leaveTaskDetails(taskId);
+    model.setWorkLogDraft({ ...draft, taskId: taskId ?? draft.taskId });
+    model.setWorkLogModalMode("create");
+  }, [leaveTaskDetails, model]);
+
+  const closeWorkLogModal = useCallback(() => { resetEditor(); model.setWorkLogModalMode(null); }, [model, resetEditor]);
+
+  const openCreateQaReportModal = useCallback((taskId?: string) => {
+    const draft = buildEmptyQaReportPayload(model.scopedBootstrap, model.activePersonFilter.length === 1 ? model.activePersonFilter[0] : null);
+    const task = model.scopedBootstrap.tasks.find((candidate) => candidate.id === taskId) ?? model.scopedBootstrap.tasks[0];
+    leaveTaskDetails(taskId);
+    model.setQaReportDraft({ ...draft, targetRefs: task ? [{ kind: "task", id: task.id }] : [], projectId: task?.projectId ?? draft.projectId });
+    model.setQaReportModalMode("create");
+  }, [leaveTaskDetails, model]);
+
+  const closeQaReportModal = useCallback(() => { resetEditor(); model.setQaReportModalMode(null); }, [model, resetEditor]);
+
+  const openCreateMilestoneReportModal = useCallback((milestoneId?: string, onReturn?: () => void) => {
+    const draft = buildEmptyTestResultPayload(model.scopedBootstrap);
+    const defaultMilestoneId = draft.targetRefs.find((ref) => ref.kind === "milestone")?.id;
+    const milestone = model.scopedBootstrap.milestones.find((candidate) => candidate.id === (milestoneId ?? defaultMilestoneId));
+    leaveTaskDetails();
+    returnToDetails.current = onReturn ?? null;
+    model.setMilestoneReportDraft({ ...draft, targetRefs: milestone ? [{ kind: "milestone", id: milestone.id }] : [], projectId: milestone?.projectIds[0] ?? draft.projectId });
+    model.setMilestoneReportFindings("");
+    model.setMilestoneReportModalMode("create");
+  }, [leaveTaskDetails, model]);
+
+  const closeMilestoneReportModal = useCallback(() => {
+    resetEditor();
+    model.setMilestoneReportModalMode(null);
+    model.setMilestoneReportFindings("");
+  }, [model, resetEditor]);
+
   const handleWorkLogSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
-    model.setIsSavingWorkLog(true);
+    if (!model.workLogModalMode) return;
+    const operation = lifecycle.beginOperation();
+    if (!operation) return;
     model.setDataMessage(null);
 
     try {
@@ -44,18 +117,20 @@ export function useAppWorkspaceReportSubmitActions(model: AppWorkspaceModel) {
       };
 
       await createWorkLogRecord(payload, model.handleUnauthorized);
-      await model.loadWorkspace();
-      model.setWorkLogModalMode(null);
+      await operation.refresh();
+      if (operation.isCurrent()) closeWorkLogModal();
     } catch (error) {
-      model.setDataMessage(toErrorMessage(error));
+      if (operation.isCurrent()) model.setDataMessage(toErrorMessage(error));
     } finally {
-      model.setIsSavingWorkLog(false);
+      operation.finish();
     }
-  }, [model]);
+  }, [model, lifecycle, closeWorkLogModal]);
 
   const handleQaReportSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
-    model.setIsSavingQaReport(true);
+    if (!model.qaReportModalMode) return;
+    const operation = lifecycle.beginOperation();
+    if (!operation) return;
     model.setDataMessage(null);
 
     try {
@@ -93,19 +168,21 @@ export function useAppWorkspaceReportSubmitActions(model: AppWorkspaceModel) {
       };
 
       await createQaReportRecord(payload, model.handleUnauthorized);
-      await model.loadWorkspace();
-      model.setQaReportModalMode(null);
+      await operation.refresh();
+      if (operation.isCurrent()) closeQaReportModal();
 
     } catch (error) {
-      model.setDataMessage(toErrorMessage(error));
+      if (operation.isCurrent()) model.setDataMessage(toErrorMessage(error));
     } finally {
-      model.setIsSavingQaReport(false);
+      operation.finish();
     }
-  }, [model]);
+  }, [model, lifecycle, closeQaReportModal]);
 
   const handleMilestoneReportSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();
-    model.setIsSavingMilestoneReport(true);
+    if (!model.milestoneReportModalMode) return;
+    const operation = lifecycle.beginOperation();
+    if (!operation) return;
     model.setDataMessage(null);
 
     try {
@@ -152,19 +229,19 @@ export function useAppWorkspaceReportSubmitActions(model: AppWorkspaceModel) {
       };
 
       await createTestResultRecord(payload, model.handleUnauthorized);
-      await model.loadWorkspace();
-      model.setMilestoneReportModalMode(null);
-      model.setMilestoneReportFindings("");
-    } catch (error) {
-      model.setDataMessage(toErrorMessage(error));
-    } finally {
-      model.setIsSavingMilestoneReport(false);
-    }
-  }, [model]);
+      await operation.refresh();
+      if (operation.isCurrent()) closeMilestoneReportModal();
 
-  return {
-    handleMilestoneReportSubmit,
-    handleQaReportSubmit,
-    handleWorkLogSubmit,
-  };
+    } catch (error) {
+      if (operation.isCurrent()) model.setDataMessage(toErrorMessage(error));
+    } finally {
+      operation.finish();
+    }
+  }, [model, lifecycle, closeMilestoneReportModal]);
+
+  return { handleWorkLogSubmit, handleQaReportSubmit, handleMilestoneReportSubmit,
+    isSavingWorkLog: lifecycle.isSaving && Boolean(model.workLogModalMode),
+    isSavingQaReport: lifecycle.isSaving && Boolean(model.qaReportModalMode),
+    isSavingMilestoneReport: lifecycle.isSaving && Boolean(model.milestoneReportModalMode),
+    closeMilestoneReportModal, closeQaReportModal, closeWorkLogModal, openCreateMilestoneReportModal, openCreateQaReportModal, openCreateWorkLogModal };
 }

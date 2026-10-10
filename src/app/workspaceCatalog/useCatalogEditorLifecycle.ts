@@ -34,8 +34,8 @@ export function useCatalogEditorLifecycle({ loadWorkspace, selectedProjectId, se
       session === getSessionGeneration() && local === getLocalWorkspaceGeneration();
     return {
       isCurrent,
-      async refresh() {
-        if (isCurrent()) await latestLoadWorkspace.current(undefined, isCurrent);
+      async refresh(canNotify: () => boolean = isCurrent) {
+        return isCurrent() && await latestLoadWorkspace.current(undefined, isCurrent, canNotify);
       },
     };
   }, []);
@@ -43,9 +43,10 @@ export function useCatalogEditorLifecycle({ loadWorkspace, selectedProjectId, se
   const captureEditor = useCallback(() => {
     const editor = editorVersion.current;
     const workspace = captureWorkspace();
+    const isCurrent = () => workspace.isCurrent() && editor === editorVersion.current;
     return {
-      ...workspace,
-      isCurrent: () => workspace.isCurrent() && editor === editorVersion.current,
+      isCurrent,
+      refresh: () => workspace.refresh(isCurrent),
     };
   }, [captureWorkspace]);
 

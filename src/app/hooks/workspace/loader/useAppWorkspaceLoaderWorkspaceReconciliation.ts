@@ -2,7 +2,6 @@ import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
 import { reconcileActivePersonFilter } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceReconciliationSelection";
-import { reconcileWorkLogAndReports } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceReconciliationReports";
 import type { SelectMemberHandler } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
 
 export function reconcileWorkspaceState(
@@ -18,5 +17,4 @@ export function reconcileWorkspaceState(
 
   reconcileActivePersonFilter(state, scopedPayload);
   selectMember(nextMemberId, scopedPayload);
-  reconcileWorkLogAndReports(state, scopedPayload);
 }

@@ -10,7 +10,6 @@ export function useAppWorkspaceUiStateReports() {
   const [qaReportDraft, setQaReportDraft] = useState<QaReportPayload>(
     buildEmptyQaReportPayload(EMPTY_BOOTSTRAP),
   );
-  const [isSavingQaReport, setIsSavingQaReport] = useState(false);
 
   const [milestoneReportModalMode, setMilestoneReportModalMode] =
     useState<MilestoneReportModalMode>(null);
@@ -18,21 +17,16 @@ export function useAppWorkspaceUiStateReports() {
     buildEmptyTestResultPayload(EMPTY_BOOTSTRAP),
   );
   const [milestoneReportFindings, setMilestoneReportFindings] = useState("");
-  const [isSavingMilestoneReport, setIsSavingMilestoneReport] = useState(false);
 
   return {
     milestoneReportDraft,
     milestoneReportFindings,
     milestoneReportModalMode,
-    isSavingMilestoneReport,
-    isSavingQaReport,
     qaReportDraft,
     qaReportModalMode,
     setMilestoneReportDraft,
     setMilestoneReportFindings,
     setMilestoneReportModalMode,
-    setIsSavingMilestoneReport,
-    setIsSavingQaReport,
     setQaReportDraft,
     setQaReportModalMode,
   };

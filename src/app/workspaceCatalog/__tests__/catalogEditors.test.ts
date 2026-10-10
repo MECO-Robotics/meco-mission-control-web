@@ -81,7 +81,7 @@ function setup(item: typeof cases[number]) {
   const dependencies = {
     bootstrap, scopedBootstrap: bootstrap, selectedProjectId: bootstrap.projects[0].id,
     selectedSeasonId: bootstrap.projects[0].seasonId, signedInMemberId: bootstrap.members.at(-1)?.id ?? null,
-    handleUnauthorized: jest.fn(), loadWorkspace: jest.fn(async () => {}), setDataMessage: jest.fn(), setBootstrap: jest.fn(),
+    handleUnauthorized: jest.fn(), loadWorkspace: jest.fn(async () => true), setDataMessage: jest.fn(), setBootstrap: jest.fn(),
   };
   const cap = item.name[0].toUpperCase() + item.name.slice(1);
   const useOwner = item.useOwner as (input: typeof dependencies) => Record<string, unknown>;
