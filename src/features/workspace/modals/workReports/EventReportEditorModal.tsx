@@ -30,7 +30,6 @@ export function MilestoneReportEditorModal({
 }: MilestoneReportEditorModalProps) {
   const initialDraft = useRef(JSON.stringify([milestoneReportDraft, milestoneReportFindings]));
   const closeMilestoneReportModal = () => {
-    if (isSavingMilestoneReport) return;
     if (JSON.stringify([milestoneReportDraft, milestoneReportFindings]) !== initialDraft.current && !window.confirm("Discard unsaved changes?")) return;
     onClose();
   };
@@ -106,7 +105,6 @@ export function MilestoneReportEditorModal({
                   summary: milestone.target.value,
                 }))
               }
-              required
               value={milestoneReportDraft.summary}
             />
           </label>

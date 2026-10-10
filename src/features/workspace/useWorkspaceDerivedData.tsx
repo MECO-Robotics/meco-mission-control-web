@@ -127,7 +127,6 @@ export function useWorkspaceDerivedData({
     },
     [
       bootstrap.tasks.length,
-      bootstrap.risks.length,
       bootstrap.workLogs.length,
       bootstrap.members.length,
       showProjectInventoryTab,

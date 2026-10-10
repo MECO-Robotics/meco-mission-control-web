@@ -34,14 +34,14 @@ it.each(["success", "failure"])("does not publish obsolete refresh %s or clear a
   const first = load();
   const latest = load();
   if (outcome === "success") resolve(createBootstrap()); else reject(new Error("old error"));
-  await first;
+  expect(await first).toBe(false);
   expect(state.setBootstrap).not.toHaveBeenCalled();
   expect(reconcileWorkspaceState).not.toHaveBeenCalled();
   expect(state.setDataMessage.mock.calls).toEqual([[null], [null]]);
   expect(state.setIsLoadingData.mock.calls).toEqual([[true], [true]]);
   const payload = createBootstrap();
   finishLatest(payload);
-  await latest;
+  expect(await latest).toBe(true);
   expect(state.setBootstrap).toHaveBeenCalledWith(payload);
   expect(reconcileWorkspaceState).toHaveBeenCalledTimes(1);
   expect(state.setIsLoadingData).toHaveBeenLastCalledWith(false);
@@ -55,9 +55,29 @@ it("rejects an editor refresh after its workspace becomes inapplicable", async (
   const request = load(undefined, () => applicable);
   applicable = false;
   finish(createBootstrap());
-  await request;
+  expect(await request).toBe(false);
   expect(state.setBootstrap).not.toHaveBeenCalled();
   expect(reconcileWorkspaceState).not.toHaveBeenCalled();
   expect(state.setDataMessage.mock.calls).toEqual([[null]]);
   expect(state.setIsLoadingData.mock.calls).toEqual([[true]]);
+});
+
+it("reports failure to mutation callers while keeping the refresh error visible", async () => {
+  const { state, load } = setup();
+  jest.mocked(fetchBootstrap).mockRejectedValueOnce(new Error("bootstrap unavailable"));
+  expect(await load()).toBe(false);
+  expect(state.setDataMessage).toHaveBeenLastCalledWith("bootstrap unavailable");
+  expect(state.setIsLoadingData).toHaveBeenLastCalledWith(false);
+  expect(state.setBootstrap).not.toHaveBeenCalled();
+});
+
+it.each(["success", "failure"])("does not replace a newer editor message when a retired editor refresh ends in %s", async (outcome) => {
+  const { state, load } = setup();
+  const payload = createBootstrap();
+  if (outcome === "success") jest.mocked(fetchBootstrap).mockResolvedValueOnce(payload);
+  else jest.mocked(fetchBootstrap).mockRejectedValueOnce(new Error("retired refresh failed"));
+  expect(await load(undefined, () => true, () => false)).toBe(outcome === "success");
+  expect(state.setDataMessage).not.toHaveBeenCalled();
+  expect(state.setIsLoadingData).toHaveBeenLastCalledWith(false);
+  if (outcome === "success") expect(state.setBootstrap).toHaveBeenCalledWith(payload);
 });

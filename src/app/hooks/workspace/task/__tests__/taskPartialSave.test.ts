@@ -29,7 +29,7 @@ function setup() {
       dependencies.bootstrap = typeof next === "function" ? next(dependencies.bootstrap) : next;
       dependencies.scopedBootstrap = dependencies.bootstrap;
     },
-    setDataMessage: jest.fn(), handleUnauthorized: jest.fn(), loadWorkspace: jest.fn(async () => {}), enqueueTaskEditNotice: jest.fn(),
+    setDataMessage: jest.fn(), handleUnauthorized: jest.fn(), loadWorkspace: jest.fn(async () => true), enqueueTaskEditNotice: jest.fn(),
   };
   const Render = () => { cursor = 0; return useTaskEditor(dependencies); };
   const saved = { ...bootstrap.tasks[0], id: "new-task" };
@@ -131,4 +131,13 @@ it("does not restore an old report's task over a newer editor or details selecti
   render().restoreTimelineTaskDetails("other-task");
   secondReturn();
   expect(render().activeTimelineTaskDetailId).toBe("other-task");
+});
+
+it("does not announce a reconciled status change when the refresh failed", async () => {
+  const { render, dependencies } = setup();
+  jest.mocked(dependencies.loadWorkspace).mockResolvedValueOnce(false);
+  const task = dependencies.bootstrap.tasks[0];
+  await render().handleTaskStatusChange(task, task.status === "complete" ? "not-started" : "complete");
+  expect(updateTaskRecord).toHaveBeenCalledTimes(1);
+  expect(dependencies.enqueueTaskEditNotice).not.toHaveBeenCalled();
 });

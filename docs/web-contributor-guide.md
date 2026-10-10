@@ -97,6 +97,8 @@ For new edit flows:
 - Show unauthorized, validation, network, and rollback states in the initiating
   view or modal.
 
+Work-log, QA and milestone-report actions share one editor lifecycle. Cancel and close remain available during saves, retaining dirty-draft confirmation. Opening or closing a report retires pending editor callbacks; a completed write may refresh its original workspace but cannot close or report an error in a newer draft. Bootstrap refreshes never initialize report drafts. Workspace publication and editor notifications have separate lifetime guards, so a retired editor refresh cannot clear or replace the newer editor’s error. Workspace loads return whether the latest applicable payload was reconciled; task success notices require that result. An acknowledged create closes even when refresh fails, leaving the workspace error visible and avoiding duplicate create retries.
+
 Pseudo-state workflows, such as blocked or waiting-on-dependency task drops,
 should open an edit intent with the relevant draft context instead of silently
 changing fields that require user explanation.

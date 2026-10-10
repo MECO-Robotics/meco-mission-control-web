@@ -10,11 +10,8 @@ export function useAppWorkspaceUiStateWorkLog() {
   const [workLogDraft, setWorkLogDraft] = useState<WorkLogPayload>(
     buildEmptyWorkLogPayload(EMPTY_BOOTSTRAP),
   );
-  const [isSavingWorkLog, setIsSavingWorkLog] = useState(false);
 
   return {
-    isSavingWorkLog,
-    setIsSavingWorkLog,
     setWorkLogDraft,
     setWorkLogModalMode,
     workLogDraft,

@@ -159,9 +159,9 @@ export function useTaskEditor({ bootstrap, scopedBootstrap, selectedProjectId, s
         onDeleted: (id) => { if (workspace.isCurrent()) publish((current) => ({ ...current, taskDependencies: (current.taskDependencies ?? []).filter((item) => item.id !== id) })); },
       }, TASK_RELATION_PERSISTENCE)) return;
       if (!workspace.isCurrent()) return;
-      await workspace.refresh();
+      const refreshed = await operation.refresh();
       if (operation.isCurrent()) {
-        if (isEdit) enqueueTaskEditNotice(buildTaskEditSuccessNotice());
+        if (isEdit && refreshed) enqueueTaskEditNotice(buildTaskEditSuccessNotice());
         closeTaskModal();
       }
     } catch (error) {
@@ -177,8 +177,8 @@ export function useTaskEditor({ bootstrap, scopedBootstrap, selectedProjectId, s
     setDataMessage(null);
     try {
       await updateTaskRecord(task.id, { status }, handleUnauthorized);
-      await workspace.refresh();
-      if (workspace.isCurrent()) enqueueTaskEditNotice(buildTaskEditSuccessNotice());
+      const refreshed = await workspace.refresh();
+      if (refreshed && workspace.isCurrent()) enqueueTaskEditNotice(buildTaskEditSuccessNotice());
     } catch (error) {
       if (workspace.isCurrent()) setDataMessage(toErrorMessage(error));
     }
