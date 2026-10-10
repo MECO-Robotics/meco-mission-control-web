@@ -127,6 +127,13 @@ describe("WorkLogsView", () => {
     expect(html).toContain("Created worklog Drive CAD");
   });
 
+  it("provides the shared Log work plus action on Activity", () => {
+    const html = renderWorkLogsView("activity");
+
+    expect(html).toContain('aria-label="Log work"');
+    expect(html).toContain('class="topbar-add-button topbar-add-menu-trigger secondary-action icon-button"');
+  });
+
   it("keeps QA and milestone history as filters rather than duplicate task lists", () => {
     const base = { projectId: "p", targetRefs: [], createdByMemberId: null, participantIds: [], mentorId: null, requestedById: null, result: "pass", status: "submitted" as const, notes: "", createdAt: "2026-09-10" };
     const reports: BootstrapPayload["reports"] = [
