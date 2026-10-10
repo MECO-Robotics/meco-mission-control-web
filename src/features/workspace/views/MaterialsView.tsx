@@ -157,12 +157,6 @@ export function MaterialsView({
         </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
 
-      <div className="panel-header compact-header">
-        <div className="queue-section-header">
-          <h2>Materials manager</h2>
-        </div>
-      </div>
-
       <div className={`table-shell ${materialsFilterMotionClass}`}>
         <div
           className="ops-table ops-table-header materials-table"

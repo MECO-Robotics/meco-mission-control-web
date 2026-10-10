@@ -4,7 +4,9 @@
   [docs/web-contributor-guide.md](docs/web-contributor-guide.md), including for
   documentation-only tasks. Treat its guidance as required, not optional. For
   workspace views, enforce the **Workspace Topbar Contract**: shared topbar
-  actions and filters only when specified, with no view-level title or eyebrow.
+  title, search bar, controls/custom page slots and shared plus action on every
+  view; keep the title visible at compact widths. Do not add view-level titles,
+  second bars, local Add/Create buttons or alternate plus controls.
 - Follow [CONTRIBUTING.md](CONTRIBUTING.md) for setup, validation and PR policy.
 - Work in dedicated worktrees outside base checkouts. Base checkouts are for inspection, fetching and worktree creation.
 - This is an undeployed prototype with disposable development data. Prefer coherent replacement over compatibility scaffolding; update affected consumers and describe resets or breaking changes.

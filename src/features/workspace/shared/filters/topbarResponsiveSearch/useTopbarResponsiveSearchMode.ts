@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useState, type RefObject } from "react";
 
 import {
   clampSearchMode,
@@ -46,7 +46,6 @@ export function useTopbarResponsiveSearchMode({
 }: UseTopbarResponsiveSearchModeOptions) {
   const [searchMode, setSearchMode] = useState<SearchCompactMode>("full");
   const [searchWidth, setSearchWidth] = useState<number | null>(null);
-  const leftWidthRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (resolvedMode !== "dynamic-label" || typeof ResizeObserver === "undefined") {
@@ -63,13 +62,6 @@ export function useTopbarResponsiveSearchMode({
     }
 
     const updateSearchMode = () => {
-      const topbar = element.closest(".app-topbar");
-      const topbarLeft = topbar?.querySelector<HTMLElement>(".app-topbar-left");
-      const measuredLeftWidth = topbarLeft?.getBoundingClientRect().width ?? 0;
-      if (measuredLeftWidth > 0 && searchMode !== "icon") {
-        leftWidthRef.current = measuredLeftWidth;
-      }
-
       const nextSearchWidth = shouldUseCollisionDetection
         ? getCollisionMeasurement(searchRef, effectivePadding, collisionRoots)
         : { availableWidthPx: container.clientWidth, blockers: 0 };
@@ -111,10 +103,6 @@ export function useTopbarResponsiveSearchMode({
 
         if (nextMode !== current) {
           onCompactModeChange?.(nextMode, { widthPx: widthToTest, blockers });
-        }
-
-        if (nextMode === "icon" && leftWidthRef.current === null && measuredLeftWidth > 0) {
-          leftWidthRef.current = measuredLeftWidth;
         }
 
         return nextMode;
@@ -161,7 +149,7 @@ export function useTopbarResponsiveSearchMode({
       return;
     }
 
-    setTopbarSearchCollisionMode(searchRef, searchMode, leftWidthRef.current);
+    setTopbarSearchCollisionMode(searchRef, searchMode);
 
     return () => {
       setTopbarSearchCollisionMode(searchRef, "full");

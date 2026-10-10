@@ -125,12 +125,6 @@ export function ArtifactInventoryView({
         sortMenu={<ResourceSortMenu direction={sortDirection} field={sortField} label={artifactNoun} onDirectionChange={setSortDirection} onFieldChange={(field) => setSortField(field as ArtifactSortField)} options={[{ label: "Artifact", value: "title" }, { label: "Linked to", value: "targets" }, { label: "Status", value: "status" }, { label: "URI", value: "uri" }, { label: "Updated", value: "updated" }]} />}
       />
 
-      <div className="panel-header compact-header">
-        <div className="queue-section-header">
-          <h2>{sectionTitle}</h2>
-        </div>
-      </div>
-
       <WorkspaceTopbarAddMenu
         actions={buildSingleAddMenuAction({
           label: addLabel,

@@ -54,19 +54,27 @@ needed.
 
 ## Workspace Topbar Contract
 
-The app topbar and navigation own the page context. Views must not render a
-title, eyebrow, subtitle, tagline, or introductory header at the top of their
-content. Keep operational screens free of explanatory header paragraphs; put
-product instructions in Help or tutorial content.
+The shared app topbar is the only page header. Every destination keeps one
+topbar with the active view title, the search bar, the controls area, the
+view-owned custom controls slot, and the shared plus action. Keep the title
+visible at every responsive width. The search bar may switch to its compact
+icon state, but the title and plus action remain visible. Views must not render
+a second navigation bar or add a title, eyebrow, subtitle, tagline, or
+introductory header above their content. Keep operational screens free of
+explanatory header paragraphs; put product instructions in Help or tutorial
+content.
 
-Every workspace view must use the standard shared topbar. New view-local
-**Add**/**Create** buttons are prohibited unless the product spec explicitly
-requires a view-local button. Put creation actions in the existing plus slot.
+Every workspace view must use the standard shared topbar and its slots. New
+view-local **Add**/**Create** buttons, floating add buttons, and alternate add
+menus are prohibited unless the product spec explicitly requires a view-local
+button. Put creation actions in `WorkspaceTopbarAddMenu` in the shared plus
+slot. The shell fallback supplies the standard plus action where a view has no
+specialized create action.
 
-Do not add a view-local filter bar or controls. Add filters only when explicitly
-required by the product spec, and place them in the shared topbar search bar's
-action area alongside sorting. Put other view-specific controls in the controls
-slot. Use `TopbarResponsiveSearch`, `WorkspaceTopbarControls`,
+Do not add a view-local filter bar or a second row of controls. Add filters only
+when explicitly required by the product spec, and place them in the shared
+topbar search bar's action area alongside sorting. Put other view-specific
+controls in the controls slot. Use `TopbarResponsiveSearch`, `WorkspaceTopbarControls`,
 `WorkspaceSortMenu`/`CompactFilterMenu`, and `WorkspaceTopbarAddMenu` rather than
 inline substitutes. Each control must act on the current view's data. If a
 control does not apply to a destination, do not show a dead or decorative

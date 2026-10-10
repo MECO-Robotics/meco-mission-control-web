@@ -75,40 +75,31 @@ export function HelpView({
             placeholder="Search help..."
             value={searchFilter}
           />
+          <button
+            aria-controls={onStartInteractiveTutorial ? undefined : "help-tutorial-dialog"}
+            className="primary-action help-tutorial-launch"
+            data-tutorial-launch="help"
+            disabled={isInteractiveTutorialActive}
+            onClick={() => {
+              if (hasInteractiveChapterLauncher && onStartInteractiveTutorialChapter) {
+                onStartInteractiveTutorialChapter(interactiveTutorialChapters[0].id);
+                return;
+              }
+
+              if (onStartInteractiveTutorial) {
+                onStartInteractiveTutorial();
+                return;
+              }
+
+              openTutorial();
+            }}
+            type="button"
+          >
+            <IconHelp />
+            {hasInteractiveChapterLauncher ? "Start chapter 1" : "Start tutorial"}
+          </button>
         </div>
       </AppTopbarSlotPortal>
-
-      <div className="panel-header compact-header">
-        <div className="queue-section-header">
-          <h2>Help documentation</h2>
-          <p className="section-copy">
-            Practical operating notes for scope, edit flow, filters, access, and recovery.
-          </p>
-        </div>
-        <button
-          aria-controls={onStartInteractiveTutorial ? undefined : "help-tutorial-dialog"}
-          className="primary-action help-tutorial-launch"
-          data-tutorial-launch="help"
-          disabled={isInteractiveTutorialActive}
-          onClick={() => {
-            if (hasInteractiveChapterLauncher && onStartInteractiveTutorialChapter) {
-              onStartInteractiveTutorialChapter(interactiveTutorialChapters[0].id);
-              return;
-            }
-
-            if (onStartInteractiveTutorial) {
-              onStartInteractiveTutorial();
-              return;
-            }
-
-            openTutorial();
-          }}
-          type="button"
-        >
-          <IconHelp />
-          {hasInteractiveChapterLauncher ? "Start chapter 1" : "Start tutorial"}
-        </button>
-      </div>
 
       {hasInteractiveChapterLauncher ? (
         <div className="panel-subsection help-doc-section">

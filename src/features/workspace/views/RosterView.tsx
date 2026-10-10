@@ -323,11 +323,6 @@ export const RosterView: React.FC<RosterViewProps> = ({
         tutorialTarget="create-person-button"
       />
 
-      <div className="panel-header compact-header">
-        <div className="queue-section-header">
-          <h2>People</h2>
-        </div>
-      </div>
       <div className="roster-columns">
         {visibleRosterSections.length === 0 ? (
           <p className="empty-state" role="status">

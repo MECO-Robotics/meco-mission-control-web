@@ -111,15 +111,4 @@
     min-width: max-content;
   }
 
-  .app-topbar[data-topbar-search-mode="icon"] .app-topbar-left {
-    flex: 0 0 var(--app-topbar-left-collapse-width, auto);
-    width: var(--app-topbar-left-collapse-width, auto);
-    max-width: var(--app-topbar-left-collapse-width, none);
-    overflow: hidden;
-    padding-inline: 0.2rem 0.1rem;
-  }
-
-  .app-topbar[data-topbar-search-mode="icon"] .app-topbar-view-title h1 {
-    display: none;
-  }
 }

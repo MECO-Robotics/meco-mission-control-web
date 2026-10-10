@@ -61,13 +61,11 @@ export function AppTopbar({
           src={topbarLogo.src}
         />
       </div>
-      {activeViewLabel ? (
-        <div className="app-topbar-left">
-          <div className="app-topbar-view-title">
-            <h1>{activeViewLabel}</h1>
-          </div>
+      <div className="app-topbar-left">
+        <div className="app-topbar-view-title">
+          <h1>{activeViewLabel?.trim() || "Workspace"}</h1>
         </div>
-      ) : null}
+      </div>
       <div className="app-topbar-search-slot">
         <div className="app-topbar-search-host" id={APP_TOPBAR_SLOT_IDS.search} />
         <div className="app-topbar-controls-host" id={APP_TOPBAR_SLOT_IDS.controls} />

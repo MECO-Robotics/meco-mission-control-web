@@ -20,11 +20,6 @@ export function HomeView({ bootstrap, onOpenTask, onOpenSchedule, today = new Da
 
   return (
     <section className={`panel dense-panel overview-shell home-view ${WORKSPACE_PANEL_CLASS}`}>
-      <div className="panel-header compact-header">
-        <div className="queue-section-header">
-          <h2>Home</h2>
-        </div>
-      </div>
 
       <div className="overview-section-grid">
         <OverviewListSection

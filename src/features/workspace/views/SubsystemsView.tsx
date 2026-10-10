@@ -1,9 +1,10 @@
 ﻿import { useMemo, useState } from "react";
 
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
+import { buildTopbarAddMenuActions, makeAddMenuAction } from "@/features/workspace/shared/topbar";
 import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
-import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
+import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { getDefaultSubsystemId } from "@/lib/appUtils/common";
 
 import {
@@ -108,17 +109,13 @@ export function SubsystemsView({
           setSortField={setSortField}
         />
       </AppTopbarSlotPortal>
-
-      <div className="panel-header compact-header">
-        <div className="queue-section-header">
-          <h2 style={{ color: "var(--text-title)" }}>Subsystem manager</h2>
-        </div>
-      </div>
-
-      <WorkspaceFloatingAddButton
-        ariaLabel="Add subsystem"
-        onClick={openCreateSubsystemModal}
-        title="Add subsystem"
+      <WorkspaceTopbarAddMenu
+        actions={buildTopbarAddMenuActions(
+          makeAddMenuAction("Add subsystem", openCreateSubsystemModal),
+          makeAddMenuAction("Add mechanism", () => openCreateMechanismModal(selectedSubsystemId || undefined)),
+        )}
+        ariaLabel="Add subsystem or mechanism"
+        title="Add to subsystems"
         tutorialTarget="create-subsystem-button"
       />
 

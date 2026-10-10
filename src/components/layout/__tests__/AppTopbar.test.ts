@@ -161,8 +161,24 @@ describe("AppTopbar", () => {
   it("keeps the title visible when the topbar compacts", () => {
     const topbarShellControlsCss = readTopbarShellControlsCss();
 
-    expect(topbarShellControlsCss).toContain(".app-topbar-view-title h1");
-    expect(topbarShellControlsCss).not.toContain(".app-topbar-view-title {\n    display: none;");
+    expect(topbarShellControlsCss).not.toContain(".app-topbar-view-title h1 {\n    display: none;");
+    expect(topbarShellControlsCss).not.toContain("--app-topbar-left-collapse-width");
+  });
+
+  it("always renders a title when no view label is supplied", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(AppTopbar, {
+        activeViewLabel: null,
+        isDarkMode: false,
+        isSidebarCollapsed: false,
+        onCreateMilestone: jest.fn(),
+        onCreatePart: jest.fn(),
+        onCreateQaReport: jest.fn(),
+        onCreateTask: jest.fn(),
+      }),
+    );
+
+    expect(markup).toContain("<h1>Workspace</h1>");
   });
 
   it("adds gradient side hints to compact topbar scroll areas", () => {

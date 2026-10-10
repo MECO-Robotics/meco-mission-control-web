@@ -3,7 +3,8 @@
 import type { ArtifactRecord } from "@/types/recordsInventory";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
-import { WorkspaceEmptyState, WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
+import { WorkspaceEmptyState, WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
+import { buildSingleAddMenuAction } from "@/features/workspace/shared/topbar";
 import { EditableHoverIndicator, TableCell } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { WorkspaceSortMenu } from "@/features/workspace/shared/filters/WorkspaceSortMenu";
@@ -142,15 +143,9 @@ export function WorkflowView({
         </div>
       </AppTopbarSlotPortal>
 
-      <div className="panel-header compact-header">
-        <div className="queue-section-header">
-          <h2 style={{ color: "var(--text-title)" }}>Workflow manager</h2>
-        </div>
-      </div>
-
-      <WorkspaceFloatingAddButton
+      <WorkspaceTopbarAddMenu
+        actions={buildSingleAddMenuAction({ label: "Add workflow", onSelect: openCreateWorkstreamModal })}
         ariaLabel="Add workflow"
-        onClick={openCreateWorkstreamModal}
         title="Add workflow"
       />
 

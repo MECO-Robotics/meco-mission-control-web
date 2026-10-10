@@ -237,12 +237,6 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
         </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
 
-      <div className="panel-header compact-header">
-        <div className="queue-section-header">
-          <h2 style={{ color: "var(--text-title)" }}>Timeline</h2>
-        </div>
-      </div>
-
       <TimelineGridBody
         bootstrap={bootstrap}
         clearHoveredMilestonePopup={data.clearHoveredMilestonePopup}
