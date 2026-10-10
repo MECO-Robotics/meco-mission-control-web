@@ -26,7 +26,6 @@ export function QaReportEditorModal({
 }: QaReportEditorModalProps) {
   const initialDraft = useRef(JSON.stringify(qaReportDraft));
   const closeQaReportModal = () => {
-    if (isSavingQaReport) return;
     if (JSON.stringify(qaReportDraft) !== initialDraft.current && !window.confirm("Discard unsaved changes?")) return;
     onClose();
   };

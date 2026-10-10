@@ -26,7 +26,6 @@ export function WorkLogEditorModal({
 }: WorkLogEditorModalProps) {
   const initialDraft = useRef(JSON.stringify(workLogDraft));
   const closeWorkLogModal = () => {
-    if (isSavingWorkLog) return;
     if (JSON.stringify(workLogDraft) !== initialDraft.current && !window.confirm("Discard unsaved changes?")) return;
     onClose();
   };
