@@ -182,3 +182,18 @@ Local demo part instances now also retain their supplied identities on reload, i
 Dashboard attention and health share `RisksView`; `riskViewModel` owns its risk detail/edit/delete lifecycle. `riskViewDataScope` produces the health metrics separately from private scoped collections, and the health cards consume that metric type directly. The dashboard is the only risk presentation: the retired standalone risk board, metrics search, manual-create flow and navigation mode had no URL or sidebar target and are removed. Report-generated risks, attention filtering, modal validation, cancellation and persisted edits remain supported.
 
 Risk writes belong to the editor session that started them. Closing, opening another risk or unmounting retires that session: a late success or failure cannot close a newer editor, replace its error, or clear its busy state. Save and delete share one pending guard; a current-session failure keeps its draft available for retry.
+
+Purchasing saves commercial fields through the record command, approval through
+`PUT /purchases/:id/approval`, and order/cost/PO metadata through
+`POST /purchases/:id/transition`. Approval attribution comes from the server;
+accepted decisions are immutable. An accepted create immediately becomes an edit,
+so a later workflow or refresh failure cannot repeat creation. Pending purchases
+can record cost or PO metadata without advancing their order status.
+
+Local robot editing uses the same project boundaries: subsystem parents cannot
+cycle, and subsystems/mechanisms cannot move between projects. Hierarchy deletion
+removes descendants and their placed parts and linked work; definition deletion
+clears removed placement targets. Missing hard prerequisites stay blocking.
+Manufacturing work must be retargeted or removed before its part definition is
+deleted. Help requests are canonical Risks with category `help` and server-owned
+creator attribution.
