@@ -8,6 +8,7 @@ import { PurchaseEditorFields } from "./PurchaseEditorFields";
 
 export interface PurchaseEditorModalProps {
   bootstrap: BootstrapPayload;
+  activePurchaseId: string | null;
   closePurchaseModal: () => void;
   handlePurchaseSubmit: (milestone: FormEvent<HTMLFormElement>) => void;
   isSavingPurchase: boolean;

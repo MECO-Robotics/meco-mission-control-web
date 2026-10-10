@@ -3,7 +3,7 @@ import { useCallback, useState } from "react";
 import { buildEmptyPurchasePayload } from "@/lib/appUtils/payloadBuilders";
 import { purchaseToPayload } from "@/lib/appUtils/payloadConversions";
 import { toErrorMessage } from "@/lib/appUtils/common";
-import { createPurchaseItemRecord, updatePurchaseItemRecord } from "@/lib/auth/records/production";
+import { createPurchaseItemRecord, updatePurchaseItemRecord, transitionPurchaseItemRecord, approvePurchaseItemRecord } from "@/lib/auth/records/production";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { WorkspaceLoader } from "@/app/hooks/workspace/loader/useAppWorkspaceLoaderWorkspaceTypes";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
@@ -25,6 +25,7 @@ export function usePurchaseActions({ bootstrap, handleUnauthorized, loadWorkspac
     useCatalogEditorLifecycle({ loadWorkspace, selectedProjectId, selectedSeasonId });
   const makeCreatePurchaseDraft = useCallback(() => buildEmptyPurchasePayload(bootstrap), [bootstrap]);
   const {
+    acknowledgeCreate,
     modalMode: purchaseModalMode,
     activeRecordId: activePurchaseId,
     draft: purchaseDraft,
@@ -80,16 +81,36 @@ export function usePurchaseActions({ bootstrap, handleUnauthorized, loadWorkspac
       const payload: PurchaseItemPayload = {
         ...purchaseDraft,
         title: purchaseDraft.title.trim(),
-        finalCost: purchaseFinalCost.trim().length > 0
-          ? { amount: Number(purchaseFinalCost), currency: "USD" }
-          : null,
+        approvalStatus: "pending", approvedById: null, approvedAt: null,
+        orderStatus: "not-ordered", purchaseOrderNumber: null, finalCost: null, orderedAt: null, deliveredAt: null,
       };
 
-      if (purchaseModalMode === "create") {
-        await createPurchaseItemRecord(payload, handleUnauthorized);
-      } else if (purchaseModalMode === "edit" && activePurchaseId) {
-        await updatePurchaseItemRecord(activePurchaseId, payload, handleUnauthorized);
+      const desiredFinalCost = purchaseFinalCost.trim().length > 0
+        ? { amount: Number(purchaseFinalCost), currency: purchaseDraft.finalCost ? purchaseDraft.finalCost.currency : "USD" }
+        : null;
+      if (desiredFinalCost && (!Number.isFinite(desiredFinalCost.amount) || desiredFinalCost.amount < 0)) {
+        setDataMessage("Final cost must be a nonnegative number.");
+        return;
       }
+      let saved: PurchaseItemRecord;
+      if (purchaseModalMode === "create") {
+        saved = await createPurchaseItemRecord(payload, handleUnauthorized);
+        if (operation.isCurrent()) acknowledgeCreate(saved.id);
+      } else if (activePurchaseId) {
+        const commercial: Partial<PurchaseItemPayload> = { ...payload };
+        for (const field of ["approvalStatus", "approvedById", "approvedAt", "orderStatus", "purchaseOrderNumber", "finalCost", "orderedAt", "deliveredAt"] as const) delete commercial[field];
+        saved = await updatePurchaseItemRecord(activePurchaseId, commercial, handleUnauthorized);
+      } else return;
+      try {
+        if (saved.approvalStatus !== purchaseDraft.approvalStatus) saved = await approvePurchaseItemRecord(saved.id, purchaseDraft.approvalStatus, handleUnauthorized);
+        if (saved.orderStatus !== purchaseDraft.orderStatus || saved.purchaseOrderNumber !== purchaseDraft.purchaseOrderNumber || JSON.stringify(saved.finalCost) !== JSON.stringify(desiredFinalCost)) {
+          saved = await transitionPurchaseItemRecord(saved.id, { orderStatus: purchaseDraft.orderStatus, finalCost: desiredFinalCost, purchaseOrderNumber: purchaseDraft.purchaseOrderNumber }, handleUnauthorized);
+        }
+      } catch (error) {
+        await operation.refresh();
+        throw error;
+      }
+      if (operation.isCurrent()) setPurchaseDraft(purchaseToPayload(saved));
 
       await operation.refresh();
       if (operation.isCurrent()) closePurchaseModal();
@@ -98,7 +119,7 @@ export function usePurchaseActions({ bootstrap, handleUnauthorized, loadWorkspac
     } finally {
       operation.finish();
     }
-  }, [activePurchaseId, bootstrap, closePurchaseModal, handleUnauthorized, purchaseDraft, purchaseFinalCost, purchaseModalMode, setDataMessage, beginOperation]);
+  }, [activePurchaseId, bootstrap, closePurchaseModal, handleUnauthorized, purchaseDraft, purchaseFinalCost, purchaseModalMode, setDataMessage, beginOperation, acknowledgeCreate, setPurchaseDraft]);
 
   return {
     purchaseModalMode,
