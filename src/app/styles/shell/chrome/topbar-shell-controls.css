@@ -23,7 +23,16 @@
   display: flex;
   flex: 0 0 auto;
   align-items: center;
+}
+
+.app-topbar-add-root {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+  height: 100%;
   margin-left: 0.35rem;
+  padding-right: 0.35rem;
 }
 
 .app-topbar-add-host:not(:empty) ~ .app-topbar-add-fallback {

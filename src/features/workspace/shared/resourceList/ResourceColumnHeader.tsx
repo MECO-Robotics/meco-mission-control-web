@@ -18,10 +18,15 @@ export function ResourceColumnHeader({
   sortField: string | null;
 }) {
   const isSorted = sortField === field;
-  const direction = isSorted ? sortDirection : "ascending";
   return (
-    <span aria-sort={isSorted ? sortDirection : "none"} className="table-column-header-cell" role="columnheader">
-      <button aria-label={`Sort by ${label} ${direction}`} className="table-sort-button" onClick={() => onSort(field)} type="button">
+    <span className="table-column-header-cell">
+      <button
+        aria-label={isSorted ? `Sorted by ${label} ${sortDirection}` : `Sort by ${label}`}
+        aria-pressed={isSorted}
+        className="table-sort-button"
+        onClick={() => onSort(field)}
+        type="button"
+      >
         {isSorted ? <span aria-hidden="true" className="table-sort-arrow">{sortDirection === "ascending" ? "↑" : "↓"}</span> : null}
         <span className="table-column-title">{label}</span>
       </button>

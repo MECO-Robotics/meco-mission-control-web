@@ -52,7 +52,7 @@
   );
   box-shadow:
     0 8px 18px rgba(15, 28, 52, 0.05),
-    0 0 0 1.5px
+    0 0 0 1px
       color-mix(
         in srgb,
         var(--task-queue-board-card-priority-accent) 26%,
@@ -75,12 +75,12 @@
 }
 
 .task-queue-board-card-priority-accented[data-priority="high"] {
-  border-width: 2px;
+  border-width: 1px;
 }
 
 .task-queue-board-card-priority-accented[data-priority="critical"] {
-  border-style: double;
-  border-width: 5px;
+  border-style: solid;
+  border-width: 1px;
 }
 
 .task-queue-board-card-priority-label {

@@ -8,7 +8,7 @@ import { resolveWorkspaceColor } from "@/features/workspace/shared/model/workspa
 import { readTaskAssigneeIds, readTaskSubsystemIds, readTaskWorkstreamIds, formatSubsystemNames, formatWorkstreamNames } from "./taskQueueKanbanCard";
 
 const TASK_QUEUE_CARD_PRIORITY_ACCENTS: Record<TaskRecord["priority"], string> = {
-  critical: "#b42318",
+  critical: "var(--status-danger-text)",
   high: "#e5484d",
   medium: "#c58a00",
   low: "#2563eb",

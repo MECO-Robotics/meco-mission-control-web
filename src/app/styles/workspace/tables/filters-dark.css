@@ -107,11 +107,3 @@
   background: rgba(96, 165, 250, 0.16);
   color: #bfdbfe;
 }
-
-.page-shell.dark-mode .filter-tone-info {
-  --filter-tone-bg: rgba(96, 165, 250, 0.16);
-  --filter-tone-bg-active: rgba(96, 165, 250, 0.24);
-  --filter-tone-border: rgba(96, 165, 250, 0.42);
-  --filter-tone-foreground: #bfdbfe;
-  --filter-tone-check: #bfdbfe;
-}

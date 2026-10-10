@@ -22,6 +22,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .sidebar-shell,
+  .page-shell,
+  .app-topbar-brand,
+  .app-topbar-brand-icon {
+    transition: none;
+  }
+
   .workspace-tab-panel-enter,
   .workspace-subtab-panel[data-swipe-direction] {
     animation: none;

@@ -1,5 +1,6 @@
 import {
   cloneElement,
+  Fragment,
   isValidElement,
   useEffect,
   useRef,
@@ -241,10 +242,14 @@ export function KanbanColumns<TState extends string, TItem>({
               label={column.state}
             >
               {items.length > 0 ? (
-                items.map((item) => {
+                items.map((item, index) => {
                   const itemId = getItemId?.(item);
                   if (!drag.dragEnabled || !itemId) {
-                    return renderItem(item, column.state);
+                    const renderedItem = renderItem(item, column.state);
+                    const itemKey = itemId ?? `${column.state}:${index}`;
+                    return isValidElement(renderedItem)
+                      ? cloneElement(renderedItem, { key: itemKey })
+                      : <Fragment key={itemKey}>{renderedItem}</Fragment>;
                   }
 
                   const itemDragEnabled = canDragItem

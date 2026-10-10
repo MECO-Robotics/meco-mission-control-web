@@ -1,6 +1,6 @@
 # Color Theme
 
-This document summarizes the visual language currently used by the app. Exact copied values are limited to hex colors; gradients, alpha washes, shadows, spacing, and layout behavior are described in plain language.
+This document defines the shared visual rules used by the app. Runtime semantic colors live in `src/app/theme/index.ts`; shell sizing and control dimensions live in `src/app/styles/shell/layout/frame.css`. Keep this document aligned with those sources when either changes.
 
 ## Brand
 
@@ -25,6 +25,83 @@ The global type stack uses system sans-serif for both display and interface text
 The app background is a light layered field: a white-to-cool-slate page base with soft blue and red radial washes. Auth and shell backgrounds reuse the same brand wash idea, with stronger blue/red atmosphere in dark mode.
 
 Global body text starts at `#11213d`. Links inherit surrounding color.
+
+## Canonical Semantic Tokens
+
+`src/app/theme/index.ts` is the runtime source of truth for these CSS custom
+properties. Use these names for shared surfaces, text, borders, focus, brand,
+and status UI instead of inventing aliases or relying on light-only fallbacks.
+When a shared semantic role is missing, define it here and in the runtime theme
+before using it. A CSS fallback must not silently establish a competing theme.
+
+| Token | Light | Dark | Use |
+| --- | --- | --- | --- |
+| `--official-blue`, `--meco-blue` | `#16478e` | `#16478e` | Brand actions and identity accents |
+| `--official-red`, `--meco-red` | `#ea1c2d` | `#ea1c2d` | Brand and destructive accents |
+| `--official-grey` | `#bbbbbb` | `#bbbbbb` | Brand artwork |
+| `--official-black` | `#000000` | `#ffffff` | Inverse brand foreground |
+| `--official-white` | `#ffffff` | `#ffffff` | White brand artwork |
+| `--meco-soft-blue` | `rgba(22, 71, 142, 0.08)` | `rgba(22, 71, 142, 0.2)` | Active navigation and brand selection washes |
+| `--meco-soft-red` | `rgba(234, 28, 45, 0.08)` | `rgba(234, 28, 45, 0.2)` | Brand emphasis washes |
+| `--row-tint` | `rgba(22, 71, 142, 0.14)` | `rgba(59, 130, 246, 0.18)` | Selected or highlighted rows |
+| `--bg-panel` | `#ffffff` | `#1e293b` | Cards, panels, and controls |
+| `--bg-row-alt` | `#f8fafc` | `#0f172a` | Alternate rows and secondary shell surfaces |
+| `--border-base` | `#e5e7eb` | `#334155` | Standard separators and outlines |
+| `--border-strong` | `#cbd5e1` | `#475569` | Emphasized separators |
+| `--text-title` | `#000000` | `#f8fafc` | Headings and primary labels |
+| `--text-copy` | `#475569` | `#e2e8f0` | Body copy and inactive navigation |
+| `--text-muted` | `#475569` | `#94a3b8` | Secondary metadata |
+| `--shadow-soft` | `0 2px 8px rgba(15, 28, 52, 0.08)` | `0 2px 8px rgba(0, 0, 0, 0.24)` | Soft loading and panel depth |
+| `--official-green` | `#166534` | `#34d399` | Success and completion accents |
+| `--status-success-bg` / `--status-success-text` | `#dcfce7` / `#166534` | `#064e3b` / `#34d399` | Success states |
+| `--status-info-bg` / `--status-info-text` | `#e0f2fe` / `#075985` | `#082f49` / `#38bdf8` | Informational states and visible focus indicators |
+| `--status-warning-bg` / `--status-warning-text` | `#fef3c7` / `#92400e` | `#451a03` / `#fbbf24` | Warning states |
+| `--status-danger-bg` / `--status-danger-text` | `#fee2e2` / `#991b1b` | `#450a0a` / `#f87171` | Danger states |
+| `--status-neutral-bg` / `--status-neutral-text` | `#f1f5f9` / `#475569` | `#1e293b` / `#94a3b8` | Neutral states |
+| `--team-task-open-chart` / `--team-task-open-text` | `#eab308` / `#a16207` | `#facc15` / `#facc15` | Team open-task metrics |
+| `--team-task-blocked-chart` / `--team-task-blocked-text` | `#ea1c2d` / `#b91c1c` | `#ea1c2d` / `#f87171` | Team blocked-task metrics |
+| `--team-task-overdue-chart` / `--team-task-overdue-text` | `#f97316` / `#c2410c` | `#fb923c` / `#fb923c` | Team overdue-task metrics |
+
+Use `--status-danger-text` for shared error copy, `--text-title` for pagination
+controls, and `--bg-row-alt` for neutral pagination buttons. These roles replace
+legacy aliases such as `--danger-text`, `--text-strong`, and `--bg-base`.
+
+Use `--text-copy` rather than generic gray for readable inactive controls.
+Use `--meco-soft-blue` with `--text-title` for selected nested navigation;
+`--status-info-text` supplies its visible keyboard focus ring. Keep border widths
+at 1px or less on colored card and callout edges. Status background and text
+tokens are pairs and should be applied together.
+
+### Shared layout and control values
+
+These dimensions are shared shell behavior and are defined by the runtime CSS
+variables in `src/app/styles/shell/layout/frame.css`:
+
+| Variable | Value | Use |
+| --- | --- | --- |
+| `--shell-topbar-height` | `58px` | Fixed application topbar |
+| `--shell-sidebar-expanded-width` | `156px` | Expanded sidebar and brand area |
+| `--shell-sidebar-collapsed-width` | `64px` | Collapsed sidebar and brand area |
+| `--control-select-radius` | `10px` | Select and shared compact control corners |
+| `--control-select-padding-block` | `0.34rem` | Compact select vertical padding |
+| `--control-select-form-padding-block` | `0.62rem` | Form select vertical padding |
+| `--control-select-focus-border` | Light: `rgba(22, 71, 142, 0.44)`; dark: 72% `--status-info-text` | Select focus border |
+| `--control-select-focus-ring` | Light: `0 0 0 2px rgba(22, 71, 142, 0.14)`; dark: 28% `--status-info-text` | Select focus halo |
+
+The workspace topbar has one fixed row. It contains the fixed shell brand,
+current view title, a search control, filters, custom controls, and exactly one
+shared plus-menu. At narrow widths, controls can scroll within the row while the
+title and plus-menu stay visible. When a view has no page-specific create
+actions, the shell's workspace-level menu remains available. Record-specific
+create, edit, and delete actions stay beside the record they affect. Do not add
+a second title or toolbar row.
+
+Operational views use compact density: controls and metadata stay short, with
+stable dimensions; repeated records use thin borders and restrained shadows.
+Use horizontal scrolling or stable internal minimum widths for dense tables and
+boards rather than squeezing columns until labels collide. At colored card and
+callout edges, use no more than a 1px border. Under `prefers-reduced-motion`,
+disable shell shifts and decorative transitions while preserving state changes.
 
 ## Theme Modes
 
@@ -52,17 +129,11 @@ Dark mode uses:
 
 Dark mode keeps brand blue and red intact, but raises their transparent washes so the brand atmosphere remains visible against the dark shell.
 
-## Status Colors
+## Domain Status Accents
 
-Shared status tokens:
-
-| Status | Light Background | Light Text | Dark Background | Dark Text |
-| --- | --- | --- | --- | --- |
-| Success | `#dcfce7` | `#166534` | `#064e3b` | `#34d399` |
-| Info | `#e0f2fe` | `#075985` | `#082f49` | `#38bdf8` |
-| Warning | `#fef3c7` | `#92400e` | `#451a03` | `#fbbf24` |
-| Danger | `#fee2e2` | `#991b1b` | `#450a0a` | `#f87171` |
-| Neutral | `#f1f5f9` | `#475569` | `#1e293b` | `#94a3b8` |
+Use the canonical status token pairs above for shared success, information,
+warning, danger, and neutral states. Keep task workflow accents below only for
+domain-specific states that do not map to those shared roles.
 
 Task and workflow status accents:
 
@@ -107,7 +178,6 @@ Timeline task bars use discipline-based accents:
 | Engagement | `#b26d3b` |
 | Presentation | `#a05fb8` |
 | Media production | `#d05b7f` |
-| Partnerships | `#3a8a76` |
 | Game analysis | `#3e7cc7` |
 | Scouting | `#3aa0b8` |
 | Data analysis | `#4f65b8` |
@@ -142,7 +212,9 @@ Practice and competition lean blue, deadlines lean red, internal review leans gr
 
 ## Alerts And Destructive UI
 
-Destructive actions use red surfaces and red text, with `#b42318` as the main danger text in light surfaces and `#fca5a5` as the dark-mode danger text. Delete/action surfaces also use `#fff1f2` and `#fda29b`.
+Destructive actions use the `--status-danger-bg` and `--status-danger-text`
+token pair in both themes. Reserve stronger red gradients for destructive task
+detail headers, using the existing `#b81d2c`, `#f02c3d`, and `#8f1320` values.
 
 Task details use red gradients for destructive headers and emphasis, including `#b81d2c`, `#f02c3d`, and `#8f1320`.
 
@@ -166,7 +238,7 @@ Neutral UI tends to use cool slate rather than warm grey. Panels, cards, table r
 
 The shell has a fixed top bar and a fixed left sidebar. The top bar height is 58px. The expanded sidebar and brand area are 156px wide; the collapsed sidebar is 64px wide.
 
-The top bar is flat, panel-colored, and separated by a single border. The sidebar uses a vertical gradient between alternate-row and panel surfaces. Active sidebar tabs use a soft brand-blue wash, brand-blue text, and a modest border. Inactive sidebar tabs stay transparent and copy-colored.
+The top bar is flat, panel-colored, and separated by a single border. The sidebar uses a vertical gradient between alternate-row and panel surfaces. Active sidebar tabs use a soft brand-blue wash and readable title text. Nested navigation uses the same wash, title text, copy-colored inactive text, and a visible info-colored focus ring. Inactive sidebar tabs stay transparent and copy-colored.
 
 Sidebar collapse and overlay states animate width and shell padding. Overlay mode adds a dark scrim and a rightward sidebar shadow.
 
@@ -174,17 +246,18 @@ Sidebar collapse and overlay states animate width and shell padding. Overlay mod
 
 Select controls share a 10px radius, compact vertical padding, right-side chevron indicators made from the current text color, and a blue focus ring. Focus uses a transparent brand-blue ring; hover increases the border tint.
 
-Filter controls use rounded pills, compact icon buttons, uppercase count labels, and tone classes:
+Filter controls use rounded pills, compact icon buttons, uppercase count labels,
+and tone classes. Their foreground and check colors use the paired shared status
+tokens; selected and hover backgrounds mix the same status text color into its
+status background. Dark mode uses the dark values from those token pairs.
 
-| Tone | Text Hex |
+| Tone | Token pair |
 | --- | --- |
-| Primary | `#16478e` |
-| Success | `#246847` |
-| Warning | `#a84712` |
-| Danger | `#9b1d2a` |
-| Neutral | `#54627b` |
-
-Dark filter controls can switch to `#bfdbfe` for foreground and check marks.
+| Info | `--status-info-bg` / `--status-info-text` |
+| Success | `--status-success-bg` / `--status-success-text` |
+| Warning | `--status-warning-bg` / `--status-warning-text` |
+| Danger | `--status-danger-bg` / `--status-danger-text` |
+| Neutral | `--status-neutral-bg` / `--status-neutral-text` |
 
 ## Cards, Boards, And Tables
 
@@ -210,7 +283,7 @@ Auth cards use soft borders, glassy white overlays in light mode, translucent da
 
 ## Typography
 
-Body text uses a serif-first reading stack. Headings, navigation, filters, buttons, labels, and dense operational controls use a geometric sans-first stack.
+Body text, headings, navigation, filters, buttons, labels, and dense operational controls use the system sans-serif stack with platform fallbacks.
 
 Text hierarchy favors:
 
@@ -244,7 +317,7 @@ Motion is short and functional. Sidebar width, shell padding, filter focus, hove
 
 ## Responsive Behavior
 
-The app is built around fixed shell chrome with responsive content density. Selects and toolbars collapse toward full width on smaller screens. Tables and task boards preserve internal structure through horizontal scroll or stable min-widths rather than collapsing into unreadable columns. Auth switches from two-column composition to tighter stacked behavior on smaller screens.
+The app is built around fixed shell chrome with responsive content density. Selects and view controls can use available width on smaller screens. The workspace topbar remains one row; search and controls scroll horizontally when needed, with title and shared plus-menu remaining visible. Tables and task boards preserve internal structure through horizontal scroll or stable min-widths rather than collapsing into unreadable columns. Auth switches from two-column composition to tighter stacked behavior on smaller screens.
 
 ## Assets
 

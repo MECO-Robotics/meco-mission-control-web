@@ -71,6 +71,8 @@ export function AppTopbar({
         <div className="app-topbar-search-host" id={APP_TOPBAR_SLOT_IDS.search} />
         <div className="app-topbar-controls-host" id={APP_TOPBAR_SLOT_IDS.controls} />
         <div className="app-topbar-zoom-host" id={APP_TOPBAR_SLOT_IDS.zoom} />
+      </div>
+      <div className="app-topbar-add-root">
         <div className="app-topbar-add-host" id={APP_TOPBAR_SLOT_IDS.add} />
         <div className="app-topbar-add-fallback">
           <WorkspaceTopbarAddMenu

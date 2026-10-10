@@ -25,7 +25,7 @@ export function CadStepUploadPanel({
     <section className="cad-card cad-step-upload-card">
       <div className="cad-section-heading">
         <span className="cad-eyebrow">STEP upload</span>
-        <h3>Detect CAD structure</h3>
+        <h2>Detect CAD structure</h2>
         <p>
           Export from the master assembly, preserve assembly hierarchy, avoid flattened STEP, and use meaningful
           assembly and part names.{" "}

@@ -107,6 +107,18 @@ describe("AppTopbar", () => {
     expect(markup).toContain('class="topbar-add-button topbar-add-menu-trigger secondary-action icon-button"');
   });
 
+  it("keeps the shared plus action outside the horizontally scrolling search and controls slot", () => {
+    const markup = renderTopbar();
+    const zoomSlot = markup.indexOf('id="workspace-topbar-slot-zoom"');
+    const searchSlotEnd = markup.indexOf("</div>", zoomSlot);
+    const addRootStart = markup.indexOf('class="app-topbar-add-root"');
+
+    expect(markup).toContain('id="workspace-topbar-slot-zoom"');
+    expect(markup).toContain('id="workspace-topbar-slot-add"');
+    expect(searchSlotEnd).toBeLessThan(addRootStart);
+    expect(markup.indexOf('id="workspace-topbar-slot-add"')).toBeGreaterThan(addRootStart);
+  });
+
   it("lets the topbar title area grow instead of hard-clamping its width", () => {
     const topbarShellCss = readTopbarShellCss();
 
@@ -158,6 +170,10 @@ describe("AppTopbar", () => {
     expect(topbarShellControlsCss).toContain(".app-topbar-controls-host:not(:empty)");
     expect(topbarShellControlsCss).toContain(".app-topbar-search-host .filter-toolbar");
     expect(topbarShellControlsCss).toContain("min-width: max-content;");
+    expect(topbarSearchCss).toMatch(
+      /@media\s*\(max-width:\s*880px\)\s*\{[\s\S]*\.app-topbar-search-slot\s*\{[^}]*justify-content:\s*flex-start;/,
+    );
+    expect(topbarShellControlsCss).toMatch(/\.app-topbar-add-root\s*\{[^}]*flex:\s*0 0 auto;/);
   });
 
   it("keeps the title visible when the topbar compacts", () => {

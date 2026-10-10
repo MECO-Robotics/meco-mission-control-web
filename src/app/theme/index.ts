@@ -38,6 +38,9 @@ function getThemeVars(mode: ThemeMode) {
     "--text-title": isDarkMode ? "#f8fafc" : "#000000",
     "--text-copy": isDarkMode ? "#e2e8f0" : "#475569",
     "--text-muted": isDarkMode ? "#94a3b8" : "#475569",
+    "--shadow-soft": isDarkMode
+      ? "0 2px 8px rgba(0, 0, 0, 0.24)"
+      : "0 2px 8px rgba(15, 28, 52, 0.08)",
     "--official-green": isDarkMode ? "#34d399" : "#166534",
     "--bg-row-alt": isDarkMode ? "#0f172a" : "#f8fafc",
     "--status-success-bg": isDarkMode ? "#064e3b" : "#dcfce7",

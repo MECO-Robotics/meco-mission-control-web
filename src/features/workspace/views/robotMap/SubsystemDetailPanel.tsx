@@ -50,7 +50,7 @@ function SubsystemDrilldownGroup({
   return (
     <div className="robot-config-drilldown-group">
       <div className="robot-config-drilldown-group-header">
-        <h5>{label}</h5>
+        <h4>{label}</h4>
         <small>{items.length}</small>
       </div>
       {items.length > 0 ? (
@@ -92,7 +92,7 @@ export function SubsystemDetailPanel({
   if (!selectedSubsystem) {
     return (
       <aside className="robot-config-detail-panel">
-        <h3>Subsystem Details</h3>
+        <h2>Subsystem Details</h2>
         <p className="empty-state">Select a subsystem to configure mechanisms and parts.</p>
       </aside>
     );
@@ -135,7 +135,7 @@ export function SubsystemDetailPanel({
     <aside className="robot-config-detail-panel">
       <header className="robot-config-detail-header">
         <div className="robot-config-detail-title-row">
-          <h3>{selectedSubsystem.name}</h3>
+          <h2>{selectedSubsystem.name}</h2>
           <button
             aria-label="Edit subsystem"
             className="icon-button robot-config-detail-title-edit"
@@ -153,12 +153,12 @@ export function SubsystemDetailPanel({
       </header>
 
       <section className="robot-config-detail-readonly">
-        <h4>Description</h4>
+        <h3>Description</h3>
         <p className="section-copy">{selectedSubsystem.description || "No description yet."}</p>
       </section>
 
       <section className="robot-config-detail-drilldowns" aria-label="Subsystem drilldown links">
-        <h4>Drilldowns</h4>
+        <h3>Drilldowns</h3>
         <div className="robot-config-drilldown-grid">
           {drilldownGroups.map((group) => (
             <SubsystemDrilldownGroup

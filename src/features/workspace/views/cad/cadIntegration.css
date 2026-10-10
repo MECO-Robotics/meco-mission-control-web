@@ -6,6 +6,13 @@
   gap: 16px;
 }
 
+.cad-integration-shell > *,
+.cad-integration-shell .cad-card {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 .cad-step-upload-form,
 .cad-step-preview-card,
 .cad-snapshot-diff-card,
@@ -68,7 +75,7 @@
   padding: 16px;
 }
 
-.cad-card h3 {
+.cad-card :is(h2, h3) {
   font-size: 1rem;
   margin: 2px 0 8px;
 }
@@ -129,6 +136,7 @@
 .cad-field {
   display: grid;
   gap: 6px;
+  min-width: 0;
   margin-top: 12px;
 }
 
@@ -148,6 +156,10 @@
   border-radius: 12px;
   color: var(--text-title);
   font: inherit;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 10px 12px;
   resize: vertical;
 }

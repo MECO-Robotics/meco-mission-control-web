@@ -1,4 +1,5 @@
 import { CadFileViewer } from "../../views/cad/viewer/CadPartViewer";
+import { IconChevronLeft } from "@/components/shared/Icons";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { WorkspaceTopbarControls } from "@/features/workspace/shared/topbar";
 import { useSyncExternalStore } from "react";
@@ -18,7 +19,15 @@ export function WorkspaceCadSection(props: WorkspaceContentPanelsViewProps) {
       <WorkspaceSubPanel disableAnimations={props.disablePanelAnimations} isActive>
         <AppTopbarSlotPortal slot="controls">
           <WorkspaceTopbarControls>
-            <button className="ghost-button" onClick={() => props.onOpenDrilldownTarget({ tab: "tasks", taskView: "robot-map" })} type="button">Back to Structure</button>
+            <button
+              aria-label="Back to Structure"
+              className="secondary-action icon-button"
+              onClick={() => props.onOpenDrilldownTarget({ tab: "tasks", taskView: "robot-map" })}
+              title="Back to Structure"
+              type="button"
+            >
+              <IconChevronLeft />
+            </button>
           </WorkspaceTopbarControls>
         </AppTopbarSlotPortal>
         {localMode ? (

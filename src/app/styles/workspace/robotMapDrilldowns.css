@@ -3,8 +3,9 @@
   gap: 0.55rem;
 }
 
-.robot-config-detail-drilldowns h4 {
+.robot-config-detail-drilldowns h3 {
   color: var(--text-title);
+  font-size: 1em;
   margin: 0;
 }
 
@@ -29,7 +30,7 @@
   justify-content: space-between;
 }
 
-.robot-config-drilldown-group-header h5 {
+.robot-config-drilldown-group-header h4 {
   color: var(--text-title);
   font-size: 0.8rem;
   margin: 0;
