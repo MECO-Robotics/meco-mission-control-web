@@ -327,7 +327,7 @@ docs/
   *.docx                  # Historical requirements/spec baselines
 
 scripts/
-  codex-worktree-bootstrap.ps1
+  codex-worktree-bootstrap.mjs
 
 src/
   app/
@@ -359,7 +359,7 @@ src/
 Operational files:
 
 - `CONTRIBUTING.md`: contributor setup, ownership criteria, validation and protected PR workflow
-- `environment.toml`: Codex worktree startup source of truth
+- `environment.toml`: Codex worktree startup source of truth. The Node bootstrap works on Linux, macOS and Windows; `WEB_HOST`/`WEB_PORT` override its address, `npm_config_cache` selects the dependency cache, and `codex-web.log` records Vite output. It uses `npm ci` and strict port selection.
 - `.env.example`: local env template
 - `.env.production.example`: production env template
 - `package.json`: scripts and dependencies
