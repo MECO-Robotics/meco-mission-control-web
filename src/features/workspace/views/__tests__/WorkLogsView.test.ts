@@ -33,6 +33,7 @@ function renderWorkLogsView(
           seasonId: "season-1",
         },
       },
+      openCreateQaReportModal: jest.fn(),
       openCreateWorkLogModal: jest.fn(),
       openEditTaskModal: jest.fn(),
       subsystemsById: {
@@ -131,6 +132,13 @@ describe("WorkLogsView", () => {
     const html = renderWorkLogsView("activity");
 
     expect(html).toContain('aria-label="Log work"');
+    expect(html).toContain('class="topbar-add-button topbar-add-menu-trigger secondary-action icon-button"');
+  });
+
+  it("provides the shared Add QA report plus action on QA reports", () => {
+    const html = renderWorkLogsView("qa");
+
+    expect(html).toContain('aria-label="Add QA report"');
     expect(html).toContain('class="topbar-add-button topbar-add-menu-trigger secondary-action icon-button"');
   });
 
