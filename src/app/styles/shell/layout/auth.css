@@ -27,39 +27,7 @@
   place-items: center;
   padding: clamp(1rem, 3vw, 2rem);
   overflow: hidden;
-  background:
-    radial-gradient(circle at 12% 18%, rgba(22, 71, 142, 0.12), transparent 26%),
-    radial-gradient(circle at 88% 12%, rgba(234, 28, 45, 0.1), transparent 22%),
-    linear-gradient(160deg, #f8fbff 0%, #eef4fb 100%);
-}
-
-.page-shell.auth-shell::before,
-.page-shell.auth-shell::after {
-  content: "";
-  position: absolute;
-  inset: auto;
-  border-radius: 999px;
-  pointer-events: none;
-}
-
-.page-shell.auth-shell::before {
-  top: 6%;
-  right: -8%;
-  width: 18rem;
-  height: 18rem;
-  background: radial-gradient(circle,
-      rgba(22, 71, 142, 0.14) 0%,
-      rgba(22, 71, 142, 0) 72%);
-}
-
-.page-shell.auth-shell::after {
-  left: -10%;
-  bottom: -12%;
-  width: 22rem;
-  height: 22rem;
-  background: radial-gradient(circle,
-      rgba(234, 28, 45, 0.1) 0%,
-      rgba(234, 28, 45, 0) 72%);
+  background: linear-gradient(180deg, #ffffff 0%, #f5f7fb 100%);
 }
 
 .auth-layout {
@@ -94,7 +62,7 @@
   border: 1px solid rgba(15, 28, 52, 0.1);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.76);
-  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.12);
+  box-shadow: var(--shadow-soft);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
@@ -119,5 +87,5 @@
 .page-shell.auth-shell.dark-mode .auth-dev-bypass {
   border-color: rgba(148, 163, 184, 0.24);
   background: rgba(15, 23, 42, 0.72);
-  box-shadow: 0 14px 36px rgba(2, 6, 23, 0.36);
+  box-shadow: var(--shadow-soft);
 }

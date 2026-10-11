@@ -85,6 +85,7 @@ export function TopbarResponsiveSearch({
     placeholder,
     resolvedActionCount,
     resolvedMode,
+    forceCompactAtNarrowWidth: portalToTopbar,
     searchRef,
     shouldUseCollisionDetection,
   });

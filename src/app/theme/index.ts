@@ -12,10 +12,10 @@ type ThemeMode = "light" | "dark";
 
 function getShellBackground(mode: ThemeMode) {
   if (mode === "dark") {
-    return "radial-gradient(circle at 12% 8%, rgba(22, 71, 142, 0.24), transparent 26%), radial-gradient(circle at 88% 0%, rgba(234, 28, 45, 0.18), transparent 22%), linear-gradient(180deg, #08111f 0%, #0f172a 100%)";
+    return "linear-gradient(180deg, #08111f 0%, #0f172a 100%)";
   }
 
-  return "radial-gradient(circle at 12% 8%, rgba(22, 71, 142, 0.1), transparent 26%), radial-gradient(circle at 88% 0%, rgba(234, 28, 45, 0.08), transparent 22%), linear-gradient(180deg, #ffffff 0%, #f5f7fb 100%)";
+  return "linear-gradient(180deg, #ffffff 0%, #f5f7fb 100%)";
 }
 
 function getThemeVars(mode: ThemeMode) {
@@ -34,8 +34,20 @@ function getThemeVars(mode: ThemeMode) {
     "--row-tint": isDarkMode ? "rgba(59, 130, 246, 0.18)" : "rgba(22, 71, 142, 0.14)",
     "--bg-panel": isDarkMode ? "#1e293b" : "#ffffff",
     "--border-base": isDarkMode ? "#334155" : "#e5e7eb",
+    "--border-strong": isDarkMode ? "#475569" : "#cbd5e1",
     "--text-title": isDarkMode ? "#f8fafc" : "#000000",
-    "--text-copy": isDarkMode ? "#e2e8f0" : "#64748b",
+    "--text-copy": isDarkMode ? "#e2e8f0" : "#475569",
+    "--text-muted": isDarkMode ? "#94a3b8" : "#475569",
+    "--text-accent": isDarkMode ? "#93c5fd" : "#16478e",
+    "--text-link": isDarkMode ? "#93c5fd" : "#1d4ed8",
+    "--text-link-hover": isDarkMode ? "#bfdbfe" : "#1e40af",
+    "--shadow-soft": isDarkMode
+      ? "0 2px 8px rgba(0, 0, 0, 0.24)"
+      : "0 2px 8px rgba(15, 28, 52, 0.08)",
+    "--shadow-overlay": isDarkMode
+      ? "0 4px 12px rgba(2, 6, 23, 0.3)"
+      : "0 4px 12px rgba(15, 23, 42, 0.14)",
+    "--official-green": isDarkMode ? "#34d399" : "#166534",
     "--bg-row-alt": isDarkMode ? "#0f172a" : "#f8fafc",
     "--status-success-bg": isDarkMode ? "#064e3b" : "#dcfce7",
     "--status-success-text": isDarkMode ? "#34d399" : "#166534",
@@ -57,6 +69,14 @@ function getThemeVars(mode: ThemeMode) {
     "--status-neutral-bg": isDarkMode ? "#1e293b" : "#f1f5f9",
     "--status-neutral-text": isDarkMode ? "#94a3b8" : "#475569",
     "--status-neutral-chart": isDarkMode ? "#94a3b8" : "#64748b",
+    "--cad-viewer-background": "#17202c",
+    "--cad-viewer-text": "#edf3fa",
+    "--calendar-event-milestone": "#16478e",
+    "--calendar-event-task-due": "#4f46e5",
+    "--calendar-event-qa-due": "#92400e",
+    "--calendar-event-manufacturing-due": "#166534",
+    "--calendar-event-other": "#475569",
+    "--calendar-event-meeting": "#16478e",
   } as const;
 }
 
@@ -64,7 +84,6 @@ export function buildPageShellStyle(mode: ThemeMode): CSSProperties {
   return {
     background: getShellBackground(mode),
     ...getThemeVars(mode),
-    color: mode === "dark" ? "var(--text-copy)" : "#11213d",
     colorScheme: mode,
   } as CSSProperties;
 }

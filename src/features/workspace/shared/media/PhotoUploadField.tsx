@@ -107,7 +107,7 @@ export function PhotoUploadField({
         <p style={{ margin: 0, color: "var(--text-copy)" }}>Uploading...</p>
       ) : null}
       {errorMessage ? (
-        <p role="alert" style={{ margin: 0, color: "var(--danger-text)" }}>
+        <p role="alert" style={{ margin: 0, color: "var(--status-danger-text)" }}>
           {errorMessage}
         </p>
       ) : null}

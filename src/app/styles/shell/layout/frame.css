@@ -18,11 +18,21 @@
   min-height: 100vh;
   display: block;
   background: var(--official-white);
+  color: var(--text-title);
   box-sizing: border-box;
   padding-top: var(--shell-topbar-height);
   padding-left: var(--shell-sidebar-width);
-  transition: padding-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.workspace-content-clip {
+  width: 100%;
+  min-width: 0;
   overflow-x: clip;
+}
+
+.page-shell.dark-mode {
+  --control-select-focus-border: color-mix(in srgb, var(--status-info-text) 72%, transparent);
+  --control-select-focus-ring: 0 0 0 2px color-mix(in srgb, var(--status-info-text) 28%, transparent);
 }
 
 .page-shell.is-sidebar-collapsed {

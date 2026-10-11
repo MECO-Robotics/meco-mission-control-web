@@ -22,7 +22,7 @@ export const RosterSection: React.FC<RosterSectionProps> = ({
   <div className={`panel-subsection${className ? ` ${className}` : ""}`}>
     <div className="roster-section-header">
       <div className="roster-section-title">
-        <h3>{title}</h3>
+        <h2>{title}</h2>
         <span aria-label={`${presentCount} of ${count} here today`} className="sidebar-tab-count">{presentCount}/{count} here</span>
       </div>
     </div>

@@ -14,7 +14,7 @@ export default function AppWorkspaceCoreImpl() {
       <AuthStatusScreen
         body="Checking the server-side auth configuration before the workspace opens."
         isDarkMode={auth.isDarkMode}
-        shellStyle={auth.isDarkMode ? auth.pageShellStyle : undefined}
+        shellStyle={auth.pageShellStyle}
         title="Loading sign-in rules for MECO Mission Control."
       />
     );
@@ -26,7 +26,7 @@ export default function AppWorkspaceCoreImpl() {
         body="The app could not confirm the server-side sign-in rules, so access is paused until the API is reachable again."
         isDarkMode={auth.isDarkMode}
         message={auth.authMessage}
-        shellStyle={auth.isDarkMode ? auth.pageShellStyle : undefined}
+        shellStyle={auth.pageShellStyle}
         title="Couldn&apos;t load the authentication configuration."
       />
     );
@@ -56,7 +56,7 @@ export default function AppWorkspaceCoreImpl() {
         onVerifyEmailCode={auth.handleVerifyEmailCode}
         onDevBypassSignIn={auth.handleDevBypassSignIn}
         onReturnToPublicDemo={auth.isPublicDemoSession && !auth.isSignInForced ? auth.returnToPublicDemo : undefined}
-        shellStyle={auth.isDarkMode ? auth.pageShellStyle : undefined}
+        shellStyle={auth.pageShellStyle}
         signInConfig={auth.enforcedAuthConfig}
       />
     );

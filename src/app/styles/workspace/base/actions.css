@@ -35,9 +35,18 @@
 }
 
 .danger-action {
-  background: #fff1f2;
-  color: #b42318;
-  border: 1px solid #fda29b;
+  background: var(--status-danger-bg);
+  color: var(--status-danger-text);
+  border: 1px solid color-mix(in srgb, var(--status-danger-text) 42%, transparent);
+}
+
+button.ops-row {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
 }
 
 .primary-action:hover,

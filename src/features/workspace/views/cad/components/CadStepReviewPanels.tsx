@@ -124,7 +124,7 @@ export function CadStepReviewPanels({
             <span>Finalize with unresolved warnings</span>
           </label>
           <button
-            className="secondary-button"
+            className="secondary-action"
             disabled={!snapshot || isFinalizing || usesPlaceholderParser || (unresolvedCount > 0 && !allowUnresolved)}
             onClick={() => onFinalize(allowUnresolved)}
             type="button"

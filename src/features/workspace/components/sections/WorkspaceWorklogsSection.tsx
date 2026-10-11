@@ -8,6 +8,8 @@ export function WorkspaceWorklogsSection(props: WorkspaceContentPanelsViewProps)
     bootstrap,
     disablePanelAnimations = false,
     membersById,
+    openCreateMilestoneReportModal,
+    openCreateQaReportModal,
     openCreateWorkLogModal,
     openTimelineTaskDetailsModal,
     tabSwitchDirection,
@@ -25,6 +27,8 @@ export function WorkspaceWorklogsSection(props: WorkspaceContentPanelsViewProps)
           activePersonFilter={activePersonFilter}
           bootstrap={bootstrap}
           membersById={membersById}
+          openCreateMilestoneReportModal={openCreateMilestoneReportModal}
+          openCreateQaReportModal={openCreateQaReportModal}
           openCreateWorkLogModal={openCreateWorkLogModal}
           openEditTaskModal={openTimelineTaskDetailsModal}
           subsystemsById={props.subsystemsById}

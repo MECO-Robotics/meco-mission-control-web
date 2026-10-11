@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface CatalogDraftEditorArgs<
   TRecord extends { id: string },
@@ -29,11 +29,13 @@ export function useCatalogDraftEditor<
   selectedSeasonId,
   toDraft,
 }: CatalogDraftEditorArgs<TRecord, TPayload, TCreateArgs>) {
+  const acceptedCreateId = useRef<string | null>(null);
   const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
   const [activeRecordId, setActiveRecordId] = useState<string | null>(null);
   const [draft, setDraft] = useState<TPayload>(() => makeInitialDraft());
 
   const openCreate = useCallback((...args: TCreateArgs) => {
+    acceptedCreateId.current = null;
     resetOperation();
     setActiveRecordId(null);
     setDraft(makeCreateDraft(...args));
@@ -41,6 +43,7 @@ export function useCatalogDraftEditor<
   }, [makeCreateDraft, resetOperation]);
 
   const openEdit = useCallback((record: TRecord) => {
+    acceptedCreateId.current = null;
     resetOperation();
     setActiveRecordId(record.id);
     setDraft(toDraft(record));
@@ -48,6 +51,7 @@ export function useCatalogDraftEditor<
   }, [resetOperation, toDraft]);
 
   const close = useCallback(() => {
+    acceptedCreateId.current = null;
     resetOperation();
     setModalMode(null);
     setActiveRecordId(null);
@@ -55,11 +59,18 @@ export function useCatalogDraftEditor<
 
   useEffect(() => close(), [close, selectedProjectId, selectedSeasonId]);
 
+  const acknowledgeCreate = useCallback((id: string) => {
+    acceptedCreateId.current = id;
+    setActiveRecordId(id);
+    setModalMode("edit");
+  }, []);
+
   useEffect(() => {
-    if (bootstrapIsEmpty || (modalMode === "edit" && !records.some((record) => record.id === activeRecordId))) {
+    if (records.some((record) => record.id === acceptedCreateId.current)) acceptedCreateId.current = null;
+    if (bootstrapIsEmpty || (modalMode === "edit" && acceptedCreateId.current !== activeRecordId && !records.some((record) => record.id === activeRecordId))) {
       close();
     }
   }, [activeRecordId, bootstrapIsEmpty, close, modalMode, records]);
 
-  return { activeRecordId, close, draft, modalMode, openCreate, openEdit, setDraft };
+  return { acknowledgeCreate, activeRecordId, close, draft, modalMode, openCreate, openEdit, setDraft };
 }

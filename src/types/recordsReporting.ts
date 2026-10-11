@@ -49,10 +49,11 @@ export interface TestFindingRecord extends QaFindingRecord {
 
 export interface RiskRecord {
   id: string;
+  createdByMemberId?: string | null;
   projectId: string;
   title: string;
   detail: string;
-  category: "dependency" | "design" | "manufacturing" | "supply" | "schedule" | "qa" | "inventory" | "other";
+  category: "dependency" | "design" | "manufacturing" | "supply" | "schedule" | "qa" | "inventory" | "help" | "other";
   severity: RiskSeverity;
   status: "open" | "in-progress" | "blocked" | "resolved";
   blocksWork: boolean;

@@ -1,7 +1,8 @@
-import type { ChangeEvent, FormEvent } from "react";
+import type { ChangeEvent, FormEvent, Ref } from "react";
 
 export function CadStepUploadPanel({
   fileName,
+  fileInputRef,
   isUploading,
   label,
   onFileChange,
@@ -9,6 +10,7 @@ export function CadStepUploadPanel({
   onSubmit,
 }: {
   fileName: string;
+  fileInputRef?: Ref<HTMLInputElement>;
   isUploading: boolean;
   label: string;
   onFileChange: (file: File | null) => void;
@@ -23,7 +25,7 @@ export function CadStepUploadPanel({
     <section className="cad-card cad-step-upload-card">
       <div className="cad-section-heading">
         <span className="cad-eyebrow">STEP upload</span>
-        <h3>Detect CAD structure</h3>
+        <h2>Detect CAD structure</h2>
         <p>
           Export from the master assembly, preserve assembly hierarchy, avoid flattened STEP, and use meaningful
           assembly and part names.{" "}
@@ -39,7 +41,7 @@ export function CadStepUploadPanel({
         </label>
         <label className="cad-field">
           <span>STEP file</span>
-          <input accept=".step,.stp" onChange={handleFileChange} type="file" />
+          <input accept=".step,.stp" onChange={handleFileChange} ref={fileInputRef} type="file" />
         </label>
         <div className="cad-step-guidance">
           <strong>Naming conventions</strong>
@@ -48,7 +50,7 @@ export function CadStepUploadPanel({
           <span>ASM - Intake</span>
           <span>PRT - Drivetrain - Bearing Block</span>
         </div>
-        <button className="primary-button" disabled={!fileName || isUploading} type="submit">
+        <button className="primary-action" disabled={!fileName || isUploading} type="submit">
           {isUploading ? "Uploading STEP..." : "Upload STEP"}
         </button>
       </form>

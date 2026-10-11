@@ -131,8 +131,8 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
       const today = new Date().toISOString().slice(0, 10);
       const blocked = openTasks.filter(task => task.isBlocked);
       const overdue = openTasks.filter(task => task.dueDate < today);
-      const metric = (label: string, count: number, filter: "blocked" | "overdue") => <button type="button" className={`team-task-status-filter is-${filter}`} aria-label={`${count} ${label.toLowerCase()} tasks`} aria-pressed={taskDrilldown?.groupId === group.id && taskDrilldown.filter === filter} key={filter} onClick={() => setTaskDrilldown({ groupId: group.id, filter })}>
-        <span className="team-metric-label">{label}</span><strong className={`is-${filter}`}>{count}</strong>
+      const metric = (label: string, count: number, filter: "blocked" | "overdue") => <button type="button" className={`team-task-status-filter is-${filter}`} aria-label={`${label} ${count}`} aria-pressed={taskDrilldown?.groupId === group.id && taskDrilldown.filter === filter} key={filter} onClick={() => setTaskDrilldown({ groupId: group.id, filter })}>
+        <span className="team-metric-label">{label}</span>{" "}<strong className={`is-${filter}`}>{count}</strong>
       </button>;
       const drilldownTasks = taskDrilldown?.groupId !== group.id ? tasks : taskDrilldown.filter === "blocked" ? blocked : taskDrilldown.filter === "overdue" ? overdue : openTasks;
       const remaining = openTasks.reduce((sum, task) => sum + Math.max(0, task.estimatedHours - task.actualHours), 0);
@@ -197,7 +197,7 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
       return <article className="panel-card team-card" key={group.id}>
         <header className="panel-header team-card-header">
           <div className="team-card-identity">
-            <h3>{group.name}{group.isArchived ? " · Archived" : ""}</h3>
+            <h2>{group.name}{group.isArchived ? " · Archived" : ""}</h2>
             {group.projectIds.length ? <span>{group.projectIds.map(id => projects.find(project => project.id === id)?.name ?? "Unknown project").join(", ")}</span> : null}
           </div>
           <div className="metric-grid">
@@ -208,7 +208,7 @@ export function TeamsView({ bootstrap, selectedSeasonId, selectedProjectId, onRe
             <div className="team-task-breakdown">
               <span className={`team-task-pie${taskPieTotal === 0 ? " is-empty" : ""}`} role="img" aria-label={`${openForPie.length} open, ${blocked.length} blocked, ${overdueForPie.length} overdue, and ${completedTasks} completed tasks`} style={{ "--team-task-open-end": `${taskPieOpenEnd}deg`, "--team-task-blocked-end": `${taskPieBlockedEnd}deg`, "--team-task-overdue-end": `${taskPieOverdueEnd}deg` } as React.CSSProperties} />
               <span className="team-task-legend">
-                <button type="button" className="team-task-open-filter" aria-label={`${openTasks.length} open tasks`} aria-pressed={taskDrilldown?.groupId === group.id && taskDrilldown.filter === "open"} onClick={() => setTaskDrilldown({ groupId: group.id, filter: "open" })}>Open <strong>{openTasks.length}</strong></button>
+                <button type="button" className="team-task-open-filter" aria-label={`Open ${openTasks.length}`} aria-pressed={taskDrilldown?.groupId === group.id && taskDrilldown.filter === "open"} onClick={() => setTaskDrilldown({ groupId: group.id, filter: "open" })}>Open <strong>{openTasks.length}</strong></button>
                 <span>Done <strong>{completedTasks}</strong></span>
                 {metric("Blocked", blocked.length, "blocked")}{metric("Overdue", overdue.length, "overdue")}
               </span>

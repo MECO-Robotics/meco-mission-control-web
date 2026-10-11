@@ -104,7 +104,7 @@ export function RobotMapCanvas({
 
           <div className="robot-config-map-edit-overlay">
             {hasUnplacedSubsystems ? (
-              <button aria-expanded={isUnplacedModalOpen} aria-haspopup="dialog" aria-label={`Show ${unplacedSubsystems.length} unplaced subsystems`} className="secondary-action queue-toolbar-action robot-config-unplaced-trigger" onClick={() => setIsUnplacedModalOpen(true)} type="button">
+              <button aria-expanded={isUnplacedModalOpen} aria-haspopup="dialog" className="secondary-action queue-toolbar-action robot-config-unplaced-trigger" onClick={() => setIsUnplacedModalOpen(true)} type="button">
                 <Layers3 aria-hidden="true" size={14} />
                 <span>Unplaced</span>
                 <span className="robot-config-unplaced-count">{unplacedSubsystems.length}</span>

@@ -54,19 +54,32 @@ needed.
 
 ## Workspace Topbar Contract
 
-The app topbar and navigation own the page context. Views must not render a
-title, eyebrow, subtitle, tagline, or introductory header at the top of their
-content. Keep operational screens free of explanatory header paragraphs; put
-product instructions in Help or tutorial content.
+The shared app topbar is the only page header. Every destination keeps one
+topbar with the active view title, the search bar, the controls area, the
+view-owned custom controls slot, and the shared plus action. Keep the title
+visible at every responsive width. The search bar may switch to its compact
+icon state, but the title and plus action remain visible. Views must not render
+a second navigation bar or add a title, eyebrow, subtitle, tagline, or
+introductory header above their content. Keep operational screens free of
+explanatory header paragraphs; put product instructions in Help or tutorial
+content.
 
-Every workspace view must use the standard shared topbar. New view-local
-**Add**/**Create** buttons are prohibited unless the product spec explicitly
-requires a view-local button. Put creation actions in the existing plus slot.
+Every workspace view must use the standard shared topbar and its slots. New
+view-local **Add**/**Create** buttons, floating add buttons, and alternate add
+menus are prohibited unless the product spec explicitly requires a view-local
+button. Put creation actions in `WorkspaceTopbarAddMenu` in the shared plus
+slot. The shell fallback supplies the standard plus action where a view has no
+specialized create action.
 
-Do not add a view-local filter bar or controls. Add filters only when explicitly
-required by the product spec, and place them in the shared topbar search bar's
-action area alongside sorting. Put other view-specific controls in the controls
-slot. Use `TopbarResponsiveSearch`, `WorkspaceTopbarControls`,
+Apply this contract to every registered destination and every subview or mode,
+including views that share a renderer. When auditing a shell or navigation
+change, check all route owners and confirm each one still renders the shared
+title, responsive search, controls/custom controls slot, and shared plus menu.
+
+Do not add a view-local filter bar or a second row of controls. Add filters only
+when explicitly required by the product spec, and place them in the shared
+topbar search bar's action area alongside sorting. Put other view-specific
+controls in the controls slot. Use `TopbarResponsiveSearch`, `WorkspaceTopbarControls`,
 `WorkspaceSortMenu`/`CompactFilterMenu`, and `WorkspaceTopbarAddMenu` rather than
 inline substitutes. Each control must act on the current view's data. If a
 control does not apply to a destination, do not show a dead or decorative
@@ -135,7 +148,7 @@ Follow [CONTRIBUTING.md](../CONTRIBUTING.md). Keep one clear owner and explicit 
 
 Before adding a UI element, inspect the shared UI components, existing view patterns, and design tokens for one that already provides the needed behavior and appearance. Compose or extend that owner; do not recreate an existing button, menu, control, layout, or interaction with view-local markup and styles. Add a new shared element only when the behavior is genuinely missing, and document its intended reuse.
 
-Treat the current visual system as a hard constraint. Preserve established typography, spacing, surfaces, colors, controls, and responsive behavior; compose existing components and styles instead of introducing a new one-off look. Add a visual exception only when the product spec explicitly requires it.
+Treat the current visual system as a hard constraint. Preserve established typography, spacing, surfaces, colors, controls, and responsive behavior; compose existing components and styles instead of introducing a new one-off look. Add a visual exception only when the product spec explicitly requires it. Use [color-theme.md](../color-theme.md) as the official definition of semantic theme tokens and visual exceptions; if a shared semantic role is missing, define it there and in the runtime theme rather than adding an undefined token or light-only fallback. Check light and dark modes, including empty and disabled states. Colored side borders on cards, list items, callouts, or alerts must stay at 1px or less.
 
 Before implementing an additional feature, inspect and reuse the existing modules, components, and layouts that already own the relevant behavior. Extend a shared owner when the behavior is genuinely shared; keep domain-specific data and presentation at the view boundary. Do not rebuild an existing layout or interaction in parallel. For Kanban views, reuse `KanbanColumns`, `KanbanScrollFrame`, and their drag behavior, supplying view-specific columns and cards.
 
@@ -155,6 +168,10 @@ When changing styles:
 - Keep card usage for repeated items, dialogs, and framed tools.
 - Prefer existing tokens, class patterns, and shared components before creating
   new styling conventions.
+- Reset browser-default button surfaces when a table row is implemented as a
+  button; use a transparent surface and inherited text so the browser does not
+  introduce an unthemed gray panel. Use the paired semantic link tokens from
+  `color-theme.md` for interactive text links and preserve a visible focus ring.
 
 ## Validation
 
@@ -184,3 +201,18 @@ Local demo part instances now also retain their supplied identities on reload, i
 Dashboard attention and health share `RisksView`; `riskViewModel` owns its risk detail/edit/delete lifecycle. `riskViewDataScope` produces the health metrics separately from private scoped collections, and the health cards consume that metric type directly. The dashboard is the only risk presentation: the retired standalone risk board, metrics search, manual-create flow and navigation mode had no URL or sidebar target and are removed. Report-generated risks, attention filtering, modal validation, cancellation and persisted edits remain supported.
 
 Risk writes belong to the editor session that started them. Closing, opening another risk or unmounting retires that session: a late success or failure cannot close a newer editor, replace its error, or clear its busy state. Save and delete share one pending guard; a current-session failure keeps its draft available for retry.
+
+Purchasing saves commercial fields through the record command, approval through
+`PUT /purchases/:id/approval`, and order/cost/PO metadata through
+`POST /purchases/:id/transition`. Approval attribution comes from the server;
+accepted decisions are immutable. An accepted create immediately becomes an edit,
+so a later workflow or refresh failure cannot repeat creation. Pending purchases
+can record cost or PO metadata without advancing their order status.
+
+Local robot editing uses the same project boundaries: subsystem parents cannot
+cycle, and subsystems/mechanisms cannot move between projects. Hierarchy deletion
+removes descendants and their placed parts and linked work; definition deletion
+clears removed placement targets. Missing hard prerequisites stay blocking.
+Manufacturing work must be retargeted or removed before its part definition is
+deleted. Help requests are canonical Risks with category `help` and server-owned
+creator attribution.

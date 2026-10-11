@@ -1,4 +1,7 @@
 import { CadFileViewer } from "../../views/cad/viewer/CadPartViewer";
+import { IconChevronLeft } from "@/components/shared/Icons";
+import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
+import { WorkspaceTopbarControls } from "@/features/workspace/shared/topbar";
 import { useSyncExternalStore } from "react";
 import { getLocalWorkspaceMode, subscribeLocalWorkspace } from "@/lib/localWorkspace/session";
 import { CadIntegrationView } from "@/features/workspace/views/cad";
@@ -14,9 +17,21 @@ export function WorkspaceCadSection(props: WorkspaceContentPanelsViewProps) {
       tabSwitchDirection={props.tabSwitchDirection}
     >
       <WorkspaceSubPanel disableAnimations={props.disablePanelAnimations} isActive>
-        <div className="workspace-presentation-controls"><button className="ghost-button" onClick={() => props.onOpenDrilldownTarget({ tab: "tasks", taskView: "robot-map" })} type="button">Back to Structure</button></div>
+        <AppTopbarSlotPortal slot="controls">
+          <WorkspaceTopbarControls>
+            <button
+              aria-label="Back to Structure"
+              className="secondary-action icon-button"
+              onClick={() => props.onOpenDrilldownTarget({ tab: "tasks", taskView: "robot-map" })}
+              title="Back to Structure"
+              type="button"
+            >
+              <IconChevronLeft />
+            </button>
+          </WorkspaceTopbarControls>
+        </AppTopbarSlotPortal>
         {localMode ? (
-          <CadFileViewer key={props.selectedProject?.id ?? "none"} partDefinitions={Object.values(props.partDefinitionsById)} onSavePartImage={props.savePartImage} />
+          <CadFileViewer importPlacement="topbar" key={props.selectedProject?.id ?? "none"} partDefinitions={Object.values(props.partDefinitionsById)} onSavePartImage={props.savePartImage} />
         ) : <CadIntegrationView
           onSavePartImage={props.savePartImage}
           mechanisms={Object.values(props.mechanismsById)}

@@ -33,6 +33,8 @@ function renderWorkLogsView(
           seasonId: "season-1",
         },
       },
+      openCreateQaReportModal: jest.fn(),
+      openCreateMilestoneReportModal: jest.fn(),
       openCreateWorkLogModal: jest.fn(),
       openEditTaskModal: jest.fn(),
       subsystemsById: {
@@ -125,6 +127,27 @@ describe("WorkLogsView", () => {
     expect(html).toContain("Drive CAD");
     expect(html).toContain("Student One");
     expect(html).toContain("Created worklog Drive CAD");
+  });
+
+  it("provides the shared Log work plus action on Activity", () => {
+    const html = renderWorkLogsView("activity");
+
+    expect(html).toContain('aria-label="Log work"');
+    expect(html).toContain('class="topbar-add-button topbar-add-menu-trigger secondary-action icon-button"');
+  });
+
+  it("provides the shared Add QA report plus action on QA reports", () => {
+    const html = renderWorkLogsView("qa");
+
+    expect(html).toContain('aria-label="Add QA report"');
+    expect(html).toContain('class="topbar-add-button topbar-add-menu-trigger secondary-action icon-button"');
+  });
+
+  it("provides the shared Add milestone report plus action on Results", () => {
+    const html = renderWorkLogsView("results");
+
+    expect(html).toContain('aria-label="Add milestone report"');
+    expect(html).toContain('class="topbar-add-button topbar-add-menu-trigger secondary-action icon-button"');
   });
 
   it("keeps QA and milestone history as filters rather than duplicate task lists", () => {

@@ -178,7 +178,7 @@ export interface RiskPayload {
   title: string;
   detail: string;
   severity: RiskSeverity;
-  category: "dependency" | "design" | "manufacturing" | "supply" | "schedule" | "qa" | "inventory" | "other";
+  category: "dependency" | "design" | "manufacturing" | "supply" | "schedule" | "qa" | "inventory" | "help" | "other";
   status: "open" | "in-progress" | "blocked" | "resolved";
   blocksWork: boolean;
   source: { kind: "manual" } | { kind: "task" | "task-dependency" | "qa-finding" | "test-finding" | "qa-request" | "test-result" | "report" | "event" | "milestone" | "manufacturing-details" | "part-instance" | "material"; id: string };

@@ -69,7 +69,6 @@ export function MobileReleasePanel() {
   return (
     <section className="auth-panel" aria-label="Mobile app releases">
       <div className="auth-panel-copy">
-        <p className="auth-panel-eyebrow">Mobile app</p>
         <h2>Install from Mission Control mobile releases.</h2>
         <p className="auth-body">
           Open the GitHub releases page to get the latest mobile build for your
@@ -203,7 +202,6 @@ export function DevBypassButton({
 
 export function AuthStatusCard({
   body,
-  eyebrow = "MECO Mission Control",
   isDarkMode = false,
   message,
   shellStyle,
@@ -224,7 +222,6 @@ export function AuthStatusCard({
           width={MECO_MAIN_LOGO_WIDTH}
           src={isDarkMode ? MECO_MAIN_LOGO_WHITE_SRC : MECO_MAIN_LOGO_LIGHT_SRC}
         />
-        <p className="eyebrow">{eyebrow}</p>
         <h1>{title}</h1>
         <p className="auth-body">{body}</p>
         {message ? <p className="auth-error">{message}</p> : null}

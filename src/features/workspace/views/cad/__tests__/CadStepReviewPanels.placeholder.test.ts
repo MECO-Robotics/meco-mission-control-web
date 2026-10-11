@@ -80,7 +80,7 @@ describe("CAD STEP placeholder output guards", () => {
     expect(markup).toContain("Placeholder parser output. This is not from your uploaded STEP file.");
     expect(markup).toContain("Finalize is blocked for placeholder STEP output.");
     expect(markup).toContain("disabled=\"\"");
-    expect(markup).toContain("<button class=\"secondary-button compact-action\" disabled=\"\" type=\"button\">Confirm</button>");
+    expect(markup).toContain("<button class=\"secondary-action compact-action\" disabled=\"\" type=\"button\">Confirm</button>");
     expect(markup).toContain("Placeholder output cannot be saved as future mapping rules.");
     expect(markup).not.toContain("This snapshot and future imports");
   });

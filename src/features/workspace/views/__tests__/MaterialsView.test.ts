@@ -60,7 +60,8 @@ describe("MaterialsView stock presentation", () => {
       }),
     );
 
-    expect(markup).toContain('aria-sort="ascending"');
+    expect(markup).toContain('aria-label="Sorted by Material ascending"');
+    expect(markup).toContain('aria-pressed="true"');
     expect(markup).toContain("table-sort-arrow");
     expect(markup.indexOf("Aluminum Sheet")).toBeLessThan(markup.indexOf("Zinc Sheet"));
   });

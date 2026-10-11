@@ -22,7 +22,7 @@ export function TimelineMonthHeaderRow({ cells }: TimelineMonthHeaderRowProps) {
             borderBottom: "1px solid var(--border-base)",
             borderRight: "1px solid var(--border-base)",
             textTransform: "uppercase",
-            color: "var(--meco-blue)",
+            color: "var(--text-accent)",
             background: "var(--bg-row-alt)",
             position: "sticky",
             top: 0,

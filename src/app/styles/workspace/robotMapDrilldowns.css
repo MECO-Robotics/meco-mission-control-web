@@ -3,8 +3,9 @@
   gap: 0.55rem;
 }
 
-.robot-config-detail-drilldowns h4 {
+.robot-config-detail-drilldowns h3 {
   color: var(--text-title);
+  font-size: 1em;
   margin: 0;
 }
 
@@ -29,7 +30,7 @@
   justify-content: space-between;
 }
 
-.robot-config-drilldown-group-header h5 {
+.robot-config-drilldown-group-header h4 {
   color: var(--text-title);
   font-size: 0.8rem;
   margin: 0;
@@ -50,7 +51,7 @@
 .robot-config-drilldown-link {
   background: transparent;
   border: 0;
-  color: #2563eb;
+  color: var(--text-link);
   cursor: pointer;
   display: flex;
   gap: 0.5rem;
@@ -61,10 +62,16 @@
   width: 100%;
 }
 
-.robot-config-drilldown-link:hover,
+.robot-config-drilldown-link:hover {
+  color: var(--text-link-hover);
+  text-decoration: underline;
+}
+
 .robot-config-drilldown-link:focus-visible {
-  color: #1d4ed8;
-  outline: none;
+  color: var(--text-link-hover);
+  outline: 2px solid var(--status-info-text);
+  outline-offset: 2px;
+  border-radius: 2px;
   text-decoration: underline;
 }
 

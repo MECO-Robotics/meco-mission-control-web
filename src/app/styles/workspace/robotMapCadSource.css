@@ -19,7 +19,7 @@
 .robot-config-cad-source {
   border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
   border-radius: 999px;
-  color: #334155;
+  color: var(--text-copy);
   display: inline-flex;
   flex: 0 0 auto;
   font-size: 0.72rem;
@@ -31,21 +31,21 @@
 }
 
 .robot-config-cad-source[data-source="manual"] {
-  background: #f8fafc;
-  color: #475569;
+  background: var(--status-neutral-bg);
+  color: var(--status-neutral-text);
 }
 
 .robot-config-cad-source[data-source="step-import"] {
-  background: #ecfdf5;
-  color: #047857;
+  background: var(--status-success-bg);
+  color: var(--status-success-text);
 }
 
 .robot-config-cad-source[data-source="onshape-sync"] {
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: var(--status-info-bg);
+  color: var(--status-info-text);
 }
 
 .robot-config-cad-source[data-source="edited-after-import"] {
-  background: #fff7ed;
-  color: #c2410c;
+  background: var(--status-warning-bg);
+  color: var(--status-warning-text);
 }

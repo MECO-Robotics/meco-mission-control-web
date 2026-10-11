@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useState, type RefObject } from "react";
 
 import {
   clampSearchMode,
@@ -23,6 +23,7 @@ type UseTopbarResponsiveSearchModeOptions = {
   placeholder: string;
   resolvedActionCount: number;
   resolvedMode: "multi-state" | "dynamic-label";
+  forceCompactAtNarrowWidth: boolean;
   searchRef: RefObject<HTMLDivElement | null>;
   shouldUseCollisionDetection: boolean;
 };
@@ -41,12 +42,16 @@ export function useTopbarResponsiveSearchMode({
   placeholder,
   resolvedActionCount,
   resolvedMode,
+  forceCompactAtNarrowWidth,
   searchRef,
   shouldUseCollisionDetection,
 }: UseTopbarResponsiveSearchModeOptions) {
-  const [searchMode, setSearchMode] = useState<SearchCompactMode>("full");
+  const [searchMode, setSearchMode] = useState<SearchCompactMode>(() =>
+    forceCompactAtNarrowWidth && typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches
+      ? "icon"
+      : "full",
+  );
   const [searchWidth, setSearchWidth] = useState<number | null>(null);
-  const leftWidthRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (resolvedMode !== "dynamic-label" || typeof ResizeObserver === "undefined") {
@@ -63,11 +68,19 @@ export function useTopbarResponsiveSearchMode({
     }
 
     const updateSearchMode = () => {
-      const topbar = element.closest(".app-topbar");
-      const topbarLeft = topbar?.querySelector<HTMLElement>(".app-topbar-left");
-      const measuredLeftWidth = topbarLeft?.getBoundingClientRect().width ?? 0;
-      if (measuredLeftWidth > 0 && searchMode !== "icon") {
-        leftWidthRef.current = measuredLeftWidth;
+      if (
+        forceCompactAtNarrowWidth &&
+        element.closest(".app-topbar") &&
+        window.matchMedia("(max-width: 640px)").matches
+      ) {
+        setSearchWidth(container.clientWidth);
+        setSearchMode((current) => {
+          if (current !== "icon") {
+            onCompactModeChange?.("icon", { widthPx: container.clientWidth, blockers: 0 });
+          }
+          return "icon";
+        });
+        return;
       }
 
       const nextSearchWidth = shouldUseCollisionDetection
@@ -113,10 +126,6 @@ export function useTopbarResponsiveSearchMode({
           onCompactModeChange?.(nextMode, { widthPx: widthToTest, blockers });
         }
 
-        if (nextMode === "icon" && leftWidthRef.current === null && measuredLeftWidth > 0) {
-          leftWidthRef.current = measuredLeftWidth;
-        }
-
         return nextMode;
       });
     };
@@ -143,6 +152,7 @@ export function useTopbarResponsiveSearchMode({
     collisionRoots,
     effectiveCompactBias,
     effectivePadding,
+    forceCompactAtNarrowWidth,
     iconSwitchWidth,
     legacyIconReleaseWidth,
     legacyIconWidth,
@@ -161,7 +171,7 @@ export function useTopbarResponsiveSearchMode({
       return;
     }
 
-    setTopbarSearchCollisionMode(searchRef, searchMode, leftWidthRef.current);
+    setTopbarSearchCollisionMode(searchRef, searchMode);
 
     return () => {
       setTopbarSearchCollisionMode(searchRef, "full");

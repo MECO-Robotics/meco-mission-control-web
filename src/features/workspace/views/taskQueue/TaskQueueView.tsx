@@ -139,12 +139,6 @@ export function TaskQueueView({
         </WorkspaceTopbarControls>
       </AppTopbarSlotPortal>
 
-      <div className="panel-header compact-header">
-        <div className="queue-section-header">
-          <h2>Kanban</h2>
-        </div>
-      </div>
-
       <TaskQueueBoardSection
         bootstrap={bootstrap}
         workTypesById={workTypesById}

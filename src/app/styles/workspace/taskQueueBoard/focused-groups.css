@@ -1,10 +1,3 @@
-.page-shell.dark-mode .task-queue-board-focused-count,
-.page-shell.dark-mode .task-queue-board-priority-label-count {
-  background: rgba(96, 165, 250, 0.2);
-  color: #dbeafe;
-  border: 1px solid rgba(96, 165, 250, 0.34);
-}
-
 .task-queue-board-focused-exit {
   display: inline-flex;
   align-items: center;
@@ -12,9 +5,9 @@
   width: 2rem;
   height: 2rem;
   border-radius: 999px;
-  border: 1px solid rgba(220, 38, 38, 0.35);
-  background: rgba(239, 68, 68, 0.12);
-  color: #b91c1c;
+  border: 1px solid color-mix(in srgb, var(--status-danger-text) 30%, transparent);
+  background: var(--status-danger-bg);
+  color: var(--status-danger-text);
   font-size: 1.05rem;
   font-weight: 800;
   cursor: pointer;
@@ -42,19 +35,19 @@
 }
 
 .task-queue-board-priority-label-critical {
-  color: #dc2626;
+  color: var(--status-danger-text);
 }
 
 .task-queue-board-priority-label-high {
-  color: #ef4444;
+  color: var(--status-danger-text);
 }
 
 .task-queue-board-priority-label-medium {
-  color: #ca8a04;
+  color: var(--status-warning-text);
 }
 
 .task-queue-board-priority-label-low {
-  color: #2563eb;
+  color: var(--status-neutral-text);
 }
 
 .task-queue-board-priority-label-icon {

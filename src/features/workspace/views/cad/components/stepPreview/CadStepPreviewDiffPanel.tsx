@@ -63,7 +63,7 @@ export function CadStepPreviewDiffPanel({
           <span className="cad-eyebrow">STEP preview diff</span>
           <h3 id="cad-step-preview-title">Review import impact</h3>
         </div>
-        <button className="secondary-button compact-action" onClick={onReviewMappings} type="button">
+        <button className="secondary-action compact-action" onClick={onReviewMappings} type="button">
           Review mapping decisions
         </button>
       </div>

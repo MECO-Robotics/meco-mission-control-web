@@ -78,43 +78,43 @@
 }
 
 .filter-tone-info {
-  --filter-tone-bg: rgba(22, 71, 142, 0.12);
-  --filter-tone-bg-active: rgba(22, 71, 142, 0.18);
-  --filter-tone-border: rgba(22, 71, 142, 0.26);
-  --filter-tone-foreground: var(--official-blue);
-  --filter-tone-check: var(--official-blue);
+  --filter-tone-bg: var(--status-info-bg);
+  --filter-tone-bg-active: color-mix(in srgb, var(--status-info-bg) 72%, var(--status-info-text));
+  --filter-tone-border: color-mix(in srgb, var(--status-info-text) 30%, transparent);
+  --filter-tone-foreground: var(--status-info-text);
+  --filter-tone-check: var(--status-info-text);
 }
 
 .filter-tone-success {
-  --filter-tone-bg: rgba(61, 153, 108, 0.12);
-  --filter-tone-bg-active: rgba(61, 153, 108, 0.18);
-  --filter-tone-border: rgba(61, 153, 108, 0.26);
-  --filter-tone-foreground: #246847;
-  --filter-tone-check: #246847;
+  --filter-tone-bg: var(--status-success-bg);
+  --filter-tone-bg-active: color-mix(in srgb, var(--status-success-bg) 72%, var(--status-success-text));
+  --filter-tone-border: color-mix(in srgb, var(--status-success-text) 30%, transparent);
+  --filter-tone-foreground: var(--status-success-text);
+  --filter-tone-check: var(--status-success-text);
 }
 
 .filter-tone-warning {
-  --filter-tone-bg: rgba(220, 120, 18, 0.14);
-  --filter-tone-bg-active: rgba(220, 120, 18, 0.2);
-  --filter-tone-border: rgba(220, 120, 18, 0.28);
-  --filter-tone-foreground: #a84712;
-  --filter-tone-check: #a84712;
+  --filter-tone-bg: var(--status-warning-bg);
+  --filter-tone-bg-active: color-mix(in srgb, var(--status-warning-bg) 72%, var(--status-warning-text));
+  --filter-tone-border: color-mix(in srgb, var(--status-warning-text) 30%, transparent);
+  --filter-tone-foreground: var(--status-warning-text);
+  --filter-tone-check: var(--status-warning-text);
 }
 
 .filter-tone-danger {
-  --filter-tone-bg: rgba(183, 28, 38, 0.12);
-  --filter-tone-bg-active: rgba(183, 28, 38, 0.18);
-  --filter-tone-border: rgba(183, 28, 38, 0.26);
-  --filter-tone-foreground: #9b1d2a;
-  --filter-tone-check: #9b1d2a;
+  --filter-tone-bg: var(--status-danger-bg);
+  --filter-tone-bg-active: color-mix(in srgb, var(--status-danger-bg) 72%, var(--status-danger-text));
+  --filter-tone-border: color-mix(in srgb, var(--status-danger-text) 30%, transparent);
+  --filter-tone-foreground: var(--status-danger-text);
+  --filter-tone-check: var(--status-danger-text);
 }
 
 .filter-tone-neutral {
-  --filter-tone-bg: rgba(112, 128, 154, 0.12);
-  --filter-tone-bg-active: rgba(112, 128, 154, 0.18);
-  --filter-tone-border: rgba(112, 128, 154, 0.22);
-  --filter-tone-foreground: #54627b;
-  --filter-tone-check: #54627b;
+  --filter-tone-bg: var(--status-neutral-bg);
+  --filter-tone-bg-active: color-mix(in srgb, var(--status-neutral-bg) 72%, var(--status-neutral-text));
+  --filter-tone-border: color-mix(in srgb, var(--status-neutral-text) 30%, transparent);
+  --filter-tone-foreground: var(--status-neutral-text);
+  --filter-tone-check: var(--status-neutral-text);
 }
 
 .toolbar-filter-dropdown.filter-tone-info,

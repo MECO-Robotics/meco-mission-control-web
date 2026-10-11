@@ -227,10 +227,47 @@ it.each(["", "0", "123.45"])("stores purchase final cost %j as a commercial amou
   const editor = read().raw as ReturnType<typeof usePurchaseActions>;
   editor.setPurchaseFinalCost(finalCost);
   read().setDraft({ ...read().draft, title: "Stale free text" });
+  jest.mocked(production.transitionPurchaseItemRecord).mockResolvedValue({ id: "saved-purchase", finalCost: finalCost === "" ? null : { amount: Number(finalCost), currency: "USD" } } as never);
   await read().submit();
+  if (finalCost) expect(production.transitionPurchaseItemRecord).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ finalCost: { amount: Number(finalCost), currency: "USD" } }), dependencies.handleUnauthorized);
   expect(production.createPurchaseItemRecord).toHaveBeenCalledWith(expect.objectContaining({
     title: "Stale free text",
     taskId: "task-1",
-    finalCost: finalCost === "" ? null : { amount: Number(finalCost), currency: "USD" },
+    finalCost: null,
   }), dependencies.handleUnauthorized);
+});
+
+it("retains an accepted purchase identity when final-cost transition fails and retries without another create", async () => {
+  const { read, record, dependencies } = setup(cases.find((item) => item.name === "purchase")!);
+  const accepted = { ...record, id: "accepted-purchase", finalCost: null };
+  jest.mocked(production.createPurchaseItemRecord).mockResolvedValue(accepted as never);
+  jest.mocked(production.updatePurchaseItemRecord).mockResolvedValue(accepted as never);
+  jest.mocked(production.transitionPurchaseItemRecord).mockRejectedValueOnce(new Error("Cost update rejected"));
+  read().openCreate();
+  (read().raw as ReturnType<typeof usePurchaseActions>).setPurchaseFinalCost("45");
+  await read().submit();
+  expect(read().mode).toBe("edit");
+  expect(read().raw.activePurchaseId).toBe("accepted-purchase");
+  expect(dependencies.setDataMessage).toHaveBeenLastCalledWith("Cost update rejected");
+  jest.mocked(production.transitionPurchaseItemRecord).mockResolvedValue({ ...accepted, finalCost: { amount: 45, currency: "USD" } } as never);
+  await read().submit();
+  expect(production.createPurchaseItemRecord).toHaveBeenCalledTimes(1);
+  expect(production.updatePurchaseItemRecord).toHaveBeenCalledWith("accepted-purchase", expect.any(Object), dependencies.handleUnauthorized);
+  expect(read().mode).toBeNull();
+});
+
+it("routes purchase approval and order metadata through their domain commands", async () => {
+  const { read, record, dependencies } = setup(cases.find((item) => item.name === "purchase")!);
+  const approved = { ...record, approvalStatus: "approved", approvedById: "mentor", approvedAt: "2026-10-10T12:00:00Z" };
+  jest.mocked(production.approvePurchaseItemRecord).mockResolvedValue(approved as never);
+  jest.mocked(production.transitionPurchaseItemRecord).mockResolvedValue({ ...approved, orderStatus: "ordered", purchaseOrderNumber: "PO-123" } as never);
+  read().openEdit(record);
+  read().setDraft({ ...read().draft, approvalStatus: "approved", orderStatus: "ordered", purchaseOrderNumber: "PO-123" });
+  await read().submit();
+  const genericPayload = jest.mocked(production.updatePurchaseItemRecord).mock.calls[0][1];
+  expect(genericPayload).not.toHaveProperty("approvalStatus");
+  expect(genericPayload).not.toHaveProperty("purchaseOrderNumber");
+  expect(production.approvePurchaseItemRecord).toHaveBeenCalledWith("editor-record", "approved", dependencies.handleUnauthorized);
+  expect(production.transitionPurchaseItemRecord).toHaveBeenCalledWith("editor-record", expect.objectContaining({ orderStatus: "ordered", purchaseOrderNumber: "PO-123" }), dependencies.handleUnauthorized);
+  expect(read().mode).toBeNull();
 });

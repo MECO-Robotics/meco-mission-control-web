@@ -2,7 +2,7 @@ import { requestApi } from "../core/request";
 
 export async function requestItem<TItem, TPayload>(
   path: string,
-  method: "POST" | "PATCH" | "DELETE",
+  method: "POST" | "PUT" | "PATCH" | "DELETE",
   payload?: TPayload,
   onUnauthorized?: () => void,
 ) {

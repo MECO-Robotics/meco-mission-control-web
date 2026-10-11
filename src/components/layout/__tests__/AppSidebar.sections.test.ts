@@ -59,4 +59,26 @@ describe("flat sidebar navigation", () => {
     const sidebarCss = readFileSync("src/app/styles/shell/sidebar/sidebar-navigation.css", "utf8");
     expect(sidebarCss).toMatch(/\.sidebar-nav-item\[data-robot-disabled="true"\]\s*\{[^}]*opacity:\s*0\.48;[^}]*cursor:\s*not-allowed;/);
   });
+
+  it("uses theme-aware colors for nested navigation and its keyboard focus ring", () => {
+    const sidebarCss = readFileSync("src/app/styles/shell/sidebar/sidebar-navigation.css", "utf8");
+    expect(sidebarCss).toContain("border-left: 1px solid var(--border-base)");
+    expect(sidebarCss).toContain("color: var(--text-copy)");
+    expect(sidebarCss).toContain("background: var(--meco-soft-blue)");
+    expect(sidebarCss).toContain("color: var(--text-title)");
+    expect(sidebarCss).toContain("outline: 2px solid var(--status-info-text)");
+    expect(sidebarCss).not.toMatch(/var\(--(?:border-subtle|text-secondary|sidebar-active-bg|text-primary|focus-ring),/);
+  });
+
+  it("keeps shell collapse immediate and disables remaining chrome transitions for reduced motion", () => {
+    const motionCss = readFileSync("src/app/styles/shell/layout/motion-a.css", "utf8");
+    const reducedMotionRules = motionCss.split("@media (prefers-reduced-motion: reduce)")[1];
+    const frameCss = readFileSync("src/app/styles/shell/layout/frame.css", "utf8");
+    const sidebarCss = readFileSync("src/app/styles/shell/sidebar/sidebar-core.css", "utf8");
+    expect(frameCss).not.toMatch(/transition:\s*[^;]*padding/);
+    expect(sidebarCss).not.toMatch(/transition:\s*[^;]*width/);
+    expect(reducedMotionRules).toContain(".app-topbar-brand");
+    expect(reducedMotionRules).toContain(".app-topbar-brand-icon");
+    expect(reducedMotionRules).toContain("transition: none");
+  });
 });

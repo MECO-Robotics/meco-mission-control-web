@@ -20,7 +20,7 @@
   justify-content: center;
   background: var(--timeline-task-status-logo-background);
   box-shadow: 0 0 0 1px rgba(15, 28, 52, 0.14);
-  color: #54627b;
+  color: var(--status-neutral-text);
   transform: translateY(-50%);
   pointer-events: none;
   z-index: 10020;
@@ -69,12 +69,7 @@
   justify-content: center;
   gap: 0;
   cursor: pointer;
-  transition:
-    max-width 160ms ease,
-    min-width 160ms ease,
-    padding 160ms ease,
-    background-color 160ms ease,
-    box-shadow 160ms ease;
+  transition: background-color 160ms ease, box-shadow 160ms ease;
   overflow: visible;
   pointer-events: auto;
 }
@@ -127,33 +122,33 @@
 }
 
 .timeline-task-status-icon-button[data-status-signal="not-started"] .timeline-task-status-caption {
-  background: color-mix(in srgb, #d6dbe6 72%, transparent);
-  color: #54627b;
+  background: color-mix(in srgb, var(--status-neutral-bg) 86%, transparent);
+  color: var(--status-neutral-text);
 }
 
 .timeline-task-status-icon-button[data-status-signal="in-progress"] .timeline-task-status-caption {
-  background: color-mix(in srgb, #f2f0dc 72%, transparent);
-  color: #b77900;
+  background: color-mix(in srgb, var(--status-warning-bg) 86%, transparent);
+  color: var(--status-warning-text);
 }
 
 .timeline-task-status-icon-button[data-status-signal="waiting-for-qa"] .timeline-task-status-caption {
-  background: color-mix(in srgb, #deebff 72%, transparent);
-  color: #275098;
+  background: color-mix(in srgb, var(--status-info-bg) 86%, transparent);
+  color: var(--status-info-text);
 }
 
 .timeline-task-status-icon-button[data-status-signal="complete"] .timeline-task-status-caption {
-  background: color-mix(in srgb, #dbf0e0 72%, transparent);
-  color: #246847;
+  background: color-mix(in srgb, var(--status-success-bg) 86%, transparent);
+  color: var(--status-success-text);
 }
 
 .timeline-task-status-icon-button[data-status-signal="blocked"] .timeline-task-status-caption {
-  background: color-mix(in srgb, #f6e7e7 72%, transparent);
-  color: #8f4b5d;
+  background: color-mix(in srgb, var(--status-danger-bg) 86%, transparent);
+  color: var(--status-danger-text);
 }
 
 .timeline-task-status-icon-button[data-status-signal="waiting-on-dependency"] .timeline-task-status-caption {
-  background: color-mix(in srgb, #e6e7f3 72%, transparent);
-  color: #c25a14;
+  background: color-mix(in srgb, var(--status-warning-bg) 86%, transparent);
+  color: var(--status-warning-text);
 }
 
 .timeline-task-status-logo.is-compact svg {
@@ -162,19 +157,19 @@
 }
 
 .timeline-task-status-logo-not-started {
-  color: #54627b;
+  color: var(--status-neutral-text);
 }
 
 .timeline-task-status-logo-signal-in-progress {
-  color: #b77900;
+  color: var(--status-warning-text);
 }
 
 .timeline-task-status-logo-signal-waiting-for-qa {
-  color: #275098;
+  color: var(--status-info-text);
 }
 
 .timeline-task-status-logo-signal-complete {
-  color: #246847;
+  color: var(--status-success-text);
 }
 
 .timeline-task-status-logo-signal-blocked {
@@ -182,5 +177,15 @@
 }
 
 .timeline-task-status-logo-signal-waiting-on-dependency {
-  color: #c25a14;
+  color: var(--status-warning-text);
+}
+
+@media (max-width: 640px) {
+  .timeline-task-status-icon-button,
+  .timeline-task-status-icon-button.is-compact {
+    width: 24px;
+    min-width: 24px;
+    height: 24px;
+    margin-right: -12px;
+  }
 }
