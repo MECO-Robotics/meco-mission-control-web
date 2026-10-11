@@ -14,7 +14,7 @@ The app uses the original sidebar implementation: Home shortcut, expandable Work
 
 | Area | Views | Consolidation |
 | --- | --- | --- |
-| Home | Priority work, upcoming milestones, Needs attention | One attention row per source record; Project health expands on demand |
+| Home | Action Required, next four milestone timeline, task status distribution | Uses selected project scope; one attention row per source record; detailed metrics remain in Risks |
 | Work | Tasks, Schedule, Risks, Activity | Schedule offers Calendar, Timeline and Agenda; Activity filters work logs, changes, QA and milestone results |
 | Resources | Materials/Documents, Parts, Purchases, Manufacturing, Structure | Manufacturing uses a process filter; installed parts live under their definition; CAD import opens from Structure |
 | Team | People, Teams | People combines directory, presence, availability and individual workload; Teams manages ResponsibleGroups, adds or reuses matching WorkType disciplines, and derives team workload/capacity |
@@ -24,6 +24,18 @@ Tasks opens first in Work. Robot-only Parts and Manufacturing require a robot pr
 Task details use a drawer on desktop and fill the narrow viewport. Logging work and submitting QA open from the task; milestone results open from the milestone. The originating detail returns after save or cancel, and editors protect unsaved changes. Collection filters survive destination changes within the current season/project; changing scope resets these local filters. URLs retain canonical destination, presentation and scope. Task details support Back, Forward and refresh; browser Back restores page scroll.
 
 The former Dashboard, Readiness, Config and Reports destinations, the work-log status board, the separate part-mapping page and the standalone People workload/availability pages have been removed. Their retained behavior is owned by the views above.
+
+### Home dashboard signals
+
+Home uses the selected project (or all projects) and current bootstrap data. The active person filter also scopes tasks and task-linked risks. Each signal answers a separate project-lead decision:
+
+This hierarchy follows dashboard evaluation research that measures whether users can complete real decisions and whether the displayed data is accurate, current, and complete, rather than rewarding chart count. PLM context also connects product structure and change workflows to manufacturing, which supports routing action rows to their owning domain. See the [dashboard evaluation framework](https://eprints.whiterose.ac.uk/id/eprint/184215/1/dashboard_evaluation.pdf), [dashboard decision study](https://osuva.uwasa.fi/items/76b8c883-a991-4901-8cac-82ac65eb3f3b), and [PTC Windchill overview](https://www.ptc.com/en/products/windchill).
+
+| Signal | Decision question and source | Status and ordering rule | Click destination |
+| --- | --- | --- | --- |
+| Action Required | What needs attention now? Reuses the attention model’s open risks, blocked tasks, tasks waiting for QA, overdue tasks, due-soon tasks, and other existing attention queue inputs. Multiple signals for the same source record are combined into one row with their reasons. | Uses the source urgency score where present; otherwise ranks critical/high risks, blocked tasks, overdue tasks, waiting-for-QA tasks, due-soon tasks, and lower-severity risks in that order. Shows the five highest-ranked rows; the queue’s existing rules determine which records qualify. | Task opens its detail drawer; risk opens that risk’s details; purchase opens its editor; QA opens QA / Reports; manufacturing opens Kanban. “View all” opens Risks. |
+| Upcoming milestones | What is coming next, and what readiness has been recorded? Reads milestones in the scoped bootstrap payload. | Excludes complete and past milestones, sorts by start date, and shows the next four with existing milestone status and readiness. Missing readiness is “Not assessed”; it is not treated as ready. | Opens the selected milestone in Schedule → Agenda. |
+| Task status | How are scoped tasks distributed across execution states, and which group needs follow-up? Reads current scoped bootstrap tasks and groups by their stored status. | Displays exact counts for not started, in progress, waiting for QA, and complete. The stacked bar is proportional to those counts; labels and counts remain visible without color. | Activating a status label reveals matching tasks; selecting a task opens its detail drawer. |
 
 See [navigation-consolidation.md](navigation-consolidation.md) for the cross-client scope, validation and contract changes.
 
@@ -65,6 +77,7 @@ Key implications for web-app changes:
 The following recent PR themes are now part of the current spec:
 
 - Metrics is a decision-focused dashboard, not just a statistics page.
+- Home prioritizes Action Required, then the next four milestones, with task status distribution as its only supporting chart. It uses current scoped data and does not imply historical trends or an aggregate readiness score.
 - Attention has become Action Required and should function as cross-domain triage.
 - WorkLogs Activity now shows platform audit actions, not only work-log records, and follows the
   platform retention/privacy policy for archive, delete, and admin-access behavior.

@@ -35,6 +35,7 @@ describe("canonical workspace navigation", () => {
     expect(new URLSearchParams(search).has("mode")).toBe(false);
     expect(readNavigationLocation(search, "robot-project")).toEqual({ tab: "tasks", taskView: "timeline" });
     expect(readNavigationLocation("?view=work-schedule&presentation=agenda&milestone=review-1", "robot-project")).toEqual({ tab: "tasks", taskView: "agenda", milestoneId: "review-1" });
+    expect(readNavigationLocation("?view=work-risks&risk=risk-1", "robot-project")).toEqual({ tab: "risks", riskId: "risk-1" });
   });
   it("rejects unknown and unavailable destinations and presentation values", () => {
     expect(readNavigationLocation("?view=resources-parts", "non-robot-project")).toEqual({ tab: "home" });

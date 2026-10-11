@@ -1,16 +1,7 @@
 import type { MilestoneRecord } from "@/types/recordsExecution";
 import { getMilestoneTypeStyle } from "@/features/workspace/shared/events/eventStyles";
-import { formatMilestoneDateTime, formatMilestoneEndDateTime, formatMilestoneStatusLabel } from "./milestonesViewUtils";
+import { formatMilestoneDateTime, formatMilestoneEndDateTime, formatMilestoneReadinessLabel, formatMilestoneStatusLabel } from "./milestonesViewUtils";
 import { IconRisk } from "@/components/shared/Icons";
-
-function readinessLabel(status: MilestoneRecord["readinessStatus"]) {
-  switch (status) {
-    case "blocked": return "Blocked";
-    case "qa": return "QA";
-    case "ready": return "Ready";
-    default: return "Not ready";
-  }
-}
 
 export function MilestonesAgendaList({ milestones, onOpenMilestone, projectLabelByMilestoneId, riskCountByMilestoneId = {} }: {
   milestones: MilestoneRecord[];
@@ -27,7 +18,7 @@ export function MilestonesAgendaList({ milestones, onOpenMilestone, projectLabel
           <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center", marginTop: "0.25rem" }}>
             <time dateTime={milestone.startAt}>{formatMilestoneDateTime(milestone.startAt)}{milestone.endAt ? ` – ${formatMilestoneEndDateTime(milestone.startAt, milestone.endAt)}` : ""}</time>
             <span className="pill status-pill">{formatMilestoneStatusLabel(milestone.status) ?? "Not ready"}</span>
-            <span className="pill status-pill">{readinessLabel(milestone.readinessStatus)}</span>
+            <span className="pill status-pill">{formatMilestoneReadinessLabel(milestone.readinessStatus)}</span>
             <span>{getMilestoneTypeStyle(milestone.type).label}</span>
             <span>{projectLabelByMilestoneId[milestone.id]}</span>
             {riskCountByMilestoneId[milestone.id] ? <span aria-label={`${riskCountByMilestoneId[milestone.id]} risks`} title={`${riskCountByMilestoneId[milestone.id]} risks`} style={{ display: "inline-flex", alignItems: "center", gap: "0.2rem" }}><IconRisk />{riskCountByMilestoneId[milestone.id]}</span> : null}

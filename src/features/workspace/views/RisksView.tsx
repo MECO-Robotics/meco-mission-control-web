@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { RiskPayload } from "@/types/payloads";
@@ -23,6 +23,7 @@ interface RisksViewProps {
   onUpdateRisk: (riskId: string, payload: RiskPayload) => Promise<void>;
   onOpenSource?: (source: string, id: string) => void;
   onOpenSchedule?: (milestoneId: string) => void;
+  selectedRiskId?: string | null;
 }
 
 export function RisksView({
@@ -34,6 +35,7 @@ export function RisksView({
   onUpdateRisk,
   onOpenSource,
   onOpenSchedule,
+  selectedRiskId,
 }: RisksViewProps) {
   const [healthOpen, setHealthOpen] = useState(false);
   const viewModel = useRisksViewModel({
@@ -43,6 +45,11 @@ export function RisksView({
     onCreateRisk,
     onUpdateRisk,
   });
+  const openRiskDetails = viewModel.openRiskDetails;
+  useEffect(() => {
+    const risk = selectedRiskId ? bootstrap.risks.find((item) => item.id === selectedRiskId) : undefined;
+    if (risk) openRiskDetails(risk);
+  }, [bootstrap.risks, openRiskDetails, selectedRiskId]);
   return (
     <section className={`panel dense-panel subsystem-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
       <RiskActionOverview activePersonFilter={activePersonFilter} bootstrap={bootstrap} onCreateRisk={viewModel.openCreateEditor} onOpenRisk={viewModel.openRiskDetails} onUpdateRisk={onUpdateRisk} />

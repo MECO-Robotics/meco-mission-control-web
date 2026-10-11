@@ -1,5 +1,5 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
-import type { MilestoneStatus } from "@/types/common";
+import type { MilestoneStatus, ReadinessStatus } from "@/types/common";
 import type { MilestoneRecord } from "@/types/recordsExecution";
 import { filterSelectionIncludes, filterSelectionIntersects, filterSelectionMatchesTaskPeople } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
@@ -82,6 +82,14 @@ export function formatMilestoneStatusLabel(status: MilestoneStatus | undefined) 
   if (status === "active") return "Active";
   if (status === "complete") return "Complete";
   return null;
+}
+
+export function formatMilestoneReadinessLabel(status: ReadinessStatus | undefined) {
+  if (status === "ready") return "Ready";
+  if (status === "blocked") return "Blocked";
+  if (status === "qa") return "QA";
+  if (status === "not-ready") return "Not ready";
+  return "Not assessed";
 }
 
 export function buildMilestoneSearchSuggestions({

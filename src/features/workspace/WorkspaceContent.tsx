@@ -208,6 +208,8 @@ export function WorkspaceContent({
     const params = new URLSearchParams(window.location.search);
     if (target.milestoneId) params.set("milestone", target.milestoneId);
     else params.delete("milestone");
+    if (target.riskId) params.set("risk", target.riskId);
+    else params.delete("risk");
     window.history.replaceState(window.history.state, "", `${window.location.pathname}?${params.toString()}${window.location.hash}`);
     if (target.taskView) {
       setTaskView(target.taskView);

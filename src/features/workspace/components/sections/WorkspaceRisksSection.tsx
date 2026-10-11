@@ -22,6 +22,7 @@ export function WorkspaceRisksSection(props: WorkspaceContentPanelsViewProps) {
         onUpdateRisk={props.onUpdateRisk}
         openTaskDetailModal={props.openTimelineTaskDetailsModal}
         onOpenSource={openSource}
+        selectedRiskId={new URLSearchParams(window.location.search).get("risk")}
         onOpenSchedule={(milestoneId) => props.onOpenDrilldownTarget({ tab: "tasks", taskView: "agenda", milestoneId })}
       />
     </WorkspaceSectionPanel>

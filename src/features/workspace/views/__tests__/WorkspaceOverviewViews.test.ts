@@ -5,6 +5,9 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { createBootstrap } from "@/lib/appUtilsTestFixtures";
 import { HomeView } from "@/features/workspace/views/overview";
+import { buildHomeViewModel } from "@/features/workspace/views/overview/overviewViewModel";
+import { buildAttentionQueue } from "@/features/workspace/views/attention/attentionQueue";
+import { buildAttentionViewModel } from "@/features/workspace/views/attention/attentionViewModel";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
@@ -29,6 +32,7 @@ function createOverviewBootstrap() {
         workTypeId: workType.id,
         dueDate: "2026-05-16",
         priority: "critical",
+        status: "not-started",
       },
       {
         ...base.tasks[0],
@@ -52,6 +56,7 @@ function createOverviewBootstrap() {
         workTypeId: workType.id,
         dueDate: "2026-05-19",
         priority: "medium",
+        status: "waiting-for-qa",
       },
       {
         ...base.tasks[0],
@@ -63,6 +68,15 @@ function createOverviewBootstrap() {
         workTypeId: workType.id,
         dueDate: "2026-06-15",
         priority: "low",
+        status: "complete",
+      },
+      {
+        ...base.tasks[0],
+        id: "task-other-project",
+        title: "Other project task",
+        projectId: "other-project",
+        dueDate: "2026-05-20",
+        status: "in-progress",
       },
     ],
     milestones: [
@@ -70,7 +84,35 @@ function createOverviewBootstrap() {
         ...base.milestones[0],
         id: "milestone-soon",
         title: "Drive practice deadline",
+        projectIds: [project.id],
+        status: "planned",
+        readinessStatus: "blocked",
         startAt: "2026-05-20T18:00:00.000Z",
+      },
+      ...["2026-06-10", "2026-07-10", "2026-08-10", "2026-09-10"].map((startAt, index) => ({
+        ...base.milestones[0],
+        id: `milestone-${index + 2}`,
+        title: `Future gate ${index + 2}`,
+        projectIds: [project.id],
+        readinessStatus: index === 0 ? ("ready" as const) : undefined,
+        status: "planned" as const,
+        startAt,
+      })),
+      {
+        ...base.milestones[0],
+        id: "milestone-complete",
+        title: "Completed gate",
+        projectIds: [project.id],
+        status: "complete",
+        startAt: "2026-05-22T18:00:00.000Z",
+      },
+      {
+        ...base.milestones[0],
+        id: "milestone-other-project",
+        title: "Other project gate",
+        projectIds: ["other-project"],
+        status: "planned",
+        startAt: "2026-05-21T18:00:00.000Z",
       },
     ],
     risks: [
@@ -93,32 +135,117 @@ function createOverviewBootstrap() {
         updatedAt: "2026-05-17",
         resolvedAt: null,
       },
+      {
+        id: "risk-other-project",
+        projectId: "other-project",
+        title: "Other project risk",
+        detail: "This risk belongs to another project.",
+        category: "qa",
+        severity: "high",
+        status: "open",
+        blocksWork: true,
+        source: { kind: "manual" },
+        relatedTargets: [],
+        mitigationTaskId: null,
+        ownerGroupId: null,
+        ownerMemberId: null,
+        mitigationDueDate: null,
+        createdAt: "2026-05-17",
+        updatedAt: "2026-05-17",
+        resolvedAt: null,
+      },
     ],
   });
 }
 
 describe("Workspace overview views", () => {
-  it("shows actionable near-term work and the home agenda", () => {
+  it("orders action, upcoming milestones, and the task status summary", () => {
+    const bootstrap = createOverviewBootstrap();
     const markup = renderToStaticMarkup(React.createElement(HomeView, {
-      bootstrap: createOverviewBootstrap(), onOpenTask: jest.fn(), today: fixedToday,
+      bootstrap,
+      onOpenActionItem: jest.fn(),
+      onOpenAllActions: jest.fn(),
+      onOpenTask: jest.fn(),
+      onOpenSchedule: jest.fn(),
+      projectId: bootstrap.projects[0].id,
+      scopeLabel: bootstrap.projects[0].name,
+      today: fixedToday,
     }));
-    expect(markup).toContain("Priority work");
-    expect(markup).toContain(">Agenda</h3>");
+    expect(markup.indexOf("Action Required")).toBeLessThan(markup.indexOf("Upcoming milestones"));
+    expect(markup.indexOf("Upcoming milestones")).toBeLessThan(markup.indexOf("Task status"));
     expect(markup).toContain("Drive practice deadline");
-    expect(markup).toContain("Finish bellypan CAD");
-    expect(markup).toContain("Wire intake sensor");
+    expect(markup).toContain("Future gate 4");
+    expect(markup).toContain("Ready");
+    expect(markup).toContain("Not assessed");
+    expect(markup).toContain("Blocked");
+    expect(markup).not.toContain("Other project gate");
+    expect(markup).not.toContain("Completed gate");
+    expect(markup).toContain('aria-label="Filter task list by status"');
+    expect(markup).toContain("Waiting for QA");
     expect(markup).not.toContain("Later media recap");
-    expect(markup).not.toContain("Schedule pressure");
   });
-  it("keeps completed tasks out of the priority list", () => {
+
+  it("shows an empty action state and keeps task status counts explicit", () => {
     const bootstrap = createOverviewBootstrap();
     bootstrap.tasks = bootstrap.tasks.map(task => ({
-  ...task, status: "complete" }));
-    const markup = renderToStaticMarkup(React.createElement(HomeView, {
-      bootstrap, onOpenTask: jest.fn(), today: fixedToday,
+      ...task,
+      dueDate: "2026-12-01",
+      status: "complete",
     }));
-    expect(markup).toContain("No near-term task deadlines.");
-    expect(markup).not.toContain("Finish bellypan CAD");
-    expect(markup).toContain("Drive practice deadline");
+    bootstrap.risks = [];
+    const markup = renderToStaticMarkup(React.createElement(HomeView, {
+      bootstrap,
+      onOpenActionItem: jest.fn(),
+      onOpenAllActions: jest.fn(),
+      onOpenTask: jest.fn(),
+      onOpenSchedule: jest.fn(),
+      projectId: bootstrap.projects[0].id,
+      today: fixedToday,
+    }));
+    expect(markup).toContain("No current action items in this scope.");
+    expect(markup).toContain("Complete");
+    expect(markup).toContain("4 tasks");
+  });
+});
+
+describe("buildHomeViewModel", () => {
+  it("scopes the task distribution and next four milestones to the selected project", () => {
+    const bootstrap = createOverviewBootstrap();
+    const projectId = bootstrap.projects[0].id;
+    const model = buildHomeViewModel({ bootstrap, projectId, today: fixedToday });
+
+    expect(model.upcomingMilestones.map((milestone) => milestone.id)).toEqual([
+      "milestone-soon",
+      "milestone-2",
+      "milestone-3",
+      "milestone-4",
+    ]);
+    expect(model.tasksByStatus["not-started"]).toHaveLength(1);
+    expect(model.tasksByStatus["in-progress"]).toHaveLength(1);
+    expect(model.tasksByStatus["waiting-for-qa"]).toHaveLength(1);
+    expect(model.tasksByStatus.complete).toHaveLength(1);
+
+    const allProjectsModel = buildHomeViewModel({ bootstrap, today: fixedToday });
+    expect(allProjectsModel.upcomingMilestones.map((milestone) => milestone.id)).toContain("milestone-other-project");
+    expect(allProjectsModel.tasksByStatus["in-progress"]).toHaveLength(2);
+  });
+
+  it("keeps action rows unique and limits them to the selected project", () => {
+    const bootstrap = createOverviewBootstrap();
+    const projectId = bootstrap.projects[0].id;
+    const queue = buildAttentionQueue(buildAttentionViewModel({
+      activePersonFilter: [],
+      bootstrap,
+      projectId,
+      today: fixedToday,
+    }));
+    const riskRows = queue.filter((item) => item.recordId === "risk-high");
+
+    expect(queue.some((item) => item.recordId === "risk-other-project")).toBe(false);
+    expect(queue.some((item) => item.recordId === "task-other-project")).toBe(false);
+    expect(riskRows).toHaveLength(1);
+    expect(queue.some((item) => item.recordId === "task-overdue")).toBe(true);
+    expect(queue[0].recordId).toBe("risk-high");
+    expect(queue.map((item) => item.urgency)).toEqual([...queue.map((item) => item.urgency)].sort((left, right) => right - left));
   });
 });

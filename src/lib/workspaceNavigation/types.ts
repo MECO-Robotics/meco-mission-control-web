@@ -40,6 +40,7 @@ export interface NavigationItem {
 
 export interface NavigationTarget {
   milestoneId?: string;
+  riskId?: string;
   tab: ViewTab;
   taskView?: TaskViewTab;
   worklogsView?: WorklogsViewTab;

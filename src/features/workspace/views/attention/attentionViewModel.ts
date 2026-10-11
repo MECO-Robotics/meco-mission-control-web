@@ -8,16 +8,16 @@ import { isDateOverdue } from "./attentionViewHelpers";
 
 export type { AttentionNowItem, AttentionReason, AttentionTriageGroup, AttentionTriageItem, AttentionViewModel, MentorActionQueueItem } from "./attentionViewTypes";
 
-export function buildAttentionViewModel({ activePersonFilter, bootstrap }: { activePersonFilter: FilterSelection; bootstrap: BootstrapPayload }): AttentionViewModel {
+export function buildAttentionViewModel({ activePersonFilter, bootstrap, projectId, today = new Date() }: { activePersonFilter: FilterSelection; bootstrap: BootstrapPayload; projectId?: string | null; today?: Date }): AttentionViewModel {
   const membersById = new Map(bootstrap.members.map((member) => [member.id, member]));
   const projectsById = new Map(bootstrap.projects.map((project) => [project.id, project]));
-  const scopedTasks = bootstrap.tasks.filter((task) => filterSelectionMatchesTaskPeople(activePersonFilter, task));
+  const scopedTasks = bootstrap.tasks.filter((task) => (!projectId || task.projectId === projectId) && filterSelectionMatchesTaskPeople(activePersonFilter, task));
   const scopedTaskIds = new Set(scopedTasks.map((task) => task.id));
-  const scopedRisks = bootstrap.risks.filter((risk) => activePersonFilter.length === 0 || risk.relatedTargets.some((ref) => ref.kind === "task" && scopedTaskIds.has(ref.id)) || (risk.mitigationTaskId ? scopedTaskIds.has(risk.mitigationTaskId) : false));
+  const scopedRisks = bootstrap.risks.filter((risk) => (!projectId || risk.projectId === projectId) && (activePersonFilter.length === 0 || risk.relatedTargets.some((ref) => ref.kind === "task" && scopedTaskIds.has(ref.id)) || (risk.mitigationTaskId ? scopedTaskIds.has(risk.mitigationTaskId) : false)));
   const blockedTasks = scopedTasks.filter((task) => getTaskPlanningState(task, bootstrap) === "blocked");
   const waitingQaTasks = scopedTasks.filter((task) => task.status === "waiting-for-qa");
-  const overdueTasks = scopedTasks.filter((task) => task.dueDate && isDateOverdue(task.dueDate));
-  const dueSoonTasks = scopedTasks.filter((task) => task.dueDate && !isDateOverdue(task.dueDate) && isTaskDueSoon(task.dueDate, new Date()));
+  const overdueTasks = scopedTasks.filter((task) => task.dueDate && isDateOverdue(task.dueDate, today));
+  const dueSoonTasks = scopedTasks.filter((task) => task.dueDate && !isDateOverdue(task.dueDate, today) && isTaskDueSoon(task.dueDate, today));
   const openRisks = scopedRisks.filter((risk) => risk.status !== "resolved");
 
   const taskRows = (tasks: typeof scopedTasks, status: string): AttentionTriageItem[] => tasks.map((task) => ({

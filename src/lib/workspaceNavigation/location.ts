@@ -9,6 +9,7 @@ export function readNavigationLocation(search: string, context: ViewAvailability
   const target = getNavigationTarget(id, context);
   const mode = params.get("mode");
   const presentation = params.get("presentation");
+  if (id === "work-risks" && params.get("risk")) return { ...target, riskId: params.get("risk")! };
   if (id === "work-schedule" && params.get("milestone")) return { ...target, taskView: "agenda", milestoneId: params.get("milestone")! };
   if (id === "work-schedule" && (presentation === "timeline" || presentation === "agenda")) return { ...target, taskView: presentation };
   if (id === "work-activity" && presentation === "activity") return { ...target, worklogsView: "activity" };
@@ -22,6 +23,7 @@ export function writeNavigationLocation(state: NavigationState, context: ViewAva
   const id = getActiveNavigationSubItemId(state, context);
   params.set("view", id ?? "home");
   if (id !== "work-schedule") params.delete("milestone");
+  if (id !== "work-risks") params.delete("risk");
   params.delete("mode");
   params.delete("presentation");
   params.delete("utility");
