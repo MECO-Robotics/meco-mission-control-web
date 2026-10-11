@@ -58,11 +58,11 @@
 
 .cad-hierarchy-node[data-status="needs-review"],
 .cad-hierarchy-warning-list article[data-severity="warning"] {
-  border-color: rgba(245, 158, 11, 0.36);
+  border-color: color-mix(in srgb, var(--status-warning-text) 30%, transparent);
 }
 
 .cad-hierarchy-node[data-status="confirmed"] {
-  border-color: rgba(34, 197, 94, 0.32);
+  border-color: color-mix(in srgb, var(--status-success-text) 30%, transparent);
 }
 
 .cad-hierarchy-node strong,

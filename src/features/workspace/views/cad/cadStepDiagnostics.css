@@ -28,9 +28,13 @@
   margin: 0;
 }
 
+.cad-summary-title {
+  color: var(--text-title);
+}
+
 .cad-old-snapshot-alert {
   background: var(--status-warning-bg);
-  border: 1px solid rgba(245, 158, 11, 0.28);
+  border: 1px solid color-mix(in srgb, var(--status-warning-text) 30%, transparent);
   border-radius: 8px;
   color: var(--status-warning-text);
   font-size: 0.84rem;

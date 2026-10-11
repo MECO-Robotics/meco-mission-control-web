@@ -1,9 +1,9 @@
 .task-detail-header-status-icon-signal-blocked {
-  color: var(--official-red);
+  color: var(--status-danger-text);
 }
 
 .task-detail-header-status-icon-signal-waiting-on-dependency {
-  color: #c25a14;
+  color: var(--status-warning-text);
 }
 
 .task-detail-header-meta-line {

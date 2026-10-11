@@ -20,7 +20,9 @@
   background: linear-gradient(90deg,
       color-mix(in srgb, var(--meco-blue) 68%, #ffffff 32%),
       var(--official-green));
-  transition: width 240ms ease; /* impeccable-disable-line layout-transition: communicates changing time completion percentage */
+  width: 100%;
+  transform: scaleX(var(--risk-time-completion, 0));
+  transform-origin: left center;
 }
 
 .risk-time-progress-caption {

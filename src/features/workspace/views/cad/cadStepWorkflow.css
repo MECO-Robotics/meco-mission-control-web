@@ -31,7 +31,7 @@
 
 .cad-parser-alert {
   background: var(--status-danger-bg);
-  border: 1px solid rgba(220, 38, 38, 0.3);
+  border: 1px solid color-mix(in srgb, var(--status-danger-text) 30%, transparent);
   border-radius: 8px;
   color: var(--status-danger-text) !important;
   font-weight: 800;
@@ -47,7 +47,7 @@
 
 .cad-summary-warning-item {
   background: var(--status-warning-bg);
-  border: 1px solid rgba(245, 158, 11, 0.28);
+  border: 1px solid color-mix(in srgb, var(--status-warning-text) 30%, transparent);
   border-radius: 8px;
   display: grid;
   gap: 3px;
@@ -56,12 +56,16 @@
 
 .cad-summary-warning-item[data-severity="error"] {
   background: var(--status-danger-bg);
-  border-color: rgba(220, 38, 38, 0.3);
+  border-color: color-mix(in srgb, var(--status-danger-text) 30%, transparent);
 }
 
 .cad-summary-warning-item span {
-  color: var(--text-copy);
+  color: var(--status-warning-text);
   font-size: 0.78rem;
+}
+
+.cad-summary-warning-item[data-severity="error"] span {
+  color: var(--status-danger-text);
 }
 
 .cad-summary-warning-item code {

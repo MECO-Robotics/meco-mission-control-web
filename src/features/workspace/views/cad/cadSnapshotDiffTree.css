@@ -59,15 +59,15 @@
 }
 
 .cad-diff-record[data-status="new"] {
-  border-color: rgba(22, 163, 74, 0.3);
+  border-color: color-mix(in srgb, var(--status-success-text) 30%, transparent);
 }
 
 .cad-diff-record[data-status="changed"] {
-  border-color: rgba(37, 99, 235, 0.3);
+  border-color: color-mix(in srgb, var(--status-info-text) 30%, transparent);
 }
 
 .cad-diff-record[data-status="removed"] {
-  border-color: rgba(220, 38, 38, 0.3);
+  border-color: color-mix(in srgb, var(--status-danger-text) 30%, transparent);
 }
 
 .cad-diff-record small {
@@ -99,13 +99,13 @@
 
 .cad-diff-warning-badge {
   background: var(--status-warning-bg);
-  border: 1px solid rgba(245, 158, 11, 0.25);
+  border: 1px solid color-mix(in srgb, var(--status-warning-text) 30%, transparent);
   color: var(--status-warning-text);
 }
 
 .cad-diff-warning-badge[data-severity="error"] {
   background: var(--status-danger-bg);
-  border-color: rgba(220, 38, 38, 0.25);
+  border-color: color-mix(in srgb, var(--status-danger-text) 30%, transparent);
   color: var(--status-danger-text);
 }
 

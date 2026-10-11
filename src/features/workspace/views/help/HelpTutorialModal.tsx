@@ -1,5 +1,5 @@
 import { ModalDialog } from "@/components/ModalDialog";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 
 import { IconChevronLeft, IconChevronRight } from "@/components/shared/Icons";
 import { HELP_TUTORIAL_STEPS } from "@/features/workspace/views/help/helpContent";
@@ -111,7 +111,7 @@ export function HelpTutorialModal({
         </div>
 
         <div className="help-tutorial-progress" aria-hidden="true">
-          <span style={{ width: `${progressPercent}%` }} />
+          <span style={{ "--tutorial-progress": String(progressPercent / 100) } as CSSProperties} />
         </div>
 
         <div className="help-tutorial-layout">

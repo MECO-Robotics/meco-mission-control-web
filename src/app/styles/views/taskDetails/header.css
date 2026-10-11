@@ -115,17 +115,17 @@
 }
 
 .task-detail-header-status-icon-signal-not-started {
-  color: #54627b;
+  color: var(--status-neutral-text);
 }
 
 .task-detail-header-status-icon-signal-in-progress {
-  color: #b77900;
+  color: var(--status-warning-text);
 }
 
 .task-detail-header-status-icon-signal-waiting-for-qa {
-  color: #275098;
+  color: var(--status-info-text);
 }
 
 .task-detail-header-status-icon-signal-complete {
-  color: #246847;
+  color: var(--status-success-text);
 }

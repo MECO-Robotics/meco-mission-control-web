@@ -22,8 +22,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sidebar-shell,
-  .page-shell,
   .app-topbar-brand,
   .app-topbar-brand-icon {
     transition: none;

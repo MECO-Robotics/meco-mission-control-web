@@ -41,7 +41,7 @@ describe("AppSidebar scope", () => {
     const scopeIndex = markup.indexOf("sidebar-scope-trigger");
 
     expect(profileIndex).toBeLessThan(scopeIndex);
-    expect(markup).toContain('aria-label="Project and season"');
+    expect(markup).toContain('aria-label="Project and season: 2026 Season - Robot"');
     expect(markup).toContain('data-tutorial-target="project-select"');
     expect(markup).toContain("2026 Season - Robot");
     expect(markup).toContain("Robot");

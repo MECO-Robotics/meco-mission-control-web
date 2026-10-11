@@ -70,11 +70,13 @@ describe("flat sidebar navigation", () => {
     expect(sidebarCss).not.toMatch(/var\(--(?:border-subtle|text-secondary|sidebar-active-bg|text-primary|focus-ring),/);
   });
 
-  it("disables shell collapse transitions when reduced motion is requested", () => {
+  it("keeps shell collapse immediate and disables remaining chrome transitions for reduced motion", () => {
     const motionCss = readFileSync("src/app/styles/shell/layout/motion-a.css", "utf8");
     const reducedMotionRules = motionCss.split("@media (prefers-reduced-motion: reduce)")[1];
-    expect(reducedMotionRules).toContain(".sidebar-shell");
-    expect(reducedMotionRules).toContain(".page-shell");
+    const frameCss = readFileSync("src/app/styles/shell/layout/frame.css", "utf8");
+    const sidebarCss = readFileSync("src/app/styles/shell/sidebar/sidebar-core.css", "utf8");
+    expect(frameCss).not.toMatch(/transition:\s*[^;]*padding/);
+    expect(sidebarCss).not.toMatch(/transition:\s*[^;]*width/);
     expect(reducedMotionRules).toContain(".app-topbar-brand");
     expect(reducedMotionRules).toContain(".app-topbar-brand-icon");
     expect(reducedMotionRules).toContain("transition: none");

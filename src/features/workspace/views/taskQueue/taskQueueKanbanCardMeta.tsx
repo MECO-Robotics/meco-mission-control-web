@@ -9,9 +9,9 @@ import { readTaskAssigneeIds, readTaskSubsystemIds, readTaskWorkstreamIds, forma
 
 const TASK_QUEUE_CARD_PRIORITY_ACCENTS: Record<TaskRecord["priority"], string> = {
   critical: "var(--status-danger-text)",
-  high: "#e5484d",
-  medium: "#c58a00",
-  low: "#2563eb",
+  high: "var(--status-danger-text)",
+  medium: "var(--status-warning-text)",
+  low: "var(--status-neutral-text)",
 };
 
 export function getTaskQueueCardPriorityAccentColor(priority: TaskRecord["priority"]) {

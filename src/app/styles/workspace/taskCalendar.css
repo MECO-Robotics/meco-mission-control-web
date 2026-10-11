@@ -210,7 +210,7 @@
 .task-calendar-day-event {
   border: 0;
   border-radius: 0.4rem;
-  color: #fff;
+  color: var(--official-white);
   cursor: pointer;
   display: block;
   font-size: 0.72rem;
@@ -225,27 +225,27 @@
 }
 
 .task-calendar-day-event-milestone {
-  background: #2563eb;
+  background: var(--calendar-event-milestone);
 }
 
 .task-calendar-day-event-task-due {
-  background: #4f46e5;
+  background: var(--calendar-event-task-due);
 }
 
 .task-calendar-day-event-qa-due {
-  background: #ca8a04;
+  background: var(--calendar-event-qa-due);
 }
 
 .task-calendar-day-event-manufacturing-due {
-  background: #15803d;
+  background: var(--calendar-event-manufacturing-due);
 }
 
 .task-calendar-day-event-event {
-  background: #475569;
+  background: var(--calendar-event-other);
 }
 
 .task-calendar-day-event-meeting {
-  background: var(--official-blue);
+  background: var(--calendar-event-meeting);
 }
 
 .task-calendar-more {

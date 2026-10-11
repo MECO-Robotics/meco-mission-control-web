@@ -166,6 +166,10 @@ When changing styles:
 - Keep card usage for repeated items, dialogs, and framed tools.
 - Prefer existing tokens, class patterns, and shared components before creating
   new styling conventions.
+- Reset browser-default button surfaces when a table row is implemented as a
+  button; use a transparent surface and inherited text so the browser does not
+  introduce an unthemed gray panel. Use the paired semantic link tokens from
+  `color-theme.md` for interactive text links and preserve a visible focus ring.
 
 ## Validation
 

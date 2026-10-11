@@ -1,11 +1,11 @@
 .task-detail-deadline-pill-warning {
-  background: rgba(183, 121, 0, 0.16);
-  color: #8d6400;
+  background: var(--status-warning-bg);
+  color: var(--status-warning-text);
 }
 
 .task-detail-deadline-pill-danger {
-  background: rgba(234, 28, 45, 0.14);
-  color: var(--official-red);
+  background: var(--status-danger-bg);
+  color: var(--status-danger-text);
 }
 
 .task-detail-discipline-pill,

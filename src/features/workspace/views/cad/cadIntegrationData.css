@@ -80,7 +80,7 @@
 }
 
 .cad-sync-history-table tr[data-status="failed"] td {
-  background: rgba(220, 38, 38, 0.045);
+  background: color-mix(in srgb, var(--status-danger-bg) 42%, var(--bg-panel));
 }
 
 .cad-sync-status-pill {
@@ -97,19 +97,19 @@
 
 .cad-sync-history-table tr[data-status="completed"] .cad-sync-status-pill {
   background: var(--status-success-bg);
-  border-color: rgba(22, 163, 74, 0.25);
+  border-color: color-mix(in srgb, var(--status-success-text) 30%, transparent);
   color: var(--status-success-text);
 }
 
 .cad-sync-history-table tr[data-status="failed"] .cad-sync-status-pill {
   background: var(--status-danger-bg);
-  border-color: rgba(220, 38, 38, 0.25);
+  border-color: color-mix(in srgb, var(--status-danger-text) 30%, transparent);
   color: var(--status-danger-text);
 }
 
 .cad-sync-error-summary {
   background: var(--status-danger-bg);
-  border: 1px solid rgba(220, 38, 38, 0.2);
+  border: 1px solid color-mix(in srgb, var(--status-danger-text) 30%, transparent);
   border-radius: 10px;
   color: var(--status-danger-text) !important;
   margin-top: 8px !important;
@@ -117,11 +117,11 @@
 }
 
 .cad-warning-item[data-severity="error"] {
-  border-color: rgba(220, 38, 38, 0.35);
+  border-color: color-mix(in srgb, var(--status-danger-text) 30%, transparent);
 }
 
 .cad-warning-item[data-severity="warning"] {
-  border-color: rgba(245, 158, 11, 0.35);
+  border-color: color-mix(in srgb, var(--status-warning-text) 30%, transparent);
 }
 
 .cad-empty-copy {

@@ -22,9 +22,12 @@ The browser theme color also uses `#16478e`.
 
 The global type stack uses system sans-serif for both display and interface text, with platform fallbacks.
 
-The app background is a light layered field: a white-to-cool-slate page base with soft blue and red radial washes. Auth and shell backgrounds reuse the same brand wash idea, with stronger blue/red atmosphere in dark mode.
+The app background is a restrained white-to-cool-slate page base in light mode and deep slate gradient in dark mode. The auth introduction panel may use the documented brand atmosphere; auth cards use solid semantic panel surfaces and the full-page auth shell stays on the restrained page base. Sidebar collapse changes the shell and sidebar dimensions immediately so content does not animate layout properties.
 
-Global body text starts at `#11213d`. Links inherit surrounding color.
+Workspace text inherits `--text-title` from the shell; normal copy and metadata
+use `--text-copy` and `--text-muted`. Links use the semantic `--text-link` and
+`--text-link-hover` pair so they remain readable on both theme surfaces. The
+document root uses `#475569` only as a pre-shell fallback.
 
 ## Canonical Semantic Tokens
 
@@ -51,13 +54,23 @@ before using it. A CSS fallback must not silently establish a competing theme.
 | `--text-title` | `#000000` | `#f8fafc` | Headings and primary labels |
 | `--text-copy` | `#475569` | `#e2e8f0` | Body copy and inactive navigation |
 | `--text-muted` | `#475569` | `#94a3b8` | Secondary metadata |
+| `--text-accent` | `#16478e` | `#93c5fd` | Small non-interactive brand labels on workspace surfaces |
+| `--text-link` / `--text-link-hover` | `#1d4ed8` / `#1e40af` | `#93c5fd` / `#bfdbfe` | Interactive links on workspace surfaces |
 | `--shadow-soft` | `0 2px 8px rgba(15, 28, 52, 0.08)` | `0 2px 8px rgba(0, 0, 0, 0.24)` | Soft loading and panel depth |
+| `--shadow-overlay` | `0 4px 12px rgba(15, 23, 42, 0.14)` | `0 4px 12px rgba(2, 6, 23, 0.3)` | Popovers and menus that need separation from nearby content |
 | `--official-green` | `#166534` | `#34d399` | Success and completion accents |
 | `--status-success-bg` / `--status-success-text` | `#dcfce7` / `#166534` | `#064e3b` / `#34d399` | Success states |
 | `--status-info-bg` / `--status-info-text` | `#e0f2fe` / `#075985` | `#082f49` / `#38bdf8` | Informational states and visible focus indicators |
 | `--status-warning-bg` / `--status-warning-text` | `#fef3c7` / `#92400e` | `#451a03` / `#fbbf24` | Warning states |
 | `--status-danger-bg` / `--status-danger-text` | `#fee2e2` / `#991b1b` | `#450a0a` / `#f87171` | Danger states |
 | `--status-neutral-bg` / `--status-neutral-text` | `#f1f5f9` / `#475569` | `#1e293b` / `#94a3b8` | Neutral states |
+| `--cad-viewer-background` / `--cad-viewer-text` | `#17202c` / `#edf3fa` | `#17202c` / `#edf3fa` | CAD model canvas with fixed dark contrast |
+| `--calendar-event-milestone` | `#16478e` | `#16478e` | Calendar milestone event with white text |
+| `--calendar-event-task-due` | `#4f46e5` | `#4f46e5` | Calendar task deadline with white text |
+| `--calendar-event-qa-due` | `#92400e` | `#92400e` | Calendar QA deadline with white text |
+| `--calendar-event-manufacturing-due` | `#166534` | `#166534` | Calendar manufacturing deadline with white text |
+| `--calendar-event-other` | `#475569` | `#475569` | Other calendar event with white text |
+| `--calendar-event-meeting` | `#16478e` | `#16478e` | Calendar meeting with white text |
 | `--team-task-open-chart` / `--team-task-open-text` | `#eab308` / `#a16207` | `#facc15` / `#facc15` | Team open-task metrics |
 | `--team-task-blocked-chart` / `--team-task-blocked-text` | `#ea1c2d` / `#b91c1c` | `#ea1c2d` / `#f87171` | Team blocked-task metrics |
 | `--team-task-overdue-chart` / `--team-task-overdue-text` | `#f97316` / `#c2410c` | `#fb923c` / `#fb923c` | Team overdue-task metrics |
@@ -66,11 +79,25 @@ Use `--status-danger-text` for shared error copy, `--text-title` for pagination
 controls, and `--bg-row-alt` for neutral pagination buttons. These roles replace
 legacy aliases such as `--danger-text`, `--text-strong`, and `--bg-base`.
 
+### Surface elevation
+
+Use `--shadow-soft` for ordinary panels, cards, auth surfaces, and shared chrome
+in both themes. Pair it with a 1px semantic border when a visible edge is needed.
+Use `--shadow-overlay` for menus and popovers. Avoid broad, diffuse shadows on
+operational surfaces.
+
 Use `--text-copy` rather than generic gray for readable inactive controls.
 Use `--meco-soft-blue` with `--text-title` for selected nested navigation;
 `--status-info-text` supplies its visible keyboard focus ring. Keep border widths
 at 1px or less on colored card and callout edges. Status background and text
-tokens are pairs and should be applied together.
+tokens are pairs and should be applied together. Sidebar width and shell offset
+changes are immediate; animate visual properties such as transform and opacity
+when motion improves feedback.
+
+Reset browser-default button surfaces on clickable table rows with a transparent
+background, no default border, and inherited text styling. Keep row and status
+colors on the page or row surface; do not let a browser's gray button face become
+an untracked theme surface.
 
 ### Shared layout and control values
 
@@ -101,7 +128,7 @@ stable dimensions; repeated records use thin borders and restrained shadows.
 Use horizontal scrolling or stable internal minimum widths for dense tables and
 boards rather than squeezing columns until labels collide. At colored card and
 callout edges, use no more than a 1px border. Under `prefers-reduced-motion`,
-disable shell shifts and decorative transitions while preserving state changes.
+disable decorative transitions while preserving state changes.
 
 ## Theme Modes
 
@@ -127,28 +154,28 @@ Dark mode uses:
 | Title text | `#f8fafc` |
 | Copy text | `#e2e8f0` |
 
-Dark mode keeps brand blue and red intact, but raises their transparent washes so the brand atmosphere remains visible against the dark shell.
+Dark mode keeps brand blue and red intact. Use paired status tokens for color washes; reserve radial gradients for the auth introduction panel.
 
 ## Domain Status Accents
 
-Use the canonical status token pairs above for shared success, information,
-warning, danger, and neutral states. Keep task workflow accents below only for
-domain-specific states that do not map to those shared roles.
+Use the canonical status token pairs above for task states, priorities,
+deadlines, warnings, and errors. The task priority ladder is consistent across
+cards, pills, and detail views: critical/high use danger, medium uses warning,
+and low uses neutral. Task statuses map as follows:
 
-Task and workflow status accents:
-
-| Meaning | Hex |
+| Status | Token pair |
 | --- | --- |
-| Not started / neutral | `#54627b` |
-| In progress | `#b77900` |
-| Waiting for QA | `#275098` |
-| Complete | `#246847` |
-| Blocked alternate | `#8f4b5d` |
-| Waiting on dependency | `#c25a14` |
-| High priority / purchase in progress | `#a84712` |
-| Alternate in-progress text | `#8a5c00` |
+| Not started | `--status-neutral-bg` / `--status-neutral-text` |
+| In progress | `--status-warning-bg` / `--status-warning-text` |
+| Waiting for QA | `--status-info-bg` / `--status-info-text` |
+| Complete | `--status-success-bg` / `--status-success-text` |
+| Blocked | `--status-danger-bg` / `--status-danger-text` |
+| Waiting on dependency | `--status-warning-bg` / `--status-warning-text` |
 
-Status pills are usually tinted backgrounds using the same family as the text color. Timeline status icons are circular, use translucent white surfaces, and expose compact variants for dense rows.
+Status backgrounds and foregrounds always use their semantic pair. For a
+restrained 1px status outline, mix the status foreground at 30% with transparent.
+Timeline status icons use the same foreground tokens and retain their compact
+variants for dense rows.
 
 ## Workspace Color Palette
 
@@ -216,8 +243,6 @@ Destructive actions use the `--status-danger-bg` and `--status-danger-text`
 token pair in both themes. Reserve stronger red gradients for destructive task
 detail headers, using the existing `#b81d2c`, `#f02c3d`, and `#8f1320` values.
 
-Task details use red gradients for destructive headers and emphasis, including `#b81d2c`, `#f02c3d`, and `#8f1320`.
-
 ## Secondary Blues
 
 The app uses several blue support colors for focus, dark-mode labels, progress bars, and notification timers:
@@ -228,11 +253,10 @@ These should stay subordinate to brand blue unless the component is a system/pro
 
 ## Neutrals And Soft Surfaces
 
-Common neutral and surface colors:
-
-`#21304a`, `#58667d`, `#64748b`, `#cbd5e1`, `#d1d1d1`, `#d6dbe6`, `#e5e7eb`, `#e6e7f3`, `#f1f5f9`, `#f8fafc`, `#f8fbff`, `#eef4fb`
-
-Neutral UI tends to use cool slate rather than warm grey. Panels, cards, table rows, and filter menus are separated mostly by thin borders, low-opacity shadows, and alternate-row fills.
+Use `--text-copy` and `--text-muted` for neutral text, `--border-base` and
+`--border-strong` for separators, and `--bg-row-alt` and `--bg-panel` for
+surfaces. Keep neutral UI cool slate; do not introduce local grey values where
+one of these shared roles applies.
 
 ## Shell And Navigation
 
@@ -240,7 +264,7 @@ The shell has a fixed top bar and a fixed left sidebar. The top bar height is 58
 
 The top bar is flat, panel-colored, and separated by a single border. The sidebar uses a vertical gradient between alternate-row and panel surfaces. Active sidebar tabs use a soft brand-blue wash and readable title text. Nested navigation uses the same wash, title text, copy-colored inactive text, and a visible info-colored focus ring. Inactive sidebar tabs stay transparent and copy-colored.
 
-Sidebar collapse and overlay states animate width and shell padding. Overlay mode adds a dark scrim and a rightward sidebar shadow.
+Sidebar collapse updates shell and sidebar dimensions immediately. Overlay mode keeps the shell offset fixed, adds a dark scrim, and gives the floating sidebar a rightward shadow.
 
 ## Controls
 
@@ -259,27 +283,26 @@ status background. Dark mode uses the dark values from those token pairs.
 | Danger | `--status-danger-bg` / `--status-danger-text` |
 | Neutral | `--status-neutral-bg` / `--status-neutral-text` |
 
+Workspace notification cards use the four semantic status pairs in both themes.
+Neutral notification history uses an inverse gray surface with white text.
+
 ## Cards, Boards, And Tables
 
 Cards and board columns use panel surfaces, thin borders, and soft shadows. Task queue columns have a 16px radius, compact internal grid spacing, and uppercase micro-headings. Counts use pill-shaped blue-tinted badges.
 
 Tables are grid-based rather than native table layouts. Headers use small uppercase labels, muted copy color, and brand-blue sort arrows. Purchase, manufacturing, and print tables each define their own proportional column templates.
 
-Task queue advanced cards use zoom-scaled spacing and type. Dark-mode board labels use cool blues and slates such as `#93c5fd` and `#cbd5e1`. Attention states use `#dc2626`, `#ef4444`, `#b91c1c`, `#ca8a04`, and `#2563eb`.
+Task queue advanced cards use zoom-scaled spacing and type. Board labels use the canonical text tokens. Task status and priority states use the semantic token pairs defined above in both themes.
 
 ## Timeline
 
-Timeline bars use discipline color as the primary accent and task status color as the secondary accent. Bars have reveal overlays, masked overflow fades, row hover/selected highlights, and compact status logos.
+Timeline bars use discipline color as the primary accent and task status color as the secondary accent. Bars have reveal overlays, masked overflow fades, row hover/selected highlights, and compact status logos. Reveal text uses the same contrast-aware foreground as the task title.
 
 Timeline controls are pill-shaped and compact. Expand/collapse and period navigation use short ease-out animations. Today markers, row highlights, milestone overlays, and subsystem bands derive color from the same discipline/subsystem accent system.
 
 ## Auth Experience
 
-Auth pages center a two-column layout over a large, faint MECO backdrop image. The light auth shell uses a clean blue/red radial atmosphere over `#f8fbff` to `#eef4fb`.
-
-The dark auth card uses a deep blue gradient between `#0b1731` and `#10284d`, brand-colored radial washes, white text, rounded corners near 30px, and a stronger shadow.
-
-Auth cards use soft borders, glassy white overlays in light mode, translucent dark surfaces in dark mode, and a large MECO logo/backdrop with reduced opacity.
+Auth pages center the sign-in content over the app's restrained light or dark page base. The introduction panel carries the deep blue surface, brand-colored radial washes, and white text. Auth cards use solid `--bg-panel` surfaces, semantic borders, and `--shadow-soft` in both themes so status and sign-in copy remains readable.
 
 ## Typography
 
@@ -304,16 +327,16 @@ The app uses compact operational density:
 
 ## Shadows And Depth
 
-Depth is restrained. The app uses:
-
-- Very soft panel shadows for board columns and cards.
-- Stronger shadows for modals, toast notifications, overlays, and dark profile menus.
-- Drop shadows on logos/backdrops where the mark needs to float.
-- Minimal or no shadow on fixed chrome like the top bar.
+Depth is restrained. Use `--shadow-soft` for panels, cards, auth surfaces, and
+shared chrome, and `--shadow-overlay` for menus and popovers. Add separate depth
+only for a distinct component need, such as a brand mark that must float.
 
 ## Motion
 
-Motion is short and functional. Sidebar width, shell padding, filter focus, hover states, timeline unfolding, timeline period swipes, status captions, and board card affordances use brief easing. The app avoids long decorative motion.
+Motion is short and functional. Sidebar width and shell padding update
+immediately. Animate visual feedback such as filter focus, hover, timeline
+unfolding, timeline period swipes, status captions, and board card affordances.
+The app avoids long decorative motion.
 
 ## Responsive Behavior
 
@@ -321,7 +344,7 @@ The app is built around fixed shell chrome with responsive content density. Sele
 
 ## Assets
 
-Brand SVG assets use the official blue, red, grey, black, and white palette. The white logo variant uses white for most lettering and red for select numeric/brand detail. The login backdrop uses the same brand colors at lower opacity as an atmospheric layer.
+Brand SVG assets use the official blue, red, grey, black, and white palette. The white logo variant uses white for most lettering and red for select numeric/brand detail.
 
 The tab icon and main logo are the strongest source of visual identity and should remain aligned with `#16478e`, `#ea1c2d`, `#bbbbbb`, `#000000`, and `#ffffff`.
 

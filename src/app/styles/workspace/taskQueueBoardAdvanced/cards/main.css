@@ -6,8 +6,8 @@
   height: 1.25rem;
   padding: 0 0.35rem;
   border-radius: 999px;
-  background: rgba(22, 71, 142, 0.1);
-  color: var(--official-blue);
+  background: var(--status-info-bg);
+  color: var(--status-info-text);
   border: 1px solid transparent;
   font-size: 0.7rem;
   font-weight: 800;
@@ -24,9 +24,9 @@
 }
 
 .page-shell.dark-mode .task-queue-board-focused-exit {
-  border-color: rgba(248, 113, 113, 0.5);
-  background: rgba(248, 113, 113, 0.16);
-  color: #fda4af;
+  border-color: color-mix(in srgb, var(--status-danger-text) 30%, transparent);
+  background: var(--status-danger-bg);
+  color: var(--status-danger-text);
 }
 
 .task-queue-board-card {

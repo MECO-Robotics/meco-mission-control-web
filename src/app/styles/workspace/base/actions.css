@@ -40,6 +40,15 @@
   border: 1px solid color-mix(in srgb, var(--status-danger-text) 42%, transparent);
 }
 
+button.ops-row {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
 .primary-action:hover,
 .secondary-action:hover,
 .danger-action:hover,

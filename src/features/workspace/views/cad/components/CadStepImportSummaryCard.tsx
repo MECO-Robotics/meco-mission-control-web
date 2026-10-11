@@ -113,7 +113,7 @@ export function CadStepImportSummaryCard({
   return (
     <article className="cad-card cad-status-card">
       <span className="cad-eyebrow">Import summary</span>
-      <h3>{snapshot?.label ?? "No STEP snapshot selected"}</h3>
+        <h3 className="cad-summary-title">{snapshot?.label ?? "No STEP snapshot selected"}</h3>
       <dl className="cad-key-values">
         {hasSourceModel ? (
           <>

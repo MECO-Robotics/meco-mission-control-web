@@ -72,18 +72,11 @@ describe("TimelineView", () => {
     expect(source).toMatch(/window\.clearTimeout\(clearMotion\);/);
   });
 
-  it("only transitions timeline grid width during period motion", () => {
+  it("keeps timeline period motion off layout dimensions", () => {
     const css = readAppCss();
 
-    expect(css).toMatch(
-      new RegExp(
-        `${String.raw`\.timeline-grid-motion\[data-period-motion\]\s*\{[\s\S]*`}` +
-          `transition:${String.raw`\s*min-width 180ms ease,\s*grid-template-columns 180ms ease;`}`,
-      ),
-    );
-    expect(css).toMatch(
-      /\.timeline-grid-motion\s*\{[\s\S]*will-change:\s*min-width,\s*grid-template-columns;/,
-    );
+    expect(css).not.toMatch(/\.timeline-grid-motion\[data-period-motion\][^{]*\{[^}]*transition:\s*[^}]*min-width/);
+    expect(css).not.toMatch(/\.timeline-grid-motion\s*\{[^}]*will-change:\s*min-width/);
   });
 
   it("keeps timeline shells and rows stretched to the available page width", () => {

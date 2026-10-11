@@ -1,42 +1,42 @@
 /* Split WorkspaceStatusToast styles by concern: base, tone, and dark-mode overrides. */
 .workspace-toast-card[data-toast-tone="success"] {
-  --toast-surface: #eff8f1;
-  --toast-border: #b8ddbf;
-  --toast-title: #1f3d28;
-  --toast-copy: #355141;
-  --toast-accent: #58b86f;
-  --toast-accent-soft: rgba(88, 184, 111, 0.16);
-  --toast-dismiss: #6b8a74;
+  --toast-surface: var(--status-success-bg);
+  --toast-border: color-mix(in srgb, var(--status-success-text) 30%, transparent);
+  --toast-title: var(--status-success-text);
+  --toast-copy: var(--status-success-text);
+  --toast-accent: var(--status-success-text);
+  --toast-accent-soft: color-mix(in srgb, var(--status-success-text) 16%, transparent);
+  --toast-dismiss: var(--status-success-text);
 }
 
 .workspace-toast-card[data-toast-tone="warning"] {
-  --toast-surface: #fff5dd;
-  --toast-border: #e2c57f;
-  --toast-title: #4c3710;
-  --toast-copy: #735717;
-  --toast-accent: #e0a83d;
-  --toast-accent-soft: rgba(224, 168, 61, 0.18);
-  --toast-dismiss: #9f7a2b;
+  --toast-surface: var(--status-warning-bg);
+  --toast-border: color-mix(in srgb, var(--status-warning-text) 30%, transparent);
+  --toast-title: var(--status-warning-text);
+  --toast-copy: var(--status-warning-text);
+  --toast-accent: var(--status-warning-text);
+  --toast-accent-soft: color-mix(in srgb, var(--status-warning-text) 16%, transparent);
+  --toast-dismiss: var(--status-warning-text);
 }
 
 .workspace-toast-card[data-toast-tone="error"] {
-  --toast-surface: #fdeceb;
-  --toast-border: #ecb0a8;
-  --toast-title: #6a1f19;
-  --toast-copy: #8c3730;
-  --toast-accent: #ef7d6d;
-  --toast-accent-soft: rgba(239, 125, 109, 0.16);
-  --toast-dismiss: #b56c66;
+  --toast-surface: var(--status-danger-bg);
+  --toast-border: color-mix(in srgb, var(--status-danger-text) 30%, transparent);
+  --toast-title: var(--status-danger-text);
+  --toast-copy: var(--status-danger-text);
+  --toast-accent: var(--status-danger-text);
+  --toast-accent-soft: color-mix(in srgb, var(--status-danger-text) 16%, transparent);
+  --toast-dismiss: var(--status-danger-text);
 }
 
 .workspace-toast-card[data-toast-tone="info"] {
-  --toast-surface: #eef6fe;
-  --toast-border: #b6d0ea;
-  --toast-title: #183c67;
-  --toast-copy: #4a6786;
-  --toast-accent: #66a8de;
-  --toast-accent-soft: rgba(102, 168, 222, 0.16);
-  --toast-dismiss: #6e8eb1;
+  --toast-surface: var(--status-info-bg);
+  --toast-border: color-mix(in srgb, var(--status-info-text) 30%, transparent);
+  --toast-title: var(--status-info-text);
+  --toast-copy: var(--status-info-text);
+  --toast-accent: var(--status-info-text);
+  --toast-accent-soft: color-mix(in srgb, var(--status-info-text) 16%, transparent);
+  --toast-dismiss: var(--status-info-text);
 }
 
 .workspace-toast-card[data-toast-tone="neutral"] {
@@ -51,6 +51,11 @@
 
 .workspace-toast-card[data-toast-tone="neutral"] .workspace-toast-dismiss:focus-visible {
   outline-color: rgba(255, 255, 255, 0.4);
+}
+
+.page-shell.dark-mode .workspace-toast-card[data-toast-tone="neutral"] {
+  --toast-surface: #565656;
+  --toast-border: #757575;
 }
 
 .workspace-toast-card[data-toast-tone="neutral"] .workspace-toast-dismiss:hover,

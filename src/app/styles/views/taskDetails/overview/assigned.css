@@ -74,23 +74,23 @@
 }
 
 .task-details-overview-priority .priority-critical {
-  background: rgba(220, 38, 38, 0.12);
-  color: #dc2626;
+  background: var(--status-danger-bg);
+  color: var(--status-danger-text);
 }
 
 .task-details-overview-priority .priority-high {
-  background: rgba(239, 68, 68, 0.12);
-  color: #ef4444;
+  background: var(--status-danger-bg);
+  color: var(--status-danger-text);
 }
 
 .task-details-overview-priority .priority-medium {
-  background: rgba(202, 138, 4, 0.14);
-  color: #ca8a04;
+  background: var(--status-warning-bg);
+  color: var(--status-warning-text);
 }
 
 .task-details-overview-priority .priority-low {
-  background: rgba(37, 99, 235, 0.12);
-  color: #2563eb;
+  background: var(--status-neutral-bg);
+  color: var(--status-neutral-text);
 }
 
 .task-details-overview-subsystem {

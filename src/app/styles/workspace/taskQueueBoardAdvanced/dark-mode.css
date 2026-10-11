@@ -26,31 +26,30 @@
 }
 
 .page-shell.dark-mode .task-queue-board-column {
-  --kanban-lane-surface: rgba(15, 23, 42, 0.68);
   background: var(--kanban-lane-surface);
-  border-color: rgba(148, 163, 184, 0.24);
-  box-shadow: 0 10px 22px rgba(2, 6, 23, 0.28);
+  border-color: var(--border-base);
+  box-shadow: var(--shadow-soft);
 }
 
 .page-shell.dark-mode .task-queue-board-column-count {
-  background: rgba(59, 130, 246, 0.16);
-  color: #93c5fd;
+  background: var(--status-info-bg);
+  color: var(--status-info-text);
 }
 
 .page-shell.dark-mode .task-queue-board-card {
-  background: rgba(15, 23, 42, 0.9);
-  border-color: rgba(148, 163, 184, 0.2);
-  box-shadow: 0 10px 20px rgba(2, 6, 23, 0.25);
+  background: var(--bg-row-alt);
+  border-color: var(--border-base);
+  box-shadow: var(--shadow-soft);
 }
 
 .page-shell.dark-mode .task-queue-board-card-priority-accented {
   border-color: color-mix(
     in srgb,
     var(--task-queue-board-card-priority-accent) 48%,
-    rgba(148, 163, 184, 0.2)
+    var(--border-base)
   );
   box-shadow:
-    0 10px 20px rgba(2, 6, 23, 0.25),
+    var(--shadow-soft),
     0 0 0 1.5px
       color-mix(
         in srgb,
@@ -66,19 +65,11 @@
 }
 
 .page-shell.dark-mode .task-queue-board-card-meta > span:not(.task-queue-board-card-person) {
-  background: rgba(148, 163, 184, 0.14);
-  color: #cbd5e1;
+  background: var(--status-neutral-bg);
+  color: var(--status-neutral-text);
 }
 
 .page-shell.dark-mode .task-queue-board-card-due:not(.pill) {
-  background: rgba(59, 130, 246, 0.16);
-  color: #93c5fd;
-}
-
-.page-shell.dark-mode .task-queue-board-column-empty {
-  color: rgba(226, 232, 240, 0.7);
-}
-
-.page-shell.dark-mode .task-queue-board-load-status {
-  color: rgba(226, 232, 240, 0.75);
+  background: var(--status-info-bg);
+  color: var(--status-info-text);
 }

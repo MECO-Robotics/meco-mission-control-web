@@ -43,19 +43,19 @@
 }
 
 .timeline-not-started {
-  --timeline-task-status-accent: #54627b;
+  --timeline-task-status-accent: var(--status-neutral-text);
 }
 
 .timeline-in-progress {
-  --timeline-task-status-accent: #b77900;
+  --timeline-task-status-accent: var(--status-warning-text);
 }
 
 .timeline-waiting-for-qa {
-  --timeline-task-status-accent: #275098;
+  --timeline-task-status-accent: var(--status-info-text);
 }
 
 .timeline-complete {
-  --timeline-task-status-accent: #246847;
+  --timeline-task-status-accent: var(--status-success-text);
 }
 
 .table-shell {

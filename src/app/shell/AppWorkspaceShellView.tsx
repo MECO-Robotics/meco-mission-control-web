@@ -84,7 +84,8 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
         {c.isAddSeasonPopupOpen ? <AddSeasonPopup controller={c} /> : null}
         {c.robotProjectModalMode ? <RobotProjectPopup controller={c} /> : null}
         <SidebarOverlay controller={c} />
-        <WorkspaceContent
+        <div className="workspace-content-clip">
+          <WorkspaceContent
           {...c}
           allMembers={c.bootstrap.members}
           artifacts={c.scopedArtifacts}
@@ -106,7 +107,8 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
           onTaskEditSaved={c.notifyTaskEditSaved}
           onStartInteractiveTutorial={() => void c.startInteractiveTutorial("planning")}
           onStartInteractiveTutorialChapter={(chapterId) => void c.startInteractiveTutorial(chapterId)}
-        />
+          />
+        </div>
       </Suspense>
 
       <>

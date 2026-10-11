@@ -42,7 +42,6 @@ export function SignInScreen({
 
         <section className="auth-card auth-card-wide">
           <div className="auth-card-header">
-            <p className="eyebrow">Secure access</p>
             <h1>{authCardTitle}</h1>
             <p className="auth-body">{authCardBody}</p>
           </div>

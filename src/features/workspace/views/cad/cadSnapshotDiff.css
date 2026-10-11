@@ -4,10 +4,10 @@
 }
 
 .cad-preview-pill {
-  background: rgba(37, 99, 235, 0.08);
-  border: 1px solid rgba(37, 99, 235, 0.2);
+  background: var(--status-info-bg);
+  border: 1px solid color-mix(in srgb, var(--status-info-text) 30%, transparent);
   border-radius: 999px;
-  color: #1d4ed8;
+  color: var(--status-info-text);
   flex: 0 0 auto;
   font-size: 0.72rem;
   font-weight: 800;
@@ -27,15 +27,15 @@
 }
 
 .cad-diff-count[data-status="new"] {
-  border-color: rgba(22, 163, 74, 0.35);
+  border-color: color-mix(in srgb, var(--status-success-text) 30%, transparent);
 }
 
 .cad-diff-count[data-status="changed"] {
-  border-color: rgba(37, 99, 235, 0.35);
+  border-color: color-mix(in srgb, var(--status-info-text) 30%, transparent);
 }
 
 .cad-diff-count[data-status="removed"] {
-  border-color: rgba(220, 38, 38, 0.35);
+  border-color: color-mix(in srgb, var(--status-danger-text) 30%, transparent);
 }
 
 @media (max-width: 900px) {

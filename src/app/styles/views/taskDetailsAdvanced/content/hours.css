@@ -32,26 +32,26 @@
 }
 
 .task-detail-hours-pill-success {
-  background: rgba(36, 104, 71, 0.14);
-  color: #246847;
+  background: var(--status-success-bg);
+  color: var(--status-success-text);
 }
 
 .task-detail-hours-pill-warning {
-  background: rgba(183, 121, 0, 0.16);
-  color: #8d6400;
+  background: var(--status-warning-bg);
+  color: var(--status-warning-text);
 }
 
 .task-detail-hours-pill-danger {
-  background: rgba(234, 28, 45, 0.14);
-  color: var(--official-red);
+  background: var(--status-danger-bg);
+  color: var(--status-danger-text);
 }
 
 .task-detail-hours-pill-neutral {
-  background: rgba(84, 98, 123, 0.12);
-  color: #54627b;
+  background: var(--status-neutral-bg);
+  color: var(--status-neutral-text);
 }
 
 .task-detail-deadline-pill-success {
-  background: rgba(36, 104, 71, 0.14);
-  color: #246847;
+  background: var(--status-success-bg);
+  color: var(--status-success-text);
 }

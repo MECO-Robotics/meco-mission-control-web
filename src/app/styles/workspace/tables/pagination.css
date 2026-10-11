@@ -82,7 +82,9 @@
 }
 
 .table-pagination-controls button:disabled {
-  opacity: 0.45;
+  background: var(--status-neutral-bg);
+  color: var(--status-neutral-text);
+  border-color: color-mix(in srgb, var(--status-neutral-text) 30%, transparent);
   cursor: not-allowed;
 }
 

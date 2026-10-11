@@ -7,10 +7,12 @@
 
 .help-tutorial-progress span {
   display: block;
+  width: 100%;
   height: 100%;
   border-radius: inherit;
   background: linear-gradient(90deg, var(--meco-blue), var(--official-red));
-  transition: width 160ms ease; /* impeccable-disable-line layout-transition: tracks tutorial progress */
+  transform: scaleX(var(--tutorial-progress, 0));
+  transform-origin: left center;
 }
 
 .help-tutorial-layout {

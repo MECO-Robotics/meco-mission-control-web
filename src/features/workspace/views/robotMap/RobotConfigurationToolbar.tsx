@@ -1,5 +1,7 @@
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
+import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { WorkspaceSortMenu } from "@/features/workspace/shared/filters/WorkspaceSortMenu";
+import { WorkspaceTopbarControls } from "@/features/workspace/shared/topbar/WorkspaceTopbarControls";
 
 interface RobotConfigurationToolbarProps {
   onSearchChange: (value: string) => void;
@@ -19,15 +21,33 @@ export function RobotConfigurationToolbar({
   onSortFieldChange,
 }: RobotConfigurationToolbarProps) {
   return (
-    <div className="robot-config-toolbar panel-actions filter-toolbar">
-      <TopbarResponsiveSearch
-        actions={<WorkspaceSortMenu direction={sortDirection} field={sortField} label="robot map" onDirectionChange={onSortDirectionChange} onFieldChange={onSortFieldChange} options={[{ label: "Layout", value: "layout" }, { label: "Name", value: "name" }, { label: "Mechanisms", value: "mechanisms" }, { label: "Parts", value: "parts" }]} />}
-        ariaLabel="Search subsystems, mechanisms, and parts"
-        compactPlaceholder="Search"
-        onChange={onSearchChange}
-        placeholder="Search subsystem or mechanism..."
-        value={search}
+    <AppTopbarSlotPortal slot="controls">
+      <WorkspaceTopbarControls
+        search={
+          <TopbarResponsiveSearch
+            actions={
+              <WorkspaceSortMenu
+                direction={sortDirection}
+                field={sortField}
+                label="robot map"
+                onDirectionChange={onSortDirectionChange}
+                onFieldChange={onSortFieldChange}
+                options={[
+                  { label: "Layout", value: "layout" },
+                  { label: "Name", value: "name" },
+                  { label: "Mechanisms", value: "mechanisms" },
+                  { label: "Parts", value: "parts" },
+                ]}
+              />
+            }
+            ariaLabel="Search subsystems, mechanisms, and parts"
+            compactPlaceholder="Search"
+            onChange={onSearchChange}
+            placeholder="Search subsystem or mechanism..."
+            value={search}
+          />
+        }
       />
-    </div>
+    </AppTopbarSlotPortal>
   );
 }

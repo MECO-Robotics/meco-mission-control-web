@@ -40,9 +40,7 @@
   padding: 1rem;
   border: 1px solid var(--border-base);
   border-radius: 18px;
-  background:
-    radial-gradient(circle at top right, rgba(22, 71, 142, 0.05), transparent 34%),
-    linear-gradient(180deg, var(--bg-panel), var(--bg-row-alt));
+  background: linear-gradient(180deg, var(--bg-panel), var(--bg-row-alt));
 }
 
 .metrics-scope-card .panel-header.compact-header {
@@ -114,7 +112,9 @@
   background: linear-gradient(90deg,
       color-mix(in srgb, var(--meco-blue) 72%, #ffffff 28%),
       var(--official-green));
-  transition: width 220ms ease; /* impeccable-disable-line layout-transition: communicates changing completion percentage */
+  width: 100%;
+  transform: scaleX(var(--metrics-completion, 0));
+  transform-origin: left center;
 }
 
 @media (max-width: 980px) {

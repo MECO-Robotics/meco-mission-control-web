@@ -71,6 +71,8 @@ describe("RobotMapView", () => {
     );
 
     expect(markup).toContain("Empty 3D viewer");
+    expect(markup).toContain("workspace-topbar-controls");
+    expect(markup).toContain('aria-label="Search subsystems, mechanisms, and parts"');
     expect(markup).not.toContain("<h2>Robot Configuration</h2>");
     expect(markup).not.toContain("Upload an isometric layout image");
     expect(markup).not.toContain("Inspect the robot assembly in 3D.");
@@ -146,7 +148,7 @@ describe("RobotMapView", () => {
       }),
     );
 
-    expect(markup).toContain('aria-label="Show 1 unplaced subsystems"');
+    expect(markup).not.toContain('aria-label="Unplaced 1"');
     expect(markup).toContain('aria-haspopup="dialog"');
     expect(markup).not.toContain('class="robot-config-unplaced"');
     expect(markup).not.toContain("robot-config-unplaced-grid");

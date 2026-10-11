@@ -1,4 +1,4 @@
-﻿import type { ReactNode } from "react";
+﻿import type { CSSProperties, ReactNode } from "react";
 
 import { TableCell } from "@/features/workspace/shared/table/workspaceTableChrome";
 
@@ -160,7 +160,11 @@ export function MetricScopeTable({
                   {formatPercent(row.taskCompletionRate)}
                 </strong>
                 <div className="metrics-completion-track" aria-hidden="true">
-                  <span style={{ width: `${Math.max(0, Math.min(100, row.taskCompletionRate * 100))}%` }} />
+                  <span
+                    style={{
+                      "--metrics-completion": String(Math.max(0, Math.min(1, row.taskCompletionRate))),
+                    } as CSSProperties}
+                  />
                 </div>
               </div>
             </TableCell>

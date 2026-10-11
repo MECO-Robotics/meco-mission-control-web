@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 import {
   MetricStatCard,
   formatAgeDays,
@@ -121,7 +123,13 @@ export function MetricsTopSummary(data: RiskMetricsSectionData) {
           {formatPercent(data.hoursLoggedRate)} of planned hours logged
         </p>
         <div className="risk-time-progress-track" aria-hidden="true">
-          <span style={{ width: data.clampedCompletionWidth }} />
+          <span
+            style={{
+              "--risk-time-completion": String(
+                Math.max(0, Math.min(1, Number.parseFloat(data.clampedCompletionWidth) / 100)),
+              ),
+            } as CSSProperties}
+          />
         </div>
         <p className="risk-time-progress-caption">{formatThisWeekHours(data.logsThisWeekHours)}</p>
         {data.expectedProgressRate !== null ? (

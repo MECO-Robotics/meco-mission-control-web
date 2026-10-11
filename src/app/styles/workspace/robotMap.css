@@ -6,14 +6,6 @@
   min-height: 0;
 }
 
-.robot-config-toolbar {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  justify-content: flex-start;
-}
-
 .robot-config-main {
   display: grid;
   gap: 0.75rem;

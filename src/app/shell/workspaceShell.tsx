@@ -33,7 +33,6 @@ export function WorkspaceShellLoading() {
       className="workspace-shell-loading"
       role="status"
     >
-      <p className="eyebrow">MECO Mission Control</p>
       <p className="workspace-shell-loading-copy">Loading workspace modules...</p>
     </section>
   );

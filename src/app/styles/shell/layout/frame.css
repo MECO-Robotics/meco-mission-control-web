@@ -18,10 +18,15 @@
   min-height: 100vh;
   display: block;
   background: var(--official-white);
+  color: var(--text-title);
   box-sizing: border-box;
   padding-top: var(--shell-topbar-height);
   padding-left: var(--shell-sidebar-width);
-  transition: padding-left 0.25s cubic-bezier(0.4, 0, 0.2, 1); /* impeccable-disable-line layout-transition: preserves the shell content shift when the sidebar collapses */
+}
+
+.workspace-content-clip {
+  width: 100%;
+  min-width: 0;
   overflow-x: clip;
 }
 
