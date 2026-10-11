@@ -39,10 +39,13 @@ function getThemeVars(mode: ThemeMode) {
     "--bg-row-alt": isDarkMode ? "#0f172a" : "#f8fafc",
     "--status-success-bg": isDarkMode ? "#064e3b" : "#dcfce7",
     "--status-success-text": isDarkMode ? "#34d399" : "#166534",
+    "--status-success-chart": isDarkMode ? "#34d399" : "#15803d",
     "--status-info-bg": isDarkMode ? "#082f49" : "#e0f2fe",
     "--status-info-text": isDarkMode ? "#38bdf8" : "#075985",
+    "--status-info-chart": isDarkMode ? "#60a5fa" : "#2563eb",
     "--status-warning-bg": isDarkMode ? "#451a03" : "#fef3c7",
     "--status-warning-text": isDarkMode ? "#fbbf24" : "#92400e",
+    "--status-warning-chart": isDarkMode ? "#fbbf24" : "#d97706",
     "--status-danger-bg": isDarkMode ? "#450a0a" : "#fee2e2",
     "--status-danger-text": isDarkMode ? "#f87171" : "#991b1b",
     "--team-task-open-chart": isDarkMode ? "#facc15" : "#eab308",
@@ -53,6 +56,7 @@ function getThemeVars(mode: ThemeMode) {
     "--team-task-overdue-text": isDarkMode ? "#fb923c" : "#c2410c",
     "--status-neutral-bg": isDarkMode ? "#1e293b" : "#f1f5f9",
     "--status-neutral-text": isDarkMode ? "#94a3b8" : "#475569",
+    "--status-neutral-chart": isDarkMode ? "#94a3b8" : "#64748b",
   } as const;
 }
 
@@ -60,6 +64,7 @@ export function buildPageShellStyle(mode: ThemeMode): CSSProperties {
   return {
     background: getShellBackground(mode),
     ...getThemeVars(mode),
+    color: mode === "dark" ? "var(--text-copy)" : "#11213d",
     colorScheme: mode,
   } as CSSProperties;
 }

@@ -185,6 +185,26 @@
   border-radius: 0;
 }
 
+.home-task-status-segment.status-pill-success,
+.home-task-status-swatch.status-pill-success {
+  background: var(--status-success-chart);
+}
+
+.home-task-status-segment.status-pill-info,
+.home-task-status-swatch.status-pill-info {
+  background: var(--status-info-chart);
+}
+
+.home-task-status-segment.status-pill-warning,
+.home-task-status-swatch.status-pill-warning {
+  background: var(--status-warning-chart);
+}
+
+.home-task-status-segment.status-pill-neutral,
+.home-task-status-swatch.status-pill-neutral {
+  background: var(--status-neutral-chart);
+}
+
 .home-task-status-legend {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -227,6 +247,7 @@
   width: 0.55rem;
   height: 0.55rem;
   padding: 0;
+  border-radius: 2px;
 }
 
 .home-task-status-results {
