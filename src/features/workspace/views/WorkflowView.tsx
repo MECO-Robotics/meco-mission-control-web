@@ -3,7 +3,7 @@
 import type { ArtifactRecord } from "@/types/recordsInventory";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
-import { WorkspaceEmptyState, WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
+import { WorkspaceEmptyState } from "@/features/workspace/shared/ui";
 import { EditableHoverIndicator, TableCell } from "@/features/workspace/shared/table/workspaceTableChrome";
 import { TopbarResponsiveSearch } from "@/features/workspace/shared/filters/TopbarResponsiveSearch";
 import { WorkspaceSortMenu } from "@/features/workspace/shared/filters/WorkspaceSortMenu";
@@ -14,7 +14,6 @@ interface WorkflowViewProps {
   artifacts: ArtifactRecord[];
   bootstrap: BootstrapPayload;
   membersById: Record<string, BootstrapPayload["members"][number]>;
-  openCreateWorkstreamModal: () => void;
   openEditWorkstreamModal: (workstream: BootstrapPayload["workstreams"][number]) => void;
 }
 
@@ -22,7 +21,6 @@ export function WorkflowView({
   artifacts,
   bootstrap,
   membersById,
-  openCreateWorkstreamModal,
   openEditWorkstreamModal,
 }: WorkflowViewProps) {
   const [search, setSearch] = useState("");
@@ -148,12 +146,6 @@ export function WorkflowView({
         </div>
       </div>
 
-      <WorkspaceFloatingAddButton
-        ariaLabel="Add workflow"
-        onClick={openCreateWorkstreamModal}
-        title="Add workflow"
-      />
-
       <div className="panel-subsection subsystem-manager-list" style={{ flex: "1 1 620px" }}>
         <div className={`table-shell subsystem-manager-list-shell ${workflowFilterMotionClass}`}>
           <div
@@ -248,12 +240,6 @@ export function WorkflowView({
 
           {filteredRows.length === 0 ? (
             <WorkspaceEmptyState
-              actionLabel={hasWorkflowFilters || hasHiddenArchivedWorkflows ? undefined : "Add workflow"}
-              onAction={
-                hasWorkflowFilters || hasHiddenArchivedWorkflows
-                  ? undefined
-                  : openCreateWorkstreamModal
-              }
               reason={
                 hasHiddenArchivedWorkflows
                   ? "Archived workflow lanes are hidden. Turn on Show archived to review existing lanes."

@@ -3,7 +3,6 @@
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import { useFilterChangeMotionClass } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
-import { WorkspaceFloatingAddButton } from "@/features/workspace/shared/ui";
 import { getDefaultSubsystemId } from "@/lib/appUtils/common";
 
 import {
@@ -20,7 +19,6 @@ export function SubsystemsView({
   membersById,
   openCreateMechanismModal,
   openCreatePartInstanceModal,
-  openCreateSubsystemModal,
   openEditMechanismModal,
   openEditSubsystemModal,
 }: SubsystemsViewProps) {
@@ -114,13 +112,6 @@ export function SubsystemsView({
           <h2 style={{ color: "var(--text-title)" }}>Subsystem manager</h2>
         </div>
       </div>
-
-      <WorkspaceFloatingAddButton
-        ariaLabel="Add subsystem"
-        onClick={openCreateSubsystemModal}
-        title="Add subsystem"
-        tutorialTarget="create-subsystem-button"
-      />
 
       <SubsystemsTableSection
         bootstrap={bootstrap}

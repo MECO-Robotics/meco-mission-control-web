@@ -11,7 +11,6 @@ export function WorkspaceSubsystemsSection(props: WorkspaceContentPanelsViewProp
     membersById,
     openCreateMechanismModal,
     openCreatePartInstanceModal,
-    openCreateSubsystemModal,
     openEditMechanismModal,
     openEditPartInstanceModal,
     openEditSubsystemModal,
@@ -30,7 +29,6 @@ export function WorkspaceSubsystemsSection(props: WorkspaceContentPanelsViewProp
             artifacts={artifacts}
             bootstrap={bootstrap}
             membersById={membersById}
-            openCreateWorkstreamModal={props.openCreateWorkstreamModal}
             openEditWorkstreamModal={props.openEditWorkstreamModal}
           />
         ) : (
@@ -39,7 +37,6 @@ export function WorkspaceSubsystemsSection(props: WorkspaceContentPanelsViewProp
             membersById={membersById}
             openCreateMechanismModal={openCreateMechanismModal}
             openCreatePartInstanceModal={openCreatePartInstanceModal}
-            openCreateSubsystemModal={openCreateSubsystemModal}
             openEditMechanismModal={openEditMechanismModal}
             openEditPartInstanceModal={openEditPartInstanceModal}
             openEditSubsystemModal={openEditSubsystemModal}

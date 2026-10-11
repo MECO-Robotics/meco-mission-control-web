@@ -1,5 +1,6 @@
 import { Component, lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
+import type { TopbarAddMenuAction } from "@/features/workspace/shared/ui/WorkspaceTopbarAddMenu";
 import { buildTopbarAddMenuActions, makeAddMenuAction } from "@/features/workspace/shared/topbar";
 import { CadPartImageAssignment, type CadPartImageTargets } from "./CadPartImageAssignment";
 import type { CadMesh } from "./cadGeometry";
@@ -81,6 +82,7 @@ export function CadFileViewer({
   embeddedInMap = false,
   onOpenCadWorkspace,
   onOrbitingChange,
+  additionalTopbarActions = [],
   ...imageTargets
 }: {
   title?: string;
@@ -89,6 +91,7 @@ export function CadFileViewer({
   importPlacement?: "inline" | "topbar";
   onOpenCadWorkspace?: () => void;
   onOrbitingChange?: (isOrbiting: boolean) => void;
+  additionalTopbarActions?: TopbarAddMenuAction[];
 } & CadPartImageTargets) {
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -107,12 +110,13 @@ export function CadFileViewer({
         <WorkspaceTopbarAddMenu
           actions={buildTopbarAddMenuActions(
             makeAddMenuAction("Import STEP file", () => fileInputRef.current?.click()),
+            ...additionalTopbarActions,
             ...(onOpenCadWorkspace
               ? [makeAddMenuAction("Open CAD integration", onOpenCadWorkspace)]
               : []),
           )}
-          ariaLabel="Import CAD"
-          title="Import CAD"
+          ariaLabel={additionalTopbarActions.length ? "Add or import" : "Import CAD"}
+          title={additionalTopbarActions.length ? "Add or import" : "Import CAD"}
           tutorialTarget="import-cad-button"
         />
       </>

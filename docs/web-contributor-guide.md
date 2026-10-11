@@ -133,6 +133,8 @@ truth for permissions, persistence, and schema validation.
 
 Follow [CONTRIBUTING.md](../CONTRIBUTING.md). Keep one clear owner and explicit dependencies; delete redundant representations and forwarding layers. Split or merge modules according to responsibility and reuse, without file-size quotas. Keep styles with the view or component whose cascade they control.
 
+Before adding a UI element, inspect the shared UI components, existing view patterns, and design tokens for one that already provides the needed behavior and appearance. Compose or extend that owner; do not recreate an existing button, menu, control, layout, or interaction with view-local markup and styles. Add a new shared element only when the behavior is genuinely missing, and document its intended reuse.
+
 Treat the current visual system as a hard constraint. Preserve established typography, spacing, surfaces, colors, controls, and responsive behavior; compose existing components and styles instead of introducing a new one-off look. Add a visual exception only when the product spec explicitly requires it.
 
 Before implementing an additional feature, inspect and reuse the existing modules, components, and layouts that already own the relevant behavior. Extend a shared owner when the behavior is genuinely shared; keep domain-specific data and presentation at the view boundary. Do not rebuild an existing layout or interaction in parallel. For Kanban views, reuse `KanbanColumns`, `KanbanScrollFrame`, and their drag behavior, supplying view-specific columns and cards.

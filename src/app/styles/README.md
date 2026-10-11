@@ -2,6 +2,8 @@
 
 ## Layer Direction
 
+Before adding a styled UI element, reuse the existing component, token, selector, or view pattern that already owns its behavior and visual treatment. Extend that owner when appropriate; do not create a parallel button, menu, control, or one-off style for an existing interaction. Keep intentional exceptions tied to an explicit product requirement.
+
 This repo keeps behavior-preserving import order today and uses this target layering model for incremental cleanup:
 
 1. `reset`

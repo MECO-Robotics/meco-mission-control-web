@@ -198,12 +198,12 @@ export function RobotMapView({
               key={primaryProjectId}
               onOrbitingChange={onOrbitingChange}
               onOpenCadWorkspace={onOpenCadWorkspace}
+              additionalTopbarActions={[{ label: "Add subsystem", onSelect: openCreateSubsystemModal }]}
               partDefinitions={bootstrap.partDefinitions}
               onSavePartImage={onSavePartImage}
             />
           )}
           isLayoutEditEnabled={isLayoutEditEnabled}
-          onAddSubsystem={openCreateSubsystemModal}
           onAutoArrange={handleAutoArrange}
           onDraftLayoutChange={applyLayoutDraft}
           onLayoutDrop={handleLayoutDrop}

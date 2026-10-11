@@ -12,7 +12,6 @@ import type { RobotConfigurationSubsystemModel } from "./robotMapViewModel";
 interface RobotMapCanvasProps {
   cadViewer: (onOrbitingChange: (isOrbiting: boolean) => void) => ReactNode;
   isLayoutEditEnabled: boolean;
-  onAddSubsystem: () => void;
   onAutoArrange: () => void;
   onDraftLayoutChange: (subsystemId: string, layout: SubsystemLayoutFields) => void;
   onLayoutDrop: (subsystemId: string, layout: SubsystemLayoutFields) => void;
@@ -26,7 +25,6 @@ interface RobotMapCanvasProps {
 export function RobotMapCanvas({
   cadViewer,
   isLayoutEditEnabled,
-  onAddSubsystem,
   onAutoArrange,
   onDraftLayoutChange,
   onLayoutDrop,
@@ -129,7 +127,7 @@ export function RobotMapCanvas({
 
           {!hasUnplacedSubsystems ? (
             <div className="robot-config-map-actions-overlay">
-              <RobotMapCanvasActions onAddSubsystem={onAddSubsystem} onResetLayout={onResetLayout} />
+              <RobotMapCanvasActions onResetLayout={onResetLayout} />
             </div>
           ) : null}
           {pendingPlacementSubsystemId ? (
@@ -147,7 +145,6 @@ export function RobotMapCanvas({
 
       {isUnplacedModalOpen && hasUnplacedSubsystems ? (
         <RobotMapUnplacedModal
-          onAddSubsystem={onAddSubsystem}
           onAutoArrange={onAutoArrange}
           onClose={() => setIsUnplacedModalOpen(false)}
           onPlaceSubsystem={beginSubsystemPlacement}

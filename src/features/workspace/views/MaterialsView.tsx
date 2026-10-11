@@ -261,8 +261,6 @@ export function MaterialsView({
 
         {filteredMaterials.length === 0 ? (
           <WorkspaceEmptyState
-            actionLabel={hasMaterialFilters ? undefined : "Add material"}
-            onAction={hasMaterialFilters ? undefined : openCreateMaterialModal}
             reason={
               hasMaterialFilters
                 ? "The current search or filters hide every material record in this scope."

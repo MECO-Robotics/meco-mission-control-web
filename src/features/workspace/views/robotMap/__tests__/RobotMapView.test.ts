@@ -16,7 +16,6 @@ describe("RobotMapView", () => {
     const subsystem = buildRobotConfigurationViewModel(createBootstrap(), "").subsystems[0];
     const markup = renderToStaticMarkup(
       React.createElement(RobotMapUnplacedModal, {
-        onAddSubsystem: jest.fn(),
         onAutoArrange: jest.fn(),
         onClose: jest.fn(),
         onPlaceSubsystem: jest.fn(),
@@ -31,6 +30,7 @@ describe("RobotMapView", () => {
     expect(markup).toContain("Place");
     expect(markup).toContain("Auto-arrange");
     expect(markup).toContain("Reset");
+    expect(markup).not.toContain('aria-label="Add subsystem"');
   });
 
   it("keeps the robot view free of duplicated configuration copy and readiness-first metrics", () => {
@@ -78,7 +78,9 @@ describe("RobotMapView", () => {
     expect(markup).not.toContain("Map View");
     expect(markup).not.toContain("List View");
     expect(markup).not.toContain("3D View");
-    expect(markup).toContain('aria-label="Import CAD"');
+    expect(markup).toContain('aria-label="Add or import"');
+    expect(markup).toContain(">Add subsystem</span>");
+    expect(markup).not.toContain('aria-label="Add subsystem"');
     expect(markup).toContain('data-tutorial-target="import-cad-button"');
     expect(markup).not.toContain('aria-label="Map presentation"');
     expect(markup).not.toContain('aria-label="Upload isometric image"');
