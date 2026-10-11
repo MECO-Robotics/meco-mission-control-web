@@ -188,7 +188,7 @@ Dark filter controls can switch to `#bfdbfe` for foreground and check marks.
 
 ## Cards, Boards, And Tables
 
-Cards and board columns use panel surfaces, thin borders, and soft shadows. Task queue columns have a 16px radius, compact internal grid spacing, and uppercase micro-headings. Counts use pill-shaped blue-tinted badges.
+Workspace modules sit flush on the main viewport without an enclosing card border, rounded frame, or shadow. Use panel surfaces and thin borders for repeated records, dialogs, and distinct tools within a module. Task queue columns have a 16px radius, compact internal grid spacing, and uppercase micro-headings. Counts use pill-shaped blue-tinted badges.
 
 Tables are grid-based rather than native table layouts. Headers use small uppercase labels, muted copy color, and brand-blue sort arrows. Purchase, manufacturing, and print tables each define their own proportional column templates.
 

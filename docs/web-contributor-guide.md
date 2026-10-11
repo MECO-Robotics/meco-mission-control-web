@@ -27,6 +27,24 @@ Keep view-specific business logic near the view that uses it. Promote helpers
 into `src/lib/` only when they are reused across sections or represent a shared
 contract.
 
+## Workspace Topbar Contract
+
+Every workspace view uses the single shell topbar. It contains the current view
+title, that view's search and filter controls, its custom page controls, and one
+shared plus button when the view supports creation. Put view controls in the
+`controls` slot with `AppTopbarSlotPortal`; combine them in one
+`WorkspaceTopbarControls` and use `WorkspaceTopbarAddMenu` for every create
+action. Multiple create choices belong in that menu. Views without create
+actions omit the plus button.
+
+Do not render a second toolbar, search/filter row, view title, eyebrow, subtitle,
+tagline, introductory banner, floating add button, or a different add button in
+the view body. Keep record-specific actions inside the record context. Keep
+presentation navigation such as calendar/timeline tabs in the content area.
+Before handoff, inspect every affected route at narrow and wide widths and
+confirm there is one topbar row, its title remains visible, its controls stay in
+that row, and creation uses the shared plus menu.
+
 ## View And Tab Routing
 
 User-facing navigation is defined around workspace sections instead of raw data
@@ -110,6 +128,9 @@ When changing styles:
 - Confirm text does not overlap, clip, or resize controls unexpectedly.
 - Preserve keyboard focus and hover states.
 - Keep card usage for repeated items, dialogs, and framed tools.
+- Keep primary workspace modules flush with the viewport. Do not wrap a module's
+  full content in an extra rounded card; use surfaces for repeated items and
+  distinct tools inside the module.
 - Prefer existing tokens, class patterns, and shared components before creating
   new styling conventions.
 

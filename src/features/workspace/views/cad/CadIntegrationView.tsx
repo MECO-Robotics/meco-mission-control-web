@@ -40,7 +40,7 @@ export function CadIntegrationView({
   const cadWorkflow = useCadStepWorkflow({ projectId, seasonId });
 
   return (
-    <section className="panel dense-panel cad-integration-shell">
+    <section className="panel dense-panel cad-integration-shell workspace-panel">
       <CadStepImportHeader selectedSnapshot={cadWorkflow.selectedCadSnapshot} />
 
       {cadWorkflow.message ? <div className="cad-message" role="status">{cadWorkflow.message}</div> : null}
