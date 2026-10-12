@@ -1,9 +1,13 @@
 .robot-config-shell {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
   gap: 0.75rem;
   min-height: 0;
+  padding: 0;
 }
 
 .robot-config-main {
