@@ -12,6 +12,7 @@ import { WorkLogsActivityToolbar } from "./workLogs/WorkLogsActivityToolbar";
 import { WorkLogsTableSection } from "./workLogs/WorkLogsTableSection";
 import { WorkLogsToolbar } from "./workLogs/WorkLogsToolbar";
 import { ReportHistoryList } from "./workLogs/ReportHistoryList";
+import { QaReportList } from "./workLogs/QaReportList";
 import { WorkspaceSortMenu } from "@/features/workspace/shared/filters/WorkspaceSortMenu";
 import { WorkspaceTopbarAddMenu } from "@/features/workspace/shared/ui";
 import { useRememberedViewState } from "@/features/workspace/shared/navigation/WorkspaceViewMemory";
@@ -42,6 +43,6 @@ export function WorkLogsView({ activePersonFilter, bootstrap, membersById, openC
     {view === "logs" ? <>
       <p className="workspace-inline-summary">{state.summary.totalLogs} logs · {state.summary.loggedHours.toFixed(1)} hours · {state.summary.activeContributorCount} contributors · {state.summary.remainingHours.toFixed(1)} planned hours remaining</p>
       <WorkLogsTableSection membersById={membersById} openEditTaskModal={openEditTaskModal} subsystemsById={subsystemsById} taskById={state.taskById} workLogFilterMotionClass={state.workLogFilterMotionClass} workLogPagination={state.workLogPagination} workLogs={state.workLogs} />
-    </> : view === "activity" ? <WorkLogsActivitySection actions={state.activityActions} activityGroupMode={state.activityGroupMode} activityPagination={state.activityPagination} description="Changes across the current workspace." membersById={membersById} openEditTaskModal={openEditTaskModal} subsystemsById={subsystemsById} taskById={state.taskById} /> : <ReportHistoryList reports={reports} bootstrap={bootstrap} onOpenTask={id => { const task = state.taskById[id]; if (task) openEditTaskModal(task); }} onOpenMilestone={onOpenSchedule} />}
+    </> : view === "activity" ? <WorkLogsActivitySection actions={state.activityActions} activityGroupMode={state.activityGroupMode} activityPagination={state.activityPagination} description="Changes across the current workspace." membersById={membersById} openEditTaskModal={openEditTaskModal} subsystemsById={subsystemsById} taskById={state.taskById} /> : view === "qa" ? <QaReportList reports={reports} bootstrap={bootstrap} onOpenTask={id => { const task = state.taskById[id]; if (task) openEditTaskModal(task); }} onOpenMilestone={onOpenSchedule} /> : <ReportHistoryList reports={reports} bootstrap={bootstrap} onOpenTask={id => { const task = state.taskById[id]; if (task) openEditTaskModal(task); }} onOpenMilestone={onOpenSchedule} />}
   </section>;
 }

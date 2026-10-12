@@ -97,7 +97,6 @@ export function RiskActionOverview({ activePersonFilter, bootstrap, onCreateRisk
       compactPlaceholder="Search"
       onChange={setSearchFilter}
       placeholder="Search risks..."
-      portalToTopbar
       value={searchFilter}
     />
     <WorkspaceTopbarAddMenu
