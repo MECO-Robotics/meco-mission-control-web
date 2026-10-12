@@ -14,6 +14,9 @@ export function FilterOptionMenu({
   menuOffsetX,
   onChange,
   options,
+  searchText,
+  onSearchTextChange,
+  hideSearchInput = false,
   showAllOption = true,
   singleSelect,
   style,
@@ -31,13 +34,18 @@ export function FilterOptionMenu({
   style?: CSSProperties;
   onChange: (value: FilterSelection) => void;
   options: DropdownOption[];
+  searchText?: string;
+  onSearchTextChange?: (value: string) => void;
+  hideSearchInput?: boolean;
   value: FilterSelection;
 }) {
-  const [searchText, setSearchText] = useState("");
+  const [internalSearchText, setInternalSearchText] = useState("");
+  const queryText = searchText ?? internalSearchText;
+  const updateSearchText = onSearchTextChange ?? setInternalSearchText;
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const filteredOptions = useMemo(() => {
-    const query = searchText.trim().toLowerCase();
+    const query = queryText.trim().toLowerCase();
     if (!query) {
       return options;
     }
@@ -48,7 +56,7 @@ export function FilterOptionMenu({
       }
       return option.id.toLowerCase().includes(query);
     });
-  }, [options, searchText]);
+  }, [options, queryText]);
 
   useLayoutEffect(() => {
     if (typeof window === "undefined") {
@@ -74,17 +82,17 @@ export function FilterOptionMenu({
       role="listbox"
     >
       {headerContent ? <div role="presentation">{headerContent}</div> : null}
-      <div className="table-column-filter-search" role="presentation">
+      {!hideSearchInput ? <div className="table-column-filter-search" role="presentation">
         <input
           aria-label={`Search ${allLabel} options`}
           className="table-column-filter-search-input"
-          onChange={(milestone) => setSearchText(milestone.target.value)}
+          onChange={(milestone) => updateSearchText(milestone.target.value)}
           placeholder="Search..."
           ref={searchInputRef}
           type="text"
-          value={searchText}
+          value={queryText}
         />
-      </div>
+      </div> : null}
       {showAllOption ? (
         <button
           aria-selected={value.length === 0}

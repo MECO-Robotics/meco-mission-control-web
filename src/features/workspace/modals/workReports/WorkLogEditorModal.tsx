@@ -72,7 +72,7 @@ export function WorkLogEditorModal({
         >
           <label className="field modal-wide">
             <span>Task</span>
-            <FilterDropdown allLabel="Choose a task" ariaLabel="Task" onChange={(selection) => {
+            <FilterDropdown allLabel="Choose a task" ariaLabel="Task" searchInTopbar onChange={(selection) => {
               const taskId = selection[0];
               if (taskId) setWorkLogDraft((current) => ({ ...current, taskId }));
             }} options={taskOptions} showAllOption={false} singleSelect buttonContent={<span>{taskOptions.find((option) => option.id === workLogDraft.taskId)?.name ?? "Choose a task"}</span>} value={workLogDraft.taskId ? [workLogDraft.taskId] : []} />
@@ -119,7 +119,7 @@ export function WorkLogEditorModal({
           </label>
           <label className="field modal-wide">
             <span>Participants</span>
-            <FilterDropdown allLabel="Select participants" ariaLabel="Participants" compactSummary buttonContent={<span>{workLogDraft.participantIds.length ? `Participants (${workLogDraft.participantIds.length})` : "Select participants"}</span>} onChange={(selection) => setWorkLogDraft((current) => ({ ...current, participantIds: selection }))} options={participantOptions} showAllOption={false} value={workLogDraft.participantIds} />
+            <FilterDropdown allLabel="Select participants" ariaLabel="Participants" searchInTopbar compactSummary buttonContent={<span>{workLogDraft.participantIds.length ? `Participants (${workLogDraft.participantIds.length})` : "Select participants"}</span>} onChange={(selection) => setWorkLogDraft((current) => ({ ...current, participantIds: selection }))} options={participantOptions} showAllOption={false} value={workLogDraft.participantIds} />
             {workLogDraft.participantIds.length ? <small>{workLogDraft.participantIds.map((id) => participantOptions.find((option) => option.id === id)?.name).filter(Boolean).join(", ")}</small> : null}
           </label>
           <label className="field modal-wide">

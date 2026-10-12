@@ -1,5 +1,5 @@
 import { createPortal } from "react-dom";
-import { useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
 import type { DropdownOption } from "../model/workspaceTypes";
 import {
@@ -8,6 +8,7 @@ import {
   formatFilterSelectionLabel,
 } from "./workspaceFilterUtils";
 import { FilterOptionMenu } from "./workspaceFilterDropdownMenu";
+import { useTopbarSearchOverride } from "./TopbarSearchOverride";
 import {
   useFilterDropdownMenuState,
   usePrunedFilterSelection,
@@ -29,6 +30,7 @@ export function FilterDropdown({
   menuClassName,
   portalMenu,
   portalMenuPlacement = "auto",
+  searchInTopbar = false,
   onChange,
   options,
   selectedAllLabel,
@@ -51,6 +53,7 @@ export function FilterDropdown({
   menuClassName?: string;
   portalMenu?: boolean;
   portalMenuPlacement?: "auto" | "above" | "below";
+  searchInTopbar?: boolean;
   onChange: (value: FilterSelection) => void;
   options: DropdownOption[];
   selectedAllLabel?: string;
@@ -59,6 +62,9 @@ export function FilterDropdown({
   value: FilterSelection;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const topbarSearch = useTopbarSearchOverride();
+  const setTopbarSearch = topbarSearch?.setActive;
   const filterRef = useRef<HTMLSpanElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -77,6 +83,10 @@ export function FilterDropdown({
   const selectedToneClassName = getSelectedToneClassName?.(value);
   const columnAppearance = appearance === "column";
   const accessibleLabel = `${ariaLabel ?? allLabel}${columnAppearance && !isActive ? "" : `: ${selectedLabel}`}`;
+  const closeMenu = () => {
+    setIsOpen(false);
+    setSearchText("");
+  };
 
   const renderMenu = (style?: CSSProperties) => (
     <FilterOptionMenu
@@ -88,6 +98,9 @@ export function FilterDropdown({
       menuOffsetX={menuOffsetX}
       onChange={onChange}
       options={options}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      hideSearchInput={searchInTopbar}
       showAllOption={showAllOption}
       singleSelect={singleSelect}
       style={style}
@@ -95,13 +108,20 @@ export function FilterDropdown({
     />
   );
 
+  useEffect(() => {
+    if (!searchInTopbar || !isOpen || !setTopbarSearch) return;
+    const override = { label: allLabel.toLowerCase(), value: searchText, onChange: setSearchText };
+    setTopbarSearch(override);
+    return () => setTopbarSearch(null);
+  }, [allLabel, isOpen, searchInTopbar, searchText, setTopbarSearch]);
+
   usePrunedFilterSelection(value, options, onChange);
   const { menuOffsetX, menuPosition } = useFilterDropdownMenuState({
     buttonRef,
     filterRef,
     isOpen,
     menuRef,
-    onClose: () => setIsOpen(false),
+    onClose: closeMenu,
     portalMenu,
     portalMenuPlacement,
     viewSelector: columnAppearance
@@ -125,7 +145,10 @@ export function FilterDropdown({
         ref={buttonRef}
         onClick={(event) => {
           if (columnAppearance) event.stopPropagation();
-          setIsOpen((current) => !current);
+          setIsOpen((current) => {
+            if (current) setSearchText("");
+            return !current;
+          });
         }}
         title={accessibleLabel}
         type="button"

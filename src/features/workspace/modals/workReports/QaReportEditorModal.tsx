@@ -130,7 +130,7 @@ export function QaReportEditorModal({
           </label>
           <label className="field modal-wide">
             <span>Participants</span>
-            <FilterDropdown allLabel="Select participants" ariaLabel="Participants" compactSummary buttonContent={<span>{qaReportDraft.participantIds.length ? `Participants (${qaReportDraft.participantIds.length})` : "Select participants"}</span>} onChange={(selection) => setQaReportDraft((current) => ({ ...current, participantIds: selection }))} options={participantOptions} showAllOption={false} value={qaReportDraft.participantIds} />
+            <FilterDropdown allLabel="Select participants" ariaLabel="Participants" searchInTopbar compactSummary buttonContent={<span>{qaReportDraft.participantIds.length ? `Participants (${qaReportDraft.participantIds.length})` : "Select participants"}</span>} onChange={(selection) => setQaReportDraft((current) => ({ ...current, participantIds: selection }))} options={participantOptions} showAllOption={false} value={qaReportDraft.participantIds} />
             {qaReportDraft.participantIds.length ? <small>{qaReportDraft.participantIds.map((id) => participantOptions.find((option) => option.id === id)?.name).filter(Boolean).join(", ")}</small> : null}
           </label>
           <label className="field modal-wide">

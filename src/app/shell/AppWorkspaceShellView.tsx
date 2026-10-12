@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { resetLocalDemo } from "@/lib/localWorkspace/session";
 import { AddSeasonPopup, RobotProjectPopup, SidebarOverlay } from "./AppWorkspaceShellOverlays";
 import { AppTopbar, AppSidebar, WorkspaceModalHost, WorkspaceContent, WorkspaceShellLoading } from "./workspaceShell";
+import { TopbarSearchOverrideProvider } from "@/features/workspace/shared/filters/TopbarSearchOverride";
 
 export function AppWorkspaceShellView({ controller }: { controller: AppWorkspaceController }) {
   const c = mergeWorkspaceShellController(controller);
@@ -26,6 +27,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       data-navigation-view={activeSubItemId ?? "help"}
       style={c.pageShellStyle}
     >
+      <TopbarSearchOverrideProvider>
       <Suspense fallback={<WorkspaceShellLoading />}>
         <AppTopbar
       activeViewLabel={activeViewLabel}
@@ -126,6 +128,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
         </Suspense>
       ) : null}
     </>
+      </TopbarSearchOverrideProvider>
     </main>
   );
 }
