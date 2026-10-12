@@ -158,11 +158,13 @@ describe("WorkLogsView", () => {
     ];
     const qa = renderWorkLogsView("qa", { reports });
     expect(qa).toContain("Sensor QA");
+    expect(qa).toContain("qa-report-list");
+    expect(qa).toContain("Outcome");
     expect(qa).not.toContain("Scrimmage result");
     const milestones = renderWorkLogsView("results", { reports });
     expect(milestones).toContain("Scrimmage result");
     expect(milestones).not.toContain("Sensor QA");
-    expect(renderWorkLogsView("qa")).toContain("No results recorded yet");
+    expect(renderWorkLogsView("qa")).toContain("No QA reports yet");
   });
 
   it("falls back to work logs when audit actions are unavailable", () => {

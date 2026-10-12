@@ -1,0 +1,16 @@
+.qa-report-row {
+  grid-template-columns: var(--workspace-grid-template);
+}
+
+.qa-report-disclosure > summary {
+  display: grid;
+  list-style: none;
+}
+
+.qa-report-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.qa-report-details {
+  padding: 0.5rem 0.75rem 0.75rem;
+}
