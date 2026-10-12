@@ -219,14 +219,6 @@ export function CadStepMappingReviewTable({
                       <button
                         className="ghost-button compact-action"
                         disabled={isSavingMapping || usesPlaceholderParser}
-                        onClick={() => confirmMapping("IGNORE", null)}
-                        type="button"
-                      >
-                        Ignore
-                      </button>
-                      <button
-                        className="ghost-button compact-action"
-                        disabled={isSavingMapping || usesPlaceholderParser}
                         onClick={() => confirmMapping("REFERENCE_GEOMETRY", null)}
                         type="button"
                       >

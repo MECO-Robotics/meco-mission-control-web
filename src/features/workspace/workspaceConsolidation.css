@@ -30,11 +30,9 @@
 .teams-editor h3 { margin: 0; }
 .teams-editor fieldset { min-width: 0; margin: 0; padding: .55rem .7rem; border: 1px solid var(--border-base); border-radius: 8px; }
 .teams-editor legend { padding-inline: .25rem; color: var(--text-title); font-weight: 600; }
-.teams-editor .checkbox-field { display: inline-flex; align-items: center; gap: .4rem; margin: .2rem .75rem .2rem 0; }
 .team-primary-help { margin: 0 0 .4rem; color: var(--text-copy); font-size: .82rem; }
 .team-member-option { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding-block: .2rem; border-bottom: 1px solid var(--border-base); }
 .team-member-option .secondary-action { padding: .25rem .5rem; font-size: .8rem; }
-.team-member-option .secondary-action:disabled { opacity: .7; }
 .team-card { display: grid; gap: .35rem; padding: .35rem 0 .5rem; border: 0; border-bottom: 1px solid var(--border-base); border-radius: 0; background: transparent; }
 .teams-list > .team-card:nth-of-type(odd) { padding-inline: .4rem; background: color-mix(in srgb, var(--meco-blue) 3%, var(--bg-panel)); }
 .teams-list > .team-card:nth-of-type(even) { padding-inline: .4rem; background: color-mix(in srgb, var(--meco-red) 3%, var(--bg-panel)); }

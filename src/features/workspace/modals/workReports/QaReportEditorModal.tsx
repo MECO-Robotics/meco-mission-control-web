@@ -5,6 +5,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { QaReportPayload } from "@/types/payloads";
 import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
 import { WorkReportEditorActions } from "./WorkReportEditorActions";
+import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 
 interface QaReportEditorModalProps {
   bootstrap: BootstrapPayload;
@@ -33,6 +34,7 @@ export function QaReportEditorModal({
   const taskRef = qaReportDraft.targetRefs.find((ref) => ref.kind === "task");
   const selectedTask = bootstrap.tasks.find((task) => task.id === taskRef?.id);
   const qaReportPhotoProjectId = selectedTask?.projectId ?? bootstrap.projects[0]?.id ?? null;
+  const participantOptions = bootstrap.members.map((member) => ({ id: member.id, name: member.name }));
 
   return (
     <ModalDialog label="Add QA report" onClose={closeQaReportModal}>
@@ -128,34 +130,8 @@ export function QaReportEditorModal({
           </label>
           <label className="field modal-wide">
             <span>Participants</span>
-            <select
-              multiple
-              onChange={(milestone) =>
-                setQaReportDraft((current) => ({
-                  ...current,
-                  participantIds: Array.from(
-                    milestone.currentTarget.selectedOptions,
-                    (option) => option.value,
-                  ),
-                }))
-              }
-              size={Math.min(bootstrap.members.length || 1, 5)}
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
-              }}
-              value={qaReportDraft.participantIds}
-            >
-              {bootstrap.members.map((member) => (
-                <option key={member.id} value={member.id}>
-                  {member.name}
-                </option>
-              ))}
-            </select>
-            <small style={{ color: "var(--text-copy)" }}>
-              Hold Ctrl or Cmd to select multiple people.
-            </small>
+            <FilterDropdown allLabel="Select participants" ariaLabel="Participants" compactSummary buttonContent={<span>{qaReportDraft.participantIds.length ? `Participants (${qaReportDraft.participantIds.length})` : "Select participants"}</span>} onChange={(selection) => setQaReportDraft((current) => ({ ...current, participantIds: selection }))} options={participantOptions} showAllOption={false} value={qaReportDraft.participantIds} />
+            {qaReportDraft.participantIds.length ? <small>{qaReportDraft.participantIds.map((id) => participantOptions.find((option) => option.id === id)?.name).filter(Boolean).join(", ")}</small> : null}
           </label>
           <label className="field modal-wide">
             <span>Notes</span>

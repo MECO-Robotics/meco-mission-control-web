@@ -10,7 +10,6 @@ import { buildEmptyMaterialPayload } from "@/lib/appUtils/payloadBuilders";
 import { materialToPayload } from "@/lib/appUtils/payloadConversions";
 import { toErrorMessage } from "@/lib/appUtils/common";
 import { createMaterialRecord, deleteMaterialRecord, updateMaterialRecord } from "@/lib/auth/records/inventory";
-import type { MaterialPayload } from "@/types/payloads";
 
 export function useMaterialEditor({
   bootstrap, selectedProjectId, selectedSeasonId,
@@ -63,13 +62,7 @@ export function useMaterialEditor({
     setDataMessage(null);
 
     try {
-      const payload: MaterialPayload =
-        materialModalMode === "create"
-          ? {
-              ...materialDraft,
-              reorderPoint: Math.floor(materialDraft.onHandQuantity / 2),
-            }
-          : materialDraft;
+      const payload = materialDraft;
 
       if (materialModalMode === "create") {
         await createMaterialRecord(payload, handleUnauthorized);

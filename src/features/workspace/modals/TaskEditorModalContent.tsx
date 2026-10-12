@@ -164,22 +164,19 @@ export function TaskEditorModal(props: TaskEditorModalProps) {
                 setTaskDraft={updateDraftWhenIdle}
                 taskDraft={taskDraft}
               />
-              <PhotoUploadField
-                label="Task photo"
-                currentUrl={taskDraft.photoUrl}
-                onChange={(value) =>
-                  updateDraftWhenIdle((current) => ({ ...current, photoUrl: value }))
-                }
-                onUpload={async (file) => {
-                  const projectId = taskDraft.projectId || bootstrap.projects[0]?.id;
-
-                  if (!projectId) {
-                    throw new Error("No project is available for photo upload.");
-                  }
-
-                  return requestPhotoUpload(projectId, file);
-                }}
-              />
+              <details className="modal-wide">
+                <summary>Optional task details</summary>
+                <PhotoUploadField
+                  label="Task photo"
+                  currentUrl={taskDraft.photoUrl}
+                  onChange={(value) => updateDraftWhenIdle((current) => ({ ...current, photoUrl: value }))}
+                  onUpload={async (file) => {
+                    const projectId = taskDraft.projectId || bootstrap.projects[0]?.id;
+                    if (!projectId) throw new Error("No project is available for photo upload.");
+                    return requestPhotoUpload(projectId, file);
+                  }}
+                />
+              </details>
             </>
           ) : undefined}
           beforeFooterContent={isCreateTaskModal ? (

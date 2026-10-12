@@ -49,5 +49,8 @@ describe("WorkLogEditorModal", () => {
 
     expect(html).toContain("Primary - Task summary");
     expect(html).not.toContain("Secondary - Task summary");
+    expect(html).toContain('aria-label="Task: Task title - Primary, Secondary"');
+    expect(html).toContain('aria-label="Participants: Select participants"');
+    expect(html).not.toContain("Hold Ctrl or Cmd");
   });
 });
