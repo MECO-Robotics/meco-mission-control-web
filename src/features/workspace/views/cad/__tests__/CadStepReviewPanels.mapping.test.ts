@@ -86,6 +86,7 @@ describe("CAD STEP review panel mapping state", () => {
     expect(markup).toContain("Current: This snapshot only; confidence manual");
     expect(markup).toContain("Review choice: This snapshot only before finalize.");
     expect(markup).toContain("Review choice: ignore item.");
+    expect(markup).not.toContain(">Ignore</button>");
   });
 
   it("renders mapping review state with carry-forward scope and finalize guard", () => {

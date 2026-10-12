@@ -125,10 +125,13 @@ export const RosterAddPersonModal: React.FC<RosterAddPersonModalProps> = ({
                   <option value="external">External access</option>
                 </select>
               </label>
-              <RosterAttendanceFields
-                onChange={(patch) => setMemberForm((curr) => ({ ...curr, ...patch }))}
-                value={memberForm}
-              />
+              <details className="modal-wide">
+                <summary>Attendance planning</summary>
+                <RosterAttendanceFields
+                  onChange={(patch) => setMemberForm((curr) => ({ ...curr, ...patch }))}
+                  value={memberForm}
+                />
+              </details>
             </>
           )}
           <div className="modal-actions modal-wide">
