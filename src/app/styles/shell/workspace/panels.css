@@ -13,11 +13,12 @@
   min-width: 0;
 }
 
-.workspace-panel {
+.page-shell .panel.workspace-panel {
   margin: 0;
   border-radius: 0;
   border: 0;
-  background: var(--bg-panel);
+  background: transparent;
+  box-shadow: none;
 }
 
 .panel-header.compact-header {
