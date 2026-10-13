@@ -138,6 +138,16 @@
   outline-offset: 1px;
 }
 
+.sidebar-nested-nav-title {
+  margin: 0;
+  padding: 0.18rem 0.55rem 0.32rem;
+  color: var(--text-copy);
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.2;
+  pointer-events: none;
+}
+
 .sidebar[data-collapsed="true"] .sidebar-nav-group[data-has-compact-subitems="true"] {
   position: relative;
 }
