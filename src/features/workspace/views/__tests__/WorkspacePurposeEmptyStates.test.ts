@@ -69,13 +69,14 @@ describe("workspace purpose empty states", () => {
         artifacts: [],
         bootstrap: EMPTY_BOOTSTRAP,
         membersById: {},
+        openCreateWorkstreamModal: jest.fn(),
         openEditWorkstreamModal: jest.fn(),
       }),
     );
 
     expect(markup).toContain("Organize project workstreams here");
     expect(markup).toContain("No workflow lanes have been created");
-    expect(markup).not.toContain('aria-label="Add workflow"');
+    expect(markup).toContain('aria-label="Add workflow"');
     expect(markup).not.toContain("workspace-empty-state-action");
     expect(markup).not.toContain("No workflows match the current search.");
   });
@@ -97,6 +98,7 @@ describe("workspace purpose empty states", () => {
           ],
         },
         membersById: {},
+        openCreateWorkstreamModal: jest.fn(),
         openEditWorkstreamModal: jest.fn(),
       }),
     );
