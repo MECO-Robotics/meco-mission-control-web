@@ -56,11 +56,10 @@ function renderWorkLogsView(
 }
 
 describe("WorkLogsView", () => {
-  it("keeps work log totals within Activity", () => {
+  it("keeps work logs free of the extra summary eyebrow", () => {
     const html = renderWorkLogsView("logs");
 
-    expect(html).toContain("0 logs");
-    expect(html).toContain("contributors");
+    expect(html).not.toContain("workspace-inline-summary");
   });
 
   it("renders activity entries for logged work", () => {
@@ -122,8 +121,11 @@ describe("WorkLogsView", () => {
       ],
     });
 
-    expect(html).toContain("Changes across the current workspace");
-    expect(html).toContain("Group: Person");
+    expect(html).not.toContain("Changes across the current workspace");
+    expect(html).toContain('class="ops-table ops-table-header worklog-activity-table"');
+    expect(html).toContain("Date");
+    expect(html).toContain("Action");
+    expect(html).not.toContain("Group: Person");
     expect(html).toContain("Drive CAD");
     expect(html).toContain("Student One");
     expect(html).toContain("Created worklog Drive CAD");

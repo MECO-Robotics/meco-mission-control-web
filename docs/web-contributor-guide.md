@@ -60,7 +60,8 @@ view-owned custom controls slot, and the shared plus action. Keep the title
 visible at every responsive width. The search bar may switch to its compact
 icon state, but the title and plus action remain visible. Views must not render
 a second navigation bar or add a title, eyebrow, subtitle, tagline, or
-introductory header above their content. Keep operational screens free of
+introductory header above their content. Do not add eyebrow copy to workspace
+views unless the user explicitly asks for it. Keep operational screens free of
 explanatory header paragraphs; put product instructions in Help or tutorial
 content.
 
