@@ -4,6 +4,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { SubsystemPayload } from "@/types/payloads";
 import { PhotoUploadField } from "@/features/workspace/shared/media/PhotoUploadField";
 import { WorkspaceColorField } from "../WorkspaceColorField";
+import { FilterDropdown } from "@/features/workspace/shared/filters/FilterDropdown";
 
 import type { SubsystemEditorModalState } from "./buildSubsystemEditorModalState";
 import { formatIterationVersion } from "./buildSubsystemEditorModalState";
@@ -160,34 +161,16 @@ export function SubsystemEditorModalFields({
         </select>
       </label>
 
-      <label className="field">
+      <div className="field">
         <span style={labelStyle}>Mentors</span>
-        <select
-          multiple
-          onChange={(milestone) =>
-            setSubsystemDraft((current) => ({
-              ...current,
-              mentorIds: Array.from(milestone.currentTarget.selectedOptions, (option) => option.value),
-            }))
-          }
-          size={Math.min(
-            bootstrap.members.filter(
-              (member) => member.role === "mentor" || member.role === "admin",
-            ).length || 1,
-            5,
-          )}
-          style={fieldStyle}
+        <FilterDropdown allLabel="Select mentors" ariaLabel="Mentors" portalMenu compactSummary showAllOption={false}
+          buttonContent={<span>{subsystemDraft.mentorIds.length ? `Mentors (${subsystemDraft.mentorIds.length})` : "Select mentors"}</span>}
+          onChange={(selection) => setSubsystemDraft((current) => ({ ...current, mentorIds: selection }))}
+          options={bootstrap.members.filter((member) => member.role === "mentor" || member.role === "admin").map((member) => ({ id: member.id, name: member.name }))}
           value={subsystemDraft.mentorIds}
-        >
-          {bootstrap.members
-            .filter((member) => member.role === "mentor" || member.role === "admin")
-            .map((member) => (
-              <option key={member.id} value={member.id}>
-                {member.name}
-              </option>
-            ))}
-        </select>
-      </label>
+        />
+        {subsystemDraft.mentorIds.length ? <small>{subsystemDraft.mentorIds.map((id) => bootstrap.members.find((member) => member.id === id)?.name).filter(Boolean).join(", ")}</small> : null}
+      </div>
 
       <PhotoUploadField
         currentUrl={subsystemDraft.photoUrl}

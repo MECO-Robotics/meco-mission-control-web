@@ -144,7 +144,7 @@ export function TaskDetailsModal({
 
           {beforeFooterContent}
 
-          <div className="modal-actions modal-wide">
+          <div className="modal-actions modal-wide task-details-modal-actions">
             {footerActions}
             {onLogWork ? <button className="secondary-action" type="button" onClick={() => onLogWork(activeTask.id)}>Log work</button> : null}
             {onSubmitQa ? <button className="secondary-action" type="button" onClick={() => onSubmitQa(activeTask.id)}>Submit QA</button> : null}

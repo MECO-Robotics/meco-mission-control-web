@@ -136,6 +136,8 @@ describe("TaskEditorModal", () => {
     expect(taskEditorModalCss).toContain("width: min(920px, calc(100vw - 2rem));");
     expect(taskEditorModalCss).toContain("@media (max-width: 900px)");
     expect(taskEditorModalCss).toContain(".task-editor-modal .field > span:first-child");
+    expect(taskEditorModalCss).toContain(".task-editor-modal .task-details-modal-actions");
+    expect(taskEditorModalCss).toContain("position: sticky");
     expect(overviewCss).toContain(
       "grid-template-columns: minmax(8.5rem, 0.85fr) minmax(11rem, 1fr) minmax(13rem, 1.2fr);",
     );

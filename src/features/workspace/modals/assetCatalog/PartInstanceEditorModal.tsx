@@ -72,15 +72,19 @@ export function PartInstanceEditorModal({
           <option value="stock">Stock</option><option value="installed">Installed</option><option value="repair">Repair</option><option value="retired">Retired</option><option value="lost">Lost</option><option value="unlocated">Unlocated</option>
         </select>
       </label>
-      {location.kind === "installed" ? (
-        <>
-          <label className="field"><span>Installed subsystem</span><select value={location.subsystemId} onChange={(event) => setLocation({ ...location, subsystemId: event.target.value, mechanismId: null })}>{bootstrap.subsystems.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
-          <label className="field"><span>Installed mechanism</span><select value={location.mechanismId ?? ""} onChange={(event) => setLocation({ ...location, mechanismId: event.target.value || null })}><option value="">No mechanism</option>{locationMechanisms.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
-        </>
-      ) : null}
-      {location.kind === "stock" || location.kind === "repair" || location.kind === "retired" ? (
-        <label className="field"><span>{location.kind === "stock" ? "Stock location" : location.kind === "repair" ? "Repair location" : "Retirement location"}</span><input value={location.location ?? ""} onChange={(event) => setLocation({ ...location, location: event.target.value })} /></label>
-      ) : null}
+      <fieldset className="field modal-wide part-instance-location">
+        <legend>Physical placement</legend>
+        {location.kind === "installed" ? (
+          <>
+            <label className="field"><span>Installed subsystem</span><select value={location.subsystemId} onChange={(event) => setLocation({ ...location, subsystemId: event.target.value, mechanismId: null })}>{bootstrap.subsystems.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+            <label className="field"><span>Installed mechanism</span><select value={location.mechanismId ?? ""} onChange={(event) => setLocation({ ...location, mechanismId: event.target.value || null })}><option value="">No mechanism</option>{locationMechanisms.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+          </>
+        ) : null}
+        {location.kind === "stock" || location.kind === "repair" || location.kind === "retired" ? (
+          <label className="field"><span>{location.kind === "stock" ? "Stock location" : location.kind === "repair" ? "Repair location" : "Retirement location"}</span><input value={location.location ?? ""} onChange={(event) => setLocation({ ...location, location: event.target.value })} /></label>
+        ) : null}
+        {location.kind === "lost" || location.kind === "unlocated" ? <p className="section-copy">No physical location details for this status.</p> : null}
+      </fieldset>
       <p className="section-copy modal-wide">Robot readiness is derived from QA, open Risks, and Task state; this form only records physical location.</p>
       <PhotoUploadField currentUrl={partInstanceDraft.photoUrl} label="Part photo" onChange={(value) => setPartInstanceDraft((current) => ({ ...current, photoUrl: value }))} onUpload={(file) => projectId ? requestPhotoUpload(projectId, file) : Promise.reject(new Error("Choose an intended subsystem or ensure a project exists before uploading."))} />
       <div className="modal-actions modal-wide"><button className="secondary-action" onClick={closePartInstanceModal} type="button">Cancel</button><button className="primary-action" disabled={isSavingPartInstance} type="submit">{isSavingPartInstance ? "Saving..." : partInstanceModalMode === "create" ? "Add instance" : "Save changes"}</button></div>

@@ -33,6 +33,13 @@ export function QaReportEditorModal({
   };
   const taskRef = qaReportDraft.targetRefs.find((ref) => ref.kind === "task");
   const selectedTask = bootstrap.tasks.find((task) => task.id === taskRef?.id);
+  const taskOptions = bootstrap.tasks.map((task) => {
+    const subsystemName = task.subsystemIds
+      .map((subsystemId) => bootstrap.subsystems.find((subsystem) => subsystem.id === subsystemId)?.name)
+      .filter(Boolean)
+      .join(", ") || "Unknown subsystem";
+    return { id: task.id, name: `${task.title} - ${subsystemName}` };
+  });
   const qaReportPhotoProjectId = selectedTask?.projectId ?? bootstrap.projects[0]?.id ?? null;
   const participantOptions = bootstrap.members.map((member) => ({ id: member.id, name: member.name }));
 
@@ -64,32 +71,19 @@ export function QaReportEditorModal({
         >
           <label className="field modal-wide">
             <span>Task</span>
-            <select
-              aria-label="Task"
-              onChange={(milestone) =>
+            <FilterDropdown allLabel="Choose a task" ariaLabel="Task" portalMenu singleSelect showAllOption={false}
+              onChange={(selection) => {
+                const taskId = selection[0];
+                if (!taskId) return;
                 setQaReportDraft((current) => ({
                   ...current,
-                  projectId: bootstrap.tasks.find((task) => task.id === milestone.target.value)?.projectId ?? current.projectId,
-                  targetRefs: [{ kind: "task", id: milestone.target.value }],
-                }))
-              }
-              required
-              style={{
-                background: "var(--bg-row-alt)",
-                color: "var(--text-title)",
-                border: "1px solid var(--border-base)",
+                  projectId: bootstrap.tasks.find((task) => task.id === taskId)?.projectId ?? current.projectId,
+                  targetRefs: [{ kind: "task", id: taskId }],
+                }));
               }}
-              value={taskRef?.id ?? ""}
-            >
-              <option disabled value="">
-                Choose a task
-              </option>
-              {bootstrap.tasks.map((task) => (
-                <option key={task.id} value={task.id}>
-                  {task.title}
-                </option>
-              ))}
-            </select>
+              options={taskOptions} buttonContent={<span>{taskOptions.find((option) => option.id === taskRef?.id)?.name ?? "Choose a task"}</span>}
+              value={taskRef?.id ? [taskRef.id] : []}
+            />
             {selectedTask ? (
               <small style={{ color: "var(--text-copy)" }}>{selectedTask.summary}</small>
             ) : null}
@@ -130,7 +124,7 @@ export function QaReportEditorModal({
           </label>
           <label className="field modal-wide">
             <span>Participants</span>
-            <FilterDropdown allLabel="Select participants" ariaLabel="Participants" searchInTopbar compactSummary buttonContent={<span>{qaReportDraft.participantIds.length ? `Participants (${qaReportDraft.participantIds.length})` : "Select participants"}</span>} onChange={(selection) => setQaReportDraft((current) => ({ ...current, participantIds: selection }))} options={participantOptions} showAllOption={false} value={qaReportDraft.participantIds} />
+            <FilterDropdown allLabel="Select participants" ariaLabel="Participants" portalMenu compactSummary buttonContent={<span>{qaReportDraft.participantIds.length ? `Participants (${qaReportDraft.participantIds.length})` : "Select participants"}</span>} onChange={(selection) => setQaReportDraft((current) => ({ ...current, participantIds: selection }))} options={participantOptions} showAllOption={false} value={qaReportDraft.participantIds} />
             {qaReportDraft.participantIds.length ? <small>{qaReportDraft.participantIds.map((id) => participantOptions.find((option) => option.id === id)?.name).filter(Boolean).join(", ")}</small> : null}
           </label>
           <label className="field modal-wide">
@@ -161,9 +155,7 @@ export function QaReportEditorModal({
             }}
           />
           <WorkReportEditorActions
-            disabled={
-              isSavingQaReport || bootstrap.tasks.length === 0 || bootstrap.members.length === 0
-            }
+            disabled={isSavingQaReport || bootstrap.tasks.length === 0 || !taskRef?.id || bootstrap.members.length === 0 || qaReportDraft.participantIds.length === 0}
             isSaving={isSavingQaReport}
             onCancel={closeQaReportModal}
             submitLabel="Add QA report"
