@@ -56,6 +56,7 @@ export function RisksView({
       <AttentionView
         activePersonFilter={activePersonFilter}
         bootstrap={bootstrap}
+        showToolbar={false}
         onOpenSource={onOpenSource}
         onOpenRisk={(riskId) => {
           const targetRisk = bootstrap.risks.find((risk) => risk.id === riskId);
