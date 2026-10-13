@@ -7,7 +7,6 @@ import { buildHomeViewModel } from "@/features/workspace/views/overview/overview
 import { summarizeUri } from "@/features/workspace/views/artifacts/artifactInventoryModel";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type {
-  EscalationRecord,
   MeetingRecord,
   MilestoneRequirementRecord,
   QaRequestRecord,
@@ -109,7 +108,7 @@ describe("normalizeBootstrapPayload", () => {
     expect(summarizeUri(normalized.artifacts[0]!.uri)).toBe("example.org/build-notes");
   });
 
-  it("preserves calendar and triage bootstrap records", () => {
+  it("preserves calendar bootstrap records", () => {
     const meetings: MeetingRecord[] = [
       {
         id: "meeting-1",
@@ -123,13 +122,6 @@ describe("normalizeBootstrapPayload", () => {
         description: "",
       },
     ];
-    const escalations: EscalationRecord[] = [
-      {
-        title: "Battery shipment delayed",
-        detail: "Critical battery order is delayed by 3 days.",
-        severity: "high",
-      },
-    ];
     const payload: BootstrapPayload = {
       ...EMPTY_BOOTSTRAP,
       meetings,
@@ -141,14 +133,12 @@ describe("normalizeBootstrapPayload", () => {
           totalHours: 3,
         },
       ],
-      escalations,
     };
 
     const normalized = normalizeBootstrapPayload(payload);
 
     expect(normalized.meetings).toEqual(meetings);
     expect(normalized.attendanceRecords).toEqual(payload.attendanceRecords);
-    expect(normalized.escalations).toEqual(escalations);
   });
 
   it("preserves QA requests required by the platform bootstrap contract", () => {

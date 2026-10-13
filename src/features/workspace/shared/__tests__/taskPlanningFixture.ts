@@ -97,4 +97,5 @@ export const bootstrap: BootstrapPayload = {
   purchaseItems: [],
   manufacturingProcesses: [],
   milestoneRequirements: [],
+  actions: [],
 };

@@ -2,7 +2,7 @@
 
 React + Vite browser frontend for MECO Mission Control.
 
-This repository contains the broad-screen web workspace for Mission Control: planning, readiness review, robot configuration, inventory, manufacturing coordination, roster operations, reports, and help/tutorial workflows. It runs against `meco-mission-control-platform` and is deployed as static assets behind `nginx`.
+This repository contains the broad-screen web workspace for Mission Control: planning, readiness review, robot configuration, inventory, manufacturing coordination, roster operations, reports, and help/tutorial workflows. It is designed to run against `meco-mission-control-platform` and deploy as static assets behind `nginx`. The prototype is not deployed or serving real users or operational data.
 
 Use this README as the setup entry point. Use [`docs/web-contributor-guide.md`](docs/web-contributor-guide.md) for implementation conventions and [`docs/CURRENT_WEB_SPEC.md`](docs/CURRENT_WEB_SPEC.md) as the current product/spec reference.
 
@@ -62,7 +62,7 @@ Current web responsibilities are organized into Home, Work, Resources and Team, 
 
 ## System Overview
 
-Current production topology:
+Intended deployment topology:
 
 ```text
 Browser
@@ -85,7 +85,7 @@ Repos involved:
 - `meco-mission-control-platform`: Fastify + Prisma API and persistence
 - `meco-mission-control-mobile`: mobile client for fast in-shop updates
 
-`deploy/pm-web.nginx.conf` currently redirects HTTP to HTTPS on `meco-pm.duckdns.org`, serves static web files from `/opt/pm-web/site`, and proxies API/health routes to `127.0.0.1:8080`.
+`deploy/pm-web.nginx.conf` describes the target nginx setup: redirect HTTP to HTTPS on `meco-pm.duckdns.org`, serve static web files from `/opt/pm-web/site`, and proxy API/health routes to `127.0.0.1:8080`.
 
 ## Quick Start
 
@@ -678,7 +678,7 @@ Check:
 
 ## Cross-Repo Responsibilities
 
-Use [`docs/cross-repo-architecture.md`](docs/cross-repo-architecture.md) for the current web, mobile, platform, Postgres, storage, Slack, Onshape, and deployment relationship diagram.
+Use [`public/docs/cross-repo-architecture.md`](public/docs/cross-repo-architecture.md) for the target web, mobile, platform, Postgres, storage, Slack, Onshape, and deployment relationship diagram.
 
 Related repos:
 
