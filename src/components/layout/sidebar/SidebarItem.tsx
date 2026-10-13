@@ -13,11 +13,12 @@ interface SidebarItemProps {
   isActive: boolean;
   activeViewId: string;
   isCollapsed: boolean;
+  hasSubItems?: boolean;
   onSelect: (config: SidebarItemConfig) => void;
   onDisabledSelect: (config: SidebarItemConfig) => void;
 }
 
-export function SidebarItem({ config, isActive, activeViewId, isCollapsed, onSelect, onDisabledSelect }: SidebarItemProps) {
+export function SidebarItem({ config, isActive, activeViewId, isCollapsed, hasSubItems = false, onSelect, onDisabledSelect }: SidebarItemProps) {
   const [isHovered, setIsHovered] = useState(false);
   const Icon = icons[config.icon as keyof typeof icons];
 
@@ -26,7 +27,7 @@ export function SidebarItem({ config, isActive, activeViewId, isCollapsed, onSel
       className="sidebar-nav-item"
       aria-label={config.label}
       aria-current={isActive ? "page" : undefined}
-      title={isCollapsed ? config.label : undefined}
+      title={isCollapsed && !hasSubItems ? config.label : undefined}
       data-active={isActive ? "true" : "false"}
       data-enabled={config.isEnabled ? "true" : "false"}
       data-robot-disabled={config.isDisabled ? "true" : "false"}
@@ -42,7 +43,7 @@ export function SidebarItem({ config, isActive, activeViewId, isCollapsed, onSel
     >
       <span aria-hidden="true" className="sidebar-nav-item-icon">{Icon ? <Icon size={14} /> : null}</span>
       {!isCollapsed ? <span className="sidebar-nav-item-label">{config.label}</span> : null}
-      {isCollapsed ? (
+      {isCollapsed && !hasSubItems ? (
         <span aria-hidden="true" className="sidebar-nav-item-rollout" data-visible={isHovered ? "true" : "false"}>
           {config.label}
         </span>

@@ -35,6 +35,19 @@ describe("flat sidebar navigation", () => {
     expect(markup).toContain('aria-label="Parts"');
     expect(markup).not.toContain("sidebar-section-heading");
   });
+  it("opens nested view selectors on hover or keyboard focus when folded", () => {
+    const markup = renderSidebar([], "worklogs", { isCollapsed: true, worklogsView: "activity" });
+
+    expect(markup).toContain('aria-label="Activity views" class="sidebar-nested-nav sidebar-nested-nav-compact"');
+    expect(markup).toContain('aria-label="Work logs"');
+    expect(markup).toContain('aria-label="Changes"');
+    expect(markup).toMatch(/<div class="sidebar-nav-group" data-has-compact-subitems="true">[\s\S]*?data-tutorial-target="sidebar-view-work-activity"/);
+    expect(markup).toMatch(/<div class="sidebar-nav-group"><button(?=[^>]*data-tutorial-target="sidebar-view-resources-materials")/);
+
+    const sidebarCss = readFileSync("src/app/styles/shell/sidebar/sidebar-navigation.css", "utf8");
+    expect(sidebarCss).toContain('.sidebar-nav-group[data-has-compact-subitems="true"]:hover .sidebar-nested-nav-compact');
+    expect(sidebarCss).toContain('.sidebar-nav-group[data-has-compact-subitems="true"]:focus-within .sidebar-nested-nav-compact');
+  });
   it("keeps unavailable Resources subitems visible and openable", () => {
     const markup = renderSidebar([], "inventory");
     expect(markup).toContain('data-enabled="false"');

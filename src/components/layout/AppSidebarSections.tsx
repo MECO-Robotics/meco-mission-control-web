@@ -16,6 +16,11 @@ const QA_REPORT_VIEWS = [
   { icon: ClipboardCheck, label: "QA results", key: "qa", target: { tab: "worklogs", worklogsView: "qa" } },
   { icon: FileText, label: "Milestone results", key: "results", target: { tab: "worklogs", worklogsView: "results" } },
 ] as const;
+const SUBVIEW_PARENT_IDS = new Set<NavigationSubItemId>([
+  "work-schedule",
+  "work-activity",
+  "resources-qa-reports",
+]);
 
 interface SidebarSubview {
   icon: LucideIcon;
@@ -24,14 +29,15 @@ interface SidebarSubview {
   target: NavigationTarget;
 }
 
-function SidebarSubviews({ activeKey, ariaLabel, items, onSelect }: {
+function SidebarSubviews({ activeKey, ariaLabel, compact, items, onSelect }: {
   activeKey: string;
   ariaLabel: string;
+  compact: boolean;
   items: readonly SidebarSubview[];
   onSelect: (target: NavigationTarget) => void;
 }) {
   return (
-    <div aria-label={ariaLabel} className="sidebar-nested-nav">
+    <div aria-label={ariaLabel} className={`sidebar-nested-nav${compact ? " sidebar-nested-nav-compact" : ""}`}>
       {items.map(({ icon: Icon, key, label, target }) => {
         const isActiveView = activeKey === key;
         return (
@@ -87,23 +93,28 @@ export function AppSidebarSections({
         </h2>
       )}
       {subItems.map((item) => (
-        <div className="sidebar-nav-group" key={item.id}>
+        <div
+          className="sidebar-nav-group"
+          data-has-compact-subitems={isCollapsed && SUBVIEW_PARENT_IDS.has(item.id) ? "true" : undefined}
+          key={item.id}
+        >
         <SidebarItem
           config={item}
           isActive={activeSubItemId === item.id}
           activeViewId={activeSubItemId ?? ""}
           isCollapsed={isCollapsed}
+          hasSubItems={SUBVIEW_PARENT_IDS.has(item.id)}
           onSelect={(config) => onSubItemSelect(config.target)}
           onDisabledSelect={() => onDisabledSubItemSelect()}
         />
-        {item.id === "work-schedule" && activeSubItemId === "work-schedule" && !isCollapsed ? (
-          <SidebarSubviews activeKey={activeTaskView} ariaLabel="Schedule views" items={SCHEDULE_VIEWS} onSelect={onSubItemSelect} />
+        {item.id === "work-schedule" && (isCollapsed || activeSubItemId === "work-schedule") ? (
+          <SidebarSubviews activeKey={activeTaskView} ariaLabel="Schedule views" compact={isCollapsed} items={SCHEDULE_VIEWS} onSelect={onSubItemSelect} />
         ) : null}
-        {item.id === "work-activity" && activeSubItemId === "work-activity" && !isCollapsed ? (
-          <SidebarSubviews activeKey={activeWorklogsView} ariaLabel="Activity views" items={ACTIVITY_VIEWS} onSelect={onSubItemSelect} />
+        {item.id === "work-activity" && (isCollapsed || activeSubItemId === "work-activity") ? (
+          <SidebarSubviews activeKey={activeWorklogsView} ariaLabel="Activity views" compact={isCollapsed} items={ACTIVITY_VIEWS} onSelect={onSubItemSelect} />
         ) : null}
-        {item.id === "resources-qa-reports" && activeSubItemId === "resources-qa-reports" && !isCollapsed ? (
-          <SidebarSubviews activeKey={activeWorklogsView} ariaLabel="QA and report views" items={QA_REPORT_VIEWS} onSelect={onSubItemSelect} />
+        {item.id === "resources-qa-reports" && (isCollapsed || activeSubItemId === "resources-qa-reports") ? (
+          <SidebarSubviews activeKey={activeWorklogsView} ariaLabel="QA and report views" compact={isCollapsed} items={QA_REPORT_VIEWS} onSelect={onSubItemSelect} />
         ) : null}
         </div>
       ))}
