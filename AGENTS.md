@@ -18,3 +18,4 @@
 - Keep generated diagnostics outside tracked source. Run checks relevant to the change and report actual outcomes and limitations; never claim unrun checks passed.
 - Web merge protections are intentionally disabled during prototype development (user direction, 2026-09-09). Keep CI validation and dedicated-worktree PRs; do not reinstate approval/digest gates without user direction. Deployment approvals remain separate. See docs/prototype-merge-policy.md.
 - Before making any code or configuration modification, invoke the Moyu skill and apply its scope checklist. This is mandatory for every LLM-assisted modification, regardless of size.
+- Do not add eyebrow copy to workspace views unless the user explicitly asks for it.

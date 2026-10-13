@@ -10,6 +10,10 @@
   justify-content: flex-start;
 }
 
+.table-shell > :nth-child(2n of .ops-row) {
+  background-color: var(--bg-row-alt);
+}
+
 .purchase-table {
   grid-template-columns: var(--workspace-grid-template, 2.4fr 1fr 0.5fr 0.8fr 0.8fr 0.8fr 0.8fr);
 }
