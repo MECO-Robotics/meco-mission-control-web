@@ -27,6 +27,21 @@ describe("RisksView", () => {
     expect(markup).not.toContain("Member two risk");
   });
 
+  it("renders only one shared search on the Risks view", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(RisksView, {
+        activePersonFilter: [],
+        bootstrap: createBootstrap(),
+        onCreateRisk: jest.fn(),
+        onDeleteRisk: jest.fn(),
+        onUpdateRisk: jest.fn(),
+      }),
+    );
+
+    expect(markup.match(/aria-label="Search risks"/g)).toHaveLength(1);
+    expect(markup).not.toContain('aria-label="Search attention"');
+  });
+
   it("keeps hours progress and task completion semantics separate in dashboard health", () => {
     const markup = renderToStaticMarkup(
       React.createElement(RiskMetricsSection, buildRiskViewScopeData({
