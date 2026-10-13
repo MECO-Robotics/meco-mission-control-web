@@ -1,6 +1,25 @@
 .task-editor-modal .task-details-modal {
   width: min(920px, calc(100vw - 2rem));
   max-width: 920px;
+  overflow: hidden;
+}
+
+.task-editor-modal .task-details-header {
+  flex: 0 0 auto;
+}
+
+.task-editor-modal .modal-form {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.task-editor-modal .task-details-modal-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  padding-block: 0.65rem;
+  background: var(--bg-panel);
+  border-top: 1px solid var(--border-base);
 }
 
 .task-editor-modal .modal-form {

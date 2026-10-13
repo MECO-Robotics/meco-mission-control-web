@@ -185,6 +185,9 @@ describe("workspace creation modals", () => {
     expect(markup).toContain("task-details-close-button");
     expect(markup).toContain('aria-label="Close QA report modal"');
     expect(markup).toContain("modal-form task-details-grid");
+    expect(markup).toContain('aria-label="Task: Inspect intake - Drive"');
+    expect(markup).toContain("Inspect intake - Drive");
+    expect(markup).toContain('type="submit">Add QA report');
     expect(markup).toContain("Result");
     expect(markup).toContain("Notes");
     expect(markup).toContain('aria-label="Participants: Student"');

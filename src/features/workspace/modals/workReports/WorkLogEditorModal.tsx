@@ -32,9 +32,6 @@ export function WorkLogEditorModal({
   };
   const selectedTask = bootstrap.tasks.find((task) => task.id === workLogDraft.taskId);
   const workLogPhotoProjectId = selectedTask?.projectId ?? bootstrap.projects[0]?.id ?? null;
-  const selectedSubsystem = selectedTask
-    ? bootstrap.subsystems.find((subsystem) => subsystem.id === selectedTask.subsystemIds[0])
-    : null;
   const taskOptions = bootstrap.tasks.map((task) => {
     const subsystemName = task.subsystemIds
       .map((subsystemId) => bootstrap.subsystems.find((subsystem) => subsystem.id === subsystemId)?.name)
@@ -72,7 +69,7 @@ export function WorkLogEditorModal({
         >
           <label className="field modal-wide">
             <span>Task</span>
-            <FilterDropdown allLabel="Choose a task" ariaLabel="Task" searchInTopbar onChange={(selection) => {
+            <FilterDropdown allLabel="Choose a task" ariaLabel="Task" portalMenu onChange={(selection) => {
               const taskId = selection[0];
               if (taskId) setWorkLogDraft((current) => ({ ...current, taskId }));
             }} options={taskOptions} showAllOption={false} singleSelect buttonContent={<span>{taskOptions.find((option) => option.id === workLogDraft.taskId)?.name ?? "Choose a task"}</span>} value={workLogDraft.taskId ? [workLogDraft.taskId] : []} />
@@ -81,11 +78,7 @@ export function WorkLogEditorModal({
                 No tasks are available in this filtered workspace.
               </small>
             ) : null}
-            {selectedTask ? (
-              <small style={{ color: "var(--text-copy)" }}>
-                {selectedSubsystem?.name ?? "Unknown subsystem"} - {selectedTask.summary}
-              </small>
-            ) : null}
+            {selectedTask ? <small style={{ color: "var(--text-copy)" }}>{selectedTask.summary}</small> : null}
           </label>
           <label className="field">
             <span>Date</span>
@@ -119,7 +112,7 @@ export function WorkLogEditorModal({
           </label>
           <label className="field modal-wide">
             <span>Participants</span>
-            <FilterDropdown allLabel="Select participants" ariaLabel="Participants" searchInTopbar compactSummary buttonContent={<span>{workLogDraft.participantIds.length ? `Participants (${workLogDraft.participantIds.length})` : "Select participants"}</span>} onChange={(selection) => setWorkLogDraft((current) => ({ ...current, participantIds: selection }))} options={participantOptions} showAllOption={false} value={workLogDraft.participantIds} />
+            <FilterDropdown allLabel="Select participants" ariaLabel="Participants" portalMenu compactSummary buttonContent={<span>{workLogDraft.participantIds.length ? `Participants (${workLogDraft.participantIds.length})` : "Select participants"}</span>} onChange={(selection) => setWorkLogDraft((current) => ({ ...current, participantIds: selection }))} options={participantOptions} showAllOption={false} value={workLogDraft.participantIds} />
             {workLogDraft.participantIds.length ? <small>{workLogDraft.participantIds.map((id) => participantOptions.find((option) => option.id === id)?.name).filter(Boolean).join(", ")}</small> : null}
           </label>
           <label className="field modal-wide">
