@@ -41,11 +41,12 @@ describe("WorkflowView", () => {
         artifacts: [],
         bootstrap: createBootstrap(),
         membersById: {},
+        openCreateWorkstreamModal: jest.fn(),
         openEditWorkstreamModal: jest.fn(),
       }),
     );
 
-    expect(markup).not.toContain('aria-label="Add workflow"');
+    expect(markup).toContain('aria-label="Add workflow"');
   });
 
   it("surfaces workflow color metadata in the rendered row", () => {
@@ -54,6 +55,7 @@ describe("WorkflowView", () => {
         artifacts: [],
         bootstrap: createBootstrap(),
         membersById: {},
+        openCreateWorkstreamModal: jest.fn(),
         openEditWorkstreamModal: jest.fn(),
       }),
     );

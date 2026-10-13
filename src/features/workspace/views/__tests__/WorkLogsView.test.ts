@@ -129,11 +129,11 @@ describe("WorkLogsView", () => {
     expect(html).toContain("Created worklog Drive CAD");
   });
 
-  it("provides the shared Log work plus action on Activity", () => {
+  it("does not provide a Log work action on Activity", () => {
     const html = renderWorkLogsView("activity");
 
-    expect(html).toContain('aria-label="Log work"');
-    expect(html).toContain('class="topbar-add-button topbar-add-menu-trigger secondary-action icon-button"');
+    expect(html).not.toContain('aria-label="Log work"');
+    expect(html).not.toContain('class="topbar-add-button topbar-add-menu-trigger secondary-action icon-button"');
   });
 
   it("provides the shared Add QA report plus action on QA reports", () => {
