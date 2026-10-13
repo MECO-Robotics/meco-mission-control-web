@@ -32,7 +32,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
         <AppTopbar
       activeViewLabel={activeViewLabel}
       isDarkMode={c.isDarkMode}
-      isSidebarCollapsed={c.isSidebarCollapsed}
+      isSidebarCollapsed={c.isSidebarCollapsed || c.isSidebarOverlay}
       onCreateMilestone={handleCreateMilestone}
       onCreatePart={c.openCreatePartDefinitionModal}
       onCreateQaReport={c.openCreateQaReportModal}
