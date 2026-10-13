@@ -39,14 +39,17 @@ describe("flat sidebar navigation", () => {
     const markup = renderSidebar([], "worklogs", { isCollapsed: true, worklogsView: "activity" });
 
     expect(markup).toContain('aria-label="Activity views" class="sidebar-nested-nav sidebar-nested-nav-compact"');
+    expect(markup).toContain('<p class="sidebar-nested-nav-title">Activity</p>');
     expect(markup).toContain('aria-label="Work logs"');
     expect(markup).toContain('aria-label="Changes"');
+    expect(markup).not.toMatch(/<button[^>]*>Activity<\/button>/);
     expect(markup).toMatch(/<div class="sidebar-nav-group" data-has-compact-subitems="true">[\s\S]*?data-tutorial-target="sidebar-view-work-activity"/);
     expect(markup).toMatch(/<div class="sidebar-nav-group"><button(?=[^>]*data-tutorial-target="sidebar-view-resources-materials")/);
 
     const sidebarCss = readFileSync("src/app/styles/shell/sidebar/sidebar-navigation.css", "utf8");
     expect(sidebarCss).toContain('.sidebar-nav-group[data-has-compact-subitems="true"]:hover .sidebar-nested-nav-compact');
     expect(sidebarCss).toContain('.sidebar-nav-group[data-has-compact-subitems="true"]:focus-within .sidebar-nested-nav-compact');
+    expect(sidebarCss).toMatch(/\.sidebar-nested-nav-title\s*\{[^}]*font-size:\s*0\.7rem;[^}]*pointer-events:\s*none;/);
   });
   it("keeps unavailable Resources subitems visible and openable", () => {
     const markup = renderSidebar([], "inventory");

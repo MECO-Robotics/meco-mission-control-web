@@ -29,15 +29,17 @@ interface SidebarSubview {
   target: NavigationTarget;
 }
 
-function SidebarSubviews({ activeKey, ariaLabel, compact, items, onSelect }: {
+function SidebarSubviews({ activeKey, ariaLabel, compact, items, onSelect, title }: {
   activeKey: string;
   ariaLabel: string;
   compact: boolean;
   items: readonly SidebarSubview[];
   onSelect: (target: NavigationTarget) => void;
+  title: string;
 }) {
   return (
-    <div aria-label={ariaLabel} className={`sidebar-nested-nav${compact ? " sidebar-nested-nav-compact" : ""}`}>
+    <div aria-label={ariaLabel} className={`sidebar-nested-nav${compact ? " sidebar-nested-nav-compact" : ""}`} role="group">
+      {compact ? <p className="sidebar-nested-nav-title">{title}</p> : null}
       {items.map(({ icon: Icon, key, label, target }) => {
         const isActiveView = activeKey === key;
         return (
@@ -108,13 +110,13 @@ export function AppSidebarSections({
           onDisabledSelect={() => onDisabledSubItemSelect()}
         />
         {item.id === "work-schedule" && (isCollapsed || activeSubItemId === "work-schedule") ? (
-          <SidebarSubviews activeKey={activeTaskView} ariaLabel="Schedule views" compact={isCollapsed} items={SCHEDULE_VIEWS} onSelect={onSubItemSelect} />
+          <SidebarSubviews activeKey={activeTaskView} ariaLabel="Schedule views" compact={isCollapsed} items={SCHEDULE_VIEWS} onSelect={onSubItemSelect} title="Schedule" />
         ) : null}
         {item.id === "work-activity" && (isCollapsed || activeSubItemId === "work-activity") ? (
-          <SidebarSubviews activeKey={activeWorklogsView} ariaLabel="Activity views" compact={isCollapsed} items={ACTIVITY_VIEWS} onSelect={onSubItemSelect} />
+          <SidebarSubviews activeKey={activeWorklogsView} ariaLabel="Activity views" compact={isCollapsed} items={ACTIVITY_VIEWS} onSelect={onSubItemSelect} title="Activity" />
         ) : null}
         {item.id === "resources-qa-reports" && (isCollapsed || activeSubItemId === "resources-qa-reports") ? (
-          <SidebarSubviews activeKey={activeWorklogsView} ariaLabel="QA and report views" compact={isCollapsed} items={QA_REPORT_VIEWS} onSelect={onSubItemSelect} />
+          <SidebarSubviews activeKey={activeWorklogsView} ariaLabel="QA and report views" compact={isCollapsed} items={QA_REPORT_VIEWS} onSelect={onSubItemSelect} title="QA / Reports" />
         ) : null}
         </div>
       ))}
