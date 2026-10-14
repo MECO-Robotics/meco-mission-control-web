@@ -14,7 +14,7 @@ The app uses the original sidebar implementation: Home shortcut, expandable Work
 
 | Area | Views | Consolidation |
 | --- | --- | --- |
-| Home | Action Required, next four milestone timeline, task status distribution | Uses selected project scope; one attention row per source record; detailed metrics remain in Risks |
+| Home | Action Required, next four milestone timeline, task status distribution | Uses selected project scope; one attention row per source record; Risks provides build review and linked work |
 | Work | Tasks, Schedule, Risks, Activity | Schedule offers Calendar, Timeline and Agenda; Activity filters work logs, changes, QA and milestone results |
 | Resources | Materials/Documents, Parts, Purchases, Manufacturing, Structure | Manufacturing uses a process filter; installed parts live under their definition; CAD import opens from Structure |
 | Team | People, Teams | People combines directory, presence, availability and individual workload; Teams manages ResponsibleGroups, adds or reuses matching WorkType disciplines, and derives team workload/capacity |
@@ -41,9 +41,11 @@ See [navigation-consolidation.md](navigation-consolidation.md) for the cross-cli
 
 ### Risks triage
 
-Risks is one ranked queue of risk records and actionable task signals. Each record appears once with its combined reasons, owner, priority and due context. The default ordering follows urgency; search, source/owner/signal filters and priority/title/due-date sorting operate on this same queue. Resolved risks are excluded by default and can be included explicitly. The severity board and repeated Unassigned, Blocked and Overdue lists are removed.
+Risks is a build-review surface with coordinated charts, a ranked queue and a selected-record inspector. Bottlenecks by area show unfinished work split into blocked, waiting on dependencies, QA and other work. Deadline exposure compares recorded task and mitigation deadlines. Risk response shows whether active risks have a named owner and a linked mitigation, with critical/high counts visible. These are current-state diagnostics, not a delivery forecast or an aggregate health score. Tasks linked to multiple areas appear in each area's chart.
 
-Risk rows provide quick ownership, severity and status changes with pending and failure feedback. Task rows open the existing task details for task actions. Risk details retain the full mitigation, related-record and audit context, with the existing editor for broader changes. Add risk remains in the shared topbar plus menu. Project health stays collapsed below the queue and is calculated separately from queue search and filters.
+Selecting a chart segment filters the same deduplicated record queue; the selected context can be cleared in the shared topbar. Search, source/owner/signal filters and priority/title/due-date sorting apply to this queue. Resolved risks are excluded by default and can be included explicitly. Selecting a record reveals its context, next actions and an explicit relationship diagram. The diagram distinguishes attached work, mitigation and prerequisite links, reports missing records, and preserves cycles without inventing associations. Manufacturing attachments identify tasks with manufacturing details; purchase attachments identify purchase records and their linked tasks. A mitigation task is a response, not automatically affected work.
+
+Ownership, severity and status changes live with the selected risk and show pending/failure feedback. Task actions use the existing task details. The full risk editor retains attachments, mitigation and audit context. Add risk remains in the shared topbar plus menu. The old severity board, repeated action-count lists, Project health dashboard and hours-based pseudo-progress are removed.
 
 Home shares the same risks-and-tasks queue and urgency rules for its Action Required preview. Its five-row limit does not limit the Risks queue. Purchasing, manufacturing and report review records stay in their owning domain views.
 
@@ -84,7 +86,7 @@ Key implications for web-app changes:
 
 The following recent PR themes are now part of the current spec:
 
-- Metrics is a decision-focused dashboard, not just a statistics page.
+- Risks connects current bottlenecks, recorded deadlines and response gaps to reviewable records and explicit dependency links.
 - Home prioritizes Action Required, then the next four milestones, with task status distribution as its only supporting chart. It uses current scoped data and does not imply historical trends or an aggregate readiness score.
 - Attention has become Action Required and should function as cross-domain triage.
 - WorkLogs Activity now shows platform audit actions, not only work-log records, and follows the
@@ -118,5 +120,5 @@ npm run test:ci -- WorkLogsView
 - Do not describe the old primary-tab model as the current user-facing navigation.
 - Do not describe Part Mapping as a normal standalone page without noting robot-only gating and Robot Configuration ownership.
 - Do not describe Attention as the current label; user-facing copy is Action Required.
-- Do not treat Metrics as a generic chart page; it is now decision and readiness oriented.
+- Do not restore the retired Project health score or treat logged hours as completion. Risks shows recorded work states, deadlines and response links.
 - Do not place Robot Configuration under generic task planning copy without noting its configuration role.

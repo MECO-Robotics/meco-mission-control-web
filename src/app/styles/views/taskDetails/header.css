@@ -26,7 +26,8 @@
   color: var(--text-title);
 }
 
-.modal-card .icon-button.task-details-close-button {
+.modal-card .icon-button.task-details-close-button,
+.risk-review-context .icon-button.task-details-close-button {
   color: #fff !important;
   border: 1px solid color-mix(in srgb, var(--official-red) 72%, black) !important;
   background: linear-gradient(135deg, #ea1c2d, #b81d2c) !important;
@@ -43,7 +44,9 @@
 }
 
 .modal-card .icon-button.task-details-close-button:hover,
-.modal-card .icon-button.task-details-close-button:focus-visible {
+.modal-card .icon-button.task-details-close-button:focus-visible,
+.risk-review-context .icon-button.task-details-close-button:hover,
+.risk-review-context .icon-button.task-details-close-button:focus-visible {
   background: linear-gradient(135deg, #f02c3d, #8f1320) !important;
   color: #fff !important;
   border-color: color-mix(in srgb, var(--official-red) 85%, black) !important;

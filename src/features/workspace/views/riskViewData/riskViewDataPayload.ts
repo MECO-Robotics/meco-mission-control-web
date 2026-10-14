@@ -3,14 +3,6 @@ import type { RiskRecord } from "@/types/recordsReporting";
 
 export interface SelectOption { id: string; name: string }
 
-export function formatRiskSeverity(severity: RiskPayload["severity"]) {
-  return severity === "critical" ? "Critical" : severity === "high" ? "High" : severity === "medium" ? "Medium" : "Low";
-}
-
-export function getRiskSeverityPillClassName(severity: RiskPayload["severity"]) {
-  return severity === "critical" || severity === "high" ? "status-pill status-pill-danger" : severity === "medium" ? "status-pill status-pill-warning" : "status-pill status-pill-neutral";
-}
-
 export function toRiskPayload(risk: RiskRecord): RiskPayload {
   return {
     projectId: risk.projectId, title: risk.title, detail: risk.detail,

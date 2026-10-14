@@ -15,7 +15,7 @@ export function filterRiskTriageRows(rows: AttentionQueueRow[], filters: RiskTri
     (filters.source === "all" || row.source === filters.source)
     && (filters.owner === "all" || (filters.owner === "unassigned" ? !row.ownerMemberId : row.ownerMemberId === filters.owner))
     && (filters.signal === "all" || row.signals.includes(filters.signal))
-    && (!query || [row.title, row.context, row.priority, row.status, ...row.reasons].join(" ").toLocaleLowerCase().includes(query)),
+    && (!query || [row.title, row.detail, row.context, ...(row.areaLabels ?? []), row.priority, row.status, ...row.reasons].join(" ").toLocaleLowerCase().includes(query)),
   );
   const direction = filters.sortDirection === "asc" ? 1 : -1;
   if (filters.sortField === "priority") return direction === 1 ? filtered : filtered.reverse();

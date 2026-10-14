@@ -5,7 +5,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { RiskPayload } from "@/types/payloads";
 import type { RiskRecord } from "@/types/recordsReporting";
 
-import { buildRiskViewScopeData } from "./riskViewData/riskViewDataScope";
+import { filterSelectionMatchesTaskPeople } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { buildRiskViewLookups } from "./riskViewData/riskViewDataLookups";
 import { sanitizeRiskPatch, sanitizeRiskPayload, toRiskPayload } from "./riskViewData/riskViewDataPayload";
 
@@ -43,8 +43,8 @@ export function useRisksViewModel({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const viewData = useMemo(() => {
-    const { pools, metrics } = buildRiskViewScopeData({ activePersonFilter, bootstrap });
-    return { metrics, ...buildRiskViewLookups({ bootstrap, scope: pools }) };
+    const scopedTasks = bootstrap.tasks.filter(task => filterSelectionMatchesTaskPeople(activePersonFilter, task));
+    return buildRiskViewLookups({ bootstrap, scopedTasks });
   }, [activePersonFilter, bootstrap]);
 
   const [draft, setDraft] = useState<RiskPayload>({
@@ -80,7 +80,6 @@ export function useRisksViewModel({
   const openRiskDetails = useCallback((risk: RiskRecord) => {
     if (writeSession.current.pending.has(risk.id)) return;
     closeEditor();
-    editingRiskId.current = risk.id;
     setDraft(toRiskPayload(risk));
     setActiveRiskId(risk.id);
     setEditorMode("detail");

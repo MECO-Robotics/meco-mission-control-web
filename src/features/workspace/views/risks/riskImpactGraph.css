@@ -1,0 +1,26 @@
+.risk-impact { min-width: 0; }
+.risk-impact h3 { margin: 1rem 0 .4rem; color: var(--text-title); }
+.risk-impact-counts { margin: 0 0 .65rem; color: var(--text-copy); font-size: .85rem; font-variant-numeric: tabular-nums; }
+.risk-impact-cycle { color: var(--status-warning-text); background: var(--status-warning-bg); padding: .5rem; }
+.risk-impact-scroll { overflow: auto; max-width: 100%; max-height: 30rem; scrollbar-color: var(--border-strong) var(--bg-panel); }
+.risk-impact-canvas { position: relative; }
+.risk-impact-canvas > svg { position: absolute; inset: 0; color: var(--text-muted); }
+.risk-impact-edge path { fill: none; stroke: currentColor; stroke-width: 1; }
+.risk-impact-edge text { fill: var(--text-copy); font-size: 11px; paint-order: stroke; stroke: var(--bg-panel); stroke-width: 4px; stroke-linejoin: round; }
+.risk-impact-edge.is-blocking { color: var(--status-danger-text); }
+.risk-impact-node { position: absolute; width: 208px; height: 72px; display: grid; align-content: center; gap: .2rem; padding: .55rem .65rem; border: 1px solid var(--border-base); border-radius: 8px; background: var(--bg-panel); color: var(--text-title); text-align: left; font: inherit; cursor: pointer; }
+.risk-impact-node small { font-size: .75rem; color: var(--text-copy); }
+.risk-impact-node strong { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-size: .85rem; line-height: 1.25; }
+.risk-impact-node:hover { border-color: var(--text-link); }
+.risk-impact-node.is-selected { border-color: var(--status-info-text); background: var(--status-info-bg); color: var(--status-info-text); }
+.risk-impact-node.is-selected small { color: var(--status-info-text); }
+.risk-impact-node:disabled { background: var(--status-neutral-bg); color: var(--status-neutral-text); cursor: default; }
+.risk-impact-node:disabled small { color: var(--status-neutral-text); }
+.risk-impact-node:focus-visible, .risk-impact-scroll:focus-visible { outline: 2px solid var(--status-info-text); outline-offset: 2px; }
+.risk-impact-relations { margin-top: .75rem; color: var(--text-copy); }
+.risk-impact-relations summary { cursor: pointer; }
+.risk-impact-relations ul { margin: .5rem 0; padding-left: 1rem; }
+.risk-impact-relations li { margin-block: .35rem; overflow-wrap: anywhere; font-size: .85rem; }
+.risk-impact-relations .ghost-button { padding: 0; min-height: 0; border: 0; background: transparent; color: var(--text-link); font: inherit; text-decoration: underline; text-underline-offset: .15em; }
+.risk-impact-relations .ghost-button:disabled { color: var(--text-muted); text-decoration: none; }
+@media (prefers-reduced-motion: reduce) { .risk-impact *, .risk-impact *::before, .risk-impact *::after { transition: none; animation: none; scroll-behavior: auto; } }
