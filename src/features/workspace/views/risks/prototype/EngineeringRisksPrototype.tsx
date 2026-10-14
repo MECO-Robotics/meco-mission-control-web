@@ -43,6 +43,8 @@ export function EngineeringRisksPrototype({ bootstrap, activePersonFilter }: {
   const [milestonesExpanded, setMilestonesExpanded] = useState(() => typeof window === "undefined" || window.matchMedia("(min-width: 851px)").matches);
   useEffect(() => { const media = window.matchMedia("(min-width: 851px)"); const update = () => setMilestonesExpanded(media.matches); media.addEventListener("change", update); return () => media.removeEventListener("change", update); }, []);
   const nextId = useRef(1);
+  const reviewTrigger = useRef<HTMLButtonElement | null>(null);
+  const closeConcern = () => { setSelectedId(null); reviewTrigger.current?.focus({ preventScroll: true }); };
   const current = useMemo(() => {
     const allowed = new Set(buildAttentionQueue({ bootstrap, activePersonFilter, includeResolvedRisks: true }).filter((row) => row.source === "risk").map((row) => row.recordId));
     return buildPrototypeConcerns(bootstrap).filter((concern) => allowed.has(concern.id));
@@ -74,15 +76,39 @@ export function EngineeringRisksPrototype({ bootstrap, activePersonFilter }: {
   };
   return <section className="panel dense-panel subsystem-manager-shell workspace-panel engineering-risk-prototype">
     <TopbarResponsiveSearch ariaLabel="Search engineering concerns" compactPlaceholder="Search" placeholder="Search concerns, mechanisms and evidence…" value={search} onChange={(value) => { setSearch(value); setSelectedId(null); }} actions={<>
-      <CompactFilterMenu ariaLabel="Concern filters" buttonLabel="Filter concerns" iconOnly activeCount={Number(includeResolved)} items={[{ label: "Resolved", content: <label className="risk-triage-resolved"><input type="checkbox" checked={includeResolved} onChange={(event) => { setIncludeResolved(event.target.checked); setSelectedId(null); }} />Include resolved concerns</label> }]} />
+      <CompactFilterMenu ariaLabel="Concern filters" buttonLabel="Filter concerns" iconOnly activeCount={Number(includeResolved)} items={[{ label: "Prototype data", content: <FilterDropdown className="engineering-prototype-source" allLabel="Prototype data" ariaLabel="Prototype data" showAllOption={false} singleSelect compactSummary hideButtonIcon buttonContent={<span>{source === "scenario" ? "Not saved" : "Read only"}</span>} options={[{ id: "scenario", name: "Review scenarios · not saved" }, { id: "current", name: "Current records · read only" }]} value={[source]} onChange={(value) => changeSource(value[0] === "current" ? "current" : "scenario")} /> }, { label: "Resolved", content: <label className="risk-triage-resolved"><input type="checkbox" checked={includeResolved} onChange={(event) => { setIncludeResolved(event.target.checked); setSelectedId(null); }} />Include resolved concerns</label> }]} />
       <WorkspaceSortMenu label="concerns" field={sort.field} direction={sort.direction} options={[{ value: "priority", label: "Severity" }, { value: "title", label: "Title" }]} onFieldChange={(field) => setSort((previous) => ({ ...previous, field }))} onDirectionChange={(direction) => setSort((previous) => ({ ...previous, direction }))} />
     </>} />
     <AppTopbarSlotPortal slot="controls"><WorkspaceTopbarControls>
-      <FilterDropdown className="engineering-prototype-source" allLabel="Prototype data" ariaLabel="Prototype data" showAllOption={false} singleSelect compactSummary hideButtonIcon buttonContent={<span>{source === "scenario" ? "Scenarios · not saved" : "Current · read only"}</span>} options={[{ id: "scenario", name: "Review scenarios · not saved" }, { id: "current", name: "Current records · read only" }]} value={[source]} onChange={(value) => changeSource(value[0] === "current" ? "current" : "scenario")} />
       {selection ? <button className="risk-chart-clear" type="button" aria-label={`Clear chart selection: ${selectedLabel}`} onClick={() => { setSelection(null); setSelectedId(null); }}><span>{selectedLabel}</span><strong>Clear</strong></button> : null}
     </WorkspaceTopbarControls></AppTopbarSlotPortal>
     <WorkspaceTopbarAddMenu ariaLabel="Add example concern" title="Add example concern" actions={buildSingleAddMenuAction({ label: "Add example concern", onSelect: newExample })} />
-    <div className="engineering-overview">
+    <div className={`engineering-workspace${selected ? " has-selection" : ""}`}>
+      <section className="engineering-concerns" aria-label="Engineering concern queue">
+        <div className="risk-queue-summary"><h2>Engineering concerns</h2><span>{rows.length} records{source === "scenario" ? " · scenarios, not saved" : " · current, read only"}</span></div>
+        {notice ? <p className="engineering-notice" role="status">{notice}</p> : null}
+        {rows.length ? <ul className="workspace-record-list">{pagination.pageItems.map((concern) => <li className="engineering-concern" key={concern.id}>
+          <button type="button" className="risk-review-row" aria-pressed={selectedId === concern.id} onClick={(event) => { reviewTrigger.current = event.currentTarget; selectConcern(concern.id); }}>
+            <span className="risk-review-row-heading"><strong>{concern.title}</strong><span className={`status-pill status-pill-${severityTone(concern.severity)}`}>{concern.severity}</span></span>
+            <span className="risk-review-row-detail">{concern.detail}</span>
+            <span className="risk-review-row-meta">{concern.subjects.map((subject) => subject.label).join(", ")} · {concern.ownerLabel} · {concern.status.replaceAll("-", " ")}</span>
+            <span className="risk-review-row-signals">{concern.blocksWork ? <span className="risk-signal tone-danger">Explicitly blocks work</span> : <span className="risk-signal tone-neutral">No work block recorded</span>}{concern.temporaryRepair ? <span className="risk-signal tone-warning">Temporary repair</span> : null}{concern.mitigation?.status === "complete" && concern.status !== "resolved" ? <span className="risk-signal tone-info">Action complete; concern open</span> : null}{concern.verification.status === "pending" ? <span className="risk-signal tone-info">Verification pending</span> : null}{!concern.mitigation ? <span className="risk-signal tone-warning">No mitigation task</span> : null}</span>
+            <span className="engineering-row-milestone">{milestoneText(concern)}</span>
+            <span className="engineering-row-response">{concern.mitigation ? `Action: ${concern.mitigation.title} · ${concern.mitigation.status.replaceAll("-", " ")}` : "Mitigation action not recorded"}</span>
+            <span className="engineering-row-review"><span>{concern.evidence.length ? `${concern.evidence[0].role === "source" ? "Reported by" : "Evidence"}: ${concern.evidence[0].label}${concern.evidence[0].available ? "" : " · unavailable"}${concern.evidence.length > 1 ? ` (+${concern.evidence.length - 1})` : ""}` : "Evidence not recorded"}</span><strong>Review concern</strong></span>
+          </button>
+        </li>)}</ul> : <p className="empty-state">No concerns match this scope. Clear the chart selection or adjust search.</p>}
+        <PaginationControls label="engineering concerns" {...pagination} onPageChange={pagination.setPage} onPageSizeChange={pagination.setPageSize} />
+      </section>
+      {selected ? <ConcernContext key={selected.id} concern={selected} bootstrap={bootstrap} onClose={closeConcern} onEdit={() => setDraft(structuredClone(selected))} onReplace={replaceExample} onTaskComplete={() => {
+        if (!selected.mitigation) return;
+        replaceExample({ ...selected, mitigation: { ...selected.mitigation, status: "complete" } });
+        setExampleTasks((records) => records.map((task) => task.id === selected.mitigation!.id ? { ...task, status: "complete", blocked: false } : task));
+      }} onResolve={() => {
+        if (!selected.scenario || selected.verification.status !== "verified" || !selected.verification.criteria.trim() || selected.verification.criteria === "Not recorded" || !selected.verification.evidence?.trim()) return;
+        replaceExample({ ...selected, status: "resolved", blocksWork: false }); setSelectedId(null); setNotice("Example concern resolved after recorded verification. Current records were not changed.");
+      }} /> : <aside className="engineering-support" aria-label="Concern comparisons and task context">
+        <div className="engineering-overview">
       <section className="engineering-area-chart" aria-labelledby="engineering-areas-title">
         <div className="risk-chart-heading"><h2 id="engineering-areas-title">Open concerns by mechanism</h2><span>{base.filter((concern) => concern.status !== "resolved").length} unique concerns</span></div>
         <div className="engineering-column-labels"><span>Mechanism / subsystem</span><span>Open concerns · severity</span><span>Task context</span></div>
@@ -102,7 +128,7 @@ export function EngineeringRisksPrototype({ bootstrap, activePersonFilter }: {
         <p className="risk-chart-note">A concern can affect several mechanisms; it appears once in the queue. Task counts are separate work records.</p>
       </section>
       <section className="engineering-milestones" aria-labelledby="engineering-milestones-title">
-        <details className="engineering-milestone-details" open={milestonesExpanded} onToggle={(event) => setMilestonesExpanded(event.currentTarget.open)}><summary><h2 id="engineering-milestones-title">Milestone commitments</h2><span>{base.filter((concern) => concern.status !== "resolved" && concern.milestones.some((milestone) => milestone.basis === "required")).length} required · {base.filter((concern) => concern.status !== "resolved" && concern.milestones.some((milestone) => milestone.basis === "linked")).length} linked</span></summary>
+        <details className="engineering-milestone-details" open={milestonesExpanded} onToggle={(event) => setMilestonesExpanded(event.currentTarget.open)}><summary><h2 id="engineering-milestones-title">Milestone commitments</h2><span>{milestones.length} milestones · concern counts per milestone</span></summary>
         {milestones.map((milestone) => {
           const related = base.filter((concern) => concern.status !== "resolved" && concern.milestones.some((item) => item.id === milestone.id));
           const required = related.filter((concern) => concern.milestones.some((item) => item.id === milestone.id && item.basis === "required")).length;
@@ -115,29 +141,7 @@ export function EngineeringRisksPrototype({ bootstrap, activePersonFilter }: {
         <button className="engineering-blocked-entry" type="button" onClick={() => setTaskList(true)}><span>Blocked tasks</span><strong>{blocked.length}</strong><span>Review tasks</span></button>
       </section>
     </div>
-    <div className={`engineering-workspace${selected ? " has-selection" : ""}`}>
-      <section className="engineering-concerns" aria-label="Engineering concern queue">
-        <div className="risk-queue-summary"><h2>Engineering concerns</h2><span>{rows.length} records{source === "scenario" ? " · illustrative scenarios" : " · current records"}</span></div>
-        {notice ? <p className="engineering-notice" role="status">{notice}</p> : null}
-        {rows.length ? <ul className="workspace-record-list">{pagination.pageItems.map((concern) => <li className="engineering-concern" key={concern.id}>
-          <button type="button" className="risk-review-row" aria-pressed={selectedId === concern.id} onClick={() => selectConcern(concern.id)}>
-            <span className="risk-review-row-heading"><strong>{concern.title}</strong><span className={`status-pill status-pill-${severityTone(concern.severity)}`}>{concern.severity}</span></span>
-            <span className="risk-review-row-detail">{concern.detail}</span>
-            <span className="risk-review-row-meta">{concern.subjects.map((subject) => subject.label).join(", ")} · {concern.ownerLabel} · {concern.status.replaceAll("-", " ")}</span>
-            <span className="engineering-row-milestone">{milestoneText(concern)}</span>
-            <span className="risk-review-row-signals">{concern.blocksWork ? <span className="risk-signal tone-danger">Explicitly blocks work</span> : <span className="risk-signal tone-neutral">No work block recorded</span>}{concern.temporaryRepair ? <span className="risk-signal tone-warning">Temporary repair</span> : null}{concern.mitigation?.status === "complete" && concern.status !== "resolved" ? <span className="risk-signal tone-info">Action complete; concern open</span> : null}{concern.verification.status === "pending" ? <span className="risk-signal tone-info">Verification pending</span> : null}{!concern.mitigation ? <span className="risk-signal tone-warning">No mitigation task</span> : null}</span>
-          </button>
-        </li>)}</ul> : <p className="empty-state">No concerns match this scope. Clear the chart selection or adjust search.</p>}
-        <PaginationControls label="engineering concerns" {...pagination} onPageChange={pagination.setPage} onPageSizeChange={pagination.setPageSize} />
-      </section>
-      {selected ? <ConcernContext key={selected.id} concern={selected} bootstrap={bootstrap} onClose={() => setSelectedId(null)} onEdit={() => setDraft(structuredClone(selected))} onReplace={replaceExample} onTaskComplete={() => {
-        if (!selected.mitigation) return;
-        replaceExample({ ...selected, mitigation: { ...selected.mitigation, status: "complete" } });
-        setExampleTasks((records) => records.map((task) => task.id === selected.mitigation!.id ? { ...task, status: "complete", blocked: false } : task));
-      }} onResolve={() => {
-        if (!selected.scenario || selected.verification.status !== "verified" || !selected.verification.criteria.trim() || selected.verification.criteria === "Not recorded" || !selected.verification.evidence?.trim()) return;
-        replaceExample({ ...selected, status: "resolved", blocksWork: false }); setSelectedId(null); setNotice("Example concern resolved after recorded verification. Current records were not changed.");
-      }} /> : <section className="engineering-task-preview" aria-label="Blocked tasks preview"><div className="risk-chart-heading"><h2>Blocked tasks</h2><span>{blocked.length} tasks</span></div>{blocked.slice(0, 3).map((task) => <button className="engineering-task-link" type="button" key={task.id} onClick={() => openTask(task)}><strong>{task.title}</strong><span>Task blocked · {task.status.replaceAll("-", " ")}</span></button>)}{!blocked.length ? <p className="risk-chart-note">No blocked tasks in this task scope. Open concerns can still require action.</p> : <button className="risk-context-link" type="button" onClick={() => setTaskList(true)}>Review all {blocked.length} blocked tasks</button>}</section>}
+        <section className="engineering-task-preview" aria-label="Blocked tasks preview"><div className="risk-chart-heading"><h2>Blocked tasks</h2><span>{blocked.length} tasks</span></div>{blocked.slice(0, 3).map((task) => <button className="engineering-task-link" type="button" key={task.id} onClick={() => openTask(task)}><strong>{task.title}</strong><span>Task blocked · {task.status.replaceAll("-", " ")}</span></button>)}{!blocked.length ? <p className="risk-chart-note">No blocked tasks in this task scope. Open concerns can still require action.</p> : <button className="risk-context-link" type="button" onClick={() => setTaskList(true)}>Review all {blocked.length} blocked tasks</button>}</section></aside>}
     </div>
     {draft ? <ConcernEditor concern={draft} subjects={[...new Map(examples.flatMap((concern) => concern.subjects).map((subject) => [subject.id, subject])).values()]} milestones={[...new Map(examples.flatMap((concern) => concern.milestones.map((milestone) => [milestone.id, milestone] as const))).values()]} onClose={() => setDraft(null)} onSave={(next) => { setExamples((records) => records.some((record) => record.id === next.id) ? records.map((record) => record.id === next.id ? next : record) : [...records, next]); setDraft(null); setSelectedId(next.id); }} /> : null}
     {taskList ? <ModalDialog label="Blocked tasks" onClose={() => setTaskList(false)} dismissOnBackdrop><section className="modal-card"><div className="panel-header compact-header"><h2>Blocked tasks · {blocked.length}</h2><button className="secondary-action" type="button" onClick={() => setTaskList(false)}>Close</button></div><ul className="workspace-record-list">{blocked.map((task) => <li key={task.id}><button className="engineering-task-link" type="button" onClick={() => openTask(task)}><strong>{task.title}</strong><span>{task.status.replaceAll("-", " ")}</span></button></li>)}</ul>{!blocked.length ? <p>No blocked tasks in this scope.</p> : null}</section></ModalDialog> : null}
@@ -149,6 +153,8 @@ function ConcernContext({ concern, bootstrap, onClose, onEdit, onReplace, onTask
   concern: PrototypeConcern; bootstrap: BootstrapPayload; onClose: () => void; onEdit: () => void; onReplace: (next: PrototypeConcern) => void; onTaskComplete: () => void; onResolve: () => void;
 }) {
   const [inline, setInline] = useState(() => typeof window === "undefined" || window.matchMedia("(min-width: 1180px)").matches);
+  const reviewHeading = useRef<HTMLHeadingElement | null>(null);
+  useEffect(() => { if (inline) reviewHeading.current?.focus({ preventScroll: true }); }, [inline]);
   const [evidenceId, setEvidenceId] = useState<string | null>(null);
   const [verificationOpen, setVerificationOpen] = useState(false);
   const [verificationEvidence, setVerificationEvidence] = useState("");
@@ -157,8 +163,8 @@ function ConcernContext({ concern, bootstrap, onClose, onEdit, onReplace, onTask
   useEffect(() => { const media = window.matchMedia("(min-width: 1180px)"); const update = () => setInline(media.matches); media.addEventListener("change", update); return () => media.removeEventListener("change", update); }, []);
   const selectedEvidence = concern.evidence.find((item) => item.id === evidenceId);
   const attachedRecords = concern.scenario ? [] : (bootstrap.risks.find((risk) => risk.id === concern.id)?.relatedTargets ?? []).filter((ref) => !["task", "mechanism", "subsystem", "milestone", "report", "qa-finding", "test-finding", "qa-request", "test-result", "artifact"].includes(ref.kind)).map((ref) => getRiskRecordReference(ref, bootstrap));
-  const content = <section className={`risk-review-context engineering-concern-context${inline ? "" : " modal-card task-details-modal"}`} aria-label={`Concern: ${concern.title}`}>
-    <div className="risk-context-heading"><h2>{concern.title}</h2><button className="icon-button task-details-close-button" type="button" aria-label="Close concern review" onClick={onClose}><X size={18} /></button></div>
+  const content = <section className={`risk-review-context engineering-concern-context${inline ? "" : " modal-card task-details-modal"}`} aria-label={`Concern: ${concern.title}`} onKeyDown={(event) => { if (inline && event.key === "Escape" && !verificationOpen) { event.stopPropagation(); onClose(); } }}>
+    <div className="risk-context-heading"><h2 ref={reviewHeading} tabIndex={-1}>{concern.title}</h2><button className="icon-button task-details-close-button" type="button" aria-label="Close concern review" onClick={onClose}><X size={18} /></button></div>
     <div className="risk-context-meta"><span className={`status-pill status-pill-${severityTone(concern.severity)}`}>{concern.severity} severity</span><span>{concern.status.replaceAll("-", " ")}</span><span>{concern.scenario ? "Illustrative scenario" : "Current record · read only"}</span></div>
     <p className="risk-context-description">{concern.detail}</p>
     <dl className="engineering-facts"><div><dt>Affects</dt><dd>{concern.subjects.map((subject) => subject.label).join(", ")}</dd></div><div><dt>Owner</dt><dd>{concern.ownerLabel}</dd></div><div><dt>Work blocking</dt><dd>{concern.blocksWork ? "Explicitly blocks work" : "No work block recorded"}</dd></div><div><dt>Milestones</dt><dd>{milestoneText(concern)}</dd></div></dl>
