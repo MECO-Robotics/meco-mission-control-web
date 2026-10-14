@@ -30,7 +30,7 @@ The first prototype put a mechanism overview before the concern queue. It buried
 | Full-width concern ledger with analytics below | Maximum reading space | Desktop comparisons require scrolling | Alternative |
 | Mechanism-grouped concern lists | Comparisons sit beside their conditions | Multiple mechanism links make placement and global severity ordering ambiguous | Rejected |
 
-The queue precedes analytics in DOM and reading order. Wide screens give it approximately 70% of the workspace. The compact right rail contains severity-coded mechanism comparisons, a **Before each milestone** section naming the actual concerns as **Must resolve** or **Linked only**, with recorded dates, and separate blocked-task context. Selecting a concern replaces that rail with a wider inspector, never a third column. On narrow screens the complete bounded queue and pagination precede all analytics; review uses the established drawer.
+Wide screens retain the approximately 70% concern column and compact analytical rail. A compact blocked-task preview now comes first in the left column; graphs remain at the top of the right column. The preview lists up to three tasks and opens the full blocked-task list. Duplicate blocked-task entries below the milestone section are removed. The rail retains severity-coded mechanism comparisons and **Before each milestone**, naming actual concerns as **Must resolve** or **Linked only** with recorded dates. Selecting a concern replaces the rail with a wider inspector, never a third column. On compact screens, DOM and visual order are blocked tasks, graphs with milestone context, then engineering concerns; review uses the established drawer. This ordering reflects the user's refinement after the concern-first review.
 
 Rows expose the actual condition/consequence, labeled severity and work effect, affected mechanism and owner, milestone linkage, mitigation action and named evidence reference. They are single review targets without nested interactive controls. The selected inspector receives keyboard focus; closing it returns focus to the originating row without resetting filters or pagination. Charts keep the same unique-count semantics and filter the queue through one shared-topbar selection.
 
@@ -45,7 +45,7 @@ The shared Filter menu contains the source selector alongside concern filters. Q
 - All milestone links and requirement conditions are retained. A generic required custom condition stays linked context. Only an explicit required `workflow-state=resolved` condition is shown as required concern clearance. Scenario commitments are explicitly authored examples.
 - A concern linked to multiple mechanisms remains one queue record; editing preserves all selected mechanisms and milestone links.
 - Completion of a mitigation action does not resolve the concern. Example resolution requires criteria plus recorded verification evidence and an explicit resolution action, guarded at the transition as well as the control.
-- The source selector uses the shared dropdown. All mobile analytics follow the queue; mechanism groups have Show all / Show fewer controls. Other attached records remain available in selected context.
+- The source selector uses the shared dropdown. Compact screens put graphs above the concern queue; mechanism groups have Show all / Show fewer controls. Other attached records remain available in selected context.
 
 ## Acceptance proof
 
@@ -57,7 +57,7 @@ The prototype's focused model tests cover explicit subject attribution, source/s
 4. A single concern affecting multiple mechanisms and multiple milestones.
 5. Required clearance versus a required generic test-plan review.
 6. Missing evidence, owner, action, milestone and verification information.
-7. Concern-first DOM and viewport hierarchy, keyboard review/focus return, chart selection, stable totals, pagination, empty scopes, mobile and both themes.
+7. Responsive blocked-task/graph/concern ordering, keyboard review/focus return, chart selection, stable totals, pagination, empty scopes, mobile and both themes.
 8. Current/scenario separation, no API writes, reset on ordinary reload, and unchanged ordinary Risks.
 
 ## Product decisions before promotion

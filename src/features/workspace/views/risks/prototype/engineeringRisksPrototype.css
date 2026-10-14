@@ -27,19 +27,21 @@
 .engineering-risk-prototype .engineering-milestone-details > summary h2 { display: inline; margin-inline-end: .5rem; }
 .engineering-risk-prototype .engineering-milestone-details > summary > span { display: block; margin: .4rem 0; font-size: .7rem; color: var(--text-muted); }
 .engineering-risk-prototype .engineering-unlinked { color: var(--text-muted); font-size: .75rem; }
-.engineering-risk-prototype .engineering-blocked-entry { display: flex; gap: .6rem; align-items: center; width: 100%; margin-top: 1rem; padding: .7rem .3rem; background: var(--bg-row-alt); border: 0; color: var(--text-copy); font: inherit; font-size: .75rem; cursor: pointer; }
-.engineering-risk-prototype .engineering-blocked-entry > strong { color: var(--status-danger-text); }
-.engineering-risk-prototype .engineering-blocked-entry > span:last-child { margin-left: auto; color: var(--text-link); }
-.engineering-risk-prototype .engineering-workspace { display: grid; grid-template-columns: minmax(0, 2.25fr) minmax(17rem, 1fr); gap: 1.6rem; }
+.engineering-risk-prototype .engineering-workspace { display: grid; grid-template-columns: minmax(0, 2.25fr) minmax(17rem, 1fr); grid-template-areas: "blocked support" "concerns support"; grid-template-rows: auto 1fr; column-gap: 1.6rem; row-gap: 1rem; }
 .engineering-risk-prototype .engineering-concerns, .engineering-risk-prototype .engineering-task-preview { min-width: 0; }
+.engineering-risk-prototype .engineering-concerns { grid-area: concerns; }
 .engineering-risk-prototype .engineering-concern { padding: 0; }
 .engineering-risk-prototype .engineering-concern .risk-review-row[aria-pressed="true"] { background: var(--row-tint); }
 .engineering-risk-prototype .engineering-row-milestone { font-size: .72rem; color: var(--text-copy); }
-.engineering-risk-prototype .engineering-task-preview { border-top: 1px solid var(--border-base); padding-top: 1rem; }
+.engineering-risk-prototype .engineering-task-preview { grid-area: blocked; border-bottom: 1px solid var(--border-base); padding-bottom: .5rem; }
+.engineering-risk-prototype .engineering-task-preview .risk-chart-heading { flex-wrap: wrap; gap: .4rem .65rem; }
+.engineering-risk-prototype .engineering-task-preview .risk-chart-heading > span { white-space: normal; }
+.engineering-risk-prototype .engineering-task-preview .risk-chart-heading > .risk-context-link { margin-inline-start: auto; }
+.engineering-risk-prototype .engineering-task-preview .engineering-task-link { display: flex; align-items: baseline; justify-content: space-between; gap: .65rem; padding: .4rem .2rem; border-bottom: 0; }
+.engineering-risk-prototype .engineering-task-preview .engineering-task-link > span { flex-shrink: 0; }
 .engineering-risk-prototype .engineering-task-link { display: grid; gap: .3rem; width: 100%; padding: .8rem .2rem; border: 0; border-bottom: 1px solid var(--border-base); background: transparent; text-align: left; color: var(--text-title); font: inherit; cursor: pointer; }
 .engineering-risk-prototype .engineering-task-link strong { font-size: .8rem; }
 .engineering-risk-prototype .engineering-task-link > span { font-size: .7rem; color: var(--text-muted); }
-.engineering-risk-prototype .engineering-task-preview > .risk-context-link { margin-top: 1rem; }
 .engineering-risk-prototype button[aria-pressed="true"] { outline: 2px solid var(--text-title); outline-offset: 2px; }
 .engineering-risk-prototype button:hover { background-color: var(--bg-row-alt); }
 .engineering-risk-prototype button:focus-visible { outline: 2px solid var(--status-info-text); outline-offset: 2px; }
@@ -58,11 +60,11 @@
 .engineering-risk-prototype .engineering-notice { color: var(--status-info-text); font-size: .76rem; }
 .engineering-risk-prototype .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 @media (min-width: 1180px) {
-  .engineering-risk-prototype .risk-review-inspector { align-self: start; position: sticky; top: .5rem; max-height: calc(100dvh - 6rem); overflow-y: auto; }
-  .engineering-risk-prototype .engineering-workspace.has-selection { grid-template-columns: minmax(0, 1.1fr) minmax(25rem, 1fr); }
+  .engineering-risk-prototype .risk-review-inspector { grid-area: context; align-self: start; position: sticky; top: .5rem; max-height: calc(100dvh - 6rem); overflow-y: auto; }
+  .engineering-risk-prototype .engineering-workspace.has-selection { grid-template-areas: "blocked context" "concerns context"; grid-template-columns: minmax(0, 1.1fr) minmax(25rem, 1fr); }
 }
 @media (max-width: 1179px) {
-  .engineering-risk-prototype .engineering-workspace { grid-template-columns: minmax(0, 1fr); }
+  .engineering-risk-prototype .engineering-workspace, .engineering-risk-prototype .engineering-workspace.has-selection { grid-template-columns: minmax(0, 1fr); grid-template-areas: "blocked" "support" "concerns"; grid-template-rows: auto; }
 }
 @media (max-width: 640px) {
   .engineering-risk-prototype .engineering-column-labels, .engineering-risk-prototype .engineering-area-list > li { grid-template-columns: minmax(6rem, 1fr) minmax(3rem, .7fr); gap: .5rem; }
@@ -74,7 +76,7 @@
   .engineering-risk-prototype .risk-review-row-heading { flex-wrap: wrap; }
 }
 
-.engineering-risk-prototype .engineering-support { min-width: 0; border-inline-start: 1px solid var(--border-base); padding-inline-start: 1rem; }
+.engineering-risk-prototype .engineering-support { grid-area: support; min-width: 0; border-inline-start: 1px solid var(--border-base); padding-inline-start: 1rem; }
 .engineering-risk-prototype .engineering-support .risk-chart-heading { align-items: start; flex-wrap: wrap; }
 .engineering-risk-prototype .engineering-support .risk-chart-heading > span { white-space: normal; }
 .engineering-risk-prototype .engineering-support h2 { font-size: .82rem; }
@@ -84,7 +86,7 @@
 .engineering-risk-prototype .engineering-row-review strong { color: var(--text-link); font-weight: 600; }
 .engineering-risk-prototype .engineering-concern-context button:disabled { opacity: .5; cursor: not-allowed; }
 @media (max-width: 1179px) {
-  .engineering-risk-prototype .engineering-support { border-inline-start: 0; padding-inline-start: 0; border-top: 1px solid var(--border-base); padding-top: 1rem; }
+  .engineering-risk-prototype .engineering-support { border-inline-start: 0; padding-inline-start: 0; border-bottom: 1px solid var(--border-base); }
   .engineering-risk-prototype .engineering-overview { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 }
 @media (max-width: 640px) {
