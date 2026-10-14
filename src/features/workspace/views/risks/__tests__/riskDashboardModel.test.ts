@@ -10,7 +10,6 @@ it("counts tasks once per area regardless of how many risks block them", () => {
   bootstrap.risks.push({ ...bootstrap.risks[0], id: "additional" });
   const model = buildRiskDashboard({ bootstrap, activePersonFilter: [], filters, today });
   expect(model.areas[0]).toMatchObject({ id: "subsystem-1", taskCount: 2, blocked: 2, dependency: 0, qa: 0, other: 0 });
-  expect(model.responses.reduce((total, cell) => total + cell.count, 0)).toBe(3);
 });
 
 it("includes ordinary unfinished work in charts and contextual selection, keeping default queue actionable", () => {
@@ -39,23 +38,12 @@ it("buckets task and risk dates separately with local calendar boundaries and in
   expect(buildRiskDashboard({ bootstrap, activePersonFilter: [], filters, today, selection: { kind: "deadline", source: "risk", bucket: "soon" } }).queueRows.map(row => row.recordId)).toEqual(["risk-1"]);
 });
 
-it("partitions only unresolved risks by valid owner and resolvable mitigation", () => {
-  const bootstrap = createBootstrap();
-  bootstrap.risks[0] = { ...bootstrap.risks[0], ownerMemberId: "member-1" };
-  bootstrap.risks[1] = { ...bootstrap.risks[1], ownerMemberId: "missing", mitigationTaskId: "missing" };
-  bootstrap.risks.push({ ...bootstrap.risks[0], id: "resolved", status: "resolved" });
-  const model = buildRiskDashboard({ bootstrap, activePersonFilter: [], filters, today, includeResolvedRisks: true });
-  expect(model.responses.find(cell => cell.owner && cell.mitigation)).toMatchObject({ count: 1, highCount: 1 });
-  expect(model.responses.find(cell => !cell.owner && !cell.mitigation)?.count).toBe(1);
-  expect(model.responses.reduce((total, cell) => total + cell.count, 0)).toBe(2);
-});
-
 it("applies source, search and people scope before chart aggregation", () => {
   const bootstrap = createBootstrap();
   const model = buildRiskDashboard({ bootstrap, activePersonFilter: ["member-1"], filters: { ...filters, source: "risk", search: "Only Alex" }, today });
   expect(model.rows.map(row => row.recordId)).toEqual(["risk-1"]);
   expect(model.areas).toEqual([]);
-  expect(model.responses.reduce((total, cell) => total + cell.count, 0)).toBe(1);
+  expect(model.deadlines.reduce((total, bucket) => total + bucket.riskCount, 0)).toBe(1);
 });
 
 it("handles overlapping subsystem assignments and per-project unassigned work without inventing a global sum", () => {

@@ -41,7 +41,7 @@ See [navigation-consolidation.md](navigation-consolidation.md) for the cross-cli
 
 ### Risks triage
 
-Risks is a build-review surface with coordinated charts, a ranked queue and a selected-record inspector. Bottlenecks by area show unfinished work split into blocked, waiting on dependencies, QA and other work. Deadline exposure compares recorded task and mitigation deadlines. Risk response shows whether active risks have a named owner and a linked mitigation, with critical/high counts visible. These are current-state diagnostics, not a delivery forecast or an aggregate health score. Tasks linked to multiple areas appear in each area's chart.
+Risks is a build-review surface with coordinated charts, a ranked queue and a selected-record inspector. Bottlenecks by area show unfinished work split into blocked, waiting on dependencies, QA and other work. Deadline exposure compares recorded task and mitigation deadlines. These are current-state diagnostics, not a delivery forecast or an aggregate health score. Tasks linked to multiple areas appear in each area's chart.
 
 Selecting a chart segment filters the same deduplicated record queue; the selected context can be cleared in the shared topbar. Search, source/owner/signal filters and priority/title/due-date sorting apply to this queue. Resolved risks are excluded by default and can be included explicitly. Selecting a record reveals its context, next actions and an explicit relationship diagram. The diagram distinguishes attached work, mitigation and prerequisite links, reports missing records, and preserves cycles without inventing associations. Manufacturing attachments identify tasks with manufacturing details; purchase attachments identify purchase records and their linked tasks. A mitigation task is a response, not automatically affected work.
 
@@ -86,7 +86,7 @@ Key implications for web-app changes:
 
 The following recent PR themes are now part of the current spec:
 
-- Risks connects current bottlenecks, recorded deadlines and response gaps to reviewable records and explicit dependency links.
+- Risks connects current bottlenecks and recorded deadlines to reviewable records and explicit dependency links.
 - Home prioritizes Action Required, then the next four milestones, with task status distribution as its only supporting chart. It uses current scoped data and does not imply historical trends or an aggregate readiness score.
 - Attention has become Action Required and should function as cross-domain triage.
 - WorkLogs Activity now shows platform audit actions, not only work-log records, and follows the

@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import type { AreaPressure, DeadlineBucket, RiskChartSelection, RiskResponseCell } from "./riskDashboardModel";
+import type { AreaPressure, DeadlineBucket, RiskChartSelection } from "./riskDashboardModel";
 
 const segments = [
   { id: "blocked", label: "Blocked", tone: "danger" },
@@ -11,15 +11,13 @@ const segments = [
 interface Props {
   areas: AreaPressure[];
   deadlines: DeadlineBucket[];
-  responses: RiskResponseCell[];
   selection: RiskChartSelection | null;
   onSelect: (selection: RiskChartSelection) => void;
 }
 
-export function RiskDashboardCharts({ areas, deadlines, responses, selection, onSelect }: Props) {
+export function RiskDashboardCharts({ areas, deadlines, selection, onSelect }: Props) {
   const maxTasks = Math.max(1, ...areas.map((area) => area.taskCount));
   const maxDeadline = Math.max(1, ...deadlines.flatMap((bucket) => [bucket.taskCount, bucket.riskCount]));
-  const riskCount = responses.reduce((sum, cell) => sum + cell.count, 0);
   return <div className="risk-review-charts">
     <section className="risk-chart risk-area-chart" aria-labelledby="risk-areas-title">
       <div className="risk-chart-heading"><h2 id="risk-areas-title">Bottlenecks by area</h2><span>Unfinished tasks</span></div>
@@ -47,21 +45,6 @@ export function RiskDashboardCharts({ areas, deadlines, responses, selection, on
         })}
       </div>)}
       <p className="risk-chart-note">Recorded deadlines, not a delivery forecast.</p>
-    </section>
-    <section className="risk-chart risk-response-chart" aria-labelledby="risk-response-title">
-      <div className="risk-chart-heading"><h2 id="risk-response-title">Risk response</h2><span>{riskCount} open</span></div>
-      <div className="risk-response-matrix">
-        <span /><span>Mitigation linked</span><span>No available mitigation</span>
-        {[true, false].map((owner) => <div className="risk-response-matrix-row" key={String(owner)}>
-          <span>{owner ? "Named owner" : "No named owner"}</span>
-          {[true, false].map((mitigation) => {
-            const cell = responses.find((item) => item.owner === owner && item.mitigation === mitigation);
-            const count = cell?.count ?? 0;
-            return <button key={String(mitigation)} className={`risk-response-cell tone-${owner && mitigation ? "neutral" : "warning"}`} type="button" disabled={!count} aria-label={`${owner ? "Named owner" : "No named owner"}, ${mitigation ? "mitigation linked" : "no available mitigation"}: ${count} risks, ${cell?.highCount ?? 0} critical or high`} aria-pressed={selection?.kind === "response" && selection.owner === owner && selection.mitigation === mitigation} onClick={() => onSelect({ kind: "response", owner, mitigation })}><strong>{count}</strong><small className={cell?.highCount ? "risk-severity-high" : ""}>{cell?.highCount ?? 0} critical / high</small></button>;
-          })}
-        </div>)}
-      </div>
-      <p className="risk-chart-note">Linked work is a response plan, not proof the risk is resolved.</p>
     </section>
   </div>;
 }

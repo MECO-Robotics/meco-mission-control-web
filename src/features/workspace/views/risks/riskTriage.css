@@ -1,4 +1,4 @@
-.risk-review-charts { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr) minmax(0, 1fr); gap: 1.25rem; padding: .5rem 0 1rem; border-bottom: 1px solid var(--border-base); }
+.risk-review-charts { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 1.25rem; padding: .5rem 0 1rem; border-bottom: 1px solid var(--border-base); }
 .risk-chart { min-width: 0; }
 .risk-chart-heading { display: flex; justify-content: space-between; align-items: baseline; gap: .5rem; margin-bottom: .75rem; }
 .risk-chart-heading h2, .risk-queue-summary h2 { margin: 0; font-size: .96rem; color: var(--text-title); }
@@ -30,15 +30,6 @@
 .risk-deadline-bar::before { content: ""; position: absolute; inset: 0 auto 0 0; z-index: -1; width: var(--risk-bar-width); background: var(--risk-tone-bg); border-inline-start: 1px solid var(--risk-tone-fg); }
 .risk-deadline-bar:disabled { cursor: default; color: var(--text-muted); }
 .risk-deadline-bar:disabled::before { display: none; }
-.risk-response-matrix { display: grid; grid-template-columns: minmax(3.5rem, .8fr) repeat(2, minmax(0, 1fr)); gap: .4rem; align-items: stretch; color: var(--text-copy); font-size: .65rem; }
-.risk-response-matrix > span { align-self: end; }
-.risk-response-matrix-row { display: contents; }
-.risk-response-matrix-row > span { align-self: center; }
-.risk-response-cell { display: grid; gap: .2rem; padding: .65rem .25rem; min-width: 0; border: 1px solid var(--border-base); border-radius: 4px; background: var(--risk-tone-bg); color: var(--risk-tone-fg); cursor: pointer; font: inherit; text-align: center; }
-.risk-response-cell strong { font-size: 1.3rem; font-variant-numeric: tabular-nums; }
-.risk-response-cell small { font-size: .6rem; }
-.risk-response-cell:disabled { background: transparent; color: var(--text-muted); cursor: default; }
-.risk-severity-high { color: var(--status-danger-text); }
 .risk-review-charts button[aria-pressed="true"] { outline: 2px solid var(--text-title); outline-offset: 2px; }
 .risk-review-charts button:focus-visible, .risk-review-row:focus-visible, .risk-context-link:focus-visible, .risk-chart-clear:focus-visible { outline: 2px solid var(--status-info-text); outline-offset: 2px; }
 .risk-chart-clear { display: inline-flex; align-items: center; gap: .6rem; max-width: 19rem; padding: .35rem .5rem; border: 1px solid var(--border-base); border-radius: 5px; background: var(--row-tint); color: var(--text-title); font: inherit; font-size: .72rem; cursor: pointer; }
@@ -87,8 +78,7 @@
   .risk-review-workspace.has-selection { grid-template-columns: minmax(0, 1.1fr) minmax(24rem, 1fr); }
 }
 @media (max-width: 1179px) {
-  .risk-review-charts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .risk-area-chart { grid-column: 1 / -1; }
+  .risk-review-charts { grid-template-columns: minmax(0, 1fr); }
   .risk-review-context.modal-card { width: min(46rem, 100vw); max-width: 100vw; height: 100dvh; overflow-y: auto; padding: 1.25rem; }
 }
 @media (max-width: 640px) {
