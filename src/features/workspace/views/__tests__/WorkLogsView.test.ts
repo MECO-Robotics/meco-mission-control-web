@@ -212,7 +212,8 @@ describe("WorkLogsView", () => {
       actions: [],
     });
 
-    expect(html).toContain("Drive CAD");
+    expect(html).toContain("No activity matches the current filters.");
+    expect(html).not.toContain("Drive CAD");
     expect(html).not.toContain("Logged work on Drive CAD");
   });
 });
