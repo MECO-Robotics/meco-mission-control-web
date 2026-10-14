@@ -44,6 +44,23 @@
   box-shadow: 0 8px 18px rgba(15, 28, 52, 0.05);
 }
 
+.task-queue-board-card:is(:hover, :focus-visible) {
+  transform: translateY(-2px) scale(1.015);
+  transform-origin: center;
+  z-index: 3;
+  box-shadow: 0 12px 24px rgba(15, 28, 52, 0.14);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .task-queue-board-card {
+    transition: none;
+  }
+
+  .task-queue-board-card:is(:hover, :focus-visible) {
+    transform: none;
+  }
+}
+
 .task-queue-board-card-priority-accented {
   border-color: color-mix(
     in srgb,

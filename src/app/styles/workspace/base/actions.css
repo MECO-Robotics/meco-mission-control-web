@@ -11,6 +11,14 @@
   transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
 }
 
+.kanban-draggable-card,
+.task-queue-board-column {
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
 .primary-action,
 .secondary-action,
 .danger-action,
@@ -60,6 +68,24 @@ button.ops-row {
 .member-row:hover,
 .tab:hover {
   transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primary-action,
+  .secondary-action,
+  .danger-action,
+  .icon-button,
+  .subsystem-toggle,
+  .timeline-day-number-button,
+  .timeline-bar,
+  .subsystem-manager-row,
+  .ops-row,
+  .member-row,
+  .kanban-draggable-card,
+  .task-queue-board-column {
+    transition: none;
+  }
+
 }
 
 .editable-hover-target {
