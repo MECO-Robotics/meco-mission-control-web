@@ -14,8 +14,9 @@ it("keeps a completed mitigation distinct from resolution of the risk", () => {
   const markup = renderContext(bootstrap);
   expect(markup).toContain("Mitigation complete; risk still open");
   expect(markup).toContain("Open mitigation task");
-  expect(markup).toContain('aria-label="Close record review"');
+  expect(markup).toContain('aria-label="Close risk details"');
   expect(markup).toContain("Linked work and dependencies");
+  expect(markup).toContain("Risk detailed view");
 });
 
 it("preserves missing supply attachments as visibly unavailable context", () => {
@@ -37,4 +38,5 @@ it("makes risk changes unavailable during a write and opens tasks through their 
   expect(taskMarkup).toContain("Open task");
   expect(taskMarkup).not.toContain("<select");
   expect(taskMarkup).not.toContain("Edit risk");
+  expect(taskMarkup).not.toContain("Risk detailed view");
 });

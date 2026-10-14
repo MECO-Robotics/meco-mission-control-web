@@ -1,7 +1,5 @@
-import { useEffect, useState, type ReactNode } from "react";
-import { createPortal } from "react-dom";
-import { X } from "lucide-react";
-import { ModalDialog } from "@/components/ModalDialog";
+import { useState } from "react";
+import { RiskDetailsView } from "./RiskDetailsView";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { RiskPayload } from "@/types/payloads";
 import type { RiskRecord } from "@/types/recordsReporting";
@@ -22,14 +20,7 @@ interface Props {
 }
 
 export function RiskReviewContext({ bootstrap, selected, pending, error, onClose, onEditRisk, onUpdateRisk, onOpenRecord }: Props) {
-  const [inline, setInline] = useState(() => typeof window === "undefined" || window.matchMedia("(min-width: 1180px)").matches);
   const [inspectedReference, setInspectedReference] = useState<{ kind: string; id: string } | null>(null);
-  useEffect(() => {
-    const media = window.matchMedia("(min-width: 1180px)");
-    const update = () => setInline(media.matches);
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
-  }, []);
   const risk = selected.kind === "risk" ? bootstrap.risks.find((item) => item.id === selected.id) : undefined;
   const task = selected.kind === "task" ? bootstrap.tasks.find((item) => item.id === selected.id) : undefined;
   if (!risk && !task) return null;
@@ -45,11 +36,7 @@ export function RiskReviewContext({ bootstrap, selected, pending, error, onClose
     if (["project", "responsible-group", "vendor", "meeting", "event", "design-iteration"].includes(kind)) setInspectedReference({ kind, id });
     else onOpenRecord(kind, id);
   };
-  const section = (children: ReactNode) => <section className={`risk-review-context${inline ? "" : " modal-card task-details-modal"}`} aria-label={`Review ${title}`} aria-busy={pending}>
-    {children}
-  </section>;
-  const content = <>
-    <div className="risk-context-heading"><h2>{title}</h2><button className="icon-button task-details-close-button" type="button" aria-label="Close record review" onClick={onClose}><X size={18} /></button></div>
+  return <RiskDetailsView title={title} kind={selected.kind} pending={pending} onClose={onClose}>
     <div className="risk-context-meta"><span className={`status-pill status-pill-${priority === "high" || priority === "critical" ? "danger" : priority === "medium" ? "warning" : "neutral"}`}>{priority} {risk ? "risk" : "priority"}</span><span>{(risk?.status ?? task!.status).replaceAll("-", " ")}</span></div>
     <p className="risk-context-description">{risk?.detail || task?.summary || "No additional details recorded."}</p>
     <RiskImpactGraph key={`${selected.kind}:${selected.id}`} bootstrap={bootstrap} selected={selected} onOpenRecord={openRecord} />
@@ -80,8 +67,5 @@ export function RiskReviewContext({ bootstrap, selected, pending, error, onClose
     {source ? <section className="risk-context-evidence"><h3>Source evidence</h3><button className="risk-context-link" disabled={!source.available} type="button" onClick={() => openRecord(source.kind, source.id)}>{source.label}{!source.available ? " (unavailable)" : ""}</button>{sourceReport ? <p>{(sourceReport.result ?? "Not assessed").replaceAll("-", " ")}{sourceReport.notes && sourceReport.notes !== sourceReport.summary ? ` · ${sourceReport.notes}` : ""}</p> : null}</section> : null}
     {links.length ? <section className="risk-context-evidence"><h3>Attached records</h3><ul>{links.map((ref) => <li key={ref.key}><button className="risk-context-link" disabled={!ref.available} type="button" onClick={() => openRecord(ref.kind, ref.id)}>{ref.label}{!ref.available ? " (unavailable)" : ""}</button></li>)}</ul></section> : null}
     {risk ? <details className="risk-context-audit"><summary>Risk history</summary><WorkspaceAuditActionList actions={riskAuditActions(bootstrap.actions, risk)} emptyText="No risk changes recorded." /></details> : null}
-  </>;
-  if (inline) return <aside className="risk-review-inspector">{section(content)}</aside>;
-  if (typeof document === "undefined") return null;
-  return createPortal(<ModalDialog label={`Review ${title}`} onClose={onClose} dismissOnBackdrop>{section(content)}</ModalDialog>, document.body);
+  </RiskDetailsView>;
 }
