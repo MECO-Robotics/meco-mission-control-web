@@ -74,6 +74,12 @@
 }
 
 @media (max-width: 760px) {
+  .workspace-schedule-scroll.is-calendar-workspace:has(.task-calendar-mobile-agenda) {
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
   .schedule-agenda-list li {
     grid-template-columns: 1fr;
   }
@@ -112,6 +118,12 @@
   z-index: 3;
 }
 
+.task-calendar-weekdays > [role="row"] {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  height: 100%;
+}
+
 .meeting-schedule-modal .form-error {
   color: var(--status-danger-text);
   font-size: 0.78rem;
@@ -130,9 +142,7 @@
 .task-calendar-weekdays {
   border-bottom: 1px solid var(--border-base);
   box-shadow: 0 1px 0 var(--border-base);
-  display: grid;
-  gap: 0;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  display: block;
   height: 2rem;
 }
 

@@ -125,7 +125,9 @@ describe("TaskCalendarMonthGrid day selection", () => {
         monthCells: [new Date(2026, 4, 7)],
         onOpenDay: jest.fn(),
         onOpenEvent: jest.fn(),
+        onMoveFocus: jest.fn(),
         eventCapacity: 1,
+        activeDateKey: "2026-05-07",
         selectedDateKey: "2026-05-07",
         todayDateKey: "2026-05-08",
       }),
@@ -147,7 +149,9 @@ describe("TaskCalendarMonthGrid day selection", () => {
       monthCells: [new Date(2026, 4, 7)],
       onOpenDay,
       onOpenEvent,
+      onMoveFocus: jest.fn(),
       eventCapacity: 2,
+      activeDateKey: "2026-05-07",
       selectedDateKey: null,
       todayDateKey: "2026-05-08",
     });
@@ -170,7 +174,9 @@ describe("TaskCalendarMonthGrid day selection", () => {
       monthCells: [new Date(2026, 4, 7)],
       onOpenDay,
       onOpenEvent: jest.fn(),
+      onMoveFocus: jest.fn(),
       eventCapacity: 2,
+      activeDateKey: "2026-05-07",
       selectedDateKey: null,
       todayDateKey: "2026-05-08",
     });
@@ -190,6 +196,7 @@ describe("TaskCalendarMonthGrid day selection", () => {
     const markup = renderToStaticMarkup(React.createElement(TaskCalendarMonthGrid, {
       eventsByDateKey: new Map(), monthCells: [new Date(2026, 4, 7)],
       onOpenDay: jest.fn(), onOpenEvent: jest.fn(), eventCapacity: 4,
+      onMoveFocus: jest.fn(), activeDateKey: "2026-05-07",
       selectedDateKey: null, todayDateKey: "2026-05-08",
     }));
     expect(markup).not.toContain("<button");

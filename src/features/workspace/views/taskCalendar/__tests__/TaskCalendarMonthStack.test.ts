@@ -21,6 +21,11 @@ describe("TaskCalendarMonthStack", () => {
     );
 
     expect(markup).toContain('aria-label="Calendar"');
+    expect(markup).toContain('aria-label="Calendar dates"');
+    expect(markup).toContain('role="grid"');
+    expect(markup).toContain('data-date="2026-10-01" aria-current="date"');
+    expect(markup).toContain('role="columnheader"');
+    expect(markup.match(/role="gridcell" tabindex="0"/g)).toHaveLength(1);
     expect(markup.match(/class="task-calendar-weekdays"/g)).toHaveLength(1);
     ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].forEach((weekday) => {
       expect(markup).toContain(`>${weekday}</span>`);
