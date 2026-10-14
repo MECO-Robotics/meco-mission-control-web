@@ -128,16 +128,19 @@ export function EngineeringRisksPrototype({ bootstrap, activePersonFilter }: {
         <p className="risk-chart-note">A concern can affect several mechanisms; it appears once in the queue. Task counts are separate work records.</p>
       </section>
       <section className="engineering-milestones" aria-labelledby="engineering-milestones-title">
-        <details className="engineering-milestone-details" open={milestonesExpanded} onToggle={(event) => setMilestonesExpanded(event.currentTarget.open)}><summary><h2 id="engineering-milestones-title">Milestone commitments</h2><span>{milestones.length} milestones · concern counts per milestone</span></summary>
+        <details className="engineering-milestone-details" open={milestonesExpanded} onToggle={(event) => setMilestonesExpanded(event.currentTarget.open)}><summary><h2 id="engineering-milestones-title">Before each milestone</h2><span>{milestones.length} milestones</span></summary>
         {milestones.map((milestone) => {
           const related = base.filter((concern) => concern.status !== "resolved" && concern.milestones.some((item) => item.id === milestone.id));
-          const required = related.filter((concern) => concern.milestones.some((item) => item.id === milestone.id && item.basis === "required")).length;
           return <button className="engineering-milestone" type="button" key={milestone.id} aria-pressed={selection?.kind === "milestone" && selection.id === milestone.id} onClick={() => selectMark({ kind: "milestone", id: milestone.id })}>
-            <span><strong>{milestone.title}</strong><time>{milestone.date ?? "Date not recorded"}</time></span><span className="engineering-milestone-counts"><strong>{required} required before</strong><span>{related.length - required} linked only</span></span>
+            <span className="engineering-milestone-heading"><strong>{milestone.title}</strong><time>{milestone.date ?? "Date not recorded"}</time></span>
+            <span className="engineering-milestone-concerns">{related.map((concern) => {
+              const required = concern.milestones.some((item) => item.id === milestone.id && item.basis === "required");
+              return <span key={concern.id}><strong className={required ? "engineering-must-resolve" : undefined}>{required ? "Must resolve" : "Linked only"}</strong><span>{concern.title}</span></span>;
+            })}</span>
           </button>;
         })}
         <button className="engineering-unlinked" type="button" aria-pressed={selection?.kind === "milestone" && selection.id === "none"} onClick={() => selectMark({ kind: "milestone", id: "none" })}><span>No milestone linked</span><strong>{base.filter((concern) => concern.status !== "resolved" && !concern.milestones.length).length}</strong></button>
-        <p className="risk-chart-note">“Required before” reflects explicit concern clearance. Other required conditions stay with the linked milestone.</p></details>
+        <p className="risk-chart-note">“Must resolve” concerns must be resolved before that milestone. Linked concerns have no recorded resolution requirement.</p></details>
         <button className="engineering-blocked-entry" type="button" onClick={() => setTaskList(true)}><span>Blocked tasks</span><strong>{blocked.length}</strong><span>Review tasks</span></button>
       </section>
     </div>
