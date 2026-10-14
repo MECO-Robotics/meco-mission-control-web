@@ -11,8 +11,6 @@ export function TaskCalendarMonthStack({
   eventsByDateKey,
   monthCursor,
   onOpenDay,
-  onOpenEvent,
-  onCloseSelectedDay,
   onVisibleMonthChange,
   selectedDateKey,
   todayDateKey,
@@ -20,8 +18,6 @@ export function TaskCalendarMonthStack({
   eventsByDateKey: Map<string, TaskCalendarEvent[]>;
   monthCursor: Date;
   onOpenDay: (dateKey: string) => void;
-  onOpenEvent: (event: TaskCalendarEvent) => void;
-  onCloseSelectedDay: () => void;
   onVisibleMonthChange: (month: Date) => void;
   selectedDateKey: string | null;
   todayDateKey: string;
@@ -38,7 +34,6 @@ export function TaskCalendarMonthStack({
   const monthsAfter = monthWindow.cursorKey === cursorKey ? monthWindow.monthsAfter : INITIAL_MONTHS_EACH_DIRECTION;
   const stackRef = useRef<HTMLDivElement>(null);
   const [stackHeight, setStackHeight] = useState(0);
-  const selectedDayRef = useRef<HTMLElement>(null);
   const cursorDayRef = useRef<HTMLElement>(null);
   const scrollUpdatedCursorKeyRef = useRef<string | null>(null);
   const previousStackHeightRef = useRef<number | null>(null);
@@ -62,11 +57,8 @@ export function TaskCalendarMonthStack({
       scrollUpdatedCursorKeyRef.current = null;
       return;
     }
-    if (!selectedDateKey) cursorDayRef.current?.scrollIntoView({ block: "start" });
-  }, [cursorKey, selectedDateKey]);
-  useEffect(() => {
-    if (selectedDateKey) selectedDayRef.current?.scrollIntoView({ block: "nearest" });
-  }, [selectedDateKey]);
+    cursorDayRef.current?.scrollIntoView({ block: "start" });
+  }, [cursorKey]);
   useLayoutEffect(() => {
     const stack = stackRef.current;
     const previousHeight = previousStackHeightRef.current;
@@ -161,12 +153,9 @@ export function TaskCalendarMonthStack({
         eventsByDateKey={eventsByDateKey}
         monthCells={calendarDates}
         onOpenDay={onOpenDay}
-        onOpenEvent={onOpenEvent}
         selectedDateKey={selectedDateKey}
         todayDateKey={todayDateKey}
-        onCloseSelectedDay={onCloseSelectedDay}
         dayRef={(dateKey, element) => {
-          if (dateKey === selectedDateKey) selectedDayRef.current = element;
           if (dateKey === `${cursorYear}-${String(cursorMonth + 1).padStart(2, "0")}-01`) {
             cursorDayRef.current = element;
           }
