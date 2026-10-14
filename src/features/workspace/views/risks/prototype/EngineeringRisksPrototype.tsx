@@ -84,30 +84,12 @@ export function EngineeringRisksPrototype({ bootstrap, activePersonFilter }: {
     </WorkspaceTopbarControls></AppTopbarSlotPortal>
     <WorkspaceTopbarAddMenu ariaLabel="Add example concern" title="Add example concern" actions={buildSingleAddMenuAction({ label: "Add example concern", onSelect: newExample })} />
     <div className={`engineering-workspace${selected ? " has-selection" : ""}`}>
-      <section className="engineering-concerns" aria-label="Engineering concern queue">
-        <div className="risk-queue-summary"><h2>Engineering concerns</h2><span>{rows.length} records{source === "scenario" ? " · scenarios, not saved" : " · current, read only"}</span></div>
-        {notice ? <p className="engineering-notice" role="status">{notice}</p> : null}
-        {rows.length ? <ul className="workspace-record-list">{pagination.pageItems.map((concern) => <li className="engineering-concern" key={concern.id}>
-          <button type="button" className="risk-review-row" aria-pressed={selectedId === concern.id} onClick={(event) => { reviewTrigger.current = event.currentTarget; selectConcern(concern.id); }}>
-            <span className="risk-review-row-heading"><strong>{concern.title}</strong><span className={`status-pill status-pill-${severityTone(concern.severity)}`}>{concern.severity}</span></span>
-            <span className="risk-review-row-detail">{concern.detail}</span>
-            <span className="risk-review-row-meta">{concern.subjects.map((subject) => subject.label).join(", ")} · {concern.ownerLabel} · {concern.status.replaceAll("-", " ")}</span>
-            <span className="risk-review-row-signals">{concern.blocksWork ? <span className="risk-signal tone-danger">Explicitly blocks work</span> : <span className="risk-signal tone-neutral">No work block recorded</span>}{concern.temporaryRepair ? <span className="risk-signal tone-warning">Temporary repair</span> : null}{concern.mitigation?.status === "complete" && concern.status !== "resolved" ? <span className="risk-signal tone-info">Action complete; concern open</span> : null}{concern.verification.status === "pending" ? <span className="risk-signal tone-info">Verification pending</span> : null}{!concern.mitigation ? <span className="risk-signal tone-warning">No mitigation task</span> : null}</span>
-            <span className="engineering-row-milestone">{milestoneText(concern)}</span>
-            <span className="engineering-row-response">{concern.mitigation ? `Action: ${concern.mitigation.title} · ${concern.mitigation.status.replaceAll("-", " ")}` : "Mitigation action not recorded"}</span>
-            <span className="engineering-row-review"><span>{concern.evidence.length ? `${concern.evidence[0].role === "source" ? "Reported by" : "Evidence"}: ${concern.evidence[0].label}${concern.evidence[0].available ? "" : " · unavailable"}${concern.evidence.length > 1 ? ` (+${concern.evidence.length - 1})` : ""}` : "Evidence not recorded"}</span><strong>Review concern</strong></span>
-          </button>
-        </li>)}</ul> : <p className="empty-state">No concerns match this scope. Clear the chart selection or adjust search.</p>}
-        <PaginationControls label="engineering concerns" {...pagination} onPageChange={pagination.setPage} onPageSizeChange={pagination.setPageSize} />
+      <section className="engineering-task-preview" aria-label="Blocked tasks preview">
+        <div className="risk-chart-heading"><h2>Blocked tasks</h2><span>{blocked.length} task{blocked.length === 1 ? "" : "s"} · {source === "scenario" ? "scenarios, not saved" : "current, read only"}</span><button className="risk-context-link" type="button" aria-label={`Review all ${blocked.length} blocked task${blocked.length === 1 ? "" : "s"}`} onClick={() => setTaskList(true)}>View all</button></div>
+        {blocked.slice(0, 3).map((task) => <button className="engineering-task-link" type="button" key={task.id} onClick={() => openTask(task)}><strong>{task.title}</strong><span>{task.status.replaceAll("-", " ")}</span></button>)}
+        {!blocked.length ? <p className="risk-chart-note">No blocked tasks in this task scope.</p> : null}
       </section>
-      {selected ? <ConcernContext key={selected.id} concern={selected} bootstrap={bootstrap} onClose={closeConcern} onEdit={() => setDraft(structuredClone(selected))} onReplace={replaceExample} onTaskComplete={() => {
-        if (!selected.mitigation) return;
-        replaceExample({ ...selected, mitigation: { ...selected.mitigation, status: "complete" } });
-        setExampleTasks((records) => records.map((task) => task.id === selected.mitigation!.id ? { ...task, status: "complete", blocked: false } : task));
-      }} onResolve={() => {
-        if (!selected.scenario || selected.verification.status !== "verified" || !selected.verification.criteria.trim() || selected.verification.criteria === "Not recorded" || !selected.verification.evidence?.trim()) return;
-        replaceExample({ ...selected, status: "resolved", blocksWork: false }); setSelectedId(null); setNotice("Example concern resolved after recorded verification. Current records were not changed.");
-      }} /> : <aside className="engineering-support" aria-label="Concern comparisons and task context">
+      {!selected ? <aside className="engineering-support" aria-label="Concern comparisons and task context">
         <div className="engineering-overview">
       <section className="engineering-area-chart" aria-labelledby="engineering-areas-title">
         <div className="risk-chart-heading"><h2 id="engineering-areas-title">Open concerns by mechanism</h2><span>{base.filter((concern) => concern.status !== "resolved").length} unique concerns</span></div>
@@ -141,10 +123,33 @@ export function EngineeringRisksPrototype({ bootstrap, activePersonFilter }: {
         })}
         <button className="engineering-unlinked" type="button" aria-pressed={selection?.kind === "milestone" && selection.id === "none"} onClick={() => selectMark({ kind: "milestone", id: "none" })}><span>No milestone linked</span><strong>{base.filter((concern) => concern.status !== "resolved" && !concern.milestones.length).length}</strong></button>
         <p className="risk-chart-note">“Must resolve” concerns must be resolved before that milestone. Linked concerns have no recorded resolution requirement.</p></details>
-        <button className="engineering-blocked-entry" type="button" onClick={() => setTaskList(true)}><span>Blocked tasks</span><strong>{blocked.length}</strong><span>Review tasks</span></button>
       </section>
     </div>
-        <section className="engineering-task-preview" aria-label="Blocked tasks preview"><div className="risk-chart-heading"><h2>Blocked tasks</h2><span>{blocked.length} tasks</span></div>{blocked.slice(0, 3).map((task) => <button className="engineering-task-link" type="button" key={task.id} onClick={() => openTask(task)}><strong>{task.title}</strong><span>Task blocked · {task.status.replaceAll("-", " ")}</span></button>)}{!blocked.length ? <p className="risk-chart-note">No blocked tasks in this task scope. Open concerns can still require action.</p> : <button className="risk-context-link" type="button" onClick={() => setTaskList(true)}>Review all {blocked.length} blocked tasks</button>}</section></aside>}
+</aside> : null}
+      <section className="engineering-concerns" aria-label="Engineering concern queue">
+        <div className="risk-queue-summary"><h2>Engineering concerns</h2><span>{rows.length} records{source === "scenario" ? " · scenarios, not saved" : " · current, read only"}</span></div>
+        {notice ? <p className="engineering-notice" role="status">{notice}</p> : null}
+        {rows.length ? <ul className="workspace-record-list">{pagination.pageItems.map((concern) => <li className="engineering-concern" key={concern.id}>
+          <button type="button" className="risk-review-row" aria-pressed={selectedId === concern.id} onClick={(event) => { reviewTrigger.current = event.currentTarget; selectConcern(concern.id); }}>
+            <span className="risk-review-row-heading"><strong>{concern.title}</strong><span className={`status-pill status-pill-${severityTone(concern.severity)}`}>{concern.severity}</span></span>
+            <span className="risk-review-row-detail">{concern.detail}</span>
+            <span className="risk-review-row-meta">{concern.subjects.map((subject) => subject.label).join(", ")} · {concern.ownerLabel} · {concern.status.replaceAll("-", " ")}</span>
+            <span className="risk-review-row-signals">{concern.blocksWork ? <span className="risk-signal tone-danger">Explicitly blocks work</span> : <span className="risk-signal tone-neutral">No work block recorded</span>}{concern.temporaryRepair ? <span className="risk-signal tone-warning">Temporary repair</span> : null}{concern.mitigation?.status === "complete" && concern.status !== "resolved" ? <span className="risk-signal tone-info">Action complete; concern open</span> : null}{concern.verification.status === "pending" ? <span className="risk-signal tone-info">Verification pending</span> : null}{!concern.mitigation ? <span className="risk-signal tone-warning">No mitigation task</span> : null}</span>
+            <span className="engineering-row-milestone">{milestoneText(concern)}</span>
+            <span className="engineering-row-response">{concern.mitigation ? `Action: ${concern.mitigation.title} · ${concern.mitigation.status.replaceAll("-", " ")}` : "Mitigation action not recorded"}</span>
+            <span className="engineering-row-review"><span>{concern.evidence.length ? `${concern.evidence[0].role === "source" ? "Reported by" : "Evidence"}: ${concern.evidence[0].label}${concern.evidence[0].available ? "" : " · unavailable"}${concern.evidence.length > 1 ? ` (+${concern.evidence.length - 1})` : ""}` : "Evidence not recorded"}</span><strong>Review concern</strong></span>
+          </button>
+        </li>)}</ul> : <p className="empty-state">No concerns match this scope. Clear the chart selection or adjust search.</p>}
+        <PaginationControls label="engineering concerns" {...pagination} onPageChange={pagination.setPage} onPageSizeChange={pagination.setPageSize} />
+      </section>
+      {selected ? <ConcernContext key={selected.id} concern={selected} bootstrap={bootstrap} onClose={closeConcern} onEdit={() => setDraft(structuredClone(selected))} onReplace={replaceExample} onTaskComplete={() => {
+        if (!selected.mitigation) return;
+        replaceExample({ ...selected, mitigation: { ...selected.mitigation, status: "complete" } });
+        setExampleTasks((records) => records.map((task) => task.id === selected.mitigation!.id ? { ...task, status: "complete", blocked: false } : task));
+      }} onResolve={() => {
+        if (!selected.scenario || selected.verification.status !== "verified" || !selected.verification.criteria.trim() || selected.verification.criteria === "Not recorded" || !selected.verification.evidence?.trim()) return;
+        replaceExample({ ...selected, status: "resolved", blocksWork: false }); setSelectedId(null); setNotice("Example concern resolved after recorded verification. Current records were not changed.");
+      }} /> : null}
     </div>
     {draft ? <ConcernEditor concern={draft} subjects={[...new Map(examples.flatMap((concern) => concern.subjects).map((subject) => [subject.id, subject])).values()]} milestones={[...new Map(examples.flatMap((concern) => concern.milestones.map((milestone) => [milestone.id, milestone] as const))).values()]} onClose={() => setDraft(null)} onSave={(next) => { setExamples((records) => records.some((record) => record.id === next.id) ? records.map((record) => record.id === next.id ? next : record) : [...records, next]); setDraft(null); setSelectedId(next.id); }} /> : null}
     {taskList ? <ModalDialog label="Blocked tasks" onClose={() => setTaskList(false)} dismissOnBackdrop><section className="modal-card"><div className="panel-header compact-header"><h2>Blocked tasks · {blocked.length}</h2><button className="secondary-action" type="button" onClick={() => setTaskList(false)}>Close</button></div><ul className="workspace-record-list">{blocked.map((task) => <li key={task.id}><button className="engineering-task-link" type="button" onClick={() => openTask(task)}><strong>{task.title}</strong><span>{task.status.replaceAll("-", " ")}</span></button></li>)}</ul>{!blocked.length ? <p>No blocked tasks in this scope.</p> : null}</section></ModalDialog> : null}
