@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
-import { X } from "lucide-react";
 import { ModalDialog } from "@/components/ModalDialog";
 import { AppTopbarSlotPortal } from "@/components/layout/AppTopbarSlotPortal";
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -14,6 +13,7 @@ import { PaginationControls, useWorkspacePagination } from "@/features/workspace
 import { buildAttentionQueue } from "../../attention/attentionQueue";
 import { getRiskRecordReference } from "../../riskViewData/riskRecordLinks";
 import { RiskImpactGraph } from "../RiskImpactGraph";
+import { RiskDetailsView } from "../RiskDetailsView";
 import { buildPrototypeConcerns, buildConcernAreas, buildConcernContextTasks, createConcernScenarios, createConcernScenarioTasks, filterPrototypeConcerns, type PrototypeConcern, type ConcernContextTask } from "./riskConcernPrototypeModel";
 import "../riskTriage.css";
 import "./engineeringRisksPrototype.css";
@@ -160,19 +160,14 @@ export function EngineeringRisksPrototype({ bootstrap, activePersonFilter }: {
 function ConcernContext({ concern, bootstrap, onClose, onEdit, onReplace, onTaskComplete, onResolve }: {
   concern: PrototypeConcern; bootstrap: BootstrapPayload; onClose: () => void; onEdit: () => void; onReplace: (next: PrototypeConcern) => void; onTaskComplete: () => void; onResolve: () => void;
 }) {
-  const [inline, setInline] = useState(() => typeof window === "undefined" || window.matchMedia("(min-width: 1180px)").matches);
-  const reviewHeading = useRef<HTMLHeadingElement | null>(null);
-  useEffect(() => { if (inline) reviewHeading.current?.focus({ preventScroll: true }); }, [inline]);
   const [evidenceId, setEvidenceId] = useState<string | null>(null);
   const [verificationOpen, setVerificationOpen] = useState(false);
   const [verificationEvidence, setVerificationEvidence] = useState("");
   const [verificationCriteria, setVerificationCriteria] = useState(concern.verification.criteria === "Not recorded" ? "" : concern.verification.criteria);
   const [linkedReference, setLinkedReference] = useState<{ kind: string; id: string } | null>(null);
-  useEffect(() => { const media = window.matchMedia("(min-width: 1180px)"); const update = () => setInline(media.matches); media.addEventListener("change", update); return () => media.removeEventListener("change", update); }, []);
   const selectedEvidence = concern.evidence.find((item) => item.id === evidenceId);
   const attachedRecords = concern.scenario ? [] : (bootstrap.risks.find((risk) => risk.id === concern.id)?.relatedTargets ?? []).filter((ref) => !["task", "mechanism", "subsystem", "milestone", "report", "qa-finding", "test-finding", "qa-request", "test-result", "artifact"].includes(ref.kind)).map((ref) => getRiskRecordReference(ref, bootstrap));
-  const content = <section className={`risk-review-context engineering-concern-context${inline ? "" : " modal-card task-details-modal"}`} aria-label={`Concern: ${concern.title}`} onKeyDown={(event) => { if (inline && event.key === "Escape" && !verificationOpen) { event.stopPropagation(); onClose(); } }}>
-    <div className="risk-context-heading"><h2 ref={reviewHeading} tabIndex={-1}>{concern.title}</h2><button className="icon-button task-details-close-button" type="button" aria-label="Close concern review" onClick={onClose}><X size={18} /></button></div>
+  return <RiskDetailsView title={concern.title} className="engineering-concern-context" onClose={onClose}>
     <div className="risk-context-meta"><span className={`status-pill status-pill-${severityTone(concern.severity)}`}>{concern.severity} severity</span><span>{concern.status.replaceAll("-", " ")}</span><span>{concern.scenario ? "Illustrative scenario" : "Current record · read only"}</span></div>
     <p className="risk-context-description">{concern.detail}</p>
     <dl className="engineering-facts"><div><dt>Affects</dt><dd>{concern.subjects.map((subject) => subject.label).join(", ")}</dd></div><div><dt>Owner</dt><dd>{concern.ownerLabel}</dd></div><div><dt>Work blocking</dt><dd>{concern.blocksWork ? "Explicitly blocks work" : "No work block recorded"}</dd></div><div><dt>Milestones</dt><dd>{milestoneText(concern)}</dd></div></dl>
@@ -186,8 +181,7 @@ function ConcernContext({ concern, bootstrap, onClose, onEdit, onReplace, onTask
     {!concern.scenario && bootstrap.risks.some((risk) => risk.id === concern.id) ? <details className="engineering-relationships"><summary>Recorded relationships</summary><RiskImpactGraph bootstrap={bootstrap} selected={{ kind: "risk", id: concern.id }} onOpenRecord={(kind, id) => setLinkedReference({ kind, id })} /></details> : <details className="engineering-relationships"><summary>Recorded relationships</summary><ul><li>Concern affects {concern.subjects.map((subject) => subject.label).join(", ")}.</li>{concern.mitigation ? <li>Concern mitigated by {concern.mitigation.title}.</li> : null}{concern.milestones.length ? <li>{milestoneText(concern)}.</li> : null}{concern.evidence.map((item) => <li key={item.id}>{item.role === "source" ? "Reported by" : "Supported by"} {item.label}{item.available ? "" : " (unavailable)"}.</li>)}</ul></details>}
     {linkedReference ? <section className="engineering-evidence-detail" aria-live="polite"><strong>{getRiskRecordReference(linkedReference, bootstrap).label}</strong><p>{linkedReference.kind === "task" ? bootstrap.tasks.find((task) => task.id === linkedReference.id)?.summary || "No task description recorded." : getRiskRecordReference(linkedReference, bootstrap).taskIds.map((id) => bootstrap.tasks.find((task) => task.id === id)?.title).filter(Boolean).join(" · ") || "No directly associated work recorded."}</p></section> : null}
     {verificationOpen ? <ModalDialog label="Record example verification" onClose={() => setVerificationOpen(false)} dismissOnBackdrop><section className="modal-card"><h2>Record example verification</h2><form className="modal-form" onSubmit={(event) => { event.preventDefault(); onReplace({ ...concern, verification: { criteria: verificationCriteria.trim(), status: "verified", evidence: verificationEvidence.trim() } }); setVerificationOpen(false); }}><label className="field modal-wide"><span>Verification criteria</span><textarea required minLength={8} value={verificationCriteria} onChange={(event) => setVerificationCriteria(event.target.value)} /></label><label className="field modal-wide"><span>Verification evidence or report reference</span><textarea required minLength={8} value={verificationEvidence} onChange={(event) => setVerificationEvidence(event.target.value)} /></label><p className="risk-chart-note modal-wide">This records scenario evidence. Resolving the concern remains a separate action.</p><div className="modal-actions modal-wide"><button className="secondary-action" type="button" onClick={() => setVerificationOpen(false)}>Cancel</button><button className="primary-action" type="submit">Record verification</button></div></form></section></ModalDialog> : null}
-  </section>;
-  return inline ? <aside className="risk-review-inspector">{content}</aside> : <ModalDialog label={`Concern: ${concern.title}`} onClose={onClose} dismissOnBackdrop>{content}</ModalDialog>;
+  </RiskDetailsView>;
 }
 
 function ConcernEditor({ concern, subjects, milestones, onClose, onSave }: {
