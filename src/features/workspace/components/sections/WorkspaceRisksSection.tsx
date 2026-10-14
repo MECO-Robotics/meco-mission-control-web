@@ -1,8 +1,16 @@
 import { RisksView } from "@/features/workspace/views/RisksView";
+import { lazy, Suspense } from "react";
 import { WorkspaceSectionPanel } from "../../WorkspaceContentPanelShells";
 import type { WorkspaceContentPanelsViewProps } from "../workspaceContentPanelsViewTypes";
 
+const EngineeringRisksPrototype = lazy(() => import("@/features/workspace/views/risks/prototype/EngineeringRisksPrototype").then((module) => ({ default: module.EngineeringRisksPrototype })));
+
 export function WorkspaceRisksSection(props: WorkspaceContentPanelsViewProps) {
+  if (new URLSearchParams(window.location.search).get("risk-prototype") === "engineering") return (
+    <WorkspaceSectionPanel disableAnimations={props.disablePanelAnimations} isActive={props.activeTab === "risks"} tabSwitchDirection={props.tabSwitchDirection}>
+      <Suspense fallback={<p role="status">Loading review prototype…</p>}><EngineeringRisksPrototype bootstrap={props.bootstrap} activePersonFilter={props.activePersonFilter} /></Suspense>
+    </WorkspaceSectionPanel>
+  );
   return (
     <WorkspaceSectionPanel disableAnimations={props.disablePanelAnimations} isActive={props.activeTab === "risks"} tabSwitchDirection={props.tabSwitchDirection}>
       <RisksView
