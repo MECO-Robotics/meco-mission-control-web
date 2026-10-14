@@ -93,3 +93,8 @@
 @media (max-width: 640px) {
   .engineering-risk-prototype .engineering-overview { grid-template-columns: minmax(0, 1fr); }
 }
+
+.engineering-task-dialog > .modal-card { width: min(38rem, 100%); box-sizing: border-box; overflow-wrap: anywhere; }
+@media (min-width: 1180px) {
+  .engineering-task-dialog { justify-items: end; }
+}
