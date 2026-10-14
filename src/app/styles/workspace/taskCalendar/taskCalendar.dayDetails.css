@@ -1,10 +1,3 @@
-.task-calendar-day-details {
-  border-top: 1px solid var(--border-base);
-  display: grid;
-  gap: 0.7rem;
-  padding: 0.85rem;
-}
-
 .task-calendar-day-details-header {
   align-items: flex-start;
   display: flex;
@@ -12,24 +5,8 @@
   justify-content: space-between;
 }
 
-.task-calendar-day-details-eyebrow {
-  color: var(--text-muted);
-  font-size: 0.68rem;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.task-calendar-day-details-header h3,
 .task-calendar-day-details-header p {
   margin: 0;
-}
-
-.task-calendar-day-details-header h3 {
-  color: var(--text-title);
-  font-size: 1rem;
-}
-
-.task-calendar-day-details-header p {
   color: var(--text-copy);
   font-size: 0.78rem;
   font-weight: 700;
