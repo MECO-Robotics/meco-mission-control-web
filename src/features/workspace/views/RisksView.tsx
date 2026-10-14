@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { RiskPayload } from "@/types/payloads";
@@ -43,10 +43,13 @@ export function RisksView({
     onUpdateRisk,
   });
   const openRiskDetails = viewModel.openRiskDetails;
+  const openedRiskLink = useRef<string | null>(null);
   useEffect(() => {
+    if (!selectedRiskId) { openedRiskLink.current = null; return; }
+    if (openedRiskLink.current === selectedRiskId || viewModel.pendingRiskIds.has(selectedRiskId)) return;
     const risk = selectedRiskId ? bootstrap.risks.find((item) => item.id === selectedRiskId) : undefined;
-    if (risk) openRiskDetails(risk);
-  }, [bootstrap.risks, openRiskDetails, selectedRiskId]);
+    if (risk) { openRiskDetails(risk); openedRiskLink.current = selectedRiskId; }
+  }, [bootstrap.risks, openRiskDetails, selectedRiskId, viewModel.pendingRiskIds]);
   return (
     <section className={`panel dense-panel subsystem-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
       <RiskTriageQueue
