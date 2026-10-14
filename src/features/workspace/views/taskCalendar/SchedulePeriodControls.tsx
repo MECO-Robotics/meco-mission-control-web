@@ -9,7 +9,6 @@ export function SchedulePeriodControls({
   periodLabel,
   presentation,
   range,
-  showRangeSelector = true,
 }: {
   onRangeChange?: (value: TimelineViewInterval) => void;
   onShiftPeriod: (direction: -1 | 1) => void;
@@ -17,7 +16,6 @@ export function SchedulePeriodControls({
   periodLabel: string;
   presentation: SchedulePresentation;
   range: TimelineViewInterval;
-  showRangeSelector?: boolean;
 }) {
   const isTimeline = presentation === "timeline";
   const showsPeriodNavigation = !isTimeline || range !== "all";
@@ -28,9 +26,7 @@ export function SchedulePeriodControls({
       aria-label={presentation === "timeline" ? "Timeline period controls" : `${presentation} period controls`}
       className={`timeline-period-controls${range === "week" ? " is-week" : ""}${isTimeline && range === "all" ? " is-all" : ""}`}
     >
-      {showRangeSelector ? (
-        <ScheduleRangeSelector onChange={onRangeChange} presentation={presentation} value={range} />
-      ) : null}
+      <ScheduleRangeSelector onChange={onRangeChange} presentation={presentation} value={range} />
       {showsPeriodNavigation ? (
         <>
           <span aria-hidden="true" className="timeline-period-divider" />

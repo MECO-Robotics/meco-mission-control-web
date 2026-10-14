@@ -74,14 +74,23 @@
 }
 
 @media (max-width: 760px) {
-  .workspace-schedule-scroll.is-calendar-workspace:has(.task-calendar-mobile-agenda) {
-    overflow-x: hidden;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-
   .schedule-agenda-list li {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .workspace-schedule-scroll.is-calendar-workspace {
+    overflow-x: hidden;
+    overflow-y: hidden;
+  }
+
+  .workspace-schedule-scroll.is-calendar-workspace > .workspace-tab-panel {
+    min-width: 38rem;
+  }
+
+  .task-calendar-month-stack {
+    min-width: 38rem;
   }
 }
 

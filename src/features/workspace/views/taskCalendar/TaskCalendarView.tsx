@@ -95,19 +95,6 @@ export function TaskCalendarView({
   onTaskEditCanceled = () => {},
   onTaskEditSaved = () => {},
 }: TaskCalendarViewProps) {
-  const [isCompactCalendar, setIsCompactCalendar] = useState(() =>
-    typeof window !== "undefined" && window.matchMedia("(max-width: 760px)").matches,
-  );
-  const isMobileAgenda = presentation === "calendar" && isCompactCalendar;
-  const activePresentation = isMobileAgenda ? "agenda" : presentation;
-  useEffect(() => {
-    const query = window.matchMedia("(max-width: 760px)");
-    const update = () => setIsCompactCalendar(query.matches);
-    update();
-    query.addEventListener("change", update);
-    return () => query.removeEventListener("change", update);
-  }, []);
-
   const [isMeetingModalOpen, setIsMeetingModalOpen] = useState(false);
   const [isSavingMeeting, setIsSavingMeeting] = useState(false);
   const [meetingDraft, setMeetingDraft] = useState<MeetingPayload>(() => createDefaultMeetingDraft(bootstrap));
@@ -190,7 +177,8 @@ export function TaskCalendarView({
       }
     }
   };
-  const activeAgendaRange = isMobileAgenda ? "week" : agendaRange;
+  const activePresentation = presentation;
+  const activeAgendaRange = agendaRange;
   const agendaBounds = getSchedulePeriodBounds(agendaStartDate, activeAgendaRange);
   const agendaEvents = useMemo(() => calendar.events.filter((event) => {
     const eventDate = toEventDateKey(event.start);
@@ -213,7 +201,7 @@ export function TaskCalendarView({
     : formatMonthYearLabel(formatLocalDate(periodDate));
 
   const changeScheduleRange = (range: TimelineViewInterval) => {
-    if (activePresentation !== "agenda" || isMobileAgenda) return;
+    if (activePresentation !== "agenda") return;
     setAgendaRange(range);
     setAgendaStartDate(getSchedulePeriodBounds(agendaStartDate, range).startDate);
   };
@@ -260,17 +248,16 @@ export function TaskCalendarView({
   };
 
   return (
-    <section className={`panel dense-panel task-calendar-shell ${activePresentation === "calendar" ? "task-calendar-full-height" : ""} ${isMobileAgenda ? "task-calendar-mobile-agenda" : ""} ${WORKSPACE_PANEL_CLASS}`}>
+    <section className={`panel dense-panel task-calendar-shell ${activePresentation === "calendar" ? "task-calendar-full-height" : ""} ${WORKSPACE_PANEL_CLASS}`}>
       <AppTopbarSlotPortal slot="controls">
         <WorkspaceTopbarControls className="schedule-topbar-controls">
           <SchedulePeriodControls
-            onRangeChange={activePresentation === "agenda" && !isMobileAgenda ? changeScheduleRange : undefined}
+            onRangeChange={activePresentation === "agenda" ? changeScheduleRange : undefined}
             onShiftPeriod={shiftPeriod}
             onToday={goToToday}
             periodLabel={periodLabel}
             presentation={activePresentation}
             range={activePresentation === "calendar" ? "month" : activeAgendaRange}
-            showRangeSelector={!isMobileAgenda}
           />
         </WorkspaceTopbarControls>
         <TopbarResponsiveSearch
