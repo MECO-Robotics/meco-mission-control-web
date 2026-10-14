@@ -79,3 +79,11 @@ it("includes upcoming mitigation deadlines without marking undated risks due soo
   expect(rows[0]).toMatchObject({ recordId: "risk-1", urgency: 60, dueDate: "2026-04-25", signals: expect.arrayContaining(["due-soon"]) });
   expect(rows[1].signals).not.toContain("due-soon");
 });
+
+it("adds detail and scope metadata without exposing ordinary unfinished tasks in Home", () => {
+  const bootstrap = createBootstrap();
+  bootstrap.risks = [];
+  bootstrap.tasks = [{ ...bootstrap.tasks[0], dueDate: "2026-06-01", summary: "Known work", ownerId: "member-1" }];
+  expect(buildAttentionQueue({ bootstrap, activePersonFilter: [], today })).toEqual([]);
+  expect(buildAttentionQueue({ bootstrap, activePersonFilter: [], today, includeAllUnfinishedTasks: true })[0]).toMatchObject({ detail: "Known work", projectId: "project-1", areaIds: ["subsystem-1"], areaLabels: ["Drive"], affectedTaskIds: ["task-1"], planningState: "ready" });
+});

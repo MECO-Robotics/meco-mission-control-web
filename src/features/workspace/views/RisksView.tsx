@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { RiskPayload } from "@/types/payloads";
@@ -7,9 +7,6 @@ import type { FilterSelection } from "@/features/workspace/shared/filters/worksp
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 
 import { RiskEditorModal } from "./RiskEditorModal";
-import { RiskDetailsModal } from "./RiskDetailsModal";
-import { RiskMetricsSection } from "./RiskMetricsSection";
-import { riskAuditActions } from "./riskViewData/riskAuditActions";
 import { useRisksViewModel } from "./riskViewModel";
 import { RiskTriageQueue } from "./risks/RiskTriageQueue";
 
@@ -21,6 +18,7 @@ interface RisksViewProps {
   openTaskDetailModal?: (task: TaskRecord) => void;
   onUpdateRisk: (riskId: string, payload: Partial<RiskPayload>) => Promise<void>;
   onOpenSchedule?: (milestoneId: string) => void;
+  onOpenRecord?: (kind: string, id: string) => void;
   selectedRiskId?: string | null;
 }
 
@@ -32,9 +30,9 @@ export function RisksView({
   openTaskDetailModal,
   onUpdateRisk,
   onOpenSchedule,
+  onOpenRecord,
   selectedRiskId,
 }: RisksViewProps) {
-  const [healthOpen, setHealthOpen] = useState(false);
   const viewModel = useRisksViewModel({
     activePersonFilter,
     bootstrap,
@@ -60,18 +58,20 @@ export function RisksView({
         onUpdateRisk={viewModel.handleQuickUpdateRisk}
         pendingRiskIds={viewModel.pendingRiskIds}
         riskErrors={viewModel.riskErrors}
-        editingRiskId={viewModel.editorMode === "edit" ? viewModel.activeRisk?.id ?? null : null}
-        onOpenTask={(taskId) => {
-          const task = bootstrap.tasks.find((item) => item.id === taskId);
-          if (task && openTaskDetailModal) {
-            openTaskDetailModal(task);
-          }
+        selectedRisk={viewModel.editorMode === "detail" ? viewModel.activeRisk : null}
+        onCloseRisk={viewModel.closeEditor}
+        onEditRisk={viewModel.openEditEditor}
+        onOpenRecord={(kind, id) => {
+          if (kind === "task" || kind === "manufacturing-details") {
+            const task = bootstrap.tasks.find((item) => item.id === id);
+            if (task) openTaskDetailModal?.(task);
+          } else if (kind === "risk") {
+            const risk = bootstrap.risks.find((item) => item.id === id);
+            if (risk) viewModel.openRiskDetails(risk);
+          } else if (kind === "milestone") { viewModel.closeEditor(); onOpenSchedule?.(id); }
+          else onOpenRecord?.(kind, id);
         }}
       />
-      <details className="workspace-disclosure" onToggle={(event) => setHealthOpen(event.currentTarget.open)}>
-        <summary>Project health</summary>
-        {healthOpen ? <RiskMetricsSection {...viewModel.metrics} /> : null}
-      </details>
 
       <RiskEditorModal
         draft={viewModel.draft}
@@ -88,19 +88,6 @@ export function RisksView({
         onSave={() => void viewModel.handleSaveRisk()}
         setDraft={viewModel.setDraft}
       />
-      {viewModel.editorMode === "detail" && viewModel.activeRisk ? (
-        <RiskDetailsModal
-          activeRisk={viewModel.activeRisk}
-          auditActions={riskAuditActions(bootstrap.actions, viewModel.activeRisk)}
-          getTargetLabel={viewModel.getTargetLabel}
-          getMitigationLabel={viewModel.getMitigationLabel}
-          getSourceLabel={viewModel.getSourceLabel}
-          ownerLabel={bootstrap.members.find((member) => member.id === viewModel.activeRisk?.ownerMemberId)?.name ?? "Unassigned"}
-          onClose={viewModel.closeEditor}
-          onEditRisk={() => viewModel.openEditEditor(viewModel.activeRisk!)}
-          onOpenSchedule={(milestoneId) => { viewModel.closeEditor(); onOpenSchedule?.(milestoneId); }}
-        />
-      ) : null}
     </section>
   );
 }
