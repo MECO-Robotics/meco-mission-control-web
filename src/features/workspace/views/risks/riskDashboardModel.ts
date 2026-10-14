@@ -8,8 +8,7 @@ export type AreaSegment = "blocked" | "dependency" | "qa" | "other";
 export type DeadlineBucketId = "overdue" | "today" | "soon" | "later" | "undated";
 export type RiskChartSelection =
   | { kind: "area"; areaId: string; segment?: AreaSegment }
-  | { kind: "deadline"; source: "risk" | "task"; bucket: DeadlineBucketId }
-  | { kind: "response"; owner: boolean; mitigation: boolean };
+  | { kind: "deadline"; source: "risk" | "task"; bucket: DeadlineBucketId };
 export interface AreaPressure {
   id: string;
   label: string;
@@ -22,7 +21,6 @@ export interface AreaPressure {
   other: number;
 }
 export interface DeadlineBucket { id: DeadlineBucketId; label: string; taskCount: number; riskCount: number }
-export interface RiskResponseCell { id: string; owner: boolean; mitigation: boolean; count: number; highCount: number }
 
 function taskSegment(row: AttentionQueueRow): AreaSegment {
   return row.planningState === "blocked" ? "blocked" : row.planningState === "waiting-on-dependency" ? "dependency" : row.status === "waiting-for-qa" ? "qa" : "other";
@@ -47,10 +45,7 @@ export function buildRiskDashboard({ bootstrap, activePersonFilter, filters, inc
 }) {
   const rows = filterRiskTriageRows(buildAttentionQueue({ bootstrap, activePersonFilter, includeResolvedRisks, includeAllUnfinishedTasks: true, today }), filters);
   const projects = new Map(bootstrap.projects.map(project => [project.id, project.name]));
-  const members = new Set(bootstrap.members.map(member => member.id));
-  const tasks = new Set(bootstrap.tasks.map(task => task.id));
   const risks = new Map(bootstrap.risks.map(risk => [risk.id, risk]));
-  const response = (row: AttentionQueueRow) => ({ owner: Boolean(row.ownerMemberId && members.has(row.ownerMemberId)), mitigation: Boolean(risks.get(row.recordId)?.mitigationTaskId && tasks.has(risks.get(row.recordId)!.mitigationTaskId!)) });
   const areaMap = new Map<string, AreaPressure>();
   const deadlines: DeadlineBucket[] = [
     { id: "overdue", label: "Overdue", taskCount: 0, riskCount: 0 },
@@ -59,7 +54,6 @@ export function buildRiskDashboard({ bootstrap, activePersonFilter, filters, inc
     { id: "later", label: "Later", taskCount: 0, riskCount: 0 },
     { id: "undated", label: "No valid date", taskCount: 0, riskCount: 0 },
   ];
-  const responses: RiskResponseCell[] = [false, true].flatMap(owner => [false, true].map(mitigation => ({ id: `${owner ? "owned" : "unassigned"}:${mitigation ? "linked" : "unlinked"}`, owner, mitigation, count: 0, highCount: 0 })));
   for (const row of rows) {
     if (row.source === "risk" && row.status === "resolved") continue;
     const bucket = deadlines.find(item => item.id === deadlineBucket(row.dueDate, today))!;
@@ -76,23 +70,15 @@ export function buildRiskDashboard({ bootstrap, activePersonFilter, filters, inc
       }
     } else {
       bucket.riskCount++;
-      const coverage = response(row);
-      const cell = responses.find(item => item.owner === coverage.owner && item.mitigation === coverage.mitigation)!;
-      cell.count++;
-      if (row.priority === "critical" || row.priority === "high") cell.highCount++;
     }
   }
   const selectedTaskIds = new Set(rows.filter(row => row.source === "task" && selection?.kind === "area" && row.areaIds?.includes(selection.areaId) && (!selection.segment || taskSegment(row) === selection.segment)).map(row => row.recordId));
   const queueRows = rows.filter(row => {
     if (!selection) return row.source === "risk" || row.signals.some(signal => signal !== "unassigned");
     if (selection.kind === "deadline") return row.source === selection.source && row.status !== "resolved" && deadlineBucket(row.dueDate, today) === selection.bucket;
-    if (selection.kind === "response") {
-      const coverage = response(row);
-      return row.source === "risk" && row.status !== "resolved" && coverage.owner === selection.owner && coverage.mitigation === selection.mitigation;
-    }
     if (row.source === "task") return selectedTaskIds.has(row.recordId);
     return selection.segment ? row.affectedTaskIds?.some(id => selectedTaskIds.has(id)) || selectedTaskIds.has(risks.get(row.recordId)?.mitigationTaskId ?? "") : row.areaIds?.includes(selection.areaId);
   });
   const areas = [...areaMap.values()].sort((a, b) => (b.blocked + b.dependency) - (a.blocked + a.dependency) || b.qa - a.qa || b.taskCount - a.taskCount || a.label.localeCompare(b.label) || a.id.localeCompare(b.id));
-  return { rows, queueRows, areas, deadlines, responses };
+  return { rows, queueRows, areas, deadlines };
 }

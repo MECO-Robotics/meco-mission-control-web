@@ -60,7 +60,7 @@ export function RiskTriageQueue({ bootstrap, activePersonFilter, pendingRiskIds,
     closeContext();
     setSelection((current) => JSON.stringify(current) === JSON.stringify(next) ? null : next);
   };
-  const selectionLabel = !selection ? "" : selection.kind === "area" ? `${model.areas.find((area) => area.id === selection.areaId)?.label ?? "Area"}${selection.segment ? ` · ${selection.segment === "qa" ? "QA" : selection.segment}` : ""}` : selection.kind === "deadline" ? `${selection.source === "task" ? "Tasks" : "Mitigations"} · ${model.deadlines.find((bucket) => bucket.id === selection.bucket)?.label ?? selection.bucket}` : `${selection.owner ? "Named owner" : "No named owner"} · ${selection.mitigation ? "mitigation linked" : "no mitigation"}`;
+  const selectionLabel = !selection ? "" : selection.kind === "area" ? `${model.areas.find((area) => area.id === selection.areaId)?.label ?? "Area"}${selection.segment ? ` · ${selection.segment === "qa" ? "QA" : selection.segment}` : ""}` : `${selection.source === "task" ? "Tasks" : "Mitigations"} · ${model.deadlines.find((bucket) => bucket.id === selection.bucket)?.label ?? selection.bucket}`;
   const selectRow = (row: AttentionQueueRow) => {
     if (row.source === "risk") {
       setSelectedTaskId(null);
@@ -81,7 +81,7 @@ export function RiskTriageQueue({ bootstrap, activePersonFilter, pendingRiskIds,
     </>} />
     {selection ? <AppTopbarSlotPortal slot="controls"><WorkspaceTopbarControls><button className="risk-chart-clear" type="button" aria-label={`Clear chart selection: ${selectionLabel}`} onClick={() => { closeContext(); setSelection(null); }}><span>{selectionLabel}</span><strong>Clear</strong></button></WorkspaceTopbarControls></AppTopbarSlotPortal> : null}
     <WorkspaceTopbarAddMenu actions={buildSingleAddMenuAction({ label: "Add risk", onSelect: onCreateRisk })} ariaLabel="Add risk" title="Add risk" />
-    <RiskDashboardCharts areas={model.areas} deadlines={model.deadlines} responses={model.responses} selection={selection} onSelect={selectChart} />
+    <RiskDashboardCharts areas={model.areas} deadlines={model.deadlines} selection={selection} onSelect={selectChart} />
     <div className={`risk-review-workspace${selected ? " has-selection" : ""}`}>
       <section className="risk-triage" aria-label="Review queue">
         <div className="risk-queue-summary"><h2>Review queue</h2><span>{model.queueRows.length} records · {model.queueRows.filter((row) => row.source === "risk").length} risks · {model.queueRows.filter((row) => row.source === "task").length} tasks</span></div>
