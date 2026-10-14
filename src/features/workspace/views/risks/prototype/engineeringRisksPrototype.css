@@ -17,9 +17,12 @@
 .engineering-risk-prototype .engineering-milestone, .engineering-risk-prototype .engineering-unlinked { display: flex; align-items: start; justify-content: space-between; gap: 1rem; width: 100%; border: 0; border-bottom: 1px solid var(--border-base); padding: .7rem .3rem; background: transparent; color: var(--text-title); text-align: left; font: inherit; cursor: pointer; }
 .engineering-risk-prototype .engineering-milestone > span { display: grid; gap: .35rem; }
 .engineering-risk-prototype .engineering-milestone strong { font-size: .78rem; line-height: 1.45; }
-.engineering-risk-prototype .engineering-milestone time, .engineering-risk-prototype .engineering-milestone-counts > span { color: var(--text-muted); font-size: .69rem; }
-.engineering-risk-prototype .engineering-milestone-counts { flex-shrink: 0; text-align: right; }
-.engineering-risk-prototype .engineering-milestone-counts strong { color: var(--status-warning-text); font-size: .72rem; }
+.engineering-risk-prototype .engineering-milestone time { color: var(--text-muted); font-size: .69rem; }
+.engineering-risk-prototype .engineering-milestone { display: grid; gap: .55rem; }
+.engineering-risk-prototype .engineering-milestone-heading { min-width: 0; }
+.engineering-risk-prototype .engineering-milestone-concerns > span { display: grid; gap: .2rem; color: var(--text-copy); font-size: .72rem; line-height: 1.45; overflow-wrap: anywhere; }
+.engineering-risk-prototype .engineering-milestone-concerns strong { color: var(--text-muted); font-size: .65rem; font-weight: 500; }
+.engineering-risk-prototype .engineering-milestone-concerns .engineering-must-resolve { color: var(--status-warning-text); }
 .engineering-risk-prototype .engineering-milestone-details > summary { cursor: pointer; color: var(--text-title); margin-bottom: .4rem; }
 .engineering-risk-prototype .engineering-milestone-details > summary h2 { display: inline; margin-inline-end: .5rem; }
 .engineering-risk-prototype .engineering-milestone-details > summary > span { display: block; margin: .4rem 0; font-size: .7rem; color: var(--text-muted); }
