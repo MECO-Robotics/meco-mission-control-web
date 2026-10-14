@@ -8,13 +8,6 @@
   background: var(--kanban-lane-surface);
 }
 
-.task-queue-board-column:is(:hover, :focus-within) {
-  transform: translateY(-2px) scale(1.01);
-  transform-origin: top center;
-  z-index: 2;
-  overflow: visible;
-}
-
 .kanban-draggable-card:hover,
 .kanban-draggable-card:focus-within {
   transform: translateY(-1px);
