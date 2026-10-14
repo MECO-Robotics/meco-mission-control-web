@@ -102,6 +102,8 @@ describe("TaskCalendarDayDetails", () => {
     );
 
     expect(markup).toContain(dayLabel);
+    expect(markup).toContain(`<dialog aria-label="Details for ${dayLabel}"`);
+    expect(markup).toContain('aria-label="Close day details"');
     expect(markup).toContain("2 things due");
     expect(markup).toContain("Robot | Wire drivetrain");
     expect(markup).toContain("Task due");
@@ -121,9 +123,7 @@ describe("TaskCalendarMonthGrid day selection", () => {
       React.createElement(TaskCalendarMonthGrid, {
         eventsByDateKey: new Map([["2026-05-07", [taskEvent, meetingEvent]]]),
         monthCells: [new Date(2026, 4, 7)],
-        onCloseSelectedDay: jest.fn(),
         onOpenDay: jest.fn(),
-        onOpenEvent: jest.fn(),
         selectedDateKey: "2026-05-07",
         todayDateKey: "2026-05-08",
       }),
@@ -133,17 +133,16 @@ describe("TaskCalendarMonthGrid day selection", () => {
     expect(markup).toContain(`View details for ${dayLabel} with 2 items`);
     expect(markup).toContain("task-calendar-day is-selected");
     expect(markup).toContain("task-calendar-day-open");
+    expect(markup).not.toContain("<dialog");
+    expect(markup).not.toContain("task-calendar-day-details");
   });
 
   it("opens day details from the date control while keeping event chips informational", () => {
     const onOpenDay = jest.fn();
-    const onOpenEvent = jest.fn();
     const grid = TaskCalendarMonthGrid({
       eventsByDateKey: new Map([["2026-05-07", [taskEvent, meetingEvent]]]),
       monthCells: [new Date(2026, 4, 7)],
-      onCloseSelectedDay: jest.fn(),
       onOpenDay,
-      onOpenEvent,
       selectedDateKey: null,
       todayDateKey: "2026-05-08",
     });
@@ -154,7 +153,6 @@ describe("TaskCalendarMonthGrid day selection", () => {
 
     expect(onOpenDay).toHaveBeenCalledWith("2026-05-07");
     expect(eventButton).toBeNull();
-    expect(onOpenEvent).not.toHaveBeenCalled();
   });
 });
 

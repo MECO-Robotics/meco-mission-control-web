@@ -23,6 +23,7 @@ import { useMilestonesMilestoneModalState } from "@/features/workspace/views/mil
 import { MeetingScheduleModal } from "./MeetingScheduleModal";
 import { ScheduleAgendaMonthList } from "./ScheduleAgendaMonthList";
 import { TaskCalendarMonthStack } from "./TaskCalendarMonthStack";
+import { TaskCalendarDayDetails } from "./TaskCalendarDayDetails";
 import { groupTaskCalendarEventsByMonth, toEventDateKey, type TaskCalendarSortMode } from "./taskCalendarLayout";
 import type { TaskCalendarEvent, TaskCalendarEventType } from "./taskCalendarEvents";
 import { useTaskCalendarEventData } from "./useTaskCalendarEventData";
@@ -159,6 +160,7 @@ export function TaskCalendarView({
   };
 
   const openEvent = (event: TaskCalendarEvent) => {
+    setSelectedDateKey(null);
     if (event.extendedProps.type === "milestone") {
       const milestone = calendar.milestonesById[event.extendedProps.recordId];
       if (milestone) {
@@ -293,13 +295,20 @@ export function TaskCalendarView({
             monthCursor={calendar.monthCursor}
             onVisibleMonthChange={calendar.setMonthCursor}
             onOpenDay={setSelectedDateKey}
-            onOpenEvent={openEvent}
-            onCloseSelectedDay={() => setSelectedDateKey(null)}
             selectedDateKey={selectedDateKey}
             todayDateKey={calendar.todayDateKey}
           />
         </>
       )}
+
+      {presentation === "calendar" && selectedDateKey ? (
+        <TaskCalendarDayDetails
+          dateKey={selectedDateKey}
+          events={calendar.eventsByDateKey.get(selectedDateKey) ?? []}
+          onClose={() => setSelectedDateKey(null)}
+          onOpenEvent={openEvent}
+        />
+      ) : null}
 
       <MilestonesMilestoneModal
         activeMilestone={milestoneModalState.activeMilestone}

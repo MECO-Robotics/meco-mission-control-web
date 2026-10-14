@@ -1,17 +1,14 @@
 import { WEEKDAY_LABELS } from "./taskCalendarLayout";
 import { formatLocalDate } from "@/lib/dateUtils";
 import type { TaskCalendarEvent } from "./taskCalendarEvents";
-import { TaskCalendarDayDetails } from "./TaskCalendarDayDetails";
 
 interface TaskCalendarMonthGridProps {
   eventsByDateKey: Map<string, TaskCalendarEvent[]>;
   monthCells: Date[];
   onOpenDay: (dateKey: string) => void;
-  onOpenEvent: (event: TaskCalendarEvent) => void;
   selectedDateKey: string | null;
   todayDateKey: string;
   dayRef?: (dateKey: string, element: HTMLElement | null) => void;
-  onCloseSelectedDay: () => void;
 }
 
 function eventTypeClassName(event: TaskCalendarEvent) {
@@ -32,11 +29,9 @@ export function TaskCalendarMonthGrid({
   eventsByDateKey,
   monthCells,
   onOpenDay,
-  onOpenEvent,
   selectedDateKey,
   todayDateKey,
   dayRef,
-  onCloseSelectedDay,
 }: TaskCalendarMonthGridProps) {
   return (
     <>
@@ -49,7 +44,6 @@ export function TaskCalendarMonthGrid({
       <div className="task-calendar-grid">
         {Array.from({ length: Math.ceil(monthCells.length / 7) }, (_, weekIndex) => {
           const weekDates = monthCells.slice(weekIndex * 7, weekIndex * 7 + 7);
-          const hasSelectedDate = weekDates.some((date) => formatLocalDate(date) === selectedDateKey);
           return (
             <div className="task-calendar-week" key={formatLocalDate(weekDates[0])}>
               {weekDates.map((cellDate) => {
@@ -117,14 +111,6 @@ export function TaskCalendarMonthGrid({
                   </article>
                 );
               })}
-              {hasSelectedDate && selectedDateKey ? (
-                <TaskCalendarDayDetails
-                  dateKey={selectedDateKey}
-                  events={eventsByDateKey.get(selectedDateKey) ?? []}
-                  onClose={onCloseSelectedDay}
-                  onOpenEvent={onOpenEvent}
-                />
-              ) : null}
             </div>
           );
         })}

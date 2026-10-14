@@ -91,17 +91,16 @@
   height: 2.2rem;
   padding: 0;
   line-height: 0;
-  border: 1px solid color-mix(in srgb, var(--meco-blue) 80%, var(--official-black));
-  background: var(--meco-blue);
-  color: var(--official-white);
-  box-shadow: var(--shadow-soft);
+  border: 0;
+  background: transparent;
+  color: var(--text-link);
+  box-shadow: none;
 }
 
 .topbar-add-menu .topbar-add-menu-trigger.secondary-action.icon-button:hover,
 .topbar-add-menu .topbar-add-menu-trigger.secondary-action.icon-button:focus-visible {
-  border-color: color-mix(in srgb, var(--meco-blue) 92%, var(--official-black));
-  background: color-mix(in srgb, var(--meco-blue) 90%, var(--official-black));
-  color: var(--official-white);
+  background: transparent;
+  color: var(--text-link-hover);
 }
 
 .topbar-add-menu .topbar-add-menu-trigger.secondary-action.icon-button svg {

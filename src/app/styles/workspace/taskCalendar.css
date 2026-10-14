@@ -155,11 +155,7 @@
 .task-calendar-week {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  grid-template-rows: var(--task-calendar-week-height, 7rem) auto;
-}
-
-.task-calendar-week > .task-calendar-day-details {
-  grid-column: 1 / -1;
+  grid-template-rows: var(--task-calendar-week-height, 7rem);
 }
 
 .task-calendar-day {
