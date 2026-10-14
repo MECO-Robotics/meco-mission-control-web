@@ -11,6 +11,7 @@ export function TaskCalendarMonthStack({
   eventsByDateKey,
   monthCursor,
   onOpenDay,
+  onOpenEvent,
   onVisibleMonthChange,
   selectedDateKey,
   todayDateKey,
@@ -18,6 +19,7 @@ export function TaskCalendarMonthStack({
   eventsByDateKey: Map<string, TaskCalendarEvent[]>;
   monthCursor: Date;
   onOpenDay: (dateKey: string) => void;
+  onOpenEvent: (event: TaskCalendarEvent) => void;
   onVisibleMonthChange: (month: Date) => void;
   selectedDateKey: string | null;
   todayDateKey: string;
@@ -34,6 +36,7 @@ export function TaskCalendarMonthStack({
   const monthsAfter = monthWindow.cursorKey === cursorKey ? monthWindow.monthsAfter : INITIAL_MONTHS_EACH_DIRECTION;
   const stackRef = useRef<HTMLDivElement>(null);
   const [stackHeight, setStackHeight] = useState(0);
+  const [eventCapacity, setEventCapacity] = useState(4);
   const cursorDayRef = useRef<HTMLElement>(null);
   const scrollUpdatedCursorKeyRef = useRef<string | null>(null);
   const previousStackHeightRef = useRef<number | null>(null);
@@ -41,7 +44,15 @@ export function TaskCalendarMonthStack({
     const stack = stackRef.current;
     if (!stack) return;
 
-    const updateHeight = () => setStackHeight(stack.clientHeight);
+    const eventArea = stack.querySelector<HTMLElement>(".task-calendar-day-events");
+    const updateHeight = () => {
+      setStackHeight(stack.clientHeight);
+      if (!eventArea) return;
+      const style = getComputedStyle(eventArea);
+      const gap = parseFloat(style.rowGap);
+      const available = eventArea.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+      setEventCapacity(Math.max(1, Math.floor((available + gap) / (parseFloat(style.gridAutoRows) + gap))));
+    };
     updateHeight();
     if (typeof ResizeObserver === "undefined") {
       window.addEventListener("resize", updateHeight);
@@ -50,8 +61,9 @@ export function TaskCalendarMonthStack({
 
     const observer = new ResizeObserver(updateHeight);
     observer.observe(stack);
+    if (eventArea) observer.observe(eventArea);
     return () => observer.disconnect();
-  }, []);
+  }, [cursorKey, monthsBefore]);
   useEffect(() => {
     if (scrollUpdatedCursorKeyRef.current === cursorKey) {
       scrollUpdatedCursorKeyRef.current = null;
@@ -153,6 +165,8 @@ export function TaskCalendarMonthStack({
         eventsByDateKey={eventsByDateKey}
         monthCells={calendarDates}
         onOpenDay={onOpenDay}
+        onOpenEvent={onOpenEvent}
+        eventCapacity={eventCapacity}
         selectedDateKey={selectedDateKey}
         todayDateKey={todayDateKey}
         dayRef={(dateKey, element) => {

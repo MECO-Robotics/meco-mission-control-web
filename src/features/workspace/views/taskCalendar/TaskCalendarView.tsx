@@ -295,6 +295,7 @@ export function TaskCalendarView({
             monthCursor={calendar.monthCursor}
             onVisibleMonthChange={calendar.setMonthCursor}
             onOpenDay={setSelectedDateKey}
+            onOpenEvent={openEvent}
             selectedDateKey={selectedDateKey}
             todayDateKey={calendar.todayDateKey}
           />

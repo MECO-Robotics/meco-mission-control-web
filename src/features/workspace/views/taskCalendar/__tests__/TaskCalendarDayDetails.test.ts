@@ -117,13 +117,15 @@ describe("TaskCalendarDayDetails", () => {
 });
 
 describe("TaskCalendarMonthGrid day selection", () => {
-  it("renders clickable day cells and marks the selected day", () => {
+  it("shows the day drawer control only when items exceed the available capacity", () => {
     const dayLabel = formatExpectedDayLabel("2026-05-07");
     const markup = renderToStaticMarkup(
       React.createElement(TaskCalendarMonthGrid, {
         eventsByDateKey: new Map([["2026-05-07", [taskEvent, meetingEvent]]]),
         monthCells: [new Date(2026, 4, 7)],
         onOpenDay: jest.fn(),
+        onOpenEvent: jest.fn(),
+        eventCapacity: 1,
         selectedDateKey: "2026-05-07",
         todayDateKey: "2026-05-08",
       }),
@@ -137,22 +139,62 @@ describe("TaskCalendarMonthGrid day selection", () => {
     expect(markup).not.toContain("task-calendar-day-details");
   });
 
-  it("opens day details from the date control while keeping event chips informational", () => {
+  it("opens visible task details directly without opening the day drawer", () => {
     const onOpenDay = jest.fn();
+    const onOpenEvent = jest.fn();
     const grid = TaskCalendarMonthGrid({
       eventsByDateKey: new Map([["2026-05-07", [taskEvent, meetingEvent]]]),
       monthCells: [new Date(2026, 4, 7)],
       onOpenDay,
+      onOpenEvent,
+      eventCapacity: 2,
       selectedDateKey: null,
       todayDateKey: "2026-05-08",
     });
     const dayButton = findButtonByClass(grid, "task-calendar-day-open");
-    const eventButton = findButtonByTitle(grid, meetingEvent.title);
+    const eventButton = findButtonByTitle(grid, taskEvent.title);
 
-    dayButton?.props.onClick?.({ stopPropagation: jest.fn() });
+    eventButton?.props.onClick?.({ stopPropagation: jest.fn() });
 
+    expect(dayButton).toBeNull();
+    expect(onOpenDay).not.toHaveBeenCalled();
+    expect(onOpenEvent).toHaveBeenCalledWith(taskEvent);
+    expect(findButtonByTitle(grid, meetingEvent.title)).toBeNull();
+  });
+
+  it("reserves room for an actionable overflow count and lists all items in the drawer", () => {
+    const onOpenDay = jest.fn();
+    const events = [taskEvent, meetingEvent, { ...taskEvent, id: "task:other", title: "Other task" }];
+    const grid = TaskCalendarMonthGrid({
+      eventsByDateKey: new Map([["2026-05-07", events]]),
+      monthCells: [new Date(2026, 4, 7)],
+      onOpenDay,
+      onOpenEvent: jest.fn(),
+      eventCapacity: 2,
+      selectedDateKey: null,
+      todayDateKey: "2026-05-08",
+    });
+
+    const markup = renderToStaticMarkup(grid);
+    expect(markup).toContain("+2 more");
+    expect(markup).not.toContain("Other task");
+    findButtonByClass(grid, "task-calendar-more")?.props.onClick?.({ stopPropagation: jest.fn() });
     expect(onOpenDay).toHaveBeenCalledWith("2026-05-07");
-    expect(eventButton).toBeNull();
+    const details = renderToStaticMarkup(React.createElement(TaskCalendarDayDetails, {
+      dateKey: "2026-05-07", events, onClose: jest.fn(), onOpenEvent: jest.fn(),
+    }));
+    for (const event of events) expect(details).toContain(event.title);
+  });
+
+  it("keeps empty dates passive", () => {
+    const markup = renderToStaticMarkup(React.createElement(TaskCalendarMonthGrid, {
+      eventsByDateKey: new Map(), monthCells: [new Date(2026, 4, 7)],
+      onOpenDay: jest.fn(), onOpenEvent: jest.fn(), eventCapacity: 4,
+      selectedDateKey: null, todayDateKey: "2026-05-08",
+    }));
+    expect(markup).not.toContain("<button");
+    expect(markup).not.toContain("has-overflow");
+    expect(markup).toContain(">7</span>");
   });
 });
 

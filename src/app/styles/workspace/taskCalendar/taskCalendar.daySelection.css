@@ -1,5 +1,9 @@
-.task-calendar-day {
+.task-calendar-day.has-overflow {
   cursor: pointer;
+}
+
+.task-calendar-day-number {
+  margin-left: auto;
 }
 
 .task-calendar-day.is-selected {

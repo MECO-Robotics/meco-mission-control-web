@@ -1,11 +1,13 @@
 import { WEEKDAY_LABELS } from "./taskCalendarLayout";
 import { formatLocalDate } from "@/lib/dateUtils";
-import type { TaskCalendarEvent } from "./taskCalendarEvents";
+import { canOpenTaskCalendarEvent, type TaskCalendarEvent } from "./taskCalendarEvents";
 
 interface TaskCalendarMonthGridProps {
   eventsByDateKey: Map<string, TaskCalendarEvent[]>;
   monthCells: Date[];
   onOpenDay: (dateKey: string) => void;
+  onOpenEvent: (event: TaskCalendarEvent) => void;
+  eventCapacity: number;
   selectedDateKey: string | null;
   todayDateKey: string;
   dayRef?: (dateKey: string, element: HTMLElement | null) => void;
@@ -29,6 +31,8 @@ export function TaskCalendarMonthGrid({
   eventsByDateKey,
   monthCells,
   onOpenDay,
+  onOpenEvent,
+  eventCapacity,
   selectedDateKey,
   todayDateKey,
   dayRef,
@@ -49,7 +53,8 @@ export function TaskCalendarMonthGrid({
               {weekDates.map((cellDate) => {
                 const cellDateKey = formatLocalDate(cellDate);
                 const cellEvents = eventsByDateKey.get(cellDateKey) ?? [];
-                const visibleEvents = cellEvents.slice(0, 4);
+                const hasOverflow = cellEvents.length > eventCapacity;
+                const visibleEvents = cellEvents.slice(0, hasOverflow ? Math.max(0, eventCapacity - 1) : eventCapacity);
                 const hiddenEventCount = Math.max(0, cellEvents.length - visibleEvents.length);
                 const isSelected = cellDateKey === selectedDateKey;
                 const isToday = cellDateKey === todayDateKey;
@@ -60,6 +65,7 @@ export function TaskCalendarMonthGrid({
                   isEvenMonth ? "is-even-month" : "",
                   isSelected ? "is-selected" : "",
                   isToday ? "is-today" : "",
+                  hasOverflow ? "has-overflow" : "",
                 ]
                   .filter(Boolean)
                   .join(" ");
@@ -71,7 +77,7 @@ export function TaskCalendarMonthGrid({
                     data-date={cellDateKey}
                     key={cellDateKey}
                     ref={(element) => dayRef?.(cellDateKey, element)}
-                    onClick={() => onOpenDay(cellDateKey)}
+                    onClick={hasOverflow ? () => onOpenDay(cellDateKey) : undefined}
                   >
                     <header className="task-calendar-day-header">
                       {startsMonth ? (
@@ -79,7 +85,7 @@ export function TaskCalendarMonthGrid({
                           {cellDate.toLocaleDateString(undefined, { month: "long", year: "numeric" })}
                         </strong>
                       ) : null}
-                      <button
+                      {hasOverflow ? <button
                         aria-describedby={`${cellDateKey}-details`}
                         className="task-calendar-day-open"
                         onClick={(event) => {
@@ -91,21 +97,38 @@ export function TaskCalendarMonthGrid({
                         <span>{cellDate.getDate()}</span>
                         {cellEvents.length > 0 ? <small>{cellEvents.length}</small> : null}
                         <span className="visually-hidden" id={`${cellDateKey}-details`}>{dayButtonLabel}</span>
-                      </button>
+                      </button> : <span className="task-calendar-day-number">{cellDate.getDate()}</span>}
                     </header>
 
                     <div className="task-calendar-day-events">
-                      {visibleEvents.map((event) => (
-                        <div
-                          className={`task-calendar-day-event ${eventTypeClassName(event)}`}
-                          key={event.id}
-                          title={event.title}
-                        >
-                          {event.title}
-                        </div>
-                      ))}
+                      {visibleEvents.map((event) => {
+                        const className = `task-calendar-day-event ${eventTypeClassName(event)}`;
+                        return canOpenTaskCalendarEvent(event) ? (
+                          <button
+                            aria-label={`Open ${event.title}`}
+                            className={className}
+                            key={event.id}
+                            onClick={(click) => {
+                              click.stopPropagation();
+                              onOpenEvent(event);
+                            }}
+                            title={event.title}
+                            type="button"
+                          >{event.title}</button>
+                        ) : (
+                          <div className={className} key={event.id} title={event.title}>{event.title}</div>
+                        );
+                      })}
                       {hiddenEventCount > 0 ? (
-                        <small className="task-calendar-more">+{hiddenEventCount} more</small>
+                        <button
+                          aria-label={dayButtonLabel}
+                          className="task-calendar-more"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onOpenDay(cellDateKey);
+                          }}
+                          type="button"
+                        >+{hiddenEventCount} more</button>
                       ) : null}
                     </div>
                   </article>

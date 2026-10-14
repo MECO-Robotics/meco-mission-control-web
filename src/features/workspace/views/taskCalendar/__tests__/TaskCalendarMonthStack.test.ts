@@ -13,6 +13,7 @@ describe("TaskCalendarMonthStack", () => {
         eventsByDateKey: new Map(),
         monthCursor: new Date(2026, 9, 1),
         onOpenDay: jest.fn(),
+        onOpenEvent: jest.fn(),
         onVisibleMonthChange: jest.fn(),
         selectedDateKey: null,
         todayDateKey: "2026-10-01",

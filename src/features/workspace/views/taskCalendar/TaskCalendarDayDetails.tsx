@@ -1,5 +1,5 @@
 import { ModalDialog } from "@/components/ModalDialog";
-import type { TaskCalendarEvent, TaskCalendarEventType } from "./taskCalendarEvents";
+import { canOpenTaskCalendarEvent, type TaskCalendarEvent, type TaskCalendarEventType } from "./taskCalendarEvents";
 
 interface TaskCalendarDayDetailsProps {
   dateKey: string;
@@ -39,12 +39,6 @@ function formatItemCount(count: number) {
   return `${count} thing${count === 1 ? "" : "s"} due`;
 }
 
-function canOpenEvent(event: TaskCalendarEvent) {
-  return event.extendedProps.type === "milestone" ||
-    event.extendedProps.type === "task-due" ||
-    event.extendedProps.type === "qa-due";
-}
-
 export function TaskCalendarDayDetails({
   dateKey,
   events,
@@ -81,7 +75,7 @@ export function TaskCalendarDayDetails({
                   <span className={`task-calendar-day-details-type ${event.extendedProps.type}`}>
                     {EVENT_TYPE_LABELS[event.extendedProps.type]}
                   </span>
-                  {canOpenEvent(event) ? (
+                  {canOpenTaskCalendarEvent(event) ? (
                     <button
                       aria-label={`Open ${event.title}`}
                       className="task-calendar-day-details-title"
