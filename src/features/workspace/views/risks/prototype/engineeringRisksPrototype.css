@@ -27,7 +27,7 @@
 .engineering-risk-prototype .engineering-milestone-details > summary h2 { display: inline; margin-inline-end: .5rem; }
 .engineering-risk-prototype .engineering-milestone-details > summary > span { display: block; margin: .4rem 0; font-size: .7rem; color: var(--text-muted); }
 .engineering-risk-prototype .engineering-unlinked { color: var(--text-muted); font-size: .75rem; }
-.engineering-risk-prototype .engineering-workspace { display: grid; grid-template-columns: minmax(0, 2.25fr) minmax(17rem, 1fr); grid-template-areas: "blocked support" "concerns support"; grid-template-rows: auto 1fr; column-gap: 1.6rem; row-gap: 1rem; }
+.engineering-risk-prototype .engineering-workspace { display: grid; grid-template-columns: minmax(0, 2.25fr) minmax(17rem, 1fr); grid-template-areas: "concerns blocked" "concerns support"; grid-template-rows: auto 1fr; column-gap: 1.6rem; row-gap: 1rem; }
 .engineering-risk-prototype .engineering-concerns, .engineering-risk-prototype .engineering-task-preview { min-width: 0; }
 .engineering-risk-prototype .engineering-concerns { grid-area: concerns; }
 .engineering-risk-prototype .engineering-concern { padding: 0; }
@@ -60,8 +60,9 @@
 .engineering-risk-prototype .engineering-notice { color: var(--status-info-text); font-size: .76rem; }
 .engineering-risk-prototype .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 @media (min-width: 1180px) {
+  .engineering-risk-prototype .engineering-task-preview { border-inline-start: 1px solid var(--border-base); padding-inline-start: 1rem; }
   .engineering-risk-prototype .risk-review-inspector { grid-area: context; align-self: start; position: sticky; top: .5rem; max-height: calc(100dvh - 6rem); overflow-y: auto; }
-  .engineering-risk-prototype .engineering-workspace.has-selection { grid-template-areas: "blocked context" "concerns context"; grid-template-columns: minmax(0, 1.1fr) minmax(25rem, 1fr); }
+  .engineering-risk-prototype .engineering-workspace.has-selection { grid-template-areas: "concerns blocked" "concerns context"; grid-template-columns: minmax(0, 1.1fr) minmax(25rem, 1fr); }
 }
 @media (max-width: 1179px) {
   .engineering-risk-prototype .engineering-workspace, .engineering-risk-prototype .engineering-workspace.has-selection { grid-template-columns: minmax(0, 1fr); grid-template-areas: "blocked" "support" "concerns"; grid-template-rows: auto; }
