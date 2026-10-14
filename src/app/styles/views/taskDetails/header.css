@@ -26,7 +26,8 @@
   color: var(--text-title);
 }
 
-.modal-card .icon-button.task-details-close-button {
+.modal-card .icon-button.task-details-close-button,
+.risk-review-context .icon-button.task-details-close-button {
   color: var(--official-red);
   border: 0;
   background: transparent;
@@ -43,7 +44,9 @@
 }
 
 .modal-card .icon-button.task-details-close-button:hover,
-.modal-card .icon-button.task-details-close-button:focus-visible {
+.modal-card .icon-button.task-details-close-button:focus-visible,
+.risk-review-context .icon-button.task-details-close-button:hover,
+.risk-review-context .icon-button.task-details-close-button:focus-visible {
   background: transparent;
   color: var(--official-red);
 }

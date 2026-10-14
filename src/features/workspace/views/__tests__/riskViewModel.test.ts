@@ -35,6 +35,17 @@ function deferred() {
   return { promise, resolve, reject };
 }
 
+it("allows inspector quick changes while reserving full-editor changes for that editor", async () => {
+  const { args, render } = setup();
+  render().openRiskDetails(args.bootstrap.risks[0]);
+  await render().handleQuickUpdateRisk("risk-1", { severity: "critical" });
+  expect(args.onUpdateRisk).toHaveBeenCalledWith("risk-1", { severity: "critical" });
+  expect(render().editorMode).toBe("detail");
+  render().openEditEditor(args.bootstrap.risks[0]);
+  await render().handleQuickUpdateRisk("risk-1", { severity: "low" });
+  expect(args.onUpdateRisk).toHaveBeenCalledTimes(1);
+});
+
 it("guards repeated quick writes and same-risk editor opening while allowing independent risk work", async () => {
   const { args, render } = setup();
   const request = deferred();
