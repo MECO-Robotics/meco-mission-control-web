@@ -9,7 +9,9 @@ Reference for **Issue #76**.
 
 - Goal: make promotion from `development` to `staging`, from `staging` or `development` to `main`, and production deploys repeatable and safe.
 - Scope: repository `meco-mission-control-web` only.
-- Related checks are defined in `.github/workflows/ci.yml`, `.github/workflows/merge-requirements.yml`, and `.github/workflows/deploy-vps.yml`.
+- CI and deployment workflows are in `.github/workflows/ci.yml` and
+  `.github/workflows/deploy-vps.yml`. The retained
+  `.github/workflows/merge-requirements.yml` workflow is disabled.
 
 ## 1) Required local quality gates before PR merge
 
@@ -31,30 +33,21 @@ Reference for **Issue #76**.
    `meco-mission-control-platform` (schema/route + payload validation) before
    adjusting web typing/mapping.
 
-## 2) CI and merge-gate checks (repo-side)
+## 2) CI and merge policy
 
-Before a PR is mergeable, the secretless `ci.yml` workflow runs PR code and the
-default-branch `merge-requirements.yml` workflow publishes the protected
-`merge-requirements` status after enforcing:
+CI continues to validate pull requests and main/development pushes. Its results are
+available as validation evidence. During prototype development, branch protection,
+merge approval, required-status, and workflow-digest gates are disabled. The retained
+`merge-requirements.yml` workflow does not publish or enforce a protected
+`merge-requirements` status. Dedicated worktrees and reviewable pull requests remain
+the development convention; deployment approvals are separate. See
+[prototype-merge-policy.md](prototype-merge-policy.md) for current settings and
+reinstatement guidance.
 
-- `branch-model`
-- `ci-validate` (`npm audit --audit-level=low` and `npm run verify`)
-- `snapshot-validate`
+### Branch routing convention
 
-The trusted workflow never checks out or executes the PR revision. It accepts only
-`pull_request` runs from `.github/workflows/ci.yml`, requires the PR copy of that
-workflow to match the trusted SHA-256 embedded in the gate script, and verifies that
-the exact PR head passed all three required web checks. It also compares the web
-bootstrap contract with the platform repository. For PRs into `main`, it requires
-successful `ci-validate` and `snapshot-validate` checks on the exact platform and
-mobile commits pinned in `contracts/production-integration.json`.
-
-Because `workflow_run` executes the workflow and gate script from the default branch,
-changes to this trust boundary must land on `main` before a development PR relies on
-them. The bootstrap subset is `.github/workflows/merge-requirements.yml` and
-`scripts/merge-requirements-gate.mjs`.
-
-### Branch model check
+These source/target patterns document the current review convention; they are not an
+enforced merge gate.
 
 - PR target `development` must come from:
   - `feature/*`, `fix/*`, or `hotfix/*`
@@ -67,8 +60,9 @@ them. The bootstrap subset is `.github/workflows/merge-requirements.yml` and
 
 ### Snapshot validation check
 
-- Required for all PRs that run CI jobs.
-- This job runs production-bundle build + creates `snapshot/manifest.json` and
+- The CI workflow runs this job for pull requests; its result is validation evidence,
+  not a protected merge requirement.
+- The job runs a production-bundle build and creates `snapshot/manifest.json` and
   `snapshot/web-production-snapshot.tgz`.
 - Snapshot artifacts include:
   - `dist/**`
@@ -80,31 +74,20 @@ them. The bootstrap subset is `.github/workflows/merge-requirements.yml` and
 
 ### Cross-repository coordination
 
-- The trusted merge gate queries public platform and mobile repository state without
-  requiring cross-repository package credentials.
-- The vendored web bootstrap contract must match the platform contract at the immutable
-  revision in `contracts/production-integration.json`. For development and staging PRs,
-  the manifest's platform branch must exactly match the PR target. Promote compatible
-  platform contract changes and update the manifest before the dependent web change.
-- PRs into `main` require successful platform and mobile `ci-validate` and
-  `snapshot-validate` checks before the web `merge-requirements` status passes. Update
-  `contracts/production-integration.json` to the full, reviewed platform and mobile
-  release branches and commit SHAs being released. The gate authenticates its GitHub
-  API reads, proves each immutable revision belongs to its declared release branch,
-  and validates required jobs from that revision's successful canonical CI workflow,
-  so later external branch movement cannot stale an approval.
-- Pull-request `npm run verify-contracts` uses the same pinned platform revision as
-  the trusted gate; the authenticated trusted gate confirms that revision belongs to
-  its declared release branch. Local and post-merge push verification use the selected
-  branch channel.
+- `npm run verify-contracts` compares the web bootstrap contract with the platform
+  contract. Pull requests use the platform revision in
+  `contracts/production-integration.json`; other runs use the selected branch channel.
+  Promote compatible platform contract changes and update the manifest before the
+  dependent web change.
+- For a production release, update the manifest with the reviewed platform and mobile
+  release branches and commit SHAs, then review their CI and snapshot results manually.
+  The trusted merge gate is disabled, so web merges do not automatically check those
+  external results.
 
-## 3) Unresolved review-thread check
+## 3) Review-thread hygiene
 
-Before merging a PR, verify there are no unresolved review threads / open unresolved comments in the PR conversation.
-
-- Resolve all threads in the GitHub PR discussion before merge.
-- Confirm mergeability state in PR view after final review activity.
-- This repo's branch-protection expectations assume conversation resolution is part of the merge policy.
+Review unresolved threads and comments before merging, and resolve them when the
+discussion is complete. This is a review practice, not a branch-protection rule.
 
 ## 4) Production env and proxy assumptions
 
@@ -146,27 +129,27 @@ Rollback path (implemented by workflow):
   4. Verify `nginx` config and restart/reload nginx services if needed.
 - Do not keep secrets in notes/artifacts; secrets stay in repo settings only.
 
-## 6) Release blocker list template
+## 6) Manual release-readiness checklist
 
-Use this block in issue/PR comments before merging to `main`.
+Use this block to record review and release-readiness evidence. CI and snapshot
+results, branch routing, and review threads are manual review practices; they are not
+protected merge blockers.
 
-| PR / Change | Target | Check type | Status | Owner | Blocker details | ETA |
-| --- | --- | --- | --- | --- | --- | --- |
-| #1234 | development | `npm run verify` | [ ] Pending |  |  |  |
-| #1234 | staging | `ci-validate` | [ ] Pending |  |  |  |
-| #1234 | staging | `snapshot-validate` | [ ] Pending |  |  |  |
-| #1234 | staging | stabilization fixes only | [ ] Pending |  |  |  |
-| #1234 | main | `ci-validate` | [ ] Pending |  |  |  |
-| #1234 | main | `snapshot-validate` | [ ] Pending |  |  |  |
-| #1234 | main | Unresolved review threads | [ ] Pending |  |  |  |
-| #1234 | production | Deploy source validation (main/tag/manifest) | [ ] Pending |  |  |  |
-| #1234 | production | VPS backup present | [ ] Pending |  |  |  |
-| #1234 | production | Smoke check (`/health`) after deploy | [ ] Pending |  |  |  |
+| PR / Change | Stage | Readiness check | Status | Owner | Notes |
+| --- | --- | --- | --- | --- | --- |
+| #1234 | development | Local `npm run verify` | [ ] Pending |  |  |
+| #1234 | PR | Review CI validation results | [ ] Pending |  |  |
+| #1234 | PR | Review generated snapshot artifact | [ ] Pending |  |  |
+| #1234 | staging | Confirm candidate and stabilization scope | [ ] Pending |  |  |
+| #1234 | main | Review platform/mobile CI and snapshot results for release SHAs | [ ] Pending |  |  |
+| #1234 | PR | Review discussion and resolve threads when complete | [ ] Pending |  |  |
+| #1234 | production | Deploy source validation (`main`/manifest) | [ ] Pending |  |  |
+| #1234 | production | VPS backup present | [ ] Pending |  |  |
+| #1234 | production | Smoke check (`/health`) after deploy | [ ] Pending |  |  |
 
-## 7) Completion criteria (promotion complete)
+## 7) Completion review
 
-- All items in sections 1-5 are marked complete for the target branch.
-- No unresolved review thread or conversation item.
-- Snapshot produced and validated in CI.
-- Post-merge production deploy source allowed by `deploy-vps.yml`.
-- VPS backup retained and rollback check validated from backup inventory.
+- Record local verification and relevant CI/snapshot outcomes for the release candidate.
+- Review and resolve discussion threads as appropriate; this is not a branch-protection condition.
+- Before production deployment, confirm `deploy-vps.yml` accepts the source and passes its validation steps.
+- After deployment, confirm the VPS backup is retained and check `/health`; use the rollback path above if the release is unhealthy.

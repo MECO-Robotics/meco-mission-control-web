@@ -46,7 +46,7 @@ The frontend normalizes bootstrap data at its boundary. Reports use the canonica
 When changing data contracts:
 
 1. Update the platform route/schema contract first.
-2. Align `src/types/**` and `src/lib/auth.ts` in this repo.
+2. Align `src/types/**` and the relevant module under `src/lib/auth/` in this repo.
 3. Validate scoped season/project behavior, including `All projects` and non-robot project cases.
 4. Verify view gating for robot-only tabs and controls.
 

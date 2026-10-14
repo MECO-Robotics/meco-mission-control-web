@@ -80,44 +80,6 @@ export type ActivityPaginationState = {
   totalPages: number;
 };
 
-function buildLegacyActivityActions(
-  workLogs: WorkLogRecord[],
-  taskById: Record<string, BootstrapPayload["tasks"][number]>,
-): AuditActionRecord[] {
-  return workLogs.map((workLog) => {
-    const task = taskById[workLog.taskId];
-    const entityLabel = task?.title ?? workLog.taskId;
-
-    return {
-      id: `legacy-worklog-${workLog.id}`,
-      timestamp: `${workLog.date}T12:00:00`,
-      operation: "create",
-      entityType: "worklog",
-      entityId: workLog.id,
-      entityLabel,
-      message: `Logged work on ${entityLabel}`,
-      changedFields: [],
-      projectId: task?.projectId ?? null,
-      taskId: workLog.taskId,
-      subsystemId: task?.subsystemIds[0] ?? null,
-      actorMemberId: null,
-      memberIds: workLog.participantIds,
-    };
-  });
-}
-
-export function selectActivityActions({
-  auditActions,
-  taskById,
-  workLogs,
-}: {
-  auditActions: AuditActionRecord[];
-  taskById: Record<string, BootstrapPayload["tasks"][number]>;
-  workLogs: WorkLogRecord[];
-}) {
-  return auditActions.length > 0 ? auditActions : buildLegacyActivityActions(workLogs, taskById);
-}
-
 export function actionMatchesSearch({
   action,
   membersById,
@@ -209,11 +171,7 @@ export function useWorkLogsViewState({
     [sortMode, subsystemFilter, summaryWorkLogs, taskById],
   );
   const activityActions = useMemo(() => {
-    const actions = selectActivityActions({
-      auditActions: bootstrap.actions ?? [],
-      taskById,
-      workLogs: bootstrap.workLogs,
-    });
+    const actions = bootstrap.actions;
     const scopedActions =
       activePersonFilter.length === 0
         ? actions

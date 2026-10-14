@@ -16,7 +16,7 @@ Unsigned demo users edit an isolated workspace in browser `sessionStorage`. The 
 
 Interactive tutorials use a separate in-memory copy of the examples, even for signed-in users. Starting a chapter restores that tutorial baseline. Ending the tutorial restores the previous workspace; tutorial changes are discarded on exit or reload. The header identifies both modes as **no sync**. Real signed-in workspaces continue using the authenticated API.
 
-STEP processing and Onshape connections require server services and are unavailable in local modes; robot maps, parts, materials, planning, roster, and reports can be edited locally. Roster assignments, report participants, work logs, and subsystem ownership use the same local member IDs. Deleting a member removes their references throughout that workspace; stale selections are rejected. Roster metrics respect season membership. Browser storage errors are surfaced without publishing failed writes. Demo snapshots carry a schema version; incompatible or malformed snapshots are preserved under an archive key, then reset to current examples on startup. For manual demo recovery, run `sessionStorage.removeItem("meco.local-demo.v1")` in the browser console, then reload.
+STEP processing and Onshape connections require server services and are unavailable in local modes; robot maps, parts, materials, planning, roster, and reports can be edited locally. Roster assignments, report participants, work logs, and subsystem ownership use the same local member IDs. Deleting a member removes their references throughout that workspace; stale selections are rejected. Roster metrics respect season membership. Browser storage errors are surfaced without publishing failed writes. Demo snapshots carry a schema version; incompatible or malformed snapshots are archived when browser storage permits, otherwise they may be removed, then reset to current examples on startup. For manual demo recovery, run `sessionStorage.removeItem("meco.local-demo.v1")` in the browser console, then reload.
 
 ## Table of Contents
 
@@ -184,9 +184,9 @@ npm run verify
 
 1. Update backend bootstrap shape first.
 2. Update frontend types in `src/types/*`.
-3. Update normalization in `src/lib/auth/bootstrap` only when compatibility with older payloads is required.
+3. Update canonical boundary defaults in `src/lib/auth/bootstrap` when payload fields change.
 4. Update derived selectors/hooks under `src/app/hooks` or view-local model helpers.
-5. Test empty data, legacy data, selected season/project, and `All projects` behavior.
+5. Check empty and canonical data, selected season/project, and `All projects` behavior.
 
 ### Change robot configuration behavior
 
@@ -262,7 +262,7 @@ Use this table to find the right implementation area before changing UI behavior
 | Roster | `src/features/workspace/views/roster/*` |
 | Help/tutorial | `src/features/workspace/views/help/*`, `src/app/interactiveTutorial/*` |
 | Shared workspace shells | `src/features/workspace/components/*` |
-| API client facade | `src/lib/auth.ts`, `src/lib/auth/*` |
+| API and auth helpers | `src/lib/auth/*` |
 | Payload builders/utilities | `src/lib/appUtils/*` |
 | Shared frontend types | `src/types/*` |
 
@@ -358,7 +358,7 @@ src/
 
 Operational files:
 
-- `CONTRIBUTING.md`: contributor setup, ownership criteria, validation and protected PR workflow
+- `CONTRIBUTING.md`: contributor setup, ownership criteria, validation and reviewable PR workflow
 - `environment.toml`: Codex worktree startup source of truth. The Node bootstrap works on Linux, macOS and Windows; `WEB_HOST`/`WEB_PORT` override its address, `npm_config_cache` selects the dependency cache, and `codex-web.log` records Vite output. It uses `npm ci` and strict port selection.
 - `.env.example`: local env template
 - `.env.production.example`: production env template
@@ -366,7 +366,7 @@ Operational files:
 
 ## Data Flow and API Boundary
 
-The frontend API facade is exposed through `src/lib/auth.ts`, which re-exports narrower modules from `src/lib/auth/*`.
+The frontend API and auth helpers live in focused modules under `src/lib/auth/`.
 
 High-use endpoint groups:
 
@@ -405,14 +405,7 @@ ResponsibleGroup remains the Task assignment dimension; group workload and capac
 
 ### Bootstrap normalization
 
-The frontend includes compatibility normalization for older or evolving bootstrap payloads. This is intentional, but it should not become a substitute for a clear backend contract.
-
-Normalization currently backfills and aligns:
-
-- missing seasons/projects/workstreams
-- required per-season default project buckets
-- scoped references for tasks/workstreams/subsystems
-- default values for member/artifact/part/manufacturing/work-log fields
+Bootstrap normalization fills empty defaults for artifact URIs and schedule times. The platform supplies canonical collections and records; normalization does not synthesize missing records, scopes, project buckets, or legacy payload fields.
 
 When changing backend contracts:
 
@@ -531,7 +524,7 @@ Timeline cases live in directly discovered, behavior-named `TimelineView.*.test.
 
 ## Development Workflow
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, ownership criteria, validation and protected PR flow. Keep diagnostics outside tracked source. Shared skills are optional ignored local imports; synchronize explicitly rather than treating them as application dependencies.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, ownership criteria, validation and reviewable PR flow. Branch protection and merge approval gates are disabled during prototype development; CI validation remains enabled. Keep diagnostics outside tracked source. Shared skills are optional ignored local imports; synchronize explicitly rather than treating them as application dependencies.
 
 The snapshot job packages the verified bundle from the same CI run; it does not reinstall dependencies or rebuild.
 
@@ -574,7 +567,7 @@ Trigger conditions:
 Pipeline summary:
 
 1. Deploy source gate:
-   - allow only protected `main`, optionally with a matching release manifest
+   - allow only `main`, optionally with a matching release manifest
 2. Validate job:
    - install deps with `npm ci`
    - typecheck
@@ -656,7 +649,7 @@ Remember:
 - `All projects` can hide project-specific tabs
 - manufacturing appears only for robot project scope
 - Robot Configuration and part-mapping support are robot-project specific
-- frontend bootstrap normalization can backfill defaults, but it does not create missing backend records permanently unless a mutation does so
+- bootstrap normalization fills empty defaults for artifact URIs and schedule times; it does not create missing backend records
 
 ### View appears blank after navigation changes
 

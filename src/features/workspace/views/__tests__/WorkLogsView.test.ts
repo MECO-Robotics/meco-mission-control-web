@@ -169,7 +169,7 @@ describe("WorkLogsView", () => {
     expect(renderWorkLogsView("qa")).toContain("No QA reports yet");
   });
 
-  it("falls back to work logs when audit actions are unavailable", () => {
+  it("does not synthesize activity entries when audit actions are unavailable", () => {
     const html = renderWorkLogsView("activity", {
       tasks: [
         {
@@ -213,6 +213,6 @@ describe("WorkLogsView", () => {
     });
 
     expect(html).toContain("Drive CAD");
-    expect(html).toContain("Logged work on Drive CAD");
+    expect(html).not.toContain("Logged work on Drive CAD");
   });
 });

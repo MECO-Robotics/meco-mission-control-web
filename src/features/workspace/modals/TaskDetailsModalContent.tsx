@@ -61,7 +61,7 @@ export function TaskDetailsModal({
   const linkedRiskIds = new Set(bootstrap.risks.filter((risk) => risk.relatedTargets.some(
     (target) => target.kind === "task" && target.id === activeTask.id,
   )).map((risk) => risk.id));
-  const taskAuditActions = (bootstrap.actions ?? []).filter(
+  const taskAuditActions = bootstrap.actions.filter(
     (action) =>
       action.taskId === activeTask.id ||
       (action.entityType === "task" && action.entityId === activeTask.id) ||
