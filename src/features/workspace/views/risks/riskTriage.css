@@ -1,0 +1,99 @@
+.risk-triage .risk-triage-row {
+  align-items: start;
+  gap: 1rem;
+  padding-block: 0.65rem;
+}
+
+.risk-triage-record {
+  flex: 1 1 24rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.risk-triage .risk-triage-title,
+.risk-triage .risk-triage-mitigation {
+  padding: 0;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  text-align: left;
+  white-space: normal;
+}
+
+.risk-triage .risk-triage-title {
+  color: var(--text-link);
+  font-weight: 600;
+}
+
+.risk-triage .risk-triage-title:hover,
+.risk-triage .risk-triage-mitigation:hover {
+  color: var(--text-link-hover);
+  background: transparent;
+}
+
+.risk-triage .risk-triage-mitigation {
+  margin-top: 0.3rem;
+  color: var(--text-link);
+  font-size: 0.85rem;
+}
+
+.risk-triage-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  flex: 0 1 28rem;
+}
+
+.risk-triage-actions label {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+  flex: 1 1 7rem;
+  color: var(--text-copy);
+  font-size: 0.8rem;
+}
+
+.risk-triage-actions select {
+  width: 100%;
+  min-width: 0;
+}
+
+.risk-triage-signals {
+  color: var(--text-copy);
+  font-size: 0.85rem;
+}
+
+.risk-triage .risk-triage-signals ul {
+  margin: 0.25rem 0;
+  padding-left: 1.25rem;
+}
+
+.risk-triage .risk-triage-signals li {
+  display: list-item;
+  padding: 0.15rem 0;
+  border: 0;
+}
+
+.risk-triage-resolved {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-copy);
+}
+
+@media (max-width: 760px) {
+  .risk-triage .risk-triage-row {
+    flex-direction: column;
+  }
+
+  .risk-triage-actions {
+    flex: auto;
+    width: 100%;
+  }
+
+  .risk-triage-record {
+    flex: auto;
+    width: 100%;
+  }
+}

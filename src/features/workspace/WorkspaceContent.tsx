@@ -121,7 +121,7 @@ export interface WorkspaceContentProps {
   openEditPartDefinitionModal: (item: PartDefinitionRecord) => void;
   openEditPurchaseModal: (item: PurchaseItemRecord) => void;
   openTimelineTaskDetailsModal: (task: TaskRecord) => void;
-  onUpdateRisk: (riskId: string, payload: RiskPayload) => Promise<void>;
+  onUpdateRisk: (riskId: string, payload: Partial<RiskPayload>) => Promise<void>;
   partDefinitionsById: Record<string, BootstrapPayload["partDefinitions"][number]>;
   rosterMentors: BootstrapPayload["members"];
   showCncMentorQuickActions: boolean;

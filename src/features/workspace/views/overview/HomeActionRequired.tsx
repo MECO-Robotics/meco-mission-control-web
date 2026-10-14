@@ -3,15 +3,11 @@ import type { AttentionQueueRow } from "@/features/workspace/views/attention/att
 const VISIBLE_ACTION_COUNT = 5;
 
 function actionLabel(row: AttentionQueueRow) {
-  if (row.action === "open-task") return "Open task";
-  if (row.action === "open-risk") return "Open risk";
-  if (row.source === "qa") return "Open QA";
-  return `Open ${row.source}`;
+  return row.action === "open-task" ? "Open task" : "Open risk";
 }
 
 function sourceLabel(source: string) {
-  if (source === "qa") return "QA";
-  return source.charAt(0).toUpperCase() + source.slice(1);
+  return source === "task" ? "Task" : "Risk";
 }
 
 export function HomeActionRequired({

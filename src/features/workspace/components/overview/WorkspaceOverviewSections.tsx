@@ -11,15 +11,8 @@ export function WorkspaceHomeSection(props: WorkspaceContentPanelsViewProps) {
   const openActionItem = (item: AttentionQueueRow) => {
     if (item.action === "open-task") {
       openTask(item.recordId);
-    } else if (item.action === "open-risk") {
-      props.onOpenDrilldownTarget({ tab: "risks", riskId: item.recordId });
-    } else if (item.source === "purchase") {
-      const purchase = props.bootstrap.purchaseItems.find((record) => record.id === item.recordId);
-      if (purchase) props.openEditPurchaseModal(purchase);
-    } else if (item.source === "manufacturing") {
-      props.onOpenDrilldownTarget({ tab: "tasks", taskView: "kanban" });
     } else {
-      props.onOpenDrilldownTarget({ tab: "worklogs", worklogsView: "qa" });
+      props.onOpenDrilldownTarget({ tab: "risks", riskId: item.recordId });
     }
   };
 

@@ -33,11 +33,19 @@ This hierarchy follows dashboard evaluation research that measures whether users
 
 | Signal | Decision question and source | Status and ordering rule | Click destination |
 | --- | --- | --- | --- |
-| Action Required | What needs attention now? Reuses the attention model’s open risks, blocked tasks, tasks waiting for QA, overdue tasks, due-soon tasks, and other existing attention queue inputs. Multiple signals for the same source record are combined into one row with their reasons. | Uses the source urgency score where present; otherwise ranks critical/high risks, blocked tasks, overdue tasks, waiting-for-QA tasks, due-soon tasks, and lower-severity risks in that order. Shows the five highest-ranked rows; the queue’s existing rules determine which records qualify. | Task opens its detail drawer; risk opens that risk’s details; purchase opens its editor; QA opens QA / Reports; manufacturing opens Kanban. “View all” opens Risks. |
+| Action Required | What needs attention now? Shares the Risks queue's active risks and blocked, overdue, waiting-for-QA or due-soon task signals. Multiple signals for the same source record are combined into one row with their reasons. | Ranks blocking work first, then overdue, critical/high risks, waiting-for-QA tasks, tasks due within seven days, and other active risks. Priority, due date, title and record identity break ties. Shows the five highest-ranked rows. | Task opens its detail drawer; risk opens that risk's details. “View all” opens Risks. |
 | Upcoming milestones | What is coming next, and what readiness has been recorded? Reads milestones in the scoped bootstrap payload. | Excludes complete and past milestones, sorts by start date, and shows the next four with existing milestone status and readiness. Missing readiness is “Not assessed”; it is not treated as ready. | Opens the selected milestone in Schedule → Agenda. |
 | Task status | How are scoped tasks distributed across execution states, and which group needs follow-up? Reads current scoped bootstrap tasks and groups by their stored status. | Displays exact counts for not started, in progress, waiting for QA, and complete. The stacked bar is proportional to those counts; labels and counts remain visible without color. | Activating a status label reveals matching tasks; selecting a task opens its detail drawer. |
 
 See [navigation-consolidation.md](navigation-consolidation.md) for the cross-client scope, validation and contract changes.
+
+### Risks triage
+
+Risks is one ranked queue of risk records and actionable task signals. Each record appears once with its combined reasons, owner, priority and due context. The default ordering follows urgency; search, source/owner/signal filters and priority/title/due-date sorting operate on this same queue. Resolved risks are excluded by default and can be included explicitly. The severity board and repeated Unassigned, Blocked and Overdue lists are removed.
+
+Risk rows provide quick ownership, severity and status changes with pending and failure feedback. Task rows open the existing task details for task actions. Risk details retain the full mitigation, related-record and audit context, with the existing editor for broader changes. Add risk remains in the shared topbar plus menu. Project health stays collapsed below the queue and is calculated separately from queue search and filters.
+
+Home shares the same risks-and-tasks queue and urgency rules for its Action Required preview. Its five-row limit does not limit the Risks queue. Purchasing, manufacturing and report review records stay in their owning domain views.
 
 ## Data and API Contract Notes
 
