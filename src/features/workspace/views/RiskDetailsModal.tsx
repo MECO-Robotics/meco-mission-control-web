@@ -47,9 +47,6 @@ export function RiskDetailsModal({
       >
         <div className="panel-header compact-header task-details-header">
           <div>
-            <p className="eyebrow" style={{ color: "var(--official-red)" }}>
-              View Risk Details
-            </p>
             <h2>{activeRisk.title}</h2>
             <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.45rem", marginTop: "0.35rem" }}>
               <span
@@ -70,7 +67,7 @@ export function RiskDetailsModal({
             </div>
           </div>
           <div className="panel-actions">
-            <button className="icon-button task-details-close-button" onClick={onClose} type="button">
+            <button aria-label="Close risk details" className="icon-button task-details-close-button" onClick={onClose} type="button">
               {"\u00D7"}
             </button>
           </div>

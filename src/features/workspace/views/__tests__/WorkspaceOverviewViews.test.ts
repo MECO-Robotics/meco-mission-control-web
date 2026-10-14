@@ -7,7 +7,6 @@ import { createBootstrap } from "@/lib/appUtilsTestFixtures";
 import { HomeView } from "@/features/workspace/views/overview";
 import { buildHomeViewModel } from "@/features/workspace/views/overview/overviewViewModel";
 import { buildAttentionQueue } from "@/features/workspace/views/attention/attentionQueue";
-import { buildAttentionViewModel } from "@/features/workspace/views/attention/attentionViewModel";
 
 (globalThis as typeof globalThis & { React: typeof React }).React = React;
 
@@ -233,12 +232,12 @@ describe("buildHomeViewModel", () => {
   it("keeps action rows unique and limits them to the selected project", () => {
     const bootstrap = createOverviewBootstrap();
     const projectId = bootstrap.projects[0].id;
-    const queue = buildAttentionQueue(buildAttentionViewModel({
+    const queue = buildAttentionQueue({
       activePersonFilter: [],
       bootstrap,
       projectId,
       today: fixedToday,
-    }));
+    });
     const riskRows = queue.filter((item) => item.recordId === "risk-high");
 
     expect(queue.some((item) => item.recordId === "risk-other-project")).toBe(false);

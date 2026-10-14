@@ -9,8 +9,6 @@
 .workspace-record-list > li { display: flex; align-items: start; justify-content: space-between; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--border-base); }
 .workspace-record-list small { display: block; margin-top: .3rem; color: var(--text-copy); }
 .workspace-record-list p { margin: .4rem 0 0; max-width: 75ch; color: var(--text-copy); }
-.home-attention { padding: 1rem; }
-.home-attention .workspace-presentation-controls { padding-inline: 0; }
 .workspace-disclosure { margin: 1rem; }
 .workspace-disclosure > summary { cursor: pointer; font-size: 1.1rem; font-weight: 600; padding: 1rem 0; }
 .workspace-inline-summary { padding: 0 1rem; color: var(--text-copy); }
@@ -109,7 +107,6 @@
   .workspace-record-list > li { flex-direction: column; gap: .6rem; }
   .workspace-detail-card, .modal-scrim .task-details-modal, .modal-scrim .risk-details-modal { width: 100%; max-width: none; min-height: 100dvh; }
   .workspace-presentation-controls { padding: .65rem; }
-  .home-attention { padding: .75rem; }
   .team-card-header > .metric-grid { grid-template-columns: minmax(0, 1fr); }
   .team-card .metric-grid > div { border-right: 0; }
   .team-card .team-task-breakdown { flex-wrap: wrap; }
@@ -119,25 +116,12 @@
   .team-member-capacity { grid-column: 2; }
 }
 
-.workspace-presentation-controls button, .workspace-record-list .ghost-button, .people-member-context .ghost-button, .home-attention > .ghost-button { font: inherit; min-height: 40px; padding: .45rem .8rem; border: 1px solid var(--border-base); border-radius: 7px; background: var(--bg-panel); color: var(--text-title); cursor: pointer; }
+.workspace-presentation-controls button, .workspace-record-list .ghost-button, .people-member-context .ghost-button { font: inherit; min-height: 40px; padding: .45rem .8rem; border: 1px solid var(--border-base); border-radius: 7px; background: var(--bg-panel); color: var(--text-title); cursor: pointer; }
 .workspace-presentation-controls button:hover, .workspace-record-list .ghost-button:hover, .people-member-context .ghost-button:hover { background: var(--bg-row-alt); }
 .workspace-presentation-controls button:disabled { opacity: .55; cursor: default; }
 .workspace-presentation-controls button:focus-visible, .workspace-record-list button:focus-visible, .workspace-disclosure summary:focus-visible { outline: 2px solid var(--official-blue); outline-offset: 2px; }
 @media (max-width: 700px) { .task-queue-view .task-queue-board-column { min-width: min(18rem, calc(100vw - 3rem)); max-width: min(18rem, calc(100vw - 3rem)); } .task-queue-view .task-queue-board-card { white-space: normal; } }
 
-.attention-reasons, .people-workload-details { margin-top: .5rem; color: var(--text-copy); }
-.attention-reasons summary, .people-workload-details summary { cursor: pointer; font-size: .875rem; }
-.attention-reasons li { margin-block: .4rem; max-width: 75ch; }
+.people-workload-details { margin-top: .5rem; color: var(--text-copy); }
+.people-workload-details summary { cursor: pointer; font-size: .875rem; }
 .people-workload-details[open] { display: flex; flex-direction: column; gap: .4rem; }
-/* Action-first risk overview and severity triage. */
-.risk-action-workspace { display: grid; gap: 1rem; margin: 1rem 0; }
-.risk-action-counts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
-.risk-action-count { min-width: 0; padding: .8rem; border: 1px solid var(--border-base); border-radius: .75rem; background: var(--bg-row-alt); }
-.risk-action-count > span { color: var(--text-copy); }
-.risk-action-count > strong { display: block; font-size: 1.5rem; }
-.risk-action-count ul { margin: .4rem 0 0; padding-left: 1.2rem; }
-.risk-severity-kanban.task-queue-board { min-height: 20rem; }
-.risk-board-card { cursor: grab; }
-.risk-board-card p, .risk-board-card small { margin: 0; color: var(--text-copy); }
-.risk-board-title { padding: 0; border: 0; background: none; color: var(--text-title); font: inherit; font-weight: 650; text-align: left; cursor: pointer; }
-@media (max-width: 760px) { .risk-action-counts { grid-template-columns: 1fr; } }
