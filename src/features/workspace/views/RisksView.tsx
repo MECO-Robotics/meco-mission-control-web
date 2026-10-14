@@ -1,18 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { RiskPayload } from "@/types/payloads";
 import type { TaskRecord } from "@/types/recordsExecution";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
-import { AttentionView } from "@/features/workspace/views/attention/AttentionView";
 
 import { RiskEditorModal } from "./RiskEditorModal";
 import { RiskDetailsModal } from "./RiskDetailsModal";
 import { RiskMetricsSection } from "./RiskMetricsSection";
 import { riskAuditActions } from "./riskViewData/riskAuditActions";
 import { useRisksViewModel } from "./riskViewModel";
-import { RiskActionOverview } from "./risks/RiskActionOverview";
+import { RiskTriageQueue } from "./risks/RiskTriageQueue";
 
 interface RisksViewProps {
   activePersonFilter: FilterSelection;
@@ -20,8 +19,7 @@ interface RisksViewProps {
   onDeleteRisk: (riskId: string) => Promise<void>;
   onCreateRisk: (payload: RiskPayload) => Promise<void>;
   openTaskDetailModal?: (task: TaskRecord) => void;
-  onUpdateRisk: (riskId: string, payload: RiskPayload) => Promise<void>;
-  onOpenSource?: (source: string, id: string) => void;
+  onUpdateRisk: (riskId: string, payload: Partial<RiskPayload>) => Promise<void>;
   onOpenSchedule?: (milestoneId: string) => void;
   selectedRiskId?: string | null;
 }
@@ -33,7 +31,6 @@ export function RisksView({
   onCreateRisk,
   openTaskDetailModal,
   onUpdateRisk,
-  onOpenSource,
   onOpenSchedule,
   selectedRiskId,
 }: RisksViewProps) {
@@ -46,24 +43,24 @@ export function RisksView({
     onUpdateRisk,
   });
   const openRiskDetails = viewModel.openRiskDetails;
+  const openedRiskLink = useRef<string | null>(null);
   useEffect(() => {
+    if (!selectedRiskId) { openedRiskLink.current = null; return; }
+    if (openedRiskLink.current === selectedRiskId || viewModel.pendingRiskIds.has(selectedRiskId)) return;
     const risk = selectedRiskId ? bootstrap.risks.find((item) => item.id === selectedRiskId) : undefined;
-    if (risk) openRiskDetails(risk);
-  }, [bootstrap.risks, openRiskDetails, selectedRiskId]);
+    if (risk) { openRiskDetails(risk); openedRiskLink.current = selectedRiskId; }
+  }, [bootstrap.risks, openRiskDetails, selectedRiskId, viewModel.pendingRiskIds]);
   return (
     <section className={`panel dense-panel subsystem-manager-shell ${WORKSPACE_PANEL_CLASS}`}>
-      <RiskActionOverview activePersonFilter={activePersonFilter} bootstrap={bootstrap} onCreateRisk={viewModel.openCreateEditor} onOpenRisk={viewModel.openRiskDetails} onUpdateRisk={onUpdateRisk} />
-      <AttentionView
+      <RiskTriageQueue
         activePersonFilter={activePersonFilter}
         bootstrap={bootstrap}
-        showToolbar={false}
-        onOpenSource={onOpenSource}
-        onOpenRisk={(riskId) => {
-          const targetRisk = bootstrap.risks.find((risk) => risk.id === riskId);
-          if (targetRisk) {
-            viewModel.openRiskDetails(targetRisk);
-          }
-        }}
+        onCreateRisk={viewModel.openCreateEditor}
+        onOpenRisk={viewModel.openRiskDetails}
+        onUpdateRisk={viewModel.handleQuickUpdateRisk}
+        pendingRiskIds={viewModel.pendingRiskIds}
+        riskErrors={viewModel.riskErrors}
+        editingRiskId={viewModel.editorMode === "edit" ? viewModel.activeRisk?.id ?? null : null}
         onOpenTask={(taskId) => {
           const task = bootstrap.tasks.find((item) => item.id === taskId);
           if (task && openTaskDetailModal) {

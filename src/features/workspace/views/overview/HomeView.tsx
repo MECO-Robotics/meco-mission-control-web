@@ -2,7 +2,6 @@ import { useMemo } from "react";
 
 import { WORKSPACE_PANEL_CLASS } from "@/features/workspace/shared/model/workspaceTypes";
 import { buildAttentionQueue, type AttentionQueueRow } from "@/features/workspace/views/attention/attentionQueue";
-import { buildAttentionViewModel } from "@/features/workspace/views/attention/attentionViewModel";
 import type { FilterSelection } from "@/features/workspace/shared/filters/workspaceFilterUtils";
 import { formatMilestoneDateTime, formatMilestoneReadinessLabel, formatMilestoneStatusLabel } from "@/features/workspace/views/milestones/milestonesViewUtils";
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -38,7 +37,7 @@ export function HomeView({
     [activePersonFilter, bootstrap, projectId, today],
   );
   const actionItems = useMemo(
-    () => buildAttentionQueue(buildAttentionViewModel({ activePersonFilter, bootstrap, projectId, today })),
+    () => buildAttentionQueue({ activePersonFilter, bootstrap, projectId, today }),
     [activePersonFilter, bootstrap, projectId, today],
   );
 
