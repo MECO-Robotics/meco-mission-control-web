@@ -10,8 +10,7 @@ This is an opt-in interactive prototype at `/?view=work-risks&risk-prototype=eng
 
 ## Committee and evidence
 
-Two independent GPT-6 Luna members researched domain/data and visual/interaction design. The primary agent integrated their recommendations and built the prototype. Both Luna members then independently critiqued the rendered prototype and source against the committee rubric; the primary agent consolidated corrections and verified the result.
-
+The first committee used two independent Luna members for domain/data and visual/interaction research. The second pass uses two independent Sol members to challenge the hierarchy, compare alternative layouts and critique rendered results. The primary agent implements and verifies the integrated design. Research guidance informs this prototype rather than prescribing a particular layout.
 The initial data review found six risks, all open and explicitly marked as blocking work, with no named owner or mitigation due date. That sample overemphasizes task blockers. The contract supports source, affected targets, status, severity, mitigation and generic milestone requirements, but does not record temporary repairs or structured verification evidence. These absences are displayed, not inferred from report wording.
 
 Research informed the design, rather than imposing an external compliance process:
@@ -21,15 +20,23 @@ Research informed the design, rather than imposing an external compliance proces
 - [Shneiderman's information visualization paper](https://drum.lib.umd.edu/items/155a868e-fb83-4115-9899-9187ea8c0498) informs overview, filtering and selected detail.
 - [W3C use of color](https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html) and [keyboard operation](https://www.w3.org/WAI/WCAG22/Understanding/keyboard) inform labeled counts, non-color cues and native controls.
 
-## Concepts considered
+## Concern-first revision
+
+The first prototype put a mechanism overview before the concern queue. It buried actual records below comparisons, especially on phones. The revised question is: which engineering condition needs review, what evidence exists, and what must happen before its recorded commitment?
 
 | Concept | Benefit | Cost | Decision |
 | --- | --- | --- | --- |
-| Mechanism concern overview with separate task context | Finds concerns without task blockage and compares affected mechanisms | Must distinguish per-mechanism counts from unique concerns | Selected |
-| Concern-first list with existing task charts | Simple and direct | Leaves the overview dominated by tasks | Rejected as insufficient |
-| Milestone-first review timeline | Organizes explicit review commitments | Sparse associations can suggest unsupported readiness or gates | Kept as supporting context |
+| Primary concern queue with analytical rail | Actual conditions come first; mechanism comparisons remain available beside the work | Selected review needs more width than the compact rail | Selected |
+| Full-width concern ledger with analytics below | Maximum reading space | Desktop comparisons require scrolling | Alternative |
+| Mechanism-grouped concern lists | Comparisons sit beside their conditions | Multiple mechanism links make placement and global severity ordering ambiguous | Rejected |
 
-The selected representation puts severity-coded concern bars first, task counts in a separately labeled column, and concerns in their own queue. A blocked-task preview and direct task-list entry remain visible. Milestones are supporting context, collapsed at narrow widths so the first concern remains visible. Area expansion is explicit rather than a clipped internal scroll.
+The queue precedes analytics in DOM and reading order. Wide screens give it approximately 70% of the workspace. The compact right rail contains severity-coded mechanism comparisons, explicit milestone commitments and separate blocked-task context. Selecting a concern replaces that rail with a wider inspector, never a third column. On narrow screens the complete bounded queue and pagination precede all analytics; review uses the established drawer.
+
+Rows expose the actual condition/consequence, labeled severity and work effect, affected mechanism and owner, milestone linkage, mitigation action and named evidence reference. They are single review targets without nested interactive controls. The selected inspector receives keyboard focus; closing it returns focus to the originating row without resetting filters or pagination. Charts keep the same unique-count semantics and filter the queue through one shared-topbar selection.
+
+The shared Filter menu contains the source selector alongside concern filters. Queue metadata always identifies **scenarios, not saved** or **current, read only**, including on the narrowest phones. Keeping the source choice inside filters avoids overflowing the single topbar. Example changes remain local and reset on reload.
+
+[Google SRE monitoring guidance](https://sre.google/workbook/monitoring/) motivates matching dashboard content to the user's action and diagnostic questions. Its [distributed-systems monitoring chapter](https://sre.google/sre-book/monitoring-distributed-systems/) distinguishes short-term workarounds from long-term fixes. These are supporting principles; concern-first ordering is this committee's product judgment. [W3C focus-order guidance](https://www.w3.org/WAI/WCAG22/Understanding/focus-order.html) supports matching keyboard order to the meaningful reading sequence.
 
 ## Critique and corrections
 
@@ -38,7 +45,7 @@ The selected representation puts severity-coded concern bars first, task counts 
 - All milestone links and requirement conditions are retained. A generic required custom condition stays linked context. Only an explicit required `workflow-state=resolved` condition is shown as required concern clearance. Scenario commitments are explicitly authored examples.
 - A concern linked to multiple mechanisms remains one queue record; editing preserves all selected mechanisms and milestone links.
 - Completion of a mitigation action does not resolve the concern. Example resolution requires criteria plus recorded verification evidence and an explicit resolution action, guarded at the transition as well as the control.
-- The source selector uses the shared dropdown. Mobile milestone details collapse; mechanism groups have Show all / Show fewer controls. Other attached records remain available in selected context.
+- The source selector uses the shared dropdown. All mobile analytics follow the queue; mechanism groups have Show all / Show fewer controls. Other attached records remain available in selected context.
 
 ## Acceptance proof
 
@@ -50,10 +57,12 @@ The prototype's focused model tests cover explicit subject attribution, source/s
 4. A single concern affecting multiple mechanisms and multiple milestones.
 5. Required clearance versus a required generic test-plan review.
 6. Missing evidence, owner, action, milestone and verification information.
-7. Keyboard chart selection, stable overview totals, pagination, empty scopes, mobile and both themes.
+7. Concern-first DOM and viewport hierarchy, keyboard review/focus return, chart selection, stable totals, pagination, empty scopes, mobile and both themes.
 8. Current/scenario separation, no API writes, reset on ordinary reload, and unchanged ordinary Risks.
 
 ## Product decisions before promotion
+
+The illustrative cracked-bracket example records an observation but has incomplete consequence rationale and no separately recorded corrective redesign action; its load-test task demonstrates verification work. This is a content/workflow gap to resolve before promotion, not evidence of a complete engineering response model.
 
 The prototype does not add a production repair/verification schema, acceptance authority, attachments upload or audited clearance workflow. Promote those concepts intentionally after evaluating the representation. Free text in an example verification form demonstrates the interaction; it is not independent proof of an engineering test. Current risk status and task status remain authoritative and separate.
 
