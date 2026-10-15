@@ -2,20 +2,17 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskPayload } from "@/types/payloads/task";
 import { getDefaultWorkTypeIdForProject } from "@/lib/taskDisciplines";
 import { localTodayDate } from "@/lib/dateUtils";
-import { getDefaultSubsystemId } from "@/lib/appUtils/common";
 import { uniqueIds } from "../internal";
 
-export function buildEmptyTaskPayload(bootstrap: BootstrapPayload): TaskPayload {
-  const firstProject = bootstrap.projects[0]?.id ?? "";
-  const firstProjectRecord = bootstrap.projects[0] ?? null;
+export function buildEmptyTaskPayload(bootstrap: BootstrapPayload, preferredProjectId?: string | null): TaskPayload {
+  const firstProjectRecord = bootstrap.projects.find(({ id }) => id === preferredProjectId) ?? bootstrap.projects[0] ?? null;
+  const firstProject = firstProjectRecord?.id ?? "";
   const firstWorkType = getDefaultWorkTypeIdForProject(bootstrap, firstProjectRecord);
   const firstStudent =
     bootstrap.members.find((m) => m.role === "lead")?.id ??
     bootstrap.members.find((m) => m.role === "student")?.id ??
-    bootstrap.members[0]?.id ??
     null;
-  const firstMentor =
-    bootstrap.members.find((m) => m.role === "mentor")?.id ?? bootstrap.members[0]?.id ?? null;
+  const firstMentor = bootstrap.members.find((m) => m.role === "mentor")?.id ?? null;
   const today = localTodayDate();
 
   return {
@@ -24,7 +21,13 @@ export function buildEmptyTaskPayload(bootstrap: BootstrapPayload): TaskPayload 
     title: "",
     summary: "",
     photoUrl: "",
-    subsystemIds: firstProjectRecord?.projectType === "robot" ? uniqueIds([getDefaultSubsystemId(bootstrap)]) : [],
+    subsystemIds: firstProjectRecord?.projectType === "robot" ? uniqueIds([
+      bootstrap.subsystems.find((item) => item.projectId === firstProject && item.isCore && !item.isArchived)?.id ??
+      bootstrap.subsystems.find((item) => item.projectId === firstProject && !item.isArchived)?.id ??
+      bootstrap.subsystems.find((item) => item.projectId === firstProject && item.isCore)?.id ??
+      bootstrap.subsystems.find((item) => item.projectId === firstProject)?.id ??
+      "",
+    ]) : [],
     workTypeId: firstWorkType,
     responsibleGroupId: null,
     mechanismIds: [],

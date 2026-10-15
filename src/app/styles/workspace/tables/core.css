@@ -32,6 +32,22 @@
   text-transform: uppercase;
 }
 
+.purchase-receipt-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.8rem;
+  padding: 0.35rem 0.65rem 0.55rem;
+  color: var(--text-copy);
+  font-size: 0.75rem;
+}
+
+.purchase-receipt-summary > span + span::before {
+  content: "·";
+  margin-inline-end: 0.8rem;
+  color: var(--text-muted);
+}
+
 .manufacturing-table {
   grid-template-columns: var(--workspace-grid-template, 2.5fr 1fr 0.45fr 0.7fr 0.75fr 0.8fr 0.8fr);
 }

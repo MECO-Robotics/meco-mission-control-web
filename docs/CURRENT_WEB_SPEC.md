@@ -122,3 +122,11 @@ npm run test:ci -- WorkLogsView
 - Do not describe Attention as the current label; user-facing copy is Action Required.
 - Do not restore the retired Project health score or treat logged hours as completion. Risks shows recorded work states, deadlines and response links.
 - Do not place Robot Configuration under generic task planning copy without noting its configuration role.
+
+## Receiving and current evidence
+
+Purchases show received and remaining quantities with receipt locations and history. Mentor/admin users can record partial receipts for ordered, shipped or delivered purchases. Receiving records quantity and stock destination; it does not mark work or parts ready. An acknowledged receipt stays pending reconciliation if the following refresh fails, so the same action cannot be accidentally retried.
+
+New task drafts use the selected project and a subsystem from that project. Owner defaults and choices use leads/students; mentor defaults use mentors. Missing eligible people remain unassigned. Existing advanced and manufacturing details remain available and retain saved values when collapsed.
+
+Part readiness uses reviewed, revision-matched evidence. Historical results remain stored; stale results do not verify a changed part revision. Required milestone criteria must exist before readiness can be established.

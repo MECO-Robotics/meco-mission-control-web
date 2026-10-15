@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { PurchaseItemRecord } from "@/types/recordsInventory";
@@ -13,15 +13,23 @@ import type { ResourceSortDirection } from "@/features/workspace/shared/resource
 import { filterPurchaseItems, getPurchaseFilterValue, getPurchaseVendorName, getSelectedPurchaseQuote, sortPurchaseItems, type PurchaseColumn, type PurchaseColumnFilters, type PurchaseListContext } from "./purchases/purchaseListModel";
 import { PurchaseFiltersToolbar } from "./purchases/PurchaseFiltersToolbar";
 import { PurchaseTable } from "./purchases/PurchaseTable";
+import { ModalDialog } from "@/components/ModalDialog";
+import { receivePurchaseItemRecord } from "@/lib/auth/records/production";
+import { toErrorMessage } from "@/lib/appUtils/common";
+import { submitPurchaseReceipt } from "./purchases/submitPurchaseReceipt";
 
 interface PurchasesViewProps {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   openCreatePurchaseModal: () => void;
   openEditPurchaseModal: (item: PurchaseItemRecord) => void;
+  canReceivePurchases?: boolean;
+  handleUnauthorized?: () => void;
+  loadWorkspace?: () => Promise<unknown>;
+  setDataMessage?: (message: string | null) => void;
 }
 
-export function PurchasesView({ activePersonFilter, bootstrap, openCreatePurchaseModal, openEditPurchaseModal }: PurchasesViewProps) {
+export function PurchasesView({ activePersonFilter, bootstrap, openCreatePurchaseModal, openEditPurchaseModal, canReceivePurchases = false, handleUnauthorized, loadWorkspace, setDataMessage }: PurchasesViewProps) {
   const [search, setSearch] = useState("");
   const [project, setProject] = useState<FilterSelection>([]);
   const [orderStatus, setOrderStatus] = useState<FilterSelection>([]);
@@ -30,6 +38,17 @@ export function PurchasesView({ activePersonFilter, bootstrap, openCreatePurchas
   const [columnFilters, setColumnFilters] = useState<PurchaseColumnFilters>({});
   const [sortField, setSortField] = useState<PurchaseColumn>("item");
   const [sortDirection, setSortDirection] = useState<ResourceSortDirection>("ascending");
+  const [receivingItem, setReceivingItem] = useState<PurchaseItemRecord | null>(null);
+  const [receiptQuantity, setReceiptQuantity] = useState("1");
+  const [receiptLocation, setReceiptLocation] = useState("");
+  const [isReceiving, setIsReceiving] = useState(false);
+  const [acknowledgedReceipt, setAcknowledgedReceipt] = useState<{ id: string; received: number } | null>(null);
+  useEffect(() => {
+    if (!acknowledgedReceipt) return;
+    const refreshedItem = bootstrap.purchaseItems.find((item) => item.id === acknowledgedReceipt.id);
+    const received = (refreshedItem?.receipts ?? []).reduce((total, receipt) => total + receipt.quantity, 0);
+    if (received > acknowledgedReceipt.received) setAcknowledgedReceipt(null);
+  }, [acknowledgedReceipt, bootstrap.purchaseItems]);
   const context = useMemo<PurchaseListContext>(() => ({
     tasksById: Object.fromEntries(bootstrap.tasks.map((task) => [task.id, task])),
     vendorsById: Object.fromEntries(bootstrap.vendors.map((item) => [item.id, item])),
@@ -71,12 +90,42 @@ export function PurchasesView({ activePersonFilter, bootstrap, openCreatePurchas
     if (column === sortField) setSortDirection((current) => current === "ascending" ? "descending" : "ascending");
     else { setSortField(column); setSortDirection("ascending"); }
   };
+  const openReceipt = (item: PurchaseItemRecord) => {
+    setReceiptQuantity("1");
+    setReceiptLocation("");
+    setReceivingItem(item);
+  };
+  const submitReceipt = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!receivingItem || isReceiving) return;
+    const quantity = Number(receiptQuantity);
+    const location = receiptLocation.trim();
+    const received = (receivingItem.receipts ?? []).reduce((total, receipt) => total + receipt.quantity, 0);
+    if (!Number.isInteger(quantity) || quantity < 1 || !location || quantity > receivingItem.quantity - received) return;
+    setIsReceiving(true);
+    await submitPurchaseReceipt({
+      write: () => receivePurchaseItemRecord(receivingItem.id, { quantity, location }, handleUnauthorized),
+      acknowledge: () => {
+        setReceivingItem(null);
+        setAcknowledgedReceipt({ id: receivingItem.id, received });
+      },
+      refresh: () => loadWorkspace?.() ?? Promise.resolve(),
+      reportError: (error) => setDataMessage?.(toErrorMessage(error)),
+    });
+    setIsReceiving(false);
+  };
 
   return (
     <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
       <PurchaseFiltersToolbar approval={approval} bootstrap={bootstrap} search={search} setApproval={setApproval} setSearch={setSearch} setOrderStatus={setOrderStatus} setProject={setProject} setVendor={setVendor} orderStatus={orderStatus} project={project} uniqueVendors={uniqueVendors} vendor={vendor} sortField={sortField} sortDirection={sortDirection} onSortFieldChange={(field) => setSortField(field as PurchaseColumn)} onSortDirectionChange={setSortDirection} />
       <WorkspaceTopbarAddMenu actions={buildSingleAddMenuAction({ label: "Add purchase", onSelect: openCreatePurchaseModal })} ariaLabel="Add purchase" title="Add purchase" tutorialTarget="create-purchase-button" />
-      <PurchaseTable bootstrap={bootstrap} filteredPurchases={pagination.pageItems} filterMotionClass={filterMotionClass} hasPurchaseFilters={hasFilters} context={context} openEditPurchaseModal={openEditPurchaseModal} pagination={pagination} columnFilters={columnFilters} columnOptions={columnOptions} setColumnFilter={setColumnFilter} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} />
+      <PurchaseTable bootstrap={bootstrap} filteredPurchases={pagination.pageItems} filterMotionClass={filterMotionClass} hasPurchaseFilters={hasFilters} context={context} openEditPurchaseModal={openEditPurchaseModal} canReceivePurchases={canReceivePurchases} onReceive={openReceipt} acknowledgedReceiptId={acknowledgedReceipt?.id ?? null} pagination={pagination} columnFilters={columnFilters} columnOptions={columnOptions} setColumnFilter={setColumnFilter} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} />
+      {receivingItem ? <ModalDialog label={`Receive ${receivingItem.title}`} onClose={() => setReceivingItem(null)} dismissOnBackdrop><form className="modal-card" onSubmit={submitReceipt}>
+        <div className="panel-header compact-header"><h2>Receive {receivingItem.title}</h2><button className="secondary-action" type="button" onClick={() => setReceivingItem(null)}>Close</button></div>
+        <label className="field"><span>Quantity received</span><input autoFocus min="1" max={receivingItem.quantity - (receivingItem.receipts ?? []).reduce((total, receipt) => total + receipt.quantity, 0)} step="1" required type="number" value={receiptQuantity} onChange={(event) => setReceiptQuantity(event.target.value)} /></label>
+        <label className="field"><span>Location</span><input required value={receiptLocation} onChange={(event) => setReceiptLocation(event.target.value)} /></label>
+        <div className="modal-actions"><button className="secondary-action" type="button" onClick={() => setReceivingItem(null)}>Cancel</button><button className="primary-action" disabled={isReceiving || !receiptLocation.trim()} type="submit">{isReceiving ? "Receiving…" : "Record receipt"}</button></div>
+      </form></ModalDialog> : null}
     </section>
   );
 }

@@ -21,3 +21,29 @@ it("keeps record IDs in the selector and distinguishes subsystem revisions by la
   expect(draft.subsystemIds).toEqual(["drive-v2"]);
   expect(setEditingField).toHaveBeenCalledWith(null);
 });
+
+it("limits owner choices to eligible student roles while keeping mentors separate", () => {
+  const bootstrap = createBootstrap();
+  bootstrap.members.push({
+    id: "external-1", name: "External", email: "external@meco.test", role: "external",
+    elevated: false, seasonId: "season-2026",
+  });
+  const model = useTaskDetailsOverviewModel({
+    activeTask: bootstrap.tasks[0],
+    bootstrap,
+    taskDraft: buildEmptyTaskPayload(bootstrap),
+    setEditingField: jest.fn(),
+  });
+
+  expect(model.editableMemberOptions.map(({ role }) => role)).toEqual(["lead", "student"]);
+  expect(model.editableMentorOptions.map(({ role }) => role)).toEqual(["mentor"]);
+
+  const createModel = useTaskDetailsOverviewModel({
+    activeTask: bootstrap.tasks[0],
+    bootstrap,
+    editableMemberOptions: bootstrap.members,
+    taskDraft: buildEmptyTaskPayload(bootstrap),
+    setEditingField: jest.fn(),
+  });
+  expect(createModel.editableMemberOptions.map(({ role }) => role)).toEqual(["lead", "student"]);
+});

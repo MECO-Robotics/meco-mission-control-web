@@ -23,6 +23,10 @@ export function WorkspaceInventorySection(props: WorkspaceContentPanelsViewProps
     tabSwitchDirection,
     subsystemsById,
     activePersonFilter,
+    canReceivePurchases,
+    handleUnauthorized,
+    loadWorkspace,
+    setDataMessage,
   } = props;
 
   return (
@@ -70,6 +74,10 @@ export function WorkspaceInventorySection(props: WorkspaceContentPanelsViewProps
           bootstrap={bootstrap}
           openCreatePurchaseModal={openCreatePurchaseModal}
           openEditPurchaseModal={openEditPurchaseModal}
+          canReceivePurchases={canReceivePurchases}
+          handleUnauthorized={handleUnauthorized}
+          loadWorkspace={loadWorkspace}
+          setDataMessage={setDataMessage}
         />
       </WorkspaceSubPanel>
     </WorkspaceSectionPanel>

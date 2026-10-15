@@ -75,7 +75,7 @@ export function useTaskEditor({ bootstrap, scopedBootstrap, selectedProjectId, s
     resetEditor();
     setActiveTimelineTaskDetailId(null);
     setActiveTaskId(null);
-    const draft = buildEmptyTaskPayload(scopedBootstrap);
+    const draft = buildEmptyTaskPayload(scopedBootstrap, selectedProjectId);
     setTaskDraft(options.memberId ? { ...draft, assigneeIds: [options.memberId], ownerId: options.memberId } : draft);
     setShowTimelineCreateToggleInTaskModal(options.fromTimeline ?? false);
     setTaskModalMode("create");

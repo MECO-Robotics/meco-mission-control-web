@@ -120,6 +120,7 @@ export interface WorkspaceContentProps {
   ) => Promise<boolean>;
   openEditPartDefinitionModal: (item: PartDefinitionRecord) => void;
   openEditPurchaseModal: (item: PurchaseItemRecord) => void;
+  canReceivePurchases: boolean;
   openTimelineTaskDetailsModal: (task: TaskRecord) => void;
   onUpdateRisk: (riskId: string, payload: Partial<RiskPayload>) => Promise<void>;
   partDefinitionsById: Record<string, BootstrapPayload["partDefinitions"][number]>;

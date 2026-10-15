@@ -93,6 +93,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
           artifacts={c.scopedArtifacts}
           availabilityBootstrap={c.bootstrap}
           bootstrap={c.scopedBootstrap}
+          canReceivePurchases={c.signedInMember?.role === "mentor" || c.signedInMember?.role === "admin"}
           onDeleteRisk={c.handleDeleteRisk}
           onCreateRisk={c.handleCreateRisk}
           onUpdateRisk={c.handleUpdateRisk}
