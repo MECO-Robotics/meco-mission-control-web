@@ -187,11 +187,18 @@ describe("workspace creation modals", () => {
     expect(markup).toContain("modal-form task-details-grid");
     expect(markup).toContain('aria-label="Task: Inspect intake - Drive"');
     expect(markup).toContain("Inspect intake - Drive");
-    expect(markup).toContain('type="submit">Add QA report');
+    expect(markup).toContain('value="submitted">Submit for review</button>');
+    expect(markup).not.toContain("Review and approve");
     expect(markup).toContain("Result");
     expect(markup).toContain("Notes");
     expect(markup).toContain('aria-label="Participants: Student"');
     expect(markup).not.toContain("Hold Ctrl or Cmd");
+
+    const reviewerMarkup = renderToStaticMarkup(React.createElement(QaReportEditorModal, {
+      bootstrap, closeQaReportModal: jest.fn(), handleQaReportSubmit: jest.fn(), canReviewQa: true, isSavingQaReport: false,
+      requestPhotoUpload: jest.fn(async () => "https://cdn.example.test/qa.png"), qaReportDraft: buildEmptyQaReportPayload(bootstrap), setQaReportDraft: jest.fn(),
+    }));
+    expect(reviewerMarkup).toContain('value="reviewed">Review and approve</button>');
   });
 
   it("allows setting a material reorder point while creating the record", () => {

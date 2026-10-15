@@ -45,6 +45,8 @@ function getSwipeDirection<T extends string>(
 }
 
 export interface WorkspaceContentProps {
+  workspaceOperationScope?: string;
+  canReviewQa?: boolean;
   activePersonFilter: FilterSelection;
   activeTab: ViewTab;
   tabSwitchDirection: TabSwitchDirection;

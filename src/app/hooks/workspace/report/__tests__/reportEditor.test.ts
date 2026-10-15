@@ -43,6 +43,7 @@ function setup() {
   bootstrap.milestones.push(milestone);
   const state = {
     bootstrap, scopedBootstrap: bootstrap, activePersonFilter: [], selectedProjectId: null as string | null, selectedSeasonId: null as string | null,
+    sessionUser: { accountId: "account-lead", email: bootstrap.members[0].email, name: bootstrap.members[0].name } as AppWorkspaceModel["sessionUser"], signedInMember: bootstrap.members[0] as AppWorkspaceModel["signedInMember"], isPublicDemoSession: false,
     loadWorkspace: jest.fn(async () => true), handleUnauthorized: jest.fn(), setDataMessage: jest.fn(),
     workLogDraft: {} as AppWorkspaceModel["workLogDraft"], qaReportDraft: {} as AppWorkspaceModel["qaReportDraft"], milestoneReportDraft: {} as AppWorkspaceModel["milestoneReportDraft"], milestoneReportFindings: "", activeTimelineTaskDetailId: task.id,
     taskModalMode: "edit" as string | null,
@@ -211,10 +212,9 @@ it("keeps the newer report save busy when an older save finishes", async () => {
   expect(state.workLogModalMode).toBeNull();
 });
 
-it("submits QA with canonical timestamps, required nullable reviewer and an allowed empty summary", async () => {
+it("submits lead QA evidence as submitted without client-owned review identity or approval time", async () => {
   const { state, render, task } = setup();
   render().openCreateQaReportModal(task.id);
-  state.qaReportDraft.reviewedAt = "2026-10-10T00:00:00.000Z";
   jest.mocked(createQaReportRecord).mockResolvedValueOnce({} as never);
   await render().handleQaReportSubmit({ preventDefault: jest.fn() } as never);
   expect(createQaReportRecord).toHaveBeenCalledWith({
@@ -222,9 +222,40 @@ it("submits QA with canonical timestamps, required nullable reviewer and an allo
     createdByMemberId: state.bootstrap.members[0].id, requestedById: null, mentorId: null,
     result: "pass", summary: "", notes: "", participantIds: [state.bootstrap.members[0].id],
     createdAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
-    reviewedAt: "2026-10-10T00:00:00.000Z", reviewedById: null, status: "draft", evidenceNotes: "", photoUrl: "",
+    evidenceNotes: "", photoUrl: "", status: "submitted",
   }, state.handleUnauthorized);
   expect(state.qaReportModalMode).toBeNull();
+});
+
+it("sends an explicit reviewed transition only for the linked signed-in mentor", async () => {
+  const { state, render, task } = setup();
+  const mentor = state.bootstrap.members.find((member) => member.role === "mentor")!;
+  state.sessionUser = { ...state.sessionUser!, accountId: "mentor-account", email: mentor.email, name: mentor.name };
+  state.signedInMember = mentor;
+  render().openCreateQaReportModal(task.id);
+  jest.mocked(createQaReportRecord).mockResolvedValueOnce({} as never);
+  await render().handleQaReportSubmit({ preventDefault: jest.fn() } as never, "reviewed");
+  const payload = jest.mocked(createQaReportRecord).mock.calls.at(-1)?.[0];
+  expect(payload).toEqual(expect.objectContaining({ status: "reviewed" }));
+  expect(payload).not.toHaveProperty("reviewedById");
+  expect(payload).not.toHaveProperty("reviewedAt");
+});
+
+it("keeps a QA draft as draft when that submit mode is selected", async () => {
+  const { render, task } = setup();
+  render().openCreateQaReportModal(task.id);
+  jest.mocked(createQaReportRecord).mockResolvedValueOnce({} as never);
+  await render().handleQaReportSubmit({ preventDefault: jest.fn() } as never, "draft");
+  expect(jest.mocked(createQaReportRecord).mock.calls.at(-1)?.[0]).toEqual(expect.objectContaining({ status: "draft" }));
+});
+
+it("does not send reviewed status for an unlinked or unauthorized session", async () => {
+  const { state, render, task } = setup();
+  state.signedInMember = state.bootstrap.members.find((member) => member.role === "student")!;
+  render().openCreateQaReportModal(task.id);
+  await render().handleQaReportSubmit({ preventDefault: jest.fn() } as never, "reviewed");
+  expect(createQaReportRecord).not.toHaveBeenCalled();
+  expect(state.setDataMessage).toHaveBeenCalledWith("Only the signed-in mentor or admin can approve a QA report.");
 });
 
 it("submits an empty-summary milestone report without QA-only review fields", async () => {

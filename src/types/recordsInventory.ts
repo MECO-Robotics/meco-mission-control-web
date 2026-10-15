@@ -76,6 +76,8 @@ export interface PurchaseQuoteRecord {
 
 export interface PurchaseReceiptRecord {
   id: string;
+  /** Client operation key; absent on receipts created before idempotent receiving. */
+  operationId?: string;
   quantity: number;
   location: string;
   receivedAt: string;

@@ -47,7 +47,8 @@ export interface WorkspaceModalHostViewProps {
   onTaskEditCanceled: () => void;
   requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   workTypesById: Record<string, BootstrapPayload["workTypes"][number]>;
-  handleQaReportSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleQaReportSubmit: (milestone: FormEvent<HTMLFormElement>, status: QaReportPayload["status"]) => Promise<void>;
+  canReviewQa?: boolean;
   handleMilestoneReportSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
   handleWorkLogSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
   isSavingQaReport: boolean;

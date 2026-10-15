@@ -15,6 +15,13 @@ function findActions(node: ReactNode): ReactElement<{ onCancel: () => void }> | 
   return findActions(node.props.children);
 }
 
+function findButton(node: ReactNode, label: string): ReactElement<{ onClick?: () => void }> | null {
+  if (Array.isArray(node)) return node.map((child) => findButton(child, label)).find(Boolean) ?? null;
+  if (!isValidElement<{ children?: ReactNode; onClick?: () => void }>(node)) return null;
+  if (node.type === "button" && node.props.children === label) return node as ReactElement<{ onClick?: () => void }>;
+  return findButton(node.props.children, label);
+}
+
 const cases = [
   { name: "work log", build: buildEmptyWorkLogPayload, render: (bootstrap: ReturnType<typeof createBootstrap>, draft: ReturnType<typeof buildEmptyWorkLogPayload>, close: () => void) => WorkLogEditorModal({ bootstrap, workLogDraft: draft, closeWorkLogModal: close, isSavingWorkLog: true, handleWorkLogSubmit: jest.fn(), setWorkLogDraft: jest.fn(), requestPhotoUpload: jest.fn() }) },
   { name: "QA report", build: buildEmptyQaReportPayload, render: (bootstrap: ReturnType<typeof createBootstrap>, draft: ReturnType<typeof buildEmptyQaReportPayload>, close: () => void) => QaReportEditorModal({ bootstrap, qaReportDraft: draft, closeQaReportModal: close, isSavingQaReport: true, handleQaReportSubmit: jest.fn(), setQaReportDraft: jest.fn(), requestPhotoUpload: jest.fn() }) },
@@ -43,8 +50,12 @@ it.each(cases)("dismisses a pending $name through dialog and Cancel controls whi
     draft.notes = "A changed draft";
     const dirty = render();
     const actions = findActions(dirty);
-    expect(actions).not.toBeNull();
-    actions!.props.onCancel();
+    if (actions) actions.props.onCancel();
+    else {
+      const cancel = findButton(dirty, "Cancel");
+      expect(cancel).not.toBeNull();
+      cancel!.props.onClick?.();
+    }
     expect(confirm).toHaveBeenCalledWith("Discard unsaved changes?");
     expect(close).toHaveBeenCalledTimes(1);
     confirm.mockReturnValue(true);

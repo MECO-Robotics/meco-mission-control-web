@@ -8,6 +8,7 @@ import { EditableHoverIndicator, PaginationControls, TableCell, type useWorkspac
 import { formatCurrency } from "@/lib/appUtils/common";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { PurchaseItemRecord } from "@/types/recordsInventory";
+import { sumReceiptQuantities } from "./submitPurchaseReceipt";
 import { ResourceRecordCell } from "@/features/workspace/shared/resourceList/ResourceRecordCell";
 import { ResourceColumnHeader, type ResourceSortDirection } from "@/features/workspace/shared/resourceList/ResourceColumnHeader";
 import { getPurchaseVendorName, getSelectedPurchaseQuote, type PurchaseColumn, type PurchaseColumnFilters, type PurchaseListContext } from "./purchaseListModel";
@@ -59,8 +60,8 @@ export function PurchaseTable({ bootstrap, filteredPurchases, filterMotionClass,
         const quote = getSelectedPurchaseQuote(item);
         const finalCost = item.finalCost ? `${formatCurrency(item.finalCost.amount)} ${item.finalCost.currency ?? ""}`.trim() : "Pending";
         const receipts = item.receipts ?? [];
-        const received = receipts.reduce((total, receipt) => total + receipt.quantity, 0);
-        const remaining = Math.max(0, item.quantity - received);
+        const received = sumReceiptQuantities(receipts.map((receipt) => receipt.quantity));
+        const remaining = Math.max(0, sumReceiptQuantities([item.quantity - received]));
         const canReceive = canReceivePurchases && item.id !== acknowledgedReceiptId && remaining > 0 && ["ordered", "shipped", "delivered"].includes(item.orderStatus);
         return (
           <Fragment key={item.id}>

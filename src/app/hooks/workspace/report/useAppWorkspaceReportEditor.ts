@@ -125,9 +125,14 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
     }
   }, [model, lifecycle, closeWorkLogModal]);
 
-  const handleQaReportSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
+  const handleQaReportSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>, requestedStatus: QaReportPayload["status"] = "submitted") => {
     milestone.preventDefault();
     if (!model.qaReportModalMode) return;
+    const canReviewQa = Boolean(model.sessionUser && !model.isPublicDemoSession && model.signedInMember && ["mentor", "admin"].includes(model.signedInMember.role));
+    if (requestedStatus === "reviewed" && !canReviewQa) {
+      model.setDataMessage("Only the signed-in mentor or admin can approve a QA report.");
+      return;
+    }
     const operation = lifecycle.beginOperation();
     if (!operation) return;
     model.setDataMessage(null);
@@ -160,11 +165,9 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
         participantIds,
         notes: model.qaReportDraft.notes.trim(),
         createdAt: reportDate,
-        reviewedAt: model.qaReportDraft.reviewedAt,
-        reviewedById: model.qaReportDraft.reviewedById,
-        status: model.qaReportDraft.status,
         evidenceNotes: model.qaReportDraft.evidenceNotes?.trim() || "",
         photoUrl: model.qaReportDraft.photoUrl ?? "",
+        status: requestedStatus,
       };
 
       await createQaReportRecord(payload, model.handleUnauthorized);

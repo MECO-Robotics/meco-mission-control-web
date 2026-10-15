@@ -52,8 +52,6 @@ export function buildEmptyQaReportPayload(
     projectId: bootstrap.tasks[0]?.projectId ?? bootstrap.projects[0]?.id ?? "",
     participantIds: participantId ? [participantId] : [],
     result: "pass",
-    reviewedById: null,
-    reviewedAt: null,
   };
 }
 

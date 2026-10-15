@@ -25,6 +25,7 @@ export function WorkspaceReportModalsSection(props: WorkspaceModalHostViewProps)
       {props.qaReportModalMode ? (
         <QaReportEditorModal
           bootstrap={props.bootstrap}
+          canReviewQa={props.canReviewQa}
           closeQaReportModal={props.closeQaReportModal}
           handleQaReportSubmit={props.handleQaReportSubmit}
           isSavingQaReport={props.isSavingQaReport}

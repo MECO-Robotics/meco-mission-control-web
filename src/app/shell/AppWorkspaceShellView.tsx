@@ -20,6 +20,13 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
     handleSelectSeason,
     handleSelectProject,
   } = useWorkspaceShellNavigation(c);
+  const workspaceOperationScope = JSON.stringify({
+    identity: c.isPublicDemoSession ? "public-demo" : c.sessionUser ? `account:${c.sessionUser.accountId}` : localMode === "demo" ? "local-demo" : "local",
+    localMode: localMode ?? "server",
+    seasonId: c.selectedSeasonId ?? "all-seasons",
+    projectId: c.selectedProjectId ?? "all-projects",
+  });
+  const canReviewQa = Boolean(c.sessionUser && !c.isPublicDemoSession && c.signedInMember && ["mentor", "admin"].includes(c.signedInMember.role));
   return (
     <main
       className={`page-shell ${c.isDarkMode ? "dark-mode" : ""} ${c.isSidebarCollapsed ? "is-sidebar-collapsed" : ""} ${c.isSidebarOverlay ? "is-sidebar-overlay" : ""}`}
@@ -89,6 +96,8 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
         <div className="workspace-content-clip">
           <WorkspaceContent
           {...c}
+          workspaceOperationScope={workspaceOperationScope}
+          canReviewQa={canReviewQa}
           allMembers={c.bootstrap.members}
           artifacts={c.scopedArtifacts}
           availabilityBootstrap={c.bootstrap}
@@ -124,6 +133,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
           <WorkspaceModalHost
             {...c}
             bootstrap={c.scopedBootstrap}
+            canReviewQa={canReviewQa}
             onTaskEditCanceled={c.notifyTaskEditCanceled}
           />
         </Suspense>

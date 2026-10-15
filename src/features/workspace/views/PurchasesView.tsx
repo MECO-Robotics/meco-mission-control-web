@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { PurchaseItemRecord } from "@/types/recordsInventory";
@@ -15,12 +15,13 @@ import { PurchaseFiltersToolbar } from "./purchases/PurchaseFiltersToolbar";
 import { PurchaseTable } from "./purchases/PurchaseTable";
 import { ModalDialog } from "@/components/ModalDialog";
 import { receivePurchaseItemRecord } from "@/lib/auth/records/production";
-import { toErrorMessage } from "@/lib/appUtils/common";
-import { submitPurchaseReceipt } from "./purchases/submitPurchaseReceipt";
+import { createClientOperationId } from "@/lib/appUtils/clientOperationId";
+import { createStableReceiptOperation, isDiscretePurchaseReceipt, isValidReceiptQuantity, receiptOperationStorageKey, restoreReceiptOperation, submitPersistedPurchaseReceipt, sumReceiptQuantities } from "./purchases/submitPurchaseReceipt";
 
 interface PurchasesViewProps {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
+  receiptOperationScope?: string;
   openCreatePurchaseModal: () => void;
   openEditPurchaseModal: (item: PurchaseItemRecord) => void;
   canReceivePurchases?: boolean;
@@ -29,7 +30,7 @@ interface PurchasesViewProps {
   setDataMessage?: (message: string | null) => void;
 }
 
-export function PurchasesView({ activePersonFilter, bootstrap, openCreatePurchaseModal, openEditPurchaseModal, canReceivePurchases = false, handleUnauthorized, loadWorkspace, setDataMessage }: PurchasesViewProps) {
+export function PurchasesView({ activePersonFilter, bootstrap, receiptOperationScope = "local-anonymous", openCreatePurchaseModal, openEditPurchaseModal, canReceivePurchases = false, handleUnauthorized, loadWorkspace, setDataMessage }: PurchasesViewProps) {
   const [search, setSearch] = useState("");
   const [project, setProject] = useState<FilterSelection>([]);
   const [orderStatus, setOrderStatus] = useState<FilterSelection>([]);
@@ -41,12 +42,37 @@ export function PurchasesView({ activePersonFilter, bootstrap, openCreatePurchas
   const [receivingItem, setReceivingItem] = useState<PurchaseItemRecord | null>(null);
   const [receiptQuantity, setReceiptQuantity] = useState("1");
   const [receiptLocation, setReceiptLocation] = useState("");
+  const [receiptOutcomeUnknown, setReceiptOutcomeUnknown] = useState(false);
+  const [receiptError, setReceiptError] = useState<string | null>(null);
+  const [receiptStorageBlocked, setReceiptStorageBlocked] = useState(false);
   const [isReceiving, setIsReceiving] = useState(false);
   const [acknowledgedReceipt, setAcknowledgedReceipt] = useState<{ id: string; received: number } | null>(null);
+  const bootstrapRef = useRef(bootstrap);
+  const [receiptOperations] = useState(() => new Map<string, ReturnType<typeof createStableReceiptOperation>>());
+  const receiptScopeRef = useRef(receiptOperationScope);
+  useEffect(() => {
+    if (receiptScopeRef.current === receiptOperationScope) return;
+    receiptScopeRef.current = receiptOperationScope;
+    receiptOperations.clear();
+    setReceivingItem(null);
+    setReceiptOutcomeUnknown(false);
+    setReceiptStorageBlocked(false);
+    setReceiptError(null);
+    setIsReceiving(false);
+    setAcknowledgedReceipt(null);
+  }, [receiptOperationScope, receiptOperations]);
+  const getReceiptStorage = () => {
+    try { return globalThis.localStorage; } catch { return undefined; }
+  };
+  const clearSavedReceiptOperation = (scope: string, itemId: string) => {
+    try { getReceiptStorage()?.removeItem(receiptOperationStorageKey(scope, itemId)); } catch { /* The request outcome is already confirmed. */ }
+  };
+  const operationMapKey = (scope: string, itemId: string) => `${scope}\u0000${itemId}`;
+  bootstrapRef.current = bootstrap;
   useEffect(() => {
     if (!acknowledgedReceipt) return;
     const refreshedItem = bootstrap.purchaseItems.find((item) => item.id === acknowledgedReceipt.id);
-    const received = (refreshedItem?.receipts ?? []).reduce((total, receipt) => total + receipt.quantity, 0);
+    const received = sumReceiptQuantities((refreshedItem?.receipts ?? []).map((receipt) => receipt.quantity));
     if (received > acknowledgedReceipt.received) setAcknowledgedReceipt(null);
   }, [acknowledgedReceipt, bootstrap.purchaseItems]);
   const context = useMemo<PurchaseListContext>(() => ({
@@ -91,8 +117,24 @@ export function PurchasesView({ activePersonFilter, bootstrap, openCreatePurchas
     else { setSortField(column); setSortDirection("ascending"); }
   };
   const openReceipt = (item: PurchaseItemRecord) => {
-    setReceiptQuantity("1");
-    setReceiptLocation("");
+    const storage = getReceiptStorage();
+    const mapKey = operationMapKey(receiptOperationScope, item.id);
+    let operation = receiptOperations.get(mapKey);
+    let invalidSavedOperation = false;
+    if (!operation) {
+      const restored = restoreReceiptOperation(storage, receiptOperationScope, item.id);
+      invalidSavedOperation = restored.kind === "invalid";
+      operation = createStableReceiptOperation(createClientOperationId, restored.kind === "valid" ? { payload: restored.payload, outcomeUnknown: true } : undefined);
+      receiptOperations.set(mapKey, operation);
+    }
+    const savedPayload = operation.currentPayload();
+    setReceiptQuantity(savedPayload ? String(savedPayload.quantity) : "1");
+    setReceiptLocation(savedPayload?.location ?? "");
+    setReceiptStorageBlocked(invalidSavedOperation);
+    setReceiptOutcomeUnknown(operation.isOutcomeUnknown() || invalidSavedOperation);
+    setReceiptError(invalidSavedOperation
+      ? "Saved receipt details could not be read. Check the purchase history before trying again."
+      : operation.isOutcomeUnknown() ? "We couldn't confirm whether this receipt was recorded. Choose Check again to confirm it safely with the same details." : null);
     setReceivingItem(item);
   };
   const submitReceipt = async (event: FormEvent<HTMLFormElement>) => {
@@ -100,19 +142,69 @@ export function PurchasesView({ activePersonFilter, bootstrap, openCreatePurchas
     if (!receivingItem || isReceiving) return;
     const quantity = Number(receiptQuantity);
     const location = receiptLocation.trim();
-    const received = (receivingItem.receipts ?? []).reduce((total, receipt) => total + receipt.quantity, 0);
-    if (!Number.isInteger(quantity) || quantity < 1 || !location || quantity > receivingItem.quantity - received) return;
+    const received = sumReceiptQuantities((receivingItem.receipts ?? []).map((receipt) => receipt.quantity));
+    const discretePart = isDiscretePurchaseReceipt(receivingItem);
+    const remaining = receivingItem.quantity - received;
+    if (receiptStorageBlocked || !isValidReceiptQuantity(quantity, remaining, discretePart) || !location || location.length > 200) return;
+    const mapKey = operationMapKey(receiptOperationScope, receivingItem.id);
+    const receiptOperation = receiptOperations.get(mapKey) ?? createStableReceiptOperation(createClientOperationId);
+    receiptOperations.set(mapKey, receiptOperation);
+    const operation = receiptOperation.payloadFor(quantity, location);
     setIsReceiving(true);
-    await submitPurchaseReceipt({
-      write: () => receivePurchaseItemRecord(receivingItem.id, { quantity, location }, handleUnauthorized),
+    const outcome = await submitPersistedPurchaseReceipt({
+      storage: getReceiptStorage(),
+      scope: receiptOperationScope,
+      itemId: receivingItem.id,
+      payload: operation,
+      write: () => receivePurchaseItemRecord(receivingItem.id, operation, handleUnauthorized),
       acknowledge: () => {
-        setReceivingItem(null);
-        setAcknowledgedReceipt({ id: receivingItem.id, received });
+        receiptOperations.delete(mapKey);
+        clearSavedReceiptOperation(receiptOperationScope, receivingItem.id);
+        if (receiptScopeRef.current === receiptOperationScope) {
+          setReceivingItem(null);
+          setAcknowledgedReceipt({ id: receivingItem.id, received });
+        }
       },
-      refresh: () => loadWorkspace?.() ?? Promise.resolve(),
-      reportError: (error) => setDataMessage?.(toErrorMessage(error)),
+      refresh: () => receiptScopeRef.current === receiptOperationScope ? loadWorkspace?.() ?? Promise.resolve() : Promise.resolve(),
+      hasReceipt: () => bootstrapRef.current.purchaseItems.find((item) => item.id === receivingItem.id)?.receipts?.some((receipt) => receipt.operationId === operation.operationId) ?? false,
+      reportError: (message) => {
+        if (receiptScopeRef.current === receiptOperationScope) {
+          setReceiptError(message);
+          setDataMessage?.(message);
+        }
+      },
     });
-    setIsReceiving(false);
+    if (outcome === "not-sent") {
+      receiptOperation.reset();
+      if (receiptScopeRef.current === receiptOperationScope) {
+        setIsReceiving(false);
+        setReceiptError("We couldn't save this receipt safely. Check your browser storage settings and try again.");
+      }
+      return;
+    }
+    if (outcome === "unknown") receiptOperation.markOutcomeUnknown();
+    if (outcome === "rejected") {
+      receiptOperation.reset();
+      clearSavedReceiptOperation(receiptOperationScope, receivingItem.id);
+    }
+    if (receiptScopeRef.current === receiptOperationScope) {
+      setReceiptOutcomeUnknown(outcome === "unknown");
+      setIsReceiving(false);
+    }
+  };
+
+  const isDiscreteReceipt = receivingItem !== null && isDiscretePurchaseReceipt(receivingItem);
+  const receiptUnit = isDiscreteReceipt
+    ? "parts"
+    : receivingItem?.materialId
+    ? bootstrap.materials.find((material) => material.id === receivingItem.materialId)?.unit ?? "material units"
+    : "service units";
+  const beginNewReceiptOperation = () => {
+    if (receivingItem) {
+      receiptOperations.get(operationMapKey(receiptOperationScope, receivingItem.id))?.reset();
+      clearSavedReceiptOperation(receiptOperationScope, receivingItem.id);
+    }
+    setReceiptError(null);
   };
 
   return (
@@ -122,9 +214,11 @@ export function PurchasesView({ activePersonFilter, bootstrap, openCreatePurchas
       <PurchaseTable bootstrap={bootstrap} filteredPurchases={pagination.pageItems} filterMotionClass={filterMotionClass} hasPurchaseFilters={hasFilters} context={context} openEditPurchaseModal={openEditPurchaseModal} canReceivePurchases={canReceivePurchases} onReceive={openReceipt} acknowledgedReceiptId={acknowledgedReceipt?.id ?? null} pagination={pagination} columnFilters={columnFilters} columnOptions={columnOptions} setColumnFilter={setColumnFilter} sortField={sortField} sortDirection={sortDirection} onSort={handleSort} />
       {receivingItem ? <ModalDialog label={`Receive ${receivingItem.title}`} onClose={() => setReceivingItem(null)} dismissOnBackdrop><form className="modal-card" onSubmit={submitReceipt}>
         <div className="panel-header compact-header"><h2>Receive {receivingItem.title}</h2><button className="secondary-action" type="button" onClick={() => setReceivingItem(null)}>Close</button></div>
-        <label className="field"><span>Quantity received</span><input autoFocus min="1" max={receivingItem.quantity - (receivingItem.receipts ?? []).reduce((total, receipt) => total + receipt.quantity, 0)} step="1" required type="number" value={receiptQuantity} onChange={(event) => setReceiptQuantity(event.target.value)} /></label>
-        <label className="field"><span>Location</span><input required value={receiptLocation} onChange={(event) => setReceiptLocation(event.target.value)} /></label>
-        <div className="modal-actions"><button className="secondary-action" type="button" onClick={() => setReceivingItem(null)}>Cancel</button><button className="primary-action" disabled={isReceiving || !receiptLocation.trim()} type="submit">{isReceiving ? "Receiving…" : "Record receipt"}</button></div>
+        <label className="field"><span>Quantity received ({receiptUnit})</span><input autoFocus disabled={isReceiving || receiptOutcomeUnknown || receiptStorageBlocked} min={isDiscreteReceipt ? 1 : undefined} max={Math.min(1000, sumReceiptQuantities([receivingItem.quantity - sumReceiptQuantities((receivingItem.receipts ?? []).map((receipt) => receipt.quantity))]))} step={isDiscreteReceipt ? "1" : "any"} required type="number" value={receiptQuantity} onChange={(event) => { setReceiptQuantity(event.target.value); beginNewReceiptOperation(); }} /></label>
+        <label className="field"><span>Location</span><input disabled={isReceiving || receiptOutcomeUnknown || receiptStorageBlocked} maxLength={200} required value={receiptLocation} onChange={(event) => { setReceiptLocation(event.target.value); beginNewReceiptOperation(); }} /></label>
+        {receiptError ? <p role="alert">{receiptError}</p> : null}
+        {receiptOutcomeUnknown ? <p>These details are held so Check again can confirm the delivery safely.</p> : null}
+        <div className="modal-actions"><button className="secondary-action" type="button" onClick={() => setReceivingItem(null)}>Cancel</button><button className="primary-action" disabled={isReceiving || receiptStorageBlocked || !receiptLocation.trim()} type="submit">{isReceiving ? "Receiving…" : receiptOutcomeUnknown ? "Check again" : "Record receipt"}</button></div>
       </form></ModalDialog> : null}
     </section>
   );

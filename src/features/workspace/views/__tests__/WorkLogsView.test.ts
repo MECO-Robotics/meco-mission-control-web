@@ -4,6 +4,7 @@ import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
+import { createBootstrap } from "@/lib/appUtilsTestFixtures";
 import { WorkLogsView } from "@/features/workspace/views/WorkLogsView";
 import type { WorklogsViewTab } from "@/lib/workspaceNavigation";
 import type { BootstrapPayload } from "@/types/bootstrap";
@@ -13,6 +14,7 @@ import type { BootstrapPayload } from "@/types/bootstrap";
 function renderWorkLogsView(
   view: WorklogsViewTab,
   bootstrapOverrides: Partial<BootstrapPayload> = {},
+  canReviewFindings = false,
 ) {
   const bootstrap: BootstrapPayload = {
     ...EMPTY_BOOTSTRAP,
@@ -23,6 +25,7 @@ function renderWorkLogsView(
     React.createElement(WorkLogsView, {
       activePersonFilter: [],
       bootstrap,
+      canReviewFindings,
       membersById: {
         "student-1": {
           email: "student@meco.dev",
@@ -162,11 +165,64 @@ describe("WorkLogsView", () => {
     expect(qa).toContain("Sensor QA");
     expect(qa).toContain("qa-report-list");
     expect(qa).toContain("Outcome");
+    expect(qa).toContain("Submitted · waiting for review");
+    expect(qa).toContain("Not reviewed");
+    expect(qa).not.toContain(">pass</span>");
     expect(qa).not.toContain("Scrimmage result");
     const milestones = renderWorkLogsView("results", { reports });
     expect(milestones).toContain("Scrimmage result");
     expect(milestones).not.toContain("Sensor QA");
     expect(renderWorkLogsView("qa")).toContain("No QA reports yet");
+  });
+
+  it("orders QA recent history by server review order, labels date fallback, and separates observed date", () => {
+    const base = { projectId: "project-1", targetRefs: [], createdByMemberId: null, participantIds: [], mentorId: null, requestedById: null, summary: "", notes: "", createdAt: "2026-10-15T00:00:00.000Z" };
+    const reports: BootstrapPayload["reports"] = [
+      { ...base, id: "old-pass", reportType: "qa", summary: "Earlier pass", result: "pass", status: "reviewed", createdAt: "2099-12-31T00:00:00.000Z", reviewedAt: "2026-10-10T00:00:00.000Z", reviewOrder: 1 },
+      { ...base, id: "new-fail", reportType: "qa", summary: "Later failure", result: "fail", status: "reviewed", createdAt: "2026-10-10T00:00:00.000Z", reviewedAt: "2026-10-15T00:00:00.000Z", reviewOrder: 2 },
+      { ...base, id: "legacy", reportType: "qa", summary: "Legacy review", result: "pass", status: "reviewed", reviewedAt: "2026-10-12T00:00:00.000Z" },
+      { ...base, id: "submitted", reportType: "qa", summary: "Still waiting", result: "pass", status: "submitted", createdAt: "2100-01-01T00:00:00.000Z" },
+    ];
+    const html = renderWorkLogsView("qa", { reports });
+    expect(html.indexOf("Later failure")).toBeLessThan(html.indexOf("Earlier pass"));
+    expect(html.indexOf("Earlier pass")).toBeLessThan(html.indexOf("Legacy review"));
+    expect(html.indexOf("Legacy review")).toBeLessThan(html.indexOf("Still waiting"));
+    expect(html).toContain("Order unavailable · sorted by review date");
+    expect(html).toContain("Observed: 2099-12-31T00:00:00.000Z");
+    expect(html).toContain("Not reviewed");
+  });
+
+  it("shows unknown verification and exposes retest only to reviewers", () => {
+    const report: BootstrapPayload["reports"][number] = {
+      id: "report-qa", reportType: "qa", projectId: "project-1", targetRefs: [], createdByMemberId: null,
+      participantIds: [], mentorId: null, requestedById: null, summary: "Wheel check", notes: "", status: "reviewed",
+      result: "pass", createdAt: "2026-10-10T00:00:00.000Z", reviewedAt: "2026-10-11T00:00:00.000Z", reviewedById: "mentor-1",
+    };
+    const finding: BootstrapPayload["qaFindings"][number] = {
+      id: "finding-1", reportId: report.id, projectId: "project-1", targetRefs: [], title: "Loose wheel nut", detail: "Check torque again.",
+      severity: "medium", status: "open", createdAt: "2026-10-10T00:00:00.000Z", updatedAt: "2026-10-10T00:00:00.000Z",
+    };
+    const data = { reports: [report], qaFindings: [finding], testFindings: [{ ...finding, id: "test-finding-1", testResultId: "test-result-1" }] };
+    const student = renderWorkLogsView("qa", data);
+    expect(student).toContain("This review needs another check");
+    expect(student).not.toContain(">Record retest</button>");
+    const mentor = renderWorkLogsView("qa", data, true);
+    expect(mentor).toMatch(/>\s*Record retest<\/button>/);
+    expect(mentor).not.toContain("Retests are temporarily unavailable");
+    expect(mentor).toContain("Wheel check");
+    const results = renderWorkLogsView("results", data, true);
+    expect(results).toContain("Test findings");
+    expect(results).toMatch(/>\s*Record retest<\/button>/);
+    expect(student).not.toContain("Test findings");
+
+    const platformBootstrap = createBootstrap();
+    const stale = renderWorkLogsView("qa", {
+      ...data,
+      partInstances: platformBootstrap.partInstances,
+      reports: [{ ...report, targetRefs: [{ kind: "task", id: platformBootstrap.tasks[0].id }], inspectedPartInstanceIds: [], reviewOrder: 1, needsReverification: false }],
+      tasks: [{ ...platformBootstrap.tasks[0], partInstanceIds: ["new-part"] }],
+    }, true);
+    expect(stale).toContain("Some current parts were added after this review.");
   });
 
   it("does not synthesize activity entries when audit actions are unavailable", () => {
