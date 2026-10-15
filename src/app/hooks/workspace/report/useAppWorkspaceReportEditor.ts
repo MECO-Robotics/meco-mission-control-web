@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
 import { buildEmptyQaReportPayload, buildEmptyTestResultPayload, buildEmptyWorkLogPayload } from "@/lib/appUtils/payloadBuilders";
 
 import { useCatalogEditorLifecycle } from "@/app/workspaceCatalog/useCatalogEditorLifecycle";
 import { toErrorMessage } from "@/lib/appUtils/common";
-import { createQaReportRecord, createTestResultRecord, createWorkLogRecord } from "@/lib/auth/records/reporting";
+import { createQaReportRecord, createQaRequestRecord, createTestResultRecord, createWorkLogRecord } from "@/lib/auth/records/reporting";
 import type { QaReportPayload, TestResultPayload, WorkLogPayload } from "@/types/payloads";
 
 function getUniqueValidMemberIds(candidateIds: string[] | null | undefined, model: AppWorkspaceModel) {
@@ -25,7 +25,19 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
   const { resetEditor } = lifecycle;
   const { selectedProjectId, selectedSeasonId, setWorkLogModalMode, setQaReportModalMode, setMilestoneReportModalMode } = model;
   const returnToDetails = useRef<(() => void) | null>(null);
+  const qaRequestLocks = useRef(new Set<string>());
+  const [requestedQaTaskIds, setRequestedQaTaskIds] = useState<string[]>([]);
   const reportIsOpen = Boolean(model.workLogModalMode || model.qaReportModalMode || model.milestoneReportModalMode);
+
+  useEffect(() => {
+    setRequestedQaTaskIds((current) => current.filter((taskId) =>
+      !model.bootstrap.qaRequests.some((request) => request.targetRefs.some((ref) => ref.kind === "task" && ref.id === taskId)),
+    ));
+  }, [model.bootstrap.qaRequests]);
+
+  useEffect(() => {
+    setRequestedQaTaskIds([]);
+  }, [model.sessionUser?.accountId, model.isPublicDemoSession]);
 
   // Successful submissions close through their own handlers; dismissal and save both
   // return to the record that launched this action without stacking dialogs.
@@ -63,12 +75,46 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
   const closeWorkLogModal = useCallback(() => { resetEditor(); model.setWorkLogModalMode(null); }, [model, resetEditor]);
 
   const openCreateQaReportModal = useCallback((taskId?: string) => {
+    const canSubmitQa = Boolean(model.sessionUser && !model.isPublicDemoSession && model.signedInMember && ["lead", "mentor", "admin"].includes(model.signedInMember.role));
+    if (!canSubmitQa) return;
     const draft = buildEmptyQaReportPayload(model.scopedBootstrap, model.activePersonFilter.length === 1 ? model.activePersonFilter[0] : null);
     const task = model.scopedBootstrap.tasks.find((candidate) => candidate.id === taskId) ?? model.scopedBootstrap.tasks[0];
     leaveTaskDetails(taskId);
     model.setQaReportDraft({ ...draft, targetRefs: task ? [{ kind: "task", id: task.id }] : [], projectId: task?.projectId ?? draft.projectId });
     model.setQaReportModalMode("create");
   }, [leaveTaskDetails, model]);
+
+  const requestTaskQa = useCallback(async (taskId: string) => {
+    const task = model.bootstrap.tasks.find((candidate) => candidate.id === taskId);
+    const member = model.signedInMember;
+    if (!model.sessionUser || model.isPublicDemoSession || !task || !member || !["student", "lead"].includes(member.role)) return;
+    if (!task.assigneeIds.includes(member.id) && task.ownerId !== member.id) return;
+    const mentor = model.bootstrap.members.find((candidate) => candidate.id === task.mentorId && candidate.role === "mentor");
+    if (!mentor || task.status === "not-started" || task.status === "complete" || task.status === "waiting-for-qa" || task.isBlocked || task.isWaitingOnDependency) return;
+    if (requestedQaTaskIds.includes(taskId) || model.bootstrap.qaRequests.some((request) => request.targetRefs.some((ref) => ref.kind === "task" && ref.id === task.id) && ["requested", "in-review"].includes(request.status))) return;
+    if (qaRequestLocks.current.has(taskId)) return;
+    qaRequestLocks.current.add(taskId);
+    model.setDataMessage(null);
+    try {
+      await createQaRequestRecord({
+        projectId: task.projectId,
+        targetRefs: [{ kind: "task", id: task.id }],
+        subject: `${task.title} — QA request`,
+        mentorId: mentor.id,
+      }, model.handleUnauthorized);
+    } catch (error) {
+      model.setDataMessage(toErrorMessage(error));
+      qaRequestLocks.current.delete(taskId);
+      return;
+    }
+    setRequestedQaTaskIds((current) => current.includes(taskId) ? current : [...current, taskId]);
+    qaRequestLocks.current.delete(taskId);
+    try {
+      if (!await model.loadWorkspace()) model.setDataMessage("QA was requested, but the task status could not be refreshed. Reload to see the latest status.");
+    } catch {
+      model.setDataMessage("QA was requested, but the task status could not be refreshed. Reload to see the latest status.");
+    }
+  }, [model, requestedQaTaskIds]);
 
   const closeQaReportModal = useCallback(() => { resetEditor(); model.setQaReportModalMode(null); }, [model, resetEditor]);
 
@@ -128,9 +174,14 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
   const handleQaReportSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>, requestedStatus: QaReportPayload["status"] = "submitted") => {
     milestone.preventDefault();
     if (!model.qaReportModalMode) return;
+    const canSubmitQa = Boolean(model.sessionUser && !model.isPublicDemoSession && model.signedInMember && ["lead", "mentor", "admin"].includes(model.signedInMember.role));
     const canReviewQa = Boolean(model.sessionUser && !model.isPublicDemoSession && model.signedInMember && ["mentor", "admin"].includes(model.signedInMember.role));
     if (requestedStatus === "reviewed" && !canReviewQa) {
       model.setDataMessage("Only the signed-in mentor or admin can approve a QA report.");
+      return;
+    }
+    if (!canSubmitQa) {
+      model.setDataMessage("Only a signed-in lead, mentor, or admin can submit a QA report.");
       return;
     }
     const operation = lifecycle.beginOperation();
@@ -241,5 +292,5 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
     isSavingWorkLog: lifecycle.isSaving && Boolean(model.workLogModalMode),
     isSavingQaReport: lifecycle.isSaving && Boolean(model.qaReportModalMode),
     isSavingMilestoneReport: lifecycle.isSaving && Boolean(model.milestoneReportModalMode),
-    closeMilestoneReportModal, closeQaReportModal, closeWorkLogModal, openCreateMilestoneReportModal, openCreateQaReportModal, openCreateWorkLogModal };
+    closeMilestoneReportModal, closeQaReportModal, closeWorkLogModal, openCreateMilestoneReportModal, openCreateQaReportModal, openCreateWorkLogModal, requestTaskQa, requestedQaTaskIds };
 }

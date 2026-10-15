@@ -1,6 +1,6 @@
 import { ReportHistoryList } from "../views/workLogs/ReportHistoryList";
 import { ModalDialog } from "@/components/ModalDialog";
-import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
+import { useEffect, useRef, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import type { BootstrapPayload } from "@/types/bootstrap";
 import type { TaskPayload } from "@/types/payloads/task";
 import type { TaskRecord } from "@/types/recordsExecution";
@@ -10,6 +10,7 @@ import { TaskDetailsHeaderSection } from "./task/TaskDetailsHeaderSection";
 import { TaskDetailsOverviewSectionView } from "./task/details/overview/TaskDetailsOverviewSectionView";
 import type { TaskDetailsEditableField } from "./task/taskModalTypes";
 import { WorkspaceAuditActionList } from "../shared/WorkspaceAuditActionList";
+import { getTaskQaRequestBlockReason } from "./task/taskQaRequest";
 
 interface TaskDetailsModalProps {
   activeTask: TaskRecord;
@@ -30,6 +31,9 @@ interface TaskDetailsModalProps {
   onEditTask: (task: TaskRecord) => void;
   onLogWork?: (taskId: string) => void;
   onSubmitQa?: (taskId: string) => void;
+  onRequestQa?: (taskId: string) => Promise<void>;
+  signedInMemberId?: string | null;
+  acknowledgedQaTaskIds?: readonly string[];
   showDependencyBlockersSection?: boolean;
   showEditButton?: boolean;
 }
@@ -53,10 +57,18 @@ export function TaskDetailsModal({
   onEditTask,
   onLogWork,
   onSubmitQa,
+  onRequestQa,
+  signedInMemberId = null,
+  acknowledgedQaTaskIds = [],
   showDependencyBlockersSection = true,
   showEditButton = true,
 }: TaskDetailsModalProps) {
   const [editingField, setEditingField] = useState<TaskDetailsEditableField | null>(null);
+  const [isRequestingQa, setIsRequestingQa] = useState(false);
+  const requestLock = useRef(false);
+  const qaRequestBlockReason = getTaskQaRequestBlockReason(activeTask, signedInMemberId, bootstrap, acknowledgedQaTaskIds);
+  const signedInMember = bootstrap.members.find((member) => member.id === signedInMemberId);
+  const isAssignedStudentOrLead = Boolean(signedInMember && (signedInMember.role === "student" || signedInMember.role === "lead") && (activeTask.ownerId === signedInMember.id || activeTask.assigneeIds.includes(signedInMember.id)));
   const canInlineEdit = Boolean(taskDraft && setTaskDraft);
   const linkedRiskIds = new Set(bootstrap.risks.filter((risk) => risk.relatedTargets.some(
     (target) => target.kind === "task" && target.id === activeTask.id,
@@ -70,7 +82,21 @@ export function TaskDetailsModal({
 
   useEffect(() => {
     setEditingField(null);
+    setIsRequestingQa(false);
+    requestLock.current = false;
   }, [activeTask.id]);
+
+  const requestQa = async () => {
+    if (!onRequestQa || qaRequestBlockReason || requestLock.current) return;
+    requestLock.current = true;
+    setIsRequestingQa(true);
+    try {
+      await onRequestQa(activeTask.id);
+    } finally {
+      requestLock.current = false;
+      setIsRequestingQa(false);
+    }
+  };
 
   const openTaskEditModal = () => onEditTask(activeTask);
 
@@ -148,6 +174,8 @@ export function TaskDetailsModal({
             {footerActions}
             {onLogWork ? <button className="secondary-action" type="button" onClick={() => onLogWork(activeTask.id)}>Log work</button> : null}
             {onSubmitQa ? <button className="secondary-action" type="button" onClick={() => onSubmitQa(activeTask.id)}>Submit QA</button> : null}
+            {onRequestQa && isAssignedStudentOrLead ? <button className="secondary-action" type="button" disabled={Boolean(qaRequestBlockReason) || isRequestingQa} title={qaRequestBlockReason ?? undefined} onClick={() => void requestQa()}>{isRequestingQa ? "Requesting QA…" : qaRequestBlockReason?.startsWith("QA has already") ? "QA requested" : "Request QA"}</button> : null}
+            {onRequestQa && isAssignedStudentOrLead && qaRequestBlockReason && !qaRequestBlockReason.startsWith("QA has already") ? <small className="muted-copy" role="status">{qaRequestBlockReason}</small> : null}
             {showEditButton ? (
               <button
                 className="primary-action task-details-edit-button"

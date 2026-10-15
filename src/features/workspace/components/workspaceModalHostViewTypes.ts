@@ -44,11 +44,15 @@ export interface WorkspaceModalHostViewProps {
   closeWorkLogModal: () => void;
   openCreateWorkLogModal: (taskId?: string) => void;
   openCreateQaReportModal: (taskId?: string) => void;
+  requestTaskQa: (taskId: string) => Promise<void>;
+  signedInMemberId?: string | null;
+  requestedQaTaskIds?: readonly string[];
   onTaskEditCanceled: () => void;
   requestPhotoUpload: (projectId: string, file: File) => Promise<string>;
   workTypesById: Record<string, BootstrapPayload["workTypes"][number]>;
   handleQaReportSubmit: (milestone: FormEvent<HTMLFormElement>, status: QaReportPayload["status"]) => Promise<void>;
   canReviewQa?: boolean;
+  canCreateQaReport?: boolean;
   handleMilestoneReportSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
   handleWorkLogSubmit: (milestone: FormEvent<HTMLFormElement>) => Promise<void>;
   isSavingQaReport: boolean;

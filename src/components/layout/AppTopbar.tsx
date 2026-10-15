@@ -19,7 +19,7 @@ interface AppTopbarProps {
   isSidebarCollapsed: boolean;
   onCreateMilestone: () => void;
   onCreatePart: () => void;
-  onCreateQaReport: () => void;
+  onCreateQaReport?: () => void;
   onCreateTask: () => void;
 }
 
@@ -80,7 +80,7 @@ export function AppTopbar({
               makeAddMenuAction("Add task", onCreateTask),
               makeAddMenuAction("Add milestone", onCreateMilestone),
               makeAddMenuAction("Add part", onCreatePart),
-              makeAddMenuAction("Add QA report", onCreateQaReport),
+              ...(onCreateQaReport ? [makeAddMenuAction("Add QA report", onCreateQaReport)] : []),
             )}
             ariaLabel="Add workspace item"
             title="Add to workspace"

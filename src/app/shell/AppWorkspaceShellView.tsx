@@ -27,6 +27,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
     projectId: c.selectedProjectId ?? "all-projects",
   });
   const canReviewQa = Boolean(c.sessionUser && !c.isPublicDemoSession && c.signedInMember && ["mentor", "admin"].includes(c.signedInMember.role));
+  const canCreateQaReport = Boolean(c.sessionUser && !c.isPublicDemoSession && c.signedInMember && ["lead", "mentor", "admin"].includes(c.signedInMember.role));
   return (
     <main
       className={`page-shell ${c.isDarkMode ? "dark-mode" : ""} ${c.isSidebarCollapsed ? "is-sidebar-collapsed" : ""} ${c.isSidebarOverlay ? "is-sidebar-overlay" : ""}`}
@@ -42,7 +43,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       isSidebarCollapsed={c.isSidebarCollapsed || c.isSidebarOverlay}
       onCreateMilestone={handleCreateMilestone}
       onCreatePart={c.openCreatePartDefinitionModal}
-      onCreateQaReport={c.openCreateQaReportModal}
+      onCreateQaReport={canCreateQaReport ? c.openCreateQaReportModal : undefined}
       onCreateTask={c.openCreateTaskModal}
     />
         <AppSidebar
@@ -56,7 +57,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
       notificationCount={c.notificationHistory.length}
       onCreateMilestone={handleCreateMilestone}
       onCreatePart={c.openCreatePartDefinitionModal}
-      onCreateQaReport={c.openCreateQaReportModal}
+      onCreateQaReport={canCreateQaReport ? c.openCreateQaReportModal : undefined}
       onCreateSeason={c.handleCreateSeason}
       onCreateTask={c.openCreateTaskModal}
       onRefreshWorkspace={c.loadWorkspace}
@@ -98,6 +99,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
           {...c}
           workspaceOperationScope={workspaceOperationScope}
           canReviewQa={canReviewQa}
+          canCreateQaReport={canCreateQaReport}
           allMembers={c.bootstrap.members}
           artifacts={c.scopedArtifacts}
           availabilityBootstrap={c.bootstrap}
@@ -134,6 +136,8 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
             {...c}
             bootstrap={c.scopedBootstrap}
             canReviewQa={canReviewQa}
+            signedInMemberId={c.sessionUser && !c.isPublicDemoSession ? c.signedInMember?.id ?? null : null}
+            requestedQaTaskIds={c.requestedQaTaskIds}
             onTaskEditCanceled={c.notifyTaskEditCanceled}
           />
         </Suspense>

@@ -46,6 +46,7 @@ interface WorkLogsViewProps {
   activePersonFilter: FilterSelection;
   bootstrap: BootstrapPayload;
   canReviewFindings?: boolean;
+  canCreateQaReport?: boolean;
   operationScope?: string;
   selectedSeasonId?: string | null;
   selectedProjectId?: string | null;
@@ -61,7 +62,7 @@ interface WorkLogsViewProps {
   subsystemsById: SubsystemsById;
   view: WorklogsViewTab;
 }
-export function WorkLogsView({ activePersonFilter, bootstrap, canReviewFindings, operationScope = "local-anonymous", selectedSeasonId = null, selectedProjectId = null, handleUnauthorized, loadWorkspace, setDataMessage, membersById, openCreateMilestoneReportModal, openCreateQaReportModal, openCreateWorkLogModal, openEditTaskModal, onOpenSchedule, subsystemsById, view }: WorkLogsViewProps) {
+export function WorkLogsView({ activePersonFilter, bootstrap, canReviewFindings, canCreateQaReport = true, operationScope = "local-anonymous", selectedSeasonId = null, selectedProjectId = null, handleUnauthorized, loadWorkspace, setDataMessage, membersById, openCreateMilestoneReportModal, openCreateQaReportModal, openCreateWorkLogModal, openEditTaskModal, onOpenSchedule, subsystemsById, view }: WorkLogsViewProps) {
   const state = useWorkLogsViewState({ activePersonFilter, bootstrap, membersById, subsystemsById });
   const readFinding = useCallback((findingId: string, sourceType: "qa" | "test") => fetchFindingForRetest(findingId, sourceType, selectedSeasonId, selectedProjectId, handleUnauthorized), [handleUnauthorized, selectedProjectId, selectedSeasonId]);
   const [reportSort, setReportSort] = useRememberedViewState("history.sort", "recent");
@@ -74,7 +75,7 @@ export function WorkLogsView({ activePersonFilter, bootstrap, canReviewFindings,
   return <section className={`panel dense-panel ${WORKSPACE_PANEL_CLASS}`}>
     <AppTopbarSlotPortal slot="controls"><WorkspaceTopbarControls>
       {view === "logs" ? <WorkLogsToolbar bootstrap={bootstrap} renderMode="topbar" search={state.search} setSearch={state.setSearch} setSortMode={state.setSortMode} setSubsystemFilter={state.setSubsystemFilter} sortMode={state.sortMode} sortOptions={state.sortOptions} subsystemFilter={state.subsystemFilter} /> : view === "activity" ? <WorkLogsActivityToolbar activitySortMode={state.activitySortMode} activitySortDirection={state.activitySortDirection} search={state.search} setActivitySortMode={state.setActivitySortMode} setActivitySortDirection={state.setActivitySortDirection} setSearch={state.setSearch} /> : <TopbarResponsiveSearch actions={<WorkspaceSortMenu direction={reportSortDirection} field={reportSort} label="history" onDirectionChange={setReportSortDirection} onFieldChange={setReportSort} options={[{ label: view === "qa" ? "Recent review" : "Date", value: "recent" }, { label: "Title", value: "title" }]} />} ariaLabel="Search report history" compactPlaceholder="Search" onChange={state.setSearch} placeholder="Search report history…" value={state.search} />}
-      {view === "qa" ? <WorkspaceTopbarAddMenu actions={buildSingleAddMenuAction({ label: "Add QA report", onSelect: openCreateQaReportModal })} ariaLabel="Add QA report" title="Add QA report" /> : view === "results" ? <WorkspaceTopbarAddMenu actions={buildSingleAddMenuAction({ label: "Add milestone report", onSelect: openCreateMilestoneReportModal })} ariaLabel="Add milestone report" title="Add milestone report" /> : view === "logs" ? <WorkspaceTopbarAddMenu actions={buildSingleAddMenuAction({ label: "Log work", onSelect: openCreateWorkLogModal })} ariaLabel="Log work" title="Log work" /> : null}
+      {view === "qa" && canCreateQaReport ? <WorkspaceTopbarAddMenu actions={buildSingleAddMenuAction({ label: "Add QA report", onSelect: openCreateQaReportModal })} ariaLabel="Add QA report" title="Add QA report" /> : view === "results" ? <WorkspaceTopbarAddMenu actions={buildSingleAddMenuAction({ label: "Add milestone report", onSelect: openCreateMilestoneReportModal })} ariaLabel="Add milestone report" title="Add milestone report" /> : view === "logs" ? <WorkspaceTopbarAddMenu actions={buildSingleAddMenuAction({ label: "Log work", onSelect: openCreateWorkLogModal })} ariaLabel="Log work" title="Log work" /> : null}
     </WorkspaceTopbarControls></AppTopbarSlotPortal>
     {view === "logs" ? <>
       <WorkLogsTableSection membersById={membersById} openEditTaskModal={openEditTaskModal} subsystemsById={subsystemsById} taskById={state.taskById} workLogFilterMotionClass={state.workLogFilterMotionClass} workLogPagination={state.workLogPagination} workLogs={state.workLogs} />

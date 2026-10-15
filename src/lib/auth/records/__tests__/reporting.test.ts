@@ -1,4 +1,4 @@
-import { createQaReportRecord, retestReportFindingRecord } from "../reporting";
+import { createQaReportRecord, createQaRequestRecord, retestReportFindingRecord } from "../reporting";
 import { requestItem } from "../common";
 
 jest.mock("../common", () => ({ requestItem: jest.fn() }));
@@ -30,6 +30,15 @@ it("submits QA evidence through the review-owned route without client approval f
   expect(payload).toHaveProperty("status", "reviewed");
   expect(payload).not.toHaveProperty("reviewedById");
   expect(payload).not.toHaveProperty("reviewedAt");
+});
+
+it("requests QA through the existing request route with the assigned mentor and no client-owned request identity", async () => {
+  requestItemMock.mockResolvedValueOnce({ id: "qa-request-1" } as never);
+  const payload = { projectId: "project-1", targetRefs: [{ kind: "task" as const, id: "task-1" }], subject: "Build — QA request", mentorId: "mentor-1" };
+  await createQaRequestRecord(payload, jest.fn());
+  expect(requestItemMock).toHaveBeenCalledWith("/qa-requests", "POST", payload, expect.any(Function));
+  expect(payload).not.toHaveProperty("requestedById");
+  expect(payload).not.toHaveProperty("status");
 });
 
 it("sends the stable retest operation and finding category to the lifecycle route", async () => {

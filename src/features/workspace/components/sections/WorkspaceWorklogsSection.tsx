@@ -27,6 +27,7 @@ export function WorkspaceWorklogsSection(props: WorkspaceContentPanelsViewProps)
           activePersonFilter={activePersonFilter}
           bootstrap={bootstrap}
           canReviewFindings={props.canReviewQa}
+          canCreateQaReport={props.canCreateQaReport}
           operationScope={props.workspaceOperationScope}
           selectedSeasonId={props.selectedSeasonId}
           selectedProjectId={props.selectedProject?.id ?? null}

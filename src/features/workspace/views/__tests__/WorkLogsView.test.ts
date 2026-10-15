@@ -15,6 +15,7 @@ function renderWorkLogsView(
   view: WorklogsViewTab,
   bootstrapOverrides: Partial<BootstrapPayload> = {},
   canReviewFindings = false,
+  canCreateQaReport = true,
 ) {
   const bootstrap: BootstrapPayload = {
     ...EMPTY_BOOTSTRAP,
@@ -26,6 +27,7 @@ function renderWorkLogsView(
       activePersonFilter: [],
       bootstrap,
       canReviewFindings,
+      canCreateQaReport,
       membersById: {
         "student-1": {
           email: "student@meco.dev",
@@ -146,6 +148,11 @@ describe("WorkLogsView", () => {
 
     expect(html).toContain('aria-label="Add QA report"');
     expect(html).toContain('class="topbar-add-button topbar-add-menu-trigger secondary-action icon-button"');
+  });
+
+  it("hides QA creation for student roles while retaining work logging", () => {
+    expect(renderWorkLogsView("qa", {}, false, false)).not.toContain('aria-label="Add QA report"');
+    expect(renderWorkLogsView("logs", {}, false, false)).toContain('aria-label="Log work"');
   });
 
   it("provides the shared Add milestone report plus action on Results", () => {

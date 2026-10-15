@@ -8,6 +8,8 @@ import { createStableReceiptOperation, isDiscretePurchaseReceipt, isValidReceipt
 import { PurchaseTable } from "@/features/workspace/views/purchases/PurchaseTable";
 import { receivePurchaseItemRecord } from "@/lib/auth/records/production";
 import { requestItem } from "@/lib/auth/records/common";
+import { PurchaseEditorFields } from "@/features/workspace/modals/purchaseManufacturing/PurchaseEditorFields";
+import { buildEmptyPurchasePayload } from "@/lib/appUtils/catalogPayloadBuilders";
 
 jest.mock("@/lib/auth/records/common", () => ({ requestItem: jest.fn() }));
 
@@ -221,4 +223,16 @@ describe("purchase receiving UI", () => {
     }));
     expect(lockedHtml).not.toContain('>Receive</button>');
   });
+});
+
+it("uses whole-count validation only when a physical part definition is linked", () => {
+  const bootstrap = createBootstrap();
+  const draft = { ...buildEmptyPurchasePayload(bootstrap), quantity: 1.5 };
+  const renderQuantity = (purchaseDraft: typeof draft) => renderToStaticMarkup(React.createElement(PurchaseEditorFields, {
+    bootstrap, activePurchaseId: null, purchaseDraft, purchaseFinalCost: "", setPurchaseDraft: jest.fn(), setPurchaseFinalCost: jest.fn(),
+  }));
+  expect(renderQuantity(draft)).toContain('min="1" step="1" type="number"');
+  expect(renderQuantity({ ...draft, materialId: "material-aluminum" })).toContain('min="1" step="1" type="number"');
+  expect(renderQuantity({ ...draft, partDefinitionId: null, materialId: "material-aluminum" })).toContain('min="1" step="any" type="number"');
+  expect(renderQuantity({ ...draft, kind: "manufacturing-service" })).toContain('min="1" step="any" type="number"');
 });

@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createBootstrap } from "@/lib/appUtilsTestFixtures";
 import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
-import { createWorkLogRecord, createQaReportRecord, createTestResultRecord } from "@/lib/auth/records/reporting";
+import { createWorkLogRecord, createQaReportRecord, createQaRequestRecord, createTestResultRecord } from "@/lib/auth/records/reporting";
 import { reconcileWorkspaceState } from "../../loader/useAppWorkspaceLoaderWorkspaceReconciliation";
 import type { AppWorkspaceState } from "@/app/hooks/useAppWorkspaceState";
 import { useAppWorkspaceReportEditor } from "../useAppWorkspaceReportEditor";
 
 jest.mock("react", () => ({ ...jest.requireActual("react"), useCallback: jest.fn((callback) => callback), useEffect: jest.fn(), useRef: jest.fn(), useState: jest.fn() }));
 
-jest.mock("@/lib/auth/records/reporting", () => ({ createWorkLogRecord: jest.fn(), createQaReportRecord: jest.fn(), createTestResultRecord: jest.fn() }));
+jest.mock("@/lib/auth/records/reporting", () => ({ createWorkLogRecord: jest.fn(), createQaReportRecord: jest.fn(), createQaRequestRecord: jest.fn(), createTestResultRecord: jest.fn() }));
 
 function setup() {
   const slots: unknown[] = [];
@@ -81,6 +81,48 @@ it("opens work logging for the chosen task, removes its overlay, and restores de
   actions.closeWorkLogModal();
   render();
   expect(state.activeTimelineTaskDetailId).toBe(task.id);
+});
+
+it("hands an eligible assigned student to the assigned mentor through one QA request", async () => {
+  const { state, render, task } = setup();
+  state.signedInMember = state.bootstrap.members.find((member) => member.id === "student-1")!;
+  task.status = "in-progress";
+  task.assigneeIds = ["student-1"];
+  task.mentorId = "mentor-1";
+  jest.mocked(createQaRequestRecord).mockResolvedValueOnce({} as never);
+  const request = render().requestTaskQa;
+  await Promise.all([request(task.id), request(task.id)]);
+  expect(createQaRequestRecord).toHaveBeenCalledTimes(1);
+  expect(createQaRequestRecord).toHaveBeenCalledWith({ projectId: task.projectId, targetRefs: [{ kind: "task", id: task.id }], subject: `${task.title} — QA request`, mentorId: "mentor-1" }, state.handleUnauthorized);
+  expect(state.loadWorkspace).toHaveBeenCalledTimes(1);
+});
+
+it("allows retry after a failed QA request", async () => {
+  const { state, render, task } = setup();
+  state.signedInMember = state.bootstrap.members.find((member) => member.id === "student-1")!;
+  task.status = "in-progress";
+  task.assigneeIds = ["student-1"];
+  task.mentorId = "mentor-1";
+  jest.mocked(createQaRequestRecord).mockRejectedValueOnce(new Error("Temporary failure")).mockResolvedValueOnce({} as never);
+  await render().requestTaskQa(task.id);
+  await render().requestTaskQa(task.id);
+  expect(createQaRequestRecord).toHaveBeenCalledTimes(2);
+  expect(state.loadWorkspace).toHaveBeenCalledTimes(1);
+});
+
+it("keeps an acknowledged QA request in a waiting state when workspace refresh fails", async () => {
+  const { state, render, task } = setup();
+  state.signedInMember = state.bootstrap.members.find((member) => member.id === "student-1")!;
+  task.status = "in-progress";
+  task.assigneeIds = ["student-1"];
+  task.mentorId = "mentor-1";
+  state.loadWorkspace.mockResolvedValueOnce(false);
+  jest.mocked(createQaRequestRecord).mockResolvedValueOnce({} as never);
+  await render().requestTaskQa(task.id);
+  expect(render().requestedQaTaskIds).toContain(task.id);
+  expect(state.setDataMessage).toHaveBeenCalledWith("QA was requested, but the task status could not be refreshed. Reload to see the latest status.");
+  await render().requestTaskQa(task.id);
+  expect(createQaRequestRecord).toHaveBeenCalledTimes(1);
 });
 
 it("seeds QA with the chosen task as a typed evidence target and returns after submission", () => {
@@ -253,6 +295,8 @@ it("does not send reviewed status for an unlinked or unauthorized session", asyn
   const { state, render, task } = setup();
   state.signedInMember = state.bootstrap.members.find((member) => member.role === "student")!;
   render().openCreateQaReportModal(task.id);
+  expect(state.qaReportModalMode).toBeNull();
+  state.qaReportModalMode = "create";
   await render().handleQaReportSubmit({ preventDefault: jest.fn() } as never, "reviewed");
   expect(createQaReportRecord).not.toHaveBeenCalled();
   expect(state.setDataMessage).toHaveBeenCalledWith("Only the signed-in mentor or admin can approve a QA report.");
