@@ -4,7 +4,7 @@ import { PurchasesView } from "@/features/workspace/views/PurchasesView";
 import { createBootstrap } from "@/lib/appUtilsTestFixtures";
 import { createClientOperationId } from "@/lib/appUtils/clientOperationId";
 import type { PurchaseItemRecord } from "@/types/recordsInventory";
-import { createStableReceiptOperation, isDiscretePurchaseReceipt, isValidReceiptQuantity, persistReceiptOperation, receiptOperationStorageKey, reconcileAcknowledgedReceiptOperation, restoreReceiptOperation, submitPersistedPurchaseReceipt, submitPurchaseReceipt, sumReceiptQuantities } from "@/features/workspace/views/purchases/submitPurchaseReceipt";
+import { createStableReceiptOperation, isDiscretePurchaseReceipt, isValidReceiptQuantity, persistReceiptOperation, receiptOperationStorageKey, reconcileAcknowledgedReceiptOperation, reconcilePendingReceiptOperation, restoreReceiptOperation, submitPersistedPurchaseReceipt, submitPurchaseReceipt, sumReceiptQuantities } from "@/features/workspace/views/purchases/submitPurchaseReceipt";
 import { PurchaseTable } from "@/features/workspace/views/purchases/PurchaseTable";
 import { receivePurchaseItemRecord } from "@/lib/auth/records/production";
 import { requestItem } from "@/lib/auth/records/common";
@@ -271,6 +271,68 @@ describe("purchase receiving UI", () => {
     expect(outcome).toBe("unknown");
     expect(reportError).toHaveBeenCalledWith(expect.stringContaining("couldn't confirm"));
     expect(acknowledge).not.toHaveBeenCalled();
+  });
+
+  it("keeps an uncertain receipt pending when refresh resolves before its bootstrap publication", async () => {
+    const values = new Map<string, string>();
+    const storage = { getItem: (key: string) => values.get(key) ?? null, setItem: (key: string, value: string) => values.set(key, value), removeItem: (key: string) => values.delete(key) };
+    const payload = { operationId: "scheduled-publication", quantity: 1.5, location: "Shelf A" };
+    let publishBootstrap!: () => void;
+    let visibleReceipts = item.receipts;
+    const write = jest.fn().mockRejectedValue(new Error("connection lost"));
+    const submission = submitPersistedPurchaseReceipt({
+      storage, scope: "account:account-a", itemId: item.id, payload, write,
+      refresh: async () => { await new Promise<void>((resolve) => { publishBootstrap = resolve; }); return true; },
+      acknowledge: jest.fn(),
+      hasReceipt: () => visibleReceipts?.some((receipt) => receipt.operationId === payload.operationId) ?? false,
+      reportError: jest.fn(),
+    });
+    await Promise.resolve();
+    publishBootstrap();
+    const outcome = await submission;
+
+    expect(outcome).toBe("unknown");
+    expect(restoreReceiptOperation(storage, "account:account-a", item.id)).toEqual({ kind: "valid", payload });
+    setTimeout(() => {
+      visibleReceipts = [...(item.receipts ?? []), { ...item.receipts![0]!, id: "scheduled-receipt", operationId: payload.operationId, quantity: payload.quantity }];
+    }, 0);
+    await new Promise((resolve) => setTimeout(resolve, 1));
+    expect(reconcilePendingReceiptOperation(storage, "account:account-a", item.id, visibleReceipts)).toBe(true);
+    expect(restoreReceiptOperation(storage, "account:account-a", item.id)).toEqual({ kind: "none" });
+    expect(write).toHaveBeenCalledTimes(1);
+  });
+
+  it("retains an earlier uncertain operation when its retry is rejected before canonical publication", async () => {
+    const values = new Map<string, string>();
+    const storage = { getItem: (key: string) => values.get(key) ?? null, setItem: (key: string, value: string) => values.set(key, value), removeItem: (key: string) => values.delete(key) };
+    const scope = "account:account-a";
+    const payload = { operationId: "uncertain-retry", quantity: 1.5, location: "Shelf A" };
+    const firstOutcome = await submitPersistedPurchaseReceipt({
+      storage, scope, itemId: item.id, payload,
+      write: async () => { throw new Error("connection lost"); },
+      refresh: async () => true, acknowledge: jest.fn(), hasReceipt: () => false, reportError: jest.fn(),
+    });
+    expect(firstOutcome).toBe("unknown");
+
+    const operation = createStableReceiptOperation(() => "must-not-replace", { payload, outcomeUnknown: true });
+    const retryPayload = operation.payloadFor(9, "Shelf B");
+    const retryWrite = jest.fn(async () => { throw Object.assign(new Error("receipt already exists"), { statusCode: 409 }); });
+    const retryOutcome = await submitPersistedPurchaseReceipt({
+      storage, scope, itemId: item.id, payload: retryPayload,
+      write: retryWrite, refresh: async () => true, acknowledge: jest.fn(), hasReceipt: () => false,
+      retainUnknownOnRejection: operation.isOutcomeUnknown(), reportError: jest.fn(),
+    });
+
+    expect(retryOutcome).toBe("unknown");
+    expect(retryWrite).toHaveBeenCalledTimes(1);
+    expect(retryWrite).toHaveBeenCalledWith();
+    expect(restoreReceiptOperation(storage, scope, item.id)).toEqual({ kind: "valid", payload });
+    expect(operation.payloadFor(2, "Shelf B")).toBe(payload);
+
+    const receipts = [...(item.receipts ?? []), { ...item.receipts![0]!, id: "confirmed-receipt", operationId: payload.operationId, quantity: payload.quantity }];
+    expect(reconcilePendingReceiptOperation(storage, scope, item.id, receipts)).toBe(true);
+    expect(restoreReceiptOperation(storage, scope, item.id)).toEqual({ kind: "none" });
+    expect(createStableReceiptOperation(() => "next-delivery").payloadFor(1, "Shelf B").operationId).toBe("next-delivery");
   });
 
   it("keeps an acknowledged receipt locked and reports refresh failure without retrying the write", async () => {

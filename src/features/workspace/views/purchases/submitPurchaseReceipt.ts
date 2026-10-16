@@ -6,6 +6,7 @@ interface SubmitPurchaseReceiptOptions {
   acknowledge: () => void;
   hasReceipt: () => boolean;
   reportError: (message: string) => void;
+  retainUnknownOnRejection?: boolean;
 }
 
 export function isDiscretePurchaseReceipt(item: PurchaseItemRecord) {
@@ -108,6 +109,13 @@ export function reconcileAcknowledgedReceiptOperation(storage: ReceiptAttemptSto
   return false;
 }
 
+export function reconcilePendingReceiptOperation(storage: ReceiptAttemptStorage | undefined, scope: string, itemId: string, receipts: Array<{ operationId?: string }> | undefined) {
+  const restored = restoreReceiptOperation(storage, scope, itemId);
+  if (restored.kind !== "valid" || !(receipts ?? []).some((receipt) => receipt.operationId === restored.payload.operationId)) return false;
+  try { storage?.removeItem?.(receiptOperationStorageKey(scope, itemId)); } catch { /* The bootstrap already confirms this operation. */ }
+  return true;
+}
+
 function isAmbiguous(error: unknown) {
   const statusCode = typeof error === "object" && error !== null && "statusCode" in error
     ? (error as { statusCode?: unknown }).statusCode
@@ -129,7 +137,7 @@ function receiptErrorMessage(error: unknown) {
   return "This receipt could not be recorded. Check the details and try again.";
 }
 
-export async function submitPurchaseReceipt({ write, refresh, acknowledge, hasReceipt, reportError }: SubmitPurchaseReceiptOptions) {
+export async function submitPurchaseReceipt({ write, refresh, acknowledge, hasReceipt, reportError, retainUnknownOnRejection = false }: SubmitPurchaseReceiptOptions) {
   try {
     await write();
     acknowledge();
@@ -149,8 +157,11 @@ export async function submitPurchaseReceipt({ write, refresh, acknowledge, hasRe
     } catch {
       // Keep the operation available for an idempotent retry when its outcome is unknown.
     }
-    reportError(receiptErrorMessage(error));
-    return isAmbiguous(error) ? "unknown" as const : "rejected" as const;
+    const outcomeUnknown = isAmbiguous(error) || retainUnknownOnRejection;
+    reportError(outcomeUnknown
+      ? "We couldn't confirm whether this receipt was recorded. Choose Check again to confirm it safely with the same details."
+      : receiptErrorMessage(error));
+    return outcomeUnknown ? "unknown" as const : "rejected" as const;
   }
 }
 

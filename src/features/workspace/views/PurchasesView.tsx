@@ -16,7 +16,7 @@ import { PurchaseTable } from "./purchases/PurchaseTable";
 import { ModalDialog } from "@/components/ModalDialog";
 import { receivePurchaseItemRecord } from "@/lib/auth/records/production";
 import { createClientOperationId } from "@/lib/appUtils/clientOperationId";
-import { createStableReceiptOperation, isDiscretePurchaseReceipt, isValidReceiptQuantity, persistReceiptOperation, receiptOperationStorageKey, reconcileAcknowledgedReceiptOperation, restoreReceiptOperation, submitPersistedPurchaseReceipt, sumReceiptQuantities } from "./purchases/submitPurchaseReceipt";
+import { createStableReceiptOperation, isDiscretePurchaseReceipt, isValidReceiptQuantity, persistReceiptOperation, receiptOperationStorageKey, reconcileAcknowledgedReceiptOperation, reconcilePendingReceiptOperation, restoreReceiptOperation, submitPersistedPurchaseReceipt, sumReceiptQuantities } from "./purchases/submitPurchaseReceipt";
 
 interface PurchasesViewProps {
   activePersonFilter: FilterSelection;
@@ -85,6 +85,17 @@ export function PurchasesView({ activePersonFilter, bootstrap, receiptOperationS
     const ids = new Set(bootstrap.purchaseItems.filter((item) => reconcileAcknowledgedReceiptOperation(getReceiptStorage(), receiptOperationScope, item.id, item.receipts)).map((item) => item.id));
     setAcknowledgedReceiptIds((current) => current.size === ids.size && [...current].every((id) => ids.has(id)) ? current : ids);
   }, [bootstrap.purchaseItems, receiptOperationScope]);
+  useEffect(() => {
+    const reconciledItems = bootstrap.purchaseItems.filter((item) => reconcilePendingReceiptOperation(getReceiptStorage(), receiptOperationScope, item.id, item.receipts));
+    if (!reconciledItems.length) return;
+    reconciledItems.forEach((item) => receiptOperations.delete(operationMapKey(receiptOperationScope, item.id)));
+    if (receivingItem && reconciledItems.some((item) => item.id === receivingItem.id) && receiptScopeRef.current === receiptOperationScope) {
+      setReceivingItem(null);
+      setReceiptOutcomeUnknown(false);
+      setReceiptError(null);
+      setIsReceiving(false);
+    }
+  }, [bootstrap.purchaseItems, receiptOperationScope, receiptOperations, receivingItem]);
   const context = useMemo<PurchaseListContext>(() => ({
     tasksById: Object.fromEntries(bootstrap.tasks.map((task) => [task.id, task])),
     vendorsById: Object.fromEntries(bootstrap.vendors.map((item) => [item.id, item])),
@@ -164,6 +175,7 @@ export function PurchasesView({ activePersonFilter, bootstrap, receiptOperationS
     const receiptOperation = receiptOperations.get(mapKey) ?? createStableReceiptOperation(createClientOperationId);
     receiptOperations.set(mapKey, receiptOperation);
     const operation = receiptOperation.payloadFor(quantity, location);
+    const retryingUnknownOutcome = receiptOperation.isOutcomeUnknown();
     const submittedReceiptScope = receiptOperationScope;
     const submittedViewScope = receiptViewScope;
     const isCurrentView = () => receiptScopeRef.current === submittedReceiptScope && receiptViewScopeRef.current === submittedViewScope;
@@ -184,6 +196,7 @@ export function PurchasesView({ activePersonFilter, bootstrap, receiptOperationS
       },
       refresh: () => isCurrentView() ? loadWorkspace?.() ?? Promise.resolve() : Promise.resolve(),
       hasReceipt: () => bootstrapRef.current.purchaseItems.find((item) => item.id === receivingItem.id)?.receipts?.some((receipt) => receipt.operationId === operation.operationId) ?? false,
+      retainUnknownOnRejection: retryingUnknownOutcome,
       reportError: (message) => {
         if (isCurrentView()) {
           setReceiptError(message);
