@@ -15,6 +15,7 @@ interface QaReportListProps {
   reports: ReportRecord[];
   canReviewFindings?: boolean;
   operationScope?: string;
+  viewScope?: string;
   handleUnauthorized?: () => void;
   loadWorkspace?: () => Promise<unknown>;
   setDataMessage?: (message: string | null) => void;
@@ -23,7 +24,7 @@ interface QaReportListProps {
   onOpenMilestone?: (milestoneId: string) => void;
 }
 
-export function QaReportList({ bootstrap, reports, canReviewFindings = false, operationScope = "local-anonymous", handleUnauthorized, loadWorkspace, setDataMessage, readFinding, onOpenTask, onOpenMilestone }: QaReportListProps) {
+export function QaReportList({ bootstrap, reports, canReviewFindings = false, operationScope = "local-anonymous", viewScope = "", handleUnauthorized, loadWorkspace, setDataMessage, readFinding, onOpenTask, onOpenMilestone }: QaReportListProps) {
   const gridStyle = { "--workspace-grid-template": QA_REPORT_GRID } as CSSProperties;
   if (reports.length === 0) return <WorkspaceEmptyState title="No QA reports yet" reason="QA reviews recorded for this workspace will appear here." />;
 
@@ -75,7 +76,7 @@ export function QaReportList({ bootstrap, reports, canReviewFindings = false, op
                   {typeof report.reviewOrder === "number" ? <p>Review {report.reviewOrder}</p> : null}
                   {correctiveTask ? <p>Follow-up: {onOpenTask ? <button className="secondary-action" type="button" onClick={() => onOpenTask(correctiveTask.id)}>Open {correctiveTask.title}</button> : correctiveTask.title}</p> : null}
                   {linkedRisk ? <p>Linked risk: {linkedRisk.title}</p> : null}
-                  {needsVerification || finding.retests?.length ? <FindingRetestAction key={`${operationScope}:qa:${finding.id}`} finding={finding} sourceType="qa" scope={operationScope} canReview={canReviewFindings} handleUnauthorized={handleUnauthorized} members={bootstrap.members} loadWorkspace={loadWorkspace} setDataMessage={setDataMessage} readFinding={readFinding} /> : null}
+                  {needsVerification || finding.retests?.length ? <FindingRetestAction key={`${viewScope}:qa:${finding.id}`} finding={finding} sourceType="qa" scope={operationScope} viewScope={viewScope} canReview={canReviewFindings} handleUnauthorized={handleUnauthorized} members={bootstrap.members} loadWorkspace={loadWorkspace} setDataMessage={setDataMessage} readFinding={readFinding} /> : null}
                 </div>;
               })}
               {report.photoUrl ? <a href={report.photoUrl} rel="noreferrer" target="_blank">View attached evidence</a> : null}

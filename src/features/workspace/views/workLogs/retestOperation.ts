@@ -19,15 +19,15 @@ export function retestOperationStorageKey(scope: string, sourceType: RetestOpera
   return `mission-control:retest:v1:${encodeURIComponent(scope)}:${sourceType}:${encodeURIComponent(findingId)}`;
 }
 
-export function persistRetestOperation(storage: RetestOperationStorage | undefined, scope: string, findingId: string, payload: RetestOperationPayload) {
-  return writeRetestOperation(storage, scope, findingId, payload, "pending");
+export function persistRetestOperation(storage: RetestOperationStorage | undefined, scope: string, findingId: string, payload: RetestOperationPayload, state: "pending" | "acknowledged" = "pending") {
+  return writeRetestOperation(storage, scope, findingId, payload, state);
 }
 
 export function markRetestOperationConflict(storage: RetestOperationStorage | undefined, scope: string, findingId: string, payload: RetestOperationPayload) {
   return writeRetestOperation(storage, scope, findingId, payload, "conflict");
 }
 
-function writeRetestOperation(storage: RetestOperationStorage | undefined, scope: string, findingId: string, payload: RetestOperationPayload, state: "pending" | "conflict") {
+function writeRetestOperation(storage: RetestOperationStorage | undefined, scope: string, findingId: string, payload: RetestOperationPayload, state: "pending" | "conflict" | "acknowledged") {
   if (!storage || !isValidRetestPayload(payload)) return false;
   const key = retestOperationStorageKey(scope, payload.sourceType, findingId);
   const value = JSON.stringify({ version: 1, scope, findingId, state, payload });
@@ -45,10 +45,10 @@ export function restoreRetestOperation(storage: Pick<RetestOperationStorage, "ge
     const value = storage.getItem(retestOperationStorageKey(scope, sourceType, findingId));
     if (value === null) return { kind: "none" as const };
     const record = JSON.parse(value) as { version?: unknown; scope?: unknown; findingId?: unknown; state?: unknown; payload?: RetestOperationPayload };
-    if (record.version !== 1 || record.scope !== scope || record.findingId !== findingId || (record.state !== undefined && record.state !== "pending" && record.state !== "conflict") || !isValidRetestPayload(record.payload) || record.payload.sourceType !== sourceType) {
+    if (record.version !== 1 || record.scope !== scope || record.findingId !== findingId || (record.state !== undefined && record.state !== "pending" && record.state !== "conflict" && record.state !== "acknowledged") || !isValidRetestPayload(record.payload) || record.payload.sourceType !== sourceType) {
       return { kind: "invalid" as const };
     }
-    return { kind: "valid" as const, payload: record.payload, conflict: record.state === "conflict" };
+    return { kind: "valid" as const, payload: record.payload, conflict: record.state === "conflict", acknowledged: record.state === "acknowledged" };
   } catch {
     return { kind: "invalid" as const };
   }
@@ -79,14 +79,14 @@ export async function submitDurableRetest(options: {
   scope: string;
   findingId: string;
   payload: RetestOperationPayload;
-  write: (payload: RetestOperationPayload) => Promise<{ retests?: unknown[] }>;
+  write: (payload: RetestOperationPayload) => Promise<{ retests?: unknown[]; status?: QaFindingRecord["status"] }>;
 }) {
   if (!persistRetestOperation(options.storage, options.scope, options.findingId, options.payload)) return { kind: "storage-failed" as const };
   try {
     const finding = await options.write(options.payload);
     if (retestOperationIsCanonical(finding.retests, options.payload.operationId)) {
-      clearRetestOperation(options.storage, options.scope, options.payload.sourceType, options.findingId);
-      return { kind: "confirmed" as const, finding };
+      const saved = persistRetestOperation(options.storage, options.scope, options.findingId, options.payload, "acknowledged");
+      return { kind: "acknowledged" as const, finding, storageFailed: !saved };
     }
     return { kind: "pending" as const, finding };
   } catch (error) {

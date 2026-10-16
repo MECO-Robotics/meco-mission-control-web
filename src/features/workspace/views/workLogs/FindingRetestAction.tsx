@@ -1,14 +1,15 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import { createClientOperationId } from "@/lib/appUtils/clientOperationId";
 import { retestReportFindingRecord } from "@/lib/auth/records/reporting";
 import type { FindingRetestRecord, QaFindingRecord } from "@/types/recordsReporting";
-import { clearRetestOperation, reconcileRetestConflict, restoreRetestOperation, retestOperationIsCanonical, submitDurableRetest, type RetestOperationPayload, type RetestOperationStorage } from "./retestOperation";
+import { clearRetestOperation, persistRetestOperation, reconcileRetestConflict, restoreRetestOperation, retestOperationIsCanonical, submitDurableRetest, type RetestOperationPayload, type RetestOperationStorage } from "./retestOperation";
 
 interface FindingRetestActionProps {
   finding: QaFindingRecord;
   sourceType: "qa" | "test";
   scope: string;
+  viewScope?: string;
   canReview: boolean;
   handleUnauthorized?: () => void;
   members: Array<{ id: string; name: string }>;
@@ -17,7 +18,7 @@ interface FindingRetestActionProps {
   readFinding: (findingId: string, sourceType: "qa" | "test") => Promise<QaFindingRecord | null>;
 }
 
-type ConflictState = "checking" | "unknown" | "not-found" | null;
+type ConflictState = "checking" | "unknown" | "not-found" | "acknowledged" | null;
 
 function getStorage(): RetestOperationStorage | undefined {
   try { return globalThis.localStorage; } catch { return undefined; }
@@ -27,7 +28,7 @@ function retestDescription(record: FindingRetestRecord) {
   return `${record.result === "pass" ? "Passed" : "Needs more work"}: ${record.notes}`;
 }
 
-export function FindingRetestAction({ finding, sourceType, scope, canReview, handleUnauthorized, members, loadWorkspace, setDataMessage, readFinding }: FindingRetestActionProps) {
+export function FindingRetestAction({ finding, sourceType, scope, viewScope = "", canReview, handleUnauthorized, members, loadWorkspace, setDataMessage, readFinding }: FindingRetestActionProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [result, setResult] = useState<"pass" | "fail">("pass");
   const [notes, setNotes] = useState("");
@@ -39,6 +40,12 @@ export function FindingRetestAction({ finding, sourceType, scope, canReview, han
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
   const [storageBlocked, setStorageBlocked] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const viewActive = useRef(true);
+
+  useEffect(() => {
+    viewActive.current = true;
+    return () => { viewActive.current = false; };
+  }, [viewScope]);
 
   useEffect(() => {
     const storage = getStorage();
@@ -58,7 +65,12 @@ export function FindingRetestAction({ finding, sourceType, scope, canReview, han
     setResult(restored.payload.result);
     setNotes(restored.payload.notes);
     setEvidenceNotes(restored.payload.evidenceNotes ?? "");
-    if (restored.conflict) {
+    if (restored.acknowledged) {
+      setConflictState("acknowledged");
+      setMessage("Retest was accepted. Waiting for the refreshed finding history before another check can be recorded.");
+      setHistoryOverride(null);
+      setIsOpen(false);
+    } else if (restored.conflict) {
       setConflictState("unknown");
       setMessage("We couldn't confirm this check. Check its status before trying again.");
       setIsOpen(false);
@@ -67,7 +79,7 @@ export function FindingRetestAction({ finding, sourceType, scope, canReview, han
       setMessage("We couldn't confirm this check. You can check it again using the same details.");
       setIsOpen(true);
     }
-  }, [finding.id, finding.retests, scope, sourceType]);
+  }, [finding.id, finding.retests, scope, sourceType, viewScope]);
 
   useEffect(() => {
     if (!pendingPayload || !retestOperationIsCanonical(finding.retests, pendingPayload.operationId)) return;
@@ -76,7 +88,6 @@ export function FindingRetestAction({ finding, sourceType, scope, canReview, han
     setConflictState(null);
     setIsOpen(false);
     setStorageBlocked(false);
-    setMessage("Retest recorded.");
   }, [finding.id, finding.retests, pendingPayload, scope, sourceType]);
 
   useEffect(() => setHistoryOverride(null), [finding.retests]);
@@ -87,6 +98,7 @@ export function FindingRetestAction({ finding, sourceType, scope, canReview, han
     setIsOpen(false);
     try {
       const canonicalFinding = await readFinding(finding.id, sourceType);
+      if (!viewActive.current) return;
       const reconciliation = reconcileRetestConflict(canonicalFinding, payload);
       if (reconciliation.kind === "unknown") {
         setConflictState("unknown");
@@ -95,9 +107,10 @@ export function FindingRetestAction({ finding, sourceType, scope, canReview, han
       }
       if (canonicalFinding) setHistoryOverride((canonicalFinding.retests ?? []) as FindingRetestRecord[]);
       if (reconciliation.kind === "found") {
-        clearRetestOperation(getStorage(), scope, sourceType, finding.id);
-        setPendingPayload(null);
-        setConflictState(null);
+        persistRetestOperation(getStorage(), scope, finding.id, payload, "acknowledged");
+        setPendingPayload(payload);
+        setConflictState("acknowledged");
+        setIsOpen(false);
         setMessage(reconciliation.intentMatches
           ? `This check is already in the history: ${retestDescription(reconciliation.record)}.`
           : `A different check is already recorded for this operation: ${retestDescription(reconciliation.record)}. Your newer details were not recorded.`);
@@ -107,10 +120,12 @@ export function FindingRetestAction({ finding, sourceType, scope, canReview, han
       setConflictState("not-found");
       setMessage("This operation was not found in the current finding history. Start a new check to try again.");
     } catch {
-      setConflictState("unknown");
-      setMessage("We couldn't check the finding history. Your saved check is still pending.");
+      if (viewActive.current) {
+        setConflictState("unknown");
+        setMessage("We couldn't check the finding history. Your saved check is still pending.");
+      }
     } finally {
-      setIsCheckingStatus(false);
+      if (viewActive.current) setIsCheckingStatus(false);
     }
   };
 
@@ -152,6 +167,7 @@ export function FindingRetestAction({ finding, sourceType, scope, canReview, han
       payload,
       write: (request) => retestReportFindingRecord(finding.id, request, handleUnauthorized),
     });
+    if (!viewActive.current) return;
     if (outcome.kind === "storage-failed") {
       setMessage("We couldn't save this check safely. Check browser storage settings and try again.");
       setIsSaving(false);
@@ -172,13 +188,13 @@ export function FindingRetestAction({ finding, sourceType, scope, canReview, han
       await reconcilePending(payload);
       return;
     }
-    if (outcome.kind === "confirmed") {
-      setPendingPayload(null);
-      setConflictState(null);
+    if (outcome.kind === "acknowledged") {
+      setPendingPayload(payload);
+      setConflictState("acknowledged");
       setIsOpen(false);
       setHistoryOverride((outcome.finding.retests ?? []) as FindingRetestRecord[]);
-      setMessage(payload.result === "pass" ? "Retest recorded. The finding is closed after this review." : "Retest recorded. The finding remains open for follow-up.");
-      try { await loadWorkspace?.(); } catch { setMessage("Retest recorded, but the finding could not refresh. Refresh the workspace to see its current status."); }
+      setMessage(`${outcome.finding.status === "resolved" ? "Retest recorded. The finding is closed after this review." : "Retest recorded. The finding remains open for follow-up."} Waiting for refreshed history before another check can be recorded.`);
+      try { await loadWorkspace?.(); } catch { if (viewActive.current) setMessage("Retest recorded, but the finding could not refresh. Refresh the workspace to see its current status."); }
     } else {
       setPendingPayload(payload);
       setConflictState(null);
@@ -200,6 +216,6 @@ export function FindingRetestAction({ finding, sourceType, scope, canReview, han
       <label className="field"><span>Evidence (optional)</span><textarea disabled={isSaving || Boolean(pendingPayload)} onChange={(event) => setEvidenceNotes(event.target.value)} rows={2} value={evidenceNotes} /></label>
       {message ? <p role="alert">{message}</p> : null}
       <div className="modal-actions"><button className="secondary-action" disabled={isSaving} onClick={() => setIsOpen(false)} type="button">Close</button><button className="primary-action" disabled={isSaving || storageBlocked || !notes.trim()} type="submit">{isSaving ? "Saving…" : pendingPayload ? "Check retest" : "Record retest"}</button></div>
-    </form> : <><button className="secondary-action" disabled={storageBlocked || isCheckingStatus} type="button" onClick={conflictState === "unknown" ? checkStatus : conflictState === "not-found" ? startNewCheck : () => { setMessage(null); setIsOpen(true); }}>{isCheckingStatus ? "Checking status…" : conflictState === "unknown" ? "Check status" : conflictState === "not-found" ? "Start a new check" : pendingPayload ? "Check retest" : "Record retest"}</button>{message ? <p role="status">{message}</p> : null}</> : null}
+    </form> : <><button className="secondary-action" disabled={storageBlocked || isCheckingStatus || conflictState === "acknowledged"} type="button" onClick={conflictState === "unknown" ? checkStatus : conflictState === "not-found" ? startNewCheck : () => { setMessage(null); setIsOpen(true); }}>{isCheckingStatus ? "Checking status…" : conflictState === "acknowledged" ? "Retest accepted" : conflictState === "unknown" ? "Check status" : conflictState === "not-found" ? "Start a new check" : pendingPayload ? "Check retest" : "Record retest"}</button>{message ? <p role="status">{message}</p> : null}</> : null}
   </div>;
 }

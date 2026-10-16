@@ -28,7 +28,8 @@ export function WorkspaceWorklogsSection(props: WorkspaceContentPanelsViewProps)
           bootstrap={bootstrap}
           canReviewFindings={props.canReviewQa}
           canCreateQaReport={props.canCreateQaReport}
-          operationScope={props.workspaceOperationScope}
+          operationScope={props.receiptOperationScope}
+          viewScope={props.workspaceOperationScope}
           selectedSeasonId={props.selectedSeasonId}
           selectedProjectId={props.selectedProject?.id ?? null}
           handleUnauthorized={props.handleUnauthorized}

@@ -48,6 +48,7 @@ interface WorkLogsViewProps {
   canReviewFindings?: boolean;
   canCreateQaReport?: boolean;
   operationScope?: string;
+  viewScope?: string;
   selectedSeasonId?: string | null;
   selectedProjectId?: string | null;
   handleUnauthorized?: () => void;
@@ -62,7 +63,7 @@ interface WorkLogsViewProps {
   subsystemsById: SubsystemsById;
   view: WorklogsViewTab;
 }
-export function WorkLogsView({ activePersonFilter, bootstrap, canReviewFindings, canCreateQaReport = true, operationScope = "local-anonymous", selectedSeasonId = null, selectedProjectId = null, handleUnauthorized, loadWorkspace, setDataMessage, membersById, openCreateMilestoneReportModal, openCreateQaReportModal, openCreateWorkLogModal, openEditTaskModal, onOpenSchedule, subsystemsById, view }: WorkLogsViewProps) {
+export function WorkLogsView({ activePersonFilter, bootstrap, canReviewFindings, canCreateQaReport = true, operationScope = "local-anonymous", viewScope = "", selectedSeasonId = null, selectedProjectId = null, handleUnauthorized, loadWorkspace, setDataMessage, membersById, openCreateMilestoneReportModal, openCreateQaReportModal, openCreateWorkLogModal, openEditTaskModal, onOpenSchedule, subsystemsById, view }: WorkLogsViewProps) {
   const state = useWorkLogsViewState({ activePersonFilter, bootstrap, membersById, subsystemsById });
   const readFinding = useCallback((findingId: string, sourceType: "qa" | "test") => fetchFindingForRetest(findingId, sourceType, selectedSeasonId, selectedProjectId, handleUnauthorized), [handleUnauthorized, selectedProjectId, selectedSeasonId]);
   const [reportSort, setReportSort] = useRememberedViewState("history.sort", "recent");
@@ -79,6 +80,6 @@ export function WorkLogsView({ activePersonFilter, bootstrap, canReviewFindings,
     </WorkspaceTopbarControls></AppTopbarSlotPortal>
     {view === "logs" ? <>
       <WorkLogsTableSection membersById={membersById} openEditTaskModal={openEditTaskModal} subsystemsById={subsystemsById} taskById={state.taskById} workLogFilterMotionClass={state.workLogFilterMotionClass} workLogPagination={state.workLogPagination} workLogs={state.workLogs} />
-    </> : view === "activity" ? <WorkLogsActivitySection actions={state.activityActions} activityPagination={state.activityPagination} membersById={membersById} openEditTaskModal={openEditTaskModal} subsystemsById={subsystemsById} taskById={state.taskById} /> : view === "qa" ? <QaReportList reports={reports} bootstrap={bootstrap} canReviewFindings={canReviewFindings} operationScope={operationScope} handleUnauthorized={handleUnauthorized} loadWorkspace={loadWorkspace} setDataMessage={setDataMessage} readFinding={readFinding} onOpenTask={id => { const task = state.taskById[id]; if (task) openEditTaskModal(task); }} onOpenMilestone={onOpenSchedule} /> : <><ReportHistoryList reports={reports} bootstrap={bootstrap} onOpenTask={id => { const task = state.taskById[id]; if (task) openEditTaskModal(task); }} onOpenMilestone={onOpenSchedule} /><TestFindingRetestList bootstrap={bootstrap} canReview={Boolean(canReviewFindings)} handleUnauthorized={handleUnauthorized} operationScope={operationScope} loadWorkspace={loadWorkspace} setDataMessage={setDataMessage} readFinding={readFinding} /></>}
+    </> : view === "activity" ? <WorkLogsActivitySection actions={state.activityActions} activityPagination={state.activityPagination} membersById={membersById} openEditTaskModal={openEditTaskModal} subsystemsById={subsystemsById} taskById={state.taskById} /> : view === "qa" ? <QaReportList reports={reports} bootstrap={bootstrap} canReviewFindings={canReviewFindings} operationScope={operationScope} viewScope={viewScope} handleUnauthorized={handleUnauthorized} loadWorkspace={loadWorkspace} setDataMessage={setDataMessage} readFinding={readFinding} onOpenTask={id => { const task = state.taskById[id]; if (task) openEditTaskModal(task); }} onOpenMilestone={onOpenSchedule} /> : <><ReportHistoryList reports={reports} bootstrap={bootstrap} onOpenTask={id => { const task = state.taskById[id]; if (task) openEditTaskModal(task); }} onOpenMilestone={onOpenSchedule} /><TestFindingRetestList bootstrap={bootstrap} canReview={Boolean(canReviewFindings)} handleUnauthorized={handleUnauthorized} operationScope={operationScope} viewScope={viewScope} loadWorkspace={loadWorkspace} setDataMessage={setDataMessage} readFinding={readFinding} /></>}
   </section>;
 }
