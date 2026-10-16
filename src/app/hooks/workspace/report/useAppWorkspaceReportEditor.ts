@@ -27,8 +27,12 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
   const returnToDetails = useRef<(() => void) | null>(null);
   const qaRequestLocks = useRef(new Set<string>());
   const qaRequestContext = useRef(0);
+  const qaRequestMount = useRef(0);
   const [requestedQaTaskIds, setRequestedQaTaskIds] = useState<string[]>([]);
   const accountId = model.sessionUser?.accountId;
+  const qaRequestAccountId = useRef(accountId);
+  qaRequestAccountId.current = accountId;
+  const qaRequestLockScope = model.isPublicDemoSession ? "public-demo" : accountId ? `account:${accountId}` : "local";
   const reportIsOpen = Boolean(model.workLogModalMode || model.qaReportModalMode || model.milestoneReportModalMode);
 
   useEffect(() => {
@@ -40,6 +44,11 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
   useEffect(() => {
     setRequestedQaTaskIds([]);
   }, [accountId, model.isPublicDemoSession]);
+
+  useEffect(() => {
+    const mount = qaRequestMount.current;
+    return () => { qaRequestMount.current = mount + 1; };
+  }, []);
 
   useEffect(() => {
     qaRequestContext.current += 1;
@@ -100,9 +109,10 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
     if (!mentor || task.status === "not-started" || task.status === "complete" || task.status === "waiting-for-qa" || task.isBlocked || task.isWaitingOnDependency) return;
     if (requestedQaTaskIds.includes(taskId) || model.bootstrap.qaRequests.some((request) => request.targetRefs.some((ref) => ref.kind === "task" && ref.id === task.id) && ["requested", "in-review"].includes(request.status))) return;
     const context = qaRequestContext.current;
+    const mount = qaRequestMount.current;
     const workspace = lifecycle.captureWorkspace();
     const isCurrent = () => context === qaRequestContext.current && workspace.isCurrent();
-    const lockId = `${context}:${taskId}`;
+    const lockId = `${qaRequestLockScope}:${taskId}`;
     if (qaRequestLocks.current.has(lockId)) return;
     qaRequestLocks.current.add(lockId);
     model.setDataMessage(null);
@@ -119,6 +129,9 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
       return;
     }
     if (!isCurrent()) {
+      if (qaRequestMount.current === mount && qaRequestAccountId.current === accountId) {
+        setRequestedQaTaskIds((current) => current.includes(taskId) ? current : [...current, taskId]);
+      }
       qaRequestLocks.current.delete(lockId);
       return;
     }
@@ -130,7 +143,7 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
     } finally {
       qaRequestLocks.current.delete(lockId);
     }
-  }, [model, requestedQaTaskIds, lifecycle]);
+  }, [model, requestedQaTaskIds, lifecycle, qaRequestLockScope]);
 
   const closeQaReportModal = useCallback(() => { resetEditor(); model.setQaReportModalMode(null); }, [model, resetEditor]);
 

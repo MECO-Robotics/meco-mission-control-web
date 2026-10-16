@@ -99,6 +99,69 @@ it("hands an eligible assigned student to the assigned mentor through one QA req
   expect(state.loadWorkspace).toHaveBeenCalledTimes(1);
 });
 
+it("keeps the same account-task request locked while project and season context changes", async () => {
+  const { state, render, task } = setup();
+  state.signedInMember = state.bootstrap.members.find((member) => member.id === "student-1")!;
+  task.status = "in-progress";
+  task.assigneeIds = ["student-1"];
+  task.mentorId = "mentor-1";
+  let resolve!: () => void;
+  jest.mocked(createQaRequestRecord).mockImplementationOnce(() => new Promise((yes) => { resolve = () => yes({} as never); }));
+  const pending = render().requestTaskQa(task.id);
+
+  state.selectedProjectId = "another-project";
+  state.selectedSeasonId = "another-season";
+  render();
+  state.selectedProjectId = null;
+  state.selectedSeasonId = null;
+  render();
+  await render().requestTaskQa(task.id);
+  expect(createQaRequestRecord).toHaveBeenCalledTimes(1);
+
+  resolve();
+  await pending;
+  expect(state.loadWorkspace).not.toHaveBeenCalled();
+  await render().requestTaskQa(task.id);
+  expect(render().requestedQaTaskIds).toContain(task.id);
+  expect(createQaRequestRecord).toHaveBeenCalledTimes(1);
+
+  const canonicalRequest = {
+    id: "qa-request-1", projectId: task.projectId, targetRefs: [{ kind: "task" as const, id: task.id }],
+    subject: "QA request", mentorId: "mentor-1", requestedById: "student-1", createdAt: "2026-10-16T12:00:00Z", status: "requested" as const,
+  };
+  state.bootstrap.qaRequests = [canonicalRequest];
+  render();
+  expect(render().requestedQaTaskIds).not.toContain(task.id);
+  await render().requestTaskQa(task.id);
+  expect(createQaRequestRecord).toHaveBeenCalledTimes(1);
+
+  state.bootstrap.qaRequests = [{ ...canonicalRequest, status: "complete" }];
+  render();
+  await render().requestTaskQa(task.id);
+  expect(createQaRequestRecord).toHaveBeenCalledTimes(2);
+});
+
+it("does not acknowledge a late QA request success in a different account", async () => {
+  const { state, render, task } = setup();
+  state.signedInMember = state.bootstrap.members.find((member) => member.id === "student-1")!;
+  task.status = "in-progress";
+  task.assigneeIds = ["student-1"];
+  task.mentorId = "mentor-1";
+  let resolveOld!: () => void;
+  jest.mocked(createQaRequestRecord)
+    .mockImplementationOnce(() => new Promise((yes) => { resolveOld = () => yes({} as never); }))
+    .mockResolvedValueOnce({} as never);
+  const oldRequest = render().requestTaskQa(task.id);
+  state.sessionUser = { ...state.sessionUser!, accountId: "account-next" };
+  render();
+  resolveOld();
+  await oldRequest;
+  expect(render().requestedQaTaskIds).not.toContain(task.id);
+  const currentRequest = render().requestTaskQa(task.id);
+  await currentRequest;
+  expect(createQaRequestRecord).toHaveBeenCalledTimes(2);
+});
+
 it("allows retry after a failed QA request", async () => {
   const { state, render, task } = setup();
   state.signedInMember = state.bootstrap.members.find((member) => member.id === "student-1")!;

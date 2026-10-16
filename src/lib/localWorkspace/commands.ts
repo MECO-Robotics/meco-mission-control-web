@@ -38,6 +38,133 @@ function newLocalId() {
   return `local-${Array.from(crypto.getRandomValues(new Uint32Array(4)), (part) => part.toString(16).padStart(8, "0")).join("")}`;
 }
 
+function localCommandError(message: string, statusCode: number) {
+  return Object.assign(new Error(message), { statusCode });
+}
+
+function submitLocalQaReport(snapshot: BootstrapPayload, body: Record<string, unknown>) {
+  const projectId = typeof body.projectId === "string" ? body.projectId : "";
+  const targetRefs = Array.isArray(body.targetRefs) ? body.targetRefs as BootstrapPayload["reports"][number]["targetRefs"] : [];
+  const result = body.result;
+  const status = body.status;
+  if (body.reportType !== "qa" || !snapshot.projects.some((project) => project.id === projectId) || !targetRefs.length ||
+    !["pass", "minor-fix", "iteration-worthy"].includes(String(result)) || !["draft", "submitted", "reviewed"].includes(String(status)) ||
+    typeof body.summary !== "string" || !Array.isArray(body.participantIds) || body.participantIds.length === 0) {
+    throw localCommandError("QA report details are incomplete or no longer valid in this local workspace.", 400);
+  }
+  const reportTaskIds = targetRefs.filter((ref) => ref.kind === "task").map((ref) => ref.id);
+  if (reportTaskIds.length > 1 || reportTaskIds.some((taskId) => !snapshot.tasks.some((task) => task.id === taskId && task.projectId === projectId))) {
+    throw localCommandError("Choose a task in the selected project for this QA report.", 400);
+  }
+  const reviewer = status === "reviewed" ? snapshot.members.find((member) => member.role === "mentor" || member.role === "admin") : undefined;
+  if (status === "reviewed" && !reviewer) throw localCommandError("A local mentor or admin reviewer is required to review QA.", 403);
+  const now = new Date().toISOString();
+  const report: BootstrapPayload["reports"][number] = {
+    id: newLocalId(), projectId, reportType: "qa", targetRefs,
+    createdByMemberId: typeof body.createdByMemberId === "string" ? body.createdByMemberId : null,
+    participantIds: body.participantIds as string[],
+    mentorId: typeof body.mentorId === "string" ? body.mentorId : null,
+    requestedById: typeof body.requestedById === "string" ? body.requestedById : null,
+    summary: body.summary.trim(), notes: typeof body.notes === "string" ? body.notes : "",
+    ...(typeof body.evidenceNotes === "string" ? { evidenceNotes: body.evidenceNotes } : {}),
+    ...(typeof body.photoUrl === "string" ? { photoUrl: body.photoUrl } : {}),
+    createdAt: typeof body.createdAt === "string" ? body.createdAt : now,
+    status: status as "draft" | "submitted" | "reviewed",
+    result: result as "pass" | "minor-fix" | "iteration-worthy",
+    reviewedById: reviewer?.id ?? null,
+    reviewedAt: reviewer ? now : null,
+  };
+  validateRosterReferences(snapshot, report as unknown as Row);
+  snapshot.reports.push(report);
+  return { item: report };
+}
+
+function retestLocalFinding(snapshot: BootstrapPayload, findingId: string, body: Record<string, unknown>) {
+  if (body.sourceType !== undefined && body.sourceType !== "qa" && body.sourceType !== "test") throw localCommandError("Retest sourceType must be qa or test.", 400);
+  const qaFinding = snapshot.qaFindings.some((finding) => finding.id === findingId);
+  const testFinding = snapshot.testFindings.some((finding) => finding.id === findingId);
+  if (body.sourceType === undefined && qaFinding && testFinding) throw localCommandError("sourceType is required when QA and test findings share an ID.", 409);
+  const sourceType = (body.sourceType ?? (qaFinding ? "qa" : "test")) as "qa" | "test";
+  const rows = sourceType === "qa" ? snapshot.qaFindings : snapshot.testFindings;
+  const index = rows.findIndex((finding) => finding.id === findingId);
+  if (index < 0) throw localCommandError("QA or test finding not found in this local workspace.", 404);
+  const finding = rows[index];
+  const operationId = typeof body.operationId === "string" ? body.operationId.trim() : "";
+  const result = body.result as "pass" | "fail";
+  const notes = typeof body.notes === "string" ? body.notes : "";
+  const evidenceNotes = typeof body.evidenceNotes === "string" ? body.evidenceNotes : undefined;
+  const observedAt = typeof body.observedAt === "string" ? body.observedAt : undefined;
+  if (!operationId || operationId.length > 200 || (result !== "pass" && result !== "fail") || !notes.trim()) {
+    throw localCommandError("Retest details are incomplete or invalid.", 400);
+  }
+  const prior = finding.retests?.find((retest) => retest.operationId === operationId);
+  if (prior) {
+    if (prior.sourceType !== sourceType || prior.result !== result || prior.notes !== notes || (prior.evidenceNotes ?? "") !== (evidenceNotes ?? "") || prior.observedAt !== observedAt) {
+      throw localCommandError("operationId was already used with a different retest payload.", 409);
+    }
+    return { item: finding };
+  }
+  const reviewer = snapshot.members.find((member) => member.role === "mentor" || member.role === "admin");
+  if (!reviewer) throw localCommandError("A local mentor or admin reviewer is required to record a retest.", 403);
+  const reviewedAt = new Date().toISOString();
+  const sourceId = sourceType === "qa" ? finding.reportId : (finding as BootstrapPayload["testFindings"][number]).testResultId;
+  if (sourceType === "qa" && !sourceId) throw localCommandError("QA finding has no source report.", 409);
+  const retest = {
+    operationId, sourceType, result, notes, ...(evidenceNotes ? { evidenceNotes } : {}), ...(observedAt ? { observedAt } : {}),
+    reviewedAt, reviewedById: reviewer.id, order: Math.max(0, ...(finding.retests ?? []).map((entry) => entry.order)) + 1,
+    supersedesId: sourceId,
+  };
+  const updated = { ...finding, status: result === "pass" ? "resolved" as const : "open" as const, updatedAt: reviewedAt, retests: [...(finding.retests ?? []), retest] };
+  if (sourceType === "qa") snapshot.qaFindings[index] = updated as BootstrapPayload["qaFindings"][number];
+  else snapshot.testFindings[index] = updated as BootstrapPayload["testFindings"][number];
+  return { item: updated };
+}
+
+function receiveLocalPurchase(snapshot: BootstrapPayload, itemId: string, body: Record<string, unknown>) {
+  const item = snapshot.purchaseItems.find((candidate) => candidate.id === itemId);
+  if (!item) throw localCommandError("Purchase item not found.", 404);
+  const operationId = typeof body.operationId === "string" ? body.operationId.trim() : "";
+  const quantity = typeof body.quantity === "number" ? Number(body.quantity.toFixed(12)) : Number.NaN;
+  const location = typeof body.location === "string" ? body.location.trim() : "";
+  if (!operationId || operationId.length > 200 || !Number.isFinite(quantity) || quantity <= 0 || quantity > 1000 || !location || location.length > 200) {
+    throw localCommandError("Receipt quantity, location, or operationId is invalid.", 400);
+  }
+  const receipts = item.receipts ?? [];
+  const prior = receipts.find((receipt) => receipt.operationId === operationId);
+  if (prior) {
+    if (prior.quantity !== quantity || prior.location !== location) throw localCommandError("This operationId was already used with a different receipt payload.", 409);
+    return { item, receipt: prior };
+  }
+  const discretePart = item.kind !== "manufacturing-service" && item.partDefinitionId !== null;
+  if (discretePart && !Number.isSafeInteger(quantity)) throw localCommandError("Part-instance receipts require a whole number.", 400);
+  if (!["ordered", "shipped", "delivered"].includes(item.orderStatus)) throw localCommandError("Only ordered purchases can be received.", 409);
+  const received = receipts.reduce((total, receipt) => total + receipt.quantity, 0);
+  if (received + quantity > item.quantity + Number.EPSILON * Math.max(1, item.quantity, received, quantity) * 8) throw localCommandError("Receipt quantity exceeds the remaining purchase quantity.", 409);
+  const task = snapshot.tasks.find((candidate) => candidate.id === item.taskId);
+  if (!task) throw localCommandError("Purchase item or linked task not found.", 404);
+  const isMaterialPurchase = item.kind !== "manufacturing-service" && item.partDefinitionId === null && item.materialId !== null;
+  const material = isMaterialPurchase ? snapshot.materials.find((candidate) => candidate.id === item.materialId) : undefined;
+  if (isMaterialPurchase && !material) throw localCommandError("Linked stock material not found.", 404);
+  if (material && material.onHandQuantity > 0 && material.location.trim() !== location) throw localCommandError("Receive this material at its existing stock location.", 409);
+  if (discretePart && !snapshot.partDefinitions.some((definition) => definition.id === item.partDefinitionId)) throw localCommandError("The purchased part definition no longer exists.", 409);
+  const partInstanceIds: string[] = [];
+  if (discretePart) {
+    for (let index = 0; index < quantity; index += 1) {
+      const partInstanceId = newLocalId();
+      partInstanceIds.push(partInstanceId);
+      snapshot.partInstances.push({ id: partInstanceId, partDefinitionId: item.partDefinitionId!, intendedSubsystemId: task.subsystemIds[0] ?? null, intendedMechanismId: null, location: { kind: "stock", location } });
+    }
+  }
+  if (material) {
+    material.onHandQuantity = Number((material.onHandQuantity + quantity).toFixed(12));
+    if (material.onHandQuantity === quantity) material.location = location;
+  }
+  const receipt = { id: newLocalId(), operationId, quantity, location, receivedAt: new Date().toISOString(), partInstanceIds };
+  item.receipts = [...receipts, receipt];
+  refreshLocalTaskState(snapshot);
+  return { item, receipt };
+}
+
 export function refreshLocalTaskState(snapshot: BootstrapPayload) {
   const loggedHours = new Map<string, number>();
   for (const log of snapshot.workLogs) loggedHours.set(log.taskId, (loggedHours.get(log.taskId) ?? 0) + log.hours);
@@ -151,6 +278,9 @@ export function applyLocalCommand(snapshot: BootstrapPayload, path: string, opti
   const resource = parts[0] === "manufacturing" && parts[1] === "processes" ? "manufacturing/processes" : parts[0];
   const encodedId = resource === "manufacturing/processes" ? parts[2] : parts[1];
   const extra = resource === "manufacturing/processes" ? parts[3] : parts[2];
+  if (resource === "qa-reports" && encodedId === "submit" && parts.length === 2 && method === "POST") return submitLocalQaReport(snapshot, body);
+  if (resource === "report-findings" && encodedId && extra === "retest" && parts.length === 3 && method === "POST") return retestLocalFinding(snapshot, decodeURIComponent(encodedId), body);
+  if (resource === "purchases" && encodedId && extra === "receipts" && parts.length === 3 && method === "POST") return receiveLocalPurchase(snapshot, decodeURIComponent(encodedId), body);
   if (resource === "purchases" && extra === "transition" && parts.length === 3 && method === "POST") {
     if (Object.keys(body).some((field) => field !== "orderStatus" && field !== "finalCost" && field !== "purchaseOrderNumber")) throw new Error("Unsupported purchase transition fields.");
     return applyLocalCommand(snapshot, `/purchases/${encodedId}`, { ...options, method: "PATCH" });

@@ -6,6 +6,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { EMPTY_BOOTSTRAP } from "@/features/workspace/shared/model/bootstrapDefaults";
 import { createBootstrap } from "@/lib/appUtilsTestFixtures";
 import { WorkLogsView } from "@/features/workspace/views/WorkLogsView";
+import { filterTestResultsForHistory } from "@/features/workspace/views/workLogs/workLogsViewStateData";
 import type { WorklogsViewTab } from "@/lib/workspaceNavigation";
 import type { BootstrapPayload } from "@/types/bootstrap";
 
@@ -16,6 +17,7 @@ function renderWorkLogsView(
   bootstrapOverrides: Partial<BootstrapPayload> = {},
   canReviewFindings = false,
   canCreateQaReport = true,
+  activePersonFilter: string[] = [],
 ) {
   const bootstrap: BootstrapPayload = {
     ...EMPTY_BOOTSTRAP,
@@ -24,7 +26,7 @@ function renderWorkLogsView(
 
   return renderToStaticMarkup(
     React.createElement(WorkLogsView, {
-      activePersonFilter: [],
+      activePersonFilter,
       bootstrap,
       canReviewFindings,
       canCreateQaReport,
@@ -209,7 +211,7 @@ describe("WorkLogsView", () => {
       id: "finding-1", reportId: report.id, projectId: "project-1", targetRefs: [], title: "Loose wheel nut", detail: "Check torque again.",
       severity: "medium", status: "open", createdAt: "2026-10-10T00:00:00.000Z", updatedAt: "2026-10-10T00:00:00.000Z",
     };
-    const data = { reports: [report], qaFindings: [finding], testFindings: [{ ...finding, id: "test-finding-1", testResultId: "test-result-1" }] };
+    const data = { reports: [report], qaFindings: [finding], testResults: [{ id: "test-result-1", projectId: report.projectId, targetRefs: [], title: "Wheel test", status: "fail" as const }], testFindings: [{ ...finding, id: "test-finding-1", testResultId: "test-result-1" }] };
     const student = renderWorkLogsView("qa", data);
     expect(student).toContain("This review needs another check");
     expect(student).not.toContain(">Record retest</button>");
@@ -230,6 +232,30 @@ describe("WorkLogsView", () => {
       tasks: [{ ...platformBootstrap.tasks[0], partInstanceIds: ["new-part"] }],
     }, true);
     expect(stale).toContain("Some current parts were added after this review.");
+  });
+
+  it("filters test retests with the Results search and person filters through their canonical test result", () => {
+    const bootstrap = createBootstrap();
+    const [task] = bootstrap.tasks;
+    bootstrap.tasks = [
+      { ...task, id: "task-for-current-person", title: "Drive test", ownerId: "student-1", assigneeIds: ["student-1"] },
+      { ...task, id: "task-for-other-person", title: "Pump test", ownerId: "other-student", assigneeIds: ["other-student"] },
+    ];
+    bootstrap.testResults = [
+      { id: "drive-result", projectId: task.projectId, targetRefs: [{ kind: "task", id: "task-for-current-person" }], title: "Drive vibration", status: "fail" },
+      { id: "pump-result", projectId: task.projectId, targetRefs: [{ kind: "task", id: "task-for-other-person" }], title: "Pump pressure", status: "fail" },
+    ];
+    bootstrap.testFindings = [
+      { id: "drive-finding", reportId: null, testResultId: "drive-result", projectId: task.projectId, targetRefs: [], title: "Drive mount", detail: "Retorque", severity: "medium", status: "open", createdAt: "2026-10-16", updatedAt: "2026-10-16" },
+      { id: "pump-finding", reportId: null, testResultId: "pump-result", projectId: task.projectId, targetRefs: [], title: "Pump seal", detail: "Inspect", severity: "medium", status: "open", createdAt: "2026-10-16", updatedAt: "2026-10-16" },
+    ];
+    const matching = filterTestResultsForHistory(bootstrap.testResults, ["student-1"], "drive", Object.fromEntries(bootstrap.tasks.map((entry) => [entry.id, entry])));
+    expect(matching.map((result) => result.id)).toEqual(["drive-result"]);
+
+    const html = renderWorkLogsView("results", bootstrap, true, true, ["student-1"]);
+    expect(html).toContain("Drive mount");
+    expect(html).not.toContain("Pump seal");
+    expect(html).toContain("Test findings");
   });
 
   it("does not synthesize activity entries when audit actions are unavailable", () => {

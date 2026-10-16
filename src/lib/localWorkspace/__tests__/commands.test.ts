@@ -16,8 +16,8 @@ function snapshot(): BootstrapPayload {
   return state;
 }
 
-function command(state: BootstrapPayload, path: string, body: object = {}, method = "POST") {
-  return applyLocalCommand(state, path, { method, body: JSON.stringify(body) }) as { item: { id: string } };
+function command<T = { item: { id: string } }>(state: BootstrapPayload, path: string, body: object = {}, method = "POST"): T {
+  return applyLocalCommand(state, path, { method, body: JSON.stringify(body) }) as T;
 }
 
 test("local CRUD writes canonical Task records and rejects removed ManufacturingItem routes", () => {
@@ -27,6 +27,69 @@ test("local CRUD writes canonical Task records and rejects removed Manufacturing
   expect(state.tasks.find(({ id }) => id === created.id)).not.toHaveProperty("blockers");
   expect(() => command(state, "/tasks", { title: "Invalid", linkedManufacturingIds: ["old"] })).toThrow("removed Task fields");
   expect(() => command(state, "/manufacturing", { title: "Duplicate work" })).toThrow("nothing was synced");
+});
+
+test("local QA submission writes a canonical lowercase QA report and owns review attribution", () => {
+  const state = snapshot();
+  state.members.push({ id: "participant", name: "Student", email: "student@example.com", role: "student", elevated: false, seasonId: "season" });
+  state.members.push({ id: "mentor", name: "Mentor", email: "mentor@example.com", role: "mentor", elevated: true, seasonId: "season" });
+  const submitted = command(state, "/qa-reports/submit", {
+    reportType: "qa", projectId: "robot-project", targetRefs: [{ kind: "task", id: "task" }],
+    createdByMemberId: "participant", participantIds: ["participant"], mentorId: "mentor", requestedById: "participant",
+    summary: "Local QA", notes: "Checked assembly", result: "minor-fix", status: "reviewed", reviewedById: "spoofed", reviewedAt: "1999-01-01T00:00:00Z",
+  }).item;
+
+  expect(state.reports).toContainEqual(expect.objectContaining({ id: submitted.id, reportType: "qa", status: "reviewed", reviewedById: "mentor", summary: "Local QA" }));
+  expect(state.reports[0].reviewedAt).not.toBe("1999-01-01T00:00:00Z");
+  expect(() => command(state, "/qa-reports/submit", { reportType: "qa", projectId: "missing" })).toThrow("incomplete or no longer valid");
+});
+
+test("local finding retests use canonical finding history and replay operation IDs idempotently", () => {
+  const state = snapshot();
+  state.members.push({ id: "mentor", name: "Mentor", email: "mentor@example.com", role: "mentor", elevated: true, seasonId: "season" });
+  state.testResults.push({ id: "test-result", projectId: "robot-project", targetRefs: [{ kind: "task", id: "task" }], title: "Drive test", status: "fail" });
+  state.testFindings.push({
+    id: "finding", reportId: null, testResultId: "test-result", projectId: "robot-project", targetRefs: [{ kind: "task", id: "task" }],
+    title: "Loose fastener", detail: "Retorque", severity: "medium", status: "open", createdAt: "2026-10-16", updatedAt: "2026-10-16",
+  });
+  const payload = { operationId: "retest-1", sourceType: "test", result: "pass", notes: "Torque verified" };
+  const first = command(state, "/report-findings/finding/retest", payload).item;
+  const replay = command(state, "/report-findings/finding/retest", payload).item;
+
+  expect(first).toEqual(replay);
+  expect(state.testFindings[0].status).toBe("resolved");
+  expect(state.testFindings[0].retests).toHaveLength(1);
+  expect(state.testFindings[0].retests![0]).toMatchObject({ operationId: "retest-1", sourceType: "test", reviewedById: "mentor", supersedesId: "test-result" });
+  expect(() => command(state, "/report-findings/finding/retest", { ...payload, notes: "Different payload" })).toThrow("different retest payload");
+});
+
+test("local purchase receipts preserve operation identity, stock updates and linked service decimals", () => {
+  const state = snapshot();
+  state.partDefinitions.push({ id: "bearing", seasonId: "season", name: "Bearing", partNumber: "B-1", revision: "A", iteration: 1, isArchived: false, type: "bearing", defaultAcquisitionMethod: "purchase-cots", materialId: "steel", description: "" });
+  state.materials.push({ id: "steel", name: "Steel", category: "metal", unit: "kg", onHandQuantity: 0, reorderPoint: 0, location: "", preferredVendorId: null, notes: "" });
+  state.purchaseItems.push({
+    id: "part-purchase", taskId: "task", kind: "cots-goods", partDefinitionId: "bearing", materialId: "steel", title: "Bearing", quantity: 3,
+    quotes: [], selectedQuoteId: null, approvalStatus: "approved", approvedById: null, approvedAt: null, purchaseOrderNumber: null,
+    orderStatus: "ordered", finalCost: null, expectedDeliveryDate: null, trackingNumber: null, trackingUrl: null, orderedAt: null, deliveredAt: null,
+  });
+  const payload = { operationId: "receipt-1", quantity: 2, location: "Shelf A" };
+  const first = command<{ receipt: { quantity: number; partInstanceIds: string[] } }>(state, "/purchases/part-purchase/receipts", payload).receipt;
+  const replay = command<{ receipt: { quantity: number; partInstanceIds: string[] } }>(state, "/purchases/part-purchase/receipts", payload).receipt;
+  expect(replay).toEqual(first);
+  expect(state.purchaseItems[0].receipts).toHaveLength(1);
+  expect(state.partInstances).toHaveLength(2);
+  expect(state.materials[0].onHandQuantity).toBe(0);
+  expect(() => command(state, "/purchases/part-purchase/receipts", { ...payload, quantity: 1 })).toThrow("different receipt payload");
+  expect(() => command(state, "/purchases/part-purchase/receipts", { ...payload, operationId: "fractional-part", quantity: 1.5 })).toThrow("whole number");
+
+  state.purchaseItems.push({ ...state.purchaseItems[0], id: "material-purchase", partDefinitionId: null, quantity: 3, receipts: [] });
+  command(state, "/purchases/material-purchase/receipts", { operationId: "material-receipt", quantity: 0.5, location: "Material shelf" });
+  expect(state.materials[0]).toMatchObject({ onHandQuantity: 0.5, location: "Material shelf" });
+
+  state.purchaseItems.push({ ...state.purchaseItems[0], id: "service-purchase", kind: "manufacturing-service", quantity: 3, receipts: [] });
+  const serviceReceipt = command<{ receipt: { quantity: number; partInstanceIds: string[] } }>(state, "/purchases/service-purchase/receipts", { operationId: "service-receipt", quantity: 1.5, location: "Shop" }).receipt;
+  expect(serviceReceipt.quantity).toBe(1.5);
+  expect(serviceReceipt.partInstanceIds).toEqual([]);
 });
 
 test("local Tasks derive blocked state from canonical Risks and dependencies", () => {
