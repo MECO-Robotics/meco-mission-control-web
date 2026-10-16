@@ -94,7 +94,6 @@
   .risk-context-wide { grid-column: 1 / -1; }
 }
 
-.risk-details-eyebrow { margin: 0 0 .35rem; color: var(--text-muted); font-size: .68rem; font-weight: 600; }
 
 dialog.modal-scrim.risk-details-dialog { width: 100vw; height: 100dvh; max-height: 100dvh; padding: 0; }
 .risk-details-dialog > .risk-review-context { box-sizing: border-box; height: 100dvh; max-height: 100dvh; }

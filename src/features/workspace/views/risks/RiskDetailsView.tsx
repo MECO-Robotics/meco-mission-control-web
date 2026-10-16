@@ -25,7 +25,7 @@ export function RiskDetailsView({ title, kind = "risk", pending = false, classNa
   const content = <section className={`risk-review-context ${className}${inline ? "" : " modal-card task-details-modal"}`} aria-label={label} aria-busy={pending} onKeyDown={(event) => {
     if (inline && event.key === "Escape" && !(event.target instanceof Element && event.target.closest("dialog"))) { event.stopPropagation(); close(); }
   }}>
-    <div className="risk-context-heading"><div>{kind === "risk" ? <p className="risk-details-eyebrow">Risk detailed view</p> : null}<h2 ref={heading} tabIndex={-1}>{title}</h2></div><button className="icon-button task-details-close-button" type="button" aria-label={`Close ${kind} details`} onClick={close}><X size={18} /></button></div>
+    <div className="risk-context-heading"><div><h2 ref={heading} tabIndex={-1}>{title}</h2></div><button className="icon-button task-details-close-button" type="button" aria-label={`Close ${kind} details`} onClick={close}><X size={18} /></button></div>
     {children}
   </section>;
   return inline ? <aside className="risk-review-inspector">{content}</aside> : <ModalDialog className="modal-scrim risk-details-dialog" label={label} onClose={close} dismissOnBackdrop>{content}</ModalDialog>;

@@ -16,7 +16,7 @@ it("keeps a completed mitigation distinct from resolution of the risk", () => {
   expect(markup).toContain("Open mitigation task");
   expect(markup).toContain('aria-label="Close risk details"');
   expect(markup).toContain("Linked work and dependencies");
-  expect(markup).toContain("Risk detailed view");
+  expect(markup).not.toContain("Risk detailed view");
 });
 
 it("preserves missing supply attachments as visibly unavailable context", () => {
