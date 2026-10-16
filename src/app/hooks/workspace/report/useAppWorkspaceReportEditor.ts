@@ -4,7 +4,7 @@ import type { AppWorkspaceModel } from "@/app/hooks/useAppWorkspaceModel";
 import { buildEmptyQaReportPayload, buildEmptyTestResultPayload, buildEmptyWorkLogPayload } from "@/lib/appUtils/payloadBuilders";
 
 import { useCatalogEditorLifecycle } from "@/app/workspaceCatalog/useCatalogEditorLifecycle";
-import { toErrorMessage } from "@/lib/appUtils/common";
+import { resolveSignedInMemberForSessionUser, toErrorMessage } from "@/lib/appUtils/common";
 import { createQaReportRecord, createQaRequestRecord, createTestResultRecord, createWorkLogRecord } from "@/lib/auth/records/reporting";
 import type { QaReportPayload, TestResultPayload, WorkLogPayload } from "@/types/payloads";
 
@@ -33,6 +33,9 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
   const qaRequestAccountId = useRef(accountId);
   qaRequestAccountId.current = accountId;
   const qaRequestLockScope = model.isPublicDemoSession ? "public-demo" : accountId ? `account:${accountId}` : "local";
+  const localActorMemberId = model.sessionUser && !model.isPublicDemoSession
+    ? resolveSignedInMemberForSessionUser(model.bootstrap.members, model.sessionUser)?.id ?? null
+    : null;
   const reportIsOpen = Boolean(model.workLogModalMode || model.qaReportModalMode || model.milestoneReportModalMode);
 
   useEffect(() => {
@@ -143,7 +146,7 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
     } finally {
       qaRequestLocks.current.delete(lockId);
     }
-  }, [model, requestedQaTaskIds, lifecycle, qaRequestLockScope]);
+  }, [model, requestedQaTaskIds, lifecycle, qaRequestLockScope, accountId]);
 
   const closeQaReportModal = useCallback(() => { resetEditor(); model.setQaReportModalMode(null); }, [model, resetEditor]);
 
@@ -252,7 +255,7 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
         reviewedAt: null,
       };
 
-      await createQaReportRecord(payload, model.handleUnauthorized);
+      await createQaReportRecord(payload, model.handleUnauthorized, localActorMemberId);
       await operation.refresh();
       if (operation.isCurrent()) closeQaReportModal();
 
@@ -261,7 +264,7 @@ export function useAppWorkspaceReportEditor(model: AppWorkspaceModel) {
     } finally {
       operation.finish();
     }
-  }, [model, lifecycle, closeQaReportModal]);
+  }, [model, lifecycle, closeQaReportModal, localActorMemberId]);
 
   const handleMilestoneReportSubmit = useCallback(async (milestone: React.FormEvent<HTMLFormElement>) => {
     milestone.preventDefault();

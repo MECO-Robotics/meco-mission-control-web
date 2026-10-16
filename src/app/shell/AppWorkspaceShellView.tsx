@@ -7,6 +7,7 @@ import { resetLocalDemo } from "@/lib/localWorkspace/session";
 import { AddSeasonPopup, RobotProjectPopup, SidebarOverlay } from "./AppWorkspaceShellOverlays";
 import { AppTopbar, AppSidebar, WorkspaceModalHost, WorkspaceContent, WorkspaceShellLoading } from "./workspaceShell";
 import { TopbarSearchOverrideProvider } from "@/features/workspace/shared/filters/TopbarSearchOverride";
+import { resolveSignedInMemberForSessionUser } from "@/lib/appUtils/common";
 
 export function AppWorkspaceShellView({ controller }: { controller: AppWorkspaceController }) {
   const c = mergeWorkspaceShellController(controller);
@@ -27,6 +28,9 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
     projectId: c.selectedProjectId ?? "all-projects",
   });
   const receiptOperationScope = c.isPublicDemoSession ? "public-demo" : c.sessionUser ? `account:${c.sessionUser.accountId}` : localMode === "demo" ? "local-demo" : "local";
+  const localActorMemberId = c.sessionUser && !c.isPublicDemoSession
+    ? resolveSignedInMemberForSessionUser(c.bootstrap.members, c.sessionUser)?.id ?? null
+    : null;
   const canReviewQa = Boolean(c.sessionUser && !c.isPublicDemoSession && c.signedInMember && ["mentor", "admin"].includes(c.signedInMember.role));
   const canCreateQaReport = Boolean(c.sessionUser && !c.isPublicDemoSession && c.signedInMember && ["lead", "mentor", "admin"].includes(c.signedInMember.role));
   return (
@@ -103,6 +107,7 @@ export function AppWorkspaceShellView({ controller }: { controller: AppWorkspace
           receiptViewScope={workspaceOperationScope}
           canReviewQa={canReviewQa}
           canCreateQaReport={canCreateQaReport}
+          localActorMemberId={localActorMemberId}
           allMembers={c.bootstrap.members}
           artifacts={c.scopedArtifacts}
           availabilityBootstrap={c.bootstrap}

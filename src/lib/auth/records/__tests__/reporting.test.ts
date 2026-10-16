@@ -24,9 +24,9 @@ it("submits QA evidence through the review-owned route without client approval f
     status: "reviewed" as const,
   };
 
-  await createQaReportRecord(payload, jest.fn());
+  await createQaReportRecord(payload, jest.fn(), "mentor-b");
 
-  expect(requestItemMock).toHaveBeenCalledWith("/qa-reports/submit", "POST", payload, expect.any(Function));
+  expect(requestItemMock).toHaveBeenCalledWith("/qa-reports/submit", "POST", payload, expect.any(Function), "mentor-b");
   expect(payload).toHaveProperty("status", "reviewed");
   expect(payload).not.toHaveProperty("reviewedById");
   expect(payload).not.toHaveProperty("reviewedAt");
@@ -45,7 +45,7 @@ it("sends the stable retest operation and finding category to the lifecycle rout
   requestItemMock.mockResolvedValueOnce({ id: "finding-1" } as never);
   const payload = { operationId: "stable-retest-1", sourceType: "qa" as const, result: "pass" as const, notes: "Retightened and checked", evidenceNotes: "Witness mark is aligned", observedAt: "2026-10-15T12:00:00.000Z" };
 
-  await retestReportFindingRecord("finding-1", payload);
+  await retestReportFindingRecord("finding-1", payload, undefined, "admin-1");
 
-  expect(requestItemMock).toHaveBeenCalledWith("/report-findings/finding-1/retest", "POST", payload, undefined);
+  expect(requestItemMock).toHaveBeenCalledWith("/report-findings/finding-1/retest", "POST", payload, undefined, "admin-1");
 });

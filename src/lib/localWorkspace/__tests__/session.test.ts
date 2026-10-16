@@ -45,6 +45,32 @@ it("isolates tutorial changes, resets its baseline, and restores demo edits on e
   expect((await read()).materials[0].name).toBe("Demo edit");
 });
 
+it("uses only the current request actor in local tutorial reviews and drops it after logout", async () => {
+  const tutorialSeed = createBootstrap();
+  tutorialSeed.members.push(
+    { id: "mentor-b", name: "Mentor B", email: "mentor-b@example.com", role: "mentor", elevated: true, seasonId: "season-2026" },
+    { id: "admin-1", name: "Admin", email: "admin@example.com", role: "admin", elevated: true, seasonId: "season-2026" },
+  );
+  globalThis.fetch = jest.fn(async () => new Response(JSON.stringify(tutorialSeed)));
+  await requestApi("/tutorial/session/start", { method: "POST" });
+  const payload = {
+    reportType: "qa", projectId: "project-a", targetRefs: [{ kind: "task", id: "task-1" }],
+    participantIds: ["lead-1"], summary: "Local review", notes: "Checked", result: "pass", status: "reviewed",
+    reviewedById: "mentor-1", reviewedAt: "1999-01-01T00:00:00Z",
+  };
+  const review = (localActorMemberId?: string | null) => requestApi<{ item: BootstrapPayload["reports"][number] }>(
+    "/qa-reports/submit", { method: "POST", body: JSON.stringify(payload) }, undefined, localActorMemberId,
+  );
+
+  const mentorReview = await review("mentor-b");
+  expect(mentorReview.item).toMatchObject({ reviewedById: "mentor-b" });
+  expect(mentorReview.item.reviewedAt).not.toBe("1999-01-01T00:00:00Z");
+  const adminReview = await review("admin-1");
+  expect(adminReview.item).toMatchObject({ reviewedById: "admin-1" });
+  await expect(review()).rejects.toMatchObject({ statusCode: 403 });
+  expect(fetch).toHaveBeenCalledTimes(1);
+});
+
 it("does not publish a write if browser storage rejects it", async () => {
   await read();
   storage.setItem.mockImplementationOnce(() => { throw new Error("quota exceeded"); });

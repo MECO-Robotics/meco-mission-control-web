@@ -16,8 +16,8 @@ function snapshot(): BootstrapPayload {
   return state;
 }
 
-function command<T = { item: { id: string } }>(state: BootstrapPayload, path: string, body: object = {}, method = "POST"): T {
-  return applyLocalCommand(state, path, { method, body: JSON.stringify(body) }) as T;
+function command<T = { item: { id: string } }>(state: BootstrapPayload, path: string, body: object = {}, method = "POST", actorMemberId?: string | null): T {
+  return applyLocalCommand(state, path, { method, body: JSON.stringify(body) }, actorMemberId) as T;
 }
 
 test("local CRUD writes canonical Task records and rejects removed ManufacturingItem routes", () => {
@@ -29,38 +29,64 @@ test("local CRUD writes canonical Task records and rejects removed Manufacturing
   expect(() => command(state, "/manufacturing", { title: "Duplicate work" })).toThrow("nothing was synced");
 });
 
-test("local QA submission writes a canonical lowercase QA report and owns review attribution", () => {
+test("local QA review attribution follows the current mentor or admin actor, not payload metadata or roster order", () => {
   const state = snapshot();
   state.members.push({ id: "participant", name: "Student", email: "student@example.com", role: "student", elevated: false, seasonId: "season" });
-  state.members.push({ id: "mentor", name: "Mentor", email: "mentor@example.com", role: "mentor", elevated: true, seasonId: "season" });
+  state.members.push(
+    { id: "mentor-a", name: "Mentor A", email: "a@example.com", role: "mentor", elevated: true, seasonId: "season" },
+    { id: "mentor-b", name: "Mentor B", email: "b@example.com", role: "mentor", elevated: true, seasonId: "season" },
+    { id: "admin", name: "Admin", email: "admin@example.com", role: "admin", elevated: true, seasonId: "season" },
+  );
   const submitted = command(state, "/qa-reports/submit", {
     reportType: "qa", projectId: "robot-project", targetRefs: [{ kind: "task", id: "task" }],
-    createdByMemberId: "participant", participantIds: ["participant"], mentorId: "mentor", requestedById: "participant",
-    summary: "Local QA", notes: "Checked assembly", result: "minor-fix", status: "reviewed", reviewedById: "spoofed", reviewedAt: "1999-01-01T00:00:00Z",
-  }).item;
+    createdByMemberId: "participant", participantIds: ["participant"], mentorId: "mentor-a", requestedById: "participant",
+    summary: "Local QA", notes: "Checked assembly", result: "minor-fix", status: "reviewed", actorMemberId: "mentor-a", reviewedById: "mentor-a", reviewedAt: "1999-01-01T00:00:00Z",
+  }, "POST", "mentor-b").item;
 
-  expect(state.reports).toContainEqual(expect.objectContaining({ id: submitted.id, reportType: "qa", status: "reviewed", reviewedById: "mentor", summary: "Local QA" }));
+  expect(state.reports).toContainEqual(expect.objectContaining({ id: submitted.id, reportType: "qa", status: "reviewed", reviewedById: "mentor-b", summary: "Local QA" }));
   expect(state.reports[0].reviewedAt).not.toBe("1999-01-01T00:00:00Z");
+  const adminReview = command<{ item: BootstrapPayload["reports"][number] }>(state, "/qa-reports/submit", {
+    reportType: "qa", projectId: "robot-project", targetRefs: [{ kind: "task", id: "task" }],
+    participantIds: ["participant"], summary: "Admin QA", notes: "Admin checked", result: "pass", status: "reviewed",
+    reviewedById: "mentor-a", reviewedAt: "1999-01-01T00:00:00Z",
+  }, "POST", "admin").item;
+  expect(adminReview).toMatchObject({ reviewedById: "admin", status: "reviewed" });
+  expect(adminReview.reviewedAt).not.toBe("1999-01-01T00:00:00Z");
   expect(() => command(state, "/qa-reports/submit", { reportType: "qa", projectId: "missing" })).toThrow("incomplete or no longer valid");
+  expect(() => command(state, "/qa-reports/submit", {
+    reportType: "qa", projectId: "robot-project", targetRefs: [{ kind: "task", id: "task" }],
+    participantIds: ["participant"], summary: "Unlinked", notes: "", result: "pass", status: "reviewed",
+  }, "POST", "participant")).toThrow("local mentor or admin reviewer is required");
 });
 
 test("local finding retests use canonical finding history and replay operation IDs idempotently", () => {
   const state = snapshot();
-  state.members.push({ id: "mentor", name: "Mentor", email: "mentor@example.com", role: "mentor", elevated: true, seasonId: "season" });
+  state.members.push(
+    { id: "mentor-a", name: "Mentor A", email: "a@example.com", role: "mentor", elevated: true, seasonId: "season" },
+    { id: "mentor-b", name: "Mentor B", email: "b@example.com", role: "mentor", elevated: true, seasonId: "season" },
+    { id: "admin", name: "Admin", email: "admin@example.com", role: "admin", elevated: true, seasonId: "season" },
+    { id: "student", name: "Student", email: "student@example.com", role: "student", elevated: false, seasonId: "season" },
+  );
   state.testResults.push({ id: "test-result", projectId: "robot-project", targetRefs: [{ kind: "task", id: "task" }], title: "Drive test", status: "fail" });
   state.testFindings.push({
     id: "finding", reportId: null, testResultId: "test-result", projectId: "robot-project", targetRefs: [{ kind: "task", id: "task" }],
     title: "Loose fastener", detail: "Retorque", severity: "medium", status: "open", createdAt: "2026-10-16", updatedAt: "2026-10-16",
   });
   const payload = { operationId: "retest-1", sourceType: "test", result: "pass", notes: "Torque verified" };
-  const first = command(state, "/report-findings/finding/retest", payload).item;
-  const replay = command(state, "/report-findings/finding/retest", payload).item;
+  const first = command(state, "/report-findings/finding/retest", { ...payload, actorMemberId: "mentor-a", reviewedById: "mentor-a", reviewedAt: "1999-01-01T00:00:00Z" }, "POST", "mentor-b").item;
+  const replay = command(state, "/report-findings/finding/retest", payload, "POST", "mentor-b").item;
 
   expect(first).toEqual(replay);
   expect(state.testFindings[0].status).toBe("resolved");
   expect(state.testFindings[0].retests).toHaveLength(1);
-  expect(state.testFindings[0].retests![0]).toMatchObject({ operationId: "retest-1", sourceType: "test", reviewedById: "mentor", supersedesId: "test-result" });
+  expect(state.testFindings[0].retests![0]).toMatchObject({ operationId: "retest-1", sourceType: "test", reviewedById: "mentor-b", supersedesId: "test-result" });
+  expect(state.testFindings[0].retests![0].reviewedAt).not.toBe("1999-01-01T00:00:00Z");
+  const adminRetest = command<{ item: BootstrapPayload["testFindings"][number] }>(state, "/report-findings/finding/retest", { ...payload, operationId: "retest-admin", actorMemberId: "mentor-a", reviewedById: "mentor-a", reviewedAt: "1999-01-01T00:00:00Z" }, "POST", "admin").item;
+  expect(adminRetest.retests?.at(-1)).toMatchObject({ operationId: "retest-admin", reviewedById: "admin" });
+  expect(adminRetest.retests?.at(-1)?.reviewedAt).not.toBe("1999-01-01T00:00:00Z");
   expect(() => command(state, "/report-findings/finding/retest", { ...payload, notes: "Different payload" })).toThrow("different retest payload");
+  expect(() => command(state, "/report-findings/finding/retest", { ...payload, operationId: "retest-student" }, "POST", "student")).toThrow("local mentor or admin reviewer is required");
+  expect(() => command(state, "/report-findings/finding/retest", { ...payload, operationId: "retest-unlinked" })).toThrow("local mentor or admin reviewer is required");
 });
 
 test("local purchase receipts preserve operation identity, stock updates and linked service decimals", () => {

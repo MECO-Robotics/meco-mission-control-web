@@ -29,7 +29,7 @@ function findElement(node: ReactNode, predicate: (element: TestElement) => boole
 
 const finding = { id: "finding-1", retests: [] } as unknown as QaFindingRecord;
 const readFindingMock = jest.fn(async () => finding);
-const props: Parameters<typeof FindingRetestAction>[0] = { finding, sourceType: "qa", scope: "account:mentor", canReview: true, members: [], readFinding: readFindingMock };
+const props: Parameters<typeof FindingRetestAction>[0] = { finding, sourceType: "qa", scope: "account:mentor", canReview: true, localActorMemberId: "mentor-b", members: [], readFinding: readFindingMock };
 
 function render(componentProps = props) {
   cursor = 0;
@@ -95,6 +95,7 @@ test("component persists the exact retest before POST and reuses its operation a
   expect(requestItemMock).toHaveBeenCalledTimes(1);
   const firstPayload = requestItemMock.mock.calls[0][2] as { operationId: string; sourceType: string; result: string; notes: string; observedAt?: string };
   expect(requestItemMock.mock.calls[0][0]).toBe(`/report-findings/${finding.id}/retest`);
+  expect(requestItemMock.mock.calls[0][4]).toBe("mentor-b");
   expect(firstPayload).toEqual(expect.objectContaining({ operationId: expect.any(String), sourceType: "qa", result: "pass", notes: "Torque checked", observedAt: expect.any(String) }));
   expect(JSON.parse([...storageValues.values()][0]).payload).toEqual(firstPayload);
 

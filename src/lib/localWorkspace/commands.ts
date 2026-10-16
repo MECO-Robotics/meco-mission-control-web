@@ -42,7 +42,7 @@ function localCommandError(message: string, statusCode: number) {
   return Object.assign(new Error(message), { statusCode });
 }
 
-function submitLocalQaReport(snapshot: BootstrapPayload, body: Record<string, unknown>) {
+function submitLocalQaReport(snapshot: BootstrapPayload, body: Record<string, unknown>, actorMemberId?: string | null) {
   const projectId = typeof body.projectId === "string" ? body.projectId : "";
   const targetRefs = Array.isArray(body.targetRefs) ? body.targetRefs as BootstrapPayload["reports"][number]["targetRefs"] : [];
   const result = body.result;
@@ -56,7 +56,7 @@ function submitLocalQaReport(snapshot: BootstrapPayload, body: Record<string, un
   if (reportTaskIds.length > 1 || reportTaskIds.some((taskId) => !snapshot.tasks.some((task) => task.id === taskId && task.projectId === projectId))) {
     throw localCommandError("Choose a task in the selected project for this QA report.", 400);
   }
-  const reviewer = status === "reviewed" ? snapshot.members.find((member) => member.role === "mentor" || member.role === "admin") : undefined;
+  const reviewer = status === "reviewed" ? snapshot.members.find((member) => member.id === actorMemberId && (member.role === "mentor" || member.role === "admin")) : undefined;
   if (status === "reviewed" && !reviewer) throw localCommandError("A local mentor or admin reviewer is required to review QA.", 403);
   const now = new Date().toISOString();
   const report: BootstrapPayload["reports"][number] = {
@@ -79,7 +79,7 @@ function submitLocalQaReport(snapshot: BootstrapPayload, body: Record<string, un
   return { item: report };
 }
 
-function retestLocalFinding(snapshot: BootstrapPayload, findingId: string, body: Record<string, unknown>) {
+function retestLocalFinding(snapshot: BootstrapPayload, findingId: string, body: Record<string, unknown>, actorMemberId?: string | null) {
   if (body.sourceType !== undefined && body.sourceType !== "qa" && body.sourceType !== "test") throw localCommandError("Retest sourceType must be qa or test.", 400);
   const qaFinding = snapshot.qaFindings.some((finding) => finding.id === findingId);
   const testFinding = snapshot.testFindings.some((finding) => finding.id === findingId);
@@ -104,7 +104,7 @@ function retestLocalFinding(snapshot: BootstrapPayload, findingId: string, body:
     }
     return { item: finding };
   }
-  const reviewer = snapshot.members.find((member) => member.role === "mentor" || member.role === "admin");
+  const reviewer = snapshot.members.find((member) => member.id === actorMemberId && (member.role === "mentor" || member.role === "admin"));
   if (!reviewer) throw localCommandError("A local mentor or admin reviewer is required to record a retest.", 403);
   const reviewedAt = new Date().toISOString();
   const sourceId = sourceType === "qa" ? finding.reportId : (finding as BootstrapPayload["testFindings"][number]).testResultId;
@@ -268,7 +268,7 @@ function removeReferences(snapshot: BootstrapPayload, resource: string, id: stri
 }
 
 /** Applies browser workspace commands only. Caller clones and persists the draft atomically. */
-export function applyLocalCommand(snapshot: BootstrapPayload, path: string, options: RequestInit = {}): unknown {
+export function applyLocalCommand(snapshot: BootstrapPayload, path: string, options: RequestInit = {}, actorMemberId?: string | null): unknown {
   const pathname = path.split("?")[0].replace(/^\/api\//, "").replace(/^\//, "");
   const method = (options.method ?? "GET").toUpperCase();
   const body: Record<string, unknown> = typeof options.body === "string" ? JSON.parse(options.body) : {};
@@ -278,8 +278,8 @@ export function applyLocalCommand(snapshot: BootstrapPayload, path: string, opti
   const resource = parts[0] === "manufacturing" && parts[1] === "processes" ? "manufacturing/processes" : parts[0];
   const encodedId = resource === "manufacturing/processes" ? parts[2] : parts[1];
   const extra = resource === "manufacturing/processes" ? parts[3] : parts[2];
-  if (resource === "qa-reports" && encodedId === "submit" && parts.length === 2 && method === "POST") return submitLocalQaReport(snapshot, body);
-  if (resource === "report-findings" && encodedId && extra === "retest" && parts.length === 3 && method === "POST") return retestLocalFinding(snapshot, decodeURIComponent(encodedId), body);
+  if (resource === "qa-reports" && encodedId === "submit" && parts.length === 2 && method === "POST") return submitLocalQaReport(snapshot, body, actorMemberId);
+  if (resource === "report-findings" && encodedId && extra === "retest" && parts.length === 3 && method === "POST") return retestLocalFinding(snapshot, decodeURIComponent(encodedId), body, actorMemberId);
   if (resource === "purchases" && encodedId && extra === "receipts" && parts.length === 3 && method === "POST") return receiveLocalPurchase(snapshot, decodeURIComponent(encodedId), body);
   if (resource === "purchases" && extra === "transition" && parts.length === 3 && method === "POST") {
     if (Object.keys(body).some((field) => field !== "orderStatus" && field !== "finalCost" && field !== "purchaseOrderNumber")) throw new Error("Unsupported purchase transition fields.");

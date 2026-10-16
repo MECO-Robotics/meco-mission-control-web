@@ -50,6 +50,7 @@ export interface WorkspaceContentProps {
   receiptViewScope?: string;
   canReviewQa?: boolean;
   canCreateQaReport?: boolean;
+  localActorMemberId?: string | null;
   activePersonFilter: FilterSelection;
   activeTab: ViewTab;
   tabSwitchDirection: TabSwitchDirection;

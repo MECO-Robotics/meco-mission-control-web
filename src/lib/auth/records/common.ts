@@ -5,6 +5,7 @@ export async function requestItem<TItem, TPayload>(
   method: "POST" | "PUT" | "PATCH" | "DELETE",
   payload?: TPayload,
   onUnauthorized?: () => void,
+  localActorMemberId?: string | null,
 ) {
   const response = await requestApi<{ item: TItem }>(
     path,
@@ -18,6 +19,7 @@ export async function requestItem<TItem, TPayload>(
           body: JSON.stringify(payload),
         },
     onUnauthorized,
+    localActorMemberId,
   );
 
   return response.item;

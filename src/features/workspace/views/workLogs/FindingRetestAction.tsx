@@ -12,6 +12,7 @@ interface FindingRetestActionProps {
   viewScope?: string;
   canReview: boolean;
   handleUnauthorized?: () => void;
+  localActorMemberId?: string | null;
   members: Array<{ id: string; name: string }>;
   loadWorkspace?: () => Promise<unknown>;
   setDataMessage?: (message: string | null) => void;
@@ -28,7 +29,7 @@ function retestDescription(record: FindingRetestRecord) {
   return `${record.result === "pass" ? "Passed" : "Needs more work"}: ${record.notes}`;
 }
 
-export function FindingRetestAction({ finding, sourceType, scope, viewScope = "", canReview, handleUnauthorized, members, loadWorkspace, setDataMessage, readFinding }: FindingRetestActionProps) {
+export function FindingRetestAction({ finding, sourceType, scope, viewScope = "", canReview, handleUnauthorized, localActorMemberId, members, loadWorkspace, setDataMessage, readFinding }: FindingRetestActionProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [result, setResult] = useState<"pass" | "fail">("pass");
   const [notes, setNotes] = useState("");
@@ -165,7 +166,7 @@ export function FindingRetestAction({ finding, sourceType, scope, viewScope = ""
       scope,
       findingId: finding.id,
       payload,
-      write: (request) => retestReportFindingRecord(finding.id, request, handleUnauthorized),
+      write: (request) => retestReportFindingRecord(finding.id, request, handleUnauthorized, localActorMemberId),
     });
     if (!viewActive.current) return;
     if (outcome.kind === "storage-failed") {

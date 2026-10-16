@@ -397,7 +397,7 @@ it("submits QA evidence with null review metadata for the strict contract", asyn
     result: "pass", summary: "", notes: "", participantIds: [state.bootstrap.members[0].id],
     createdAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
     evidenceNotes: "", photoUrl: "", status: "submitted", reviewedById: null, reviewedAt: null,
-  }, state.handleUnauthorized);
+  }, state.handleUnauthorized, state.bootstrap.members[0].id);
   expect(state.qaReportModalMode).toBeNull();
 });
 
@@ -412,6 +412,36 @@ it("sends an explicit reviewed transition only for the linked signed-in mentor",
   const payload = jest.mocked(createQaReportRecord).mock.calls.at(-1)?.[0];
   expect(payload).toEqual(expect.objectContaining({ status: "reviewed" }));
   expect(payload).toEqual(expect.objectContaining({ reviewedById: null, reviewedAt: null }));
+  expect(jest.mocked(createQaReportRecord).mock.calls.at(-1)?.[2]).toBe(mentor.id);
+});
+
+it("uses the current account's roster actor for review and drops it after sign-out", async () => {
+  const { state, render, task } = setup();
+  const mentorB = { ...state.bootstrap.members.find((member) => member.role === "mentor")!, id: "mentor-b", email: "mentor-b@example.com" };
+  const admin = { ...mentorB, id: "admin-1", email: "admin@example.com", role: "admin" as const };
+  state.bootstrap.members.push(mentorB, admin);
+  task.status = "in-progress";
+  state.sessionUser = { ...state.sessionUser!, accountId: "account-b", email: mentorB.email, name: mentorB.name };
+  state.signedInMember = mentorB;
+  state.selectedSeasonId = "another-season";
+  state.selectedProjectId = "another-project";
+  render().openCreateQaReportModal(task.id);
+  jest.mocked(createQaReportRecord).mockResolvedValue({} as never);
+  await render().handleQaReportSubmit({ preventDefault: jest.fn() } as never, "reviewed");
+  expect(jest.mocked(createQaReportRecord).mock.calls.at(-1)?.[2]).toBe(mentorB.id);
+
+  state.sessionUser = { ...state.sessionUser!, accountId: "account-admin", email: admin.email, name: admin.name };
+  state.signedInMember = admin;
+  render().openCreateQaReportModal(task.id);
+  await render().handleQaReportSubmit({ preventDefault: jest.fn() } as never, "reviewed");
+  expect(jest.mocked(createQaReportRecord).mock.calls.at(-1)?.[2]).toBe(admin.id);
+
+  state.sessionUser = null;
+  state.signedInMember = null;
+  state.qaReportModalMode = "create";
+  await render().handleQaReportSubmit({ preventDefault: jest.fn() } as never, "reviewed");
+  expect(createQaReportRecord).toHaveBeenCalledTimes(2);
+  expect(state.setDataMessage).toHaveBeenCalledWith("Only the signed-in mentor or admin can approve a QA report.");
 });
 
 it("keeps a QA draft as draft when that submit mode is selected", async () => {

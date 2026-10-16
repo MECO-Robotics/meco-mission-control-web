@@ -1,11 +1,12 @@
 import type { BootstrapPayload } from "@/types/bootstrap";
 import { FindingRetestAction } from "./FindingRetestAction";
 
-export function TestFindingRetestList({ bootstrap, testResults, canReview, handleUnauthorized, operationScope, viewScope = "", loadWorkspace, setDataMessage, readFinding }: {
+export function TestFindingRetestList({ bootstrap, testResults, canReview, handleUnauthorized, localActorMemberId, operationScope, viewScope = "", loadWorkspace, setDataMessage, readFinding }: {
   bootstrap: BootstrapPayload;
   testResults: BootstrapPayload["testResults"];
   canReview: boolean;
   handleUnauthorized?: () => void;
+  localActorMemberId?: string | null;
   operationScope: string;
   viewScope?: string;
   loadWorkspace?: () => Promise<unknown>;
@@ -22,7 +23,7 @@ export function TestFindingRetestList({ bootstrap, testResults, canReview, handl
       return <div className="qa-finding-details" key={finding.id}>
         <p><strong>{finding.title}</strong>: {finding.detail} <span className="table-cell-pill">{finding.status}</span></p>
         {result ? <p>{result.title}</p> : null}
-        <FindingRetestAction key={`${viewScope}:test:${finding.id}`} finding={finding} sourceType="test" scope={operationScope} viewScope={viewScope} canReview={canReview} handleUnauthorized={handleUnauthorized} members={bootstrap.members} loadWorkspace={loadWorkspace} setDataMessage={setDataMessage} readFinding={readFinding} />
+        <FindingRetestAction key={`${viewScope}:test:${finding.id}`} finding={finding} sourceType="test" scope={operationScope} viewScope={viewScope} canReview={canReview} handleUnauthorized={handleUnauthorized} localActorMemberId={localActorMemberId} members={bootstrap.members} loadWorkspace={loadWorkspace} setDataMessage={setDataMessage} readFinding={readFinding} />
       </div>;
     })}
   </section>;

@@ -128,6 +128,7 @@ export async function requestLocalWorkspace<T>(
   path: string,
   options: RequestInit,
   loadSeed: () => Promise<BootstrapPayload>,
+  actorMemberId?: string | null,
 ): Promise<T> {
   const pathname = path.split("?", 1)[0];
   if (pathname === "/tutorial/session/start") {
@@ -167,7 +168,7 @@ export async function requestLocalWorkspace<T>(
   if (pathname === "/bootstrap") return structuredClone(current) as T;
   if (pathname === "/roster/insights") return localRosterInsights(current, new URLSearchParams(path.split("?")[1])) as T;
   const draft = structuredClone(current);
-  const result = applyLocalCommand(draft, path, options);
+  const result = applyLocalCommand(draft, path, options, actorMemberId);
   if ((options.method ?? "GET").toUpperCase() !== "GET") {
     if (workspace.mode === "demo") {
       // Save before publishing. Quota/privacy errors leave the previous state intact.

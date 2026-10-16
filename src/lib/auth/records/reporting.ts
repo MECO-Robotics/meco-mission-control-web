@@ -21,8 +21,9 @@ export function createReportRecord(
 export function createQaReportRecord(
   payload: QaReportPayload,
   onUnauthorized?: () => void,
+  localActorMemberId?: string | null,
 ) {
-  return requestItem<ReportRecord, QaReportPayload>("/qa-reports/submit", "POST", payload, onUnauthorized);
+  return requestItem<ReportRecord, QaReportPayload>("/qa-reports/submit", "POST", payload, onUnauthorized, localActorMemberId);
 }
 
 export function createQaRequestRecord(
@@ -36,12 +37,14 @@ export function retestReportFindingRecord(
   findingId: string,
   payload: { operationId: string; sourceType?: "qa" | "test"; result: "pass" | "fail"; notes: string; evidenceNotes?: string; observedAt?: string },
   onUnauthorized?: () => void,
+  localActorMemberId?: string | null,
 ) {
   return requestItem<QaFindingRecord, typeof payload>(
     `/report-findings/${findingId}/retest`,
     "POST",
     payload,
     onUnauthorized,
+    localActorMemberId,
   );
 }
 
