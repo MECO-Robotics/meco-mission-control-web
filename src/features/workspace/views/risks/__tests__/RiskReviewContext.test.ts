@@ -2,6 +2,8 @@ import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createBootstrap } from "../../__tests__/riskViewTestFixtures";
 import { RiskReviewContext } from "../RiskReviewContext";
+import { ConcernContext } from "../prototype/EngineeringRisksPrototype";
+import { createConcernScenarios } from "../prototype/riskConcernPrototypeModel";
 
 function renderContext(bootstrap = createBootstrap(), selected: { kind: "risk" | "task"; id: string } = { kind: "risk", id: "risk-1" }, pending = false) {
   return renderToStaticMarkup(React.createElement(RiskReviewContext, { bootstrap, selected, pending, onClose: jest.fn(), onEditRisk: jest.fn(), onUpdateRisk: jest.fn(async () => undefined), onOpenRecord: jest.fn() }));
@@ -17,6 +19,19 @@ it("keeps a completed mitigation distinct from resolution of the risk", () => {
   expect(markup).toContain('aria-label="Close risk details"');
   expect(markup).toContain("Linked work and dependencies");
   expect(markup).not.toContain("Risk detailed view");
+
+  const scenario = createConcernScenarios()[0];
+  const prototypeMarkup = renderToStaticMarkup(React.createElement(ConcernContext, {
+    concern: scenario,
+    bootstrap,
+    onClose: jest.fn(),
+    onEdit: jest.fn(),
+    onReplace: jest.fn(),
+    onTaskComplete: jest.fn(),
+    onResolve: jest.fn(),
+  }));
+  expect(prototypeMarkup).toContain("Risk detailed view");
+  expect(prototypeMarkup).toContain(`<h2 tabindex="-1">${scenario.title}</h2>`);
 });
 
 it("preserves missing supply attachments as visibly unavailable context", () => {

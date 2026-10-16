@@ -157,7 +157,7 @@ export function EngineeringRisksPrototype({ bootstrap, activePersonFilter }: {
   </section>;
 }
 
-function ConcernContext({ concern, bootstrap, onClose, onEdit, onReplace, onTaskComplete, onResolve }: {
+export function ConcernContext({ concern, bootstrap, onClose, onEdit, onReplace, onTaskComplete, onResolve }: {
   concern: PrototypeConcern; bootstrap: BootstrapPayload; onClose: () => void; onEdit: () => void; onReplace: (next: PrototypeConcern) => void; onTaskComplete: () => void; onResolve: () => void;
 }) {
   const [evidenceId, setEvidenceId] = useState<string | null>(null);
@@ -167,7 +167,7 @@ function ConcernContext({ concern, bootstrap, onClose, onEdit, onReplace, onTask
   const [linkedReference, setLinkedReference] = useState<{ kind: string; id: string } | null>(null);
   const selectedEvidence = concern.evidence.find((item) => item.id === evidenceId);
   const attachedRecords = concern.scenario ? [] : (bootstrap.risks.find((risk) => risk.id === concern.id)?.relatedTargets ?? []).filter((ref) => !["task", "mechanism", "subsystem", "milestone", "report", "qa-finding", "test-finding", "qa-request", "test-result", "artifact"].includes(ref.kind)).map((ref) => getRiskRecordReference(ref, bootstrap));
-  return <RiskDetailsView title={concern.title} className="engineering-concern-context" onClose={onClose}>
+  return <RiskDetailsView title={concern.title} eyebrow="Risk detailed view" className="engineering-concern-context" onClose={onClose}>
     <div className="risk-context-meta"><span className={`status-pill status-pill-${severityTone(concern.severity)}`}>{concern.severity} severity</span><span>{concern.status.replaceAll("-", " ")}</span><span>{concern.scenario ? "Illustrative scenario" : "Current record · read only"}</span></div>
     <p className="risk-context-description">{concern.detail}</p>
     <dl className="engineering-facts"><div><dt>Affects</dt><dd>{concern.subjects.map((subject) => subject.label).join(", ")}</dd></div><div><dt>Owner</dt><dd>{concern.ownerLabel}</dd></div><div><dt>Work blocking</dt><dd>{concern.blocksWork ? "Explicitly blocks work" : "No work block recorded"}</dd></div><div><dt>Milestones</dt><dd>{milestoneText(concern)}</dd></div></dl>
