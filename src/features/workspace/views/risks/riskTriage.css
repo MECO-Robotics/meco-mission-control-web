@@ -52,6 +52,7 @@
 .risk-review-inspector { min-width: 0; border-inline-start: 1px solid var(--border-base); }
 .risk-review-context { min-width: 0; padding: 0 0 1rem 1rem; overflow-wrap: anywhere; }
 .risk-context-heading { display: flex; align-items: start; justify-content: space-between; gap: .65rem; }
+.risk-details-eyebrow { margin: 0 0 .35rem; color: var(--text-muted); font-size: .68rem; font-weight: 600; }
 .risk-context-heading h2 { margin: 0; color: var(--text-title); font-size: 1rem; line-height: 1.45; }
 .risk-context-heading > button { flex-shrink: 0; }
 .risk-context-meta { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; margin: .5rem 0; color: var(--text-copy); font-size: .75rem; }
@@ -94,7 +95,6 @@
   .risk-context-wide { grid-column: 1 / -1; }
 }
 
-.risk-details-eyebrow { margin: 0 0 .35rem; color: var(--text-muted); font-size: .68rem; font-weight: 600; }
 
 dialog.modal-scrim.risk-details-dialog { width: 100vw; height: 100dvh; max-height: 100dvh; padding: 0; }
 .risk-details-dialog > .risk-review-context { box-sizing: border-box; height: 100dvh; max-height: 100dvh; }
